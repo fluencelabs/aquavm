@@ -24,17 +24,20 @@ pub fn main() {
 
 #[fce]
 pub struct StepperOutcome {
-    pub aqua: String,
+    pub data: String,
     pub next_peer_pks: Vec<String>,
 }
 
 #[fce]
-pub fn invoke(init_user_id: String, aqua: String) -> StepperOutcome {
-    info!("stepper invoked with user_id = {}, aqua = {:?}", init_user_id, aqua);
+pub fn invoke(init_user_id: String, aqua: String, data: String) -> StepperOutcome {
+    info!(
+        "stepper invoked with user_id = {}, aqua = {:?}, data = {:?}",
+        init_user_id, aqua, data
+    );
 
     let outcome = StepperOutcome {
-        aqua,
-        next_peer_pks: vec![init_user_id]
+        data,
+        next_peer_pks: vec![init_user_id],
     };
 
     outcome

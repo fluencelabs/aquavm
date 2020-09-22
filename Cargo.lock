@@ -16,26 +16,22 @@ checksum = "4785bdd1c96b2a846b2bd7cc02e86b6b3dbf14e7e53446c4f54c92a361040822"
 
 [[package]]
 name = "fluence"
-version = "0.2.4"
-source = "git+https://github.com/fluencelabs/rust-sdk#75f4baaa905255b240d191880aeeed3e7ec1ad4f"
+version = "0.2.6"
 dependencies = [
  "fluence-sdk-macro",
  "fluence-sdk-main",
- "safe-transmute",
 ]
 
 [[package]]
 name = "fluence-sdk-macro"
-version = "0.2.4"
-source = "git+https://github.com/fluencelabs/rust-sdk#75f4baaa905255b240d191880aeeed3e7ec1ad4f"
+version = "0.2.6"
 dependencies = [
  "fluence-sdk-wit",
 ]
 
 [[package]]
 name = "fluence-sdk-main"
-version = "0.2.4"
-source = "git+https://github.com/fluencelabs/rust-sdk#75f4baaa905255b240d191880aeeed3e7ec1ad4f"
+version = "0.2.6"
 dependencies = [
  "fluence-sdk-macro",
  "log",
@@ -44,8 +40,7 @@ dependencies = [
 
 [[package]]
 name = "fluence-sdk-wit"
-version = "0.2.4"
-source = "git+https://github.com/fluencelabs/rust-sdk#75f4baaa905255b240d191880aeeed3e7ec1ad4f"
+version = "0.2.6"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -157,12 +152,6 @@ name = "ryu"
 version = "1.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "71d301d4193d031abdd79ff7e3dd721168a9572ef3fe51a1517aba235bd8f86e"
-
-[[package]]
-name = "safe-transmute"
-version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "50b8b2cd387f744f69469aaed197954ba4c0ecdb31e02edf99b023e0df11178a"
 
 [[package]]
 name = "serde"
