@@ -6,6 +6,9 @@ version = "0.1.0"
 dependencies = [
  "fluence",
  "log",
+ "serde",
+ "serde-lexpr",
+ "serde_derive",
 ]
 
 [[package]]
@@ -16,7 +19,7 @@ checksum = "4785bdd1c96b2a846b2bd7cc02e86b6b3dbf14e7e53446c4f54c92a361040822"
 
 [[package]]
 name = "fluence"
-version = "0.2.6"
+version = "0.2.7"
 dependencies = [
  "fluence-sdk-macro",
  "fluence-sdk-main",
@@ -24,14 +27,14 @@ dependencies = [
 
 [[package]]
 name = "fluence-sdk-macro"
-version = "0.2.6"
+version = "0.2.7"
 dependencies = [
  "fluence-sdk-wit",
 ]
 
 [[package]]
 name = "fluence-sdk-main"
-version = "0.2.6"
+version = "0.2.7"
 dependencies = [
  "fluence-sdk-macro",
  "log",
@@ -40,7 +43,7 @@ dependencies = [
 
 [[package]]
 name = "fluence-sdk-wit"
-version = "0.2.6"
+version = "0.2.7"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -68,6 +71,29 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dc6f3ad7b9d11a0c00842ff8de1b60ee58661048eb8049ed33c73594f359d7e6"
 
 [[package]]
+name = "lexpr"
+version = "0.2.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d6b5eeb1dcf1c6a1fad8c1a88c4cc01618db83810c55cc64c1f86d73688fbfdc"
+dependencies = [
+ "itoa",
+ "lexpr-macros",
+ "proc-macro-hack",
+ "ryu",
+]
+
+[[package]]
+name = "lexpr-macros"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cd627fb38e19c00d8d068618259205f7a91c91aeade5c15bc35dbca037bb1c35"
+dependencies = [
+ "proc-macro-hack",
+ "proc-macro2",
+ "quote",
+]
+
+[[package]]
 name = "libc"
 version = "0.2.77"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -87,6 +113,12 @@ name = "ppv-lite86"
 version = "0.2.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c36fa947111f5c62a733b652544dd0016a43ce89619538a8ef92724a6f501a20"
+
+[[package]]
+name = "proc-macro-hack"
+version = "0.5.18"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "99c605b9a0adc77b7211c6b1f722dcb613d68d66859a44f3d485a6da332b0598"
 
 [[package]]
 name = "proc-macro2"
@@ -160,6 +192,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "96fe57af81d28386a513cbc6858332abc6117cfdb5999647c6444b8f43a370a5"
 dependencies = [
  "serde_derive",
+]
+
+[[package]]
+name = "serde-lexpr"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "143e5e658ac3a7374bdf285b9355cab74dd144293b86c9be27eab39452239d41"
+dependencies = [
+ "lexpr",
+ "serde",
 ]
 
 [[package]]

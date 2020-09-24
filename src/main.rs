@@ -14,23 +14,21 @@
  * limitations under the License.
  */
 mod air;
+mod instructions;
+mod stepper_outcome;
+
+use instructions::Instruction;
+use stepper_outcome::StepperOutcome;
 
 use fluence::fce;
-use log::info;
 
 pub fn main() {
     fluence::WasmLogger::init_with_level(log::Level::Info).unwrap();
 }
 
 #[fce]
-pub struct StepperOutcome {
-    pub data: String,
-    pub next_peer_pks: Vec<String>,
-}
-
-#[fce]
 pub fn invoke(init_user_id: String, aqua: String, data: String) -> StepperOutcome {
-    info!(
+    log::info!(
         "stepper invoked with user_id = {}, aqua = {:?}, data = {:?}",
         init_user_id, aqua, data
     );
@@ -39,6 +37,17 @@ pub fn invoke(init_user_id: String, aqua: String, data: String) -> StepperOutcom
         data,
         next_peer_pks: vec![init_user_id],
     };
+
+    let parsed_aqua: Vec<Instruction>  = match serde_lexpr::from_str(&aqua) {
+        Ok(parsed) => parsed,
+        Err(e) => {
+            log::error!("supplied aqua script can't be parsed: {:?}", e);
+
+            return outcome;
+        }
+    };
+
+    log::info!("parsed_aqua: {:?}", parsed_aqua);
 
     outcome
 }
