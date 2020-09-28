@@ -16,13 +16,31 @@
 
 mod call;
 
-use serde_derive::{Serialize, Deserialize};
+pub(crate) use call::Call;
+
+pub(self) use crate::stepper::ExecutableInstruction;
+
+use serde_derive::{Deserialize, Serialize};
+use std::collections::hash_map::RandomState;
+use std::collections::HashMap;
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
 #[serde(rename_all = "kebab-case")]
 pub(crate) enum Instruction {
     Null,
-    Call(call::Call),
+    Call(Call),
+    /*
     Par(Box<Instruction>, Box<Instruction>),
     Seq(Box<Instruction>, Box<Instruction>),
+
+     */
+}
+
+impl ExecutableInstruction for Instruction {
+    fn execute(self, data: &mut HashMap<String, Vec<u8>, RandomState>) {
+        match self {
+            Instruction::Null => {},
+            Instruction::Call(call) => call.execute(data),
+        }
+    }
 }

@@ -14,10 +14,18 @@
  * limitations under the License.
  */
 
-use fluence::fce;
+use crate::Instruction;
 
-#[fce]
-pub struct StepperOutcome {
-    pub data: Vec<u8>,
-    pub next_peer_pks: Vec<String>,
+use std::collections::HashMap;
+
+pub(crate) trait ExecutableInstruction {
+    fn execute(self, data: &mut HashMap<String, Vec<u8>>);
+}
+
+pub(crate) fn execute(instructions: Vec<Instruction>) {
+    let mut data = HashMap::new();
+
+    for instruction in instructions {
+        instruction.execute(&mut data);
+    }
 }

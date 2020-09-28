@@ -15,6 +15,7 @@
  */
 mod air;
 mod instructions;
+mod stepper;
 mod stepper_outcome;
 
 use instructions::Instruction;
@@ -27,10 +28,12 @@ pub fn main() {
 }
 
 #[fce]
-pub fn invoke(init_user_id: String, aqua: String, data: String) -> StepperOutcome {
+pub fn invoke(init_user_id: String, aqua: String, data: Vec<u8>) -> StepperOutcome {
     log::info!(
         "stepper invoked with user_id = {}, aqua = {:?}, data = {:?}",
-        init_user_id, aqua, data
+        init_user_id,
+        aqua,
+        data
     );
 
     let outcome = StepperOutcome {
@@ -38,7 +41,7 @@ pub fn invoke(init_user_id: String, aqua: String, data: String) -> StepperOutcom
         next_peer_pks: vec![init_user_id],
     };
 
-    let parsed_aqua: Vec<Instruction>  = match serde_lexpr::from_str(&aqua) {
+    let parsed_aqua = match serde_sexpr::from_str::<Vec<Instruction>>(&aqua) {
         Ok(parsed) => parsed,
         Err(e) => {
             log::error!("supplied aqua script can't be parsed: {:?}", e);
@@ -46,8 +49,21 @@ pub fn invoke(init_user_id: String, aqua: String, data: String) -> StepperOutcom
             return outcome;
         }
     };
-
     log::info!("parsed_aqua: {:?}", parsed_aqua);
 
+    crate::stepper::execute(parsed_aqua);
+
     outcome
+}
+
+#[fce]
+pub struct CallServiceResult {
+    pub result: i32,
+    pub outcome: Vec<u8>,
+}
+
+#[fce]
+#[link(wasm_import_module = "aqua_test_module")]
+extern "C" {
+    pub fn call_service(service_id: String, fn_name: String, args: Vec<u8>) -> CallServiceResult;
 }
