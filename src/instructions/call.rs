@@ -22,7 +22,7 @@ use std::collections::HashMap;
 pub(crate) struct Call {
     pub peer_part: (String, Option<String>),
     pub fn_part: (Option<String>, String),
-    pub args: Vec<u8>,
+    pub args: String,
     pub result_name: String,
 }
 
@@ -34,6 +34,7 @@ impl super::ExecutableInstruction for Call {
             _ => unimplemented!(),
         };
 
-        let _result = unsafe { crate::call_service(service_id, self.fn_part.1, self.args) };
+        let result = unsafe { crate::call_service(service_id, self.fn_part.1, self.args) };
+        log::info!("call_service result: {:?}", result)
     }
 }
