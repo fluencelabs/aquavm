@@ -16,6 +16,7 @@
 
 use crate::StepperOutcome;
 
+use jsonpath_lib::JsonPathError;
 use serde_json::Error as SerdeJsonError;
 use serde_sexpr::Error as SExprError;
 
@@ -40,8 +41,14 @@ pub enum AquamarineError {
     /// Semantic errors in instructions.
     LocalServiceError(String),
 
-    /// Aquamarine result deserialization errors.
-    ExecutionError(String),
+    /// Value with such name isn't presence in data.
+    VariableNotFound(String),
+
+    /// Value with such path isn't found in data with such error.
+    VariableNotInJsonPath(String, JsonPathError),
+
+    /// Multiple values found for such json path.
+    MultipleValuesInJsonPath(String),
 }
 
 impl Error for AquamarineError {}
@@ -54,7 +61,21 @@ impl std::fmt::Display for AquamarineError {
             AquamarineError::CurrentPeerIdNotSet(err) => write!(f, "{}", err),
             AquamarineError::InstructionError(err_msg) => write!(f, "{}", err_msg),
             AquamarineError::LocalServiceError(err_msg) => write!(f, "{}", err_msg),
-            AquamarineError::ExecutionError(err_msg) => write!(f, "{}", err_msg),
+            AquamarineError::VariableNotFound(variable_name) => write!(
+                f,
+                "variable with name {} isn't present in data",
+                variable_name
+            ),
+            AquamarineError::VariableNotInJsonPath(json_path, json_path_err) => write!(
+                f,
+                "variable with path {} not found with error: {}",
+                json_path, json_path_err
+            ),
+            AquamarineError::MultipleValuesInJsonPath(json_path) => write!(
+                f,
+                "multiple variables found for this json path {}",
+                json_path
+            ),
         }
     }
 }
@@ -81,11 +102,13 @@ impl Into<StepperOutcome> for AquamarineError {
     fn into(self) -> StepperOutcome {
         let ret_code = match self {
             AquamarineError::SExprParseError(_) => 1,
-            AquamarineError::DataParseError(_) => 2,
-            AquamarineError::CurrentPeerIdNotSet(_) => 3,
-            AquamarineError::InstructionError(_) => 4,
-            AquamarineError::LocalServiceError(_) => 5,
-            AquamarineError::ExecutionError(_) => 6,
+            AquamarineError::DataParseError(..) => 2,
+            AquamarineError::CurrentPeerIdNotSet(..) => 3,
+            AquamarineError::InstructionError(..) => 4,
+            AquamarineError::LocalServiceError(..) => 5,
+            AquamarineError::VariableNotFound(..) => 6,
+            AquamarineError::VariableNotInJsonPath(..) => 7,
+            AquamarineError::MultipleValuesInJsonPath(..) => 8,
         };
 
         StepperOutcome {

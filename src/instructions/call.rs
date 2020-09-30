@@ -101,13 +101,32 @@ fn parse_peer_fn_parts(
 }
 
 fn parse_args(args: Vec<String>, data: &AquaData) -> Result<serde_json::Value> {
-    let result = Vec::with_capacity(args.len());
+    let mut result = Vec::with_capacity(args.len());
 
     for arg in args {
-        let first_dot_pos = match arg.find('.') {
-            Some(pos) => {}
-            None => {}
+        let mut split_arg: Vec<&str> = arg.splitn(1, '.').collect();
+        let variable_name = split_arg.remove(0);
+
+        let value_by_key = data
+            .get(variable_name)
+            .ok_or_else(|| AquamarineError::VariableNotFound(String::from(variable_name)))?;
+
+        let value = if !split_arg.is_empty() {
+            let json_path = split_arg.remove(0);
+            let values = jsonpath_lib::select(&value_by_key, json_path)
+                .map_err(|e| AquamarineError::VariableNotInJsonPath(String::from(json_path), e))?;
+            if values.len() != 1 {
+                return Err(AquamarineError::MultipleValuesInJsonPath(String::from(
+                    json_path,
+                )));
+            }
+
+            values[0].clone()
+        } else {
+            value_by_key.clone()
         };
+
+        result.push(value);
     }
 
     Ok(serde_json::Value::Array(result))
