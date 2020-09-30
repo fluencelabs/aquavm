@@ -5,11 +5,13 @@ authors = ["Fluence Labs"]
 edition = "2018"
 
 [lib]
+name = "aquamarine_client"
 crate-type = ["cdylib"]
+path = "src/wasm_bindgen.rs"
 
 [[bin]]
 name = "aquamarine"
-path = "src/main.rs"
+path = "src/fce.rs"
 
 [[bin]]
 name = "aqua_test_module"
