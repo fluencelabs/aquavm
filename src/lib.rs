@@ -13,13 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+mod air;
+mod execution;
+mod instructions;
+mod stepper;
+mod stepper_outcome;
 
-use fluence::fce;
-use serde::{Deserialize, Serialize};
+use crate::execution::exec;
+use wasm_bindgen::prelude::*;
 
-#[fce]
-#[derive(Serialize, Deserialize)]
-pub struct StepperOutcome {
-    pub data: String,
-    pub next_peer_pks: Vec<String>,
+#[wasm_bindgen]
+pub fn invoke(init_user_id: String, aqua: String, data: String) -> String {
+    let outcome = exec(init_user_id, aqua, data);
+    serde_json::to_string(&outcome).unwrap()
+}
+
+#[wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(js_namespace = console)]
+    fn log(s: &str);
+}
+
+#[wasm_bindgen(raw_module = "../src/call_service.ts")]
+extern "C" {
+    pub fn call_service(service_id: String, fn_name: String, args: String) -> String;
 }

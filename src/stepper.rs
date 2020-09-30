@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-use crate::Instruction;
-
+use crate::instructions::Instruction;
 use std::collections::HashMap;
 
 pub(crate) trait ExecutableInstruction {
