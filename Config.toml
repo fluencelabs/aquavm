@@ -1,6 +1,11 @@
-modules_dir = "artifacts/"
+modules_dir = "./target/wasm32-wasi/release/"
 
 [[module]]
-    name = "aquamarine"
+    name = "aqua_test_module"
+    mem_pages_count = 100
+    logger_enabled = true
+
+[[module]]
+name = "aquamarine"
     mem_pages_count = 100
     logger_enabled = true

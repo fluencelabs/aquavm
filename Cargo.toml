@@ -8,6 +8,13 @@ edition = "2018"
 name = "aquamarine"
 path = "src/main.rs"
 
+[[bin]]
+name = "aqua_test_module"
+path = "test_module/main.rs"
+
 [dependencies]
-fluence = { path = "/Users/mike/dev/work/fluence/wasm/rust-sdk", features = ["logger"] }
+fluence = { git = "https://github.com/fluencelabs/rust-sdk", features = ["logger"] }
+serde = { version = "1.0.116", features = ["derive"] }
+serde_derive = "1.0.116"
+serde_sexpr = "0.1.0"
 log = "0.4.11"
