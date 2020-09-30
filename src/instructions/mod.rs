@@ -39,7 +39,7 @@ pub(crate) enum Instruction {
 impl ExecutableInstruction for Instruction {
     fn execute(self, data: &mut HashMap<String, Vec<u8>, RandomState>) {
         match self {
-            Instruction::Null => {},
+            Instruction::Null => {}
             Instruction::Call(call) => call.execute(data),
         }
     }

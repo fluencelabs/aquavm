@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 mod air;
+mod execution;
 mod instructions;
 mod stepper;
 mod stepper_outcome;
-mod execution;
 
-use fluence::fce;
 use crate::execution::exec;
-use crate::stepper_outcome::{StepperOutcome};
+use crate::stepper_outcome::StepperOutcome;
+use fluence::fce;
 
 pub fn main() {
     fluence::WasmLogger::init_with_level(log::Level::Info).unwrap();

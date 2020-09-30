@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 mod air;
+mod execution;
 mod instructions;
 mod stepper;
 mod stepper_outcome;
-mod execution;
 
 use crate::execution::exec;
 use wasm_bindgen::prelude::*;
