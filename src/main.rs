@@ -17,49 +17,39 @@ mod air;
 mod instructions;
 mod stepper;
 mod stepper_outcome;
-
-use instructions::Instruction;
-use stepper_outcome::StepperOutcome;
+mod execution;
 
 use fluence::fce;
+use crate::execution::exec;
+use crate::stepper_outcome::StepperOutcomeInner;
 
 pub fn main() {
     fluence::WasmLogger::init_with_level(log::Level::Info).unwrap();
 }
 
 #[fce]
-pub fn invoke(init_user_id: String, aqua: String, data: Vec<u8>) -> StepperOutcome {
-    log::info!(
-        "stepper invoked with user_id = {}, aqua = {:?}, data = {:?}",
-        init_user_id,
-        aqua,
-        data
-    );
+pub fn invoke(init_user_id: String, aqua: String, data: String) -> StepperOutcome {
+    to_stepper_outcome(exec(init_user_id, aqua, data))
 
-    let outcome = StepperOutcome {
-        data,
-        next_peer_pks: vec![init_user_id],
-    };
+}
 
-    let parsed_aqua = match serde_sexpr::from_str::<Vec<Instruction>>(&aqua) {
-        Ok(parsed) => parsed,
-        Err(e) => {
-            log::error!("supplied aqua script can't be parsed: {:?}", e);
-
-            return outcome;
-        }
-    };
-    log::info!("parsed_aqua: {:?}", parsed_aqua);
-
-    crate::stepper::execute(parsed_aqua);
-
-    outcome
+pub fn to_stepper_outcome(inner_outcome: StepperOutcomeInner) -> StepperOutcome {
+    StepperOutcome {
+        data: inner_outcome.data,
+        next_peer_pks: inner_outcome.next_peer_pks
+    }
 }
 
 #[fce]
 pub struct CallServiceResult {
     pub result: i32,
     pub outcome: Vec<u8>,
+}
+
+#[fce]
+pub struct StepperOutcome {
+    pub data: String,
+    pub next_peer_pks: Vec<String>,
 }
 
 #[fce]

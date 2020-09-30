@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-use crate::Instruction;
-
 use std::collections::HashMap;
+use crate::instructions::Instruction;
 
 pub(crate) trait ExecutableInstruction {
     fn execute(self, data: &mut HashMap<String, Vec<u8>>);

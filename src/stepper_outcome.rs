@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-use fluence::fce;
+use serde::{Deserialize, Serialize};
 
-#[fce]
-pub struct StepperOutcome {
-    pub data: Vec<u8>,
+#[derive(Serialize, Deserialize)]
+pub struct StepperOutcomeInner {
+    pub data: String,
     pub next_peer_pks: Vec<String>,
 }

@@ -13,7 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+mod air;
+mod instructions;
+mod stepper;
 mod stepper_outcome;
+mod execution;
 
-pub use stepper_outcome::StepperOutcome;
+use crate::execution::exec;
+use wasm_bindgen::prelude::*;
+
+#[wasm_bindgen]
+pub fn invoke(init_user_id: String, aqua: String, data: String) -> String {
+    let outcome = exec(init_user_id, aqua, data);
+    serde_json::to_string(&outcome).unwrap()
+}
+
+#[wasm_bindgen]
+extern "C" {
+    pub fn call_service(service_id: String, fn_name: String, args: Vec<u8>) -> String;
+    #[wasm_bindgen(js_namespace = console)]
+    fn log(s: &str);
+}
