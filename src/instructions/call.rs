@@ -50,11 +50,12 @@ pub enum FunctionPart {
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
-#[serde(rename_all = "kebab-case")]
 pub(crate) struct Call(PeerPart, FunctionPart, Vec<String>, String);
 
 impl super::ExecutableInstruction for Call {
     fn execute(self, data: &mut AquaData, next_peer_pks: &mut Vec<String>) -> Result<()> {
+        log::info!("call called with data: {:?} and next_peer_pks: {:?}", data, next_peer_pks);
+
         let (peer_pk, service_id, func_name) = parse_peer_fn_parts(self.0, self.1)?;
         let function_args = parse_args(self.2, data)?;
         let function_args = serde_json::to_string(&function_args)?;

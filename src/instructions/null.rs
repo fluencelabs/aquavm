@@ -21,11 +21,12 @@ use serde_derive::Deserialize;
 use serde_derive::Serialize;
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
-#[serde(rename_all = "kebab-case")]
 pub(crate) struct Null {}
 
 impl super::ExecutableInstruction for Null {
-    fn execute(self, _data: &mut AquaData, _next_peer_pks: &mut Vec<String>) -> Result<()> {
+    fn execute(self, data: &mut AquaData, next_peer_pks: &mut Vec<String>) -> Result<()> {
+        log::info!("null called with data: {:?} and next_peer_pks: {:?}", data, next_peer_pks);
+
         Ok(())
     }
 }

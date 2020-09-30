@@ -28,7 +28,7 @@ use serde_derive::Deserialize;
 use serde_derive::Serialize;
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
-#[serde(untagged)]
+#[serde(rename_all = "kebab-case")]
 pub(crate) enum Instruction {
     Null(Null),
     Call(Call),

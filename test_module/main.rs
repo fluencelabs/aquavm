@@ -17,6 +17,6 @@ pub fn call_service(service_id: String, fn_name: String, args: String) -> CallSe
 
     CallServiceResult {
         ret_code: 0,
-        result: args,
+        result: String::from("[\"args\"]"),
     }
 }
