@@ -20,6 +20,7 @@ use serde_json::Error as SerdeJsonError;
 use serde_sexpr::Error as SExprError;
 
 use std::convert::Into;
+use std::env::VarError;
 use std::error::Error;
 
 #[derive(Debug)]
@@ -29,6 +30,15 @@ pub enum AquamarineError {
 
     /// Errors occurred while parsing supplied data.
     DataParseError(SerdeJsonError),
+
+    /// Indicates that environment variable with name CURRENT_PEER_ID isn't set.
+    CurrentPeerIdNotSet(VarError),
+
+    /// Semantic errors in instructions.
+    InstructionError(String),
+
+    /// Semantic errors in instructions.
+    LocalServiceError(String),
 
     /// Aquamarine result deserialization errors.
     ExecutionError(String),
@@ -41,6 +51,9 @@ impl std::fmt::Display for AquamarineError {
         match self {
             AquamarineError::SExprParseError(err) => write!(f, "{}", err),
             AquamarineError::DataParseError(err) => write!(f, "{}", err),
+            AquamarineError::CurrentPeerIdNotSet(err) => write!(f, "{}", err),
+            AquamarineError::InstructionError(err_msg) => write!(f, "{}", err_msg),
+            AquamarineError::LocalServiceError(err_msg) => write!(f, "{}", err_msg),
             AquamarineError::ExecutionError(err_msg) => write!(f, "{}", err_msg),
         }
     }
@@ -69,7 +82,10 @@ impl Into<StepperOutcome> for AquamarineError {
         let ret_code = match self {
             AquamarineError::SExprParseError(_) => 1,
             AquamarineError::DataParseError(_) => 2,
-            AquamarineError::ExecutionError(_) => 3,
+            AquamarineError::CurrentPeerIdNotSet(_) => 3,
+            AquamarineError::InstructionError(_) => 4,
+            AquamarineError::LocalServiceError(_) => 5,
+            AquamarineError::ExecutionError(_) => 6,
         };
 
         StepperOutcome {

@@ -15,13 +15,12 @@
  */
 
 mod air;
+mod defines;
 mod errors;
 mod instructions;
 mod stepper;
 
-pub(crate) type Result<T> = std::result::Result<T, errors::AquamarineError>;
-pub(crate) type AquaData = std::collections::HashMap<String, Vec<u8>>;
-pub(crate) use crate::stepper::StepperOutcome;
+pub(crate) use crate::defines::*;
 
 use crate::stepper::execute_aqua;
 
@@ -39,7 +38,13 @@ extern "C" {
     fn log(s: &str);
 }
 
+pub fn call_service(service_id: String, fn_name: String, args: String) -> CallServiceResult {
+    let result = call_service_impl(service_id, fn_name, args);
+    serde_json::from_str(&result).unwrap()
+}
+
 #[wasm_bindgen(raw_module = "../src/call_service.ts")]
 extern "C" {
-    pub fn call_service(service_id: String, fn_name: String, args: String) -> String;
+    #[link_name = "call_service"]
+    fn call_service_impl(service_id: String, fn_name: String, args: String) -> String;
 }

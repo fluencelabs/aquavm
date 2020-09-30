@@ -40,8 +40,8 @@ fn execute_aqua_impl(init_user_id: String, aqua: String, data: String) -> Result
         parsed_data
     );
 
-    let data = super::stepper::execute(parsed_aqua, &mut parsed_data)?;
-    let data = serde_json::to_string(&data)?;
+    super::stepper::execute(parsed_aqua, &mut parsed_data)?;
+    let data = serde_json::to_string(&parsed_data)?;
 
     Ok(StepperOutcome {
         ret_code: 0,

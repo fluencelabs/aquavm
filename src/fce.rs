@@ -15,14 +15,12 @@
  */
 
 mod air;
+mod defines;
 mod errors;
 mod instructions;
 mod stepper;
 
-pub(crate) type Result<T> = std::result::Result<T, AquamarineError>;
-pub(crate) type AquaData = serde_json::Value;
-pub(crate) use crate::stepper::StepperOutcome;
-pub(crate) use errors::AquamarineError;
+pub(crate) use crate::defines::*;
 
 use crate::stepper::execute_aqua;
 use fluence::fce;
@@ -34,12 +32,6 @@ pub fn main() {
 #[fce]
 pub fn invoke(init_user_id: String, aqua: String, data: String) -> StepperOutcome {
     execute_aqua(init_user_id, aqua, data)
-}
-
-#[fce]
-pub struct CallServiceResult {
-    pub ret_code: i32,
-    pub result: String,
 }
 
 #[fce]

@@ -63,6 +63,15 @@ a -> B
   (call fn [x.0])
 )
 
+data - HashMap<String, serde_json::Value>
+x.h.a.v -> (x - key in data, h.a.v - json path)
+
+0
+1
+
+(call 1 (counter inc) [x.a] b)
+(call 0 (response inc) [b] _)
+
 -- any (fastest) -- does not work
 (seq
     (seq
@@ -71,7 +80,7 @@ a -> B
         y <- Q
       )
       (xor
-        (call fn [x] z)
+        (call fn [x.h.a.v, x.a.b.n] z)
         (call fn [y] z)
       )
     )

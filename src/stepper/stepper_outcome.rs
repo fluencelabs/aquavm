@@ -17,10 +17,12 @@
 use fluence::fce;
 use serde::{Deserialize, Serialize};
 
+pub const SUCCESS_ERROR_CODE: i32 = 0;
+
 #[fce]
 #[derive(Serialize, Deserialize)]
 pub struct StepperOutcome {
-    /// A return code, where 0 means success.
+    /// A return code, where SUCCESS_ERROR_CODE means success.
     pub ret_code: i32,
 
     /// Contains data if ret_code == 0, otherwise error message (that could be empty string).
