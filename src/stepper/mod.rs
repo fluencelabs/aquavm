@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-use fluence::fce;
-use serde::{Deserialize, Serialize};
+mod execution;
+mod stepper;
+mod stepper_outcome;
 
-#[fce]
-#[derive(Serialize, Deserialize)]
-pub struct StepperOutcome {
-    pub data: String,
-    pub next_peer_pks: Vec<String>,
-}
+pub(crate) use execution::execute_aqua;
+pub use stepper_outcome::StepperOutcome;
+pub(crate) use stepper::ExecutableInstruction;

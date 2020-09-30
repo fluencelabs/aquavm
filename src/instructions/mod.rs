@@ -20,7 +20,8 @@ pub(crate) use call::Call;
 
 pub(self) use crate::stepper::ExecutableInstruction;
 
-use serde_derive::{Deserialize, Serialize};
+use serde_derive::Deserialize;
+use serde_derive::Serialize;
 use std::collections::hash_map::RandomState;
 use std::collections::HashMap;
 

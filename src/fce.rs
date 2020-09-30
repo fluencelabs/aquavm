@@ -13,14 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 mod air;
-mod execution;
 mod instructions;
 mod stepper;
-mod stepper_outcome;
 
-use crate::execution::exec;
-use crate::stepper_outcome::StepperOutcome;
+use crate::stepper::execute_aqua;
+use crate::stepper::StepperOutcome;
 use fluence::fce;
 
 pub fn main() {
@@ -29,7 +28,7 @@ pub fn main() {
 
 #[fce]
 pub fn invoke(init_user_id: String, aqua: String, data: String) -> StepperOutcome {
-    exec(init_user_id, aqua, data)
+    execute_aqua(init_user_id, aqua, data)
 }
 
 #[fce]
