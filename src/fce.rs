@@ -33,8 +33,8 @@ pub fn invoke(init_user_id: String, aqua: String, data: String) -> StepperOutcom
 
 #[fce]
 pub struct CallServiceResult {
-    pub result: i32,
-    pub outcome: String,
+    pub ret_code: i32,
+    pub result: String,
 }
 
 #[fce]

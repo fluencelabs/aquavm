@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+use super::Result;
+use super::StepperOutcome;
 use crate::instructions::Instruction;
-use super::stepper_outcome::StepperOutcome;
 
 pub(crate) fn execute_aqua(init_user_id: String, aqua: String, data: String) -> StepperOutcome {
     log::info!(
@@ -25,23 +26,18 @@ pub(crate) fn execute_aqua(init_user_id: String, aqua: String, data: String) -> 
         data
     );
 
-    let outcome = StepperOutcome {
+    execute_aqua_impl(init_user_id, aqua, data).unwrap_or_else(Into::into)
+}
+
+fn execute_aqua_impl(init_user_id: String, aqua: String, data: String) -> Result<StepperOutcome> {
+    let parsed_aqua = serde_sexpr::from_str::<Vec<Instruction>>(&aqua)?;
+
+    log::info!("parsed_aqua: {:?}", parsed_aqua);
+    super::stepper::execute(parsed_aqua);
+
+    Ok(StepperOutcome {
         ret_code: 0,
         data,
         next_peer_pks: vec![init_user_id],
-    };
-
-    let parsed_aqua = match serde_sexpr::from_str::<Vec<Instruction>>(&aqua) {
-        Ok(parsed) => parsed,
-        Err(e) => {
-            log::error!("supplied aqua script can't be parsed: {:?}", e);
-
-            return outcome;
-        }
-    };
-    log::info!("parsed_aqua: {:?}", parsed_aqua);
-
-    super::stepper::execute(parsed_aqua);
-
-    outcome
+    })
 }

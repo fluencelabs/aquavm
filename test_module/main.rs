@@ -4,19 +4,19 @@ fn main() {}
 
 #[fce]
 pub struct CallServiceResult {
-    pub result: i32,
-    pub outcome: Vec<u8>,
+    pub ret_code: i32,
+    pub result: String,
 }
 
 #[fce]
-pub fn call_service(service_id: String, fn_name: String, args: Vec<u8>) -> CallServiceResult {
+pub fn call_service(service_id: String, fn_name: String, args: String) -> CallServiceResult {
     println!(
         "call service invoked with:\n  service_id: {}\n  fn_name: {}\n  args: {:?}",
         service_id, fn_name, args
     );
 
     CallServiceResult {
-        result: 0,
-        outcome: vec![1, 2, 3],
+        ret_code: 0,
+        result: args,
     }
 }

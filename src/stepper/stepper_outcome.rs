@@ -20,8 +20,12 @@ use serde::{Deserialize, Serialize};
 #[fce]
 #[derive(Serialize, Deserialize)]
 pub struct StepperOutcome {
-    // 0 means success
+    /// A return code, where 0 means success.
     pub ret_code: i32,
+
+    /// Contains data if ret_code == 0, otherwise error message (that could be empty string).
     pub data: String,
+
+    /// Public keys of peers that should receive data.
     pub next_peer_pks: Vec<String>,
 }
