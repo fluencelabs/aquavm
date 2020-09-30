@@ -21,7 +21,7 @@ mod execution;
 
 use fluence::fce;
 use crate::execution::exec;
-use crate::stepper_outcome::StepperOutcomeInner;
+use crate::stepper_outcome::{StepperOutcome};
 
 pub fn main() {
     fluence::WasmLogger::init_with_level(log::Level::Info).unwrap();
@@ -29,27 +29,13 @@ pub fn main() {
 
 #[fce]
 pub fn invoke(init_user_id: String, aqua: String, data: String) -> StepperOutcome {
-    to_stepper_outcome(exec(init_user_id, aqua, data))
-
-}
-
-pub fn to_stepper_outcome(inner_outcome: StepperOutcomeInner) -> StepperOutcome {
-    StepperOutcome {
-        data: inner_outcome.data,
-        next_peer_pks: inner_outcome.next_peer_pks
-    }
+    exec(init_user_id, aqua, data)
 }
 
 #[fce]
 pub struct CallServiceResult {
     pub result: i32,
     pub outcome: String,
-}
-
-#[fce]
-pub struct StepperOutcome {
-    pub data: String,
-    pub next_peer_pks: Vec<String>,
 }
 
 #[fce]

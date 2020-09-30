@@ -1,7 +1,8 @@
-use crate::stepper_outcome::{StepperOutcomeInner};
-use crate::instructions::Instruction;
 
-pub fn exec(init_user_id: String, aqua: String, data: String) -> StepperOutcomeInner {
+use crate::instructions::Instruction;
+use crate::stepper_outcome::StepperOutcome;
+
+pub fn exec(init_user_id: String, aqua: String, data: String) -> StepperOutcome {
     log::info!(
         "stepper invoked with user_id = {}, aqua = {:?}, data = {:?}",
         init_user_id,
@@ -9,7 +10,7 @@ pub fn exec(init_user_id: String, aqua: String, data: String) -> StepperOutcomeI
         data
     );
 
-    let outcome = StepperOutcomeInner {
+    let outcome = StepperOutcome {
         data,
         next_peer_pks: vec![init_user_id],
     };
