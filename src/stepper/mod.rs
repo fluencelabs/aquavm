@@ -14,15 +14,11 @@
  * limitations under the License.
  */
 
-mod errors;
 mod execution;
 mod stepper;
 mod stepper_outcome;
 
 pub use stepper_outcome::StepperOutcome;
 
-pub(crate) use errors::AquamarineError;
 pub(crate) use execution::execute_aqua;
 pub(crate) use stepper::ExecutableInstruction;
-
-pub(self) type Result<T> = std::result::Result<T, AquamarineError>;

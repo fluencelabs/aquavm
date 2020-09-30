@@ -15,11 +15,16 @@
  */
 
 mod air;
+mod errors;
 mod instructions;
 mod stepper;
 
+pub(crate) type Result<T> = std::result::Result<T, AquamarineError>;
+pub(crate) type AquaData = serde_json::Value;
+pub(crate) use crate::stepper::StepperOutcome;
+pub(crate) use errors::AquamarineError;
+
 use crate::stepper::execute_aqua;
-use crate::stepper::StepperOutcome;
 use fluence::fce;
 
 pub fn main() {

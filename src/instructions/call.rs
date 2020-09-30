@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-use serde_derive::{Deserialize, Serialize};
-use std::collections::HashMap;
+use crate::AquaData;
+use crate::Result;
+
+use serde_derive::Deserialize;
+use serde_derive::Serialize;
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub(crate) struct Call {
@@ -26,7 +29,7 @@ pub(crate) struct Call {
 }
 
 impl super::ExecutableInstruction for Call {
-    fn execute(self, _data: &mut HashMap<String, Vec<u8>>) {
+    fn execute(self, _data: &mut AquaData) -> Result<()> {
         let service_id = match (self.peer_part.1, self.fn_part.0) {
             (Some(service_id), None) => service_id,
             (None, Some(service_id)) => service_id,
@@ -34,5 +37,7 @@ impl super::ExecutableInstruction for Call {
         };
 
         let _result = unsafe { crate::call_service(service_id, self.fn_part.1, self.args) };
+
+        Ok(())
     }
 }

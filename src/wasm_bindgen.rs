@@ -13,9 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 mod air;
+mod errors;
 mod instructions;
 mod stepper;
+
+pub(crate) type Result<T> = std::result::Result<T, errors::AquamarineError>;
+pub(crate) type AquaData = std::collections::HashMap<String, Vec<u8>>;
+pub(crate) use crate::stepper::StepperOutcome;
 
 use crate::stepper::execute_aqua;
 

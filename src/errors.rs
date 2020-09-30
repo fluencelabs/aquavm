@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-use super::StepperOutcome;
+use crate::StepperOutcome;
 
+use serde_json::Error as SerdeJsonError;
 use serde_sexpr::Error as SExprError;
 
 use std::convert::Into;
@@ -23,8 +24,11 @@ use std::error::Error;
 
 #[derive(Debug)]
 pub enum AquamarineError {
-    /// FaaS errors.
-    ParseError(SExprError),
+    /// Errors occurred while parsing aqua script in the form of S expressions.
+    SExprParseError(SExprError),
+
+    /// Errors occurred while parsing supplied data.
+    DataParseError(SerdeJsonError),
 
     /// Aquamarine result deserialization errors.
     ExecutionError(String),
@@ -35,7 +39,8 @@ impl Error for AquamarineError {}
 impl std::fmt::Display for AquamarineError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         match self {
-            AquamarineError::ParseError(err) => write!(f, "{}", err),
+            AquamarineError::SExprParseError(err) => write!(f, "{}", err),
+            AquamarineError::DataParseError(err) => write!(f, "{}", err),
             AquamarineError::ExecutionError(err_msg) => write!(f, "{}", err_msg),
         }
     }
@@ -43,7 +48,13 @@ impl std::fmt::Display for AquamarineError {
 
 impl From<SExprError> for AquamarineError {
     fn from(err: SExprError) -> Self {
-        AquamarineError::ParseError(err)
+        AquamarineError::SExprParseError(err)
+    }
+}
+
+impl From<SerdeJsonError> for AquamarineError {
+    fn from(err: SerdeJsonError) -> Self {
+        AquamarineError::DataParseError(err)
     }
 }
 
@@ -55,17 +66,16 @@ impl From<std::convert::Infallible> for AquamarineError {
 
 impl Into<StepperOutcome> for AquamarineError {
     fn into(self) -> StepperOutcome {
-        match self {
-            AquamarineError::ParseError(err) => StepperOutcome {
-                ret_code: 1,
-                data: format!("{}", err),
-                next_peer_pks: vec![],
-            },
-            AquamarineError::ExecutionError(err) => StepperOutcome {
-                ret_code: 2,
-                data: err,
-                next_peer_pks: vec![],
-            },
+        let ret_code = match self {
+            AquamarineError::SExprParseError(_) => 1,
+            AquamarineError::DataParseError(_) => 2,
+            AquamarineError::ExecutionError(_) => 3,
+        };
+
+        StepperOutcome {
+            ret_code,
+            data: format!("{}", self),
+            next_peer_pks: vec![],
         }
     }
 }

@@ -15,16 +15,17 @@
  */
 
 use crate::instructions::Instruction;
-use std::collections::HashMap;
+use crate::AquaData;
+use crate::Result;
 
 pub(crate) trait ExecutableInstruction {
-    fn execute(self, data: &mut HashMap<String, Vec<u8>>);
+    fn execute(self, data: &mut AquaData) -> Result<()>;
 }
 
-pub(crate) fn execute(instructions: Vec<Instruction>) {
-    let mut data = HashMap::new();
-
+pub(crate) fn execute(instructions: Vec<Instruction>, data: &mut AquaData) -> Result<()> {
     for instruction in instructions {
-        instruction.execute(&mut data);
+        instruction.execute(data)?;
     }
+
+    Ok(())
 }
