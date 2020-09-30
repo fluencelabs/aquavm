@@ -30,7 +30,11 @@ pub fn invoke(init_user_id: String, aqua: String, data: String) -> String {
 
 #[wasm_bindgen]
 extern "C" {
-    pub fn call_service(service_id: String, fn_name: String, args: String) -> String;
     #[wasm_bindgen(js_namespace = console)]
     fn log(s: &str);
+}
+
+#[wasm_bindgen(raw_module = "../src/call_service.ts")]
+extern "C" {
+    pub fn call_service(service_id: String, fn_name: String, args: String) -> String;
 }
