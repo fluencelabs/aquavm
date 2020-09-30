@@ -15,19 +15,18 @@
  */
 
 use serde_derive::{Deserialize, Serialize};
-use std::collections::hash_map::RandomState;
 use std::collections::HashMap;
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub(crate) struct Call {
     pub peer_part: (String, Option<String>),
     pub fn_part: (Option<String>, String),
-    pub args: Vec<u8>,
+    pub args: String,
     pub result_name: String,
 }
 
 impl super::ExecutableInstruction for Call {
-    fn execute(self, _data: &mut HashMap<String, Vec<u8>, RandomState>) {
+    fn execute(self, _data: &mut HashMap<String, Vec<u8>>) {
         let service_id = match (self.peer_part.1, self.fn_part.0) {
             (Some(service_id), None) => service_id,
             (None, Some(service_id)) => service_id,

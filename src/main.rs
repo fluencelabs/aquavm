@@ -28,7 +28,7 @@ pub fn main() {
 }
 
 #[fce]
-pub fn invoke(init_user_id: String, aqua: String, data: Vec<u8>) -> StepperOutcome {
+pub fn invoke(init_user_id: String, aqua: String, data: String) -> StepperOutcome {
     log::info!(
         "stepper invoked with user_id = {}, aqua = {:?}, data = {:?}",
         init_user_id,
@@ -59,11 +59,11 @@ pub fn invoke(init_user_id: String, aqua: String, data: Vec<u8>) -> StepperOutco
 #[fce]
 pub struct CallServiceResult {
     pub result: i32,
-    pub outcome: Vec<u8>,
+    pub outcome: String,
 }
 
 #[fce]
 #[link(wasm_import_module = "aqua_test_module")]
 extern "C" {
-    pub fn call_service(service_id: String, fn_name: String, args: Vec<u8>) -> CallServiceResult;
+    pub fn call_service(service_id: String, fn_name: String, args: String) -> CallServiceResult;
 }

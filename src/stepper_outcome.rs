@@ -18,6 +18,6 @@ use fluence::fce;
 
 #[fce]
 pub struct StepperOutcome {
-    pub data: Vec<u8>,
+    pub data: String,
     pub next_peer_pks: Vec<String>,
 }
