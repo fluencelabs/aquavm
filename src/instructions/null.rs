@@ -14,36 +14,19 @@
  * limitations under the License.
  */
 
-mod call;
-mod null;
-
-pub(self) use crate::stepper::ExecutableInstruction;
-
 use crate::AquaData;
 use crate::Result;
-use call::Call;
-use null::Null;
 
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
-#[serde(rename_all = "kebab-case")]
-pub(crate) enum Instruction {
-    Null(Null),
-    Call(Call),
-    /*
-    Par(Box<Instruction>, Box<Instruction>),
-    Seq(Box<Instruction>, Box<Instruction>),
+pub(crate) struct Null {}
 
-     */
-}
-
-impl ExecutableInstruction for Instruction {
+impl super::ExecutableInstruction for Null {
     fn execute(self, data: &mut AquaData, next_peer_pks: &mut Vec<String>) -> Result<()> {
-        match self {
-            Instruction::Null(null) => null.execute(data, next_peer_pks),
-            Instruction::Call(call) => call.execute(data, next_peer_pks),
-        }
+        log::info!("null called with data: {:?} and next_peer_pks: {:?}", data, next_peer_pks);
+
+        Ok(())
     }
 }

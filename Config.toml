@@ -9,3 +9,6 @@ modules_dir = "./target/wasm32-wasi/release/"
 name = "aquamarine"
     mem_pages_count = 100
     logger_enabled = true
+
+    [module.wasi]
+    envs = ["CURRENT_PEER_ID=asd"]

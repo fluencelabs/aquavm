@@ -13,28 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-mod air;
-mod execution;
-mod instructions;
-mod stepper;
-mod stepper_outcome;
 
-use crate::execution::exec;
-use wasm_bindgen::prelude::*;
+use fluence::fce;
+use serde::{Deserialize, Serialize};
 
-#[wasm_bindgen]
-pub fn invoke(init_user_id: String, aqua: String, data: String) -> String {
-    let outcome = exec(init_user_id, aqua, data);
-    serde_json::to_string(&outcome).unwrap()
-}
+pub const SUCCESS_ERROR_CODE: i32 = 0;
 
-#[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(js_namespace = console)]
-    fn log(s: &str);
-}
+#[fce]
+#[derive(Serialize, Deserialize)]
+pub struct StepperOutcome {
+    /// A return code, where SUCCESS_ERROR_CODE means success.
+    pub ret_code: i32,
 
-#[wasm_bindgen(raw_module = "../src/call_service.ts")]
-extern "C" {
-    pub fn call_service(service_id: String, fn_name: String, args: String) -> String;
+    /// Contains data if ret_code == 0, otherwise error message (that could be empty string).
+    pub data: String,
+
+    /// Public keys of peers that should receive data.
+    pub next_peer_pks: Vec<String>,
 }

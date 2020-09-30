@@ -14,12 +14,20 @@
  * limitations under the License.
  */
 
-use fluence::fce;
-use serde::{Deserialize, Serialize};
+use crate::instructions::Instruction;
+use crate::AquaData;
+use crate::Result;
 
-#[fce]
-#[derive(Serialize, Deserialize)]
-pub struct StepperOutcome {
-    pub data: String,
-    pub next_peer_pks: Vec<String>,
+pub(crate) trait ExecutableInstruction {
+    fn execute(self, data: &mut AquaData, next_peer_pks: &mut Vec<String>) -> Result<()>;
+}
+
+pub(crate) fn execute(instructions: Vec<Instruction>, data: &mut AquaData) -> Result<Vec<String>> {
+    let mut next_peer_pks = Vec::new();
+
+    for instruction in instructions {
+        instruction.execute(data, &mut next_peer_pks)?;
+    }
+
+    Ok(next_peer_pks)
 }

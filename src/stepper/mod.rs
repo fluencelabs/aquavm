@@ -13,33 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-mod air;
+
 mod execution;
-mod instructions;
 mod stepper;
 mod stepper_outcome;
 
-use crate::execution::exec;
-use crate::stepper_outcome::StepperOutcome;
-use fluence::fce;
+pub use stepper_outcome::StepperOutcome;
+pub use stepper_outcome::SUCCESS_ERROR_CODE;
 
-pub fn main() {
-    fluence::WasmLogger::init_with_level(log::Level::Info).unwrap();
-}
-
-#[fce]
-pub fn invoke(init_user_id: String, aqua: String, data: String) -> StepperOutcome {
-    exec(init_user_id, aqua, data)
-}
-
-#[fce]
-pub struct CallServiceResult {
-    pub result: i32,
-    pub outcome: String,
-}
-
-#[fce]
-#[link(wasm_import_module = "aqua_test_module")]
-extern "C" {
-    pub fn call_service(service_id: String, fn_name: String, args: String) -> CallServiceResult;
-}
+pub(crate) use execution::execute_aqua;
+pub(crate) use stepper::ExecutableInstruction;

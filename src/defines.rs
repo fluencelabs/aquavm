@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
-use crate::instructions::Instruction;
-use std::collections::HashMap;
+/// This file contains defines similar for both FCE and browser targets.
 
-pub(crate) trait ExecutableInstruction {
-    fn execute(self, data: &mut HashMap<String, Vec<u8>>);
-}
+pub(crate) type Result<T> = std::result::Result<T, AquamarineError>;
+pub(crate) type AquaData = std::collections::HashMap<String, serde_json::Value>;
+pub(crate) use crate::errors::AquamarineError;
+pub(crate) use crate::stepper::StepperOutcome;
 
-pub(crate) fn execute(instructions: Vec<Instruction>) {
-    let mut data = HashMap::new();
+pub(crate) const CALL_SERVICE_SUCCESS: i32 = 0;
 
-    for instruction in instructions {
-        instruction.execute(&mut data);
-    }
+use serde_derive::Deserialize;
+use serde_derive::Serialize;
+
+#[fluence::fce]
+#[derive(Serialize, Deserialize)]
+pub struct CallServiceResult {
+    pub ret_code: i32,
+    pub result: String,
 }
