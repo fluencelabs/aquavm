@@ -4,7 +4,7 @@ Aquamarine is a distributed choreography language &amp; platform
 
 ## Examples
 
-```rust
+```lisp
 ((call (%current% (local_service_id local_fn_name) () result_name)) (call (remote_peer_id (service_id fn_name) () g)))
 ```
 This instruction sequence contains two call instructions:
