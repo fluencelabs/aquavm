@@ -21,7 +21,7 @@ use crate::Result;
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
 
-const CURRENT_PEER_ALIAS: &str = "%current%";
+const CURRENT_PEER_ALIAS: &str = "%current_peer_id%";
 const CURRENT_PEER_ID_ENV_NAME: &str = "CURRENT_PEER_ID";
 
 /*
@@ -105,7 +105,7 @@ fn parse_args(args: Vec<String>, data: &AquaData) -> Result<serde_json::Value> {
     let mut result = Vec::with_capacity(args.len());
 
     for arg in args {
-        let mut split_arg: Vec<&str> = arg.splitn(1, '.').collect();
+        let mut split_arg: Vec<&str> = arg.splitn(2, '.').collect();
         let variable_name = split_arg.remove(0);
 
         let value_by_key = data

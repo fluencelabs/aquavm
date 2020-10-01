@@ -30,7 +30,7 @@ pub(crate) fn execute_aqua(init_user_id: String, aqua: String, data: String) -> 
     execute_aqua_impl(init_user_id, aqua, data).unwrap_or_else(Into::into)
 }
 
-fn execute_aqua_impl(init_user_id: String, aqua: String, data: String) -> Result<StepperOutcome> {
+fn execute_aqua_impl(_init_user_id: String, aqua: String, data: String) -> Result<StepperOutcome> {
     let mut parsed_data: AquaData = serde_json::from_str(&data)?;
     let parsed_aqua = serde_sexpr::from_str::<Vec<Instruction>>(&aqua)?;
 
