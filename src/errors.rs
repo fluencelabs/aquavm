@@ -44,7 +44,7 @@ pub enum AquamarineError {
     /// Value with such name isn't presence in data.
     VariableNotFound(String),
 
-    /// Value with such path isn't found in data with such error.
+    /// Value with such path wasn't found in data with such error.
     VariableNotInJsonPath(String, JsonPathError),
 
     /// Multiple values found for such json path.

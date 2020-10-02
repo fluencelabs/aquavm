@@ -15,6 +15,8 @@
  */
 
 use super::StepperOutcome;
+use crate::instructions::ExecutableInstruction;
+use crate::instructions::ExecutionContext;
 use crate::instructions::Instruction;
 use crate::AquaData;
 use crate::Result;
@@ -31,8 +33,8 @@ pub(crate) fn execute_aqua(init_user_id: String, aqua: String, data: String) -> 
 }
 
 fn execute_aqua_impl(_init_user_id: String, aqua: String, data: String) -> Result<StepperOutcome> {
-    let mut parsed_data: AquaData = serde_json::from_str(&data)?;
-    let parsed_aqua = serde_sexpr::from_str::<Vec<Instruction>>(&aqua)?;
+    let parsed_data: AquaData = serde_json::from_str(&data)?;
+    let parsed_aqua = serde_sexpr::from_str::<Instruction>(&aqua)?;
 
     log::info!(
         "parsed_aqua: {:?}\nparsed_data: {:?}",
@@ -40,12 +42,14 @@ fn execute_aqua_impl(_init_user_id: String, aqua: String, data: String) -> Resul
         parsed_data
     );
 
-    let next_peer_pks = super::stepper::execute(parsed_aqua, &mut parsed_data)?;
-    let data = serde_json::to_string(&parsed_data)?;
+    let mut execution_ctx = ExecutionContext::new(parsed_data);
+    parsed_aqua.execute(&mut execution_ctx)?;
+
+    let data = serde_json::to_string(&execution_ctx.data)?;
 
     Ok(StepperOutcome {
         ret_code: 0,
         data,
-        next_peer_pks,
+        next_peer_pks: execution_ctx.next_peer_pks,
     })
 }

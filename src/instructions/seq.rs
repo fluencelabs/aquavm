@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+use super::ExecutionContext;
 use super::Instruction;
-use crate::AquaData;
 use crate::Result;
 
 use serde_derive::Deserialize;
@@ -25,14 +25,14 @@ use serde_derive::Serialize;
 pub(crate) struct Seq(Box<Instruction>, Box<Instruction>);
 
 impl super::ExecutableInstruction for Seq {
-    fn execute(self, data: &mut AquaData, next_peer_pks: &mut Vec<String>) -> Result<()> {
-        log::info!("seq called with data: {:?} and next_peer_pks: {:?}", data, next_peer_pks);
+    fn execute(&self, ctx: &mut ExecutionContext) -> Result<()> {
+        log::info!("seq is called with context: {:?}", ctx);
 
-        let pks_count_before_call = next_peer_pks.len();
-        self.0.execute(data, next_peer_pks)?;
+        let pks_count_before_call = ctx.next_peer_pks.len();
+        self.0.execute(ctx)?;
 
-        if pks_count_before_call == next_peer_pks.len() {
-            self.1.execute(data, next_peer_pks)?;
+        if pks_count_before_call == ctx.next_peer_pks.len() {
+            self.1.execute(ctx)?;
         }
 
         Ok(())

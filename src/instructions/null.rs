@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use crate::AquaData;
+use super::ExecutionContext;
 use crate::Result;
 
 use serde_derive::Deserialize;
@@ -24,8 +24,8 @@ use serde_derive::Serialize;
 pub(crate) struct Null {}
 
 impl super::ExecutableInstruction for Null {
-    fn execute(self, data: &mut AquaData, next_peer_pks: &mut Vec<String>) -> Result<()> {
-        log::info!("null called with data: {:?} and next_peer_pks: {:?}", data, next_peer_pks);
+    fn execute(&self, ctx: &mut ExecutionContext) -> Result<()> {
+        log::info!("null is called with context: {:?}", ctx);
 
         Ok(())
     }

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use super::ExecutionContext;
 use super::Instruction;
 use crate::AquaData;
 use crate::Result;
@@ -25,11 +26,11 @@ use serde_derive::Serialize;
 pub(crate) struct Par(Box<Instruction>, Box<Instruction>);
 
 impl super::ExecutableInstruction for Par {
-    fn execute(self, data: &mut AquaData, next_peer_pks: &mut Vec<String>) -> Result<()> {
-        log::info!("par called with data: {:?} and next_peer_pks: {:?}", data, next_peer_pks);
+    fn execute(&self, ctx: &mut ExecutionContext) -> Result<()> {
+        log::info!("par is called with context: {:?}", ctx);
 
-        self.0.execute(data, next_peer_pks)?;
-        self.1.execute(data, next_peer_pks)?;
+        self.0.execute(ctx)?;
+        self.1.execute(ctx)?;
 
         Ok(())
     }

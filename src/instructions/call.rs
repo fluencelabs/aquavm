@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use super::ExecutionContext;
 use crate::AquaData;
 use crate::AquamarineError;
 use crate::Result;
@@ -53,27 +54,29 @@ pub enum FunctionPart {
 pub(crate) struct Call(PeerPart, FunctionPart, Vec<String>, String);
 
 impl super::ExecutableInstruction for Call {
-    fn execute(self, data: &mut AquaData, next_peer_pks: &mut Vec<String>) -> Result<()> {
-        log::info!("call called with data: {:?} and next_peer_pks: {:?}", data, next_peer_pks);
+    fn execute(&self, ctx: &mut ExecutionContext) -> Result<()> {
+        log::info!("call is called with context: {:?}", ctx);
 
-        let (peer_pk, service_id, func_name) = parse_peer_fn_parts(self.0, self.1)?;
-        let function_args = parse_args(self.2, data)?;
+        let (peer_pk, service_id, func_name) = parse_peer_fn_parts(&self.0, &self.1)?;
+        let function_args = parse_args(&self.2, &ctx.data)?;
         let function_args = serde_json::to_string(&function_args)?;
-        let result_name = parse_result_name(self.3)?;
+        let result_name = parse_result_name(&self.3)?;
 
         let current_peer_id = std::env::var(CURRENT_PEER_ID_ENV_NAME)
             .map_err(|e| AquamarineError::CurrentPeerIdNotSet(e))?;
 
         if peer_pk == current_peer_id || peer_pk == CURRENT_PEER_ALIAS {
-            let result = unsafe { crate::call_service(service_id, func_name, function_args) };
+            let result = unsafe {
+                crate::call_service(service_id.to_string(), func_name.to_string(), function_args)
+            };
             if result.ret_code != crate::CALL_SERVICE_SUCCESS {
                 return Err(AquamarineError::LocalServiceError(result.result));
             }
 
             let result: serde_json::Value = serde_json::from_str(&result.result)?;
-            data.insert(result_name, result);
+            ctx.data.insert(result_name.to_string(), result);
         } else {
-            next_peer_pks.push(peer_pk);
+            ctx.next_peer_pks.push(peer_pk.to_string());
         }
 
         Ok(())
@@ -81,10 +84,10 @@ impl super::ExecutableInstruction for Call {
 }
 
 #[rustfmt::skip]
-fn parse_peer_fn_parts(
-    peer_part: PeerPart,
-    fn_part: FunctionPart,
-) -> Result<(String, String, String)> {
+fn parse_peer_fn_parts<'a>(
+    peer_part: &'a PeerPart,
+    fn_part: &'a FunctionPart,
+) -> Result<(&'a str, &'a str, &'a str)> {
     match (peer_part, fn_part) {
         (PeerPart::PeerPkWithPkServiceId(peer_pk, peer_service_id), FunctionPart::ServiceIdWithFuncName(_service_id, func_name)) => {
             Ok((peer_pk, peer_service_id, func_name))
@@ -101,7 +104,7 @@ fn parse_peer_fn_parts(
     }
 }
 
-fn parse_args(args: Vec<String>, data: &AquaData) -> Result<serde_json::Value> {
+fn parse_args(args: &[String], data: &AquaData) -> Result<serde_json::Value> {
     let mut result = Vec::with_capacity(args.len());
 
     for arg in args {
@@ -133,7 +136,7 @@ fn parse_args(args: Vec<String>, data: &AquaData) -> Result<serde_json::Value> {
     Ok(serde_json::Value::Array(result))
 }
 
-fn parse_result_name(result_name: String) -> Result<String> {
+fn parse_result_name(result_name: &str) -> Result<&str> {
     if !result_name.is_empty() {
         Ok(result_name)
     } else {

@@ -15,38 +15,66 @@
  */
 
 mod call;
+mod fold;
 mod null;
 mod par;
 mod seq;
 
-pub(self) use crate::stepper::ExecutableInstruction;
-
 use crate::AquaData;
 use crate::Result;
 use call::Call;
+use fold::Fold;
+use fold::FoldState;
+use fold::Next;
 use null::Null;
 use par::Par;
 use seq::Seq;
 
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
+use std::collections::HashMap;
+
+#[derive(Clone, Default, Debug)]
+pub(super) struct ExecutionContext {
+    pub data: AquaData,
+    pub next_peer_pks: Vec<String>,
+    pub folds: HashMap<String, FoldState>,
+}
+
+impl ExecutionContext {
+    pub(super) fn new(data: AquaData) -> Self {
+        Self {
+            data,
+            next_peer_pks: vec![],
+            folds: HashMap::new(),
+        }
+    }
+}
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
 #[serde(rename_all = "kebab-case")]
 pub(crate) enum Instruction {
     Null(Null),
     Call(Call),
+    Fold(Fold),
+    Next(Next),
     Par(Par),
     Seq(Seq),
 }
 
+pub(crate) trait ExecutableInstruction {
+    fn execute(&self, ctx: &mut ExecutionContext) -> Result<()>;
+}
+
 impl ExecutableInstruction for Instruction {
-    fn execute(self, data: &mut AquaData, next_peer_pks: &mut Vec<String>) -> Result<()> {
+    fn execute(&self, ctx: &mut ExecutionContext) -> Result<()> {
         match self {
-            Instruction::Null(null) => null.execute(data, next_peer_pks),
-            Instruction::Call(call) => call.execute(data, next_peer_pks),
-            Instruction::Par(par) => par.execute(data, next_peer_pks),
-            Instruction::Seq(seq) => seq.execute(data, next_peer_pks),
+            Instruction::Null(null) => null.execute(ctx),
+            Instruction::Call(call) => call.execute(ctx),
+            Instruction::Fold(fold) => fold.execute(ctx),
+            Instruction::Next(next) => next.execute(ctx),
+            Instruction::Par(par) => par.execute(ctx),
+            Instruction::Seq(seq) => seq.execute(ctx),
         }
     }
 }
