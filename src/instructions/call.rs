@@ -60,7 +60,7 @@ impl super::ExecutableInstruction for Call {
         let (peer_pk, service_id, func_name) = parse_peer_fn_parts(&self.0, &self.1)?;
         let function_args = parse_args(&self.2, &ctx.data)?;
         let function_args = serde_json::to_string(&function_args)
-            .map_err(|e| AquamarineError::FuncArgsParseError(e))?;
+            .map_err(|e| AquamarineError::FuncArgsSerdeError(e))?;
         let result_name = parse_result_name(&self.3)?;
 
         let current_peer_id = std::env::var(CURRENT_PEER_ID_ENV_NAME)
@@ -75,7 +75,7 @@ impl super::ExecutableInstruction for Call {
             }
 
             let result: serde_json::Value = serde_json::from_str(&result.result)
-                .map_err(|e| AquamarineError::CallServiceParseError(e))?;
+                .map_err(|e| AquamarineError::CallServiceSerdeError(e))?;
             ctx.data.insert(result_name.to_string(), result);
         } else {
             ctx.next_peer_pks.push(peer_pk.to_string());

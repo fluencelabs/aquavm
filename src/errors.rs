@@ -30,13 +30,13 @@ pub enum AquamarineError {
     SExprParseError(SExprError),
 
     /// Errors occurred while parsing data.
-    DataParseError(SerdeJsonError),
+    DataSerdeError(SerdeJsonError),
 
     /// Errors occurred while parsing function arguments of an expression.
-    FuncArgsParseError(SerdeJsonError),
+    FuncArgsSerdeError(SerdeJsonError),
 
     /// Errors occurred while parsing returned by call_service value.
-    CallServiceParseError(SerdeJsonError),
+    CallServiceSerdeError(SerdeJsonError),
 
     /// Indicates that environment variable with name CURRENT_PEER_ID isn't set.
     CurrentPeerIdNotSet(VarError),
@@ -62,19 +62,19 @@ impl Error for AquamarineError {}
 impl std::fmt::Display for AquamarineError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         match self {
-            AquamarineError::SExprParseError(err) => write!(f, "{}", err),
-            AquamarineError::DataParseError(err) => {
-                write!(f, "an error occurred while parsing data: {}", err)
+            AquamarineError::SExprParseError(err) => write!(f, "{:?}", err),
+            AquamarineError::DataSerdeError(err) => {
+                write!(f, "an error occurred while serializing/deserializing data: {:?}", err)
             }
-            AquamarineError::FuncArgsParseError(err) => {
-                write!(f, "an error occurred while function arguments: {}", err)
+            AquamarineError::FuncArgsSerdeError(err) => {
+                write!(f, "an error occurred while serializing/deserializing function arguments: {:?}", err)
             }
-            AquamarineError::CallServiceParseError(err) => write!(
+            AquamarineError::CallServiceSerdeError(err) => write!(
                 f,
-                "an error occurred while parsing call_service result: {}",
+                "an error occurred while serializing/deserializing call_service result: {:?}",
                 err
             ),
-            AquamarineError::CurrentPeerIdNotSet(err) => write!(f, "{}", err),
+            AquamarineError::CurrentPeerIdNotSet(err) => write!(f, "{:?}", err),
             AquamarineError::InstructionError(err_msg) => write!(f, "{}", err_msg),
             AquamarineError::LocalServiceError(err_msg) => write!(f, "{}", err_msg),
             AquamarineError::VariableNotFound(variable_name) => write!(
@@ -84,7 +84,7 @@ impl std::fmt::Display for AquamarineError {
             ),
             AquamarineError::VariableNotInJsonPath(json_path, json_path_err) => write!(
                 f,
-                "variable with path {} not found with error: {}",
+                "variable with path {} not found with error: {:?}",
                 json_path, json_path_err
             ),
             AquamarineError::MultipleValuesInJsonPath(json_path) => write!(
@@ -112,9 +112,9 @@ impl Into<StepperOutcome> for AquamarineError {
     fn into(self) -> StepperOutcome {
         let ret_code = match self {
             AquamarineError::SExprParseError(_) => 1,
-            AquamarineError::DataParseError(..) => 2,
-            AquamarineError::FuncArgsParseError(..) => 3,
-            AquamarineError::CallServiceParseError(..) => 4,
+            AquamarineError::DataSerdeError(..) => 2,
+            AquamarineError::FuncArgsSerdeError(..) => 3,
+            AquamarineError::CallServiceSerdeError(..) => 4,
             AquamarineError::CurrentPeerIdNotSet(..) => 5,
             AquamarineError::InstructionError(..) => 6,
             AquamarineError::LocalServiceError(..) => 7,
