@@ -19,6 +19,7 @@ use crate::instructions::ExecutableInstruction;
 use crate::instructions::ExecutionContext;
 use crate::instructions::Instruction;
 use crate::AquaData;
+use crate::AquamarineError;
 use crate::Result;
 
 pub(crate) fn execute_aqua(init_user_id: String, aqua: String, data: String) -> StepperOutcome {
@@ -33,7 +34,8 @@ pub(crate) fn execute_aqua(init_user_id: String, aqua: String, data: String) -> 
 }
 
 fn execute_aqua_impl(_init_user_id: String, aqua: String, data: String) -> Result<StepperOutcome> {
-    let parsed_data: AquaData = serde_json::from_str(&data)?;
+    let parsed_data: AquaData =
+        serde_json::from_str(&data).map_err(|e| AquamarineError::DataParseError(e))?;
     let parsed_aqua = serde_sexpr::from_str::<Instruction>(&aqua)?;
 
     log::info!(
@@ -45,7 +47,8 @@ fn execute_aqua_impl(_init_user_id: String, aqua: String, data: String) -> Resul
     let mut execution_ctx = ExecutionContext::new(parsed_data);
     parsed_aqua.execute(&mut execution_ctx)?;
 
-    let data = serde_json::to_string(&execution_ctx.data)?;
+    let data = serde_json::to_string(&execution_ctx.data)
+        .map_err(|e| AquamarineError::DataParseError(e))?;
 
     Ok(StepperOutcome {
         ret_code: 0,

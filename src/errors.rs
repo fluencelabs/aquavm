@@ -29,8 +29,14 @@ pub enum AquamarineError {
     /// Errors occurred while parsing aqua script in the form of S expressions.
     SExprParseError(SExprError),
 
-    /// Errors occurred while parsing supplied data.
+    /// Errors occurred while parsing data.
     DataParseError(SerdeJsonError),
+
+    /// Errors occurred while parsing function arguments of an expression.
+    FuncArgsParseError(SerdeJsonError),
+
+    /// Errors occurred while parsing returned by call_service value.
+    CallServiceParseError(SerdeJsonError),
 
     /// Indicates that environment variable with name CURRENT_PEER_ID isn't set.
     CurrentPeerIdNotSet(VarError),
@@ -57,7 +63,17 @@ impl std::fmt::Display for AquamarineError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         match self {
             AquamarineError::SExprParseError(err) => write!(f, "{}", err),
-            AquamarineError::DataParseError(err) => write!(f, "{}", err),
+            AquamarineError::DataParseError(err) => {
+                write!(f, "an error occurred while parsing data: {}", err)
+            }
+            AquamarineError::FuncArgsParseError(err) => {
+                write!(f, "an error occurred while function arguments: {}", err)
+            }
+            AquamarineError::CallServiceParseError(err) => write!(
+                f,
+                "an error occurred while parsing call_service result: {}",
+                err
+            ),
             AquamarineError::CurrentPeerIdNotSet(err) => write!(f, "{}", err),
             AquamarineError::InstructionError(err_msg) => write!(f, "{}", err_msg),
             AquamarineError::LocalServiceError(err_msg) => write!(f, "{}", err_msg),
@@ -86,12 +102,6 @@ impl From<SExprError> for AquamarineError {
     }
 }
 
-impl From<SerdeJsonError> for AquamarineError {
-    fn from(err: SerdeJsonError) -> Self {
-        AquamarineError::DataParseError(err)
-    }
-}
-
 impl From<std::convert::Infallible> for AquamarineError {
     fn from(_: std::convert::Infallible) -> Self {
         unreachable!()
@@ -103,12 +113,14 @@ impl Into<StepperOutcome> for AquamarineError {
         let ret_code = match self {
             AquamarineError::SExprParseError(_) => 1,
             AquamarineError::DataParseError(..) => 2,
-            AquamarineError::CurrentPeerIdNotSet(..) => 3,
-            AquamarineError::InstructionError(..) => 4,
-            AquamarineError::LocalServiceError(..) => 5,
-            AquamarineError::VariableNotFound(..) => 6,
-            AquamarineError::VariableNotInJsonPath(..) => 7,
-            AquamarineError::MultipleValuesInJsonPath(..) => 8,
+            AquamarineError::FuncArgsParseError(..) => 3,
+            AquamarineError::CallServiceParseError(..) => 4,
+            AquamarineError::CurrentPeerIdNotSet(..) => 5,
+            AquamarineError::InstructionError(..) => 6,
+            AquamarineError::LocalServiceError(..) => 7,
+            AquamarineError::VariableNotFound(..) => 8,
+            AquamarineError::VariableNotInJsonPath(..) => 9,
+            AquamarineError::MultipleValuesInJsonPath(..) => 10,
         };
 
         StepperOutcome {

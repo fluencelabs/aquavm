@@ -16,7 +16,6 @@
 
 use super::ExecutionContext;
 use super::Instruction;
-use crate::AquaData;
 use crate::Result;
 
 use serde_derive::Deserialize;
