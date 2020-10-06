@@ -127,11 +127,12 @@ impl super::ExecutableInstruction for Next {
 
 #[cfg(test)]
 mod tests {
+    use crate::SerdeValue;
+
     use aqua_test_utils::create_aqua_vm;
     use aquamarine_vm::vec1::Vec1;
     use aquamarine_vm::HostExportedFunc;
     use aquamarine_vm::IValue;
-    use aquamarine_vm::StepperOutcome;
 
     use serde_json::json;
 
@@ -140,12 +141,17 @@ mod tests {
         env_logger::init();
 
         let call_service: HostExportedFunc = Box::new(|_, args| -> Option<IValue> {
+            println!("call_service called with {:?}\n", args);
+
+            let arg = match &args[2] {
+                IValue::String(str) => str,
+                _ => unreachable!(),
+            };
+
+            let arg: Vec<String> = serde_json::from_str(arg).unwrap();
+
             Some(IValue::Record(
-                Vec1::new(vec![
-                    IValue::S32(0),
-                    IValue::String(String::from("\"test\"")),
-                ])
-                .unwrap(),
+                Vec1::new(vec![IValue::S32(0), IValue::String(format!("{}", arg[0]))]).unwrap(),
             ))
         });
         let mut vm = create_aqua_vm(call_service);
@@ -154,7 +160,7 @@ mod tests {
             r#"
             (fold (Iterable i
                 (seq (
-                    (call (%current_peer_id% (local_service_id local_fn_name) (i) result_name))
+                    (call (%current_peer_id% (local_service_id local_fn_name) (i) acc[]))
                     (next i)
                 )
             )))"#,
@@ -164,19 +170,15 @@ mod tests {
             .call(json!([
                 String::from("asd"),
                 script,
-                String::from("{\"Iterable\": {\"serde-value\": [1,2,3,4,5]}}"),
+                String::from("{\"Iterable\": {\"serde-value\": [\"1\",\"2\",\"3\",\"4\",\"5\"]}}"),
             ]))
             .expect("call should be successful");
 
+        let res: SerdeValue = serde_json::from_str(&res.data).unwrap();
+
         assert_eq!(
-            res,
-            StepperOutcome {
-                data: String::from("{}"),
-                next_peer_pks: vec![
-                    String::from("remote_peer_id_1"),
-                    String::from("remote_peer_id_2")
-                ]
-            }
+            res.get("acc").unwrap(),
+            &json!({"accumulator": [1,2,3,4,5]})
         );
     }
 }
