@@ -34,3 +34,42 @@ impl super::ExecutableInstruction for Par {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use aquamarine_vm::StepperOutcome;
+    use aquamarine_vm::HostExportedFunc;
+    use aquamarine_vm::IValue;
+    use aquamarine_vm::vec1::Vec1;
+    use aqua_test_utils::create_aqua_vm;
+
+    use serde_json::json;
+
+    #[test]
+    fn par() {
+        let call_service: HostExportedFunc = Box::new(|_, _| -> Option<IValue> {
+            Some(IValue::Record(
+                Vec1::new(vec![
+                    IValue::S32(0),
+                    IValue::String(String::from("\"test\"")),
+                ])
+                    .unwrap(),
+            ))
+        });
+        let mut vm = create_aqua_vm(call_service);
+
+        let script = String::from(r#"
+            (par (
+                (call (remote_peer_id_1 (local_service_id local_fn_name) () result_name))
+                (call (remote_peer_id_2 (service_id fn_name) () g))
+            ))"#,
+        );
+
+        let res = vm.call(json!([String::from("asd"), script, String::from("{}"),])).expect("call should be successful");
+
+        assert_eq!(res, StepperOutcome {
+            data: String::from("{}"),
+            next_peer_pks: vec![String::from("remote_peer_id_1"), String::from("remote_peer_id_2")]
+        });
+    }
+}

@@ -88,6 +88,7 @@ fn format_aqua(aqua: String) -> String {
     String::from_iter(formatted_aqua.into_iter())
 }
 
+#[cfg(test)]
 mod tests {
     #[test]
     fn format_aqua_test() {

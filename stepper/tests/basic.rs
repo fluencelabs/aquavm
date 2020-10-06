@@ -15,19 +15,11 @@
  */
 
 use aquamarine_vm::vec1::Vec1;
-use aquamarine_vm::AquamarineVM;
-use aquamarine_vm::AquamarineVMConfig;
-use aquamarine_vm::Ctx;
 use aquamarine_vm::HostExportedFunc;
-use aquamarine_vm::HostImportDescriptor;
-use aquamarine_vm::IType;
 use aquamarine_vm::IValue;
-
 use aqua_test_utils::create_aqua_vm;
 
 use serde_json::json;
-
-use std::path::PathBuf;
 
 #[test]
 fn call() {

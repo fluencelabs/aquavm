@@ -21,8 +21,10 @@ jobs:
           rustup component add clippy
 
           cargo install fcli
+          cd stepper
           fce build
 
+          cd ..
           cargo fmt --all -- --check --color always
           cargo build --release --all-features
           cargo test --release --all-features

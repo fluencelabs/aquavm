@@ -50,7 +50,7 @@ dependencies = [
 [[package]]
 name = "aquamarine-vm"
 version = "0.1.0"
-source = "git+https://github.com/fluencelabs/fce#22ce70568477b46a3456181c98905b8cee06591f"
+source = "git+https://github.com/fluencelabs/fce#71497738a0ce25f80a3f7a6d5c4cdbc10f08419c"
 dependencies = [
  "fluence-faas",
  "serde",
@@ -371,7 +371,7 @@ dependencies = [
 [[package]]
 name = "fce"
 version = "0.1.7"
-source = "git+https://github.com/fluencelabs/fce#22ce70568477b46a3456181c98905b8cee06591f"
+source = "git+https://github.com/fluencelabs/fce#71497738a0ce25f80a3f7a6d5c4cdbc10f08419c"
 dependencies = [
  "boolinator",
  "fce-wit-interfaces",
@@ -391,7 +391,7 @@ dependencies = [
 [[package]]
 name = "fce-wit-interfaces"
 version = "0.1.5"
-source = "git+https://github.com/fluencelabs/fce#22ce70568477b46a3456181c98905b8cee06591f"
+source = "git+https://github.com/fluencelabs/fce#71497738a0ce25f80a3f7a6d5c4cdbc10f08419c"
 dependencies = [
  "multimap",
  "wasmer-interface-types-fl",
@@ -400,7 +400,7 @@ dependencies = [
 [[package]]
 name = "fce-wit-parser"
 version = "0.1.7"
-source = "git+https://github.com/fluencelabs/fce#22ce70568477b46a3456181c98905b8cee06591f"
+source = "git+https://github.com/fluencelabs/fce#71497738a0ce25f80a3f7a6d5c4cdbc10f08419c"
 dependencies = [
  "anyhow",
  "fce-wit-interfaces",
@@ -421,7 +421,7 @@ dependencies = [
 [[package]]
 name = "fluence-faas"
 version = "0.1.8"
-source = "git+https://github.com/fluencelabs/fce#22ce70568477b46a3456181c98905b8cee06591f"
+source = "git+https://github.com/fluencelabs/fce#71497738a0ce25f80a3f7a6d5c4cdbc10f08419c"
 dependencies = [
  "cmd_lib",
  "fce",
