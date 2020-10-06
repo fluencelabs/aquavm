@@ -35,6 +35,7 @@ dependencies = [
 name = "aquamarine"
 version = "0.1.0"
 dependencies = [
+ "aqua-test-utils",
  "aquamarine-vm",
  "fluence",
  "jsonpath_lib",

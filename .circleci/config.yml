@@ -26,7 +26,7 @@ jobs:
           cargo fmt --all -- --check --color always
           cargo build --release --all-features
           cargo test --release --all-features
-          cargo clippy --target=wasm32-wasi
+          cargo clippy -v
 
       - save_cache:
           paths:

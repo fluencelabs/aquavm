@@ -23,6 +23,8 @@ use aquamarine_vm::HostImportDescriptor;
 use aquamarine_vm::IType;
 use aquamarine_vm::IValue;
 
+use aqua_test_utils::create_aqua_vm;
+
 use serde_json::json;
 
 use std::path::PathBuf;
@@ -38,21 +40,8 @@ fn call() {
             .unwrap(),
         ))
     });
+    let mut vm = create_aqua_vm(call_service);
 
-    let call_service_descriptor = HostImportDescriptor {
-        host_exported_func: call_service,
-        argument_types: vec![IType::String, IType::String, IType::String],
-        output_type: Some(IType::Record(0)),
-        error_handler: None,
-    };
-
-    let config = AquamarineVMConfig {
-        aquamarine_wasm_path: PathBuf::from("./target/wasm32-wasi/debug/aquamarine.wasm"),
-        call_service: call_service_descriptor,
-        current_peer_id: String::from("some_peer_id"),
-    };
-
-    let mut vm = AquamarineVM::new(config).expect("vm should be created");
     let script = String::from(
         r#"
         (seq (
