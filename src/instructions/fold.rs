@@ -110,7 +110,8 @@ impl super::ExecutableInstruction for Next {
         // here it's need to getting fold state again because of borrow checker
         let fold_state = ctx
             .folds
-            .get_mut(iterable_variable_name).expect("fold state is deleted only after fold finishing");
+            .get_mut(iterable_variable_name)
+            .expect("fold state is deleted only after fold finishing");
 
         fold_state.cursor = fold_state.cursor - 1;
 

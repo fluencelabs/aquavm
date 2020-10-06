@@ -36,7 +36,8 @@ pub(crate) fn execute_aqua(init_user_id: String, aqua: String, data: String) -> 
 fn execute_aqua_impl(_init_user_id: String, aqua: String, data: String) -> Result<StepperOutcome> {
     let parsed_data: AquaData =
         serde_json::from_str(&data).map_err(|e| AquamarineError::DataSerdeError(e))?;
-    let parsed_aqua = serde_sexpr::from_str::<Instruction>(&aqua)?;
+    let formatted_aqua = format_aqua(aqua);
+    let parsed_aqua = serde_sexpr::from_str::<Instruction>(&formatted_aqua)?;
 
     log::info!(
         "parsed_aqua: {:?}\nparsed_data: {:?}",
@@ -55,4 +56,57 @@ fn execute_aqua_impl(_init_user_id: String, aqua: String, data: String) -> Resul
         data,
         next_peer_pks: execution_ctx.next_peer_pks,
     })
+}
+
+/// Formats aqua script in a form of S-expressions to a form compatible with the serde_sexpr crate.
+fn format_aqua(aqua: String) -> String {
+    use std::iter::FromIterator;
+
+    let mut formatted_aqua = Vec::with_capacity(aqua.len());
+    // whether to skip the next whitespace
+    let mut skip_next_whitespace = false;
+    // whether c was a closing brace
+    let mut was_cbr = false;
+
+    for c in aqua.chars() {
+        let is_whitespace = c == ' ';
+        if (skip_next_whitespace && is_whitespace) || c == '\n' {
+            continue;
+        }
+
+        let is_cbr = c == ')';
+
+        skip_next_whitespace = is_whitespace || c == '(' || is_cbr;
+        if was_cbr && !is_cbr {
+            formatted_aqua.push(' ');
+        }
+
+        was_cbr = is_cbr;
+        formatted_aqua.push(c)
+    }
+
+    String::from_iter(formatted_aqua.into_iter())
+}
+
+mod tests {
+    #[test]
+    fn format_aqua_test() {
+        let aqua = format!(
+            r#"(( ((  (seq (
+            (call (%current_peer_id% (add_module ||) (module) module))
+            (seq (
+                (call (%current_peer_id% (add_blueprint ||) (blueprint) blueprint_id))
+                (seq (
+                    (call (%current_peer_id% (create ||) (blueprint_id) service_id))
+                    (call ({} (|| ||) (service_id) client_result))
+                )  )
+            ) )
+        ))"#,
+            "abc"
+        );
+
+        let aqua = super::format_aqua(aqua);
+
+        assert_eq!(aqua, String::from("(((((seq ((call (%current_peer_id% (add_module ||) (module) module)) (seq ((call (%current_peer_id% (add_blueprint ||) (blueprint) blueprint_id)) (seq ((call (%current_peer_id% (create ||) (blueprint_id) service_id)) (call (abc (|| ||) (service_id) client_result))))))))"))
+    }
 }

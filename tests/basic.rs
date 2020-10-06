@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+use aquamarine_vm::vec1::Vec1;
 use aquamarine_vm::AquamarineVM;
 use aquamarine_vm::AquamarineVMConfig;
 use aquamarine_vm::Ctx;
+use aquamarine_vm::HostExportedFunc;
 use aquamarine_vm::HostImportDescriptor;
 use aquamarine_vm::IType;
 use aquamarine_vm::IValue;
@@ -27,12 +29,20 @@ use std::path::PathBuf;
 
 #[test]
 fn call() {
-    let call_service = move |_ctx: &Ctx, _args: Vec<IValue>| -> Option<IValue> { None };
+    let call_service: HostExportedFunc = Box::new(|_, args| -> Option<IValue> {
+        Some(IValue::Record(
+            Vec1::new(vec![
+                IValue::S32(0),
+                IValue::String(String::from("\"test\"")),
+            ])
+            .unwrap(),
+        ))
+    });
 
     let call_service_descriptor = HostImportDescriptor {
-        host_exported_func: Box::new(call_service),
-        argument_types: vec![IType::String, IType],
-        output_type: None,
+        host_exported_func: call_service,
+        argument_types: vec![IType::String, IType::String, IType::String],
+        output_type: Some(IType::Record(0)),
         error_handler: None,
     };
 
@@ -43,7 +53,9 @@ fn call() {
     };
 
     let mut vm = AquamarineVM::new(config).expect("vm should be created");
-    let script = String::from("(seq ((call (%current% (local_service_id local_fn_name) () result_name)) (call (remote_peer_id (service_id fn_name) () g))))");
+    let script = String::from("(seq ((call (%current_peer_id1% (local_service_id local_fn_name) () result_name)) (call (remote_peer_id (service_id fn_name) () g))))");
 
-    vm.call(json!([String::from("asd"), script, String::from("{}"),]));
+    let res = vm.call(json!([String::from("asd"), script, String::from("{}"),]));
+
+    println!("result is {:?}", res);
 }

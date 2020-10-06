@@ -65,7 +65,7 @@ impl super::ExecutableInstruction for Call {
         let result_name = parse_result_name(&self.3)?;
 
         let current_peer_id = std::env::var(CURRENT_PEER_ID_ENV_NAME)
-            .map_err(|e| AquamarineError::CurrentPeerIdNotSet(e))?;
+            .map_err(|e| AquamarineError::CurrentPeerIdEnvError(e))?;
 
         if peer_pk == current_peer_id || peer_pk == CURRENT_PEER_ALIAS {
             let result = unsafe {

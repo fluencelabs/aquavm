@@ -41,7 +41,7 @@ pub enum AquamarineError {
     CallServiceSerdeError(CallServiceResult, SerdeJsonError),
 
     /// Indicates that environment variable with name CURRENT_PEER_ID isn't set.
-    CurrentPeerIdNotSet(VarError),
+    CurrentPeerIdEnvError(VarError),
 
     /// Semantic errors in instructions.
     InstructionError(String),
@@ -85,10 +85,14 @@ impl std::fmt::Display for AquamarineError {
             ),
             AquamarineError::CallServiceSerdeError(result, err) => write!(
                 f,
-                "call_service result {:?} can't be serialized or deserialized with an error: {:?}",
+                "call_service result \"{:?}\" can't be serialized or deserialized with an error: {:?}",
                 result, err
             ),
-            AquamarineError::CurrentPeerIdNotSet(err) => write!(f, "{:?}", err),
+            AquamarineError::CurrentPeerIdEnvError(err) => write!(
+                f,
+                "the environment variable with current peer id can't be obtained: {:?}",
+                err
+            ),
             AquamarineError::InstructionError(err_msg) => write!(f, "{}", err_msg),
             AquamarineError::LocalServiceError(err_msg) => write!(f, "{}", err_msg),
             AquamarineError::VariableNotFound(variable_name) => write!(
@@ -139,7 +143,7 @@ impl Into<StepperOutcome> for AquamarineError {
             AquamarineError::DataSerdeError(..) => 2,
             AquamarineError::FuncArgsSerdeError(..) => 3,
             AquamarineError::CallServiceSerdeError(..) => 4,
-            AquamarineError::CurrentPeerIdNotSet(..) => 5,
+            AquamarineError::CurrentPeerIdEnvError(..) => 5,
             AquamarineError::InstructionError(..) => 6,
             AquamarineError::LocalServiceError(..) => 7,
             AquamarineError::VariableNotFound(..) => 8,

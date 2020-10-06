@@ -18,7 +18,7 @@ name = "aqua_test_module"
 path = "test_module/main.rs"
 
 [dependencies]
-fluence = { git = "https://github.com/fluencelabs/rust-sdk", features = ["logger"] }
+fluence = { git = "https://github.com/fluencelabs/rust-sdk", branch = "logging", features = ["logger"] }
 
 serde = { version = "1.0.116", features = [ "derive", "rc" ] }
 serde_derive = "1.0.116"
