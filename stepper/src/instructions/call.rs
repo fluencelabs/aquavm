@@ -124,8 +124,14 @@ fn parse_args(args: &[String], ctx: &ExecutionContext) -> Result<SerdeValue> {
         let value_by_key = match (value_from_data, value_from_fold) {
             (Some(value), None) => value,
             (None, Some(fold_state)) => &fold_state.iterable[fold_state.cursor],
-            (None, None) => return Err(AquamarineError::VariableNotFound(variable_name.to_string())),
-            (Some(_), Some(_)) => return Err(AquamarineError::MultipleVariablesFound(variable_name.to_string())),
+            (None, None) => {
+                return Err(AquamarineError::VariableNotFound(variable_name.to_string()))
+            }
+            (Some(_), Some(_)) => {
+                return Err(AquamarineError::MultipleVariablesFound(
+                    variable_name.to_string(),
+                ))
+            }
         };
 
         let value = if !split_arg.is_empty() {

@@ -20,7 +20,7 @@ pub(crate) type Result<T> = std::result::Result<T, AquamarineError>;
 pub(crate) type AquaData = std::collections::HashMap<String, SerdeValue>;
 pub(crate) type SerdeValue = serde_json::Value;
 pub(crate) use crate::errors::AquamarineError;
-pub(crate) use crate::stepper::StepperOutcome;
+pub(crate) use crate::stepper_outcome::StepperOutcome;
 
 pub(crate) const CALL_SERVICE_SUCCESS: i32 = 0;
 

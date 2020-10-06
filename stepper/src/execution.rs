@@ -48,8 +48,8 @@ fn execute_aqua_impl(_init_user_id: String, aqua: String, data: String) -> Resul
     let mut execution_ctx = ExecutionContext::new(parsed_data);
     parsed_aqua.execute(&mut execution_ctx)?;
 
-    let data = serde_json::to_string(&execution_ctx.data)
-        .map_err(AquamarineError::DataSerdeError)?;
+    let data =
+        serde_json::to_string(&execution_ctx.data).map_err(AquamarineError::DataSerdeError)?;
 
     Ok(StepperOutcome {
         ret_code: 0,

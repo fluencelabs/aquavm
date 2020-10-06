@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-mod air;
 mod defines;
 mod errors;
+mod execution;
 mod instructions;
-mod stepper;
+mod stepper_outcome;
 
 pub(crate) use crate::defines::*;
 
-use crate::stepper::execute_aqua;
+use crate::execution::execute_aqua;
 
 use wasm_bindgen::prelude::*;
 
