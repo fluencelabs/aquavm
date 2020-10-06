@@ -16,11 +16,13 @@
 
 use super::ExecutionContext;
 use super::Instruction;
-use crate::AquaData;
+use crate::AquamarineError;
 use crate::Result;
+use crate::SerdeValue;
 
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
+use std::collections::LinkedList;
 use std::rc::Rc;
 
 /*
@@ -34,7 +36,8 @@ use std::rc::Rc;
 
 #[derive(Debug, Clone)]
 pub(crate) struct FoldState {
-    pub data: Vec<serde_json::Value>,
+    // TODO: make it store a ref to context value
+    pub iterable: Vec<SerdeValue>,
     pub cursor: usize,
     pub instr_head: Rc<Instruction>,
 }
@@ -47,16 +50,38 @@ pub(crate) struct Next(String);
 
 impl super::ExecutableInstruction for Fold {
     fn execute(&self, ctx: &mut ExecutionContext) -> Result<()> {
-        log::info!("fold is called with context: {:?}", ctx);
+        log::info!("fold {:?} is called with context {:?}", self, ctx);
+
+        let iterable_name = &self.0;
+        let iterable_variable_name = &self.1;
+        let instr_head = self.2.clone();
+
+        let iterable = ctx
+            .data
+            .get(iterable_name)
+            .ok_or_else(|| AquamarineError::VariableNotFound(String::from(iterable_name)))?;
+
+        let iterable = match iterable {
+            SerdeValue::Array(json_array) => json_array.clone(),
+            v => {
+                return Err(AquamarineError::VariableIsNotArray(
+                    v.clone(),
+                    iterable_name.clone(),
+                ))
+            }
+        };
 
         let fold_state = FoldState {
-            data: vec![],
+            iterable,
             cursor: 0,
-            instr_head: self.2.clone(),
+            instr_head: instr_head.clone(),
         };
-        ctx.folds.insert(self.1.clone(), fold_state);
 
-        self.2.execute(ctx)?;
+        ctx.folds.insert(iterable_variable_name.clone(), fold_state);
+
+        instr_head.execute(ctx)?;
+
+        ctx.folds.remove(iterable_variable_name);
 
         Ok(())
     }
@@ -64,9 +89,30 @@ impl super::ExecutableInstruction for Fold {
 
 impl super::ExecutableInstruction for Next {
     fn execute(&self, ctx: &mut ExecutionContext) -> Result<()> {
-        log::info!("next is called with context: {:?}", ctx);
+        log::info!("next {:?} is called with context {:?}", self, ctx);
 
-        ctx.folds[&self.0].instr_head.clone().execute(ctx)?;
+        let iterable_variable_name = &self.0;
+        let fold_state = ctx
+            .folds
+            .get_mut(iterable_variable_name)
+            .ok_or_else(|| AquamarineError::FoldStateNotFound(iterable_variable_name.clone()))?;
+
+        if fold_state.iterable.len() >= fold_state.cursor {
+            // the only thing is needed here - is just to pass
+            return Ok(());
+        }
+
+        fold_state.cursor = fold_state.cursor + 1;
+
+        let next_instr = fold_state.instr_head.clone();
+        next_instr.execute(ctx)?;
+
+        // here it's need to getting fold state again because of borrow checker
+        let fold_state = ctx
+            .folds
+            .get_mut(iterable_variable_name).expect("fold state is deleted only after fold finishing");
+
+        fold_state.cursor = fold_state.cursor - 1;
 
         Ok(())
     }

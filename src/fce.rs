@@ -35,7 +35,7 @@ pub fn invoke(init_user_id: String, aqua: String, data: String) -> StepperOutcom
 }
 
 #[fce]
-#[link(wasm_import_module = "aqua_test_module")]
+#[link(wasm_import_module = "host")]
 extern "C" {
     pub fn call_service(service_id: String, fn_name: String, args: String) -> CallServiceResult;
 }

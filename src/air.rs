@@ -63,7 +63,7 @@ a -> B
   (call fn [x.0])
 )
 
-data - HashMap<String, serde_json::Value>
+data - HashMap<String, SerdeValue>
 x.h.a.v -> (x - key in data, h.a.v - json path)
 
 0

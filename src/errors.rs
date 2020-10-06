@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+use crate::CallServiceResult;
+use crate::SerdeValue;
 use crate::StepperOutcome;
 
 use jsonpath_lib::JsonPathError;
@@ -29,14 +31,14 @@ pub enum AquamarineError {
     /// Errors occurred while parsing aqua script in the form of S expressions.
     SExprParseError(SExprError),
 
-    /// Errors occurred while parsing data.
+    /// Errors occurred while parsing aqua data.
     DataSerdeError(SerdeJsonError),
 
     /// Errors occurred while parsing function arguments of an expression.
-    FuncArgsSerdeError(SerdeJsonError),
+    FuncArgsSerdeError(SerdeValue, SerdeJsonError),
 
     /// Errors occurred while parsing returned by call_service value.
-    CallServiceSerdeError(SerdeJsonError),
+    CallServiceSerdeError(CallServiceResult, SerdeJsonError),
 
     /// Indicates that environment variable with name CURRENT_PEER_ID isn't set.
     CurrentPeerIdNotSet(VarError),
@@ -44,7 +46,7 @@ pub enum AquamarineError {
     /// Semantic errors in instructions.
     InstructionError(String),
 
-    /// Semantic errors in instructions.
+    /// An error is occurred while calling local service via call_service.
     LocalServiceError(String),
 
     /// Value with such name isn't presence in data.
@@ -53,8 +55,14 @@ pub enum AquamarineError {
     /// Value with such path wasn't found in data with such error.
     VariableNotInJsonPath(String, JsonPathError),
 
+    /// Value with such name isn't presence in data.
+    VariableIsNotArray(SerdeValue, String),
+
     /// Multiple values found for such json path.
     MultipleValuesInJsonPath(String),
+
+    /// Fold state for such iterable variable name isn't found.
+    FoldStateNotFound(String),
 }
 
 impl Error for AquamarineError {}
@@ -62,17 +70,23 @@ impl Error for AquamarineError {}
 impl std::fmt::Display for AquamarineError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         match self {
-            AquamarineError::SExprParseError(err) => write!(f, "{:?}", err),
-            AquamarineError::DataSerdeError(err) => {
-                write!(f, "an error occurred while serializing/deserializing data: {:?}", err)
+            AquamarineError::SExprParseError(err) => {
+                write!(f, "aqua script can't be parsed: {:?}", err)
             }
-            AquamarineError::FuncArgsSerdeError(err) => {
-                write!(f, "an error occurred while serializing/deserializing function arguments: {:?}", err)
-            }
-            AquamarineError::CallServiceSerdeError(err) => write!(
+            AquamarineError::DataSerdeError(err) => write!(
                 f,
-                "an error occurred while serializing/deserializing call_service result: {:?}",
+                "an error occurred while serializing/deserializing data: {:?}",
                 err
+            ),
+            AquamarineError::FuncArgsSerdeError(args, err) => write!(
+                f,
+                "function arguments {} can't be serialized or deserialized with an error: {:?}",
+                args, err
+            ),
+            AquamarineError::CallServiceSerdeError(result, err) => write!(
+                f,
+                "call_service result {:?} can't be serialized or deserialized with an error: {:?}",
+                result, err
             ),
             AquamarineError::CurrentPeerIdNotSet(err) => write!(f, "{:?}", err),
             AquamarineError::InstructionError(err_msg) => write!(f, "{}", err_msg),
@@ -87,10 +101,20 @@ impl std::fmt::Display for AquamarineError {
                 "variable with path {} not found with error: {:?}",
                 json_path, json_path_err
             ),
+            AquamarineError::VariableIsNotArray(value, variable_name) => write!(
+                f,
+                "serde value {} addressed by name {} isn't an array and couldn't be used in fold",
+                value, variable_name
+            ),
             AquamarineError::MultipleValuesInJsonPath(json_path) => write!(
                 f,
                 "multiple variables found for this json path {}",
                 json_path
+            ),
+            AquamarineError::FoldStateNotFound(iterable_variable_name) => write!(
+                f,
+                "fold state for variable with name {} not found",
+                iterable_variable_name
             ),
         }
     }
@@ -120,7 +144,9 @@ impl Into<StepperOutcome> for AquamarineError {
             AquamarineError::LocalServiceError(..) => 7,
             AquamarineError::VariableNotFound(..) => 8,
             AquamarineError::VariableNotInJsonPath(..) => 9,
-            AquamarineError::MultipleValuesInJsonPath(..) => 10,
+            AquamarineError::VariableIsNotArray(..) => 10,
+            AquamarineError::MultipleValuesInJsonPath(..) => 11,
+            AquamarineError::FoldStateNotFound(_) => 12,
         };
 
         StepperOutcome {

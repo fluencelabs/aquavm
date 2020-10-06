@@ -17,7 +17,8 @@
 /// This file contains defines similar for both FCE and browser targets.
 
 pub(crate) type Result<T> = std::result::Result<T, AquamarineError>;
-pub(crate) type AquaData = std::collections::HashMap<String, serde_json::Value>;
+pub(crate) type AquaData = std::collections::HashMap<String, SerdeValue>;
+pub(crate) type SerdeValue = serde_json::Value;
 pub(crate) use crate::errors::AquamarineError;
 pub(crate) use crate::stepper::StepperOutcome;
 
@@ -27,7 +28,7 @@ use serde_derive::Deserialize;
 use serde_derive::Serialize;
 
 #[fluence::fce]
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CallServiceResult {
     pub ret_code: i32,
     pub result: String,

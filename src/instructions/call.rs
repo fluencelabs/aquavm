@@ -18,6 +18,7 @@ use super::ExecutionContext;
 use crate::AquaData;
 use crate::AquamarineError;
 use crate::Result;
+use crate::SerdeValue;
 
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
@@ -55,12 +56,12 @@ pub(crate) struct Call(PeerPart, FunctionPart, Vec<String>, String);
 
 impl super::ExecutableInstruction for Call {
     fn execute(&self, ctx: &mut ExecutionContext) -> Result<()> {
-        log::info!("call is called with context: {:?}", ctx);
+        log::info!("call {:?} is called with context {:?}", self, ctx);
 
         let (peer_pk, service_id, func_name) = parse_peer_fn_parts(&self.0, &self.1)?;
         let function_args = parse_args(&self.2, &ctx.data)?;
         let function_args = serde_json::to_string(&function_args)
-            .map_err(|e| AquamarineError::FuncArgsSerdeError(e))?;
+            .map_err(|e| AquamarineError::FuncArgsSerdeError(function_args, e))?;
         let result_name = parse_result_name(&self.3)?;
 
         let current_peer_id = std::env::var(CURRENT_PEER_ID_ENV_NAME)
@@ -74,8 +75,8 @@ impl super::ExecutableInstruction for Call {
                 return Err(AquamarineError::LocalServiceError(result.result));
             }
 
-            let result: serde_json::Value = serde_json::from_str(&result.result)
-                .map_err(|e| AquamarineError::CallServiceSerdeError(e))?;
+            let result: SerdeValue = serde_json::from_str(&result.result)
+                .map_err(|e| AquamarineError::CallServiceSerdeError(result, e))?;
             ctx.data.insert(result_name.to_string(), result);
         } else {
             ctx.next_peer_pks.push(peer_pk.to_string());
@@ -106,7 +107,7 @@ fn parse_peer_fn_parts<'a>(
     }
 }
 
-fn parse_args(args: &[String], data: &AquaData) -> Result<serde_json::Value> {
+fn parse_args(args: &[String], data: &AquaData) -> Result<SerdeValue> {
     let mut result = Vec::with_capacity(args.len());
 
     for arg in args {
@@ -135,7 +136,7 @@ fn parse_args(args: &[String], data: &AquaData) -> Result<serde_json::Value> {
         result.push(value);
     }
 
-    Ok(serde_json::Value::Array(result))
+    Ok(SerdeValue::Array(result))
 }
 
 fn parse_result_name(result_name: &str) -> Result<&str> {
