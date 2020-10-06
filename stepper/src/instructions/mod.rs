@@ -38,14 +38,16 @@ use std::collections::HashMap;
 pub(super) struct ExecutionContext {
     pub data: AquaData,
     pub next_peer_pks: Vec<String>,
+    pub current_peer_id: String,
     pub folds: HashMap<String, FoldState>,
 }
 
 impl ExecutionContext {
-    pub(super) fn new(data: AquaData) -> Self {
+    pub(super) fn new(data: AquaData, current_peer_id: String) -> Self {
         Self {
             data,
             next_peer_pks: vec![],
+            current_peer_id,
             folds: HashMap::new(),
         }
     }

@@ -23,7 +23,6 @@ use serde_derive::Deserialize;
 use serde_derive::Serialize;
 
 const CURRENT_PEER_ALIAS: &str = "%current_peer_id%";
-const CURRENT_PEER_ID_ENV_NAME: &str = "CURRENT_PEER_ID";
 
 /*
    (current)
@@ -68,10 +67,7 @@ impl super::ExecutableInstruction for Call {
             .map_err(|e| AquamarineError::FuncArgsSerdeError(function_args, e))?;
         let result_variable_name = parse_result_variable_name(result_variable_name)?;
 
-        let current_peer_id = std::env::var(CURRENT_PEER_ID_ENV_NAME)
-            .map_err(AquamarineError::CurrentPeerIdEnvError)?;
-
-        if peer_pk == current_peer_id || peer_pk == CURRENT_PEER_ALIAS {
+        if peer_pk == ctx.current_peer_id || peer_pk == CURRENT_PEER_ALIAS {
             let result = unsafe {
                 crate::call_service(service_id.to_string(), func_name.to_string(), function_args)
             };
