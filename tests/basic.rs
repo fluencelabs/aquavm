@@ -53,7 +53,13 @@ fn call() {
     };
 
     let mut vm = AquamarineVM::new(config).expect("vm should be created");
-    let script = String::from("(seq ((call (%current_peer_id1% (local_service_id local_fn_name) () result_name)) (call (remote_peer_id (service_id fn_name) () g))))");
+    let script = String::from(
+        r#"
+        (seq (
+            (call (%current_peer_id1% (local_service_id local_fn_name) () result_name))
+            (call (remote_peer_id (service_id fn_name) () g))
+        ))"#,
+    );
 
     let res = vm.call(json!([String::from("asd"), script, String::from("{}"),]));
 

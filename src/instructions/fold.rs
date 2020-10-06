@@ -22,7 +22,6 @@ use crate::SerdeValue;
 
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
-use std::collections::LinkedList;
 use std::rc::Rc;
 
 /*
@@ -102,7 +101,7 @@ impl super::ExecutableInstruction for Next {
             return Ok(());
         }
 
-        fold_state.cursor = fold_state.cursor + 1;
+        fold_state.cursor += 1;
 
         let next_instr = fold_state.instr_head.clone();
         next_instr.execute(ctx)?;
@@ -113,7 +112,7 @@ impl super::ExecutableInstruction for Next {
             .get_mut(iterable_variable_name)
             .expect("fold state is deleted only after fold finishing");
 
-        fold_state.cursor = fold_state.cursor - 1;
+        fold_state.cursor -= 1;
 
         Ok(())
     }

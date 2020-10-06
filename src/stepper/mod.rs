@@ -18,6 +18,5 @@ mod execution;
 mod stepper_outcome;
 
 pub use stepper_outcome::StepperOutcome;
-pub use stepper_outcome::SUCCESS_ERROR_CODE;
 
 pub(crate) use execution::execute_aqua;

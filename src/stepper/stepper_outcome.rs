@@ -17,8 +17,6 @@
 use fluence::fce;
 use serde::{Deserialize, Serialize};
 
-pub const SUCCESS_ERROR_CODE: i32 = 0;
-
 #[fce]
 #[derive(Serialize, Deserialize)]
 pub struct StepperOutcome {

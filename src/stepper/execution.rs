@@ -35,7 +35,7 @@ pub(crate) fn execute_aqua(init_user_id: String, aqua: String, data: String) -> 
 
 fn execute_aqua_impl(_init_user_id: String, aqua: String, data: String) -> Result<StepperOutcome> {
     let parsed_data: AquaData =
-        serde_json::from_str(&data).map_err(|e| AquamarineError::DataSerdeError(e))?;
+        serde_json::from_str(&data).map_err(AquamarineError::DataSerdeError)?;
     let formatted_aqua = format_aqua(aqua);
     let parsed_aqua = serde_sexpr::from_str::<Instruction>(&formatted_aqua)?;
 
@@ -49,7 +49,7 @@ fn execute_aqua_impl(_init_user_id: String, aqua: String, data: String) -> Resul
     parsed_aqua.execute(&mut execution_ctx)?;
 
     let data = serde_json::to_string(&execution_ctx.data)
-        .map_err(|e| AquamarineError::DataSerdeError(e))?;
+        .map_err(AquamarineError::DataSerdeError)?;
 
     Ok(StepperOutcome {
         ret_code: 0,
