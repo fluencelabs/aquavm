@@ -27,6 +27,7 @@ jobs:
           cargo build --release --all-features
           cargo test --release --all-features
           cargo clippy --target=wasm32-wasi
+
       - save_cache:
           paths:
             - ~/.cargo

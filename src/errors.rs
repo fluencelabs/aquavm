@@ -49,8 +49,11 @@ pub enum AquamarineError {
     /// An error is occurred while calling local service via call_service.
     LocalServiceError(String),
 
-    /// Value with such name isn't presence in data.
+    /// Value for such name isn't presence in data.
     VariableNotFound(String),
+
+    /// Value for such name presences both in data and fold states.
+    MultipleVariablesFound(String),
 
     /// Value with such path wasn't found in data with such error.
     VariableNotInJsonPath(String, JsonPathError),
@@ -100,6 +103,11 @@ impl std::fmt::Display for AquamarineError {
                 "variable with name {} isn't present in data",
                 variable_name
             ),
+            AquamarineError::MultipleVariablesFound(variable_name) => write!(
+                f,
+                "variable with name {} defined twice: in  call and fold",
+                variable_name
+            ),
             AquamarineError::VariableNotInJsonPath(json_path, json_path_err) => write!(
                 f,
                 "variable with path {} not found with error: {:?}",
@@ -147,10 +155,11 @@ impl Into<StepperOutcome> for AquamarineError {
             AquamarineError::InstructionError(..) => 6,
             AquamarineError::LocalServiceError(..) => 7,
             AquamarineError::VariableNotFound(..) => 8,
-            AquamarineError::VariableNotInJsonPath(..) => 9,
-            AquamarineError::VariableIsNotArray(..) => 10,
-            AquamarineError::MultipleValuesInJsonPath(..) => 11,
-            AquamarineError::FoldStateNotFound(_) => 12,
+            AquamarineError::MultipleVariablesFound(..) => 9,
+            AquamarineError::VariableNotInJsonPath(..) => 10,
+            AquamarineError::VariableIsNotArray(..) => 11,
+            AquamarineError::MultipleValuesInJsonPath(..) => 12,
+            AquamarineError::FoldStateNotFound(_) => 13,
         };
 
         StepperOutcome {

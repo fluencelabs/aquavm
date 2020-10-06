@@ -15,7 +15,6 @@
  */
 
 use super::ExecutionContext;
-use crate::AquaData;
 use crate::AquamarineError;
 use crate::Result;
 use crate::SerdeValue;
@@ -58,11 +57,16 @@ impl super::ExecutableInstruction for Call {
     fn execute(&self, ctx: &mut ExecutionContext) -> Result<()> {
         log::info!("call {:?} is called with context {:?}", self, ctx);
 
-        let (peer_pk, service_id, func_name) = parse_peer_fn_parts(&self.0, &self.1)?;
-        let function_args = parse_args(&self.2, &ctx.data)?;
+        let peer_part = &self.0;
+        let function_part = &self.1;
+        let arguments = &self.2;
+        let result_variable_name = &self.3;
+
+        let (peer_pk, service_id, func_name) = parse_peer_fn_parts(peer_part, function_part)?;
+        let function_args = parse_args(arguments, ctx)?;
         let function_args = serde_json::to_string(&function_args)
             .map_err(|e| AquamarineError::FuncArgsSerdeError(function_args, e))?;
-        let result_name = parse_result_name(&self.3)?;
+        let result_variable_name = parse_result_variable_name(result_variable_name)?;
 
         let current_peer_id = std::env::var(CURRENT_PEER_ID_ENV_NAME)
             .map_err(AquamarineError::CurrentPeerIdEnvError)?;
@@ -77,7 +81,7 @@ impl super::ExecutableInstruction for Call {
 
             let result: SerdeValue = serde_json::from_str(&result.result)
                 .map_err(|e| AquamarineError::CallServiceSerdeError(result, e))?;
-            ctx.data.insert(result_name.to_string(), result);
+            ctx.data.insert(result_variable_name.to_string(), result);
         } else {
             ctx.next_peer_pks.push(peer_pk.to_string());
         }
@@ -107,20 +111,26 @@ fn parse_peer_fn_parts<'a>(
     }
 }
 
-fn parse_args(args: &[String], data: &AquaData) -> Result<SerdeValue> {
+fn parse_args(args: &[String], ctx: &ExecutionContext) -> Result<SerdeValue> {
     let mut result = Vec::with_capacity(args.len());
 
     for arg in args {
         let mut split_arg: Vec<&str> = arg.splitn(2, '.').collect();
         let variable_name = split_arg.remove(0);
 
-        let value_by_key = data
-            .get(variable_name)
-            .ok_or_else(|| AquamarineError::VariableNotFound(String::from(variable_name)))?;
+        let value_from_data = ctx.data.get(variable_name);
+        let value_from_fold = ctx.folds.get(variable_name);
+
+        let value_by_key = match (value_from_data, value_from_fold) {
+            (Some(value), None) => value,
+            (None, Some(fold_state)) => &fold_state.iterable[fold_state.cursor],
+            (None, None) => return Err(AquamarineError::VariableNotFound(variable_name.to_string())),
+            (Some(_), Some(_)) => return Err(AquamarineError::MultipleVariablesFound(variable_name.to_string())),
+        };
 
         let value = if !split_arg.is_empty() {
             let json_path = split_arg.remove(0);
-            let values = jsonpath_lib::select(&value_by_key, json_path)
+            let values = jsonpath_lib::select(value_by_key, json_path)
                 .map_err(|e| AquamarineError::VariableNotInJsonPath(String::from(json_path), e))?;
             if values.len() != 1 {
                 return Err(AquamarineError::MultipleValuesInJsonPath(String::from(
@@ -139,7 +149,7 @@ fn parse_args(args: &[String], data: &AquaData) -> Result<SerdeValue> {
     Ok(SerdeValue::Array(result))
 }
 
-fn parse_result_name(result_name: &str) -> Result<&str> {
+fn parse_result_variable_name(result_name: &str) -> Result<&str> {
     if !result_name.is_empty() {
         Ok(result_name)
     } else {
