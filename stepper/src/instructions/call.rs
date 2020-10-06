@@ -15,6 +15,7 @@
  */
 
 use super::ExecutionContext;
+use crate::AValue;
 use crate::AquamarineError;
 use crate::Result;
 use crate::SerdeValue;
@@ -77,7 +78,7 @@ impl super::ExecutableInstruction for Call {
 
             let result: SerdeValue = serde_json::from_str(&result.result)
                 .map_err(|e| AquamarineError::CallServiceSerdeError(result, e))?;
-            ctx.data.insert(result_variable_name.to_string(), result);
+            set_result(ctx, result_variable_name, result)?;
         } else {
             ctx.next_peer_pks.push(peer_pk.to_string());
         }
@@ -114,18 +115,17 @@ fn parse_args(args: &[String], ctx: &ExecutionContext) -> Result<SerdeValue> {
         let mut split_arg: Vec<&str> = arg.splitn(2, '.').collect();
         let variable_name = split_arg.remove(0);
 
-        let value_from_data = ctx.data.get(variable_name);
-        let value_from_fold = ctx.folds.get(variable_name);
-
-        let value_by_key = match (value_from_data, value_from_fold) {
-            (Some(value), None) => value,
-            (None, Some(fold_state)) => &fold_state.iterable[fold_state.cursor],
-            (None, None) => {
-                return Err(AquamarineError::VariableNotFound(variable_name.to_string()))
-            }
-            (Some(_), Some(_)) => {
-                return Err(AquamarineError::MultipleVariablesFound(
-                    variable_name.to_string(),
+        let value_from_data = ctx
+            .data
+            .get(variable_name)
+            .ok_or_else(|| AquamarineError::VariableNotFound(variable_name.to_string()))?;
+        let value_by_key = match value_from_data {
+            AValue::SerdeValue(value) => value,
+            AValue::Iterator(values, cursor) => &values[*cursor],
+            v => {
+                return Err(AquamarineError::IncompatibleAValueType(
+                    v.clone(),
+                    String::from("ServeValue or Iterator"),
                 ))
             }
         };
@@ -159,4 +159,41 @@ fn parse_result_variable_name(result_name: &str) -> Result<&str> {
             "result name of a call instruction must be non empty",
         )))
     }
+}
+
+fn set_result(
+    ctx: &mut ExecutionContext,
+    result_variable_name: &str,
+    result: SerdeValue,
+) -> Result<()> {
+    use std::collections::hash_map::Entry;
+
+    let is_array = result_variable_name.ends_with("[]");
+    if is_array {
+        match ctx
+            .data
+            .entry(result_variable_name.strip_suffix("[]").unwrap().to_string())
+        {
+            Entry::Occupied(mut entry) => match entry.get_mut() {
+                AValue::Accumulator(values) => values.push_back(result),
+                v => {
+                    return Err(AquamarineError::IncompatibleAValueType(
+                        v.clone(),
+                        String::from("Accumulator"),
+                    ))
+                }
+            },
+            Entry::Vacant(entry) => {
+                let mut list = std::collections::LinkedList::new();
+                list.push_back(result);
+                entry.insert(AValue::Accumulator(list));
+            }
+        }
+    } else {
+        // TODO: check that value already present
+        ctx.data
+            .insert(result_variable_name.to_string(), AValue::SerdeValue(result));
+    }
+
+    Ok(())
 }

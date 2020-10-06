@@ -16,6 +16,7 @@
 
 use super::ExecutionContext;
 use super::Instruction;
+use crate::AValue;
 use crate::AquamarineError;
 use crate::Result;
 use crate::SerdeValue;
@@ -33,32 +34,30 @@ use std::rc::Rc;
  )
 */
 
-#[derive(Debug, Clone)]
-pub(crate) struct FoldState {
-    // TODO: make it store a ref to context value
-    pub iterable: Vec<SerdeValue>,
-    pub cursor: usize,
-    pub instr_head: Rc<Instruction>,
-}
-
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub(crate) struct Fold(String, String, Rc<Instruction>);
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub(crate) struct Next(String);
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) struct FoldState {
+    instr_head: Rc<Instruction>,
+}
+
 impl super::ExecutableInstruction for Fold {
     fn execute(&self, ctx: &mut ExecutionContext) -> Result<()> {
         log::info!("fold {:?} is called with context {:?}", self, ctx);
 
         let iterable_name = &self.0;
-        let iterable_variable_name = &self.1;
+        let iterator_name = &self.1;
         let instr_head = self.2.clone();
 
         let iterable = ctx
             .data
             .get(iterable_name)
             .ok_or_else(|| AquamarineError::VariableNotFound(String::from(iterable_name)))?;
+        let iterable = (crate::to_svalue!(iterable) as Result<&_>)?;
 
         let iterable = match iterable {
             SerdeValue::Array(json_array) => json_array.clone(),
@@ -71,16 +70,18 @@ impl super::ExecutableInstruction for Fold {
         };
 
         let fold_state = FoldState {
-            iterable,
-            cursor: 0,
             instr_head: instr_head.clone(),
         };
 
-        ctx.folds.insert(iterable_variable_name.clone(), fold_state);
+        // TODO: check for result
+        ctx.data
+            .insert(iterator_name.clone(), AValue::Iterator(iterable, 0));
+        ctx.folds.insert(iterator_name.clone(), fold_state);
 
         instr_head.execute(ctx)?;
 
-        ctx.folds.remove(iterable_variable_name);
+        ctx.data.remove(iterator_name);
+        ctx.folds.remove(iterator_name);
 
         Ok(())
     }
@@ -90,30 +91,92 @@ impl super::ExecutableInstruction for Next {
     fn execute(&self, ctx: &mut ExecutionContext) -> Result<()> {
         log::info!("next {:?} is called with context {:?}", self, ctx);
 
-        let iterable_variable_name = &self.0;
-        let fold_state = ctx
-            .folds
-            .get_mut(iterable_variable_name)
-            .ok_or_else(|| AquamarineError::FoldStateNotFound(iterable_variable_name.clone()))?;
+        let iterator_name = &self.0;
+        let iterator = ctx
+            .data
+            .get_mut(iterator_name)
+            .ok_or_else(|| AquamarineError::VariableNotFound(iterator_name.clone()))?;
+        let iterator =
+            (crate::to_iterator!(iterator) as Result<(&mut Vec<SerdeValue>, &mut usize)>)?;
 
-        if fold_state.iterable.len() >= fold_state.cursor {
-            // the only thing is needed here - is just to pass
+        if iterator.0.is_empty() || (*iterator.1 >= iterator.0.len() - 1) {
+            // just do nothing to exit
             return Ok(());
         }
 
-        fold_state.cursor += 1;
+        *iterator.1 += 1;
 
-        let next_instr = fold_state.instr_head.clone();
+        let next_instr = ctx
+            .folds
+            .get(iterator_name)
+            .expect("folds should correspond to data")
+            .instr_head
+            .clone();
+
         next_instr.execute(ctx)?;
 
-        // here it's need to getting fold state again because of borrow checker
-        let fold_state = ctx
-            .folds
-            .get_mut(iterable_variable_name)
-            .expect("fold state is deleted only after fold finishing");
-
-        fold_state.cursor -= 1;
+        // get the same fold state again because of borrow checker
+        match ctx.data.get_mut(iterator_name) {
+            Some(AValue::Iterator(_, cursor)) => *cursor -= 1,
+            _ => unreachable!("iterator value shouldn't changed inside fold"),
+        };
 
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use aqua_test_utils::create_aqua_vm;
+    use aquamarine_vm::vec1::Vec1;
+    use aquamarine_vm::HostExportedFunc;
+    use aquamarine_vm::IValue;
+    use aquamarine_vm::StepperOutcome;
+
+    use serde_json::json;
+
+    #[test]
+    fn fold() {
+        env_logger::init();
+
+        let call_service: HostExportedFunc = Box::new(|_, args| -> Option<IValue> {
+            Some(IValue::Record(
+                Vec1::new(vec![
+                    IValue::S32(0),
+                    IValue::String(String::from("\"test\"")),
+                ])
+                .unwrap(),
+            ))
+        });
+        let mut vm = create_aqua_vm(call_service);
+
+        let script = String::from(
+            r#"
+            (fold (Iterable i
+                (seq (
+                    (call (%current_peer_id% (local_service_id local_fn_name) (i) result_name))
+                    (next i)
+                )
+            )))"#,
+        );
+
+        let res = vm
+            .call(json!([
+                String::from("asd"),
+                script,
+                String::from("{\"Iterable\": {\"serde-value\": [1,2,3,4,5]}}"),
+            ]))
+            .expect("call should be successful");
+
+        assert_eq!(
+            res,
+            StepperOutcome {
+                data: String::from("{}"),
+                next_peer_pks: vec![
+                    String::from("remote_peer_id_1"),
+                    String::from("remote_peer_id_2")
+                ]
+            }
+        );
     }
 }

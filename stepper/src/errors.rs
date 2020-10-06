@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use crate::AValue;
 use crate::CallServiceResult;
 use crate::SerdeValue;
 use crate::StepperOutcome;
@@ -27,7 +28,7 @@ use std::env::VarError;
 use std::error::Error;
 
 #[derive(Debug)]
-pub enum AquamarineError {
+pub(crate) enum AquamarineError {
     /// Errors occurred while parsing aqua script in the form of S expressions.
     SExprParseError(SExprError),
 
@@ -52,20 +53,17 @@ pub enum AquamarineError {
     /// Value for such name isn't presence in data.
     VariableNotFound(String),
 
-    /// Value for such name presences both in data and fold states.
-    MultipleVariablesFound(String),
-
     /// Value with such path wasn't found in data with such error.
     VariableNotInJsonPath(String, JsonPathError),
 
     /// Value with such name isn't presence in data.
     VariableIsNotArray(SerdeValue, String),
 
+    /// Value for such name isn't presence in data.
+    IncompatibleAValueType(AValue, String),
+
     /// Multiple values found for such json path.
     MultipleValuesInJsonPath(String),
-
-    /// Fold state for such iterable variable name isn't found.
-    FoldStateNotFound(String),
 }
 
 impl Error for AquamarineError {}
@@ -103,11 +101,6 @@ impl std::fmt::Display for AquamarineError {
                 "variable with name {} isn't present in data",
                 variable_name
             ),
-            AquamarineError::MultipleVariablesFound(variable_name) => write!(
-                f,
-                "variable with name {} defined twice: in  call and fold",
-                variable_name
-            ),
             AquamarineError::VariableNotInJsonPath(json_path, json_path_err) => write!(
                 f,
                 "variable with path {} not found with error: {:?}",
@@ -118,15 +111,16 @@ impl std::fmt::Display for AquamarineError {
                 "serde value {} addressed by name {} isn't an array and couldn't be used in fold",
                 value, variable_name
             ),
+            AquamarineError::IncompatibleAValueType(avalue, desired_type) => write!(
+                f,
+                "got avalue \"{:?}\", but {} type is needed",
+                avalue,
+                desired_type,
+            ),
             AquamarineError::MultipleValuesInJsonPath(json_path) => write!(
                 f,
                 "multiple variables found for this json path {}",
                 json_path
-            ),
-            AquamarineError::FoldStateNotFound(iterable_variable_name) => write!(
-                f,
-                "fold state for variable with name {} not found",
-                iterable_variable_name
             ),
         }
     }
@@ -155,11 +149,10 @@ impl Into<StepperOutcome> for AquamarineError {
             AquamarineError::InstructionError(..) => 6,
             AquamarineError::LocalServiceError(..) => 7,
             AquamarineError::VariableNotFound(..) => 8,
-            AquamarineError::MultipleVariablesFound(..) => 9,
-            AquamarineError::VariableNotInJsonPath(..) => 10,
-            AquamarineError::VariableIsNotArray(..) => 11,
+            AquamarineError::VariableNotInJsonPath(..) => 9,
+            AquamarineError::VariableIsNotArray(..) => 10,
+            AquamarineError::IncompatibleAValueType(..) => 11,
             AquamarineError::MultipleValuesInJsonPath(..) => 12,
-            AquamarineError::FoldStateNotFound(_) => 13,
         };
 
         StepperOutcome {

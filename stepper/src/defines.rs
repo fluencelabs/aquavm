@@ -14,18 +14,72 @@
  * limitations under the License.
  */
 
-/// This file contains defines similar for both FCE and browser targets.
+use serde_derive::Deserialize;
+use serde_derive::Serialize;
+use std::collections::LinkedList;
+
+/// This file contains defines the same things for both FCE and browser targets.
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub(crate) enum AValue {
+    SerdeValue(SerdeValue),
+    Iterator(Vec<SerdeValue>, usize),
+    Accumulator(LinkedList<SerdeValue>),
+}
+
+#[macro_export]
+macro_rules! to_svalue {
+    ($avalue:expr) => {{
+        match $avalue {
+            AValue::SerdeValue(value) => Ok(value),
+            v => {
+                return Err(AquamarineError::IncompatibleAValueType(
+                    v.clone(),
+                    String::from("SerdeValue"),
+                ))
+            }
+        }
+    }};
+}
+
+#[macro_export]
+macro_rules! to_iterator {
+    ($avalue:expr) => {{
+        match $avalue {
+            AValue::Iterator(values, cursor) => Ok((values, cursor)),
+            v => {
+                return Err(AquamarineError::IncompatibleAValueType(
+                    v.clone(),
+                    String::from("Iterator"),
+                ))
+            }
+        }
+    }};
+}
+
+#[macro_export]
+macro_rules! to_acc {
+    ($avalue:expr) => {
+        match $avalue {
+            AValue::Accumulator(acc) => Ok(acc),
+            v => {
+                return Err(AquamarineError::IncompatibleAValueType(
+                    v.clone(),
+                    String::from("Accumulator"),
+                ))
+            }
+        }
+    };
+}
 
 pub(crate) type Result<T> = std::result::Result<T, AquamarineError>;
-pub(crate) type AquaData = std::collections::HashMap<String, SerdeValue>;
+pub(crate) type AquaData = std::collections::HashMap<String, AValue>;
 pub(crate) type SerdeValue = serde_json::Value;
 pub(crate) use crate::errors::AquamarineError;
 pub(crate) use crate::stepper_outcome::StepperOutcome;
 
 pub(crate) const CALL_SERVICE_SUCCESS: i32 = 0;
-
-use serde_derive::Deserialize;
-use serde_derive::Serialize;
 
 #[fluence::fce]
 #[derive(Debug, Clone, Serialize, Deserialize)]
