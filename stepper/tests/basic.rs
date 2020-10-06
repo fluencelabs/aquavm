@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+use aqua_test_utils::create_aqua_vm;
 use aquamarine_vm::vec1::Vec1;
 use aquamarine_vm::HostExportedFunc;
 use aquamarine_vm::IValue;
-use aqua_test_utils::create_aqua_vm;
 
 use serde_json::json;
 
