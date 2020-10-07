@@ -91,7 +91,7 @@ impl std::fmt::Display for AquamarineError {
             ),
             AquamarineError::CurrentPeerIdEnvError(err, env_name) => write!(
                 f,
-                "the environment variable {} can't be obtained: {:?}",
+                "the environment variable \"{}\" can't be obtained: {:?}",
                 env_name,
                 err
             ),
