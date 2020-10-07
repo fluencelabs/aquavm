@@ -136,13 +136,8 @@ mod tests {
 
     use serde_json::json;
 
-    #[test]
-    fn fold() {
-        env_logger::init();
-
-        let call_service: HostExportedFunc = Box::new(|_, args| -> Option<IValue> {
-            println!("call_service called with {:?}\n", args);
-
+    fn get_echo_call_service() -> HostExportedFunc {
+        Box::new(|_, args| -> Option<IValue> {
             let arg = match &args[2] {
                 IValue::String(str) => str,
                 _ => unreachable!(),
@@ -151,12 +146,18 @@ mod tests {
             let arg: Vec<String> = serde_json::from_str(arg).unwrap();
 
             Some(IValue::Record(
-                Vec1::new(vec![IValue::S32(0), IValue::String(format!("{}", arg[0]))]).unwrap(),
+                Vec1::new(vec![IValue::S32(0), IValue::String(arg[0].clone())]).unwrap(),
             ))
-        });
-        let mut vm = create_aqua_vm(call_service);
+        })
+    }
 
-        let script = String::from(
+    #[test]
+    fn fold() {
+        env_logger::init();
+
+        let mut vm = create_aqua_vm(get_echo_call_service());
+
+        let lfold = String::from(
             r#"
             (fold (Iterable i
                 (seq (
@@ -169,7 +170,7 @@ mod tests {
         let res = vm
             .call(json!([
                 String::from("asd"),
-                script,
+                lfold,
                 String::from("{\"Iterable\": {\"serde-value\": [\"1\",\"2\",\"3\",\"4\",\"5\"]}}"),
             ]))
             .expect("call should be successful");
@@ -179,6 +180,68 @@ mod tests {
         assert_eq!(
             res.get("acc").unwrap(),
             &json!({"accumulator": [1,2,3,4,5]})
+        );
+
+        let rfold = String::from(
+            r#"
+            (fold (Iterable i
+                (seq (
+                    (next i)
+                    (call (%current_peer_id% (local_service_id local_fn_name) (i) acc[]))
+                )
+            )))"#,
+        );
+
+        let res = vm
+            .call(json!([
+                String::from("asd"),
+                rfold,
+                String::from("{\"Iterable\": {\"serde-value\": [\"1\",\"2\",\"3\",\"4\",\"5\"]}}"),
+            ]))
+            .expect("call should be successful");
+
+        let res: SerdeValue = serde_json::from_str(&res.data).unwrap();
+
+        assert_eq!(
+            res.get("acc").unwrap(),
+            &json!({"accumulator": [5,4,3,2,1]})
+        );
+    }
+
+    #[test]
+    fn inner_fold() {
+        env_logger::init();
+
+        let mut vm = create_aqua_vm(get_echo_call_service());
+
+        let script = String::from(
+            r#"
+            (fold (Iterable1 i
+                (seq (
+                    (fold (Iterable2 j
+                        (seq (
+                            (call (%current_peer_id% (local_service_id local_fn_name) (i) acc[]))
+                            (next j)
+                        ))
+                    ))
+                    (next i)
+                ))
+            ))"#,
+        );
+
+        let res = vm
+            .call(json!([
+                String::from("asd"),
+                script,
+                String::from("{\"Iterable1\": {\"serde-value\": [\"1\",\"2\",\"3\",\"4\",\"5\"]}, \"Iterable2\": {\"serde-value\": [\"1\",\"2\",\"3\",\"4\",\"5\"]}}"),
+            ]))
+            .expect("call should be successful");
+
+        let res: SerdeValue = serde_json::from_str(&res.data).unwrap();
+
+        assert_eq!(
+            res.get("acc").unwrap(),
+            &json!({"accumulator": [1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,4,4,4,4,4,5,5,5,5,5]})
         );
     }
 }

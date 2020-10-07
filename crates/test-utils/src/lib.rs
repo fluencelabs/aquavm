@@ -44,7 +44,7 @@ pub fn create_aqua_vm(call_service: HostExportedFunc) -> AquamarineVM {
     let config = AquamarineVMConfig {
         aquamarine_wasm_path: PathBuf::from("../target/wasm32-wasi/debug/aquamarine.wasm"),
         call_service: call_service_descriptor,
-        current_peer_id: String::from("some_peer_id"),
+        current_peer_id: String::from("test_peer_id"),
     };
 
     AquamarineVM::new(config).expect("vm should be created")

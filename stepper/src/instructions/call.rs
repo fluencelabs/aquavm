@@ -197,3 +197,106 @@ fn set_result(
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::SerdeValue;
+
+    use aqua_test_utils::create_aqua_vm;
+    use aquamarine_vm::vec1::Vec1;
+    use aquamarine_vm::HostExportedFunc;
+    use aquamarine_vm::IValue;
+
+    use serde_json::json;
+
+    fn get_echo_call_service() -> HostExportedFunc {
+        Box::new(|_, args| -> Option<IValue> {
+            let arg = match &args[2] {
+                IValue::String(str) => str,
+                _ => unreachable!(),
+            };
+
+            let arg: Vec<String> = serde_json::from_str(arg).unwrap();
+
+            Some(IValue::Record(
+                Vec1::new(vec![
+                    IValue::S32(0),
+                    IValue::String(format!("\"{}\"", arg[0])),
+                ])
+                .unwrap(),
+            ))
+        })
+    }
+
+    #[test]
+    fn current_peer_id_call() {
+        env_logger::init();
+
+        let mut vm = create_aqua_vm(get_echo_call_service());
+
+        let script = String::from(
+            r#"
+               (call (%current_peer_id% (local_service_id local_fn_name) (value) result_name))
+            "#,
+        );
+
+        let res = vm
+            .call(json!([
+                String::from("asd"),
+                script,
+                String::from("{\"value\": {\"serde-value\": \"test\"}}"),
+            ]))
+            .expect("call should be successful");
+
+        let res: SerdeValue = serde_json::from_str(&res.data).unwrap();
+
+        assert_eq!(
+            res.get("result_name").unwrap(),
+            &json!({"serde-value": "test"})
+        );
+
+        let script = String::from(
+            r#"
+               (call (test_peer_id (local_service_id local_fn_name) (value) result_name))
+            "#,
+        );
+
+        let res = vm
+            .call(json!([
+                String::from("asd"),
+                script,
+                String::from("{\"value\": {\"serde-value\": \"test\"}}"),
+            ]))
+            .expect("call should be successful");
+
+        let res: SerdeValue = serde_json::from_str(&res.data).unwrap();
+
+        assert_eq!(
+            res.get("result_name").unwrap(),
+            &json!({"serde-value": "test"})
+        );
+    }
+
+    #[test]
+    fn remote_peer_id_call() {
+        env_logger::init();
+
+        let mut vm = create_aqua_vm(get_echo_call_service());
+        let remote_peer_id = String::from("some_remote_peer_id");
+
+        let script = format!(
+            "(call ({} (local_service_id local_fn_name) (value) result_name))",
+            remote_peer_id
+        );
+
+        let res = vm
+            .call(json!([
+                String::from("asd"),
+                script,
+                String::from("{\"value\": {\"serde-value\": \"test\"}}"),
+            ]))
+            .expect("call should be successful");
+
+        assert_eq!(res.next_peer_pks, vec![remote_peer_id]);
+    }
+}

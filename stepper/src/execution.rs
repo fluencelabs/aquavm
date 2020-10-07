@@ -42,7 +42,7 @@ fn execute_aqua_impl(_init_user_id: String, aqua: String, data: String) -> Resul
     let parsed_aqua = serde_sexpr::from_str::<Instruction>(&formatted_aqua)?;
 
     log::info!(
-        "parsed_aqua: {:?}\nparsed_data: {:?}",
+        "\nparsed_aqua: {:?}\nparsed_data: {:?}",
         parsed_aqua,
         parsed_data
     );
