@@ -153,8 +153,6 @@ mod tests {
 
     #[test]
     fn fold() {
-        env_logger::init();
-
         let mut vm = create_aqua_vm(get_echo_call_service());
 
         let lfold = String::from(
@@ -210,8 +208,6 @@ mod tests {
 
     #[test]
     fn inner_fold() {
-        env_logger::init();
-
         let mut vm = create_aqua_vm(get_echo_call_service());
 
         let script = String::from(

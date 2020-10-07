@@ -230,8 +230,6 @@ mod tests {
 
     #[test]
     fn current_peer_id_call() {
-        env_logger::init();
-
         let mut vm = create_aqua_vm(get_echo_call_service());
 
         let script = String::from(
@@ -279,8 +277,6 @@ mod tests {
 
     #[test]
     fn remote_peer_id_call() {
-        env_logger::init();
-
         let mut vm = create_aqua_vm(get_echo_call_service());
         let remote_peer_id = String::from("some_remote_peer_id");
 
