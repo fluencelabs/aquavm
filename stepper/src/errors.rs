@@ -42,7 +42,7 @@ pub(crate) enum AquamarineError {
     CallServiceSerdeError(CallServiceResult, SerdeJsonError),
 
     /// Indicates that environment variable with name CURRENT_PEER_ID isn't set.
-    CurrentPeerIdEnvError(VarError),
+    CurrentPeerIdEnvError(VarError, String),
 
     /// Semantic errors in instructions.
     InstructionError(String),
@@ -89,9 +89,10 @@ impl std::fmt::Display for AquamarineError {
                 "call_service result \"{:?}\" can't be serialized or deserialized with an error: {:?}",
                 result, err
             ),
-            AquamarineError::CurrentPeerIdEnvError(err) => write!(
+            AquamarineError::CurrentPeerIdEnvError(err, env_name) => write!(
                 f,
-                "the environment variable with current peer id can't be obtained: {:?}",
+                "the environment variable {} can't be obtained: {:?}",
+                env_name,
                 err
             ),
             AquamarineError::InstructionError(err_msg) => write!(f, "{}", err_msg),

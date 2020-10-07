@@ -47,8 +47,9 @@ fn execute_aqua_impl(_init_user_id: String, aqua: String, data: String) -> Resul
         parsed_data
     );
 
-    let current_peer_id =
-        std::env::var(CURRENT_PEER_ID_ENV_NAME).map_err(AquamarineError::CurrentPeerIdEnvError)?;
+    let current_peer_id = std::env::var(CURRENT_PEER_ID_ENV_NAME).map_err(|e| {
+        AquamarineError::CurrentPeerIdEnvError(e, String::from(CURRENT_PEER_ID_ENV_NAME))
+    })?;
 
     let mut execution_ctx = ExecutionContext::new(parsed_data, current_peer_id);
     parsed_aqua.execute(&mut execution_ctx)?;
