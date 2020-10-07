@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-use crate::AValue;
 use crate::CallServiceResult;
-use crate::SerdeValue;
+use crate::JValue;
 use crate::StepperOutcome;
 
 use jsonpath_lib::JsonPathError;
@@ -36,7 +35,7 @@ pub(crate) enum AquamarineError {
     DataSerdeError(SerdeJsonError),
 
     /// Errors occurred while parsing function arguments of an expression.
-    FuncArgsSerdeError(SerdeValue, SerdeJsonError),
+    FuncArgsSerdeError(JValue, SerdeJsonError),
 
     /// Errors occurred while parsing returned by call_service value.
     CallServiceSerdeError(CallServiceResult, SerdeJsonError),
@@ -53,17 +52,23 @@ pub(crate) enum AquamarineError {
     /// Value for such name isn't presence in data.
     VariableNotFound(String),
 
+    /// Multiple values for such name found.
+    MultipleVariablesFound(String),
+
     /// Value with such path wasn't found in data with such error.
     VariableNotInJsonPath(String, JsonPathError),
 
-    /// Value with such name isn't presence in data.
-    VariableIsNotArray(SerdeValue, String),
-
     /// Value for such name isn't presence in data.
-    IncompatibleAValueType(AValue, String),
+    IncompatibleJValueType(JValue, String),
 
     /// Multiple values found for such json path.
     MultipleValuesInJsonPath(String),
+
+    /// Fold state wasn't found for such iterator name.
+    FoldStateNotFound(String),
+
+    /// Multiple fold states found for such iterator name.
+    MultipleFoldStates(String),
 }
 
 impl Error for AquamarineError {}
@@ -102,17 +107,17 @@ impl std::fmt::Display for AquamarineError {
                 "variable with name {} isn't present in data",
                 variable_name
             ),
+            AquamarineError::MultipleVariablesFound(variable_name) => write!(
+                f,
+                "multiple variables found for name {} in data",
+                variable_name
+            ),
             AquamarineError::VariableNotInJsonPath(json_path, json_path_err) => write!(
                 f,
                 "variable with path {} not found with error: {:?}",
                 json_path, json_path_err
             ),
-            AquamarineError::VariableIsNotArray(value, variable_name) => write!(
-                f,
-                "serde value {} addressed by name {} isn't an array and couldn't be used in fold",
-                value, variable_name
-            ),
-            AquamarineError::IncompatibleAValueType(avalue, desired_type) => write!(
+            AquamarineError::IncompatibleJValueType(avalue, desired_type) => write!(
                 f,
                 "got avalue \"{:?}\", but {} type is needed",
                 avalue,
@@ -122,6 +127,16 @@ impl std::fmt::Display for AquamarineError {
                 f,
                 "multiple variables found for this json path {}",
                 json_path
+            ),
+            AquamarineError::FoldStateNotFound(iterator) => write!(
+                f,
+                "fold state not found for this iterable {}",
+                iterator
+            ),
+            AquamarineError::MultipleFoldStates(iterator) => write!(
+                f,
+                "multiple fold states found for this iterable {}",
+                iterator
             ),
         }
     }
@@ -150,10 +165,12 @@ impl Into<StepperOutcome> for AquamarineError {
             AquamarineError::InstructionError(..) => 6,
             AquamarineError::LocalServiceError(..) => 7,
             AquamarineError::VariableNotFound(..) => 8,
-            AquamarineError::VariableNotInJsonPath(..) => 9,
-            AquamarineError::VariableIsNotArray(..) => 10,
-            AquamarineError::IncompatibleAValueType(..) => 11,
+            AquamarineError::MultipleVariablesFound(..) => 9,
+            AquamarineError::VariableNotInJsonPath(..) => 10,
+            AquamarineError::IncompatibleJValueType(..) => 11,
             AquamarineError::MultipleValuesInJsonPath(..) => 12,
+            AquamarineError::FoldStateNotFound(..) => 13,
+            AquamarineError::MultipleFoldStates(..) => 14,
         };
 
         StepperOutcome {

@@ -16,10 +16,9 @@
 
 use super::ExecutionContext;
 use super::Instruction;
-use crate::AValue;
 use crate::AquamarineError;
+use crate::JValue;
 use crate::Result;
-use crate::SerdeValue;
 
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
@@ -42,7 +41,9 @@ pub(crate) struct Next(String);
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) struct FoldState {
-    instr_head: Rc<Instruction>,
+    pub(crate) cursor: usize,
+    pub(crate) iterable_name: String,
+    pub(crate) instr_head: Rc<Instruction>,
 }
 
 impl super::ExecutableInstruction for Fold {
@@ -53,34 +54,37 @@ impl super::ExecutableInstruction for Fold {
         let iterator_name = &self.1;
         let instr_head = self.2.clone();
 
-        let iterable = ctx
-            .data
-            .get(iterable_name)
-            .ok_or_else(|| AquamarineError::VariableNotFound(String::from(iterable_name)))?;
-        let iterable = (crate::to_svalue!(iterable) as Result<&_>)?;
-
-        let iterable = match iterable {
-            SerdeValue::Array(json_array) => json_array.clone(),
-            v => {
-                return Err(AquamarineError::VariableIsNotArray(
+        // check that value exists and has array type
+        match ctx.data.get(iterable_name) {
+            Some(JValue::Array(_)) => {}
+            Some(v) => {
+                return Err(AquamarineError::IncompatibleJValueType(
                     v.clone(),
-                    iterable_name.clone(),
+                    String::from("Array"),
                 ))
+            }
+            None => {
+                return Err(AquamarineError::VariableNotFound(String::from(
+                    iterable_name,
+                )))
             }
         };
 
         let fold_state = FoldState {
+            cursor: 0,
+            iterable_name: iterable_name.clone(),
             instr_head: instr_head.clone(),
         };
 
-        // TODO: check for result
-        ctx.data
-            .insert(iterator_name.clone(), AValue::Iterator(iterable, 0));
-        ctx.folds.insert(iterator_name.clone(), fold_state);
+        if ctx
+            .folds
+            .insert(iterator_name.clone(), fold_state)
+            .is_some()
+        {
+            return Err(AquamarineError::MultipleFoldStates(iterable_name.clone()));
+        }
 
         instr_head.execute(ctx)?;
-
-        ctx.data.remove(iterator_name);
         ctx.folds.remove(iterator_name);
 
         Ok(())
@@ -92,32 +96,32 @@ impl super::ExecutableInstruction for Next {
         log::info!("next {:?} is called with context {:?}", self, ctx);
 
         let iterator_name = &self.0;
-        let iterator = ctx
-            .data
+        let fold_state = ctx
+            .folds
             .get_mut(iterator_name)
-            .ok_or_else(|| AquamarineError::VariableNotFound(iterator_name.clone()))?;
-        let iterator =
-            (crate::to_iterator!(iterator) as Result<(&mut Vec<SerdeValue>, &mut usize)>)?;
+            .ok_or_else(|| AquamarineError::FoldStateNotFound(iterator_name.clone()))?;
+        let value = ctx
+            .data
+            .get(&fold_state.iterable_name)
+            .expect("this has been checked on the fold instruction");
+        let value_len = match value {
+            JValue::Array(array) => array.len(),
+            _ => unreachable!(),
+        };
 
-        if iterator.0.is_empty() || (*iterator.1 >= iterator.0.len() - 1) {
+        fold_state.cursor += 1;
+        if value_len == 0 || value_len <= fold_state.cursor {
+            fold_state.cursor -= 1;
             // just do nothing to exit
             return Ok(());
         }
 
-        *iterator.1 += 1;
-
-        let next_instr = ctx
-            .folds
-            .get(iterator_name)
-            .expect("folds should correspond to data")
-            .instr_head
-            .clone();
-
+        let next_instr = fold_state.instr_head.clone();
         next_instr.execute(ctx)?;
 
         // get the same fold state again because of borrow checker
-        match ctx.data.get_mut(iterator_name) {
-            Some(AValue::Iterator(_, cursor)) => *cursor -= 1,
+        match ctx.folds.get_mut(iterator_name) {
+            Some(fold_state) => fold_state.cursor -= 1,
             _ => unreachable!("iterator value shouldn't changed inside fold"),
         };
 
@@ -127,7 +131,7 @@ impl super::ExecutableInstruction for Next {
 
 #[cfg(test)]
 mod tests {
-    use crate::SerdeValue;
+    use crate::JValue;
 
     use aqua_test_utils::create_aqua_vm;
     use aquamarine_vm::vec1::Vec1;
@@ -169,16 +173,13 @@ mod tests {
             .call(json!([
                 String::from("asd"),
                 lfold,
-                String::from("{\"Iterable\": {\"serde-value\": [\"1\",\"2\",\"3\",\"4\",\"5\"]}}"),
+                String::from("{\"Iterable\": [\"1\",\"2\",\"3\",\"4\",\"5\"]}"),
             ]))
             .expect("call should be successful");
 
-        let res: SerdeValue = serde_json::from_str(&res.data).unwrap();
+        let res: JValue = serde_json::from_str(&res.data).unwrap();
 
-        assert_eq!(
-            res.get("acc").unwrap(),
-            &json!({"accumulator": [1,2,3,4,5]})
-        );
+        assert_eq!(res.get("acc").unwrap(), &json!([1, 2, 3, 4, 5]));
 
         let rfold = String::from(
             r#"
@@ -194,20 +195,19 @@ mod tests {
             .call(json!([
                 String::from("asd"),
                 rfold,
-                String::from("{\"Iterable\": {\"serde-value\": [\"1\",\"2\",\"3\",\"4\",\"5\"]}}"),
+                String::from("{\"Iterable\": [\"1\",\"2\",\"3\",\"4\",\"5\"]}"),
             ]))
             .expect("call should be successful");
 
-        let res: SerdeValue = serde_json::from_str(&res.data).unwrap();
+        let res: JValue = serde_json::from_str(&res.data).unwrap();
 
-        assert_eq!(
-            res.get("acc").unwrap(),
-            &json!({"accumulator": [5,4,3,2,1]})
-        );
+        assert_eq!(res.get("acc").unwrap(), &json!([5, 4, 3, 2, 1]));
     }
 
     #[test]
     fn inner_fold() {
+        env_logger::init();
+
         let mut vm = create_aqua_vm(get_echo_call_service());
 
         let script = String::from(
@@ -229,15 +229,15 @@ mod tests {
             .call(json!([
                 String::from("asd"),
                 script,
-                String::from("{\"Iterable1\": {\"serde-value\": [\"1\",\"2\",\"3\",\"4\",\"5\"]}, \"Iterable2\": {\"serde-value\": [\"1\",\"2\",\"3\",\"4\",\"5\"]}}"),
+                String::from("{\"Iterable1\": [\"1\",\"2\",\"3\",\"4\",\"5\"], \"Iterable2\": [\"1\",\"2\",\"3\",\"4\",\"5\"]}"),
             ]))
             .expect("call should be successful");
 
-        let res: SerdeValue = serde_json::from_str(&res.data).unwrap();
+        let res: JValue = serde_json::from_str(&res.data).unwrap();
 
         assert_eq!(
             res.get("acc").unwrap(),
-            &json!({"accumulator": [1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,4,4,4,4,4,5,5,5,5,5]})
+            &json!([1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5])
         );
     }
 }

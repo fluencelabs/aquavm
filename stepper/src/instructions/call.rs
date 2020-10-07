@@ -15,10 +15,9 @@
  */
 
 use super::ExecutionContext;
-use crate::AValue;
 use crate::AquamarineError;
+use crate::JValue;
 use crate::Result;
-use crate::SerdeValue;
 
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
@@ -76,7 +75,7 @@ impl super::ExecutableInstruction for Call {
                 return Err(AquamarineError::LocalServiceError(result.result));
             }
 
-            let result: SerdeValue = serde_json::from_str(&result.result)
+            let result: JValue = serde_json::from_str(&result.result)
                 .map_err(|e| AquamarineError::CallServiceSerdeError(result, e))?;
             set_result(ctx, result_variable_name, result)?;
         } else {
@@ -108,32 +107,29 @@ fn parse_peer_fn_parts<'a>(
     }
 }
 
-fn parse_args(args: &[String], ctx: &ExecutionContext) -> Result<SerdeValue> {
+#[rustfmt::skip]
+fn parse_args(args: &[String], ctx: &ExecutionContext) -> Result<JValue> {
     let mut result = Vec::with_capacity(args.len());
 
     for arg in args {
         let mut split_arg: Vec<&str> = arg.splitn(2, '.').collect();
         let variable_name = split_arg.remove(0);
 
-        let value_from_data = ctx
-            .data
-            .get(variable_name)
-            .ok_or_else(|| AquamarineError::VariableNotFound(variable_name.to_string()))?;
-        let value_by_key = match value_from_data {
-            AValue::SerdeValue(value) => value,
-            AValue::Iterator(values, cursor) => &values[*cursor],
-            v => {
-                return Err(AquamarineError::IncompatibleAValueType(
-                    v.clone(),
-                    String::from("ServeValue or Iterator"),
-                ))
-            }
+        let value_by_key = match (ctx.data.get(variable_name), ctx.folds.get(variable_name)) {
+            (_, Some(fold_state)) => match ctx.data.get(&fold_state.iterable_name) {
+                Some(JValue::Array(values)) => &values[fold_state.cursor],
+                Some(v) => return Err(AquamarineError::IncompatibleJValueType(v.clone(), String::from("array"))),
+                None => return Err(AquamarineError::VariableNotFound(fold_state.iterable_name.clone())),
+            },
+            (Some(value), None) => value,
+            (None, None) => return Err(AquamarineError::VariableNotFound(variable_name.to_string())),
         };
 
         let value = if !split_arg.is_empty() {
             let json_path = split_arg.remove(0);
             let values = jsonpath_lib::select(value_by_key, json_path)
                 .map_err(|e| AquamarineError::VariableNotInJsonPath(String::from(json_path), e))?;
+
             if values.len() != 1 {
                 return Err(AquamarineError::MultipleValuesInJsonPath(String::from(
                     json_path,
@@ -148,7 +144,7 @@ fn parse_args(args: &[String], ctx: &ExecutionContext) -> Result<SerdeValue> {
         result.push(value);
     }
 
-    Ok(SerdeValue::Array(result))
+    Ok(JValue::Array(result))
 }
 
 fn parse_result_variable_name(result_name: &str) -> Result<&str> {
@@ -164,35 +160,42 @@ fn parse_result_variable_name(result_name: &str) -> Result<&str> {
 fn set_result(
     ctx: &mut ExecutionContext,
     result_variable_name: &str,
-    result: SerdeValue,
+    result: JValue,
 ) -> Result<()> {
     use std::collections::hash_map::Entry;
 
     let is_array = result_variable_name.ends_with("[]");
-    if is_array {
-        match ctx
+    if !is_array {
+        if ctx
             .data
-            .entry(result_variable_name.strip_suffix("[]").unwrap().to_string())
+            .insert(result_variable_name.to_string(), result)
+            .is_some()
         {
-            Entry::Occupied(mut entry) => match entry.get_mut() {
-                AValue::Accumulator(values) => values.push_back(result),
-                v => {
-                    return Err(AquamarineError::IncompatibleAValueType(
-                        v.clone(),
-                        String::from("Accumulator"),
-                    ))
-                }
-            },
-            Entry::Vacant(entry) => {
-                let mut list = std::collections::LinkedList::new();
-                list.push_back(result);
-                entry.insert(AValue::Accumulator(list));
-            }
+            return Err(AquamarineError::MultipleVariablesFound(
+                result_variable_name.to_string(),
+            ));
         }
-    } else {
-        // TODO: check that value already present
-        ctx.data
-            .insert(result_variable_name.to_string(), AValue::SerdeValue(result));
+
+        return Ok(());
+    }
+
+    match ctx
+        .data
+        // unwrap is safe because it's been checked for []
+        .entry(result_variable_name.strip_suffix("[]").unwrap().to_string())
+    {
+        Entry::Occupied(mut entry) => match entry.get_mut() {
+            JValue::Array(values) => values.push(result),
+            v => {
+                return Err(AquamarineError::IncompatibleJValueType(
+                    v.clone(),
+                    String::from("Array"),
+                ))
+            }
+        },
+        Entry::Vacant(entry) => {
+            entry.insert(JValue::Array(vec![result]));
+        }
     }
 
     Ok(())
@@ -200,7 +203,7 @@ fn set_result(
 
 #[cfg(test)]
 mod tests {
-    use crate::SerdeValue;
+    use crate::JValue;
 
     use aqua_test_utils::create_aqua_vm;
     use aquamarine_vm::vec1::Vec1;
@@ -242,16 +245,13 @@ mod tests {
             .call(json!([
                 String::from("asd"),
                 script,
-                String::from("{\"value\": {\"serde-value\": \"test\"}}"),
+                String::from("{\"value\": \"test\"}"),
             ]))
             .expect("call should be successful");
 
-        let res: SerdeValue = serde_json::from_str(&res.data).unwrap();
+        let res: JValue = serde_json::from_str(&res.data).unwrap();
 
-        assert_eq!(
-            res.get("result_name").unwrap(),
-            &json!({"serde-value": "test"})
-        );
+        assert_eq!(res.get("result_name").unwrap(), &json!("test"));
 
         let script = String::from(
             r#"
@@ -263,16 +263,13 @@ mod tests {
             .call(json!([
                 String::from("asd"),
                 script,
-                String::from("{\"value\": {\"serde-value\": \"test\"}}"),
+                String::from("{\"value\": \"test\"}"),
             ]))
             .expect("call should be successful");
 
-        let res: SerdeValue = serde_json::from_str(&res.data).unwrap();
+        let res: JValue = serde_json::from_str(&res.data).unwrap();
 
-        assert_eq!(
-            res.get("result_name").unwrap(),
-            &json!({"serde-value": "test"})
-        );
+        assert_eq!(res.get("result_name").unwrap(), &json!("test"));
     }
 
     #[test]
@@ -289,7 +286,7 @@ mod tests {
             .call(json!([
                 String::from("asd"),
                 script,
-                String::from("{\"value\": {\"serde-value\": \"test\"}}"),
+                String::from("{\"value\": \"test\"}"),
             ]))
             .expect("call should be successful");
 
