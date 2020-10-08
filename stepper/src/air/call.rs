@@ -62,7 +62,11 @@ impl super::ExecutableInstruction for Call {
         let result_variable_name = &self.3;
 
         let (peer_pk, service_id, func_name) = parse_peer_fn_parts(peer_part, function_part)?;
-        let function_args = parse_args(arguments, ctx)?;
+        let peer_pk = prepare_call_arg(peer_pk, ctx)?;
+        let service_id = prepare_call_arg(service_id, ctx)?;
+        let func_name = prepare_call_arg(func_name, ctx)?;
+
+        let function_args = extract_args_by_paths(arguments, ctx)?;
         let function_args = serde_json::to_string(&function_args)
             .map_err(|e| AquamarineError::FuncArgsSerdeError(function_args, e))?;
         let result_variable_name = parse_result_variable_name(result_variable_name)?;
@@ -79,7 +83,8 @@ impl super::ExecutableInstruction for Call {
                 .map_err(|e| AquamarineError::CallServiceSerdeError(result, e))?;
             set_result(ctx, result_variable_name, result)?;
         } else {
-            ctx.next_peer_pks.push(peer_pk.to_string());
+            let peer_pk = peer_pk.to_string();
+            ctx.next_peer_pks.push(peer_pk);
         }
 
         Ok(())
@@ -107,41 +112,12 @@ fn parse_peer_fn_parts<'a>(
     }
 }
 
-#[rustfmt::skip]
-fn parse_args(args: &[String], ctx: &ExecutionContext) -> Result<JValue> {
-    let mut result = Vec::with_capacity(args.len());
+fn extract_args_by_paths(arg_paths: &[String], ctx: &ExecutionContext) -> Result<JValue> {
+    let mut result = Vec::with_capacity(arg_paths.len());
 
-    for arg in args {
-        let mut split_arg: Vec<&str> = arg.splitn(2, '.').collect();
-        let variable_name = split_arg.remove(0);
-
-        let value_by_key = match (ctx.data.get(variable_name), ctx.folds.get(variable_name)) {
-            (_, Some(fold_state)) => match ctx.data.get(&fold_state.iterable_name) {
-                Some(JValue::Array(values)) => &values[fold_state.cursor],
-                Some(v) => return Err(AquamarineError::IncompatibleJValueType(v.clone(), String::from("array"))),
-                None => return Err(AquamarineError::VariableNotFound(fold_state.iterable_name.clone())),
-            },
-            (Some(value), None) => value,
-            (None, None) => return Err(AquamarineError::VariableNotFound(variable_name.to_string())),
-        };
-
-        let value = if !split_arg.is_empty() {
-            let json_path = split_arg.remove(0);
-            let values = jsonpath_lib::select(value_by_key, json_path)
-                .map_err(|e| AquamarineError::VariableNotInJsonPath(String::from(json_path), e))?;
-
-            if values.len() != 1 {
-                return Err(AquamarineError::MultipleValuesInJsonPath(String::from(
-                    json_path,
-                )));
-            }
-
-            values[0].clone()
-        } else {
-            value_by_key.clone()
-        };
-
-        result.push(value);
+    for arg_path in arg_paths {
+        let arg = get_args_by_path(arg_path, ctx)?;
+        result.extend(arg.into_iter().cloned());
     }
 
     Ok(JValue::Array(result))
@@ -154,6 +130,65 @@ fn parse_result_variable_name(result_name: &str) -> Result<&str> {
         Err(AquamarineError::InstructionError(String::from(
             "result name of a call instruction must be non empty",
         )))
+    }
+}
+
+fn get_args_by_path<'args_path, 'ctx>(
+    arg_path: &'args_path str,
+    ctx: &'ctx ExecutionContext,
+) -> Result<Vec<&'ctx JValue>> {
+    let mut split_arg: Vec<&str> = arg_path.splitn(2, '.').collect();
+    let arg_path_head = split_arg.remove(0);
+
+    let value_by_head = match (ctx.data.get(arg_path_head), ctx.folds.get(arg_path_head)) {
+        (_, Some(fold_state)) => match ctx.data.get(&fold_state.iterable_name) {
+            Some(JValue::Array(values)) => &values[fold_state.cursor],
+            Some(v) => {
+                return Err(AquamarineError::IncompatibleJValueType(
+                    v.clone(),
+                    String::from("array"),
+                ))
+            }
+            None => {
+                return Err(AquamarineError::VariableNotFound(
+                    fold_state.iterable_name.clone(),
+                ))
+            }
+        },
+        (Some(value), None) => value,
+        (None, None) => return Err(AquamarineError::VariableNotFound(arg_path_head.to_string())),
+    };
+
+    if split_arg.is_empty() {
+        return Ok(vec![value_by_head]);
+    }
+
+    let json_path = split_arg.remove(0);
+    let values = jsonpath_lib::select(value_by_head, json_path).map_err(|e| {
+        AquamarineError::VariableNotInJsonPath(value_by_head.clone(), String::from(json_path), e)
+    })?;
+
+    Ok(values)
+}
+
+fn prepare_call_arg<'a>(arg_path: &'a str, ctx: &'a ExecutionContext) -> Result<&'a str> {
+    if arg_path.starts_with("\"") && arg_path.ends_with("\"") {
+        return Ok(arg_path);
+    }
+
+    let args = get_args_by_path(arg_path, ctx)?;
+    if args.len() != 1 {
+        return Err(AquamarineError::MultipleValuesInJsonPath(
+            arg_path.to_string(),
+        ));
+    }
+
+    match args[0] {
+        JValue::String(str) => Ok(str),
+        v => Err(AquamarineError::IncompatibleJValueType(
+            v.clone(),
+            String::from("string"),
+        )),
     }
 }
 

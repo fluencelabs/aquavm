@@ -56,7 +56,7 @@ pub(crate) enum AquamarineError {
     MultipleVariablesFound(String),
 
     /// Value with such path wasn't found in data with such error.
-    VariableNotInJsonPath(String, JsonPathError),
+    VariableNotInJsonPath(JValue, String, JsonPathError),
 
     /// Value for such name isn't presence in data.
     IncompatibleJValueType(JValue, String),
@@ -112,10 +112,10 @@ impl std::fmt::Display for AquamarineError {
                 "multiple variables found for name {} in data",
                 variable_name
             ),
-            AquamarineError::VariableNotInJsonPath(json_path, json_path_err) => write!(
+            AquamarineError::VariableNotInJsonPath(value, json_path, json_path_err) => write!(
                 f,
-                "variable with path {} not found with error: {:?}",
-                json_path, json_path_err
+                "variable with path {} not found in {:?} with error: {:?}",
+                json_path, value, json_path_err
             ),
             AquamarineError::IncompatibleJValueType(avalue, desired_type) => write!(
                 f,
