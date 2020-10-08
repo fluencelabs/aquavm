@@ -1,0 +1,43 @@
+version: 2
+jobs:
+  aqua:
+    docker:
+      - image: circleci/rust:latest
+    resource_class: medium+
+    environment:
+      RUST_BACKTRACE: 1
+      RUST_TEST_THREADS: 1
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - aqua01-{{ checksum "Cargo.lock" }}
+      - run: |
+          rustup toolchain install nightly-2020-07-12-x86_64-unknown-linux-gnu
+          rustup default nightly-2020-07-12-x86_64-unknown-linux-gnu
+
+          rustup target add wasm32-wasi
+          rustup component add rustfmt
+          rustup component add clippy
+
+          cargo install fcli
+          cd stepper
+          fce build
+
+          cd ..
+          cargo fmt --all -- --check --color always
+          cargo build --release --all-features
+          cargo test --release --all-features
+          cargo clippy -v
+
+      - save_cache:
+          paths:
+            - ~/.cargo
+            - ~/.rustup
+          key: aqua01-{{ checksum "Cargo.lock" }}
+
+workflows:
+  version: 2
+  arqada:
+    jobs:
+      - aqua

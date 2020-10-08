@@ -17,12 +17,12 @@
 mod air;
 mod defines;
 mod errors;
-mod instructions;
-mod stepper;
+mod execution;
+mod stepper_outcome;
 
 pub(crate) use crate::defines::*;
 
-use crate::stepper::execute_aqua;
+use crate::execution::execute_aqua;
 
 use wasm_bindgen::prelude::*;
 

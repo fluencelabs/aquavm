@@ -14,20 +14,36 @@
  * limitations under the License.
  */
 
-use fluence::fce;
-use serde::{Deserialize, Serialize};
+#![warn(rust_2018_idioms)]
+#![deny(
+    dead_code,
+    nonstandard_style,
+    unused_imports,
+    unused_mut,
+    unused_variables,
+    unused_unsafe,
+    unreachable_patterns
+)]
 
-pub const SUCCESS_ERROR_CODE: i32 = 0;
+use fluence::fce;
+
+fn main() {}
 
 #[fce]
-#[derive(Serialize, Deserialize)]
-pub struct StepperOutcome {
-    /// A return code, where SUCCESS_ERROR_CODE means success.
+pub struct CallServiceResult {
     pub ret_code: i32,
+    pub result: String,
+}
 
-    /// Contains data if ret_code == 0, otherwise error message (that could be empty string).
-    pub data: String,
+#[fce]
+pub fn call_service(service_id: String, fn_name: String, args: String) -> CallServiceResult {
+    println!(
+        "call service invoked with:\n  service_id: {}\n  fn_name: {}\n  args: {:?}",
+        service_id, fn_name, args
+    );
 
-    /// Public keys of peers that should receive data.
-    pub next_peer_pks: Vec<String>,
+    CallServiceResult {
+        ret_code: 0,
+        result: String::from("[\"result string\"]"),
+    }
 }

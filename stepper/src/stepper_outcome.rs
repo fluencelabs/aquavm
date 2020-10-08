@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-use crate::instructions::Instruction;
-use crate::AquaData;
-use crate::Result;
+use fluence::fce;
+use serde::{Deserialize, Serialize};
 
-pub(crate) trait ExecutableInstruction {
-    fn execute(self, data: &mut AquaData, next_peer_pks: &mut Vec<String>) -> Result<()>;
-}
+#[fce]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct StepperOutcome {
+    /// A return code, where SUCCESS_ERROR_CODE means success.
+    pub ret_code: i32,
 
-pub(crate) fn execute(instructions: Vec<Instruction>, data: &mut AquaData) -> Result<Vec<String>> {
-    let mut next_peer_pks = Vec::new();
+    /// Contains data if ret_code == 0, otherwise error message (that could be empty string).
+    pub data: String,
 
-    for instruction in instructions {
-        instruction.execute(data, &mut next_peer_pks)?;
-    }
-
-    Ok(next_peer_pks)
+    /// Public keys of peers that should receive data.
+    pub next_peer_pks: Vec<String>,
 }

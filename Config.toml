@@ -11,4 +11,4 @@ name = "aquamarine"
     logger_enabled = true
 
     [module.wasi]
-    envs = ["CURRENT_PEER_ID=asd"]
+    envs = { "CURRENT_PEER_ID" = "some_peer_id" }

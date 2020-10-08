@@ -14,12 +14,19 @@
  * limitations under the License.
  */
 
-mod execution;
-mod stepper;
-mod stepper_outcome;
+use super::ExecutionContext;
+use crate::Result;
 
-pub use stepper_outcome::StepperOutcome;
-pub use stepper_outcome::SUCCESS_ERROR_CODE;
+use serde_derive::Deserialize;
+use serde_derive::Serialize;
 
-pub(crate) use execution::execute_aqua;
-pub(crate) use stepper::ExecutableInstruction;
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
+pub(crate) struct Null {}
+
+impl super::ExecutableInstruction for Null {
+    fn execute(&self, ctx: &mut ExecutionContext) -> Result<()> {
+        log::info!("null is called with context: {:?}", ctx);
+
+        Ok(())
+    }
+}

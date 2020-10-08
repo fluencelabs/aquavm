@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-/// This file contains defines similar for both FCE and browser targets.
-
-pub(crate) type Result<T> = std::result::Result<T, AquamarineError>;
-pub(crate) type AquaData = std::collections::HashMap<String, serde_json::Value>;
-pub(crate) use crate::errors::AquamarineError;
-pub(crate) use crate::stepper::StepperOutcome;
-
-pub(crate) const CALL_SERVICE_SUCCESS: i32 = 0;
-
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
 
+/// This file contains defines of some things similar both for FCE and browser targets.
+
+pub(crate) type Result<T> = std::result::Result<T, AquamarineError>;
+pub(crate) type AquaData = std::collections::HashMap<String, JValue>;
+pub(crate) type JValue = serde_json::Value;
+pub(crate) use crate::errors::AquamarineError;
+pub(crate) use crate::stepper_outcome::StepperOutcome;
+
+pub(crate) const CALL_SERVICE_SUCCESS: i32 = 0;
+
 #[fluence::fce]
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CallServiceResult {
     pub ret_code: i32,
     pub result: String,
