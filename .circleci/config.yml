@@ -36,20 +36,17 @@ jobs:
             - ~/.rustup
           key: aqua01-{{ checksum "Cargo.lock" }}
   bindgen:
-    language: rust
-    rust: nightly
+    docker:
+      - image: circleci/rust:latest
+    steps:
+      - checkout
 
-    addons:
-      firefox: latest
-      chrome: stable
+      - name: Install
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
-    install:
-      - curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-
-    script:
-
-      - wasm-pack test --firefox --headless
-      - wasm-pack test --chrome  --headless
+      - run: cargo test
+      - run: wasm-pack test --headless --chrome
+      - run: wasm-pack test --headless --firefox
 workflows:
   version: 2
   arqada:
