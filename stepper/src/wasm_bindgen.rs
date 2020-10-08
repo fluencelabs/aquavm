@@ -25,22 +25,33 @@ pub(crate) use crate::defines::*;
 use crate::execution::execute_aqua;
 
 use wasm_bindgen::prelude::*;
+use wasm_bindgen::__rt::std::env::VarError;
+
+#[wasm_bindgen(start)]
+pub fn main() {
+    fluence::WasmLogger::init_with_level(log::Level::Info).unwrap();
+}
 
 #[wasm_bindgen]
 pub fn invoke(init_user_id: String, aqua: String, data: String) -> String {
     let outcome = execute_aqua(init_user_id, aqua, data);
-    serde_json::to_string(&outcome).unwrap()
-}
-
-#[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(js_namespace = console)]
-    fn log(s: &str);
+    serde_json::to_string(&outcome).expect("Cannot parse StepperOutcome")
 }
 
 pub fn call_service(service_id: String, fn_name: String, args: String) -> CallServiceResult {
     let result = call_service_impl(service_id, fn_name, args);
-    serde_json::from_str(&result).unwrap()
+    log::info!("result {}", result);
+    serde_json::from_str(&result).expect("Cannot parse CallServiceResult")
+}
+
+pub fn get_current_peer_id() -> std::result::Result<String, VarError> {
+    Ok(get_current_peer_id_impl())
+}
+
+#[wasm_bindgen]
+extern "C" {
+    #[link_name = "get_current_peer_id"]
+    fn get_current_peer_id_impl() -> String;
 }
 
 #[wasm_bindgen(raw_module = "../src/call_service.ts")]

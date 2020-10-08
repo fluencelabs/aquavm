@@ -35,6 +35,7 @@ pub(crate) use crate::defines::*;
 
 use crate::execution::execute_aqua;
 use fluence::fce;
+use std::env::VarError;
 
 pub fn main() {
     fluence::WasmLogger::init_with_level(log::Level::Info).unwrap();
@@ -43,6 +44,10 @@ pub fn main() {
 #[fce]
 pub fn invoke(init_user_id: String, aqua: String, data: String) -> StepperOutcome {
     execute_aqua(init_user_id, aqua, data)
+}
+
+pub fn get_current_peer_id() -> std::result::Result<String, VarError> {
+    std::env::var(CURRENT_PEER_ID_ENV_NAME)
 }
 
 #[fce]
