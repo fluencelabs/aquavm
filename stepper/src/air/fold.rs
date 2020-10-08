@@ -148,7 +148,7 @@ mod tests {
             r#"
             (fold (Iterable i
                 (seq (
-                    (call (%current_peer_id% (local_service_id local_fn_name) (i) acc[]))
+                    (call (%current_peer_id% ("local_service_id" "local_fn_name") (i) acc[]))
                     (next i)
                 )
             )))"#,
@@ -176,7 +176,7 @@ mod tests {
             (fold (Iterable i
                 (seq (
                     (next i)
-                    (call (%current_peer_id% (local_service_id local_fn_name) (i) acc[]))
+                    (call (%current_peer_id% ("local_service_id" "local_fn_name") (i) acc[]))
                 )
             )))"#,
         );
@@ -204,7 +204,7 @@ mod tests {
                 (seq (
                     (fold (Iterable2 j
                         (seq (
-                            (call (%current_peer_id% (local_service_id local_fn_name) (i) acc[]))
+                            (call (%current_peer_id% ("local_service_id" "local_fn_name") (i) acc[]))
                             (next j)
                         ))
                     ))
@@ -239,7 +239,7 @@ mod tests {
                 (seq (
                     (fold (Iterable2 i
                         (seq (
-                            (call (%current_peer_id% (local_service_id local_fn_name) (i) acc[]))
+                            (call (%current_peer_id% ("local_service_id" "local_fn_name") (i) acc[]))
                             (next i)
                         ))
                     ))

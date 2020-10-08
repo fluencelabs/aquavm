@@ -100,7 +100,12 @@ impl Call {
             )),
         }?;
 
-        let peer_pk = Self::prepare_call_arg(peer_pk, ctx)?;
+        let peer_pk = if peer_pk != CURRENT_PEER_ALIAS {
+            Self::prepare_call_arg(peer_pk, ctx)?
+        } else {
+            peer_pk
+        };
+
         let service_id = Self::prepare_call_arg(service_id, ctx)?;
         let func_name = Self::prepare_call_arg(func_name, ctx)?;
 
@@ -111,21 +116,33 @@ impl Call {
         let mut result = Vec::with_capacity(self.2.len());
 
         for arg_path in self.2.iter() {
-            let arg = Self::get_args_by_path(arg_path, ctx)?;
-            result.extend(arg.into_iter().cloned());
+            if is_string_literal(arg_path) {
+                result.push(JValue::String(arg_path[1..arg_path.len()-1].to_string()));
+            } else {
+                let arg = Self::get_args_by_path(arg_path, ctx)?;
+                result.extend(arg.into_iter().cloned());
+            }
         }
 
         Ok(JValue::Array(result))
     }
 
     fn parse_result_variable_name(&self) -> Result<&str> {
-        if !&self.3.is_empty() {
-            Ok(&self.3)
-        } else {
-            Err(AquamarineError::InstructionError(String::from(
+        let result_variable_name = &self.3;
+
+        if result_variable_name.is_empty() {
+            return Err(AquamarineError::InstructionError(String::from(
                 "result name of a call instruction must be non empty",
-            )))
+            )));
         }
+
+        if is_string_literal(result_variable_name) {
+            return Err(AquamarineError::InstructionError(String::from(
+                "result name of a call instruction must be non string literal",
+            )));
+        }
+
+        Ok(result_variable_name)
     }
 
     fn get_args_by_path<'args_path, 'ctx>(
@@ -173,8 +190,8 @@ impl Call {
     }
 
     fn prepare_call_arg<'a>(arg_path: &'a str, ctx: &'a ExecutionContext) -> Result<&'a str> {
-        if arg_path.starts_with('\"') && arg_path.ends_with('\"') {
-            return Ok(arg_path);
+        if is_string_literal(arg_path) {
+            return Ok(&arg_path[1..arg_path.len() - 1]);
         }
 
         let args = Self::get_args_by_path(arg_path, ctx)?;
@@ -236,6 +253,10 @@ impl Call {
     }
 }
 
+fn is_string_literal(value: &str) -> bool {
+    value.starts_with('"') && value.ends_with('"')
+}
+
 #[cfg(test)]
 mod tests {
     use crate::JValue;
@@ -251,7 +272,7 @@ mod tests {
 
         let script = String::from(
             r#"
-               (call (%current_peer_id% (local_service_id local_fn_name) (value) result_name))
+               (call (%current_peer_id% ("local_service_id" "local_fn_name") (value) result_name))
             "#,
         );
 
@@ -269,7 +290,7 @@ mod tests {
 
         let script = String::from(
             r#"
-               (call (test_peer_id (local_service_id local_fn_name) (value) result_name))
+               (call ("test_peer_id" ("local_service_id" "local_fn_name") (value) result_name))
             "#,
         );
 
@@ -292,7 +313,7 @@ mod tests {
         let remote_peer_id = String::from("some_remote_peer_id");
 
         let script = format!(
-            "(call ({} (local_service_id local_fn_name) (value) result_name))",
+            r#"(call ("{}" ("local_service_id" "local_fn_name") (value) result_name))"#,
             remote_peer_id
         );
 
@@ -305,5 +326,45 @@ mod tests {
             .expect("call should be successful");
 
         assert_eq!(res.next_peer_pks, vec![remote_peer_id]);
+    }
+
+    #[test]
+    fn variables() {
+        let mut vm = create_aqua_vm(echo_string_call_service());
+
+        let script = format!(
+            r#"(call (remote_peer_id ("some_service_id" "local_fn_name") ("param") result_name))"#,
+        );
+
+        let res = vm
+            .call(json!([
+                String::from("asd"),
+                script,
+                String::from("{\"remote_peer_id\": \"some_peer_id\"}"),
+            ]))
+            .expect("call should be successful");
+
+        assert_eq!(res.next_peer_pks, vec![String::from("some_peer_id")]);
+    }
+
+    #[test]
+    fn string_parameters() {
+        let mut vm = create_aqua_vm(echo_string_call_service());
+
+        let script = format!(
+            r#"(call (%current_peer_id% ("some_service_id" "local_fn_name") ("arg") result_name))"#,
+        );
+
+        let res = vm
+            .call(json!([
+                String::from("asd"),
+                script,
+                String::from("{}"),
+            ]))
+            .expect("call should be successful");
+
+        let jdata: JValue = serde_json::from_str(&res.data).expect("should be valid json");
+
+        assert_eq!(jdata, json!({ "result_name" : "arg" }));
     }
 }
