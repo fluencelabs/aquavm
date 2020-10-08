@@ -206,34 +206,13 @@ mod tests {
     use crate::JValue;
 
     use aqua_test_utils::create_aqua_vm;
-    use aquamarine_vm::vec1::Vec1;
-    use aquamarine_vm::HostExportedFunc;
-    use aquamarine_vm::IValue;
+    use aqua_test_utils::echo_string_call_service;
 
     use serde_json::json;
 
-    fn get_echo_call_service() -> HostExportedFunc {
-        Box::new(|_, args| -> Option<IValue> {
-            let arg = match &args[2] {
-                IValue::String(str) => str,
-                _ => unreachable!(),
-            };
-
-            let arg: Vec<String> = serde_json::from_str(arg).unwrap();
-
-            Some(IValue::Record(
-                Vec1::new(vec![
-                    IValue::S32(0),
-                    IValue::String(format!("\"{}\"", arg[0])),
-                ])
-                .unwrap(),
-            ))
-        })
-    }
-
     #[test]
     fn current_peer_id_call() {
-        let mut vm = create_aqua_vm(get_echo_call_service());
+        let mut vm = create_aqua_vm(echo_string_call_service());
 
         let script = String::from(
             r#"
@@ -274,7 +253,7 @@ mod tests {
 
     #[test]
     fn remote_peer_id_call() {
-        let mut vm = create_aqua_vm(get_echo_call_service());
+        let mut vm = create_aqua_vm(echo_string_call_service());
         let remote_peer_id = String::from("some_remote_peer_id");
 
         let script = format!(

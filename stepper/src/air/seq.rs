@@ -42,25 +42,14 @@ impl super::ExecutableInstruction for Seq {
 #[cfg(test)]
 mod tests {
     use aqua_test_utils::create_aqua_vm;
-    use aquamarine_vm::vec1::Vec1;
-    use aquamarine_vm::HostExportedFunc;
-    use aquamarine_vm::IValue;
+    use aqua_test_utils::unit_call_service;
     use aquamarine_vm::StepperOutcome;
 
     use serde_json::json;
 
     #[test]
     fn par() {
-        let call_service: HostExportedFunc = Box::new(|_, _| -> Option<IValue> {
-            Some(IValue::Record(
-                Vec1::new(vec![
-                    IValue::S32(0),
-                    IValue::String(String::from("\"test\"")),
-                ])
-                .unwrap(),
-            ))
-        });
-        let mut vm = create_aqua_vm(call_service);
+        let mut vm = create_aqua_vm(unit_call_service());
 
         let script = String::from(
             r#"

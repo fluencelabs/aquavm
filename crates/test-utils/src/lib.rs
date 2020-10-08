@@ -29,7 +29,9 @@ use aquamarine_vm::AquamarineVM;
 use aquamarine_vm::AquamarineVMConfig;
 use aquamarine_vm::HostExportedFunc;
 use aquamarine_vm::HostImportDescriptor;
+use aquamarine_vm::IValue;
 use aquamarine_vm::IType;
+use aquamarine_vm::vec1::Vec1;
 
 use std::path::PathBuf;
 
@@ -49,3 +51,46 @@ pub fn create_aqua_vm(call_service: HostExportedFunc) -> AquamarineVM {
 
     AquamarineVM::new(config).expect("vm should be created")
 }
+
+pub fn unit_call_service() -> HostExportedFunc {
+    Box::new(|_, _| -> Option<IValue> {
+        Some(IValue::Record(
+            Vec1::new(vec![
+                IValue::S32(0),
+                IValue::String(String::from("\"test\"")),
+            ])
+                .unwrap(),
+        ))
+    })
+}
+
+pub fn echo_string_call_service() -> HostExportedFunc {
+    Box::new(|_, args| -> Option<IValue> {
+        let arg = match &args[2] {
+            IValue::String(str) => str,
+            _ => unreachable!(),
+        };
+
+        let arg: Vec<String> = serde_json::from_str(arg).unwrap();
+
+        Some(IValue::Record(
+            Vec1::new(vec![IValue::S32(0), IValue::String(format!("\"{}\"",arg[0]))]).unwrap(),
+        ))
+    })
+}
+
+pub fn echo_number_call_service() -> HostExportedFunc {
+    Box::new(|_, args| -> Option<IValue> {
+        let arg = match &args[2] {
+            IValue::String(str) => str,
+            _ => unreachable!(),
+        };
+
+        let arg: Vec<String> = serde_json::from_str(arg).unwrap();
+
+        Some(IValue::Record(
+            Vec1::new(vec![IValue::S32(0), IValue::String(arg[0].clone())]).unwrap(),
+        ))
+    })
+}
+

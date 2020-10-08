@@ -135,7 +135,7 @@ impl std::fmt::Display for AquamarineError {
             ),
             AquamarineError::MultipleFoldStates(iterator) => write!(
                 f,
-                "multiple fold states found for this iterable {}",
+                "multiple fold states found for iterable {}",
                 iterator
             ),
         }

@@ -134,30 +134,15 @@ mod tests {
     use crate::JValue;
 
     use aqua_test_utils::create_aqua_vm;
-    use aquamarine_vm::vec1::Vec1;
-    use aquamarine_vm::HostExportedFunc;
-    use aquamarine_vm::IValue;
+    use aqua_test_utils::echo_number_call_service;
+    use aquamarine_vm::AquamarineVMError;
+    use aquamarine_vm::StepperError;
 
     use serde_json::json;
 
-    fn get_echo_call_service() -> HostExportedFunc {
-        Box::new(|_, args| -> Option<IValue> {
-            let arg = match &args[2] {
-                IValue::String(str) => str,
-                _ => unreachable!(),
-            };
-
-            let arg: Vec<String> = serde_json::from_str(arg).unwrap();
-
-            Some(IValue::Record(
-                Vec1::new(vec![IValue::S32(0), IValue::String(arg[0].clone())]).unwrap(),
-            ))
-        })
-    }
-
     #[test]
-    fn fold() {
-        let mut vm = create_aqua_vm(get_echo_call_service());
+    fn lfold() {
+        let mut vm = create_aqua_vm(echo_number_call_service());
 
         let lfold = String::from(
             r#"
@@ -180,6 +165,11 @@ mod tests {
         let res: JValue = serde_json::from_str(&res.data).unwrap();
 
         assert_eq!(res.get("acc").unwrap(), &json!([1, 2, 3, 4, 5]));
+    }
+
+    #[test]
+    fn rfold() {
+        let mut vm = create_aqua_vm(echo_number_call_service());
 
         let rfold = String::from(
             r#"
@@ -206,9 +196,7 @@ mod tests {
 
     #[test]
     fn inner_fold() {
-        env_logger::init();
-
-        let mut vm = create_aqua_vm(get_echo_call_service());
+        let mut vm = create_aqua_vm(echo_number_call_service());
 
         let script = String::from(
             r#"
@@ -238,6 +226,47 @@ mod tests {
         assert_eq!(
             res.get("acc").unwrap(),
             &json!([1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5])
+        );
+    }
+
+    #[test]
+    fn inner_fold_with_same_iterator() {
+        let mut vm = create_aqua_vm(echo_number_call_service());
+
+        let script = String::from(
+            r#"
+            (fold (Iterable1 i
+                (seq (
+                    (fold (Iterable2 i
+                        (seq (
+                            (call (%current_peer_id% (local_service_id local_fn_name) (i) acc[]))
+                            (next i)
+                        ))
+                    ))
+                    (next i)
+                ))
+            ))"#,
+        );
+
+        let res = vm
+            .call(json!([
+                String::from("asd"),
+                script,
+                String::from("{\"Iterable1\": [\"1\",\"2\",\"3\",\"4\",\"5\"], \"Iterable2\": [\"1\",\"2\",\"3\",\"4\",\"5\"]}"),
+            ]));
+
+        assert!(res.is_err());
+        let error = res.err().unwrap();
+        let error = match error {
+            AquamarineVMError::StepperError(error) => error,
+            _ => unreachable!(),
+        };
+
+        assert_eq!(
+            error,
+            StepperError::MultipleFoldStates(String::from(
+                "multiple fold states found for iterable Iterable2"
+            ))
         );
     }
 }
