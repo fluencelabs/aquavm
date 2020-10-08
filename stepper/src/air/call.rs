@@ -117,7 +117,7 @@ impl Call {
 
         for arg_path in self.2.iter() {
             if is_string_literal(arg_path) {
-                result.push(JValue::String(arg_path[1..arg_path.len()-1].to_string()));
+                result.push(JValue::String(arg_path[1..arg_path.len() - 1].to_string()));
             } else {
                 let arg = Self::get_args_by_path(arg_path, ctx)?;
                 result.extend(arg.into_iter().cloned());
@@ -263,6 +263,9 @@ mod tests {
 
     use aqua_test_utils::create_aqua_vm;
     use aqua_test_utils::echo_string_call_service;
+    use aquamarine_vm::vec1::Vec1;
+    use aquamarine_vm::HostExportedFunc;
+    use aquamarine_vm::IValue;
 
     use serde_json::json;
 
@@ -349,22 +352,33 @@ mod tests {
 
     #[test]
     fn string_parameters() {
-        let mut vm = create_aqua_vm(echo_string_call_service());
+        let call_service: HostExportedFunc = Box::new(|_, args| -> Option<IValue> {
+            let arg = match &args[2] {
+                IValue::String(str) => str,
+                _ => unreachable!(),
+            };
+
+            Some(IValue::Record(
+                Vec1::new(vec![IValue::S32(0), IValue::String(arg.clone())]).unwrap(),
+            ))
+        });
+
+        let mut vm = create_aqua_vm(call_service);
 
         let script = format!(
-            r#"(call (%current_peer_id% ("some_service_id" "local_fn_name") ("arg") result_name))"#,
+            r#"(call (%current_peer_id% ("some_service_id" "local_fn_name") ("arg1" "arg2" arg3) result_name))"#,
         );
 
         let res = vm
             .call(json!([
                 String::from("asd"),
                 script,
-                String::from("{}"),
+                json!({"arg3": "arg3_value"}).to_string(),
             ]))
             .expect("call should be successful");
 
         let jdata: JValue = serde_json::from_str(&res.data).expect("should be valid json");
 
-        assert_eq!(jdata, json!({ "result_name" : "arg" }));
+        assert_eq!(jdata["result_name"], json!(["arg1", "arg2", "arg3_value"]));
     }
 }

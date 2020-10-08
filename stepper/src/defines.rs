@@ -17,6 +17,8 @@
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
 
+/// arg path: head.$(json_path)
+/// result:   head
 /// This file contains defines of some things similar both for FCE and browser targets.
 
 pub(crate) type Result<T> = std::result::Result<T, AquamarineError>;
