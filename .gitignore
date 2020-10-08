@@ -2,3 +2,6 @@
 /target
 .DS_Store
 .repl_history
+*.wasm
+
+!./artifacts/*.wasm
