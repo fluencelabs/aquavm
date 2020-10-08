@@ -18,9 +18,9 @@ use super::StepperOutcome;
 use crate::air::ExecutableInstruction;
 use crate::air::ExecutionContext;
 use crate::air::Instruction;
-use crate::{AquaData, get_current_peer_id};
 use crate::AquamarineError;
 use crate::Result;
+use crate::{get_current_peer_id, AquaData};
 
 const CURRENT_PEER_ID_ENV_NAME: &str = "CURRENT_PEER_ID";
 

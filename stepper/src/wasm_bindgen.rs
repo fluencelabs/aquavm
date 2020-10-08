@@ -24,8 +24,8 @@ pub(crate) use crate::defines::*;
 
 use crate::execution::execute_aqua;
 
-use wasm_bindgen::prelude::*;
 use wasm_bindgen::__rt::std::env::VarError;
+use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen(start)]
 pub fn main() {
