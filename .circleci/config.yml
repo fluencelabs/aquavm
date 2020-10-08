@@ -41,12 +41,11 @@ jobs:
     steps:
       - checkout
 
-      - name: Install
-        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-
-      - run: cargo test
-      - run: wasm-pack test --headless --chrome
-      - run: wasm-pack test --headless --firefox
+      - run: |
+        curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+        cargo test
+        wasm-pack test --headless --chrome
+        wasm-pack test --headless --firefox
 workflows:
   version: 2
   arqada:
