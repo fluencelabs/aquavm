@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+mod air;
 mod defines;
 mod errors;
 mod execution;
-mod instructions;
 mod stepper_outcome;
 
 pub(crate) use crate::defines::*;

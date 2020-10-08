@@ -15,9 +15,9 @@
  */
 
 use super::StepperOutcome;
-use crate::instructions::ExecutableInstruction;
-use crate::instructions::ExecutionContext;
-use crate::instructions::Instruction;
+use crate::air::ExecutableInstruction;
+use crate::air::ExecutionContext;
+use crate::air::Instruction;
 use crate::AquaData;
 use crate::AquamarineError;
 use crate::Result;

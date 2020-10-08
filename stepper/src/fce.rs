@@ -25,10 +25,10 @@
     unreachable_patterns
 )]
 
+mod air;
 mod defines;
 mod errors;
 mod execution;
-mod instructions;
 mod stepper_outcome;
 
 pub(crate) use crate::defines::*;
