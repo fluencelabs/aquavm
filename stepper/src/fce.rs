@@ -37,6 +37,8 @@ use crate::execution::execute_aqua;
 use fluence::fce;
 use std::env::VarError;
 
+const CURRENT_PEER_ID_ENV_NAME: &str = "CURRENT_PEER_ID";
+
 pub fn main() {
     fluence::WasmLogger::init_with_level(log::Level::Info).unwrap();
 }

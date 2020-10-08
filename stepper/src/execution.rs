@@ -20,9 +20,8 @@ use crate::air::ExecutionContext;
 use crate::air::Instruction;
 use crate::AquamarineError;
 use crate::Result;
-use crate::{get_current_peer_id, AquaData};
-
-const CURRENT_PEER_ID_ENV_NAME: &str = "CURRENT_PEER_ID";
+use crate::AquaData;
+use crate::get_current_peer_id;
 
 pub(crate) fn execute_aqua(init_user_id: String, aqua: String, data: String) -> StepperOutcome {
     log::info!(
@@ -48,7 +47,7 @@ fn execute_aqua_impl(_init_user_id: String, aqua: String, data: String) -> Resul
     );
 
     let current_peer_id = get_current_peer_id().map_err(|e| {
-        AquamarineError::CurrentPeerIdEnvError(e, String::from(CURRENT_PEER_ID_ENV_NAME))
+        AquamarineError::CurrentPeerIdEnvError(e, String::from("CURRENT_PEER_ID"))
     })?;
 
     let mut execution_ctx = ExecutionContext::new(parsed_data, current_peer_id);
