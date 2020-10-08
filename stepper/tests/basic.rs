@@ -16,6 +16,9 @@
 
 use aqua_test_utils::create_aqua_vm;
 use aqua_test_utils::unit_call_service;
+use aquamarine_vm::vec1::Vec1;
+use aquamarine_vm::HostExportedFunc;
+use aquamarine_vm::IValue;
 use aquamarine_vm::StepperOutcome;
 
 use serde_json::json;
@@ -111,7 +114,29 @@ fn create_service() {
         ))"#,
     );
 
-    let mut vm = create_aqua_vm(unit_call_service());
+    let call_service: HostExportedFunc = Box::new(|_, args| -> Option<IValue> {
+        let builtin_service = match &args[0] {
+            IValue::String(str) => str,
+            _ => unreachable!(),
+        };
+
+        let response = match builtin_service.as_str() {
+            "add_module" => String::from("add_module response"),
+            "add_blueprint" => String::from("add_blueprint response"),
+            "create" => String::from("create response"),
+            _ => String::from("unknown response"),
+        };
+
+        Some(IValue::Record(
+            Vec1::new(vec![
+                IValue::S32(0),
+                IValue::String(format!("\"{}\"", response)),
+            ])
+            .unwrap(),
+        ))
+    });
+
+    let mut vm = create_aqua_vm(call_service);
 
     let res = vm
         .call(json!([String::from("init_user_pk"), script, data,]))
@@ -119,17 +144,17 @@ fn create_service() {
 
     let resulted_data: JValue = serde_json::from_str(&res.data).expect("should be correct json");
 
-    data_value
-        .as_object_mut()
-        .unwrap()
-        .insert(String::from("module"), JValue::String(String::from("test")));
+    data_value.as_object_mut().unwrap().insert(
+        String::from("module"),
+        JValue::String(String::from("add_module response")),
+    );
     data_value.as_object_mut().unwrap().insert(
         String::from("blueprint_id"),
-        JValue::String(String::from("test")),
+        JValue::String(String::from("add_blueprint response")),
     );
     data_value.as_object_mut().unwrap().insert(
         String::from("service_id"),
-        JValue::String(String::from("test")),
+        JValue::String(String::from("create response")),
     );
 
     assert_eq!(resulted_data, data_value);

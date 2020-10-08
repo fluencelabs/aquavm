@@ -25,13 +25,13 @@
     unreachable_patterns
 )]
 
+use aquamarine_vm::vec1::Vec1;
 use aquamarine_vm::AquamarineVM;
 use aquamarine_vm::AquamarineVMConfig;
 use aquamarine_vm::HostExportedFunc;
 use aquamarine_vm::HostImportDescriptor;
-use aquamarine_vm::IValue;
 use aquamarine_vm::IType;
-use aquamarine_vm::vec1::Vec1;
+use aquamarine_vm::IValue;
 
 use std::path::PathBuf;
 
@@ -59,7 +59,7 @@ pub fn unit_call_service() -> HostExportedFunc {
                 IValue::S32(0),
                 IValue::String(String::from("\"test\"")),
             ])
-                .unwrap(),
+            .unwrap(),
         ))
     })
 }
@@ -74,7 +74,11 @@ pub fn echo_string_call_service() -> HostExportedFunc {
         let arg: Vec<String> = serde_json::from_str(arg).unwrap();
 
         Some(IValue::Record(
-            Vec1::new(vec![IValue::S32(0), IValue::String(format!("\"{}\"",arg[0]))]).unwrap(),
+            Vec1::new(vec![
+                IValue::S32(0),
+                IValue::String(format!("\"{}\"", arg[0])),
+            ])
+            .unwrap(),
         ))
     })
 }
@@ -93,4 +97,3 @@ pub fn echo_number_call_service() -> HostExportedFunc {
         ))
     })
 }
-
