@@ -19,6 +19,7 @@ mod fold;
 mod null;
 mod par;
 mod seq;
+mod xor;
 
 use crate::AquaData;
 use crate::Result;
@@ -29,6 +30,7 @@ use fold::Next;
 use null::Null;
 use par::Par;
 use seq::Seq;
+use xor::Xor;
 
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
@@ -62,6 +64,7 @@ pub(crate) enum Instruction {
     Next(Next),
     Par(Par),
     Seq(Seq),
+    Xor(Xor),
 }
 
 pub(crate) trait ExecutableInstruction {
@@ -77,6 +80,7 @@ impl ExecutableInstruction for Instruction {
             Instruction::Next(next) => next.execute(ctx),
             Instruction::Par(par) => par.execute(ctx),
             Instruction::Seq(seq) => seq.execute(ctx),
+            Instruction::Xor(xor) => xor.execute(ctx),
         }
     }
 }
