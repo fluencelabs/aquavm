@@ -146,10 +146,10 @@ impl Call {
     }
 
     fn get_args_by_path<'args_path, 'ctx>(
-        arg_path: &'args_path str,
+        args_path: &'args_path str,
         ctx: &'ctx ExecutionContext,
     ) -> Result<Vec<&'ctx JValue>> {
-        let mut split_arg: Vec<&str> = arg_path.splitn(2, '.').collect();
+        let mut split_arg: Vec<&str> = args_path.splitn(2, '.').collect();
         let arg_path_head = split_arg.remove(0);
 
         let value_by_head = match (ctx.data.get(arg_path_head), ctx.folds.get(arg_path_head)) {
@@ -195,6 +195,10 @@ impl Call {
         }
 
         let args = Self::get_args_by_path(arg_path, ctx)?;
+        if args.is_empty() {
+            return Err(AquamarineError::VariableNotFound(arg_path.to_string()));
+        }
+
         if args.len() != 1 {
             return Err(AquamarineError::MultipleValuesInJsonPath(
                 arg_path.to_string(),
@@ -217,6 +221,7 @@ impl Call {
 
         let is_array = result_variable_name.ends_with("[]");
         if !is_array {
+            // if result is not an array, simply insert it into data
             if ctx
                 .data
                 .insert(result_variable_name.to_string(), result)
@@ -230,6 +235,7 @@ impl Call {
             return Ok(());
         }
 
+        // if result is an array, insert result to the end of the array
         match ctx
             .data
             // unwrap is safe because it's been checked for []
