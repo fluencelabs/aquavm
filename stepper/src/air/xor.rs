@@ -77,8 +77,8 @@ mod tests {
         let script = String::from(
             r#"
             (xor (
-                (call (%current_peer_id% (service_id_1 local_fn_name) () result_1))
-                (call (%current_peer_id% (service_id_2 local_fn_name) () result_2))
+                (call (%current_peer_id% ("service_id_1" "local_fn_name") () result_1))
+                (call (%current_peer_id% ("service_id_2" "local_fn_name") () result_2))
             ))"#,
         );
 
@@ -97,8 +97,8 @@ mod tests {
         let script = String::from(
             r#"
             (xor (
-                (call (%current_peer_id% (service_id_2 local_fn_name) () result_1))
-                (call (%current_peer_id% (service_id_1 local_fn_name) () result_2))
+                (call (%current_peer_id% ("service_id_2" "local_fn_name") () result_1))
+                (call (%current_peer_id% ("service_id_1" "local_fn_name") () result_2))
             ))"#,
         );
 
