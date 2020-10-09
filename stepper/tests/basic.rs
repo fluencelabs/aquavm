@@ -33,10 +33,10 @@ fn seq_par_call() {
         r#"
         (seq (
             (par (
-                (call (%current_peer_id% (local_service_id local_fn_name) () result_1))
-                (call (remote_peer_id (service_id fn_name) () g))
+                (call (%current_peer_id% ("local_service_id" "local_fn_name") () result_1))
+                (call ("remote_peer_id" ("service_id" "fn_name") () g))
             ))
-            (call (%current_peer_id% (local_service_id local_fn_name) () result_2))
+            (call (%current_peer_id% ("local_service_id" "local_fn_name") () result_2))
         ))"#,
     );
 
@@ -59,10 +59,10 @@ fn par_par_call() {
         r#"
         (par (
             (par (
-                (call (%current_peer_id% (local_service_id local_fn_name) () result_1))
-                (call (remote_peer_id (service_id fn_name) () g))
+                (call (%current_peer_id% ("local_service_id" "local_fn_name") () result_1))
+                (call ("remote_peer_id" ("service_id" "fn_name") () g))
             ))
-            (call (%current_peer_id% (local_service_id local_fn_name) () result_2))
+            (call (%current_peer_id% ("local_service_id" "local_fn_name") () result_2))
         ))"#,
     );
 
@@ -103,12 +103,12 @@ fn create_service() {
 
     let script = String::from(
         r#"(seq (
-            (call (%current_peer_id% (add_module ||) (module_bytes module_config) module))
+            (call (%current_peer_id% ("add_module" "") (module_bytes module_config) module))
             (seq (
-                (call (%current_peer_id% (add_blueprint ||) (blueprint) blueprint_id))
+                (call (%current_peer_id% ("add_blueprint" "") (blueprint) blueprint_id))
                 (seq (
-                    (call (%current_peer_id% (create ||) (blueprint_id) service_id))
-                    (call (remote_peer_id (|| ||) (service_id) client_result))
+                    (call (%current_peer_id% ("create" "") (blueprint_id) service_id))
+                    (call ("remote_peer_id" ("" "") (service_id) client_result))
                 ))
             ))
         ))"#,

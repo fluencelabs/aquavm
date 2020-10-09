@@ -50,8 +50,8 @@ mod tests {
         let script = String::from(
             r#"
             (par (
-                (call (remote_peer_id_1 (local_service_id local_fn_name) () result_name))
-                (call (remote_peer_id_2 (service_id fn_name) () g))
+                (call ("remote_peer_id_1" ("local_service_id" "local_fn_name") () result_name))
+                (call ("remote_peer_id_2" ("service_id" "fn_name") () g))
             ))"#,
         );
 

@@ -56,16 +56,11 @@ impl super::ExecutableInstruction for Call {
     fn execute(&self, ctx: &mut ExecutionContext) -> Result<()> {
         log::info!("call {:?} is called with context {:?}", self, ctx);
 
-        let peer_part = &self.0;
-        let function_part = &self.1;
-        let arguments = &self.2;
-        let result_variable_name = &self.3;
+        let (peer_pk, service_id, func_name) = self.prepare_peer_fn_parts(ctx)?;
 
-        let (peer_pk, service_id, func_name) = parse_peer_fn_parts(peer_part, function_part)?;
-        let function_args = parse_args(arguments, ctx)?;
+        let function_args = self.extract_args_by_paths(ctx)?;
         let function_args = serde_json::to_string(&function_args)
             .map_err(|e| AquamarineError::FuncArgsSerdeError(function_args, e))?;
-        let result_variable_name = parse_result_variable_name(result_variable_name)?;
 
         if peer_pk == ctx.current_peer_id || peer_pk == CURRENT_PEER_ALIAS {
             let result = unsafe {
@@ -77,128 +72,195 @@ impl super::ExecutableInstruction for Call {
 
             let result: JValue = serde_json::from_str(&result.result)
                 .map_err(|e| AquamarineError::CallServiceSerdeError(result, e))?;
-            set_result(ctx, result_variable_name, result)?;
+            self.set_result(ctx, result)?;
         } else {
-            ctx.next_peer_pks.push(peer_pk.to_string());
+            let peer_pk = peer_pk.to_string();
+            ctx.next_peer_pks.push(peer_pk);
         }
 
         Ok(())
     }
 }
 
-#[rustfmt::skip]
-fn parse_peer_fn_parts<'a>(
-    peer_part: &'a PeerPart,
-    fn_part: &'a FunctionPart,
-) -> Result<(&'a str, &'a str, &'a str)> {
-    match (peer_part, fn_part) {
-        (PeerPart::PeerPkWithPkServiceId(peer_pk, peer_service_id), FunctionPart::ServiceIdWithFuncName(_service_id, func_name)) => {
-            Ok((peer_pk, peer_service_id, func_name))
-        },
-        (PeerPart::PeerPkWithPkServiceId(peer_pk, peer_service_id), FunctionPart::FuncName(func_name)) => {
-            Ok((peer_pk, peer_service_id, func_name))
-        },
-        (PeerPart::PeerPk(peer_pk), FunctionPart::ServiceIdWithFuncName(service_id, func_name)) => {
-            Ok((peer_pk, service_id, func_name))
-        }
-        (PeerPart::PeerPk(_), FunctionPart::FuncName(_)) => Err(AquamarineError::InstructionError(
-            String::from("call should have service id specified by peer part or function part"),
-        )),
+impl Call {
+    #[rustfmt::skip]
+    fn prepare_peer_fn_parts<'a>(&'a self, ctx: &'a ExecutionContext) -> Result<(&'a str, &'a str, &'a str)> {
+        let (peer_pk, service_id, func_name) = match (&self.0, &self.1) {
+            (PeerPart::PeerPkWithPkServiceId(peer_pk, peer_service_id), FunctionPart::ServiceIdWithFuncName(_service_id, func_name)) => {
+                Ok((peer_pk, peer_service_id, func_name))
+            },
+            (PeerPart::PeerPkWithPkServiceId(peer_pk, peer_service_id), FunctionPart::FuncName(func_name)) => {
+                Ok((peer_pk, peer_service_id, func_name))
+            },
+            (PeerPart::PeerPk(peer_pk), FunctionPart::ServiceIdWithFuncName(service_id, func_name)) => {
+                Ok((peer_pk, service_id, func_name))
+            }
+            (PeerPart::PeerPk(_), FunctionPart::FuncName(_)) => Err(AquamarineError::InstructionError(
+                String::from("call should have service id specified by peer part or function part"),
+            )),
+        }?;
+
+        let peer_pk = if peer_pk != CURRENT_PEER_ALIAS {
+            Self::prepare_call_arg(peer_pk, ctx)?
+        } else {
+            peer_pk
+        };
+
+        let service_id = Self::prepare_call_arg(service_id, ctx)?;
+        let func_name = Self::prepare_call_arg(func_name, ctx)?;
+
+        Ok((peer_pk, service_id, func_name))
     }
-}
 
-#[rustfmt::skip]
-fn parse_args(args: &[String], ctx: &ExecutionContext) -> Result<JValue> {
-    let mut result = Vec::with_capacity(args.len());
+    fn extract_args_by_paths(&self, ctx: &ExecutionContext) -> Result<JValue> {
+        let mut result = Vec::with_capacity(self.2.len());
 
-    for arg in args {
-        let mut split_arg: Vec<&str> = arg.splitn(2, '.').collect();
-        let variable_name = split_arg.remove(0);
+        for arg_path in self.2.iter() {
+            if is_string_literal(arg_path) {
+                result.push(JValue::String(arg_path[1..arg_path.len() - 1].to_string()));
+            } else {
+                let arg = Self::get_args_by_path(arg_path, ctx)?;
+                result.extend(arg.into_iter().cloned());
+            }
+        }
 
-        let value_by_key = match (ctx.data.get(variable_name), ctx.folds.get(variable_name)) {
+        Ok(JValue::Array(result))
+    }
+
+    fn parse_result_variable_name(&self) -> Result<&str> {
+        let result_variable_name = &self.3;
+
+        if result_variable_name.is_empty() {
+            return Err(AquamarineError::InstructionError(String::from(
+                "result name of a call instruction must be non empty",
+            )));
+        }
+
+        if is_string_literal(result_variable_name) {
+            return Err(AquamarineError::InstructionError(String::from(
+                "result name of a call instruction must be non string literal",
+            )));
+        }
+
+        Ok(result_variable_name)
+    }
+
+    fn get_args_by_path<'args_path, 'ctx>(
+        args_path: &'args_path str,
+        ctx: &'ctx ExecutionContext,
+    ) -> Result<Vec<&'ctx JValue>> {
+        let mut split_arg: Vec<&str> = args_path.splitn(2, '.').collect();
+        let arg_path_head = split_arg.remove(0);
+
+        let value_by_head = match (ctx.data.get(arg_path_head), ctx.folds.get(arg_path_head)) {
             (_, Some(fold_state)) => match ctx.data.get(&fold_state.iterable_name) {
                 Some(JValue::Array(values)) => &values[fold_state.cursor],
-                Some(v) => return Err(AquamarineError::IncompatibleJValueType(v.clone(), String::from("array"))),
-                None => return Err(AquamarineError::VariableNotFound(fold_state.iterable_name.clone())),
+                Some(v) => {
+                    return Err(AquamarineError::IncompatibleJValueType(
+                        v.clone(),
+                        String::from("array"),
+                    ))
+                }
+                None => {
+                    return Err(AquamarineError::VariableNotFound(
+                        fold_state.iterable_name.clone(),
+                    ))
+                }
             },
             (Some(value), None) => value,
-            (None, None) => return Err(AquamarineError::VariableNotFound(variable_name.to_string())),
-        };
-
-        let value = if !split_arg.is_empty() {
-            let json_path = split_arg.remove(0);
-            let values = jsonpath_lib::select(value_by_key, json_path)
-                .map_err(|e| AquamarineError::VariableNotInJsonPath(String::from(json_path), e))?;
-
-            if values.len() != 1 {
-                return Err(AquamarineError::MultipleValuesInJsonPath(String::from(
-                    json_path,
-                )));
+            (None, None) => {
+                return Err(AquamarineError::VariableNotFound(arg_path_head.to_string()))
             }
-
-            values[0].clone()
-        } else {
-            value_by_key.clone()
         };
 
-        result.push(value);
+        if split_arg.is_empty() {
+            return Ok(vec![value_by_head]);
+        }
+
+        let json_path = split_arg.remove(0);
+        let values = jsonpath_lib::select(value_by_head, json_path).map_err(|e| {
+            AquamarineError::VariableNotInJsonPath(
+                value_by_head.clone(),
+                String::from(json_path),
+                e,
+            )
+        })?;
+
+        Ok(values)
     }
 
-    Ok(JValue::Array(result))
-}
+    fn prepare_call_arg<'a>(arg_path: &'a str, ctx: &'a ExecutionContext) -> Result<&'a str> {
+        if is_string_literal(arg_path) {
+            return Ok(&arg_path[1..arg_path.len() - 1]);
+        }
 
-fn parse_result_variable_name(result_name: &str) -> Result<&str> {
-    if !result_name.is_empty() {
-        Ok(result_name)
-    } else {
-        Err(AquamarineError::InstructionError(String::from(
-            "result name of a call instruction must be non empty",
-        )))
-    }
-}
+        let args = Self::get_args_by_path(arg_path, ctx)?;
+        if args.is_empty() {
+            return Err(AquamarineError::VariableNotFound(arg_path.to_string()));
+        }
 
-fn set_result(
-    ctx: &mut ExecutionContext,
-    result_variable_name: &str,
-    result: JValue,
-) -> Result<()> {
-    use std::collections::hash_map::Entry;
-
-    let is_array = result_variable_name.ends_with("[]");
-    if !is_array {
-        if ctx
-            .data
-            .insert(result_variable_name.to_string(), result)
-            .is_some()
-        {
-            return Err(AquamarineError::MultipleVariablesFound(
-                result_variable_name.to_string(),
+        if args.len() != 1 {
+            return Err(AquamarineError::MultipleValuesInJsonPath(
+                arg_path.to_string(),
             ));
         }
 
-        return Ok(());
-    }
-
-    match ctx
-        .data
-        // unwrap is safe because it's been checked for []
-        .entry(result_variable_name.strip_suffix("[]").unwrap().to_string())
-    {
-        Entry::Occupied(mut entry) => match entry.get_mut() {
-            JValue::Array(values) => values.push(result),
-            v => {
-                return Err(AquamarineError::IncompatibleJValueType(
-                    v.clone(),
-                    String::from("Array"),
-                ))
-            }
-        },
-        Entry::Vacant(entry) => {
-            entry.insert(JValue::Array(vec![result]));
+        match args[0] {
+            JValue::String(str) => Ok(str),
+            v => Err(AquamarineError::IncompatibleJValueType(
+                v.clone(),
+                String::from("string"),
+            )),
         }
     }
 
-    Ok(())
+    fn set_result(&self, ctx: &mut ExecutionContext, result: JValue) -> Result<()> {
+        use std::collections::hash_map::Entry;
+
+        let result_variable_name = self.parse_result_variable_name()?;
+
+        let is_array = result_variable_name.ends_with("[]");
+        if !is_array {
+            // if result is not an array, simply insert it into data
+            if ctx
+                .data
+                .insert(result_variable_name.to_string(), result)
+                .is_some()
+            {
+                return Err(AquamarineError::MultipleVariablesFound(
+                    result_variable_name.to_string(),
+                ));
+            }
+
+            return Ok(());
+        }
+
+        // if result is an array, insert result to the end of the array
+        match ctx
+            .data
+            // unwrap is safe because it's been checked for []
+            .entry(result_variable_name.strip_suffix("[]").unwrap().to_string())
+        {
+            Entry::Occupied(mut entry) => match entry.get_mut() {
+                JValue::Array(values) => values.push(result),
+                v => {
+                    return Err(AquamarineError::IncompatibleJValueType(
+                        v.clone(),
+                        String::from("Array"),
+                    ))
+                }
+            },
+            Entry::Vacant(entry) => {
+                entry.insert(JValue::Array(vec![result]));
+            }
+        }
+
+        Ok(())
+    }
+}
+
+fn is_string_literal(value: &str) -> bool {
+    value.starts_with('"') && value.ends_with('"')
 }
 
 #[cfg(test)]
@@ -207,6 +269,9 @@ mod tests {
 
     use aqua_test_utils::create_aqua_vm;
     use aqua_test_utils::echo_string_call_service;
+    use aquamarine_vm::vec1::Vec1;
+    use aquamarine_vm::HostExportedFunc;
+    use aquamarine_vm::IValue;
 
     use serde_json::json;
 
@@ -216,7 +281,7 @@ mod tests {
 
         let script = String::from(
             r#"
-               (call (%current_peer_id% (local_service_id local_fn_name) (value) result_name))
+               (call (%current_peer_id% ("local_service_id" "local_fn_name") (value) result_name))
             "#,
         );
 
@@ -234,7 +299,7 @@ mod tests {
 
         let script = String::from(
             r#"
-               (call (test_peer_id (local_service_id local_fn_name) (value) result_name))
+               (call ("test_peer_id" ("local_service_id" "local_fn_name") (value) result_name))
             "#,
         );
 
@@ -257,7 +322,7 @@ mod tests {
         let remote_peer_id = String::from("some_remote_peer_id");
 
         let script = format!(
-            "(call ({} (local_service_id local_fn_name) (value) result_name))",
+            r#"(call ("{}" ("local_service_id" "local_fn_name") (value) result_name))"#,
             remote_peer_id
         );
 
@@ -270,5 +335,56 @@ mod tests {
             .expect("call should be successful");
 
         assert_eq!(res.next_peer_pks, vec![remote_peer_id]);
+    }
+
+    #[test]
+    fn variables() {
+        let mut vm = create_aqua_vm(echo_string_call_service());
+
+        let script = format!(
+            r#"(call (remote_peer_id ("some_service_id" "local_fn_name") ("param") result_name))"#,
+        );
+
+        let res = vm
+            .call(json!([
+                String::from("asd"),
+                script,
+                String::from("{\"remote_peer_id\": \"some_peer_id\"}"),
+            ]))
+            .expect("call should be successful");
+
+        assert_eq!(res.next_peer_pks, vec![String::from("some_peer_id")]);
+    }
+
+    #[test]
+    fn string_parameters() {
+        let call_service: HostExportedFunc = Box::new(|_, args| -> Option<IValue> {
+            let arg = match &args[2] {
+                IValue::String(str) => str,
+                _ => unreachable!(),
+            };
+
+            Some(IValue::Record(
+                Vec1::new(vec![IValue::S32(0), IValue::String(arg.clone())]).unwrap(),
+            ))
+        });
+
+        let mut vm = create_aqua_vm(call_service);
+
+        let script = format!(
+            r#"(call (%current_peer_id% ("some_service_id" "local_fn_name") ("arg1" "arg2" arg3) result_name))"#,
+        );
+
+        let res = vm
+            .call(json!([
+                String::from("asd"),
+                script,
+                json!({"arg3": "arg3_value"}).to_string(),
+            ]))
+            .expect("call should be successful");
+
+        let jdata: JValue = serde_json::from_str(&res.data).expect("should be valid json");
+
+        assert_eq!(jdata["result_name"], json!(["arg1", "arg2", "arg3_value"]));
     }
 }
