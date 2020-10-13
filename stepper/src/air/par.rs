@@ -16,6 +16,7 @@
 
 use super::ExecutionContext;
 use super::Instruction;
+use super::NewEvidenceState;
 use crate::Result;
 
 use serde_derive::Deserialize;
@@ -26,10 +27,33 @@ pub(crate) struct Par(Box<Instruction>, Box<Instruction>);
 
 impl super::ExecutableInstruction for Par {
     fn execute(&self, ctx: &mut ExecutionContext) -> Result<()> {
+        use super::EvidenceState;
+
         log::info!("par is called with context: {:?}", ctx);
 
+        let current_left = ctx.call_evidence_ctx.left;
+        let current_right = ctx.call_evidence_ctx.right;
+
+        let (prev_left, prev_right) = match ctx.call_evidence_ctx.current_states[current_left] {
+            EvidenceState::Par(left, right) => (left, right),
+            _ => unreachable!(),
+        };
+
+        ctx.call_evidence_ctx.right = current_left + prev_left;
+        ctx.call_evidence_ctx
+            .new_states
+            .push(NewEvidenceState::LeftPar(current_left));
         self.0.execute(ctx)?;
+
+        ctx.call_evidence_ctx.left = current_left + prev_left;
+        ctx.call_evidence_ctx.right = current_left + prev_left + prev_right;
+        ctx.call_evidence_ctx
+            .new_states
+            .push(NewEvidenceState::RightPar(current_left));
         self.1.execute(ctx)?;
+
+        ctx.call_evidence_ctx.left = ctx.call_evidence_ctx.right;
+        ctx.call_evidence_ctx.right = current_right;
 
         Ok(())
     }

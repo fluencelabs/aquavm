@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
+use super::CallEvidenceContext;
+use super::CallResult;
+use super::EvidenceState;
 use super::ExecutionContext;
+use super::NewEvidenceState;
 use crate::AquamarineError;
 use crate::JValue;
 use crate::Result;
@@ -56,6 +60,17 @@ impl super::ExecutableInstruction for Call {
     fn execute(&self, ctx: &mut ExecutionContext) -> Result<()> {
         log::info!("call {:?} is called with context {:?}", self, ctx);
 
+        let should_be_executed = Self::should_be_executed(&ctx.call_evidence_ctx);
+
+        // TODO: check for overflow
+        ctx.call_evidence_ctx.left += 1;
+
+        // bubble call service errors up
+        let should_be_executed = should_be_executed?;
+        if !should_be_executed {
+            return Ok(());
+        }
+
         let (peer_pk, service_id, func_name) = self.prepare_peer_fn_parts(ctx)?;
 
         let function_args = self.extract_args_by_paths(ctx)?;
@@ -72,10 +87,15 @@ impl super::ExecutableInstruction for Call {
 
             let result: JValue = serde_json::from_str(&result.result)
                 .map_err(|e| AquamarineError::CallServiceSerdeError(result, e))?;
-            self.set_result(ctx, result)?;
+            self.set_local_result(ctx, result)?;
         } else {
             let peer_pk = peer_pk.to_string();
             ctx.next_peer_pks.push(peer_pk);
+
+            let evidence_state = EvidenceState::Call(CallResult::RequestSent);
+            ctx.call_evidence_ctx
+                .new_states
+                .push(NewEvidenceState::EvidenceState(evidence_state));
         }
 
         Ok(())
@@ -214,10 +234,15 @@ impl Call {
         }
     }
 
-    fn set_result(&self, ctx: &mut ExecutionContext, result: JValue) -> Result<()> {
+    fn set_local_result(&self, ctx: &mut ExecutionContext, result: JValue) -> Result<()> {
         use std::collections::hash_map::Entry;
 
         let result_variable_name = self.parse_result_variable_name()?;
+
+        let evidence_state = EvidenceState::Call(CallResult::Executed);
+        ctx.call_evidence_ctx
+            .new_states
+            .push(NewEvidenceState::EvidenceState(evidence_state));
 
         let is_array = result_variable_name.ends_with("[]");
         if !is_array {
@@ -256,6 +281,24 @@ impl Call {
         }
 
         Ok(())
+    }
+
+    fn should_be_executed(call_evidence_ctx: &CallEvidenceContext) -> Result<bool> {
+        let left = call_evidence_ctx.left;
+        let right = call_evidence_ctx.right;
+
+        if left >= right || left >= call_evidence_ctx.current_states.len() {
+            return Ok(true);
+        }
+
+        let state = &call_evidence_ctx.current_states[left];
+        match state {
+            EvidenceState::Call(CallResult::CallServiceFailed(err_msg)) => {
+                Err(AquamarineError::LocalServiceError(err_msg.clone()))
+            }
+            EvidenceState::Call(_) => Ok(false),
+            EvidenceState::Par(..) => Err(AquamarineError::VariableNotFound(String::new())),
+        }
     }
 }
 

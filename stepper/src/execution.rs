@@ -23,6 +23,8 @@ use crate::AquaData;
 use crate::AquamarineError;
 use crate::Result;
 
+use crate::call_evidence::CallEvidenceContext;
+
 pub(crate) fn execute_aqua(init_user_id: String, aqua: String, data: String) -> StepperOutcome {
     log::info!(
         "stepper invoked with user_id = {}, aqua = {:?}, data = {:?}",
@@ -35,7 +37,7 @@ pub(crate) fn execute_aqua(init_user_id: String, aqua: String, data: String) -> 
 }
 
 fn execute_aqua_impl(_init_user_id: String, aqua: String, data: String) -> Result<StepperOutcome> {
-    let parsed_data: AquaData =
+    let mut parsed_data: AquaData =
         serde_json::from_str(&data).map_err(AquamarineError::DataSerdeError)?;
     let formatted_aqua = format_aqua(aqua);
     let parsed_aqua = serde_sexpr::from_str::<Instruction>(&formatted_aqua)?;
@@ -49,8 +51,20 @@ fn execute_aqua_impl(_init_user_id: String, aqua: String, data: String) -> Resul
     let current_peer_id = get_current_peer_id()
         .map_err(|e| AquamarineError::CurrentPeerIdEnvError(e, String::from("CURRENT_PEER_ID")))?;
 
+    let call_evidence_ctx_key: &str = "__call";
+    let call_evidence_ctx: CallEvidenceContext = parsed_data
+        .remove(call_evidence_ctx_key)
+        .map(|v| serde_json::from_value(v).unwrap())
+        .unwrap_or_default();
     let mut execution_ctx = ExecutionContext::new(parsed_data, current_peer_id);
+    execution_ctx.call_evidence_ctx = call_evidence_ctx;
+
     parsed_aqua.execute(&mut execution_ctx)?;
+
+    let serialized_ctx = serde_json::to_value(execution_ctx.call_evidence_ctx).unwrap();
+    execution_ctx
+        .data
+        .insert(call_evidence_ctx_key.to_string(), serialized_ctx);
 
     let data =
         serde_json::to_string(&execution_ctx.data).map_err(AquamarineError::DataSerdeError)?;

@@ -15,6 +15,7 @@
  */
 
 mod air;
+mod call_evidence;
 mod defines;
 mod errors;
 mod execution;

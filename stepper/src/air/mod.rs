@@ -21,6 +21,11 @@ mod par;
 mod seq;
 mod xor;
 
+pub(self) use crate::call_evidence::CallEvidenceContext;
+pub(self) use crate::call_evidence::CallResult;
+pub(self) use crate::call_evidence::EvidenceState;
+pub(self) use crate::call_evidence::NewEvidenceState;
+
 use crate::AquaData;
 use crate::Result;
 use call::Call;
@@ -42,6 +47,7 @@ pub(super) struct ExecutionContext {
     pub next_peer_pks: Vec<String>,
     pub current_peer_id: String,
     pub folds: HashMap<String, FoldState>,
+    pub call_evidence_ctx: CallEvidenceContext,
 }
 
 impl ExecutionContext {
@@ -51,6 +57,7 @@ impl ExecutionContext {
             next_peer_pks: vec![],
             current_peer_id,
             folds: HashMap::new(),
+            call_evidence_ctx: <_>::default(),
         }
     }
 }
@@ -68,19 +75,19 @@ pub(crate) enum Instruction {
 }
 
 pub(crate) trait ExecutableInstruction {
-    fn execute(&self, ctx: &mut ExecutionContext) -> Result<()>;
+    fn execute(&self, exec_ctx: &mut ExecutionContext) -> Result<()>;
 }
 
 impl ExecutableInstruction for Instruction {
-    fn execute(&self, ctx: &mut ExecutionContext) -> Result<()> {
+    fn execute(&self, exec_ctx: &mut ExecutionContext) -> Result<()> {
         match self {
-            Instruction::Null(null) => null.execute(ctx),
-            Instruction::Call(call) => call.execute(ctx),
-            Instruction::Fold(fold) => fold.execute(ctx),
-            Instruction::Next(next) => next.execute(ctx),
-            Instruction::Par(par) => par.execute(ctx),
-            Instruction::Seq(seq) => seq.execute(ctx),
-            Instruction::Xor(xor) => xor.execute(ctx),
+            Instruction::Null(null) => null.execute(exec_ctx),
+            Instruction::Call(call) => call.execute(exec_ctx),
+            Instruction::Fold(fold) => fold.execute(exec_ctx),
+            Instruction::Next(next) => next.execute(exec_ctx),
+            Instruction::Par(par) => par.execute(exec_ctx),
+            Instruction::Seq(seq) => seq.execute(exec_ctx),
+            Instruction::Xor(xor) => xor.execute(exec_ctx),
         }
     }
 }
