@@ -35,10 +35,10 @@ pub(crate) enum AquamarineError {
     DataSerdeError(SerdeJsonError),
 
     /// Errors occurred while parsing function arguments of an expression.
-    FuncArgsSerdeError(JValue, SerdeJsonError),
+    FuncArgsSerializationError(JValue, SerdeJsonError),
 
     /// Errors occurred while parsing returned by call_service value.
-    CallServiceSerdeError(CallServiceResult, SerdeJsonError),
+    CallServiceResultDeserializationError(CallServiceResult, SerdeJsonError),
 
     /// Indicates that environment variable with name CURRENT_PEER_ID isn't set.
     CurrentPeerIdEnvError(VarError, String),
@@ -84,12 +84,12 @@ impl std::fmt::Display for AquamarineError {
                 "an error occurred while serializing/deserializing data: {:?}",
                 err
             ),
-            AquamarineError::FuncArgsSerdeError(args, err) => write!(
+            AquamarineError::FuncArgsSerializationError(args, err) => write!(
                 f,
                 "function arguments {} can't be serialized or deserialized with an error: {:?}",
                 args, err
             ),
-            AquamarineError::CallServiceSerdeError(result, err) => write!(
+            AquamarineError::CallServiceResultDeserializationError(result, err) => write!(
                 f,
                 "call_service result \"{:?}\" can't be serialized or deserialized with an error: {:?}",
                 result, err
@@ -159,8 +159,8 @@ impl Into<StepperOutcome> for AquamarineError {
         let ret_code = match self {
             AquamarineError::SExprParseError(_) => 1,
             AquamarineError::DataSerdeError(..) => 2,
-            AquamarineError::FuncArgsSerdeError(..) => 3,
-            AquamarineError::CallServiceSerdeError(..) => 4,
+            AquamarineError::FuncArgsSerializationError(..) => 3,
+            AquamarineError::CallServiceResultDeserializationError(..) => 4,
             AquamarineError::CurrentPeerIdEnvError(..) => 5,
             AquamarineError::InstructionError(..) => 6,
             AquamarineError::LocalServiceError(..) => 7,

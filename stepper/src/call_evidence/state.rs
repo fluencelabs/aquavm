@@ -34,10 +34,3 @@ pub(crate) enum EvidenceState {
     Par(usize, usize),
     Call(CallResult),
 }
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub(crate) enum NewEvidenceState {
-    LeftPar(usize),
-    RightPar(usize),
-    EvidenceState(EvidenceState),
-}

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-use super::ExecutionContext;
+use super::CallEvidenceCtx;
+use super::ExecutionCtx;
 use super::Instruction;
 use crate::AquamarineError;
 use crate::Result;
@@ -26,11 +27,11 @@ use serde_derive::Serialize;
 pub(crate) struct Xor(Box<Instruction>, Box<Instruction>);
 
 impl super::ExecutableInstruction for Xor {
-    fn execute(&self, ctx: &mut ExecutionContext) -> Result<()> {
-        log::info!("xor is called with context: {:?}", ctx);
+    fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
+        log::info!("xor is called with contexts: {:?} {:?}", exec_ctx, call_ctx);
 
-        match self.0.execute(ctx) {
-            Err(AquamarineError::LocalServiceError(_)) => self.1.execute(ctx),
+        match self.0.execute(exec_ctx, call_ctx) {
+            Err(AquamarineError::LocalServiceError(_)) => self.1.execute(exec_ctx, call_ctx),
             res => res,
         }
     }

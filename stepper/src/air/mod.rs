@@ -15,22 +15,22 @@
  */
 
 mod call;
+mod execution_context;
 mod fold;
 mod null;
 mod par;
 mod seq;
 mod xor;
 
-pub(self) use crate::call_evidence::CallEvidenceContext;
+pub(crate) use execution_context::ExecutionCtx;
+
+pub(self) use crate::call_evidence::CallEvidenceCtx;
 pub(self) use crate::call_evidence::CallResult;
 pub(self) use crate::call_evidence::EvidenceState;
-pub(self) use crate::call_evidence::NewEvidenceState;
 
-use crate::AquaData;
 use crate::Result;
 use call::Call;
 use fold::Fold;
-use fold::FoldState;
 use fold::Next;
 use null::Null;
 use par::Par;
@@ -39,28 +39,6 @@ use xor::Xor;
 
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
-use std::collections::HashMap;
-
-#[derive(Clone, Default, Debug)]
-pub(super) struct ExecutionContext {
-    pub data: AquaData,
-    pub next_peer_pks: Vec<String>,
-    pub current_peer_id: String,
-    pub folds: HashMap<String, FoldState>,
-    pub call_evidence_ctx: CallEvidenceContext,
-}
-
-impl ExecutionContext {
-    pub(super) fn new(data: AquaData, current_peer_id: String) -> Self {
-        Self {
-            data,
-            next_peer_pks: vec![],
-            current_peer_id,
-            folds: HashMap::new(),
-            call_evidence_ctx: <_>::default(),
-        }
-    }
-}
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
 #[serde(rename_all = "kebab-case")]
@@ -75,19 +53,19 @@ pub(crate) enum Instruction {
 }
 
 pub(crate) trait ExecutableInstruction {
-    fn execute(&self, exec_ctx: &mut ExecutionContext) -> Result<()>;
+    fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()>;
 }
 
 impl ExecutableInstruction for Instruction {
-    fn execute(&self, exec_ctx: &mut ExecutionContext) -> Result<()> {
+    fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
         match self {
-            Instruction::Null(null) => null.execute(exec_ctx),
-            Instruction::Call(call) => call.execute(exec_ctx),
-            Instruction::Fold(fold) => fold.execute(exec_ctx),
-            Instruction::Next(next) => next.execute(exec_ctx),
-            Instruction::Par(par) => par.execute(exec_ctx),
-            Instruction::Seq(seq) => seq.execute(exec_ctx),
-            Instruction::Xor(xor) => xor.execute(exec_ctx),
+            Instruction::Null(null) => null.execute(exec_ctx, call_ctx),
+            Instruction::Call(call) => call.execute(exec_ctx, call_ctx),
+            Instruction::Fold(fold) => fold.execute(exec_ctx, call_ctx),
+            Instruction::Next(next) => next.execute(exec_ctx, call_ctx),
+            Instruction::Par(par) => par.execute(exec_ctx, call_ctx),
+            Instruction::Seq(seq) => seq.execute(exec_ctx, call_ctx),
+            Instruction::Xor(xor) => xor.execute(exec_ctx, call_ctx),
         }
     }
 }
