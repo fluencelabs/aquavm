@@ -60,13 +60,13 @@ impl super::ExecutableInstruction for Call {
     fn execute(&self, ctx: &mut ExecutionContext) -> Result<()> {
         log::info!("call {:?} is called with context {:?}", self, ctx);
 
-        let should_be_executed = Self::should_be_executed(&ctx.call_evidence_ctx);
+        let should_executed = Self::should_executed(&ctx.call_evidence_ctx);
 
         // TODO: check for overflow
         ctx.call_evidence_ctx.left += 1;
 
         // bubble call service errors up
-        let should_be_executed = should_be_executed?;
+        let should_be_executed = should_executed?;
         if !should_be_executed {
             return Ok(());
         }
@@ -283,7 +283,7 @@ impl Call {
         Ok(())
     }
 
-    fn should_be_executed(call_evidence_ctx: &CallEvidenceContext) -> Result<bool> {
+    fn should_executed(call_evidence_ctx: &CallEvidenceContext) -> Result<bool> {
         let left = call_evidence_ctx.left;
         let right = call_evidence_ctx.right;
 

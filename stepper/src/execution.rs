@@ -18,6 +18,7 @@ use super::StepperOutcome;
 use crate::air::ExecutableInstruction;
 use crate::air::ExecutionContext;
 use crate::air::Instruction;
+use crate::call_evidence::EvidenceState;
 use crate::get_current_peer_id;
 use crate::AquaData;
 use crate::AquamarineError;
@@ -52,16 +53,19 @@ fn execute_aqua_impl(_init_user_id: String, aqua: String, data: String) -> Resul
         .map_err(|e| AquamarineError::CurrentPeerIdEnvError(e, String::from("CURRENT_PEER_ID")))?;
 
     let call_evidence_ctx_key: &str = "__call";
-    let call_evidence_ctx: CallEvidenceContext = parsed_data
+    let current_states: Vec<EvidenceState> = parsed_data
         .remove(call_evidence_ctx_key)
         .map(|v| serde_json::from_value(v).unwrap())
         .unwrap_or_default();
+
     let mut execution_ctx = ExecutionContext::new(parsed_data, current_peer_id);
+    let call_evidence_ctx = CallEvidenceContext::new(current_states);
     execution_ctx.call_evidence_ctx = call_evidence_ctx;
 
     parsed_aqua.execute(&mut execution_ctx)?;
 
-    let serialized_ctx = serde_json::to_value(execution_ctx.call_evidence_ctx).unwrap();
+    let serialized_ctx =
+        serde_json::to_value(execution_ctx.call_evidence_ctx.into_states()).unwrap();
     execution_ctx
         .data
         .insert(call_evidence_ctx_key.to_string(), serialized_ctx);

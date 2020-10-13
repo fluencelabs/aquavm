@@ -34,9 +34,13 @@ impl super::ExecutableInstruction for Par {
         let current_left = ctx.call_evidence_ctx.left;
         let current_right = ctx.call_evidence_ctx.right;
 
-        let (prev_left, prev_right) = match ctx.call_evidence_ctx.current_states[current_left] {
-            EvidenceState::Par(left, right) => (left, right),
-            _ => unreachable!(),
+        let (prev_left, prev_right) = if current_left < current_right {
+            match ctx.call_evidence_ctx.current_states[current_left] {
+                EvidenceState::Par(left, right) => (left, right),
+                _ => unreachable!(),
+            }
+        } else {
+            (0, 0)
         };
 
         ctx.call_evidence_ctx.right = current_left + prev_left;
