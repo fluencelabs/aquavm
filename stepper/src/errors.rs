@@ -77,11 +77,14 @@ pub(crate) enum AquamarineError {
     /// Expected evidence state of different type.
     InvalidEvidenceState(EvidenceState, String),
 
-    /// Errors occurred on aqua data deserialization.
+    /// Errors occurred on call evidence deserialization.
     CallEvidenceDeserializationError(SerdeJsonError),
 
-    /// Errors occurred on aqua data serialization.
+    /// Errors occurred on call evidence serialization.
     CallEvidenceSerializationError(SerdeJsonError),
+
+    /// Errors occurred when reserved keyword is used for variable name.
+    ReservedKeywordError(String),
 }
 
 impl Error for AquamarineError {}
@@ -171,6 +174,11 @@ impl std::fmt::Display for AquamarineError {
                 "an error occurred while data serialization: {:?}",
                 err
             ),
+            AquamarineError::ReservedKeywordError(variable_name) => write!(
+                f,
+                "a variable can't be named as {} because this name is reserved",
+                variable_name
+            ),
         }
     }
 }
@@ -208,6 +216,7 @@ impl Into<StepperOutcome> for AquamarineError {
             AquamarineError::InvalidEvidenceState(..) => 16,
             AquamarineError::CallEvidenceDeserializationError(..) => 17,
             AquamarineError::CallEvidenceSerializationError(..) => 18,
+            AquamarineError::ReservedKeywordError(..) => 19,
         };
 
         StepperOutcome {

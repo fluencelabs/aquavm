@@ -184,6 +184,12 @@ impl ParsedCall {
             )));
         }
 
+        if super::RESERVED_KEYWORDS.contains(result_variable_name.as_str()) {
+            return Err(AquamarineError::ReservedKeywordError(
+                result_variable_name.to_string(),
+            ));
+        }
+
         if is_string_literal(result_variable_name) {
             return Err(AquamarineError::InstructionError(String::from(
                 "result name of a call instruction must be non string literal",
@@ -238,6 +244,10 @@ impl ParsedCall {
     }
 
     fn prepare_call_arg<'a>(arg_path: &'a str, ctx: &'a ExecutionCtx) -> Result<&'a str> {
+        if super::RESERVED_KEYWORDS.contains(arg_path) {
+            return Err(AquamarineError::ReservedKeywordError(arg_path.to_string()));
+        }
+
         if is_string_literal(arg_path) {
             return Ok(&arg_path[1..arg_path.len() - 1]);
         }
