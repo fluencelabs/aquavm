@@ -35,7 +35,10 @@ use aquamarine_vm::IValue;
 
 use std::path::PathBuf;
 
-pub fn create_aqua_vm(call_service: HostExportedFunc, current_peer_id: impl Into<String>) -> AquamarineVM {
+pub fn create_aqua_vm(
+    call_service: HostExportedFunc,
+    current_peer_id: impl Into<String>,
+) -> AquamarineVM {
     let call_service_descriptor = HostImportDescriptor {
         host_exported_func: call_service,
         argument_types: vec![IType::String, IType::String, IType::String],

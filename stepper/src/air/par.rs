@@ -32,6 +32,7 @@ impl ExecutableInstruction for Par {
         log::info!("par is called with context: {:?} {:?}", exec_ctx, call_ctx);
 
         let (left_subtree_size, right_subtree_size) = extract_subtree_sizes(call_ctx);
+
         let pre_new_states_count = call_ctx.new_states.len();
         call_ctx.new_states.push(EvidenceState::Par(0, 0));
 
@@ -60,7 +61,12 @@ fn extract_subtree_sizes(call_ctx: &mut CallEvidenceCtx) -> (usize, usize) {
     let subtree_size = call_ctx.subtree_size;
 
     if used_states_in_subtree < subtree_size {
-        match call_ctx.current_states.remove(used_states_in_subtree) {
+        log::info!(
+            "call evidence: the previous state is found {:?}",
+            call_ctx.current_states[0]
+        );
+
+        match call_ctx.current_states.remove(0) {
             EvidenceState::Par(left, right) => (left, right),
             _ => unreachable!(),
         }

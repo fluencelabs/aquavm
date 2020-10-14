@@ -73,74 +73,8 @@ impl super::ExecutableInstruction for Call {
             call_ctx
         );
 
-        let should_executed = prepare_evidence_state(call_ctx)?;
-        if !should_executed {
-            return Ok(());
-        }
-
         let parsed_call = ParsedCall::new(self, exec_ctx)?;
         parsed_call.execute(exec_ctx, call_ctx)
-    }
-}
-
-impl super::ExecutableInstruction for ParsedCall {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
-        if self.peer_pk != exec_ctx.current_peer_id && self.peer_pk != CURRENT_PEER_ALIAS {
-            self.set_remote_call_result(exec_ctx, call_ctx);
-
-            return Ok(());
-        }
-
-        let function_args = self.extract_args_by_paths(exec_ctx)?;
-        let function_args = serde_json::to_string(&function_args)
-            .map_err(|e| AquamarineError::FuncArgsSerializationError(function_args, e))?;
-
-        let result = unsafe {
-            crate::call_service(
-                self.service_id.to_string(),
-                self.function_name.to_string(),
-                function_args,
-            )
-        };
-
-        if result.ret_code != crate::CALL_SERVICE_SUCCESS {
-            return Err(AquamarineError::LocalServiceError(result.result));
-        }
-
-        let result: JValue = serde_json::from_str(&result.result)
-            .map_err(|e| AquamarineError::CallServiceResultDeserializationError(result, e))?;
-        self.set_local_call_result(exec_ctx, call_ctx, result)
-    }
-}
-
-fn prepare_evidence_state(call_ctx: &mut CallEvidenceCtx) -> Result<bool> {
-    if call_ctx.used_states_in_subtree >= call_ctx.subtree_size {
-        log::info!("call evidence: previous state wasn't found");
-        return Ok(true);
-    }
-
-    call_ctx.used_states_in_subtree += 1;
-    let prev_state = call_ctx.current_states.remove(0);
-
-    log::info!("call evidence: previous state found {:?}", prev_state);
-
-    match &prev_state {
-        // this call was failed on one of the previous executions,
-        // here it's needed to bubble this special error up
-        EvidenceState::Call(CallResult::CallServiceFailed(err_msg)) => {
-            let err_msg = err_msg.clone();
-            call_ctx.new_states.push(prev_state);
-            Err(AquamarineError::LocalServiceError(err_msg))
-        }
-        // this instruction should be executed (peer id will be checked in the call)
-        EvidenceState::Call(CallResult::RequestSent) => Ok(true),
-        // this instruction's been already executed
-        EvidenceState::Call(CallResult::Executed) => {
-            call_ctx.new_states.push(prev_state);
-            Ok(false)
-        }
-        // state has inconsistent order - return a error, call shouldn't be executed
-        EvidenceState::Par(..) => Err(AquamarineError::VariableNotFound(String::new())),
     }
 }
 
@@ -156,6 +90,38 @@ impl ParsedCall {
             function_arg_paths: call.2.clone(),
             result_variable_name: result_variable_name.to_string(),
         })
+    }
+
+    pub fn execute(
+        self,
+        exec_ctx: &mut ExecutionCtx,
+        call_ctx: &mut CallEvidenceCtx,
+    ) -> Result<()> {
+        let should_executed = self.prepare_evidence_state(call_ctx, &exec_ctx.current_peer_id)?;
+        if !should_executed {
+            return Ok(());
+        }
+
+        if self.peer_pk != exec_ctx.current_peer_id && self.peer_pk != CURRENT_PEER_ALIAS {
+            set_remote_call_result(self.peer_pk, exec_ctx, call_ctx);
+
+            return Ok(());
+        }
+
+        let function_args = self.extract_args_by_paths(exec_ctx)?;
+        let function_args = serde_json::to_string(&function_args)
+            .map_err(|e| AquamarineError::FuncArgsSerializationError(function_args, e))?;
+
+        let result =
+            unsafe { crate::call_service(self.service_id, self.function_name, function_args) };
+
+        if result.ret_code != crate::CALL_SERVICE_SUCCESS {
+            return Err(AquamarineError::LocalServiceError(result.result));
+        }
+
+        let result: JValue = serde_json::from_str(&result.result)
+            .map_err(|e| AquamarineError::CallServiceResultDeserializationError(result, e))?;
+        set_local_call_result(self.result_variable_name, exec_ctx, call_ctx, result)
     }
 
     fn prepare_peer_fn_parts<'a>(
@@ -296,79 +262,114 @@ impl ParsedCall {
         }
     }
 
-    fn set_local_call_result(
+    fn prepare_evidence_state(
         &self,
-        exec_ctx: &mut ExecutionCtx,
         call_ctx: &mut CallEvidenceCtx,
-        result: JValue,
-    ) -> Result<()> {
-        use std::collections::hash_map::Entry;
-
-        let executed_evidence_state = EvidenceState::Call(CallResult::Executed);
-        let is_array = self.result_variable_name.ends_with("[]");
-
-        if !is_array {
-            // if result is not an array, simply insert it into data
-            if exec_ctx
-                .data
-                .insert(self.result_variable_name.to_string(), result)
-                .is_some()
-            {
-                return Err(AquamarineError::MultipleVariablesFound(
-                    self.result_variable_name.to_string(),
-                ));
-            }
-
-            log::info!(
-                "call evidence: adding new state {:?}",
-                executed_evidence_state
-            );
-            call_ctx.new_states.push(executed_evidence_state);
-
-            return Ok(());
+        current_peer_id: &str,
+    ) -> Result<bool> {
+        if call_ctx.used_states_in_subtree >= call_ctx.subtree_size {
+            log::info!("call evidence: previous state wasn't found");
+            return Ok(true);
         }
 
-        // if result is an array, insert result to the end of the array
-        match exec_ctx
-            .data
-            // unwrap is safe because it's been checked for []
-            .entry(
-                self.result_variable_name
-                    .strip_suffix("[]")
-                    .unwrap()
-                    .to_string(),
-            ) {
-            Entry::Occupied(mut entry) => match entry.get_mut() {
-                JValue::Array(values) => values.push(result),
-                v => {
-                    return Err(AquamarineError::IncompatibleJValueType(
-                        v.clone(),
-                        String::from("Array"),
-                    ))
+        call_ctx.used_states_in_subtree += 1;
+        let prev_state = call_ctx.current_states.remove(0);
+
+        log::info!("call evidence: previous state found {:?}", prev_state);
+
+        match &prev_state {
+            // this call was failed on one of the previous executions,
+            // here it's needed to bubble this special error up
+            EvidenceState::Call(CallResult::CallServiceFailed(err_msg)) => {
+                let err_msg = err_msg.clone();
+                call_ctx.new_states.push(prev_state);
+                Err(AquamarineError::LocalServiceError(err_msg.clone()))
+            }
+            EvidenceState::Call(CallResult::RequestSent) => {
+                // check whether current node can execute this call
+                if self.peer_pk == current_peer_id {
+                    Ok(true)
+                } else {
+                    call_ctx.new_states.push(prev_state);
+                    Ok(false)
                 }
-            },
-            Entry::Vacant(entry) => {
-                entry.insert(JValue::Array(vec![result]));
             }
+            // this instruction's been already executed
+            EvidenceState::Call(CallResult::Executed) => {
+                call_ctx.new_states.push(prev_state);
+                Ok(false)
+            }
+            // state has inconsistent order - return a error, call shouldn't be executed
+            EvidenceState::Par(..) => Err(AquamarineError::VariableNotFound(String::new())),
+        }
+    }
+}
+
+fn set_local_call_result(
+    result_variable_name: String,
+    exec_ctx: &mut ExecutionCtx,
+    call_ctx: &mut CallEvidenceCtx,
+    result: JValue,
+) -> Result<()> {
+    use std::collections::hash_map::Entry;
+
+    let new_evidence_state = EvidenceState::Call(CallResult::Executed);
+    let is_array = result_variable_name.ends_with("[]");
+
+    if !is_array {
+        // if result is not an array, simply insert it into data
+        if exec_ctx
+            .data
+            .insert(result_variable_name.clone(), result)
+            .is_some()
+        {
+            return Err(AquamarineError::MultipleVariablesFound(
+                result_variable_name,
+            ));
         }
 
-        log::info!(
-            "call evidence: adding new state {:?}",
-            executed_evidence_state
-        );
-        call_ctx.new_states.push(executed_evidence_state);
+        log::info!("call evidence: adding new state {:?}", new_evidence_state);
+        call_ctx.new_states.push(new_evidence_state);
 
-        Ok(())
+        return Ok(());
     }
 
-    fn set_remote_call_result(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) {
-        let peer_pk = self.peer_pk.to_string();
-        exec_ctx.next_peer_pks.push(peer_pk);
-
-        let evidence_state = EvidenceState::Call(CallResult::RequestSent);
-        log::info!("call evidence: adding new state {:?}", evidence_state);
-        call_ctx.new_states.push(evidence_state);
+    // if result is an array, insert result to the end of the array
+    match exec_ctx
+        .data
+        // unwrap is safe because it's been checked for []
+        .entry(result_variable_name.strip_suffix("[]").unwrap().to_string())
+    {
+        Entry::Occupied(mut entry) => match entry.get_mut() {
+            JValue::Array(values) => values.push(result),
+            v => {
+                return Err(AquamarineError::IncompatibleJValueType(
+                    v.clone(),
+                    String::from("Array"),
+                ))
+            }
+        },
+        Entry::Vacant(entry) => {
+            entry.insert(JValue::Array(vec![result]));
+        }
     }
+
+    log::info!("call evidence: adding new state {:?}", new_evidence_state);
+    call_ctx.new_states.push(new_evidence_state);
+
+    Ok(())
+}
+
+fn set_remote_call_result(
+    peer_pk: String,
+    exec_ctx: &mut ExecutionCtx,
+    call_ctx: &mut CallEvidenceCtx,
+) {
+    exec_ctx.next_peer_pks.push(peer_pk);
+
+    let new_evidence_state = EvidenceState::Call(CallResult::RequestSent);
+    log::info!("call evidence: adding new state {:?}", new_evidence_state);
+    call_ctx.new_states.push(new_evidence_state);
 }
 
 fn is_string_literal(value: &str) -> bool {

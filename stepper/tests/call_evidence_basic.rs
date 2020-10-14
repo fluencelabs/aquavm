@@ -124,34 +124,35 @@ fn evidence_par_par_call() {
 
 #[test]
 fn evidence_seq_seq() {
-    let mut vm1 = create_aqua_vm(
-        unit_call_service(),
-        "12D3KooWHk9BjDQBUqnavciRPhAYFvqKBe4ZiPPvde7vDaqgn5er",
-    );
-    let mut vm2 = create_aqua_vm(
-        unit_call_service(),
-        "12D3KooWAzJcYitiZrerycVB4Wryrx22CFKdDGx7c4u31PFdfTbR",
-    );
+    let peer_id_1 = String::from("12D3KooWHk9BjDQBUqnavciRPhAYFvqKBe4ZiPPvde7vDaqgn5er");
+    let peer_id_2 = String::from("12D3KooWAzJcYitiZrerycVB4Wryrx22CFKdDGx7c4u31PFdfTbR");
+    let mut vm1 = create_aqua_vm(unit_call_service(), peer_id_1.clone());
+    let mut vm2 = create_aqua_vm(unit_call_service(), peer_id_2.clone());
 
-    let script = String::from(
+    let script = format!(
         r#"
         (seq (
-            (call ("12D3KooWHk9BjDQBUqnavciRPhAYFvqKBe4ZiPPvde7vDaqgn5er" ("identity" "") () void0))
+            (call ("{}" ("identity" "") () void0))
             (seq (
-                (call ("12D3KooWHk9BjDQBUqnavciRPhAYFvqKBe4ZiPPvde7vDaqgn5er" ("add_blueprint" "") () blueprint_id))
-                (call ("12D3KooWAzJcYitiZrerycVB4Wryrx22CFKdDGx7c4u31PFdfTbR" ("addBlueprint-14d8488e-d10d-474d-96b2-878f6a7d74c8" "") () void1))
+                (call ("{}" ("add_blueprint" "") () blueprint_id))
+                (call ("{}" ("addBlueprint-14d8488e-d10d-474d-96b2-878f6a7d74c8" "") () void1))
             ))
         ))
         "#,
+        peer_id_1, peer_id_1, peer_id_2
     );
 
     let res1 = vm2
         .call(json!([String::from("asd"), script, String::from("{}")]))
         .expect("should be successful");
 
+    assert_eq!(res1.next_peer_pks, vec![peer_id_1.clone()]);
+
     let res2 = vm1
         .call(json!([String::from("asd"), script, res1.data]))
         .expect("should be successful");
+
+    assert_eq!(res2.next_peer_pks, vec![peer_id_2.clone()]);
 
     let res3 = vm2
         .call(json!([String::from("asd"), script, res2.data]))
@@ -256,15 +257,14 @@ fn evidence_create_service() {
 }
 
 #[test]
-#[ignore]
 fn evidence_par_seq_fold_call() {
-    env_logger::init();
-
     let return_numbers_call_service: HostExportedFunc = Box::new(|_, args| -> Option<IValue> {
         Some(IValue::Record(
             Vec1::new(vec![
                 IValue::S32(0),
-                IValue::String(String::from("[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]")),
+                IValue::String(String::from(
+                    "[\"1\", \"2\", \"3\", \"4\", \"5\", \"6\", \"7\", \"8\", \"9\", \"10\"]",
+                )),
             ])
             .unwrap(),
         ))
@@ -307,8 +307,7 @@ fn evidence_par_seq_fold_call() {
 
     let mut data = res2.data;
 
-    for i in 0..10 {
-        println!("\n{}\n", i);
+    for _ in 0..100 {
         let res3 = vm2
             .call(json!([String::from("asd"), script, data]))
             .expect("should be successful");
@@ -325,9 +324,30 @@ fn evidence_par_seq_fold_call() {
 
     let right_json = json!( {
         "result_2": "test",
+        "IterableResultPeer1": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
+        "acc": [1,2,3,4,5,6,7,8,9,10],
         "__call": [
-            { "par": [1,1] },
+            { "par": [21,1] },
             { "call": "executed" },
+            { "par": [1,18] },
+            { "call": "executed" },
+            { "par": [1,16] },
+            { "call": "executed" },
+            { "par": [1,14] },
+            { "call": "executed" },
+            { "par": [1,12] },
+            { "call": "executed" },
+            { "par": [1,10] },
+            { "call": "executed" },
+            { "par": [1,8] },
+            { "call": "executed" },
+            { "par": [1,6] },
+            { "call": "executed" },
+            { "par": [1,4] },
+            { "call": "executed" },
+            { "par": [1,2] },
+            { "call": "executed" },
+            { "par": [1,0] },
             { "call": "executed" },
             { "call": "executed" },
         ]
