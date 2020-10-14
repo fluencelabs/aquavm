@@ -50,8 +50,9 @@ pub(crate) struct FoldState {
 impl super::ExecutableInstruction for Fold {
     fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
         log::info!(
-            "fold {:?} is called with contexts {:?} {:?}",
-            self,
+            "fold {} {} is called with contexts {:?} {:?}",
+            self.0,
+            self.1,
             exec_ctx,
             call_ctx
         );

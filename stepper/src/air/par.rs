@@ -40,8 +40,13 @@ impl ExecutableInstruction for Par {
         let new_right_subtree_size =
             execute_subtree(&self.1, right_subtree_size, exec_ctx, call_ctx)?;
 
-        call_ctx.new_states[pre_new_states_count] =
+        let new_par_evidence_state =
             EvidenceState::Par(new_left_subtree_size, new_right_subtree_size);
+        log::info!(
+            "call evidence: adding new state {:?}",
+            new_par_evidence_state
+        );
+        call_ctx.new_states[pre_new_states_count] = new_par_evidence_state;
 
         call_ctx.used_states_in_subtree = 0;
         call_ctx.subtree_size = call_ctx.current_states.len();

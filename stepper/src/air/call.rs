@@ -115,11 +115,14 @@ impl super::ExecutableInstruction for ParsedCall {
 
 fn prepare_evidence_state(call_ctx: &mut CallEvidenceCtx) -> Result<bool> {
     if call_ctx.used_states_in_subtree >= call_ctx.subtree_size {
+        log::info!("call evidence: previous state wasn't found");
         return Ok(true);
     }
 
     call_ctx.used_states_in_subtree += 1;
     let prev_state = call_ctx.current_states.remove(0);
+
+    log::info!("call evidence: previous state found {:?}", prev_state);
 
     match &prev_state {
         // this call was failed on one of the previous executions,
@@ -316,6 +319,10 @@ impl ParsedCall {
                 ));
             }
 
+            log::info!(
+                "call evidence: adding new state {:?}",
+                executed_evidence_state
+            );
             call_ctx.new_states.push(executed_evidence_state);
 
             return Ok(());
@@ -345,6 +352,10 @@ impl ParsedCall {
             }
         }
 
+        log::info!(
+            "call evidence: adding new state {:?}",
+            executed_evidence_state
+        );
         call_ctx.new_states.push(executed_evidence_state);
 
         Ok(())
@@ -355,6 +366,7 @@ impl ParsedCall {
         exec_ctx.next_peer_pks.push(peer_pk);
 
         let evidence_state = EvidenceState::Call(CallResult::RequestSent);
+        log::info!("call evidence: adding new state {:?}", evidence_state);
         call_ctx.new_states.push(evidence_state);
     }
 }
