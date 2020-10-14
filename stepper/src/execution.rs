@@ -39,7 +39,7 @@ pub(crate) fn execute_aqua(init_user_id: String, aqua: String, data: String) -> 
 
 fn execute_aqua_impl(_init_user_id: String, aqua: String, data: String) -> Result<StepperOutcome> {
     let mut parsed_data: AquaData =
-        serde_json::from_str(&data).map_err(AquamarineError::DataSerdeError)?;
+        serde_json::from_str(&data).map_err(AquamarineError::DataDeserializationError)?;
     let formatted_aqua = format_aqua(aqua);
     let parsed_aqua = serde_sexpr::from_str::<Instruction>(&formatted_aqua)?;
 
@@ -68,13 +68,13 @@ fn execute_aqua_impl(_init_user_id: String, aqua: String, data: String) -> Resul
         .data
         .insert(call_evidence_ctx_key.to_string(), serialized_call_ctx);
 
-    let data =
-        serde_json::to_string(&execution_ctx.data).map_err(AquamarineError::DataSerdeError)?;
+    let data = serde_json::to_string(&execution_ctx.data)
+        .map_err(AquamarineError::DataSerializationError)?;
 
     Ok(StepperOutcome {
         ret_code: 0,
         data,
-        next_peer_pks: execution_ctx.next_peer_pks,
+        next_peer_pks: dedup(execution_ctx.next_peer_pks),
     })
 }
 
@@ -106,6 +106,15 @@ fn format_aqua(aqua: String) -> String {
     }
 
     String::from_iter(formatted_aqua.into_iter())
+}
+
+use std::hash::Hash;
+
+fn dedup<T: Eq + Hash>(mut vec: Vec<T>) -> Vec<T> {
+    use std::collections::HashSet;
+
+    let set: HashSet<_> = vec.drain(..).collect(); // dedup
+    set.into_iter().collect()
 }
 
 #[cfg(test)]

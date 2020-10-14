@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use crate::call_evidence::EvidenceState;
 use crate::CallServiceResult;
 use crate::JValue;
 use crate::StepperOutcome;
@@ -31,8 +32,11 @@ pub(crate) enum AquamarineError {
     /// Errors occurred while parsing aqua script in the form of S expressions.
     SExprParseError(SExprError),
 
-    /// Errors occurred while parsing aqua data.
-    DataSerdeError(SerdeJsonError),
+    /// Errors occurred while deserializing aqua data.
+    DataDeserializationError(SerdeJsonError),
+
+    /// Errors occurred while deserializing aqua data.
+    DataSerializationError(SerdeJsonError),
 
     /// Errors occurred while parsing function arguments of an expression.
     FuncArgsSerializationError(JValue, SerdeJsonError),
@@ -69,6 +73,9 @@ pub(crate) enum AquamarineError {
 
     /// Multiple fold states found for such iterator name.
     MultipleFoldStates(String),
+
+    /// Expected evidence state of different type.
+    InvalidEvidenceState(EvidenceState, String),
 }
 
 impl Error for AquamarineError {}
@@ -79,9 +86,14 @@ impl std::fmt::Display for AquamarineError {
             AquamarineError::SExprParseError(err) => {
                 write!(f, "aqua script can't be parsed: {:?}", err)
             }
-            AquamarineError::DataSerdeError(err) => write!(
+            AquamarineError::DataDeserializationError(err) => write!(
                 f,
-                "an error occurred while serializing/deserializing data: {:?}",
+                "an error occurred while data deserialization: {:?}",
+                err
+            ),
+            AquamarineError::DataSerializationError(err) => write!(
+                f,
+                "an error occurred while data serialization: {:?}",
                 err
             ),
             AquamarineError::FuncArgsSerializationError(args, err) => write!(
@@ -138,6 +150,11 @@ impl std::fmt::Display for AquamarineError {
                 "multiple fold states found for iterable {}",
                 iterator
             ),
+            AquamarineError::InvalidEvidenceState(found_state, expected) => write!(
+                f,
+                "invalid evidence state: expected {}, but found {:?}",
+                expected, found_state
+            ),
         }
     }
 }
@@ -158,19 +175,21 @@ impl Into<StepperOutcome> for AquamarineError {
     fn into(self) -> StepperOutcome {
         let ret_code = match self {
             AquamarineError::SExprParseError(_) => 1,
-            AquamarineError::DataSerdeError(..) => 2,
-            AquamarineError::FuncArgsSerializationError(..) => 3,
-            AquamarineError::CallServiceResultDeserializationError(..) => 4,
-            AquamarineError::CurrentPeerIdEnvError(..) => 5,
-            AquamarineError::InstructionError(..) => 6,
-            AquamarineError::LocalServiceError(..) => 7,
-            AquamarineError::VariableNotFound(..) => 8,
-            AquamarineError::MultipleVariablesFound(..) => 9,
-            AquamarineError::VariableNotInJsonPath(..) => 10,
-            AquamarineError::IncompatibleJValueType(..) => 11,
-            AquamarineError::MultipleValuesInJsonPath(..) => 12,
-            AquamarineError::FoldStateNotFound(..) => 13,
-            AquamarineError::MultipleFoldStates(..) => 14,
+            AquamarineError::DataDeserializationError(..) => 2,
+            AquamarineError::DataSerializationError(..) => 3,
+            AquamarineError::FuncArgsSerializationError(..) => 4,
+            AquamarineError::CallServiceResultDeserializationError(..) => 5,
+            AquamarineError::CurrentPeerIdEnvError(..) => 6,
+            AquamarineError::InstructionError(..) => 7,
+            AquamarineError::LocalServiceError(..) => 8,
+            AquamarineError::VariableNotFound(..) => 9,
+            AquamarineError::MultipleVariablesFound(..) => 10,
+            AquamarineError::VariableNotInJsonPath(..) => 11,
+            AquamarineError::IncompatibleJValueType(..) => 12,
+            AquamarineError::MultipleValuesInJsonPath(..) => 13,
+            AquamarineError::FoldStateNotFound(..) => 14,
+            AquamarineError::MultipleFoldStates(..) => 15,
+            AquamarineError::InvalidEvidenceState(..) => 16,
         };
 
         StepperOutcome {

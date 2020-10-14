@@ -19,6 +19,7 @@ use super::EvidenceState;
 use super::ExecutableInstruction;
 use super::ExecutionCtx;
 use super::Instruction;
+use crate::AquamarineError;
 use crate::Result;
 
 use serde_derive::Deserialize;
@@ -31,7 +32,7 @@ impl ExecutableInstruction for Par {
     fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
         log::info!("par is called with context: {:?} {:?}", exec_ctx, call_ctx);
 
-        let (left_subtree_size, right_subtree_size) = extract_subtree_sizes(call_ctx);
+        let (left_subtree_size, right_subtree_size) = extract_subtree_sizes(call_ctx)?;
 
         let pre_new_states_count = call_ctx.new_states.len();
         call_ctx.new_states.push(EvidenceState::Par(0, 0));
@@ -56,7 +57,7 @@ impl ExecutableInstruction for Par {
     }
 }
 
-fn extract_subtree_sizes(call_ctx: &mut CallEvidenceCtx) -> (usize, usize) {
+fn extract_subtree_sizes(call_ctx: &mut CallEvidenceCtx) -> Result<(usize, usize)> {
     let used_states_in_subtree = call_ctx.used_states_in_subtree;
     let subtree_size = call_ctx.subtree_size;
 
@@ -67,11 +68,14 @@ fn extract_subtree_sizes(call_ctx: &mut CallEvidenceCtx) -> (usize, usize) {
         );
 
         match call_ctx.current_states.remove(0) {
-            EvidenceState::Par(left, right) => (left, right),
-            _ => unreachable!(),
+            EvidenceState::Par(left, right) => Ok((left, right)),
+            state => Err(AquamarineError::InvalidEvidenceState(
+                state,
+                String::from("par"),
+            )),
         }
     } else {
-        (0, 0)
+        Ok((0, 0))
     }
 }
 
@@ -100,6 +104,8 @@ mod tests {
 
     #[test]
     fn par_remote_remote() {
+        use std::collections::HashSet;
+
         let mut vm = create_aqua_vm(unit_call_service(), "");
 
         let script = String::from(
@@ -110,17 +116,19 @@ mod tests {
             ))"#,
         );
 
-        let res = vm
+        let mut res = vm
             .call(json!([String::from("asd"), script, String::from("{}"),]))
             .expect("call should be successful");
 
-        assert_eq!(
-            res.next_peer_pks,
-            vec![
-                String::from("remote_peer_id_1"),
-                String::from("remote_peer_id_2")
-            ]
-        );
+        let peers_result: HashSet<_> = res.next_peer_pks.drain(..).collect();
+        let peers_right: HashSet<_> = vec![
+            String::from("remote_peer_id_1"),
+            String::from("remote_peer_id_2"),
+        ]
+        .drain(..)
+        .collect();
+
+        assert_eq!(peers_result, peers_right);
     }
 
     #[test]

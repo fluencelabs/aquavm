@@ -205,7 +205,8 @@ fn evidence_create_service() {
     let data = data_value.to_string();
 
     let script = String::from(
-        r#"(seq (
+        r#"
+        (seq (
             (call (%current_peer_id% ("add_module" "") (module_bytes module_config) module))
             (seq (
                 (call (%current_peer_id% ("add_blueprint" "") (blueprint) blueprint_id))
@@ -355,4 +356,161 @@ fn evidence_par_seq_fold_call() {
 
     assert_eq!(resulted_json, right_json);
     assert!(res4.next_peer_pks.is_empty());
+}
+
+#[test]
+fn evidence_par_seq_fold_in_cycle_call() {
+    let return_numbers_call_service: HostExportedFunc = Box::new(|_, args| -> Option<IValue> {
+        Some(IValue::Record(
+            Vec1::new(vec![
+                IValue::S32(0),
+                IValue::String(String::from(
+                    "[\"1\", \"2\", \"3\", \"4\", \"5\", \"6\", \"7\", \"8\", \"9\", \"10\"]",
+                )),
+            ])
+            .unwrap(),
+        ))
+    });
+
+    let mut vm1 = create_aqua_vm(return_numbers_call_service, "some_peer_id_1");
+    let mut vm2 = create_aqua_vm(echo_number_call_service(), "some_peer_id_2");
+    let mut vm3 = create_aqua_vm(unit_call_service(), "some_peer_id_3");
+
+    let script = String::from(
+        r#"
+        (par (
+            (seq (
+                (call ("some_peer_id_1" ("local_service_id" "local_fn_name") () IterableResultPeer1))
+                (fold (IterableResultPeer1 i
+                    (par (
+                        (call ("some_peer_id_2" ("local_service_id" "local_fn_name") (i) acc[]))
+                        (next i)
+                    ))
+                ))
+            ))
+            (call ("some_peer_id_3" ("local_service_id" "local_fn_name") () result_2))
+        ))"#,
+    );
+
+    let mut data = String::from("{}");
+
+    for _ in 0..100 {
+        let res1 = vm1
+            .call(json!([String::from("asd"), script, data]))
+            .expect("should be successful");
+
+        data = res1.data;
+
+        let res2 = vm2
+            .call(json!([String::from("asd"), script, data]))
+            .expect("should be successful");
+
+        data = res2.data;
+
+        let res3 = vm3
+            .call(json!([String::from("asd"), script, data]))
+            .expect("should be successful");
+
+        data = res3.data;
+    }
+
+    let resulted_json: JValue =
+        serde_json::from_str(&data).expect("stepper should return valid json");
+
+    let right_json = json!( {
+        "result_2": "test",
+        "IterableResultPeer1": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
+        "acc": [1,2,3,4,5,6,7,8,9,10],
+        "__call": [
+            { "par": [21,1] },
+            { "call": "executed" },
+            { "par": [1,18] },
+            { "call": "executed" },
+            { "par": [1,16] },
+            { "call": "executed" },
+            { "par": [1,14] },
+            { "call": "executed" },
+            { "par": [1,12] },
+            { "call": "executed" },
+            { "par": [1,10] },
+            { "call": "executed" },
+            { "par": [1,8] },
+            { "call": "executed" },
+            { "par": [1,6] },
+            { "call": "executed" },
+            { "par": [1,4] },
+            { "call": "executed" },
+            { "par": [1,2] },
+            { "call": "executed" },
+            { "par": [1,0] },
+            { "call": "executed" },
+            { "call": "executed" },
+        ]
+    });
+
+    assert_eq!(resulted_json, right_json);
+}
+
+#[test]
+fn evidence_seq_par_seq_seq() {
+    let peer_id_1 = String::from("12D3KooWHk9BjDQBUqnavciRPhAYFvqKBe4ZiPPvde7vDaqgn5er");
+    let peer_id_2 = String::from("12D3KooWAzJcYitiZrerycVB4Wryrx22CFKdDGx7c4u31PFdfTbR");
+    let mut vm1 = create_aqua_vm(unit_call_service(), peer_id_1.clone());
+    let mut vm2 = create_aqua_vm(unit_call_service(), peer_id_2.clone());
+    let script = format!(
+        r#"
+        (seq (
+            (par (
+                (seq (
+                    (call ("{}" ("" "") () result_1))
+                    (call ("{}" ("" "") () result_2))
+                ))
+                (seq (
+                    (call ("{}" ("" "") () result_3))
+                    (call ("{}" ("" "") () result_4))
+                ))
+            ))
+            (call ("{}" ("" "") () result_5))
+        ))
+        "#,
+        peer_id_1, peer_id_2, peer_id_2, peer_id_1, peer_id_2
+    );
+
+    let res1 = vm2
+        .call(json!([String::from("asd"), script, String::from("{}")]))
+        .expect("should be successful");
+
+    assert_eq!(res1.next_peer_pks, vec![peer_id_1.clone()]);
+
+    let res2 = vm1
+        .call(json!([String::from("asd"), script, res1.data]))
+        .expect("should be successful");
+
+    assert_eq!(res2.next_peer_pks, vec![peer_id_2.clone()]);
+
+    let res3 = vm2
+        .call(json!([String::from("asd"), script, res2.data]))
+        .expect("should be successful");
+
+    let resulted_json: JValue =
+        serde_json::from_str(&res3.data).expect("stepper should return valid json");
+
+    let right_json = json!( {
+        "result_1": "test",
+        "result_2": "test",
+        "result_3": "test",
+        "result_4": "test",
+        "result_5": "test",
+        "__call": [
+            { "par": [2,2] },
+            { "call": "executed" },
+            { "call": "executed" },
+            { "call": "executed" },
+            { "call": "executed" },
+            { "call": "executed" },
+        ]
+    });
+
+    assert_eq!(resulted_json, right_json);
+    assert!(res3.next_peer_pks.is_empty());
 }

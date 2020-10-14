@@ -283,7 +283,7 @@ impl ParsedCall {
             EvidenceState::Call(CallResult::CallServiceFailed(err_msg)) => {
                 let err_msg = err_msg.clone();
                 call_ctx.new_states.push(prev_state);
-                Err(AquamarineError::LocalServiceError(err_msg.clone()))
+                Err(AquamarineError::LocalServiceError(err_msg))
             }
             EvidenceState::Call(CallResult::RequestSent) => {
                 // check whether current node can execute this call
@@ -300,7 +300,10 @@ impl ParsedCall {
                 Ok(false)
             }
             // state has inconsistent order - return a error, call shouldn't be executed
-            EvidenceState::Par(..) => Err(AquamarineError::VariableNotFound(String::new())),
+            par_state @ EvidenceState::Par(..) => Err(AquamarineError::InvalidEvidenceState(
+                par_state.clone(),
+                String::from("call"),
+            )),
         }
     }
 }
