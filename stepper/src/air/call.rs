@@ -273,7 +273,8 @@ impl ParsedCall {
         }
 
         call_ctx.used_states_in_subtree += 1;
-        let prev_state = call_ctx.current_states.remove(0);
+        // unwrap is safe here, because current_states length's been checked
+        let prev_state = call_ctx.current_states.pop_front().unwrap();
 
         log::info!("call evidence: previous state found {:?}", prev_state);
 

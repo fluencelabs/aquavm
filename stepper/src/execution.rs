@@ -26,6 +26,8 @@ use crate::Result;
 
 use crate::call_evidence::CallEvidenceCtx;
 
+use std::collections::VecDeque;
+
 pub(crate) fn execute_aqua(init_user_id: String, aqua: String, data: String) -> StepperOutcome {
     log::info!(
         "stepper invoked with user_id = {}, aqua = {:?}, data = {:?}",
@@ -53,17 +55,19 @@ fn execute_aqua_impl(_init_user_id: String, aqua: String, data: String) -> Resul
         .map_err(|e| AquamarineError::CurrentPeerIdEnvError(e, String::from("CURRENT_PEER_ID")))?;
 
     let call_evidence_ctx_key: &str = "__call";
-    let current_states: Vec<EvidenceState> = parsed_data
-        .remove(call_evidence_ctx_key)
-        .map(|v| serde_json::from_value(v).unwrap())
-        .unwrap_or_default();
+    let current_states: VecDeque<EvidenceState> = match parsed_data.remove(call_evidence_ctx_key) {
+        Some(jvalue) => serde_json::from_value(jvalue)
+            .map_err(AquamarineError::CallEvidenceDeserializationError)?,
+        None => VecDeque::new(),
+    };
 
     let mut execution_ctx = ExecutionCtx::new(parsed_data, current_peer_id);
     let mut call_evidence_ctx = CallEvidenceCtx::new(current_states);
 
     parsed_aqua.execute(&mut execution_ctx, &mut call_evidence_ctx)?;
 
-    let serialized_call_ctx = serde_json::to_value(call_evidence_ctx.new_states).unwrap();
+    let serialized_call_ctx = serde_json::to_value(call_evidence_ctx.new_states)
+        .map_err(AquamarineError::CallEvidenceSerializationError)?;
     execution_ctx
         .data
         .insert(call_evidence_ctx_key.to_string(), serialized_call_ctx);

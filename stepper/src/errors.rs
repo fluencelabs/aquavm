@@ -76,6 +76,12 @@ pub(crate) enum AquamarineError {
 
     /// Expected evidence state of different type.
     InvalidEvidenceState(EvidenceState, String),
+
+    /// Errors occurred on aqua data deserialization.
+    CallEvidenceDeserializationError(SerdeJsonError),
+
+    /// Errors occurred on aqua data serialization.
+    CallEvidenceSerializationError(SerdeJsonError),
 }
 
 impl Error for AquamarineError {}
@@ -155,6 +161,16 @@ impl std::fmt::Display for AquamarineError {
                 "invalid evidence state: expected {}, but found {:?}",
                 expected, found_state
             ),
+            AquamarineError::CallEvidenceDeserializationError(err) => write!(
+                f,
+                "an error occurred while data deserialization: {:?}",
+                err
+            ),
+            AquamarineError::CallEvidenceSerializationError(err) => write!(
+                f,
+                "an error occurred while data serialization: {:?}",
+                err
+            ),
         }
     }
 }
@@ -190,6 +206,8 @@ impl Into<StepperOutcome> for AquamarineError {
             AquamarineError::FoldStateNotFound(..) => 14,
             AquamarineError::MultipleFoldStates(..) => 15,
             AquamarineError::InvalidEvidenceState(..) => 16,
+            AquamarineError::CallEvidenceDeserializationError(..) => 17,
+            AquamarineError::CallEvidenceSerializationError(..) => 18,
         };
 
         StepperOutcome {

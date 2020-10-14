@@ -19,16 +19,18 @@ use super::EvidenceState;
 use serde::Deserialize;
 use serde::Serialize;
 
+use std::collections::VecDeque;
+
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub(crate) struct CallEvidenceCtx {
-    pub(crate) current_states: Vec<EvidenceState>,
+    pub(crate) current_states: VecDeque<EvidenceState>,
     pub(crate) used_states_in_subtree: usize,
     pub(crate) subtree_size: usize,
     pub(crate) new_states: Vec<EvidenceState>,
 }
 
 impl CallEvidenceCtx {
-    pub fn new(current_states: Vec<EvidenceState>) -> Self {
+    pub fn new(current_states: VecDeque<EvidenceState>) -> Self {
         let right = current_states.len();
         Self {
             current_states,
