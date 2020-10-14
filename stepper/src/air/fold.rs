@@ -276,7 +276,7 @@ mod tests {
 
         assert_eq!(
             error,
-            StepperError::UnknownError(String::from(
+            StepperError::MultipleFoldStates(String::from(
                 "multiple fold states found for iterable Iterable2"
             ))
         );

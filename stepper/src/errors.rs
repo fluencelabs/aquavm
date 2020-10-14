@@ -32,10 +32,10 @@ pub(crate) enum AquamarineError {
     /// Errors occurred while parsing aqua script in the form of S expressions.
     SExprParseError(SExprError),
 
-    /// Errors occurred while deserializing aqua data.
+    /// Errors occurred on aqua data deserialization.
     DataDeserializationError(SerdeJsonError),
 
-    /// Errors occurred while deserializing aqua data.
+    /// Errors occurred on aqua data serialization.
     DataSerializationError(SerdeJsonError),
 
     /// Errors occurred while parsing function arguments of an expression.
