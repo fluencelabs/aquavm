@@ -33,6 +33,7 @@ impl ExecutableInstruction for Par {
         log::info!("par is called with context: {:?} {:?}", exec_ctx, call_ctx);
 
         let (left_subtree_size, right_subtree_size) = extract_subtree_sizes(call_ctx)?;
+        let pre_subtree_used_states = call_ctx.used_states_in_subtree;
         let pre_subtree_size = call_ctx.subtree_size;
 
         let pre_current_states_len = call_ctx.current_states.len();
@@ -56,11 +57,10 @@ impl ExecutableInstruction for Par {
 
         let post_current_states_len = call_ctx.current_states.len();
 
-        let new_subtree_size = pre_subtree_size - (pre_current_states_len - post_current_states_len);
+        call_ctx.used_states_in_subtree = pre_subtree_used_states + (pre_current_states_len - post_current_states_len) + 1;
+        call_ctx.subtree_size = pre_subtree_size;
 
-        log::info!("subtree size was {} becomes {} ({} - ({} - {})) \n\n", call_ctx.subtree_size, new_subtree_size, pre_subtree_size, pre_current_states_len, post_current_states_len );
-        call_ctx.used_states_in_subtree = 0;
-        call_ctx.subtree_size = new_subtree_size;
+        log::info!("new used states count {}, subtree size {}\n\n", call_ctx.used_states_in_subtree, call_ctx.subtree_size);
 
         Ok(())
     }
