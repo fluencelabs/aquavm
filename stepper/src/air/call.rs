@@ -87,6 +87,8 @@ impl super::ExecutableInstruction for ParsedCall {
     fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
         if self.peer_pk != exec_ctx.current_peer_id && self.peer_pk != CURRENT_PEER_ALIAS {
             self.set_remote_call_result(exec_ctx, call_ctx);
+
+            return Ok(());
         }
 
         let function_args = self.extract_args_by_paths(exec_ctx)?;
@@ -118,18 +120,22 @@ fn prepare_evidence_state(call_ctx: &mut CallEvidenceCtx) -> Result<bool> {
 
     call_ctx.used_states_in_subtree += 1;
     let prev_state = call_ctx.current_states.remove(0);
-    call_ctx.new_states.push(prev_state);
 
-    // unwrap is safe because new_states contains at least one value
-    // which was inserted on this call
-    match call_ctx.new_states.last().unwrap() {
+    match &prev_state {
         // this call was failed on one of the previous executions,
         // here it's needed to bubble this special error up
         EvidenceState::Call(CallResult::CallServiceFailed(err_msg)) => {
-            Err(AquamarineError::LocalServiceError(err_msg.clone()))
+            let err_msg = err_msg.clone();
+            call_ctx.new_states.push(prev_state);
+            Err(AquamarineError::LocalServiceError(err_msg))
         }
-        // this instruction shouldn't be executed
-        EvidenceState::Call(_) => Ok(false),
+        // this instruction should be executed (peer id will be checked in the call)
+        EvidenceState::Call(CallResult::RequestSent) => Ok(true),
+        // this instruction's been already executed
+        EvidenceState::Call(CallResult::Executed) => {
+            call_ctx.new_states.push(prev_state);
+            Ok(false)
+        }
         // state has inconsistent order - return a error, call shouldn't be executed
         EvidenceState::Par(..) => Err(AquamarineError::VariableNotFound(String::new())),
     }
@@ -310,9 +316,7 @@ impl ParsedCall {
                 ));
             }
 
-            call_ctx
-                .new_states
-                .push(executed_evidence_state);
+            call_ctx.new_states.push(executed_evidence_state);
 
             return Ok(());
         }
@@ -341,9 +345,7 @@ impl ParsedCall {
             }
         }
 
-        call_ctx
-            .new_states
-            .push(executed_evidence_state);
+        call_ctx.new_states.push(executed_evidence_state);
 
         Ok(())
     }
@@ -353,9 +355,7 @@ impl ParsedCall {
         exec_ctx.next_peer_pks.push(peer_pk);
 
         let evidence_state = EvidenceState::Call(CallResult::RequestSent);
-        call_ctx
-            .new_states
-            .push(evidence_state);
+        call_ctx.new_states.push(evidence_state);
     }
 }
 
@@ -377,7 +377,7 @@ mod tests {
 
     #[test]
     fn current_peer_id_call() {
-        let mut vm = create_aqua_vm(echo_string_call_service());
+        let mut vm = create_aqua_vm(echo_string_call_service(), "test_peer_id");
 
         let script = String::from(
             r#"
@@ -418,7 +418,7 @@ mod tests {
 
     #[test]
     fn remote_peer_id_call() {
-        let mut vm = create_aqua_vm(echo_string_call_service());
+        let mut vm = create_aqua_vm(echo_string_call_service(), "");
         let remote_peer_id = String::from("some_remote_peer_id");
 
         let script = format!(
@@ -439,7 +439,7 @@ mod tests {
 
     #[test]
     fn variables() {
-        let mut vm = create_aqua_vm(echo_string_call_service());
+        let mut vm = create_aqua_vm(echo_string_call_service(), "");
 
         let script = format!(
             r#"(call (remote_peer_id ("some_service_id" "local_fn_name") ("param") result_name))"#,
@@ -469,7 +469,7 @@ mod tests {
             ))
         });
 
-        let mut vm = create_aqua_vm(call_service);
+        let mut vm = create_aqua_vm(call_service, "");
 
         let script = format!(
             r#"(call (%current_peer_id% ("some_service_id" "local_fn_name") ("arg1" "arg2" arg3) result_name))"#,

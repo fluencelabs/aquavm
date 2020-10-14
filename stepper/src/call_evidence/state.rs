@@ -18,6 +18,7 @@ use serde::Deserialize;
 use serde::Serialize;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub(crate) enum CallResult {
     /// Request was sent to a target node and it shouldn't be called again.
     RequestSent,
@@ -30,6 +31,7 @@ pub(crate) enum CallResult {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub(crate) enum EvidenceState {
     Par(usize, usize),
     Call(CallResult),

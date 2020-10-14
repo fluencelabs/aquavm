@@ -73,7 +73,7 @@ mod tests {
             }
         });
 
-        let mut vm = create_aqua_vm(call_service);
+        let mut vm = create_aqua_vm(call_service, "");
 
         let script = String::from(
             r#"

@@ -44,13 +44,12 @@ impl super::ExecutableInstruction for Seq {
 mod tests {
     use aqua_test_utils::create_aqua_vm;
     use aqua_test_utils::unit_call_service;
-    use aquamarine_vm::StepperOutcome;
 
     use serde_json::json;
 
     #[test]
-    fn par() {
-        let mut vm = create_aqua_vm(unit_call_service());
+    fn seq_remote_remote() {
+        let mut vm = create_aqua_vm(unit_call_service(), "");
 
         let script = String::from(
             r#"
@@ -61,15 +60,42 @@ mod tests {
         );
 
         let res = vm
+            .call(json!([String::from("asd"), script, String::from("{}")]))
+            .expect("call should be successful");
+
+        assert_eq!(res.next_peer_pks, vec![String::from("remote_peer_id_1")]);
+
+        let res = vm
+            .call(json!([
+                String::from("asd"),
+                script,
+                json!({
+                    "__call": [{"call": "executed"}]
+                    }
+                )
+                .to_string(),
+            ]))
+            .expect("call should be successful");
+
+        assert_eq!(res.next_peer_pks, vec![String::from("remote_peer_id_2")]);
+    }
+
+    #[test]
+    fn seq_local_remote() {
+        let mut vm = create_aqua_vm(unit_call_service(), "");
+
+        let script = String::from(
+            r#"
+            (seq (
+                (call (%current_peer_id% ("local_service_id" "local_fn_name") () result_name))
+                (call ("remote_peer_id_2" ("service_id" "fn_name") () g))
+            ))"#,
+        );
+
+        let res = vm
             .call(json!([String::from("asd"), script, String::from("{}"),]))
             .expect("call should be successful");
 
-        assert_eq!(
-            res,
-            StepperOutcome {
-                data: String::from("{}"),
-                next_peer_pks: vec![String::from("remote_peer_id_1")]
-            }
-        );
+        assert_eq!(res.next_peer_pks, vec![String::from("remote_peer_id_2")]);
     }
 }

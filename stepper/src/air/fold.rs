@@ -153,7 +153,7 @@ mod tests {
 
     #[test]
     fn lfold() {
-        let mut vm = create_aqua_vm(echo_number_call_service());
+        let mut vm = create_aqua_vm(echo_number_call_service(), "");
 
         let lfold = String::from(
             r#"
@@ -180,7 +180,7 @@ mod tests {
 
     #[test]
     fn rfold() {
-        let mut vm = create_aqua_vm(echo_number_call_service());
+        let mut vm = create_aqua_vm(echo_number_call_service(), "");
 
         let rfold = String::from(
             r#"
@@ -207,7 +207,7 @@ mod tests {
 
     #[test]
     fn inner_fold() {
-        let mut vm = create_aqua_vm(echo_number_call_service());
+        let mut vm = create_aqua_vm(echo_number_call_service(), "");
 
         let script = String::from(
             r#"
@@ -242,7 +242,7 @@ mod tests {
 
     #[test]
     fn inner_fold_with_same_iterator() {
-        let mut vm = create_aqua_vm(echo_number_call_service());
+        let mut vm = create_aqua_vm(echo_number_call_service(), "");
 
         let script = String::from(
             r#"

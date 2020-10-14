@@ -50,12 +50,12 @@ impl ExecutableInstruction for Par {
     }
 }
 
-fn extract_subtree_sizes(call_ctx: &CallEvidenceCtx) -> (usize, usize) {
+fn extract_subtree_sizes(call_ctx: &mut CallEvidenceCtx) -> (usize, usize) {
     let used_states_in_subtree = call_ctx.used_states_in_subtree;
     let subtree_size = call_ctx.subtree_size;
 
     if used_states_in_subtree < subtree_size {
-        match call_ctx.current_states[used_states_in_subtree] {
+        match call_ctx.current_states.remove(used_states_in_subtree) {
             EvidenceState::Par(left, right) => (left, right),
             _ => unreachable!(),
         }
@@ -65,7 +65,7 @@ fn extract_subtree_sizes(call_ctx: &CallEvidenceCtx) -> (usize, usize) {
 }
 
 fn execute_subtree(
-    subtree: &Box<Instruction>,
+    subtree: &Instruction,
     subtree_size: usize,
     exec_ctx: &mut ExecutionCtx,
     call_ctx: &mut CallEvidenceCtx,
@@ -84,13 +84,12 @@ fn execute_subtree(
 mod tests {
     use aqua_test_utils::create_aqua_vm;
     use aqua_test_utils::unit_call_service;
-    use aquamarine_vm::StepperOutcome;
 
     use serde_json::json;
 
     #[test]
-    fn par() {
-        let mut vm = create_aqua_vm(unit_call_service());
+    fn par_remote_remote() {
+        let mut vm = create_aqua_vm(unit_call_service(), "");
 
         let script = String::from(
             r#"
@@ -105,14 +104,30 @@ mod tests {
             .expect("call should be successful");
 
         assert_eq!(
-            res,
-            StepperOutcome {
-                data: String::from("{}"),
-                next_peer_pks: vec![
-                    String::from("remote_peer_id_1"),
-                    String::from("remote_peer_id_2")
-                ]
-            }
+            res.next_peer_pks,
+            vec![
+                String::from("remote_peer_id_1"),
+                String::from("remote_peer_id_2")
+            ]
         );
+    }
+
+    #[test]
+    fn par_local_remote() {
+        let mut vm = create_aqua_vm(unit_call_service(), "");
+
+        let script = String::from(
+            r#"
+            (par (
+                (call (%current_peer_id% ("local_service_id" "local_fn_name") () result_name))
+                (call ("remote_peer_id_2" ("service_id" "fn_name") () g))
+            ))"#,
+        );
+
+        let res = vm
+            .call(json!([String::from("asd"), script, String::from("{}"),]))
+            .expect("call should be successful");
+
+        assert_eq!(res.next_peer_pks, vec![String::from("remote_peer_id_2")]);
     }
 }
