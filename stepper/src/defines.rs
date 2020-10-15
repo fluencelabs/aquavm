@@ -22,8 +22,10 @@ use serde_derive::Serialize;
 pub(crate) type Result<T> = std::result::Result<T, AquamarineError>;
 pub(crate) type AquaData = std::collections::HashMap<String, JValue>;
 pub(crate) type JValue = serde_json::Value;
+
 pub(crate) use crate::errors::AquamarineError;
 pub(crate) use crate::stepper_outcome::StepperOutcome;
+pub(crate) use crate::stepper_outcome::STEPPER_SUCCESS;
 
 pub(crate) const CALL_SERVICE_SUCCESS: i32 = 0;
 

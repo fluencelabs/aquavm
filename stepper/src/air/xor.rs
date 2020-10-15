@@ -64,11 +64,7 @@ mod tests {
             } else {
                 // return success for services with other ids
                 Some(IValue::Record(
-                    Vec1::new(vec![
-                        IValue::S32(0),
-                        IValue::String(String::from("\"res\"")),
-                    ])
-                    .unwrap(),
+                    Vec1::new(vec![IValue::S32(0), IValue::String(String::from("\"res\""))]).unwrap(),
                 ))
             }
         });

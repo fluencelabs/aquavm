@@ -66,12 +66,7 @@ struct ParsedCall {
 
 impl super::ExecutableInstruction for Call {
     fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
-        log::info!(
-            "call {:?} is called with contexts: {:?} {:?}",
-            self,
-            exec_ctx,
-            call_ctx
-        );
+        log::info!("call {:?} is called with contexts: {:?} {:?}", self, exec_ctx, call_ctx);
 
         let parsed_call = ParsedCall::new(self, exec_ctx)?;
         parsed_call.execute(exec_ctx, call_ctx)
@@ -92,11 +87,7 @@ impl ParsedCall {
         })
     }
 
-    pub fn execute(
-        self,
-        exec_ctx: &mut ExecutionCtx,
-        call_ctx: &mut CallEvidenceCtx,
-    ) -> Result<()> {
+    pub fn execute(self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
         let should_executed = self.prepare_evidence_state(call_ctx, &exec_ctx.current_peer_id)?;
         if !should_executed {
             return Ok(());
@@ -112,8 +103,7 @@ impl ParsedCall {
         let function_args = serde_json::to_string(&function_args)
             .map_err(|e| AquamarineError::FuncArgsSerializationError(function_args, e))?;
 
-        let result =
-            unsafe { crate::call_service(self.service_id, self.function_name, function_args) };
+        let result = unsafe { crate::call_service(self.service_id, self.function_name, function_args) };
 
         if result.ret_code != crate::CALL_SERVICE_SUCCESS {
             return Err(AquamarineError::LocalServiceError(result.result));
@@ -132,16 +122,13 @@ impl ParsedCall {
         use PeerPart::*;
 
         let (peer_pk, service_id, func_name) = match (&raw_call.0, &raw_call.1) {
-            (
-                PeerPkWithServiceId(peer_pk, peer_service_id),
-                ServiceIdWithFuncName(_service_id, func_name),
-            ) => Ok((peer_pk, peer_service_id, func_name)),
+            (PeerPkWithServiceId(peer_pk, peer_service_id), ServiceIdWithFuncName(_service_id, func_name)) => {
+                Ok((peer_pk, peer_service_id, func_name))
+            }
             (PeerPkWithServiceId(peer_pk, peer_service_id), FuncName(func_name)) => {
                 Ok((peer_pk, peer_service_id, func_name))
             }
-            (PeerPk(peer_pk), ServiceIdWithFuncName(service_id, func_name)) => {
-                Ok((peer_pk, service_id, func_name))
-            }
+            (PeerPk(peer_pk), ServiceIdWithFuncName(service_id, func_name)) => Ok((peer_pk, service_id, func_name)),
             (PeerPk(_), FuncName(_)) => Err(AquamarineError::InstructionError(String::from(
                 "call should have service id specified by peer part or function part",
             ))),
@@ -184,9 +171,7 @@ impl ParsedCall {
         }
 
         if super::RESERVED_KEYWORDS.contains(result_variable_name.as_str()) {
-            return Err(AquamarineError::ReservedKeywordError(
-                result_variable_name.to_string(),
-            ));
+            return Err(AquamarineError::ReservedKeywordError(result_variable_name.to_string()));
         }
 
         if is_string_literal(result_variable_name) {
@@ -214,16 +199,10 @@ impl ParsedCall {
                         String::from("array"),
                     ))
                 }
-                None => {
-                    return Err(AquamarineError::VariableNotFound(
-                        fold_state.iterable_name.clone(),
-                    ))
-                }
+                None => return Err(AquamarineError::VariableNotFound(fold_state.iterable_name.clone())),
             },
             (Some(value), None) => value,
-            (None, None) => {
-                return Err(AquamarineError::VariableNotFound(arg_path_head.to_string()))
-            }
+            (None, None) => return Err(AquamarineError::VariableNotFound(arg_path_head.to_string())),
         };
 
         if split_arg.is_empty() {
@@ -231,13 +210,8 @@ impl ParsedCall {
         }
 
         let json_path = split_arg.remove(0);
-        let values = jsonpath_lib::select(value_by_head, json_path).map_err(|e| {
-            AquamarineError::VariableNotInJsonPath(
-                value_by_head.clone(),
-                String::from(json_path),
-                e,
-            )
-        })?;
+        let values = jsonpath_lib::select(value_by_head, json_path)
+            .map_err(|e| AquamarineError::VariableNotInJsonPath(value_by_head.clone(), String::from(json_path), e))?;
 
         Ok(values)
     }
@@ -257,9 +231,7 @@ impl ParsedCall {
         }
 
         if args.len() != 1 {
-            return Err(AquamarineError::MultipleValuesInJsonPath(
-                arg_path.to_string(),
-            ));
+            return Err(AquamarineError::MultipleValuesInJsonPath(arg_path.to_string()));
         }
 
         match args[0] {
@@ -271,11 +243,7 @@ impl ParsedCall {
         }
     }
 
-    fn prepare_evidence_state(
-        &self,
-        call_ctx: &mut CallEvidenceCtx,
-        current_peer_id: &str,
-    ) -> Result<bool> {
+    fn prepare_evidence_state(&self, call_ctx: &mut CallEvidenceCtx, current_peer_id: &str) -> Result<bool> {
         if call_ctx.unused_subtree_elements_count == 0 {
             log::info!("call evidence: previous state wasn't found");
             return Ok(true);
@@ -331,14 +299,8 @@ fn set_local_call_result(
 
     if !is_array {
         // if result is not an array, simply insert it into data
-        if exec_ctx
-            .data
-            .insert(result_variable_name.clone(), result)
-            .is_some()
-        {
-            return Err(AquamarineError::MultipleVariablesFound(
-                result_variable_name,
-            ));
+        if exec_ctx.data.insert(result_variable_name.clone(), result).is_some() {
+            return Err(AquamarineError::MultipleVariablesFound(result_variable_name));
         }
 
         log::info!("call evidence: adding new state {:?}", new_evidence_state);
@@ -373,11 +335,7 @@ fn set_local_call_result(
     Ok(())
 }
 
-fn set_remote_call_result(
-    peer_pk: String,
-    exec_ctx: &mut ExecutionCtx,
-    call_ctx: &mut CallEvidenceCtx,
-) {
+fn set_remote_call_result(peer_pk: String, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) {
     exec_ctx.next_peer_pks.push(peer_pk);
 
     let new_evidence_state = EvidenceState::Call(CallResult::RequestSent);
@@ -467,9 +425,7 @@ mod tests {
     fn variables() {
         let mut vm = create_aqua_vm(echo_string_call_service(), "");
 
-        let script = format!(
-            r#"(call (remote_peer_id ("some_service_id" "local_fn_name") ("param") result_name))"#,
-        );
+        let script = format!(r#"(call (remote_peer_id ("some_service_id" "local_fn_name") ("param") result_name))"#,);
 
         let res = vm
             .call(json!([

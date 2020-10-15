@@ -70,11 +70,7 @@ impl super::ExecutableInstruction for Fold {
                     String::from("Array"),
                 ))
             }
-            None => {
-                return Err(AquamarineError::VariableNotFound(String::from(
-                    iterable_name,
-                )))
-            }
+            None => return Err(AquamarineError::VariableNotFound(String::from(iterable_name))),
         };
 
         let fold_state = FoldState {
@@ -83,11 +79,7 @@ impl super::ExecutableInstruction for Fold {
             instr_head: instr_head.clone(),
         };
 
-        if exec_ctx
-            .folds
-            .insert(iterator_name.clone(), fold_state)
-            .is_some()
-        {
+        if exec_ctx.folds.insert(iterator_name.clone(), fold_state).is_some() {
             return Err(AquamarineError::MultipleFoldStates(iterable_name.clone()));
         }
 
@@ -100,12 +92,7 @@ impl super::ExecutableInstruction for Fold {
 
 impl super::ExecutableInstruction for Next {
     fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
-        log::info!(
-            "next {:?} is called with contexts {:?} {:?}",
-            self,
-            exec_ctx,
-            call_ctx
-        );
+        log::info!("next {:?} is called with contexts {:?} {:?}", self, exec_ctx, call_ctx);
 
         let iterator_name = &self.0;
         let fold_state = exec_ctx
@@ -229,7 +216,9 @@ mod tests {
             .call(json!([
                 String::from("asd"),
                 script,
-                String::from("{\"Iterable1\": [\"1\",\"2\",\"3\",\"4\",\"5\"], \"Iterable2\": [\"1\",\"2\",\"3\",\"4\",\"5\"]}"),
+                String::from(
+                    "{\"Iterable1\": [\"1\",\"2\",\"3\",\"4\",\"5\"], \"Iterable2\": [\"1\",\"2\",\"3\",\"4\",\"5\"]}"
+                ),
             ]))
             .expect("call should be successful");
 
@@ -260,12 +249,13 @@ mod tests {
             ))"#,
         );
 
-        let res = vm
-            .call(json!([
-                String::from("asd"),
-                script,
-                String::from("{\"Iterable1\": [\"1\",\"2\",\"3\",\"4\",\"5\"], \"Iterable2\": [\"1\",\"2\",\"3\",\"4\",\"5\"]}"),
-            ]));
+        let res = vm.call(json!([
+            String::from("asd"),
+            script,
+            String::from(
+                "{\"Iterable1\": [\"1\",\"2\",\"3\",\"4\",\"5\"], \"Iterable2\": [\"1\",\"2\",\"3\",\"4\",\"5\"]}"
+            ),
+        ]));
 
         assert!(res.is_err());
         let error = res.err().unwrap();
@@ -276,9 +266,7 @@ mod tests {
 
         assert_eq!(
             error,
-            StepperError::MultipleFoldStates(String::from(
-                "multiple fold states found for iterable Iterable2"
-            ))
+            StepperError::MultipleFoldStates(String::from("multiple fold states found for iterable Iterable2"))
         );
     }
 }

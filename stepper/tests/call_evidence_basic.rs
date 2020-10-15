@@ -57,8 +57,7 @@ fn evidence_seq_par_call() {
         ]))
         .expect("should be successful");
 
-    let resulted_json: JValue =
-        serde_json::from_str(&res.data).expect("stepper should return valid json");
+    let resulted_json: JValue = serde_json::from_str(&res.data).expect("stepper should return valid json");
 
     let right_json = json!( {
         "result_2": "test",
@@ -105,8 +104,7 @@ fn evidence_par_par_call() {
         ]))
         .expect("should be successful");
 
-    let resulted_json: JValue =
-        serde_json::from_str(&res.data).expect("stepper should return valid json");
+    let resulted_json: JValue = serde_json::from_str(&res.data).expect("stepper should return valid json");
 
     let right_json = json!( {
         "result_1" : "test",
@@ -160,8 +158,7 @@ fn evidence_seq_seq() {
         .call(json!([String::from("asd"), script, res2.data]))
         .expect("should be successful");
 
-    let resulted_json: JValue =
-        serde_json::from_str(&res3.data).expect("stepper should return valid json");
+    let resulted_json: JValue = serde_json::from_str(&res3.data).expect("stepper should return valid json");
 
     let right_json = json!( {
         "void0": "test",
@@ -234,11 +231,7 @@ fn evidence_create_service() {
         };
 
         Some(IValue::Record(
-            Vec1::new(vec![
-                IValue::S32(0),
-                IValue::String(format!("\"{}\"", response)),
-            ])
-            .unwrap(),
+            Vec1::new(vec![IValue::S32(0), IValue::String(format!("\"{}\"", response))]).unwrap(),
         ))
     });
 
@@ -322,8 +315,7 @@ fn evidence_par_seq_fold_call() {
         .call(json!([String::from("asd"), script, data]))
         .expect("should be successful");
 
-    let resulted_json: JValue =
-        serde_json::from_str(&res4.data).expect("stepper should return valid json");
+    let resulted_json: JValue = serde_json::from_str(&res4.data).expect("stepper should return valid json");
 
     let right_json = json!( {
         "result_2": "test",
@@ -416,8 +408,7 @@ fn evidence_par_seq_fold_in_cycle_call() {
         data = res3.data;
     }
 
-    let resulted_json: JValue =
-        serde_json::from_str(&data).expect("stepper should return valid json");
+    let resulted_json: JValue = serde_json::from_str(&data).expect("stepper should return valid json");
 
     let right_json = json!( {
         "result_2": "test",
@@ -494,8 +485,7 @@ fn evidence_seq_par_seq_seq() {
         .call(json!([String::from("asd"), script, res2.data]))
         .expect("should be successful");
 
-    let resulted_json: JValue =
-        serde_json::from_str(&res3.data).expect("stepper should return valid json");
+    let resulted_json: JValue = serde_json::from_str(&res3.data).expect("stepper should return valid json");
 
     let right_json = json!( {
         "result_1": "test",

@@ -40,22 +40,15 @@ impl ExecutableInstruction for Par {
         let pre_new_states_count = call_ctx.new_states.len();
         call_ctx.new_states.push(EvidenceState::Par(0, 0));
 
-        let new_left_subtree_size =
-            execute_subtree(&self.0, left_subtree_size, exec_ctx, call_ctx)?;
-        let new_right_subtree_size =
-            execute_subtree(&self.1, right_subtree_size, exec_ctx, call_ctx)?;
+        let new_left_subtree_size = execute_subtree(&self.0, left_subtree_size, exec_ctx, call_ctx)?;
+        let new_right_subtree_size = execute_subtree(&self.1, right_subtree_size, exec_ctx, call_ctx)?;
 
-        let new_par_evidence_state =
-            EvidenceState::Par(new_left_subtree_size, new_right_subtree_size);
-        log::info!(
-            "call evidence: adding new state {:?}",
-            new_par_evidence_state
-        );
+        let new_par_evidence_state = EvidenceState::Par(new_left_subtree_size, new_right_subtree_size);
+        log::info!("call evidence: adding new state {:?}", new_par_evidence_state);
         call_ctx.new_states[pre_new_states_count] = new_par_evidence_state;
 
         let post_states_count = call_ctx.current_states.len();
-        call_ctx.unused_subtree_elements_count =
-            pre_unused_elements - (pre_states_count - post_states_count);
+        call_ctx.unused_subtree_elements_count = pre_unused_elements - (pre_states_count - post_states_count);
 
         Ok(())
     }
@@ -76,10 +69,7 @@ fn extract_subtree_sizes(call_ctx: &mut CallEvidenceCtx) -> Result<(usize, usize
     // unwrap is safe here because of length's been checked
     match call_ctx.current_states.pop_front().unwrap() {
         EvidenceState::Par(left, right) => Ok((left, right)),
-        state => Err(AquamarineError::InvalidEvidenceState(
-            state,
-            String::from("par"),
-        )),
+        state => Err(AquamarineError::InvalidEvidenceState(state, String::from("par"))),
     }
 }
 
@@ -124,12 +114,9 @@ mod tests {
             .expect("call should be successful");
 
         let peers_result: HashSet<_> = res.next_peer_pks.drain(..).collect();
-        let peers_right: HashSet<_> = vec![
-            String::from("remote_peer_id_1"),
-            String::from("remote_peer_id_2"),
-        ]
-        .drain(..)
-        .collect();
+        let peers_right: HashSet<_> = vec![String::from("remote_peer_id_1"), String::from("remote_peer_id_2")]
+            .drain(..)
+            .collect();
 
         assert_eq!(peers_result, peers_right);
     }

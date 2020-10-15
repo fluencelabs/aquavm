@@ -45,12 +45,7 @@ pub fn main() {
 }
 
 #[fce]
-pub fn invoke(
-    init_user_id: String,
-    aqua: String,
-    prev_data: String,
-    data: String,
-) -> StepperOutcome {
+pub fn invoke(init_user_id: String, aqua: String, prev_data: String, data: String) -> StepperOutcome {
     execute_aqua(init_user_id, aqua, prev_data, data)
 }
 
