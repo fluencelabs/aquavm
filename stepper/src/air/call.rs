@@ -42,7 +42,7 @@ const CURRENT_PEER_ALIAS: &str = "%current_peer_id%";
 #[serde(untagged)]
 pub enum PeerPart {
     PeerPk(String),
-    PeerPkWithPkServiceId(String, String),
+    PeerPkWithServiceId(String, String),
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
@@ -128,24 +128,23 @@ impl ParsedCall {
         raw_call: &'a Call,
         exec_ctx: &'a ExecutionCtx,
     ) -> Result<(&'a str, &'a str, &'a str)> {
+        use FunctionPart::*;
+        use PeerPart::*;
+
         let (peer_pk, service_id, func_name) = match (&raw_call.0, &raw_call.1) {
             (
-                PeerPart::PeerPkWithPkServiceId(peer_pk, peer_service_id),
-                FunctionPart::ServiceIdWithFuncName(_service_id, func_name),
+                PeerPkWithServiceId(peer_pk, peer_service_id),
+                ServiceIdWithFuncName(_service_id, func_name),
             ) => Ok((peer_pk, peer_service_id, func_name)),
-            (
-                PeerPart::PeerPkWithPkServiceId(peer_pk, peer_service_id),
-                FunctionPart::FuncName(func_name),
-            ) => Ok((peer_pk, peer_service_id, func_name)),
-            (
-                PeerPart::PeerPk(peer_pk),
-                FunctionPart::ServiceIdWithFuncName(service_id, func_name),
-            ) => Ok((peer_pk, service_id, func_name)),
-            (PeerPart::PeerPk(_), FunctionPart::FuncName(_)) => {
-                Err(AquamarineError::InstructionError(String::from(
-                    "call should have service id specified by peer part or function part",
-                )))
+            (PeerPkWithServiceId(peer_pk, peer_service_id), FuncName(func_name)) => {
+                Ok((peer_pk, peer_service_id, func_name))
             }
+            (PeerPk(peer_pk), ServiceIdWithFuncName(service_id, func_name)) => {
+                Ok((peer_pk, service_id, func_name))
+            }
+            (PeerPk(_), FuncName(_)) => Err(AquamarineError::InstructionError(String::from(
+                "call should have service id specified by peer part or function part",
+            ))),
         }?;
 
         let peer_pk = if peer_pk != CURRENT_PEER_ALIAS {
