@@ -111,12 +111,7 @@ mod tests {
         );
 
         let mut res = vm
-            .call(json!([
-                "asd",
-                script,
-                "{}",
-                "{}",
-            ]))
+            .call(json!(["asd", script, "{}", "{}",]))
             .expect("call should be successful");
 
         let peers_result: HashSet<_> = res.next_peer_pks.drain(..).collect();
@@ -140,12 +135,7 @@ mod tests {
         );
 
         let res = vm
-            .call(json!([
-                "asd",
-                script,
-                "{}",
-                "{}",
-            ]))
+            .call(json!(["asd", script, "{}", "{}",]))
             .expect("call should be successful");
 
         assert_eq!(res.next_peer_pks, vec![String::from("remote_peer_id_2")]);

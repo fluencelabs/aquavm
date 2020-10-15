@@ -370,12 +370,7 @@ mod tests {
         );
 
         let res = vm
-            .call(json!([
-                "asd",
-                script,
-                "{}",
-                "{\"value\": \"test\"}",
-            ]))
+            .call(json!(["asd", script, "{}", "{\"value\": \"test\"}",]))
             .expect("call should be successful");
 
         let res: JValue = serde_json::from_str(&res.data).unwrap();
@@ -389,12 +384,7 @@ mod tests {
         );
 
         let res = vm
-            .call(json!([
-                "asd",
-                script,
-                "{}",
-                "{\"value\": \"test\"}",
-            ]))
+            .call(json!(["asd", script, "{}", "{\"value\": \"test\"}",]))
             .expect("call should be successful");
 
         let res: JValue = serde_json::from_str(&res.data).unwrap();
@@ -413,12 +403,7 @@ mod tests {
         );
 
         let res = vm
-            .call(json!([
-                "asd",
-                script,
-                "{}",
-                "{\"value\": \"test\"}",
-            ]))
+            .call(json!(["asd", script, "{}", "{\"value\": \"test\"}",]))
             .expect("call should be successful");
 
         assert_eq!(res.next_peer_pks, vec![remote_peer_id]);
@@ -431,12 +416,7 @@ mod tests {
         let script = format!(r#"(call (remote_peer_id ("some_service_id" "local_fn_name") ("param") result_name))"#,);
 
         let res = vm
-            .call(json!([
-                "asd",
-                script,
-                "{}",
-                "{\"remote_peer_id\": \"some_peer_id\"}",
-            ]))
+            .call(json!(["asd", script, "{}", "{\"remote_peer_id\": \"some_peer_id\"}",]))
             .expect("call should be successful");
 
         assert_eq!(res.next_peer_pks, vec![String::from("some_peer_id")]);
@@ -462,12 +442,7 @@ mod tests {
         );
 
         let res = vm
-            .call(json!([
-                "asd",
-                script,
-                "{}",
-                json!({"arg3": "arg3_value"}).to_string(),
-            ]))
+            .call(json!(["asd", script, "{}", json!({"arg3": "arg3_value"}).to_string(),]))
             .expect("call should be successful");
 
         let jdata: JValue = serde_json::from_str(&res.data).expect("should be valid json");

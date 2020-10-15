@@ -80,12 +80,7 @@ mod tests {
         );
 
         let res = vm
-            .call(json!([
-                "asd",
-                script,
-                "{}",
-                json!({"arg3": "arg3_value"}).to_string(),
-            ]))
+            .call(json!(["asd", script, "{}", json!({"arg3": "arg3_value"}).to_string(),]))
             .expect("call should be successful");
 
         let jdata: JValue = serde_json::from_str(&res.data).expect("should be valid json");
@@ -101,12 +96,7 @@ mod tests {
         );
 
         let res = vm
-            .call(json!([
-                "asd",
-                script,
-                "{}",
-                json!({"arg3": "arg3_value"}).to_string(),
-            ]))
+            .call(json!(["asd", script, "{}", json!({"arg3": "arg3_value"}).to_string(),]))
             .expect("call should be successful");
 
         let jdata: JValue = serde_json::from_str(&res.data).expect("should be valid json");

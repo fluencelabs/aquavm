@@ -145,34 +145,19 @@ fn evidence_seq_seq() {
     );
 
     let res1 = vm2
-        .call(json!([
-            "asd",
-            script,
-            "{}",
-            "{}",
-        ]))
+        .call(json!(["asd", script, "{}", "{}",]))
         .expect("should be successful");
 
     assert_eq!(res1.next_peer_pks, vec![peer_id_1.clone()]);
 
     let res2 = vm1
-        .call(json!([
-            "asd",
-            script,
-            "{}",
-            res1.data,
-        ]))
+        .call(json!(["asd", script, "{}", res1.data,]))
         .expect("should be successful");
 
     assert_eq!(res2.next_peer_pks, vec![peer_id_2.clone()]);
 
     let res3 = vm2
-        .call(json!([
-            "asd",
-            script,
-            "{}",
-            res2.data,
-        ]))
+        .call(json!(["asd", script, "{}", res2.data,]))
         .expect("should be successful");
 
     let resulted_json: JValue = serde_json::from_str(&res3.data).expect("stepper should return valid json");
@@ -255,12 +240,7 @@ fn evidence_create_service() {
     let mut vm = create_aqua_vm(call_service, "");
 
     let res = vm
-        .call(json!([
-            "init_user_pk",
-            script,
-            "{}",
-            data,
-        ]))
+        .call(json!(["init_user_pk", script, "{}", data,]))
         .expect("should be successful");
 
     let resulted_data: JValue = serde_json::from_str(&res.data).expect("should be correct json");
@@ -321,36 +301,21 @@ fn evidence_par_seq_fold_call() {
         .expect("should be successful");
 
     let res2 = vm1
-        .call(json!([
-            "asd",
-            script,
-            "{}",
-            res1.data,
-        ]))
+        .call(json!(["asd", script, "{}", res1.data,]))
         .expect("should be successful");
 
     let mut data = res2.data;
 
     for _ in 0..100 {
         let res3 = vm2
-            .call(json!([
-                "asd",
-                script,
-                "{}",
-                data,
-            ]))
+            .call(json!(["asd", script, "{}", data,]))
             .expect("should be successful");
 
         data = res3.data;
     }
 
     let res4 = vm3
-        .call(json!([
-            "asd",
-            script,
-            "{}",
-            data,
-        ]))
+        .call(json!(["asd", script, "{}", data,]))
         .expect("should be successful");
 
     let resulted_json: JValue = serde_json::from_str(&res4.data).expect("stepper should return valid json");
@@ -428,34 +393,19 @@ fn evidence_par_seq_fold_in_cycle_call() {
 
     for _ in 0..100 {
         let res1 = vm1
-            .call(json!([
-                "asd",
-                script,
-                "{}",
-                data
-            ]))
+            .call(json!(["asd", script, "{}", data]))
             .expect("should be successful");
 
         data = res1.data;
 
         let res2 = vm2
-            .call(json!([
-                "asd",
-                script,
-                "{}",
-                data
-            ]))
+            .call(json!(["asd", script, "{}", data]))
             .expect("should be successful");
 
         data = res2.data;
 
         let res3 = vm3
-            .call(json!([
-                "asd",
-                script,
-                "{}",
-                data
-            ]))
+            .call(json!(["asd", script, "{}", data]))
             .expect("should be successful");
 
         data = res3.data;
@@ -523,34 +473,19 @@ fn evidence_seq_par_seq_seq() {
     );
 
     let res1 = vm2
-        .call(json!([
-                "asd",
-                script,
-                "{}",
-                "{}",
-            ]))
+        .call(json!(["asd", script, "{}", "{}",]))
         .expect("should be successful");
 
     assert_eq!(res1.next_peer_pks, vec![peer_id_1.clone()]);
 
     let res2 = vm1
-        .call(json!([
-                "asd",
-                script,
-                "{}",
-                res1.data
-            ]))
+        .call(json!(["asd", script, "{}", res1.data]))
         .expect("should be successful");
 
     assert_eq!(res2.next_peer_pks, vec![peer_id_2.clone()]);
 
     let res3 = vm2
-        .call(json!([
-                "asd",
-                script,
-                "{}",
-                res2.data
-            ]))
+        .call(json!(["asd", script, "{}", res2.data]))
         .expect("should be successful");
 
     let resulted_json: JValue = serde_json::from_str(&res3.data).expect("stepper should return valid json");

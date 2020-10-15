@@ -40,12 +40,7 @@ fn seq_par_call() {
     );
 
     let res = vm
-        .call(json!([
-            "asd",
-            script,
-            "{}",
-            "{}",
-        ]))
+        .call(json!(["asd", script, "{}", "{}",]))
         .expect("should be successful");
 
     let resulted_json: JValue = serde_json::from_str(&res.data).expect("stepper should return valid json");
@@ -79,12 +74,7 @@ fn par_par_call() {
     );
 
     let res = vm
-        .call(json!([
-            "asd",
-            script,
-            "{}",
-            "{}",
-        ]))
+        .call(json!(["asd", script, "{}", "{}",]))
         .expect("should be successful");
 
     let resulted_json: JValue = serde_json::from_str(&res.data).expect("stepper should return valid json");
@@ -161,12 +151,7 @@ fn create_service() {
     let mut vm = create_aqua_vm(call_service, "");
 
     let res = vm
-        .call(json!([
-            "init_user_pk",
-            script,
-            "{}",
-            data,
-        ]))
+        .call(json!(["init_user_pk", script, "{}", data,]))
         .expect("should be successful");
 
     let resulted_data: JValue = serde_json::from_str(&res.data).expect("should be correct json");
