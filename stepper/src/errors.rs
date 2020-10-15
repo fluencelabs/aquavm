@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use crate::call_evidence::EvidenceState;
+use crate::call_evidence::{CallResult, EvidenceState};
 use crate::CallServiceResult;
 use crate::JValue;
 use crate::StepperOutcome;
@@ -85,6 +85,12 @@ pub(crate) enum AquamarineError {
 
     /// Errors occurred when reserved keyword is used for variable name.
     ReservedKeywordError(String),
+
+    /// Errors occurred when previous and current evidence states are incompatible.
+    IncompatibleEvidenceStates(EvidenceState, EvidenceState),
+
+    /// Errors occurred when previous and current call results are incompatible.
+    IncompatibleCallResults(CallResult, CallResult),
 }
 
 impl Error for AquamarineError {}
@@ -127,8 +133,8 @@ impl std::fmt::Display for AquamarineError {
                 "variable with path {} not found in {:?} with error: {:?}",
                 json_path, value, json_path_err
             ),
-            AquamarineError::IncompatibleJValueType(avalue, desired_type) => {
-                write!(f, "got avalue \"{:?}\", but {} type is needed", avalue, desired_type,)
+            AquamarineError::IncompatibleJValueType(jvalue, desired_type) => {
+                write!(f, "got avalue \"{:?}\", but {} type is needed", jvalue, desired_type,)
             }
             AquamarineError::MultipleValuesInJsonPath(json_path) => {
                 write!(f, "multiple variables found for this json path {}", json_path)
@@ -154,6 +160,16 @@ impl std::fmt::Display for AquamarineError {
                 f,
                 "a variable can't be named as {} because this name is reserved",
                 variable_name
+            ),
+            AquamarineError::IncompatibleEvidenceStates(prev_state, current_state) => write!(
+                f,
+                "previous and current data have incompatible states: {:?} {:?}",
+                prev_state, current_state
+            ),
+            AquamarineError::IncompatibleCallResults(prev_call_result, current_call_result) => write!(
+                f,
+                "previous and current call results are incompatible: {:?} {:?}",
+                prev_call_result, current_call_result
             ),
         }
     }
@@ -193,6 +209,8 @@ impl Into<StepperOutcome> for AquamarineError {
             AquamarineError::CallEvidenceDeserializationError(..) => 17,
             AquamarineError::CallEvidenceSerializationError(..) => 18,
             AquamarineError::ReservedKeywordError(..) => 19,
+            AquamarineError::IncompatibleEvidenceStates(..) => 20,
+            AquamarineError::IncompatibleCallResults(..) => 21,
         };
 
         StepperOutcome {

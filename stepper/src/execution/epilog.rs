@@ -24,7 +24,7 @@ use crate::Result;
 pub(super) fn make_result_data(mut data: AquaData, call_ctx: CallEvidenceCtx) -> Result<String> {
     use serde_json::{to_string, to_value};
 
-    let serialized_call_ctx = to_value(call_ctx.new_states).map_err(CallSeError)?;
+    let serialized_call_ctx = to_value(call_ctx.new_path).map_err(CallSeError)?;
     data.insert(CALL_EVIDENCE_CTX_KEY.to_string(), serialized_call_ctx);
 
     let data = to_string(&data).map_err(DataSeError)?;

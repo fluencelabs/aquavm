@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
+use crate::AquamarineError::IncompatibleCallResults;
+use crate::AquamarineError::IncompatibleEvidenceStates;
 use crate::Result;
 
 use serde::Deserialize;
 use serde::Serialize;
 
-use std::collections::VecDeque;
+pub(crate) type CallEvidencePath = std::collections::VecDeque<EvidenceState>;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -42,30 +44,31 @@ pub(crate) enum EvidenceState {
 }
 
 pub(crate) fn merge_call_states(
-    mut prev_states: VecDeque<EvidenceState>,
-    mut states: VecDeque<EvidenceState>,
-) -> Result<VecDeque<EvidenceState>> {
-    let mut merged_call_states = VecDeque::new();
+    mut prev_path: CallEvidencePath,
+    mut current_path: CallEvidencePath,
+) -> Result<CallEvidencePath> {
+    let mut merged_path = CallEvidencePath::new();
 
-    let prev_subtree_size = prev_states.len();
-    let subtree_size = states.len();
+    let prev_subtree_size = prev_path.len();
+    let current_subtree_size = current_path.len();
+
     handle_subtree(
-        &mut prev_states,
+        &mut prev_path,
         prev_subtree_size,
-        &mut states,
-        subtree_size,
-        &mut merged_call_states,
+        &mut current_path,
+        current_subtree_size,
+        &mut merged_path,
     )?;
 
-    Ok(merged_call_states)
+    Ok(merged_path)
 }
 
 fn handle_subtree(
-    prev_states: &mut VecDeque<EvidenceState>,
+    prev_path: &mut CallEvidencePath,
     mut prev_subtree_size: usize,
-    states: &mut VecDeque<EvidenceState>,
-    mut subtree_size: usize,
-    result: &mut VecDeque<EvidenceState>,
+    current_path: &mut CallEvidencePath,
+    mut current_subtree_size: usize,
+    result_path: &mut CallEvidencePath,
 ) -> Result<()> {
     use EvidenceState::Call;
     use EvidenceState::Par;
@@ -73,14 +76,14 @@ fn handle_subtree(
     loop {
         let prev_state = if prev_subtree_size != 0 {
             prev_subtree_size -= 1;
-            prev_states.pop_front()
+            prev_path.pop_front()
         } else {
             None
         };
 
-        let state = if subtree_size != 0 {
-            subtree_size -= 1;
-            states.pop_front()
+        let state = if current_subtree_size != 0 {
+            current_subtree_size -= 1;
+            current_path.pop_front()
         } else {
             None
         };
@@ -88,44 +91,48 @@ fn handle_subtree(
         match (prev_state, state) {
             (Some(Call(prev_call)), Some(Call(call))) => {
                 let resulted_call = handle_call(prev_call, call)?;
-                result.push_back(Call(resulted_call));
+                result_path.push_back(Call(resulted_call));
             }
-            (Some(Par(prev_left, prev_right)), Some(Par(left, right))) => {
-                handle_subtree(prev_states, prev_left, states, left, result)?;
-                handle_subtree(prev_states, prev_right, states, right, result)?;
+            (Some(Par(prev_left, prev_right)), Some(Par(current_left, current_right))) => {
+                handle_subtree(prev_path, prev_left, current_path, current_left, result_path)?;
+                handle_subtree(prev_path, prev_right, current_path, current_right, result_path)?;
             }
             (None, Some(_)) => {
-                result.extend(states.drain(..));
+                result_path.extend(current_path.drain(..current_subtree_size));
+                break;
             }
             (Some(_), None) => {
-                result.extend(prev_states.drain(..));
+                result_path.extend(prev_path.drain(..prev_subtree_size));
+                break;
             }
-            // TODO: return a error
-            (Some(Call(..)), Some(Par(..))) => unimplemented!(),
-            (Some(Par(..)), Some(Call(..))) => unimplemented!(),
             (None, None) => break,
+            // this match arn represents (Call, Par) and (Par, Call) states
+            (Some(prev_state), Some(current_state)) => {
+                return Err(IncompatibleEvidenceStates(prev_state, current_state))
+            }
         }
     }
 
     Ok(())
 }
 
-fn handle_call(prev_call_result: CallResult, call_result: CallResult) -> Result<CallResult> {
+fn handle_call(prev_call_result: CallResult, current_call_result: CallResult) -> Result<CallResult> {
     use CallResult::*;
 
-    match (&prev_call_result, &call_result) {
+    match (&prev_call_result, &current_call_result) {
         (CallServiceFailed(prev_err_msg), CallServiceFailed(err_msg)) => {
-            if prev_err_msg != err_msg {}
-            Ok(call_result)
+            if prev_err_msg != err_msg {
+                return Err(IncompatibleCallResults(prev_call_result, current_call_result));
+            }
+            Ok(current_call_result)
         }
-        (RequestSent, CallServiceFailed(_)) => Ok(call_result),
+        (RequestSent, CallServiceFailed(_)) => Ok(current_call_result),
         (CallServiceFailed(_), RequestSent) => Ok(prev_call_result),
-        (RequestSent, Executed) => Ok(call_result),
+        (RequestSent, RequestSent) => Ok(prev_call_result),
+        (RequestSent, Executed) => Ok(current_call_result),
         (Executed, RequestSent) => Ok(prev_call_result),
         (Executed, Executed) => Ok(prev_call_result),
-        // TODO: make them errors
-        (CallServiceFailed(_), Executed) => Ok(Executed),
-        (Executed, CallServiceFailed(_)) => Ok(Executed),
-        _ => Ok(Executed),
+        (CallServiceFailed(_), Executed) => Err(IncompatibleCallResults(prev_call_result, current_call_result)),
+        (Executed, CallServiceFailed(_)) => Err(IncompatibleCallResults(prev_call_result, current_call_result)),
     }
 }

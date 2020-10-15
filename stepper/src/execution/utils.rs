@@ -46,6 +46,7 @@ pub(super) fn format_aqua(aqua: String) -> String {
     String::from_iter(formatted_aqua.into_iter())
 }
 
+/// Deduplicate values in a supplied vector.
 pub(super) fn dedup<T: Eq + Hash>(mut vec: Vec<T>) -> Vec<T> {
     use std::collections::HashSet;
 

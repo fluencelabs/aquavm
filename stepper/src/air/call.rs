@@ -244,14 +244,14 @@ impl ParsedCall {
     }
 
     fn prepare_evidence_state(&self, call_ctx: &mut CallEvidenceCtx, current_peer_id: &str) -> Result<bool> {
-        if call_ctx.unused_subtree_elements_count == 0 {
+        if call_ctx.current_subtree_elements_count == 0 {
             log::info!("call evidence: previous state wasn't found");
             return Ok(true);
         }
 
-        call_ctx.unused_subtree_elements_count -= 1;
+        call_ctx.current_subtree_elements_count -= 1;
         // unwrap is safe here, because current_states length's been checked
-        let prev_state = call_ctx.current_states.pop_front().unwrap();
+        let prev_state = call_ctx.current_path.pop_front().unwrap();
 
         log::info!("call evidence: previous state found {:?}", prev_state);
 
@@ -260,7 +260,7 @@ impl ParsedCall {
             // here it's needed to bubble this special error up
             EvidenceState::Call(CallResult::CallServiceFailed(err_msg)) => {
                 let err_msg = err_msg.clone();
-                call_ctx.new_states.push(prev_state);
+                call_ctx.new_path.push_back(prev_state);
                 Err(AquamarineError::LocalServiceError(err_msg))
             }
             EvidenceState::Call(CallResult::RequestSent) => {
@@ -268,13 +268,13 @@ impl ParsedCall {
                 if self.peer_pk == current_peer_id {
                     Ok(true)
                 } else {
-                    call_ctx.new_states.push(prev_state);
+                    call_ctx.new_path.push_back(prev_state);
                     Ok(false)
                 }
             }
             // this instruction's been already executed
             EvidenceState::Call(CallResult::Executed) => {
-                call_ctx.new_states.push(prev_state);
+                call_ctx.new_path.push_back(prev_state);
                 Ok(false)
             }
             // state has inconsistent order - return a error, call shouldn't be executed
@@ -304,7 +304,7 @@ fn set_local_call_result(
         }
 
         log::info!("call evidence: adding new state {:?}", new_evidence_state);
-        call_ctx.new_states.push(new_evidence_state);
+        call_ctx.new_path.push_back(new_evidence_state);
 
         return Ok(());
     }
@@ -330,7 +330,7 @@ fn set_local_call_result(
     }
 
     log::info!("call evidence: adding new state {:?}", new_evidence_state);
-    call_ctx.new_states.push(new_evidence_state);
+    call_ctx.new_path.push_back(new_evidence_state);
 
     Ok(())
 }
@@ -340,7 +340,7 @@ fn set_remote_call_result(peer_pk: String, exec_ctx: &mut ExecutionCtx, call_ctx
 
     let new_evidence_state = EvidenceState::Call(CallResult::RequestSent);
     log::info!("call evidence: adding new state {:?}", new_evidence_state);
-    call_ctx.new_states.push(new_evidence_state);
+    call_ctx.new_path.push_back(new_evidence_state);
 }
 
 fn is_string_literal(value: &str) -> bool {
