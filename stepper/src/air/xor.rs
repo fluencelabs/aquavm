@@ -81,8 +81,9 @@ mod tests {
 
         let res = vm
             .call(json!([
-                String::from("asd"),
+                "asd",
                 script,
+                "{}",
                 json!({"arg3": "arg3_value"}).to_string(),
             ]))
             .expect("call should be successful");
@@ -101,8 +102,9 @@ mod tests {
 
         let res = vm
             .call(json!([
-                String::from("asd"),
+                "asd",
                 script,
+                "{}",
                 json!({"arg3": "arg3_value"}).to_string(),
             ]))
             .expect("call should be successful");

@@ -19,7 +19,6 @@ use super::EvidenceState;
 use super::ExecutableInstruction;
 use super::ExecutionCtx;
 use super::Instruction;
-use crate::AquamarineError;
 use crate::Result;
 
 use serde_derive::Deserialize;
@@ -55,6 +54,8 @@ impl ExecutableInstruction for Par {
 }
 
 fn extract_subtree_sizes(call_ctx: &mut CallEvidenceCtx) -> Result<(usize, usize)> {
+    use crate::AquamarineError::InvalidEvidenceState;
+
     if call_ctx.current_subtree_elements_count == 0 {
         return Ok((0, 0));
     }
@@ -69,7 +70,7 @@ fn extract_subtree_sizes(call_ctx: &mut CallEvidenceCtx) -> Result<(usize, usize
     // unwrap is safe here because of length's been checked
     match call_ctx.current_path.pop_front().unwrap() {
         EvidenceState::Par(left, right) => Ok((left, right)),
-        state => Err(AquamarineError::InvalidEvidenceState(state, String::from("par"))),
+        state => Err(InvalidEvidenceState(state, String::from("par"))),
     }
 }
 
@@ -110,7 +111,12 @@ mod tests {
         );
 
         let mut res = vm
-            .call(json!([String::from("asd"), script, String::from("{}"),]))
+            .call(json!([
+                "asd",
+                script,
+                "{}",
+                "{}",
+            ]))
             .expect("call should be successful");
 
         let peers_result: HashSet<_> = res.next_peer_pks.drain(..).collect();
@@ -134,7 +140,12 @@ mod tests {
         );
 
         let res = vm
-            .call(json!([String::from("asd"), script, String::from("{}"),]))
+            .call(json!([
+                "asd",
+                script,
+                "{}",
+                "{}",
+            ]))
             .expect("call should be successful");
 
         assert_eq!(res.next_peer_pks, vec![String::from("remote_peer_id_2")]);

@@ -155,9 +155,10 @@ mod tests {
 
         let res = vm
             .call(json!([
-                String::from("asd"),
+                "asd",
                 lfold,
-                String::from("{\"Iterable\": [\"1\",\"2\",\"3\",\"4\",\"5\"]}"),
+                "{}",
+                "{\"Iterable\": [\"1\",\"2\",\"3\",\"4\",\"5\"]}",
             ]))
             .expect("call should be successful");
 
@@ -182,9 +183,10 @@ mod tests {
 
         let res = vm
             .call(json!([
-                String::from("asd"),
+                "asd",
                 rfold,
-                String::from("{\"Iterable\": [\"1\",\"2\",\"3\",\"4\",\"5\"]}"),
+                "{}",
+                "{\"Iterable\": [\"1\",\"2\",\"3\",\"4\",\"5\"]}",
             ]))
             .expect("call should be successful");
 
@@ -214,11 +216,10 @@ mod tests {
 
         let res = vm
             .call(json!([
-                String::from("asd"),
+                "asd",
                 script,
-                String::from(
-                    "{\"Iterable1\": [\"1\",\"2\",\"3\",\"4\",\"5\"], \"Iterable2\": [\"1\",\"2\",\"3\",\"4\",\"5\"]}"
-                ),
+                "{}",
+                "{\"Iterable1\": [\"1\",\"2\",\"3\",\"4\",\"5\"], \"Iterable2\": [\"1\",\"2\",\"3\",\"4\",\"5\"]}",
             ]))
             .expect("call should be successful");
 
@@ -250,11 +251,10 @@ mod tests {
         );
 
         let res = vm.call(json!([
-            String::from("asd"),
+            "asd",
             script,
-            String::from(
-                "{\"Iterable1\": [\"1\",\"2\",\"3\",\"4\",\"5\"], \"Iterable2\": [\"1\",\"2\",\"3\",\"4\",\"5\"]}"
-            ),
+            "{}",
+            "{\"Iterable1\": [\"1\",\"2\",\"3\",\"4\",\"5\"], \"Iterable2\": [\"1\",\"2\",\"3\",\"4\",\"5\"]}",
         ]));
 
         assert!(res.is_err());

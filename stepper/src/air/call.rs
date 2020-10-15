@@ -371,9 +371,10 @@ mod tests {
 
         let res = vm
             .call(json!([
-                String::from("asd"),
+                "asd",
                 script,
-                String::from("{\"value\": \"test\"}"),
+                "{}",
+                "{\"value\": \"test\"}",
             ]))
             .expect("call should be successful");
 
@@ -389,9 +390,10 @@ mod tests {
 
         let res = vm
             .call(json!([
-                String::from("asd"),
+                "asd",
                 script,
-                String::from("{\"value\": \"test\"}"),
+                "{}",
+                "{\"value\": \"test\"}",
             ]))
             .expect("call should be successful");
 
@@ -412,9 +414,10 @@ mod tests {
 
         let res = vm
             .call(json!([
-                String::from("asd"),
+                "asd",
                 script,
-                String::from("{\"value\": \"test\"}"),
+                "{}",
+                "{\"value\": \"test\"}",
             ]))
             .expect("call should be successful");
 
@@ -429,9 +432,10 @@ mod tests {
 
         let res = vm
             .call(json!([
-                String::from("asd"),
+                "asd",
                 script,
-                String::from("{\"remote_peer_id\": \"some_peer_id\"}"),
+                "{}",
+                "{\"remote_peer_id\": \"some_peer_id\"}",
             ]))
             .expect("call should be successful");
 
@@ -459,8 +463,9 @@ mod tests {
 
         let res = vm
             .call(json!([
-                String::from("asd"),
+                "asd",
                 script,
+                "{}",
                 json!({"arg3": "arg3_value"}).to_string(),
             ]))
             .expect("call should be successful");

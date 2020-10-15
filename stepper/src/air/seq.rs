@@ -60,15 +60,21 @@ mod tests {
         );
 
         let res = vm
-            .call(json!([String::from("asd"), script, String::from("{}")]))
+            .call(json!([
+                "asd",
+                script,
+                "{}",
+                "{}",
+            ]))
             .expect("call should be successful");
 
         assert_eq!(res.next_peer_pks, vec![String::from("remote_peer_id_1")]);
 
         let res = vm
             .call(json!([
-                String::from("asd"),
+                "asd",
                 script,
+                "{}",
                 json!({
                     "__call": [{"call": "executed"}]
                     }
@@ -93,7 +99,12 @@ mod tests {
         );
 
         let res = vm
-            .call(json!([String::from("asd"), script, String::from("{}"),]))
+            .call(json!([
+                "asd",
+                script,
+                "{}",
+                "{}",
+            ]))
             .expect("call should be successful");
 
         assert_eq!(res.next_peer_pks, vec![String::from("remote_peer_id_2")]);
