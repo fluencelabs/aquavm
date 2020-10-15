@@ -91,6 +91,9 @@ pub(crate) enum AquamarineError {
 
     /// Errors occurred when previous and current call results are incompatible.
     IncompatibleCallResults(CallResult, CallResult),
+
+    /// Errors occurred when evidence path contains less elements then corresponding Par has.
+    EvidencePathTooSmall(usize, usize),
 }
 
 impl Error for AquamarineError {}
@@ -145,10 +148,10 @@ impl std::fmt::Display for AquamarineError {
             AquamarineError::MultipleFoldStates(iterator) => {
                 write!(f, "multiple fold states found for iterable {}", iterator)
             }
-            AquamarineError::InvalidEvidenceState(found_state, expected) => write!(
+            AquamarineError::InvalidEvidenceState(found, expected) => write!(
                 f,
                 "invalid evidence state: expected {}, but found {:?}",
-                expected, found_state
+                expected, found
             ),
             AquamarineError::CallEvidenceDeserializationError(err) => {
                 write!(f, "an error occurred while data deserialization: {:?}", err)
@@ -170,6 +173,11 @@ impl std::fmt::Display for AquamarineError {
                 f,
                 "previous and current call results are incompatible: {:?} {:?}",
                 prev_call_result, current_call_result
+            ),
+            AquamarineError::EvidencePathTooSmall(actual_count, desired_count) => write!(
+                f,
+                "evidence path remains {} elements, but {} requires by Par",
+                actual_count, desired_count
             ),
         }
     }
@@ -211,6 +219,7 @@ impl Into<StepperOutcome> for AquamarineError {
             AquamarineError::ReservedKeywordError(..) => 19,
             AquamarineError::IncompatibleEvidenceStates(..) => 20,
             AquamarineError::IncompatibleCallResults(..) => 21,
+            AquamarineError::EvidencePathTooSmall(..) => 21,
         };
 
         StepperOutcome {

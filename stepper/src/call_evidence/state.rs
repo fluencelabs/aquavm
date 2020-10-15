@@ -59,6 +59,8 @@ pub(crate) fn merge_call_states(
         &mut merged_path,
     )?;
 
+    log::info!("merged path: {:?}", merged_path);
+
     Ok(merged_path)
 }
 
@@ -69,6 +71,7 @@ fn handle_subtree(
     mut current_subtree_size: usize,
     result_path: &mut CallEvidencePath,
 ) -> Result<()> {
+    use crate::AquamarineError::EvidencePathTooSmall;
     use crate::AquamarineError::IncompatibleEvidenceStates;
     use EvidenceState::Call;
     use EvidenceState::Par;
@@ -81,14 +84,14 @@ fn handle_subtree(
             None
         };
 
-        let state = if current_subtree_size != 0 {
+        let current_state = if current_subtree_size != 0 {
             current_subtree_size -= 1;
             current_path.pop_front()
         } else {
             None
         };
 
-        match (prev_state, state) {
+        match (prev_state, current_state) {
             (Some(Call(prev_call)), Some(Call(call))) => {
                 let resulted_call = handle_call(prev_call, call)?;
                 result_path.push_back(Call(resulted_call));
@@ -98,13 +101,24 @@ fn handle_subtree(
 
                 handle_subtree(prev_path, prev_left, current_path, current_left, result_path)?;
                 handle_subtree(prev_path, prev_right, current_path, current_right, result_path)?;
+
+                prev_subtree_size -= prev_left + prev_right;
+                current_subtree_size -= current_left + current_right;
             }
             (None, Some(s)) => {
+                if current_path.len() < current_subtree_size {
+                    return Err(EvidencePathTooSmall(current_path.len(), current_subtree_size));
+                }
+
                 result_path.push_back(s);
                 result_path.extend(current_path.drain(..current_subtree_size));
                 break;
             }
             (Some(s), None) => {
+                if prev_path.len() < prev_subtree_size {
+                    return Err(EvidencePathTooSmall(prev_path.len(), prev_subtree_size));
+                }
+
                 result_path.push_back(s);
                 result_path.extend(prev_path.drain(..prev_subtree_size));
                 break;
@@ -215,6 +229,53 @@ mod tests {
         right_merged_path.push_back(Par(1, 1));
         right_merged_path.push_back(Call(Executed));
         right_merged_path.push_back(Call(Executed));
+
+        assert_eq!(merged_path, right_merged_path);
+    }
+
+    #[test]
+    fn merge_call_states_3() {
+        use CallResult::*;
+        use EvidenceState::*;
+
+        let mut prev_path = CallEvidencePath::new();
+        prev_path.push_back(Call(Executed));
+        prev_path.push_back(Par(2, 0));
+        prev_path.push_back(Par(1, 0));
+        prev_path.push_back(Call(RequestSent));
+        prev_path.push_back(Par(1, 2));
+        prev_path.push_back(Call(RequestSent));
+        prev_path.push_back(Call(Executed));
+        prev_path.push_back(Call(RequestSent));
+
+        let mut current_path = CallEvidencePath::new();
+        current_path.push_back(Call(RequestSent));
+        current_path.push_back(Par(3, 3));
+        current_path.push_back(Par(1, 1));
+        current_path.push_back(Call(Executed));
+        current_path.push_back(Call(Executed));
+        current_path.push_back(Par(1, 1));
+        current_path.push_back(Call(Executed));
+        current_path.push_back(Call(RequestSent));
+        current_path.push_back(Par(1, 1));
+        current_path.push_back(Call(Executed));
+        current_path.push_back(Call(RequestSent));
+
+        let merged_path = merge_call_states(prev_path, current_path).expect("merging should be successful");
+
+        let mut right_merged_path = CallEvidencePath::new();
+        right_merged_path.push_back(Call(Executed));
+        right_merged_path.push_back(Par(3, 3));
+        right_merged_path.push_back(Par(1, 1));
+        right_merged_path.push_back(Call(Executed));
+        right_merged_path.push_back(Call(Executed));
+        right_merged_path.push_back(Par(1, 1));
+        right_merged_path.push_back(Call(Executed));
+        right_merged_path.push_back(Call(RequestSent));
+        right_merged_path.push_back(Par(1, 2));
+        right_merged_path.push_back(Call(Executed));
+        right_merged_path.push_back(Call(Executed));
+        right_merged_path.push_back(Call(RequestSent));
 
         assert_eq!(merged_path, right_merged_path);
     }
