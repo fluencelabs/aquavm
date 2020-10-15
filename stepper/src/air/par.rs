@@ -32,11 +32,10 @@ impl ExecutableInstruction for Par {
     fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
         log::info!("par is called with context: {:?} {:?}", exec_ctx, call_ctx);
 
-        let pre_current_states_count = call_ctx.current_states.len();
-        let pre_subtree_used_states = call_ctx.used_states_in_subtree;
-        let pre_subtree_size = call_ctx.subtree_size;
-
         let (left_subtree_size, right_subtree_size) = extract_subtree_sizes(call_ctx)?;
+
+        let pre_states_count = call_ctx.current_states.len();
+        let pre_unused_elements = call_ctx.unused_subtree_elements_count;
 
         let pre_new_states_count = call_ctx.new_states.len();
         call_ctx.new_states.push(EvidenceState::Par(0, 0));
@@ -54,20 +53,20 @@ impl ExecutableInstruction for Par {
         );
         call_ctx.new_states[pre_new_states_count] = new_par_evidence_state;
 
-        let post_current_states_count = call_ctx.current_states.len();
-
-        call_ctx.used_states_in_subtree =
-            pre_subtree_used_states + (pre_current_states_count - post_current_states_count) + 1;
-        call_ctx.subtree_size = pre_subtree_size;
+        let post_states_count = call_ctx.current_states.len();
+        call_ctx.unused_subtree_elements_count =
+            pre_unused_elements - (pre_states_count - post_states_count);
 
         Ok(())
     }
 }
 
 fn extract_subtree_sizes(call_ctx: &mut CallEvidenceCtx) -> Result<(usize, usize)> {
-    if call_ctx.used_states_in_subtree >= call_ctx.subtree_size {
+    if call_ctx.unused_subtree_elements_count == 0 {
         return Ok((0, 0));
     }
+
+    call_ctx.unused_subtree_elements_count -= 1;
 
     log::info!(
         "call evidence: the previous state was found {:?}",
@@ -90,8 +89,7 @@ fn execute_subtree(
     exec_ctx: &mut ExecutionCtx,
     call_ctx: &mut CallEvidenceCtx,
 ) -> Result<usize> {
-    call_ctx.used_states_in_subtree = 0;
-    call_ctx.subtree_size = subtree_size;
+    call_ctx.unused_subtree_elements_count = subtree_size;
     let before_states_count = call_ctx.new_states.len();
 
     // execute subtree

@@ -27,6 +27,8 @@ type JValue = serde_json::Value;
 
 #[test]
 fn evidence_seq_par_call() {
+    env_logger::init();
+
     let mut vm = create_aqua_vm(unit_call_service(), "");
 
     let script = String::from(

@@ -24,8 +24,7 @@ use std::collections::VecDeque;
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub(crate) struct CallEvidenceCtx {
     pub(crate) current_states: VecDeque<EvidenceState>,
-    pub(crate) used_states_in_subtree: usize,
-    pub(crate) subtree_size: usize,
+    pub(crate) unused_subtree_elements_count: usize,
     pub(crate) new_states: Vec<EvidenceState>,
 }
 
@@ -34,8 +33,7 @@ impl CallEvidenceCtx {
         let right = current_states.len();
         Self {
             current_states,
-            used_states_in_subtree: 0,
-            subtree_size: right,
+            unused_subtree_elements_count: right,
             new_states: vec![],
         }
     }

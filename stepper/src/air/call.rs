@@ -277,12 +277,12 @@ impl ParsedCall {
         call_ctx: &mut CallEvidenceCtx,
         current_peer_id: &str,
     ) -> Result<bool> {
-        if call_ctx.used_states_in_subtree >= call_ctx.subtree_size {
+        if call_ctx.unused_subtree_elements_count == 0 {
             log::info!("call evidence: previous state wasn't found");
             return Ok(true);
         }
 
-        call_ctx.used_states_in_subtree += 1;
+        call_ctx.unused_subtree_elements_count -= 1;
         // unwrap is safe here, because current_states length's been checked
         let prev_state = call_ctx.current_states.pop_front().unwrap();
 
