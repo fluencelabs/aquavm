@@ -14,24 +14,25 @@
  * limitations under the License.
  */
 
-use super::CallEvidenceCtx;
-use super::ExecutionCtx;
-use crate::Result;
+use serde::Deserialize;
+use serde::Serialize;
 
-use serde_derive::Deserialize;
-use serde_derive::Serialize;
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(crate) enum CallResult {
+    /// Request was sent to a target node and it shouldn't be called again.
+    RequestSent,
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
-pub(crate) struct Null {}
+    /// A corresponding call's been already executed.
+    Executed,
 
-impl super::ExecutableInstruction for Null {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
-        log::info!(
-            "null is called with contexts: {:?} {:?}",
-            exec_ctx,
-            call_ctx
-        );
+    /// call_service ended with a service error.
+    CallServiceFailed(String),
+}
 
-        Ok(())
-    }
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(crate) enum EvidenceState {
+    Par(usize, usize),
+    Call(CallResult),
 }

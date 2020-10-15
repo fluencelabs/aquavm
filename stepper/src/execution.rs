@@ -16,12 +16,17 @@
 
 use super::StepperOutcome;
 use crate::air::ExecutableInstruction;
-use crate::air::ExecutionContext;
+use crate::air::ExecutionCtx;
 use crate::air::Instruction;
+use crate::call_evidence::EvidenceState;
 use crate::get_current_peer_id;
 use crate::AquaData;
 use crate::AquamarineError;
 use crate::Result;
+
+use crate::call_evidence::CallEvidenceCtx;
+
+use std::collections::VecDeque;
 
 pub(crate) fn execute_aqua(init_user_id: String, aqua: String, data: String) -> StepperOutcome {
     log::info!(
@@ -35,8 +40,8 @@ pub(crate) fn execute_aqua(init_user_id: String, aqua: String, data: String) -> 
 }
 
 fn execute_aqua_impl(_init_user_id: String, aqua: String, data: String) -> Result<StepperOutcome> {
-    let parsed_data: AquaData =
-        serde_json::from_str(&data).map_err(AquamarineError::DataSerdeError)?;
+    let mut parsed_data: AquaData =
+        serde_json::from_str(&data).map_err(AquamarineError::DataDeserializationError)?;
     let formatted_aqua = format_aqua(aqua);
     let parsed_aqua = serde_sexpr::from_str::<Instruction>(&formatted_aqua)?;
 
@@ -49,16 +54,31 @@ fn execute_aqua_impl(_init_user_id: String, aqua: String, data: String) -> Resul
     let current_peer_id = get_current_peer_id()
         .map_err(|e| AquamarineError::CurrentPeerIdEnvError(e, String::from("CURRENT_PEER_ID")))?;
 
-    let mut execution_ctx = ExecutionContext::new(parsed_data, current_peer_id);
-    parsed_aqua.execute(&mut execution_ctx)?;
+    let call_evidence_ctx_key: &str = "__call";
+    let current_states: VecDeque<EvidenceState> = match parsed_data.remove(call_evidence_ctx_key) {
+        Some(jvalue) => serde_json::from_value(jvalue)
+            .map_err(AquamarineError::CallEvidenceDeserializationError)?,
+        None => VecDeque::new(),
+    };
 
-    let data =
-        serde_json::to_string(&execution_ctx.data).map_err(AquamarineError::DataSerdeError)?;
+    let mut execution_ctx = ExecutionCtx::new(parsed_data, current_peer_id);
+    let mut call_evidence_ctx = CallEvidenceCtx::new(current_states);
+
+    parsed_aqua.execute(&mut execution_ctx, &mut call_evidence_ctx)?;
+
+    let serialized_call_ctx = serde_json::to_value(call_evidence_ctx.new_states)
+        .map_err(AquamarineError::CallEvidenceSerializationError)?;
+    execution_ctx
+        .data
+        .insert(call_evidence_ctx_key.to_string(), serialized_call_ctx);
+
+    let data = serde_json::to_string(&execution_ctx.data)
+        .map_err(AquamarineError::DataSerializationError)?;
 
     Ok(StepperOutcome {
         ret_code: 0,
         data,
-        next_peer_pks: execution_ctx.next_peer_pks,
+        next_peer_pks: dedup(execution_ctx.next_peer_pks),
     })
 }
 
@@ -90,6 +110,15 @@ fn format_aqua(aqua: String) -> String {
     }
 
     String::from_iter(formatted_aqua.into_iter())
+}
+
+use std::hash::Hash;
+
+fn dedup<T: Eq + Hash>(mut vec: Vec<T>) -> Vec<T> {
+    use std::collections::HashSet;
+
+    let set: HashSet<_> = vec.drain(..).collect(); // dedup
+    set.into_iter().collect()
 }
 
 #[cfg(test)]

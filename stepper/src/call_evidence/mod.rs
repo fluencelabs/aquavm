@@ -14,24 +14,9 @@
  * limitations under the License.
  */
 
-use super::CallEvidenceCtx;
-use super::ExecutionCtx;
-use crate::Result;
+mod context;
+mod state;
 
-use serde_derive::Deserialize;
-use serde_derive::Serialize;
-
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
-pub(crate) struct Null {}
-
-impl super::ExecutableInstruction for Null {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
-        log::info!(
-            "null is called with contexts: {:?} {:?}",
-            exec_ctx,
-            call_ctx
-        );
-
-        Ok(())
-    }
-}
+pub(crate) use context::CallEvidenceCtx;
+pub(crate) use state::CallResult;
+pub(crate) use state::EvidenceState;

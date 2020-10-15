@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-use super::ExecutionContext;
+use super::CallEvidenceCtx;
+use super::ExecutionCtx;
 use super::Instruction;
 use crate::AquamarineError;
 use crate::JValue;
@@ -47,15 +48,21 @@ pub(crate) struct FoldState {
 }
 
 impl super::ExecutableInstruction for Fold {
-    fn execute(&self, ctx: &mut ExecutionContext) -> Result<()> {
-        log::info!("fold {:?} is called with context {:?}", self, ctx);
+    fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
+        log::info!(
+            "fold {} {} is called with contexts {:?} {:?}",
+            self.0,
+            self.1,
+            exec_ctx,
+            call_ctx
+        );
 
         let iterable_name = &self.0;
         let iterator_name = &self.1;
         let instr_head = self.2.clone();
 
         // check that value exists and has array type
-        match ctx.data.get(iterable_name) {
+        match exec_ctx.data.get(iterable_name) {
             Some(JValue::Array(_)) => {}
             Some(v) => {
                 return Err(AquamarineError::IncompatibleJValueType(
@@ -76,7 +83,7 @@ impl super::ExecutableInstruction for Fold {
             instr_head: instr_head.clone(),
         };
 
-        if ctx
+        if exec_ctx
             .folds
             .insert(iterator_name.clone(), fold_state)
             .is_some()
@@ -84,23 +91,28 @@ impl super::ExecutableInstruction for Fold {
             return Err(AquamarineError::MultipleFoldStates(iterable_name.clone()));
         }
 
-        instr_head.execute(ctx)?;
-        ctx.folds.remove(iterator_name);
+        instr_head.execute(exec_ctx, call_ctx)?;
+        exec_ctx.folds.remove(iterator_name);
 
         Ok(())
     }
 }
 
 impl super::ExecutableInstruction for Next {
-    fn execute(&self, ctx: &mut ExecutionContext) -> Result<()> {
-        log::info!("next {:?} is called with context {:?}", self, ctx);
+    fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
+        log::info!(
+            "next {:?} is called with contexts {:?} {:?}",
+            self,
+            exec_ctx,
+            call_ctx
+        );
 
         let iterator_name = &self.0;
-        let fold_state = ctx
+        let fold_state = exec_ctx
             .folds
             .get_mut(iterator_name)
             .ok_or_else(|| AquamarineError::FoldStateNotFound(iterator_name.clone()))?;
-        let value = ctx
+        let value = exec_ctx
             .data
             .get(&fold_state.iterable_name)
             .expect("this has been checked on the fold instruction");
@@ -117,10 +129,10 @@ impl super::ExecutableInstruction for Next {
         }
 
         let next_instr = fold_state.instr_head.clone();
-        next_instr.execute(ctx)?;
+        next_instr.execute(exec_ctx, call_ctx)?;
 
         // get the same fold state again because of borrow checker
-        match ctx.folds.get_mut(iterator_name) {
+        match exec_ctx.folds.get_mut(iterator_name) {
             Some(fold_state) => fold_state.cursor -= 1,
             _ => unreachable!("iterator value shouldn't changed inside fold"),
         };
@@ -142,7 +154,7 @@ mod tests {
 
     #[test]
     fn lfold() {
-        let mut vm = create_aqua_vm(echo_number_call_service());
+        let mut vm = create_aqua_vm(echo_number_call_service(), "");
 
         let lfold = String::from(
             r#"
@@ -169,7 +181,7 @@ mod tests {
 
     #[test]
     fn rfold() {
-        let mut vm = create_aqua_vm(echo_number_call_service());
+        let mut vm = create_aqua_vm(echo_number_call_service(), "");
 
         let rfold = String::from(
             r#"
@@ -196,7 +208,7 @@ mod tests {
 
     #[test]
     fn inner_fold() {
-        let mut vm = create_aqua_vm(echo_number_call_service());
+        let mut vm = create_aqua_vm(echo_number_call_service(), "");
 
         let script = String::from(
             r#"
@@ -231,7 +243,7 @@ mod tests {
 
     #[test]
     fn inner_fold_with_same_iterator() {
-        let mut vm = create_aqua_vm(echo_number_call_service());
+        let mut vm = create_aqua_vm(echo_number_call_service(), "");
 
         let script = String::from(
             r#"

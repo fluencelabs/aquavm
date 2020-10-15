@@ -19,7 +19,6 @@ use aqua_test_utils::unit_call_service;
 use aquamarine_vm::vec1::Vec1;
 use aquamarine_vm::HostExportedFunc;
 use aquamarine_vm::IValue;
-use aquamarine_vm::StepperOutcome;
 
 use serde_json::json;
 
@@ -27,7 +26,7 @@ type JValue = serde_json::Value;
 
 #[test]
 fn seq_par_call() {
-    let mut vm = create_aqua_vm(unit_call_service());
+    let mut vm = create_aqua_vm(unit_call_service(), "");
 
     let script = String::from(
         r#"
@@ -43,17 +42,26 @@ fn seq_par_call() {
     let res = vm
         .call(json!([String::from("asd"), script, String::from("{}"),]))
         .expect("should be successful");
-    let right_outcome = StepperOutcome {
-        data: String::from("{\"result_1\":\"test\"}"),
-        next_peer_pks: vec![String::from("remote_peer_id")],
-    };
 
-    assert_eq!(res, right_outcome);
+    let resulted_json: JValue =
+        serde_json::from_str(&res.data).expect("stepper should return valid json");
+
+    let right_json = json!( {
+        "result_1" : "test",
+        "__call": [
+            { "par": [1,1] },
+            { "call": "executed" },
+            { "call": "request_sent" },
+        ]
+    });
+
+    assert_eq!(resulted_json, right_json);
+    assert_eq!(res.next_peer_pks, vec![String::from("remote_peer_id")]);
 }
 
 #[test]
 fn par_par_call() {
-    let mut vm = create_aqua_vm(unit_call_service());
+    let mut vm = create_aqua_vm(unit_call_service(), "");
 
     let script = String::from(
         r#"
@@ -73,7 +81,17 @@ fn par_par_call() {
     let resulted_json: JValue =
         serde_json::from_str(&res.data).expect("stepper should return valid json");
 
-    let right_json = json!( {"result_1" : "test", "result_2" : "test"} );
+    let right_json = json!( {
+        "result_1" : "test",
+        "result_2" : "test",
+        "__call": [
+            { "par": [3,1] },
+            { "par": [1,1] },
+            { "call": "executed" },
+            { "call": "request_sent" },
+            { "call": "executed" },
+        ]
+    });
 
     assert_eq!(resulted_json, right_json);
     assert_eq!(res.next_peer_pks, vec![String::from("remote_peer_id")]);
@@ -136,7 +154,7 @@ fn create_service() {
         ))
     });
 
-    let mut vm = create_aqua_vm(call_service);
+    let mut vm = create_aqua_vm(call_service, "");
 
     let res = vm
         .call(json!([String::from("init_user_pk"), script, data,]))
@@ -155,6 +173,10 @@ fn create_service() {
     data_value.as_object_mut().unwrap().insert(
         String::from("service_id"),
         JValue::String(String::from("create response")),
+    );
+    data_value.as_object_mut().unwrap().insert(
+        String::from("__call"),
+        json!([{"call": "executed"}, {"call": "executed"}, {"call": "executed"}, {"call": "request_sent"}]),
     );
 
     assert_eq!(resulted_data, data_value);

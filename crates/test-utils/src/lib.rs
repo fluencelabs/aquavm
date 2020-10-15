@@ -35,7 +35,10 @@ use aquamarine_vm::IValue;
 
 use std::path::PathBuf;
 
-pub fn create_aqua_vm(call_service: HostExportedFunc) -> AquamarineVM {
+pub fn create_aqua_vm(
+    call_service: HostExportedFunc,
+    current_peer_id: impl Into<String>,
+) -> AquamarineVM {
     let call_service_descriptor = HostImportDescriptor {
         host_exported_func: call_service,
         argument_types: vec![IType::String, IType::String, IType::String],
@@ -46,7 +49,7 @@ pub fn create_aqua_vm(call_service: HostExportedFunc) -> AquamarineVM {
     let config = AquamarineVMConfig {
         aquamarine_wasm_path: PathBuf::from("../target/wasm32-wasi/debug/aquamarine.wasm"),
         call_service: call_service_descriptor,
-        current_peer_id: String::from("test_peer_id"),
+        current_peer_id: current_peer_id.into(),
     };
 
     AquamarineVM::new(config).expect("vm should be created")
