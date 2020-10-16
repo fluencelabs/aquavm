@@ -28,7 +28,7 @@ pub(super) fn set_local_call_result(
     call_ctx: &mut CallEvidenceCtx,
     result: JValue,
 ) -> Result<()> {
-    use std::collections::hash_map::Entry;
+    use std::collections::hash_map::Entry::{Occupied, Vacant};
 
     let new_evidence_state = EvidenceState::Call(CallResult::Executed);
     let is_array = result_variable_name.ends_with("[]");
@@ -45,13 +45,11 @@ pub(super) fn set_local_call_result(
         return Ok(());
     }
 
+    // unwrap is safe because it's been checked for []
+    let result_variable_name = result_variable_name.strip_suffix("[]").unwrap().to_string();
     // if result is an array, insert result to the end of the array
-    match exec_ctx
-        .data
-        // unwrap is safe because it's been checked for []
-        .entry(result_variable_name.strip_suffix("[]").unwrap().to_string())
-    {
-        Entry::Occupied(mut entry) => match entry.get_mut() {
+    match exec_ctx.data.entry(result_variable_name) {
+        Occupied(mut entry) => match entry.get_mut() {
             JValue::Array(values) => values.push(result),
             v => {
                 return Err(AquamarineError::IncompatibleJValueType(
@@ -60,7 +58,7 @@ pub(super) fn set_local_call_result(
                 ))
             }
         },
-        Entry::Vacant(entry) => {
+        Vacant(entry) => {
             entry.insert(JValue::Array(vec![result]));
         }
     }
