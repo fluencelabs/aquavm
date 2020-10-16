@@ -86,6 +86,14 @@ fn data_merge() {
         .call(json!(["asd", script, res1.data, res2.data]))
         .expect("should be successful");
 
+    let res5 = vm2
+        .call(json!(["asd", script, res3.data, res4.data]))
+        .expect("should be successful");
+
+    let res6 = vm1
+        .call(json!(["asd", script, res3.data, res4.data]))
+        .expect("should be successful");
+
     let resulted_json3: JValue = serde_json::from_str(&res3.data).expect("stepper should return valid json");
 
     let right_json3 = json!( {
@@ -129,4 +137,51 @@ fn data_merge() {
 
     assert_eq!(resulted_json4, right_json4);
     assert_eq!(res4.next_peer_pks, vec![String::from("B")]);
+
+    let resulted_json5: JValue = serde_json::from_str(&res5.data).expect("stepper should return valid json");
+
+    let right_json5 = json!( {
+        "void": [["A", "B"]],
+        "neighborhood": ["A", "B"],
+        "providers": [["A", "B"]],
+        "__call": [
+            { "call": "executed" },
+            { "par": [1,2] },
+            { "call": "executed" },
+            { "par": [1,0] },
+            { "call": "executed" },
+            { "par": [1,2] },
+            { "call": "executed" },
+            { "par": [1,0] },
+            { "call": "executed" },
+            { "call": "request_sent" },
+        ]
+    });
+
+    assert_eq!(resulted_json5, right_json5);
+    assert_eq!(res5.next_peer_pks, vec![String::from("A")]);
+
+    let resulted_json6: JValue = serde_json::from_str(&res6.data).expect("stepper should return valid json");
+
+    let right_json6 = json!( {
+        "void": [["A", "B"], ["A", "B"]],
+        "neighborhood": ["A", "B"],
+        "providers": [["A", "B"]],
+        "__call": [
+            { "call": "executed" },
+            { "par": [1,2] },
+            { "call": "executed" },
+            { "par": [1,0] },
+            { "call": "executed" },
+            { "par": [1,2] },
+            { "call": "executed" },
+            { "par": [1,0] },
+            { "call": "executed" },
+            { "call": "executed" },
+            { "call": "request_sent" }
+        ]
+    });
+
+    assert_eq!(resulted_json6, right_json6);
+    assert_eq!(res6.next_peer_pks, vec![String::from("B")]);
 }
