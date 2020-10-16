@@ -26,6 +26,7 @@ use serde_json::json;
 type JValue = serde_json::Value;
 
 #[test]
+#[ignore]
 fn data_merge() {
     let neighborhood_call_service1: HostExportedFunc = Box::new(|_, _| -> Option<IValue> {
         Some(IValue::Record(
