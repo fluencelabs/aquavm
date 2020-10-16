@@ -105,7 +105,7 @@ impl super::ExecutableInstruction for Next {
             .expect("this has been checked on the fold instruction");
         let value_len = match value {
             JValue::Array(array) => array.len(),
-            _ => unreachable!(),
+            _ => unreachable!("iterable value shouldn't changed inside fold"),
         };
 
         fold_state.cursor += 1;

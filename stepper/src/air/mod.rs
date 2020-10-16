@@ -25,7 +25,6 @@ mod xor;
 pub(crate) use execution_context::ExecutionCtx;
 
 pub(self) use crate::call_evidence::CallEvidenceCtx;
-pub(self) use crate::call_evidence::CallResult;
 pub(self) use crate::call_evidence::EvidenceState;
 
 use crate::Result;
