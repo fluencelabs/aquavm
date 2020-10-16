@@ -15,13 +15,12 @@
  */
 
 use super::utils::is_string_literal;
+use super::utils::prepare_evidence_state;
 use super::Call;
 use super::CURRENT_PEER_ALIAS;
 use crate::air::ExecutionCtx;
 use crate::air::RESERVED_KEYWORDS;
 use crate::call_evidence::CallEvidenceCtx;
-use crate::call_evidence::CallResult;
-use crate::call_evidence::EvidenceState;
 use crate::AquamarineError;
 use crate::JValue;
 use crate::Result;
@@ -50,7 +49,8 @@ impl ParsedCall {
     }
 
     pub(super) fn execute(self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
-        let should_executed = self.prepare_evidence_state(call_ctx, &exec_ctx.current_peer_id)?;
+        let is_current_peer = self.peer_pk == exec_ctx.current_peer_id;
+        let should_executed = prepare_evidence_state(is_current_peer, exec_ctx, call_ctx)?;
         if !should_executed {
             return Ok(());
         }
@@ -201,49 +201,6 @@ impl ParsedCall {
             v => Err(AquamarineError::IncompatibleJValueType(
                 v.clone(),
                 String::from("string"),
-            )),
-        }
-    }
-
-    fn prepare_evidence_state(&self, call_ctx: &mut CallEvidenceCtx, current_peer_id: &str) -> Result<bool> {
-        if call_ctx.current_subtree_elements_count == 0 {
-            log::info!("call evidence: previous state wasn't found");
-            return Ok(true);
-        }
-
-        call_ctx.current_subtree_elements_count -= 1;
-        // unwrap is safe here, because current_subtree_elements_count depends on current_path len,
-        // and it's been checked previously
-        let prev_state = call_ctx.current_path.pop_front().unwrap();
-
-        log::info!("call evidence: previous state found {:?}", prev_state);
-
-        match &prev_state {
-            // this call was failed on one of the previous executions,
-            // here it's needed to bubble this special error up
-            EvidenceState::Call(CallResult::CallServiceFailed(err_msg)) => {
-                let err_msg = err_msg.clone();
-                call_ctx.new_path.push_back(prev_state);
-                Err(AquamarineError::LocalServiceError(err_msg))
-            }
-            EvidenceState::Call(CallResult::RequestSent) => {
-                // check whether current node can execute this call
-                if self.peer_pk == current_peer_id {
-                    Ok(true)
-                } else {
-                    call_ctx.new_path.push_back(prev_state);
-                    Ok(false)
-                }
-            }
-            // this instruction's been already executed
-            EvidenceState::Call(CallResult::Executed) => {
-                call_ctx.new_path.push_back(prev_state);
-                Ok(false)
-            }
-            // state has inconsistent order - return a error, call shouldn't be executed
-            par_state @ EvidenceState::Par(..) => Err(AquamarineError::InvalidEvidenceState(
-                par_state.clone(),
-                String::from("call"),
             )),
         }
     }
