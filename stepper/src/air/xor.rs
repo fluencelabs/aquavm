@@ -17,7 +17,7 @@
 use super::CallEvidenceCtx;
 use super::ExecutionCtx;
 use super::Instruction;
-use crate::AquamarineError;
+use crate::AquamarineError::LocalServiceError;
 use crate::Result;
 
 use serde_derive::Deserialize;
@@ -31,7 +31,7 @@ impl super::ExecutableInstruction for Xor {
         log::info!("xor is called with contexts: {:?} {:?}", exec_ctx, call_ctx);
 
         match self.0.execute(exec_ctx, call_ctx) {
-            Err(AquamarineError::LocalServiceError(_)) => self.1.execute(exec_ctx, call_ctx),
+            Err(LocalServiceError(_)) => self.1.execute(exec_ctx, call_ctx),
             res => res,
         }
     }
@@ -64,11 +64,7 @@ mod tests {
             } else {
                 // return success for services with other ids
                 Some(IValue::Record(
-                    Vec1::new(vec![
-                        IValue::S32(0),
-                        IValue::String(String::from("\"res\"")),
-                    ])
-                    .unwrap(),
+                    Vec1::new(vec![IValue::S32(0), IValue::String(String::from("\"res\""))]).unwrap(),
                 ))
             }
         });
@@ -84,11 +80,7 @@ mod tests {
         );
 
         let res = vm
-            .call(json!([
-                String::from("asd"),
-                script,
-                json!({"arg3": "arg3_value"}).to_string(),
-            ]))
+            .call(json!(["asd", script, "{}", json!({"arg3": "arg3_value"}).to_string(),]))
             .expect("call should be successful");
 
         let jdata: JValue = serde_json::from_str(&res.data).expect("should be valid json");
@@ -104,11 +96,7 @@ mod tests {
         );
 
         let res = vm
-            .call(json!([
-                String::from("asd"),
-                script,
-                json!({"arg3": "arg3_value"}).to_string(),
-            ]))
+            .call(json!(["asd", script, "{}", json!({"arg3": "arg3_value"}).to_string(),]))
             .expect("call should be successful");
 
         let jdata: JValue = serde_json::from_str(&res.data).expect("should be valid json");

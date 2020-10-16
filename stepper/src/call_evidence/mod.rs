@@ -18,5 +18,7 @@ mod context;
 mod state;
 
 pub(crate) use context::CallEvidenceCtx;
+pub(crate) use state::merge_call_states;
+pub(crate) use state::CallEvidencePath;
 pub(crate) use state::CallResult;
 pub(crate) use state::EvidenceState;

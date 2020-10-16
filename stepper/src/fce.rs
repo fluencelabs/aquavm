@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#![allow(improper_ctypes)]
 #![warn(rust_2018_idioms)]
 #![deny(
     dead_code,
@@ -45,8 +46,8 @@ pub fn main() {
 }
 
 #[fce]
-pub fn invoke(init_user_id: String, aqua: String, data: String) -> StepperOutcome {
-    execute_aqua(init_user_id, aqua, data)
+pub fn invoke(init_user_id: String, aqua: String, prev_data: String, data: String) -> StepperOutcome {
+    execute_aqua(init_user_id, aqua, prev_data, data)
 }
 
 pub fn get_current_peer_id() -> std::result::Result<String, VarError> {

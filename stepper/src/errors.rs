@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use crate::call_evidence::EvidenceState;
+use crate::call_evidence::{CallResult, EvidenceState};
 use crate::CallServiceResult;
 use crate::JValue;
 use crate::StepperOutcome;
@@ -85,6 +85,15 @@ pub(crate) enum AquamarineError {
 
     /// Errors occurred when reserved keyword is used for variable name.
     ReservedKeywordError(String),
+
+    /// Errors occurred when previous and current evidence states are incompatible.
+    IncompatibleEvidenceStates(EvidenceState, EvidenceState),
+
+    /// Errors occurred when previous and current call results are incompatible.
+    IncompatibleCallResults(CallResult, CallResult),
+
+    /// Errors occurred when evidence path contains less elements then corresponding Par has.
+    EvidencePathTooSmall(usize, usize),
 }
 
 impl Error for AquamarineError {}
@@ -92,19 +101,13 @@ impl Error for AquamarineError {}
 impl std::fmt::Display for AquamarineError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         match self {
-            AquamarineError::SExprParseError(err) => {
-                write!(f, "aqua script can't be parsed: {:?}", err)
+            AquamarineError::SExprParseError(err) => write!(f, "aqua script can't be parsed: {:?}", err),
+            AquamarineError::DataDeserializationError(err) => {
+                write!(f, "an error occurred while data deserialization: {:?}", err)
             }
-            AquamarineError::DataDeserializationError(err) => write!(
-                f,
-                "an error occurred while data deserialization: {:?}",
-                err
-            ),
-            AquamarineError::DataSerializationError(err) => write!(
-                f,
-                "an error occurred while data serialization: {:?}",
-                err
-            ),
+            AquamarineError::DataSerializationError(err) => {
+                write!(f, "an error occurred while data serialization: {:?}", err)
+            }
             AquamarineError::FuncArgsSerializationError(args, err) => write!(
                 f,
                 "function arguments {} can't be serialized or deserialized with an error: {:?}",
@@ -118,66 +121,63 @@ impl std::fmt::Display for AquamarineError {
             AquamarineError::CurrentPeerIdEnvError(err, env_name) => write!(
                 f,
                 "the environment variable \"{}\" can't be obtained: {:?}",
-                env_name,
-                err
+                env_name, err
             ),
             AquamarineError::InstructionError(err_msg) => write!(f, "{}", err_msg),
             AquamarineError::LocalServiceError(err_msg) => write!(f, "{}", err_msg),
-            AquamarineError::VariableNotFound(variable_name) => write!(
-                f,
-                "variable with name {} isn't present in data",
-                variable_name
-            ),
-            AquamarineError::MultipleVariablesFound(variable_name) => write!(
-                f,
-                "multiple variables found for name {} in data",
-                variable_name
-            ),
+            AquamarineError::VariableNotFound(variable_name) => {
+                write!(f, "variable with name {} isn't present in data", variable_name)
+            }
+            AquamarineError::MultipleVariablesFound(variable_name) => {
+                write!(f, "multiple variables found for name {} in data", variable_name)
+            }
             AquamarineError::VariableNotInJsonPath(value, json_path, json_path_err) => write!(
                 f,
                 "variable with path {} not found in {:?} with error: {:?}",
                 json_path, value, json_path_err
             ),
-            AquamarineError::IncompatibleJValueType(avalue, desired_type) => write!(
-                f,
-                "got avalue \"{:?}\", but {} type is needed",
-                avalue,
-                desired_type,
-            ),
-            AquamarineError::MultipleValuesInJsonPath(json_path) => write!(
-                f,
-                "multiple variables found for this json path {}",
-                json_path
-            ),
-            AquamarineError::FoldStateNotFound(iterator) => write!(
-                f,
-                "fold state not found for this iterable {}",
-                iterator
-            ),
-            AquamarineError::MultipleFoldStates(iterator) => write!(
-                f,
-                "multiple fold states found for iterable {}",
-                iterator
-            ),
-            AquamarineError::InvalidEvidenceState(found_state, expected) => write!(
+            AquamarineError::IncompatibleJValueType(jvalue, desired_type) => {
+                write!(f, "got avalue \"{:?}\", but {} type is needed", jvalue, desired_type,)
+            }
+            AquamarineError::MultipleValuesInJsonPath(json_path) => {
+                write!(f, "multiple variables found for this json path {}", json_path)
+            }
+            AquamarineError::FoldStateNotFound(iterator) => {
+                write!(f, "fold state not found for this iterable {}", iterator)
+            }
+            AquamarineError::MultipleFoldStates(iterator) => {
+                write!(f, "multiple fold states found for iterable {}", iterator)
+            }
+            AquamarineError::InvalidEvidenceState(found, expected) => write!(
                 f,
                 "invalid evidence state: expected {}, but found {:?}",
-                expected, found_state
+                expected, found
             ),
-            AquamarineError::CallEvidenceDeserializationError(err) => write!(
-                f,
-                "an error occurred while data deserialization: {:?}",
-                err
-            ),
-            AquamarineError::CallEvidenceSerializationError(err) => write!(
-                f,
-                "an error occurred while data serialization: {:?}",
-                err
-            ),
+            AquamarineError::CallEvidenceDeserializationError(err) => {
+                write!(f, "an error occurred while data deserialization: {:?}", err)
+            }
+            AquamarineError::CallEvidenceSerializationError(err) => {
+                write!(f, "an error occurred while data serialization: {:?}", err)
+            }
             AquamarineError::ReservedKeywordError(variable_name) => write!(
                 f,
                 "a variable can't be named as {} because this name is reserved",
                 variable_name
+            ),
+            AquamarineError::IncompatibleEvidenceStates(prev_state, current_state) => write!(
+                f,
+                "previous and current data have incompatible states: {:?} {:?}",
+                prev_state, current_state
+            ),
+            AquamarineError::IncompatibleCallResults(prev_call_result, current_call_result) => write!(
+                f,
+                "previous and current call results are incompatible: {:?} {:?}",
+                prev_call_result, current_call_result
+            ),
+            AquamarineError::EvidencePathTooSmall(actual_count, desired_count) => write!(
+                f,
+                "evidence path remains {} elements, but {} requires by Par",
+                actual_count, desired_count
             ),
         }
     }
@@ -217,6 +217,9 @@ impl Into<StepperOutcome> for AquamarineError {
             AquamarineError::CallEvidenceDeserializationError(..) => 17,
             AquamarineError::CallEvidenceSerializationError(..) => 18,
             AquamarineError::ReservedKeywordError(..) => 19,
+            AquamarineError::IncompatibleEvidenceStates(..) => 20,
+            AquamarineError::IncompatibleCallResults(..) => 21,
+            AquamarineError::EvidencePathTooSmall(..) => 21,
         };
 
         StepperOutcome {

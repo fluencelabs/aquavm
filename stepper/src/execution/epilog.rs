@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-use super::CallEvidenceCtx;
-use super::ExecutionCtx;
+use super::CALL_EVIDENCE_CTX_KEY;
+use crate::call_evidence::CallEvidenceCtx;
+use crate::AquaData;
+use crate::AquamarineError::CallEvidenceSerializationError as CallSeError;
+use crate::AquamarineError::DataSerializationError as DataSeError;
 use crate::Result;
 
-use serde_derive::Deserialize;
-use serde_derive::Serialize;
+pub(super) fn make_result_data(mut data: AquaData, call_ctx: CallEvidenceCtx) -> Result<String> {
+    use serde_json::{to_string, to_value};
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
-pub(crate) struct Null {}
+    let serialized_call_ctx = to_value(call_ctx.new_path).map_err(CallSeError)?;
+    data.insert(CALL_EVIDENCE_CTX_KEY.to_string(), serialized_call_ctx);
 
-impl super::ExecutableInstruction for Null {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
-        log::info!("null is called with contexts: {:?} {:?}", exec_ctx, call_ctx);
+    let data = to_string(&data).map_err(DataSeError)?;
 
-        Ok(())
-    }
+    Ok(data)
 }

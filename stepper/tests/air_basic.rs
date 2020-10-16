@@ -40,11 +40,10 @@ fn seq_par_call() {
     );
 
     let res = vm
-        .call(json!([String::from("asd"), script, String::from("{}"),]))
+        .call(json!(["asd", script, "{}", "{}",]))
         .expect("should be successful");
 
-    let resulted_json: JValue =
-        serde_json::from_str(&res.data).expect("stepper should return valid json");
+    let resulted_json: JValue = serde_json::from_str(&res.data).expect("stepper should return valid json");
 
     let right_json = json!( {
         "result_1" : "test",
@@ -75,11 +74,10 @@ fn par_par_call() {
     );
 
     let res = vm
-        .call(json!([String::from("asd"), script, String::from("{}"),]))
+        .call(json!(["asd", script, "{}", "{}",]))
         .expect("should be successful");
 
-    let resulted_json: JValue =
-        serde_json::from_str(&res.data).expect("stepper should return valid json");
+    let resulted_json: JValue = serde_json::from_str(&res.data).expect("stepper should return valid json");
 
     let right_json = json!( {
         "result_1" : "test",
@@ -146,18 +144,14 @@ fn create_service() {
         };
 
         Some(IValue::Record(
-            Vec1::new(vec![
-                IValue::S32(0),
-                IValue::String(format!("\"{}\"", response)),
-            ])
-            .unwrap(),
+            Vec1::new(vec![IValue::S32(0), IValue::String(format!("\"{}\"", response))]).unwrap(),
         ))
     });
 
     let mut vm = create_aqua_vm(call_service, "");
 
     let res = vm
-        .call(json!([String::from("init_user_pk"), script, data,]))
+        .call(json!(["init_user_pk", script, "{}", data,]))
         .expect("should be successful");
 
     let resulted_data: JValue = serde_json::from_str(&res.data).expect("should be correct json");

@@ -14,27 +14,26 @@
  * limitations under the License.
  */
 
-use super::EvidenceState;
+use super::CallEvidencePath;
 
 use serde::Deserialize;
 use serde::Serialize;
 
-use std::collections::VecDeque;
-
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub(crate) struct CallEvidenceCtx {
-    pub(crate) current_states: VecDeque<EvidenceState>,
-    pub(crate) unused_subtree_elements_count: usize,
-    pub(crate) new_states: Vec<EvidenceState>,
+    pub(crate) current_path: CallEvidencePath,
+    pub(crate) current_subtree_elements_count: usize,
+    // TODO: consider change it to Vec for optimization
+    pub(crate) new_path: CallEvidencePath,
 }
 
 impl CallEvidenceCtx {
-    pub fn new(current_states: VecDeque<EvidenceState>) -> Self {
-        let right = current_states.len();
+    pub fn new(current_path: CallEvidencePath) -> Self {
+        let current_subtree_elements_count = current_path.len();
         Self {
-            current_states,
-            unused_subtree_elements_count: right,
-            new_states: vec![],
+            current_path,
+            current_subtree_elements_count,
+            new_path: CallEvidencePath::new(),
         }
     }
 }

@@ -14,6 +14,18 @@
  * limitations under the License.
  */
 
+#![allow(unused_attributes)]
+#![warn(rust_2018_idioms)]
+#![deny(
+    dead_code,
+    nonstandard_style,
+    unused_imports,
+    unused_mut,
+    unused_variables,
+    // unused_unsafe,
+    unreachable_patterns
+)]
+
 mod air;
 mod call_evidence;
 mod defines;
@@ -34,8 +46,8 @@ pub fn main() {
 }
 
 #[wasm_bindgen]
-pub fn invoke(init_user_id: String, aqua: String, data: String) -> String {
-    let outcome = execute_aqua(init_user_id, aqua, data);
+pub fn invoke(init_user_id: String, aqua: String, prev_data: String, data: String) -> String {
+    let outcome = execute_aqua(init_user_id, aqua, prev_data, data);
     serde_json::to_string(&outcome).expect("Cannot parse StepperOutcome")
 }
 
