@@ -35,7 +35,7 @@ impl super::ExecutableInstruction for Xor {
             Err(LocalServiceError(_)) => {
                 exec_ctx.subtree_complete = true;
                 self.1.execute(exec_ctx, call_ctx)
-            },
+            }
             res => res,
         }
     }
