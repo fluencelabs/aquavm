@@ -45,6 +45,7 @@ pub(super) fn prepare_evidence_state(
         EvidenceState::Call(CallResult::CallServiceFailed(err_msg)) => {
             let err_msg = err_msg.clone();
             call_ctx.new_path.push_back(prev_state);
+            exec_ctx.subtree_complete = false;
             Err(AquamarineError::LocalServiceError(err_msg))
         }
         EvidenceState::Call(CallResult::RequestSent) => {

@@ -34,7 +34,6 @@ impl super::ExecutableInstruction for Seq {
 
         if exec_ctx.subtree_complete {
             self.1.execute(exec_ctx, call_ctx)?;
-            exec_ctx.subtree_complete = true;
         }
 
         Ok(())

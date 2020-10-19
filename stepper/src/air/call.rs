@@ -64,7 +64,7 @@ impl super::ExecutableInstruction for Call {
 
         let parsed_call = match ParsedCall::new(self, exec_ctx) {
             Ok(parsed_call) => parsed_call,
-            // for support lazy variable evaluating
+            // to support lazy variable evaluation
             Err(VariableNotFound(_)) | Err(VariableNotInJsonPath(..)) => {
                 exec_ctx.subtree_complete = false;
                 return Ok(());

@@ -47,7 +47,7 @@ impl ExecutableInstruction for Par {
         let new_right_subtree_size = execute_subtree(&self.1, right_subtree_size, exec_ctx, call_ctx)?;
         let right_subtree_complete = exec_ctx.subtree_complete;
 
-        // par is completed if at least one of its subtree is completed
+        // par is completed if at least one of its subtrees is completed
         exec_ctx.subtree_complete = left_subtree_complete || right_subtree_complete;
 
         let new_par_evidence_state = EvidenceState::Par(new_left_subtree_size, new_right_subtree_size);
