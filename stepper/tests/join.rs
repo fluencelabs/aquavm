@@ -29,7 +29,11 @@ type JValue = serde_json::Value;
 fn join_chat() {
     let members_call_service1: HostExportedFunc = Box::new(|_, _| -> Option<IValue> {
         Some(IValue::Record(
-            Vec1::new(vec![IValue::S32(0), IValue::String(String::from(r#"[["A", "Relay1"], ["B", "Relay2"]]"#))]).unwrap(),
+            Vec1::new(vec![
+                IValue::S32(0),
+                IValue::String(String::from(r#"[["A", "Relay1"], ["B", "Relay2"]]"#)),
+            ])
+            .unwrap(),
         ))
     });
 

@@ -71,7 +71,12 @@ impl super::ExecutableInstruction for Call {
                 return Ok(());
             }
             Err(VariableNotInJsonPath(variable, json_path, json_path_err)) => {
-                log::info!(r#"variable not found with json path "{}" in {:?} with error "{:?}", waiting"#, json_path, variable, json_path_err);
+                log::info!(
+                    r#"variable not found with json path "{}" in {:?} with error "{:?}", waiting"#,
+                    json_path,
+                    variable,
+                    json_path_err
+                );
                 exec_ctx.subtree_complete = false;
                 return Ok(());
             }
