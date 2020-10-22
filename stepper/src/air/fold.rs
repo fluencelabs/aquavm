@@ -63,7 +63,12 @@ impl super::ExecutableInstruction for Fold {
 
         // check that value exists and has array type
         match exec_ctx.data.get(iterable_name) {
-            Some(JValue::Array(_)) => {}
+            Some(JValue::Array(array)) => {
+                if array.is_empty() {
+                    // skip fold if array is empty
+                    return Ok(());
+                }
+            }
             Some(v) => {
                 return Err(AquamarineError::IncompatibleJValueType(
                     v.clone(),
