@@ -20,7 +20,7 @@ use serde_derive::Serialize;
 /// This file contains defines of some things similar both for FCE and browser targets.
 
 pub(crate) type Result<T> = std::result::Result<T, AquamarineError>;
-pub(crate) type AquaData = std::collections::HashMap<String, JValue>;
+pub(crate) type AquaData<'a> = std::collections::HashMap<&'a str, &'a JValue>;
 pub(crate) type JValue = serde_json::Value;
 
 pub(crate) use crate::errors::AquamarineError;

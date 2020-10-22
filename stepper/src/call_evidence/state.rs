@@ -15,6 +15,7 @@
  */
 
 use crate::Result;
+use crate::JValue;
 
 use serde::Deserialize;
 use serde::Serialize;
@@ -25,11 +26,11 @@ pub(crate) type CallEvidencePath = std::collections::VecDeque<EvidenceState>;
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(crate) enum CallResult {
-    /// Request was sent to a target node and it shouldn't be called again.
-    RequestSent,
+    /// Request was sent to a target node by node with such public key and it shouldn't be called again.
+    RequestSent(String),
 
-    /// A corresponding call's been already executed.
-    Executed,
+    /// A corresponding call's been already executed with such value and result.
+    Executed(String, JValue),
 
     /// call_service ended with a service error.
     CallServiceFailed(String),

@@ -30,7 +30,7 @@ pub(super) fn set_local_call_result(
 ) -> Result<()> {
     use std::collections::hash_map::Entry::{Occupied, Vacant};
 
-    let new_evidence_state = EvidenceState::Call(CallResult::Executed);
+    let new_evidence_state = EvidenceState::Call(CallResult::Executed(result_variable_name, result));
     let is_array = result_variable_name.ends_with("[]");
 
     if !is_array {
