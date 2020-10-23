@@ -39,8 +39,16 @@ impl ExecutableInstruction for Par {
         let pre_new_states_count = call_ctx.new_path.len();
         call_ctx.new_path.push_back(EvidenceState::Par(0, 0));
 
+        exec_ctx.subtree_complete = determine_subtree_complete(&self.0);
         let new_left_subtree_size = execute_subtree(&self.0, left_subtree_size, exec_ctx, call_ctx)?;
+        let left_subtree_complete = exec_ctx.subtree_complete;
+
+        exec_ctx.subtree_complete = determine_subtree_complete(&self.1);
         let new_right_subtree_size = execute_subtree(&self.1, right_subtree_size, exec_ctx, call_ctx)?;
+        let right_subtree_complete = exec_ctx.subtree_complete;
+
+        // par is completed if at least one of its subtrees is completed
+        exec_ctx.subtree_complete = left_subtree_complete || right_subtree_complete;
 
         let new_par_evidence_state = EvidenceState::Par(new_left_subtree_size, new_right_subtree_size);
         log::info!("call evidence: adding new state {:?}", new_par_evidence_state);
@@ -87,6 +95,22 @@ fn execute_subtree(
     subtree.execute(exec_ctx, call_ctx)?;
 
     Ok(call_ctx.new_path.len() - before_states_count)
+}
+
+fn determine_subtree_complete(next_instruction: &Instruction) -> bool {
+    // this is needed to prevent situation when on such pattern
+    // (fold (Iterable i
+    //    (par (
+    //       (call (..))
+    //       (next i)
+    //    ))
+    // ))
+    // par will be executed after the last next that wouldn't change subtree_complete
+    if let Instruction::Next(_) = next_instruction {
+        false
+    } else {
+        true
+    }
 }
 
 #[cfg(test)]

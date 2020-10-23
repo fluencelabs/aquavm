@@ -19,12 +19,27 @@ use crate::AquaData;
 
 use std::collections::HashMap;
 
+/// Execution context contains all necessary information needed to execute aqua script.
 #[derive(Clone, Default, Debug)]
 pub(crate) struct ExecutionCtx {
+    /// Contains all set variables.
     pub data: AquaData,
+
+    /// Set of peer public keys that should receive resulted data.
     pub next_peer_pks: Vec<String>,
+
+    /// PeerId of a peer executing this aqua script.
     pub current_peer_id: String,
+
+    /// Describes all met folds on the current execution step.
     pub folds: HashMap<String, FoldState>,
+
+    /// Indicates that previous executed subtree is complete.
+    /// A subtree treats as a complete if all subtree elements satisfy the following rules:
+    ///   - at least one of par subtrees is complete
+    ///   - all of seq subtrees are complete
+    ///   - call executes successfully (call evidence equals to Executed)
+    pub subtree_complete: bool,
 }
 
 impl ExecutionCtx {
@@ -34,6 +49,7 @@ impl ExecutionCtx {
             next_peer_pks: vec![],
             current_peer_id,
             folds: HashMap::new(),
+            subtree_complete: true,
         }
     }
 }

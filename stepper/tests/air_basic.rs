@@ -47,10 +47,12 @@ fn seq_par_call() {
 
     let right_json = json!( {
         "result_1" : "test",
+        "result_2" : "test",
         "__call": [
             { "par": [1,1] },
             { "call": "executed" },
             { "call": "request_sent" },
+            { "call": "executed" },
         ]
     });
 

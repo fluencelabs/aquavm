@@ -31,6 +31,8 @@ use crate::STEPPER_SUCCESS;
 pub(self) const CALL_EVIDENCE_CTX_KEY: &str = "__call";
 
 pub(crate) fn execute_aqua(init_user_id: String, aqua: String, prev_data: String, data: String) -> StepperOutcome {
+    log::info!("aquamarine version is {}", env!("CARGO_PKG_VERSION"));
+
     log::info!(
         "stepper invoked with user_id = {}, aqua = {:?}, prev_data = {:?}, data = {:?}",
         init_user_id,

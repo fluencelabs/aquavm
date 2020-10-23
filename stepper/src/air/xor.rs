@@ -30,8 +30,12 @@ impl super::ExecutableInstruction for Xor {
     fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
         log::info!("xor is called with contexts: {:?} {:?}", exec_ctx, call_ctx);
 
+        exec_ctx.subtree_complete = true;
         match self.0.execute(exec_ctx, call_ctx) {
-            Err(LocalServiceError(_)) => self.1.execute(exec_ctx, call_ctx),
+            Err(LocalServiceError(_)) => {
+                exec_ctx.subtree_complete = true;
+                self.1.execute(exec_ctx, call_ctx)
+            }
             res => res,
         }
     }

@@ -63,7 +63,12 @@ impl super::ExecutableInstruction for Fold {
 
         // check that value exists and has array type
         match exec_ctx.data.get(iterable_name) {
-            Some(JValue::Array(_)) => {}
+            Some(JValue::Array(array)) => {
+                if array.is_empty() {
+                    // skip fold if array is empty
+                    return Ok(());
+                }
+            }
             Some(v) => {
                 return Err(AquamarineError::IncompatibleJValueType(
                     v.clone(),
@@ -268,5 +273,28 @@ mod tests {
             error,
             StepperError::MultipleFoldStates(String::from("multiple fold states found for iterable Iterable2"))
         );
+    }
+
+    #[test]
+    fn empty_fold() {
+        let mut vm = create_aqua_vm(echo_number_call_service(), "");
+
+        let lfold = String::from(
+            r#"
+            (fold (Iterable i
+                (seq (
+                    (call (%current_peer_id% ("local_service_id" "local_fn_name") (i) acc[]))
+                    (next i)
+                )
+            )))"#,
+        );
+
+        let res = vm
+            .call(json!(["asd", lfold, "{}", "{\"Iterable\": []}",]))
+            .expect("call should be successful");
+
+        let res: JValue = serde_json::from_str(&res.data).unwrap();
+
+        assert!(res.get("acc").is_none());
     }
 }
