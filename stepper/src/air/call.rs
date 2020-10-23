@@ -21,6 +21,8 @@ use parsed_call::ParsedCall;
 
 use super::CallEvidenceCtx;
 use super::ExecutionCtx;
+use crate::AquamarineError::VariableNotFound;
+use crate::AquamarineError::VariableNotInJsonPath;
 use crate::Result;
 
 use serde_derive::Deserialize;
@@ -60,7 +62,27 @@ impl super::ExecutableInstruction for Call {
     fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
         log::info!("call {:?} is called with contexts: {:?} {:?}", self, exec_ctx, call_ctx);
 
-        let parsed_call = ParsedCall::new(self, exec_ctx)?;
+        let parsed_call = match ParsedCall::new(self, exec_ctx) {
+            Ok(parsed_call) => parsed_call,
+            // to support lazy variable evaluation
+            Err(VariableNotFound(variable_name)) => {
+                log::info!(r#"variable with name "{}" not found, waiting"#, variable_name);
+                exec_ctx.subtree_complete = false;
+                return Ok(());
+            }
+            Err(VariableNotInJsonPath(variable, json_path, json_path_err)) => {
+                log::info!(
+                    r#"variable not found with json path "{}" in {:?} with error "{:?}", waiting"#,
+                    json_path,
+                    variable,
+                    json_path_err
+                );
+                exec_ctx.subtree_complete = false;
+                return Ok(());
+            }
+            Err(err) => return Err(err),
+        };
+
         parsed_call.execute(exec_ctx, call_ctx)
     }
 }

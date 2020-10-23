@@ -15,8 +15,6 @@
  */
 
 use aqua_test_utils::create_aqua_vm;
-use aqua_test_utils::echo_number_call_service;
-use aqua_test_utils::unit_call_service;
 use aquamarine_vm::vec1::Vec1;
 use aquamarine_vm::HostExportedFunc;
 use aquamarine_vm::IValue;
@@ -26,6 +24,7 @@ use serde_json::json;
 type JValue = serde_json::Value;
 
 #[test]
+#[ignore]
 fn data_merge() {
     let neighborhood_call_service1: HostExportedFunc = Box::new(|_, _| -> Option<IValue> {
         Some(IValue::Record(

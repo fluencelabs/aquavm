@@ -22,6 +22,55 @@ use crate::AquamarineError;
 use crate::JValue;
 use crate::Result;
 
+pub(super) fn prepare_evidence_state(
+    is_current_peer: bool,
+    exec_ctx: &mut ExecutionCtx,
+    call_ctx: &mut CallEvidenceCtx,
+) -> Result<bool> {
+    if call_ctx.current_subtree_elements_count == 0 {
+        log::info!("call evidence: previous state wasn't found");
+        return Ok(true);
+    }
+
+    call_ctx.current_subtree_elements_count -= 1;
+    // unwrap is safe here, because current_subtree_elements_count depends on current_path len,
+    // and it's been checked previously
+    let prev_state = call_ctx.current_path.pop_front().unwrap();
+
+    log::info!("call evidence: previous state found {:?}", prev_state);
+
+    match &prev_state {
+        // this call was failed on one of the previous executions,
+        // here it's needed to bubble this special error up
+        EvidenceState::Call(CallResult::CallServiceFailed(err_msg)) => {
+            let err_msg = err_msg.clone();
+            call_ctx.new_path.push_back(prev_state);
+            exec_ctx.subtree_complete = false;
+            Err(AquamarineError::LocalServiceError(err_msg))
+        }
+        EvidenceState::Call(CallResult::RequestSent) => {
+            // check whether current node can execute this call
+            if is_current_peer {
+                Ok(true)
+            } else {
+                exec_ctx.subtree_complete = false;
+                call_ctx.new_path.push_back(prev_state);
+                Ok(false)
+            }
+        }
+        // this instruction's been already executed
+        EvidenceState::Call(CallResult::Executed) => {
+            call_ctx.new_path.push_back(prev_state);
+            Ok(false)
+        }
+        // state has inconsistent order - return a error, call shouldn't be executed
+        par_state @ EvidenceState::Par(..) => Err(AquamarineError::InvalidEvidenceState(
+            par_state.clone(),
+            String::from("call"),
+        )),
+    }
+}
+
 pub(super) fn set_local_call_result(
     result_variable_name: String,
     exec_ctx: &mut ExecutionCtx,
@@ -71,6 +120,7 @@ pub(super) fn set_local_call_result(
 
 pub(super) fn set_remote_call_result(peer_pk: String, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) {
     exec_ctx.next_peer_pks.push(peer_pk);
+    exec_ctx.subtree_complete = false;
 
     let new_evidence_state = EvidenceState::Call(CallResult::RequestSent);
     log::info!("call evidence: adding new state {:?}", new_evidence_state);

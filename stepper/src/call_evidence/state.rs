@@ -43,7 +43,7 @@ pub(crate) enum EvidenceState {
     Call(CallResult),
 }
 
-pub(crate) fn merge_call_states(
+pub(crate) fn merge_call_paths(
     mut prev_path: CallEvidencePath,
     mut current_path: CallEvidencePath,
 ) -> Result<CallEvidencePath> {
@@ -52,7 +52,7 @@ pub(crate) fn merge_call_states(
     let prev_subtree_size = prev_path.len();
     let current_subtree_size = current_path.len();
 
-    handle_subtree(
+    merge_subtree(
         &mut prev_path,
         prev_subtree_size,
         &mut current_path,
@@ -65,7 +65,7 @@ pub(crate) fn merge_call_states(
     Ok(merged_path)
 }
 
-fn handle_subtree(
+fn merge_subtree(
     prev_path: &mut CallEvidencePath,
     mut prev_subtree_size: usize,
     current_path: &mut CallEvidencePath,
@@ -94,14 +94,14 @@ fn handle_subtree(
 
         match (prev_state, current_state) {
             (Some(Call(prev_call)), Some(Call(call))) => {
-                let resulted_call = handle_call(prev_call, call)?;
+                let resulted_call = merge_call(prev_call, call)?;
                 result_path.push_back(Call(resulted_call));
             }
             (Some(Par(prev_left, prev_right)), Some(Par(current_left, current_right))) => {
                 result_path.push_back(Par(max(prev_left, current_left), max(prev_right, current_right)));
 
-                handle_subtree(prev_path, prev_left, current_path, current_left, result_path)?;
-                handle_subtree(prev_path, prev_right, current_path, current_right, result_path)?;
+                merge_subtree(prev_path, prev_left, current_path, current_left, result_path)?;
+                merge_subtree(prev_path, prev_right, current_path, current_right, result_path)?;
 
                 prev_subtree_size -= prev_left + prev_right;
                 current_subtree_size -= current_left + current_right;
@@ -135,7 +135,7 @@ fn handle_subtree(
     Ok(())
 }
 
-fn handle_call(prev_call_result: CallResult, current_call_result: CallResult) -> Result<CallResult> {
+fn merge_call(prev_call_result: CallResult, current_call_result: CallResult) -> Result<CallResult> {
     use crate::AquamarineError::IncompatibleCallResults;
     use CallResult::*;
 
@@ -161,7 +161,7 @@ fn handle_call(prev_call_result: CallResult, current_call_result: CallResult) ->
 mod tests {
     use crate::call_evidence::CallResult;
     use crate::call_evidence::EvidenceState;
-    use crate::call_evidence::{merge_call_states, CallEvidencePath};
+    use crate::call_evidence::{merge_call_paths, CallEvidencePath};
 
     #[test]
     fn merge_call_states_1() {
@@ -184,7 +184,7 @@ mod tests {
         current_path.push_back(Call(Executed));
         current_path.push_back(Call(RequestSent));
 
-        let merged_path = merge_call_states(prev_path, current_path).expect("merging should be successful");
+        let merged_path = merge_call_paths(prev_path, current_path).expect("merging should be successful");
 
         let mut right_merged_path = CallEvidencePath::new();
         right_merged_path.push_back(Par(1, 1));
@@ -219,7 +219,7 @@ mod tests {
         current_path.push_back(Call(Executed));
         current_path.push_back(Call(RequestSent));
 
-        let merged_path = merge_call_states(prev_path, current_path).expect("merging should be successful");
+        let merged_path = merge_call_paths(prev_path, current_path).expect("merging should be successful");
 
         let mut right_merged_path = CallEvidencePath::new();
         right_merged_path.push_back(Par(2, 2));
@@ -262,7 +262,7 @@ mod tests {
         current_path.push_back(Call(Executed));
         current_path.push_back(Call(RequestSent));
 
-        let merged_path = merge_call_states(prev_path, current_path).expect("merging should be successful");
+        let merged_path = merge_call_paths(prev_path, current_path).expect("merging should be successful");
 
         let mut right_merged_path = CallEvidencePath::new();
         right_merged_path.push_back(Call(Executed));

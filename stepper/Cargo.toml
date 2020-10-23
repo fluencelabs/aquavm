@@ -33,4 +33,6 @@ aqua-test-utils = { path = "../crates/test-utils" }
 aquamarine-vm = { git = "https://github.com/fluencelabs/fce" }
 
 env_logger = "0.7.1"
+maplit = "1.0.2"
+pretty_assertions = "0.6.1"
 serde_json = "1.0.56"

@@ -29,10 +29,10 @@ impl super::ExecutableInstruction for Seq {
     fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
         log::info!("seq is called with contexts: {:?} {:?}", exec_ctx, call_ctx);
 
-        let pks_count_before_call = exec_ctx.next_peer_pks.len();
+        exec_ctx.subtree_complete = true;
         self.0.execute(exec_ctx, call_ctx)?;
 
-        if pks_count_before_call == exec_ctx.next_peer_pks.len() {
+        if exec_ctx.subtree_complete {
             self.1.execute(exec_ctx, call_ctx)?;
         }
 

@@ -18,7 +18,7 @@ use super::utils::format_aqua;
 use super::CALL_EVIDENCE_CTX_KEY;
 use crate::air::ExecutionCtx;
 use crate::air::Instruction;
-use crate::call_evidence::merge_call_states;
+use crate::call_evidence::merge_call_paths;
 use crate::call_evidence::CallEvidenceCtx;
 use crate::call_evidence::EvidenceState;
 use crate::get_current_peer_id;
@@ -67,10 +67,10 @@ pub(super) fn make_contexts(mut prev_data: AquaData, mut data: AquaData) -> Resu
     };
 
     let data = merge_data(prev_data, data)?;
-    let current_states = merge_call_states(prev_states, states)?;
+    let current_path = merge_call_paths(prev_states, states)?;
 
     let execution_ctx = ExecutionCtx::new(data, current_peer_id);
-    let call_evidence_ctx = CallEvidenceCtx::new(current_states);
+    let call_evidence_ctx = CallEvidenceCtx::new(current_path);
 
     Ok((execution_ctx, call_evidence_ctx))
 }
