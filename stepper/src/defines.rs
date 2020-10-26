@@ -17,7 +17,6 @@
 /// This file contains defines of some things similar both for FCE and browser targets.
 
 pub(crate) type Result<T> = std::result::Result<T, AquamarineError>;
-pub(crate) type AquaDataCache<'a> = std::collections::HashMap<&'a String, AValue<'a>>;
 pub(crate) type JValue = serde_json::Value;
 pub(crate) use crate::call_evidence::CallEvidencePath;
 
@@ -25,14 +24,18 @@ pub(crate) use crate::errors::AquamarineError;
 pub(crate) use crate::stepper_outcome::StepperOutcome;
 pub(crate) use crate::stepper_outcome::STEPPER_SUCCESS;
 
+use std::cell::RefCell;
+use std::rc::Rc;
+
 pub(crate) const CALL_SERVICE_SUCCESS: i32 = 0;
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub(crate) enum AValue<'a> {
-    JValueRef(&'a JValue),
-    JValueAccumulatorRef(Vec<&'a JValue>),
+pub(crate) enum AValue {
+    JValueRef(Rc<JValue>),
+    JValueAccumulatorRef(RefCell<Vec<Rc<JValue>>>),
+    JValueFoldCursor(crate::air::FoldState),
 }
 
 #[fluence::fce]

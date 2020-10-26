@@ -43,10 +43,10 @@ pub(super) fn prepare(
 
 /// Make execution and call evidence contexts from supplied data.
 /// Internally, it unites variable from previous and current data and merges call evidence paths.
-pub(super) fn make_contexts<'a>(
+pub(super) fn make_contexts(
     prev_path: CallEvidencePath,
     path: CallEvidencePath,
-) -> Result<(ExecutionCtx<'a>, CallEvidenceCtx)> {
+) -> Result<(ExecutionCtx, CallEvidenceCtx)> {
     use AquamarineError::CurrentPeerIdEnvError as EnvError;
 
     let current_peer_id = get_current_peer_id().map_err(|e| EnvError(e, String::from("CURRENT_PEER_ID")))?;

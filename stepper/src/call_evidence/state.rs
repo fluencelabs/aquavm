@@ -20,6 +20,7 @@ use crate::Result;
 use serde::Deserialize;
 use serde::Serialize;
 use std::cmp::max;
+use std::rc::Rc;
 
 pub(crate) type CallEvidencePath = std::collections::VecDeque<EvidenceState>;
 
@@ -30,7 +31,7 @@ pub(crate) enum CallResult {
     RequestSent(String),
 
     /// A corresponding call's been already executed with such value and result.
-    Executed(String, JValue),
+    Executed(Rc<JValue>),
 
     /// call_service ended with a service error.
     CallServiceFailed(String),

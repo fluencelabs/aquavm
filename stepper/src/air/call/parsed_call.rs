@@ -36,7 +36,7 @@ pub(super) struct ParsedCall {
 }
 
 impl ParsedCall {
-    pub(super) fn new(raw_call: &Call, exec_ctx: &ExecutionCtx<'_>) -> Result<Self> {
+    pub(super) fn new(raw_call: &Call, exec_ctx: &ExecutionCtx) -> Result<Self> {
         let (peer_pk, service_id, func_name) = Self::prepare_peer_fn_parts(raw_call, exec_ctx)?;
         let result_variable_name = Self::parse_result_variable_name(raw_call)?;
 
@@ -49,7 +49,7 @@ impl ParsedCall {
         })
     }
 
-    pub(super) fn execute<'a>(self, exec_ctx: &mut ExecutionCtx<'a>, call_ctx: &'a mut CallEvidenceCtx) -> Result<()> {
+    pub(super) fn execute(self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
         let is_current_peer = self.peer_pk == exec_ctx.current_peer_id;
         let should_executed = prepare_evidence_state(is_current_peer, exec_ctx, call_ctx)?;
         if !should_executed {
@@ -79,7 +79,7 @@ impl ParsedCall {
 
     fn prepare_peer_fn_parts<'a>(
         raw_call: &'a Call,
-        exec_ctx: &'a ExecutionCtx<'_>,
+        exec_ctx: &'a ExecutionCtx,
     ) -> Result<(&'a str, &'a str, &'a str)> {
         use super::FunctionPart::*;
         use super::PeerPart::*;
@@ -109,7 +109,7 @@ impl ParsedCall {
         Ok((peer_pk, service_id, func_name))
     }
 
-    fn extract_args_by_paths(&self, ctx: &ExecutionCtx<'_>) -> Result<JValue> {
+    fn extract_args_by_paths(&self, ctx: &ExecutionCtx) -> Result<JValue> {
         let mut result = Vec::with_capacity(self.function_arg_paths.len());
 
         for arg_path in self.function_arg_paths.iter() {
@@ -148,14 +148,22 @@ impl ParsedCall {
 
     fn get_args_by_path<'args_path, 'ctx>(
         args_path: &'args_path str,
-        ctx: &'ctx ExecutionCtx<'_>,
+        ctx: &'ctx ExecutionCtx,
     ) -> Result<Vec<&'ctx JValue>> {
         let mut split_arg: Vec<&str> = args_path.splitn(2, '.').collect();
         let arg_path_head = split_arg.remove(0);
 
-        let value_by_head = match (ctx.data_cache.get(&arg_path_head.to_string()), ctx.folds.get(arg_path_head)) {
-            (_, Some(fold_state)) => match ctx.data_cache.get(&fold_state.iterable_name) {
-                Some(AValue::JValueAccumulatorRef(acc)) => acc[fold_state.cursor],
+        let value_by_head = match ctx.data_cache.get(arg_path_head) {
+            AValue::JValueFoldCursor(fold_state) => {
+                match &fold_state.iterable {
+                    JValue::Array(array) => &array[fold_state.cursor],
+                    _ => unreachable!(),
+                }
+            },
+            AValue::
+                /*
+                match ctx.data_cache.get(&fold_state.iterable_name) {
+                Some(AValue::JValueAccumulatorRef(acc)) => acc.borrow().get(fold_state.cursor).unwrap(),
                 Some(_v) => {
                     unimplemented!("return a error");
                     /*
@@ -167,8 +175,9 @@ impl ParsedCall {
                      */
                 }
                 None => return Err(AquamarineError::VariableNotFound(fold_state.iterable_name.clone())),
-            },
-            (Some(AValue::JValueRef(value)), None) => *value,
+
+                 */
+            Some(AValue::JValueRef(value)) => value,
             (Some(AValue::JValueAccumulatorRef(_)), None) => {
                 unimplemented!("return a error")
                 /*
@@ -178,21 +187,22 @@ impl ParsedCall {
                 ))
                  */
             }
-            (None, None) => return Err(AquamarineError::VariableNotFound(arg_path_head.to_string())),
+            None => return Err(AquamarineError::VariableNotFound(arg_path_head.to_string())),
         };
 
         if split_arg.is_empty() {
-            return Ok(vec![value_by_head]);
+            return Ok(vec![value_by_head.as_ref()]);
         }
 
         let json_path = split_arg.remove(0);
-        let values = jsonpath_lib::select(value_by_head, json_path)
-            .map_err(|e| AquamarineError::VariableNotInJsonPath(value_by_head.clone(), String::from(json_path), e))?;
+        let values = jsonpath_lib::select(value_by_head, json_path).map_err(|e| {
+            AquamarineError::VariableNotInJsonPath(value_by_head.as_ref().clone(), String::from(json_path), e)
+        })?;
 
         Ok(values)
     }
 
-    fn prepare_call_arg<'a>(arg_path: &'a str, ctx: &'a ExecutionCtx<'_>) -> Result<&'a str> {
+    fn prepare_call_arg<'a>(arg_path: &'a str, ctx: &'a ExecutionCtx) -> Result<&'a str> {
         if RESERVED_KEYWORDS.contains(arg_path) {
             return Err(AquamarineError::ReservedKeywordError(arg_path.to_string()));
         }

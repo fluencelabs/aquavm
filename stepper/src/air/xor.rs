@@ -27,7 +27,7 @@ use serde_derive::Serialize;
 pub(crate) struct Xor(Box<Instruction>, Box<Instruction>);
 
 impl super::ExecutableInstruction for Xor {
-    fn execute<'exec_ctx, 'call_ctx: 'exec_ctx, 'a, 'b>(&'a self, exec_ctx: &'b mut ExecutionCtx<'exec_ctx>, call_ctx: &'call_ctx mut CallEvidenceCtx) -> Result<()> {
+    fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
         log::info!("xor is called with contexts: {:?} {:?}", exec_ctx, call_ctx);
 
         exec_ctx.subtree_complete = true;

@@ -23,6 +23,7 @@ mod seq;
 mod xor;
 
 pub(crate) use execution_context::ExecutionCtx;
+pub(crate) use fold::FoldState;
 
 pub(self) use crate::call_evidence::CallEvidenceCtx;
 pub(self) use crate::call_evidence::EvidenceState;
@@ -61,12 +62,11 @@ pub(crate) enum Instruction {
 }
 
 pub(crate) trait ExecutableInstruction {
-    fn execute<'exec_ctx, 'call_ctx: 'exec_ctx, 'a, 'b>(&'a self, exec_ctx: &'b mut ExecutionCtx<'exec_ctx>, call_ctx: &'call_ctx mut CallEvidenceCtx) -> Result<()>;
+    fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()>;
 }
 
 impl ExecutableInstruction for Instruction {
-    fn execute<'exec_ctx, 'call_ctx: 'exec_ctx, 'a, 'b>(&'a self, exec_ctx: &'b mut ExecutionCtx<'exec_ctx>, call_ctx: &'call_ctx mut CallEvidenceCtx) -> Result<()> {
-
+    fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
         match self {
             Instruction::Null(null) => null.execute(exec_ctx, call_ctx),
             Instruction::Call(call) => call.execute(exec_ctx, call_ctx),

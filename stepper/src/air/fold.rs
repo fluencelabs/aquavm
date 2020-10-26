@@ -43,14 +43,14 @@ pub(crate) struct Next(String);
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) struct FoldState {
+    // TODO: maybe change to bidirectional iterator
     pub(crate) cursor: usize,
-    pub(crate) iterable_name: String,
+    pub(crate) iterable: Rc<JValue>,
     pub(crate) instr_head: Rc<Instruction>,
 }
 
 impl super::ExecutableInstruction for Fold {
-    fn execute<'exec_ctx, 'call_ctx: 'exec_ctx, 'a, 'b>(&'a self, exec_ctx: &'b mut ExecutionCtx<'exec_ctx>, call_ctx: &'call_ctx mut CallEvidenceCtx) -> Result<()> {
-
+    fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
         log::info!(
             "fold {} {} is called with contexts {:?} {:?}",
             self.0,
@@ -64,11 +64,18 @@ impl super::ExecutableInstruction for Fold {
         let instr_head = self.2.clone();
 
         // check that value exists and has array type
-        match exec_ctx.data_cache.get(iterable_name) {
-            Some(AValue::JValueRef(JValue::Array(array))) => {
-                if array.is_empty() {
-                    // skip fold if array is empty
-                    return Ok(());
+        let iterable = match exec_ctx.data_cache.get(iterable_name) {
+            Some(AValue::JValueRef(jvalue_rc)) => {
+                match jvalue_rc.as_ref() {
+                    JValue::Array(array) => {
+                        if array.is_empty() {
+                            // skip fold if array is empty
+                            return Ok(());
+                        }
+
+                        jvalue_rc
+                    }
+                    _ => unimplemented!("return a error"),
                 }
             }
             Some(_v) => {
@@ -86,37 +93,36 @@ impl super::ExecutableInstruction for Fold {
 
         let fold_state = FoldState {
             cursor: 0,
-            iterable_name: iterable_name.clone(),
+            iterable: iterable.clone(),
             instr_head: instr_head.clone(),
         };
 
-        if exec_ctx.folds.insert(iterator_name.clone(), fold_state).is_some() {
+        if exec_ctx.data_cache.insert(iterator_name.clone(), AValue::JValueFoldCursor(fold_state)).is_some() {
             return Err(AquamarineError::MultipleFoldStates(iterable_name.clone()));
         }
 
         instr_head.execute(exec_ctx, call_ctx)?;
-        exec_ctx.folds.remove(iterator_name);
+        exec_ctx.data_cache.remove(iterator_name);
 
         Ok(())
     }
 }
 
 impl super::ExecutableInstruction for Next {
-    fn execute<'exec_ctx, 'call_ctx: 'exec_ctx, 'a, 'b>(&'a self, exec_ctx: &'b mut ExecutionCtx<'exec_ctx>, call_ctx: &'call_ctx mut CallEvidenceCtx) -> Result<()> {
-
+    fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
         log::info!("next {:?} is called with contexts {:?} {:?}", self, exec_ctx, call_ctx);
 
         let iterator_name = &self.0;
-        let fold_state = exec_ctx
-            .folds
+        let avalue = exec_ctx
+            .data_cache
             .get_mut(iterator_name)
             .ok_or_else(|| AquamarineError::FoldStateNotFound(iterator_name.clone()))?;
-        let value = exec_ctx
-            .data_cache
-            .get(&fold_state.iterable_name)
-            .expect("this has been checked on the fold instruction");
-        let value_len = match value {
-            AValue::JValueRef(JValue::Array(array)) => array.len(),
+        let fold_state = match avalue {
+            AValue::JValueFoldCursor(state) => state,
+            _ => unimplemented!("return a error"),
+        };
+        let value_len = match fold_state.iterable.as_ref() {
+            JValue::Array(array) => array.len(),
             _ => unreachable!("iterable value shouldn't changed inside fold"),
         };
 
@@ -131,8 +137,8 @@ impl super::ExecutableInstruction for Next {
         next_instr.execute(exec_ctx, call_ctx)?;
 
         // get the same fold state again because of borrow checker
-        match exec_ctx.folds.get_mut(iterator_name) {
-            Some(fold_state) => fold_state.cursor -= 1,
+        match exec_ctx.data_cache.get_mut(iterator_name) {
+            Some(AValue::JValueFoldCursor(fold_state)) => fold_state.cursor -= 1,
             _ => unreachable!("iterator value shouldn't changed inside fold"),
         };
 

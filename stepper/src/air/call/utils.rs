@@ -23,9 +23,12 @@ use crate::AquamarineError;
 use crate::JValue;
 use crate::Result;
 
+use std::cell::RefCell;
+use std::rc::Rc;
+
 pub(super) fn prepare_evidence_state(
     is_current_peer: bool,
-    exec_ctx: &mut ExecutionCtx<'_>,
+    exec_ctx: &mut ExecutionCtx,
     call_ctx: &mut CallEvidenceCtx,
 ) -> Result<bool> {
     if call_ctx.current_subtree_elements_count == 0 {
@@ -72,45 +75,43 @@ pub(super) fn prepare_evidence_state(
     }
 }
 
-pub(super) fn set_local_call_result<'a>(
+pub(super) fn set_local_call_result(
     result_variable_name: String,
-    exec_ctx: &mut ExecutionCtx<'a>,
-    call_ctx: &'a mut CallEvidenceCtx,
+    exec_ctx: &mut ExecutionCtx,
+    call_ctx: &mut CallEvidenceCtx,
     result: JValue,
 ) -> Result<()> {
     use std::collections::hash_map::Entry::{Occupied, Vacant};
 
     let is_array = result_variable_name.ends_with("[]");
     let result_variable_name = result_variable_name.strip_suffix("[]").unwrap().to_string();
-    let new_evidence_state = EvidenceState::Call(CallResult::Executed(result_variable_name, result));
-    call_ctx.new_path.push_back(new_evidence_state);
+    let result = Rc::new(result);
 
-    let (variable_name_ref, result_ref) = match call_ctx.new_path.get(call_ctx.new_path.len()).unwrap() {
-        EvidenceState::Call(CallResult::Executed(variable_name, result)) => (variable_name, result),
-        _ => unreachable!(),
-    };
+    let new_evidence_state = EvidenceState::Call(CallResult::Executed(result.clone()));
 
     if !is_array {
         // if result is not an array, simply insert it into data
         if exec_ctx
             .data_cache
-            .insert(variable_name_ref, AValue::JValueRef(result_ref))
+            .insert(result_variable_name.clone(), AValue::JValueRef(result))
             .is_some()
         {
-            // call_ctx.new_path.pop_back();
-            return Err(AquamarineError::MultipleVariablesFound(variable_name_ref.to_string()));
+            return Err(AquamarineError::MultipleVariablesFound(
+                result_variable_name.to_string(),
+            ));
         }
 
-        exec_ctx.data_cache.insert(variable_name_ref, AValue::JValueRef(result_ref));
-        // log::info!("call evidence: adding new state {:?}", new_evidence_state);
+        log::info!("call evidence: adding new state {:?}", new_evidence_state);
+        call_ctx.new_path.push_back(new_evidence_state);
+
         return Ok(());
     }
 
     // unwrap is safe because it's been checked for []
     // if result is an array, insert result to the end of the array
-    match exec_ctx.data_cache.entry(variable_name_ref) {
+    match exec_ctx.data_cache.entry(result_variable_name) {
         Occupied(mut entry) => match entry.get_mut() {
-            AValue::JValueAccumulatorRef(values) => values.push(result_ref),
+            AValue::JValueAccumulatorRef(values) => values.borrow_mut().push(result),
             _v => {
                 unimplemented!("return a error");
                 /*
@@ -123,16 +124,17 @@ pub(super) fn set_local_call_result<'a>(
             }
         },
         Vacant(entry) => {
-            entry.insert(AValue::JValueAccumulatorRef(vec![result_ref]));
+            entry.insert(AValue::JValueAccumulatorRef(RefCell::new(vec![result])));
         }
     }
 
-    exec_ctx.data_cache.insert(variable_name_ref, AValue::JValueRef(result_ref));
-    // log::info!("call evidence: adding new state {:?}", new_evidence_state);
+    log::info!("call evidence: adding new state {:?}", new_evidence_state);
+    call_ctx.new_path.push_back(new_evidence_state);
+
     Ok(())
 }
 
-pub(super) fn set_remote_call_result(peer_pk: String, exec_ctx: &mut ExecutionCtx<'_>, call_ctx: &mut CallEvidenceCtx) {
+pub(super) fn set_remote_call_result(peer_pk: String, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) {
     exec_ctx.next_peer_pks.push(peer_pk.clone());
     exec_ctx.subtree_complete = false;
 
