@@ -15,6 +15,7 @@
  */
 
 use crate::call_evidence::{CallResult, EvidenceState};
+//use crate::AValue;
 use crate::CallServiceResult;
 use crate::JValue;
 use crate::StepperOutcome;
@@ -224,7 +225,7 @@ impl Into<StepperOutcome> for AquamarineError {
 
         StepperOutcome {
             ret_code,
-            data: format!("{}", self),
+            call_path: format!("{}", self),
             next_peer_pks: vec![],
         }
     }

@@ -26,7 +26,7 @@ use serde_derive::Serialize;
 pub(crate) struct Seq(Box<Instruction>, Box<Instruction>);
 
 impl super::ExecutableInstruction for Seq {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
+    fn execute(&self, exec_ctx: &mut ExecutionCtx<'_>, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
         log::info!("seq is called with contexts: {:?} {:?}", exec_ctx, call_ctx);
 
         exec_ctx.subtree_complete = true;

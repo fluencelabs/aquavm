@@ -18,13 +18,14 @@ use super::ExecutionCtx;
 use crate::call_evidence::CallEvidenceCtx;
 use crate::call_evidence::CallResult;
 use crate::call_evidence::EvidenceState;
+use crate::AValue;
 use crate::AquamarineError;
 use crate::JValue;
 use crate::Result;
 
 pub(super) fn prepare_evidence_state(
     is_current_peer: bool,
-    exec_ctx: &mut ExecutionCtx,
+    exec_ctx: &mut ExecutionCtx<'_>,
     call_ctx: &mut CallEvidenceCtx,
 ) -> Result<bool> {
     if call_ctx.current_subtree_elements_count == 0 {
@@ -48,7 +49,7 @@ pub(super) fn prepare_evidence_state(
             exec_ctx.subtree_complete = false;
             Err(AquamarineError::LocalServiceError(err_msg))
         }
-        EvidenceState::Call(CallResult::RequestSent) => {
+        EvidenceState::Call(CallResult::RequestSent(..)) => {
             // check whether current node can execute this call
             if is_current_peer {
                 Ok(true)
@@ -59,7 +60,7 @@ pub(super) fn prepare_evidence_state(
             }
         }
         // this instruction's been already executed
-        EvidenceState::Call(CallResult::Executed) => {
+        EvidenceState::Call(CallResult::Executed(..)) => {
             call_ctx.new_path.push_back(prev_state);
             Ok(false)
         }
@@ -73,18 +74,23 @@ pub(super) fn prepare_evidence_state(
 
 pub(super) fn set_local_call_result(
     result_variable_name: String,
-    exec_ctx: &mut ExecutionCtx,
+    exec_ctx: &mut ExecutionCtx<'_>,
     call_ctx: &mut CallEvidenceCtx,
     result: JValue,
 ) -> Result<()> {
     use std::collections::hash_map::Entry::{Occupied, Vacant};
 
-    let new_evidence_state = EvidenceState::Call(CallResult::Executed(result_variable_name, result));
     let is_array = result_variable_name.ends_with("[]");
+    let result_ref = &result;
+    let new_evidence_state = EvidenceState::Call(CallResult::Executed(result_variable_name.clone(), result));
 
     if !is_array {
         // if result is not an array, simply insert it into data
-        if exec_ctx.data.insert(result_variable_name.clone(), result).is_some() {
+        if exec_ctx
+            .data_cache
+            .insert(result_variable_name.as_str(), AValue::JValueRef(result_ref))
+            .is_some()
+        {
             return Err(AquamarineError::MultipleVariablesFound(result_variable_name));
         }
 
@@ -97,18 +103,22 @@ pub(super) fn set_local_call_result(
     // unwrap is safe because it's been checked for []
     let result_variable_name = result_variable_name.strip_suffix("[]").unwrap().to_string();
     // if result is an array, insert result to the end of the array
-    match exec_ctx.data.entry(result_variable_name) {
+    match exec_ctx.data_cache.entry(result_variable_name.as_str()) {
         Occupied(mut entry) => match entry.get_mut() {
-            JValue::Array(values) => values.push(result),
-            v => {
+            AValue::JValueAccumulatorRef(values) => values.push(result_ref),
+            _v => {
+                unimplemented!("return a error");
+                /*
                 return Err(AquamarineError::IncompatibleJValueType(
                     v.clone(),
                     String::from("Array"),
                 ))
+
+                 */
             }
         },
         Vacant(entry) => {
-            entry.insert(JValue::Array(vec![result]));
+            entry.insert(AValue::JValueAccumulatorRef(vec![result_ref]));
         }
     }
 
@@ -118,11 +128,11 @@ pub(super) fn set_local_call_result(
     Ok(())
 }
 
-pub(super) fn set_remote_call_result(peer_pk: String, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) {
-    exec_ctx.next_peer_pks.push(peer_pk);
+pub(super) fn set_remote_call_result(peer_pk: String, exec_ctx: &mut ExecutionCtx<'_>, call_ctx: &mut CallEvidenceCtx) {
+    exec_ctx.next_peer_pks.push(peer_pk.clone());
     exec_ctx.subtree_complete = false;
 
-    let new_evidence_state = EvidenceState::Call(CallResult::RequestSent);
+    let new_evidence_state = EvidenceState::Call(CallResult::RequestSent(peer_pk));
     log::info!("call evidence: adding new state {:?}", new_evidence_state);
     call_ctx.new_path.push_back(new_evidence_state);
 }

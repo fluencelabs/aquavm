@@ -15,85 +15,46 @@
  */
 
 use super::utils::format_aqua;
-use super::CALL_EVIDENCE_CTX_KEY;
 use crate::air::ExecutionCtx;
 use crate::air::Instruction;
 use crate::call_evidence::merge_call_paths;
 use crate::call_evidence::CallEvidenceCtx;
-use crate::call_evidence::EvidenceState;
 use crate::get_current_peer_id;
-use crate::AquaData;
 use crate::AquamarineError;
+use crate::CallEvidencePath;
 use crate::Result;
 
-use std::collections::VecDeque;
-
 /// Parse and prepare supplied data and aqua script.
-pub(super) fn prepare(prev_data: String, data: String, aqua: String) -> Result<(AquaData, AquaData, Instruction)> {
+pub(super) fn prepare(
+    raw_prev_path: String,
+    raw_path: String,
+    raw_aqua: String,
+) -> Result<(CallEvidencePath, CallEvidencePath, Instruction)> {
     use AquamarineError::DataDeserializationError as DataDeError;
 
-    let parsed_prev_data: AquaData = serde_json::from_str(&prev_data).map_err(DataDeError)?;
-    let parsed_data: AquaData = serde_json::from_str(&data).map_err(DataDeError)?;
+    let prev_path: CallEvidencePath = serde_json::from_str(&raw_prev_path).map_err(DataDeError)?;
+    let path: CallEvidencePath = serde_json::from_str(&raw_path).map_err(DataDeError)?;
 
-    let formatted_aqua = format_aqua(aqua);
-    let parsed_aqua: Instruction = serde_sexpr::from_str(&formatted_aqua)?;
+    let formatted_aqua = format_aqua(raw_aqua);
+    let aqua: Instruction = serde_sexpr::from_str(&formatted_aqua)?;
 
-    log::info!(
-        "\nparsed aqua: {:?}\nparsed prev_data: {:?}\nparsed data: {:?}",
-        parsed_aqua,
-        parsed_prev_data,
-        parsed_data
-    );
-
-    Ok((parsed_prev_data, parsed_data, parsed_aqua))
+    Ok((prev_path, path, aqua))
 }
 
 /// Make execution and call evidence contexts from supplied data.
 /// Internally, it unites variable from previous and current data and merges call evidence paths.
-pub(super) fn make_contexts(mut prev_data: AquaData, mut data: AquaData) -> Result<(ExecutionCtx, CallEvidenceCtx)> {
-    use AquamarineError::CallEvidenceDeserializationError as CallDeError;
+pub(super) fn make_contexts<'a>(
+    prev_path: CallEvidencePath,
+    path: CallEvidencePath,
+) -> Result<(ExecutionCtx<'a>, CallEvidenceCtx)> {
     use AquamarineError::CurrentPeerIdEnvError as EnvError;
 
     let current_peer_id = get_current_peer_id().map_err(|e| EnvError(e, String::from("CURRENT_PEER_ID")))?;
+    let exec_ctx = ExecutionCtx::new(current_peer_id);
 
-    let prev_states: VecDeque<EvidenceState> = match prev_data.remove(CALL_EVIDENCE_CTX_KEY) {
-        Some(jvalue) => serde_json::from_value(jvalue).map_err(CallDeError)?,
-        None => VecDeque::new(),
-    };
+    let current_path = merge_call_paths(prev_path, path)?;
 
-    let states: VecDeque<EvidenceState> = match data.remove(CALL_EVIDENCE_CTX_KEY) {
-        Some(jvalue) => serde_json::from_value(jvalue).map_err(CallDeError)?,
-        None => VecDeque::new(),
-    };
-
-    let data = merge_data(prev_data, data)?;
-    let current_path = merge_call_paths(prev_states, states)?;
-
-    let execution_ctx = ExecutionCtx::new(data, current_peer_id);
     let call_evidence_ctx = CallEvidenceCtx::new(current_path);
 
-    Ok((execution_ctx, call_evidence_ctx))
-}
-
-fn merge_data(mut prev_data: AquaData, data: AquaData) -> Result<AquaData> {
-    use boolinator::Boolinator;
-    use std::collections::hash_map::Entry::{Occupied, Vacant};
-    use AquamarineError::MultipleVariablesFound;
-
-    for (key, value) in data {
-        match prev_data.entry(key) {
-            Vacant(entry) => {
-                entry.insert(value);
-            }
-            // check that data has equal values for the same key
-            Occupied(entry) => {
-                entry
-                    .get()
-                    .eq(&value)
-                    .ok_or_else(|| MultipleVariablesFound(entry.key().clone()))?;
-            }
-        }
-    }
-
-    Ok(prev_data)
+    Ok((exec_ctx, call_evidence_ctx))
 }

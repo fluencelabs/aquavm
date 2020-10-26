@@ -17,6 +17,7 @@
 use super::CallEvidenceCtx;
 use super::ExecutionCtx;
 use super::Instruction;
+use crate::AValue;
 use crate::AquamarineError;
 use crate::JValue;
 use crate::Result;
@@ -48,7 +49,7 @@ pub(crate) struct FoldState {
 }
 
 impl super::ExecutableInstruction for Fold {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
+    fn execute(&self, exec_ctx: &mut ExecutionCtx<'_>, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
         log::info!(
             "fold {} {} is called with contexts {:?} {:?}",
             self.0,
@@ -62,18 +63,22 @@ impl super::ExecutableInstruction for Fold {
         let instr_head = self.2.clone();
 
         // check that value exists and has array type
-        match exec_ctx.data.get(iterable_name) {
-            Some(JValue::Array(array)) => {
+        match exec_ctx.data_cache.get(iterable_name.as_str()) {
+            Some(AValue::JValueRef(JValue::Array(array))) => {
                 if array.is_empty() {
                     // skip fold if array is empty
                     return Ok(());
                 }
             }
-            Some(v) => {
+            Some(_v) => {
+                unimplemented!("return a error");
+                /*
                 return Err(AquamarineError::IncompatibleJValueType(
                     v.clone(),
                     String::from("Array"),
                 ))
+
+                 */
             }
             None => return Err(AquamarineError::VariableNotFound(String::from(iterable_name))),
         };
@@ -96,7 +101,7 @@ impl super::ExecutableInstruction for Fold {
 }
 
 impl super::ExecutableInstruction for Next {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
+    fn execute(&self, exec_ctx: &mut ExecutionCtx<'_>, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
         log::info!("next {:?} is called with contexts {:?} {:?}", self, exec_ctx, call_ctx);
 
         let iterator_name = &self.0;
@@ -105,11 +110,11 @@ impl super::ExecutableInstruction for Next {
             .get_mut(iterator_name)
             .ok_or_else(|| AquamarineError::FoldStateNotFound(iterator_name.clone()))?;
         let value = exec_ctx
-            .data
-            .get(&fold_state.iterable_name)
+            .data_cache
+            .get(fold_state.iterable_name.as_str())
             .expect("this has been checked on the fold instruction");
         let value_len = match value {
-            JValue::Array(array) => array.len(),
+            AValue::JValueRef(JValue::Array(array)) => array.len(),
             _ => unreachable!("iterable value shouldn't changed inside fold"),
         };
 

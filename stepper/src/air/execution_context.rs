@@ -15,15 +15,15 @@
  */
 
 use super::fold::FoldState;
-use crate::AquaData;
+use crate::AquaDataCache;
 
 use std::collections::HashMap;
 
 /// Execution context contains all necessary information needed to execute aqua script.
 #[derive(Clone, Default, Debug)]
-pub(crate) struct ExecutionCtx {
+pub(crate) struct ExecutionCtx<'a> {
     /// Contains all set variables.
-    pub data: AquaData,
+    pub data_cache: AquaDataCache<'a>,
 
     /// Set of peer public keys that should receive resulted data.
     pub next_peer_pks: Vec<String>,
@@ -37,15 +37,16 @@ pub(crate) struct ExecutionCtx {
     /// Indicates that previous executed subtree is complete.
     /// A subtree treats as a complete if all subtree elements satisfy the following rules:
     ///   - at least one of par subtrees is complete
+    ///   - non-thrown subtree of xor is complete
     ///   - all of seq subtrees are complete
     ///   - call executes successfully (call evidence equals to Executed)
     pub subtree_complete: bool,
 }
 
-impl ExecutionCtx {
-    pub(crate) fn new(data: AquaData, current_peer_id: String) -> Self {
+impl ExecutionCtx<'_> {
+    pub(crate) fn new(current_peer_id: String) -> Self {
         Self {
-            data,
+            data_cache: HashMap::new(),
             next_peer_pks: vec![],
             current_peer_id,
             folds: HashMap::new(),
