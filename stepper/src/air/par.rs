@@ -106,11 +106,7 @@ fn determine_subtree_complete(next_instruction: &Instruction) -> bool {
     //    ))
     // ))
     // par will be executed after the last next that wouldn't change subtree_complete
-    if let Instruction::Next(_) = next_instruction {
-        false
-    } else {
-        true
-    }
+    !matches!(next_instruction, Instruction::Next(_))
 }
 
 #[cfg(test)]

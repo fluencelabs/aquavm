@@ -96,9 +96,7 @@ pub(super) fn set_local_call_result(
             .insert(result_variable_name.clone(), AValue::JValueRef(result))
             .is_some()
         {
-            return Err(AquamarineError::MultipleVariablesFound(
-                result_variable_name.to_string(),
-            ));
+            return Err(AquamarineError::MultipleVariablesFound(result_variable_name));
         }
 
         log::info!("call evidence: adding new state {:?}", new_evidence_state);
@@ -141,6 +139,15 @@ pub(super) fn set_remote_call_result(peer_pk: String, exec_ctx: &mut ExecutionCt
     let new_evidence_state = EvidenceState::Call(CallResult::RequestSent(peer_pk));
     log::info!("call evidence: adding new state {:?}", new_evidence_state);
     call_ctx.new_path.push_back(new_evidence_state);
+}
+
+pub(super) fn find_by_json_path<'jvalue, 'json_path>(
+    jvalue: &'jvalue JValue,
+    json_path: &'json_path str,
+) -> Result<Vec<&'jvalue JValue>> {
+    use AquamarineError::VariableNotInJsonPath as JsonPathError;
+
+    jsonpath_lib::select(jvalue, json_path).map_err(|e| JsonPathError(jvalue.clone(), String::from(json_path), e))
 }
 
 pub(super) fn is_string_literal(value: &str) -> bool {

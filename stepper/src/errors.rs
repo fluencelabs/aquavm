@@ -33,12 +33,6 @@ pub(crate) enum AquamarineError {
     /// Errors occurred while parsing aqua script in the form of S expressions.
     SExprParseError(SExprError),
 
-    /// Errors occurred on aqua data deserialization.
-    DataDeserializationError(SerdeJsonError),
-
-    /// Errors occurred on aqua data serialization.
-    DataSerializationError(SerdeJsonError),
-
     /// Errors occurred while parsing function arguments of an expression.
     FuncArgsSerializationError(JValue, SerdeJsonError),
 
@@ -103,12 +97,6 @@ impl std::fmt::Display for AquamarineError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         match self {
             AquamarineError::SExprParseError(err) => write!(f, "aqua script can't be parsed: {:?}", err),
-            AquamarineError::DataDeserializationError(err) => {
-                write!(f, "an error occurred while data deserialization: {:?}", err)
-            }
-            AquamarineError::DataSerializationError(err) => {
-                write!(f, "an error occurred while data serialization: {:?}", err)
-            }
             AquamarineError::FuncArgsSerializationError(args, err) => write!(
                 f,
                 "function arguments {} can't be serialized or deserialized with an error: {:?}",
@@ -200,27 +188,25 @@ impl Into<StepperOutcome> for AquamarineError {
     fn into(self) -> StepperOutcome {
         let ret_code = match self {
             AquamarineError::SExprParseError(_) => 1,
-            AquamarineError::DataDeserializationError(..) => 2,
-            AquamarineError::DataSerializationError(..) => 3,
-            AquamarineError::FuncArgsSerializationError(..) => 4,
-            AquamarineError::CallServiceResultDeserializationError(..) => 5,
-            AquamarineError::CurrentPeerIdEnvError(..) => 6,
-            AquamarineError::InstructionError(..) => 7,
-            AquamarineError::LocalServiceError(..) => 8,
-            AquamarineError::VariableNotFound(..) => 9,
-            AquamarineError::MultipleVariablesFound(..) => 10,
-            AquamarineError::VariableNotInJsonPath(..) => 11,
-            AquamarineError::IncompatibleJValueType(..) => 12,
-            AquamarineError::MultipleValuesInJsonPath(..) => 13,
-            AquamarineError::FoldStateNotFound(..) => 14,
-            AquamarineError::MultipleFoldStates(..) => 15,
-            AquamarineError::InvalidEvidenceState(..) => 16,
-            AquamarineError::CallEvidenceDeserializationError(..) => 17,
-            AquamarineError::CallEvidenceSerializationError(..) => 18,
-            AquamarineError::ReservedKeywordError(..) => 19,
-            AquamarineError::IncompatibleEvidenceStates(..) => 20,
-            AquamarineError::IncompatibleCallResults(..) => 21,
-            AquamarineError::EvidencePathTooSmall(..) => 21,
+            AquamarineError::FuncArgsSerializationError(..) => 2,
+            AquamarineError::CallServiceResultDeserializationError(..) => 3,
+            AquamarineError::CurrentPeerIdEnvError(..) => 4,
+            AquamarineError::InstructionError(..) => 5,
+            AquamarineError::LocalServiceError(..) => 6,
+            AquamarineError::VariableNotFound(..) => 7,
+            AquamarineError::MultipleVariablesFound(..) => 8,
+            AquamarineError::VariableNotInJsonPath(..) => 9,
+            AquamarineError::IncompatibleJValueType(..) => 10,
+            AquamarineError::MultipleValuesInJsonPath(..) => 11,
+            AquamarineError::FoldStateNotFound(..) => 12,
+            AquamarineError::MultipleFoldStates(..) => 13,
+            AquamarineError::InvalidEvidenceState(..) => 14,
+            AquamarineError::CallEvidenceDeserializationError(..) => 15,
+            AquamarineError::CallEvidenceSerializationError(..) => 16,
+            AquamarineError::ReservedKeywordError(..) => 17,
+            AquamarineError::IncompatibleEvidenceStates(..) => 18,
+            AquamarineError::IncompatibleCallResults(..) => 19,
+            AquamarineError::EvidencePathTooSmall(..) => 20,
         };
 
         StepperOutcome {

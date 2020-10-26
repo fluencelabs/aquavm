@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use super::utils::find_by_json_path;
 use super::utils::is_string_literal;
 use super::utils::prepare_evidence_state;
 use super::Call;
@@ -26,6 +27,8 @@ use crate::AquamarineError;
 use crate::JValue;
 use crate::Result;
 
+use std::borrow::Cow;
+
 #[derive(Debug, PartialEq, Eq)]
 pub(super) struct ParsedCall {
     peer_pk: String,
@@ -37,13 +40,13 @@ pub(super) struct ParsedCall {
 
 impl ParsedCall {
     pub(super) fn new(raw_call: &Call, exec_ctx: &ExecutionCtx) -> Result<Self> {
-        let (peer_pk, service_id, func_name) = Self::prepare_peer_fn_parts(raw_call, exec_ctx)?;
+        let (peer_pk, service_id, function_name) = Self::prepare_peer_fn_parts(raw_call, exec_ctx)?;
         let result_variable_name = Self::parse_result_variable_name(raw_call)?;
 
         Ok(Self {
-            peer_pk: peer_pk.to_string(),
-            service_id: service_id.to_string(),
-            function_name: func_name.to_string(),
+            peer_pk,
+            service_id,
+            function_name,
             function_arg_paths: raw_call.2.clone(),
             result_variable_name: result_variable_name.to_string(),
         })
@@ -77,10 +80,7 @@ impl ParsedCall {
         super::utils::set_local_call_result(self.result_variable_name, exec_ctx, call_ctx, result)
     }
 
-    fn prepare_peer_fn_parts<'a>(
-        raw_call: &'a Call,
-        exec_ctx: &'a ExecutionCtx,
-    ) -> Result<(&'a str, &'a str, &'a str)> {
+    fn prepare_peer_fn_parts<'a>(raw_call: &'a Call, exec_ctx: &'a ExecutionCtx) -> Result<(String, String, String)> {
         use super::FunctionPart::*;
         use super::PeerPart::*;
 
@@ -100,7 +100,7 @@ impl ParsedCall {
         let peer_pk = if peer_pk != CURRENT_PEER_ALIAS {
             Self::prepare_call_arg(peer_pk, exec_ctx)?
         } else {
-            peer_pk
+            peer_pk.to_string()
         };
 
         let service_id = Self::prepare_call_arg(service_id, exec_ctx)?;
@@ -111,13 +111,22 @@ impl ParsedCall {
 
     fn extract_args_by_paths(&self, ctx: &ExecutionCtx) -> Result<JValue> {
         let mut result = Vec::with_capacity(self.function_arg_paths.len());
+        let owned_maybe_json_path = |jvalue: Cow<'_, JValue>, json_path: Option<&str>| -> Result<Vec<JValue>> {
+            if json_path.is_none() {
+                return Ok(vec![jvalue.into_owned()]);
+            }
+
+            let json_path = json_path.unwrap();
+            let values = find_by_json_path(jvalue.as_ref(), json_path)?;
+            Ok(values.into_iter().cloned().collect())
+        };
 
         for arg_path in self.function_arg_paths.iter() {
             if is_string_literal(arg_path) {
                 result.push(JValue::String(arg_path[1..arg_path.len() - 1].to_string()));
             } else {
-                let arg = Self::get_args_by_path(arg_path, ctx)?;
-                result.extend(arg.into_iter().cloned());
+                let arg = Self::get_args_by_path(arg_path, ctx, owned_maybe_json_path)?;
+                result.extend(arg);
             }
         }
 
@@ -146,86 +155,64 @@ impl ParsedCall {
         Ok(result_variable_name)
     }
 
-    fn get_args_by_path<'args_path, 'ctx>(
+    fn get_args_by_path<'args_path, 'exec_ctx, T: 'exec_ctx>(
         args_path: &'args_path str,
-        ctx: &'ctx ExecutionCtx,
-    ) -> Result<Vec<&'ctx JValue>> {
+        ctx: &'exec_ctx ExecutionCtx,
+        maybe_json_path: impl FnOnce(Cow<'exec_ctx, JValue>, Option<&str>) -> Result<T>,
+    ) -> Result<T> {
         let mut split_arg: Vec<&str> = args_path.splitn(2, '.').collect();
         let arg_path_head = split_arg.remove(0);
 
-        let value_by_head = match ctx.data_cache.get(arg_path_head) {
-            AValue::JValueFoldCursor(fold_state) => {
-                match &fold_state.iterable {
-                    JValue::Array(array) => &array[fold_state.cursor],
-                    _ => unreachable!(),
+        match ctx.data_cache.get(arg_path_head) {
+            Some(AValue::JValueFoldCursor(fold_state)) => match fold_state.iterable.as_ref() {
+                JValue::Array(array) => {
+                    let jvalue = &array[fold_state.cursor];
+                    maybe_json_path(Cow::Borrowed(jvalue), split_arg.pop())
                 }
+                _ => unreachable!(),
             },
-            AValue::
-                /*
-                match ctx.data_cache.get(&fold_state.iterable_name) {
-                Some(AValue::JValueAccumulatorRef(acc)) => acc.borrow().get(fold_state.cursor).unwrap(),
-                Some(_v) => {
-                    unimplemented!("return a error");
-                    /*
-                    return Err(AquamarineError::IncompatibleJValueType(
-                        v.clone(),
-                        String::from("accumulator"),
-                    ))
-
-                     */
-                }
-                None => return Err(AquamarineError::VariableNotFound(fold_state.iterable_name.clone())),
-
-                 */
-            Some(AValue::JValueRef(value)) => value,
-            (Some(AValue::JValueAccumulatorRef(_)), None) => {
-                unimplemented!("return a error")
-                /*
-                return Err(AquamarineError::IncompatibleJValueType(
-                    v.clone(),
-                    String::from("value"),
-                ))
-                 */
+            Some(AValue::JValueRef(value)) => maybe_json_path(Cow::Borrowed(value.as_ref()), split_arg.pop()),
+            Some(AValue::JValueAccumulatorRef(acc)) => {
+                let owned_acc = acc.borrow().iter().map(|v| v.as_ref()).cloned().collect::<Vec<_>>();
+                let jvalue = JValue::Array(owned_acc);
+                maybe_json_path(Cow::Owned(jvalue), split_arg.pop())
             }
-            None => return Err(AquamarineError::VariableNotFound(arg_path_head.to_string())),
-        };
-
-        if split_arg.is_empty() {
-            return Ok(vec![value_by_head.as_ref()]);
+            None => Err(AquamarineError::VariableNotFound(arg_path_head.to_string())),
         }
-
-        let json_path = split_arg.remove(0);
-        let values = jsonpath_lib::select(value_by_head, json_path).map_err(|e| {
-            AquamarineError::VariableNotInJsonPath(value_by_head.as_ref().clone(), String::from(json_path), e)
-        })?;
-
-        Ok(values)
     }
 
-    fn prepare_call_arg<'a>(arg_path: &'a str, ctx: &'a ExecutionCtx) -> Result<&'a str> {
+    fn prepare_call_arg<'a>(arg_path: &'a str, ctx: &'a ExecutionCtx) -> Result<String> {
+        fn borrowed_maybe_json_path(jvalue: Cow<'_, JValue>, json_path: Option<&str>) -> Result<JValue> {
+            if json_path.is_none() {
+                return Ok(jvalue.into_owned());
+            }
+
+            let json_path = json_path.unwrap();
+            let values = find_by_json_path(jvalue.as_ref(), json_path)?;
+            if values.is_empty() {
+                return Err(AquamarineError::VariableNotFound(json_path.to_string()));
+            }
+
+            if values.len() != 1 {
+                return Err(AquamarineError::MultipleValuesInJsonPath(json_path.to_string()));
+            }
+
+            Ok(values[0].clone())
+        }
+
         if RESERVED_KEYWORDS.contains(arg_path) {
             return Err(AquamarineError::ReservedKeywordError(arg_path.to_string()));
         }
 
         if is_string_literal(arg_path) {
-            return Ok(&arg_path[1..arg_path.len() - 1]);
+            return Ok(arg_path[1..arg_path.len() - 1].to_string());
         }
 
-        let args = Self::get_args_by_path(arg_path, ctx)?;
-        if args.is_empty() {
-            return Err(AquamarineError::VariableNotFound(arg_path.to_string()));
-        }
+        let arg = Self::get_args_by_path(arg_path, ctx, borrowed_maybe_json_path)?;
 
-        if args.len() != 1 {
-            return Err(AquamarineError::MultipleValuesInJsonPath(arg_path.to_string()));
-        }
-
-        match args[0] {
+        match arg {
             JValue::String(str) => Ok(str),
-            v => Err(AquamarineError::IncompatibleJValueType(
-                v.clone(),
-                String::from("string"),
-            )),
+            v => Err(AquamarineError::IncompatibleJValueType(v, String::from("string"))),
         }
     }
 }

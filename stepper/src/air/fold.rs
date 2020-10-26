@@ -97,7 +97,11 @@ impl super::ExecutableInstruction for Fold {
             instr_head: instr_head.clone(),
         };
 
-        if exec_ctx.data_cache.insert(iterator_name.clone(), AValue::JValueFoldCursor(fold_state)).is_some() {
+        if exec_ctx
+            .data_cache
+            .insert(iterator_name.clone(), AValue::JValueFoldCursor(fold_state))
+            .is_some()
+        {
             return Err(AquamarineError::MultipleFoldStates(iterable_name.clone()));
         }
 

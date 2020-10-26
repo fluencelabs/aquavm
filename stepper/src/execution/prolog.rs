@@ -30,10 +30,10 @@ pub(super) fn prepare(
     raw_path: String,
     raw_aqua: String,
 ) -> Result<(CallEvidencePath, CallEvidencePath, Instruction)> {
-    use AquamarineError::DataDeserializationError as DataDeError;
+    use AquamarineError::CallEvidenceDeserializationError as CallDeError;
 
-    let prev_path: CallEvidencePath = serde_json::from_str(&raw_prev_path).map_err(DataDeError)?;
-    let path: CallEvidencePath = serde_json::from_str(&raw_path).map_err(DataDeError)?;
+    let prev_path: CallEvidencePath = serde_json::from_str(&raw_prev_path).map_err(CallDeError)?;
+    let path: CallEvidencePath = serde_json::from_str(&raw_path).map_err(CallDeError)?;
 
     let formatted_aqua = format_aqua(raw_aqua);
     let aqua: Instruction = serde_sexpr::from_str(&formatted_aqua)?;

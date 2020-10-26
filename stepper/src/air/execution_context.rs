@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-use super::fold::FoldState;
 use crate::AValue;
 
 use std::collections::HashMap;
@@ -46,7 +45,6 @@ impl ExecutionCtx {
             data_cache: HashMap::new(),
             next_peer_pks: vec![],
             current_peer_id,
-            folds: HashMap::new(),
             subtree_complete: true,
         }
     }
