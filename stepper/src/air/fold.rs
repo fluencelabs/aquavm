@@ -49,7 +49,8 @@ pub(crate) struct FoldState {
 }
 
 impl super::ExecutableInstruction for Fold {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx<'_>, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
+    fn execute<'exec_ctx, 'call_ctx: 'exec_ctx, 'a, 'b>(&'a self, exec_ctx: &'b mut ExecutionCtx<'exec_ctx>, call_ctx: &'call_ctx mut CallEvidenceCtx) -> Result<()> {
+
         log::info!(
             "fold {} {} is called with contexts {:?} {:?}",
             self.0,
@@ -63,7 +64,7 @@ impl super::ExecutableInstruction for Fold {
         let instr_head = self.2.clone();
 
         // check that value exists and has array type
-        match exec_ctx.data_cache.get(iterable_name.as_str()) {
+        match exec_ctx.data_cache.get(iterable_name) {
             Some(AValue::JValueRef(JValue::Array(array))) => {
                 if array.is_empty() {
                     // skip fold if array is empty
@@ -101,7 +102,8 @@ impl super::ExecutableInstruction for Fold {
 }
 
 impl super::ExecutableInstruction for Next {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx<'_>, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
+    fn execute<'exec_ctx, 'call_ctx: 'exec_ctx, 'a, 'b>(&'a self, exec_ctx: &'b mut ExecutionCtx<'exec_ctx>, call_ctx: &'call_ctx mut CallEvidenceCtx) -> Result<()> {
+
         log::info!("next {:?} is called with contexts {:?} {:?}", self, exec_ctx, call_ctx);
 
         let iterator_name = &self.0;
@@ -111,7 +113,7 @@ impl super::ExecutableInstruction for Next {
             .ok_or_else(|| AquamarineError::FoldStateNotFound(iterator_name.clone()))?;
         let value = exec_ctx
             .data_cache
-            .get(fold_state.iterable_name.as_str())
+            .get(&fold_state.iterable_name)
             .expect("this has been checked on the fold instruction");
         let value_len = match value {
             AValue::JValueRef(JValue::Array(array)) => array.len(),

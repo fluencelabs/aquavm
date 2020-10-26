@@ -49,7 +49,7 @@ impl ParsedCall {
         })
     }
 
-    pub(super) fn execute(self, exec_ctx: &mut ExecutionCtx<'_>, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
+    pub(super) fn execute<'a>(self, exec_ctx: &mut ExecutionCtx<'a>, call_ctx: &'a mut CallEvidenceCtx) -> Result<()> {
         let is_current_peer = self.peer_pk == exec_ctx.current_peer_id;
         let should_executed = prepare_evidence_state(is_current_peer, exec_ctx, call_ctx)?;
         if !should_executed {
@@ -153,8 +153,8 @@ impl ParsedCall {
         let mut split_arg: Vec<&str> = args_path.splitn(2, '.').collect();
         let arg_path_head = split_arg.remove(0);
 
-        let value_by_head = match (ctx.data_cache.get(arg_path_head), ctx.folds.get(arg_path_head)) {
-            (_, Some(fold_state)) => match ctx.data_cache.get(fold_state.iterable_name.as_str()) {
+        let value_by_head = match (ctx.data_cache.get(&arg_path_head.to_string()), ctx.folds.get(arg_path_head)) {
+            (_, Some(fold_state)) => match ctx.data_cache.get(&fold_state.iterable_name) {
                 Some(AValue::JValueAccumulatorRef(acc)) => acc[fold_state.cursor],
                 Some(_v) => {
                     unimplemented!("return a error");

@@ -28,7 +28,8 @@ use serde_derive::Serialize;
 pub(crate) struct Par(Box<Instruction>, Box<Instruction>);
 
 impl ExecutableInstruction for Par {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx<'_>, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
+    fn execute<'exec_ctx, 'call_ctx: 'exec_ctx, 'a, 'b>(&'a self, exec_ctx: &'b mut ExecutionCtx<'exec_ctx>, call_ctx: &'call_ctx mut CallEvidenceCtx) -> Result<()> {
+
         log::info!("par is called with context: {:?} {:?}", exec_ctx, call_ctx);
 
         let (left_subtree_size, right_subtree_size) = extract_subtree_sizes(call_ctx)?;
@@ -82,11 +83,11 @@ fn extract_subtree_sizes(call_ctx: &mut CallEvidenceCtx) -> Result<(usize, usize
     }
 }
 
-fn execute_subtree(
+fn execute_subtree<'a>(
     subtree: &Instruction,
     subtree_size: usize,
-    exec_ctx: &mut ExecutionCtx<'_>,
-    call_ctx: &mut CallEvidenceCtx,
+    exec_ctx: &mut ExecutionCtx<'a>,
+    call_ctx: &'a mut CallEvidenceCtx,
 ) -> Result<usize> {
     call_ctx.current_subtree_elements_count = subtree_size;
     let before_states_count = call_ctx.new_path.len();

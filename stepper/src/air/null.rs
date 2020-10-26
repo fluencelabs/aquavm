@@ -25,7 +25,8 @@ use serde_derive::Serialize;
 pub(crate) struct Null {}
 
 impl super::ExecutableInstruction for Null {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx<'_>, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
+    fn execute<'exec_ctx, 'call_ctx: 'exec_ctx, 'a, 'b>(&'a self, exec_ctx: &'b mut ExecutionCtx<'exec_ctx>, call_ctx: &'call_ctx mut CallEvidenceCtx) -> Result<()> {
+
         log::info!("null is called with contexts: {:?} {:?}", exec_ctx, call_ctx);
 
         Ok(())

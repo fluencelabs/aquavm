@@ -72,38 +72,43 @@ pub(super) fn prepare_evidence_state(
     }
 }
 
-pub(super) fn set_local_call_result(
+pub(super) fn set_local_call_result<'a>(
     result_variable_name: String,
-    exec_ctx: &mut ExecutionCtx<'_>,
-    call_ctx: &mut CallEvidenceCtx,
+    exec_ctx: &mut ExecutionCtx<'a>,
+    call_ctx: &'a mut CallEvidenceCtx,
     result: JValue,
 ) -> Result<()> {
     use std::collections::hash_map::Entry::{Occupied, Vacant};
 
     let is_array = result_variable_name.ends_with("[]");
-    let result_ref = &result;
-    let new_evidence_state = EvidenceState::Call(CallResult::Executed(result_variable_name.clone(), result));
+    let result_variable_name = result_variable_name.strip_suffix("[]").unwrap().to_string();
+    let new_evidence_state = EvidenceState::Call(CallResult::Executed(result_variable_name, result));
+    call_ctx.new_path.push_back(new_evidence_state);
+
+    let (variable_name_ref, result_ref) = match call_ctx.new_path.get(call_ctx.new_path.len()).unwrap() {
+        EvidenceState::Call(CallResult::Executed(variable_name, result)) => (variable_name, result),
+        _ => unreachable!(),
+    };
 
     if !is_array {
         // if result is not an array, simply insert it into data
         if exec_ctx
             .data_cache
-            .insert(result_variable_name.as_str(), AValue::JValueRef(result_ref))
+            .insert(variable_name_ref, AValue::JValueRef(result_ref))
             .is_some()
         {
-            return Err(AquamarineError::MultipleVariablesFound(result_variable_name));
+            // call_ctx.new_path.pop_back();
+            return Err(AquamarineError::MultipleVariablesFound(variable_name_ref.to_string()));
         }
 
-        log::info!("call evidence: adding new state {:?}", new_evidence_state);
-        call_ctx.new_path.push_back(new_evidence_state);
-
+        exec_ctx.data_cache.insert(variable_name_ref, AValue::JValueRef(result_ref));
+        // log::info!("call evidence: adding new state {:?}", new_evidence_state);
         return Ok(());
     }
 
     // unwrap is safe because it's been checked for []
-    let result_variable_name = result_variable_name.strip_suffix("[]").unwrap().to_string();
     // if result is an array, insert result to the end of the array
-    match exec_ctx.data_cache.entry(result_variable_name.as_str()) {
+    match exec_ctx.data_cache.entry(variable_name_ref) {
         Occupied(mut entry) => match entry.get_mut() {
             AValue::JValueAccumulatorRef(values) => values.push(result_ref),
             _v => {
@@ -122,9 +127,8 @@ pub(super) fn set_local_call_result(
         }
     }
 
-    log::info!("call evidence: adding new state {:?}", new_evidence_state);
-    call_ctx.new_path.push_back(new_evidence_state);
-
+    exec_ctx.data_cache.insert(variable_name_ref, AValue::JValueRef(result_ref));
+    // log::info!("call evidence: adding new state {:?}", new_evidence_state);
     Ok(())
 }
 

@@ -17,7 +17,7 @@
 /// This file contains defines of some things similar both for FCE and browser targets.
 
 pub(crate) type Result<T> = std::result::Result<T, AquamarineError>;
-pub(crate) type AquaDataCache<'a> = std::collections::HashMap<&'a str, AValue<'a>>;
+pub(crate) type AquaDataCache<'a> = std::collections::HashMap<&'a String, AValue<'a>>;
 pub(crate) type JValue = serde_json::Value;
 pub(crate) use crate::call_evidence::CallEvidencePath;
 
