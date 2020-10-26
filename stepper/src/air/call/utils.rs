@@ -26,55 +26,6 @@ use crate::Result;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-pub(super) fn prepare_evidence_state(
-    is_current_peer: bool,
-    exec_ctx: &mut ExecutionCtx,
-    call_ctx: &mut CallEvidenceCtx,
-) -> Result<bool> {
-    if call_ctx.current_subtree_elements_count == 0 {
-        log::info!("call evidence: previous state wasn't found");
-        return Ok(true);
-    }
-
-    call_ctx.current_subtree_elements_count -= 1;
-    // unwrap is safe here, because current_subtree_elements_count depends on current_path len,
-    // and it's been checked previously
-    let prev_state = call_ctx.current_path.pop_front().unwrap();
-
-    log::info!("call evidence: previous state found {:?}", prev_state);
-
-    match &prev_state {
-        // this call was failed on one of the previous executions,
-        // here it's needed to bubble this special error up
-        EvidenceState::Call(CallResult::CallServiceFailed(err_msg)) => {
-            let err_msg = err_msg.clone();
-            call_ctx.new_path.push_back(prev_state);
-            exec_ctx.subtree_complete = false;
-            Err(AquamarineError::LocalServiceError(err_msg))
-        }
-        EvidenceState::Call(CallResult::RequestSent(..)) => {
-            // check whether current node can execute this call
-            if is_current_peer {
-                Ok(true)
-            } else {
-                exec_ctx.subtree_complete = false;
-                call_ctx.new_path.push_back(prev_state);
-                Ok(false)
-            }
-        }
-        // this instruction's been already executed
-        EvidenceState::Call(CallResult::Executed(..)) => {
-            call_ctx.new_path.push_back(prev_state);
-            Ok(false)
-        }
-        // state has inconsistent order - return a error, call shouldn't be executed
-        par_state @ EvidenceState::Par(..) => Err(AquamarineError::InvalidEvidenceState(
-            par_state.clone(),
-            String::from("call"),
-        )),
-    }
-}
-
 pub(super) fn set_local_call_result(
     result_variable_name: String,
     exec_ctx: &mut ExecutionCtx,
@@ -82,22 +33,19 @@ pub(super) fn set_local_call_result(
     result: JValue,
 ) -> Result<()> {
     use std::collections::hash_map::Entry::{Occupied, Vacant};
+    use AquamarineError::*;
 
-    let is_array = result_variable_name.ends_with("[]");
-    let result_variable_name = result_variable_name.strip_suffix("[]").unwrap().to_string();
+    let stripped_result = result_variable_name.strip_suffix("[]");
     let result = Rc::new(result);
 
     let new_evidence_state = EvidenceState::Call(CallResult::Executed(result.clone()));
 
-    if !is_array {
+    if stripped_result.is_none() {
         // if result is not an array, simply insert it into data
-        if exec_ctx
-            .data_cache
-            .insert(result_variable_name.clone(), AValue::JValueRef(result))
-            .is_some()
-        {
-            return Err(AquamarineError::MultipleVariablesFound(result_variable_name));
-        }
+        match exec_ctx.data_cache.entry(result_variable_name) {
+            Vacant(entry) => entry.insert(AValue::JValueRef(result)),
+            Occupied(entry) => return Err(MultipleVariablesFound(entry.key().clone())),
+        };
 
         log::info!("call evidence: adding new state {:?}", new_evidence_state);
         call_ctx.new_path.push_back(new_evidence_state);
@@ -107,19 +55,10 @@ pub(super) fn set_local_call_result(
 
     // unwrap is safe because it's been checked for []
     // if result is an array, insert result to the end of the array
-    match exec_ctx.data_cache.entry(result_variable_name) {
+    match exec_ctx.data_cache.entry(stripped_result.unwrap().to_string()) {
         Occupied(mut entry) => match entry.get_mut() {
             AValue::JValueAccumulatorRef(values) => values.borrow_mut().push(result),
-            _v => {
-                unimplemented!("return a error");
-                /*
-                return Err(AquamarineError::IncompatibleJValueType(
-                    v.clone(),
-                    String::from("Array"),
-                ))
-
-                 */
-            }
+            v => return Err(IncompatibleAValueType(v.clone(), String::from("Array"))),
         },
         Vacant(entry) => {
             entry.insert(AValue::JValueAccumulatorRef(RefCell::new(vec![result])));

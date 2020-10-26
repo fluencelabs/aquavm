@@ -166,9 +166,12 @@ fn merge_call(prev_call_result: CallResult, current_call_result: CallResult) -> 
 
 #[cfg(test)]
 mod tests {
+    use crate::JValue;
     use crate::call_evidence::CallResult;
     use crate::call_evidence::EvidenceState;
     use crate::call_evidence::{merge_call_paths, CallEvidencePath};
+
+    use std::rc::Rc;
 
     #[test]
     fn merge_call_states_1() {
@@ -177,19 +180,19 @@ mod tests {
 
         let mut prev_path = CallEvidencePath::new();
         prev_path.push_back(Par(1, 1));
-        prev_path.push_back(Call(RequestSent));
-        prev_path.push_back(Call(Executed));
+        prev_path.push_back(Call(RequestSent(String::from("peer_1"))));
+        prev_path.push_back(Call(Executed(Rc::new(JValue::Null))));
         prev_path.push_back(Par(1, 1));
-        prev_path.push_back(Call(RequestSent));
-        prev_path.push_back(Call(Executed));
+        prev_path.push_back(Call(RequestSent(String::from("peer_3"))));
+        prev_path.push_back(Call(Executed(Rc::new(JValue::Null))));
 
         let mut current_path = CallEvidencePath::new();
         current_path.push_back(Par(1, 1));
-        current_path.push_back(Call(Executed));
-        current_path.push_back(Call(RequestSent));
+        current_path.push_back(Call(Executed(Rc::new(JValue::Null))));
+        current_path.push_back(Call(RequestSent(String::from("peer_2"))));
         current_path.push_back(Par(1, 1));
-        current_path.push_back(Call(Executed));
-        current_path.push_back(Call(RequestSent));
+        current_path.push_back(Call(Executed(Rc::new(JValue::Null))));
+        current_path.push_back(Call(RequestSent(String::from("peer_4"))));
 
         let merged_path = merge_call_paths(prev_path, current_path).expect("merging should be successful");
 

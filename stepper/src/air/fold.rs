@@ -51,6 +51,8 @@ pub(crate) struct FoldState {
 
 impl super::ExecutableInstruction for Fold {
     fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
+        use AquamarineError::*;
+
         log::info!(
             "fold {} {} is called with contexts {:?} {:?}",
             self.0,
@@ -75,20 +77,11 @@ impl super::ExecutableInstruction for Fold {
 
                         jvalue_rc
                     }
-                    _ => unimplemented!("return a error"),
+                    v => return Err(IncompatibleJValueType(v.clone(), String::from("Array"))),
                 }
             }
-            Some(_v) => {
-                unimplemented!("return a error");
-                /*
-                return Err(AquamarineError::IncompatibleJValueType(
-                    v.clone(),
-                    String::from("Array"),
-                ))
-
-                 */
-            }
-            None => return Err(AquamarineError::VariableNotFound(String::from(iterable_name))),
+            Some(v) => return Err(IncompatibleAValueType(v.clone(), String::from("JValueRef"))),
+            None => return Err(VariableNotFound(String::from(iterable_name))),
         };
 
         let fold_state = FoldState {
@@ -97,12 +90,12 @@ impl super::ExecutableInstruction for Fold {
             instr_head: instr_head.clone(),
         };
 
-        if exec_ctx
+        let previous_value = exec_ctx
             .data_cache
-            .insert(iterator_name.clone(), AValue::JValueFoldCursor(fold_state))
-            .is_some()
-        {
-            return Err(AquamarineError::MultipleFoldStates(iterable_name.clone()));
+            .insert(iterator_name.clone(), AValue::JValueFoldCursor(fold_state));
+
+        if previous_value.is_some() {
+            return Err(MultipleFoldStates(iterable_name.clone()));
         }
 
         instr_head.execute(exec_ctx, call_ctx)?;
@@ -114,6 +107,8 @@ impl super::ExecutableInstruction for Fold {
 
 impl super::ExecutableInstruction for Next {
     fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
+        use AquamarineError::IncompatibleAValueType;
+
         log::info!("next {:?} is called with contexts {:?} {:?}", self, exec_ctx, call_ctx);
 
         let iterator_name = &self.0;
@@ -123,7 +118,7 @@ impl super::ExecutableInstruction for Next {
             .ok_or_else(|| AquamarineError::FoldStateNotFound(iterator_name.clone()))?;
         let fold_state = match avalue {
             AValue::JValueFoldCursor(state) => state,
-            _ => unimplemented!("return a error"),
+            v => return Err(IncompatibleAValueType(v.clone(), String::from("JValueFoldCursor"))),
         };
         let value_len = match fold_state.iterable.as_ref() {
             JValue::Array(array) => array.len(),

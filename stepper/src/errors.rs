@@ -15,7 +15,7 @@
  */
 
 use crate::call_evidence::{CallResult, EvidenceState};
-//use crate::AValue;
+use crate::AValue;
 use crate::CallServiceResult;
 use crate::JValue;
 use crate::StepperOutcome;
@@ -57,8 +57,11 @@ pub(crate) enum AquamarineError {
     /// Value with such path wasn't found in data with such error.
     VariableNotInJsonPath(JValue, String, JsonPathError),
 
-    /// Value for such name isn't presence in data.
+    /// Provided JValue has incompatible with target type.
     IncompatibleJValueType(JValue, String),
+
+    /// Provided AValue has incompatible with target type.
+    IncompatibleAValueType(AValue, String),
 
     /// Multiple values found for such json path.
     MultipleValuesInJsonPath(String),
@@ -126,7 +129,10 @@ impl std::fmt::Display for AquamarineError {
                 json_path, value, json_path_err
             ),
             AquamarineError::IncompatibleJValueType(jvalue, desired_type) => {
-                write!(f, "got avalue \"{:?}\", but {} type is needed", jvalue, desired_type,)
+                write!(f, "got jvalue \"{:?}\", but {} type is needed", jvalue, desired_type,)
+            }
+            AquamarineError::IncompatibleAValueType(avalue, desired_type) => {
+                write!(f, "got avalue \"{:?}\", but {} type is needed", avalue, desired_type,)
             }
             AquamarineError::MultipleValuesInJsonPath(json_path) => {
                 write!(f, "multiple variables found for this json path {}", json_path)
@@ -197,16 +203,17 @@ impl Into<StepperOutcome> for AquamarineError {
             AquamarineError::MultipleVariablesFound(..) => 8,
             AquamarineError::VariableNotInJsonPath(..) => 9,
             AquamarineError::IncompatibleJValueType(..) => 10,
-            AquamarineError::MultipleValuesInJsonPath(..) => 11,
-            AquamarineError::FoldStateNotFound(..) => 12,
-            AquamarineError::MultipleFoldStates(..) => 13,
-            AquamarineError::InvalidEvidenceState(..) => 14,
-            AquamarineError::CallEvidenceDeserializationError(..) => 15,
-            AquamarineError::CallEvidenceSerializationError(..) => 16,
-            AquamarineError::ReservedKeywordError(..) => 17,
-            AquamarineError::IncompatibleEvidenceStates(..) => 18,
-            AquamarineError::IncompatibleCallResults(..) => 19,
-            AquamarineError::EvidencePathTooSmall(..) => 20,
+            AquamarineError::IncompatibleAValueType(..) => 11,
+            AquamarineError::MultipleValuesInJsonPath(..) => 12,
+            AquamarineError::FoldStateNotFound(..) => 13,
+            AquamarineError::MultipleFoldStates(..) => 14,
+            AquamarineError::InvalidEvidenceState(..) => 15,
+            AquamarineError::CallEvidenceDeserializationError(..) => 16,
+            AquamarineError::CallEvidenceSerializationError(..) => 17,
+            AquamarineError::ReservedKeywordError(..) => 18,
+            AquamarineError::IncompatibleEvidenceStates(..) => 19,
+            AquamarineError::IncompatibleCallResults(..) => 20,
+            AquamarineError::EvidencePathTooSmall(..) => 21,
         };
 
         StepperOutcome {
