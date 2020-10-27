@@ -100,3 +100,20 @@ pub fn echo_number_call_service() -> HostExportedFunc {
         ))
     })
 }
+
+pub fn set_variable_call_service(json: impl Into<String>) -> HostExportedFunc {
+    let json = json.into();
+    Box::new(move |_, _| -> Option<IValue> {
+        Some(IValue::Record(
+            Vec1::new(vec![IValue::S32(0), IValue::String(json.clone())]).unwrap(),
+        ))
+    })
+}
+
+#[macro_export]
+macro_rules! call_vm {
+    ($vm:expr, $init_user_id:expr, $script:expr, $prev_data:expr, $data:expr) => {
+        $vm.call(json!([$init_user_id, $script, $prev_data, $data,]))
+            .expect("call should be successful");
+    };
+}

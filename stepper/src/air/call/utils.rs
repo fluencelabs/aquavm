@@ -75,7 +75,7 @@ pub(super) fn set_remote_call_result(peer_pk: String, exec_ctx: &mut ExecutionCt
     exec_ctx.next_peer_pks.push(peer_pk.clone());
     exec_ctx.subtree_complete = false;
 
-    let new_evidence_state = EvidenceState::Call(CallResult::RequestSent(peer_pk));
+    let new_evidence_state = EvidenceState::Call(CallResult::RequestSent(exec_ctx.current_peer_id.clone()));
     log::info!("call evidence: adding new state {:?}", new_evidence_state);
     call_ctx.new_path.push_back(new_evidence_state);
 }

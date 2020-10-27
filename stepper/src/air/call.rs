@@ -89,81 +89,108 @@ impl super::ExecutableInstruction for Call {
 
 #[cfg(test)]
 mod tests {
+    use crate::call_evidence::CallEvidencePath;
     use crate::JValue;
 
+    use aqua_test_utils::call_vm;
     use aqua_test_utils::create_aqua_vm;
     use aqua_test_utils::echo_string_call_service;
+    use aqua_test_utils::set_variable_call_service;
+    use aqua_test_utils::unit_call_service;
     use aquamarine_vm::vec1::Vec1;
     use aquamarine_vm::HostExportedFunc;
     use aquamarine_vm::IValue;
 
     use serde_json::json;
+    use std::rc::Rc;
 
     #[test]
     fn current_peer_id_call() {
-        let mut vm = create_aqua_vm(echo_string_call_service(), "test_peer_id");
+        use crate::call_evidence::CallResult::*;
+        use crate::call_evidence::EvidenceState::*;
+
+        let mut vm = create_aqua_vm(unit_call_service(), "test_peer_id");
 
         let script = String::from(
             r#"
-               (call (%current_peer_id% ("local_service_id" "local_fn_name") (value) result_name))
+               (call (%current_peer_id% ("local_service_id" "local_fn_name") () result_name))
             "#,
         );
 
-        let res = vm
-            .call(json!(["asd", script, "{}", "{\"value\": \"test\"}",]))
-            .expect("call should be successful");
+        let res = call_vm!(vm, "asd", script, "[]", "[]");
+        let call_path: CallEvidencePath = serde_json::from_str(&res.data).expect("should be a valid json");
 
-        let res: JValue = serde_json::from_str(&res.data).unwrap();
-
-        assert_eq!(res.get("result_name").unwrap(), &json!("test"));
+        assert_eq!(call_path.len(), 1);
+        assert_eq!(
+            call_path[0],
+            Call(Executed(Rc::new(JValue::String(String::from("test")))))
+        );
+        assert!(res.next_peer_pks.is_empty());
 
         let script = String::from(
             r#"
-               (call ("test_peer_id" ("local_service_id" "local_fn_name") (value) result_name))
+               (call ("test_peer_id" ("local_service_id" "local_fn_name") () result_name))
             "#,
         );
 
-        let res = vm
-            .call(json!(["asd", script, "{}", "{\"value\": \"test\"}",]))
-            .expect("call should be successful");
+        let res = call_vm!(vm, "asd", script, "[]", "[]");
+        let call_path: CallEvidencePath = serde_json::from_str(&res.data).expect("should be a valid json");
 
-        let res: JValue = serde_json::from_str(&res.data).unwrap();
-
-        assert_eq!(res.get("result_name").unwrap(), &json!("test"));
+        assert_eq!(call_path.len(), 1);
+        assert_eq!(
+            call_path[0],
+            Call(Executed(Rc::new(JValue::String(String::from("test")))))
+        );
+        assert!(res.next_peer_pks.is_empty());
     }
 
     #[test]
     fn remote_peer_id_call() {
-        let mut vm = create_aqua_vm(echo_string_call_service(), "");
-        let remote_peer_id = String::from("some_remote_peer_id");
+        use crate::call_evidence::CallResult::*;
+        use crate::call_evidence::EvidenceState::*;
 
+        let some_local_peer_id = String::from("some_local_peer_id");
+        let mut vm = create_aqua_vm(echo_string_call_service(), some_local_peer_id.clone());
+
+        let remote_peer_id = String::from("some_remote_peer_id");
         let script = format!(
             r#"(call ("{}" ("local_service_id" "local_fn_name") (value) result_name))"#,
             remote_peer_id
         );
 
-        let res = vm
-            .call(json!(["asd", script, "{}", "{\"value\": \"test\"}",]))
-            .expect("call should be successful");
+        let res = call_vm!(vm, "asd", script, "[]", "[]");
+        let call_path: CallEvidencePath = serde_json::from_str(&res.data).expect("should be a valid json");
 
+        assert_eq!(call_path.len(), 1);
+        assert_eq!(call_path[0], Call(RequestSent(some_local_peer_id)));
         assert_eq!(res.next_peer_pks, vec![remote_peer_id]);
     }
 
     #[test]
     fn variables() {
-        let mut vm = create_aqua_vm(echo_string_call_service(), "");
+        let mut vm = create_aqua_vm(unit_call_service(), "remote_peer_id");
+        let mut set_variable_vm = create_aqua_vm(set_variable_call_service(r#""remote_peer_id""#), "set_variable");
 
-        let script = format!(r#"(call (remote_peer_id ("some_service_id" "local_fn_name") ("param") result_name))"#,);
+        let script = format!(
+            r#"
+            (seq (
+                (call ("set_variable" ("some_service_id" "local_fn_name") () remote_peer_id))
+                (call (remote_peer_id ("some_service_id" "local_fn_name") () result_name))
+            ))
+        "#,
+        );
 
-        let res = vm
-            .call(json!(["asd", script, "{}", "{\"remote_peer_id\": \"some_peer_id\"}",]))
-            .expect("call should be successful");
+        let res = call_vm!(set_variable_vm, "asd", script, "[]", "[]");
+        let res = call_vm!(vm, "asd", script, "[]", res.data);
 
-        assert_eq!(res.next_peer_pks, vec![String::from("some_peer_id")]);
+        assert!(res.next_peer_pks.is_empty());
     }
 
     #[test]
     fn string_parameters() {
+        use crate::call_evidence::CallResult::*;
+        use crate::call_evidence::EvidenceState::*;
+
         let call_service: HostExportedFunc = Box::new(|_, args| -> Option<IValue> {
             let arg = match &args[2] {
                 IValue::String(str) => str,
@@ -175,18 +202,30 @@ mod tests {
             ))
         });
 
-        let mut vm = create_aqua_vm(call_service, "");
+        let mut vm = create_aqua_vm(call_service, "A");
+        let mut set_variable_vm = create_aqua_vm(set_variable_call_service(r#""arg3_value""#), "set_variable");
 
-        let script = format!(
-            r#"(call (%current_peer_id% ("some_service_id" "local_fn_name") ("arg1" "arg2" arg3) result_name))"#,
+        let script = String::from(
+            r#"
+            (seq (
+                (call ("set_variable" ("some_service_id" "local_fn_name") () arg3))
+                (call ("A" ("some_service_id" "local_fn_name") ("arg1" "arg2" arg3) result))
+            ))
+        "#,
         );
 
-        let res = vm
-            .call(json!(["asd", script, "{}", json!({"arg3": "arg3_value"}).to_string(),]))
-            .expect("call should be successful");
+        let res = call_vm!(set_variable_vm, "asd", script, "[]", "[]");
+        let res = call_vm!(vm, "asd", script, "[]", res.data);
+        let call_path: CallEvidencePath = serde_json::from_str(&res.data).expect("should be a valid json");
 
-        let jdata: JValue = serde_json::from_str(&res.data).expect("should be valid json");
-
-        assert_eq!(jdata["result_name"], json!(["arg1", "arg2", "arg3_value"]));
+        assert_eq!(call_path.len(), 2);
+        assert_eq!(
+            call_path[1],
+            Call(Executed(Rc::new(JValue::Array(vec![
+                JValue::String(String::from("arg1")),
+                JValue::String(String::from("arg2")),
+                JValue::String(String::from("arg3_value")),
+            ]))))
+        );
     }
 }

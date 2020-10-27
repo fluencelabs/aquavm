@@ -21,6 +21,8 @@ use super::CURRENT_PEER_ALIAS;
 use crate::air::ExecutionCtx;
 use crate::air::RESERVED_KEYWORDS;
 use crate::call_evidence::CallEvidenceCtx;
+use crate::call_evidence::CallResult;
+use crate::call_evidence::EvidenceState;
 use crate::AValue;
 use crate::AquamarineError;
 use crate::JValue;
@@ -70,6 +72,11 @@ impl ParsedCall {
         let result = unsafe { crate::call_service(self.service_id, self.function_name, function_args) };
 
         if result.ret_code != crate::CALL_SERVICE_SUCCESS {
+            call_ctx
+                .new_path
+                .push_back(EvidenceState::Call(CallResult::CallServiceFailed(
+                    result.result.clone(),
+                )));
             return Err(AquamarineError::LocalServiceError(result.result));
         }
 
@@ -236,6 +243,7 @@ fn get_args_by_path<'args_path, 'exec_ctx, T: 'exec_ctx>(
     }
 }
 
+// Prepare argumen of call
 fn prepare_call_arg<'a>(arg_path: &'a str, ctx: &'a ExecutionCtx) -> Result<String> {
     fn borrowed_maybe_json_path(jvalue: Cow<'_, JValue>, json_path: Option<&str>) -> Result<JValue> {
         if json_path.is_none() {

@@ -166,10 +166,10 @@ fn merge_call(prev_call_result: CallResult, current_call_result: CallResult) -> 
 
 #[cfg(test)]
 mod tests {
-    use crate::JValue;
     use crate::call_evidence::CallResult;
     use crate::call_evidence::EvidenceState;
     use crate::call_evidence::{merge_call_paths, CallEvidencePath};
+    use crate::JValue;
 
     use std::rc::Rc;
 
@@ -198,11 +198,11 @@ mod tests {
 
         let mut right_merged_path = CallEvidencePath::new();
         right_merged_path.push_back(Par(1, 1));
-        right_merged_path.push_back(Call(Executed));
-        right_merged_path.push_back(Call(Executed));
+        right_merged_path.push_back(Call(Executed(Rc::new(JValue::Null))));
+        right_merged_path.push_back(Call(Executed(Rc::new(JValue::Null))));
         right_merged_path.push_back(Par(1, 1));
-        right_merged_path.push_back(Call(Executed));
-        right_merged_path.push_back(Call(Executed));
+        right_merged_path.push_back(Call(Executed(Rc::new(JValue::Null))));
+        right_merged_path.push_back(Call(Executed(Rc::new(JValue::Null))));
 
         assert_eq!(merged_path, right_merged_path);
     }
@@ -214,32 +214,32 @@ mod tests {
 
         let mut prev_path = CallEvidencePath::new();
         prev_path.push_back(Par(1, 0));
-        prev_path.push_back(Call(RequestSent));
+        prev_path.push_back(Call(RequestSent(String::from("peer_1"))));
         prev_path.push_back(Par(1, 1));
-        prev_path.push_back(Call(RequestSent));
-        prev_path.push_back(Call(Executed));
+        prev_path.push_back(Call(RequestSent(String::from("peer_2"))));
+        prev_path.push_back(Call(Executed(Rc::new(JValue::Null))));
 
         let mut current_path = CallEvidencePath::new();
         current_path.push_back(Par(2, 2));
-        current_path.push_back(Call(Executed));
-        current_path.push_back(Call(Executed));
-        current_path.push_back(Call(Executed));
-        current_path.push_back(Call(RequestSent));
+        current_path.push_back(Call(Executed(Rc::new(JValue::Null))));
+        current_path.push_back(Call(Executed(Rc::new(JValue::Null))));
+        current_path.push_back(Call(Executed(Rc::new(JValue::Null))));
+        current_path.push_back(Call(RequestSent(String::from("peer_1"))));
         current_path.push_back(Par(1, 1));
-        current_path.push_back(Call(Executed));
-        current_path.push_back(Call(RequestSent));
+        current_path.push_back(Call(Executed(Rc::new(JValue::Null))));
+        current_path.push_back(Call(RequestSent(String::from("peer_2"))));
 
         let merged_path = merge_call_paths(prev_path, current_path).expect("merging should be successful");
 
         let mut right_merged_path = CallEvidencePath::new();
         right_merged_path.push_back(Par(2, 2));
-        right_merged_path.push_back(Call(Executed));
-        right_merged_path.push_back(Call(Executed));
-        right_merged_path.push_back(Call(Executed));
-        right_merged_path.push_back(Call(RequestSent));
+        right_merged_path.push_back(Call(Executed(Rc::new(JValue::Null))));
+        right_merged_path.push_back(Call(Executed(Rc::new(JValue::Null))));
+        right_merged_path.push_back(Call(Executed(Rc::new(JValue::Null))));
+        right_merged_path.push_back(Call(RequestSent(String::from("peer_1"))));
         right_merged_path.push_back(Par(1, 1));
-        right_merged_path.push_back(Call(Executed));
-        right_merged_path.push_back(Call(Executed));
+        right_merged_path.push_back(Call(Executed(Rc::new(JValue::Null))));
+        right_merged_path.push_back(Call(Executed(Rc::new(JValue::Null))));
 
         assert_eq!(merged_path, right_merged_path);
     }
@@ -250,43 +250,43 @@ mod tests {
         use EvidenceState::*;
 
         let mut prev_path = CallEvidencePath::new();
-        prev_path.push_back(Call(Executed));
+        prev_path.push_back(Call(Executed(Rc::new(JValue::Null))));
         prev_path.push_back(Par(2, 0));
         prev_path.push_back(Par(1, 0));
-        prev_path.push_back(Call(RequestSent));
+        prev_path.push_back(Call(RequestSent(String::from("peer_1"))));
         prev_path.push_back(Par(1, 2));
-        prev_path.push_back(Call(RequestSent));
-        prev_path.push_back(Call(Executed));
-        prev_path.push_back(Call(RequestSent));
+        prev_path.push_back(Call(RequestSent(String::from("peer_1"))));
+        prev_path.push_back(Call(Executed(Rc::new(JValue::Null))));
+        prev_path.push_back(Call(RequestSent(String::from("peer_1"))));
 
         let mut current_path = CallEvidencePath::new();
-        current_path.push_back(Call(RequestSent));
+        current_path.push_back(Call(Executed(Rc::new(JValue::Null))));
         current_path.push_back(Par(3, 3));
         current_path.push_back(Par(1, 1));
-        current_path.push_back(Call(Executed));
-        current_path.push_back(Call(Executed));
+        current_path.push_back(Call(Executed(Rc::new(JValue::Null))));
+        current_path.push_back(Call(Executed(Rc::new(JValue::Null))));
         current_path.push_back(Par(1, 1));
-        current_path.push_back(Call(Executed));
-        current_path.push_back(Call(RequestSent));
+        current_path.push_back(Call(Executed(Rc::new(JValue::Null))));
+        current_path.push_back(Call(RequestSent(String::from("peer_1"))));
         current_path.push_back(Par(1, 1));
-        current_path.push_back(Call(Executed));
-        current_path.push_back(Call(RequestSent));
+        current_path.push_back(Call(Executed(Rc::new(JValue::Null))));
+        current_path.push_back(Call(RequestSent(String::from("peer_1"))));
 
         let merged_path = merge_call_paths(prev_path, current_path).expect("merging should be successful");
 
         let mut right_merged_path = CallEvidencePath::new();
-        right_merged_path.push_back(Call(Executed));
+        right_merged_path.push_back(Call(Executed(Rc::new(JValue::Null))));
         right_merged_path.push_back(Par(3, 3));
         right_merged_path.push_back(Par(1, 1));
-        right_merged_path.push_back(Call(Executed));
-        right_merged_path.push_back(Call(Executed));
+        right_merged_path.push_back(Call(Executed(Rc::new(JValue::Null))));
+        right_merged_path.push_back(Call(Executed(Rc::new(JValue::Null))));
         right_merged_path.push_back(Par(1, 1));
-        right_merged_path.push_back(Call(Executed));
-        right_merged_path.push_back(Call(RequestSent));
+        right_merged_path.push_back(Call(Executed(Rc::new(JValue::Null))));
+        right_merged_path.push_back(Call(RequestSent(String::from("peer_1"))));
         right_merged_path.push_back(Par(1, 2));
-        right_merged_path.push_back(Call(Executed));
-        right_merged_path.push_back(Call(Executed));
-        right_merged_path.push_back(Call(RequestSent));
+        right_merged_path.push_back(Call(Executed(Rc::new(JValue::Null))));
+        right_merged_path.push_back(Call(Executed(Rc::new(JValue::Null))));
+        right_merged_path.push_back(Call(RequestSent(String::from("peer_1"))));
 
         assert_eq!(merged_path, right_merged_path);
     }

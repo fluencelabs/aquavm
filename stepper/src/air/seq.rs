@@ -42,6 +42,7 @@ impl super::ExecutableInstruction for Seq {
 
 #[cfg(test)]
 mod tests {
+    use aqua_test_utils::call_vm;
     use aqua_test_utils::create_aqua_vm;
     use aqua_test_utils::unit_call_service;
 
@@ -59,25 +60,10 @@ mod tests {
             ))"#,
         );
 
-        let res = vm
-            .call(json!(["asd", script, "{}", "{}",]))
-            .expect("call should be successful");
-
+        let res = call_vm!(vm, "asd", script, "[]", "[]");
         assert_eq!(res.next_peer_pks, vec![String::from("remote_peer_id_1")]);
 
-        let res = vm
-            .call(json!([
-                "asd",
-                script,
-                "{}",
-                json!({
-                    "__call": [{"call": "executed"}]
-                    }
-                )
-                .to_string(),
-            ]))
-            .expect("call should be successful");
-
+        let res = call_vm!(vm, "asd", script, "[]", json!([{"call": {"executed": ""}}]).to_string());
         assert_eq!(res.next_peer_pks, vec![String::from("remote_peer_id_2")]);
     }
 
@@ -93,10 +79,7 @@ mod tests {
             ))"#,
         );
 
-        let res = vm
-            .call(json!(["asd", script, "{}", "{}",]))
-            .expect("call should be successful");
-
+        let res = call_vm!(vm, "asd", script, "[]", "[]");
         assert_eq!(res.next_peer_pks, vec![String::from("remote_peer_id_2")]);
     }
 }

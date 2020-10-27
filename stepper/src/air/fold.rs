@@ -147,132 +147,160 @@ impl super::ExecutableInstruction for Next {
 
 #[cfg(test)]
 mod tests {
+    use crate::call_evidence::CallEvidencePath;
     use crate::JValue;
 
+    use aqua_test_utils::call_vm;
     use aqua_test_utils::create_aqua_vm;
     use aqua_test_utils::echo_number_call_service;
+    use aqua_test_utils::set_variable_call_service;
     use aquamarine_vm::AquamarineVMError;
     use aquamarine_vm::StepperError;
 
     use serde_json::json;
+    use std::rc::Rc;
 
     #[test]
     fn lfold() {
-        let mut vm = create_aqua_vm(echo_number_call_service(), "");
+        use crate::call_evidence::CallResult::*;
+        use crate::call_evidence::EvidenceState::*;
+
+        let mut vm = create_aqua_vm(echo_number_call_service(), "A");
+        let mut set_variable_vm = create_aqua_vm(set_variable_call_service(r#"["1","2","3","4","5"]"#), "set_variable");
 
         let lfold = String::from(
             r#"
-            (fold (Iterable i
-                (seq (
-                    (call (%current_peer_id% ("local_service_id" "local_fn_name") (i) acc[]))
-                    (next i)
-                )
-            )))"#,
+            (seq (
+                (call ("set_variable" ("" "") () Iterable))
+                (fold (Iterable i
+                    (seq (
+                        (call ("A" ("" "") (i) acc[]))
+                        (next i)
+                    ))
+                ))
+            ))"#,
         );
 
-        let res = vm
-            .call(json!([
-                "asd",
-                lfold,
-                "{}",
-                "{\"Iterable\": [\"1\",\"2\",\"3\",\"4\",\"5\"]}",
-            ]))
-            .expect("call should be successful");
+        let res = call_vm!(set_variable_vm, "", lfold, "[]", "[]");
+        let res = call_vm!(vm, "", lfold, "[]", res.data);
+        let res: CallEvidencePath = serde_json::from_str(&res.data).expect("should be valid call evidence path");
 
-        let res: JValue = serde_json::from_str(&res.data).unwrap();
+        assert_eq!(res.len(), 6);
+        assert_eq!(res[0], Call(Executed(Rc::new(json!(["1", "2", "3", "4", "5"])))));
 
-        assert_eq!(res.get("acc").unwrap(), &json!([1, 2, 3, 4, 5]));
+        for i in 1..=5 {
+            assert_eq!(res[i], Call(Executed(Rc::new(JValue::Number(i.into())))));
+        }
     }
 
     #[test]
     fn rfold() {
-        let mut vm = create_aqua_vm(echo_number_call_service(), "");
+        use crate::call_evidence::CallResult::*;
+        use crate::call_evidence::EvidenceState::*;
+
+        let mut vm = create_aqua_vm(echo_number_call_service(), "A");
+        let mut set_variable_vm = create_aqua_vm(set_variable_call_service(r#"["1","2","3","4","5"]"#), "set_variable");
 
         let rfold = String::from(
             r#"
-            (fold (Iterable i
-                (seq (
-                    (next i)
-                    (call (%current_peer_id% ("local_service_id" "local_fn_name") (i) acc[]))
-                )
-            )))"#,
+            (seq (
+                (call ("set_variable" ("" "") () Iterable))
+                (fold (Iterable i
+                    (seq (
+                        (next i)
+                        (call ("A" ("" "") (i) acc[]))
+                    ))
+                ))
+            ))"#,
         );
 
-        let res = vm
-            .call(json!([
-                "asd",
-                rfold,
-                "{}",
-                "{\"Iterable\": [\"1\",\"2\",\"3\",\"4\",\"5\"]}",
-            ]))
-            .expect("call should be successful");
+        let res = call_vm!(set_variable_vm, "", rfold, "[]", "[]");
+        let res = call_vm!(vm, "", rfold, "[]", res.data);
+        let res: CallEvidencePath = serde_json::from_str(&res.data).expect("should be valid call evidence path");
 
-        let res: JValue = serde_json::from_str(&res.data).unwrap();
+        assert_eq!(res.len(), 6);
+        assert_eq!(res[0], Call(Executed(Rc::new(json!(["1", "2", "3", "4", "5"])))));
 
-        assert_eq!(res.get("acc").unwrap(), &json!([5, 4, 3, 2, 1]));
+        for i in 1..=5 {
+            assert_eq!(res[i], Call(Executed(Rc::new(JValue::Number((6 - i).into())))));
+        }
     }
 
     #[test]
     fn inner_fold() {
-        let mut vm = create_aqua_vm(echo_number_call_service(), "");
+        use crate::call_evidence::CallResult::*;
+        use crate::call_evidence::EvidenceState::*;
+
+        let mut vm = create_aqua_vm(echo_number_call_service(), "A");
+        let mut set_variable_vm = create_aqua_vm(set_variable_call_service(r#"["1","2","3","4","5"]"#), "set_variable");
 
         let script = String::from(
             r#"
-            (fold (Iterable1 i
+            (seq (
                 (seq (
-                    (fold (Iterable2 j
-                        (seq (
-                            (call (%current_peer_id% ("local_service_id" "local_fn_name") (i) acc[]))
-                            (next j)
+                    (call ("set_variable" ("" "") () Iterable1))
+                    (call ("set_variable" ("" "") () Iterable2))
+                ))
+                (fold (Iterable1 i
+                    (seq (
+                        (fold (Iterable2 j
+                            (seq (
+                                (call ("A" ("" "") (i) acc[]))
+                                (next j)
+                            ))
                         ))
+                        (next i)
                     ))
-                    (next i)
                 ))
             ))"#,
         );
 
-        let res = vm
-            .call(json!([
-                "asd",
-                script,
-                "{}",
-                "{\"Iterable1\": [\"1\",\"2\",\"3\",\"4\",\"5\"], \"Iterable2\": [\"1\",\"2\",\"3\",\"4\",\"5\"]}",
-            ]))
-            .expect("call should be successful");
+        let res = call_vm!(set_variable_vm, "", script, "[]", "[]");
+        let res = call_vm!(vm, "", script, "[]", res.data);
+        let res: CallEvidencePath = serde_json::from_str(&res.data).expect("should be valid call evidence path");
 
-        let res: JValue = serde_json::from_str(&res.data).unwrap();
+        assert_eq!(res.len(), 27);
+        assert_eq!(res[0], Call(Executed(Rc::new(json!(["1", "2", "3", "4", "5"])))));
+        assert_eq!(res[1], Call(Executed(Rc::new(json!(["1", "2", "3", "4", "5"])))));
 
-        assert_eq!(
-            res.get("acc").unwrap(),
-            &json!([1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5])
-        );
+        for i in 1..=5 {
+            for j in 1..=5 {
+                assert_eq!(
+                    res[1 + 5 * (i - 1) + j],
+                    Call(Executed(Rc::new(JValue::Number(i.into()))))
+                );
+            }
+        }
     }
 
     #[test]
     fn inner_fold_with_same_iterator() {
-        let mut vm = create_aqua_vm(echo_number_call_service(), "");
+        let mut vm = create_aqua_vm(echo_number_call_service(), "A");
+        let mut set_variable_vm = create_aqua_vm(set_variable_call_service(r#"["1","2","3","4","5"]"#), "set_variable");
 
         let script = String::from(
             r#"
-            (fold (Iterable1 i
+            (seq (
                 (seq (
-                    (fold (Iterable2 i
-                        (seq (
-                            (call (%current_peer_id% ("local_service_id" "local_fn_name") (i) acc[]))
-                            (next i)
+                    (call ("set_variable" ("" "") () Iterable1))
+                    (call ("set_variable" ("" "") () Iterable2))
+                ))
+                (fold (Iterable1 i
+                    (seq (
+                        (fold (Iterable2 i
+                            (seq (
+                                (call ("A" ("" "") (i) acc[]))
+                                (next i)
+                            ))
                         ))
+                        (next i)
                     ))
-                    (next i)
                 ))
             ))"#,
         );
 
-        let res = vm.call(json!([
-            "asd",
-            script,
-            "{}",
-            "{\"Iterable1\": [\"1\",\"2\",\"3\",\"4\",\"5\"], \"Iterable2\": [\"1\",\"2\",\"3\",\"4\",\"5\"]}",
-        ]));
+        let res = call_vm!(set_variable_vm, "", script, "[]", "[]");
+        let res = vm.call(json!(["", script, "{}", res.data]));
 
         assert!(res.is_err());
         let error = res.err().unwrap();
@@ -289,24 +317,30 @@ mod tests {
 
     #[test]
     fn empty_fold() {
-        let mut vm = create_aqua_vm(echo_number_call_service(), "");
+        use crate::call_evidence::CallResult::*;
+        use crate::call_evidence::EvidenceState::*;
 
-        let lfold = String::from(
+        let mut vm = create_aqua_vm(echo_number_call_service(), "A");
+        let mut set_variable_vm = create_aqua_vm(set_variable_call_service(r#"[]"#), "set_variable");
+
+        let empty_fold = String::from(
             r#"
-            (fold (Iterable i
-                (seq (
-                    (call (%current_peer_id% ("local_service_id" "local_fn_name") (i) acc[]))
-                    (next i)
-                )
-            )))"#,
+            (seq (
+                (call ("set_variable" ("" "") () Iterable))
+                (fold (Iterable i
+                    (seq (
+                        (call ("A" ("" "") (i) acc[]))
+                        (next i)
+                    ))
+                ))
+            ))"#,
         );
 
-        let res = vm
-            .call(json!(["asd", lfold, "{}", "{\"Iterable\": []}",]))
-            .expect("call should be successful");
+        let res = call_vm!(set_variable_vm, "", empty_fold, "[]", "[]");
+        let res = call_vm!(vm, "", empty_fold, "[]", res.data);
+        let res: CallEvidencePath = serde_json::from_str(&res.data).expect("should be valid call evidence path");
 
-        let res: JValue = serde_json::from_str(&res.data).unwrap();
-
-        assert!(res.get("acc").is_none());
+        assert_eq!(res.len(), 1);
+        assert_eq!(res[0], Call(Executed(Rc::new(json!([])))));
     }
 }

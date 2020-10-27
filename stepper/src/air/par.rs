@@ -39,11 +39,9 @@ impl ExecutableInstruction for Par {
         let pre_new_states_count = call_ctx.new_path.len();
         call_ctx.new_path.push_back(EvidenceState::Par(0, 0));
 
-        exec_ctx.subtree_complete = determine_subtree_complete(&self.0);
         let new_left_subtree_size = execute_subtree(&self.0, left_subtree_size, exec_ctx, call_ctx)?;
         let left_subtree_complete = exec_ctx.subtree_complete;
 
-        exec_ctx.subtree_complete = determine_subtree_complete(&self.1);
         let new_right_subtree_size = execute_subtree(&self.1, right_subtree_size, exec_ctx, call_ctx)?;
         let right_subtree_complete = exec_ctx.subtree_complete;
 
@@ -91,6 +89,8 @@ fn execute_subtree(
     call_ctx.current_subtree_elements_count = subtree_size;
     let before_states_count = call_ctx.new_path.len();
 
+    exec_ctx.subtree_complete = determine_subtree_complete(&subtree);
+
     // execute subtree
     subtree.execute(exec_ctx, call_ctx)?;
 
@@ -111,6 +111,7 @@ fn determine_subtree_complete(next_instruction: &Instruction) -> bool {
 
 #[cfg(test)]
 mod tests {
+    use aqua_test_utils::call_vm;
     use aqua_test_utils::create_aqua_vm;
     use aqua_test_utils::unit_call_service;
 
@@ -130,14 +131,11 @@ mod tests {
             ))"#,
         );
 
-        let mut res = vm
-            .call(json!(["asd", script, "{}", "{}",]))
-            .expect("call should be successful");
+        let mut res = call_vm!(vm, "", script, "[]", "[]");
 
         let peers_result: HashSet<_> = res.next_peer_pks.drain(..).collect();
-        let peers_right: HashSet<_> = vec![String::from("remote_peer_id_1"), String::from("remote_peer_id_2")]
-            .drain(..)
-            .collect();
+        let peers_right: HashSet<_> =
+            maplit::hashset!(String::from("remote_peer_id_1"), String::from("remote_peer_id_2"));
 
         assert_eq!(peers_result, peers_right);
     }
@@ -154,9 +152,7 @@ mod tests {
             ))"#,
         );
 
-        let res = vm
-            .call(json!(["asd", script, "{}", "{}",]))
-            .expect("call should be successful");
+        let res = call_vm!(vm, "", script, "[]", "[]");
 
         assert_eq!(res.next_peer_pks, vec![String::from("remote_peer_id_2")]);
     }

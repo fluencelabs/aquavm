@@ -43,8 +43,10 @@ impl super::ExecutableInstruction for Xor {
 
 #[cfg(test)]
 mod tests {
+    use crate::call_evidence::CallEvidencePath;
     use crate::JValue;
 
+    use aqua_test_utils::call_vm;
     use aqua_test_utils::create_aqua_vm;
     use aquamarine_vm::vec1::Vec1;
     use aquamarine_vm::HostExportedFunc;
@@ -52,8 +54,13 @@ mod tests {
 
     use serde_json::json;
 
+    use std::rc::Rc;
+
     #[test]
     fn xor() {
+        use crate::call_evidence::CallResult::*;
+        use crate::call_evidence::EvidenceState::*;
+
         let call_service: HostExportedFunc = Box::new(|_, args| -> Option<IValue> {
             let builtin_service = match &args[0] {
                 IValue::String(str) => str,
@@ -63,12 +70,12 @@ mod tests {
             if builtin_service == "service_id_1" {
                 // return a error for service with id service_id_1
                 Some(IValue::Record(
-                    Vec1::new(vec![IValue::S32(1), IValue::String(String::from("{}"))]).unwrap(),
+                    Vec1::new(vec![IValue::S32(1), IValue::String(String::from(r#""error""#))]).unwrap(),
                 ))
             } else {
                 // return success for services with other ids
                 Some(IValue::Record(
-                    Vec1::new(vec![IValue::S32(0), IValue::String(String::from("\"res\""))]).unwrap(),
+                    Vec1::new(vec![IValue::S32(0), IValue::String(String::from(r#""res""#))]).unwrap(),
                 ))
             }
         });
@@ -83,13 +90,15 @@ mod tests {
             ))"#,
         );
 
-        let res = vm
-            .call(json!(["asd", script, "{}", json!({"arg3": "arg3_value"}).to_string(),]))
-            .expect("call should be successful");
+        let res = call_vm!(vm, "asd", script, "[]", "[]");
+        let call_path: CallEvidencePath = serde_json::from_str(&res.data).expect("should be valid json");
 
-        let jdata: JValue = serde_json::from_str(&res.data).expect("should be valid json");
-
-        assert_eq!(jdata["result_2"], json!("res"));
+        assert_eq!(call_path.len(), 2);
+        assert_eq!(call_path[0], Call(CallServiceFailed(String::from(r#""error""#))));
+        assert_eq!(
+            call_path[1],
+            Call(Executed(Rc::new(JValue::String(String::from("res")))))
+        );
 
         let script = String::from(
             r#"
@@ -99,12 +108,13 @@ mod tests {
             ))"#,
         );
 
-        let res = vm
-            .call(json!(["asd", script, "{}", json!({"arg3": "arg3_value"}).to_string(),]))
-            .expect("call should be successful");
+        let res = call_vm!(vm, "asd", script, "[]", "[]");
+        let call_path: CallEvidencePath = serde_json::from_str(&res.data).expect("should be valid json");
 
-        let jdata: JValue = serde_json::from_str(&res.data).expect("should be valid json");
-
-        assert_eq!(jdata["result_1"], json!("res"));
+        assert_eq!(call_path.len(), 1);
+        assert_eq!(
+            call_path[0],
+            Call(Executed(Rc::new(JValue::String(String::from("res")))))
+        );
     }
 }
