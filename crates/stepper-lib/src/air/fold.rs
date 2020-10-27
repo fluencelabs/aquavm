@@ -80,7 +80,7 @@ impl super::ExecutableInstruction for Fold {
                     v => return Err(IncompatibleJValueType(v.clone(), String::from("Array"))),
                 }
             }
-            Some(v) => return Err(IncompatibleAValueType(v.clone(), String::from("JValueRef"))),
+            Some(v) => return Err(IncompatibleAValueType(format!("{:?}", v), String::from("JValueRef"))),
             None => return Err(VariableNotFound(String::from(iterable_name))),
         };
 
@@ -118,7 +118,12 @@ impl super::ExecutableInstruction for Next {
             .ok_or_else(|| AquamarineError::FoldStateNotFound(iterator_name.clone()))?;
         let fold_state = match avalue {
             AValue::JValueFoldCursor(state) => state,
-            v => return Err(IncompatibleAValueType(v.clone(), String::from("JValueFoldCursor"))),
+            v => {
+                return Err(IncompatibleAValueType(
+                    format!("{:?}", v),
+                    String::from("JValueFoldCursor"),
+                ))
+            }
         };
         let value_len = match fold_state.iterable.as_ref() {
             JValue::Array(array) => array.len(),
@@ -275,8 +280,7 @@ mod tests {
 
     #[test]
     fn inner_fold_with_same_iterator() {
-        let mut vm = create_aqua_vm(echo_number_call_service(), "A");
-        let mut set_variable_vm = create_aqua_vm(set_variable_call_service(r#"["1","2","3","4","5"]"#), "set_variable");
+        let mut vm = create_aqua_vm(set_variable_call_service(r#"["1","2","3","4","5"]"#), "set_variable");
 
         let script = String::from(
             r#"
@@ -299,8 +303,7 @@ mod tests {
             ))"#,
         );
 
-        let res = call_vm!(set_variable_vm, "", script, "[]", "[]");
-        let res = vm.call(json!(["", script, "{}", res.data]));
+        let res = vm.call(json!(["", script, "[]", "[]"]));
 
         assert!(res.is_err());
         let error = res.err().unwrap();
@@ -311,7 +314,7 @@ mod tests {
 
         assert_eq!(
             error,
-            StepperError::MultipleFoldStates(String::from("multiple fold states found for iterable Iterable2"))
+            StepperError::FoldStateNotFound(String::from("multiple fold states found for iterable Iterable2"))
         );
     }
 

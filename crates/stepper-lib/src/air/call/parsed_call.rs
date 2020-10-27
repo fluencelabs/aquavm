@@ -20,6 +20,7 @@ use super::Call;
 use super::CURRENT_PEER_ALIAS;
 use crate::air::ExecutionCtx;
 use crate::air::RESERVED_KEYWORDS;
+use crate::build_targets::CALL_SERVICE_SUCCESS;
 use crate::call_evidence::CallEvidenceCtx;
 use crate::call_evidence::CallResult;
 use crate::call_evidence::EvidenceState;
@@ -71,7 +72,7 @@ impl ParsedCall {
 
         let result = unsafe { crate::call_service(self.service_id, self.function_name, function_args) };
 
-        if result.ret_code != crate::CALL_SERVICE_SUCCESS {
+        if result.ret_code != CALL_SERVICE_SUCCESS {
             call_ctx
                 .new_path
                 .push_back(EvidenceState::Call(CallResult::CallServiceFailed(

@@ -14,33 +14,45 @@
  * limitations under the License.
  */
 
-/// This file contains defines of some things similar both for FCE and browser targets.
+#![allow(improper_ctypes)]
+#![warn(rust_2018_idioms)]
+#![deny(
+    dead_code,
+    nonstandard_style,
+    unused_imports,
+    unused_mut,
+    unused_variables,
+    unused_unsafe,
+    unreachable_patterns
+)]
+
+mod air;
+mod build_targets;
+mod call_evidence;
+mod errors;
+mod execution;
+mod stepper_outcome;
+
+pub use crate::call_evidence::CallEvidencePath;
+pub use crate::call_evidence::CallResult;
+pub use crate::call_evidence::EvidenceState;
+pub use crate::errors::AquamarineError;
+pub use crate::stepper_outcome::StepperOutcome;
+pub use crate::stepper_outcome::STEPPER_SUCCESS;
+pub use execution::execute_aqua;
 
 pub(crate) type Result<T> = std::result::Result<T, AquamarineError>;
 pub(crate) type JValue = serde_json::Value;
-pub(crate) use crate::call_evidence::CallEvidencePath;
 
-pub(crate) use crate::errors::AquamarineError;
-pub(crate) use crate::stepper_outcome::StepperOutcome;
-pub(crate) use crate::stepper_outcome::STEPPER_SUCCESS;
+pub(crate) use build_targets::call_service;
+pub(crate) use build_targets::get_current_peer_id;
 
 use std::cell::RefCell;
 use std::rc::Rc;
-
-pub(crate) const CALL_SERVICE_SUCCESS: i32 = 0;
-use serde_derive::Deserialize;
-use serde_derive::Serialize;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub(crate) enum AValue {
     JValueRef(Rc<JValue>),
     JValueAccumulatorRef(RefCell<Vec<Rc<JValue>>>),
     JValueFoldCursor(crate::air::FoldState),
-}
-
-#[fluence::fce]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct CallServiceResult {
-    pub ret_code: i32,
-    pub result: String,
 }

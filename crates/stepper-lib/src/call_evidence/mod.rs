@@ -14,27 +14,11 @@
  * limitations under the License.
  */
 
-#![allow(improper_ctypes)]
-#![warn(rust_2018_idioms)]
-#![deny(
-    dead_code,
-    nonstandard_style,
-    unused_imports,
-    unused_mut,
-    unused_variables,
-    unused_unsafe,
-    unreachable_patterns
-)]
+mod context;
+mod state;
 
-use fluence::fce;
-use stepper_lib::execute_aqua;
-use stepper_lib::StepperOutcome;
-
-pub fn main() {
-    fluence::WasmLogger::init_with_level(log::Level::Info).unwrap();
-}
-
-#[fce]
-pub fn invoke(init_user_id: String, aqua: String, prev_data: String, data: String) -> StepperOutcome {
-    execute_aqua(init_user_id, aqua, prev_data, data)
-}
+pub(crate) use context::CallEvidenceCtx;
+pub(crate) use state::merge_call_paths;
+pub use state::CallEvidencePath;
+pub use state::CallResult;
+pub use state::EvidenceState;

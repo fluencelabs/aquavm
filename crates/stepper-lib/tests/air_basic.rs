@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+use crate::CallEvidencePath;
+use crate::CallResult;
+use crate::EvidenceState;
+
+use aqua_test_utils::call_vm;
 use aqua_test_utils::create_aqua_vm;
 use aqua_test_utils::unit_call_service;
 use aquamarine_vm::vec1::Vec1;
@@ -39,11 +44,8 @@ fn seq_par_call() {
         ))"#,
     );
 
-    let res = vm
-        .call(json!(["asd", script, "{}", "{}",]))
-        .expect("should be successful");
-
-    let resulted_json: JValue = serde_json::from_str(&res.data).expect("stepper should return valid json");
+    let res = call_vm!(vm, "asd", script, "[]", "[]");
+    let resulted_json: CallEvidencePath = serde_json::from_str(&res.data).expect("stepper should return valid json");
 
     let right_json = json!( {
         "result_1" : "test",

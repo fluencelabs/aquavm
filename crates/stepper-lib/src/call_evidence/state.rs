@@ -22,11 +22,11 @@ use serde::Serialize;
 use std::cmp::max;
 use std::rc::Rc;
 
-pub(crate) type CallEvidencePath = std::collections::VecDeque<EvidenceState>;
+pub type CallEvidencePath = std::collections::VecDeque<EvidenceState>;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub(crate) enum CallResult {
+pub enum CallResult {
     /// Request was sent to a target node by node with such public key and it shouldn't be called again.
     RequestSent(String),
 
@@ -39,7 +39,7 @@ pub(crate) enum CallResult {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub(crate) enum EvidenceState {
+pub enum EvidenceState {
     Par(usize, usize),
     Call(CallResult),
 }

@@ -14,11 +14,17 @@
  * limitations under the License.
  */
 
-mod context;
-mod state;
+use super::CallServiceResult;
+use std::env::VarError;
 
-pub(crate) use context::CallEvidenceCtx;
-pub(crate) use state::merge_call_paths;
-pub(crate) use state::CallEvidencePath;
-pub(crate) use state::CallResult;
-pub(crate) use state::EvidenceState;
+const CURRENT_PEER_ID_ENV_NAME: &str = "CURRENT_PEER_ID";
+
+pub fn get_current_peer_id() -> std::result::Result<String, VarError> {
+    std::env::var(CURRENT_PEER_ID_ENV_NAME)
+}
+
+#[fluence::fce]
+#[link(wasm_import_module = "host")]
+extern "C" {
+    pub(crate) fn call_service(service_id: String, fn_name: String, args: String) -> CallServiceResult;
+}

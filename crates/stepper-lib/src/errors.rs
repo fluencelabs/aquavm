@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
+use crate::build_targets::CallServiceResult;
 use crate::call_evidence::{CallResult, EvidenceState};
-use crate::AValue;
-use crate::CallServiceResult;
 use crate::JValue;
 use crate::StepperOutcome;
 
@@ -29,7 +28,7 @@ use std::env::VarError;
 use std::error::Error;
 
 #[derive(Debug)]
-pub(crate) enum AquamarineError {
+pub enum AquamarineError {
     /// Errors occurred while parsing aqua script in the form of S expressions.
     SExprParseError(SExprError),
 
@@ -61,7 +60,7 @@ pub(crate) enum AquamarineError {
     IncompatibleJValueType(JValue, String),
 
     /// Provided AValue has incompatible with target type.
-    IncompatibleAValueType(AValue, String),
+    IncompatibleAValueType(String, String),
 
     /// Multiple values found for such json path.
     MultipleValuesInJsonPath(String),
@@ -132,7 +131,7 @@ impl std::fmt::Display for AquamarineError {
                 write!(f, "got jvalue \"{:?}\", but {} type is needed", jvalue, desired_type,)
             }
             AquamarineError::IncompatibleAValueType(avalue, desired_type) => {
-                write!(f, "got avalue \"{:?}\", but {} type is needed", avalue, desired_type,)
+                write!(f, "got avalue {}, but {} type is needed", avalue, desired_type,)
             }
             AquamarineError::MultipleValuesInJsonPath(json_path) => {
                 write!(f, "multiple variables found for this json path {}", json_path)

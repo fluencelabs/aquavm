@@ -27,7 +27,7 @@ use crate::Result;
 use crate::StepperOutcome;
 use crate::STEPPER_SUCCESS;
 
-pub(crate) fn execute_aqua(init_user_id: String, aqua: String, prev_data: String, data: String) -> StepperOutcome {
+pub fn execute_aqua(init_user_id: String, aqua: String, prev_data: String, data: String) -> StepperOutcome {
     log::info!(
         "aquamarine version is {}, init user id is {}",
         env!("CARGO_PKG_VERSION"),

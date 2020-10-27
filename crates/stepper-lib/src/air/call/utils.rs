@@ -58,7 +58,7 @@ pub(super) fn set_local_call_result(
     match exec_ctx.data_cache.entry(stripped_result.unwrap().to_string()) {
         Occupied(mut entry) => match entry.get_mut() {
             AValue::JValueAccumulatorRef(values) => values.borrow_mut().push(result),
-            v => return Err(IncompatibleAValueType(v.clone(), String::from("Array"))),
+            v => return Err(IncompatibleAValueType(format!("{:?}", v), String::from("Array"))),
         },
         Vacant(entry) => {
             entry.insert(AValue::JValueAccumulatorRef(RefCell::new(vec![result])));
@@ -72,7 +72,7 @@ pub(super) fn set_local_call_result(
 }
 
 pub(super) fn set_remote_call_result(peer_pk: String, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) {
-    exec_ctx.next_peer_pks.push(peer_pk.clone());
+    exec_ctx.next_peer_pks.push(peer_pk);
     exec_ctx.subtree_complete = false;
 
     let new_evidence_state = EvidenceState::Call(CallResult::RequestSent(exec_ctx.current_peer_id.clone()));
