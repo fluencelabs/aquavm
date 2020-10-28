@@ -138,16 +138,15 @@ fn join_chat() {
     let client_1_res_json: JValue = serde_json::from_str(&client_1_res.data).expect("stepper should return valid json");
 
     let client_1_right_json = json!( [
-            { "call": { "executed" : "test" } },
-            { "call": { "executed" : [["A", "Relay1"], ["B", "Relay2"]]} },
-            { "call": { "executed" : [["A", "Relay1"], ["B", "Relay2"]]} },
-            { "par": [2, 2] },
-            { "call": { "executed" : "test" } },
-            { "call": { "executed" : "test" } },
-            { "par": [1, 0] },
-            { "call": { "request_sent" : "Remote" } },
-        ]
-    );
+        { "call": { "executed" : "test" } },
+        { "call": { "executed" : [["A", "Relay1"], ["B", "Relay2"]]} },
+        { "call": { "executed" : [["A", "Relay1"], ["B", "Relay2"]]} },
+        { "par": [2, 2] },
+        { "call": { "executed" : "test" } },
+        { "call": { "executed" : "test" } },
+        { "par": [1, 0] },
+        { "call": { "request_sent" : "Remote" } },
+    ]);
 
     assert_eq!(client_1_res_json, client_1_right_json);
     assert_eq!(client_1_res.next_peer_pks, Vec::<String>::new());

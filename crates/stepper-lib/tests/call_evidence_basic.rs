@@ -290,31 +290,30 @@ fn evidence_par_seq_fold_call() {
     let resulted_path: JValue = serde_json::from_str(&res.data).expect("a valid json");
 
     let right_json = json!( [
-            { "par": [21,1] },
-            { "call": { "executed": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"] } },
-            { "par": [1,18] },
-            { "call": { "executed": 1 } },
-            { "par": [1,16] },
-            { "call": { "executed": 2 } },
-            { "par": [1,14] },
-            { "call": { "executed": 3 } },
-            { "par": [1,12] },
-            { "call": { "executed": 4 } },
-            { "par": [1,10] },
-            { "call": { "executed": 5 } },
-            { "par": [1,8] },
-            { "call": { "executed": 6 } },
-            { "par": [1,6] },
-            { "call": { "executed": 7 } },
-            { "par": [1,4] },
-            { "call": { "executed": 8 } },
-            { "par": [1,2] },
-            { "call": { "executed": 9 } },
-            { "par": [1,0] },
-            { "call": { "executed": 10 } },
-            { "call": { "executed": "test" } },
-        ]
-    );
+        { "par": [21,1] },
+        { "call": { "executed": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"] } },
+        { "par": [1,18] },
+        { "call": { "executed": 1 } },
+        { "par": [1,16] },
+        { "call": { "executed": 2 } },
+        { "par": [1,14] },
+        { "call": { "executed": 3 } },
+        { "par": [1,12] },
+        { "call": { "executed": 4 } },
+        { "par": [1,10] },
+        { "call": { "executed": 5 } },
+        { "par": [1,8] },
+        { "call": { "executed": 6 } },
+        { "par": [1,6] },
+        { "call": { "executed": 7 } },
+        { "par": [1,4] },
+        { "call": { "executed": 8 } },
+        { "par": [1,2] },
+        { "call": { "executed": 9 } },
+        { "par": [1,0] },
+        { "call": { "executed": 10 } },
+        { "call": { "executed": "test" } },
+    ]);
 
     assert_eq!(resulted_path, right_json);
     assert!(res.next_peer_pks.is_empty());
@@ -430,14 +429,13 @@ fn evidence_seq_par_seq_seq() {
     let resulted_json: JValue = serde_json::from_str(&res.data).expect("stepper should return valid json");
 
     let right_json = json!( [
-            { "par": [2,2] },
-            { "call": {"executed" : "test" } },
-            { "call": {"executed" : "test" } },
-            { "call": {"executed" : "test" } },
-            { "call": {"executed" : "test" } },
-            { "call": {"executed" : "test" } },
-        ]
-    );
+        { "par": [2,2] },
+        { "call": {"executed" : "test" } },
+        { "call": {"executed" : "test" } },
+        { "call": {"executed" : "test" } },
+        { "call": {"executed" : "test" } },
+        { "call": {"executed" : "test" } },
+    ]);
 
     assert_eq!(resulted_json, right_json);
     assert!(res.next_peer_pks.is_empty());
