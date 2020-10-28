@@ -33,8 +33,8 @@ use aquamarine_vm::HostImportDescriptor;
 use aquamarine_vm::IType;
 use aquamarine_vm::IValue;
 
-use std::path::PathBuf;
 use std::collections::HashMap;
+use std::path::PathBuf;
 
 type JValue = serde_json::Value;
 
@@ -129,7 +129,10 @@ pub fn set_variables_call_service(ret_mapping: HashMap<String, String>) -> HostE
             _ => String::from("default"),
         };
 
-        let result = ret_mapping.get(&arg_name).cloned().unwrap_or(String::from(r#""test""#));
+        let result = ret_mapping
+            .get(&arg_name)
+            .cloned()
+            .unwrap_or(String::from(r#""test""#));
 
         Some(IValue::Record(
             Vec1::new(vec![IValue::S32(0), IValue::String(result.clone())]).unwrap(),

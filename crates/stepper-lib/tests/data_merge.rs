@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-use aqua_test_utils::create_aqua_vm;
 use aqua_test_utils::call_vm;
+use aqua_test_utils::create_aqua_vm;
 use aquamarine_vm::vec1::Vec1;
 use aquamarine_vm::HostExportedFunc;
 use aquamarine_vm::IValue;
 
-use serde_json::json;
 use pretty_assertions::assert_eq;
+use serde_json::json;
 
 type JValue = serde_json::Value;
 
@@ -78,18 +78,18 @@ fn data_merge() {
     let resulted_json1: JValue = serde_json::from_str(&res1.data).expect("stepper should return valid json");
 
     let right_json1 = json!( [
-            { "call": { "executed": ["A", "B"] } },
-            { "par": [1,2] },
-            { "call": { "executed": ["A", "B"] } },
-            { "par": [1,0] },
-            { "call": { "request_sent": "A" } },
-            { "par": [1,2] },
-            { "call": { "executed": ["A", "B"] } },
-            { "par": [1,0] },
-            { "call": { "request_sent": "A" } },
-            { "call": { "executed": ["A", "B"] } },
-            { "call": { "request_sent": "A" } },
-        ]);
+        { "call": { "executed": ["A", "B"] } },
+        { "par": [1,2] },
+        { "call": { "executed": ["A", "B"] } },
+        { "par": [1,0] },
+        { "call": { "request_sent": "A" } },
+        { "par": [1,2] },
+        { "call": { "executed": ["A", "B"] } },
+        { "par": [1,0] },
+        { "call": { "request_sent": "A" } },
+        { "call": { "executed": ["A", "B"] } },
+        { "call": { "request_sent": "A" } },
+    ]);
 
     assert_eq!(resulted_json1, right_json1);
     assert_eq!(res1.next_peer_pks, vec![String::from("B")]);
@@ -97,17 +97,17 @@ fn data_merge() {
     let resulted_json2: JValue = serde_json::from_str(&res2.data).expect("stepper should return valid json");
 
     let right_json2 = json!( [
-            { "call": { "executed": ["A", "B"] } },
-            { "par": [1,2] },
-            { "call": { "request_sent": "B" } },
-            { "par": [1,0] },
-            { "call": { "executed": ["A", "B"] } },
-            { "par": [1,2] },
-            { "call": { "request_sent": "B" } },
-            { "par": [1,0] },
-            { "call": { "executed": ["A", "B"] } },
-            { "call": { "request_sent": "B" } },
-        ]);
+        { "call": { "executed": ["A", "B"] } },
+        { "par": [1,2] },
+        { "call": { "request_sent": "B" } },
+        { "par": [1,0] },
+        { "call": { "executed": ["A", "B"] } },
+        { "par": [1,2] },
+        { "call": { "request_sent": "B" } },
+        { "par": [1,0] },
+        { "call": { "executed": ["A", "B"] } },
+        { "call": { "request_sent": "B" } },
+    ]);
 
     assert_eq!(resulted_json2, right_json2);
     assert_eq!(res2.next_peer_pks, vec![String::from("A")]);
@@ -115,18 +115,18 @@ fn data_merge() {
     let resulted_json3: JValue = serde_json::from_str(&res3.data).expect("stepper should return valid json");
 
     let right_json3 = json!( [
-            { "call": { "executed": ["A", "B"] } },
-            { "par": [1,2] },
-            { "call": { "executed": ["A", "B"] } },
-            { "par": [1,0] },
-            { "call": { "executed": ["A", "B"] } },
-            { "par": [1,2] },
-            { "call": { "executed": ["A", "B"] } },
-            { "par": [1,0] },
-            { "call": { "executed": ["A", "B"] } },
-            { "call": { "executed": ["A", "B"] } },
-            { "call": { "request_sent": "A" } },
-        ]);
+        { "call": { "executed": ["A", "B"] } },
+        { "par": [1,2] },
+        { "call": { "executed": ["A", "B"] } },
+        { "par": [1,0] },
+        { "call": { "executed": ["A", "B"] } },
+        { "par": [1,2] },
+        { "call": { "executed": ["A", "B"] } },
+        { "par": [1,0] },
+        { "call": { "executed": ["A", "B"] } },
+        { "call": { "executed": ["A", "B"] } },
+        { "call": { "request_sent": "A" } },
+    ]);
 
     assert_eq!(resulted_json3, right_json3);
     assert!(res3.next_peer_pks.is_empty());
@@ -134,18 +134,18 @@ fn data_merge() {
     let resulted_json4: JValue = serde_json::from_str(&res4.data).expect("stepper should return valid json");
 
     let right_json4 = json!( [
-            { "call": { "executed": ["A", "B"] } },
-            { "par": [1,2] },
-            { "call": { "executed": ["A", "B"] } },
-            { "par": [1,0] },
-            { "call": { "executed": ["A", "B"] } },
-            { "par": [1,2] },
-            { "call": { "executed": ["A", "B"] } },
-            { "par": [1,0] },
-            { "call": { "executed": ["A", "B"] } },
-            { "call": { "executed": ["A", "B"] } },
-            { "call": { "executed": ["A", "B"] } },
-        ]);
+        { "call": { "executed": ["A", "B"] } },
+        { "par": [1,2] },
+        { "call": { "executed": ["A", "B"] } },
+        { "par": [1,0] },
+        { "call": { "executed": ["A", "B"] } },
+        { "par": [1,2] },
+        { "call": { "executed": ["A", "B"] } },
+        { "par": [1,0] },
+        { "call": { "executed": ["A", "B"] } },
+        { "call": { "executed": ["A", "B"] } },
+        { "call": { "executed": ["A", "B"] } },
+    ]);
 
     assert_eq!(resulted_json4, right_json4);
     assert!(res4.next_peer_pks.is_empty());
