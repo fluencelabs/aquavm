@@ -15,6 +15,7 @@
  */
 
 use aqua_test_utils::create_aqua_vm;
+use aqua_test_utils::call_vm;
 use aqua_test_utils::unit_call_service;
 use aquamarine_vm::vec1::Vec1;
 use aquamarine_vm::HostExportedFunc;
@@ -68,58 +69,42 @@ fn join_chat() {
         "#,
     );
 
-    let client_1_res = client_1
-        .call(json!(["asd", script, "{}", "{}"]))
-        .expect("should be successful");
+    let client_1_res = call_vm!(client_1, "asd", script, "[]", "[]");
 
     let client_1_res_json: JValue = serde_json::from_str(&client_1_res.data).expect("stepper should return valid json");
 
-    let client_1_right_json = json!( {
-        "__call": [
-            { "call": "request_sent" },
-        ]
-    });
+    let client_1_right_json = json!([
+            { "call": {"request_sent": "A" } },
+        ]);
 
     assert_eq!(client_1_res_json, client_1_right_json);
     assert_eq!(client_1_res.next_peer_pks, vec![String::from("Relay1")]);
 
-    let relay_1_res = relay_1
-        .call(json!(["asd", script, client_1_res.data, "{}"]))
-        .expect("should be successful");
+    let relay_1_res = call_vm!(relay_1, "asd", script, client_1_res.data, "[]");
 
     let relay_1_res_json: JValue = serde_json::from_str(&relay_1_res.data).expect("stepper should return valid json");
 
-    let relay_1_right_json = json!( {
-        "void1": ["test"],
-        "__call": [
-            { "call": "executed" },
-            { "call": "request_sent" },
-        ]
-    });
+    let relay_1_right_json = json!( [
+            { "call": { "executed" : "test" } },
+            { "call": { "request_sent": "Relay1" } },
+        ]);
 
     assert_eq!(relay_1_res_json, relay_1_right_json);
     assert_eq!(relay_1_res.next_peer_pks, vec![String::from("Remote")]);
 
-    let remote_res = remote
-        .call(json!(["asd", script, relay_1_res.data, "{}"]))
-        .expect("should be successful");
+    let remote_res = call_vm!(remote, "asd", script, relay_1_res.data, "[]");
 
     let remote_res_json: JValue = serde_json::from_str(&remote_res.data).expect("stepper should return valid json");
 
-    let remote_right_json = json!( {
-        "void1": ["test"],
-        "void2": [[["A", "Relay1"], ["B", "Relay2"]]],
-        "members": [["A", "Relay1"], ["B", "Relay2"]],
-        "__call": [
-            { "call": "executed" },
-            { "call": "executed" },
-            { "call": "executed" },
+    let remote_right_json = json!( [
+            { "call": { "executed" : "test" } },
+            { "call": { "executed" : [["A", "Relay1"], ["B", "Relay2"]]} },
+            { "call": { "executed" : [["A", "Relay1"], ["B", "Relay2"]]} },
             { "par": [1, 2] },
-            { "call": "request_sent" },
+            { "call": { "request_sent" : "Remote" } },
             { "par": [1, 0] },
-            { "call": "request_sent" },
-        ]
-    });
+            { "call": { "request_sent" : "Remote" } },
+        ]);
 
     let remote_res_next_peer_pks: HashSet<_> = remote_res.next_peer_pks.iter().map(|s| s.as_str()).collect();
     let next_peer_pks_right = maplit::hashset! {
@@ -130,108 +115,75 @@ fn join_chat() {
     assert_eq!(remote_res_json, remote_right_json);
     assert_eq!(remote_res_next_peer_pks, next_peer_pks_right);
 
-    let relay_1_res = relay_1
-        .call(json!(["asd", script, remote_res.data, "{}"]))
-        .expect("should be successful");
+    let relay_1_res = call_vm!(relay_1, "asd", script, remote_res.data, "[]");
 
     let relay_1_res_json: JValue = serde_json::from_str(&relay_1_res.data).expect("stepper should return valid json");
 
-    let relay_1_right_json = json!( {
-        "void1": ["test"],
-        "void2": [[["A", "Relay1"], ["B", "Relay2"]]],
-        "void": ["test"],
-        "members": [["A", "Relay1"], ["B", "Relay2"]],
-        "__call": [
-            { "call": "executed" },
-            { "call": "executed" },
-            { "call": "executed" },
+    let relay_1_right_json = json!( [
+            { "call": { "executed" : "test" } },
+            { "call": { "executed" : [["A", "Relay1"], ["B", "Relay2"]]} },
+            { "call": { "executed" : [["A", "Relay1"], ["B", "Relay2"]]} },
             { "par": [2, 2] },
-            { "call": "executed" },
-            { "call": "request_sent" },
+            { "call": { "executed" : "test" } },
+            { "call": { "request_sent" : "Relay1" } },
             { "par": [1, 0] },
-            { "call": "request_sent" },
-        ]
-    });
+            { "call": { "request_sent" : "Remote" } },
+        ]);
 
     assert_eq!(relay_1_res_json, relay_1_right_json);
     assert_eq!(relay_1_res.next_peer_pks, vec![String::from("A")]);
 
-    let client_1_res = client_1
-        .call(json!(["asd", script, relay_1_res.data, "{}"]))
-        .expect("should be successful");
+    let client_1_res = call_vm!(client_1, "asd", script, relay_1_res.data, "[]");
 
     let client_1_res_json: JValue = serde_json::from_str(&client_1_res.data).expect("stepper should return valid json");
 
-    let client_1_right_json = json!( {
-        "void1": ["test"],
-        "void2": [[["A", "Relay1"], ["B", "Relay2"]]],
-        "void": ["test"],
-        "void3": ["test"],
-        "members": [["A", "Relay1"], ["B", "Relay2"]],
-        "__call": [
-            { "call": "executed" },
-            { "call": "executed" },
-            { "call": "executed" },
+    let client_1_right_json = json!( [
+            { "call": { "executed" : "test" } },
+            { "call": { "executed" : [["A", "Relay1"], ["B", "Relay2"]]} },
+            { "call": { "executed" : [["A", "Relay1"], ["B", "Relay2"]]} },
             { "par": [2, 2] },
-            { "call": "executed" },
-            { "call": "executed" },
+            { "call": { "executed" : "test" } },
+            { "call": { "executed" : "test" } },
             { "par": [1, 0] },
-            { "call": "request_sent" },
+            { "call": { "request_sent" : "Remote" } },
         ]
-    });
+    );
 
     assert_eq!(client_1_res_json, client_1_right_json);
     assert_eq!(client_1_res.next_peer_pks, Vec::<String>::new());
 
-    let relay_2_res = relay_2
-        .call(json!(["asd", script, remote_res.data, "{}"]))
-        .expect("should be successful");
+    let relay_2_res = call_vm!(relay_2, "asd", script, remote_res.data, "[]");
 
     let relay_2_res_json: JValue = serde_json::from_str(&relay_2_res.data).expect("stepper should return valid json");
 
-    let relay_2_right_json = json!( {
-        "void1": ["test"],
-        "void2": [[["A", "Relay1"], ["B", "Relay2"]]],
-        "void": ["test"],
-        "members": [["A", "Relay1"], ["B", "Relay2"]],
-        "__call": [
-            { "call": "executed" },
-            { "call": "executed" },
-            { "call": "executed" },
+    let relay_2_right_json = json!( [
+            { "call": { "executed" : "test" } },
+            { "call": { "executed" : [["A", "Relay1"], ["B", "Relay2"]]} },
+            { "call": { "executed" : [["A", "Relay1"], ["B", "Relay2"]]} },
             { "par": [1, 3] },
-            { "call": "request_sent" },
+            { "call": { "request_sent" : "Remote" } },
             { "par": [2, 0] },
-            { "call": "executed" },
-            { "call": "request_sent" },
-        ]
-    });
+            { "call": { "executed" : "test" } },
+            { "call": { "request_sent" : "Relay2" } },
+        ]);
 
     assert_eq!(relay_2_res_json, relay_2_right_json);
     assert_eq!(relay_2_res.next_peer_pks, vec![String::from("B")]);
 
-    let client_2_res = client_2
-        .call(json!(["asd", script, relay_2_res.data, "{}"]))
-        .expect("should be successful");
+    let client_2_res = call_vm!(client_2, "asd", script, relay_2_res.data, "[]");
 
     let client_2_res_json: JValue = serde_json::from_str(&client_2_res.data).expect("stepper should return valid json");
 
-    let client_2_right_json = json!( {
-        "void1": ["test"],
-        "void2": [[["A", "Relay1"], ["B", "Relay2"]]],
-        "void": ["test"],
-        "void3": ["test"],
-        "members": [["A", "Relay1"], ["B", "Relay2"]],
-        "__call": [
-            { "call": "executed" },
-            { "call": "executed" },
-            { "call": "executed" },
+    let client_2_right_json = json!( [
+            { "call": { "executed" : "test" } },
+            { "call": { "executed" : [["A", "Relay1"], ["B", "Relay2"]]} },
+            { "call": { "executed" : [["A", "Relay1"], ["B", "Relay2"]]} },
             { "par": [1, 3] },
-            { "call": "request_sent" },
+            { "call": { "request_sent" : "Remote" } },
             { "par": [2, 0] },
-            { "call": "executed" },
-            { "call": "executed" },
-        ]
-    });
+            { "call": { "executed" : "test" } },
+            { "call": { "executed" : "test" } },
+        ]);
 
     assert_eq!(client_2_res_json, client_2_right_json);
     assert_eq!(client_2_res.next_peer_pks, Vec::<String>::new());
@@ -271,44 +223,24 @@ fn join() {
         "#,
     );
 
-    let client_1_res = client_1
-        .call(json!(["asd", script, "{}", "{}"]))
-        .expect("should be successful");
-
-    let relay_1_res = relay_1
-        .call(json!(["asd", script, client_1_res.data, "{}"]))
-        .expect("should be successful");
-
-    let remote_res = remote
-        .call(json!(["asd", script, relay_1_res.data, "{}"]))
-        .expect("should be successful");
-
-    let relay_1_res = relay_1
-        .call(json!(["asd", script, remote_res.data, "{}"]))
-        .expect("should be successful");
-
-    let client_1_res = client_1
-        .call(json!(["asd", script, relay_1_res.data, "{}"]))
-        .expect("should be successful");
+    let client_1_res = call_vm!(client_1, "asd", script, "[]", "[]");
+    let relay_1_res = call_vm!(relay_1, "asd", script, client_1_res.data, "[]");
+    let remote_res = call_vm!(remote, "asd", script, relay_1_res.data, "[]");
+    let relay_1_res = call_vm!(relay_1, "asd", script, remote_res.data, "[]");
+    let client_1_res = call_vm!(client_1, "asd", script, relay_1_res.data, "[]");
 
     let client_1_res_json: JValue = serde_json::from_str(&client_1_res.data).expect("stepper should return valid json");
 
-    let client_1_right_json = json!( {
-        "void1": ["test"],
-        "void": ["test", "test"],
-        "void3": ["test", "test"],
-        "members": [["A"], ["B"]],
-        "__call": [
-            { "call": "executed" },
-            { "call": "executed" },
+    let client_1_right_json = json!( [
+            { "call": { "executed" : "test" } },
+            { "call": { "executed" : [["A"], ["B"]]} },
             { "par": [2, 3] },
-            { "call": "executed" },
-            { "call": "executed" },
+            { "call": { "executed" : "test" } },
+            { "call": { "executed" : "test" } },
             { "par": [2, 0] },
-            { "call": "executed" },
-            { "call": "executed" },
-        ]
-    });
+            { "call": { "executed" : "test" } },
+            { "call": { "executed" : "test" } },
+        ]);
 
     assert_eq!(client_1_res_json, client_1_right_json);
     assert_eq!(client_1_res.next_peer_pks, Vec::<String>::new());
