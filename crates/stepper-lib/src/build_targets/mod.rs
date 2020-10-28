@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#[cfg(not(feature = "wasm_bindgen"))]
+#[cfg(feature = "fce")]
 mod fce;
-#[cfg(feature = "wasm_bindgen")]
+#[cfg(not(feature = "fce"))]
 mod wasm_bindgen;
 
 use serde_derive::Deserialize;
@@ -31,12 +31,12 @@ pub struct CallServiceResult {
     pub result: String,
 }
 
-#[cfg(not(feature = "wasm_bindgen"))]
+#[cfg(feature = "fce")]
 pub(crate) use fce::call_service;
-#[cfg(not(feature = "wasm_bindgen"))]
+#[cfg(feature = "fce")]
 pub(crate) use fce::get_current_peer_id;
 
-#[cfg(feature = "wasm_bindgen")]
-pub(crate) use fce::get_current_peer_id;
-#[cfg(feature = "wasm_bindgen")]
+#[cfg(not(feature = "fce"))]
 pub(crate) use wasm_bindgen::call_service;
+#[cfg(not(feature = "fce"))]
+pub(crate) use wasm_bindgen::get_current_peer_id;

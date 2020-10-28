@@ -35,4 +35,4 @@ wasm-bindgen = "0.2.68"
 [features]
 # indicates that this library should be compiled for the wasm bindgen target
 # otherwise it will be compiled to the FCE target
-wasm_bindgen = []
+fce = []
