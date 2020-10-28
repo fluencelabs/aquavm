@@ -15,9 +15,9 @@
  */
 
 #[cfg(feature = "fce")]
-mod fce;
+mod fce_target;
 #[cfg(not(feature = "fce"))]
-mod wasm_bindgen;
+mod wasm_bindgen_target;
 
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
@@ -32,11 +32,11 @@ pub struct CallServiceResult {
 }
 
 #[cfg(feature = "fce")]
-pub(crate) use fce::call_service;
+pub(crate) use fce_target::call_service;
 #[cfg(feature = "fce")]
-pub(crate) use fce::get_current_peer_id;
+pub(crate) use fce_target::get_current_peer_id;
 
 #[cfg(not(feature = "fce"))]
-pub(crate) use wasm_bindgen::call_service;
+pub(crate) use wasm_bindgen_target::call_service;
 #[cfg(not(feature = "fce"))]
-pub(crate) use wasm_bindgen::get_current_peer_id;
+pub(crate) use wasm_bindgen_target::get_current_peer_id;

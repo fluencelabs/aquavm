@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#![allow(unused_unsafe)] // for wasm_bindgen target where calling FFI is safe
+
 use super::utils::find_by_json_path;
 use super::utils::is_string_literal;
 use super::Call;
@@ -244,7 +246,7 @@ fn get_args_by_path<'args_path, 'exec_ctx, T: 'exec_ctx>(
     }
 }
 
-// Prepare argumen of call
+// Prepare arguments of call
 fn prepare_call_arg<'a>(arg_path: &'a str, ctx: &'a ExecutionCtx) -> Result<String> {
     fn borrowed_maybe_json_path(jvalue: Cow<'_, JValue>, json_path: Option<&str>) -> Result<JValue> {
         if json_path.is_none() {
