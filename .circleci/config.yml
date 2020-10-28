@@ -22,7 +22,7 @@ jobs:
 
           cargo install fcli
           cd stepper
-          fce build
+          fce build --features fce
 
           cd ..
           cargo fmt --all -- --check --color always
