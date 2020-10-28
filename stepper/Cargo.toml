@@ -23,4 +23,4 @@ log = "0.4.11"
 serde_json = "1.0"
 
 [features]
-wasm_bindgen = ["wasm-bindgen/wasm_bindgen"]
+wasm_bindgen = ["stepper-lib/wasm_bindgen"]

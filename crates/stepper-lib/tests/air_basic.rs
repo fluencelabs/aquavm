@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-use crate::CallEvidencePath;
-use crate::CallResult;
-use crate::EvidenceState;
-
 use aqua_test_utils::call_vm;
 use aqua_test_utils::create_aqua_vm;
+use aqua_test_utils::set_variables_call_service;
 use aqua_test_utils::unit_call_service;
 use aquamarine_vm::vec1::Vec1;
 use aquamarine_vm::HostExportedFunc;
@@ -27,11 +24,17 @@ use aquamarine_vm::IValue;
 
 use serde_json::json;
 
+use std::rc::Rc;
+
 type JValue = serde_json::Value;
 
 #[test]
 fn seq_par_call() {
-    let mut vm = create_aqua_vm(unit_call_service(), "");
+    use stepper_lib::CallResult::*;
+    use stepper_lib::EvidenceState::{self, *};
+
+    let vm_peer_id = String::from("some_peer_id");
+    let mut vm = create_aqua_vm(unit_call_service(), vm_peer_id.clone());
 
     let script = String::from(
         r#"
@@ -45,26 +48,27 @@ fn seq_par_call() {
     );
 
     let res = call_vm!(vm, "asd", script, "[]", "[]");
-    let resulted_json: CallEvidencePath = serde_json::from_str(&res.data).expect("stepper should return valid json");
+    let resulted_path: Vec<EvidenceState> = serde_json::from_str(&res.data).expect("stepper should return valid json");
 
-    let right_json = json!( {
-        "result_1" : "test",
-        "result_2" : "test",
-        "__call": [
-            { "par": [1,1] },
-            { "call": "executed" },
-            { "call": "request_sent" },
-            { "call": "executed" },
-        ]
-    });
+    let test_string = String::from("test");
+    let right_path = vec![
+        Par(1, 1),
+        Call(Executed(Rc::new(JValue::String(test_string.clone())))),
+        Call(RequestSent(vm_peer_id)),
+        Call(Executed(Rc::new(JValue::String(test_string.clone())))),
+    ];
 
-    assert_eq!(resulted_json, right_json);
+    assert_eq!(resulted_path, right_path);
     assert_eq!(res.next_peer_pks, vec![String::from("remote_peer_id")]);
 }
 
 #[test]
 fn par_par_call() {
-    let mut vm = create_aqua_vm(unit_call_service(), "");
+    use stepper_lib::CallResult::*;
+    use stepper_lib::EvidenceState::{self, *};
+
+    let vm_peer_id = String::from("some_peer_id");
+    let mut vm = create_aqua_vm(unit_call_service(), vm_peer_id.clone());
 
     let script = String::from(
         r#"
@@ -77,32 +81,29 @@ fn par_par_call() {
         ))"#,
     );
 
-    let res = vm
-        .call(json!(["asd", script, "{}", "{}",]))
-        .expect("should be successful");
+    let res = call_vm!(vm, "asd", script, "[]", "[]");
+    let resulted_path: Vec<EvidenceState> = serde_json::from_str(&res.data).expect("stepper should return valid json");
 
-    let resulted_json: JValue = serde_json::from_str(&res.data).expect("stepper should return valid json");
+    let test_string = String::from("test");
+    let right_path = vec![
+        Par(3, 1),
+        Par(1, 1),
+        Call(Executed(Rc::new(JValue::String(test_string.clone())))),
+        Call(RequestSent(vm_peer_id)),
+        Call(Executed(Rc::new(JValue::String(test_string.clone())))),
+    ];
 
-    let right_json = json!( {
-        "result_1" : "test",
-        "result_2" : "test",
-        "__call": [
-            { "par": [3,1] },
-            { "par": [1,1] },
-            { "call": "executed" },
-            { "call": "request_sent" },
-            { "call": "executed" },
-        ]
-    });
-
-    assert_eq!(resulted_json, right_json);
+    assert_eq!(resulted_path, right_path);
     assert_eq!(res.next_peer_pks, vec![String::from("remote_peer_id")]);
 }
 
 #[test]
 fn create_service() {
+    use stepper_lib::CallResult::*;
+    use stepper_lib::EvidenceState::{self, *};
+
     let module = "greeting";
-    let config = json!(
+    let module_config = json!(
         {
             "name": module,
             "mem_pages_count": 100,
@@ -114,36 +115,32 @@ fn create_service() {
             }
         }
     );
-    let mut data_value = json!({
-        "module_bytes": vec![1,2],
-        "module_config": config,
-        "blueprint": { "name": "blueprint", "dependencies": [module] },
-    });
-    let data = data_value.to_string();
 
-    let script = String::from(
-        r#"(seq (
-            (call (%current_peer_id% ("add_module" "") (module_bytes module_config) module))
-            (seq (
-                (call (%current_peer_id% ("add_blueprint" "") (blueprint) blueprint_id))
-                (seq (
-                    (call (%current_peer_id% ("create" "") (blueprint_id) service_id))
-                    (call ("remote_peer_id" ("" "") (service_id) client_result))
-                ))
-            ))
-        ))"#,
+    let module_bytes = json!([1, 2]);
+    let blueprint = json!({ "name": "blueprint", "dependencies": [module]});
+
+    let variables_mapping = maplit::hashmap!(
+        String::from("module_bytes") => module_bytes.to_string(),
+        String::from("module_config") => module_config.to_string(),
+        String::from("blueprint") => blueprint.to_string(),
     );
 
-    let call_service: HostExportedFunc = Box::new(|_, args| -> Option<IValue> {
+    let mut set_variables_vm = create_aqua_vm(set_variables_call_service(variables_mapping), "set_variables");
+
+    let add_module_response = String::from("add_module response");
+    let add_blueprint_response = String::from("add_blueprint response");
+    let create_response = String::from("create response");
+
+    let call_service: HostExportedFunc = Box::new(move |_, args| -> Option<IValue> {
         let builtin_service = match &args[0] {
             IValue::String(str) => str,
             _ => unreachable!(),
         };
 
         let response = match builtin_service.as_str() {
-            "add_module" => String::from("add_module response"),
-            "add_blueprint" => String::from("add_blueprint response"),
-            "create" => String::from("create response"),
+            "add_module" => add_module_response.clone(),
+            "add_blueprint" => add_blueprint_response.clone(),
+            "create" => create_response.clone(),
             _ => String::from("unknown response"),
         };
 
@@ -152,31 +149,48 @@ fn create_service() {
         ))
     });
 
-    let mut vm = create_aqua_vm(call_service, "");
+    let mut vm = create_aqua_vm(call_service, "A");
 
-    let res = vm
-        .call(json!(["init_user_pk", script, "{}", data,]))
-        .expect("should be successful");
+    let script = String::from(
+        r#"
+        (seq (
+            (seq (
+                (seq (
+                    (call ("set_variables" ("add_module" "") ("module_bytes") module_bytes))
+                    (call ("set_variables" ("add_module" "") ("module_config") module_config))
+                ))
+                (call ("set_variables" ("add_module" "") ("blueprint") blueprint))
+            ))
+            (seq (
+                (call ("A" ("add_module" "") (module_bytes module_config) module))
+                (seq (
+                    (call ("A" ("add_blueprint" "") (blueprint) blueprint_id))
+                    (seq (
+                        (call ("A" ("create" "") (blueprint_id) service_id))
+                        (call ("remote_peer_id" ("" "") (service_id) client_result))
+                    ))
+                ))
+            ))
+        ))"#,
+    );
 
-    let resulted_data: JValue = serde_json::from_str(&res.data).expect("should be correct json");
+    let res = call_vm!(set_variables_vm, "init_user_id", script, "[]", "[]");
+    let res = call_vm!(vm, "init_user_id", script, "[]", res.data);
 
-    data_value.as_object_mut().unwrap().insert(
-        String::from("module"),
-        JValue::String(String::from("add_module response")),
-    );
-    data_value.as_object_mut().unwrap().insert(
-        String::from("blueprint_id"),
-        JValue::String(String::from("add_blueprint response")),
-    );
-    data_value.as_object_mut().unwrap().insert(
-        String::from("service_id"),
-        JValue::String(String::from("create response")),
-    );
-    data_value.as_object_mut().unwrap().insert(
-        String::from("__call"),
-        json!([{"call": "executed"}, {"call": "executed"}, {"call": "executed"}, {"call": "request_sent"}]),
-    );
+    let add_module_response = String::from("add_module response");
+    let add_blueprint_response = String::from("add_blueprint response");
+    let create_response = String::from("create response");
+    let resulted_path: Vec<EvidenceState> = serde_json::from_str(&res.data).expect("should be a correct json");
+    let right_path = vec![
+        Call(Executed(Rc::new(module_bytes))),
+        Call(Executed(Rc::new(module_config))),
+        Call(Executed(Rc::new(blueprint))),
+        Call(Executed(Rc::new(JValue::String(add_module_response)))),
+        Call(Executed(Rc::new(JValue::String(add_blueprint_response)))),
+        Call(Executed(Rc::new(JValue::String(create_response)))),
+        Call(RequestSent(String::from("A"))),
+    ];
 
-    assert_eq!(resulted_data, data_value);
+    assert_eq!(resulted_path, right_path);
     assert_eq!(res.next_peer_pks, vec![String::from("remote_peer_id")]);
 }

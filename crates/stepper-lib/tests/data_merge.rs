@@ -15,16 +15,17 @@
  */
 
 use aqua_test_utils::create_aqua_vm;
+use aqua_test_utils::call_vm;
 use aquamarine_vm::vec1::Vec1;
 use aquamarine_vm::HostExportedFunc;
 use aquamarine_vm::IValue;
 
 use serde_json::json;
+use pretty_assertions::assert_eq;
 
 type JValue = serde_json::Value;
 
 #[test]
-#[ignore]
 fn data_merge() {
     let neighborhood_call_service1: HostExportedFunc = Box::new(|_, _| -> Option<IValue> {
         Some(IValue::Record(
@@ -69,118 +70,83 @@ fn data_merge() {
         "#,
     );
 
-    let res1 = vm1
-        .call(json!(["asd", script, "{}", "{}"]))
-        .expect("should be successful");
+    let res1 = call_vm!(vm1, "asd", script, "[]", "[]");
+    let res2 = call_vm!(vm2, "asd", script, "[]", "[]");
+    let res3 = call_vm!(vm1, "asd", script, res1.data, res2.data);
+    let res4 = call_vm!(vm2, "asd", script, res1.data, res2.data);
 
-    let res2 = vm2
-        .call(json!(["asd", script, "{}", "{}"]))
-        .expect("should be successful");
+    let resulted_json1: JValue = serde_json::from_str(&res1.data).expect("stepper should return valid json");
 
-    let res3 = vm2
-        .call(json!(["asd", script, res1.data, res2.data]))
-        .expect("should be successful");
+    let right_json1 = json!( [
+            { "call": { "executed": ["A", "B"] } },
+            { "par": [1,2] },
+            { "call": { "executed": ["A", "B"] } },
+            { "par": [1,0] },
+            { "call": { "request_sent": "A" } },
+            { "par": [1,2] },
+            { "call": { "executed": ["A", "B"] } },
+            { "par": [1,0] },
+            { "call": { "request_sent": "A" } },
+            { "call": { "executed": ["A", "B"] } },
+            { "call": { "request_sent": "A" } },
+        ]);
 
-    let res4 = vm1
-        .call(json!(["asd", script, res1.data, res2.data]))
-        .expect("should be successful");
+    assert_eq!(resulted_json1, right_json1);
+    assert_eq!(res1.next_peer_pks, vec![String::from("B")]);
 
-    let res5 = vm2
-        .call(json!(["asd", script, res3.data, res4.data]))
-        .expect("should be successful");
+    let resulted_json2: JValue = serde_json::from_str(&res2.data).expect("stepper should return valid json");
 
-    let res6 = vm1
-        .call(json!(["asd", script, res3.data, res4.data]))
-        .expect("should be successful");
+    let right_json2 = json!( [
+            { "call": { "executed": ["A", "B"] } },
+            { "par": [1,2] },
+            { "call": { "request_sent": "B" } },
+            { "par": [1,0] },
+            { "call": { "executed": ["A", "B"] } },
+            { "par": [1,2] },
+            { "call": { "request_sent": "B" } },
+            { "par": [1,0] },
+            { "call": { "executed": ["A", "B"] } },
+            { "call": { "request_sent": "B" } },
+        ]);
+
+    assert_eq!(resulted_json2, right_json2);
+    assert_eq!(res2.next_peer_pks, vec![String::from("A")]);
 
     let resulted_json3: JValue = serde_json::from_str(&res3.data).expect("stepper should return valid json");
 
-    let right_json3 = json!( {
-        "void": [["A", "B"]],
-        "neighborhood": ["A", "B"],
-        "providers": [["A", "B"]],
-        "__call": [
-            { "call": "executed" },
+    let right_json3 = json!( [
+            { "call": { "executed": ["A", "B"] } },
             { "par": [1,2] },
-            { "call": "executed" },
+            { "call": { "executed": ["A", "B"] } },
             { "par": [1,0] },
-            { "call": "executed" },
+            { "call": { "executed": ["A", "B"] } },
             { "par": [1,2] },
-            { "call": "request_sent" },
+            { "call": { "executed": ["A", "B"] } },
             { "par": [1,0] },
-            { "call": "executed" },
-        ]
-    });
+            { "call": { "executed": ["A", "B"] } },
+            { "call": { "executed": ["A", "B"] } },
+            { "call": { "request_sent": "A" } },
+        ]);
 
     assert_eq!(resulted_json3, right_json3);
-    assert_eq!(res3.next_peer_pks, vec![String::from("A")]);
+    assert!(res3.next_peer_pks.is_empty());
 
     let resulted_json4: JValue = serde_json::from_str(&res4.data).expect("stepper should return valid json");
 
-    let right_json4 = json!( {
-        "void": [["A", "B"]],
-        "neighborhood": ["A", "B"],
-        "providers": [["A", "B"]],
-        "__call": [
-            { "call": "executed" },
+    let right_json4 = json!( [
+            { "call": { "executed": ["A", "B"] } },
             { "par": [1,2] },
-            { "call": "executed" },
+            { "call": { "executed": ["A", "B"] } },
             { "par": [1,0] },
-            { "call": "executed" },
+            { "call": { "executed": ["A", "B"] } },
             { "par": [1,2] },
-            { "call": "executed" },
+            { "call": { "executed": ["A", "B"] } },
             { "par": [1,0] },
-            { "call": "request_sent" },
-        ]
-    });
+            { "call": { "executed": ["A", "B"] } },
+            { "call": { "executed": ["A", "B"] } },
+            { "call": { "executed": ["A", "B"] } },
+        ]);
 
     assert_eq!(resulted_json4, right_json4);
-    assert_eq!(res4.next_peer_pks, vec![String::from("B")]);
-
-    let resulted_json5: JValue = serde_json::from_str(&res5.data).expect("stepper should return valid json");
-
-    let right_json5 = json!( {
-        "void": [["A", "B"]],
-        "neighborhood": ["A", "B"],
-        "providers": [["A", "B"]],
-        "__call": [
-            { "call": "executed" },
-            { "par": [1,2] },
-            { "call": "executed" },
-            { "par": [1,0] },
-            { "call": "executed" },
-            { "par": [1,2] },
-            { "call": "executed" },
-            { "par": [1,0] },
-            { "call": "executed" },
-            { "call": "request_sent" },
-        ]
-    });
-
-    assert_eq!(resulted_json5, right_json5);
-    assert_eq!(res5.next_peer_pks, vec![String::from("A")]);
-
-    let resulted_json6: JValue = serde_json::from_str(&res6.data).expect("stepper should return valid json");
-
-    let right_json6 = json!( {
-        "void": [["A", "B"], ["A", "B"]],
-        "neighborhood": ["A", "B"],
-        "providers": [["A", "B"]],
-        "__call": [
-            { "call": "executed" },
-            { "par": [1,2] },
-            { "call": "executed" },
-            { "par": [1,0] },
-            { "call": "executed" },
-            { "par": [1,2] },
-            { "call": "executed" },
-            { "par": [1,0] },
-            { "call": "executed" },
-            { "call": "executed" },
-            { "call": "request_sent" }
-        ]
-    });
-
-    assert_eq!(resulted_json6, right_json6);
-    assert_eq!(res6.next_peer_pks, vec![String::from("B")]);
+    assert!(res4.next_peer_pks.is_empty());
 }

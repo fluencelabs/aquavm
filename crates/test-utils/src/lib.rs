@@ -34,6 +34,9 @@ use aquamarine_vm::IType;
 use aquamarine_vm::IValue;
 
 use std::path::PathBuf;
+use std::collections::HashMap;
+
+type JValue = serde_json::Value;
 
 pub fn create_aqua_vm(
     call_service: HostExportedFunc,
@@ -47,7 +50,7 @@ pub fn create_aqua_vm(
     };
 
     let config = AquamarineVMConfig {
-        aquamarine_wasm_path: PathBuf::from("../target/wasm32-wasi/debug/aquamarine.wasm"),
+        aquamarine_wasm_path: PathBuf::from("../../target/wasm32-wasi/debug/aquamarine.wasm"),
         call_service: call_service_descriptor,
         current_peer_id: current_peer_id.into(),
     };
@@ -106,6 +109,30 @@ pub fn set_variable_call_service(json: impl Into<String>) -> HostExportedFunc {
     Box::new(move |_, _| -> Option<IValue> {
         Some(IValue::Record(
             Vec1::new(vec![IValue::S32(0), IValue::String(json.clone())]).unwrap(),
+        ))
+    })
+}
+
+pub fn set_variables_call_service(ret_mapping: HashMap<String, String>) -> HostExportedFunc {
+    Box::new(move |_, args| -> Option<IValue> {
+        let arg_name = match &args[2] {
+            IValue::String(json_str) => {
+                let json = serde_json::from_str(json_str).expect("a valid json");
+                match json {
+                    JValue::Array(array) => match array.first() {
+                        Some(JValue::String(str)) => str.to_string(),
+                        _ => String::from("default"),
+                    },
+                    _ => String::from("default"),
+                }
+            }
+            _ => String::from("default"),
+        };
+
+        let result = ret_mapping.get(&arg_name).cloned().unwrap_or(String::from(r#""test""#));
+
+        Some(IValue::Record(
+            Vec1::new(vec![IValue::S32(0), IValue::String(result.clone())]).unwrap(),
         ))
     })
 }

@@ -151,14 +151,20 @@ fn merge_call(prev_call_result: CallResult, current_call_result: CallResult) -> 
         (CallServiceFailed(_), RequestSent(_)) => Ok(prev_call_result),
         (RequestSent(prev_sender), RequestSent(sender)) => {
             if prev_sender != sender {
-                unimplemented!("return a error");
+                return Err(IncompatibleCallResults(prev_call_result, current_call_result));
             }
 
             Ok(prev_call_result)
         }
         (RequestSent(_), Executed(..)) => Ok(current_call_result),
         (Executed(..), RequestSent(_)) => Ok(prev_call_result),
-        (Executed(..), Executed(..)) => Ok(prev_call_result),
+        (Executed(prev_result), Executed(result)) => {
+            if prev_result != result {
+                return Err(IncompatibleCallResults(prev_call_result, current_call_result));
+            }
+
+            Ok(prev_call_result)
+        }
         (CallServiceFailed(_), Executed(..)) => Err(IncompatibleCallResults(prev_call_result, current_call_result)),
         (Executed(..), CallServiceFailed(_)) => Err(IncompatibleCallResults(prev_call_result, current_call_result)),
     }
