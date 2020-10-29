@@ -31,6 +31,7 @@ mod build_targets;
 mod call_evidence;
 mod errors;
 mod execution;
+pub mod log_targets;
 mod stepper_outcome;
 
 pub use crate::call_evidence::CallEvidencePath;

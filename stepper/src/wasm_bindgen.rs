@@ -26,17 +26,17 @@
     unreachable_patterns
 )]
 
-mod logger_target_map;
-
 use stepper_lib::execute_aqua;
+use stepper_lib::log_targets::TARGET_MAP;
 use wasm_bindgen::prelude::*;
+
+use std::collections::HashMap;
 
 #[wasm_bindgen(start)]
 pub fn main() {
-    use std::collections::HashMap;
     use std::iter::FromIterator;
 
-    let target_map = HashMap::from_iter(logger_target_map::TARGET_MAP.iter().cloned());
+    let target_map = HashMap::from_iter(TARGET_MAP.iter().cloned());
 
     fluence::WasmLogger::new()
         .with_log_level(log::Level::Info)

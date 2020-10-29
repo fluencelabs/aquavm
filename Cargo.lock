@@ -53,8 +53,8 @@ dependencies = [
 
 [[package]]
 name = "aquamarine-vm"
-version = "0.1.0"
-source = "git+https://github.com/fluencelabs/fce#42375f3334a0f1353b0fd55fc03726c7c54faba8"
+version = "0.1.1"
+source = "git+https://github.com/fluencelabs/fce#aff6695ea19b4b4841be32944ed9bd7b58d85d93"
 dependencies = [
  "fluence-faas",
  "maplit",
@@ -394,7 +394,7 @@ dependencies = [
 [[package]]
 name = "fce"
 version = "0.1.9"
-source = "git+https://github.com/fluencelabs/fce#42375f3334a0f1353b0fd55fc03726c7c54faba8"
+source = "git+https://github.com/fluencelabs/fce#aff6695ea19b4b4841be32944ed9bd7b58d85d93"
 dependencies = [
  "boolinator",
  "fce-wit-interfaces",
@@ -415,7 +415,7 @@ dependencies = [
 [[package]]
 name = "fce-wit-interfaces"
 version = "0.1.6"
-source = "git+https://github.com/fluencelabs/fce#42375f3334a0f1353b0fd55fc03726c7c54faba8"
+source = "git+https://github.com/fluencelabs/fce#aff6695ea19b4b4841be32944ed9bd7b58d85d93"
 dependencies = [
  "multimap",
  "wasmer-interface-types-fl",
@@ -424,7 +424,7 @@ dependencies = [
 [[package]]
 name = "fce-wit-parser"
 version = "0.1.8"
-source = "git+https://github.com/fluencelabs/fce#42375f3334a0f1353b0fd55fc03726c7c54faba8"
+source = "git+https://github.com/fluencelabs/fce#aff6695ea19b4b4841be32944ed9bd7b58d85d93"
 dependencies = [
  "anyhow",
  "fce-wit-interfaces",
@@ -454,7 +454,7 @@ dependencies = [
 [[package]]
 name = "fluence-faas"
 version = "0.1.10"
-source = "git+https://github.com/fluencelabs/fce#42375f3334a0f1353b0fd55fc03726c7c54faba8"
+source = "git+https://github.com/fluencelabs/fce#aff6695ea19b4b4841be32944ed9bd7b58d85d93"
 dependencies = [
  "cmd_lib",
  "fce",
@@ -475,6 +475,15 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-macro"
 version = "0.2.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4b1720124376ac6bb13e523e3eceeef4475041a03a6434ca7d988cbdc031a5c4"
+dependencies = [
+ "fluence-sdk-wit 0.2.8 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "fluence-sdk-macro"
+version = "0.2.8"
 source = "git+https://github.com/fluencelabs/rust-sdk?branch=improve_logger#dc2851379ec475356110d41366a9fc6cbc143fd0"
 dependencies = [
  "fluence-sdk-wit 0.2.8 (git+https://github.com/fluencelabs/rust-sdk?branch=improve_logger)",
@@ -489,12 +498,14 @@ dependencies = [
 ]
 
 [[package]]
-name = "fluence-sdk-macro"
+name = "fluence-sdk-main"
 version = "0.2.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4b1720124376ac6bb13e523e3eceeef4475041a03a6434ca7d988cbdc031a5c4"
+checksum = "5484ff6f5e091d4904217c45ed86cd0215e496090adaa9716e510742177fc512"
 dependencies = [
- "fluence-sdk-wit 0.2.8 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fluence-sdk-macro 0.2.8 (registry+https://github.com/rust-lang/crates.io-index)",
+ "log",
+ "serde",
 ]
 
 [[package]]
@@ -518,14 +529,17 @@ dependencies = [
 ]
 
 [[package]]
-name = "fluence-sdk-main"
+name = "fluence-sdk-wit"
 version = "0.2.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5484ff6f5e091d4904217c45ed86cd0215e496090adaa9716e510742177fc512"
+checksum = "560baf91197ded38a99a5c94ff366a3dd971ebf33f5d987ecce31d3dedf86d17"
 dependencies = [
- "fluence-sdk-macro 0.2.8 (registry+https://github.com/rust-lang/crates.io-index)",
- "log",
+ "proc-macro2",
+ "quote",
  "serde",
+ "serde_json",
+ "syn",
+ "uuid",
 ]
 
 [[package]]
@@ -545,20 +559,6 @@ dependencies = [
 name = "fluence-sdk-wit"
 version = "0.2.8"
 source = "git+https://github.com/fluencelabs/rust-sdk#8c0a02916519872c3d6073de16c950d10da0b2f4"
-dependencies = [
- "proc-macro2",
- "quote",
- "serde",
- "serde_json",
- "syn",
- "uuid",
-]
-
-[[package]]
-name = "fluence-sdk-wit"
-version = "0.2.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "560baf91197ded38a99a5c94ff366a3dd971ebf33f5d987ecce31d3dedf86d17"
 dependencies = [
  "proc-macro2",
  "quote",

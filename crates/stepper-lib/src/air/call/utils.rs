@@ -35,12 +35,12 @@ pub(super) fn set_local_call_result(
     use std::collections::hash_map::Entry::{Occupied, Vacant};
     use AquamarineError::*;
 
-    let stripped_result = result_variable_name.strip_suffix("[]");
+    let stripped_result_name = result_variable_name.strip_suffix("[]");
     let result = Rc::new(result);
 
     let new_evidence_state = EvidenceState::Call(CallResult::Executed(result.clone()));
 
-    if stripped_result.is_none() {
+    if stripped_result_name.is_none() {
         // if result is not an array, simply insert it into data
         match exec_ctx.data_cache.entry(result_variable_name) {
             Vacant(entry) => entry.insert(AValue::JValueRef(result)),
@@ -54,9 +54,9 @@ pub(super) fn set_local_call_result(
     }
 
     // unwrap is safe because it's been checked for []
-    // if result is an array, insert result to the end of the array
-    match exec_ctx.data_cache.entry(stripped_result.unwrap().to_string()) {
+    match exec_ctx.data_cache.entry(stripped_result_name.unwrap().to_string()) {
         Occupied(mut entry) => match entry.get_mut() {
+            // if result is an array, insert result to the end of the array
             AValue::JValueAccumulatorRef(values) => values.borrow_mut().push(result),
             v => return Err(IncompatibleAValueType(format!("{:?}", v), String::from("Array"))),
         },

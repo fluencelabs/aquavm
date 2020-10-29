@@ -70,10 +70,10 @@ fn data_merge() {
         "#,
     );
 
-    let res1 = call_vm!(vm1, "asd", script, "[]", "[]");
-    let res2 = call_vm!(vm2, "asd", script, "[]", "[]");
-    let res3 = call_vm!(vm1, "asd", script, res1.data, res2.data);
-    let res4 = call_vm!(vm2, "asd", script, res1.data, res2.data);
+    let res1 = call_vm!(vm1, "asd", script.clone(), "[]", "[]");
+    let res2 = call_vm!(vm2, "asd", script.clone(), "[]", "[]");
+    let res3 = call_vm!(vm1, "asd", script.clone(), res1.data.clone(), res2.data.clone());
+    let res4 = call_vm!(vm2, "asd", script, res1.data.clone(), res2.data.clone());
 
     let resulted_json1: JValue = serde_json::from_str(&res1.data).expect("stepper should return valid json");
 

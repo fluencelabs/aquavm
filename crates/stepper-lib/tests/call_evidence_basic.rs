@@ -133,10 +133,10 @@ fn evidence_seq_seq() {
         peer_id_1, peer_id_1, peer_id_2
     );
 
-    let res = call_vm!(vm2, "asd", script, "[]", "[]");
+    let res = call_vm!(vm2, "asd", script.clone(), "[]", "[]");
     assert_eq!(res.next_peer_pks, vec![peer_id_1.clone()]);
 
-    let res = call_vm!(vm1, "asd", script, "[]", res.data);
+    let res = call_vm!(vm1, "asd", script.clone(), "[]", res.data);
     assert_eq!(res.next_peer_pks, vec![peer_id_2.clone()]);
 
     let res = call_vm!(vm2, "asd", script, "[]", res.data);
@@ -277,12 +277,12 @@ fn evidence_par_seq_fold_call() {
         ))"#,
     );
 
-    let res = call_vm!(vm2, "asd", script, "[]", "[]");
-    let res = call_vm!(vm1, "asd", script, "[]", res.data);
+    let res = call_vm!(vm2, "asd", script.clone(), "[]", "[]");
+    let res = call_vm!(vm1, "asd", script.clone(), "[]", res.data);
     let mut data = res.data;
 
     for _ in 0..100 {
-        let res = call_vm!(vm2, "asd", script, "[]", data);
+        let res = call_vm!(vm2, "asd", script.clone(), "[]", data);
         data = res.data;
     }
 
@@ -356,9 +356,9 @@ fn evidence_par_seq_fold_in_cycle_call() {
     let mut data = String::from("[]");
 
     for _ in 0..100 {
-        let res = call_vm!(vm1, "asd", script, "[]", data);
-        let res = call_vm!(vm2, "asd", script, "[]", res.data);
-        let res = call_vm!(vm3, "asd", script, "[]", res.data);
+        let res = call_vm!(vm1, "asd", script.clone(), "[]", data);
+        let res = call_vm!(vm2, "asd", script.clone(), "[]", res.data);
+        let res = call_vm!(vm3, "asd", script.clone(), "[]", res.data);
         data = res.data;
     }
 
@@ -418,10 +418,10 @@ fn evidence_seq_par_seq_seq() {
         peer_id_1, peer_id_2, peer_id_2, peer_id_1, peer_id_2
     );
 
-    let res = call_vm!(vm2, "asd", script, "[]", "[]");
+    let res = call_vm!(vm2, "asd", script.clone(), "[]", "[]");
     assert_eq!(res.next_peer_pks, vec![peer_id_1.clone()]);
 
-    let res = call_vm!(vm1, "asd", script, "[]", res.data);
+    let res = call_vm!(vm1, "asd", script.clone(), "[]", res.data);
     assert_eq!(res.next_peer_pks, vec![peer_id_2.clone()]);
 
     let res = call_vm!(vm2, "asd", script, "[]", res.data);

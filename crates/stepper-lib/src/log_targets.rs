@@ -14,12 +14,21 @@
  * limitations under the License.
  */
 
+pub const INSTRUCTION: &str = "instruction";
+pub const EXEC_CTX: &str = "exec_ctx";
+pub const CALL_EVIDENCE_CTX: &str = "evidence_ctx";
+pub const SUBTREE: &str = "subtree_complete";
+pub const EVIDENCE_MERGE: &str = "evidence_merge";
+pub const EVIDENCE_PREV_STATE: &str = "evidence_prev_state";
+pub const EVIDENCE_NEW_STATE: &str = "evidence_new_state";
+
+/// This map should be used by rust-sdk logger that allows print only necessary targets by id.
 pub const TARGET_MAP: [(&'static str, i64); 7] = [
-    ("instruction", 1 << 0),
-    ("exec_ctx", 1 << 1),
-    ("evidence_ctx", 1 << 2),
-    ("subtree_complete", 1 << 3),
-    ("evidence_merge", 1 << 4),
-    ("evidence_prev_state", 1 << 5),
-    ("evidence_new_state", 1 << 6),
+    (INSTRUCTION, 1 << 1),
+    (EXEC_CTX, 1 << 2),
+    (CALL_EVIDENCE_CTX, 1 << 3),
+    (SUBTREE, 1 << 4),
+    (EVIDENCE_MERGE, 1 << 5),
+    (EVIDENCE_PREV_STATE, 1 << 6),
+    (EVIDENCE_NEW_STATE, 1 << 7),
 ];

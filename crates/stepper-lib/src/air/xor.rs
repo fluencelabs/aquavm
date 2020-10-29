@@ -52,8 +52,6 @@ mod tests {
     use aquamarine_vm::HostExportedFunc;
     use aquamarine_vm::IValue;
 
-    use serde_json::json;
-
     use std::rc::Rc;
 
     #[test]

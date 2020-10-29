@@ -174,7 +174,7 @@ fn create_service() {
         ))"#,
     );
 
-    let res = call_vm!(set_variables_vm, "init_user_id", script, "[]", "[]");
+    let res = call_vm!(set_variables_vm, "init_user_id", script.clone(), "[]", "[]");
     let res = call_vm!(vm, "init_user_id", script, "[]", res.data);
 
     let add_module_response = String::from("add_module response");

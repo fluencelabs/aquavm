@@ -60,7 +60,7 @@ mod tests {
             ))"#,
         );
 
-        let res = call_vm!(vm, "asd", script, "[]", "[]");
+        let res = call_vm!(vm, "asd", script.clone(), "[]", "[]");
         assert_eq!(res.next_peer_pks, vec![String::from("remote_peer_id_1")]);
 
         let res = call_vm!(vm, "asd", script, "[]", json!([{"call": {"executed": ""}}]).to_string());

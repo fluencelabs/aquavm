@@ -21,6 +21,9 @@ use parsed_call::ParsedCall;
 
 use super::CallEvidenceCtx;
 use super::ExecutionCtx;
+use crate::log_targets::CALL_EVIDENCE_CTX;
+use crate::log_targets::EXEC_CTX;
+use crate::log_targets::INSTRUCTION;
 use crate::AquamarineError::VariableNotFound;
 use crate::AquamarineError::VariableNotInJsonPath;
 use crate::Result;
@@ -60,7 +63,9 @@ pub(crate) struct Call(PeerPart, FunctionPart, Vec<String>, String);
 
 impl super::ExecutableInstruction for Call {
     fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
-        log::info!("call {:?} is called with contexts: {:?} {:?}", self, exec_ctx, call_ctx);
+        log::info!(target: INSTRUCTION, "> call");
+        log::info!(target: EXEC_CTX, "execution context:\n{:?}", exec_ctx);
+        log::info!(target: CALL_EVIDENCE_CTX, "call evidence context:\n{:?}", call_ctx);
 
         let parsed_call = match ParsedCall::new(self, exec_ctx) {
             Ok(parsed_call) => parsed_call,
@@ -101,7 +106,6 @@ mod tests {
     use aquamarine_vm::HostExportedFunc;
     use aquamarine_vm::IValue;
 
-    use serde_json::json;
     use std::rc::Rc;
 
     #[test]
@@ -180,7 +184,7 @@ mod tests {
         "#,
         );
 
-        let res = call_vm!(set_variable_vm, "asd", script, "[]", "[]");
+        let res = call_vm!(set_variable_vm, "asd", script.clone(), "[]", "[]");
         let res = call_vm!(vm, "asd", script, "[]", res.data);
 
         assert!(res.next_peer_pks.is_empty());
@@ -214,7 +218,7 @@ mod tests {
         "#,
         );
 
-        let res = call_vm!(set_variable_vm, "asd", script, "[]", "[]");
+        let res = call_vm!(set_variable_vm, "asd", script.clone(), "[]", "[]");
         let res = call_vm!(vm, "asd", script, "[]", res.data);
         let call_path: CallEvidencePath = serde_json::from_str(&res.data).expect("should be a valid json");
 

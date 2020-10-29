@@ -186,7 +186,7 @@ mod tests {
             ))"#,
         );
 
-        let res = call_vm!(set_variable_vm, "", lfold, "[]", "[]");
+        let res = call_vm!(set_variable_vm, "", lfold.clone(), "[]", "[]");
         let res = call_vm!(vm, "", lfold, "[]", res.data);
         let res: CallEvidencePath = serde_json::from_str(&res.data).expect("should be valid call evidence path");
 
@@ -219,7 +219,7 @@ mod tests {
             ))"#,
         );
 
-        let res = call_vm!(set_variable_vm, "", rfold, "[]", "[]");
+        let res = call_vm!(set_variable_vm, "", rfold.clone(), "[]", "[]");
         let res = call_vm!(vm, "", rfold, "[]", res.data);
         let res: CallEvidencePath = serde_json::from_str(&res.data).expect("should be valid call evidence path");
 
@@ -260,7 +260,7 @@ mod tests {
             ))"#,
         );
 
-        let res = call_vm!(set_variable_vm, "", script, "[]", "[]");
+        let res = call_vm!(set_variable_vm, "", script.clone(), "[]", "[]");
         let res = call_vm!(vm, "", script, "[]", res.data);
         let res: CallEvidencePath = serde_json::from_str(&res.data).expect("should be valid call evidence path");
 
@@ -303,7 +303,7 @@ mod tests {
             ))"#,
         );
 
-        let res = vm.call(json!(["", script, "[]", "[]"]));
+        let res = vm.call_with_prev_data("", script, "[]", "[]");
 
         assert!(res.is_err());
         let error = res.err().unwrap();
@@ -339,7 +339,7 @@ mod tests {
             ))"#,
         );
 
-        let res = call_vm!(set_variable_vm, "", empty_fold, "[]", "[]");
+        let res = call_vm!(set_variable_vm, "", empty_fold.clone(), "[]", "[]");
         let res = call_vm!(vm, "", empty_fold, "[]", res.data);
         let res: CallEvidencePath = serde_json::from_str(&res.data).expect("should be valid call evidence path");
 

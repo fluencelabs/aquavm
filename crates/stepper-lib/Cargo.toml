@@ -24,7 +24,7 @@ wasm-bindgen = "0.2.68"
 
 [dev_dependencies]
 aqua-test-utils = { path = "../test-utils" }
-aquamarine-vm = { git = "https://github.com/fluencelabs/fce" }
+aquamarine-vm = { git = "https://github.com/fluencelabs/fce", features = ["raw-aquamarine-vm-api"] }
 
 env_logger = "0.7.1"
 maplit = "1.0.2"

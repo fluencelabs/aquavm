@@ -115,8 +115,6 @@ mod tests {
     use aqua_test_utils::create_aqua_vm;
     use aqua_test_utils::unit_call_service;
 
-    use serde_json::json;
-
     #[test]
     fn par_remote_remote() {
         use std::collections::HashSet;
