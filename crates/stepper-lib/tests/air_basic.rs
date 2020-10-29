@@ -156,10 +156,10 @@ fn create_service() {
         (seq (
             (seq (
                 (seq (
-                    (call ("set_variables" ("add_module" "") ("module_bytes") module_bytes))
-                    (call ("set_variables" ("add_module" "") ("module_config") module_config))
+                    (call ("set_variables" ("" "") ("module_bytes") module_bytes))
+                    (call ("set_variables" ("" "") ("module_config") module_config))
                 ))
-                (call ("set_variables" ("add_module" "") ("blueprint") blueprint))
+                (call ("set_variables" ("" "") ("blueprint") blueprint))
             ))
             (seq (
                 (call ("A" ("add_module" "") (module_bytes module_config) module))
