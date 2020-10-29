@@ -40,15 +40,6 @@ use xor::Xor;
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
 
-use once_cell::sync::Lazy;
-use std::collections::HashSet;
-
-pub(self) static RESERVED_KEYWORDS: Lazy<HashSet<&str>> = Lazy::new(|| {
-    let mut set = HashSet::new();
-    set.insert("__call");
-    set
-});
-
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
 #[serde(rename_all = "kebab-case")]
 pub(crate) enum Instruction {

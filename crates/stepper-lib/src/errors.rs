@@ -15,7 +15,8 @@
  */
 
 use crate::build_targets::CallServiceResult;
-use crate::call_evidence::{CallResult, EvidenceState};
+use crate::call_evidence::CallResult;
+use crate::call_evidence::EvidenceState;
 use crate::JValue;
 use crate::StepperOutcome;
 
@@ -79,9 +80,6 @@ pub enum AquamarineError {
 
     /// Errors occurred on call evidence serialization.
     CallEvidenceSerializationError(SerdeJsonError),
-
-    /// Errors occurred when reserved keyword is used for variable name.
-    ReservedKeywordError(String),
 
     /// Errors occurred when previous and current evidence states are incompatible.
     IncompatibleEvidenceStates(EvidenceState, EvidenceState),
@@ -153,11 +151,6 @@ impl std::fmt::Display for AquamarineError {
             AquamarineError::CallEvidenceSerializationError(err) => {
                 write!(f, "an error occurred while data serialization: {:?}", err)
             }
-            AquamarineError::ReservedKeywordError(variable_name) => write!(
-                f,
-                "a variable can't be named as {} because this name is reserved",
-                variable_name
-            ),
             AquamarineError::IncompatibleEvidenceStates(prev_state, current_state) => write!(
                 f,
                 "previous and current data have incompatible states: {:?} {:?}",
@@ -209,10 +202,9 @@ impl Into<StepperOutcome> for AquamarineError {
             AquamarineError::InvalidEvidenceState(..) => 15,
             AquamarineError::CallEvidenceDeserializationError(..) => 16,
             AquamarineError::CallEvidenceSerializationError(..) => 17,
-            AquamarineError::ReservedKeywordError(..) => 18,
-            AquamarineError::IncompatibleEvidenceStates(..) => 19,
-            AquamarineError::IncompatibleCallResults(..) => 20,
-            AquamarineError::EvidencePathTooSmall(..) => 21,
+            AquamarineError::IncompatibleEvidenceStates(..) => 18,
+            AquamarineError::IncompatibleCallResults(..) => 19,
+            AquamarineError::EvidencePathTooSmall(..) => 20,
         };
 
         StepperOutcome {

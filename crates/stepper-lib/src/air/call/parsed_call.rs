@@ -21,7 +21,6 @@ use super::utils::is_string_literal;
 use super::Call;
 use super::CURRENT_PEER_ALIAS;
 use crate::air::ExecutionCtx;
-use crate::air::RESERVED_KEYWORDS;
 use crate::build_targets::CALL_SERVICE_SUCCESS;
 use crate::call_evidence::CallEvidenceCtx;
 use crate::call_evidence::CallResult;
@@ -207,10 +206,6 @@ fn parse_result_variable_name(call: &Call) -> Result<&str> {
         )));
     }
 
-    if RESERVED_KEYWORDS.contains(result_variable_name.as_str()) {
-        return Err(AquamarineError::ReservedKeywordError(result_variable_name.to_string()));
-    }
-
     if is_string_literal(result_variable_name) {
         return Err(AquamarineError::InstructionError(String::from(
             "result name of a call instruction must be non string literal",
@@ -264,10 +259,6 @@ fn prepare_call_arg<'a>(arg_path: &'a str, ctx: &'a ExecutionCtx) -> Result<Stri
         }
 
         Ok(values[0].clone())
-    }
-
-    if RESERVED_KEYWORDS.contains(arg_path) {
-        return Err(AquamarineError::ReservedKeywordError(arg_path.to_string()));
     }
 
     if is_string_literal(arg_path) {
