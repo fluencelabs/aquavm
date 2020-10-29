@@ -9,7 +9,7 @@ name = "stepper_lib"
 path = "src/lib.rs"
 
 [dependencies]
-fluence = { git = "https://github.com/fluencelabs/rust-sdk", branch = "improve_logger", features = ["logger"] }
+fluence = { git = "https://github.com/fluencelabs/rust-sdk", features = ["logger"] }
 
 serde = { version = "1.0.116", features = [ "derive", "rc" ] }
 serde_derive = "1.0.116"
@@ -23,7 +23,7 @@ serde_json = "1.0"
 wasm-bindgen = "0.2.68"
 
 [dev_dependencies]
-aqua-test-utils = { path = "../test-utils" }
+aqua-test-utils = { path = "../crates/test-utils" }
 aquamarine-vm = { git = "https://github.com/fluencelabs/fce", features = ["raw-aquamarine-vm-api"] }
 
 env_logger = "0.7.1"

@@ -17,6 +17,9 @@
 use super::CallEvidenceCtx;
 use super::ExecutionCtx;
 use super::Instruction;
+use crate::log_targets::CALL_EVIDENCE_CTX;
+use crate::log_targets::EXEC_CTX;
+use crate::log_targets::INSTRUCTION;
 use crate::AValue;
 use crate::AquamarineError;
 use crate::JValue;
@@ -53,13 +56,9 @@ impl super::ExecutableInstruction for Fold {
     fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
         use AquamarineError::*;
 
-        log::info!(
-            "fold {} {} is called with contexts {:?} {:?}",
-            self.0,
-            self.1,
-            exec_ctx,
-            call_ctx
-        );
+        log::info!(target: INSTRUCTION, "> fold");
+        log::info!(target: EXEC_CTX, "execution context:\n{:?}", exec_ctx);
+        log::info!(target: CALL_EVIDENCE_CTX, "call evidence context:\n{:?}", call_ctx);
 
         let iterable_name = &self.0;
         let iterator_name = &self.1;
@@ -109,7 +108,9 @@ impl super::ExecutableInstruction for Next {
     fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
         use AquamarineError::IncompatibleAValueType;
 
-        log::info!("next {:?} is called with contexts {:?} {:?}", self, exec_ctx, call_ctx);
+        log::info!(target: INSTRUCTION, "> next");
+        log::info!(target: EXEC_CTX, "execution context:\n{:?}", exec_ctx);
+        log::info!(target: CALL_EVIDENCE_CTX, "call evidence context:\n{:?}", call_ctx);
 
         let iterator_name = &self.0;
         let avalue = exec_ctx
@@ -187,8 +188,10 @@ mod tests {
         );
 
         let res = call_vm!(set_variable_vm, "", lfold.clone(), "[]", "[]");
+        println!("res {:?}", res);
         let res = call_vm!(vm, "", lfold, "[]", res.data);
         let res: CallEvidencePath = serde_json::from_str(&res.data).expect("should be valid call evidence path");
+        println!("res {:?}", res);
 
         assert_eq!(res.len(), 6);
         assert_eq!(res[0], Call(Executed(Rc::new(json!(["1", "2", "3", "4", "5"])))));

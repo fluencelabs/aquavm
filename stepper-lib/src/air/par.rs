@@ -19,6 +19,9 @@ use super::EvidenceState;
 use super::ExecutableInstruction;
 use super::ExecutionCtx;
 use super::Instruction;
+use crate::log_targets::CALL_EVIDENCE_CTX;
+use crate::log_targets::EXEC_CTX;
+use crate::log_targets::INSTRUCTION;
 use crate::Result;
 
 use serde_derive::Deserialize;
@@ -29,7 +32,9 @@ pub(crate) struct Par(Box<Instruction>, Box<Instruction>);
 
 impl ExecutableInstruction for Par {
     fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
-        log::info!("par is called with context: {:?} {:?}", exec_ctx, call_ctx);
+        log::info!(target: INSTRUCTION, "> fold");
+        log::info!(target: EXEC_CTX, "execution context:\n{:?}", exec_ctx);
+        log::info!(target: CALL_EVIDENCE_CTX, "call evidence context:\n{:?}", call_ctx);
 
         let (left_subtree_size, right_subtree_size) = extract_subtree_sizes(call_ctx)?;
 

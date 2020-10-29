@@ -29,26 +29,18 @@ use std::rc::Rc;
 pub(super) fn set_local_call_result(
     result_variable_name: String,
     exec_ctx: &mut ExecutionCtx,
-    call_ctx: &mut CallEvidenceCtx,
     result: Rc<JValue>,
 ) -> Result<()> {
     use std::collections::hash_map::Entry::{Occupied, Vacant};
     use AquamarineError::*;
 
     let stripped_result_name = result_variable_name.strip_suffix("[]");
-
-    let new_evidence_state = EvidenceState::Call(CallResult::Executed(result.clone()));
-
     if stripped_result_name.is_none() {
         // if result is not an array, simply insert it into data
         match exec_ctx.data_cache.entry(result_variable_name) {
             Vacant(entry) => entry.insert(AValue::JValueRef(result)),
             Occupied(entry) => return Err(MultipleVariablesFound(entry.key().clone())),
         };
-
-        log::info!("call evidence: adding new state {:?}", new_evidence_state);
-        call_ctx.new_path.push_back(new_evidence_state);
-
         return Ok(());
     }
 
@@ -63,9 +55,6 @@ pub(super) fn set_local_call_result(
             entry.insert(AValue::JValueAccumulatorRef(RefCell::new(vec![result])));
         }
     }
-
-    log::info!("call evidence: adding new state {:?}", new_evidence_state);
-    call_ctx.new_path.push_back(new_evidence_state);
 
     Ok(())
 }

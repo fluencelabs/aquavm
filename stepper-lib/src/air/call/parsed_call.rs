@@ -86,7 +86,14 @@ impl ParsedCall {
 
         let result: JValue = serde_json::from_str(&result.result)
             .map_err(|e| AquamarineError::CallServiceResultDeserializationError(result, e))?;
-        super::utils::set_local_call_result(self.result_variable_name, exec_ctx, call_ctx, Rc::new(result))
+        let result = Rc::new(result);
+        super::utils::set_local_call_result(self.result_variable_name, exec_ctx, result.clone())?;
+
+        let new_evidence_state = EvidenceState::Call(CallResult::Executed(result));
+        log::info!("call evidence: adding new state {:?}", new_evidence_state);
+        call_ctx.new_path.push_back(new_evidence_state);
+
+        Ok(())
     }
 
     pub(super) fn prepare_evidence_state(
@@ -131,7 +138,7 @@ impl ParsedCall {
             }
             // this instruction's been already executed
             Call(Executed(result)) => {
-                set_local_call_result(self.result_variable_name.clone(), exec_ctx, call_ctx, result.clone())?;
+                set_local_call_result(self.result_variable_name.clone(), exec_ctx, result.clone())?;
                 call_ctx.new_path.push_back(prev_state);
                 Ok(false)
             }

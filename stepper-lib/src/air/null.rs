@@ -16,6 +16,9 @@
 
 use super::CallEvidenceCtx;
 use super::ExecutionCtx;
+use crate::log_targets::CALL_EVIDENCE_CTX;
+use crate::log_targets::EXEC_CTX;
+use crate::log_targets::INSTRUCTION;
 use crate::Result;
 
 use serde_derive::Deserialize;
@@ -26,7 +29,9 @@ pub(crate) struct Null {}
 
 impl super::ExecutableInstruction for Null {
     fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
-        log::info!("null is called with contexts: {:?} {:?}", exec_ctx, call_ctx);
+        log::info!(target: INSTRUCTION, "> null");
+        log::info!(target: EXEC_CTX, "execution context:\n{:?}", exec_ctx);
+        log::info!(target: CALL_EVIDENCE_CTX, "call evidence context:\n{:?}", call_ctx);
 
         Ok(())
     }

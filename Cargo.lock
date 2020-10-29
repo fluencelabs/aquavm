@@ -28,7 +28,7 @@ checksum = "a1fd36ffbb1fb7c834eac128ea8d0e310c5aeb635548f9d58861e1308d46e71c"
 name = "aqua-test-module"
 version = "0.1.0"
 dependencies = [
- "fluence 0.2.8 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence",
 ]
 
 [[package]]
@@ -36,7 +36,7 @@ name = "aqua-test-utils"
 version = "0.1.0"
 dependencies = [
  "aquamarine-vm",
- "fluence 0.2.8 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence",
  "serde_json",
 ]
 
@@ -44,7 +44,7 @@ dependencies = [
 name = "aquamarine"
 version = "0.1.2"
 dependencies = [
- "fluence 0.2.8 (git+https://github.com/fluencelabs/rust-sdk?branch=improve_logger)",
+ "fluence",
  "log",
  "serde_json",
  "stepper-lib",
@@ -436,16 +436,7 @@ dependencies = [
 [[package]]
 name = "fluence"
 version = "0.2.8"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=improve_logger#dc2851379ec475356110d41366a9fc6cbc143fd0"
-dependencies = [
- "fluence-sdk-macro 0.2.8 (git+https://github.com/fluencelabs/rust-sdk?branch=improve_logger)",
- "fluence-sdk-main 0.2.8 (git+https://github.com/fluencelabs/rust-sdk?branch=improve_logger)",
-]
-
-[[package]]
-name = "fluence"
-version = "0.2.8"
-source = "git+https://github.com/fluencelabs/rust-sdk#8c0a02916519872c3d6073de16c950d10da0b2f4"
+source = "git+https://github.com/fluencelabs/rust-sdk#a6c587db0b6f22c3d3af81f10b187f148f8e9d30"
 dependencies = [
  "fluence-sdk-macro 0.2.8 (git+https://github.com/fluencelabs/rust-sdk)",
  "fluence-sdk-main 0.2.8 (git+https://github.com/fluencelabs/rust-sdk)",
@@ -484,15 +475,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-macro"
 version = "0.2.8"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=improve_logger#dc2851379ec475356110d41366a9fc6cbc143fd0"
-dependencies = [
- "fluence-sdk-wit 0.2.8 (git+https://github.com/fluencelabs/rust-sdk?branch=improve_logger)",
-]
-
-[[package]]
-name = "fluence-sdk-macro"
-version = "0.2.8"
-source = "git+https://github.com/fluencelabs/rust-sdk#8c0a02916519872c3d6073de16c950d10da0b2f4"
+source = "git+https://github.com/fluencelabs/rust-sdk#a6c587db0b6f22c3d3af81f10b187f148f8e9d30"
 dependencies = [
  "fluence-sdk-wit 0.2.8 (git+https://github.com/fluencelabs/rust-sdk)",
 ]
@@ -511,17 +494,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-main"
 version = "0.2.8"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=improve_logger#dc2851379ec475356110d41366a9fc6cbc143fd0"
-dependencies = [
- "fluence-sdk-macro 0.2.8 (git+https://github.com/fluencelabs/rust-sdk?branch=improve_logger)",
- "log",
- "serde",
-]
-
-[[package]]
-name = "fluence-sdk-main"
-version = "0.2.8"
-source = "git+https://github.com/fluencelabs/rust-sdk#8c0a02916519872c3d6073de16c950d10da0b2f4"
+source = "git+https://github.com/fluencelabs/rust-sdk#a6c587db0b6f22c3d3af81f10b187f148f8e9d30"
 dependencies = [
  "fluence-sdk-macro 0.2.8 (git+https://github.com/fluencelabs/rust-sdk)",
  "log",
@@ -545,20 +518,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-wit"
 version = "0.2.8"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=improve_logger#dc2851379ec475356110d41366a9fc6cbc143fd0"
-dependencies = [
- "proc-macro2",
- "quote",
- "serde",
- "serde_json",
- "syn",
- "uuid",
-]
-
-[[package]]
-name = "fluence-sdk-wit"
-version = "0.2.8"
-source = "git+https://github.com/fluencelabs/rust-sdk#8c0a02916519872c3d6073de16c950d10da0b2f4"
+source = "git+https://github.com/fluencelabs/rust-sdk#a6c587db0b6f22c3d3af81f10b187f148f8e9d30"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1206,7 +1166,7 @@ dependencies = [
  "aquamarine-vm",
  "boolinator",
  "env_logger",
- "fluence 0.2.8 (git+https://github.com/fluencelabs/rust-sdk?branch=improve_logger)",
+ "fluence",
  "jsonpath_lib",
  "log",
  "maplit",
