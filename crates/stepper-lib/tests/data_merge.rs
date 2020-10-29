@@ -157,19 +157,28 @@ fn acc_merge() {
     env_logger::init();
 
     let neighborhood_call_service: HostExportedFunc = Box::new(|_, args| -> Option<IValue> {
+        let args_count = match &args[1] {
+            IValue::String(str) => str,
+            _ => unreachable!(),
+        };
+
+        let args_count = (args_count.as_bytes()[0] - b'0') as usize;
+
         let args_json = match &args[2] {
             IValue::String(str) => str,
             _ => unreachable!(),
         };
 
         let args: Vec<JValue> = serde_json::from_str(args_json).expect("valid json");
+        let args = match &args[0] {
+            JValue::Array(args) => args,
+            _ => unreachable!(),
+        };
+
+        assert_eq!(args.len(), args_count);
 
         Some(IValue::Record(
-            Vec1::new(vec![
-                IValue::S32(0),
-                IValue::String(String::from(r#""B""#)),
-            ])
-            .unwrap(),
+            Vec1::new(vec![IValue::S32(0), IValue::String(json!(args).to_string())]).unwrap(),
         ))
     });
 
@@ -187,8 +196,8 @@ fn acc_merge() {
                         (seq (
                             (call ("A" ("get_providers" "") () providers[]))
                             (seq (
-                                (call ("B" ("return" "") (providers) void[]))
-                                (call ("B" ("return" "") (providers void) void[]))
+                                (call ("B" ("" "2") (providers) void[]))
+                                (call ("B" ("" "3") (void) void[]))
                             ))
                         ))
                     ))
@@ -197,6 +206,6 @@ fn acc_merge() {
         "#,
     );
 
-    let res1 = call_vm!(vm1, "asd", script.clone(), "[]", "[]");
-    let res2 = call_vm!(vm2, "asd", script, "[]", res1.data);
+    let res = call_vm!(vm1, "asd", script.clone(), "[]", "[]");
+    call_vm!(vm2, "asd", script, "[]", res.data);
 }
