@@ -26,12 +26,23 @@
     unreachable_patterns
 )]
 
+mod logger_target_map;
+
 use fluence::fce;
 use stepper_lib::execute_aqua;
 use stepper_lib::StepperOutcome;
 
 pub fn main() {
-    fluence::WasmLogger::init_with_level(log::Level::Info).unwrap();
+    use std::collections::HashMap;
+    use std::iter::FromIterator;
+
+    let target_map = HashMap::from_iter(logger_target_map::TARGET_MAP.iter().cloned());
+
+    fluence::WasmLogger::new()
+        .with_log_level(log::Level::Info)
+        .with_target_map(target_map)
+        .build()
+        .unwrap();
 }
 
 #[fce]

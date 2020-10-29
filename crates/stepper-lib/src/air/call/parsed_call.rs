@@ -229,7 +229,7 @@ fn get_args_by_path<'args_path, 'exec_ctx, T: 'exec_ctx>(
                 let jvalue = &array[fold_state.cursor];
                 maybe_json_path(Cow::Borrowed(jvalue), split_arg.pop())
             }
-            _ => unreachable!(),
+            _ => unreachable!("fold state must be well-formed because it is changed only by stepper"),
         },
         Some(AValue::JValueRef(value)) => maybe_json_path(Cow::Borrowed(value.as_ref()), split_arg.pop()),
         Some(AValue::JValueAccumulatorRef(acc)) => {
