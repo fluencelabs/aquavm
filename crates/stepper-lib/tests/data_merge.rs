@@ -16,6 +16,7 @@
 
 use aqua_test_utils::call_vm;
 use aqua_test_utils::create_aqua_vm;
+use aqua_test_utils::set_variable_call_service;
 use aquamarine_vm::vec1::Vec1;
 use aquamarine_vm::HostExportedFunc;
 use aquamarine_vm::IValue;
@@ -149,4 +150,53 @@ fn data_merge() {
 
     assert_eq!(resulted_json4, right_json4);
     assert!(res4.next_peer_pks.is_empty());
+}
+
+#[test]
+fn acc_merge() {
+    env_logger::init();
+
+    let neighborhood_call_service: HostExportedFunc = Box::new(|_, args| -> Option<IValue> {
+        let args_json = match &args[2] {
+            IValue::String(str) => str,
+            _ => unreachable!(),
+        };
+
+        let args: Vec<JValue> = serde_json::from_str(args_json).expect("valid json");
+
+        Some(IValue::Record(
+            Vec1::new(vec![
+                IValue::S32(0),
+                IValue::String(String::from(r#""B""#)),
+            ])
+            .unwrap(),
+        ))
+    });
+
+    let mut vm1 = create_aqua_vm(set_variable_call_service(r#""peer_id""#), "A");
+    let mut vm2 = create_aqua_vm(neighborhood_call_service, "B");
+
+    let script = String::from(
+        r#"
+        (seq (
+            (call ("A" ("add_provider" "") () void[]))
+                (seq (
+                    (call ("A" ("add_provider" "") () void[]))
+                    (seq (
+                        (call ("A" ("get_providers" "") () providers[]))
+                        (seq (
+                            (call ("A" ("get_providers" "") () providers[]))
+                            (seq (
+                                (call ("B" ("return" "") (providers) void[]))
+                                (call ("B" ("return" "") (providers void) void[]))
+                            ))
+                        ))
+                    ))
+                ))
+            ))
+        "#,
+    );
+
+    let res1 = call_vm!(vm1, "asd", script.clone(), "[]", "[]");
+    let res2 = call_vm!(vm2, "asd", script, "[]", res1.data);
 }

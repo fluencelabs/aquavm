@@ -18,6 +18,7 @@
 
 use super::utils::find_by_json_path;
 use super::utils::is_string_literal;
+use super::utils::set_local_call_result;
 use super::Call;
 use super::CURRENT_PEER_ALIAS;
 use crate::air::ExecutionCtx;
@@ -31,6 +32,7 @@ use crate::JValue;
 use crate::Result;
 
 use std::borrow::Cow;
+use std::rc::Rc;
 
 #[derive(Debug, PartialEq, Eq)]
 pub(super) struct ParsedCall {
@@ -84,7 +86,7 @@ impl ParsedCall {
 
         let result: JValue = serde_json::from_str(&result.result)
             .map_err(|e| AquamarineError::CallServiceResultDeserializationError(result, e))?;
-        super::utils::set_local_call_result(self.result_variable_name, exec_ctx, call_ctx, result)
+        super::utils::set_local_call_result(self.result_variable_name, exec_ctx, call_ctx, Rc::new(result))
     }
 
     pub(super) fn prepare_evidence_state(
@@ -129,9 +131,7 @@ impl ParsedCall {
             }
             // this instruction's been already executed
             Call(Executed(result)) => {
-                exec_ctx
-                    .data_cache
-                    .insert(self.result_variable_name.clone(), AValue::JValueRef(result.clone()));
+                set_local_call_result(self.result_variable_name.clone(), exec_ctx, call_ctx, result.clone())?;
                 call_ctx.new_path.push_back(prev_state);
                 Ok(false)
             }

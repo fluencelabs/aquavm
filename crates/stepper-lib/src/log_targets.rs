@@ -23,7 +23,7 @@ pub const EVIDENCE_PREV_STATE: &str = "evidence_prev_state";
 pub const EVIDENCE_NEW_STATE: &str = "evidence_new_state";
 
 /// This map should be used by rust-sdk logger that allows print only necessary targets by id.
-pub const TARGET_MAP: [(&'static str, i64); 7] = [
+pub const TARGET_MAP: [(&str, i64); 7] = [
     (INSTRUCTION, 1 << 1),
     (EXEC_CTX, 1 << 2),
     (CALL_EVIDENCE_CTX, 1 << 3),

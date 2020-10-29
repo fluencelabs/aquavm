@@ -30,13 +30,12 @@ pub(super) fn set_local_call_result(
     result_variable_name: String,
     exec_ctx: &mut ExecutionCtx,
     call_ctx: &mut CallEvidenceCtx,
-    result: JValue,
+    result: Rc<JValue>,
 ) -> Result<()> {
     use std::collections::hash_map::Entry::{Occupied, Vacant};
     use AquamarineError::*;
 
     let stripped_result_name = result_variable_name.strip_suffix("[]");
-    let result = Rc::new(result);
 
     let new_evidence_state = EvidenceState::Call(CallResult::Executed(result.clone()));
 
