@@ -22,9 +22,10 @@ pub const CALL_EVIDENCE_PATH: &str = "call_evidence_path";
 pub const SUBTREE_ELEMENTS: &str = "subtree_elements_count";
 pub const NEW_CALL_EVIDENCE_PATH: &str = "new_call_evidence_path";
 pub const EVIDENCE_MERGE: &str = "evidence_merge";
+pub const INITIAL_PARAMS: &str = "initial_params";
 
 /// This map should be used by rust-sdk logger that allows print only necessary targets by id.
-pub const TARGET_MAP: [(&str, i64); 8] = [
+pub const TARGET_MAP: [(&str, i64); 9] = [
     (INSTRUCTION, 1 << 1),
     (DATA_CACHE, 1 << 2),
     (NEXT_PEER_PKS, 1 << 3),
@@ -33,4 +34,5 @@ pub const TARGET_MAP: [(&str, i64); 8] = [
     (SUBTREE_ELEMENTS, 1 << 6),
     (NEW_CALL_EVIDENCE_PATH, 1 << 7),
     (EVIDENCE_MERGE, 1 << 8),
+    (INITIAL_PARAMS, 1 << 9),
 ];
