@@ -184,10 +184,8 @@ mod tests {
         );
 
         let res = call_vm!(set_variable_vm, "", lfold.clone(), "[]", "[]");
-        println!("res {:?}", res);
         let res = call_vm!(vm, "", lfold, "[]", res.data);
         let res: CallEvidencePath = serde_json::from_str(&res.data).expect("should be valid call evidence path");
-        println!("res {:?}", res);
 
         assert_eq!(res.len(), 6);
         assert_eq!(res[0], Call(Executed(Rc::new(json!(["1", "2", "3", "4", "5"])))));

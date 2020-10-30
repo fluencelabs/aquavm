@@ -19,9 +19,9 @@ mod utils;
 
 use parsed_call::ParsedCall;
 
-use crate::log_instruction;
 use super::CallEvidenceCtx;
 use super::ExecutionCtx;
+use crate::log_instruction;
 use crate::AquamarineError::VariableNotFound;
 use crate::AquamarineError::VariableNotInJsonPath;
 use crate::Result;
