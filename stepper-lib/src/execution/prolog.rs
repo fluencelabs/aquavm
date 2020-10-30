@@ -20,6 +20,7 @@ use crate::air::Instruction;
 use crate::call_evidence::merge_call_paths;
 use crate::call_evidence::CallEvidenceCtx;
 use crate::get_current_peer_id;
+use crate::log_targets::RUN_PARAMS;
 use crate::AquamarineError;
 use crate::CallEvidencePath;
 use crate::Result;
@@ -38,6 +39,14 @@ pub(super) fn prepare(
     let formatted_aqua = format_aqua(raw_aqua);
     let aqua: Instruction = serde_sexpr::from_str(&formatted_aqua)?;
 
+    log::info!(
+        target: RUN_PARAMS,
+        "aqua: {:?}\nprev_path: {:?}\ncurrent_path: {:?}",
+        aqua,
+        prev_path,
+        path
+    );
+
     Ok((prev_path, path, aqua))
 }
 
@@ -50,10 +59,10 @@ pub(super) fn make_contexts(
     use AquamarineError::CurrentPeerIdEnvError as EnvError;
 
     let current_peer_id = get_current_peer_id().map_err(|e| EnvError(e, String::from("CURRENT_PEER_ID")))?;
+    log::info!(target: RUN_PARAMS, "current peer id {}", current_peer_id);
+
     let exec_ctx = ExecutionCtx::new(current_peer_id);
-
     let current_path = merge_call_paths(prev_path, path)?;
-
     let call_evidence_ctx = CallEvidenceCtx::new(current_path);
 
     Ok((exec_ctx, call_evidence_ctx))

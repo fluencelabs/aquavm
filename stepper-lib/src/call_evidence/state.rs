@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use crate::log_targets::EVIDENCE_PATH_MERGE;
 use crate::JValue;
 use crate::Result;
 
@@ -61,7 +62,7 @@ pub(crate) fn merge_call_paths(
         &mut merged_path,
     )?;
 
-    log::info!("merged path: {:?}", merged_path);
+    log::info!(target: EVIDENCE_PATH_MERGE, "merged path: {:?}", merged_path);
 
     Ok(merged_path)
 }

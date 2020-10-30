@@ -39,7 +39,7 @@ pub const NEW_CALL_EVIDENCE_PATH: &str = "new_call_evidence_path";
 pub const EVIDENCE_PATH_MERGE: &str = "evidence_merge";
 
 /// Print out running arguments and params of a script.
-pub const INITIAL_PARAMS: &str = "initial_params";
+pub const RUN_PARAMS: &str = "initial_params";
 
 /// Print out state of data cache at the beginning of each instruction execution.
 pub const EVIDENCE_CHANGING: &str = "evidence_changing";
@@ -54,6 +54,6 @@ pub const TARGET_MAP: [(&str, i64); 10] = [
     (SUBTREE_ELEMENTS, 1 << 6),
     (NEW_CALL_EVIDENCE_PATH, 1 << 7),
     (EVIDENCE_PATH_MERGE, 1 << 8),
-    (INITIAL_PARAMS, 1 << 9),
+    (RUN_PARAMS, 1 << 9),
     (EVIDENCE_CHANGING, 1 << 9),
 ];
