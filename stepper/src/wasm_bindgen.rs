@@ -22,53 +22,31 @@
     unused_imports,
     unused_mut,
     unused_variables,
-    // unused_unsafe,
+    unused_unsafe,
     unreachable_patterns
 )]
 
-mod air;
-mod call_evidence;
-mod defines;
-mod errors;
-mod execution;
-mod stepper_outcome;
-
-pub(crate) use crate::defines::*;
-
-use crate::execution::execute_aqua;
-
-use wasm_bindgen::__rt::std::env::VarError;
+use stepper_lib::execute_aqua;
+use stepper_lib::log_targets::TARGET_MAP;
 use wasm_bindgen::prelude::*;
+
+use std::collections::HashMap;
 
 #[wasm_bindgen(start)]
 pub fn main() {
-    fluence::WasmLogger::init_with_level(log::Level::Info).unwrap();
+    use std::iter::FromIterator;
+
+    let target_map = HashMap::from_iter(TARGET_MAP.iter().cloned());
+
+    fluence::WasmLogger::new()
+        .with_log_level(log::Level::Info)
+        .with_target_map(target_map)
+        .build()
+        .unwrap();
 }
 
 #[wasm_bindgen]
 pub fn invoke(init_user_id: String, aqua: String, prev_data: String, data: String) -> String {
     let outcome = execute_aqua(init_user_id, aqua, prev_data, data);
     serde_json::to_string(&outcome).expect("Cannot parse StepperOutcome")
-}
-
-pub fn call_service(service_id: String, fn_name: String, args: String) -> CallServiceResult {
-    let result = call_service_impl(service_id, fn_name, args);
-    log::info!("result {}", result);
-    serde_json::from_str(&result).expect("Cannot parse CallServiceResult")
-}
-
-pub fn get_current_peer_id() -> std::result::Result<String, VarError> {
-    Ok(get_current_peer_id_impl())
-}
-
-#[wasm_bindgen]
-extern "C" {
-    #[link_name = "get_current_peer_id"]
-    fn get_current_peer_id_impl() -> String;
-}
-
-#[wasm_bindgen(raw_module = "../src/call_service.ts")]
-extern "C" {
-    #[link_name = "call_service"]
-    fn call_service_impl(service_id: String, fn_name: String, args: String) -> String;
 }

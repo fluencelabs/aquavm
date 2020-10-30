@@ -22,12 +22,12 @@ jobs:
 
           cargo install fcli
           cd stepper
-          fce build
+          fce build --features fce
 
           cd ..
           cargo fmt --all -- --check --color always
-          cargo build --release --all-features
-          cargo test --release --all-features
+          cargo check
+          cargo test --release
           cargo clippy -v
 
       - save_cache:

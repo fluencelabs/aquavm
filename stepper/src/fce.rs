@@ -26,36 +26,26 @@
     unreachable_patterns
 )]
 
-mod air;
-mod call_evidence;
-mod defines;
-mod errors;
-mod execution;
-mod stepper_outcome;
-
-pub(crate) use crate::defines::*;
-
-use crate::execution::execute_aqua;
 use fluence::fce;
-use std::env::VarError;
+use stepper_lib::execute_aqua;
+use stepper_lib::log_targets::TARGET_MAP;
+use stepper_lib::StepperOutcome;
 
-const CURRENT_PEER_ID_ENV_NAME: &str = "CURRENT_PEER_ID";
+use std::collections::HashMap;
 
 pub fn main() {
-    fluence::WasmLogger::init_with_level(log::Level::Info).unwrap();
+    use std::iter::FromIterator;
+
+    let target_map = HashMap::from_iter(TARGET_MAP.iter().cloned());
+
+    fluence::WasmLogger::new()
+        .with_log_level(log::Level::Info)
+        .with_target_map(target_map)
+        .build()
+        .unwrap();
 }
 
 #[fce]
 pub fn invoke(init_user_id: String, aqua: String, prev_data: String, data: String) -> StepperOutcome {
     execute_aqua(init_user_id, aqua, prev_data, data)
-}
-
-pub fn get_current_peer_id() -> std::result::Result<String, VarError> {
-    std::env::var(CURRENT_PEER_ID_ENV_NAME)
-}
-
-#[fce]
-#[link(wasm_import_module = "host")]
-extern "C" {
-    pub fn call_service(service_id: String, fn_name: String, args: String) -> CallServiceResult;
 }

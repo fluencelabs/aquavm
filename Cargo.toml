@@ -3,6 +3,7 @@ members = [
     "crates/test-module",
     "crates/test-utils",
     "stepper",
+    "stepper-lib",
 ]
 
 [profile.release]
