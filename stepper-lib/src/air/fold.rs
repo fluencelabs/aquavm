@@ -17,9 +17,7 @@
 use super::CallEvidenceCtx;
 use super::ExecutionCtx;
 use super::Instruction;
-use crate::log_targets::CALL_EVIDENCE_CTX;
-use crate::log_targets::EXEC_CTX;
-use crate::log_targets::INSTRUCTION;
+use crate::log_instruction;
 use crate::AValue;
 use crate::AquamarineError;
 use crate::JValue;
@@ -56,9 +54,7 @@ impl super::ExecutableInstruction for Fold {
     fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
         use AquamarineError::*;
 
-        log::info!(target: INSTRUCTION, "> fold");
-        log::info!(target: EXEC_CTX, "execution context:\n{:?}", exec_ctx);
-        log::info!(target: CALL_EVIDENCE_CTX, "call evidence context:\n{:?}", call_ctx);
+        log_instruction!(fold, exec_ctx, call_ctx);
 
         let iterable_name = &self.0;
         let iterator_name = &self.1;
@@ -108,9 +104,7 @@ impl super::ExecutableInstruction for Next {
     fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
         use AquamarineError::IncompatibleAValueType;
 
-        log::info!(target: INSTRUCTION, "> next");
-        log::info!(target: EXEC_CTX, "execution context:\n{:?}", exec_ctx);
-        log::info!(target: CALL_EVIDENCE_CTX, "call evidence context:\n{:?}", call_ctx);
+        log_instruction!(next, exec_ctx, call_ctx);
 
         let iterator_name = &self.0;
         let avalue = exec_ctx
@@ -168,6 +162,8 @@ mod tests {
 
     #[test]
     fn lfold() {
+        env_logger::init();
+
         use crate::call_evidence::CallResult::*;
         use crate::call_evidence::EvidenceState::*;
 

@@ -15,20 +15,22 @@
  */
 
 pub const INSTRUCTION: &str = "instruction";
-pub const EXEC_CTX: &str = "exec_ctx";
-pub const CALL_EVIDENCE_CTX: &str = "evidence_ctx";
-pub const SUBTREE: &str = "subtree_complete";
+pub const DATA_CACHE: &str = "data_cache";
+pub const NEXT_PEER_PKS: &str = "next_peer_pks";
+pub const SUBTREE_COMPLETE: &str = "subtree_complete";
+pub const CALL_EVIDENCE_PATH: &str = "call_evidence_path";
+pub const SUBTREE_ELEMENTS: &str = "subtree_elements_count";
+pub const NEW_CALL_EVIDENCE_PATH: &str = "new_call_evidence_path";
 pub const EVIDENCE_MERGE: &str = "evidence_merge";
-pub const EVIDENCE_PREV_STATE: &str = "evidence_prev_state";
-pub const EVIDENCE_NEW_STATE: &str = "evidence_new_state";
 
 /// This map should be used by rust-sdk logger that allows print only necessary targets by id.
-pub const TARGET_MAP: [(&str, i64); 7] = [
+pub const TARGET_MAP: [(&str, i64); 8] = [
     (INSTRUCTION, 1 << 1),
-    (EXEC_CTX, 1 << 2),
-    (CALL_EVIDENCE_CTX, 1 << 3),
-    (SUBTREE, 1 << 4),
-    (EVIDENCE_MERGE, 1 << 5),
-    (EVIDENCE_PREV_STATE, 1 << 6),
-    (EVIDENCE_NEW_STATE, 1 << 7),
+    (DATA_CACHE, 1 << 2),
+    (NEXT_PEER_PKS, 1 << 3),
+    (SUBTREE_COMPLETE, 1 << 4),
+    (CALL_EVIDENCE_PATH, 1 << 5),
+    (SUBTREE_ELEMENTS, 1 << 6),
+    (NEW_CALL_EVIDENCE_PATH, 1 << 7),
+    (EVIDENCE_MERGE, 1 << 8),
 ];

@@ -49,6 +49,8 @@ pub(crate) use build_targets::call_service;
 pub(crate) use build_targets::get_current_peer_id;
 
 use std::cell::RefCell;
+use std::fmt::Display;
+use std::fmt::Formatter;
 use std::rc::Rc;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -56,4 +58,24 @@ pub(crate) enum AValue {
     JValueRef(Rc<JValue>),
     JValueAccumulatorRef(RefCell<Vec<Rc<JValue>>>),
     JValueFoldCursor(crate::air::FoldState),
+}
+
+impl Display for AValue {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AValue::JValueRef(value) => write!(f, "{:?}", value)?,
+            AValue::JValueAccumulatorRef(acc) => {
+                write!(f, "[ ")?;
+                for value in acc.borrow().iter() {
+                    write!(f, "{:?} ", value)?;
+                }
+                write!(f, "]")?;
+            }
+            AValue::JValueFoldCursor(fold_state) => {
+                write!(f, "cursor: {}, iterable: {}", fold_state.cursor, fold_state.iterable)?;
+            }
+        }
+
+        Ok(())
+    }
 }

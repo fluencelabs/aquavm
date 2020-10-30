@@ -17,9 +17,7 @@
 use super::CallEvidenceCtx;
 use super::ExecutionCtx;
 use super::Instruction;
-use crate::log_targets::CALL_EVIDENCE_CTX;
-use crate::log_targets::EXEC_CTX;
-use crate::log_targets::INSTRUCTION;
+use crate::log_instruction;
 use crate::Result;
 
 use serde_derive::Deserialize;
@@ -30,9 +28,7 @@ pub(crate) struct Seq(Box<Instruction>, Box<Instruction>);
 
 impl super::ExecutableInstruction for Seq {
     fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
-        log::info!(target: INSTRUCTION, "> seq");
-        log::info!(target: EXEC_CTX, "execution context:\n{:?}", exec_ctx);
-        log::info!(target: CALL_EVIDENCE_CTX, "call evidence context:\n{:?}", call_ctx);
+        log_instruction!(seq, exec_ctx, call_ctx);
 
         exec_ctx.subtree_complete = true;
         self.0.execute(exec_ctx, call_ctx)?;

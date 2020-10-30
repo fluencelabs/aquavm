@@ -18,6 +18,8 @@ use super::CallEvidencePath;
 
 use serde::Deserialize;
 use serde::Serialize;
+use std::fmt::Display;
+use std::fmt::Formatter;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub(crate) struct CallEvidenceCtx {
@@ -35,5 +37,17 @@ impl CallEvidenceCtx {
             current_subtree_elements_count,
             new_path: CallEvidencePath::new(),
         }
+    }
+}
+
+impl Display for CallEvidenceCtx {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "current path:\n{:?}", self.current_path)?;
+        writeln!(
+            f,
+            "current subtree elements count:\n{:?}",
+            self.current_subtree_elements_count
+        )?;
+        writeln!(f, "new path:\n{:?}", self.new_path)
     }
 }

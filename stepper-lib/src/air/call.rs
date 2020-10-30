@@ -19,11 +19,9 @@ mod utils;
 
 use parsed_call::ParsedCall;
 
+use crate::log_instruction;
 use super::CallEvidenceCtx;
 use super::ExecutionCtx;
-use crate::log_targets::CALL_EVIDENCE_CTX;
-use crate::log_targets::EXEC_CTX;
-use crate::log_targets::INSTRUCTION;
 use crate::AquamarineError::VariableNotFound;
 use crate::AquamarineError::VariableNotInJsonPath;
 use crate::Result;
@@ -63,9 +61,7 @@ pub(crate) struct Call(PeerPart, FunctionPart, Vec<String>, String);
 
 impl super::ExecutableInstruction for Call {
     fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
-        log::info!(target: INSTRUCTION, "> call");
-        log::info!(target: EXEC_CTX, "execution context:\n{:?}", exec_ctx);
-        log::info!(target: CALL_EVIDENCE_CTX, "call evidence context:\n{:?}", call_ctx);
+        log_instruction!(call, exec_ctx, call_ctx);
 
         let parsed_call = match ParsedCall::new(self, exec_ctx) {
             Ok(parsed_call) => parsed_call,

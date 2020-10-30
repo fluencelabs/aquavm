@@ -17,6 +17,8 @@
 use crate::AValue;
 
 use std::collections::HashMap;
+use std::fmt::Display;
+use std::fmt::Formatter;
 
 /// Execution context contains all necessary information needed to execute aqua script.
 #[derive(Clone, Default, Debug)]
@@ -47,5 +49,19 @@ impl ExecutionCtx {
             current_peer_id,
             subtree_complete: true,
         }
+    }
+}
+
+impl Display for ExecutionCtx {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "data cache:")?;
+        for (key, value) in self.data_cache.iter() {
+            writeln!(f, "  {} => {}", key, value)?;
+        }
+        writeln!(f, "current peer id: {}", self.current_peer_id)?;
+        writeln!(f, "subtree complete: {}", self.subtree_complete)?;
+        writeln!(f, "next peer public keys: {:?}", self.next_peer_pks)?;
+
+        Ok(())
     }
 }
