@@ -18,6 +18,7 @@ use super::ExecutionCtx;
 use crate::call_evidence::CallEvidenceCtx;
 use crate::call_evidence::CallResult;
 use crate::call_evidence::EvidenceState;
+use crate::log_targets::EVIDENCE_CHANGING;
 use crate::AValue;
 use crate::AquamarineError;
 use crate::JValue;
@@ -64,7 +65,11 @@ pub(super) fn set_remote_call_result(peer_pk: String, exec_ctx: &mut ExecutionCt
     exec_ctx.subtree_complete = false;
 
     let new_evidence_state = EvidenceState::Call(CallResult::RequestSent(exec_ctx.current_peer_id.clone()));
-    log::info!("call evidence: adding new state {:?}", new_evidence_state);
+    log::info!(
+        target: EVIDENCE_CHANGING,
+        "  adding new call evidence state {:?}",
+        new_evidence_state
+    );
     call_ctx.new_path.push_back(new_evidence_state);
 }
 

@@ -26,6 +26,7 @@ use crate::build_targets::CALL_SERVICE_SUCCESS;
 use crate::call_evidence::CallEvidenceCtx;
 use crate::call_evidence::CallResult;
 use crate::call_evidence::EvidenceState;
+use crate::log_targets::EVIDENCE_CHANGING;
 use crate::AValue;
 use crate::AquamarineError;
 use crate::JValue;
@@ -90,7 +91,11 @@ impl ParsedCall {
         super::utils::set_local_call_result(self.result_variable_name, exec_ctx, result.clone())?;
 
         let new_evidence_state = EvidenceState::Call(CallResult::Executed(result));
-        log::info!("call evidence: adding new state {:?}", new_evidence_state);
+        log::info!(
+            target: EVIDENCE_CHANGING,
+            "  adding new call evidence state {:?}",
+            new_evidence_state
+        );
         call_ctx.new_path.push_back(new_evidence_state);
 
         Ok(())
@@ -105,7 +110,7 @@ impl ParsedCall {
         use crate::call_evidence::EvidenceState::*;
 
         if call_ctx.current_subtree_elements_count == 0 {
-            log::info!("call evidence: previous state wasn't found");
+            log::info!(target: EVIDENCE_CHANGING, "  previous call evidence state wasn't found");
             return Ok(true);
         }
 
@@ -114,7 +119,11 @@ impl ParsedCall {
         // and it's been checked previously
         let prev_state = call_ctx.current_path.pop_front().unwrap();
 
-        log::info!("call evidence: previous state found {:?}", prev_state);
+        log::info!(
+            target: EVIDENCE_CHANGING,
+            "  previous call evidence state found {:?}",
+            prev_state
+        );
 
         match &prev_state {
             // this call was failed on one of the previous executions,

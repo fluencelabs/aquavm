@@ -20,6 +20,7 @@ use super::ExecutableInstruction;
 use super::ExecutionCtx;
 use super::Instruction;
 use crate::log_instruction;
+use crate::log_targets::EVIDENCE_CHANGING;
 use crate::Result;
 
 use serde_derive::Deserialize;
@@ -50,7 +51,11 @@ impl ExecutableInstruction for Par {
         exec_ctx.subtree_complete = left_subtree_complete || right_subtree_complete;
 
         let new_par_evidence_state = EvidenceState::Par(new_left_subtree_size, new_right_subtree_size);
-        log::info!("call evidence: adding new state {:?}", new_par_evidence_state);
+        log::info!(
+            target: EVIDENCE_CHANGING,
+            "  adding new call evidence state {:?}",
+            new_par_evidence_state
+        );
         call_ctx.new_path[pre_new_states_count] = new_par_evidence_state;
 
         let post_states_count = call_ctx.current_path.len();
@@ -70,7 +75,8 @@ fn extract_subtree_sizes(call_ctx: &mut CallEvidenceCtx) -> Result<(usize, usize
     call_ctx.current_subtree_elements_count -= 1;
 
     log::info!(
-        "call evidence: the previous state was found {:?}",
+        target: EVIDENCE_CHANGING,
+        "  previous call evidence state was found {:?}",
         call_ctx.current_path[0]
     );
 
