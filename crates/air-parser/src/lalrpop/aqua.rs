@@ -1,7 +1,7 @@
 // auto-generated: "lalrpop 0.19.1"
-// sha256: 3160ffcd972a8641d318d48a87f9190f816ea613aaf9f78f2f44ffc92147
+// sha256: 86c5f9f19756f6b1f0fee3a99fc3468ea0297143e52b9c0e395ad39a2fb32
 use crate::ast::*;
-use crate::lalrpop::InstructionError;
+use crate::lalrpop::parser::InstructionError;
 use lalrpop_util::ErrorRecovery;
 #[allow(unused_extern_crates)]
 extern crate lalrpop_util as __lalrpop_util;
@@ -13,7 +13,7 @@ mod __parse__Instr {
     #![allow(non_snake_case, non_camel_case_types, unused_mut, unused_variables, unused_imports, unused_parens)]
 
     use crate::ast::*;
-    use crate::lalrpop::InstructionError;
+    use crate::lalrpop::parser::InstructionError;
     use lalrpop_util::ErrorRecovery;
     #[allow(unused_extern_crates)]
     extern crate lalrpop_util as __lalrpop_util;
@@ -1365,7 +1365,7 @@ pub use self::__parse__Instr::InstrParser;
 mod __intern_token {
     #![allow(unused_imports)]
     use crate::ast::*;
-    use crate::lalrpop::InstructionError;
+    use crate::lalrpop::parser::InstructionError;
     use lalrpop_util::ErrorRecovery;
     #[allow(unused_extern_crates)]
     extern crate lalrpop_util as __lalrpop_util;

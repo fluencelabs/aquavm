@@ -1,5 +1,5 @@
 use crate::ast::*;
-use crate::lalrpop::InstructionError;
+use crate::lalrpop::parser::InstructionError;
 
 use lalrpop_util::ErrorRecovery;
 

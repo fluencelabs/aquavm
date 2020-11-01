@@ -1,6 +1,10 @@
 #![allow(unused_imports, unused_variables, dead_code)]
 
-mod aqua;
 mod ast;
-mod lalrpop;
-mod peg;
+mod lalrpop {
+    mod aqua;
+    mod parser;
+}
+mod peg {
+    mod parser;
+}

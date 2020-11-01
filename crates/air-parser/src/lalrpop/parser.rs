@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use crate::aqua;
+use super::aqua;
 use crate::ast::Instruction;
 
 use lalrpop_util::{ErrorRecovery, ParseError};

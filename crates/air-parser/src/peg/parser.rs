@@ -20,7 +20,7 @@ use pest::Parser;
 use pest_derive::*;
 
 #[derive(Parser)]
-#[grammar = "aqua.pest"]
+#[grammar = "peg/aqua.pest"]
 pub struct Expression {}
 
 #[derive(Debug, Default)]
