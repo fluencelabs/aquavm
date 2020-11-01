@@ -101,34 +101,75 @@ fn parse(source_code: &str) -> Box<Instruction> {
     }
 }
 
-#[test]
-fn parse_seq() {
+#[cfg(test)]
+mod tests {
+    use super::*;
     use crate::ast::*;
     use CallOutput::*;
     use FunctionPart::*;
     use PeerPart::*;
     use Value::*;
 
-    let source_code = r#"
-    (seq
-        (call peerid function () void)
-        (call "id" "f" ("hello" name) void[])
-    )
-    "#;
-    let instruction = *parse(source_code);
-    let expected = Instruction::Seq(Seq(
-        Box::new(Instruction::Call(Call {
-            peer: PeerPk(Variable("peerid")),
-            f: FuncName(Variable("function")),
-            args: vec![],
-            output: Scalar("void"),
-        })),
-        Box::new(Instruction::Call(Call {
-            peer: PeerPk(Literal("id")),
-            f: FuncName(Literal("f")),
-            args: vec![Literal("hello"), Variable("name")],
-            output: Accumulator("void"),
-        })),
-    ));
-    assert_eq!(instruction, expected);
+    #[test]
+    fn parse_seq() {
+        let source_code = r#"
+        (seq
+            (call peerid function () void)
+            (call "id" "f" ("hello" name) void[])
+        )
+        "#;
+        let instruction = *parse(source_code);
+        let expected = Instruction::Seq(Seq(
+            Box::new(Instruction::Call(Call {
+                peer: PeerPk(Variable("peerid")),
+                f: FuncName(Variable("function")),
+                args: vec![],
+                output: Scalar("void"),
+            })),
+            Box::new(Instruction::Call(Call {
+                peer: PeerPk(Literal("id")),
+                f: FuncName(Literal("f")),
+                args: vec![Literal("hello"), Variable("name")],
+                output: Accumulator("void"),
+            })),
+        ));
+        assert_eq!(instruction, expected);
+    }
+
+    #[test]
+    fn parse_seq_seq() {
+        let source_code = r#"
+        (seq
+            (seq
+                (call peerid function () void)
+                (call peerid function () void)
+            )
+            (call "id" "f" ("hello" name) void[])
+        )
+        "#;
+        let instruction = *parse(source_code);
+        let expected = Instruction::Seq(Seq(
+            Box::new(Instruction::Seq(Seq(
+                Box::new(Instruction::Call(Call {
+                    peer: PeerPk(Variable("peerid")),
+                    f: FuncName(Variable("function")),
+                    args: vec![],
+                    output: Scalar("void"),
+                })),
+                Box::new(Instruction::Call(Call {
+                    peer: PeerPk(Variable("peerid")),
+                    f: FuncName(Variable("function")),
+                    args: vec![],
+                    output: Scalar("void"),
+                })),
+            ))),
+            Box::new(Instruction::Call(Call {
+                peer: PeerPk(Literal("id")),
+                f: FuncName(Literal("f")),
+                args: vec![Literal("hello"), Variable("name")],
+                output: Accumulator("void"),
+            })),
+        ));
+        assert_eq!(instruction, expected);
+    }
 }
