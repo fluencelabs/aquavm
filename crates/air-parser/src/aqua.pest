@@ -1,0 +1,37 @@
+WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
+COMMENT = _{ "/*" ~ (!"*/" ~ ANY)* ~ "*/" }
+
+
+lbr = _{ "(" }
+rbr = _{ ")" }
+
+seq = { "seq" }
+null = { "null" }
+call = { "call" }
+fold = { "fold" }
+next = { "next" }
+par = { "par" }
+xor = { "xor" }
+
+instruction = { seq | null | call | fold | next | par | xor }
+expr = { lbr ~ instruction ~ rbr }
+
+/*
+(seq
+    (call node)
+    (call "client")
+)
+*/
+/*
+
+object = {
+    "{" ~ "}" |
+    "{" ~ pair ~ ("," ~ pair)* ~ "}"
+}
+pair = { string ~ ":" ~ value }
+
+array = {
+    "[" ~ "]" |
+    "[" ~ value ~ ("," ~ value)* ~ "]"
+}
+*/
