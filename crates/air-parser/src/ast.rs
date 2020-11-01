@@ -38,7 +38,18 @@ pub enum FunctionPart<'i> {
 }
 
 #[derive(Debug, PartialEq, Eq)]
-pub struct Call<'i>(pub PeerPart<'i>, pub FunctionPart<'i>);
+pub struct Call<'i> {
+    pub peer: PeerPart<'i>,
+    pub f: FunctionPart<'i>,
+    pub args: Vec<&'i str>,
+    pub output: CallOutput<'i>,
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum CallOutput<'i> {
+    Scalar(&'i str),
+    Accumulator(&'i str),
+}
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Seq<'i>(pub Box<Instruction<'i>>, pub Box<Instruction<'i>>);

@@ -52,35 +52,41 @@ fn parse_aqua() {
                 }
                 Err(errors)
             }
-            Err(_) => {
+            Err(err) => {
                 for error in errors.iter() {
                     println!("Parse error: {:?}", error);
                 }
+                println!("Parsing failed: {:?}", err);
                 Err(errors)
             }
         }
     };
 
-    let _: Box<Instruction> = parse("(call peerid function)").unwrap();
-
     let mut files = SimpleFiles::new();
     let source_code = r#"
     (seq
-        (call peerid function)
-        (call id)
-        ()
+        (call peerid function () void[])
+        (call id f (hello) void[])
     )
     "#;
-    let file_id = files.add("seq.aqua", unindent::unindent(source_code));
+    let file_id = files.add("seq.aqua", source_code);
 
     match parse(source_code) {
         Err(errors) => {
             let labels = errors
                 .into_iter()
                 .map(|err| match err.error {
-                    ParseError::UnrecognizedEOF { location, expected } => {
-                        Label::primary(file_id, location..location)
-                            .with_message(format!("expected {:?}", expected))
+                    ParseError::UnrecognizedToken {
+                        token: (start, token, end),
+                        expected,
+                    } => {
+                        Label::primary(file_id, start..end).with_message(format!("expected {}", {
+                            if expected.is_empty() {
+                                "<nothing>".to_string()
+                            } else {
+                                expected.join(" or ")
+                            }
+                        }))
                     }
                     err => unimplemented!("parse error not implemented: {:?}", err),
                     /*
@@ -100,6 +106,6 @@ fn parse_aqua() {
 
             term::emit(&mut writer.lock(), &config, &files, &diagnostic).expect("term emit");
         }
-        _ => {}
+        Ok(r) => println!("parsed:\n{:#?}", r),
     }
 }

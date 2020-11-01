@@ -3,7 +3,7 @@ use crate::lalrpop::InstructionError;
 
 use lalrpop_util::ErrorRecovery;
 
-grammar<'err>(errors: &'err mut Vec<ErrorRecovery<usize, (usize, &'input str), ()>>);
+grammar<'err>(errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>);
 
 extern {
     type Error = InstructionError;
@@ -11,7 +11,7 @@ extern {
 
 pub Instr: Box<Instruction<'input>> = {
     "(" <s:Seq> <l:Instr> <r:Instr> ")" => Box::new(Instruction::Seq(Seq(l, r))),
-    "(" <c:Call> <peer:PeerPart> <f:FPart> ")" => Box::new(Instruction::Call(Call(peer, f))),
+    "(" <c:Call> <peer:PeerPart> <f:FPart> <args:Args> <output:Output> ")" => Box::new(Instruction::Call(Call{peer, f, args, output})),
     ! => { errors.push(<>); Box::new(Instruction::Error) },
 }
 
@@ -23,24 +23,44 @@ Call: &'input str = {
     "call"
 }
 
+Args: Vec<&'input str> = {
+    "(" <args:(<Arg>)*> ")" => args
+}
+
+
 FPart: FunctionPart<'input> = {
     <f:Function> => FunctionPart::FuncName(f),
     "(" <sid:ServiceId> <f:Function> ")" => FunctionPart::ServiceIdWithFuncName(sid, f),
 }
 
-Function: &'input str = {
-    r"[0-9a-zA-Z]+"
-}
 
 PeerPart: PeerPart<'input> = {
     <pid:PeerId> => PeerPart::PeerPk(pid),
     "(" <pid:PeerId> <sid:ServiceId> ")" => PeerPart::PeerPkWithServiceId(pid, sid),
 }
 
-PeerId: &'input str = {
-    r"[0-9a-zA-Z]+"
+Output: CallOutput<'input> = {
+    <o:Alphanumeric> => CallOutput::Scalar(o),
+    <o:ACCUMULATOR> => CallOutput::Accumulator(o),
+};
+
+Function = Alphanumeric;
+PeerId = Alphanumeric;
+ServiceId = Alphanumeric;
+Arg = Alphanumeric;
+LBR = "(";
+RBR = ")";
+
+Alphanumeric: &'input str = {
+    ALPHANUMERIC
 }
 
-ServiceId: &'input str = {
-    r"[0-9a-zA-Z]+"
+match {
+    r"[0-9a-zA-Z]+" => ALPHANUMERIC,
+    "seq",
+    "call",
+} else {
+    r"[0-9a-zA-Z]+\[\]" => ACCUMULATOR,
+    _
 }
+
