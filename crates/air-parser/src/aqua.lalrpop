@@ -63,7 +63,7 @@ match {
     "seq",
     "call",
 } else {
-    r"[0-9a-zA-Z]+(?:\[\])" => ACCUMULATOR,
+    r"[0-9a-zA-Z]+\[\]" => ACCUMULATOR,
     _
 }
 
