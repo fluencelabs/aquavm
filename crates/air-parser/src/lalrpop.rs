@@ -111,7 +111,7 @@ fn parse_seq() {
 
     let source_code = r#"
     (seq
-        (call peerid function () void[])
+        (call peerid function () void)
         (call "id" "f" ("hello" name) void[])
     )
     "#;
@@ -121,13 +121,13 @@ fn parse_seq() {
             peer: PeerPk(Variable("peerid")),
             f: FuncName(Variable("function")),
             args: vec![],
-            output: Accumulator("void[]"),
+            output: Scalar("void"),
         })),
         Box::new(Instruction::Call(Call {
             peer: PeerPk(Literal("id")),
             f: FuncName(Literal("f")),
             args: vec![Literal("hello"), Variable("name")],
-            output: Accumulator("void[]"),
+            output: Accumulator("void"),
         })),
     ));
     assert_eq!(instruction, expected);

@@ -1,5 +1,5 @@
 // auto-generated: "lalrpop 0.19.1"
-// sha256: c04e3bf1a5fcc260f14f612a2c4ef3ef040e6757afc5a48f41194f2125c5c9
+// sha256: 8751652de970e81e10ee4f347db2ca51935a47aaf379a1c8e6d1ecf120a71cd6
 use crate::ast::*;
 use crate::lalrpop::InstructionError;
 use lalrpop_util::ErrorRecovery;
@@ -1376,7 +1376,7 @@ mod __intern_token {
             ("^(\")", false),
             ("^(\\()", false),
             ("^(\\))", false),
-            ("^([0-9A-Za-z]+\\[\\])", false),
+            ("^([0-9A-Za-z]+(?:\\[\\]))", false),
             ("^([0-9A-Za-z]+)", false),
             ("^(call)", false),
             ("^(seq)", false),
@@ -1571,7 +1571,7 @@ fn __action12<
     (_, o, _): (usize, &'input str, usize),
 ) -> CallOutput<'input>
 {
-    CallOutput::Accumulator(o)
+    CallOutput::Accumulator(&o[..o.len()-2])
 }
 
 #[allow(unused_variables)]
