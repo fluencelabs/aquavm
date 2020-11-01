@@ -2,6 +2,7 @@
 members = [
     "crates/test-module",
     "crates/test-utils",
+    "crates/air-parser",
     "stepper",
     "stepper-lib",
 ]

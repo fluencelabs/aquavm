@@ -1,0 +1,46 @@
+use crate::ast::*;
+use crate::lalrpop::InstructionError;
+
+use lalrpop_util::ErrorRecovery;
+
+grammar<'err>(errors: &'err mut Vec<ErrorRecovery<usize, (usize, &'input str), ()>>);
+
+extern {
+    type Error = InstructionError;
+}
+
+pub Instr: Box<Instruction<'input>> = {
+    "(" <s:Seq> <l:Instr> <r:Instr> ")" => Box::new(Instruction::Seq(Seq(l, r))),
+    "(" <c:Call> <peer:PeerPart> <f:FPart> ")" => Box::new(Instruction::Call(Call(peer, f))),
+    ! => { errors.push(<>); Box::new(Instruction::Error) },
+}
+
+Seq: &'input str = {
+    "seq"
+}
+
+Call: &'input str = {
+    "call"
+}
+
+FPart: FunctionPart<'input> = {
+    <f:Function> => FunctionPart::FuncName(f),
+    "(" <sid:ServiceId> <f:Function> ")" => FunctionPart::ServiceIdWithFuncName(sid, f),
+}
+
+Function: &'input str = {
+    r"[0-9a-zA-Z]+"
+}
+
+PeerPart: PeerPart<'input> = {
+    <pid:PeerId> => PeerPart::PeerPk(pid),
+    "(" <pid:PeerId> <sid:ServiceId> ")" => PeerPart::PeerPkWithServiceId(pid, sid),
+}
+
+PeerId: &'input str = {
+    r"[0-9a-zA-Z]+"
+}
+
+ServiceId: &'input str = {
+    r"[0-9a-zA-Z]+"
+}
