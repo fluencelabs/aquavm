@@ -107,25 +107,26 @@ fn parse_seq() {
     use CallOutput::*;
     use FunctionPart::*;
     use PeerPart::*;
+    use Value::*;
 
     let source_code = r#"
     (seq
         (call peerid function () void[])
-        (call id f (hello) void[])
+        (call "id" "f" ("hello" name) void[])
     )
     "#;
     let instruction = *parse(source_code);
     let expected = Instruction::Seq(Seq(
         Box::new(Instruction::Call(Call {
-            peer: PeerPk("peerid"),
-            f: FuncName("function"),
+            peer: PeerPk(Variable("peerid")),
+            f: FuncName(Variable("function")),
             args: vec![],
             output: Accumulator("void[]"),
         })),
         Box::new(Instruction::Call(Call {
-            peer: PeerPk("id"),
-            f: FuncName("f"),
-            args: vec!["hello"],
+            peer: PeerPk(Literal("id")),
+            f: FuncName(Literal("f")),
+            args: vec![Literal("hello"), Variable("name")],
             output: Accumulator("void[]"),
         })),
     ));

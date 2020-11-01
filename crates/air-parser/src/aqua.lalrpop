@@ -23,7 +23,7 @@ Call: &'input str = {
     "call"
 }
 
-Args: Vec<&'input str> = {
+Args: Vec<Value<'input>> = {
     "(" <args:(<Arg>)*> ")" => args
 }
 
@@ -44,12 +44,15 @@ Output: CallOutput<'input> = {
     <o:ACCUMULATOR> => CallOutput::Accumulator(o),
 };
 
-Function = Alphanumeric;
-PeerId = Alphanumeric;
-ServiceId = Alphanumeric;
-Arg = Alphanumeric;
-LBR = "(";
-RBR = ")";
+Function = Value;
+PeerId = Value;
+ServiceId = Value;
+Arg = Value;
+
+Value: Value<'input> = {
+    "\"" <v: Alphanumeric> "\"" => Value::Literal(v),
+    <v:Alphanumeric> => Value::Variable(v),
+}
 
 Alphanumeric: &'input str = {
     ALPHANUMERIC

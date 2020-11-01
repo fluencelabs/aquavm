@@ -27,22 +27,28 @@ pub struct Null {}
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum PeerPart<'i> {
-    PeerPk(&'i str),
-    PeerPkWithServiceId(&'i str, &'i str),
+    PeerPk(Value<'i>),
+    PeerPkWithServiceId(Value<'i>, Value<'i>),
 }
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum FunctionPart<'i> {
-    FuncName(&'i str),
-    ServiceIdWithFuncName(&'i str, &'i str),
+    FuncName(Value<'i>),
+    ServiceIdWithFuncName(Value<'i>, Value<'i>),
 }
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Call<'i> {
     pub peer: PeerPart<'i>,
     pub f: FunctionPart<'i>,
-    pub args: Vec<&'i str>,
+    pub args: Vec<Value<'i>>,
     pub output: CallOutput<'i>,
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum Value<'i> {
+    Variable(&'i str),
+    Literal(&'i str),
 }
 
 #[derive(Debug, PartialEq, Eq)]

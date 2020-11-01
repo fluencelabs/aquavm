@@ -1,5 +1,5 @@
 // auto-generated: "lalrpop 0.19.1"
-// sha256: 6158fd9537bdff745f51fc8c893d4def0dc25363827b4f2ce3aa4ad8304ce1
+// sha256: c04e3bf1a5fcc260f14f612a2c4ef3ef040e6757afc5a48f41194f2125c5c9
 use crate::ast::*;
 use crate::lalrpop::InstructionError;
 use lalrpop_util::ErrorRecovery;
@@ -25,95 +25,104 @@ mod __parse__Instr {
      {
         Variant0(&'input str),
         Variant1(__lalrpop_util::ErrorRecovery<usize, Token<'input>, InstructionError>),
-        Variant2(::std::vec::Vec<&'input str>),
-        Variant3(Vec<&'input str>),
-        Variant4(FunctionPart<'input>),
-        Variant5(Box<Instruction<'input>>),
-        Variant6(CallOutput<'input>),
-        Variant7(PeerPart<'input>),
+        Variant2(Value<'input>),
+        Variant3(::std::vec::Vec<Value<'input>>),
+        Variant4(Vec<Value<'input>>),
+        Variant5(FunctionPart<'input>),
+        Variant6(Box<Instruction<'input>>),
+        Variant7(CallOutput<'input>),
+        Variant8(PeerPart<'input>),
     }
     const __ACTION: &[i8] = &[
         // State 0
-        2, 0, 0, 0, 0, 0, 16,
+        0, 2, 0, 0, 0, 0, 0, 17,
         // State 1
-        0, 0, 17, 18, 0, 0, 0,
+        0, 0, 0, 18, 19, 0, 0, 0,
         // State 2
-        6, 0, 0, 0, 0, 21, 0,
+        6, 7, 0, 0, 0, 0, 23, 0,
         // State 3
-        2, 0, 0, 0, 0, 0, 16,
+        0, 2, 0, 0, 0, 0, 0, 17,
         // State 4
-        9, 0, 0, 0, 0, 21, 0,
+        6, 10, 0, 0, 0, 0, 23, 0,
         // State 5
-        0, 0, 0, 0, 0, 21, 0,
+        0, 0, 0, 0, 0, 0, 23, 0,
         // State 6
-        2, 0, 0, 0, 0, 0, 16,
+        6, 0, 0, 0, 0, 0, 23, 0,
         // State 7
-        12, 0, 0, 0, 0, 0, 0,
+        0, 2, 0, 0, 0, 0, 0, 17,
         // State 8
-        0, 0, 0, 0, 0, 21, 0,
+        0, 13, 0, 0, 0, 0, 0, 0,
         // State 9
-        0, 0, 0, 0, 0, 21, 0,
+        6, 0, 0, 0, 0, 0, 23, 0,
         // State 10
-        0, 0, 0, 0, 30, 21, 0,
+        6, 0, 0, 0, 0, 0, 23, 0,
         // State 11
-        0, 33, 0, 0, 0, 21, 0,
+        0, 0, 0, 0, 0, 34, 23, 0,
         // State 12
-        0, 0, 0, 0, 0, 21, 0,
+        6, 0, 37, 0, 0, 0, 23, 0,
         // State 13
-        0, 38, 0, 0, 0, 21, 0,
+        6, 0, 0, 0, 0, 0, 23, 0,
         // State 14
-        0, 0, 0, 0, 0, 0, 0,
+        6, 0, 42, 0, 0, 0, 23, 0,
         // State 15
-        -16, -16, 0, 0, 0, 0, -16,
+        0, 0, 0, 0, 0, 0, 0, 0,
         // State 16
-        -10, 0, 0, 0, 0, -10, 0,
+        0, -16, -16, 0, 0, 0, 0, -16,
         // State 17
-        -24, 0, 0, 0, 0, 0, -24,
+        -10, -10, 0, 0, 0, 0, -10, 0,
         // State 18
-        -20, 0, 0, 0, 0, -20, 0,
+        0, -22, 0, 0, 0, 0, 0, -22,
         // State 19
-        -21, 0, 0, 0, 0, -21, 0,
+        -25, -25, -25, 0, 0, 0, -25, 0,
         // State 20
-        -6, -6, 0, 0, 0, -6, 0,
+        -20, -20, 0, 0, 0, 0, -20, 0,
         // State 21
-        -13, -13, 0, 0, 0, 0, 0,
+        -19, -19, 0, 0, 0, 0, -19, 0,
         // State 22
-        -11, 0, 0, 0, 0, 0, 0,
+        -6, -6, -6, 0, 0, 0, -6, 0,
         // State 23
-        0, 27, 0, 0, 0, 0, 0,
+        0, -11, 0, 0, 0, 0, 0, 0,
         // State 24
-        0, -25, 0, 0, 0, -25, 0,
+        0, -13, -13, 0, 0, 0, 0, 0,
         // State 25
-        0, 35, 0, 0, 0, 0, 0,
+        29, 0, 0, 0, 0, 0, 0, 0,
         // State 26
-        -14, -14, 0, 0, 0, 0, -14,
+        0, 0, 31, 0, 0, 0, 0, 0,
         // State 27
-        0, -18, 0, 0, 0, 0, 0,
+        -23, 0, -23, 0, 0, 0, -23, 0,
         // State 28
-        0, 36, 0, 0, 0, 0, 0,
+        -24, -24, -24, 0, 0, 0, -24, 0,
         // State 29
-        0, -19, 0, 0, 0, 0, 0,
+        0, 0, 39, 0, 0, 0, 0, 0,
         // State 30
-        0, -7, 0, 0, 0, -7, 0,
+        0, -14, -14, 0, 0, 0, 0, -14,
         // State 31
-        0, -4, 0, 0, 0, -4, 0,
+        0, 0, -17, 0, 0, 0, 0, 0,
         // State 32
-        0, 0, 0, 0, -8, -8, 0,
+        0, 0, 40, 0, 0, 0, 0, 0,
         // State 33
-        0, 39, 0, 0, 0, 0, 0,
+        0, 0, -18, 0, 0, 0, 0, 0,
         // State 34
-        -22, 0, 0, 0, 0, -22, 0,
+        -4, 0, -4, 0, 0, 0, -4, 0,
         // State 35
-        -15, -15, 0, 0, 0, 0, -15,
+        -7, 0, -7, 0, 0, 0, -7, 0,
         // State 36
-        0, -5, 0, 0, 0, -5, 0,
+        0, 0, 0, 0, 0, -8, -8, 0,
         // State 37
-        0, 0, 0, 0, -9, -9, 0,
+        0, 0, 43, 0, 0, 0, 0, 0,
         // State 38
-        -12, 0, 0, 0, 0, 0, 0,
+        -21, -21, 0, 0, 0, 0, -21, 0,
+        // State 39
+        0, -15, -15, 0, 0, 0, 0, -15,
+        // State 40
+        -5, 0, -5, 0, 0, 0, -5, 0,
+        // State 41
+        0, 0, 0, 0, 0, -9, -9, 0,
+        // State 42
+        0, -12, 0, 0, 0, 0, 0, 0,
     ];
     fn __action(state: i8, integer: usize) -> i8 {
-        __ACTION[(state as usize) * 7 + integer]
+        __ACTION[(state as usize) * 8 + integer]
     }
     const __EOF_ACTION: &[i8] = &[
         // State 0
@@ -145,11 +154,11 @@ mod __parse__Instr {
         // State 13
         0,
         // State 14
-        -26,
-        // State 15
-        -16,
-        // State 16
         0,
+        // State 15
+        -26,
+        // State 16
+        -16,
         // State 17
         0,
         // State 18
@@ -169,7 +178,7 @@ mod __parse__Instr {
         // State 25
         0,
         // State 26
-        -14,
+        0,
         // State 27
         0,
         // State 28
@@ -177,7 +186,7 @@ mod __parse__Instr {
         // State 29
         0,
         // State 30
-        0,
+        -14,
         // State 31
         0,
         // State 32
@@ -187,56 +196,69 @@ mod __parse__Instr {
         // State 34
         0,
         // State 35
-        -15,
+        0,
         // State 36
         0,
         // State 37
         0,
         // State 38
         0,
+        // State 39
+        -15,
+        // State 40
+        0,
+        // State 41
+        0,
+        // State 42
+        0,
     ];
     fn __goto(state: i8, nt: usize) -> i8 {
         match nt {
-            2 => 13,
+            2 => 14,
             3 => match state {
-                4 | 12 => 21,
-                8..=9 => 24,
-                10 => 27,
-                11 | 13 => 30,
-                _ => 18,
+                5 => 25,
+                11 => 31,
+                _ => 19,
             },
             4 => match state {
-                13 => 36,
-                _ => 31,
+                14 => 40,
+                _ => 34,
             },
-            5 => 10,
+            5 => 11,
             6 => 2,
-            7 => 7,
+            7 => 8,
             8 => match state {
-                12 => 33,
-                _ => 22,
+                13 => 37,
+                _ => 23,
             },
             9 => match state {
-                0 => 14,
-                6 => 23,
-                _ => 6,
+                0 => 15,
+                7 => 26,
+                _ => 7,
             },
-            11 => 28,
-            12 => match state {
-                2 => 19,
-                _ => 9,
+            10 => 32,
+            11 => match state {
+                2 => 20,
+                _ => 10,
             },
-            13 => 4,
-            15 => 3,
-            16 => match state {
-                9 => 25,
-                _ => 12,
+            12 => 4,
+            13 => 3,
+            14 => match state {
+                10 => 29,
+                _ => 13,
+            },
+            15 => match state {
+                4 | 13 => 24,
+                9..=10 => 27,
+                12 | 14 => 35,
+                _ => 21,
             },
             _ => 0,
         }
     }
     fn __expected_tokens(__state: i8) -> Vec<::std::string::String> {
         const __TERMINAL: &[&str] = &[
+            r###""\"""###,
             r###""(""###,
             r###"")""###,
             r###""call""###,
@@ -296,7 +318,7 @@ mod __parse__Instr {
 
         #[inline]
         fn error_action(&self, state: i8) -> i8 {
-            __action(state, 7 - 1)
+            __action(state, 8 - 1)
         }
 
         #[inline]
@@ -363,10 +385,11 @@ mod __parse__Instr {
         match *__token {
             Token(0, _) if true => Some(0),
             Token(1, _) if true => Some(1),
-            Token(4, _) if true => Some(2),
+            Token(2, _) if true => Some(2),
             Token(5, _) if true => Some(3),
-            Token(2, _) if true => Some(4),
+            Token(6, _) if true => Some(4),
             Token(3, _) if true => Some(5),
+            Token(4, _) if true => Some(6),
             _ => None,
         }
     }
@@ -380,8 +403,8 @@ mod __parse__Instr {
     ) -> __Symbol<'input>
     {
         match __token_index {
-            0 | 1 | 2 | 3 | 4 | 5 => match __token {
-                Token(0, __tok0) | Token(1, __tok0) | Token(4, __tok0) | Token(5, __tok0) | Token(2, __tok0) | Token(3, __tok0) if true => __Symbol::Variant0(__tok0),
+            0 | 1 | 2 | 3 | 4 | 5 | 6 => match __token {
+                Token(0, __tok0) | Token(1, __tok0) | Token(2, __tok0) | Token(5, __tok0) | Token(6, __tok0) | Token(3, __tok0) | Token(4, __tok0) if true => __Symbol::Variant0(__tok0),
                 _ => unreachable!(),
             },
             _ => unreachable!(),
@@ -503,7 +526,7 @@ mod __parse__Instr {
             17 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 11,
+                    nonterminal_produced: 10,
                 }
             }
             18 => {
@@ -520,13 +543,13 @@ mod __parse__Instr {
             }
             20 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 1,
-                    nonterminal_produced: 13,
+                    states_to_pop: 4,
+                    nonterminal_produced: 12,
                 }
             }
             21 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 4,
+                    states_to_pop: 1,
                     nonterminal_produced: 13,
                 }
             }
@@ -538,14 +561,14 @@ mod __parse__Instr {
             }
             23 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 1,
+                    states_to_pop: 3,
                     nonterminal_produced: 15,
                 }
             }
             24 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 16,
+                    nonterminal_produced: 15,
                 }
             }
             25 => __state_machine::SimulatedReduce::Accept,
@@ -714,7 +737,7 @@ mod __parse__Instr {
             }
             25 => {
                 // __Instr = Instr => ActionFn(0);
-                let __sym0 = __pop_Variant5(__symbols);
+                let __sym0 = __pop_Variant6(__symbols);
                 let __start = __sym0.0.clone();
                 let __end = __sym0.2.clone();
                 let __nt = super::__action0::<>(errors, input, __sym0);
@@ -733,36 +756,14 @@ mod __parse__Instr {
     fn __symbol_type_mismatch() -> ! {
         panic!("symbol type mismatch")
     }
-    fn __pop_Variant5<
+    fn __pop_Variant6<
       'input,
     >(
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
     ) -> (usize, Box<Instruction<'input>>, usize)
      {
         match __symbols.pop() {
-            Some((__l, __Symbol::Variant5(__v), __r)) => (__l, __v, __r),
-            _ => __symbol_type_mismatch()
-        }
-    }
-    fn __pop_Variant6<
-      'input,
-    >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, CallOutput<'input>, usize)
-     {
-        match __symbols.pop() {
             Some((__l, __Symbol::Variant6(__v), __r)) => (__l, __v, __r),
-            _ => __symbol_type_mismatch()
-        }
-    }
-    fn __pop_Variant4<
-      'input,
-    >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, FunctionPart<'input>, usize)
-     {
-        match __symbols.pop() {
-            Some((__l, __Symbol::Variant4(__v), __r)) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
@@ -770,21 +771,54 @@ mod __parse__Instr {
       'input,
     >(
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, PeerPart<'input>, usize)
+    ) -> (usize, CallOutput<'input>, usize)
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant7(__v), __r)) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
-    fn __pop_Variant3<
+    fn __pop_Variant5<
       'input,
     >(
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, Vec<&'input str>, usize)
+    ) -> (usize, FunctionPart<'input>, usize)
      {
         match __symbols.pop() {
-            Some((__l, __Symbol::Variant3(__v), __r)) => (__l, __v, __r),
+            Some((__l, __Symbol::Variant5(__v), __r)) => (__l, __v, __r),
+            _ => __symbol_type_mismatch()
+        }
+    }
+    fn __pop_Variant8<
+      'input,
+    >(
+        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+    ) -> (usize, PeerPart<'input>, usize)
+     {
+        match __symbols.pop() {
+            Some((__l, __Symbol::Variant8(__v), __r)) => (__l, __v, __r),
+            _ => __symbol_type_mismatch()
+        }
+    }
+    fn __pop_Variant2<
+      'input,
+    >(
+        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+    ) -> (usize, Value<'input>, usize)
+     {
+        match __symbols.pop() {
+            Some((__l, __Symbol::Variant2(__v), __r)) => (__l, __v, __r),
+            _ => __symbol_type_mismatch()
+        }
+    }
+    fn __pop_Variant4<
+      'input,
+    >(
+        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+    ) -> (usize, Vec<Value<'input>>, usize)
+     {
+        match __symbols.pop() {
+            Some((__l, __Symbol::Variant4(__v), __r)) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
@@ -799,14 +833,14 @@ mod __parse__Instr {
             _ => __symbol_type_mismatch()
         }
     }
-    fn __pop_Variant2<
+    fn __pop_Variant3<
       'input,
     >(
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, ::std::vec::Vec<&'input str>, usize)
+    ) -> (usize, ::std::vec::Vec<Value<'input>>, usize)
      {
         match __symbols.pop() {
-            Some((__l, __Symbol::Variant2(__v), __r)) => (__l, __v, __r),
+            Some((__l, __Symbol::Variant3(__v), __r)) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
@@ -833,11 +867,11 @@ mod __parse__Instr {
     ) -> (usize, usize)
     {
         // (<Arg>) = Arg => ActionFn(22);
-        let __sym0 = __pop_Variant0(__symbols);
+        let __sym0 = __pop_Variant2(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action22::<>(errors, input, __sym0);
-        __symbols.push((__start, __Symbol::Variant0(__nt), __end));
+        __symbols.push((__start, __Symbol::Variant2(__nt), __end));
         (1, 0)
     }
     pub(crate) fn __reduce1<
@@ -855,7 +889,7 @@ mod __parse__Instr {
         let __start = __lookahead_start.cloned().or_else(|| __symbols.last().map(|s| s.2.clone())).unwrap_or_default();
         let __end = __start.clone();
         let __nt = super::__action20::<>(errors, input, &__start, &__end);
-        __symbols.push((__start, __Symbol::Variant2(__nt), __end));
+        __symbols.push((__start, __Symbol::Variant3(__nt), __end));
         (0, 1)
     }
     pub(crate) fn __reduce2<
@@ -870,11 +904,11 @@ mod __parse__Instr {
     ) -> (usize, usize)
     {
         // (<Arg>)* = (<Arg>)+ => ActionFn(21);
-        let __sym0 = __pop_Variant2(__symbols);
+        let __sym0 = __pop_Variant3(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action21::<>(errors, input, __sym0);
-        __symbols.push((__start, __Symbol::Variant2(__nt), __end));
+        __symbols.push((__start, __Symbol::Variant3(__nt), __end));
         (1, 1)
     }
     pub(crate) fn __reduce3<
@@ -889,11 +923,11 @@ mod __parse__Instr {
     ) -> (usize, usize)
     {
         // (<Arg>)+ = Arg => ActionFn(25);
-        let __sym0 = __pop_Variant0(__symbols);
+        let __sym0 = __pop_Variant2(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action25::<>(errors, input, __sym0);
-        __symbols.push((__start, __Symbol::Variant2(__nt), __end));
+        __symbols.push((__start, __Symbol::Variant3(__nt), __end));
         (1, 2)
     }
     pub(crate) fn __reduce4<
@@ -909,12 +943,12 @@ mod __parse__Instr {
     {
         // (<Arg>)+ = (<Arg>)+, Arg => ActionFn(26);
         assert!(__symbols.len() >= 2);
-        let __sym1 = __pop_Variant0(__symbols);
-        let __sym0 = __pop_Variant2(__symbols);
+        let __sym1 = __pop_Variant2(__symbols);
+        let __sym0 = __pop_Variant3(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym1.2.clone();
         let __nt = super::__action26::<>(errors, input, __sym0, __sym1);
-        __symbols.push((__start, __Symbol::Variant2(__nt), __end));
+        __symbols.push((__start, __Symbol::Variant3(__nt), __end));
         (2, 2)
     }
     pub(crate) fn __reduce5<
@@ -947,12 +981,12 @@ mod __parse__Instr {
         _: ::std::marker::PhantomData<(&'input (), &'err ())>,
     ) -> (usize, usize)
     {
-        // Arg = Alphanumeric => ActionFn(16);
-        let __sym0 = __pop_Variant0(__symbols);
+        // Arg = Value => ActionFn(16);
+        let __sym0 = __pop_Variant2(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action16::<>(errors, input, __sym0);
-        __symbols.push((__start, __Symbol::Variant0(__nt), __end));
+        __symbols.push((__start, __Symbol::Variant2(__nt), __end));
         (1, 4)
     }
     pub(crate) fn __reduce7<
@@ -973,7 +1007,7 @@ mod __parse__Instr {
         let __start = __sym0.0.clone();
         let __end = __sym1.2.clone();
         let __nt = super::__action27::<>(errors, input, __sym0, __sym1);
-        __symbols.push((__start, __Symbol::Variant3(__nt), __end));
+        __symbols.push((__start, __Symbol::Variant4(__nt), __end));
         (2, 5)
     }
     pub(crate) fn __reduce8<
@@ -990,12 +1024,12 @@ mod __parse__Instr {
         // Args = "(", (<Arg>)+, ")" => ActionFn(28);
         assert!(__symbols.len() >= 3);
         let __sym2 = __pop_Variant0(__symbols);
-        let __sym1 = __pop_Variant2(__symbols);
+        let __sym1 = __pop_Variant3(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym2.2.clone();
         let __nt = super::__action28::<>(errors, input, __sym0, __sym1, __sym2);
-        __symbols.push((__start, __Symbol::Variant3(__nt), __end));
+        __symbols.push((__start, __Symbol::Variant4(__nt), __end));
         (3, 5)
     }
     pub(crate) fn __reduce9<
@@ -1029,11 +1063,11 @@ mod __parse__Instr {
     ) -> (usize, usize)
     {
         // FPart = Function => ActionFn(7);
-        let __sym0 = __pop_Variant0(__symbols);
+        let __sym0 = __pop_Variant2(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action7::<>(errors, input, __sym0);
-        __symbols.push((__start, __Symbol::Variant4(__nt), __end));
+        __symbols.push((__start, __Symbol::Variant5(__nt), __end));
         (1, 7)
     }
     pub(crate) fn __reduce11<
@@ -1050,13 +1084,13 @@ mod __parse__Instr {
         // FPart = "(", ServiceId, Function, ")" => ActionFn(8);
         assert!(__symbols.len() >= 4);
         let __sym3 = __pop_Variant0(__symbols);
-        let __sym2 = __pop_Variant0(__symbols);
-        let __sym1 = __pop_Variant0(__symbols);
+        let __sym2 = __pop_Variant2(__symbols);
+        let __sym1 = __pop_Variant2(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym3.2.clone();
         let __nt = super::__action8::<>(errors, input, __sym0, __sym1, __sym2, __sym3);
-        __symbols.push((__start, __Symbol::Variant4(__nt), __end));
+        __symbols.push((__start, __Symbol::Variant5(__nt), __end));
         (4, 7)
     }
     pub(crate) fn __reduce12<
@@ -1070,12 +1104,12 @@ mod __parse__Instr {
         _: ::std::marker::PhantomData<(&'input (), &'err ())>,
     ) -> (usize, usize)
     {
-        // Function = Alphanumeric => ActionFn(13);
-        let __sym0 = __pop_Variant0(__symbols);
+        // Function = Value => ActionFn(13);
+        let __sym0 = __pop_Variant2(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action13::<>(errors, input, __sym0);
-        __symbols.push((__start, __Symbol::Variant0(__nt), __end));
+        __symbols.push((__start, __Symbol::Variant2(__nt), __end));
         (1, 8)
     }
     pub(crate) fn __reduce13<
@@ -1092,14 +1126,14 @@ mod __parse__Instr {
         // Instr = "(", Seq, Instr, Instr, ")" => ActionFn(1);
         assert!(__symbols.len() >= 5);
         let __sym4 = __pop_Variant0(__symbols);
-        let __sym3 = __pop_Variant5(__symbols);
-        let __sym2 = __pop_Variant5(__symbols);
+        let __sym3 = __pop_Variant6(__symbols);
+        let __sym2 = __pop_Variant6(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym4.2.clone();
         let __nt = super::__action1::<>(errors, input, __sym0, __sym1, __sym2, __sym3, __sym4);
-        __symbols.push((__start, __Symbol::Variant5(__nt), __end));
+        __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (5, 9)
     }
     pub(crate) fn __reduce14<
@@ -1116,16 +1150,16 @@ mod __parse__Instr {
         // Instr = "(", Call, PeerPart, FPart, Args, Output, ")" => ActionFn(2);
         assert!(__symbols.len() >= 7);
         let __sym6 = __pop_Variant0(__symbols);
-        let __sym5 = __pop_Variant6(__symbols);
-        let __sym4 = __pop_Variant3(__symbols);
-        let __sym3 = __pop_Variant4(__symbols);
-        let __sym2 = __pop_Variant7(__symbols);
+        let __sym5 = __pop_Variant7(__symbols);
+        let __sym4 = __pop_Variant4(__symbols);
+        let __sym3 = __pop_Variant5(__symbols);
+        let __sym2 = __pop_Variant8(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym6.2.clone();
         let __nt = super::__action2::<>(errors, input, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5, __sym6);
-        __symbols.push((__start, __Symbol::Variant5(__nt), __end));
+        __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (7, 9)
     }
     pub(crate) fn __reduce15<
@@ -1144,29 +1178,10 @@ mod __parse__Instr {
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action3::<>(errors, input, __sym0);
-        __symbols.push((__start, __Symbol::Variant5(__nt), __end));
+        __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (1, 9)
     }
     pub(crate) fn __reduce16<
-        'input,
-        'err,
-    >(
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
-        input: &'input str,
-        __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'input (), &'err ())>,
-    ) -> (usize, usize)
-    {
-        // LBR = "(" => ActionFn(17);
-        let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
-        let __nt = super::__action17::<>(errors, input, __sym0);
-        __symbols.push((__start, __Symbol::Variant0(__nt), __end));
-        (1, 10)
-    }
-    pub(crate) fn __reduce17<
         'input,
         'err,
     >(
@@ -1182,10 +1197,10 @@ mod __parse__Instr {
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action11::<>(errors, input, __sym0);
-        __symbols.push((__start, __Symbol::Variant6(__nt), __end));
-        (1, 11)
+        __symbols.push((__start, __Symbol::Variant7(__nt), __end));
+        (1, 10)
     }
-    pub(crate) fn __reduce18<
+    pub(crate) fn __reduce17<
         'input,
         'err,
     >(
@@ -1201,7 +1216,26 @@ mod __parse__Instr {
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action12::<>(errors, input, __sym0);
-        __symbols.push((__start, __Symbol::Variant6(__nt), __end));
+        __symbols.push((__start, __Symbol::Variant7(__nt), __end));
+        (1, 10)
+    }
+    pub(crate) fn __reduce18<
+        'input,
+        'err,
+    >(
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
+        input: &'input str,
+        __lookahead_start: Option<&usize>,
+        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: ::std::marker::PhantomData<(&'input (), &'err ())>,
+    ) -> (usize, usize)
+    {
+        // PeerId = Value => ActionFn(14);
+        let __sym0 = __pop_Variant2(__symbols);
+        let __start = __sym0.0.clone();
+        let __end = __sym0.2.clone();
+        let __nt = super::__action14::<>(errors, input, __sym0);
+        __symbols.push((__start, __Symbol::Variant2(__nt), __end));
         (1, 11)
     }
     pub(crate) fn __reduce19<
@@ -1215,12 +1249,12 @@ mod __parse__Instr {
         _: ::std::marker::PhantomData<(&'input (), &'err ())>,
     ) -> (usize, usize)
     {
-        // PeerId = Alphanumeric => ActionFn(14);
-        let __sym0 = __pop_Variant0(__symbols);
+        // PeerPart = PeerId => ActionFn(9);
+        let __sym0 = __pop_Variant2(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action14::<>(errors, input, __sym0);
-        __symbols.push((__start, __Symbol::Variant0(__nt), __end));
+        let __nt = super::__action9::<>(errors, input, __sym0);
+        __symbols.push((__start, __Symbol::Variant8(__nt), __end));
         (1, 12)
     }
     pub(crate) fn __reduce20<
@@ -1234,57 +1268,19 @@ mod __parse__Instr {
         _: ::std::marker::PhantomData<(&'input (), &'err ())>,
     ) -> (usize, usize)
     {
-        // PeerPart = PeerId => ActionFn(9);
-        let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
-        let __nt = super::__action9::<>(errors, input, __sym0);
-        __symbols.push((__start, __Symbol::Variant7(__nt), __end));
-        (1, 13)
-    }
-    pub(crate) fn __reduce21<
-        'input,
-        'err,
-    >(
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
-        input: &'input str,
-        __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'input (), &'err ())>,
-    ) -> (usize, usize)
-    {
         // PeerPart = "(", PeerId, ServiceId, ")" => ActionFn(10);
         assert!(__symbols.len() >= 4);
         let __sym3 = __pop_Variant0(__symbols);
-        let __sym2 = __pop_Variant0(__symbols);
-        let __sym1 = __pop_Variant0(__symbols);
+        let __sym2 = __pop_Variant2(__symbols);
+        let __sym1 = __pop_Variant2(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym3.2.clone();
         let __nt = super::__action10::<>(errors, input, __sym0, __sym1, __sym2, __sym3);
-        __symbols.push((__start, __Symbol::Variant7(__nt), __end));
-        (4, 13)
+        __symbols.push((__start, __Symbol::Variant8(__nt), __end));
+        (4, 12)
     }
-    pub(crate) fn __reduce22<
-        'input,
-        'err,
-    >(
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
-        input: &'input str,
-        __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'input (), &'err ())>,
-    ) -> (usize, usize)
-    {
-        // RBR = ")" => ActionFn(18);
-        let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
-        let __nt = super::__action18::<>(errors, input, __sym0);
-        __symbols.push((__start, __Symbol::Variant0(__nt), __end));
-        (1, 14)
-    }
-    pub(crate) fn __reduce23<
+    pub(crate) fn __reduce21<
         'input,
         'err,
     >(
@@ -1301,7 +1297,48 @@ mod __parse__Instr {
         let __end = __sym0.2.clone();
         let __nt = super::__action4::<>(errors, input, __sym0);
         __symbols.push((__start, __Symbol::Variant0(__nt), __end));
-        (1, 15)
+        (1, 13)
+    }
+    pub(crate) fn __reduce22<
+        'input,
+        'err,
+    >(
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
+        input: &'input str,
+        __lookahead_start: Option<&usize>,
+        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: ::std::marker::PhantomData<(&'input (), &'err ())>,
+    ) -> (usize, usize)
+    {
+        // ServiceId = Value => ActionFn(15);
+        let __sym0 = __pop_Variant2(__symbols);
+        let __start = __sym0.0.clone();
+        let __end = __sym0.2.clone();
+        let __nt = super::__action15::<>(errors, input, __sym0);
+        __symbols.push((__start, __Symbol::Variant2(__nt), __end));
+        (1, 14)
+    }
+    pub(crate) fn __reduce23<
+        'input,
+        'err,
+    >(
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
+        input: &'input str,
+        __lookahead_start: Option<&usize>,
+        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: ::std::marker::PhantomData<(&'input (), &'err ())>,
+    ) -> (usize, usize)
+    {
+        // Value = "\"", Alphanumeric, "\"" => ActionFn(17);
+        assert!(__symbols.len() >= 3);
+        let __sym2 = __pop_Variant0(__symbols);
+        let __sym1 = __pop_Variant0(__symbols);
+        let __sym0 = __pop_Variant0(__symbols);
+        let __start = __sym0.0.clone();
+        let __end = __sym2.2.clone();
+        let __nt = super::__action17::<>(errors, input, __sym0, __sym1, __sym2);
+        __symbols.push((__start, __Symbol::Variant2(__nt), __end));
+        (3, 15)
     }
     pub(crate) fn __reduce24<
         'input,
@@ -1314,13 +1351,13 @@ mod __parse__Instr {
         _: ::std::marker::PhantomData<(&'input (), &'err ())>,
     ) -> (usize, usize)
     {
-        // ServiceId = Alphanumeric => ActionFn(15);
+        // Value = Alphanumeric => ActionFn(18);
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action15::<>(errors, input, __sym0);
-        __symbols.push((__start, __Symbol::Variant0(__nt), __end));
-        (1, 16)
+        let __nt = super::__action18::<>(errors, input, __sym0);
+        __symbols.push((__start, __Symbol::Variant2(__nt), __end));
+        (1, 15)
     }
 }
 pub use self::__parse__Instr::InstrParser;
@@ -1336,6 +1373,7 @@ mod __intern_token {
     use self::__lalrpop_util::state_machine as __state_machine;
     pub fn new_builder() -> __lalrpop_util::lexer::MatcherBuilder {
         let __strs: &[(&str, bool)] = &[
+            ("^(\")", false),
             ("^(\\()", false),
             ("^(\\))", false),
             ("^([0-9A-Za-z]+\\[\\])", false),
@@ -1350,16 +1388,23 @@ mod __intern_token {
 pub use self::__lalrpop_util::lexer::Token;
 
 #[allow(unused_variables)]
-fn __action0<'input, 'err>(
+fn __action0<
+    'input,
+    'err,
+>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, __0, _): (usize, Box<Instruction<'input>>, usize),
-) -> Box<Instruction<'input>> {
+) -> Box<Instruction<'input>>
+{
     __0
 }
 
 #[allow(unused_variables)]
-fn __action1<'input, 'err>(
+fn __action1<
+    'input,
+    'err,
+>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, _, _): (usize, &'input str, usize),
@@ -1367,333 +1412,449 @@ fn __action1<'input, 'err>(
     (_, l, _): (usize, Box<Instruction<'input>>, usize),
     (_, r, _): (usize, Box<Instruction<'input>>, usize),
     (_, _, _): (usize, &'input str, usize),
-) -> Box<Instruction<'input>> {
+) -> Box<Instruction<'input>>
+{
     Box::new(Instruction::Seq(Seq(l, r)))
 }
 
 #[allow(unused_variables)]
-fn __action2<'input, 'err>(
+fn __action2<
+    'input,
+    'err,
+>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, _, _): (usize, &'input str, usize),
     (_, c, _): (usize, &'input str, usize),
     (_, peer, _): (usize, PeerPart<'input>, usize),
     (_, f, _): (usize, FunctionPart<'input>, usize),
-    (_, args, _): (usize, Vec<&'input str>, usize),
+    (_, args, _): (usize, Vec<Value<'input>>, usize),
     (_, output, _): (usize, CallOutput<'input>, usize),
     (_, _, _): (usize, &'input str, usize),
-) -> Box<Instruction<'input>> {
-    Box::new(Instruction::Call(Call {
-        peer,
-        f,
-        args,
-        output,
-    }))
+) -> Box<Instruction<'input>>
+{
+    Box::new(Instruction::Call(Call{peer, f, args, output}))
 }
 
 #[allow(unused_variables)]
-fn __action3<'input, 'err>(
+fn __action3<
+    'input,
+    'err,
+>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
-    (_, __0, _): (
-        usize,
-        __lalrpop_util::ErrorRecovery<usize, Token<'input>, InstructionError>,
-        usize,
-    ),
-) -> Box<Instruction<'input>> {
-    {
-        errors.push(__0);
-        Box::new(Instruction::Error)
-    }
+    (_, __0, _): (usize, __lalrpop_util::ErrorRecovery<usize, Token<'input>, InstructionError>, usize),
+) -> Box<Instruction<'input>>
+{
+    { errors.push(__0); Box::new(Instruction::Error) }
 }
 
 #[allow(unused_variables)]
-fn __action4<'input, 'err>(
+fn __action4<
+    'input,
+    'err,
+>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, __0, _): (usize, &'input str, usize),
-) -> &'input str {
+) -> &'input str
+{
     __0
 }
 
 #[allow(unused_variables)]
-fn __action5<'input, 'err>(
+fn __action5<
+    'input,
+    'err,
+>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, __0, _): (usize, &'input str, usize),
-) -> &'input str {
+) -> &'input str
+{
     __0
 }
 
 #[allow(unused_variables)]
-fn __action6<'input, 'err>(
+fn __action6<
+    'input,
+    'err,
+>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, _, _): (usize, &'input str, usize),
-    (_, args, _): (usize, ::std::vec::Vec<&'input str>, usize),
+    (_, args, _): (usize, ::std::vec::Vec<Value<'input>>, usize),
     (_, _, _): (usize, &'input str, usize),
-) -> Vec<&'input str> {
+) -> Vec<Value<'input>>
+{
     args
 }
 
 #[allow(unused_variables)]
-fn __action7<'input, 'err>(
+fn __action7<
+    'input,
+    'err,
+>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
-    (_, f, _): (usize, &'input str, usize),
-) -> FunctionPart<'input> {
+    (_, f, _): (usize, Value<'input>, usize),
+) -> FunctionPart<'input>
+{
     FunctionPart::FuncName(f)
 }
 
 #[allow(unused_variables)]
-fn __action8<'input, 'err>(
+fn __action8<
+    'input,
+    'err,
+>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, _, _): (usize, &'input str, usize),
-    (_, sid, _): (usize, &'input str, usize),
-    (_, f, _): (usize, &'input str, usize),
+    (_, sid, _): (usize, Value<'input>, usize),
+    (_, f, _): (usize, Value<'input>, usize),
     (_, _, _): (usize, &'input str, usize),
-) -> FunctionPart<'input> {
+) -> FunctionPart<'input>
+{
     FunctionPart::ServiceIdWithFuncName(sid, f)
 }
 
 #[allow(unused_variables)]
-fn __action9<'input, 'err>(
+fn __action9<
+    'input,
+    'err,
+>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
-    (_, pid, _): (usize, &'input str, usize),
-) -> PeerPart<'input> {
+    (_, pid, _): (usize, Value<'input>, usize),
+) -> PeerPart<'input>
+{
     PeerPart::PeerPk(pid)
 }
 
 #[allow(unused_variables)]
-fn __action10<'input, 'err>(
+fn __action10<
+    'input,
+    'err,
+>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, _, _): (usize, &'input str, usize),
-    (_, pid, _): (usize, &'input str, usize),
-    (_, sid, _): (usize, &'input str, usize),
+    (_, pid, _): (usize, Value<'input>, usize),
+    (_, sid, _): (usize, Value<'input>, usize),
     (_, _, _): (usize, &'input str, usize),
-) -> PeerPart<'input> {
+) -> PeerPart<'input>
+{
     PeerPart::PeerPkWithServiceId(pid, sid)
 }
 
 #[allow(unused_variables)]
-fn __action11<'input, 'err>(
+fn __action11<
+    'input,
+    'err,
+>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, o, _): (usize, &'input str, usize),
-) -> CallOutput<'input> {
+) -> CallOutput<'input>
+{
     CallOutput::Scalar(o)
 }
 
 #[allow(unused_variables)]
-fn __action12<'input, 'err>(
+fn __action12<
+    'input,
+    'err,
+>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, o, _): (usize, &'input str, usize),
-) -> CallOutput<'input> {
+) -> CallOutput<'input>
+{
     CallOutput::Accumulator(o)
 }
 
 #[allow(unused_variables)]
-fn __action13<'input, 'err>(
+fn __action13<
+    'input,
+    'err,
+>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
-    (_, __0, _): (usize, &'input str, usize),
-) -> &'input str {
+    (_, __0, _): (usize, Value<'input>, usize),
+) -> Value<'input>
+{
     __0
 }
 
 #[allow(unused_variables)]
-fn __action14<'input, 'err>(
+fn __action14<
+    'input,
+    'err,
+>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
-    (_, __0, _): (usize, &'input str, usize),
-) -> &'input str {
+    (_, __0, _): (usize, Value<'input>, usize),
+) -> Value<'input>
+{
     __0
 }
 
 #[allow(unused_variables)]
-fn __action15<'input, 'err>(
+fn __action15<
+    'input,
+    'err,
+>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
-    (_, __0, _): (usize, &'input str, usize),
-) -> &'input str {
+    (_, __0, _): (usize, Value<'input>, usize),
+) -> Value<'input>
+{
     __0
 }
 
 #[allow(unused_variables)]
-fn __action16<'input, 'err>(
+fn __action16<
+    'input,
+    'err,
+>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
-    (_, __0, _): (usize, &'input str, usize),
-) -> &'input str {
+    (_, __0, _): (usize, Value<'input>, usize),
+) -> Value<'input>
+{
     __0
 }
 
 #[allow(unused_variables)]
-fn __action17<'input, 'err>(
+fn __action17<
+    'input,
+    'err,
+>(
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
+    input: &'input str,
+    (_, _, _): (usize, &'input str, usize),
+    (_, v, _): (usize, &'input str, usize),
+    (_, _, _): (usize, &'input str, usize),
+) -> Value<'input>
+{
+    Value::Literal(v)
+}
+
+#[allow(unused_variables)]
+fn __action18<
+    'input,
+    'err,
+>(
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
+    input: &'input str,
+    (_, v, _): (usize, &'input str, usize),
+) -> Value<'input>
+{
+    Value::Variable(v)
+}
+
+#[allow(unused_variables)]
+fn __action19<
+    'input,
+    'err,
+>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, __0, _): (usize, &'input str, usize),
-) -> &'input str {
+) -> &'input str
+{
     __0
 }
 
 #[allow(unused_variables)]
-fn __action18<'input, 'err>(
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
-    input: &'input str,
-    (_, __0, _): (usize, &'input str, usize),
-) -> &'input str {
-    __0
-}
-
-#[allow(unused_variables)]
-fn __action19<'input, 'err>(
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
-    input: &'input str,
-    (_, __0, _): (usize, &'input str, usize),
-) -> &'input str {
-    __0
-}
-
-#[allow(unused_variables)]
-fn __action20<'input, 'err>(
+fn __action20<
+    'input,
+    'err,
+>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     __lookbehind: &usize,
     __lookahead: &usize,
-) -> ::std::vec::Vec<&'input str> {
+) -> ::std::vec::Vec<Value<'input>>
+{
     vec![]
 }
 
 #[allow(unused_variables)]
-fn __action21<'input, 'err>(
+fn __action21<
+    'input,
+    'err,
+>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
-    (_, v, _): (usize, ::std::vec::Vec<&'input str>, usize),
-) -> ::std::vec::Vec<&'input str> {
+    (_, v, _): (usize, ::std::vec::Vec<Value<'input>>, usize),
+) -> ::std::vec::Vec<Value<'input>>
+{
     v
 }
 
 #[allow(unused_variables)]
-fn __action22<'input, 'err>(
+fn __action22<
+    'input,
+    'err,
+>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
-    (_, __0, _): (usize, &'input str, usize),
-) -> &'input str {
+    (_, __0, _): (usize, Value<'input>, usize),
+) -> Value<'input>
+{
     __0
 }
 
 #[allow(unused_variables)]
-fn __action23<'input, 'err>(
+fn __action23<
+    'input,
+    'err,
+>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
-    (_, __0, _): (usize, &'input str, usize),
-) -> ::std::vec::Vec<&'input str> {
+    (_, __0, _): (usize, Value<'input>, usize),
+) -> ::std::vec::Vec<Value<'input>>
+{
     vec![__0]
 }
 
 #[allow(unused_variables)]
-fn __action24<'input, 'err>(
+fn __action24<
+    'input,
+    'err,
+>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
-    (_, v, _): (usize, ::std::vec::Vec<&'input str>, usize),
-    (_, e, _): (usize, &'input str, usize),
-) -> ::std::vec::Vec<&'input str> {
-    {
-        let mut v = v;
-        v.push(e);
-        v
-    }
+    (_, v, _): (usize, ::std::vec::Vec<Value<'input>>, usize),
+    (_, e, _): (usize, Value<'input>, usize),
+) -> ::std::vec::Vec<Value<'input>>
+{
+    { let mut v = v; v.push(e); v }
 }
 
 #[allow(unused_variables)]
-fn __action25<'input, 'err>(
+fn __action25<
+    'input,
+    'err,
+>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
-    __0: (usize, &'input str, usize),
-) -> ::std::vec::Vec<&'input str> {
+    __0: (usize, Value<'input>, usize),
+) -> ::std::vec::Vec<Value<'input>>
+{
     let __start0 = __0.0.clone();
     let __end0 = __0.2.clone();
-    let __temp0 = __action22(errors, input, __0);
+    let __temp0 = __action22(
+        errors,
+        input,
+        __0,
+    );
     let __temp0 = (__start0, __temp0, __end0);
-    __action23(errors, input, __temp0)
+    __action23(
+        errors,
+        input,
+        __temp0,
+    )
 }
 
 #[allow(unused_variables)]
-fn __action26<'input, 'err>(
+fn __action26<
+    'input,
+    'err,
+>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
-    __0: (usize, ::std::vec::Vec<&'input str>, usize),
-    __1: (usize, &'input str, usize),
-) -> ::std::vec::Vec<&'input str> {
+    __0: (usize, ::std::vec::Vec<Value<'input>>, usize),
+    __1: (usize, Value<'input>, usize),
+) -> ::std::vec::Vec<Value<'input>>
+{
     let __start0 = __1.0.clone();
     let __end0 = __1.2.clone();
-    let __temp0 = __action22(errors, input, __1);
+    let __temp0 = __action22(
+        errors,
+        input,
+        __1,
+    );
     let __temp0 = (__start0, __temp0, __end0);
-    __action24(errors, input, __0, __temp0)
+    __action24(
+        errors,
+        input,
+        __0,
+        __temp0,
+    )
 }
 
 #[allow(unused_variables)]
-fn __action27<'input, 'err>(
+fn __action27<
+    'input,
+    'err,
+>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     __0: (usize, &'input str, usize),
     __1: (usize, &'input str, usize),
-) -> Vec<&'input str> {
+) -> Vec<Value<'input>>
+{
     let __start0 = __0.2.clone();
     let __end0 = __1.0.clone();
-    let __temp0 = __action20(errors, input, &__start0, &__end0);
+    let __temp0 = __action20(
+        errors,
+        input,
+        &__start0,
+        &__end0,
+    );
     let __temp0 = (__start0, __temp0, __end0);
-    __action6(errors, input, __0, __temp0, __1)
+    __action6(
+        errors,
+        input,
+        __0,
+        __temp0,
+        __1,
+    )
 }
 
 #[allow(unused_variables)]
-fn __action28<'input, 'err>(
+fn __action28<
+    'input,
+    'err,
+>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     __0: (usize, &'input str, usize),
-    __1: (usize, ::std::vec::Vec<&'input str>, usize),
+    __1: (usize, ::std::vec::Vec<Value<'input>>, usize),
     __2: (usize, &'input str, usize),
-) -> Vec<&'input str> {
+) -> Vec<Value<'input>>
+{
     let __start0 = __1.0.clone();
     let __end0 = __1.2.clone();
-    let __temp0 = __action21(errors, input, __1);
+    let __temp0 = __action21(
+        errors,
+        input,
+        __1,
+    );
     let __temp0 = (__start0, __temp0, __end0);
-    __action6(errors, input, __0, __temp0, __2)
+    __action6(
+        errors,
+        input,
+        __0,
+        __temp0,
+        __2,
+    )
 }
 
-pub trait __ToTriple<'input, 'err> {
-    fn to_triple(
-        value: Self,
-    ) -> Result<
-        (usize, Token<'input>, usize),
-        __lalrpop_util::ParseError<usize, Token<'input>, InstructionError>,
-    >;
+pub trait __ToTriple<'input, 'err, > {
+    fn to_triple(value: Self) -> Result<(usize,Token<'input>,usize), __lalrpop_util::ParseError<usize, Token<'input>, InstructionError>>;
 }
 
-impl<'input, 'err> __ToTriple<'input, 'err> for (usize, Token<'input>, usize) {
-    fn to_triple(
-        value: Self,
-    ) -> Result<
-        (usize, Token<'input>, usize),
-        __lalrpop_util::ParseError<usize, Token<'input>, InstructionError>,
-    > {
+impl<'input, 'err, > __ToTriple<'input, 'err, > for (usize, Token<'input>, usize) {
+    fn to_triple(value: Self) -> Result<(usize,Token<'input>,usize), __lalrpop_util::ParseError<usize, Token<'input>, InstructionError>> {
         Ok(value)
     }
 }
-impl<'input, 'err> __ToTriple<'input, 'err>
-    for Result<(usize, Token<'input>, usize), InstructionError>
-{
-    fn to_triple(
-        value: Self,
-    ) -> Result<
-        (usize, Token<'input>, usize),
-        __lalrpop_util::ParseError<usize, Token<'input>, InstructionError>,
-    > {
+impl<'input, 'err, > __ToTriple<'input, 'err, > for Result<(usize, Token<'input>, usize), InstructionError> {
+    fn to_triple(value: Self) -> Result<(usize,Token<'input>,usize), __lalrpop_util::ParseError<usize, Token<'input>, InstructionError>> {
         match value {
             Ok(v) => Ok(v),
             Err(error) => Err(__lalrpop_util::ParseError::User { error }),
