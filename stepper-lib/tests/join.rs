@@ -190,8 +190,6 @@ fn join_chat() {
 
 #[test]
 fn join() {
-    env_logger::init();
-
     let members_call_service1: HostExportedFunc = Box::new(|_, _| -> Option<IValue> {
         Some(IValue::Record(
             Vec1::new(vec![IValue::S32(0), IValue::String(String::from(r#"[["A"], ["B"]]"#))]).unwrap(),

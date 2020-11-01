@@ -26,10 +26,24 @@ wasm-bindgen = "0.2.68"
 aqua-test-utils = { path = "../crates/test-utils" }
 aquamarine-vm = { git = "https://github.com/fluencelabs/fce", features = ["raw-aquamarine-vm-api"] }
 
+criterion = "0.3.3"
+once_cell = "1.4.1"
 env_logger = "0.7.1"
 maplit = "1.0.2"
 pretty_assertions = "0.6.1"
 serde_json = "1.0.56"
+
+[[bench]]
+name = "call_benchmark"
+harness = false
+
+[[bench]]
+name = "chat_benchmark"
+harness = false
+
+[[bench]]
+name = "create_service_benchmark"
+harness = false
 
 [features]
 # indicates that this library should be compiled for the wasm bindgen target
