@@ -39,10 +39,12 @@ impl std::fmt::Display for InstructionError {
     }
 }
 
-#[test]
-fn parse_aqua() {
-    let parser = aqua::InstrParser::new();
+fn parse(source_code: &str) -> Box<Instruction> {
+    let mut files = SimpleFiles::new();
+    let file_id = files.add("script.aqua", source_code);
+
     let parse = |s| -> Result<Box<Instruction<'_>>, Vec<ErrorRecovery<_, _, _>>> {
+        let parser = aqua::InstrParser::new();
         let mut errors = Vec::new();
         match parser.parse(&mut errors, s) {
             Ok(r) if errors.is_empty() => Ok(r),
@@ -53,23 +55,11 @@ fn parse_aqua() {
                 Err(errors)
             }
             Err(err) => {
-                for error in errors.iter() {
-                    println!("Parse error: {:?}", error);
-                }
                 println!("Parsing failed: {:?}", err);
                 Err(errors)
             }
         }
     };
-
-    let mut files = SimpleFiles::new();
-    let source_code = r#"
-    (seq
-        (call peerid function () void[])
-        (call id f (hello) void[])
-    )
-    "#;
-    let file_id = files.add("seq.aqua", source_code);
 
     match parse(source_code) {
         Err(errors) => {
@@ -105,7 +95,39 @@ fn parse_aqua() {
             let config = codespan_reporting::term::Config::default();
 
             term::emit(&mut writer.lock(), &config, &files, &diagnostic).expect("term emit");
+            panic!("parsing failed");
         }
-        Ok(r) => println!("parsed:\n{:#?}", r),
+        Ok(r) => r,
     }
+}
+
+#[test]
+fn parse_seq() {
+    use crate::ast::*;
+    use CallOutput::*;
+    use FunctionPart::*;
+    use PeerPart::*;
+
+    let source_code = r#"
+    (seq
+        (call peerid function () void[])
+        (call id f (hello) void[])
+    )
+    "#;
+    let instruction = *parse(source_code);
+    let expected = Instruction::Seq(Seq(
+        Box::new(Instruction::Call(Call {
+            peer: PeerPk("peerid"),
+            f: FuncName("function"),
+            args: vec![],
+            output: Accumulator("void[]"),
+        })),
+        Box::new(Instruction::Call(Call {
+            peer: PeerPk("id"),
+            f: FuncName("f"),
+            args: vec!["hello"],
+            output: Accumulator("void[]"),
+        })),
+    ));
+    assert_eq!(instruction, expected);
 }
