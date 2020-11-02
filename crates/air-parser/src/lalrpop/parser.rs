@@ -63,7 +63,7 @@ fn parse(source_code: &str) -> Box<Instruction> {
 
     match parse(source_code.as_ref()) {
         Err(errors) => {
-            let labels = errors
+            let labels: Vec<_> = errors
                 .into_iter()
                 .map(|err| match err.error {
                     ParseError::UnrecognizedToken {
@@ -87,11 +87,10 @@ fn parse(source_code: &str) -> Box<Instruction> {
                     */
                 })
                 .collect();
-            let diagnostic = Diagnostic::error()
-                .with_message("some error")
-                .with_labels(labels);
 
-            let writer = StandardStream::stderr(ColorChoice::Always);
+            let diagnostic = Diagnostic::error().with_labels(labels);
+
+            let writer = StandardStream::stderr(ColorChoice::Auto);
             let config = codespan_reporting::term::Config::default();
 
             term::emit(&mut writer.lock(), &config, &files, &diagnostic).expect("term emit");
@@ -116,8 +115,8 @@ mod tests {
     fn parse_seq() {
         let source_code = r#"
         (seq
-            (call peerid function () void)
-            (call "id" "f" ("hello" name) void[])
+            (call peerid function [] void)
+            (call "id" "f" ["hello" name] void[])
         )
         "#;
         let instruction = *parse(source_code);
@@ -140,13 +139,15 @@ mod tests {
 
     #[test]
     fn parse_seq_seq() {
+        // TODO: make output one of _ () "" and absence
+
         let source_code = r#"
         (seq
             (seq
-                (call peerid function () void)
-                (call (peerid serviceA) ("serviceB" function) () void)
+                (call peerid function [] void)
+                (call (peerid serviceA) ("serviceB" function) [] void)
             )
-            (call "id" "f" ("hello" name) void[])
+            (call "id" "f" ["hello" name] void[])
         )
         "#;
         let instruction = *parse(source_code);
@@ -178,7 +179,7 @@ mod tests {
     #[test]
     fn parse_json_path() {
         let source_code = r#"
-        (call id.$.a "f" ("hello" name) void[])
+        (call id.$.a "f" ["hello" name] void[])
         "#;
         let instruction = *parse(source_code);
         let expected = Instruction::Call(Call {
@@ -220,7 +221,6 @@ mod tests {
         )
         "#)
     }
-
     #[test]
     fn parse_seq_par_xor_seq() {
         for name in &["xor", "par", "seq"] {
