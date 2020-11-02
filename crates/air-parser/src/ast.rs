@@ -14,11 +14,17 @@
  * limitations under the License.
  */
 
+use std::rc::Rc;
+
 #[derive(Debug, PartialEq, Eq)]
 pub enum Instruction<'i> {
     Null,
     Call(Call<'i>),
     Seq(Seq<'i>),
+    Par(Par<'i>),
+    Xor(Xor<'i>),
+    Fold(Fold<'i>),
+    Next(Next<'i>),
     Error,
 }
 
@@ -57,3 +63,19 @@ pub enum CallOutput<'i> {
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Seq<'i>(pub Box<Instruction<'i>>, pub Box<Instruction<'i>>);
+
+#[derive(Debug, PartialEq, Eq)]
+pub struct Par<'i>(pub Box<Instruction<'i>>, pub Box<Instruction<'i>>);
+
+#[derive(Debug, PartialEq, Eq)]
+pub struct Xor<'i>(pub Box<Instruction<'i>>, pub Box<Instruction<'i>>);
+
+#[derive(Debug, PartialEq, Eq)]
+pub struct Fold<'i> {
+    pub iterable: &'i str,
+    pub iterator: &'i str,
+    pub instruction: Rc<Instruction<'i>>,
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub struct Next<'i>(pub &'i str);

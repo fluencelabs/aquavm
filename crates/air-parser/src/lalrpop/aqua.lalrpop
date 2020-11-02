@@ -2,6 +2,7 @@ use crate::ast::*;
 use crate::lalrpop::parser::InstructionError;
 
 use lalrpop_util::ErrorRecovery;
+use std::rc::Rc;
 
 grammar<'err>(errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>);
 
@@ -10,17 +11,17 @@ extern {
 }
 
 pub Instr: Box<Instruction<'input>> = {
-    "(" <s:Seq> <l:Instr> <r:Instr> ")" => Box::new(Instruction::Seq(Seq(l, r))),
-    "(" <c:Call> <peer:PeerPart> <f:FPart> <args:Args> <output:Output> ")" => Box::new(Instruction::Call(Call{peer, f, args, output})),
+    "(" "seq" <l:Instr> <r:Instr> ")" => Box::new(Instruction::Seq(Seq(l, r))),
+    "(" "par" <l:Instr> <r:Instr> ")" => Box::new(Instruction::Par(Par(l, r))),
+    "(" "xor" <l:Instr> <r:Instr> ")" => Box::new(Instruction::Xor(Xor(l, r))),
+    "(" "call" <peer:PeerPart> <f:FPart> <args:Args> <output:Output> ")" => Box::new(Instruction::Call(Call{peer, f, args, output})),
+    "(" "fold" <iterable:Alphanumeric> <iterator:Alphanumeric> <i:Instr> ")" => {
+        let instruction = Rc::new(*i);
+        Box::new(Instruction::Fold(Fold{ iterable, iterator, instruction }))
+    },
+    "(" "next" <i:Alphanumeric> ")" => Box::new(Instruction::Next(Next(i))),
+    "(" "null" ")" => Box::new(Instruction::Null),
     ! => { errors.push(<>); Box::new(Instruction::Error) },
-}
-
-Seq: &'input str = {
-    "seq"
-}
-
-Call: &'input str = {
-    "call"
 }
 
 Args: Vec<Value<'input>> = {
@@ -70,6 +71,11 @@ match {
     r"[0-9a-zA-Z]+\.\$\.[0-9a-zA-Z]+" => JSON_PATH,
     "seq",
     "call",
+    "null",
+    "par",
+    "xor",
+    "fold",
+    "next",
 } else {
     _
 }

@@ -61,7 +61,7 @@ fn parse(source_code: &str) -> Box<Instruction> {
         }
     };
 
-    match parse(source_code) {
+    match parse(source_code.as_ref()) {
         Err(errors) => {
             let labels = errors
                 .into_iter()
@@ -103,12 +103,14 @@ fn parse(source_code: &str) -> Box<Instruction> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use super::parse;
     use crate::ast::*;
     use CallOutput::*;
     use FunctionPart::*;
     use PeerPart::*;
     use Value::*;
+
+    use fstrings::f;
 
     #[test]
     fn parse_seq() {
@@ -189,5 +191,116 @@ mod tests {
             output: Accumulator("void"),
         });
         assert_eq!(instruction, expected);
+    }
+
+    #[test]
+    fn parse_null() {
+        use Instruction::Null;
+
+        let source_code = r#"
+        (seq
+            (null)
+            
+            ( null     )
+        )
+        "#;
+        let instruction = *parse(source_code);
+        let expected = Instruction::Seq(Seq(Box::new(Null), Box::new(Null)));
+        assert_eq!(instruction, expected)
+    }
+
+    fn source_seq_with(name: &'static str) -> String {
+        f!(r#"
+        (seq
+            ({name}
+                (seq (null) (null))
+                (null)
+            )
+            ({name}   (null) (seq (null) (null))   )
+        )
+        "#)
+    }
+
+    #[test]
+    fn parse_seq_par_xor_seq() {
+        for name in &["xor", "par", "seq"] {
+            let source_code = source_seq_with(name);
+            let instruction = *parse(&source_code.as_ref());
+            let instr = binary_instruction(*name);
+            let expected = seq(instr(seqnn(), null()), instr(null(), seqnn()));
+            assert_eq!(instruction, expected);
+        }
+    }
+
+    #[test]
+    fn parse_fold() {
+        let source_code = r#"
+        (fold iterable i
+            (null)
+        )
+        "#;
+        let instruction = *parse(&source_code.as_ref());
+        let expected = fold("iterable", "i", Instruction::Null);
+        assert_eq!(instruction, expected);
+    }
+
+    fn source_fold_with(name: &str) -> String {
+        f!(r#"(fold iterable i
+            ({name} (null) (null))
+        )"#)
+    }
+    #[test]
+    fn parse_fold_with_xor_par_seq() {
+        for name in &["xor", "par", "seq"] {
+            let source_code = source_fold_with(name);
+            let instruction = *parse(&source_code.as_ref());
+            let instr = |l, r| match *name {
+                "xor" => xor(l, r),
+                "par" => par(l, r),
+                "seq" => seq(l, r),
+                _ => unreachable!(),
+            };
+            let expected = fold("iterable", "i", instr(null(), null()));
+            assert_eq!(instruction, expected);
+        }
+    }
+
+    // Test DSL
+
+    fn seq<'a>(l: Instruction<'a>, r: Instruction<'a>) -> Instruction<'a> {
+        Instruction::Seq(Seq(Box::new(l), Box::new(r)))
+    }
+    fn par<'a>(l: Instruction<'a>, r: Instruction<'a>) -> Instruction<'a> {
+        Instruction::Par(Par(Box::new(l), Box::new(r)))
+    }
+    fn xor<'a>(l: Instruction<'a>, r: Instruction<'a>) -> Instruction<'a> {
+        Instruction::Xor(Xor(Box::new(l), Box::new(r)))
+    }
+    fn seqnn() -> Instruction<'static> {
+        seq(Instruction::Null, Instruction::Null)
+    }
+    fn null() -> Instruction<'static> {
+        Instruction::Null
+    }
+    fn fold<'a>(
+        iterable: &'a str,
+        iterator: &'a str,
+        instruction: Instruction<'a>,
+    ) -> Instruction<'a> {
+        Instruction::Fold(Fold {
+            iterable,
+            iterator,
+            instruction: std::rc::Rc::new(instruction),
+        })
+    }
+    fn binary_instruction<'a>(
+        name: &'a str,
+    ) -> impl for<'b> Fn(Instruction<'_>, Instruction<'_>) -> Instruction<'b> {
+        match name {
+            "xor" => |l, r| xor(l, r),
+            "par" => |l, r| par(l, r),
+            "seq" => |l, r| seq(l, r),
+            _ => unreachable!(),
+        }
     }
 }

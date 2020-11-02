@@ -13,3 +13,6 @@ regex = "1.4.1"
 
 codespan = "0.9.5"
 codespan-reporting = "0.9.5"
+
+[dev-dependencies]
+fstrings = "0.2.3"
