@@ -41,20 +41,20 @@ use air_parser::ast::Instruction;
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
 
-pub(crate) trait ExecutableInstruction {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()>;
+pub(crate) trait ExecutableInstruction<'i> {
+    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, call_ctx: &mut CallEvidenceCtx) -> Result<()>;
 }
 
-impl<'i> ExecutableInstruction for Instruction<'i> {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
+impl<'i> ExecutableInstruction<'i> for Instruction<'i> {
+    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
         match self {
             Instruction::Seq(seq) => seq.execute(exec_ctx, call_ctx),
             Instruction::Call(call) => call.execute(exec_ctx, call_ctx),
             Instruction::Null(null) => null.execute(exec_ctx, call_ctx),
-            _ => unimplemented!(),
-            /*Instruction::Fold(fold) => fold.execute(exec_ctx, call_ctx),
+            Instruction::Fold(fold) => fold.execute(exec_ctx, call_ctx),
             Instruction::Next(next) => next.execute(exec_ctx, call_ctx),
-            Instruction::Par(par) => par.execute(exec_ctx, call_ctx),
+            _ => unimplemented!(),
+            /*Instruction::Par(par) => par.execute(exec_ctx, call_ctx),
             Instruction::Xor(xor) => xor.execute(exec_ctx, call_ctx),*/
         }
     }

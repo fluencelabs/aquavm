@@ -25,8 +25,8 @@ use air_parser::ast::Seq;
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
 
-impl<'i> super::ExecutableInstruction for Seq<'i> {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
+impl<'i> super::ExecutableInstruction<'i> for Seq<'i> {
+    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
         log_instruction!(seq, exec_ctx, call_ctx);
 
         exec_ctx.subtree_complete = true;

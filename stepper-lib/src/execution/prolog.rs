@@ -56,7 +56,7 @@ pub(super) fn prepare<'i>(
 pub(super) fn make_contexts(
     prev_path: CallEvidencePath,
     path: CallEvidencePath,
-) -> Result<(ExecutionCtx, CallEvidenceCtx)> {
+) -> Result<(ExecutionCtx<'static>, CallEvidenceCtx)> {
     use AquamarineError::CurrentPeerIdEnvError as EnvError;
 
     let current_peer_id = get_current_peer_id().map_err(|e| EnvError(e, String::from("CURRENT_PEER_ID")))?;

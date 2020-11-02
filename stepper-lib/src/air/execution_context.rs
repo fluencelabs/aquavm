@@ -22,9 +22,9 @@ use std::fmt::Formatter;
 
 /// Execution context contains all necessary information needed to execute aqua script.
 #[derive(Clone, Default, Debug)]
-pub(crate) struct ExecutionCtx {
+pub(crate) struct ExecutionCtx<'i> {
     /// Contains all set variables.
-    pub data_cache: HashMap<String, AValue>,
+    pub data_cache: HashMap<String, AValue<'i>>,
 
     /// Set of peer public keys that should receive resulted data.
     pub next_peer_pks: Vec<String>,
@@ -41,7 +41,7 @@ pub(crate) struct ExecutionCtx {
     pub subtree_complete: bool,
 }
 
-impl ExecutionCtx {
+impl<'i> ExecutionCtx<'i> {
     pub(crate) fn new(current_peer_id: String) -> Self {
         Self {
             data_cache: HashMap::new(),
@@ -52,7 +52,7 @@ impl ExecutionCtx {
     }
 }
 
-impl Display for ExecutionCtx {
+impl<'i> Display for ExecutionCtx<'i> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "data cache:")?;
         for (key, value) in self.data_cache.iter() {

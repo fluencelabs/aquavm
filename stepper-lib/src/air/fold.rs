@@ -23,15 +23,11 @@ use crate::AquamarineError;
 use crate::JValue;
 use crate::Result;
 
+use air_parser::ast::{Fold, Next};
+
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
 use std::rc::Rc;
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub(crate) struct FoldState {
-    pub(crate) cursor: usize,
-    pub(crate) iterable: Rc<JValue>,
-}
 
 /*
  (fold Iterable i
@@ -42,33 +38,22 @@ pub(crate) struct FoldState {
  )
 */
 
-/*
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
-pub(crate) struct Fold(String, String, Rc<Instruction>);
-
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
-pub(crate) struct Next(String);
-
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub(crate) struct FoldState {
+pub(crate) struct FoldState<'i> {
     // TODO: maybe change to bidirectional iterator
     pub(crate) cursor: usize,
     pub(crate) iterable: Rc<JValue>,
-    pub(crate) instr_head: Rc<Instruction>,
+    pub(crate) instr_head: Rc<Instruction<'i>>,
 }
 
-impl super::ExecutableInstruction for Fold {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
+impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
+    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
         use AquamarineError::*;
 
         log_instruction!(fold, exec_ctx, call_ctx);
 
-        let iterable_name = &self.0;
-        let iterator_name = &self.1;
-        let instr_head = self.2.clone();
-
         // check that value exists and has array type
-        let iterable = match exec_ctx.data_cache.get(iterable_name) {
+        let iterable = match exec_ctx.data_cache.get(self.iterable) {
             Some(AValue::JValueRef(jvalue_rc)) => {
                 match jvalue_rc.as_ref() {
                     JValue::Array(array) => {
@@ -83,41 +68,41 @@ impl super::ExecutableInstruction for Fold {
                 }
             }
             Some(v) => return Err(IncompatibleAValueType(format!("{:?}", v), String::from("JValueRef"))),
-            None => return Err(VariableNotFound(String::from(iterable_name))),
+            None => return Err(VariableNotFound(self.iterable.to_string())),
         };
 
         let fold_state = FoldState {
             cursor: 0,
             iterable: iterable.clone(),
-            instr_head: instr_head.clone(),
+            instr_head: self.instruction.clone(),
         };
 
         let previous_value = exec_ctx
             .data_cache
-            .insert(iterator_name.clone(), AValue::JValueFoldCursor(fold_state));
+            .insert(self.iterator.to_string(), AValue::JValueFoldCursor(fold_state));
 
         if previous_value.is_some() {
-            return Err(MultipleFoldStates(iterable_name.clone()));
+            return Err(MultipleFoldStates(self.iterable.to_string()));
         }
 
-        instr_head.execute(exec_ctx, call_ctx)?;
-        exec_ctx.data_cache.remove(iterator_name);
+        self.instruction.execute(exec_ctx, call_ctx)?;
+        exec_ctx.data_cache.remove(self.iterator);
 
         Ok(())
     }
 }
 
-impl super::ExecutableInstruction for Next {
+impl<'i> super::ExecutableInstruction<'i> for Next<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
         use AquamarineError::IncompatibleAValueType;
 
         log_instruction!(next, exec_ctx, call_ctx);
 
-        let iterator_name = &self.0;
+        let iterator_name = self.0;
         let avalue = exec_ctx
             .data_cache
             .get_mut(iterator_name)
-            .ok_or_else(|| AquamarineError::FoldStateNotFound(iterator_name.clone()))?;
+            .ok_or_else(|| AquamarineError::FoldStateNotFound(iterator_name.to_string()))?;
         let fold_state = match avalue {
             AValue::JValueFoldCursor(state) => state,
             v => {
@@ -351,4 +336,3 @@ mod tests {
         assert_eq!(res[0], Call(Executed(Rc::new(json!([])))));
     }
 }
-*/

@@ -44,7 +44,7 @@ const CURRENT_PEER_ALIAS: &str = "%current_peer_id%";
    FN_PART: resolves to (fn_name) \/ (fn_srv_id, fn_name)
 */
 
-impl<'i> super::ExecutableInstruction for Call<'i> {
+impl<'i> super::ExecutableInstruction<'i> for Call<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
         log_instruction!(call, exec_ctx, call_ctx);
 

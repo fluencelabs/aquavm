@@ -54,13 +54,13 @@ use std::fmt::Formatter;
 use std::rc::Rc;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub(crate) enum AValue {
+pub(crate) enum AValue<'i> {
     JValueRef(Rc<JValue>),
     JValueAccumulatorRef(RefCell<Vec<Rc<JValue>>>),
-    JValueFoldCursor(crate::air::FoldState),
+    JValueFoldCursor(crate::air::FoldState<'i>),
 }
 
-impl Display for AValue {
+impl<'i> Display for AValue<'i> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             AValue::JValueRef(value) => write!(f, "{:?}", value)?,
