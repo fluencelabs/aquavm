@@ -147,7 +147,9 @@ pub fn set_variables_call_service(ret_mapping: HashMap<String, String>) -> HostE
 #[macro_export]
 macro_rules! call_vm {
     ($vm:expr, $init_user_id:expr, $script:expr, $prev_data:expr, $data:expr) => {
-        $vm.call_with_prev_data($init_user_id, $script, $prev_data, $data)
-            .expect("call should be successful");
+        match $vm.call_with_prev_data($init_user_id, $script, $prev_data, $data) {
+            Ok(v) => v,
+            Err(err) => panic!("VM call failed: {}", err),
+        }
     };
 }

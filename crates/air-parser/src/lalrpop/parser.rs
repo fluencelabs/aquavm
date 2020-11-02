@@ -313,18 +313,18 @@ mod tests {
     }
 
     #[test]
-    fn seq_with_empty() {
+    fn seq_with_empty_and_dash() {
         let source_code = r#"
         (seq 
             (seq 
                 (seq 
-                    (call "set_variables" ("" "") ["module_bytes"] module_bytes)
+                    (call "set_variables" ("" "") ["module-bytes"] module-bytes)
                     (call "set_variables" ("" "") ["module_config"] module_config)
                 )
                 (call "set_variables" ("" "") ["blueprint"] blueprint)
             )
             (seq 
-                (call "A" ("add_module" "") [module_bytes module_config] module)
+                (call "A" ("add_module" "") [module-bytes module_config] module)
                 (seq 
                     (call "A" ("add_blueprint" "") [blueprint] blueprint_id)
                     (seq 
@@ -342,8 +342,8 @@ mod tests {
                     Instruction::Call(Call {
                         peer: PeerPk(Literal("set_variables")),
                         f: ServiceIdWithFuncName(Literal(""), Literal("")),
-                        args: vec![Literal("module_bytes")],
-                        output: Scalar("module_bytes"),
+                        args: vec![Literal("module-bytes")],
+                        output: Scalar("module-bytes"),
                     }),
                     Instruction::Call(Call {
                         peer: PeerPk(Literal("set_variables")),
@@ -363,7 +363,7 @@ mod tests {
                 Instruction::Call(Call {
                     peer: PeerPk(Literal("A")),
                     f: ServiceIdWithFuncName(Literal("add_module"), Literal("")),
-                    args: vec![Variable("module_bytes"), Variable("module_config")],
+                    args: vec![Variable("module-bytes"), Variable("module_config")],
                     output: Scalar("module"),
                 }),
                 seq(

@@ -1,5 +1,5 @@
 // auto-generated: "lalrpop 0.19.1"
-// sha256: 2ade1d6b5ab67793a165a13dcab8566d1f5c7f5aa2e1df8cad3b2269f5645b
+// sha256: 57a01db5c9f2fcad0cdb4ed1186e5a1198f9aa44c9b32903ea8ee4ec9e955
 use crate::ast::*;
 use crate::lalrpop::parser::InstructionError;
 use lalrpop_util::ErrorRecovery;
@@ -1674,9 +1674,9 @@ mod __intern_token {
             ("^(\\))", false),
             ("^(\\[)", false),
             ("^(\\])", false),
-            ("^([0-9A-Z_a-z]+)", false),
-            ("^([0-9A-Z_a-z]+\\.\\$\\.[0-9A-Z_a-z]+)", false),
-            ("^([0-9A-Z_a-z]+\\[\\])", false),
+            ("^([\\-0-9A-Z_a-z]+)", false),
+            ("^([\\-0-9A-Z_a-z]+\\.\\$\\.[0-9A-Z_a-z]+)", false),
+            ("^([\\-0-9A-Z_a-z]+\\[\\])", false),
             ("^(%current_peer_id%)", false),
             ("^(call)", false),
             ("^(fold)", false),
