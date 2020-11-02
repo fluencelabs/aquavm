@@ -1,5 +1,5 @@
 // auto-generated: "lalrpop 0.19.1"
-// sha256: 71a16012ea1e8f7e53176e51ab7417ee2e68b726c0b4f08173dd485cdfba
+// sha256: 46236778379f592c5f03bcaf941f2d9529881d9947989af645e28cbce7fc9b
 use crate::ast::*;
 use crate::lalrpop::parser::InstructionError;
 use lalrpop_util::ErrorRecovery;
@@ -1703,7 +1703,7 @@ fn __action19<
         let mut path = v.splitn(2, ".");
         let variable = path.next().expect("must contain dot");
         let path = path.next().expect("contain component after dot");
-        Value::JsonPath{variable, path}
+        Value::JsonPath { variable, path }
     }
 }
 

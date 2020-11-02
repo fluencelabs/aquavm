@@ -142,7 +142,7 @@ mod tests {
         (seq
             (seq
                 (call peerid function () void)
-                (call peerid function () void)
+                (call (peerid serviceA) ("serviceB" function) () void)
             )
             (call "id" "f" ("hello" name) void[])
         )
@@ -157,8 +157,8 @@ mod tests {
                     output: Scalar("void"),
                 })),
                 Box::new(Instruction::Call(Call {
-                    peer: PeerPk(Variable("peerid")),
-                    f: FuncName(Variable("function")),
+                    peer: PeerPkWithServiceId(Variable("peerid"), Variable("serviceA")),
+                    f: ServiceIdWithFuncName(Literal("serviceB"), Variable("function")),
                     args: vec![],
                     output: Scalar("void"),
                 })),
@@ -179,6 +179,15 @@ mod tests {
         (call id.$.a "f" ("hello" name) void[])
         "#;
         let instruction = *parse(source_code);
-        println!("{:#?}", instruction);
+        let expected = Instruction::Call(Call {
+            peer: PeerPk(JsonPath {
+                variable: "id",
+                path: "$.a",
+            }),
+            f: FuncName(Literal("f")),
+            args: vec![Literal("hello"), Variable("name")],
+            output: Accumulator("void"),
+        });
+        assert_eq!(instruction, expected);
     }
 }

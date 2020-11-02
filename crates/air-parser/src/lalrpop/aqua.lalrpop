@@ -56,7 +56,7 @@ Value: Value<'input> = {
         let mut path = v.splitn(2, ".");
         let variable = path.next().expect("must contain dot");
         let path = path.next().expect("contain component after dot");
-        Value::JsonPath{variable, path}
+        Value::JsonPath { variable, path }
     },
 }
 
