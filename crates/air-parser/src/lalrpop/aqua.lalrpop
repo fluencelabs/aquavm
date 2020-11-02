@@ -55,6 +55,7 @@ ServiceId = Value;
 Arg = Value;
 
 Value: Value<'input> = {
+    "\"" "\"" => Value::Literal(""), // TODO: signal absence somehow?
     "\"" <v: Alphanumeric> "\"" => Value::Literal(v),
     <v:Alphanumeric> => Value::Variable(v),
     <v:JSON_PATH> => {

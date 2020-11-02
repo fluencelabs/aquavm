@@ -116,7 +116,6 @@ pub fn parse(source_code: &str) -> Result<Box<Instruction>, String> {
 
 #[cfg(test)]
 mod tests {
-    use super::parse;
     use crate::ast::*;
     use CallOutput::*;
     use FunctionPart::*;
@@ -124,6 +123,10 @@ mod tests {
     use Value::*;
 
     use fstrings::f;
+
+    fn parse(source_code: &str) -> Instruction {
+        *super::parse(source_code).expect("parsing failed")
+    }
 
     #[test]
     fn parse_seq() {
@@ -133,7 +136,7 @@ mod tests {
             (call "id" "f" ["hello" name] void[])
         )
         "#;
-        let instruction = *parse(source_code);
+        let instruction = parse(source_code);
         let expected = seq(
             Instruction::Call(Call {
                 peer: PeerPk(Variable("peerid")),
@@ -164,7 +167,7 @@ mod tests {
             (call "id" "f" ["hello" name] void[])
         )
         "#;
-        let instruction = *parse(source_code);
+        let instruction = parse(source_code);
         let expected = seq(
             seq(
                 Instruction::Call(Call {
@@ -195,7 +198,7 @@ mod tests {
         let source_code = r#"
         (call id.$.a "f" ["hello" name] void[])
         "#;
-        let instruction = *parse(source_code);
+        let instruction = parse(source_code);
         let expected = Instruction::Call(Call {
             peer: PeerPk(JsonPath {
                 variable: "id",
@@ -217,7 +220,7 @@ mod tests {
             ( null     )
         )
         "#;
-        let instruction = *parse(source_code);
+        let instruction = parse(source_code);
         let expected = Instruction::Seq(Seq(Box::new(null()), Box::new(null())));
         assert_eq!(instruction, expected)
     }
@@ -238,7 +241,7 @@ mod tests {
     fn parse_seq_par_xor_seq() {
         for name in &["xor", "par", "seq"] {
             let source_code = source_seq_with(name);
-            let instruction = *parse(&source_code.as_ref());
+            let instruction = parse(&source_code.as_ref());
             let instr = binary_instruction(*name);
             let expected = seq(instr(seqnn(), null()), instr(null(), seqnn()));
             assert_eq!(instruction, expected);
@@ -252,7 +255,7 @@ mod tests {
             (null)
         )
         "#;
-        let instruction = *parse(&source_code.as_ref());
+        let instruction = parse(&source_code.as_ref());
         let expected = fold("iterable", "i", null());
         assert_eq!(instruction, expected);
     }
@@ -266,7 +269,7 @@ mod tests {
     fn parse_fold_with_xor_par_seq() {
         for name in &["xor", "par", "seq"] {
             let source_code = source_fold_with(name);
-            let instruction = *parse(&source_code.as_ref());
+            let instruction = parse(&source_code.as_ref());
             let instr = binary_instruction(*name);
             let expected = fold("iterable", "i", instr(null(), null()));
             assert_eq!(instruction, expected);
@@ -283,7 +286,7 @@ mod tests {
             )
             (call %current_peer_id% ("local_service_id" "local_fn_name") [] result_2)
         )"#;
-        let instruction = *parse(&source_code.as_ref());
+        let instruction = parse(&source_code.as_ref());
         let expected = seq(
             par(
                 Instruction::Call(Call {
@@ -306,6 +309,88 @@ mod tests {
                 output: Scalar("result_2"),
             }),
         );
+        assert_eq!(instruction, expected);
+    }
+
+    #[test]
+    fn seq_with_empty() {
+        let source_code = r#"
+        (seq 
+            (seq 
+                (seq 
+                    (call "set_variables" ("" "") ["module_bytes"] module_bytes)
+                    (call "set_variables" ("" "") ["module_config"] module_config)
+                )
+                (call "set_variables" ("" "") ["blueprint"] blueprint)
+            )
+            (seq 
+                (call "A" ("add_module" "") [module_bytes module_config] module)
+                (seq 
+                    (call "A" ("add_blueprint" "") [blueprint] blueprint_id)
+                    (seq 
+                        (call "A" ("create" "") [blueprint_id] service_id)
+                        (call "remote_peer_id" ("" "") [service_id] client_result)
+                    )
+                )
+            )
+        )
+        "#;
+        let instruction = parse(&source_code.as_ref());
+        let expected = seq(
+            seq(
+                seq(
+                    Instruction::Call(Call {
+                        peer: PeerPk(Literal("set_variables")),
+                        f: ServiceIdWithFuncName(Literal(""), Literal("")),
+                        args: vec![Literal("module_bytes")],
+                        output: Scalar("module_bytes"),
+                    }),
+                    Instruction::Call(Call {
+                        peer: PeerPk(Literal("set_variables")),
+                        f: ServiceIdWithFuncName(Literal(""), Literal("")),
+                        args: vec![Literal("module_config")],
+                        output: Scalar("module_config"),
+                    }),
+                ),
+                Instruction::Call(Call {
+                    peer: PeerPk(Literal("set_variables")),
+                    f: ServiceIdWithFuncName(Literal(""), Literal("")),
+                    args: vec![Literal("blueprint")],
+                    output: Scalar("blueprint"),
+                }),
+            ),
+            seq(
+                Instruction::Call(Call {
+                    peer: PeerPk(Literal("A")),
+                    f: ServiceIdWithFuncName(Literal("add_module"), Literal("")),
+                    args: vec![Variable("module_bytes"), Variable("module_config")],
+                    output: Scalar("module"),
+                }),
+                seq(
+                    Instruction::Call(Call {
+                        peer: PeerPk(Literal("A")),
+                        f: ServiceIdWithFuncName(Literal("add_blueprint"), Literal("")),
+                        args: vec![Variable("blueprint")],
+                        output: Scalar("blueprint_id"),
+                    }),
+                    seq(
+                        Instruction::Call(Call {
+                            peer: PeerPk(Literal("A")),
+                            f: ServiceIdWithFuncName(Literal("create"), Literal("")),
+                            args: vec![Variable("blueprint_id")],
+                            output: Scalar("service_id"),
+                        }),
+                        Instruction::Call(Call {
+                            peer: PeerPk(Literal("remote_peer_id")),
+                            f: ServiceIdWithFuncName(Literal(""), Literal("")),
+                            args: vec![Variable("service_id")],
+                            output: Scalar("client_result"),
+                        }),
+                    ),
+                ),
+            ),
+        );
+
         assert_eq!(instruction, expected);
     }
 
