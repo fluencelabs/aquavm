@@ -120,20 +120,20 @@ mod tests {
         )
         "#;
         let instruction = *parse(source_code);
-        let expected = Instruction::Seq(Seq(
-            Box::new(Instruction::Call(Call {
+        let expected = seq(
+            Instruction::Call(Call {
                 peer: PeerPk(Variable("peerid")),
                 f: FuncName(Variable("function")),
                 args: vec![],
                 output: Scalar("void"),
-            })),
-            Box::new(Instruction::Call(Call {
+            }),
+            Instruction::Call(Call {
                 peer: PeerPk(Literal("id")),
                 f: FuncName(Literal("f")),
                 args: vec![Literal("hello"), Variable("name")],
                 output: Accumulator("void"),
-            })),
-        ));
+            }),
+        );
         assert_eq!(instruction, expected);
     }
 
@@ -151,28 +151,28 @@ mod tests {
         )
         "#;
         let instruction = *parse(source_code);
-        let expected = Instruction::Seq(Seq(
-            Box::new(Instruction::Seq(Seq(
-                Box::new(Instruction::Call(Call {
+        let expected = seq(
+            seq(
+                Instruction::Call(Call {
                     peer: PeerPk(Variable("peerid")),
                     f: FuncName(Variable("function")),
                     args: vec![],
                     output: Scalar("void"),
-                })),
-                Box::new(Instruction::Call(Call {
+                }),
+                Instruction::Call(Call {
                     peer: PeerPkWithServiceId(Variable("peerid"), Variable("serviceA")),
                     f: ServiceIdWithFuncName(Literal("serviceB"), Variable("function")),
                     args: vec![],
                     output: Scalar("void"),
-                })),
-            ))),
-            Box::new(Instruction::Call(Call {
+                }),
+            ),
+            Instruction::Call(Call {
                 peer: PeerPk(Literal("id")),
                 f: FuncName(Literal("f")),
                 args: vec![Literal("hello"), Variable("name")],
                 output: Accumulator("void"),
-            })),
-        ));
+            }),
+        );
         assert_eq!(instruction, expected);
     }
 
