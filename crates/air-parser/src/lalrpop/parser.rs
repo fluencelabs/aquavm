@@ -254,12 +254,7 @@ mod tests {
         for name in &["xor", "par", "seq"] {
             let source_code = source_fold_with(name);
             let instruction = *parse(&source_code.as_ref());
-            let instr = |l, r| match *name {
-                "xor" => xor(l, r),
-                "par" => par(l, r),
-                "seq" => seq(l, r),
-                _ => unreachable!(),
-            };
+            let instr = binary_instruction(*name);
             let expected = fold("iterable", "i", instr(null(), null()));
             assert_eq!(instruction, expected);
         }
@@ -293,13 +288,13 @@ mod tests {
             instruction: std::rc::Rc::new(instruction),
         })
     }
-    fn binary_instruction<'a>(
-        name: &'a str,
-    ) -> impl for<'b> Fn(Instruction<'_>, Instruction<'_>) -> Instruction<'b> {
+    fn binary_instruction(
+        name: &str,
+    ) -> Box<dyn for<'a> Fn(Instruction<'a>, Instruction<'a>) -> Instruction<'a>> {
         match name {
-            "xor" => |l, r| xor(l, r),
-            "par" => |l, r| par(l, r),
-            "seq" => |l, r| seq(l, r),
+            "xor" => Box::new(|l, r| xor(l, r)),
+            "par" => Box::new(|l, r| par(l, r)),
+            "seq" => Box::new(|l, r| seq(l, r)),
             _ => unreachable!(),
         }
     }
