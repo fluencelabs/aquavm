@@ -74,13 +74,13 @@ fn par_par_call() {
 
     let script = String::from(
         r#"
-        (par (
-            (par (
-                (call %current_peer_id% ("local_service_id" "local_fn_name") () result_1)
-                (call "remote_peer_id" ("service_id" "fn_name") () g)
-            ))
-            (call %current_peer_id% ("local_service_id" "local_fn_name") () result_2)
-        ))"#,
+        (par
+            (par
+                (call %current_peer_id% ("local_service_id" "local_fn_name") [] result_1)
+                (call "remote_peer_id" ("service_id" "fn_name") [] g)
+            )
+            (call %current_peer_id% ("local_service_id" "local_fn_name") [] result_2)
+        )"#,
     );
 
     let res = call_vm!(vm, "asd", script, "[]", "[]");
