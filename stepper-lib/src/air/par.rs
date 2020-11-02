@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-/*
 use super::CallEvidenceCtx;
 use super::EvidenceState;
 use super::ExecutableInstruction;
@@ -24,14 +23,13 @@ use crate::log_instruction;
 use crate::log_targets::EVIDENCE_CHANGING;
 use crate::Result;
 
+use air_parser::ast::Par;
+
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
-pub(crate) struct Par(Box<Instruction>, Box<Instruction>);
-
-impl ExecutableInstruction for Par {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
+impl<'i> ExecutableInstruction<'i> for Par<'i> {
+    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
         log_instruction!(par, exec_ctx, call_ctx);
 
         let (left_subtree_size, right_subtree_size) = extract_subtree_sizes(call_ctx)?;
@@ -88,10 +86,10 @@ fn extract_subtree_sizes(call_ctx: &mut CallEvidenceCtx) -> Result<(usize, usize
     }
 }
 
-fn execute_subtree(
-    subtree: &Instruction,
+fn execute_subtree<'i>(
+    subtree: &Instruction<'i>,
     subtree_size: usize,
-    exec_ctx: &mut ExecutionCtx,
+    exec_ctx: &mut ExecutionCtx<'i>,
     call_ctx: &mut CallEvidenceCtx,
 ) -> Result<usize> {
     call_ctx.current_subtree_elements_count = subtree_size;
@@ -163,4 +161,3 @@ mod tests {
         assert_eq!(res.next_peer_pks, vec![String::from("remote_peer_id_2")]);
     }
 }
-*/
