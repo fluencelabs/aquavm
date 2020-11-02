@@ -103,7 +103,7 @@ fn execute_subtree<'i>(
     Ok(call_ctx.new_path.len() - before_states_count)
 }
 
-fn determine_subtree_complete(next_instruction: &Instruction) -> bool {
+fn determine_subtree_complete(next_instruction: &Instruction<'_>) -> bool {
     // this is needed to prevent situation when on such pattern
     // (fold (Iterable i
     //    (par (

@@ -93,7 +93,7 @@ impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
 }
 
 impl<'i> super::ExecutableInstruction<'i> for Next<'i> {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
+    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
         use AquamarineError::IncompatibleAValueType;
 
         log_instruction!(next, exec_ctx, call_ctx);

@@ -22,6 +22,7 @@ use std::fmt::Formatter;
 
 use codespan_reporting::diagnostic::{Diagnostic, Label};
 use codespan_reporting::files::SimpleFiles;
+use codespan_reporting::term::termcolor::Buffer;
 use codespan_reporting::term::{
     self,
     termcolor::{ColorChoice, StandardStream},
@@ -40,7 +41,7 @@ impl std::fmt::Display for InstructionError {
     }
 }
 
-pub fn parse(source_code: &str) -> Box<Instruction> {
+pub fn parse(source_code: &str) -> Result<Box<Instruction>, String> {
     let mut files = SimpleFiles::new();
     let file_id = files.add("script.aqua", source_code);
 
@@ -100,11 +101,16 @@ pub fn parse(source_code: &str) -> Box<Instruction> {
 
             let writer = StandardStream::stderr(ColorChoice::Auto);
             let config = codespan_reporting::term::Config::default();
+            term::emit(&mut writer.lock(), &config, &files, &diagnostic)
+                .expect("term emit to stderr");
 
-            term::emit(&mut writer.lock(), &config, &files, &diagnostic).expect("term emit");
-            panic!("parsing failed");
+            let mut buffer = Buffer::no_color();
+            term::emit(&mut buffer, &config, &files, &diagnostic).expect("term emit to buffer");
+            Err(String::from_utf8_lossy(buffer.as_slice())
+                .as_ref()
+                .to_string())
         }
-        Ok(r) => r,
+        Ok(r) => Ok(r),
     }
 }
 

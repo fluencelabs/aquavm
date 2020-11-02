@@ -31,8 +31,6 @@ use air_parser::ast::Call;
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
 
-const CURRENT_PEER_ALIAS: &str = "%current_peer_id%";
-
 /*
    (current)
    (pk $pk)
@@ -45,7 +43,7 @@ const CURRENT_PEER_ALIAS: &str = "%current_peer_id%";
 */
 
 impl<'i> super::ExecutableInstruction<'i> for Call<'i> {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
+    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
         log_instruction!(call, exec_ctx, call_ctx);
 
         let parsed_call = match ParsedCall::new(self, exec_ctx) {

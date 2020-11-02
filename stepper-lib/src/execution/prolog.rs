@@ -38,7 +38,7 @@ pub(super) fn prepare<'i>(
     let path: CallEvidencePath = serde_json::from_str(&raw_path).map_err(CallDeError)?;
 
     // let formatted_aqua = format_aqua(raw_aqua);
-    let aqua: Instruction<'i> = *air_parser::parse(raw_aqua);
+    let aqua: Instruction<'i> = *air_parser::parse(raw_aqua).map_err(|msg| AquamarineError::AIRParseError(msg))?;
 
     log::info!(
         target: RUN_PARAMS,

@@ -48,7 +48,7 @@ pub struct Call<'i> {
     pub output: CallOutput<'i>,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Value<'i> {
     Variable(&'i str),
     Literal(&'i str),
@@ -56,10 +56,20 @@ pub enum Value<'i> {
     CurrentPeerId,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum CallOutput<'i> {
     Scalar(&'i str),
     Accumulator(&'i str),
+}
+
+impl<'i> CallOutput<'i> {
+    pub fn name(&self) -> &'i str {
+        use CallOutput::*;
+
+        match self {
+            Scalar(name) | Accumulator(name) => name,
+        }
+    }
 }
 
 #[derive(Debug, PartialEq, Eq)]

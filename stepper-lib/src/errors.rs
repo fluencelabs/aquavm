@@ -30,6 +30,8 @@ use std::error::Error;
 
 #[derive(Debug)]
 pub enum AquamarineError {
+    AIRParseError(String),
+
     /// Errors occurred while parsing aqua script in the form of S expressions.
     SExprParseError(SExprError),
 
@@ -97,6 +99,7 @@ impl std::fmt::Display for AquamarineError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         match self {
             AquamarineError::SExprParseError(err) => write!(f, "aqua script can't be parsed: {:?}", err),
+            AquamarineError::AIRParseError(err) => write!(f, "aqua script can't be parsed:\n{}", err),
             AquamarineError::FuncArgsSerializationError(args, err) => write!(
                 f,
                 "function arguments {} can't be serialized or deserialized with an error: {:?}",
@@ -185,7 +188,7 @@ impl From<std::convert::Infallible> for AquamarineError {
 impl Into<StepperOutcome> for AquamarineError {
     fn into(self) -> StepperOutcome {
         let ret_code = match self {
-            AquamarineError::SExprParseError(_) => 1,
+            AquamarineError::AIRParseError(_) => 1,
             AquamarineError::FuncArgsSerializationError(..) => 2,
             AquamarineError::CallServiceResultDeserializationError(..) => 3,
             AquamarineError::CurrentPeerIdEnvError(..) => 4,
@@ -205,6 +208,7 @@ impl Into<StepperOutcome> for AquamarineError {
             AquamarineError::IncompatibleEvidenceStates(..) => 18,
             AquamarineError::IncompatibleCallResults(..) => 19,
             AquamarineError::EvidencePathTooSmall(..) => 20,
+            AquamarineError::SExprParseError(..) => unreachable!("we're not using sexpr anymore"),
         };
 
         StepperOutcome {
