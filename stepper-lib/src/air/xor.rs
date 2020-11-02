@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-/*
 use super::CallEvidenceCtx;
 use super::ExecutionCtx;
 use super::Instruction;
@@ -22,14 +21,13 @@ use crate::log_instruction;
 use crate::AquamarineError::LocalServiceError;
 use crate::Result;
 
+use air_parser::ast::Xor;
+
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
-pub(crate) struct Xor(Box<Instruction>, Box<Instruction>);
-
-impl super::ExecutableInstruction for Xor {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
+impl<'i> super::ExecutableInstruction<'i> for Xor<'i> {
+    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
         log_instruction!(xor, exec_ctx, call_ctx);
 
         exec_ctx.subtree_complete = true;
@@ -118,4 +116,3 @@ mod tests {
         );
     }
 }
-*/

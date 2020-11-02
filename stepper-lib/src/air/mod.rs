@@ -53,9 +53,9 @@ impl<'i> ExecutableInstruction<'i> for Instruction<'i> {
             Instruction::Null(null) => null.execute(exec_ctx, call_ctx),
             Instruction::Fold(fold) => fold.execute(exec_ctx, call_ctx),
             Instruction::Next(next) => next.execute(exec_ctx, call_ctx),
-            _ => unimplemented!(),
-            /*Instruction::Par(par) => par.execute(exec_ctx, call_ctx),
-            Instruction::Xor(xor) => xor.execute(exec_ctx, call_ctx),*/
+            Instruction::Par(par) => par.execute(exec_ctx, call_ctx),
+            Instruction::Xor(xor) => xor.execute(exec_ctx, call_ctx),
+            Instruction::Error => unreachable!("should not execute if parsing failed. QED."),
         }
     }
 }
