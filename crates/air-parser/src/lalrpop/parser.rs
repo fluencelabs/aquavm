@@ -63,7 +63,7 @@ fn parse(source_code: &str) -> Box<Instruction> {
 
     match parse(source_code.as_ref()) {
         Err(errors) => {
-            let labels: Vec<_> = errors
+            let labels = errors
                 .into_iter()
                 .map(|err| match err.error {
                     ParseError::UnrecognizedToken {
@@ -87,10 +87,11 @@ fn parse(source_code: &str) -> Box<Instruction> {
                     */
                 })
                 .collect();
+            let diagnostic = Diagnostic::error()
+                .with_message("some error")
+                .with_labels(labels);
 
-            let diagnostic = Diagnostic::error().with_labels(labels);
-
-            let writer = StandardStream::stderr(ColorChoice::Auto);
+            let writer = StandardStream::stderr(ColorChoice::Always);
             let config = codespan_reporting::term::Config::default();
 
             term::emit(&mut writer.lock(), &config, &files, &diagnostic).expect("term emit");
@@ -115,71 +116,69 @@ mod tests {
     fn parse_seq() {
         let source_code = r#"
         (seq
-            (call peerid function [] void)
-            (call "id" "f" ["hello" name] void[])
+            (call peerid function () void)
+            (call "id" "f" ("hello" name) void[])
         )
         "#;
         let instruction = *parse(source_code);
-        let expected = seq(
-            Instruction::Call(Call {
+        let expected = Instruction::Seq(Seq(
+            Box::new(Instruction::Call(Call {
                 peer: PeerPk(Variable("peerid")),
                 f: FuncName(Variable("function")),
                 args: vec![],
                 output: Scalar("void"),
-            }),
-            Instruction::Call(Call {
+            })),
+            Box::new(Instruction::Call(Call {
                 peer: PeerPk(Literal("id")),
                 f: FuncName(Literal("f")),
                 args: vec![Literal("hello"), Variable("name")],
                 output: Accumulator("void"),
-            }),
-        );
+            })),
+        ));
         assert_eq!(instruction, expected);
     }
 
     #[test]
     fn parse_seq_seq() {
-        // TODO: make output one of _ () "" and absence
-
         let source_code = r#"
         (seq
             (seq
-                (call peerid function [] void)
-                (call (peerid serviceA) ("serviceB" function) [] void)
+                (call peerid function () void)
+                (call (peerid serviceA) ("serviceB" function) () void)
             )
-            (call "id" "f" ["hello" name] void[])
+            (call "id" "f" ("hello" name) void[])
         )
         "#;
         let instruction = *parse(source_code);
-        let expected = seq(
-            seq(
-                Instruction::Call(Call {
+        let expected = Instruction::Seq(Seq(
+            Box::new(Instruction::Seq(Seq(
+                Box::new(Instruction::Call(Call {
                     peer: PeerPk(Variable("peerid")),
                     f: FuncName(Variable("function")),
                     args: vec![],
                     output: Scalar("void"),
-                }),
-                Instruction::Call(Call {
+                })),
+                Box::new(Instruction::Call(Call {
                     peer: PeerPkWithServiceId(Variable("peerid"), Variable("serviceA")),
                     f: ServiceIdWithFuncName(Literal("serviceB"), Variable("function")),
                     args: vec![],
                     output: Scalar("void"),
-                }),
-            ),
-            Instruction::Call(Call {
+                })),
+            ))),
+            Box::new(Instruction::Call(Call {
                 peer: PeerPk(Literal("id")),
                 f: FuncName(Literal("f")),
                 args: vec![Literal("hello"), Variable("name")],
                 output: Accumulator("void"),
-            }),
-        );
+            })),
+        ));
         assert_eq!(instruction, expected);
     }
 
     #[test]
     fn parse_json_path() {
         let source_code = r#"
-        (call id.$.a "f" ["hello" name] void[])
+        (call id.$.a "f" ("hello" name) void[])
         "#;
         let instruction = *parse(source_code);
         let expected = Instruction::Call(Call {
@@ -221,6 +220,7 @@ mod tests {
         )
         "#)
     }
+
     #[test]
     fn parse_seq_par_xor_seq() {
         for name in &["xor", "par", "seq"] {
@@ -254,7 +254,12 @@ mod tests {
         for name in &["xor", "par", "seq"] {
             let source_code = source_fold_with(name);
             let instruction = *parse(&source_code.as_ref());
-            let instr = binary_instruction(*name);
+            let instr = |l, r| match *name {
+                "xor" => xor(l, r),
+                "par" => par(l, r),
+                "seq" => seq(l, r),
+                _ => unreachable!(),
+            };
             let expected = fold("iterable", "i", instr(null(), null()));
             assert_eq!(instruction, expected);
         }
@@ -288,13 +293,13 @@ mod tests {
             instruction: std::rc::Rc::new(instruction),
         })
     }
-    fn binary_instruction(
-        name: &str,
-    ) -> Box<dyn for<'a> Fn(Instruction<'a>, Instruction<'a>) -> Instruction<'a>> {
+    fn binary_instruction<'a>(
+        name: &'a str,
+    ) -> impl for<'b> Fn(Instruction<'_>, Instruction<'_>) -> Instruction<'b> {
         match name {
-            "xor" => Box::new(|l, r| xor(l, r)),
-            "par" => Box::new(|l, r| par(l, r)),
-            "seq" => Box::new(|l, r| seq(l, r)),
+            "xor" => |l, r| xor(l, r),
+            "par" => |l, r| par(l, r),
+            "seq" => |l, r| seq(l, r),
             _ => unreachable!(),
         }
     }

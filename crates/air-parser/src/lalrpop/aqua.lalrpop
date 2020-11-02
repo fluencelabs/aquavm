@@ -14,22 +14,18 @@ pub Instr: Box<Instruction<'input>> = {
     "(" "seq" <l:Instr> <r:Instr> ")" => Box::new(Instruction::Seq(Seq(l, r))),
     "(" "par" <l:Instr> <r:Instr> ")" => Box::new(Instruction::Par(Par(l, r))),
     "(" "xor" <l:Instr> <r:Instr> ")" => Box::new(Instruction::Xor(Xor(l, r))),
-
-    "(" "call" <peer:PeerPart> <f:FPart> <args:Args> <output:Output> ")" =>
-        Box::new(Instruction::Call(Call{peer, f, args, output})),
-
+    "(" "call" <peer:PeerPart> <f:FPart> <args:Args> <output:Output> ")" => Box::new(Instruction::Call(Call{peer, f, args, output})),
     "(" "fold" <iterable:Alphanumeric> <iterator:Alphanumeric> <i:Instr> ")" => {
         let instruction = Rc::new(*i);
         Box::new(Instruction::Fold(Fold{ iterable, iterator, instruction }))
     },
-
     "(" "next" <i:Alphanumeric> ")" => Box::new(Instruction::Next(Next(i))),
     "(" "null" ")" => Box::new(Instruction::Null),
     ! => { errors.push(<>); Box::new(Instruction::Error) },
 }
 
 Args: Vec<Value<'input>> = {
-    "[" <args:(<Arg>)*> "]" => args
+    "(" <args:(<Arg>)*> ")" => args
 }
 
 
