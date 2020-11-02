@@ -106,11 +106,11 @@ fn execute_subtree<'i>(
 fn determine_subtree_complete(next_instruction: &Instruction<'_>) -> bool {
     // this is needed to prevent situation when on such pattern
     // (fold (Iterable i
-    //    (par (
-    //       (call (..))
+    //    (par
+    //       (call ..)
     //       (next i)
-    //    ))
-    // ))
+    //    )
+    // )
     // par will be executed after the last next that wouldn't change subtree_complete
     !matches!(next_instruction, Instruction::Next(_))
 }
@@ -129,10 +129,10 @@ mod tests {
 
         let script = String::from(
             r#"
-            (par (
-                (call ("remote_peer_id_1" ("local_service_id" "local_fn_name") () result_name))
-                (call ("remote_peer_id_2" ("service_id" "fn_name") () g))
-            ))"#,
+            (par 
+                (call "remote_peer_id_1" ("local_service_id" "local_fn_name") [] result_name)
+                (call "remote_peer_id_2" ("service_id" "fn_name") [] g)
+            )"#,
         );
 
         let mut res = call_vm!(vm, "", script, "[]", "[]");
@@ -150,10 +150,10 @@ mod tests {
 
         let script = String::from(
             r#"
-            (par (
-                (call (%current_peer_id% ("local_service_id" "local_fn_name") () result_name))
-                (call ("remote_peer_id_2" ("service_id" "fn_name") () g))
-            ))"#,
+            (par 
+                (call %current_peer_id% ("local_service_id" "local_fn_name") [] result_name)
+                (call "remote_peer_id_2" ("service_id" "fn_name") [] g)
+            )"#,
         );
 
         let res = call_vm!(vm, "", script, "[]", "[]");

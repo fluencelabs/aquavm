@@ -54,10 +54,10 @@ mod tests {
 
         let script = String::from(
             r#"
-            (seq (
-                (call ("remote_peer_id_1" ("local_service_id" "local_fn_name") () result_name))
-                (call ("remote_peer_id_2" ("service_id" "fn_name") () g))
-            ))"#,
+            (seq 
+                (call "remote_peer_id_1" ("local_service_id" "local_fn_name") [] result_name)
+                (call "remote_peer_id_2" ("service_id" "fn_name") [] g)
+            )"#,
         );
 
         let res = call_vm!(vm, "asd", script.clone(), "[]", "[]");
@@ -73,10 +73,10 @@ mod tests {
 
         let script = String::from(
             r#"
-            (seq (
-                (call (%current_peer_id% ("local_service_id" "local_fn_name") () result_name))
-                (call ("remote_peer_id_2" ("service_id" "fn_name") () g))
-            ))"#,
+            (seq 
+                (call %current_peer_id% ("local_service_id" "local_fn_name") [] result_name)
+                (call "remote_peer_id_2" ("service_id" "fn_name") [] g)
+            )"#,
         );
 
         let res = call_vm!(vm, "asd", script, "[]", "[]");

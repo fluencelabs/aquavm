@@ -164,15 +164,15 @@ mod tests {
 
         let lfold = String::from(
             r#"
-            (seq (
-                (call ("set_variable" ("" "") () Iterable))
-                (fold (Iterable i
-                    (seq (
-                        (call ("A" ("" "") (i) acc[]))
+            (seq
+                (call "set_variable" ("" "") [] Iterable)
+                (fold Iterable i
+                    (seq
+                        (call "A" ("" "") [i] acc[])
                         (next i)
-                    ))
-                ))
-            ))"#,
+                    )
+                )
+            )"#,
         );
 
         let res = call_vm!(set_variable_vm, "", lfold.clone(), "[]", "[]");
@@ -197,15 +197,15 @@ mod tests {
 
         let rfold = String::from(
             r#"
-            (seq (
-                (call ("set_variable" ("" "") () Iterable))
-                (fold (Iterable i
-                    (seq (
+            (seq
+                (call "set_variable" ("" "") [] Iterable)
+                (fold Iterable i
+                    (seq
                         (next i)
-                        (call ("A" ("" "") (i) acc[]))
-                    ))
-                ))
-            ))"#,
+                        (call "A" ("" "") [i] acc[])
+                    )
+                )
+            )"#,
         );
 
         let res = call_vm!(set_variable_vm, "", rfold.clone(), "[]", "[]");
@@ -230,23 +230,23 @@ mod tests {
 
         let script = String::from(
             r#"
-            (seq (
-                (seq (
-                    (call ("set_variable" ("" "") () Iterable1))
-                    (call ("set_variable" ("" "") () Iterable2))
-                ))
-                (fold (Iterable1 i
-                    (seq (
-                        (fold (Iterable2 j
-                            (seq (
-                                (call ("A" ("" "") (i) acc[]))
+            (seq
+                (seq
+                    (call "set_variable" ("" "") [] Iterable1)
+                    (call "set_variable" ("" "") [] Iterable2)
+                )
+                (fold Iterable1 i
+                    (seq
+                        (fold Iterable2 j
+                            (seq
+                                (call "A" ("" "") [i] acc[])
                                 (next j)
-                            ))
-                        ))
+                            )
+                        )
                         (next i)
-                    ))
-                ))
-            ))"#,
+                    )
+                )
+            )"#,
         );
 
         let res = call_vm!(set_variable_vm, "", script.clone(), "[]", "[]");
@@ -273,23 +273,23 @@ mod tests {
 
         let script = String::from(
             r#"
-            (seq (
-                (seq (
-                    (call ("set_variable" ("" "") () Iterable1))
-                    (call ("set_variable" ("" "") () Iterable2))
-                ))
-                (fold (Iterable1 i
-                    (seq (
-                        (fold (Iterable2 i
-                            (seq (
-                                (call ("A" ("" "") (i) acc[]))
+            (seq
+                (seq
+                    (call "set_variable" ("" "") [] Iterable1)
+                    (call "set_variable" ("" "") [] Iterable2)
+                )
+                (fold Iterable1 i
+                    (seq
+                        (fold Iterable2 i
+                            (seq
+                                (call "A" ("" "") [i] acc[])
                                 (next i)
-                            ))
-                        ))
+                            )
+                        )
                         (next i)
-                    ))
-                ))
-            ))"#,
+                    )
+                )
+            )"#,
         );
 
         let res = vm.call_with_prev_data("", script, "[]", "[]");
@@ -317,15 +317,15 @@ mod tests {
 
         let empty_fold = String::from(
             r#"
-            (seq (
-                (call ("set_variable" ("" "") () Iterable))
-                (fold (Iterable i
-                    (seq (
-                        (call ("A" ("" "") (i) acc[]))
+            (seq
+                (call "set_variable" ("" "") [] Iterable)
+                (fold Iterable i
+                    (seq
+                        (call "A" ("" "") [i] acc[])
                         (next i)
-                    ))
-                ))
-            ))"#,
+                    )
+                )
+            )"#,
         );
 
         let res = call_vm!(set_variable_vm, "", empty_fold.clone(), "[]", "[]");

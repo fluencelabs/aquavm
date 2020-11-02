@@ -97,7 +97,7 @@ mod tests {
 
         let script = String::from(
             r#"
-               (call (%current_peer_id% ("local_service_id" "local_fn_name") () result_name))
+               (call %current_peer_id% ("local_service_id" "local_fn_name") [] result_name)
             "#,
         );
 
@@ -113,7 +113,7 @@ mod tests {
 
         let script = String::from(
             r#"
-               (call ("test_peer_id" ("local_service_id" "local_fn_name") () result_name))
+               (call "test_peer_id" ("local_service_id" "local_fn_name") [] result_name)
             "#,
         );
 
@@ -138,7 +138,7 @@ mod tests {
 
         let remote_peer_id = String::from("some_remote_peer_id");
         let script = format!(
-            r#"(call ("{}" ("local_service_id" "local_fn_name") (value) result_name))"#,
+            r#"(call "{}" ("local_service_id" "local_fn_name") [value] result_name)"#,
             remote_peer_id
         );
 
@@ -157,10 +157,10 @@ mod tests {
 
         let script = format!(
             r#"
-            (seq (
-                (call ("set_variable" ("some_service_id" "local_fn_name") () remote_peer_id))
-                (call (remote_peer_id ("some_service_id" "local_fn_name") () result_name))
-            ))
+            (seq 
+                (call "set_variable" ("some_service_id" "local_fn_name") [] remote_peer_id)
+                (call remote_peer_id ("some_service_id" "local_fn_name") [] result_name)
+            )
         "#,
         );
 
@@ -191,10 +191,10 @@ mod tests {
 
         let script = String::from(
             r#"
-            (seq (
-                (call ("set_variable" ("some_service_id" "local_fn_name") () arg3))
-                (call ("A" ("some_service_id" "local_fn_name") ("arg1" "arg2" arg3) result))
-            ))
+            (seq 
+                (call "set_variable" ("some_service_id" "local_fn_name") [] arg3)
+                (call "A" ("some_service_id" "local_fn_name") ["arg1" "arg2" arg3] result)
+            )
         "#,
         );
 

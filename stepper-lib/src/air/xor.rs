@@ -82,10 +82,10 @@ mod tests {
 
         let script = String::from(
             r#"
-            (xor (
-                (call (%current_peer_id% ("service_id_1" "local_fn_name") () result_1))
-                (call (%current_peer_id% ("service_id_2" "local_fn_name") () result_2))
-            ))"#,
+            (xor
+                (call %current_peer_id% ("service_id_1" "local_fn_name") [] result_1)
+                (call %current_peer_id% ("service_id_2" "local_fn_name") [] result_2)
+            )"#,
         );
 
         let res = call_vm!(vm, "asd", script, "[]", "[]");
@@ -100,10 +100,10 @@ mod tests {
 
         let script = String::from(
             r#"
-            (xor (
-                (call (%current_peer_id% ("service_id_2" "local_fn_name") () result_1))
-                (call (%current_peer_id% ("service_id_1" "local_fn_name") () result_2))
-            ))"#,
+            (xor
+                (call %current_peer_id% ("service_id_2" "local_fn_name") [] result_1)
+                (call %current_peer_id% ("service_id_1" "local_fn_name") [] result_2)
+            )"#,
         );
 
         let res = call_vm!(vm, "asd", script, "[]", "[]");
