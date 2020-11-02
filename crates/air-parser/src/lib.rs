@@ -5,6 +5,3 @@ mod lalrpop {
     mod aqua;
     mod parser;
 }
-mod peg {
-    mod parser;
-}
