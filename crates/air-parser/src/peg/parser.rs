@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+use crate::ast::Instruction;
 use pest::error::Error;
-use pest::iterators::Pairs;
-use pest::Parser;
+use pest::iterators::{Pair, Pairs};
+use pest::{Parser, RuleType};
 use pest_derive::*;
 
 #[derive(Parser)]
@@ -33,16 +34,31 @@ pub struct Script {}
 type PestPairs<'a> = pest::iterators::Pairs<'a, Rule>;
 type Result<T> = std::result::Result<T, Error<Rule>>;
 
-pub fn parse(air_script: &str) -> Script {
+fn parse(source_code: &str) -> Box<Instruction> {
+    parse_core(source_code);
+    Box::new(Instruction::Null)
+}
+
+fn next(mut pairs: PestPairs<'_>) {
+    if let Some(pair) = pairs.next() {
+        let rule = pair.as_rule();
+        let inner = pair.into_inner();
+        println!("rule: {:#?}\ninner:{:#?}\n", rule, inner);
+        inner
+    }
+}
+
+pub fn parse_core(air_script: &str) -> Script {
     let expr: PestPairs<'_> = Expression::parse(Rule::expr, "( seq )").expect("parse expr");
+    next(expr);
 
     let script = Script::default();
 
-    for pair in expr {
+    /*for pair in expr {
         println!("pair: {:#?}", pair);
         // Loop over the pairs converted as an iterator of the tokens
         // which composed it.
-        for inner_pair in pair.into_inner() {
+        /*for inner_pair in pair.into_inner() {
             match inner_pair.as_rule() {
                 Rule::instruction => {
                     let inst = inner_pair.into_inner().next().expect("instruction");
@@ -59,8 +75,8 @@ pub fn parse(air_script: &str) -> Script {
             // Populate the group based on the rules found by the
             // parser.
             // println!("inner_pair {:?}", inner_pair);
-        }
-    }
+        }*/
+    }*/
 
     Script {}
 }
@@ -69,9 +85,78 @@ pub fn parse(air_script: &str) -> Script {
 mod tests {
     use super::*;
 
+    use crate::ast::CallOutput::*;
+    use crate::ast::FunctionPart::*;
+    use crate::ast::PeerPart::*;
+    use crate::ast::Value::*;
+    use crate::ast::*;
+
     #[test]
     fn do_parse() {
         let script = parse("(seq)");
         println!("{:?}", script);
+    }
+
+    #[test]
+    fn parse_seq() {
+        let source_code = r#"
+        (seq
+            (call peerid function () void)
+            (call "id" "f" ("hello" name) void[])
+        )
+        "#;
+        let instruction = *parse(source_code);
+        let expected = Instruction::Seq(Seq(
+            Box::new(Instruction::Call(Call {
+                peer: PeerPk(Variable("peerid")),
+                f: FuncName(Variable("function")),
+                args: vec![],
+                output: Scalar("void"),
+            })),
+            Box::new(Instruction::Call(Call {
+                peer: PeerPk(Literal("id")),
+                f: FuncName(Literal("f")),
+                args: vec![Literal("hello"), Variable("name")],
+                output: Accumulator("void"),
+            })),
+        ));
+        assert_eq!(instruction, expected);
+    }
+
+    #[test]
+    fn parse_seq_seq() {
+        let source_code = r#"
+        (seq
+            (seq
+                (call peerid function () void)
+                (call peerid function () void)
+            )
+            (call "id" "f" ("hello" name) void[])
+        )
+        "#;
+        let instruction = *parse(source_code);
+        let expected = Instruction::Seq(Seq(
+            Box::new(Instruction::Seq(Seq(
+                Box::new(Instruction::Call(Call {
+                    peer: PeerPk(Variable("peerid")),
+                    f: FuncName(Variable("function")),
+                    args: vec![],
+                    output: Scalar("void"),
+                })),
+                Box::new(Instruction::Call(Call {
+                    peer: PeerPk(Variable("peerid")),
+                    f: FuncName(Variable("function")),
+                    args: vec![],
+                    output: Scalar("void"),
+                })),
+            ))),
+            Box::new(Instruction::Call(Call {
+                peer: PeerPk(Literal("id")),
+                f: FuncName(Literal("f")),
+                args: vec![Literal("hello"), Variable("name")],
+                output: Accumulator("void"),
+            })),
+        ));
+        assert_eq!(instruction, expected);
     }
 }

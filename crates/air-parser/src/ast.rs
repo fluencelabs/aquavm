@@ -16,14 +16,11 @@
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Instruction<'i> {
-    Null(Null),
+    Null,
     Call(Call<'i>),
     Seq(Seq<'i>),
     Error,
 }
-
-#[derive(Debug, PartialEq, Eq)]
-pub struct Null {}
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum PeerPart<'i> {
