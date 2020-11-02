@@ -27,6 +27,12 @@ use serde_derive::Deserialize;
 use serde_derive::Serialize;
 use std::rc::Rc;
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) struct FoldState {
+    pub(crate) cursor: usize,
+    pub(crate) iterable: Rc<JValue>,
+}
+
 /*
  (fold Iterable i
    (par
@@ -36,6 +42,7 @@ use std::rc::Rc;
  )
 */
 
+/*
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub(crate) struct Fold(String, String, Rc<Instruction>);
 
@@ -344,3 +351,4 @@ mod tests {
         assert_eq!(res[0], Call(Executed(Rc::new(json!([])))));
     }
 }
+*/

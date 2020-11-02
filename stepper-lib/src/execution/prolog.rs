@@ -16,7 +16,6 @@
 
 use super::utils::format_aqua;
 use crate::air::ExecutionCtx;
-use crate::air::Instruction;
 use crate::call_evidence::merge_call_paths;
 use crate::call_evidence::CallEvidenceCtx;
 use crate::get_current_peer_id;
@@ -25,19 +24,21 @@ use crate::AquamarineError;
 use crate::CallEvidencePath;
 use crate::Result;
 
+use air_parser::ast::Instruction;
+
 /// Parse and prepare supplied data and aqua script.
-pub(super) fn prepare(
+pub(super) fn prepare<'i>(
     raw_prev_path: String,
     raw_path: String,
-    raw_aqua: String,
-) -> Result<(CallEvidencePath, CallEvidencePath, Instruction)> {
+    raw_aqua: &'i str,
+) -> Result<(CallEvidencePath, CallEvidencePath, Instruction<'i>)> {
     use AquamarineError::CallEvidenceDeserializationError as CallDeError;
 
     let prev_path: CallEvidencePath = serde_json::from_str(&raw_prev_path).map_err(CallDeError)?;
     let path: CallEvidencePath = serde_json::from_str(&raw_path).map_err(CallDeError)?;
 
-    let formatted_aqua = format_aqua(raw_aqua);
-    let aqua: Instruction = serde_sexpr::from_str(&formatted_aqua)?;
+    // let formatted_aqua = format_aqua(raw_aqua);
+    let aqua: Instruction<'i> = *air_parser::parse(raw_aqua);
 
     log::info!(
         target: RUN_PARAMS,

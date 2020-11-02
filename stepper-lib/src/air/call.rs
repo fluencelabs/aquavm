@@ -26,6 +26,8 @@ use crate::AquamarineError::VariableNotFound;
 use crate::AquamarineError::VariableNotInJsonPath;
 use crate::Result;
 
+use air_parser::ast::Call;
+
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
 
@@ -42,24 +44,7 @@ const CURRENT_PEER_ALIAS: &str = "%current_peer_id%";
    FN_PART: resolves to (fn_name) \/ (fn_srv_id, fn_name)
 */
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
-#[serde(untagged)]
-pub(self) enum PeerPart {
-    PeerPk(String),
-    PeerPkWithServiceId(String, String),
-}
-
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
-#[serde(untagged)]
-pub(self) enum FunctionPart {
-    FuncName(String),
-    ServiceIdWithFuncName(String, String),
-}
-
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
-pub(crate) struct Call(PeerPart, FunctionPart, Vec<String>, String);
-
-impl super::ExecutableInstruction for Call {
+impl<'i> super::ExecutableInstruction for Call<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
         log_instruction!(call, exec_ctx, call_ctx);
 

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+/*
 use super::CallEvidenceCtx;
 use super::ExecutionCtx;
 use super::Instruction;
@@ -117,3 +118,4 @@ mod tests {
         );
     }
 }
+*/

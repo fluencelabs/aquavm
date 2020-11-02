@@ -49,13 +49,14 @@ impl ParsedCall {
         let (peer_pk, service_id, function_name) = prepare_peer_fn_parts(raw_call, exec_ctx)?;
         let result_variable_name = parse_result_variable_name(raw_call)?;
 
-        Ok(Self {
+        /*Ok(Self {
             peer_pk,
             service_id,
             function_name,
-            function_arg_paths: raw_call.2.clone(),
+            function_arg_paths: raw_call.args.clone(),
             result_variable_name: result_variable_name.to_string(),
-        })
+        })*/
+        unimplemented!()
     }
 
     pub(super) fn execute(self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
@@ -160,11 +161,14 @@ impl ParsedCall {
     }
 }
 
-fn prepare_peer_fn_parts<'a>(raw_call: &'a Call, exec_ctx: &'a ExecutionCtx) -> Result<(String, String, String)> {
-    use super::FunctionPart::*;
-    use super::PeerPart::*;
+fn prepare_peer_fn_parts<'a, 'i>(
+    raw_call: &'a Call<'i>,
+    exec_ctx: &'a ExecutionCtx,
+) -> Result<(String, String, String)> {
+    use air_parser::ast::FunctionPart::*;
+    use air_parser::ast::PeerPart::*;
 
-    let (peer_pk, service_id, func_name) = match (&raw_call.0, &raw_call.1) {
+    let (peer_pk, service_id, func_name) = match (&raw_call.peer, &raw_call.f) {
         (PeerPkWithServiceId(peer_pk, peer_service_id), ServiceIdWithFuncName(_service_id, func_name)) => {
             Ok((peer_pk, peer_service_id, func_name))
         }
@@ -177,7 +181,7 @@ fn prepare_peer_fn_parts<'a>(raw_call: &'a Call, exec_ctx: &'a ExecutionCtx) -> 
         ))),
     }?;
 
-    let peer_pk = if peer_pk != CURRENT_PEER_ALIAS {
+    /*let peer_pk = if peer_pk != CURRENT_PEER_ALIAS {
         prepare_call_arg(peer_pk, exec_ctx)?
     } else {
         peer_pk.to_string()
@@ -186,7 +190,8 @@ fn prepare_peer_fn_parts<'a>(raw_call: &'a Call, exec_ctx: &'a ExecutionCtx) -> 
     let service_id = prepare_call_arg(service_id, exec_ctx)?;
     let func_name = prepare_call_arg(func_name, exec_ctx)?;
 
-    Ok((peer_pk, service_id, func_name))
+    Ok((peer_pk, service_id, func_name))*/
+    unimplemented!()
 }
 
 fn extract_args_by_paths(function_arg_paths: &[String], ctx: &ExecutionCtx) -> Result<JValue> {
@@ -213,10 +218,10 @@ fn extract_args_by_paths(function_arg_paths: &[String], ctx: &ExecutionCtx) -> R
     Ok(JValue::Array(result))
 }
 
-fn parse_result_variable_name(call: &Call) -> Result<&str> {
-    let result_variable_name = &call.3;
+fn parse_result_variable_name<'a, 'i>(call: &'a Call<'i>) -> Result<&'i str> {
+    let result_variable_name = &call.output;
 
-    if result_variable_name.is_empty() {
+    /*if result_variable_name.is_empty() {
         return Err(AquamarineError::InstructionError(String::from(
             "result name of a call instruction must be non empty",
         )));
@@ -228,7 +233,8 @@ fn parse_result_variable_name(call: &Call) -> Result<&str> {
         )));
     }
 
-    Ok(result_variable_name)
+    Ok(result_variable_name)*/
+    unimplemented!()
 }
 
 fn get_args_by_path<'args_path, 'exec_ctx, T: 'exec_ctx>(

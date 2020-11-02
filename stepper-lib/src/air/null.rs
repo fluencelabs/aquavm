@@ -19,11 +19,10 @@ use super::ExecutionCtx;
 use crate::log_instruction;
 use crate::Result;
 
+use air_parser::ast::Null;
+
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
-
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
-pub(crate) struct Null {}
 
 impl super::ExecutableInstruction for Null {
     fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {

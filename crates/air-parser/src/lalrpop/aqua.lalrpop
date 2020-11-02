@@ -20,7 +20,7 @@ pub Instr: Box<Instruction<'input>> = {
         Box::new(Instruction::Fold(Fold{ iterable, iterator, instruction }))
     },
     "(" "next" <i:Alphanumeric> ")" => Box::new(Instruction::Next(Next(i))),
-    "(" "null" ")" => Box::new(Instruction::Null),
+    "(" "null" ")" => Box::new(Instruction::Null(Null)),
     ! => { errors.push(<>); Box::new(Instruction::Error) },
 }
 

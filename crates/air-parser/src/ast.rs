@@ -18,7 +18,7 @@ use std::rc::Rc;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Instruction<'i> {
-    Null,
+    Null(Null),
     Call(Call<'i>),
     Seq(Seq<'i>),
     Par(Par<'i>),
@@ -79,3 +79,6 @@ pub struct Fold<'i> {
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Next<'i>(pub &'i str);
+
+#[derive(Debug, PartialEq, Eq)]
+pub struct Null;

@@ -20,13 +20,12 @@ use super::Instruction;
 use crate::log_instruction;
 use crate::Result;
 
+use air_parser::ast::Seq;
+
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
-pub(crate) struct Seq(Box<Instruction>, Box<Instruction>);
-
-impl super::ExecutableInstruction for Seq {
+impl<'i> super::ExecutableInstruction for Seq<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
         log_instruction!(seq, exec_ctx, call_ctx);
 

@@ -38,7 +38,7 @@ pub fn execute_aqua(init_user_id: String, aqua: String, prev_data: String, data:
 }
 
 fn execute_aqua_impl(_init_user_id: String, aqua: String, prev_path: String, path: String) -> Result<StepperOutcome> {
-    let (prev_path, path, aqua) = prepare(prev_path, path, aqua)?;
+    let (prev_path, path, aqua) = prepare(prev_path, path, aqua.as_str())?;
     let (mut exec_ctx, mut call_ctx) = make_contexts(prev_path, path)?;
 
     aqua.execute(&mut exec_ctx, &mut call_ctx)?;

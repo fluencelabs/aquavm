@@ -29,43 +29,33 @@ pub(self) use crate::call_evidence::CallEvidenceCtx;
 pub(self) use crate::call_evidence::EvidenceState;
 
 use crate::Result;
-use call::Call;
-use fold::Fold;
-use fold::Next;
-use null::Null;
-use par::Par;
-use seq::Seq;
-use xor::Xor;
+// use call::Call;
+// use fold::Fold;
+// use fold::Next;
+// use null::Null;
+// use par::Par;
+// use seq::Seq;
+// use xor::Xor;
 
+use air_parser::ast::Instruction;
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
-
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
-#[serde(rename_all = "kebab-case")]
-pub(crate) enum Instruction {
-    Null(Null),
-    Call(Call),
-    Fold(Fold),
-    Next(Next),
-    Par(Par),
-    Seq(Seq),
-    Xor(Xor),
-}
 
 pub(crate) trait ExecutableInstruction {
     fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()>;
 }
 
-impl ExecutableInstruction for Instruction {
+impl<'i> ExecutableInstruction for Instruction<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
         match self {
-            Instruction::Null(null) => null.execute(exec_ctx, call_ctx),
+            Instruction::Seq(seq) => seq.execute(exec_ctx, call_ctx),
             Instruction::Call(call) => call.execute(exec_ctx, call_ctx),
-            Instruction::Fold(fold) => fold.execute(exec_ctx, call_ctx),
+            Instruction::Null(null) => null.execute(exec_ctx, call_ctx),
+            _ => unimplemented!(),
+            /*Instruction::Fold(fold) => fold.execute(exec_ctx, call_ctx),
             Instruction::Next(next) => next.execute(exec_ctx, call_ctx),
             Instruction::Par(par) => par.execute(exec_ctx, call_ctx),
-            Instruction::Seq(seq) => seq.execute(exec_ctx, call_ctx),
-            Instruction::Xor(xor) => xor.execute(exec_ctx, call_ctx),
+            Instruction::Xor(xor) => xor.execute(exec_ctx, call_ctx),*/
         }
     }
 }

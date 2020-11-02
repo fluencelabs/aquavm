@@ -39,7 +39,7 @@ impl std::fmt::Display for InstructionError {
     }
 }
 
-fn parse(source_code: &str) -> Box<Instruction> {
+pub fn parse(source_code: &str) -> Box<Instruction> {
     let mut files = SimpleFiles::new();
     let file_id = files.add("script.aqua", source_code);
 
@@ -195,8 +195,6 @@ mod tests {
 
     #[test]
     fn parse_null() {
-        use Instruction::Null;
-
         let source_code = r#"
         (seq
             (null)
@@ -205,7 +203,7 @@ mod tests {
         )
         "#;
         let instruction = *parse(source_code);
-        let expected = Instruction::Seq(Seq(Box::new(Null), Box::new(Null)));
+        let expected = Instruction::Seq(Seq(Box::new(null()), Box::new(null())));
         assert_eq!(instruction, expected)
     }
 
@@ -240,7 +238,7 @@ mod tests {
         )
         "#;
         let instruction = *parse(&source_code.as_ref());
-        let expected = fold("iterable", "i", Instruction::Null);
+        let expected = fold("iterable", "i", null());
         assert_eq!(instruction, expected);
     }
 
@@ -277,10 +275,10 @@ mod tests {
         Instruction::Xor(Xor(Box::new(l), Box::new(r)))
     }
     fn seqnn() -> Instruction<'static> {
-        seq(Instruction::Null, Instruction::Null)
+        seq(null(), null())
     }
     fn null() -> Instruction<'static> {
-        Instruction::Null
+        Instruction::Null(Null)
     }
     fn fold<'a>(
         iterable: &'a str,
