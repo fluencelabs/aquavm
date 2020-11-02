@@ -14,18 +14,22 @@ pub Instr: Box<Instruction<'input>> = {
     "(" "seq" <l:Instr> <r:Instr> ")" => Box::new(Instruction::Seq(Seq(l, r))),
     "(" "par" <l:Instr> <r:Instr> ")" => Box::new(Instruction::Par(Par(l, r))),
     "(" "xor" <l:Instr> <r:Instr> ")" => Box::new(Instruction::Xor(Xor(l, r))),
-    "(" "call" <peer:PeerPart> <f:FPart> <args:Args> <output:Output> ")" => Box::new(Instruction::Call(Call{peer, f, args, output})),
+
+    "(" "call" <peer:PeerPart> <f:FPart> <args:Args> <output:Output> ")" =>
+        Box::new(Instruction::Call(Call{peer, f, args, output})),
+
     "(" "fold" <iterable:Alphanumeric> <iterator:Alphanumeric> <i:Instr> ")" => {
         let instruction = Rc::new(*i);
         Box::new(Instruction::Fold(Fold{ iterable, iterator, instruction }))
     },
+
     "(" "next" <i:Alphanumeric> ")" => Box::new(Instruction::Next(Next(i))),
     "(" "null" ")" => Box::new(Instruction::Null(Null)),
     ! => { errors.push(<>); Box::new(Instruction::Error) },
 }
 
 Args: Vec<Value<'input>> = {
-    "(" <args:(<Arg>)*> ")" => args
+    "[" <args:(<Arg>)*> "]" => args
 }
 
 
@@ -59,6 +63,7 @@ Value: Value<'input> = {
         let path = path.next().expect("contain component after dot");
         Value::JsonPath { variable, path }
     },
+    CURRENT_PEER_ID => Value::CurrentPeerId,
 }
 
 
@@ -66,9 +71,10 @@ Value: Value<'input> = {
 Alphanumeric = ALPHANUMERIC;
 
 match {
-    r"[0-9a-zA-Z]+" => ALPHANUMERIC,
-    r"[0-9a-zA-Z]+\[\]" => ACCUMULATOR,
-    r"[0-9a-zA-Z]+\.\$\.[0-9a-zA-Z]+" => JSON_PATH,
+    r"[0-9a-zA-Z_]+" => ALPHANUMERIC,
+    r"[0-9a-zA-Z_]+\[\]" => ACCUMULATOR,
+    r"[0-9a-zA-Z_]+\.\$\.[0-9a-zA-Z_]+" => JSON_PATH,
+    "%current_peer_id%" => CURRENT_PEER_ID,
     "seq",
     "call",
     "null",

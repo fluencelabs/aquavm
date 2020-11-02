@@ -29,6 +29,7 @@ use codespan_reporting::term::{
 
 #[derive(Debug)]
 pub enum InstructionError {
+    #[allow(dead_code)]
     InvalidPeerId,
 }
 
@@ -56,18 +57,21 @@ pub fn parse(source_code: &str) -> Box<Instruction> {
             }
             Err(err) => {
                 println!("Parsing failed: {:?}", err);
-                Err(errors)
+                Err(vec![ErrorRecovery {
+                    error: err,
+                    dropped_tokens: vec![],
+                }])
             }
         }
     };
 
     match parse(source_code.as_ref()) {
         Err(errors) => {
-            let labels = errors
+            let labels: Vec<Label<usize>> = errors
                 .into_iter()
                 .map(|err| match err.error {
                     ParseError::UnrecognizedToken {
-                        token: (start, token, end),
+                        token: (start, _, end),
                         expected,
                     } => {
                         Label::primary(file_id, start..end).with_message(format!("expected {}", {
@@ -78,20 +82,23 @@ pub fn parse(source_code: &str) -> Box<Instruction> {
                             }
                         }))
                     }
+                    ParseError::InvalidToken { location } => {
+                        Label::primary(file_id, location..(location + 1))
+                            .with_message("unexpected token")
+                    }
                     err => unimplemented!("parse error not implemented: {:?}", err),
                     /*
-                        ParseError::InvalidToken { .. } => {}
+
                         ParseError::UnrecognizedToken { .. } => {}
                         ParseError::ExtraToken { .. } => {}
                         ParseError::User { .. } => {}
                     */
                 })
                 .collect();
-            let diagnostic = Diagnostic::error()
-                .with_message("some error")
-                .with_labels(labels);
+            println!("labels {}", labels.len());
+            let diagnostic = Diagnostic::error().with_labels(labels);
 
-            let writer = StandardStream::stderr(ColorChoice::Always);
+            let writer = StandardStream::stderr(ColorChoice::Auto);
             let config = codespan_reporting::term::Config::default();
 
             term::emit(&mut writer.lock(), &config, &files, &diagnostic).expect("term emit");
@@ -116,69 +123,71 @@ mod tests {
     fn parse_seq() {
         let source_code = r#"
         (seq
-            (call peerid function () void)
-            (call "id" "f" ("hello" name) void[])
+            (call peerid function [] void)
+            (call "id" "f" ["hello" name] void[])
         )
         "#;
         let instruction = *parse(source_code);
-        let expected = Instruction::Seq(Seq(
-            Box::new(Instruction::Call(Call {
+        let expected = seq(
+            Instruction::Call(Call {
                 peer: PeerPk(Variable("peerid")),
                 f: FuncName(Variable("function")),
                 args: vec![],
                 output: Scalar("void"),
-            })),
-            Box::new(Instruction::Call(Call {
+            }),
+            Instruction::Call(Call {
                 peer: PeerPk(Literal("id")),
                 f: FuncName(Literal("f")),
                 args: vec![Literal("hello"), Variable("name")],
                 output: Accumulator("void"),
-            })),
-        ));
+            }),
+        );
         assert_eq!(instruction, expected);
     }
 
     #[test]
     fn parse_seq_seq() {
+        // TODO: make output one of _ () "" and absence
+
         let source_code = r#"
         (seq
             (seq
-                (call peerid function () void)
-                (call (peerid serviceA) ("serviceB" function) () void)
+                (call peerid function [] void)
+                (call (peerid serviceA) ("serviceB" function) [] void)
             )
-            (call "id" "f" ("hello" name) void[])
+            (call "id" "f" ["hello" name] void[])
         )
         "#;
         let instruction = *parse(source_code);
-        let expected = Instruction::Seq(Seq(
-            Box::new(Instruction::Seq(Seq(
-                Box::new(Instruction::Call(Call {
+        let expected = seq(
+            seq(
+                Instruction::Call(Call {
                     peer: PeerPk(Variable("peerid")),
                     f: FuncName(Variable("function")),
                     args: vec![],
                     output: Scalar("void"),
-                })),
-                Box::new(Instruction::Call(Call {
+                }),
+                Instruction::Call(Call {
                     peer: PeerPkWithServiceId(Variable("peerid"), Variable("serviceA")),
                     f: ServiceIdWithFuncName(Literal("serviceB"), Variable("function")),
                     args: vec![],
                     output: Scalar("void"),
-                })),
-            ))),
-            Box::new(Instruction::Call(Call {
+                }),
+            ),
+            Instruction::Call(Call {
                 peer: PeerPk(Literal("id")),
                 f: FuncName(Literal("f")),
                 args: vec![Literal("hello"), Variable("name")],
                 output: Accumulator("void"),
-            })),
-        ));
+            }),
+        );
         assert_eq!(instruction, expected);
     }
 
     #[test]
     fn parse_json_path() {
         let source_code = r#"
-        (call id.$.a "f" ("hello" name) void[])
+        (call id.$.a "f" ["hello" name] void[])
         "#;
         let instruction = *parse(source_code);
         let expected = Instruction::Call(Call {
@@ -252,15 +261,46 @@ mod tests {
         for name in &["xor", "par", "seq"] {
             let source_code = source_fold_with(name);
             let instruction = *parse(&source_code.as_ref());
-            let instr = |l, r| match *name {
-                "xor" => xor(l, r),
-                "par" => par(l, r),
-                "seq" => seq(l, r),
-                _ => unreachable!(),
-            };
+            let instr = binary_instruction(*name);
             let expected = fold("iterable", "i", instr(null(), null()));
             assert_eq!(instruction, expected);
         }
+    }
+
+    #[test]
+    fn seq_par_call() {
+        let source_code = r#"
+        (seq 
+            (par 
+                (call %current_peer_id% ("local_service_id" "local_fn_name") [] result_1)
+                (call "remote_peer_id" ("service_id" "fn_name") [] g)
+            )
+            (call %current_peer_id% ("local_service_id" "local_fn_name") [] result_2)
+        )"#;
+        let instruction = *parse(&source_code.as_ref());
+        let expected = seq(
+            par(
+                Instruction::Call(Call {
+                    peer: PeerPk(CurrentPeerId),
+                    f: ServiceIdWithFuncName(Literal("local_service_id"), Literal("local_fn_name")),
+                    args: vec![],
+                    output: Scalar("result_1"),
+                }),
+                Instruction::Call(Call {
+                    peer: PeerPk(Literal("remote_peer_id")),
+                    f: ServiceIdWithFuncName(Literal("service_id"), Literal("fn_name")),
+                    args: vec![],
+                    output: Scalar("g"),
+                }),
+            ),
+            Instruction::Call(Call {
+                peer: PeerPk(CurrentPeerId),
+                f: ServiceIdWithFuncName(Literal("local_service_id"), Literal("local_fn_name")),
+                args: vec![],
+                output: Scalar("result_2"),
+            }),
+        );
+        assert_eq!(instruction, expected);
     }
 
     // Test DSL
@@ -291,9 +331,9 @@ mod tests {
             instruction: std::rc::Rc::new(instruction),
         })
     }
-    fn binary_instruction<'a>(
+    fn binary_instruction<'a, 'b>(
         name: &'a str,
-    ) -> impl for<'b> Fn(Instruction<'_>, Instruction<'_>) -> Instruction<'b> {
+    ) -> impl Fn(Instruction<'b>, Instruction<'b>) -> Instruction<'b> {
         match name {
             "xor" => |l, r| xor(l, r),
             "par" => |l, r| par(l, r),

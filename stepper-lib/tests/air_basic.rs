@@ -34,17 +34,19 @@ fn seq_par_call() {
     use stepper_lib::EvidenceState::{self, *};
 
     let vm_peer_id = String::from("some_peer_id");
+    println!("creating aqua vm");
     let mut vm = create_aqua_vm(unit_call_service(), vm_peer_id.clone());
+    println!("created aqua vm");
 
     let script = String::from(
         r#"
-        (seq (
-            (par (
-                (call (%current_peer_id% ("local_service_id" "local_fn_name") () result_1))
-                (call ("remote_peer_id" ("service_id" "fn_name") () g))
-            ))
-            (call (%current_peer_id% ("local_service_id" "local_fn_name") () result_2))
-        ))"#,
+        (seq 
+            (par 
+                (call %current_peer_id% ("local_service_id" "local_fn_name") [] result_1)
+                (call "remote_peer_id" ("service_id" "fn_name") [] g)
+            )
+            (call %current_peer_id% ("local_service_id" "local_fn_name") [] result_2)
+        )"#,
     );
 
     let res = call_vm!(vm, "asd", script, "[]", "[]");
