@@ -212,6 +212,38 @@ mod tests {
     }
 
     #[test]
+    fn parse_json_path_complex() {
+        let source_code = r#"
+        (seq
+            (call m.$.[1] "f" [] void)
+            (call m.$.abc.cde[a][0].cde "f" [] void)
+        )
+        "#;
+        let instruction = parse(source_code);
+        let expected = seq(
+            Instruction::Call(Call {
+                peer: PeerPk(JsonPath {
+                    variable: "m",
+                    path: "$.[1]",
+                }),
+                f: FuncName(Literal("f")),
+                args: vec![],
+                output: Scalar("void"),
+            }),
+            Instruction::Call(Call {
+                peer: PeerPk(JsonPath {
+                    variable: "m",
+                    path: "$.abc.cde[a][0].cde",
+                }),
+                f: FuncName(Literal("f")),
+                args: vec![],
+                output: Scalar("void"),
+            }),
+        );
+        assert_eq!(instruction, expected);
+    }
+
+    #[test]
     fn parse_null() {
         let source_code = r#"
         (seq
