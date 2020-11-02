@@ -172,4 +172,13 @@ mod tests {
         ));
         assert_eq!(instruction, expected);
     }
+
+    #[test]
+    fn parse_json_path() {
+        let source_code = r#"
+        (call id.$.a "f" ("hello" name) void[])
+        "#;
+        let instruction = *parse(source_code);
+        println!("{:#?}", instruction);
+    }
 }

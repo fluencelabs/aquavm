@@ -236,6 +236,7 @@ fn get_args_by_path<'args_path, 'exec_ctx, T: 'exec_ctx>(
     ctx: &'exec_ctx ExecutionCtx,
     maybe_json_path: impl FnOnce(Cow<'exec_ctx, JValue>, Option<&str>) -> Result<T>,
 ) -> Result<T> {
+    println!("args_path: {}", args_path);
     let mut split_arg: Vec<&str> = args_path.splitn(2, '.').collect();
     let arg_path_head = split_arg.remove(0);
 

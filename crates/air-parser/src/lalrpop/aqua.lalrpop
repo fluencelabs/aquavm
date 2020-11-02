@@ -52,18 +52,25 @@ Arg = Value;
 Value: Value<'input> = {
     "\"" <v: Alphanumeric> "\"" => Value::Literal(v),
     <v:Alphanumeric> => Value::Variable(v),
+    <v:JSON_PATH> => {
+        let mut path = v.splitn(2, ".");
+        let variable = path.next().expect("must contain dot");
+        let path = path.next().expect("contain component after dot");
+        Value::JsonPath{variable, path}
+    },
 }
 
-Alphanumeric: &'input str = {
-    ALPHANUMERIC
-}
+
+
+Alphanumeric = ALPHANUMERIC;
 
 match {
     r"[0-9a-zA-Z]+" => ALPHANUMERIC,
+    r"[0-9a-zA-Z]+\[\]" => ACCUMULATOR,
+    r"[0-9a-zA-Z]+\.\$\.[0-9a-zA-Z]+" => JSON_PATH,
     "seq",
     "call",
 } else {
-    r"[0-9a-zA-Z]+\[\]" => ACCUMULATOR,
     _
 }
 

@@ -44,7 +44,7 @@ fn next(mut pairs: PestPairs<'_>) {
         let rule = pair.as_rule();
         let inner = pair.into_inner();
         println!("rule: {:#?}\ninner:{:#?}\n", rule, inner);
-        inner
+        next(inner)
     }
 }
 
