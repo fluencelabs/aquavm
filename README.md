@@ -18,23 +18,11 @@ Aquamarine is a distributed choreography platform, controlled by AIR language
 
 ### Instructions
 #### seq: sequential
-```s
-(seq 
-    (call "12D3Node"    ("dht"    "get") [key] value) 
-    (call "12D3Storage" ("sqlite" "put") [key value] void)
-) 
-```
 ![seq example](images/seq.png)
 - `seq` takes two instructions
 - executes them sequentially
 
 #### par: parallel
-```s
-(par 
-    (call "ClientA" ("chat" "display") [msg] void[]) 
-    (call "ClientB" ("chat" "display") [msg] void[])
-)
-```
 ![par example](images/par.png)
 - `par` takes two instructions
 - executes them in parallel
