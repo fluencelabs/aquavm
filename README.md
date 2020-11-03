@@ -3,9 +3,8 @@
 Aquamarine is a distributed choreography platform, controlled by AIR language
 ![Aquamarine schema](images/aquamarine.png)
 
-## AIR
+## AIR: Aquamarine Intermediate Representation
 ### What is it?
-*Aquamarine Intermediate Representation*
 
 - S-expression-based low-level language
 - Controls Fluence network and its peers
