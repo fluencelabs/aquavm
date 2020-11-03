@@ -16,20 +16,18 @@
 
 use super::aqua;
 use crate::ast::Instruction;
-
-use lalrpop_util::{ErrorRecovery, ParseError};
-use std::fmt::Formatter;
-
 use crate::lalrpop::aqua::Token;
+
 use codespan_reporting::diagnostic::{Diagnostic, Label};
 use codespan_reporting::files::SimpleFiles;
-use codespan_reporting::term::termcolor::Buffer;
-use codespan_reporting::term::{
-    self,
-    termcolor::{ColorChoice, StandardStream},
-};
+use codespan_reporting::term;
+use codespan_reporting::term::termcolor::{Buffer, ColorChoice, StandardStream};
+use lalrpop_util::{ErrorRecovery, ParseError};
+
+use std::fmt::Formatter;
 
 #[derive(Debug)]
+/// Represents custom parsing errors. Isn't used yet.
 pub enum InstructionError {
     #[allow(dead_code)]
     InvalidPeerId,

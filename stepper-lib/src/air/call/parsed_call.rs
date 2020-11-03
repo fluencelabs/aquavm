@@ -42,9 +42,8 @@ pub(super) struct ParsedCall<'i> {
 }
 
 impl<'i> ParsedCall<'i> {
+    /// Builds `ParsedCall` from `Call` by transforming `PeerPart` & `FunctionPart` into `ResolvedTriplet`
     pub(super) fn new(raw_call: &Call<'i>, exec_ctx: &ExecutionCtx<'i>) -> Result<Self> {
-        // 1. peer_part + fn_part => triplet
-        // 2. resolve triplet (extract by variable name, take literal, %current_peer_id%, etc)
         let triplet = Triplet::try_from(&raw_call.peer, &raw_call.f)?;
         #[rustfmt::skip]
         let ResolvedTriplet { peer_pk, service_id, function_name } = triplet.resolve(exec_ctx)?;

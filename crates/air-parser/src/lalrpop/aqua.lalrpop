@@ -44,6 +44,7 @@ PeerPart: PeerPart<'input> = {
     "(" <pid:PeerId> <sid:ServiceId> ")" => PeerPart::PeerPkWithServiceId(pid, sid),
 }
 
+// TODO: make output one of _ () "" and absence
 Output: CallOutput<'input> = {
     <o:Alphanumeric> => CallOutput::Scalar(o),
     <o:ACCUMULATOR> => CallOutput::Accumulator(&o[..o.len()-2]),

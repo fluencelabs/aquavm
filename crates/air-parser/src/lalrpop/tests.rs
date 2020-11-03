@@ -54,8 +54,6 @@ fn parse_seq() {
 
 #[test]
 fn parse_seq_seq() {
-    // TODO: make output one of _ () "" and absence
-
     let source_code = r#"
         (seq
             (seq
