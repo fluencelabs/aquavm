@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-use super::utils::format_aqua;
 use crate::air::ExecutionCtx;
 use crate::call_evidence::merge_call_paths;
 use crate::call_evidence::CallEvidenceCtx;

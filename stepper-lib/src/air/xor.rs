@@ -16,15 +16,11 @@
 
 use super::CallEvidenceCtx;
 use super::ExecutionCtx;
-use super::Instruction;
 use crate::log_instruction;
 use crate::AquamarineError::LocalServiceError;
 use crate::Result;
 
 use air_parser::ast::Xor;
-
-use serde_derive::Deserialize;
-use serde_derive::Serialize;
 
 impl<'i> super::ExecutableInstruction<'i> for Xor<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, call_ctx: &mut CallEvidenceCtx) -> Result<()> {

@@ -32,9 +32,6 @@ use crate::Result;
 
 use air_parser::ast::Instruction;
 
-use serde_derive::Deserialize;
-use serde_derive::Serialize;
-
 pub(crate) trait ExecutableInstruction<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, call_ctx: &mut CallEvidenceCtx) -> Result<()>;
 }

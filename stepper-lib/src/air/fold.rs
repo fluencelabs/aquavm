@@ -25,8 +25,6 @@ use crate::Result;
 
 use air_parser::ast::{Fold, Next};
 
-use serde_derive::Deserialize;
-use serde_derive::Serialize;
 use std::rc::Rc;
 
 /*

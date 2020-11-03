@@ -29,9 +29,6 @@ use crate::Result;
 
 use air_parser::ast::Call;
 
-use serde_derive::Deserialize;
-use serde_derive::Serialize;
-
 /*
    (current)
    (pk $pk)

@@ -25,9 +25,6 @@ use crate::Result;
 
 use air_parser::ast::Par;
 
-use serde_derive::Deserialize;
-use serde_derive::Serialize;
-
 impl<'i> ExecutableInstruction<'i> for Par<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
         log_instruction!(par, exec_ctx, call_ctx);

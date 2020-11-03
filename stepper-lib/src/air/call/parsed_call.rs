@@ -17,23 +17,20 @@
 #![allow(unused_unsafe)] // for wasm_bindgen target where calling FFI is safe
 
 use super::triplet::{ResolvedTriplet, Triplet};
-use super::utils::{
-    find_by_json_path, is_string_literal, resolve_jvalue, set_local_call_result, set_remote_call_result,
-};
+use super::utils::{resolve_jvalue, set_local_call_result, set_remote_call_result};
 use super::Call;
 
 use crate::air::ExecutionCtx;
 use crate::build_targets::CALL_SERVICE_SUCCESS;
 use crate::call_evidence::{CallEvidenceCtx, CallResult, EvidenceState};
 use crate::log_targets::EVIDENCE_CHANGING;
-use crate::AValue;
 use crate::AquamarineError;
 use crate::JValue;
 use crate::Result;
 
-use air_parser::ast::{CallOutput, FunctionPart, PeerPart, Value};
+use air_parser::ast::{CallOutput, Value};
 
-use std::{borrow::Cow, rc::Rc};
+use std::rc::Rc;
 
 #[derive(Debug, PartialEq, Eq)]
 pub(super) struct ParsedCall<'i> {

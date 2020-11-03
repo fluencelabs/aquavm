@@ -28,7 +28,7 @@ use air_parser::ast::{CallOutput, Value};
 
 use std::{borrow::Cow, cell::RefCell, rc::Rc};
 
-// TODO: move to parsed_call
+/// Writes result of a local `Call` instruction to `ExecutionCtx` at `output`
 pub(super) fn set_local_call_result<'i>(
     output: CallOutput<'i>,
     exec_ctx: &mut ExecutionCtx<'i>,
@@ -61,6 +61,7 @@ pub(super) fn set_local_call_result<'i>(
     Ok(())
 }
 
+/// Writes evidence of a particle being sent to remote node
 pub(super) fn set_remote_call_result<'i>(
     peer_pk: String,
     exec_ctx: &mut ExecutionCtx<'i>,
@@ -78,6 +79,7 @@ pub(super) fn set_remote_call_result<'i>(
     call_ctx.new_path.push_back(new_evidence_state);
 }
 
+/// Applies `json_path` to `jvalue`
 pub(super) fn find_by_json_path<'jvalue, 'json_path>(
     jvalue: &'jvalue JValue,
     json_path: &'json_path str,
@@ -85,10 +87,6 @@ pub(super) fn find_by_json_path<'jvalue, 'json_path>(
     use AquamarineError::VariableNotInJsonPath as JsonPathError;
 
     jsonpath_lib::select(jvalue, json_path).map_err(|e| JsonPathError(jvalue.clone(), String::from(json_path), e))
-}
-
-pub(super) fn is_string_literal(value: &str) -> bool {
-    value.starts_with('"') && value.ends_with('"')
 }
 
 /// Takes variable's value from `ExecutionCtx::data_cache`

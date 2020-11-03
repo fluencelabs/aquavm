@@ -21,9 +21,6 @@ use crate::Result;
 
 use air_parser::ast::Null;
 
-use serde_derive::Deserialize;
-use serde_derive::Serialize;
-
 impl<'i> super::ExecutableInstruction<'i> for Null {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
         log_instruction!(null, exec_ctx, call_ctx);
