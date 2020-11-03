@@ -21,12 +21,16 @@ use crate::{AquamarineError, Result};
 
 use air_parser::ast::{FunctionPart, PeerPart, Value};
 
+/// Triplet represents a location of the executable code in the network
+/// It is build from `PeerPart` and `FunctionPart` of a `Call` instruction
 pub(super) struct Triplet<'a, 'i> {
     pub(super) peer_pk: &'a Value<'i>,
     pub(super) service_id: &'a Value<'i>,
     pub(super) function_name: &'a Value<'i>,
 }
 
+/// ResolvedTriplet represents same location as `Triplet`, but with all
+/// variables, literals and etc resolved into final `String`
 pub(super) struct ResolvedTriplet {
     pub(super) peer_pk: String,
     pub(super) service_id: String,
@@ -34,6 +38,7 @@ pub(super) struct ResolvedTriplet {
 }
 
 impl<'a, 'i> Triplet<'a, 'i> {
+    /// Build a `Triplet` from `Call`'s `PeerPart` and `FunctionPart`
     pub fn try_from(peer: &'a PeerPart<'i>, f: &'a FunctionPart<'i>) -> Result<Self> {
         use air_parser::ast::FunctionPart::*;
         use air_parser::ast::PeerPart::*;
@@ -58,6 +63,7 @@ impl<'a, 'i> Triplet<'a, 'i> {
         })
     }
 
+    /// Resolve variables, literals, etc in the `Triplet`, and build a `ResolvedTriplet`
     pub fn resolve(self, ctx: &'a ExecutionCtx<'i>) -> Result<ResolvedTriplet> {
         let Triplet {
             peer_pk,
