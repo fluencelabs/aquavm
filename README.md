@@ -4,6 +4,14 @@ Aquamarine is a distributed choreography platform, controlled by AIR language
 ![Aquamarine schema](images/aquamarine.png)
 
 ## AIR: Aquamarine Intermediate Representation
+Scripts written in AIR look like this:
+
+![fold example](images/fold_example.png)
+1. Gather chat members by calling chat.members
+2. Iterate through elements in members array, m = element
+3. Each m is an object, represented as array; [0] is the first field
+4. (next m) triggers next iteration
+
 ### What is it?
 
 - S-expression-based low-level language
@@ -42,13 +50,6 @@ Aquamarine is a distributed choreography platform, controlled by AIR language
 - on each iteration instruction is executed
 - instruction can read the variable
 - `next` triggers next iteration
-
-#### fold: example
-![fold example](images/fold_example.png)
-1. Gather chat members by calling chat.members
-2. Iterate through elements in members array, m = element
-3. Each m is an object, represented as array; [0] is the first field
-4. (next m) triggers next iteration
 
 #### xor: branching & error handling
 ![xor structure](images/xor.png)
