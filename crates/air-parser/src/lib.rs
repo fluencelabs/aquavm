@@ -6,6 +6,9 @@ extern crate fstrings;
 
 pub mod ast;
 mod lalrpop {
+    #[cfg(test)]
+    mod tests;
+
     #[rustfmt::skip]
     mod aqua;
     mod parser;
