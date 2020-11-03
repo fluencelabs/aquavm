@@ -20,7 +20,7 @@ Scripts written in AIR look like this:
 1. Gather chat members by calling chat.members
 2. Iterate through elements in members array, m = element
 3. Each m is an object, represented as array; [0] is the first field
-4. (next m) triggers next iteration
+4. `(next m)` triggers next iteration
 
 ### AIR: Instructions
 #### call: execution
