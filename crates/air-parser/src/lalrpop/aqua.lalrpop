@@ -74,7 +74,7 @@ Alphanumeric = ALPHANUMERIC;
 match {
     r"[\w_-]+" => ALPHANUMERIC,
     r"[\w_-]+\[\]" => ACCUMULATOR,
-    r"[\w-]+\.\$((\.[\w-]+)*(\.*\[\w+\])*)+" => JSON_PATH,
+    r"[\w_-]+\.\$[^ ]+" => JSON_PATH,
     "%current_peer_id%" => CURRENT_PEER_ID,
     "seq",
     "call",

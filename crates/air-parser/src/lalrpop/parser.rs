@@ -41,29 +41,35 @@ impl std::fmt::Display for InstructionError {
     }
 }
 
+// Caching parser to cache internal regexes, which are expensive to instantiate
+// See also https://github.com/lalrpop/lalrpop/issues/269
+thread_local!(static PARSER: aqua::InstrParser = aqua::InstrParser::new());
+
 pub fn parse(source_code: &str) -> Result<Box<Instruction>, String> {
     let mut files = SimpleFiles::new();
     let file_id = files.add("script.aqua", source_code);
 
     let parse = |s| -> Result<Box<Instruction<'_>>, Vec<ErrorRecovery<_, _, _>>> {
-        let parser = aqua::InstrParser::new();
-        let mut errors = Vec::new();
-        match parser.parse(&mut errors, s) {
-            Ok(r) if errors.is_empty() => Ok(r),
-            Ok(_) => {
-                for error in errors.iter() {
-                    println!("Parse error: {:?}", error);
+        // let parser = aqua::InstrParser::new();
+        PARSER.with(|parser| {
+            let mut errors = Vec::new();
+            match parser.parse(&mut errors, s) {
+                Ok(r) if errors.is_empty() => Ok(r),
+                Ok(_) => {
+                    for error in errors.iter() {
+                        println!("Parse error: {:?}", error);
+                    }
+                    Err(errors)
                 }
-                Err(errors)
+                Err(err) => {
+                    println!("Parsing failed: {:?}", err);
+                    Err(vec![ErrorRecovery {
+                        error: err,
+                        dropped_tokens: vec![],
+                    }])
+                }
             }
-            Err(err) => {
-                println!("Parsing failed: {:?}", err);
-                Err(vec![ErrorRecovery {
-                    error: err,
-                    dropped_tokens: vec![],
-                }])
-            }
-        }
+        })
     };
 
     match parse(source_code.as_ref()) {
