@@ -22,7 +22,6 @@ use crate::StepperOutcome;
 
 use jsonpath_lib::JsonPathError;
 use serde_json::Error as SerdeJsonError;
-use serde_sexpr::Error as SExprError;
 
 use std::convert::Into;
 use std::env::VarError;
@@ -31,9 +30,6 @@ use std::error::Error;
 #[derive(Debug)]
 pub enum AquamarineError {
     AIRParseError(String),
-
-    /// Errors occurred while parsing aqua script in the form of S expressions.
-    SExprParseError(SExprError),
 
     /// Errors occurred while parsing function arguments of an expression.
     FuncArgsSerializationError(JValue, SerdeJsonError),
@@ -98,7 +94,6 @@ impl Error for AquamarineError {}
 impl std::fmt::Display for AquamarineError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         match self {
-            AquamarineError::SExprParseError(err) => write!(f, "aqua script can't be parsed: {:?}", err),
             AquamarineError::AIRParseError(err) => write!(f, "aqua script can't be parsed:\n{}", err),
             AquamarineError::FuncArgsSerializationError(args, err) => write!(
                 f,
@@ -173,12 +168,6 @@ impl std::fmt::Display for AquamarineError {
     }
 }
 
-impl From<SExprError> for AquamarineError {
-    fn from(err: SExprError) -> Self {
-        AquamarineError::SExprParseError(err)
-    }
-}
-
 impl From<std::convert::Infallible> for AquamarineError {
     fn from(_: std::convert::Infallible) -> Self {
         unreachable!()
@@ -208,7 +197,6 @@ impl Into<StepperOutcome> for AquamarineError {
             AquamarineError::IncompatibleEvidenceStates(..) => 18,
             AquamarineError::IncompatibleCallResults(..) => 19,
             AquamarineError::EvidencePathTooSmall(..) => 20,
-            AquamarineError::SExprParseError(..) => unreachable!("we're not using sexpr anymore"),
         };
 
         StepperOutcome {
