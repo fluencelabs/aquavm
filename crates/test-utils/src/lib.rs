@@ -52,7 +52,7 @@ pub fn create_aqua_vm(
     let tmp_dir = std::env::temp_dir();
 
     let config = AquamarineVMConfig {
-        aquamarine_wasm_path: PathBuf::from("../target/wasm32-wasi/release/aquamarine.wasm"),
+        aquamarine_wasm_path: PathBuf::from("../target/wasm32-wasi/debug/aquamarine.wasm"),
         call_service: call_service_descriptor,
         current_peer_id: current_peer_id.into(),
         particle_data_store: tmp_dir,
