@@ -17,12 +17,12 @@ Aquamarine is a distributed choreography platform, controlled by AIR language
 #### call: execution
 ![call example](images/call_data.png)
 - `call` commands the execution
-- takes network location, service id, function name, list of function arguments, and an output name
+- takes network `location`, `service id`, `function name`, `list of function arguments`, and an `output name`
 - moves execution to a peer, specified by `location`
-- peer must have the specified WASM service running
-- the service must have specified function available to be called
-- argument list is given to the function
-- result of the function is saved and available under output name
+- peer must have the specified WASM `service` running
+- the `service` must have specified `function` available to be called
+- `argument list` is given to the `function`
+- result of the `function` is saved and available under `output name`
 - example call could be thought of as `data.result = dht.put(key, value)`
 
 #### seq: sequential
