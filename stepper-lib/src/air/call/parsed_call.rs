@@ -74,10 +74,8 @@ impl<'i> ParsedCall<'i> {
         }
 
         let function_args = self.function_arg_paths.iter();
-        let function_args = function_args
-            .map(|v| resolve_jvalue(v, exec_ctx))
-            .collect::<Result<Vec<_>>>()?;
-        let function_args = JValue::Array(function_args).to_string();
+        let function_args: Result<Vec<_>> = function_args.map(|v| resolve_jvalue(v, exec_ctx)).collect();
+        let function_args = JValue::Array(function_args?).to_string();
 
         let result = unsafe { crate::call_service(self.service_id, self.function_name, function_args) };
 
