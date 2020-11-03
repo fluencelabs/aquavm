@@ -34,9 +34,7 @@ fn seq_par_call() {
     use stepper_lib::EvidenceState::{self, *};
 
     let vm_peer_id = String::from("some_peer_id");
-    println!("creating aqua vm");
     let mut vm = create_aqua_vm(unit_call_service(), vm_peer_id.clone());
-    println!("created aqua vm");
 
     let script = String::from(
         r#"

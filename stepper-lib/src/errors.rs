@@ -29,6 +29,7 @@ use std::error::Error;
 
 #[derive(Debug)]
 pub enum AquamarineError {
+    /// Error occurred while parsing AIR script
     AIRParseError(String),
 
     /// Errors occurred while parsing function arguments of an expression.
