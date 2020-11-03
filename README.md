@@ -1,37 +1,48 @@
 # Aquamarine
 
-Aquamarine is a distributed choreography language &amp; platform
+Aquamarine is a distributed choreography platform, controlled by AIR language
+![Aquamarine schema](images/aquamarine.png)
 
 ## AIR
+### What is it?
+*Aquamarine Intermediate Representation*
 
-The current version supports the following instructions:
-- call
-- par
-- seq
-- fold
-- next
-- null
+- S-expression-based low-level language
+- Controls Fluence network and its peers
+- Inspired by WAT (WebAssembly Text Format)
+- Meant to be a compile target
+- Development meant to happen in a higher-level language
+- Syntax is in flux, will change
 
-## Examples
+### Structure
+![AIR structure scheme](images/air_structure_data.png)
 
-```lisp
-(seq (
-    (call (%current_peer_id1% (local_service_id local_fn_name) () result_name_1))
-    (call (remote_peer_id (service_id fn_name) () result_name_2))
-)),
+### Instructions
+#### seq: sequential
+```s
+(seq 
+    (call "12D3Node"    ("dht"    "get") [key] value) 
+    (call "12D3Storage" ("sqlite" "put") [key value] void)
+) 
 ```
+![seq example](images/seq.png)
+- `seq` takes two instructions
+- executes them sequentially
 
-This instruction sequence contains two call instructions in the sequential order:
-1. call a function with `local_fn_name` name of a local service with `local_service_id` id and bind result to `result_name`
-2. call a remote peer with `remote_peer_id` id
-
-```lisp
-(fold (Iterable i
-    (seq (
-        (call (%current_peer_id% (local_service_id local_fn_name) (i) acc[]))
-        (next i)
-    )
-)))
+#### par: parallel
+```s
+(par 
+    (call "ClientA" ("chat" "display") [msg] void[]) 
+    (call "ClientB" ("chat" "display") [msg] void[])
+)
 ```
+![par example](images/par.png)
+- `par` takes two instructions
+- executes them in parallel
 
-This example is an analog of left fold. It iterates over `Iterable` and on each iteration calls `local_service_id` and puts result to `acc`.
+#### fold: iteration
+![fold example](images/fold.png)
+1. Gather chat members by calling chat.members
+2. Iterate through elements in members array, m = element
+3. Each m is an object, represented as array; [0] is the first field
+4. (next m) triggers next iteration
