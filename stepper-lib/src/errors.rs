@@ -75,7 +75,7 @@ pub enum AquamarineError {
     InvalidEvidenceState(EvidenceState, String),
 
     /// Errors occurred on call evidence deserialization.
-    CallEvidenceDeserializationError(SerdeJsonError),
+    CallEvidenceDeserializationError(SerdeJsonError, String),
 
     /// Errors occurred on call evidence serialization.
     CallEvidenceSerializationError(SerdeJsonError),
@@ -144,9 +144,11 @@ impl std::fmt::Display for AquamarineError {
                 "invalid evidence state: expected {}, but found {:?}",
                 expected, found
             ),
-            AquamarineError::CallEvidenceDeserializationError(err) => {
-                write!(f, "an error occurred while data deserialization: {:?}", err)
-            }
+            AquamarineError::CallEvidenceDeserializationError(err, path) => write!(
+                f,
+                "an error occurred while call evidence path deserialization on {:?}: {:?}",
+                path, err
+            ),
             AquamarineError::CallEvidenceSerializationError(err) => {
                 write!(f, "an error occurred while data serialization: {:?}", err)
             }

@@ -33,8 +33,9 @@ pub(super) fn prepare<'i>(
 ) -> Result<(CallEvidencePath, CallEvidencePath, Instruction<'i>)> {
     use AquamarineError::CallEvidenceDeserializationError as CallDeError;
 
-    let prev_path: CallEvidencePath = serde_json::from_str(&raw_prev_path).map_err(CallDeError)?;
-    let path: CallEvidencePath = serde_json::from_str(&raw_path).map_err(CallDeError)?;
+    let prev_path: CallEvidencePath =
+        serde_json::from_str(&raw_prev_path).map_err(|err| CallDeError(err, raw_prev_path))?;
+    let path: CallEvidencePath = serde_json::from_str(&raw_path).map_err(|err| CallDeError(err, raw_path))?;
 
     let aqua: Instruction<'i> = *air_parser::parse(raw_aqua).map_err(|msg| AquamarineError::AIRParseError(msg))?;
 

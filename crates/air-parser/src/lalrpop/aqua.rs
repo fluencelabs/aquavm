@@ -1693,23 +1693,16 @@ mod __intern_token {
 pub use self::__lalrpop_util::lexer::Token;
 
 #[allow(unused_variables)]
-fn __action0<
-    'input,
-    'err,
->(
+fn __action0<'input, 'err>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, __0, _): (usize, Box<Instruction<'input>>, usize),
-) -> Box<Instruction<'input>>
-{
+) -> Box<Instruction<'input>> {
     __0
 }
 
 #[allow(unused_variables)]
-fn __action1<
-    'input,
-    'err,
->(
+fn __action1<'input, 'err>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, _, _): (usize, &'input str, usize),
@@ -1717,16 +1710,12 @@ fn __action1<
     (_, l, _): (usize, Box<Instruction<'input>>, usize),
     (_, r, _): (usize, Box<Instruction<'input>>, usize),
     (_, _, _): (usize, &'input str, usize),
-) -> Box<Instruction<'input>>
-{
+) -> Box<Instruction<'input>> {
     Box::new(Instruction::Seq(Seq(l, r)))
 }
 
 #[allow(unused_variables)]
-fn __action2<
-    'input,
-    'err,
->(
+fn __action2<'input, 'err>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, _, _): (usize, &'input str, usize),
@@ -1734,16 +1723,12 @@ fn __action2<
     (_, l, _): (usize, Box<Instruction<'input>>, usize),
     (_, r, _): (usize, Box<Instruction<'input>>, usize),
     (_, _, _): (usize, &'input str, usize),
-) -> Box<Instruction<'input>>
-{
+) -> Box<Instruction<'input>> {
     Box::new(Instruction::Par(Par(l, r)))
 }
 
 #[allow(unused_variables)]
-fn __action3<
-    'input,
-    'err,
->(
+fn __action3<'input, 'err>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, _, _): (usize, &'input str, usize),
@@ -1751,16 +1736,12 @@ fn __action3<
     (_, l, _): (usize, Box<Instruction<'input>>, usize),
     (_, r, _): (usize, Box<Instruction<'input>>, usize),
     (_, _, _): (usize, &'input str, usize),
-) -> Box<Instruction<'input>>
-{
+) -> Box<Instruction<'input>> {
     Box::new(Instruction::Xor(Xor(l, r)))
 }
 
 #[allow(unused_variables)]
-fn __action4<
-    'input,
-    'err,
->(
+fn __action4<'input, 'err>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, _, _): (usize, &'input str, usize),
@@ -1770,16 +1751,17 @@ fn __action4<
     (_, args, _): (usize, Vec<Value<'input>>, usize),
     (_, output, _): (usize, CallOutput<'input>, usize),
     (_, _, _): (usize, &'input str, usize),
-) -> Box<Instruction<'input>>
-{
-    Box::new(Instruction::Call(Call{peer, f, args, output}))
+) -> Box<Instruction<'input>> {
+    Box::new(Instruction::Call(Call {
+        peer_part: peer,
+        function_part: f,
+        args,
+        output,
+    }))
 }
 
 #[allow(unused_variables)]
-fn __action5<
-    'input,
-    'err,
->(
+fn __action5<'input, 'err>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, _, _): (usize, &'input str, usize),
@@ -1788,261 +1770,199 @@ fn __action5<
     (_, iterator, _): (usize, &'input str, usize),
     (_, i, _): (usize, Box<Instruction<'input>>, usize),
     (_, _, _): (usize, &'input str, usize),
-) -> Box<Instruction<'input>>
-{
+) -> Box<Instruction<'input>> {
     {
         let instruction = Rc::new(*i);
-        Box::new(Instruction::Fold(Fold{ iterable, iterator, instruction }))
+        Box::new(Instruction::Fold(Fold {
+            iterable,
+            iterator,
+            instruction,
+        }))
     }
 }
 
 #[allow(unused_variables)]
-fn __action6<
-    'input,
-    'err,
->(
+fn __action6<'input, 'err>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, _, _): (usize, &'input str, usize),
     (_, _, _): (usize, &'input str, usize),
     (_, i, _): (usize, &'input str, usize),
     (_, _, _): (usize, &'input str, usize),
-) -> Box<Instruction<'input>>
-{
+) -> Box<Instruction<'input>> {
     Box::new(Instruction::Next(Next(i)))
 }
 
 #[allow(unused_variables)]
-fn __action7<
-    'input,
-    'err,
->(
+fn __action7<'input, 'err>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, __0, _): (usize, &'input str, usize),
     (_, __1, _): (usize, &'input str, usize),
     (_, __2, _): (usize, &'input str, usize),
-) -> Box<Instruction<'input>>
-{
+) -> Box<Instruction<'input>> {
     Box::new(Instruction::Null(Null))
 }
 
 #[allow(unused_variables)]
-fn __action8<
-    'input,
-    'err,
->(
+fn __action8<'input, 'err>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
-    (_, __0, _): (usize, __lalrpop_util::ErrorRecovery<usize, Token<'input>, InstructionError>, usize),
-) -> Box<Instruction<'input>>
-{
-    { errors.push(__0); Box::new(Instruction::Error) }
+    (_, __0, _): (
+        usize,
+        __lalrpop_util::ErrorRecovery<usize, Token<'input>, InstructionError>,
+        usize,
+    ),
+) -> Box<Instruction<'input>> {
+    {
+        errors.push(__0);
+        Box::new(Instruction::Error)
+    }
 }
 
 #[allow(unused_variables)]
-fn __action9<
-    'input,
-    'err,
->(
+fn __action9<'input, 'err>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, _, _): (usize, &'input str, usize),
     (_, args, _): (usize, ::std::vec::Vec<Value<'input>>, usize),
     (_, _, _): (usize, &'input str, usize),
-) -> Vec<Value<'input>>
-{
+) -> Vec<Value<'input>> {
     args
 }
 
 #[allow(unused_variables)]
-fn __action10<
-    'input,
-    'err,
->(
+fn __action10<'input, 'err>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, f, _): (usize, Value<'input>, usize),
-) -> FunctionPart<'input>
-{
+) -> FunctionPart<'input> {
     FunctionPart::FuncName(f)
 }
 
 #[allow(unused_variables)]
-fn __action11<
-    'input,
-    'err,
->(
+fn __action11<'input, 'err>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, _, _): (usize, &'input str, usize),
     (_, sid, _): (usize, Value<'input>, usize),
     (_, f, _): (usize, Value<'input>, usize),
     (_, _, _): (usize, &'input str, usize),
-) -> FunctionPart<'input>
-{
+) -> FunctionPart<'input> {
     FunctionPart::ServiceIdWithFuncName(sid, f)
 }
 
 #[allow(unused_variables)]
-fn __action12<
-    'input,
-    'err,
->(
+fn __action12<'input, 'err>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, pid, _): (usize, Value<'input>, usize),
-) -> PeerPart<'input>
-{
+) -> PeerPart<'input> {
     PeerPart::PeerPk(pid)
 }
 
 #[allow(unused_variables)]
-fn __action13<
-    'input,
-    'err,
->(
+fn __action13<'input, 'err>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, _, _): (usize, &'input str, usize),
     (_, pid, _): (usize, Value<'input>, usize),
     (_, sid, _): (usize, Value<'input>, usize),
     (_, _, _): (usize, &'input str, usize),
-) -> PeerPart<'input>
-{
+) -> PeerPart<'input> {
     PeerPart::PeerPkWithServiceId(pid, sid)
 }
 
 #[allow(unused_variables)]
-fn __action14<
-    'input,
-    'err,
->(
+fn __action14<'input, 'err>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, o, _): (usize, &'input str, usize),
-) -> CallOutput<'input>
-{
+) -> CallOutput<'input> {
     CallOutput::Scalar(o)
 }
 
 #[allow(unused_variables)]
-fn __action15<
-    'input,
-    'err,
->(
+fn __action15<'input, 'err>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, o, _): (usize, &'input str, usize),
-) -> CallOutput<'input>
-{
-    CallOutput::Accumulator(&o[..o.len()-2])
+) -> CallOutput<'input> {
+    CallOutput::Accumulator(&o[..o.len() - 2])
 }
 
 #[allow(unused_variables)]
-fn __action16<
-    'input,
-    'err,
->(
+fn __action16<'input, 'err>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, __0, _): (usize, Value<'input>, usize),
-) -> Value<'input>
-{
+) -> Value<'input> {
     __0
 }
 
 #[allow(unused_variables)]
-fn __action17<
-    'input,
-    'err,
->(
+fn __action17<'input, 'err>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, __0, _): (usize, Value<'input>, usize),
-) -> Value<'input>
-{
+) -> Value<'input> {
     __0
 }
 
 #[allow(unused_variables)]
-fn __action18<
-    'input,
-    'err,
->(
+fn __action18<'input, 'err>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, __0, _): (usize, Value<'input>, usize),
-) -> Value<'input>
-{
+) -> Value<'input> {
     __0
 }
 
 #[allow(unused_variables)]
-fn __action19<
-    'input,
-    'err,
->(
+fn __action19<'input, 'err>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, __0, _): (usize, Value<'input>, usize),
-) -> Value<'input>
-{
+) -> Value<'input> {
     __0
 }
 
 #[allow(unused_variables)]
-fn __action20<
-    'input,
-    'err,
->(
+fn __action20<'input, 'err>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, __0, _): (usize, &'input str, usize),
     (_, __1, _): (usize, &'input str, usize),
-) -> Value<'input>
-{
+) -> Value<'input> {
     Value::Literal("")
 }
 
 #[allow(unused_variables)]
-fn __action21<
-    'input,
-    'err,
->(
+fn __action21<'input, 'err>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, _, _): (usize, &'input str, usize),
     (_, v, _): (usize, &'input str, usize),
     (_, _, _): (usize, &'input str, usize),
-) -> Value<'input>
-{
+) -> Value<'input> {
     Value::Literal(v)
 }
 
 #[allow(unused_variables)]
-fn __action22<
-    'input,
-    'err,
->(
+fn __action22<'input, 'err>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, v, _): (usize, &'input str, usize),
-) -> Value<'input>
-{
+) -> Value<'input> {
     Value::Variable(v)
 }
 
 #[allow(unused_variables)]
-fn __action23<
-    'input,
-    'err,
->(
+fn __action23<'input, 'err>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, v, _): (usize, &'input str, usize),
-) -> Value<'input>
-{
+) -> Value<'input> {
     {
         let mut path = v.splitn(2, ".");
         let variable = path.next().expect("must contain dot");
@@ -2052,219 +1972,158 @@ fn __action23<
 }
 
 #[allow(unused_variables)]
-fn __action24<
-    'input,
-    'err,
->(
+fn __action24<'input, 'err>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, __0, _): (usize, &'input str, usize),
-) -> Value<'input>
-{
+) -> Value<'input> {
     Value::CurrentPeerId
 }
 
 #[allow(unused_variables)]
-fn __action25<
-    'input,
-    'err,
->(
+fn __action25<'input, 'err>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, __0, _): (usize, &'input str, usize),
-) -> &'input str
-{
+) -> &'input str {
     __0
 }
 
 #[allow(unused_variables)]
-fn __action26<
-    'input,
-    'err,
->(
+fn __action26<'input, 'err>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     __lookbehind: &usize,
     __lookahead: &usize,
-) -> ::std::vec::Vec<Value<'input>>
-{
+) -> ::std::vec::Vec<Value<'input>> {
     vec![]
 }
 
 #[allow(unused_variables)]
-fn __action27<
-    'input,
-    'err,
->(
+fn __action27<'input, 'err>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, v, _): (usize, ::std::vec::Vec<Value<'input>>, usize),
-) -> ::std::vec::Vec<Value<'input>>
-{
+) -> ::std::vec::Vec<Value<'input>> {
     v
 }
 
 #[allow(unused_variables)]
-fn __action28<
-    'input,
-    'err,
->(
+fn __action28<'input, 'err>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, __0, _): (usize, Value<'input>, usize),
-) -> Value<'input>
-{
+) -> Value<'input> {
     __0
 }
 
 #[allow(unused_variables)]
-fn __action29<
-    'input,
-    'err,
->(
+fn __action29<'input, 'err>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, __0, _): (usize, Value<'input>, usize),
-) -> ::std::vec::Vec<Value<'input>>
-{
+) -> ::std::vec::Vec<Value<'input>> {
     vec![__0]
 }
 
 #[allow(unused_variables)]
-fn __action30<
-    'input,
-    'err,
->(
+fn __action30<'input, 'err>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, v, _): (usize, ::std::vec::Vec<Value<'input>>, usize),
     (_, e, _): (usize, Value<'input>, usize),
-) -> ::std::vec::Vec<Value<'input>>
-{
-    { let mut v = v; v.push(e); v }
+) -> ::std::vec::Vec<Value<'input>> {
+    {
+        let mut v = v;
+        v.push(e);
+        v
+    }
 }
 
 #[allow(unused_variables)]
-fn __action31<
-    'input,
-    'err,
->(
+fn __action31<'input, 'err>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     __0: (usize, Value<'input>, usize),
-) -> ::std::vec::Vec<Value<'input>>
-{
+) -> ::std::vec::Vec<Value<'input>> {
     let __start0 = __0.0.clone();
     let __end0 = __0.2.clone();
-    let __temp0 = __action28(
-        errors,
-        input,
-        __0,
-    );
+    let __temp0 = __action28(errors, input, __0);
     let __temp0 = (__start0, __temp0, __end0);
-    __action29(
-        errors,
-        input,
-        __temp0,
-    )
+    __action29(errors, input, __temp0)
 }
 
 #[allow(unused_variables)]
-fn __action32<
-    'input,
-    'err,
->(
+fn __action32<'input, 'err>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     __0: (usize, ::std::vec::Vec<Value<'input>>, usize),
     __1: (usize, Value<'input>, usize),
-) -> ::std::vec::Vec<Value<'input>>
-{
+) -> ::std::vec::Vec<Value<'input>> {
     let __start0 = __1.0.clone();
     let __end0 = __1.2.clone();
-    let __temp0 = __action28(
-        errors,
-        input,
-        __1,
-    );
+    let __temp0 = __action28(errors, input, __1);
     let __temp0 = (__start0, __temp0, __end0);
-    __action30(
-        errors,
-        input,
-        __0,
-        __temp0,
-    )
+    __action30(errors, input, __0, __temp0)
 }
 
 #[allow(unused_variables)]
-fn __action33<
-    'input,
-    'err,
->(
+fn __action33<'input, 'err>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     __0: (usize, &'input str, usize),
     __1: (usize, &'input str, usize),
-) -> Vec<Value<'input>>
-{
+) -> Vec<Value<'input>> {
     let __start0 = __0.2.clone();
     let __end0 = __1.0.clone();
-    let __temp0 = __action26(
-        errors,
-        input,
-        &__start0,
-        &__end0,
-    );
+    let __temp0 = __action26(errors, input, &__start0, &__end0);
     let __temp0 = (__start0, __temp0, __end0);
-    __action9(
-        errors,
-        input,
-        __0,
-        __temp0,
-        __1,
-    )
+    __action9(errors, input, __0, __temp0, __1)
 }
 
 #[allow(unused_variables)]
-fn __action34<
-    'input,
-    'err,
->(
+fn __action34<'input, 'err>(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     __0: (usize, &'input str, usize),
     __1: (usize, ::std::vec::Vec<Value<'input>>, usize),
     __2: (usize, &'input str, usize),
-) -> Vec<Value<'input>>
-{
+) -> Vec<Value<'input>> {
     let __start0 = __1.0.clone();
     let __end0 = __1.2.clone();
-    let __temp0 = __action27(
-        errors,
-        input,
-        __1,
-    );
+    let __temp0 = __action27(errors, input, __1);
     let __temp0 = (__start0, __temp0, __end0);
-    __action9(
-        errors,
-        input,
-        __0,
-        __temp0,
-        __2,
-    )
+    __action9(errors, input, __0, __temp0, __2)
 }
 
-pub trait __ToTriple<'input, 'err, > {
-    fn to_triple(value: Self) -> Result<(usize,Token<'input>,usize), __lalrpop_util::ParseError<usize, Token<'input>, InstructionError>>;
+pub trait __ToTriple<'input, 'err> {
+    fn to_triple(
+        value: Self,
+    ) -> Result<
+        (usize, Token<'input>, usize),
+        __lalrpop_util::ParseError<usize, Token<'input>, InstructionError>,
+    >;
 }
 
-impl<'input, 'err, > __ToTriple<'input, 'err, > for (usize, Token<'input>, usize) {
-    fn to_triple(value: Self) -> Result<(usize,Token<'input>,usize), __lalrpop_util::ParseError<usize, Token<'input>, InstructionError>> {
+impl<'input, 'err> __ToTriple<'input, 'err> for (usize, Token<'input>, usize) {
+    fn to_triple(
+        value: Self,
+    ) -> Result<
+        (usize, Token<'input>, usize),
+        __lalrpop_util::ParseError<usize, Token<'input>, InstructionError>,
+    > {
         Ok(value)
     }
 }
-impl<'input, 'err, > __ToTriple<'input, 'err, > for Result<(usize, Token<'input>, usize), InstructionError> {
-    fn to_triple(value: Self) -> Result<(usize,Token<'input>,usize), __lalrpop_util::ParseError<usize, Token<'input>, InstructionError>> {
+impl<'input, 'err> __ToTriple<'input, 'err>
+    for Result<(usize, Token<'input>, usize), InstructionError>
+{
+    fn to_triple(
+        value: Self,
+    ) -> Result<
+        (usize, Token<'input>, usize),
+        __lalrpop_util::ParseError<usize, Token<'input>, InstructionError>,
+    > {
         match value {
             Ok(v) => Ok(v),
             Err(error) => Err(__lalrpop_util::ParseError::User { error }),

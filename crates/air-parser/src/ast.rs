@@ -42,8 +42,8 @@ pub enum FunctionPart<'i> {
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Call<'i> {
-    pub peer: PeerPart<'i>,
-    pub f: FunctionPart<'i>,
+    pub peer_part: PeerPart<'i>,
+    pub function_part: FunctionPart<'i>,
     pub args: Vec<Value<'i>>,
     pub output: CallOutput<'i>,
 }

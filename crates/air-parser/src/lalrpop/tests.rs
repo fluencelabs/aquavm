@@ -37,14 +37,14 @@ fn parse_seq() {
     let instruction = parse(source_code);
     let expected = seq(
         Instruction::Call(Call {
-            peer: PeerPk(Variable("peerid")),
-            f: FuncName(Variable("function")),
+            peer_part: PeerPk(Variable("peerid")),
+            function_part: FuncName(Variable("function")),
             args: vec![],
             output: Scalar("void"),
         }),
         Instruction::Call(Call {
-            peer: PeerPk(Literal("id")),
-            f: FuncName(Literal("f")),
+            peer_part: PeerPk(Literal("id")),
+            function_part: FuncName(Literal("f")),
             args: vec![Literal("hello"), Variable("name")],
             output: Accumulator("void"),
         }),
@@ -67,21 +67,21 @@ fn parse_seq_seq() {
     let expected = seq(
         seq(
             Instruction::Call(Call {
-                peer: PeerPk(Variable("peerid")),
-                f: FuncName(Variable("function")),
+                peer_part: PeerPk(Variable("peerid")),
+                function_part: FuncName(Variable("function")),
                 args: vec![],
                 output: Scalar("void"),
             }),
             Instruction::Call(Call {
-                peer: PeerPkWithServiceId(Variable("peerid"), Variable("serviceA")),
-                f: ServiceIdWithFuncName(Literal("serviceB"), Variable("function")),
+                peer_part: PeerPkWithServiceId(Variable("peerid"), Variable("serviceA")),
+                function_part: ServiceIdWithFuncName(Literal("serviceB"), Variable("function")),
                 args: vec![],
                 output: Scalar("void"),
             }),
         ),
         Instruction::Call(Call {
-            peer: PeerPk(Literal("id")),
-            f: FuncName(Literal("f")),
+            peer_part: PeerPk(Literal("id")),
+            function_part: FuncName(Literal("f")),
             args: vec![Literal("hello"), Variable("name")],
             output: Accumulator("void"),
         }),
@@ -96,11 +96,11 @@ fn parse_json_path() {
         "#;
     let instruction = parse(source_code);
     let expected = Instruction::Call(Call {
-        peer: PeerPk(JsonPath {
+        peer_part: PeerPk(JsonPath {
             variable: "id",
             path: "$.a",
         }),
-        f: FuncName(Literal("f")),
+        function_part: FuncName(Literal("f")),
         args: vec![Literal("hello"), Variable("name")],
         output: Accumulator("void"),
     });
@@ -118,20 +118,20 @@ fn parse_json_path_complex() {
     let instruction = parse(source_code);
     let expected = seq(
         Instruction::Call(Call {
-            peer: PeerPk(JsonPath {
+            peer_part: PeerPk(JsonPath {
                 variable: "m",
                 path: "$.[1]",
             }),
-            f: FuncName(Literal("f")),
+            function_part: FuncName(Literal("f")),
             args: vec![],
             output: Scalar("void"),
         }),
         Instruction::Call(Call {
-            peer: PeerPk(JsonPath {
+            peer_part: PeerPk(JsonPath {
                 variable: "m",
                 path: "$.abc.cde[a][0].cde",
             }),
-            f: FuncName(Literal("f")),
+            function_part: FuncName(Literal("f")),
             args: vec![],
             output: Scalar("void"),
         }),
@@ -218,21 +218,27 @@ fn seq_par_call() {
     let expected = seq(
         par(
             Instruction::Call(Call {
-                peer: PeerPk(CurrentPeerId),
-                f: ServiceIdWithFuncName(Literal("local_service_id"), Literal("local_fn_name")),
+                peer_part: PeerPk(CurrentPeerId),
+                function_part: ServiceIdWithFuncName(
+                    Literal("local_service_id"),
+                    Literal("local_fn_name"),
+                ),
                 args: vec![],
                 output: Scalar("result_1"),
             }),
             Instruction::Call(Call {
-                peer: PeerPk(Literal("remote_peer_id")),
-                f: ServiceIdWithFuncName(Literal("service_id"), Literal("fn_name")),
+                peer_part: PeerPk(Literal("remote_peer_id")),
+                function_part: ServiceIdWithFuncName(Literal("service_id"), Literal("fn_name")),
                 args: vec![],
                 output: Scalar("g"),
             }),
         ),
         Instruction::Call(Call {
-            peer: PeerPk(CurrentPeerId),
-            f: ServiceIdWithFuncName(Literal("local_service_id"), Literal("local_fn_name")),
+            peer_part: PeerPk(CurrentPeerId),
+            function_part: ServiceIdWithFuncName(
+                Literal("local_service_id"),
+                Literal("local_fn_name"),
+            ),
             args: vec![],
             output: Scalar("result_2"),
         }),
@@ -268,49 +274,49 @@ fn seq_with_empty_and_dash() {
         seq(
             seq(
                 Instruction::Call(Call {
-                    peer: PeerPk(Literal("set_variables")),
-                    f: ServiceIdWithFuncName(Literal(""), Literal("")),
+                    peer_part: PeerPk(Literal("set_variables")),
+                    function_part: ServiceIdWithFuncName(Literal(""), Literal("")),
                     args: vec![Literal("module-bytes")],
                     output: Scalar("module-bytes"),
                 }),
                 Instruction::Call(Call {
-                    peer: PeerPk(Literal("set_variables")),
-                    f: ServiceIdWithFuncName(Literal(""), Literal("")),
+                    peer_part: PeerPk(Literal("set_variables")),
+                    function_part: ServiceIdWithFuncName(Literal(""), Literal("")),
                     args: vec![Literal("module_config")],
                     output: Scalar("module_config"),
                 }),
             ),
             Instruction::Call(Call {
-                peer: PeerPk(Literal("set_variables")),
-                f: ServiceIdWithFuncName(Literal(""), Literal("")),
+                peer_part: PeerPk(Literal("set_variables")),
+                function_part: ServiceIdWithFuncName(Literal(""), Literal("")),
                 args: vec![Literal("blueprint")],
                 output: Scalar("blueprint"),
             }),
         ),
         seq(
             Instruction::Call(Call {
-                peer: PeerPk(Literal("A")),
-                f: ServiceIdWithFuncName(Literal("add_module"), Literal("")),
+                peer_part: PeerPk(Literal("A")),
+                function_part: ServiceIdWithFuncName(Literal("add_module"), Literal("")),
                 args: vec![Variable("module-bytes"), Variable("module_config")],
                 output: Scalar("module"),
             }),
             seq(
                 Instruction::Call(Call {
-                    peer: PeerPk(Literal("A")),
-                    f: ServiceIdWithFuncName(Literal("add_blueprint"), Literal("")),
+                    peer_part: PeerPk(Literal("A")),
+                    function_part: ServiceIdWithFuncName(Literal("add_blueprint"), Literal("")),
                     args: vec![Variable("blueprint")],
                     output: Scalar("blueprint_id"),
                 }),
                 seq(
                     Instruction::Call(Call {
-                        peer: PeerPk(Literal("A")),
-                        f: ServiceIdWithFuncName(Literal("create"), Literal("")),
+                        peer_part: PeerPk(Literal("A")),
+                        function_part: ServiceIdWithFuncName(Literal("create"), Literal("")),
                         args: vec![Variable("blueprint_id")],
                         output: Scalar("service_id"),
                     }),
                     Instruction::Call(Call {
-                        peer: PeerPk(Literal("remote_peer_id")),
-                        f: ServiceIdWithFuncName(Literal(""), Literal("")),
+                        peer_part: PeerPk(Literal("remote_peer_id")),
+                        function_part: ServiceIdWithFuncName(Literal(""), Literal("")),
                         args: vec![Variable("service_id")],
                         output: Scalar("client_result"),
                     }),
