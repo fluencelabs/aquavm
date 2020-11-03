@@ -13,10 +13,18 @@ Aquamarine is a distributed choreography platform, controlled by AIR language
 - Development meant to happen in a higher-level language
 - Syntax is in flux, will change
 
-### Structure
-![AIR structure scheme](images/air_structure_data.png)
-
 ### Instructions
+#### call: execution
+![call example](images/call_data.png)
+- `call` commands the execution
+- takes network location, service id, function name, list of function arguments, and an output name
+- moves execution to a peer, specified by `location`
+- peer must have the specified WASM service running
+- the service must have specified function available to be called
+- argument list is given to the function
+- result of the function is saved and available under output name
+- example call could be thought of as `data.result = dht.put(key, value)`
+
 #### seq: sequential
 ![seq example](images/seq.png)
 - `seq` takes two instructions
@@ -28,7 +36,20 @@ Aquamarine is a distributed choreography platform, controlled by AIR language
 - executes them in parallel
 
 #### fold: iteration
-![fold example](images/fold.png)
+![fold structre](images/fold.png)
+- `fold` takes an array, a variable and an instruction
+- iterates through the array, assigning each element to the variable
+- on each iteration instruction is executed
+- instruction can read the variable
+- `next` triggers next iteration
+
+#### xor: branching & error handling
+TODO
+#### null
+TODO
+
+#### example
+![fold example](images/fold_example.png)
 1. Gather chat members by calling chat.members
 2. Iterate through elements in members array, m = element
 3. Each m is an object, represented as array; [0] is the first field
