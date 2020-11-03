@@ -22,7 +22,6 @@ use crate::StepperOutcome;
 
 use jsonpath_lib::JsonPathError;
 use serde_json::Error as SerdeJsonError;
-use serde_sexpr::Error as SExprError;
 
 use std::convert::Into;
 use std::env::VarError;
@@ -30,8 +29,8 @@ use std::error::Error;
 
 #[derive(Debug)]
 pub enum AquamarineError {
-    /// Errors occurred while parsing aqua script in the form of S expressions.
-    SExprParseError(SExprError),
+    /// Error occurred while parsing AIR script
+    AIRParseError(String),
 
     /// Errors occurred while parsing function arguments of an expression.
     FuncArgsSerializationError(JValue, SerdeJsonError),
@@ -76,7 +75,7 @@ pub enum AquamarineError {
     InvalidEvidenceState(EvidenceState, String),
 
     /// Errors occurred on call evidence deserialization.
-    CallEvidenceDeserializationError(SerdeJsonError),
+    CallEvidenceDeserializationError(SerdeJsonError, String),
 
     /// Errors occurred on call evidence serialization.
     CallEvidenceSerializationError(SerdeJsonError),
@@ -96,7 +95,7 @@ impl Error for AquamarineError {}
 impl std::fmt::Display for AquamarineError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         match self {
-            AquamarineError::SExprParseError(err) => write!(f, "aqua script can't be parsed: {:?}", err),
+            AquamarineError::AIRParseError(err) => write!(f, "aqua script can't be parsed:\n{}", err),
             AquamarineError::FuncArgsSerializationError(args, err) => write!(
                 f,
                 "function arguments {} can't be serialized or deserialized with an error: {:?}",
@@ -145,9 +144,11 @@ impl std::fmt::Display for AquamarineError {
                 "invalid evidence state: expected {}, but found {:?}",
                 expected, found
             ),
-            AquamarineError::CallEvidenceDeserializationError(err) => {
-                write!(f, "an error occurred while data deserialization: {:?}", err)
-            }
+            AquamarineError::CallEvidenceDeserializationError(err, path) => write!(
+                f,
+                "an error occurred while call evidence path deserialization on {:?}: {:?}",
+                path, err
+            ),
             AquamarineError::CallEvidenceSerializationError(err) => {
                 write!(f, "an error occurred while data serialization: {:?}", err)
             }
@@ -170,12 +171,6 @@ impl std::fmt::Display for AquamarineError {
     }
 }
 
-impl From<SExprError> for AquamarineError {
-    fn from(err: SExprError) -> Self {
-        AquamarineError::SExprParseError(err)
-    }
-}
-
 impl From<std::convert::Infallible> for AquamarineError {
     fn from(_: std::convert::Infallible) -> Self {
         unreachable!()
@@ -185,7 +180,7 @@ impl From<std::convert::Infallible> for AquamarineError {
 impl Into<StepperOutcome> for AquamarineError {
     fn into(self) -> StepperOutcome {
         let ret_code = match self {
-            AquamarineError::SExprParseError(_) => 1,
+            AquamarineError::AIRParseError(_) => 1,
             AquamarineError::FuncArgsSerializationError(..) => 2,
             AquamarineError::CallServiceResultDeserializationError(..) => 3,
             AquamarineError::CurrentPeerIdEnvError(..) => 4,

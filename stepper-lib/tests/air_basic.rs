@@ -38,13 +38,13 @@ fn seq_par_call() {
 
     let script = String::from(
         r#"
-        (seq (
-            (par (
-                (call (%current_peer_id% ("local_service_id" "local_fn_name") () result_1))
-                (call ("remote_peer_id" ("service_id" "fn_name") () g))
-            ))
-            (call (%current_peer_id% ("local_service_id" "local_fn_name") () result_2))
-        ))"#,
+        (seq 
+            (par 
+                (call %current_peer_id% ("local_service_id" "local_fn_name") [] result_1)
+                (call "remote_peer_id" ("service_id" "fn_name") [] g)
+            )
+            (call %current_peer_id% ("local_service_id" "local_fn_name") [] result_2)
+        )"#,
     );
 
     let res = call_vm!(vm, "asd", script, "[]", "[]");
@@ -72,13 +72,13 @@ fn par_par_call() {
 
     let script = String::from(
         r#"
-        (par (
-            (par (
-                (call (%current_peer_id% ("local_service_id" "local_fn_name") () result_1))
-                (call ("remote_peer_id" ("service_id" "fn_name") () g))
-            ))
-            (call (%current_peer_id% ("local_service_id" "local_fn_name") () result_2))
-        ))"#,
+        (par
+            (par
+                (call %current_peer_id% ("local_service_id" "local_fn_name") [] result_1)
+                (call "remote_peer_id" ("service_id" "fn_name") [] g)
+            )
+            (call %current_peer_id% ("local_service_id" "local_fn_name") [] result_2)
+        )"#,
     );
 
     let res = call_vm!(vm, "asd", script, "[]", "[]");
@@ -153,25 +153,25 @@ fn create_service() {
 
     let script = String::from(
         r#"
-        (seq (
-            (seq (
-                (seq (
-                    (call ("set_variables" ("" "") ("module_bytes") module_bytes))
-                    (call ("set_variables" ("" "") ("module_config") module_config))
-                ))
-                (call ("set_variables" ("" "") ("blueprint") blueprint))
-            ))
-            (seq (
-                (call ("A" ("add_module" "") (module_bytes module_config) module))
-                (seq (
-                    (call ("A" ("add_blueprint" "") (blueprint) blueprint_id))
-                    (seq (
-                        (call ("A" ("create" "") (blueprint_id) service_id))
-                        (call ("remote_peer_id" ("" "") (service_id) client_result))
-                    ))
-                ))
-            ))
-        ))"#,
+        (seq 
+            (seq 
+                (seq 
+                    (call "set_variables" ("" "") ["module_bytes"] module_bytes)
+                    (call "set_variables" ("" "") ["module_config"] module_config)
+                )
+                (call "set_variables" ("" "") ["blueprint"] blueprint)
+            )
+            (seq 
+                (call "A" ("add_module" "") [module_bytes module_config] module)
+                (seq 
+                    (call "A" ("add_blueprint" "") [blueprint] blueprint_id)
+                    (seq 
+                        (call "A" ("create" "") [blueprint_id] service_id)
+                        (call "remote_peer_id" ("" "") [service_id] client_result)
+                    )
+                )
+            )
+        )"#,
     );
 
     let res = call_vm!(set_variables_vm, "init_user_id", script.clone(), "[]", "[]");

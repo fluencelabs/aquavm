@@ -45,29 +45,29 @@ fn data_merge() {
 
     let script = String::from(
         r#"
-        (seq (
-            (call (%current_peer_id% ("neighborhood" "") () neighborhood))
-            (seq (
-                (seq (
-                    (fold (neighborhood i
-                        (par (
-                            (call (i ("add_provider" "") () void[]))
+        (seq 
+            (call %current_peer_id% ("neighborhood" "") [] neighborhood)
+            (seq 
+                (seq 
+                    (fold neighborhood i
+                        (par 
+                            (call i ("add_provider" "") [] void[])
                             (next i)
-                        ))
-                    ))
-                    (fold (neighborhood i
-                        (par (
-                            (call (i ("get_providers" "") () providers[]))
+                        )
+                    )
+                    (fold neighborhood i
+                        (par 
+                            (call i ("get_providers" "") [] providers[])
                             (next i)
-                        ))
-                    ))
-                ))
-                (seq (
-                    (call ("A" ("identity" "") () void[]))
-                    (call ("B" ("" "") () none))
-                ))
-            ))
-        ))
+                        )
+                    )
+                )
+                (seq 
+                    (call "A" ("identity" "") [] void[])
+                    (call "B" ("" "") [] none)
+                )
+            )
+        )
         "#,
     );
 
@@ -187,22 +187,22 @@ fn acc_merge() {
 
     let script = String::from(
         r#"
-        (seq (
-            (call ("A" ("add_provider" "") () void[]))
-                (seq (
-                    (call ("A" ("add_provider" "") () void[]))
-                    (seq (
-                        (call ("A" ("get_providers" "") () providers[]))
-                        (seq (
-                            (call ("A" ("get_providers" "") () providers[]))
-                            (seq (
-                                (call ("B" ("" "2") (providers) void[]))
-                                (call ("B" ("" "3") (void) void[]))
-                            ))
-                        ))
-                    ))
-                ))
-            ))
+        (seq 
+            (call "A" ("add_provider" "") [] void[])
+            (seq 
+                (call "A" ("add_provider" "") [] void[])
+                (seq 
+                    (call "A" ("get_providers" "") [] providers[])
+                    (seq 
+                        (call "A" ("get_providers" "") [] providers[])
+                        (seq 
+                            (call "B" ("" "2") [providers] void[])
+                            (call "B" ("" "3") [void] void[])
+                        )
+                    )
+                )
+            )
+        )
         "#,
     );
 

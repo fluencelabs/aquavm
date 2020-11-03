@@ -13,7 +13,7 @@ use std::cell::RefCell;
 thread_local!(static VM: RefCell<AquamarineVM> = RefCell::new(create_aqua_vm(unit_call_service(), "test_peer_id")));
 thread_local!(static SCRIPT: String = String::from(
         r#"
-            (call (%current_peer_id% ("local_service_id" "local_fn_name") () result_name))
+            (call %current_peer_id% ("local_service_id" "local_fn_name") [] result_name)
         "#,
     )
 );

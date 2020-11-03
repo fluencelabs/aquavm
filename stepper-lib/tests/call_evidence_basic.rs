@@ -37,13 +37,13 @@ fn evidence_seq_par_call() {
 
     let script = String::from(
         r#"
-        (seq (
-            (par (
-                (call (%current_peer_id% ("local_service_id" "local_fn_name") () result_1))
-                (call ("remote_peer_id" ("service_id" "fn_name") () g))
-            ))
-            (call (%current_peer_id% ("local_service_id" "local_fn_name") () result_2))
-        ))"#,
+        (seq
+            (par
+                (call %current_peer_id% ("local_service_id" "local_fn_name") [] result_1)
+                (call "remote_peer_id" ("service_id" "fn_name") [] g)
+            )
+            (call %current_peer_id% ("local_service_id" "local_fn_name") [] result_2)
+        )"#,
     );
 
     let initial_state = json!([
@@ -77,13 +77,13 @@ fn evidence_par_par_call() {
 
     let script = String::from(
         r#"
-        (par (
-            (par (
-                (call ("some_peer_id" ("local_service_id" "local_fn_name") () result_1))
-                (call ("remote_peer_id" ("service_id" "fn_name") () g))
-            ))
-            (call (%current_peer_id% ("local_service_id" "local_fn_name") () result_2))
-        ))"#,
+        (par
+            (par
+                (call "some_peer_id" ("local_service_id" "local_fn_name") [] result_1)
+                (call "remote_peer_id" ("service_id" "fn_name") [] g)
+            )
+            (call %current_peer_id% ("local_service_id" "local_fn_name") [] result_2)
+        )"#,
     );
 
     let initial_state = json!([
@@ -122,13 +122,13 @@ fn evidence_seq_seq() {
 
     let script = format!(
         r#"
-        (seq (
-            (call ("{}" ("identity" "") () void0))
-            (seq (
-                (call ("{}" ("add_blueprint" "") () blueprint_id))
-                (call ("{}" ("addBlueprint-14d8488e-d10d-474d-96b2-878f6a7d74c8" "") () void1))
-            ))
-        ))
+        (seq
+            (call "{}" ("identity" "") [] void0)
+            (seq
+                (call "{}" ("add_blueprint" "") [] blueprint_id)
+                (call "{}" ("addBlueprint-14d8488e-d10d-474d-96b2-878f6a7d74c8" "") [] void1)
+            )
+        )
         "#,
         peer_id_1, peer_id_1, peer_id_2
     );
@@ -201,25 +201,25 @@ fn evidence_create_service() {
 
     let script = String::from(
         r#"
-        (seq (
-            (seq (
-                (seq (
-                    (call ("set_variables" ("add_module" "") ("module_bytes") module_bytes))
-                    (call ("set_variables" ("add_module" "") ("module_config") module_config))
-                ))
-                (call ("set_variables" ("add_module" "") ("blueprint") blueprint))
-            ))
-            (seq (
-                (call ("A" ("add_module" "") (module_bytes module_config) module))
-                (seq (
-                    (call ("A" ("add_blueprint" "") (blueprint) blueprint_id))
-                    (seq (
-                        (call ("A" ("create" "") (blueprint_id) service_id))
-                        (call ("remote_peer_id" ("" "") (service_id) client_result))
-                    ))
-                ))
-            ))
-        ))"#,
+        (seq 
+            (seq 
+                (seq 
+                    (call "set_variables" ("add_module" "") ["module_bytes"] module_bytes)
+                    (call "set_variables" ("add_module" "") ["module_config"] module_config)
+                )
+                (call "set_variables" ("add_module" "") ["blueprint"] blueprint)
+            )
+            (seq 
+                (call "A" ("add_module" "") [module_bytes module_config] module)
+                (seq 
+                    (call "A" ("add_blueprint" "") [blueprint] blueprint_id)
+                    (seq 
+                        (call "A" ("create" "") [blueprint_id] service_id)
+                        (call "remote_peer_id" ("" "") [service_id] client_result)
+                    )
+                )
+            )
+        )"#,
     );
 
     let add_module_response = String::from("add_module response");
@@ -263,18 +263,18 @@ fn evidence_par_seq_fold_call() {
 
     let script = String::from(
         r#"
-        (par (
-            (seq (
-                (call ("some_peer_id_1" ("local_service_id" "local_fn_name") () IterableResultPeer1))
-                (fold (IterableResultPeer1 i
-                    (par (
-                        (call ("some_peer_id_2" ("local_service_id" "local_fn_name") (i) acc[]))
+        (par
+            (seq
+                (call "some_peer_id_1" ("local_service_id" "local_fn_name") [] IterableResultPeer1)
+                (fold IterableResultPeer1 i
+                    (par
+                        (call "some_peer_id_2" ("local_service_id" "local_fn_name") [i] acc[])
                         (next i)
-                    ))
-                ))
-            ))
-            (call ("some_peer_id_3" ("local_service_id" "local_fn_name") () result_2))
-        ))"#,
+                    )
+                )
+            )
+            (call "some_peer_id_3" ("local_service_id" "local_fn_name") [] result_2)
+        )"#,
     );
 
     let res = call_vm!(vm2, "asd", script.clone(), "[]", "[]");
@@ -339,18 +339,18 @@ fn evidence_par_seq_fold_in_cycle_call() {
 
     let script = String::from(
         r#"
-        (par (
-            (seq (
-                (call ("some_peer_id_1" ("local_service_id" "local_fn_name") () IterableResultPeer1))
-                (fold (IterableResultPeer1 i
-                    (par (
-                        (call ("some_peer_id_2" ("local_service_id" "local_fn_name") (i) acc[]))
+        (par 
+            (seq 
+                (call "some_peer_id_1" ("local_service_id" "local_fn_name") [] IterableResultPeer1)
+                (fold IterableResultPeer1 i
+                    (par 
+                        (call "some_peer_id_2" ("local_service_id" "local_fn_name") [i] acc[])
                         (next i)
-                    ))
-                ))
-            ))
-            (call ("some_peer_id_3" ("local_service_id" "local_fn_name") () result_2))
-        ))"#,
+                    )
+                )
+            )
+            (call "some_peer_id_3" ("local_service_id" "local_fn_name") [] result_2)
+        )"#,
     );
 
     let mut data = String::from("[]");
@@ -401,19 +401,19 @@ fn evidence_seq_par_seq_seq() {
     let mut vm2 = create_aqua_vm(unit_call_service(), peer_id_2.clone());
     let script = format!(
         r#"
-        (seq (
-            (par (
-                (seq (
-                    (call ("{}" ("" "") () result_1))
-                    (call ("{}" ("" "") () result_2))
-                ))
-                (seq (
-                    (call ("{}" ("" "") () result_3))
-                    (call ("{}" ("" "") () result_4))
-                ))
-            ))
-            (call ("{}" ("" "") () result_5))
-        ))
+        (seq 
+            (par 
+                (seq 
+                    (call "{}" ("" "") [] result_1)
+                    (call "{}" ("" "") [] result_2)
+                )
+                (seq 
+                    (call "{}" ("" "") [] result_3)
+                    (call "{}" ("" "") [] result_4)
+                )
+            )
+            (call "{}" ("" "") [] result_5)
+        )
         "#,
         peer_id_1, peer_id_2, peer_id_2, peer_id_1, peer_id_2
     );

@@ -23,14 +23,10 @@ use crate::log_instruction;
 use crate::log_targets::EVIDENCE_CHANGING;
 use crate::Result;
 
-use serde_derive::Deserialize;
-use serde_derive::Serialize;
+use air_parser::ast::Par;
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
-pub(crate) struct Par(Box<Instruction>, Box<Instruction>);
-
-impl ExecutableInstruction for Par {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
+impl<'i> ExecutableInstruction<'i> for Par<'i> {
+    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
         log_instruction!(par, exec_ctx, call_ctx);
 
         let (left_subtree_size, right_subtree_size) = extract_subtree_sizes(call_ctx)?;
@@ -87,10 +83,10 @@ fn extract_subtree_sizes(call_ctx: &mut CallEvidenceCtx) -> Result<(usize, usize
     }
 }
 
-fn execute_subtree(
-    subtree: &Instruction,
+fn execute_subtree<'i>(
+    subtree: &Instruction<'i>,
     subtree_size: usize,
-    exec_ctx: &mut ExecutionCtx,
+    exec_ctx: &mut ExecutionCtx<'i>,
     call_ctx: &mut CallEvidenceCtx,
 ) -> Result<usize> {
     call_ctx.current_subtree_elements_count = subtree_size;
@@ -104,14 +100,14 @@ fn execute_subtree(
     Ok(call_ctx.new_path.len() - before_states_count)
 }
 
-fn determine_subtree_complete(next_instruction: &Instruction) -> bool {
+fn determine_subtree_complete(next_instruction: &Instruction<'_>) -> bool {
     // this is needed to prevent situation when on such pattern
     // (fold (Iterable i
-    //    (par (
-    //       (call (..))
+    //    (par
+    //       (call ..)
     //       (next i)
-    //    ))
-    // ))
+    //    )
+    // )
     // par will be executed after the last next that wouldn't change subtree_complete
     !matches!(next_instruction, Instruction::Next(_))
 }
@@ -130,10 +126,10 @@ mod tests {
 
         let script = String::from(
             r#"
-            (par (
-                (call ("remote_peer_id_1" ("local_service_id" "local_fn_name") () result_name))
-                (call ("remote_peer_id_2" ("service_id" "fn_name") () g))
-            ))"#,
+            (par 
+                (call "remote_peer_id_1" ("local_service_id" "local_fn_name") [] result_name)
+                (call "remote_peer_id_2" ("service_id" "fn_name") [] g)
+            )"#,
         );
 
         let mut res = call_vm!(vm, "", script, "[]", "[]");
@@ -151,10 +147,10 @@ mod tests {
 
         let script = String::from(
             r#"
-            (par (
-                (call (%current_peer_id% ("local_service_id" "local_fn_name") () result_name))
-                (call ("remote_peer_id_2" ("service_id" "fn_name") () g))
-            ))"#,
+            (par 
+                (call %current_peer_id% ("local_service_id" "local_fn_name") [] result_name)
+                (call "remote_peer_id_2" ("service_id" "fn_name") [] g)
+            )"#,
         );
 
         let res = call_vm!(vm, "", script, "[]", "[]");

@@ -14,17 +14,11 @@
  * limitations under the License.
  */
 
-use super::CallEvidenceCtx;
-use super::ExecutionCtx;
-use crate::log_instruction;
-use crate::Result;
+extern crate lalrpop;
 
-use air_parser::ast::Null;
-
-impl<'i> super::ExecutableInstruction<'i> for Null {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
-        log_instruction!(null, exec_ctx, call_ctx);
-
-        Ok(())
-    }
+fn main() {
+    lalrpop::Configuration::new()
+        .generate_in_source_tree()
+        .process()
+        .unwrap();
 }

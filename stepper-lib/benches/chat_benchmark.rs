@@ -34,24 +34,24 @@ thread_local!(static CLIENT_2_VM: RefCell<AquamarineVM> = RefCell::new(create_aq
 fn chat_sent_message_benchmark() -> Result<StepperOutcome, AquamarineVMError> {
     let script = String::from(
         r#"
-            (seq (
-                (call ("Relay1" ("identity" "") () void1[]))
-                (seq (
-                    (call ("Remote" ("552196ea-b9b2-4761-98d4-8e7dba77fac4" "add") () void2[]))
-                    (seq (
-                        (call ("Remote" ("920e3ba3-cbdf-4ae3-8972-0fa2f31fffd9" "get_users") () members))
-                        (fold (members m
-                            (par (
-                                (seq (
-                                    (call (m.$.[1] ("identity" "") () void[]))
-                                    (call (m.$.[0] ("fgemb3" "add") () void3[]))
-                                ))
+            (seq 
+                (call "Relay1" ("identity" "") [] void1[])
+                (seq 
+                    (call "Remote" ("552196ea-b9b2-4761-98d4-8e7dba77fac4" "add") [] void2[])
+                    (seq 
+                        (call "Remote" ("920e3ba3-cbdf-4ae3-8972-0fa2f31fffd9" "get_users") [] members)
+                        (fold members m
+                            (par 
+                                (seq 
+                                    (call m.$.[1] ("identity" "") [] void[])
+                                    (call m.$.[0] ("fgemb3" "add") [] void3[])
+                                )
                                 (next m)
-                            ))
-                        ))
-                    ))
-                ))
-            ))
+                            )
+                        )
+                    )
+                )
+            )
         "#,
     );
 

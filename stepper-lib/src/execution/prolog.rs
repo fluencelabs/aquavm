@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-use super::utils::format_aqua;
 use crate::air::ExecutionCtx;
-use crate::air::Instruction;
 use crate::call_evidence::merge_call_paths;
 use crate::call_evidence::CallEvidenceCtx;
 use crate::get_current_peer_id;
@@ -25,19 +23,21 @@ use crate::AquamarineError;
 use crate::CallEvidencePath;
 use crate::Result;
 
+use air_parser::ast::Instruction;
+
 /// Parse and prepare supplied data and aqua script.
-pub(super) fn prepare(
+pub(super) fn prepare<'i>(
     raw_prev_path: String,
     raw_path: String,
-    raw_aqua: String,
-) -> Result<(CallEvidencePath, CallEvidencePath, Instruction)> {
+    raw_aqua: &'i str,
+) -> Result<(CallEvidencePath, CallEvidencePath, Instruction<'i>)> {
     use AquamarineError::CallEvidenceDeserializationError as CallDeError;
 
-    let prev_path: CallEvidencePath = serde_json::from_str(&raw_prev_path).map_err(CallDeError)?;
-    let path: CallEvidencePath = serde_json::from_str(&raw_path).map_err(CallDeError)?;
+    let prev_path: CallEvidencePath =
+        serde_json::from_str(&raw_prev_path).map_err(|err| CallDeError(err, raw_prev_path))?;
+    let path: CallEvidencePath = serde_json::from_str(&raw_path).map_err(|err| CallDeError(err, raw_path))?;
 
-    let formatted_aqua = format_aqua(raw_aqua);
-    let aqua: Instruction = serde_sexpr::from_str(&formatted_aqua)?;
+    let aqua: Instruction<'i> = *air_parser::parse(raw_aqua).map_err(|msg| AquamarineError::AIRParseError(msg))?;
 
     log::info!(
         target: RUN_PARAMS,
@@ -55,7 +55,7 @@ pub(super) fn prepare(
 pub(super) fn make_contexts(
     prev_path: CallEvidencePath,
     path: CallEvidencePath,
-) -> Result<(ExecutionCtx, CallEvidenceCtx)> {
+) -> Result<(ExecutionCtx<'static>, CallEvidenceCtx)> {
     use AquamarineError::CurrentPeerIdEnvError as EnvError;
 
     let current_peer_id = get_current_peer_id().map_err(|e| EnvError(e, String::from("CURRENT_PEER_ID")))?;

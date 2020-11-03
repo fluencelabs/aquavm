@@ -71,25 +71,25 @@ thread_local!(static SET_VARIABLES_VM: RefCell<AquamarineVM> = RefCell::new({
 fn create_service_benchmark() -> Result<StepperOutcome, AquamarineVMError> {
     let script = String::from(
         r#"
-        (seq (
-            (seq (
-                (seq (
-                    (call ("set_variables" ("" "") ("module_bytes") module_bytes))
-                    (call ("set_variables" ("" "") ("module_config") module_config))
-                ))
-                (call ("set_variables" ("" "") ("blueprint") blueprint))
-            ))
-            (seq (
-                (call ("A" ("add_module" "") (module_bytes module_config) module))
-                (seq (
-                    (call ("A" ("add_blueprint" "") (blueprint) blueprint_id))
-                    (seq (
-                        (call ("A" ("create" "") (blueprint_id) service_id))
-                        (call ("remote_peer_id" ("" "") (service_id) client_result))
-                    ))
-                ))
-            ))
-        ))"#,
+        (seq 
+            (seq 
+                (seq 
+                    (call "set_variables" ("" "") ["module_bytes"] module_bytes)
+                    (call "set_variables" ("" "") ["module_config"] module_config)
+                )
+                (call "set_variables" ("" "") ["blueprint"] blueprint)
+            )
+            (seq 
+                (call "A" ("add_module" "") [module_bytes module_config] module)
+                (seq 
+                    (call "A" ("add_blueprint" "") [blueprint] blueprint_id)
+                    (seq 
+                        (call "A" ("create" "") [blueprint_id] service_id)
+                        (call "remote_peer_id" ("" "") [service_id] client_result)
+                    )
+                )
+            )
+        )"#,
     );
 
     let res = SET_VARIABLES_VM

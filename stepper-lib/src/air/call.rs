@@ -15,6 +15,7 @@
  */
 
 mod parsed_call;
+mod triplet;
 mod utils;
 
 use parsed_call::ParsedCall;
@@ -26,10 +27,7 @@ use crate::AquamarineError::VariableNotFound;
 use crate::AquamarineError::VariableNotInJsonPath;
 use crate::Result;
 
-use serde_derive::Deserialize;
-use serde_derive::Serialize;
-
-const CURRENT_PEER_ALIAS: &str = "%current_peer_id%";
+use air_parser::ast::Call;
 
 /*
    (current)
@@ -42,25 +40,8 @@ const CURRENT_PEER_ALIAS: &str = "%current_peer_id%";
    FN_PART: resolves to (fn_name) \/ (fn_srv_id, fn_name)
 */
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
-#[serde(untagged)]
-pub(self) enum PeerPart {
-    PeerPk(String),
-    PeerPkWithServiceId(String, String),
-}
-
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
-#[serde(untagged)]
-pub(self) enum FunctionPart {
-    FuncName(String),
-    ServiceIdWithFuncName(String, String),
-}
-
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
-pub(crate) struct Call(PeerPart, FunctionPart, Vec<String>, String);
-
-impl super::ExecutableInstruction for Call {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
+impl<'i> super::ExecutableInstruction<'i> for Call<'i> {
+    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
         log_instruction!(call, exec_ctx, call_ctx);
 
         let parsed_call = match ParsedCall::new(self, exec_ctx) {
@@ -113,7 +94,7 @@ mod tests {
 
         let script = String::from(
             r#"
-               (call (%current_peer_id% ("local_service_id" "local_fn_name") () result_name))
+               (call %current_peer_id% ("local_service_id" "local_fn_name") [] result_name)
             "#,
         );
 
@@ -129,7 +110,7 @@ mod tests {
 
         let script = String::from(
             r#"
-               (call ("test_peer_id" ("local_service_id" "local_fn_name") () result_name))
+               (call "test_peer_id" ("local_service_id" "local_fn_name") [] result_name)
             "#,
         );
 
@@ -154,7 +135,7 @@ mod tests {
 
         let remote_peer_id = String::from("some_remote_peer_id");
         let script = format!(
-            r#"(call ("{}" ("local_service_id" "local_fn_name") (value) result_name))"#,
+            r#"(call "{}" ("local_service_id" "local_fn_name") [value] result_name)"#,
             remote_peer_id
         );
 
@@ -173,10 +154,10 @@ mod tests {
 
         let script = format!(
             r#"
-            (seq (
-                (call ("set_variable" ("some_service_id" "local_fn_name") () remote_peer_id))
-                (call (remote_peer_id ("some_service_id" "local_fn_name") () result_name))
-            ))
+            (seq 
+                (call "set_variable" ("some_service_id" "local_fn_name") [] remote_peer_id)
+                (call remote_peer_id ("some_service_id" "local_fn_name") [] result_name)
+            )
         "#,
         );
 
@@ -207,10 +188,10 @@ mod tests {
 
         let script = String::from(
             r#"
-            (seq (
-                (call ("set_variable" ("some_service_id" "local_fn_name") () arg3))
-                (call ("A" ("some_service_id" "local_fn_name") ("arg1" "arg2" arg3) result))
-            ))
+            (seq 
+                (call "set_variable" ("some_service_id" "local_fn_name") [] arg3)
+                (call "A" ("some_service_id" "local_fn_name") ["arg1" "arg2" arg3] result)
+            )
         "#,
         );
 

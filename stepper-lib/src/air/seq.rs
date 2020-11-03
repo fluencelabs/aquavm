@@ -16,18 +16,13 @@
 
 use super::CallEvidenceCtx;
 use super::ExecutionCtx;
-use super::Instruction;
 use crate::log_instruction;
 use crate::Result;
 
-use serde_derive::Deserialize;
-use serde_derive::Serialize;
+use air_parser::ast::Seq;
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
-pub(crate) struct Seq(Box<Instruction>, Box<Instruction>);
-
-impl super::ExecutableInstruction for Seq {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
+impl<'i> super::ExecutableInstruction<'i> for Seq<'i> {
+    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
         log_instruction!(seq, exec_ctx, call_ctx);
 
         exec_ctx.subtree_complete = true;
@@ -55,10 +50,10 @@ mod tests {
 
         let script = String::from(
             r#"
-            (seq (
-                (call ("remote_peer_id_1" ("local_service_id" "local_fn_name") () result_name))
-                (call ("remote_peer_id_2" ("service_id" "fn_name") () g))
-            ))"#,
+            (seq 
+                (call "remote_peer_id_1" ("local_service_id" "local_fn_name") [] result_name)
+                (call "remote_peer_id_2" ("service_id" "fn_name") [] g)
+            )"#,
         );
 
         let res = call_vm!(vm, "asd", script.clone(), "[]", "[]");
@@ -74,10 +69,10 @@ mod tests {
 
         let script = String::from(
             r#"
-            (seq (
-                (call (%current_peer_id% ("local_service_id" "local_fn_name") () result_name))
-                (call ("remote_peer_id_2" ("service_id" "fn_name") () g))
-            ))"#,
+            (seq 
+                (call %current_peer_id% ("local_service_id" "local_fn_name") [] result_name)
+                (call "remote_peer_id_2" ("service_id" "fn_name") [] g)
+            )"#,
         );
 
         let res = call_vm!(vm, "asd", script, "[]", "[]");
