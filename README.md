@@ -1,7 +1,7 @@
 # Aquamarine
 
 <p width="100%">
-<img alt="aquamarine scheme" align="right" src="images/aquamarine.png" width="550"/>
+<img alt="aquamarine scheme" align="right" src="images/aquamarine.png" style="max-height:550px"/>
 </p>
 
 Aquamarine is a distributed choreography platform, controlled by AIR language
@@ -20,8 +20,8 @@ Aquamarine is a distributed choreography platform, controlled by AIR language
 
 Scripts written in AIR look like this:
 
-<img alt="fold example" src="images/fold_example.png" width="500"/>
-<img alt="fold example" src="images/fold_example.png" width="700"/>
+<img alt="fold example" src="images/fold_example.png" style="max-height:200px"/>
+<img alt="fold example" src="images/fold_example.png" style="max-height:300px"/>
 
 ![fold example](images/fold_example.png)
 1. Gather chat members by calling chat.members
@@ -31,8 +31,8 @@ Scripts written in AIR look like this:
 
 ### AIR: Instructions
 #### call: execution
-<img alt="call structure" src="images/call_data.png" width="500"/>
-<img alt="call structure" src="images/call_data.png" width="700"/>
+<img alt="call structure" src="images/call_data.png" style="max-height:200px"/>
+<img alt="call structure" src="images/call_data.png" style="max-height:300px"/>
 
 ![call structure](images/call_data.png)
 - `call` commands the execution
@@ -45,24 +45,24 @@ Scripts written in AIR look like this:
 - example call could be thought of as `data.result = dht.put(key, value)`
 
 #### seq: sequential
-<img alt="seq structure" src="images/seq.png" width="500"/>
-<img alt="seq structure" src="images/seq.png" width="700"/>
+<img alt="seq structure" src="images/seq.png" style="max-height:200px"/>
+<img alt="seq structure" src="images/seq.png" style="max-height:300px"/>
 
 ![seq structure](images/seq.png)
 - `seq` takes two instructions
 - executes them sequentially
 
 #### par: parallel
-<img alt="par structure" src="images/par.png" width="500"/>
-<img alt="par structure" src="images/par.png" width="700"/>
+<img alt="par structure" src="images/par.png" style="max-height:200px"/>
+<img alt="par structure" src="images/par.png" style="max-height:300px"/>
 
 ![par structure](images/par.png)
 - `par` takes two instructions
 - executes them in parallel
 
 #### fold: iteration
-<img alt="fold structre" src="images/fold.png" width="500"/>
-<img alt="fold structre" src="images/fold.png" width="700"/>
+<img alt="fold structre" src="images/fold.png" style="max-height:200px"/>
+<img alt="fold structre" src="images/fold.png" style="max-height:300px"/>
 
 ![fold structre](images/fold.png)
 - `fold` takes an array, a variable and an instruction
@@ -72,16 +72,16 @@ Scripts written in AIR look like this:
 - `next` triggers next iteration
 
 #### xor: branching & error handling
-<img alt="xor structure" src="images/xor.png" width="500"/>
-<img alt="xor structure" src="images/xor.png" width="700"/>
+<img alt="xor structure" src="images/xor.png" style="max-height:200px"/>
+<img alt="xor structure" src="images/xor.png" style="max-height:300px"/>
 
 ![xor structure](images/xor.png)
 - `xor` takes two instructions
 - iff first instruction fails, second one is executed
 
 #### null
-<img alt="null structure" src="images/null.png" width="500"/>
-<img alt="null structure" src="images/null.png" width="700"/>
+<img alt="null structure" src="images/null.png" style="max-height:200px"/>
+<img alt="null structure" src="images/null.png" style="max-height:300px"/>
 
 ![null structure](images/null.png)
 
