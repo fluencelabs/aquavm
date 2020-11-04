@@ -22,7 +22,6 @@ Scripts written in AIR look like this:
 
 <img alt="fold example" src="images/fold_example.png" width="700"/>
 
-![fold example](images/fold_example.png)
 1. Gather chat members by calling chat.members
 2. Iterate through elements in members array, m = element
 3. Each m is an object, represented as array; [0] is the first field
@@ -32,7 +31,6 @@ Scripts written in AIR look like this:
 #### call: execution
 <img alt="call structure" src="images/call_data.png" width="500"/>
 
-![call structure](images/call_data.png)
 - `call` commands the execution
 - takes network `location`, `service id`, `function name`, `list of function arguments`, and an `output name`
 - moves execution to a peer, specified by `location`
@@ -45,21 +43,18 @@ Scripts written in AIR look like this:
 #### seq: sequential
 <img alt="seq structure" src="images/seq.png" width="500"/>
 
-![seq structure](images/seq.png)
 - `seq` takes two instructions
 - executes them sequentially
 
 #### par: parallel
 <img alt="par structure" src="images/par.png" width="500"/>
 
-![par structure](images/par.png)
 - `par` takes two instructions
 - executes them in parallel
 
 #### fold: iteration
 <img alt="fold structre" src="images/fold.png" width="500"/>
 
-![fold structre](images/fold.png)
 - `fold` takes an array, a variable and an instruction
 - iterates through the array, assigning each element to the variable
 - on each iteration instruction is executed
@@ -69,14 +64,12 @@ Scripts written in AIR look like this:
 #### xor: branching & error handling
 <img alt="xor structure" src="images/xor.png" width="500"/>
 
-![xor structure](images/xor.png)
 - `xor` takes two instructions
 - iff first instruction fails, second one is executed
 
 #### null
 <img alt="null structure" src="images/null.png" width="500"/>
 
-![null structure](images/null.png)
 
 - `null` takes no arguments
 - does nothing, useful for code generation
