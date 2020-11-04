@@ -20,7 +20,7 @@ Aquamarine is a distributed choreography platform, controlled by AIR language
 
 Scripts written in AIR look like this:
 
-<img alt="fold example" src="images/fold_example.png" width="90%"/>
+<img alt="fold example" src="images/fold_example.png" width="100%"/>
 
 1. Gather chat members by calling chat.members
 2. Iterate through elements in members array, m = element
@@ -29,7 +29,7 @@ Scripts written in AIR look like this:
 
 ### AIR: Instructions
 #### call: execution
-<img alt="call structure" src="images/call_data.png" width="90%"/>
+<img alt="call structure" src="images/call_data.png" width="80%"/>
 
 - `call` commands the execution
 - takes network `location`, `service id`, `function name`, `list of function arguments`, and an `output name`
