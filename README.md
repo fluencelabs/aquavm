@@ -20,7 +20,8 @@ Aquamarine is a distributed choreography platform, controlled by AIR language
 
 Scripts written in AIR look like this:
 
-<img alt="fold example" src="images/fold_example.png" width="1000"/>
+<img alt="fold example" src="images/fold_example.png" width="500"/>
+<img alt="fold example" src="images/fold_example.png" width="700"/>
 
 ![fold example](images/fold_example.png)
 1. Gather chat members by calling chat.members
@@ -30,7 +31,8 @@ Scripts written in AIR look like this:
 
 ### AIR: Instructions
 #### call: execution
-<img alt="call structure" src="images/call_data.png" width="1000"/>
+<img alt="call structure" src="images/call_data.png" width="500"/>
+<img alt="call structure" src="images/call_data.png" width="700"/>
 
 ![call structure](images/call_data.png)
 - `call` commands the execution
@@ -43,21 +45,24 @@ Scripts written in AIR look like this:
 - example call could be thought of as `data.result = dht.put(key, value)`
 
 #### seq: sequential
-<img alt="seq structure" src="images/seq.png" width="1000"/>
+<img alt="seq structure" src="images/seq.png" width="500"/>
+<img alt="seq structure" src="images/seq.png" width="700"/>
 
 ![seq structure](images/seq.png)
 - `seq` takes two instructions
 - executes them sequentially
 
 #### par: parallel
-<img alt="par structure" src="images/par.png" width="1000"/>
+<img alt="par structure" src="images/par.png" width="500"/>
+<img alt="par structure" src="images/par.png" width="700"/>
 
 ![par structure](images/par.png)
 - `par` takes two instructions
 - executes them in parallel
 
 #### fold: iteration
-<img alt="fold structre" src="images/fold.png" width="1000"/>
+<img alt="fold structre" src="images/fold.png" width="500"/>
+<img alt="fold structre" src="images/fold.png" width="700"/>
 
 ![fold structre](images/fold.png)
 - `fold` takes an array, a variable and an instruction
@@ -67,14 +72,16 @@ Scripts written in AIR look like this:
 - `next` triggers next iteration
 
 #### xor: branching & error handling
-<img alt="xor structure" src="images/xor.png" width="1000"/>
+<img alt="xor structure" src="images/xor.png" width="500"/>
+<img alt="xor structure" src="images/xor.png" width="700"/>
 
 ![xor structure](images/xor.png)
 - `xor` takes two instructions
 - iff first instruction fails, second one is executed
 
 #### null
-<img alt="null structure" src="images/null.png" width="1000"/>
+<img alt="null structure" src="images/null.png" width="500"/>
+<img alt="null structure" src="images/null.png" width="700"/>
 
 ![null structure](images/null.png)
 
