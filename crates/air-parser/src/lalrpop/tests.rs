@@ -140,6 +140,34 @@ fn parse_json_path_complex() {
 }
 
 #[test]
+fn json_path_square_braces() {
+    let source_code = r#"
+        (call u.$["peer_id"] ("return" "") [u.$["peer_id"] u.$["name"]] void[])
+        "#;
+    let instruction = parse(source_code);
+    let expected = Instruction::Call(Call {
+        peer_part: PeerPk(JsonPath {
+            variable: "u",
+            path: r#"$["peer_id"]"#,
+        }),
+        function_part: ServiceIdWithFuncName(Literal("return"), Literal("")),
+        args: vec![
+            JsonPath {
+                variable: "u",
+                path: r#"$["peer_id"]"#,
+            },
+            JsonPath {
+                variable: "u",
+                path: r#"$["name"]"#,
+            },
+        ],
+        output: Accumulator("void"),
+    });
+
+    assert_eq!(instruction, expected);
+}
+
+#[test]
 fn parse_null() {
     let source_code = r#"
         (seq
