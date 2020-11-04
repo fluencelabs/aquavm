@@ -20,7 +20,7 @@ Aquamarine is a distributed choreography platform, controlled by AIR language
 
 Scripts written in AIR look like this:
 
-<img alt="fold example" src="images/fold_example.png" width="657px"/>
+<img alt="fold example" src="images/fold_example.png" width="90%"/>
 
 1. Gather chat members by calling chat.members
 2. Iterate through elements in members array, m = element
@@ -29,7 +29,7 @@ Scripts written in AIR look like this:
 
 ### AIR: Instructions
 #### call: execution
-<img alt="call structure" src="images/call_data.png" width="679"/>
+<img alt="call structure" src="images/call_data.png" width="90%"/>
 
 - `call` commands the execution
 - takes network `location`, `service id`, `function name`, `list of function arguments`, and an `output name`
@@ -41,19 +41,19 @@ Scripts written in AIR look like this:
 - example call could be thought of as `data.result = dht.put(key, value)`
 
 #### seq: sequential
-<img alt="seq structure" src="images/seq.png" width="155"/>
+<img alt="seq structure" src="images/seq.png" width="70%"/>
 
 - `seq` takes two instructions
 - executes them sequentially
 
 #### par: parallel
-<img alt="par structure" src="images/par.png" width="155"/>
+<img alt="par structure" src="images/par.png" width="64%"/>
 
 - `par` takes two instructions
 - executes them in parallel
 
 #### fold: iteration
-<img alt="fold structre" src="images/fold.png" height="161"/>
+<img alt="fold structre" src="images/fold.png" width="64%"/>
 
 - `fold` takes an array, a variable and an instruction
 - iterates through the array, assigning each element to the variable
@@ -62,13 +62,13 @@ Scripts written in AIR look like this:
 - `next` triggers next iteration
 
 #### xor: branching & error handling
-<img alt="xor structure" src="images/xor.png" height="123"/>
+<img alt="xor structure" src="images/xor.png" width="69%"/>
 
 - `xor` takes two instructions
 - iff first instruction fails, second one is executed
 
 #### null
-<img alt="null structure" src="images/null.png" height="123"/>
+<img alt="null structure" src="images/null.png" width="69%"/>
 
 
 - `null` takes no arguments
