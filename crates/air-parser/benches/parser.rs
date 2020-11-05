@@ -70,8 +70,24 @@ mod gen {
     }
 }
 
-fn bench_creation(c: &mut Criterion) {
+fn create_parser(c: &mut Criterion) {
     c.bench_function("create_parser", move |b| b.iter(move || InstrParser::new()));
+}
+
+fn clone_parser(c: &mut Criterion) {
+    let parser = InstrParser::new();
+    c.bench_function("clone_parser", move |b| {
+        let parser = parser.clone();
+        b.iter(move || parser.clone())
+    });
+}
+
+fn clone_parser_rc(c: &mut Criterion) {
+    let parser = Rc::new(InstrParser::new());
+    c.bench_function("clone_parser_rc", move |b| {
+        let parser = parser.clone();
+        b.iter(move || parser.clone())
+    });
 }
 
 fn parse(c: &mut Criterion) {
@@ -126,5 +142,13 @@ fn parse_deep(c: &mut Criterion) {
     );
 }
 
-criterion_group!(benches, bench_creation, parse, parse_to_fail, parse_deep);
-criterion_main!(benches);
+criterion_group!(
+    parser,
+    create_parser,
+    parse,
+    parse_to_fail,
+    parse_deep,
+    clone_parser,
+    clone_parser_rc,
+);
+criterion_main!(parser);

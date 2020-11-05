@@ -67,7 +67,7 @@ dependencies = [
 [[package]]
 name = "aquamarine-vm"
 version = "0.1.2"
-source = "git+https://github.com/fluencelabs/fce#c8114d48c6de55fea75f04c6998df7c685e8ce7b"
+source = "git+https://github.com/fluencelabs/fce#d09c5b5d733ddc3b1ef5689f5775fbd9f931c4eb"
 dependencies = [
  "fluence-faas",
  "maplit",
@@ -638,8 +638,8 @@ checksum = "e88a8acf291dafb59c2d96e8f59828f3838bb1a70398823ade51a84de6a6deed"
 
 [[package]]
 name = "fce"
-version = "0.1.9"
-source = "git+https://github.com/fluencelabs/fce#c8114d48c6de55fea75f04c6998df7c685e8ce7b"
+version = "0.1.10"
+source = "git+https://github.com/fluencelabs/fce#d09c5b5d733ddc3b1ef5689f5775fbd9f931c4eb"
 dependencies = [
  "boolinator",
  "fce-wit-interfaces",
@@ -659,8 +659,8 @@ dependencies = [
 
 [[package]]
 name = "fce-wit-interfaces"
-version = "0.1.6"
-source = "git+https://github.com/fluencelabs/fce#c8114d48c6de55fea75f04c6998df7c685e8ce7b"
+version = "0.1.7"
+source = "git+https://github.com/fluencelabs/fce#d09c5b5d733ddc3b1ef5689f5775fbd9f931c4eb"
 dependencies = [
  "multimap",
  "wasmer-interface-types-fl",
@@ -668,8 +668,8 @@ dependencies = [
 
 [[package]]
 name = "fce-wit-parser"
-version = "0.1.8"
-source = "git+https://github.com/fluencelabs/fce#c8114d48c6de55fea75f04c6998df7c685e8ce7b"
+version = "0.1.9"
+source = "git+https://github.com/fluencelabs/fce#d09c5b5d733ddc3b1ef5689f5775fbd9f931c4eb"
 dependencies = [
  "anyhow",
  "fce-wit-interfaces",
@@ -695,8 +695,8 @@ dependencies = [
 
 [[package]]
 name = "fluence-faas"
-version = "0.1.10"
-source = "git+https://github.com/fluencelabs/fce#c8114d48c6de55fea75f04c6998df7c685e8ce7b"
+version = "0.1.11"
+source = "git+https://github.com/fluencelabs/fce#d09c5b5d733ddc3b1ef5689f5775fbd9f931c4eb"
 dependencies = [
  "cmd_lib",
  "fce",
@@ -992,7 +992,7 @@ dependencies = [
 [[package]]
 name = "lalrpop"
 version = "0.19.1"
-source = "git+https://github.com/fluencelabs/lalrpop#149e77b301828392b09da5c2ba634fd19ce3a3a7"
+source = "git+https://github.com/fluencelabs/lalrpop?branch=cloneable_parser#486546b479b51ee370beec1d9e663dcbafa7cab1"
 dependencies = [
  "ascii-canvas",
  "atty",
@@ -1016,7 +1016,7 @@ dependencies = [
 [[package]]
 name = "lalrpop-util"
 version = "0.19.1"
-source = "git+https://github.com/fluencelabs/lalrpop#149e77b301828392b09da5c2ba634fd19ce3a3a7"
+source = "git+https://github.com/fluencelabs/lalrpop?branch=cloneable_parser#486546b479b51ee370beec1d9e663dcbafa7cab1"
 dependencies = [
  "regex",
 ]
@@ -1981,9 +1981,9 @@ dependencies = [
 
 [[package]]
 name = "wasmer-interface-types-fl"
-version = "0.17.10"
+version = "0.17.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1de496e366bd1c198942248fc1de4b94e4647b263dd60099d5f7776f0d621656"
+checksum = "e916b92f2d315ea27d5ff1d3d6410fe852c51d21bb91a8d1ba7adbf701de7f53"
 dependencies = [
  "log",
  "nom",
