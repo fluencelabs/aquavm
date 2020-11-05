@@ -112,7 +112,7 @@ fn parse_json_path_complex() {
     let source_code = r#"
         (seq
             (call m.$.[1] "f" [] void)
-            (call m.$.abc.cde[a][0].cde "f" [] void)
+            (call m.$.abc["c"].cde[a][0].cde["bcd"] "f" [] void)
         )
         "#;
     let instruction = parse(source_code);
@@ -129,13 +129,41 @@ fn parse_json_path_complex() {
         Instruction::Call(Call {
             peer_part: PeerPk(JsonPath {
                 variable: "m",
-                path: "$.abc.cde[a][0].cde",
+                path: r#"$.abc["c"].cde[a][0].cde["bcd"]"#,
             }),
             function_part: FuncName(Literal("f")),
             args: vec![],
             output: Scalar("void"),
         }),
     );
+    assert_eq!(instruction, expected);
+}
+
+#[test]
+fn json_path_square_braces() {
+    let source_code = r#"
+        (call u.$["peer_id"] ("return" "") [u.$["peer_id"].cde[0]["abc"].abc u.$["name"]] void[])
+        "#;
+    let instruction = parse(source_code);
+    let expected = Instruction::Call(Call {
+        peer_part: PeerPk(JsonPath {
+            variable: "u",
+            path: r#"$["peer_id"]"#,
+        }),
+        function_part: ServiceIdWithFuncName(Literal("return"), Literal("")),
+        args: vec![
+            JsonPath {
+                variable: "u",
+                path: r#"$["peer_id"].cde[0]["abc"].abc"#,
+            },
+            JsonPath {
+                variable: "u",
+                path: r#"$["name"]"#,
+            },
+        ],
+        output: Accumulator("void"),
+    });
+
     assert_eq!(instruction, expected);
 }
 

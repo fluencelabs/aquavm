@@ -15,8 +15,8 @@ pub Instr: Box<Instruction<'input>> = {
     "(" "par" <l:Instr> <r:Instr> ")" => Box::new(Instruction::Par(Par(l, r))),
     "(" "xor" <l:Instr> <r:Instr> ")" => Box::new(Instruction::Xor(Xor(l, r))),
 
-    "(" "call" <peer:PeerPart> <f:FPart> <args:Args> <output:Output> ")" =>
-        Box::new(Instruction::Call(Call{peer, f, args, output})),
+    "(" "call" <p:PeerPart> <f:FPart> <args:Args> <output:Output> ")" =>
+        Box::new(Instruction::Call(Call{peer_part: p, function_part: f, args, output})),
 
     "(" "fold" <iterable:Alphanumeric> <iterator:Alphanumeric> <i:Instr> ")" => {
         let instruction = Rc::new(*i);
@@ -75,7 +75,7 @@ Alphanumeric = ALPHANUMERIC;
 match {
     r"[\w_-]+" => ALPHANUMERIC,
     r"[\w_-]+\[\]" => ACCUMULATOR,
-    r"[\w_-]+\.\$[^ ]+" => JSON_PATH,
+    r#"[\w_-]+\.*\$([\w._-]*(\[[\w"]+\])*)+"# => JSON_PATH,
     "%current_peer_id%" => CURRENT_PEER_ID,
     "seq",
     "call",

@@ -32,9 +32,8 @@ Scripts written in AIR look like this:
 <img alt="call structure" src="images/call_data.png" width="670"/>
 
 - `call` commands the execution
-- takes network `location`, `service id`, `function name`, `list of function arguments`, and an `output name`
 - moves execution to a peer, specified by `location`
-- peer must have the specified WASM `service` running
+- peer is expected to have specified WASM `service`
 - the `service` must have specified `function` available to be called
 - `argument list` is given to the `function`
 - result of the `function` is saved and available under `output name`
