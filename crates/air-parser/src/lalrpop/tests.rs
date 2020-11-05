@@ -23,7 +23,7 @@ use Value::*;
 use fstrings::f;
 
 fn parse(source_code: &str) -> Instruction {
-    *super::parse(source_code).expect("parsing failed")
+    *crate::parse(source_code).expect("parsing failed")
 }
 
 #[test]

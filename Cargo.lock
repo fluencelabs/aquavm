@@ -15,6 +15,7 @@ version = "0.1.0"
 dependencies = [
  "codespan",
  "codespan-reporting",
+ "criterion",
  "fstrings",
  "lalrpop",
  "lalrpop-util",
@@ -991,8 +992,7 @@ dependencies = [
 [[package]]
 name = "lalrpop"
 version = "0.19.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "60fb56191fb8ed5311597e5750debe6779c9fdb487dbaa5ff302592897d7a2c8"
+source = "git+https://github.com/fluencelabs/lalrpop#149e77b301828392b09da5c2ba634fd19ce3a3a7"
 dependencies = [
  "ascii-canvas",
  "atty",
@@ -1016,8 +1016,7 @@ dependencies = [
 [[package]]
 name = "lalrpop-util"
 version = "0.19.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6771161eff561647fad8bb7e745e002c304864fb8f436b52b30acda51fca4408"
+source = "git+https://github.com/fluencelabs/lalrpop#149e77b301828392b09da5c2ba634fd19ce3a3a7"
 dependencies = [
  "regex",
 ]

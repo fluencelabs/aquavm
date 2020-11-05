@@ -4,17 +4,18 @@
 #[macro_use]
 extern crate fstrings;
 
-pub mod ast;
 mod lalrpop {
     #[cfg(test)]
-    mod tests;
+    pub mod tests;
 
     // aqua is auto-generated, so exclude it from `cargo fmt -- --check`
     #[rustfmt::skip]
-    mod aqua;
-    mod parser;
-
-    pub use parser::parse;
+    pub mod aqua;
+    pub mod parser;
 }
+pub mod ast;
 
-pub use lalrpop::parse;
+pub use lalrpop::parser::parse;
+
+// #[cfg(test)]
+pub use lalrpop::aqua::InstrParser;
