@@ -33,7 +33,7 @@ Scripts written in AIR look like this:
 
 - `call` commands the execution
 - moves execution to a peer, specified by `location`
-- peer expected to have specified WASM `service`
+- peer is expected to have specified WASM `service`
 - the `service` must have specified `function` available to be called
 - `argument list` is given to the `function`
 - result of the `function` is saved and available under `output name`
