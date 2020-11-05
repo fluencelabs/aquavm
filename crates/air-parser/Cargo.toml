@@ -5,13 +5,18 @@ authors = ["Fluence Labs"]
 edition = "2018"
 
 [build-dependencies]
-lalrpop = { version = "0.19.1", features = ["lexer"] }
+lalrpop = { git = "https://github.com/fluencelabs/lalrpop", version = "0.19.1", features = ["lexer"] }
 
 [dependencies]
-lalrpop-util = { version = "0.19.1", features = ["lexer"] }
+lalrpop-util = { git = "https://github.com/fluencelabs/lalrpop", version = "0.19.1", features = ["lexer"] }
 regex = "1.4.1"
 codespan = "0.9.5"
 codespan-reporting = "0.9.5"
 
 [dev-dependencies]
 fstrings = "0.2.3"
+criterion = "0.3.3"
+
+[[bench]]
+name = "parser"
+harness = false
