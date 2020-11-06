@@ -25,37 +25,49 @@ use crate::Result;
 
 use air_parser::ast::Par;
 
+enum SubtreeType {
+    Left,
+    Right,
+}
+
+impl std::fmt::Display for SubtreeType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Left => write!(f, "left"),
+            Self::Right => write!(f, "right"),
+        }
+    }
+}
+
 impl<'i> ExecutableInstruction<'i> for Par<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
+        use SubtreeType::*;
+
         log_instruction!(par, exec_ctx, call_ctx);
 
         let (left_subtree_size, right_subtree_size) = extract_subtree_sizes(call_ctx)?;
 
-        let pre_states_count = call_ctx.current_path.len();
-        let pre_unused_elements = call_ctx.current_subtree_elements_count;
+        let before_path_size = call_ctx.current_path.len();
+        let before_subtree_size = call_ctx.current_subtree_size;
 
-        let pre_new_states_count = call_ctx.new_path.len();
+        let par_pos = call_ctx.new_path.len();
         call_ctx.new_path.push_back(EvidenceState::Par(0, 0));
 
-        let new_left_subtree_size = execute_subtree(&self.0, left_subtree_size, exec_ctx, call_ctx)?;
+        // execute a left subtree of this par
+        execute_subtree(&self.0, left_subtree_size, exec_ctx, call_ctx, par_pos, Left)?;
         let left_subtree_complete = exec_ctx.subtree_complete;
 
-        let new_right_subtree_size = execute_subtree(&self.1, right_subtree_size, exec_ctx, call_ctx)?;
+        // execute a right subtree of this par
+        execute_subtree(&self.1, right_subtree_size, exec_ctx, call_ctx, par_pos, Right)?;
         let right_subtree_complete = exec_ctx.subtree_complete;
 
         // par is completed if at least one of its subtrees is completed
         exec_ctx.subtree_complete = left_subtree_complete || right_subtree_complete;
 
-        let new_par_evidence_state = EvidenceState::Par(new_left_subtree_size, new_right_subtree_size);
-        log::info!(
-            target: EVIDENCE_CHANGING,
-            "  adding new call evidence state {:?}",
-            new_par_evidence_state
-        );
-        call_ctx.new_path[pre_new_states_count] = new_par_evidence_state;
-
-        let post_states_count = call_ctx.current_path.len();
-        call_ctx.current_subtree_elements_count = pre_unused_elements - (pre_states_count - post_states_count);
+        // decrease current subtree size by used elements from current_path
+        let after_path_size = call_ctx.current_path.len();
+        let used_path_elements = before_path_size - after_path_size;
+        call_ctx.current_subtree_size = before_subtree_size - used_path_elements;
 
         Ok(())
     }
@@ -64,11 +76,10 @@ impl<'i> ExecutableInstruction<'i> for Par<'i> {
 fn extract_subtree_sizes(call_ctx: &mut CallEvidenceCtx) -> Result<(usize, usize)> {
     use crate::AquamarineError::InvalidEvidenceState;
 
-    if call_ctx.current_subtree_elements_count == 0 {
+    if call_ctx.current_subtree_size == 0 {
         return Ok((0, 0));
     }
-
-    call_ctx.current_subtree_elements_count -= 1;
+    call_ctx.current_subtree_size -= 1;
 
     log::info!(
         target: EVIDENCE_CHANGING,
@@ -88,16 +99,54 @@ fn execute_subtree<'i>(
     subtree_size: usize,
     exec_ctx: &mut ExecutionCtx<'i>,
     call_ctx: &mut CallEvidenceCtx,
-) -> Result<usize> {
-    call_ctx.current_subtree_elements_count = subtree_size;
-    let before_states_count = call_ctx.new_path.len();
+    current_par_pos: usize,
+    subtree_type: SubtreeType,
+) -> Result<()> {
+    fn update_last_par_state(
+        call_ctx: &mut CallEvidenceCtx,
+        subtree_type: SubtreeType,
+        current_par_pos: usize,
+        before_new_path_len: usize,
+    ) {
+        let new_subtree_size = call_ctx.new_path.len() - before_new_path_len;
+
+        // unwrap is safe here, because this par is added at the beginning of this par instruction.
+        let par_state = call_ctx.new_path.get_mut(current_par_pos).unwrap();
+        match par_state {
+            EvidenceState::Par(left, right) => {
+                if let SubtreeType::Left = subtree_type {
+                    *left = new_subtree_size;
+                } else {
+                    *right = new_subtree_size;
+                }
+
+                log::info!(target: EVIDENCE_CHANGING, "  set {} par subtree size to {}", subtree_type, new_subtree_size);
+            }
+            _ => unreachable!("current_pas_pos must point to a par state"),
+        }
+    }
+
+    use crate::AquamarineError::LocalServiceError;
+
+    call_ctx.current_subtree_size = subtree_size;
+    let before_new_path_len = call_ctx.new_path.len();
 
     exec_ctx.subtree_complete = determine_subtree_complete(&subtree);
 
     // execute subtree
-    subtree.execute(exec_ctx, call_ctx)?;
-
-    Ok(call_ctx.new_path.len() - before_states_count)
+    match subtree.execute(exec_ctx, call_ctx) {
+        res @ Ok(_) => {
+            update_last_par_state(call_ctx, subtree_type, current_par_pos, before_new_path_len);
+            res
+        }
+        // if there is a service error, update already added Par state
+        // and then bubble the error up
+        err @ Err(LocalServiceError(_)) => {
+            update_last_par_state(call_ctx, subtree_type, current_par_pos, before_new_path_len);
+            err
+        }
+        err @ Err(_) => err,
+    }
 }
 
 fn determine_subtree_complete(next_instruction: &Instruction<'_>) -> bool {
@@ -108,7 +157,7 @@ fn determine_subtree_complete(next_instruction: &Instruction<'_>) -> bool {
     //       (next i)
     //    )
     // )
-    // par will be executed after the last next that wouldn't change subtree_complete
+    // par will be completed after the last next that wouldn't change subtree_complete
     !matches!(next_instruction, Instruction::Next(_))
 }
 

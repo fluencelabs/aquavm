@@ -108,13 +108,13 @@ impl<'i> ParsedCall<'i> {
         use crate::call_evidence::CallResult::*;
         use crate::call_evidence::EvidenceState::*;
 
-        if call_ctx.current_subtree_elements_count == 0 {
+        if call_ctx.current_subtree_size == 0 {
             log::info!(target: EVIDENCE_CHANGING, "  previous call evidence state wasn't found");
             return Ok(true);
         }
 
-        call_ctx.current_subtree_elements_count -= 1;
-        // unwrap is safe here, because current_subtree_elements_count depends on current_path len,
+        call_ctx.current_subtree_size -= 1;
+        // unwrap is safe here, because current_subtree_size depends on current_path len,
         // and it's been checked previously
         let prev_state = call_ctx.current_path.pop_front().unwrap();
 
