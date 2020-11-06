@@ -50,19 +50,15 @@ mod tests {
 
     use std::rc::Rc;
 
-    #[test]
-    fn xor() {
-        use crate::call_evidence::CallResult::*;
-        use crate::call_evidence::EvidenceState::*;
-
-        let call_service: HostExportedFunc = Box::new(|_, args| -> Option<IValue> {
+    fn fallible_call_service(fallible_service_id: String) -> HostExportedFunc {
+        Box::new(move |_, args| -> Option<IValue> {
             let builtin_service = match &args[0] {
                 IValue::String(str) => str,
                 _ => unreachable!(),
             };
 
-            if builtin_service == "service_id_1" {
-                // return a error for service with id service_id_1
+            // return a error for service with such id
+            if builtin_service == &fallible_service_id {
                 Some(IValue::Record(
                     Vec1::new(vec![IValue::S32(1), IValue::String(String::from(r#""error""#))]).unwrap(),
                 ))
@@ -72,9 +68,16 @@ mod tests {
                     Vec1::new(vec![IValue::S32(0), IValue::String(String::from(r#""res""#))]).unwrap(),
                 ))
             }
-        });
+        })
+    }
 
-        let mut vm = create_aqua_vm(call_service, "");
+    #[test]
+    fn xor() {
+        use crate::call_evidence::CallResult::*;
+        use crate::call_evidence::EvidenceState::*;
+
+        let fallible_service_id = String::from("service_id_1");
+        let mut vm = create_aqua_vm(fallible_call_service(fallible_service_id), "");
 
         let script = String::from(
             r#"
@@ -110,5 +113,55 @@ mod tests {
             call_path[0],
             Call(Executed(Rc::new(JValue::String(String::from("res")))))
         );
+    }
+
+    #[test]
+    fn xor_par() {
+        use crate::call_evidence::CallResult::*;
+        use crate::call_evidence::EvidenceState::*;
+
+        let fallible_service_id = String::from("service_id_1");
+        let mut vm = create_aqua_vm(fallible_call_service(fallible_service_id), "");
+
+        let script = String::from(
+            r#"
+            (xor
+                (par
+                    (seq
+                        (call %current_peer_id% ("service_id_2" "local_fn_name") [] result_1)
+                        (call %current_peer_id% ("service_id_2" "local_fn_name") [] result_2)
+                    )
+                    (par
+                        (call %current_peer_id% ("service_id_1" "local_fn_name") [] result_3)
+                        (call %current_peer_id% ("service_id_2" "local_fn_name") [] result_4)
+                    )
+                )
+                (seq
+                    (call %current_peer_id% ("service_id_2" "local_fn_name") [] result_4)
+                    (call %current_peer_id% ("service_id_2" "local_fn_name") [] result_5)
+                )
+            )"#,
+        );
+
+        let result = call_vm!(vm, "asd", script.clone(), "[]", "[]");
+        let result_path: CallEvidencePath = serde_json::from_str(&result.data).expect("should be valid json");
+
+        let res = String::from("res");
+
+        let right_path = vec![
+            Par(2, 2),
+            Call(Executed(Rc::new(JValue::String(res.clone())))),
+            Call(Executed(Rc::new(JValue::String(res.clone())))),
+            Par(1, 0),
+            Call(CallServiceFailed(String::from(r#""error""#))),
+            Call(Executed(Rc::new(JValue::String(res.clone())))),
+            Call(Executed(Rc::new(JValue::String(res)))),
+        ];
+
+        assert_eq!(result_path, right_path);
+
+        let result = call_vm!(vm, "asd", script, "[]", result.data);
+        let result_path: CallEvidencePath = serde_json::from_str(&result.data).expect("should be valid json");
+        assert_eq!(result_path, right_path);
     }
 }

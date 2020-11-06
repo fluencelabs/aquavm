@@ -94,6 +94,7 @@ fn extract_subtree_sizes(call_ctx: &mut CallEvidenceCtx) -> Result<(usize, usize
     }
 }
 
+/// Execute provided subtree and update Par state in call_ctx.new_path.
 fn execute_subtree<'i>(
     subtree: &Instruction<'i>,
     subtree_size: usize,
@@ -120,7 +121,12 @@ fn execute_subtree<'i>(
                     *right = new_subtree_size;
                 }
 
-                log::info!(target: EVIDENCE_CHANGING, "  set {} par subtree size to {}", subtree_type, new_subtree_size);
+                log::info!(
+                    target: EVIDENCE_CHANGING,
+                    "  set {} par subtree size to {}",
+                    subtree_type,
+                    new_subtree_size
+                );
             }
             _ => unreachable!("current_pas_pos must point to a par state"),
         }
