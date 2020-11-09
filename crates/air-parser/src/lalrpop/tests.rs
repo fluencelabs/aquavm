@@ -213,7 +213,7 @@ fn parse_fold() {
         )
         "#;
     let instruction = parse(&source_code.as_ref());
-    let expected = fold(Value::Literal("iterable"), "i", null());
+    let expected = fold(Value::Variable("iterable"), "i", null());
     assert_eq!(instruction, expected);
 }
 
@@ -228,7 +228,7 @@ fn parse_fold_with_xor_par_seq() {
         let source_code = source_fold_with(name);
         let instruction = parse(&source_code.as_ref());
         let instr = binary_instruction(*name);
-        let expected = fold(Value::Literal("iterable"), "i", instr(null(), null()));
+        let expected = fold(Value::Variable("iterable"), "i", instr(null(), null()));
         assert_eq!(instruction, expected);
     }
 }
