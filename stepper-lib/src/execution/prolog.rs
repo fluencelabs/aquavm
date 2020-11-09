@@ -31,11 +31,20 @@ pub(super) fn prepare<'i>(
     raw_path: String,
     raw_aqua: &'i str,
 ) -> Result<(CallEvidencePath, CallEvidencePath, Instruction<'i>)> {
-    use AquamarineError::CallEvidenceDeserializationError as CallDeError;
+    fn to_evidence_path(raw_path: String) -> Result<CallEvidencePath> {
+        use AquamarineError::CallEvidenceDeserializationError as CallDeError;
 
-    let prev_path: CallEvidencePath =
-        serde_json::from_str(&raw_prev_path).map_err(|err| CallDeError(err, raw_prev_path))?;
-    let path: CallEvidencePath = serde_json::from_str(&raw_path).map_err(|err| CallDeError(err, raw_path))?;
+        // treat empty string as an empty call evidence path allows abstracting from
+        // the internal format for empty data.
+        if raw_path.is_empty() {
+            Ok(CallEvidencePath::new())
+        } else {
+            serde_json::from_str(&raw_path).map_err(|err| CallDeError(err, raw_path))
+        }
+    }
+
+    let prev_path = to_evidence_path(raw_prev_path)?;
+    let path = to_evidence_path(raw_path)?;
 
     let aqua: Instruction<'i> = *air_parser::parse(raw_aqua).map_err(|msg| AquamarineError::AIRParseError(msg))?;
 

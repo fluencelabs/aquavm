@@ -24,17 +24,17 @@ use std::fmt::Formatter;
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub(crate) struct CallEvidenceCtx {
     pub(crate) current_path: CallEvidencePath,
-    pub(crate) current_subtree_elements_count: usize,
+    pub(crate) current_subtree_size: usize,
     // TODO: consider change it to Vec for optimization
     pub(crate) new_path: CallEvidencePath,
 }
 
 impl CallEvidenceCtx {
     pub fn new(current_path: CallEvidencePath) -> Self {
-        let current_subtree_elements_count = current_path.len();
+        let current_subtree_size = current_path.len();
         Self {
             current_path,
-            current_subtree_elements_count,
+            current_subtree_size,
             new_path: CallEvidencePath::new(),
         }
     }
@@ -43,11 +43,7 @@ impl CallEvidenceCtx {
 impl Display for CallEvidenceCtx {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "current path:\n{:?}", self.current_path)?;
-        writeln!(
-            f,
-            "current subtree elements count:\n{:?}",
-            self.current_subtree_elements_count
-        )?;
+        writeln!(f, "current subtree elements count:\n{:?}", self.current_subtree_size)?;
         writeln!(f, "new path:\n{:?}", self.new_path)
     }
 }
