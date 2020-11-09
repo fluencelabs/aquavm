@@ -5,10 +5,10 @@ authors = ["Fluence Labs"]
 edition = "2018"
 
 [build-dependencies]
-lalrpop = { git = "https://github.com/fluencelabs/lalrpop", version = "0.19.1", features = ["lexer"] }
+lalrpop = { git = "https://github.com/fluencelabs/lalrpop", branch = "cloneable_parser", version = "0.19.1", features = ["lexer"] }
 
 [dependencies]
-lalrpop-util = { git = "https://github.com/fluencelabs/lalrpop", version = "0.19.1", features = ["lexer"] }
+lalrpop-util = { git = "https://github.com/fluencelabs/lalrpop", branch = "cloneable_parser", version = "0.19.1", features = ["lexer"] }
 regex = "1.4.1"
 codespan = "0.9.5"
 codespan-reporting = "0.9.5"
