@@ -39,12 +39,12 @@ pub(crate) trait ExecutableInstruction<'i> {
 impl<'i> ExecutableInstruction<'i> for Instruction<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
         match self {
-            Instruction::Seq(seq) => seq.execute(exec_ctx, call_ctx),
             Instruction::Call(call) => call.execute(exec_ctx, call_ctx),
-            Instruction::Null(null) => null.execute(exec_ctx, call_ctx),
             Instruction::Fold(fold) => fold.execute(exec_ctx, call_ctx),
             Instruction::Next(next) => next.execute(exec_ctx, call_ctx),
+            Instruction::Null(null) => null.execute(exec_ctx, call_ctx),
             Instruction::Par(par) => par.execute(exec_ctx, call_ctx),
+            Instruction::Seq(seq) => seq.execute(exec_ctx, call_ctx),
             Instruction::Xor(xor) => xor.execute(exec_ctx, call_ctx),
             Instruction::Error => unreachable!("should not execute if parsing failed. QED."),
         }
@@ -84,7 +84,7 @@ macro_rules! log_instruction {
         log::info!(
             target: crate::log_targets::SUBTREE_ELEMENTS,
             "  subtree elements count: {:?}",
-            $call_ctx.current_subtree_elements_count
+            $call_ctx.current_subtree_size
         );
         log::info!(
             target: crate::log_targets::NEW_CALL_EVIDENCE_PATH,
