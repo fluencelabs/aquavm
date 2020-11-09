@@ -35,5 +35,4 @@ jobs:
           publish_branch: gh-pages
           publish_dir: ./target/doc
           force_orphan: true
-          destination_dir: docs
           cname: fluence.network
