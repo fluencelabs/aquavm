@@ -34,7 +34,7 @@ pub(super) fn prepare<'i>(
     fn to_evidence_path(raw_path: String) -> Result<CallEvidencePath> {
         use AquamarineError::CallEvidenceDeserializationError as CallDeError;
 
-        // treat empty string as an empty call evidence path allows abstract from
+        // treat empty string as an empty call evidence path allows abstracting from
         // the internal format for empty data.
         if raw_path.is_empty() {
             Ok(CallEvidencePath::new())
