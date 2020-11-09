@@ -56,6 +56,7 @@ pub(super) fn set_local_call_result<'i>(
                 }
             };
         }
+        CallOutput::None => {}
     }
 
     Ok(())

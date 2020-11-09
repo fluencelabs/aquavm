@@ -15,8 +15,10 @@ pub Instr: Box<Instruction<'input>> = {
     "(" "par" <l:Instr> <r:Instr> ")" => Box::new(Instruction::Par(Par(l, r))),
     "(" "xor" <l:Instr> <r:Instr> ")" => Box::new(Instruction::Xor(Xor(l, r))),
 
-    "(" "call" <p:PeerPart> <f:FPart> <args:Args> <output:Output> ")" =>
-        Box::new(Instruction::Call(Call{peer_part: p, function_part: f, args, output})),
+    "(" "call" <p:PeerPart> <f:FPart> <args:Args> <output:Output?> ")" => {
+        let output = output.unwrap_or(CallOutput::None);
+        Box::new(Instruction::Call(Call{peer_part: p, function_part: f, args, output}))
+    },
 
     "(" "fold" <iterable:Alphanumeric> <iterator:Alphanumeric> <i:Instr> ")" => {
         let instruction = Rc::new(*i);
@@ -44,7 +46,6 @@ PeerPart: PeerPart<'input> = {
     "(" <pid:PeerId> <sid:ServiceId> ")" => PeerPart::PeerPkWithServiceId(pid, sid),
 }
 
-// TODO: make output one of _ () "" and absence
 Output: CallOutput<'input> = {
     <o:Alphanumeric> => CallOutput::Scalar(o),
     <o:ACCUMULATOR> => CallOutput::Accumulator(&o[..o.len()-2]),
