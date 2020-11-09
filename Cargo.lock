@@ -999,7 +999,7 @@ dependencies = [
 [[package]]
 name = "lalrpop"
 version = "0.19.1"
-source = "git+https://github.com/fluencelabs/lalrpop#149e77b301828392b09da5c2ba634fd19ce3a3a7"
+source = "git+https://github.com/fluencelabs/lalrpop?branch=cloneable_parser#486546b479b51ee370beec1d9e663dcbafa7cab1"
 dependencies = [
  "ascii-canvas",
  "atty",
@@ -1023,7 +1023,7 @@ dependencies = [
 [[package]]
 name = "lalrpop-util"
 version = "0.19.1"
-source = "git+https://github.com/fluencelabs/lalrpop#149e77b301828392b09da5c2ba634fd19ce3a3a7"
+source = "git+https://github.com/fluencelabs/lalrpop?branch=cloneable_parser#486546b479b51ee370beec1d9e663dcbafa7cab1"
 dependencies = [
  "regex",
 ]
