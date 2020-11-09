@@ -44,8 +44,8 @@ impl<'a, 'i> Triplet<'a, 'i> {
         use air_parser::ast::PeerPart::*;
 
         let (peer_pk, service_id, function_name) = match (peer, f) {
-            (PeerPkWithServiceId(peer_pk, peer_service_id), ServiceIdWithFuncName(_service_id, func_name)) => {
-                Ok((peer_pk, peer_service_id, func_name))
+            (PeerPkWithServiceId(peer_pk, _peer_service_id), ServiceIdWithFuncName(service_id, func_name)) => {
+                Ok((peer_pk, service_id, func_name))
             }
             (PeerPkWithServiceId(peer_pk, peer_service_id), FuncName(func_name)) => {
                 Ok((peer_pk, peer_service_id, func_name))
