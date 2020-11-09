@@ -1,5 +1,5 @@
 // auto-generated: "lalrpop 0.19.1"
-// sha256: 9467c547a220171aaf78fe3f8795514c281b4cff41de6a38a5021d6edcea737
+// sha256: 16d0e636128bfae4daa48833950cdbf2289de5d19282908961d73fa82a56
 use crate::ast::*;
 use crate::lalrpop::parser::InstructionError;
 use lalrpop_util::ErrorRecovery;
@@ -42,7 +42,7 @@ mod __parse__Instr {
         // State 1
         9, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 31, 32, 0,
         // State 2
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 0, 0, 0,
+        9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 31, 32, 0,
         // State 3
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 0, 0, 0,
         // State 4
@@ -299,7 +299,6 @@ mod __parse__Instr {
         match nt {
             2 => 21,
             3 => match state {
-                2 => 10,
                 10 => 17,
                 3 => 32,
                 8 => 36,
@@ -337,6 +336,7 @@ mod __parse__Instr {
                 _ => 20,
             },
             14 => match state {
+                2 => 10,
                 7 | 20 => 35,
                 15..=16 => 42,
                 19 | 21 => 54,
@@ -1427,12 +1427,12 @@ mod __parse__Instr {
         _: ::std::marker::PhantomData<(&'input (), &'err ())>,
     ) -> (usize, usize)
     {
-        // Instr = "(", "fold", Alphanumeric, Alphanumeric, Instr, ")" => ActionFn(5);
+        // Instr = "(", "fold", Value, Alphanumeric, Instr, ")" => ActionFn(5);
         assert!(__symbols.len() >= 6);
         let __sym5 = __pop_Variant0(__symbols);
         let __sym4 = __pop_Variant6(__symbols);
         let __sym3 = __pop_Variant0(__symbols);
-        let __sym2 = __pop_Variant0(__symbols);
+        let __sym2 = __pop_Variant2(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
@@ -1893,7 +1893,7 @@ fn __action5<
     input: &'input str,
     (_, _, _): (usize, &'input str, usize),
     (_, _, _): (usize, &'input str, usize),
-    (_, iterable, _): (usize, &'input str, usize),
+    (_, iterable, _): (usize, Value<'input>, usize),
     (_, iterator, _): (usize, &'input str, usize),
     (_, i, _): (usize, Box<Instruction<'input>>, usize),
     (_, _, _): (usize, &'input str, usize),

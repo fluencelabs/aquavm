@@ -19,6 +19,7 @@ mod execution_context;
 mod fold;
 mod null;
 mod par;
+pub(crate) mod resolve;
 mod seq;
 mod xor;
 

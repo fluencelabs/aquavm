@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use super::resolve::resolve_jvalue;
 use super::CallEvidenceCtx;
 use super::ExecutionCtx;
 use super::Instruction;
@@ -50,28 +51,25 @@ impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
 
         log_instruction!(fold, exec_ctx, call_ctx);
 
+        // TODO: implement and call resolve_avalue to reuse existing Rc's
+        let iterable = resolve_jvalue(&self.iterable, exec_ctx)?;
         // check that value exists and has array type
-        let iterable = match exec_ctx.data_cache.get(self.iterable) {
-            Some(AValue::JValueRef(jvalue_rc)) => {
-                match jvalue_rc.as_ref() {
-                    JValue::Array(array) => {
-                        if array.is_empty() {
-                            // skip fold if array is empty
-                            return Ok(());
-                        }
-
-                        jvalue_rc
-                    }
-                    v => return Err(IncompatibleJValueType(v.clone(), String::from("Array"))),
+        let iterable = match &iterable {
+            JValue::Array(ref array) => {
+                if array.is_empty() {
+                    // skip fold if array is empty
+                    return Ok(());
                 }
+
+                iterable
             }
-            Some(v) => return Err(IncompatibleAValueType(format!("{:?}", v), String::from("JValueRef"))),
-            None => return Err(VariableNotFound(self.iterable.to_string())),
+            v => return Err(IncompatibleJValueType(v.clone(), String::from("Array"))),
         };
 
         let fold_state = FoldState {
             cursor: 0,
-            iterable: iterable.clone(),
+            // TODO: reuse existing Rc from JValueRef, if there was some
+            iterable: Rc::new(iterable),
             instr_head: self.instruction.clone(),
         };
 
@@ -80,7 +78,7 @@ impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
             .insert(self.iterator.to_string(), AValue::JValueFoldCursor(fold_state));
 
         if previous_value.is_some() {
-            return Err(MultipleFoldStates(self.iterable.to_string()));
+            return Err(MultipleFoldStates(self.iterator.to_string()));
         }
 
         self.instruction.execute(exec_ctx, call_ctx)?;
@@ -332,5 +330,46 @@ mod tests {
 
         assert_eq!(res.len(), 1);
         assert_eq!(res[0], Call(Executed(Rc::new(json!([])))));
+    }
+
+    #[test]
+    fn json_path() {
+        env_logger::init();
+
+        use crate::call_evidence::CallResult::*;
+        use crate::call_evidence::EvidenceState::*;
+
+        let mut vm = create_aqua_vm(echo_number_call_service(), "A");
+        let mut set_variable_vm = create_aqua_vm(
+            set_variable_call_service(r#"{ "array": ["1","2","3","4","5"] }"#),
+            "set_variable",
+        );
+
+        let lfold = String::from(
+            r#"
+            (seq
+                (call "set_variable" ("" "") [] Iterable)
+                (fold Iterable.$["array"] i
+                    (seq
+                        (call "A" ("" "") [i] acc[])
+                        (next i)
+                    )
+                )
+            )"#,
+        );
+
+        let res = call_vm!(set_variable_vm, "", lfold.clone(), "[]", "[]");
+        let res = call_vm!(vm, "", lfold, "[]", res.data);
+        let res: CallEvidencePath = serde_json::from_str(&res.data).expect("should be valid call evidence path");
+
+        assert_eq!(res.len(), 6);
+        assert_eq!(
+            res[0],
+            Call(Executed(Rc::new(json!({ "array": ["1", "2", "3", "4", "5"] }))))
+        );
+
+        for i in 1..=5 {
+            assert_eq!(res[i], Call(Executed(Rc::new(JValue::Number(i.into())))));
+        }
     }
 }

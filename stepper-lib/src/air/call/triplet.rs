@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-use super::utils::resolve_value;
-
 use crate::air::ExecutionCtx;
 use crate::{AquamarineError, Result};
 
+use crate::air::resolve::resolve_value;
 use air_parser::ast::{FunctionPart, PeerPart, Value};
 
 /// Triplet represents a location of the executable code in the network

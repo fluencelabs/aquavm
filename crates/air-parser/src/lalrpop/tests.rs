@@ -21,6 +21,7 @@ use PeerPart::*;
 use Value::*;
 
 use fstrings::f;
+use std::rc::Rc;
 
 fn parse(source_code: &str) -> Instruction {
     *crate::parse(source_code).expect("parsing failed")
@@ -212,7 +213,7 @@ fn parse_fold() {
         )
         "#;
     let instruction = parse(&source_code.as_ref());
-    let expected = fold("iterable", "i", null());
+    let expected = fold(Value::Literal("iterable"), "i", null());
     assert_eq!(instruction, expected);
 }
 
@@ -227,7 +228,7 @@ fn parse_fold_with_xor_par_seq() {
         let source_code = source_fold_with(name);
         let instruction = parse(&source_code.as_ref());
         let instr = binary_instruction(*name);
-        let expected = fold("iterable", "i", instr(null(), null()));
+        let expected = fold(Value::Literal("iterable"), "i", instr(null(), null()));
         assert_eq!(instruction, expected);
     }
 }
@@ -371,6 +372,23 @@ fn no_output() {
     assert_eq!(instruction, expected);
 }
 
+#[test]
+fn fold_json_path() {
+    let source_code = r#"
+    (fold members.$.["users"] m (null))
+    "#;
+    let instruction = parse(&source_code.as_ref());
+    let expected = Instruction::Fold(Fold {
+        iterable: JsonPath {
+            variable: "members",
+            path: "$.[\"users\"]",
+        },
+        iterator: "m",
+        instruction: Rc::new(null()),
+    });
+    assert_eq!(instruction, expected);
+}
+
 // Test DSL
 
 fn seq<'a>(l: Instruction<'a>, r: Instruction<'a>) -> Instruction<'a> {
@@ -388,7 +406,11 @@ fn seqnn() -> Instruction<'static> {
 fn null() -> Instruction<'static> {
     Instruction::Null(Null)
 }
-fn fold<'a>(iterable: &'a str, iterator: &'a str, instruction: Instruction<'a>) -> Instruction<'a> {
+fn fold<'a>(
+    iterable: Value<'a>,
+    iterator: &'a str,
+    instruction: Instruction<'a>,
+) -> Instruction<'a> {
     Instruction::Fold(Fold {
         iterable,
         iterator,
