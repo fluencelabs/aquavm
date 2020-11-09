@@ -30,8 +30,8 @@ fn parse(source_code: &str) -> Instruction {
 fn parse_seq() {
     let source_code = r#"
         (seq
-            (call peerid function [] void)
-            (call "id" "f" ["hello" name] void[])
+            (call peerid function [] output)
+            (call "id" "f" ["hello" name])
         )
         "#;
     let instruction = parse(source_code);
@@ -40,13 +40,13 @@ fn parse_seq() {
             peer_part: PeerPk(Variable("peerid")),
             function_part: FuncName(Variable("function")),
             args: vec![],
-            output: Scalar("void"),
+            output: Scalar("output"),
         }),
         Instruction::Call(Call {
             peer_part: PeerPk(Literal("id")),
             function_part: FuncName(Literal("f")),
             args: vec![Literal("hello"), Variable("name")],
-            output: Accumulator("void"),
+            output: None,
         }),
     );
     assert_eq!(instruction, expected);
@@ -57,10 +57,10 @@ fn parse_seq_seq() {
     let source_code = r#"
         (seq
             (seq
-                (call peerid function [] void)
-                (call (peerid serviceA) ("serviceB" function) [] void)
+                (call peerid function [])
+                (call (peerid serviceA) ("serviceB" function) [])
             )
-            (call "id" "f" ["hello" name] void[])
+            (call "id" "f" ["hello" name] output[])
         )
         "#;
     let instruction = parse(source_code);
@@ -70,20 +70,20 @@ fn parse_seq_seq() {
                 peer_part: PeerPk(Variable("peerid")),
                 function_part: FuncName(Variable("function")),
                 args: vec![],
-                output: Scalar("void"),
+                output: None,
             }),
             Instruction::Call(Call {
                 peer_part: PeerPkWithServiceId(Variable("peerid"), Variable("serviceA")),
                 function_part: ServiceIdWithFuncName(Literal("serviceB"), Variable("function")),
                 args: vec![],
-                output: Scalar("void"),
+                output: None,
             }),
         ),
         Instruction::Call(Call {
             peer_part: PeerPk(Literal("id")),
             function_part: FuncName(Literal("f")),
             args: vec![Literal("hello"), Variable("name")],
-            output: Accumulator("void"),
+            output: Accumulator("output"),
         }),
     );
     assert_eq!(instruction, expected);
