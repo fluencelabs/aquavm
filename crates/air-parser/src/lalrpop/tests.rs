@@ -356,6 +356,21 @@ fn seq_with_empty_and_dash() {
     assert_eq!(instruction, expected);
 }
 
+#[test]
+fn no_output() {
+    let source_code = r#"
+    (call peer (service fname) [])
+    "#;
+    let instruction = parse(&source_code.as_ref());
+    let expected = Instruction::Call(Call {
+        peer_part: PeerPk(Variable("peer")),
+        function_part: ServiceIdWithFuncName(Variable("service"), Variable("fname")),
+        args: vec![],
+        output: None,
+    });
+    assert_eq!(instruction, expected);
+}
+
 // Test DSL
 
 fn seq<'a>(l: Instruction<'a>, r: Instruction<'a>) -> Instruction<'a> {

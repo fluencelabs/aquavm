@@ -60,16 +60,7 @@ pub enum Value<'i> {
 pub enum CallOutput<'i> {
     Scalar(&'i str),
     Accumulator(&'i str),
-}
-
-impl<'i> CallOutput<'i> {
-    pub fn name(&self) -> &'i str {
-        use CallOutput::*;
-
-        match self {
-            Scalar(name) | Accumulator(name) => name,
-        }
-    }
+    None,
 }
 
 #[derive(Debug, PartialEq, Eq)]
