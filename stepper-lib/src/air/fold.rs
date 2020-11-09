@@ -150,7 +150,7 @@ mod tests {
 
     #[test]
     fn lfold() {
-        env_logger::init();
+        env_logger::try_init().ok();
 
         use crate::call_evidence::CallResult::*;
         use crate::call_evidence::EvidenceState::*;
@@ -334,8 +334,6 @@ mod tests {
 
     #[test]
     fn json_path() {
-        env_logger::init();
-
         use crate::call_evidence::CallResult::*;
         use crate::call_evidence::EvidenceState::*;
 
