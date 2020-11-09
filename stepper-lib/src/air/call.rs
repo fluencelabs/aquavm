@@ -98,7 +98,7 @@ mod tests {
             "#,
         );
 
-        let res = call_vm!(vm, "asd", script, "[]", "[]");
+        let res = call_vm!(vm, "asd", script.clone(), "[]", "[]");
         let call_path: CallEvidencePath = serde_json::from_str(&res.data).expect("should be a valid json");
 
         assert_eq!(call_path.len(), 1);
@@ -107,6 +107,10 @@ mod tests {
             Call(Executed(Rc::new(JValue::String(String::from("test")))))
         );
         assert!(res.next_peer_pks.is_empty());
+
+        // test that empty string for data works
+        let res_with_empty_string = call_vm!(vm, "asd", script, "", "");
+        assert_eq!(res_with_empty_string, res);
 
         let script = String::from(
             r#"
