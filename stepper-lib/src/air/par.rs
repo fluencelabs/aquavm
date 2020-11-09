@@ -103,35 +103,6 @@ fn execute_subtree<'i>(
     current_par_pos: usize,
     subtree_type: SubtreeType,
 ) -> Result<()> {
-    fn update_last_par_state(
-        call_ctx: &mut CallEvidenceCtx,
-        subtree_type: SubtreeType,
-        current_par_pos: usize,
-        before_new_path_len: usize,
-    ) {
-        let new_subtree_size = call_ctx.new_path.len() - before_new_path_len;
-
-        // unwrap is safe here, because this par is added at the beginning of this par instruction.
-        let par_state = call_ctx.new_path.get_mut(current_par_pos).unwrap();
-        match par_state {
-            EvidenceState::Par(left, right) => {
-                if let SubtreeType::Left = subtree_type {
-                    *left = new_subtree_size;
-                } else {
-                    *right = new_subtree_size;
-                }
-
-                log::info!(
-                    target: EVIDENCE_CHANGING,
-                    "  set {} par subtree size to {}",
-                    subtree_type,
-                    new_subtree_size
-                );
-            }
-            _ => unreachable!("current_pas_pos must point to a par state"),
-        }
-    }
-
     use crate::AquamarineError::LocalServiceError;
 
     call_ctx.current_subtree_size = subtree_size;
@@ -142,13 +113,13 @@ fn execute_subtree<'i>(
     // execute subtree
     match subtree.execute(exec_ctx, call_ctx) {
         res @ Ok(_) => {
-            update_last_par_state(call_ctx, subtree_type, current_par_pos, before_new_path_len);
+            update_par_state(call_ctx, subtree_type, current_par_pos, before_new_path_len);
             res
         }
         // if there is a service error, update already added Par state
         // and then bubble the error up
         err @ Err(LocalServiceError(_)) => {
-            update_last_par_state(call_ctx, subtree_type, current_par_pos, before_new_path_len);
+            update_par_state(call_ctx, subtree_type, current_par_pos, before_new_path_len);
             err
         }
         err @ Err(_) => err,
@@ -165,6 +136,36 @@ fn determine_subtree_complete(next_instruction: &Instruction<'_>) -> bool {
     // )
     // par will be completed after the last next that wouldn't change subtree_complete
     !matches!(next_instruction, Instruction::Next(_))
+}
+
+/// Set left or right fields of a Par identified by current_par_pos.
+fn update_par_state(
+    call_ctx: &mut CallEvidenceCtx,
+    subtree_type: SubtreeType,
+    current_par_pos: usize,
+    before_new_path_len: usize,
+) {
+    let new_subtree_size = call_ctx.new_path.len() - before_new_path_len;
+
+    // unwrap is safe here, because this par is added at the beginning of this par instruction.
+    let par_state = call_ctx.new_path.get_mut(current_par_pos).unwrap();
+    match par_state {
+        EvidenceState::Par(left, right) => {
+            if let SubtreeType::Left = subtree_type {
+                *left = new_subtree_size;
+            } else {
+                *right = new_subtree_size;
+            }
+
+            log::info!(
+                target: EVIDENCE_CHANGING,
+                "  set {} par subtree size to {}",
+                subtree_type,
+                new_subtree_size
+            );
+        }
+        _ => unreachable!("current_pas_pos must point to a par state"),
+    }
 }
 
 #[cfg(test)]
