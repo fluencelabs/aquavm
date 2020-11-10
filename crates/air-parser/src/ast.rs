@@ -74,7 +74,7 @@ pub struct Xor<'i>(pub Box<Instruction<'i>>, pub Box<Instruction<'i>>);
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Fold<'i> {
-    pub iterable: &'i str,
+    pub iterable: Value<'i>,
     pub iterator: &'i str,
     pub instruction: Rc<Instruction<'i>>,
 }

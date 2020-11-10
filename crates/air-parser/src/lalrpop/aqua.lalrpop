@@ -20,7 +20,7 @@ pub Instr: Box<Instruction<'input>> = {
         Box::new(Instruction::Call(Call{peer_part: p, function_part: f, args, output}))
     },
 
-    "(" "fold" <iterable:Alphanumeric> <iterator:Alphanumeric> <i:Instr> ")" => {
+    "(" "fold" <iterable:Value> <iterator:Alphanumeric> <i:Instr> ")" => {
         let instruction = Rc::new(*i);
         Box::new(Instruction::Fold(Fold{ iterable, iterator, instruction }))
     },

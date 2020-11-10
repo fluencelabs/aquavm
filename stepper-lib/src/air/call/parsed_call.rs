@@ -17,9 +17,10 @@
 #![allow(unused_unsafe)] // for wasm_bindgen target where calling FFI is safe
 
 use super::triplet::{ResolvedTriplet, Triplet};
-use super::utils::{resolve_jvalue, set_local_call_result, set_remote_call_result};
+use super::utils::{set_local_call_result, set_remote_call_result};
 use super::Call;
 
+use crate::air::resolve::resolve_jvalue;
 use crate::air::ExecutionCtx;
 use crate::build_targets::CALL_SERVICE_SUCCESS;
 use crate::call_evidence::{CallEvidenceCtx, CallResult, EvidenceState};
