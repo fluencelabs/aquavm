@@ -54,6 +54,7 @@ pub enum Value<'i> {
     Literal(&'i str),
     JsonPath { variable: &'i str, path: &'i str },
     CurrentPeerId,
+    InitPeerId,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]

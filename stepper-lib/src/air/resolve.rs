@@ -28,6 +28,7 @@ use std::borrow::Cow;
 pub(crate) fn resolve_jvalue<'i>(value: &Value<'i>, ctx: &ExecutionCtx<'i>) -> Result<JValue> {
     let value = match value {
         Value::CurrentPeerId => JValue::String(ctx.current_peer_id.clone()),
+        Value::InitPeerId => JValue::String(ctx.init_peer_id.clone()),
         Value::Literal(value) => JValue::String(value.to_string()),
         Value::Variable(name) => resolve_variable(name, ctx)?,
         Value::JsonPath { variable, path } => {
@@ -69,6 +70,7 @@ pub(crate) fn resolve_variable<'exec_ctx, 'i>(variable: &'i str, ctx: &'exec_ctx
 pub(crate) fn resolve_value<'i, 'a: 'i>(value: &'a Value<'i>, ctx: &'a ExecutionCtx<'i>) -> Result<Cow<'i, str>> {
     let resolved = match value {
         Value::CurrentPeerId => Cow::Borrowed(ctx.current_peer_id.as_str()),
+        Value::InitPeerId => Cow::Borrowed(ctx.init_peer_id.as_str()),
         Value::Literal(value) => Cow::Borrowed(*value),
         Value::Variable(name) => {
             let resolved = resolve_variable(name, ctx)?;
