@@ -27,19 +27,19 @@ use crate::Result;
 use crate::StepperOutcome;
 use crate::STEPPER_SUCCESS;
 
-pub fn execute_aqua(init_user_id: String, aqua: String, prev_data: String, data: String) -> StepperOutcome {
+pub fn execute_aqua(init_peer_id: String, aqua: String, prev_data: String, data: String) -> StepperOutcome {
     log::info!(
         "aquamarine version is {}, init user id is {}",
         env!("CARGO_PKG_VERSION"),
-        init_user_id
+        init_peer_id
     );
 
-    execute_aqua_impl(init_user_id, aqua, prev_data, data).unwrap_or_else(Into::into)
+    execute_aqua_impl(init_peer_id, aqua, prev_data, data).unwrap_or_else(Into::into)
 }
 
-fn execute_aqua_impl(_init_user_id: String, aqua: String, prev_path: String, path: String) -> Result<StepperOutcome> {
+fn execute_aqua_impl(init_peer_id: String, aqua: String, prev_path: String, path: String) -> Result<StepperOutcome> {
     let (prev_path, path, aqua) = prepare(prev_path, path, aqua.as_str())?;
-    let (mut exec_ctx, mut call_ctx) = make_contexts(prev_path, path)?;
+    let (mut exec_ctx, mut call_ctx) = make_contexts(prev_path, path, init_peer_id)?;
 
     aqua.execute(&mut exec_ctx, &mut call_ctx)?;
 

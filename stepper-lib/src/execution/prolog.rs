@@ -64,13 +64,14 @@ pub(super) fn prepare<'i>(
 pub(super) fn make_contexts(
     prev_path: CallEvidencePath,
     path: CallEvidencePath,
+    init_peer_id: String,
 ) -> Result<(ExecutionCtx<'static>, CallEvidenceCtx)> {
     use AquamarineError::CurrentPeerIdEnvError as EnvError;
 
     let current_peer_id = get_current_peer_id().map_err(|e| EnvError(e, String::from("CURRENT_PEER_ID")))?;
     log::info!(target: RUN_PARAMS, "current peer id {}", current_peer_id);
 
-    let exec_ctx = ExecutionCtx::new(current_peer_id);
+    let exec_ctx = ExecutionCtx::new(current_peer_id, init_peer_id);
     let current_path = merge_call_paths(prev_path, path)?;
     let call_evidence_ctx = CallEvidenceCtx::new(current_path);
 

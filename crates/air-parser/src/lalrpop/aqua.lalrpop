@@ -67,6 +67,7 @@ Value: Value<'input> = {
         Value::JsonPath { variable, path }
     },
     CURRENT_PEER_ID => Value::CurrentPeerId,
+    INIT_PEER_ID => Value::InitPeerId,
 }
 
 
@@ -78,6 +79,7 @@ match {
     r"[\w_-]+\[\]" => ACCUMULATOR,
     r#"[\w_-]+\.*\$([\w._-]*(\[[\w"]+\])*)+"# => JSON_PATH,
     r#"%current_peer_id%"# => CURRENT_PEER_ID,
+    r#"%init_peer_id%"# => INIT_PEER_ID,
     "seq",
     "call",
     "null",

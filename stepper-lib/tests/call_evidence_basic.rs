@@ -235,7 +235,7 @@ fn evidence_create_service() {
         Call(Executed(Rc::new(JValue::String(String::from("test"))))),
     ];
 
-    let res = call_vm!(vm, "init_user_id", script, "[]", json!(path).to_string());
+    let res = call_vm!(vm, "init_peer_id", script, "[]", json!(path).to_string());
 
     let resulted_path: Vec<EvidenceState> = serde_json::from_str(&res.data).expect("should be a correct json");
 
