@@ -29,8 +29,11 @@ pub(crate) struct ExecutionCtx<'i> {
     /// Set of peer public keys that should receive resulted data.
     pub next_peer_pks: Vec<String>,
 
-    /// PeerId of a peer executing this aqua script.
+    /// PeerId of a peer executing this aqua script at the moment.
     pub current_peer_id: String,
+
+    /// PeerId of a peer send this aqua script.
+    pub init_peer_id: String,
 
     /// Indicates that previous executed subtree is complete.
     /// A subtree treats as a complete if all subtree elements satisfy the following rules:
@@ -42,11 +45,12 @@ pub(crate) struct ExecutionCtx<'i> {
 }
 
 impl<'i> ExecutionCtx<'i> {
-    pub(crate) fn new(current_peer_id: String) -> Self {
+    pub(crate) fn new(current_peer_id: String, init_peer_id: String) -> Self {
         Self {
             data_cache: HashMap::new(),
             next_peer_pks: vec![],
             current_peer_id,
+            init_peer_id,
             subtree_complete: true,
         }
     }

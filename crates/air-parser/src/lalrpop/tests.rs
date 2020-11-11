@@ -234,6 +234,34 @@ fn parse_fold_with_xor_par_seq() {
 }
 
 #[test]
+fn parse_current_init_peer_id() {
+    let source_code = r#"
+        (seq
+            (call %current_peer_id% ("local_service_id" "local_fn_name") [])
+            (call %init_peer_id% ("service_id" "fn_name") [])
+        )"#;
+    let instruction = parse(&source_code.as_ref());
+    let expected = seq(
+        Instruction::Call(Call {
+            peer_part: PeerPk(CurrentPeerId),
+            function_part: ServiceIdWithFuncName(
+                Literal("local_service_id"),
+                Literal("local_fn_name"),
+            ),
+            args: vec![],
+            output: None,
+        }),
+        Instruction::Call(Call {
+            peer_part: PeerPk(InitPeerId),
+            function_part: ServiceIdWithFuncName(Literal("service_id"), Literal("fn_name")),
+            args: vec![],
+            output: None,
+        }),
+    );
+    assert_eq!(instruction, expected);
+}
+
+#[test]
 fn seq_par_call() {
     let source_code = r#"
         (seq 

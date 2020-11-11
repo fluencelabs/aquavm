@@ -174,8 +174,8 @@ fn create_service() {
         )"#,
     );
 
-    let res = call_vm!(set_variables_vm, "init_user_id", script.clone(), "[]", "[]");
-    let res = call_vm!(vm, "init_user_id", script, "[]", res.data);
+    let res = call_vm!(set_variables_vm, "init_peer_id", script.clone(), "[]", "[]");
+    let res = call_vm!(vm, "init_peer_id", script, "[]", res.data);
 
     let add_module_response = String::from("add_module response");
     let add_blueprint_response = String::from("add_blueprint response");
