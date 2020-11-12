@@ -1,7 +1,6 @@
 # Aquamarine
 Aquamarine is a composability medium, controlled by AIR language.
 
-<p>
 <p align="center" width="100%">
 <img alt="aquamarine scheme" src="images/interpreter.png" width="621"/>
 </p>
