@@ -1,0 +1,51 @@
+name: "tagged-release"
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  pre-release:
+    name: "Tagged Release"
+    runs-on: "ubuntu-latest"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          target: wasm32-wasi
+          profile: minimal
+          override: true
+
+      - name: Install fcli
+        uses: actions-rs/cargo@v1
+        with:
+          toolchain: nightly
+          command: install
+          args: fcli
+
+    ### Update & build
+      - uses: actions-rs/cargo@v1
+        with:
+          toolchain: nightly
+          command: update
+
+      - name: fce build --release
+        working-directory: ./stepper
+        shell: bash
+        run: fce build --release --features fce
+
+    ### Create release
+      - uses: marvinpinto/action-automatic-releases@latest
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
+          prerelease: false
+          files: |
+            LICENSE
+            target/wasm32-wasi/release/aquamarine.wasm
