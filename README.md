@@ -1,7 +1,5 @@
 # Fluence stack
 
-Aquamarine is a distributed choreography platform, controlled by AIR language
-
 <p width="100%">
 <img alt="aquamarine scheme" align="center" src="images/stack.png"/>
 </p>
@@ -14,11 +12,15 @@ Aquamarine is a distributed choreography platform, controlled by AIR language
 
 <br/>
 
-## Aquamarine Intermediate Representation
+# Aquamarine
+Aquamarine is a distributed choreography platform, controlled by AIR language
 
 <p width="100%">
 <img alt="aquamarine scheme" align="center" src="images/interpreter.png"/>
 </p>
+
+
+## Aquamarine Intermediate Representation
 
 ### AIR: What is it?
 
