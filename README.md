@@ -1,11 +1,21 @@
 # Aquamarine
+Aquamarine is a composability medium, controlled by AIR language.
 
-<p width="100%">
-<img alt="aquamarine scheme" align="right" src="images/aquamarine.png" width="550"/>
+<br/>
+<p align="center" width="100%">
+    <img alt="aquamarine scheme" src="images/interpreter.png" width="621"/>
 </p>
+<br/>
 
-Aquamarine is a distributed choreography platform, controlled by AIR language
-<br/><br/><br/><br/><br/><br/>
+## Fluence stack
+
+Fluence [nodes](https://github.com/fluencelabs/fluence) use aquamarine to coordinate requests between different services run by [FCE](https://github.com/fluencelabs/fce):
+
+<br/>
+<p align="center" width="100%">
+    <img alt="aquamarine scheme" align="center" src="images/stack.png" width="663"/>
+</p>
+<br/>
 
 ## Aquamarine Intermediate Representation
 
