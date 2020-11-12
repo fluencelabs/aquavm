@@ -1,5 +1,8 @@
 # Aquamarine
-Aquamarine is a composability medium, controlled by AIR language.
+
+ - composability medium
+ - allows developers to express network choreography in a script
+ - moves script & data from peer to peer in a single-use logical network with checking merkle proofs and signatures.
 
 <br/>
 <p align="center" width="100%">
@@ -62,7 +65,7 @@ Scripts written in AIR look like this:
 - executes them in parallel
 
 #### fold: iteration
-<img alt="fold structre" src="images/fold.png" width="536"/>
+<img alt="fold structure" src="images/fold.png" width="536"/>
 
 - `fold` takes an array, a variable and an instruction
 - iterates through the array, assigning each element to the variable
