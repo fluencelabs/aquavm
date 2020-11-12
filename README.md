@@ -1,5 +1,5 @@
 # Aquamarine
-Aquamarine is a composability medium, controlled by AIR language.
+Aquamarine is a composability medium, expressed network choreography in a script. It moves script & data from peer to peer in a single-use logical network with checking merkle proofs and signatures.
 
 <br/>
 <p align="center" width="100%">
