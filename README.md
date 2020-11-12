@@ -6,11 +6,12 @@ Aquamarine is a distributed choreography platform, controlled by AIR language
 <img alt="aquamarine scheme" align="right" src="images/stack.png" width="663"/>
 </p>
 
-<br/><br/><br/><br/><br/><br/>
+<br/><br/><br/><br/><br/><br/><br/><br/>
+<p>
 - Choreography, control plane: [fluencelabs/aquamarine](https://github.com/fluencelabs/aquamarine)
 - Execution, WASM runtime: [fluencelabs/fce](https://github.com/fluencelabs/fce)
 - Node, network: [fluencelabs/fluence](https://github.com/fluencelabs/fluence)
-
+</p>
 <br/>
 
 ## Aquamarine Intermediate Representation
