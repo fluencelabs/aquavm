@@ -3,7 +3,7 @@
 Aquamarine is a distributed choreography platform, controlled by AIR language
 
 <p width="100%">
-<img alt="aquamarine scheme" align="center" src="images/stack.png" width="663"/>
+<img alt="aquamarine scheme" align="center" src="images/stack.png"/>
 </p>
 
 <br/><br/><br/>
@@ -15,7 +15,7 @@ Aquamarine is a distributed choreography platform, controlled by AIR language
 ## Aquamarine Intermediate Representation
 
 <p width="100%">
-<img alt="aquamarine scheme" align="center" src="images/interpreter.png" width="621"/>
+<img alt="aquamarine scheme" align="center" src="images/interpreter.png"/>
 </p>
 
 ### AIR: What is it?
