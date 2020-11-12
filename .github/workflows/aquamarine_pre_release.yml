@@ -38,7 +38,7 @@ jobs:
       - name: fce build --release
         working-directory: ./stepper
         shell: bash
-        run: fce build --release
+        run: fce build --release --features fce
 
     ### Create pre-release
       - uses: marvinpinto/action-automatic-releases@latest
