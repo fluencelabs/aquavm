@@ -37,4 +37,4 @@ jobs:
           publish_branch: gh-pages
           publish_dir: ./target/doc
           force_orphan: true
-          cname: fluencelabs.github.io
+          cname: aquamarine.fluence.dev
