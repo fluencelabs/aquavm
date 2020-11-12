@@ -1,6 +1,6 @@
 # Aquamarine
 
-Aquamarine is a composability medium. Developers can express network choreography in aquamarine script. Aquamarine moves script & data from peer to peer in a single-use logical network with checking merkle proofs and signatures.
+Aquamarine is a composability medium, allows developers to express network choreography in a script. Aquamarine moves script & data from peer to peer in a single-use logical network with checking merkle proofs and signatures.
 
 <br/>
 <p align="center" width="100%">
