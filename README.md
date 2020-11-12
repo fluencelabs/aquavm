@@ -1,5 +1,5 @@
 # Aquamarine
-Aquamarine is a distributed choreography platform, controlled by AIR language.
+Aquamarine is a composability medium, controlled by AIR language.
 
 <p>
 <p align="center" width="100%">
