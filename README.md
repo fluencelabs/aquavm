@@ -1,8 +1,9 @@
 # Aquamarine
 Aquamarine is a composability medium, controlled by AIR language.
 
+<br/>
 <p align="center" width="100%">
-<img alt="aquamarine scheme" src="images/interpreter.png" width="621"/>
+    <img alt="aquamarine scheme" src="images/interpreter.png" width="621"/>
 </p>
 
 <br/>
@@ -14,7 +15,7 @@ Fluence [nodes](https://github.com/fluencelabs/fluence) use aquamarine to coordi
 
 <br/>
 <p align="center" width="100%">
-<img alt="aquamarine scheme" align="center" src="images/stack.png" width="663"/>
+    <img alt="aquamarine scheme" align="center" src="images/stack.png" width="663"/>
 </p>
 <br/>
 
