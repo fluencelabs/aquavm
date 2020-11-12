@@ -1,7 +1,7 @@
 # Aquamarine
 Aquamarine is a distributed choreography platform, controlled by AIR language.
 
-<p width="100%">
+<p>
 <img alt="aquamarine scheme" align="center" src="images/interpreter.png" width="621"/>
 </p>
 
