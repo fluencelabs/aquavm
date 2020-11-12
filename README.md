@@ -2,7 +2,7 @@
 Aquamarine is a distributed choreography platform, controlled by AIR language.
 
 <p width="100%">
-<img alt="aquamarine scheme" align="center" src="images/interpreter.png"/>
+<img alt="aquamarine scheme" align="center" src="images/interpreter.png" width="621"/>
 </p>
 
 <br/>
@@ -15,7 +15,7 @@ Fluence [nodes](https://github.com/fluencelabs/fluence) use aquamarine to coordi
 <br/>
  
 <p width="100%">
-<img alt="aquamarine scheme" align="center" src="images/stack.png"/>
+<img alt="aquamarine scheme" align="center" src="images/stack.png" width="663"/>
 </p>
 
 <br/>
