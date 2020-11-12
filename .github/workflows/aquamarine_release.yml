@@ -31,7 +31,6 @@ jobs:
 
     ### Update & build
       - uses: actions-rs/cargo@v1
-        working-directory: ./stepper
         with:
           toolchain: nightly
           command: update
