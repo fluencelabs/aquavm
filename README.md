@@ -16,9 +16,9 @@ Fluence [nodes](https://github.com/fluencelabs/fluence) use aquamarine to coordi
 
 <br/>
  
-<div style="text-align: center;">
+<center>
 <img alt="aquamarine scheme" align="center" src="images/stack.png" width="663"/>
-</div>
+</center>
 
 <br/>
 
