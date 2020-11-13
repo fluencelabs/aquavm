@@ -29,6 +29,7 @@
 use fluence::fce;
 use stepper_lib::execute_aqua;
 use stepper_lib::log_targets::TARGET_MAP;
+use stepper_lib::parse;
 use stepper_lib::StepperOutcome;
 
 use std::collections::HashMap;
@@ -48,4 +49,17 @@ pub fn main() {
 #[fce]
 pub fn invoke(init_peer_id: String, aqua: String, prev_data: String, data: String) -> StepperOutcome {
     execute_aqua(init_peer_id, aqua, prev_data, data)
+}
+
+// TODO: hide behind feature
+#[fce]
+pub fn ast(script: String) -> String {
+    let do_parse = || -> std::result::Result<_, Box<dyn std::error::Error>> {
+        let ast = parse(&script)?;
+        Ok(serde_json::to_string(&ast)?)
+    };
+    match do_parse() {
+        Ok(json) => json,
+        Err(err) => err.to_string(),
+    }
 }

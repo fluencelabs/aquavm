@@ -46,7 +46,7 @@ pub(super) fn prepare<'i>(
     let prev_path = to_evidence_path(raw_prev_path)?;
     let path = to_evidence_path(raw_path)?;
 
-    let aqua: Instruction<'i> = *air_parser::parse(raw_aqua).map_err(|msg| AquamarineError::AIRParseError(msg))?;
+    let aqua = parse(raw_aqua)?;
 
     log::info!(
         target: RUN_PARAMS,
@@ -57,6 +57,11 @@ pub(super) fn prepare<'i>(
     );
 
     Ok((prev_path, path, aqua))
+}
+
+/// Parse an AIR script to AST
+pub fn parse(script: &str) -> Result<Instruction<'_>> {
+    Ok(*air_parser::parse(script).map_err(|msg| AquamarineError::AIRParseError(msg))?)
 }
 
 /// Make execution and call evidence contexts from supplied data.
