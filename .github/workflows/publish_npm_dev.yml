@@ -66,8 +66,9 @@ jobs:
           cat << EOF > aquamarine.wasm.base64.d.ts
           export const wasmBs64: string;
           EOF
-
         working-directory: pkg
+
+      - run: cat pkg/package.json
 
       - name: Prepare package.json for publishing
         run: |
@@ -85,9 +86,10 @@ jobs:
               "types": "index.d.ts"
             }' | tee pkg/package.json
 
+      - run: cat pkg/package.json
 
       ### Set default version
-      - run: yarn version --new-version 0.0.1
+      - run: yarn version --new-version 0.0.1 --no-git-tag-version
         working-directory: pkg
 
       ### Maybe get version from NPM registry
