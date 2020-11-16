@@ -1,0 +1,11 @@
+inputs:
+  name:
+    description: 'Your name'
+    default: 'No name provided'
+runs:
+  using: "composite"
+  steps:
+    - run: echo Hello ${{ inputs.name }}.
+      shell: bash
+    - run: echo "Nice to meet you!"
+      shell: pwsh

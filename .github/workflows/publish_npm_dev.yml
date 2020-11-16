@@ -1,0 +1,19 @@
+# run locally like this:
+# act -b -P ubuntu-latest=nektos/act-environments-ubuntu:18.04 -j npm-publish-dev -s "NPM_TOKEN=uuid-uuid-uuid-uuid"
+
+name: "publish-base64-npm-dev"
+
+on:
+  push:
+
+jobs:
+  npm-publish-dev:
+    name: "Publish Aquamarine to NPM"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - uses: fluencelabs/aquamarine/say-hello
+        with:
+          name: folex

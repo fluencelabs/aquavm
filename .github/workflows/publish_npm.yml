@@ -5,8 +5,8 @@ name: "publish-base64-npm"
 
 on:
   push:
-#    branches:
-#      - "master"
+    branches:
+      - "master"
 
 jobs:
   npm-publish:
