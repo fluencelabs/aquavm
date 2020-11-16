@@ -74,7 +74,7 @@ jobs:
           cat pkg/package.json | jq --arg name aquamarine.wasm.base64.js \
             '. + {
               files: [ "aquamarine.wasm.base64.js", "aquamarine.wasm.base64.d.ts",  "index.js", "index.d.ts" ],
-              "name": "@fluencelabs/aquamarine-stepper",
+              "name": "@fluencelabs/aquamarine-stepper-${{ env.BRANCH_NAME }}",
               "description": "Aquamarine IR interpreter as base64 WASM",
               "main": "index.js",
               "repository": "https://github.com/fluencelabs/aquamarine",
@@ -84,11 +84,15 @@ jobs:
               "main": "index.js",
               "types": "index.d.ts"
             }' | tee pkg/package.json
-      ### Get versions from NPM registry
-      ### If there are versions with ${{CURRENT_BRANCH}} inside, take last
-      ### If there are no such versions, use 0.0.1+${{CURRENT_BRANCH}}
-      - run: yarn version --new-version $(yarn --silent info --json @fluencelabs/aquamarine-stepper | jq 'last(.data.versions[] | select(test("${{ env.BRANCH_NAME }}"))) // "0.1.1+${{ env.BRANCH_NAME }}"') --no-git-tag-version
+
+
+      ### Set default version
+      - run: yarn version --new-version 0.0.1
+
+      ### Maybe get version from NPM registry
+      - run: yarn version --new-version $(yarn info --silent @fluencelabs/aquamarine-stepper-${{ env.BRANCH_NAME }} version) --no-git-tag-version || true
         working-directory: pkg
+
       ### Increment patch component of the version
       - run: yarn version --patch --no-git-tag-version
         working-directory: pkg
