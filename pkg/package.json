@@ -1,0 +1,18 @@
+{
+  "name": "@fluencelabs/aquamarine-stepper",
+  "collaborators": [
+    "Fluence Labs"
+  ],
+  "version": "0.0.1",
+  "files": [
+    "aquamarine.wasm.base64.js"
+  ],
+  "module": "aquamarine_client.js",
+  "sideEffects": false,
+  "description": "Aquamarine IR interpreter as base64 WASM",
+  "main": "index.js",
+  "repository": "https://github.com/fluencelabs/aquamarine",
+  "author": "Fluence Labs",
+  "license": "Apache 2.0",
+  "private": false
+}
