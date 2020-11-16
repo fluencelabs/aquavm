@@ -82,6 +82,13 @@ jobs:
       - run: yarn version --patch --no-git-tag-version
         working-directory: pkg
 
+    ### Add README so it appears on npmjs.org
+      - run: |
+          cat <<EOF > README.md
+          # Aquamarine IR interpreter as base64 WASM
+          EOF
+        working-directory: pkg
+
     ### Publish aquamarine-stepper to NPM
       - uses: JS-DevTools/npm-publish@v1
         with:

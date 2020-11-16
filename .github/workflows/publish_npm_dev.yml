@@ -99,6 +99,14 @@ jobs:
       - run: yarn version --patch --no-git-tag-version
         working-directory: pkg
 
+      ### Add README so it appears on npmjs.org
+      - run: |
+          cat <<EOF > README.md
+          # Aquamarine IR interpreter as base64 WASM
+          Built from branch ${{ env.BRANCH_NAME }}
+          EOF
+        working-directory: pkg
+
     ### Publish to NPM registry
       - uses: actions/setup-node@v1
         with:
