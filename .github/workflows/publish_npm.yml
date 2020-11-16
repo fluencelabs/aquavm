@@ -53,11 +53,19 @@ jobs:
           cp index.js index.d.ts
         working-directory: pkg
 
+      - name: Generate aquamarine.wasm.base64.d.ts
+        run: |
+          cat << EOF > aquamarine.wasm.base64.d.ts
+          export const wasmBs64: String;
+          EOF
+
+        working-directory: pkg
+
       - name: Prepare package.json for publishing
         run: |
           cat pkg/package.json | jq --arg name aquamarine.wasm.base64.js \
             '. + {
-              files: [ "aquamarine.wasm.base64.js", "index.js", "index.d.ts" ],
+              files: [ "aquamarine.wasm.base64.js", "aquamarine.wasm.base64.d.ts",  "index.js", "index.d.ts" ],
               "name": "@fluencelabs/aquamarine-stepper",
               "description": "Aquamarine IR interpreter as base64 WASM",
               "main": "index.js",
