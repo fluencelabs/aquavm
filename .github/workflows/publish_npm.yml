@@ -26,20 +26,35 @@ jobs:
           target: wasm32-unknown-unknown
           profile: minimal
           override: true
-      - run: which cc
-      - run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
     ### Build aquamarine.wasm
-#      - run: yarn install --frozen-lockfile
       - run: wasm-pack build ../stepper --no-typescript --release -d $(pwd)/pkg |& tail -n 100
 
     ### Generate aquamarine.wasm.base64.js
-#      - run: yarn b64-cli encode aquamarine.wasm
-      - run: |
+      - name: Generate aquamarine.wasm.base64.js
+        run: |
           cat << EOF > aquamarine.wasm.base64.js
           export const wasmBs64 = "
-            $(base64 -w0 pkg/index_bg.wasm)
+            $(base64 -w0 pkg/aquamarine_client_bg.wasm)
           ";
           EOF
 
+      - name: Build correct package.json
+        run: |
+          cat pkg/package.json | jq --arg name aquamarine.wasm.base64.js \
+            '. + {
+              files: [ $name ],
+              "name": "aquamarine-stepper",
+              "version": "0.0.1",
+              "description": "Aquamarine IR interpreter as base64 WASM",
+              "main": "index.js",
+              "repository": "https://github.com/fluencelabs/aquamarine",
+              "author": "Fluence Labs",
+              "license": "Apache 2.0",
+              "private": false
+            }' | tee pkg/package.json
+
     ### Publish aquamarine-stepper to NPM
+      - run: cat pkg/package.json
