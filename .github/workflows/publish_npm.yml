@@ -1,0 +1,44 @@
+name: "publish-base64-npm"
+
+on:
+  push:
+#    branches:
+#      - "master"
+
+jobs:
+  npm-publish:
+    name: "Publish Aquamarine to NPM"
+    runs-on: "ubuntu-latest"
+    defaults:
+      run:
+        working-directory: js-build
+        shell: bash
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+    ### Install rust & wasm-pack
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          target: wasm32-wasi
+          profile: minimal
+          override: true
+      - run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+    ### Build aquamarine.wasm
+#      - run: yarn install --frozen-lockfile
+      - run: wasm-pack build ../stepper --no-typescript --release
+
+    ### Generate aquamarine.wasm.base64.js
+#      - run: yarn b64-cli encode aquamarine.wasm
+      - run: |
+          cat << EOF > aquamarine.wasm.base64.js
+          export const wasmBs64 = "
+            $(base64 -w0 pkg/index_bg.wasm)
+          ";
+          EOF
+
+    ### Publish aquamarine-stepper to NPM
