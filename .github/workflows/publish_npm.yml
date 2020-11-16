@@ -31,7 +31,7 @@ jobs:
 
     ### Build aquamarine.wasm
 #      - run: yarn install --frozen-lockfile
-      - run: wasm-pack build ../stepper --no-typescript --release |& tail -n 100
+      - run: wasm-pack build ../stepper --no-typescript --release -d $(pwd)/pkg |& tail -n 100
 
     ### Generate aquamarine.wasm.base64.js
 #      - run: yarn b64-cli encode aquamarine.wasm
