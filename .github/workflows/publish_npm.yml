@@ -55,8 +55,10 @@ jobs:
             }' | tee pkg/package.json
     ### Get version from NPM registry
       - run: yarn version --new-version $(yarn info --silent @fluencelabs/aquamarine-stepper version) --no-git-tag-version
+        working-directory: pkg
     ### Increment patch component of the version
       - run: yarn version --patch
+        working-directory: pkg
 
     ### Publish aquamarine-stepper to NPM
       - uses: JS-DevTools/npm-publish@v1
