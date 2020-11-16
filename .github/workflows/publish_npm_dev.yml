@@ -15,13 +15,12 @@ jobs:
         shell: bash
 
     steps:
-      ### extract branch name
+    ### Extract branch name
       - name: Extract branch name
         if: github.event_name != 'pull_request'
         run: echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
         id: extract_branch
 
-      # extract branch name on pull request
       - name: Extract branch name
         if: github.event_name == 'pull_request'
         run: echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
@@ -29,7 +28,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      ### Install rust & wasm-pack
+    ### Install rust & wasm-pack
       - name: Install Rust toolchain
         uses: actions-rs/toolchain@v1
         with:
@@ -40,10 +39,10 @@ jobs:
       - name: Install wasm-pack
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
-      ### Build aquamarine.wasm
+    ### Build aquamarine.wasm
       - run: wasm-pack build $GITHUB_WORKSPACE/stepper --no-typescript --release -d $(pwd)/pkg
 
-      ### Generate aquamarine.wasm.base64.js
+    ### Generate aquamarine.wasm.base64.js
       - run: sudo apt-get update && sudo apt-get --yes --force-yes install  jq
       - name: Generate aquamarine.wasm.base64.js
         run: |
@@ -51,7 +50,7 @@ jobs:
           export const wasmBs64 = "$(base64 -w0 pkg/aquamarine_client_bg.wasm)";
           EOF
 
-      ### Generate index files so import works as: | import {wasmBs64} from "@fluencelabs/aquamarine-stepper"; |
+    ### Generate index files so import works as: | import {wasmBs64} from "@fluencelabs/aquamarine-stepper"; |
       - name: Generate index.js & index.d.ts
         run: |
           cat << EOF > index.js
@@ -88,26 +87,19 @@ jobs:
 
       - run: cat pkg/package.json
 
-      ### Set default version
-      - run: yarn version --new-version 0.0.1 --no-git-tag-version
+    ### Set default version
+      - run: yarn version --new-version 0.0.0 --no-git-tag-version
         working-directory: pkg
 
-      ### Maybe get version from NPM registry
+    ### Maybe get version from NPM registry
       - run: yarn version --new-version $(yarn info --silent @fluencelabs/aquamarine-stepper-${{ env.BRANCH_NAME }} version) --no-git-tag-version || true
         working-directory: pkg
 
-      ### Increment patch component of the version
+    ### Increment patch component of the version
       - run: yarn version --patch --no-git-tag-version
         working-directory: pkg
 
-#      ### Publish aquamarine-stepper to NPM
-#      - uses: JS-DevTools/npm-publish@v1
-#        with:
-#          package: pkg/package.json
-#          access: public
-#          check-version: false
-#          token: ${{ secrets.NPM_TOKEN }}
-
+    ### Publish to NPM registry
       - uses: actions/setup-node@v1
         with:
           node-version: '15'
