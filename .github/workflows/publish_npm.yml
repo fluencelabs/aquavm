@@ -57,7 +57,7 @@ jobs:
       - run: yarn version --new-version $(yarn info --silent @fluencelabs/aquamarine-stepper version) --no-git-tag-version
         working-directory: pkg
     ### Increment patch component of the version
-      - run: yarn version --patch
+      - run: yarn version --patch --no-git-tag-version
         working-directory: pkg
 
     ### Publish aquamarine-stepper to NPM
