@@ -1,3 +1,6 @@
+# run locally like this:
+# act -b -P ubuntu-latest=nektos/act-environments-ubuntu:18.04 -j npm-publish -s "NPM_TOKEN=uuid-uuid-uuid-uuid"
+
 name: "publish-base64-npm"
 
 on:
@@ -48,6 +51,7 @@ jobs:
           EOF
 
           cp index.js index.d.ts
+        working-directory: pkg
 
       - name: Prepare package.json for publishing
         run: |
