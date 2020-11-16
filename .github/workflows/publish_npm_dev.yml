@@ -10,10 +10,93 @@ jobs:
   npm-publish-dev:
     name: "Publish Aquamarine to NPM"
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+
     steps:
+      ### extract branch name
+      - name: Extract branch name
+        if: github.event_name != 'pull_request'
+        run: echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
+        id: extract_branch
+
+      # extract branch name on pull request
+      - name: Extract branch name
+        if: github.event_name == 'pull_request'
+        run: echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
+
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - uses: ./.github/sayhello
+      ### Install rust & wasm-pack
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1
         with:
-          name: folex
+          toolchain: nightly
+          target: wasm32-unknown-unknown
+          profile: minimal
+          override: true
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+      ### Build aquamarine.wasm
+      - run: wasm-pack build $GITHUB_WORKSPACE/stepper --no-typescript --release -d $(pwd)/pkg
+
+      ### Generate aquamarine.wasm.base64.js
+      - run: sudo apt-get update && sudo apt-get --yes --force-yes install  jq
+      - name: Generate aquamarine.wasm.base64.js
+        run: |
+          cat << EOF > pkg/aquamarine.wasm.base64.js
+          export const wasmBs64 = "$(base64 -w0 pkg/aquamarine_client_bg.wasm)";
+          EOF
+
+      ### Generate index files so import works as: | import {wasmBs64} from "@fluencelabs/aquamarine-stepper"; |
+      - name: Generate index.js & index.d.ts
+        run: |
+          cat << EOF > index.js
+          export * from "./aquamarine.wasm.base64.js";
+          EOF
+
+          cp index.js index.d.ts
+        working-directory: pkg
+
+      - name: Generate aquamarine.wasm.base64.d.ts
+        run: |
+          cat << EOF > aquamarine.wasm.base64.d.ts
+          export const wasmBs64: string;
+          EOF
+
+        working-directory: pkg
+
+      - name: Prepare package.json for publishing
+        run: |
+          cat pkg/package.json | jq --arg name aquamarine.wasm.base64.js \
+            '. + {
+              files: [ "aquamarine.wasm.base64.js", "aquamarine.wasm.base64.d.ts",  "index.js", "index.d.ts" ],
+              "name": "@fluencelabs/aquamarine-stepper",
+              "description": "Aquamarine IR interpreter as base64 WASM",
+              "main": "index.js",
+              "repository": "https://github.com/fluencelabs/aquamarine",
+              "author": "Fluence Labs",
+              "license": "Apache 2.0",
+              "private": false,
+              "main": "index.js",
+              "types": "index.d.ts"
+            }' | tee pkg/package.json
+      ### Get versions from NPM registry
+      ### If there are versions with ${{CURRENT_BRANCH}} inside, take last
+      ### If there are no such versions, use 0.0.1+${{CURRENT_BRANCH}}
+      - run: yarn version --new-version $(yarn --silent info --json @fluencelabs/aquamarine-stepper | jq 'last(.data.versions[] | select(test("${{ env.BRANCH_NAME }}"))) // "0.1.1+${{ env.BRANCH_NAME }}"') --no-git-tag-version
+        working-directory: pkg
+      ### Increment patch component of the version
+      - run: yarn version --patch --no-git-tag-version
+        working-directory: pkg
+
+      ### Publish aquamarine-stepper to NPM
+      - uses: JS-DevTools/npm-publish@v1
+        with:
+          package: pkg/package.json
+          access: public
+          check-version: false
+          token: ${{ secrets.NPM_TOKEN }}
