@@ -1,0 +1,12 @@
+{
+  "name": "aqua-builder",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build-wasm": "wasm-pack build --no-typescript --release -d ../js-build/pkg ../stepper/ && node build.js && cd pkg && npm i"
+  },
+  "devDependencies": {
+    "@wasm-tool/wasm-pack-plugin": "1.0.1"
+  }
+}
