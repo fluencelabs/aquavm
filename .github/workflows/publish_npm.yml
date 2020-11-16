@@ -46,7 +46,7 @@ jobs:
     ### Generate index files so import works as: | import {wasmBs64} from "@fluencelabs/aquamarine-stepper"; |
       - name: Generate index.js & index.d.ts
         run: |
-          echo << EOF > index.js
+          cat << EOF > index.js
           export * from "./aquamarine.wasm.base64.js";
           EOF
 
