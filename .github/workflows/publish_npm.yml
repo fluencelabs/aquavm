@@ -62,4 +62,6 @@ jobs:
       - uses: JS-DevTools/npm-publish@v1
         with:
           package: pkg/package.json
+          access: public
+          check-version: false
           token: ${{ secrets.NPM_TOKEN }}
