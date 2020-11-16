@@ -11,7 +11,7 @@ jobs:
     runs-on: "ubuntu-latest"
     defaults:
       run:
-        working-directory: js-build
+#        working-directory: js-build
         shell: bash
 
     steps:
@@ -30,7 +30,7 @@ jobs:
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
     ### Build aquamarine.wasm
-      - run: wasm-pack build ../stepper --no-typescript --release -d $(pwd)/pkg |& tail -n 100
+      - run: wasm-pack build $GITHUB_WORKSPACE/stepper --no-typescript --release -d $(pwd)/pkg |& tail -n 100
 
     ### Generate aquamarine.wasm.base64.js
       - name: Generate aquamarine.wasm.base64.js
@@ -41,12 +41,12 @@ jobs:
           ";
           EOF
 
-      - name: Build correct package.json
+      - name: Prepare package.json for publishing
         run: |
           cat pkg/package.json | jq --arg name aquamarine.wasm.base64.js \
             '. + {
               files: [ $name ],
-              "name": "aquamarine-stepper",
+              "name": "@fluencelabs/aquamarine-stepper",
               "version": "0.0.1",
               "description": "Aquamarine IR interpreter as base64 WASM",
               "main": "index.js",
@@ -58,3 +58,8 @@ jobs:
 
     ### Publish aquamarine-stepper to NPM
       - run: cat pkg/package.json
+
+      - uses: JS-DevTools/npm-publish@v1
+        with:
+          package: pkg/package.json
+          token: ${{ secrets.NPM_TOKEN }}
