@@ -33,7 +33,7 @@ jobs:
       - run: wasm-pack build $GITHUB_WORKSPACE/stepper --no-typescript --release -d $(pwd)/pkg |& tail -n 100
 
     ### Generate aquamarine.wasm.base64.js
-      - run: apt-get update && apt-get --yes --force-yes install  jq
+      - run: sudo apt-get update && sudo apt-get --yes --force-yes install  jq
       - name: Generate aquamarine.wasm.base64.js
         run: |
           cat << EOF > pkg/aquamarine.wasm.base64.js
