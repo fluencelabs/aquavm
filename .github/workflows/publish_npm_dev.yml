@@ -5,6 +5,8 @@ name: "publish-base64-npm-dev"
 
 on:
   push:
+    branches-ignore:
+      - master
 
 jobs:
   npm-publish-dev:
