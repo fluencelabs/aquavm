@@ -30,7 +30,7 @@ jobs:
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
     ### Build aquamarine.wasm
-      - run: wasm-pack build $GITHUB_WORKSPACE/stepper --no-typescript --release -d $(pwd)/pkg |& tail -n 100
+      - run: wasm-pack build $GITHUB_WORKSPACE/stepper --no-typescript --release -d $(pwd)/pkg
 
     ### Generate aquamarine.wasm.base64.js
       - run: sudo apt-get update && sudo apt-get --yes --force-yes install  jq
@@ -39,6 +39,14 @@ jobs:
           cat << EOF > pkg/aquamarine.wasm.base64.js
           export const wasmBs64 = "$(base64 -w0 pkg/aquamarine_client_bg.wasm)";
           EOF
+
+      - name: Generate index.js & index.d.ts
+        run: |
+          echo << EOF > index.js
+          export * from "./aquamarine.wasm.base64.js";
+          EOF
+
+          cp index.js index.d.ts
 
       - name: Prepare package.json for publishing
         run: |
@@ -51,7 +59,9 @@ jobs:
               "repository": "https://github.com/fluencelabs/aquamarine",
               "author": "Fluence Labs",
               "license": "Apache 2.0",
-              "private": false
+              "private": false,
+              "main": "index.js",
+              "types": "index.d.ts"
             }' | tee pkg/package.json
     ### Get version from NPM registry
       - run: yarn version --new-version $(yarn info --silent @fluencelabs/aquamarine-stepper version) --no-git-tag-version
