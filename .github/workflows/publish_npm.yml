@@ -56,7 +56,7 @@ jobs:
       - name: Generate aquamarine.wasm.base64.d.ts
         run: |
           cat << EOF > aquamarine.wasm.base64.d.ts
-          export const wasmBs64: String;
+          export const wasmBs64: string;
           EOF
 
         working-directory: pkg
