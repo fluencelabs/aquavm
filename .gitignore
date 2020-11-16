@@ -3,6 +3,9 @@
 stepper-lib/target
 .DS_Store
 .repl_history
-*.wasm
+#*.wasm
 
 !./artifacts/*.wasm
+!./pkg/aquamarine_client_bg.wasm
+
+

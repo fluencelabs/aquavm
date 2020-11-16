@@ -8,7 +8,7 @@ on:
 jobs:
   npm-publish:
     name: "Publish Aquamarine to NPM"
-    runs-on: "ubuntu-latest"
+    runs-on: ubuntu-latest
     defaults:
       run:
 #        working-directory: js-build
@@ -33,12 +33,11 @@ jobs:
       - run: wasm-pack build $GITHUB_WORKSPACE/stepper --no-typescript --release -d $(pwd)/pkg |& tail -n 100
 
     ### Generate aquamarine.wasm.base64.js
+      - run: apt-get update && apt-get --yes --force-yes install  jq
       - name: Generate aquamarine.wasm.base64.js
         run: |
-          cat << EOF > aquamarine.wasm.base64.js
-          export const wasmBs64 = "
-            $(base64 -w0 pkg/aquamarine_client_bg.wasm)
-          ";
+          cat << EOF > pkg/aquamarine.wasm.base64.js
+          export const wasmBs64 = "$(base64 -w0 pkg/aquamarine_client_bg.wasm)";
           EOF
 
       - name: Prepare package.json for publishing
@@ -47,7 +46,6 @@ jobs:
             '. + {
               files: [ $name ],
               "name": "@fluencelabs/aquamarine-stepper",
-              "version": "0.0.1",
               "description": "Aquamarine IR interpreter as base64 WASM",
               "main": "index.js",
               "repository": "https://github.com/fluencelabs/aquamarine",
@@ -55,10 +53,12 @@ jobs:
               "license": "Apache 2.0",
               "private": false
             }' | tee pkg/package.json
+    ### Get version from NPM registry
+      - run: yarn version --new-version $(yarn info --silent @fluencelabs/aquamarine-stepper version) --no-git-tag-version
+    ### Increment patch component of the version
+      - run: yarn version --patch
 
     ### Publish aquamarine-stepper to NPM
-      - run: cat pkg/package.json
-
       - uses: JS-DevTools/npm-publish@v1
         with:
           package: pkg/package.json
