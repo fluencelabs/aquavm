@@ -14,6 +14,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - uses: fluencelabs/aquamarine
+      - uses: fluencelabs/aquamarine/sayhello@latest
         with:
           name: folex
