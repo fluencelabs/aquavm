@@ -81,7 +81,7 @@ fn extract_subtree_sizes(call_ctx: &mut CallEvidenceCtx) -> Result<(usize, usize
     }
     call_ctx.current_subtree_size -= 1;
 
-    log::info!(
+    log::trace!(
         target: EVIDENCE_CHANGING,
         "  previous call evidence state was found {:?}",
         call_ctx.current_path[0]
@@ -157,7 +157,7 @@ fn update_par_state(
                 *right = new_subtree_size;
             }
 
-            log::info!(
+            log::trace!(
                 target: EVIDENCE_CHANGING,
                 "  set {} par subtree size to {}",
                 subtree_type,
