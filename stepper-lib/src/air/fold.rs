@@ -21,6 +21,7 @@ use super::Instruction;
 use crate::log_instruction;
 use crate::AValue;
 use crate::AquamarineError;
+use crate::ExecutedCallResult;
 use crate::JValue;
 use crate::Result;
 
@@ -41,7 +42,7 @@ use std::rc::Rc;
 pub(crate) struct FoldState<'i> {
     // TODO: maybe change to bidirectional iterator
     pub(crate) cursor: usize,
-    pub(crate) iterable: Rc<JValue>,
+    pub(crate) iterable: Rc<ExecutedCallResult>,
     pub(crate) instr_head: Rc<Instruction<'i>>,
 }
 
@@ -63,7 +64,7 @@ impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
 
                 iterable
             }
-            v => return Err(IncompatibleJValueType(v.clone(), String::from("Array"))),
+            v => return Err(IncompatibleJValueType(v.clone(), "array")),
         };
 
         let fold_state = FoldState {
@@ -90,6 +91,7 @@ impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
 
 impl<'i> super::ExecutableInstruction<'i> for Next<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
+        use AquamarineError::FoldStateNotFound;
         use AquamarineError::IncompatibleAValueType;
 
         log_instruction!(next, exec_ctx, call_ctx);
@@ -98,7 +100,7 @@ impl<'i> super::ExecutableInstruction<'i> for Next<'i> {
         let avalue = exec_ctx
             .data_cache
             .get_mut(iterator_name)
-            .ok_or_else(|| AquamarineError::FoldStateNotFound(iterator_name.to_string()))?;
+            .ok_or_else(|| FoldStateNotFound(iterator_name.to_string()))?;
         let fold_state = match avalue {
             AValue::JValueFoldCursor(state) => state,
             v => {

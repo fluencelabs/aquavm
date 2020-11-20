@@ -32,12 +32,14 @@ mod call_evidence;
 mod errors;
 mod execution;
 pub mod log_targets;
+mod security_tetraplet;
 mod stepper_outcome;
 
 pub use crate::call_evidence::CallEvidencePath;
 pub use crate::call_evidence::CallResult;
 pub use crate::call_evidence::EvidenceState;
 pub use crate::errors::AquamarineError;
+pub use crate::security_tetraplet::SecurityTetraplet;
 pub use crate::stepper_outcome::StepperOutcome;
 pub use crate::stepper_outcome::STEPPER_SUCCESS;
 pub use execution::execute_aqua;
@@ -53,10 +55,16 @@ use std::fmt::Display;
 use std::fmt::Formatter;
 use std::rc::Rc;
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+pub struct ExecutedCallResult {
+    pub value: JValue,
+    pub security_tetraplet: SecurityTetraplet,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub(crate) enum AValue<'i> {
-    JValueRef(Rc<JValue>),
-    JValueAccumulatorRef(RefCell<Vec<Rc<JValue>>>),
+    JValueRef(Rc<ExecutedCallResult>),
+    JValueAccumulatorRef(RefCell<Vec<Rc<ExecutedCallResult>>>),
     JValueFoldCursor(crate::air::FoldState<'i>),
 }
 

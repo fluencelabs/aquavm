@@ -74,13 +74,13 @@ pub(crate) fn resolve_value<'i, 'a: 'i>(value: &'a Value<'i>, ctx: &'a Execution
         Value::Literal(value) => Cow::Borrowed(*value),
         Value::Variable(name) => {
             let resolved = resolve_variable(name, ctx)?;
-            let resolved = require_string(resolved)?;
+            let resolved = try_to_string(resolved)?;
             Cow::Owned(resolved)
         }
         Value::JsonPath { variable, path } => {
             let resolved = resolve_variable(variable, ctx)?;
             let resolved = apply_json_path(resolved, path)?;
-            let resolved = require_string(resolved)?;
+            let resolved = try_to_string(resolved)?;
             Cow::Owned(resolved)
         }
     };
@@ -88,15 +88,16 @@ pub(crate) fn resolve_value<'i, 'a: 'i>(value: &'a Value<'i>, ctx: &'a Execution
     Ok(resolved)
 }
 
-pub(crate) fn require_string(value: JValue) -> Result<String> {
-    if let JValue::String(s) = value {
-        Ok(s)
-    } else {
-        Err(AquamarineError::IncompatibleJValueType(value, "string".to_string()))
+fn try_to_string(value: JValue) -> Result<String> {
+    use AquamarineError::IncompatibleJValueType;
+
+    match value {
+        JValue::String(s) => Ok(s),
+        _ => Err(IncompatibleJValueType(value, "string")),
     }
 }
 
-pub(crate) fn apply_json_path<'i>(jvalue: JValue, json_path: &'i str) -> Result<JValue> {
+pub(crate) fn apply_json_path(jvalue: JValue, json_path: &str) -> Result<JValue> {
     let values = find_by_json_path(&jvalue, json_path)?;
     if values.is_empty() {
         return Err(AquamarineError::VariableNotFound(json_path.to_string()));

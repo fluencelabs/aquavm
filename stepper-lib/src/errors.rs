@@ -57,7 +57,7 @@ pub enum AquamarineError {
     VariableNotInJsonPath(JValue, String, JsonPathError),
 
     /// Provided JValue has incompatible with target type.
-    IncompatibleJValueType(JValue, String),
+    IncompatibleJValueType(JValue, &'static str),
 
     /// Provided AValue has incompatible with target type.
     IncompatibleAValueType(String, String),
