@@ -59,6 +59,7 @@ version = "0.1.3"
 dependencies = [
  "fluence",
  "log",
+ "serde",
  "serde_json",
  "stepper-lib",
  "wasm-bindgen",
@@ -986,8 +987,6 @@ dependencies = [
 [[package]]
 name = "jsonpath_lib"
 version = "0.2.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f8727f6987896c010ec9add275f59de2ae418b672fafa77bc3673b4cee1f09ca"
 dependencies = [
  "array_tool",
  "env_logger",

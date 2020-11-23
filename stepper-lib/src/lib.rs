@@ -49,16 +49,18 @@ pub(crate) type JValue = serde_json::Value;
 
 pub(crate) use build_targets::call_service;
 pub(crate) use build_targets::get_current_peer_id;
+use serde::Serialize;
+use serde::Deserialize;
 
 use std::cell::RefCell;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::rc::Rc;
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
 pub struct ExecutedCallResult {
-    pub value: JValue,
-    pub security_tetraplet: SecurityTetraplet,
+    pub result: JValue,
+    pub tetraplet: SecurityTetraplet,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
@@ -67,6 +69,8 @@ pub(crate) enum AValue<'i> {
     JValueAccumulatorRef(RefCell<Vec<Rc<ExecutedCallResult>>>),
     JValueFoldCursor(crate::air::FoldState<'i>),
 }
+
+pub(crate) trait JValuable {}
 
 impl<'i> Display for AValue<'i> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {

@@ -15,17 +15,20 @@
  */
 
 use crate::air::ExecutionCtx;
-use crate::{AquamarineError, Result};
+use crate::AquamarineError;
+use crate::JValue;
+use crate::Result;
 
-use crate::air::resolve::resolve_value;
-use air_parser::ast::{FunctionPart, PeerPart, Value};
+use air_parser::ast::{FunctionPart, InstructionValue, PeerPart};
+
+use std::borrow::Cow;
 
 /// Triplet represents a location of the executable code in the network
 /// It is build from `PeerPart` and `FunctionPart` of a `Call` instruction
 pub(super) struct Triplet<'a, 'i> {
-    pub(super) peer_pk: &'a Value<'i>,
-    pub(super) service_id: &'a Value<'i>,
-    pub(super) function_name: &'a Value<'i>,
+    pub(super) peer_pk: &'a InstructionValue<'i>,
+    pub(super) service_id: &'a InstructionValue<'i>,
+    pub(super) function_name: &'a InstructionValue<'i>,
 }
 
 /// ResolvedTriplet represents same location as `Triplet`, but with all
@@ -69,9 +72,9 @@ impl<'a, 'i> Triplet<'a, 'i> {
             service_id,
             function_name,
         } = self;
-        let peer_pk = resolve_value(peer_pk, ctx)?.as_ref().to_string();
-        let service_id = resolve_value(service_id, ctx)?.as_ref().to_string();
-        let function_name = resolve_value(function_name, ctx)?.as_ref().to_string();
+        let peer_pk = resolve_to_string(peer_pk, ctx)?;
+        let service_id = resolve_to_string(service_id, ctx)?;
+        let function_name = resolve_to_string(function_name, ctx)?;
 
         Ok(ResolvedTriplet {
             peer_pk,
@@ -79,4 +82,52 @@ impl<'a, 'i> Triplet<'a, 'i> {
             function_name,
         })
     }
+}
+
+/// Resolve value to string by either resolving variable from `ExecutionCtx`, taking literal value, or etc
+// TODO: return &str to avoid excess cloning
+fn resolve_to_string<'i, 'a: 'i>(value: &'a InstructionValue<'i>, ctx: &'a ExecutionCtx<'i>) -> Result<String> {
+    use crate::air::resolve::apply_json_path;
+    use crate::air::resolve::resolve_to_call_result;
+    use crate::air::JValuableResult;
+
+    let resolved = match value {
+        InstructionValue::CurrentPeerId => ctx.current_peer_id.clone(),
+        InstructionValue::InitPeerId => ctx.init_peer_id.clone(),
+        InstructionValue::Literal(value) => *value,
+        InstructionValue::Variable(name) => {
+            let resolved = resolve_to_call_result(name, ctx)?;
+            cow_to_string(resolved.as_jvalue())
+        }
+        InstructionValue::JsonPath { variable, path } => {
+            let resolved = resolve_to_call_result(variable, ctx)?;
+            let resolved = resolved.apply_json_path(path)?;
+            vec_to_string(resolved)
+        }
+    };
+
+    Ok(resolved.to_string())
+}
+
+fn cow_to_string(value: Cow<'_, JValue>) -> Result<String> {
+    use AquamarineError::IncompatibleJValueType;
+    use Cow::*;
+
+    match value {
+        Borrowed(JValue::String(s)) => Ok(s.clone()),
+        Owned(JValue::String(s)) => Ok(s),
+        _ => Err(IncompatibleJValueType(value.into_owned(), "string")),
+    }
+}
+
+fn vec_to_string(values: Vec<&JValue>) -> Result<String> {
+    if values.is_empty() {
+        return Err(AquamarineError::VariableNotFound(json_path.to_string()));
+    }
+
+    if values.len() != 1 {
+        return Err(AquamarineError::MultipleValuesInJsonPath(json_path.to_string()));
+    }
+
+    cow_to_string(Cow::Borrowed(values[0]))
 }

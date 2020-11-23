@@ -27,9 +27,9 @@ mod __parse__Instr {
      {
         Variant0(&'input str),
         Variant1(__lalrpop_util::ErrorRecovery<usize, Token<'input>, InstructionError>),
-        Variant2(Value<'input>),
-        Variant3(::std::vec::Vec<Value<'input>>),
-        Variant4(Vec<Value<'input>>),
+        Variant2(InstructionValue<'input>),
+        Variant3(::std::vec::Vec<InstructionValue<'input>>),
+        Variant4(Vec<InstructionValue<'input>>),
         Variant5(FunctionPart<'input>),
         Variant6(Box<Instruction<'input>>),
         Variant7(CallOutput<'input>),
@@ -1008,7 +1008,7 @@ mod __parse__Instr {
       'input,
     >(
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, Value<'input>, usize)
+    ) -> (usize, InstructionValue<'input>, usize)
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant2(__v), __r)) => (__l, __v, __r),
@@ -1019,7 +1019,7 @@ mod __parse__Instr {
       'input,
     >(
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, Vec<Value<'input>>, usize)
+    ) -> (usize, Vec<InstructionValue<'input>>, usize)
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant4(__v), __r)) => (__l, __v, __r),
@@ -1052,7 +1052,7 @@ mod __parse__Instr {
       'input,
     >(
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, ::std::vec::Vec<Value<'input>>, usize)
+    ) -> (usize, ::std::vec::Vec<InstructionValue<'input>>, usize)
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant3(__v), __r)) => (__l, __v, __r),
@@ -1908,7 +1908,7 @@ fn __action4<
     (_, _, _): (usize, &'input str, usize),
     (_, p, _): (usize, PeerPart<'input>, usize),
     (_, f, _): (usize, FunctionPart<'input>, usize),
-    (_, args, _): (usize, Vec<Value<'input>>, usize),
+    (_, args, _): (usize, Vec<InstructionValue<'input>>, usize),
     (_, output, _): (usize, ::std::option::Option<CallOutput<'input>>, usize),
     (_, _, _): (usize, &'input str, usize),
 ) -> Box<Instruction<'input>>
@@ -1928,7 +1928,7 @@ fn __action5<
     input: &'input str,
     (_, _, _): (usize, &'input str, usize),
     (_, _, _): (usize, &'input str, usize),
-    (_, iterable, _): (usize, Value<'input>, usize),
+    (_, iterable, _): (usize, InstructionValue<'input>, usize),
     (_, iterator, _): (usize, &'input str, usize),
     (_, i, _): (usize, Box<Instruction<'input>>, usize),
     (_, _, _): (usize, &'input str, usize),
@@ -1992,9 +1992,9 @@ fn __action9<
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, _, _): (usize, &'input str, usize),
-    (_, args, _): (usize, ::std::vec::Vec<Value<'input>>, usize),
+    (_, args, _): (usize, ::std::vec::Vec<InstructionValue<'input>>, usize),
     (_, _, _): (usize, &'input str, usize),
-) -> Vec<Value<'input>>
+) -> Vec<InstructionValue<'input>>
 {
     args
 }
@@ -2006,7 +2006,7 @@ fn __action10<
 >(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
-    (_, f, _): (usize, Value<'input>, usize),
+    (_, f, _): (usize, InstructionValue<'input>, usize),
 ) -> FunctionPart<'input>
 {
     FunctionPart::FuncName(f)
@@ -2020,8 +2020,8 @@ fn __action11<
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, _, _): (usize, &'input str, usize),
-    (_, sid, _): (usize, Value<'input>, usize),
-    (_, f, _): (usize, Value<'input>, usize),
+    (_, sid, _): (usize, InstructionValue<'input>, usize),
+    (_, f, _): (usize, InstructionValue<'input>, usize),
     (_, _, _): (usize, &'input str, usize),
 ) -> FunctionPart<'input>
 {
@@ -2035,7 +2035,7 @@ fn __action12<
 >(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
-    (_, pid, _): (usize, Value<'input>, usize),
+    (_, pid, _): (usize, InstructionValue<'input>, usize),
 ) -> PeerPart<'input>
 {
     PeerPart::PeerPk(pid)
@@ -2049,8 +2049,8 @@ fn __action13<
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, _, _): (usize, &'input str, usize),
-    (_, pid, _): (usize, Value<'input>, usize),
-    (_, sid, _): (usize, Value<'input>, usize),
+    (_, pid, _): (usize, InstructionValue<'input>, usize),
+    (_, sid, _): (usize, InstructionValue<'input>, usize),
     (_, _, _): (usize, &'input str, usize),
 ) -> PeerPart<'input>
 {
@@ -2090,8 +2090,8 @@ fn __action16<
 >(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
-    (_, __0, _): (usize, Value<'input>, usize),
-) -> Value<'input>
+    (_, __0, _): (usize, InstructionValue<'input>, usize),
+) -> InstructionValue<'input>
 {
     __0
 }
@@ -2103,8 +2103,8 @@ fn __action17<
 >(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
-    (_, __0, _): (usize, Value<'input>, usize),
-) -> Value<'input>
+    (_, __0, _): (usize, InstructionValue<'input>, usize),
+) -> InstructionValue<'input>
 {
     __0
 }
@@ -2116,8 +2116,8 @@ fn __action18<
 >(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
-    (_, __0, _): (usize, Value<'input>, usize),
-) -> Value<'input>
+    (_, __0, _): (usize, InstructionValue<'input>, usize),
+) -> InstructionValue<'input>
 {
     __0
 }
@@ -2129,8 +2129,8 @@ fn __action19<
 >(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
-    (_, __0, _): (usize, Value<'input>, usize),
-) -> Value<'input>
+    (_, __0, _): (usize, InstructionValue<'input>, usize),
+) -> InstructionValue<'input>
 {
     __0
 }
@@ -2144,9 +2144,9 @@ fn __action20<
     input: &'input str,
     (_, __0, _): (usize, &'input str, usize),
     (_, __1, _): (usize, &'input str, usize),
-) -> Value<'input>
+) -> InstructionValue<'input>
 {
-    Value::Literal("")
+    InstructionValue::Literal("")
 }
 
 #[allow(unused_variables)]
@@ -2159,9 +2159,9 @@ fn __action21<
     (_, _, _): (usize, &'input str, usize),
     (_, v, _): (usize, &'input str, usize),
     (_, _, _): (usize, &'input str, usize),
-) -> Value<'input>
+) -> InstructionValue<'input>
 {
-    Value::Literal(v)
+    InstructionValue::Literal(v)
 }
 
 #[allow(unused_variables)]
@@ -2172,9 +2172,9 @@ fn __action22<
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, v, _): (usize, &'input str, usize),
-) -> Value<'input>
+) -> InstructionValue<'input>
 {
-    Value::Variable(v)
+    InstructionValue::Variable(v)
 }
 
 #[allow(unused_variables)]
@@ -2185,13 +2185,13 @@ fn __action23<
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, v, _): (usize, &'input str, usize),
-) -> Value<'input>
+) -> InstructionValue<'input>
 {
     {
         let mut path = v.splitn(2, ".");
         let variable = path.next().expect("must contain dot");
         let path = path.next().expect("contain component after dot");
-        Value::JsonPath { variable, path }
+        InstructionValue::JsonPath { variable, path }
     }
 }
 
@@ -2203,9 +2203,9 @@ fn __action24<
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, __0, _): (usize, &'input str, usize),
-) -> Value<'input>
+) -> InstructionValue<'input>
 {
-    Value::CurrentPeerId
+    InstructionValue::CurrentPeerId
 }
 
 #[allow(unused_variables)]
@@ -2216,9 +2216,9 @@ fn __action25<
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     (_, __0, _): (usize, &'input str, usize),
-) -> Value<'input>
+) -> InstructionValue<'input>
 {
-    Value::InitPeerId
+    InstructionValue::InitPeerId
 }
 
 #[allow(unused_variables)]
@@ -2243,7 +2243,7 @@ fn __action27<
     input: &'input str,
     __lookbehind: &usize,
     __lookahead: &usize,
-) -> ::std::vec::Vec<Value<'input>>
+) -> ::std::vec::Vec<InstructionValue<'input>>
 {
     vec![]
 }
@@ -2255,8 +2255,8 @@ fn __action28<
 >(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
-    (_, v, _): (usize, ::std::vec::Vec<Value<'input>>, usize),
-) -> ::std::vec::Vec<Value<'input>>
+    (_, v, _): (usize, ::std::vec::Vec<InstructionValue<'input>>, usize),
+) -> ::std::vec::Vec<InstructionValue<'input>>
 {
     v
 }
@@ -2268,8 +2268,8 @@ fn __action29<
 >(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
-    (_, __0, _): (usize, Value<'input>, usize),
-) -> Value<'input>
+    (_, __0, _): (usize, InstructionValue<'input>, usize),
+) -> InstructionValue<'input>
 {
     __0
 }
@@ -2308,8 +2308,8 @@ fn __action32<
 >(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
-    (_, __0, _): (usize, Value<'input>, usize),
-) -> ::std::vec::Vec<Value<'input>>
+    (_, __0, _): (usize, InstructionValue<'input>, usize),
+) -> ::std::vec::Vec<InstructionValue<'input>>
 {
     vec![__0]
 }
@@ -2321,9 +2321,9 @@ fn __action33<
 >(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
-    (_, v, _): (usize, ::std::vec::Vec<Value<'input>>, usize),
-    (_, e, _): (usize, Value<'input>, usize),
-) -> ::std::vec::Vec<Value<'input>>
+    (_, v, _): (usize, ::std::vec::Vec<InstructionValue<'input>>, usize),
+    (_, e, _): (usize, InstructionValue<'input>, usize),
+) -> ::std::vec::Vec<InstructionValue<'input>>
 {
     { let mut v = v; v.push(e); v }
 }
@@ -2335,8 +2335,8 @@ fn __action34<
 >(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
-    __0: (usize, Value<'input>, usize),
-) -> ::std::vec::Vec<Value<'input>>
+    __0: (usize, InstructionValue<'input>, usize),
+) -> ::std::vec::Vec<InstructionValue<'input>>
 {
     let __start0 = __0.0.clone();
     let __end0 = __0.2.clone();
@@ -2360,9 +2360,9 @@ fn __action35<
 >(
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
-    __0: (usize, ::std::vec::Vec<Value<'input>>, usize),
-    __1: (usize, Value<'input>, usize),
-) -> ::std::vec::Vec<Value<'input>>
+    __0: (usize, ::std::vec::Vec<InstructionValue<'input>>, usize),
+    __1: (usize, InstructionValue<'input>, usize),
+) -> ::std::vec::Vec<InstructionValue<'input>>
 {
     let __start0 = __1.0.clone();
     let __end0 = __1.2.clone();
@@ -2389,7 +2389,7 @@ fn __action36<
     input: &'input str,
     __0: (usize, &'input str, usize),
     __1: (usize, &'input str, usize),
-) -> Vec<Value<'input>>
+) -> Vec<InstructionValue<'input>>
 {
     let __start0 = __0.2.clone();
     let __end0 = __1.0.clone();
@@ -2417,9 +2417,9 @@ fn __action37<
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, InstructionError>>,
     input: &'input str,
     __0: (usize, &'input str, usize),
-    __1: (usize, ::std::vec::Vec<Value<'input>>, usize),
+    __1: (usize, ::std::vec::Vec<InstructionValue<'input>>, usize),
     __2: (usize, &'input str, usize),
-) -> Vec<Value<'input>>
+) -> Vec<InstructionValue<'input>>
 {
     let __start0 = __1.0.clone();
     let __end0 = __1.2.clone();
@@ -2449,7 +2449,7 @@ fn __action38<
     __1: (usize, &'input str, usize),
     __2: (usize, PeerPart<'input>, usize),
     __3: (usize, FunctionPart<'input>, usize),
-    __4: (usize, Vec<Value<'input>>, usize),
+    __4: (usize, Vec<InstructionValue<'input>>, usize),
     __5: (usize, CallOutput<'input>, usize),
     __6: (usize, &'input str, usize),
 ) -> Box<Instruction<'input>>
@@ -2486,7 +2486,7 @@ fn __action39<
     __1: (usize, &'input str, usize),
     __2: (usize, PeerPart<'input>, usize),
     __3: (usize, FunctionPart<'input>, usize),
-    __4: (usize, Vec<Value<'input>>, usize),
+    __4: (usize, Vec<InstructionValue<'input>>, usize),
     __5: (usize, &'input str, usize),
 ) -> Box<Instruction<'input>>
 {

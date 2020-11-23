@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use super::resolve::resolve_jvalue;
+use super::resolve::resolve_to_jvalue;
 use super::CallEvidenceCtx;
 use super::ExecutionCtx;
 use super::Instruction;
@@ -25,7 +25,9 @@ use crate::ExecutedCallResult;
 use crate::JValue;
 use crate::Result;
 
-use air_parser::ast::{Fold, Next};
+use air_parser::ast::Fold;
+use air_parser::ast::Next;
+use air_parser::ast::InstructionValue;
 
 use std::rc::Rc;
 
@@ -42,7 +44,7 @@ use std::rc::Rc;
 pub(crate) struct FoldState<'i> {
     // TODO: maybe change to bidirectional iterator
     pub(crate) cursor: usize,
-    pub(crate) iterable: Rc<ExecutedCallResult>,
+    pub(crate) iterable: Rc<AValue<'i>>,
     pub(crate) instr_head: Rc<Instruction<'i>>,
 }
 
@@ -52,8 +54,21 @@ impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
 
         log_instruction!(fold, exec_ctx, call_ctx);
 
-        // TODO: implement and call resolve_avalue to reuse existing Rc's
-        let iterable = resolve_jvalue(&self.iterable, exec_ctx)?;
+        let t = match &self.iterable {
+            InstructionValue::Variable(name) => {
+                match exec_ctx.data_cache.get(name) {
+                    AValue::JValueRef(result) => {
+
+                    },
+                    AValue::JValueAccumulatorRef(acc) =>
+                }
+            },
+            InstructionValue::JsonPath(variable, path) => {
+
+            }
+        }
+
+        let iterable = resolve_to_jvalue(&self.iterable, exec_ctx)?;
         // check that value exists and has array type
         let iterable = match &iterable {
             JValue::Array(ref array) => {

@@ -14,11 +14,19 @@
  * limitations under the License.
  */
 
+use crate::SecurityTetraplet;
+
 use wasm_bindgen::__rt::std::env::VarError;
 use wasm_bindgen::prelude::*;
 
-pub(crate) fn call_service(service_id: String, fn_name: String, args: String) -> super::CallServiceResult {
-    let result = call_service_impl(service_id, fn_name, args);
+pub(crate) fn call_service(
+    service_id: String,
+    fn_name: String,
+    args: String,
+    security_tetraplets: Vec<Vec<SecurityTetraplet>>,
+) -> super::CallServiceResult {
+    let security_tetraplets = serde_json::to_string(&security_tetraplets).expect("cannor serialize tetraplets");
+    let result = call_service_impl(service_id, fn_name, args, security_tetraplets);
     log::info!("result {}", result);
     serde_json::from_str(&result).expect("Cannot parse CallServiceResult")
 }
@@ -36,5 +44,5 @@ extern "C" {
 #[wasm_bindgen(raw_module = "../src/call_service.ts")]
 extern "C" {
     #[link_name = "call_service"]
-    fn call_service_impl(service_id: String, fn_name: String, args: String) -> String;
+    fn call_service_impl(service_id: String, fn_name: String, args: String, security_tetraplets: String) -> String;
 }

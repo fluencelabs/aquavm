@@ -15,85 +15,76 @@
  */
 
 use super::ExecutionCtx;
+use super::JValuableResult;
 use crate::AValue;
 use crate::AquamarineError;
+use crate::ExecutedCallResult;
 use crate::JValue;
 use crate::Result;
+use crate::SecurityTetraplet;
 
-use air_parser::ast::Value;
+use air_parser::ast::InstructionValue;
 
 use std::borrow::Cow;
+use std::rc::Rc;
 
-/// Resolve value to JValue, similar to `resolve_value`
-pub(crate) fn resolve_jvalue<'i>(value: &Value<'i>, ctx: &ExecutionCtx<'i>) -> Result<JValue> {
-    let value = match value {
-        Value::CurrentPeerId => JValue::String(ctx.current_peer_id.clone()),
-        Value::InitPeerId => JValue::String(ctx.init_peer_id.clone()),
-        Value::Literal(value) => JValue::String(value.to_string()),
-        Value::Variable(name) => resolve_variable(name, ctx)?,
-        Value::JsonPath { variable, path } => {
-            let value = resolve_variable(variable, ctx)?;
-            apply_json_path(value, path)?
-        }
-    };
+/// Resolve value to called function arguments.
+pub(crate) fn resolve_to_args<'i>(
+    value: &InstructionValue<'i>,
+    exec_ctx: &ExecutionCtx<'i>,
+) -> Result<(Cow<'i, JValue>, Vec<SecurityTetraplet>)> {
+    fn handle_string_arg(arg: &str) -> Result<(Cow<'i, JValue>, Vec<SecurityTetraplet>)> {
+        let jvalue = JValue::String(arg.to_string());
+        let tetraplet = SecurityTetraplet::initiator_tetraplet(exec_ctx);
 
-    Ok(value)
-}
-
-/// Takes variable's value from `ExecutionCtx::data_cache`
-/// TODO: maybe return &'i JValue?
-pub(crate) fn resolve_variable<'exec_ctx, 'i>(variable: &'i str, ctx: &'exec_ctx ExecutionCtx<'i>) -> Result<JValue> {
-    use AquamarineError::VariableNotFound;
-
-    let value = ctx
-        .data_cache
-        .get(variable)
-        .ok_or_else(|| VariableNotFound(variable.to_string()))?;
+        Ok((Cow::Owned(jvalue), vec![tetraplet]))
+    }
 
     match value {
-        AValue::JValueFoldCursor(fold_state) => {
-            if let JValue::Array(array) = fold_state.iterable.as_ref() {
-                Ok(array[fold_state.cursor].clone())
-            } else {
-                unreachable!("fold state must be well-formed because it is changed only by stepper")
-            }
+        InstructionValue::CurrentPeerId => handle_string_arg(exec_ctx.current_peer_id.as_str()),
+        InstructionValue::InitPeerId => handle_string_arg(exec_ctx.init_peer_id.as_str()),
+        InstructionValue::Literal(value) => handle_string_arg(value),
+        InstructionValue::Variable(name) => {
+            let resolved = resolve_to_call_result(name, ctx)?;
+            let jvalue = resolved.as_jvalue();
+            let tetraplets = resolved.as_tetraplets();
+
+            Ok((jvalue, tetraplets))
         }
-        AValue::JValueRef(value) => Ok(value.as_ref().clone()),
-        AValue::JValueAccumulatorRef(acc) => {
-            let owned_acc = acc.borrow().iter().map(|v| v.as_ref()).cloned().collect::<Vec<_>>();
-            Ok(JValue::Array(owned_acc))
+        InstructionValue::JsonPath { variable, path } => {
+            let resolved = resolve_to_call_result(variable, ctx)?;
+            let (jvalue, tetraplets) = resolved.apply_json_path_with_tetraplets(path)?;
+            let jvalue = jvalue.iter().cloned().collect::<Vec<_>>();
+            let jvalue = JValue::Array(jvalue);
+
+            Ok((Cow::Owned(jvalue), tetraplets))
         }
     }
 }
 
-/// Resolve value to string by either resolving variable from `ExecutionCtx`, taking literal value, or etc
-pub(crate) fn resolve_value<'i, 'a: 'i>(value: &'a Value<'i>, ctx: &'a ExecutionCtx<'i>) -> Result<Cow<'i, str>> {
-    let resolved = match value {
-        Value::CurrentPeerId => Cow::Borrowed(ctx.current_peer_id.as_str()),
-        Value::InitPeerId => Cow::Borrowed(ctx.init_peer_id.as_str()),
-        Value::Literal(value) => Cow::Borrowed(*value),
-        Value::Variable(name) => {
-            let resolved = resolve_variable(name, ctx)?;
-            let resolved = try_to_string(resolved)?;
-            Cow::Owned(resolved)
-        }
-        Value::JsonPath { variable, path } => {
-            let resolved = resolve_variable(variable, ctx)?;
-            let resolved = apply_json_path(resolved, path)?;
-            let resolved = try_to_string(resolved)?;
-            Cow::Owned(resolved)
-        }
-    };
+/// Takes variable's value from `ExecutionCtx::data_cache` by name.
+pub(crate) fn resolve_to_call_result<'name, 'exec_ctx>(
+    name: &'name str,
+    ctx: &'exec_ctx ExecutionCtx<'name>,
+) -> Result<impl JValuableResult> {
+    use AquamarineError::VariableNotFound;
 
-    Ok(resolved)
-}
-
-fn try_to_string(value: JValue) -> Result<String> {
-    use AquamarineError::IncompatibleJValueType;
+    let value = ctx
+        .data_cache
+        .get(name)
+        .ok_or_else(|| VariableNotFound(name.to_string()))?;
 
     match value {
-        JValue::String(s) => Ok(s),
-        _ => Err(IncompatibleJValueType(value, "string")),
+        AValue::JValueFoldCursor(fold_state) => match &fold_state.iterable {
+            AValue::JValueRef(call_result) => match call_result.as_ref() {
+                JValue::Array(_array) => unimplemented!(),
+                _ => unreachable!("fold state must be well-formed because it is changed only by stepper"),
+            },
+            AValue::JValueAccumulatorRef(_acc) => unimplemented!(),
+            _ => unreachable!("fold state must be well-formed because it is changed only by stepper"),
+        },
+        AValue::JValueRef(value) => Ok(value.clone()),
+        AValue::JValueAccumulatorRef(acc) => Ok(acc.borrow()),
     }
 }
 

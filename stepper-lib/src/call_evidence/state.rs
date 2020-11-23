@@ -15,6 +15,7 @@
  */
 
 use crate::log_targets::EVIDENCE_PATH_MERGE;
+use crate::ExecutedCallResult;
 use crate::JValue;
 use crate::Result;
 
@@ -32,7 +33,7 @@ pub enum CallResult {
     RequestSent(String),
 
     /// A corresponding call's been already executed with such value and result.
-    Executed(Rc<JValue>),
+    Executed(Rc<ExecutedCallResult>),
 
     /// call_service ended with a service error.
     CallServiceFailed(String),

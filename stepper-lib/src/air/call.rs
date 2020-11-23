@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-mod parsed_call;
+mod resolved_call;
 mod triplet;
 mod utils;
 
-use parsed_call::ParsedCall;
+use resolved_call::ResolvedCall;
 
 use super::CallEvidenceCtx;
 use super::ExecutionCtx;
@@ -44,8 +44,8 @@ impl<'i> super::ExecutableInstruction<'i> for Call<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
         log_instruction!(call, exec_ctx, call_ctx);
 
-        let parsed_call = match ParsedCall::new(self, exec_ctx) {
-            Ok(parsed_call) => parsed_call,
+        let resolved_call = match ResolvedCall::new(self, exec_ctx) {
+            Ok(resolved_call) => resolved_call,
             // to support lazy variable evaluation
             Err(VariableNotFound(variable_name)) => {
                 log::info!(r#"variable with name "{}" not found, waiting"#, variable_name);
@@ -65,7 +65,7 @@ impl<'i> super::ExecutableInstruction<'i> for Call<'i> {
             Err(err) => return Err(err),
         };
 
-        parsed_call.execute(exec_ctx, call_ctx)
+        resolved_call.execute(exec_ctx, call_ctx)
     }
 }
 

@@ -21,18 +21,20 @@ use crate::call_evidence::EvidenceState;
 use crate::log_targets::EVIDENCE_CHANGING;
 use crate::AValue;
 use crate::AquamarineError;
+use crate::ExecutedCallResult;
 use crate::JValue;
 use crate::Result;
 
 use air_parser::ast::CallOutput;
 
-use std::{cell::RefCell, rc::Rc};
+use std::cell::RefCell;
+use std::rc::Rc;
 
 /// Writes result of a local `Call` instruction to `ExecutionCtx` at `output`
 pub(super) fn set_local_call_result<'i>(
-    output: CallOutput<'i>,
+    output: &CallOutput,
     exec_ctx: &mut ExecutionCtx<'i>,
-    result: Rc<JValue>,
+    result: Rc<ExecutedCallResult>,
 ) -> Result<()> {
     use std::collections::hash_map::Entry::{Occupied, Vacant};
     use AquamarineError::*;

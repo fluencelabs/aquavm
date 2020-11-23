@@ -17,6 +17,7 @@
 mod call;
 mod execution_context;
 mod fold;
+mod jvaluable_result;
 mod null;
 mod par;
 pub(crate) mod resolve;
@@ -28,6 +29,7 @@ pub(crate) use fold::FoldState;
 
 pub(self) use crate::call_evidence::CallEvidenceCtx;
 pub(self) use crate::call_evidence::EvidenceState;
+pub(self) use jvaluable_result::JValuableResult;
 
 use crate::Result;
 

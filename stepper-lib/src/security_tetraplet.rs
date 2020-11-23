@@ -16,11 +16,15 @@
 
 use crate::air::ExecutionCtx;
 
+use fluence::fce;
+use wasm_bindgen::prelude::*;
+
 use serde::Deserialize;
 use serde::Serialize;
 
 /// Describes an origin returns corresponding value.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[fce]
 pub struct SecurityTetraplet {
     pub pub_key: String,
     pub service_id: String,
