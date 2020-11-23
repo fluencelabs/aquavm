@@ -91,7 +91,7 @@ impl<'i> ParsedCall<'i> {
         set_local_call_result(self.output, exec_ctx, result.clone())?;
 
         let new_evidence_state = EvidenceState::Call(CallResult::Executed(result));
-        log::info!(
+        log::trace!(
             target: EVIDENCE_CHANGING,
             "  adding new call evidence state {:?}",
             new_evidence_state
@@ -110,7 +110,7 @@ impl<'i> ParsedCall<'i> {
         use crate::call_evidence::EvidenceState::*;
 
         if call_ctx.current_subtree_size == 0 {
-            log::info!(target: EVIDENCE_CHANGING, "  previous call evidence state wasn't found");
+            log::trace!(target: EVIDENCE_CHANGING, "  previous call evidence state wasn't found");
             return Ok(true);
         }
 
@@ -119,7 +119,7 @@ impl<'i> ParsedCall<'i> {
         // and it's been checked previously
         let prev_state = call_ctx.current_path.pop_front().unwrap();
 
-        log::info!(
+        log::trace!(
             target: EVIDENCE_CHANGING,
             "  previous call evidence state found {:?}",
             prev_state

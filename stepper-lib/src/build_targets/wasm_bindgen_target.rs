@@ -19,7 +19,7 @@ use wasm_bindgen::prelude::*;
 
 pub(crate) fn call_service(service_id: String, fn_name: String, args: String) -> super::CallServiceResult {
     let result = call_service_impl(service_id, fn_name, args);
-    log::info!("result {}", result);
+    log::trace!("result {}", result);
     serde_json::from_str(&result).expect("Cannot parse CallServiceResult")
 }
 
