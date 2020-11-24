@@ -87,6 +87,10 @@ match {
     "xor",
     "fold",
     "next",
+    // ignore patterns
+    // see: https://lalrpop.github.io/lalrpop/lexer_tutorial/001_lexer_gen.html#customizing-skipping-between-tokens
+    r"\s*" => { }, // The default whitespace skipping is disabled if an `ignore pattern` is specified
+    r";[^\n\r]*[\n\r]*" => { }, // Skip `; comments`
 } else {
     _
 }
