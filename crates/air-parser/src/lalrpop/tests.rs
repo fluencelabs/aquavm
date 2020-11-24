@@ -403,7 +403,28 @@ fn no_output() {
 #[test]
 fn fold_json_path() {
     let source_code = r#"
-    (fold members.$.["users"] m (null))
+    ; comment
+    (fold members.$.["users"] m (null)) ;;; comment
+    ;;; comment
+    "#;
+    let instruction = parse(&source_code.as_ref());
+    let expected = Instruction::Fold(Fold {
+        iterable: JsonPath {
+            variable: "members",
+            path: "$.[\"users\"]",
+        },
+        iterator: "m",
+        instruction: Rc::new(null()),
+    });
+    assert_eq!(instruction, expected);
+}
+
+#[test]
+fn comments() {
+    let source_code = r#"
+    ; comment
+    (fold members.$.["users"] m (null)) ;;; comment ;;?()()
+    ;;; comme;?!.$.  nt[][][][()()()null;$::!
     "#;
     let instruction = parse(&source_code.as_ref());
     let expected = Instruction::Fold(Fold {

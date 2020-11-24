@@ -57,7 +57,7 @@ impl<'i> ExecutableInstruction<'i> for Instruction<'i> {
 #[macro_export]
 macro_rules! log_instruction {
     ($instr_name:expr, $exec_ctx:expr, $call_ctx:expr) => {
-        log::info!(target: crate::log_targets::INSTRUCTION, "> {}", stringify!($instr_name));
+        log::debug!(target: crate::log_targets::INSTRUCTION, "> {}", stringify!($instr_name));
 
         let mut data_cache_log = String::from("  data cache:");
         if $exec_ctx.data_cache.is_empty() {
@@ -67,29 +67,29 @@ macro_rules! log_instruction {
             data_cache_log.push_str(&format!("\n    {} => {}", key, value));
         }
 
-        log::info!(target: crate::log_targets::DATA_CACHE, "{}", data_cache_log);
-        log::info!(
+        log::trace!(target: crate::log_targets::DATA_CACHE, "{}", data_cache_log);
+        log::trace!(
             target: crate::log_targets::NEXT_PEER_PKS,
             "  next peers pk: {:?}",
             $exec_ctx.next_peer_pks
         );
-        log::info!(
+        log::trace!(
             target: crate::log_targets::SUBTREE_COMPLETE,
             "  subtree complete: {}",
             $exec_ctx.subtree_complete
         );
 
-        log::info!(
+        log::debug!(
             target: crate::log_targets::CALL_EVIDENCE_PATH,
             "  current call evidence path: {:?}",
             $call_ctx.current_path
         );
-        log::info!(
+        log::trace!(
             target: crate::log_targets::SUBTREE_ELEMENTS,
             "  subtree elements count: {:?}",
             $call_ctx.current_subtree_size
         );
-        log::info!(
+        log::debug!(
             target: crate::log_targets::NEW_CALL_EVIDENCE_PATH,
             "  new call evidence path: {:?}",
             $call_ctx.new_path

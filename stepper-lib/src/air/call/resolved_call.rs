@@ -90,7 +90,8 @@ impl<'i> ResolvedCall<'i> {
         let new_evidence_state = Call(Executed(result));
         call_ctx.new_path.push_back(new_evidence_state);
 
-        log::info!(
+        let new_evidence_state = EvidenceState::Call(CallResult::Executed(result));
+        log::trace!(
             target: EVIDENCE_CHANGING,
             "  adding new call evidence state {:?}",
             new_evidence_state
@@ -101,7 +102,7 @@ impl<'i> ResolvedCall<'i> {
 
     fn prepare_evidence_state(&self, exec_ctx: &mut ExecutionCtx<'i>, call_ctx: &mut CallEvidenceCtx) -> Result<bool> {
         if call_ctx.current_subtree_size == 0 {
-            log::info!(target: EVIDENCE_CHANGING, "  previous call evidence state wasn't found");
+            log::trace!(target: EVIDENCE_CHANGING, "  previous call evidence state wasn't found");
             return Ok(true);
         }
 
@@ -110,7 +111,7 @@ impl<'i> ResolvedCall<'i> {
         // and it's been checked previously
         let prev_state = call_ctx.current_path.pop_front().unwrap();
 
-        log::info!(
+        log::trace!(
             target: EVIDENCE_CHANGING,
             "  previous call evidence state found {:?}",
             prev_state

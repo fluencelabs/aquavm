@@ -25,9 +25,11 @@ pub(crate) fn call_service(
     args: String,
     security_tetraplets: Vec<Vec<SecurityTetraplet>>,
 ) -> super::CallServiceResult {
-    let security_tetraplets = serde_json::to_string(&security_tetraplets).expect("cannor serialize tetraplets");
+    let security_tetraplets = serde_json::to_string(&security_tetraplets).expect("can't serialize tetraplets");
     let result = call_service_impl(service_id, fn_name, args, security_tetraplets);
-    log::info!("result {}", result);
+
+    log::trace!("result {}", result);
+
     serde_json::from_str(&result).expect("Cannot parse CallServiceResult")
 }
 

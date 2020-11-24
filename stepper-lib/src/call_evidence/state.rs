@@ -63,7 +63,7 @@ pub(crate) fn merge_call_paths(
         &mut merged_path,
     )?;
 
-    log::info!(target: EVIDENCE_PATH_MERGE, "merged path: {:?}", merged_path);
+    log::trace!(target: EVIDENCE_PATH_MERGE, "merged path: {:?}", merged_path);
 
     Ok(merged_path)
 }

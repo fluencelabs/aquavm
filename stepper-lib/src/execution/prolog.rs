@@ -46,9 +46,9 @@ pub(super) fn prepare<'i>(
     let prev_path = to_evidence_path(raw_prev_path)?;
     let path = to_evidence_path(raw_path)?;
 
-    let aqua: Instruction<'i> = *air_parser::parse(raw_aqua).map_err(|msg| AquamarineError::AIRParseError(msg))?;
+    let aqua: Instruction<'i> = *air_parser::parse(raw_aqua).map_err(AquamarineError::AIRParseError)?;
 
-    log::info!(
+    log::trace!(
         target: RUN_PARAMS,
         "aqua: {:?}\nprev_path: {:?}\ncurrent_path: {:?}",
         aqua,
@@ -69,7 +69,7 @@ pub(super) fn make_contexts(
     use AquamarineError::CurrentPeerIdEnvError as EnvError;
 
     let current_peer_id = get_current_peer_id().map_err(|e| EnvError(e, String::from("CURRENT_PEER_ID")))?;
-    log::info!(target: RUN_PARAMS, "current peer id {}", current_peer_id);
+    log::trace!(target: RUN_PARAMS, "current peer id {}", current_peer_id);
 
     let exec_ctx = ExecutionCtx::new(current_peer_id, init_peer_id);
     let current_path = merge_call_paths(prev_path, path)?;

@@ -41,9 +41,34 @@ pub(super) fn set_local_call_result<'i>(
 
     match output {
         CallOutput::Scalar(name) => {
+            if let Some(fold_block_name) = exec_ctx.met_folds.back() {
+                let fold_state = match exec_ctx.data_cache.get_mut(*fold_block_name) {
+                    Some(AValue::JValueFoldCursor(fold_state)) => fold_state,
+                    _ => unreachable!("fold block data must be represented as fold cursor"),
+                };
+
+                fold_state.met_variables.insert(name, result.clone());
+            }
+
             match exec_ctx.data_cache.entry(name.to_string()) {
-                Vacant(entry) => entry.insert(AValue::JValueRef(result)),
-                Occupied(entry) => return Err(MultipleVariablesFound(entry.key().clone())),
+                Vacant(entry) => {
+                    entry.insert(AValue::JValueRef(result));
+                }
+                Occupied(mut entry) => {
+                    // check that current execution flow is inside a fold block
+                    if exec_ctx.met_folds.is_empty() {
+                        // shadowing is allowed only inside fold blocks
+                        return Err(MultipleVariablesFound(entry.key().clone()));
+                    }
+
+                    match entry.get() {
+                        AValue::JValueRef(_) => {}
+                        // shadowing is allowed only for scalar values
+                        _ => return Err(ShadowingError(entry.key().clone())),
+                    };
+
+                    entry.insert(AValue::JValueRef(result));
+                }
             };
         }
         CallOutput::Accumulator(name) => {
@@ -74,7 +99,7 @@ pub(super) fn set_remote_call_result<'i>(
     exec_ctx.subtree_complete = false;
 
     let new_evidence_state = EvidenceState::Call(CallResult::RequestSent(exec_ctx.current_peer_id.clone()));
-    log::info!(
+    log::trace!(
         target: EVIDENCE_CHANGING,
         "  adding new call evidence state {:?}",
         new_evidence_state
