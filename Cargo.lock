@@ -68,11 +68,7 @@ dependencies = [
 [[package]]
 name = "aquamarine-vm"
 version = "0.1.2"
-<<<<<<< HEAD
-source = "git+https://github.com/fluencelabs/fce#af75084ceb950560a56399a946c985c5df0bb480"
-=======
 source = "git+https://github.com/fluencelabs/fce#afa612a5639f900f5730f005f61651edb0c97569"
->>>>>>> master
 dependencies = [
  "fluence-faas",
  "maplit",
@@ -633,11 +629,7 @@ checksum = "e88a8acf291dafb59c2d96e8f59828f3838bb1a70398823ade51a84de6a6deed"
 [[package]]
 name = "fce"
 version = "0.1.11"
-<<<<<<< HEAD
-source = "git+https://github.com/fluencelabs/fce#af75084ceb950560a56399a946c985c5df0bb480"
-=======
 source = "git+https://github.com/fluencelabs/fce#afa612a5639f900f5730f005f61651edb0c97569"
->>>>>>> master
 dependencies = [
  "boolinator",
  "fce-utils",
@@ -659,20 +651,12 @@ dependencies = [
 [[package]]
 name = "fce-utils"
 version = "0.1.0"
-<<<<<<< HEAD
-source = "git+https://github.com/fluencelabs/fce#af75084ceb950560a56399a946c985c5df0bb480"
-=======
 source = "git+https://github.com/fluencelabs/fce#afa612a5639f900f5730f005f61651edb0c97569"
->>>>>>> master
 
 [[package]]
 name = "fce-wit-interfaces"
 version = "0.1.8"
-<<<<<<< HEAD
-source = "git+https://github.com/fluencelabs/fce#af75084ceb950560a56399a946c985c5df0bb480"
-=======
 source = "git+https://github.com/fluencelabs/fce#afa612a5639f900f5730f005f61651edb0c97569"
->>>>>>> master
 dependencies = [
  "multimap",
  "wasmer-interface-types-fl",
@@ -681,11 +665,7 @@ dependencies = [
 [[package]]
 name = "fce-wit-parser"
 version = "0.1.10"
-<<<<<<< HEAD
-source = "git+https://github.com/fluencelabs/fce#af75084ceb950560a56399a946c985c5df0bb480"
-=======
 source = "git+https://github.com/fluencelabs/fce#afa612a5639f900f5730f005f61651edb0c97569"
->>>>>>> master
 dependencies = [
  "anyhow",
  "fce-wit-interfaces",
@@ -712,11 +692,7 @@ dependencies = [
 [[package]]
 name = "fluence-faas"
 version = "0.1.12"
-<<<<<<< HEAD
-source = "git+https://github.com/fluencelabs/fce#af75084ceb950560a56399a946c985c5df0bb480"
-=======
 source = "git+https://github.com/fluencelabs/fce#afa612a5639f900f5730f005f61651edb0c97569"
->>>>>>> master
 dependencies = [
  "cmd_lib",
  "fce",

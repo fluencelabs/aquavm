@@ -19,7 +19,6 @@
 use super::triplet::{ResolvedTriplet, Triplet};
 use super::utils::{set_local_call_result, set_remote_call_result};
 use super::Call;
-use crate::air::resolve::resolve_to_jvalue;
 use crate::air::ExecutionCtx;
 use crate::build_targets::{CallServiceResult, CALL_SERVICE_SUCCESS};
 use crate::call_evidence::{CallEvidenceCtx, CallResult, EvidenceState};
@@ -75,8 +74,8 @@ impl<'i> ResolvedCall<'i> {
             return Ok(());
         }
 
-        let (function_args, tetraplets) = self.prepare_args()?;
-        let result = unsafe { crate::call_service(self.service_id, self.function_name, function_args, tetraplets) };
+        let (function_args, tetraplets) = self.prepare_args(exec_ctx)?;
+        let result = unsafe { crate::call_service(self.service_id.clone(), self.function_name.clone(), function_args, tetraplets) };
 
         if result.ret_code != CALL_SERVICE_SUCCESS {
             call_ctx
@@ -88,14 +87,14 @@ impl<'i> ResolvedCall<'i> {
         let result = self.prepare_result(result, exec_ctx)?;
         set_local_call_result(&self.output, exec_ctx, result.clone())?;
         let new_evidence_state = Call(Executed(result));
-        call_ctx.new_path.push_back(new_evidence_state);
 
-        let new_evidence_state = EvidenceState::Call(CallResult::Executed(result));
         log::trace!(
             target: EVIDENCE_CHANGING,
             "  adding new call evidence state {:?}",
             new_evidence_state
         );
+
+        call_ctx.new_path.push_back(new_evidence_state);
 
         Ok(())
     }
@@ -117,32 +116,36 @@ impl<'i> ResolvedCall<'i> {
             prev_state
         );
 
-        self.handle_prev_state(prev_state, exec_ctx)
+        self.handle_prev_state(prev_state, exec_ctx, call_ctx)
     }
 
-    fn prepare_args(&self) -> Result<(String, Vec<Vec<SecurityTetraplet>>)> {
+    fn prepare_args<'a>(&self, exec_ctx: &ExecutionCtx<'a>) -> Result<(String, Vec<Vec<SecurityTetraplet>>)> {
         use crate::air::resolve::resolve_to_args;
 
         let function_args = self.function_arg_paths.iter();
-        let function_args = function_args
-            .map(|v| resolve_to_args(v, exec_ctx))
-            .collect::<Result<(Vec<_>, Vec<Vec<_>>)>>();
-        let function_args = function_args?;
-        let function_args = JValue::Array(function_args.0);
-        let tetraplets = function_args.1;
+        let mut args = Vec::new();
+        let mut tetraplets = Vec::new();
+        for instruction_value in function_args {
+            let (arg, tetraplet) = resolve_to_args(instruction_value, exec_ctx)?;
+            args.push(arg);
+            tetraplets.push(tetraplet);
+        }
 
-        Ok((function_args.to_string(), tetraplets))
+        let jvalue = JValue::Array(args);
+        let function_args = jvalue.to_string();
+
+        Ok((function_args, tetraplets))
     }
 
-    fn prepare_result(self, result: CallServiceResult, ctx: &mut ExecutionCtx<'i>) -> Result<Rc<ExecutedCallResult>> {
+    fn prepare_result(&self, result: CallServiceResult, ctx: &mut ExecutionCtx<'i>) -> Result<Rc<ExecutedCallResult>> {
         use AquamarineError::CallServiceResultDeserializationError as DeError;
 
         let result: JValue = serde_json::from_str(&result.result).map_err(|e| DeError(result, e))?;
 
         let tetraplet = SecurityTetraplet {
             pub_key: ctx.current_peer_id.clone(),
-            service_id: self.service_id,
-            function_name: self.function_name,
+            service_id: self.service_id.clone(),
+            function_name: self.function_name.clone(),
             json_path: String::new(),
         };
 
@@ -151,7 +154,7 @@ impl<'i> ResolvedCall<'i> {
         Ok(Rc::new(result))
     }
 
-    fn handle_prev_state(&self, prev_state: EvidenceState, exec_ctx: &mut ExecutionCtx<'i>) -> Result<bool> {
+    fn handle_prev_state(&self, prev_state: EvidenceState, exec_ctx: &mut ExecutionCtx<'i>, call_ctx: &mut CallEvidenceCtx) -> Result<bool> {
         use crate::call_evidence::CallResult::*;
         use crate::call_evidence::EvidenceState::*;
 

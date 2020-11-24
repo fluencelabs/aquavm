@@ -17,7 +17,7 @@
 #![allow(improper_ctypes)]
 #![warn(rust_2018_idioms)]
 #![deny(
-    dead_code,
+    // dead_code,
     nonstandard_style,
     unused_imports,
     unused_mut,
@@ -57,13 +57,13 @@ use std::fmt::Display;
 use std::fmt::Formatter;
 use std::rc::Rc;
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct ExecutedCallResult {
     pub result: JValue,
     pub tetraplet: SecurityTetraplet,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+// #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub(crate) enum AValue<'i> {
     JValueRef(Rc<ExecutedCallResult>),
     JValueAccumulatorRef(RefCell<Vec<Rc<ExecutedCallResult>>>),
@@ -84,7 +84,7 @@ impl<'i> Display for AValue<'i> {
                 write!(f, "]")?;
             }
             AValue::JValueFoldCursor(fold_state) => {
-                write!(f, "cursor: {}, iterable: {}", fold_state.cursor, fold_state.iterable)?;
+                write!(f, "cursor, current value is {:?}", fold_state.iterable.peek())?;
             }
         }
 

@@ -22,7 +22,7 @@ use std::fmt::Display;
 use std::fmt::Formatter;
 
 /// Execution context contains all necessary information needed to execute aqua script.
-#[derive(Clone, Default, Debug)]
+// #[derive(Clone, Default, Debug)]
 pub(crate) struct ExecutionCtx<'i> {
     /// Contains all set variables.
     pub data_cache: HashMap<String, AValue<'i>>,

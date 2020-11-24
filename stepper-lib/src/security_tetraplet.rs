@@ -17,14 +17,13 @@
 use crate::air::ExecutionCtx;
 
 use fluence::fce;
-use wasm_bindgen::prelude::*;
 
 use serde::Deserialize;
 use serde::Serialize;
 
 /// Describes an origin returns corresponding value.
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[fce]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct SecurityTetraplet {
     pub pub_key: String,
     pub service_id: String,
@@ -34,7 +33,7 @@ pub struct SecurityTetraplet {
 
 impl SecurityTetraplet {
     // This one is used for creating tetraplet for host identified by init peer id.
-    pub fn initiator_tetraplet(exec_ctx: &ExecutionCtx) -> Self {
+    pub(crate) fn initiator_tetraplet(exec_ctx: &ExecutionCtx<'_>) -> Self {
         Self {
             pub_key: exec_ctx.init_peer_id.clone(),
             service_id: String::new(),

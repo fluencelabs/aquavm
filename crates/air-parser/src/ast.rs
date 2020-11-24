@@ -48,7 +48,7 @@ pub struct Call<'i> {
     pub output: CallOutput<'i>,
 }
 
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone, Hash)]
 pub enum InstructionValue<'i> {
     Variable(&'i str),
     Literal(&'i str),
@@ -57,7 +57,7 @@ pub enum InstructionValue<'i> {
     InitPeerId,
 }
 
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone, Hash)]
 pub enum CallOutput<'i> {
     Scalar(&'i str),
     Accumulator(&'i str),

@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-use super::resolve::resolve_to_jvalue;
 use super::CallEvidenceCtx;
 use super::ExecutionCtx;
 use super::Instruction;
-use crate::log_instruction;
+use crate::{log_instruction, ExecutedCallResult};
 use crate::AValue;
 use crate::AquamarineError;
-use crate::ExecutedCallResult;
+// use crate::ExecutedCallResult;
+use crate::SecurityTetraplet;
 use crate::JValue;
 use crate::Result;
 
 use air_parser::ast::Fold;
 use air_parser::ast::Next;
-use air_parser::ast::InstructionValue;
+// use air_parser::ast::InstructionValue;
 
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -41,35 +41,63 @@ use std::rc::Rc;
  )
 */
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub(crate) struct FoldState<'i> {
-    // TODO: maybe change to bidirectional iterator
-    pub(crate) cursor: usize,
-    pub(crate) iterable: Rc<AValue<'i>>,
-    pub(crate) instr_head: Rc<Instruction<'i>>,
-    // map of met variables inside this (not any inner) fold block with their initial values
-    pub(crate) met_variables: HashMap<&'i str, Rc<JValue>>,
+pub(crate) trait Foldable {
+    type Item;
+
+    fn next(&mut self) -> bool;
+
+    fn back(&mut self) -> bool;
+
+    fn peek(&self) -> Option<Self::Item>;
 }
 
+// #[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) struct FoldState<'i> {
+    pub(crate) iterable: Box<dyn Foldable<Item = (JValue, SecurityTetraplet)> + 'i>,
+    pub(crate) instr_head: Rc<Instruction<'i>>,
+    // map of met variables inside this (not any inner) fold block with their initial values
+    pub(crate) met_variables: HashMap<&'i str, Rc<ExecutedCallResult>>,
+}
+
+
 impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
+    fn execute(&self, _exec_ctx: &mut ExecutionCtx<'i>, _call_ctx: &mut CallEvidenceCtx) -> Result<()> {
+        unimplemented!();
+        /*
         use AquamarineError::*;
 
         log_instruction!(fold, exec_ctx, call_ctx);
 
-        let t = match &self.iterable {
+        let foldable = match &self.iterable {
             InstructionValue::Variable(name) => {
                 match exec_ctx.data_cache.get(name) {
-                    AValue::JValueRef(result) => {
-
+                    AValue::JValueRef(variable) => {
+                        match &variable.result {
+                            JValue::Array(array) => {
+                                if array.is_empty() {
+                                    // skip fold if array is empty
+                                    return Ok(());
+                                }
+                            },
+                            v => return Err(IncompatibleJValueType(v.clone(), "array")),
+                        }
                     },
-                    AValue::JValueAccumulatorRef(acc) =>
+                    AValue::JValueAccumulatorRef(acc) => {}
+                    // Vec<Rc<ExecutedCallResult>>
                 }
             },
             InstructionValue::JsonPath(variable, path) => {
+                match exec_ctx.data_cache.get(name) {
+                    AValue::JValueRef(variable) => {
+                        use jsonpath_lib::select;
+                        let selected_values = select(&variable.result, path).unwrap();
+                    },
+                    AValue::JValueAccumulatorRef(acc) => {
 
+                    }
+                }
             }
-        }
+        };
 
         let iterable = resolve_to_jvalue(&self.iterable, exec_ctx)?;
         // check that value exists and has array type
@@ -86,8 +114,6 @@ impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
         };
 
         let fold_state = FoldState {
-            cursor: 0,
-            // TODO: reuse existing Rc from JValueRef, if there was some
             iterable: Rc::new(iterable),
             instr_head: self.instruction.clone(),
             met_variables: HashMap::new(),
@@ -129,6 +155,8 @@ impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
         }
 
         Ok(())
+
+         */
     }
 }
 
@@ -144,23 +172,20 @@ impl<'i> super::ExecutableInstruction<'i> for Next<'i> {
             .data_cache
             .get_mut(iterator_name)
             .ok_or_else(|| FoldStateNotFound(iterator_name.to_string()))?;
+
         let fold_state = match avalue {
             AValue::JValueFoldCursor(state) => state,
             v => {
+                // it's not possible to use unreachable here
+                // because at now next syntactically could be used without fold
                 return Err(IncompatibleAValueType(
-                    format!("{:?}", v),
+                    format!("{}", v),
                     String::from("JValueFoldCursor"),
                 ))
             }
         };
-        let value_len = match fold_state.iterable.as_ref() {
-            JValue::Array(array) => array.len(),
-            _ => unreachable!("iterable value shouldn't changed inside fold"),
-        };
 
-        fold_state.cursor += 1;
-        if value_len == 0 || value_len <= fold_state.cursor {
-            fold_state.cursor -= 1;
+        if !fold_state.iterable.next() {
             // just do nothing to exit
             return Ok(());
         }
@@ -170,7 +195,9 @@ impl<'i> super::ExecutableInstruction<'i> for Next<'i> {
 
         // get the same fold state again because of borrow checker
         match exec_ctx.data_cache.get_mut(iterator_name) {
-            Some(AValue::JValueFoldCursor(fold_state)) => fold_state.cursor -= 1,
+            // move iterator back to provide correct value for possible subtree after next
+            // (for example for cases such as right fold)
+            Some(AValue::JValueFoldCursor(fold_state)) => fold_state.iterable.back(),
             _ => unreachable!("iterator value shouldn't changed inside fold"),
         };
 

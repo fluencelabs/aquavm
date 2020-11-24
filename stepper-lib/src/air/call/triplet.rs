@@ -87,26 +87,24 @@ impl<'a, 'i> Triplet<'a, 'i> {
 /// Resolve value to string by either resolving variable from `ExecutionCtx`, taking literal value, or etc
 // TODO: return &str to avoid excess cloning
 fn resolve_to_string<'i, 'a: 'i>(value: &'a InstructionValue<'i>, ctx: &'a ExecutionCtx<'i>) -> Result<String> {
-    use crate::air::resolve::apply_json_path;
     use crate::air::resolve::resolve_to_call_result;
-    use crate::air::JValuableResult;
 
     let resolved = match value {
         InstructionValue::CurrentPeerId => ctx.current_peer_id.clone(),
         InstructionValue::InitPeerId => ctx.init_peer_id.clone(),
-        InstructionValue::Literal(value) => *value,
+        InstructionValue::Literal(value) => value.to_string(),
         InstructionValue::Variable(name) => {
             let resolved = resolve_to_call_result(name, ctx)?;
-            cow_to_string(resolved.as_jvalue())
+            cow_to_string(resolved.as_jvalue())?
         }
         InstructionValue::JsonPath { variable, path } => {
             let resolved = resolve_to_call_result(variable, ctx)?;
             let resolved = resolved.apply_json_path(path)?;
-            vec_to_string(resolved)
+            vec_to_string(resolved, path)?
         }
     };
 
-    Ok(resolved.to_string())
+    Ok(resolved)
 }
 
 fn cow_to_string(value: Cow<'_, JValue>) -> Result<String> {
@@ -120,7 +118,7 @@ fn cow_to_string(value: Cow<'_, JValue>) -> Result<String> {
     }
 }
 
-fn vec_to_string(values: Vec<&JValue>) -> Result<String> {
+fn vec_to_string(values: Vec<&JValue>, json_path: &str) -> Result<String> {
     if values.is_empty() {
         return Err(AquamarineError::VariableNotFound(json_path.to_string()));
     }

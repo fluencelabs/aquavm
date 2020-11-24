@@ -16,7 +16,6 @@
 
 use crate::log_targets::EVIDENCE_PATH_MERGE;
 use crate::ExecutedCallResult;
-use crate::JValue;
 use crate::Result;
 
 use serde::Deserialize;

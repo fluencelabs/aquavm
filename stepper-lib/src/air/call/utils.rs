@@ -22,7 +22,6 @@ use crate::log_targets::EVIDENCE_CHANGING;
 use crate::AValue;
 use crate::AquamarineError;
 use crate::ExecutedCallResult;
-use crate::JValue;
 use crate::Result;
 
 use air_parser::ast::CallOutput;
@@ -32,7 +31,7 @@ use std::rc::Rc;
 
 /// Writes result of a local `Call` instruction to `ExecutionCtx` at `output`
 pub(super) fn set_local_call_result<'i>(
-    output: &CallOutput,
+    output: &CallOutput<'i>,
     exec_ctx: &mut ExecutionCtx<'i>,
     result: Rc<ExecutedCallResult>,
 ) -> Result<()> {
@@ -76,7 +75,7 @@ pub(super) fn set_local_call_result<'i>(
                 Occupied(mut entry) => match entry.get_mut() {
                     // if result is an array, insert result to the end of the array
                     AValue::JValueAccumulatorRef(values) => values.borrow_mut().push(result),
-                    v => return Err(IncompatibleAValueType(format!("{:?}", v), String::from("Array"))),
+                    v => return Err(IncompatibleAValueType(format!("{}", v), String::from("Array"))),
                 },
                 Vacant(entry) => {
                     entry.insert(AValue::JValueAccumulatorRef(RefCell::new(vec![result])));
