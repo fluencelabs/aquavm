@@ -17,6 +17,7 @@
 use crate::AValue;
 
 use std::collections::HashMap;
+use std::collections::VecDeque;
 use std::fmt::Display;
 use std::fmt::Formatter;
 
@@ -42,6 +43,9 @@ pub(crate) struct ExecutionCtx<'i> {
     ///   - all of seq subtrees are complete
     ///   - call executes successfully (call evidence equals to Executed)
     pub subtree_complete: bool,
+
+    /// List of met folds used to determine whether a variable can be shadowed.
+    pub met_folds: VecDeque<&'i str>,
 }
 
 impl<'i> ExecutionCtx<'i> {
@@ -52,6 +56,7 @@ impl<'i> ExecutionCtx<'i> {
             current_peer_id,
             init_peer_id,
             subtree_complete: true,
+            met_folds: VecDeque::new(),
         }
     }
 }

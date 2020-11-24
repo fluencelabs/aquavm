@@ -26,6 +26,7 @@ use crate::Result;
 
 use air_parser::ast::{Fold, Next};
 
+use std::collections::HashSet;
 use std::rc::Rc;
 
 /*
@@ -43,6 +44,8 @@ pub(crate) struct FoldState<'i> {
     pub(crate) cursor: usize,
     pub(crate) iterable: Rc<JValue>,
     pub(crate) instr_head: Rc<Instruction<'i>>,
+    // list of met variables inside this (not inner) fold block
+    pub(crate) met_variables: HashSet<&'i str>,
 }
 
 impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
@@ -71,6 +74,7 @@ impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
             // TODO: reuse existing Rc from JValueRef, if there was some
             iterable: Rc::new(iterable),
             instr_head: self.instruction.clone(),
+            met_variables: HashSet::new(),
         };
 
         let previous_value = exec_ctx
@@ -80,9 +84,19 @@ impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
         if previous_value.is_some() {
             return Err(MultipleFoldStates(self.iterator.to_string()));
         }
+        exec_ctx.met_folds.push_back(self.iterator);
 
         self.instruction.execute(exec_ctx, call_ctx)?;
-        exec_ctx.data_cache.remove(self.iterator);
+
+        let fold_state = match exec_ctx.data_cache.remove(self.iterator) {
+            Some(AValue::JValueFoldCursor(fold_state)) => fold_state,
+            _ => unreachable!("fold cursor is changed only inside fold block"),
+        };
+
+        for met_variable in fold_state.met_variables {
+            exec_ctx.data_cache.remove(met_variable);
+        }
+        exec_ctx.met_folds.pop_back();
 
         Ok(())
     }
