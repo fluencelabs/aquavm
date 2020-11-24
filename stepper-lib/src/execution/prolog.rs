@@ -46,7 +46,7 @@ pub(super) fn prepare<'i>(
     let prev_path = to_evidence_path(raw_prev_path)?;
     let path = to_evidence_path(raw_path)?;
 
-    let aqua: Instruction<'i> = *air_parser::parse(raw_aqua).map_err(|msg| AquamarineError::AIRParseError(msg))?;
+    let aqua: Instruction<'i> = *air_parser::parse(raw_aqua).map_err(AquamarineError::AIRParseError)?;
 
     log::trace!(
         target: RUN_PARAMS,
