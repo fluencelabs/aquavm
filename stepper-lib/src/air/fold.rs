@@ -152,10 +152,10 @@ mod tests {
     use crate::call_evidence::CallEvidencePath;
     use crate::JValue;
 
-    use aqua_test_utils::call_vm;
     use aqua_test_utils::create_aqua_vm;
     use aqua_test_utils::echo_number_call_service;
     use aqua_test_utils::set_variable_call_service;
+    use aqua_test_utils::{call_vm, echo_string_call_service};
     use aquamarine_vm::AquamarineVMError;
     use aquamarine_vm::StepperError;
 
@@ -383,5 +383,111 @@ mod tests {
         for i in 1..=5 {
             assert_eq!(res[i], Call(Executed(Rc::new(JValue::Number(i.into())))));
         }
+    }
+
+    #[test]
+    fn shadowing() {
+        use crate::call_evidence::CallResult::*;
+        use crate::call_evidence::EvidenceState::*;
+
+        let mut set_variables_vm = create_aqua_vm(set_variable_call_service(r#"["1","2"]"#), "set_variable");
+        let mut vm_a = create_aqua_vm(echo_string_call_service(), "A");
+        let mut vm_b = create_aqua_vm(echo_string_call_service(), "B");
+
+        let script = String::from(
+            r#"
+            (seq
+                (seq
+                    (call "set_variable" ("" "") [] Iterable1)
+                    (call "set_variable" ("" "") [] Iterable2)
+                )
+                (fold Iterable1 i
+                    (seq
+                        (seq
+                            (fold Iterable2 j
+                                (seq
+                                    (seq
+                                        (call "A" ("" "") [i] local_j)
+                                        (call "B" ("" "") [local_j])
+                                    )
+                                    (next j)
+                                )
+                            )
+                            (par
+                                (call "A" ("" "") [i] local_i)
+                                (call "B" ("" "") [i])
+                            )
+                        )
+                        (next i)
+                    )
+                )
+            )"#,
+        );
+
+        let res = call_vm!(set_variables_vm, "", script.clone(), "[]", "[]");
+        let res = call_vm!(vm_a, "", script.clone(), "[]", res.data);
+        let res = call_vm!(vm_b, "", script.clone(), "[]", res.data);
+        let res = call_vm!(vm_a, "", script.clone(), "[]", res.data);
+        let res = call_vm!(vm_b, "", script.clone(), "[]", res.data);
+        let res = call_vm!(vm_a, "", script.clone(), "[]", res.data);
+        let res = call_vm!(vm_b, "", script, "[]", res.data);
+
+        let res: CallEvidencePath = serde_json::from_str(&res.data).expect("should be valid call evidence path");
+
+        assert_eq!(res.len(), 12);
+        for i in 2..11 {
+            assert!(matches!(res[i], Call(Executed(_))) || matches!(res[i], Par(..)));
+        }
+    }
+
+    #[test]
+    fn shadowing_scope() {
+        let mut set_variables_vm = create_aqua_vm(set_variable_call_service(r#"["1","2"]"#), "set_variable");
+        let mut vm_a = create_aqua_vm(echo_string_call_service(), "A");
+        let mut vm_b = create_aqua_vm(echo_string_call_service(), "B");
+
+        let script = String::from(
+            r#"
+            (seq
+                (seq
+                    (call "set_variable" ("" "") [] Iterable1)
+                    (call "set_variable" ("" "") [] Iterable2)
+                )
+                (fold Iterable1 i
+                    (seq
+                        (seq
+                            (fold Iterable2 j
+                                (seq
+                                    (seq
+                                        (call "A" ("" "") [i] local_j)
+                                        (call "B" ("" "") [local_j])
+                                    )
+                                    (next j)
+                                )
+                            )
+                            (call "A" ("" "") [local_j])
+                        )
+                        (next i)
+                    )
+                )
+            )"#,
+        );
+
+        let res = call_vm!(set_variables_vm, "", script.clone(), "[]", "[]");
+        let res = call_vm!(vm_a, "", script.clone(), "[]", res.data);
+        let res = call_vm!(vm_b, "", script.clone(), "[]", res.data);
+        let res = call_vm!(vm_a, "", script.clone(), "[]", res.data);
+        let res = call_vm!(vm_b, "", script.clone(), "[]", res.data);
+
+        let res = vm_a.call_with_prev_data("", script, "[]", res.data);
+
+        assert!(res.is_err());
+        let error = res.err().unwrap();
+        let error = match error {
+            AquamarineVMError::StepperError(error) => error,
+            _ => unreachable!(),
+        };
+
+        assert!(matches!(error, StepperError::VariableNotFound(_)));
     }
 }

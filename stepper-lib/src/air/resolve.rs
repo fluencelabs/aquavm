@@ -96,7 +96,7 @@ pub(crate) fn require_string(value: JValue) -> Result<String> {
     }
 }
 
-pub(crate) fn apply_json_path<'i>(jvalue: JValue, json_path: &'i str) -> Result<JValue> {
+pub(crate) fn apply_json_path(jvalue: JValue, json_path: &str) -> Result<JValue> {
     let values = find_by_json_path(&jvalue, json_path)?;
     if values.is_empty() {
         return Err(AquamarineError::VariableNotFound(json_path.to_string()));
