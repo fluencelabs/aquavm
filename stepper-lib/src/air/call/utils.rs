@@ -39,6 +39,15 @@ pub(super) fn set_local_call_result<'i>(
 
     match output {
         CallOutput::Scalar(name) => {
+            if let Some(fold_block_name) = exec_ctx.met_folds.back() {
+                let fold_state = match exec_ctx.data_cache.get_mut(*fold_block_name) {
+                    Some(AValue::JValueFoldCursor(fold_state)) => fold_state,
+                    _ => unreachable!("fold block data must be represented as fold cursor"),
+                };
+
+                fold_state.met_variables.insert(name, result.clone());
+            }
+
             match exec_ctx.data_cache.entry(name.to_string()) {
                 Vacant(entry) => {
                     entry.insert(AValue::JValueRef(result));
@@ -53,21 +62,12 @@ pub(super) fn set_local_call_result<'i>(
                     match entry.get() {
                         AValue::JValueRef(_) => {}
                         // shadowing is allowed only for scalar values
-                        _ => return Err(MultipleVariablesFound(entry.key().clone())),
+                        _ => return Err(ShadowingError(entry.key().clone())),
                     };
 
                     entry.insert(AValue::JValueRef(result));
                 }
             };
-
-            if let Some(fold_block_name) = exec_ctx.met_folds.back() {
-                let fold_state = match exec_ctx.data_cache.get_mut(*fold_block_name) {
-                    Some(AValue::JValueFoldCursor(fold_state)) => fold_state,
-                    _ => unreachable!(),
-                };
-
-                fold_state.met_variables.insert(name);
-            }
         }
         CallOutput::Accumulator(name) => {
             match exec_ctx.data_cache.entry(name.to_string()) {
