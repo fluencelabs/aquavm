@@ -78,8 +78,8 @@ struct FoldableVecJsonPathResult<'ctx> {
     pub len: usize,
 }
 
-impl<'ctx> Foldable<'ctx> for FoldableNamedResult {
-    type Item = FoldableResult<'ctx>;
+impl<'free_ctx> Foldable<'free_ctx> for FoldableNamedResult {
+    type Item = FoldableResult<'free_ctx>;
 
     fn next(&mut self) -> bool {
         if self.cursor < self.len {
@@ -99,7 +99,7 @@ impl<'ctx> Foldable<'ctx> for FoldableNamedResult {
         }
     }
 
-    fn peek<'s, 'i>(&'s self, exec_ctx: &'ctx ExecutionCtx<'i>) -> Option<Self::Item> {
+    fn peek<'s, 'i>(&'s self, exec_ctx: &'free_ctx ExecutionCtx<'i>) -> Option<Self::Item> {
         if self.len == 0 {
             return None;
         }
@@ -118,8 +118,8 @@ impl<'ctx> Foldable<'ctx> for FoldableNamedResult {
     }
 }
 
-impl<'ctx> Foldable<'ctx> for FoldableJsonPathResult<'ctx> {
-    type Item = FoldableResult<'ctx>;
+impl<'real_ctx, 'free_ctx> Foldable<'free_ctx> for FoldableJsonPathResult<'real_ctx> {
+    type Item = FoldableResult<'real_ctx>;
 
     fn next(&mut self) -> bool {
         if self.cursor < self.len {
@@ -139,7 +139,7 @@ impl<'ctx> Foldable<'ctx> for FoldableJsonPathResult<'ctx> {
         }
     }
 
-    fn peek<'s, 'i>(&'s self, _exec_ctx: &'ctx ExecutionCtx<'i>) -> Option<Self::Item> {
+    fn peek<'s, 'i>(&'s self, _exec_ctx: &'free_ctx ExecutionCtx<'i>) -> Option<Self::Item> {
         if self.len == 0 {
             return None;
         }
@@ -151,8 +151,8 @@ impl<'ctx> Foldable<'ctx> for FoldableJsonPathResult<'ctx> {
     }
 }
 
-impl<'ctx> Foldable<'ctx> for FoldableVecJsonPathResult<'ctx> {
-    type Item = FoldableResult<'ctx>;
+impl<'real_ctx, 'free_ctx> Foldable<'free_ctx> for FoldableVecJsonPathResult<'real_ctx> {
+    type Item = FoldableResult<'real_ctx>;
 
     fn next(&mut self) -> bool {
         if self.cursor < self.len {
@@ -172,7 +172,7 @@ impl<'ctx> Foldable<'ctx> for FoldableVecJsonPathResult<'ctx> {
         }
     }
 
-    fn peek<'s, 'i>(&'s self, _exec_ctx: &'ctx ExecutionCtx<'i>) -> Option<Self::Item> {
+    fn peek<'s, 'i>(&'s self, _exec_ctx: &'free_ctx ExecutionCtx<'i>) -> Option<Self::Item> {
         if self.len == 0 {
             return None;
         }
@@ -194,12 +194,12 @@ pub(crate) struct FoldState<'i> {
 }
 
 impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
+    fn execute<'real_ctx>(&self, exec_ctx: &'real_ctx mut ExecutionCtx<'i>, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
         use AquamarineError::*;
 
         log_instruction!(fold, exec_ctx, call_ctx);
 
-        let iterable: Box<dyn for<'ctx> Foldable<'ctx, Item = FoldableResult<'ctx>>> = match &self.iterable {
+        let iterable: Box<dyn for<'ctx> Foldable<'ctx, Item = FoldableResult<'ctx>> + 'real_ctx> = match &self.iterable {
             InstructionValue::Variable(name) => {
                 match exec_ctx.data_cache.get(*name) {
                     Some(AValue::JValueRef(variable)) => {
@@ -220,7 +220,8 @@ impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
                             len,
                         };
 
-                        Box::new(foldable) as Box<dyn for<'ctx> Foldable<'ctx, Item = FoldableResult<'ctx>>>
+                        // Box::new(foldable) as Box<dyn for<'ctx> Foldable<'ctx, Item = FoldableResult<'ctx>>>
+                        unreachable!()
                     }
                     Some(AValue::JValueAccumulatorRef(acc)) => {
                         let foldable = FoldableNamedResult {
@@ -271,8 +272,7 @@ impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
                     };
 
                     // Box::new(foldable) as Box<dyn for<'ctx> Foldable<'ctx, Item = FoldableResult<'ctx>>>
-                    //Box::new(foldable) as _
-                    unreachable!();
+                    Box::new(foldable) as _
                 }
                 _ => unreachable!(),
             },
