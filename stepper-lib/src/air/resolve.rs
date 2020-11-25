@@ -72,7 +72,7 @@ pub(crate) fn resolve_to_call_result<'name, 'i, 'ctx>(
 
     match value {
         AValue::JValueFoldCursor(fold_state) => {
-            let peeked_value = fold_state.iterable.peek().unwrap();
+            let peeked_value = fold_state.iterable.peek(ctx).unwrap();
             Ok(Box::new(peeked_value))
         },
         AValue::JValueRef(value) => Ok(Box::new(value.clone())),

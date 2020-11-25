@@ -25,6 +25,7 @@ use std::fmt::Formatter;
 // #[derive(Clone, Default, Debug)]
 pub(crate) struct ExecutionCtx<'i> {
     /// Contains all set variables.
+    // TODO: use shared string (Rc<String>) to avoid copying.
     pub data_cache: HashMap<String, AValue<'i>>,
 
     /// Set of peer public keys that should receive resulted data.

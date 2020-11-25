@@ -41,14 +41,14 @@ use std::rc::Rc;
  )
 */
 
-pub(crate) trait Foldable {
+pub(crate) trait Foldable<'ctx> {
     type Item;
 
     fn next(&mut self) -> bool;
 
     fn back(&mut self) -> bool;
 
-    fn peek(&self) -> Option<Self::Item>;
+    fn peek<'s, 'i>(&'s self, exec_ctx: &'ctx ExecutionCtx<'i>) -> Option<Self::Item>;
 }
 
 struct FoldableExecutedCallResult {
@@ -57,8 +57,8 @@ struct FoldableExecutedCallResult {
     pub len: usize,
 }
 
-impl Foldable for FoldableExecutedCallResult {
-    type Item = (JValue, SecurityTetraplet);
+impl<'ctx> Foldable<'ctx> for FoldableExecutedCallResult {
+    type Item = (&'ctx JValue, &'ctx SecurityTetraplet);
 
     fn next(&mut self) -> bool {
         if self.cursor < self.len {
@@ -78,25 +78,30 @@ impl Foldable for FoldableExecutedCallResult {
         }
     }
 
-    fn peek(&self) -> Option<Self::Item> {
-        let inner_jvalue = self.call_result.as_ref();
+    fn peek<'s, 'i>(&'s self, _exec_ctx: &'ctx ExecutionCtx<'i>) -> Option<Self::Item> {
+        unimplemented!()
+        /*
+        let call_result = self.call_result.as_ref();
 
-        let jvalue = match &inner_jvalue.result {
+        let jvalue = match &call_result.result {
             JValue::Array(array) => &array[self.cursor],
             _ => unreachable!("foldable contains only array json value types"),
         };
-        Some((jvalue.clone(), self.call_result.tetraplet.clone()))
+        Some((jvalue, &call_result.tetraplet))
+
+         */
     }
 }
 
+/// RefCell<Vec<Rc<ExecutedCallResult>>>
 struct FoldableVecExecutedCallResult {
-    pub call_result: Vec<Rc<ExecutedCallResult>>,
+    pub name: String,
     pub cursor: usize,
     pub len: usize,
 }
 
-impl Foldable for FoldableVecExecutedCallResult {
-    type Item = (JValue, SecurityTetraplet);
+impl<'ctx> Foldable<'ctx> for FoldableVecExecutedCallResult {
+    type Item = (&'ctx JValue, &'ctx SecurityTetraplet);
 
     fn next(&mut self) -> bool {
         if self.cursor < self.len {
@@ -116,16 +121,38 @@ impl Foldable for FoldableVecExecutedCallResult {
         }
     }
 
-    fn peek(&self) -> Option<Self::Item> {
-        let inner_value = &self.call_result[self.cursor];
+    fn peek<'s, 'i>(&'s self, exec_ctx: &'ctx ExecutionCtx<'i>) -> Option<Self::Item> {
+        /// RefCell<Vec<Rc<ExecutedCallResult>>>
+        let acc = match exec_ctx.data_cache.get(&self.name) {
+            Some(AValue::JValueAccumulatorRef(acc)) => acc,
+            _ => unreachable!(),
+        };
 
-        Some((inner_value.result.clone(), inner_value.tetraplet.clone()))
+        //let inner_value = &acc.borrow()[self.cursor];
+        use std::cell::Ref;
+
+
+        use std::ops::Deref;
+        // Some((&inner_value.result, &inner_value.tetraplet))
+        let _t1 = acc.deref();
+        let t2 = acc.borrow();
+        let y = std::cell::Ref::map(t2, |v| &v.get(0).unwrap().result);
+        let t22 = t2.get(0)?;
+        let t3 = t22.as_ref();
+        let t4 = &t3.result;
+        let t5 = &t3.tetraplet;
+
+        Some((
+            t4, t5
+            )
+
+        )
     }
 }
 
 // #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) struct FoldState<'i> {
-    pub(crate) iterable: Box<dyn Foldable<Item = (JValue, SecurityTetraplet)> + 'i>,
+    pub(crate) iterable: Box<dyn for<'ctx> Foldable<'ctx, Item = (&'ctx JValue, &'ctx SecurityTetraplet)>>,
     pub(crate) instr_head: Rc<Instruction<'i>>,
     // map of met variables inside this (not any inner) fold block with their initial values
     pub(crate) met_variables: HashMap<&'i str, Rc<ExecutedCallResult>>,
@@ -138,7 +165,7 @@ impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
 
         log_instruction!(fold, exec_ctx, call_ctx);
 
-        let iterable: Box<dyn Foldable<Item = (JValue, SecurityTetraplet)> + 'i> = match &self.iterable {
+        let iterable: Box<dyn for<'ctx> Foldable<'ctx, Item = (&'ctx JValue, &'ctx SecurityTetraplet)>> = match &self.iterable {
             InstructionValue::Variable(name) => {
                 match exec_ctx.data_cache.get(*name) {
                     Some(AValue::JValueRef(variable)) => {
@@ -163,7 +190,7 @@ impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
                     },
                     Some(AValue::JValueAccumulatorRef(acc)) => {
                         let foldable = FoldableVecExecutedCallResult {
-                            call_result: acc.borrow().clone(),
+                            name: name.to_string(),
                             cursor: 0,
                             len: acc.borrow().len(),
                         };

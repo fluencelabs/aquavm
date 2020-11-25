@@ -83,8 +83,8 @@ impl<'i> Display for AValue<'i> {
                 }
                 write!(f, "]")?;
             }
-            AValue::JValueFoldCursor(fold_state) => {
-                write!(f, "cursor, current value is {:?}", fold_state.iterable.peek())?;
+            AValue::JValueFoldCursor(_fold_state) => {
+                write!(f, "cursor")?;
             }
         }
 
