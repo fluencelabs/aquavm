@@ -74,7 +74,7 @@ pub(crate) fn resolve_to_call_result<'name, 'i, 'ctx>(
         AValue::JValueFoldCursor(fold_state) => {
             let peeked_value = fold_state.iterable.peek(ctx).unwrap();
             Ok(Box::new(peeked_value))
-        },
+        }
         AValue::JValueRef(value) => Ok(Box::new(value.clone())),
         AValue::JValueAccumulatorRef(acc) => Ok(Box::new(acc.borrow())),
     }

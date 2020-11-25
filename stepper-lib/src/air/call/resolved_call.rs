@@ -75,7 +75,14 @@ impl<'i> ResolvedCall<'i> {
         }
 
         let (function_args, tetraplets) = self.prepare_args(exec_ctx)?;
-        let result = unsafe { crate::call_service(self.service_id.clone(), self.function_name.clone(), function_args, tetraplets) };
+        let result = unsafe {
+            crate::call_service(
+                self.service_id.clone(),
+                self.function_name.clone(),
+                function_args,
+                tetraplets,
+            )
+        };
 
         if result.ret_code != CALL_SERVICE_SUCCESS {
             call_ctx
@@ -154,7 +161,12 @@ impl<'i> ResolvedCall<'i> {
         Ok(Rc::new(result))
     }
 
-    fn handle_prev_state(&self, prev_state: EvidenceState, exec_ctx: &mut ExecutionCtx<'i>, call_ctx: &mut CallEvidenceCtx) -> Result<bool> {
+    fn handle_prev_state(
+        &self,
+        prev_state: EvidenceState,
+        exec_ctx: &mut ExecutionCtx<'i>,
+        call_ctx: &mut CallEvidenceCtx,
+    ) -> Result<bool> {
         use crate::call_evidence::CallResult::*;
         use crate::call_evidence::EvidenceState::*;
 

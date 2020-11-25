@@ -21,7 +21,7 @@
     nonstandard_style,
     unused_imports,
     unused_mut,
-    unused_variables,
+    // unused_variables,
     unused_unsafe,
     unreachable_patterns
 )]
@@ -49,8 +49,8 @@ pub(crate) type JValue = serde_json::Value;
 
 pub(crate) use build_targets::call_service;
 pub(crate) use build_targets::get_current_peer_id;
-use serde::Serialize;
 use serde::Deserialize;
+use serde::Serialize;
 
 use std::cell::RefCell;
 use std::fmt::Display;

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+use crate::air::fold::FoldableResult;
 use crate::ExecutedCallResult;
 use crate::JValue;
 use crate::Result;
 use crate::SecurityTetraplet;
-use crate::air::fold::FoldableResult;
 
 use std::borrow::Cow;
 use std::rc::Rc;
@@ -37,8 +37,8 @@ pub(crate) trait JValuableResult {
 
 impl JValuableResult for (JValue, SecurityTetraplet) {
     fn apply_json_path(&self, json_path: &str) -> Result<Vec<&JValue>> {
-        use jsonpath_lib::select;
         use crate::AquamarineError::VariableNotInJsonPath as JsonPathError;
+        use jsonpath_lib::select;
 
         let selected_jvalues =
             select(&self.0, json_path).map_err(|e| JsonPathError(self.0.clone(), String::from(json_path), e))?;
@@ -46,8 +46,8 @@ impl JValuableResult for (JValue, SecurityTetraplet) {
     }
 
     fn apply_json_path_with_tetraplets(&self, json_path: &str) -> Result<(Vec<&JValue>, Vec<SecurityTetraplet>)> {
-        use jsonpath_lib::select;
         use crate::AquamarineError::VariableNotInJsonPath as JsonPathError;
+        use jsonpath_lib::select;
 
         let selected_jvalues =
             select(&self.0, json_path).map_err(|e| JsonPathError(self.0.clone(), String::from(json_path), e))?;
@@ -70,8 +70,8 @@ impl JValuableResult for (JValue, SecurityTetraplet) {
 
 impl JValuableResult for (&JValue, &SecurityTetraplet) {
     fn apply_json_path(&self, json_path: &str) -> Result<Vec<&JValue>> {
-        use jsonpath_lib::select;
         use crate::AquamarineError::VariableNotInJsonPath as JsonPathError;
+        use jsonpath_lib::select;
 
         let selected_jvalues =
             select(&self.0, json_path).map_err(|e| JsonPathError(self.0.clone(), String::from(json_path), e))?;
@@ -79,8 +79,8 @@ impl JValuableResult for (&JValue, &SecurityTetraplet) {
     }
 
     fn apply_json_path_with_tetraplets(&self, json_path: &str) -> Result<(Vec<&JValue>, Vec<SecurityTetraplet>)> {
-        use jsonpath_lib::select;
         use crate::AquamarineError::VariableNotInJsonPath as JsonPathError;
+        use jsonpath_lib::select;
 
         let selected_jvalues =
             select(&self.0, json_path).map_err(|e| JsonPathError(self.0.clone(), String::from(json_path), e))?;
@@ -103,10 +103,10 @@ impl JValuableResult for (&JValue, &SecurityTetraplet) {
 
 impl<'ctx> JValuableResult for FoldableResult<'ctx> {
     fn apply_json_path(&self, json_path: &str) -> Result<Vec<&JValue>> {
-        use jsonpath_lib::select;
         use crate::AquamarineError::VariableNotInJsonPath as JsonPathError;
-        use FoldableResult::*;
+        use jsonpath_lib::select;
         use std::ops::Deref;
+        use FoldableResult::*;
 
         let jvalue = match self {
             Ref((jvalue, _)) => jvalue.deref(),
@@ -119,10 +119,10 @@ impl<'ctx> JValuableResult for FoldableResult<'ctx> {
     }
 
     fn apply_json_path_with_tetraplets(&self, json_path: &str) -> Result<(Vec<&JValue>, Vec<SecurityTetraplet>)> {
-        use jsonpath_lib::select;
         use crate::AquamarineError::VariableNotInJsonPath as JsonPathError;
-        use FoldableResult::*;
+        use jsonpath_lib::select;
         use std::ops::Deref;
+        use FoldableResult::*;
 
         let (jvalue, tetraplet) = match self {
             Ref((jvalue, tetraplet)) => (jvalue.deref(), tetraplet.deref()),
@@ -148,8 +148,8 @@ impl<'ctx> JValuableResult for FoldableResult<'ctx> {
     }
 
     fn into_jvalue(self: Box<Self>) -> JValue {
-        use FoldableResult::*;
         use std::ops::Deref;
+        use FoldableResult::*;
 
         match *self {
             Ref((jvalue, _)) => jvalue.deref().clone(),
@@ -158,38 +158,36 @@ impl<'ctx> JValuableResult for FoldableResult<'ctx> {
     }
 
     fn as_tetraplets(&self) -> Vec<SecurityTetraplet> {
-        use FoldableResult::*;
         use std::ops::Deref;
+        use FoldableResult::*;
 
         // these clones is needed because of rust-sdk allows passing arguments only by value
         match self {
             Ref((_, tetraplet)) => {
                 let tetraplet = tetraplet.deref().clone();
                 vec![tetraplet]
-            },
-            Raw((_, tetraplet)) => {
-                vec![(*tetraplet).clone()]
-            },
+            }
+            Raw((_, tetraplet)) => vec![(*tetraplet).clone()],
         }
     }
 }
 
 impl JValuableResult for Rc<ExecutedCallResult> {
     fn apply_json_path(&self, json_path: &str) -> Result<Vec<&JValue>> {
-        use jsonpath_lib::select;
         use crate::AquamarineError::VariableNotInJsonPath as JsonPathError;
+        use jsonpath_lib::select;
 
-        let selected_jvalues =
-            select(&self.result, json_path).map_err(|e| JsonPathError(self.result.clone(), String::from(json_path), e))?;
+        let selected_jvalues = select(&self.result, json_path)
+            .map_err(|e| JsonPathError(self.result.clone(), String::from(json_path), e))?;
         Ok(selected_jvalues)
     }
 
     fn apply_json_path_with_tetraplets(&self, json_path: &str) -> Result<(Vec<&JValue>, Vec<SecurityTetraplet>)> {
-        use jsonpath_lib::select;
         use crate::AquamarineError::VariableNotInJsonPath as JsonPathError;
+        use jsonpath_lib::select;
 
-        let selected_jvalues =
-            select(&self.result, json_path).map_err(|e| JsonPathError(self.result.clone(), String::from(json_path), e))?;
+        let selected_jvalues = select(&self.result, json_path)
+            .map_err(|e| JsonPathError(self.result.clone(), String::from(json_path), e))?;
         Ok((selected_jvalues, vec![self.tetraplet.clone()]))
     }
 

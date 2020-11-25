@@ -21,16 +21,16 @@ use crate::log_instruction;
 use crate::AValue;
 use crate::AquamarineError;
 use crate::ExecutedCallResult;
-use crate::SecurityTetraplet;
 use crate::JValue;
 use crate::Result;
+use crate::SecurityTetraplet;
 
 use air_parser::ast::Fold;
-use air_parser::ast::Next;
 use air_parser::ast::InstructionValue;
+use air_parser::ast::Next;
 
-use std::collections::HashMap;
 use std::cell::Ref;
+use std::collections::HashMap;
 use std::rc::Rc;
 
 /*
@@ -52,61 +52,33 @@ pub(crate) trait Foldable<'ctx> {
     fn peek<'s, 'i>(&'s self, exec_ctx: &'ctx ExecutionCtx<'i>) -> Option<Self::Item>;
 }
 
-struct FoldableExecutedCallResult {
-    pub call_result: Rc<ExecutedCallResult>,
-    pub cursor: usize,
-    pub len: usize,
-}
-
 pub(crate) enum FoldableResult<'ctx> {
     Raw((&'ctx JValue, &'ctx SecurityTetraplet)),
     Ref((Ref<'ctx, JValue>, Ref<'ctx, SecurityTetraplet>)),
 }
 
-impl<'ctx> Foldable<'ctx> for FoldableExecutedCallResult {
-    type Item = FoldableResult<'ctx>;
-
-    fn next(&mut self) -> bool {
-        if self.cursor < self.len {
-            self.cursor += 1;
-            true
-        } else {
-            false
-        }
-    }
-
-    fn back(&mut self) -> bool {
-        if self.cursor != 0 {
-            self.cursor -= 1;
-            true
-        } else {
-            false
-        }
-    }
-
-    fn peek<'s, 'i>(&'s self, _exec_ctx: &'ctx ExecutionCtx<'i>) -> Option<Self::Item> {
-        unimplemented!()
-        /*
-        let call_result = self.call_result.as_ref();
-
-        let jvalue = match &call_result.result {
-            JValue::Array(array) => &array[self.cursor],
-            _ => unreachable!("foldable contains only array json value types"),
-        };
-        Some((jvalue, &call_result.tetraplet))
-
-         */
-    }
-}
-
-/// RefCell<Vec<Rc<ExecutedCallResult>>>
-struct FoldableVecExecutedCallResult {
+/// for RefCell<Vec<Rc<ExecutedCallResult>>> and Rc<ExecutedCallResult>
+struct FoldableNamedResult {
     pub name: String,
     pub cursor: usize,
     pub len: usize,
 }
 
-impl<'ctx> Foldable<'ctx> for FoldableVecExecutedCallResult {
+struct FoldableJsonPathResult<'ctx> {
+    pub jvalues: Vec<&'ctx JValue>,
+    pub tetraplet: &'ctx SecurityTetraplet,
+    pub cursor: usize,
+    pub len: usize,
+}
+
+struct FoldableVecJsonPathResult<'ctx> {
+    pub jvalues: Vec<&'ctx JValue>,
+    pub tetraplets: Vec<&'ctx SecurityTetraplet>,
+    pub cursor: usize,
+    pub len: usize,
+}
+
+impl<'ctx> Foldable<'ctx> for FoldableNamedResult {
     type Item = FoldableResult<'ctx>;
 
     fn next(&mut self) -> bool {
@@ -132,15 +104,82 @@ impl<'ctx> Foldable<'ctx> for FoldableVecExecutedCallResult {
             return None;
         }
 
-        // RefCell<Vec<Rc<ExecutedCallResult>>>
-        let acc = match exec_ctx.data_cache.get(&self.name) {
-            Some(AValue::JValueAccumulatorRef(acc)) => acc,
+        let result = match exec_ctx.data_cache.get(&self.name) {
+            Some(AValue::JValueAccumulatorRef(acc)) => {
+                let jvalue = Ref::map(acc.borrow(), |v| &v[self.cursor].result);
+                let tetraplet = Ref::map(acc.borrow(), |v| &v[self.cursor].tetraplet);
+                FoldableResult::Ref((jvalue, tetraplet))
+            }
+            Some(AValue::JValueRef(call_result)) => FoldableResult::Raw((&call_result.result, &call_result.tetraplet)),
             _ => unreachable!(),
         };
 
-        let jvalue = Ref::map(acc.borrow(), |v| &v[self.cursor].result);
-        let tetraplet = Ref::map(acc.borrow(), |v| &v[self.cursor].tetraplet);
-        let result = FoldableResult::Ref((jvalue, tetraplet));
+        Some(result)
+    }
+}
+
+impl<'ctx> Foldable<'ctx> for FoldableJsonPathResult<'ctx> {
+    type Item = FoldableResult<'ctx>;
+
+    fn next(&mut self) -> bool {
+        if self.cursor < self.len {
+            self.cursor += 1;
+            true
+        } else {
+            false
+        }
+    }
+
+    fn back(&mut self) -> bool {
+        if self.cursor != 0 {
+            self.cursor -= 1;
+            true
+        } else {
+            false
+        }
+    }
+
+    fn peek<'s, 'i>(&'s self, _exec_ctx: &'ctx ExecutionCtx<'i>) -> Option<Self::Item> {
+        if self.len == 0 {
+            return None;
+        }
+
+        let jvalue = self.jvalues[self.cursor];
+        let result = FoldableResult::Raw((jvalue, &self.tetraplet));
+
+        Some(result)
+    }
+}
+
+impl<'ctx> Foldable<'ctx> for FoldableVecJsonPathResult<'ctx> {
+    type Item = FoldableResult<'ctx>;
+
+    fn next(&mut self) -> bool {
+        if self.cursor < self.len {
+            self.cursor += 1;
+            true
+        } else {
+            false
+        }
+    }
+
+    fn back(&mut self) -> bool {
+        if self.cursor != 0 {
+            self.cursor -= 1;
+            true
+        } else {
+            false
+        }
+    }
+
+    fn peek<'s, 'i>(&'s self, _exec_ctx: &'ctx ExecutionCtx<'i>) -> Option<Self::Item> {
+        if self.len == 0 {
+            return None;
+        }
+
+        let jvalue = self.jvalues[self.cursor];
+        let tetraplet = self.tetraplets[self.cursor];
+        let result = FoldableResult::Raw((jvalue, tetraplet));
 
         Some(result)
     }
@@ -153,7 +192,6 @@ pub(crate) struct FoldState<'i> {
     // map of met variables inside this (not any inner) fold block with their initial values
     pub(crate) met_variables: HashMap<&'i str, Rc<ExecutedCallResult>>,
 }
-
 
 impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
@@ -172,44 +210,72 @@ impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
                                     return Ok(());
                                 }
                                 array.len()
-                            },
+                            }
                             v => return Err(IncompatibleJValueType(v.clone(), "array")),
                         };
 
-                        let foldable = FoldableExecutedCallResult {
-                            call_result: variable.clone(),
+                        let foldable = FoldableNamedResult {
+                            name: name.to_string(),
                             cursor: 0,
-                            len
+                            len,
                         };
 
-                        Box::new(foldable)
-                    },
+                        Box::new(foldable) as Box<dyn for<'ctx> Foldable<'ctx, Item = FoldableResult<'ctx>>>
+                    }
                     Some(AValue::JValueAccumulatorRef(acc)) => {
-                        let foldable = FoldableVecExecutedCallResult {
+                        let foldable = FoldableNamedResult {
                             name: name.to_string(),
                             cursor: 0,
                             len: acc.borrow().len(),
                         };
 
-                        Box::new(foldable)
-                    },
-                    _ => unreachable!(),
-                }
-            },
-            InstructionValue::JsonPath{ variable, path} => {
-                match exec_ctx.data_cache.get(*variable) {
-                    Some(AValue::JValueRef(variable)) => {
-                        use jsonpath_lib::select;
-                        let _selected_values = select(&variable.result, path).unwrap();
+                        // Box::new(foldable) as Box<dyn for<'ctx> Foldable<'ctx, Item = FoldableResult<'ctx>>>
                         unreachable!();
-                    },
-                    Some(AValue::JValueAccumulatorRef(_acc)) => {
-                        unreachable!();
-
-                    },
+                    }
                     _ => unreachable!(),
                 }
             }
+            InstructionValue::JsonPath { variable, path } => match exec_ctx.data_cache.get(*variable) {
+                Some(AValue::JValueRef(variable)) => {
+                    use jsonpath_lib::select;
+                    let jvalues = select(&variable.result, path).unwrap();
+                    let len = jvalues.len();
+
+                    let foldable = FoldableJsonPathResult {
+                        jvalues,
+                        tetraplet: &variable.tetraplet,
+                        cursor: 0,
+                        len,
+                    };
+
+                    // let t: Box<dyn for<'ctx> Foldable<'ctx, Item = FoldableResult<'ctx>>> = Box::new(foldable);
+                    // t // as Box<dyn for<'ctx> Foldable<'ctx, Item = FoldableResult<'ctx>>>
+                    //Box::new(foldable) as _
+                    unreachable!();
+                }
+                Some(AValue::JValueAccumulatorRef(acc)) => {
+                    use jsonpath_lib::select_with_iter;
+
+                    let acc = acc.borrow();
+                    let (jvalues, tetraplet_indices) = select_with_iter(acc.iter().map(|v| &v.result), path).unwrap();
+                    let tetraplets = tetraplet_indices
+                        .iter()
+                        .map(|&id| &acc[id].tetraplet)
+                        .collect::<Vec<_>>();
+
+                    let foldable = FoldableVecJsonPathResult {
+                        jvalues,
+                        tetraplets,
+                        cursor: 0,
+                        len: acc.len(),
+                    };
+
+                    // Box::new(foldable) as Box<dyn for<'ctx> Foldable<'ctx, Item = FoldableResult<'ctx>>>
+                    //Box::new(foldable) as _
+                    unreachable!();
+                }
+                _ => unreachable!(),
+            },
             _ => unreachable!(),
         };
 
@@ -279,7 +345,7 @@ impl<'i> super::ExecutableInstruction<'i> for Next<'i> {
                 return Err(IncompatibleAValueType(
                     format!("{}", v),
                     String::from("JValueFoldCursor"),
-                ))
+                ));
             }
         };
 
