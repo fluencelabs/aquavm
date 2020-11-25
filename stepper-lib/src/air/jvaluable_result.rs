@@ -54,12 +54,44 @@ impl JValuableResult for (JValue, SecurityTetraplet) {
     }
 
     fn as_jvalue(&self) -> Cow<'_, JValue> {
-        // this clone is needed because of rust-sdk allows passing arguments only by value
         Cow::Borrowed(&self.0)
     }
 
     fn into_jvalue(self: Box<Self>) -> JValue {
         self.0
+    }
+
+    fn as_tetraplets(&self) -> Vec<SecurityTetraplet> {
+        // this clone is needed because of rust-sdk allows passing arguments only by value
+        vec![self.1.clone()]
+    }
+}
+
+impl JValuableResult for (&JValue, &SecurityTetraplet) {
+    fn apply_json_path(&self, json_path: &str) -> Result<Vec<&JValue>> {
+        use jsonpath_lib::select;
+        use crate::AquamarineError::VariableNotInJsonPath as JsonPathError;
+
+        let selected_jvalues =
+            select(&self.0, json_path).map_err(|e| JsonPathError(self.0.clone(), String::from(json_path), e))?;
+        Ok(selected_jvalues)
+    }
+
+    fn apply_json_path_with_tetraplets(&self, json_path: &str) -> Result<(Vec<&JValue>, Vec<SecurityTetraplet>)> {
+        use jsonpath_lib::select;
+        use crate::AquamarineError::VariableNotInJsonPath as JsonPathError;
+
+        let selected_jvalues =
+            select(&self.0, json_path).map_err(|e| JsonPathError(self.0.clone(), String::from(json_path), e))?;
+        Ok((selected_jvalues, vec![self.1.clone()]))
+    }
+
+    fn as_jvalue(&self) -> Cow<'_, JValue> {
+        Cow::Borrowed(&self.0)
+    }
+
+    fn into_jvalue(self: Box<Self>) -> JValue {
+        self.0.clone()
     }
 
     fn as_tetraplets(&self) -> Vec<SecurityTetraplet> {
@@ -88,7 +120,6 @@ impl JValuableResult for Rc<ExecutedCallResult> {
     }
 
     fn as_jvalue(&self) -> Cow<'_, JValue> {
-        // this clone is needed because of rust-sdk allows passing arguments only by value
         Cow::Borrowed(&self.result)
     }
 
@@ -125,7 +156,6 @@ impl JValuableResult for std::cell::Ref<'_, Vec<Rc<ExecutedCallResult>>> {
     }
 
     fn as_jvalue(&self) -> Cow<'_, JValue> {
-        // this cloned is needed because of rust-sdk allows passing arguments only by value
         let jvalue_array = self.iter().map(|r| r.result.clone()).collect::<Vec<_>>();
         Cow::Owned(JValue::Array(jvalue_array))
     }

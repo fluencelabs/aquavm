@@ -17,17 +17,17 @@
 use super::CallEvidenceCtx;
 use super::ExecutionCtx;
 use super::Instruction;
-use crate::{log_instruction, ExecutedCallResult};
+use crate::log_instruction;
 use crate::AValue;
 use crate::AquamarineError;
-// use crate::ExecutedCallResult;
+use crate::ExecutedCallResult;
 use crate::SecurityTetraplet;
 use crate::JValue;
 use crate::Result;
 
 use air_parser::ast::Fold;
 use air_parser::ast::Next;
-// use air_parser::ast::InstructionValue;
+use air_parser::ast::InstructionValue;
 
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -51,6 +51,78 @@ pub(crate) trait Foldable {
     fn peek(&self) -> Option<Self::Item>;
 }
 
+struct FoldableExecutedCallResult {
+    pub call_result: Rc<ExecutedCallResult>,
+    pub cursor: usize,
+    pub len: usize,
+}
+
+impl Foldable for FoldableExecutedCallResult {
+    type Item = (JValue, SecurityTetraplet);
+
+    fn next(&mut self) -> bool {
+        if self.cursor < self.len {
+            self.cursor += 1;
+            true
+        } else {
+            false
+        }
+    }
+
+    fn back(&mut self) -> bool {
+        if self.cursor != 0 {
+            self.cursor -= 1;
+            true
+        } else {
+            false
+        }
+    }
+
+    fn peek(&self) -> Option<Self::Item> {
+        let inner_jvalue = self.call_result.as_ref();
+
+        let jvalue = match &inner_jvalue.result {
+            JValue::Array(array) => &array[self.cursor],
+            _ => unreachable!("foldable contains only array json value types"),
+        };
+        Some((jvalue.clone(), self.call_result.tetraplet.clone()))
+    }
+}
+
+struct FoldableVecExecutedCallResult {
+    pub call_result: Vec<Rc<ExecutedCallResult>>,
+    pub cursor: usize,
+    pub len: usize,
+}
+
+impl Foldable for FoldableVecExecutedCallResult {
+    type Item = (JValue, SecurityTetraplet);
+
+    fn next(&mut self) -> bool {
+        if self.cursor < self.len {
+            self.cursor += 1;
+            true
+        } else {
+            false
+        }
+    }
+
+    fn back(&mut self) -> bool {
+        if self.cursor != 0 {
+            self.cursor -= 1;
+            true
+        } else {
+            false
+        }
+    }
+
+    fn peek(&self) -> Option<Self::Item> {
+        let inner_value = &self.call_result[self.cursor];
+
+        Some((inner_value.result.clone(), inner_value.tetraplet.clone()))
+    }
+}
+
 // #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) struct FoldState<'i> {
     pub(crate) iterable: Box<dyn Foldable<Item = (JValue, SecurityTetraplet)> + 'i>,
@@ -61,60 +133,65 @@ pub(crate) struct FoldState<'i> {
 
 
 impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
-    fn execute(&self, _exec_ctx: &mut ExecutionCtx<'i>, _call_ctx: &mut CallEvidenceCtx) -> Result<()> {
-        unimplemented!();
-        /*
+    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
         use AquamarineError::*;
 
         log_instruction!(fold, exec_ctx, call_ctx);
 
-        let foldable = match &self.iterable {
+        let iterable: Box<dyn Foldable<Item = (JValue, SecurityTetraplet)> + 'i> = match &self.iterable {
             InstructionValue::Variable(name) => {
-                match exec_ctx.data_cache.get(name) {
-                    AValue::JValueRef(variable) => {
-                        match &variable.result {
+                match exec_ctx.data_cache.get(*name) {
+                    Some(AValue::JValueRef(variable)) => {
+                        let len = match &variable.result {
                             JValue::Array(array) => {
                                 if array.is_empty() {
                                     // skip fold if array is empty
                                     return Ok(());
                                 }
+                                array.len()
                             },
                             v => return Err(IncompatibleJValueType(v.clone(), "array")),
-                        }
+                        };
+
+                        let foldable = FoldableExecutedCallResult {
+                            call_result: variable.clone(),
+                            cursor: 0,
+                            len
+                        };
+
+                        Box::new(foldable)
                     },
-                    AValue::JValueAccumulatorRef(acc) => {}
-                    // Vec<Rc<ExecutedCallResult>>
+                    Some(AValue::JValueAccumulatorRef(acc)) => {
+                        let foldable = FoldableVecExecutedCallResult {
+                            call_result: acc.borrow().clone(),
+                            cursor: 0,
+                            len: acc.borrow().len(),
+                        };
+
+                        Box::new(foldable)
+                    },
+                    _ => unreachable!(),
                 }
             },
-            InstructionValue::JsonPath(variable, path) => {
-                match exec_ctx.data_cache.get(name) {
-                    AValue::JValueRef(variable) => {
+            InstructionValue::JsonPath{ variable, path} => {
+                match exec_ctx.data_cache.get(*variable) {
+                    Some(AValue::JValueRef(variable)) => {
                         use jsonpath_lib::select;
-                        let selected_values = select(&variable.result, path).unwrap();
+                        let _selected_values = select(&variable.result, path).unwrap();
+                        unreachable!();
                     },
-                    AValue::JValueAccumulatorRef(acc) => {
+                    Some(AValue::JValueAccumulatorRef(_acc)) => {
+                        unreachable!();
 
-                    }
+                    },
+                    _ => unreachable!(),
                 }
             }
-        };
-
-        let iterable = resolve_to_jvalue(&self.iterable, exec_ctx)?;
-        // check that value exists and has array type
-        let iterable = match &iterable {
-            JValue::Array(ref array) => {
-                if array.is_empty() {
-                    // skip fold if array is empty
-                    return Ok(());
-                }
-
-                iterable
-            }
-            v => return Err(IncompatibleJValueType(v.clone(), "array")),
+            _ => unreachable!(),
         };
 
         let fold_state = FoldState {
-            iterable: Rc::new(iterable),
+            iterable,
             instr_head: self.instruction.clone(),
             met_variables: HashMap::new(),
         };
@@ -155,8 +232,6 @@ impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
         }
 
         Ok(())
-
-         */
     }
 }
 

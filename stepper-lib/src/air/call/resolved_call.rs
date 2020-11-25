@@ -119,7 +119,7 @@ impl<'i> ResolvedCall<'i> {
         self.handle_prev_state(prev_state, exec_ctx, call_ctx)
     }
 
-    fn prepare_args<'a>(&self, exec_ctx: &ExecutionCtx<'a>) -> Result<(String, Vec<Vec<SecurityTetraplet>>)> {
+    fn prepare_args(&self, exec_ctx: &ExecutionCtx<'i>) -> Result<(String, Vec<Vec<SecurityTetraplet>>)> {
         use crate::air::resolve::resolve_to_args;
 
         let function_args = self.function_arg_paths.iter();

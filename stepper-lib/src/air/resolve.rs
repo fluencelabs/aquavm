@@ -25,11 +25,11 @@ use crate::SecurityTetraplet;
 use air_parser::ast::InstructionValue;
 
 /// Resolve value to called function arguments.
-pub(crate) fn resolve_to_args<'i, 'ctx: 'i>(
+pub(crate) fn resolve_to_args<'i>(
     value: &InstructionValue<'i>,
-    ctx: &'ctx ExecutionCtx<'i>,
+    ctx: &ExecutionCtx<'i>,
 ) -> Result<(JValue, Vec<SecurityTetraplet>)> {
-    fn handle_string_arg<'i, 'ctx: 'i>(arg: &str, ctx: &'ctx ExecutionCtx<'i>) -> Result<(JValue, Vec<SecurityTetraplet>)> {
+    fn handle_string_arg<'i>(arg: &str, ctx: &ExecutionCtx<'i>) -> Result<(JValue, Vec<SecurityTetraplet>)> {
         let jvalue = JValue::String(arg.to_string());
         let tetraplet = SecurityTetraplet::initiator_tetraplet(ctx);
 
@@ -59,10 +59,10 @@ pub(crate) fn resolve_to_args<'i, 'ctx: 'i>(
 }
 
 /// Takes variable's value from `ExecutionCtx::data_cache` by name.
-pub(crate) fn resolve_to_call_result<'name, 'exec_ctx>(
+pub(crate) fn resolve_to_call_result<'name, 'i, 'ctx>(
     name: &'name str,
-    ctx: &'exec_ctx ExecutionCtx<'name>,
-) -> Result<Box<dyn JValuableResult + 'exec_ctx>> {
+    ctx: &'ctx ExecutionCtx<'i>,
+) -> Result<Box<dyn JValuableResult + 'ctx>> {
     use AquamarineError::VariableNotFound;
 
     let value = ctx

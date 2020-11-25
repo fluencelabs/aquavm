@@ -66,7 +66,7 @@ impl<'a, 'i> Triplet<'a, 'i> {
     }
 
     /// Resolve variables, literals, etc in the `Triplet`, and build a `ResolvedTriplet`
-    pub fn resolve(self, ctx: &'a ExecutionCtx<'i>) -> Result<ResolvedTriplet> {
+    pub fn resolve(self, ctx: &ExecutionCtx<'i>) -> Result<ResolvedTriplet> {
         let Triplet {
             peer_pk,
             service_id,
@@ -86,7 +86,7 @@ impl<'a, 'i> Triplet<'a, 'i> {
 
 /// Resolve value to string by either resolving variable from `ExecutionCtx`, taking literal value, or etc
 // TODO: return &str to avoid excess cloning
-fn resolve_to_string<'i, 'a: 'i>(value: &'a InstructionValue<'i>, ctx: &'a ExecutionCtx<'i>) -> Result<String> {
+fn resolve_to_string<'i>(value: &InstructionValue<'i>, ctx: &ExecutionCtx<'i>) -> Result<String> {
     use crate::air::resolve::resolve_to_call_result;
 
     let resolved = match value {
