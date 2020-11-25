@@ -30,6 +30,7 @@ use air_parser::ast::Next;
 use air_parser::ast::InstructionValue;
 
 use std::collections::HashMap;
+use std::cell::Ref;
 use std::rc::Rc;
 
 /*
@@ -57,8 +58,13 @@ struct FoldableExecutedCallResult {
     pub len: usize,
 }
 
+pub(crate) enum FoldableResult<'ctx> {
+    Raw((&'ctx JValue, &'ctx SecurityTetraplet)),
+    Ref((Ref<'ctx, JValue>, Ref<'ctx, SecurityTetraplet>)),
+}
+
 impl<'ctx> Foldable<'ctx> for FoldableExecutedCallResult {
-    type Item = (&'ctx JValue, &'ctx SecurityTetraplet);
+    type Item = FoldableResult<'ctx>;
 
     fn next(&mut self) -> bool {
         if self.cursor < self.len {
@@ -101,7 +107,7 @@ struct FoldableVecExecutedCallResult {
 }
 
 impl<'ctx> Foldable<'ctx> for FoldableVecExecutedCallResult {
-    type Item = (&'ctx JValue, &'ctx SecurityTetraplet);
+    type Item = FoldableResult<'ctx>;
 
     fn next(&mut self) -> bool {
         if self.cursor < self.len {
@@ -122,37 +128,27 @@ impl<'ctx> Foldable<'ctx> for FoldableVecExecutedCallResult {
     }
 
     fn peek<'s, 'i>(&'s self, exec_ctx: &'ctx ExecutionCtx<'i>) -> Option<Self::Item> {
-        /// RefCell<Vec<Rc<ExecutedCallResult>>>
+        if self.len == 0 {
+            return None;
+        }
+
+        // RefCell<Vec<Rc<ExecutedCallResult>>>
         let acc = match exec_ctx.data_cache.get(&self.name) {
             Some(AValue::JValueAccumulatorRef(acc)) => acc,
             _ => unreachable!(),
         };
 
-        //let inner_value = &acc.borrow()[self.cursor];
-        use std::cell::Ref;
+        let jvalue = Ref::map(acc.borrow(), |v| &v[self.cursor].result);
+        let tetraplet = Ref::map(acc.borrow(), |v| &v[self.cursor].tetraplet);
+        let result = FoldableResult::Ref((jvalue, tetraplet));
 
-
-        use std::ops::Deref;
-        // Some((&inner_value.result, &inner_value.tetraplet))
-        let _t1 = acc.deref();
-        let t2 = acc.borrow();
-        let y = std::cell::Ref::map(t2, |v| &v.get(0).unwrap().result);
-        let t22 = t2.get(0)?;
-        let t3 = t22.as_ref();
-        let t4 = &t3.result;
-        let t5 = &t3.tetraplet;
-
-        Some((
-            t4, t5
-            )
-
-        )
+        Some(result)
     }
 }
 
 // #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) struct FoldState<'i> {
-    pub(crate) iterable: Box<dyn for<'ctx> Foldable<'ctx, Item = (&'ctx JValue, &'ctx SecurityTetraplet)>>,
+    pub(crate) iterable: Box<dyn for<'ctx> Foldable<'ctx, Item = FoldableResult<'ctx>>>,
     pub(crate) instr_head: Rc<Instruction<'i>>,
     // map of met variables inside this (not any inner) fold block with their initial values
     pub(crate) met_variables: HashMap<&'i str, Rc<ExecutedCallResult>>,
@@ -165,7 +161,7 @@ impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
 
         log_instruction!(fold, exec_ctx, call_ctx);
 
-        let iterable: Box<dyn for<'ctx> Foldable<'ctx, Item = (&'ctx JValue, &'ctx SecurityTetraplet)>> = match &self.iterable {
+        let iterable: Box<dyn for<'ctx> Foldable<'ctx, Item = FoldableResult<'ctx>>> = match &self.iterable {
             InstructionValue::Variable(name) => {
                 match exec_ctx.data_cache.get(*name) {
                     Some(AValue::JValueRef(variable)) => {

@@ -21,8 +21,6 @@ use crate::Result;
 
 use air_parser::ast::{FunctionPart, InstructionValue, PeerPart};
 
-use std::borrow::Cow;
-
 /// Triplet represents a location of the executable code in the network
 /// It is build from `PeerPart` and `FunctionPart` of a `Call` instruction
 pub(super) struct Triplet<'a, 'i> {
@@ -95,7 +93,8 @@ fn resolve_to_string<'i>(value: &InstructionValue<'i>, ctx: &ExecutionCtx<'i>) -
         InstructionValue::Literal(value) => value.to_string(),
         InstructionValue::Variable(name) => {
             let resolved = resolve_to_call_result(name, ctx)?;
-            cow_to_string(resolved.as_jvalue())?
+            let jvalue = resolved.into_jvalue();
+            jvalue_to_string(jvalue)?
         }
         InstructionValue::JsonPath { variable, path } => {
             let resolved = resolve_to_call_result(variable, ctx)?;
@@ -107,14 +106,12 @@ fn resolve_to_string<'i>(value: &InstructionValue<'i>, ctx: &ExecutionCtx<'i>) -
     Ok(resolved)
 }
 
-fn cow_to_string(value: Cow<'_, JValue>) -> Result<String> {
+fn jvalue_to_string(jvalue: JValue) -> Result<String> {
     use AquamarineError::IncompatibleJValueType;
-    use Cow::*;
 
-    match value {
-        Borrowed(JValue::String(s)) => Ok(s.clone()),
-        Owned(JValue::String(s)) => Ok(s),
-        _ => Err(IncompatibleJValueType(value.into_owned(), "string")),
+    match jvalue {
+        JValue::String(s) => Ok(s),
+        _ => Err(IncompatibleJValueType(jvalue, "string")),
     }
 }
 
@@ -127,5 +124,5 @@ fn vec_to_string(values: Vec<&JValue>, json_path: &str) -> Result<String> {
         return Err(AquamarineError::MultipleValuesInJsonPath(json_path.to_string()));
     }
 
-    cow_to_string(Cow::Borrowed(values[0]))
+    jvalue_to_string(values[0].clone())
 }
