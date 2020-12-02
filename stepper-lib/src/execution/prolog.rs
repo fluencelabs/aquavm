@@ -46,9 +46,9 @@ pub(super) fn prepare<'i>(
     let prev_path = to_evidence_path(raw_prev_path)?;
     let path = to_evidence_path(raw_path)?;
 
-    let aqua = parse(raw_aqua)?;
+    let aqua: Instruction<'i> = *air_parser::parse(raw_aqua).map_err(AquamarineError::AIRParseError)?;
 
-    log::info!(
+    log::trace!(
         target: RUN_PARAMS,
         "aqua: {:?}\nprev_path: {:?}\ncurrent_path: {:?}",
         aqua,
@@ -57,11 +57,6 @@ pub(super) fn prepare<'i>(
     );
 
     Ok((prev_path, path, aqua))
-}
-
-/// Parse an AIR script to AST
-pub fn parse(script: &str) -> Result<Instruction<'_>> {
-    Ok(*air_parser::parse(script).map_err(|msg| AquamarineError::AIRParseError(msg))?)
 }
 
 /// Make execution and call evidence contexts from supplied data.
@@ -74,11 +69,16 @@ pub(super) fn make_contexts(
     use AquamarineError::CurrentPeerIdEnvError as EnvError;
 
     let current_peer_id = get_current_peer_id().map_err(|e| EnvError(e, String::from("CURRENT_PEER_ID")))?;
-    log::info!(target: RUN_PARAMS, "current peer id {}", current_peer_id);
+    log::trace!(target: RUN_PARAMS, "current peer id {}", current_peer_id);
 
     let exec_ctx = ExecutionCtx::new(current_peer_id, init_peer_id);
     let current_path = merge_call_paths(prev_path, path)?;
     let call_evidence_ctx = CallEvidenceCtx::new(current_path);
 
     Ok((exec_ctx, call_evidence_ctx))
+}
+
+/// Parse an AIR script to AST
+pub fn parse(script: &str) -> Result<Instruction<'_>> {
+    Ok(*air_parser::parse(script).map_err(|msg| AquamarineError::AIRParseError(msg))?)
 }

@@ -88,6 +88,9 @@ pub enum AquamarineError {
 
     /// Errors occurred when evidence path contains less elements then corresponding Par has.
     EvidencePathTooSmall(usize, usize),
+
+    /// Errors occurred when evidence path contains less elements then corresponding Par has.
+    ShadowingError(String),
 }
 
 impl Error for AquamarineError {}
@@ -167,6 +170,11 @@ impl std::fmt::Display for AquamarineError {
                 "evidence path remains {} elements, but {} requires by Par",
                 actual_count, desired_count
             ),
+            AquamarineError::ShadowingError(variable_name) => write!(
+                f,
+                "vairable with name = '{}' can't be shadowed, shadowing is supported only for scalar values",
+                variable_name
+            ),
         }
     }
 }
@@ -200,6 +208,7 @@ impl Into<StepperOutcome> for AquamarineError {
             AquamarineError::IncompatibleEvidenceStates(..) => 18,
             AquamarineError::IncompatibleCallResults(..) => 19,
             AquamarineError::EvidencePathTooSmall(..) => 20,
+            AquamarineError::ShadowingError(_) => 21,
         };
 
         StepperOutcome {

@@ -26,6 +26,7 @@ use crate::Result;
 
 use air_parser::ast::{Fold, Next};
 
+use std::collections::HashMap;
 use std::rc::Rc;
 
 /*
@@ -43,6 +44,8 @@ pub(crate) struct FoldState<'i> {
     pub(crate) cursor: usize,
     pub(crate) iterable: Rc<JValue>,
     pub(crate) instr_head: Rc<Instruction<'i>>,
+    // map of met variables inside this (not any inner) fold block with their initial values
+    pub(crate) met_variables: HashMap<&'i str, Rc<JValue>>,
 }
 
 impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
@@ -71,6 +74,7 @@ impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
             // TODO: reuse existing Rc from JValueRef, if there was some
             iterable: Rc::new(iterable),
             instr_head: self.instruction.clone(),
+            met_variables: HashMap::new(),
         };
 
         let previous_value = exec_ctx
@@ -80,9 +84,33 @@ impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
         if previous_value.is_some() {
             return Err(MultipleFoldStates(self.iterator.to_string()));
         }
+        exec_ctx.met_folds.push_back(self.iterator);
 
         self.instruction.execute(exec_ctx, call_ctx)?;
-        exec_ctx.data_cache.remove(self.iterator);
+
+        let fold_state = match exec_ctx.data_cache.remove(self.iterator) {
+            Some(AValue::JValueFoldCursor(fold_state)) => fold_state,
+            _ => unreachable!("fold cursor is changed only inside fold block"),
+        };
+
+        for (variable_name, _) in fold_state.met_variables {
+            exec_ctx.data_cache.remove(variable_name);
+        }
+        exec_ctx.met_folds.pop_back();
+
+        if let Some(fold_block_name) = exec_ctx.met_folds.back() {
+            let fold_state = match exec_ctx.data_cache.get(*fold_block_name) {
+                Some(AValue::JValueFoldCursor(fold_state)) => fold_state,
+                _ => unreachable!("fold block data must be represented as fold cursor"),
+            };
+
+            let mut upper_fold_values = HashMap::new();
+            for (variable_name, variable) in fold_state.met_variables.iter() {
+                upper_fold_values.insert(variable_name.to_string(), AValue::JValueRef(variable.clone()));
+            }
+
+            exec_ctx.data_cache.extend(upper_fold_values);
+        }
 
         Ok(())
     }
@@ -138,12 +166,13 @@ mod tests {
     use crate::call_evidence::CallEvidencePath;
     use crate::JValue;
 
-    use aqua_test_utils::call_vm;
     use aqua_test_utils::create_aqua_vm;
     use aqua_test_utils::echo_number_call_service;
     use aqua_test_utils::set_variable_call_service;
+    use aqua_test_utils::{call_vm, echo_string_call_service};
     use aquamarine_vm::AquamarineVMError;
     use aquamarine_vm::StepperError;
+    use aquamarine_vm::StepperOutcome;
 
     use serde_json::json;
     use std::rc::Rc;
@@ -368,6 +397,156 @@ mod tests {
 
         for i in 1..=5 {
             assert_eq!(res[i], Call(Executed(Rc::new(JValue::Number(i.into())))));
+        }
+    }
+
+    #[test]
+    fn shadowing() {
+        use crate::call_evidence::CallResult::*;
+        use crate::call_evidence::EvidenceState::*;
+
+        let mut set_variables_vm = create_aqua_vm(set_variable_call_service(r#"["1","2"]"#), "set_variable");
+        let mut vm_a = create_aqua_vm(echo_string_call_service(), "A");
+        let mut vm_b = create_aqua_vm(echo_string_call_service(), "B");
+
+        let script = String::from(
+            r#"
+            (seq
+                (seq
+                    (call "set_variable" ("" "") [] Iterable1)
+                    (call "set_variable" ("" "") [] Iterable2)
+                )
+                (fold Iterable1 i
+                    (seq
+                        (seq
+                            (fold Iterable2 j
+                                (seq
+                                    (seq
+                                        (call "A" ("" "") [i] local_j)
+                                        (call "B" ("" "") [local_j])
+                                    )
+                                    (next j)
+                                )
+                            )
+                            (par
+                                (call "A" ("" "") [i] local_i)
+                                (call "B" ("" "") [i])
+                            )
+                        )
+                        (next i)
+                    )
+                )
+            )"#,
+        );
+
+        let res = call_vm!(set_variables_vm, "", script.clone(), "[]", "[]");
+        let res = call_vm!(vm_a, "", script.clone(), "[]", res.data);
+        let res = call_vm!(vm_b, "", script.clone(), "[]", res.data);
+        let res = call_vm!(vm_a, "", script.clone(), "[]", res.data);
+        let res = call_vm!(vm_b, "", script.clone(), "[]", res.data);
+        let res = call_vm!(vm_a, "", script.clone(), "[]", res.data);
+        let res = call_vm!(vm_b, "", script, "[]", res.data);
+
+        let res: CallEvidencePath = serde_json::from_str(&res.data).expect("should be valid call evidence path");
+
+        assert_eq!(res.len(), 12);
+        for i in 2..11 {
+            assert!(matches!(res[i], Call(Executed(_))) || matches!(res[i], Par(..)));
+        }
+    }
+
+    #[test]
+    fn shadowing_scope() {
+        use crate::call_evidence::CallResult::*;
+        use crate::call_evidence::EvidenceState::*;
+
+        fn execute_script(script: String) -> Result<StepperOutcome, AquamarineVMError> {
+            let mut set_variables_vm = create_aqua_vm(set_variable_call_service(r#"["1","2"]"#), "set_variable");
+            let mut vm_a = create_aqua_vm(echo_string_call_service(), "A");
+            let mut vm_b = create_aqua_vm(echo_string_call_service(), "B");
+
+            let res = call_vm!(set_variables_vm, "", script.clone(), "[]", "[]");
+            let res = call_vm!(vm_a, "", script.clone(), "[]", res.data);
+            let res = call_vm!(vm_b, "", script.clone(), "[]", res.data);
+            let res = call_vm!(vm_a, "", script.clone(), "[]", res.data);
+            let res = call_vm!(vm_b, "", script.clone(), "[]", res.data);
+
+            vm_a.call_with_prev_data("", script, "[]", res.data)
+        }
+
+        let use_non_exist_variable_script = String::from(
+            r#"
+            (seq
+                (seq
+                    (call "set_variable" ("" "") [] Iterable1)
+                    (call "set_variable" ("" "") [] Iterable2)
+                )
+                (fold Iterable1 i
+                    (seq
+                        (seq
+                            (fold Iterable2 j
+                                (seq
+                                    (seq
+                                        (call "A" ("" "") [i] local_j)
+                                        (call "B" ("" "") [local_j])
+                                    )
+                                    (next j)
+                                )
+                            )
+                            (call "A" ("" "") [local_j])
+                        )
+                        (next i)
+                    )
+                )
+            )"#,
+        );
+
+        let res = execute_script(use_non_exist_variable_script);
+        assert!(res.is_err());
+        let error = res.err().unwrap();
+        let error = match error {
+            AquamarineVMError::StepperError(error) => error,
+            _ => unreachable!(),
+        };
+
+        assert!(matches!(error, StepperError::VariableNotFound(_)));
+
+        let variable_shadowing_script = String::from(
+            r#"
+            (seq
+                (seq
+                    (call "set_variable" ("" "") [] Iterable1)
+                    (call "set_variable" ("" "") [] Iterable2)
+                )
+                (fold Iterable1 i
+                    (seq
+                        (seq
+                            (call "A" ("" "") ["value"] local_j)
+                            (seq
+                                (fold Iterable2 j
+                                    (seq
+                                        (seq
+                                            (call "A" ("" "") [i] local_j)
+                                            (call "B" ("" "") [local_j])
+                                        )
+                                        (next j)
+                                    )
+                                )
+                                (call "A" ("" "") [local_j])
+                            )
+                        )
+                        (next i)
+                    )
+                )
+            )"#,
+        );
+
+        let res = execute_script(variable_shadowing_script).unwrap();
+        let res: CallEvidencePath = serde_json::from_str(&res.data).expect("should be valid call evidence path");
+
+        assert_eq!(res.len(), 11);
+        for i in 0..10 {
+            assert!(matches!(res[i], Call(Executed(_))));
         }
     }
 }

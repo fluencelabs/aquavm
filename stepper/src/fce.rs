@@ -26,24 +26,15 @@
     unreachable_patterns
 )]
 
+mod logger;
+
 use fluence::fce;
 use stepper_lib::execute_aqua;
 use stepper_lib::log_targets::TARGET_MAP;
-use stepper_lib::parse;
 use stepper_lib::StepperOutcome;
 
-use std::collections::HashMap;
-
 pub fn main() {
-    use std::iter::FromIterator;
-
-    let target_map = HashMap::from_iter(TARGET_MAP.iter().cloned());
-
-    fluence::WasmLogger::new()
-        .with_log_level(log::Level::Info)
-        .with_target_map(target_map)
-        .build()
-        .unwrap();
+    logger::init_logger();
 }
 
 #[fce]
@@ -51,7 +42,6 @@ pub fn invoke(init_peer_id: String, aqua: String, prev_data: String, data: Strin
     execute_aqua(init_peer_id, aqua, prev_data, data)
 }
 
-// TODO: hide behind feature
 #[fce]
 pub fn ast(script: String) -> String {
     let do_parse = || -> std::result::Result<_, Box<dyn std::error::Error>> {

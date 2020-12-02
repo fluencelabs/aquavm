@@ -48,12 +48,12 @@ impl<'i> super::ExecutableInstruction<'i> for Call<'i> {
             Ok(parsed_call) => parsed_call,
             // to support lazy variable evaluation
             Err(VariableNotFound(variable_name)) => {
-                log::info!(r#"variable with name "{}" not found, waiting"#, variable_name);
+                log::trace!(r#"variable with name "{}" not found, waiting"#, variable_name);
                 exec_ctx.subtree_complete = false;
                 return Ok(());
             }
             Err(VariableNotInJsonPath(variable, json_path, json_path_err)) => {
-                log::info!(
+                log::trace!(
                     r#"variable not found with json path "{}" in {:?} with error "{:?}", waiting"#,
                     json_path,
                     variable,
