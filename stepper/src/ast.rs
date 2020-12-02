@@ -14,36 +14,16 @@
  * limitations under the License.
  */
 
-#![allow(improper_ctypes)]
-#![warn(rust_2018_idioms)]
-#![deny(
-    dead_code,
-    nonstandard_style,
-    unused_imports,
-    unused_mut,
-    unused_variables,
-    unused_unsafe,
-    unreachable_patterns
-)]
+use stepper_lib::parse;
 
-mod ast;
-mod logger;
-
-use fluence::fce;
-use stepper_lib::execute_aqua;
-use stepper_lib::log_targets::TARGET_MAP;
-use stepper_lib::StepperOutcome;
-
-pub fn main() {
-    logger::init_logger();
-}
-
-#[fce]
-pub fn invoke(init_peer_id: String, aqua: String, prev_data: String, data: String) -> StepperOutcome {
-    execute_aqua(init_peer_id, aqua, prev_data, data)
-}
-
-#[fce]
+/// Parse AIR script and return it as minified JSON
 pub fn ast(script: String) -> String {
-    ast::ast(script)
+    let do_parse = || -> std::result::Result<_, Box<dyn std::error::Error>> {
+        let ast = parse(&script)?;
+        Ok(serde_json::to_string(&ast)?)
+    };
+    match do_parse() {
+        Ok(json) => json,
+        Err(err) => err.to_string(),
+    }
 }
