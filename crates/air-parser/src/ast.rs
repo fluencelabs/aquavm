@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+use serde::Serialize;
 use std::rc::Rc;
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Serialize, Debug, PartialEq, Eq)]
 pub enum Instruction<'i> {
     Null(Null),
     Call(Call<'i>),
@@ -28,19 +29,19 @@ pub enum Instruction<'i> {
     Error,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Serialize, Debug, PartialEq, Eq)]
 pub enum PeerPart<'i> {
     PeerPk(Value<'i>),
     PeerPkWithServiceId(Value<'i>, Value<'i>),
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Serialize, Debug, PartialEq, Eq)]
 pub enum FunctionPart<'i> {
     FuncName(Value<'i>),
     ServiceIdWithFuncName(Value<'i>, Value<'i>),
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Serialize, Debug, PartialEq, Eq)]
 pub struct Call<'i> {
     pub peer_part: PeerPart<'i>,
     pub function_part: FunctionPart<'i>,
@@ -48,7 +49,7 @@ pub struct Call<'i> {
     pub output: CallOutput<'i>,
 }
 
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Serialize, Debug, PartialEq, Eq, Clone)]
 pub enum Value<'i> {
     Variable(&'i str),
     Literal(&'i str),
@@ -57,31 +58,31 @@ pub enum Value<'i> {
     InitPeerId,
 }
 
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Serialize, Debug, PartialEq, Eq, Clone)]
 pub enum CallOutput<'i> {
     Scalar(&'i str),
     Accumulator(&'i str),
     None,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Serialize, Debug, PartialEq, Eq)]
 pub struct Seq<'i>(pub Box<Instruction<'i>>, pub Box<Instruction<'i>>);
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Serialize, Debug, PartialEq, Eq)]
 pub struct Par<'i>(pub Box<Instruction<'i>>, pub Box<Instruction<'i>>);
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Serialize, Debug, PartialEq, Eq)]
 pub struct Xor<'i>(pub Box<Instruction<'i>>, pub Box<Instruction<'i>>);
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Serialize, Debug, PartialEq, Eq)]
 pub struct Fold<'i> {
     pub iterable: Value<'i>,
     pub iterator: &'i str,
     pub instruction: Rc<Instruction<'i>>,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Serialize, Debug, PartialEq, Eq)]
 pub struct Next<'i>(pub &'i str);
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Serialize, Debug, PartialEq, Eq)]
 pub struct Null;

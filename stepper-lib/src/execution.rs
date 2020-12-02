@@ -27,6 +27,8 @@ use crate::Result;
 use crate::StepperOutcome;
 use crate::STEPPER_SUCCESS;
 
+pub use prolog::parse;
+
 pub fn execute_aqua(init_peer_id: String, aqua: String, prev_data: String, data: String) -> StepperOutcome {
     log::trace!(
         "aquamarine version is {}, init user id is {}",

@@ -13,6 +13,9 @@ regex = "1.4.1"
 codespan = "0.9.5"
 codespan-reporting = "0.9.5"
 
+# TODO: hide serde behind feature
+serde = "1.0.117"
+
 [dev-dependencies]
 fstrings = "0.2.3"
 criterion = "0.3.3"

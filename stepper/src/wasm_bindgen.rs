@@ -26,6 +26,7 @@
     unreachable_patterns
 )]
 
+mod ast;
 mod logger;
 
 use stepper_lib::execute_aqua;
@@ -40,4 +41,9 @@ pub fn main() {
 pub fn invoke(init_peer_id: String, aqua: String, prev_data: String, data: String) -> String {
     let outcome = execute_aqua(init_peer_id, aqua, prev_data, data);
     serde_json::to_string(&outcome).expect("Cannot parse StepperOutcome")
+}
+
+#[wasm_bindgen]
+pub fn ast(script: String) -> String {
+    ast::ast(script)
 }
