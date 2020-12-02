@@ -20,7 +20,7 @@ use stepper_lib::parse;
 pub fn ast(script: String) -> String {
     let do_parse = || -> std::result::Result<_, Box<dyn std::error::Error>> {
         let ast = parse(&script)?;
-        Ok(serde_json::to_string(&ast)?)
+        serde_json::to_string(&ast).map_err(Into::into)
     };
     match do_parse() {
         Ok(json) => json,
