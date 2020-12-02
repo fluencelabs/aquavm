@@ -31,7 +31,6 @@ mod logger;
 
 use fluence::fce;
 use stepper_lib::execute_aqua;
-use stepper_lib::log_targets::TARGET_MAP;
 use stepper_lib::StepperOutcome;
 
 pub fn main() {
