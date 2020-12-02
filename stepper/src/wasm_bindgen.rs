@@ -29,7 +29,7 @@
 mod ast;
 mod logger;
 
-use stepper_lib::{execute_aqua, parse};
+use stepper_lib::execute_aqua;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen(start)]
