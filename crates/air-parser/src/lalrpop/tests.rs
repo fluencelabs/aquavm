@@ -17,8 +17,8 @@
 use crate::ast::*;
 use CallOutput::*;
 use FunctionPart::*;
-use PeerPart::*;
 use InstructionValue::*;
+use PeerPart::*;
 
 use fstrings::f;
 use std::rc::Rc;
@@ -228,7 +228,11 @@ fn parse_fold_with_xor_par_seq() {
         let source_code = source_fold_with(name);
         let instruction = parse(&source_code.as_ref());
         let instr = binary_instruction(*name);
-        let expected = fold(InstructionValue::Variable("iterable"), "i", instr(null(), null()));
+        let expected = fold(
+            InstructionValue::Variable("iterable"),
+            "i",
+            instr(null(), null()),
+        );
         assert_eq!(instruction, expected);
     }
 }

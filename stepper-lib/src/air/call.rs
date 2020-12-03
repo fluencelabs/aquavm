@@ -72,7 +72,9 @@ impl<'i> super::ExecutableInstruction<'i> for Call<'i> {
 #[cfg(test)]
 mod tests {
     use crate::call_evidence::CallEvidencePath;
+    use crate::ExecutedCallResult;
     use crate::JValue;
+    use crate::SecurityTetraplet;
 
     use aqua_test_utils::call_vm;
     use aqua_test_utils::create_aqua_vm;
@@ -85,50 +87,61 @@ mod tests {
 
     use std::rc::Rc;
 
+    // Check that %current_peer_id% alias works correctly (by comparing result with it and explicit peer id).
+    // Additionally, check that empty string for data does the same as empty call path.
     #[test]
     fn current_peer_id_call() {
         use crate::call_evidence::CallResult::*;
         use crate::call_evidence::EvidenceState::*;
 
-        let mut vm = create_aqua_vm(unit_call_service(), "test_peer_id");
+        let vm_peer_id = String::from("test_peer_id");
+        let mut vm = create_aqua_vm(unit_call_service(), vm_peer_id.clone());
 
-        let script = String::from(
+        let service_id = String::from("local_service_id");
+        let function_name = String::from("local_fn_name");
+        let script = format!(
             r#"
-               (call %current_peer_id% ("local_service_id" "local_fn_name") [] result_name)
+               (call %current_peer_id% ("{}" "{}") [] result_name
             "#,
+            service_id, service_function_name
         );
 
         let res = call_vm!(vm, "asd", script.clone(), "[]", "[]");
         let call_path: CallEvidencePath = serde_json::from_str(&res.data).expect("should be a valid json");
 
+        let function_arguments = String::from("[]"); // empty function arguments
+        let tetraplet = SecurityTetraplet {
+            pub_key: vm_peer_id.clone(),
+            service_id,
+            function_name,
+            function_arguments,
+        };
+
+        let executed_call_state = Call(Executed(Rc::new(ExecutedCallResult {
+            result: JValue::String(String::from("test")),
+            tetraplet,
+        })));
         assert_eq!(call_path.len(), 1);
-        assert_eq!(
-            call_path[0],
-            Call(Executed(Rc::new(JValue::String(String::from("test")))))
-        );
+        assert_eq!(call_path[0], executed_call_state);
         assert!(res.next_peer_pks.is_empty());
+
+        let script = format!(
+            r#"
+               (call "{}" ("{}" "{}") [] result_name)
+            "#,
+            vm_peer_id, service_id, function_name
+        );
+
+        let res_with_peer_id = call_vm!(vm, "asd", script, "[]", "[]");
+        let call_path: CallEvidencePath = serde_json::from_str(&res.data).expect("should be a valid json");
+        assert_eq!(res_with_peer_id, res);
 
         // test that empty string for data works
         let res_with_empty_string = call_vm!(vm, "asd", script, "", "");
         assert_eq!(res_with_empty_string, res);
-
-        let script = String::from(
-            r#"
-               (call "test_peer_id" ("local_service_id" "local_fn_name") [] result_name)
-            "#,
-        );
-
-        let res = call_vm!(vm, "asd", script, "[]", "[]");
-        let call_path: CallEvidencePath = serde_json::from_str(&res.data).expect("should be a valid json");
-
-        assert_eq!(call_path.len(), 1);
-        assert_eq!(
-            call_path[0],
-            Call(Executed(Rc::new(JValue::String(String::from("test")))))
-        );
-        assert!(res.next_peer_pks.is_empty());
     }
 
+    // Check that specifying remote peer id in call will result its appearing in next_peer_pks.
     #[test]
     fn remote_peer_id_call() {
         use crate::call_evidence::CallResult::*;
@@ -151,6 +164,7 @@ mod tests {
         assert_eq!(res.next_peer_pks, vec![remote_peer_id]);
     }
 
+    // Check that setting variables works as expected.
     #[test]
     fn variables() {
         let mut vm = create_aqua_vm(unit_call_service(), "remote_peer_id");
@@ -171,6 +185,7 @@ mod tests {
         assert!(res.next_peer_pks.is_empty());
     }
 
+    // Check that string literals can be used as call parameters.
     #[test]
     fn string_parameters() {
         use crate::call_evidence::CallResult::*;
@@ -187,30 +202,50 @@ mod tests {
             ))
         });
 
-        let mut vm = create_aqua_vm(call_service, "A");
-        let mut set_variable_vm = create_aqua_vm(set_variable_call_service(r#""arg3_value""#), "set_variable");
+        let vm_peer_id = String::from("A");
+        let mut vm = create_aqua_vm(call_service, vm_peer_id.clone());
 
-        let script = String::from(
+        let set_variable_vm_peer_id = String::from("set_variable");
+        let mut set_variable_vm = create_aqua_vm(
+            set_variable_call_service(r#""arg3_value""#),
+            set_variable_vm_peer_id.clone(),
+        );
+
+        let service_id = String::from("some_service_id");
+        let function_name = String::from("local_fn_name");
+        let script = format!(
             r#"
             (seq 
-                (call "set_variable" ("some_service_id" "local_fn_name") [] arg3)
-                (call "A" ("some_service_id" "local_fn_name") ["arg1" "arg2" arg3] result)
+                (call "{}" ("{}" "{}") [] arg3)
+                (call "{}" ("{}" "{}") ["arg1" "arg2" arg3] result)
             )
         "#,
+            set_variable_vm_peer_id, service_id, function_name, vm_peer_id, service_id, function_name
         );
 
         let res = call_vm!(set_variable_vm, "asd", script.clone(), "[]", "[]");
         let res = call_vm!(vm, "asd", script, "[]", res.data);
         let call_path: CallEvidencePath = serde_json::from_str(&res.data).expect("should be a valid json");
 
+        let function_arguments = json!(["arg1", "arg2", "arg3_value"]).to_string();
+        let tetraplet = SecurityTetraplet {
+            pub_key: vm_peer_id,
+            service_id,
+            function_name,
+            function_arguments,
+        };
+
         assert_eq!(call_path.len(), 2);
-        assert_eq!(
+        assert!(matches!(
             call_path[1],
-            Call(Executed(Rc::new(JValue::Array(vec![
-                JValue::String(String::from("arg1")),
-                JValue::String(String::from("arg2")),
-                JValue::String(String::from("arg3_value")),
-            ]))))
-        );
+            Call(Executed(Rc::new(ExecutedCallResult {
+                result: JValue::Array(vec![
+                    JValue::String(String::from("arg1")),
+                    JValue::String(String::from("arg2")),
+                    JValue::String(String::from("arg3_value")),
+                ]),
+                tetraplet,
+            })))
+        ));
     }
 }

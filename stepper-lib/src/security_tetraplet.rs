@@ -28,7 +28,7 @@ pub struct SecurityTetraplet {
     pub pub_key: String,
     pub service_id: String,
     pub function_name: String,
-    pub json_path: String,
+    pub function_arguments: String,
 }
 
 impl SecurityTetraplet {
@@ -38,7 +38,7 @@ impl SecurityTetraplet {
             pub_key: exec_ctx.init_peer_id.clone(),
             service_id: String::new(),
             function_name: String::new(),
-            json_path: String::new(),
+            function_arguments: String::new(),
         }
     }
 }

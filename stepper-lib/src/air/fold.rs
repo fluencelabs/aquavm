@@ -49,7 +49,7 @@ pub(crate) trait Foldable<'ctx> {
 
     fn back(&mut self) -> bool;
 
-    fn peek<'s, 'i>(&'s self, exec_ctx: &'ctx ExecutionCtx<'i>) -> Option<Self::Item>;
+    fn peek<'i>(&'ctx self, exec_ctx: &'ctx ExecutionCtx<'i>) -> Option<Self::Item>;
 }
 
 pub(crate) enum FoldableResult<'ctx> {
@@ -64,22 +64,22 @@ struct FoldableNamedResult {
     pub len: usize,
 }
 
-struct FoldableJsonPathResult<'ctx> {
-    pub jvalues: Vec<&'ctx JValue>,
-    pub tetraplet: &'ctx SecurityTetraplet,
+struct FoldableJsonPathResult {
+    pub jvalues: Vec<JValue>,
+    pub tetraplet: SecurityTetraplet,
     pub cursor: usize,
     pub len: usize,
 }
 
-struct FoldableVecJsonPathResult<'ctx> {
-    pub jvalues: Vec<&'ctx JValue>,
-    pub tetraplets: Vec<&'ctx SecurityTetraplet>,
+struct FoldableVecJsonPathResult {
+    pub jvalues: Vec<JValue>,
+    pub tetraplets: Vec<SecurityTetraplet>,
     pub cursor: usize,
     pub len: usize,
 }
 
-impl<'free_ctx> Foldable<'free_ctx> for FoldableNamedResult {
-    type Item = FoldableResult<'free_ctx>;
+impl<'ctx> Foldable<'ctx> for FoldableNamedResult {
+    type Item = FoldableResult<'ctx>;
 
     fn next(&mut self) -> bool {
         if self.cursor < self.len {
@@ -99,7 +99,7 @@ impl<'free_ctx> Foldable<'free_ctx> for FoldableNamedResult {
         }
     }
 
-    fn peek<'s, 'i>(&'s self, exec_ctx: &'free_ctx ExecutionCtx<'i>) -> Option<Self::Item> {
+    fn peek<'i>(&'ctx self, exec_ctx: &'ctx ExecutionCtx<'i>) -> Option<Self::Item> {
         if self.len == 0 {
             return None;
         }
@@ -118,8 +118,8 @@ impl<'free_ctx> Foldable<'free_ctx> for FoldableNamedResult {
     }
 }
 
-impl<'real_ctx, 'free_ctx> Foldable<'free_ctx> for FoldableJsonPathResult<'real_ctx> {
-    type Item = FoldableResult<'real_ctx>;
+impl<'ctx> Foldable<'ctx> for FoldableJsonPathResult {
+    type Item = FoldableResult<'ctx>;
 
     fn next(&mut self) -> bool {
         if self.cursor < self.len {
@@ -139,20 +139,20 @@ impl<'real_ctx, 'free_ctx> Foldable<'free_ctx> for FoldableJsonPathResult<'real_
         }
     }
 
-    fn peek<'s, 'i>(&'s self, _exec_ctx: &'free_ctx ExecutionCtx<'i>) -> Option<Self::Item> {
+    fn peek<'i>(&'ctx self, _exec_ctx: &'ctx ExecutionCtx<'i>) -> Option<Self::Item> {
         if self.len == 0 {
             return None;
         }
 
-        let jvalue = self.jvalues[self.cursor];
+        let jvalue = &self.jvalues[self.cursor];
         let result = FoldableResult::Raw((jvalue, &self.tetraplet));
 
         Some(result)
     }
 }
 
-impl<'real_ctx, 'free_ctx> Foldable<'free_ctx> for FoldableVecJsonPathResult<'real_ctx> {
-    type Item = FoldableResult<'real_ctx>;
+impl<'ctx> Foldable<'ctx> for FoldableVecJsonPathResult {
+    type Item = FoldableResult<'ctx>;
 
     fn next(&mut self) -> bool {
         if self.cursor < self.len {
@@ -172,13 +172,13 @@ impl<'real_ctx, 'free_ctx> Foldable<'free_ctx> for FoldableVecJsonPathResult<'re
         }
     }
 
-    fn peek<'s, 'i>(&'s self, _exec_ctx: &'free_ctx ExecutionCtx<'i>) -> Option<Self::Item> {
+    fn peek<'i>(&'ctx self, _exec_ctx: &'ctx ExecutionCtx<'i>) -> Option<Self::Item> {
         if self.len == 0 {
             return None;
         }
 
-        let jvalue = self.jvalues[self.cursor];
-        let tetraplet = self.tetraplets[self.cursor];
+        let jvalue = &self.jvalues[self.cursor];
+        let tetraplet = &self.tetraplets[self.cursor];
         let result = FoldableResult::Raw((jvalue, tetraplet));
 
         Some(result)
@@ -194,12 +194,12 @@ pub(crate) struct FoldState<'i> {
 }
 
 impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
-    fn execute<'real_ctx>(&self, exec_ctx: &'real_ctx mut ExecutionCtx<'i>, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
+    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
         use AquamarineError::*;
 
         log_instruction!(fold, exec_ctx, call_ctx);
 
-        let iterable: Box<dyn for<'ctx> Foldable<'ctx, Item = FoldableResult<'ctx>> + 'real_ctx> = match &self.iterable {
+        let iterable: Box<dyn for<'ctx> Foldable<'ctx, Item = FoldableResult<'ctx>>> = match &self.iterable {
             InstructionValue::Variable(name) => {
                 match exec_ctx.data_cache.get(*name) {
                     Some(AValue::JValueRef(variable)) => {
@@ -220,8 +220,7 @@ impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
                             len,
                         };
 
-                        // Box::new(foldable) as Box<dyn for<'ctx> Foldable<'ctx, Item = FoldableResult<'ctx>>>
-                        unreachable!()
+                        Box::new(foldable)
                     }
                     Some(AValue::JValueAccumulatorRef(acc)) => {
                         let foldable = FoldableNamedResult {
@@ -230,8 +229,7 @@ impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
                             len: acc.borrow().len(),
                         };
 
-                        // Box::new(foldable) as Box<dyn for<'ctx> Foldable<'ctx, Item = FoldableResult<'ctx>>>
-                        unreachable!();
+                        Box::new(foldable)
                     }
                     _ => unreachable!(),
                 }
@@ -241,27 +239,27 @@ impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
                     use jsonpath_lib::select;
                     let jvalues = select(&variable.result, path).unwrap();
                     let len = jvalues.len();
+                    let jvalues = jvalues.into_iter().cloned().collect();
 
                     let foldable = FoldableJsonPathResult {
                         jvalues,
-                        tetraplet: &variable.tetraplet,
+                        tetraplet: variable.tetraplet.clone(),
                         cursor: 0,
                         len,
                     };
 
-                    // let t: Box<dyn for<'ctx> Foldable<'ctx, Item = FoldableResult<'ctx>>> = Box::new(foldable);
-                    // t // as Box<dyn for<'ctx> Foldable<'ctx, Item = FoldableResult<'ctx>>>
-                    //Box::new(foldable) as _
-                    unreachable!();
+                    Box::new(foldable)
                 }
                 Some(AValue::JValueAccumulatorRef(acc)) => {
                     use jsonpath_lib::select_with_iter;
 
                     let acc = acc.borrow();
                     let (jvalues, tetraplet_indices) = select_with_iter(acc.iter().map(|v| &v.result), path).unwrap();
+                    let jvalues = jvalues.into_iter().cloned().collect();
                     let tetraplets = tetraplet_indices
                         .iter()
                         .map(|&id| &acc[id].tetraplet)
+                        .cloned()
                         .collect::<Vec<_>>();
 
                     let foldable = FoldableVecJsonPathResult {
@@ -271,8 +269,7 @@ impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
                         len: acc.len(),
                     };
 
-                    // Box::new(foldable) as Box<dyn for<'ctx> Foldable<'ctx, Item = FoldableResult<'ctx>>>
-                    Box::new(foldable) as _
+                    Box::new(foldable)
                 }
                 _ => unreachable!(),
             },
@@ -385,6 +382,7 @@ mod tests {
     use serde_json::json;
     use std::rc::Rc;
 
+    // Check that
     #[test]
     fn lfold() {
         env_logger::try_init().ok();

@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+use serde::Serialize;
+use serde::Deserialize;
+
 use std::rc::Rc;
 
 #[derive(Debug, PartialEq, Eq)]
@@ -48,7 +51,7 @@ pub struct Call<'i> {
     pub output: CallOutput<'i>,
 }
 
-#[derive(Debug, PartialEq, Eq, Clone, Hash)]
+#[derive(Debug, PartialEq, Eq, Clone, Hash, Serialize, Deserialize)]
 pub enum InstructionValue<'i> {
     Variable(&'i str),
     Literal(&'i str),

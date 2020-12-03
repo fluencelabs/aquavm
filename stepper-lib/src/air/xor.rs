@@ -40,6 +40,7 @@ impl<'i> super::ExecutableInstruction<'i> for Xor<'i> {
 #[cfg(test)]
 mod tests {
     use crate::call_evidence::CallEvidencePath;
+    use crate::ExecutedCallResult;
     use crate::JValue;
 
     use aqua_test_utils::call_vm;
@@ -92,10 +93,15 @@ mod tests {
 
         assert_eq!(call_path.len(), 2);
         assert_eq!(call_path[0], Call(CallServiceFailed(String::from(r#""error""#))));
-        assert_eq!(
+        assert!(matches!(
             call_path[1],
-            Call(Executed(Rc::new(JValue::String(String::from("res")))))
-        );
+            Call(Executed(Rc::new(
+                ExecutedCallResult {
+                    result: JValue::String(String::from("res")),
+                    tetraplet: _,
+                }
+            )))
+        ));
 
         let script = String::from(
             r#"
@@ -109,10 +115,15 @@ mod tests {
         let call_path: CallEvidencePath = serde_json::from_str(&res.data).expect("should be valid json");
 
         assert_eq!(call_path.len(), 1);
-        assert_eq!(
+        assert!(matches!(
             call_path[0],
-            Call(Executed(Rc::new(JValue::String(String::from("res")))))
-        );
+            Call(Executed(Rc::new(
+                ExecutedCallResult {
+                    result: JValue::String(String::from("res")),
+                    tetraplet: _,
+                }
+            )))
+        ));
     }
 
     #[test]
@@ -121,7 +132,7 @@ mod tests {
         use crate::call_evidence::EvidenceState::*;
 
         let fallible_service_id = String::from("service_id_1");
-        let mut vm = create_aqua_vm(fallible_call_service(fallible_service_id), "");
+        let mut vm = create_aqua_vm(fallible_call_service(fallible_service_id.clone()), "");
 
         let script = String::from(
             r#"
@@ -147,15 +158,26 @@ mod tests {
         let result_path: CallEvidencePath = serde_json::from_str(&result.data).expect("should be valid json");
 
         let res = String::from("res");
+        let executed_call_result = ExecutedCallResult {
+            result: JValue::String(res),
+            tetraplet: crate::SecurityTetraplet {
+                pub_key: fallible_service_id,
+                service_id: String::from("service_id_2"),
+                function_name: String::from("local_fn_name"),
+                json_path: String::new(),
+            },
+        };
+
+        let executed_call_result = Rc::new(executed_call_result);
 
         let right_path = vec![
             Par(2, 2),
-            Call(Executed(Rc::new(JValue::String(res.clone())))),
-            Call(Executed(Rc::new(JValue::String(res.clone())))),
+            Call(Executed(executed_call_result.clone())),
+            Call(Executed(executed_call_result.clone())),
             Par(1, 0),
             Call(CallServiceFailed(String::from(r#""error""#))),
-            Call(Executed(Rc::new(JValue::String(res.clone())))),
-            Call(Executed(Rc::new(JValue::String(res)))),
+            Call(Executed(executed_call_result.clone())),
+            Call(Executed(executed_call_result.clone())),
         ];
 
         assert_eq!(result_path, right_path);

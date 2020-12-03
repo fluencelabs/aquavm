@@ -148,12 +148,14 @@ impl<'i> ResolvedCall<'i> {
         use AquamarineError::CallServiceResultDeserializationError as DeError;
 
         let result: JValue = serde_json::from_str(&result.result).map_err(|e| DeError(result, e))?;
+        let function_arguments =
+            serde_json::to_string(&self.function_arg_paths).expect("default serializer wouldn't fail");
 
         let tetraplet = SecurityTetraplet {
             pub_key: ctx.current_peer_id.clone(),
             service_id: self.service_id.clone(),
             function_name: self.function_name.clone(),
-            json_path: String::new(),
+            function_arguments,
         };
 
         let result = ExecutedCallResult { result, tetraplet };
