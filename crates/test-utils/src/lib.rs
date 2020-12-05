@@ -56,7 +56,7 @@ pub fn create_aqua_vm(
         call_service: call_service_descriptor,
         current_peer_id: current_peer_id.into(),
         particle_data_store: tmp_dir,
-        logging_mask: i64::max_value(),
+        logging_mask: (1 + 16 + 64 + 256 + 512),
     };
 
     AquamarineVM::new(config).expect("vm should be created")
