@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-use log::Level as LogLevel;
 use stepper_lib::log_targets::TARGET_MAP;
+
+use log::Level as LogLevel;
 
 use std::collections::HashMap;
 
