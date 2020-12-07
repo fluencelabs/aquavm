@@ -30,8 +30,13 @@ mod ast;
 mod logger;
 
 use fluence::fce;
+use logger::DEFAULT_LOG_LEVEL;
 use stepper_lib::execute_aqua;
 use stepper_lib::StepperOutcome;
+
+use log::Level as LogLevel;
+
+const RUST_LOG_ENV_NAME: &str = "RUST_LOG";
 
 pub fn main() {
     logger::init_logger();
@@ -39,10 +44,22 @@ pub fn main() {
 
 #[fce]
 pub fn invoke(init_peer_id: String, aqua: String, prev_data: String, data: String) -> StepperOutcome {
+    let log_level = get_log_level();
+    log::set_max_level(log_level.to_level_filter());
+
     execute_aqua(init_peer_id, aqua, prev_data, data)
 }
 
 #[fce]
 pub fn ast(script: String) -> String {
     ast::ast(script)
+}
+
+fn get_log_level() -> LogLevel {
+    use std::str::FromStr;
+
+    match std::env::var(RUST_LOG_ENV_NAME) {
+        Ok(log_level_str) => LogLevel::from_str(&log_level_str).unwrap_or(DEFAULT_LOG_LEVEL),
+        Err(_) => DEFAULT_LOG_LEVEL,
+    }
 }

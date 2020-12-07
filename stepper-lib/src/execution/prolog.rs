@@ -80,6 +80,6 @@ pub(super) fn make_contexts(
 
 /// Parse an AIR script to AST
 pub fn parse(script: &str) -> Result<Instruction<'_>> {
-    let ast = air_parser::parse(script).map_err(|msg| AquamarineError::AIRParseError(msg))?;
+    let ast = air_parser::parse(script).map_err(AquamarineError::AIRParseError)?;
     Ok(*ast)
 }
