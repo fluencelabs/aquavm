@@ -14,37 +14,20 @@
  * limitations under the License.
  */
 
-use log::Level as LogLevel;
 use stepper_lib::log_targets::TARGET_MAP;
+
+use log::Level as LogLevel;
 
 use std::collections::HashMap;
 
-const RUST_LOG_ENV_NAME: &str = "RUST_LOG";
-const DEFAULT_LOG_LEVEL: &str = "trace";
+pub const DEFAULT_LOG_LEVEL: LogLevel = LogLevel::Info;
 
 pub fn init_logger() {
     use std::iter::FromIterator;
 
     let target_map = HashMap::from_iter(TARGET_MAP.iter().cloned());
-    let log_level_str = std::env::var(RUST_LOG_ENV_NAME).unwrap_or(String::from(DEFAULT_LOG_LEVEL));
-    let log_level = to_log_level(&log_level_str);
-
-    fluence::WasmLogger::new()
-        .with_log_level(log_level)
+    fluence::WasmLoggerBuilder::new()
         .with_target_map(target_map)
         .build()
         .unwrap();
-}
-
-fn to_log_level(raw_log_level: &String) -> LogLevel {
-    use LogLevel::*;
-
-    match raw_log_level.to_ascii_lowercase().as_str() {
-        "error" => Error,
-        "warn" => Warn,
-        "info" => Info,
-        "debug" => Debug,
-        "trace" => Trace,
-        _ => Trace,
-    }
 }

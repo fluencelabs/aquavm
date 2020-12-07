@@ -29,7 +29,9 @@
 mod ast;
 mod logger;
 
+use logger::DEFAULT_LOG_LEVEL;
 use stepper_lib::execute_aqua;
+
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen(start)]
@@ -38,7 +40,12 @@ pub fn main() {
 }
 
 #[wasm_bindgen]
-pub fn invoke(init_peer_id: String, aqua: String, prev_data: String, data: String) -> String {
+pub fn invoke(init_peer_id: String, aqua: String, prev_data: String, data: String, log_level: &str) -> String {
+    use std::str::FromStr;
+
+    let log_level = log::Level::from_str(log_level).unwrap_or(DEFAULT_LOG_LEVEL);
+    log::set_max_level(log_level.to_level_filter());
+
     let outcome = execute_aqua(init_peer_id, aqua, prev_data, data);
     serde_json::to_string(&outcome).expect("Cannot parse StepperOutcome")
 }
