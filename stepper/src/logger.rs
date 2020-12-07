@@ -26,5 +26,8 @@ pub fn init_logger() {
     use std::iter::FromIterator;
 
     let target_map = HashMap::from_iter(TARGET_MAP.iter().cloned());
-    fluence::WasmLogger::new().with_target_map(target_map).build().unwrap();
+    fluence::WasmLoggerBuilder::new()
+        .with_target_map(target_map)
+        .build()
+        .unwrap();
 }
