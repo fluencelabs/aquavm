@@ -42,7 +42,9 @@ pub use crate::errors::AquamarineError;
 pub use crate::security_tetraplet::SecurityTetraplet;
 pub use crate::stepper_outcome::StepperOutcome;
 pub use crate::stepper_outcome::STEPPER_SUCCESS;
+pub use air_parser::ast::Instruction;
 pub use execution::execute_aqua;
+pub use execution::parse;
 
 pub(crate) type Result<T> = std::result::Result<T, AquamarineError>;
 pub(crate) type JValue = serde_json::Value;

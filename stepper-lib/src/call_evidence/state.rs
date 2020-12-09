@@ -20,7 +20,6 @@ use crate::Result;
 
 use serde::Deserialize;
 use serde::Serialize;
-use std::cmp::max;
 use std::rc::Rc;
 
 pub type CallEvidencePath = std::collections::VecDeque<EvidenceState>;
@@ -100,10 +99,20 @@ fn merge_subtree(
                 result_path.push_back(Call(resulted_call));
             }
             (Some(Par(prev_left, prev_right)), Some(Par(current_left, current_right))) => {
-                result_path.push_back(Par(max(prev_left, current_left), max(prev_right, current_right)));
+                let par_position = result_path.len();
+                // place temporary Par value to avoid insert in the middle
+                result_path.push_back(Par(0, 0));
+
+                let before_result_len = result_path.len();
 
                 merge_subtree(prev_path, prev_left, current_path, current_left, result_path)?;
+                let left_par_size = result_path.len() - before_result_len;
+
                 merge_subtree(prev_path, prev_right, current_path, current_right, result_path)?;
+                let right_par_size = result_path.len() - left_par_size - before_result_len;
+
+                // update temporary Par with final values
+                result_path[par_position] = Par(left_par_size, right_par_size);
 
                 prev_subtree_size -= prev_left + prev_right;
                 current_subtree_size -= current_left + current_right;
@@ -168,6 +177,20 @@ fn merge_call(prev_call_result: CallResult, current_call_result: CallResult) -> 
         }
         (CallServiceFailed(_), Executed(..)) => Err(IncompatibleCallResults(prev_call_result, current_call_result)),
         (Executed(..), CallServiceFailed(_)) => Err(IncompatibleCallResults(prev_call_result, current_call_result)),
+    }
+}
+
+impl std::fmt::Display for EvidenceState {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        use CallResult::*;
+        use EvidenceState::*;
+
+        match self {
+            Par(left, right) => write!(f, "Par({}, {})", left, right),
+            Call(RequestSent(peer_id)) => write!(f, "RequestSent({})", peer_id),
+            Call(Executed(result)) => write!(f, "Executed({:?})", result),
+            Call(CallServiceFailed(err_msg)) => write!(f, "CallServiceFailed({})", err_msg),
+        }
     }
 }
 

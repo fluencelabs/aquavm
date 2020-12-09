@@ -47,9 +47,6 @@ impl<'i> ExecutableInstruction<'i> for Par<'i> {
 
         let (left_subtree_size, right_subtree_size) = extract_subtree_sizes(call_ctx)?;
 
-        let before_path_size = call_ctx.current_path.len();
-        let before_subtree_size = call_ctx.current_subtree_size;
-
         let par_pos = call_ctx.new_path.len();
         call_ctx.new_path.push_back(EvidenceState::Par(0, 0));
 
@@ -64,11 +61,6 @@ impl<'i> ExecutableInstruction<'i> for Par<'i> {
         // par is completed if at least one of its subtrees is completed
         exec_ctx.subtree_complete = left_subtree_complete || right_subtree_complete;
 
-        // decrease current subtree size by used elements from current_path
-        let after_path_size = call_ctx.current_path.len();
-        let used_path_elements = before_path_size - after_path_size;
-        call_ctx.current_subtree_size = before_subtree_size - used_path_elements;
-
         Ok(())
     }
 }
@@ -79,6 +71,7 @@ fn extract_subtree_sizes(call_ctx: &mut CallEvidenceCtx) -> Result<(usize, usize
     if call_ctx.current_subtree_size == 0 {
         return Ok((0, 0));
     }
+
     call_ctx.current_subtree_size -= 1;
 
     log::trace!(
@@ -105,21 +98,24 @@ fn execute_subtree<'i>(
 ) -> Result<()> {
     use crate::AquamarineError::LocalServiceError;
 
+    let before_subtree_size = call_ctx.current_subtree_size;
     call_ctx.current_subtree_size = subtree_size;
     let before_new_path_len = call_ctx.new_path.len();
 
     exec_ctx.subtree_complete = determine_subtree_complete(&subtree);
 
-    // execute subtree
+    // execute a subtree
     match subtree.execute(exec_ctx, call_ctx) {
         res @ Ok(_) => {
             update_par_state(call_ctx, subtree_type, current_par_pos, before_new_path_len);
+            call_ctx.current_subtree_size = before_subtree_size - subtree_size;
             res
         }
         // if there is a service error, update already added Par state
         // and then bubble the error up
         err @ Err(LocalServiceError(_)) => {
             update_par_state(call_ctx, subtree_type, current_par_pos, before_new_path_len);
+            call_ctx.current_subtree_size = before_subtree_size - subtree_size;
             err
         }
         err @ Err(_) => err,
