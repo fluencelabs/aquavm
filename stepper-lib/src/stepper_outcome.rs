@@ -19,6 +19,7 @@ use serde::{Deserialize, Serialize};
 
 pub const STEPPER_SUCCESS: i32 = 0;
 
+/// Describes a return value of the stepper.
 #[fce]
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct StepperOutcome {

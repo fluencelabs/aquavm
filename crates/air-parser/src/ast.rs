@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-use serde::Serialize;
 use serde::Deserialize;
+use serde::Serialize;
 
 use std::rc::Rc;
 
@@ -47,7 +47,7 @@ pub enum FunctionPart<'i> {
 pub struct Call<'i> {
     pub peer_part: PeerPart<'i>,
     pub function_part: FunctionPart<'i>,
-    pub args: Vec<InstructionValue<'i>>,
+    pub args: Rc<Vec<InstructionValue<'i>>>,
     pub output: CallOutput<'i>,
 }
 

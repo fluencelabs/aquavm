@@ -17,15 +17,17 @@
 use super::CallServiceResult;
 use crate::SecurityTetraplet;
 
+use fluence::fce;
+
 use std::env::VarError;
 
 const CURRENT_PEER_ID_ENV_NAME: &str = "CURRENT_PEER_ID";
 
-pub fn get_current_peer_id() -> std::result::Result<String, VarError> {
+pub(crate) fn get_current_peer_id() -> std::result::Result<String, VarError> {
     std::env::var(CURRENT_PEER_ID_ENV_NAME)
 }
 
-#[fluence::fce]
+#[fce]
 #[link(wasm_import_module = "host")]
 extern "C" {
     pub(crate) fn call_service(

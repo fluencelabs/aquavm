@@ -188,7 +188,7 @@ impl JValuableResult for Rc<ExecutedCallResult> {
 
         let selected_jvalues = select(&self.result, json_path)
             .map_err(|e| JsonPathError(self.result.clone(), String::from(json_path), e))?;
-        Ok((selected_jvalues, vec![self.tetraplet.clone()]))
+        Ok((selected_jvalues, vec![self.triplet.clone()]))
     }
 
     fn as_jvalue(&self) -> Cow<'_, JValue> {
@@ -201,7 +201,7 @@ impl JValuableResult for Rc<ExecutedCallResult> {
 
     fn as_tetraplets(&self) -> Vec<SecurityTetraplet> {
         // this clone is needed because of rust-sdk allows passing arguments only by value
-        vec![self.tetraplet.clone()]
+        vec![self.triplet.clone()]
     }
 }
 
@@ -221,7 +221,7 @@ impl JValuableResult for std::cell::Ref<'_, Vec<Rc<ExecutedCallResult>>> {
         let tetraplets = tetraplet_indices
             .into_iter()
             // this cloned is needed because of rust-sdk allows passing arguments only by value
-            .map(|id| self[id].tetraplet.clone())
+            .map(|id| self[id].triplet.clone())
             .collect::<Vec<_>>();
 
         Ok((selected_values, tetraplets))
@@ -241,7 +241,7 @@ impl JValuableResult for std::cell::Ref<'_, Vec<Rc<ExecutedCallResult>>> {
     fn as_tetraplets(&self) -> Vec<SecurityTetraplet> {
         self.iter()
             // this cloned is needed because of rust-sdk allows passing arguments only by value
-            .map(|r| r.tetraplet.clone())
+            .map(|r| r.triplet.clone())
             .collect::<Vec<_>>()
     }
 }

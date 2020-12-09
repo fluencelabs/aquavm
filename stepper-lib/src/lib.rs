@@ -39,7 +39,6 @@ pub use crate::call_evidence::CallEvidencePath;
 pub use crate::call_evidence::CallResult;
 pub use crate::call_evidence::EvidenceState;
 pub use crate::errors::AquamarineError;
-pub use crate::security_tetraplet::SecurityTetraplet;
 pub use crate::stepper_outcome::StepperOutcome;
 pub use crate::stepper_outcome::STEPPER_SUCCESS;
 pub use air_parser::ast::Instruction;
@@ -51,6 +50,9 @@ pub(crate) type JValue = serde_json::Value;
 
 pub(crate) use build_targets::call_service;
 pub(crate) use build_targets::get_current_peer_id;
+pub(crate) use security_tetraplet::SecurityTetraplet;
+
+use crate::air::ResolvedTriplet;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -61,14 +63,14 @@ use std::rc::Rc;
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct ExecutedCallResult {
-    pub result: JValue,
-    pub tetraplet: SecurityTetraplet,
+    pub result: Rc<JValue>,
+    pub triplet: Rc<ResolvedTriplet>,
 }
 
 // #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub(crate) enum AValue<'i> {
-    JValueRef(Rc<ExecutedCallResult>),
-    JValueAccumulatorRef(RefCell<Vec<Rc<ExecutedCallResult>>>),
+    JValueRef(ExecutedCallResult),
+    JValueAccumulatorRef(RefCell<Vec<ExecutedCallResult>>),
     JValueFoldCursor(crate::air::FoldState<'i>),
 }
 

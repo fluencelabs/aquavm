@@ -17,10 +17,11 @@ pub Instr: Box<Instruction<'input>> = {
 
     "(" "call" <p:PeerPart> <f:FPart> <args:Args> <output:Output?> ")" => {
         let output = output.unwrap_or(CallOutput::None);
+        let args = Rc::new(args);
         Box::new(Instruction::Call(Call{peer_part: p, function_part: f, args, output}))
     },
 
-    "(" "fold" <iterable:Value> <iterator:Alphanumeric> <i:Instr> ")" => {
+    "(" "fold" <iterable:InstructionValue> <iterator:Alphanumeric> <i:Instr> ")" => {
         let instruction = Rc::new(*i);
         Box::new(Instruction::Fold(Fold{ iterable, iterator, instruction }))
     },
@@ -30,7 +31,7 @@ pub Instr: Box<Instruction<'input>> = {
     ! => { errors.push(<>); Box::new(Instruction::Error) },
 }
 
-Args: Vec<Value<'input>> = {
+Args: Vec<InstructionValue<'input>> = {
     "[" <args:(<Arg>)*> "]" => args
 }
 
@@ -51,23 +52,23 @@ Output: CallOutput<'input> = {
     <o:ACCUMULATOR> => CallOutput::Accumulator(&o[..o.len()-2]),
 };
 
-Function = Value;
-PeerId = Value;
-ServiceId = Value;
-Arg = Value;
+Function = InstructionValue;
+PeerId = InstructionValue;
+ServiceId = InstructionValue;
+Arg = InstructionValue;
 
-Value: Value<'input> = {
-    "\"" "\"" => Value::Literal(""), // TODO: signal absence somehow?
-    "\"" <v: Alphanumeric> "\"" => Value::Literal(v),
-    <v:Alphanumeric> => Value::Variable(v),
+InstructionValue: InstructionValue<'input> = {
+    "\"" "\"" => InstructionValue::Literal(""), // TODO: signal absence somehow?
+    "\"" <v: Alphanumeric> "\"" => InstructionValue::Literal(v),
+    <v:Alphanumeric> => InstructionValue::Variable(v),
     <v:JSON_PATH> => {
         let mut path = v.splitn(2, ".");
         let variable = path.next().expect("must contain dot");
         let path = path.next().expect("contain component after dot");
-        Value::JsonPath { variable, path }
+        InstructionValue::JsonPath { variable, path }
     },
-    CURRENT_PEER_ID => Value::CurrentPeerId,
-    INIT_PEER_ID => Value::InitPeerId,
+    CURRENT_PEER_ID => InstructionValue::CurrentPeerId,
+    INIT_PEER_ID => InstructionValue::InitPeerId,
 }
 
 

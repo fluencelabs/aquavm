@@ -29,6 +29,8 @@ use crate::Result;
 
 use air_parser::ast::Call;
 
+pub(crate) use triplet::ResolvedTriplet;
+
 /*
    (current)
    (pk $pk)
@@ -114,12 +116,12 @@ mod tests {
             pub_key: vm_peer_id.clone(),
             service_id,
             function_name,
-            function_arguments,
+            json_path: function_arguments,
         };
 
         let executed_call_state = Call(Executed(Rc::new(ExecutedCallResult {
             result: JValue::String(String::from("test")),
-            tetraplet,
+            triplet: tetraplet,
         })));
         assert_eq!(call_path.len(), 1);
         assert_eq!(call_path[0], executed_call_state);
@@ -232,7 +234,7 @@ mod tests {
             pub_key: vm_peer_id,
             service_id,
             function_name,
-            function_arguments,
+            json_path: function_arguments,
         };
 
         assert_eq!(call_path.len(), 2);
@@ -244,7 +246,7 @@ mod tests {
                     JValue::String(String::from("arg2")),
                     JValue::String(String::from("arg3_value")),
                 ]),
-                tetraplet,
+                triplet,
             })))
         ));
     }

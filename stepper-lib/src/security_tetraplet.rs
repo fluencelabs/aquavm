@@ -15,30 +15,36 @@
  */
 
 use crate::air::ExecutionCtx;
+use crate::air::ResolvedTriplet;
 
-use fluence::fce;
+use std::rc::Rc;
 
-use serde::Deserialize;
-use serde::Serialize;
-
-/// Describes an origin returns corresponding value.
-#[fce]
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// Describes an origin returned corresponding value.
+#[derive(Clone)]
 pub struct SecurityTetraplet {
-    pub pub_key: String,
-    pub service_id: String,
-    pub function_name: String,
-    pub function_arguments: String,
+    // describes location of the value in the network.
+    pub triplet: Rc<ResolvedTriplet>,
+
+    // json path used to obtain supplied to call_service values from the value.
+    pub json_path: String,
 }
 
 impl SecurityTetraplet {
-    // This one is used for creating tetraplet for host identified by init peer id.
+    /// Create tetraplet for string variables defined in the script such as variable_1, variable_2 here
+    /// "(call ("" "") "" ["variable_1" "variable_2"])"
     pub(crate) fn initiator_tetraplet(exec_ctx: &ExecutionCtx<'_>) -> Self {
-        Self {
-            pub_key: exec_ctx.init_peer_id.clone(),
+        let triplet = ResolvedTriplet {
+            // these variables set by the initiator peer
+            peer_pk: exec_ctx.init_peer_id.clone(),
             service_id: String::new(),
             function_name: String::new(),
-            function_arguments: String::new(),
+        };
+        let triplet = Rc::new(triplet);
+
+        Self {
+            triplet,
+            // json path can't applied to the string literals
+            json_path: String::new(),
         }
     }
 }

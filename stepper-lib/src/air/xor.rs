@@ -98,7 +98,7 @@ mod tests {
             Call(Executed(Rc::new(
                 ExecutedCallResult {
                     result: JValue::String(String::from("res")),
-                    tetraplet: _,
+                    triplet: _,
                 }
             )))
         ));
@@ -120,7 +120,7 @@ mod tests {
             Call(Executed(Rc::new(
                 ExecutedCallResult {
                     result: JValue::String(String::from("res")),
-                    tetraplet: _,
+                    triplet: _,
                 }
             )))
         ));
@@ -160,7 +160,7 @@ mod tests {
         let res = String::from("res");
         let executed_call_result = ExecutedCallResult {
             result: JValue::String(res),
-            tetraplet: crate::SecurityTetraplet {
+            triplet: crate::SecurityTetraplet {
                 pub_key: fallible_service_id,
                 service_id: String::from("service_id_2"),
                 function_name: String::from("local_fn_name"),

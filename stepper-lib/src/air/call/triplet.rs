@@ -21,6 +21,9 @@ use crate::Result;
 
 use air_parser::ast::{FunctionPart, InstructionValue, PeerPart};
 
+use serde::Serialize;
+use serde::Deserialize;
+
 /// Triplet represents a location of the executable code in the network
 /// It is build from `PeerPart` and `FunctionPart` of a `Call` instruction
 pub(super) struct Triplet<'a, 'i> {
@@ -31,10 +34,11 @@ pub(super) struct Triplet<'a, 'i> {
 
 /// ResolvedTriplet represents same location as `Triplet`, but with all
 /// variables, literals and etc resolved into final `String`
-pub(super) struct ResolvedTriplet {
-    pub(super) peer_pk: String,
-    pub(super) service_id: String,
-    pub(super) function_name: String,
+#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
+pub(crate) struct ResolvedTriplet {
+    pub(crate) peer_pk: String,
+    pub(crate) service_id: String,
+    pub(crate) function_name: String,
 }
 
 impl<'a, 'i> Triplet<'a, 'i> {
