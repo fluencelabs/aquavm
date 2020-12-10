@@ -135,7 +135,7 @@ impl<'i> ResolvedCall<'i> {
             prev_state
         );
 
-        handle_prev_state(&self.triplet, prev_state, exec_ctx, call_ctx)
+        handle_prev_state(&self.triplet, &self.output, prev_state, exec_ctx, call_ctx)
     }
 
     /// Prepare arguments of this call instruction by resolving and preparing their security tetraplets.

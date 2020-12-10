@@ -15,7 +15,7 @@
  */
 
 use super::ExecutionCtx;
-use super::JValuableResult;
+use super::fold::JValuableResult;
 use crate::AValue;
 use crate::AquamarineError;
 use crate::JValue;

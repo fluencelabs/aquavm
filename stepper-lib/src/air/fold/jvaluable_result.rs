@@ -109,8 +109,9 @@ impl<'ctx> JValuableResult for FoldableResult<'ctx> {
         use FoldableResult::*;
 
         let jvalue = match self {
-            Ref((jvalue, _)) => jvalue.deref(),
-            Raw((jvalue, _)) => jvalue,
+            RefRef((jvalue, _)) => *jvalue,
+            RefValue((jvalue, _)) => jvalue,
+            RcValue((jvalue, _)) => jvalue.deref(),
         };
 
         let selected_jvalues =
@@ -125,8 +126,9 @@ impl<'ctx> JValuableResult for FoldableResult<'ctx> {
         use FoldableResult::*;
 
         let (jvalue, tetraplet) = match self {
-            Ref((jvalue, tetraplet)) => (jvalue.deref(), tetraplet.deref()),
-            Raw((jvalue, tetraplet)) => (*jvalue, *tetraplet),
+            RefRef((jvalue, tetraplet)) => (*jvalue, *tetraplet),
+            RefValue((jvalue, tetraplet)) => (*jvalue, tetraplet),
+            RcValue((jvalue, tetraplet)) => (jvalue, tetraplet)
         };
 
         let selected_jvalues =
@@ -163,11 +165,11 @@ impl<'ctx> JValuableResult for FoldableResult<'ctx> {
 
         // these clones is needed because of rust-sdk allows passing arguments only by value
         match self {
-            Ref((_, tetraplet)) => {
+            RefRef((_, tetraplet)) => {
                 let tetraplet = tetraplet.deref().clone();
                 vec![tetraplet]
             }
-            Raw((_, tetraplet)) => vec![(*tetraplet).clone()],
+            RefValue((_, tetraplet)) => vec![(*tetraplet).clone()],
         }
     }
 }

@@ -18,7 +18,8 @@ mod foldable;
 mod jvaluable_result;
 
 use foldable::*;
-use jvaluable_result::*;
+pub(crate) use jvaluable_result::JValuableResult;
+
 use super::CallEvidenceCtx;
 use super::ExecutionCtx;
 use super::Instruction;
@@ -34,7 +35,6 @@ use air_parser::ast::Fold;
 use air_parser::ast::InstructionValue;
 use air_parser::ast::Next;
 
-use std::cell::Ref;
 use std::collections::HashMap;
 use std::rc::Rc;
 
@@ -64,8 +64,8 @@ impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
         let iterable: Box<dyn for<'ctx> Foldable<'ctx, Item = FoldableResult<'ctx>>> = match &self.iterable {
             InstructionValue::Variable(name) => {
                 match exec_ctx.data_cache.get(*name) {
-                    Some(AValue::JValueRef(variable)) => {
-                        let len = match &variable.result {
+                    Some(AValue::JValueRef(call_result)) => {
+                        let len = match &call_result.result {
                             JValue::Array(array) => {
                                 if array.is_empty() {
                                     // skip fold if array is empty
@@ -76,8 +76,8 @@ impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
                             v => return Err(IncompatibleJValueType(v.clone(), "array")),
                         };
 
-                        let foldable = FoldableNamedResult {
-                            name: name.to_string(),
+                        let foldable = FoldableRcResult {
+                            call_result: call_result.clone(),
                             cursor: 0,
                             len,
                         };
@@ -85,8 +85,10 @@ impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
                         Box::new(foldable)
                     }
                     Some(AValue::JValueAccumulatorRef(acc)) => {
-                        let foldable = FoldableNamedResult {
-                            name: name.to_string(),
+                        let call_results = acc.borrow().iter().cloned().collect::<Vec<_>>();
+
+                        let foldable = FoldableVecRcResult {
+                            call_results,
                             cursor: 0,
                             len: acc.borrow().len(),
                         };
@@ -103,9 +105,14 @@ impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
                     let len = jvalues.len();
                     let jvalues = jvalues.into_iter().cloned().collect();
 
+                    let tetraplet = SecurityTetraplet {
+                        triplet: variable.triplet.clone(),
+                        json_path: path.to_string()
+                    };
+
                     let foldable = FoldableJsonPathResult {
                         jvalues,
-                        tetraplet: variable.triplet.clone(),
+                        tetraplet,
                         cursor: 0,
                         len,
                     };
@@ -121,7 +128,10 @@ impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
                     let tetraplets = tetraplet_indices
                         .iter()
                         .map(|&id| &acc[id].triplet)
-                        .cloned()
+                        .map(|triplet| SecurityTetraplet {
+                            triplet: triplet.clone(),
+                            json_path: path.to_string(),
+                        })
                         .collect::<Vec<_>>();
 
                     let foldable = FoldableVecJsonPathResult {
