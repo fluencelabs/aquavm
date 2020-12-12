@@ -213,7 +213,7 @@ impl Into<StepperOutcome> for AquamarineError {
 
         StepperOutcome {
             ret_code,
-            call_path: format!("{}", self),
+            data: format!("{}", self),
             next_peer_pks: vec![],
         }
     }
