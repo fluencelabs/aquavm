@@ -62,15 +62,15 @@ use std::fmt::Formatter;
 use std::rc::Rc;
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
-pub struct ExecutedCallResult {
+pub struct ResolvedCallResult {
     pub result: Rc<JValue>,
     pub triplet: Rc<ResolvedTriplet>,
 }
 
 // #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub(crate) enum AValue<'i> {
-    JValueRef(ExecutedCallResult),
-    JValueAccumulatorRef(RefCell<Vec<ExecutedCallResult>>),
+    JValueRef(ResolvedCallResult),
+    JValueAccumulatorRef(RefCell<Vec<ResolvedCallResult>>),
     JValueFoldCursor(crate::air::FoldState<'i>),
 }
 

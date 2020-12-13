@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-use crate::air::fold::FoldableResult;
-use crate::ExecutedCallResult;
+use crate::air::fold::IterableItemType;
 use crate::JValue;
+use crate::ResolvedCallResult;
 use crate::Result;
 use crate::SecurityTetraplet;
 
@@ -103,11 +103,11 @@ impl JValuableResult for (&JValue, &SecurityTetraplet) {
 }
  */
 
-impl<'ctx> JValuableResult for FoldableResult<'ctx> {
+impl<'ctx> JValuableResult for IterableItemType<'ctx> {
     fn apply_json_path(&self, json_path: &str) -> Result<Vec<&JValue>> {
         use crate::AquamarineError::JValueJsonPathError as JsonPathError;
         use jsonpath_lib::select;
-        use FoldableResult::*;
+        use IterableItemType::*;
 
         let jvalue = match self {
             RefRef((jvalue, _)) => *jvalue,
@@ -123,7 +123,7 @@ impl<'ctx> JValuableResult for FoldableResult<'ctx> {
     fn apply_json_path_with_tetraplets(&self, json_path: &str) -> Result<(Vec<&JValue>, Vec<SecurityTetraplet>)> {
         use crate::AquamarineError::JValueJsonPathError as JsonPathError;
         use jsonpath_lib::select;
-        use FoldableResult::*;
+        use IterableItemType::*;
 
         let (jvalue, tetraplet) = match self {
             RefRef((jvalue, tetraplet)) => (*jvalue, *tetraplet),
@@ -137,7 +137,7 @@ impl<'ctx> JValuableResult for FoldableResult<'ctx> {
     }
 
     fn as_jvalue(&self) -> Cow<'_, JValue> {
-        use FoldableResult::*;
+        use IterableItemType::*;
 
         match self {
             RefRef((jvalue, _)) => Cow::Borrowed(jvalue),
@@ -150,7 +150,7 @@ impl<'ctx> JValuableResult for FoldableResult<'ctx> {
     }
 
     fn into_jvalue(self: Box<Self>) -> JValue {
-        use FoldableResult::*;
+        use IterableItemType::*;
 
         match *self {
             RefRef((jvalue, _)) => jvalue.deref().clone(),
@@ -160,7 +160,7 @@ impl<'ctx> JValuableResult for FoldableResult<'ctx> {
     }
 
     fn as_tetraplets(&self) -> Vec<SecurityTetraplet> {
-        use FoldableResult::*;
+        use IterableItemType::*;
 
         // these clones is needed because of rust-sdk allows passing arguments only by value
         match self {
@@ -174,7 +174,7 @@ impl<'ctx> JValuableResult for FoldableResult<'ctx> {
     }
 }
 
-impl JValuableResult for ExecutedCallResult {
+impl JValuableResult for ResolvedCallResult {
     fn apply_json_path(&self, json_path: &str) -> Result<Vec<&JValue>> {
         use crate::AquamarineError::JValueJsonPathError as JsonPathError;
         use jsonpath_lib::select;
@@ -217,7 +217,7 @@ impl JValuableResult for ExecutedCallResult {
     }
 }
 
-impl JValuableResult for std::cell::Ref<'_, Vec<ExecutedCallResult>> {
+impl JValuableResult for std::cell::Ref<'_, Vec<ResolvedCallResult>> {
     fn apply_json_path(&self, json_path: &str) -> Result<Vec<&JValue>> {
         use jsonpath_lib::select_with_iter;
 

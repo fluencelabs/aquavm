@@ -21,8 +21,8 @@ use crate::call_evidence::CallResult;
 use crate::call_evidence::EvidenceState;
 use crate::log_targets::EVIDENCE_CHANGING;
 use crate::AquamarineError;
-use crate::ExecutedCallResult;
 use crate::JValue;
+use crate::ResolvedCallResult;
 use crate::Result;
 
 use air_parser::ast::CallOutput;
@@ -41,7 +41,7 @@ pub(super) fn set_local_call_result<'i>(
     use std::collections::hash_map::Entry::{Occupied, Vacant};
     use AquamarineError::*;
 
-    let executed_result = ExecutedCallResult { result, triplet };
+    let executed_result = ResolvedCallResult { result, triplet };
 
     match output {
         CallOutput::Scalar(name) => {

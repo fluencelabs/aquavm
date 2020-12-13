@@ -17,8 +17,8 @@
 use crate::build_targets::CallServiceResult;
 use crate::call_evidence::CallResult;
 use crate::call_evidence::EvidenceState;
-use crate::ExecutedCallResult;
 use crate::JValue;
+use crate::ResolvedCallResult;
 use crate::StepperOutcome;
 
 use jsonpath_lib::JsonPathError;
@@ -58,7 +58,7 @@ pub enum AquamarineError {
     JValueJsonPathError(JValue, String, JsonPathError),
 
     /// An error occurred while trying to apply json path to this accumulator with JValue's.
-    JValueAccJsonPathError(Vec<ExecutedCallResult>, String, JsonPathError),
+    JValueAccJsonPathError(Vec<ResolvedCallResult>, String, JsonPathError),
 
     /// Provided JValue has incompatible with target type.
     IncompatibleJValueType(JValue, &'static str),

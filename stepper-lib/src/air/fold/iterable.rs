@@ -14,53 +14,66 @@
  * limitations under the License.
  */
 
-use crate::ExecutedCallResult;
 use crate::JValue;
+use crate::ResolvedCallResult;
 use crate::SecurityTetraplet;
 
 use std::rc::Rc;
 
-pub(crate) trait Foldable<'ctx> {
+/// This trait represent bidirectional iterator and
+/// is used to abstract values used in fold as iterables.
+pub(crate) trait Iterable<'ctx> {
+    /// Represent iterable type.
     type Item;
 
+    /// Move inner iterator to the next value and return true if it exists,
+    /// does nothing and return false otherwise.
     fn next(&mut self) -> bool;
 
-    fn back(&mut self) -> bool;
+    /// Move inner iterator to the previous value and return true if it exists,
+    /// does nothing and return false otherwise.
+    fn prev(&mut self) -> bool;
 
+    /// Return current iterable value if Iterable value is not empty and None otherwise.
     fn peek(&'ctx self) -> Option<Self::Item>;
 }
 
+/// Combines all possible iterable item types.
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub(crate) enum FoldableResult<'ctx> {
+pub(crate) enum IterableItemType<'ctx> {
     RefRef((&'ctx JValue, &'ctx SecurityTetraplet)),
     RefValue((&'ctx JValue, SecurityTetraplet)),
     RcValue((Rc<JValue>, SecurityTetraplet)),
 }
 
+/// Used for iterating over JValue of array type.
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub(crate) struct FoldableRcResult {
-    pub call_result: ExecutedCallResult,
+pub(crate) struct IterableResolvedCall {
+    pub call_result: ResolvedCallResult,
     pub cursor: usize,
     pub len: usize,
 }
 
+/// Used for iterating over accumulator with JValues.
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub(crate) struct FoldableVecRcResult {
-    pub call_results: Vec<ExecutedCallResult>,
+pub(crate) struct IterableVecResolvedCall {
+    pub call_results: Vec<ResolvedCallResult>,
     pub cursor: usize,
     pub len: usize,
 }
 
+/// Used for iterating over a result of applied to a JValue json path.
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub(crate) struct FoldableJsonPathResult {
+pub(crate) struct IterableJsonPathResult {
     pub jvalues: Vec<JValue>,
     pub tetraplet: SecurityTetraplet,
     pub cursor: usize,
     pub len: usize,
 }
 
+/// Used for iterating over a result of applied to an accumulator json path.
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub(crate) struct FoldableVecJsonPathResult {
+pub(crate) struct IterableVecJsonPathResult {
     pub jvalues: Vec<JValue>,
     pub tetraplets: Vec<SecurityTetraplet>,
     pub cursor: usize,
@@ -89,14 +102,14 @@ macro_rules! foldable_prev {
     }};
 }
 
-impl<'ctx> Foldable<'ctx> for FoldableRcResult {
-    type Item = FoldableResult<'ctx>;
+impl<'ctx> Iterable<'ctx> for IterableResolvedCall {
+    type Item = IterableItemType<'ctx>;
 
     fn next(&mut self) -> bool {
         foldable_next!(self)
     }
 
-    fn back(&mut self) -> bool {
+    fn prev(&mut self) -> bool {
         foldable_prev!(self)
     }
 
@@ -118,19 +131,19 @@ impl<'ctx> Foldable<'ctx> for FoldableRcResult {
             _ => unimplemented!("this jvalue is set only by fold instruction, so it must have array type"),
         };
 
-        let result = FoldableResult::RefValue((jvalue, tetraplet));
+        let result = IterableItemType::RefValue((jvalue, tetraplet));
         Some(result)
     }
 }
 
-impl<'ctx> Foldable<'ctx> for FoldableVecRcResult {
-    type Item = FoldableResult<'ctx>;
+impl<'ctx> Iterable<'ctx> for IterableVecResolvedCall {
+    type Item = IterableItemType<'ctx>;
 
     fn next(&mut self) -> bool {
         foldable_next!(self)
     }
 
-    fn back(&mut self) -> bool {
+    fn prev(&mut self) -> bool {
         foldable_prev!(self)
     }
 
@@ -139,25 +152,25 @@ impl<'ctx> Foldable<'ctx> for FoldableVecRcResult {
             return None;
         }
 
-        let ExecutedCallResult { result, triplet } = self.call_results[self.cursor].clone();
+        let ResolvedCallResult { result, triplet } = self.call_results[self.cursor].clone();
         let tetraplet = SecurityTetraplet {
             triplet,
             json_path: String::new(),
         };
 
-        let result = FoldableResult::RcValue((result, tetraplet));
+        let result = IterableItemType::RcValue((result, tetraplet));
         Some(result)
     }
 }
 
-impl<'ctx> Foldable<'ctx> for FoldableJsonPathResult {
-    type Item = FoldableResult<'ctx>;
+impl<'ctx> Iterable<'ctx> for IterableJsonPathResult {
+    type Item = IterableItemType<'ctx>;
 
     fn next(&mut self) -> bool {
         foldable_next!(self)
     }
 
-    fn back(&mut self) -> bool {
+    fn prev(&mut self) -> bool {
         foldable_prev!(self)
     }
 
@@ -167,20 +180,20 @@ impl<'ctx> Foldable<'ctx> for FoldableJsonPathResult {
         }
 
         let jvalue = &self.jvalues[self.cursor];
-        let result = FoldableResult::RefRef((jvalue, &self.tetraplet));
+        let result = IterableItemType::RefRef((jvalue, &self.tetraplet));
 
         Some(result)
     }
 }
 
-impl<'ctx> Foldable<'ctx> for FoldableVecJsonPathResult {
-    type Item = FoldableResult<'ctx>;
+impl<'ctx> Iterable<'ctx> for IterableVecJsonPathResult {
+    type Item = IterableItemType<'ctx>;
 
     fn next(&mut self) -> bool {
         foldable_next!(self)
     }
 
-    fn back(&mut self) -> bool {
+    fn prev(&mut self) -> bool {
         foldable_prev!(self)
     }
 
@@ -191,7 +204,7 @@ impl<'ctx> Foldable<'ctx> for FoldableVecJsonPathResult {
 
         let jvalue = &self.jvalues[self.cursor];
         let tetraplet = &self.tetraplets[self.cursor];
-        let result = FoldableResult::RefRef((jvalue, tetraplet));
+        let result = IterableItemType::RefRef((jvalue, tetraplet));
 
         Some(result)
     }
