@@ -40,7 +40,6 @@ impl<'i> super::ExecutableInstruction<'i> for Xor<'i> {
 #[cfg(test)]
 mod tests {
     use crate::call_evidence::CallEvidencePath;
-    use crate::ExecutedCallResult;
     use crate::JValue;
 
     use aqua_test_utils::call_vm;
@@ -90,18 +89,11 @@ mod tests {
 
         let res = call_vm!(vm, "asd", script, "[]", "[]");
         let call_path: CallEvidencePath = serde_json::from_str(&res.data).expect("should be valid json");
+        let executed_call_result = Call(Executed(Rc::new(JValue::String(String::from("res")))));
 
         assert_eq!(call_path.len(), 2);
         assert_eq!(call_path[0], Call(CallServiceFailed(String::from(r#""error""#))));
-        assert!(matches!(
-            call_path[1],
-            Call(Executed(Rc::new(
-                ExecutedCallResult {
-                    result: JValue::String(String::from("res")),
-                    triplet: _,
-                }
-            )))
-        ));
+        assert_eq!(call_path[1], executed_call_result);
 
         let script = String::from(
             r#"
@@ -115,15 +107,7 @@ mod tests {
         let call_path: CallEvidencePath = serde_json::from_str(&res.data).expect("should be valid json");
 
         assert_eq!(call_path.len(), 1);
-        assert!(matches!(
-            call_path[0],
-            Call(Executed(Rc::new(
-                ExecutedCallResult {
-                    result: JValue::String(String::from("res")),
-                    triplet: _,
-                }
-            )))
-        ));
+        assert_eq!(call_path[0], executed_call_result);
     }
 
     #[test]
@@ -158,17 +142,7 @@ mod tests {
         let result_path: CallEvidencePath = serde_json::from_str(&result.data).expect("should be valid json");
 
         let res = String::from("res");
-        let executed_call_result = ExecutedCallResult {
-            result: JValue::String(res),
-            triplet: crate::SecurityTetraplet {
-                pub_key: fallible_service_id,
-                service_id: String::from("service_id_2"),
-                function_name: String::from("local_fn_name"),
-                json_path: String::new(),
-            },
-        };
-
-        let executed_call_result = Rc::new(executed_call_result);
+        let executed_call_result = Rc::new(JValue::String(res));
 
         let right_path = vec![
             Par(2, 2),

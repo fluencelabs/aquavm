@@ -29,7 +29,6 @@ pub(crate) use fold::FoldState;
 
 pub(self) use crate::call_evidence::CallEvidenceCtx;
 pub(self) use crate::call_evidence::EvidenceState;
-pub(self) use jvaluable_result::JValuableResult;
 
 use crate::Result;
 

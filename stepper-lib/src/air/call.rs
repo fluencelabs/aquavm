@@ -23,8 +23,8 @@ use resolved_call::ResolvedCall;
 use super::CallEvidenceCtx;
 use super::ExecutionCtx;
 use crate::log_instruction;
+use crate::AquamarineError::JValueJsonPathError;
 use crate::AquamarineError::VariableNotFound;
-use crate::AquamarineError::VariableNotInJsonPath;
 use crate::Result;
 
 use air_parser::ast::Call;
@@ -54,7 +54,7 @@ impl<'i> super::ExecutableInstruction<'i> for Call<'i> {
                 exec_ctx.subtree_complete = false;
                 return Ok(());
             }
-            Err(VariableNotInJsonPath(variable, json_path, json_path_err)) => {
+            Err(JValueJsonPathError(variable, json_path, json_path_err)) => {
                 log::trace!(
                     r#"variable not found with json path "{}" in {:?} with error "{:?}", waiting"#,
                     json_path,
@@ -74,9 +74,7 @@ impl<'i> super::ExecutableInstruction<'i> for Call<'i> {
 #[cfg(test)]
 mod tests {
     use crate::call_evidence::CallEvidencePath;
-    use crate::ExecutedCallResult;
     use crate::JValue;
-    use crate::SecurityTetraplet;
 
     use aqua_test_utils::call_vm;
     use aqua_test_utils::create_aqua_vm;
@@ -103,26 +101,15 @@ mod tests {
         let function_name = String::from("local_fn_name");
         let script = format!(
             r#"
-               (call %current_peer_id% ("{}" "{}") [] result_name
+               (call %current_peer_id% ("{}" "{}") [] result_name)
             "#,
-            service_id, service_function_name
+            service_id, function_name
         );
 
         let res = call_vm!(vm, "asd", script.clone(), "[]", "[]");
         let call_path: CallEvidencePath = serde_json::from_str(&res.data).expect("should be a valid json");
 
-        let function_arguments = String::from("[]"); // empty function arguments
-        let tetraplet = SecurityTetraplet {
-            pub_key: vm_peer_id.clone(),
-            service_id,
-            function_name,
-            json_path: function_arguments,
-        };
-
-        let executed_call_state = Call(Executed(Rc::new(ExecutedCallResult {
-            result: JValue::String(String::from("test")),
-            triplet: tetraplet,
-        })));
+        let executed_call_state = Call(Executed(Rc::new(JValue::String(String::from("test")))));
         assert_eq!(call_path.len(), 1);
         assert_eq!(call_path[0], executed_call_state);
         assert!(res.next_peer_pks.is_empty());
@@ -134,8 +121,7 @@ mod tests {
             vm_peer_id, service_id, function_name
         );
 
-        let res_with_peer_id = call_vm!(vm, "asd", script, "[]", "[]");
-        let call_path: CallEvidencePath = serde_json::from_str(&res.data).expect("should be a valid json");
+        let res_with_peer_id = call_vm!(vm, "asd", script.clone(), "[]", "[]");
         assert_eq!(res_with_peer_id, res);
 
         // test that empty string for data works
@@ -229,25 +215,14 @@ mod tests {
         let res = call_vm!(vm, "asd", script, "[]", res.data);
         let call_path: CallEvidencePath = serde_json::from_str(&res.data).expect("should be a valid json");
 
-        let function_arguments = json!(["arg1", "arg2", "arg3_value"]).to_string();
-        let tetraplet = SecurityTetraplet {
-            pub_key: vm_peer_id,
-            service_id,
-            function_name,
-            json_path: function_arguments,
-        };
-
         assert_eq!(call_path.len(), 2);
-        assert!(matches!(
+        assert_eq!(
             call_path[1],
-            Call(Executed(Rc::new(ExecutedCallResult {
-                result: JValue::Array(vec![
-                    JValue::String(String::from("arg1")),
-                    JValue::String(String::from("arg2")),
-                    JValue::String(String::from("arg3_value")),
-                ]),
-                triplet,
-            })))
-        ));
+            Call(Executed(Rc::new(JValue::Array(vec![
+                JValue::String(String::from("arg1")),
+                JValue::String(String::from("arg2")),
+                JValue::String(String::from("arg3_value")),
+            ]))))
+        );
     }
 }

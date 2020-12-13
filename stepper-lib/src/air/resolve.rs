@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-use super::ExecutionCtx;
 use super::fold::JValuableResult;
+use super::ExecutionCtx;
 use crate::AValue;
 use crate::AquamarineError;
 use crate::JValue;
@@ -72,7 +72,7 @@ pub(crate) fn resolve_to_call_result<'name, 'i, 'ctx>(
 
     match value {
         AValue::JValueFoldCursor(fold_state) => {
-            let peeked_value = fold_state.iterable.peek(ctx).unwrap();
+            let peeked_value = fold_state.iterable.peek().unwrap();
             Ok(Box::new(peeked_value))
         }
         AValue::JValueRef(value) => Ok(Box::new(value.clone())),

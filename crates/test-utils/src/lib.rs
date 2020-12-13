@@ -44,7 +44,7 @@ pub fn create_aqua_vm(
 ) -> AquamarineVM {
     let call_service_descriptor = HostImportDescriptor {
         host_exported_func: call_service,
-        argument_types: vec![IType::String, IType::String, IType::String],
+        argument_types: vec![IType::String, IType::String, IType::String, IType::String],
         output_type: Some(IType::Record(0)),
         error_handler: None,
     };

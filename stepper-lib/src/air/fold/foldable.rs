@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-use crate::air::ExecutionCtx;
-use crate::AValue;
+use crate::ExecutedCallResult;
 use crate::JValue;
 use crate::SecurityTetraplet;
-use crate::ExecutedCallResult;
 
 use std::rc::Rc;
 
@@ -32,24 +30,28 @@ pub(crate) trait Foldable<'ctx> {
     fn peek(&'ctx self) -> Option<Self::Item>;
 }
 
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) enum FoldableResult<'ctx> {
     RefRef((&'ctx JValue, &'ctx SecurityTetraplet)),
     RefValue((&'ctx JValue, SecurityTetraplet)),
     RcValue((Rc<JValue>, SecurityTetraplet)),
 }
 
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) struct FoldableRcResult {
     pub call_result: ExecutedCallResult,
     pub cursor: usize,
     pub len: usize,
 }
 
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) struct FoldableVecRcResult {
     pub call_results: Vec<ExecutedCallResult>,
     pub cursor: usize,
     pub len: usize,
 }
 
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) struct FoldableJsonPathResult {
     pub jvalues: Vec<JValue>,
     pub tetraplet: SecurityTetraplet,
@@ -57,6 +59,7 @@ pub(crate) struct FoldableJsonPathResult {
     pub len: usize,
 }
 
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) struct FoldableVecJsonPathResult {
     pub jvalues: Vec<JValue>,
     pub tetraplets: Vec<SecurityTetraplet>,
@@ -66,24 +69,24 @@ pub(crate) struct FoldableVecJsonPathResult {
 
 macro_rules! foldable_next {
     ($self: expr) => {{
-        if $self.cursor < $self.len {
+        if $self.cursor + 1 < $self.len {
             $self.cursor += 1;
             true
         } else {
             false
         }
-    }}
+    }};
 }
 
 macro_rules! foldable_prev {
     ($self: expr) => {{
-        if $self.cursor != 0 {
+        if $self.cursor >= 1 {
             $self.cursor -= 1;
             true
         } else {
             false
         }
-    }}
+    }};
 }
 
 impl<'ctx> Foldable<'ctx> for FoldableRcResult {
@@ -98,17 +101,19 @@ impl<'ctx> Foldable<'ctx> for FoldableRcResult {
     }
 
     fn peek(&'ctx self) -> Option<Self::Item> {
-        if self.len == 0  || self.cursor >= self.len {
+        use std::ops::Deref;
+
+        if self.len == 0 || self.cursor >= self.len {
             return None;
         }
 
         let triplet = self.call_result.triplet.clone();
         let tetraplet = SecurityTetraplet {
             triplet,
-            json_path: self.len.into()
+            json_path: self.len.to_string(),
         };
 
-        let jvalue = match &self.call_result.result {
+        let jvalue = match &self.call_result.result.deref() {
             JValue::Array(array) => &array[self.cursor],
             _ => unimplemented!("this jvalue is set only by fold instruction, so it must have array type"),
         };
@@ -130,14 +135,14 @@ impl<'ctx> Foldable<'ctx> for FoldableVecRcResult {
     }
 
     fn peek(&'ctx self) -> Option<Self::Item> {
-        if self.len == 0  || self.cursor >= self.len {
+        if self.len == 0 || self.cursor >= self.len {
             return None;
         }
 
-        let ExecutedCallResult {result, triplet} = self.call_results[self.cursor].clone();
+        let ExecutedCallResult { result, triplet } = self.call_results[self.cursor].clone();
         let tetraplet = SecurityTetraplet {
             triplet,
-            json_path: String::new()
+            json_path: String::new(),
         };
 
         let result = FoldableResult::RcValue((result, tetraplet));

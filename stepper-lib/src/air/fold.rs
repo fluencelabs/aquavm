@@ -57,6 +57,7 @@ pub(crate) struct FoldState<'i> {
 
 impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
+        use std::ops::Deref;
         use AquamarineError::*;
 
         log_instruction!(fold, exec_ctx, call_ctx);
@@ -65,7 +66,7 @@ impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
             InstructionValue::Variable(name) => {
                 match exec_ctx.data_cache.get(*name) {
                     Some(AValue::JValueRef(call_result)) => {
-                        let len = match &call_result.result {
+                        let len = match &call_result.result.deref() {
                             JValue::Array(array) => {
                                 if array.is_empty() {
                                     // skip fold if array is empty
@@ -73,7 +74,7 @@ impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
                                 }
                                 array.len()
                             }
-                            v => return Err(IncompatibleJValueType(v.clone(), "array")),
+                            v => return Err(IncompatibleJValueType((*v).clone(), "array")),
                         };
 
                         let foldable = FoldableRcResult {
@@ -85,29 +86,41 @@ impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
                         Box::new(foldable)
                     }
                     Some(AValue::JValueAccumulatorRef(acc)) => {
-                        let call_results = acc.borrow().iter().cloned().collect::<Vec<_>>();
+                        let acc = acc.borrow();
+                        if acc.is_empty() {
+                            return Ok(());
+                        }
+
+                        let call_results = acc.iter().cloned().collect::<Vec<_>>();
 
                         let foldable = FoldableVecRcResult {
                             call_results,
                             cursor: 0,
-                            len: acc.borrow().len(),
+                            len: acc.len(),
                         };
 
                         Box::new(foldable)
                     }
-                    _ => unreachable!(),
+                    _ => unreachable!("1"),
                 }
             }
             InstructionValue::JsonPath { variable, path } => match exec_ctx.data_cache.get(*variable) {
                 Some(AValue::JValueRef(variable)) => {
                     use jsonpath_lib::select;
-                    let jvalues = select(&variable.result, path).unwrap();
+
+                    let jvalues = select(&variable.result, path)
+                        .map_err(|e| JValueJsonPathError(variable.result.deref().clone(), path.to_string(), e))?;
+
                     let len = jvalues.len();
+                    if len == 0 {
+                        return Ok(());
+                    }
+
                     let jvalues = jvalues.into_iter().cloned().collect();
 
                     let tetraplet = SecurityTetraplet {
                         triplet: variable.triplet.clone(),
-                        json_path: path.to_string()
+                        json_path: path.to_string(),
                     };
 
                     let foldable = FoldableJsonPathResult {
@@ -123,7 +136,12 @@ impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
                     use jsonpath_lib::select_with_iter;
 
                     let acc = acc.borrow();
-                    let (jvalues, tetraplet_indices) = select_with_iter(acc.iter().map(|v| &v.result), path).unwrap();
+                    if acc.is_empty() {
+                        return Ok(());
+                    }
+
+                    let (jvalues, tetraplet_indices) = select_with_iter(acc.iter().map(|v| v.result.deref()), path)
+                        .map_err(|e| JValueAccJsonPathError(acc.clone(), path.to_string(), e))?;
                     let jvalues = jvalues.into_iter().cloned().collect();
                     let tetraplets = tetraplet_indices
                         .iter()
@@ -143,9 +161,9 @@ impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
 
                     Box::new(foldable)
                 }
-                _ => unreachable!(),
+                _ => unreachable!("asdsad"),
             },
-            _ => unreachable!(),
+            _ => unreachable!("aaaa"),
         };
 
         let fold_state = FoldState {
@@ -311,7 +329,9 @@ mod tests {
             )"#,
         );
 
+        println!("set variables\n");
         let res = call_vm!(set_variable_vm, "", rfold.clone(), "[]", "[]");
+        println!("execute rfold\n");
         let res = call_vm!(vm, "", rfold, "[]", res.data);
         let res: CallEvidencePath = serde_json::from_str(&res.data).expect("should be valid call evidence path");
 
@@ -440,6 +460,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn json_path() {
         use crate::call_evidence::CallResult::*;
         use crate::call_evidence::EvidenceState::*;

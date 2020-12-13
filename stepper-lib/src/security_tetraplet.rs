@@ -17,10 +17,12 @@
 use crate::air::ExecutionCtx;
 use crate::air::ResolvedTriplet;
 
+use serde::Deserialize;
+use serde::Serialize;
 use std::rc::Rc;
 
 /// Describes an origin returned corresponding value.
-#[derive(Clone)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash, Serialize, Deserialize)]
 pub struct SecurityTetraplet {
     // describes location of the value in the network.
     pub triplet: Rc<ResolvedTriplet>,
