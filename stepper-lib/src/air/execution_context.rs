@@ -22,7 +22,6 @@ use std::fmt::Display;
 use std::fmt::Formatter;
 
 /// Execution context contains all necessary information needed to execute aqua script.
-// #[derive(Clone, Default, Debug)]
 pub(crate) struct ExecutionCtx<'i> {
     /// Contains all set variables.
     // TODO: use shared string (Rc<String>) to avoid copying.

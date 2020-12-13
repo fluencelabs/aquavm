@@ -67,7 +67,6 @@ pub struct ResolvedCallResult {
     pub triplet: Rc<ResolvedTriplet>,
 }
 
-// #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub(crate) enum AValue<'i> {
     JValueRef(ResolvedCallResult),
     JValueAccumulatorRef(RefCell<Vec<ResolvedCallResult>>),

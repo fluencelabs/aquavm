@@ -16,6 +16,7 @@
 
 mod iterable;
 mod jvaluable_result;
+mod utils;
 
 use iterable::*;
 pub(crate) use jvaluable_result::JValuableResult;
@@ -26,150 +27,46 @@ use super::Instruction;
 use crate::log_instruction;
 use crate::AValue;
 use crate::AquamarineError;
-use crate::JValue;
 use crate::ResolvedCallResult;
 use crate::Result;
-use crate::SecurityTetraplet;
 
 use air_parser::ast::Fold;
-use air_parser::ast::InstructionValue;
 use air_parser::ast::Next;
 
 use std::collections::HashMap;
 use std::rc::Rc;
 
-/*
- (fold Iterable i
-   (par
-     (call fn [i] acc[])
-     (next i)
-   )
- )
-*/
+use utils::IterableValue;
 
 pub(crate) struct FoldState<'i> {
-    pub(crate) iterable: Box<dyn for<'ctx> Iterable<'ctx, Item = IterableItemType<'ctx>>>,
+    pub(crate) iterable: IterableValue,
     pub(crate) instr_head: Rc<Instruction<'i>>,
     // map of met variables inside this (not any inner) fold block with their initial values
     pub(crate) met_variables: HashMap<&'i str, ResolvedCallResult>,
 }
 
+impl<'i> FoldState<'i> {
+    pub fn new(iterable: IterableValue, instr_head: Rc<Instruction<'i>>) -> Self {
+        Self {
+            iterable,
+            instr_head,
+            met_variables: HashMap::new(),
+        }
+    }
+}
+
 impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
-        use std::ops::Deref;
-        use AquamarineError::*;
+        use AquamarineError::MultipleFoldStates;
 
         log_instruction!(fold, exec_ctx, call_ctx);
 
-        let iterable: Box<dyn for<'ctx> Iterable<'ctx, Item = IterableItemType<'ctx>>> = match &self.iterable {
-            InstructionValue::Variable(name) => {
-                match exec_ctx.data_cache.get(*name) {
-                    Some(AValue::JValueRef(call_result)) => {
-                        let len = match &call_result.result.deref() {
-                            JValue::Array(array) => {
-                                if array.is_empty() {
-                                    // skip fold if array is empty
-                                    return Ok(());
-                                }
-                                array.len()
-                            }
-                            v => return Err(IncompatibleJValueType((*v).clone(), "array")),
-                        };
-
-                        let foldable = IterableResolvedCall {
-                            call_result: call_result.clone(),
-                            cursor: 0,
-                            len,
-                        };
-
-                        Box::new(foldable)
-                    }
-                    Some(AValue::JValueAccumulatorRef(acc)) => {
-                        let acc = acc.borrow();
-                        if acc.is_empty() {
-                            return Ok(());
-                        }
-
-                        let call_results = acc.iter().cloned().collect::<Vec<_>>();
-
-                        let foldable = IterableVecResolvedCall {
-                            call_results,
-                            cursor: 0,
-                            len: acc.len(),
-                        };
-
-                        Box::new(foldable)
-                    }
-                    _ => unreachable!("1"),
-                }
-            }
-            InstructionValue::JsonPath { variable, path } => match exec_ctx.data_cache.get(*variable) {
-                Some(AValue::JValueRef(variable)) => {
-                    use jsonpath_lib::select;
-
-                    let jvalues = select(&variable.result, path)
-                        .map_err(|e| JValueJsonPathError(variable.result.deref().clone(), path.to_string(), e))?;
-
-                    let len = jvalues.len();
-                    if len == 0 {
-                        return Ok(());
-                    }
-
-                    let jvalues = jvalues.into_iter().cloned().collect();
-
-                    let tetraplet = SecurityTetraplet {
-                        triplet: variable.triplet.clone(),
-                        json_path: path.to_string(),
-                    };
-
-                    let foldable = IterableJsonPathResult {
-                        jvalues,
-                        tetraplet,
-                        cursor: 0,
-                        len,
-                    };
-
-                    Box::new(foldable)
-                }
-                Some(AValue::JValueAccumulatorRef(acc)) => {
-                    use jsonpath_lib::select_with_iter;
-
-                    let acc = acc.borrow();
-                    if acc.is_empty() {
-                        return Ok(());
-                    }
-
-                    let (jvalues, tetraplet_indices) = select_with_iter(acc.iter().map(|v| v.result.deref()), path)
-                        .map_err(|e| JValueAccJsonPathError(acc.clone(), path.to_string(), e))?;
-                    let jvalues = jvalues.into_iter().cloned().collect();
-                    let tetraplets = tetraplet_indices
-                        .iter()
-                        .map(|&id| &acc[id].triplet)
-                        .map(|triplet| SecurityTetraplet {
-                            triplet: triplet.clone(),
-                            json_path: path.to_string(),
-                        })
-                        .collect::<Vec<_>>();
-
-                    let foldable = IterableVecJsonPathResult {
-                        jvalues,
-                        tetraplets,
-                        cursor: 0,
-                        len: acc.len(),
-                    };
-
-                    Box::new(foldable)
-                }
-                _ => unreachable!("asdsad"),
-            },
-            _ => unreachable!("aaaa"),
+        let iterable = match utils::construct_iterable_value(&self.iterable, exec_ctx)? {
+            Some(iterable) => iterable,
+            None => return Ok(()),
         };
 
-        let fold_state = FoldState {
-            iterable,
-            instr_head: self.instruction.clone(),
-            met_variables: HashMap::new(),
-        };
+        let fold_state = FoldState::new(iterable, self.instruction.clone());
 
         let previous_value = exec_ctx
             .data_cache
@@ -182,29 +79,7 @@ impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
 
         self.instruction.execute(exec_ctx, call_ctx)?;
 
-        let fold_state = match exec_ctx.data_cache.remove(self.iterator) {
-            Some(AValue::JValueFoldCursor(fold_state)) => fold_state,
-            _ => unreachable!("fold cursor is changed only inside fold block"),
-        };
-
-        for (variable_name, _) in fold_state.met_variables {
-            exec_ctx.data_cache.remove(variable_name);
-        }
-        exec_ctx.met_folds.pop_back();
-
-        if let Some(fold_block_name) = exec_ctx.met_folds.back() {
-            let fold_state = match exec_ctx.data_cache.get(*fold_block_name) {
-                Some(AValue::JValueFoldCursor(fold_state)) => fold_state,
-                _ => unreachable!("fold block data must be represented as fold cursor"),
-            };
-
-            let mut upper_fold_values = HashMap::new();
-            for (variable_name, variable) in fold_state.met_variables.iter() {
-                upper_fold_values.insert(variable_name.to_string(), AValue::JValueRef(variable.clone()));
-            }
-
-            exec_ctx.data_cache.extend(upper_fold_values);
-        }
+        cleanup_variables(exec_ctx, &self.iterator);
 
         Ok(())
     }
@@ -255,9 +130,36 @@ impl<'i> super::ExecutableInstruction<'i> for Next<'i> {
     }
 }
 
+fn cleanup_variables(exec_ctx: &mut ExecutionCtx<'_>, iterator: &str) {
+    let fold_state = match exec_ctx.data_cache.remove(iterator) {
+        Some(AValue::JValueFoldCursor(fold_state)) => fold_state,
+        _ => unreachable!("fold cursor is changed only inside fold block"),
+    };
+
+    for (variable_name, _) in fold_state.met_variables {
+        exec_ctx.data_cache.remove(variable_name);
+    }
+    exec_ctx.met_folds.pop_back();
+
+    // TODO: fix 3 or more inner folds behaviour
+    if let Some(fold_block_name) = exec_ctx.met_folds.back() {
+        let fold_state = match exec_ctx.data_cache.get(*fold_block_name) {
+            Some(AValue::JValueFoldCursor(fold_state)) => fold_state,
+            _ => unreachable!("fold block data must be represented as fold cursor"),
+        };
+
+        let mut upper_fold_values = HashMap::new();
+        for (variable_name, variable) in fold_state.met_variables.iter() {
+            upper_fold_values.insert(variable_name.to_string(), AValue::JValueRef(variable.clone()));
+        }
+
+        exec_ctx.data_cache.extend(upper_fold_values);
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::call_evidence::CallEvidencePath;
+    use crate::CallEvidencePath;
     use crate::JValue;
 
     use aqua_test_utils::create_aqua_vm;

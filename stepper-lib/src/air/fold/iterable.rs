@@ -49,40 +49,76 @@ pub(crate) enum IterableItemType<'ctx> {
 /// Used for iterating over JValue of array type.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) struct IterableResolvedCall {
-    pub call_result: ResolvedCallResult,
-    pub cursor: usize,
-    pub len: usize,
+    pub(crate) call_result: ResolvedCallResult,
+    pub(crate) cursor: usize,
+    pub(crate) len: usize,
+}
+
+impl IterableResolvedCall {
+    pub(crate) fn init(call_result: ResolvedCallResult, len: usize) -> Self {
+        Self {
+            call_result,
+            cursor: 0,
+            len,
+        }
+    }
 }
 
 /// Used for iterating over accumulator with JValues.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) struct IterableVecResolvedCall {
-    pub call_results: Vec<ResolvedCallResult>,
-    pub cursor: usize,
-    pub len: usize,
+    pub(crate) call_results: Vec<ResolvedCallResult>,
+    pub(crate) cursor: usize,
+}
+
+impl IterableVecResolvedCall {
+    pub(crate) fn init(call_results: Vec<ResolvedCallResult>) -> Self {
+        Self {
+            call_results,
+            cursor: 0,
+        }
+    }
 }
 
 /// Used for iterating over a result of applied to a JValue json path.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) struct IterableJsonPathResult {
-    pub jvalues: Vec<JValue>,
-    pub tetraplet: SecurityTetraplet,
-    pub cursor: usize,
-    pub len: usize,
+    pub(crate) jvalues: Vec<JValue>,
+    pub(crate) tetraplet: SecurityTetraplet,
+    pub(crate) cursor: usize,
+}
+
+impl IterableJsonPathResult {
+    pub(crate) fn init(jvalues: Vec<JValue>, tetraplet: SecurityTetraplet) -> Self {
+        Self {
+            jvalues,
+            tetraplet,
+            cursor: 0,
+        }
+    }
 }
 
 /// Used for iterating over a result of applied to an accumulator json path.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) struct IterableVecJsonPathResult {
-    pub jvalues: Vec<JValue>,
-    pub tetraplets: Vec<SecurityTetraplet>,
-    pub cursor: usize,
-    pub len: usize,
+    pub(crate) jvalues: Vec<JValue>,
+    pub(crate) tetraplets: Vec<SecurityTetraplet>,
+    pub(crate) cursor: usize,
+}
+
+impl IterableVecJsonPathResult {
+    pub(crate) fn init(jvalues: Vec<JValue>, tetraplets: Vec<SecurityTetraplet>) -> Self {
+        Self {
+            jvalues,
+            tetraplets,
+            cursor: 0,
+        }
+    }
 }
 
 macro_rules! foldable_next {
-    ($self: expr) => {{
-        if $self.cursor + 1 < $self.len {
+    ($self: expr, $len:expr) => {{
+        if $self.cursor + 1 < $len {
             $self.cursor += 1;
             true
         } else {
@@ -106,7 +142,7 @@ impl<'ctx> Iterable<'ctx> for IterableResolvedCall {
     type Item = IterableItemType<'ctx>;
 
     fn next(&mut self) -> bool {
-        foldable_next!(self)
+        foldable_next!(self, self.len)
     }
 
     fn prev(&mut self) -> bool {
@@ -116,7 +152,7 @@ impl<'ctx> Iterable<'ctx> for IterableResolvedCall {
     fn peek(&'ctx self) -> Option<Self::Item> {
         use std::ops::Deref;
 
-        if self.len == 0 || self.cursor >= self.len {
+        if self.len == 0 {
             return None;
         }
 
@@ -140,7 +176,7 @@ impl<'ctx> Iterable<'ctx> for IterableVecResolvedCall {
     type Item = IterableItemType<'ctx>;
 
     fn next(&mut self) -> bool {
-        foldable_next!(self)
+        foldable_next!(self, self.call_results.len())
     }
 
     fn prev(&mut self) -> bool {
@@ -148,7 +184,7 @@ impl<'ctx> Iterable<'ctx> for IterableVecResolvedCall {
     }
 
     fn peek(&'ctx self) -> Option<Self::Item> {
-        if self.len == 0 || self.cursor >= self.len {
+        if self.call_results.is_empty() {
             return None;
         }
 
@@ -167,7 +203,7 @@ impl<'ctx> Iterable<'ctx> for IterableJsonPathResult {
     type Item = IterableItemType<'ctx>;
 
     fn next(&mut self) -> bool {
-        foldable_next!(self)
+        foldable_next!(self, self.jvalues.len())
     }
 
     fn prev(&mut self) -> bool {
@@ -175,7 +211,7 @@ impl<'ctx> Iterable<'ctx> for IterableJsonPathResult {
     }
 
     fn peek(&'ctx self) -> Option<Self::Item> {
-        if self.len == 0 {
+        if self.jvalues.is_empty() {
             return None;
         }
 
@@ -190,7 +226,7 @@ impl<'ctx> Iterable<'ctx> for IterableVecJsonPathResult {
     type Item = IterableItemType<'ctx>;
 
     fn next(&mut self) -> bool {
-        foldable_next!(self)
+        foldable_next!(self, self.jvalues.len())
     }
 
     fn prev(&mut self) -> bool {
@@ -198,7 +234,7 @@ impl<'ctx> Iterable<'ctx> for IterableVecJsonPathResult {
     }
 
     fn peek(&'ctx self) -> Option<Self::Item> {
-        if self.len == 0 {
+        if self.jvalues.is_empty() {
             return None;
         }
 
