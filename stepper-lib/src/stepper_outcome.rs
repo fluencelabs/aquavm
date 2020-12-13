@@ -27,7 +27,7 @@ pub struct StepperOutcome {
     pub ret_code: i32,
 
     /// Contains data if ret_code == 0, otherwise error message (that could be empty string).
-    pub call_path: String,
+    pub data: String,
 
     /// Public keys of peers that should receive data.
     pub next_peer_pks: Vec<String>,

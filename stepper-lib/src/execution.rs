@@ -46,11 +46,11 @@ fn execute_aqua_impl(init_peer_id: String, aqua: String, prev_path: String, path
     aqua.execute(&mut exec_ctx, &mut call_ctx)?;
 
     let next_peer_pks = dedup(exec_ctx.next_peer_pks);
-    let serialized_call_path = serde_json::to_string(&call_ctx.new_path).map_err(CallSeError)?;
+    let data = serde_json::to_string(&call_ctx.new_path).map_err(CallSeError)?;
 
     Ok(StepperOutcome {
         ret_code: STEPPER_SUCCESS,
-        call_path: serialized_call_path,
+        data,
         next_peer_pks,
     })
 }
