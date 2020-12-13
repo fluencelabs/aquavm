@@ -41,14 +41,14 @@ pub(crate) fn resolve_to_args<'i>(
         InstructionValue::InitPeerId => handle_string_arg(ctx.init_peer_id.as_str(), ctx),
         InstructionValue::Literal(value) => handle_string_arg(value, ctx),
         InstructionValue::Variable(name) => {
-            let resolved = resolve_to_call_result(name, ctx)?;
+            let resolved = resolve_to_jvaluable_result(name, ctx)?;
             let tetraplets = resolved.as_tetraplets();
             let jvalue = resolved.into_jvalue();
 
             Ok((jvalue, tetraplets))
         }
         InstructionValue::JsonPath { variable, path } => {
-            let resolved = resolve_to_call_result(variable, ctx)?;
+            let resolved = resolve_to_jvaluable_result(variable, ctx)?;
             let (jvalue, tetraplets) = resolved.apply_json_path_with_tetraplets(path)?;
             let jvalue = jvalue.into_iter().cloned().collect::<Vec<_>>();
             let jvalue = JValue::Array(jvalue);
@@ -58,8 +58,8 @@ pub(crate) fn resolve_to_args<'i>(
     }
 }
 
-/// Takes variable's value from `ExecutionCtx::data_cache` by name.
-pub(crate) fn resolve_to_call_result<'name, 'i, 'ctx>(
+/// Constructs jvaluable result from `ExecutionCtx::data_cache` by name.
+pub(crate) fn resolve_to_jvaluable_result<'name, 'i, 'ctx>(
     name: &'name str,
     ctx: &'ctx ExecutionCtx<'i>,
 ) -> Result<Box<dyn JValuableResult + 'ctx>> {
@@ -71,11 +71,11 @@ pub(crate) fn resolve_to_call_result<'name, 'i, 'ctx>(
         .ok_or_else(|| VariableNotFound(name.to_string()))?;
 
     match value {
+        AValue::JValueRef(value) => Ok(Box::new(value.clone())),
+        AValue::JValueAccumulatorRef(acc) => Ok(Box::new(acc.borrow())),
         AValue::JValueFoldCursor(fold_state) => {
             let peeked_value = fold_state.iterable.peek().unwrap();
             Ok(Box::new(peeked_value))
         }
-        AValue::JValueRef(value) => Ok(Box::new(value.clone())),
-        AValue::JValueAccumulatorRef(acc) => Ok(Box::new(acc.borrow())),
     }
 }
