@@ -173,10 +173,10 @@ jobs:
       - name: Set project version to MAX_VERSION & add branch to its name
         run: |
           PATH="~/.cargo/bin:$PATH"
-          toml set Config.toml package.version "${{ env.MAX_VERSION }}" | sponge Config.toml
+          toml set Cargo.toml package.version "${{ env.MAX_VERSION }}" | sponge Cargo.toml
 
-          NAME=$(toml get Config.toml package.name)
-          toml set Config.toml package.name "$NAME_$BRANCH_NAME" | sponge Config.toml
+          NAME=$(toml get Cargo.toml package.name)
+          toml set Cargo.toml package.name "$NAME_$BRANCH_NAME" | sponge Cargo.toml
         working-directory: crates/air-interpreter-wasm
 
       - name: Login to crates.io
