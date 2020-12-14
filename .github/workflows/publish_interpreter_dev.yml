@@ -54,8 +54,8 @@ jobs:
           profile: minimal
 
 ### Calculate MAX_VERSION
-      - name: Install jq
-        run: sudo apt-get update && sudo apt-get --yes --force-yes install jq
+      - name: Install jq & sponge
+        run: sudo apt-get update && sudo apt-get --yes --force-yes install jq moreutils
 
       - name: Install cargo-show
         run: cargo install cargo-show
@@ -163,12 +163,11 @@ jobs:
       - name: Copy aquamarine.wasm to air-interpreter-wasm
         run: cp target/wasm32-wasi/release/aquamarine.wasm crates/air-interpreter-wasm/aquamarine.wasm
 
-      - name: Set project version to MAX_VERSION
+      - name: Set project version to MAX_VERSION & add branch to its name
         run: |
+          PATH="~/.cargo/bin:$PATH"
           toml set Config.toml package.version "${{ env.MAX_VERSION }}" | sponge Config.toml
 
-      - name: Add branch to project name
-        run: |
           NAME=$(toml get Config.toml package.name)
           toml set Config.toml package.name "$NAME_$BRANCH_NAME" | sponge Config.toml
         working-directory: crates/air-interpreter-wasm
