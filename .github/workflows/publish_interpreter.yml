@@ -130,8 +130,8 @@ jobs:
           token: ${{ secrets.NPM_TOKEN }}
 
 ### === Rust package release ===
-      - name: Install fcli toml
-        run: cargo install fcli toml
+      - name: Install fcli toml-cli
+        run: cargo install fcli toml-cli
 
       - name: Build aquamarine.wasm for node
         run: fce build --release -p aquamarine
