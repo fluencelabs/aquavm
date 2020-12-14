@@ -20,7 +20,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-    ### Install rust & wasm-pack
       - name: Install Rust toolchain
         uses: actions-rs/toolchain@v1
         with:
@@ -28,14 +27,27 @@ jobs:
           target: wasm32-unknown-unknown
           profile: minimal
           override: true
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get --yes --force-yes install jq
+
+      - name: Install cargo-show & cargo-release
+        run: cargo install cargo-show cargo-release
+
+      - name: Get versions from npm & crates.io, and take the highest one
+        run: |
+          yarn global add semver
+          JS_VERSION="$(yarn info --silent @fluencelabs/aquamarine-stepper version)"
+          RS_VERSION="$((cargo show --json air-interpreter-wasm | jq -r .crate.max_version) 2>/dev/null || true)"
+          MAX_VERSION="$(semver "$JS_VERSION" "$RS_VERSION" | tail -n1)"
+          echo "MAX_VERSION=$MAX_VERSION" | tee -a $GITHUB_ENV
+
       - name: Install wasm-pack
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
-    ### Build aquamarine.wasm
-      - run: wasm-pack build $GITHUB_WORKSPACE/stepper --no-typescript --release -d $(pwd)/pkg
+      - name: Build aquamarine.wasm
+        run: wasm-pack build $GITHUB_WORKSPACE/stepper --no-typescript --release -d $(pwd)/pkg
 
-    ### Generate aquamarine.wasm.base64.js
-      - run: sudo apt-get update && sudo apt-get --yes --force-yes install  jq
       - name: Generate aquamarine.wasm.base64.js
         run: |
           cat << EOF > pkg/aquamarine.wasm.base64.js
@@ -57,7 +69,6 @@ jobs:
           cat << EOF > aquamarine.wasm.base64.d.ts
           export const wasmBs64: string;
           EOF
-
         working-directory: pkg
 
       - name: Prepare package.json for publishing
@@ -80,7 +91,7 @@ jobs:
              mv pkg/package_new.json pkg/package.json
 
     ### Get version from NPM registry
-      - run: yarn version --new-version $(yarn info --silent @fluencelabs/aquamarine-stepper version) --no-git-tag-version
+      - run: yarn version --new-version $MAX_VERSION --no-git-tag-version
         working-directory: pkg
     ### Increment patch component of the version
       - run: yarn version --patch --no-git-tag-version

@@ -1,0 +1,8 @@
+[package]
+name = "air-interpreter-wasm"
+version = "0.0.0"
+authors = ["Fluence Labs"]
+edition = "2018"
+
+
+[dependencies]
