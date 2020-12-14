@@ -175,6 +175,6 @@ jobs:
       - name: Login to crates.io
         run: cargo login ${{ secrets.CRATES_IO_TOKEN }}
 
-      - name: Publish
+      - name: Publish to crates.io
         run: cargo publish --allow-dirty
         working-directory: crates/air-interpreter-wasm

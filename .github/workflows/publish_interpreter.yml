@@ -43,19 +43,19 @@ jobs:
           profile: minimal
 
 ### Calculate MAX_VERSION
-      - name: Install jq
-        run: sudo apt-get update && sudo apt-get --yes --force-yes install jq
+      - name: Install jq & sponge
+        run: sudo apt-get update && sudo apt-get --yes --force-yes install jq moreutils
 
-      - name: Install cargo-show, cargo-release & fcli
-        run: cargo install cargo-show cargo-release fcli
+      - name: Install cargo-show
+        run: cargo install cargo-show
 
       - name: Get versions from npm & crates.io, and take the highest one
         run: |
           yarn global add semver
           PATH="$(yarn global bin):$PATH"
-          JS_VERSION="$(yarn info --silent @fluencelabs/aquamarine-stepper version)"
+          JS_VERSION="$(yarn info --silent @fluencelabs/aquamarine-stepper version || true)"
           RS_VERSION="$((cargo show --json air-interpreter-wasm | jq -r .crate.max_version) 2>/dev/null || true)"
-          MAX_VERSION="$(semver "$JS_VERSION" "$RS_VERSION" | tail -n1)"
+          MAX_VERSION="$(semver "$JS_VERSION" "$RS_VERSION" "0.0.0" | tail -n1)"
           echo "MAX_VERSION=$MAX_VERSION" | tee -a $GITHUB_ENV
 
 ### === JavaScript package release ===
@@ -108,7 +108,7 @@ jobs:
              mv pkg/package_new.json pkg/package.json
 
     ### Set version
-      - run: yarn version --new-version $MAX_VERSION --no-git-tag-version
+      - run: yarn version --new-version ${{ env.MAX_VERSION }} --no-git-tag-version
         working-directory: pkg
     ### Increment patch component of the version
       - run: yarn version --patch --no-git-tag-version
@@ -130,7 +130,25 @@ jobs:
           token: ${{ secrets.NPM_TOKEN }}
 
 ### === Rust package release ===
+      - name: Install fcli toml
+        run: cargo install fcli toml
+
       - name: Build aquamarine.wasm for node
         run: fce build --release -p aquamarine
         working-directory: stepper
 
+      - name: Copy aquamarine.wasm to air-interpreter-wasm
+        run: cp target/wasm32-wasi/release/aquamarine.wasm crates/air-interpreter-wasm/aquamarine.wasm
+
+      - name: Set project version to MAX_VERSION
+        run: |
+          PATH="~/.cargo/bin:$PATH"
+          toml set Config.toml package.version "${{ env.MAX_VERSION }}" | sponge Config.toml
+        working-directory: crates/air-interpreter-wasm
+
+      - name: Login to crates.io
+        run: cargo login ${{ secrets.CRATES_IO_TOKEN }}
+
+      - name: Publish to crates.io
+        run: cargo publish --allow-dirty
+        working-directory: crates/air-interpreter-wasm
