@@ -175,7 +175,7 @@ jobs:
           PATH="~/.cargo/bin:$PATH"
           toml set Cargo.toml package.version "${{ env.MAX_VERSION }}" | sponge Cargo.toml
 
-          NAME=$(toml get Cargo.toml package.name)
+          NAME=$(toml get Cargo.toml package.name | jq -r .)
           toml set Cargo.toml package.name "${NAME}_${BRANCH_NAME}" | sponge Cargo.toml
 
           cat Cargo.toml
