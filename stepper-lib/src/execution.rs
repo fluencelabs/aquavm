@@ -29,6 +29,18 @@ use crate::STEPPER_SUCCESS;
 
 pub use prolog::parse;
 
+/*
+Two strategies layers: one for preparation, another for interpretation.
+1 layer:
+    - each strategy is stateful
+    - each strategy takes EvidenceState
+    - they produce
+
+2 layer:
+
+
+ */
+
 pub fn execute_aqua(init_peer_id: String, aqua: String, prev_data: String, data: String) -> StepperOutcome {
     log::trace!(
         "aquamarine version is {}, init user id is {}",

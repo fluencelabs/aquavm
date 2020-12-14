@@ -5,6 +5,8 @@ members = [
     "crates/test-utils",
     "stepper",
     "stepper-lib",
+    "stepper-lib/tests/security_tetraplets/auth_module",
+    "stepper-lib/tests/security_tetraplets/log_storage",
 ]
 
 [profile.release]

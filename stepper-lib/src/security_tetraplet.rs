@@ -32,7 +32,7 @@ pub struct SecurityTetraplet {
 }
 
 impl SecurityTetraplet {
-    /// Create tetraplet for string variables defined in the script
+    /// Create tetraplet for string literals defined in the script
     /// such as variable_1, variable_2 here "(call ("" "") "" ["variable_1" "variable_2"])".
     pub(crate) fn initiator_tetraplet(exec_ctx: &ExecutionCtx<'_>) -> Self {
         let triplet = ResolvedTriplet {

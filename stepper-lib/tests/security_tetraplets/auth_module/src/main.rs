@@ -14,20 +14,8 @@
  * limitations under the License.
  */
 
-#![warn(rust_2018_idioms)]
-#![deny(
-    dead_code,
-    nonstandard_style,
-    unused_imports,
-    unused_mut,
-    unused_variables,
-    unused_unsafe,
-    unreachable_patterns
-)]
-
 use fluence::fce;
-
-fn main() {}
+use fluence::WasmLoggerBuilder;
 
 #[fce]
 pub struct CallServiceResult {
@@ -35,20 +23,25 @@ pub struct CallServiceResult {
     pub result: String,
 }
 
+const ADMIN_PEER_PK: &str = "12D3KooWEXNUbCXooUwHrHBbrmjsrpHXoEphPwbjQXEGyzbqKnE1";
+
+fn main() {
+    WasmLoggerBuilder::new().build().unwrap();
+}
+
 #[fce]
-pub fn call_service(
-    service_id: String,
-    fn_name: String,
-    args: String,
-    tetraplets: String,
-) -> CallServiceResult {
+pub fn call_service(service_id: String, fn_name: String, args: String, tetraplets: String) -> CallServiceResult {
     println!(
-        "call service invoked with:\n  service_id: {}\n  fn_name: {}\n  args: {}\n  tetraples: {}",
+        "call service called with {} {} {} {}",
         service_id, fn_name, args, tetraplets
     );
 
     CallServiceResult {
         ret_code: 0,
-        result: String::from("[\"result string\"]"),
+        result: String::new(),
     }
+}
+
+fn is_authorized(user_peer_pk: &str) -> bool {
+    user_peer_pk ==
 }

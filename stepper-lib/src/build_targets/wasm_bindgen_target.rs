@@ -19,6 +19,12 @@ use crate::SecurityTetraplet;
 use wasm_bindgen::__rt::std::env::VarError;
 use wasm_bindgen::prelude::*;
 
+// [args] from json path   <--- [t1, t2, ...]
+// [args] as JValue::Array <--- [t1]
+
+// args [[1,2,3],      1, ...]
+// t    [[t1,t2,t3], [t1], ...]
+
 pub(crate) fn call_service(
     service_id: String,
     fn_name: String,

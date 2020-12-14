@@ -84,6 +84,7 @@ impl IterableVecResolvedCall {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) struct IterableJsonPathResult {
     pub(crate) jvalues: Vec<JValue>,
+    // consider adding index for each tetraplet
     pub(crate) tetraplet: SecurityTetraplet,
     pub(crate) cursor: usize,
 }
@@ -108,6 +109,7 @@ pub(crate) struct IterableVecJsonPathResult {
 
 impl IterableVecJsonPathResult {
     pub(crate) fn init(jvalues: Vec<JValue>, tetraplets: Vec<SecurityTetraplet>) -> Self {
+        // TODO: add assert on length
         Self {
             jvalues,
             tetraplets,

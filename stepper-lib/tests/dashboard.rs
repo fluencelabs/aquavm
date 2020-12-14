@@ -182,7 +182,7 @@ struct AquaVMState {
 
 #[test]
 fn dashboard() {
-    let script = include_str!("dashboard/script.clj");
+    let script = include_str!("./scripts/dashboard.clj");
 
     let known_peer_ids = parse_peers();
     let client_id = String::from("client_id");

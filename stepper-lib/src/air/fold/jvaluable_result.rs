@@ -74,10 +74,7 @@ impl<'ctx> JValuableResult for IterableItemType<'ctx> {
         match self {
             RefRef((jvalue, _)) => Cow::Borrowed(jvalue),
             RefValue((jvalue, _)) => Cow::Borrowed(jvalue),
-            RcValue((jvalue, _)) => {
-                let jvalue = jvalue.deref().clone();
-                Cow::Owned(jvalue)
-            }
+            RcValue((jvalue, _)) => Cow::Borrowed(jvalue.deref()),
         }
     }
 
