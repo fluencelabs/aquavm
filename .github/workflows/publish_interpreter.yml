@@ -46,8 +46,8 @@ jobs:
       - name: Install jq
         run: sudo apt-get update && sudo apt-get --yes --force-yes install jq
 
-      - name: Install cargo-show, cargo-release & fce-cli
-        run: cargo install cargo-show cargo-release fce-cli
+      - name: Install cargo-show, cargo-release & fcli
+        run: cargo install cargo-show cargo-release fcli
 
       - name: Get versions from npm & crates.io, and take the highest one
         run: |

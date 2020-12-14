@@ -56,8 +56,8 @@ jobs:
       - name: Install jq
         run: sudo apt-get update && sudo apt-get --yes --force-yes install jq
 
-      - name: Install cargo-show, cargo-release & fce-cli
-        run: cargo install cargo-show cargo-release fce-cli
+      - name: Install cargo-show, cargo-release, fcli & toml
+        run: cargo install cargo-show cargo-release fcli toml
 
       - name: Get versions from npm & crates.io, and take the highest one
         run: |
@@ -142,7 +142,7 @@ jobs:
     ### Publish to NPM registry
       - uses: actions/setup-node@v1
         with:
-          node-version: '15'
+          node-version: '14'
           registry-url: 'https://registry.npmjs.org'
 
       - run: npm publish --access public
