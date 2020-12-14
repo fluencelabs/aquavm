@@ -1,7 +1,7 @@
 # run locally like this:
-# act -b -P ubuntu-latest=nektos/act-environments-ubuntu:18.04 -j npm-publish -s "NPM_TOKEN=uuid-uuid-uuid-uuid"
+# act -b -P ubuntu-latest=nektos/act-environments-ubuntu:18.04 -j publish-interpreter -s "NPM_TOKEN=uuid-uuid-uuid-uuid"
 
-name: "publish-base64-npm"
+name: "publish-interpreter"
 
 on:
   push:
@@ -91,7 +91,7 @@ jobs:
              cat pkg/package_new.json
              mv pkg/package_new.json pkg/package.json
 
-    ### Get version from NPM registry
+    ### Set version
       - run: yarn version --new-version $MAX_VERSION --no-git-tag-version
         working-directory: pkg
     ### Increment patch component of the version
