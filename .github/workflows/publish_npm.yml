@@ -31,8 +31,8 @@ jobs:
       - name: Install jq
         run: sudo apt-get update && sudo apt-get --yes --force-yes install jq
 
-      - name: Install cargo-show & cargo-release
-        run: cargo install cargo-show cargo-release
+      - name: Install cargo-show, cargo-release & fce-cli
+        run: cargo install cargo-show cargo-release fce-cli
 
       - name: Get versions from npm & crates.io, and take the highest one
         run: |
@@ -42,10 +42,11 @@ jobs:
           MAX_VERSION="$(semver "$JS_VERSION" "$RS_VERSION" | tail -n1)"
           echo "MAX_VERSION=$MAX_VERSION" | tee -a $GITHUB_ENV
 
+### === JavaScript package release ===
       - name: Install wasm-pack
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
-      - name: Build aquamarine.wasm
+      - name: Build aquamarine.wasm for JS clients
         run: wasm-pack build $GITHUB_WORKSPACE/stepper --no-typescript --release -d $(pwd)/pkg
 
       - name: Generate aquamarine.wasm.base64.js
@@ -111,3 +112,9 @@ jobs:
           access: public
           check-version: false
           token: ${{ secrets.NPM_TOKEN }}
+
+### === Rust package release ===
+      - name: Build aquamarine.wasm for node
+        run: fce build --release -p aquamarine
+        working-directory: stepper
+
