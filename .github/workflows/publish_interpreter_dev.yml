@@ -57,8 +57,8 @@ jobs:
       - name: Install jq & sponge
         run: sudo apt-get update && sudo apt-get --yes --force-yes install jq moreutils
 
-      - name: Install cargo-show toml-cli
-        run: cargo install toml-cli cargo-show
+      - name: Install cargo-show
+        run: cargo install cargo-show || true
 
       - name: Get versions from npm & crates.io, and take the highest one
         run: |
@@ -161,7 +161,7 @@ jobs:
 
 ### === Rust package release ===
       - name: Install fcli toml-cli
-        run: cargo install fcli toml-cli
+        run: cargo install fcli toml-cli || true
 
       - name: Build aquamarine.wasm for node
         run: fce build --release -p aquamarine
