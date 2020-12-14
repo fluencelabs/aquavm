@@ -167,7 +167,7 @@ jobs:
           cargo release --skip-publish --skip-push --skip-tag --no-dev-version --no-confirm ${{ env.MAX_VERSION }}
 
           # cargo release creates unwanted git commit, remove it so it doesn't appear in build_info
-          git reset --soft "origin/${{ BRANCH_NAME }}"
+          git reset --soft "origin/${{ env.BRANCH_NAME }}"
 
       - name: Add branch to project name
         run: |
