@@ -3,12 +3,3 @@
 [[package]]
 name = "air-interpreter-wasm"
 version = "0.0.6"
-dependencies = [
- "tinyjson",
-]
-
-[[package]]
-name = "tinyjson"
-version = "2.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ad73d64a61cff5b678aa6a06871966914b356c176ca278e62f76c37d04d52506"
