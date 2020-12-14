@@ -176,7 +176,9 @@ jobs:
           toml set Cargo.toml package.version "${{ env.MAX_VERSION }}" | sponge Cargo.toml
 
           NAME=$(toml get Cargo.toml package.name)
-          toml set Cargo.toml package.name "$NAME_$BRANCH_NAME" | sponge Cargo.toml
+          toml set Cargo.toml package.name "$NAME_${{ env.BRANCH_NAME }}" | sponge Cargo.toml
+
+          cat Cargo.toml
         working-directory: crates/air-interpreter-wasm
 
       - name: Login to crates.io
