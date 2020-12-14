@@ -56,8 +56,8 @@ jobs:
       - name: Install jq
         run: sudo apt-get update && sudo apt-get --yes --force-yes install jq
 
-      - name: Install cargo-show, cargo-release, fcli & toml
-        run: cargo install cargo-show cargo-release fcli toml
+      - name: Install cargo-show
+        run: cargo install cargo-show
 
       - name: Get versions from npm & crates.io, and take the highest one
         run: |
@@ -124,7 +124,7 @@ jobs:
         working-directory: pkg
 
     ### Set version to MAX_VERSION
-      - run: yarn version --new-version $MAX_VERSION --no-git-tag-version || true
+      - run: yarn version --new-version ${{ env.MAX_VERSION }} --no-git-tag-version || true
         working-directory: pkg
 
     ### Increment patch component of the version
@@ -152,7 +152,32 @@ jobs:
 
 
 ### === Rust package release ===
+      - name: Install cargo-release fcli toml
+        run: cargo install cargo-release fcli toml
+
       - name: Build aquamarine.wasm for node
         run: fce build --release -p aquamarine
         working-directory: stepper
 
+      - name: Copy aquamarine.wasm to air-interpreter-wasm
+        run: cp target/wasm32-wasi/release/aquamarine.wasm crates/air-interpreter-wasm/aquamarine.wasm
+
+      - name: Set project version to MAX_VERSION
+        run: |
+          cargo release --skip-publish --skip-push --skip-tag --no-dev-version --no-confirm ${{ env.MAX_VERSION }}
+
+          # cargo release creates unwanted git commit, remove it so it doesn't appear in build_info
+          git reset --soft "origin/${{ BRANCH_NAME }}"
+
+      - name: Add branch to project name
+        run: |
+          NAME=$(toml get Config.toml package.name)
+          toml set Config.toml package.name "$NAME_$BRANCH_NAME"
+        working-directory: crates/air-interpreter-wasm
+
+      - name: Login to crates.io
+        run: cargo login ${{ secrets.CRATES_IO_TOKEN }}
+
+      - name: Publish
+        run: cargo publish --allow-dirty
+        working-directory: crates/air-interpreter-wasm
