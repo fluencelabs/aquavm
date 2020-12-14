@@ -10,7 +10,7 @@ on:
 
 jobs:
   npm-publish-dev:
-    name: "Publish Aquamarine to NPM"
+    name: "Publish AIR interpreter .wasm to NPM & crates.io"
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -47,6 +47,7 @@ jobs:
       - name: Get versions from npm & crates.io, and take the highest one
         run: |
           yarn global add semver
+          PATH="$(yarn global bin):$PATH"
           JS_VERSION="$(yarn info --silent @fluencelabs/aquamarine-stepper-${{ env.BRANCH_NAME }} version || true)"
           RS_VERSION="$((cargo show --json air-interpreter-wasm-${{ env.BRANCH_NAME }} | jq -r .crate.max_version) 2>/dev/null || true)"
           MAX_VERSION="$(semver "$JS_VERSION" "$RS_VERSION" "0.0.0" | tail -n1)"
