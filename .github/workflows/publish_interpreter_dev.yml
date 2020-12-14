@@ -58,13 +58,13 @@ jobs:
         run: sudo apt-get update && sudo apt-get --yes --force-yes install jq moreutils
 
       - name: Install cargo-show toml-cli
-        run: cargo install cargo-show toml-cli
+        run: cargo install toml-cli cargo-show
 
       - name: Set project version to MAX_VERSION
         run: |
           PATH="~/.cargo/bin:$PATH"
           echo "toml is |$(which toml)|"
-          toml set Config.toml package.version "${{ env.MAX_VERSION }}" | sponge Config.toml
+          toml set Cargo.toml package.version "${{ env.MAX_VERSION }}" | sponge Cargo.toml
         working-directory: crates/air-interpreter-wasm
 
       - name: Get versions from npm & crates.io, and take the highest one
