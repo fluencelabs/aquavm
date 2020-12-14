@@ -153,8 +153,8 @@ jobs:
 
 
 ### === Rust package release ===
-      - name: Install cargo-release fcli toml
-        run: cargo install cargo-release fcli toml
+      - name: Install fcli toml
+        run: cargo install fcli toml
 
       - name: Build aquamarine.wasm for node
         run: fce build --release -p aquamarine
@@ -165,15 +165,12 @@ jobs:
 
       - name: Set project version to MAX_VERSION
         run: |
-          cargo release --skip-publish --skip-push --skip-tag --no-dev-version --no-confirm ${{ env.MAX_VERSION }}
-
-          # cargo release creates unwanted git commit, remove it so it doesn't appear in build_info
-          git reset --soft "origin/${{ env.BRANCH_NAME }}"
+          toml set Config.toml package.version "${{ env.MAX_VERSION }}" | sponge Config.toml
 
       - name: Add branch to project name
         run: |
           NAME=$(toml get Config.toml package.name)
-          toml set Config.toml package.name "$NAME_$BRANCH_NAME"
+          toml set Config.toml package.name "$NAME_$BRANCH_NAME" | sponge Config.toml
         working-directory: crates/air-interpreter-wasm
 
       - name: Login to crates.io
