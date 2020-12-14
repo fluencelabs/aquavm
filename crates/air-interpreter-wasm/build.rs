@@ -14,60 +14,56 @@
  * limitations under the License.
  */
 
-use serde::Deserialize;
-use serde_json::Value as JValue;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::{env, fs};
+use tinyjson::{JsonValue as JValue, JsonValue};
 
 // const INTERPRETER_WASM: &'static [u8] = include_bytes!("aquamarine.wasm");
 const PKG_NAME: &'static str = "air-interpreter-wasm";
 
-#[derive(Deserialize)]
-struct Target {
-    pub src_path: Path,
-    pub kind: String,
+fn as_array(jv: &JValue) -> Option<&Vec<JsonValue>> {
+    match jv {
+        JsonValue::Array(packages) => Some(packages),
+        _ => None,
+    }
 }
 
-#[derive(Deserialize, Debug)]
-struct Package {
-    pub name: String,
-    pub targets: Vec<Target>,
-}
-
-#[derive(Deserialize)]
-struct Metadata {
-    pub packages: Vec<Package>,
-}
-
-fn get_src_dir() -> Path {
-    let metadata = Command::new("$CARGO")
+fn get_src_dir() -> PathBuf {
+    let cargo = env::var_os("CARGO").expect("read CARGO from env");
+    let metadata = Command::new(cargo)
         .arg("metadata")
         .output()
         .expect("execute `cargo metadata`")
         .stdout;
 
-    let metadata: Metadata =
-        serde_json::from_slice(&metadata).expect("valid json from `cargo metadata`");
+    let metadata =
+        std::str::from_utf8(metadata.as_slice()).expect("`cargo metadata` output is valid utf8");
+    let metadata: JValue = metadata.parse().expect("valid json from `cargo metadata`");
+    let packages = as_array(&metadata["packages"]).expect(".packages must be an array");
 
-    let package = metadata
-        .packages
-        .into_iter()
-        .find(|pkg| pkg.name.as_str() == PKG_NAME)
+    let package = packages
+        .iter()
+        .find(|pkg| pkg["name"] == JValue::String(PKG_NAME.to_string()))
         .expect(format!("find package {} in `cargo metadata`", PKG_NAME).as_str());
 
-    let target = package
-        .targets
-        .into_iter()
-        .find(|t| t.kind == "lib")
+    let targets = as_array(&package["targets"]).expect("package contain field .targets");
+    let target_lib = targets
+        .iter()
+        .find(|t| t["kind"] == JValue::Array(vec![JValue::String("lib".to_string())]))
         .expect(format!("find target 'lib' in package {:#?}", package).as_str());
 
-    let src_dir = target
-        .src_path
-        .parent()
-        .expect(format!("{:?} have parent dir", target.src_path).as_str());
+    let src_path = match &target_lib["src_path"] {
+        JsonValue::String(path) => path,
+        _ => panic!("target.src_path must be a string"),
+    };
 
-    src_dir.to_owned().into()
+    let src_dir = Path::new(src_path)
+        .parent()
+        .and_then(|p| p.parent())
+        .expect(format!("{:?}/../.. must exist", src_path).as_str());
+
+    src_dir.to_owned()
 }
 
 fn main() {
@@ -76,13 +72,17 @@ fn main() {
 
     let out_dir = env::var_os("OUT_DIR").expect("read OUT_DIR from env");
     let out_dest_path = Path::new(&out_dir).join("aquamarine.wasm");
-    let target_dir = env::var_os("CARGO_TARGET_DIR").expect("read CARGO_TARGET_DIR from env");
-    let target_dest_path = Path::new(&target_dir).join("aquamarine.wasm");
     println!("out_dest_path is {:?}", out_dest_path);
-    println!("target_dest_path is {:?}", out_dest_path);
+    fs::copy(&wasm, &out_dest_path)
+        .expect(format!("copy {:?} to {:?}", wasm, out_dest_path).as_str());
 
-    fs::copy(&wasm, out_dest_path);
-    fs::copy(&wasm, target_dest_path);
+    if let Some(target_dir) = env::var_os("CARGO_BUILD_TARGET_DIR") {
+        let target_dest_path = Path::new(&target_dir).join("aquamarine.wasm");
+        println!("target_dest_path is {:?}", out_dest_path);
+
+        fs::copy(&wasm, &target_dest_path)
+            .expect(format!("copy wasm to target_dest_path: {:?}", target_dest_path).as_str());
+    }
 
     // fs::write(&dest_path, INTERPRETER_WASM)
     //     .expect(format!("Write aquamarine.wasm to {:?}", dest_path).as_str());

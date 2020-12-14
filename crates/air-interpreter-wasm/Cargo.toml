@@ -1,6 +1,6 @@
 [package]
 name = "air-interpreter-wasm"
-version = "0.0.1"
+version = "0.0.6"
 authors = ["Fluence Labs"]
 description = "Distribution of AIR interpreter as .wasm"
 license = "Apache-2.0"
@@ -12,6 +12,4 @@ include = [
 ]
 
 [build-dependencies]
-serde_json = "1.0.60"
-serde = "1.0.118"
-serde_derive = "1.0.118"
+tinyjson = "2.2.0"
