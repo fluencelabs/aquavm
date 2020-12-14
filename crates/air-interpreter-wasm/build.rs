@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-use std::path::Path;
-use std::{env, fs};
-
-const INTERPRETER_WASM: &'static [u8] = include_bytes!("aquamarine.wasm");
+// use std::path::Path;
+// use std::{env, fs};
+//
+// const INTERPRETER_WASM: &'static [u8] = include_bytes!("aquamarine.wasm");
 
 fn main() {
-    let out_dir = env::var_os("OUT_DIR").expect("Read OUT_DIR from env");
-    let dest_path = Path::new(&out_dir).join("aquamarine.wasm");
-    println!("aaa Dest path is {:?}", dest_path);
-    fs::write(&dest_path, INTERPRETER_WASM)
-        .expect(format!("Write aquamarine.wasm to {:?}", dest_path).as_str());
-    println!("cargo:rerun-if-changed=build.rs");
-    println!("cargo:rerun-if-changed=aquamarine.wasm");
+    println!("I: air-interpreter-wasm build.rs ran");
+    eprintln!("E: air-interpreter-wasm build.rs ran");
+    // let out_dir = env::var_os("OUT_DIR").expect("Read OUT_DIR from env");
+    // let dest_path = Path::new(&out_dir).join("aquamarine.wasm");
+    // println!("aaa Dest path is {:?}", dest_path);
+    // fs::write(&dest_path, INTERPRETER_WASM)
+    //     .expect(format!("Write aquamarine.wasm to {:?}", dest_path).as_str());
+    // println!("cargo:rerun-if-changed=build.rs");
+    // println!("cargo:rerun-if-changed=aquamarine.wasm");
 }
