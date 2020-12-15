@@ -15,19 +15,16 @@
  */
 
 mod preparation;
-mod utils;
 
 use preparation::prepare;
 use preparation::PrepareResult;
-use utils::dedup;
 
 use crate::air::ExecutableInstruction;
-use crate::Result;
 use crate::StepperOutcome;
 
 pub use preparation::parse;
 
-pub(crate) fn execute_aqua(init_peer_id: String, aqua: String, prev_data: String, data: String) -> StepperOutcome {
+pub fn execute_aqua(init_peer_id: String, aqua: String, prev_data: String, data: String) -> StepperOutcome {
     log::trace!(
         "aquamarine version is {}, init user id is {}",
         env!("CARGO_PKG_VERSION"),
@@ -37,16 +34,22 @@ pub(crate) fn execute_aqua(init_peer_id: String, aqua: String, prev_data: String
     execute_aqua_impl(init_peer_id, aqua, prev_data, data).unwrap_or_else(Into::into)
 }
 
-fn execute_aqua_impl(init_peer_id: String, aqua: String, prev_path: String, path: String) -> Result<StepperOutcome> {
+fn execute_aqua_impl(
+    init_peer_id: String,
+    aqua: String,
+    prev_path: String,
+    path: String,
+) -> Result<StepperOutcome, StepperOutcome> {
     let PrepareResult {
         mut exec_ctx,
         mut call_ctx,
         aqua,
-    } = prepare(prev_path, path, aqua.as_str(), init_peer_id)?;
+    } = prepare(prev_path, path.clone(), aqua.as_str(), init_peer_id).map_err(|e| StepperOutcome::error_from_data(path, e))?;
 
-    aqua.execute(&mut exec_ctx, &mut call_ctx)?;
+    aqua.execute(&mut exec_ctx, &mut call_ctx)
+        .map_err(|e| StepperOutcome::error_from_ctxs(exec_ctx.clone(), &call_ctx, e))?;
 
-    let outcome = StepperOutcome::from_contexts(exec_ctx, &call_ctx)?;
+    let outcome = StepperOutcome::success(exec_ctx, &call_ctx);
 
     Ok(outcome)
 }

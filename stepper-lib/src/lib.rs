@@ -33,6 +33,7 @@ mod errors;
 mod execution;
 pub mod log_targets;
 mod stepper_outcome;
+mod utils;
 
 pub use crate::call_evidence::CallEvidencePath;
 pub use crate::call_evidence::CallResult;

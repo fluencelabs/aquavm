@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+use crate::air::ExecutionCtx;
 use crate::call_evidence::CallEvidenceCtx;
-use crate::AquamarineError::CallEvidenceSerializationError as CallSeError;
-use crate::Result;
+use crate::AquamarineError;
 use fluence::fce;
 use serde::{Deserialize, Serialize};
 
@@ -40,17 +40,40 @@ pub struct StepperOutcome {
 }
 
 impl StepperOutcome {
-    pub(crate) fn from_contexts(exec_ctx: ExecutionContext<'_>, call_ctx: &CallEvidenceCtx) -> Result<Self> {
-        let data = serde_json::to_string(&call_ctx.new_path).map_err(CallSeError)?;
+    pub(crate) fn success(exec_ctx: ExecutionCtx<'_>, call_ctx: &CallEvidenceCtx) -> Self {
+        use crate::utils::dedup;
+
+        let data = serde_json::to_string(&call_ctx.new_path).expect("default serializer shouldn't fail");
         let next_peer_pks = dedup(exec_ctx.next_peer_pks);
 
-        let outcome = Self {
+        Self {
             ret_code: STEPPER_SUCCESS,
             error_message: String::new(),
             data,
             next_peer_pks,
-        };
+        }
+    }
 
-        Ok(outcome)
+    pub(crate) fn error_from_data(data: String, err: AquamarineError) -> Self {
+        let ret_code = err.error_code();
+
+        StepperOutcome {
+            ret_code,
+            error_message: format!("{}", err),
+            data,
+            next_peer_pks: vec![],
+        }
+    }
+
+    pub(crate) fn error_from_ctxs(exec_ctx: ExecutionCtx<'_>, call_ctx: &CallEvidenceCtx, err: AquamarineError) -> Self {
+        let ret_code = err.error_code();
+        let data = serde_json::to_string(&call_ctx.new_path).expect("default serializer shouldn't fail");
+
+        StepperOutcome {
+            ret_code,
+            error_message: format!("{}", err),
+            data,
+            next_peer_pks: exec_ctx.next_peer_pks,
+        }
     }
 }

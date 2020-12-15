@@ -27,9 +27,9 @@ use air_parser::ast::Instruction;
 
 /// Represents result of the preparation step.
 pub(super) struct PrepareResult<'ctx, 'i> {
-    exec_ctx: ExecutionCtx<'ctx>,
-    call_ctx: CallEvidenceCtx,
-    aqua: Instruction<'i>,
+    pub(crate) exec_ctx: ExecutionCtx<'ctx>,
+    pub(crate) call_ctx: CallEvidenceCtx,
+    pub(crate) aqua: Instruction<'i>
 }
 
 /// Parse and prepare supplied data and aqua script.

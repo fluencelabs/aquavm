@@ -18,12 +18,10 @@ use crate::build_targets::CallServiceResult;
 use crate::call_evidence::CallResult;
 use crate::call_evidence::EvidenceState;
 use crate::JValue;
-use crate::StepperOutcome;
 
 use jsonpath_lib::JsonPathError;
 use serde_json::Error as SerdeJsonError;
 
-use std::convert::Into;
 use std::env::VarError;
 use std::error::Error;
 
@@ -91,6 +89,34 @@ pub enum AquamarineError {
 
     /// Errors occurred when evidence path contains less elements then corresponding Par has.
     ShadowingError(String),
+}
+
+impl AquamarineError {
+    pub(crate) fn error_code(&self) -> i32 {
+        match self {
+            AquamarineError::AIRParseError(_) => 1,
+            AquamarineError::FuncArgsSerializationError(..) => 2,
+            AquamarineError::CallServiceResultDeserializationError(..) => 3,
+            AquamarineError::CurrentPeerIdEnvError(..) => 4,
+            AquamarineError::InstructionError(..) => 5,
+            AquamarineError::LocalServiceError(..) => 6,
+            AquamarineError::VariableNotFound(..) => 7,
+            AquamarineError::MultipleVariablesFound(..) => 8,
+            AquamarineError::VariableNotInJsonPath(..) => 9,
+            AquamarineError::IncompatibleJValueType(..) => 10,
+            AquamarineError::IncompatibleAValueType(..) => 11,
+            AquamarineError::MultipleValuesInJsonPath(..) => 12,
+            AquamarineError::FoldStateNotFound(..) => 13,
+            AquamarineError::MultipleFoldStates(..) => 14,
+            AquamarineError::InvalidEvidenceState(..) => 15,
+            AquamarineError::CallEvidenceDeserializationError(..) => 16,
+            AquamarineError::CallEvidenceSerializationError(..) => 17,
+            AquamarineError::IncompatibleEvidenceStates(..) => 18,
+            AquamarineError::IncompatibleCallResults(..) => 19,
+            AquamarineError::EvidencePathTooSmall(..) => 20,
+            AquamarineError::ShadowingError(_) => 21,
+        }
+    }
 }
 
 impl Error for AquamarineError {}
@@ -182,39 +208,5 @@ impl std::fmt::Display for AquamarineError {
 impl From<std::convert::Infallible> for AquamarineError {
     fn from(_: std::convert::Infallible) -> Self {
         unreachable!()
-    }
-}
-
-impl Into<StepperOutcome> for AquamarineError {
-    fn into(self) -> StepperOutcome {
-        let ret_code = match self {
-            AquamarineError::AIRParseError(_) => 1,
-            AquamarineError::FuncArgsSerializationError(..) => 2,
-            AquamarineError::CallServiceResultDeserializationError(..) => 3,
-            AquamarineError::CurrentPeerIdEnvError(..) => 4,
-            AquamarineError::InstructionError(..) => 5,
-            AquamarineError::LocalServiceError(..) => 6,
-            AquamarineError::VariableNotFound(..) => 7,
-            AquamarineError::MultipleVariablesFound(..) => 8,
-            AquamarineError::VariableNotInJsonPath(..) => 9,
-            AquamarineError::IncompatibleJValueType(..) => 10,
-            AquamarineError::IncompatibleAValueType(..) => 11,
-            AquamarineError::MultipleValuesInJsonPath(..) => 12,
-            AquamarineError::FoldStateNotFound(..) => 13,
-            AquamarineError::MultipleFoldStates(..) => 14,
-            AquamarineError::InvalidEvidenceState(..) => 15,
-            AquamarineError::CallEvidenceDeserializationError(..) => 16,
-            AquamarineError::CallEvidenceSerializationError(..) => 17,
-            AquamarineError::IncompatibleEvidenceStates(..) => 18,
-            AquamarineError::IncompatibleCallResults(..) => 19,
-            AquamarineError::EvidencePathTooSmall(..) => 20,
-            AquamarineError::ShadowingError(_) => 21,
-        };
-
-        StepperOutcome {
-            ret_code,
-            data: format!("{}", self),
-            next_peer_pks: vec![],
-        }
     }
 }
