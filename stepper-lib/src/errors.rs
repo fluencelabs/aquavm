@@ -92,7 +92,7 @@ pub enum AquamarineError {
 }
 
 impl AquamarineError {
-    pub(crate) fn error_code(&self) -> i32 {
+    pub(crate) fn to_error_code(&self) -> i32 {
         match self {
             AquamarineError::AIRParseError(_) => 1,
             AquamarineError::FuncArgsSerializationError(..) => 2,

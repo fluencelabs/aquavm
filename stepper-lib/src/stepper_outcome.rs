@@ -55,7 +55,7 @@ impl StepperOutcome {
     }
 
     pub(crate) fn error_from_data(data: String, err: AquamarineError) -> Self {
-        let ret_code = err.error_code();
+        let ret_code = err.to_error_code();
 
         StepperOutcome {
             ret_code,
@@ -70,7 +70,7 @@ impl StepperOutcome {
         call_ctx: &CallEvidenceCtx,
         err: AquamarineError,
     ) -> Self {
-        let ret_code = err.error_code();
+        let ret_code = err.to_error_code();
         let data = serde_json::to_string(&call_ctx.new_path).expect("default serializer shouldn't fail");
 
         StepperOutcome {
