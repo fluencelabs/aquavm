@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-mod prolog;
+mod preparation;
 mod utils;
 
-use prolog::make_contexts;
-use prolog::prepare;
+use preparation::prepare;
+use preparation::PrepareResult;
 use utils::dedup;
 
 use crate::air::ExecutableInstruction;
-use crate::AquamarineError::CallEvidenceSerializationError as CallSeError;
 use crate::Result;
 use crate::StepperOutcome;
-use crate::STEPPER_SUCCESS;
 
-pub use prolog::parse;
+pub use preparation::parse;
 
-pub fn execute_aqua(init_peer_id: String, aqua: String, prev_data: String, data: String) -> StepperOutcome {
+pub(crate) fn execute_aqua(init_peer_id: String, aqua: String, prev_data: String, data: String) -> StepperOutcome {
     log::trace!(
         "aquamarine version is {}, init user id is {}",
         env!("CARGO_PKG_VERSION"),
@@ -40,17 +38,15 @@ pub fn execute_aqua(init_peer_id: String, aqua: String, prev_data: String, data:
 }
 
 fn execute_aqua_impl(init_peer_id: String, aqua: String, prev_path: String, path: String) -> Result<StepperOutcome> {
-    let (prev_path, path, aqua) = prepare(prev_path, path, aqua.as_str())?;
-    let (mut exec_ctx, mut call_ctx) = make_contexts(prev_path, path, init_peer_id)?;
+    let PrepareResult {
+        mut exec_ctx,
+        mut call_ctx,
+        aqua,
+    } = prepare(prev_path, path, aqua.as_str(), init_peer_id)?;
 
     aqua.execute(&mut exec_ctx, &mut call_ctx)?;
 
-    let next_peer_pks = dedup(exec_ctx.next_peer_pks);
-    let data = serde_json::to_string(&call_ctx.new_path).map_err(CallSeError)?;
+    let outcome = StepperOutcome::from_contexts(exec_ctx, &call_ctx)?;
 
-    Ok(StepperOutcome {
-        ret_code: STEPPER_SUCCESS,
-        data,
-        next_peer_pks,
-    })
+    Ok(outcome)
 }

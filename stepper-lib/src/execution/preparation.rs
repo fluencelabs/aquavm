@@ -25,12 +25,20 @@ use crate::Result;
 
 use air_parser::ast::Instruction;
 
+/// Represents result of the preparation step.
+pub(super) struct PrepareResult<'ctx, 'i> {
+    exec_ctx: ExecutionCtx<'ctx>,
+    call_ctx: CallEvidenceCtx,
+    aqua: Instruction<'i>,
+}
+
 /// Parse and prepare supplied data and aqua script.
 pub(super) fn prepare<'i>(
     raw_prev_path: String,
     raw_path: String,
     raw_aqua: &'i str,
-) -> Result<(CallEvidencePath, CallEvidencePath, Instruction<'i>)> {
+    init_peer_id: String,
+) -> Result<PrepareResult<'static, 'i>> {
     fn to_evidence_path(raw_path: String) -> Result<CallEvidencePath> {
         use AquamarineError::CallEvidenceDeserializationError as CallDeError;
 
@@ -56,12 +64,19 @@ pub(super) fn prepare<'i>(
         path
     );
 
-    Ok((prev_path, path, aqua))
+    let (exec_ctx, call_ctx) = make_contexts(prev_path, path, init_peer_id)?;
+    let result = PrepareResult {
+        exec_ctx,
+        call_ctx,
+        aqua,
+    };
+
+    Ok(result)
 }
 
 /// Make execution and call evidence contexts from supplied data.
 /// Internally, it unites variable from previous and current data and merges call evidence paths.
-pub(super) fn make_contexts(
+fn make_contexts(
     prev_path: CallEvidencePath,
     path: CallEvidencePath,
     init_peer_id: String,
@@ -78,7 +93,7 @@ pub(super) fn make_contexts(
     Ok((exec_ctx, call_evidence_ctx))
 }
 
-/// Parse an AIR script to AST
+/// Parse an AIR script to AST.
 pub fn parse(script: &str) -> Result<Instruction<'_>> {
     let ast = air_parser::parse(script).map_err(AquamarineError::AIRParseError)?;
     Ok(*ast)

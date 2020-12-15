@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+use crate::call_evidence::CallEvidenceCtx;
+use crate::AquamarineError::CallEvidenceSerializationError as CallSeError;
+use crate::Result;
 use fluence::fce;
 use serde::{Deserialize, Serialize};
 
@@ -25,9 +28,29 @@ pub struct StepperOutcome {
     /// A return code, where SUCCESS_ERROR_CODE means success.
     pub ret_code: i32,
 
-    /// Contains data if ret_code == 0, otherwise error message (that could be empty string).
+    /// Contains error message if ret_code != SUCCESS_ERROR_CODE.
+    pub error_message: String,
+
+    /// Contains script data that should be preserved in an executor of this stepper
+    /// regardless of ret_code value.
     pub data: String,
 
     /// Public keys of peers that should receive data.
     pub next_peer_pks: Vec<String>,
+}
+
+impl StepperOutcome {
+    pub(crate) fn from_contexts(exec_ctx: ExecutionContext<'_>, call_ctx: &CallEvidenceCtx) -> Result<Self> {
+        let data = serde_json::to_string(&call_ctx.new_path).map_err(CallSeError)?;
+        let next_peer_pks = dedup(exec_ctx.next_peer_pks);
+
+        let outcome = Self {
+            ret_code: STEPPER_SUCCESS,
+            error_message: String::new(),
+            data,
+            next_peer_pks,
+        };
+
+        Ok(outcome)
+    }
 }
