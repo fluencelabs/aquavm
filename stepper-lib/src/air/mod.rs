@@ -23,7 +23,6 @@ pub(crate) mod resolve;
 mod seq;
 mod xor;
 
-pub(crate) use call::ResolvedTriplet;
 pub(crate) use execution_context::ExecutionCtx;
 pub(crate) use fold::FoldState;
 

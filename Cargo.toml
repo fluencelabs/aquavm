@@ -1,6 +1,7 @@
 [workspace]
 members = [
     "crates/air-parser",
+    "crates/plets",
     "crates/test-module",
     "crates/test-utils",
     "stepper",

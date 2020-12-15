@@ -15,7 +15,6 @@
  */
 
 use super::ExecutionCtx;
-use super::ResolvedTriplet;
 use crate::call_evidence::CallEvidenceCtx;
 use crate::call_evidence::CallResult;
 use crate::call_evidence::EvidenceState;
@@ -26,6 +25,7 @@ use crate::ResolvedCallResult;
 use crate::Result;
 
 use air_parser::ast::CallOutput;
+use plets::ResolvedTriplet;
 
 use std::rc::Rc;
 

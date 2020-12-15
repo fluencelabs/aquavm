@@ -29,8 +29,6 @@ use crate::Result;
 
 use air_parser::ast::Call;
 
-pub(crate) use triplet::ResolvedTriplet;
-
 /*
    (current)
    (pk $pk)

@@ -1,0 +1,13 @@
+[package]
+name = "plets"
+version = "0.1.0"
+authors = ["Fluence Labs"]
+edition = "2018"
+
+[lib]
+name = "plets"
+path = "src/lib.rs"
+
+[dependencies]
+fluence = { git = "https://github.com/fluencelabs/rust-sdk", features = ["logger"] }
+serde = "1.0.118"

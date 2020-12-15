@@ -1265,6 +1265,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "plets"
+version = "0.1.0"
+dependencies = [
+ "fluence",
+ "serde",
+]
+
+[[package]]
 name = "plotters"
 version = "0.2.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1632,6 +1640,7 @@ dependencies = [
  "log",
  "maplit",
  "once_cell",
+ "plets",
  "pretty_assertions",
  "serde",
  "serde_derive",

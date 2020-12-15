@@ -20,25 +20,14 @@ use crate::JValue;
 use crate::Result;
 
 use air_parser::ast::{FunctionPart, InstructionValue, PeerPart};
+use plets::ResolvedTriplet;
 
-use serde::Deserialize;
-use serde::Serialize;
-
-/// Triplet represents a location of the executable code in the network
-/// It is build from `PeerPart` and `FunctionPart` of a `Call` instruction
+/// Triplet represents a location of the executable code in the network.
+/// It is build from `PeerPart` and `FunctionPart` of a `Call` instruction.
 pub(super) struct Triplet<'a, 'i> {
     pub(super) peer_pk: &'a InstructionValue<'i>,
     pub(super) service_id: &'a InstructionValue<'i>,
     pub(super) function_name: &'a InstructionValue<'i>,
-}
-
-/// ResolvedTriplet represents same location as `Triplet`, but with all
-/// variables, literals and etc resolved into final `String`
-#[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
-pub struct ResolvedTriplet {
-    pub peer_pk: String,
-    pub service_id: String,
-    pub function_name: String,
 }
 
 impl<'a, 'i> Triplet<'a, 'i> {
@@ -67,7 +56,7 @@ impl<'a, 'i> Triplet<'a, 'i> {
         })
     }
 
-    /// Resolve variables, literals, etc in the `Triplet`, and build a `ResolvedTriplet`
+    /// Resolve variables, literals, etc in the `Triplet`, and build a `ResolvedTriplet`.
     pub fn resolve(self, ctx: &ExecutionCtx<'i>) -> Result<ResolvedTriplet> {
         let Triplet {
             peer_pk,
@@ -86,8 +75,8 @@ impl<'a, 'i> Triplet<'a, 'i> {
     }
 }
 
-/// Resolve value to string by either resolving variable from `ExecutionCtx`, taking literal value, or etc
-// TODO: return &str to avoid excess cloning
+/// Resolve value to string by either resolving variable from `ExecutionCtx`, taking literal value, or etc.
+// TODO: return Rc<String> to avoid excess cloning
 fn resolve_to_string<'i>(value: &InstructionValue<'i>, ctx: &ExecutionCtx<'i>) -> Result<String> {
     use crate::air::resolve::resolve_to_jvaluable_result;
 

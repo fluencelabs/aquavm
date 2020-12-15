@@ -16,7 +16,7 @@
 
 #![allow(unused_unsafe)] // for wasm_bindgen target where calling FFI is safe
 
-use super::triplet::{ResolvedTriplet, Triplet};
+use super::triplet::Triplet;
 use super::utils::*;
 use super::Call;
 use crate::air::ExecutionCtx;
@@ -29,6 +29,7 @@ use crate::Result;
 use crate::SecurityTetraplet;
 
 use air_parser::ast::{CallOutput, InstructionValue};
+use plets::ResolvedTriplet;
 
 use std::rc::Rc;
 

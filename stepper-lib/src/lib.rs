@@ -32,7 +32,6 @@ mod call_evidence;
 mod errors;
 mod execution;
 pub mod log_targets;
-mod security_tetraplet;
 mod stepper_outcome;
 
 pub use crate::call_evidence::CallEvidencePath;
@@ -45,14 +44,15 @@ pub use air_parser::ast::Instruction;
 pub use execution::execute_aqua;
 pub use execution::parse;
 
+pub use plets::ResolvedTriplet;
+pub use plets::SecurityTetraplet;
+
 pub(crate) type Result<T> = std::result::Result<T, AquamarineError>;
 pub(crate) type JValue = serde_json::Value;
 
 pub(crate) use build_targets::call_service;
 pub(crate) use build_targets::get_current_peer_id;
-pub(crate) use security_tetraplet::SecurityTetraplet;
 
-use crate::air::ResolvedTriplet;
 use serde::Deserialize;
 use serde::Serialize;
 

@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-use crate::air::ExecutionCtx;
-use crate::air::ResolvedTriplet;
+use crate::ResolvedTriplet;
 
 use serde::Deserialize;
 use serde::Serialize;
@@ -32,12 +31,12 @@ pub struct SecurityTetraplet {
 }
 
 impl SecurityTetraplet {
-    /// Create tetraplet for string literals defined in the script
+    /// Create a tetraplet for string literals defined in the script
     /// such as variable_1, variable_2 here "(call ("" "") "" ["variable_1" "variable_2"])".
-    pub(crate) fn initiator_tetraplet(exec_ctx: &ExecutionCtx<'_>) -> Self {
+    pub fn initiator_tetraplet(init_peer_id: String) -> Self {
         let triplet = ResolvedTriplet {
             // these variables set by the initiator peer
-            peer_pk: exec_ctx.init_peer_id.clone(),
+            peer_pk: init_peer_id,
             service_id: String::new(),
             function_name: String::new(),
         };
