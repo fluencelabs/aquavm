@@ -44,7 +44,8 @@ fn execute_aqua_impl(
         mut exec_ctx,
         mut call_ctx,
         aqua,
-    } = prepare(prev_path, path.clone(), aqua.as_str(), init_peer_id).map_err(|e| StepperOutcome::error_from_data(path, e))?;
+    } = prepare(prev_path, path.clone(), aqua.as_str(), init_peer_id)
+        .map_err(|e| StepperOutcome::error_from_data(path, e))?;
 
     aqua.execute(&mut exec_ctx, &mut call_ctx)
         .map_err(|e| StepperOutcome::error_from_ctxs(exec_ctx.clone(), &call_ctx, e))?;

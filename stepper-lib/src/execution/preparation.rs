@@ -29,7 +29,7 @@ use air_parser::ast::Instruction;
 pub(super) struct PrepareResult<'ctx, 'i> {
     pub(crate) exec_ctx: ExecutionCtx<'ctx>,
     pub(crate) call_ctx: CallEvidenceCtx,
-    pub(crate) aqua: Instruction<'i>
+    pub(crate) aqua: Instruction<'i>,
 }
 
 /// Parse and prepare supplied data and aqua script.
