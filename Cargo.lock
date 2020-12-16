@@ -683,7 +683,7 @@ checksum = "37ab347416e802de484e4d03c7316c48f1ecb56574dfd4a46a80f173ce1de04d"
 [[package]]
 name = "fluence"
 version = "0.2.11"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=logger-i32#8b0477c2b9b4b97e169cff98bb613b1ba0b0e923"
+source = "git+https://github.com/fluencelabs/rust-sdk?branch=logger-i32#6f2ace2a059abe83813e209bc0844e87d8a5d00d"
 dependencies = [
  "fluence-sdk-macro 0.2.11 (git+https://github.com/fluencelabs/rust-sdk?branch=logger-i32)",
  "fluence-sdk-main 0.2.11 (git+https://github.com/fluencelabs/rust-sdk?branch=logger-i32)",
@@ -723,7 +723,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-macro"
 version = "0.2.11"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=logger-i32#8b0477c2b9b4b97e169cff98bb613b1ba0b0e923"
+source = "git+https://github.com/fluencelabs/rust-sdk?branch=logger-i32#6f2ace2a059abe83813e209bc0844e87d8a5d00d"
 dependencies = [
  "fluence-sdk-wit 0.2.11 (git+https://github.com/fluencelabs/rust-sdk?branch=logger-i32)",
 ]
@@ -742,7 +742,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-main"
 version = "0.2.11"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=logger-i32#8b0477c2b9b4b97e169cff98bb613b1ba0b0e923"
+source = "git+https://github.com/fluencelabs/rust-sdk?branch=logger-i32#6f2ace2a059abe83813e209bc0844e87d8a5d00d"
 dependencies = [
  "fluence-sdk-macro 0.2.11 (git+https://github.com/fluencelabs/rust-sdk?branch=logger-i32)",
  "log",
@@ -766,7 +766,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-wit"
 version = "0.2.11"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=logger-i32#8b0477c2b9b4b97e169cff98bb613b1ba0b0e923"
+source = "git+https://github.com/fluencelabs/rust-sdk?branch=logger-i32#6f2ace2a059abe83813e209bc0844e87d8a5d00d"
 dependencies = [
  "proc-macro2",
  "quote",
