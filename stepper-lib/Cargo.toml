@@ -10,7 +10,7 @@ path = "src/lib.rs"
 
 [dependencies]
 air-parser = { path = "../crates/air-parser" }
-fluence = { git = "https://github.com/fluencelabs/rust-sdk", features = ["logger"] }
+fluence = { git = "https://github.com/fluencelabs/rust-sdk", features = ["logger"], branch = "logger-i32" }
 
 serde = { version = "1.0.116", features = [ "derive", "rc" ] }
 serde_derive = "1.0.116"

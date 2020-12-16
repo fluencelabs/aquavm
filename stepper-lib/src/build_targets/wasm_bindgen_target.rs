@@ -18,7 +18,7 @@ use wasm_bindgen::__rt::std::env::VarError;
 use wasm_bindgen::prelude::*;
 
 pub(crate) fn call_service(service_id: String, fn_name: String, args: String) -> super::CallServiceResult {
-    let result = call_service_impl(service_id, fn_name, args);
+    let result = call_service_impl(service_id, fn_name, args, 0);
     log::trace!("result {}", result);
     serde_json::from_str(&result).expect("Cannot parse CallServiceResult")
 }
@@ -36,5 +36,5 @@ extern "C" {
 #[wasm_bindgen(raw_module = "../src/call_service.ts")]
 extern "C" {
     #[link_name = "call_service"]
-    fn call_service_impl(service_id: String, fn_name: String, args: String) -> String;
+    fn call_service_impl(service_id: String, fn_name: String, args: String, w: i64) -> String;
 }
