@@ -37,7 +37,6 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             ~/.cargo/bin
-            target
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
       - name: Install Rust toolchain with wasm32-unknown-unknown
         uses: actions-rs/toolchain@v1
@@ -169,7 +168,7 @@ jobs:
         working-directory: stepper
 
       - name: Copy aquamarine.wasm to air-interpreter-wasm
-        run: cp target/wasm32-wasi/release/aquamarine.wasm crates/air-interpreter-wasm/aquamarine.wasm
+        run: cp target/wasm32-wasi/debug/aquamarine.wasm crates/air-interpreter-wasm/aquamarine.wasm
 
       - name: Set project version to MAX_VERSION & add branch to its name
         run: |
