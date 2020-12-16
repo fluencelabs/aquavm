@@ -135,7 +135,7 @@ jobs:
         run: cargo install fcli toml-cli || true
 
       - name: Build aquamarine.wasm for node
-        run: fce build --release -p aquamarine
+        run: fce build --release -p aquamarine --features fce
         working-directory: stepper
 
       - name: Copy aquamarine.wasm to air-interpreter-wasm
