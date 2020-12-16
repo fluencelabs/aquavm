@@ -7,6 +7,8 @@ members = [
     "stepper-lib",
 ]
 
+exclude = [ "crates/air-interpreter-wasm" ]
+
 [profile.release]
 opt-level = 3
 debug = false

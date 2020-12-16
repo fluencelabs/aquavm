@@ -1,7 +1,7 @@
 # run locally like this:
-# act -b -P ubuntu-latest=nektos/act-environments-ubuntu:18.04 -j npm-publish-dev -s "NPM_TOKEN=uuid-uuid-uuid-uuid"
+# act -b -P ubuntu-latest=nektos/act-environments-ubuntu:18.04 -j publish-interpreter-branch -s "NPM_TOKEN=uuid-uuid-uuid-uuid"
 
-name: "publish-base64-npm-dev"
+name: "publish-interpreter-branch"
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
 
 jobs:
   npm-publish-dev:
-    name: "Publish Aquamarine to NPM"
+    name: "Publish AIR interpreter .wasm to NPM & crates.io"
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -30,22 +30,52 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-    ### Install rust & wasm-pack
-      - name: Install Rust toolchain
+### Prepare cargo & toolchains
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            ~/.cargo/bin
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - name: Install Rust toolchain with wasm32-unknown-unknown
         uses: actions-rs/toolchain@v1
         with:
           toolchain: nightly
           target: wasm32-unknown-unknown
           profile: minimal
           override: true
+      - name: Install wasm32-wasi
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          target: wasm32-wasi
+          profile: minimal
+
+### Calculate MAX_VERSION
+      - name: Install jq & sponge
+        run: sudo apt-get update && sudo apt-get --yes --force-yes install jq moreutils
+
+      - name: Install cargo-show
+        run: cargo install cargo-show || true
+
+      - name: Get versions from npm & crates.io, and take the highest one
+        run: |
+          yarn global add semver
+          PATH="$(yarn global bin):$PATH"
+          JS_VERSION="$(yarn info --silent @fluencelabs/aquamarine-stepper-${{ env.BRANCH_NAME }} version || true)"
+          RS_VERSION="$((cargo show --json air-interpreter-wasm-${{ env.BRANCH_NAME }} | jq -r .crate.max_version) 2>/dev/null || true)"
+          MAX_VERSION="$(semver "$JS_VERSION" "$RS_VERSION" "0.0.0" | tail -n1)"
+          echo "MAX_VERSION=$MAX_VERSION" | tee -a $GITHUB_ENV
+
+### === JavaScript package release ===
       - name: Install wasm-pack
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+        continue-on-error: true
 
-    ### Build aquamarine.wasm
-      - run: wasm-pack build $GITHUB_WORKSPACE/stepper --no-typescript --release -d $(pwd)/pkg
+      - name: Build aquamarine.wasm for JS clients
+        run: wasm-pack build $GITHUB_WORKSPACE/stepper --no-typescript --debug -d $(pwd)/pkg
 
-    ### Generate aquamarine.wasm.base64.js
-      - run: sudo apt-get update && sudo apt-get --yes --force-yes install  jq
       - name: Generate aquamarine.wasm.base64.js
         run: |
           cat << EOF > pkg/aquamarine.wasm.base64.js
@@ -68,8 +98,6 @@ jobs:
           export const wasmBs64: string;
           EOF
         working-directory: pkg
-
-      - run: cat pkg/package.json
 
       - name: Prepare package.json for publishing
         run: |
@@ -96,8 +124,8 @@ jobs:
       - run: yarn version --new-version 0.0.0 --no-git-tag-version
         working-directory: pkg
 
-    ### Maybe get version from NPM registry
-      - run: yarn version --new-version $(yarn info --silent @fluencelabs/aquamarine-stepper-${{ env.BRANCH_NAME }} version) --no-git-tag-version || true
+    ### Set version to MAX_VERSION
+      - run: yarn version --new-version ${{ env.MAX_VERSION }} --no-git-tag-version || true
         working-directory: pkg
 
     ### Increment patch component of the version
@@ -115,10 +143,40 @@ jobs:
     ### Publish to NPM registry
       - uses: actions/setup-node@v1
         with:
-          node-version: '15'
+          node-version: '14'
           registry-url: 'https://registry.npmjs.org'
 
       - run: npm publish --access public
         working-directory: pkg
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+
+### === Rust package release ===
+      - name: Install fcli toml-cli
+        run: cargo install fcli toml-cli || true
+
+      - name: Build aquamarine.wasm for node (note this is a DEBUG build)
+        run: fce build -p aquamarine --features fce
+        working-directory: stepper
+
+      - name: Copy aquamarine.wasm to air-interpreter-wasm
+        run: cp target/wasm32-wasi/debug/aquamarine.wasm crates/air-interpreter-wasm/aquamarine.wasm
+
+      - name: Set project version to MAX_VERSION & add branch to its name
+        run: |
+          PATH="~/.cargo/bin:$PATH"
+          toml set Cargo.toml package.version "${{ env.MAX_VERSION }}" | sponge Cargo.toml
+
+          NAME=$(toml get Cargo.toml package.name | jq -r .)
+          toml set Cargo.toml package.name "${NAME}_${BRANCH_NAME}" | sponge Cargo.toml
+
+          cat Cargo.toml
+        working-directory: crates/air-interpreter-wasm
+
+      - name: Login to crates.io
+        run: cargo login ${{ secrets.CRATES_IO_TOKEN }}
+
+      - name: Publish to crates.io
+        run: cargo publish --allow-dirty
+        working-directory: crates/air-interpreter-wasm
