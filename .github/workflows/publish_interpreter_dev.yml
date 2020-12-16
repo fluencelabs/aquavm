@@ -81,7 +81,7 @@ jobs:
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
       - name: Build aquamarine.wasm for JS clients
-        run: wasm-pack build $GITHUB_WORKSPACE/stepper --no-typescript --release -d $(pwd)/pkg
+        run: wasm-pack build $GITHUB_WORKSPACE/stepper --no-typescript --debug -d $(pwd)/pkg
 
       - name: Generate aquamarine.wasm.base64.js
         run: |
@@ -164,7 +164,7 @@ jobs:
         run: cargo install fcli toml-cli || true
 
       - name: Build aquamarine.wasm for node
-        run: fce build --release -p aquamarine --features fce
+        run: fce build --debug -p aquamarine --features fce
         working-directory: stepper
 
       - name: Copy aquamarine.wasm to air-interpreter-wasm
