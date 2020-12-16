@@ -68,13 +68,6 @@ jobs:
           MAX_VERSION="$(semver "$JS_VERSION" "$RS_VERSION" "0.0.0" | tail -n1)"
           echo "MAX_VERSION=$MAX_VERSION" | tee -a $GITHUB_ENV
 
-      - name: Set project version to MAX_VERSION
-        run: |
-          PATH="~/.cargo/bin:$PATH"
-          echo "toml is |$(which toml)|"
-          toml set Cargo.toml package.version "${{ env.MAX_VERSION }}" | sponge Cargo.toml
-        working-directory: crates/air-interpreter-wasm
-
 ### === JavaScript package release ===
       - name: Install wasm-pack
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
