@@ -51,6 +51,11 @@ jobs:
           toolchain: nightly
           target: wasm32-wasi
           profile: minimal
+      - uses: actions-rs/cargo@v1
+        with:
+          toolchain: nightly
+          command: update
+          args: --aggressive
 
 ### Calculate MAX_VERSION
       - name: Install jq & sponge
