@@ -73,7 +73,7 @@ pub enum AquamarineError {
     InvalidEvidenceState(EvidenceState, String),
 
     /// Errors occurred on call evidence deserialization.
-    CallEvidenceDeserializationError(SerdeJsonError, String),
+    CallEvidenceDeserializationError(SerdeJsonError, Vec<u8>),
 
     /// Errors occurred on call evidence serialization.
     CallEvidenceSerializationError(SerdeJsonError),

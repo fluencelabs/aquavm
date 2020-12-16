@@ -28,7 +28,7 @@ pub(crate) fn success<T>(data: &T, next_peer_pks: Vec<String>) -> StepperOutcome
 where
     T: ?Sized + Serialize,
 {
-    let data = serde_json::to_string(data).expect("default serializer shouldn't fail");
+    let data = serde_json::to_vec(data).expect("default serializer shouldn't fail");
     let next_peer_pks = dedup(next_peer_pks);
 
     StepperOutcome {
@@ -41,7 +41,7 @@ where
 
 /// Create StepperOutcome from supplied data and error,
 /// set ret_code based on the error.
-pub(crate) fn error_from_raw_data(data: impl Into<String>, err: AquamarineError) -> StepperOutcome {
+pub(crate) fn error_from_raw_data(data: impl Into<Vec<u8>>, err: AquamarineError) -> StepperOutcome {
     let ret_code = err.to_error_code();
     let data = data.into();
 
@@ -60,7 +60,7 @@ where
     T: ?Sized + Serialize,
 {
     let ret_code = err.to_error_code();
-    let data = serde_json::to_string(data).expect("default serializer shouldn't fail");
+    let data = serde_json::to_vec(data).expect("default serializer shouldn't fail");
     let next_peer_pks = dedup(next_peer_pks);
 
     StepperOutcome {

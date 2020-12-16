@@ -33,7 +33,7 @@ pub struct StepperOutcome {
 
     /// Contains script data that should be preserved in an executor of this stepper
     /// regardless of ret_code value.
-    pub data: String,
+    pub data: Vec<u8>,
 
     /// Public keys of peers that should receive data.
     pub next_peer_pks: Vec<String>,

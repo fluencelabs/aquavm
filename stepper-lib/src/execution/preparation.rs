@@ -34,12 +34,12 @@ pub(super) struct PrepareResult<'ctx, 'i> {
 
 /// Parse and prepare supplied data and aqua script.
 pub(super) fn prepare<'i>(
-    raw_prev_path: &str,
-    raw_path: &str,
+    raw_prev_path: &[u8],
+    raw_path: &[u8],
     raw_aqua: &'i str,
     init_peer_id: String,
 ) -> Result<PrepareResult<'static, 'i>> {
-    fn to_evidence_path(raw_path: &str) -> Result<CallEvidencePath> {
+    fn to_evidence_path(raw_path: &[u8]) -> Result<CallEvidencePath> {
         use AquamarineError::CallEvidenceDeserializationError as CallDeError;
 
         // treat empty string as an empty call evidence path allows abstracting from
@@ -47,7 +47,7 @@ pub(super) fn prepare<'i>(
         if raw_path.is_empty() {
             Ok(CallEvidencePath::new())
         } else {
-            serde_json::from_str(&raw_path).map_err(|err| CallDeError(err, raw_path.to_string()))
+            serde_json::from_slice(&raw_path).map_err(|err| CallDeError(err, raw_path.to_vec()))
         }
     }
 

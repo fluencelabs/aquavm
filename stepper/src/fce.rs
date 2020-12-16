@@ -43,7 +43,7 @@ pub fn main() {
 }
 
 #[fce]
-pub fn invoke(init_peer_id: String, aqua: String, prev_data: String, data: String) -> StepperOutcome {
+pub fn invoke(init_peer_id: String, aqua: String, prev_data: Vec<u8>, data: Vec<u8>) -> StepperOutcome {
     let log_level = get_log_level();
     log::set_max_level(log_level.to_level_filter());
 

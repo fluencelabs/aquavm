@@ -27,7 +27,7 @@ use stepper_interface::StepperOutcome;
 
 use std::convert::identity;
 
-pub fn execute_aqua(init_peer_id: String, aqua: String, prev_data: String, data: String) -> StepperOutcome {
+pub fn execute_aqua(init_peer_id: String, aqua: String, prev_data: Vec<u8>, data: Vec<u8>) -> StepperOutcome {
     log::trace!(
         "aquamarine version is {}, init user id is {}",
         env!("CARGO_PKG_VERSION"),
@@ -40,8 +40,8 @@ pub fn execute_aqua(init_peer_id: String, aqua: String, prev_data: String, data:
 fn execute_aqua_impl(
     init_peer_id: String,
     aqua: String,
-    prev_path: String,
-    path: String,
+    prev_path: Vec<u8>,
+    path: Vec<u8>,
 ) -> Result<StepperOutcome, StepperOutcome> {
     let PrepareResult {
         mut exec_ctx,
