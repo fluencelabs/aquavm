@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
+mod outcome;
 mod preparation;
+
+pub use preparation::parse;
 
 use preparation::prepare;
 use preparation::PrepareResult;
 
 use crate::air::ExecutableInstruction;
-use crate::StepperOutcome;
+use stepper_interface::StepperOutcome;
 
-pub use preparation::parse;
+use std::convert::identity;
 
 pub fn execute_aqua(init_peer_id: String, aqua: String, prev_data: String, data: String) -> StepperOutcome {
     log::trace!(
@@ -31,7 +34,7 @@ pub fn execute_aqua(init_peer_id: String, aqua: String, prev_data: String, data:
         init_peer_id
     );
 
-    execute_aqua_impl(init_peer_id, aqua, prev_data, data).unwrap_or_else(Into::into)
+    execute_aqua_impl(init_peer_id, aqua, prev_data, data).unwrap_or_else(identity)
 }
 
 fn execute_aqua_impl(
@@ -46,13 +49,13 @@ fn execute_aqua_impl(
         aqua,
     } = prepare(&prev_path, &path, aqua.as_str(), init_peer_id)
         // return the initial data in case of errors
-        .map_err(|e| StepperOutcome::error_from_data(path, e))?;
+        .map_err(|e| outcome::error_from_raw_data(path, e))?;
 
     aqua.execute(&mut exec_ctx, &mut call_ctx)
         // return new collected path in case of errors
-        .map_err(|e| StepperOutcome::error_from_ctxs(exec_ctx.clone(), &call_ctx, e))?;
+        .map_err(|e| outcome::error_from_data(&call_ctx.new_path, exec_ctx.next_peer_pks.clone(), e))?;
 
-    let outcome = StepperOutcome::success(exec_ctx, &call_ctx);
+    let outcome = outcome::success(&call_ctx.new_path, exec_ctx.next_peer_pks);
 
     Ok(outcome)
 }

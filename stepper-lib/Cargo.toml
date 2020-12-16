@@ -11,6 +11,7 @@ path = "src/lib.rs"
 [dependencies]
 air-parser = { path = "../crates/air-parser" }
 fluence = { git = "https://github.com/fluencelabs/rust-sdk", features = ["logger"] }
+stepper-interface = { path = "../crates/stepper-interface" }
 
 serde = { version = "1.0.116", features = [ "derive", "rc" ] }
 serde_derive = "1.0.116"
