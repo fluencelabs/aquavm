@@ -37,7 +37,7 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             ~/.cargo/bin
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-1-${{ hashFiles('**/Cargo.lock') }}
       - name: Install Rust toolchain with wasm32-unknown-unknown
         uses: actions-rs/toolchain@v1
         with:
@@ -79,7 +79,7 @@ jobs:
         continue-on-error: true
 
       - name: Build aquamarine.wasm for JS clients
-        run: wasm-pack build $GITHUB_WORKSPACE/stepper --no-typescript --debug -d $(pwd)/pkg
+        run: wasm-pack build $GITHUB_WORKSPACE/stepper --no-typescript --release -d $(pwd)/pkg
 
       - name: Generate aquamarine.wasm.base64.js
         run: |
@@ -161,12 +161,12 @@ jobs:
       - name: Install fcli toml-cli
         run: cargo install fcli toml-cli || true
 
-      - name: Build aquamarine.wasm for node (note this is a DEBUG build)
-        run: fce build -p aquamarine --features fce
+      - name: Build aquamarine.wasm for node
+        run: fce build -p aquamarine --release --features fce
         working-directory: stepper
 
       - name: Copy aquamarine.wasm to air-interpreter-wasm
-        run: cp target/wasm32-wasi/debug/aquamarine.wasm crates/air-interpreter-wasm/aquamarine.wasm
+        run: cp target/wasm32-wasi/release/aquamarine.wasm crates/air-interpreter-wasm/aquamarine.wasm
 
       - name: Set project version to MAX_VERSION & add branch to its name
         run: |
