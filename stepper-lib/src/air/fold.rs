@@ -166,12 +166,12 @@ mod tests {
     use crate::call_evidence::CallEvidencePath;
     use crate::JValue;
 
+    use aqua_test_utils::call_vm;
     use aqua_test_utils::create_aqua_vm;
     use aqua_test_utils::echo_number_call_service;
+    use aqua_test_utils::echo_string_call_service;
     use aqua_test_utils::set_variable_call_service;
-    use aqua_test_utils::{call_vm, echo_string_call_service};
     use aquamarine_vm::AquamarineVMError;
-    use aquamarine_vm::StepperError;
     use aquamarine_vm::StepperOutcome;
 
     use serde_json::json;
@@ -202,7 +202,7 @@ mod tests {
 
         let res = call_vm!(set_variable_vm, "", lfold.clone(), "[]", "[]");
         let res = call_vm!(vm, "", lfold, "[]", res.data);
-        let res: CallEvidencePath = serde_json::from_str(&res.data).expect("should be valid call evidence path");
+        let res: CallEvidencePath = serde_json::from_slice(&res.data).expect("should be valid call evidence path");
 
         assert_eq!(res.len(), 6);
         assert_eq!(res[0], Call(Executed(Rc::new(json!(["1", "2", "3", "4", "5"])))));
@@ -235,7 +235,7 @@ mod tests {
 
         let res = call_vm!(set_variable_vm, "", rfold.clone(), "[]", "[]");
         let res = call_vm!(vm, "", rfold, "[]", res.data);
-        let res: CallEvidencePath = serde_json::from_str(&res.data).expect("should be valid call evidence path");
+        let res: CallEvidencePath = serde_json::from_slice(&res.data).expect("should be valid call evidence path");
 
         assert_eq!(res.len(), 6);
         assert_eq!(res[0], Call(Executed(Rc::new(json!(["1", "2", "3", "4", "5"])))));
@@ -276,7 +276,7 @@ mod tests {
 
         let res = call_vm!(set_variable_vm, "", script.clone(), "[]", "[]");
         let res = call_vm!(vm, "", script, "[]", res.data);
-        let res: CallEvidencePath = serde_json::from_str(&res.data).expect("should be valid call evidence path");
+        let res: CallEvidencePath = serde_json::from_slice(&res.data).expect("should be valid call evidence path");
 
         assert_eq!(res.len(), 27);
         assert_eq!(res[0], Call(Executed(Rc::new(json!(["1", "2", "3", "4", "5"])))));
@@ -317,19 +317,9 @@ mod tests {
             )"#,
         );
 
-        let res = vm.call_with_prev_data("", script, "[]", "[]");
+        let res = call_vm!(vm, "", script, "[]", "[]");
 
-        assert!(res.is_err());
-        let error = res.err().unwrap();
-        let error = match error {
-            AquamarineVMError::StepperError(error) => error,
-            _ => unreachable!(),
-        };
-
-        assert_eq!(
-            error,
-            StepperError::MultipleFoldStates(String::from("multiple fold states found for iterable i"))
-        );
+        assert_eq!(res.ret_code, 14);
     }
 
     #[test]
@@ -355,7 +345,7 @@ mod tests {
 
         let res = call_vm!(set_variable_vm, "", empty_fold.clone(), "[]", "[]");
         let res = call_vm!(vm, "", empty_fold, "[]", res.data);
-        let res: CallEvidencePath = serde_json::from_str(&res.data).expect("should be valid call evidence path");
+        let res: CallEvidencePath = serde_json::from_slice(&res.data).expect("should be valid call evidence path");
 
         assert_eq!(res.len(), 1);
         assert_eq!(res[0], Call(Executed(Rc::new(json!([])))));
@@ -387,7 +377,7 @@ mod tests {
 
         let res = call_vm!(set_variable_vm, "", lfold.clone(), "[]", "[]");
         let res = call_vm!(vm, "", lfold, "[]", res.data);
-        let res: CallEvidencePath = serde_json::from_str(&res.data).expect("should be valid call evidence path");
+        let res: CallEvidencePath = serde_json::from_slice(&res.data).expect("should be valid call evidence path");
 
         assert_eq!(res.len(), 6);
         assert_eq!(
@@ -447,7 +437,7 @@ mod tests {
         let res = call_vm!(vm_a, "", script.clone(), "[]", res.data);
         let res = call_vm!(vm_b, "", script, "[]", res.data);
 
-        let res: CallEvidencePath = serde_json::from_str(&res.data).expect("should be valid call evidence path");
+        let res: CallEvidencePath = serde_json::from_slice(&res.data).expect("should be valid call evidence path");
 
         assert_eq!(res.len(), 12);
         for i in 2..11 {
@@ -501,15 +491,8 @@ mod tests {
             )"#,
         );
 
-        let res = execute_script(use_non_exist_variable_script);
-        assert!(res.is_err());
-        let error = res.err().unwrap();
-        let error = match error {
-            AquamarineVMError::StepperError(error) => error,
-            _ => unreachable!(),
-        };
-
-        assert!(matches!(error, StepperError::VariableNotFound(_)));
+        let res = execute_script(use_non_exist_variable_script).unwrap();
+        assert_eq!(res.ret_code, 7);
 
         let variable_shadowing_script = String::from(
             r#"
@@ -542,7 +525,7 @@ mod tests {
         );
 
         let res = execute_script(variable_shadowing_script).unwrap();
-        let res: CallEvidencePath = serde_json::from_str(&res.data).expect("should be valid call evidence path");
+        let res: CallEvidencePath = serde_json::from_slice(&res.data).expect("should be valid call evidence path");
 
         assert_eq!(res.len(), 11);
         for i in 0..10 {

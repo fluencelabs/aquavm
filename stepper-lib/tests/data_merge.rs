@@ -76,7 +76,7 @@ fn data_merge() {
     let res3 = call_vm!(vm1, "asd", script.clone(), res1.data.clone(), res2.data.clone());
     let res4 = call_vm!(vm2, "asd", script, res1.data.clone(), res2.data.clone());
 
-    let resulted_json1: JValue = serde_json::from_str(&res1.data).expect("stepper should return valid json");
+    let resulted_json1: JValue = serde_json::from_slice(&res1.data).expect("stepper should return valid json");
 
     let right_json1 = json!( [
         { "call": { "executed": ["A", "B"] } },
@@ -95,7 +95,7 @@ fn data_merge() {
     assert_eq!(resulted_json1, right_json1);
     assert_eq!(res1.next_peer_pks, vec![String::from("B")]);
 
-    let resulted_json2: JValue = serde_json::from_str(&res2.data).expect("stepper should return valid json");
+    let resulted_json2: JValue = serde_json::from_slice(&res2.data).expect("stepper should return valid json");
 
     let right_json2 = json!( [
         { "call": { "executed": ["A", "B"] } },
@@ -113,7 +113,7 @@ fn data_merge() {
     assert_eq!(resulted_json2, right_json2);
     assert_eq!(res2.next_peer_pks, vec![String::from("A")]);
 
-    let resulted_json3: JValue = serde_json::from_str(&res3.data).expect("stepper should return valid json");
+    let resulted_json3: JValue = serde_json::from_slice(&res3.data).expect("stepper should return valid json");
 
     let right_json3 = json!( [
         { "call": { "executed": ["A", "B"] } },
@@ -132,7 +132,7 @@ fn data_merge() {
     assert_eq!(resulted_json3, right_json3);
     assert!(res3.next_peer_pks.is_empty());
 
-    let resulted_json4: JValue = serde_json::from_str(&res4.data).expect("stepper should return valid json");
+    let resulted_json4: JValue = serde_json::from_slice(&res4.data).expect("stepper should return valid json");
 
     let right_json4 = json!( [
         { "call": { "executed": ["A", "B"] } },

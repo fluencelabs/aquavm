@@ -27,7 +27,7 @@ wasm-bindgen = "=0.2.65"
 
 [dev_dependencies]
 aqua-test-utils = { path = "../crates/test-utils" }
-aquamarine-vm = { git = "https://github.com/fluencelabs/fce", features = ["raw-aquamarine-vm-api"], branch = "master" }
+aquamarine-vm = { git = "https://github.com/fluencelabs/fce", features = ["raw-aquamarine-vm-api"], branch = "bytearray_interface" }
 
 criterion = "0.3.3"
 csv = "1.1.5"

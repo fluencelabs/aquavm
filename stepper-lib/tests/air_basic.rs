@@ -48,7 +48,8 @@ fn seq_par_call() {
     );
 
     let res = call_vm!(vm, "asd", script, "[]", "[]");
-    let resulted_path: Vec<EvidenceState> = serde_json::from_str(&res.data).expect("stepper should return valid json");
+    let resulted_path: Vec<EvidenceState> =
+        serde_json::from_slice(&res.data).expect("stepper should return valid json");
 
     let test_string = String::from("test");
     let right_path = vec![
@@ -82,7 +83,8 @@ fn par_par_call() {
     );
 
     let res = call_vm!(vm, "asd", script, "[]", "[]");
-    let resulted_path: Vec<EvidenceState> = serde_json::from_str(&res.data).expect("stepper should return valid json");
+    let resulted_path: Vec<EvidenceState> =
+        serde_json::from_slice(&res.data).expect("stepper should return valid json");
 
     let test_string = String::from("test");
     let right_path = vec![
@@ -180,7 +182,7 @@ fn create_service() {
     let add_module_response = String::from("add_module response");
     let add_blueprint_response = String::from("add_blueprint response");
     let create_response = String::from("create response");
-    let resulted_path: Vec<EvidenceState> = serde_json::from_str(&res.data).expect("should be a correct json");
+    let resulted_path: Vec<EvidenceState> = serde_json::from_slice(&res.data).expect("should be a correct json");
     let right_path = vec![
         Call(Executed(Rc::new(module_bytes))),
         Call(Executed(Rc::new(module_config))),

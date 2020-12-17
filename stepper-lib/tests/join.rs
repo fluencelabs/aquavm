@@ -71,7 +71,8 @@ fn join_chat() {
 
     let client_1_res = call_vm!(client_1, "asd", script.clone(), "[]", "[]");
 
-    let client_1_res_json: JValue = serde_json::from_str(&client_1_res.data).expect("stepper should return valid json");
+    let client_1_res_json: JValue =
+        serde_json::from_slice(&client_1_res.data).expect("stepper should return valid json");
 
     let client_1_right_json = json!([
         { "call": {"request_sent": "A" } },
@@ -82,7 +83,7 @@ fn join_chat() {
 
     let relay_1_res = call_vm!(relay_1, "asd", script.clone(), client_1_res.data, "[]");
 
-    let relay_1_res_json: JValue = serde_json::from_str(&relay_1_res.data).expect("stepper should return valid json");
+    let relay_1_res_json: JValue = serde_json::from_slice(&relay_1_res.data).expect("stepper should return valid json");
 
     let relay_1_right_json = json!( [
         { "call": { "executed" : "test" } },
@@ -94,7 +95,7 @@ fn join_chat() {
 
     let remote_res = call_vm!(remote, "asd", script.clone(), relay_1_res.data, "[]");
 
-    let remote_res_json: JValue = serde_json::from_str(&remote_res.data).expect("stepper should return valid json");
+    let remote_res_json: JValue = serde_json::from_slice(&remote_res.data).expect("stepper should return valid json");
 
     let remote_right_json = json!( [
         { "call": { "executed" : "test" } },
@@ -117,7 +118,7 @@ fn join_chat() {
 
     let relay_1_res = call_vm!(relay_1, "asd", script.clone(), remote_res.data.clone(), "[]");
 
-    let relay_1_res_json: JValue = serde_json::from_str(&relay_1_res.data).expect("stepper should return valid json");
+    let relay_1_res_json: JValue = serde_json::from_slice(&relay_1_res.data).expect("stepper should return valid json");
 
     let relay_1_right_json = json!( [
         { "call": { "executed" : "test" } },
@@ -135,7 +136,8 @@ fn join_chat() {
 
     let client_1_res = call_vm!(client_1, "asd", script.clone(), relay_1_res.data, "[]");
 
-    let client_1_res_json: JValue = serde_json::from_str(&client_1_res.data).expect("stepper should return valid json");
+    let client_1_res_json: JValue =
+        serde_json::from_slice(&client_1_res.data).expect("stepper should return valid json");
 
     let client_1_right_json = json!( [
         { "call": { "executed" : "test" } },
@@ -153,7 +155,7 @@ fn join_chat() {
 
     let relay_2_res = call_vm!(relay_2, "asd", script.clone(), remote_res.data, "[]");
 
-    let relay_2_res_json: JValue = serde_json::from_str(&relay_2_res.data).expect("stepper should return valid json");
+    let relay_2_res_json: JValue = serde_json::from_slice(&relay_2_res.data).expect("stepper should return valid json");
 
     let relay_2_right_json = json!( [
         { "call": { "executed" : "test" } },
@@ -171,7 +173,8 @@ fn join_chat() {
 
     let client_2_res = call_vm!(client_2, "asd", script, relay_2_res.data, "[]");
 
-    let client_2_res_json: JValue = serde_json::from_str(&client_2_res.data).expect("stepper should return valid json");
+    let client_2_res_json: JValue =
+        serde_json::from_slice(&client_2_res.data).expect("stepper should return valid json");
 
     let client_2_right_json = json!( [
         { "call": { "executed" : "test" } },
@@ -226,7 +229,8 @@ fn join() {
     let relay_1_res = call_vm!(relay_1, "asd", script.clone(), remote_res.data, "[]");
     let client_1_res = call_vm!(client_1, "asd", script, relay_1_res.data, "[]");
 
-    let client_1_res_json: JValue = serde_json::from_str(&client_1_res.data).expect("stepper should return valid json");
+    let client_1_res_json: JValue =
+        serde_json::from_slice(&client_1_res.data).expect("stepper should return valid json");
 
     let client_1_right_json = json!( [
         { "call": { "executed" : "test" } },
@@ -305,7 +309,8 @@ fn init_peer_id() {
         ""
     );
 
-    let client_1_res_json: JValue = serde_json::from_str(&client_1_res.data).expect("stepper should return valid json");
+    let client_1_res_json: JValue =
+        serde_json::from_slice(&client_1_res.data).expect("stepper should return valid json");
 
     let client_1_right_json = json!( [
         { "call": { "executed" : "test" } },
@@ -325,7 +330,7 @@ fn init_peer_id() {
     let initiator_1_res = call_vm!(initiator, initiator_peer_id, script, client_1_res.data, "");
 
     let initiator_1_res_json: JValue =
-        serde_json::from_str(&initiator_1_res.data).expect("stepper should return valid json");
+        serde_json::from_slice(&initiator_1_res.data).expect("stepper should return valid json");
 
     let initiator_1_right_json = json!( [
         { "call": { "executed" : "test" } },

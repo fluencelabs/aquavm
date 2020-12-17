@@ -99,7 +99,7 @@ mod tests {
         );
 
         let res = call_vm!(vm, "asd", script.clone(), "[]", "[]");
-        let call_path: CallEvidencePath = serde_json::from_str(&res.data).expect("should be a valid json");
+        let call_path: CallEvidencePath = serde_json::from_slice(&res.data).expect("should be a valid json");
 
         assert_eq!(call_path.len(), 1);
         assert_eq!(
@@ -119,7 +119,7 @@ mod tests {
         );
 
         let res = call_vm!(vm, "asd", script, "[]", "[]");
-        let call_path: CallEvidencePath = serde_json::from_str(&res.data).expect("should be a valid json");
+        let call_path: CallEvidencePath = serde_json::from_slice(&res.data).expect("should be a valid json");
 
         assert_eq!(call_path.len(), 1);
         assert_eq!(
@@ -144,7 +144,7 @@ mod tests {
         );
 
         let res = call_vm!(vm, "asd", script, "[]", "[]");
-        let call_path: CallEvidencePath = serde_json::from_str(&res.data).expect("should be a valid json");
+        let call_path: CallEvidencePath = serde_json::from_slice(&res.data).expect("should be a valid json");
 
         assert_eq!(call_path.len(), 1);
         assert_eq!(call_path[0], Call(RequestSent(some_local_peer_id)));
@@ -201,7 +201,7 @@ mod tests {
 
         let res = call_vm!(set_variable_vm, "asd", script.clone(), "[]", "[]");
         let res = call_vm!(vm, "asd", script, "[]", res.data);
-        let call_path: CallEvidencePath = serde_json::from_str(&res.data).expect("should be a valid json");
+        let call_path: CallEvidencePath = serde_json::from_slice(&res.data).expect("should be a valid json");
 
         assert_eq!(call_path.len(), 2);
         assert_eq!(
