@@ -716,6 +716,14 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-macro"
 version = "0.2.11"
+source = "git+https://github.com/fluencelabs/rust-sdk#31dc0a30dfd05144439c63d3fc3aae93636de06c"
+dependencies = [
+ "fluence-sdk-wit 0.2.11 (git+https://github.com/fluencelabs/rust-sdk)",
+]
+
+[[package]]
+name = "fluence-sdk-macro"
+version = "0.2.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "348397aaa898e0bcd1554e71add917b400542684f0d416ef9cc8693da7daba48"
 dependencies = [
@@ -723,11 +731,13 @@ dependencies = [
 ]
 
 [[package]]
-name = "fluence-sdk-macro"
+name = "fluence-sdk-main"
 version = "0.2.11"
 source = "git+https://github.com/fluencelabs/rust-sdk#31dc0a30dfd05144439c63d3fc3aae93636de06c"
 dependencies = [
- "fluence-sdk-wit 0.2.11 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence-sdk-macro 0.2.11 (git+https://github.com/fluencelabs/rust-sdk)",
+ "log",
+ "serde",
 ]
 
 [[package]]
@@ -742,20 +752,9 @@ dependencies = [
 ]
 
 [[package]]
-name = "fluence-sdk-main"
-version = "0.2.11"
-source = "git+https://github.com/fluencelabs/rust-sdk#31dc0a30dfd05144439c63d3fc3aae93636de06c"
-dependencies = [
- "fluence-sdk-macro 0.2.11 (git+https://github.com/fluencelabs/rust-sdk)",
- "log",
- "serde",
-]
-
-[[package]]
 name = "fluence-sdk-wit"
 version = "0.2.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ef3b20f7cd8ac6ee02a0ee7abd62f9339a236520430c0c702802149dc221555a"
+source = "git+https://github.com/fluencelabs/rust-sdk#31dc0a30dfd05144439c63d3fc3aae93636de06c"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -768,7 +767,8 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-wit"
 version = "0.2.11"
-source = "git+https://github.com/fluencelabs/rust-sdk#31dc0a30dfd05144439c63d3fc3aae93636de06c"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ef3b20f7cd8ac6ee02a0ee7abd62f9339a236520430c0c702802149dc221555a"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1605,6 +1605,7 @@ checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 [[package]]
 name = "stepper-interface"
 version = "0.1.0"
+source = "git+https://github.com/fluencelabs/aquamarine?branch=new_stepper_outcome#d3c865baa77a08499de2bbcd21b64f6a634511fe"
 dependencies = [
  "fluence",
  "serde",
@@ -1614,7 +1615,6 @@ dependencies = [
 [[package]]
 name = "stepper-interface"
 version = "0.1.0"
-source = "git+https://github.com/fluencelabs/aquamarine?branch=new_stepper_outcome#10077294530c65ae5eb53d4ca8ea305557151182"
 dependencies = [
  "fluence",
  "serde",
