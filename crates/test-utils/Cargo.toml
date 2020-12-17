@@ -9,6 +9,6 @@ name = "aqua_test_utils"
 path = "src/lib.rs"
 
 [dependencies]
-fluence = { git = "https://github.com/fluencelabs/rust-sdk", features = ["logger"], branch = "logger-i32" }
+fluence = { git = "https://github.com/fluencelabs/rust-sdk", features = ["logger"] }
 aquamarine-vm = { git = "https://github.com/fluencelabs/fce", branch = "master" }
 serde_json = "1.0.56"
