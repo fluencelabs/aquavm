@@ -14,43 +14,48 @@
  * limitations under the License.
  */
 
-mod prolog;
-mod utils;
+mod outcome;
+mod preparation;
 
-use prolog::make_contexts;
-use prolog::prepare;
-use utils::dedup;
+pub use preparation::parse;
+
+use preparation::prepare;
+use preparation::PrepareResult;
 
 use crate::air::ExecutableInstruction;
-use crate::AquamarineError::CallEvidenceSerializationError as CallSeError;
-use crate::Result;
-use crate::StepperOutcome;
-use crate::STEPPER_SUCCESS;
+use stepper_interface::StepperOutcome;
 
-pub use prolog::parse;
+use std::convert::identity;
 
-pub fn execute_aqua(init_peer_id: String, aqua: String, prev_data: String, data: String) -> StepperOutcome {
+pub fn execute_aqua(init_peer_id: String, aqua: String, prev_data: Vec<u8>, data: Vec<u8>) -> StepperOutcome {
     log::trace!(
         "aquamarine version is {}, init user id is {}",
         env!("CARGO_PKG_VERSION"),
         init_peer_id
     );
 
-    execute_aqua_impl(init_peer_id, aqua, prev_data, data).unwrap_or_else(Into::into)
+    execute_aqua_impl(init_peer_id, aqua, prev_data, data).unwrap_or_else(identity)
 }
 
-fn execute_aqua_impl(init_peer_id: String, aqua: String, prev_path: String, path: String) -> Result<StepperOutcome> {
-    let (prev_path, path, aqua) = prepare(prev_path, path, aqua.as_str())?;
-    let (mut exec_ctx, mut call_ctx) = make_contexts(prev_path, path, init_peer_id)?;
+fn execute_aqua_impl(
+    init_peer_id: String,
+    aqua: String,
+    prev_path: Vec<u8>,
+    path: Vec<u8>,
+) -> Result<StepperOutcome, StepperOutcome> {
+    let PrepareResult {
+        mut exec_ctx,
+        mut call_ctx,
+        aqua,
+    } = prepare(&prev_path, &path, aqua.as_str(), init_peer_id)
+        // return the initial data in case of errors
+        .map_err(|e| outcome::error_from_raw_data(path, e))?;
 
-    aqua.execute(&mut exec_ctx, &mut call_ctx)?;
+    aqua.execute(&mut exec_ctx, &mut call_ctx)
+        // return new collected path in case of errors
+        .map_err(|e| outcome::error_from_data(&call_ctx.new_path, exec_ctx.next_peer_pks.clone(), e))?;
 
-    let next_peer_pks = dedup(exec_ctx.next_peer_pks);
-    let data = serde_json::to_string(&call_ctx.new_path).map_err(CallSeError)?;
+    let outcome = outcome::success(&call_ctx.new_path, exec_ctx.next_peer_pks);
 
-    Ok(StepperOutcome {
-        ret_code: STEPPER_SUCCESS,
-        data,
-        next_peer_pks,
-    })
+    Ok(outcome)
 }

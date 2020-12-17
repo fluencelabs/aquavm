@@ -45,7 +45,7 @@ pub const RUN_PARAMS: &str = "initial_params";
 pub const EVIDENCE_CHANGING: &str = "evidence_changing";
 
 /// This map should be used by rust-sdk logger that allows print only necessary targets by id.
-pub const TARGET_MAP: [(&str, i64); 10] = [
+pub const TARGET_MAP: [(&str, i32); 10] = [
     (INSTRUCTION, 1 << 1),
     (DATA_CACHE, 1 << 2),
     (NEXT_PEER_PKS, 1 << 3),

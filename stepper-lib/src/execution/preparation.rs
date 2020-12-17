@@ -25,13 +25,21 @@ use crate::Result;
 
 use air_parser::ast::Instruction;
 
+/// Represents result of the preparation step.
+pub(super) struct PrepareResult<'ctx, 'i> {
+    pub(crate) exec_ctx: ExecutionCtx<'ctx>,
+    pub(crate) call_ctx: CallEvidenceCtx,
+    pub(crate) aqua: Instruction<'i>,
+}
+
 /// Parse and prepare supplied data and aqua script.
 pub(super) fn prepare<'i>(
-    raw_prev_path: String,
-    raw_path: String,
+    raw_prev_path: &[u8],
+    raw_path: &[u8],
     raw_aqua: &'i str,
-) -> Result<(CallEvidencePath, CallEvidencePath, Instruction<'i>)> {
-    fn to_evidence_path(raw_path: String) -> Result<CallEvidencePath> {
+    init_peer_id: String,
+) -> Result<PrepareResult<'static, 'i>> {
+    fn to_evidence_path(raw_path: &[u8]) -> Result<CallEvidencePath> {
         use AquamarineError::CallEvidenceDeserializationError as CallDeError;
 
         // treat empty string as an empty call evidence path allows abstracting from
@@ -39,7 +47,7 @@ pub(super) fn prepare<'i>(
         if raw_path.is_empty() {
             Ok(CallEvidencePath::new())
         } else {
-            serde_json::from_str(&raw_path).map_err(|err| CallDeError(err, raw_path))
+            serde_json::from_slice(&raw_path).map_err(|err| CallDeError(err, raw_path.to_vec()))
         }
     }
 
@@ -56,12 +64,19 @@ pub(super) fn prepare<'i>(
         path
     );
 
-    Ok((prev_path, path, aqua))
+    let (exec_ctx, call_ctx) = make_contexts(prev_path, path, init_peer_id)?;
+    let result = PrepareResult {
+        exec_ctx,
+        call_ctx,
+        aqua,
+    };
+
+    Ok(result)
 }
 
 /// Make execution and call evidence contexts from supplied data.
 /// Internally, it unites variable from previous and current data and merges call evidence paths.
-pub(super) fn make_contexts(
+fn make_contexts(
     prev_path: CallEvidencePath,
     path: CallEvidencePath,
     init_peer_id: String,
@@ -78,7 +93,7 @@ pub(super) fn make_contexts(
     Ok((exec_ctx, call_evidence_ctx))
 }
 
-/// Parse an AIR script to AST
+/// Parse an AIR script to AST.
 pub fn parse(script: &str) -> Result<Instruction<'_>> {
     let ast = air_parser::parse(script).map_err(AquamarineError::AIRParseError)?;
     Ok(*ast)

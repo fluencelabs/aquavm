@@ -1,11 +1,11 @@
 use aqua_test_utils::create_aqua_vm;
 use aqua_test_utils::unit_call_service;
-use aquamarine_vm::vec1::Vec1;
-use aquamarine_vm::AquamarineVM;
-use aquamarine_vm::AquamarineVMError;
-use aquamarine_vm::HostExportedFunc;
-use aquamarine_vm::IValue;
-use aquamarine_vm::StepperOutcome;
+use aqua_test_utils::AquamarineVM;
+use aqua_test_utils::AquamarineVMError;
+use aqua_test_utils::HostExportedFunc;
+use aqua_test_utils::IValue;
+use aqua_test_utils::StepperOutcome;
+use aqua_test_utils::Vec1;
 
 use criterion::criterion_group;
 use criterion::criterion_main;

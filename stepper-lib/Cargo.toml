@@ -11,6 +11,7 @@ path = "src/lib.rs"
 [dependencies]
 air-parser = { path = "../crates/air-parser" }
 fluence = { git = "https://github.com/fluencelabs/rust-sdk", features = ["logger"] }
+stepper-interface = { path = "../crates/stepper-interface" }
 
 serde = { version = "1.0.116", features = [ "derive", "rc" ] }
 serde_derive = "1.0.116"
@@ -26,7 +27,6 @@ wasm-bindgen = "=0.2.65"
 
 [dev_dependencies]
 aqua-test-utils = { path = "../crates/test-utils" }
-aquamarine-vm = { git = "https://github.com/fluencelabs/fce", features = ["raw-aquamarine-vm-api"], branch = "master" }
 
 criterion = "0.3.3"
 csv = "1.1.5"

@@ -15,6 +15,7 @@ path = "src/fce.rs"
 
 [dependencies]
 stepper-lib = { path = "../stepper-lib" }
+stepper-interface = { path = "../crates/stepper-interface" }
 
 fluence = { git = "https://github.com/fluencelabs/rust-sdk", features = ["logger"] }
 
