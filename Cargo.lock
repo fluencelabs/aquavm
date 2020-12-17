@@ -69,13 +69,13 @@ dependencies = [
 [[package]]
 name = "aquamarine-vm"
 version = "0.1.3"
-source = "git+https://github.com/fluencelabs/fce#2d31b7fd63cea4f0a33562e8ebf186e5f91039b8"
+source = "git+https://github.com/fluencelabs/fce#2af7a7297b4c3cb70e328ad994ce3c549ab359b3"
 dependencies = [
  "fluence-faas",
  "maplit",
  "serde",
  "serde_json",
- "stepper-interface 0.1.0 (git+https://github.com/fluencelabs/aquamarine?branch=new_stepper_outcome)",
+ "stepper-interface 0.1.0 (git+https://github.com/fluencelabs/aquamarine)",
 ]
 
 [[package]]
@@ -630,7 +630,7 @@ checksum = "e88a8acf291dafb59c2d96e8f59828f3838bb1a70398823ade51a84de6a6deed"
 [[package]]
 name = "fce"
 version = "0.1.13"
-source = "git+https://github.com/fluencelabs/fce#2d31b7fd63cea4f0a33562e8ebf186e5f91039b8"
+source = "git+https://github.com/fluencelabs/fce#2af7a7297b4c3cb70e328ad994ce3c549ab359b3"
 dependencies = [
  "boolinator",
  "fce-utils",
@@ -652,12 +652,12 @@ dependencies = [
 [[package]]
 name = "fce-utils"
 version = "0.1.0"
-source = "git+https://github.com/fluencelabs/fce#2d31b7fd63cea4f0a33562e8ebf186e5f91039b8"
+source = "git+https://github.com/fluencelabs/fce#2af7a7297b4c3cb70e328ad994ce3c549ab359b3"
 
 [[package]]
 name = "fce-wit-interfaces"
 version = "0.1.8"
-source = "git+https://github.com/fluencelabs/fce#2d31b7fd63cea4f0a33562e8ebf186e5f91039b8"
+source = "git+https://github.com/fluencelabs/fce#2af7a7297b4c3cb70e328ad994ce3c549ab359b3"
 dependencies = [
  "multimap",
  "wasmer-interface-types-fl",
@@ -666,7 +666,7 @@ dependencies = [
 [[package]]
 name = "fce-wit-parser"
 version = "0.1.10"
-source = "git+https://github.com/fluencelabs/fce#2d31b7fd63cea4f0a33562e8ebf186e5f91039b8"
+source = "git+https://github.com/fluencelabs/fce#2af7a7297b4c3cb70e328ad994ce3c549ab359b3"
 dependencies = [
  "anyhow",
  "fce-wit-interfaces",
@@ -694,7 +694,7 @@ dependencies = [
 [[package]]
 name = "fluence-faas"
 version = "0.1.15"
-source = "git+https://github.com/fluencelabs/fce#2d31b7fd63cea4f0a33562e8ebf186e5f91039b8"
+source = "git+https://github.com/fluencelabs/fce#2af7a7297b4c3cb70e328ad994ce3c549ab359b3"
 dependencies = [
  "cmd_lib",
  "fce",
@@ -716,6 +716,14 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-macro"
 version = "0.2.11"
+source = "git+https://github.com/fluencelabs/rust-sdk#31dc0a30dfd05144439c63d3fc3aae93636de06c"
+dependencies = [
+ "fluence-sdk-wit 0.2.11 (git+https://github.com/fluencelabs/rust-sdk)",
+]
+
+[[package]]
+name = "fluence-sdk-macro"
+version = "0.2.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "348397aaa898e0bcd1554e71add917b400542684f0d416ef9cc8693da7daba48"
 dependencies = [
@@ -723,11 +731,13 @@ dependencies = [
 ]
 
 [[package]]
-name = "fluence-sdk-macro"
+name = "fluence-sdk-main"
 version = "0.2.11"
 source = "git+https://github.com/fluencelabs/rust-sdk#31dc0a30dfd05144439c63d3fc3aae93636de06c"
 dependencies = [
- "fluence-sdk-wit 0.2.11 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence-sdk-macro 0.2.11 (git+https://github.com/fluencelabs/rust-sdk)",
+ "log",
+ "serde",
 ]
 
 [[package]]
@@ -742,20 +752,9 @@ dependencies = [
 ]
 
 [[package]]
-name = "fluence-sdk-main"
-version = "0.2.11"
-source = "git+https://github.com/fluencelabs/rust-sdk#31dc0a30dfd05144439c63d3fc3aae93636de06c"
-dependencies = [
- "fluence-sdk-macro 0.2.11 (git+https://github.com/fluencelabs/rust-sdk)",
- "log",
- "serde",
-]
-
-[[package]]
 name = "fluence-sdk-wit"
 version = "0.2.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ef3b20f7cd8ac6ee02a0ee7abd62f9339a236520430c0c702802149dc221555a"
+source = "git+https://github.com/fluencelabs/rust-sdk#31dc0a30dfd05144439c63d3fc3aae93636de06c"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -768,7 +767,8 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-wit"
 version = "0.2.11"
-source = "git+https://github.com/fluencelabs/rust-sdk#31dc0a30dfd05144439c63d3fc3aae93636de06c"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ef3b20f7cd8ac6ee02a0ee7abd62f9339a236520430c0c702802149dc221555a"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1605,6 +1605,7 @@ checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 [[package]]
 name = "stepper-interface"
 version = "0.1.0"
+source = "git+https://github.com/fluencelabs/aquamarine#0f9ec42b1ab161761f2c609ddc2c95bad5b3e696"
 dependencies = [
  "fluence",
  "serde",
@@ -1614,7 +1615,6 @@ dependencies = [
 [[package]]
 name = "stepper-interface"
 version = "0.1.0"
-source = "git+https://github.com/fluencelabs/aquamarine?branch=new_stepper_outcome#10077294530c65ae5eb53d4ca8ea305557151182"
 dependencies = [
  "fluence",
  "serde",
