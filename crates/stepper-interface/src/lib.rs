@@ -26,10 +26,10 @@ pub const STEPPER_SUCCESS: i32 = 0;
 #[fce]
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct StepperOutcome {
-    /// A return code, where SUCCESS_ERROR_CODE means success.
+    /// A return code, where STEPPER_SUCCESS means success.
     pub ret_code: i32,
 
-    /// Contains error message if ret_code != SUCCESS_ERROR_CODE.
+    /// Contains error message if ret_code != STEPPER_SUCCESS.
     pub error_message: String,
 
     /// Contains script data that should be preserved in an executor of this stepper
