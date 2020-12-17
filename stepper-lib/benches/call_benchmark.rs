@@ -1,8 +1,8 @@
 use aqua_test_utils::create_aqua_vm;
 use aqua_test_utils::unit_call_service;
-use aquamarine_vm::AquamarineVM;
-use aquamarine_vm::AquamarineVMError;
-use aquamarine_vm::StepperOutcome;
+use aqua_test_utils::AquamarineVM;
+use aqua_test_utils::AquamarineVMError;
+use aqua_test_utils::StepperOutcome;
 
 use criterion::criterion_group;
 use criterion::criterion_main;

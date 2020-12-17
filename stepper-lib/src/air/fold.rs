@@ -171,8 +171,8 @@ mod tests {
     use aqua_test_utils::echo_number_call_service;
     use aqua_test_utils::echo_string_call_service;
     use aqua_test_utils::set_variable_call_service;
-    use aquamarine_vm::AquamarineVMError;
-    use aquamarine_vm::StepperOutcome;
+    use aqua_test_utils::AquamarineVMError;
+    use aqua_test_utils::StepperOutcome;
 
     use serde_json::json;
     use std::rc::Rc;

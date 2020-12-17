@@ -1627,7 +1627,6 @@ version = "0.1.3"
 dependencies = [
  "air-parser",
  "aqua-test-utils",
- "aquamarine-vm",
  "boolinator",
  "criterion",
  "csv",
