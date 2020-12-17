@@ -40,7 +40,7 @@ pub fn main() {
 }
 
 #[wasm_bindgen]
-pub fn invoke(init_peer_id: String, aqua: String, prev_data: String, data: String, log_level: &str) -> String {
+pub fn invoke(init_peer_id: String, aqua: String, prev_data: Vec<u8>, data: Vec<u8>, log_level: &str) -> String {
     use std::str::FromStr;
 
     let log_level = log::Level::from_str(log_level).unwrap_or(DEFAULT_LOG_LEVEL);

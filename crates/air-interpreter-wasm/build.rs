@@ -14,12 +14,6 @@
  * limitations under the License.
  */
 
-use std::hash::Hash;
-
-/// Deduplicate values in a supplied vector.
-pub(super) fn dedup<T: Eq + Hash>(mut vec: Vec<T>) -> Vec<T> {
-    use std::collections::HashSet;
-
-    let set: HashSet<_> = vec.drain(..).collect();
-    set.into_iter().collect()
+fn main() {
+    built::write_built_file().expect("Failed to acquire build-time information")
 }

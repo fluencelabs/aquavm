@@ -32,14 +32,11 @@ mod call_evidence;
 mod errors;
 mod execution;
 pub mod log_targets;
-mod stepper_outcome;
 
 pub use crate::call_evidence::CallEvidencePath;
 pub use crate::call_evidence::CallResult;
 pub use crate::call_evidence::EvidenceState;
 pub use crate::errors::AquamarineError;
-pub use crate::stepper_outcome::StepperOutcome;
-pub use crate::stepper_outcome::STEPPER_SUCCESS;
 pub use air_parser::ast::Instruction;
 pub use execution::execute_aqua;
 pub use execution::parse;

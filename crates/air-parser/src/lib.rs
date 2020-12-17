@@ -8,8 +8,9 @@ mod lalrpop {
     #[cfg(test)]
     pub mod tests;
 
-    // aqua is auto-generated, so exclude it from `cargo fmt -- --check`
+    // aqua is auto-generated, so exclude it from `cargo fmt -- --check` and `cargo clippy`
     #[rustfmt::skip]
+    #[allow(clippy::all)]
     pub mod aqua;
     pub mod parser;
 }

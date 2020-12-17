@@ -18,9 +18,9 @@ use aqua_test_utils::call_vm;
 use aqua_test_utils::create_aqua_vm;
 use aqua_test_utils::echo_number_call_service;
 use aqua_test_utils::unit_call_service;
-use aquamarine_vm::vec1::Vec1;
-use aquamarine_vm::HostExportedFunc;
-use aquamarine_vm::IValue;
+use aqua_test_utils::HostExportedFunc;
+use aqua_test_utils::IValue;
+use aqua_test_utils::Vec1;
 
 use serde_json::json;
 
@@ -54,7 +54,8 @@ fn evidence_seq_par_call() {
     .to_string();
 
     let res = call_vm!(vm, "asd", script, "[]", initial_state);
-    let resulted_path: Vec<EvidenceState> = serde_json::from_str(&res.data).expect("stepper should return valid json");
+    let resulted_path: Vec<EvidenceState> =
+        serde_json::from_slice(&res.data).expect("stepper should return valid json");
 
     let test_string = String::from("test");
     let right_path = vec![
@@ -95,7 +96,8 @@ fn evidence_par_par_call() {
     .to_string();
 
     let res = call_vm!(vm, "asd", script, "[]", initial_state);
-    let resulted_path: Vec<EvidenceState> = serde_json::from_str(&res.data).expect("stepper should return valid json");
+    let resulted_path: Vec<EvidenceState> =
+        serde_json::from_slice(&res.data).expect("stepper should return valid json");
 
     let test_string = String::from("test");
     let right_path = vec![
@@ -141,7 +143,8 @@ fn evidence_seq_seq() {
 
     let res = call_vm!(vm2, "asd", script, "[]", res.data);
 
-    let resulted_path: Vec<EvidenceState> = serde_json::from_str(&res.data).expect("stepper should return valid json");
+    let resulted_path: Vec<EvidenceState> =
+        serde_json::from_slice(&res.data).expect("stepper should return valid json");
 
     let test_string = String::from("test");
     let right_path = vec![
@@ -216,7 +219,7 @@ fn evidence_create_service() {
 
     let res = call_vm!(vm, "init_peer_id", script, "[]", json!(path).to_string());
 
-    let resulted_path: Vec<EvidenceState> = serde_json::from_str(&res.data).expect("should be a correct json");
+    let resulted_path: Vec<EvidenceState> = serde_json::from_slice(&res.data).expect("should be a correct json");
 
     assert_eq!(resulted_path, path);
     assert!(res.next_peer_pks.is_empty());
@@ -266,7 +269,7 @@ fn evidence_par_seq_fold_call() {
     }
 
     let res = call_vm!(vm3, "asd", script, "[]", data);
-    let resulted_path: JValue = serde_json::from_str(&res.data).expect("a valid json");
+    let resulted_path: JValue = serde_json::from_slice(&res.data).expect("a valid json");
 
     let right_json = json!( [
         { "par": [21,1] },
@@ -332,7 +335,7 @@ fn evidence_par_seq_fold_in_cycle_call() {
         )"#,
     );
 
-    let mut data = String::from("[]");
+    let mut data = vec![];
 
     for _ in 0..100 {
         let res = call_vm!(vm1, "asd", script.clone(), "[]", data);
@@ -341,7 +344,7 @@ fn evidence_par_seq_fold_in_cycle_call() {
         data = res.data;
     }
 
-    let resulted_json: JValue = serde_json::from_str(&data).expect("stepper should return valid json");
+    let resulted_json: JValue = serde_json::from_slice(&data).expect("stepper should return valid json");
 
     let right_json = json!( [
         { "par": [21,1] },
@@ -405,7 +408,7 @@ fn evidence_seq_par_seq_seq() {
 
     let res = call_vm!(vm2, "asd", script, "[]", res.data);
 
-    let resulted_json: JValue = serde_json::from_str(&res.data).expect("stepper should return valid json");
+    let resulted_json: JValue = serde_json::from_slice(&res.data).expect("stepper should return valid json");
 
     let right_json = json!( [
         { "par": [2,2] },

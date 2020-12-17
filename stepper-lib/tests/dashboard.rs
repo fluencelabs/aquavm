@@ -16,9 +16,9 @@
 
 use aqua_test_utils::call_vm;
 use aqua_test_utils::create_aqua_vm;
-use aquamarine_vm::vec1::Vec1;
-use aquamarine_vm::IValue;
-use aquamarine_vm::{AquamarineVM, HostExportedFunc};
+use aqua_test_utils::IValue;
+use aqua_test_utils::Vec1;
+use aqua_test_utils::{AquamarineVM, HostExportedFunc};
 
 use std::cell::RefCell;
 use std::collections::HashSet;
@@ -177,7 +177,7 @@ fn create_peer_host_function(peer_id: String, known_peer_ids: Vec<String>) -> Ho
 struct AquaVMState {
     vm: AquamarineVM,
     peer_id: String,
-    prev_result: String,
+    prev_result: Vec<u8>,
 }
 
 #[test]
@@ -207,7 +207,7 @@ fn dashboard() {
             AquaVMState {
                 vm,
                 peer_id,
-                prev_result: String::new(),
+                prev_result: vec![],
             }
         })
         .collect::<Vec<_>>();
@@ -247,7 +247,7 @@ fn dashboard() {
 
     // peers 1 -> relay 2 -> client 3
     for aqua_vm in known_peers.iter_mut() {
-        let prev_result = std::mem::replace(&mut aqua_vm.prev_result, String::new());
+        let prev_result = std::mem::replace(&mut aqua_vm.prev_result, vec![]);
         let known_peer_res = call_vm!(
             aqua_vm.vm,
             client_id.clone(),
@@ -293,7 +293,7 @@ fn dashboard() {
 
     // peers 2 -> relay 3 -> client 4
     for aqua_vm in known_peers.iter_mut() {
-        let prev_result = std::mem::replace(&mut aqua_vm.prev_result, String::new());
+        let prev_result = std::mem::replace(&mut aqua_vm.prev_result, vec![]);
         let known_peer_res = call_vm!(
             aqua_vm.vm,
             client_id.clone(),

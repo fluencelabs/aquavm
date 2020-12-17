@@ -44,9 +44,9 @@ mod tests {
 
     use aqua_test_utils::call_vm;
     use aqua_test_utils::create_aqua_vm;
-    use aquamarine_vm::vec1::Vec1;
-    use aquamarine_vm::HostExportedFunc;
-    use aquamarine_vm::IValue;
+    use aqua_test_utils::HostExportedFunc;
+    use aqua_test_utils::IValue;
+    use aqua_test_utils::Vec1;
 
     use std::rc::Rc;
 
@@ -88,7 +88,7 @@ mod tests {
         );
 
         let res = call_vm!(vm, "asd", script, "[]", "[]");
-        let call_path: CallEvidencePath = serde_json::from_str(&res.data).expect("should be valid json");
+        let call_path: CallEvidencePath = serde_json::from_slice(&res.data).expect("should be valid json");
         let executed_call_result = Call(Executed(Rc::new(JValue::String(String::from("res")))));
 
         assert_eq!(call_path.len(), 2);
@@ -104,7 +104,7 @@ mod tests {
         );
 
         let res = call_vm!(vm, "asd", script, "[]", "[]");
-        let call_path: CallEvidencePath = serde_json::from_str(&res.data).expect("should be valid json");
+        let call_path: CallEvidencePath = serde_json::from_slice(&res.data).expect("should be valid json");
 
         assert_eq!(call_path.len(), 1);
         assert_eq!(call_path[0], executed_call_result);
@@ -139,7 +139,7 @@ mod tests {
         );
 
         let result = call_vm!(vm, "asd", script.clone(), "[]", "[]");
-        let result_path: CallEvidencePath = serde_json::from_str(&result.data).expect("should be valid json");
+        let result_path: CallEvidencePath = serde_json::from_slice(&result.data).expect("should be valid json");
 
         let res = String::from("res");
         let executed_call_result = Rc::new(JValue::String(res));
@@ -157,7 +157,7 @@ mod tests {
         assert_eq!(result_path, right_path);
 
         let result = call_vm!(vm, "asd", script, "[]", result.data);
-        let result_path: CallEvidencePath = serde_json::from_str(&result.data).expect("should be valid json");
+        let result_path: CallEvidencePath = serde_json::from_slice(&result.data).expect("should be valid json");
         assert_eq!(result_path, right_path);
     }
 }

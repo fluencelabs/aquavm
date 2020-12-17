@@ -25,13 +25,15 @@
     unreachable_patterns
 )]
 
-use aquamarine_vm::vec1::Vec1;
-use aquamarine_vm::AquamarineVM;
-use aquamarine_vm::AquamarineVMConfig;
-use aquamarine_vm::HostExportedFunc;
-use aquamarine_vm::HostImportDescriptor;
-use aquamarine_vm::IType;
-use aquamarine_vm::IValue;
+pub use aquamarine_vm::vec1::Vec1;
+pub use aquamarine_vm::AquamarineVM;
+pub use aquamarine_vm::AquamarineVMConfig;
+pub use aquamarine_vm::AquamarineVMError;
+pub use aquamarine_vm::HostExportedFunc;
+pub use aquamarine_vm::HostImportDescriptor;
+pub use aquamarine_vm::IType;
+pub use aquamarine_vm::IValue;
+pub use aquamarine_vm::StepperOutcome;
 
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -56,7 +58,7 @@ pub fn create_aqua_vm(
         call_service: call_service_descriptor,
         current_peer_id: current_peer_id.into(),
         particle_data_store: tmp_dir,
-        logging_mask: i64::max_value(),
+        logging_mask: i32::max_value(),
     };
 
     AquamarineVM::new(config).expect("vm should be created")

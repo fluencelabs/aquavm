@@ -19,6 +19,7 @@ use serde::Serialize;
 
 use std::rc::Rc;
 
+#[allow(clippy::large_enum_variant)] // for Null and Error variants
 #[derive(Serialize, Debug, PartialEq, Eq)]
 pub enum Instruction<'i> {
     Null(Null),
