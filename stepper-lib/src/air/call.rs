@@ -79,9 +79,9 @@ mod tests {
     use aqua_test_utils::echo_string_call_service;
     use aqua_test_utils::set_variable_call_service;
     use aqua_test_utils::unit_call_service;
-    use aqua_test_utils::Vec1;
     use aqua_test_utils::HostExportedFunc;
     use aqua_test_utils::IValue;
+    use aqua_test_utils::Vec1;
 
     use std::rc::Rc;
 

@@ -16,8 +16,8 @@
 
 use aqua_test_utils::call_vm;
 use aqua_test_utils::create_aqua_vm;
-use aqua_test_utils::Vec1;
 use aqua_test_utils::IValue;
+use aqua_test_utils::Vec1;
 use aqua_test_utils::{AquamarineVM, HostExportedFunc};
 
 use std::cell::RefCell;

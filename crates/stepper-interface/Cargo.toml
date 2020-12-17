@@ -1,5 +1,6 @@
 [package]
 name = "stepper-interface"
+description = "Interface of the Aquamarine stepper"
 version = "0.1.0"
 authors = ["Fluence Labs"]
 edition = "2018"
