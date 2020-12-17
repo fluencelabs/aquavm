@@ -10,5 +10,5 @@ path = "src/lib.rs"
 
 [dependencies]
 fluence = { git = "https://github.com/fluencelabs/rust-sdk", features = ["logger"] }
-aquamarine-vm = { git = "https://github.com/fluencelabs/fce", branch = "bytearray_interface", features = ["raw-aquamarine-vm-api"] }
+aquamarine-vm = { git = "https://github.com/fluencelabs/fce", branch = "master", features = ["raw-aquamarine-vm-api"] }
 serde_json = "1.0.56"
