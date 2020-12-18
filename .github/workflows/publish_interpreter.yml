@@ -67,6 +67,7 @@ jobs:
 ### === JavaScript package release ===
       - name: Install wasm-pack
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+        continue-on-error: true
 
       - name: Build aquamarine.wasm for JS clients
         run: wasm-pack build $GITHUB_WORKSPACE/stepper --no-typescript --release -d $(pwd)/pkg
