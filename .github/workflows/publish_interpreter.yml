@@ -159,11 +159,12 @@ jobs:
         run: cargo publish --allow-dirty
         working-directory: crates/air-interpreter-wasm
 
-### Create a release
+### Create a pre-release
       - uses: marvinpinto/action-automatic-releases@latest
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           automatic_release_tag: "${{ env.MAX_VERSION }}"
+          prerelease: true
           title: "Aquamarine ${{ env.MAX_VERSION }}"
           files: |
             LICENSE
