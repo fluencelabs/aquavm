@@ -42,6 +42,11 @@ jobs:
           toolchain: nightly
           target: wasm32-wasi
           profile: minimal
+      - uses: actions-rs/cargo@v1
+        with:
+          toolchain: nightly
+          command: update
+          args: --aggressive
 
 ### Calculate MAX_VERSION
       - name: Install jq & sponge
@@ -62,6 +67,7 @@ jobs:
 ### === JavaScript package release ===
       - name: Install wasm-pack
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+        continue-on-error: true
 
       - name: Build aquamarine.wasm for JS clients
         run: wasm-pack build $GITHUB_WORKSPACE/stepper --no-typescript --release -d $(pwd)/pkg
@@ -153,3 +159,14 @@ jobs:
       - name: Publish to crates.io
         run: cargo publish --allow-dirty
         working-directory: crates/air-interpreter-wasm
+
+### Create a pre-release
+      - uses: marvinpinto/action-automatic-releases@latest
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "${{ env.MAX_VERSION }}"
+          prerelease: true
+          title: "Aquamarine ${{ env.MAX_VERSION }}"
+          files: |
+            LICENSE
+            target/wasm32-wasi/release/aquamarine.wasm
