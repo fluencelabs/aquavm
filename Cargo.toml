@@ -6,9 +6,7 @@ members = [
     "crates/test-module",
     "crates/test-utils",
     "stepper",
-    "stepper-lib",
-    "stepper-lib/tests/security_tetraplets/auth_module",
-    "stepper-lib/tests/security_tetraplets/log_storage",
+    "stepper-lib"
 ]
 
 exclude = [

@@ -118,14 +118,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "auth_module"
-version = "0.1.0"
-dependencies = [
- "fluence 0.2.12 (registry+https://github.com/rust-lang/crates.io-index)",
- "stepper-lib",
-]
-
-[[package]]
 name = "autocfg"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1177,14 +1169,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4fabed175da42fed1fa0746b0ea71f412aa9d35e76e95e59b192c64b9dc2bf8b"
 dependencies = [
  "cfg-if 0.1.10",
-]
-
-[[package]]
-name = "log_storage"
-version = "0.1.0"
-dependencies = [
- "fluence 0.2.12 (registry+https://github.com/rust-lang/crates.io-index)",
- "stepper-lib",
 ]
 
 [[package]]

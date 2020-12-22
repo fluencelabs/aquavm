@@ -34,14 +34,9 @@ jobs:
           cd ../../../../
 
           cargo fmt --all -- --check --color always
-          cargo check -p stepper-lib
-          cargo check -p stepper
-
-          cargo test --release -p stepper-lib
-          cargo test --release -p air-parser
-
-          cargo clippy -v -p stepper-lib
-          cargo clippy -v -p stepper
+          cargo check
+          cargo test --release
+          cargo clippy -v
 
       - save_cache:
           paths:

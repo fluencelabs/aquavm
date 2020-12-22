@@ -202,11 +202,12 @@ use std::path::PathBuf;
 use stepper_lib::{CallEvidencePath, CallResult, EvidenceState};
 
 fn construct_service_config(module_name: impl Into<String>) -> AppServiceConfig {
-    let module_path = "../target/wasm32-wasi/debug/";
+    let module_name = module_name.into();
+    let module_path = format!("./tests/security_tetraplets/{}/target/wasm32-wasi/debug/", module_name);
 
     let faas_config = FaaSConfig {
         modules_dir: Some(PathBuf::from(module_path)),
-        modules_config: vec![(module_name.into(), <_>::default())],
+        modules_config: vec![(module_name, <_>::default())],
         default_modules_config: None,
     };
 
