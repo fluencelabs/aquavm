@@ -9,5 +9,5 @@ name = "plets"
 path = "src/lib.rs"
 
 [dependencies]
-fluence = { version = "=0.2.12", features = ["logger"] }
+fluence = { version = "=0.2.13", features = ["logger"] }
 serde = { version = "1.0.118", features = ["rc"] }

@@ -264,7 +264,8 @@ fn tetraplet_with_wasm_modules() {
 
         let tetraplets: Vec<Vec<SDKTetraplet>> = serde_json::from_str(tetraplets).unwrap();
 
-        let call_parameters = CallParameters::new("", "", "", tetraplets);
+        let mut call_parameters = CallParameters::default();
+        call_parameters.tetraplets = tetraplets;
 
         let service_args = serde_json::from_str(service_args).unwrap();
         let mut service = services_inner.borrow_mut();

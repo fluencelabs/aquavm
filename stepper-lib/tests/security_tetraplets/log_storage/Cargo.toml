@@ -10,6 +10,6 @@ path = "src/main.rs"
 
 [dependencies]
 stepper-lib = { path = "../../../../stepper-lib" }
-fluence = { version = "=0.2.12", features = ["logger"] }
+fluence = { version = "=0.2.13", features = ["logger"] }
 
 [workspace]
