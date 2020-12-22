@@ -138,10 +138,10 @@ pub fn set_variables_call_service(ret_mapping: HashMap<String, String>) -> HostE
         let result = ret_mapping
             .get(&arg_name)
             .cloned()
-            .unwrap_or(String::from(r#""test""#));
+            .unwrap_or_else(|| String::from(r#""test""#));
 
         Some(IValue::Record(
-            Vec1::new(vec![IValue::S32(0), IValue::String(result.clone())]).unwrap(),
+            Vec1::new(vec![IValue::S32(0), IValue::String(result)]).unwrap(),
         ))
     })
 }
