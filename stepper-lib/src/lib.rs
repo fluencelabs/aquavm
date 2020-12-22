@@ -83,7 +83,7 @@ impl<'i> Display for AValue<'i> {
                 }
                 write!(f, "]")?;
             }
-            AValue::JValueFoldCursor(_fold_state) => {
+            AValue::JValueFoldCursor(_) => {
                 write!(f, "cursor")?;
             }
         }
