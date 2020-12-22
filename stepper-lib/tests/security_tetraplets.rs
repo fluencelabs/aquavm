@@ -262,21 +262,7 @@ fn tetraplet_with_wasm_modules() {
             _ => unreachable!(),
         };
 
-        let tetraplets: ArgTetraplets = serde_json::from_str(tetraplets).unwrap();
-
-        let tetraplets = tetraplets
-            .into_iter()
-            .map(|t| {
-                t.into_iter()
-                    .map(|t| SDKTetraplet {
-                        peer_pk: t.triplet.peer_pk.clone(),
-                        service_id: t.triplet.service_id.clone(),
-                        function_name: t.triplet.function_name.clone(),
-                        json_path: t.json_path,
-                    })
-                    .collect::<Vec<_>>()
-            })
-            .collect::<Vec<_>>();
+        let tetraplets: Vec<Vec<SDKTetraplet>> = serde_json::from_str(tetraplets).unwrap();
 
         let call_parameters = CallParameters::new("", "", "", tetraplets);
 
