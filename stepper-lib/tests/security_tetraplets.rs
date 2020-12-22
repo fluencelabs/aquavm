@@ -242,6 +242,7 @@ fn tetraplet_with_wasm_modules() {
     let services = Rc::new(RefCell::new(services));
 
     let services_inner = services.clone();
+    const ADMIN_PEER_PK: &str = "12D3KooWEXNUbCXooUwHrHBbrmjsrpHXoEphPwbjQXEGyzbqKnE1";
     let host_func: HostExportedFunc = Box::new(move |_, args: Vec<IValue>| -> Option<IValue> {
         let service_id = match &args[0] {
             IValue::String(str) => str,
@@ -266,6 +267,7 @@ fn tetraplet_with_wasm_modules() {
         let tetraplets: Vec<Vec<SDKTetraplet>> = serde_json::from_str(tetraplets).unwrap();
 
         let mut call_parameters = CallParameters::default();
+        call_parameters.init_peer_id = ADMIN_PEER_PK.to_string();
         call_parameters.tetraplets = tetraplets;
 
         let service_args = serde_json::from_str(service_args).unwrap();
@@ -282,7 +284,7 @@ fn tetraplet_with_wasm_modules() {
     let script = String::from(
         r#"
         (seq
-            (call %current_peer_id% ("auth" "is_authorized") [%init_peer_id%] auth_result)
+            (call %current_peer_id% ("auth" "is_authorized") [] auth_result)
             (call %current_peer_id% ("log_storage" "delete") [auth_result.$.is_authorized "1"])
         )
     "#,
@@ -290,7 +292,6 @@ fn tetraplet_with_wasm_modules() {
 
     let mut vm = create_aqua_vm(host_func, "some peer_id");
 
-    const ADMIN_PEER_PK: &str = "12D3KooWEXNUbCXooUwHrHBbrmjsrpHXoEphPwbjQXEGyzbqKnE1";
     let result = call_vm!(vm, ADMIN_PEER_PK, script, "", "");
     let path: CallEvidencePath = serde_json::from_slice(&result.data).unwrap();
     let right_res = EvidenceState::Call(CallResult::Executed(Rc::new(serde_json::Value::String(String::from(
