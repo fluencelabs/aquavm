@@ -25,7 +25,7 @@ use crate::ResolvedCallResult;
 use crate::Result;
 
 use air_parser::ast::CallOutput;
-use plets::ResolvedTriplet;
+use polyplets::ResolvedTriplet;
 
 use std::rc::Rc;
 
@@ -111,6 +111,8 @@ pub(super) fn set_remote_call_result<'i>(
     call_ctx.new_path.push_back(new_evidence_state);
 }
 
+/// This function looks at the existing call state, validates it,
+/// and returns Ok(true) if the call should be executed further.
 pub(super) fn handle_prev_state<'i>(
     triplet: &Rc<ResolvedTriplet>,
     output: &CallOutput<'i>,

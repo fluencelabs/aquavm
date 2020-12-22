@@ -528,7 +528,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "plets"
+name = "polyplets"
 version = "0.1.0"
 dependencies = [
  "fluence",
@@ -745,7 +745,7 @@ dependencies = [
  "fluence",
  "jsonpath_lib",
  "log",
- "plets",
+ "polyplets",
  "serde",
  "serde_derive",
  "serde_json",

@@ -21,7 +21,7 @@
     nonstandard_style,
     unused_imports,
     unused_mut,
-    // unused_variables,
+    unused_variables,
     unused_unsafe,
     unreachable_patterns
 )]
@@ -41,8 +41,8 @@ pub use air_parser::ast::Instruction;
 pub use execution::execute_aqua;
 pub use execution::parse;
 
-pub use plets::ResolvedTriplet;
-pub use plets::SecurityTetraplet;
+pub use polyplets::ResolvedTriplet;
+pub use polyplets::SecurityTetraplet;
 
 pub(crate) type Result<T> = std::result::Result<T, AquamarineError>;
 pub(crate) type JValue = serde_json::Value;

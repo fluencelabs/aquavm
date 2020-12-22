@@ -19,7 +19,8 @@ use aqua_test_utils::create_aqua_vm;
 use aqua_test_utils::HostExportedFunc;
 use aqua_test_utils::IValue;
 use aqua_test_utils::Vec1;
-use plets::{ResolvedTriplet, SecurityTetraplet};
+use polyplets::ResolvedTriplet;
+use polyplets::SecurityTetraplet;
 
 use std::cell::RefCell;
 use std::rc::Rc;

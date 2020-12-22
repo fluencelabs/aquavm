@@ -123,16 +123,15 @@ fn handle_instruction_json_path<'ctx>(
                 return Ok(None);
             }
 
-            let path = path.to_string();
             let (jvalues, tetraplet_indices) = select_with_iter(acc.iter().map(|v| v.result.deref()), &path)
-                .map_err(|e| JValueAccJsonPathError(acc.clone(), path.clone(), e))?;
+                .map_err(|e| JValueAccJsonPathError(acc.clone(), path.to_string(), e))?;
             let jvalues = jvalues.into_iter().cloned().collect();
             let tetraplets = tetraplet_indices
                 .iter()
                 .map(|&id| &acc[id].triplet)
                 .map(|triplet| SecurityTetraplet {
                     triplet: triplet.clone(),
-                    json_path: path.clone(),
+                    json_path: path.to_string(),
                 })
                 .collect::<Vec<_>>();
 

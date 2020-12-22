@@ -20,7 +20,7 @@ use crate::JValue;
 use crate::Result;
 
 use air_parser::ast::{FunctionPart, InstructionValue, PeerPart};
-use plets::ResolvedTriplet;
+use polyplets::ResolvedTriplet;
 
 /// Triplet represents a location of the executable code in the network.
 /// It is build from `PeerPart` and `FunctionPart` of a `Call` instruction.

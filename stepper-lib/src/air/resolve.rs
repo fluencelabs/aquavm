@@ -31,7 +31,7 @@ pub(crate) fn resolve_to_args<'i>(
 ) -> Result<(JValue, Vec<SecurityTetraplet>)> {
     fn handle_string_arg<'i>(arg: &str, ctx: &ExecutionCtx<'i>) -> Result<(JValue, Vec<SecurityTetraplet>)> {
         let jvalue = JValue::String(arg.to_string());
-        let tetraplet = SecurityTetraplet::initiator_tetraplet(ctx.init_peer_id.clone());
+        let tetraplet = SecurityTetraplet::literal_tetraplet(ctx.init_peer_id.clone());
 
         Ok((jvalue, vec![tetraplet]))
     }

@@ -21,17 +21,12 @@ jobs:
           rustup component add clippy
 
           cargo install fcli
-          cd stepper
-          fce build --features fce
 
-          cd ..
-          cd stepper-lib/tests/security_tetraplets/auth_module
-          fce build
+          # build a Wasm binary for stepper
+          (cd stepper; fce build --features fce)
 
-          cd ../log_storage
-          fce build
-
-          cd ../../../../
+          # build Wasm binaries for tests
+          (cd stepper-lib/tests/security_tetraplets/; ./build.sh)
 
           cargo fmt --all -- --check --color always
           cargo check

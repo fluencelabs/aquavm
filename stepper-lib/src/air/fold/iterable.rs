@@ -167,7 +167,7 @@ impl<'ctx> Iterable<'ctx> for IterableResolvedCall {
 
         let jvalue = match &self.call_result.result.deref() {
             JValue::Array(array) => &array[self.cursor],
-            _ => unimplemented!("this jvalue is set only by fold instruction, so it must have array type"),
+            _ => unimplemented!("this jvalue is set only by fold instruction, so it must have an array type"),
         };
 
         let result = IterableItemType::RefValue((jvalue, tetraplet));

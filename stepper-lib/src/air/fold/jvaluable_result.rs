@@ -97,7 +97,7 @@ impl<'ctx> JValuable for IterableItemType<'ctx> {
     fn as_tetraplets(&self) -> Vec<SecurityTetraplet> {
         use IterableItemType::*;
 
-        // these clones is needed because of rust-sdk allows passing arguments only by value
+        // these clones are needed because rust-sdk allows passing arguments only by value
         match self {
             RefRef((_, tetraplet)) => {
                 let tetraplet = tetraplet.deref().clone();

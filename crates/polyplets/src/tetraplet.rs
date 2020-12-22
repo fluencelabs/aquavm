@@ -23,20 +23,20 @@ use std::rc::Rc;
 /// Describes an origin returned corresponding value.
 #[derive(Clone, Debug, Eq, PartialEq, Hash, Serialize, Deserialize)]
 pub struct SecurityTetraplet {
-    // describes location of the value in the network.
+    /// Describes origin of the value in the network.
     #[serde(flatten)]
     pub triplet: Rc<ResolvedTriplet>,
 
-    // json path used to obtain supplied to call_service values from the value.
+    /// Value was produced by applying this `json_path` to the output from `call_service`.
     pub json_path: String,
 }
 
 impl SecurityTetraplet {
     /// Create a tetraplet for string literals defined in the script
-    /// such as variable_1, variable_2 here "(call ("" "") "" ["variable_1" "variable_2"])".
-    pub fn initiator_tetraplet(init_peer_id: String) -> Self {
+    /// such as variable here `(call ("" "") "" ["variable_1"])`.
+    pub fn literal_tetraplet(init_peer_id: String) -> Self {
         let triplet = ResolvedTriplet {
-            // these variables set by the initiator peer
+            // these variables represent the initiator peer
             peer_pk: init_peer_id,
             service_id: String::new(),
             function_name: String::new(),
@@ -45,7 +45,7 @@ impl SecurityTetraplet {
 
         Self {
             triplet,
-            // json path can't applied to the string literals
+            // json path can't be applied to the string literals
             json_path: String::new(),
         }
     }

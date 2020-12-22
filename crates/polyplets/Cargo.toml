@@ -1,11 +1,11 @@
 [package]
-name = "plets"
+name = "polyplets"
 version = "0.1.0"
 authors = ["Fluence Labs"]
 edition = "2018"
 
 [lib]
-name = "plets"
+name = "polyplets"
 path = "src/lib.rs"
 
 [dependencies]

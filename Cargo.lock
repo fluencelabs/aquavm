@@ -1353,14 +1353,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "plets"
-version = "0.1.0"
-dependencies = [
- "fluence 0.2.13 (registry+https://github.com/rust-lang/crates.io-index)",
- "serde",
-]
-
-[[package]]
 name = "plotters"
 version = "0.2.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1370,6 +1362,14 @@ dependencies = [
  "num-traits",
  "wasm-bindgen",
  "web-sys",
+]
+
+[[package]]
+name = "polyplets"
+version = "0.1.0"
+dependencies = [
+ "fluence 0.2.13 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde",
 ]
 
 [[package]]
@@ -1747,7 +1747,7 @@ dependencies = [
  "log",
  "maplit",
  "once_cell",
- "plets",
+ "polyplets",
  "pretty_assertions",
  "serde",
  "serde_derive",

@@ -11,7 +11,7 @@ path = "src/lib.rs"
 [dependencies]
 air-parser = { path = "../crates/air-parser" }
 fluence = { version = "=0.2.13", features = ["logger"] }
-plets = { path = "../crates/plets" }
+polyplets = { path = "../crates/polyplets" }
 stepper-interface = { path = "../crates/stepper-interface" }
 
 serde = { version = "1.0.116", features = [ "derive", "rc" ] }

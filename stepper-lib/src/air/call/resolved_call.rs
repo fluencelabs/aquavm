@@ -29,7 +29,7 @@ use crate::Result;
 use crate::SecurityTetraplet;
 
 use air_parser::ast::{CallOutput, InstructionValue};
-use plets::ResolvedTriplet;
+use polyplets::ResolvedTriplet;
 
 use std::rc::Rc;
 
