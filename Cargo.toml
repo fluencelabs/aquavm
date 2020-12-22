@@ -11,7 +11,11 @@ members = [
     "stepper-lib/tests/security_tetraplets/log_storage",
 ]
 
-exclude = [ "crates/air-interpreter-wasm" ]
+exclude = [
+    "crates/air-interpreter-wasm",
+    "stepper-lib/tests/security_tetraplets/auth_module",
+    "stepper-lib/tests/security_tetraplets/log_storage",
+]
 
 [profile.release]
 opt-level = 3

@@ -15,7 +15,6 @@
  */
 
 use fluence::fce;
-use fluence::WasmLoggerBuilder;
 
 #[fce]
 pub struct CallServiceResult {
@@ -23,19 +22,20 @@ pub struct CallServiceResult {
     pub result: String,
 }
 
-fn main() {
-    WasmLoggerBuilder::new().build().unwrap();
-}
+fn main() {}
 
 #[fce]
-pub fn call_service(service_id: String, fn_name: String, args: String, tetraplets: String) -> CallServiceResult {
-    println!(
-        "call service called with {} {} {} {}",
-        service_id, fn_name, args, tetraplets
-    );
+fn delete(is_authorized: Vec<i32>, _record_id: String) -> String {
+    let call_parameters = fluence::get_call_parameters();
+    let tetraplets = call_parameters.tetraplets;
+    let tetraplet = &tetraplets[0];
 
-    CallServiceResult {
-        ret_code: 0,
-        result: String::new(),
+    if tetraplet[0].json_path != "$.is_authorized" {
+        return String::from("invalid json path in tetraplet");
+    }
+
+    match is_authorized[0] {
+        1 => String::from("Ok"),
+        _ => String::from("not authorized"),
     }
 }

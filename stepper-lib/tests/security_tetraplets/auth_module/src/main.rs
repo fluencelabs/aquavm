@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+#![allow(clippy::all)]
+
 use fluence::fce;
-use fluence::WasmLoggerBuilder;
 
 #[fce]
 pub struct CallServiceResult {
@@ -25,23 +26,18 @@ pub struct CallServiceResult {
 
 const ADMIN_PEER_PK: &str = "12D3KooWEXNUbCXooUwHrHBbrmjsrpHXoEphPwbjQXEGyzbqKnE1";
 
-fn main() {
-    WasmLoggerBuilder::new().build().unwrap();
+fn main() {}
+
+#[fce]
+struct AuthResult {
+    pub is_authorized: i32,
 }
 
 #[fce]
-pub fn call_service(service_id: String, fn_name: String, args: String, tetraplets: String) -> CallServiceResult {
-    println!(
-        "call service called with {} {} {} {}",
-        service_id, fn_name, args, tetraplets
-    );
+fn is_authorized(user_peer_pk: String) -> AuthResult {
+    let is_authorized = user_peer_pk == ADMIN_PEER_PK;
 
-    CallServiceResult {
-        ret_code: 0,
-        result: String::new(),
+    AuthResult {
+        is_authorized: is_authorized.into(),
     }
-}
-
-fn is_authorized(user_peer_pk: &str) -> bool {
-    user_peer_pk == ADMIN_PEER_PK
 }

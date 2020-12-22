@@ -193,3 +193,120 @@ fn fold_json_path() {
     call_vm!(client_vm, init_peer_id.clone(), script.clone(), "[]", res.data);
     assert_eq!(arg_tetraplets, right_tetraplets);
 }
+
+use fluence_app_service::AppService;
+use fluence_app_service::AppServiceConfig;
+use fluence_app_service::FaaSConfig;
+
+use std::path::PathBuf;
+use stepper_lib::{CallEvidencePath, CallResult, EvidenceState};
+
+fn construct_service_config(module_name: impl Into<String>) -> AppServiceConfig {
+    let module_path = "../target/wasm32-wasi/debug/";
+
+    let faas_config = FaaSConfig {
+        modules_dir: Some(PathBuf::from(module_path)),
+        modules_config: vec![(module_name.into(), <_>::default())],
+        default_modules_config: None,
+    };
+
+    let service_base_dir = std::env::temp_dir();
+
+    let config = AppServiceConfig {
+        service_base_dir,
+        faas_config,
+    };
+
+    config
+}
+
+#[test]
+fn tetraplet_with_wasm_modules() {
+    use fluence::CallParameters;
+    use fluence::SecurityTetraplet as SDKTetraplet;
+
+    let auth_module_name = String::from("auth_module");
+    let auth_service_config = construct_service_config(auth_module_name.clone());
+    let auth_service = AppService::new(auth_service_config, auth_module_name.clone(), <_>::default()).unwrap();
+
+    let log_module_name = String::from("log_storage");
+    let log_service_config = construct_service_config(log_module_name.clone());
+    let log_service = AppService::new(log_service_config, log_module_name.clone(), <_>::default()).unwrap();
+
+    let services = maplit::hashmap!(
+      "auth" => auth_service,
+      "log_storage" => log_service,
+    );
+    let services = Rc::new(RefCell::new(services));
+
+    let services_inner = services.clone();
+    let host_func: HostExportedFunc = Box::new(move |_, args: Vec<IValue>| -> Option<IValue> {
+        let service_id = match &args[0] {
+            IValue::String(str) => str,
+            _ => unreachable!(),
+        };
+
+        let function_name = match &args[1] {
+            IValue::String(str) => str,
+            _ => unreachable!(),
+        };
+
+        let service_args = match &args[2] {
+            IValue::String(str) => str,
+            _ => unreachable!(),
+        };
+
+        let tetraplets = match &args[3] {
+            IValue::String(str) => str,
+            _ => unreachable!(),
+        };
+
+        let tetraplets: ArgTetraplets = serde_json::from_str(tetraplets).unwrap();
+
+        let tetraplets = tetraplets
+            .into_iter()
+            .map(|t| {
+                t.into_iter()
+                    .map(|t| SDKTetraplet {
+                        peer_pk: t.triplet.peer_pk.clone(),
+                        service_id: t.triplet.service_id.clone(),
+                        function_name: t.triplet.function_name.clone(),
+                        json_path: t.json_path,
+                    })
+                    .collect::<Vec<_>>()
+            })
+            .collect::<Vec<_>>();
+
+        let call_parameters = CallParameters::new("", "", "", tetraplets);
+
+        let service_args = serde_json::from_str(service_args).unwrap();
+        let mut service = services_inner.borrow_mut();
+        let service: &mut AppService = service.get_mut(service_id.as_str()).unwrap();
+
+        let result = service.call(function_name, service_args, call_parameters).unwrap();
+
+        Some(IValue::Record(
+            Vec1::new(vec![IValue::S32(0), IValue::String(result.to_string())]).unwrap(),
+        ))
+    });
+
+    let script = String::from(
+        r#"
+        (seq
+            (call %current_peer_id% ("auth" "is_authorized") [%init_peer_id%] auth_result)
+            (call %current_peer_id% ("log_storage" "delete") [auth_result.$.is_authorized "1"])
+        )
+    "#,
+    );
+
+    let mut vm = create_aqua_vm(host_func, "some peer_id");
+
+    const ADMIN_PEER_PK: &str = "12D3KooWEXNUbCXooUwHrHBbrmjsrpHXoEphPwbjQXEGyzbqKnE1";
+    let result = call_vm!(vm, ADMIN_PEER_PK, script, "", "");
+    let path: CallEvidencePath = serde_json::from_slice(&result.data).unwrap();
+    let right_res = EvidenceState::Call(CallResult::Executed(Rc::new(serde_json::Value::String(String::from(
+        "Ok",
+    )))));
+
+    assert_eq!(path[1], right_res)
+}

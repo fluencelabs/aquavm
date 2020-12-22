@@ -42,7 +42,7 @@ checksum = "68803225a7b13e47191bab76f2687382b60d259e8cf37f6e1893658b84bb9479"
 name = "aqua-test-module"
 version = "0.1.0"
 dependencies = [
- "fluence",
+ "fluence 0.2.12 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -50,7 +50,7 @@ name = "aqua-test-utils"
 version = "0.1.0"
 dependencies = [
  "aquamarine-vm",
- "fluence",
+ "fluence 0.2.12 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_json",
 ]
 
@@ -58,7 +58,7 @@ dependencies = [
 name = "aquamarine"
 version = "0.1.3"
 dependencies = [
- "fluence",
+ "fluence 0.2.12 (registry+https://github.com/rust-lang/crates.io-index)",
  "log",
  "serde",
  "serde_json",
@@ -69,10 +69,10 @@ dependencies = [
 
 [[package]]
 name = "aquamarine-vm"
-version = "0.1.3"
-source = "git+https://github.com/fluencelabs/fce#ede18f00de6a88b83ad3acf53bcd7f842123df79"
+version = "0.1.4"
+source = "git+https://github.com/fluencelabs/fce#20092f817444b3a535255e65ac725bdaeb638d93"
 dependencies = [
- "fluence-faas",
+ "fluence-faas 0.1.16 (git+https://github.com/fluencelabs/fce)",
  "maplit",
  "serde",
  "serde_json",
@@ -121,7 +121,7 @@ dependencies = [
 name = "auth_module"
 version = "0.1.0"
 dependencies = [
- "fluence",
+ "fluence 0.2.12 (registry+https://github.com/rust-lang/crates.io-index)",
  "stepper-lib",
 ]
 
@@ -638,13 +638,36 @@ checksum = "e88a8acf291dafb59c2d96e8f59828f3838bb1a70398823ade51a84de6a6deed"
 
 [[package]]
 name = "fce"
-version = "0.1.13"
-source = "git+https://github.com/fluencelabs/fce#ede18f00de6a88b83ad3acf53bcd7f842123df79"
+version = "0.1.14"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6101e9c7bd51f7478c41c2c1ce2405ef9e87fac5576c012877d5a9feed628a61"
 dependencies = [
  "boolinator",
- "fce-utils",
- "fce-wit-interfaces",
- "fce-wit-parser",
+ "fce-utils 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fce-wit-interfaces 0.1.9 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fce-wit-parser 0.1.11 (registry+https://github.com/rust-lang/crates.io-index)",
+ "log",
+ "multi-map",
+ "multimap",
+ "parity-wasm",
+ "pwasm-utils",
+ "safe-transmute",
+ "serde",
+ "wasmer-interface-types-fl",
+ "wasmer-runtime-core-fl",
+ "wasmer-runtime-fl",
+ "wasmer-wasi-fl",
+]
+
+[[package]]
+name = "fce"
+version = "0.1.14"
+source = "git+https://github.com/fluencelabs/fce#20092f817444b3a535255e65ac725bdaeb638d93"
+dependencies = [
+ "boolinator",
+ "fce-utils 0.1.0 (git+https://github.com/fluencelabs/fce)",
+ "fce-wit-interfaces 0.1.9 (git+https://github.com/fluencelabs/fce)",
+ "fce-wit-parser 0.1.11 (git+https://github.com/fluencelabs/fce)",
  "log",
  "multi-map",
  "multimap",
@@ -661,12 +684,28 @@ dependencies = [
 [[package]]
 name = "fce-utils"
 version = "0.1.0"
-source = "git+https://github.com/fluencelabs/fce#ede18f00de6a88b83ad3acf53bcd7f842123df79"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dcdd9d63fa5f87e03514ba8ca3bb91a25121bbf1c63a26df710f166ab8f274f7"
+
+[[package]]
+name = "fce-utils"
+version = "0.1.0"
+source = "git+https://github.com/fluencelabs/fce#20092f817444b3a535255e65ac725bdaeb638d93"
 
 [[package]]
 name = "fce-wit-interfaces"
-version = "0.1.8"
-source = "git+https://github.com/fluencelabs/fce#ede18f00de6a88b83ad3acf53bcd7f842123df79"
+version = "0.1.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9fcd89f62accf83a87dbea298caaed542b6c556380103116b6b89717382a8f21"
+dependencies = [
+ "multimap",
+ "wasmer-interface-types-fl",
+]
+
+[[package]]
+name = "fce-wit-interfaces"
+version = "0.1.9"
+source = "git+https://github.com/fluencelabs/fce#20092f817444b3a535255e65ac725bdaeb638d93"
 dependencies = [
  "multimap",
  "wasmer-interface-types-fl",
@@ -674,11 +713,25 @@ dependencies = [
 
 [[package]]
 name = "fce-wit-parser"
-version = "0.1.10"
-source = "git+https://github.com/fluencelabs/fce#ede18f00de6a88b83ad3acf53bcd7f842123df79"
+version = "0.1.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "064d9e93e4b588385e77582be61b6d7aaeb352b0af7b33ab9807d61ee606f4e5"
 dependencies = [
  "anyhow",
- "fce-wit-interfaces",
+ "fce-wit-interfaces 0.1.9 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde",
+ "walrus",
+ "wasmer-interface-types-fl",
+ "wasmer-runtime-core-fl",
+]
+
+[[package]]
+name = "fce-wit-parser"
+version = "0.1.11"
+source = "git+https://github.com/fluencelabs/fce#20092f817444b3a535255e65ac725bdaeb638d93"
+dependencies = [
+ "anyhow",
+ "fce-wit-interfaces 0.1.9 (git+https://github.com/fluencelabs/fce)",
  "serde",
  "walrus",
  "wasmer-interface-types-fl",
@@ -694,6 +747,16 @@ checksum = "37ab347416e802de484e4d03c7316c48f1ecb56574dfd4a46a80f173ce1de04d"
 [[package]]
 name = "fluence"
 version = "0.2.12"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6a3506e38cf0ff078c51ba86f778a5a6238bed0bed4457180171e15a5a6c3f1c"
+dependencies = [
+ "fluence-sdk-macro 0.2.12 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fluence-sdk-main 0.2.12 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "fluence"
+version = "0.2.12"
 source = "git+https://github.com/fluencelabs/rust-sdk#a555291c1ceca0b9c959240e1d311d0e3309eda3"
 dependencies = [
  "fluence-sdk-macro 0.2.12 (git+https://github.com/fluencelabs/rust-sdk)",
@@ -701,13 +764,52 @@ dependencies = [
 ]
 
 [[package]]
+name = "fluence-app-service"
+version = "0.1.16"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6c79666132ded8df5f90e1ce80fc866e83ec6e6378cc8cde122e208ac17471fe"
+dependencies = [
+ "fluence-faas 0.1.16 (registry+https://github.com/rust-lang/crates.io-index)",
+ "log",
+ "maplit",
+ "serde",
+ "serde_derive",
+ "serde_json",
+ "toml",
+ "wasmer-wasi-fl",
+]
+
+[[package]]
 name = "fluence-faas"
-version = "0.1.15"
-source = "git+https://github.com/fluencelabs/fce#ede18f00de6a88b83ad3acf53bcd7f842123df79"
+version = "0.1.16"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1aa609abcbb28923ec440410239c12b15abae417e916e49c1c15ff8cf888ccae"
 dependencies = [
  "cmd_lib",
- "fce",
- "fce-utils",
+ "fce 0.1.14 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fce-utils 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fluence-sdk-main 0.2.12 (registry+https://github.com/rust-lang/crates.io-index)",
+ "itertools",
+ "log",
+ "safe-transmute",
+ "serde",
+ "serde_derive",
+ "serde_json",
+ "toml",
+ "wasmer-interface-types-fl",
+ "wasmer-runtime-core-fl",
+ "wasmer-runtime-fl",
+ "wasmer-wasi-fl",
+]
+
+[[package]]
+name = "fluence-faas"
+version = "0.1.16"
+source = "git+https://github.com/fluencelabs/fce#20092f817444b3a535255e65ac725bdaeb638d93"
+dependencies = [
+ "cmd_lib",
+ "fce 0.1.14 (git+https://github.com/fluencelabs/fce)",
+ "fce-utils 0.1.0 (git+https://github.com/fluencelabs/fce)",
  "fluence-sdk-main 0.2.12 (registry+https://github.com/rust-lang/crates.io-index)",
  "itertools",
  "log",
@@ -1081,7 +1183,7 @@ dependencies = [
 name = "log_storage"
 version = "0.1.0"
 dependencies = [
- "fluence",
+ "fluence 0.2.12 (registry+https://github.com/rust-lang/crates.io-index)",
  "stepper-lib",
 ]
 
@@ -1270,7 +1372,7 @@ dependencies = [
 name = "plets"
 version = "0.1.0"
 dependencies = [
- "fluence",
+ "fluence 0.2.12 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde",
 ]
 
@@ -1630,7 +1732,7 @@ checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 name = "stepper-interface"
 version = "0.1.0"
 dependencies = [
- "fluence",
+ "fluence 0.2.12 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde",
  "wasmer-interface-types-fl",
 ]
@@ -1640,7 +1742,7 @@ name = "stepper-interface"
 version = "0.1.0"
 source = "git+https://github.com/fluencelabs/aquamarine#b967a63abca9742d6764e9b27926025d5e2b2efb"
 dependencies = [
- "fluence",
+ "fluence 0.2.12 (git+https://github.com/fluencelabs/rust-sdk)",
  "serde",
  "wasmer-interface-types-fl",
 ]
@@ -1655,7 +1757,8 @@ dependencies = [
  "criterion",
  "csv",
  "env_logger",
- "fluence",
+ "fluence 0.2.12 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fluence-app-service",
  "jsonpath_lib",
  "log",
  "maplit",

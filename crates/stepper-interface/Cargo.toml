@@ -10,7 +10,7 @@ name = "stepper_interface"
 path = "src/lib.rs"
 
 [dependencies]
-fluence = { git = "https://github.com/fluencelabs/rust-sdk" }
+fluence = "=0.2.12"
 wasmer-wit = { package = "wasmer-interface-types-fl", version = "=0.17.20" }
 
 serde = "1.0.118"

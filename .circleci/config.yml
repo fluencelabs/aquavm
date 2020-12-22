@@ -25,10 +25,23 @@ jobs:
           fce build --features fce
 
           cd ..
+          cd stepper-lib/tests/security_tetraplets/auth_module
+          fce build
+
+          cd ../log_storage
+          fce build
+
+          cd ../../../../
+
           cargo fmt --all -- --check --color always
-          cargo check
-          cargo test --release
-          cargo clippy -v
+          cargo check -p stepper-lib
+          cargo check -p stepper
+
+          cargo test --release -p stepper-lib
+          cargo test --release -p air-parser
+
+          cargo clippy -v -p stepper-lib
+          cargo clippy -v -p stepper
 
       - save_cache:
           paths:
