@@ -119,9 +119,7 @@ mod tests {
             vm_peer_id, service_id, function_name
         );
 
-
-        let res = call_vm!(vm, "asd", script, "[]", "[]");
-        let res_with_peer_id = call_vm!(vm, "asd", script.clone(), "[]", "[]");
+        let res = call_vm!(vm, "asd", script.clone(), "[]", "[]");
 
         // test that empty string for data works
         let res_with_empty_string = call_vm!(vm, "asd", script, "", "");

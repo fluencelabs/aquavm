@@ -161,7 +161,8 @@ impl<'ctx> Iterable<'ctx> for IterableResolvedCall {
         let triplet = self.call_result.triplet.clone();
         let tetraplet = SecurityTetraplet {
             triplet,
-            json_path: self.len.to_string(),
+            // TODO: consider set json_path to the current cursor here
+            json_path: String::new(),
         };
 
         let jvalue = match &self.call_result.result.deref() {

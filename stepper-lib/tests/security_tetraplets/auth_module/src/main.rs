@@ -43,5 +43,5 @@ pub fn call_service(service_id: String, fn_name: String, args: String, tetraplet
 }
 
 fn is_authorized(user_peer_pk: &str) -> bool {
-    user_peer_pk ==
+    user_peer_pk == ADMIN_PEER_PK
 }
