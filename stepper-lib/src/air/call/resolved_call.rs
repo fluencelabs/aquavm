@@ -83,6 +83,8 @@ impl<'i> ResolvedCall<'i> {
             tetraplets,
         } = self.resolve_args(exec_ctx)?;
 
+        let tetraplets = serde_json::to_string(&tetraplets).expect("default serializer shouldn't fail");
+
         let service_result = unsafe {
             crate::call_service(
                 // copying here is necessary because of current limitations of rust-sdk

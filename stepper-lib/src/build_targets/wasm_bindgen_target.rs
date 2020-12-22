@@ -19,21 +19,13 @@ use crate::SecurityTetraplet;
 use wasm_bindgen::__rt::std::env::VarError;
 use wasm_bindgen::prelude::*;
 
-// [args] from json path   <--- [t1, t2, ...]
-// [args] as JValue::Array <--- [t1]
-
-// args [[1,2,3],      1, ...]
-// t    [[t1,t2,t3], [t1], ...]
-
 pub(crate) fn call_service(
     service_id: String,
     fn_name: String,
     args: String,
-    security_tetraplets: Vec<Vec<SecurityTetraplet>>,
+    security_tetraplets: String,
 ) -> super::CallServiceResult {
-    let security_tetraplets = serde_json::to_string(&security_tetraplets).expect("can't serialize tetraplets");
     let result = call_service_impl(service_id, fn_name, args, security_tetraplets);
-
     log::trace!("result {}", result);
 
     serde_json::from_str(&result).expect("Cannot parse CallServiceResult")

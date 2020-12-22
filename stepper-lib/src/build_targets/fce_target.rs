@@ -15,7 +15,6 @@
  */
 
 use super::CallServiceResult;
-use crate::SecurityTetraplet;
 
 use fluence::fce;
 
@@ -27,22 +26,10 @@ pub(crate) fn get_current_peer_id() -> std::result::Result<String, VarError> {
     std::env::var(CURRENT_PEER_ID_ENV_NAME)
 }
 
-pub(crate) fn call_service(
-    service_id: String,
-    fn_name: String,
-    args: String,
-    tetraplets: Vec<Vec<SecurityTetraplet>>,
-) -> CallServiceResult {
-    let tetraplets = serde_json::to_string(&tetraplets).unwrap();
-
-    unsafe { call_service_impl(service_id, fn_name, args, tetraplets) }
-}
-
 #[fce]
 #[link(wasm_import_module = "host")]
 extern "C" {
-    #[link_name = "call_service"]
-    pub(crate) fn call_service_impl(
+    pub(crate) fn call_service(
         service_id: String,
         fn_name: String,
         args: String,

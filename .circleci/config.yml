@@ -26,7 +26,7 @@ jobs:
           (cd stepper; fce build --features fce)
 
           # build Wasm binaries for tests
-          (cd stepper-lib/tests/security_tetraplets/; ./build.sh)
+          (cd stepper-lib/tests/; ./build.sh)
 
           cargo fmt --all -- --check --color always
           cargo check
