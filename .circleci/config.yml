@@ -45,6 +45,6 @@ jobs:
           key: aqua01-{{ checksum "Cargo.lock" }}
 workflows:
   version: 2
-  arqada:
+  aqua:
     jobs:
       - aqua
