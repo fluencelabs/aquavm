@@ -14,15 +14,7 @@
  * limitations under the License.
  */
 
-#![allow(clippy::all)]
-
 use fluence::fce;
-
-#[fce]
-pub struct CallServiceResult {
-    pub ret_code: i32,
-    pub result: String,
-}
 
 const ADMIN_PEER_PK: &str = "12D3KooWEXNUbCXooUwHrHBbrmjsrpHXoEphPwbjQXEGyzbqKnE1";
 
