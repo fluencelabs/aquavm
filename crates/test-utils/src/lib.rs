@@ -46,7 +46,7 @@ pub fn create_aqua_vm(
 ) -> AquamarineVM {
     let call_service_descriptor = HostImportDescriptor {
         host_exported_func: call_service,
-        argument_types: vec![IType::String, IType::String, IType::String],
+        argument_types: vec![IType::String, IType::String, IType::String, IType::String],
         output_type: Some(IType::Record(0)),
         error_handler: None,
     };
@@ -138,10 +138,10 @@ pub fn set_variables_call_service(ret_mapping: HashMap<String, String>) -> HostE
         let result = ret_mapping
             .get(&arg_name)
             .cloned()
-            .unwrap_or(String::from(r#""test""#));
+            .unwrap_or_else(|| String::from(r#""test""#));
 
         Some(IValue::Record(
-            Vec1::new(vec![IValue::S32(0), IValue::String(result.clone())]).unwrap(),
+            Vec1::new(vec![IValue::S32(0), IValue::String(result)]).unwrap(),
         ))
     })
 }

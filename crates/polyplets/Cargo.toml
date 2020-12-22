@@ -1,12 +1,13 @@
 [package]
-name = "aqua-test-module"
+name = "polyplets"
 version = "0.1.0"
 authors = ["Fluence Labs"]
 edition = "2018"
 
-[[bin]]
-name = "aqua_test_module"
-path = "src/main.rs"
+[lib]
+name = "polyplets"
+path = "src/lib.rs"
 
 [dependencies]
 fluence = { version = "=0.2.13", features = ["logger"] }
+serde = { version = "1.0.118", features = ["rc"] }

@@ -1,14 +1,19 @@
 [workspace]
 members = [
     "crates/air-parser",
+    "crates/polyplets",
     "crates/stepper-interface",
     "crates/test-module",
     "crates/test-utils",
     "stepper",
-    "stepper-lib",
+    "stepper-lib"
 ]
 
-exclude = [ "crates/air-interpreter-wasm" ]
+exclude = [
+    "crates/air-interpreter-wasm",
+    "stepper-lib/tests/security_tetraplets/auth_module",
+    "stepper-lib/tests/security_tetraplets/log_storage",
+]
 
 [profile.release]
 opt-level = 3

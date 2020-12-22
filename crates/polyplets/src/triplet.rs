@@ -14,25 +14,14 @@
  * limitations under the License.
  */
 
-use super::CallServiceResult;
+use serde::Deserialize;
+use serde::Serialize;
 
-use fluence::fce;
-
-use std::env::VarError;
-
-const CURRENT_PEER_ID_ENV_NAME: &str = "CURRENT_PEER_ID";
-
-pub(crate) fn get_current_peer_id() -> std::result::Result<String, VarError> {
-    std::env::var(CURRENT_PEER_ID_ENV_NAME)
-}
-
-#[fce]
-#[link(wasm_import_module = "host")]
-extern "C" {
-    pub(crate) fn call_service(
-        service_id: String,
-        fn_name: String,
-        args: String,
-        tetraplets: String,
-    ) -> CallServiceResult;
+/// ResolvedTriplet represents peer network location with all
+/// variables, literals and etc resolved into final string.
+#[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
+pub struct ResolvedTriplet {
+    pub peer_pk: String,
+    pub service_id: String,
+    pub function_name: String,
 }

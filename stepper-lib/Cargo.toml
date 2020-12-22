@@ -10,13 +10,14 @@ path = "src/lib.rs"
 
 [dependencies]
 air-parser = { path = "../crates/air-parser" }
-fluence = { git = "https://github.com/fluencelabs/rust-sdk", features = ["logger"] }
+fluence = { version = "=0.2.13", features = ["logger"] }
+polyplets = { path = "../crates/polyplets" }
 stepper-interface = { path = "../crates/stepper-interface" }
 
 serde = { version = "1.0.116", features = [ "derive", "rc" ] }
 serde_derive = "1.0.116"
 
-jsonpath_lib = "0.2.5"
+jsonpath_lib = { git = "https://github.com/fluencelabs/jsonpath", branch = "fluence" }
 
 boolinator = "2.4.0"
 log = "0.4.11"
@@ -27,6 +28,7 @@ wasm-bindgen = "=0.2.65"
 
 [dev_dependencies]
 aqua-test-utils = { path = "../crates/test-utils" }
+fluence-app-service = "=0.1.17"
 
 criterion = "0.3.3"
 csv = "1.1.5"

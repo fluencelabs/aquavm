@@ -14,108 +14,68 @@
  * limitations under the License.
  */
 
+use super::fold::JValuable;
 use super::ExecutionCtx;
 use crate::AValue;
 use crate::AquamarineError;
 use crate::JValue;
 use crate::Result;
+use crate::SecurityTetraplet;
 
-use air_parser::ast::Value;
+use air_parser::ast::InstructionValue;
 
-use std::borrow::Cow;
+/// Resolve value to called function arguments.
+pub(crate) fn resolve_to_args<'i>(
+    value: &InstructionValue<'i>,
+    ctx: &ExecutionCtx<'i>,
+) -> Result<(JValue, Vec<SecurityTetraplet>)> {
+    fn handle_string_arg<'i>(arg: &str, ctx: &ExecutionCtx<'i>) -> Result<(JValue, Vec<SecurityTetraplet>)> {
+        let jvalue = JValue::String(arg.to_string());
+        let tetraplet = SecurityTetraplet::literal_tetraplet(ctx.init_peer_id.clone());
 
-/// Resolve value to JValue, similar to `resolve_value`
-pub(crate) fn resolve_jvalue<'i>(value: &Value<'i>, ctx: &ExecutionCtx<'i>) -> Result<JValue> {
-    let value = match value {
-        Value::CurrentPeerId => JValue::String(ctx.current_peer_id.clone()),
-        Value::InitPeerId => JValue::String(ctx.init_peer_id.clone()),
-        Value::Literal(value) => JValue::String(value.to_string()),
-        Value::Variable(name) => resolve_variable(name, ctx)?,
-        Value::JsonPath { variable, path } => {
-            let value = resolve_variable(variable, ctx)?;
-            apply_json_path(value, path)?
+        Ok((jvalue, vec![tetraplet]))
+    }
+
+    match value {
+        InstructionValue::CurrentPeerId => handle_string_arg(ctx.current_peer_id.as_str(), ctx),
+        InstructionValue::InitPeerId => handle_string_arg(ctx.init_peer_id.as_str(), ctx),
+        InstructionValue::Literal(value) => handle_string_arg(value, ctx),
+        InstructionValue::Variable(name) => {
+            let resolved = resolve_to_jvaluable(name, ctx)?;
+            let tetraplets = resolved.as_tetraplets();
+            let jvalue = resolved.into_jvalue();
+
+            Ok((jvalue, tetraplets))
         }
-    };
+        InstructionValue::JsonPath { variable, path } => {
+            let resolved = resolve_to_jvaluable(variable, ctx)?;
+            let (jvalue, tetraplets) = resolved.apply_json_path_with_tetraplets(path)?;
+            let jvalue = jvalue.into_iter().cloned().collect::<Vec<_>>();
+            let jvalue = JValue::Array(jvalue);
 
-    Ok(value)
+            Ok((jvalue, tetraplets))
+        }
+    }
 }
 
-/// Takes variable's value from `ExecutionCtx::data_cache`
-/// TODO: maybe return &'i JValue?
-pub(crate) fn resolve_variable<'exec_ctx, 'i>(variable: &'i str, ctx: &'exec_ctx ExecutionCtx<'i>) -> Result<JValue> {
+/// Constructs jvaluable result from `ExecutionCtx::data_cache` by name.
+pub(crate) fn resolve_to_jvaluable<'name, 'i, 'ctx>(
+    name: &'name str,
+    ctx: &'ctx ExecutionCtx<'i>,
+) -> Result<Box<dyn JValuable + 'ctx>> {
     use AquamarineError::VariableNotFound;
 
     let value = ctx
         .data_cache
-        .get(variable)
-        .ok_or_else(|| VariableNotFound(variable.to_string()))?;
+        .get(name)
+        .ok_or_else(|| VariableNotFound(name.to_string()))?;
 
     match value {
+        AValue::JValueRef(value) => Ok(Box::new(value.clone())),
+        AValue::JValueAccumulatorRef(acc) => Ok(Box::new(acc.borrow())),
         AValue::JValueFoldCursor(fold_state) => {
-            if let JValue::Array(array) = fold_state.iterable.as_ref() {
-                Ok(array[fold_state.cursor].clone())
-            } else {
-                unreachable!("fold state must be well-formed because it is changed only by stepper")
-            }
-        }
-        AValue::JValueRef(value) => Ok(value.as_ref().clone()),
-        AValue::JValueAccumulatorRef(acc) => {
-            let owned_acc = acc.borrow().iter().map(|v| v.as_ref()).cloned().collect::<Vec<_>>();
-            Ok(JValue::Array(owned_acc))
+            let peeked_value = fold_state.iterable.peek().unwrap();
+            Ok(Box::new(peeked_value))
         }
     }
-}
-
-/// Resolve value to string by either resolving variable from `ExecutionCtx`, taking literal value, or etc
-pub(crate) fn resolve_value<'i, 'a: 'i>(value: &'a Value<'i>, ctx: &'a ExecutionCtx<'i>) -> Result<Cow<'i, str>> {
-    let resolved = match value {
-        Value::CurrentPeerId => Cow::Borrowed(ctx.current_peer_id.as_str()),
-        Value::InitPeerId => Cow::Borrowed(ctx.init_peer_id.as_str()),
-        Value::Literal(value) => Cow::Borrowed(*value),
-        Value::Variable(name) => {
-            let resolved = resolve_variable(name, ctx)?;
-            let resolved = require_string(resolved)?;
-            Cow::Owned(resolved)
-        }
-        Value::JsonPath { variable, path } => {
-            let resolved = resolve_variable(variable, ctx)?;
-            let resolved = apply_json_path(resolved, path)?;
-            let resolved = require_string(resolved)?;
-            Cow::Owned(resolved)
-        }
-    };
-
-    Ok(resolved)
-}
-
-pub(crate) fn require_string(value: JValue) -> Result<String> {
-    if let JValue::String(s) = value {
-        Ok(s)
-    } else {
-        Err(AquamarineError::IncompatibleJValueType(value, "string".to_string()))
-    }
-}
-
-pub(crate) fn apply_json_path(jvalue: JValue, json_path: &str) -> Result<JValue> {
-    let values = find_by_json_path(&jvalue, json_path)?;
-    if values.is_empty() {
-        return Err(AquamarineError::VariableNotFound(json_path.to_string()));
-    }
-
-    if values.len() != 1 {
-        return Err(AquamarineError::MultipleValuesInJsonPath(json_path.to_string()));
-    }
-
-    // TODO: sure need this clone?
-    Ok(values[0].clone())
-}
-
-/// Applies `json_path` to `jvalue`
-fn find_by_json_path<'jvalue, 'json_path>(
-    jvalue: &'jvalue JValue,
-    json_path: &'json_path str,
-) -> Result<Vec<&'jvalue JValue>> {
-    use AquamarineError::VariableNotInJsonPath as JsonPathError;
-
-    jsonpath_lib::select(jvalue, json_path).map_err(|e| JsonPathError(jvalue.clone(), String::from(json_path), e))
 }

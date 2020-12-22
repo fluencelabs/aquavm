@@ -14,25 +14,21 @@
  * limitations under the License.
  */
 
-use super::CallServiceResult;
-
 use fluence::fce;
+use serde::{Deserialize, Serialize};
 
-use std::env::VarError;
+pub const STEPPER_SUCCESS: i32 = 0;
 
-const CURRENT_PEER_ID_ENV_NAME: &str = "CURRENT_PEER_ID";
-
-pub(crate) fn get_current_peer_id() -> std::result::Result<String, VarError> {
-    std::env::var(CURRENT_PEER_ID_ENV_NAME)
-}
-
+/// Describes a return value of the stepper.
 #[fce]
-#[link(wasm_import_module = "host")]
-extern "C" {
-    pub(crate) fn call_service(
-        service_id: String,
-        fn_name: String,
-        args: String,
-        tetraplets: String,
-    ) -> CallServiceResult;
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct StepperOutcome {
+    /// A return code, where SUCCESS_ERROR_CODE means success.
+    pub ret_code: i32,
+
+    /// Contains data if ret_code == 0, otherwise error message (that could be empty string).
+    pub data: String,
+
+    /// Public keys of peers that should receive data.
+    pub next_peer_pks: Vec<String>,
 }

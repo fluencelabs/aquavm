@@ -18,6 +18,7 @@ use crate::build_targets::CallServiceResult;
 use crate::call_evidence::CallResult;
 use crate::call_evidence::EvidenceState;
 use crate::JValue;
+use crate::ResolvedCallResult;
 
 use jsonpath_lib::JsonPathError;
 use serde_json::Error as SerdeJsonError;
@@ -51,11 +52,14 @@ pub enum AquamarineError {
     /// Multiple values for such name found.
     MultipleVariablesFound(String),
 
-    /// Value with such path wasn't found in data with such error.
-    VariableNotInJsonPath(JValue, String, JsonPathError),
+    /// An error occurred while trying to apply json path to this JValue.
+    JValueJsonPathError(JValue, String, JsonPathError),
+
+    /// An error occurred while trying to apply json path to this accumulator with JValue's.
+    JValueAccJsonPathError(Vec<ResolvedCallResult>, String, JsonPathError),
 
     /// Provided JValue has incompatible with target type.
-    IncompatibleJValueType(JValue, String),
+    IncompatibleJValueType(JValue, &'static str),
 
     /// Provided AValue has incompatible with target type.
     IncompatibleAValueType(String, String),
@@ -102,19 +106,20 @@ impl AquamarineError {
             AquamarineError::LocalServiceError(..) => 6,
             AquamarineError::VariableNotFound(..) => 7,
             AquamarineError::MultipleVariablesFound(..) => 8,
-            AquamarineError::VariableNotInJsonPath(..) => 9,
-            AquamarineError::IncompatibleJValueType(..) => 10,
-            AquamarineError::IncompatibleAValueType(..) => 11,
-            AquamarineError::MultipleValuesInJsonPath(..) => 12,
-            AquamarineError::FoldStateNotFound(..) => 13,
-            AquamarineError::MultipleFoldStates(..) => 14,
-            AquamarineError::InvalidEvidenceState(..) => 15,
-            AquamarineError::CallEvidenceDeserializationError(..) => 16,
-            AquamarineError::CallEvidenceSerializationError(..) => 17,
-            AquamarineError::IncompatibleEvidenceStates(..) => 18,
-            AquamarineError::IncompatibleCallResults(..) => 19,
-            AquamarineError::EvidencePathTooSmall(..) => 20,
-            AquamarineError::ShadowingError(_) => 21,
+            AquamarineError::JValueJsonPathError(..) => 9,
+            AquamarineError::JValueAccJsonPathError(..) => 10,
+            AquamarineError::IncompatibleJValueType(..) => 11,
+            AquamarineError::IncompatibleAValueType(..) => 12,
+            AquamarineError::MultipleValuesInJsonPath(..) => 13,
+            AquamarineError::FoldStateNotFound(..) => 14,
+            AquamarineError::MultipleFoldStates(..) => 15,
+            AquamarineError::InvalidEvidenceState(..) => 16,
+            AquamarineError::CallEvidenceDeserializationError(..) => 17,
+            AquamarineError::CallEvidenceSerializationError(..) => 18,
+            AquamarineError::IncompatibleEvidenceStates(..) => 19,
+            AquamarineError::IncompatibleCallResults(..) => 20,
+            AquamarineError::EvidencePathTooSmall(..) => 21,
+            AquamarineError::ShadowingError(_) => 22,
         }
     }
 }
@@ -148,7 +153,12 @@ impl std::fmt::Display for AquamarineError {
             AquamarineError::MultipleVariablesFound(variable_name) => {
                 write!(f, "multiple variables found for name {} in data", variable_name)
             }
-            AquamarineError::VariableNotInJsonPath(value, json_path, json_path_err) => write!(
+            AquamarineError::JValueJsonPathError(value, json_path, json_path_err) => write!(
+                f,
+                "variable with path {} not found in {:?} with error: {:?}",
+                json_path, value, json_path_err
+            ),
+            AquamarineError::JValueAccJsonPathError(value, json_path, json_path_err) => write!(
                 f,
                 "variable with path {} not found in {:?} with error: {:?}",
                 json_path, value, json_path_err

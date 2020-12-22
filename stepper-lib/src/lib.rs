@@ -41,23 +41,36 @@ pub use air_parser::ast::Instruction;
 pub use execution::execute_aqua;
 pub use execution::parse;
 
+pub use polyplets::ResolvedTriplet;
+pub use polyplets::SecurityTetraplet;
+
 pub(crate) type Result<T> = std::result::Result<T, AquamarineError>;
 pub(crate) type JValue = serde_json::Value;
 
 pub(crate) use build_targets::call_service;
 pub(crate) use build_targets::get_current_peer_id;
 
+use serde::Deserialize;
+use serde::Serialize;
+
 use std::cell::RefCell;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::rc::Rc;
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
+pub struct ResolvedCallResult {
+    pub result: Rc<JValue>,
+    pub triplet: Rc<ResolvedTriplet>,
+}
+
 pub(crate) enum AValue<'i> {
-    JValueRef(Rc<JValue>),
-    JValueAccumulatorRef(RefCell<Vec<Rc<JValue>>>),
+    JValueRef(ResolvedCallResult),
+    JValueAccumulatorRef(RefCell<Vec<ResolvedCallResult>>),
     JValueFoldCursor(crate::air::FoldState<'i>),
 }
+
+pub(crate) trait JValuable {}
 
 impl<'i> Display for AValue<'i> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -70,8 +83,8 @@ impl<'i> Display for AValue<'i> {
                 }
                 write!(f, "]")?;
             }
-            AValue::JValueFoldCursor(fold_state) => {
-                write!(f, "cursor: {}, iterable: {}", fold_state.cursor, fold_state.iterable)?;
+            AValue::JValueFoldCursor(_) => {
+                write!(f, "cursor")?;
             }
         }
 

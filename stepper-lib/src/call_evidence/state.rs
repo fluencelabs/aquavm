@@ -188,7 +188,7 @@ impl std::fmt::Display for EvidenceState {
         match self {
             Par(left, right) => write!(f, "Par({}, {})", left, right),
             Call(RequestSent(peer_id)) => write!(f, "RequestSent({})", peer_id),
-            Call(Executed(result)) => write!(f, "Executed({})", result),
+            Call(Executed(result)) => write!(f, "Executed({:?})", result),
             Call(CallServiceFailed(err_msg)) => write!(f, "CallServiceFailed({})", err_msg),
         }
     }

@@ -21,10 +21,13 @@ jobs:
           rustup component add clippy
 
           cargo install fcli
-          cd stepper
-          fce build --features fce
 
-          cd ..
+          # build a Wasm binary for stepper
+          (cd stepper; fce build --features fce)
+
+          # build Wasm binaries for tests
+          (cd stepper-lib/tests/; ./build_test_binaries.sh)
+
           cargo fmt --all -- --check --color always
           cargo check
           cargo test --release
@@ -37,6 +40,6 @@ jobs:
           key: aqua01-{{ checksum "Cargo.lock" }}
 workflows:
   version: 2
-  arqada:
+  aqua:
     jobs:
       - aqua

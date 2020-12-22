@@ -14,20 +14,7 @@
  * limitations under the License.
  */
 
-#![warn(rust_2018_idioms)]
-#![deny(
-    dead_code,
-    nonstandard_style,
-    unused_imports,
-    unused_mut,
-    unused_variables,
-    unused_unsafe,
-    unreachable_patterns
-)]
-
 use fluence::fce;
-
-fn main() {}
 
 #[fce]
 pub struct CallServiceResult {
@@ -35,20 +22,20 @@ pub struct CallServiceResult {
     pub result: String,
 }
 
-#[fce]
-pub fn call_service(
-    service_id: String,
-    fn_name: String,
-    args: String,
-    tetraplets: String,
-) -> CallServiceResult {
-    println!(
-        "call service invoked with:\n  service_id: {}\n  fn_name: {}\n  args: {}\n  tetraples: {}",
-        service_id, fn_name, args, tetraplets
-    );
+fn main() {}
 
-    CallServiceResult {
-        ret_code: 0,
-        result: String::from("[\"result string\"]"),
+#[fce]
+fn delete(is_authorized: Vec<i32>, _record_id: String) -> String {
+    let call_parameters = fluence::get_call_parameters();
+    let tetraplets = call_parameters.tetraplets;
+    let tetraplet = &tetraplets[0];
+
+    if tetraplet[0].json_path != "$.is_authorized" {
+        return String::from("invalid json path in tetraplet");
+    }
+
+    match is_authorized[0] {
+        1 => String::from("Ok"),
+        _ => String::from("not authorized"),
     }
 }

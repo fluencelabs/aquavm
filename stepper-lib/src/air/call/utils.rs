@@ -19,23 +19,29 @@ use crate::call_evidence::CallEvidenceCtx;
 use crate::call_evidence::CallResult;
 use crate::call_evidence::EvidenceState;
 use crate::log_targets::EVIDENCE_CHANGING;
-use crate::AValue;
 use crate::AquamarineError;
 use crate::JValue;
+use crate::ResolvedCallResult;
 use crate::Result;
 
 use air_parser::ast::CallOutput;
+use polyplets::ResolvedTriplet;
 
-use std::{cell::RefCell, rc::Rc};
+use std::rc::Rc;
 
-/// Writes result of a local `Call` instruction to `ExecutionCtx` at `output`
+/// Writes result of a local `Call` instruction to `ExecutionCtx` at `output`.
 pub(super) fn set_local_call_result<'i>(
-    output: CallOutput<'i>,
-    exec_ctx: &mut ExecutionCtx<'i>,
     result: Rc<JValue>,
+    triplet: Rc<ResolvedTriplet>,
+    output: &CallOutput<'i>,
+    exec_ctx: &mut ExecutionCtx<'i>,
 ) -> Result<()> {
+    use crate::AValue;
+    use std::cell::RefCell;
     use std::collections::hash_map::Entry::{Occupied, Vacant};
     use AquamarineError::*;
+
+    let executed_result = ResolvedCallResult { result, triplet };
 
     match output {
         CallOutput::Scalar(name) => {
@@ -45,12 +51,12 @@ pub(super) fn set_local_call_result<'i>(
                     _ => unreachable!("fold block data must be represented as fold cursor"),
                 };
 
-                fold_state.met_variables.insert(name, result.clone());
+                fold_state.met_variables.insert(name, executed_result.clone());
             }
 
             match exec_ctx.data_cache.entry(name.to_string()) {
                 Vacant(entry) => {
-                    entry.insert(AValue::JValueRef(result));
+                    entry.insert(AValue::JValueRef(executed_result));
                 }
                 Occupied(mut entry) => {
                     // check that current execution flow is inside a fold block
@@ -65,7 +71,7 @@ pub(super) fn set_local_call_result<'i>(
                         _ => return Err(ShadowingError(entry.key().clone())),
                     };
 
-                    entry.insert(AValue::JValueRef(result));
+                    entry.insert(AValue::JValueRef(executed_result));
                 }
             };
         }
@@ -73,11 +79,11 @@ pub(super) fn set_local_call_result<'i>(
             match exec_ctx.data_cache.entry(name.to_string()) {
                 Occupied(mut entry) => match entry.get_mut() {
                     // if result is an array, insert result to the end of the array
-                    AValue::JValueAccumulatorRef(values) => values.borrow_mut().push(result),
-                    v => return Err(IncompatibleAValueType(format!("{:?}", v), String::from("Array"))),
+                    AValue::JValueAccumulatorRef(values) => values.borrow_mut().push(executed_result),
+                    v => return Err(IncompatibleAValueType(format!("{}", v), String::from("Array"))),
                 },
                 Vacant(entry) => {
-                    entry.insert(AValue::JValueAccumulatorRef(RefCell::new(vec![result])));
+                    entry.insert(AValue::JValueAccumulatorRef(RefCell::new(vec![executed_result])));
                 }
             };
         }
@@ -103,4 +109,51 @@ pub(super) fn set_remote_call_result<'i>(
         new_evidence_state
     );
     call_ctx.new_path.push_back(new_evidence_state);
+}
+
+/// This function looks at the existing call state, validates it,
+/// and returns Ok(true) if the call should be executed further.
+pub(super) fn handle_prev_state<'i>(
+    triplet: &Rc<ResolvedTriplet>,
+    output: &CallOutput<'i>,
+    prev_state: EvidenceState,
+    exec_ctx: &mut ExecutionCtx<'i>,
+    call_ctx: &mut CallEvidenceCtx,
+) -> Result<bool> {
+    use crate::call_evidence::CallResult::*;
+    use crate::call_evidence::EvidenceState::*;
+
+    match &prev_state {
+        // this call was failed on one of the previous executions,
+        // here it's needed to bubble this special error up
+        Call(CallServiceFailed(err_msg)) => {
+            let err_msg = err_msg.clone();
+            call_ctx.new_path.push_back(prev_state);
+            exec_ctx.subtree_complete = false;
+            Err(AquamarineError::LocalServiceError(err_msg))
+        }
+        Call(RequestSent(..)) => {
+            let peer_pk = triplet.peer_pk.as_str();
+            // check whether current node can execute this call
+            let is_current_peer = peer_pk == exec_ctx.current_peer_id;
+            if is_current_peer {
+                Ok(true)
+            } else {
+                exec_ctx.subtree_complete = false;
+                call_ctx.new_path.push_back(prev_state);
+                Ok(false)
+            }
+        }
+        // this instruction's been already executed
+        Call(Executed(result)) => {
+            set_local_call_result(result.clone(), triplet.clone(), output, exec_ctx)?;
+            call_ctx.new_path.push_back(prev_state);
+            Ok(false)
+        }
+        // state has inconsistent order - return a error, call shouldn't be executed
+        par_state @ Par(..) => Err(AquamarineError::InvalidEvidenceState(
+            par_state.clone(),
+            String::from("call"),
+        )),
+    }
 }

@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+use serde::Deserialize;
 use serde::Serialize;
+
 use std::rc::Rc;
 
 #[allow(clippy::large_enum_variant)] // for Null and Error variants
@@ -32,26 +34,26 @@ pub enum Instruction<'i> {
 
 #[derive(Serialize, Debug, PartialEq, Eq)]
 pub enum PeerPart<'i> {
-    PeerPk(Value<'i>),
-    PeerPkWithServiceId(Value<'i>, Value<'i>),
+    PeerPk(InstructionValue<'i>),
+    PeerPkWithServiceId(InstructionValue<'i>, InstructionValue<'i>),
 }
 
 #[derive(Serialize, Debug, PartialEq, Eq)]
 pub enum FunctionPart<'i> {
-    FuncName(Value<'i>),
-    ServiceIdWithFuncName(Value<'i>, Value<'i>),
+    FuncName(InstructionValue<'i>),
+    ServiceIdWithFuncName(InstructionValue<'i>, InstructionValue<'i>),
 }
 
 #[derive(Serialize, Debug, PartialEq, Eq)]
 pub struct Call<'i> {
     pub peer_part: PeerPart<'i>,
     pub function_part: FunctionPart<'i>,
-    pub args: Vec<Value<'i>>,
+    pub args: Rc<Vec<InstructionValue<'i>>>,
     pub output: CallOutput<'i>,
 }
 
-#[derive(Serialize, Debug, PartialEq, Eq, Clone)]
-pub enum Value<'i> {
+#[derive(Debug, PartialEq, Eq, Clone, Hash, Serialize, Deserialize)]
+pub enum InstructionValue<'i> {
     Variable(&'i str),
     Literal(&'i str),
     JsonPath { variable: &'i str, path: &'i str },
@@ -59,7 +61,7 @@ pub enum Value<'i> {
     InitPeerId,
 }
 
-#[derive(Serialize, Debug, PartialEq, Eq, Clone)]
+#[derive(Serialize, Debug, Hash, PartialEq, Eq, Clone)]
 pub enum CallOutput<'i> {
     Scalar(&'i str),
     Accumulator(&'i str),
@@ -77,7 +79,7 @@ pub struct Xor<'i>(pub Box<Instruction<'i>>, pub Box<Instruction<'i>>);
 
 #[derive(Serialize, Debug, PartialEq, Eq)]
 pub struct Fold<'i> {
-    pub iterable: Value<'i>,
+    pub iterable: InstructionValue<'i>,
     pub iterator: &'i str,
     pub instruction: Rc<Instruction<'i>>,
 }

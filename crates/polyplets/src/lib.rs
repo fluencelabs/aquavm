@@ -25,30 +25,8 @@
     unreachable_patterns
 )]
 
-use fluence::fce;
+mod tetraplet;
+mod triplet;
 
-fn main() {}
-
-#[fce]
-pub struct CallServiceResult {
-    pub ret_code: i32,
-    pub result: String,
-}
-
-#[fce]
-pub fn call_service(
-    service_id: String,
-    fn_name: String,
-    args: String,
-    tetraplets: String,
-) -> CallServiceResult {
-    println!(
-        "call service invoked with:\n  service_id: {}\n  fn_name: {}\n  args: {}\n  tetraples: {}",
-        service_id, fn_name, args, tetraplets
-    );
-
-    CallServiceResult {
-        ret_code: 0,
-        result: String::from("[\"result string\"]"),
-    }
-}
+pub use tetraplet::SecurityTetraplet;
+pub use triplet::ResolvedTriplet;

@@ -15,25 +15,19 @@
  */
 
 use crate::air::ExecutionCtx;
-use crate::{AquamarineError, Result};
+use crate::AquamarineError;
+use crate::JValue;
+use crate::Result;
 
-use crate::air::resolve::resolve_value;
-use air_parser::ast::{FunctionPart, PeerPart, Value};
+use air_parser::ast::{FunctionPart, InstructionValue, PeerPart};
+use polyplets::ResolvedTriplet;
 
-/// Triplet represents a location of the executable code in the network
-/// It is build from `PeerPart` and `FunctionPart` of a `Call` instruction
+/// Triplet represents a location of the executable code in the network.
+/// It is build from `PeerPart` and `FunctionPart` of a `Call` instruction.
 pub(super) struct Triplet<'a, 'i> {
-    pub(super) peer_pk: &'a Value<'i>,
-    pub(super) service_id: &'a Value<'i>,
-    pub(super) function_name: &'a Value<'i>,
-}
-
-/// ResolvedTriplet represents same location as `Triplet`, but with all
-/// variables, literals and etc resolved into final `String`
-pub(super) struct ResolvedTriplet {
-    pub(super) peer_pk: String,
-    pub(super) service_id: String,
-    pub(super) function_name: String,
+    pub(super) peer_pk: &'a InstructionValue<'i>,
+    pub(super) service_id: &'a InstructionValue<'i>,
+    pub(super) function_name: &'a InstructionValue<'i>,
 }
 
 impl<'a, 'i> Triplet<'a, 'i> {
@@ -62,16 +56,16 @@ impl<'a, 'i> Triplet<'a, 'i> {
         })
     }
 
-    /// Resolve variables, literals, etc in the `Triplet`, and build a `ResolvedTriplet`
-    pub fn resolve(self, ctx: &'a ExecutionCtx<'i>) -> Result<ResolvedTriplet> {
+    /// Resolve variables, literals, etc in the `Triplet`, and build a `ResolvedTriplet`.
+    pub fn resolve(self, ctx: &ExecutionCtx<'i>) -> Result<ResolvedTriplet> {
         let Triplet {
             peer_pk,
             service_id,
             function_name,
         } = self;
-        let peer_pk = resolve_value(peer_pk, ctx)?.as_ref().to_string();
-        let service_id = resolve_value(service_id, ctx)?.as_ref().to_string();
-        let function_name = resolve_value(function_name, ctx)?.as_ref().to_string();
+        let peer_pk = resolve_to_string(peer_pk, ctx)?;
+        let service_id = resolve_to_string(service_id, ctx)?;
+        let function_name = resolve_to_string(function_name, ctx)?;
 
         Ok(ResolvedTriplet {
             peer_pk,
@@ -79,4 +73,49 @@ impl<'a, 'i> Triplet<'a, 'i> {
             function_name,
         })
     }
+}
+
+/// Resolve value to string by either resolving variable from `ExecutionCtx`, taking literal value, or etc.
+// TODO: return Rc<String> to avoid excess cloning
+fn resolve_to_string<'i>(value: &InstructionValue<'i>, ctx: &ExecutionCtx<'i>) -> Result<String> {
+    use crate::air::resolve::resolve_to_jvaluable;
+
+    let resolved = match value {
+        InstructionValue::CurrentPeerId => ctx.current_peer_id.clone(),
+        InstructionValue::InitPeerId => ctx.init_peer_id.clone(),
+        InstructionValue::Literal(value) => value.to_string(),
+        InstructionValue::Variable(name) => {
+            let resolved = resolve_to_jvaluable(name, ctx)?;
+            let jvalue = resolved.into_jvalue();
+            jvalue_to_string(jvalue)?
+        }
+        InstructionValue::JsonPath { variable, path } => {
+            let resolved = resolve_to_jvaluable(variable, ctx)?;
+            let resolved = resolved.apply_json_path(path)?;
+            vec_to_string(resolved, path)?
+        }
+    };
+
+    Ok(resolved)
+}
+
+fn jvalue_to_string(jvalue: JValue) -> Result<String> {
+    use AquamarineError::IncompatibleJValueType;
+
+    match jvalue {
+        JValue::String(s) => Ok(s),
+        _ => Err(IncompatibleJValueType(jvalue, "string")),
+    }
+}
+
+fn vec_to_string(values: Vec<&JValue>, json_path: &str) -> Result<String> {
+    if values.is_empty() {
+        return Err(AquamarineError::VariableNotFound(json_path.to_string()));
+    }
+
+    if values.len() != 1 {
+        return Err(AquamarineError::MultipleValuesInJsonPath(json_path.to_string()));
+    }
+
+    jvalue_to_string(values[0].clone())
 }

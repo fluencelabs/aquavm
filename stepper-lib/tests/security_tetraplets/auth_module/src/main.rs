@@ -14,20 +14,9 @@
  * limitations under the License.
  */
 
-#![warn(rust_2018_idioms)]
-#![deny(
-    dead_code,
-    nonstandard_style,
-    unused_imports,
-    unused_mut,
-    unused_variables,
-    unused_unsafe,
-    unreachable_patterns
-)]
+#![allow(clippy::all)]
 
 use fluence::fce;
-
-fn main() {}
 
 #[fce]
 pub struct CallServiceResult {
@@ -35,20 +24,20 @@ pub struct CallServiceResult {
     pub result: String,
 }
 
-#[fce]
-pub fn call_service(
-    service_id: String,
-    fn_name: String,
-    args: String,
-    tetraplets: String,
-) -> CallServiceResult {
-    println!(
-        "call service invoked with:\n  service_id: {}\n  fn_name: {}\n  args: {}\n  tetraples: {}",
-        service_id, fn_name, args, tetraplets
-    );
+const ADMIN_PEER_PK: &str = "12D3KooWEXNUbCXooUwHrHBbrmjsrpHXoEphPwbjQXEGyzbqKnE1";
 
-    CallServiceResult {
-        ret_code: 0,
-        result: String::from("[\"result string\"]"),
+fn main() {}
+
+#[fce]
+struct AuthResult {
+    pub is_authorized: i32,
+}
+
+#[fce]
+fn is_authorized(user_peer_pk: String) -> AuthResult {
+    let is_authorized = user_peer_pk == ADMIN_PEER_PK;
+
+    AuthResult {
+        is_authorized: is_authorized.into(),
     }
 }
