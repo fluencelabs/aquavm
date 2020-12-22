@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use super::fold::JValuableResult;
+use super::fold::JValuable;
 use super::ExecutionCtx;
 use crate::AValue;
 use crate::AquamarineError;
@@ -41,14 +41,14 @@ pub(crate) fn resolve_to_args<'i>(
         InstructionValue::InitPeerId => handle_string_arg(ctx.init_peer_id.as_str(), ctx),
         InstructionValue::Literal(value) => handle_string_arg(value, ctx),
         InstructionValue::Variable(name) => {
-            let resolved = resolve_to_jvaluable_result(name, ctx)?;
+            let resolved = resolve_to_jvaluable(name, ctx)?;
             let tetraplets = resolved.as_tetraplets();
             let jvalue = resolved.into_jvalue();
 
             Ok((jvalue, tetraplets))
         }
         InstructionValue::JsonPath { variable, path } => {
-            let resolved = resolve_to_jvaluable_result(variable, ctx)?;
+            let resolved = resolve_to_jvaluable(variable, ctx)?;
             let (jvalue, tetraplets) = resolved.apply_json_path_with_tetraplets(path)?;
             let jvalue = jvalue.into_iter().cloned().collect::<Vec<_>>();
             let jvalue = JValue::Array(jvalue);
@@ -59,10 +59,10 @@ pub(crate) fn resolve_to_args<'i>(
 }
 
 /// Constructs jvaluable result from `ExecutionCtx::data_cache` by name.
-pub(crate) fn resolve_to_jvaluable_result<'name, 'i, 'ctx>(
+pub(crate) fn resolve_to_jvaluable<'name, 'i, 'ctx>(
     name: &'name str,
     ctx: &'ctx ExecutionCtx<'i>,
-) -> Result<Box<dyn JValuableResult + 'ctx>> {
+) -> Result<Box<dyn JValuable + 'ctx>> {
     use AquamarineError::VariableNotFound;
 
     let value = ctx

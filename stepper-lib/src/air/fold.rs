@@ -19,7 +19,7 @@ mod jvaluable_result;
 mod utils;
 
 use iterable::*;
-pub(crate) use jvaluable_result::JValuableResult;
+pub(crate) use jvaluable_result::JValuable;
 
 use super::CallEvidenceCtx;
 use super::ExecutionCtx;

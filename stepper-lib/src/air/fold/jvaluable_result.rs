@@ -23,19 +23,25 @@ use crate::SecurityTetraplet;
 use std::borrow::Cow;
 use std::ops::Deref;
 
-pub(crate) trait JValuableResult {
+/// Represent a value that could be transform to a JValue with or without tetraplets.
+pub(crate) trait JValuable {
+    /// Applies json path to the internal value, produces JValue.
     fn apply_json_path(&self, json_path: &str) -> Result<Vec<&JValue>>;
 
+    /// Applies json path to the internal value, produces JValue with tetraplet.
     fn apply_json_path_with_tetraplets(&self, json_path: &str) -> Result<(Vec<&JValue>, Vec<SecurityTetraplet>)>;
 
+    /// Return internal value as borrowed if it's possible, owned otherwise.
     fn as_jvalue(&self) -> Cow<'_, JValue>;
 
+    /// Convert this boxed value to an owned JValue.
     fn into_jvalue(self: Box<Self>) -> JValue;
 
+    /// Return tetraplets associating with internal value.
     fn as_tetraplets(&self) -> Vec<SecurityTetraplet>;
 }
 
-impl<'ctx> JValuableResult for IterableItemType<'ctx> {
+impl<'ctx> JValuable for IterableItemType<'ctx> {
     fn apply_json_path(&self, json_path: &str) -> Result<Vec<&JValue>> {
         use crate::AquamarineError::JValueJsonPathError as JsonPathError;
         use jsonpath_lib::select;
@@ -103,7 +109,7 @@ impl<'ctx> JValuableResult for IterableItemType<'ctx> {
     }
 }
 
-impl JValuableResult for ResolvedCallResult {
+impl JValuable for ResolvedCallResult {
     fn apply_json_path(&self, json_path: &str) -> Result<Vec<&JValue>> {
         use crate::AquamarineError::JValueJsonPathError as JsonPathError;
         use jsonpath_lib::select;
@@ -146,7 +152,7 @@ impl JValuableResult for ResolvedCallResult {
     }
 }
 
-impl JValuableResult for std::cell::Ref<'_, Vec<ResolvedCallResult>> {
+impl JValuable for std::cell::Ref<'_, Vec<ResolvedCallResult>> {
     fn apply_json_path(&self, json_path: &str) -> Result<Vec<&JValue>> {
         use jsonpath_lib::select_with_iter;
 

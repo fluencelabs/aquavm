@@ -78,19 +78,19 @@ impl<'a, 'i> Triplet<'a, 'i> {
 /// Resolve value to string by either resolving variable from `ExecutionCtx`, taking literal value, or etc.
 // TODO: return Rc<String> to avoid excess cloning
 fn resolve_to_string<'i>(value: &InstructionValue<'i>, ctx: &ExecutionCtx<'i>) -> Result<String> {
-    use crate::air::resolve::resolve_to_jvaluable_result;
+    use crate::air::resolve::resolve_to_jvaluable;
 
     let resolved = match value {
         InstructionValue::CurrentPeerId => ctx.current_peer_id.clone(),
         InstructionValue::InitPeerId => ctx.init_peer_id.clone(),
         InstructionValue::Literal(value) => value.to_string(),
         InstructionValue::Variable(name) => {
-            let resolved = resolve_to_jvaluable_result(name, ctx)?;
+            let resolved = resolve_to_jvaluable(name, ctx)?;
             let jvalue = resolved.into_jvalue();
             jvalue_to_string(jvalue)?
         }
         InstructionValue::JsonPath { variable, path } => {
-            let resolved = resolve_to_jvaluable_result(variable, ctx)?;
+            let resolved = resolve_to_jvaluable(variable, ctx)?;
             let resolved = resolved.apply_json_path(path)?;
             vec_to_string(resolved, path)?
         }
