@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# set -euo pipefail
+set -euo pipefail
 
 for dir in ./security_tetraplets/*; do
     # skip non-directory entries

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-use crate::SecurityTetraplet;
-
 use wasm_bindgen::__rt::std::env::VarError;
 use wasm_bindgen::prelude::*;
 
