@@ -24,6 +24,7 @@ use std::rc::Rc;
 #[derive(Clone, Debug, Eq, PartialEq, Hash, Serialize, Deserialize)]
 pub struct SecurityTetraplet {
     // describes location of the value in the network.
+    #[serde(flatten)]
     pub triplet: Rc<ResolvedTriplet>,
 
     // json path used to obtain supplied to call_service values from the value.

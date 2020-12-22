@@ -367,7 +367,7 @@ mod tests {
             r#"
             (seq
                 (call "set_variable" ("" "") [] Iterable)
-                (fold Iterable.$["array"] i
+                (fold Iterable.$["array"]! i
                     (seq
                         (call "A" ("" "") [i] acc[])
                         (next i)
