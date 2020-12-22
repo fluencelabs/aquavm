@@ -21,7 +21,7 @@ use std::collections::VecDeque;
 use std::fmt::Display;
 use std::fmt::Formatter;
 
-/// Execution context contains all necessary information needed to execute aqua script.
+/// Contains all necessary state needed to execute aqua script.
 pub(crate) struct ExecutionCtx<'i> {
     /// Contains all set variables.
     // TODO: use shared string (Rc<String>) to avoid copying.

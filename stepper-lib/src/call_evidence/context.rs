@@ -21,11 +21,18 @@ use serde::Serialize;
 use std::fmt::Display;
 use std::fmt::Formatter;
 
+/// Encapsulates all necessary state regarding to the call pathes.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub(crate) struct CallEvidenceCtx {
+    /// Contains path (serialized tree of states) after merging current and previous data,
+    /// stepper used it to realize which instructions've been already executed.
     pub(crate) current_path: CallEvidencePath,
+
+    /// Size of a current considered subtree inside current path.
     pub(crate) current_subtree_size: usize,
+
     // TODO: consider change it to Vec for optimization
+    /// Accumulator for resulted path produced by the stepper after execution.
     pub(crate) new_path: CallEvidencePath,
 }
 
