@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-use super::fold::JValuable;
 use super::ExecutionCtx;
+use super::JValuable;
 use crate::AValue;
 use crate::AquamarineError;
 use crate::JValue;
