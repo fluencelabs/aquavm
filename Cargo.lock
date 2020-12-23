@@ -1685,7 +1685,7 @@ dependencies = [
 [[package]]
 name = "stepper-interface"
 version = "0.1.0"
-source = "git+https://github.com/fluencelabs/aquamarine?branch=master#51754016f701aa9dd45661b4dfd78ee01533fabc"
+source = "git+https://github.com/fluencelabs/aquamarine?branch=master#6e5efe4903fa6c89781ef2f20edabca281ff9011"
 dependencies = [
  "fluence",
  "serde",
