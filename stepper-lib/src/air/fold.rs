@@ -172,7 +172,6 @@ mod tests {
     use serde_json::json;
     use std::rc::Rc;
 
-    // Check that
     #[test]
     fn lfold() {
         env_logger::try_init().ok();
@@ -229,9 +228,7 @@ mod tests {
             )"#,
         );
 
-        println!("set variables\n");
         let res = call_vm!(set_variable_vm, "", rfold.clone(), "[]", "[]");
-        println!("execute rfold\n");
         let res = call_vm!(vm, "", rfold, "[]", res.data);
         let res: CallEvidencePath = serde_json::from_slice(&res.data).expect("should be valid call evidence path");
 
@@ -291,7 +288,6 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
     fn inner_fold_with_same_iterator() {
         let mut vm = create_aqua_vm(set_variable_call_service(r#"["1","2","3","4","5"]"#), "set_variable");
 
@@ -318,7 +314,7 @@ mod tests {
 
         let res = call_vm!(vm, "", script, "[]", "[]");
 
-        assert_eq!(res.ret_code, 14);
+        assert_eq!(res.ret_code, 15);
     }
 
     #[test]
@@ -351,7 +347,6 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
     fn json_path() {
         use crate::call_evidence::CallResult::*;
         use crate::call_evidence::EvidenceState::*;
@@ -366,7 +361,7 @@ mod tests {
             r#"
             (seq
                 (call "set_variable" ("" "") [] Iterable)
-                (fold Iterable.$["array"]! i
+                (fold Iterable.$.array! i
                     (seq
                         (call "A" ("" "") [i] acc[])
                         (next i)

@@ -17,7 +17,6 @@
 mod call;
 mod execution_context;
 mod fold;
-mod json_path;
 mod jvaluable;
 mod null;
 mod par;

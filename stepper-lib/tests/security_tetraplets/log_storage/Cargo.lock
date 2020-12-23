@@ -388,9 +388,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dc6f3ad7b9d11a0c00842ff8de1b60ee58661048eb8049ed33c73594f359d7e6"
 
 [[package]]
-name = "jsonpath_lib"
+name = "jsonpath_lib-fl"
 version = "0.2.5"
-source = "git+https://github.com/fluencelabs/jsonpath?branch=fluence#538b433ae2ccbd882ff02fcff22ea16be779fb6f"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e81233a3c2e1f4579f1fdb856eeec115dcb23817374268212ebad691bd53e664"
 dependencies = [
  "array_tool",
  "env_logger",
@@ -743,7 +744,7 @@ dependencies = [
  "air-parser",
  "boolinator",
  "fluence",
- "jsonpath_lib",
+ "jsonpath_lib-fl",
  "log",
  "polyplets",
  "serde",
