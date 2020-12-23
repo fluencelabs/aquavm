@@ -48,7 +48,7 @@ jobs:
           command: update
           args: --aggressive
 
-### Calculate MAX_VERSION
+### Calculate FINAL_VERSION
       - name: Install jq & sponge
         run: sudo apt-get update && sudo apt-get --yes --force-yes install jq moreutils
 
@@ -62,7 +62,8 @@ jobs:
           JS_VERSION="$(yarn info --silent @fluencelabs/aquamarine-stepper version || true)"
           RS_VERSION="$((cargo show --json air-interpreter-wasm | jq -r .crate.max_version) 2>/dev/null || true)"
           MAX_VERSION="$(semver "$JS_VERSION" "$RS_VERSION" "0.0.0" | tail -n1)"
-          echo "MAX_VERSION=$MAX_VERSION" | tee -a $GITHUB_ENV
+          FINAL_VERSION="$(semver --increment patch "$MAX_VERSION")"
+          echo "FINAL_VERSION=$FINAL_VERSION" | tee -a $GITHUB_ENV
 
 ### === JavaScript package release ===
       - name: Install wasm-pack
@@ -115,10 +116,8 @@ jobs:
              mv pkg/package_new.json pkg/package.json
 
     ### Set version
-      - run: yarn version --new-version ${{ env.MAX_VERSION }} --no-git-tag-version
-        working-directory: pkg
-    ### Increment patch component of the version
-      - run: yarn version --patch --no-git-tag-version
+      - name: Set version to ${{ env.FINAL_VERSION }}
+        run: yarn version --new-version ${{ env.FINAL_VERSION }} --no-git-tag-version
         working-directory: pkg
 
     ### Add README so it appears on npmjs.org
@@ -147,10 +146,10 @@ jobs:
       - name: Copy aquamarine.wasm to air-interpreter-wasm
         run: cp target/wasm32-wasi/release/aquamarine.wasm crates/air-interpreter-wasm/aquamarine.wasm
 
-      - name: Set project version to MAX_VERSION
+      - name: Set project version to ${{ env.FINAL_VERSION }}
         run: |
           PATH="~/.cargo/bin:$PATH"
-          toml set Cargo.toml package.version "${{ env.MAX_VERSION }}" | sponge Cargo.toml
+          toml set Cargo.toml package.version "${{ env.FINAL_VERSION }}" | sponge Cargo.toml
         working-directory: crates/air-interpreter-wasm
 
       - name: Login to crates.io
@@ -164,9 +163,9 @@ jobs:
       - uses: marvinpinto/action-automatic-releases@latest
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "${{ env.MAX_VERSION }}"
+          automatic_release_tag: "${{ env.FINAL_VERSION }}"
           prerelease: true
-          title: "Aquamarine ${{ env.MAX_VERSION }}"
+          title: "Aquamarine ${{ env.FINAL_VERSION }}"
           files: |
             LICENSE
             target/wasm32-wasi/release/aquamarine.wasm

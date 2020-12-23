@@ -57,7 +57,7 @@ jobs:
           command: update
           args: --aggressive
 
-### Calculate MAX_VERSION
+### Calculate FINAL_VERSION
       - name: Install jq & sponge
         run: sudo apt-get update && sudo apt-get --yes --force-yes install jq moreutils
 
@@ -71,7 +71,8 @@ jobs:
           JS_VERSION="$(yarn info --silent @fluencelabs/aquamarine-stepper-${{ env.BRANCH_NAME }} version || true)"
           RS_VERSION="$((cargo show --json air-interpreter-wasm-${{ env.BRANCH_NAME }} | jq -r .crate.max_version) 2>/dev/null || true)"
           MAX_VERSION="$(semver "$JS_VERSION" "$RS_VERSION" "0.0.0" | tail -n1)"
-          echo "MAX_VERSION=$MAX_VERSION" | tee -a $GITHUB_ENV
+          FINAL_VERSION="$(semver --increment patch "$MAX_VERSION")"
+          echo "FINAL_VERSION=$FINAL_VERSION" | tee -a $GITHUB_ENV
 
 ### === JavaScript package release ===
       - name: Install wasm-pack
@@ -129,12 +130,8 @@ jobs:
       - run: yarn version --new-version 0.0.0 --no-git-tag-version
         working-directory: pkg
 
-    ### Set version to MAX_VERSION
-      - run: yarn version --new-version ${{ env.MAX_VERSION }} --no-git-tag-version || true
-        working-directory: pkg
-
-    ### Increment patch component of the version
-      - run: yarn version --patch --no-git-tag-version
+    ### Set version to FINAL_VERSION
+      - run: yarn version --new-version ${{ env.FINAL_VERSION }} --no-git-tag-version || true
         working-directory: pkg
 
       ### Add README so it appears on npmjs.org
@@ -168,10 +165,10 @@ jobs:
       - name: Copy aquamarine.wasm to air-interpreter-wasm
         run: cp target/wasm32-wasi/release/aquamarine.wasm crates/air-interpreter-wasm/aquamarine.wasm
 
-      - name: Set project version to MAX_VERSION & add branch to its name
+      - name: Set project version to ${{ env.FINAL_VERSION }}_${{ env.BRANCH_NAME }}
         run: |
           PATH="~/.cargo/bin:$PATH"
-          toml set Cargo.toml package.version "${{ env.MAX_VERSION }}" | sponge Cargo.toml
+          toml set Cargo.toml package.version "${{ env.FINAL_VERSION }}" | sponge Cargo.toml
 
           NAME=$(toml get Cargo.toml package.name | jq -r .)
           toml set Cargo.toml package.name "${NAME}_${BRANCH_NAME}" | sponge Cargo.toml
