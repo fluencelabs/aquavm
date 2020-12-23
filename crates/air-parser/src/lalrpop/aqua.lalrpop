@@ -35,12 +35,10 @@ Args: Vec<InstructionValue<'input>> = {
     "[" <args:(<Arg>)*> "]" => args
 }
 
-
 FPart: FunctionPart<'input> = {
     <f:Function> => FunctionPart::FuncName(f),
     "(" <sid:ServiceId> <f:Function> ")" => FunctionPart::ServiceIdWithFuncName(sid, f),
 }
-
 
 PeerPart: PeerPart<'input> = {
     <pid:PeerId> => PeerPart::PeerPk(pid),
@@ -71,14 +69,12 @@ InstructionValue: InstructionValue<'input> = {
     INIT_PEER_ID => InstructionValue::InitPeerId,
 }
 
-
-
 Alphanumeric = ALPHANUMERIC;
 
 match {
     r"[\w_-]+" => ALPHANUMERIC,
     r"[\w_-]+\[\]" => ACCUMULATOR,
-    r#"[\w_-]+\.*\$([\w._-]*(\[[\w"]+\])*)+"# => JSON_PATH,
+    r#"[\w_-]+\.*\$([\w._-]*(\[[\w"]+\])*!*)+"# => JSON_PATH,
     r#"%current_peer_id%"# => CURRENT_PEER_ID,
     r#"%init_peer_id%"# => INIT_PEER_ID,
     "seq",

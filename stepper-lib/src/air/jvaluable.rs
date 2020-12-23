@@ -20,6 +20,9 @@ use crate::ResolvedCallResult;
 use crate::Result;
 use crate::SecurityTetraplet;
 
+use jsonpath_lib::select;
+use jsonpath_lib::select_with_iter;
+
 use std::borrow::Cow;
 use std::ops::Deref;
 
@@ -44,7 +47,6 @@ pub(crate) trait JValuable {
 impl<'ctx> JValuable for IterableItemType<'ctx> {
     fn apply_json_path(&self, json_path: &str) -> Result<Vec<&JValue>> {
         use crate::AquamarineError::JValueJsonPathError as JsonPathError;
-        use jsonpath_lib::select;
         use IterableItemType::*;
 
         let jvalue = match self {
@@ -59,9 +61,8 @@ impl<'ctx> JValuable for IterableItemType<'ctx> {
     }
 
     fn apply_json_path_with_tetraplets(&self, json_path: &str) -> Result<(Vec<&JValue>, Vec<SecurityTetraplet>)> {
+        use super::fold::IterableItemType::*;
         use crate::AquamarineError::JValueJsonPathError as JsonPathError;
-        use jsonpath_lib::select;
-        use IterableItemType::*;
 
         let (jvalue, tetraplet) = match self {
             RefRef((jvalue, tetraplet)) => (*jvalue, *tetraplet),
@@ -112,7 +113,6 @@ impl<'ctx> JValuable for IterableItemType<'ctx> {
 impl JValuable for ResolvedCallResult {
     fn apply_json_path(&self, json_path: &str) -> Result<Vec<&JValue>> {
         use crate::AquamarineError::JValueJsonPathError as JsonPathError;
-        use jsonpath_lib::select;
 
         let selected_jvalues = select(&self.result, json_path)
             .map_err(|e| JsonPathError(self.result.deref().clone(), String::from(json_path), e))?;
@@ -121,7 +121,6 @@ impl JValuable for ResolvedCallResult {
 
     fn apply_json_path_with_tetraplets(&self, json_path: &str) -> Result<(Vec<&JValue>, Vec<SecurityTetraplet>)> {
         use crate::AquamarineError::JValueJsonPathError as JsonPathError;
-        use jsonpath_lib::select;
 
         let selected_jvalues = select(&self.result, json_path)
             .map_err(|e| JsonPathError(self.result.deref().clone(), String::from(json_path), e))?;
@@ -154,23 +153,18 @@ impl JValuable for ResolvedCallResult {
 
 impl JValuable for std::cell::Ref<'_, Vec<ResolvedCallResult>> {
     fn apply_json_path(&self, json_path: &str) -> Result<Vec<&JValue>> {
-        use jsonpath_lib::select_with_iter;
-
         let (selected_values, _) = select_with_iter(self.iter().map(|r| r.result.deref()), json_path).unwrap();
 
         Ok(selected_values)
     }
 
     fn apply_json_path_with_tetraplets(&self, json_path: &str) -> Result<(Vec<&JValue>, Vec<SecurityTetraplet>)> {
-        use jsonpath_lib::select_with_iter;
-
         let (selected_values, tetraplet_indices) =
             select_with_iter(self.iter().map(|r| r.result.deref()), json_path).unwrap();
         let tetraplets = tetraplet_indices
             .into_iter()
-            .map(|id| self[id].triplet.clone())
-            .map(|triplet| SecurityTetraplet {
-                triplet,
+            .map(|id| SecurityTetraplet {
+                triplet: self[id].triplet.clone(),
                 json_path: json_path.to_string(),
             })
             .collect::<Vec<_>>();
@@ -190,10 +184,8 @@ impl JValuable for std::cell::Ref<'_, Vec<ResolvedCallResult>> {
 
     fn as_tetraplets(&self) -> Vec<SecurityTetraplet> {
         self.iter()
-            // this cloned is needed because of rust-sdk allows passing arguments only by value
-            .map(|r| r.triplet.clone())
-            .map(|triplet| SecurityTetraplet {
-                triplet,
+            .map(|r| SecurityTetraplet {
+                triplet: r.triplet.clone(),
                 json_path: String::new(),
             })
             .collect::<Vec<_>>()

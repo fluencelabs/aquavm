@@ -118,14 +118,15 @@ fn handle_instruction_json_path<'ctx>(
                 return Ok(None);
             }
 
-            let (jvalues, tetraplet_indices) = select_with_iter(acc.iter().map(|v| v.result.deref()), &json_path)
-                .map_err(|e| JValueAccJsonPathError(acc.clone(), json_path.to_string(), e))?;
+            let acc_iter = acc.iter().map(|v| v.result.deref());
+            let (jvalues, tetraplet_indices) = select_with_iter(acc_iter, &path)
+                .map_err(|e| JValueAccJsonPathError(acc.clone(), path.to_string(), e))?;
+
             let jvalues = jvalues.into_iter().cloned().collect();
             let tetraplets = tetraplet_indices
-                .iter()
-                .map(|&id| &acc[id].triplet)
-                .map(|triplet| SecurityTetraplet {
-                    triplet: triplet.clone(),
+                .into_iter()
+                .map(|id| SecurityTetraplet {
+                    triplet: acc[id].triplet.clone(),
                     json_path: json_path.to_string(),
                 })
                 .collect::<Vec<_>>();

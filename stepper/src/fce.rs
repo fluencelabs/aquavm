@@ -36,7 +36,7 @@ use stepper_lib::execute_aqua;
 
 use log::Level as LogLevel;
 
-const RUST_LOG_ENV_NAME: &str = "RUST_LOG";
+const WASM_LOG_ENV_NAME: &str = "WASM_LOG";
 
 pub fn main() {
     logger::init_logger();
@@ -58,7 +58,7 @@ pub fn ast(script: String) -> String {
 fn get_log_level() -> LogLevel {
     use std::str::FromStr;
 
-    match std::env::var(RUST_LOG_ENV_NAME) {
+    match std::env::var(WASM_LOG_ENV_NAME) {
         Ok(log_level_str) => LogLevel::from_str(&log_level_str).unwrap_or(DEFAULT_LOG_LEVEL),
         Err(_) => DEFAULT_LOG_LEVEL,
     }
