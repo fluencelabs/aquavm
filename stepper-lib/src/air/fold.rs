@@ -15,11 +15,10 @@
  */
 
 mod iterable;
-mod jvaluable_result;
 mod utils;
 
-use iterable::*;
-pub(crate) use jvaluable_result::JValuable;
+pub(crate) use iterable::Iterable;
+pub(crate) use iterable::IterableItemType;
 
 use super::CallEvidenceCtx;
 use super::ExecutionCtx;
