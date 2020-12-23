@@ -80,6 +80,7 @@ fn handle_instruction_variable<'ctx>(
     Ok(iterable)
 }
 
+/// Constructs iterable value from resolved call result.
 fn from_call_result(call_result: ResolvedCallResult) -> Result<Option<IterableValue>> {
     use AquamarineError::IncompatibleJValueType;
 
@@ -153,6 +154,7 @@ fn apply_json_path<'jvalue, 'str>(jvalue: &'jvalue JValue, json_path: &'str str)
     select(jvalue, json_path).map_err(|e| JValueJsonPathError(jvalue.clone(), json_path.to_string(), e))
 }
 
+/// Applies json_path to provided jvalues and construct IterableValue from the result and given triplet.
 fn from_jvalues(jvalues: Vec<&JValue>, triplet: Rc<ResolvedTriplet>, json_path: &str) -> Option<IterableValue> {
     if jvalues.is_empty() {
         return None;
