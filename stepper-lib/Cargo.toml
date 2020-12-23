@@ -17,7 +17,7 @@ stepper-interface = { path = "../crates/stepper-interface" }
 serde = { version = "1.0.116", features = [ "derive", "rc" ] }
 serde_derive = "1.0.116"
 
-jsonpath_lib = { git = "https://github.com/fluencelabs/jsonpath", branch = "fluence" }
+jsonpath_lib-fl = "=0.2.6"
 
 boolinator = "2.4.0"
 log = "0.4.11"
