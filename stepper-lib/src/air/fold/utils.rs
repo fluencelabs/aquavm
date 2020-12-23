@@ -18,14 +18,19 @@ use super::iterable::*;
 use super::Iterable;
 use super::IterableItemType;
 use crate::air::ExecutionCtx;
+use crate::AValue;
 use crate::AquamarineError;
 use crate::JValue;
+use crate::ResolvedCallResult;
+use crate::ResolvedTriplet;
 use crate::Result;
 use crate::SecurityTetraplet;
-use crate::{AValue, ResolvedCallResult};
 
 use air_parser::ast::InstructionValue;
+use jsonpath_lib::select;
+use jsonpath_lib::select_with_iter;
 
+use crate::air::fold::JValuable;
 use std::ops::Deref;
 use std::rc::Rc;
 
@@ -61,19 +66,15 @@ fn handle_instruction_variable<'ctx>(
             Some(Box::new(foldable))
         }
         Some(AValue::JValueFoldCursor(fold_state)) => {
-            use IterableItemType::*;
-
             let iterable_value = fold_state.iterable.peek().unwrap();
-            let (result, triplet) = match iterable_value {
-                RefRef((jvalue, tetraplet)) => (Rc::new(jvalue.clone()), tetraplet.triplet.clone()),
-                RefValue((jvalue, tetraplet)) => (Rc::new(jvalue.clone()), tetraplet.triplet),
-                RcValue((jvalue, tetraplet)) => (jvalue.clone(), tetraplet.triplet),
-            };
+            let jvalue = iterable_value.as_jvalue();
+            let result = Rc::new(jvalue.into_owned());
+            let triplet = iterable_value.as_tetraplets().remove(0).triplet;
 
             let call_result = ResolvedCallResult { result, triplet };
             from_call_result(call_result)?
         }
-        _ => return Err(AquamarineError::VariableNotFound(variable_name.to_string()))
+        _ => return Err(AquamarineError::VariableNotFound(variable_name.to_string())),
     };
 
     Ok(iterable)
@@ -101,63 +102,68 @@ fn from_call_result(call_result: ResolvedCallResult) -> Result<Option<IterableVa
 
 fn handle_instruction_json_path<'ctx>(
     exec_ctx: &ExecutionCtx<'ctx>,
-    variable: &str,
-    path: &str,
+    variable_name: &str,
+    json_path: &str,
 ) -> Result<Option<IterableValue>> {
     use AquamarineError::JValueAccJsonPathError;
-    use AquamarineError::JValueJsonPathError;
 
-    let iterable: IterableValue = match exec_ctx.data_cache.get(variable) {
+    let iterable: Option<IterableValue> = match exec_ctx.data_cache.get(variable_name) {
         Some(AValue::JValueRef(variable)) => {
-            use jsonpath_lib::select;
-
-            let jvalues = select(&variable.result, path)
-                .map_err(|e| JValueJsonPathError(variable.result.deref().clone(), path.to_string(), e))?;
-
-            let len = jvalues.len();
-            if len == 0 {
-                return Ok(None);
-            }
-
-            let jvalues = jvalues.into_iter().cloned().collect();
-
-            let tetraplet = SecurityTetraplet {
-                triplet: variable.triplet.clone(),
-                json_path: path.to_string(),
-            };
-
-            let foldable = IterableJsonPathResult::init(jvalues, tetraplet);
-            Box::new(foldable)
+            let jvalues = apply_json_path(&variable.result, json_path)?;
+            from_jvalues(jvalues, variable.triplet.clone(), json_path)
         }
         Some(AValue::JValueAccumulatorRef(acc)) => {
-            use jsonpath_lib::select_with_iter;
-
             let acc = acc.borrow();
             if acc.is_empty() {
                 return Ok(None);
             }
 
-            let (jvalues, tetraplet_indices) = select_with_iter(acc.iter().map(|v| v.result.deref()), &path)
-                .map_err(|e| JValueAccJsonPathError(acc.clone(), path.to_string(), e))?;
+            let (jvalues, tetraplet_indices) = select_with_iter(acc.iter().map(|v| v.result.deref()), &json_path)
+                .map_err(|e| JValueAccJsonPathError(acc.clone(), json_path.to_string(), e))?;
             let jvalues = jvalues.into_iter().cloned().collect();
             let tetraplets = tetraplet_indices
                 .iter()
                 .map(|&id| &acc[id].triplet)
                 .map(|triplet| SecurityTetraplet {
                     triplet: triplet.clone(),
-                    json_path: path.to_string(),
+                    json_path: json_path.to_string(),
                 })
                 .collect::<Vec<_>>();
 
             let foldable = IterableVecJsonPathResult::init(jvalues, tetraplets);
-            Box::new(foldable)
+            Some(Box::new(foldable))
         }
-        _ => {
-            return Err(AquamarineError::InstructionError(String::from(
-                "At now, it isn't possible to use fold iterator in other folds",
-            )))
+        Some(AValue::JValueFoldCursor(fold_state)) => {
+            let iterable_value = fold_state.iterable.peek().unwrap();
+            let (jvalues, mut tetraplets) = iterable_value.apply_json_path_with_tetraplets(json_path)?;
+            let triplet = tetraplets.remove(0).triplet;
+
+            from_jvalues(jvalues, triplet, json_path)
         }
+        _ => return Err(AquamarineError::VariableNotFound(variable_name.to_string())),
     };
 
-    Ok(Some(iterable))
+    Ok(iterable)
+}
+
+fn apply_json_path<'jvalue, 'str>(jvalue: &'jvalue JValue, json_path: &'str str) -> Result<Vec<&'jvalue JValue>> {
+    use AquamarineError::JValueJsonPathError;
+
+    select(jvalue, json_path).map_err(|e| JValueJsonPathError(jvalue.clone(), json_path.to_string(), e))
+}
+
+fn from_jvalues(jvalues: Vec<&JValue>, triplet: Rc<ResolvedTriplet>, json_path: &str) -> Option<IterableValue> {
+    if jvalues.is_empty() {
+        return None;
+    }
+
+    let jvalues = jvalues.into_iter().cloned().collect();
+
+    let tetraplet = SecurityTetraplet {
+        triplet,
+        json_path: json_path.to_string(),
+    };
+
+    let foldable = IterableJsonPathResult::init(jvalues, tetraplet);
+    Some(Box::new(foldable))
 }
