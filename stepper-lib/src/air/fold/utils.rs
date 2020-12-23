@@ -18,6 +18,7 @@ use super::iterable::*;
 use super::Iterable;
 use super::IterableItemType;
 use crate::air::ExecutionCtx;
+use crate::air::JValuable;
 use crate::AValue;
 use crate::AquamarineError;
 use crate::JValue;
@@ -30,7 +31,6 @@ use air_parser::ast::InstructionValue;
 use jsonpath_lib::select;
 use jsonpath_lib::select_with_iter;
 
-use crate::air::fold::JValuable;
 use std::ops::Deref;
 use std::rc::Rc;
 
@@ -120,8 +120,8 @@ fn handle_instruction_json_path<'ctx>(
             }
 
             let acc_iter = acc.iter().map(|v| v.result.deref());
-            let (jvalues, tetraplet_indices) = select_with_iter(acc_iter, &path)
-                .map_err(|e| JValueAccJsonPathError(acc.clone(), path.to_string(), e))?;
+            let (jvalues, tetraplet_indices) = select_with_iter(acc_iter, &json_path)
+                .map_err(|e| JValueAccJsonPathError(acc.clone(), json_path.to_string(), e))?;
 
             let jvalues = jvalues.into_iter().cloned().collect();
             let tetraplets = tetraplet_indices
