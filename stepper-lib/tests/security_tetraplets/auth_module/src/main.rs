@@ -14,15 +14,7 @@
  * limitations under the License.
  */
 
-#![allow(clippy::all)]
-
 use fluence::fce;
-
-#[fce]
-pub struct CallServiceResult {
-    pub ret_code: i32,
-    pub result: String,
-}
 
 const ADMIN_PEER_PK: &str = "12D3KooWEXNUbCXooUwHrHBbrmjsrpHXoEphPwbjQXEGyzbqKnE1";
 
@@ -34,8 +26,9 @@ struct AuthResult {
 }
 
 #[fce]
-fn is_authorized(user_peer_pk: String) -> AuthResult {
-    let is_authorized = user_peer_pk == ADMIN_PEER_PK;
+fn is_authorized() -> AuthResult {
+    let call_parameters = fluence::get_call_parameters();
+    let is_authorized = call_parameters.init_peer_id == ADMIN_PEER_PK;
 
     AuthResult {
         is_authorized: is_authorized.into(),

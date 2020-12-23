@@ -16,16 +16,10 @@
 
 use fluence::fce;
 
-#[fce]
-pub struct CallServiceResult {
-    pub ret_code: i32,
-    pub result: String,
-}
-
 fn main() {}
 
 #[fce]
-fn delete(is_authorized: Vec<i32>, _record_id: String) -> String {
+fn delete(is_authorized: bool, _record_id: String) -> String {
     let call_parameters = fluence::get_call_parameters();
     let tetraplets = call_parameters.tetraplets;
     let tetraplet = &tetraplets[0];
@@ -34,8 +28,9 @@ fn delete(is_authorized: Vec<i32>, _record_id: String) -> String {
         return String::from("invalid json path in tetraplet");
     }
 
-    match is_authorized[0] {
-        1 => String::from("Ok"),
-        _ => String::from("not authorized"),
+    if is_authorized {
+        String::from("Ok")
+    } else {
+        String::from("not authorized")
     }
 }
