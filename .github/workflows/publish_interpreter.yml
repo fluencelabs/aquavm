@@ -62,7 +62,7 @@ jobs:
           JS_VERSION="$(yarn info --silent @fluencelabs/aquamarine-stepper version || true)"
           RS_VERSION="$((cargo show --json air-interpreter-wasm | jq -r .crate.max_version) 2>/dev/null || true)"
           MAX_VERSION="$(semver "$JS_VERSION" "$RS_VERSION" "0.0.0" | tail -n1)"
-          FINAL_VERSION"$(semver --increment patch "$MAX_VERSION")"
+          FINAL_VERSION="$(semver --increment patch "$MAX_VERSION")"
           echo "FINAL_VERSION=$FINAL_VERSION" | tee -a $GITHUB_ENV
 
 ### === JavaScript package release ===
