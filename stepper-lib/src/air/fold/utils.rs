@@ -18,15 +18,16 @@ use super::iterable::*;
 use super::Iterable;
 use super::IterableItemType;
 use crate::air::ExecutionCtx;
-use crate::AValue;
 use crate::AquamarineError;
 use crate::JValue;
 use crate::Result;
 use crate::SecurityTetraplet;
+use crate::{AValue, ResolvedCallResult};
 
 use air_parser::ast::InstructionValue;
 
 use std::ops::Deref;
+use std::rc::Rc;
 
 pub(super) type IterableValue = Box<dyn for<'ctx> Iterable<'ctx, Item = IterableItemType<'ctx>>>;
 
@@ -39,7 +40,7 @@ pub(super) fn construct_iterable_value<'ctx>(
     match value {
         InstructionValue::Variable(name) => handle_instruction_variable(exec_ctx, name),
         InstructionValue::JsonPath { variable, path } => handle_instruction_json_path(exec_ctx, variable, path),
-        _ => unreachable!("it's statically checked that other types of iterable value aren't possible here"),
+        _ => unreachable!("it will be statically checked that other types of iterable value aren't possible here"),
     }
 }
 
@@ -47,24 +48,8 @@ fn handle_instruction_variable<'ctx>(
     exec_ctx: &ExecutionCtx<'ctx>,
     variable_name: &str,
 ) -> Result<Option<IterableValue>> {
-    use AquamarineError::IncompatibleJValueType;
-
-    let iterable: IterableValue = match exec_ctx.data_cache.get(variable_name) {
-        Some(AValue::JValueRef(call_result)) => {
-            let len = match &call_result.result.deref() {
-                JValue::Array(array) => {
-                    if array.is_empty() {
-                        // skip fold if array is empty
-                        return Ok(None);
-                    }
-                    array.len()
-                }
-                v => return Err(IncompatibleJValueType((*v).clone(), "array")),
-            };
-
-            let foldable = IterableResolvedCall::init(call_result.clone(), len);
-            Box::new(foldable)
-        }
+    let iterable: Option<IterableValue> = match exec_ctx.data_cache.get(variable_name) {
+        Some(AValue::JValueRef(call_result)) => from_call_result(call_result.clone())?,
         Some(AValue::JValueAccumulatorRef(acc)) => {
             let acc = acc.borrow();
             if acc.is_empty() {
@@ -73,16 +58,45 @@ fn handle_instruction_variable<'ctx>(
 
             let call_results = acc.iter().cloned().collect::<Vec<_>>();
             let foldable = IterableVecResolvedCall::init(call_results);
-            Box::new(foldable)
+            Some(Box::new(foldable))
         }
-        _ => {
-            return Err(AquamarineError::InstructionError(String::from(
-                "At now, it isn't possible to use fold iterator in other folds",
-            )))
+        Some(AValue::JValueFoldCursor(fold_state)) => {
+            use IterableItemType::*;
+
+            let iterable_value = fold_state.iterable.peek().unwrap();
+            let (result, triplet) = match iterable_value {
+                RefRef((jvalue, tetraplet)) => (Rc::new(jvalue.clone()), tetraplet.triplet.clone()),
+                RefValue((jvalue, tetraplet)) => (Rc::new(jvalue.clone()), tetraplet.triplet),
+                RcValue((jvalue, tetraplet)) => (jvalue.clone(), tetraplet.triplet),
+            };
+
+            let call_result = ResolvedCallResult { result, triplet };
+            from_call_result(call_result)?
         }
+        _ => return Err(AquamarineError::VariableNotFound(variable_name.to_string()))
     };
 
-    Ok(Some(iterable))
+    Ok(iterable)
+}
+
+fn from_call_result(call_result: ResolvedCallResult) -> Result<Option<IterableValue>> {
+    use AquamarineError::IncompatibleJValueType;
+
+    let len = match &call_result.result.deref() {
+        JValue::Array(array) => {
+            if array.is_empty() {
+                // skip fold if array is empty
+                return Ok(None);
+            }
+            array.len()
+        }
+        v => return Err(IncompatibleJValueType((*v).clone(), "array")),
+    };
+
+    let foldable = IterableResolvedCall::init(call_result, len);
+    let foldable = Box::new(foldable);
+
+    Ok(Some(foldable))
 }
 
 fn handle_instruction_json_path<'ctx>(
