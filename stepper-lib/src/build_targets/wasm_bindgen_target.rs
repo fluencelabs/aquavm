@@ -35,12 +35,14 @@ pub(crate) fn get_current_peer_id() -> std::result::Result<String, VarError> {
 
 #[wasm_bindgen]
 extern "C" {
+    #[allow(unused_attributes)]
     #[link_name = "get_current_peer_id"]
     fn get_current_peer_id_impl() -> String;
 }
 
-#[wasm_bindgen(raw_module = "../src/call_service.ts")]
+#[wasm_bindgen]
 extern "C" {
+    #[allow(unused_attributes)]
     #[link_name = "call_service"]
     fn call_service_impl(service_id: String, fn_name: String, args: String, security_tetraplets: String) -> String;
 }

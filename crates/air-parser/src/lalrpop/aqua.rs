@@ -1,5 +1,5 @@
 // auto-generated: "lalrpop 0.19.1"
-// sha256: 8a23b63f12c69777912912dcebc44de81f6034fe4572d97d583bd4533c7d1
+// sha256: 28e49a3d2dd29ac97678a166f8a0d8c6e0b6e7e83484e8abfe5efefcebc7034
 use crate::ast::*;
 use crate::lalrpop::parser::InstructionError;
 use lalrpop_util::ErrorRecovery;
