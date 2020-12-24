@@ -16,7 +16,7 @@
 
 use super::iterable::*;
 use super::Iterable;
-use super::IterableItemType;
+use super::IterableItem;
 use crate::air::ExecutionCtx;
 use crate::air::JValuable;
 use crate::AValue;
@@ -34,7 +34,7 @@ use jsonpath_lib::select_with_iter;
 use std::ops::Deref;
 use std::rc::Rc;
 
-pub(super) type IterableValue = Box<dyn for<'ctx> Iterable<'ctx, Item = IterableItemType<'ctx>>>;
+pub(super) type IterableValue = Box<dyn for<'ctx> Iterable<'ctx, Item = IterableItem<'ctx>>>;
 
 /// Constructs iterable value for given instruction value,
 /// return Some if iterable isn't empty and None otherwise.
@@ -69,7 +69,7 @@ fn handle_instruction_variable<'ctx>(
             let iterable_value = fold_state.iterable.peek().unwrap();
             let jvalue = iterable_value.as_jvalue();
             let result = Rc::new(jvalue.into_owned());
-            let triplet = iterable_value.as_tetraplets().remove(0).triplet;
+            let triplet = as_triplet(&iterable_value);
 
             let call_result = ResolvedCallResult { result, triplet };
             from_call_result(call_result)?
@@ -137,8 +137,8 @@ fn handle_instruction_json_path<'ctx>(
         }
         Some(AValue::JValueFoldCursor(fold_state)) => {
             let iterable_value = fold_state.iterable.peek().unwrap();
-            let (jvalues, mut tetraplets) = iterable_value.apply_json_path_with_tetraplets(json_path)?;
-            let triplet = tetraplets.remove(0).triplet;
+            let jvalues = iterable_value.apply_json_path(json_path)?;
+            let triplet = as_triplet(&iterable_value);
 
             from_jvalues(jvalues, triplet, json_path)
         }
@@ -169,4 +169,15 @@ fn from_jvalues(jvalues: Vec<&JValue>, triplet: Rc<ResolvedTriplet>, json_path: 
 
     let foldable = IterableJsonPathResult::init(jvalues, tetraplet);
     Some(Box::new(foldable))
+}
+
+fn as_triplet(iterable: &IterableItem<'_>) -> Rc<ResolvedTriplet> {
+    use IterableItem::*;
+
+    // clone is cheap here, because triplet is under Rc
+    match iterable {
+        RefRef((_, tetraplet)) => tetraplet.triplet.clone(),
+        RefValue((_, tetraplet)) => tetraplet.triplet.clone(),
+        RcValue((_, tetraplet)) => tetraplet.triplet.clone(),
+    }
 }

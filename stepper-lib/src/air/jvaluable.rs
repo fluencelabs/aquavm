@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use crate::air::fold::IterableItemType;
+use crate::air::fold::IterableItem;
 use crate::JValue;
 use crate::ResolvedCallResult;
 use crate::Result;
@@ -44,10 +44,10 @@ pub(crate) trait JValuable {
     fn as_tetraplets(&self) -> Vec<SecurityTetraplet>;
 }
 
-impl<'ctx> JValuable for IterableItemType<'ctx> {
+impl<'ctx> JValuable for IterableItem<'ctx> {
     fn apply_json_path(&self, json_path: &str) -> Result<Vec<&JValue>> {
         use crate::AquamarineError::JValueJsonPathError as JsonPathError;
-        use IterableItemType::*;
+        use IterableItem::*;
 
         let jvalue = match self {
             RefRef((jvalue, _)) => *jvalue,
@@ -61,7 +61,7 @@ impl<'ctx> JValuable for IterableItemType<'ctx> {
     }
 
     fn apply_json_path_with_tetraplets(&self, json_path: &str) -> Result<(Vec<&JValue>, Vec<SecurityTetraplet>)> {
-        use super::fold::IterableItemType::*;
+        use super::fold::IterableItem::*;
         use crate::AquamarineError::JValueJsonPathError as JsonPathError;
 
         let (jvalue, tetraplet) = match self {
@@ -76,7 +76,7 @@ impl<'ctx> JValuable for IterableItemType<'ctx> {
     }
 
     fn as_jvalue(&self) -> Cow<'_, JValue> {
-        use IterableItemType::*;
+        use IterableItem::*;
 
         match self {
             RefRef((jvalue, _)) => Cow::Borrowed(jvalue),
@@ -86,7 +86,7 @@ impl<'ctx> JValuable for IterableItemType<'ctx> {
     }
 
     fn into_jvalue(self: Box<Self>) -> JValue {
-        use IterableItemType::*;
+        use IterableItem::*;
 
         match *self {
             RefRef((jvalue, _)) => jvalue.deref().clone(),
@@ -96,7 +96,7 @@ impl<'ctx> JValuable for IterableItemType<'ctx> {
     }
 
     fn as_tetraplets(&self) -> Vec<SecurityTetraplet> {
-        use IterableItemType::*;
+        use IterableItem::*;
 
         // these clones are needed because rust-sdk allows passing arguments only by value
         match self {
