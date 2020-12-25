@@ -42,11 +42,17 @@ pub(super) fn construct_iterable_value<'ctx>(
     value: &InstructionValue<'ctx>,
     exec_ctx: &ExecutionCtx<'ctx>,
 ) -> Result<Option<IterableValue>> {
+    use AquamarineError::AIRParseError;
+
     match value {
         InstructionValue::Variable(name) => handle_instruction_variable(exec_ctx, name),
         InstructionValue::JsonPath { variable, path } => handle_instruction_json_path(exec_ctx, variable, path),
         // TODO: check statically that it isn't possible to use string literals and so on as fold iterable
-        _ => unreachable!("it will be statically checked that other types of iterable value aren't possible here"),
+        _ => {
+            return Err(AIRParseError(String::from(
+                "only variables could be used as fold iterables",
+            )))
+        }
     }
 }
 
