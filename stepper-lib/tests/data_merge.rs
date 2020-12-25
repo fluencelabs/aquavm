@@ -45,12 +45,12 @@ fn data_merge() {
 
     let script = String::from(
         r#"
-        (seq 
-            (call "A" ("neighborhood" "") [] neighborhood)
-            (seq 
-                (seq 
+        (seq
+            (call %init_peer_id% ("neighborhood" "") [] neighborhood)
+            (seq
+                (seq
                     (fold neighborhood i
-                        (par 
+                        (par
                             (call i ("add_provider" "") [] void[])
                             (next i)
                         )
@@ -71,8 +71,9 @@ fn data_merge() {
         "#,
     );
 
-    let res1 = call_vm!(vm1, "asd", script.clone(), "[]", "[]");
-    let res2 = call_vm!(vm2, "asd", script.clone(), "[]", "[]");
+    // little hack here with init_peer_id to execute the first call from both VMs
+    let res1 = call_vm!(vm1, "A", script.clone(), "[]", "[]");
+    let res2 = call_vm!(vm2, "B", script.clone(), "[]", "[]");
     let res3 = call_vm!(vm1, "asd", script.clone(), res1.data.clone(), res2.data.clone());
     let res4 = call_vm!(vm2, "asd", script, res1.data.clone(), res2.data.clone());
 
