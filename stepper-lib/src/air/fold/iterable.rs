@@ -39,8 +39,9 @@ pub(crate) trait Iterable<'ctx> {
 }
 
 /// Combines all possible iterable item types.
-/// iterable item is the variable that `fold` sets to each element of the collection it iterates through, 
-/// i.e., it is the `iterable` in the `(fold collection iterable instruction)` statement
+///
+/// Iterable item is a variable that `fold` sets to each element of the collection it iterates
+/// through, i.e., it is the `iterable` in the `(fold collection iterable instruction)` statement.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) enum IterableItem<'ctx> {
     RefRef((&'ctx JValue, &'ctx SecurityTetraplet)),

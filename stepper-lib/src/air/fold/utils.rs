@@ -45,6 +45,7 @@ pub(super) fn construct_iterable_value<'ctx>(
     match value {
         InstructionValue::Variable(name) => handle_instruction_variable(exec_ctx, name),
         InstructionValue::JsonPath { variable, path } => handle_instruction_json_path(exec_ctx, variable, path),
+        // TODO: check statically that it isn't possible to use string literals and so on as fold iterable
         _ => unreachable!("it will be statically checked that other types of iterable value aren't possible here"),
     }
 }
