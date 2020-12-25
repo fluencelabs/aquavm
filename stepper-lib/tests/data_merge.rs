@@ -46,7 +46,7 @@ fn data_merge() {
     let script = String::from(
         r#"
         (seq 
-            (call %current_peer_id% ("neighborhood" "") [] neighborhood)
+            (call "A" ("neighborhood" "") [] neighborhood)
             (seq 
                 (seq 
                     (fold neighborhood i
@@ -78,7 +78,7 @@ fn data_merge() {
 
     let resulted_json1: JValue = serde_json::from_slice(&res1.data).expect("stepper should return valid json");
 
-    let right_json1 = json!( [
+    let expected_json1 = json!( [
         { "call": { "executed": ["A", "B"] } },
         { "par": [1,2] },
         { "call": { "executed": ["A", "B"] } },
@@ -92,12 +92,12 @@ fn data_merge() {
         { "call": { "request_sent": "A" } },
     ]);
 
-    assert_eq!(resulted_json1, right_json1);
+    assert_eq!(resulted_json1, expected_json1);
     assert_eq!(res1.next_peer_pks, vec![String::from("B")]);
 
     let resulted_json2: JValue = serde_json::from_slice(&res2.data).expect("stepper should return valid json");
 
-    let right_json2 = json!( [
+    let expected_json2 = json!( [
         { "call": { "executed": ["A", "B"] } },
         { "par": [1,2] },
         { "call": { "request_sent": "B" } },
@@ -110,12 +110,12 @@ fn data_merge() {
         { "call": { "request_sent": "B" } },
     ]);
 
-    assert_eq!(resulted_json2, right_json2);
+    assert_eq!(resulted_json2, expected_json2);
     assert_eq!(res2.next_peer_pks, vec![String::from("A")]);
 
     let resulted_json3: JValue = serde_json::from_slice(&res3.data).expect("stepper should return valid json");
 
-    let right_json3 = json!( [
+    let expected_json3 = json!( [
         { "call": { "executed": ["A", "B"] } },
         { "par": [1,2] },
         { "call": { "executed": ["A", "B"] } },
@@ -129,12 +129,12 @@ fn data_merge() {
         { "call": { "request_sent": "A" } },
     ]);
 
-    assert_eq!(resulted_json3, right_json3);
+    assert_eq!(resulted_json3, expected_json3);
     assert!(res3.next_peer_pks.is_empty());
 
     let resulted_json4: JValue = serde_json::from_slice(&res4.data).expect("stepper should return valid json");
 
-    let right_json4 = json!( [
+    let expected_json4 = json!( [
         { "call": { "executed": ["A", "B"] } },
         { "par": [1,2] },
         { "call": { "executed": ["A", "B"] } },
@@ -148,7 +148,7 @@ fn data_merge() {
         { "call": { "executed": ["A", "B"] } },
     ]);
 
-    assert_eq!(resulted_json4, right_json4);
+    assert_eq!(resulted_json4, expected_json4);
     assert!(res4.next_peer_pks.is_empty());
 }
 

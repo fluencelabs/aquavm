@@ -37,7 +37,6 @@ pub(crate) fn resolve_to_args<'i>(
     }
 
     match value {
-        InstructionValue::CurrentPeerId => handle_string_arg(ctx.current_peer_id.as_str(), ctx),
         InstructionValue::InitPeerId => handle_string_arg(ctx.init_peer_id.as_str(), ctx),
         InstructionValue::Literal(value) => handle_string_arg(value, ctx),
         InstructionValue::Variable(name) => {

@@ -195,14 +195,16 @@ mod tests {
 
     #[test]
     fn par_local_remote() {
-        let mut vm = create_aqua_vm(unit_call_service(), "");
+        let local_peer_id = "local_peer_id";
+        let mut vm = create_aqua_vm(unit_call_service(), local_peer_id);
 
-        let script = String::from(
+        let script = format!(
             r#"
             (par 
-                (call %current_peer_id% ("local_service_id" "local_fn_name") [] result_name)
+                (call "{}" ("local_service_id" "local_fn_name") [] result_name)
                 (call "remote_peer_id_2" ("service_id" "fn_name") [] g)
             )"#,
+            local_peer_id
         );
 
         let res = call_vm!(vm, "", script, "[]", "[]");

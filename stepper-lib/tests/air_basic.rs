@@ -36,15 +36,16 @@ fn seq_par_call() {
     let vm_peer_id = String::from("some_peer_id");
     let mut vm = create_aqua_vm(unit_call_service(), vm_peer_id.clone());
 
-    let script = String::from(
+    let script = format!(
         r#"
         (seq 
             (par 
-                (call %current_peer_id% ("local_service_id" "local_fn_name") [] result_1)
+                (call "{0}" ("local_service_id" "local_fn_name") [] result_1)
                 (call "remote_peer_id" ("service_id" "fn_name") [] g)
             )
-            (call %current_peer_id% ("local_service_id" "local_fn_name") [] result_2)
+            (call "{0}" ("local_service_id" "local_fn_name") [] result_2)
         )"#,
+        vm_peer_id
     );
 
     let res = call_vm!(vm, "asd", script, "[]", "[]");
@@ -52,14 +53,14 @@ fn seq_par_call() {
         serde_json::from_slice(&res.data).expect("stepper should return valid json");
 
     let test_string = String::from("test");
-    let right_path = vec![
+    let expected_path = vec![
         Par(1, 1),
         Call(Executed(Rc::new(JValue::String(test_string.clone())))),
         Call(RequestSent(vm_peer_id)),
         Call(Executed(Rc::new(JValue::String(test_string.clone())))),
     ];
 
-    assert_eq!(resulted_path, right_path);
+    assert_eq!(resulted_path, expected_path);
     assert_eq!(res.next_peer_pks, vec![String::from("remote_peer_id")]);
 }
 
@@ -71,15 +72,16 @@ fn par_par_call() {
     let vm_peer_id = String::from("some_peer_id");
     let mut vm = create_aqua_vm(unit_call_service(), vm_peer_id.clone());
 
-    let script = String::from(
+    let script = format!(
         r#"
         (par
             (par
-                (call %current_peer_id% ("local_service_id" "local_fn_name") [] result_1)
+                (call "{0}" ("local_service_id" "local_fn_name") [] result_1)
                 (call "remote_peer_id" ("service_id" "fn_name") [] g)
             )
-            (call %current_peer_id% ("local_service_id" "local_fn_name") [] result_2)
+            (call "{0}" ("local_service_id" "local_fn_name") [] result_2)
         )"#,
+        vm_peer_id,
     );
 
     let res = call_vm!(vm, "asd", script, "[]", "[]");
@@ -87,7 +89,7 @@ fn par_par_call() {
         serde_json::from_slice(&res.data).expect("stepper should return valid json");
 
     let test_string = String::from("test");
-    let right_path = vec![
+    let expected_path = vec![
         Par(3, 1),
         Par(1, 1),
         Call(Executed(Rc::new(JValue::String(test_string.clone())))),
@@ -95,7 +97,7 @@ fn par_par_call() {
         Call(Executed(Rc::new(JValue::String(test_string.clone())))),
     ];
 
-    assert_eq!(resulted_path, right_path);
+    assert_eq!(resulted_path, expected_path);
     assert_eq!(res.next_peer_pks, vec![String::from("remote_peer_id")]);
 }
 
@@ -162,7 +164,7 @@ fn create_service() {
     let add_blueprint_response = String::from("add_blueprint response");
     let create_response = String::from("create response");
     let resulted_path: Vec<EvidenceState> = serde_json::from_slice(&res.data).expect("should be a correct json");
-    let right_path = vec![
+    let expected_path = vec![
         Call(Executed(Rc::new(module_bytes))),
         Call(Executed(Rc::new(module_config))),
         Call(Executed(Rc::new(blueprint))),
@@ -172,6 +174,6 @@ fn create_service() {
         Call(RequestSent(String::from("A"))),
     ];
 
-    assert_eq!(resulted_path, right_path);
+    assert_eq!(resulted_path, expected_path);
     assert_eq!(res.next_peer_pks, vec![String::from("remote_peer_id")]);
 }

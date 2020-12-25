@@ -238,16 +238,21 @@ fn parse_fold_with_xor_par_seq() {
 }
 
 #[test]
-fn parse_current_init_peer_id() {
-    let source_code = r#"
+fn parse_init_peer_id() {
+    let peer_id = String::from("some_peer_id");
+    let source_code = format!(
+        r#"
         (seq
-            (call %current_peer_id% ("local_service_id" "local_fn_name") [])
+            (call "{}" ("local_service_id" "local_fn_name") [])
             (call %init_peer_id% ("service_id" "fn_name") [])
-        )"#;
+        )"#,
+        peer_id
+    );
+
     let instruction = parse(&source_code.as_ref());
     let expected = seq(
         Instruction::Call(Call {
-            peer_part: PeerPk(CurrentPeerId),
+            peer_part: PeerPk(InstructionValue::Literal(&peer_id)),
             function_part: ServiceIdWithFuncName(
                 Literal("local_service_id"),
                 Literal("local_fn_name"),
@@ -262,24 +267,30 @@ fn parse_current_init_peer_id() {
             output: None,
         }),
     );
+
     assert_eq!(instruction, expected);
 }
 
 #[test]
 fn seq_par_call() {
-    let source_code = r#"
+    let peer_id = String::from("some_peer_id");
+    let source_code = format!(
+        r#"
         (seq 
             (par 
-                (call %current_peer_id% ("local_service_id" "local_fn_name") [] result_1)
-                (call "remote_peer_id" ("service_id" "fn_name") [] g)
+                (call "{0}" ("local_service_id" "local_fn_name") [] result_1)
+                (call "{0}" ("service_id" "fn_name") [] g)
             )
-            (call %current_peer_id% ("local_service_id" "local_fn_name") [] result_2)
-        )"#;
+            (call "{0}" ("local_service_id" "local_fn_name") [] result_2)
+        )"#,
+        peer_id,
+    );
+
     let instruction = parse(&source_code.as_ref());
     let expected = seq(
         par(
             Instruction::Call(Call {
-                peer_part: PeerPk(CurrentPeerId),
+                peer_part: PeerPk(InstructionValue::Literal(&peer_id)),
                 function_part: ServiceIdWithFuncName(
                     Literal("local_service_id"),
                     Literal("local_fn_name"),
@@ -288,14 +299,14 @@ fn seq_par_call() {
                 output: Scalar("result_1"),
             }),
             Instruction::Call(Call {
-                peer_part: PeerPk(Literal("remote_peer_id")),
+                peer_part: PeerPk(Literal(&peer_id)),
                 function_part: ServiceIdWithFuncName(Literal("service_id"), Literal("fn_name")),
                 args: Rc::new(vec![]),
                 output: Scalar("g"),
             }),
         ),
         Instruction::Call(Call {
-            peer_part: PeerPk(CurrentPeerId),
+            peer_part: PeerPk(InstructionValue::Literal(&peer_id)),
             function_part: ServiceIdWithFuncName(
                 Literal("local_service_id"),
                 Literal("local_fn_name"),
@@ -304,6 +315,7 @@ fn seq_par_call() {
             output: Scalar("result_2"),
         }),
     );
+
     assert_eq!(instruction, expected);
 }
 

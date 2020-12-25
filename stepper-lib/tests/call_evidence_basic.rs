@@ -33,17 +33,19 @@ fn evidence_seq_par_call() {
     use stepper_lib::CallResult::*;
     use stepper_lib::EvidenceState::{self, *};
 
-    let mut vm = create_aqua_vm(unit_call_service(), "");
+    let local_peer_id = "local_peer_id";
+    let mut vm = create_aqua_vm(unit_call_service(), local_peer_id);
 
-    let script = String::from(
+    let script = format!(
         r#"
         (seq
             (par
-                (call %current_peer_id% ("local_service_id" "local_fn_name") [] result_1)
+                (call "{0}" ("local_service_id" "local_fn_name") [] result_1)
                 (call "remote_peer_id" ("service_id" "fn_name") [] g)
             )
-            (call %current_peer_id% ("local_service_id" "local_fn_name") [] result_2)
+            (call "{0}" ("local_service_id" "local_fn_name") [] result_2)
         )"#,
+        local_peer_id
     );
 
     let initial_state = json!([
@@ -58,14 +60,14 @@ fn evidence_seq_par_call() {
         serde_json::from_slice(&res.data).expect("stepper should return valid json");
 
     let test_string = String::from("test");
-    let right_path = vec![
+    let expected_path = vec![
         Par(1, 1),
         Call(Executed(Rc::new(JValue::String(test_string.clone())))),
         Call(Executed(Rc::new(JValue::String(test_string.clone())))),
         Call(Executed(Rc::new(JValue::String(test_string)))),
     ];
 
-    assert_eq!(resulted_path, right_path);
+    assert_eq!(resulted_path, expected_path);
     assert!(res.next_peer_pks.is_empty());
 }
 
@@ -74,17 +76,19 @@ fn evidence_par_par_call() {
     use stepper_lib::CallResult::*;
     use stepper_lib::EvidenceState::{self, *};
 
-    let mut vm = create_aqua_vm(unit_call_service(), "some_peer_id");
+    let local_peer_id = "local_peer_id";
+    let mut vm = create_aqua_vm(unit_call_service(), local_peer_id);
 
-    let script = String::from(
+    let script = format!(
         r#"
         (par
             (par
-                (call "some_peer_id" ("local_service_id" "local_fn_name") [] result_1)
+                (call "local_peer_id" ("local_service_id" "local_fn_name") [] result_1)
                 (call "remote_peer_id" ("service_id" "fn_name") [] g)
             )
-            (call %current_peer_id% ("local_service_id" "local_fn_name") [] result_2)
+            (call "{}" ("local_service_id" "local_fn_name") [] result_2)
         )"#,
+        local_peer_id,
     );
 
     let initial_state = json!([
@@ -100,15 +104,15 @@ fn evidence_par_par_call() {
         serde_json::from_slice(&res.data).expect("stepper should return valid json");
 
     let test_string = String::from("test");
-    let right_path = vec![
+    let expected_path = vec![
         Par(3, 1),
         Par(1, 1),
         Call(Executed(Rc::new(JValue::String(test_string.clone())))),
-        Call(RequestSent(String::from("some_peer_id"))),
+        Call(RequestSent(local_peer_id.to_string())),
         Call(Executed(Rc::new(JValue::String(test_string)))),
     ];
 
-    assert_eq!(resulted_path, right_path);
+    assert_eq!(resulted_path, expected_path);
     assert_eq!(res.next_peer_pks, vec![String::from("remote_peer_id")]);
 }
 
@@ -147,13 +151,13 @@ fn evidence_seq_seq() {
         serde_json::from_slice(&res.data).expect("stepper should return valid json");
 
     let test_string = String::from("test");
-    let right_path = vec![
+    let expected_path = vec![
         Call(Executed(Rc::new(JValue::String(test_string.clone())))),
         Call(Executed(Rc::new(JValue::String(test_string.clone())))),
         Call(Executed(Rc::new(JValue::String(test_string)))),
     ];
 
-    assert_eq!(resulted_path, right_path);
+    assert_eq!(resulted_path, expected_path);
 }
 
 #[test]
@@ -271,7 +275,7 @@ fn evidence_par_seq_fold_call() {
     let res = call_vm!(vm3, "asd", script, "[]", data);
     let resulted_path: JValue = serde_json::from_slice(&res.data).expect("a valid json");
 
-    let right_json = json!( [
+    let expected_json = json!( [
         { "par": [21,1] },
         { "call": { "executed": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"] } },
         { "par": [1,18] },
@@ -297,7 +301,7 @@ fn evidence_par_seq_fold_call() {
         { "call": { "executed": "test" } },
     ]);
 
-    assert_eq!(resulted_path, right_json);
+    assert_eq!(resulted_path, expected_json);
     assert!(res.next_peer_pks.is_empty());
 }
 
@@ -346,7 +350,7 @@ fn evidence_par_seq_fold_in_cycle_call() {
 
     let resulted_json: JValue = serde_json::from_slice(&data).expect("stepper should return valid json");
 
-    let right_json = json!( [
+    let expected_json = json!( [
         { "par": [21,1] },
         { "call": { "executed": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"] } },
         { "par": [1,18] },
@@ -372,7 +376,7 @@ fn evidence_par_seq_fold_in_cycle_call() {
         { "call": { "executed": "test" } },
     ]);
 
-    assert_eq!(resulted_json, right_json);
+    assert_eq!(resulted_json, expected_json);
 }
 
 #[test]
@@ -410,7 +414,7 @@ fn evidence_seq_par_seq_seq() {
 
     let resulted_json: JValue = serde_json::from_slice(&res.data).expect("stepper should return valid json");
 
-    let right_json = json!( [
+    let expected_json = json!( [
         { "par": [2,2] },
         { "call": {"executed" : "test" } },
         { "call": {"executed" : "test" } },
@@ -419,6 +423,6 @@ fn evidence_seq_par_seq_seq() {
         { "call": {"executed" : "test" } },
     ]);
 
-    assert_eq!(resulted_json, right_json);
+    assert_eq!(resulted_json, expected_json);
     assert!(res.next_peer_pks.is_empty());
 }

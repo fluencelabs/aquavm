@@ -81,7 +81,6 @@ fn resolve_to_string<'i>(value: &InstructionValue<'i>, ctx: &ExecutionCtx<'i>) -
     use crate::air::resolve::resolve_to_jvaluable;
 
     let resolved = match value {
-        InstructionValue::CurrentPeerId => ctx.current_peer_id.clone(),
         InstructionValue::InitPeerId => ctx.init_peer_id.clone(),
         InstructionValue::Literal(value) => value.to_string(),
         InstructionValue::Variable(name) => {
