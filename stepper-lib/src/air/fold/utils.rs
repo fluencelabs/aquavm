@@ -174,10 +174,12 @@ fn from_jvalues(jvalues: Vec<&JValue>, triplet: Rc<ResolvedTriplet>, json_path: 
 fn as_triplet(iterable: &IterableItem<'_>) -> Rc<ResolvedTriplet> {
     use IterableItem::*;
 
+    let tetraplet = match iterable {
+        RefRef((_, tetraplet)) => tetraplet,
+        RefValue((_, tetraplet)) => tetraplet,
+        RcValue((_, tetraplet)) => tetraplet,
+    };
+
     // clone is cheap here, because triplet is under Rc
-    match iterable {
-        RefRef((_, tetraplet)) => tetraplet.triplet.clone(),
-        RefValue((_, tetraplet)) => tetraplet.triplet.clone(),
-        RcValue((_, tetraplet)) => tetraplet.triplet.clone(),
-    }
+    Rc::clone(&tetraplet.triplet)
 }
