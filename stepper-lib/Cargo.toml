@@ -28,7 +28,7 @@ wasm-bindgen = "=0.2.65"
 
 [dev_dependencies]
 aqua-test-utils = { path = "../crates/test-utils" }
-fluence-app-service = "=0.1.17"
+fluence-app-service = "=0.1.18"
 
 criterion = "0.3.3"
 csv = "1.1.5"

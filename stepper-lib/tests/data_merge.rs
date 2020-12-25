@@ -17,7 +17,7 @@
 use aqua_test_utils::call_vm;
 use aqua_test_utils::create_aqua_vm;
 use aqua_test_utils::set_variable_call_service;
-use aqua_test_utils::HostExportedFunc;
+use aqua_test_utils::CallServiceClosure;
 use aqua_test_utils::IValue;
 use aqua_test_utils::Vec1;
 
@@ -28,13 +28,13 @@ type JValue = serde_json::Value;
 
 #[test]
 fn data_merge() {
-    let neighborhood_call_service1: HostExportedFunc = Box::new(|_, _| -> Option<IValue> {
+    let neighborhood_call_service1: CallServiceClosure = Box::new(|_, _| -> Option<IValue> {
         Some(IValue::Record(
             Vec1::new(vec![IValue::S32(0), IValue::String(String::from("[\"A\", \"B\"]"))]).unwrap(),
         ))
     });
 
-    let neighborhood_call_service2: HostExportedFunc = Box::new(|_, _| -> Option<IValue> {
+    let neighborhood_call_service2: CallServiceClosure = Box::new(|_, _| -> Option<IValue> {
         Some(IValue::Record(
             Vec1::new(vec![IValue::S32(0), IValue::String(String::from("[\"A\", \"B\"]"))]).unwrap(),
         ))
@@ -156,7 +156,7 @@ fn data_merge() {
 fn acc_merge() {
     env_logger::init();
 
-    let neighborhood_call_service: HostExportedFunc = Box::new(|_, args| -> Option<IValue> {
+    let neighborhood_call_service: CallServiceClosure = Box::new(|_, args| -> Option<IValue> {
         let args_count = match &args[1] {
             IValue::String(str) => str,
             _ => unreachable!(),

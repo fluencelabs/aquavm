@@ -3,6 +3,7 @@ name = "air-parser"
 version = "0.1.0"
 authors = ["Fluence Labs"]
 edition = "2018"
+license = "Apache-2.0"
 
 [build-dependencies]
 lalrpop = { git = "https://github.com/fluencelabs/lalrpop", branch = "cloneable_parser", version = "0.19.1", features = ["lexer"] }

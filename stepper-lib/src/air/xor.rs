@@ -44,13 +44,13 @@ mod tests {
 
     use aqua_test_utils::call_vm;
     use aqua_test_utils::create_aqua_vm;
-    use aqua_test_utils::HostExportedFunc;
+    use aqua_test_utils::CallServiceClosure;
     use aqua_test_utils::IValue;
     use aqua_test_utils::Vec1;
 
     use std::rc::Rc;
 
-    fn fallible_call_service(fallible_service_id: String) -> HostExportedFunc {
+    fn fallible_call_service(fallible_service_id: String) -> CallServiceClosure {
         Box::new(move |_, args| -> Option<IValue> {
             let builtin_service = match &args[0] {
                 IValue::String(str) => str,

@@ -18,7 +18,7 @@ use aqua_test_utils::call_vm;
 use aqua_test_utils::create_aqua_vm;
 use aqua_test_utils::set_variables_call_service;
 use aqua_test_utils::unit_call_service;
-use aqua_test_utils::HostExportedFunc;
+use aqua_test_utils::CallServiceClosure;
 use aqua_test_utils::IValue;
 use aqua_test_utils::Vec1;
 
@@ -135,7 +135,7 @@ fn create_service() {
     let add_blueprint_response = String::from("add_blueprint response");
     let create_response = String::from("create response");
 
-    let call_service: HostExportedFunc = Box::new(move |_, args| -> Option<IValue> {
+    let call_service: CallServiceClosure = Box::new(move |_, args| -> Option<IValue> {
         let builtin_service = match &args[0] {
             IValue::String(str) => str,
             _ => unreachable!(),

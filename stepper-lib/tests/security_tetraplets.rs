@@ -16,7 +16,7 @@
 
 use aqua_test_utils::call_vm;
 use aqua_test_utils::create_aqua_vm;
-use aqua_test_utils::HostExportedFunc;
+use aqua_test_utils::CallServiceClosure;
 use aqua_test_utils::IValue;
 use aqua_test_utils::Vec1;
 use polyplets::ResolvedTriplet;
@@ -27,11 +27,11 @@ use std::rc::Rc;
 
 type ArgTetraplets = Vec<Vec<SecurityTetraplet>>;
 
-fn arg_host_function() -> (HostExportedFunc, Rc<RefCell<ArgTetraplets>>) {
+fn arg_host_function() -> (CallServiceClosure, Rc<RefCell<ArgTetraplets>>) {
     let arg_tetraplets = Rc::new(RefCell::new(ArgTetraplets::new()));
 
     let arg_tetraplets_inner = arg_tetraplets.clone();
-    let host_function: HostExportedFunc = Box::new(move |_, args| -> Option<IValue> {
+    let host_function: CallServiceClosure = Box::new(move |_, args| -> Option<IValue> {
         let tetraplets = match &args[3] {
             IValue::String(str) => str,
             _ => unreachable!(),
@@ -51,7 +51,7 @@ fn arg_host_function() -> (HostExportedFunc, Rc<RefCell<ArgTetraplets>>) {
 
 #[test]
 fn simple_fold() {
-    let return_numbers_call_service: HostExportedFunc = Box::new(|_, _| -> Option<IValue> {
+    let return_numbers_call_service: CallServiceClosure = Box::new(|_, _| -> Option<IValue> {
         Some(IValue::Record(
             Vec1::new(vec![
                 IValue::S32(0),
@@ -128,7 +128,7 @@ fn simple_fold() {
 
 #[test]
 fn fold_json_path() {
-    let return_numbers_call_service: HostExportedFunc = Box::new(|_, _| -> Option<IValue> {
+    let return_numbers_call_service: CallServiceClosure = Box::new(|_, _| -> Option<IValue> {
         Some(IValue::Record(
             Vec1::new(vec![
                 IValue::S32(0),
@@ -243,7 +243,7 @@ fn tetraplet_with_wasm_modules() {
 
     let services_inner = services.clone();
     const ADMIN_PEER_PK: &str = "12D3KooWEXNUbCXooUwHrHBbrmjsrpHXoEphPwbjQXEGyzbqKnE1";
-    let host_func: HostExportedFunc = Box::new(move |_, args: Vec<IValue>| -> Option<IValue> {
+    let host_func: CallServiceClosure = Box::new(move |_, args: Vec<IValue>| -> Option<IValue> {
         let service_id = match &args[0] {
             IValue::String(str) => str,
             _ => unreachable!(),
