@@ -39,8 +39,11 @@ pub(crate) trait Iterable<'ctx> {
 }
 
 /// Combines all possible iterable item types.
+///
+/// Iterable item is a variable that `fold` sets to each element of the collection it iterates
+/// through, i.e., it is the `iterable` in the `(fold collection iterable instruction)` statement.
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub(crate) enum IterableItemType<'ctx> {
+pub(crate) enum IterableItem<'ctx> {
     RefRef((&'ctx JValue, &'ctx SecurityTetraplet)),
     RefValue((&'ctx JValue, SecurityTetraplet)),
     RcValue((Rc<JValue>, SecurityTetraplet)),
@@ -141,7 +144,7 @@ macro_rules! foldable_prev {
 }
 
 impl<'ctx> Iterable<'ctx> for IterableResolvedCall {
-    type Item = IterableItemType<'ctx>;
+    type Item = IterableItem<'ctx>;
 
     fn next(&mut self) -> bool {
         foldable_next!(self, self.len)
@@ -170,13 +173,13 @@ impl<'ctx> Iterable<'ctx> for IterableResolvedCall {
             _ => unimplemented!("this jvalue is set only by fold instruction, so it must have an array type"),
         };
 
-        let result = IterableItemType::RefValue((jvalue, tetraplet));
+        let result = IterableItem::RefValue((jvalue, tetraplet));
         Some(result)
     }
 }
 
 impl<'ctx> Iterable<'ctx> for IterableVecResolvedCall {
-    type Item = IterableItemType<'ctx>;
+    type Item = IterableItem<'ctx>;
 
     fn next(&mut self) -> bool {
         foldable_next!(self, self.call_results.len())
@@ -197,13 +200,13 @@ impl<'ctx> Iterable<'ctx> for IterableVecResolvedCall {
             json_path: String::new(),
         };
 
-        let result = IterableItemType::RcValue((result, tetraplet));
+        let result = IterableItem::RcValue((result, tetraplet));
         Some(result)
     }
 }
 
 impl<'ctx> Iterable<'ctx> for IterableJsonPathResult {
-    type Item = IterableItemType<'ctx>;
+    type Item = IterableItem<'ctx>;
 
     fn next(&mut self) -> bool {
         foldable_next!(self, self.jvalues.len())
@@ -219,14 +222,14 @@ impl<'ctx> Iterable<'ctx> for IterableJsonPathResult {
         }
 
         let jvalue = &self.jvalues[self.cursor];
-        let result = IterableItemType::RefRef((jvalue, &self.tetraplet));
+        let result = IterableItem::RefRef((jvalue, &self.tetraplet));
 
         Some(result)
     }
 }
 
 impl<'ctx> Iterable<'ctx> for IterableVecJsonPathResult {
-    type Item = IterableItemType<'ctx>;
+    type Item = IterableItem<'ctx>;
 
     fn next(&mut self) -> bool {
         foldable_next!(self, self.jvalues.len())
@@ -243,7 +246,7 @@ impl<'ctx> Iterable<'ctx> for IterableVecJsonPathResult {
 
         let jvalue = &self.jvalues[self.cursor];
         let tetraplet = &self.tetraplets[self.cursor];
-        let result = IterableItemType::RefRef((jvalue, tetraplet));
+        let result = IterableItem::RefRef((jvalue, tetraplet));
 
         Some(result)
     }

@@ -70,7 +70,7 @@ dependencies = [
 [[package]]
 name = "aquamarine-vm"
 version = "0.1.6"
-source = "git+https://github.com/fluencelabs/fce?branch=master#f022a2dec4229f1dd739794e98a0e5d080ea13d5"
+source = "git+https://github.com/fluencelabs/fce#f022a2dec4229f1dd739794e98a0e5d080ea13d5"
 dependencies = [
  "fluence-faas 0.1.18 (git+https://github.com/fluencelabs/fce)",
  "maplit",
@@ -654,7 +654,7 @@ dependencies = [
 [[package]]
 name = "fce"
 version = "0.1.14"
-source = "git+https://github.com/fluencelabs/fce?branch=master#f022a2dec4229f1dd739794e98a0e5d080ea13d5"
+source = "git+https://github.com/fluencelabs/fce#f022a2dec4229f1dd739794e98a0e5d080ea13d5"
 dependencies = [
  "boolinator",
  "fce-utils 0.1.0 (git+https://github.com/fluencelabs/fce)",
@@ -682,7 +682,7 @@ checksum = "dcdd9d63fa5f87e03514ba8ca3bb91a25121bbf1c63a26df710f166ab8f274f7"
 [[package]]
 name = "fce-utils"
 version = "0.1.0"
-source = "git+https://github.com/fluencelabs/fce?branch=master#f022a2dec4229f1dd739794e98a0e5d080ea13d5"
+source = "git+https://github.com/fluencelabs/fce#f022a2dec4229f1dd739794e98a0e5d080ea13d5"
 
 [[package]]
 name = "fce-wit-interfaces"
@@ -697,7 +697,7 @@ dependencies = [
 [[package]]
 name = "fce-wit-interfaces"
 version = "0.1.9"
-source = "git+https://github.com/fluencelabs/fce?branch=master#f022a2dec4229f1dd739794e98a0e5d080ea13d5"
+source = "git+https://github.com/fluencelabs/fce#f022a2dec4229f1dd739794e98a0e5d080ea13d5"
 dependencies = [
  "multimap",
  "wasmer-interface-types-fl",
@@ -720,7 +720,7 @@ dependencies = [
 [[package]]
 name = "fce-wit-parser"
 version = "0.1.11"
-source = "git+https://github.com/fluencelabs/fce?branch=master#f022a2dec4229f1dd739794e98a0e5d080ea13d5"
+source = "git+https://github.com/fluencelabs/fce#f022a2dec4229f1dd739794e98a0e5d080ea13d5"
 dependencies = [
  "anyhow",
  "fce-wit-interfaces 0.1.9 (git+https://github.com/fluencelabs/fce)",
@@ -788,7 +788,7 @@ dependencies = [
 [[package]]
 name = "fluence-faas"
 version = "0.1.18"
-source = "git+https://github.com/fluencelabs/fce?branch=master#f022a2dec4229f1dd739794e98a0e5d080ea13d5"
+source = "git+https://github.com/fluencelabs/fce#f022a2dec4229f1dd739794e98a0e5d080ea13d5"
 dependencies = [
  "cmd_lib",
  "fce 0.1.14 (git+https://github.com/fluencelabs/fce)",
@@ -1685,7 +1685,7 @@ dependencies = [
 [[package]]
 name = "stepper-interface"
 version = "0.1.0"
-source = "git+https://github.com/fluencelabs/aquamarine?branch=master#6e5efe4903fa6c89781ef2f20edabca281ff9011"
+source = "git+https://github.com/fluencelabs/aquamarine#5cb4cc0fb0c149a4bd3160dd0bac9c3d5ac3db7d"
 dependencies = [
  "fluence",
  "serde",

@@ -18,7 +18,7 @@ mod iterable;
 mod utils;
 
 pub(crate) use iterable::Iterable;
-pub(crate) use iterable::IterableItemType;
+pub(crate) use iterable::IterableItem;
 
 use super::CallEvidenceCtx;
 use super::ExecutionCtx;
