@@ -55,7 +55,7 @@ pub fn create_aqua_vm(
 
     let config = AquamarineVMConfig {
         aquamarine_wasm_path: PathBuf::from("../target/wasm32-wasi/debug/aquamarine.wasm"),
-        call_service: call_service_descriptor,
+        call_service: Box::new(call_service_descriptor),
         current_peer_id: current_peer_id.into(),
         particle_data_store: tmp_dir,
         logging_mask: i32::max_value(),
