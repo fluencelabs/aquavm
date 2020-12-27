@@ -2,7 +2,7 @@ use aqua_test_utils::create_aqua_vm;
 use aqua_test_utils::unit_call_service;
 use aqua_test_utils::AquamarineVM;
 use aqua_test_utils::AquamarineVMError;
-use aqua_test_utils::HostExportedFunc;
+use aqua_test_utils::CallServiceClosure;
 use aqua_test_utils::IValue;
 use aqua_test_utils::StepperOutcome;
 use aqua_test_utils::Vec1;
@@ -16,7 +16,7 @@ use std::cell::RefCell;
 thread_local!(static RELAY_1_VM: RefCell<AquamarineVM> = RefCell::new(create_aqua_vm(unit_call_service(), "Relay1")));
 thread_local!(static RELAY_2_VM: RefCell<AquamarineVM> = RefCell::new(create_aqua_vm(unit_call_service(), "Relay2")));
 thread_local!(static REMOTE_VM: RefCell<AquamarineVM> = RefCell::new({
-    let members_call_service: HostExportedFunc = Box::new(|_, _| -> Option<IValue> {
+    let members_call_service: CallServiceClosure = Box::new(|_, _| -> Option<IValue> {
         Some(IValue::Record(
             Vec1::new(vec![
                 IValue::S32(0),

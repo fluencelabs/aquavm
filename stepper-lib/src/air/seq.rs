@@ -65,17 +65,20 @@ mod tests {
 
     #[test]
     fn seq_local_remote() {
-        let mut vm = create_aqua_vm(unit_call_service(), "");
+        let local_peer_id = "local_peer_id";
+        let remote_peer_id = String::from("remote_peer_id");
+        let mut vm = create_aqua_vm(unit_call_service(), local_peer_id);
 
-        let script = String::from(
+        let script = format!(
             r#"
             (seq 
-                (call %current_peer_id% ("local_service_id" "local_fn_name") [] result_name)
-                (call "remote_peer_id_2" ("service_id" "fn_name") [] g)
+                (call "{}" ("local_service_id" "local_fn_name") [] result_name)
+                (call "{}" ("service_id" "fn_name") [] g)
             )"#,
+            local_peer_id, remote_peer_id
         );
 
         let res = call_vm!(vm, "asd", script, "[]", "[]");
-        assert_eq!(res.next_peer_pks, vec![String::from("remote_peer_id_2")]);
+        assert_eq!(res.next_peer_pks, vec![remote_peer_id]);
     }
 }

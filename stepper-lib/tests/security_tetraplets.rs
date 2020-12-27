@@ -16,7 +16,7 @@
 
 use aqua_test_utils::call_vm;
 use aqua_test_utils::create_aqua_vm;
-use aqua_test_utils::HostExportedFunc;
+use aqua_test_utils::CallServiceClosure;
 use aqua_test_utils::IValue;
 use aqua_test_utils::Vec1;
 use polyplets::ResolvedTriplet;
@@ -27,11 +27,11 @@ use std::rc::Rc;
 
 type ArgTetraplets = Vec<Vec<SecurityTetraplet>>;
 
-fn arg_host_function() -> (HostExportedFunc, Rc<RefCell<ArgTetraplets>>) {
+fn arg_host_function() -> (CallServiceClosure, Rc<RefCell<ArgTetraplets>>) {
     let arg_tetraplets = Rc::new(RefCell::new(ArgTetraplets::new()));
 
     let arg_tetraplets_inner = arg_tetraplets.clone();
-    let host_function: HostExportedFunc = Box::new(move |_, args| -> Option<IValue> {
+    let host_function: CallServiceClosure = Box::new(move |_, args| -> Option<IValue> {
         let tetraplets = match &args[3] {
             IValue::String(str) => str,
             _ => unreachable!(),
@@ -51,7 +51,7 @@ fn arg_host_function() -> (HostExportedFunc, Rc<RefCell<ArgTetraplets>>) {
 
 #[test]
 fn simple_fold() {
-    let return_numbers_call_service: HostExportedFunc = Box::new(|_, _| -> Option<IValue> {
+    let return_numbers_call_service: CallServiceClosure = Box::new(|_, _| -> Option<IValue> {
         Some(IValue::Record(
             Vec1::new(vec![
                 IValue::S32(0),
@@ -116,19 +116,19 @@ fn simple_fold() {
         json_path: String::new(),
     };
 
-    let right_tetraplets = vec![vec![first_arg_tetraplet], vec![second_arg_tetraplet]];
-    let right_tetraplets = Rc::new(RefCell::new(right_tetraplets));
+    let expected_tetraplets = vec![vec![first_arg_tetraplet], vec![second_arg_tetraplet]];
+    let expected_tetraplets = Rc::new(RefCell::new(expected_tetraplets));
     for i in 0..10 {
         let res = call_vm!(client_vms[i].0, init_peer_id.clone(), script.clone(), "[]", data);
         data = res.data;
 
-        assert_eq!(client_vms[i].1, right_tetraplets);
+        assert_eq!(client_vms[i].1, expected_tetraplets);
     }
 }
 
 #[test]
 fn fold_json_path() {
-    let return_numbers_call_service: HostExportedFunc = Box::new(|_, _| -> Option<IValue> {
+    let return_numbers_call_service: CallServiceClosure = Box::new(|_, _| -> Option<IValue> {
         Some(IValue::Record(
             Vec1::new(vec![
                 IValue::S32(0),
@@ -189,10 +189,10 @@ fn fold_json_path() {
         json_path: String::new(),
     };
 
-    let right_tetraplets = vec![vec![first_arg_tetraplet], vec![second_arg_tetraplet]];
-    let right_tetraplets = Rc::new(RefCell::new(right_tetraplets));
+    let expected_tetraplets = vec![vec![first_arg_tetraplet], vec![second_arg_tetraplet]];
+    let expected_tetraplets = Rc::new(RefCell::new(expected_tetraplets));
     call_vm!(client_vm, init_peer_id.clone(), script.clone(), "[]", res.data);
-    assert_eq!(arg_tetraplets, right_tetraplets);
+    assert_eq!(arg_tetraplets, expected_tetraplets);
 }
 
 use fluence_app_service::AppService;
@@ -243,7 +243,7 @@ fn tetraplet_with_wasm_modules() {
 
     let services_inner = services.clone();
     const ADMIN_PEER_PK: &str = "12D3KooWEXNUbCXooUwHrHBbrmjsrpHXoEphPwbjQXEGyzbqKnE1";
-    let host_func: HostExportedFunc = Box::new(move |_, args: Vec<IValue>| -> Option<IValue> {
+    let host_func: CallServiceClosure = Box::new(move |_, args: Vec<IValue>| -> Option<IValue> {
         let service_id = match &args[0] {
             IValue::String(str) => str,
             _ => unreachable!(),
@@ -281,22 +281,24 @@ fn tetraplet_with_wasm_modules() {
         ))
     });
 
-    let script = String::from(
+    let local_peer_id = "local_peer_id";
+    let script = format!(
         r#"
         (seq
-            (call %current_peer_id% ("auth" "is_authorized") [] auth_result)
-            (call %current_peer_id% ("log_storage" "delete") [auth_result.$.is_authorized "1"])
+            (call "{0}" ("auth" "is_authorized") [] auth_result)
+            (call "{0}" ("log_storage" "delete") [auth_result.$.is_authorized "1"])
         )
     "#,
+        local_peer_id,
     );
 
-    let mut vm = create_aqua_vm(host_func, "some peer_id");
+    let mut vm = create_aqua_vm(host_func, local_peer_id);
 
     let result = call_vm!(vm, ADMIN_PEER_PK, script, "", "");
     let path: CallEvidencePath = serde_json::from_slice(&result.data).unwrap();
-    let right_res = EvidenceState::Call(CallResult::Executed(Rc::new(serde_json::Value::String(String::from(
+    let expected_res = EvidenceState::Call(CallResult::Executed(Rc::new(serde_json::Value::String(String::from(
         "Ok",
     )))));
 
-    assert_eq!(path[1], right_res)
+    assert_eq!(path[1], expected_res)
 }

@@ -79,13 +79,13 @@ mod tests {
     use aqua_test_utils::echo_string_call_service;
     use aqua_test_utils::set_variable_call_service;
     use aqua_test_utils::unit_call_service;
-    use aqua_test_utils::HostExportedFunc;
+    use aqua_test_utils::CallServiceClosure;
     use aqua_test_utils::IValue;
     use aqua_test_utils::Vec1;
 
     use std::rc::Rc;
 
-    // Check that %current_peer_id% alias works correctly (by comparing result with it and explicit peer id).
+    // Check that %init_peer_id% alias works correctly (by comparing result with it and explicit peer id).
     // Additionally, check that empty string for data does the same as empty call path.
     #[test]
     fn current_peer_id_call() {
@@ -99,12 +99,12 @@ mod tests {
         let function_name = String::from("local_fn_name");
         let script = format!(
             r#"
-               (call %current_peer_id% ("{}" "{}") [] result_name)
+               (call %init_peer_id% ("{}" "{}") [] result_name)
             "#,
             service_id, function_name
         );
 
-        let res = call_vm!(vm, "asd", script.clone(), "[]", "[]");
+        let res = call_vm!(vm, vm_peer_id.clone(), script.clone(), "[]", "[]");
         let call_path: CallEvidencePath = serde_json::from_slice(&res.data).expect("should be a valid json");
 
         let executed_call_state = Call(Executed(Rc::new(JValue::String(String::from("test")))));
@@ -176,7 +176,7 @@ mod tests {
         use crate::call_evidence::CallResult::*;
         use crate::call_evidence::EvidenceState::*;
 
-        let call_service: HostExportedFunc = Box::new(|_, args| -> Option<IValue> {
+        let call_service: CallServiceClosure = Box::new(|_, args| -> Option<IValue> {
             let arg = match &args[2] {
                 IValue::String(str) => str,
                 _ => unreachable!(),

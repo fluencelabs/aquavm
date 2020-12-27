@@ -57,7 +57,6 @@ pub enum InstructionValue<'i> {
     Variable(&'i str),
     Literal(&'i str),
     JsonPath { variable: &'i str, path: &'i str },
-    CurrentPeerId,
     InitPeerId,
 }
 

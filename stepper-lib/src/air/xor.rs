@@ -44,13 +44,13 @@ mod tests {
 
     use aqua_test_utils::call_vm;
     use aqua_test_utils::create_aqua_vm;
-    use aqua_test_utils::HostExportedFunc;
+    use aqua_test_utils::CallServiceClosure;
     use aqua_test_utils::IValue;
     use aqua_test_utils::Vec1;
 
     use std::rc::Rc;
 
-    fn fallible_call_service(fallible_service_id: String) -> HostExportedFunc {
+    fn fallible_call_service(fallible_service_id: String) -> CallServiceClosure {
         Box::new(move |_, args| -> Option<IValue> {
             let builtin_service = match &args[0] {
                 IValue::String(str) => str,
@@ -76,15 +76,17 @@ mod tests {
         use crate::call_evidence::CallResult::*;
         use crate::call_evidence::EvidenceState::*;
 
+        let local_peer_id = "local_peer_id";
         let fallible_service_id = String::from("service_id_1");
-        let mut vm = create_aqua_vm(fallible_call_service(fallible_service_id), "");
+        let mut vm = create_aqua_vm(fallible_call_service(fallible_service_id), local_peer_id);
 
-        let script = String::from(
+        let script = format!(
             r#"
             (xor
-                (call %current_peer_id% ("service_id_1" "local_fn_name") [] result_1)
-                (call %current_peer_id% ("service_id_2" "local_fn_name") [] result_2)
+                (call "{0}" ("service_id_1" "local_fn_name") [] result_1)
+                (call "{0}" ("service_id_2" "local_fn_name") [] result_2)
             )"#,
+            local_peer_id,
         );
 
         let res = call_vm!(vm, "asd", script, "[]", "[]");
@@ -95,12 +97,13 @@ mod tests {
         assert_eq!(call_path[0], Call(CallServiceFailed(String::from(r#""error""#))));
         assert_eq!(call_path[1], executed_call_result);
 
-        let script = String::from(
+        let script = format!(
             r#"
             (xor
-                (call %current_peer_id% ("service_id_2" "local_fn_name") [] result_1)
-                (call %current_peer_id% ("service_id_1" "local_fn_name") [] result_2)
+                (call "{0}" ("service_id_2" "local_fn_name") [] result_1)
+                (call "{0}" ("service_id_1" "local_fn_name") [] result_2)
             )"#,
+            local_peer_id
         );
 
         let res = call_vm!(vm, "asd", script, "[]", "[]");
@@ -116,26 +119,28 @@ mod tests {
         use crate::call_evidence::EvidenceState::*;
 
         let fallible_service_id = String::from("service_id_1");
-        let mut vm = create_aqua_vm(fallible_call_service(fallible_service_id.clone()), "");
+        let local_peer_id = "local_peer_id";
+        let mut vm = create_aqua_vm(fallible_call_service(fallible_service_id.clone()), local_peer_id);
 
-        let script = String::from(
+        let script = format!(
             r#"
             (xor
                 (par
                     (seq
-                        (call %current_peer_id% ("service_id_2" "local_fn_name") [] result_1)
-                        (call %current_peer_id% ("service_id_2" "local_fn_name") [] result_2)
+                        (call "{0}" ("service_id_2" "local_fn_name") [] result_1)
+                        (call "{0}" ("service_id_2" "local_fn_name") [] result_2)
                     )
                     (par
-                        (call %current_peer_id% ("service_id_1" "local_fn_name") [] result_3)
-                        (call %current_peer_id% ("service_id_2" "local_fn_name") [] result_4)
+                        (call "{0}" ("service_id_1" "local_fn_name") [] result_3)
+                        (call "{0}" ("service_id_2" "local_fn_name") [] result_4)
                     )
                 )
                 (seq
-                    (call %current_peer_id% ("service_id_2" "local_fn_name") [] result_4)
-                    (call %current_peer_id% ("service_id_2" "local_fn_name") [] result_5)
+                    (call "{0}" ("service_id_2" "local_fn_name") [] result_4)
+                    (call "{0}" ("service_id_2" "local_fn_name") [] result_5)
                 )
             )"#,
+            local_peer_id
         );
 
         let result = call_vm!(vm, "asd", script.clone(), "[]", "[]");
@@ -144,7 +149,7 @@ mod tests {
         let res = String::from("res");
         let executed_call_result = Rc::new(JValue::String(res));
 
-        let right_path = vec![
+        let expected_path = vec![
             Par(2, 2),
             Call(Executed(executed_call_result.clone())),
             Call(Executed(executed_call_result.clone())),
@@ -154,10 +159,10 @@ mod tests {
             Call(Executed(executed_call_result.clone())),
         ];
 
-        assert_eq!(result_path, right_path);
+        assert_eq!(result_path, expected_path);
 
         let result = call_vm!(vm, "asd", script, "[]", result.data);
         let result_path: CallEvidencePath = serde_json::from_slice(&result.data).expect("should be valid json");
-        assert_eq!(result_path, right_path);
+        assert_eq!(result_path, expected_path);
     }
 }

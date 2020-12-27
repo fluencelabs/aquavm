@@ -29,10 +29,10 @@ pub use aquamarine_vm::vec1::Vec1;
 pub use aquamarine_vm::AquamarineVM;
 pub use aquamarine_vm::AquamarineVMConfig;
 pub use aquamarine_vm::AquamarineVMError;
-pub use aquamarine_vm::HostExportedFunc;
-pub use aquamarine_vm::HostImportDescriptor;
+pub use aquamarine_vm::CallServiceClosure;
 pub use aquamarine_vm::IType;
 pub use aquamarine_vm::IValue;
+pub use aquamarine_vm::ParticleParameters;
 pub use aquamarine_vm::StepperOutcome;
 
 use std::collections::HashMap;
@@ -41,21 +41,14 @@ use std::path::PathBuf;
 type JValue = serde_json::Value;
 
 pub fn create_aqua_vm(
-    call_service: HostExportedFunc,
+    call_service: CallServiceClosure,
     current_peer_id: impl Into<String>,
 ) -> AquamarineVM {
-    let call_service_descriptor = HostImportDescriptor {
-        host_exported_func: call_service,
-        argument_types: vec![IType::String, IType::String, IType::String, IType::String],
-        output_type: Some(IType::Record(0)),
-        error_handler: None,
-    };
-
     let tmp_dir = std::env::temp_dir();
 
     let config = AquamarineVMConfig {
         aquamarine_wasm_path: PathBuf::from("../target/wasm32-wasi/debug/aquamarine.wasm"),
-        call_service: call_service_descriptor,
+        call_service,
         current_peer_id: current_peer_id.into(),
         particle_data_store: tmp_dir,
         logging_mask: i32::max_value(),
@@ -64,7 +57,7 @@ pub fn create_aqua_vm(
     AquamarineVM::new(config).expect("vm should be created")
 }
 
-pub fn unit_call_service() -> HostExportedFunc {
+pub fn unit_call_service() -> CallServiceClosure {
     Box::new(|_, _| -> Option<IValue> {
         Some(IValue::Record(
             Vec1::new(vec![
@@ -76,7 +69,7 @@ pub fn unit_call_service() -> HostExportedFunc {
     })
 }
 
-pub fn echo_string_call_service() -> HostExportedFunc {
+pub fn echo_string_call_service() -> CallServiceClosure {
     Box::new(|_, args| -> Option<IValue> {
         let arg = match &args[2] {
             IValue::String(str) => str,
@@ -95,7 +88,7 @@ pub fn echo_string_call_service() -> HostExportedFunc {
     })
 }
 
-pub fn echo_number_call_service() -> HostExportedFunc {
+pub fn echo_number_call_service() -> CallServiceClosure {
     Box::new(|_, args| -> Option<IValue> {
         let arg = match &args[2] {
             IValue::String(str) => str,
@@ -110,7 +103,7 @@ pub fn echo_number_call_service() -> HostExportedFunc {
     })
 }
 
-pub fn set_variable_call_service(json: impl Into<String>) -> HostExportedFunc {
+pub fn set_variable_call_service(json: impl Into<String>) -> CallServiceClosure {
     let json = json.into();
     Box::new(move |_, _| -> Option<IValue> {
         Some(IValue::Record(
@@ -119,7 +112,7 @@ pub fn set_variable_call_service(json: impl Into<String>) -> HostExportedFunc {
     })
 }
 
-pub fn set_variables_call_service(ret_mapping: HashMap<String, String>) -> HostExportedFunc {
+pub fn set_variables_call_service(ret_mapping: HashMap<String, String>) -> CallServiceClosure {
     Box::new(move |_, args| -> Option<IValue> {
         let arg_name = match &args[2] {
             IValue::String(json_str) => {

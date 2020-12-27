@@ -17,7 +17,7 @@
 use aqua_test_utils::call_vm;
 use aqua_test_utils::create_aqua_vm;
 use aqua_test_utils::set_variable_call_service;
-use aqua_test_utils::HostExportedFunc;
+use aqua_test_utils::CallServiceClosure;
 use aqua_test_utils::IValue;
 use aqua_test_utils::Vec1;
 
@@ -28,13 +28,13 @@ type JValue = serde_json::Value;
 
 #[test]
 fn data_merge() {
-    let neighborhood_call_service1: HostExportedFunc = Box::new(|_, _| -> Option<IValue> {
+    let neighborhood_call_service1: CallServiceClosure = Box::new(|_, _| -> Option<IValue> {
         Some(IValue::Record(
             Vec1::new(vec![IValue::S32(0), IValue::String(String::from("[\"A\", \"B\"]"))]).unwrap(),
         ))
     });
 
-    let neighborhood_call_service2: HostExportedFunc = Box::new(|_, _| -> Option<IValue> {
+    let neighborhood_call_service2: CallServiceClosure = Box::new(|_, _| -> Option<IValue> {
         Some(IValue::Record(
             Vec1::new(vec![IValue::S32(0), IValue::String(String::from("[\"A\", \"B\"]"))]).unwrap(),
         ))
@@ -45,12 +45,12 @@ fn data_merge() {
 
     let script = String::from(
         r#"
-        (seq 
-            (call %current_peer_id% ("neighborhood" "") [] neighborhood)
-            (seq 
-                (seq 
+        (seq
+            (call %init_peer_id% ("neighborhood" "") [] neighborhood)
+            (seq
+                (seq
                     (fold neighborhood i
-                        (par 
+                        (par
                             (call i ("add_provider" "") [] void[])
                             (next i)
                         )
@@ -71,14 +71,15 @@ fn data_merge() {
         "#,
     );
 
-    let res1 = call_vm!(vm1, "asd", script.clone(), "[]", "[]");
-    let res2 = call_vm!(vm2, "asd", script.clone(), "[]", "[]");
+    // little hack here with init_peer_id to execute the first call from both VMs
+    let res1 = call_vm!(vm1, "A", script.clone(), "[]", "[]");
+    let res2 = call_vm!(vm2, "B", script.clone(), "[]", "[]");
     let res3 = call_vm!(vm1, "asd", script.clone(), res1.data.clone(), res2.data.clone());
     let res4 = call_vm!(vm2, "asd", script, res1.data.clone(), res2.data.clone());
 
     let resulted_json1: JValue = serde_json::from_slice(&res1.data).expect("stepper should return valid json");
 
-    let right_json1 = json!( [
+    let expected_json1 = json!( [
         { "call": { "executed": ["A", "B"] } },
         { "par": [1,2] },
         { "call": { "executed": ["A", "B"] } },
@@ -92,12 +93,12 @@ fn data_merge() {
         { "call": { "request_sent": "A" } },
     ]);
 
-    assert_eq!(resulted_json1, right_json1);
+    assert_eq!(resulted_json1, expected_json1);
     assert_eq!(res1.next_peer_pks, vec![String::from("B")]);
 
     let resulted_json2: JValue = serde_json::from_slice(&res2.data).expect("stepper should return valid json");
 
-    let right_json2 = json!( [
+    let expected_json2 = json!( [
         { "call": { "executed": ["A", "B"] } },
         { "par": [1,2] },
         { "call": { "request_sent": "B" } },
@@ -110,12 +111,12 @@ fn data_merge() {
         { "call": { "request_sent": "B" } },
     ]);
 
-    assert_eq!(resulted_json2, right_json2);
+    assert_eq!(resulted_json2, expected_json2);
     assert_eq!(res2.next_peer_pks, vec![String::from("A")]);
 
     let resulted_json3: JValue = serde_json::from_slice(&res3.data).expect("stepper should return valid json");
 
-    let right_json3 = json!( [
+    let expected_json3 = json!( [
         { "call": { "executed": ["A", "B"] } },
         { "par": [1,2] },
         { "call": { "executed": ["A", "B"] } },
@@ -129,12 +130,12 @@ fn data_merge() {
         { "call": { "request_sent": "A" } },
     ]);
 
-    assert_eq!(resulted_json3, right_json3);
+    assert_eq!(resulted_json3, expected_json3);
     assert!(res3.next_peer_pks.is_empty());
 
     let resulted_json4: JValue = serde_json::from_slice(&res4.data).expect("stepper should return valid json");
 
-    let right_json4 = json!( [
+    let expected_json4 = json!( [
         { "call": { "executed": ["A", "B"] } },
         { "par": [1,2] },
         { "call": { "executed": ["A", "B"] } },
@@ -148,7 +149,7 @@ fn data_merge() {
         { "call": { "executed": ["A", "B"] } },
     ]);
 
-    assert_eq!(resulted_json4, right_json4);
+    assert_eq!(resulted_json4, expected_json4);
     assert!(res4.next_peer_pks.is_empty());
 }
 
@@ -156,7 +157,7 @@ fn data_merge() {
 fn acc_merge() {
     env_logger::init();
 
-    let neighborhood_call_service: HostExportedFunc = Box::new(|_, args| -> Option<IValue> {
+    let neighborhood_call_service: CallServiceClosure = Box::new(|_, args| -> Option<IValue> {
         let args_count = match &args[1] {
             IValue::String(str) => str,
             _ => unreachable!(),
