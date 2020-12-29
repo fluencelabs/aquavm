@@ -43,6 +43,7 @@ pub use execution::parse;
 
 pub use polyplets::ResolvedTriplet;
 pub use polyplets::SecurityTetraplet;
+pub use stepper_interface::StepperOutcome;
 
 pub(crate) type Result<T> = std::result::Result<T, AquamarineError>;
 pub(crate) type JValue = serde_json::Value;
