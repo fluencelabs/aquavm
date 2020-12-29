@@ -1,6 +1,6 @@
 [package]
 name = "aquamarine"
-version = "0.1.3"
+version = "0.2.1"
 authors = ["Fluence Labs"]
 edition = "2018"
 
@@ -15,7 +15,6 @@ path = "src/fce.rs"
 
 [dependencies]
 stepper-lib = { path = "../stepper-lib" }
-stepper-interface = { path = "../crates/stepper-interface" }
 
 fluence = { version = "=0.2.13", features = ["logger"] }
 

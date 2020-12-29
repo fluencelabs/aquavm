@@ -16,9 +16,9 @@
 
 use fluence::fce;
 
+use fluence_it_types::IValue;
 use serde::Deserialize;
 use serde::Serialize;
-use wasmer_wit::values::InterfaceValue as IValue;
 
 pub const STEPPER_SUCCESS: i32 = 0;
 
