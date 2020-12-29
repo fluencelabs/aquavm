@@ -75,7 +75,7 @@ jobs:
           # get package name from Cargo.toml
           PKG_NAME="$(toml get Cargo.toml package.name | tr -d \")"
 
-      ### NPM
+          ### NPM
           # take all versions from npm and replace single quotes with double quotes
           NPM_VERSIONS=$(yarn info --silent "$PKG_NAME" versions 2>/dev/null | tr \' \")
           # take only versions that contain branch name
@@ -87,20 +87,20 @@ jobs:
           # increment prerelease part of the version
           PRERELEASE_NPM_VERSION="$(semver --increment prerelease --preid "$SANITIZED_BRANCH" "${LAST_NPM_VERSION}" || true)"
 
-      ### CRATES.IO
+          ### CRATES.IO
           CRATE_VERSIONS=$(cargo show --json "$PKG_NAME")
           CRATE_VERSIONS_FILTERED=$(echo $CRATE_VERSIONS | jq -r '.versions[] | .num | select(contains(\"$SANITIZED_BRANCH\"))"')
           CRATE_VERSIONS_FLATTENED=$(echo $CRATE_VERSIONS_FILTERED | awk '{print}' ORS=' ')
           LAST_CRATE_VERSION="$(semver -p $(echo $CRATE_VERSIONS_FLATTENED) | tail -n1 || true)"
           PRERELEASE_CRATE_VERSION="$(semver --increment prerelease --preid "$SANITIZED_BRANCH" "${LAST_CRATE_VERSION}" || true)"
 
-      ### LOCAL
-      ### (NOTE: the following code assumes that local versions do not contain prerelease suffix; existing suffix will be ignored)
+          ### LOCAL
+          ### (NOTE: the following code assumes that local versions do not contain prerelease suffix; existing suffix will be ignored)
           # take local Rust version
           LOCAL_RUST_VERSION="$(toml get Cargo.toml package.version | tr -d \")"
           LOCAL_RUST_PRERELEASE_VERSION="$(semver --increment prerelease --preid "$SANITIZED_BRANCH" "${LOCAL_RUST_VERSION}-0")" # added '-0' here to avoid semver erroneously increment patch octet. Any suffix works, '-0' is chosen deliberately.
 
-      ### SAVE FINAL VERSION TO ENV
+          ### SAVE FINAL VERSION TO ENV
           # take the highest version
           MAX_VERSION="$(semver "$LOCAL_RUST_PRERELEASE_VERSION" "$PRERELEASE_NPM_VERSION" "$PRERELEASE_CRATE_VERSION" | tail -n1)"
           # save info to env
