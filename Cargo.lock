@@ -56,13 +56,12 @@ dependencies = [
 
 [[package]]
 name = "aquamarine"
-version = "0.1.3"
+version = "0.2.1"
 dependencies = [
  "fluence",
  "log",
  "serde",
  "serde_json",
- "stepper-interface 0.1.1",
  "stepper-lib",
  "wasm-bindgen",
 ]
@@ -741,10 +740,11 @@ dependencies = [
 
 [[package]]
 name = "fluence-it-types"
-version = "0.1.0"
+version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3a7bb80cb11068166b9ac80b90b15e2cf9fc50cadafe306d81e5e71a12b78e13"
+checksum = "1b81c770e52b35e2406f8251f6c01b3b882c3eaed3029731d8c19c74dc1b423c"
 dependencies = [
+ "it-to-bytes",
  "serde",
 ]
 
@@ -963,6 +963,12 @@ dependencies = [
  "quote",
  "syn",
 ]
+
+[[package]]
+name = "it-to-bytes"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "729c74bb4236418898a219c6d96f14cba77456dd7c04a2e99e65e9c643709b56"
 
 [[package]]
 name = "itertools"
@@ -1679,7 +1685,7 @@ dependencies = [
 
 [[package]]
 name = "stepper-lib"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "air-parser",
  "aqua-test-utils",

@@ -31,8 +31,8 @@ mod logger;
 
 use fluence::fce;
 use logger::DEFAULT_LOG_LEVEL;
-use stepper_interface::StepperOutcome;
 use stepper_lib::execute_aqua;
+use stepper_lib::StepperOutcome;
 
 use log::Level as LogLevel;
 

@@ -23,7 +23,7 @@ use preparation::prepare;
 use preparation::PrepareResult;
 
 use crate::air::ExecutableInstruction;
-use stepper_interface::StepperOutcome;
+use crate::StepperOutcome;
 
 use std::convert::identity;
 
