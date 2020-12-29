@@ -72,8 +72,8 @@ jobs:
 
           # sanitize branch name so it can be used as a semver suffix (replace [^0-9a-zA-Z-] with hyphen)
           SANITIZED_BRANCH="$(echo -n "${{ env.BRANCH_NAME }}" | tr -C '[:alnum:]-' -)"
-          # get package name from package.json
-          PKG_NAME="$(cat package.json | jq -r .name)"
+          # get package name from Cargo.toml
+          PKG_NAME="$(toml get Cargo.toml package.name | tr -d \")"
 
       ### NPM
           # take all versions from npm and replace single quotes with double quotes
@@ -97,7 +97,7 @@ jobs:
       ### LOCAL
       ### (NOTE: the following code assumes that local versions do not contain prerelease suffix; existing suffix will be ignored)
           # take local Rust version
-          LOCAL_RUST_VERSION="$(toml get Cargo.toml package.version)"
+          LOCAL_RUST_VERSION="$(toml get Cargo.toml package.version | tr -d \")"
           LOCAL_RUST_PRERELEASE_VERSION="$(semver --increment prerelease --preid "$SANITIZED_BRANCH" "${LOCAL_RUST_VERSION}-0")" # added '-0' here to avoid semver erroneously increment patch octet. Any suffix works, '-0' is chosen deliberately.
 
       ### SAVE FINAL VERSION TO ENV
