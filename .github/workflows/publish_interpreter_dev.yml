@@ -99,7 +99,7 @@ jobs:
           ### LOCAL
           ### (NOTE: the following code assumes that local versions do not contain prerelease suffix; existing suffix will be ignored)
           # take local Rust version
-          LOCAL_RUST_VERSION="$(toml get Cargo.toml package.version | tr -d \")"
+          LOCAL_RUST_VERSION="$(toml get crates/air-interpreter-wasm/Cargo.toml package.version | tr -d \")"
           LOCAL_RUST_PRERELEASE_VERSION="$(semver --increment prerelease --preid "$SANITIZED_BRANCH" "${LOCAL_RUST_VERSION}-0")" # added '-0' here to avoid semver erroneously increment patch octet. Any suffix works, '-0' is chosen deliberately.
 
           ### SAVE FINAL VERSION TO ENV
