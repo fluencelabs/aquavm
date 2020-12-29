@@ -81,7 +81,6 @@ jobs:
           MAX_VERSION="$(semver "$NEXT_JS_VERSION" "$NEXT_RS_VERSION" "$LOCAL_RUST_VERSION" | tail -n1)"
 
           echo "FINAL_VERSION=$MAX_VERSION" | tee -a $GITHUB_ENV
-          echo "PKG_NAME=$PKG_NAME" | tee -a $GITHUB_ENV
           echo "JS_PKG_NAME=$JS_PKG_NAME" | tee -a $GITHUB_ENV
 
 ### === JavaScript package release ===
@@ -168,13 +167,10 @@ jobs:
       - name: Copy aquamarine.wasm to air-interpreter-wasm
         run: cp target/wasm32-wasi/release/aquamarine.wasm crates/air-interpreter-wasm/aquamarine.wasm
 
-      - name: Set project name@version to ${{ env.PKG_NAME }}@${{ env.FINAL_VERSION }}
+      - name: Set project version to ${{ env.FINAL_VERSION }}
         run: |
           PATH="~/.cargo/bin:$PATH"
           toml set Cargo.toml package.version "${{ env.FINAL_VERSION }}" | sponge Cargo.toml
-
-          NAME=$(toml get Cargo.toml package.name | jq -r .)
-          toml set Cargo.toml package.name "${{ env.PKG_NAME }}" | sponge Cargo.toml
         working-directory: crates/air-interpreter-wasm
 
       - name: Login to crates.io
