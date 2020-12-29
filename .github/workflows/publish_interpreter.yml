@@ -10,7 +10,7 @@ on:
 
 jobs:
   npm-publish:
-    name: "Publish Aquamarine to NPM"
+    name: "Publish Aquamarine to NPM & crates.io"
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -120,7 +120,7 @@ jobs:
           cat pkg/package.json | jq --arg name aquamarine.wasm.base64.js \
             '. + {
               files: [ "aquamarine.wasm.base64.js", "aquamarine.wasm.base64.d.ts",  "index.js", "index.d.ts" ],
-              "name": "${{ env.JS_PKG_VERSION }}",
+              "name": "${{ env.JS_PKG_NAME }}",
               "description": "Aquamarine IR interpreter as base64 WASM",
               "main": "index.js",
               "repository": "https://github.com/fluencelabs/aquamarine",
