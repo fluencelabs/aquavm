@@ -20,7 +20,7 @@ mod preparation;
 pub use preparation::parse;
 
 use preparation::prepare;
-use preparation::PrepareResult;
+use preparation::PrepareDescriptor;
 
 use crate::air::ExecutableInstruction;
 use stepper_interface::StepperOutcome;
@@ -43,7 +43,7 @@ fn execute_aqua_impl(
     prev_path: Vec<u8>,
     path: Vec<u8>,
 ) -> Result<StepperOutcome, StepperOutcome> {
-    let PrepareResult {
+    let PrepareDescriptor {
         mut exec_ctx,
         mut call_ctx,
         aqua,

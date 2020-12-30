@@ -25,8 +25,9 @@ use crate::Result;
 
 use air_parser::ast::Instruction;
 
+pub(super) type PrepareResult<T> = Result<T, PrepareError>;
 /// Represents result of the preparation step.
-pub(super) struct PrepareResult<'ctx, 'i> {
+pub(super) struct PrepareDescriptor<'ctx, 'i> {
     pub(crate) exec_ctx: ExecutionCtx<'ctx>,
     pub(crate) call_ctx: CallEvidenceCtx,
     pub(crate) aqua: Instruction<'i>,
@@ -38,7 +39,7 @@ pub(super) fn prepare<'i>(
     raw_path: &[u8],
     raw_aqua: &'i str,
     init_peer_id: String,
-) -> Result<PrepareResult<'static, 'i>> {
+) -> Result<PrepareDescriptor<'static, 'i>> {
     fn to_evidence_path(raw_path: &[u8]) -> Result<CallEvidencePath> {
         use AquamarineError::CallEvidenceDeserializationError as CallDeError;
 
@@ -65,7 +66,7 @@ pub(super) fn prepare<'i>(
     );
 
     let (exec_ctx, call_ctx) = make_contexts(prev_path, path, init_peer_id)?;
-    let result = PrepareResult {
+    let result = PrepareDescriptor {
         exec_ctx,
         call_ctx,
         aqua,

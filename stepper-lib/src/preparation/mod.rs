@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 
-mod context;
-mod state;
-
-pub use state::CallEvidencePath;
-pub use state::CallResult;
-pub use state::EvidenceState;
-
-pub(crate) use context::CallEvidenceCtx;
+mod errors;
+mod outcome;
+mod preparation;
+mod state_merging;

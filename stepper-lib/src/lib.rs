@@ -29,6 +29,7 @@
 mod air;
 mod build_targets;
 mod call_evidence;
+mod preparation;
 mod errors;
 mod execution;
 pub mod log_targets;

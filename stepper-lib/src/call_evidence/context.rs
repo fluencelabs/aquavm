@@ -42,7 +42,8 @@ impl CallEvidenceCtx {
         Self {
             current_path,
             current_subtree_size,
-            new_path: CallEvidencePath::new(),
+            // the new path will contain at least current_path.len() elements
+            new_path: CallEvidencePath::with_capacity(current_path.len()),
         }
     }
 }
