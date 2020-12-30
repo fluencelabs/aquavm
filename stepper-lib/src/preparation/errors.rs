@@ -21,11 +21,14 @@ use serde::Error as SerdeJsonError;
 use std::env::VarError;
 use std::error::Error;
 
-/// Errors arised on the stepper preparation step.
+/// Errors happened during the stepper preparation step.
 #[derive(Debug)]
 pub(crate) enum PreparationError {
     /// Error occurred while parsing AIR script
     AIRParseError(String),
+
+    /// Errors occurred on call evidence deserialization.
+    CallEvidenceDeError(SerdeJsonError, Vec<u8>),
 
     /// Indicates that environment variable with current name doesn't set.
     CurrentPeerIdEnvError(VarError, String),
@@ -34,12 +37,9 @@ pub(crate) enum PreparationError {
     StateMergingError(DataMergingError),
 }
 
-/// Errors arised from merging previous data with a new supplied to the stepper.
+/// Errors arose out of merging previous data with a new.
 #[derive(Debug)]
 pub(crate) enum DataMergingError {
-    /// Errors occurred on call evidence deserialization.
-    CallEvidenceDeserializationError(SerdeJsonError, Vec<u8>),
-
     /// Errors occurred when previous and current evidence states are incompatible.
     IncompatibleEvidenceStates(EvidenceState, EvidenceState),
 
@@ -53,16 +53,17 @@ pub(crate) enum DataMergingError {
 impl Error for PreparationError {}
 impl Error for DataMergingError {}
 
-impl std::fmt::Display for DataMergingError {
+impl std::fmt::Display for PreparationError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
-        use StateMergingError::*;
+        use Self::*;
 
         match self {
-            CallEvidenceDeserializationError(serde_error, evidence_path) => {
+            AIRParseError(err_msg) => write!(f, "aqua script can't be parsed:\n{}", err),
+            CallEvidenceDeError(serde_error, evidence_path) => {
                 let print_error = move |path| {
                     write!(
                         f,
-                        "an error occurred while call evidence path deserialization on {:?}: {:?}",
+                        "an error occurred while call evidence path deserialization on \"{:?}\": {:?}",
                         path, serde_error
                     )
                 };
@@ -72,6 +73,21 @@ impl std::fmt::Display for DataMergingError {
                     Err(e) => print_error(e.into_bytes()),
                 };
             }
+            CurrentPeerIdEnvError(err, env_name) => write!(
+                f,
+                "the environment variable with name \"{}\" can't be obtained: {:?}",
+                env_name, err
+            ),
+            StateMergingError(err) => write!(f, "{}", err),
+        }
+    }
+}
+
+impl std::fmt::Display for DataMergingError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+        use Self::*;
+
+        match self {
             IncompatibleEvidenceStates(prev_state, current_state) => write!(
                 f,
                 "previous and current data have incompatible states: {:?} {:?}",
@@ -91,7 +107,6 @@ impl std::fmt::Display for DataMergingError {
     }
 }
 
-
 impl From<std::convert::Infallible> for PreparationError {
     fn from(_: std::convert::Infallible) -> Self {
         unreachable!()
@@ -103,4 +118,3 @@ impl From<std::convert::Infallible> for DataMergingError {
         unreachable!()
     }
 }
-

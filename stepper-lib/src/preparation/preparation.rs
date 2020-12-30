@@ -14,34 +14,33 @@
  * limitations under the License.
  */
 
+use super::merge_call_paths;
+use super::PreparationError;
 use crate::air::ExecutionCtx;
-use crate::call_evidence::merge_call_paths;
 use crate::call_evidence::CallEvidenceCtx;
 use crate::get_current_peer_id;
 use crate::log_targets::RUN_PARAMS;
-use crate::AquamarineError;
 use crate::CallEvidencePath;
-use crate::Result;
 
 use air_parser::ast::Instruction;
 
-pub(super) type PrepareResult<T> = Result<T, PrepareError>;
+type PreparationResult<T> = Result<T, PreparationError>;
 /// Represents result of the preparation step.
-pub(super) struct PrepareDescriptor<'ctx, 'i> {
+pub(crate) struct PreparationDescriptor<'ctx, 'i> {
     pub(crate) exec_ctx: ExecutionCtx<'ctx>,
     pub(crate) call_ctx: CallEvidenceCtx,
     pub(crate) aqua: Instruction<'i>,
 }
 
 /// Parse and prepare supplied data and aqua script.
-pub(super) fn prepare<'i>(
-    raw_prev_path: &[u8],
-    raw_path: &[u8],
+pub(crate) fn prepare<'i>(
+    prev_data: &[u8],
+    data: &[u8],
     raw_aqua: &'i str,
     init_peer_id: String,
-) -> Result<PrepareDescriptor<'static, 'i>> {
+) -> PreparationResult<PreparationDescriptor<'static, 'i>> {
     fn to_evidence_path(raw_path: &[u8]) -> Result<CallEvidencePath> {
-        use AquamarineError::CallEvidenceDeserializationError as CallDeError;
+        use PreparationError::CallEvidenceDeError as CallDeError;
 
         // treat empty string as an empty call evidence path allows abstracting from
         // the internal format for empty data.
@@ -52,8 +51,8 @@ pub(super) fn prepare<'i>(
         }
     }
 
-    let prev_path = to_evidence_path(raw_prev_path)?;
-    let path = to_evidence_path(raw_path)?;
+    let prev_path = to_evidence_path(prev_data)?;
+    let path = to_evidence_path(data)?;
 
     let aqua: Instruction<'i> = *air_parser::parse(raw_aqua).map_err(AquamarineError::AIRParseError)?;
 
@@ -66,7 +65,7 @@ pub(super) fn prepare<'i>(
     );
 
     let (exec_ctx, call_ctx) = make_contexts(prev_path, path, init_peer_id)?;
-    let result = PrepareDescriptor {
+    let result = PreparationDescriptor {
         exec_ctx,
         call_ctx,
         aqua,

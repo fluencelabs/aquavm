@@ -29,18 +29,17 @@
 mod air;
 mod build_targets;
 mod call_evidence;
-mod preparation;
 mod errors;
 mod execution;
 pub mod log_targets;
+mod preparation;
 
 pub use crate::call_evidence::CallEvidencePath;
 pub use crate::call_evidence::CallResult;
 pub use crate::call_evidence::EvidenceState;
-pub use crate::errors::AquamarineError;
+pub use crate::preparation::parse;
 pub use air_parser::ast::Instruction;
 pub use execution::execute_aqua;
-pub use execution::parse;
 
 pub use polyplets::ResolvedTriplet;
 pub use polyplets::SecurityTetraplet;
@@ -50,6 +49,7 @@ pub(crate) type JValue = serde_json::Value;
 
 pub(crate) use build_targets::call_service;
 pub(crate) use build_targets::get_current_peer_id;
+pub(crate) use errors::AquamarineError;
 
 use serde::Deserialize;
 use serde::Serialize;

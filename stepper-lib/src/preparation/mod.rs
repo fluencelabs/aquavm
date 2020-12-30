@@ -14,7 +14,24 @@
  * limitations under the License.
  */
 
+mod data_merging;
 mod errors;
 mod outcome;
 mod preparation;
-mod state_merging;
+
+pub use preparation::parse;
+
+pub(super) mod prelude {
+    pub(crate) use super::preparation::prepare;
+    pub(crate) use super::preparation::PreparationDescriptor;
+
+    pub(crate) mod outcome {
+        pub(crate) use crate::preparation::outcome::from_execution_errors;
+        pub(crate) use crate::preparation::outcome::from_path_and_peers;
+        pub(crate) use crate::preparation::outcome::from_preparation_error;
+    }
+}
+
+pub(self) use data_merging::merge_call_paths;
+pub(self) use errors::DataMergingError;
+pub(self) use errors::PreparationError;

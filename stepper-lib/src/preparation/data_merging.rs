@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
+use super::DataMergingError;
 use crate::call_evidence::CallEvidencePath;
 use crate::call_evidence::EvidenceState;
-use crate::call_evidence::StateMergingError;
 
 use std::rc::Rc;
 
-pub(super) type MergeResult<T> = Result<T, StateMergingError>;
+type MergeResult<T> = Result<T, DataMergingError>;
 
-fn merge_call_paths(
+pub(super) fn merge_call_paths(
     mut prev_path: CallEvidencePath,
     mut current_path: CallEvidencePath,
 ) -> MergeResult<CallEvidencePath> {

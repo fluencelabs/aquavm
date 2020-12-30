@@ -14,20 +14,14 @@
  * limitations under the License.
  */
 
-mod outcome;
-mod preparation;
-
-pub use preparation::parse;
-
-use preparation::prepare;
-use preparation::PrepareDescriptor;
-
 use crate::air::ExecutableInstruction;
+use crate::preparation::prelude::*;
+
 use stepper_interface::StepperOutcome;
 
-use std::convert::identity;
-
 pub fn execute_aqua(init_peer_id: String, aqua: String, prev_data: Vec<u8>, data: Vec<u8>) -> StepperOutcome {
+    use std::convert::identity;
+
     log::trace!(
         "aquamarine version is {}, init user id is {}",
         env!("CARGO_PKG_VERSION"),
@@ -40,22 +34,22 @@ pub fn execute_aqua(init_peer_id: String, aqua: String, prev_data: Vec<u8>, data
 fn execute_aqua_impl(
     init_peer_id: String,
     aqua: String,
-    prev_path: Vec<u8>,
-    path: Vec<u8>,
+    prev_data: Vec<u8>,
+    data: Vec<u8>,
 ) -> Result<StepperOutcome, StepperOutcome> {
-    let PrepareDescriptor {
+    let PreparationDescriptor {
         mut exec_ctx,
         mut call_ctx,
         aqua,
-    } = prepare(&prev_path, &path, aqua.as_str(), init_peer_id)
+    } = prepare(&prev_data, &data, aqua.as_str(), init_peer_id)
         // return the initial data in case of errors
-        .map_err(|e| outcome::error_from_raw_data(path, e))?;
+        .map_err(|e| outcome::from_preparation_error(data, e))?;
 
     aqua.execute(&mut exec_ctx, &mut call_ctx)
         // return new collected path in case of errors
-        .map_err(|e| outcome::error_from_data(&call_ctx.new_path, exec_ctx.next_peer_pks.clone(), e))?;
+        .map_err(|e| outcome::from_execution_errors(&call_ctx.new_path, exec_ctx.next_peer_pks.clone(), e))?;
 
-    let outcome = outcome::success(&call_ctx.new_path, exec_ctx.next_peer_pks);
+    let outcome = outcome::from_path_and_peers(&call_ctx.new_path, exec_ctx.next_peer_pks);
 
     Ok(outcome)
 }

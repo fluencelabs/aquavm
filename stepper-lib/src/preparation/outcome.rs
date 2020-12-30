@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use crate::AquamarineError;
+use super::PreparationError;
 
 use stepper_interface::StepperOutcome;
 use stepper_interface::STEPPER_SUCCESS;
@@ -24,7 +24,7 @@ use std::hash::Hash;
 
 /// Create StepperOutcome from supplied data and next_peer_pks,
 /// set ret_code to STEPPER_SUCCESS.
-pub(crate) fn success<T>(data: &T, next_peer_pks: Vec<String>) -> StepperOutcome
+pub(crate) fn from_path_and_peers<T>(data: &T, next_peer_pks: Vec<String>) -> StepperOutcome
 where
     T: ?Sized + Serialize,
 {
@@ -41,7 +41,7 @@ where
 
 /// Create StepperOutcome from supplied data and error,
 /// set ret_code based on the error.
-pub(crate) fn error_from_raw_data(data: impl Into<Vec<u8>>, err: AquamarineError) -> StepperOutcome {
+pub(crate) fn from_preparation_error(data: impl Into<Vec<u8>>, err: PreparationError) -> StepperOutcome {
     let ret_code = err.to_error_code();
     let data = data.into();
 
@@ -55,7 +55,7 @@ pub(crate) fn error_from_raw_data(data: impl Into<Vec<u8>>, err: AquamarineError
 
 /// Create StepperOutcome from supplied data, next_peer_pks and error,
 /// set ret_code based on the error.
-pub(crate) fn error_from_data<T>(data: &T, next_peer_pks: Vec<String>, err: AquamarineError) -> StepperOutcome
+pub(crate) fn from_execution_errors<T>(data: &T, next_peer_pks: Vec<String>, err: AquamarineError) -> StepperOutcome
 where
     T: ?Sized + Serialize,
 {
