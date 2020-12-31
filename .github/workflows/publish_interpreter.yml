@@ -61,13 +61,14 @@ jobs:
           yarn global add semver
           PATH="$(yarn global bin):$PATH"
 
+          STEPPER_CARGO_TOML="stepper/Cargo.toml"
           CARGO_TOML="crates/air-interpreter-wasm/Cargo.toml"
           # get package name from Cargo.toml
           RS_PKG_NAME="$(toml get "$CARGO_TOML" package.name | tr -d \")"
           JS_PKG_NAME="@fluencelabs/aquamarine-stepper"
 
           # get version from Cargo.toml
-          LOCAL_RUST_VERSION="$(toml get "$CARGO_TOML" package.version | tr -d \")"
+          LOCAL_RUST_VERSION="$(toml get "$STEPPER_CARGO_TOML" package.version | tr -d \")"
 
           # get & increment version from NPM
           JS_VERSION="$(yarn info --silent "$JS_PKG_NAME" version || true)"
