@@ -61,18 +61,56 @@ jobs:
       - name: Install jq & sponge
         run: sudo apt-get update && sudo apt-get --yes --force-yes install jq moreutils
 
-      - name: Install cargo-show
-        run: cargo install cargo-show || true
+      - name: Install cargo-show & toml-cli
+        run: cargo install cargo-show toml-cli || true
 
       - name: Get versions from npm & crates.io, and take the highest one
         run: |
+          # install semver and add it to PATH
           yarn global add semver
           PATH="$(yarn global bin):$PATH"
-          JS_VERSION="$(yarn info --silent @fluencelabs/aquamarine-stepper-${{ env.BRANCH_NAME }} version || true)"
-          RS_VERSION="$((cargo show --json air-interpreter-wasm-${{ env.BRANCH_NAME }} | jq -r .crate.max_version) 2>/dev/null || true)"
-          MAX_VERSION="$(semver "$JS_VERSION" "$RS_VERSION" "0.0.0" | tail -n1)"
-          FINAL_VERSION="$(semver --increment patch "$MAX_VERSION")"
-          echo "FINAL_VERSION=$FINAL_VERSION" | tee -a $GITHUB_ENV
+
+          CARGO_TOML="crates/air-interpreter-wasm/Cargo.toml"
+
+          # sanitize branch name so it can be used as a semver suffix (replace [^0-9a-zA-Z-] with hyphen)
+          SANITIZED_BRANCH="$(echo -n "${{ env.BRANCH_NAME }}" | tr -C '[:alnum:]-' -)"
+
+          # get package name from Cargo.toml
+          PKG_NAME="$(toml get "$CARGO_TOML" package.name | tr -d \")"
+          JS_PKG_NAME="@fluencelabs/aquamarine-stepper"
+
+          ### NPM
+          # take all versions from npm and replace single quotes with double quotes
+          NPM_VERSIONS=$(yarn info --silent "$JS_PKG_NAME" versions 2>/dev/null | tr \' \")
+          # take only versions that contain branch name
+          NPM_VERSIONS_FILTERED=$(echo $NPM_VERSIONS | jq -r ".[] | select(contains(\"$SANITIZED_BRANCH\"))")
+          # flatten into a single line
+          NPM_VERSIONS_FLATTENED=$(echo $NPM_VERSIONS_FILTERED | awk '{print}' ORS=' ')
+          # sort versions according to semver, take highest (last)
+          LAST_NPM_VERSION="$(semver -p $(echo $NPM_VERSIONS_FLATTENED) | tail -n1 || true)"
+          # increment prerelease part of the version
+          PRERELEASE_NPM_VERSION="$(semver --increment prerelease --preid "$SANITIZED_BRANCH" "${LAST_NPM_VERSION}" || true)"
+
+          ### CRATES.IO
+          CRATE_VERSIONS=$(cargo show --json "$PKG_NAME")
+          CRATE_VERSIONS_FILTERED=$(echo $CRATE_VERSIONS | jq -r ".versions[] | .num | select(contains(\"$SANITIZED_BRANCH\"))")
+          CRATE_VERSIONS_FLATTENED=$(echo $CRATE_VERSIONS_FILTERED | awk '{print}' ORS=' ')
+          LAST_CRATE_VERSION="$(semver -p $(echo $CRATE_VERSIONS_FLATTENED) | tail -n1 || true)"
+          PRERELEASE_CRATE_VERSION="$(semver --increment prerelease --preid "$SANITIZED_BRANCH" "${LAST_CRATE_VERSION}" || true)"
+
+          ### LOCAL
+          ### (NOTE: the following code assumes that local versions do not contain prerelease suffix; existing suffix will be ignored)
+          # take local Rust version
+          LOCAL_RUST_VERSION="$(toml get "$CARGO_TOML" package.version | tr -d \")"
+          LOCAL_RUST_PRERELEASE_VERSION="$(semver --increment prerelease --preid "$SANITIZED_BRANCH" "${LOCAL_RUST_VERSION}-0")" # added '-0' here to avoid semver erroneously increment patch octet. Any suffix works, '-0' is chosen deliberately.
+
+          ### SAVE FINAL VERSION TO ENV
+          # take the highest version
+          MAX_VERSION="$(semver "$LOCAL_RUST_PRERELEASE_VERSION" "$PRERELEASE_NPM_VERSION" "$PRERELEASE_CRATE_VERSION" | tail -n1)"
+          # save info to env
+          echo "FINAL_VERSION=$MAX_VERSION" | tee -a $GITHUB_ENV
+          echo "PKG_NAME=$PKG_NAME" | tee -a $GITHUB_ENV
+          echo "JS_PKG_NAME=$JS_PKG_NAME" | tee -a $GITHUB_ENV
 
 ### === JavaScript package release ===
       - name: Install wasm-pack
@@ -105,12 +143,12 @@ jobs:
           EOF
         working-directory: pkg
 
-      - name: Prepare package.json for publishing
+      - name: Prepare package.json for publishing of ${{ env.JS_PKG_NAME }} @ ${{ env.FINAL_VERSION }}
         run: |
           cat pkg/package.json | jq --arg name aquamarine.wasm.base64.js \
             '. + {
               files: [ "aquamarine.wasm.base64.js", "aquamarine.wasm.base64.d.ts",  "index.js", "index.d.ts" ],
-              "name": "@fluencelabs/aquamarine-stepper-${{ env.BRANCH_NAME }}",
+              "name": "${{ env.JS_PKG_NAME }}",
               "description": "Aquamarine IR interpreter as base64 WASM",
               "main": "index.js",
               "repository": "https://github.com/fluencelabs/aquamarine",
@@ -125,10 +163,6 @@ jobs:
           mv pkg/package_new.json pkg/package.json
 
       - run: cat pkg/package.json
-
-    ### Set default version
-      - run: yarn version --new-version 0.0.0 --no-git-tag-version
-        working-directory: pkg
 
     ### Set version to FINAL_VERSION
       - run: yarn version --new-version ${{ env.FINAL_VERSION }} --no-git-tag-version || true
@@ -155,8 +189,8 @@ jobs:
 
 
 ### === Rust package release ===
-      - name: Install fcli toml-cli
-        run: cargo install fcli toml-cli || true
+      - name: Install fcli
+        run: cargo install fcli || true
 
       - name: Build aquamarine.wasm for node
         run: fce build -p aquamarine --release --features fce
@@ -165,15 +199,13 @@ jobs:
       - name: Copy aquamarine.wasm to air-interpreter-wasm
         run: cp target/wasm32-wasi/release/aquamarine.wasm crates/air-interpreter-wasm/aquamarine.wasm
 
-      - name: Set project version to ${{ env.FINAL_VERSION }}_${{ env.BRANCH_NAME }}
+      - name: Set project name@version to ${{ env.PKG_NAME }}@${{ env.FINAL_VERSION }}
         run: |
           PATH="~/.cargo/bin:$PATH"
           toml set Cargo.toml package.version "${{ env.FINAL_VERSION }}" | sponge Cargo.toml
 
           NAME=$(toml get Cargo.toml package.name | jq -r .)
-          toml set Cargo.toml package.name "${NAME}_${BRANCH_NAME}" | sponge Cargo.toml
-
-          cat Cargo.toml
+          toml set Cargo.toml package.name "${{ env.PKG_NAME }}" | sponge Cargo.toml
         working-directory: crates/air-interpreter-wasm
 
       - name: Login to crates.io
