@@ -26,7 +26,7 @@ pub(super) mod prelude {
     pub(crate) use super::preparation::PreparationDescriptor;
 
     pub(crate) mod outcome {
-        pub(crate) use crate::preparation::outcome::from_execution_errors;
+        pub(crate) use crate::preparation::outcome::from_execution_error;
         pub(crate) use crate::preparation::outcome::from_path_and_peers;
         pub(crate) use crate::preparation::outcome::from_preparation_error;
     }

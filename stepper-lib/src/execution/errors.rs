@@ -26,16 +26,14 @@ use serde_json::Error as SerdeJsonError;
 use std::env::VarError;
 use std::error::Error;
 
+/// Errors arised while executing AIR script.
 #[derive(Debug)]
-pub enum AquamarineError {
-    /// Error occurred while parsing AIR script
-    AIRParseError(String),
-
+pub enum ExecutionError {
     /// Errors occurred while parsing function arguments of an expression.
     FuncArgsSerializationError(JValue, SerdeJsonError),
 
     /// Errors occurred while parsing returned by call_service value.
-    CallServiceResultDeserializationError(CallServiceResult, SerdeJsonError),
+    CallServiceResultDeError(CallServiceResult, SerdeJsonError),
 
     /// Indicates that environment variable with name CURRENT_PEER_ID isn't set.
     CurrentPeerIdEnvError(VarError, String),
@@ -95,118 +93,118 @@ pub enum AquamarineError {
     ShadowingError(String),
 }
 
-impl AquamarineError {
+impl ExecutionError {
     pub(crate) fn to_error_code(&self) -> i32 {
         match self {
-            AquamarineError::AIRParseError(_) => 1,
-            AquamarineError::FuncArgsSerializationError(..) => 2,
-            AquamarineError::CallServiceResultDeserializationError(..) => 3,
-            AquamarineError::CurrentPeerIdEnvError(..) => 4,
-            AquamarineError::InstructionError(..) => 5,
-            AquamarineError::LocalServiceError(..) => 6,
-            AquamarineError::VariableNotFound(..) => 7,
-            AquamarineError::MultipleVariablesFound(..) => 8,
-            AquamarineError::JValueJsonPathError(..) => 9,
-            AquamarineError::JValueAccJsonPathError(..) => 10,
-            AquamarineError::IncompatibleJValueType(..) => 11,
-            AquamarineError::IncompatibleAValueType(..) => 12,
-            AquamarineError::MultipleValuesInJsonPath(..) => 13,
-            AquamarineError::FoldStateNotFound(..) => 14,
-            AquamarineError::MultipleFoldStates(..) => 15,
-            AquamarineError::InvalidEvidenceState(..) => 16,
-            AquamarineError::CallEvidenceDeserializationError(..) => 17,
-            AquamarineError::CallEvidenceSerializationError(..) => 18,
-            AquamarineError::IncompatibleEvidenceStates(..) => 19,
-            AquamarineError::IncompatibleCallResults(..) => 20,
-            AquamarineError::EvidencePathTooSmall(..) => 21,
-            AquamarineError::ShadowingError(_) => 22,
+            ExecutionError::AIRParseError(_) => 1,
+            ExecutionError::FuncArgsSerializationError(..) => 2,
+            ExecutionError::CallServiceResultDeError(..) => 3,
+            ExecutionError::CurrentPeerIdEnvError(..) => 4,
+            ExecutionError::InstructionError(..) => 5,
+            ExecutionError::LocalServiceError(..) => 6,
+            ExecutionError::VariableNotFound(..) => 7,
+            ExecutionError::MultipleVariablesFound(..) => 8,
+            ExecutionError::JValueJsonPathError(..) => 9,
+            ExecutionError::JValueAccJsonPathError(..) => 10,
+            ExecutionError::IncompatibleJValueType(..) => 11,
+            ExecutionError::IncompatibleAValueType(..) => 12,
+            ExecutionError::MultipleValuesInJsonPath(..) => 13,
+            ExecutionError::FoldStateNotFound(..) => 14,
+            ExecutionError::MultipleFoldStates(..) => 15,
+            ExecutionError::InvalidEvidenceState(..) => 16,
+            ExecutionError::CallEvidenceDeserializationError(..) => 17,
+            ExecutionError::CallEvidenceSerializationError(..) => 18,
+            ExecutionError::IncompatibleEvidenceStates(..) => 19,
+            ExecutionError::IncompatibleCallResults(..) => 20,
+            ExecutionError::EvidencePathTooSmall(..) => 21,
+            ExecutionError::ShadowingError(_) => 22,
         }
     }
 }
 
-impl Error for AquamarineError {}
+impl Error for ExecutionError {}
 
-impl std::fmt::Display for AquamarineError {
+impl std::fmt::Display for ExecutionError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         match self {
-            AquamarineError::AIRParseError(err) => write!(f, "aqua script can't be parsed:\n{}", err),
-            AquamarineError::FuncArgsSerializationError(args, err) => write!(
+            ExecutionError::AIRParseError(err) => write!(f, "aqua script can't be parsed:\n{}", err),
+            ExecutionError::FuncArgsSerializationError(args, err) => write!(
                 f,
                 "function arguments {} can't be serialized or deserialized with an error: {:?}",
                 args, err
             ),
-            AquamarineError::CallServiceResultDeserializationError(result, err) => write!(
+            ExecutionError::CallServiceResultDeError(result, err) => write!(
                 f,
                 "call_service result \"{:?}\" can't be serialized or deserialized with an error: {:?}",
                 result, err
             ),
-            AquamarineError::CurrentPeerIdEnvError(err, env_name) => write!(
+            ExecutionError::CurrentPeerIdEnvError(err, env_name) => write!(
                 f,
                 "the environment variable \"{}\" can't be obtained: {:?}",
                 env_name, err
             ),
-            AquamarineError::InstructionError(err_msg) => write!(f, "{}", err_msg),
-            AquamarineError::LocalServiceError(err_msg) => write!(f, "{}", err_msg),
-            AquamarineError::VariableNotFound(variable_name) => {
+            ExecutionError::InstructionError(err_msg) => write!(f, "{}", err_msg),
+            ExecutionError::LocalServiceError(err_msg) => write!(f, "{}", err_msg),
+            ExecutionError::VariableNotFound(variable_name) => {
                 write!(f, "variable with name {} isn't present in data", variable_name)
             }
-            AquamarineError::MultipleVariablesFound(variable_name) => {
+            ExecutionError::MultipleVariablesFound(variable_name) => {
                 write!(f, "multiple variables found for name {} in data", variable_name)
             }
-            AquamarineError::JValueJsonPathError(value, json_path, json_path_err) => write!(
+            ExecutionError::JValueJsonPathError(value, json_path, json_path_err) => write!(
                 f,
                 "variable with path {} not found in {:?} with error: {:?}",
                 json_path, value, json_path_err
             ),
-            AquamarineError::JValueAccJsonPathError(value, json_path, json_path_err) => write!(
+            ExecutionError::JValueAccJsonPathError(value, json_path, json_path_err) => write!(
                 f,
                 "variable with path {} not found in {:?} with error: {:?}",
                 json_path, value, json_path_err
             ),
-            AquamarineError::IncompatibleJValueType(jvalue, desired_type) => {
+            ExecutionError::IncompatibleJValueType(jvalue, desired_type) => {
                 write!(f, "got jvalue \"{:?}\", but {} type is needed", jvalue, desired_type,)
             }
-            AquamarineError::IncompatibleAValueType(avalue, desired_type) => {
+            ExecutionError::IncompatibleAValueType(avalue, desired_type) => {
                 write!(f, "got avalue {}, but {} type is needed", avalue, desired_type,)
             }
-            AquamarineError::MultipleValuesInJsonPath(json_path) => {
+            ExecutionError::MultipleValuesInJsonPath(json_path) => {
                 write!(f, "multiple variables found for this json path {}", json_path)
             }
-            AquamarineError::FoldStateNotFound(iterator) => {
+            ExecutionError::FoldStateNotFound(iterator) => {
                 write!(f, "fold state not found for this iterable {}", iterator)
             }
-            AquamarineError::MultipleFoldStates(iterator) => {
+            ExecutionError::MultipleFoldStates(iterator) => {
                 write!(f, "multiple fold states found for iterable {}", iterator)
             }
-            AquamarineError::InvalidEvidenceState(found, expected) => write!(
+            ExecutionError::InvalidEvidenceState(found, expected) => write!(
                 f,
                 "invalid evidence state: expected {}, but found {:?}",
                 expected, found
             ),
-            AquamarineError::CallEvidenceDeserializationError(err, path) => write!(
+            ExecutionError::CallEvidenceDeserializationError(err, path) => write!(
                 f,
                 "an error occurred while call evidence path deserialization on {:?}: {:?}",
                 path, err
             ),
-            AquamarineError::CallEvidenceSerializationError(err) => {
+            ExecutionError::CallEvidenceSerializationError(err) => {
                 write!(f, "an error occurred while data serialization: {:?}", err)
             }
-            AquamarineError::IncompatibleEvidenceStates(prev_state, current_state) => write!(
+            ExecutionError::IncompatibleEvidenceStates(prev_state, current_state) => write!(
                 f,
                 "previous and current data have incompatible states: {:?} {:?}",
                 prev_state, current_state
             ),
-            AquamarineError::IncompatibleCallResults(prev_call_result, current_call_result) => write!(
+            ExecutionError::IncompatibleCallResults(prev_call_result, current_call_result) => write!(
                 f,
                 "previous and current call results are incompatible: {:?} {:?}",
                 prev_call_result, current_call_result
             ),
-            AquamarineError::EvidencePathTooSmall(actual_count, desired_count) => write!(
+            ExecutionError::EvidencePathTooSmall(actual_count, desired_count) => write!(
                 f,
                 "evidence path remains {} elements, but {} requires by Par",
                 actual_count, desired_count
             ),
-            AquamarineError::ShadowingError(variable_name) => write!(
+            ExecutionError::ShadowingError(variable_name) => write!(
                 f,
                 "vairable with name = '{}' can't be shadowed, shadowing is supported only for scalar values",
                 variable_name
@@ -215,7 +213,7 @@ impl std::fmt::Display for AquamarineError {
     }
 }
 
-impl From<std::convert::Infallible> for AquamarineError {
+impl From<std::convert::Infallible> for ExecutionError {
     fn from(_: std::convert::Infallible) -> Self {
         unreachable!()
     }

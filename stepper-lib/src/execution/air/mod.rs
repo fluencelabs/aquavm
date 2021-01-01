@@ -15,12 +15,9 @@
  */
 
 mod call;
-mod execution_context;
 mod fold;
-mod jvaluable;
 mod null;
 mod par;
-pub(crate) mod resolve;
 mod seq;
 mod xor;
 

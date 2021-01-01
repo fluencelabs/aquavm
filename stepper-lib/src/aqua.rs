@@ -47,7 +47,7 @@ fn execute_aqua_impl(
 
     aqua.execute(&mut exec_ctx, &mut call_ctx)
         // return new collected path in case of errors
-        .map_err(|e| outcome::from_execution_errors(&call_ctx.new_path, exec_ctx.next_peer_pks.clone(), e))?;
+        .map_err(|e| outcome::from_execution_error(&call_ctx.new_path, exec_ctx.next_peer_pks.clone(), e))?;
 
     let outcome = outcome::from_path_and_peers(&call_ctx.new_path, exec_ctx.next_peer_pks);
 

@@ -39,15 +39,15 @@ pub(crate) fn prepare<'i>(
     raw_aqua: &'i str,
     init_peer_id: String,
 ) -> PreparationResult<PreparationDescriptor<'static, 'i>> {
-    fn to_evidence_path(raw_path: &[u8]) -> Result<CallEvidencePath> {
+    fn to_evidence_path(raw_data: &[u8]) -> PreparationResult<CallEvidencePath> {
         use PreparationError::CallEvidenceDeError as CallDeError;
 
         // treat empty string as an empty call evidence path allows abstracting from
         // the internal format for empty data.
-        if raw_path.is_empty() {
+        if raw_data.is_empty() {
             Ok(CallEvidencePath::new())
         } else {
-            serde_json::from_slice(&raw_path).map_err(|err| CallDeError(err, raw_path.to_vec()))
+            serde_json::from_slice(&raw_data).map_err(|err| CallDeError(err, raw_data.to_vec()))
         }
     }
 
@@ -80,10 +80,11 @@ fn make_contexts(
     prev_path: CallEvidencePath,
     path: CallEvidencePath,
     init_peer_id: String,
-) -> Result<(ExecutionCtx<'static>, CallEvidenceCtx)> {
-    use AquamarineError::CurrentPeerIdEnvError as EnvError;
+) -> PreparationResult<(ExecutionCtx<'static>, CallEvidenceCtx)> {
+    use crate::build_targets::CURRENT_PEER_ID_ENV_NAME;
+    use PreparationError::CurrentPeerIdEnvError as EnvError;
 
-    let current_peer_id = get_current_peer_id().map_err(|e| EnvError(e, String::from("CURRENT_PEER_ID")))?;
+    let current_peer_id = get_current_peer_id().map_err(|e| EnvError(e, String::from(CURRENT_PEER_ID_ENV_NAME)))?;
     log::trace!(target: RUN_PARAMS, "current peer id {}", current_peer_id);
 
     let exec_ctx = ExecutionCtx::new(current_peer_id, init_peer_id);
@@ -94,7 +95,7 @@ fn make_contexts(
 }
 
 /// Parse an AIR script to AST.
-pub fn parse(script: &str) -> Result<Instruction<'_>> {
-    let ast = air_parser::parse(script).map_err(AquamarineError::AIRParseError)?;
+pub fn parse(script: &str) -> PreparationResult<Instruction<'_>> {
+    let ast = air_parser::parse(script).map_err(PreparationError::AIRParseError)?;
     Ok(*ast)
 }

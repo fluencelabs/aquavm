@@ -26,20 +26,20 @@
     unreachable_patterns
 )]
 
-mod air;
 mod build_targets;
-mod call_evidence;
-mod errors;
+mod contexts;
 mod execution;
-pub mod log_targets;
 mod preparation;
+
+mod aqua;
+pub mod log_targets;
 
 pub use crate::call_evidence::CallEvidencePath;
 pub use crate::call_evidence::CallResult;
 pub use crate::call_evidence::EvidenceState;
 pub use crate::preparation::parse;
 pub use air_parser::ast::Instruction;
-pub use execution::execute_aqua;
+pub use aqua::execute_aqua;
 
 pub use polyplets::ResolvedTriplet;
 pub use polyplets::SecurityTetraplet;

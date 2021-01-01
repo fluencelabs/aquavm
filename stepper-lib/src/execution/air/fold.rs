@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-mod iterable;
 mod utils;
 
 pub(crate) use iterable::Iterable;

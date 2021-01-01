@@ -18,8 +18,6 @@ use crate::AValue;
 
 use std::collections::HashMap;
 use std::collections::VecDeque;
-use std::fmt::Display;
-use std::fmt::Formatter;
 
 /// Contains all necessary state needed to execute aqua script.
 pub(crate) struct ExecutionCtx<'i> {
@@ -60,6 +58,9 @@ impl<'i> ExecutionCtx<'i> {
         }
     }
 }
+
+use std::fmt::Display;
+use std::fmt::Formatter;
 
 impl<'i> Display for ExecutionCtx<'i> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
