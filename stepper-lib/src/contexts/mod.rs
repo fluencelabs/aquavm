@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-mod call_evidence_context;
 mod execution_context;
-mod state;
+mod execution_trace_context;
 
-pub use state::CallEvidencePath;
-pub use state::CallResult;
-pub use state::EvidenceState;
+pub use execution_trace_context::CallResult;
+pub use execution_trace_context::ExecutedState;
+pub use execution_trace_context::ExecutionTrace;
+
+pub(crate) use execution_context::AValue;
+pub(crate) use execution_context::ExecutionCtx;
+pub(crate) use execution_trace_context::ExecutionTraceCtx;
 
 pub(crate) use context::CallEvidenceCtx;

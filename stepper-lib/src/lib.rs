@@ -45,51 +45,7 @@ pub use polyplets::ResolvedTriplet;
 pub use polyplets::SecurityTetraplet;
 pub use stepper_interface::StepperOutcome;
 
-pub(crate) type Result<T> = std::result::Result<T, AquamarineError>;
 pub(crate) type JValue = serde_json::Value;
 
 pub(crate) use build_targets::call_service;
 pub(crate) use build_targets::get_current_peer_id;
-pub(crate) use errors::AquamarineError;
-
-use serde::Deserialize;
-use serde::Serialize;
-
-use std::cell::RefCell;
-use std::fmt::Display;
-use std::fmt::Formatter;
-use std::rc::Rc;
-
-#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
-pub struct ResolvedCallResult {
-    pub result: Rc<JValue>,
-    pub triplet: Rc<ResolvedTriplet>,
-}
-
-pub(crate) enum AValue<'i> {
-    JValueRef(ResolvedCallResult),
-    JValueAccumulatorRef(RefCell<Vec<ResolvedCallResult>>),
-    JValueFoldCursor(crate::air::FoldState<'i>),
-}
-
-pub(crate) trait JValuable {}
-
-impl<'i> Display for AValue<'i> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        match self {
-            AValue::JValueRef(value) => write!(f, "{:?}", value)?,
-            AValue::JValueAccumulatorRef(acc) => {
-                write!(f, "[ ")?;
-                for value in acc.borrow().iter() {
-                    write!(f, "{:?} ", value)?;
-                }
-                write!(f, "]")?;
-            }
-            AValue::JValueFoldCursor(_) => {
-                write!(f, "cursor")?;
-            }
-        }
-
-        Ok(())
-    }
-}

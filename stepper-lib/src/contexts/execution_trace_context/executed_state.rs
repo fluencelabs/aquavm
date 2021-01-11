@@ -22,13 +22,11 @@ use serde::Deserialize;
 use serde::Serialize;
 use std::rc::Rc;
 
-pub type CallEvidencePath = std::collections::VecDeque<EvidenceState>;
-
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum CallResult {
     /// Request was sent to a target node by node with such public key and it shouldn't be called again.
-    RequestSent(String),
+    RequestSentBy(String),
 
     /// A corresponding call's been already executed with such value and result.
     Executed(Rc<JValue>),
@@ -39,12 +37,12 @@ pub enum CallResult {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub enum EvidenceState {
+pub enum ExecutedState {
     Par(usize, usize),
     Call(CallResult),
 }
 
-impl std::fmt::Display for EvidenceState {
+impl std::fmt::Display for ExecutedState {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         use CallResult::*;
         use EvidenceState::*;

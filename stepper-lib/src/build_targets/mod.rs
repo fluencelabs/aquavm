@@ -19,8 +19,8 @@ mod fce_target;
 #[cfg(not(feature = "fce"))]
 mod wasm_bindgen_target;
 
-use serde_derive::Deserialize;
-use serde_derive::Serialize;
+use serde::Deserialize;
+use serde::Serialize;
 
 pub const CALL_SERVICE_SUCCESS: i32 = 0;
 

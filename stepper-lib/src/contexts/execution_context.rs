@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-use crate::AValue;
+mod avalue;
+
+pub(crate) use avalue::AValue;
 
 use std::collections::HashMap;
 use std::collections::VecDeque;

@@ -17,6 +17,7 @@
 use super::EvidenceState;
 
 use serde::Error as SerdeJsonError;
+use thiserror::Error as ThisError;
 
 use std::env::VarError;
 use std::error::Error;
@@ -38,15 +39,18 @@ pub(crate) enum PreparationError {
 }
 
 /// Errors arose out of merging previous data with a new.
-#[derive(Debug)]
+#[derive(ThisError, Debug)]
 pub(crate) enum DataMergingError {
     /// Errors occurred when previous and current evidence states are incompatible.
+    #[error("previous and current data have incompatible states: '{0:?}' '{1:?}'")]
     IncompatibleEvidenceStates(EvidenceState, EvidenceState),
 
     /// Errors occurred when previous and current call results are incompatible.
+    #[error("previous and current call results are incompatible: '{0:?}' '{1:?}'")]
     IncompatibleCallResults(CallResult, CallResult),
 
     /// Errors occurred when evidence path contains less elements then corresponding Par has.
+    #[error("evidence path has {0} elements, but {1} requires by Par")]
     EvidencePathTooSmall(usize, usize),
 }
 
