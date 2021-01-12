@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use stepper_lib::parse;
+use stepper_lib::parse::parse;
 
 /// Parse AIR script and return it as minified JSON
 pub fn ast(script: String) -> String {
