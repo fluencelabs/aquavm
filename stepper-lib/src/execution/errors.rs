@@ -43,7 +43,7 @@ pub(crate) enum ExecutionError {
     VariableNotFound(String),
 
     /// Multiple values for such name found.
-    #[error("multiple variables found for name {0} in data")]
+    #[error("multiple variables found for name '{0}' in data")]
     MultipleVariablesFound(String),
 
     /// An error occurred while trying to apply json path to this JValue.
@@ -78,7 +78,7 @@ pub(crate) enum ExecutionError {
     #[error("invalid evidence state: expected '{0}', but actual {1:?}")]
     InvalidExecutedState(String, ExecutedState),
 
-    /// Errors occurred when evidence path contains less elements then corresponding Par has.
+    /// Errors encountered while shadowing non-scalar values.
     #[error("variable with name '{0}' can't be shadowed, shadowing is supported only for scalar values")]
     ShadowingError(String),
 
