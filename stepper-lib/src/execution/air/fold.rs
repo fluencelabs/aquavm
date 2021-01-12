@@ -16,17 +16,15 @@
 
 mod utils;
 
-use iterable::Iterable;
-use iterable::IterableItem;
-
 use super::ExecutionCtx;
 use super::ExecutionError;
 use super::ExecutionResult;
 use super::ExecutionTraceCtx;
 use super::Instruction;
+use crate::contexts::execution::AValue;
+use crate::contexts::execution::ResolvedCallResult;
+use crate::execution::boxed_value::*;
 use crate::log_instruction;
-use crate::AValue;
-use crate::ResolvedCallResult;
 
 use air_parser::ast::Fold;
 use air_parser::ast::Next;
@@ -55,7 +53,7 @@ impl<'i> FoldState<'i> {
 
 impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut ExecutionTraceCtx) -> ExecutionResult<()> {
-        use AquamarineError::MultipleFoldStates;
+        use ExecutionError::MultipleFoldStates;
 
         log_instruction!(fold, exec_ctx, trace_ctx);
 
@@ -84,9 +82,9 @@ impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
 }
 
 impl<'i> super::ExecutableInstruction<'i> for Next<'i> {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut ExecutionTraceCtx) -> Result<()> {
-        use AquamarineError::FoldStateNotFound;
-        use AquamarineError::IncompatibleAValueType;
+    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut ExecutionTraceCtx) -> ExecutionResult<()> {
+        use ExecutionError::FoldStateNotFound;
+        use ExecutionError::IncompatibleAValueType;
 
         log_instruction!(next, exec_ctx, trace_ctx);
 

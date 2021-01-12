@@ -15,6 +15,7 @@
  */
 
 use super::ExecutionResult;
+use super::JValuable;
 use crate::contexts::execution::ResolvedCallResult;
 use crate::JValue;
 use crate::SecurityTetraplet;
@@ -22,6 +23,7 @@ use crate::SecurityTetraplet;
 use jsonpath_lib::select_with_iter;
 
 use std::borrow::Cow;
+use std::ops::Deref;
 
 impl JValuable for std::cell::Ref<'_, Vec<ResolvedCallResult>> {
     fn apply_json_path(&self, json_path: &str) -> ExecutionResult<Vec<&JValue>> {

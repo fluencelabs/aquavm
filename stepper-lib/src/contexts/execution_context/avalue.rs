@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+use crate::execution::FoldState;
+use crate::JValue;
+use crate::ResolvedTriplet;
+
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -31,7 +35,7 @@ pub struct ResolvedCallResult {
 pub(crate) enum AValue<'i> {
     JValueRef(ResolvedCallResult),
     JValueAccumulatorRef(RefCell<Vec<ResolvedCallResult>>),
-    JValueFoldCursor(crate::air::FoldState<'i>),
+    JValueFoldCursor(FoldState<'i>),
 }
 
 impl<'i> Display for AValue<'i> {

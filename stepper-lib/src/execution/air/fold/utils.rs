@@ -14,16 +14,8 @@
  * limitations under the License.
  */
 
-use super::;
-use super::ExecutionCtx;
-use super::ExecutionError;
-use super::ExecutionResult;
-use super::Iterable;
-use super::IterableItem;
-use crate::air::JValuable;
-use crate::AValue;
+use super::*;
 use crate::JValue;
-use crate::ResolvedCallResult;
 use crate::ResolvedTriplet;
 use crate::SecurityTetraplet;
 
@@ -41,25 +33,21 @@ pub(super) type IterableValue = Box<dyn for<'ctx> Iterable<'ctx, Item = Iterable
 pub(super) fn construct_iterable_value<'ctx>(
     value: &InstructionValue<'ctx>,
     exec_ctx: &ExecutionCtx<'ctx>,
-) -> Result<Option<IterableValue>> {
-    use AquamarineError::AIRParseError;
+) -> ExecutionResult<Option<IterableValue>> {
+    use ExecutionError::InvalidFoldIterable;
 
     match value {
         InstructionValue::Variable(name) => handle_instruction_variable(exec_ctx, name),
         InstructionValue::JsonPath { variable, path } => handle_instruction_json_path(exec_ctx, variable, path),
         // TODO: check statically that it isn't possible to use string literals and so on as fold iterable
-        _ => {
-            return Err(AIRParseError(String::from(
-                "only variables could be used as fold iterables",
-            )))
-        }
+        v => return Err(InvalidFoldIterable(format!("{:?}", v))),
     }
 }
 
 fn handle_instruction_variable<'ctx>(
     exec_ctx: &ExecutionCtx<'ctx>,
     variable_name: &str,
-) -> Result<Option<IterableValue>> {
+) -> ExecutionResult<Option<IterableValue>> {
     let iterable: Option<IterableValue> = match exec_ctx.data_cache.get(variable_name) {
         Some(AValue::JValueRef(call_result)) => from_call_result(call_result.clone())?,
         Some(AValue::JValueAccumulatorRef(acc)) => {
@@ -81,15 +69,15 @@ fn handle_instruction_variable<'ctx>(
             let call_result = ResolvedCallResult { result, triplet };
             from_call_result(call_result)?
         }
-        _ => return Err(AquamarineError::VariableNotFound(variable_name.to_string())),
+        _ => return Err(ExecutionError::VariableNotFound(variable_name.to_string())),
     };
 
     Ok(iterable)
 }
 
 /// Constructs iterable value from resolved call result.
-fn from_call_result(call_result: ResolvedCallResult) -> Result<Option<IterableValue>> {
-    use AquamarineError::IncompatibleJValueType;
+fn from_call_result(call_result: ResolvedCallResult) -> ExecutionResult<Option<IterableValue>> {
+    use ExecutionError::IncompatibleJValueType;
 
     let len = match &call_result.result.deref() {
         JValue::Array(array) => {
@@ -112,8 +100,8 @@ fn handle_instruction_json_path<'ctx>(
     exec_ctx: &ExecutionCtx<'ctx>,
     variable_name: &str,
     json_path: &str,
-) -> Result<Option<IterableValue>> {
-    use AquamarineError::JValueAccJsonPathError;
+) -> ExecutionResult<Option<IterableValue>> {
+    use ExecutionError::JValueAccJsonPathError;
 
     let iterable: Option<IterableValue> = match exec_ctx.data_cache.get(variable_name) {
         Some(AValue::JValueRef(variable)) => {
@@ -149,14 +137,17 @@ fn handle_instruction_json_path<'ctx>(
 
             from_jvalues(jvalues, triplet, json_path)
         }
-        _ => return Err(AquamarineError::VariableNotFound(variable_name.to_string())),
+        _ => return Err(ExecutionError::VariableNotFound(variable_name.to_string())),
     };
 
     Ok(iterable)
 }
 
-fn apply_json_path<'jvalue, 'str>(jvalue: &'jvalue JValue, json_path: &'str str) -> Result<Vec<&'jvalue JValue>> {
-    use AquamarineError::JValueJsonPathError;
+fn apply_json_path<'jvalue, 'str>(
+    jvalue: &'jvalue JValue,
+    json_path: &'str str,
+) -> ExecutionResult<Vec<&'jvalue JValue>> {
+    use ExecutionError::JValueJsonPathError;
 
     select(jvalue, json_path).map_err(|e| JValueJsonPathError(jvalue.clone(), json_path.to_string(), e))
 }

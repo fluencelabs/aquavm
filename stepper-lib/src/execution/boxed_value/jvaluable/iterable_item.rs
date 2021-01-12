@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
+use super::ExecutionError::JValueJsonPathError as JsonPathError;
 use super::ExecutionResult;
-use crate::contexts::execution::ResolvedCallResult;
+use super::IterableItem;
+use super::JValuable;
 use crate::JValue;
 use crate::SecurityTetraplet;
 
-use jsonpath::select;
+use jsonpath_lib::select;
+
+use std::borrow::Cow;
+use std::ops::Deref;
 
 impl<'ctx> JValuable for IterableItem<'ctx> {
     fn apply_json_path(&self, json_path: &str) -> ExecutionResult<Vec<&JValue>> {
-        use crate::AquamarineError::JValueJsonPathError as JsonPathError;
-        use IterableItem::*;
+        use super::IterableItem::*;
 
         let jvalue = match self {
             RefRef((jvalue, _)) => *jvalue,
@@ -41,8 +45,7 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
         &self,
         json_path: &str,
     ) -> ExecutionResult<(Vec<&JValue>, Vec<SecurityTetraplet>)> {
-        use super::fold::IterableItem::*;
-        use crate::AquamarineError::JValueJsonPathError as JsonPathError;
+        use super::IterableItem::*;
 
         let (jvalue, tetraplet) = match self {
             RefRef((jvalue, tetraplet)) => (*jvalue, *tetraplet),
@@ -56,7 +59,7 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
     }
 
     fn as_jvalue(&self) -> Cow<'_, JValue> {
-        use IterableItem::*;
+        use super::IterableItem::*;
 
         match self {
             RefRef((jvalue, _)) => Cow::Borrowed(jvalue),
@@ -66,7 +69,7 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
     }
 
     fn into_jvalue(self: Box<Self>) -> JValue {
-        use IterableItem::*;
+        use super::IterableItem::*;
 
         match *self {
             RefRef((jvalue, _)) => jvalue.deref().clone(),
@@ -76,7 +79,7 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
     }
 
     fn as_tetraplets(&self) -> Vec<SecurityTetraplet> {
-        use IterableItem::*;
+        use super::IterableItem::*;
 
         // these clones are needed because rust-sdk allows passing arguments only by value
         match self {

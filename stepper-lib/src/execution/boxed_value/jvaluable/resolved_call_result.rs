@@ -15,23 +15,30 @@
  */
 
 use super::ExecutionResult;
+use super::JValuable;
 use crate::contexts::execution::ResolvedCallResult;
 use crate::JValue;
 use crate::SecurityTetraplet;
 
+use jsonpath_lib::select;
+
 use std::borrow::Cow;
+use std::ops::Deref;
 
 impl JValuable for ResolvedCallResult {
-    fn apply_json_path(&self, json_path: &str) -> Result<Vec<&JValue>> {
-        use crate::AquamarineError::JValueJsonPathError as JsonPathError;
+    fn apply_json_path(&self, json_path: &str) -> ExecutionResult<Vec<&JValue>> {
+        use super::ExecutionError::JValueJsonPathError as JsonPathError;
 
         let selected_jvalues = select(&self.result, json_path)
             .map_err(|e| JsonPathError(self.result.deref().clone(), String::from(json_path), e))?;
         Ok(selected_jvalues)
     }
 
-    fn apply_json_path_with_tetraplets(&self, json_path: &str) -> Result<(Vec<&JValue>, Vec<SecurityTetraplet>)> {
-        use crate::AquamarineError::JValueJsonPathError as JsonPathError;
+    fn apply_json_path_with_tetraplets(
+        &self,
+        json_path: &str,
+    ) -> ExecutionResult<(Vec<&JValue>, Vec<SecurityTetraplet>)> {
+        use super::ExecutionError::JValueJsonPathError as JsonPathError;
 
         let selected_jvalues = select(&self.result, json_path)
             .map_err(|e| JsonPathError(self.result.deref().clone(), String::from(json_path), e))?;

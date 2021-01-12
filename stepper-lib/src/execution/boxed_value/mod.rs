@@ -17,6 +17,7 @@
 mod iterable;
 mod jvaluable;
 
+pub(crate) use super::ExecutionError;
 pub(crate) use iterable::*;
 pub(crate) use jvaluable::*;
 

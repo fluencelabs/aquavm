@@ -44,7 +44,7 @@ impl<'a, 'i> Triplet<'a, 'i> {
                 Ok((peer_pk, peer_service_id, func_name))
             }
             (PeerPk(peer_pk), ServiceIdWithFuncName(service_id, func_name)) => Ok((peer_pk, service_id, func_name)),
-            (PeerPk(_), FuncName(_)) => Err(AquamarineError::InstructionError(String::from(
+            (PeerPk(_), FuncName(_)) => Err(ExecutionError::InstructionError(String::from(
                 "call should have service id specified by peer part or function part",
             ))),
         }?;

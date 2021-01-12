@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-use super::ExecutionCtx;
-use super::JValuable;
-use crate::AValue;
-use crate::AquamarineError;
+use crate::contexts::execution::AValue;
+use crate::contexts::execution::ExecutionCtx;
+use crate::execution::boxed_value::JValuable;
+use crate::execution::ExecutionError;
+use crate::execution::ExecutionResult;
 use crate::JValue;
-use crate::Result;
 use crate::SecurityTetraplet;
 
 use air_parser::ast::InstructionValue;
@@ -28,8 +28,8 @@ use air_parser::ast::InstructionValue;
 pub(crate) fn resolve_to_args<'i>(
     value: &InstructionValue<'i>,
     ctx: &ExecutionCtx<'i>,
-) -> Result<(JValue, Vec<SecurityTetraplet>)> {
-    fn handle_string_arg<'i>(arg: &str, ctx: &ExecutionCtx<'i>) -> Result<(JValue, Vec<SecurityTetraplet>)> {
+) -> ExecutionResult<(JValue, Vec<SecurityTetraplet>)> {
+    fn handle_string_arg<'i>(arg: &str, ctx: &ExecutionCtx<'i>) -> ExecutionResult<(JValue, Vec<SecurityTetraplet>)> {
         let jvalue = JValue::String(arg.to_string());
         let tetraplet = SecurityTetraplet::literal_tetraplet(ctx.init_peer_id.clone());
 
@@ -61,8 +61,8 @@ pub(crate) fn resolve_to_args<'i>(
 pub(crate) fn resolve_to_jvaluable<'name, 'i, 'ctx>(
     name: &'name str,
     ctx: &'ctx ExecutionCtx<'i>,
-) -> Result<Box<dyn JValuable + 'ctx>> {
-    use AquamarineError::VariableNotFound;
+) -> ExecutionResult<Box<dyn JValuable + 'ctx>> {
+    use ExecutionError::VariableNotFound;
 
     let value = ctx
         .data_cache

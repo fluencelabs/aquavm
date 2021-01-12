@@ -24,9 +24,8 @@ pub(crate) use resolved_call::IterableResolvedCall;
 pub(crate) use vec_json_path_result::IterableVecJsonPathResult;
 pub(crate) use vec_resolved_call::IterableVecResolvedCall;
 
-use super::ResolvedCallResult;
-use super::SecurityTetraplet;
 use crate::JValue;
+use crate::SecurityTetraplet;
 
 use std::rc::Rc;
 

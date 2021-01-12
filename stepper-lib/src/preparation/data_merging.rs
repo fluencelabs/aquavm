@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+use super::CallResult;
 use super::DataMergingError;
 use super::ExecutedState;
 use super::ExecutionTrace;
-
-use std::rc::Rc;
+use crate::log_targets::EVIDENCE_PATH_MERGE;
 
 type MergeResult<T> = Result<T, DataMergingError>;
 
@@ -124,8 +124,8 @@ fn merge_subtree(
 }
 
 fn merge_call(prev_call_result: CallResult, current_call_result: CallResult) -> MergeResult<CallResult> {
-    use crate::AquamarineError::IncompatibleCallResults;
-    use CallResult::*;
+    use super::CallResult::*;
+    use super::DataMergingError::IncompatibleCallResults;
 
     match (&prev_call_result, &current_call_result) {
         (CallServiceFailed(prev_err_msg), CallServiceFailed(err_msg)) => {
@@ -134,17 +134,17 @@ fn merge_call(prev_call_result: CallResult, current_call_result: CallResult) -> 
             }
             Ok(current_call_result)
         }
-        (RequestSent(_), CallServiceFailed(_)) => Ok(current_call_result),
-        (CallServiceFailed(_), RequestSent(_)) => Ok(prev_call_result),
-        (RequestSent(prev_sender), RequestSent(sender)) => {
+        (RequestSentBy(_), CallServiceFailed(_)) => Ok(current_call_result),
+        (CallServiceFailed(_), RequestSentBy(_)) => Ok(prev_call_result),
+        (RequestSentBy(prev_sender), RequestSentBy(sender)) => {
             if prev_sender != sender {
                 return Err(IncompatibleCallResults(prev_call_result, current_call_result));
             }
 
             Ok(prev_call_result)
         }
-        (RequestSent(_), Executed(..)) => Ok(current_call_result),
-        (Executed(..), RequestSent(_)) => Ok(prev_call_result),
+        (RequestSentBy(_), Executed(..)) => Ok(current_call_result),
+        (Executed(..), RequestSentBy(_)) => Ok(prev_call_result),
         (Executed(prev_result), Executed(result)) => {
             if prev_result != result {
                 return Err(IncompatibleCallResults(prev_call_result, current_call_result));

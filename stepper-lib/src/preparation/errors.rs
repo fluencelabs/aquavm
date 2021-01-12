@@ -17,7 +17,7 @@
 use super::CallResult;
 use super::ExecutedState;
 
-use serde::Error as SerdeJsonError;
+use serde_json::Error as SerdeJsonError;
 use thiserror::Error as ThisError;
 
 use std::env::VarError;
@@ -25,15 +25,15 @@ use std::error::Error;
 
 /// Errors happened during the stepper preparation step.
 #[derive(Debug)]
-pub(crate) enum PreparationError {
+pub enum PreparationError {
     /// Error occurred while parsing AIR script
     AIRParseError(String),
 
     /// Errors occurred on call evidence deserialization.
     CallEvidenceDeError(SerdeJsonError, Vec<u8>),
 
-    /// Indicates that environment variable with current name doesn't set.
-    CurrentPeerIdEnvError(VarError, String),
+    /// Point out that error is occured while getting current peer id.
+    CurrentPeerIdEnvError(VarError),
 
     /// Errors occurred while merging previous and current data.
     StateMergingError(DataMergingError),
@@ -41,7 +41,7 @@ pub(crate) enum PreparationError {
 
 /// Errors arose out of merging previous data with a new.
 #[derive(ThisError, Debug)]
-pub(crate) enum DataMergingError {
+pub enum DataMergingError {
     /// Errors occurred when previous and current evidence states are incompatible.
     #[error("previous and current data have incompatible states: '{0:?}' '{1:?}'")]
     IncompatibleExecutedStates(ExecutedState, ExecutedState),
@@ -56,16 +56,37 @@ pub(crate) enum DataMergingError {
 }
 
 impl Error for PreparationError {}
-impl Error for DataMergingError {}
 
-impl std::fmt::Display for PreparationError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+impl PreparationError {
+    pub(crate) fn to_error_code(&self) -> u32 {
+        use DataMergingError::*;
+        use PreparationError::*;
+
+        match self {
+            AIRParseError(_) => 1,
+            CallEvidenceDeError(..) => 2,
+            CurrentPeerIdEnvError(_) => 3,
+            StateMergingError(IncompatibleExecutedStates(..)) => 4,
+            StateMergingError(IncompatibleCallResults(..)) => 5,
+            StateMergingError(EvidencePathTooSmall(..)) => 6,
+        }
+    }
+}
+
+use std::fmt;
+
+impl fmt::Display for PreparationError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         use PreparationError::*;
 
         match self {
             AIRParseError(err_msg) => write!(f, "aqua script can't be parsed:\n{}", err_msg),
             CallEvidenceDeError(serde_error, evidence_path) => {
-                let print_error = move |path| {
+                fn print_error(
+                    f: &mut fmt::Formatter<'_>,
+                    path: impl std::fmt::Debug,
+                    serde_error: &SerdeJsonError,
+                ) -> Result<(), fmt::Error> {
                     write!(
                         f,
                         "an error occurred while call evidence path deserialization on '{:?}': {:?}",
@@ -73,18 +94,20 @@ impl std::fmt::Display for PreparationError {
                     )
                 };
 
-                let path = match String::from_utf8(evidence_path) {
-                    Ok(str) => print_error(str),
-                    Err(e) => print_error(e.into_bytes()),
-                };
+                match String::from_utf8(evidence_path.to_vec()) {
+                    Ok(str) => print_error(f, str, serde_error),
+                    Err(e) => print_error(f, e.into_bytes(), serde_error),
+                }
             }
-            CurrentPeerIdEnvError(err, env_name) => write!(
-                f,
-                "the environment variable with name '{}' can't be obtained: {:?}",
-                env_name, err
-            ),
+            CurrentPeerIdEnvError(err) => write!(f, "current peer id can't be obtained: {:?}", err),
             StateMergingError(err) => write!(f, "{}", err),
         }
+    }
+}
+
+impl From<DataMergingError> for PreparationError {
+    fn from(err: DataMergingError) -> Self {
+        Self::StateMergingError(err)
     }
 }
 

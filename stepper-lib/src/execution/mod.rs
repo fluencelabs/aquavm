@@ -19,8 +19,8 @@ mod boxed_value;
 mod errors;
 mod utils;
 
-pub(self) use errors::ExecutionError;
-pub(self) type ExecutionResult<T> = std::result::Result<T, ExecutionError>;
+pub(super) use air::ExecutableInstruction;
+pub(super) use air::FoldState;
+pub(super) use errors::ExecutionError;
 
-pub(self) use crate::build_targets::call_service;
-pub(self) use crate::build_targets::get_current_peer_id;
+pub(self) type ExecutionResult<T> = std::result::Result<T, ExecutionError>;

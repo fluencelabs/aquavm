@@ -56,7 +56,7 @@ dependencies = [
 
 [[package]]
 name = "aquamarine"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "fluence",
  "log",
@@ -1651,7 +1651,7 @@ dependencies = [
 
 [[package]]
 name = "stepper-lib"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "air-parser",
  "aqua-test-utils",
@@ -1669,12 +1669,8 @@ dependencies = [
  "pretty_assertions",
  "serde",
  "serde_json",
-<<<<<<< HEAD
- "stepper-interface 0.1.1",
- "thiserror",
-=======
  "stepper-interface 0.1.2",
->>>>>>> master
+ "thiserror",
  "wasm-bindgen",
 ]
 

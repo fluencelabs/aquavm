@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-use super::StateMergingError;
-use crate::log_targets::EVIDENCE_PATH_MERGE;
 use crate::JValue;
 
 use serde::Deserialize;
@@ -45,11 +43,11 @@ pub enum ExecutedState {
 impl std::fmt::Display for ExecutedState {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         use CallResult::*;
-        use EvidenceState::*;
+        use ExecutedState::*;
 
         match self {
             Par(left, right) => write!(f, "Par({}, {})", left, right),
-            Call(RequestSent(peer_id)) => write!(f, "RequestSent({})", peer_id),
+            Call(RequestSentBy(peer_id)) => write!(f, "RequestSent({})", peer_id),
             Call(Executed(result)) => write!(f, "Executed({:?})", result),
             Call(CallServiceFailed(err_msg)) => write!(f, "CallServiceFailed({})", err_msg),
         }

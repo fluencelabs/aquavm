@@ -16,15 +16,16 @@
 
 use super::merge_call_paths;
 use super::ExecutionCtx;
+use super::ExecutionTrace;
+use super::ExecutionTraceCtx;
 use super::PreparationError;
-use crate::call_evidence::ExecutionTraceCtx;
-use crate::get_current_peer_id;
+use crate::build_targets::get_current_peer_id;
 use crate::log_targets::RUN_PARAMS;
-use crate::CallEvidencePath;
 
 use air_parser::ast::Instruction;
 
 type PreparationResult<T> = Result<T, PreparationError>;
+
 /// Represents result of the preparation step.
 pub(crate) struct PreparationDescriptor<'ctx, 'i> {
     pub(crate) exec_ctx: ExecutionCtx<'ctx>,
@@ -39,13 +40,13 @@ pub(crate) fn prepare<'i>(
     raw_aqua: &'i str,
     init_peer_id: String,
 ) -> PreparationResult<PreparationDescriptor<'static, 'i>> {
-    fn to_evidence_path(raw_data: &[u8]) -> PreparationResult<CallEvidencePath> {
+    fn to_evidence_path(raw_data: &[u8]) -> PreparationResult<ExecutionTrace> {
         use PreparationError::CallEvidenceDeError as CallDeError;
 
         // treat empty string as an empty call evidence path allows abstracting from
         // the internal format for empty data.
         if raw_data.is_empty() {
-            Ok(CallEvidencePath::new())
+            Ok(ExecutionTrace::new())
         } else {
             serde_json::from_slice(&raw_data).map_err(|err| CallDeError(err, raw_data.to_vec()))
         }
@@ -54,7 +55,7 @@ pub(crate) fn prepare<'i>(
     let prev_path = to_evidence_path(prev_data)?;
     let path = to_evidence_path(data)?;
 
-    let aqua: Instruction<'i> = *air_parser::parse(raw_aqua).map_err(AquamarineError::AIRParseError)?;
+    let aqua: Instruction<'i> = *air_parser::parse(raw_aqua).map_err(PreparationError::AIRParseError)?;
 
     log::trace!(
         target: RUN_PARAMS,
@@ -77,14 +78,11 @@ pub(crate) fn prepare<'i>(
 /// Make execution and call evidence contexts from supplied data.
 /// Internally, it unites variable from previous and current data and merges call evidence paths.
 fn make_contexts(
-    prev_path: CallEvidencePath,
-    path: CallEvidencePath,
+    prev_path: ExecutionTrace,
+    path: ExecutionTrace,
     init_peer_id: String,
 ) -> PreparationResult<(ExecutionCtx<'static>, ExecutionTraceCtx)> {
-    use crate::build_targets::CURRENT_PEER_ID_ENV_NAME;
-    use PreparationError::CurrentPeerIdEnvError as EnvError;
-
-    let current_peer_id = get_current_peer_id().map_err(|e| EnvError(e, String::from(CURRENT_PEER_ID_ENV_NAME)))?;
+    let current_peer_id = get_current_peer_id().map_err(|e| PreparationError::CurrentPeerIdEnvError(e))?;
     log::trace!(target: RUN_PARAMS, "current peer id {}", current_peer_id);
 
     let exec_ctx = ExecutionCtx::new(current_peer_id, init_peer_id);

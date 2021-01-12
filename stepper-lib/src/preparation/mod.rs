@@ -20,13 +20,15 @@ mod preparation;
 
 pub use preparation::parse;
 
-pub(crate) use errors::PreparationError;
+pub use errors::PreparationError;
+
+pub(crate) use errors::DataMergingError;
 pub(crate) use preparation::prepare;
 pub(crate) use preparation::PreparationDescriptor;
-
-pub(self) use data_merging::merge_call_paths;
-pub(self) use errors::DataMergingError;
 
 pub(self) use crate::contexts::execution::*;
 pub(self) use crate::contexts::execution_trace::CallResult;
 pub(self) use crate::contexts::execution_trace::ExecutedState;
+pub(self) use crate::contexts::execution_trace::ExecutionTrace;
+pub(self) use crate::contexts::execution_trace::ExecutionTraceCtx;
+pub(self) use data_merging::merge_call_paths;

@@ -15,10 +15,10 @@
  */
 
 use super::ExecutionCtx;
+use super::ExecutionError::LocalServiceError;
+use super::ExecutionResult;
 use super::ExecutionTraceCtx;
 use crate::log_instruction;
-use crate::AquamarineError::LocalServiceError;
-use crate::Result;
 
 use air_parser::ast::Xor;
 

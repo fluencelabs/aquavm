@@ -15,9 +15,9 @@
  */
 
 use super::ExecutionCtx;
+use super::ExecutionResult;
 use super::ExecutionTraceCtx;
 use crate::log_instruction;
-use crate::Result;
 
 use air_parser::ast::Seq;
 

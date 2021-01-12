@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-use super::foldable_next;
-use super::foldable_prev;
 use super::Iterable;
+use super::IterableItem;
+use crate::foldable_next;
+use crate::foldable_prev;
+use crate::JValue;
+use crate::SecurityTetraplet;
 
 /// Used for iterating over a result of applied to an accumulator json path.
 #[derive(Clone, Debug, Eq, PartialEq)]

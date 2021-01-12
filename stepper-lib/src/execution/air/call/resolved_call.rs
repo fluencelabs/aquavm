@@ -67,7 +67,7 @@ impl<'i> ResolvedCall<'i> {
         trace_ctx: &mut ExecutionTraceCtx,
     ) -> ExecutionResult<()> {
         use CallResult::*;
-        use EvidenceState::Call;
+        use ExecutedState::Call;
         use ExecutionError::CallServiceResultDeError as DeError;
 
         let should_execute = self.prepare_evidence_state(exec_ctx, trace_ctx)?;
@@ -90,7 +90,7 @@ impl<'i> ResolvedCall<'i> {
         let tetraplets = serde_json::to_string(&tetraplets).expect("default serializer shouldn't fail");
 
         let service_result = unsafe {
-            crate::call_service(
+            crate::build_targets::call_service(
                 // copying here is necessary because of current limitations of rust-sdk
                 self.triplet.service_id.clone(),
                 self.triplet.function_name.clone(),
@@ -102,7 +102,7 @@ impl<'i> ResolvedCall<'i> {
         // check that service call succeeded
         if service_result.ret_code != CALL_SERVICE_SUCCESS {
             trace_ctx
-                .new_path
+                .new_trace
                 .push_back(Call(CallServiceFailed(service_result.result.clone())));
             return Err(ExecutionError::LocalServiceError(service_result.result));
         }
@@ -119,7 +119,7 @@ impl<'i> ResolvedCall<'i> {
             new_evidence_state
         );
 
-        trace_ctx.new_path.push_back(new_evidence_state);
+        trace_ctx.new_trace.push_back(new_evidence_state);
 
         Ok(())
     }
@@ -138,7 +138,7 @@ impl<'i> ResolvedCall<'i> {
         trace_ctx.current_subtree_size -= 1;
         // unwrap is safe here, because current_subtree_size depends on current_path len,
         // and it's been checked previously
-        let prev_state = trace_ctx.current_path.pop_front().unwrap();
+        let prev_state = trace_ctx.current_trace.pop_front().unwrap();
 
         log::trace!(
             target: EVIDENCE_CHANGING,

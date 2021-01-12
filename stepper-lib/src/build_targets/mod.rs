@@ -35,8 +35,6 @@ pub struct CallServiceResult {
 pub(crate) use fce_target::call_service;
 #[cfg(feature = "fce")]
 pub(crate) use fce_target::get_current_peer_id;
-#[cfg(feature = "fce")]
-pub(crate) use fce_target::CURRENT_PEER_ID_ENV_NAME;
 
 #[cfg(not(feature = "fce"))]
 pub(crate) use wasm_bindgen_target::call_service;

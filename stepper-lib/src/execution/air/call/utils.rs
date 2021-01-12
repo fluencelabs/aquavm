@@ -33,7 +33,7 @@ pub(super) fn set_local_call_result<'i>(
     triplet: Rc<ResolvedTriplet>,
     output: &CallOutput<'i>,
     exec_ctx: &mut ExecutionCtx<'i>,
-) -> Result<()> {
+) -> ExecutionResult<()> {
     use crate::contexts::execution::AValue;
     use std::cell::RefCell;
     use std::collections::hash_map::Entry::{Occupied, Vacant};
@@ -100,13 +100,13 @@ pub(super) fn set_remote_call_result<'i>(
     exec_ctx.next_peer_pks.push(peer_pk);
     exec_ctx.subtree_complete = false;
 
-    let new_evidence_state = EvidenceState::Call(CallResult::RequestSent(exec_ctx.current_peer_id.clone()));
+    let new_evidence_state = ExecutedState::Call(CallResult::RequestSentBy(exec_ctx.current_peer_id.clone()));
     log::trace!(
         target: EVIDENCE_CHANGING,
         "  adding new call evidence state {:?}",
         new_evidence_state
     );
-    trace_ctx.new_path.push_back(new_evidence_state);
+    trace_ctx.new_trace.push_back(new_evidence_state);
 }
 
 /// This function looks at the existing call state, validates it,
@@ -114,10 +114,10 @@ pub(super) fn set_remote_call_result<'i>(
 pub(super) fn handle_prev_state<'i>(
     triplet: &Rc<ResolvedTriplet>,
     output: &CallOutput<'i>,
-    prev_state: EvidenceState,
+    prev_state: ExecutedState,
     exec_ctx: &mut ExecutionCtx<'i>,
     trace_ctx: &mut ExecutionTraceCtx,
-) -> Result<bool> {
+) -> ExecutionResult<bool> {
     use CallResult::*;
     use ExecutedState::*;
 
@@ -126,11 +126,11 @@ pub(super) fn handle_prev_state<'i>(
         // here it's needed to bubble this special error up
         Call(CallServiceFailed(err_msg)) => {
             let err_msg = err_msg.clone();
-            trace_ctx.new_path.push_back(prev_state);
+            trace_ctx.new_trace.push_back(prev_state);
             exec_ctx.subtree_complete = false;
-            Err(AquamarineError::LocalServiceError(err_msg))
+            Err(ExecutionError::LocalServiceError(err_msg))
         }
-        Call(RequestSent(..)) => {
+        Call(RequestSentBy(..)) => {
             let peer_pk = triplet.peer_pk.as_str();
             // check whether current node can execute this call
             let is_current_peer = peer_pk == exec_ctx.current_peer_id;
@@ -138,20 +138,20 @@ pub(super) fn handle_prev_state<'i>(
                 Ok(true)
             } else {
                 exec_ctx.subtree_complete = false;
-                trace_ctx.new_path.push_back(prev_state);
+                trace_ctx.new_trace.push_back(prev_state);
                 Ok(false)
             }
         }
         // this instruction's been already executed
         Call(Executed(result)) => {
             set_local_call_result(result.clone(), triplet.clone(), output, exec_ctx)?;
-            trace_ctx.new_path.push_back(prev_state);
+            trace_ctx.new_trace.push_back(prev_state);
             Ok(false)
         }
         // state has inconsistent order - return a error, call shouldn't be executed
-        par_state @ Par(..) => Err(AquamarineError::InvalidEvidenceState(
-            par_state.clone(),
+        par_state @ Par(..) => Err(ExecutionError::InvalidExecutedState(
             String::from("call"),
+            par_state.clone(),
         )),
     }
 }

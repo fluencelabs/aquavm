@@ -15,20 +15,17 @@
  */
 
 use crate::build_targets::CallServiceResult;
-use crate::call_evidence::CallResult;
-use crate::call_evidence::EvidenceState;
+use crate::contexts::execution::ResolvedCallResult;
+use crate::contexts::execution_trace::ExecutedState;
 use crate::JValue;
-use crate::ResolvedCallResult;
 
 use jsonpath_lib::JsonPathError;
 use serde_json::Error as SerdeJsonError;
 use thiserror::Error as ThisError;
 
-use std::error::Error;
-
 /// Errors arised while executing AIR script.
 #[derive(ThisError, Debug)]
-pub enum ExecutionError {
+pub(crate) enum ExecutionError {
     /// Errors occurred while parsing returned by call_service value.
     #[error("call_service result '{0:?}' can't be serialized or deserialized with an error: {1:?}")]
     CallServiceResultDeError(CallServiceResult, SerdeJsonError),
@@ -79,14 +76,40 @@ pub enum ExecutionError {
 
     /// Expected evidence state of different type.
     #[error("invalid evidence state: expected '{0}', but actual {1:?}")]
-    InvalidEvidenceState(String, ExecutedState),
+    InvalidExecutedState(String, ExecutedState),
 
     /// Errors occurred when evidence path contains less elements then corresponding Par has.
-    #[error("vairable with name '{0}' can't be shadowed, shadowing is supported only for scalar values")]
+    #[error("variable with name '{0}' can't be shadowed, shadowing is supported only for scalar values")]
     ShadowingError(String),
+
+    /// Errors occured when instruction value can't be used as a fold iterable.
+    #[error("instruction value '{0}' can't be used as a fold iterable")]
+    InvalidFoldIterable(String),
 }
 
-impl Error for ExecutionError {}
+impl ExecutionError {
+    pub(crate) fn to_error_code(&self) -> u32 {
+        use ExecutionError::*;
+
+        match self {
+            CallServiceResultDeError(..) => 1,
+            InstructionError(_) => 2,
+            LocalServiceError(_) => 3,
+            VariableNotFound(_) => 4,
+            MultipleVariablesFound(_) => 5,
+            JValueJsonPathError(..) => 6,
+            JValueAccJsonPathError(..) => 7,
+            IncompatibleJValueType(..) => 8,
+            IncompatibleAValueType(..) => 9,
+            MultipleValuesInJsonPath(_) => 10,
+            FoldStateNotFound(_) => 11,
+            MultipleFoldStates(_) => 12,
+            InvalidExecutedState(..) => 13,
+            ShadowingError(_) => 14,
+            InvalidFoldIterable(_) => 15,
+        }
+    }
+}
 
 impl From<std::convert::Infallible> for ExecutionError {
     fn from(_: std::convert::Infallible) -> Self {

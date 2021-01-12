@@ -21,6 +21,8 @@ mod par;
 mod seq;
 mod xor;
 
+pub(crate) use fold::FoldState;
+
 pub(self) use super::ExecutionError;
 pub(self) use super::ExecutionResult;
 pub(self) use crate::contexts::execution::ExecutionCtx;
@@ -75,7 +77,7 @@ macro_rules! log_instruction {
         log::debug!(
             target: crate::log_targets::CALL_EVIDENCE_PATH,
             "  current call evidence path: {:?}",
-            $trace_ctx.current_path
+            $trace_ctx.current_trace
         );
         log::trace!(
             target: crate::log_targets::SUBTREE_ELEMENTS,
@@ -85,7 +87,7 @@ macro_rules! log_instruction {
         log::debug!(
             target: crate::log_targets::NEW_CALL_EVIDENCE_PATH,
             "  new call evidence path: {:?}",
-            $trace_ctx.new_path
+            $trace_ctx.new_trace
         );
     };
 }

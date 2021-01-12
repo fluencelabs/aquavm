@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-use super::EvidenceState;
 use super::ExecutableInstruction;
 use super::ExecutionCtx;
 use super::ExecutionResult;
 use super::ExecutionTraceCtx;
 use super::Instruction;
+use crate::contexts::execution_trace::ExecutedState;
 use crate::log_instruction;
 use crate::log_targets::EVIDENCE_CHANGING;
 
@@ -47,8 +47,8 @@ impl<'i> ExecutableInstruction<'i> for Par<'i> {
 
         let (left_subtree_size, right_subtree_size) = extract_subtree_sizes(trace_ctx)?;
 
-        let par_pos = trace_ctx.new_path.len();
-        trace_ctx.new_path.push_back(EvidenceState::Par(0, 0));
+        let par_pos = trace_ctx.new_trace.len();
+        trace_ctx.new_trace.push_back(ExecutedState::Par(0, 0));
 
         // execute a left subtree of this par
         execute_subtree(&self.0, left_subtree_size, exec_ctx, trace_ctx, par_pos, Left)?;
@@ -65,8 +65,8 @@ impl<'i> ExecutableInstruction<'i> for Par<'i> {
     }
 }
 
-fn extract_subtree_sizes(trace_ctx: &mut ExecutionTraceCtx) -> Result<(usize, usize)> {
-    use crate::AquamarineError::InvalidEvidenceState;
+fn extract_subtree_sizes(trace_ctx: &mut ExecutionTraceCtx) -> ExecutionResult<(usize, usize)> {
+    use super::ExecutionError::InvalidExecutedState;
 
     if trace_ctx.current_subtree_size == 0 {
         return Ok((0, 0));
@@ -77,17 +77,17 @@ fn extract_subtree_sizes(trace_ctx: &mut ExecutionTraceCtx) -> Result<(usize, us
     log::trace!(
         target: EVIDENCE_CHANGING,
         "  previous call evidence state was found {:?}",
-        trace_ctx.current_path[0]
+        trace_ctx.current_trace[0]
     );
 
     // unwrap is safe here because of length's been checked
-    match trace_ctx.current_path.pop_front().unwrap() {
-        EvidenceState::Par(left, right) => Ok((left, right)),
-        state => Err(InvalidEvidenceState(state, String::from("par"))),
+    match trace_ctx.current_trace.pop_front().unwrap() {
+        ExecutedState::Par(left, right) => Ok((left, right)),
+        state => Err(InvalidExecutedState(String::from("par"), state)),
     }
 }
 
-/// Execute provided subtree and update Par state in trace_ctx.new_path.
+/// Execute provided subtree and update Par state in trace_ctx.new_trace.
 fn execute_subtree<'i>(
     subtree: &Instruction<'i>,
     subtree_size: usize,
@@ -95,12 +95,12 @@ fn execute_subtree<'i>(
     trace_ctx: &mut ExecutionTraceCtx,
     current_par_pos: usize,
     subtree_type: SubtreeType,
-) -> Result<()> {
-    use crate::AquamarineError::LocalServiceError;
+) -> ExecutionResult<()> {
+    use super::ExecutionError::LocalServiceError;
 
     let before_subtree_size = trace_ctx.current_subtree_size;
     trace_ctx.current_subtree_size = subtree_size;
-    let before_new_path_len = trace_ctx.new_path.len();
+    let before_new_path_len = trace_ctx.new_trace.len();
 
     exec_ctx.subtree_complete = determine_subtree_complete(&subtree);
 
@@ -141,12 +141,12 @@ fn update_par_state(
     current_par_pos: usize,
     before_new_path_len: usize,
 ) {
-    let new_subtree_size = trace_ctx.new_path.len() - before_new_path_len;
+    let new_subtree_size = trace_ctx.new_trace.len() - before_new_path_len;
 
     // unwrap is safe here, because this par is added at the beginning of this par instruction.
-    let par_state = trace_ctx.new_path.get_mut(current_par_pos).unwrap();
+    let par_state = trace_ctx.new_trace.get_mut(current_par_pos).unwrap();
     match par_state {
-        EvidenceState::Par(left, right) => {
+        ExecutedState::Par(left, right) => {
             if let SubtreeType::Left = subtree_type {
                 *left = new_subtree_size;
             } else {

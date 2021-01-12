@@ -23,6 +23,8 @@ use crate::STEPPER_SUCCESS;
 use serde::Serialize;
 use std::hash::Hash;
 
+const EXECUTION_ERRORS_START_ID: i32 = 1000;
+
 /// Create StepperOutcome from supplied data and next_peer_pks,
 /// set ret_code to STEPPER_SUCCESS.
 pub(crate) fn from_path_and_peers<T>(data: &T, next_peer_pks: Vec<String>) -> StepperOutcome
@@ -43,7 +45,7 @@ where
 /// Create StepperOutcome from supplied data and error,
 /// set ret_code based on the error.
 pub(crate) fn from_preparation_error(data: impl Into<Vec<u8>>, err: PreparationError) -> StepperOutcome {
-    let ret_code = err.to_error_code();
+    let ret_code = err.to_error_code() as i32;
     let data = data.into();
 
     StepperOutcome {
@@ -60,7 +62,9 @@ pub(crate) fn from_execution_error<T>(data: &T, next_peer_pks: Vec<String>, err:
 where
     T: ?Sized + Serialize,
 {
-    let ret_code = err.to_error_code();
+    let ret_code = err.to_error_code() as i32;
+    let ret_code = EXECUTION_ERRORS_START_ID + ret_code;
+
     let data = serde_json::to_vec(data).expect("default serializer shouldn't fail");
     let next_peer_pks = dedup(next_peer_pks);
 

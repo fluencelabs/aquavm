@@ -18,12 +18,13 @@ mod cell_vec_resolved_call_result;
 mod iterable_item;
 mod resolved_call_result;
 
+use super::iterable::IterableItem;
+use super::ExecutionError;
 use super::ExecutionResult;
 use crate::JValue;
 use crate::SecurityTetraplet;
 
 use std::borrow::Cow;
-use std::ops::Deref;
 
 /// Represent a value that could be transform to a JValue with or without tetraplets.
 pub(crate) trait JValuable {

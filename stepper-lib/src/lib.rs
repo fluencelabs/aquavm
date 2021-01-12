@@ -39,4 +39,8 @@ pub use polyplets::SecurityTetraplet;
 pub use stepper_interface::StepperOutcome;
 pub use stepper_interface::STEPPER_SUCCESS;
 
+pub use crate::preparation::parse;
+pub use crate::preparation::PreparationError;
+pub use aqua::execute_aqua;
+
 pub(crate) type JValue = serde_json::Value;
