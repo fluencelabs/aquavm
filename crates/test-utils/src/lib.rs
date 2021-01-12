@@ -25,7 +25,7 @@
     unreachable_patterns
 )]
 
-pub use aquamarine_vm::vec1::Vec1;
+pub use aquamarine_vm::ne_vec::NEVec;
 pub use aquamarine_vm::AquamarineVM;
 pub use aquamarine_vm::AquamarineVMConfig;
 pub use aquamarine_vm::AquamarineVMError;
@@ -60,7 +60,7 @@ pub fn create_aqua_vm(
 pub fn unit_call_service() -> CallServiceClosure {
     Box::new(|_, _| -> Option<IValue> {
         Some(IValue::Record(
-            Vec1::new(vec![
+            NEVec::new(vec![
                 IValue::S32(0),
                 IValue::String(String::from("\"test\"")),
             ])
@@ -79,7 +79,7 @@ pub fn echo_string_call_service() -> CallServiceClosure {
         let arg: Vec<String> = serde_json::from_str(arg).unwrap();
 
         Some(IValue::Record(
-            Vec1::new(vec![
+            NEVec::new(vec![
                 IValue::S32(0),
                 IValue::String(format!("\"{}\"", arg[0])),
             ])
@@ -98,7 +98,7 @@ pub fn echo_number_call_service() -> CallServiceClosure {
         let arg: Vec<String> = serde_json::from_str(arg).unwrap();
 
         Some(IValue::Record(
-            Vec1::new(vec![IValue::S32(0), IValue::String(arg[0].clone())]).unwrap(),
+            NEVec::new(vec![IValue::S32(0), IValue::String(arg[0].clone())]).unwrap(),
         ))
     })
 }
@@ -107,7 +107,7 @@ pub fn set_variable_call_service(json: impl Into<String>) -> CallServiceClosure 
     let json = json.into();
     Box::new(move |_, _| -> Option<IValue> {
         Some(IValue::Record(
-            Vec1::new(vec![IValue::S32(0), IValue::String(json.clone())]).unwrap(),
+            NEVec::new(vec![IValue::S32(0), IValue::String(json.clone())]).unwrap(),
         ))
     })
 }
@@ -134,7 +134,7 @@ pub fn set_variables_call_service(ret_mapping: HashMap<String, String>) -> CallS
             .unwrap_or_else(|| String::from(r#""test""#));
 
         Some(IValue::Record(
-            Vec1::new(vec![IValue::S32(0), IValue::String(result)]).unwrap(),
+            NEVec::new(vec![IValue::S32(0), IValue::String(result)]).unwrap(),
         ))
     })
 }

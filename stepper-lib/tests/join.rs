@@ -19,7 +19,7 @@ use aqua_test_utils::create_aqua_vm;
 use aqua_test_utils::unit_call_service;
 use aqua_test_utils::CallServiceClosure;
 use aqua_test_utils::IValue;
-use aqua_test_utils::Vec1;
+use aqua_test_utils::NEVec;
 
 use pretty_assertions::assert_eq;
 use serde_json::json;
@@ -32,7 +32,7 @@ fn join_chat() {
 
     let members_call_service1: CallServiceClosure = Box::new(|_, _| -> Option<IValue> {
         Some(IValue::Record(
-            Vec1::new(vec![
+            NEVec::new(vec![
                 IValue::S32(0),
                 IValue::String(String::from(r#"[["A", "Relay1"], ["B", "Relay2"]]"#)),
             ])
@@ -195,7 +195,7 @@ fn join_chat() {
 fn join() {
     let members_call_service1: CallServiceClosure = Box::new(|_, _| -> Option<IValue> {
         Some(IValue::Record(
-            Vec1::new(vec![IValue::S32(0), IValue::String(String::from(r#"[["A"], ["B"]]"#))]).unwrap(),
+            NEVec::new(vec![IValue::S32(0), IValue::String(String::from(r#"[["A"], ["B"]]"#))]).unwrap(),
         ))
     });
 
@@ -251,7 +251,7 @@ fn join() {
 fn init_peer_id() {
     let members_call_service1: CallServiceClosure = Box::new(|_, _| -> Option<IValue> {
         Some(IValue::Record(
-            Vec1::new(vec![IValue::S32(0), IValue::String(String::from(r#"[["A"], ["B"]]"#))]).unwrap(),
+            NEVec::new(vec![IValue::S32(0), IValue::String(String::from(r#"[["A"], ["B"]]"#))]).unwrap(),
         ))
     });
 

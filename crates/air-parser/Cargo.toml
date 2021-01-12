@@ -15,7 +15,7 @@ codespan = "0.9.5"
 codespan-reporting = "0.9.5"
 
 # TODO: hide serde behind feature
-serde = { version = "1.0.117", features = ["rc"] }
+serde = { version = "=1.0.118", features = ["rc"] }
 
 [dev-dependencies]
 fstrings = "0.2.3"

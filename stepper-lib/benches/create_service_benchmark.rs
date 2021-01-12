@@ -5,7 +5,7 @@ use aqua_test_utils::AquamarineVMError;
 use aqua_test_utils::CallServiceClosure;
 use aqua_test_utils::IValue;
 use aqua_test_utils::StepperOutcome;
-use aqua_test_utils::Vec1;
+use aqua_test_utils::NEVec;
 
 use serde_json::json;
 
@@ -34,7 +34,7 @@ thread_local!(static VM: RefCell<AquamarineVM> = RefCell::new({
         };
 
         Some(IValue::Record(
-            Vec1::new(vec![IValue::S32(0), IValue::String(format!("\"{}\"", response))]).unwrap(),
+            NEVec::new(vec![IValue::S32(0), IValue::String(format!("\"{}\"", response))]).unwrap(),
         ))
     });
 

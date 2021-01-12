@@ -46,7 +46,7 @@ mod tests {
     use aqua_test_utils::create_aqua_vm;
     use aqua_test_utils::CallServiceClosure;
     use aqua_test_utils::IValue;
-    use aqua_test_utils::Vec1;
+    use aqua_test_utils::NEVec;
 
     use std::rc::Rc;
 
@@ -60,12 +60,12 @@ mod tests {
             // return a error for service with such id
             if builtin_service == &fallible_service_id {
                 Some(IValue::Record(
-                    Vec1::new(vec![IValue::S32(1), IValue::String(String::from(r#""error""#))]).unwrap(),
+                    NEVec::new(vec![IValue::S32(1), IValue::String(String::from(r#""error""#))]).unwrap(),
                 ))
             } else {
                 // return success for services with other ids
                 Some(IValue::Record(
-                    Vec1::new(vec![IValue::S32(0), IValue::String(String::from(r#""res""#))]).unwrap(),
+                    NEVec::new(vec![IValue::S32(0), IValue::String(String::from(r#""res""#))]).unwrap(),
                 ))
             }
         })
