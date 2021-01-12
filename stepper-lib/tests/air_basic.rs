@@ -30,8 +30,8 @@ type JValue = serde_json::Value;
 
 #[test]
 fn seq_par_call() {
-    use stepper_lib::CallResult::*;
-    use stepper_lib::EvidenceState::{self, *};
+    use stepper_lib::execution_trace::CallResult::*;
+    use stepper_lib::execution_trace::ExecutedState::{self, *};
 
     let vm_peer_id = String::from("some_peer_id");
     let mut vm = create_aqua_vm(unit_call_service(), vm_peer_id.clone());
@@ -49,14 +49,14 @@ fn seq_par_call() {
     );
 
     let res = call_vm!(vm, "asd", script, "[]", "[]");
-    let resulted_path: Vec<EvidenceState> =
+    let resulted_path: Vec<ExecutedState> =
         serde_json::from_slice(&res.data).expect("stepper should return valid json");
 
     let test_string = String::from("test");
     let expected_path = vec![
         Par(1, 1),
         Call(Executed(Rc::new(JValue::String(test_string.clone())))),
-        Call(RequestSent(vm_peer_id)),
+        Call(RequestSentBy(vm_peer_id)),
         Call(Executed(Rc::new(JValue::String(test_string.clone())))),
     ];
 
@@ -66,8 +66,8 @@ fn seq_par_call() {
 
 #[test]
 fn par_par_call() {
-    use stepper_lib::CallResult::*;
-    use stepper_lib::EvidenceState::{self, *};
+    use stepper_lib::execution_trace::CallResult::*;
+    use stepper_lib::execution_trace::ExecutedState::{self, *};
 
     let vm_peer_id = String::from("some_peer_id");
     let mut vm = create_aqua_vm(unit_call_service(), vm_peer_id.clone());
@@ -85,7 +85,7 @@ fn par_par_call() {
     );
 
     let res = call_vm!(vm, "asd", script, "[]", "[]");
-    let resulted_path: Vec<EvidenceState> =
+    let resulted_path: Vec<ExecutedState> =
         serde_json::from_slice(&res.data).expect("stepper should return valid json");
 
     let test_string = String::from("test");
@@ -93,7 +93,7 @@ fn par_par_call() {
         Par(3, 1),
         Par(1, 1),
         Call(Executed(Rc::new(JValue::String(test_string.clone())))),
-        Call(RequestSent(vm_peer_id)),
+        Call(RequestSentBy(vm_peer_id)),
         Call(Executed(Rc::new(JValue::String(test_string.clone())))),
     ];
 
@@ -103,8 +103,8 @@ fn par_par_call() {
 
 #[test]
 fn create_service() {
-    use stepper_lib::CallResult::*;
-    use stepper_lib::EvidenceState::{self, *};
+    use stepper_lib::execution_trace::CallResult::*;
+    use stepper_lib::execution_trace::ExecutedState::{self, *};
 
     let module = "greeting";
     let module_config = json!(
@@ -163,7 +163,7 @@ fn create_service() {
     let add_module_response = String::from("add_module response");
     let add_blueprint_response = String::from("add_blueprint response");
     let create_response = String::from("create response");
-    let resulted_path: Vec<EvidenceState> = serde_json::from_slice(&res.data).expect("should be a correct json");
+    let resulted_path: Vec<ExecutedState> = serde_json::from_slice(&res.data).expect("should be a correct json");
     let expected_path = vec![
         Call(Executed(Rc::new(module_bytes))),
         Call(Executed(Rc::new(module_config))),
@@ -171,7 +171,7 @@ fn create_service() {
         Call(Executed(Rc::new(JValue::String(add_module_response)))),
         Call(Executed(Rc::new(JValue::String(add_blueprint_response)))),
         Call(Executed(Rc::new(JValue::String(create_response)))),
-        Call(RequestSent(String::from("A"))),
+        Call(RequestSentBy(String::from("A"))),
     ];
 
     assert_eq!(resulted_path, expected_path);

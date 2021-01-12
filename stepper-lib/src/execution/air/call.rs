@@ -62,7 +62,7 @@ impl<'i> super::ExecutableInstruction<'i> for Call<'i> {
 
 #[cfg(test)]
 mod tests {
-    use crate::call_evidence::CallEvidencePath;
+    use crate::contexts::execution_trace::ExecutionTrace;
     use crate::JValue;
 
     use aqua_test_utils::call_vm;
@@ -80,8 +80,8 @@ mod tests {
     // Additionally, check that empty string for data does the same as empty call path.
     #[test]
     fn current_peer_id_call() {
-        use crate::call_evidence::CallResult::*;
-        use crate::call_evidence::EvidenceState::*;
+        use crate::contexts::execution_trace::CallResult::*;
+        use crate::contexts::execution_trace::ExecutedState::*;
 
         let vm_peer_id = String::from("test_peer_id");
         let mut vm = create_aqua_vm(unit_call_service(), vm_peer_id.clone());
@@ -96,7 +96,7 @@ mod tests {
         );
 
         let res = call_vm!(vm, vm_peer_id.clone(), script.clone(), "[]", "[]");
-        let call_path: CallEvidencePath = serde_json::from_slice(&res.data).expect("should be a valid json");
+        let call_path: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be a valid json");
 
         let executed_call_state = Call(Executed(Rc::new(JValue::String(String::from("test")))));
         assert_eq!(call_path.len(), 1);
@@ -120,8 +120,8 @@ mod tests {
     // Check that specifying remote peer id in call will result its appearing in next_peer_pks.
     #[test]
     fn remote_peer_id_call() {
-        use crate::call_evidence::CallResult::*;
-        use crate::call_evidence::EvidenceState::*;
+        use crate::contexts::execution_trace::CallResult::*;
+        use crate::contexts::execution_trace::ExecutedState::*;
 
         let some_local_peer_id = String::from("some_local_peer_id");
         let mut vm = create_aqua_vm(echo_string_call_service(), some_local_peer_id.clone());
@@ -133,10 +133,10 @@ mod tests {
         );
 
         let res = call_vm!(vm, "asd", script, "[]", "[]");
-        let call_path: CallEvidencePath = serde_json::from_slice(&res.data).expect("should be a valid json");
+        let call_path: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be a valid json");
 
         assert_eq!(call_path.len(), 1);
-        assert_eq!(call_path[0], Call(RequestSent(some_local_peer_id)));
+        assert_eq!(call_path[0], Call(RequestSentBy(some_local_peer_id)));
         assert_eq!(res.next_peer_pks, vec![remote_peer_id]);
     }
 
@@ -164,8 +164,8 @@ mod tests {
     // Check that string literals can be used as call parameters.
     #[test]
     fn string_parameters() {
-        use crate::call_evidence::CallResult::*;
-        use crate::call_evidence::EvidenceState::*;
+        use crate::contexts::execution_trace::CallResult::*;
+        use crate::contexts::execution_trace::ExecutedState::*;
 
         let call_service: CallServiceClosure = Box::new(|_, args| -> Option<IValue> {
             let arg = match &args[2] {
@@ -201,7 +201,7 @@ mod tests {
 
         let res = call_vm!(set_variable_vm, "asd", script.clone(), "[]", "[]");
         let res = call_vm!(vm, "asd", script, "[]", res.data);
-        let call_path: CallEvidencePath = serde_json::from_slice(&res.data).expect("should be a valid json");
+        let call_path: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be a valid json");
 
         assert_eq!(call_path.len(), 2);
         assert_eq!(

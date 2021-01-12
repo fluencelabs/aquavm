@@ -23,7 +23,7 @@ use serde_json::json;
 #[test]
 fn network_explore() {
     //use stepper_lib::CallResult::*;
-    //use stepper_lib::EvidenceState::{self, *};
+    //use stepper_lib::ExecutedState::{self, *};
 
     let relay_id = String::from("12D3KooWSpr929UacQSTUWQeK7CQPhcW2TSmLrGTdE1NcFWkuCvY");
     let client_id = String::from("12D3KooWEDU1WwGtvHUKpGCaMjhcLWyCUq3MQiRKZBLLFcBVVMck");

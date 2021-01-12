@@ -39,8 +39,17 @@ pub use polyplets::SecurityTetraplet;
 pub use stepper_interface::StepperOutcome;
 pub use stepper_interface::STEPPER_SUCCESS;
 
-pub use crate::preparation::parse;
-pub use crate::preparation::PreparationError;
+pub mod parse {
+    pub use crate::preparation::parse;
+    pub use crate::preparation::PreparationError;
+}
+
 pub use aqua::execute_aqua;
+
+pub mod execution_trace {
+    pub use crate::contexts::execution_trace::CallResult;
+    pub use crate::contexts::execution_trace::ExecutedState;
+    pub use crate::contexts::execution_trace::ExecutionTrace;
+}
 
 pub(crate) type JValue = serde_json::Value;

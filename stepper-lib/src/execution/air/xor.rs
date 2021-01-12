@@ -39,7 +39,7 @@ impl<'i> super::ExecutableInstruction<'i> for Xor<'i> {
 
 #[cfg(test)]
 mod tests {
-    use crate::call_evidence::CallEvidencePath;
+    use crate::contexts::execution_trace::ExecutionTrace;
     use crate::JValue;
 
     use aqua_test_utils::call_vm;
@@ -73,8 +73,8 @@ mod tests {
 
     #[test]
     fn xor() {
-        use crate::call_evidence::CallResult::*;
-        use crate::call_evidence::EvidenceState::*;
+        use crate::contexts::execution_trace::CallResult::*;
+        use crate::contexts::execution_trace::ExecutedState::*;
 
         let local_peer_id = "local_peer_id";
         let fallible_service_id = String::from("service_id_1");
@@ -90,7 +90,7 @@ mod tests {
         );
 
         let res = call_vm!(vm, "asd", script, "[]", "[]");
-        let call_path: CallEvidencePath = serde_json::from_slice(&res.data).expect("should be valid json");
+        let call_path: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid json");
         let executed_call_result = Call(Executed(Rc::new(JValue::String(String::from("res")))));
 
         assert_eq!(call_path.len(), 2);
@@ -107,7 +107,7 @@ mod tests {
         );
 
         let res = call_vm!(vm, "asd", script, "[]", "[]");
-        let call_path: CallEvidencePath = serde_json::from_slice(&res.data).expect("should be valid json");
+        let call_path: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid json");
 
         assert_eq!(call_path.len(), 1);
         assert_eq!(call_path[0], executed_call_result);
@@ -115,8 +115,8 @@ mod tests {
 
     #[test]
     fn xor_par() {
-        use crate::call_evidence::CallResult::*;
-        use crate::call_evidence::EvidenceState::*;
+        use crate::contexts::execution_trace::CallResult::*;
+        use crate::contexts::execution_trace::ExecutedState::*;
 
         let fallible_service_id = String::from("service_id_1");
         let local_peer_id = "local_peer_id";
@@ -144,7 +144,7 @@ mod tests {
         );
 
         let result = call_vm!(vm, "asd", script.clone(), "[]", "[]");
-        let result_path: CallEvidencePath = serde_json::from_slice(&result.data).expect("should be valid json");
+        let result_path: ExecutionTrace = serde_json::from_slice(&result.data).expect("should be valid json");
 
         let res = String::from("res");
         let executed_call_result = Rc::new(JValue::String(res));
@@ -162,7 +162,7 @@ mod tests {
         assert_eq!(result_path, expected_path);
 
         let result = call_vm!(vm, "asd", script, "[]", result.data);
-        let result_path: CallEvidencePath = serde_json::from_slice(&result.data).expect("should be valid json");
+        let result_path: ExecutionTrace = serde_json::from_slice(&result.data).expect("should be valid json");
         assert_eq!(result_path, expected_path);
     }
 }

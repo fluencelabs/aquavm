@@ -30,8 +30,8 @@ type JValue = serde_json::Value;
 
 #[test]
 fn evidence_seq_par_call() {
-    use stepper_lib::CallResult::*;
-    use stepper_lib::EvidenceState::{self, *};
+    use stepper_lib::execution_trace::CallResult::*;
+    use stepper_lib::execution_trace::ExecutedState::{self, *};
 
     let local_peer_id = "local_peer_id";
     let mut vm = create_aqua_vm(unit_call_service(), local_peer_id);
@@ -56,7 +56,7 @@ fn evidence_seq_par_call() {
     .to_string();
 
     let res = call_vm!(vm, "asd", script, "[]", initial_state);
-    let resulted_path: Vec<EvidenceState> =
+    let resulted_path: Vec<ExecutedState> =
         serde_json::from_slice(&res.data).expect("stepper should return valid json");
 
     let test_string = String::from("test");
@@ -73,8 +73,8 @@ fn evidence_seq_par_call() {
 
 #[test]
 fn evidence_par_par_call() {
-    use stepper_lib::CallResult::*;
-    use stepper_lib::EvidenceState::{self, *};
+    use stepper_lib::execution_trace::CallResult::*;
+    use stepper_lib::execution_trace::ExecutedState::{self, *};
 
     let local_peer_id = "local_peer_id";
     let mut vm = create_aqua_vm(unit_call_service(), local_peer_id);
@@ -94,13 +94,13 @@ fn evidence_par_par_call() {
     let initial_state = json!([
         { "par": [3,0] },
         { "par": [1,0] },
-        { "call": {"request_sent": "peer_id_1"} },
+        { "call": {"request_sent_by": "peer_id_1"} },
         { "call": {"executed": "test"} },
     ])
     .to_string();
 
     let res = call_vm!(vm, "asd", script, "[]", initial_state);
-    let resulted_path: Vec<EvidenceState> =
+    let resulted_path: Vec<ExecutedState> =
         serde_json::from_slice(&res.data).expect("stepper should return valid json");
 
     let test_string = String::from("test");
@@ -108,7 +108,7 @@ fn evidence_par_par_call() {
         Par(3, 1),
         Par(1, 1),
         Call(Executed(Rc::new(JValue::String(test_string.clone())))),
-        Call(RequestSent(local_peer_id.to_string())),
+        Call(RequestSentBy(local_peer_id.to_string())),
         Call(Executed(Rc::new(JValue::String(test_string)))),
     ];
 
@@ -118,8 +118,8 @@ fn evidence_par_par_call() {
 
 #[test]
 fn evidence_seq_seq() {
-    use stepper_lib::CallResult::*;
-    use stepper_lib::EvidenceState::{self, *};
+    use stepper_lib::execution_trace::CallResult::*;
+    use stepper_lib::execution_trace::ExecutedState::{self, *};
 
     let peer_id_1 = String::from("12D3KooWHk9BjDQBUqnavciRPhAYFvqKBe4ZiPPvde7vDaqgn5er");
     let peer_id_2 = String::from("12D3KooWAzJcYitiZrerycVB4Wryrx22CFKdDGx7c4u31PFdfTbR");
@@ -147,7 +147,7 @@ fn evidence_seq_seq() {
 
     let res = call_vm!(vm2, "asd", script, "[]", res.data);
 
-    let resulted_path: Vec<EvidenceState> =
+    let resulted_path: Vec<ExecutedState> =
         serde_json::from_slice(&res.data).expect("stepper should return valid json");
 
     let test_string = String::from("test");
@@ -162,8 +162,8 @@ fn evidence_seq_seq() {
 
 #[test]
 fn evidence_create_service() {
-    use stepper_lib::CallResult::*;
-    use stepper_lib::EvidenceState::{self, *};
+    use stepper_lib::execution_trace::CallResult::*;
+    use stepper_lib::execution_trace::ExecutedState::{self, *};
 
     let module = "greeting";
     let module_config = json!(
@@ -223,7 +223,7 @@ fn evidence_create_service() {
 
     let res = call_vm!(vm, "init_peer_id", script, "[]", json!(path).to_string());
 
-    let resulted_path: Vec<EvidenceState> = serde_json::from_slice(&res.data).expect("should be a correct json");
+    let resulted_path: Vec<ExecutedState> = serde_json::from_slice(&res.data).expect("should be a correct json");
 
     assert_eq!(resulted_path, path);
     assert!(res.next_peer_pks.is_empty());

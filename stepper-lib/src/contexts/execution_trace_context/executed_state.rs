@@ -47,7 +47,7 @@ impl std::fmt::Display for ExecutedState {
 
         match self {
             Par(left, right) => write!(f, "Par({}, {})", left, right),
-            Call(RequestSentBy(peer_id)) => write!(f, "RequestSent({})", peer_id),
+            Call(RequestSentBy(peer_id)) => write!(f, "RequestSentBy({})", peer_id),
             Call(Executed(result)) => write!(f, "Executed({:?})", result),
             Call(CallServiceFailed(err_msg)) => write!(f, "CallServiceFailed({})", err_msg),
         }

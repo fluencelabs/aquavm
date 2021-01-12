@@ -155,7 +155,7 @@ fn cleanup_variables(exec_ctx: &mut ExecutionCtx<'_>, iterator: &str) {
 
 #[cfg(test)]
 mod tests {
-    use crate::CallEvidencePath;
+    use crate::contexts::execution_trace::ExecutionTrace;
     use crate::JValue;
 
     use aqua_test_utils::call_vm;
@@ -173,8 +173,8 @@ mod tests {
     fn lfold() {
         env_logger::try_init().ok();
 
-        use crate::call_evidence::CallResult::*;
-        use crate::call_evidence::EvidenceState::*;
+        use crate::contexts::execution_trace::CallResult::*;
+        use crate::contexts::execution_trace::ExecutedState::*;
 
         let mut vm = create_aqua_vm(echo_number_call_service(), "A");
         let mut set_variable_vm = create_aqua_vm(set_variable_call_service(r#"["1","2","3","4","5"]"#), "set_variable");
@@ -194,7 +194,7 @@ mod tests {
 
         let res = call_vm!(set_variable_vm, "", lfold.clone(), "[]", "[]");
         let res = call_vm!(vm, "", lfold, "[]", res.data);
-        let res: CallEvidencePath = serde_json::from_slice(&res.data).expect("should be valid call evidence path");
+        let res: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid call evidence path");
 
         assert_eq!(res.len(), 6);
         assert_eq!(res[0], Call(Executed(Rc::new(json!(["1", "2", "3", "4", "5"])))));
@@ -206,8 +206,8 @@ mod tests {
 
     #[test]
     fn rfold() {
-        use crate::call_evidence::CallResult::*;
-        use crate::call_evidence::EvidenceState::*;
+        use crate::contexts::execution_trace::CallResult::*;
+        use crate::contexts::execution_trace::ExecutedState::*;
 
         let mut vm = create_aqua_vm(echo_number_call_service(), "A");
         let mut set_variable_vm = create_aqua_vm(set_variable_call_service(r#"["1","2","3","4","5"]"#), "set_variable");
@@ -227,7 +227,7 @@ mod tests {
 
         let res = call_vm!(set_variable_vm, "", rfold.clone(), "[]", "[]");
         let res = call_vm!(vm, "", rfold, "[]", res.data);
-        let res: CallEvidencePath = serde_json::from_slice(&res.data).expect("should be valid call evidence path");
+        let res: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid call evidence path");
 
         assert_eq!(res.len(), 6);
         assert_eq!(res[0], Call(Executed(Rc::new(json!(["1", "2", "3", "4", "5"])))));
@@ -239,8 +239,8 @@ mod tests {
 
     #[test]
     fn inner_fold() {
-        use crate::call_evidence::CallResult::*;
-        use crate::call_evidence::EvidenceState::*;
+        use crate::contexts::execution_trace::CallResult::*;
+        use crate::contexts::execution_trace::ExecutedState::*;
 
         let mut vm = create_aqua_vm(echo_number_call_service(), "A");
         let mut set_variable_vm = create_aqua_vm(set_variable_call_service(r#"["1","2","3","4","5"]"#), "set_variable");
@@ -268,7 +268,7 @@ mod tests {
 
         let res = call_vm!(set_variable_vm, "", script.clone(), "[]", "[]");
         let res = call_vm!(vm, "", script, "[]", res.data);
-        let res: CallEvidencePath = serde_json::from_slice(&res.data).expect("should be valid call evidence path");
+        let res: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid call evidence path");
 
         assert_eq!(res.len(), 27);
         assert_eq!(res[0], Call(Executed(Rc::new(json!(["1", "2", "3", "4", "5"])))));
@@ -316,8 +316,8 @@ mod tests {
 
     #[test]
     fn empty_fold() {
-        use crate::call_evidence::CallResult::*;
-        use crate::call_evidence::EvidenceState::*;
+        use crate::contexts::execution_trace::CallResult::*;
+        use crate::contexts::execution_trace::ExecutedState::*;
 
         let mut vm = create_aqua_vm(echo_number_call_service(), "A");
         let mut set_variable_vm = create_aqua_vm(set_variable_call_service(r#"[]"#), "set_variable");
@@ -337,7 +337,7 @@ mod tests {
 
         let res = call_vm!(set_variable_vm, "", empty_fold.clone(), "[]", "[]");
         let res = call_vm!(vm, "", empty_fold, "[]", res.data);
-        let res: CallEvidencePath = serde_json::from_slice(&res.data).expect("should be valid call evidence path");
+        let res: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid call evidence path");
 
         assert_eq!(res.len(), 1);
         assert_eq!(res[0], Call(Executed(Rc::new(json!([])))));
@@ -345,8 +345,8 @@ mod tests {
 
     #[test]
     fn json_path() {
-        use crate::call_evidence::CallResult::*;
-        use crate::call_evidence::EvidenceState::*;
+        use crate::contexts::execution_trace::CallResult::*;
+        use crate::contexts::execution_trace::ExecutedState::*;
 
         let mut vm = create_aqua_vm(echo_number_call_service(), "A");
         let mut set_variable_vm = create_aqua_vm(
@@ -369,7 +369,7 @@ mod tests {
 
         let res = call_vm!(set_variable_vm, "", lfold.clone(), "[]", "[]");
         let res = call_vm!(vm, "", lfold, "[]", res.data);
-        let res: CallEvidencePath = serde_json::from_slice(&res.data).expect("should be valid call evidence path");
+        let res: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid call evidence path");
 
         assert_eq!(res.len(), 6);
         assert_eq!(
@@ -384,8 +384,8 @@ mod tests {
 
     #[test]
     fn shadowing() {
-        use crate::call_evidence::CallResult::*;
-        use crate::call_evidence::EvidenceState::*;
+        use crate::contexts::execution_trace::CallResult::*;
+        use crate::contexts::execution_trace::ExecutedState::*;
 
         let mut set_variables_vm = create_aqua_vm(set_variable_call_service(r#"["1","2"]"#), "set_variable");
         let mut vm_a = create_aqua_vm(echo_string_call_service(), "A");
@@ -429,7 +429,7 @@ mod tests {
         let res = call_vm!(vm_a, "", script.clone(), "[]", res.data);
         let res = call_vm!(vm_b, "", script, "[]", res.data);
 
-        let res: CallEvidencePath = serde_json::from_slice(&res.data).expect("should be valid call evidence path");
+        let res: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid call evidence path");
 
         assert_eq!(res.len(), 12);
         for i in 2..11 {
@@ -439,8 +439,8 @@ mod tests {
 
     #[test]
     fn shadowing_scope() {
-        use crate::call_evidence::CallResult::*;
-        use crate::call_evidence::EvidenceState::*;
+        use crate::contexts::execution_trace::CallResult::*;
+        use crate::contexts::execution_trace::ExecutedState::*;
 
         fn execute_script(script: String) -> Result<StepperOutcome, AquamarineVMError> {
             let mut set_variables_vm = create_aqua_vm(set_variable_call_service(r#"["1","2"]"#), "set_variable");
@@ -517,7 +517,7 @@ mod tests {
         );
 
         let res = execute_script(variable_shadowing_script).unwrap();
-        let res: CallEvidencePath = serde_json::from_slice(&res.data).expect("should be valid call evidence path");
+        let res: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid call evidence path");
 
         assert_eq!(res.len(), 11);
         for i in 0..10 {

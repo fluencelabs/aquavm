@@ -159,9 +159,10 @@ fn merge_call(prev_call_result: CallResult, current_call_result: CallResult) -> 
 
 #[cfg(test)]
 mod tests {
-    use crate::call_evidence::CallResult;
-    use crate::call_evidence::ExecutedState;
-    use crate::call_evidence::{merge_call_paths, ExecutionTrace};
+    use super::merge_call_paths;
+    use super::CallResult;
+    use super::ExecutedState;
+    use super::ExecutionTrace;
     use crate::JValue;
 
     use std::rc::Rc;
@@ -173,19 +174,19 @@ mod tests {
 
         let mut prev_path = ExecutionTrace::new();
         prev_path.push_back(Par(1, 1));
-        prev_path.push_back(Call(RequestSent(String::from("peer_1"))));
+        prev_path.push_back(Call(RequestSentBy(String::from("peer_1"))));
         prev_path.push_back(Call(Executed(Rc::new(JValue::Null))));
         prev_path.push_back(Par(1, 1));
-        prev_path.push_back(Call(RequestSent(String::from("peer_3"))));
+        prev_path.push_back(Call(RequestSentBy(String::from("peer_3"))));
         prev_path.push_back(Call(Executed(Rc::new(JValue::Null))));
 
         let mut current_path = ExecutionTrace::new();
         current_path.push_back(Par(1, 1));
         current_path.push_back(Call(Executed(Rc::new(JValue::Null))));
-        current_path.push_back(Call(RequestSent(String::from("peer_2"))));
+        current_path.push_back(Call(RequestSentBy(String::from("peer_2"))));
         current_path.push_back(Par(1, 1));
         current_path.push_back(Call(Executed(Rc::new(JValue::Null))));
-        current_path.push_back(Call(RequestSent(String::from("peer_4"))));
+        current_path.push_back(Call(RequestSentBy(String::from("peer_4"))));
 
         let merged_path = merge_call_paths(prev_path, current_path).expect("merging should be successful");
 
@@ -207,9 +208,9 @@ mod tests {
 
         let mut prev_path = ExecutionTrace::new();
         prev_path.push_back(Par(1, 0));
-        prev_path.push_back(Call(RequestSent(String::from("peer_1"))));
+        prev_path.push_back(Call(RequestSentBy(String::from("peer_1"))));
         prev_path.push_back(Par(1, 1));
-        prev_path.push_back(Call(RequestSent(String::from("peer_2"))));
+        prev_path.push_back(Call(RequestSentBy(String::from("peer_2"))));
         prev_path.push_back(Call(Executed(Rc::new(JValue::Null))));
 
         let mut current_path = ExecutionTrace::new();
@@ -217,10 +218,10 @@ mod tests {
         current_path.push_back(Call(Executed(Rc::new(JValue::Null))));
         current_path.push_back(Call(Executed(Rc::new(JValue::Null))));
         current_path.push_back(Call(Executed(Rc::new(JValue::Null))));
-        current_path.push_back(Call(RequestSent(String::from("peer_1"))));
+        current_path.push_back(Call(RequestSentBy(String::from("peer_1"))));
         current_path.push_back(Par(1, 1));
         current_path.push_back(Call(Executed(Rc::new(JValue::Null))));
-        current_path.push_back(Call(RequestSent(String::from("peer_2"))));
+        current_path.push_back(Call(RequestSentBy(String::from("peer_2"))));
 
         let merged_path = merge_call_paths(prev_path, current_path).expect("merging should be successful");
 
@@ -229,7 +230,7 @@ mod tests {
         expected_merged_path.push_back(Call(Executed(Rc::new(JValue::Null))));
         expected_merged_path.push_back(Call(Executed(Rc::new(JValue::Null))));
         expected_merged_path.push_back(Call(Executed(Rc::new(JValue::Null))));
-        expected_merged_path.push_back(Call(RequestSent(String::from("peer_1"))));
+        expected_merged_path.push_back(Call(RequestSentBy(String::from("peer_1"))));
         expected_merged_path.push_back(Par(1, 1));
         expected_merged_path.push_back(Call(Executed(Rc::new(JValue::Null))));
         expected_merged_path.push_back(Call(Executed(Rc::new(JValue::Null))));
@@ -246,11 +247,11 @@ mod tests {
         prev_path.push_back(Call(Executed(Rc::new(JValue::Null))));
         prev_path.push_back(Par(2, 0));
         prev_path.push_back(Par(1, 0));
-        prev_path.push_back(Call(RequestSent(String::from("peer_1"))));
+        prev_path.push_back(Call(RequestSentBy(String::from("peer_1"))));
         prev_path.push_back(Par(1, 2));
-        prev_path.push_back(Call(RequestSent(String::from("peer_1"))));
+        prev_path.push_back(Call(RequestSentBy(String::from("peer_1"))));
         prev_path.push_back(Call(Executed(Rc::new(JValue::Null))));
-        prev_path.push_back(Call(RequestSent(String::from("peer_1"))));
+        prev_path.push_back(Call(RequestSentBy(String::from("peer_1"))));
 
         let mut current_path = ExecutionTrace::new();
         current_path.push_back(Call(Executed(Rc::new(JValue::Null))));
@@ -260,10 +261,10 @@ mod tests {
         current_path.push_back(Call(Executed(Rc::new(JValue::Null))));
         current_path.push_back(Par(1, 1));
         current_path.push_back(Call(Executed(Rc::new(JValue::Null))));
-        current_path.push_back(Call(RequestSent(String::from("peer_1"))));
+        current_path.push_back(Call(RequestSentBy(String::from("peer_1"))));
         current_path.push_back(Par(1, 1));
         current_path.push_back(Call(Executed(Rc::new(JValue::Null))));
-        current_path.push_back(Call(RequestSent(String::from("peer_1"))));
+        current_path.push_back(Call(RequestSentBy(String::from("peer_1"))));
 
         let merged_path = merge_call_paths(prev_path, current_path).expect("merging should be successful");
 
@@ -275,11 +276,11 @@ mod tests {
         expected_merged_path.push_back(Call(Executed(Rc::new(JValue::Null))));
         expected_merged_path.push_back(Par(1, 1));
         expected_merged_path.push_back(Call(Executed(Rc::new(JValue::Null))));
-        expected_merged_path.push_back(Call(RequestSent(String::from("peer_1"))));
+        expected_merged_path.push_back(Call(RequestSentBy(String::from("peer_1"))));
         expected_merged_path.push_back(Par(1, 2));
         expected_merged_path.push_back(Call(Executed(Rc::new(JValue::Null))));
         expected_merged_path.push_back(Call(Executed(Rc::new(JValue::Null))));
-        expected_merged_path.push_back(Call(RequestSent(String::from("peer_1"))));
+        expected_merged_path.push_back(Call(RequestSentBy(String::from("peer_1"))));
 
         assert_eq!(merged_path, expected_merged_path);
     }
