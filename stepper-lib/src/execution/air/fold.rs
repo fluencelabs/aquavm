@@ -311,7 +311,7 @@ mod tests {
 
         let res = call_vm!(vm, "", script, "[]", "[]");
 
-        assert_eq!(res.ret_code, 15);
+        assert_eq!(res.ret_code, 1012);
     }
 
     #[test]
@@ -484,7 +484,7 @@ mod tests {
         );
 
         let res = execute_script(use_non_exist_variable_script).unwrap();
-        assert_eq!(res.ret_code, 7);
+        assert_eq!(res.ret_code, 1004);
 
         let variable_shadowing_script = String::from(
             r#"
