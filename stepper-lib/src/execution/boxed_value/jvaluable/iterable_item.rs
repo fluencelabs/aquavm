@@ -14,8 +14,15 @@
  * limitations under the License.
  */
 
+use super::ExecutionResult;
+use crate::contexts::execution::ResolvedCallResult;
+use crate::JValue;
+use crate::SecurityTetraplet;
+
+use jsonpath::select;
+
 impl<'ctx> JValuable for IterableItem<'ctx> {
-    fn apply_json_path(&self, json_path: &str) -> Result<Vec<&JValue>> {
+    fn apply_json_path(&self, json_path: &str) -> ExecutionResult<Vec<&JValue>> {
         use crate::AquamarineError::JValueJsonPathError as JsonPathError;
         use IterableItem::*;
 
@@ -30,7 +37,10 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
         Ok(selected_jvalues)
     }
 
-    fn apply_json_path_with_tetraplets(&self, json_path: &str) -> Result<(Vec<&JValue>, Vec<SecurityTetraplet>)> {
+    fn apply_json_path_with_tetraplets(
+        &self,
+        json_path: &str,
+    ) -> ExecutionResult<(Vec<&JValue>, Vec<SecurityTetraplet>)> {
         use super::fold::IterableItem::*;
         use crate::AquamarineError::JValueJsonPathError as JsonPathError;
 

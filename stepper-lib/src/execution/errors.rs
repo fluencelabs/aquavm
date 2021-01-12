@@ -24,7 +24,6 @@ use jsonpath_lib::JsonPathError;
 use serde_json::Error as SerdeJsonError;
 use thiserror::Error as ThisError;
 
-use std::env::VarError;
 use std::error::Error;
 
 /// Errors arised while executing AIR script.
@@ -83,7 +82,7 @@ pub enum ExecutionError {
     InvalidEvidenceState(String, ExecutedState),
 
     /// Errors occurred when evidence path contains less elements then corresponding Par has.
-    #[error("vairable with name '{}' can't be shadowed, shadowing is supported only for scalar values")]
+    #[error("vairable with name '{0}' can't be shadowed, shadowing is supported only for scalar values")]
     ShadowingError(String),
 }
 

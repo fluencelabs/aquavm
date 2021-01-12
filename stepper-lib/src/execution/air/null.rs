@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-use super::CallEvidenceCtx;
 use super::ExecutionCtx;
+use super::ExecutionResult;
+use super::ExecutionTraceCtx;
 use crate::log_instruction;
-use crate::Result;
 
 use air_parser::ast::Null;
 
 impl<'i> super::ExecutableInstruction<'i> for Null {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
-        log_instruction!(null, exec_ctx, call_ctx);
+    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut ExecutionTraceCtx) -> ExecutionResult<()> {
+        log_instruction!(null, exec_ctx, trace_ctx);
 
         Ok(())
     }

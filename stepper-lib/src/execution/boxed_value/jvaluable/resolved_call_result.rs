@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+use super::ExecutionResult;
+use crate::contexts::execution::ResolvedCallResult;
+use crate::JValue;
+use crate::SecurityTetraplet;
+
 use std::borrow::Cow;
 
 impl JValuable for ResolvedCallResult {

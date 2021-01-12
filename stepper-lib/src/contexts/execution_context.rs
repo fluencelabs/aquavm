@@ -17,6 +17,7 @@
 mod avalue;
 
 pub(crate) use avalue::AValue;
+pub(crate) use avalue::ResolvedCallResult;
 
 use std::collections::HashMap;
 use std::collections::VecDeque;

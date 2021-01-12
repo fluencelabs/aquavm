@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
+mod outcome;
+
 use crate::air::ExecutableInstruction;
-use crate::preparation::prelude::*;
+use crate::preparation::prepare;
+use crate::preparation::PreparationDescriptor;
 
 use stepper_interface::StepperOutcome;
 
@@ -39,17 +42,17 @@ fn execute_aqua_impl(
 ) -> Result<StepperOutcome, StepperOutcome> {
     let PreparationDescriptor {
         mut exec_ctx,
-        mut call_ctx,
+        mut trace_ctx,
         aqua,
     } = prepare(&prev_data, &data, aqua.as_str(), init_peer_id)
         // return the initial data in case of errors
         .map_err(|e| outcome::from_preparation_error(data, e))?;
 
-    aqua.execute(&mut exec_ctx, &mut call_ctx)
+    aqua.execute(&mut exec_ctx, &mut trace_ctx)
         // return new collected path in case of errors
-        .map_err(|e| outcome::from_execution_error(&call_ctx.new_path, exec_ctx.next_peer_pks.clone(), e))?;
+        .map_err(|e| outcome::from_execution_error(&trace_ctx.new_path, exec_ctx.next_peer_pks.clone(), e))?;
 
-    let outcome = outcome::from_path_and_peers(&call_ctx.new_path, exec_ctx.next_peer_pks);
+    let outcome = outcome::from_path_and_peers(&trace_ctx.new_path, exec_ctx.next_peer_pks);
 
     Ok(outcome)
 }

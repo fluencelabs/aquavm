@@ -17,12 +17,15 @@
 mod execution_context;
 mod execution_trace_context;
 
-pub use execution_trace_context::CallResult;
-pub use execution_trace_context::ExecutedState;
-pub use execution_trace_context::ExecutionTrace;
+pub mod execution_trace {
+    pub use super::execution_trace_context::CallResult;
+    pub use super::execution_trace_context::ExecutedState;
+    pub use super::execution_trace_context::ExecutionTrace;
+    pub(crate) use super::execution_trace_context::ExecutionTraceCtx;
+}
 
-pub(crate) use execution_context::AValue;
-pub(crate) use execution_context::ExecutionCtx;
-pub(crate) use execution_trace_context::ExecutionTraceCtx;
-
-pub(crate) use context::CallEvidenceCtx;
+pub(crate) mod execution {
+    pub(crate) use super::execution_context::AValue;
+    pub(crate) use super::execution_context::ExecutionCtx;
+    pub(crate) use super::execution_context::ResolvedCallResult;
+}

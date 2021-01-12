@@ -19,17 +19,17 @@
 use super::triplet::Triplet;
 use super::utils::*;
 use super::Call;
-use crate::air::ExecutionCtx;
+use super::ExecutionCtx;
+use super::ExecutionError;
+use super::ExecutionResult;
 use crate::build_targets::CALL_SERVICE_SUCCESS;
-use crate::call_evidence::{CallEvidenceCtx, CallResult, EvidenceState};
+use crate::contexts::execution_trace::*;
 use crate::log_targets::EVIDENCE_CHANGING;
-use crate::AquamarineError;
 use crate::JValue;
-use crate::Result;
+use crate::ResolvedTriplet;
 use crate::SecurityTetraplet;
 
 use air_parser::ast::{CallOutput, InstructionValue};
-use polyplets::ResolvedTriplet;
 
 use std::rc::Rc;
 
@@ -48,7 +48,7 @@ struct ResolvedArguments {
 
 impl<'i> ResolvedCall<'i> {
     /// Build `ResolvedCall` from `Call` by transforming `PeerPart` & `FunctionPart` into `ResolvedTriplet`.
-    pub(super) fn new(raw_call: &Call<'i>, exec_ctx: &ExecutionCtx<'i>) -> Result<Self> {
+    pub(super) fn new(raw_call: &Call<'i>, exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<Self> {
         let triplet = Triplet::try_from(&raw_call.peer_part, &raw_call.function_part)?;
         let triplet = triplet.resolve(exec_ctx)?;
         let triplet = Rc::new(triplet);
@@ -61,19 +61,23 @@ impl<'i> ResolvedCall<'i> {
     }
 
     /// Executes resolved instruction, updates contexts based on a execution result.
-    pub(super) fn execute(self, exec_ctx: &mut ExecutionCtx<'i>, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
-        use AquamarineError::CallServiceResultDeserializationError as DeError;
+    pub(super) fn execute(
+        self,
+        exec_ctx: &mut ExecutionCtx<'i>,
+        trace_ctx: &mut ExecutionTraceCtx,
+    ) -> ExecutionResult<()> {
         use CallResult::*;
         use EvidenceState::Call;
+        use ExecutionError::CallServiceResultDeError as DeError;
 
-        let should_execute = self.prepare_evidence_state(exec_ctx, call_ctx)?;
+        let should_execute = self.prepare_evidence_state(exec_ctx, trace_ctx)?;
         if !should_execute {
             return Ok(());
         }
 
         // call can be executed only on peers with such peer_id
         if self.triplet.peer_pk != exec_ctx.current_peer_id {
-            set_remote_call_result(self.triplet.peer_pk.clone(), exec_ctx, call_ctx);
+            set_remote_call_result(self.triplet.peer_pk.clone(), exec_ctx, trace_ctx);
 
             return Ok(());
         }
@@ -97,10 +101,10 @@ impl<'i> ResolvedCall<'i> {
 
         // check that service call succeeded
         if service_result.ret_code != CALL_SERVICE_SUCCESS {
-            call_ctx
+            trace_ctx
                 .new_path
                 .push_back(Call(CallServiceFailed(service_result.result.clone())));
-            return Err(AquamarineError::LocalServiceError(service_result.result));
+            return Err(ExecutionError::LocalServiceError(service_result.result));
         }
 
         let result: JValue = serde_json::from_str(&service_result.result).map_err(|e| DeError(service_result, e))?;
@@ -115,22 +119,26 @@ impl<'i> ResolvedCall<'i> {
             new_evidence_state
         );
 
-        call_ctx.new_path.push_back(new_evidence_state);
+        trace_ctx.new_path.push_back(new_evidence_state);
 
         Ok(())
     }
 
     /// Determine whether this call should be really called and adjust prev call evidence path accordingly.
-    fn prepare_evidence_state(&self, exec_ctx: &mut ExecutionCtx<'i>, call_ctx: &mut CallEvidenceCtx) -> Result<bool> {
-        if call_ctx.current_subtree_size == 0 {
+    fn prepare_evidence_state(
+        &self,
+        exec_ctx: &mut ExecutionCtx<'i>,
+        trace_ctx: &mut ExecutionTraceCtx,
+    ) -> ExecutionResult<bool> {
+        if trace_ctx.current_subtree_size == 0 {
             log::trace!(target: EVIDENCE_CHANGING, "  previous call evidence state wasn't found");
             return Ok(true);
         }
 
-        call_ctx.current_subtree_size -= 1;
+        trace_ctx.current_subtree_size -= 1;
         // unwrap is safe here, because current_subtree_size depends on current_path len,
         // and it's been checked previously
-        let prev_state = call_ctx.current_path.pop_front().unwrap();
+        let prev_state = trace_ctx.current_path.pop_front().unwrap();
 
         log::trace!(
             target: EVIDENCE_CHANGING,
@@ -138,12 +146,12 @@ impl<'i> ResolvedCall<'i> {
             prev_state
         );
 
-        handle_prev_state(&self.triplet, &self.output, prev_state, exec_ctx, call_ctx)
+        handle_prev_state(&self.triplet, &self.output, prev_state, exec_ctx, trace_ctx)
     }
 
     /// Prepare arguments of this call instruction by resolving and preparing their security tetraplets.
-    fn resolve_args(&self, exec_ctx: &ExecutionCtx<'i>) -> Result<ResolvedArguments> {
-        use crate::air::resolve::resolve_to_args;
+    fn resolve_args(&self, exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<ResolvedArguments> {
+        use crate::execution::utils::resolve_to_args;
 
         let function_args = self.function_arg_paths.iter();
         let mut call_arguments = Vec::new();

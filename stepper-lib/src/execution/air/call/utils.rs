@@ -15,14 +15,12 @@
  */
 
 use super::ExecutionCtx;
-use crate::call_evidence::CallEvidenceCtx;
-use crate::call_evidence::CallResult;
-use crate::call_evidence::EvidenceState;
+use super::ExecutionError;
+use super::ExecutionResult;
+use crate::contexts::execution::ResolvedCallResult;
+use crate::contexts::execution_trace::*;
 use crate::log_targets::EVIDENCE_CHANGING;
-use crate::AquamarineError;
 use crate::JValue;
-use crate::ResolvedCallResult;
-use crate::Result;
 
 use air_parser::ast::CallOutput;
 use polyplets::ResolvedTriplet;
@@ -36,10 +34,10 @@ pub(super) fn set_local_call_result<'i>(
     output: &CallOutput<'i>,
     exec_ctx: &mut ExecutionCtx<'i>,
 ) -> Result<()> {
-    use crate::AValue;
+    use crate::contexts::execution::AValue;
     use std::cell::RefCell;
     use std::collections::hash_map::Entry::{Occupied, Vacant};
-    use AquamarineError::*;
+    use ExecutionError::*;
 
     let executed_result = ResolvedCallResult { result, triplet };
 
@@ -97,7 +95,7 @@ pub(super) fn set_local_call_result<'i>(
 pub(super) fn set_remote_call_result<'i>(
     peer_pk: String,
     exec_ctx: &mut ExecutionCtx<'i>,
-    call_ctx: &mut CallEvidenceCtx,
+    trace_ctx: &mut ExecutionTraceCtx,
 ) {
     exec_ctx.next_peer_pks.push(peer_pk);
     exec_ctx.subtree_complete = false;
@@ -108,7 +106,7 @@ pub(super) fn set_remote_call_result<'i>(
         "  adding new call evidence state {:?}",
         new_evidence_state
     );
-    call_ctx.new_path.push_back(new_evidence_state);
+    trace_ctx.new_path.push_back(new_evidence_state);
 }
 
 /// This function looks at the existing call state, validates it,
@@ -118,17 +116,17 @@ pub(super) fn handle_prev_state<'i>(
     output: &CallOutput<'i>,
     prev_state: EvidenceState,
     exec_ctx: &mut ExecutionCtx<'i>,
-    call_ctx: &mut CallEvidenceCtx,
+    trace_ctx: &mut ExecutionTraceCtx,
 ) -> Result<bool> {
-    use crate::call_evidence::CallResult::*;
-    use crate::call_evidence::EvidenceState::*;
+    use CallResult::*;
+    use ExecutedState::*;
 
     match &prev_state {
         // this call was failed on one of the previous executions,
         // here it's needed to bubble this special error up
         Call(CallServiceFailed(err_msg)) => {
             let err_msg = err_msg.clone();
-            call_ctx.new_path.push_back(prev_state);
+            trace_ctx.new_path.push_back(prev_state);
             exec_ctx.subtree_complete = false;
             Err(AquamarineError::LocalServiceError(err_msg))
         }
@@ -140,14 +138,14 @@ pub(super) fn handle_prev_state<'i>(
                 Ok(true)
             } else {
                 exec_ctx.subtree_complete = false;
-                call_ctx.new_path.push_back(prev_state);
+                trace_ctx.new_path.push_back(prev_state);
                 Ok(false)
             }
         }
         // this instruction's been already executed
         Call(Executed(result)) => {
             set_local_call_result(result.clone(), triplet.clone(), output, exec_ctx)?;
-            call_ctx.new_path.push_back(prev_state);
+            trace_ctx.new_path.push_back(prev_state);
             Ok(false)
         }
         // state has inconsistent order - return a error, call shouldn't be executed

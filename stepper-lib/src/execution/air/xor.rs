@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-use super::CallEvidenceCtx;
 use super::ExecutionCtx;
+use super::ExecutionTraceCtx;
 use crate::log_instruction;
 use crate::AquamarineError::LocalServiceError;
 use crate::Result;
@@ -23,14 +23,14 @@ use crate::Result;
 use air_parser::ast::Xor;
 
 impl<'i> super::ExecutableInstruction<'i> for Xor<'i> {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
-        log_instruction!(xor, exec_ctx, call_ctx);
+    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut ExecutionTraceCtx) -> ExecutionResult<()> {
+        log_instruction!(xor, exec_ctx, trace_ctx);
 
         exec_ctx.subtree_complete = true;
-        match self.0.execute(exec_ctx, call_ctx) {
+        match self.0.execute(exec_ctx, trace_ctx) {
             Err(LocalServiceError(_)) => {
                 exec_ctx.subtree_complete = true;
-                self.1.execute(exec_ctx, call_ctx)
+                self.1.execute(exec_ctx, trace_ctx)
             }
             res => res,
         }

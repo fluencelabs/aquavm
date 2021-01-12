@@ -20,29 +20,20 @@ mod utils;
 
 use resolved_call::ResolvedCall;
 
-use super::CallEvidenceCtx;
 use super::ExecutionCtx;
+use super::ExecutionError;
+use super::ExecutionResult;
+use super::ExecutionTraceCtx;
 use crate::log_instruction;
-use crate::AquamarineError::JValueJsonPathError;
-use crate::AquamarineError::VariableNotFound;
-use crate::Result;
 
 use air_parser::ast::Call;
 
-/*
-   (current)
-   (pk $pk)
-   (pk $pk $srv_id)
-   PEER_PART: resolves to (peer_pk) \/ (peer_pk, pk_srv_id)
-
-   (fn $name)
-   (fn $name $srv_id)
-   FN_PART: resolves to (fn_name) \/ (fn_srv_id, fn_name)
-*/
-
 impl<'i> super::ExecutableInstruction<'i> for Call<'i> {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
-        log_instruction!(call, exec_ctx, call_ctx);
+    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut ExecutionTraceCtx) -> ExecutionResult<()> {
+        use ExecutionError::JValueJsonPathError;
+        use ExecutionError::VariableNotFound;
+
+        log_instruction!(call, exec_ctx, trace_ctx);
 
         let resolved_call = match ResolvedCall::new(self, exec_ctx) {
             Ok(resolved_call) => resolved_call,
@@ -65,7 +56,7 @@ impl<'i> super::ExecutableInstruction<'i> for Call<'i> {
             Err(err) => return Err(err),
         };
 
-        resolved_call.execute(exec_ctx, call_ctx)
+        resolved_call.execute(exec_ctx, trace_ctx)
     }
 }
 

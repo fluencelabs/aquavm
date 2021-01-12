@@ -19,7 +19,7 @@
 #![deny(
     dead_code,
     nonstandard_style,
-    unused_imports,
+    //unused_imports,
     unused_mut,
     unused_variables,
     unused_unsafe,
@@ -34,18 +34,9 @@ mod preparation;
 mod aqua;
 pub mod log_targets;
 
-pub use crate::call_evidence::CallEvidencePath;
-pub use crate::call_evidence::CallResult;
-pub use crate::call_evidence::EvidenceState;
-pub use crate::preparation::parse;
-pub use air_parser::ast::Instruction;
-pub use aqua::execute_aqua;
-
 pub use polyplets::ResolvedTriplet;
 pub use polyplets::SecurityTetraplet;
 pub use stepper_interface::StepperOutcome;
+pub use stepper_interface::STEPPER_SUCCESS;
 
 pub(crate) type JValue = serde_json::Value;
-
-pub(crate) use build_targets::call_service;
-pub(crate) use build_targets::get_current_peer_id;

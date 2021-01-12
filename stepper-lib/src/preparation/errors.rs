@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-use super::EvidenceState;
+use super::CallResult;
+use super::ExecutedState;
 
 use serde::Error as SerdeJsonError;
 use thiserror::Error as ThisError;
@@ -43,7 +44,7 @@ pub(crate) enum PreparationError {
 pub(crate) enum DataMergingError {
     /// Errors occurred when previous and current evidence states are incompatible.
     #[error("previous and current data have incompatible states: '{0:?}' '{1:?}'")]
-    IncompatibleEvidenceStates(EvidenceState, EvidenceState),
+    IncompatibleExecutedStates(ExecutedState, ExecutedState),
 
     /// Errors occurred when previous and current call results are incompatible.
     #[error("previous and current call results are incompatible: '{0:?}' '{1:?}'")]
@@ -59,15 +60,15 @@ impl Error for DataMergingError {}
 
 impl std::fmt::Display for PreparationError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
-        use Self::*;
+        use PreparationError::*;
 
         match self {
-            AIRParseError(err_msg) => write!(f, "aqua script can't be parsed:\n{}", err),
+            AIRParseError(err_msg) => write!(f, "aqua script can't be parsed:\n{}", err_msg),
             CallEvidenceDeError(serde_error, evidence_path) => {
                 let print_error = move |path| {
                     write!(
                         f,
-                        "an error occurred while call evidence path deserialization on \"{:?}\": {:?}",
+                        "an error occurred while call evidence path deserialization on '{:?}': {:?}",
                         path, serde_error
                     )
                 };
@@ -79,34 +80,10 @@ impl std::fmt::Display for PreparationError {
             }
             CurrentPeerIdEnvError(err, env_name) => write!(
                 f,
-                "the environment variable with name \"{}\" can't be obtained: {:?}",
+                "the environment variable with name '{}' can't be obtained: {:?}",
                 env_name, err
             ),
             StateMergingError(err) => write!(f, "{}", err),
-        }
-    }
-}
-
-impl std::fmt::Display for DataMergingError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
-        use Self::*;
-
-        match self {
-            IncompatibleEvidenceStates(prev_state, current_state) => write!(
-                f,
-                "previous and current data have incompatible states: {:?} {:?}",
-                prev_state, current_state
-            ),
-            IncompatibleCallResults(prev_call_result, current_call_result) => write!(
-                f,
-                "previous and current call results are incompatible: {:?} {:?}",
-                prev_call_result, current_call_result
-            ),
-            EvidencePathTooSmall(actual_count, expected_count) => write!(
-                f,
-                "evidence path remains {} elements, but {} requires by Par",
-                actual_count, desired_count
-            ),
         }
     }
 }

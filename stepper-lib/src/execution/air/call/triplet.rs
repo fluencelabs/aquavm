@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-use crate::air::ExecutionCtx;
-use crate::AquamarineError;
+use super::ExecutionCtx;
+use super::ExecutionError;
+use super::ExecutionResult;
 use crate::JValue;
-use crate::Result;
 
 use air_parser::ast::{FunctionPart, InstructionValue, PeerPart};
 use polyplets::ResolvedTriplet;
@@ -32,7 +32,7 @@ pub(super) struct Triplet<'a, 'i> {
 
 impl<'a, 'i> Triplet<'a, 'i> {
     /// Build a `Triplet` from `Call`'s `PeerPart` and `FunctionPart`
-    pub fn try_from(peer: &'a PeerPart<'i>, f: &'a FunctionPart<'i>) -> Result<Self> {
+    pub fn try_from(peer: &'a PeerPart<'i>, f: &'a FunctionPart<'i>) -> ExecutionResult<Self> {
         use air_parser::ast::FunctionPart::*;
         use air_parser::ast::PeerPart::*;
 
@@ -57,7 +57,7 @@ impl<'a, 'i> Triplet<'a, 'i> {
     }
 
     /// Resolve variables, literals, etc in the `Triplet`, and build a `ResolvedTriplet`.
-    pub fn resolve(self, ctx: &ExecutionCtx<'i>) -> Result<ResolvedTriplet> {
+    pub fn resolve(self, ctx: &ExecutionCtx<'i>) -> ExecutionResult<ResolvedTriplet> {
         let Triplet {
             peer_pk,
             service_id,
@@ -77,8 +77,8 @@ impl<'a, 'i> Triplet<'a, 'i> {
 
 /// Resolve value to string by either resolving variable from `ExecutionCtx`, taking literal value, or etc.
 // TODO: return Rc<String> to avoid excess cloning
-fn resolve_to_string<'i>(value: &InstructionValue<'i>, ctx: &ExecutionCtx<'i>) -> Result<String> {
-    use crate::air::resolve::resolve_to_jvaluable;
+fn resolve_to_string<'i>(value: &InstructionValue<'i>, ctx: &ExecutionCtx<'i>) -> ExecutionResult<String> {
+    use crate::execution::utils::resolve_to_jvaluable;
 
     let resolved = match value {
         InstructionValue::InitPeerId => ctx.init_peer_id.clone(),
@@ -98,8 +98,8 @@ fn resolve_to_string<'i>(value: &InstructionValue<'i>, ctx: &ExecutionCtx<'i>) -
     Ok(resolved)
 }
 
-fn jvalue_to_string(jvalue: JValue) -> Result<String> {
-    use AquamarineError::IncompatibleJValueType;
+fn jvalue_to_string(jvalue: JValue) -> ExecutionResult<String> {
+    use ExecutionError::IncompatibleJValueType;
 
     match jvalue {
         JValue::String(s) => Ok(s),
@@ -107,13 +107,13 @@ fn jvalue_to_string(jvalue: JValue) -> Result<String> {
     }
 }
 
-fn vec_to_string(values: Vec<&JValue>, json_path: &str) -> Result<String> {
+fn vec_to_string(values: Vec<&JValue>, json_path: &str) -> ExecutionResult<String> {
     if values.is_empty() {
-        return Err(AquamarineError::VariableNotFound(json_path.to_string()));
+        return Err(ExecutionError::VariableNotFound(json_path.to_string()));
     }
 
     if values.len() != 1 {
-        return Err(AquamarineError::MultipleValuesInJsonPath(json_path.to_string()));
+        return Err(ExecutionError::MultipleValuesInJsonPath(json_path.to_string()));
     }
 
     jvalue_to_string(values[0].clone())

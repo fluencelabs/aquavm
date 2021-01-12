@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-use super::PreparationError;
+use crate::execution::ExecutionError;
+use crate::preparation::PreparationError;
 
-use stepper_interface::StepperOutcome;
-use stepper_interface::STEPPER_SUCCESS;
+use crate::StepperOutcome;
+use crate::STEPPER_SUCCESS;
 
 use serde::Serialize;
 use std::hash::Hash;
@@ -55,7 +56,7 @@ pub(crate) fn from_preparation_error(data: impl Into<Vec<u8>>, err: PreparationE
 
 /// Create StepperOutcome from supplied data, next_peer_pks and error,
 /// set ret_code based on the error.
-pub(crate) fn from_execution_error<T>(data: &T, next_peer_pks: Vec<String>, err: AquamarineError) -> StepperOutcome
+pub(crate) fn from_execution_error<T>(data: &T, next_peer_pks: Vec<String>, err: ExecutionError) -> StepperOutcome
 where
     T: ?Sized + Serialize,
 {

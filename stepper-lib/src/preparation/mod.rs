@@ -16,22 +16,17 @@
 
 mod data_merging;
 mod errors;
-mod outcome;
 mod preparation;
 
 pub use preparation::parse;
 
-pub(super) mod prelude {
-    pub(crate) use super::preparation::prepare;
-    pub(crate) use super::preparation::PreparationDescriptor;
-
-    pub(crate) mod outcome {
-        pub(crate) use crate::preparation::outcome::from_execution_error;
-        pub(crate) use crate::preparation::outcome::from_path_and_peers;
-        pub(crate) use crate::preparation::outcome::from_preparation_error;
-    }
-}
+pub(crate) use errors::PreparationError;
+pub(crate) use preparation::prepare;
+pub(crate) use preparation::PreparationDescriptor;
 
 pub(self) use data_merging::merge_call_paths;
 pub(self) use errors::DataMergingError;
-pub(self) use errors::PreparationError;
+
+pub(self) use crate::contexts::execution::*;
+pub(self) use crate::contexts::execution_trace::CallResult;
+pub(self) use crate::contexts::execution_trace::ExecutedState;

@@ -16,17 +16,17 @@
 
 mod utils;
 
-pub(crate) use iterable::Iterable;
-pub(crate) use iterable::IterableItem;
+use iterable::Iterable;
+use iterable::IterableItem;
 
-use super::CallEvidenceCtx;
 use super::ExecutionCtx;
+use super::ExecutionError;
+use super::ExecutionResult;
+use super::ExecutionTraceCtx;
 use super::Instruction;
 use crate::log_instruction;
 use crate::AValue;
-use crate::AquamarineError;
 use crate::ResolvedCallResult;
-use crate::Result;
 
 use air_parser::ast::Fold;
 use air_parser::ast::Next;
@@ -54,10 +54,10 @@ impl<'i> FoldState<'i> {
 }
 
 impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
+    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut ExecutionTraceCtx) -> ExecutionResult<()> {
         use AquamarineError::MultipleFoldStates;
 
-        log_instruction!(fold, exec_ctx, call_ctx);
+        log_instruction!(fold, exec_ctx, trace_ctx);
 
         let iterable = match utils::construct_iterable_value(&self.iterable, exec_ctx)? {
             Some(iterable) => iterable,
@@ -75,7 +75,7 @@ impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
         }
         exec_ctx.met_folds.push_back(self.iterator);
 
-        self.instruction.execute(exec_ctx, call_ctx)?;
+        self.instruction.execute(exec_ctx, trace_ctx)?;
 
         cleanup_variables(exec_ctx, &self.iterator);
 
@@ -84,11 +84,11 @@ impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
 }
 
 impl<'i> super::ExecutableInstruction<'i> for Next<'i> {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
+    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut ExecutionTraceCtx) -> Result<()> {
         use AquamarineError::FoldStateNotFound;
         use AquamarineError::IncompatibleAValueType;
 
-        log_instruction!(next, exec_ctx, call_ctx);
+        log_instruction!(next, exec_ctx, trace_ctx);
 
         let iterator_name = self.0;
         let avalue = exec_ctx
@@ -114,7 +114,7 @@ impl<'i> super::ExecutableInstruction<'i> for Next<'i> {
         }
 
         let next_instr = fold_state.instr_head.clone();
-        next_instr.execute(exec_ctx, call_ctx)?;
+        next_instr.execute(exec_ctx, trace_ctx)?;
 
         // get the same fold state again because of borrow checker
         match exec_ctx.data_cache.get_mut(iterator_name) {

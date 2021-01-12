@@ -15,26 +15,26 @@
  */
 
 use super::DataMergingError;
-use crate::call_evidence::CallEvidencePath;
-use crate::call_evidence::EvidenceState;
+use super::ExecutedState;
+use super::ExecutionTrace;
 
 use std::rc::Rc;
 
 type MergeResult<T> = Result<T, DataMergingError>;
 
 pub(super) fn merge_call_paths(
-    mut prev_path: CallEvidencePath,
-    mut current_path: CallEvidencePath,
-) -> MergeResult<CallEvidencePath> {
-    let mut merged_path = CallEvidencePath::new();
+    mut prev_trace: ExecutionTrace,
+    mut current_trace: ExecutionTrace,
+) -> MergeResult<ExecutionTrace> {
+    let mut merged_path = ExecutionTrace::new();
 
-    let prev_subtree_size = prev_path.len();
-    let current_subtree_size = current_path.len();
+    let prev_subtree_size = prev_trace.len();
+    let current_subtree_size = current_trace.len();
 
     merge_subtree(
-        &mut prev_path,
+        &mut prev_trace,
         prev_subtree_size,
-        &mut current_path,
+        &mut current_trace,
         current_subtree_size,
         &mut merged_path,
     )?;
@@ -45,16 +45,15 @@ pub(super) fn merge_call_paths(
 }
 
 fn merge_subtree(
-    prev_path: &mut CallEvidencePath,
+    prev_path: &mut ExecutionTrace,
     mut prev_subtree_size: usize,
-    current_path: &mut CallEvidencePath,
+    current_path: &mut ExecutionTrace,
     mut current_subtree_size: usize,
-    result_path: &mut CallEvidencePath,
+    result_path: &mut ExecutionTrace,
 ) -> MergeResult<()> {
-    use EvidenceState::Call;
-    use EvidenceState::Par;
-    use StateMergingError::EvidencePathTooSmall;
-    use StateMergingError::IncompatibleEvidenceStates;
+    use DataMergingError::EvidencePathTooSmall;
+    use DataMergingError::IncompatibleExecutedStates;
+    use ExecutedState::*;
 
     loop {
         let prev_state = if prev_subtree_size != 0 {
@@ -116,7 +115,7 @@ fn merge_subtree(
             (None, None) => break,
             // this match arn represents (Call, Par) and (Par, Call) states
             (Some(prev_state), Some(current_state)) => {
-                return Err(IncompatibleEvidenceStates(prev_state, current_state))
+                return Err(IncompatibleExecutedStates(prev_state, current_state))
             }
         }
     }
@@ -161,8 +160,8 @@ fn merge_call(prev_call_result: CallResult, current_call_result: CallResult) -> 
 #[cfg(test)]
 mod tests {
     use crate::call_evidence::CallResult;
-    use crate::call_evidence::EvidenceState;
-    use crate::call_evidence::{merge_call_paths, CallEvidencePath};
+    use crate::call_evidence::ExecutedState;
+    use crate::call_evidence::{merge_call_paths, ExecutionTrace};
     use crate::JValue;
 
     use std::rc::Rc;
@@ -170,9 +169,9 @@ mod tests {
     #[test]
     fn merge_call_states_1() {
         use CallResult::*;
-        use EvidenceState::*;
+        use ExecutedState::*;
 
-        let mut prev_path = CallEvidencePath::new();
+        let mut prev_path = ExecutionTrace::new();
         prev_path.push_back(Par(1, 1));
         prev_path.push_back(Call(RequestSent(String::from("peer_1"))));
         prev_path.push_back(Call(Executed(Rc::new(JValue::Null))));
@@ -180,7 +179,7 @@ mod tests {
         prev_path.push_back(Call(RequestSent(String::from("peer_3"))));
         prev_path.push_back(Call(Executed(Rc::new(JValue::Null))));
 
-        let mut current_path = CallEvidencePath::new();
+        let mut current_path = ExecutionTrace::new();
         current_path.push_back(Par(1, 1));
         current_path.push_back(Call(Executed(Rc::new(JValue::Null))));
         current_path.push_back(Call(RequestSent(String::from("peer_2"))));
@@ -190,7 +189,7 @@ mod tests {
 
         let merged_path = merge_call_paths(prev_path, current_path).expect("merging should be successful");
 
-        let mut expected_merged_path = CallEvidencePath::new();
+        let mut expected_merged_path = ExecutionTrace::new();
         expected_merged_path.push_back(Par(1, 1));
         expected_merged_path.push_back(Call(Executed(Rc::new(JValue::Null))));
         expected_merged_path.push_back(Call(Executed(Rc::new(JValue::Null))));
@@ -204,16 +203,16 @@ mod tests {
     #[test]
     fn merge_call_states_2() {
         use CallResult::*;
-        use EvidenceState::*;
+        use ExecutedState::*;
 
-        let mut prev_path = CallEvidencePath::new();
+        let mut prev_path = ExecutionTrace::new();
         prev_path.push_back(Par(1, 0));
         prev_path.push_back(Call(RequestSent(String::from("peer_1"))));
         prev_path.push_back(Par(1, 1));
         prev_path.push_back(Call(RequestSent(String::from("peer_2"))));
         prev_path.push_back(Call(Executed(Rc::new(JValue::Null))));
 
-        let mut current_path = CallEvidencePath::new();
+        let mut current_path = ExecutionTrace::new();
         current_path.push_back(Par(2, 2));
         current_path.push_back(Call(Executed(Rc::new(JValue::Null))));
         current_path.push_back(Call(Executed(Rc::new(JValue::Null))));
@@ -225,7 +224,7 @@ mod tests {
 
         let merged_path = merge_call_paths(prev_path, current_path).expect("merging should be successful");
 
-        let mut expected_merged_path = CallEvidencePath::new();
+        let mut expected_merged_path = ExecutionTrace::new();
         expected_merged_path.push_back(Par(2, 2));
         expected_merged_path.push_back(Call(Executed(Rc::new(JValue::Null))));
         expected_merged_path.push_back(Call(Executed(Rc::new(JValue::Null))));
@@ -241,9 +240,9 @@ mod tests {
     #[test]
     fn merge_call_states_3() {
         use CallResult::*;
-        use EvidenceState::*;
+        use ExecutedState::*;
 
-        let mut prev_path = CallEvidencePath::new();
+        let mut prev_path = ExecutionTrace::new();
         prev_path.push_back(Call(Executed(Rc::new(JValue::Null))));
         prev_path.push_back(Par(2, 0));
         prev_path.push_back(Par(1, 0));
@@ -253,7 +252,7 @@ mod tests {
         prev_path.push_back(Call(Executed(Rc::new(JValue::Null))));
         prev_path.push_back(Call(RequestSent(String::from("peer_1"))));
 
-        let mut current_path = CallEvidencePath::new();
+        let mut current_path = ExecutionTrace::new();
         current_path.push_back(Call(Executed(Rc::new(JValue::Null))));
         current_path.push_back(Par(3, 3));
         current_path.push_back(Par(1, 1));
@@ -268,7 +267,7 @@ mod tests {
 
         let merged_path = merge_call_paths(prev_path, current_path).expect("merging should be successful");
 
-        let mut expected_merged_path = CallEvidencePath::new();
+        let mut expected_merged_path = ExecutionTrace::new();
         expected_merged_path.push_back(Call(Executed(Rc::new(JValue::Null))));
         expected_merged_path.push_back(Par(3, 3));
         expected_merged_path.push_back(Par(1, 1));

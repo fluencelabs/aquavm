@@ -14,14 +14,26 @@
  * limitations under the License.
  */
 
+use super::ExecutionResult;
+use crate::contexts::execution::ResolvedCallResult;
+use crate::JValue;
+use crate::SecurityTetraplet;
+
+use jsonpath_lib::select_with_iter;
+
+use std::borrow::Cow;
+
 impl JValuable for std::cell::Ref<'_, Vec<ResolvedCallResult>> {
-    fn apply_json_path(&self, json_path: &str) -> Result<Vec<&JValue>> {
+    fn apply_json_path(&self, json_path: &str) -> ExecutionResult<Vec<&JValue>> {
         let (selected_values, _) = select_with_iter(self.iter().map(|r| r.result.deref()), json_path).unwrap();
 
         Ok(selected_values)
     }
 
-    fn apply_json_path_with_tetraplets(&self, json_path: &str) -> Result<(Vec<&JValue>, Vec<SecurityTetraplet>)> {
+    fn apply_json_path_with_tetraplets(
+        &self,
+        json_path: &str,
+    ) -> ExecutionResult<(Vec<&JValue>, Vec<SecurityTetraplet>)> {
         let (selected_values, tetraplet_indices) =
             select_with_iter(self.iter().map(|r| r.result.deref()), json_path).unwrap();
         let tetraplets = tetraplet_indices

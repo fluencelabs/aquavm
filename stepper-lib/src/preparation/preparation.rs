@@ -15,9 +15,9 @@
  */
 
 use super::merge_call_paths;
+use super::ExecutionCtx;
 use super::PreparationError;
-use crate::air::ExecutionCtx;
-use crate::call_evidence::CallEvidenceCtx;
+use crate::call_evidence::ExecutionTraceCtx;
 use crate::get_current_peer_id;
 use crate::log_targets::RUN_PARAMS;
 use crate::CallEvidencePath;
@@ -28,7 +28,7 @@ type PreparationResult<T> = Result<T, PreparationError>;
 /// Represents result of the preparation step.
 pub(crate) struct PreparationDescriptor<'ctx, 'i> {
     pub(crate) exec_ctx: ExecutionCtx<'ctx>,
-    pub(crate) call_ctx: CallEvidenceCtx,
+    pub(crate) trace_ctx: ExecutionTraceCtx,
     pub(crate) aqua: Instruction<'i>,
 }
 
@@ -64,10 +64,10 @@ pub(crate) fn prepare<'i>(
         path
     );
 
-    let (exec_ctx, call_ctx) = make_contexts(prev_path, path, init_peer_id)?;
+    let (exec_ctx, trace_ctx) = make_contexts(prev_path, path, init_peer_id)?;
     let result = PreparationDescriptor {
         exec_ctx,
-        call_ctx,
+        trace_ctx,
         aqua,
     };
 
@@ -80,7 +80,7 @@ fn make_contexts(
     prev_path: CallEvidencePath,
     path: CallEvidencePath,
     init_peer_id: String,
-) -> PreparationResult<(ExecutionCtx<'static>, CallEvidenceCtx)> {
+) -> PreparationResult<(ExecutionCtx<'static>, ExecutionTraceCtx)> {
     use crate::build_targets::CURRENT_PEER_ID_ENV_NAME;
     use PreparationError::CurrentPeerIdEnvError as EnvError;
 
@@ -89,7 +89,7 @@ fn make_contexts(
 
     let exec_ctx = ExecutionCtx::new(current_peer_id, init_peer_id);
     let current_path = merge_call_paths(prev_path, path)?;
-    let call_evidence_ctx = CallEvidenceCtx::new(current_path);
+    let call_evidence_ctx = ExecutionTraceCtx::new(current_path);
 
     Ok((exec_ctx, call_evidence_ctx))
 }

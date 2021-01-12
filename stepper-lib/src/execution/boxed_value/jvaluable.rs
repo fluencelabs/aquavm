@@ -18,24 +18,23 @@ mod cell_vec_resolved_call_result;
 mod iterable_item;
 mod resolved_call_result;
 
-use crate::air::fold::IterableItem;
+use super::ExecutionResult;
 use crate::JValue;
-use crate::ResolvedCallResult;
-use crate::Result;
 use crate::SecurityTetraplet;
 
-use jsonpath_lib::select;
-use jsonpath_lib::select_with_iter;
-
+use std::borrow::Cow;
 use std::ops::Deref;
 
 /// Represent a value that could be transform to a JValue with or without tetraplets.
 pub(crate) trait JValuable {
     /// Applies json path to the internal value, produces JValue.
-    fn apply_json_path(&self, json_path: &str) -> Result<Vec<&JValue>>;
+    fn apply_json_path(&self, json_path: &str) -> ExecutionResult<Vec<&JValue>>;
 
     /// Applies json path to the internal value, produces JValue with tetraplet.
-    fn apply_json_path_with_tetraplets(&self, json_path: &str) -> Result<(Vec<&JValue>, Vec<SecurityTetraplet>)>;
+    fn apply_json_path_with_tetraplets(
+        &self,
+        json_path: &str,
+    ) -> ExecutionResult<(Vec<&JValue>, Vec<SecurityTetraplet>)>;
 
     /// Return internal value as borrowed if it's possible, owned otherwise.
     fn as_jvalue(&self) -> Cow<'_, JValue>;

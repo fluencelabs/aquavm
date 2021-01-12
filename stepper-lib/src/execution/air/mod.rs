@@ -21,31 +21,27 @@ mod par;
 mod seq;
 mod xor;
 
-pub(crate) use execution_context::ExecutionCtx;
-pub(crate) use fold::FoldState;
-
-pub(self) use crate::call_evidence::CallEvidenceCtx;
-pub(self) use crate::call_evidence::EvidenceState;
-pub(self) use jvaluable::JValuable;
-
-use crate::Result;
+pub(self) use super::ExecutionError;
+pub(self) use super::ExecutionResult;
+pub(self) use crate::contexts::execution::ExecutionCtx;
+pub(self) use crate::contexts::execution_trace::ExecutionTraceCtx;
 
 use air_parser::ast::Instruction;
 
 pub(crate) trait ExecutableInstruction<'i> {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, call_ctx: &mut CallEvidenceCtx) -> Result<()>;
+    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut ExecutionTraceCtx) -> ExecutionResult<()>;
 }
 
 impl<'i> ExecutableInstruction<'i> for Instruction<'i> {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, call_ctx: &mut CallEvidenceCtx) -> Result<()> {
+    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut ExecutionTraceCtx) -> ExecutionResult<()> {
         match self {
-            Instruction::Call(call) => call.execute(exec_ctx, call_ctx),
-            Instruction::Fold(fold) => fold.execute(exec_ctx, call_ctx),
-            Instruction::Next(next) => next.execute(exec_ctx, call_ctx),
-            Instruction::Null(null) => null.execute(exec_ctx, call_ctx),
-            Instruction::Par(par) => par.execute(exec_ctx, call_ctx),
-            Instruction::Seq(seq) => seq.execute(exec_ctx, call_ctx),
-            Instruction::Xor(xor) => xor.execute(exec_ctx, call_ctx),
+            Instruction::Call(call) => call.execute(exec_ctx, trace_ctx),
+            Instruction::Fold(fold) => fold.execute(exec_ctx, trace_ctx),
+            Instruction::Next(next) => next.execute(exec_ctx, trace_ctx),
+            Instruction::Null(null) => null.execute(exec_ctx, trace_ctx),
+            Instruction::Par(par) => par.execute(exec_ctx, trace_ctx),
+            Instruction::Seq(seq) => seq.execute(exec_ctx, trace_ctx),
+            Instruction::Xor(xor) => xor.execute(exec_ctx, trace_ctx),
             Instruction::Error => unreachable!("should not execute if parsing failed. QED."),
         }
     }
@@ -53,7 +49,7 @@ impl<'i> ExecutableInstruction<'i> for Instruction<'i> {
 
 #[macro_export]
 macro_rules! log_instruction {
-    ($instr_name:expr, $exec_ctx:expr, $call_ctx:expr) => {
+    ($instr_name:expr, $exec_ctx:expr, $trace_ctx:expr) => {
         log::debug!(target: crate::log_targets::INSTRUCTION, "> {}", stringify!($instr_name));
 
         let mut data_cache_log = String::from("  data cache:");
@@ -79,17 +75,17 @@ macro_rules! log_instruction {
         log::debug!(
             target: crate::log_targets::CALL_EVIDENCE_PATH,
             "  current call evidence path: {:?}",
-            $call_ctx.current_path
+            $trace_ctx.current_path
         );
         log::trace!(
             target: crate::log_targets::SUBTREE_ELEMENTS,
             "  subtree elements count: {:?}",
-            $call_ctx.current_subtree_size
+            $trace_ctx.current_subtree_size
         );
         log::debug!(
             target: crate::log_targets::NEW_CALL_EVIDENCE_PATH,
             "  new call evidence path: {:?}",
-            $call_ctx.new_path
+            $trace_ctx.new_path
         );
     };
 }
