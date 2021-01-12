@@ -18,7 +18,7 @@ use aqua_test_utils::call_vm;
 use aqua_test_utils::create_aqua_vm;
 use aqua_test_utils::CallServiceClosure;
 use aqua_test_utils::IValue;
-use aqua_test_utils::Vec1;
+use aqua_test_utils::NEVec;
 use polyplets::ResolvedTriplet;
 use polyplets::SecurityTetraplet;
 
@@ -42,7 +42,7 @@ fn arg_host_function() -> (CallServiceClosure, Rc<RefCell<ArgTetraplets>>) {
         *arg_tetraplets_inner.borrow_mut() = de_tetraplets;
 
         Some(IValue::Record(
-            Vec1::new(vec![IValue::S32(0), IValue::String(tetraplets.clone())]).unwrap(),
+            NEVec::new(vec![IValue::S32(0), IValue::String(tetraplets.clone())]).unwrap(),
         ))
     });
 
@@ -53,7 +53,7 @@ fn arg_host_function() -> (CallServiceClosure, Rc<RefCell<ArgTetraplets>>) {
 fn simple_fold() {
     let return_numbers_call_service: CallServiceClosure = Box::new(|_, _| -> Option<IValue> {
         Some(IValue::Record(
-            Vec1::new(vec![
+            NEVec::new(vec![
                 IValue::S32(0),
                 IValue::String(String::from(
                     "[\"1\", \"2\", \"3\", \"4\", \"5\", \"6\", \"7\", \"8\", \"9\", \"10\"]",
@@ -130,7 +130,7 @@ fn simple_fold() {
 fn fold_json_path() {
     let return_numbers_call_service: CallServiceClosure = Box::new(|_, _| -> Option<IValue> {
         Some(IValue::Record(
-            Vec1::new(vec![
+            NEVec::new(vec![
                 IValue::S32(0),
                 IValue::String(String::from(
                     "{\"arg\": [\"1\", \"2\", \"3\", \"4\", \"5\", \"6\", \"7\", \"8\", \"9\", \"10\"]}",
@@ -277,7 +277,7 @@ fn tetraplet_with_wasm_modules() {
         let result = service.call(function_name, service_args, call_parameters).unwrap();
 
         Some(IValue::Record(
-            Vec1::new(vec![IValue::S32(0), IValue::String(result.to_string())]).unwrap(),
+            NEVec::new(vec![IValue::S32(0), IValue::String(result.to_string())]).unwrap(),
         ))
     });
 

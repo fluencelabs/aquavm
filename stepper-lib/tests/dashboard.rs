@@ -17,7 +17,7 @@
 use aqua_test_utils::call_vm;
 use aqua_test_utils::create_aqua_vm;
 use aqua_test_utils::IValue;
-use aqua_test_utils::Vec1;
+use aqua_test_utils::NEVec;
 use aqua_test_utils::{AquamarineVM, CallServiceClosure};
 
 use std::cell::RefCell;
@@ -97,7 +97,7 @@ fn client_host_function(
         };
 
         Some(IValue::Record(
-            Vec1::new(vec![IValue::S32(0), IValue::String(ret_value.to_string())]).unwrap(),
+            NEVec::new(vec![IValue::S32(0), IValue::String(ret_value.to_string())]).unwrap(),
         ))
     });
 
@@ -153,7 +153,7 @@ fn peer_host_function(
         let ret_value = to_ret_value(service_name.as_str(), function_name.as_str(), args);
 
         Some(IValue::Record(
-            Vec1::new(vec![IValue::S32(0), IValue::String(ret_value.to_string())]).unwrap(),
+            NEVec::new(vec![IValue::S32(0), IValue::String(ret_value.to_string())]).unwrap(),
         ))
     })
 }

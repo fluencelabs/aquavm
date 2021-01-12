@@ -20,7 +20,7 @@ use aqua_test_utils::echo_number_call_service;
 use aqua_test_utils::unit_call_service;
 use aqua_test_utils::CallServiceClosure;
 use aqua_test_utils::IValue;
-use aqua_test_utils::Vec1;
+use aqua_test_utils::NEVec;
 
 use serde_json::json;
 
@@ -200,7 +200,7 @@ fn evidence_create_service() {
         };
 
         Some(IValue::Record(
-            Vec1::new(vec![IValue::S32(0), IValue::String(format!("\"{}\"", response))]).unwrap(),
+            NEVec::new(vec![IValue::S32(0), IValue::String(format!("\"{}\"", response))]).unwrap(),
         ))
     });
 
@@ -233,7 +233,7 @@ fn evidence_create_service() {
 fn evidence_par_seq_fold_call() {
     let return_numbers_call_service: CallServiceClosure = Box::new(|_, _| -> Option<IValue> {
         Some(IValue::Record(
-            Vec1::new(vec![
+            NEVec::new(vec![
                 IValue::S32(0),
                 IValue::String(String::from(
                     "[\"1\", \"2\", \"3\", \"4\", \"5\", \"6\", \"7\", \"8\", \"9\", \"10\"]",
@@ -309,7 +309,7 @@ fn evidence_par_seq_fold_call() {
 fn evidence_par_seq_fold_in_cycle_call() {
     let return_numbers_call_service: CallServiceClosure = Box::new(|_, _| -> Option<IValue> {
         Some(IValue::Record(
-            Vec1::new(vec![
+            NEVec::new(vec![
                 IValue::S32(0),
                 IValue::String(String::from(
                     "[\"1\", \"2\", \"3\", \"4\", \"5\", \"6\", \"7\", \"8\", \"9\", \"10\"]",

@@ -284,7 +284,7 @@ checksum = "37ab347416e802de484e4d03c7316c48f1ecb56574dfd4a46a80f173ce1de04d"
 
 [[package]]
 name = "fluence"
-version = "0.2.13"
+version = "0.2.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "083f40a5d000b28b74f10d824925eccf1fbdf6dbb8881e6d052c6183b2bc615e"
 dependencies = [
@@ -294,7 +294,7 @@ dependencies = [
 
 [[package]]
 name = "fluence-sdk-macro"
-version = "0.2.13"
+version = "0.2.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2f79abced6cdfdd7089b0accad0d9c760bf9d2e82ae1bec851383e061cb40790"
 dependencies = [
@@ -303,7 +303,7 @@ dependencies = [
 
 [[package]]
 name = "fluence-sdk-main"
-version = "0.2.13"
+version = "0.2.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2348d5b5000012f9da835e52f7473e08dff6345e9beba2e80a91b801e48ac0b6"
 dependencies = [
@@ -314,7 +314,7 @@ dependencies = [
 
 [[package]]
 name = "fluence-sdk-wit"
-version = "0.2.13"
+version = "0.2.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8da5f51cddeae52ff5b91d1a5d8be90e54629f4887f89f8d7501b829b374fe6a"
 dependencies = [
@@ -674,7 +674,7 @@ checksum = "50b8b2cd387f744f69469aaed197954ba4c0ecdb31e02edf99b023e0df11178a"
 
 [[package]]
 name = "serde"
-version = "1.0.118"
+version = "=1.0.118"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "06c64263859d87aa2eb554587e2d23183398d617427327cf2b3d0ed8c69e4800"
 dependencies = [
@@ -683,7 +683,7 @@ dependencies = [
 
 [[package]]
 name = "serde_derive"
-version = "1.0.118"
+version = "=1.0.118"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c84d3526699cd55261af4b941e4e725444df67aa4f9e6a3564f18030d12672df"
 dependencies = [

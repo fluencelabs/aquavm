@@ -5,7 +5,7 @@ use aqua_test_utils::AquamarineVMError;
 use aqua_test_utils::CallServiceClosure;
 use aqua_test_utils::IValue;
 use aqua_test_utils::StepperOutcome;
-use aqua_test_utils::Vec1;
+use aqua_test_utils::NEVec;
 
 use criterion::criterion_group;
 use criterion::criterion_main;
@@ -18,7 +18,7 @@ thread_local!(static RELAY_2_VM: RefCell<AquamarineVM> = RefCell::new(create_aqu
 thread_local!(static REMOTE_VM: RefCell<AquamarineVM> = RefCell::new({
     let members_call_service: CallServiceClosure = Box::new(|_, _| -> Option<IValue> {
         Some(IValue::Record(
-            Vec1::new(vec![
+            NEVec::new(vec![
                 IValue::S32(0),
                 IValue::String(String::from(r#"[["A", "Relay1"], ["B", "Relay2"]]"#)),
             ])

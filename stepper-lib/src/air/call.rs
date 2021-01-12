@@ -81,7 +81,7 @@ mod tests {
     use aqua_test_utils::unit_call_service;
     use aqua_test_utils::CallServiceClosure;
     use aqua_test_utils::IValue;
-    use aqua_test_utils::Vec1;
+    use aqua_test_utils::NEVec;
 
     use std::rc::Rc;
 
@@ -183,7 +183,7 @@ mod tests {
             };
 
             Some(IValue::Record(
-                Vec1::new(vec![IValue::S32(0), IValue::String(arg.clone())]).unwrap(),
+                NEVec::new(vec![IValue::S32(0), IValue::String(arg.clone())]).unwrap(),
             ))
         });
 

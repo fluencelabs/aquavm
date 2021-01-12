@@ -19,7 +19,7 @@ use aqua_test_utils::create_aqua_vm;
 use aqua_test_utils::set_variable_call_service;
 use aqua_test_utils::CallServiceClosure;
 use aqua_test_utils::IValue;
-use aqua_test_utils::Vec1;
+use aqua_test_utils::NEVec;
 
 use pretty_assertions::assert_eq;
 use serde_json::json;
@@ -30,13 +30,13 @@ type JValue = serde_json::Value;
 fn data_merge() {
     let neighborhood_call_service1: CallServiceClosure = Box::new(|_, _| -> Option<IValue> {
         Some(IValue::Record(
-            Vec1::new(vec![IValue::S32(0), IValue::String(String::from("[\"A\", \"B\"]"))]).unwrap(),
+            NEVec::new(vec![IValue::S32(0), IValue::String(String::from("[\"A\", \"B\"]"))]).unwrap(),
         ))
     });
 
     let neighborhood_call_service2: CallServiceClosure = Box::new(|_, _| -> Option<IValue> {
         Some(IValue::Record(
-            Vec1::new(vec![IValue::S32(0), IValue::String(String::from("[\"A\", \"B\"]"))]).unwrap(),
+            NEVec::new(vec![IValue::S32(0), IValue::String(String::from("[\"A\", \"B\"]"))]).unwrap(),
         ))
     });
 
@@ -179,7 +179,7 @@ fn acc_merge() {
         assert_eq!(args.len(), args_count);
 
         Some(IValue::Record(
-            Vec1::new(vec![IValue::S32(0), IValue::String(json!(args).to_string())]).unwrap(),
+            NEVec::new(vec![IValue::S32(0), IValue::String(json!(args).to_string())]).unwrap(),
         ))
     });
 
