@@ -4,8 +4,8 @@ use aqua_test_utils::AquamarineVM;
 use aqua_test_utils::AquamarineVMError;
 use aqua_test_utils::CallServiceClosure;
 use aqua_test_utils::IValue;
-use aqua_test_utils::StepperOutcome;
 use aqua_test_utils::NEVec;
+use aqua_test_utils::StepperOutcome;
 
 use criterion::criterion_group;
 use criterion::criterion_main;
