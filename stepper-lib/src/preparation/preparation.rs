@@ -91,9 +91,3 @@ fn make_contexts(
 
     Ok((exec_ctx, call_evidence_ctx))
 }
-
-/// Parse an AIR script to AST.
-pub fn parse(script: &str) -> PreparationResult<Instruction<'_>> {
-    let ast = air_parser::parse(script).map_err(PreparationError::AIRParseError)?;
-    Ok(*ast)
-}

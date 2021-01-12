@@ -39,17 +39,21 @@ pub use polyplets::SecurityTetraplet;
 pub use stepper_interface::StepperOutcome;
 pub use stepper_interface::STEPPER_SUCCESS;
 
-pub mod parse {
-    pub use crate::preparation::parse;
-    pub use crate::preparation::PreparationError;
-}
-
 pub use aqua::execute_aqua;
 
 pub mod execution_trace {
     pub use crate::contexts::execution_trace::CallResult;
     pub use crate::contexts::execution_trace::ExecutedState;
     pub use crate::contexts::execution_trace::ExecutionTrace;
+}
+
+pub mod parser {
+    pub use air_parser::ast::Instruction;
+
+    /// Parse an AIR script to AST.
+    pub fn parse(script: &str) -> Result<Box<Instruction<'_>>, String> {
+        air_parser::parse(script)
+    }
 }
 
 pub(crate) type JValue = serde_json::Value;

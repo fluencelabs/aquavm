@@ -18,11 +18,8 @@ mod data_merging;
 mod errors;
 mod preparation;
 
-pub use preparation::parse;
-
-pub use errors::PreparationError;
-
 pub(crate) use errors::DataMergingError;
+pub(crate) use errors::PreparationError;
 pub(crate) use preparation::prepare;
 pub(crate) use preparation::PreparationDescriptor;
 
