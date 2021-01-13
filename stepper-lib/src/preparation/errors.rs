@@ -29,8 +29,8 @@ pub enum PreparationError {
     /// Error occurred while parsing AIR script
     AIRParseError(String),
 
-    /// Errors occurred on call evidence deserialization.
-    CallEvidenceDeError(SerdeJsonError, Vec<u8>),
+    /// Errors occurred on executed trace deserialization.
+    ExecutedTraceDeError(SerdeJsonError, Vec<u8>),
 
     /// Point out that error is occured while getting current peer id.
     CurrentPeerIdEnvError(VarError),
@@ -42,7 +42,7 @@ pub enum PreparationError {
 /// Errors arose out of merging previous data with a new.
 #[derive(ThisError, Debug)]
 pub enum DataMergingError {
-    /// Errors occurred when previous and current evidence states are incompatible.
+    /// Errors occurred when previous and current executed states are incompatible.
     #[error("previous and current data have incompatible states: '{0:?}' '{1:?}'")]
     IncompatibleExecutedStates(ExecutedState, ExecutedState),
 
@@ -50,9 +50,9 @@ pub enum DataMergingError {
     #[error("previous and current call results are incompatible: '{0:?}' '{1:?}'")]
     IncompatibleCallResults(CallResult, CallResult),
 
-    /// Errors occurred when evidence path contains less elements then corresponding Par has.
-    #[error("evidence path has {0} elements, but {1} requires by Par")]
-    EvidencePathTooSmall(usize, usize),
+    /// Errors occurred when executed trace contains less elements then corresponding Par has.
+    #[error("executed trace has {0} elements, but {1} requires by Par")]
+    ExecutedTraceTooSmall(usize, usize),
 }
 
 impl Error for PreparationError {}
@@ -64,11 +64,11 @@ impl PreparationError {
 
         match self {
             AIRParseError(_) => 1,
-            CallEvidenceDeError(..) => 2,
+            ExecutedTraceDeError(..) => 2,
             CurrentPeerIdEnvError(_) => 3,
             StateMergingError(IncompatibleExecutedStates(..)) => 4,
             StateMergingError(IncompatibleCallResults(..)) => 5,
-            StateMergingError(EvidencePathTooSmall(..)) => 6,
+            StateMergingError(ExecutedTraceTooSmall(..)) => 6,
         }
     }
 }
@@ -81,20 +81,20 @@ impl fmt::Display for PreparationError {
 
         match self {
             AIRParseError(err_msg) => write!(f, "aqua script can't be parsed:\n{}", err_msg),
-            CallEvidenceDeError(serde_error, evidence_path) => {
+            ExecutedTraceDeError(serde_error, executed_trace) => {
                 fn print_error(
                     f: &mut fmt::Formatter<'_>,
-                    path: impl std::fmt::Debug,
+                    trace: impl std::fmt::Debug,
                     serde_error: &SerdeJsonError,
                 ) -> Result<(), fmt::Error> {
                     write!(
                         f,
-                        "an error occurred while call evidence path deserialization on '{:?}': {:?}",
-                        path, serde_error
+                        "an error occurred while executed trace deserialization on '{:?}': {:?}",
+                        trace, serde_error
                     )
                 };
 
-                match String::from_utf8(evidence_path.to_vec()) {
+                match String::from_utf8(executed_trace.to_vec()) {
                     Ok(str) => print_error(f, str, serde_error),
                     Err(e) => print_error(f, e.into_bytes(), serde_error),
                 }

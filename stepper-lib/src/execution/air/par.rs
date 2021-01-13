@@ -21,7 +21,7 @@ use super::ExecutionTraceCtx;
 use super::Instruction;
 use crate::contexts::execution_trace::ExecutedState;
 use crate::log_instruction;
-use crate::log_targets::EVIDENCE_CHANGING;
+use crate::log_targets::EXECUTED_STATE_CHANGING;
 
 use air_parser::ast::Par;
 
@@ -75,8 +75,8 @@ fn extract_subtree_sizes(trace_ctx: &mut ExecutionTraceCtx) -> ExecutionResult<(
     trace_ctx.current_subtree_size -= 1;
 
     log::trace!(
-        target: EVIDENCE_CHANGING,
-        "  previous call evidence state was found {:?}",
+        target: EXECUTED_STATE_CHANGING,
+        "  previous call executed state was found {:?}",
         trace_ctx.current_trace[0]
     );
 
@@ -154,7 +154,7 @@ fn update_par_state(
             }
 
             log::trace!(
-                target: EVIDENCE_CHANGING,
+                target: EXECUTED_STATE_CHANGING,
                 "  set {} par subtree size to {}",
                 subtree_type,
                 new_subtree_size

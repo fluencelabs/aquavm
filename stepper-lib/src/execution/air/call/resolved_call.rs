@@ -24,7 +24,7 @@ use super::ExecutionError;
 use super::ExecutionResult;
 use crate::build_targets::CALL_SERVICE_SUCCESS;
 use crate::contexts::execution_trace::*;
-use crate::log_targets::EVIDENCE_CHANGING;
+use crate::log_targets::EXECUTED_STATE_CHANGING;
 use crate::JValue;
 use crate::ResolvedTriplet;
 use crate::SecurityTetraplet;
@@ -70,7 +70,7 @@ impl<'i> ResolvedCall<'i> {
         use ExecutedState::Call;
         use ExecutionError::CallServiceResultDeError as DeError;
 
-        let should_execute = self.prepare_evidence_state(exec_ctx, trace_ctx)?;
+        let should_execute = self.prepare_executed_state(exec_ctx, trace_ctx)?;
         if !should_execute {
             return Ok(());
         }
@@ -111,27 +111,30 @@ impl<'i> ResolvedCall<'i> {
         let result = Rc::new(result);
 
         set_local_call_result(result.clone(), self.triplet.clone(), &self.output, exec_ctx)?;
-        let new_evidence_state = Call(Executed(result));
+        let new_executed_state = Call(Executed(result));
 
         log::trace!(
-            target: EVIDENCE_CHANGING,
-            "  adding new call evidence state {:?}",
-            new_evidence_state
+            target: EXECUTED_STATE_CHANGING,
+            "  adding new call executed state {:?}",
+            new_executed_state
         );
 
-        trace_ctx.new_trace.push_back(new_evidence_state);
+        trace_ctx.new_trace.push_back(new_executed_state);
 
         Ok(())
     }
 
-    /// Determine whether this call should be really called and adjust prev call evidence path accordingly.
-    fn prepare_evidence_state(
+    /// Determine whether this call should be really called and adjust prev executed trace accordingly.
+    fn prepare_executed_state(
         &self,
         exec_ctx: &mut ExecutionCtx<'i>,
         trace_ctx: &mut ExecutionTraceCtx,
     ) -> ExecutionResult<bool> {
         if trace_ctx.current_subtree_size == 0 {
-            log::trace!(target: EVIDENCE_CHANGING, "  previous call evidence state wasn't found");
+            log::trace!(
+                target: EXECUTED_STATE_CHANGING,
+                "  previous executed trace state wasn't found"
+            );
             return Ok(true);
         }
 
@@ -141,8 +144,8 @@ impl<'i> ResolvedCall<'i> {
         let prev_state = trace_ctx.current_trace.pop_front().unwrap();
 
         log::trace!(
-            target: EVIDENCE_CHANGING,
-            "  previous call evidence state found {:?}",
+            target: EXECUTED_STATE_CHANGING,
+            "  previous executed trace found {:?}",
             prev_state
         );
 

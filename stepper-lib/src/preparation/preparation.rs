@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use super::merge_call_paths;
+use super::merge_execution_traces;
 use super::ExecutionCtx;
 use super::ExecutionTrace;
 use super::ExecutionTraceCtx;
@@ -40,10 +40,10 @@ pub(crate) fn prepare<'i>(
     raw_aqua: &'i str,
     init_peer_id: String,
 ) -> PreparationResult<PreparationDescriptor<'static, 'i>> {
-    fn to_evidence_path(raw_data: &[u8]) -> PreparationResult<ExecutionTrace> {
-        use PreparationError::CallEvidenceDeError as CallDeError;
+    fn to_executed_trace(raw_data: &[u8]) -> PreparationResult<ExecutionTrace> {
+        use PreparationError::ExecutedTraceDeError as CallDeError;
 
-        // treat empty string as an empty call evidence path allows abstracting from
+        // treat empty string as an empty executed trace allows abstracting from
         // the internal format for empty data.
         if raw_data.is_empty() {
             Ok(ExecutionTrace::new())
@@ -52,20 +52,20 @@ pub(crate) fn prepare<'i>(
         }
     }
 
-    let prev_path = to_evidence_path(prev_data)?;
-    let path = to_evidence_path(data)?;
+    let prev_trace = to_executed_trace(prev_data)?;
+    let trace = to_executed_trace(data)?;
 
     let aqua: Instruction<'i> = *air_parser::parse(raw_aqua).map_err(PreparationError::AIRParseError)?;
 
     log::trace!(
         target: RUN_PARAMS,
-        "aqua: {:?}\nprev_path: {:?}\ncurrent_path: {:?}",
+        "aqua: {:?}\nprev_trace: {:?}\ncurrent_trace: {:?}",
         aqua,
-        prev_path,
-        path
+        prev_trace,
+        trace
     );
 
-    let (exec_ctx, trace_ctx) = make_contexts(prev_path, path, init_peer_id)?;
+    let (exec_ctx, trace_ctx) = make_contexts(prev_trace, trace, init_peer_id)?;
     let result = PreparationDescriptor {
         exec_ctx,
         trace_ctx,
@@ -75,19 +75,19 @@ pub(crate) fn prepare<'i>(
     Ok(result)
 }
 
-/// Make execution and call evidence contexts from supplied data.
-/// Internally, it unites variable from previous and current data and merges call evidence paths.
+/// Make execution and execution trace contexts from supplied data.
+/// Internally, it unites variable from previous and current data and merges executed traces.
 fn make_contexts(
-    prev_path: ExecutionTrace,
-    path: ExecutionTrace,
+    prev_trace: ExecutionTrace,
+    trace: ExecutionTrace,
     init_peer_id: String,
 ) -> PreparationResult<(ExecutionCtx<'static>, ExecutionTraceCtx)> {
     let current_peer_id = get_current_peer_id().map_err(|e| PreparationError::CurrentPeerIdEnvError(e))?;
     log::trace!(target: RUN_PARAMS, "current peer id {}", current_peer_id);
 
     let exec_ctx = ExecutionCtx::new(current_peer_id, init_peer_id);
-    let current_path = merge_call_paths(prev_path, path)?;
-    let call_evidence_ctx = ExecutionTraceCtx::new(current_path);
+    let current_trace = merge_execution_traces(prev_trace, trace)?;
+    let trace_ctx = ExecutionTraceCtx::new(current_trace);
 
-    Ok((exec_ctx, call_evidence_ctx))
+    Ok((exec_ctx, trace_ctx))
 }

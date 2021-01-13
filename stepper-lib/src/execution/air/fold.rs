@@ -194,7 +194,7 @@ mod tests {
 
         let res = call_vm!(set_variable_vm, "", lfold.clone(), "[]", "[]");
         let res = call_vm!(vm, "", lfold, "[]", res.data);
-        let res: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid call evidence path");
+        let res: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid executed trace");
 
         assert_eq!(res.len(), 6);
         assert_eq!(res[0], Call(Executed(Rc::new(json!(["1", "2", "3", "4", "5"])))));
@@ -227,7 +227,7 @@ mod tests {
 
         let res = call_vm!(set_variable_vm, "", rfold.clone(), "[]", "[]");
         let res = call_vm!(vm, "", rfold, "[]", res.data);
-        let res: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid call evidence path");
+        let res: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid executed trace");
 
         assert_eq!(res.len(), 6);
         assert_eq!(res[0], Call(Executed(Rc::new(json!(["1", "2", "3", "4", "5"])))));
@@ -268,7 +268,7 @@ mod tests {
 
         let res = call_vm!(set_variable_vm, "", script.clone(), "[]", "[]");
         let res = call_vm!(vm, "", script, "[]", res.data);
-        let res: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid call evidence path");
+        let res: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid executed trace");
 
         assert_eq!(res.len(), 27);
         assert_eq!(res[0], Call(Executed(Rc::new(json!(["1", "2", "3", "4", "5"])))));
@@ -337,7 +337,7 @@ mod tests {
 
         let res = call_vm!(set_variable_vm, "", empty_fold.clone(), "[]", "[]");
         let res = call_vm!(vm, "", empty_fold, "[]", res.data);
-        let res: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid call evidence path");
+        let res: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid executed trace");
 
         assert_eq!(res.len(), 1);
         assert_eq!(res[0], Call(Executed(Rc::new(json!([])))));
@@ -369,7 +369,7 @@ mod tests {
 
         let res = call_vm!(set_variable_vm, "", lfold.clone(), "[]", "[]");
         let res = call_vm!(vm, "", lfold, "[]", res.data);
-        let res: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid call evidence path");
+        let res: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid executed trace");
 
         assert_eq!(res.len(), 6);
         assert_eq!(
@@ -429,7 +429,7 @@ mod tests {
         let res = call_vm!(vm_a, "", script.clone(), "[]", res.data);
         let res = call_vm!(vm_b, "", script, "[]", res.data);
 
-        let res: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid call evidence path");
+        let res: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid executed trace");
 
         assert_eq!(res.len(), 12);
         for i in 2..11 {
@@ -517,7 +517,7 @@ mod tests {
         );
 
         let res = execute_script(variable_shadowing_script).unwrap();
-        let res: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid call evidence path");
+        let res: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid executed trace");
 
         assert_eq!(res.len(), 11);
         for i in 0..10 {

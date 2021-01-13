@@ -49,18 +49,17 @@ fn seq_par_call() {
     );
 
     let res = call_vm!(vm, "asd", script, "[]", "[]");
-    let resulted_path: Vec<ExecutedState> =
-        serde_json::from_slice(&res.data).expect("stepper should return valid json");
+    let actual_trace: Vec<ExecutedState> = serde_json::from_slice(&res.data).expect("stepper should return valid json");
 
     let test_string = String::from("test");
-    let expected_path = vec![
+    let expected_trace = vec![
         Par(1, 1),
         Call(Executed(Rc::new(JValue::String(test_string.clone())))),
         Call(RequestSentBy(vm_peer_id)),
         Call(Executed(Rc::new(JValue::String(test_string.clone())))),
     ];
 
-    assert_eq!(resulted_path, expected_path);
+    assert_eq!(actual_trace, expected_trace);
     assert_eq!(res.next_peer_pks, vec![String::from("remote_peer_id")]);
 }
 
@@ -85,11 +84,11 @@ fn par_par_call() {
     );
 
     let res = call_vm!(vm, "asd", script, "[]", "[]");
-    let resulted_path: Vec<ExecutedState> =
+    let resulted_trace: Vec<ExecutedState> =
         serde_json::from_slice(&res.data).expect("stepper should return valid json");
 
     let test_string = String::from("test");
-    let expected_path = vec![
+    let expected_trace = vec![
         Par(3, 1),
         Par(1, 1),
         Call(Executed(Rc::new(JValue::String(test_string.clone())))),
@@ -97,7 +96,7 @@ fn par_par_call() {
         Call(Executed(Rc::new(JValue::String(test_string.clone())))),
     ];
 
-    assert_eq!(resulted_path, expected_path);
+    assert_eq!(resulted_trace, expected_trace);
     assert_eq!(res.next_peer_pks, vec![String::from("remote_peer_id")]);
 }
 
@@ -163,8 +162,8 @@ fn create_service() {
     let add_module_response = String::from("add_module response");
     let add_blueprint_response = String::from("add_blueprint response");
     let create_response = String::from("create response");
-    let resulted_path: Vec<ExecutedState> = serde_json::from_slice(&res.data).expect("should be a correct json");
-    let expected_path = vec![
+    let actual_trace: Vec<ExecutedState> = serde_json::from_slice(&res.data).expect("should be a correct json");
+    let expected_trace = vec![
         Call(Executed(Rc::new(module_bytes))),
         Call(Executed(Rc::new(module_config))),
         Call(Executed(Rc::new(blueprint))),
@@ -174,6 +173,6 @@ fn create_service() {
         Call(RequestSentBy(String::from("A"))),
     ];
 
-    assert_eq!(resulted_path, expected_path);
+    assert_eq!(actual_trace, expected_trace);
     assert_eq!(res.next_peer_pks, vec![String::from("remote_peer_id")]);
 }

@@ -26,10 +26,10 @@ use std::fmt::Formatter;
 
 pub type ExecutionTrace = std::collections::VecDeque<ExecutedState>;
 
-/// Encapsulates all necessary state regarding to the call pathes.
+/// Encapsulates all necessary state regarding to the call pathes1.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub(crate) struct ExecutionTraceCtx {
-    /// Contains path (serialized tree of states) after merging current and previous data,
+    /// Contains trace (serialized tree of states) after merging current and previous data,
     /// stepper used it to realize which instructions've been already executed.
     pub(crate) current_trace: ExecutionTrace,
 
@@ -57,8 +57,8 @@ impl ExecutionTraceCtx {
 
 impl Display for ExecutionTraceCtx {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "current path:\n{:?}", self.current_trace)?;
+        writeln!(f, "current trace:\n{:?}", self.current_trace)?;
         writeln!(f, "current subtree elements count:\n{:?}", self.current_subtree_size)?;
-        writeln!(f, "new path:\n{:?}", self.new_trace)
+        writeln!(f, "new trace:\n{:?}", self.new_trace)
     }
 }

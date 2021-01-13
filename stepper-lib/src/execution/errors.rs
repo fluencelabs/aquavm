@@ -74,8 +74,8 @@ pub(crate) enum ExecutionError {
     #[error("multiple fold states found for iterable '{0}'")]
     MultipleFoldStates(String),
 
-    /// Expected evidence state of different type.
-    #[error("invalid evidence state: expected '{0}', but actual {1:?}")]
+    /// Expected executed state of a different type.
+    #[error("invalid executed state: expected '{0}', but actual {1:?}")]
     InvalidExecutedState(String, ExecutedState),
 
     /// Errors encountered while shadowing non-scalar values.

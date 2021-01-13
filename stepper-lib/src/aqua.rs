@@ -49,7 +49,7 @@ fn execute_aqua_impl(
         .map_err(|e| outcome::from_preparation_error(data, e))?;
 
     aqua.execute(&mut exec_ctx, &mut trace_ctx)
-        // return new collected path in case of errors
+        // return new collected trace in case of errors
         .map_err(|e| outcome::from_execution_error(&trace_ctx.new_trace, exec_ctx.next_peer_pks.clone(), e))?;
 
     let outcome = outcome::from_path_and_peers(&trace_ctx.new_trace, exec_ctx.next_peer_pks);

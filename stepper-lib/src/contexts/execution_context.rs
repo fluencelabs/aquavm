@@ -39,10 +39,10 @@ pub(crate) struct ExecutionCtx<'i> {
 
     /// Indicates that previous executed subtree is complete.
     /// A subtree treats as a complete if all subtree elements satisfy the following rules:
-    ///   - at least one of par subtrees is complete
-    ///   - non-thrown subtree of xor is complete
-    ///   - all of seq subtrees are complete
-    ///   - call executes successfully (call evidence equals to Executed)
+    ///   - at least one of par subtrees is completed
+    ///   - non-thrown subtree of xor is completed
+    ///   - all of seq subtrees are completed
+    ///   - call executed successfully (executed state is Executed)
     pub subtree_complete: bool,
 
     /// List of met folds used to determine whether a variable can be shadowed.

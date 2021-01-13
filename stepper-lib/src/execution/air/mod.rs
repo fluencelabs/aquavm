@@ -75,8 +75,8 @@ macro_rules! log_instruction {
         );
 
         log::debug!(
-            target: crate::log_targets::CALL_EVIDENCE_PATH,
-            "  current call evidence path: {:?}",
+            target: crate::log_targets::EXECUTED_TRACE,
+            "  current call executed trace: {:?}",
             $trace_ctx.current_trace
         );
         log::trace!(
@@ -85,8 +85,8 @@ macro_rules! log_instruction {
             $trace_ctx.current_subtree_size
         );
         log::debug!(
-            target: crate::log_targets::NEW_CALL_EVIDENCE_PATH,
-            "  new call evidence path: {:?}",
+            target: crate::log_targets::NEW_EXECUTED_TRACE,
+            "  new call executed trace: {:?}",
             $trace_ctx.new_trace
         );
     };

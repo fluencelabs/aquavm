@@ -19,7 +19,7 @@ use super::ExecutionError;
 use super::ExecutionResult;
 use crate::contexts::execution::ResolvedCallResult;
 use crate::contexts::execution_trace::*;
-use crate::log_targets::EVIDENCE_CHANGING;
+use crate::log_targets::EXECUTED_STATE_CHANGING;
 use crate::JValue;
 
 use air_parser::ast::CallOutput;
@@ -91,7 +91,7 @@ pub(super) fn set_local_call_result<'i>(
     Ok(())
 }
 
-/// Writes evidence of a particle being sent to remote node
+/// Writes an executed state of a particle being sent to remote node
 pub(super) fn set_remote_call_result<'i>(
     peer_pk: String,
     exec_ctx: &mut ExecutionCtx<'i>,
@@ -100,13 +100,13 @@ pub(super) fn set_remote_call_result<'i>(
     exec_ctx.next_peer_pks.push(peer_pk);
     exec_ctx.subtree_complete = false;
 
-    let new_evidence_state = ExecutedState::Call(CallResult::RequestSentBy(exec_ctx.current_peer_id.clone()));
+    let new_executed_state = ExecutedState::Call(CallResult::RequestSentBy(exec_ctx.current_peer_id.clone()));
     log::trace!(
-        target: EVIDENCE_CHANGING,
-        "  adding new call evidence state {:?}",
-        new_evidence_state
+        target: EXECUTED_STATE_CHANGING,
+        "  adding new call executed state {:?}",
+        new_executed_state
     );
-    trace_ctx.new_trace.push_back(new_evidence_state);
+    trace_ctx.new_trace.push_back(new_executed_state);
 }
 
 /// This function looks at the existing call state, validates it,

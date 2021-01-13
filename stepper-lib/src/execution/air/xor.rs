@@ -90,12 +90,12 @@ mod tests {
         );
 
         let res = call_vm!(vm, "asd", script, "[]", "[]");
-        let call_path: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid json");
+        let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid json");
         let executed_call_result = Call(Executed(Rc::new(JValue::String(String::from("res")))));
 
-        assert_eq!(call_path.len(), 2);
-        assert_eq!(call_path[0], Call(CallServiceFailed(String::from(r#""error""#))));
-        assert_eq!(call_path[1], executed_call_result);
+        assert_eq!(actual_trace.len(), 2);
+        assert_eq!(actual_trace[0], Call(CallServiceFailed(String::from(r#""error""#))));
+        assert_eq!(actual_trace[1], executed_call_result);
 
         let script = format!(
             r#"
@@ -107,10 +107,10 @@ mod tests {
         );
 
         let res = call_vm!(vm, "asd", script, "[]", "[]");
-        let call_path: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid json");
+        let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid json");
 
-        assert_eq!(call_path.len(), 1);
-        assert_eq!(call_path[0], executed_call_result);
+        assert_eq!(actual_trace.len(), 1);
+        assert_eq!(actual_trace[0], executed_call_result);
     }
 
     #[test]
@@ -144,12 +144,12 @@ mod tests {
         );
 
         let result = call_vm!(vm, "asd", script.clone(), "[]", "[]");
-        let result_path: ExecutionTrace = serde_json::from_slice(&result.data).expect("should be valid json");
+        let actual_trace: ExecutionTrace = serde_json::from_slice(&result.data).expect("should be valid json");
 
         let res = String::from("res");
         let executed_call_result = Rc::new(JValue::String(res));
 
-        let expected_path = vec![
+        let expected_trace = vec![
             Par(2, 2),
             Call(Executed(executed_call_result.clone())),
             Call(Executed(executed_call_result.clone())),
@@ -159,10 +159,10 @@ mod tests {
             Call(Executed(executed_call_result.clone())),
         ];
 
-        assert_eq!(result_path, expected_path);
+        assert_eq!(actual_trace, expected_trace);
 
         let result = call_vm!(vm, "asd", script, "[]", result.data);
-        let result_path: ExecutionTrace = serde_json::from_slice(&result.data).expect("should be valid json");
-        assert_eq!(result_path, expected_path);
+        let actual_trace: ExecutionTrace = serde_json::from_slice(&result.data).expect("should be valid json");
+        assert_eq!(actual_trace, expected_trace);
     }
 }

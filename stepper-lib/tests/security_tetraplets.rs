@@ -297,10 +297,10 @@ fn tetraplet_with_wasm_modules() {
     let mut vm = create_aqua_vm(host_func, local_peer_id);
 
     let result = call_vm!(vm, ADMIN_PEER_PK, script, "", "");
-    let path: ExecutionTrace = serde_json::from_slice(&result.data).unwrap();
-    let expected_res = ExecutedState::Call(CallResult::Executed(Rc::new(serde_json::Value::String(String::from(
+    let actual_trace: ExecutionTrace = serde_json::from_slice(&result.data).unwrap();
+    let expected_state = ExecutedState::Call(CallResult::Executed(Rc::new(serde_json::Value::String(String::from(
         "Ok",
     )))));
 
-    assert_eq!(path[1], expected_res)
+    assert_eq!(actual_trace[1], expected_state)
 }
