@@ -20,7 +20,7 @@ use fluence::fce;
 
 use std::env::VarError;
 
-pub(crate) const CURRENT_PEER_ID_ENV_NAME: &str = "CURRENT_PEER_ID";
+const CURRENT_PEER_ID_ENV_NAME: &str = "CURRENT_PEER_ID";
 
 pub(crate) fn get_current_peer_id() -> std::result::Result<String, VarError> {
     std::env::var(CURRENT_PEER_ID_ENV_NAME)
