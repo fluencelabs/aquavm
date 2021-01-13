@@ -30,33 +30,32 @@ use air_parser::ast::Call;
 
 impl<'i> super::ExecutableInstruction<'i> for Call<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut ExecutionTraceCtx) -> ExecutionResult<()> {
-        use ExecutionError::JValueJsonPathError;
-        use ExecutionError::VariableNotFound;
-
         log_instruction!(call, exec_ctx, trace_ctx);
 
-        let resolved_call = match ResolvedCall::new(self, exec_ctx) {
-            Ok(resolved_call) => resolved_call,
-            // to support lazy variable evaluation
-            Err(VariableNotFound(variable_name)) => {
-                log::trace!(r#"variable with name "{}" not found, waiting"#, variable_name);
-                exec_ctx.subtree_complete = false;
-                return Ok(());
-            }
-            Err(JValueJsonPathError(variable, json_path, json_path_err)) => {
-                log::trace!(
-                    r#"variable not found with json path "{}" in {:?} with error "{:?}", waiting"#,
-                    json_path,
-                    variable,
-                    json_path_err
-                );
-                exec_ctx.subtree_complete = false;
-                return Ok(());
-            }
-            Err(err) => return Err(err),
-        };
+        let resolved_call = ResolvedCall::new(self, exec_ctx)?;
+        match resolved_call.execute(exec_ctx, trace_ctx) {
+            v @ Ok(_) => v,
 
-        resolved_call.execute(exec_ctx, trace_ctx)
+            // to support lazy variable evaluation
+            Err(e) if is_joinable_error_type(&e) => {
+                exec_ctx.subtree_complete = false;
+                Ok(())
+            }
+
+            e @ Err(_) => e,
+        }
+    }
+}
+
+/// Returns true, if supplied error is related to variable not found errors type.
+fn is_joinable_error_type(exec_error: &ExecutionError) -> bool {
+    use ExecutionError::*;
+
+    match exec_error {
+        VariableNotFound(_) => true,
+        JValueJsonPathError(..) => true,
+        JValueAccJsonPathError(..) => true,
+        _ => false,
     }
 }
 
