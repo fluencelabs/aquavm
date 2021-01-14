@@ -14,17 +14,7 @@
  * limitations under the License.
  */
 
-use stepper_lib::parser::parse;
+mod resolve;
 
-/// Parse AIR script and return it as minified JSON
-pub fn ast(script: String) -> String {
-    let do_parse = || -> std::result::Result<_, Box<dyn std::error::Error>> {
-        let ast = parse(&script)?;
-        serde_json::to_string(&ast).map_err(Into::into)
-    };
-
-    match do_parse() {
-        Ok(json) => json,
-        Err(err) => err.to_string(),
-    }
-}
+pub(crate) use resolve::resolve_to_args;
+pub(crate) use resolve::resolve_to_jvaluable;

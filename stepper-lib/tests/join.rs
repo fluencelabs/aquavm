@@ -75,7 +75,7 @@ fn join_chat() {
         serde_json::from_slice(&client_1_res.data).expect("stepper should return valid json");
 
     let client_1_expected_json = json!([
-        { "call": {"request_sent": "A" } },
+        { "call": {"request_sent_by": "A" } },
     ]);
 
     assert_eq!(client_1_res_json, client_1_expected_json);
@@ -87,7 +87,7 @@ fn join_chat() {
 
     let relay_1_expected_json = json!( [
         { "call": { "executed" : "test" } },
-        { "call": { "request_sent": "Relay1" } },
+        { "call": { "request_sent_by": "Relay1" } },
     ]);
 
     assert_eq!(relay_1_res_json, relay_1_expected_json);
@@ -102,9 +102,9 @@ fn join_chat() {
         { "call": { "executed" : [["A", "Relay1"], ["B", "Relay2"]]} },
         { "call": { "executed" : [["A", "Relay1"], ["B", "Relay2"]]} },
         { "par": [1, 2] },
-        { "call": { "request_sent" : "Remote" } },
+        { "call": { "request_sent_by" : "Remote" } },
         { "par": [1, 0] },
-        { "call": { "request_sent" : "Remote" } },
+        { "call": { "request_sent_by" : "Remote" } },
     ]);
 
     let remote_res_next_peer_pks: HashSet<_> = remote_res.next_peer_pks.iter().map(|s| s.as_str()).collect();
@@ -126,9 +126,9 @@ fn join_chat() {
         { "call": { "executed" : [["A", "Relay1"], ["B", "Relay2"]]} },
         { "par": [2, 2] },
         { "call": { "executed" : "test" } },
-        { "call": { "request_sent" : "Relay1" } },
+        { "call": { "request_sent_by" : "Relay1" } },
         { "par": [1, 0] },
-        { "call": { "request_sent" : "Remote" } },
+        { "call": { "request_sent_by" : "Remote" } },
     ]);
 
     assert_eq!(relay_1_res_json, relay_1_expected_json);
@@ -147,7 +147,7 @@ fn join_chat() {
         { "call": { "executed" : "test" } },
         { "call": { "executed" : "test" } },
         { "par": [1, 0] },
-        { "call": { "request_sent" : "Remote" } },
+        { "call": { "request_sent_by" : "Remote" } },
     ]);
 
     assert_eq!(client_1_res_json, client_1_expected_json);
@@ -162,10 +162,10 @@ fn join_chat() {
         { "call": { "executed" : [["A", "Relay1"], ["B", "Relay2"]]} },
         { "call": { "executed" : [["A", "Relay1"], ["B", "Relay2"]]} },
         { "par": [1, 3] },
-        { "call": { "request_sent" : "Remote" } },
+        { "call": { "request_sent_by" : "Remote" } },
         { "par": [2, 0] },
         { "call": { "executed" : "test" } },
-        { "call": { "request_sent" : "Relay2" } },
+        { "call": { "request_sent_by" : "Relay2" } },
     ]);
 
     assert_eq!(relay_2_res_json, relay_2_expected_json);
@@ -181,7 +181,7 @@ fn join_chat() {
         { "call": { "executed" : [["A", "Relay1"], ["B", "Relay2"]]} },
         { "call": { "executed" : [["A", "Relay1"], ["B", "Relay2"]]} },
         { "par": [1, 3] },
-        { "call": { "request_sent" : "Remote" } },
+        { "call": { "request_sent_by" : "Remote" } },
         { "par": [2, 0] },
         { "call": { "executed" : "test" } },
         { "call": { "executed" : "test" } },
@@ -321,7 +321,7 @@ fn init_peer_id() {
         { "par": [2, 0] },
         { "call": { "executed" : "test" } },
         { "call": { "executed" : "test" } },
-        { "call": { "request_sent" : "A" } },
+        { "call": { "request_sent_by" : "A" } },
     ]);
 
     assert_eq!(client_1_res_json, client_1_expected_json);

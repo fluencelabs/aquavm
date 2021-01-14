@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-use stepper_lib::parser::parse;
+mod air;
+mod boxed_value;
+mod errors;
+mod utils;
 
-/// Parse AIR script and return it as minified JSON
-pub fn ast(script: String) -> String {
-    let do_parse = || -> std::result::Result<_, Box<dyn std::error::Error>> {
-        let ast = parse(&script)?;
-        serde_json::to_string(&ast).map_err(Into::into)
-    };
+pub(super) use air::ExecutableInstruction;
+pub(super) use air::FoldState;
+pub(super) use errors::ExecutionError;
 
-    match do_parse() {
-        Ok(json) => json,
-        Err(err) => err.to_string(),
-    }
-}
+pub(self) type ExecutionResult<T> = std::result::Result<T, ExecutionError>;

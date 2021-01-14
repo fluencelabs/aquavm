@@ -26,69 +26,34 @@
     unreachable_patterns
 )]
 
-mod air;
 mod build_targets;
-mod call_evidence;
-mod errors;
+mod contexts;
 mod execution;
-pub mod log_targets;
+mod preparation;
 
-pub use crate::call_evidence::CallEvidencePath;
-pub use crate::call_evidence::CallResult;
-pub use crate::call_evidence::EvidenceState;
-pub use crate::errors::AquamarineError;
-pub use air_parser::ast::Instruction;
-pub use execution::execute_aqua;
-pub use execution::parse;
+mod aqua;
+pub mod log_targets;
 
 pub use polyplets::ResolvedTriplet;
 pub use polyplets::SecurityTetraplet;
 pub use stepper_interface::StepperOutcome;
+pub use stepper_interface::STEPPER_SUCCESS;
 
-pub(crate) type Result<T> = std::result::Result<T, AquamarineError>;
-pub(crate) type JValue = serde_json::Value;
+pub use aqua::execute_aqua;
 
-pub(crate) use build_targets::call_service;
-pub(crate) use build_targets::get_current_peer_id;
-
-use serde::Deserialize;
-use serde::Serialize;
-
-use std::cell::RefCell;
-use std::fmt::Display;
-use std::fmt::Formatter;
-use std::rc::Rc;
-
-#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
-pub struct ResolvedCallResult {
-    pub result: Rc<JValue>,
-    pub triplet: Rc<ResolvedTriplet>,
+pub mod execution_trace {
+    pub use crate::contexts::execution_trace::CallResult;
+    pub use crate::contexts::execution_trace::ExecutedState;
+    pub use crate::contexts::execution_trace::ExecutionTrace;
 }
 
-pub(crate) enum AValue<'i> {
-    JValueRef(ResolvedCallResult),
-    JValueAccumulatorRef(RefCell<Vec<ResolvedCallResult>>),
-    JValueFoldCursor(crate::air::FoldState<'i>),
-}
+pub mod parser {
+    pub use air_parser::ast::Instruction;
 
-pub(crate) trait JValuable {}
-
-impl<'i> Display for AValue<'i> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        match self {
-            AValue::JValueRef(value) => write!(f, "{:?}", value)?,
-            AValue::JValueAccumulatorRef(acc) => {
-                write!(f, "[ ")?;
-                for value in acc.borrow().iter() {
-                    write!(f, "{:?} ", value)?;
-                }
-                write!(f, "]")?;
-            }
-            AValue::JValueFoldCursor(_) => {
-                write!(f, "cursor")?;
-            }
-        }
-
-        Ok(())
+    /// Parse an AIR script to AST.
+    pub fn parse(script: &str) -> Result<Box<Instruction<'_>>, String> {
+        air_parser::parse(script)
     }
 }
+
+pub(crate) type JValue = serde_json::Value;

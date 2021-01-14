@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-use stepper_lib::parser::parse;
+mod execution_context;
+mod execution_trace_context;
 
-/// Parse AIR script and return it as minified JSON
-pub fn ast(script: String) -> String {
-    let do_parse = || -> std::result::Result<_, Box<dyn std::error::Error>> {
-        let ast = parse(&script)?;
-        serde_json::to_string(&ast).map_err(Into::into)
-    };
+pub mod execution_trace {
+    pub use super::execution_trace_context::CallResult;
+    pub use super::execution_trace_context::ExecutedState;
+    pub use super::execution_trace_context::ExecutionTrace;
+    pub(crate) use super::execution_trace_context::ExecutionTraceCtx;
+}
 
-    match do_parse() {
-        Ok(json) => json,
-        Err(err) => err.to_string(),
-    }
+pub(crate) mod execution {
+    pub(crate) use super::execution_context::AValue;
+    pub(crate) use super::execution_context::ExecutionCtx;
+    pub(crate) use super::execution_context::ResolvedCallResult;
 }

@@ -19,8 +19,8 @@ use aqua_test_utils::create_aqua_vm;
 use aqua_test_utils::CallServiceClosure;
 use aqua_test_utils::IValue;
 use aqua_test_utils::NEVec;
-use polyplets::ResolvedTriplet;
-use polyplets::SecurityTetraplet;
+use stepper_lib::ResolvedTriplet;
+use stepper_lib::SecurityTetraplet;
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -200,7 +200,9 @@ use fluence_app_service::AppServiceConfig;
 use fluence_app_service::FaaSConfig;
 
 use std::path::PathBuf;
-use stepper_lib::{CallEvidencePath, CallResult, EvidenceState};
+use stepper_lib::execution_trace::CallResult;
+use stepper_lib::execution_trace::ExecutedState;
+use stepper_lib::execution_trace::ExecutionTrace;
 
 fn construct_service_config(module_name: impl Into<String>) -> AppServiceConfig {
     let module_name = module_name.into();
@@ -295,10 +297,10 @@ fn tetraplet_with_wasm_modules() {
     let mut vm = create_aqua_vm(host_func, local_peer_id);
 
     let result = call_vm!(vm, ADMIN_PEER_PK, script, "", "");
-    let path: CallEvidencePath = serde_json::from_slice(&result.data).unwrap();
-    let expected_res = EvidenceState::Call(CallResult::Executed(Rc::new(serde_json::Value::String(String::from(
+    let actual_trace: ExecutionTrace = serde_json::from_slice(&result.data).unwrap();
+    let expected_state = ExecutedState::Call(CallResult::Executed(Rc::new(serde_json::Value::String(String::from(
         "Ok",
     )))));
 
-    assert_eq!(path[1], expected_res)
+    assert_eq!(actual_trace[1], expected_state)
 }

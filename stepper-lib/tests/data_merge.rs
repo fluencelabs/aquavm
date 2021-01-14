@@ -84,13 +84,13 @@ fn data_merge() {
         { "par": [1,2] },
         { "call": { "executed": ["A", "B"] } },
         { "par": [1,0] },
-        { "call": { "request_sent": "A" } },
+        { "call": { "request_sent_by": "A" } },
         { "par": [1,2] },
         { "call": { "executed": ["A", "B"] } },
         { "par": [1,0] },
-        { "call": { "request_sent": "A" } },
+        { "call": { "request_sent_by": "A" } },
         { "call": { "executed": ["A", "B"] } },
-        { "call": { "request_sent": "A" } },
+        { "call": { "request_sent_by": "A" } },
     ]);
 
     assert_eq!(resulted_json1, expected_json1);
@@ -101,14 +101,14 @@ fn data_merge() {
     let expected_json2 = json!( [
         { "call": { "executed": ["A", "B"] } },
         { "par": [1,2] },
-        { "call": { "request_sent": "B" } },
+        { "call": { "request_sent_by": "B" } },
         { "par": [1,0] },
         { "call": { "executed": ["A", "B"] } },
         { "par": [1,2] },
-        { "call": { "request_sent": "B" } },
+        { "call": { "request_sent_by": "B" } },
         { "par": [1,0] },
         { "call": { "executed": ["A", "B"] } },
-        { "call": { "request_sent": "B" } },
+        { "call": { "request_sent_by": "B" } },
     ]);
 
     assert_eq!(resulted_json2, expected_json2);
@@ -127,7 +127,7 @@ fn data_merge() {
         { "par": [1,0] },
         { "call": { "executed": ["A", "B"] } },
         { "call": { "executed": ["A", "B"] } },
-        { "call": { "request_sent": "A" } },
+        { "call": { "request_sent_by": "A" } },
     ]);
 
     assert_eq!(resulted_json3, expected_json3);

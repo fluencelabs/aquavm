@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-use stepper_lib::parser::parse;
+mod data_merging;
+mod errors;
+mod preparation;
 
-/// Parse AIR script and return it as minified JSON
-pub fn ast(script: String) -> String {
-    let do_parse = || -> std::result::Result<_, Box<dyn std::error::Error>> {
-        let ast = parse(&script)?;
-        serde_json::to_string(&ast).map_err(Into::into)
-    };
+pub(crate) use errors::DataMergingError;
+pub(crate) use errors::PreparationError;
+pub(crate) use preparation::prepare;
+pub(crate) use preparation::PreparationDescriptor;
 
-    match do_parse() {
-        Ok(json) => json,
-        Err(err) => err.to_string(),
-    }
-}
+pub(self) use crate::contexts::execution::*;
+pub(self) use crate::contexts::execution_trace::CallResult;
+pub(self) use crate::contexts::execution_trace::ExecutedState;
+pub(self) use crate::contexts::execution_trace::ExecutionTrace;
+pub(self) use crate::contexts::execution_trace::ExecutionTraceCtx;
+pub(self) use data_merging::merge_execution_traces;

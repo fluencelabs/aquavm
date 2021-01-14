@@ -26,23 +26,23 @@ pub const NEXT_PEER_PKS: &str = "next_peer_pks";
 /// Print out subtree_complete value at the beginning of each instruction execution.
 pub const SUBTREE_COMPLETE: &str = "subtree_complete";
 
-/// Print out current call_evidence path at the beginning of each instruction execution.
-pub const CALL_EVIDENCE_PATH: &str = "call_evidence_path";
+/// Print out current executed trace at the beginning of each instruction execution.
+pub const EXECUTED_TRACE: &str = "executed_trace";
 
 /// Print out count of element in the current subtree at the beginning of each instruction execution.
 pub const SUBTREE_ELEMENTS: &str = "subtree_elements_count";
 
 /// Print out state of data cache at the beginning of each instruction execution.
-pub const NEW_CALL_EVIDENCE_PATH: &str = "new_call_evidence_path";
+pub const NEW_EXECUTED_TRACE: &str = "new_executed_trace";
 
-/// Print out logs at the evidence merging stage.
-pub const EVIDENCE_PATH_MERGE: &str = "evidence_merge";
+/// Print out logs at the executed states merging stage.
+pub const EXECUTED_TRACE_MERGE: &str = "executed_trace_merge";
 
 /// Print out running arguments and params of a script.
 pub const RUN_PARAMS: &str = "initial_params";
 
 /// Print out state of data cache at the beginning of each instruction execution.
-pub const EVIDENCE_CHANGING: &str = "evidence_changing";
+pub const EXECUTED_STATE_CHANGING: &str = "executed_state_changing";
 
 /// This map should be used by rust-sdk logger that allows print only necessary targets by id.
 pub const TARGET_MAP: [(&str, i32); 10] = [
@@ -50,10 +50,10 @@ pub const TARGET_MAP: [(&str, i32); 10] = [
     (DATA_CACHE, 1 << 2),
     (NEXT_PEER_PKS, 1 << 3),
     (SUBTREE_COMPLETE, 1 << 4),
-    (CALL_EVIDENCE_PATH, 1 << 5),
+    (EXECUTED_TRACE, 1 << 5),
     (SUBTREE_ELEMENTS, 1 << 6),
-    (NEW_CALL_EVIDENCE_PATH, 1 << 7),
-    (EVIDENCE_PATH_MERGE, 1 << 8),
+    (NEW_EXECUTED_TRACE, 1 << 7),
+    (EXECUTED_TRACE_MERGE, 1 << 8),
     (RUN_PARAMS, 1 << 9),
-    (EVIDENCE_CHANGING, 1 << 9),
+    (EXECUTED_STATE_CHANGING, 1 << 9),
 ];
