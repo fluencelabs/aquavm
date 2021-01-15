@@ -44,7 +44,7 @@ pub const RUN_PARAMS: &str = "initial_params";
 /// Print out state of data cache at the beginning of each instruction execution.
 pub const EXECUTED_STATE_CHANGING: &str = "executed_state_changing";
 
-/// Print out state of data cache at the beginning of each instruction execution.
+/// Print log if call is postponed due the join behaviour.
 pub const JOIN_BEHAVIOUR: &str = "join_behaviour";
 
 /// This map should be used by rust-sdk logger that allows print only necessary targets by id.
