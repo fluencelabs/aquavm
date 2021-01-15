@@ -42,7 +42,7 @@ pub const EXECUTED_TRACE_MERGE: &str = "executed_trace_merge";
 pub const RUN_PARAMS: &str = "initial_params";
 
 /// Print out state of data cache at the beginning of each instruction execution.
-pub const EXECUTED_STATE_CHANGING: &str = "executed_trace_changing";
+pub const EXECUTED_STATE_CHANGING: &str = "executed_state_changing";
 
 /// This map should be used by rust-sdk logger that allows print only necessary targets by id.
 pub const TARGET_MAP: [(&str, i32); 10] = [
