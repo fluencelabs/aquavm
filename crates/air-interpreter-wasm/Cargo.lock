@@ -97,11 +97,7 @@ checksum = "388a1df253eca08550bef6c72392cfe7c30914bf41df5269b68cbd6ff8f570a3"
 
 [[package]]
 name = "serde"
-<<<<<<< HEAD
 version = "1.0.118"
-=======
-version = "1.0.119"
->>>>>>> master
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9bdd36f49e35b61d49efd8aa7fc068fd295961fd2286d0b2ee9a4c7a14e99cc3"
 dependencies = [
@@ -110,11 +106,7 @@ dependencies = [
 
 [[package]]
 name = "serde_derive"
-<<<<<<< HEAD
 version = "1.0.118"
-=======
-version = "1.0.119"
->>>>>>> master
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "552954ce79a059ddd5fd68c271592374bd15cab2274970380c000118aeffe1cd"
 dependencies = [
