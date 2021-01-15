@@ -28,35 +28,54 @@ use crate::log_instruction;
 
 use air_parser::ast::Call;
 
+/// This macro converts joinable errors to Ok and sets subtree complete to true.
+macro_rules! joinable {
+    ($cmd:expr, $exec_ctx:expr) => {
+        match $cmd {
+            Err(e) if is_joinable_error_type(&e) => {
+                $exec_ctx.subtree_complete = false;
+                return Ok(());
+            }
+            v => v,
+        }
+    };
+}
+
 impl<'i> super::ExecutableInstruction<'i> for Call<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut ExecutionTraceCtx) -> ExecutionResult<()> {
-        use ExecutionError::JValueJsonPathError;
-        use ExecutionError::VariableNotFound;
-
         log_instruction!(call, exec_ctx, trace_ctx);
 
-        let resolved_call = match ResolvedCall::new(self, exec_ctx) {
-            Ok(resolved_call) => resolved_call,
-            // to support lazy variable evaluation
-            Err(VariableNotFound(variable_name)) => {
-                log::trace!(r#"variable with name "{}" not found, waiting"#, variable_name);
-                exec_ctx.subtree_complete = false;
-                return Ok(());
-            }
-            Err(JValueJsonPathError(variable, json_path, json_path_err)) => {
-                log::trace!(
-                    r#"variable not found with json path "{}" in {:?} with error "{:?}", waiting"#,
-                    json_path,
-                    variable,
-                    json_path_err
-                );
-                exec_ctx.subtree_complete = false;
-                return Ok(());
-            }
-            Err(err) => return Err(err),
-        };
+        let resolved_call = joinable!(ResolvedCall::new(self, exec_ctx), exec_ctx)?;
+        joinable!(resolved_call.execute(exec_ctx, trace_ctx), exec_ctx)
+    }
+}
 
-        resolved_call.execute(exec_ctx, trace_ctx)
+macro_rules! log_join {
+    ($($args:tt)*) => {
+        log::trace!(target: crate::log_targets::JOIN_BEHAVIOUR, $($args)*)
+    }
+}
+
+/// Returns true, if supplied error is related to variable not found errors type.
+/// Print log if this is joinable error type.
+#[rustfmt::skip::macros(log_join)]
+fn is_joinable_error_type(exec_error: &ExecutionError) -> bool {
+    use ExecutionError::*;
+
+    match exec_error {
+        VariableNotFound(var_name) => {
+            log_join!("  call is waiting for an argument with name '{}'", var_name);
+            true
+        }
+        JValueJsonPathError(value, json_path, _) => {
+            log_join!("  call is waiting for an argument with path '{}' on jvalue '{:?}'", json_path, value);
+            true
+        }
+        JValueAccJsonPathError(acc, json_path, _) => {
+            log_join!("  call is waiting for an argument with path '{}' on accumulator '{:?}'", json_path, acc);
+            true
+        }
+        _ => false,
     }
 }
 

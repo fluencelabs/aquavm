@@ -15,7 +15,7 @@
  */
 
 use super::ExecutionCtx;
-use super::ExecutionError::LocalServiceError;
+use super::ExecutionError;
 use super::ExecutionResult;
 use super::ExecutionTraceCtx;
 use crate::log_instruction;
@@ -28,12 +28,23 @@ impl<'i> super::ExecutableInstruction<'i> for Xor<'i> {
 
         exec_ctx.subtree_complete = true;
         match self.0.execute(exec_ctx, trace_ctx) {
-            Err(LocalServiceError(_)) => {
+            Err(e) if is_catchable_by_xor(&e) => {
                 exec_ctx.subtree_complete = true;
                 self.1.execute(exec_ctx, trace_ctx)
             }
             res => res,
         }
+    }
+}
+
+/// Returns true, if this execution error type should be catched by xor.
+fn is_catchable_by_xor(exec_error: &ExecutionError) -> bool {
+    use ExecutionError::*;
+
+    match exec_error {
+        // this type of errors related to invalid data and should treat as hard errors.
+        InvalidExecutedState(..) => false,
+        _ => true,
     }
 }
 
@@ -111,6 +122,64 @@ mod tests {
 
         assert_eq!(actual_trace.len(), 1);
         assert_eq!(actual_trace[0], executed_call_result);
+    }
+
+    #[test]
+    fn xor_var_not_found() {
+        use aqua_test_utils::echo_string_call_service;
+
+        let local_peer_id = "local_peer_id";
+        let mut vm = create_aqua_vm(echo_string_call_service(), local_peer_id);
+
+        let script = format!(
+            r#"
+            (xor
+                (call "{0}" ("service_id_1" "local_fn_name") [non_existent_variable] result)
+                (call "{0}" ("service_id_2" "local_fn_name") ["expected"] result)
+            )"#,
+            local_peer_id,
+        );
+
+        let res = call_vm!(vm, "asd", script, "[]", "[]");
+        let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid json");
+
+        assert!(actual_trace.is_empty());
+        assert!(res.next_peer_pks.is_empty());
+    }
+
+    #[test]
+    fn xor_multiple_variables_found() {
+        use crate::contexts::execution_trace::CallResult::*;
+        use crate::contexts::execution_trace::ExecutedState::*;
+        use aqua_test_utils::echo_string_call_service;
+
+        let set_variables_peer_id = "set_variables_peer_id";
+        let mut set_variables_vm = create_aqua_vm(echo_string_call_service(), set_variables_peer_id);
+
+        let local_peer_id = "local_peer_id";
+        let mut vm = create_aqua_vm(echo_string_call_service(), local_peer_id);
+
+        let test_string_1 = String::from("some_string");
+        let test_string_2 = String::from("expected_string");
+        let script = format!(
+            r#"
+            (seq
+                (call "{0}" ("service_id_1" "local_fn_name") ["{2}"] result_1)
+                (xor
+                    (call "{1}" ("service_id_1" "local_fn_name") [""] result_1)
+                    (call "{1}" ("service_id_2" "local_fn_name") ["{3}"] result_2)
+                )
+            )"#,
+            set_variables_peer_id, local_peer_id, test_string_1, test_string_2
+        );
+
+        let res = call_vm!(set_variables_vm, "asd", script.clone(), "[]", "[]");
+        let res = call_vm!(vm, "asd", script, "[]", res.data);
+        let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid json");
+
+        assert_eq!(actual_trace.len(), 2);
+        assert_eq!(actual_trace[0], Call(Executed(Rc::new(JValue::String(test_string_1)))));
+        assert_eq!(actual_trace[1], Call(Executed(Rc::new(JValue::String(test_string_2)))));
     }
 
     #[test]
