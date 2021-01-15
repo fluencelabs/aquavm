@@ -25,26 +25,34 @@ use super::ExecutionError;
 use super::ExecutionResult;
 use super::ExecutionTraceCtx;
 use crate::log_instruction;
-use crate::log_targets::JOIN_BEHAVIOUR;
 
 use air_parser::ast::Call;
+
+/// This macro converts joinable errors to Ok and sets subtree complete to true.
+macro_rules! joinable {
+    ($cmd:expr, $exec_ctx:expr) => {
+        match $cmd {
+            Err(e) if is_joinable_error_type(&e) => {
+                $exec_ctx.subtree_complete = false;
+                return Ok(());
+            }
+            v => v,
+        }
+    };
+}
 
 impl<'i> super::ExecutableInstruction<'i> for Call<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut ExecutionTraceCtx) -> ExecutionResult<()> {
         log_instruction!(call, exec_ctx, trace_ctx);
 
-        let resolved_call = ResolvedCall::new(self, exec_ctx)?;
-        match resolved_call.execute(exec_ctx, trace_ctx) {
-            v @ Ok(_) => v,
+        let resolved_call = joinable!(ResolvedCall::new(self, exec_ctx), exec_ctx)?;
+        joinable!(resolved_call.execute(exec_ctx, trace_ctx), exec_ctx)
+    }
+}
 
-            // to support lazy variable evaluation
-            Err(e) if is_joinable_error_type(&e) => {
-                exec_ctx.subtree_complete = false;
-                Ok(())
-            }
-
-            e @ Err(_) => e,
-        }
+macro_rules! log_join {
+    ($($args:tt)*) => {
+        log::trace!(target: crate::log_targets::JOIN_BEHAVIOUR, $($args)*)
     }
 }
 
@@ -55,16 +63,11 @@ fn is_joinable_error_type(exec_error: &ExecutionError) -> bool {
 
     match exec_error {
         VariableNotFound(var_name) => {
-            log::trace!(
-                target: JOIN_BEHAVIOUR,
-                "  call is waiting for an argument with name '{}'",
-                var_name
-            );
+            log_join!("  call is waiting for an argument with name '{}'", var_name);
             true
         }
         JValueJsonPathError(value, json_path, _) => {
-            log::trace!(
-                target: JOIN_BEHAVIOUR,
+            log_join!(
                 "  call is waiting for an argument with path '{}' on jvalue '{:?}'",
                 json_path,
                 value
@@ -72,8 +75,7 @@ fn is_joinable_error_type(exec_error: &ExecutionError) -> bool {
             true
         }
         JValueAccJsonPathError(acc, json_path, _) => {
-            log::trace!(
-                target: JOIN_BEHAVIOUR,
+            log_join!(
                 "  call is waiting for an argument with path '{}' on accumulator '{:?}'",
                 json_path,
                 acc
