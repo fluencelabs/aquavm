@@ -58,6 +58,7 @@ macro_rules! log_join {
 
 /// Returns true, if supplied error is related to variable not found errors type.
 /// Print log if this is joinable error type.
+#[rustfmt::skip::macros(log_join)]
 fn is_joinable_error_type(exec_error: &ExecutionError) -> bool {
     use ExecutionError::*;
 
@@ -67,19 +68,11 @@ fn is_joinable_error_type(exec_error: &ExecutionError) -> bool {
             true
         }
         JValueJsonPathError(value, json_path, _) => {
-            log_join!(
-                "  call is waiting for an argument with path '{}' on jvalue '{:?}'",
-                json_path,
-                value
-            );
+            log_join!("  call is waiting for an argument with path '{}' on jvalue '{:?}'", json_path, value);
             true
         }
         JValueAccJsonPathError(acc, json_path, _) => {
-            log_join!(
-                "  call is waiting for an argument with path '{}' on accumulator '{:?}'",
-                json_path,
-                acc
-            );
+            log_join!("  call is waiting for an argument with path '{}' on accumulator '{:?}'", json_path, acc);
             true
         }
         _ => false,
