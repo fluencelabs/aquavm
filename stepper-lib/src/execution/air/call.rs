@@ -25,6 +25,7 @@ use super::ExecutionError;
 use super::ExecutionResult;
 use super::ExecutionTraceCtx;
 use crate::log_instruction;
+use crate::log_targets::JOIN_BEHAVIOUR;
 
 use air_parser::ast::Call;
 
@@ -48,13 +49,37 @@ impl<'i> super::ExecutableInstruction<'i> for Call<'i> {
 }
 
 /// Returns true, if supplied error is related to variable not found errors type.
+/// Print log if this is joinable error type.
 fn is_joinable_error_type(exec_error: &ExecutionError) -> bool {
     use ExecutionError::*;
 
     match exec_error {
-        VariableNotFound(_) => true,
-        JValueJsonPathError(..) => true,
-        JValueAccJsonPathError(..) => true,
+        VariableNotFound(var_name) => {
+            log::trace!(
+                target: JOIN_BEHAVIOUR,
+                "  call is waiting for an argument with name '{}'",
+                var_name
+            );
+            true
+        }
+        JValueJsonPathError(value, json_path, _) => {
+            log::trace!(
+                target: JOIN_BEHAVIOUR,
+                "  call is waiting for an argument with path '{}' on jvalue '{:?}'",
+                json_path,
+                value
+            );
+            true
+        }
+        JValueAccJsonPathError(acc, json_path, _) => {
+            log::trace!(
+                target: JOIN_BEHAVIOUR,
+                "  call is waiting for an argument with path '{}' on accumulator '{:?}'",
+                json_path,
+                acc
+            );
+            true
+        }
         _ => false,
     }
 }

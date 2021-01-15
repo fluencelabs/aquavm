@@ -456,36 +456,6 @@ mod tests {
             vm_a.call_with_prev_data("", script, "[]", res.data)
         }
 
-        let use_non_exist_variable_script = String::from(
-            r#"
-            (seq
-                (seq
-                    (call "set_variable" ("" "") [] Iterable1)
-                    (call "set_variable" ("" "") [] Iterable2)
-                )
-                (fold Iterable1 i
-                    (seq
-                        (seq
-                            (fold Iterable2 j
-                                (seq
-                                    (seq
-                                        (call "A" ("" "") [i] local_j)
-                                        (call "B" ("" "") [local_j])
-                                    )
-                                    (next j)
-                                )
-                            )
-                            (call "A" ("" "") [local_j])
-                        )
-                        (next i)
-                    )
-                )
-            )"#,
-        );
-
-        let res = execute_script(use_non_exist_variable_script).unwrap();
-        assert_eq!(res.ret_code, 1004);
-
         let variable_shadowing_script = String::from(
             r#"
             (seq

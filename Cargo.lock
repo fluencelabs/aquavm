@@ -56,7 +56,7 @@ dependencies = [
 
 [[package]]
 name = "aquamarine"
-version = "0.2.2"
+version = "0.2.3"
 dependencies = [
  "fluence",
  "log",
@@ -1651,7 +1651,7 @@ dependencies = [
 
 [[package]]
 name = "stepper-lib"
-version = "0.2.2"
+version = "0.2.3"
 dependencies = [
  "air-parser",
  "aqua-test-utils",

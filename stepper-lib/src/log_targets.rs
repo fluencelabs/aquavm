@@ -44,8 +44,11 @@ pub const RUN_PARAMS: &str = "initial_params";
 /// Print out state of data cache at the beginning of each instruction execution.
 pub const EXECUTED_STATE_CHANGING: &str = "executed_state_changing";
 
+/// Print out state of data cache at the beginning of each instruction execution.
+pub const JOIN_BEHAVIOUR: &str = "join_behaviour";
+
 /// This map should be used by rust-sdk logger that allows print only necessary targets by id.
-pub const TARGET_MAP: [(&str, i32); 10] = [
+pub const TARGET_MAP: [(&str, i32); 11] = [
     (INSTRUCTION, 1 << 1),
     (DATA_CACHE, 1 << 2),
     (NEXT_PEER_PKS, 1 << 3),
@@ -56,4 +59,5 @@ pub const TARGET_MAP: [(&str, i32); 10] = [
     (EXECUTED_TRACE_MERGE, 1 << 8),
     (RUN_PARAMS, 1 << 9),
     (EXECUTED_STATE_CHANGING, 1 << 9),
+    (JOIN_BEHAVIOUR, 1 << 10),
 ];
