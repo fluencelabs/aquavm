@@ -64,6 +64,9 @@ jobs:
 
           set -x
 
+          # JQ version regex pattern
+          PAT="\\\\d+.\\\\d+.\\\\d+"
+
           STEPPER_CARGO_TOML="stepper/Cargo.toml"
           CARGO_TOML="crates/air-interpreter-wasm/Cargo.toml"
           # get package name from Cargo.toml
@@ -75,13 +78,15 @@ jobs:
           LOCAL_RUST_VERSION="$(toml get "$CARGO_TOML" package.version | tr -d \")"
 
           # get & increment version from NPM
-          JS_VERSIONS=$(yarn info --silent "$JS_PKG_NAME" versions | tr \' \" | jq -r '.[] | select(contains("-") | not)' || true)
-          JS_VERSION="$(semver -p $JS_VERSIONS[@])"
+          JS_VERSIONS=$(yarn info --silent "$JS_PKG_NAME" versions | tr \' \" | jq -r '.[] | select(test(\"$PAT\"))' || true)
+          JS_VERSION="$(semver -p $JS_VERSIONS | tail -n1)"
           NEXT_JS_VERSION="$(semver --increment patch "$JS_VERSION" || true)"
 
           # get & increment version from crates.io
-          RS_VERSION="$((cargo show --json "$RS_PKG_NAME" | jq -r .crate.max_version) 2>/dev/null || true)"
-          NEXT_RS_VERSION="$(semver --increment patch "$RS_VERSION" || true)"
+          CRATE_VERSIONS=$(cargo show --json "$RS_PKG_NAME")
+          CRATE_VERSIONS_FILTERED=$(echo $CRATE_VERSIONS | jq -r ".versions[] | .num | select(test(\"$PAT\"))")
+          MAX_RS_VERSION="$(semver -p $CRATE_VERSIONS_FILTERED | tail -n1 || true)"
+          NEXT_RS_VERSION="$(semver --increment patch "$MAX_RS_VERSION" || true)"
 
           # take the highest version
           MAX_VERSION="$(semver "$NEXT_JS_VERSION" "$NEXT_RS_VERSION" "$LOCAL_RUST_VERSION" "$STEPPER_RUST_VERSION" | tail -n1)"
