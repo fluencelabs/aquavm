@@ -70,6 +70,8 @@ jobs:
           yarn global add semver
           PATH="$(yarn global bin):$PATH"
 
+          set -x
+
           CARGO_TOML="crates/air-interpreter-wasm/Cargo.toml"
 
           # sanitize branch name so it can be used as a semver suffix (replace [^0-9a-zA-Z-] with hyphen)
