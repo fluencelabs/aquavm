@@ -71,7 +71,7 @@ jobs:
           JS_PKG_NAME="@fluencelabs/aquamarine-stepper"
 
           # get version from Cargo.toml
-          STEPPER_RUST_VERSION=$(toml get "$STEPPER_CARGO_TOML" package.version | tr -d \")"
+          STEPPER_RUST_VERSION="$(toml get "$STEPPER_CARGO_TOML" package.version | tr -d \")"
           LOCAL_RUST_VERSION="$(toml get "$CARGO_TOML" package.version | tr -d \")"
 
           # get & increment version from NPM
