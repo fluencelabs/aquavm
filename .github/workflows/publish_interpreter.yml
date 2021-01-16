@@ -29,7 +29,7 @@ jobs:
             ~/.cargo/git
             ~/.cargo/bin
             target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-v1-${{ hashFiles('**/Cargo.lock') }}
       - name: Install Rust toolchain with wasm32-unknown-unknown
         uses: actions-rs/toolchain@v1
         with:
@@ -61,6 +61,8 @@ jobs:
           # install semver and add it to PATH
           yarn global add semver
           PATH="$(yarn global bin):$PATH"
+
+          set -x
 
           STEPPER_CARGO_TOML="stepper/Cargo.toml"
           CARGO_TOML="crates/air-interpreter-wasm/Cargo.toml"
