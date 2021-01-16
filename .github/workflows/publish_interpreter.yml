@@ -7,7 +7,6 @@ on:
   push:
     branches:
       - "master"
-      - "release"
 
 jobs:
   npm-publish:
@@ -61,8 +60,6 @@ jobs:
           # install semver and add it to PATH
           yarn global add semver
           PATH="$(yarn global bin):$PATH"
-
-          set -x
 
           # JQ version regex pattern
           PAT="\\\\d+.\\\\d+.\\\\d+"
