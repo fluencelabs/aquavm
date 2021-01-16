@@ -28,7 +28,7 @@ jobs:
             ~/.cargo/git
             ~/.cargo/bin
             target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-v1-${{ hashFiles('**/Cargo.lock') }}
       - name: Install Rust toolchain with wasm32-unknown-unknown
         uses: actions-rs/toolchain@v1
         with:
@@ -61,24 +61,32 @@ jobs:
           yarn global add semver
           PATH="$(yarn global bin):$PATH"
 
+          # JQ version regex pattern
+          PAT="\\\\d+.\\\\d+.\\\\d+"
+
+          STEPPER_CARGO_TOML="stepper/Cargo.toml"
           CARGO_TOML="crates/air-interpreter-wasm/Cargo.toml"
           # get package name from Cargo.toml
           RS_PKG_NAME="$(toml get "$CARGO_TOML" package.name | tr -d \")"
           JS_PKG_NAME="@fluencelabs/aquamarine-stepper"
 
           # get version from Cargo.toml
+          STEPPER_RUST_VERSION="$(toml get "$STEPPER_CARGO_TOML" package.version | tr -d \")"
           LOCAL_RUST_VERSION="$(toml get "$CARGO_TOML" package.version | tr -d \")"
 
           # get & increment version from NPM
-          JS_VERSION="$(yarn info --silent "$JS_PKG_NAME" version || true)"
+          JS_VERSIONS=$(yarn info --silent "$JS_PKG_NAME" versions | tr \' \" | jq -r ".[] | select(test(\"$PAT\"))" || true)
+          JS_VERSION="$(semver -p $JS_VERSIONS | tail -n1)"
           NEXT_JS_VERSION="$(semver --increment patch "$JS_VERSION" || true)"
 
           # get & increment version from crates.io
-          RS_VERSION="$((cargo show --json "$RS_PKG_NAME" | jq -r .crate.max_version) 2>/dev/null || true)"
-          NEXT_RS_VERSION="$(semver --increment patch "$RS_VERSION" || true)"
+          CRATE_VERSIONS=$(cargo show --json "$RS_PKG_NAME")
+          CRATE_VERSIONS_FILTERED=$(echo $CRATE_VERSIONS | jq -r ".versions[] | .num | select(test(\"$PAT\"))")
+          MAX_RS_VERSION="$(semver -p $CRATE_VERSIONS_FILTERED | tail -n1 || true)"
+          NEXT_RS_VERSION="$(semver --increment patch "$MAX_RS_VERSION" || true)"
 
           # take the highest version
-          MAX_VERSION="$(semver "$NEXT_JS_VERSION" "$NEXT_RS_VERSION" "$LOCAL_RUST_VERSION" | tail -n1)"
+          MAX_VERSION="$(semver "$NEXT_JS_VERSION" "$NEXT_RS_VERSION" "$LOCAL_RUST_VERSION" "$STEPPER_RUST_VERSION" | tail -n1)"
 
           echo "FINAL_VERSION=$MAX_VERSION" | tee -a $GITHUB_ENV
           echo "JS_PKG_NAME=$JS_PKG_NAME" | tee -a $GITHUB_ENV
@@ -188,7 +196,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ env.FINAL_VERSION }}
-          release_name: Fluence Network ${{ env.FINAL_VERSION }}
+          release_name: AIR interpreter ${{ env.FINAL_VERSION }}
           body: |
             - [${{ env.FINAL_VERSION }} @ NPM registry](https://www.npmjs.com/package/${{ env.JS_PKG_NAME }}/v/${{ env.FINAL_VERSION }})
             - [${{ env.FINAL_VERSION }} @ crates.io](https://crates.io/crates/${{ env.PKG_NAME }}/${{ env.FINAL_VERSION }})

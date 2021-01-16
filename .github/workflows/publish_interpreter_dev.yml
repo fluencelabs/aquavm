@@ -74,6 +74,8 @@ jobs:
 
           # sanitize branch name so it can be used as a semver suffix (replace [^0-9a-zA-Z-] with hyphen)
           SANITIZED_BRANCH="$(echo -n "${{ env.BRANCH_NAME }}" | tr -C '[:alnum:]-' -)"
+          # JQ Version regex pattern
+          PAT="\\\\d+.\\\\d+.\\\\d+-$SANITIZED_BRANCH.\\\\d+"
 
           # get package name from Cargo.toml
           PKG_NAME="$(toml get "$CARGO_TOML" package.name | tr -d \")"
@@ -83,7 +85,7 @@ jobs:
           # take all versions from npm and replace single quotes with double quotes
           NPM_VERSIONS=$(yarn info --silent "$JS_PKG_NAME" versions 2>/dev/null | tr \' \")
           # take only versions that contain branch name
-          NPM_VERSIONS_FILTERED=$(echo $NPM_VERSIONS | jq -r ".[] | select(contains(\"$SANITIZED_BRANCH\"))")
+          NPM_VERSIONS_FILTERED=$(echo $NPM_VERSIONS | jq -r ".[] | select(test(\"$PAT\"))")
           # flatten into a single line
           NPM_VERSIONS_FLATTENED=$(echo $NPM_VERSIONS_FILTERED | awk '{print}' ORS=' ')
           # sort versions according to semver, take highest (last)
@@ -93,7 +95,7 @@ jobs:
 
           ### CRATES.IO
           CRATE_VERSIONS=$(cargo show --json "$PKG_NAME")
-          CRATE_VERSIONS_FILTERED=$(echo $CRATE_VERSIONS | jq -r ".versions[] | .num | select(contains(\"$SANITIZED_BRANCH\"))")
+          CRATE_VERSIONS_FILTERED=$(echo $CRATE_VERSIONS | jq -r ".versions[] | .num | select(test(\"$PAT\"))")
           CRATE_VERSIONS_FLATTENED=$(echo $CRATE_VERSIONS_FILTERED | awk '{print}' ORS=' ')
           LAST_CRATE_VERSION="$(semver -p $(echo $CRATE_VERSIONS_FLATTENED) | tail -n1 || true)"
           PRERELEASE_CRATE_VERSION="$(semver --increment prerelease --preid "$SANITIZED_BRANCH" "${LAST_CRATE_VERSION}" || true)"
