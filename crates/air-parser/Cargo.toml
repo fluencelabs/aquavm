@@ -14,8 +14,10 @@ regex = "1.4.1"
 codespan = "0.9.5"
 codespan-reporting = "0.9.5"
 
-# TODO: hide serde behind feature
+# TODO: hide serde behind a feature
 serde = { version = "=1.0.118", features = ["rc"] }
+
+thiserror = "1.0.23"
 
 [dev-dependencies]
 fstrings = "0.2.3"

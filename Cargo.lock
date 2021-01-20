@@ -21,6 +21,7 @@ dependencies = [
  "lalrpop-util",
  "regex",
  "serde",
+ "thiserror",
 ]
 
 [[package]]

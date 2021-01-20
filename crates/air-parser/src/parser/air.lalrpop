@@ -1,0 +1,102 @@
+use crate::parser::ast::*;
+use crate::parser::lexer::LexicalError;
+use crate::parser::lexer::Token;
+
+use lalrpop_util::ErrorRecovery;
+use std::rc::Rc;
+
+// the only thin why input is needed here is just to introduce lifetime for Token
+grammar<'err, 'input>(input: &'input str, errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>);
+
+pub AIR = Instr;
+
+Instr: Box<Instruction<'input>> = {
+    "(" call <p:PeerPart> <f:FPart> <args:Args> <output:Output?> ")" => {
+        let output = output.unwrap_or(CallOutput::None);
+        let args = Rc::new(args);
+        Box::new(Instruction::Call(Call{peer_part: p, function_part: f, args, output}))
+    },
+
+    "(" seq <l:Instr> <r:Instr> ")" => Box::new(Instruction::Seq(Seq(l, r))),
+    "(" par <l:Instr> <r:Instr> ")" => Box::new(Instruction::Par(Par(l, r))),
+    "(" null ")" => Box::new(Instruction::Null(Null)),
+
+    "(" fold <iterable:InstructionValue> <iterator:Alphanumeric> <i:Instr> ")" => {
+        let instruction = Rc::new(*i);
+        Box::new(Instruction::Fold(Fold{ iterable, iterator, instruction }))
+    },
+    "(" next <i:Alphanumeric> ")" => Box::new(Instruction::Next(Next(i))),
+
+
+    "(" xor <l:Instr> <r:Instr> ")" => Box::new(Instruction::Xor(Xor(l, r))),
+
+    ! => { errors.push(<>); Box::new(Instruction::Error) },
+}
+
+Args: Vec<InstructionValue<'input>> = {
+    "[" <args:(<Arg>)*> "]" => args
+}
+
+FPart: FunctionPart<'input> = {
+    <f:Function> => FunctionPart::FuncName(f),
+    "(" <sid:ServiceId> <f:Function> ")" => FunctionPart::ServiceIdWithFuncName(sid, f),
+}
+
+PeerPart: PeerPart<'input> = {
+    <pid:PeerId> => PeerPart::PeerPk(pid),
+    "(" <pid:PeerId> <sid:ServiceId> ")" => PeerPart::PeerPkWithServiceId(pid, sid),
+}
+
+Output: CallOutput<'input> = {
+    <s:Alphanumeric> => CallOutput::Scalar(s),
+    <a:Accumulator> => CallOutput::Accumulator(a),
+};
+
+Function = InstructionValue;
+PeerId = InstructionValue;
+ServiceId = InstructionValue;
+Arg = InstructionValue;
+
+InstructionValue: InstructionValue<'input> = {
+    "\"" "\"" => InstructionValue::Literal(""), // empty strings are allowed
+    "\"" <s:Alphanumeric> "\"" => InstructionValue::Literal(s),
+    <s:Alphanumeric> => InstructionValue::Variable(s),
+    <v:JsonPath> => {
+        let variable_with_json_path = v.0;
+        let variable = &variable_with_json_path[0..v.1];
+
+        let len = variable_with_json_path.len();
+        let path = &variable_with_json_path[v.1 .. len];
+
+        InstructionValue::JsonPath { variable, path }
+    },
+    InitPeerId => InstructionValue::InitPeerId,
+}
+
+extern {
+    type Location = usize;
+    type Error = LexicalError;
+
+    enum Token<'input> {
+        "(" => Token::OpenRoundBracket,
+        ")" => Token::CloseRoundBracket,
+        "[" => Token::OpenSquareBracket,
+        "]" => Token::CloseSquareBracket,
+
+        "\"" => Token::DoubleQuote,
+
+        Alphanumeric => Token::Alphanumeric(<&'input str>),
+        JsonPath => Token::JsonPath(<&'input str>, <usize>),
+        Accumulator => Token::Accumulator(<&'input str>),
+
+        InitPeerId => Token::InitPeerId,
+
+        call => Token::Call,
+        seq => Token::Seq,
+        par => Token::Par,
+        null => Token::Null,
+        fold => Token::Fold,
+        xor => Token::Xor,
+        next => Token::Next,
+    }
+}

@@ -14,22 +14,26 @@
  * limitations under the License.
  */
 
-#![deny(
-    dead_code,
-    nonstandard_style,
-    unused_imports,
-    unused_mut,
-    unused_variables,
-    unused_unsafe,
-    unreachable_patterns
-)]
+#[derive(Debug, Clone)]
+pub enum Token<'input> {
+    OpenRoundBracket,
+    CloseRoundBracket,
+    OpenSquareBracket,
+    CloseSquareBracket,
 
-mod parser;
+    DoubleQuote,
 
-pub use parser::ast;
-pub use parser::parse;
-pub use parser::AIRParser;
+    Alphanumeric(&'input str),
+    JsonPath(&'input str, usize),
+    Accumulator(&'input str),
 
-#[cfg(test)]
-#[macro_use]
-extern crate fstrings;
+    InitPeerId,
+
+    Call,
+    Seq,
+    Par,
+    Null,
+    Fold,
+    Xor,
+    Next,
+}

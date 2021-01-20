@@ -14,22 +14,10 @@
  * limitations under the License.
  */
 
-#![deny(
-    dead_code,
-    nonstandard_style,
-    unused_imports,
-    unused_mut,
-    unused_variables,
-    unused_unsafe,
-    unreachable_patterns
-)]
+mod air_lexer;
+mod errors;
+mod token;
 
-mod parser;
-
-pub use parser::ast;
-pub use parser::parse;
-pub use parser::AIRParser;
-
-#[cfg(test)]
-#[macro_use]
-extern crate fstrings;
+pub use air_lexer::Lexer;
+pub use errors::LexicalError;
+pub use token::Token;

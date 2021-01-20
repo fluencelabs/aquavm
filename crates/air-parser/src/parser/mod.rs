@@ -14,22 +14,18 @@
  * limitations under the License.
  */
 
-#![deny(
-    dead_code,
-    nonstandard_style,
-    unused_imports,
-    unused_mut,
-    unused_variables,
-    unused_unsafe,
-    unreachable_patterns
-)]
+pub mod air_parser;
+mod lexer;
 
-mod parser;
+// air is auto-generated, so exclude it from `cargo fmt -- --check` and `cargo clippy`
+#[rustfmt::skip]
+#[allow(clippy::all)]
+mod air;
 
-pub use parser::ast;
-pub use parser::parse;
-pub use parser::AIRParser;
+pub mod ast;
 
 #[cfg(test)]
-#[macro_use]
-extern crate fstrings;
+pub mod tests;
+
+pub use air::AIRParser;
+pub use air_parser::parse;

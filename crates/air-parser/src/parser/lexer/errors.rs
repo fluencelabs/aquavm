@@ -14,16 +14,25 @@
  * limitations under the License.
  */
 
-use stepper_lib::log_targets::TARGET_MAP;
+use thiserror::Error as ThisError;
 
-use log::Level as LogLevel;
+#[derive(ThisError, Debug, Clone)]
+pub enum LexicalError {
+    #[error("empty string aren't allowed in this position")]
+    EmptyString(usize, usize),
 
-pub const DEFAULT_LOG_LEVEL: LogLevel = LogLevel::Info;
+    #[error("only alphanumeric characters are allowed in this position")]
+    IsNotAlphanumeric(usize, usize),
 
-pub fn init_logger() {
-    let target_map = TARGET_MAP.iter().cloned().collect();
-    fluence::WasmLoggerBuilder::new()
-        .with_target_map(target_map)
-        .build()
-        .unwrap();
+    #[error("an accumulator name should be non empty")]
+    EmptyAccName(usize, usize),
+
+    #[error("invalid characters in json path")]
+    InvalidJsonPath(usize, usize),
+}
+
+impl From<std::convert::Infallible> for LexicalError {
+    fn from(_: std::convert::Infallible) -> Self {
+        unreachable!()
+    }
 }

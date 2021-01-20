@@ -19,6 +19,7 @@ dependencies = [
  "lalrpop-util",
  "regex",
  "serde",
+ "thiserror",
 ]
 
 [[package]]
@@ -671,7 +672,7 @@ dependencies = [
 
 [[package]]
 name = "stepper-lib"
-version = "0.2.3"
+version = "0.3.0"
 dependencies = [
  "air-parser",
  "boolinator",
