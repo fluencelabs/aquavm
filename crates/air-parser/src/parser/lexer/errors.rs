@@ -30,7 +30,7 @@ pub enum LexicalError {
     #[error("an accumulator name should be non empty")]
     EmptyAccName(usize, usize),
 
-    #[error("invalid characters in json path")]
+    #[error("invalid character in json path")]
     InvalidJsonPath(usize, usize),
 }
 

@@ -5,7 +5,7 @@ use crate::parser::lexer::Token;
 use lalrpop_util::ErrorRecovery;
 use std::rc::Rc;
 
-// the only thin why input is needed here is just to introduce lifetime for Token
+// the only thing why input matters here is just to introduce lifetime for Token
 grammar<'err, 'input>(input: &'input str, errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>);
 
 pub AIR = Instr;
@@ -21,7 +21,7 @@ Instr: Box<Instruction<'input>> = {
     "(" par <l:Instr> <r:Instr> ")" => Box::new(Instruction::Par(Par(l, r))),
     "(" null ")" => Box::new(Instruction::Null(Null)),
 
-    "(" fold <iterable:InstructionValue> <iterator:Alphanumeric> <i:Instr> ")" => {
+    "(" fold <iterable:Iterable> <iterator:Alphanumeric> <i:Instr> ")" => {
         let instruction = Rc::new(*i);
         Box::new(Instruction::Fold(Fold{ iterable, iterator, instruction }))
     },
@@ -52,6 +52,19 @@ Output: CallOutput<'input> = {
     <a:Accumulator> => CallOutput::Accumulator(a),
 };
 
+Iterable: InstructionValue<'input> = {
+    <s:Alphanumeric> => InstructionValue::Variable(s),
+    <v:JsonPath> => {
+        let variable_with_json_path = v.0;
+        let variable = &variable_with_json_path[0..v.1];
+
+        let len = variable_with_json_path.len();
+        let path = &variable_with_json_path[v.1+1..len];
+
+        InstructionValue::JsonPath { variable, path }
+    },
+}
+
 Function = InstructionValue;
 PeerId = InstructionValue;
 ServiceId = InstructionValue;
@@ -65,7 +78,7 @@ InstructionValue: InstructionValue<'input> = {
         let variable = &variable_with_json_path[0..v.1];
 
         let len = variable_with_json_path.len();
-        let path = &variable_with_json_path[v.1 .. len];
+        let path = &variable_with_json_path[v.1+1..len];
 
         InstructionValue::JsonPath { variable, path }
     },

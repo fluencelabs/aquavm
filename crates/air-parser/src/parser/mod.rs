@@ -27,5 +27,5 @@ pub mod ast;
 #[cfg(test)]
 pub mod tests;
 
+pub use self::air_parser::parse;
 pub use air::AIRParser;
-pub use air_parser::parse;

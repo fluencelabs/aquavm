@@ -38,38 +38,59 @@ impl<'input> Lexer<'input> {
     pub fn next(&mut self) -> Option<Spanned<Token<'input>, usize, LexicalError>> {
         while let Some(it) = self.chars.next() {
             match it {
-                (i, '(') => {
-                    return Some(Ok((i, Token::OpenRoundBracket, i + 1)))
-                },
-                (i, ')') => {
-                    return Some(Ok((i, Token::CloseRoundBracket, i + 1)))
-                },
+                (i, '(') => return Some(Ok((i, Token::OpenRoundBracket, i + 1))),
+                (i, ')') => return Some(Ok((i, Token::CloseRoundBracket, i + 1))),
 
                 (i, '[') => return Some(Ok((i, Token::OpenSquareBracket, i + 1))),
                 (i, ']') => return Some(Ok((i, Token::CloseSquareBracket, i + 1))),
+
+                (_, ';') => {
+                    while let Some((_, ch)) = self.chars.next() {
+                        if ch == '\n' {
+                            break;
+                        }
+                    }
+                }
 
                 (start, '"') => {
                     while let Some((pos, ch)) = self.chars.next() {
                         if ch == '"' {
                             let string_size = pos - start;
-                            return Some(Ok((start, Token::StringLiteral(&self.input[start..pos]), pos + string_size)));
+                            return Some(Ok((
+                                start,
+                                Token::StringLiteral(&self.input[start + 1..pos]),
+                                pos + string_size,
+                            )));
                         }
                     }
 
-                    return Some(Err(LexicalError::EmptyAccName(start, self.input.len())));
-                },
+                    return Some(Err(LexicalError::UnclosedQuote(start, self.input.len())));
+                }
 
                 (_, ch) if ch.is_whitespace() => (),
 
                 (start, _) => {
                     let mut end = start;
+                    let mut round_brackets_balance: i64 = 0;
+                    let mut square_brackets_balance: i64 = 0;
 
-                    while let Some((i, ch)) = self.chars.next() {
-                        end = i;
+                    while let Some((i, ch)) = self.chars.peek() {
+                        end = *i;
+                        let ch = *ch;
+                        if ch == '(' {
+                            round_brackets_balance += 1;
+                        } else if ch == ')' {
+                            round_brackets_balance -= 1;
+                        } else if ch == '[' {
+                            square_brackets_balance += 1;
+                        } else if ch == ']' {
+                            square_brackets_balance -= 1;
+                        }
 
-                        if is_term_char_for_supplement(ch) {
+                        if should_stop(ch, round_brackets_balance, square_brackets_balance) {
                             break;
                         }
+                        self.chars.next();
                     }
 
                     // this slicing is safe here because borders come from the chars iterator
@@ -80,7 +101,11 @@ impl<'input> Lexer<'input> {
                         Err(e) => return Some(Err(e)),
                     };
 
-                    let token_str_len = end - start;
+                    let mut token_str_len = end - start;
+                    if round_brackets_balance < 0 || square_brackets_balance < 0 {
+                        token_str_len -= 1;
+                    }
+
                     return Some(Ok((start, token, start + token_str_len)));
                 }
             }
@@ -90,8 +115,8 @@ impl<'input> Lexer<'input> {
     }
 }
 
-fn is_term_char_for_supplement(ch: char) -> bool {
-    ch.is_whitespace() || ch == ')'
+fn should_stop(ch: char, round_brackets_balance: i64, open_square_brackets_balance: i64) -> bool {
+    ch.is_whitespace() || round_brackets_balance < 0 || open_square_brackets_balance < 0
 }
 
 #[rustfmt::skip]
@@ -120,7 +145,7 @@ fn try_to_token(input: &str, start: usize, end: usize) -> Result<Token, LexicalE
             }
 
             // this slice is safe here because str's been checked for ending with "[]"
-            if str[0..str_len - ACC_END_TAG_SIZE].chars().all(char::is_alphanumeric) {
+            if str[0..str_len - ACC_END_TAG_SIZE].chars().all(is_aqua_alphanumeric) {
                 return Ok(Token::Accumulator(&str[0..str_len - ACC_END_TAG_SIZE]));
             }
 
@@ -133,10 +158,10 @@ fn try_to_token(input: &str, start: usize, end: usize) -> Result<Token, LexicalE
             for (pos, ch) in str.chars().enumerate() {
                 if !json_path_started(json_path_start_pos) && is_json_path_start_point(ch) {
                     json_path_start_pos = Some(pos);
-                } else if !json_path_started(json_path_start_pos) && !char::is_alphanumeric(ch) {
+                } else if !json_path_started(json_path_start_pos) && !is_aqua_alphanumeric(ch) {
                     return Err(LexicalError::IsNotAlphanumeric(start, end));
                 } else if json_path_started(json_path_start_pos) & !json_path_allowed_char(ch) {
-                    return Err(LexicalError::InvalidJsonPath(start, end));
+                    return Err(LexicalError::InvalidJsonPath(start+pos, start+pos));
                 }
             }
 
@@ -156,7 +181,7 @@ const FOLD_INSTR: &str = "fold";
 const XOR_INSTR: &str = "xor";
 const NEXT_INSTR: &str = "next";
 
-const INIT_PEER_ID: &str = r#""init_peer_id""#;
+const INIT_PEER_ID: &str = "%init_peer_id%";
 
 const ACC_END_TAG: &str = "[]";
 
@@ -189,7 +214,7 @@ fn json_path_allowed_char(ch: char) -> bool {
         '"' => true,
         '\'' => true,
         '!' => true,
-        ch => ch.is_alphanumeric(),
+        ch => is_aqua_alphanumeric(ch),
     }
 }
 
@@ -199,4 +224,8 @@ impl<'input> Iterator for Lexer<'input> {
     fn next(&mut self) -> Option<Self::Item> {
         self.next()
     }
+}
+
+fn is_aqua_alphanumeric(ch: char) -> bool {
+    ch.is_alphanumeric() || ch == '_' || ch == '-'
 }
