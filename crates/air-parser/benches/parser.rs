@@ -23,8 +23,8 @@ use criterion::criterion_group;
 use criterion::criterion_main;
 use criterion::Criterion;
 
-use air_parser::AIRParser;
 use air_parser::AIRLexer;
+use air_parser::AIRParser;
 
 const SOURCE_CODE_BAD: &'static str = r#"(seq
         (seq
@@ -150,11 +150,32 @@ fn parse_deep(c: &mut Criterion) {
     );
 }
 
+fn parse_dashboard_script(c: &mut Criterion) {
+    let parser = Rc::new(AIRParser::new());
+    const DASHBOARD_SCRIPT: &str = include_str!("../../../stepper-lib/tests/scripts/dashboard.clj");
+
+    c.bench_function(
+        format!("parse {} bytes", DASHBOARD_SCRIPT.len()).as_str(),
+        move |b| {
+            let parser = parser.clone();
+            b.iter(move || {
+                let lexer = AIRLexer::new(DASHBOARD_SCRIPT);
+
+                parser
+                    .clone()
+                    .parse("", &mut Vec::new(), lexer)
+                    .expect("success")
+            })
+        },
+    );
+}
+
 criterion_group!(
     parser,
     create_parser,
     parse,
     parse_to_fail,
+    parse_dashboard_script,
     parse_deep,
     clone_parser,
     clone_parser_rc,
