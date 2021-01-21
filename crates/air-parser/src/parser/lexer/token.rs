@@ -21,8 +21,7 @@ pub enum Token<'input> {
     OpenSquareBracket,
     CloseSquareBracket,
 
-    DoubleQuote,
-
+    StringLiteral(&'input str),
     Alphanumeric(&'input str),
     JsonPath(&'input str, usize),
     Accumulator(&'input str),

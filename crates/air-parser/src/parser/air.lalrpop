@@ -58,8 +58,7 @@ ServiceId = InstructionValue;
 Arg = InstructionValue;
 
 InstructionValue: InstructionValue<'input> = {
-    "\"" "\"" => InstructionValue::Literal(""), // empty strings are allowed
-    "\"" <s:Alphanumeric> "\"" => InstructionValue::Literal(s),
+    <s:Literal> => InstructionValue::Literal(s),
     <s:Alphanumeric> => InstructionValue::Variable(s),
     <v:JsonPath> => {
         let variable_with_json_path = v.0;
@@ -83,9 +82,8 @@ extern {
         "[" => Token::OpenSquareBracket,
         "]" => Token::CloseSquareBracket,
 
-        "\"" => Token::DoubleQuote,
-
         Alphanumeric => Token::Alphanumeric(<&'input str>),
+        Literal => Token::StringLiteral(<&'input str>),
         JsonPath => Token::JsonPath(<&'input str>, <usize>),
         Accumulator => Token::Accumulator(<&'input str>),
 

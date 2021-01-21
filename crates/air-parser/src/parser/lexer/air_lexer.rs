@@ -34,21 +34,30 @@ impl<'input> Lexer<'input> {
             chars: input.char_indices().peekable(),
         }
     }
-}
 
-impl<'input> Iterator for Lexer<'input> {
-    type Item = Spanned<Token<'input>, usize, LexicalError>;
-
-    fn next(&mut self) -> Option<Self::Item> {
+    pub fn next(&mut self) -> Option<Spanned<Token<'input>, usize, LexicalError>> {
         while let Some(it) = self.chars.next() {
             match it {
-                (i, '(') => return Some(Ok((i, Token::OpenRoundBracket, i + 1))),
-                (i, ')') => return Some(Ok((i, Token::CloseRoundBracket, i + 1))),
+                (i, '(') => {
+                    return Some(Ok((i, Token::OpenRoundBracket, i + 1)))
+                },
+                (i, ')') => {
+                    return Some(Ok((i, Token::CloseRoundBracket, i + 1)))
+                },
 
                 (i, '[') => return Some(Ok((i, Token::OpenSquareBracket, i + 1))),
                 (i, ']') => return Some(Ok((i, Token::CloseSquareBracket, i + 1))),
 
-                (i, '"') => return Some(Ok((i, Token::DoubleQuote, i + 1))),
+                (start, '"') => {
+                    while let Some((pos, ch)) = self.chars.next() {
+                        if ch == '"' {
+                            let string_size = pos - start;
+                            return Some(Ok((start, Token::StringLiteral(&self.input[start..pos]), pos + string_size)));
+                        }
+                    }
+
+                    return Some(Err(LexicalError::EmptyAccName(start, self.input.len())));
+                },
 
                 (_, ch) if ch.is_whitespace() => (),
 
@@ -82,11 +91,13 @@ impl<'input> Iterator for Lexer<'input> {
 }
 
 fn is_term_char_for_supplement(ch: char) -> bool {
-    ch.is_whitespace() || ch == '"' || ch == ')'
+    ch.is_whitespace() || ch == ')'
 }
 
 #[rustfmt::skip]
 fn try_to_token(input: &str, start: usize, end: usize) -> Result<Token, LexicalError> {
+    println!("input: {}", input);
+
     match input {
         "" => Err(LexicalError::EmptyString(start, end)),
 
@@ -177,6 +188,15 @@ fn json_path_allowed_char(ch: char) -> bool {
         ',' => true,
         '"' => true,
         '\'' => true,
+        '!' => true,
         ch => ch.is_alphanumeric(),
+    }
+}
+
+impl<'input> Iterator for Lexer<'input> {
+    type Item = Spanned<Token<'input>, usize, LexicalError>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.next()
     }
 }

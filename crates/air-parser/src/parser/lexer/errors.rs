@@ -18,6 +18,9 @@ use thiserror::Error as ThisError;
 
 #[derive(ThisError, Debug, Clone)]
 pub enum LexicalError {
+    #[error("this string literal has unclosed quote")]
+    UnclosedQuote(usize, usize),
+
     #[error("empty string aren't allowed in this position")]
     EmptyString(usize, usize),
 

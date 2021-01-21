@@ -112,8 +112,8 @@ fn parse_json_path() {
 fn parse_json_path_complex() {
     let source_code = r#"
         (seq
-            (call m.$.[1] "f" [] void)
-            (call m.$.abc["c"].cde[a][0].cde["bcd"] "f" [] void)
+            (call m.$.[1] f [] void)
+            (call m.$.abc["c"].cde[a][0].cde["bcd"] f [] void)
         )
         "#;
     let instruction = parse(source_code);

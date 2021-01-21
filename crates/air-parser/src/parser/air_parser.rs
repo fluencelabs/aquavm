@@ -114,6 +114,9 @@ fn pretty_expected(expected: Vec<String>) -> String {
 fn lexical_error_to_label(file_id: usize, error: LexicalError) -> Label<usize> {
     use LexicalError::*;
     match error {
+        UnclosedQuote(start, end) => {
+            Label::primary(file_id, start..end).with_message(error.to_string())
+        }
         EmptyString(start, end) => {
             Label::primary(file_id, start..end).with_message(error.to_string())
         }
