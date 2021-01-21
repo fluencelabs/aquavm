@@ -19,7 +19,7 @@ use crate::JValue;
 use crate::ResolvedTriplet;
 use crate::SecurityTetraplet;
 
-use air_parser::ast::InstructionValue;
+use air_parser::ast;
 use jsonpath_lib::select;
 use jsonpath_lib::select_with_iter;
 
@@ -31,16 +31,12 @@ pub(super) type IterableValue = Box<dyn for<'ctx> Iterable<'ctx, Item = Iterable
 /// Constructs iterable value for given instruction value,
 /// return Some if iterable isn't empty and None otherwise.
 pub(super) fn construct_iterable_value<'ctx>(
-    value: &InstructionValue<'ctx>,
+    ast_iterable: &ast::IterableValue<'ctx>,
     exec_ctx: &ExecutionCtx<'ctx>,
 ) -> ExecutionResult<Option<IterableValue>> {
-    use ExecutionError::InvalidFoldIterable;
-
-    match value {
-        InstructionValue::Variable(name) => handle_instruction_variable(exec_ctx, name),
-        InstructionValue::JsonPath { variable, path } => handle_instruction_json_path(exec_ctx, variable, path),
-        // TODO: check statically that it isn't possible to use string literals and so on as fold iterable
-        v => return Err(InvalidFoldIterable(format!("{:?}", v))),
+    match ast_iterable {
+        ast::IterableValue::Variable(name) => handle_instruction_variable(exec_ctx, name),
+        ast::IterableValue::JsonPath { variable, path } => handle_instruction_json_path(exec_ctx, variable, path),
     }
 }
 

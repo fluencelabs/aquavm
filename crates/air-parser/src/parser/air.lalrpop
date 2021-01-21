@@ -1,4 +1,5 @@
 use crate::parser::ast::*;
+use crate::parser::into_variable_and_path;
 use crate::parser::lexer::LexicalError;
 use crate::parser::lexer::Token;
 
@@ -33,7 +34,7 @@ Instr: Box<Instruction<'input>> = {
     ! => { errors.push(<>); Box::new(Instruction::Error) },
 }
 
-Args: Vec<InstructionValue<'input>> = {
+Args: Vec<CallInstructionValue<'input>> = {
     "[" <args:(<Arg>)*> "]" => args
 }
 
@@ -52,37 +53,27 @@ Output: CallOutput<'input> = {
     <a:Accumulator> => CallOutput::Accumulator(a),
 };
 
-Iterable: InstructionValue<'input> = {
-    <s:Alphanumeric> => InstructionValue::Variable(s),
+Iterable: IterableValue<'input> = {
+    <s:Alphanumeric> => IterableValue::Variable(s),
     <v:JsonPath> => {
-        let variable_with_json_path = v.0;
-        let variable = &variable_with_json_path[0..v.1];
-
-        let len = variable_with_json_path.len();
-        let path = &variable_with_json_path[v.1+1..len];
-
-        InstructionValue::JsonPath { variable, path }
+        let (variable, path) = into_variable_and_path(v.0, v.1);
+        IterableValue::JsonPath { variable, path }
     },
 }
 
-Function = InstructionValue;
-PeerId = InstructionValue;
-ServiceId = InstructionValue;
-Arg = InstructionValue;
+Function = CallInstructionValue;
+PeerId = CallInstructionValue;
+ServiceId = CallInstructionValue;
+Arg = CallInstructionValue;
 
-InstructionValue: InstructionValue<'input> = {
-    <s:Literal> => InstructionValue::Literal(s),
-    <s:Alphanumeric> => InstructionValue::Variable(s),
+CallInstructionValue: CallInstructionValue<'input> = {
+    <s:Literal> => CallInstructionValue::Literal(s),
+    <s:Alphanumeric> => CallInstructionValue::Variable(s),
     <v:JsonPath> => {
-        let variable_with_json_path = v.0;
-        let variable = &variable_with_json_path[0..v.1];
-
-        let len = variable_with_json_path.len();
-        let path = &variable_with_json_path[v.1+1..len];
-
-        InstructionValue::JsonPath { variable, path }
+        let (variable, path) = into_variable_and_path(v.0, v.1);
+        CallInstructionValue::JsonPath { variable, path }
     },
-    InitPeerId => InstructionValue::InitPeerId,
+    InitPeerId => CallInstructionValue::InitPeerId,
 }
 
 extern {

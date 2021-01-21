@@ -159,7 +159,7 @@ fn try_to_token(input: &str, start: usize, end: usize) -> Result<Token, LexicalE
                 if !json_path_started(json_path_start_pos) && is_json_path_start_point(ch) {
                     json_path_start_pos = Some(pos);
                 } else if !json_path_started(json_path_start_pos) && !is_aqua_alphanumeric(ch) {
-                    return Err(LexicalError::IsNotAlphanumeric(start, end));
+                    return Err(LexicalError::IsNotAlphanumeric(start+pos, end+pos));
                 } else if json_path_started(json_path_start_pos) & !json_path_allowed_char(ch) {
                     return Err(LexicalError::InvalidJsonPath(start+pos, start+pos));
                 }
@@ -209,7 +209,6 @@ fn json_path_allowed_char(ch: char) -> bool {
         '?' => true,
         '.' => true,
         '*' => true,
-        '-' => true,
         ',' => true,
         '"' => true,
         '\'' => true,

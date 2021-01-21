@@ -1,6 +1,7 @@
 // auto-generated: "lalrpop 0.19.1"
-// sha256: dba090c689a39d2d32efe46d42b3ac72ec7e876adb252519af97fe13f4fb7
+// sha256: 451d65e5b9c9a33788cae0a23cbc36176d4b1f8642ae7262d92a8d2da9f41380
 use crate::parser::ast::*;
+use crate::parser::into_variable_and_path;
 use crate::parser::lexer::LexicalError;
 use crate::parser::lexer::Token;
 use lalrpop_util::ErrorRecovery;
@@ -15,6 +16,7 @@ mod __parse__AIR {
     #![allow(non_snake_case, non_camel_case_types, unused_mut, unused_variables, unused_imports, unused_parens)]
 
     use crate::parser::ast::*;
+    use crate::parser::into_variable_and_path;
     use crate::parser::lexer::LexicalError;
     use crate::parser::lexer::Token;
     use lalrpop_util::ErrorRecovery;
@@ -31,14 +33,15 @@ mod __parse__AIR {
         Variant1(&'input str),
         Variant2((&'input str, usize)),
         Variant3(__lalrpop_util::ErrorRecovery<usize, Token<'input>, LexicalError>),
-        Variant4(InstructionValue<'input>),
-        Variant5(::std::vec::Vec<InstructionValue<'input>>),
+        Variant4(CallInstructionValue<'input>),
+        Variant5(::std::vec::Vec<CallInstructionValue<'input>>),
         Variant6(Box<Instruction<'input>>),
-        Variant7(Vec<InstructionValue<'input>>),
+        Variant7(Vec<CallInstructionValue<'input>>),
         Variant8(FunctionPart<'input>),
-        Variant9(CallOutput<'input>),
-        Variant10(::std::option::Option<CallOutput<'input>>),
-        Variant11(PeerPart<'input>),
+        Variant9(IterableValue<'input>),
+        Variant10(CallOutput<'input>),
+        Variant11(::std::option::Option<CallOutput<'input>>),
+        Variant12(PeerPart<'input>),
     }
     const __ACTION: &[i8] = &[
         // State 0
@@ -86,7 +89,7 @@ mod __parse__AIR {
         // State 21
         0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 24, 25, 4, 5, 6, 0,
         // State 22
-        -21, -21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -21,
+        -25, -25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -25,
         // State 23
         0, 0, 0, 0, 0, 35, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 24
@@ -96,13 +99,13 @@ mod __parse__AIR {
         // State 26
         -33, 0, 0, 0, 0, -33, -33, -33, -33, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 27
-        -23, -23, -23, -23, 0, -23, -23, -23, -23, 0, 0, 0, 0, 0, 0, 0, 0,
+        -11, -11, -11, -11, 0, -11, -11, -11, -11, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 28
-        -25, -25, -25, -25, 0, -25, -25, -25, -25, 0, 0, 0, 0, 0, 0, 0, 0,
+        -13, -13, -13, -13, 0, -13, -13, -13, -13, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 29
-        -24, -24, -24, -24, 0, -24, -24, -24, -24, 0, 0, 0, 0, 0, 0, 0, 0,
+        -12, -12, -12, -12, 0, -12, -12, -12, -12, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 30
-        -22, -22, -22, -22, 0, -22, -22, -22, -22, 0, 0, 0, 0, 0, 0, 0, 0,
+        -10, -10, -10, -10, 0, -10, -10, -10, -10, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 31
         0, 0, 0, 0, 0, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 32
@@ -112,13 +115,13 @@ mod __parse__AIR {
         // State 34
         0, 39, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 35
-        -17, -17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -17,
+        -21, -21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -21,
         // State 36
-        0, 0, -10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, -16, -16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 37
-        0, -12, -12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, -14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 38
-        -19, -19, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -19,
+        -23, -23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -23,
         // State 39
         0, 46, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 40
@@ -132,15 +135,15 @@ mod __parse__AIR {
         // State 44
         0, 58, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 45
-        -16, -16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -16,
-        // State 46
-        -15, -15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -15,
-        // State 47
         -20, -20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -20,
+        // State 46
+        -19, -19, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -19,
+        // State 47
+        -24, -24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -24,
         // State 48
         0, 59, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 49
-        -14, -14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -14,
+        -18, -18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -18,
         // State 50
         0, -29, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 51
@@ -156,15 +159,15 @@ mod __parse__AIR {
         // State 56
         -34, 0, 0, 0, 0, -34, -34, -34, -34, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 57
-        -18, -18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -18,
+        -22, -22, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -22,
         // State 58
-        -13, -13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -13,
+        -17, -17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -17,
         // State 59
         0, 0, 0, -5, 0, -5, -5, -5, -5, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 60
         0, -9, 0, 0, -9, -9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 61
-        0, 0, -11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, -15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     ];
     fn __action(state: i8, integer: usize) -> i8 {
         __ACTION[(state as usize) * 17 + integer]
@@ -215,7 +218,7 @@ mod __parse__AIR {
         // State 21
         0,
         // State 22
-        -21,
+        -25,
         // State 23
         0,
         // State 24
@@ -241,13 +244,13 @@ mod __parse__AIR {
         // State 34
         0,
         // State 35
-        -17,
+        -21,
         // State 36
         0,
         // State 37
         0,
         // State 38
-        -19,
+        -23,
         // State 39
         0,
         // State 40
@@ -261,15 +264,15 @@ mod __parse__AIR {
         // State 44
         0,
         // State 45
-        -16,
-        // State 46
-        -15,
-        // State 47
         -20,
+        // State 46
+        -19,
+        // State 47
+        -24,
         // State 48
         0,
         // State 49
-        -14,
+        -18,
         // State 50
         0,
         // State 51
@@ -285,9 +288,9 @@ mod __parse__AIR {
         // State 56
         0,
         // State 57
-        -18,
+        -22,
         // State 58
-        -13,
+        -17,
         // State 59
         0,
         // State 60
@@ -304,12 +307,18 @@ mod __parse__AIR {
                 _ => 52,
             },
             5 => 15,
-            6 => 11,
-            7 => match state {
-                17 => 55,
-                _ => 36,
+            6 => match state {
+                6 | 17 => 36,
+                12..=13 => 42,
+                16 | 18 => 53,
+                _ => 25,
             },
+            7 => 11,
             8 => match state {
+                17 => 55,
+                _ => 37,
+            },
+            9 => match state {
                 4 => 9,
                 5 => 10,
                 0 => 20,
@@ -318,12 +327,6 @@ mod __parse__AIR {
                 10 => 41,
                 14 => 44,
                 _ => 8,
-            },
-            9 => match state {
-                6 | 17 => 37,
-                12..=13 => 42,
-                16 | 18 => 53,
-                _ => 25,
             },
             10 => 31,
             11 => 48,
@@ -589,85 +592,85 @@ mod __parse__AIR {
             }
             10 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 4,
+                    states_to_pop: 1,
                     nonterminal_produced: 6,
                 }
             }
             11 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 7,
+                    nonterminal_produced: 6,
                 }
             }
             12 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 7,
-                    nonterminal_produced: 8,
+                    states_to_pop: 1,
+                    nonterminal_produced: 6,
                 }
             }
             13 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 6,
-                    nonterminal_produced: 8,
+                    states_to_pop: 1,
+                    nonterminal_produced: 7,
                 }
             }
             14 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 5,
-                    nonterminal_produced: 8,
+                    states_to_pop: 4,
+                    nonterminal_produced: 7,
                 }
             }
             15 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 5,
+                    states_to_pop: 1,
                     nonterminal_produced: 8,
                 }
             }
             16 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 3,
-                    nonterminal_produced: 8,
+                    states_to_pop: 7,
+                    nonterminal_produced: 9,
                 }
             }
             17 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 6,
-                    nonterminal_produced: 8,
+                    nonterminal_produced: 9,
                 }
             }
             18 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 4,
-                    nonterminal_produced: 8,
+                    states_to_pop: 5,
+                    nonterminal_produced: 9,
                 }
             }
             19 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 5,
-                    nonterminal_produced: 8,
+                    nonterminal_produced: 9,
                 }
             }
             20 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 1,
-                    nonterminal_produced: 8,
+                    states_to_pop: 3,
+                    nonterminal_produced: 9,
                 }
             }
             21 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 1,
+                    states_to_pop: 6,
                     nonterminal_produced: 9,
                 }
             }
             22 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 1,
+                    states_to_pop: 4,
                     nonterminal_produced: 9,
                 }
             }
             23 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 1,
+                    states_to_pop: 5,
                     nonterminal_produced: 9,
                 }
             }
@@ -976,14 +979,25 @@ mod __parse__AIR {
             _ => __symbol_type_mismatch()
         }
     }
-    fn __pop_Variant9<
+    fn __pop_Variant4<
+      'input,
+    >(
+        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+    ) -> (usize, CallInstructionValue<'input>, usize)
+     {
+        match __symbols.pop() {
+            Some((__l, __Symbol::Variant4(__v), __r)) => (__l, __v, __r),
+            _ => __symbol_type_mismatch()
+        }
+    }
+    fn __pop_Variant10<
       'input,
     >(
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
     ) -> (usize, CallOutput<'input>, usize)
      {
         match __symbols.pop() {
-            Some((__l, __Symbol::Variant9(__v), __r)) => (__l, __v, __r),
+            Some((__l, __Symbol::Variant10(__v), __r)) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
@@ -998,25 +1012,25 @@ mod __parse__AIR {
             _ => __symbol_type_mismatch()
         }
     }
-    fn __pop_Variant4<
+    fn __pop_Variant9<
       'input,
     >(
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, InstructionValue<'input>, usize)
+    ) -> (usize, IterableValue<'input>, usize)
      {
         match __symbols.pop() {
-            Some((__l, __Symbol::Variant4(__v), __r)) => (__l, __v, __r),
+            Some((__l, __Symbol::Variant9(__v), __r)) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
-    fn __pop_Variant11<
+    fn __pop_Variant12<
       'input,
     >(
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
     ) -> (usize, PeerPart<'input>, usize)
      {
         match __symbols.pop() {
-            Some((__l, __Symbol::Variant11(__v), __r)) => (__l, __v, __r),
+            Some((__l, __Symbol::Variant12(__v), __r)) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
@@ -1035,7 +1049,7 @@ mod __parse__AIR {
       'input,
     >(
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, Vec<InstructionValue<'input>>, usize)
+    ) -> (usize, Vec<CallInstructionValue<'input>>, usize)
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant7(__v), __r)) => (__l, __v, __r),
@@ -1053,14 +1067,14 @@ mod __parse__AIR {
             _ => __symbol_type_mismatch()
         }
     }
-    fn __pop_Variant10<
+    fn __pop_Variant11<
       'input,
     >(
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
     ) -> (usize, ::std::option::Option<CallOutput<'input>>, usize)
      {
         match __symbols.pop() {
-            Some((__l, __Symbol::Variant10(__v), __r)) => (__l, __v, __r),
+            Some((__l, __Symbol::Variant11(__v), __r)) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
@@ -1068,7 +1082,7 @@ mod __parse__AIR {
       'input,
     >(
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, ::std::vec::Vec<InstructionValue<'input>>, usize)
+    ) -> (usize, ::std::vec::Vec<CallInstructionValue<'input>>, usize)
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant5(__v), __r)) => (__l, __v, __r),
@@ -1212,7 +1226,7 @@ mod __parse__AIR {
         _: ::std::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
-        // Arg = InstructionValue => ActionFn(22);
+        // Arg = CallInstructionValue => ActionFn(22);
         let __sym0 = __pop_Variant4(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
@@ -1274,15 +1288,91 @@ mod __parse__AIR {
         _: ::std::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
+        // CallInstructionValue = Literal => ActionFn(23);
+        let __sym0 = __pop_Variant1(__symbols);
+        let __start = __sym0.0.clone();
+        let __end = __sym0.2.clone();
+        let __nt = super::__action23::<>(input, errors, __sym0);
+        __symbols.push((__start, __Symbol::Variant4(__nt), __end));
+        (1, 6)
+    }
+    pub(crate) fn __reduce10<
+        'err,
+        'input,
+    >(
+        input: &'input str,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+        __lookahead_start: Option<&usize>,
+        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+    ) -> (usize, usize)
+    {
+        // CallInstructionValue = Alphanumeric => ActionFn(24);
+        let __sym0 = __pop_Variant1(__symbols);
+        let __start = __sym0.0.clone();
+        let __end = __sym0.2.clone();
+        let __nt = super::__action24::<>(input, errors, __sym0);
+        __symbols.push((__start, __Symbol::Variant4(__nt), __end));
+        (1, 6)
+    }
+    pub(crate) fn __reduce11<
+        'err,
+        'input,
+    >(
+        input: &'input str,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+        __lookahead_start: Option<&usize>,
+        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+    ) -> (usize, usize)
+    {
+        // CallInstructionValue = JsonPath => ActionFn(25);
+        let __sym0 = __pop_Variant2(__symbols);
+        let __start = __sym0.0.clone();
+        let __end = __sym0.2.clone();
+        let __nt = super::__action25::<>(input, errors, __sym0);
+        __symbols.push((__start, __Symbol::Variant4(__nt), __end));
+        (1, 6)
+    }
+    pub(crate) fn __reduce12<
+        'err,
+        'input,
+    >(
+        input: &'input str,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+        __lookahead_start: Option<&usize>,
+        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+    ) -> (usize, usize)
+    {
+        // CallInstructionValue = InitPeerId => ActionFn(26);
+        let __sym0 = __pop_Variant0(__symbols);
+        let __start = __sym0.0.clone();
+        let __end = __sym0.2.clone();
+        let __nt = super::__action26::<>(input, errors, __sym0);
+        __symbols.push((__start, __Symbol::Variant4(__nt), __end));
+        (1, 6)
+    }
+    pub(crate) fn __reduce13<
+        'err,
+        'input,
+    >(
+        input: &'input str,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+        __lookahead_start: Option<&usize>,
+        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+    ) -> (usize, usize)
+    {
         // FPart = Function => ActionFn(11);
         let __sym0 = __pop_Variant4(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action11::<>(input, errors, __sym0);
         __symbols.push((__start, __Symbol::Variant8(__nt), __end));
-        (1, 6)
+        (1, 7)
     }
-    pub(crate) fn __reduce10<
+    pub(crate) fn __reduce14<
         'err,
         'input,
     >(
@@ -1303,9 +1393,9 @@ mod __parse__AIR {
         let __end = __sym3.2.clone();
         let __nt = super::__action12::<>(input, errors, __sym0, __sym1, __sym2, __sym3);
         __symbols.push((__start, __Symbol::Variant8(__nt), __end));
-        (4, 6)
+        (4, 7)
     }
-    pub(crate) fn __reduce11<
+    pub(crate) fn __reduce15<
         'err,
         'input,
     >(
@@ -1316,15 +1406,15 @@ mod __parse__AIR {
         _: ::std::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
-        // Function = InstructionValue => ActionFn(19);
+        // Function = CallInstructionValue => ActionFn(19);
         let __sym0 = __pop_Variant4(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action19::<>(input, errors, __sym0);
         __symbols.push((__start, __Symbol::Variant4(__nt), __end));
-        (1, 7)
+        (1, 8)
     }
-    pub(crate) fn __reduce12<
+    pub(crate) fn __reduce16<
         'err,
         'input,
     >(
@@ -1338,19 +1428,19 @@ mod __parse__AIR {
         // Instr = "(", call, PeerPart, FPart, Args, Output, ")" => ActionFn(38);
         assert!(__symbols.len() >= 7);
         let __sym6 = __pop_Variant0(__symbols);
-        let __sym5 = __pop_Variant9(__symbols);
+        let __sym5 = __pop_Variant10(__symbols);
         let __sym4 = __pop_Variant7(__symbols);
         let __sym3 = __pop_Variant8(__symbols);
-        let __sym2 = __pop_Variant11(__symbols);
+        let __sym2 = __pop_Variant12(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym6.2.clone();
         let __nt = super::__action38::<>(input, errors, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5, __sym6);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
-        (7, 8)
+        (7, 9)
     }
-    pub(crate) fn __reduce13<
+    pub(crate) fn __reduce17<
         'err,
         'input,
     >(
@@ -1366,16 +1456,16 @@ mod __parse__AIR {
         let __sym5 = __pop_Variant0(__symbols);
         let __sym4 = __pop_Variant7(__symbols);
         let __sym3 = __pop_Variant8(__symbols);
-        let __sym2 = __pop_Variant11(__symbols);
+        let __sym2 = __pop_Variant12(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym5.2.clone();
         let __nt = super::__action39::<>(input, errors, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
-        (6, 8)
+        (6, 9)
     }
-    pub(crate) fn __reduce14<
+    pub(crate) fn __reduce18<
         'err,
         'input,
     >(
@@ -1397,9 +1487,9 @@ mod __parse__AIR {
         let __end = __sym4.2.clone();
         let __nt = super::__action3::<>(input, errors, __sym0, __sym1, __sym2, __sym3, __sym4);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
-        (5, 8)
+        (5, 9)
     }
-    pub(crate) fn __reduce15<
+    pub(crate) fn __reduce19<
         'err,
         'input,
     >(
@@ -1421,9 +1511,9 @@ mod __parse__AIR {
         let __end = __sym4.2.clone();
         let __nt = super::__action4::<>(input, errors, __sym0, __sym1, __sym2, __sym3, __sym4);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
-        (5, 8)
+        (5, 9)
     }
-    pub(crate) fn __reduce16<
+    pub(crate) fn __reduce20<
         'err,
         'input,
     >(
@@ -1443,9 +1533,9 @@ mod __parse__AIR {
         let __end = __sym2.2.clone();
         let __nt = super::__action5::<>(input, errors, __sym0, __sym1, __sym2);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
-        (3, 8)
+        (3, 9)
     }
-    pub(crate) fn __reduce17<
+    pub(crate) fn __reduce21<
         'err,
         'input,
     >(
@@ -1461,16 +1551,16 @@ mod __parse__AIR {
         let __sym5 = __pop_Variant0(__symbols);
         let __sym4 = __pop_Variant6(__symbols);
         let __sym3 = __pop_Variant1(__symbols);
-        let __sym2 = __pop_Variant4(__symbols);
+        let __sym2 = __pop_Variant9(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym5.2.clone();
         let __nt = super::__action6::<>(input, errors, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
-        (6, 8)
+        (6, 9)
     }
-    pub(crate) fn __reduce18<
+    pub(crate) fn __reduce22<
         'err,
         'input,
     >(
@@ -1491,9 +1581,9 @@ mod __parse__AIR {
         let __end = __sym3.2.clone();
         let __nt = super::__action7::<>(input, errors, __sym0, __sym1, __sym2, __sym3);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
-        (4, 8)
+        (4, 9)
     }
-    pub(crate) fn __reduce19<
+    pub(crate) fn __reduce23<
         'err,
         'input,
     >(
@@ -1515,9 +1605,9 @@ mod __parse__AIR {
         let __end = __sym4.2.clone();
         let __nt = super::__action8::<>(input, errors, __sym0, __sym1, __sym2, __sym3, __sym4);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
-        (5, 8)
+        (5, 9)
     }
-    pub(crate) fn __reduce20<
+    pub(crate) fn __reduce24<
         'err,
         'input,
     >(
@@ -1534,82 +1624,6 @@ mod __parse__AIR {
         let __end = __sym0.2.clone();
         let __nt = super::__action9::<>(input, errors, __sym0);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
-        (1, 8)
-    }
-    pub(crate) fn __reduce21<
-        'err,
-        'input,
-    >(
-        input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
-        __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
-    ) -> (usize, usize)
-    {
-        // InstructionValue = Literal => ActionFn(23);
-        let __sym0 = __pop_Variant1(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
-        let __nt = super::__action23::<>(input, errors, __sym0);
-        __symbols.push((__start, __Symbol::Variant4(__nt), __end));
-        (1, 9)
-    }
-    pub(crate) fn __reduce22<
-        'err,
-        'input,
-    >(
-        input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
-        __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
-    ) -> (usize, usize)
-    {
-        // InstructionValue = Alphanumeric => ActionFn(24);
-        let __sym0 = __pop_Variant1(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
-        let __nt = super::__action24::<>(input, errors, __sym0);
-        __symbols.push((__start, __Symbol::Variant4(__nt), __end));
-        (1, 9)
-    }
-    pub(crate) fn __reduce23<
-        'err,
-        'input,
-    >(
-        input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
-        __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
-    ) -> (usize, usize)
-    {
-        // InstructionValue = JsonPath => ActionFn(25);
-        let __sym0 = __pop_Variant2(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
-        let __nt = super::__action25::<>(input, errors, __sym0);
-        __symbols.push((__start, __Symbol::Variant4(__nt), __end));
-        (1, 9)
-    }
-    pub(crate) fn __reduce24<
-        'err,
-        'input,
-    >(
-        input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
-        __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
-    ) -> (usize, usize)
-    {
-        // InstructionValue = InitPeerId => ActionFn(26);
-        let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
-        let __nt = super::__action26::<>(input, errors, __sym0);
-        __symbols.push((__start, __Symbol::Variant4(__nt), __end));
         (1, 9)
     }
     pub(crate) fn __reduce25<
@@ -1628,7 +1642,7 @@ mod __parse__AIR {
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action17::<>(input, errors, __sym0);
-        __symbols.push((__start, __Symbol::Variant4(__nt), __end));
+        __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (1, 10)
     }
     pub(crate) fn __reduce26<
@@ -1647,7 +1661,7 @@ mod __parse__AIR {
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action18::<>(input, errors, __sym0);
-        __symbols.push((__start, __Symbol::Variant4(__nt), __end));
+        __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (1, 10)
     }
     pub(crate) fn __reduce27<
@@ -1666,7 +1680,7 @@ mod __parse__AIR {
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action15::<>(input, errors, __sym0);
-        __symbols.push((__start, __Symbol::Variant9(__nt), __end));
+        __symbols.push((__start, __Symbol::Variant10(__nt), __end));
         (1, 11)
     }
     pub(crate) fn __reduce28<
@@ -1685,7 +1699,7 @@ mod __parse__AIR {
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action16::<>(input, errors, __sym0);
-        __symbols.push((__start, __Symbol::Variant9(__nt), __end));
+        __symbols.push((__start, __Symbol::Variant10(__nt), __end));
         (1, 11)
     }
     pub(crate) fn __reduce29<
@@ -1700,11 +1714,11 @@ mod __parse__AIR {
     ) -> (usize, usize)
     {
         // Output? = Output => ActionFn(30);
-        let __sym0 = __pop_Variant9(__symbols);
+        let __sym0 = __pop_Variant10(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action30::<>(input, errors, __sym0);
-        __symbols.push((__start, __Symbol::Variant10(__nt), __end));
+        __symbols.push((__start, __Symbol::Variant11(__nt), __end));
         (1, 12)
     }
     pub(crate) fn __reduce30<
@@ -1722,7 +1736,7 @@ mod __parse__AIR {
         let __start = __lookahead_start.cloned().or_else(|| __symbols.last().map(|s| s.2.clone())).unwrap_or_default();
         let __end = __start.clone();
         let __nt = super::__action31::<>(input, errors, &__start, &__end);
-        __symbols.push((__start, __Symbol::Variant10(__nt), __end));
+        __symbols.push((__start, __Symbol::Variant11(__nt), __end));
         (0, 12)
     }
     pub(crate) fn __reduce31<
@@ -1736,7 +1750,7 @@ mod __parse__AIR {
         _: ::std::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
-        // PeerId = InstructionValue => ActionFn(20);
+        // PeerId = CallInstructionValue => ActionFn(20);
         let __sym0 = __pop_Variant4(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
@@ -1760,7 +1774,7 @@ mod __parse__AIR {
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action13::<>(input, errors, __sym0);
-        __symbols.push((__start, __Symbol::Variant11(__nt), __end));
+        __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (1, 14)
     }
     pub(crate) fn __reduce33<
@@ -1783,7 +1797,7 @@ mod __parse__AIR {
         let __start = __sym0.0.clone();
         let __end = __sym3.2.clone();
         let __nt = super::__action14::<>(input, errors, __sym0, __sym1, __sym2, __sym3);
-        __symbols.push((__start, __Symbol::Variant11(__nt), __end));
+        __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (4, 14)
     }
     pub(crate) fn __reduce34<
@@ -1797,7 +1811,7 @@ mod __parse__AIR {
         _: ::std::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
-        // ServiceId = InstructionValue => ActionFn(21);
+        // ServiceId = CallInstructionValue => ActionFn(21);
         let __sym0 = __pop_Variant4(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
@@ -1845,7 +1859,7 @@ fn __action2<
     (_, _, _): (usize, Token<'input>, usize),
     (_, p, _): (usize, PeerPart<'input>, usize),
     (_, f, _): (usize, FunctionPart<'input>, usize),
-    (_, args, _): (usize, Vec<InstructionValue<'input>>, usize),
+    (_, args, _): (usize, Vec<CallInstructionValue<'input>>, usize),
     (_, output, _): (usize, ::std::option::Option<CallOutput<'input>>, usize),
     (_, _, _): (usize, Token<'input>, usize),
 ) -> Box<Instruction<'input>>
@@ -1915,7 +1929,7 @@ fn __action6<
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
     (_, _, _): (usize, Token<'input>, usize),
     (_, _, _): (usize, Token<'input>, usize),
-    (_, iterable, _): (usize, InstructionValue<'input>, usize),
+    (_, iterable, _): (usize, IterableValue<'input>, usize),
     (_, iterator, _): (usize, &'input str, usize),
     (_, i, _): (usize, Box<Instruction<'input>>, usize),
     (_, _, _): (usize, Token<'input>, usize),
@@ -1981,9 +1995,9 @@ fn __action10<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
     (_, _, _): (usize, Token<'input>, usize),
-    (_, args, _): (usize, ::std::vec::Vec<InstructionValue<'input>>, usize),
+    (_, args, _): (usize, ::std::vec::Vec<CallInstructionValue<'input>>, usize),
     (_, _, _): (usize, Token<'input>, usize),
-) -> Vec<InstructionValue<'input>>
+) -> Vec<CallInstructionValue<'input>>
 {
     args
 }
@@ -1995,7 +2009,7 @@ fn __action11<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
-    (_, f, _): (usize, InstructionValue<'input>, usize),
+    (_, f, _): (usize, CallInstructionValue<'input>, usize),
 ) -> FunctionPart<'input>
 {
     FunctionPart::FuncName(f)
@@ -2009,8 +2023,8 @@ fn __action12<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
     (_, _, _): (usize, Token<'input>, usize),
-    (_, sid, _): (usize, InstructionValue<'input>, usize),
-    (_, f, _): (usize, InstructionValue<'input>, usize),
+    (_, sid, _): (usize, CallInstructionValue<'input>, usize),
+    (_, f, _): (usize, CallInstructionValue<'input>, usize),
     (_, _, _): (usize, Token<'input>, usize),
 ) -> FunctionPart<'input>
 {
@@ -2024,7 +2038,7 @@ fn __action13<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
-    (_, pid, _): (usize, InstructionValue<'input>, usize),
+    (_, pid, _): (usize, CallInstructionValue<'input>, usize),
 ) -> PeerPart<'input>
 {
     PeerPart::PeerPk(pid)
@@ -2038,8 +2052,8 @@ fn __action14<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
     (_, _, _): (usize, Token<'input>, usize),
-    (_, pid, _): (usize, InstructionValue<'input>, usize),
-    (_, sid, _): (usize, InstructionValue<'input>, usize),
+    (_, pid, _): (usize, CallInstructionValue<'input>, usize),
+    (_, sid, _): (usize, CallInstructionValue<'input>, usize),
     (_, _, _): (usize, Token<'input>, usize),
 ) -> PeerPart<'input>
 {
@@ -2080,9 +2094,9 @@ fn __action17<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
     (_, s, _): (usize, &'input str, usize),
-) -> InstructionValue<'input>
+) -> IterableValue<'input>
 {
-    InstructionValue::Variable(s)
+    IterableValue::Variable(s)
 }
 
 #[allow(unused_variables)]
@@ -2093,16 +2107,11 @@ fn __action18<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
     (_, v, _): (usize, (&'input str, usize), usize),
-) -> InstructionValue<'input>
+) -> IterableValue<'input>
 {
     {
-        let variable_with_json_path = v.0;
-        let variable = &variable_with_json_path[0..v.1];
-
-        let len = variable_with_json_path.len();
-        let path = &variable_with_json_path[v.1+1..len];
-
-        InstructionValue::JsonPath { variable, path }
+        let (variable, path) = into_variable_and_path(v.0, v.1);
+        IterableValue::JsonPath { variable, path }
     }
 }
 
@@ -2113,8 +2122,8 @@ fn __action19<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
-    (_, __0, _): (usize, InstructionValue<'input>, usize),
-) -> InstructionValue<'input>
+    (_, __0, _): (usize, CallInstructionValue<'input>, usize),
+) -> CallInstructionValue<'input>
 {
     __0
 }
@@ -2126,8 +2135,8 @@ fn __action20<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
-    (_, __0, _): (usize, InstructionValue<'input>, usize),
-) -> InstructionValue<'input>
+    (_, __0, _): (usize, CallInstructionValue<'input>, usize),
+) -> CallInstructionValue<'input>
 {
     __0
 }
@@ -2139,8 +2148,8 @@ fn __action21<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
-    (_, __0, _): (usize, InstructionValue<'input>, usize),
-) -> InstructionValue<'input>
+    (_, __0, _): (usize, CallInstructionValue<'input>, usize),
+) -> CallInstructionValue<'input>
 {
     __0
 }
@@ -2152,8 +2161,8 @@ fn __action22<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
-    (_, __0, _): (usize, InstructionValue<'input>, usize),
-) -> InstructionValue<'input>
+    (_, __0, _): (usize, CallInstructionValue<'input>, usize),
+) -> CallInstructionValue<'input>
 {
     __0
 }
@@ -2166,9 +2175,9 @@ fn __action23<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
     (_, s, _): (usize, &'input str, usize),
-) -> InstructionValue<'input>
+) -> CallInstructionValue<'input>
 {
-    InstructionValue::Literal(s)
+    CallInstructionValue::Literal(s)
 }
 
 #[allow(unused_variables)]
@@ -2179,9 +2188,9 @@ fn __action24<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
     (_, s, _): (usize, &'input str, usize),
-) -> InstructionValue<'input>
+) -> CallInstructionValue<'input>
 {
-    InstructionValue::Variable(s)
+    CallInstructionValue::Variable(s)
 }
 
 #[allow(unused_variables)]
@@ -2192,16 +2201,11 @@ fn __action25<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
     (_, v, _): (usize, (&'input str, usize), usize),
-) -> InstructionValue<'input>
+) -> CallInstructionValue<'input>
 {
     {
-        let variable_with_json_path = v.0;
-        let variable = &variable_with_json_path[0..v.1];
-
-        let len = variable_with_json_path.len();
-        let path = &variable_with_json_path[v.1+1..len];
-
-        InstructionValue::JsonPath { variable, path }
+        let (variable, path) = into_variable_and_path(v.0, v.1);
+        CallInstructionValue::JsonPath { variable, path }
     }
 }
 
@@ -2213,9 +2217,9 @@ fn __action26<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
     (_, __0, _): (usize, Token<'input>, usize),
-) -> InstructionValue<'input>
+) -> CallInstructionValue<'input>
 {
-    InstructionValue::InitPeerId
+    CallInstructionValue::InitPeerId
 }
 
 #[allow(unused_variables)]
@@ -2227,7 +2231,7 @@ fn __action27<
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
     __lookbehind: &usize,
     __lookahead: &usize,
-) -> ::std::vec::Vec<InstructionValue<'input>>
+) -> ::std::vec::Vec<CallInstructionValue<'input>>
 {
     vec![]
 }
@@ -2239,8 +2243,8 @@ fn __action28<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
-    (_, v, _): (usize, ::std::vec::Vec<InstructionValue<'input>>, usize),
-) -> ::std::vec::Vec<InstructionValue<'input>>
+    (_, v, _): (usize, ::std::vec::Vec<CallInstructionValue<'input>>, usize),
+) -> ::std::vec::Vec<CallInstructionValue<'input>>
 {
     v
 }
@@ -2252,8 +2256,8 @@ fn __action29<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
-    (_, __0, _): (usize, InstructionValue<'input>, usize),
-) -> InstructionValue<'input>
+    (_, __0, _): (usize, CallInstructionValue<'input>, usize),
+) -> CallInstructionValue<'input>
 {
     __0
 }
@@ -2292,8 +2296,8 @@ fn __action32<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
-    (_, __0, _): (usize, InstructionValue<'input>, usize),
-) -> ::std::vec::Vec<InstructionValue<'input>>
+    (_, __0, _): (usize, CallInstructionValue<'input>, usize),
+) -> ::std::vec::Vec<CallInstructionValue<'input>>
 {
     vec![__0]
 }
@@ -2305,9 +2309,9 @@ fn __action33<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
-    (_, v, _): (usize, ::std::vec::Vec<InstructionValue<'input>>, usize),
-    (_, e, _): (usize, InstructionValue<'input>, usize),
-) -> ::std::vec::Vec<InstructionValue<'input>>
+    (_, v, _): (usize, ::std::vec::Vec<CallInstructionValue<'input>>, usize),
+    (_, e, _): (usize, CallInstructionValue<'input>, usize),
+) -> ::std::vec::Vec<CallInstructionValue<'input>>
 {
     { let mut v = v; v.push(e); v }
 }
@@ -2319,8 +2323,8 @@ fn __action34<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
-    __0: (usize, InstructionValue<'input>, usize),
-) -> ::std::vec::Vec<InstructionValue<'input>>
+    __0: (usize, CallInstructionValue<'input>, usize),
+) -> ::std::vec::Vec<CallInstructionValue<'input>>
 {
     let __start0 = __0.0.clone();
     let __end0 = __0.2.clone();
@@ -2344,9 +2348,9 @@ fn __action35<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
-    __0: (usize, ::std::vec::Vec<InstructionValue<'input>>, usize),
-    __1: (usize, InstructionValue<'input>, usize),
-) -> ::std::vec::Vec<InstructionValue<'input>>
+    __0: (usize, ::std::vec::Vec<CallInstructionValue<'input>>, usize),
+    __1: (usize, CallInstructionValue<'input>, usize),
+) -> ::std::vec::Vec<CallInstructionValue<'input>>
 {
     let __start0 = __1.0.clone();
     let __end0 = __1.2.clone();
@@ -2373,7 +2377,7 @@ fn __action36<
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
     __0: (usize, Token<'input>, usize),
     __1: (usize, Token<'input>, usize),
-) -> Vec<InstructionValue<'input>>
+) -> Vec<CallInstructionValue<'input>>
 {
     let __start0 = __0.2.clone();
     let __end0 = __1.0.clone();
@@ -2401,9 +2405,9 @@ fn __action37<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
     __0: (usize, Token<'input>, usize),
-    __1: (usize, ::std::vec::Vec<InstructionValue<'input>>, usize),
+    __1: (usize, ::std::vec::Vec<CallInstructionValue<'input>>, usize),
     __2: (usize, Token<'input>, usize),
-) -> Vec<InstructionValue<'input>>
+) -> Vec<CallInstructionValue<'input>>
 {
     let __start0 = __1.0.clone();
     let __end0 = __1.2.clone();
@@ -2433,7 +2437,7 @@ fn __action38<
     __1: (usize, Token<'input>, usize),
     __2: (usize, PeerPart<'input>, usize),
     __3: (usize, FunctionPart<'input>, usize),
-    __4: (usize, Vec<InstructionValue<'input>>, usize),
+    __4: (usize, Vec<CallInstructionValue<'input>>, usize),
     __5: (usize, CallOutput<'input>, usize),
     __6: (usize, Token<'input>, usize),
 ) -> Box<Instruction<'input>>
@@ -2470,7 +2474,7 @@ fn __action39<
     __1: (usize, Token<'input>, usize),
     __2: (usize, PeerPart<'input>, usize),
     __3: (usize, FunctionPart<'input>, usize),
-    __4: (usize, Vec<InstructionValue<'input>>, usize),
+    __4: (usize, Vec<CallInstructionValue<'input>>, usize),
     __5: (usize, Token<'input>, usize),
 ) -> Box<Instruction<'input>>
 {

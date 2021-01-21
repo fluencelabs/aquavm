@@ -24,7 +24,7 @@ pub enum LexicalError {
     #[error("empty string aren't allowed in this position")]
     EmptyString(usize, usize),
 
-    #[error("only alphanumeric characters are allowed in this position")]
+    #[error("only alphanumeric and _, - characters are allowed in this position")]
     IsNotAlphanumeric(usize, usize),
 
     #[error("an accumulator name should be non empty")]

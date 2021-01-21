@@ -15,9 +15,9 @@
  */
 
 use crate::ast::*;
+use CallInstructionValue::*;
 use CallOutput::*;
 use FunctionPart::*;
-use InstructionValue::*;
 use PeerPart::*;
 
 use fstrings::f;
@@ -213,7 +213,7 @@ fn parse_fold() {
         )
         "#;
     let instruction = parse(&source_code.as_ref());
-    let expected = fold(InstructionValue::Variable("iterable"), "i", null());
+    let expected = fold(CallInstructionValue::Variable("iterable"), "i", null());
     assert_eq!(instruction, expected);
 }
 
@@ -229,7 +229,7 @@ fn parse_fold_with_xor_par_seq() {
         let instruction = parse(&source_code.as_ref());
         let instr = binary_instruction(*name);
         let expected = fold(
-            InstructionValue::Variable("iterable"),
+            CallInstructionValue::Variable("iterable"),
             "i",
             instr(null(), null()),
         );
@@ -252,7 +252,7 @@ fn parse_init_peer_id() {
     let instruction = parse(&source_code.as_ref());
     let expected = seq(
         Instruction::Call(Call {
-            peer_part: PeerPk(InstructionValue::Literal(&peer_id)),
+            peer_part: PeerPk(CallInstructionValue::Literal(&peer_id)),
             function_part: ServiceIdWithFuncName(
                 Literal("local_service_id"),
                 Literal("local_fn_name"),
@@ -290,7 +290,7 @@ fn seq_par_call() {
     let expected = seq(
         par(
             Instruction::Call(Call {
-                peer_part: PeerPk(InstructionValue::Literal(&peer_id)),
+                peer_part: PeerPk(CallInstructionValue::Literal(&peer_id)),
                 function_part: ServiceIdWithFuncName(
                     Literal("local_service_id"),
                     Literal("local_fn_name"),
@@ -306,7 +306,7 @@ fn seq_par_call() {
             }),
         ),
         Instruction::Call(Call {
-            peer_part: PeerPk(InstructionValue::Literal(&peer_id)),
+            peer_part: PeerPk(CallInstructionValue::Literal(&peer_id)),
             function_part: ServiceIdWithFuncName(
                 Literal("local_service_id"),
                 Literal("local_fn_name"),
@@ -472,7 +472,7 @@ fn null() -> Instruction<'static> {
     Instruction::Null(Null)
 }
 fn fold<'a>(
-    iterable: InstructionValue<'a>,
+    iterable: CallInstructionValue<'a>,
     iterator: &'a str,
     instruction: Instruction<'a>,
 ) -> Instruction<'a> {

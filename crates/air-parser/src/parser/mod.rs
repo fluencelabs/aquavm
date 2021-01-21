@@ -29,3 +29,7 @@ pub mod tests;
 
 pub use self::air_parser::parse;
 pub use air::AIRParser;
+
+fn into_variable_and_path(str: &str, pos: usize) -> (&str, &str) {
+    (&str[0..pos], &str[pos + 1..])
+}
