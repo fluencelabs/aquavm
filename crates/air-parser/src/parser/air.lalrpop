@@ -6,7 +6,7 @@ use crate::parser::lexer::Token;
 use lalrpop_util::ErrorRecovery;
 use std::rc::Rc;
 
-// the only thing why input matters here is just to introduce lifetime for Token
+// the only thing why input matters here is just introducing lifetime for Token
 grammar<'err, 'input>(input: &'input str, errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>);
 
 pub AIR = Instr;
