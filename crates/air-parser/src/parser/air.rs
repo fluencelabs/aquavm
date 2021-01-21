@@ -1,5 +1,5 @@
 // auto-generated: "lalrpop 0.19.1"
-// sha256: 952e693a7f1da392e89cf04da49830be15a63d04e7ec2f1a96d211d6ecbb
+// sha256: 45fb65d0326932706c3c3c28499ccc962d6da228323f4d1b87f866b6d294fc7e
 use crate::parser::ast::*;
 use crate::parser::into_variable_and_path;
 use crate::parser::lexer::LexerError;

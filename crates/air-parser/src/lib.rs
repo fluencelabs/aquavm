@@ -29,6 +29,7 @@ mod parser;
 pub use parser::ast;
 pub use parser::parse;
 pub use parser::AIRParser;
+pub use parser::AIRLexer;
 
 #[cfg(test)]
 #[macro_use]

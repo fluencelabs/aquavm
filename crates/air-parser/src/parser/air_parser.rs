@@ -16,7 +16,7 @@
 
 use super::air;
 use super::ast::Instruction;
-use super::lexer::Lexer;
+use super::lexer::AIRLexer;
 use super::lexer::LexerError;
 use super::lexer::Token;
 
@@ -39,7 +39,7 @@ pub fn parse(air_script: &str) -> Result<Box<Instruction<'_>>, String> {
 
     PARSER.with(|parser| {
         let mut errors = Vec::new();
-        let lexer = Lexer::new(air_script);
+        let lexer = AIRLexer::new(air_script);
         match parser.parse(air_script, &mut errors, lexer) {
             Ok(r) if errors.is_empty() => Ok(r),
             Ok(_) => Err(report_errors(file_id, files, errors)),

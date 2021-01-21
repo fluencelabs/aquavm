@@ -22,12 +22,12 @@ use std::str::CharIndices;
 
 pub type Spanned<Token, Loc, Error> = Result<(Loc, Token, Loc), Error>;
 
-pub struct Lexer<'input> {
+pub struct AIRLexer<'input> {
     input: &'input str,
     chars: Peekable<CharIndices<'input>>,
 }
 
-impl<'input> Iterator for Lexer<'input> {
+impl<'input> Iterator for AIRLexer<'input> {
     type Item = Spanned<Token<'input>, usize, LexerError>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -35,7 +35,7 @@ impl<'input> Iterator for Lexer<'input> {
     }
 }
 
-impl<'input> Lexer<'input> {
+impl<'input> AIRLexer<'input> {
     pub fn new(input: &'input str) -> Self {
         Self {
             input,

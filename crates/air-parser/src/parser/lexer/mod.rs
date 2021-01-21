@@ -18,6 +18,6 @@ mod air_lexer;
 mod errors;
 mod token;
 
-pub use air_lexer::Lexer;
+pub use air_lexer::AIRLexer;
 pub use errors::LexerError;
 pub use token::Token;
