@@ -1,13 +1,13 @@
 use crate::parser::ast::*;
 use crate::parser::into_variable_and_path;
-use crate::parser::lexer::LexicalError;
+use crate::parser::lexer::LexerError;
 use crate::parser::lexer::Token;
 
 use lalrpop_util::ErrorRecovery;
 use std::rc::Rc;
 
 // the only thing why input matters here is just to introduce lifetime for Token
-grammar<'err, 'input>(input: &'input str, errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>);
+grammar<'err, 'input>(input: &'input str, errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>);
 
 pub AIR = Instr;
 
@@ -78,7 +78,7 @@ CallInstructionValue: CallInstructionValue<'input> = {
 
 extern {
     type Location = usize;
-    type Error = LexicalError;
+    type Error = LexerError;
 
     enum Token<'input> {
         "(" => Token::OpenRoundBracket,

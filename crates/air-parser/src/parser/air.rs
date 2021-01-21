@@ -1,8 +1,8 @@
 // auto-generated: "lalrpop 0.19.1"
-// sha256: 451d65e5b9c9a33788cae0a23cbc36176d4b1f8642ae7262d92a8d2da9f41380
+// sha256: 952e693a7f1da392e89cf04da49830be15a63d04e7ec2f1a96d211d6ecbb
 use crate::parser::ast::*;
 use crate::parser::into_variable_and_path;
-use crate::parser::lexer::LexicalError;
+use crate::parser::lexer::LexerError;
 use crate::parser::lexer::Token;
 use lalrpop_util::ErrorRecovery;
 use std::rc::Rc;
@@ -17,7 +17,7 @@ mod __parse__AIR {
 
     use crate::parser::ast::*;
     use crate::parser::into_variable_and_path;
-    use crate::parser::lexer::LexicalError;
+    use crate::parser::lexer::LexerError;
     use crate::parser::lexer::Token;
     use lalrpop_util::ErrorRecovery;
     use std::rc::Rc;
@@ -32,7 +32,7 @@ mod __parse__AIR {
         Variant0(Token<'input>),
         Variant1(&'input str),
         Variant2((&'input str, usize)),
-        Variant3(__lalrpop_util::ErrorRecovery<usize, Token<'input>, LexicalError>),
+        Variant3(__lalrpop_util::ErrorRecovery<usize, Token<'input>, LexerError>),
         Variant4(CallInstructionValue<'input>),
         Variant5(::std::vec::Vec<CallInstructionValue<'input>>),
         Variant6(Box<Instruction<'input>>),
@@ -374,14 +374,14 @@ mod __parse__AIR {
     where 'input: 'err
     {
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __phantom: ::std::marker::PhantomData<(&'err (), &'input ())>,
     }
     impl<'err, 'input> __state_machine::ParserDefinition for __StateMachine<'err, 'input>
     where 'input: 'err
     {
         type Location = usize;
-        type Error = LexicalError;
+        type Error = LexerError;
         type Token = Token<'input>;
         type TokenIndex = usize;
         type Symbol = __Symbol<'input>;
@@ -765,9 +765,9 @@ mod __parse__AIR {
         >(
             &self,
             input: &'input str,
-            errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+            errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
             __tokens0: __TOKENS,
-        ) -> Result<Box<Instruction<'input>>, __lalrpop_util::ParseError<usize, Token<'input>, LexicalError>>
+        ) -> Result<Box<Instruction<'input>>, __lalrpop_util::ParseError<usize, Token<'input>, LexerError>>
         {
             let __tokens = __tokens0.into_iter();
             let mut __tokens = __tokens.map(|t| __ToTriple::to_triple(t));
@@ -786,7 +786,7 @@ mod __parse__AIR {
         'input,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __error_state: i8,
         __states: & [i8],
         __opt_integer: Option<usize>,
@@ -822,13 +822,13 @@ mod __parse__AIR {
         'input,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __action: i8,
         __lookahead_start: Option<&usize>,
         __states: &mut ::std::vec::Vec<i8>,
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: ::std::marker::PhantomData<(&'err (), &'input ())>,
-    ) -> Option<Result<Box<Instruction<'input>>,__lalrpop_util::ParseError<usize, Token<'input>, LexicalError>>>
+    ) -> Option<Result<Box<Instruction<'input>>,__lalrpop_util::ParseError<usize, Token<'input>, LexerError>>>
     {
         let (__pop_states, __nonterminal) = match __action {
             0 => {
@@ -1060,7 +1060,7 @@ mod __parse__AIR {
       'input,
     >(
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, __lalrpop_util::ErrorRecovery<usize, Token<'input>, LexicalError>, usize)
+    ) -> (usize, __lalrpop_util::ErrorRecovery<usize, Token<'input>, LexerError>, usize)
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant3(__v), __r)) => (__l, __v, __r),
@@ -1105,7 +1105,7 @@ mod __parse__AIR {
         'input,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: ::std::marker::PhantomData<(&'err (), &'input ())>,
@@ -1124,7 +1124,7 @@ mod __parse__AIR {
         'input,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: ::std::marker::PhantomData<(&'err (), &'input ())>,
@@ -1142,7 +1142,7 @@ mod __parse__AIR {
         'input,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: ::std::marker::PhantomData<(&'err (), &'input ())>,
@@ -1161,7 +1161,7 @@ mod __parse__AIR {
         'input,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: ::std::marker::PhantomData<(&'err (), &'input ())>,
@@ -1180,7 +1180,7 @@ mod __parse__AIR {
         'input,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: ::std::marker::PhantomData<(&'err (), &'input ())>,
@@ -1201,7 +1201,7 @@ mod __parse__AIR {
         'input,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: ::std::marker::PhantomData<(&'err (), &'input ())>,
@@ -1220,7 +1220,7 @@ mod __parse__AIR {
         'input,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: ::std::marker::PhantomData<(&'err (), &'input ())>,
@@ -1239,7 +1239,7 @@ mod __parse__AIR {
         'input,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: ::std::marker::PhantomData<(&'err (), &'input ())>,
@@ -1260,7 +1260,7 @@ mod __parse__AIR {
         'input,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: ::std::marker::PhantomData<(&'err (), &'input ())>,
@@ -1282,7 +1282,7 @@ mod __parse__AIR {
         'input,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: ::std::marker::PhantomData<(&'err (), &'input ())>,
@@ -1301,7 +1301,7 @@ mod __parse__AIR {
         'input,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: ::std::marker::PhantomData<(&'err (), &'input ())>,
@@ -1320,7 +1320,7 @@ mod __parse__AIR {
         'input,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: ::std::marker::PhantomData<(&'err (), &'input ())>,
@@ -1339,7 +1339,7 @@ mod __parse__AIR {
         'input,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: ::std::marker::PhantomData<(&'err (), &'input ())>,
@@ -1358,7 +1358,7 @@ mod __parse__AIR {
         'input,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: ::std::marker::PhantomData<(&'err (), &'input ())>,
@@ -1377,7 +1377,7 @@ mod __parse__AIR {
         'input,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: ::std::marker::PhantomData<(&'err (), &'input ())>,
@@ -1400,7 +1400,7 @@ mod __parse__AIR {
         'input,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: ::std::marker::PhantomData<(&'err (), &'input ())>,
@@ -1419,7 +1419,7 @@ mod __parse__AIR {
         'input,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: ::std::marker::PhantomData<(&'err (), &'input ())>,
@@ -1445,7 +1445,7 @@ mod __parse__AIR {
         'input,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: ::std::marker::PhantomData<(&'err (), &'input ())>,
@@ -1470,7 +1470,7 @@ mod __parse__AIR {
         'input,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: ::std::marker::PhantomData<(&'err (), &'input ())>,
@@ -1494,7 +1494,7 @@ mod __parse__AIR {
         'input,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: ::std::marker::PhantomData<(&'err (), &'input ())>,
@@ -1518,7 +1518,7 @@ mod __parse__AIR {
         'input,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: ::std::marker::PhantomData<(&'err (), &'input ())>,
@@ -1540,7 +1540,7 @@ mod __parse__AIR {
         'input,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: ::std::marker::PhantomData<(&'err (), &'input ())>,
@@ -1565,7 +1565,7 @@ mod __parse__AIR {
         'input,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: ::std::marker::PhantomData<(&'err (), &'input ())>,
@@ -1588,7 +1588,7 @@ mod __parse__AIR {
         'input,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: ::std::marker::PhantomData<(&'err (), &'input ())>,
@@ -1612,7 +1612,7 @@ mod __parse__AIR {
         'input,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: ::std::marker::PhantomData<(&'err (), &'input ())>,
@@ -1631,7 +1631,7 @@ mod __parse__AIR {
         'input,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: ::std::marker::PhantomData<(&'err (), &'input ())>,
@@ -1650,7 +1650,7 @@ mod __parse__AIR {
         'input,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: ::std::marker::PhantomData<(&'err (), &'input ())>,
@@ -1669,7 +1669,7 @@ mod __parse__AIR {
         'input,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: ::std::marker::PhantomData<(&'err (), &'input ())>,
@@ -1688,7 +1688,7 @@ mod __parse__AIR {
         'input,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: ::std::marker::PhantomData<(&'err (), &'input ())>,
@@ -1707,7 +1707,7 @@ mod __parse__AIR {
         'input,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: ::std::marker::PhantomData<(&'err (), &'input ())>,
@@ -1726,7 +1726,7 @@ mod __parse__AIR {
         'input,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: ::std::marker::PhantomData<(&'err (), &'input ())>,
@@ -1744,7 +1744,7 @@ mod __parse__AIR {
         'input,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: ::std::marker::PhantomData<(&'err (), &'input ())>,
@@ -1763,7 +1763,7 @@ mod __parse__AIR {
         'input,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: ::std::marker::PhantomData<(&'err (), &'input ())>,
@@ -1782,7 +1782,7 @@ mod __parse__AIR {
         'input,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: ::std::marker::PhantomData<(&'err (), &'input ())>,
@@ -1805,7 +1805,7 @@ mod __parse__AIR {
         'input,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: ::std::marker::PhantomData<(&'err (), &'input ())>,
@@ -1828,7 +1828,7 @@ fn __action0<
     'input,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     (_, __0, _): (usize, Box<Instruction<'input>>, usize),
 ) -> Box<Instruction<'input>>
 {
@@ -1841,7 +1841,7 @@ fn __action1<
     'input,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     (_, __0, _): (usize, Box<Instruction<'input>>, usize),
 ) -> Box<Instruction<'input>>
 {
@@ -1854,7 +1854,7 @@ fn __action2<
     'input,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     (_, _, _): (usize, Token<'input>, usize),
     (_, _, _): (usize, Token<'input>, usize),
     (_, p, _): (usize, PeerPart<'input>, usize),
@@ -1877,7 +1877,7 @@ fn __action3<
     'input,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     (_, _, _): (usize, Token<'input>, usize),
     (_, _, _): (usize, Token<'input>, usize),
     (_, l, _): (usize, Box<Instruction<'input>>, usize),
@@ -1894,7 +1894,7 @@ fn __action4<
     'input,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     (_, _, _): (usize, Token<'input>, usize),
     (_, _, _): (usize, Token<'input>, usize),
     (_, l, _): (usize, Box<Instruction<'input>>, usize),
@@ -1911,7 +1911,7 @@ fn __action5<
     'input,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     (_, __0, _): (usize, Token<'input>, usize),
     (_, __1, _): (usize, Token<'input>, usize),
     (_, __2, _): (usize, Token<'input>, usize),
@@ -1926,7 +1926,7 @@ fn __action6<
     'input,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     (_, _, _): (usize, Token<'input>, usize),
     (_, _, _): (usize, Token<'input>, usize),
     (_, iterable, _): (usize, IterableValue<'input>, usize),
@@ -1947,7 +1947,7 @@ fn __action7<
     'input,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     (_, _, _): (usize, Token<'input>, usize),
     (_, _, _): (usize, Token<'input>, usize),
     (_, i, _): (usize, &'input str, usize),
@@ -1963,7 +1963,7 @@ fn __action8<
     'input,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     (_, _, _): (usize, Token<'input>, usize),
     (_, _, _): (usize, Token<'input>, usize),
     (_, l, _): (usize, Box<Instruction<'input>>, usize),
@@ -1980,8 +1980,8 @@ fn __action9<
     'input,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
-    (_, __0, _): (usize, __lalrpop_util::ErrorRecovery<usize, Token<'input>, LexicalError>, usize),
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    (_, __0, _): (usize, __lalrpop_util::ErrorRecovery<usize, Token<'input>, LexerError>, usize),
 ) -> Box<Instruction<'input>>
 {
     { errors.push(__0); Box::new(Instruction::Error) }
@@ -1993,7 +1993,7 @@ fn __action10<
     'input,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     (_, _, _): (usize, Token<'input>, usize),
     (_, args, _): (usize, ::std::vec::Vec<CallInstructionValue<'input>>, usize),
     (_, _, _): (usize, Token<'input>, usize),
@@ -2008,7 +2008,7 @@ fn __action11<
     'input,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     (_, f, _): (usize, CallInstructionValue<'input>, usize),
 ) -> FunctionPart<'input>
 {
@@ -2021,7 +2021,7 @@ fn __action12<
     'input,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     (_, _, _): (usize, Token<'input>, usize),
     (_, sid, _): (usize, CallInstructionValue<'input>, usize),
     (_, f, _): (usize, CallInstructionValue<'input>, usize),
@@ -2037,7 +2037,7 @@ fn __action13<
     'input,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     (_, pid, _): (usize, CallInstructionValue<'input>, usize),
 ) -> PeerPart<'input>
 {
@@ -2050,7 +2050,7 @@ fn __action14<
     'input,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     (_, _, _): (usize, Token<'input>, usize),
     (_, pid, _): (usize, CallInstructionValue<'input>, usize),
     (_, sid, _): (usize, CallInstructionValue<'input>, usize),
@@ -2066,7 +2066,7 @@ fn __action15<
     'input,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     (_, s, _): (usize, &'input str, usize),
 ) -> CallOutput<'input>
 {
@@ -2079,7 +2079,7 @@ fn __action16<
     'input,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     (_, a, _): (usize, &'input str, usize),
 ) -> CallOutput<'input>
 {
@@ -2092,7 +2092,7 @@ fn __action17<
     'input,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     (_, s, _): (usize, &'input str, usize),
 ) -> IterableValue<'input>
 {
@@ -2105,7 +2105,7 @@ fn __action18<
     'input,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     (_, v, _): (usize, (&'input str, usize), usize),
 ) -> IterableValue<'input>
 {
@@ -2121,7 +2121,7 @@ fn __action19<
     'input,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     (_, __0, _): (usize, CallInstructionValue<'input>, usize),
 ) -> CallInstructionValue<'input>
 {
@@ -2134,7 +2134,7 @@ fn __action20<
     'input,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     (_, __0, _): (usize, CallInstructionValue<'input>, usize),
 ) -> CallInstructionValue<'input>
 {
@@ -2147,7 +2147,7 @@ fn __action21<
     'input,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     (_, __0, _): (usize, CallInstructionValue<'input>, usize),
 ) -> CallInstructionValue<'input>
 {
@@ -2160,7 +2160,7 @@ fn __action22<
     'input,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     (_, __0, _): (usize, CallInstructionValue<'input>, usize),
 ) -> CallInstructionValue<'input>
 {
@@ -2173,7 +2173,7 @@ fn __action23<
     'input,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     (_, s, _): (usize, &'input str, usize),
 ) -> CallInstructionValue<'input>
 {
@@ -2186,7 +2186,7 @@ fn __action24<
     'input,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     (_, s, _): (usize, &'input str, usize),
 ) -> CallInstructionValue<'input>
 {
@@ -2199,7 +2199,7 @@ fn __action25<
     'input,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     (_, v, _): (usize, (&'input str, usize), usize),
 ) -> CallInstructionValue<'input>
 {
@@ -2215,7 +2215,7 @@ fn __action26<
     'input,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     (_, __0, _): (usize, Token<'input>, usize),
 ) -> CallInstructionValue<'input>
 {
@@ -2228,7 +2228,7 @@ fn __action27<
     'input,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     __lookbehind: &usize,
     __lookahead: &usize,
 ) -> ::std::vec::Vec<CallInstructionValue<'input>>
@@ -2242,7 +2242,7 @@ fn __action28<
     'input,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     (_, v, _): (usize, ::std::vec::Vec<CallInstructionValue<'input>>, usize),
 ) -> ::std::vec::Vec<CallInstructionValue<'input>>
 {
@@ -2255,7 +2255,7 @@ fn __action29<
     'input,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     (_, __0, _): (usize, CallInstructionValue<'input>, usize),
 ) -> CallInstructionValue<'input>
 {
@@ -2268,7 +2268,7 @@ fn __action30<
     'input,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     (_, __0, _): (usize, CallOutput<'input>, usize),
 ) -> ::std::option::Option<CallOutput<'input>>
 {
@@ -2281,7 +2281,7 @@ fn __action31<
     'input,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     __lookbehind: &usize,
     __lookahead: &usize,
 ) -> ::std::option::Option<CallOutput<'input>>
@@ -2295,7 +2295,7 @@ fn __action32<
     'input,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     (_, __0, _): (usize, CallInstructionValue<'input>, usize),
 ) -> ::std::vec::Vec<CallInstructionValue<'input>>
 {
@@ -2308,7 +2308,7 @@ fn __action33<
     'input,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     (_, v, _): (usize, ::std::vec::Vec<CallInstructionValue<'input>>, usize),
     (_, e, _): (usize, CallInstructionValue<'input>, usize),
 ) -> ::std::vec::Vec<CallInstructionValue<'input>>
@@ -2322,7 +2322,7 @@ fn __action34<
     'input,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     __0: (usize, CallInstructionValue<'input>, usize),
 ) -> ::std::vec::Vec<CallInstructionValue<'input>>
 {
@@ -2347,7 +2347,7 @@ fn __action35<
     'input,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     __0: (usize, ::std::vec::Vec<CallInstructionValue<'input>>, usize),
     __1: (usize, CallInstructionValue<'input>, usize),
 ) -> ::std::vec::Vec<CallInstructionValue<'input>>
@@ -2374,7 +2374,7 @@ fn __action36<
     'input,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     __0: (usize, Token<'input>, usize),
     __1: (usize, Token<'input>, usize),
 ) -> Vec<CallInstructionValue<'input>>
@@ -2403,7 +2403,7 @@ fn __action37<
     'input,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     __0: (usize, Token<'input>, usize),
     __1: (usize, ::std::vec::Vec<CallInstructionValue<'input>>, usize),
     __2: (usize, Token<'input>, usize),
@@ -2432,7 +2432,7 @@ fn __action38<
     'input,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     __0: (usize, Token<'input>, usize),
     __1: (usize, Token<'input>, usize),
     __2: (usize, PeerPart<'input>, usize),
@@ -2469,7 +2469,7 @@ fn __action39<
     'input,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexicalError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     __0: (usize, Token<'input>, usize),
     __1: (usize, Token<'input>, usize),
     __2: (usize, PeerPart<'input>, usize),
@@ -2501,16 +2501,16 @@ fn __action39<
 }
 
 pub trait __ToTriple<'err, 'input, > {
-    fn to_triple(value: Self) -> Result<(usize,Token<'input>,usize), __lalrpop_util::ParseError<usize, Token<'input>, LexicalError>>;
+    fn to_triple(value: Self) -> Result<(usize,Token<'input>,usize), __lalrpop_util::ParseError<usize, Token<'input>, LexerError>>;
 }
 
 impl<'err, 'input, > __ToTriple<'err, 'input, > for (usize, Token<'input>, usize) {
-    fn to_triple(value: Self) -> Result<(usize,Token<'input>,usize), __lalrpop_util::ParseError<usize, Token<'input>, LexicalError>> {
+    fn to_triple(value: Self) -> Result<(usize,Token<'input>,usize), __lalrpop_util::ParseError<usize, Token<'input>, LexerError>> {
         Ok(value)
     }
 }
-impl<'err, 'input, > __ToTriple<'err, 'input, > for Result<(usize, Token<'input>, usize), LexicalError> {
-    fn to_triple(value: Self) -> Result<(usize,Token<'input>,usize), __lalrpop_util::ParseError<usize, Token<'input>, LexicalError>> {
+impl<'err, 'input, > __ToTriple<'err, 'input, > for Result<(usize, Token<'input>, usize), LexerError> {
+    fn to_triple(value: Self) -> Result<(usize,Token<'input>,usize), __lalrpop_util::ParseError<usize, Token<'input>, LexerError>> {
         match value {
             Ok(v) => Ok(v),
             Err(error) => Err(__lalrpop_util::ParseError::User { error }),

@@ -17,7 +17,7 @@
 use thiserror::Error as ThisError;
 
 #[derive(ThisError, Debug, Clone)]
-pub enum LexicalError {
+pub enum LexerError {
     #[error("this string literal has unclosed quote")]
     UnclosedQuote(usize, usize),
 
@@ -34,7 +34,7 @@ pub enum LexicalError {
     InvalidJsonPath(usize, usize),
 }
 
-impl From<std::convert::Infallible> for LexicalError {
+impl From<std::convert::Infallible> for LexerError {
     fn from(_: std::convert::Infallible) -> Self {
         unreachable!()
     }

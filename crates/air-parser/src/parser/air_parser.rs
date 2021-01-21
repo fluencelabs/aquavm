@@ -17,7 +17,7 @@
 use super::air;
 use super::ast::Instruction;
 use super::lexer::Lexer;
-use super::lexer::LexicalError;
+use super::lexer::LexerError;
 use super::lexer::Token;
 
 use codespan_reporting::diagnostic::{Diagnostic, Label};
@@ -58,7 +58,7 @@ pub fn parse(air_script: &str) -> Result<Box<Instruction<'_>>, String> {
 fn report_errors(
     file_id: usize,
     files: SimpleFiles<&str, &str>,
-    errors: Vec<ErrorRecovery<usize, Token<'_>, LexicalError>>,
+    errors: Vec<ErrorRecovery<usize, Token<'_>, LexerError>>,
 ) -> String {
     let labels = errors_to_labels(file_id, errors);
     let diagnostic = Diagnostic::error().with_labels(labels);
@@ -78,7 +78,7 @@ fn report_errors(
 
 fn errors_to_labels(
     file_id: usize,
-    errors: Vec<ErrorRecovery<usize, Token<'_>, LexicalError>>,
+    errors: Vec<ErrorRecovery<usize, Token<'_>, LexerError>>,
 ) -> Vec<Label<usize>> {
     errors
         .into_iter()
@@ -111,8 +111,8 @@ fn pretty_expected(expected: Vec<String>) -> String {
     }
 }
 
-fn lexical_error_to_label(file_id: usize, error: LexicalError) -> Label<usize> {
-    use LexicalError::*;
+fn lexical_error_to_label(file_id: usize, error: LexerError) -> Label<usize> {
+    use LexerError::*;
     match error {
         UnclosedQuote(start, end) => {
             Label::primary(file_id, start..end).with_message(error.to_string())

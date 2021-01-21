@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use super::errors::LexicalError;
+use super::errors::LexerError;
 use super::token::Token;
 
 use std::iter::Peekable;
@@ -27,6 +27,14 @@ pub struct Lexer<'input> {
     chars: Peekable<CharIndices<'input>>,
 }
 
+impl<'input> Iterator for Lexer<'input> {
+    type Item = Spanned<Token<'input>, usize, LexerError>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.next()
+    }
+}
+
 impl<'input> Lexer<'input> {
     pub fn new(input: &'input str) -> Self {
         Self {
@@ -35,83 +43,113 @@ impl<'input> Lexer<'input> {
         }
     }
 
-    pub fn next(&mut self) -> Option<Spanned<Token<'input>, usize, LexicalError>> {
-        while let Some(it) = self.chars.next() {
-            match it {
-                (i, '(') => return Some(Ok((i, Token::OpenRoundBracket, i + 1))),
-                (i, ')') => return Some(Ok((i, Token::CloseRoundBracket, i + 1))),
+    pub fn next(&mut self) -> Option<Spanned<Token<'input>, usize, LexerError>> {
+        while let Some((start_pos, ch)) = self.chars.next() {
+            match ch {
+                '(' => return Some(Ok((start_pos, Token::OpenRoundBracket, start_pos + 1))),
+                ')' => return Some(Ok((start_pos, Token::CloseRoundBracket, start_pos + 1))),
 
-                (i, '[') => return Some(Ok((i, Token::OpenSquareBracket, i + 1))),
-                (i, ']') => return Some(Ok((i, Token::CloseSquareBracket, i + 1))),
+                '[' => return Some(Ok((start_pos, Token::OpenSquareBracket, start_pos + 1))),
+                ']' => return Some(Ok((start_pos, Token::CloseSquareBracket, start_pos + 1))),
 
-                (_, ';') => {
-                    while let Some((_, ch)) = self.chars.next() {
-                        if ch == '\n' {
-                            break;
-                        }
-                    }
-                }
+                ';' => self.skip_comment(),
 
-                (start, '"') => {
-                    while let Some((pos, ch)) = self.chars.next() {
-                        if ch == '"' {
-                            let string_size = pos - start;
-                            return Some(Ok((
-                                start,
-                                Token::StringLiteral(&self.input[start + 1..pos]),
-                                pos + string_size,
-                            )));
-                        }
-                    }
+                ch if ch.is_whitespace() => {}
 
-                    return Some(Err(LexicalError::UnclosedQuote(start, self.input.len())));
-                }
+                '"' => return self.tokenize_string_literal(start_pos),
 
-                (_, ch) if ch.is_whitespace() => (),
-
-                (start, _) => {
-                    let mut end = start;
-                    let mut round_brackets_balance: i64 = 0;
-                    let mut square_brackets_balance: i64 = 0;
-
-                    while let Some((i, ch)) = self.chars.peek() {
-                        end = *i;
-                        let ch = *ch;
-                        if ch == '(' {
-                            round_brackets_balance += 1;
-                        } else if ch == ')' {
-                            round_brackets_balance -= 1;
-                        } else if ch == '[' {
-                            square_brackets_balance += 1;
-                        } else if ch == ']' {
-                            square_brackets_balance -= 1;
-                        }
-
-                        if should_stop(ch, round_brackets_balance, square_brackets_balance) {
-                            break;
-                        }
-                        self.chars.next();
-                    }
-
-                    // this slicing is safe here because borders come from the chars iterator
-                    let token_str = &self.input[start..end];
-
-                    let token = match try_to_token(token_str, start, end) {
-                        Ok(token) => token,
-                        Err(e) => return Some(Err(e)),
-                    };
-
-                    let mut token_str_len = end - start;
-                    if round_brackets_balance < 0 || square_brackets_balance < 0 {
-                        token_str_len -= 1;
-                    }
-
-                    return Some(Ok((start, token, start + token_str_len)));
-                }
+                _ => return self.tokenize_string(start_pos),
             }
         }
 
         None
+    }
+
+    fn skip_comment(&mut self) {
+        const NEW_LINE: char = '\n'; // TODO: consider '\n\r'
+
+        while let Some((_, ch)) = self.chars.next() {
+            if ch == NEW_LINE {
+                break;
+            }
+        }
+    }
+
+    fn tokenize_string_literal(
+        &mut self,
+        start_pos: usize,
+    ) -> Option<Spanned<Token<'input>, usize, LexerError>> {
+        while let Some((pos, ch)) = self.chars.next() {
+            if ch == '"' {
+                let string_size = pos - start_pos;
+                return Some(Ok((
+                    start_pos,
+                    Token::StringLiteral(&self.input[start_pos + 1..pos]),
+                    pos + string_size,
+                )));
+            }
+        }
+
+        return Some(Err(LexerError::UnclosedQuote(start_pos, self.input.len())));
+    }
+
+    fn tokenize_string(
+        &mut self,
+        start_pos: usize,
+    ) -> Option<Spanned<Token<'input>, usize, LexerError>> {
+        let mut end_pos = start_pos;
+        let mut round_brackets_balance: i64 = 0;
+        let mut square_brackets_balance: i64 = 0;
+
+        while let Some((pos, ch)) = self.chars.peek() {
+            end_pos = *pos;
+            let ch = *ch;
+
+            update_brackets_count(
+                ch,
+                &mut round_brackets_balance,
+                &mut square_brackets_balance,
+            );
+
+            if should_stop(ch, round_brackets_balance, square_brackets_balance) {
+                break;
+            }
+
+            self.chars.next();
+        }
+
+        // this slicing is safe here because borders come from the chars iterator
+        let token_str = &self.input[start_pos..end_pos];
+
+        let token = match string_to_token(token_str, start_pos) {
+            Ok(token) => token,
+            Err(e) => return Some(Err(e)),
+        };
+
+        let token_str_len = compute_token_len(
+            start_pos,
+            end_pos,
+            round_brackets_balance,
+            square_brackets_balance,
+        );
+
+        return Some(Ok((start_pos, token, start_pos + token_str_len)));
+    }
+}
+
+fn update_brackets_count(
+    ch: char,
+    round_brackets_balance: &mut i64,
+    square_brackets_balance: &mut i64,
+) {
+    if ch == '(' {
+        *round_brackets_balance += 1;
+    } else if ch == ')' {
+        *round_brackets_balance -= 1;
+    } else if ch == '[' {
+        *square_brackets_balance += 1;
+    } else if ch == ']' {
+        *square_brackets_balance -= 1;
     }
 }
 
@@ -119,12 +157,23 @@ fn should_stop(ch: char, round_brackets_balance: i64, open_square_brackets_balan
     ch.is_whitespace() || round_brackets_balance < 0 || open_square_brackets_balance < 0
 }
 
-#[rustfmt::skip]
-fn try_to_token(input: &str, start: usize, end: usize) -> Result<Token, LexicalError> {
-    println!("input: {}", input);
+fn compute_token_len(
+    start: usize,
+    end: usize,
+    round_brackets_balance: i64,
+    square_brackets_balance: i64,
+) -> usize {
+    if round_brackets_balance < 0 || square_brackets_balance < 0 {
+        // if one of these balances less then 0, end is strictly bigger then start, so -1 is safe
+        end - start - 1
+    } else {
+        end - start
+    }
+}
 
+fn string_to_token(input: &str, start: usize) -> Result<Token, LexerError> {
     match input {
-        "" => Err(LexicalError::EmptyString(start, end)),
+        "" => Err(LexerError::EmptyString(start, start)),
 
         CALL_INSTR => Ok(Token::Call),
         SEQ_INSTR => Ok(Token::Seq),
@@ -136,40 +185,47 @@ fn try_to_token(input: &str, start: usize, end: usize) -> Result<Token, LexicalE
 
         INIT_PEER_ID => Ok(Token::InitPeerId),
 
-        str if str.ends_with(ACC_END_TAG) => {
-            const ACC_END_TAG_SIZE: usize = 2;
+        str if str.ends_with(ACC_END_TAG) => try_parse_accumulator(str, start),
+        str => try_parse_call_variable(str, start),
+    }
+}
 
-            let str_len = str.len();
-            if str_len == ACC_END_TAG_SIZE {
-                return Err(LexicalError::EmptyAccName(start, end));
-            }
+fn try_parse_accumulator(maybe_acc: &str, start: usize) -> Result<Token, LexerError> {
+    const ACC_END_TAG_SIZE: usize = 2;
 
-            // this slice is safe here because str's been checked for ending with "[]"
-            if str[0..str_len - ACC_END_TAG_SIZE].chars().all(is_aqua_alphanumeric) {
-                return Ok(Token::Accumulator(&str[0..str_len - ACC_END_TAG_SIZE]));
-            }
+    let str_len = maybe_acc.len();
+    if str_len == ACC_END_TAG_SIZE {
+        return Err(LexerError::EmptyAccName(start, start));
+    }
 
-            Err(LexicalError::IsNotAlphanumeric(start, end))
+    // this slice is safe here because str's been checked for ending with "[]"
+    let maybe_acc = &maybe_acc[0..str_len - ACC_END_TAG_SIZE];
+
+    for (pos, ch) in maybe_acc.chars().enumerate() {
+        if !is_aqua_alphanumeric(ch) {
+            return Err(LexerError::IsNotAlphanumeric(start + pos, start + pos));
         }
+    }
 
-        str => {
-            let mut json_path_start_pos = None;
+    Ok(Token::Accumulator(maybe_acc))
+}
 
-            for (pos, ch) in str.chars().enumerate() {
-                if !json_path_started(json_path_start_pos) && is_json_path_start_point(ch) {
-                    json_path_start_pos = Some(pos);
-                } else if !json_path_started(json_path_start_pos) && !is_aqua_alphanumeric(ch) {
-                    return Err(LexicalError::IsNotAlphanumeric(start+pos, end+pos));
-                } else if json_path_started(json_path_start_pos) & !json_path_allowed_char(ch) {
-                    return Err(LexicalError::InvalidJsonPath(start+pos, start+pos));
-                }
-            }
+fn try_parse_call_variable(maybe_var: &str, start: usize) -> Result<Token, LexerError> {
+    let mut json_path_start_pos = None;
 
-            match json_path_start_pos {
-                Some(pos) => Ok(Token::JsonPath(str, pos)),
-                None => Ok(Token::Alphanumeric(str)),
-            }
+    for (pos, ch) in maybe_var.chars().enumerate() {
+        if !json_path_started(json_path_start_pos) && is_json_path_start_point(ch) {
+            json_path_start_pos = Some(pos);
+        } else if !json_path_started(json_path_start_pos) && !is_aqua_alphanumeric(ch) {
+            return Err(LexerError::IsNotAlphanumeric(start + pos, start + pos));
+        } else if json_path_started(json_path_start_pos) & !json_path_allowed_char(ch) {
+            return Err(LexerError::InvalidJsonPath(start + pos, start + pos));
         }
+    }
+
+    match json_path_start_pos {
+        Some(pos) => Ok(Token::JsonPath(maybe_var, pos)),
+        None => Ok(Token::Alphanumeric(maybe_var)),
     }
 }
 
@@ -214,14 +270,6 @@ fn json_path_allowed_char(ch: char) -> bool {
         '\'' => true,
         '!' => true,
         ch => is_aqua_alphanumeric(ch),
-    }
-}
-
-impl<'input> Iterator for Lexer<'input> {
-    type Item = Spanned<Token<'input>, usize, LexicalError>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        self.next()
     }
 }
 
