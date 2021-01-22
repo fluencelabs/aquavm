@@ -149,7 +149,7 @@ fn string_literal() {
 #[test]
 fn json_path() {
     // this json path contains all allowed in json path charactes
-    const JSON_PATH: &str = r#"value.$[$@[]():?.*,"\!]"#;
+    const JSON_PATH: &str = r#"value.$[$@[]():?.*,"!]"#;
 
     let json_path_tokens = run_lexer(JSON_PATH);
     assert_eq!(

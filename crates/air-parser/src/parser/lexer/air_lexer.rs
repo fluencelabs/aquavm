@@ -101,6 +101,21 @@ impl<'input> AIRLexer<'input> {
         &mut self,
         start_pos: usize,
     ) -> Option<Spanned<Token<'input>, usize, LexerError>> {
+        let end_pos = self.advance_to_token_end(start_pos);
+
+        // this slicing is safe here because borders come from the chars iterator
+        let token_str = &self.input[start_pos..end_pos];
+
+        let token = match string_to_token(token_str, start_pos) {
+            Ok(token) => token,
+            Err(e) => return Some(Err(e)),
+        };
+
+        let token_str_len = end_pos - start_pos;
+        Some(Ok((start_pos, token, start_pos + token_str_len)))
+    }
+
+    fn advance_to_token_end(&mut self, start_pos: usize) -> usize {
         let mut end_pos = start_pos;
         let mut round_brackets_balance: i64 = 0;
         let mut square_brackets_balance: i64 = 0;
@@ -123,17 +138,7 @@ impl<'input> AIRLexer<'input> {
         }
 
         self.advance_end_pos(&mut end_pos);
-
-        // this slicing is safe here because borders come from the chars iterator
-        let token_str = &self.input[start_pos..end_pos];
-
-        let token = match string_to_token(token_str, start_pos) {
-            Ok(token) => token,
-            Err(e) => return Some(Err(e)),
-        };
-
-        let token_str_len = end_pos - start_pos;
-        Some(Ok((start_pos, token, start_pos + token_str_len)))
+        end_pos
     }
 
     // if it was the last char, advance end position.
@@ -164,9 +169,9 @@ fn should_stop(ch: char, round_brackets_balance: i64, open_square_brackets_balan
     ch.is_whitespace() || round_brackets_balance < 0 || open_square_brackets_balance < 0
 }
 
-fn string_to_token(input: &str, start: usize) -> Result<Token, LexerError> {
+fn string_to_token(input: &str, start_pos: usize) -> Result<Token, LexerError> {
     match input {
-        "" => Err(LexerError::EmptyString(start, start)),
+        "" => Err(LexerError::EmptyString(start_pos, start_pos)),
 
         CALL_INSTR => Ok(Token::Call),
         SEQ_INSTR => Ok(Token::Seq),
@@ -178,8 +183,8 @@ fn string_to_token(input: &str, start: usize) -> Result<Token, LexerError> {
 
         INIT_PEER_ID => Ok(Token::InitPeerId),
 
-        str if str.ends_with(ACC_END_TAG) => try_parse_accumulator(str, start),
-        str => try_parse_call_variable(str, start),
+        str if str.ends_with(ACC_END_TAG) => try_parse_accumulator(str, start_pos),
+        str => try_parse_call_variable(str, start_pos),
     }
 }
 
@@ -245,9 +250,25 @@ fn json_path_started(first_dot_pos: Option<usize>) -> bool {
 fn json_path_allowed_char(ch: char) -> bool {
     // we don't have spec for json path now, but some possible example could be found here
     // https://packagist.org/packages/softcreatr/jsonpath
-    let allowed_chars = r#"$@[]():?.*,"\!"#;
 
-    is_aqua_alphanumeric(ch) || allowed_chars.contains(ch)
+    // good old switch faster here than hash set
+    match ch {
+        '$' => true,
+        '@' => true,
+        '[' => true,
+        ']' => true,
+        '(' => true,
+        ')' => true,
+        ':' => true,
+        '?' => true,
+        '.' => true,
+        '*' => true,
+        ',' => true,
+        '"' => true,
+        '\'' => true,
+        '!' => true,
+        ch => is_aqua_alphanumeric(ch),
+    }
 }
 
 fn is_aqua_alphanumeric(ch: char) -> bool {
