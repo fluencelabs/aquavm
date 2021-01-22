@@ -22,11 +22,11 @@ use crate::execution::ExecutionResult;
 use crate::JValue;
 use crate::SecurityTetraplet;
 
-use air_parser::ast::CallInstructionValue;
+use air_parser::ast::InstructionArg;
 
 /// Resolve value to called function arguments.
 pub(crate) fn resolve_to_args<'i>(
-    value: &CallInstructionValue<'i>,
+    value: &InstructionArg<'i>,
     ctx: &ExecutionCtx<'i>,
 ) -> ExecutionResult<(JValue, Vec<SecurityTetraplet>)> {
     fn handle_string_arg<'i>(arg: &str, ctx: &ExecutionCtx<'i>) -> ExecutionResult<(JValue, Vec<SecurityTetraplet>)> {
@@ -37,16 +37,16 @@ pub(crate) fn resolve_to_args<'i>(
     }
 
     match value {
-        CallInstructionValue::InitPeerId => handle_string_arg(ctx.init_peer_id.as_str(), ctx),
-        CallInstructionValue::Literal(value) => handle_string_arg(value, ctx),
-        CallInstructionValue::Variable(name) => {
+        InstructionArg::InitPeerId => handle_string_arg(ctx.init_peer_id.as_str(), ctx),
+        InstructionArg::Literal(value) => handle_string_arg(value, ctx),
+        InstructionArg::Variable(name) => {
             let resolved = resolve_to_jvaluable(name, ctx)?;
             let tetraplets = resolved.as_tetraplets();
             let jvalue = resolved.into_jvalue();
 
             Ok((jvalue, tetraplets))
         }
-        CallInstructionValue::JsonPath { variable, path } => {
+        InstructionArg::JsonPath { variable, path } => {
             let resolved = resolve_to_jvaluable(variable, ctx)?;
             let (jvalue, tetraplets) = resolved.apply_json_path_with_tetraplets(path)?;
             let jvalue = jvalue.into_iter().cloned().collect::<Vec<_>>();

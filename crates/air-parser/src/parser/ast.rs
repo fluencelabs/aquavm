@@ -27,6 +27,7 @@ pub enum Instruction<'i> {
     Seq(Seq<'i>),
     Par(Par<'i>),
     Xor(Xor<'i>),
+    Match(Match<'i>),
     Fold(Fold<'i>),
     Next(Next<'i>),
     Error,
@@ -34,26 +35,26 @@ pub enum Instruction<'i> {
 
 #[derive(Serialize, Debug, PartialEq, Eq)]
 pub enum PeerPart<'i> {
-    PeerPk(CallInstructionValue<'i>),
-    PeerPkWithServiceId(CallInstructionValue<'i>, CallInstructionValue<'i>),
+    PeerPk(InstructionArg<'i>),
+    PeerPkWithServiceId(InstructionArg<'i>, InstructionArg<'i>),
 }
 
 #[derive(Serialize, Debug, PartialEq, Eq)]
 pub enum FunctionPart<'i> {
-    FuncName(CallInstructionValue<'i>),
-    ServiceIdWithFuncName(CallInstructionValue<'i>, CallInstructionValue<'i>),
+    FuncName(InstructionArg<'i>),
+    ServiceIdWithFuncName(InstructionArg<'i>, InstructionArg<'i>),
 }
 
 #[derive(Serialize, Debug, PartialEq, Eq)]
 pub struct Call<'i> {
     pub peer_part: PeerPart<'i>,
     pub function_part: FunctionPart<'i>,
-    pub args: Rc<Vec<CallInstructionValue<'i>>>,
+    pub args: Rc<Vec<InstructionArg<'i>>>,
     pub output: CallOutput<'i>,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Hash, Serialize, Deserialize)]
-pub enum CallInstructionValue<'i> {
+pub enum InstructionArg<'i> {
     Variable(&'i str),
     Literal(&'i str),
     JsonPath { variable: &'i str, path: &'i str },
@@ -81,6 +82,9 @@ pub struct Par<'i>(pub Box<Instruction<'i>>, pub Box<Instruction<'i>>);
 
 #[derive(Serialize, Debug, PartialEq, Eq)]
 pub struct Xor<'i>(pub Box<Instruction<'i>>, pub Box<Instruction<'i>>);
+
+#[derive(Serialize, Debug, PartialEq, Eq)]
+pub struct Match<'i>(pub InstructionArg<'i>, pub InstructionArg<'i>, pub Box<Instruction<'i>>);
 
 #[derive(Serialize, Debug, PartialEq, Eq)]
 pub struct Fold<'i> {

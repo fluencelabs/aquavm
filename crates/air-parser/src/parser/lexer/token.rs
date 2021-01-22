@@ -35,4 +35,5 @@ pub enum Token<'input> {
     Fold,
     Xor,
     Next,
+    Match,
 }

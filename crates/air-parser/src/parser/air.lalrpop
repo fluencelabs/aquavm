@@ -31,10 +31,12 @@ Instr: Box<Instruction<'input>> = {
 
     "(" xor <l:Instr> <r:Instr> ")" => Box::new(Instruction::Xor(Xor(l, r))),
 
+    "(" match1 <l:InstructionArg> <r:InstructionArg> <i:Instr> ")" => Box::new(Instruction::Match(Match(l, r, i))),
+
     ! => { errors.push(<>); Box::new(Instruction::Error) },
 }
 
-Args: Vec<CallInstructionValue<'input>> = {
+Args: Vec<InstructionArg<'input>> = {
     "[" <args:(<Arg>)*> "]" => args
 }
 
@@ -61,19 +63,19 @@ Iterable: IterableValue<'input> = {
     },
 }
 
-Function = CallInstructionValue;
-PeerId = CallInstructionValue;
-ServiceId = CallInstructionValue;
-Arg = CallInstructionValue;
+Function = InstructionArg;
+PeerId = InstructionArg;
+ServiceId = InstructionArg;
+Arg = InstructionArg;
 
-CallInstructionValue: CallInstructionValue<'input> = {
-    <s:Literal> => CallInstructionValue::Literal(s),
-    <s:Alphanumeric> => CallInstructionValue::Variable(s),
+InstructionArg: InstructionArg<'input> = {
+    <s:Literal> => InstructionArg::Literal(s),
+    <s:Alphanumeric> => InstructionArg::Variable(s),
     <v:JsonPath> => {
         let (variable, path) = into_variable_and_path(v.0, v.1);
-        CallInstructionValue::JsonPath { variable, path }
+        InstructionArg::JsonPath { variable, path }
     },
-    InitPeerId => CallInstructionValue::InitPeerId,
+    InitPeerId => InstructionArg::InitPeerId,
 }
 
 extern {
@@ -100,5 +102,6 @@ extern {
         fold => Token::Fold,
         xor => Token::Xor,
         next => Token::Next,
+        match1 => Token::Match,
     }
 }
