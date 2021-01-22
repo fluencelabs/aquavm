@@ -141,10 +141,10 @@ impl<'input> AIRLexer<'input> {
         end_pos
     }
 
-    // if it was the last char, advance end position.
+    // if it was the last char, advance the end position.
     fn advance_end_pos(&mut self, end_pos: &mut usize) {
         if self.chars.peek().is_none() {
-            *end_pos += 1;
+            *end_pos = self.input.len();
         }
     }
 }
