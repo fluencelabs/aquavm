@@ -16,7 +16,7 @@
 
 use thiserror::Error as ThisError;
 
-#[derive(ThisError, Debug, Clone)]
+#[derive(ThisError, Debug, Clone, PartialEq, Eq, Hash)]
 pub enum LexerError {
     #[error("this string literal has unclosed quote")]
     UnclosedQuote(usize, usize),

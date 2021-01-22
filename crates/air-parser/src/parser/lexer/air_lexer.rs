@@ -31,7 +31,7 @@ impl<'input> Iterator for AIRLexer<'input> {
     type Item = Spanned<Token<'input>, usize, LexerError>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.next()
+        self.next_token()
     }
 }
 
@@ -43,7 +43,7 @@ impl<'input> AIRLexer<'input> {
         }
     }
 
-    pub fn next(&mut self) -> Option<Spanned<Token<'input>, usize, LexerError>> {
+    pub fn next_token(&mut self) -> Option<Spanned<Token<'input>, usize, LexerError>> {
         while let Some((start_pos, ch)) = self.chars.next() {
             match ch {
                 '(' => return Some(Ok((start_pos, Token::OpenRoundBracket, start_pos + 1))),
@@ -75,24 +75,28 @@ impl<'input> AIRLexer<'input> {
         }
     }
 
+    #[allow(clippy::unnecessary_wraps)]
     fn tokenize_string_literal(
         &mut self,
         start_pos: usize,
     ) -> Option<Spanned<Token<'input>, usize, LexerError>> {
         while let Some((pos, ch)) = self.chars.next() {
             if ch == '"' {
-                let string_size = pos - start_pos;
+                // + 1 to count an open double quote
+                let string_size = pos - start_pos + 1;
+
                 return Some(Ok((
                     start_pos,
                     Token::StringLiteral(&self.input[start_pos + 1..pos]),
-                    pos + string_size,
+                    start_pos + string_size,
                 )));
             }
         }
 
-        return Some(Err(LexerError::UnclosedQuote(start_pos, self.input.len())));
+        Some(Err(LexerError::UnclosedQuote(start_pos, self.input.len())))
     }
 
+    #[allow(clippy::unnecessary_wraps)]
     fn tokenize_string(
         &mut self,
         start_pos: usize,
@@ -118,6 +122,8 @@ impl<'input> AIRLexer<'input> {
             self.chars.next();
         }
 
+        self.advance_end_pos(&mut end_pos);
+
         // this slicing is safe here because borders come from the chars iterator
         let token_str = &self.input[start_pos..end_pos];
 
@@ -126,14 +132,15 @@ impl<'input> AIRLexer<'input> {
             Err(e) => return Some(Err(e)),
         };
 
-        let token_str_len = compute_token_len(
-            start_pos,
-            end_pos,
-            round_brackets_balance,
-            square_brackets_balance,
-        );
+        let token_str_len = end_pos - start_pos;
+        Some(Ok((start_pos, token, start_pos + token_str_len)))
+    }
 
-        return Some(Ok((start_pos, token, start_pos + token_str_len)));
+    // if it was the last char, advance end position.
+    fn advance_end_pos(&mut self, end_pos: &mut usize) {
+        if self.chars.peek().is_none() {
+            *end_pos += 1;
+        }
     }
 }
 
@@ -155,20 +162,6 @@ fn update_brackets_count(
 
 fn should_stop(ch: char, round_brackets_balance: i64, open_square_brackets_balance: i64) -> bool {
     ch.is_whitespace() || round_brackets_balance < 0 || open_square_brackets_balance < 0
-}
-
-fn compute_token_len(
-    start: usize,
-    end: usize,
-    round_brackets_balance: i64,
-    square_brackets_balance: i64,
-) -> usize {
-    if round_brackets_balance < 0 || square_brackets_balance < 0 {
-        // if one of these balances less then 0, end is strictly bigger then start, so -1 is safe
-        end - start - 1
-    } else {
-        end - start
-    }
 }
 
 fn string_to_token(input: &str, start: usize) -> Result<Token, LexerError> {
@@ -252,25 +245,9 @@ fn json_path_started(first_dot_pos: Option<usize>) -> bool {
 fn json_path_allowed_char(ch: char) -> bool {
     // we don't have spec for json path now, but some possible example could be found here
     // https://packagist.org/packages/softcreatr/jsonpath
+    let allowed_chars = r#"$@[]():?.*,"\!"#;
 
-    // good old switch faster here than hash set
-    match ch {
-        '$' => true,
-        '@' => true,
-        '[' => true,
-        ']' => true,
-        '(' => true,
-        ')' => true,
-        ':' => true,
-        '?' => true,
-        '.' => true,
-        '*' => true,
-        ',' => true,
-        '"' => true,
-        '\'' => true,
-        '!' => true,
-        ch => is_aqua_alphanumeric(ch),
-    }
+    is_aqua_alphanumeric(ch) || allowed_chars.contains(ch)
 }
 
 fn is_aqua_alphanumeric(ch: char) -> bool {

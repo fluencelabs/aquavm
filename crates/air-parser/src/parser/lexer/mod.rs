@@ -18,6 +18,9 @@ mod air_lexer;
 mod errors;
 mod token;
 
+#[cfg(test)]
+pub mod tests;
+
 pub use air_lexer::AIRLexer;
 pub use errors::LexerError;
 pub use token::Token;
