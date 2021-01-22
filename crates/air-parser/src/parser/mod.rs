@@ -14,16 +14,23 @@
  * limitations under the License.
  */
 
-use stepper_lib::log_targets::TARGET_MAP;
+pub mod air_parser;
+mod lexer;
 
-use log::Level as LogLevel;
+// air is auto-generated, so exclude it from `cargo fmt -- --check` and `cargo clippy`
+#[rustfmt::skip]
+#[allow(clippy::all)]
+mod air;
 
-pub const DEFAULT_LOG_LEVEL: LogLevel = LogLevel::Info;
+pub mod ast;
 
-pub fn init_logger() {
-    let target_map = TARGET_MAP.iter().cloned().collect();
-    fluence::WasmLoggerBuilder::new()
-        .with_target_map(target_map)
-        .build()
-        .unwrap();
+#[cfg(test)]
+pub mod tests;
+
+pub use self::air_parser::parse;
+pub use air::AIRParser;
+pub use lexer::AIRLexer;
+
+fn into_variable_and_path(str: &str, pos: usize) -> (&str, &str) {
+    (&str[0..pos], &str[pos + 1..])
 }

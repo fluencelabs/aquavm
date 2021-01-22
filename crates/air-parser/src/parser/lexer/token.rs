@@ -14,16 +14,25 @@
  * limitations under the License.
  */
 
-use stepper_lib::log_targets::TARGET_MAP;
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub enum Token<'input> {
+    OpenRoundBracket,
+    CloseRoundBracket,
+    OpenSquareBracket,
+    CloseSquareBracket,
 
-use log::Level as LogLevel;
+    StringLiteral(&'input str),
+    Alphanumeric(&'input str),
+    JsonPath(&'input str, usize),
+    Accumulator(&'input str),
 
-pub const DEFAULT_LOG_LEVEL: LogLevel = LogLevel::Info;
+    InitPeerId,
 
-pub fn init_logger() {
-    let target_map = TARGET_MAP.iter().cloned().collect();
-    fluence::WasmLoggerBuilder::new()
-        .with_target_map(target_map)
-        .build()
-        .unwrap();
+    Call,
+    Seq,
+    Par,
+    Null,
+    Fold,
+    Xor,
+    Next,
 }

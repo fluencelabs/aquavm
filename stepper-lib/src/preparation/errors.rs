@@ -92,7 +92,7 @@ impl fmt::Display for PreparationError {
                         "an error occurred while executed trace deserialization on '{:?}': {:?}",
                         trace, serde_error
                     )
-                };
+                }
 
                 match String::from_utf8(executed_trace.to_vec()) {
                     Ok(str) => print_error(f, str, serde_error),

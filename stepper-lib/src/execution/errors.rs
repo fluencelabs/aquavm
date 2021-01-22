@@ -81,10 +81,6 @@ pub(crate) enum ExecutionError {
     /// Errors encountered while shadowing non-scalar values.
     #[error("variable with name '{0}' can't be shadowed, shadowing is supported only for scalar values")]
     ShadowingError(String),
-
-    /// Errors occured when instruction value can't be used as a fold iterable.
-    #[error("instruction value '{0}' can't be used as a fold iterable")]
-    InvalidFoldIterable(String),
 }
 
 impl ExecutionError {
@@ -106,7 +102,6 @@ impl ExecutionError {
             MultipleFoldStates(_) => 12,
             InvalidExecutedState(..) => 13,
             ShadowingError(_) => 14,
-            InvalidFoldIterable(_) => 15,
         }
     }
 }

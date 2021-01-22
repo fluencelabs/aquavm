@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-use super::aqua;
-use crate::ast::Instruction;
-use crate::lalrpop::aqua::Token;
+use super::air;
+use super::ast::Instruction;
+use super::lexer::AIRLexer;
+use super::lexer::LexerError;
+use super::lexer::Token;
 
 use codespan_reporting::diagnostic::{Diagnostic, Label};
 use codespan_reporting::files::SimpleFiles;
@@ -24,34 +26,21 @@ use codespan_reporting::term;
 use codespan_reporting::term::termcolor::{Buffer, ColorChoice, StandardStream};
 use lalrpop_util::{ErrorRecovery, ParseError};
 
-use std::fmt::Formatter;
-
-#[derive(Debug)]
-/// Represents custom parsing errors. Isn't used yet.
-pub enum InstructionError {
-    #[allow(dead_code)]
-    InvalidPeerId,
-}
-
-impl std::error::Error for InstructionError {}
-impl std::fmt::Display for InstructionError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "InstructionError")
-    }
-}
+use air::AIRParser;
 
 // Caching parser to cache internal regexes, which are expensive to instantiate
 // See also https://github.com/lalrpop/lalrpop/issues/269
-thread_local!(static PARSER: aqua::InstrParser = aqua::InstrParser::new());
+thread_local!(static PARSER: AIRParser = AIRParser::new());
 
 /// Parse AIR `source_code` to `Box<Instruction>`
-pub fn parse(source_code: &str) -> Result<Box<Instruction>, String> {
+pub fn parse(air_script: &str) -> Result<Box<Instruction<'_>>, String> {
     let mut files = SimpleFiles::new();
-    let file_id = files.add("script.aqua", source_code);
+    let file_id = files.add("script.aqua", air_script);
 
     PARSER.with(|parser| {
         let mut errors = Vec::new();
-        match parser.parse(&mut errors, source_code) {
+        let lexer = AIRLexer::new(air_script);
+        match parser.parse(air_script, &mut errors, lexer) {
             Ok(r) if errors.is_empty() => Ok(r),
             Ok(_) => Err(report_errors(file_id, files, errors)),
             Err(err) => Err(report_errors(
@@ -69,9 +58,29 @@ pub fn parse(source_code: &str) -> Result<Box<Instruction>, String> {
 fn report_errors(
     file_id: usize,
     files: SimpleFiles<&str, &str>,
-    errors: Vec<ErrorRecovery<usize, Token, InstructionError>>,
+    errors: Vec<ErrorRecovery<usize, Token<'_>, LexerError>>,
 ) -> String {
-    let labels: Vec<Label<usize>> = errors
+    let labels = errors_to_labels(file_id, errors);
+    let diagnostic = Diagnostic::error().with_labels(labels);
+
+    // Write to stderr
+    let writer = StandardStream::stderr(ColorChoice::Auto);
+    let config = codespan_reporting::term::Config::default();
+    term::emit(&mut writer.lock(), &config, &files, &diagnostic).expect("term emit to stderr");
+
+    // Return as a string
+    let mut buffer = Buffer::no_color();
+    term::emit(&mut buffer, &config, &files, &diagnostic).expect("term emit to buffer");
+    String::from_utf8_lossy(buffer.as_slice())
+        .as_ref()
+        .to_string()
+}
+
+fn errors_to_labels(
+    file_id: usize,
+    errors: Vec<ErrorRecovery<usize, Token<'_>, LexerError>>,
+) -> Vec<Label<usize>> {
+    errors
         .into_iter()
         .map(|err| match err.error {
             ParseError::UnrecognizedToken {
@@ -89,25 +98,9 @@ fn report_errors(
                 Label::primary(file_id, location..(location + 1))
                     .with_message(format!("expected {}", pretty_expected(expected)))
             }
-            // TODO: capture start & end in user error; maybe return it as a separate Diagnostic::error?
-            ParseError::User { error } => {
-                Label::primary(file_id, 0..0).with_message(error.to_string())
-            }
+            ParseError::User { error } => lexical_error_to_label(file_id, error),
         })
-        .collect();
-    let diagnostic = Diagnostic::error().with_labels(labels);
-    let config = codespan_reporting::term::Config::default();
-
-    // Write to stderr
-    let writer = StandardStream::stderr(ColorChoice::Auto);
-    term::emit(&mut writer.lock(), &config, &files, &diagnostic).expect("term emit to stderr");
-
-    // Return as a string
-    let mut buffer = Buffer::no_color();
-    term::emit(&mut buffer, &config, &files, &diagnostic).expect("term emit to buffer");
-    String::from_utf8_lossy(buffer.as_slice())
-        .as_ref()
-        .to_string()
+        .collect()
 }
 
 fn pretty_expected(expected: Vec<String>) -> String {
@@ -115,5 +108,26 @@ fn pretty_expected(expected: Vec<String>) -> String {
         "<nothing>".to_string()
     } else {
         expected.join(" or ")
+    }
+}
+
+fn lexical_error_to_label(file_id: usize, error: LexerError) -> Label<usize> {
+    use LexerError::*;
+    match error {
+        UnclosedQuote(start, end) => {
+            Label::primary(file_id, start..end).with_message(error.to_string())
+        }
+        EmptyString(start, end) => {
+            Label::primary(file_id, start..end).with_message(error.to_string())
+        }
+        IsNotAlphanumeric(start, end) => {
+            Label::primary(file_id, start..end).with_message(error.to_string())
+        }
+        EmptyAccName(start, end) => {
+            Label::primary(file_id, start..end).with_message(error.to_string())
+        }
+        InvalidJsonPath(start, end) => {
+            Label::primary(file_id, start..end).with_message(error.to_string())
+        }
     }
 }

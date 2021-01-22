@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
-use stepper_lib::log_targets::TARGET_MAP;
+mod air_lexer;
+mod errors;
+mod token;
 
-use log::Level as LogLevel;
+#[cfg(test)]
+pub mod tests;
 
-pub const DEFAULT_LOG_LEVEL: LogLevel = LogLevel::Info;
-
-pub fn init_logger() {
-    let target_map = TARGET_MAP.iter().cloned().collect();
-    fluence::WasmLoggerBuilder::new()
-        .with_target_map(target_map)
-        .build()
-        .unwrap();
-}
+pub use air_lexer::AIRLexer;
+pub use errors::LexerError;
+pub use token::Token;

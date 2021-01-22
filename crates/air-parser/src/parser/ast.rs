@@ -34,30 +34,36 @@ pub enum Instruction<'i> {
 
 #[derive(Serialize, Debug, PartialEq, Eq)]
 pub enum PeerPart<'i> {
-    PeerPk(InstructionValue<'i>),
-    PeerPkWithServiceId(InstructionValue<'i>, InstructionValue<'i>),
+    PeerPk(CallInstructionValue<'i>),
+    PeerPkWithServiceId(CallInstructionValue<'i>, CallInstructionValue<'i>),
 }
 
 #[derive(Serialize, Debug, PartialEq, Eq)]
 pub enum FunctionPart<'i> {
-    FuncName(InstructionValue<'i>),
-    ServiceIdWithFuncName(InstructionValue<'i>, InstructionValue<'i>),
+    FuncName(CallInstructionValue<'i>),
+    ServiceIdWithFuncName(CallInstructionValue<'i>, CallInstructionValue<'i>),
 }
 
 #[derive(Serialize, Debug, PartialEq, Eq)]
 pub struct Call<'i> {
     pub peer_part: PeerPart<'i>,
     pub function_part: FunctionPart<'i>,
-    pub args: Rc<Vec<InstructionValue<'i>>>,
+    pub args: Rc<Vec<CallInstructionValue<'i>>>,
     pub output: CallOutput<'i>,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Hash, Serialize, Deserialize)]
-pub enum InstructionValue<'i> {
+pub enum CallInstructionValue<'i> {
     Variable(&'i str),
     Literal(&'i str),
     JsonPath { variable: &'i str, path: &'i str },
     InitPeerId,
+}
+
+#[derive(Debug, PartialEq, Eq, Clone, Hash, Serialize, Deserialize)]
+pub enum IterableValue<'i> {
+    Variable(&'i str),
+    JsonPath { variable: &'i str, path: &'i str },
 }
 
 #[derive(Serialize, Debug, Hash, PartialEq, Eq, Clone)]
@@ -78,7 +84,7 @@ pub struct Xor<'i>(pub Box<Instruction<'i>>, pub Box<Instruction<'i>>);
 
 #[derive(Serialize, Debug, PartialEq, Eq)]
 pub struct Fold<'i> {
-    pub iterable: InstructionValue<'i>,
+    pub iterable: IterableValue<'i>,
     pub iterator: &'i str,
     pub instruction: Rc<Instruction<'i>>,
 }

@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-use crate::ast::*;
-use CallOutput::*;
-use FunctionPart::*;
-use InstructionValue::*;
-use PeerPart::*;
+use crate::ast;
+use ast::Instruction;
 
 use fstrings::f;
 use std::rc::Rc;
@@ -29,6 +26,12 @@ fn parse(source_code: &str) -> Instruction {
 
 #[test]
 fn parse_seq() {
+    use ast::Call;
+    use ast::CallInstructionValue::*;
+    use ast::CallOutput::*;
+    use ast::FunctionPart::*;
+    use ast::PeerPart::*;
+
     let source_code = r#"
         (seq
             (call peerid function [] output)
@@ -55,6 +58,12 @@ fn parse_seq() {
 
 #[test]
 fn parse_seq_seq() {
+    use ast::Call;
+    use ast::CallInstructionValue::*;
+    use ast::CallOutput::*;
+    use ast::FunctionPart::*;
+    use ast::PeerPart::*;
+
     let source_code = r#"
         (seq
             (seq
@@ -92,6 +101,12 @@ fn parse_seq_seq() {
 
 #[test]
 fn parse_json_path() {
+    use ast::Call;
+    use ast::CallInstructionValue::*;
+    use ast::CallOutput::*;
+    use ast::FunctionPart::*;
+    use ast::PeerPart::*;
+
     let source_code = r#"
         (call id.$.a "f" ["hello" name] void[])
         "#;
@@ -110,6 +125,12 @@ fn parse_json_path() {
 
 #[test]
 fn parse_json_path_complex() {
+    use ast::Call;
+    use ast::CallInstructionValue::*;
+    use ast::CallOutput::*;
+    use ast::FunctionPart::*;
+    use ast::PeerPart::*;
+
     let source_code = r#"
         (seq
             (call m.$.[1] "f" [] void)
@@ -142,6 +163,12 @@ fn parse_json_path_complex() {
 
 #[test]
 fn json_path_square_braces() {
+    use ast::Call;
+    use ast::CallInstructionValue::*;
+    use ast::CallOutput::*;
+    use ast::FunctionPart::*;
+    use ast::PeerPart::*;
+
     let source_code = r#"
         (call u.$["peer_id"] ("return" "") [u.$["peer_id"].cde[0]["abc"].abc u.$["name"]] void[])
         "#;
@@ -178,7 +205,7 @@ fn parse_null() {
         )
         "#;
     let instruction = parse(source_code);
-    let expected = Instruction::Seq(Seq(Box::new(null()), Box::new(null())));
+    let expected = Instruction::Seq(ast::Seq(Box::new(null()), Box::new(null())));
     assert_eq!(instruction, expected)
 }
 
@@ -213,7 +240,7 @@ fn parse_fold() {
         )
         "#;
     let instruction = parse(&source_code.as_ref());
-    let expected = fold(InstructionValue::Variable("iterable"), "i", null());
+    let expected = fold(ast::IterableValue::Variable("iterable"), "i", null());
     assert_eq!(instruction, expected);
 }
 
@@ -229,7 +256,7 @@ fn parse_fold_with_xor_par_seq() {
         let instruction = parse(&source_code.as_ref());
         let instr = binary_instruction(*name);
         let expected = fold(
-            InstructionValue::Variable("iterable"),
+            ast::IterableValue::Variable("iterable"),
             "i",
             instr(null(), null()),
         );
@@ -239,6 +266,12 @@ fn parse_fold_with_xor_par_seq() {
 
 #[test]
 fn parse_init_peer_id() {
+    use ast::Call;
+    use ast::CallInstructionValue::*;
+    use ast::CallOutput::*;
+    use ast::FunctionPart::*;
+    use ast::PeerPart::*;
+
     let peer_id = String::from("some_peer_id");
     let source_code = format!(
         r#"
@@ -252,7 +285,7 @@ fn parse_init_peer_id() {
     let instruction = parse(&source_code.as_ref());
     let expected = seq(
         Instruction::Call(Call {
-            peer_part: PeerPk(InstructionValue::Literal(&peer_id)),
+            peer_part: PeerPk(Literal(&peer_id)),
             function_part: ServiceIdWithFuncName(
                 Literal("local_service_id"),
                 Literal("local_fn_name"),
@@ -273,6 +306,12 @@ fn parse_init_peer_id() {
 
 #[test]
 fn seq_par_call() {
+    use ast::Call;
+    use ast::CallInstructionValue::*;
+    use ast::CallOutput::*;
+    use ast::FunctionPart::*;
+    use ast::PeerPart::*;
+
     let peer_id = String::from("some_peer_id");
     let source_code = format!(
         r#"
@@ -290,7 +329,7 @@ fn seq_par_call() {
     let expected = seq(
         par(
             Instruction::Call(Call {
-                peer_part: PeerPk(InstructionValue::Literal(&peer_id)),
+                peer_part: PeerPk(Literal(&peer_id)),
                 function_part: ServiceIdWithFuncName(
                     Literal("local_service_id"),
                     Literal("local_fn_name"),
@@ -306,7 +345,7 @@ fn seq_par_call() {
             }),
         ),
         Instruction::Call(Call {
-            peer_part: PeerPk(InstructionValue::Literal(&peer_id)),
+            peer_part: PeerPk(Literal(&peer_id)),
             function_part: ServiceIdWithFuncName(
                 Literal("local_service_id"),
                 Literal("local_fn_name"),
@@ -321,6 +360,12 @@ fn seq_par_call() {
 
 #[test]
 fn seq_with_empty_and_dash() {
+    use ast::Call;
+    use ast::CallInstructionValue::*;
+    use ast::CallOutput::*;
+    use ast::FunctionPart::*;
+    use ast::PeerPart::*;
+
     let source_code = r#"
         (seq 
             (seq 
@@ -403,6 +448,12 @@ fn seq_with_empty_and_dash() {
 
 #[test]
 fn no_output() {
+    use ast::Call;
+    use ast::CallInstructionValue::*;
+    use ast::CallOutput::*;
+    use ast::FunctionPart::*;
+    use ast::PeerPart::*;
+
     let source_code = r#"
     (call peer (service fname) [])
     "#;
@@ -418,6 +469,9 @@ fn no_output() {
 
 #[test]
 fn fold_json_path() {
+    use ast::Fold;
+    use ast::IterableValue::*;
+
     let source_code = r#"
     ; comment
     (fold members.$.["users"] m (null)) ;;; comment
@@ -437,6 +491,9 @@ fn fold_json_path() {
 
 #[test]
 fn comments() {
+    use ast::Fold;
+    use ast::IterableValue::*;
+
     let source_code = r#"
     ; comment
     (fold members.$.["users"] m (null)) ;;; comment ;;?()()
@@ -457,26 +514,26 @@ fn comments() {
 // Test DSL
 
 fn seq<'a>(l: Instruction<'a>, r: Instruction<'a>) -> Instruction<'a> {
-    Instruction::Seq(Seq(Box::new(l), Box::new(r)))
+    Instruction::Seq(ast::Seq(Box::new(l), Box::new(r)))
 }
 fn par<'a>(l: Instruction<'a>, r: Instruction<'a>) -> Instruction<'a> {
-    Instruction::Par(Par(Box::new(l), Box::new(r)))
+    Instruction::Par(ast::Par(Box::new(l), Box::new(r)))
 }
 fn xor<'a>(l: Instruction<'a>, r: Instruction<'a>) -> Instruction<'a> {
-    Instruction::Xor(Xor(Box::new(l), Box::new(r)))
+    Instruction::Xor(ast::Xor(Box::new(l), Box::new(r)))
 }
 fn seqnn() -> Instruction<'static> {
     seq(null(), null())
 }
 fn null() -> Instruction<'static> {
-    Instruction::Null(Null)
+    Instruction::Null(ast::Null)
 }
 fn fold<'a>(
-    iterable: InstructionValue<'a>,
+    iterable: ast::IterableValue<'a>,
     iterator: &'a str,
     instruction: Instruction<'a>,
 ) -> Instruction<'a> {
-    Instruction::Fold(Fold {
+    Instruction::Fold(ast::Fold {
         iterable,
         iterator,
         instruction: std::rc::Rc::new(instruction),
