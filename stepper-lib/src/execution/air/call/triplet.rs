@@ -19,7 +19,7 @@ use super::ExecutionError;
 use super::ExecutionResult;
 use crate::JValue;
 
-use air_parser::ast::{InstructionArg, FunctionPart, PeerPart};
+use air_parser::ast::{FunctionPart, InstructionArg, PeerPart};
 use polyplets::ResolvedTriplet;
 
 /// Triplet represents a location of the executable code in the network.

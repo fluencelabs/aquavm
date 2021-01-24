@@ -29,7 +29,7 @@ use crate::JValue;
 use crate::ResolvedTriplet;
 use crate::SecurityTetraplet;
 
-use air_parser::ast::{InstructionArg, CallOutput};
+use air_parser::ast::{CallOutput, InstructionArg};
 
 use std::rc::Rc;
 

@@ -1,5 +1,5 @@
 // auto-generated: "lalrpop 0.19.1"
-// sha256: ce1187d4c5fb86fc685ecdb287fcb8ba5690fe13945c756d5de8256ce01c4cc0
+// sha256: 6c3648c95782b173e56a3f07b98821092e16f96b24f8c2261677056bdc2f7e7
 use crate::parser::ast::*;
 use crate::parser::into_variable_and_path;
 use crate::parser::lexer::LexerError;
@@ -378,7 +378,7 @@ mod __parse__AIR {
             r###"Literal"###,
             r###"call"###,
             r###"fold"###,
-            r###"match1"###,
+            r###"match_"###,
             r###"next"###,
             r###"null"###,
             r###"par"###,
@@ -1576,7 +1576,7 @@ mod __parse__AIR {
         _: ::std::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
-        // Instr = "(", match1, InstructionArg, InstructionArg, Instr, ")" => ActionFn(9);
+        // Instr = "(", match_, InstructionArg, InstructionArg, Instr, ")" => ActionFn(9);
         assert!(__symbols.len() >= 6);
         let __sym5 = __pop_Variant0(__symbols);
         let __sym4 = __pop_Variant6(__symbols);

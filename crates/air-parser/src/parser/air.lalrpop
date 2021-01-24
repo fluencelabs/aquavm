@@ -31,7 +31,7 @@ Instr: Box<Instruction<'input>> = {
 
     "(" xor <l:Instr> <r:Instr> ")" => Box::new(Instruction::Xor(Xor(l, r))),
 
-    "(" match1 <l:InstructionArg> <r:InstructionArg> <i:Instr> ")" => Box::new(Instruction::Match(Match(l, r, i))),
+    "(" match_ <l:InstructionArg> <r:InstructionArg> <i:Instr> ")" => Box::new(Instruction::Match(Match(l, r, i))),
 
     ! => { errors.push(<>); Box::new(Instruction::Error) },
 }
@@ -102,6 +102,6 @@ extern {
         fold => Token::Fold,
         xor => Token::Xor,
         next => Token::Next,
-        match1 => Token::Match,
+        match_ => Token::Match,
     }
 }
