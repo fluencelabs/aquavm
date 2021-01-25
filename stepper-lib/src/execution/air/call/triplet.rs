@@ -19,15 +19,15 @@ use super::ExecutionError;
 use super::ExecutionResult;
 use crate::JValue;
 
-use air_parser::ast::{FunctionPart, InstructionArg, PeerPart};
+use air_parser::ast::{CallArgValue, FunctionPart, PeerPart};
 use polyplets::ResolvedTriplet;
 
 /// Triplet represents a location of the executable code in the network.
 /// It is build from `PeerPart` and `FunctionPart` of a `Call` instruction.
 pub(super) struct Triplet<'a, 'i> {
-    pub(super) peer_pk: &'a InstructionArg<'i>,
-    pub(super) service_id: &'a InstructionArg<'i>,
-    pub(super) function_name: &'a InstructionArg<'i>,
+    pub(super) peer_pk: &'a CallArgValue<'i>,
+    pub(super) service_id: &'a CallArgValue<'i>,
+    pub(super) function_name: &'a CallArgValue<'i>,
 }
 
 impl<'a, 'i> Triplet<'a, 'i> {
@@ -77,18 +77,18 @@ impl<'a, 'i> Triplet<'a, 'i> {
 
 /// Resolve value to string by either resolving variable from `ExecutionCtx`, taking literal value, or etc.
 // TODO: return Rc<String> to avoid excess cloning
-fn resolve_to_string<'i>(value: &InstructionArg<'i>, ctx: &ExecutionCtx<'i>) -> ExecutionResult<String> {
+fn resolve_to_string<'i>(value: &CallArgValue<'i>, ctx: &ExecutionCtx<'i>) -> ExecutionResult<String> {
     use crate::execution::utils::resolve_to_jvaluable;
 
     let resolved = match value {
-        InstructionArg::InitPeerId => ctx.init_peer_id.clone(),
-        InstructionArg::Literal(value) => value.to_string(),
-        InstructionArg::Variable(name) => {
+        CallArgValue::InitPeerId => ctx.init_peer_id.clone(),
+        CallArgValue::Literal(value) => value.to_string(),
+        CallArgValue::Variable(name) => {
             let resolved = resolve_to_jvaluable(name, ctx)?;
             let jvalue = resolved.into_jvalue();
             jvalue_to_string(jvalue)?
         }
-        InstructionArg::JsonPath { variable, path } => {
+        CallArgValue::JsonPath { variable, path } => {
             let resolved = resolve_to_jvaluable(variable, ctx)?;
             let resolved = resolved.apply_json_path(path)?;
             vec_to_string(resolved, path)?

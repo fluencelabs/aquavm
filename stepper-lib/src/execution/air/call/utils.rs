@@ -22,7 +22,7 @@ use crate::contexts::execution_trace::*;
 use crate::log_targets::EXECUTED_STATE_CHANGING;
 use crate::JValue;
 
-use air_parser::ast::CallOutput;
+use air_parser::ast::CallOutputValue;
 use polyplets::ResolvedTriplet;
 
 use std::rc::Rc;
@@ -31,7 +31,7 @@ use std::rc::Rc;
 pub(super) fn set_local_call_result<'i>(
     result: Rc<JValue>,
     triplet: Rc<ResolvedTriplet>,
-    output: &CallOutput<'i>,
+    output: &CallOutputValue<'i>,
     exec_ctx: &mut ExecutionCtx<'i>,
 ) -> ExecutionResult<()> {
     use crate::contexts::execution::AValue;
@@ -42,7 +42,7 @@ pub(super) fn set_local_call_result<'i>(
     let executed_result = ResolvedCallResult { result, triplet };
 
     match output {
-        CallOutput::Scalar(name) => {
+        CallOutputValue::Scalar(name) => {
             if let Some(fold_block_name) = exec_ctx.met_folds.back() {
                 let fold_state = match exec_ctx.data_cache.get_mut(*fold_block_name) {
                     Some(AValue::JValueFoldCursor(fold_state)) => fold_state,
@@ -73,7 +73,7 @@ pub(super) fn set_local_call_result<'i>(
                 }
             };
         }
-        CallOutput::Accumulator(name) => {
+        CallOutputValue::Accumulator(name) => {
             match exec_ctx.data_cache.entry(name.to_string()) {
                 Occupied(mut entry) => match entry.get_mut() {
                     // if result is an array, insert result to the end of the array
@@ -85,7 +85,7 @@ pub(super) fn set_local_call_result<'i>(
                 }
             };
         }
-        CallOutput::None => {}
+        CallOutputValue::None => {}
     }
 
     Ok(())
@@ -113,7 +113,7 @@ pub(super) fn set_remote_call_result<'i>(
 /// and returns Ok(true) if the call should be executed further.
 pub(super) fn handle_prev_state<'i>(
     triplet: &Rc<ResolvedTriplet>,
-    output: &CallOutput<'i>,
+    output: &CallOutputValue<'i>,
     prev_state: ExecutedState,
     exec_ctx: &mut ExecutionCtx<'i>,
     trace_ctx: &mut ExecutionTraceCtx,

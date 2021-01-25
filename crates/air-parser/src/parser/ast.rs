@@ -35,30 +35,30 @@ pub enum Instruction<'i> {
 
 #[derive(Serialize, Debug, PartialEq, Eq)]
 pub enum PeerPart<'i> {
-    PeerPk(InstructionArg<'i>),
-    PeerPkWithServiceId(InstructionArg<'i>, InstructionArg<'i>),
+    PeerPk(CallArgValue<'i>),
+    PeerPkWithServiceId(CallArgValue<'i>, CallArgValue<'i>),
 }
 
 #[derive(Serialize, Debug, PartialEq, Eq)]
 pub enum FunctionPart<'i> {
-    FuncName(InstructionArg<'i>),
-    ServiceIdWithFuncName(InstructionArg<'i>, InstructionArg<'i>),
+    FuncName(CallArgValue<'i>),
+    ServiceIdWithFuncName(CallArgValue<'i>, CallArgValue<'i>),
 }
 
 #[derive(Serialize, Debug, PartialEq, Eq)]
 pub struct Call<'i> {
     pub peer_part: PeerPart<'i>,
     pub function_part: FunctionPart<'i>,
-    pub args: Rc<Vec<InstructionArg<'i>>>,
-    pub output: CallOutput<'i>,
+    pub args: Rc<Vec<CallArgValue<'i>>>,
+    pub output: CallOutputValue<'i>,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Hash, Serialize, Deserialize)]
-pub enum InstructionArg<'i> {
-    Variable(&'i str),
-    Literal(&'i str),
-    JsonPath { variable: &'i str, path: &'i str },
+pub enum CallArgValue<'i> {
     InitPeerId,
+    Literal(&'i str),
+    Variable(&'i str),
+    JsonPath { variable: &'i str, path: &'i str },
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Hash, Serialize, Deserialize)]
@@ -67,8 +67,15 @@ pub enum IterableValue<'i> {
     JsonPath { variable: &'i str, path: &'i str },
 }
 
+#[derive(Debug, PartialEq, Eq, Clone, Hash, Serialize, Deserialize)]
+pub enum MatchableValue<'i> {
+    Literal(&'i str),
+    Variable(&'i str),
+    JsonPath { variable: &'i str, path: &'i str },
+}
+
 #[derive(Serialize, Debug, Hash, PartialEq, Eq, Clone)]
-pub enum CallOutput<'i> {
+pub enum CallOutputValue<'i> {
     Scalar(&'i str),
     Accumulator(&'i str),
     None,
@@ -84,7 +91,11 @@ pub struct Par<'i>(pub Box<Instruction<'i>>, pub Box<Instruction<'i>>);
 pub struct Xor<'i>(pub Box<Instruction<'i>>, pub Box<Instruction<'i>>);
 
 #[derive(Serialize, Debug, PartialEq, Eq)]
-pub struct Match<'i>(pub InstructionArg<'i>, pub InstructionArg<'i>, pub Box<Instruction<'i>>);
+pub struct Match<'i>(
+    pub MatchableValue<'i>,
+    pub MatchableValue<'i>,
+    pub Box<Instruction<'i>>,
+);
 
 #[derive(Serialize, Debug, PartialEq, Eq)]
 pub struct Fold<'i> {
