@@ -13,7 +13,7 @@ pub AIR = Instr;
 
 Instr: Box<Instruction<'input>> = {
     "(" call <p:PeerPart> <f:FPart> <args:Args> <output:Output?> ")" => {
-        let output = output.unwrap_or(CallOutput::None);
+        let output = output.unwrap_or(CallOutputValue::None);
         let args = Rc::new(args);
         Box::new(Instruction::Call(Call{peer_part: p, function_part: f, args, output}))
     },
@@ -31,10 +31,12 @@ Instr: Box<Instruction<'input>> = {
 
     "(" xor <l:Instr> <r:Instr> ")" => Box::new(Instruction::Xor(Xor(l, r))),
 
+    "(" match_ <l:Matchable> <r:Matchable> <i:Instr> ")" => Box::new(Instruction::Match(Match(l, r, i))),
+
     ! => { errors.push(<>); Box::new(Instruction::Error) },
 }
 
-Args: Vec<CallInstructionValue<'input>> = {
+Args: Vec<CallArgValue<'input>> = {
     "[" <args:(<Arg>)*> "]" => args
 }
 
@@ -48,10 +50,25 @@ PeerPart: PeerPart<'input> = {
     "(" <pid:PeerId> <sid:ServiceId> ")" => PeerPart::PeerPkWithServiceId(pid, sid),
 }
 
-Output: CallOutput<'input> = {
-    <s:Alphanumeric> => CallOutput::Scalar(s),
-    <a:Accumulator> => CallOutput::Accumulator(a),
+Output: CallOutputValue<'input> = {
+    <s:Alphanumeric> => CallOutputValue::Scalar(s),
+    <a:Accumulator> => CallOutputValue::Accumulator(a),
 };
+
+Function = CallArgValue;
+PeerId = CallArgValue;
+ServiceId = CallArgValue;
+Arg = CallArgValue;
+
+CallArgValue: CallArgValue<'input> = {
+    <s:Literal> => CallArgValue::Literal(s),
+    <s:Alphanumeric> => CallArgValue::Variable(s),
+    <v:JsonPath> => {
+        let (variable, path) = into_variable_and_path(v.0, v.1);
+        CallArgValue::JsonPath { variable, path }
+    },
+    InitPeerId => CallArgValue::InitPeerId,
+}
 
 Iterable: IterableValue<'input> = {
     <s:Alphanumeric> => IterableValue::Variable(s),
@@ -61,19 +78,13 @@ Iterable: IterableValue<'input> = {
     },
 }
 
-Function = CallInstructionValue;
-PeerId = CallInstructionValue;
-ServiceId = CallInstructionValue;
-Arg = CallInstructionValue;
-
-CallInstructionValue: CallInstructionValue<'input> = {
-    <s:Literal> => CallInstructionValue::Literal(s),
-    <s:Alphanumeric> => CallInstructionValue::Variable(s),
+Matchable: MatchableValue<'input> = {
+    <s:Alphanumeric> => MatchableValue::Variable(s),
+    <s:Literal> => MatchableValue::Literal(s),
     <v:JsonPath> => {
         let (variable, path) = into_variable_and_path(v.0, v.1);
-        CallInstructionValue::JsonPath { variable, path }
+        MatchableValue::JsonPath { variable, path }
     },
-    InitPeerId => CallInstructionValue::InitPeerId,
 }
 
 extern {
@@ -100,5 +111,6 @@ extern {
         fold => Token::Fold,
         xor => Token::Xor,
         next => Token::Next,
+        match_ => Token::Match,
     }
 }

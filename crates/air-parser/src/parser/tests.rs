@@ -27,8 +27,8 @@ fn parse(source_code: &str) -> Instruction {
 #[test]
 fn parse_seq() {
     use ast::Call;
-    use ast::CallInstructionValue::*;
-    use ast::CallOutput::*;
+    use ast::CallArgValue::*;
+    use ast::CallOutputValue::*;
     use ast::FunctionPart::*;
     use ast::PeerPart::*;
 
@@ -59,8 +59,8 @@ fn parse_seq() {
 #[test]
 fn parse_seq_seq() {
     use ast::Call;
-    use ast::CallInstructionValue::*;
-    use ast::CallOutput::*;
+    use ast::CallArgValue::*;
+    use ast::CallOutputValue::*;
     use ast::FunctionPart::*;
     use ast::PeerPart::*;
 
@@ -102,8 +102,8 @@ fn parse_seq_seq() {
 #[test]
 fn parse_json_path() {
     use ast::Call;
-    use ast::CallInstructionValue::*;
-    use ast::CallOutput::*;
+    use ast::CallArgValue::*;
+    use ast::CallOutputValue::*;
     use ast::FunctionPart::*;
     use ast::PeerPart::*;
 
@@ -126,8 +126,8 @@ fn parse_json_path() {
 #[test]
 fn parse_json_path_complex() {
     use ast::Call;
-    use ast::CallInstructionValue::*;
-    use ast::CallOutput::*;
+    use ast::CallArgValue::*;
+    use ast::CallOutputValue::*;
     use ast::FunctionPart::*;
     use ast::PeerPart::*;
 
@@ -164,8 +164,8 @@ fn parse_json_path_complex() {
 #[test]
 fn json_path_square_braces() {
     use ast::Call;
-    use ast::CallInstructionValue::*;
-    use ast::CallOutput::*;
+    use ast::CallArgValue::*;
+    use ast::CallOutputValue::*;
     use ast::FunctionPart::*;
     use ast::PeerPart::*;
 
@@ -267,8 +267,8 @@ fn parse_fold_with_xor_par_seq() {
 #[test]
 fn parse_init_peer_id() {
     use ast::Call;
-    use ast::CallInstructionValue::*;
-    use ast::CallOutput::*;
+    use ast::CallArgValue::*;
+    use ast::CallOutputValue::*;
     use ast::FunctionPart::*;
     use ast::PeerPart::*;
 
@@ -307,8 +307,8 @@ fn parse_init_peer_id() {
 #[test]
 fn seq_par_call() {
     use ast::Call;
-    use ast::CallInstructionValue::*;
-    use ast::CallOutput::*;
+    use ast::CallArgValue::*;
+    use ast::CallOutputValue::*;
     use ast::FunctionPart::*;
     use ast::PeerPart::*;
 
@@ -361,8 +361,8 @@ fn seq_par_call() {
 #[test]
 fn seq_with_empty_and_dash() {
     use ast::Call;
-    use ast::CallInstructionValue::*;
-    use ast::CallOutput::*;
+    use ast::CallArgValue::*;
+    use ast::CallOutputValue::*;
     use ast::FunctionPart::*;
     use ast::PeerPart::*;
 
@@ -449,8 +449,8 @@ fn seq_with_empty_and_dash() {
 #[test]
 fn no_output() {
     use ast::Call;
-    use ast::CallInstructionValue::*;
-    use ast::CallOutput::*;
+    use ast::CallArgValue::*;
+    use ast::CallOutputValue::*;
     use ast::FunctionPart::*;
     use ast::PeerPart::*;
 

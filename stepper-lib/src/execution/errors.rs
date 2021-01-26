@@ -81,6 +81,10 @@ pub(crate) enum ExecutionError {
     /// Errors encountered while shadowing non-scalar values.
     #[error("variable with name '{0}' can't be shadowed, shadowing is supported only for scalar values")]
     ShadowingError(String),
+
+    /// This error type is produced by a match to notify xor that compared values aren't equal.
+    #[error("match is used without corresponding xor")]
+    MatchWithoutXorError,
 }
 
 impl ExecutionError {
@@ -102,6 +106,7 @@ impl ExecutionError {
             MultipleFoldStates(_) => 12,
             InvalidExecutedState(..) => 13,
             ShadowingError(_) => 14,
+            MatchWithoutXorError => 15,
         }
     }
 }

@@ -29,7 +29,7 @@ use crate::JValue;
 use crate::ResolvedTriplet;
 use crate::SecurityTetraplet;
 
-use air_parser::ast::{CallInstructionValue, CallOutput};
+use air_parser::ast::{CallArgValue, CallOutputValue};
 
 use std::rc::Rc;
 
@@ -37,8 +37,8 @@ use std::rc::Rc;
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub(super) struct ResolvedCall<'i> {
     triplet: Rc<ResolvedTriplet>,
-    function_arg_paths: Rc<Vec<CallInstructionValue<'i>>>,
-    output: CallOutput<'i>,
+    function_arg_paths: Rc<Vec<CallArgValue<'i>>>,
+    output: CallOutputValue<'i>,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
