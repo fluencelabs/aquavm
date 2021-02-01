@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use super::compare_matchable::is_matchable_eq;
+use super::compare_matchable::are_matchable_eq;
 use super::ExecutionCtx;
 use super::ExecutionError;
 use super::ExecutionResult;
@@ -27,7 +27,7 @@ impl<'i> super::ExecutableInstruction<'i> for Match<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut ExecutionTraceCtx) -> ExecutionResult<()> {
         log_instruction!(match_, exec_ctx, trace_ctx);
 
-        let are_values_equal = is_matchable_eq(&self.left_value, &self.right_value, exec_ctx)?;
+        let are_values_equal = are_matchable_eq(&self.left_value, &self.right_value, exec_ctx)?;
 
         if !are_values_equal {
             return Err(ExecutionError::MatchWithoutXorError);

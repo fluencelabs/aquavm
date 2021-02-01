@@ -16,4 +16,4 @@
 
 mod compare_matchable;
 
-pub(super) use compare_matchable::is_matchable_eq;
+pub(super) use compare_matchable::are_matchable_eq;

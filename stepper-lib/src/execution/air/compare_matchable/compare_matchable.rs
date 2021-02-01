@@ -21,7 +21,7 @@ use crate::JValue;
 
 use air_parser::ast::MatchableValue;
 
-pub(crate) fn is_matchable_eq<'ctx>(
+pub(crate) fn are_matchable_eq<'ctx>(
     left: &MatchableValue<'_>,
     right: &MatchableValue<'_>,
     exec_ctx: &'ctx ExecutionCtx<'_>,

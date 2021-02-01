@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use super::compare_matchable::is_matchable_eq;
+use super::compare_matchable::are_matchable_eq;
 use super::ExecutionCtx;
 use super::ExecutionError;
 use super::ExecutionResult;
@@ -27,7 +27,7 @@ impl<'i> super::ExecutableInstruction<'i> for MisMatch<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut ExecutionTraceCtx) -> ExecutionResult<()> {
         log_instruction!(match_, exec_ctx, trace_ctx);
 
-        let are_values_equal = is_matchable_eq(&self.left_value, &self.right_value, exec_ctx)?;
+        let are_values_equal = are_matchable_eq(&self.left_value, &self.right_value, exec_ctx)?;
 
         if are_values_equal {
             return Err(ExecutionError::MatchWithoutXorError);
@@ -172,7 +172,7 @@ mod tests {
             (seq
                 (seq
                     (call "{0}" ("" "") ["value_1"] value_1)
-                    (call "{0}" ("" "") ["value_2"] value_2)
+                    (call "{0}" ("" "") ["value_1"] value_2)
                 )
                 (mismatch value_1 value_2
                     (call "{1}" ("service_id_2" "local_fn_name") ["result_1"] result_1)
