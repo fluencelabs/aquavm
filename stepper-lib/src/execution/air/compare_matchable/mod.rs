@@ -14,27 +14,6 @@
  * limitations under the License.
  */
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub enum Token<'input> {
-    OpenRoundBracket,
-    CloseRoundBracket,
-    OpenSquareBracket,
-    CloseSquareBracket,
+mod compare_matchable;
 
-    StringLiteral(&'input str),
-    Alphanumeric(&'input str),
-    JsonPath(&'input str, usize),
-    Accumulator(&'input str),
-
-    InitPeerId,
-
-    Call,
-    Seq,
-    Par,
-    Null,
-    Fold,
-    Xor,
-    Next,
-    Match,
-    MisMatch,
-}
+pub(super) use compare_matchable::is_matchable_eq;

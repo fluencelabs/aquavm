@@ -31,7 +31,15 @@ Instr: Box<Instruction<'input>> = {
 
     "(" xor <l:Instr> <r:Instr> ")" => Box::new(Instruction::Xor(Xor(l, r))),
 
-    "(" match_ <l:Matchable> <r:Matchable> <i:Instr> ")" => Box::new(Instruction::Match(Match(l, r, i))),
+    "(" match_ <l:Matchable> <r:Matchable> <i:Instr> ")" => {
+        let match_ = Match { left_value: l, right_value: r, instruction: i};
+        Box::new(Instruction::Match(match_))
+    },
+
+    "(" mismatch <l:Matchable> <r:Matchable> <i:Instr> ")" => {
+        let mismatch = MisMatch { left_value: l, right_value: r, instruction: i};
+        Box::new(Instruction::MisMatch(mismatch))
+     },
 
     ! => { errors.push(<>); Box::new(Instruction::Error) },
 }
@@ -112,5 +120,6 @@ extern {
         xor => Token::Xor,
         next => Token::Next,
         match_ => Token::Match,
+        mismatch => Token::MisMatch,
     }
 }

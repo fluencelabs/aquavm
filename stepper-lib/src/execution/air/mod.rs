@@ -15,8 +15,10 @@
  */
 
 mod call;
+mod compare_matchable;
 mod fold;
 mod match_;
+mod mismatch;
 mod null;
 mod par;
 mod seq;
@@ -46,6 +48,7 @@ impl<'i> ExecutableInstruction<'i> for Instruction<'i> {
             Instruction::Seq(seq) => seq.execute(exec_ctx, trace_ctx),
             Instruction::Xor(xor) => xor.execute(exec_ctx, trace_ctx),
             Instruction::Match(match_) => match_.execute(exec_ctx, trace_ctx),
+            Instruction::MisMatch(mismatch) => mismatch.execute(exec_ctx, trace_ctx),
             Instruction::Error => unreachable!("should not execute if parsing succeeded. QED."),
         }
     }

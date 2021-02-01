@@ -21,15 +21,15 @@ use super::ExecutionResult;
 use super::ExecutionTraceCtx;
 use crate::log_instruction;
 
-use air_parser::ast::Match;
+use air_parser::ast::MisMatch;
 
-impl<'i> super::ExecutableInstruction<'i> for Match<'i> {
+impl<'i> super::ExecutableInstruction<'i> for MisMatch<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut ExecutionTraceCtx) -> ExecutionResult<()> {
         log_instruction!(match_, exec_ctx, trace_ctx);
 
         let are_values_equal = is_matchable_eq(&self.left_value, &self.right_value, exec_ctx)?;
 
-        if !are_values_equal {
+        if are_values_equal {
             return Err(ExecutionError::MatchWithoutXorError);
         }
 
@@ -49,7 +49,7 @@ mod tests {
     use std::rc::Rc;
 
     #[test]
-    fn match_equal() {
+    fn mismatch_equal() {
         use crate::contexts::execution_trace::CallResult::*;
         use crate::contexts::execution_trace::ExecutedState::*;
 
@@ -67,45 +67,7 @@ mod tests {
                     (call "{0}" ("" "") ["value_1"] value_2)
                 )
                 (xor
-                    (match value_1 value_2
-                        (call "{1}" ("service_id_2" "local_fn_name") ["result_1"] result_1)
-                    )
-                    (call "{1}" ("service_id_2" "local_fn_name") ["result_2"] result_2)
-                )
-            )"#,
-            set_variable_peer_id, local_peer_id
-        );
-
-        let res = call_vm!(set_variable_vm, "asd", script.clone(), "", "");
-        let res = call_vm!(vm, "asd", script, "", res.data);
-
-        let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid json");
-        let expected_executed_call_result = Call(Executed(Rc::new(JValue::String(String::from("result_1")))));
-
-        assert_eq!(actual_trace.len(), 3);
-        assert_eq!(actual_trace[2], expected_executed_call_result);
-    }
-
-    #[test]
-    fn match_not_equal() {
-        use crate::contexts::execution_trace::CallResult::*;
-        use crate::contexts::execution_trace::ExecutedState::*;
-
-        let set_variable_peer_id = "set_variable_peer_id";
-        let mut set_variable_vm = create_aqua_vm(echo_string_call_service(), set_variable_peer_id);
-
-        let local_peer_id = "local_peer_id";
-        let mut vm = create_aqua_vm(echo_string_call_service(), local_peer_id);
-
-        let script = format!(
-            r#"
-            (seq
-                (seq
-                    (call "{0}" ("" "") ["value_1"] value_1)
-                    (call "{0}" ("" "") ["value_2"] value_2)
-                )
-                (xor
-                    (match value_1 value_2
+                    (mismatch value_1 value_2
                         (call "{1}" ("service_id_2" "local_fn_name") ["result_1"] result_1)
                     )
                     (call "{1}" ("service_id_2" "local_fn_name") ["result_2"] result_2)
@@ -125,7 +87,7 @@ mod tests {
     }
 
     #[test]
-    fn match_with_string() {
+    fn mismatch_not_equal() {
         use crate::contexts::execution_trace::CallResult::*;
         use crate::contexts::execution_trace::ExecutedState::*;
 
@@ -138,9 +100,12 @@ mod tests {
         let script = format!(
             r#"
             (seq
-                (call "{0}" ("" "") ["value_1"] value_1)
+                (seq
+                    (call "{0}" ("" "") ["value_1"] value_1)
+                    (call "{0}" ("" "") ["value_2"] value_2)
+                )
                 (xor
-                    (match value_1 "value_1"
+                    (mismatch value_1 value_2
                         (call "{1}" ("service_id_2" "local_fn_name") ["result_1"] result_1)
                     )
                     (call "{1}" ("service_id_2" "local_fn_name") ["result_2"] result_2)
@@ -155,12 +120,47 @@ mod tests {
         let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid json");
         let expected_executed_call_result = Call(Executed(Rc::new(JValue::String(String::from("result_1")))));
 
+        assert_eq!(actual_trace.len(), 3);
+        assert_eq!(actual_trace[2], expected_executed_call_result);
+    }
+
+    #[test]
+    fn mismatch_with_string() {
+        use crate::contexts::execution_trace::CallResult::*;
+        use crate::contexts::execution_trace::ExecutedState::*;
+
+        let set_variable_peer_id = "set_variable_peer_id";
+        let mut set_variable_vm = create_aqua_vm(echo_string_call_service(), set_variable_peer_id);
+
+        let local_peer_id = "local_peer_id";
+        let mut vm = create_aqua_vm(echo_string_call_service(), local_peer_id);
+
+        let script = format!(
+            r#"
+            (seq
+                (call "{0}" ("" "") ["value_1"] value_1)
+                (xor
+                    (mismatch value_1 "value_1"
+                        (call "{1}" ("service_id_2" "local_fn_name") ["result_1"] result_1)
+                    )
+                    (call "{1}" ("service_id_2" "local_fn_name") ["result_2"] result_2)
+                )
+            )"#,
+            set_variable_peer_id, local_peer_id
+        );
+
+        let res = call_vm!(set_variable_vm, "asd", script.clone(), "", "");
+        let res = call_vm!(vm, "asd", script, "", res.data);
+
+        let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid json");
+        let expected_executed_call_result = Call(Executed(Rc::new(JValue::String(String::from("result_2")))));
+
         assert_eq!(actual_trace.len(), 2);
         assert_eq!(actual_trace[1], expected_executed_call_result);
     }
 
     #[test]
-    fn match_without_xor() {
+    fn mismatch_without_xor() {
         let set_variable_peer_id = "set_variable_peer_id";
         let mut set_variable_vm = create_aqua_vm(echo_string_call_service(), set_variable_peer_id);
 
@@ -174,7 +174,7 @@ mod tests {
                     (call "{0}" ("" "") ["value_1"] value_1)
                     (call "{0}" ("" "") ["value_2"] value_2)
                 )
-                (match value_1 value_2
+                (mismatch value_1 value_2
                     (call "{1}" ("service_id_2" "local_fn_name") ["result_1"] result_1)
                 )
             )"#,
