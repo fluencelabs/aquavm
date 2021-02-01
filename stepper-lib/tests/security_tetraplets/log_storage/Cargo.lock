@@ -11,7 +11,7 @@ dependencies = [
 
 [[package]]
 name = "air-parser"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "codespan",
  "codespan-reporting",
@@ -672,7 +672,7 @@ dependencies = [
 
 [[package]]
 name = "stepper-lib"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "air-parser",
  "boolinator",

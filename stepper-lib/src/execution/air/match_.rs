@@ -39,16 +39,19 @@ impl<'i> super::ExecutableInstruction<'i> for Match<'i> {
     }
 }
 
+use crate::execution::utils::resolve_to_jvaluable;
+use crate::JValue;
+
 fn compare_matchable<'ctx>(
     left: &MatchableValue<'_>,
     right: &MatchableValue<'_>,
     exec_ctx: &'ctx ExecutionCtx<'_>,
 ) -> ExecutionResult<bool> {
-    use crate::execution::utils::resolve_to_jvaluable;
     use MatchableValue::*;
 
     match (left, right) {
-        (Literal(left_name), Literal(right_name)) => Ok(left_name == right_name),
+        (Literal(name), matchable) => compare_matchable_and_literal(matchable, name, exec_ctx),
+        (matchable, Literal(name)) => compare_matchable_and_literal(matchable, name, exec_ctx),
         (Variable(left_name), Variable(right_name)) => {
             let left_jvaluable = resolve_to_jvaluable(left_name, exec_ctx)?;
             let left_value = left_jvaluable.as_jvalue();
@@ -68,6 +71,42 @@ fn compare_matchable<'ctx>(
             Ok(left_value == right_value)
         }
         _ => Ok(false),
+    }
+}
+
+fn compare_matchable_and_literal<'ctx>(
+    matchable: &MatchableValue<'_>,
+    string_literal: &str,
+    exec_ctx: &'ctx ExecutionCtx<'_>,
+) -> ExecutionResult<bool> {
+    use std::borrow::Cow;
+    use MatchableValue::*;
+
+    fn compare_jvalue_and_literal(jvalue: Cow<'_, JValue>, string_literal: &str) -> bool {
+        use std::ops::Deref;
+
+        match jvalue.deref() {
+            JValue::String(value) => value == string_literal,
+            _ => false,
+        }
+    }
+
+    match matchable {
+        Literal(name) => Ok(name == &string_literal),
+        Variable(name) => {
+            let jvaluable = resolve_to_jvaluable(name, exec_ctx)?;
+            let jvalue = jvaluable.as_jvalue();
+            Ok(compare_jvalue_and_literal(jvalue, string_literal))
+        }
+        JsonPath { variable, path } => {
+            let jvaluable = resolve_to_jvaluable(variable, exec_ctx)?;
+            let jvalues = jvaluable.apply_json_path(path)?;
+            if jvalues.len() != 1 {
+                return Ok(false);
+            }
+
+            Ok(compare_jvalue_and_literal(Cow::Borrowed(jvalues[0]), string_literal))
+        }
     }
 }
 
@@ -156,6 +195,41 @@ mod tests {
 
         assert_eq!(actual_trace.len(), 3);
         assert_eq!(actual_trace[2], expected_executed_call_result);
+    }
+
+    #[test]
+    fn match_with_string() {
+        use crate::contexts::execution_trace::CallResult::*;
+        use crate::contexts::execution_trace::ExecutedState::*;
+
+        let set_variable_peer_id = "set_variable_peer_id";
+        let mut set_variable_vm = create_aqua_vm(echo_string_call_service(), set_variable_peer_id);
+
+        let local_peer_id = "local_peer_id";
+        let mut vm = create_aqua_vm(echo_string_call_service(), local_peer_id);
+
+        let script = format!(
+            r#"
+            (seq
+                (call "{0}" ("" "") ["value_1"] value_1)
+                (xor
+                    (match value_1 "value_1"
+                        (call "{1}" ("service_id_2" "local_fn_name") ["result_1"] result_1)
+                    )
+                    (call "{1}" ("service_id_2" "local_fn_name") ["result_2"] result_2)
+                )
+            )"#,
+            set_variable_peer_id, local_peer_id
+        );
+
+        let res = call_vm!(set_variable_vm, "asd", script.clone(), "", "");
+        let res = call_vm!(vm, "asd", script, "", res.data);
+
+        let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid json");
+        let expected_executed_call_result = Call(Executed(Rc::new(JValue::String(String::from("result_1")))));
+
+        assert_eq!(actual_trace.len(), 2);
+        assert_eq!(actual_trace[1], expected_executed_call_result);
     }
 
     #[test]
