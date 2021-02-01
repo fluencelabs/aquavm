@@ -28,6 +28,7 @@ pub enum Instruction<'i> {
     Par(Par<'i>),
     Xor(Xor<'i>),
     Match(Match<'i>),
+    MisMatch(MisMatch<'i>),
     Fold(Fold<'i>),
     Next(Next<'i>),
     Error,
@@ -91,11 +92,18 @@ pub struct Par<'i>(pub Box<Instruction<'i>>, pub Box<Instruction<'i>>);
 pub struct Xor<'i>(pub Box<Instruction<'i>>, pub Box<Instruction<'i>>);
 
 #[derive(Serialize, Debug, PartialEq, Eq)]
-pub struct Match<'i>(
-    pub MatchableValue<'i>,
-    pub MatchableValue<'i>,
-    pub Box<Instruction<'i>>,
-);
+pub struct Match<'i> {
+    pub left_value: MatchableValue<'i>,
+    pub right_value: MatchableValue<'i>,
+    pub instruction: Box<Instruction<'i>>,
+}
+
+#[derive(Serialize, Debug, PartialEq, Eq)]
+pub struct MisMatch<'i> {
+    pub left_value: MatchableValue<'i>,
+    pub right_value: MatchableValue<'i>,
+    pub instruction: Box<Instruction<'i>>,
+}
 
 #[derive(Serialize, Debug, PartialEq, Eq)]
 pub struct Fold<'i> {

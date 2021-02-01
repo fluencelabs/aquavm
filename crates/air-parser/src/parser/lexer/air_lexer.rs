@@ -181,6 +181,7 @@ fn string_to_token(input: &str, start_pos: usize) -> Result<Token, LexerError> {
         XOR_INSTR => Ok(Token::Xor),
         NEXT_INSTR => Ok(Token::Next),
         MATCH_INSTR => Ok(Token::Match),
+        MISMATCH_INSTR => Ok(Token::MisMatch),
 
         INIT_PEER_ID => Ok(Token::InitPeerId),
 
@@ -236,6 +237,7 @@ const FOLD_INSTR: &str = "fold";
 const XOR_INSTR: &str = "xor";
 const NEXT_INSTR: &str = "next";
 const MATCH_INSTR: &str = "match";
+const MISMATCH_INSTR: &str = "mismatch";
 
 const INIT_PEER_ID: &str = "%init_peer_id%";
 
