@@ -37,11 +37,16 @@ pub enum CallResult {
     CallServiceFailed(String),
 }
 
+#[derive(Debug, Default, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub struct FoldResult(pub Vec<(usize, usize)>);
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum ExecutedState {
     Par(ParResult),
     Call(CallResult),
+    Fold(FoldResult),
 }
 
 impl std::fmt::Display for ExecutedState {
@@ -50,10 +55,11 @@ impl std::fmt::Display for ExecutedState {
         use ExecutedState::*;
 
         match self {
-            Par(super::ParResult(left, right)) => write!(f, "Par({}, {})", left, right),
+            Par(ParResult(left, right)) => write!(f, "Par({}, {})", left, right),
             Call(RequestSentBy(peer_id)) => write!(f, "RequestSentBy({})", peer_id),
             Call(Executed(result)) => write!(f, "Executed({:?})", result),
             Call(CallServiceFailed(err_msg)) => write!(f, "CallServiceFailed({})", err_msg),
+            Par(FoldResult(iterations_ids)) => write!(f, "Fold({:?})", interations_ids),
         }
     }
 }

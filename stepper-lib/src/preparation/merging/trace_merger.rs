@@ -68,10 +68,10 @@ impl<'i> TraceMerger<'i> {
 
             match (prev_state, current_state) {
                 (Some(Call(prev_call)), Some(Call(call))) => {
-                    let resulted_call = Self::merge_call(prev_call, call)?;
+                    let resulted_call = Self::merge_calls(prev_call, call)?;
                     self.result_trace.push_back(Call(resulted_call));
                 }
-                (Some(Par(prev_par)), Some(Par(current_par))) => self.merge_par(prev_par, current_par)?,
+                (Some(Par(prev_par)), Some(Par(current_par))) => self.merge_pars(prev_par, current_par)?,
                 (None, Some(s)) => {
                     self.result_trace.push_back(s);
 
@@ -97,7 +97,7 @@ impl<'i> TraceMerger<'i> {
         Ok(())
     }
 
-    fn merge_call(prev_call_result: CallResult, current_call_result: CallResult) -> MergeResult<CallResult> {
+    fn merge_calls(prev_call_result: CallResult, current_call_result: CallResult) -> MergeResult<CallResult> {
         use CallResult::*;
         use DataMergingError::IncompatibleCallResults;
 
@@ -131,7 +131,7 @@ impl<'i> TraceMerger<'i> {
         }
     }
 
-    fn merge_par(&mut self, prev_par: ParResult, current_par: ParResult) -> MergeResult<()> {
+    fn merge_pars(&mut self, prev_par: ParResult, current_par: ParResult) -> MergeResult<()> {
         let prev_subtree_size = self.prev_ctx.subtree_size();
         let current_subtree_size = self.current_ctx.subtree_size();
 
