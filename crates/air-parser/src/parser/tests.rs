@@ -244,6 +244,34 @@ fn parse_fold() {
     assert_eq!(instruction, expected);
 }
 
+#[test]
+fn parse_match() {
+    use ast::MatchableValue::Variable;
+
+    let source_code = r#"
+        (match v1 v2
+            (null)
+        )
+        "#;
+    let instruction = parse(&source_code.as_ref());
+    let expected = match_(Variable("v1"), Variable("v2"), null());
+    assert_eq!(instruction, expected);
+}
+
+#[test]
+fn parse_mismatch() {
+    use ast::MatchableValue::Variable;
+
+    let source_code = r#"
+        (mismatch v1 v2
+            (null)
+        )
+        "#;
+    let instruction = parse(&source_code.as_ref());
+    let expected = mismatch(Variable("v1"), Variable("v2"), null());
+    assert_eq!(instruction, expected);
+}
+
 fn source_fold_with(name: &str) -> String {
     f!(r#"(fold iterable i
             ({name} (null) (null))
@@ -516,18 +544,23 @@ fn comments() {
 fn seq<'a>(l: Instruction<'a>, r: Instruction<'a>) -> Instruction<'a> {
     Instruction::Seq(ast::Seq(Box::new(l), Box::new(r)))
 }
+
 fn par<'a>(l: Instruction<'a>, r: Instruction<'a>) -> Instruction<'a> {
     Instruction::Par(ast::Par(Box::new(l), Box::new(r)))
 }
+
 fn xor<'a>(l: Instruction<'a>, r: Instruction<'a>) -> Instruction<'a> {
     Instruction::Xor(ast::Xor(Box::new(l), Box::new(r)))
 }
+
 fn seqnn() -> Instruction<'static> {
     seq(null(), null())
 }
+
 fn null() -> Instruction<'static> {
     Instruction::Null(ast::Null)
 }
+
 fn fold<'a>(
     iterable: ast::IterableValue<'a>,
     iterator: &'a str,
@@ -539,6 +572,31 @@ fn fold<'a>(
         instruction: std::rc::Rc::new(instruction),
     })
 }
+
+fn match_<'a>(
+    left_value: ast::MatchableValue<'a>,
+    right_value: ast::MatchableValue<'a>,
+    instruction: Instruction<'a>,
+) -> Instruction<'a> {
+    Instruction::Match(ast::Match {
+        left_value,
+        right_value,
+        instruction: Box::new(instruction),
+    })
+}
+
+fn mismatch<'a>(
+    left_value: ast::MatchableValue<'a>,
+    right_value: ast::MatchableValue<'a>,
+    instruction: Instruction<'a>,
+) -> Instruction<'a> {
+    Instruction::MisMatch(ast::MisMatch {
+        left_value,
+        right_value,
+        instruction: Box::new(instruction),
+    })
+}
+
 fn binary_instruction<'a, 'b>(
     name: &'a str,
 ) -> impl Fn(Instruction<'b>, Instruction<'b>) -> Instruction<'b> {

@@ -103,6 +103,32 @@ fn air_instructions() {
             Ok((5, Token::CloseRoundBracket, 6))
         ]
     );
+
+    let match_tokens = run_lexer("match");
+    assert_eq!(match_tokens, vec![Ok((0, Token::Match, 5))]);
+
+    let match_tokens = run_lexer("(match)");
+    assert_eq!(
+        match_tokens,
+        vec![
+            Ok((0, Token::OpenRoundBracket, 1)),
+            Ok((1, Token::Match, 6)),
+            Ok((6, Token::CloseRoundBracket, 7))
+        ]
+    );
+
+    let mismatch_tokens = run_lexer("mismatch");
+    assert_eq!(mismatch_tokens, vec![Ok((0, Token::MisMatch, 8))]);
+
+    let mismatch_tokens = run_lexer("(mismatch)");
+    assert_eq!(
+        mismatch_tokens,
+        vec![
+            Ok((0, Token::OpenRoundBracket, 1)),
+            Ok((1, Token::MisMatch, 9)),
+            Ok((9, Token::CloseRoundBracket, 10))
+        ]
+    );
 }
 
 #[test]
