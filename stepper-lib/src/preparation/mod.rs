@@ -28,4 +28,5 @@ pub(self) use crate::contexts::execution_trace::CallResult;
 pub(self) use crate::contexts::execution_trace::ExecutedState;
 pub(self) use crate::contexts::execution_trace::ExecutionTrace;
 pub(self) use crate::contexts::execution_trace::ExecutionTraceCtx;
+pub(self) use crate::contexts::execution_trace::ParResult;
 pub(self) use merging::merge_execution_traces;

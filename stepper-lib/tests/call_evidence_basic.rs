@@ -21,6 +21,7 @@ use aqua_test_utils::unit_call_service;
 use aqua_test_utils::CallServiceClosure;
 use aqua_test_utils::IValue;
 use aqua_test_utils::NEVec;
+use stepper_lib::execution_trace::ParResult;
 
 use serde_json::json;
 
@@ -60,7 +61,7 @@ fn executed_trace_seq_par_call() {
 
     let test_string = String::from("test");
     let expected_trace = vec![
-        Par(1, 1),
+        Par(ParResult(1, 1)),
         Call(Executed(Rc::new(JValue::String(test_string.clone())))),
         Call(Executed(Rc::new(JValue::String(test_string.clone())))),
         Call(Executed(Rc::new(JValue::String(test_string)))),
@@ -103,8 +104,8 @@ fn executed_trace_par_par_call() {
 
     let test_string = String::from("test");
     let expected_trace = vec![
-        Par(3, 1),
-        Par(1, 1),
+        Par(ParResult(3, 1)),
+        Par(ParResult(1, 1)),
         Call(Executed(Rc::new(JValue::String(test_string.clone())))),
         Call(RequestSentBy(local_peer_id.to_string())),
         Call(Executed(Rc::new(JValue::String(test_string)))),

@@ -186,6 +186,7 @@ mod tests {
     fn xor_par() {
         use crate::contexts::execution_trace::CallResult::*;
         use crate::contexts::execution_trace::ExecutedState::*;
+        use crate::contexts::execution_trace::ParResult;
 
         let fallible_service_id = String::from("service_id_1");
         let local_peer_id = "local_peer_id";
@@ -219,10 +220,10 @@ mod tests {
         let executed_call_result = Rc::new(JValue::String(res));
 
         let expected_trace = vec![
-            Par(2, 2),
+            Par(ParResult(2, 2)),
             Call(Executed(executed_call_result.clone())),
             Call(Executed(executed_call_result.clone())),
-            Par(1, 0),
+            Par(ParResult(1, 0)),
             Call(CallServiceFailed(String::from(r#""error""#))),
             Call(Executed(executed_call_result.clone())),
             Call(Executed(executed_call_result.clone())),

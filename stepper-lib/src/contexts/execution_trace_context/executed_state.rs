@@ -20,6 +20,10 @@ use serde::Deserialize;
 use serde::Serialize;
 use std::rc::Rc;
 
+#[derive(Debug, Default, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub struct ParResult(pub usize, pub usize);
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum CallResult {
@@ -36,7 +40,7 @@ pub enum CallResult {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum ExecutedState {
-    Par(usize, usize),
+    Par(ParResult),
     Call(CallResult),
 }
 
@@ -46,7 +50,7 @@ impl std::fmt::Display for ExecutedState {
         use ExecutedState::*;
 
         match self {
-            Par(left, right) => write!(f, "Par({}, {})", left, right),
+            Par(super::ParResult(left, right)) => write!(f, "Par({}, {})", left, right),
             Call(RequestSentBy(peer_id)) => write!(f, "RequestSentBy({})", peer_id),
             Call(Executed(result)) => write!(f, "Executed({:?})", result),
             Call(CallServiceFailed(err_msg)) => write!(f, "CallServiceFailed({})", err_msg),

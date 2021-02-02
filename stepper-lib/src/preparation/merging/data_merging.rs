@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-use crate::JValue;
 use crate::log_targets::EXECUTED_TRACE_MERGE;
 use crate::preparation::CallResult;
 use crate::preparation::DataMergingError;
 use crate::preparation::ExecutedState;
 use crate::preparation::ExecutionTrace;
+use crate::preparation::ParResult;
+use crate::JValue;
 
 use air_parser::ast::Instruction;
 
@@ -108,34 +109,14 @@ fn merge_subtree<'i>(
                 let resulted_call = merge_call(prev_call, call)?;
                 result_trace.push_back(Call(resulted_call));
             }
-            (Some(Par(prev_left, prev_right)), Some(Par(current_left, current_right))) => {
-                let prev_subtree_size = prev_merge_ctx.subtree_size();
-                let current_subtree_size = current_merge_ctx.subtree_size();
-
-                let par_position = result_trace.len();
-                // place a temporary Par value to avoid insertion in the middle
-                result_trace.push_back(Par(0, 0));
-
-                let before_result_len = result_trace.len();
-
-                prev_merge_ctx.set_subtree_size(prev_left);
-                current_merge_ctx.set_subtree_size(current_left);
-                merge_subtree(prev_merge_ctx, current_merge_ctx, aqua, result_trace)?;
-
-                let left_par_size = result_trace.len() - before_result_len;
-
-                prev_merge_ctx.set_subtree_size(prev_right);
-                current_merge_ctx.set_subtree_size(current_right);
-                merge_subtree(prev_merge_ctx, current_merge_ctx, aqua, result_trace)?;
-
-                let right_par_size = result_trace.len() - left_par_size - before_result_len;
-
-                // update the temporary Par with final values
-                result_trace[par_position] = Par(left_par_size, right_par_size);
-
-                prev_merge_ctx.set_subtree_size(prev_subtree_size - prev_left - prev_right);
-                current_merge_ctx.set_subtree_size(current_subtree_size - current_left - current_right);
-            }
+            (Some(Par(prev_par)), Some(Par(current_par))) => merge_par(
+                prev_par,
+                current_par,
+                prev_merge_ctx,
+                current_merge_ctx,
+                aqua,
+                result_trace,
+            )?,
             (None, Some(s)) => {
                 result_trace.push_back(s);
 
@@ -193,4 +174,42 @@ fn merge_call(prev_call_result: CallResult, current_call_result: CallResult) -> 
         (CallServiceFailed(_), Executed(..)) => Err(IncompatibleCallResults(prev_call_result, current_call_result)),
         (Executed(..), CallServiceFailed(_)) => Err(IncompatibleCallResults(prev_call_result, current_call_result)),
     }
+}
+
+fn merge_par<'i>(
+    prev_par: ParResult,
+    current_par: ParResult,
+    prev_merge_ctx: &mut MergeCtx<'i>,
+    current_merge_ctx: &mut MergeCtx<'i>,
+    aqua: &Instruction<'i>,
+    result_trace: &mut ExecutionTrace,
+) -> MergeResult<()> {
+    let prev_subtree_size = prev_merge_ctx.subtree_size();
+    let current_subtree_size = current_merge_ctx.subtree_size();
+
+    let par_position = result_trace.len();
+    // place a temporary Par value to avoid insertion in the middle
+    result_trace.push_back(ExecutedState::Par(ParResult(0, 0)));
+
+    let len_before_merge = result_trace.len();
+
+    prev_merge_ctx.set_subtree_size(prev_par.0);
+    current_merge_ctx.set_subtree_size(current_par.0);
+    merge_subtree(prev_merge_ctx, current_merge_ctx, aqua, result_trace)?;
+
+    let left_par_size = result_trace.len() - len_before_merge;
+
+    prev_merge_ctx.set_subtree_size(prev_par.1);
+    current_merge_ctx.set_subtree_size(current_par.1);
+    merge_subtree(prev_merge_ctx, current_merge_ctx, aqua, result_trace)?;
+
+    let right_par_size = result_trace.len() - left_par_size - len_before_merge;
+
+    // update the temporary Par with final values
+    result_trace[par_position] = ExecutedState::Par(ParResult(left_par_size, right_par_size));
+
+    prev_merge_ctx.set_subtree_size(prev_subtree_size - prev_par.0 - prev_par.1);
+    current_merge_ctx.set_subtree_size(current_subtree_size - current_par.0 - current_par.1);
+
+    Ok(())
 }

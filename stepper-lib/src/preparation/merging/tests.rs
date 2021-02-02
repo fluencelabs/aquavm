@@ -18,6 +18,7 @@ use super::merge_execution_traces;
 use crate::preparation::CallResult;
 use crate::preparation::ExecutedState;
 use crate::preparation::ExecutionTrace;
+use crate::preparation::ParResult;
 use crate::JValue;
 
 use air_parser::ast;
@@ -31,18 +32,18 @@ fn merge_call_states_1() {
     use ExecutedState::*;
 
     let mut prev_trace = ExecutionTrace::new();
-    prev_trace.push_back(Par(1, 1));
+    prev_trace.push_back(Par(ParResult(1, 1)));
     prev_trace.push_back(Call(RequestSentBy(String::from("peer_1"))));
     prev_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
-    prev_trace.push_back(Par(1, 1));
+    prev_trace.push_back(Par(ParResult(1, 1)));
     prev_trace.push_back(Call(RequestSentBy(String::from("peer_3"))));
     prev_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
 
     let mut current_trace = ExecutionTrace::new();
-    current_trace.push_back(Par(1, 1));
+    current_trace.push_back(Par(ParResult(1, 1)));
     current_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
     current_trace.push_back(Call(RequestSentBy(String::from("peer_2"))));
-    current_trace.push_back(Par(1, 1));
+    current_trace.push_back(Par(ParResult(1, 1)));
     current_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
     current_trace.push_back(Call(RequestSentBy(String::from("peer_4"))));
 
@@ -52,10 +53,10 @@ fn merge_call_states_1() {
         merge_execution_traces(prev_trace, current_trace, &aqua).expect("merging should be successful");
 
     let mut expected_merged_trace = ExecutionTrace::new();
-    expected_merged_trace.push_back(Par(1, 1));
+    expected_merged_trace.push_back(Par(ParResult(1, 1)));
     expected_merged_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
     expected_merged_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
-    expected_merged_trace.push_back(Par(1, 1));
+    expected_merged_trace.push_back(Par(ParResult(1, 1)));
     expected_merged_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
     expected_merged_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
 
@@ -68,19 +69,19 @@ fn merge_call_states_2() {
     use ExecutedState::*;
 
     let mut prev_trace = ExecutionTrace::new();
-    prev_trace.push_back(Par(1, 0));
+    prev_trace.push_back(Par(ParResult(1, 0)));
     prev_trace.push_back(Call(RequestSentBy(String::from("peer_1"))));
-    prev_trace.push_back(Par(1, 1));
+    prev_trace.push_back(Par(ParResult(1, 1)));
     prev_trace.push_back(Call(RequestSentBy(String::from("peer_2"))));
     prev_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
 
     let mut current_trace = ExecutionTrace::new();
-    current_trace.push_back(Par(2, 2));
+    current_trace.push_back(Par(ParResult(2, 2)));
     current_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
     current_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
     current_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
     current_trace.push_back(Call(RequestSentBy(String::from("peer_1"))));
-    current_trace.push_back(Par(1, 1));
+    current_trace.push_back(Par(ParResult(1, 1)));
     current_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
     current_trace.push_back(Call(RequestSentBy(String::from("peer_2"))));
 
@@ -90,12 +91,12 @@ fn merge_call_states_2() {
         merge_execution_traces(prev_trace, current_trace, &aqua).expect("merging should be successful");
 
     let mut expected_merged_trace = ExecutionTrace::new();
-    expected_merged_trace.push_back(Par(2, 2));
+    expected_merged_trace.push_back(Par(ParResult(2, 2)));
     expected_merged_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
     expected_merged_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
     expected_merged_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
     expected_merged_trace.push_back(Call(RequestSentBy(String::from("peer_1"))));
-    expected_merged_trace.push_back(Par(1, 1));
+    expected_merged_trace.push_back(Par(ParResult(1, 1)));
     expected_merged_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
     expected_merged_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
 
@@ -109,24 +110,24 @@ fn merge_call_states_3() {
 
     let mut prev_trace = ExecutionTrace::new();
     prev_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
-    prev_trace.push_back(Par(2, 0));
-    prev_trace.push_back(Par(1, 0));
+    prev_trace.push_back(Par(ParResult(2, 0)));
+    prev_trace.push_back(Par(ParResult(1, 0)));
     prev_trace.push_back(Call(RequestSentBy(String::from("peer_1"))));
-    prev_trace.push_back(Par(1, 2));
+    prev_trace.push_back(Par(ParResult(1, 2)));
     prev_trace.push_back(Call(RequestSentBy(String::from("peer_1"))));
     prev_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
     prev_trace.push_back(Call(RequestSentBy(String::from("peer_1"))));
 
     let mut current_trace = ExecutionTrace::new();
     current_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
-    current_trace.push_back(Par(3, 3));
-    current_trace.push_back(Par(1, 1));
+    current_trace.push_back(Par(ParResult(3, 3)));
+    current_trace.push_back(Par(ParResult(1, 1)));
     current_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
     current_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
-    current_trace.push_back(Par(1, 1));
+    current_trace.push_back(Par(ParResult(1, 1)));
     current_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
     current_trace.push_back(Call(RequestSentBy(String::from("peer_1"))));
-    current_trace.push_back(Par(1, 1));
+    current_trace.push_back(Par(ParResult(1, 1)));
     current_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
     current_trace.push_back(Call(RequestSentBy(String::from("peer_1"))));
 
@@ -137,14 +138,14 @@ fn merge_call_states_3() {
 
     let mut expected_merged_trace = ExecutionTrace::new();
     expected_merged_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
-    expected_merged_trace.push_back(Par(3, 3));
-    expected_merged_trace.push_back(Par(1, 1));
+    expected_merged_trace.push_back(Par(ParResult(3, 3)));
+    expected_merged_trace.push_back(Par(ParResult(1, 1)));
     expected_merged_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
     expected_merged_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
-    expected_merged_trace.push_back(Par(1, 1));
+    expected_merged_trace.push_back(Par(ParResult(1, 1)));
     expected_merged_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
     expected_merged_trace.push_back(Call(RequestSentBy(String::from("peer_1"))));
-    expected_merged_trace.push_back(Par(1, 2));
+    expected_merged_trace.push_back(Par(ParResult(1, 2)));
     expected_merged_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
     expected_merged_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
     expected_merged_trace.push_back(Call(RequestSentBy(String::from("peer_1"))));
