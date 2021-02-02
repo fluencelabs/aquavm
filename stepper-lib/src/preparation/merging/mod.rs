@@ -14,18 +14,8 @@
  * limitations under the License.
  */
 
-mod errors;
-mod merging;
-mod preparation;
+mod data_merging;
+#[cfg(test)]
+mod tests;
 
-pub(crate) use errors::DataMergingError;
-pub(crate) use errors::PreparationError;
-pub(crate) use preparation::prepare;
-pub(crate) use preparation::PreparationDescriptor;
-
-pub(self) use crate::contexts::execution::*;
-pub(self) use crate::contexts::execution_trace::CallResult;
-pub(self) use crate::contexts::execution_trace::ExecutedState;
-pub(self) use crate::contexts::execution_trace::ExecutionTrace;
-pub(self) use crate::contexts::execution_trace::ExecutionTraceCtx;
-pub(self) use merging::merge_execution_traces;
+pub(crate) use data_merging::merge_execution_traces;

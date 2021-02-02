@@ -65,7 +65,7 @@ pub(crate) fn prepare<'i>(
         trace
     );
 
-    let (exec_ctx, trace_ctx) = make_contexts(prev_trace, trace, init_peer_id)?;
+    let (exec_ctx, trace_ctx) = make_contexts(prev_trace, trace, init_peer_id, &aqua)?;
     let result = PreparationDescriptor {
         exec_ctx,
         trace_ctx,
@@ -77,16 +77,17 @@ pub(crate) fn prepare<'i>(
 
 /// Make execution and execution trace contexts from supplied data.
 /// Internally, it unites variable from previous and current data and merges executed traces.
-fn make_contexts(
+fn make_contexts<'i>(
     prev_trace: ExecutionTrace,
     trace: ExecutionTrace,
     init_peer_id: String,
+    aqua: &Instruction<'i>,
 ) -> PreparationResult<(ExecutionCtx<'static>, ExecutionTraceCtx)> {
     let current_peer_id = get_current_peer_id().map_err(|e| PreparationError::CurrentPeerIdEnvError(e))?;
     log::trace!(target: RUN_PARAMS, "current peer id {}", current_peer_id);
 
     let exec_ctx = ExecutionCtx::new(current_peer_id, init_peer_id);
-    let current_trace = merge_execution_traces(prev_trace, trace)?;
+    let current_trace = merge_execution_traces(prev_trace, trace, aqua)?;
     let trace_ctx = ExecutionTraceCtx::new(current_trace);
 
     Ok((exec_ctx, trace_ctx))
