@@ -46,7 +46,6 @@ pub struct FoldResult(pub Vec<(usize, usize)>);
 pub enum ExecutedState {
     Par(ParResult),
     Call(CallResult),
-    Fold(FoldResult),
 }
 
 impl std::fmt::Display for ExecutedState {
@@ -59,7 +58,6 @@ impl std::fmt::Display for ExecutedState {
             Call(RequestSentBy(peer_id)) => write!(f, "RequestSentBy({})", peer_id),
             Call(Executed(result)) => write!(f, "Executed({:?})", result),
             Call(CallServiceFailed(err_msg)) => write!(f, "CallServiceFailed({})", err_msg),
-            Par(FoldResult(iterations_ids)) => write!(f, "Fold({:?})", interations_ids),
         }
     }
 }
