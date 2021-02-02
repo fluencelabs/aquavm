@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use crate::JValue;
 use crate::log_targets::EXECUTED_TRACE_MERGE;
 use crate::preparation::CallResult;
 use crate::preparation::DataMergingError;
@@ -22,58 +23,85 @@ use crate::preparation::ExecutionTrace;
 
 use air_parser::ast::Instruction;
 
+use std::collections::HashMap;
+
 type MergeResult<T> = Result<T, DataMergingError>;
 
 pub(crate) fn merge_execution_traces<'i>(
-    mut prev_trace: ExecutionTrace,
-    mut current_trace: ExecutionTrace,
+    prev_trace: ExecutionTrace,
+    current_trace: ExecutionTrace,
     aqua: &Instruction<'i>,
 ) -> MergeResult<ExecutionTrace> {
     let mut merged_trace = ExecutionTrace::new();
 
-    let prev_subtree_size = prev_trace.len();
-    let current_subtree_size = current_trace.len();
+    let mut prev_ctx = MergeCtx::new(prev_trace);
+    let mut current_ctx = MergeCtx::new(current_trace);
 
-    merge_subtree(
-        &mut prev_trace,
-        prev_subtree_size,
-        &mut current_trace,
-        current_subtree_size,
-        aqua,
-        &mut merged_trace,
-    )?;
+    merge_subtree(&mut prev_ctx, &mut current_ctx, aqua, &mut merged_trace)?;
 
     log::trace!(target: EXECUTED_TRACE_MERGE, "merged trace: {:?}", merged_trace);
 
     Ok(merged_trace)
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) struct MergeCtx<'i> {
+    trace: ExecutionTrace,
+    subtree_size: usize,
+    streams: HashMap<String, Vec<&'i JValue>>,
+}
+
+impl MergeCtx<'_> {
+    pub(crate) fn new(trace: ExecutionTrace) -> Self {
+        let subtree_size = trace.len();
+
+        Self {
+            trace,
+            subtree_size,
+            streams: HashMap::new(),
+        }
+    }
+
+    pub(crate) fn next_subtree_state(&mut self) -> Option<ExecutedState> {
+        if self.subtree_size != 0 {
+            self.subtree_size -= 1;
+            self.trace.pop_front()
+        } else {
+            None
+        }
+    }
+
+    pub(crate) fn set_subtree_size(&mut self, new_subtree_size: usize) {
+        self.subtree_size = new_subtree_size;
+    }
+
+    pub(crate) fn drain_subtree_states(&mut self) -> MergeResult<impl Iterator<Item = ExecutedState> + '_> {
+        use DataMergingError::ExecutedTraceTooSmall;
+
+        if self.trace.len() < self.subtree_size {
+            return Err(ExecutedTraceTooSmall(self.trace.len(), self.subtree_size));
+        }
+
+        Ok(self.trace.drain(..self.subtree_size))
+    }
+
+    pub(crate) fn subtree_size(&self) -> usize {
+        self.subtree_size
+    }
+}
+
 fn merge_subtree<'i>(
-    prev_trace: &mut ExecutionTrace,
-    mut prev_subtree_size: usize,
-    current_trace: &mut ExecutionTrace,
-    mut current_subtree_size: usize,
+    prev_merge_ctx: &mut MergeCtx<'i>,
+    current_merge_ctx: &mut MergeCtx<'i>,
     aqua: &Instruction<'i>,
     result_trace: &mut ExecutionTrace,
 ) -> MergeResult<()> {
-    use DataMergingError::ExecutedTraceTooSmall;
     use DataMergingError::IncompatibleExecutedStates;
     use ExecutedState::*;
 
     loop {
-        let prev_state = if prev_subtree_size != 0 {
-            prev_subtree_size -= 1;
-            prev_trace.pop_front()
-        } else {
-            None
-        };
-
-        let current_state = if current_subtree_size != 0 {
-            current_subtree_size -= 1;
-            current_trace.pop_front()
-        } else {
-            None
-        };
+        let prev_state = prev_merge_ctx.next_subtree_state();
+        let current_state = current_merge_ctx.next_subtree_state();
 
         match (prev_state, current_state) {
             (Some(Call(prev_call)), Some(Call(call))) => {
@@ -81,44 +109,49 @@ fn merge_subtree<'i>(
                 result_trace.push_back(Call(resulted_call));
             }
             (Some(Par(prev_left, prev_right)), Some(Par(current_left, current_right))) => {
+                let prev_subtree_size = prev_merge_ctx.subtree_size();
+                let current_subtree_size = current_merge_ctx.subtree_size();
+
                 let par_position = result_trace.len();
-                // place temporary Par value to avoid insert in the middle
+                // place a temporary Par value to avoid insertion in the middle
                 result_trace.push_back(Par(0, 0));
 
                 let before_result_len = result_trace.len();
 
-                merge_subtree(prev_trace, prev_left, current_trace, current_left, aqua, result_trace)?;
+                prev_merge_ctx.set_subtree_size(prev_left);
+                current_merge_ctx.set_subtree_size(current_left);
+                merge_subtree(prev_merge_ctx, current_merge_ctx, aqua, result_trace)?;
+
                 let left_par_size = result_trace.len() - before_result_len;
 
-                merge_subtree(prev_trace, prev_right, current_trace, current_right, aqua, result_trace)?;
+                prev_merge_ctx.set_subtree_size(prev_right);
+                current_merge_ctx.set_subtree_size(current_right);
+                merge_subtree(prev_merge_ctx, current_merge_ctx, aqua, result_trace)?;
+
                 let right_par_size = result_trace.len() - left_par_size - before_result_len;
 
-                // update temporary Par with final values
+                // update the temporary Par with final values
                 result_trace[par_position] = Par(left_par_size, right_par_size);
 
-                prev_subtree_size -= prev_left + prev_right;
-                current_subtree_size -= current_left + current_right;
+                prev_merge_ctx.set_subtree_size(prev_subtree_size - prev_left - prev_right);
+                current_merge_ctx.set_subtree_size(current_subtree_size - current_left - current_right);
             }
             (None, Some(s)) => {
-                if current_trace.len() < current_subtree_size {
-                    return Err(ExecutedTraceTooSmall(current_trace.len(), current_subtree_size));
-                }
-
                 result_trace.push_back(s);
-                result_trace.extend(current_trace.drain(..current_subtree_size));
+
+                let current_states = current_merge_ctx.drain_subtree_states()?;
+                result_trace.extend(current_states);
                 break;
             }
             (Some(s), None) => {
-                if prev_trace.len() < prev_subtree_size {
-                    return Err(ExecutedTraceTooSmall(prev_trace.len(), prev_subtree_size));
-                }
-
                 result_trace.push_back(s);
-                result_trace.extend(prev_trace.drain(..prev_subtree_size));
+
+                let prev_states = prev_merge_ctx.drain_subtree_states()?;
+                result_trace.extend(prev_states);
                 break;
             }
             (None, None) => break,
-            // this match arn represents (Call, Par) and (Par, Call) states
+            // this match arm represents (Call, Par) and (Par, Call) states
             (Some(prev_state), Some(current_state)) => {
                 return Err(IncompatibleExecutedStates(prev_state, current_state))
             }

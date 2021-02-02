@@ -20,7 +20,7 @@ use serde::Deserialize;
 use serde::Serialize;
 use std::rc::Rc;
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum CallResult {
     /// Request was sent to a target node by node with such public key and it shouldn't be called again.
@@ -33,7 +33,7 @@ pub enum CallResult {
     CallServiceFailed(String),
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum ExecutedState {
     Par(usize, usize),
