@@ -29,6 +29,7 @@ pub(crate) fn call_service(
     serde_json::from_str(&result).expect("Cannot parse CallServiceResult")
 }
 
+#[allow(clippy::unnecessary_wraps)]
 pub(crate) fn get_current_peer_id() -> std::result::Result<String, VarError> {
     Ok(get_current_peer_id_impl())
 }

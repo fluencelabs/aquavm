@@ -16,12 +16,12 @@
 
 mod errors;
 mod merging;
-mod preparation;
+mod preparation_utils;
 
 pub(crate) use errors::DataMergingError;
 pub(crate) use errors::PreparationError;
-pub(crate) use preparation::prepare;
-pub(crate) use preparation::PreparationDescriptor;
+pub(crate) use preparation_utils::prepare;
+pub(crate) use preparation_utils::PreparationDescriptor;
 
 pub(self) use crate::contexts::execution::*;
 pub(self) use crate::contexts::execution_trace::CallResult;

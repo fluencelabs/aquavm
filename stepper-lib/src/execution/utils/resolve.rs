@@ -29,6 +29,7 @@ pub(crate) fn resolve_to_args<'i>(
     value: &CallArgValue<'i>,
     ctx: &ExecutionCtx<'i>,
 ) -> ExecutionResult<(JValue, Vec<SecurityTetraplet>)> {
+    #[allow(clippy::unnecessary_wraps)]
     fn handle_string_arg<'i>(arg: &str, ctx: &ExecutionCtx<'i>) -> ExecutionResult<(JValue, Vec<SecurityTetraplet>)> {
         let jvalue = JValue::String(arg.to_string());
         let tetraplet = SecurityTetraplet::literal_tetraplet(ctx.init_peer_id.clone());

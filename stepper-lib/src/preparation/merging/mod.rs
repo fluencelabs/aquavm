@@ -14,8 +14,25 @@
  * limitations under the License.
  */
 
-mod data_merging;
+mod merge_ctx;
 #[cfg(test)]
 mod tests;
+mod trace_merger;
 
-pub(crate) use data_merging::merge_execution_traces;
+pub(self) type MergeResult<T> = Result<T, crate::preparation::DataMergingError>;
+
+use crate::contexts::execution_trace::ExecutionTrace;
+use trace_merger::TraceMerger;
+
+use air_parser::ast::Instruction;
+
+pub(crate) fn merge_execution_traces<'i>(
+    prev_trace: ExecutionTrace,
+    current_trace: ExecutionTrace,
+    aqua: &'i Instruction<'i>,
+) -> MergeResult<ExecutionTrace> {
+    let trace_merger = TraceMerger::new(prev_trace, current_trace, aqua);
+    trace_merger.merge()
+}
+
+pub(self) use merge_ctx::MergeCtx;

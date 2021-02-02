@@ -41,11 +41,8 @@ impl<'i> super::ExecutableInstruction<'i> for Xor<'i> {
 fn is_catchable_by_xor(exec_error: &ExecutionError) -> bool {
     use ExecutionError::*;
 
-    match exec_error {
-        // this type of errors related to invalid data and should treat as hard errors.
-        InvalidExecutedState(..) => false,
-        _ => true,
-    }
+    // this type of errors related to invalid data and should treat as hard errors.
+    !matches!(exec_error, InvalidExecutedState(..))
 }
 
 #[cfg(test)]
