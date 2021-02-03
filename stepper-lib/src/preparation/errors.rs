@@ -53,6 +53,10 @@ pub enum DataMergingError {
     /// Errors occurred when executed trace contains less elements then corresponding Par has.
     #[error("executed trace has {0} elements, but {1} requires by Par")]
     ExecutedTraceTooSmall(usize, usize),
+
+    /// Errors occurred when corresponding fold have different iterable names.
+    #[error("saved folds have different iterable names: {0}, {1}")]
+    IncompatibleFoldIterableNames(String, String),
 }
 
 impl Error for PreparationError {}
@@ -69,6 +73,7 @@ impl PreparationError {
             StateMergingError(IncompatibleExecutedStates(..)) => 4,
             StateMergingError(IncompatibleCallResults(..)) => 5,
             StateMergingError(ExecutedTraceTooSmall(..)) => 6,
+            StateMergingError(IncompatibleFoldIterableNames(..)) => 7,
         }
     }
 }

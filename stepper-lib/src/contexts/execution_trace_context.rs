@@ -18,6 +18,7 @@ mod executed_state;
 
 pub use executed_state::CallResult;
 pub use executed_state::ExecutedState;
+pub use executed_state::FoldResult;
 pub use executed_state::ParResult;
 pub use executed_state::ValueType;
 

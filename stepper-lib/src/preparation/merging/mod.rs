@@ -18,6 +18,7 @@ mod merge_ctx;
 #[cfg(test)]
 mod tests;
 mod trace_merger;
+mod trace_slider;
 
 pub(self) type MergeResult<T> = Result<T, crate::preparation::DataMergingError>;
 
@@ -36,3 +37,4 @@ pub(crate) fn merge_execution_traces<'i>(
 }
 
 pub(self) use merge_ctx::MergeCtx;
+pub(self) use trace_slider::TraceSlider;

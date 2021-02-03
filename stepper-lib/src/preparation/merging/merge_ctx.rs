@@ -14,62 +14,42 @@
  * limitations under the License.
  */
 
-use super::MergeResult;
-use crate::preparation::ExecutedState;
+use super::TraceSlider;
+use crate::preparation::CallResult;
 use crate::preparation::ExecutionTrace;
-use crate::JValue;
+use crate::preparation::ValueType;
+
+use std::cell::RefCell;
+use std::collections::HashMap;
+use std::rc::Rc;
+
+pub(super) type JValue = serde_json::Value;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub(super) struct MergeCtx<'i> {
-    trace: ExecutionTrace,
-    deleted_elements_count: usize,
-    position: usize,
-    subtree_size: usize,
+pub(super) struct MergeCtx {
+    pub(super) slider: TraceSlider,
+    pub(super) streams: HashMap<String, Rc<RefCell<Vec<Rc<JValue>>>>>,
 }
 
-impl MergeCtx<'_> {
+impl MergeCtx {
     pub(super) fn new(trace: ExecutionTrace) -> Self {
-        let subtree_size = trace.len();
+        let slider = TraceSlider::new(trace);
 
         Self {
-            trace,
-            deleted_elements_count: 0,
-            position: 0,
-            subtree_size,
+            slider,
+            streams: HashMap::new(),
         }
     }
 
-    pub(super) fn next_subtree_state(&mut self) -> Option<ExecutedState> {
-        // TODO: consider returning an error if the second condition is false
-        if self.subtree_size != 0 && self.position < self.trace.len() {
-            self.deleted_elements_count += 1;
-            self.subtree_size -= 1;
-            self.trace.remove(self.position)
-        } else {
-            None
+    pub(super) fn maybe_update_stream(&mut self, call_result: &CallResult) {
+        if let CallResult::Executed(value, ValueType::Stream(stream_name)) = call_result {
+            match self.streams.get_mut(stream_name) {
+                None => {
+                    self.streams
+                        .insert(stream_name.clone(), Rc::new(RefCell::new(vec![value.clone()])));
+                }
+                Some(values) => values.borrow_mut().push(value.clone()),
+            }
         }
-    }
-
-    pub(super) fn set_subtree_size(&mut self, new_subtree_size: usize) {
-        self.subtree_size = new_subtree_size;
-    }
-
-    pub(super) fn adjust_position(&mut self, new_position: usize) {
-        // TODO: check
-        self.position = self.deleted_elements_count - new_position;
-    }
-
-    pub(super) fn drain_subtree_states(&mut self) -> MergeResult<impl Iterator<Item = ExecutedState> + '_> {
-        use crate::preparation::DataMergingError::ExecutedTraceTooSmall;
-
-        if self.trace.len() < self.subtree_size {
-            return Err(ExecutedTraceTooSmall(self.trace.len(), self.subtree_size));
-        }
-
-        Ok(self.trace.drain(self.position..self.position + self.subtree_size))
-    }
-
-    pub(super) fn subtree_size(&self) -> usize {
-        self.subtree_size
     }
 }

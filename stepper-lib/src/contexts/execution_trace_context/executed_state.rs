@@ -46,13 +46,14 @@ pub enum CallResult {
 
 #[derive(Debug, Default, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub struct FoldResult(pub Vec<(usize, usize)>);
+pub struct FoldResult(pub String, pub Vec<(usize, usize, usize, usize)>);
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum ExecutedState {
     Par(ParResult),
     Call(CallResult),
+    Fold(FoldResult),
 }
 
 impl std::fmt::Display for ExecutedState {
@@ -65,6 +66,7 @@ impl std::fmt::Display for ExecutedState {
             Call(RequestSentBy(peer_id)) => write!(f, "RequestSentBy({})", peer_id),
             Call(Executed(result, value_type)) => write!(f, "Executed({:?} {:?})", result, value_type),
             Call(CallServiceFailed(err_msg)) => write!(f, "CallServiceFailed({})", err_msg),
+            Fold(FoldResult(iterable, states)) => write!(f, "Fold({}, {:?})", iterable, states),
         }
     }
 }

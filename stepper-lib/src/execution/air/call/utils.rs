@@ -154,5 +154,10 @@ pub(super) fn handle_prev_state<'i>(
             String::from("call"),
             par_state.clone(),
         )),
+        // state has inconsistent order - return a error, call shouldn't be executed
+        fold_state @ Fold(..) => Err(ExecutionError::InvalidExecutedState(
+            String::from("fold"),
+            fold_state.clone(),
+        )),
     }
 }
