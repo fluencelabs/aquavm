@@ -119,7 +119,7 @@ impl<'i> TraceMerger<'i> {
             }
             (RequestSentBy(_), Executed(..)) => Ok(current_call_result),
             (Executed(..), RequestSentBy(_)) => Ok(prev_call_result),
-            (Executed(prev_result), Executed(result)) => {
+            (Executed(prev_result, _prev_type), Executed(result, _type)) => {
                 if prev_result != result {
                     return Err(IncompatibleCallResults(prev_call_result, current_call_result));
                 }

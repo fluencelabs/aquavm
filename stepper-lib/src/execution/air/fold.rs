@@ -156,6 +156,7 @@ fn cleanup_variables(exec_ctx: &mut ExecutionCtx<'_>, iterator: &str) {
 #[cfg(test)]
 mod tests {
     use crate::contexts::execution_trace::ExecutionTrace;
+    use crate::contexts::execution_trace::ValueType;
     use crate::JValue;
 
     use aqua_test_utils::call_vm;
@@ -197,10 +198,17 @@ mod tests {
         let res: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid executed trace");
 
         assert_eq!(res.len(), 6);
-        assert_eq!(res[0], Call(Executed(Rc::new(json!(["1", "2", "3", "4", "5"])))));
+        let executed_value = Executed(Rc::new(json!(["1", "2", "3", "4", "5"])), ValueType::Scalar);
+        assert_eq!(res[0], Call(executed_value));
 
         for i in 1..=5 {
-            assert_eq!(res[i], Call(Executed(Rc::new(JValue::Number(i.into())))));
+            assert_eq!(
+                res[i],
+                Call(Executed(
+                    Rc::new(JValue::Number(i.into())),
+                    ValueType::Stream(String::from("acc"))
+                ))
+            );
         }
     }
 
@@ -230,10 +238,17 @@ mod tests {
         let res: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid executed trace");
 
         assert_eq!(res.len(), 6);
-        assert_eq!(res[0], Call(Executed(Rc::new(json!(["1", "2", "3", "4", "5"])))));
+        let executed_value = Executed(Rc::new(json!(["1", "2", "3", "4", "5"])), ValueType::Scalar);
+        assert_eq!(res[0], Call(executed_value));
 
         for i in 1..=5 {
-            assert_eq!(res[i], Call(Executed(Rc::new(JValue::Number((6 - i).into())))));
+            assert_eq!(
+                res[i],
+                Call(Executed(
+                    Rc::new(JValue::Number((6 - i).into())),
+                    ValueType::Stream(String::from("acc"))
+                ))
+            );
         }
     }
 
@@ -271,14 +286,18 @@ mod tests {
         let res: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid executed trace");
 
         assert_eq!(res.len(), 27);
-        assert_eq!(res[0], Call(Executed(Rc::new(json!(["1", "2", "3", "4", "5"])))));
-        assert_eq!(res[1], Call(Executed(Rc::new(json!(["1", "2", "3", "4", "5"])))));
+        let executed_value = Executed(Rc::new(json!(["1", "2", "3", "4", "5"])), ValueType::Scalar);
+        assert_eq!(res[0], Call(executed_value.clone()));
+        assert_eq!(res[1], Call(executed_value));
 
         for i in 1..=5 {
             for j in 1..=5 {
                 assert_eq!(
                     res[1 + 5 * (i - 1) + j],
-                    Call(Executed(Rc::new(JValue::Number(i.into()))))
+                    Call(Executed(
+                        Rc::new(JValue::Number(i.into())),
+                        ValueType::Stream(String::from("acc"))
+                    ))
                 );
             }
         }
@@ -340,7 +359,7 @@ mod tests {
         let res: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid executed trace");
 
         assert_eq!(res.len(), 1);
-        assert_eq!(res[0], Call(Executed(Rc::new(json!([])))));
+        assert_eq!(res[0], Call(Executed(Rc::new(json!([])), ValueType::Scalar)));
     }
 
     #[test]
@@ -372,13 +391,20 @@ mod tests {
         let res: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid executed trace");
 
         assert_eq!(res.len(), 6);
-        assert_eq!(
-            res[0],
-            Call(Executed(Rc::new(json!({ "array": ["1", "2", "3", "4", "5"] }))))
+        let executed_value = Executed(
+            Rc::new(json!({ "array": ["1", "2", "3", "4", "5"] })),
+            ValueType::Scalar,
         );
+        assert_eq!(res[0], Call(executed_value));
 
         for i in 1..=5 {
-            assert_eq!(res[i], Call(Executed(Rc::new(JValue::Number(i.into())))));
+            assert_eq!(
+                res[i],
+                Call(Executed(
+                    Rc::new(JValue::Number(i.into())),
+                    ValueType::Stream(String::from("acc"))
+                ))
+            );
         }
     }
 
@@ -433,7 +459,7 @@ mod tests {
 
         assert_eq!(res.len(), 12);
         for i in 2..11 {
-            assert!(matches!(res[i], Call(Executed(_))) || matches!(res[i], Par(..)));
+            assert!(matches!(res[i], Call(Executed(..))) || matches!(res[i], Par(..)));
         }
     }
 
@@ -491,7 +517,7 @@ mod tests {
 
         assert_eq!(res.len(), 11);
         for i in 0..10 {
-            assert!(matches!(res[i], Call(Executed(_))));
+            assert!(matches!(res[i], Call(Executed(..))));
         }
     }
 }

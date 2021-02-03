@@ -36,4 +36,3 @@ pub(crate) fn merge_execution_traces<'i>(
 }
 
 pub(self) use merge_ctx::MergeCtx;
-

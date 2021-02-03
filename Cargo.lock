@@ -53,6 +53,7 @@ dependencies = [
  "aquamarine-vm",
  "fluence",
  "serde_json",
+ "stepper-lib",
 ]
 
 [[package]]

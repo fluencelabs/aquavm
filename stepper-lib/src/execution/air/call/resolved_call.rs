@@ -22,6 +22,7 @@ use super::Call;
 use super::ExecutionCtx;
 use super::ExecutionError;
 use super::ExecutionResult;
+use crate::build_targets::CallServiceResult;
 use crate::build_targets::CALL_SERVICE_SUCCESS;
 use crate::contexts::execution_trace::*;
 use crate::log_targets::EXECUTED_STATE_CHANGING;
@@ -63,15 +64,11 @@ impl<'i> ResolvedCall<'i> {
 
     /// Executes resolved instruction, updates contexts based on a execution result.
     pub(super) fn execute(
-        self,
+        &self,
         exec_ctx: &mut ExecutionCtx<'i>,
         trace_ctx: &mut ExecutionTraceCtx,
     ) -> ExecutionResult<()> {
-        use CallResult::*;
-        use ExecutedState::Call;
-        use ExecutionError::CallServiceResultDeError as DeError;
-
-        let should_execute = self.prepare_executed_state(exec_ctx, trace_ctx)?;
+        let should_execute = self.prepare_current_executed_state(exec_ctx, trace_ctx)?;
         if !should_execute {
             return Ok(());
         }
@@ -100,6 +97,19 @@ impl<'i> ResolvedCall<'i> {
             )
         };
 
+        self.update_state_with_service_result(service_result, exec_ctx, trace_ctx)
+    }
+
+    fn update_state_with_service_result(
+        &self,
+        service_result: CallServiceResult,
+        exec_ctx: &mut ExecutionCtx<'i>,
+        trace_ctx: &mut ExecutionTraceCtx,
+    ) -> ExecutionResult<()> {
+        use CallResult::CallServiceFailed;
+        use ExecutedState::Call;
+        use ExecutionError::CallServiceResultDeError as DeError;
+
         // check that service call succeeded
         if service_result.ret_code != CALL_SERVICE_SUCCESS {
             trace_ctx
@@ -112,7 +122,7 @@ impl<'i> ResolvedCall<'i> {
         let result = Rc::new(result);
 
         set_local_call_result(result.clone(), self.triplet.clone(), &self.output, exec_ctx)?;
-        let new_executed_state = Call(Executed(result));
+        let new_executed_state = self.prepare_new_executed_state(result);
 
         log::trace!(
             target: EXECUTED_STATE_CHANGING,
@@ -125,8 +135,21 @@ impl<'i> ResolvedCall<'i> {
         Ok(())
     }
 
+    fn prepare_new_executed_state(&self, result: Rc<JValue>) -> ExecutedState {
+        use CallOutputValue::Accumulator;
+        use CallResult::Executed;
+        use ExecutedState::Call;
+
+        let value_type = match self.output {
+            Accumulator(name) => ValueType::Stream(String::from(name)),
+            _ => ValueType::Scalar,
+        };
+
+        Call(Executed(result, value_type))
+    }
+
     /// Determine whether this call should be really called and adjust prev executed trace accordingly.
-    fn prepare_executed_state(
+    fn prepare_current_executed_state(
         &self,
         exec_ctx: &mut ExecutionCtx<'i>,
         trace_ctx: &mut ExecutionTraceCtx,

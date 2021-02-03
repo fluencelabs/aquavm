@@ -16,6 +16,7 @@
 
 use aqua_test_utils::call_vm;
 use aqua_test_utils::create_aqua_vm;
+use aqua_test_utils::executed_state;
 use aqua_test_utils::set_variables_call_service;
 use aqua_test_utils::unit_call_service;
 use aqua_test_utils::CallServiceClosure;
@@ -24,10 +25,6 @@ use aqua_test_utils::NEVec;
 use stepper_lib::execution_trace::ParResult;
 
 use serde_json::json;
-
-use std::rc::Rc;
-
-type JValue = serde_json::Value;
 
 #[test]
 fn seq_par_call() {
@@ -52,12 +49,12 @@ fn seq_par_call() {
     let res = call_vm!(vm, "asd", script, "[]", "[]");
     let actual_trace: Vec<ExecutedState> = serde_json::from_slice(&res.data).expect("stepper should return valid json");
 
-    let test_string = String::from("test");
+    let test_string = "test";
     let expected_trace = vec![
         Par(ParResult(1, 1)),
-        Call(Executed(Rc::new(JValue::String(test_string.clone())))),
+        executed_state::scalar_string(test_string),
         Call(RequestSentBy(vm_peer_id)),
-        Call(Executed(Rc::new(JValue::String(test_string.clone())))),
+        executed_state::scalar_string(test_string),
     ];
 
     assert_eq!(actual_trace, expected_trace);
@@ -88,13 +85,13 @@ fn par_par_call() {
     let resulted_trace: Vec<ExecutedState> =
         serde_json::from_slice(&res.data).expect("stepper should return valid json");
 
-    let test_string = String::from("test");
+    let test_string = "test";
     let expected_trace = vec![
         Par(ParResult(3, 1)),
         Par(ParResult(1, 1)),
-        Call(Executed(Rc::new(JValue::String(test_string.clone())))),
+        executed_state::scalar_string(test_string),
         Call(RequestSentBy(vm_peer_id)),
-        Call(Executed(Rc::new(JValue::String(test_string.clone())))),
+        executed_state::scalar_string(test_string),
     ];
 
     assert_eq!(resulted_trace, expected_trace);
@@ -160,17 +157,17 @@ fn create_service() {
     let res = call_vm!(set_variables_vm, "init_peer_id", script.clone(), "[]", "[]");
     let res = call_vm!(vm, "init_peer_id", script, "[]", res.data);
 
-    let add_module_response = String::from("add_module response");
-    let add_blueprint_response = String::from("add_blueprint response");
-    let create_response = String::from("create response");
+    let add_module_response = "add_module response";
+    let add_blueprint_response = "add_blueprint response";
+    let create_response = "create response";
     let actual_trace: Vec<ExecutedState> = serde_json::from_slice(&res.data).expect("should be a correct json");
     let expected_trace = vec![
-        Call(Executed(Rc::new(module_bytes))),
-        Call(Executed(Rc::new(module_config))),
-        Call(Executed(Rc::new(blueprint))),
-        Call(Executed(Rc::new(JValue::String(add_module_response)))),
-        Call(Executed(Rc::new(JValue::String(add_blueprint_response)))),
-        Call(Executed(Rc::new(JValue::String(create_response)))),
+        executed_state::scalar_jvalue(module_bytes),
+        executed_state::scalar_jvalue(module_config),
+        executed_state::scalar_jvalue(blueprint),
+        executed_state::scalar_string(add_module_response),
+        executed_state::scalar_string(add_blueprint_response),
+        executed_state::scalar_string(create_response),
         Call(RequestSentBy(String::from("A"))),
     ];
 

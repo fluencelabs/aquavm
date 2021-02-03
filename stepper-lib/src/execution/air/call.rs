@@ -82,6 +82,7 @@ fn is_joinable_error_type(exec_error: &ExecutionError) -> bool {
 #[cfg(test)]
 mod tests {
     use crate::contexts::execution_trace::ExecutionTrace;
+    use crate::contexts::execution_trace::ValueType;
     use crate::JValue;
 
     use aqua_test_utils::call_vm;
@@ -117,7 +118,10 @@ mod tests {
         let res = call_vm!(vm, vm_peer_id.clone(), script.clone(), "[]", "[]");
         let call_path: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be a valid json");
 
-        let executed_call_state = Call(Executed(Rc::new(JValue::String(String::from("test")))));
+        let executed_call_state = Call(Executed(
+            Rc::new(JValue::String(String::from("test"))),
+            ValueType::Scalar,
+        ));
         assert_eq!(call_path.len(), 1);
         assert_eq!(call_path[0], executed_call_state);
         assert!(res.next_peer_pks.is_empty());
@@ -225,11 +229,14 @@ mod tests {
         assert_eq!(call_path.len(), 2);
         assert_eq!(
             call_path[1],
-            Call(Executed(Rc::new(JValue::Array(vec![
-                JValue::String(String::from("arg1")),
-                JValue::String(String::from("arg2")),
-                JValue::String(String::from("arg3_value")),
-            ]))))
+            Call(Executed(
+                Rc::new(JValue::Array(vec![
+                    JValue::String(String::from("arg1")),
+                    JValue::String(String::from("arg2")),
+                    JValue::String(String::from("arg3_value")),
+                ])),
+                ValueType::Scalar
+            ))
         );
     }
 }

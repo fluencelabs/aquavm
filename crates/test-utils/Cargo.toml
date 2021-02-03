@@ -10,6 +10,8 @@ name = "aqua_test_utils"
 path = "src/lib.rs"
 
 [dependencies]
+stepper-lib = { path = "../../stepper-lib/" }
+
 fluence = { version = "0.2.18", features = ["logger"] }
 aquamarine-vm = { version = "0.1.29", features = ["raw-aquamarine-vm-api"] }
 serde_json = "1.0.56"

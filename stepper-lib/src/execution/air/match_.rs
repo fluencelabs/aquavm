@@ -40,6 +40,7 @@ impl<'i> super::ExecutableInstruction<'i> for Match<'i> {
 #[cfg(test)]
 mod tests {
     use crate::contexts::execution_trace::ExecutionTrace;
+    use crate::contexts::execution_trace::ValueType;
     use crate::JValue;
 
     use aqua_test_utils::call_vm;
@@ -80,7 +81,8 @@ mod tests {
         let res = call_vm!(vm, "asd", script, "", res.data);
 
         let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid json");
-        let expected_executed_call_result = Call(Executed(Rc::new(JValue::String(String::from("result_1")))));
+        let executed_value = Executed(Rc::new(JValue::String(String::from("result_1"))), ValueType::Scalar);
+        let expected_executed_call_result = Call(executed_value);
 
         assert_eq!(actual_trace.len(), 3);
         assert_eq!(actual_trace[2], expected_executed_call_result);
@@ -118,7 +120,8 @@ mod tests {
         let res = call_vm!(vm, "asd", script, "", res.data);
 
         let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid json");
-        let expected_executed_call_result = Call(Executed(Rc::new(JValue::String(String::from("result_2")))));
+        let executed_value = Executed(Rc::new(JValue::String(String::from("result_2"))), ValueType::Scalar);
+        let expected_executed_call_result = Call(executed_value);
 
         assert_eq!(actual_trace.len(), 3);
         assert_eq!(actual_trace[2], expected_executed_call_result);
@@ -153,7 +156,8 @@ mod tests {
         let res = call_vm!(vm, "asd", script, "", res.data);
 
         let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid json");
-        let expected_executed_call_result = Call(Executed(Rc::new(JValue::String(String::from("result_1")))));
+        let executed_value = Executed(Rc::new(JValue::String(String::from("result_1"))), ValueType::Scalar);
+        let expected_executed_call_result = Call(executed_value);
 
         assert_eq!(actual_trace.len(), 2);
         assert_eq!(actual_trace[1], expected_executed_call_result);

@@ -142,8 +142,9 @@ pub(super) fn handle_prev_state<'i>(
                 Ok(false)
             }
         }
+        // TODO: use value_type
         // this instruction's been already executed
-        Call(Executed(result)) => {
+        Call(Executed(result, _value_type)) => {
             set_local_call_result(result.clone(), triplet.clone(), output, exec_ctx)?;
             trace_ctx.new_trace.push_back(prev_state);
             Ok(false)

@@ -23,6 +23,7 @@ pub mod execution_trace {
     pub use super::execution_trace_context::ExecutionTrace;
     pub(crate) use super::execution_trace_context::ExecutionTraceCtx;
     pub use super::execution_trace_context::ParResult;
+    pub use super::execution_trace_context::ValueType;
 }
 
 pub(crate) mod execution {

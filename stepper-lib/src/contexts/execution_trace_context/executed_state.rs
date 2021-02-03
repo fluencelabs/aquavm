@@ -26,12 +26,19 @@ pub struct ParResult(pub usize, pub usize);
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
+pub enum ValueType {
+    Scalar,
+    Stream(String),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum CallResult {
     /// Request was sent to a target node by node with such public key and it shouldn't be called again.
     RequestSentBy(String),
 
     /// A corresponding call's been already executed with such value and result.
-    Executed(Rc<JValue>),
+    Executed(Rc<JValue>, ValueType),
 
     /// call_service ended with a service error.
     CallServiceFailed(String),
@@ -56,7 +63,7 @@ impl std::fmt::Display for ExecutedState {
         match self {
             Par(ParResult(left, right)) => write!(f, "Par({}, {})", left, right),
             Call(RequestSentBy(peer_id)) => write!(f, "RequestSentBy({})", peer_id),
-            Call(Executed(result)) => write!(f, "Executed({:?})", result),
+            Call(Executed(result, value_type)) => write!(f, "Executed({:?} {:?})", result, value_type),
             Call(CallServiceFailed(err_msg)) => write!(f, "CallServiceFailed({})", err_msg),
         }
     }

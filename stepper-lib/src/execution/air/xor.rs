@@ -48,6 +48,7 @@ fn is_catchable_by_xor(exec_error: &ExecutionError) -> bool {
 #[cfg(test)]
 mod tests {
     use crate::contexts::execution_trace::ExecutionTrace;
+    use crate::contexts::execution_trace::ValueType;
     use crate::JValue;
 
     use aqua_test_utils::call_vm;
@@ -99,7 +100,8 @@ mod tests {
 
         let res = call_vm!(vm, "asd", script, "[]", "[]");
         let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid json");
-        let executed_call_result = Call(Executed(Rc::new(JValue::String(String::from("res")))));
+        let executed_value = Executed(Rc::new(JValue::String(String::from("res"))), ValueType::Scalar);
+        let executed_call_result = Call(executed_value);
 
         assert_eq!(actual_trace.len(), 2);
         assert_eq!(actual_trace[0], Call(CallServiceFailed(String::from(r#""error""#))));
@@ -156,8 +158,8 @@ mod tests {
         let local_peer_id = "local_peer_id";
         let mut vm = create_aqua_vm(echo_string_call_service(), local_peer_id);
 
-        let test_string_1 = String::from("some_string");
-        let test_string_2 = String::from("expected_string");
+        let some_string = String::from("some_string");
+        let expected_string = String::from("expected_string");
         let script = format!(
             r#"
             (seq
@@ -167,16 +169,18 @@ mod tests {
                     (call "{1}" ("service_id_2" "local_fn_name") ["{3}"] result_2)
                 )
             )"#,
-            set_variables_peer_id, local_peer_id, test_string_1, test_string_2
+            set_variables_peer_id, local_peer_id, some_string, expected_string
         );
 
         let res = call_vm!(set_variables_vm, "asd", script.clone(), "[]", "[]");
         let res = call_vm!(vm, "asd", script, "[]", res.data);
         let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid json");
+        let some_string_call_result = Executed(Rc::new(JValue::String(some_string)), ValueType::Scalar);
+        let expected_string_call_result = Executed(Rc::new(JValue::String(expected_string)), ValueType::Scalar);
 
         assert_eq!(actual_trace.len(), 2);
-        assert_eq!(actual_trace[0], Call(Executed(Rc::new(JValue::String(test_string_1)))));
-        assert_eq!(actual_trace[1], Call(Executed(Rc::new(JValue::String(test_string_2)))));
+        assert_eq!(actual_trace[0], Call(some_string_call_result));
+        assert_eq!(actual_trace[1], Call(expected_string_call_result));
     }
 
     #[test]
@@ -214,16 +218,16 @@ mod tests {
         let actual_trace: ExecutionTrace = serde_json::from_slice(&result.data).expect("should be valid json");
 
         let res = String::from("res");
-        let executed_call_result = Rc::new(JValue::String(res));
+        let executed_call_result = Executed(Rc::new(JValue::String(res)), ValueType::Scalar);
 
         let expected_trace = vec![
             Par(ParResult(2, 2)),
-            Call(Executed(executed_call_result.clone())),
-            Call(Executed(executed_call_result.clone())),
+            Call(executed_call_result.clone()),
+            Call(executed_call_result.clone()),
             Par(ParResult(1, 0)),
             Call(CallServiceFailed(String::from(r#""error""#))),
-            Call(Executed(executed_call_result.clone())),
-            Call(Executed(executed_call_result.clone())),
+            Call(executed_call_result.clone()),
+            Call(executed_call_result.clone()),
         ];
 
         assert_eq!(actual_trace, expected_trace);

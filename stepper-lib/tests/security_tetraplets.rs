@@ -19,6 +19,7 @@ use aqua_test_utils::create_aqua_vm;
 use aqua_test_utils::CallServiceClosure;
 use aqua_test_utils::IValue;
 use aqua_test_utils::NEVec;
+use stepper_lib::execution_trace::ValueType;
 use stepper_lib::ResolvedTriplet;
 use stepper_lib::SecurityTetraplet;
 
@@ -298,9 +299,10 @@ fn tetraplet_with_wasm_modules() {
 
     let result = call_vm!(vm, ADMIN_PEER_PK, script, "", "");
     let actual_trace: ExecutionTrace = serde_json::from_slice(&result.data).unwrap();
-    let expected_state = ExecutedState::Call(CallResult::Executed(Rc::new(serde_json::Value::String(String::from(
-        "Ok",
-    )))));
+    let expected_state = ExecutedState::Call(CallResult::Executed(
+        Rc::new(serde_json::Value::String(String::from("Ok"))),
+        ValueType::Scalar,
+    ));
 
     assert_eq!(actual_trace[1], expected_state)
 }

@@ -46,6 +46,7 @@ pub mod execution_trace {
     pub use crate::contexts::execution_trace::ExecutedState;
     pub use crate::contexts::execution_trace::ExecutionTrace;
     pub use crate::contexts::execution_trace::ParResult;
+    pub use crate::contexts::execution_trace::ValueType;
 }
 
 pub mod parser {

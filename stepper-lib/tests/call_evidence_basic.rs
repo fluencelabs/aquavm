@@ -17,11 +17,14 @@
 use aqua_test_utils::call_vm;
 use aqua_test_utils::create_aqua_vm;
 use aqua_test_utils::echo_number_call_service;
+use aqua_test_utils::executed_state;
 use aqua_test_utils::unit_call_service;
 use aqua_test_utils::CallServiceClosure;
 use aqua_test_utils::IValue;
 use aqua_test_utils::NEVec;
+use stepper_lib::execution_trace::ExecutedState;
 use stepper_lib::execution_trace::ParResult;
+use stepper_lib::execution_trace::ValueType;
 
 use serde_json::json;
 
@@ -32,7 +35,7 @@ type JValue = serde_json::Value;
 #[test]
 fn executed_trace_seq_par_call() {
     use stepper_lib::execution_trace::CallResult::*;
-    use stepper_lib::execution_trace::ExecutedState::{self, *};
+    use ExecutedState::*;
 
     let local_peer_id = "local_peer_id";
     let mut vm = create_aqua_vm(unit_call_service(), local_peer_id);
@@ -51,8 +54,8 @@ fn executed_trace_seq_par_call() {
 
     let initial_state = json!([
         { "par": [1,1] },
-        { "call": {"executed": "test"} },
-        { "call": {"executed": "test"} },
+        { "call": {"executed": ["test", "scalar"]} },
+        { "call": {"executed": ["test", "scalar"]} },
     ])
     .to_string();
 
@@ -60,11 +63,15 @@ fn executed_trace_seq_par_call() {
     let actual_trace: Vec<ExecutedState> = serde_json::from_slice(&res.data).expect("stepper should return valid json");
 
     let test_string = String::from("test");
+    let executed_call_result = Call(Executed(
+        Rc::new(JValue::String(test_string.clone())),
+        ValueType::Scalar,
+    ));
     let expected_trace = vec![
         Par(ParResult(1, 1)),
-        Call(Executed(Rc::new(JValue::String(test_string.clone())))),
-        Call(Executed(Rc::new(JValue::String(test_string.clone())))),
-        Call(Executed(Rc::new(JValue::String(test_string)))),
+        executed_call_result.clone(),
+        executed_call_result.clone(),
+        executed_call_result,
     ];
 
     assert_eq!(actual_trace, expected_trace);
@@ -74,7 +81,7 @@ fn executed_trace_seq_par_call() {
 #[test]
 fn executed_trace_par_par_call() {
     use stepper_lib::execution_trace::CallResult::*;
-    use stepper_lib::execution_trace::ExecutedState::{self, *};
+    use ExecutedState::*;
 
     let local_peer_id = "local_peer_id";
     let mut vm = create_aqua_vm(unit_call_service(), local_peer_id);
@@ -95,20 +102,20 @@ fn executed_trace_par_par_call() {
         { "par": [3,0] },
         { "par": [1,0] },
         { "call": {"request_sent_by": "peer_id_1"} },
-        { "call": {"executed": "test"} },
+        { "call": {"executed": ["test", {"stream": "acc"}]} },
     ])
     .to_string();
 
     let res = call_vm!(vm, "asd", script, "[]", initial_state);
     let actual_trace: Vec<ExecutedState> = serde_json::from_slice(&res.data).expect("stepper should return valid json");
 
-    let test_string = String::from("test");
+    let test_string = "test";
     let expected_trace = vec![
         Par(ParResult(3, 1)),
         Par(ParResult(1, 1)),
-        Call(Executed(Rc::new(JValue::String(test_string.clone())))),
-        Call(RequestSentBy(local_peer_id.to_string())),
-        Call(Executed(Rc::new(JValue::String(test_string)))),
+        executed_state::scalar_string(test_string),
+        Call(RequestSentBy(String::from(local_peer_id))),
+        executed_state::scalar_string(test_string),
     ];
 
     assert_eq!(actual_trace, expected_trace);
@@ -117,9 +124,6 @@ fn executed_trace_par_par_call() {
 
 #[test]
 fn executed_trace_seq_seq() {
-    use stepper_lib::execution_trace::CallResult::*;
-    use stepper_lib::execution_trace::ExecutedState::{self, *};
-
     let peer_id_1 = String::from("12D3KooWHk9BjDQBUqnavciRPhAYFvqKBe4ZiPPvde7vDaqgn5er");
     let peer_id_2 = String::from("12D3KooWAzJcYitiZrerycVB4Wryrx22CFKdDGx7c4u31PFdfTbR");
     let mut vm1 = create_aqua_vm(unit_call_service(), peer_id_1.clone());
@@ -148,11 +152,11 @@ fn executed_trace_seq_seq() {
 
     let actual_trace: Vec<ExecutedState> = serde_json::from_slice(&res.data).expect("stepper should return valid json");
 
-    let test_string = String::from("test");
+    let test_string = "test";
     let expected_trace = vec![
-        Call(Executed(Rc::new(JValue::String(test_string.clone())))),
-        Call(Executed(Rc::new(JValue::String(test_string.clone())))),
-        Call(Executed(Rc::new(JValue::String(test_string)))),
+        executed_state::scalar_string(test_string),
+        executed_state::scalar_string(test_string),
+        executed_state::scalar_string(test_string),
     ];
 
     assert_eq!(actual_trace, expected_trace);
@@ -160,9 +164,6 @@ fn executed_trace_seq_seq() {
 
 #[test]
 fn executed_trace_create_service() {
-    use stepper_lib::execution_trace::CallResult::*;
-    use stepper_lib::execution_trace::ExecutedState::{self, *};
-
     let module = "greeting";
     let module_config = json!(
         {
@@ -210,13 +211,13 @@ fn executed_trace_create_service() {
     let add_blueprint_response = String::from("add_blueprint response");
     let create_response = String::from("create response");
     let expected_trace = vec![
-        Call(Executed(Rc::new(module_bytes))),
-        Call(Executed(Rc::new(module_config))),
-        Call(Executed(Rc::new(blueprint))),
-        Call(Executed(Rc::new(JValue::String(add_module_response)))),
-        Call(Executed(Rc::new(JValue::String(add_blueprint_response)))),
-        Call(Executed(Rc::new(JValue::String(create_response)))),
-        Call(Executed(Rc::new(JValue::String(String::from("test"))))),
+        executed_state::scalar_jvalue(module_bytes),
+        executed_state::scalar_jvalue(module_config),
+        executed_state::scalar_jvalue(blueprint),
+        executed_state::scalar_string(add_module_response),
+        executed_state::scalar_string(add_blueprint_response),
+        executed_state::scalar_string(create_response),
+        executed_state::scalar_string("test"),
     ];
 
     let res = call_vm!(vm, "init_peer_id", script, "[]", json!(expected_trace).to_string());
@@ -275,28 +276,28 @@ fn executed_trace_par_seq_fold_call() {
 
     let expected_json = json!( [
         { "par": [21,1] },
-        { "call": { "executed": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"] } },
+        { "call": { "executed": [["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"], "scalar"] } },
         { "par": [1,18] },
-        { "call": { "executed": 1 } },
+        { "call": { "executed": [1, {"stream": "acc"}] } },
         { "par": [1,16] },
-        { "call": { "executed": 2 } },
+        { "call": { "executed": [2, {"stream": "acc"}] } },
         { "par": [1,14] },
-        { "call": { "executed": 3 } },
+        { "call": { "executed": [3, {"stream": "acc"}] } },
         { "par": [1,12] },
-        { "call": { "executed": 4 } },
+        { "call": { "executed": [4, {"stream": "acc"}] } },
         { "par": [1,10] },
-        { "call": { "executed": 5 } },
+        { "call": { "executed": [5, {"stream": "acc"}] } },
         { "par": [1,8] },
-        { "call": { "executed": 6 } },
+        { "call": { "executed": [6, {"stream": "acc"}] } },
         { "par": [1,6] },
-        { "call": { "executed": 7 } },
+        { "call": { "executed": [7, {"stream": "acc"}] } },
         { "par": [1,4] },
-        { "call": { "executed": 8 } },
+        { "call": { "executed": [8, {"stream": "acc"}] } },
         { "par": [1,2] },
-        { "call": { "executed": 9 } },
+        { "call": { "executed": [9, {"stream": "acc"}] } },
         { "par": [1,0] },
-        { "call": { "executed": 10 } },
-        { "call": { "executed": "test" } },
+        { "call": { "executed": [10, {"stream": "acc"}] } },
+        { "call": { "executed": ["test", "scalar"] } },
     ]);
 
     assert_eq!(actual_trace, expected_json);
@@ -350,28 +351,28 @@ fn executed_trace_par_seq_fold_in_cycle_call() {
 
     let expected_json = json!( [
         { "par": [21,1] },
-        { "call": { "executed": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"] } },
+        { "call": { "executed": [["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"], "scalar"] } },
         { "par": [1,18] },
-        { "call": { "executed": 1 } },
+        { "call": { "executed": [1, {"stream": "acc"}] } },
         { "par": [1,16] },
-        { "call": { "executed": 2 } },
+        { "call": { "executed": [2, {"stream": "acc"}] } },
         { "par": [1,14] },
-        { "call": { "executed": 3 } },
+        { "call": { "executed": [3, {"stream": "acc"}] } },
         { "par": [1,12] },
-        { "call": { "executed": 4 } },
+        { "call": { "executed": [4, {"stream": "acc"}] } },
         { "par": [1,10] },
-        { "call": { "executed": 5 } },
+        { "call": { "executed": [5, {"stream": "acc"}] } },
         { "par": [1,8] },
-        { "call": { "executed": 6 } },
+        { "call": { "executed": [6, {"stream": "acc"}] } },
         { "par": [1,6] },
-        { "call": { "executed": 7 } },
+        { "call": { "executed": [7, {"stream": "acc"}] } },
         { "par": [1,4] },
-        { "call": { "executed": 8 } },
+        { "call": { "executed": [8, {"stream": "acc"}] } },
         { "par": [1,2] },
-        { "call": { "executed": 9 } },
+        { "call": { "executed": [9, {"stream": "acc"}] } },
         { "par": [1,0] },
-        { "call": { "executed": 10 } },
-        { "call": { "executed": "test" } },
+        { "call": { "executed": [10, {"stream": "acc"}] } },
+        { "call": { "executed": ["test", "scalar"] } },
     ]);
 
     assert_eq!(resulted_json, expected_json);
@@ -414,11 +415,11 @@ fn executed_trace_seq_par_seq_seq() {
 
     let expected_json = json!( [
         { "par": [2,2] },
-        { "call": {"executed" : "test" } },
-        { "call": {"executed" : "test" } },
-        { "call": {"executed" : "test" } },
-        { "call": {"executed" : "test" } },
-        { "call": {"executed" : "test" } },
+        { "call": {"executed" : ["test", "scalar"] } },
+        { "call": {"executed" : ["test", "scalar"] } },
+        { "call": {"executed" : ["test", "scalar"] } },
+        { "call": {"executed" : ["test", "scalar"] } },
+        { "call": {"executed" : ["test", "scalar"] } },
     ]);
 
     assert_eq!(resulted_json, expected_json);

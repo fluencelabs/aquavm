@@ -25,6 +25,8 @@
     unreachable_patterns
 )]
 
+pub mod executed_state;
+
 pub use aquamarine_vm::ne_vec::NEVec;
 pub use aquamarine_vm::AquamarineVM;
 pub use aquamarine_vm::AquamarineVMConfig;
@@ -38,7 +40,7 @@ pub use aquamarine_vm::StepperOutcome;
 use std::collections::HashMap;
 use std::path::PathBuf;
 
-type JValue = serde_json::Value;
+pub(self) type JValue = serde_json::Value;
 
 pub fn create_aqua_vm(
     call_service: CallServiceClosure,
