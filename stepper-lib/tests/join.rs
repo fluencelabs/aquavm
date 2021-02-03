@@ -321,7 +321,7 @@ fn init_peer_id() {
         executed_state::par(2, 0),
         executed_state::scalar_string("test"),
         executed_state::scalar_string("test"),
-        executed_state::request_sent_by("A")
+        executed_state::request_sent_by("A"),
     ];
 
     assert_eq!(client_1_actual_trace, client_1_expected_trace);

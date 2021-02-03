@@ -15,17 +15,23 @@
  */
 
 use super::JValue;
-use stepper_lib::execution_trace::ExecutedState;
-use stepper_lib::execution_trace::ValueType;
 use stepper_lib::execution_trace::CallResult;
+use stepper_lib::execution_trace::ExecutedState;
 use stepper_lib::execution_trace::ParResult;
+use stepper_lib::execution_trace::ValueType;
 
 pub fn scalar_jvalue(result: JValue) -> ExecutedState {
-    ExecutedState::Call(CallResult::Executed(std::rc::Rc::new(result), ValueType::Scalar))
+    ExecutedState::Call(CallResult::Executed(
+        std::rc::Rc::new(result),
+        ValueType::Scalar,
+    ))
 }
 
 pub fn stream_jvalue(result: JValue, stream_name: impl Into<String>) -> ExecutedState {
-    ExecutedState::Call(CallResult::Executed(std::rc::Rc::new(result), ValueType::Stream(stream_name.into())))
+    ExecutedState::Call(CallResult::Executed(
+        std::rc::Rc::new(result),
+        ValueType::Stream(stream_name.into()),
+    ))
 }
 
 pub fn scalar_string(result: impl Into<String>) -> ExecutedState {
@@ -43,9 +49,7 @@ pub fn stream_string(result: impl Into<String>, stream_name: impl Into<String>) 
 }
 
 pub fn request_sent_by(sender: impl Into<String>) -> ExecutedState {
-    ExecutedState::Call(CallResult::RequestSentBy(
-        sender.into()
-    ))
+    ExecutedState::Call(CallResult::RequestSentBy(sender.into()))
 }
 
 pub fn par(left: usize, right: usize) -> ExecutedState {

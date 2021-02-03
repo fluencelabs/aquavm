@@ -19,13 +19,12 @@ use crate::preparation::ExecutedState;
 use crate::preparation::ExecutionTrace;
 use crate::JValue;
 
-use std::collections::HashMap;
-
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(super) struct MergeCtx<'i> {
     trace: ExecutionTrace,
+    deleted_elements_count: usize,
+    position: usize,
     subtree_size: usize,
-    streams: HashMap<String, Vec<&'i JValue>>,
 }
 
 impl MergeCtx<'_> {
@@ -34,15 +33,18 @@ impl MergeCtx<'_> {
 
         Self {
             trace,
+            deleted_elements_count: 0,
+            position: 0,
             subtree_size,
-            streams: HashMap::new(),
         }
     }
 
     pub(super) fn next_subtree_state(&mut self) -> Option<ExecutedState> {
-        if self.subtree_size != 0 {
+        // TODO: consider returning an error if the second condition is false
+        if self.subtree_size != 0 && self.position < self.trace.len() {
+            self.deleted_elements_count += 1;
             self.subtree_size -= 1;
-            self.trace.pop_front()
+            self.trace.remove(self.position)
         } else {
             None
         }
@@ -52,6 +54,11 @@ impl MergeCtx<'_> {
         self.subtree_size = new_subtree_size;
     }
 
+    pub(super) fn adjust_position(&mut self, new_position: usize) {
+        // TODO: check
+        self.position = self.deleted_elements_count - new_position;
+    }
+
     pub(super) fn drain_subtree_states(&mut self) -> MergeResult<impl Iterator<Item = ExecutedState> + '_> {
         use crate::preparation::DataMergingError::ExecutedTraceTooSmall;
 
@@ -59,7 +66,7 @@ impl MergeCtx<'_> {
             return Err(ExecutedTraceTooSmall(self.trace.len(), self.subtree_size));
         }
 
-        Ok(self.trace.drain(..self.subtree_size))
+        Ok(self.trace.drain(self.position..self.position + self.subtree_size))
     }
 
     pub(super) fn subtree_size(&self) -> usize {
