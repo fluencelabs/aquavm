@@ -44,9 +44,35 @@ pub enum CallResult {
     CallServiceFailed(String),
 }
 
+/// Let's consider an example of trace that could be produces by the following fold:
+/// (fold $stream v
+///     (call 1)
+///     (call 2)
+///     (next v)
+///     (call 3)
+///     (call 4)
+/// )
+///
+/// Having started with stream with two elements {v1, v2} the resulted trace would looks like
+/// [(1) (2)] [(1) (2)] [(3) (4)] [(3) (4)]  <---  the sequence of call states
+///    v1        v2        v2        v1      <---- corresponding values from $stream that
+///                                                the iterable v had at the moment of call
+///
+/// From this example, it could be seen that each instruction sequence inside fold is divided into
+/// two intervals (left and right), each of these intervals has borders [begin, end).
+/// So, this struct describes position inside overall execution trace belongs to one fold iteration.
 #[derive(Debug, Default, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub struct FoldResult(pub String, pub Vec<(usize, usize, usize, usize)>);
+pub struct FoldStatePositions {
+    pub left_begin: usize,
+    pub left_end: usize,
+    pub right_begin: usize,
+    pub right_end: usize,
+}
+
+#[derive(Debug, Default, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub struct FoldResult(pub String, pub Vec<FoldStatePositions>);
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]

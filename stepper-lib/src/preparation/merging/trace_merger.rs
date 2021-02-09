@@ -22,8 +22,14 @@ use crate::preparation::ExecutedState;
 use crate::preparation::ExecutionTrace;
 use crate::preparation::FoldResult;
 use crate::preparation::ParResult;
+use crate::JValue;
 
 use air_parser::ast::Instruction;
+
+use std::cell::RefCell;
+use std::rc::Rc;
+
+type MergingStream = Rc<RefCell<Vec<Rc<JValue>>>>;
 
 #[derive(Debug, PartialEq, Eq)]
 pub(crate) struct TraceMerger<'i> {
@@ -188,24 +194,7 @@ impl<'i> TraceMerger<'i> {
         let _prev_subtree_size = self.prev_ctx.slider.subtree_size();
         let _current_subtree_size = self.current_ctx.slider.subtree_size();
 
-        if prev_fold.0 != current_fold.0 {
-            return Err(DataMergingError::IncompatibleFoldIterableNames(
-                prev_fold.0,
-                current_fold.0,
-            ));
-        }
-
-        let prev_stream = match self.prev_ctx.streams.get(&prev_fold.0) {
-            Some(stream) => stream.clone(),
-            // this one means iterable with no values
-            None => std::rc::Rc::new(std::cell::RefCell::new(vec![])),
-        };
-
-        let current_stream = match self.current_ctx.streams.clone().get(&prev_fold.0) {
-            Some(stream) => stream.clone(),
-            // this one means iterable with no values
-            None => std::rc::Rc::new(std::cell::RefCell::new(vec![])),
-        };
+        let (prev_stream, current_stream) = self.extract_streams(prev_fold.0, current_fold.0)?;
 
         let mut current_used_values = HashSet::new();
         for (prev_pos, value) in prev_stream.borrow().iter().enumerate() {
@@ -217,33 +206,84 @@ impl<'i> TraceMerger<'i> {
                 }
             }
 
-            let prev_fold_position = prev_fold.1[prev_pos].0;
-            let prev_fold_subtree_size = prev_fold.1[prev_pos].1;
-            self.prev_ctx.slider.adjust_position(prev_fold_position);
-            self.prev_ctx.slider.set_interval_len(prev_fold_subtree_size);
+            let prev_fold_begin = prev_fold.1[prev_pos].left_begin;
+            let prev_fold_end = prev_fold.1[prev_pos].left_end;
+            self.prev_ctx.slider.adjust_position(prev_fold_begin);
+            self.prev_ctx.slider.set_interval_len(prev_fold_end - prev_fold_begin);
 
             if let Some(pos) = current_pos {
-                let fold_position = current_fold.1[pos].0;
-                let fold_subtree_size = current_fold.1[pos].1;
-                self.current_ctx.slider.adjust_position(fold_position);
-                self.current_ctx.slider.set_interval_len(fold_subtree_size);
+                let current_fold_begin = current_fold.1[pos].left_begin;
+                let current_fold_end = current_fold.1[pos].left_end;
+                self.current_ctx.slider.adjust_position(current_fold_begin);
+                self.current_ctx
+                    .slider
+                    .set_interval_len(current_fold_end - current_fold_begin);
             } else {
-                // self.current_ctx.slider.adjust_position(fold_position);
                 self.current_ctx.slider.set_interval_len(0);
             }
 
             self.merge_subtree()?;
         }
 
+        // merge values that has only the second stream
         for stream_id in 0..current_fold.1.len() {
             if current_used_values.contains(&stream_id) {
                 continue;
             }
 
-            let current_fold_position = current_fold.1[stream_id].0;
-            let current_fold_subtree_size = current_fold.1[stream_id].1;
-            self.current_ctx.slider.adjust_position(current_fold_position);
-            self.current_ctx.slider.set_interval_len(current_fold_subtree_size);
+            let current_fold_begin = current_fold.1[stream_id].left_begin;
+            let current_fold_end = current_fold.1[stream_id].left_end;
+            self.current_ctx.slider.adjust_position(current_fold_begin);
+            self.current_ctx
+                .slider
+                .set_interval_len(current_fold_end - current_fold_begin);
+
+            self.prev_ctx.slider.set_interval_len(0);
+
+            self.merge_subtree()?;
+        }
+
+        let mut current_used_values = HashSet::new();
+        for (prev_pos, value) in prev_stream.borrow().iter().rev().enumerate() {
+            let mut current_pos: Option<usize> = None;
+            for stream_id in 0..current_stream.borrow().len() {
+                if &current_stream.borrow()[stream_id] == value && !current_used_values.contains(&stream_id) {
+                    current_used_values.insert(stream_id);
+                    current_pos = Some(stream_id);
+                }
+            }
+
+            let prev_fold_begin = prev_fold.1[prev_pos].right_begin;
+            let prev_fold_end = prev_fold.1[prev_pos].right_end;
+            self.prev_ctx.slider.adjust_position(prev_fold_begin);
+            self.prev_ctx.slider.set_interval_len(prev_fold_end - prev_fold_begin);
+
+            if let Some(pos) = current_pos {
+                let current_fold_begin = current_fold.1[pos].right_begin;
+                let current_fold_end = current_fold.1[pos].right_end;
+                self.current_ctx.slider.adjust_position(current_fold_begin);
+                self.current_ctx
+                    .slider
+                    .set_interval_len(current_fold_end - current_fold_begin);
+            } else {
+                self.current_ctx.slider.set_interval_len(0);
+            }
+
+            self.merge_subtree()?;
+        }
+
+        // merge values that has only the second stream
+        for stream_id in current_fold.1.len()..0 {
+            if current_used_values.contains(&stream_id) {
+                continue;
+            }
+
+            let current_fold_begin = current_fold.1[stream_id].right_begin;
+            let current_fold_end = current_fold.1[stream_id].right_end;
+            self.current_ctx.slider.adjust_position(current_fold_begin);
+            self.current_ctx
+                .slider
+                .set_interval_len(current_fold_end - current_fold_begin);
 
             self.prev_ctx.slider.set_interval_len(0);
 
@@ -251,5 +291,31 @@ impl<'i> TraceMerger<'i> {
         }
 
         Ok(())
+    }
+
+    fn extract_streams(
+        &self,
+        prev_stream_name: String,
+        current_stream_name: String,
+    ) -> MergeResult<(MergingStream, MergingStream)> {
+        if prev_stream_name != current_stream_name {
+            return Err(DataMergingError::IncompatibleFoldIterableNames(
+                prev_stream_name,
+                current_stream_name,
+            ));
+        }
+
+        let prev_stream = extract_stream(&self.prev_ctx, &prev_stream_name);
+        let current_stream = extract_stream(&self.current_ctx, &current_stream_name);
+
+        Ok((prev_stream, current_stream))
+    }
+}
+
+fn extract_stream(merge_ctx: &MergeCtx, stream_name: &str) -> MergingStream {
+    match merge_ctx.streams.get(stream_name) {
+        Some(stream) => stream.clone(),
+        // this one means iterable with no values
+        None => Rc::new(RefCell::new(vec![])),
     }
 }

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+mod trace_handler;
 mod utils;
 
 use super::ExecutionCtx;
