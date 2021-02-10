@@ -22,6 +22,9 @@ pub(crate) use avalue::ResolvedCallResult;
 use crate::execution::ExecutionError;
 use crate::SecurityTetraplet;
 
+use serde::Deserialize;
+use serde::Serialize;
+
 use std::collections::HashMap;
 use std::collections::VecDeque;
 
@@ -62,12 +65,33 @@ pub(crate) struct ExecutionCtx<'i> {
 #[derive(Debug)]
 pub(crate) struct LastErrorDescriptor {
     pub(crate) error: Rc<ExecutionError>,
+    pub(crate) instruction: String,
     pub(crate) tetraplet: Option<SecurityTetraplet>,
 }
 
 impl LastErrorDescriptor {
-    pub(crate) fn new(error: Rc<ExecutionError>, tetraplet: Option<SecurityTetraplet>) -> Self {
-        Self { error, tetraplet }
+    pub(crate) fn new(error: Rc<ExecutionError>, instruction: String, tetraplet: Option<SecurityTetraplet>) -> Self {
+        Self {
+            error,
+            instruction,
+            tetraplet,
+        }
+    }
+
+    pub(crate) fn serialize(&self) -> String {
+        #[derive(Serialize, Deserialize)]
+        pub(crate) struct LastError<'s> {
+            pub(crate) error: String,
+            pub(crate) instruction: &'s str,
+        }
+
+        let error = format!("{}", &self.error);
+        let error_with_location = LastError {
+            error,
+            instruction: &self.instruction,
+        };
+
+        serde_json::to_string(&error_with_location).expect("default serializer shouldn't fail")
     }
 }
 

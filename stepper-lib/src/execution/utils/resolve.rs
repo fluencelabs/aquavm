@@ -48,7 +48,8 @@ fn prepare_string_arg<'i>(arg: &str, ctx: &ExecutionCtx<'i>) -> ExecutionResult<
 fn prepare_last_error<'i>(ctx: &ExecutionCtx<'i>) -> ExecutionResult<(JValue, Vec<SecurityTetraplet>)> {
     let result = match &ctx.last_error {
         Some(error) => {
-            let jvalue = JValue::String(format!("{}", error.error));
+            let serialized_error = error.serialize();
+            let jvalue = JValue::String(serialized_error);
             let tetraplets = error
                 .tetraplet
                 .clone()

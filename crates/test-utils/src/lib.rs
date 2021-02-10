@@ -77,13 +77,10 @@ pub fn echo_string_call_service() -> CallServiceClosure {
         };
 
         let arg: Vec<String> = serde_json::from_str(arg).unwrap();
+        let arg = serde_json::to_string(&arg[0]).unwrap();
 
         Some(IValue::Record(
-            NEVec::new(vec![
-                IValue::S32(0),
-                IValue::String(format!("\"{}\"", arg[0])),
-            ])
-            .unwrap(),
+            NEVec::new(vec![IValue::S32(0), IValue::String(arg)]).unwrap(),
         ))
     })
 }

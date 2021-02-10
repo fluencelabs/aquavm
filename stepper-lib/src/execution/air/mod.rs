@@ -36,10 +36,11 @@ use air_parser::ast::Instruction;
 
 /// Executes instruction and updates last error if needed.
 macro_rules! execute {
-    ($instr:expr, $exec_ctx:ident, $trace_ctx:ident) => {
+    ($self:expr, $instr:expr, $exec_ctx:ident, $trace_ctx:ident) => {
         match $instr.execute($exec_ctx, $trace_ctx) {
             Err(e) => {
-                let last_error = LastErrorDescriptor::new(e.clone(), None);
+                let instruction = format!("{:?}", $self);
+                let last_error = LastErrorDescriptor::new(e.clone(), instruction, None);
                 $exec_ctx.last_error = Some(last_error);
                 Err(e)
             }
@@ -58,14 +59,14 @@ impl<'i> ExecutableInstruction<'i> for Instruction<'i> {
             // call isn't wrapped by the execute macro because
             // it internally sets last_error with resolved triplet
             Instruction::Call(call) => call.execute(exec_ctx, trace_ctx),
-            Instruction::Fold(fold) => execute!(fold, exec_ctx, trace_ctx),
-            Instruction::Next(next) => execute!(next, exec_ctx, trace_ctx),
-            Instruction::Null(null) => execute!(null, exec_ctx, trace_ctx),
-            Instruction::Par(par) => execute!(par, exec_ctx, trace_ctx),
-            Instruction::Seq(seq) => execute!(seq, exec_ctx, trace_ctx),
-            Instruction::Xor(xor) => execute!(xor, exec_ctx, trace_ctx),
-            Instruction::Match(match_) => execute!(match_, exec_ctx, trace_ctx),
-            Instruction::MisMatch(mismatch) => execute!(mismatch, exec_ctx, trace_ctx),
+            Instruction::Fold(fold) => execute!(self, fold, exec_ctx, trace_ctx),
+            Instruction::Next(next) => execute!(self, next, exec_ctx, trace_ctx),
+            Instruction::Null(null) => execute!(self, null, exec_ctx, trace_ctx),
+            Instruction::Par(par) => execute!(self, par, exec_ctx, trace_ctx),
+            Instruction::Seq(seq) => execute!(self, seq, exec_ctx, trace_ctx),
+            Instruction::Xor(xor) => execute!(self, xor, exec_ctx, trace_ctx),
+            Instruction::Match(match_) => execute!(self, match_, exec_ctx, trace_ctx),
+            Instruction::MisMatch(mismatch) => execute!(self, mismatch, exec_ctx, trace_ctx),
             Instruction::Error => unreachable!("should not execute if parsing succeeded. QED."),
         }
     }

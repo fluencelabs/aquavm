@@ -73,7 +73,7 @@ mod tests {
             // return a error for service with such id
             if builtin_service == &fallible_service_id {
                 Some(IValue::Record(
-                    NEVec::new(vec![IValue::S32(1), IValue::String(String::from(r#"error"#))]).unwrap(),
+                    NEVec::new(vec![IValue::S32(1), IValue::String(String::from("error"))]).unwrap(),
                 ))
             } else {
                 // return success for services with other ids
@@ -265,7 +265,7 @@ mod tests {
         let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid json");
 
         let expected_state = Call(Executed(Rc::new(JValue::String(String::from(
-            "Local service error: ret_code is 1, error message is 'error'",
+            "{\"error\":\"Local service error: ret_code is 1, error message is \'error\'\",\"instruction\":\"Call { peer_part: PeerPk(Literal(\\\"failible_peer_id\\\")), function_part: ServiceIdWithFuncName(Literal(\\\"service_id_1\\\"), Literal(\\\"local_fn_name\\\")), args: [], output: Scalar(\\\"result\\\") }\"}"
         )))));
 
         assert_eq!(actual_trace[1], expected_state);
