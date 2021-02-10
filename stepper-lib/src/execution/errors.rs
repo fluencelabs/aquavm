@@ -23,6 +23,8 @@ use jsonpath_lib::JsonPathError;
 use serde_json::Error as SerdeJsonError;
 use thiserror::Error as ThisError;
 
+use std::rc::Rc;
+
 /// Errors arised while executing AIR script.
 #[derive(ThisError, Debug)]
 pub(crate) enum ExecutionError {
@@ -36,7 +38,7 @@ pub(crate) enum ExecutionError {
 
     /// An error is occurred while calling local service via call_service.
     #[error("{0}")]
-    LocalServiceError(String),
+    LocalServiceError(Rc<String>),
 
     /// Value for such name isn't presence in data.
     #[error("variable with name '{0}' isn't present in data")]

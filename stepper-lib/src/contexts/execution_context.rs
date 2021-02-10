@@ -19,10 +19,14 @@ mod avalue;
 pub(crate) use avalue::AValue;
 pub(crate) use avalue::ResolvedCallResult;
 
+use crate::SecurityTetraplet;
+use crate::execution::ExecutionError;
+
 use std::collections::HashMap;
 use std::collections::VecDeque;
 
 /// Contains all necessary state needed to execute aqua script.
+#[derive(Default)]
 pub(crate) struct ExecutionCtx<'i> {
     /// Contains all set variables.
     // TODO: use shared string (Rc<String>) to avoid copying.
@@ -37,6 +41,9 @@ pub(crate) struct ExecutionCtx<'i> {
     /// PeerId of a peer send this aqua script.
     pub init_peer_id: String,
 
+    /// Last error produced by local service.
+    pub last_error: Option<LastErrorDescriptor>,
+
     /// Indicates that previous executed subtree is complete.
     /// A subtree treats as a complete if all subtree elements satisfy the following rules:
     ///   - at least one of par subtrees is completed
@@ -49,15 +56,19 @@ pub(crate) struct ExecutionCtx<'i> {
     pub met_folds: VecDeque<&'i str>,
 }
 
+#[derive(Debug)]
+pub struct LastErrorDescriptor {
+    pub error: ExecutionError,
+    pub tetraplets: Vec<Vec<SecurityTetraplet>>,
+}
+
 impl<'i> ExecutionCtx<'i> {
     pub(crate) fn new(current_peer_id: String, init_peer_id: String) -> Self {
         Self {
-            data_cache: HashMap::new(),
-            next_peer_pks: vec![],
             current_peer_id,
             init_peer_id,
             subtree_complete: true,
-            met_folds: VecDeque::new(),
+            ..<_>::default()
         }
     }
 }

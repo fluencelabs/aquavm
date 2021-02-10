@@ -30,7 +30,7 @@ pub enum CallResult {
     Executed(Rc<JValue>),
 
     /// call_service ended with a service error.
-    CallServiceFailed(String),
+    CallServiceFailed(Rc<String>),
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
