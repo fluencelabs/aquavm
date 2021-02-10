@@ -248,7 +248,6 @@ mod tests {
 
         let faillible_peer_id = "failible_peer_id";
         let mut faillible_vm = create_aqua_vm(fallible_call_service("service_id_1"), faillible_peer_id);
-
         let local_peer_id = "local_peer_id";
         let mut vm = create_aqua_vm(echo_string_call_service(), local_peer_id);
 
