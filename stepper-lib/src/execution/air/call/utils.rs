@@ -19,6 +19,7 @@ use super::ExecutionError;
 use super::ExecutionResult;
 use crate::contexts::execution::ResolvedCallResult;
 use crate::contexts::execution_trace::*;
+use crate::exec_err;
 use crate::log_targets::EXECUTED_STATE_CHANGING;
 use crate::JValue;
 
@@ -60,13 +61,13 @@ pub(super) fn set_local_call_result<'i>(
                     // check that current execution flow is inside a fold block
                     if exec_ctx.met_folds.is_empty() {
                         // shadowing is allowed only inside fold blocks
-                        return Err(MultipleVariablesFound(entry.key().clone()));
+                        return exec_err!(MultipleVariablesFound(entry.key().clone()));
                     }
 
                     match entry.get() {
                         AValue::JValueRef(_) => {}
                         // shadowing is allowed only for scalar values
-                        _ => return Err(ShadowingError(entry.key().clone())),
+                        _ => return exec_err!(ShadowingError(entry.key().clone())),
                     };
 
                     entry.insert(AValue::JValueRef(executed_result));
@@ -78,7 +79,7 @@ pub(super) fn set_local_call_result<'i>(
                 Occupied(mut entry) => match entry.get_mut() {
                     // if result is an array, insert result to the end of the array
                     AValue::JValueAccumulatorRef(values) => values.borrow_mut().push(executed_result),
-                    v => return Err(IncompatibleAValueType(format!("{}", v), String::from("Array"))),
+                    v => return exec_err!(IncompatibleAValueType(format!("{}", v), String::from("Array"))),
                 },
                 Vacant(entry) => {
                     entry.insert(AValue::JValueAccumulatorRef(RefCell::new(vec![executed_result])));
@@ -128,7 +129,7 @@ pub(super) fn handle_prev_state<'i>(
             let err_msg = err_msg.clone();
             trace_ctx.new_trace.push_back(prev_state);
             exec_ctx.subtree_complete = false;
-            Err(ExecutionError::LocalServiceError(err_msg))
+            exec_err!(ExecutionError::LocalServiceError(err_msg))
         }
         Call(RequestSentBy(..)) => {
             let peer_pk = triplet.peer_pk.as_str();
@@ -149,7 +150,7 @@ pub(super) fn handle_prev_state<'i>(
             Ok(false)
         }
         // state has inconsistent order - return a error, call shouldn't be executed
-        par_state @ Par(..) => Err(ExecutionError::InvalidExecutedState(
+        par_state @ Par(..) => exec_err!(ExecutionError::InvalidExecutedState(
             String::from("call"),
             par_state.clone(),
         )),

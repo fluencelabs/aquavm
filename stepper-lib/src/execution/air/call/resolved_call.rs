@@ -102,7 +102,7 @@ impl<'i> ResolvedCall<'i> {
         };
 
         // check that service call succeeded
-        let service_result = handle_service_error(service_result, tetraplets, exec_ctx, trace_ctx)?;
+        let service_result = handle_service_error(service_result, &self.triplet, exec_ctx, trace_ctx)?;
 
         let result: JValue = serde_json::from_str(&service_result.result).map_err(|e| DeError(service_result, e))?;
         let result = Rc::new(result);
@@ -176,7 +176,7 @@ impl<'i> ResolvedCall<'i> {
 
 fn handle_service_error<'i>(
     service_result: CallServiceResult,
-    tetraplets: Vec<Vec<SecurityTetraplet>>,
+    triplet: &Rc<ResolvedTriplet>,
     exec_ctx: &mut ExecutionCtx<'i>,
     trace_ctx: &mut ExecutionTraceCtx,
 ) -> ExecutionResult<CallServiceResult> {
@@ -190,14 +190,17 @@ fn handle_service_error<'i>(
 
     let service_result = Rc::new(service_result.result);
     let error = ExecutionError::LocalServiceError(service_result.clone());
+    let error = Rc::new(error);
 
-    trace_ctx
-        .new_trace
-        .push_back(Call(CallServiceFailed(service_result)));
+    trace_ctx.new_trace.push_back(Call(CallServiceFailed(service_result)));
+    let tetraplet = SecurityTetraplet {
+        triplet: triplet.clone(),
+        json_path: String::new(),
+    };
 
     let last_error = LastErrorDescriptor {
-        error: error,
-        tetraplets,
+        error: error.clone(),
+        tetraplet,
     };
 
     exec_ctx.last_error = Some(last_error);

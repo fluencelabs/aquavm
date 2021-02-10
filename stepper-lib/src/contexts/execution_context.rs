@@ -19,11 +19,13 @@ mod avalue;
 pub(crate) use avalue::AValue;
 pub(crate) use avalue::ResolvedCallResult;
 
-use crate::SecurityTetraplet;
 use crate::execution::ExecutionError;
+use crate::SecurityTetraplet;
 
 use std::collections::HashMap;
 use std::collections::VecDeque;
+
+use std::rc::Rc;
 
 /// Contains all necessary state needed to execute aqua script.
 #[derive(Default)]
@@ -42,6 +44,7 @@ pub(crate) struct ExecutionCtx<'i> {
     pub init_peer_id: String,
 
     /// Last error produced by local service.
+    /// None means that there weren't any error.
     pub last_error: Option<LastErrorDescriptor>,
 
     /// Indicates that previous executed subtree is complete.
@@ -57,9 +60,9 @@ pub(crate) struct ExecutionCtx<'i> {
 }
 
 #[derive(Debug)]
-pub struct LastErrorDescriptor {
-    pub error: ExecutionError,
-    pub tetraplets: Vec<Vec<SecurityTetraplet>>,
+pub(crate) struct LastErrorDescriptor {
+    pub(crate) error: Rc<ExecutionError>,
+    pub(crate) tetraplet: SecurityTetraplet,
 }
 
 impl<'i> ExecutionCtx<'i> {

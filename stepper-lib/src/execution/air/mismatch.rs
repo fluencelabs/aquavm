@@ -30,7 +30,7 @@ impl<'i> super::ExecutableInstruction<'i> for MisMatch<'i> {
         let are_values_equal = are_matchable_eq(&self.left_value, &self.right_value, exec_ctx)?;
 
         if are_values_equal {
-            return Err(ExecutionError::MatchWithoutXorError);
+            return crate::exec_err!(ExecutionError::MismatchWithoutXorError);
         }
 
         self.instruction.execute(exec_ctx, trace_ctx)

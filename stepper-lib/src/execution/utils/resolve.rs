@@ -49,8 +49,8 @@ fn prepare_last_error<'i>(ctx: &ExecutionCtx<'i>) -> ExecutionResult<(JValue, Ve
     let result = match &ctx.last_error {
         Some(error) => {
             let jvalue = JValue::String(format!("{}", error.error));
-            let tetraplets = error.tetraplets.clone();
-            (jvalue, tetraplets)
+            let tetraplets = error.tetraplet.clone();
+            (jvalue, vec![tetraplets])
         }
         None => {
             let jvalue = JValue::String(String::new());

@@ -87,6 +87,10 @@ pub(crate) enum ExecutionError {
     /// This error type is produced by a match to notify xor that compared values aren't equal.
     #[error("match is used without corresponding xor")]
     MatchWithoutXorError,
+
+    /// This error type is produced by a mismatch to notify xor that compared values aren't equal.
+    #[error("match is used without corresponding xor")]
+    MismatchWithoutXorError,
 }
 
 impl ExecutionError {
@@ -109,6 +113,7 @@ impl ExecutionError {
             InvalidExecutedState(..) => 13,
             ShadowingError(_) => 14,
             MatchWithoutXorError => 15,
+            MismatchWithoutXorError => 16,
         }
     }
 }
