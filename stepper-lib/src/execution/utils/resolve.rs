@@ -49,7 +49,11 @@ fn prepare_last_error<'i>(ctx: &ExecutionCtx<'i>) -> ExecutionResult<(JValue, Ve
     let result = match &ctx.last_error {
         Some(error) => {
             let jvalue = JValue::String(format!("{}", error.error));
-            let tetraplets = error.tetraplet.clone();
+            let tetraplets = error
+                .tetraplet
+                .clone()
+                .unwrap_or_else(|| SecurityTetraplet::literal_tetraplet(ctx.init_peer_id.clone()));
+
             (jvalue, vec![tetraplets])
         }
         None => {

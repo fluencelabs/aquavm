@@ -24,7 +24,9 @@ use super::ExecutionCtx;
 use super::ExecutionError;
 use super::ExecutionResult;
 use super::ExecutionTraceCtx;
+use crate::contexts::execution::LastErrorDescriptor;
 use crate::log_instruction;
+use crate::SecurityTetraplet;
 
 use air_parser::ast::Call;
 
@@ -45,8 +47,21 @@ impl<'i> super::ExecutableInstruction<'i> for Call<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut ExecutionTraceCtx) -> ExecutionResult<()> {
         log_instruction!(call, exec_ctx, trace_ctx);
 
-        let resolved_call = joinable!(ResolvedCall::new(self, exec_ctx), exec_ctx)?;
-        joinable!(resolved_call.execute(exec_ctx, trace_ctx), exec_ctx)
+        let resolved_call = joinable!(ResolvedCall::new(self, exec_ctx), exec_ctx).map_err(|e| {
+            let last_error = LastErrorDescriptor::new(e.clone(), None);
+            exec_ctx.last_error = Some(last_error);
+
+            e
+        })?;
+
+        let triplet = resolved_call.as_triplet();
+        joinable!(resolved_call.execute(exec_ctx, trace_ctx), exec_ctx).map_err(|e| {
+            let tetraplet = SecurityTetraplet::from_triplet(triplet);
+            let last_error = LastErrorDescriptor::new(e.clone(), Some(tetraplet));
+            exec_ctx.last_error = Some(last_error);
+
+            e
+        })
     }
 }
 

@@ -62,7 +62,13 @@ pub(crate) struct ExecutionCtx<'i> {
 #[derive(Debug)]
 pub(crate) struct LastErrorDescriptor {
     pub(crate) error: Rc<ExecutionError>,
-    pub(crate) tetraplet: SecurityTetraplet,
+    pub(crate) tetraplet: Option<SecurityTetraplet>,
+}
+
+impl LastErrorDescriptor {
+    pub(crate) fn new(error: Rc<ExecutionError>, tetraplet: Option<SecurityTetraplet>) -> Self {
+        Self { error, tetraplet }
+    }
 }
 
 impl<'i> ExecutionCtx<'i> {

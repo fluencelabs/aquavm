@@ -89,7 +89,7 @@ pub(crate) enum ExecutionError {
     MatchWithoutXorError,
 
     /// This error type is produced by a mismatch to notify xor that compared values aren't equal.
-    #[error("match is used without corresponding xor")]
+    #[error("mismatch is used without corresponding xor")]
     MismatchWithoutXorError,
 }
 

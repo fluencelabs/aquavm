@@ -102,7 +102,7 @@ impl<'i> ResolvedCall<'i> {
         };
 
         // check that service call succeeded
-        let service_result = handle_service_error(service_result, &self.triplet, exec_ctx, trace_ctx)?;
+        let service_result = handle_service_error(service_result, trace_ctx)?;
 
         let result: JValue = serde_json::from_str(&service_result.result).map_err(|e| DeError(service_result, e))?;
         let result = Rc::new(result);
@@ -119,6 +119,10 @@ impl<'i> ResolvedCall<'i> {
         trace_ctx.new_trace.push_back(new_executed_state);
 
         Ok(())
+    }
+
+    pub(super) fn as_triplet(&self) -> Rc<ResolvedTriplet> {
+        self.triplet.clone()
     }
 
     /// Determine whether this call should be really called and adjust prev executed trace accordingly.
@@ -176,11 +180,8 @@ impl<'i> ResolvedCall<'i> {
 
 fn handle_service_error<'i>(
     service_result: CallServiceResult,
-    triplet: &Rc<ResolvedTriplet>,
-    exec_ctx: &mut ExecutionCtx<'i>,
     trace_ctx: &mut ExecutionTraceCtx,
 ) -> ExecutionResult<CallServiceResult> {
-    use crate::contexts::execution::LastErrorDescriptor;
     use CallResult::CallServiceFailed;
     use ExecutedState::Call;
 
@@ -193,17 +194,6 @@ fn handle_service_error<'i>(
     let error = Rc::new(error);
 
     trace_ctx.new_trace.push_back(Call(CallServiceFailed(service_result)));
-    let tetraplet = SecurityTetraplet {
-        triplet: triplet.clone(),
-        json_path: String::new(),
-    };
-
-    let last_error = LastErrorDescriptor {
-        error: error.clone(),
-        tetraplet,
-    };
-
-    exec_ctx.last_error = Some(last_error);
 
     Err(error)
 }
