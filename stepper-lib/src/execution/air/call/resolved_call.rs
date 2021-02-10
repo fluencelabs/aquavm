@@ -189,11 +189,13 @@ fn handle_service_error<'i>(
         return Ok(service_result);
     }
 
-    let service_result = Rc::new(service_result.result);
-    let error = ExecutionError::LocalServiceError(service_result.clone());
+    let error_message = Rc::new(service_result.result);
+    let error = ExecutionError::LocalServiceError(service_result.ret_code, error_message.clone());
     let error = Rc::new(error);
 
-    trace_ctx.new_trace.push_back(Call(CallServiceFailed(service_result)));
+    trace_ctx
+        .new_trace
+        .push_back(Call(CallServiceFailed(service_result.ret_code, error_message)));
 
     Err(error)
 }

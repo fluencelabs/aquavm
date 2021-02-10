@@ -128,14 +128,14 @@ fn merge_call(prev_call_result: CallResult, current_call_result: CallResult) -> 
     use super::DataMergingError::IncompatibleCallResults;
 
     match (&prev_call_result, &current_call_result) {
-        (CallServiceFailed(prev_err_msg), CallServiceFailed(err_msg)) => {
-            if prev_err_msg != err_msg {
+        (CallServiceFailed(prev_ret_code, prev_err_msg), CallServiceFailed(ret_code, err_msg)) => {
+            if prev_ret_code != ret_code || prev_err_msg != err_msg {
                 return Err(IncompatibleCallResults(prev_call_result, current_call_result));
             }
             Ok(current_call_result)
         }
-        (RequestSentBy(_), CallServiceFailed(_)) => Ok(current_call_result),
-        (CallServiceFailed(_), RequestSentBy(_)) => Ok(prev_call_result),
+        (RequestSentBy(_), CallServiceFailed(..)) => Ok(current_call_result),
+        (CallServiceFailed(..), RequestSentBy(_)) => Ok(prev_call_result),
         (RequestSentBy(prev_sender), RequestSentBy(sender)) => {
             if prev_sender != sender {
                 return Err(IncompatibleCallResults(prev_call_result, current_call_result));
@@ -152,8 +152,8 @@ fn merge_call(prev_call_result: CallResult, current_call_result: CallResult) -> 
 
             Ok(prev_call_result)
         }
-        (CallServiceFailed(_), Executed(..)) => Err(IncompatibleCallResults(prev_call_result, current_call_result)),
-        (Executed(..), CallServiceFailed(_)) => Err(IncompatibleCallResults(prev_call_result, current_call_result)),
+        (CallServiceFailed(..), Executed(..)) => Err(IncompatibleCallResults(prev_call_result, current_call_result)),
+        (Executed(..), CallServiceFailed(..)) => Err(IncompatibleCallResults(prev_call_result, current_call_result)),
     }
 }
 

@@ -184,10 +184,10 @@ mod tests {
         let res = call_vm!(set_variable_vm, "asd", script.clone(), "", "");
         let res = call_vm!(vm, "asd", script.clone(), "", res.data);
 
-        assert_eq!(res.ret_code, 1015);
+        assert_eq!(res.ret_code, 1016);
 
         let res = call_vm!(vm, "asd", script, "", res.data);
 
-        assert_eq!(res.ret_code, 1015);
+        assert_eq!(res.ret_code, 1016);
     }
 }

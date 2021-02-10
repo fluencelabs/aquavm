@@ -125,11 +125,12 @@ pub(super) fn handle_prev_state<'i>(
     match &prev_state {
         // this call was failed on one of the previous executions,
         // here it's needed to bubble this special error up
-        Call(CallServiceFailed(err_msg)) => {
+        Call(CallServiceFailed(ret_code, err_msg)) => {
+            let ret_code = *ret_code;
             let err_msg = err_msg.clone();
             trace_ctx.new_trace.push_back(prev_state);
             exec_ctx.subtree_complete = false;
-            exec_err!(ExecutionError::LocalServiceError(err_msg))
+            exec_err!(ExecutionError::LocalServiceError(ret_code, err_msg))
         }
         Call(RequestSentBy(..)) => {
             let peer_pk = triplet.peer_pk.as_str();

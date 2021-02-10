@@ -113,7 +113,7 @@ fn execute_subtree<'i>(
         }
         // if there is a service error, update already added Par state
         // and then bubble the error up
-        Err(err) if matches!(&*err, LocalServiceError(_)) => {
+        Err(err) if matches!(&*err, LocalServiceError(..)) => {
             update_par_state(trace_ctx, subtree_type, current_par_pos, before_new_path_len);
             trace_ctx.current_subtree_size = before_subtree_size - subtree_size;
             Err(err)
