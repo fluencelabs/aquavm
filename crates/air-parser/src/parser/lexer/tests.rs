@@ -182,7 +182,11 @@ fn integer_numbers() {
 
     assert_eq!(
         number_tokens,
-        vec![Ok((0, Token::Number(number.clone()), NUMBER_WITH_PLUS_SIGN.len()))]
+        vec![Ok((
+            0,
+            Token::Number(number.clone()),
+            NUMBER_WITH_PLUS_SIGN.len()
+        ))]
     );
 
     const NUMBER: &str = "123";
@@ -214,7 +218,11 @@ fn positive_float_number() {
 
     assert_eq!(
         number_tokens,
-        vec![Ok((0, Token::Number(number.clone()), FNUMBER_WITH_PLUS_SIGN.len()))]
+        vec![Ok((
+            0,
+            Token::Number(number.clone()),
+            FNUMBER_WITH_PLUS_SIGN.len()
+        ))]
     );
 
     const FNUMBER: &str = "123.123";
@@ -255,7 +263,8 @@ fn too_big_number() {
 
 #[test]
 fn too_big_float_number() {
-    const FNUMBER: &str = "10000000000000000000000000000001.1231564564545684564646515313546547682131";
+    const FNUMBER: &str =
+        "10000000000000000000000000000001.1231564564545684564646515313546547682131";
 
     let number_tokens = run_lexer(FNUMBER);
 

@@ -35,6 +35,7 @@ pub(crate) fn resolve_to_args<'i>(
         CallInstrArgValue::Literal(value) => prepare_string_arg(value, ctx),
         CallInstrArgValue::Variable(name) => prepare_variable(name, ctx),
         CallInstrArgValue::JsonPath { variable, path } => prepare_json_path(variable, path, ctx),
+        _ => unreachable!(),
     }
 }
 

@@ -188,6 +188,9 @@ fn string_to_token(input: &str, start_pos: usize) -> LexerResult<Token> {
         INIT_PEER_ID => Ok(Token::InitPeerId),
         LAST_ERROR => Ok(Token::LastError),
 
+        TRUE_VALUE => Ok(Token::Boolean(true)),
+        FALSE_VALUE => Ok(Token::Boolean(false)),
+
         str if str.ends_with(ACC_END_TAG) => try_parse_accumulator(str, start_pos),
         str => super::call_variable_parser::try_parse_call_variable(str, start_pos),
     }
@@ -225,5 +228,8 @@ const MISMATCH_INSTR: &str = "mismatch";
 
 const INIT_PEER_ID: &str = "%init_peer_id%";
 const LAST_ERROR: &str = "%last_error%";
+
+const TRUE_VALUE: &str = "true";
+const FALSE_VALUE: &str = "false";
 
 const ACC_END_TAG: &str = "[]";

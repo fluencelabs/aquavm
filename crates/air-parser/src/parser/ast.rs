@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+pub use crate::parser::lexer::Number;
+
 use serde::Deserialize;
 use serde::Serialize;
-use crate::parser::lexer::Number;
 
 use std::rc::Rc;
 

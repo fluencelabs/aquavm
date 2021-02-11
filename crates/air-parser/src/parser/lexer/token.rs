@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-use serde::Serialize;
 use serde::Deserialize;
+use serde::Serialize;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Token<'input> {
