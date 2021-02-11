@@ -49,4 +49,11 @@ impl SecurityTetraplet {
             json_path: String::new(),
         }
     }
+
+    pub fn from_triplet(triplet: Rc<ResolvedTriplet>) -> Self {
+        Self {
+            triplet,
+            json_path: String::new(),
+        }
+    }
 }

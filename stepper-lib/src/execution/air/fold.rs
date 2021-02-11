@@ -23,6 +23,7 @@ use super::ExecutionTraceCtx;
 use super::Instruction;
 use crate::contexts::execution::AValue;
 use crate::contexts::execution::ResolvedCallResult;
+use crate::exec_err;
 use crate::execution::boxed_value::*;
 use crate::log_instruction;
 
@@ -69,7 +70,7 @@ impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
             .insert(self.iterator.to_string(), AValue::JValueFoldCursor(fold_state));
 
         if previous_value.is_some() {
-            return Err(MultipleFoldStates(self.iterator.to_string()));
+            return exec_err!(MultipleFoldStates(self.iterator.to_string()));
         }
         exec_ctx.met_folds.push_back(self.iterator);
 
@@ -99,7 +100,7 @@ impl<'i> super::ExecutableInstruction<'i> for Next<'i> {
             v => {
                 // it's not possible to use unreachable here
                 // because at now next syntactically could be used without fold
-                return Err(IncompatibleAValueType(
+                return exec_err!(IncompatibleAValueType(
                     format!("{}", v),
                     String::from("JValueFoldCursor"),
                 ));

@@ -61,7 +61,9 @@ mod tests {
 
     use std::rc::Rc;
 
-    fn fallible_call_service(fallible_service_id: String) -> CallServiceClosure {
+    fn fallible_call_service(fallible_service_id: impl Into<String>) -> CallServiceClosure {
+        let fallible_service_id = fallible_service_id.into();
+
         Box::new(move |_, args| -> Option<IValue> {
             let builtin_service = match &args[0] {
                 IValue::String(str) => str,
@@ -71,7 +73,7 @@ mod tests {
             // return a error for service with such id
             if builtin_service == &fallible_service_id {
                 Some(IValue::Record(
-                    NEVec::new(vec![IValue::S32(1), IValue::String(String::from(r#""error""#))]).unwrap(),
+                    NEVec::new(vec![IValue::S32(1), IValue::String(String::from("error"))]).unwrap(),
                 ))
             } else {
                 // return success for services with other ids
@@ -105,7 +107,10 @@ mod tests {
         let executed_call_result = Call(Executed(Rc::new(JValue::String(String::from("res")))));
 
         assert_eq!(actual_trace.len(), 2);
-        assert_eq!(actual_trace[0], Call(CallServiceFailed(String::from(r#""error""#))));
+        assert_eq!(
+            actual_trace[0],
+            Call(CallServiceFailed(1, Rc::new(String::from(r#"error"#))))
+        );
         assert_eq!(actual_trace[1], executed_call_result);
 
         let script = format!(
@@ -223,7 +228,7 @@ mod tests {
             Call(Executed(executed_call_result.clone())),
             Call(Executed(executed_call_result.clone())),
             Par(1, 0),
-            Call(CallServiceFailed(String::from(r#""error""#))),
+            Call(CallServiceFailed(1, Rc::new(String::from(r#"error"#)))),
             Call(Executed(executed_call_result.clone())),
             Call(Executed(executed_call_result.clone())),
         ];
@@ -233,5 +238,36 @@ mod tests {
         let result = call_vm!(vm, "asd", script, "[]", result.data);
         let actual_trace: ExecutionTrace = serde_json::from_slice(&result.data).expect("should be valid json");
         assert_eq!(actual_trace, expected_trace);
+    }
+
+    #[test]
+    fn last_error_with_xor() {
+        use crate::contexts::execution_trace::CallResult::*;
+        use crate::contexts::execution_trace::ExecutedState::*;
+        use aqua_test_utils::echo_string_call_service;
+
+        let faillible_peer_id = "failible_peer_id";
+        let mut faillible_vm = create_aqua_vm(fallible_call_service("service_id_1"), faillible_peer_id);
+        let local_peer_id = "local_peer_id";
+        let mut vm = create_aqua_vm(echo_string_call_service(), local_peer_id);
+
+        let script = format!(
+            r#"
+            (xor
+                (call "{0}" ("service_id_1" "local_fn_name") [] result)
+                (call "{1}" ("service_id_2" "local_fn_name") [%last_error%] result)
+            )"#,
+            faillible_peer_id, local_peer_id,
+        );
+
+        let res = call_vm!(faillible_vm, "asd", script.clone(), "", "");
+        let res = call_vm!(vm, "asd", script, "", res.data);
+        let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid json");
+
+        let expected_state = Call(Executed(Rc::new(JValue::String(String::from(
+            "{\"error\":\"Local service error: ret_code is 1, error message is \'error\'\",\"instruction\":\"Call { peer_part: PeerPk(Literal(\\\"failible_peer_id\\\")), function_part: ServiceIdWithFuncName(Literal(\\\"service_id_1\\\"), Literal(\\\"local_fn_name\\\")), args: [], output: Scalar(\\\"result\\\") }\"}"
+        )))));
+
+        assert_eq!(actual_trace[1], expected_state);
     }
 }

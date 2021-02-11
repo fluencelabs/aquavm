@@ -29,9 +29,25 @@ pub(crate) use fold::FoldState;
 pub(self) use super::ExecutionError;
 pub(self) use super::ExecutionResult;
 pub(self) use crate::contexts::execution::ExecutionCtx;
+pub(self) use crate::contexts::execution::LastErrorDescriptor;
 pub(self) use crate::contexts::execution_trace::ExecutionTraceCtx;
 
 use air_parser::ast::Instruction;
+
+/// Executes instruction and updates last error if needed.
+macro_rules! execute {
+    ($self:expr, $instr:expr, $exec_ctx:ident, $trace_ctx:ident) => {
+        match $instr.execute($exec_ctx, $trace_ctx) {
+            Err(e) => {
+                let instruction = format!("{:?}", $self);
+                let last_error = LastErrorDescriptor::new(e.clone(), instruction, None);
+                $exec_ctx.last_error = Some(last_error);
+                Err(e)
+            }
+            v => v,
+        }
+    };
+}
 
 pub(crate) trait ExecutableInstruction<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut ExecutionTraceCtx) -> ExecutionResult<()>;
@@ -40,15 +56,17 @@ pub(crate) trait ExecutableInstruction<'i> {
 impl<'i> ExecutableInstruction<'i> for Instruction<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut ExecutionTraceCtx) -> ExecutionResult<()> {
         match self {
+            // call isn't wrapped by the execute macro because
+            // it internally sets last_error with resolved triplet
             Instruction::Call(call) => call.execute(exec_ctx, trace_ctx),
-            Instruction::Fold(fold) => fold.execute(exec_ctx, trace_ctx),
-            Instruction::Next(next) => next.execute(exec_ctx, trace_ctx),
-            Instruction::Null(null) => null.execute(exec_ctx, trace_ctx),
-            Instruction::Par(par) => par.execute(exec_ctx, trace_ctx),
-            Instruction::Seq(seq) => seq.execute(exec_ctx, trace_ctx),
-            Instruction::Xor(xor) => xor.execute(exec_ctx, trace_ctx),
-            Instruction::Match(match_) => match_.execute(exec_ctx, trace_ctx),
-            Instruction::MisMatch(mismatch) => mismatch.execute(exec_ctx, trace_ctx),
+            Instruction::Fold(fold) => execute!(self, fold, exec_ctx, trace_ctx),
+            Instruction::Next(next) => execute!(self, next, exec_ctx, trace_ctx),
+            Instruction::Null(null) => execute!(self, null, exec_ctx, trace_ctx),
+            Instruction::Par(par) => execute!(self, par, exec_ctx, trace_ctx),
+            Instruction::Seq(seq) => execute!(self, seq, exec_ctx, trace_ctx),
+            Instruction::Xor(xor) => execute!(self, xor, exec_ctx, trace_ctx),
+            Instruction::Match(match_) => execute!(self, match_, exec_ctx, trace_ctx),
+            Instruction::MisMatch(mismatch) => execute!(self, mismatch, exec_ctx, trace_ctx),
             Instruction::Error => unreachable!("should not execute if parsing succeeded. QED."),
         }
     }

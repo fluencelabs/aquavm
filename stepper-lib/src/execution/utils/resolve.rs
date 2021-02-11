@@ -22,39 +22,71 @@ use crate::execution::ExecutionResult;
 use crate::JValue;
 use crate::SecurityTetraplet;
 
-use air_parser::ast::CallArgValue;
+use air_parser::ast::CallInstrArgValue;
 
 /// Resolve value to called function arguments.
 pub(crate) fn resolve_to_args<'i>(
-    value: &CallArgValue<'i>,
+    value: &CallInstrArgValue<'i>,
     ctx: &ExecutionCtx<'i>,
 ) -> ExecutionResult<(JValue, Vec<SecurityTetraplet>)> {
-    fn handle_string_arg<'i>(arg: &str, ctx: &ExecutionCtx<'i>) -> ExecutionResult<(JValue, Vec<SecurityTetraplet>)> {
-        let jvalue = JValue::String(arg.to_string());
-        let tetraplet = SecurityTetraplet::literal_tetraplet(ctx.init_peer_id.clone());
-
-        Ok((jvalue, vec![tetraplet]))
-    }
-
     match value {
-        CallArgValue::InitPeerId => handle_string_arg(ctx.init_peer_id.as_str(), ctx),
-        CallArgValue::Literal(value) => handle_string_arg(value, ctx),
-        CallArgValue::Variable(name) => {
-            let resolved = resolve_to_jvaluable(name, ctx)?;
-            let tetraplets = resolved.as_tetraplets();
-            let jvalue = resolved.into_jvalue();
-
-            Ok((jvalue, tetraplets))
-        }
-        CallArgValue::JsonPath { variable, path } => {
-            let resolved = resolve_to_jvaluable(variable, ctx)?;
-            let (jvalue, tetraplets) = resolved.apply_json_path_with_tetraplets(path)?;
-            let jvalue = jvalue.into_iter().cloned().collect::<Vec<_>>();
-            let jvalue = JValue::Array(jvalue);
-
-            Ok((jvalue, tetraplets))
-        }
+        CallInstrArgValue::InitPeerId => prepare_string_arg(ctx.init_peer_id.as_str(), ctx),
+        CallInstrArgValue::LastError => prepare_last_error(ctx),
+        CallInstrArgValue::Literal(value) => prepare_string_arg(value, ctx),
+        CallInstrArgValue::Variable(name) => prepare_variable(name, ctx),
+        CallInstrArgValue::JsonPath { variable, path } => prepare_json_path(variable, path, ctx),
     }
+}
+
+fn prepare_string_arg<'i>(arg: &str, ctx: &ExecutionCtx<'i>) -> ExecutionResult<(JValue, Vec<SecurityTetraplet>)> {
+    let jvalue = JValue::String(arg.to_string());
+    let tetraplet = SecurityTetraplet::literal_tetraplet(ctx.init_peer_id.clone());
+
+    Ok((jvalue, vec![tetraplet]))
+}
+
+fn prepare_last_error<'i>(ctx: &ExecutionCtx<'i>) -> ExecutionResult<(JValue, Vec<SecurityTetraplet>)> {
+    let result = match &ctx.last_error {
+        Some(error) => {
+            let serialized_error = error.serialize();
+            let jvalue = JValue::String(serialized_error);
+            let tetraplets = error
+                .tetraplet
+                .clone()
+                .unwrap_or_else(|| SecurityTetraplet::literal_tetraplet(ctx.init_peer_id.clone()));
+
+            (jvalue, vec![tetraplets])
+        }
+        None => {
+            let jvalue = JValue::String(String::new());
+            let tetraplets = vec![];
+
+            (jvalue, tetraplets)
+        }
+    };
+
+    Ok(result)
+}
+
+fn prepare_variable<'i>(name: &str, ctx: &ExecutionCtx<'i>) -> ExecutionResult<(JValue, Vec<SecurityTetraplet>)> {
+    let resolved = resolve_to_jvaluable(name, ctx)?;
+    let tetraplets = resolved.as_tetraplets();
+    let jvalue = resolved.into_jvalue();
+
+    Ok((jvalue, tetraplets))
+}
+
+fn prepare_json_path<'i>(
+    name: &str,
+    json_path: &str,
+    ctx: &ExecutionCtx<'i>,
+) -> ExecutionResult<(JValue, Vec<SecurityTetraplet>)> {
+    let resolved = resolve_to_jvaluable(name, ctx)?;
+    let (jvalue, tetraplets) = resolved.apply_json_path_with_tetraplets(json_path)?;
+    let jvalue = jvalue.into_iter().cloned().collect::<Vec<_>>();
+    let jvalue = JValue::Array(jvalue);
+
+    Ok((jvalue, tetraplets))
 }
 
 /// Constructs jvaluable result from `ExecutionCtx::data_cache` by name.

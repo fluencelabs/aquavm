@@ -30,7 +30,7 @@ pub enum CallResult {
     Executed(Rc<JValue>),
 
     /// call_service ended with a service error.
-    CallServiceFailed(String),
+    CallServiceFailed(i32, Rc<String>),
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -49,7 +49,7 @@ impl std::fmt::Display for ExecutedState {
             Par(left, right) => write!(f, "Par({}, {})", left, right),
             Call(RequestSentBy(peer_id)) => write!(f, "RequestSentBy({})", peer_id),
             Call(Executed(result)) => write!(f, "Executed({:?})", result),
-            Call(CallServiceFailed(err_msg)) => write!(f, "CallServiceFailed({})", err_msg),
+            Call(CallServiceFailed(ret_code, err_msg)) => write!(f, "CallServiceFailed({}, {})", ret_code, err_msg),
         }
     }
 }

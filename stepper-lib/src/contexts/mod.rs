@@ -27,5 +27,6 @@ pub mod execution_trace {
 pub(crate) mod execution {
     pub(crate) use super::execution_context::AValue;
     pub(crate) use super::execution_context::ExecutionCtx;
+    pub(crate) use super::execution_context::LastErrorDescriptor;
     pub(crate) use super::execution_context::ResolvedCallResult;
 }

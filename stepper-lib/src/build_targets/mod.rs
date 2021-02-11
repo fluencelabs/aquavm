@@ -31,6 +31,12 @@ pub struct CallServiceResult {
     pub result: String,
 }
 
+impl std::fmt::Display for CallServiceResult {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "ret_code: {}, result: '{}'", self.ret_code, self.result)
+    }
+}
+
 #[cfg(feature = "fce")]
 pub(crate) use fce_target::call_service;
 #[cfg(feature = "fce")]
