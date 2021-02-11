@@ -17,6 +17,7 @@
 use super::air_lexer::Spanned;
 use super::AIRLexer;
 use super::LexerError;
+use super::Number;
 use super::Token;
 
 fn run_lexer(input: &str) -> Vec<Spanned<Token<'_>, usize, LexerError>> {
@@ -173,9 +174,113 @@ fn string_literal() {
 }
 
 #[test]
+fn integer_numbers() {
+    const NUMBER_WITH_PLUS_SIGN: &str = "+123";
+
+    let number_tokens = run_lexer(NUMBER_WITH_PLUS_SIGN);
+    let number = Number::Int(123);
+
+    assert_eq!(
+        number_tokens,
+        vec![Ok((0, Token::Number(number), NUMBER_WITH_PLUS_SIGN.len()))]
+    );
+
+    const NUMBER: &str = "123";
+
+    let number_tokens = run_lexer(NUMBER);
+
+    assert_eq!(
+        number_tokens,
+        vec![Ok((0, Token::Number(number), NUMBER.len()))]
+    );
+
+    const NUMBER_WITH_MINUS_SIGN: &str = "-123";
+
+    let number_tokens = run_lexer(NUMBER_WITH_MINUS_SIGN);
+    let number = Number::Int(-123);
+
+    assert_eq!(
+        number_tokens,
+        vec![Ok((0, Token::Number(number), NUMBER_WITH_MINUS_SIGN.len()))]
+    );
+}
+
+#[test]
+fn positive_float_number() {
+    const FNUMBER_WITH_PLUS_SIGN: &str = "+123.123";
+
+    let number_tokens = run_lexer(FNUMBER_WITH_PLUS_SIGN);
+    let number = Number::Float(123.123);
+
+    assert_eq!(
+        number_tokens,
+        vec![Ok((0, Token::Number(number), FNUMBER_WITH_PLUS_SIGN.len()))]
+    );
+
+    const FNUMBER: &str = "123.123";
+
+    let number_tokens = run_lexer(FNUMBER);
+
+    assert_eq!(
+        number_tokens,
+        vec![Ok((0, Token::Number(number), FNUMBER.len()))]
+    );
+
+    const FNUMBER_WITH_MINUS_SIGN: &str = "-123.123";
+
+    let number_tokens = run_lexer(FNUMBER_WITH_MINUS_SIGN);
+    let number = Number::Float(-123.123);
+
+    assert_eq!(
+        number_tokens,
+        vec![Ok((
+            0,
+            Token::Number(number),
+            FNUMBER_WITH_MINUS_SIGN.len()
+        ))]
+    );
+}
+
+#[test]
+fn too_big_number() {
+    const NUMBER: &str = "1231231564564545684564646515313546547682131";
+
+    let number_tokens = run_lexer(NUMBER);
+
+    assert!(matches!(
+        number_tokens[0],
+        Err(LexerError::ParseIntError(..))
+    ));
+}
+
+#[test]
+fn too_big_float_number() {
+    const FNUMBER: &str = "123.1231564564545684564646515313546547682131";
+
+    let number_tokens = run_lexer(FNUMBER);
+
+    assert!(matches!(
+        number_tokens[0],
+        Err(LexerError::ParseFloatError(..))
+    ));
+}
+
+#[test]
 fn json_path() {
     // this json path contains all allowed in json path charactes
     const JSON_PATH: &str = r#"value.$[$@[]():?.*,"!]"#;
+
+    let json_path_tokens = run_lexer(JSON_PATH);
+    assert_eq!(
+        json_path_tokens,
+        vec![Ok((0, Token::JsonPath(JSON_PATH, 5), JSON_PATH.len()))]
+    );
+}
+
+#[test]
+fn json_path_numbers() {
+    // this json path contains all allowed in json path charactes
+    const JSON_PATH: &str = r#"12345.$[$@[]():?.*,"!]"#;
 
     let json_path_tokens = run_lexer(JSON_PATH);
     assert_eq!(
@@ -216,4 +321,13 @@ fn invalid_json_path() {
         invalid_json_path_tokens,
         vec![Err(LexerError::InvalidJsonPath(7, 7))]
     );
+}
+
+#[test]
+fn invalid_json_path_numbers() {
+    // this json path contains all allowed in json path charactes
+    const JSON_PATH: &str = r#"-12345.$[$@[]():?.*,"!]"#;
+
+    let json_path_tokens = run_lexer(JSON_PATH);
+    assert_eq!(json_path_tokens, vec![Err(LexerError::IsNotAlphanumeric(6, 6))]);
 }

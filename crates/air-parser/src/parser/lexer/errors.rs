@@ -16,7 +16,10 @@
 
 use thiserror::Error as ThisError;
 
-#[derive(ThisError, Debug, Clone, PartialEq, Eq, Hash)]
+use std::num::ParseFloatError;
+use std::num::ParseIntError;
+
+#[derive(ThisError, Debug, Clone, PartialEq, Eq)]
 pub enum LexerError {
     #[error("this string literal has unclosed quote")]
     UnclosedQuote(usize, usize),
@@ -32,6 +35,20 @@ pub enum LexerError {
 
     #[error("invalid character in json path")]
     InvalidJsonPath(usize, usize),
+
+    #[error("more then one dot isn't allowed in a number")]
+    InvalidDotCount(usize, usize),
+
+    #[error("{2}")]
+    ParseIntError(usize, usize, ParseIntError),
+
+    #[error("{2}")]
+    ParseFloatError(usize, usize, ParseFloatError),
+
+    #[error(
+        "whoops, it's an internal error in the lexer, sorry for that, please contact us through github or whatever"
+    )]
+    InternalError(usize, usize),
 }
 
 impl From<std::convert::Infallible> for LexerError {

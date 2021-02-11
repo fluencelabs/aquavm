@@ -15,6 +15,7 @@
  */
 
 use super::errors::LexerError;
+use super::token::Number;
 use super::token::Token;
 
 use std::iter::Peekable;
@@ -213,20 +214,60 @@ fn try_parse_accumulator(maybe_acc: &str, start: usize) -> Result<Token, LexerEr
 
 fn try_parse_call_variable(maybe_var: &str, start: usize) -> Result<Token, LexerError> {
     let mut json_path_start_pos = None;
+    let mut non_numeric_met = false;
+    let mut float_started = false;
+    let mut is_first_char = true;
 
     for (pos, ch) in maybe_var.chars().enumerate() {
-        if !json_path_started(json_path_start_pos) && is_json_path_start_point(ch) {
+        if non_numeric_met
+            && !json_path_started(json_path_start_pos)
+            && is_json_path_start_point(ch)
+        {
             json_path_start_pos = Some(pos);
-        } else if !json_path_started(json_path_start_pos) && !is_aqua_alphanumeric(ch) {
+        } else if non_numeric_met
+            && !json_path_started(json_path_start_pos)
+            && !is_aqua_alphanumeric(ch)
+        {
             return Err(LexerError::IsNotAlphanumeric(start + pos, start + pos));
-        } else if json_path_started(json_path_start_pos) & !json_path_allowed_char(ch) {
+        } else if non_numeric_met
+            && json_path_started(json_path_start_pos)
+            && !json_path_allowed_char(ch)
+        {
             return Err(LexerError::InvalidJsonPath(start + pos, start + pos));
+        } else if is_first_char && (ch == '-' || ch == '+') {
+        } else if !non_numeric_met && ch.is_numeric() {
+        } else if !non_numeric_met && !float_started && is_float_start_point(ch) {
+            float_started = true;
+            json_path_start_pos = Some(pos);
+        } else if !non_numeric_met && float_started && is_float_start_point(ch) {
+            return Err(LexerError::InvalidDotCount(start + pos, start + pos));
+        } else if !non_numeric_met && is_aqua_alphanumeric(ch) && !ch.is_numeric() {
+            non_numeric_met = true;
+        } else if !non_numeric_met {
+            return Err(LexerError::IsNotAlphanumeric(start + pos, start + pos));
         }
+
+        is_first_char = false;
     }
 
-    match json_path_start_pos {
-        Some(pos) => Ok(Token::JsonPath(maybe_var, pos)),
-        None => Ok(Token::Alphanumeric(maybe_var)),
+    match (non_numeric_met, float_started, json_path_start_pos) {
+        (false, false, None) => {
+            let number = maybe_var
+                .parse::<i64>()
+                .map_err(|e| LexerError::ParseIntError(start, start + maybe_var.len(), e))?;
+            let number = Number::Int(number);
+            Ok(Token::Number(number))
+        }
+        (false, true, None) => {
+            let number = maybe_var
+                .parse::<f64>()
+                .map_err(|e| LexerError::ParseFloatError(start, start + maybe_var.len(), e))?;
+            let number = Number::Float(number);
+            Ok(Token::Number(number))
+        }
+        (true, _, Some(pos)) => Ok(Token::JsonPath(maybe_var, pos)),
+        (true, false, None) => Ok(Token::Alphanumeric(maybe_var)),
+        _ => Err(LexerError::InternalError(start, start + maybe_var.len())),
     }
 }
 
@@ -251,6 +292,10 @@ fn is_json_path_start_point(ch: char) -> bool {
 
 fn json_path_started(first_dot_pos: Option<usize>) -> bool {
     first_dot_pos.is_some()
+}
+
+fn is_float_start_point(ch: char) -> bool {
+    ch == '.'
 }
 
 fn json_path_allowed_char(ch: char) -> bool {

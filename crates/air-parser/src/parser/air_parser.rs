@@ -129,5 +129,17 @@ fn lexical_error_to_label(file_id: usize, error: LexerError) -> Label<usize> {
         InvalidJsonPath(start, end) => {
             Label::primary(file_id, start..end).with_message(error.to_string())
         }
+        InvalidDotCount(start, end) => {
+            Label::primary(file_id, start..end).with_message(error.to_string())
+        }
+        ParseIntError(start, end, _) => {
+            Label::primary(file_id, start..end).with_message(error.to_string())
+        }
+        ParseFloatError(start, end, _) => {
+            Label::primary(file_id, start..end).with_message(error.to_string())
+        }
+        InternalError(start, end) => {
+            Label::primary(file_id, start..end).with_message(error.to_string())
+        }
     }
 }

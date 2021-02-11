@@ -23,4 +23,5 @@ pub mod tests;
 
 pub use air_lexer::AIRLexer;
 pub use errors::LexerError;
+pub use token::Number;
 pub use token::Token;

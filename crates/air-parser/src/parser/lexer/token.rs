@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Token<'input> {
     OpenRoundBracket,
     CloseRoundBracket,
@@ -25,6 +25,7 @@ pub enum Token<'input> {
     Alphanumeric(&'input str),
     JsonPath(&'input str, usize),
     Accumulator(&'input str),
+    Number(Number),
 
     InitPeerId,
     LastError,
@@ -38,4 +39,10 @@ pub enum Token<'input> {
     Next,
     Match,
     MisMatch,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum Number {
+    Int(i64),
+    Float(f64),
 }
