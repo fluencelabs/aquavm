@@ -2,6 +2,7 @@ use crate::parser::ast::*;
 use crate::parser::into_variable_and_path;
 use crate::parser::lexer::LexerError;
 use crate::parser::lexer::Token;
+use crate::parser::lexer::Number;
 
 use lalrpop_util::ErrorRecovery;
 use std::rc::Rc;
@@ -86,6 +87,8 @@ CallInstrArgValue: CallInstrArgValue<'input> = {
         let (variable, path) = into_variable_and_path(v.0, v.1);
         CallInstrArgValue::JsonPath { variable, path }
     },
+    <n:Number> => CallInstrArgValue::Number(n),
+    <b:Boolean> => CallInstrArgValue::Boolean(b),
     InitPeerId => CallInstrArgValue::InitPeerId,
     LastError => CallInstrArgValue::LastError,
 }
@@ -121,6 +124,8 @@ extern {
         Literal => Token::StringLiteral(<&'input str>),
         JsonPath => Token::JsonPath(<&'input str>, <usize>),
         Accumulator => Token::Accumulator(<&'input str>),
+        Number => Token::Number(<Number>),
+        Boolean => Token::Boolean(<bool>),
 
         InitPeerId => Token::InitPeerId,
         LastError => Token::LastError,

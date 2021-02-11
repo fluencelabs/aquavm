@@ -36,8 +36,8 @@ pub enum LexerError {
     #[error("invalid character in json path")]
     InvalidJsonPath(usize, usize),
 
-    #[error("more then one dot isn't allowed in a number")]
-    InvalidDotCount(usize, usize),
+    #[error("this signed digit could have only digits or one dot")]
+    UnallowedCharInNumber(usize, usize),
 
     #[error("{2}")]
     ParseIntError(usize, usize, ParseIntError),

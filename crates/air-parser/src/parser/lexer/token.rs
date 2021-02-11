@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+use serde::Serialize;
+use serde::Deserialize;
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum Token<'input> {
     OpenRoundBracket,
@@ -26,6 +29,7 @@ pub enum Token<'input> {
     JsonPath(&'input str, usize),
     Accumulator(&'input str),
     Number(Number),
+    Boolean(bool),
 
     InitPeerId,
     LastError,
@@ -41,7 +45,7 @@ pub enum Token<'input> {
     MisMatch,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum Number {
     Int(i64),
     Float(f64),
