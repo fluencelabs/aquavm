@@ -30,6 +30,8 @@ pub(crate) fn are_matchable_eq<'ctx>(
     use MatchableValue::*;
 
     match (left, right) {
+        (Literal(left_name), Literal(right_name)) => Ok(left_name == right_name),
+
         (Literal(value), matchable) => compare_matchable(matchable, exec_ctx, make_string_comparator(value)),
         (matchable, Literal(value)) => compare_matchable(matchable, exec_ctx, make_string_comparator(value)),
 
@@ -72,10 +74,16 @@ fn compare_matchable<'ctx>(
     use MatchableValue::*;
 
     match matchable {
-        Literal(_) => unreachable!("this is covered by patter in the caller"),
-        Number(_) => unreachable!("this is covered by patter in the caller"),
+        Literal(str) => {
+            let jvalue = str.to_string().into();
+            Ok(comparator(Cow::Owned(jvalue)))
+        }
+        Number(number) => {
+            let jvalue = number.clone().into();
+            Ok(comparator(Cow::Owned(jvalue)))
+        }
         Boolean(bool) => {
-            let jvalue = JValue::Bool(*bool);
+            let jvalue = (*bool).into();
             Ok(comparator(Cow::Owned(jvalue)))
         }
         Variable(name) => {
@@ -119,20 +127,9 @@ fn make_bool_comparator(comparable_bool: &bool) -> Comparator<'_> {
 }
 
 fn make_number_comparator(comparable_number: &ast::Number) -> Comparator<'_> {
-    use serde_json::Number;
     use std::ops::Deref;
 
-    let comparable_number: Number = match comparable_number {
-        ast::Number::Int(value) => {
-            let number: Number = (*value).into();
-            number
-        }
-        ast::Number::Float(value) => {
-            Number::from_f64(*value).expect("it is checked by the lexer that it's a finite float point")
-        }
-    };
-
-    let comparable_jvalue = JValue::Number(comparable_number);
+    let comparable_jvalue: JValue = comparable_number.into();
 
     Box::new(move |jvalue: Cow<'_, JValue>| -> bool { jvalue.deref() == &comparable_jvalue })
 }

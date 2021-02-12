@@ -50,3 +50,18 @@ pub enum Number {
     Int(i64),
     Float(f64),
 }
+
+impl From<Number> for serde_json::Value {
+    fn from(number: Number) -> Self {
+        number.into()
+    }
+}
+
+impl From<&Number> for serde_json::Value {
+    fn from(number: &Number) -> Self {
+        match number {
+            Number::Int(value) => (*value).into(),
+            Number::Float(value) => (*value).into(),
+        }
+    }
+}
