@@ -184,6 +184,7 @@ fn string_to_token(input: &str, start_pos: usize) -> Result<Token, LexerError> {
         MISMATCH_INSTR => Ok(Token::MisMatch),
 
         INIT_PEER_ID => Ok(Token::InitPeerId),
+        LAST_ERROR => Ok(Token::LastError),
 
         str if str.ends_with(ACC_END_TAG) => try_parse_accumulator(str, start_pos),
         str => try_parse_call_variable(str, start_pos),
@@ -240,6 +241,7 @@ const MATCH_INSTR: &str = "match";
 const MISMATCH_INSTR: &str = "mismatch";
 
 const INIT_PEER_ID: &str = "%init_peer_id%";
+const LAST_ERROR: &str = "%last_error%";
 
 const ACC_END_TAG: &str = "[]";
 

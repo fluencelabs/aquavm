@@ -15,6 +15,7 @@
  */
 
 use super::*;
+use crate::exec_err;
 use crate::JValue;
 use crate::ResolvedTriplet;
 use crate::SecurityTetraplet;
@@ -65,7 +66,7 @@ fn handle_instruction_variable<'ctx>(
             let call_result = ResolvedCallResult { result, triplet };
             from_call_result(call_result)?
         }
-        _ => return Err(ExecutionError::VariableNotFound(variable_name.to_string())),
+        _ => return exec_err!(ExecutionError::VariableNotFound(variable_name.to_string())),
     };
 
     Ok(iterable)
@@ -83,7 +84,7 @@ fn from_call_result(call_result: ResolvedCallResult) -> ExecutionResult<Option<I
             }
             array.len()
         }
-        v => return Err(IncompatibleJValueType((*v).clone(), "array")),
+        v => return exec_err!(IncompatibleJValueType((*v).clone(), "array")),
     };
 
     let foldable = IterableResolvedCall::init(call_result, len);
@@ -133,7 +134,7 @@ fn handle_instruction_json_path<'ctx>(
 
             from_jvalues(jvalues, triplet, json_path)
         }
-        _ => return Err(ExecutionError::VariableNotFound(variable_name.to_string())),
+        _ => return exec_err!(ExecutionError::VariableNotFound(variable_name.to_string())),
     };
 
     Ok(iterable)
@@ -145,7 +146,7 @@ fn apply_json_path<'jvalue, 'str>(
 ) -> ExecutionResult<Vec<&'jvalue JValue>> {
     use ExecutionError::JValueJsonPathError;
 
-    select(jvalue, json_path).map_err(|e| JValueJsonPathError(jvalue.clone(), json_path.to_string(), e))
+    select(jvalue, json_path).map_err(|e| Rc::new(JValueJsonPathError(jvalue.clone(), json_path.to_string(), e)))
 }
 
 /// Applies json_path to provided jvalues and construct IterableValue from the result and given triplet.

@@ -36,27 +36,36 @@ pub enum Instruction<'i> {
 
 #[derive(Serialize, Debug, PartialEq, Eq)]
 pub enum PeerPart<'i> {
-    PeerPk(CallArgValue<'i>),
-    PeerPkWithServiceId(CallArgValue<'i>, CallArgValue<'i>),
+    PeerPk(CallInstrValue<'i>),
+    PeerPkWithServiceId(CallInstrValue<'i>, CallInstrValue<'i>),
 }
 
 #[derive(Serialize, Debug, PartialEq, Eq)]
 pub enum FunctionPart<'i> {
-    FuncName(CallArgValue<'i>),
-    ServiceIdWithFuncName(CallArgValue<'i>, CallArgValue<'i>),
+    FuncName(CallInstrValue<'i>),
+    ServiceIdWithFuncName(CallInstrValue<'i>, CallInstrValue<'i>),
 }
 
 #[derive(Serialize, Debug, PartialEq, Eq)]
 pub struct Call<'i> {
     pub peer_part: PeerPart<'i>,
     pub function_part: FunctionPart<'i>,
-    pub args: Rc<Vec<CallArgValue<'i>>>,
+    pub args: Rc<Vec<CallInstrArgValue<'i>>>,
     pub output: CallOutputValue<'i>,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Hash, Serialize, Deserialize)]
-pub enum CallArgValue<'i> {
+pub enum CallInstrValue<'i> {
     InitPeerId,
+    Literal(&'i str),
+    Variable(&'i str),
+    JsonPath { variable: &'i str, path: &'i str },
+}
+
+#[derive(Debug, PartialEq, Eq, Clone, Hash, Serialize, Deserialize)]
+pub enum CallInstrArgValue<'i> {
+    InitPeerId,
+    LastError,
     Literal(&'i str),
     Variable(&'i str),
     JsonPath { variable: &'i str, path: &'i str },

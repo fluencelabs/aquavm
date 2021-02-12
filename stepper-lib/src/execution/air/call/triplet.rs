@@ -17,17 +17,18 @@
 use super::ExecutionCtx;
 use super::ExecutionError;
 use super::ExecutionResult;
+use crate::exec_err;
 use crate::JValue;
 
-use air_parser::ast::{CallArgValue, FunctionPart, PeerPart};
+use air_parser::ast::{CallInstrValue, FunctionPart, PeerPart};
 use polyplets::ResolvedTriplet;
 
 /// Triplet represents a location of the executable code in the network.
 /// It is build from `PeerPart` and `FunctionPart` of a `Call` instruction.
 pub(super) struct Triplet<'a, 'i> {
-    pub(super) peer_pk: &'a CallArgValue<'i>,
-    pub(super) service_id: &'a CallArgValue<'i>,
-    pub(super) function_name: &'a CallArgValue<'i>,
+    pub(super) peer_pk: &'a CallInstrValue<'i>,
+    pub(super) service_id: &'a CallInstrValue<'i>,
+    pub(super) function_name: &'a CallInstrValue<'i>,
 }
 
 impl<'a, 'i> Triplet<'a, 'i> {
@@ -44,7 +45,7 @@ impl<'a, 'i> Triplet<'a, 'i> {
                 Ok((peer_pk, peer_service_id, func_name))
             }
             (PeerPk(peer_pk), ServiceIdWithFuncName(service_id, func_name)) => Ok((peer_pk, service_id, func_name)),
-            (PeerPk(_), FuncName(_)) => Err(ExecutionError::InstructionError(String::from(
+            (PeerPk(_), FuncName(_)) => exec_err!(ExecutionError::InstructionError(String::from(
                 "call should have service id specified by peer part or function part",
             ))),
         }?;
@@ -77,18 +78,18 @@ impl<'a, 'i> Triplet<'a, 'i> {
 
 /// Resolve value to string by either resolving variable from `ExecutionCtx`, taking literal value, or etc.
 // TODO: return Rc<String> to avoid excess cloning
-fn resolve_to_string<'i>(value: &CallArgValue<'i>, ctx: &ExecutionCtx<'i>) -> ExecutionResult<String> {
+fn resolve_to_string<'i>(value: &CallInstrValue<'i>, ctx: &ExecutionCtx<'i>) -> ExecutionResult<String> {
     use crate::execution::utils::resolve_to_jvaluable;
 
     let resolved = match value {
-        CallArgValue::InitPeerId => ctx.init_peer_id.clone(),
-        CallArgValue::Literal(value) => value.to_string(),
-        CallArgValue::Variable(name) => {
+        CallInstrValue::InitPeerId => ctx.init_peer_id.clone(),
+        CallInstrValue::Literal(value) => value.to_string(),
+        CallInstrValue::Variable(name) => {
             let resolved = resolve_to_jvaluable(name, ctx)?;
             let jvalue = resolved.into_jvalue();
             jvalue_to_string(jvalue)?
         }
-        CallArgValue::JsonPath { variable, path } => {
+        CallInstrValue::JsonPath { variable, path } => {
             let resolved = resolve_to_jvaluable(variable, ctx)?;
             let resolved = resolved.apply_json_path(path)?;
             vec_to_string(resolved, path)?
@@ -103,17 +104,17 @@ fn jvalue_to_string(jvalue: JValue) -> ExecutionResult<String> {
 
     match jvalue {
         JValue::String(s) => Ok(s),
-        _ => Err(IncompatibleJValueType(jvalue, "string")),
+        _ => exec_err!(IncompatibleJValueType(jvalue, "string")),
     }
 }
 
 fn vec_to_string(values: Vec<&JValue>, json_path: &str) -> ExecutionResult<String> {
     if values.is_empty() {
-        return Err(ExecutionError::VariableNotFound(json_path.to_string()));
+        return exec_err!(ExecutionError::VariableNotFound(json_path.to_string()));
     }
 
     if values.len() != 1 {
-        return Err(ExecutionError::MultipleValuesInJsonPath(json_path.to_string()));
+        return exec_err!(ExecutionError::MultipleValuesInJsonPath(json_path.to_string()));
     }
 
     jvalue_to_string(values[0].clone())

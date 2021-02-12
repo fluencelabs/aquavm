@@ -83,7 +83,7 @@ fn extract_subtree_sizes(trace_ctx: &mut ExecutionTraceCtx) -> ExecutionResult<(
     // unwrap is safe here because of length's been checked
     match trace_ctx.current_trace.pop_front().unwrap() {
         ExecutedState::Par(left, right) => Ok((left, right)),
-        state => Err(InvalidExecutedState(String::from("par"), state)),
+        state => crate::exec_err!(InvalidExecutedState(String::from("par"), state)),
     }
 }
 
@@ -113,10 +113,10 @@ fn execute_subtree<'i>(
         }
         // if there is a service error, update already added Par state
         // and then bubble the error up
-        err @ Err(LocalServiceError(_)) => {
+        Err(err) if matches!(&*err, LocalServiceError(..)) => {
             update_par_state(trace_ctx, subtree_type, current_par_pos, before_new_path_len);
             trace_ctx.current_subtree_size = before_subtree_size - subtree_size;
-            err
+            Err(err)
         }
         err @ Err(_) => err,
     }

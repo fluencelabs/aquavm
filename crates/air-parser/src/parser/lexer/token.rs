@@ -27,6 +27,7 @@ pub enum Token<'input> {
     Accumulator(&'input str),
 
     InitPeerId,
+    LastError,
 
     Call,
     Seq,

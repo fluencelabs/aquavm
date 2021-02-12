@@ -23,4 +23,6 @@ pub(super) use air::ExecutableInstruction;
 pub(super) use air::FoldState;
 pub(super) use errors::ExecutionError;
 
-pub(self) type ExecutionResult<T> = std::result::Result<T, ExecutionError>;
+use std::rc::Rc;
+
+pub(self) type ExecutionResult<T> = std::result::Result<T, Rc<ExecutionError>>;

@@ -57,3 +57,10 @@ pub mod parser {
 }
 
 pub(crate) type JValue = serde_json::Value;
+
+#[macro_export]
+macro_rules! exec_err {
+    ($err:expr) => {
+        Err(std::rc::Rc::new($err))
+    };
+}

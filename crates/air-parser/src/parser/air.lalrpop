@@ -44,7 +44,7 @@ Instr: Box<Instruction<'input>> = {
     ! => { errors.push(<>); Box::new(Instruction::Error) },
 }
 
-Args: Vec<CallArgValue<'input>> = {
+Args: Vec<CallInstrArgValue<'input>> = {
     "[" <args:(<Arg>)*> "]" => args
 }
 
@@ -63,19 +63,31 @@ Output: CallOutputValue<'input> = {
     <a:Accumulator> => CallOutputValue::Accumulator(a),
 };
 
-Function = CallArgValue;
-PeerId = CallArgValue;
-ServiceId = CallArgValue;
-Arg = CallArgValue;
+Function = CallInstrValue;
+PeerId = CallInstrValue;
+ServiceId = CallInstrValue;
 
-CallArgValue: CallArgValue<'input> = {
-    <s:Literal> => CallArgValue::Literal(s),
-    <s:Alphanumeric> => CallArgValue::Variable(s),
+CallInstrValue: CallInstrValue<'input> = {
+    <s:Literal> => CallInstrValue::Literal(s),
+    <s:Alphanumeric> => CallInstrValue::Variable(s),
     <v:JsonPath> => {
         let (variable, path) = into_variable_and_path(v.0, v.1);
-        CallArgValue::JsonPath { variable, path }
+        CallInstrValue::JsonPath { variable, path }
     },
-    InitPeerId => CallArgValue::InitPeerId,
+    InitPeerId => CallInstrValue::InitPeerId,
+}
+
+Arg = CallInstrArgValue;
+
+CallInstrArgValue: CallInstrArgValue<'input> = {
+    <s:Literal> => CallInstrArgValue::Literal(s),
+    <s:Alphanumeric> => CallInstrArgValue::Variable(s),
+    <v:JsonPath> => {
+        let (variable, path) = into_variable_and_path(v.0, v.1);
+        CallInstrArgValue::JsonPath { variable, path }
+    },
+    InitPeerId => CallInstrArgValue::InitPeerId,
+    LastError => CallInstrArgValue::LastError,
 }
 
 Iterable: IterableValue<'input> = {
@@ -111,6 +123,7 @@ extern {
         Accumulator => Token::Accumulator(<&'input str>),
 
         InitPeerId => Token::InitPeerId,
+        LastError => Token::LastError,
 
         call => Token::Call,
         seq => Token::Seq,

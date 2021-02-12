@@ -21,7 +21,9 @@ use crate::StepperOutcome;
 use crate::STEPPER_SUCCESS;
 
 use serde::Serialize;
+
 use std::hash::Hash;
+use std::rc::Rc;
 
 const EXECUTION_ERRORS_START_ID: i32 = 1000;
 
@@ -58,7 +60,7 @@ pub(crate) fn from_preparation_error(data: impl Into<Vec<u8>>, err: PreparationE
 
 /// Create StepperOutcome from supplied data, next_peer_pks and error,
 /// set ret_code based on the error.
-pub(crate) fn from_execution_error<T>(data: &T, next_peer_pks: Vec<String>, err: ExecutionError) -> StepperOutcome
+pub(crate) fn from_execution_error<T>(data: &T, next_peer_pks: Vec<String>, err: Rc<ExecutionError>) -> StepperOutcome
 where
     T: ?Sized + Serialize,
 {

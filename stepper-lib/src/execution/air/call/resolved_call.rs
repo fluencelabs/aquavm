@@ -22,6 +22,7 @@ use super::Call;
 use super::ExecutionCtx;
 use super::ExecutionError;
 use super::ExecutionResult;
+use crate::build_targets::CallServiceResult;
 use crate::build_targets::CALL_SERVICE_SUCCESS;
 use crate::contexts::execution_trace::*;
 use crate::log_targets::EXECUTED_STATE_CHANGING;
@@ -29,7 +30,7 @@ use crate::JValue;
 use crate::ResolvedTriplet;
 use crate::SecurityTetraplet;
 
-use air_parser::ast::{CallArgValue, CallOutputValue};
+use air_parser::ast::{CallInstrArgValue, CallOutputValue};
 
 use std::rc::Rc;
 
@@ -37,7 +38,7 @@ use std::rc::Rc;
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub(super) struct ResolvedCall<'i> {
     triplet: Rc<ResolvedTriplet>,
-    function_arg_paths: Rc<Vec<CallArgValue<'i>>>,
+    function_arg_paths: Rc<Vec<CallInstrArgValue<'i>>>,
     output: CallOutputValue<'i>,
 }
 
@@ -67,7 +68,7 @@ impl<'i> ResolvedCall<'i> {
         exec_ctx: &mut ExecutionCtx<'i>,
         trace_ctx: &mut ExecutionTraceCtx,
     ) -> ExecutionResult<()> {
-        use CallResult::*;
+        use CallResult::Executed;
         use ExecutedState::Call;
         use ExecutionError::CallServiceResultDeError as DeError;
 
@@ -88,7 +89,7 @@ impl<'i> ResolvedCall<'i> {
             tetraplets,
         } = self.resolve_args(exec_ctx)?;
 
-        let tetraplets = serde_json::to_string(&tetraplets).expect("default serializer shouldn't fail");
+        let serialized_tetraplets = serde_json::to_string(&tetraplets).expect("default serializer shouldn't fail");
 
         let service_result = unsafe {
             crate::build_targets::call_service(
@@ -96,17 +97,12 @@ impl<'i> ResolvedCall<'i> {
                 self.triplet.service_id.clone(),
                 self.triplet.function_name.clone(),
                 call_arguments,
-                tetraplets,
+                serialized_tetraplets,
             )
         };
 
         // check that service call succeeded
-        if service_result.ret_code != CALL_SERVICE_SUCCESS {
-            trace_ctx
-                .new_trace
-                .push_back(Call(CallServiceFailed(service_result.result.clone())));
-            return Err(ExecutionError::LocalServiceError(service_result.result));
-        }
+        let service_result = handle_service_error(service_result, trace_ctx)?;
 
         let result: JValue = serde_json::from_str(&service_result.result).map_err(|e| DeError(service_result, e))?;
         let result = Rc::new(result);
@@ -123,6 +119,10 @@ impl<'i> ResolvedCall<'i> {
         trace_ctx.new_trace.push_back(new_executed_state);
 
         Ok(())
+    }
+
+    pub(super) fn as_triplet(&self) -> Rc<ResolvedTriplet> {
+        self.triplet.clone()
     }
 
     /// Determine whether this call should be really called and adjust prev executed trace accordingly.
@@ -176,4 +176,26 @@ impl<'i> ResolvedCall<'i> {
 
         Ok(resolved_arguments)
     }
+}
+
+fn handle_service_error<'i>(
+    service_result: CallServiceResult,
+    trace_ctx: &mut ExecutionTraceCtx,
+) -> ExecutionResult<CallServiceResult> {
+    use CallResult::CallServiceFailed;
+    use ExecutedState::Call;
+
+    if service_result.ret_code == CALL_SERVICE_SUCCESS {
+        return Ok(service_result);
+    }
+
+    let error_message = Rc::new(service_result.result);
+    let error = ExecutionError::LocalServiceError(service_result.ret_code, error_message.clone());
+    let error = Rc::new(error);
+
+    trace_ctx
+        .new_trace
+        .push_back(Call(CallServiceFailed(service_result.ret_code, error_message)));
+
+    Err(error)
 }
