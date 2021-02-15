@@ -346,3 +346,31 @@ fn invalid_json_path_numbers() {
 
     lexer_test(JSON_PATH, Single(Err(LexerError::IsNotAlphanumeric(6, 6))));
 }
+
+#[test]
+fn booleans() {
+    const TRUE_BOOL_CONST: &str = "true";
+
+    lexer_test(
+        TRUE_BOOL_CONST,
+        Single(Ok((0, Token::Boolean(true), TRUE_BOOL_CONST.len()))),
+    );
+
+    const FALSE_BOOL_CONST: &str = "false";
+
+    lexer_test(
+        FALSE_BOOL_CONST,
+        Single(Ok((0, Token::Boolean(false), FALSE_BOOL_CONST.len()))),
+    );
+
+    const NON_BOOL_CONST: &str = "true1";
+
+    lexer_test(
+        NON_BOOL_CONST,
+        Single(Ok((
+            0,
+            Token::Alphanumeric(NON_BOOL_CONST),
+            NON_BOOL_CONST.len(),
+        ))),
+    );
+}
