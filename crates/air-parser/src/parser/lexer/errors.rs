@@ -33,6 +33,9 @@ pub enum LexerError {
     #[error("an accumulator name should be non empty")]
     EmptyAccName(usize, usize),
 
+    #[error("this variable or constant shouldn't have empty name")]
+    EmptyVariableOrConst(usize, usize),
+
     #[error("invalid character in json path")]
     InvalidJsonPath(usize, usize),
 

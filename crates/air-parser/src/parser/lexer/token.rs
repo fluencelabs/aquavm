@@ -51,6 +51,12 @@ pub enum Number {
     Float(f64),
 }
 
+impl From<Number> for Token<'_> {
+    fn from(value: Number) -> Self {
+        Token::Number(value)
+    }
+}
+
 impl From<Number> for serde_json::Value {
     fn from(number: Number) -> Self {
         number.into()
@@ -62,6 +68,49 @@ impl From<&Number> for serde_json::Value {
         match number {
             Number::Int(value) => (*value).into(),
             Number::Float(value) => (*value).into(),
+        }
+    }
+}
+
+use super::LexerError;
+use super::LexerResult;
+use std::convert::TryFrom;
+
+pub(crate) enum UnparsedNumber<'input> {
+    // raw value and starting pos
+    Int(&'input str, usize),
+    Float(&'input str, usize),
+}
+
+impl TryFrom<UnparsedNumber<'_>> for Number {
+    type Error = LexerError;
+
+    fn try_from(value: UnparsedNumber<'_>) -> LexerResult<Number> {
+        match value {
+            UnparsedNumber::Int(raw_value, start_pos) => {
+                let number = raw_value.parse::<i64>().map_err(|e| {
+                    LexerError::ParseIntError(start_pos, start_pos + raw_value.len(), e)
+                })?;
+
+                let number = Self::Int(number);
+                Ok(number)
+            }
+
+            UnparsedNumber::Float(raw_value, start_pos) => {
+                if raw_value.len() > 11 {
+                    return Err(LexerError::TooBigFloat(
+                        start_pos,
+                        start_pos + raw_value.len(),
+                    ));
+                }
+
+                let number = raw_value.parse::<f64>().map_err(|e| {
+                    LexerError::ParseFloatError(start_pos, start_pos + raw_value.len(), e)
+                })?;
+
+                let number = Self::Float(number);
+                Ok(number)
+            }
         }
     }
 }

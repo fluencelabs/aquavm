@@ -126,6 +126,9 @@ fn lexical_error_to_label(file_id: usize, error: LexerError) -> Label<usize> {
         EmptyAccName(start, end) => {
             Label::primary(file_id, start..end).with_message(error.to_string())
         }
+        EmptyVariableOrConst(start, end) => {
+            Label::primary(file_id, start..end).with_message(error.to_string())
+        }
         InvalidJsonPath(start, end) => {
             Label::primary(file_id, start..end).with_message(error.to_string())
         }

@@ -16,9 +16,9 @@
 
 use super::LexerError;
 use super::LexerResult;
-use super::Number;
 use super::Token;
 
+use std::convert::TryInto;
 use std::iter::Peekable;
 use std::str::CharIndices;
 
@@ -26,7 +26,7 @@ pub(super) fn try_parse_call_variable(
     string_to_parse: &str,
     start_pos: usize,
 ) -> LexerResult<Token<'_>> {
-    CallVariableParser::new(string_to_parse, start_pos).try_parse()
+    CallVariableParser::try_parse(string_to_parse, start_pos)
 }
 
 #[derive(Debug)]
@@ -35,8 +35,8 @@ struct ParserState {
     pub(self) non_numeric_met: bool,
     pub(self) digit_met: bool,
     pub(self) is_first_char: bool,
-    pub(self) current_char: Option<char>,
-    pub(self) current_pos: Option<usize>,
+    pub(self) current_char: char,
+    pub(self) current_pos: usize,
 }
 
 struct CallVariableParser<'input> {
@@ -47,37 +47,51 @@ struct CallVariableParser<'input> {
 }
 
 impl<'input> CallVariableParser<'input> {
-    pub(self) fn new(string_to_parse: &'input str, start_pos: usize) -> Self {
-        let string_to_parse_iter = string_to_parse.char_indices().peekable();
+    fn new(string_to_parse: &'input str, start_pos: usize) -> LexerResult<Self> {
+        let mut string_to_parse_iter = string_to_parse.char_indices().peekable();
+        let (current_pos, current_char) = match string_to_parse_iter.next() {
+            Some(pos_and_ch) => pos_and_ch,
+            None => return Err(LexerError::EmptyVariableOrConst(start_pos, start_pos)),
+        };
+
         let state = ParserState {
             first_dot_met_pos: None,
             non_numeric_met: false,
             digit_met: false,
             is_first_char: true,
-            current_char: None,
-            current_pos: None,
+            current_char,
+            current_pos,
         };
 
-        Self {
+        let parser = Self {
             string_to_parse_iter,
             string_to_parse,
             start_pos,
             state,
-        }
+        };
+
+        Ok(parser)
     }
 
-    pub(self) fn try_parse(mut self) -> LexerResult<Token<'input>> {
-        while self.next_char() {
-            if self.is_possible_to_parse_as_number() {
-                self.try_parse_as_number()?;
+    pub(self) fn try_parse(
+        string_to_parse: &'input str,
+        start_pos: usize,
+    ) -> LexerResult<Token<'input>> {
+        let mut parser = Self::new(string_to_parse, start_pos)?;
+
+        loop {
+            if parser.is_possible_to_parse_as_number() {
+                parser.try_parse_as_number()?;
             } else {
-                self.try_parse_as_variable()?;
+                parser.try_parse_as_variable()?;
             }
 
-            self.set_first_char_met()
+            if !parser.next_char() {
+                break;
+            }
         }
 
-        self.to_token()
+        parser.to_token()
     }
 
     fn next_char(&mut self) -> bool {
@@ -86,8 +100,9 @@ impl<'input> CallVariableParser<'input> {
             None => return false,
         };
 
-        self.state.current_char = Some(ch);
-        self.state.current_pos = Some(pos);
+        self.state.current_char = ch;
+        self.state.current_pos = pos;
+        self.state.is_first_char = false;
 
         true
     }
@@ -119,13 +134,15 @@ impl<'input> CallVariableParser<'input> {
     }
 
     fn try_parse_as_float_dot(&mut self) -> LexerResult<bool> {
+        let is_first_dot = self.try_parse_first_met_dot()?;
+
         // filter out +.12 -.2315 variants
-        if self.try_parse_first_met_dot()? && self.state.digit_met == false {
+        if is_first_dot && !self.state.digit_met {
             let error_pos = self.pos_in_string_to_parse();
             return Err(LexerError::LeadingDot(error_pos, error_pos));
         }
 
-        Ok(self.dot_met())
+        Ok(is_first_dot)
     }
 
     fn handle_non_digit(&mut self) -> LexerResult<()> {
@@ -136,8 +153,6 @@ impl<'input> CallVariableParser<'input> {
     }
 
     fn check_fallback_to_variable(&self) -> LexerResult<()> {
-        println!("dot met is {}", self.dot_met());
-
         if self.dot_met() {
             let error_pos = self.pos_in_string_to_parse();
             return Err(LexerError::UnallowedCharInNumber(error_pos, error_pos));
@@ -215,44 +230,27 @@ impl<'input> CallVariableParser<'input> {
         self.start_pos + self.current_pos()
     }
 
-    fn set_first_char_met(&mut self) {
-        self.state.is_first_char = false;
-    }
-
-    // this function should be called after the self.next_char()
     fn current_pos(&self) -> usize {
-        self.state.current_pos.unwrap()
+        self.state.current_pos
     }
 
-    // this function should be called after the self.next_char()
     fn current_char(&self) -> char {
-        self.state.current_char.unwrap()
+        self.state.current_char
     }
 
     fn to_token(&self) -> LexerResult<Token<'input>> {
+        use super::token::UnparsedNumber;
+
         match (self.is_possible_to_parse_as_number(), self.dot_met()) {
             (true, false) => {
-                let number = self
-                    .string_to_parse
-                    .parse::<i64>()
-                    .map_err(|e| self.to_parse_int_error(e))?;
-                let number = Number::Int(number);
-                Ok(Token::Number(number))
+                let number = UnparsedNumber::Int(self.string_to_parse, self.start_pos);
+                let number: super::Number = number.try_into()?;
+                Ok(number.into())
             }
             (true, true) => {
-                if self.string_to_parse.len() > 11 {
-                    return Err(LexerError::TooBigFloat(
-                        self.start_pos,
-                        self.string_to_parse.len(),
-                    ));
-                }
-
-                let number = self
-                    .string_to_parse
-                    .parse::<f64>()
-                    .map_err(|e| self.to_parse_float_error(e))?;
-                let number = Number::Float(number);
-                Ok(Token::Number(number))
+                let number = UnparsedNumber::Float(self.string_to_parse, self.start_pos);
+                let number: super::Number = number.try_into()?;
+                Ok(number.into())
             }
             (false, false) => Ok(Token::Alphanumeric(self.string_to_parse)),
             (false, true) => Ok(Token::JsonPath(
@@ -260,21 +258,5 @@ impl<'input> CallVariableParser<'input> {
                 self.state.first_dot_met_pos.unwrap(),
             )),
         }
-    }
-
-    fn to_parse_int_error(&self, e: std::num::ParseIntError) -> LexerError {
-        LexerError::ParseIntError(
-            self.start_pos,
-            self.start_pos + self.string_to_parse.len(),
-            e,
-        )
-    }
-
-    fn to_parse_float_error(&self, e: std::num::ParseFloatError) -> LexerError {
-        LexerError::ParseFloatError(
-            self.start_pos,
-            self.start_pos + self.string_to_parse.len(),
-            e,
-        )
     }
 }

@@ -37,6 +37,7 @@ use TokenCompareStrategy::*;
 
 fn lexer_test(input: &str, expected_tokens: TokenCompareStrategy) {
     let actual_tokens = run_lexer(input);
+
     match expected_tokens {
         All(expected_tokens) => assert_eq!(actual_tokens, expected_tokens),
         Some(token_ids, expected_tokens) => {
@@ -311,10 +312,9 @@ fn leading_dot() {
 fn unclosed_quote() {
     const UNCLOSED_QUOTE_AIR: &str = r#"(call ("peer_name) ("service_name" "function_name") [])"#;
 
-    let unclosed_quote_air_tokens = run_lexer(UNCLOSED_QUOTE_AIR);
-    assert_eq!(
-        unclosed_quote_air_tokens[4],
-        Err(LexerError::IsNotAlphanumeric(33, 33))
+    lexer_test(
+        UNCLOSED_QUOTE_AIR,
+        One(4, Err(LexerError::IsNotAlphanumeric(33, 33))),
     );
 }
 
@@ -323,10 +323,9 @@ fn bad_value() {
     // value contains ! that only allowed in json path
     const INVALID_VALUE: &str = r#"val!ue.$[$@[]():?.*,"\!]"#;
 
-    let invalid_value_tokens = run_lexer(INVALID_VALUE);
-    assert_eq!(
-        invalid_value_tokens,
-        vec![Err(LexerError::IsNotAlphanumeric(3, 3))]
+    lexer_test(
+        INVALID_VALUE,
+        Single(Err(LexerError::IsNotAlphanumeric(3, 3))),
     );
 }
 
@@ -334,10 +333,9 @@ fn bad_value() {
 fn invalid_json_path() {
     const INVALID_JSON_PATH: &str = r#"value.$%"#;
 
-    let invalid_json_path_tokens = run_lexer(INVALID_JSON_PATH);
-    assert_eq!(
-        invalid_json_path_tokens,
-        vec![Err(LexerError::InvalidJsonPath(7, 7))]
+    lexer_test(
+        INVALID_JSON_PATH,
+        Single(Err(LexerError::InvalidJsonPath(7, 7))),
     );
 }
 
@@ -346,9 +344,5 @@ fn invalid_json_path_numbers() {
     // this json path contains all allowed in json path charactes
     const JSON_PATH: &str = r#"+12345$[$@[]():?.*,"!]"#;
 
-    let json_path_tokens = run_lexer(JSON_PATH);
-    assert_eq!(
-        json_path_tokens,
-        vec![Err(LexerError::IsNotAlphanumeric(6, 6))]
-    );
+    lexer_test(JSON_PATH, Single(Err(LexerError::IsNotAlphanumeric(6, 6))));
 }
