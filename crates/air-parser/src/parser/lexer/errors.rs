@@ -27,7 +27,7 @@ pub enum LexerError {
     #[error("empty string aren't allowed in this position")]
     EmptyString(usize, usize),
 
-    #[error("only alphanumeric and _, - characters are allowed in this position")]
+    #[error("only alphanumeric, '_', and '-' characters are allowed in this position")]
     IsNotAlphanumeric(usize, usize),
 
     #[error("an accumulator name should be non empty")]
@@ -36,7 +36,7 @@ pub enum LexerError {
     #[error("invalid character in json path")]
     InvalidJsonPath(usize, usize),
 
-    #[error("this signed digit could have only digits or one dot")]
+    #[error("a digit could contain only digits or one dot")]
     UnallowedCharInNumber(usize, usize),
 
     #[error("{2}")]
@@ -45,10 +45,11 @@ pub enum LexerError {
     #[error("{2}")]
     ParseFloatError(usize, usize, ParseFloatError),
 
-    #[error(
-        "whoops, it's an internal error in the lexer, sorry for that, please contact us through github or whatever"
-    )]
-    InternalError(usize, usize),
+    #[error("this float is too big, a float could contain less than 12 digits")]
+    TooBigFloat(usize, usize),
+
+    #[error("leading dot without any symbols before - please write 0 if it's float or variable name if it's json path")]
+    LeadingDot(usize, usize),
 }
 
 impl From<std::convert::Infallible> for LexerError {

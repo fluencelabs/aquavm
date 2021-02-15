@@ -26,3 +26,10 @@ pub(super) use errors::ExecutionError;
 use std::rc::Rc;
 
 pub(self) type ExecutionResult<T> = std::result::Result<T, Rc<ExecutionError>>;
+
+#[macro_export]
+macro_rules! exec_err {
+    ($err:expr) => {
+        Err(std::rc::Rc::new($err))
+    };
+}

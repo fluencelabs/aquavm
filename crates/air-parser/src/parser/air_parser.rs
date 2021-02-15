@@ -138,7 +138,10 @@ fn lexical_error_to_label(file_id: usize, error: LexerError) -> Label<usize> {
         ParseFloatError(start, end, _) => {
             Label::primary(file_id, start..end).with_message(error.to_string())
         }
-        InternalError(start, end) => {
+        TooBigFloat(start, end) => {
+            Label::primary(file_id, start..end).with_message(error.to_string())
+        }
+        LeadingDot(start, end) => {
             Label::primary(file_id, start..end).with_message(error.to_string())
         }
     }
