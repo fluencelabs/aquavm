@@ -43,10 +43,10 @@ pub enum LexerError {
     UnallowedCharInNumber(usize, usize),
 
     #[error("{2}")]
-    ParseIntError(usize, usize, ParseIntError),
+    ParseIntError(usize, usize, #[source] ParseIntError),
 
     #[error("{2}")]
-    ParseFloatError(usize, usize, ParseFloatError),
+    ParseFloatError(usize, usize, #[source] ParseFloatError),
 
     #[error("this float is too big, a float could contain less than 12 digits")]
     TooBigFloat(usize, usize),
