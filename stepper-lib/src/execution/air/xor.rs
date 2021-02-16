@@ -30,6 +30,8 @@ impl<'i> super::ExecutableInstruction<'i> for Xor<'i> {
         match self.0.execute(exec_ctx, trace_ctx) {
             Err(e) if is_catchable_by_xor(&e) => {
                 exec_ctx.subtree_complete = true;
+                exec_ctx.last_error_could_be_set = true;
+
                 self.1.execute(exec_ctx, trace_ctx)
             }
             res => res,
@@ -55,34 +57,9 @@ mod tests {
 
     use aqua_test_utils::call_vm;
     use aqua_test_utils::create_aqua_vm;
-    use aqua_test_utils::CallServiceClosure;
-    use aqua_test_utils::IValue;
-    use aqua_test_utils::NEVec;
+    use aqua_test_utils::fallible_call_service;
 
     use std::rc::Rc;
-
-    fn fallible_call_service(fallible_service_id: impl Into<String>) -> CallServiceClosure {
-        let fallible_service_id = fallible_service_id.into();
-
-        Box::new(move |_, args| -> Option<IValue> {
-            let builtin_service = match &args[0] {
-                IValue::String(str) => str,
-                _ => unreachable!(),
-            };
-
-            // return a error for service with such id
-            if builtin_service == &fallible_service_id {
-                Some(IValue::Record(
-                    NEVec::new(vec![IValue::S32(1), IValue::String(String::from("error"))]).unwrap(),
-                ))
-            } else {
-                // return success for services with other ids
-                Some(IValue::Record(
-                    NEVec::new(vec![IValue::S32(0), IValue::String(String::from(r#""res""#))]).unwrap(),
-                ))
-            }
-        })
-    }
 
     #[test]
     fn xor() {
@@ -265,7 +242,7 @@ mod tests {
         let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid json");
 
         let expected_state = Call(Executed(Rc::new(JValue::String(String::from(
-            "{\"error\":\"Local service error: ret_code is 1, error message is \'error\'\",\"instruction\":\"Call { peer_part: PeerPk(Literal(\\\"failible_peer_id\\\")), function_part: ServiceIdWithFuncName(Literal(\\\"service_id_1\\\"), Literal(\\\"local_fn_name\\\")), args: [], output: Scalar(\\\"result\\\") }\"}"
+            "{\"error\":\"Local service error: ret_code is 1, error message is \'error\'\",\"instruction\":\"call \\\"failible_peer_id\\\" (\\\"service_id_1\\\" \\\"local_fn_name\\\") [] result\"}"
         )))));
 
         assert_eq!(actual_trace[1], expected_state);

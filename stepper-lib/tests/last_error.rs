@@ -16,46 +16,63 @@
 
 use aqua_test_utils::call_vm;
 use aqua_test_utils::create_aqua_vm;
-use aqua_test_utils::echo_number_call_service;
+use aqua_test_utils::fallible_call_service;
 use aqua_test_utils::unit_call_service;
 use aqua_test_utils::CallServiceClosure;
 use aqua_test_utils::IValue;
 use aqua_test_utils::NEVec;
+use stepper_lib::SecurityTetraplet;
 
-use serde_json::json;
+fn create_check_service_closure() -> CallServiceClosure {
+    Box::new(move |_, args| -> Option<IValue> {
+        let call_args = match &args[2] {
+            IValue::String(str) => str,
+            _ => unreachable!(),
+        };
 
-use std::rc::Rc;
+        let call_args: Vec<String> = serde_json::from_str(call_args).expect("json deserialization shouldn't fail");
 
-type JValue = serde_json::Value;
+        let tetraplets = match &args[3] {
+            IValue::String(str) => str,
+            _ => unreachable!(),
+        };
+
+        let de_tetraplets: Vec<Vec<SecurityTetraplet>> =
+            serde_json::from_str(tetraplets).expect("json deserialization shouldn't fail");
+
+        assert_eq!(call_args[0], "{\"error\":\"Local service error: ret_code is 1, error message is \'error\'\",\"instruction\":\"call \\\"failible_peer_id\\\" (\\\"falliable_call_service\\\" \\\"\\\") [service_id] client_result\"}");
+
+        let triplet = &de_tetraplets[0][0].triplet;
+        assert_eq!(triplet.peer_pk, "failible_peer_id");
+        assert_eq!(triplet.service_id, "failiable_call_service");
+        assert_eq!(triplet.function_name, "");
+        assert_eq!(de_tetraplets[0][0].json_path, "");
+
+        Some(IValue::Record(
+            NEVec::new(vec![IValue::S32(0), IValue::String(tetraplets.clone())]).unwrap(),
+        ))
+    })
+}
 
 #[test]
-fn executed_trace_seq_par_call() {
-    use stepper_lib::execution_trace::CallResult::*;
-    use stepper_lib::execution_trace::ExecutedState::{self, *};
+fn last_error_tetraplets() {
+    let set_variable_peer_id = "set_variable";
+    let mut set_variable_vm = create_aqua_vm(unit_call_service(), set_variable_peer_id);
+
+    let faillible_peer_id = "failible_peer_id";
+    let mut faillible_vm = create_aqua_vm(fallible_call_service("falliable_call_service"), faillible_peer_id);
 
     let local_peer_id = "local_peer_id";
-    let mut vm = create_aqua_vm(unit_call_service(), local_peer_id);
+    let mut local_vm = create_aqua_vm(create_check_service_closure(), local_peer_id);
 
-    let script = format!(include_str!("scripts/create_service_with_xor.clj"), local_peer_id);
+    let script = format!(
+        include_str!("scripts/create_service_with_xor.clj"),
+        set_variable_peer_id, faillible_peer_id, local_peer_id
+    );
 
-    let initial_state = json!([
-        { "par": [1,1] },
-        { "call": {"executed": "test"} },
-        { "call": {"executed": "test"} },
-    ])
-    .to_string();
+    let res = call_vm!(set_variable_vm, "asd", script.clone(), "", "");
+    let res = call_vm!(faillible_vm, "asd", script.clone(), "", res.data);
 
-    let res = call_vm!(vm, "asd", script, "[]", initial_state);
-    let actual_trace: Vec<ExecutedState> = serde_json::from_slice(&res.data).expect("stepper should return valid json");
-
-    let test_string = String::from("test");
-    let expected_trace = vec![
-        Par(1, 1),
-        Call(Executed(Rc::new(JValue::String(test_string.clone())))),
-        Call(Executed(Rc::new(JValue::String(test_string.clone())))),
-        Call(Executed(Rc::new(JValue::String(test_string)))),
-    ];
-
-    assert_eq!(actual_trace, expected_trace);
-    assert!(res.next_peer_pks.is_empty());
+    // assert is done on the 'create_check_service_closure' call service closure
+    let _ = call_vm!(local_vm, "asd", script, "", res.data);
 }

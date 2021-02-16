@@ -51,6 +51,7 @@ impl<'i> super::ExecutableInstruction<'i> for Call<'i> {
             let instruction = format!("{}", self);
             let last_error = LastErrorDescriptor::new(e.clone(), instruction, None);
             exec_ctx.last_error = Some(last_error);
+            exec_ctx.last_error_could_be_set = false;
 
             e
         })?;
@@ -61,6 +62,7 @@ impl<'i> super::ExecutableInstruction<'i> for Call<'i> {
             let instruction = format!("{}", self);
             let last_error = LastErrorDescriptor::new(e.clone(), instruction, Some(tetraplet));
             exec_ctx.last_error = Some(last_error);
+            exec_ctx.last_error_could_be_set = false;
 
             e
         })

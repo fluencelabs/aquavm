@@ -1,25 +1,25 @@
 (seq
  (seq
   (seq
-   (call "set_variables" ("add_module" "") ["module_bytes"] module_bytes)
-   (call "set_variables" ("add_module" "") ["module_config"] module_config)
+   (call "{0}" ("add_module" "") ["module_bytes"] module_bytes)
+   (call "{0}" ("add_module" "") ["module_config"] module_config)
    )
-  (call "set_variables" ("add_module" "") ["blueprint"] blueprint)
+  (call "{0}" ("add_module" "") ["blueprint"] blueprint)
   )
  (xor
   (seq
-   (call relay ("dist" "add_module") [module_bytes module_config] module)
+   (call "{0}" ("dist" "add_module") [module_bytes module_config] module)
    (seq
-    (call relay ("dist" "add_blueprint") [blueprint] blueprint_id)
+    (call "{0}" ("dist" "add_blueprint") [blueprint] blueprint_id)
     (seq
-     (call relay ("srv" "create") [blueprint_id] service_id)
-     (call client ("return" "") [service_id] client_result)
+     (call "{0}" ("srv" "create") [blueprint_id] service_id)
+     (call "{1}" ("failiable_call_service" "") [service_id] client_result)
      )
     )
    )
   (seq
-   (call relay ("op" "identity") ["XOR: create_greeting_service failed"] fail[])
-   (call client ("return" "") [fail %last_error%])
+   (call "{1}" ("op" "identity") ["XOR: create_greeting_service failed"] fail[])
+   (call "{2}" ("return" "") [%last_error%])
    )
   )
  )

@@ -11,10 +11,11 @@ dependencies = [
 
 [[package]]
 name = "air-parser"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "codespan",
  "codespan-reporting",
+ "itertools 0.10.0",
  "lalrpop",
  "lalrpop-util",
  "regex",
@@ -405,6 +406,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "itertools"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "37d572918e350e82412fe766d24b15e6682fb2ed2bbe018280caa810397cb319"
+dependencies = [
+ "either",
+]
+
+[[package]]
 name = "itoa"
 version = "0.4.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -434,7 +444,7 @@ dependencies = [
  "diff",
  "docopt",
  "ena",
- "itertools",
+ "itertools 0.9.0",
  "lalrpop-util",
  "petgraph",
  "regex",
@@ -673,7 +683,7 @@ dependencies = [
 
 [[package]]
 name = "stepper-lib"
-version = "0.4.1"
+version = "0.5.0"
 dependencies = [
  "air-parser",
  "boolinator",

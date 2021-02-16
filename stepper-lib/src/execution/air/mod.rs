@@ -39,7 +39,12 @@ macro_rules! execute {
     ($self:expr, $instr:expr, $exec_ctx:ident, $trace_ctx:ident) => {
         match $instr.execute($exec_ctx, $trace_ctx) {
             Err(e) => {
+                if !$exec_ctx.last_error_could_be_set {
+                    return Err(e);
+                }
+
                 let instruction = format!("{}", $self);
+                println!("set error on {}", instruction);
                 let last_error = LastErrorDescriptor::new(e.clone(), instruction, None);
                 $exec_ctx.last_error = Some(last_error);
                 Err(e)

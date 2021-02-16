@@ -50,6 +50,10 @@ pub(crate) struct ExecutionCtx<'i> {
     /// None means that there weren't any error.
     pub last_error: Option<LastErrorDescriptor>,
 
+    /// True, if last error could be set. This flag is used to distinguish
+    /// whether an error is being bubbled up from the bottom or just encountered
+    pub last_error_could_be_set: bool,
+
     /// Indicates that previous executed subtree is complete.
     /// A subtree treats as a complete if all subtree elements satisfy the following rules:
     ///   - at least one of par subtrees is completed
@@ -101,6 +105,7 @@ impl<'i> ExecutionCtx<'i> {
             current_peer_id,
             init_peer_id,
             subtree_complete: true,
+            last_error_could_be_set: true,
             ..<_>::default()
         }
     }

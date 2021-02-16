@@ -136,6 +136,33 @@ pub fn set_variables_call_service(ret_mapping: HashMap<String, String>) -> CallS
     })
 }
 
+pub fn fallible_call_service(fallible_service_id: impl Into<String>) -> CallServiceClosure {
+    let fallible_service_id = fallible_service_id.into();
+
+    Box::new(move |_, args| -> Option<IValue> {
+        let builtin_service = match &args[0] {
+            IValue::String(str) => str,
+            _ => unreachable!(),
+        };
+
+        // return a error for service with such id
+        if builtin_service == &fallible_service_id {
+            Some(IValue::Record(
+                NEVec::new(vec![IValue::S32(1), IValue::String(String::from("error"))]).unwrap(),
+            ))
+        } else {
+            // return success for services with other ids
+            Some(IValue::Record(
+                NEVec::new(vec![
+                    IValue::S32(0),
+                    IValue::String(String::from(r#""res""#)),
+                ])
+                .unwrap(),
+            ))
+        }
+    })
+}
+
 #[macro_export]
 macro_rules! call_vm {
     ($vm:expr, $init_peer_id:expr, $script:expr, $prev_data:expr, $data:expr) => {

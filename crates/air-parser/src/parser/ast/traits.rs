@@ -122,7 +122,7 @@ impl fmt::Display for Instruction<'_> {
             MisMatch(mismatch) => write!(f, "{}", mismatch),
             Fold(fold) => write!(f, "{}", fold),
             Next(next) => write!(f, "{}", next),
-            Error => Ok(())
+            Error => Ok(()),
         }
     }
 }
