@@ -125,23 +125,28 @@ jobs:
       - name: Generate aquamarine.wasm.base64.js
         run: |
           cat << EOF > pkg/aquamarine.wasm.base64.js
-          export const wasmBs64 = "$(base64 -w0 pkg/aquamarine_client_bg.wasm)";
+          module.exports = "$(base64 -w0 pkg/aquamarine_client_bg.wasm)";
           EOF
 
     ### Generate index files so import works as: | import {wasmBs64} from "@fluencelabs/aquamarine-stepper"; |
       - name: Generate index.js & index.d.ts
         run: |
           cat << EOF > index.js
-          export * from "./aquamarine.wasm.base64.js";
+          const wasmBs64 = require("./aquamarine.wasm.base64.js");
+          module.exports = wasmBs64;
           EOF
 
-          cp index.js index.d.ts
+          cat << EOF > index.d.ts
+          declare const wasmBs64: string;
+          export default wasmBs64;
+          EOF
         working-directory: pkg
 
       - name: Generate aquamarine.wasm.base64.d.ts
         run: |
           cat << EOF > aquamarine.wasm.base64.d.ts
-          export const wasmBs64: string;
+          declare const wasmBs64: string;
+          export default wasmBs64;
           EOF
         working-directory: pkg
 
@@ -184,7 +189,7 @@ jobs:
           node-version: '14'
           registry-url: 'https://registry.npmjs.org'
 
-      - run: npm publish --access public
+      - run: npm publish --access public --tag=beta
         working-directory: pkg
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
