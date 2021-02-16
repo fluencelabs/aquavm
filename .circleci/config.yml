@@ -22,11 +22,11 @@ jobs:
 
           cargo install fcli
 
-          # build a Wasm binary for stepper
-          (cd stepper; fce build --features fce)
+          # build a Wasm binary for interpreter
+          (cd interpreter; fce build --features fce)
 
           # build Wasm binaries for tests
-          (cd stepper-lib/tests/; ./build_test_binaries.sh)
+          (cd interpreter-lib/tests/; ./build_test_binaries.sh)
 
           cargo fmt --all -- --check --color always
           cargo check

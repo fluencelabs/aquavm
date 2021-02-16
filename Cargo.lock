@@ -62,10 +62,10 @@ name = "aquamarine"
 version = "0.5.0"
 dependencies = [
  "fluence",
+ "interpreter-lib",
  "log",
  "serde",
  "serde_json",
- "stepper-lib",
  "wasm-bindgen",
 ]
 
@@ -81,7 +81,7 @@ dependencies = [
  "parking_lot 0.11.1",
  "serde",
  "serde_json",
- "stepper-interface 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "stepper-interface",
 ]
 
 [[package]]
@@ -975,6 +975,40 @@ dependencies = [
 ]
 
 [[package]]
+name = "interpreter-interface"
+version = "0.1.2"
+dependencies = [
+ "fluence",
+ "fluence-it-types",
+ "serde",
+]
+
+[[package]]
+name = "interpreter-lib"
+version = "0.5.0"
+dependencies = [
+ "air-parser",
+ "aqua-test-utils",
+ "boolinator",
+ "criterion",
+ "csv",
+ "env_logger",
+ "fluence",
+ "fluence-app-service",
+ "interpreter-interface",
+ "jsonpath_lib-fl",
+ "log",
+ "maplit",
+ "once_cell",
+ "polyplets",
+ "pretty_assertions",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "wasm-bindgen",
+]
+
+[[package]]
 name = "inventory"
 version = "0.1.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1676,46 +1710,12 @@ checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 [[package]]
 name = "stepper-interface"
 version = "0.1.2"
-dependencies = [
- "fluence",
- "fluence-it-types",
- "serde",
-]
-
-[[package]]
-name = "stepper-interface"
-version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "95bde63566205ba83b6f55a61a1481a6c2a94fbac9d22d280f68232aab326d27"
 dependencies = [
  "fluence",
  "fluence-it-types",
  "serde",
-]
-
-[[package]]
-name = "stepper-lib"
-version = "0.5.0"
-dependencies = [
- "air-parser",
- "aqua-test-utils",
- "boolinator",
- "criterion",
- "csv",
- "env_logger",
- "fluence",
- "fluence-app-service",
- "jsonpath_lib-fl",
- "log",
- "maplit",
- "once_cell",
- "polyplets",
- "pretty_assertions",
- "serde",
- "serde_json",
- "stepper-interface 0.1.2",
- "thiserror",
- "wasm-bindgen",
 ]
 
 [[package]]
