@@ -30,6 +30,8 @@ use crate::SecurityTetraplet;
 
 use air_parser::ast::Call;
 
+use std::rc::Rc;
+
 /// This macro converts joinable errors to Ok and sets subtree complete to true.
 macro_rules! joinable {
     ($cmd:expr, $exec_ctx:expr) => {
@@ -48,25 +50,30 @@ impl<'i> super::ExecutableInstruction<'i> for Call<'i> {
         log_instruction!(call, exec_ctx, trace_ctx);
 
         let resolved_call = joinable!(ResolvedCall::new(self, exec_ctx), exec_ctx).map_err(|e| {
-            let instruction = format!("{}", self);
-            let last_error = LastErrorDescriptor::new(e.clone(), instruction, None);
-            exec_ctx.last_error = Some(last_error);
-            exec_ctx.last_error_could_be_set = false;
-
+            set_last_error(self, exec_ctx, e.clone(), None);
             e
         })?;
 
         let triplet = resolved_call.as_triplet();
         joinable!(resolved_call.execute(exec_ctx, trace_ctx), exec_ctx).map_err(|e| {
             let tetraplet = SecurityTetraplet::from_triplet(triplet);
-            let instruction = format!("{}", self);
-            let last_error = LastErrorDescriptor::new(e.clone(), instruction, Some(tetraplet));
-            exec_ctx.last_error = Some(last_error);
-            exec_ctx.last_error_could_be_set = false;
+            set_last_error(self, exec_ctx, e.clone(), Some(tetraplet));
 
             e
         })
     }
+}
+
+fn set_last_error<'i>(
+    call: &Call<'i>,
+    exec_ctx: &mut ExecutionCtx<'i>,
+    e: Rc<ExecutionError>,
+    tetraplet: Option<SecurityTetraplet>,
+) {
+    let instruction = format!("{}", call);
+    let last_error = LastErrorDescriptor::new(e, instruction, tetraplet);
+    exec_ctx.last_error = Some(last_error);
+    exec_ctx.last_error_could_be_set = false;
 }
 
 macro_rules! log_join {
