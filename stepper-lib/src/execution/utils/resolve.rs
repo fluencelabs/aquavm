@@ -30,16 +30,21 @@ pub(crate) fn resolve_to_args<'i>(
     ctx: &ExecutionCtx<'i>,
 ) -> ExecutionResult<(JValue, Vec<SecurityTetraplet>)> {
     match value {
-        CallInstrArgValue::InitPeerId => prepare_string_arg(ctx.init_peer_id.as_str(), ctx),
+        CallInstrArgValue::InitPeerId => prepare_consts(ctx.init_peer_id.clone(), ctx),
         CallInstrArgValue::LastError => prepare_last_error(ctx),
-        CallInstrArgValue::Literal(value) => prepare_string_arg(value, ctx),
+        CallInstrArgValue::Literal(value) => prepare_consts(value.to_string(), ctx),
+        CallInstrArgValue::Boolean(value) => prepare_consts(*value, ctx),
+        CallInstrArgValue::Number(value) => prepare_consts(value, ctx),
         CallInstrArgValue::Variable(name) => prepare_variable(name, ctx),
         CallInstrArgValue::JsonPath { variable, path } => prepare_json_path(variable, path, ctx),
     }
 }
 
-fn prepare_string_arg<'i>(arg: &str, ctx: &ExecutionCtx<'i>) -> ExecutionResult<(JValue, Vec<SecurityTetraplet>)> {
-    let jvalue = JValue::String(arg.to_string());
+fn prepare_consts<'i>(
+    arg: impl Into<JValue>,
+    ctx: &ExecutionCtx<'i>,
+) -> ExecutionResult<(JValue, Vec<SecurityTetraplet>)> {
+    let jvalue = arg.into();
     let tetraplet = SecurityTetraplet::literal_tetraplet(ctx.init_peer_id.clone());
 
     Ok((jvalue, vec![tetraplet]))

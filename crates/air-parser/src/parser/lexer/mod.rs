@@ -15,12 +15,20 @@
  */
 
 mod air_lexer;
+mod call_variable_parser;
 mod errors;
 mod token;
+mod utils;
 
 #[cfg(test)]
 pub mod tests;
 
 pub use air_lexer::AIRLexer;
 pub use errors::LexerError;
+pub use token::Number;
 pub use token::Token;
+
+pub(super) type LexerResult<T> = std::result::Result<T, LexerError>;
+
+pub(self) use utils::is_aqua_alphanumeric;
+pub(self) use utils::is_json_path_allowed_char;

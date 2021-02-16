@@ -15,7 +15,9 @@
  */
 
 use super::errors::LexerError;
+use super::is_aqua_alphanumeric;
 use super::token::Token;
+use super::LexerResult;
 
 use std::iter::Peekable;
 use std::str::CharIndices;
@@ -169,7 +171,7 @@ fn should_stop(ch: char, round_brackets_balance: i64, open_square_brackets_balan
     ch.is_whitespace() || round_brackets_balance < 0 || open_square_brackets_balance < 0
 }
 
-fn string_to_token(input: &str, start_pos: usize) -> Result<Token, LexerError> {
+fn string_to_token(input: &str, start_pos: usize) -> LexerResult<Token> {
     match input {
         "" => Err(LexerError::EmptyString(start_pos, start_pos)),
 
@@ -186,12 +188,15 @@ fn string_to_token(input: &str, start_pos: usize) -> Result<Token, LexerError> {
         INIT_PEER_ID => Ok(Token::InitPeerId),
         LAST_ERROR => Ok(Token::LastError),
 
+        TRUE_VALUE => Ok(Token::Boolean(true)),
+        FALSE_VALUE => Ok(Token::Boolean(false)),
+
         str if str.ends_with(ACC_END_TAG) => try_parse_accumulator(str, start_pos),
-        str => try_parse_call_variable(str, start_pos),
+        str => super::call_variable_parser::try_parse_call_variable(str, start_pos),
     }
 }
 
-fn try_parse_accumulator(maybe_acc: &str, start: usize) -> Result<Token, LexerError> {
+fn try_parse_accumulator(maybe_acc: &str, start: usize) -> LexerResult<Token> {
     const ACC_END_TAG_SIZE: usize = 2;
 
     let str_len = maybe_acc.len();
@@ -211,25 +216,6 @@ fn try_parse_accumulator(maybe_acc: &str, start: usize) -> Result<Token, LexerEr
     Ok(Token::Accumulator(maybe_acc))
 }
 
-fn try_parse_call_variable(maybe_var: &str, start: usize) -> Result<Token, LexerError> {
-    let mut json_path_start_pos = None;
-
-    for (pos, ch) in maybe_var.chars().enumerate() {
-        if !json_path_started(json_path_start_pos) && is_json_path_start_point(ch) {
-            json_path_start_pos = Some(pos);
-        } else if !json_path_started(json_path_start_pos) && !is_aqua_alphanumeric(ch) {
-            return Err(LexerError::IsNotAlphanumeric(start + pos, start + pos));
-        } else if json_path_started(json_path_start_pos) & !json_path_allowed_char(ch) {
-            return Err(LexerError::InvalidJsonPath(start + pos, start + pos));
-        }
-    }
-
-    match json_path_start_pos {
-        Some(pos) => Ok(Token::JsonPath(maybe_var, pos)),
-        None => Ok(Token::Alphanumeric(maybe_var)),
-    }
-}
-
 const CALL_INSTR: &str = "call";
 const SEQ_INSTR: &str = "seq";
 const PAR_INSTR: &str = "par";
@@ -243,40 +229,7 @@ const MISMATCH_INSTR: &str = "mismatch";
 const INIT_PEER_ID: &str = "%init_peer_id%";
 const LAST_ERROR: &str = "%last_error%";
 
+const TRUE_VALUE: &str = "true";
+const FALSE_VALUE: &str = "false";
+
 const ACC_END_TAG: &str = "[]";
-
-fn is_json_path_start_point(ch: char) -> bool {
-    ch == '.'
-}
-
-fn json_path_started(first_dot_pos: Option<usize>) -> bool {
-    first_dot_pos.is_some()
-}
-
-fn json_path_allowed_char(ch: char) -> bool {
-    // we don't have spec for json path now, but some possible example could be found here
-    // https://packagist.org/packages/softcreatr/jsonpath
-
-    // good old switch faster here than hash set
-    match ch {
-        '$' => true,
-        '@' => true,
-        '[' => true,
-        ']' => true,
-        '(' => true,
-        ')' => true,
-        ':' => true,
-        '?' => true,
-        '.' => true,
-        '*' => true,
-        ',' => true,
-        '"' => true,
-        '\'' => true,
-        '!' => true,
-        ch => is_aqua_alphanumeric(ch),
-    }
-}
-
-fn is_aqua_alphanumeric(ch: char) -> bool {
-    ch.is_alphanumeric() || ch == '_' || ch == '-'
-}

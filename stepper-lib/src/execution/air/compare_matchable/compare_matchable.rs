@@ -19,6 +19,7 @@ use crate::execution::air::ExecutionResult;
 use crate::execution::utils::resolve_to_jvaluable;
 use crate::JValue;
 
+use air_parser::ast;
 use air_parser::ast::MatchableValue;
 
 pub(crate) fn are_matchable_eq<'ctx>(
@@ -29,8 +30,17 @@ pub(crate) fn are_matchable_eq<'ctx>(
     use MatchableValue::*;
 
     match (left, right) {
-        (Literal(name), matchable) => compare_matchable_and_literal(matchable, name, exec_ctx),
-        (matchable, Literal(name)) => compare_matchable_and_literal(matchable, name, exec_ctx),
+        (Literal(left_name), Literal(right_name)) => Ok(left_name == right_name),
+
+        (Literal(value), matchable) => compare_matchable(matchable, exec_ctx, make_string_comparator(value)),
+        (matchable, Literal(value)) => compare_matchable(matchable, exec_ctx, make_string_comparator(value)),
+
+        (Boolean(value), matchable) => compare_matchable(matchable, exec_ctx, make_bool_comparator(value)),
+        (matchable, Boolean(value)) => compare_matchable(matchable, exec_ctx, make_bool_comparator(value)),
+
+        (Number(value), matchable) => compare_matchable(matchable, exec_ctx, make_number_comparator(value)),
+        (matchable, Number(value)) => compare_matchable(matchable, exec_ctx, make_number_comparator(value)),
+
         (Variable(left_name), Variable(right_name)) => {
             let left_jvaluable = resolve_to_jvaluable(left_name, exec_ctx)?;
             let left_value = left_jvaluable.as_jvalue();
@@ -53,29 +63,33 @@ pub(crate) fn are_matchable_eq<'ctx>(
     }
 }
 
-fn compare_matchable_and_literal<'ctx>(
+use std::borrow::Cow;
+type Comparator<'a> = Box<dyn Fn(Cow<'_, JValue>) -> bool + 'a>;
+
+fn compare_matchable<'ctx>(
     matchable: &MatchableValue<'_>,
-    string_literal: &str,
     exec_ctx: &'ctx ExecutionCtx<'_>,
+    comparator: Comparator<'ctx>,
 ) -> ExecutionResult<bool> {
-    use std::borrow::Cow;
     use MatchableValue::*;
 
-    fn compare_jvalue_and_literal(jvalue: Cow<'_, JValue>, string_literal: &str) -> bool {
-        use std::ops::Deref;
-
-        match jvalue.deref() {
-            JValue::String(value) => value == string_literal,
-            _ => false,
-        }
-    }
-
     match matchable {
-        Literal(name) => Ok(name == &string_literal),
+        Literal(str) => {
+            let jvalue = str.to_string().into();
+            Ok(comparator(Cow::Owned(jvalue)))
+        }
+        Number(number) => {
+            let jvalue = number.clone().into();
+            Ok(comparator(Cow::Owned(jvalue)))
+        }
+        Boolean(bool) => {
+            let jvalue = (*bool).into();
+            Ok(comparator(Cow::Owned(jvalue)))
+        }
         Variable(name) => {
             let jvaluable = resolve_to_jvaluable(name, exec_ctx)?;
             let jvalue = jvaluable.as_jvalue();
-            Ok(compare_jvalue_and_literal(jvalue, string_literal))
+            Ok(comparator(jvalue))
         }
         JsonPath { variable, path } => {
             let jvaluable = resolve_to_jvaluable(variable, exec_ctx)?;
@@ -84,7 +98,38 @@ fn compare_matchable_and_literal<'ctx>(
                 return Ok(false);
             }
 
-            Ok(compare_jvalue_and_literal(Cow::Borrowed(jvalues[0]), string_literal))
+            Ok(comparator(Cow::Borrowed(jvalues[0])))
         }
     }
+}
+
+fn make_string_comparator(comparable_string: &str) -> Comparator<'_> {
+    use std::ops::Deref;
+
+    Box::new(move |jvalue: Cow<'_, JValue>| -> bool {
+        match jvalue.deref() {
+            JValue::String(value) => value == comparable_string,
+            _ => false,
+        }
+    })
+}
+
+fn make_bool_comparator(comparable_bool: &bool) -> Comparator<'_> {
+    use std::ops::Deref;
+
+    let comparable_bool = *comparable_bool;
+    Box::new(move |jvalue: Cow<'_, JValue>| -> bool {
+        match jvalue.deref() {
+            JValue::Bool(jvalue) => jvalue == &comparable_bool,
+            _ => false,
+        }
+    })
+}
+
+fn make_number_comparator(comparable_number: &ast::Number) -> Comparator<'_> {
+    use std::ops::Deref;
+
+    let comparable_jvalue: JValue = comparable_number.into();
+
+    Box::new(move |jvalue: Cow<'_, JValue>| -> bool { jvalue.deref() == &comparable_jvalue })
 }

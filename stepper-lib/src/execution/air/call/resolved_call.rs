@@ -35,14 +35,14 @@ use air_parser::ast::{CallInstrArgValue, CallOutputValue};
 use std::rc::Rc;
 
 /// Represents Call instruction with resolved internal parts.
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Clone, PartialEq)]
 pub(super) struct ResolvedCall<'i> {
     triplet: Rc<ResolvedTriplet>,
     function_arg_paths: Rc<Vec<CallInstrArgValue<'i>>>,
     output: CallOutputValue<'i>,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Clone, PartialEq)]
 struct ResolvedArguments {
     call_arguments: String,
     tetraplets: Vec<Vec<SecurityTetraplet>>,

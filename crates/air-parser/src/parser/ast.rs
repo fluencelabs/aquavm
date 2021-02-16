@@ -1,18 +1,4 @@
-/*
- * Copyright 2020 Fluence Labs Limited
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+pub use crate::parser::lexer::Number;
 
 use serde::Deserialize;
 use serde::Serialize;
@@ -20,7 +6,7 @@ use serde::Serialize;
 use std::rc::Rc;
 
 #[allow(clippy::large_enum_variant)] // for Null and Error variants
-#[derive(Serialize, Debug, PartialEq, Eq)]
+#[derive(Serialize, Debug, PartialEq)]
 pub enum Instruction<'i> {
     Null(Null),
     Call(Call<'i>),
@@ -34,19 +20,19 @@ pub enum Instruction<'i> {
     Error,
 }
 
-#[derive(Serialize, Debug, PartialEq, Eq)]
+#[derive(Serialize, Debug, PartialEq)]
 pub enum PeerPart<'i> {
     PeerPk(CallInstrValue<'i>),
     PeerPkWithServiceId(CallInstrValue<'i>, CallInstrValue<'i>),
 }
 
-#[derive(Serialize, Debug, PartialEq, Eq)]
+#[derive(Serialize, Debug, PartialEq)]
 pub enum FunctionPart<'i> {
     FuncName(CallInstrValue<'i>),
     ServiceIdWithFuncName(CallInstrValue<'i>, CallInstrValue<'i>),
 }
 
-#[derive(Serialize, Debug, PartialEq, Eq)]
+#[derive(Serialize, Debug, PartialEq)]
 pub struct Call<'i> {
     pub peer_part: PeerPart<'i>,
     pub function_part: FunctionPart<'i>,
@@ -54,7 +40,7 @@ pub struct Call<'i> {
     pub output: CallOutputValue<'i>,
 }
 
-#[derive(Debug, PartialEq, Eq, Clone, Hash, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum CallInstrValue<'i> {
     InitPeerId,
     Literal(&'i str),
@@ -62,67 +48,71 @@ pub enum CallInstrValue<'i> {
     JsonPath { variable: &'i str, path: &'i str },
 }
 
-#[derive(Debug, PartialEq, Eq, Clone, Hash, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum CallInstrArgValue<'i> {
     InitPeerId,
     LastError,
     Literal(&'i str),
+    Number(Number),
+    Boolean(bool),
     Variable(&'i str),
     JsonPath { variable: &'i str, path: &'i str },
 }
 
-#[derive(Debug, PartialEq, Eq, Clone, Hash, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum IterableValue<'i> {
     Variable(&'i str),
     JsonPath { variable: &'i str, path: &'i str },
 }
 
-#[derive(Debug, PartialEq, Eq, Clone, Hash, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum MatchableValue<'i> {
     Literal(&'i str),
+    Number(Number),
+    Boolean(bool),
     Variable(&'i str),
     JsonPath { variable: &'i str, path: &'i str },
 }
 
-#[derive(Serialize, Debug, Hash, PartialEq, Eq, Clone)]
+#[derive(Serialize, Debug, PartialEq, Clone)]
 pub enum CallOutputValue<'i> {
     Scalar(&'i str),
     Accumulator(&'i str),
     None,
 }
 
-#[derive(Serialize, Debug, PartialEq, Eq)]
+#[derive(Serialize, Debug, PartialEq)]
 pub struct Seq<'i>(pub Box<Instruction<'i>>, pub Box<Instruction<'i>>);
 
-#[derive(Serialize, Debug, PartialEq, Eq)]
+#[derive(Serialize, Debug, PartialEq)]
 pub struct Par<'i>(pub Box<Instruction<'i>>, pub Box<Instruction<'i>>);
 
-#[derive(Serialize, Debug, PartialEq, Eq)]
+#[derive(Serialize, Debug, PartialEq)]
 pub struct Xor<'i>(pub Box<Instruction<'i>>, pub Box<Instruction<'i>>);
 
-#[derive(Serialize, Debug, PartialEq, Eq)]
+#[derive(Serialize, Debug, PartialEq)]
 pub struct Match<'i> {
     pub left_value: MatchableValue<'i>,
     pub right_value: MatchableValue<'i>,
     pub instruction: Box<Instruction<'i>>,
 }
 
-#[derive(Serialize, Debug, PartialEq, Eq)]
+#[derive(Serialize, Debug, PartialEq)]
 pub struct MisMatch<'i> {
     pub left_value: MatchableValue<'i>,
     pub right_value: MatchableValue<'i>,
     pub instruction: Box<Instruction<'i>>,
 }
 
-#[derive(Serialize, Debug, PartialEq, Eq)]
+#[derive(Serialize, Debug, PartialEq)]
 pub struct Fold<'i> {
     pub iterable: IterableValue<'i>,
     pub iterator: &'i str,
     pub instruction: Rc<Instruction<'i>>,
 }
 
-#[derive(Serialize, Debug, PartialEq, Eq)]
+#[derive(Serialize, Debug, PartialEq)]
 pub struct Next<'i>(pub &'i str);
 
-#[derive(Serialize, Debug, PartialEq, Eq)]
+#[derive(Serialize, Debug, PartialEq)]
 pub struct Null;
