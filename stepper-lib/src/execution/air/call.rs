@@ -48,7 +48,7 @@ impl<'i> super::ExecutableInstruction<'i> for Call<'i> {
         log_instruction!(call, exec_ctx, trace_ctx);
 
         let resolved_call = joinable!(ResolvedCall::new(self, exec_ctx), exec_ctx).map_err(|e| {
-            let instruction = format!("{:?}", self);
+            let instruction = format!("{}", self);
             let last_error = LastErrorDescriptor::new(e.clone(), instruction, None);
             exec_ctx.last_error = Some(last_error);
 
@@ -58,7 +58,7 @@ impl<'i> super::ExecutableInstruction<'i> for Call<'i> {
         let triplet = resolved_call.as_triplet();
         joinable!(resolved_call.execute(exec_ctx, trace_ctx), exec_ctx).map_err(|e| {
             let tetraplet = SecurityTetraplet::from_triplet(triplet);
-            let instruction = format!("{:?}", self);
+            let instruction = format!("{}", self);
             let last_error = LastErrorDescriptor::new(e.clone(), instruction, Some(tetraplet));
             exec_ctx.last_error = Some(last_error);
 

@@ -51,6 +51,19 @@ pub enum Number {
     Float(f64),
 }
 
+use std::fmt;
+
+impl fmt::Display for Number {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use Number::*;
+
+        match self {
+            Int(number) => write!(f, "{}", number),
+            Float(number) => write!(f, "{}", number),
+        }
+    }
+}
+
 impl From<Number> for Token<'_> {
     fn from(value: Number) -> Self {
         Token::Number(value)
