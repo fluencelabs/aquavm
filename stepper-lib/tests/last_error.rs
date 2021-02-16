@@ -40,7 +40,10 @@ fn create_check_service_closure() -> CallServiceClosure {
         let de_tetraplets: Vec<Vec<SecurityTetraplet>> =
             serde_json::from_str(tetraplets).expect("json deserialization shouldn't fail");
 
-        assert_eq!(call_args[0], "{\"error\":\"Local service error: ret_code is 1, error message is \'error\'\",\"instruction\":\"call \\\"failible_peer_id\\\" (\\\"falliable_call_service\\\" \\\"\\\") [service_id] client_result\"}");
+        assert_eq!(
+            call_args[0],
+            r#"{"error":"Local service error: ret_code is 1, error message is 'error'","instruction":"call \"failible_peer_id\" ("falliable_call_service" "") [service_id] client_result"}"#
+        );
 
         let triplet = &de_tetraplets[0][0].triplet;
         assert_eq!(triplet.peer_pk, "failible_peer_id");
