@@ -51,7 +51,7 @@ pub(crate) struct ExecutionCtx<'i> {
     pub last_error: Option<LastErrorDescriptor>,
 
     /// True, if last error could be set. This flag is used to distinguish
-    /// whether an error is being bubbled up from the bottom or just encountered
+    /// whether an error is being bubbled up from the bottom or just encountered.
     pub last_error_could_be_set: bool,
 
     /// Indicates that previous executed subtree is complete.
