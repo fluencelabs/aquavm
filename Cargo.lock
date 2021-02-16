@@ -17,6 +17,7 @@ dependencies = [
  "codespan-reporting",
  "criterion",
  "fstrings",
+ "itertools 0.10.0",
  "lalrpop",
  "lalrpop-util",
  "regex",
