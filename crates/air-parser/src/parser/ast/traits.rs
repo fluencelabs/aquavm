@@ -172,13 +172,13 @@ impl fmt::Display for Xor<'_> {
 
 impl fmt::Display for Match<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "match")
+        write!(f, "match {} {}", self.left_value, self.right_value)
     }
 }
 
 impl fmt::Display for MisMatch<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "mismatch")
+        write!(f, "mismatch {} {}", self.left_value, self.right_value)
     }
 }
 
