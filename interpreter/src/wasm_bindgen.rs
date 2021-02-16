@@ -29,8 +29,8 @@
 mod ast;
 mod logger;
 
-use logger::DEFAULT_LOG_LEVEL;
 use interpreter_lib::execute_aqua;
+use logger::DEFAULT_LOG_LEVEL;
 
 use wasm_bindgen::prelude::*;
 

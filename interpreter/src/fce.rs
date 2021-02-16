@@ -30,9 +30,9 @@ mod ast;
 mod logger;
 
 use fluence::fce;
-use logger::DEFAULT_LOG_LEVEL;
 use interpreter_lib::execute_aqua;
 use interpreter_lib::StepperOutcome;
+use logger::DEFAULT_LOG_LEVEL;
 
 use log::Level as LogLevel;
 
