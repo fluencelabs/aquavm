@@ -20,9 +20,9 @@ use crate::execution::ExecutableInstruction;
 use crate::preparation::prepare;
 use crate::preparation::PreparationDescriptor;
 
-use interpreter_interface::StepperOutcome;
+use interpreter_interface::AquaInterpreterOutcome;
 
-pub fn execute_aqua(init_peer_id: String, aqua: String, prev_data: Vec<u8>, data: Vec<u8>) -> StepperOutcome {
+pub fn execute_aqua(init_peer_id: String, aqua: String, prev_data: Vec<u8>, data: Vec<u8>) -> AquaInterpreterOutcome {
     use std::convert::identity;
 
     log::trace!(
@@ -39,7 +39,7 @@ fn execute_aqua_impl(
     aqua: String,
     prev_data: Vec<u8>,
     data: Vec<u8>,
-) -> Result<StepperOutcome, StepperOutcome> {
+) -> Result<AquaInterpreterOutcome, AquaInterpreterOutcome> {
     let PreparationDescriptor {
         mut exec_ctx,
         mut trace_ctx,

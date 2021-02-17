@@ -31,7 +31,7 @@ mod logger;
 
 use fluence::fce;
 use interpreter_lib::execute_aqua;
-use interpreter_lib::StepperOutcome;
+use interpreter_lib::AquaInterpreterOutcome;
 use logger::DEFAULT_LOG_LEVEL;
 
 use log::Level as LogLevel;
@@ -43,7 +43,7 @@ pub fn main() {
 }
 
 #[fce]
-pub fn invoke(init_peer_id: String, aqua: String, prev_data: Vec<u8>, data: Vec<u8>) -> StepperOutcome {
+pub fn invoke(init_peer_id: String, aqua: String, prev_data: Vec<u8>, data: Vec<u8>) -> AquaInterpreterOutcome {
     let log_level = get_log_level();
     log::set_max_level(log_level.to_level_filter());
 

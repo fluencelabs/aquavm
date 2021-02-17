@@ -164,8 +164,8 @@ mod tests {
     use aqua_test_utils::echo_number_call_service;
     use aqua_test_utils::echo_string_call_service;
     use aqua_test_utils::set_variable_call_service;
+    use aqua_test_utils::AquaInterpreterOutcome;
     use aqua_test_utils::AquamarineVMError;
-    use aqua_test_utils::StepperOutcome;
 
     use serde_json::json;
     use std::rc::Rc;
@@ -443,7 +443,7 @@ mod tests {
         use crate::contexts::execution_trace::CallResult::*;
         use crate::contexts::execution_trace::ExecutedState::*;
 
-        fn execute_script(script: String) -> Result<StepperOutcome, AquamarineVMError> {
+        fn execute_script(script: String) -> Result<AquaInterpreterOutcome, AquamarineVMError> {
             let mut set_variables_vm = create_aqua_vm(set_variable_call_service(r#"["1","2"]"#), "set_variable");
             let mut vm_a = create_aqua_vm(echo_string_call_service(), "A");
             let mut vm_b = create_aqua_vm(echo_string_call_service(), "B");

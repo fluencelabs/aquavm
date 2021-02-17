@@ -1,8 +1,8 @@
 use aqua_test_utils::create_aqua_vm;
 use aqua_test_utils::unit_call_service;
+use aqua_test_utils::AquaInterpreterOutcome;
 use aqua_test_utils::AquamarineVM;
 use aqua_test_utils::AquamarineVMError;
-use aqua_test_utils::StepperOutcome;
 
 use criterion::criterion_group;
 use criterion::criterion_main;
@@ -18,7 +18,7 @@ thread_local!(static SCRIPT: String = String::from(
     )
 );
 
-fn current_peer_id_call() -> Result<StepperOutcome, AquamarineVMError> {
+fn current_peer_id_call() -> Result<AquaInterpreterOutcome, AquamarineVMError> {
     VM.with(|vm| SCRIPT.with(|script| vm.borrow_mut().call_with_prev_data("", script.clone(), "[]", "[]")))
 }
 

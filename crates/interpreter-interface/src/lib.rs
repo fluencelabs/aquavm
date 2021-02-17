@@ -20,16 +20,16 @@ use fluence_it_types::IValue;
 use serde::Deserialize;
 use serde::Serialize;
 
-pub const STEPPER_SUCCESS: i32 = 0;
+pub const AQUA_INTERPRETER_SUCCESS: i32 = 0;
 
 /// Describes a result returned at the end of the interpreter execution.
 #[fce]
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct StepperOutcome {
-    /// A return code, where STEPPER_SUCCESS means success.
+pub struct AquaInterpreterOutcome {
+    /// A return code, where AQUA_INTERPRETER_SUCCESS means success.
     pub ret_code: i32,
 
-    /// Contains error message if ret_code != STEPPER_SUCCESS.
+    /// Contains error message if ret_code != AQUA_INTERPRETER_SUCCESS.
     pub error_message: String,
 
     /// Contains script data that should be preserved in an executor of this interpreter
@@ -40,19 +40,24 @@ pub struct StepperOutcome {
     pub next_peer_pks: Vec<String>,
 }
 
-impl StepperOutcome {
+impl AquaInterpreterOutcome {
     pub fn from_ivalues(mut ivalues: Vec<IValue>) -> Result<Self, String> {
         const OUTCOME_FIELDS_COUNT: usize = 4;
 
         let record_values = match ivalues.remove(0) {
             IValue::Record(record_values) => record_values,
-            v => return Err(format!("expected record for StepperOutcome, got {:?}", v)),
+            v => {
+                return Err(format!(
+                    "expected record for AquaInterpreterOutcome, got {:?}",
+                    v
+                ))
+            }
         };
 
         let mut record_values = record_values.into_vec();
         if record_values.len() != OUTCOME_FIELDS_COUNT {
             return Err(format!(
-                "expected StepperOutcome struct with {} fields, got {:?}",
+                "expected AquaInterpreterOutcome struct with {} fields, got {:?}",
                 OUTCOME_FIELDS_COUNT, record_values
             ));
         }

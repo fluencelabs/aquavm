@@ -1,11 +1,11 @@
 use aqua_test_utils::create_aqua_vm;
 use aqua_test_utils::set_variables_call_service;
+use aqua_test_utils::AquaInterpreterOutcome;
 use aqua_test_utils::AquamarineVM;
 use aqua_test_utils::AquamarineVMError;
 use aqua_test_utils::CallServiceClosure;
 use aqua_test_utils::IValue;
 use aqua_test_utils::NEVec;
-use aqua_test_utils::StepperOutcome;
 
 use serde_json::json;
 
@@ -68,7 +68,7 @@ thread_local!(static SET_VARIABLES_VM: RefCell<AquamarineVM> = RefCell::new({
     create_aqua_vm(set_variables_call_service(variables_mapping), "set_variables")
 }));
 
-fn create_service_benchmark() -> Result<StepperOutcome, AquamarineVMError> {
+fn create_service_benchmark() -> Result<AquaInterpreterOutcome, AquamarineVMError> {
     let script = String::from(
         r#"
         (seq 

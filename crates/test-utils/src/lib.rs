@@ -33,7 +33,6 @@ pub use aquamarine_vm::CallServiceClosure;
 pub use aquamarine_vm::IType;
 pub use aquamarine_vm::IValue;
 pub use aquamarine_vm::ParticleParameters;
-pub use aquamarine_vm::StepperOutcome;
 
 use std::collections::HashMap;
 use std::path::PathBuf;
