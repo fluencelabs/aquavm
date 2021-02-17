@@ -1,5 +1,5 @@
 [![crates.io version](https://img.shields.io/crates/v/air-interpreter-wasm?style=flat-square)](https://crates.io/crates/air-interpreter-wasm)
-[![npm version](https://img.shields.io/npm/v/@fluencelabs/aquamarine-stepper)](https://www.npmjs.com/package/@fluencelabs/aquamarine-stepper)
+[![npm version](https://img.shields.io/npm/v/@fluencelabs/aquamarine-interpreter)](https://www.npmjs.com/package/@fluencelabs/aquamarine-interpreter)
 
 # Aquamarine
 

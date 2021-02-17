@@ -1,6 +1,6 @@
 .idea/
 **/target
-stepper-lib/target
+interpreter-lib/target
 .DS_Store
 .repl_history
 *.wasm
