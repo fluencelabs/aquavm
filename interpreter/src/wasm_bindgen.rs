@@ -47,7 +47,7 @@ pub fn invoke(init_peer_id: String, aqua: String, prev_data: Vec<u8>, data: Vec<
     log::set_max_level(log_level.to_level_filter());
 
     let outcome = execute_aqua(init_peer_id, aqua, prev_data, data);
-    serde_json::to_string(&outcome).expect("Cannot parse AquaInterpreterOutcome")
+    serde_json::to_string(&outcome).expect("Cannot parse InterpreterOutcome")
 }
 
 #[wasm_bindgen]

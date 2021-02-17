@@ -34,8 +34,8 @@ mod preparation;
 mod aqua;
 pub mod log_targets;
 
-pub use interpreter_interface::AquaInterpreterOutcome;
-pub use interpreter_interface::AQUA_INTERPRETER_SUCCESS;
+pub use aqua_interpreter_interface::InterpreterOutcome;
+pub use aqua_interpreter_interface::INTERPRETER_SUCCESS;
 pub use polyplets::ResolvedTriplet;
 pub use polyplets::SecurityTetraplet;
 

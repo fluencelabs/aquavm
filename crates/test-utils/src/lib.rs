@@ -32,6 +32,7 @@ pub use aquamarine_vm::AquamarineVMError;
 pub use aquamarine_vm::CallServiceClosure;
 pub use aquamarine_vm::IType;
 pub use aquamarine_vm::IValue;
+pub use aquamarine_vm::InterpreterOutcome;
 pub use aquamarine_vm::ParticleParameters;
 
 use std::collections::HashMap;

@@ -17,8 +17,8 @@
 use crate::execution::ExecutionError;
 use crate::preparation::PreparationError;
 
-use crate::AquaInterpreterOutcome;
-use crate::AQUA_INTERPRETER_SUCCESS;
+use crate::InterpreterOutcome;
+use crate::INTERPRETER_SUCCESS;
 
 use serde::Serialize;
 
@@ -27,30 +27,30 @@ use std::rc::Rc;
 
 const EXECUTION_ERRORS_START_ID: i32 = 1000;
 
-/// Create AquaInterpreterOutcome from supplied data and next_peer_pks,
-/// set ret_code to AQUA_INTERPRETER_SUCCESS.
-pub(crate) fn from_path_and_peers<T>(data: &T, next_peer_pks: Vec<String>) -> AquaInterpreterOutcome
+/// Create InterpreterOutcome from supplied data and next_peer_pks,
+/// set ret_code to INTERPRETER_SUCCESS.
+pub(crate) fn from_path_and_peers<T>(data: &T, next_peer_pks: Vec<String>) -> InterpreterOutcome
 where
     T: ?Sized + Serialize,
 {
     let data = serde_json::to_vec(data).expect("default serializer shouldn't fail");
     let next_peer_pks = dedup(next_peer_pks);
 
-    AquaInterpreterOutcome {
-        ret_code: AQUA_INTERPRETER_SUCCESS,
+    InterpreterOutcome {
+        ret_code: INTERPRETER_SUCCESS,
         error_message: String::new(),
         data,
         next_peer_pks,
     }
 }
 
-/// Create AquaInterpreterOutcome from supplied data and error,
+/// Create InterpreterOutcome from supplied data and error,
 /// set ret_code based on the error.
-pub(crate) fn from_preparation_error(data: impl Into<Vec<u8>>, err: PreparationError) -> AquaInterpreterOutcome {
+pub(crate) fn from_preparation_error(data: impl Into<Vec<u8>>, err: PreparationError) -> InterpreterOutcome {
     let ret_code = err.to_error_code() as i32;
     let data = data.into();
 
-    AquaInterpreterOutcome {
+    InterpreterOutcome {
         ret_code,
         error_message: format!("{}", err),
         data,
@@ -58,13 +58,13 @@ pub(crate) fn from_preparation_error(data: impl Into<Vec<u8>>, err: PreparationE
     }
 }
 
-/// Create AquaInterpreterOutcome from supplied data, next_peer_pks and error,
+/// Create InterpreterOutcome from supplied data, next_peer_pks and error,
 /// set ret_code based on the error.
 pub(crate) fn from_execution_error<T>(
     data: &T,
     next_peer_pks: Vec<String>,
     err: Rc<ExecutionError>,
-) -> AquaInterpreterOutcome
+) -> InterpreterOutcome
 where
     T: ?Sized + Serialize,
 {
@@ -74,7 +74,7 @@ where
     let data = serde_json::to_vec(data).expect("default serializer shouldn't fail");
     let next_peer_pks = dedup(next_peer_pks);
 
-    AquaInterpreterOutcome {
+    InterpreterOutcome {
         ret_code,
         error_message: format!("{}", err),
         data,

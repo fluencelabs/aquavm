@@ -20,16 +20,16 @@ use fluence_it_types::IValue;
 use serde::Deserialize;
 use serde::Serialize;
 
-pub const AQUA_INTERPRETER_SUCCESS: i32 = 0;
+pub const INTERPRETER_SUCCESS: i32 = 0;
 
 /// Describes a result returned at the end of the interpreter execution.
 #[fce]
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct AquaInterpreterOutcome {
-    /// A return code, where AQUA_INTERPRETER_SUCCESS means success.
+pub struct InterpreterOutcome {
+    /// A return code, where INTERPRETER_SUCCESS means success.
     pub ret_code: i32,
 
-    /// Contains error message if ret_code != AQUA_INTERPRETER_SUCCESS.
+    /// Contains error message if ret_code != INTERPRETER_SUCCESS.
     pub error_message: String,
 
     /// Contains script data that should be preserved in an executor of this interpreter
@@ -40,7 +40,7 @@ pub struct AquaInterpreterOutcome {
     pub next_peer_pks: Vec<String>,
 }
 
-impl AquaInterpreterOutcome {
+impl InterpreterOutcome {
     pub fn from_ivalues(mut ivalues: Vec<IValue>) -> Result<Self, String> {
         const OUTCOME_FIELDS_COUNT: usize = 4;
 
@@ -48,7 +48,7 @@ impl AquaInterpreterOutcome {
             IValue::Record(record_values) => record_values,
             v => {
                 return Err(format!(
-                    "expected record for AquaInterpreterOutcome, got {:?}",
+                    "expected record for InterpreterOutcome, got {:?}",
                     v
                 ))
             }
@@ -57,7 +57,7 @@ impl AquaInterpreterOutcome {
         let mut record_values = record_values.into_vec();
         if record_values.len() != OUTCOME_FIELDS_COUNT {
             return Err(format!(
-                "expected AquaInterpreterOutcome struct with {} fields, got {:?}",
+                "expected InterpreterOutcome struct with {} fields, got {:?}",
                 OUTCOME_FIELDS_COUNT, record_values
             ));
         }

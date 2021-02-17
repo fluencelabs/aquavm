@@ -1,10 +1,10 @@
 use aqua_test_utils::create_aqua_vm;
 use aqua_test_utils::unit_call_service;
-use aqua_test_utils::AquaInterpreterOutcome;
 use aqua_test_utils::AquamarineVM;
 use aqua_test_utils::AquamarineVMError;
 use aqua_test_utils::CallServiceClosure;
 use aqua_test_utils::IValue;
+use aqua_test_utils::InterpreterOutcome;
 use aqua_test_utils::NEVec;
 
 use criterion::criterion_group;
@@ -31,7 +31,7 @@ thread_local!(static REMOTE_VM: RefCell<AquamarineVM> = RefCell::new({
 thread_local!(static CLIENT_1_VM: RefCell<AquamarineVM> = RefCell::new(create_aqua_vm(unit_call_service(), "A")));
 thread_local!(static CLIENT_2_VM: RefCell<AquamarineVM> = RefCell::new(create_aqua_vm(unit_call_service(), "B")));
 
-fn chat_sent_message_benchmark() -> Result<AquaInterpreterOutcome, AquamarineVMError> {
+fn chat_sent_message_benchmark() -> Result<InterpreterOutcome, AquamarineVMError> {
     let script = String::from(
         r#"
             (seq 
