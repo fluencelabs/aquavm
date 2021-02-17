@@ -42,6 +42,26 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "afddf7f520a80dbf76e6f50a35bca42a2331ef227a28b3b6dc5c2e2338d114b1"
 
 [[package]]
+name = "aqua-interpreter-interface"
+version = "0.3.1"
+dependencies = [
+ "fluence",
+ "fluence-it-types",
+ "serde",
+]
+
+[[package]]
+name = "aqua-interpreter-interface"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f4c49b8a5fe1336a9c6981be09cb13706c7d9083e48588d692120b5080a13278"
+dependencies = [
+ "fluence",
+ "fluence-it-types",
+ "serde",
+]
+
+[[package]]
 name = "aqua-test-module"
 version = "0.1.0"
 dependencies = [
@@ -59,29 +79,29 @@ dependencies = [
 
 [[package]]
 name = "aquamarine"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "fluence",
+ "interpreter-lib",
  "log",
  "serde",
  "serde_json",
- "stepper-lib",
  "wasm-bindgen",
 ]
 
 [[package]]
 name = "aquamarine-vm"
-version = "0.1.29"
+version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ef719bebed9bf1a31ea528f677d891e914437924e7fc4f9fb3139b0e8cbadba3"
+checksum = "170e51ff427660612f237ce4d3e4fd28218f080e97fcfc23ebd587bdac3379fa"
 dependencies = [
- "fluence-faas",
+ "aqua-interpreter-interface 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fluence-faas 0.2.0",
  "log",
  "maplit",
  "parking_lot 0.11.1",
  "serde",
  "serde_json",
- "stepper-interface 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -641,9 +661,33 @@ checksum = "9deb5e4f0e1533694ffbfd3644b8047ae41e8098165cdf5934a60b71f82e30c9"
 dependencies = [
  "boolinator",
  "fce-utils",
- "fce-wit-generator",
+ "fce-wit-generator 0.1.30",
  "fce-wit-interfaces",
- "fce-wit-parser",
+ "fce-wit-parser 0.1.29",
+ "log",
+ "multi-map",
+ "multimap",
+ "parity-wasm",
+ "pwasm-utils",
+ "safe-transmute",
+ "serde",
+ "wasmer-interface-types-fl",
+ "wasmer-runtime-core-fl",
+ "wasmer-runtime-fl",
+ "wasmer-wasi-fl",
+]
+
+[[package]]
+name = "fce"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "54e680149a26e9b74a140a143d624c1fe83f6a9d28daf8a12b2bdba261343a71"
+dependencies = [
+ "boolinator",
+ "fce-utils",
+ "fce-wit-generator 0.2.0",
+ "fce-wit-interfaces",
+ "fce-wit-parser 0.2.0",
  "log",
  "multi-map",
  "multimap",
@@ -669,7 +713,22 @@ version = "0.1.30"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4e19c183d232092a59aeaa4f22212699b3da2acf0bcc5329a9de2a7bb7aa9f87"
 dependencies = [
- "fce-wit-parser",
+ "fce-wit-parser 0.1.29",
+ "fluence-sdk-wit",
+ "once_cell",
+ "serde",
+ "serde_json",
+ "walrus",
+ "wasmer-interface-types-fl",
+]
+
+[[package]]
+name = "fce-wit-generator"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1eca715cf832f99fd59dae4f639e4437e5ac92a4470e0879624049f6cb1a3910"
+dependencies = [
+ "fce-wit-parser 0.2.0",
  "fluence-sdk-wit",
  "once_cell",
  "serde",
@@ -703,6 +762,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "fce-wit-parser"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1f59267a5533d352406b7203eee4b9fe918f4671f2f66a990cab9632f528c952"
+dependencies = [
+ "anyhow",
+ "fce-wit-interfaces",
+ "serde",
+ "walrus",
+ "wasmer-interface-types-fl",
+ "wasmer-runtime-core-fl",
+]
+
+[[package]]
 name = "fixedbitset"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -724,7 +797,7 @@ version = "0.1.30"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2fb49d32cad551606cc6ef324b93b0079e7f7f8a54be15176a314098028195cb"
 dependencies = [
- "fluence-faas",
+ "fluence-faas 0.1.30",
  "log",
  "maplit",
  "serde",
@@ -741,7 +814,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a74511b8a8fc16e3cb3749631824b90f89cecb742cbbaf4e467a0873e34a5a53"
 dependencies = [
  "cmd_lib",
- "fce",
+ "fce 0.1.30",
  "fce-utils",
  "fluence-sdk-main",
  "itertools 0.9.0",
@@ -750,6 +823,30 @@ dependencies = [
  "serde",
  "serde_derive",
  "serde_json",
+ "toml",
+ "wasmer-interface-types-fl",
+ "wasmer-runtime-core-fl",
+ "wasmer-runtime-fl",
+ "wasmer-wasi-fl",
+]
+
+[[package]]
+name = "fluence-faas"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f0696945762ee0d5ed97537bdd0fa1c71957fc23794074ae035d428e90bedae5"
+dependencies = [
+ "cmd_lib",
+ "fce 0.2.0",
+ "fce-utils",
+ "fluence-sdk-main",
+ "itertools 0.9.0",
+ "log",
+ "safe-transmute",
+ "serde",
+ "serde_derive",
+ "serde_json",
+ "thiserror",
  "toml",
  "wasmer-interface-types-fl",
  "wasmer-runtime-core-fl",
@@ -972,6 +1069,31 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "61124eeebbd69b8190558df225adf7e4caafce0d743919e5d6b19652314ec5ec"
 dependencies = [
  "cfg-if 1.0.0",
+]
+
+[[package]]
+name = "interpreter-lib"
+version = "0.6.0"
+dependencies = [
+ "air-parser",
+ "aqua-interpreter-interface 0.3.1",
+ "aqua-test-utils",
+ "boolinator",
+ "criterion",
+ "csv",
+ "env_logger",
+ "fluence",
+ "fluence-app-service",
+ "jsonpath_lib-fl",
+ "log",
+ "maplit",
+ "once_cell",
+ "polyplets",
+ "pretty_assertions",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "wasm-bindgen",
 ]
 
 [[package]]
@@ -1672,51 +1794,6 @@ name = "static_assertions"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
-
-[[package]]
-name = "stepper-interface"
-version = "0.1.2"
-dependencies = [
- "fluence",
- "fluence-it-types",
- "serde",
-]
-
-[[package]]
-name = "stepper-interface"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "95bde63566205ba83b6f55a61a1481a6c2a94fbac9d22d280f68232aab326d27"
-dependencies = [
- "fluence",
- "fluence-it-types",
- "serde",
-]
-
-[[package]]
-name = "stepper-lib"
-version = "0.5.0"
-dependencies = [
- "air-parser",
- "aqua-test-utils",
- "boolinator",
- "criterion",
- "csv",
- "env_logger",
- "fluence",
- "fluence-app-service",
- "jsonpath_lib-fl",
- "log",
- "maplit",
- "once_cell",
- "polyplets",
- "pretty_assertions",
- "serde",
- "serde_json",
- "stepper-interface 0.1.2",
- "thiserror",
- "wasm-bindgen",
-]
 
 [[package]]
 name = "string_cache"

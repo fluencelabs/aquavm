@@ -79,7 +79,7 @@ jobs:
 
           # get package name from Cargo.toml
           PKG_NAME="$(toml get "$CARGO_TOML" package.name | tr -d \")"
-          JS_PKG_NAME="@fluencelabs/aquamarine-stepper"
+          JS_PKG_NAME="@fluencelabs/aquamarine-interpreter"
 
           ### NPM
           # take all versions from npm and replace single quotes with double quotes
@@ -120,7 +120,7 @@ jobs:
         continue-on-error: true
 
       - name: Build aquamarine.wasm for JS clients
-        run: wasm-pack build $GITHUB_WORKSPACE/stepper --no-typescript --release -d $(pwd)/pkg
+        run: wasm-pack build $GITHUB_WORKSPACE/interpreter --no-typescript --release -d $(pwd)/pkg
 
       - name: Generate aquamarine.wasm.base64.js
         run: |
@@ -128,7 +128,7 @@ jobs:
           module.exports = "$(base64 -w0 pkg/aquamarine_client_bg.wasm)";
           EOF
 
-    ### Generate index files so import works as: | import {wasmBs64} from "@fluencelabs/aquamarine-stepper"; |
+    ### Generate index files so import works as: | import {wasmBs64} from "@fluencelabs/aquamarine-interpreter"; |
       - name: Generate index.js & index.d.ts
         run: |
           cat << EOF > index.js
@@ -201,7 +201,7 @@ jobs:
 
       - name: Build aquamarine.wasm for node
         run: fce build -p aquamarine --release --features fce
-        working-directory: stepper
+        working-directory: interpreter
 
       - name: Copy aquamarine.wasm to air-interpreter-wasm
         run: cp target/wasm32-wasi/release/aquamarine.wasm crates/air-interpreter-wasm/aquamarine.wasm
