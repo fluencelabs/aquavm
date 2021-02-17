@@ -29,9 +29,24 @@ impl fmt::Display for CallInstrArgValue<'_> {
             Number(number) => write!(f, "{}", number),
             Boolean(bool) => write!(f, "{}", bool),
             Variable(str) => write!(f, "{}", str),
-            JsonPath { variable, path } => write!(f, "{}.{}", variable, path),
+            JsonPath {
+                variable,
+                path,
+                should_flatten,
+            } => print_json_path(variable, path, should_flatten, f),
         }
     }
+}
+
+fn print_json_path(
+    variable: &str,
+    path: &str,
+    should_flatten: &bool,
+    f: &mut fmt::Formatter,
+) -> fmt::Result {
+    let maybe_flatten_char = if *should_flatten { "!" } else { "" };
+
+    write!(f, "{}.{}{}", variable, path, maybe_flatten_char)
 }
 
 impl fmt::Display for CallInstrValue<'_> {
@@ -42,7 +57,11 @@ impl fmt::Display for CallInstrValue<'_> {
             InitPeerId => write!(f, "%init_peer_id%"),
             Literal(str) => write!(f, r#""{}""#, str),
             Variable(str) => write!(f, "{}", str),
-            JsonPath { variable, path } => write!(f, "{}.{}", variable, path),
+            JsonPath {
+                variable,
+                path,
+                should_flatten,
+            } => print_json_path(variable, path, should_flatten, f),
         }
     }
 }
@@ -53,7 +72,11 @@ impl fmt::Display for IterableValue<'_> {
 
         match self {
             Variable(str) => write!(f, "{}", str),
-            JsonPath { variable, path } => write!(f, "{}.{}", variable, path),
+            JsonPath {
+                variable,
+                path,
+                should_flatten,
+            } => print_json_path(variable, path, should_flatten, f),
         }
     }
 }
@@ -67,7 +90,11 @@ impl fmt::Display for MatchableValue<'_> {
             Number(number) => write!(f, "{}", number),
             Boolean(bool) => write!(f, "{}", bool),
             Variable(str) => write!(f, "{}", str),
-            JsonPath { variable, path } => write!(f, "{}.{}", variable, path),
+            JsonPath {
+                variable,
+                path,
+                should_flatten,
+            } => print_json_path(variable, path, should_flatten, f),
         }
     }
 }

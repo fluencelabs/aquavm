@@ -130,6 +130,7 @@ fn parse_json_path() {
         peer_part: PeerPk(CallInstrValue::JsonPath {
             variable: "id",
             path: "$.a",
+            should_flatten: false,
         }),
         function_part: FuncName(CallInstrValue::Literal("f")),
         args: Rc::new(vec![
@@ -152,7 +153,7 @@ fn parse_json_path_complex() {
     let source_code = r#"
         (seq
             (call m.$.[1] "f" [] void)
-            (call m.$.abc["c"].cde[a][0].cde["bcd"] "f" [] void)
+            (call m.$.abc["c"].cde[a][0].cde["bcd"]! "f" [] void)
         )
         "#;
     let instruction = parse(source_code);
@@ -161,6 +162,7 @@ fn parse_json_path_complex() {
             peer_part: PeerPk(CallInstrValue::JsonPath {
                 variable: "m",
                 path: "$.[1]",
+                should_flatten: false,
             }),
             function_part: FuncName(CallInstrValue::Literal("f")),
             args: Rc::new(vec![]),
@@ -170,6 +172,7 @@ fn parse_json_path_complex() {
             peer_part: PeerPk(CallInstrValue::JsonPath {
                 variable: "m",
                 path: r#"$.abc["c"].cde[a][0].cde["bcd"]"#,
+                should_flatten: true,
             }),
             function_part: FuncName(CallInstrValue::Literal("f")),
             args: Rc::new(vec![]),
@@ -196,6 +199,7 @@ fn json_path_square_braces() {
         peer_part: PeerPk(CallInstrValue::JsonPath {
             variable: "u",
             path: r#"$["peer_id"]"#,
+            should_flatten: false,
         }),
         function_part: ServiceIdWithFuncName(
             CallInstrValue::Literal("return"),
@@ -205,10 +209,12 @@ fn json_path_square_braces() {
             CallInstrArgValue::JsonPath {
                 variable: "u",
                 path: r#"$["peer_id"].cde[0]["abc"].abc"#,
+                should_flatten: false,
             },
             CallInstrArgValue::JsonPath {
                 variable: "u",
                 path: r#"$["name"]"#,
+                should_flatten: false,
             },
         ]),
         output: Accumulator("void"),
@@ -600,6 +606,7 @@ fn fold_json_path() {
         iterable: JsonPath {
             variable: "members",
             path: "$.[\"users\"]",
+            should_flatten: false,
         },
         iterator: "m",
         instruction: Rc::new(null()),
@@ -622,6 +629,7 @@ fn comments() {
         iterable: JsonPath {
             variable: "members",
             path: "$.[\"users\"]",
+            should_flatten: false,
         },
         iterator: "m",
         instruction: Rc::new(null()),

@@ -63,7 +63,11 @@ pub enum CallInstrValue<'i> {
     InitPeerId,
     Literal(&'i str),
     Variable(&'i str),
-    JsonPath { variable: &'i str, path: &'i str },
+    JsonPath {
+        variable: &'i str,
+        path: &'i str,
+        should_flatten: bool,
+    },
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
@@ -74,13 +78,21 @@ pub enum CallInstrArgValue<'i> {
     Number(Number),
     Boolean(bool),
     Variable(&'i str),
-    JsonPath { variable: &'i str, path: &'i str },
+    JsonPath {
+        variable: &'i str,
+        path: &'i str,
+        should_flatten: bool,
+    },
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum IterableValue<'i> {
     Variable(&'i str),
-    JsonPath { variable: &'i str, path: &'i str },
+    JsonPath {
+        variable: &'i str,
+        path: &'i str,
+        should_flatten: bool,
+    },
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
@@ -89,7 +101,11 @@ pub enum MatchableValue<'i> {
     Number(Number),
     Boolean(bool),
     Variable(&'i str),
-    JsonPath { variable: &'i str, path: &'i str },
+    JsonPath {
+        variable: &'i str,
+        path: &'i str,
+        should_flatten: bool,
+    },
 }
 
 #[derive(Serialize, Debug, PartialEq, Clone)]

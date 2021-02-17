@@ -72,8 +72,9 @@ CallInstrValue: CallInstrValue<'input> = {
     <s:Literal> => CallInstrValue::Literal(s),
     <s:Alphanumeric> => CallInstrValue::Variable(s),
     <v:JsonPath> => {
-        let (variable, path) = into_variable_and_path(v.0, v.1);
-        CallInstrValue::JsonPath { variable, path }
+        let (variable, path) = into_variable_and_path(v.0, v.1, v.2);
+        let should_flatten = v.2;
+        CallInstrValue::JsonPath { variable, path, should_flatten }
     },
     InitPeerId => CallInstrValue::InitPeerId,
 }
@@ -84,8 +85,9 @@ CallInstrArgValue: CallInstrArgValue<'input> = {
     <s:Literal> => CallInstrArgValue::Literal(s),
     <s:Alphanumeric> => CallInstrArgValue::Variable(s),
     <v:JsonPath> => {
-        let (variable, path) = into_variable_and_path(v.0, v.1);
-        CallInstrArgValue::JsonPath { variable, path }
+        let (variable, path) = into_variable_and_path(v.0, v.1, v.2);
+        let should_flatten = v.2;
+        CallInstrArgValue::JsonPath { variable, path, should_flatten }
     },
     <n:Number> => CallInstrArgValue::Number(n),
     <b:Boolean> => CallInstrArgValue::Boolean(b),
@@ -96,8 +98,9 @@ CallInstrArgValue: CallInstrArgValue<'input> = {
 Iterable: IterableValue<'input> = {
     <s:Alphanumeric> => IterableValue::Variable(s),
     <v:JsonPath> => {
-        let (variable, path) = into_variable_and_path(v.0, v.1);
-        IterableValue::JsonPath { variable, path }
+        let (variable, path) = into_variable_and_path(v.0, v.1, v.2);
+        let should_flatten = v.2;
+        IterableValue::JsonPath { variable, path, should_flatten }
     },
 }
 
@@ -105,8 +108,9 @@ Matchable: MatchableValue<'input> = {
     <s:Alphanumeric> => MatchableValue::Variable(s),
     <s:Literal> => MatchableValue::Literal(s),
     <v:JsonPath> => {
-        let (variable, path) = into_variable_and_path(v.0, v.1);
-        MatchableValue::JsonPath { variable, path }
+        let (variable, path) = into_variable_and_path(v.0, v.1, v.2);
+        let should_flatten = v.2;
+        MatchableValue::JsonPath { variable, path, should_flatten }
     },
 }
 
@@ -122,7 +126,7 @@ extern {
 
         Alphanumeric => Token::Alphanumeric(<&'input str>),
         Literal => Token::StringLiteral(<&'input str>),
-        JsonPath => Token::JsonPath(<&'input str>, <usize>),
+        JsonPath => Token::JsonPath(<&'input str>, <usize>, <bool>),
         Accumulator => Token::Accumulator(<&'input str>),
         Number => Token::Number(<Number>),
         Boolean => Token::Boolean(<bool>),

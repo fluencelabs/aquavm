@@ -34,6 +34,7 @@ struct ParserState {
     pub(self) first_dot_met_pos: Option<usize>,
     pub(self) non_numeric_met: bool,
     pub(self) digit_met: bool,
+    pub(self) flattening_met: bool,
     pub(self) is_first_char: bool,
     pub(self) current_char: char,
     pub(self) current_pos: usize,
@@ -58,6 +59,7 @@ impl<'input> CallVariableParser<'input> {
             first_dot_met_pos: None,
             non_numeric_met: false,
             digit_met: false,
+            flattening_met: false,
             is_first_char: true,
             current_char,
             current_pos,
@@ -186,13 +188,22 @@ impl<'input> CallVariableParser<'input> {
         Ok(())
     }
 
-    fn try_parse_as_json_path(&self) -> LexerResult<()> {
-        if !self.json_path_allowed_char() {
+    fn try_parse_as_json_path(&mut self) -> LexerResult<()> {
+        if !self.json_path_allowed_char() && !self.try_parse_as_flattening() {
             let error_pos = self.pos_in_string_to_parse();
             return Err(LexerError::InvalidJsonPath(error_pos, error_pos));
         }
 
         Ok(())
+    }
+
+    fn try_parse_as_flattening(&mut self) -> bool {
+        if self.is_last_char() && self.current_char() == '!' {
+            self.state.flattening_met = true;
+            return true;
+        }
+
+        false
     }
 
     fn try_parse_first_met_dot(&mut self) -> LexerResult<bool> {
@@ -238,6 +249,10 @@ impl<'input> CallVariableParser<'input> {
         self.state.current_char
     }
 
+    fn is_last_char(&self) -> bool {
+        self.current_pos() == self.string_to_parse.len() - 1
+    }
+
     fn to_token(&self) -> LexerResult<Token<'input>> {
         use super::token::UnparsedNumber;
 
@@ -256,6 +271,7 @@ impl<'input> CallVariableParser<'input> {
             (false, true) => Ok(Token::JsonPath(
                 self.string_to_parse,
                 self.state.first_dot_met_pos.unwrap(),
+                self.state.flattening_met,
             )),
         }
     }

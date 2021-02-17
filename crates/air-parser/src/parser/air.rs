@@ -1,5 +1,5 @@
 // auto-generated: "lalrpop 0.19.1"
-// sha256: 9acb4e3c4d44725be0dbab976a8a638baa8eab91f1c9cd533f2469fe8e6e9fbb
+// sha256: e079b358186ef3fee225ccdb9f7b4aebd631876e7dc1c3123ed9fc38dc20
 use crate::parser::ast::*;
 use crate::parser::into_variable_and_path;
 use crate::parser::lexer::LexerError;
@@ -34,7 +34,7 @@ mod __parse__AIR {
         Variant0(Token<'input>),
         Variant1(&'input str),
         Variant2(bool),
-        Variant3((&'input str, usize)),
+        Variant3((&'input str, usize, bool)),
         Variant4(Number),
         Variant5(__lalrpop_util::ErrorRecovery<usize, Token<'input>, LexerError>),
         Variant6(CallInstrArgValue<'input>),
@@ -585,7 +585,7 @@ mod __parse__AIR {
             Token::Alphanumeric(_) if true => Some(5),
             Token::Boolean(_) if true => Some(6),
             Token::InitPeerId if true => Some(7),
-            Token::JsonPath(_, _) if true => Some(8),
+            Token::JsonPath(_, _, _) if true => Some(8),
             Token::LastError if true => Some(9),
             Token::StringLiteral(_) if true => Some(10),
             Token::Number(_) if true => Some(11),
@@ -621,7 +621,7 @@ mod __parse__AIR {
                 _ => unreachable!(),
             },
             8 => match __token {
-                Token::JsonPath(__tok0, __tok1) if true => __Symbol::Variant3((__tok0, __tok1)),
+                Token::JsonPath(__tok0, __tok1, __tok2) if true => __Symbol::Variant3((__tok0, __tok1, __tok2)),
                 _ => unreachable!(),
             },
             11 => match __token {
@@ -1181,7 +1181,7 @@ mod __parse__AIR {
       'input,
     >(
         __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, (&'input str, usize), usize)
+    ) -> (usize, (&'input str, usize, bool), usize)
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant3(__v), __r)) => (__l, __v, __r),
@@ -2704,12 +2704,13 @@ fn __action24<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
-    (_, v, _): (usize, (&'input str, usize), usize),
+    (_, v, _): (usize, (&'input str, usize, bool), usize),
 ) -> CallInstrValue<'input>
 {
     {
-        let (variable, path) = into_variable_and_path(v.0, v.1);
-        CallInstrValue::JsonPath { variable, path }
+        let (variable, path) = into_variable_and_path(v.0, v.1, v.2);
+        let should_flatten = v.2;
+        CallInstrValue::JsonPath { variable, path, should_flatten }
     }
 }
 
@@ -2772,12 +2773,13 @@ fn __action29<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
-    (_, v, _): (usize, (&'input str, usize), usize),
+    (_, v, _): (usize, (&'input str, usize, bool), usize),
 ) -> CallInstrArgValue<'input>
 {
     {
-        let (variable, path) = into_variable_and_path(v.0, v.1);
-        CallInstrArgValue::JsonPath { variable, path }
+        let (variable, path) = into_variable_and_path(v.0, v.1, v.2);
+        let should_flatten = v.2;
+        CallInstrArgValue::JsonPath { variable, path, should_flatten }
     }
 }
 
@@ -2853,12 +2855,13 @@ fn __action35<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
-    (_, v, _): (usize, (&'input str, usize), usize),
+    (_, v, _): (usize, (&'input str, usize, bool), usize),
 ) -> IterableValue<'input>
 {
     {
-        let (variable, path) = into_variable_and_path(v.0, v.1);
-        IterableValue::JsonPath { variable, path }
+        let (variable, path) = into_variable_and_path(v.0, v.1, v.2);
+        let should_flatten = v.2;
+        IterableValue::JsonPath { variable, path, should_flatten }
     }
 }
 
@@ -2895,12 +2898,13 @@ fn __action38<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
-    (_, v, _): (usize, (&'input str, usize), usize),
+    (_, v, _): (usize, (&'input str, usize, bool), usize),
 ) -> MatchableValue<'input>
 {
     {
-        let (variable, path) = into_variable_and_path(v.0, v.1);
-        MatchableValue::JsonPath { variable, path }
+        let (variable, path) = into_variable_and_path(v.0, v.1, v.2);
+        let should_flatten = v.2;
+        MatchableValue::JsonPath { variable, path, should_flatten }
     }
 }
 

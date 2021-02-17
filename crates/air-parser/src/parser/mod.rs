@@ -31,6 +31,12 @@ pub use self::air_parser::parse;
 pub use air::AIRParser;
 pub use lexer::AIRLexer;
 
-fn into_variable_and_path(str: &str, pos: usize) -> (&str, &str) {
-    (&str[0..pos], &str[pos + 1..])
+fn into_variable_and_path(str: &str, pos: usize, should_flatten: bool) -> (&str, &str) {
+    let json_path = if should_flatten {
+        &str[pos + 1..str.len() - 1]
+    } else {
+        &str[pos + 1..]
+    };
+
+    (&str[0..pos], json_path)
 }
