@@ -1,5 +1,6 @@
 use crate::parser::ast::*;
-use crate::parser::into_variable_and_path;
+use crate::parser::air_parser::into_variable_and_path;
+use crate::parser::air_parser::make_flattened_error;
 use crate::parser::lexer::LexerError;
 use crate::parser::lexer::Token;
 use crate::parser::lexer::Number;
@@ -71,9 +72,13 @@ ServiceId = CallInstrValue;
 CallInstrValue: CallInstrValue<'input> = {
     <s:Literal> => CallInstrValue::Literal(s),
     <s:Alphanumeric> => CallInstrValue::Variable(s),
-    <v:JsonPath> => {
+    <l: @L> <v:JsonPath> <r: @R> => {
         let (variable, path) = into_variable_and_path(v.0, v.1, v.2);
         let should_flatten = v.2;
+        if !should_flatten {
+            let token = Token::JsonPath(v.0, v.1, v.2);
+            errors.push(make_flattened_error(l, token, r));
+        }
         CallInstrValue::JsonPath { variable, path, should_flatten }
     },
     InitPeerId => CallInstrValue::InitPeerId,

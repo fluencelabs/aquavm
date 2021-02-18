@@ -123,14 +123,14 @@ fn parse_json_path() {
     use ast::PeerPart::*;
 
     let source_code = r#"
-        (call id.$.a "f" ["hello" name] void[])
+        (call id.$.a! "f" ["hello" name] void[])
         "#;
     let instruction = parse(source_code);
     let expected = Instruction::Call(Call {
         peer_part: PeerPk(CallInstrValue::JsonPath {
             variable: "id",
             path: "$.a",
-            should_flatten: false,
+            should_flatten: true,
         }),
         function_part: FuncName(CallInstrValue::Literal("f")),
         args: Rc::new(vec![
@@ -143,6 +143,24 @@ fn parse_json_path() {
 }
 
 #[test]
+fn parse_json_path_without_flattening() {
+    let source_code = r#"
+        (call id.$.a "f" ["hello" name] void[])
+        "#;
+
+    let lexer = crate::AIRLexer::new(source_code);
+
+    let parser = crate::AIRParser::new();
+    let mut errors = Vec::new();
+    parser
+        .parse(source_code, &mut errors, lexer)
+        .expect("parser shoudn't fail");
+
+    assert_eq!(errors.len(), 1);
+    assert!(matches!(errors[0], lalrpop_util::ErrorRecovery { .. }));
+}
+
+#[test]
 fn parse_json_path_complex() {
     use ast::Call;
     use ast::CallInstrValue;
@@ -152,7 +170,7 @@ fn parse_json_path_complex() {
 
     let source_code = r#"
         (seq
-            (call m.$.[1] "f" [] void)
+            (call m.$.[1]! "f" [] void)
             (call m.$.abc["c"].cde[a][0].cde["bcd"]! "f" [] void)
         )
         "#;
@@ -162,7 +180,7 @@ fn parse_json_path_complex() {
             peer_part: PeerPk(CallInstrValue::JsonPath {
                 variable: "m",
                 path: "$.[1]",
-                should_flatten: false,
+                should_flatten: true,
             }),
             function_part: FuncName(CallInstrValue::Literal("f")),
             args: Rc::new(vec![]),
@@ -192,14 +210,14 @@ fn json_path_square_braces() {
     use ast::PeerPart::*;
 
     let source_code = r#"
-        (call u.$["peer_id"] ("return" "") [u.$["peer_id"].cde[0]["abc"].abc u.$["name"]] void[])
+        (call u.$["peer_id"]! ("return" "") [u.$["peer_id"].cde[0]["abc"].abc u.$["name"]] void[])
         "#;
     let instruction = parse(source_code);
     let expected = Instruction::Call(Call {
         peer_part: PeerPk(CallInstrValue::JsonPath {
             variable: "u",
             path: r#"$["peer_id"]"#,
-            should_flatten: false,
+            should_flatten: true,
         }),
         function_part: ServiceIdWithFuncName(
             CallInstrValue::Literal("return"),
