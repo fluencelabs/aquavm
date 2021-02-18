@@ -31,6 +31,7 @@ impl<'i> super::ExecutableInstruction<'i> for Xor<'i> {
             Err(e) if is_catchable_by_xor(&e) => {
                 exec_ctx.subtree_complete = true;
                 exec_ctx.last_error_could_be_set = true;
+                log::warn!("xor caught an error: {}", e);
 
                 self.1.execute(exec_ctx, trace_ctx)
             }
