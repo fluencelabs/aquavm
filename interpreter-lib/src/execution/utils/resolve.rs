@@ -36,7 +36,11 @@ pub(crate) fn resolve_to_args<'i>(
         CallInstrArgValue::Boolean(value) => prepare_consts(*value, ctx),
         CallInstrArgValue::Number(value) => prepare_consts(value, ctx),
         CallInstrArgValue::Variable(name) => prepare_variable(name, ctx),
-        CallInstrArgValue::JsonPath { variable, path } => prepare_json_path(variable, path, ctx),
+        CallInstrArgValue::JsonPath {
+            variable,
+            path,
+            should_flatten,
+        } => prepare_json_path(variable, path, *should_flatten, ctx),
     }
 }
 
@@ -84,12 +88,22 @@ fn prepare_variable<'i>(name: &str, ctx: &ExecutionCtx<'i>) -> ExecutionResult<(
 fn prepare_json_path<'i>(
     name: &str,
     json_path: &str,
+    should_flatten: bool,
     ctx: &ExecutionCtx<'i>,
 ) -> ExecutionResult<(JValue, Vec<SecurityTetraplet>)> {
     let resolved = resolve_to_jvaluable(name, ctx)?;
     let (jvalue, tetraplets) = resolved.apply_json_path_with_tetraplets(json_path)?;
-    let jvalue = jvalue.into_iter().cloned().collect::<Vec<_>>();
-    let jvalue = JValue::Array(jvalue);
+
+    let jvalue = if should_flatten {
+        if jvalue.len() != 1 {
+            let jvalue = jvalue.into_iter().cloned().collect::<Vec<_>>();
+            return crate::exec_err!(ExecutionError::FlatteningError(JValue::Array(jvalue)));
+        }
+        jvalue[0].clone()
+    } else {
+        let jvalue = jvalue.into_iter().cloned().collect::<Vec<_>>();
+        JValue::Array(jvalue)
+    };
 
     Ok((jvalue, tetraplets))
 }

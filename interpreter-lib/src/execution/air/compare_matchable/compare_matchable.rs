@@ -50,7 +50,23 @@ pub(crate) fn are_matchable_eq<'ctx>(
 
             Ok(left_value == right_value)
         }
-        (JsonPath { variable: lv, path: lp }, JsonPath { variable: rv, path: rp }) => {
+        (
+            JsonPath {
+                variable: lv,
+                path: lp,
+                should_flatten: lsf,
+            },
+            JsonPath {
+                variable: rv,
+                path: rp,
+                should_flatten: rsf,
+            },
+        ) => {
+            // TODO: improve comparison
+            if lsf != rsf {
+                return Ok(false);
+            }
+
             let left_jvaluable = resolve_to_jvaluable(lv, exec_ctx)?;
             let left_value = left_jvaluable.apply_json_path(lp)?;
 
@@ -91,14 +107,27 @@ fn compare_matchable<'ctx>(
             let jvalue = jvaluable.as_jvalue();
             Ok(comparator(jvalue))
         }
-        JsonPath { variable, path } => {
+        JsonPath {
+            variable,
+            path,
+            should_flatten,
+        } => {
             let jvaluable = resolve_to_jvaluable(variable, exec_ctx)?;
             let jvalues = jvaluable.apply_json_path(path)?;
-            if jvalues.len() != 1 {
-                return Ok(false);
-            }
 
-            Ok(comparator(Cow::Borrowed(jvalues[0])))
+            let jvalue = if *should_flatten {
+                if jvalues.len() != 1 {
+                    return Ok(false);
+                }
+                Cow::Borrowed(jvalues[0])
+            } else {
+                let jvalue = jvalues.into_iter().cloned().collect::<Vec<_>>();
+                let jvalue = JValue::Array(jvalue);
+
+                Cow::Owned(jvalue)
+            };
+
+            Ok(comparator(jvalue))
         }
     }
 }

@@ -17,7 +17,7 @@ aqua-interpreter-interface = { path = "../crates/interpreter-interface" }
 serde = { version = "=1.0.118", features = [ "derive", "rc" ] }
 serde_json = "=1.0.61"
 
-jsonpath_lib-fl = "=0.2.6"
+jsonpath_lib-fl = "=0.2.5"
 
 boolinator = "2.4.0"
 log = "0.4.11"

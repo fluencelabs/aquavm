@@ -89,10 +89,14 @@ fn resolve_to_string<'i>(value: &CallInstrValue<'i>, ctx: &ExecutionCtx<'i>) -> 
             let jvalue = resolved.into_jvalue();
             jvalue_to_string(jvalue)?
         }
-        CallInstrValue::JsonPath { variable, path } => {
+        CallInstrValue::JsonPath {
+            variable,
+            path,
+            should_flatten,
+        } => {
             let resolved = resolve_to_jvaluable(variable, ctx)?;
             let resolved = resolved.apply_json_path(path)?;
-            vec_to_string(resolved, path)?
+            vec_to_string(resolved, path, *should_flatten)?
         }
     };
 
@@ -108,7 +112,7 @@ fn jvalue_to_string(jvalue: JValue) -> ExecutionResult<String> {
     }
 }
 
-fn vec_to_string(values: Vec<&JValue>, json_path: &str) -> ExecutionResult<String> {
+fn vec_to_string(values: Vec<&JValue>, json_path: &str, should_flatten: bool) -> ExecutionResult<String> {
     if values.is_empty() {
         return exec_err!(ExecutionError::VariableNotFound(json_path.to_string()));
     }
@@ -117,5 +121,16 @@ fn vec_to_string(values: Vec<&JValue>, json_path: &str) -> ExecutionResult<Strin
         return exec_err!(ExecutionError::MultipleValuesInJsonPath(json_path.to_string()));
     }
 
-    jvalue_to_string(values[0].clone())
+    if should_flatten {
+        match values[0] {
+            JValue::Array(jvalues) => jvalue_to_string(jvalues[0].clone()),
+            _ => {
+                let jvalue = values.into_iter().cloned().collect::<Vec<_>>();
+                let jvalue = JValue::Array(jvalue);
+                return crate::exec_err!(ExecutionError::FlatteningError(jvalue));
+            }
+        }
+    } else {
+        jvalue_to_string(values[0].clone())
+    }
 }
