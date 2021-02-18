@@ -79,7 +79,7 @@ dependencies = [
 
 [[package]]
 name = "aquamarine"
-version = "0.6.1"
+version = "0.7.0"
 dependencies = [
  "fluence",
  "interpreter-lib",
@@ -1073,7 +1073,7 @@ dependencies = [
 
 [[package]]
 name = "interpreter-lib"
-version = "0.6.1"
+version = "0.7.0"
 dependencies = [
  "air-parser",
  "aqua-interpreter-interface 0.3.1",
