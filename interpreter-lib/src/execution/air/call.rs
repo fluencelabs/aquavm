@@ -70,6 +70,8 @@ fn set_last_error<'i>(
     e: Rc<ExecutionError>,
     tetraplet: Option<SecurityTetraplet>,
 ) {
+    log::warn!("call failed with an error: {}", e);
+
     let instruction = format!("{}", call);
     let last_error = LastErrorDescriptor::new(e, instruction, tetraplet);
     exec_ctx.last_error = Some(last_error);
