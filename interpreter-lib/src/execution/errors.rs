@@ -93,7 +93,7 @@ pub(crate) enum ExecutionError {
     MismatchWithoutXorError,
 
     /// This error type is produced by a mismatch to notify xor that compared values aren't equal.
-    #[error("jvalue '{0}' can't be flattened, to be flattened a jvalue should has an array type and consists only one value")]
+    #[error("jvalue '{0}' can't be flattened, to be flattened a jvalue should have an array type and consist only one value")]
     FlatteningError(JValue),
 }
 
