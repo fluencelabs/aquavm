@@ -44,7 +44,6 @@ macro_rules! execute {
                 }
 
                 let instruction = format!("{}", $self);
-                println!("set error on {}", instruction);
                 let last_error = LastErrorDescriptor::new(e.clone(), instruction, None);
                 $exec_ctx.last_error = Some(last_error);
                 Err(e)

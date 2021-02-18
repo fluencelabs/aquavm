@@ -269,24 +269,28 @@ fn too_big_float_number() {
 #[test]
 fn json_path() {
     // this json path contains all allowed in json path charactes
-    const JSON_PATH: &str = r#"value.$[$@[]():?.*,"!]"#;
+    const JSON_PATH: &str = r#"value.$[$@[]():?.*,"]"#;
 
     lexer_test(
         JSON_PATH,
-        Single(Ok((0, Token::JsonPath(JSON_PATH, 5), JSON_PATH.len()))),
+        Single(Ok((
+            0,
+            Token::JsonPath(JSON_PATH, 5, false),
+            JSON_PATH.len(),
+        ))),
     );
 }
 
 #[test]
 fn json_path_numbers() {
-    const JSON_PATH: &str = r#"12345.$[$@[]():?.*,"!]"#;
+    const JSON_PATH: &str = r#"12345.$[$@[]():?.*,"]"#;
 
     lexer_test(
         JSON_PATH,
         Single(Err(LexerError::UnallowedCharInNumber(6, 6))),
     );
 
-    const JSON_PATH1: &str = r#"+12345.$[$@[]():?.*,"!]"#;
+    const JSON_PATH1: &str = r#"+12345.$[$@[]():?.*,"]"#;
 
     lexer_test(
         JSON_PATH1,
@@ -320,12 +324,20 @@ fn unclosed_quote() {
 
 #[test]
 fn bad_value() {
-    // value contains ! that only allowed in json path
-    const INVALID_VALUE: &str = r#"val!ue.$[$@[]():?.*,"\!]"#;
+    // value contains ! that only allowed at the end of a json path
+    const INVALID_VALUE: &str = r#"val!ue.$[$@[]():?.*,"\]"#;
 
     lexer_test(
         INVALID_VALUE,
         Single(Err(LexerError::IsNotAlphanumeric(3, 3))),
+    );
+
+    // value contains ! that only allowed at the end of a json path
+    const INVALID_VALUE2: &str = r#"value.$![$@[]():?.*,"\]"#;
+
+    lexer_test(
+        INVALID_VALUE2,
+        Single(Err(LexerError::InvalidJsonPath(7, 7))),
     );
 }
 

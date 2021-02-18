@@ -37,7 +37,11 @@ pub(super) fn construct_iterable_value<'ctx>(
 ) -> ExecutionResult<Option<IterableValue>> {
     match ast_iterable {
         ast::IterableValue::Variable(name) => handle_instruction_variable(exec_ctx, name),
-        ast::IterableValue::JsonPath { variable, path } => handle_instruction_json_path(exec_ctx, variable, path),
+        ast::IterableValue::JsonPath {
+            variable,
+            path,
+            should_flatten,
+        } => handle_instruction_json_path(exec_ctx, variable, path, *should_flatten),
     }
 }
 
@@ -97,13 +101,14 @@ fn handle_instruction_json_path<'ctx>(
     exec_ctx: &ExecutionCtx<'ctx>,
     variable_name: &str,
     json_path: &str,
+    should_flatten: bool,
 ) -> ExecutionResult<Option<IterableValue>> {
     use ExecutionError::JValueAccJsonPathError;
 
-    let iterable: Option<IterableValue> = match exec_ctx.data_cache.get(variable_name) {
+    match exec_ctx.data_cache.get(variable_name) {
         Some(AValue::JValueRef(variable)) => {
             let jvalues = apply_json_path(&variable.result, json_path)?;
-            from_jvalues(jvalues, variable.triplet.clone(), json_path)
+            from_jvalues(jvalues, variable.triplet.clone(), json_path, should_flatten)
         }
         Some(AValue::JValueAccumulatorRef(acc)) => {
             let acc = acc.borrow();
@@ -115,7 +120,7 @@ fn handle_instruction_json_path<'ctx>(
             let (jvalues, tetraplet_indices) = select_with_iter(acc_iter, &json_path)
                 .map_err(|e| JValueAccJsonPathError(acc.clone(), json_path.to_string(), e))?;
 
-            let jvalues = jvalues.into_iter().cloned().collect();
+            let jvalues = construct_iterable_jvalues(jvalues, should_flatten)?;
             let tetraplets = tetraplet_indices
                 .into_iter()
                 .map(|id| SecurityTetraplet {
@@ -125,19 +130,17 @@ fn handle_instruction_json_path<'ctx>(
                 .collect::<Vec<_>>();
 
             let foldable = IterableVecJsonPathResult::init(jvalues, tetraplets);
-            Some(Box::new(foldable))
+            Ok(Some(Box::new(foldable)))
         }
         Some(AValue::JValueFoldCursor(fold_state)) => {
             let iterable_value = fold_state.iterable.peek().unwrap();
             let jvalues = iterable_value.apply_json_path(json_path)?;
             let triplet = as_triplet(&iterable_value);
 
-            from_jvalues(jvalues, triplet, json_path)
+            from_jvalues(jvalues, triplet, json_path, should_flatten)
         }
         _ => return exec_err!(ExecutionError::VariableNotFound(variable_name.to_string())),
-    };
-
-    Ok(iterable)
+    }
 }
 
 fn apply_json_path<'jvalue, 'str>(
@@ -150,12 +153,17 @@ fn apply_json_path<'jvalue, 'str>(
 }
 
 /// Applies json_path to provided jvalues and construct IterableValue from the result and given triplet.
-fn from_jvalues(jvalues: Vec<&JValue>, triplet: Rc<ResolvedTriplet>, json_path: &str) -> Option<IterableValue> {
+fn from_jvalues(
+    jvalues: Vec<&JValue>,
+    triplet: Rc<ResolvedTriplet>,
+    json_path: &str,
+    should_flatten: bool,
+) -> ExecutionResult<Option<IterableValue>> {
     if jvalues.is_empty() {
-        return None;
+        return Ok(None);
     }
 
-    let jvalues = jvalues.into_iter().cloned().collect();
+    let jvalues = construct_iterable_jvalues(jvalues, should_flatten)?;
 
     let tetraplet = SecurityTetraplet {
         triplet,
@@ -163,7 +171,29 @@ fn from_jvalues(jvalues: Vec<&JValue>, triplet: Rc<ResolvedTriplet>, json_path: 
     };
 
     let foldable = IterableJsonPathResult::init(jvalues, tetraplet);
-    Some(Box::new(foldable))
+    Ok(Some(Box::new(foldable)))
+}
+
+fn construct_iterable_jvalues(jvalues: Vec<&JValue>, should_flatten: bool) -> ExecutionResult<Vec<JValue>> {
+    if !should_flatten {
+        let jvalues = jvalues.into_iter().cloned().collect();
+        return Ok(jvalues);
+    }
+
+    if jvalues.len() != 1 {
+        let jvalues = jvalues.into_iter().cloned().collect();
+        let jvalue = JValue::Array(jvalues);
+        return exec_err!(ExecutionError::FlatteningError(jvalue));
+    }
+
+    match jvalues[0] {
+        JValue::Array(values) => Ok(values.into_iter().cloned().collect::<Vec<_>>()),
+        _ => {
+            let jvalues = jvalues.into_iter().cloned().collect();
+            let jvalue = JValue::Array(jvalues);
+            exec_err!(ExecutionError::FlatteningError(jvalue))
+        }
+    }
 }
 
 fn as_triplet(iterable: &IterableItem<'_>) -> Rc<ResolvedTriplet> {

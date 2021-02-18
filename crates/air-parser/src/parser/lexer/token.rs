@@ -26,7 +26,7 @@ pub enum Token<'input> {
 
     StringLiteral(&'input str),
     Alphanumeric(&'input str),
-    JsonPath(&'input str, usize),
+    JsonPath(&'input str, usize, bool),
     Accumulator(&'input str),
     Number(Number),
     Boolean(bool),

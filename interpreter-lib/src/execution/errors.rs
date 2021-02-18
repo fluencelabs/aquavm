@@ -91,6 +91,10 @@ pub(crate) enum ExecutionError {
     /// This error type is produced by a mismatch to notify xor that compared values aren't equal.
     #[error("mismatch is used without corresponding xor")]
     MismatchWithoutXorError,
+
+    /// This error type is produced by a mismatch to notify xor that compared values aren't equal.
+    #[error("jvalue '{0}' can't be flattened, to be flattened a jvalue should have an array type and consist only one value")]
+    FlatteningError(JValue),
 }
 
 impl ExecutionError {
@@ -114,6 +118,7 @@ impl ExecutionError {
             ShadowingError(_) => 14,
             MatchWithoutXorError => 15,
             MismatchWithoutXorError => 16,
+            FlatteningError(_) => 17,
         }
     }
 }

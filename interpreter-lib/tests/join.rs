@@ -57,8 +57,8 @@ fn join_chat() {
                         (fold members m
                             (par 
                                 (seq
-                                    (call m.$.[1] ("identity" "") [] void[])
-                                    (call m.$.[0] ("fgemb3" "add") [] void3[])
+                                    (call m.$.[1]! ("identity" "") [] void[])
+                                    (call m.$.[0]! ("fgemb3" "add") [] void3[])
                                 )
                                 (next m)
                             )

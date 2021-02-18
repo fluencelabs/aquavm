@@ -89,7 +89,14 @@ fn resolve_to_string<'i>(value: &CallInstrValue<'i>, ctx: &ExecutionCtx<'i>) -> 
             let jvalue = resolved.into_jvalue();
             jvalue_to_string(jvalue)?
         }
-        CallInstrValue::JsonPath { variable, path } => {
+        CallInstrValue::JsonPath {
+            variable,
+            path,
+            should_flatten,
+        } => {
+            // this is checked on the parsing stage
+            debug_assert!(*should_flatten);
+
             let resolved = resolve_to_jvaluable(variable, ctx)?;
             let resolved = resolved.apply_json_path(path)?;
             vec_to_string(resolved, path)?
