@@ -24,12 +24,12 @@ use interpreter_lib::execution_trace::ExecutionTrace;
 use serde_json::json;
 
 #[test]
-fn absent_json_path() {
+fn non_wait_on_json_path() {
     use log::LevelFilter::Info;
 
     let status = json!({
         "err_msg": "",
-        "is_authorized": 1,
+        "is_authenticated": 1,
         "ret_code": 0,
     });
 
@@ -58,7 +58,7 @@ fn absent_json_path() {
             (seq
                 (call "{1}" ("op" "identity") [])
                 (seq
-                    (call "{1}" ("history" "add") [msg status.$.is_authorized] auth_result)
+                    (call "{1}" ("history" "add") [msg status.$.is_authenticated!] auth_result)
                     (call %init_peer_id% ("returnService" "run") [auth_result])
                 )
             )
