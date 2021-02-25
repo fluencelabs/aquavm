@@ -44,17 +44,16 @@ pub(crate) fn resolve_to_args<'i>(
     }
 }
 
-fn prepare_consts<'i>(
-    arg: impl Into<JValue>,
-    ctx: &ExecutionCtx<'i>,
-) -> ExecutionResult<(JValue, Vec<SecurityTetraplet>)> {
+#[allow(clippy::unnecessary_wraps)]
+fn prepare_consts(arg: impl Into<JValue>, ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, Vec<SecurityTetraplet>)> {
     let jvalue = arg.into();
     let tetraplet = SecurityTetraplet::literal_tetraplet(ctx.init_peer_id.clone());
 
     Ok((jvalue, vec![tetraplet]))
 }
 
-fn prepare_last_error<'i>(ctx: &ExecutionCtx<'i>) -> ExecutionResult<(JValue, Vec<SecurityTetraplet>)> {
+#[allow(clippy::unnecessary_wraps)]
+fn prepare_last_error(ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, Vec<SecurityTetraplet>)> {
     let result = match &ctx.last_error {
         Some(error) => {
             let serialized_error = error.serialize();

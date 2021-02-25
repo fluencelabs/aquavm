@@ -187,7 +187,7 @@ fn construct_iterable_jvalues(jvalues: Vec<&JValue>, should_flatten: bool) -> Ex
     }
 
     match jvalues[0] {
-        JValue::Array(values) => Ok(values.into_iter().cloned().collect::<Vec<_>>()),
+        JValue::Array(values) => Ok(values.clone()),
         _ => {
             let jvalues = jvalues.into_iter().cloned().collect();
             let jvalue = JValue::Array(jvalues);

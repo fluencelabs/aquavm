@@ -178,7 +178,7 @@ impl<'i> ResolvedCall<'i> {
     }
 }
 
-fn handle_service_error<'i>(
+fn handle_service_error(
     service_result: CallServiceResult,
     trace_ctx: &mut ExecutionTraceCtx,
 ) -> ExecutionResult<CallServiceResult> {

@@ -82,7 +82,7 @@ fn make_contexts(
     trace: ExecutionTrace,
     init_peer_id: String,
 ) -> PreparationResult<(ExecutionCtx<'static>, ExecutionTraceCtx)> {
-    let current_peer_id = get_current_peer_id().map_err(|e| PreparationError::CurrentPeerIdEnvError(e))?;
+    let current_peer_id = get_current_peer_id().map_err(PreparationError::CurrentPeerIdEnvError)?;
     log::trace!(target: RUN_PARAMS, "current peer id {}", current_peer_id);
 
     let exec_ctx = ExecutionCtx::new(current_peer_id, init_peer_id);
