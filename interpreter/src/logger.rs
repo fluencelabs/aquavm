@@ -18,7 +18,7 @@ use interpreter_lib::log_targets::TARGET_MAP;
 
 use log::Level as LogLevel;
 
-pub const DEFAULT_LOG_LEVEL: LogLevel = LogLevel::Info;
+pub const DEFAULT_LOG_LEVEL: LogLevel = LogLevel::Trace;
 
 pub fn init_logger() {
     let target_map = TARGET_MAP.iter().cloned().collect();
