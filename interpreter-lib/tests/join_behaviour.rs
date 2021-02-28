@@ -19,8 +19,6 @@ use aqua_test_utils::create_aqua_vm;
 use aqua_test_utils::set_variables_call_service;
 use aqua_test_utils::unit_call_service;
 
-use interpreter_lib::execution_trace::ExecutionTrace;
-
 use serde_json::json;
 
 #[test]
@@ -32,6 +30,15 @@ fn non_wait_on_json_path() {
         "is_authenticated": 1,
         "ret_code": 0,
     });
+
+    env_logger::builder()
+        .filter(Some("cranelift_codegen"), Info)
+        .filter(Some("wasmer_wasi"), Info)
+        .filter(Some("wasmer_interface_types_fl"), Info)
+        // the same for rustyline and fce
+        .filter(Some("rustyline"), Info)
+        .filter(Some("fce"), Info)
+        .build();
 
     let msg = String::from(r#""some message""#);
 

@@ -17,7 +17,7 @@
 #![allow(improper_ctypes)]
 #![warn(rust_2018_idioms)]
 #![deny(
-    dead_code,
+    //dead_code,
     nonstandard_style,
     unused_imports,
     unused_mut,
@@ -44,8 +44,8 @@ pub fn main() {
 
 #[fce]
 pub fn invoke(init_peer_id: String, aqua: String, prev_data: Vec<u8>, data: Vec<u8>) -> InterpreterOutcome {
-    let log_level = get_log_level();
-    log::set_max_level(log_level.to_level_filter());
+    //let log_level = get_log_level();
+    //log::set_max_level(log_level.to_level_filter());
 
     execute_aqua(init_peer_id, aqua, prev_data, data)
 }

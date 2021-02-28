@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+/*
 use aqua_test_utils::call_vm;
 use aqua_test_utils::create_aqua_vm;
 use aqua_test_utils::CallServiceClosure;
@@ -198,6 +199,7 @@ fn fold_json_path() {
 use fluence_app_service::AppService;
 use fluence_app_service::AppServiceConfig;
 use fluence_app_service::FaaSConfig;
+use fluence_app_service::ModuleDescriptor;
 
 use interpreter_lib::execution_trace::CallResult;
 use interpreter_lib::execution_trace::ExecutedState;
@@ -208,9 +210,15 @@ fn construct_service_config(module_name: impl Into<String>) -> AppServiceConfig 
     let module_name = module_name.into();
     let module_path = format!("./tests/security_tetraplets/{}/target/wasm32-wasi/debug/", module_name);
 
+    let module_descriptor = ModuleDescriptor {
+        file_name: module_name.clone() + ".wasm",
+        import_name: module_name,
+        ..<_>::default()
+    };
+
     let faas_config = FaaSConfig {
         modules_dir: Some(PathBuf::from(module_path)),
-        modules_config: vec![(module_name, <_>::default())],
+        modules_config: vec![module_descriptor],
         default_modules_config: None,
     };
 
@@ -304,3 +312,4 @@ fn tetraplet_with_wasm_modules() {
 
     assert_eq!(actual_trace[1], expected_state)
 }
+ */
