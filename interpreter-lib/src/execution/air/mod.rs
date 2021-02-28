@@ -53,8 +53,8 @@ macro_rules! execute {
     };
 }
 
-/// Executes match/mismatch instructions and updates last error if error wasn't
-/// MatchWithoutXorError or MismatchWithoutXorError types.
+/// Executes match/mismatch instructions and updates last error if error type wasn't
+/// MatchWithoutXorError or MismatchWithoutXorError.
 macro_rules! execute_match_mismatch {
     ($self:expr, $instr:expr, $exec_ctx:ident, $trace_ctx:ident) => {
         match $instr.execute($exec_ctx, $trace_ctx) {
