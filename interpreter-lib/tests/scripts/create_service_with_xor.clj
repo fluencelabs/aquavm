@@ -13,7 +13,7 @@
     (call "{0}" ("dist" "add_blueprint") [blueprint] blueprint_id)
     (seq
      (call "{0}" ("srv" "create") [blueprint_id] service_id)
-     (call "{1}" ("failiable_call_service" "") [service_id] client_result)
+     (call "{1}" ("fallible_call_service" "") [service_id] client_result)
      )
     )
    )

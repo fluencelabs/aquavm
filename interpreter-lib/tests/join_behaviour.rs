@@ -19,14 +19,10 @@ use aqua_test_utils::create_aqua_vm;
 use aqua_test_utils::set_variables_call_service;
 use aqua_test_utils::unit_call_service;
 
-use interpreter_lib::execution_trace::ExecutionTrace;
-
 use serde_json::json;
 
 #[test]
 fn non_wait_on_json_path() {
-    use log::LevelFilter::Info;
-
     let status = json!({
         "err_msg": "",
         "is_authenticated": 1,
