@@ -10,4 +10,4 @@ name = "aqua_test_module"
 path = "src/main.rs"
 
 [dependencies]
-fluence = { path = "/Users/mike/dev/work/fluence/wasm/rust-sdk", features = ["logger"] }
+fluence = { version = "0.4.2", features = ["logger"] }

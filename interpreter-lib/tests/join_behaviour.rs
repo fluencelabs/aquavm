@@ -23,22 +23,11 @@ use serde_json::json;
 
 #[test]
 fn non_wait_on_json_path() {
-    use log::LevelFilter::Info;
-
     let status = json!({
         "err_msg": "",
         "is_authenticated": 1,
         "ret_code": 0,
     });
-
-    env_logger::builder()
-        .filter(Some("cranelift_codegen"), Info)
-        .filter(Some("wasmer_wasi"), Info)
-        .filter(Some("wasmer_interface_types_fl"), Info)
-        // the same for rustyline and fce
-        .filter(Some("rustyline"), Info)
-        .filter(Some("fce"), Info)
-        .build();
 
     let msg = String::from(r#""some message""#);
 

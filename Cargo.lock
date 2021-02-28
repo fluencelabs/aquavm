@@ -45,7 +45,7 @@ checksum = "afddf7f520a80dbf76e6f50a35bca42a2331ef227a28b3b6dc5c2e2338d114b1"
 name = "aqua-interpreter-interface"
 version = "0.3.1"
 dependencies = [
- "fluence 0.4.1",
+ "fluence 0.4.2",
  "fluence-it-types",
  "serde",
 ]
@@ -65,7 +65,7 @@ dependencies = [
 name = "aqua-test-module"
 version = "0.1.0"
 dependencies = [
- "fluence 0.4.1",
+ "fluence 0.4.2",
 ]
 
 [[package]]
@@ -73,7 +73,7 @@ name = "aqua-test-utils"
 version = "0.1.0"
 dependencies = [
  "aquamarine-vm",
- "fluence 0.4.1",
+ "fluence 0.4.2",
  "serde_json",
 ]
 
@@ -81,7 +81,7 @@ dependencies = [
 name = "aquamarine"
 version = "0.7.0"
 dependencies = [
- "fluence 0.4.1",
+ "fluence 0.4.2",
  "interpreter-lib",
  "log",
  "serde",
@@ -91,9 +91,9 @@ dependencies = [
 
 [[package]]
 name = "aquamarine-vm"
-version = "0.5.1"
+version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0ac06fe10c7eeffd67498a57e6ddd5388f03b872daaf419994d391eddad9b2f3"
+checksum = "93ba3f6550b35f2b8aca0abb9de64744c0d50a8bc58ed14509e8456a74a2efa8"
 dependencies = [
  "aqua-interpreter-interface 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "fluence-faas",
@@ -735,17 +735,19 @@ dependencies = [
 
 [[package]]
 name = "fluence"
-version = "0.4.1"
+version = "0.4.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "31068fe4873478f9c59f01230dc6f23d504d8c11a36d6b6c51693b20c6d2570e"
 dependencies = [
- "fluence-sdk-macro 0.4.1",
- "fluence-sdk-main 0.4.1",
+ "fluence-sdk-macro 0.4.2",
+ "fluence-sdk-main 0.4.2",
 ]
 
 [[package]]
 name = "fluence-app-service"
-version = "0.5.1"
+version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "43ba4cecb2d71d0a72ee84f192ba3aa98dbe487fc152a3053824d270f31e1f7e"
+checksum = "f64788737ce00700efe6a1e45f7462d3bdba6765891d76b81c806f250f8062f0"
 dependencies = [
  "fluence-faas",
  "log",
@@ -759,14 +761,14 @@ dependencies = [
 
 [[package]]
 name = "fluence-faas"
-version = "0.5.1"
+version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e578cc7dbf8a05c2c870120de57c51130f0934933aad388bd7c9fd2c45736e66"
+checksum = "00434a1581cfdb781b889f1c11e2b8b6ad160a717021e62054be2e9796c1d13d"
 dependencies = [
  "cmd_lib",
  "fce",
  "fce-utils",
- "fluence-sdk-main 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fluence-sdk-main 0.4.2",
  "itertools 0.9.0",
  "log",
  "safe-transmute",
@@ -804,18 +806,11 @@ dependencies = [
 
 [[package]]
 name = "fluence-sdk-macro"
-version = "0.4.1"
-dependencies = [
- "fluence-sdk-wit 0.4.1",
-]
-
-[[package]]
-name = "fluence-sdk-macro"
-version = "0.4.1"
+version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c4641a1f147cd6da67751659d138b16270cfe26f6d00fd54c8a85f1457858bbf"
+checksum = "76ce80dc2d7c3db828fb31b95e75c372fde7a9a25dfa2b0d9beac07379b890a6"
 dependencies = [
- "fluence-sdk-wit 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fluence-sdk-wit 0.4.2",
 ]
 
 [[package]]
@@ -831,20 +826,11 @@ dependencies = [
 
 [[package]]
 name = "fluence-sdk-main"
-version = "0.4.1"
-dependencies = [
- "fluence-sdk-macro 0.4.1",
- "log",
- "serde",
-]
-
-[[package]]
-name = "fluence-sdk-main"
-version = "0.4.1"
+version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "46de4e8034687aa9921bd229d24a9261ff5c039ca4b9299a73ba14be85697419"
+checksum = "29cce53288e08ed86ebe36c64d8eb641a95e1d0f7f75da969b29e16ab0d7d406"
 dependencies = [
- "fluence-sdk-macro 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fluence-sdk-macro 0.4.2",
  "log",
  "serde",
 ]
@@ -865,21 +851,9 @@ dependencies = [
 
 [[package]]
 name = "fluence-sdk-wit"
-version = "0.4.1"
-dependencies = [
- "proc-macro2",
- "quote",
- "serde",
- "serde_json",
- "syn",
- "uuid",
-]
-
-[[package]]
-name = "fluence-sdk-wit"
-version = "0.4.1"
+version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7328e54bb603aaec05f0c4b25abca6969d898d112afb415ff66d493baabcbdcd"
+checksum = "56d835812bab8fb6f261b9e37355b9bf0a28a16123580145ce0fe44ef4363144"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1071,7 +1045,7 @@ dependencies = [
  "criterion",
  "csv",
  "env_logger",
- "fluence 0.4.1",
+ "fluence 0.4.2",
  "fluence-app-service",
  "jsonpath_lib-fl",
  "log",
@@ -1487,7 +1461,7 @@ dependencies = [
 name = "polyplets"
 version = "0.1.0"
 dependencies = [
- "fluence 0.4.1",
+ "fluence 0.4.2",
  "serde",
 ]
 

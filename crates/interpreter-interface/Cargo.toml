@@ -12,7 +12,7 @@ path = "src/lib.rs"
 
 [dependencies]
 #fluence = "0.4.1"
-fluence = { path = "/Users/mike/dev/work/fluence/wasm/rust-sdk", features = ["logger"] }
+fluence = { version = "0.4.2", features = ["logger"] }
 fluence-it-types = "0.1.0"
 
 serde = "=1.0.118"

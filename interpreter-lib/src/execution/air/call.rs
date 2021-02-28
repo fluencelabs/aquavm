@@ -80,7 +80,7 @@ fn set_last_error<'i>(
 
 macro_rules! log_join {
     ($($args:tt)*) => {
-        log::trace!(target: crate::log_targets::JOIN_BEHAVIOUR, $($args)*)
+        log::info!(target: crate::log_targets::JOIN_BEHAVIOUR, $($args)*)
     }
 }
 
