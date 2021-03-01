@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-/*
 use aqua_test_utils::call_vm;
 use aqua_test_utils::create_aqua_vm;
 use aqua_test_utils::CallServiceClosure;
@@ -312,4 +311,3 @@ fn tetraplet_with_wasm_modules() {
 
     assert_eq!(actual_trace[1], expected_state)
 }
- */
