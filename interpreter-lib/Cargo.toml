@@ -10,7 +10,6 @@ path = "src/lib.rs"
 
 [dependencies]
 air-parser = { path = "../crates/air-parser" }
-#fluence = { version = "0.4.2", features = ["logger"] }
 fluence = { version = "0.4.2", features = ["logger"] }
 polyplets = { path = "../crates/polyplets" }
 aqua-interpreter-interface = { path = "../crates/interpreter-interface" }
