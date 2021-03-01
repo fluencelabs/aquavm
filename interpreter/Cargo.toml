@@ -16,7 +16,7 @@ path = "src/fce.rs"
 [dependencies]
 interpreter-lib = { path = "../interpreter-lib" }
 
-fluence = { version = "0.2.18", features = ["logger"] }
+fluence = { version = "0.4.2", features = ["logger"] }
 
 # Keep 0.2.65 until this is resolved https://github.com/rustwasm/wasm-pack/issues/886
 wasm-bindgen = "=0.2.65"

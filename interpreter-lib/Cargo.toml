@@ -10,7 +10,7 @@ path = "src/lib.rs"
 
 [dependencies]
 air-parser = { path = "../crates/air-parser" }
-fluence = { version = "0.2.18", features = ["logger"] }
+fluence = { version = "0.4.2", features = ["logger"] }
 polyplets = { path = "../crates/polyplets" }
 aqua-interpreter-interface = { path = "../crates/interpreter-interface" }
 
@@ -28,7 +28,7 @@ wasm-bindgen = "=0.2.65"
 
 [dev_dependencies]
 aqua-test-utils = { path = "../crates/test-utils" }
-fluence-app-service = "0.1.29"
+fluence-app-service = "0.5.1"
 
 criterion = "0.3.3"
 csv = "1.1.5"

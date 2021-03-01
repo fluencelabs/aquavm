@@ -32,11 +32,6 @@ mod logger;
 use fluence::fce;
 use interpreter_lib::execute_aqua;
 use interpreter_lib::InterpreterOutcome;
-use logger::DEFAULT_LOG_LEVEL;
-
-use log::Level as LogLevel;
-
-const WASM_LOG_ENV_NAME: &str = "WASM_LOG";
 
 pub fn main() {
     logger::init_logger();
@@ -44,22 +39,10 @@ pub fn main() {
 
 #[fce]
 pub fn invoke(init_peer_id: String, aqua: String, prev_data: Vec<u8>, data: Vec<u8>) -> InterpreterOutcome {
-    let log_level = get_log_level();
-    log::set_max_level(log_level.to_level_filter());
-
     execute_aqua(init_peer_id, aqua, prev_data, data)
 }
 
 #[fce]
 pub fn ast(script: String) -> String {
     ast::ast(script)
-}
-
-fn get_log_level() -> LogLevel {
-    use std::str::FromStr;
-
-    match std::env::var(WASM_LOG_ENV_NAME) {
-        Ok(log_level_str) => LogLevel::from_str(&log_level_str).unwrap_or(DEFAULT_LOG_LEVEL),
-        Err(_) => DEFAULT_LOG_LEVEL,
-    }
 }

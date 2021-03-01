@@ -10,6 +10,6 @@ path = "src/main.rs"
 
 [dependencies]
 interpreter-lib = { path = "../../../../interpreter-lib" }
-fluence = { version = "0.2.18", features = ["logger"] }
+fluence = { version = "0.4.2", features = ["logger"] }
 
 [workspace]
