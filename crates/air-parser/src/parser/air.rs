@@ -1,5 +1,5 @@
-// auto-generated: "lalrpop 0.19.1"
-// sha256: 398273c66ddd518ce5f42ace9c37bc569614e0e19f8eb9a5c85b7385c932
+// auto-generated: "lalrpop 0.19.5"
+// sha3: 13a01be9e7bfafe105fe6361390cdd12c867e4697238a32a5ba72af895616ee
 use crate::parser::ast::*;
 use crate::parser::air_parser::into_variable_and_path;
 use crate::parser::air_parser::make_flattened_error;
@@ -12,6 +12,8 @@ use std::rc::Rc;
 extern crate lalrpop_util as __lalrpop_util;
 #[allow(unused_imports)]
 use self::__lalrpop_util::state_machine as __state_machine;
+extern crate core;
+extern crate alloc;
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
 mod __parse__AIR {
@@ -29,9 +31,11 @@ mod __parse__AIR {
     extern crate lalrpop_util as __lalrpop_util;
     #[allow(unused_imports)]
     use self::__lalrpop_util::state_machine as __state_machine;
+    extern crate core;
+    extern crate alloc;
     use super::__ToTriple;
     #[allow(dead_code)]
-    pub enum __Symbol<'input>
+    pub(crate) enum __Symbol<'input>
      {
         Variant0(Token<'input>),
         Variant1(&'input str),
@@ -40,7 +44,7 @@ mod __parse__AIR {
         Variant4(Number),
         Variant5(__lalrpop_util::ErrorRecovery<usize, Token<'input>, LexerError>),
         Variant6(CallInstrArgValue<'input>),
-        Variant7(::std::vec::Vec<CallInstrArgValue<'input>>),
+        Variant7(alloc::vec::Vec<CallInstrArgValue<'input>>),
         Variant8(usize),
         Variant9(Box<Instruction<'input>>),
         Variant10(Vec<CallInstrArgValue<'input>>),
@@ -49,7 +53,7 @@ mod __parse__AIR {
         Variant13(IterableValue<'input>),
         Variant14(MatchableValue<'input>),
         Variant15(CallOutputValue<'input>),
-        Variant16(::std::option::Option<CallOutputValue<'input>>),
+        Variant16(core::option::Option<CallOutputValue<'input>>),
         Variant17(PeerPart<'input>),
     }
     const __ACTION: &[i8] = &[
@@ -439,7 +443,7 @@ mod __parse__AIR {
             _ => 0,
         }
     }
-    fn __expected_tokens(__state: i8) -> Vec<::std::string::String> {
+    fn __expected_tokens(__state: i8) -> alloc::vec::Vec<alloc::string::String> {
         const __TERMINAL: &[&str] = &[
             r###""(""###,
             r###"")""###,
@@ -468,16 +472,16 @@ mod __parse__AIR {
             if next_state == 0 {
                 None
             } else {
-                Some(terminal.to_string())
+                Some(alloc::string::ToString::to_string(terminal))
             }
         }).collect()
     }
-    pub struct __StateMachine<'err, 'input>
+    pub(crate) struct __StateMachine<'err, 'input>
     where 'input: 'err
     {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
-        __phantom: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __phantom: core::marker::PhantomData<(&'err (), &'input ())>,
     }
     impl<'err, 'input> __state_machine::ParserDefinition for __StateMachine<'err, 'input>
     where 'input: 'err
@@ -505,7 +509,7 @@ mod __parse__AIR {
 
         #[inline]
         fn token_to_index(&self, token: &Self::Token) -> Option<usize> {
-            __token_to_integer(token, ::std::marker::PhantomData::<(&(), &())>)
+            __token_to_integer(token, core::marker::PhantomData::<(&(), &())>)
         }
 
         #[inline]
@@ -529,10 +533,10 @@ mod __parse__AIR {
         }
 
         fn token_to_symbol(&self, token_index: usize, token: Self::Token) -> Self::Symbol {
-            __token_to_symbol(token_index, token, ::std::marker::PhantomData::<(&(), &())>)
+            __token_to_symbol(token_index, token, core::marker::PhantomData::<(&(), &())>)
         }
 
-        fn expected_tokens(&self, state: i8) -> Vec<String> {
+        fn expected_tokens(&self, state: i8) -> alloc::vec::Vec<alloc::string::String> {
             __expected_tokens(state)
         }
 
@@ -553,8 +557,8 @@ mod __parse__AIR {
             &mut self,
             action: i8,
             start_location: Option<&Self::Location>,
-            states: &mut Vec<i8>,
-            symbols: &mut Vec<__state_machine::SymbolTriple<Self>>,
+            states: &mut alloc::vec::Vec<i8>,
+            symbols: &mut alloc::vec::Vec<__state_machine::SymbolTriple<Self>>,
         ) -> Option<__state_machine::ParseResult<Self>> {
             __reduce(
                 self.input,
@@ -563,12 +567,12 @@ mod __parse__AIR {
                 start_location,
                 states,
                 symbols,
-                ::std::marker::PhantomData::<(&(), &())>,
+                core::marker::PhantomData::<(&(), &())>,
             )
         }
 
         fn simulate_reduce(&self, action: i8) -> __state_machine::SimulatedReduce<Self> {
-            __simulate_reduce(action, ::std::marker::PhantomData::<(&(), &())>)
+            __simulate_reduce(action, core::marker::PhantomData::<(&(), &())>)
         }
     }
     fn __token_to_integer<
@@ -576,7 +580,7 @@ mod __parse__AIR {
         'input,
     >(
         __token: &Token<'input>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> Option<usize>
     {
         match *__token {
@@ -610,7 +614,7 @@ mod __parse__AIR {
     >(
         __token_index: usize,
         __token: Token<'input>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> __Symbol<'input>
     {
         match __token_index {
@@ -639,7 +643,7 @@ mod __parse__AIR {
         'input,
     >(
         __reduce_index: i8,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> __state_machine::SimulatedReduce<__StateMachine<'err, 'input>>
     where
         'input: 'err,
@@ -943,7 +947,6 @@ mod __parse__AIR {
             _ => panic!("invalid reduction index {}", __reduce_index)
         }
     }
-    #[derive(Clone)]
     pub struct AIRParser {
         _priv: (),
     }
@@ -974,7 +977,7 @@ mod __parse__AIR {
                 __StateMachine {
                     input,
                     errors,
-                    __phantom: ::std::marker::PhantomData::<(&(), &())>,
+                    __phantom: core::marker::PhantomData::<(&(), &())>,
                 },
                 __tokens,
             )
@@ -989,7 +992,7 @@ mod __parse__AIR {
         __error_state: i8,
         __states: & [i8],
         __opt_integer: Option<usize>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> bool
     {
         let mut __states = __states.to_vec();
@@ -1003,7 +1006,7 @@ mod __parse__AIR {
             };
             if __action == 0 { return false; }
             if __action > 0 { return true; }
-            let (__to_pop, __nt) = match __simulate_reduce(-(__action + 1), ::std::marker::PhantomData::<(&(), &())>) {
+            let (__to_pop, __nt) = match __simulate_reduce(-(__action + 1), core::marker::PhantomData::<(&(), &())>) {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop, nonterminal_produced
                 } => (states_to_pop, nonterminal_produced),
@@ -1024,158 +1027,158 @@ mod __parse__AIR {
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __action: i8,
         __lookahead_start: Option<&usize>,
-        __states: &mut ::std::vec::Vec<i8>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __states: &mut alloc::vec::Vec<i8>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> Option<Result<Box<Instruction<'input>>,__lalrpop_util::ParseError<usize, Token<'input>, LexerError>>>
     {
         let (__pop_states, __nonterminal) = match __action {
             0 => {
-                __reduce0(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce0(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             1 => {
-                __reduce1(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce1(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             2 => {
-                __reduce2(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce2(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             3 => {
-                __reduce3(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce3(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             4 => {
-                __reduce4(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce4(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             5 => {
-                __reduce5(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce5(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             6 => {
-                __reduce6(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce6(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             7 => {
-                __reduce7(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce7(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             8 => {
-                __reduce8(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce8(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             9 => {
-                __reduce9(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce9(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             10 => {
-                __reduce10(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce10(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             11 => {
-                __reduce11(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce11(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             12 => {
-                __reduce12(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce12(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             13 => {
-                __reduce13(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce13(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             14 => {
-                __reduce14(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce14(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             15 => {
-                __reduce15(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce15(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             16 => {
-                __reduce16(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce16(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             17 => {
-                __reduce17(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce17(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             18 => {
-                __reduce18(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce18(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             19 => {
-                __reduce19(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce19(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             20 => {
-                __reduce20(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce20(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             21 => {
-                __reduce21(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce21(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             22 => {
-                __reduce22(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce22(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             23 => {
-                __reduce23(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce23(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             24 => {
-                __reduce24(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce24(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             25 => {
-                __reduce25(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce25(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             26 => {
-                __reduce26(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce26(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             27 => {
-                __reduce27(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce27(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             28 => {
-                __reduce28(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce28(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             29 => {
-                __reduce29(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce29(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             30 => {
-                __reduce30(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce30(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             31 => {
-                __reduce31(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce31(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             32 => {
-                __reduce32(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce32(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             33 => {
-                __reduce33(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce33(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             34 => {
-                __reduce34(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce34(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             35 => {
-                __reduce35(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce35(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             36 => {
-                __reduce36(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce36(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             37 => {
-                __reduce37(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce37(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             38 => {
-                __reduce38(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce38(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             39 => {
-                __reduce39(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce39(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             40 => {
-                __reduce40(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce40(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             41 => {
-                __reduce41(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce41(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             42 => {
-                __reduce42(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce42(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             43 => {
-                __reduce43(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce43(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             44 => {
-                __reduce44(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce44(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             45 => {
-                __reduce45(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce45(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             46 => {
-                __reduce46(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce46(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             47 => {
-                __reduce47(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce47(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             48 => {
-                __reduce48(input, errors, __lookahead_start, __symbols, ::std::marker::PhantomData::<(&(), &())>)
+                __reduce48(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             49 => {
                 // __AIR = AIR => ActionFn(0);
@@ -1201,7 +1204,7 @@ mod __parse__AIR {
     fn __pop_Variant3<
       'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
     ) -> (usize, (&'input str, usize, bool), usize)
      {
         match __symbols.pop() {
@@ -1212,7 +1215,7 @@ mod __parse__AIR {
     fn __pop_Variant9<
       'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
     ) -> (usize, Box<Instruction<'input>>, usize)
      {
         match __symbols.pop() {
@@ -1223,7 +1226,7 @@ mod __parse__AIR {
     fn __pop_Variant6<
       'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
     ) -> (usize, CallInstrArgValue<'input>, usize)
      {
         match __symbols.pop() {
@@ -1234,7 +1237,7 @@ mod __parse__AIR {
     fn __pop_Variant11<
       'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
     ) -> (usize, CallInstrValue<'input>, usize)
      {
         match __symbols.pop() {
@@ -1245,7 +1248,7 @@ mod __parse__AIR {
     fn __pop_Variant15<
       'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
     ) -> (usize, CallOutputValue<'input>, usize)
      {
         match __symbols.pop() {
@@ -1256,7 +1259,7 @@ mod __parse__AIR {
     fn __pop_Variant12<
       'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
     ) -> (usize, FunctionPart<'input>, usize)
      {
         match __symbols.pop() {
@@ -1267,7 +1270,7 @@ mod __parse__AIR {
     fn __pop_Variant13<
       'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
     ) -> (usize, IterableValue<'input>, usize)
      {
         match __symbols.pop() {
@@ -1278,7 +1281,7 @@ mod __parse__AIR {
     fn __pop_Variant14<
       'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
     ) -> (usize, MatchableValue<'input>, usize)
      {
         match __symbols.pop() {
@@ -1289,7 +1292,7 @@ mod __parse__AIR {
     fn __pop_Variant4<
       'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
     ) -> (usize, Number, usize)
      {
         match __symbols.pop() {
@@ -1300,7 +1303,7 @@ mod __parse__AIR {
     fn __pop_Variant17<
       'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
     ) -> (usize, PeerPart<'input>, usize)
      {
         match __symbols.pop() {
@@ -1311,7 +1314,7 @@ mod __parse__AIR {
     fn __pop_Variant0<
       'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
     ) -> (usize, Token<'input>, usize)
      {
         match __symbols.pop() {
@@ -1322,7 +1325,7 @@ mod __parse__AIR {
     fn __pop_Variant10<
       'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
     ) -> (usize, Vec<CallInstrArgValue<'input>>, usize)
      {
         match __symbols.pop() {
@@ -1333,7 +1336,7 @@ mod __parse__AIR {
     fn __pop_Variant5<
       'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
     ) -> (usize, __lalrpop_util::ErrorRecovery<usize, Token<'input>, LexerError>, usize)
      {
         match __symbols.pop() {
@@ -1341,10 +1344,21 @@ mod __parse__AIR {
             _ => __symbol_type_mismatch()
         }
     }
+    fn __pop_Variant7<
+      'input,
+    >(
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
+    ) -> (usize, alloc::vec::Vec<CallInstrArgValue<'input>>, usize)
+     {
+        match __symbols.pop() {
+            Some((__l, __Symbol::Variant7(__v), __r)) => (__l, __v, __r),
+            _ => __symbol_type_mismatch()
+        }
+    }
     fn __pop_Variant2<
       'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
     ) -> (usize, bool, usize)
      {
         match __symbols.pop() {
@@ -1352,10 +1366,21 @@ mod __parse__AIR {
             _ => __symbol_type_mismatch()
         }
     }
+    fn __pop_Variant16<
+      'input,
+    >(
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
+    ) -> (usize, core::option::Option<CallOutputValue<'input>>, usize)
+     {
+        match __symbols.pop() {
+            Some((__l, __Symbol::Variant16(__v), __r)) => (__l, __v, __r),
+            _ => __symbol_type_mismatch()
+        }
+    }
     fn __pop_Variant8<
       'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
     ) -> (usize, usize, usize)
      {
         match __symbols.pop() {
@@ -1363,32 +1388,10 @@ mod __parse__AIR {
             _ => __symbol_type_mismatch()
         }
     }
-    fn __pop_Variant16<
-      'input,
-    >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, ::std::option::Option<CallOutputValue<'input>>, usize)
-     {
-        match __symbols.pop() {
-            Some((__l, __Symbol::Variant16(__v), __r)) => (__l, __v, __r),
-            _ => __symbol_type_mismatch()
-        }
-    }
-    fn __pop_Variant7<
-      'input,
-    >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, ::std::vec::Vec<CallInstrArgValue<'input>>, usize)
-     {
-        match __symbols.pop() {
-            Some((__l, __Symbol::Variant7(__v), __r)) => (__l, __v, __r),
-            _ => __symbol_type_mismatch()
-        }
-    }
     fn __pop_Variant1<
       'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
     ) -> (usize, &'input str, usize)
      {
         match __symbols.pop() {
@@ -1403,8 +1406,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // (<Arg>) = Arg => ActionFn(43);
@@ -1422,8 +1425,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // (<Arg>)* =  => ActionFn(41);
@@ -1440,8 +1443,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // (<Arg>)* = (<Arg>)+ => ActionFn(42);
@@ -1459,8 +1462,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // (<Arg>)+ = Arg => ActionFn(48);
@@ -1478,8 +1481,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // (<Arg>)+ = (<Arg>)+, Arg => ActionFn(49);
@@ -1499,8 +1502,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // @L =  => ActionFn(40);
@@ -1517,8 +1520,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // @R =  => ActionFn(39);
@@ -1535,8 +1538,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // AIR = Instr => ActionFn(1);
@@ -1554,8 +1557,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // Arg = CallInstrArgValue => ActionFn(26);
@@ -1573,8 +1576,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // Args = "[", "]" => ActionFn(50);
@@ -1594,8 +1597,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // Args = "[", (<Arg>)+, "]" => ActionFn(51);
@@ -1616,8 +1619,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // CallInstrArgValue = Literal => ActionFn(27);
@@ -1635,8 +1638,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // CallInstrArgValue = Alphanumeric => ActionFn(28);
@@ -1654,8 +1657,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // CallInstrArgValue = JsonPath => ActionFn(29);
@@ -1673,8 +1676,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // CallInstrArgValue = Number => ActionFn(30);
@@ -1692,8 +1695,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // CallInstrArgValue = Boolean => ActionFn(31);
@@ -1711,8 +1714,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // CallInstrArgValue = InitPeerId => ActionFn(32);
@@ -1730,8 +1733,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // CallInstrArgValue = LastError => ActionFn(33);
@@ -1749,8 +1752,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // CallInstrValue = Literal => ActionFn(22);
@@ -1768,8 +1771,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // CallInstrValue = Alphanumeric => ActionFn(23);
@@ -1787,8 +1790,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // CallInstrValue = JsonPath => ActionFn(53);
@@ -1806,8 +1809,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // CallInstrValue = InitPeerId => ActionFn(25);
@@ -1825,8 +1828,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // FPart = Function => ActionFn(13);
@@ -1844,8 +1847,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // FPart = "(", ServiceId, Function, ")" => ActionFn(14);
@@ -1867,8 +1870,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // Function = CallInstrValue => ActionFn(19);
@@ -1886,8 +1889,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // Instr = "(", call, PeerPart, FPart, Args, Output, ")" => ActionFn(54);
@@ -1912,8 +1915,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // Instr = "(", call, PeerPart, FPart, Args, ")" => ActionFn(55);
@@ -1937,8 +1940,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // Instr = "(", seq, Instr, Instr, ")" => ActionFn(3);
@@ -1961,8 +1964,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // Instr = "(", par, Instr, Instr, ")" => ActionFn(4);
@@ -1985,8 +1988,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // Instr = "(", null, ")" => ActionFn(5);
@@ -2007,8 +2010,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // Instr = "(", fold, Iterable, Alphanumeric, Instr, ")" => ActionFn(6);
@@ -2032,8 +2035,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // Instr = "(", next, Alphanumeric, ")" => ActionFn(7);
@@ -2055,8 +2058,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // Instr = "(", xor, Instr, Instr, ")" => ActionFn(8);
@@ -2079,8 +2082,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // Instr = "(", match_, Matchable, Matchable, Instr, ")" => ActionFn(9);
@@ -2104,8 +2107,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // Instr = "(", mismatch, Matchable, Matchable, Instr, ")" => ActionFn(10);
@@ -2129,8 +2132,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // Instr = error => ActionFn(11);
@@ -2148,8 +2151,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // Iterable = Alphanumeric => ActionFn(34);
@@ -2167,8 +2170,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // Iterable = JsonPath => ActionFn(35);
@@ -2186,8 +2189,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // Matchable = Alphanumeric => ActionFn(36);
@@ -2205,8 +2208,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // Matchable = Literal => ActionFn(37);
@@ -2224,8 +2227,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // Matchable = JsonPath => ActionFn(38);
@@ -2243,8 +2246,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // Output = Alphanumeric => ActionFn(17);
@@ -2262,8 +2265,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // Output = Accumulator => ActionFn(18);
@@ -2281,8 +2284,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // Output? = Output => ActionFn(44);
@@ -2300,8 +2303,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // Output? =  => ActionFn(45);
@@ -2318,8 +2321,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // PeerId = CallInstrValue => ActionFn(20);
@@ -2337,8 +2340,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // PeerPart = PeerId => ActionFn(15);
@@ -2356,8 +2359,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // PeerPart = "(", PeerId, ServiceId, ")" => ActionFn(16);
@@ -2379,8 +2382,8 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<(&'err (), &'input ())>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
         // ServiceId = CallInstrValue => ActionFn(21);
@@ -2432,7 +2435,7 @@ fn __action2<
     (_, p, _): (usize, PeerPart<'input>, usize),
     (_, f, _): (usize, FunctionPart<'input>, usize),
     (_, args, _): (usize, Vec<CallInstrArgValue<'input>>, usize),
-    (_, output, _): (usize, ::std::option::Option<CallOutputValue<'input>>, usize),
+    (_, output, _): (usize, core::option::Option<CallOutputValue<'input>>, usize),
     (_, _, _): (usize, Token<'input>, usize),
 ) -> Box<Instruction<'input>>
 {
@@ -2609,7 +2612,7 @@ fn __action12<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     (_, _, _): (usize, Token<'input>, usize),
-    (_, args, _): (usize, ::std::vec::Vec<CallInstrArgValue<'input>>, usize),
+    (_, args, _): (usize, alloc::vec::Vec<CallInstrArgValue<'input>>, usize),
     (_, _, _): (usize, Token<'input>, usize),
 ) -> Vec<CallInstrArgValue<'input>>
 {
@@ -3019,9 +3022,9 @@ fn __action41<
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     __lookbehind: &usize,
     __lookahead: &usize,
-) -> ::std::vec::Vec<CallInstrArgValue<'input>>
+) -> alloc::vec::Vec<CallInstrArgValue<'input>>
 {
-    vec![]
+    alloc::vec![]
 }
 
 #[allow(unused_variables)]
@@ -3031,8 +3034,8 @@ fn __action42<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
-    (_, v, _): (usize, ::std::vec::Vec<CallInstrArgValue<'input>>, usize),
-) -> ::std::vec::Vec<CallInstrArgValue<'input>>
+    (_, v, _): (usize, alloc::vec::Vec<CallInstrArgValue<'input>>, usize),
+) -> alloc::vec::Vec<CallInstrArgValue<'input>>
 {
     v
 }
@@ -3058,7 +3061,7 @@ fn __action44<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     (_, __0, _): (usize, CallOutputValue<'input>, usize),
-) -> ::std::option::Option<CallOutputValue<'input>>
+) -> core::option::Option<CallOutputValue<'input>>
 {
     Some(__0)
 }
@@ -3072,7 +3075,7 @@ fn __action45<
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     __lookbehind: &usize,
     __lookahead: &usize,
-) -> ::std::option::Option<CallOutputValue<'input>>
+) -> core::option::Option<CallOutputValue<'input>>
 {
     None
 }
@@ -3085,9 +3088,9 @@ fn __action46<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     (_, __0, _): (usize, CallInstrArgValue<'input>, usize),
-) -> ::std::vec::Vec<CallInstrArgValue<'input>>
+) -> alloc::vec::Vec<CallInstrArgValue<'input>>
 {
-    vec![__0]
+    alloc::vec![__0]
 }
 
 #[allow(unused_variables)]
@@ -3097,9 +3100,9 @@ fn __action47<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
-    (_, v, _): (usize, ::std::vec::Vec<CallInstrArgValue<'input>>, usize),
+    (_, v, _): (usize, alloc::vec::Vec<CallInstrArgValue<'input>>, usize),
     (_, e, _): (usize, CallInstrArgValue<'input>, usize),
-) -> ::std::vec::Vec<CallInstrArgValue<'input>>
+) -> alloc::vec::Vec<CallInstrArgValue<'input>>
 {
     { let mut v = v; v.push(e); v }
 }
@@ -3112,7 +3115,7 @@ fn __action48<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     __0: (usize, CallInstrArgValue<'input>, usize),
-) -> ::std::vec::Vec<CallInstrArgValue<'input>>
+) -> alloc::vec::Vec<CallInstrArgValue<'input>>
 {
     let __start0 = __0.0.clone();
     let __end0 = __0.2.clone();
@@ -3136,9 +3139,9 @@ fn __action49<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
-    __0: (usize, ::std::vec::Vec<CallInstrArgValue<'input>>, usize),
+    __0: (usize, alloc::vec::Vec<CallInstrArgValue<'input>>, usize),
     __1: (usize, CallInstrArgValue<'input>, usize),
-) -> ::std::vec::Vec<CallInstrArgValue<'input>>
+) -> alloc::vec::Vec<CallInstrArgValue<'input>>
 {
     let __start0 = __1.0.clone();
     let __end0 = __1.2.clone();
@@ -3193,7 +3196,7 @@ fn __action51<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     __0: (usize, Token<'input>, usize),
-    __1: (usize, ::std::vec::Vec<CallInstrArgValue<'input>>, usize),
+    __1: (usize, alloc::vec::Vec<CallInstrArgValue<'input>>, usize),
     __2: (usize, Token<'input>, usize),
 ) -> Vec<CallInstrArgValue<'input>>
 {
