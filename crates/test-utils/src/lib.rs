@@ -34,8 +34,10 @@ pub use aquamarine_vm::AquamarineVMError;
 pub use aquamarine_vm::CallServiceClosure;
 pub use aquamarine_vm::IType;
 pub use aquamarine_vm::IValue;
+pub use aquamarine_vm::InterpreterOutcome;
 pub use aquamarine_vm::ParticleParameters;
-pub use aquamarine_vm::StepperOutcome;
+
+pub use interpreter_lib::execution_trace::ExecutionTrace;
 
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -79,13 +81,10 @@ pub fn echo_string_call_service() -> CallServiceClosure {
         };
 
         let arg: Vec<String> = serde_json::from_str(arg).unwrap();
+        let arg = serde_json::to_string(&arg[0]).unwrap();
 
         Some(IValue::Record(
-            NEVec::new(vec![
-                IValue::S32(0),
-                IValue::String(format!("\"{}\"", arg[0])),
-            ])
-            .unwrap(),
+            NEVec::new(vec![IValue::S32(0), IValue::String(arg)]).unwrap(),
         ))
     })
 }
@@ -138,6 +137,33 @@ pub fn set_variables_call_service(ret_mapping: HashMap<String, String>) -> CallS
         Some(IValue::Record(
             NEVec::new(vec![IValue::S32(0), IValue::String(result)]).unwrap(),
         ))
+    })
+}
+
+pub fn fallible_call_service(fallible_service_id: impl Into<String>) -> CallServiceClosure {
+    let fallible_service_id = fallible_service_id.into();
+
+    Box::new(move |_, args| -> Option<IValue> {
+        let builtin_service = match &args[0] {
+            IValue::String(str) => str,
+            _ => unreachable!(),
+        };
+
+        // return a error for service with such id
+        if builtin_service == &fallible_service_id {
+            Some(IValue::Record(
+                NEVec::new(vec![IValue::S32(1), IValue::String(String::from("error"))]).unwrap(),
+            ))
+        } else {
+            // return success for services with other ids
+            Some(IValue::Record(
+                NEVec::new(vec![
+                    IValue::S32(0),
+                    IValue::String(String::from(r#""res""#)),
+                ])
+                .unwrap(),
+            ))
+        }
     })
 }
 

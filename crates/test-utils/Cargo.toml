@@ -1,6 +1,6 @@
 [package]
 name = "aqua-test-utils"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Fluence Labs"]
 edition = "2018"
 license = "Apache-2.0"
@@ -10,8 +10,8 @@ name = "aqua_test_utils"
 path = "src/lib.rs"
 
 [dependencies]
-stepper-lib = { path = "../../stepper-lib/" }
+interpreter-lib = { path = "../../interpreter-lib" }
 
-fluence = { version = "0.2.18", features = ["logger"] }
-aquamarine-vm = { version = "0.1.29", features = ["raw-aquamarine-vm-api"] }
+fluence = { version = "0.4.2", features = ["logger"] }
+aquamarine-vm = { version = "0.5.1", features = ["raw-aquamarine-vm-api"] }
 serde_json = "1.0.56"

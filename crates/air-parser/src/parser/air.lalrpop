@@ -1,7 +1,9 @@
 use crate::parser::ast::*;
-use crate::parser::into_variable_and_path;
+use crate::parser::air_parser::into_variable_and_path;
+use crate::parser::air_parser::make_flattened_error;
 use crate::parser::lexer::LexerError;
 use crate::parser::lexer::Token;
+use crate::parser::lexer::Number;
 
 use lalrpop_util::ErrorRecovery;
 use std::rc::Rc;
@@ -44,7 +46,7 @@ Instr: Box<Instruction<'input>> = {
     ! => { errors.push(<>); Box::new(Instruction::Error) },
 }
 
-Args: Vec<CallArgValue<'input>> = {
+Args: Vec<CallInstrArgValue<'input>> = {
     "[" <args:(<Arg>)*> "]" => args
 }
 
@@ -63,26 +65,47 @@ Output: CallOutputValue<'input> = {
     <a:Accumulator> => CallOutputValue::Accumulator(a),
 };
 
-Function = CallArgValue;
-PeerId = CallArgValue;
-ServiceId = CallArgValue;
-Arg = CallArgValue;
+Function = CallInstrValue;
+PeerId = CallInstrValue;
+ServiceId = CallInstrValue;
 
-CallArgValue: CallArgValue<'input> = {
-    <s:Literal> => CallArgValue::Literal(s),
-    <s:Alphanumeric> => CallArgValue::Variable(s),
-    <v:JsonPath> => {
-        let (variable, path) = into_variable_and_path(v.0, v.1);
-        CallArgValue::JsonPath { variable, path }
+CallInstrValue: CallInstrValue<'input> = {
+    <s:Literal> => CallInstrValue::Literal(s),
+    <s:Alphanumeric> => CallInstrValue::Variable(s),
+    <l: @L> <v:JsonPath> <r: @R> => {
+        let (variable, path) = into_variable_and_path(v.0, v.1, v.2);
+        let should_flatten = v.2;
+        if !should_flatten {
+            let token = Token::JsonPath(v.0, v.1, v.2);
+            errors.push(make_flattened_error(l, token, r));
+        }
+        CallInstrValue::JsonPath { variable, path, should_flatten }
     },
-    InitPeerId => CallArgValue::InitPeerId,
+    InitPeerId => CallInstrValue::InitPeerId,
+}
+
+Arg = CallInstrArgValue;
+
+CallInstrArgValue: CallInstrArgValue<'input> = {
+    <s:Literal> => CallInstrArgValue::Literal(s),
+    <s:Alphanumeric> => CallInstrArgValue::Variable(s),
+    <v:JsonPath> => {
+        let (variable, path) = into_variable_and_path(v.0, v.1, v.2);
+        let should_flatten = v.2;
+        CallInstrArgValue::JsonPath { variable, path, should_flatten }
+    },
+    <n:Number> => CallInstrArgValue::Number(n),
+    <b:Boolean> => CallInstrArgValue::Boolean(b),
+    InitPeerId => CallInstrArgValue::InitPeerId,
+    LastError => CallInstrArgValue::LastError,
 }
 
 Iterable: IterableValue<'input> = {
     <s:Alphanumeric> => IterableValue::Variable(s),
     <v:JsonPath> => {
-        let (variable, path) = into_variable_and_path(v.0, v.1);
-        IterableValue::JsonPath { variable, path }
+        let (variable, path) = into_variable_and_path(v.0, v.1, v.2);
+        let should_flatten = v.2;
+        IterableValue::JsonPath { variable, path, should_flatten }
     },
 }
 
@@ -90,8 +113,9 @@ Matchable: MatchableValue<'input> = {
     <s:Alphanumeric> => MatchableValue::Variable(s),
     <s:Literal> => MatchableValue::Literal(s),
     <v:JsonPath> => {
-        let (variable, path) = into_variable_and_path(v.0, v.1);
-        MatchableValue::JsonPath { variable, path }
+        let (variable, path) = into_variable_and_path(v.0, v.1, v.2);
+        let should_flatten = v.2;
+        MatchableValue::JsonPath { variable, path, should_flatten }
     },
 }
 
@@ -107,10 +131,13 @@ extern {
 
         Alphanumeric => Token::Alphanumeric(<&'input str>),
         Literal => Token::StringLiteral(<&'input str>),
-        JsonPath => Token::JsonPath(<&'input str>, <usize>),
+        JsonPath => Token::JsonPath(<&'input str>, <usize>, <bool>),
         Accumulator => Token::Accumulator(<&'input str>),
+        Number => Token::Number(<Number>),
+        Boolean => Token::Boolean(<bool>),
 
         InitPeerId => Token::InitPeerId,
+        LastError => Token::LastError,
 
         call => Token::Call,
         seq => Token::Seq,

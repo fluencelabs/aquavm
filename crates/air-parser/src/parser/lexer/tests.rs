@@ -17,6 +17,7 @@
 use super::air_lexer::Spanned;
 use super::AIRLexer;
 use super::LexerError;
+use super::Number;
 use super::Token;
 
 fn run_lexer(input: &str) -> Vec<Spanned<Token<'_>, usize, LexerError>> {
@@ -24,110 +25,119 @@ fn run_lexer(input: &str) -> Vec<Spanned<Token<'_>, usize, LexerError>> {
     lexer.collect()
 }
 
+#[allow(dead_code)]
+enum TokenCompareStrategy<'token> {
+    All(Vec<Spanned<Token<'token>, usize, LexerError>>),
+    Some(Vec<usize>, Vec<Spanned<Token<'token>, usize, LexerError>>),
+    One(usize, Spanned<Token<'token>, usize, LexerError>),
+    Single(Spanned<Token<'token>, usize, LexerError>),
+}
+
+use TokenCompareStrategy::*;
+
+fn lexer_test(input: &str, expected_tokens: TokenCompareStrategy) {
+    let actual_tokens = run_lexer(input);
+
+    match expected_tokens {
+        All(expected_tokens) => assert_eq!(actual_tokens, expected_tokens),
+        Some(token_ids, expected_tokens) => {
+            for (&id, token) in token_ids.iter().zip(expected_tokens) {
+                assert_eq!(actual_tokens[id], token);
+            }
+        }
+        One(id, token) => assert_eq!(actual_tokens[id], token),
+        Single(token) => assert_eq!(actual_tokens, vec![token]),
+    }
+}
+
 #[test]
 fn air_instructions() {
-    let call_tokens = run_lexer("call");
-    assert_eq!(call_tokens, vec![Ok((0, Token::Call, 4))]);
+    lexer_test("call", Single(Ok((0, Token::Call, 4))));
 
-    let call_tokens = run_lexer("(call)");
-    assert_eq!(
-        call_tokens,
-        vec![
+    lexer_test(
+        "(call)",
+        All(vec![
             Ok((0, Token::OpenRoundBracket, 1)),
             Ok((1, Token::Call, 5)),
-            Ok((5, Token::CloseRoundBracket, 6))
-        ]
+            Ok((5, Token::CloseRoundBracket, 6)),
+        ]),
     );
 
-    let par_tokens = run_lexer("par");
-    assert_eq!(par_tokens, vec![Ok((0, Token::Par, 3))]);
+    lexer_test("par", Single(Ok((0, Token::Par, 3))));
 
-    let par_tokens = run_lexer("(par)");
-    assert_eq!(
-        par_tokens,
-        vec![
+    lexer_test(
+        "(par)",
+        All(vec![
             Ok((0, Token::OpenRoundBracket, 1)),
             Ok((1, Token::Par, 4)),
-            Ok((4, Token::CloseRoundBracket, 5))
-        ]
+            Ok((4, Token::CloseRoundBracket, 5)),
+        ]),
     );
 
-    let seq_tokens = run_lexer("seq");
-    assert_eq!(seq_tokens, vec![Ok((0, Token::Seq, 3))]);
+    lexer_test("seq", Single(Ok((0, Token::Seq, 3))));
 
-    let seq_tokens = run_lexer("(seq)");
-    assert_eq!(
-        seq_tokens,
-        vec![
+    lexer_test(
+        "(seq)",
+        All(vec![
             Ok((0, Token::OpenRoundBracket, 1)),
             Ok((1, Token::Seq, 4)),
-            Ok((4, Token::CloseRoundBracket, 5))
-        ]
+            Ok((4, Token::CloseRoundBracket, 5)),
+        ]),
     );
 
-    let null_tokens = run_lexer("null");
-    assert_eq!(null_tokens, vec![Ok((0, Token::Null, 4))]);
+    lexer_test("null", Single(Ok((0, Token::Null, 4))));
 
-    let null_tokens = run_lexer("(null)");
-    assert_eq!(
-        null_tokens,
-        vec![
+    lexer_test(
+        "(null)",
+        All(vec![
             Ok((0, Token::OpenRoundBracket, 1)),
             Ok((1, Token::Null, 5)),
-            Ok((5, Token::CloseRoundBracket, 6))
-        ]
+            Ok((5, Token::CloseRoundBracket, 6)),
+        ]),
     );
 
-    let fold_tokens = run_lexer("fold");
-    assert_eq!(fold_tokens, vec![Ok((0, Token::Fold, 4))]);
+    lexer_test("fold", Single(Ok((0, Token::Fold, 4))));
 
-    let fold_tokens = run_lexer("(fold)");
-    assert_eq!(
-        fold_tokens,
-        vec![
+    lexer_test(
+        "(fold)",
+        All(vec![
             Ok((0, Token::OpenRoundBracket, 1)),
             Ok((1, Token::Fold, 5)),
-            Ok((5, Token::CloseRoundBracket, 6))
-        ]
+            Ok((5, Token::CloseRoundBracket, 6)),
+        ]),
     );
 
-    let next_tokens = run_lexer("next");
-    assert_eq!(next_tokens, vec![Ok((0, Token::Next, 4))]);
+    lexer_test("next", Single(Ok((0, Token::Next, 4))));
 
-    let next_tokens = run_lexer("(next)");
-    assert_eq!(
-        next_tokens,
-        vec![
+    lexer_test(
+        "(next)",
+        All(vec![
             Ok((0, Token::OpenRoundBracket, 1)),
             Ok((1, Token::Next, 5)),
-            Ok((5, Token::CloseRoundBracket, 6))
-        ]
+            Ok((5, Token::CloseRoundBracket, 6)),
+        ]),
     );
 
-    let match_tokens = run_lexer("match");
-    assert_eq!(match_tokens, vec![Ok((0, Token::Match, 5))]);
+    lexer_test("match", Single(Ok((0, Token::Match, 5))));
 
-    let match_tokens = run_lexer("(match)");
-    assert_eq!(
-        match_tokens,
-        vec![
+    lexer_test(
+        "(match)",
+        All(vec![
             Ok((0, Token::OpenRoundBracket, 1)),
             Ok((1, Token::Match, 6)),
-            Ok((6, Token::CloseRoundBracket, 7))
-        ]
+            Ok((6, Token::CloseRoundBracket, 7)),
+        ]),
     );
 
-    let mismatch_tokens = run_lexer("mismatch");
-    assert_eq!(mismatch_tokens, vec![Ok((0, Token::MisMatch, 8))]);
+    lexer_test("mismatch", Single(Ok((0, Token::MisMatch, 8))));
 
-    let mismatch_tokens = run_lexer("(mismatch)");
-    assert_eq!(
-        mismatch_tokens,
-        vec![
+    lexer_test(
+        "(mismatch)",
+        All(vec![
             Ok((0, Token::OpenRoundBracket, 1)),
             Ok((1, Token::MisMatch, 9)),
-            Ok((9, Token::CloseRoundBracket, 10))
-        ]
+            Ok((9, Token::CloseRoundBracket, 10)),
+        ]),
     );
 }
 
@@ -135,10 +145,9 @@ fn air_instructions() {
 fn init_peer_id() {
     const INIT_PEER_ID: &str = "%init_peer_id%";
 
-    let init_peer_id_tokens = run_lexer(INIT_PEER_ID);
-    assert_eq!(
-        init_peer_id_tokens,
-        vec![Ok((0, Token::InitPeerId, INIT_PEER_ID.len()))]
+    lexer_test(
+        INIT_PEER_ID,
+        Single(Ok((0, Token::InitPeerId, INIT_PEER_ID.len()))),
     );
 }
 
@@ -146,14 +155,13 @@ fn init_peer_id() {
 fn accumulator() {
     const ACC: &str = "accumulator____asdasd[]";
 
-    let init_peer_id_tokens = run_lexer(ACC);
-    assert_eq!(
-        init_peer_id_tokens,
-        vec![Ok((
+    lexer_test(
+        ACC,
+        Single(Ok((
             0,
             Token::Accumulator(&ACC[0..ACC.len() - 2]),
-            ACC.len()
-        ))]
+            ACC.len(),
+        ))),
     );
 }
 
@@ -161,26 +169,146 @@ fn accumulator() {
 fn string_literal() {
     const STRING_LITERAL: &str = r#""some_string""#;
 
-    let string_literal_tokens = run_lexer(STRING_LITERAL);
-    assert_eq!(
-        string_literal_tokens,
-        vec![Ok((
+    lexer_test(
+        STRING_LITERAL,
+        Single(Ok((
             0,
             Token::StringLiteral(&STRING_LITERAL[1..STRING_LITERAL.len() - 1]),
-            STRING_LITERAL.len()
-        ))]
+            STRING_LITERAL.len(),
+        ))),
+    );
+}
+
+#[test]
+fn integer_numbers() {
+    const NUMBER_WITH_PLUS_SIGN: &str = "+123";
+    let number = Number::Int(123);
+
+    lexer_test(
+        NUMBER_WITH_PLUS_SIGN,
+        Single(Ok((
+            0,
+            Token::Number(number.clone()),
+            NUMBER_WITH_PLUS_SIGN.len(),
+        ))),
+    );
+
+    const NUMBER: &str = "123";
+
+    lexer_test(
+        NUMBER,
+        Single(Ok((0, Token::Number(number.clone()), NUMBER.len()))),
+    );
+
+    const NUMBER_WITH_MINUS_SIGN: &str = "-123";
+    let number = Number::Int(-123);
+
+    lexer_test(
+        NUMBER_WITH_MINUS_SIGN,
+        Single(Ok((0, Token::Number(number), NUMBER_WITH_MINUS_SIGN.len()))),
+    );
+}
+
+#[test]
+fn float_number() {
+    const FNUMBER_WITH_PLUS_SIGN: &str = "+123.123";
+    let number = Number::Float(123.123);
+
+    lexer_test(
+        FNUMBER_WITH_PLUS_SIGN,
+        Single(Ok((
+            0,
+            Token::Number(number.clone()),
+            FNUMBER_WITH_PLUS_SIGN.len(),
+        ))),
+    );
+
+    const FNUMBER: &str = "123.123";
+
+    lexer_test(
+        FNUMBER,
+        Single(Ok((0, Token::Number(number), FNUMBER.len()))),
+    );
+
+    const FNUMBER_WITH_MINUS_SIGN: &str = "-123.123";
+    let number = Number::Float(-123.123);
+
+    lexer_test(
+        FNUMBER_WITH_MINUS_SIGN,
+        Single(Ok((
+            0,
+            Token::Number(number),
+            FNUMBER_WITH_MINUS_SIGN.len(),
+        ))),
+    );
+}
+
+#[test]
+fn too_big_number() {
+    const NUMBER: &str = "1231231564564545684564646515313546547682131";
+
+    let number_tokens = run_lexer(NUMBER);
+
+    assert!(matches!(
+        number_tokens[0],
+        Err(LexerError::ParseIntError(..))
+    ));
+}
+
+#[test]
+fn too_big_float_number() {
+    const FNUMBER: &str =
+        "10000000000000000000000000000001.1231564564545684564646515313546547682131";
+
+    lexer_test(
+        FNUMBER,
+        Single(Err(LexerError::TooBigFloat(0, FNUMBER.len()))),
     );
 }
 
 #[test]
 fn json_path() {
     // this json path contains all allowed in json path charactes
-    const JSON_PATH: &str = r#"value.$[$@[]():?.*,"!]"#;
+    const JSON_PATH: &str = r#"value.$[$@[]():?.*,"]"#;
 
-    let json_path_tokens = run_lexer(JSON_PATH);
-    assert_eq!(
-        json_path_tokens,
-        vec![Ok((0, Token::JsonPath(JSON_PATH, 5), JSON_PATH.len()))]
+    lexer_test(
+        JSON_PATH,
+        Single(Ok((
+            0,
+            Token::JsonPath(JSON_PATH, 5, false),
+            JSON_PATH.len(),
+        ))),
+    );
+}
+
+#[test]
+fn json_path_numbers() {
+    const JSON_PATH: &str = r#"12345.$[$@[]():?.*,"]"#;
+
+    lexer_test(
+        JSON_PATH,
+        Single(Err(LexerError::UnallowedCharInNumber(6, 6))),
+    );
+
+    const JSON_PATH1: &str = r#"+12345.$[$@[]():?.*,"]"#;
+
+    lexer_test(
+        JSON_PATH1,
+        Single(Err(LexerError::UnallowedCharInNumber(7, 7))),
+    );
+}
+
+#[test]
+fn leading_dot() {
+    const LEADING_DOT: &str = ".111";
+
+    lexer_test(LEADING_DOT, Single(Err(LexerError::LeadingDot(0, 0))));
+
+    const LEADING_DOT_AFTER_SIGN: &str = "+.1111";
+
+    lexer_test(
+        LEADING_DOT_AFTER_SIGN,
+        Single(Err(LexerError::LeadingDot(1, 1))),
     );
 }
 
@@ -188,22 +316,28 @@ fn json_path() {
 fn unclosed_quote() {
     const UNCLOSED_QUOTE_AIR: &str = r#"(call ("peer_name) ("service_name" "function_name") [])"#;
 
-    let unclosed_quote_air_tokens = run_lexer(UNCLOSED_QUOTE_AIR);
-    assert_eq!(
-        unclosed_quote_air_tokens[4],
-        Err(LexerError::IsNotAlphanumeric(33, 33))
+    lexer_test(
+        UNCLOSED_QUOTE_AIR,
+        One(4, Err(LexerError::IsNotAlphanumeric(33, 33))),
     );
 }
 
 #[test]
 fn bad_value() {
-    // value contains ! that only allowed in json path
-    const INVALID_VALUE: &str = r#"val!ue.$[$@[]():?.*,"\!]"#;
+    // value contains ! that only allowed at the end of a json path
+    const INVALID_VALUE: &str = r#"val!ue.$[$@[]():?.*,"\]"#;
 
-    let invalid_value_tokens = run_lexer(INVALID_VALUE);
-    assert_eq!(
-        invalid_value_tokens,
-        vec![Err(LexerError::IsNotAlphanumeric(3, 3))]
+    lexer_test(
+        INVALID_VALUE,
+        Single(Err(LexerError::IsNotAlphanumeric(3, 3))),
+    );
+
+    // value contains ! that only allowed at the end of a json path
+    const INVALID_VALUE2: &str = r#"value.$![$@[]():?.*,"\]"#;
+
+    lexer_test(
+        INVALID_VALUE2,
+        Single(Err(LexerError::InvalidJsonPath(7, 7))),
     );
 }
 
@@ -211,9 +345,44 @@ fn bad_value() {
 fn invalid_json_path() {
     const INVALID_JSON_PATH: &str = r#"value.$%"#;
 
-    let invalid_json_path_tokens = run_lexer(INVALID_JSON_PATH);
-    assert_eq!(
-        invalid_json_path_tokens,
-        vec![Err(LexerError::InvalidJsonPath(7, 7))]
+    lexer_test(
+        INVALID_JSON_PATH,
+        Single(Err(LexerError::InvalidJsonPath(7, 7))),
+    );
+}
+
+#[test]
+fn invalid_json_path_numbers() {
+    // this json path contains all allowed in json path charactes
+    const JSON_PATH: &str = r#"+12345$[$@[]():?.*,"!]"#;
+
+    lexer_test(JSON_PATH, Single(Err(LexerError::IsNotAlphanumeric(6, 6))));
+}
+
+#[test]
+fn booleans() {
+    const TRUE_BOOL_CONST: &str = "true";
+
+    lexer_test(
+        TRUE_BOOL_CONST,
+        Single(Ok((0, Token::Boolean(true), TRUE_BOOL_CONST.len()))),
+    );
+
+    const FALSE_BOOL_CONST: &str = "false";
+
+    lexer_test(
+        FALSE_BOOL_CONST,
+        Single(Ok((0, Token::Boolean(false), FALSE_BOOL_CONST.len()))),
+    );
+
+    const NON_BOOL_CONST: &str = "true1";
+
+    lexer_test(
+        NON_BOOL_CONST,
+        Single(Ok((
+            0,
+            Token::Alphanumeric(NON_BOOL_CONST),
+            NON_BOOL_CONST.len(),
+        ))),
     );
 }

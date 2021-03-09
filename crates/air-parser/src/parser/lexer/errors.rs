@@ -16,7 +16,10 @@
 
 use thiserror::Error as ThisError;
 
-#[derive(ThisError, Debug, Clone, PartialEq, Eq, Hash)]
+use std::num::ParseFloatError;
+use std::num::ParseIntError;
+
+#[derive(ThisError, Debug, Clone, PartialEq, Eq)]
 pub enum LexerError {
     #[error("this string literal has unclosed quote")]
     UnclosedQuote(usize, usize),
@@ -24,14 +27,35 @@ pub enum LexerError {
     #[error("empty string aren't allowed in this position")]
     EmptyString(usize, usize),
 
-    #[error("only alphanumeric and _, - characters are allowed in this position")]
+    #[error("only alphanumeric, '_', and '-' characters are allowed in this position")]
     IsNotAlphanumeric(usize, usize),
 
     #[error("an accumulator name should be non empty")]
     EmptyAccName(usize, usize),
 
+    #[error("this variable or constant shouldn't have empty name")]
+    EmptyVariableOrConst(usize, usize),
+
     #[error("invalid character in json path")]
     InvalidJsonPath(usize, usize),
+
+    #[error("a digit could contain only digits or one dot")]
+    UnallowedCharInNumber(usize, usize),
+
+    #[error("{2}")]
+    ParseIntError(usize, usize, #[source] ParseIntError),
+
+    #[error("{2}")]
+    ParseFloatError(usize, usize, #[source] ParseFloatError),
+
+    #[error("this float is too big, a float could contain less than 12 digits")]
+    TooBigFloat(usize, usize),
+
+    #[error("leading dot without any symbols before - please write 0 if it's float or variable name if it's json path")]
+    LeadingDot(usize, usize),
+
+    #[error("while using json path in call triplet, result should be flattened, add ! at the end")]
+    CallArgsNotFlattened(usize, usize),
 }
 
 impl From<std::convert::Infallible> for LexerError {

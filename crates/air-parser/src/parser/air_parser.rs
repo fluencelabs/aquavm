@@ -126,8 +126,55 @@ fn lexical_error_to_label(file_id: usize, error: LexerError) -> Label<usize> {
         EmptyAccName(start, end) => {
             Label::primary(file_id, start..end).with_message(error.to_string())
         }
+        EmptyVariableOrConst(start, end) => {
+            Label::primary(file_id, start..end).with_message(error.to_string())
+        }
         InvalidJsonPath(start, end) => {
             Label::primary(file_id, start..end).with_message(error.to_string())
         }
+        UnallowedCharInNumber(start, end) => {
+            Label::primary(file_id, start..end).with_message(error.to_string())
+        }
+        ParseIntError(start, end, _) => {
+            Label::primary(file_id, start..end).with_message(error.to_string())
+        }
+        ParseFloatError(start, end, _) => {
+            Label::primary(file_id, start..end).with_message(error.to_string())
+        }
+        TooBigFloat(start, end) => {
+            Label::primary(file_id, start..end).with_message(error.to_string())
+        }
+        LeadingDot(start, end) => {
+            Label::primary(file_id, start..end).with_message(error.to_string())
+        }
+        CallArgsNotFlattened(start, end) => {
+            Label::primary(file_id, start..end).with_message(error.to_string())
+        }
+    }
+}
+
+pub(super) fn into_variable_and_path(str: &str, pos: usize, should_flatten: bool) -> (&str, &str) {
+    let json_path = if should_flatten {
+        &str[pos + 1..str.len() - 1]
+    } else {
+        &str[pos + 1..]
+    };
+
+    (&str[0..pos], json_path)
+}
+
+pub(super) fn make_flattened_error(
+    start_pos: usize,
+    token: Token<'_>,
+    end_pos: usize,
+) -> ErrorRecovery<usize, Token<'_>, LexerError> {
+    let error = LexerError::CallArgsNotFlattened(start_pos, end_pos);
+    let error = ParseError::User { error };
+
+    let dropped_tokens = vec![(start_pos, token, end_pos)];
+
+    ErrorRecovery {
+        error,
+        dropped_tokens,
     }
 }

@@ -27,7 +27,8 @@ fn parse(source_code: &str) -> Instruction {
 #[test]
 fn parse_seq() {
     use ast::Call;
-    use ast::CallArgValue::*;
+    use ast::CallInstrArgValue;
+    use ast::CallInstrValue;
     use ast::CallOutputValue::*;
     use ast::FunctionPart::*;
     use ast::PeerPart::*;
@@ -41,15 +42,18 @@ fn parse_seq() {
     let instruction = parse(source_code);
     let expected = seq(
         Instruction::Call(Call {
-            peer_part: PeerPk(Variable("peerid")),
-            function_part: FuncName(Variable("function")),
+            peer_part: PeerPk(CallInstrValue::Variable("peerid")),
+            function_part: FuncName(CallInstrValue::Variable("function")),
             args: Rc::new(vec![]),
             output: Scalar("output"),
         }),
         Instruction::Call(Call {
-            peer_part: PeerPk(Literal("id")),
-            function_part: FuncName(Literal("f")),
-            args: Rc::new(vec![Literal("hello"), Variable("name")]),
+            peer_part: PeerPk(CallInstrValue::Literal("id")),
+            function_part: FuncName(CallInstrValue::Literal("f")),
+            args: Rc::new(vec![
+                CallInstrArgValue::Literal("hello"),
+                CallInstrArgValue::Variable("name"),
+            ]),
             output: None,
         }),
     );
@@ -59,7 +63,8 @@ fn parse_seq() {
 #[test]
 fn parse_seq_seq() {
     use ast::Call;
-    use ast::CallArgValue::*;
+    use ast::CallInstrArgValue;
+    use ast::CallInstrValue;
     use ast::CallOutputValue::*;
     use ast::FunctionPart::*;
     use ast::PeerPart::*;
@@ -77,22 +82,31 @@ fn parse_seq_seq() {
     let expected = seq(
         seq(
             Instruction::Call(Call {
-                peer_part: PeerPk(Variable("peerid")),
-                function_part: FuncName(Variable("function")),
+                peer_part: PeerPk(CallInstrValue::Variable("peerid")),
+                function_part: FuncName(CallInstrValue::Variable("function")),
                 args: Rc::new(vec![]),
                 output: None,
             }),
             Instruction::Call(Call {
-                peer_part: PeerPkWithServiceId(Variable("peerid"), Variable("serviceA")),
-                function_part: ServiceIdWithFuncName(Literal("serviceB"), Variable("function")),
+                peer_part: PeerPkWithServiceId(
+                    CallInstrValue::Variable("peerid"),
+                    CallInstrValue::Variable("serviceA"),
+                ),
+                function_part: ServiceIdWithFuncName(
+                    CallInstrValue::Literal("serviceB"),
+                    CallInstrValue::Variable("function"),
+                ),
                 args: Rc::new(vec![]),
                 output: None,
             }),
         ),
         Instruction::Call(Call {
-            peer_part: PeerPk(Literal("id")),
-            function_part: FuncName(Literal("f")),
-            args: Rc::new(vec![Literal("hello"), Variable("name")]),
+            peer_part: PeerPk(CallInstrValue::Literal("id")),
+            function_part: FuncName(CallInstrValue::Literal("f")),
+            args: Rc::new(vec![
+                CallInstrArgValue::Literal("hello"),
+                CallInstrArgValue::Variable("name"),
+            ]),
             output: Accumulator("output"),
         }),
     );
@@ -102,58 +116,83 @@ fn parse_seq_seq() {
 #[test]
 fn parse_json_path() {
     use ast::Call;
-    use ast::CallArgValue::*;
+    use ast::CallInstrArgValue;
+    use ast::CallInstrValue;
     use ast::CallOutputValue::*;
     use ast::FunctionPart::*;
     use ast::PeerPart::*;
 
     let source_code = r#"
-        (call id.$.a "f" ["hello" name] void[])
+        (call id.$.a! "f" ["hello" name] void[])
         "#;
     let instruction = parse(source_code);
     let expected = Instruction::Call(Call {
-        peer_part: PeerPk(JsonPath {
+        peer_part: PeerPk(CallInstrValue::JsonPath {
             variable: "id",
             path: "$.a",
+            should_flatten: true,
         }),
-        function_part: FuncName(Literal("f")),
-        args: Rc::new(vec![Literal("hello"), Variable("name")]),
+        function_part: FuncName(CallInstrValue::Literal("f")),
+        args: Rc::new(vec![
+            CallInstrArgValue::Literal("hello"),
+            CallInstrArgValue::Variable("name"),
+        ]),
         output: Accumulator("void"),
     });
     assert_eq!(instruction, expected);
 }
 
 #[test]
+fn parse_json_path_without_flattening() {
+    let source_code = r#"
+        (call id.$.a "f" ["hello" name] void[])
+        "#;
+
+    let lexer = crate::AIRLexer::new(source_code);
+
+    let parser = crate::AIRParser::new();
+    let mut errors = Vec::new();
+    parser
+        .parse(source_code, &mut errors, lexer)
+        .expect("parser shoudn't fail");
+
+    assert_eq!(errors.len(), 1);
+    assert!(matches!(errors[0], lalrpop_util::ErrorRecovery { .. }));
+}
+
+#[test]
 fn parse_json_path_complex() {
     use ast::Call;
-    use ast::CallArgValue::*;
+    use ast::CallInstrValue;
     use ast::CallOutputValue::*;
     use ast::FunctionPart::*;
     use ast::PeerPart::*;
 
     let source_code = r#"
         (seq
-            (call m.$.[1] "f" [] void)
-            (call m.$.abc["c"].cde[a][0].cde["bcd"] "f" [] void)
+            (call m.$.[1]! "f" [] void)
+            (call m.$.abc["c"].cde[a][0].cde["bcd"]! "f" [] void)
         )
         "#;
     let instruction = parse(source_code);
     let expected = seq(
         Instruction::Call(Call {
-            peer_part: PeerPk(JsonPath {
+            peer_part: PeerPk(CallInstrValue::JsonPath {
                 variable: "m",
                 path: "$.[1]",
+                should_flatten: true,
             }),
-            function_part: FuncName(Literal("f")),
+            function_part: FuncName(CallInstrValue::Literal("f")),
             args: Rc::new(vec![]),
             output: Scalar("void"),
         }),
         Instruction::Call(Call {
-            peer_part: PeerPk(JsonPath {
+            peer_part: PeerPk(CallInstrValue::JsonPath {
                 variable: "m",
                 path: r#"$.abc["c"].cde[a][0].cde["bcd"]"#,
+                should_flatten: true,
             }),
-            function_part: FuncName(Literal("f")),
+            function_part: FuncName(CallInstrValue::Literal("f")),
             args: Rc::new(vec![]),
             output: Scalar("void"),
         }),
@@ -164,29 +203,36 @@ fn parse_json_path_complex() {
 #[test]
 fn json_path_square_braces() {
     use ast::Call;
-    use ast::CallArgValue::*;
+    use ast::CallInstrArgValue;
+    use ast::CallInstrValue;
     use ast::CallOutputValue::*;
     use ast::FunctionPart::*;
     use ast::PeerPart::*;
 
     let source_code = r#"
-        (call u.$["peer_id"] ("return" "") [u.$["peer_id"].cde[0]["abc"].abc u.$["name"]] void[])
+        (call u.$["peer_id"]! ("return" "") [u.$["peer_id"].cde[0]["abc"].abc u.$["name"]] void[])
         "#;
     let instruction = parse(source_code);
     let expected = Instruction::Call(Call {
-        peer_part: PeerPk(JsonPath {
+        peer_part: PeerPk(CallInstrValue::JsonPath {
             variable: "u",
             path: r#"$["peer_id"]"#,
+            should_flatten: true,
         }),
-        function_part: ServiceIdWithFuncName(Literal("return"), Literal("")),
+        function_part: ServiceIdWithFuncName(
+            CallInstrValue::Literal("return"),
+            CallInstrValue::Literal(""),
+        ),
         args: Rc::new(vec![
-            JsonPath {
+            CallInstrArgValue::JsonPath {
                 variable: "u",
                 path: r#"$["peer_id"].cde[0]["abc"].abc"#,
+                should_flatten: false,
             },
-            JsonPath {
+            CallInstrArgValue::JsonPath {
                 variable: "u",
                 path: r#"$["name"]"#,
+                should_flatten: false,
             },
         ]),
         output: Accumulator("void"),
@@ -295,7 +341,7 @@ fn parse_fold_with_xor_par_seq() {
 #[test]
 fn parse_init_peer_id() {
     use ast::Call;
-    use ast::CallArgValue::*;
+    use ast::CallInstrValue;
     use ast::CallOutputValue::*;
     use ast::FunctionPart::*;
     use ast::PeerPart::*;
@@ -313,17 +359,20 @@ fn parse_init_peer_id() {
     let instruction = parse(&source_code.as_ref());
     let expected = seq(
         Instruction::Call(Call {
-            peer_part: PeerPk(Literal(&peer_id)),
+            peer_part: PeerPk(CallInstrValue::Literal(&peer_id)),
             function_part: ServiceIdWithFuncName(
-                Literal("local_service_id"),
-                Literal("local_fn_name"),
+                CallInstrValue::Literal("local_service_id"),
+                CallInstrValue::Literal("local_fn_name"),
             ),
             args: Rc::new(vec![]),
             output: None,
         }),
         Instruction::Call(Call {
-            peer_part: PeerPk(InitPeerId),
-            function_part: ServiceIdWithFuncName(Literal("service_id"), Literal("fn_name")),
+            peer_part: PeerPk(CallInstrValue::InitPeerId),
+            function_part: ServiceIdWithFuncName(
+                CallInstrValue::Literal("service_id"),
+                CallInstrValue::Literal("fn_name"),
+            ),
             args: Rc::new(vec![]),
             output: None,
         }),
@@ -333,9 +382,43 @@ fn parse_init_peer_id() {
 }
 
 #[test]
+fn parse_last_error() {
+    use ast::Call;
+    use ast::CallInstrArgValue;
+    use ast::CallInstrValue;
+    use ast::CallOutputValue::*;
+    use ast::FunctionPart::*;
+    use ast::PeerPart::*;
+
+    let source_code = format!(
+        r#"
+        (seq
+            (call %init_peer_id% ("service_id" "fn_name") [%last_error%])
+            (null)
+        )"#,
+    );
+
+    let instruction = parse(&source_code.as_ref());
+    let expected = seq(
+        Instruction::Call(Call {
+            peer_part: PeerPk(CallInstrValue::InitPeerId),
+            function_part: ServiceIdWithFuncName(
+                CallInstrValue::Literal("service_id"),
+                CallInstrValue::Literal("fn_name"),
+            ),
+            args: Rc::new(vec![CallInstrArgValue::LastError]),
+            output: None,
+        }),
+        Instruction::Null(ast::Null),
+    );
+
+    assert_eq!(instruction, expected);
+}
+
+#[test]
 fn seq_par_call() {
     use ast::Call;
-    use ast::CallArgValue::*;
+    use ast::CallInstrValue;
     use ast::CallOutputValue::*;
     use ast::FunctionPart::*;
     use ast::PeerPart::*;
@@ -357,26 +440,29 @@ fn seq_par_call() {
     let expected = seq(
         par(
             Instruction::Call(Call {
-                peer_part: PeerPk(Literal(&peer_id)),
+                peer_part: PeerPk(CallInstrValue::Literal(&peer_id)),
                 function_part: ServiceIdWithFuncName(
-                    Literal("local_service_id"),
-                    Literal("local_fn_name"),
+                    CallInstrValue::Literal("local_service_id"),
+                    CallInstrValue::Literal("local_fn_name"),
                 ),
                 args: Rc::new(vec![]),
                 output: Scalar("result_1"),
             }),
             Instruction::Call(Call {
-                peer_part: PeerPk(Literal(&peer_id)),
-                function_part: ServiceIdWithFuncName(Literal("service_id"), Literal("fn_name")),
+                peer_part: PeerPk(CallInstrValue::Literal(&peer_id)),
+                function_part: ServiceIdWithFuncName(
+                    CallInstrValue::Literal("service_id"),
+                    CallInstrValue::Literal("fn_name"),
+                ),
                 args: Rc::new(vec![]),
                 output: Scalar("g"),
             }),
         ),
         Instruction::Call(Call {
-            peer_part: PeerPk(Literal(&peer_id)),
+            peer_part: PeerPk(CallInstrValue::Literal(&peer_id)),
             function_part: ServiceIdWithFuncName(
-                Literal("local_service_id"),
-                Literal("local_fn_name"),
+                CallInstrValue::Literal("local_service_id"),
+                CallInstrValue::Literal("local_fn_name"),
             ),
             args: Rc::new(vec![]),
             output: Scalar("result_2"),
@@ -389,7 +475,8 @@ fn seq_par_call() {
 #[test]
 fn seq_with_empty_and_dash() {
     use ast::Call;
-    use ast::CallArgValue::*;
+    use ast::CallInstrArgValue;
+    use ast::CallInstrValue;
     use ast::CallOutputValue::*;
     use ast::FunctionPart::*;
     use ast::PeerPart::*;
@@ -420,50 +507,74 @@ fn seq_with_empty_and_dash() {
         seq(
             seq(
                 Instruction::Call(Call {
-                    peer_part: PeerPk(Literal("set_variables")),
-                    function_part: ServiceIdWithFuncName(Literal(""), Literal("")),
-                    args: Rc::new(vec![Literal("module-bytes")]),
+                    peer_part: PeerPk(CallInstrValue::Literal("set_variables")),
+                    function_part: ServiceIdWithFuncName(
+                        CallInstrValue::Literal(""),
+                        CallInstrValue::Literal(""),
+                    ),
+                    args: Rc::new(vec![CallInstrArgValue::Literal("module-bytes")]),
                     output: Scalar("module-bytes"),
                 }),
                 Instruction::Call(Call {
-                    peer_part: PeerPk(Literal("set_variables")),
-                    function_part: ServiceIdWithFuncName(Literal(""), Literal("")),
-                    args: Rc::new(vec![Literal("module_config")]),
+                    peer_part: PeerPk(CallInstrValue::Literal("set_variables")),
+                    function_part: ServiceIdWithFuncName(
+                        CallInstrValue::Literal(""),
+                        CallInstrValue::Literal(""),
+                    ),
+                    args: Rc::new(vec![CallInstrArgValue::Literal("module_config")]),
                     output: Scalar("module_config"),
                 }),
             ),
             Instruction::Call(Call {
-                peer_part: PeerPk(Literal("set_variables")),
-                function_part: ServiceIdWithFuncName(Literal(""), Literal("")),
-                args: Rc::new(vec![Literal("blueprint")]),
+                peer_part: PeerPk(CallInstrValue::Literal("set_variables")),
+                function_part: ServiceIdWithFuncName(
+                    CallInstrValue::Literal(""),
+                    CallInstrValue::Literal(""),
+                ),
+                args: Rc::new(vec![CallInstrArgValue::Literal("blueprint")]),
                 output: Scalar("blueprint"),
             }),
         ),
         seq(
             Instruction::Call(Call {
-                peer_part: PeerPk(Literal("A")),
-                function_part: ServiceIdWithFuncName(Literal("add_module"), Literal("")),
-                args: Rc::new(vec![Variable("module-bytes"), Variable("module_config")]),
+                peer_part: PeerPk(CallInstrValue::Literal("A")),
+                function_part: ServiceIdWithFuncName(
+                    CallInstrValue::Literal("add_module"),
+                    CallInstrValue::Literal(""),
+                ),
+                args: Rc::new(vec![
+                    CallInstrArgValue::Variable("module-bytes"),
+                    CallInstrArgValue::Variable("module_config"),
+                ]),
                 output: Scalar("module"),
             }),
             seq(
                 Instruction::Call(Call {
-                    peer_part: PeerPk(Literal("A")),
-                    function_part: ServiceIdWithFuncName(Literal("add_blueprint"), Literal("")),
-                    args: Rc::new(vec![Variable("blueprint")]),
+                    peer_part: PeerPk(CallInstrValue::Literal("A")),
+                    function_part: ServiceIdWithFuncName(
+                        CallInstrValue::Literal("add_blueprint"),
+                        CallInstrValue::Literal(""),
+                    ),
+                    args: Rc::new(vec![CallInstrArgValue::Variable("blueprint")]),
                     output: Scalar("blueprint_id"),
                 }),
                 seq(
                     Instruction::Call(Call {
-                        peer_part: PeerPk(Literal("A")),
-                        function_part: ServiceIdWithFuncName(Literal("create"), Literal("")),
-                        args: Rc::new(vec![Variable("blueprint_id")]),
+                        peer_part: PeerPk(CallInstrValue::Literal("A")),
+                        function_part: ServiceIdWithFuncName(
+                            CallInstrValue::Literal("create"),
+                            CallInstrValue::Literal(""),
+                        ),
+                        args: Rc::new(vec![CallInstrArgValue::Variable("blueprint_id")]),
                         output: Scalar("service_id"),
                     }),
                     Instruction::Call(Call {
-                        peer_part: PeerPk(Literal("remote_peer_id")),
-                        function_part: ServiceIdWithFuncName(Literal(""), Literal("")),
-                        args: Rc::new(vec![Variable("service_id")]),
+                        peer_part: PeerPk(CallInstrValue::Literal("remote_peer_id")),
+                        function_part: ServiceIdWithFuncName(
+                            CallInstrValue::Literal(""),
+                            CallInstrValue::Literal(""),
+                        ),
+                        args: Rc::new(vec![CallInstrArgValue::Variable("service_id")]),
                         output: Scalar("client_result"),
                     }),
                 ),
@@ -477,7 +588,7 @@ fn seq_with_empty_and_dash() {
 #[test]
 fn no_output() {
     use ast::Call;
-    use ast::CallArgValue::*;
+    use ast::CallInstrValue;
     use ast::CallOutputValue::*;
     use ast::FunctionPart::*;
     use ast::PeerPart::*;
@@ -487,8 +598,11 @@ fn no_output() {
     "#;
     let instruction = parse(&source_code.as_ref());
     let expected = Instruction::Call(Call {
-        peer_part: PeerPk(Variable("peer")),
-        function_part: ServiceIdWithFuncName(Variable("service"), Variable("fname")),
+        peer_part: PeerPk(CallInstrValue::Variable("peer")),
+        function_part: ServiceIdWithFuncName(
+            CallInstrValue::Variable("service"),
+            CallInstrValue::Variable("fname"),
+        ),
         args: Rc::new(vec![]),
         output: None,
     });
@@ -510,6 +624,7 @@ fn fold_json_path() {
         iterable: JsonPath {
             variable: "members",
             path: "$.[\"users\"]",
+            should_flatten: false,
         },
         iterator: "m",
         instruction: Rc::new(null()),
@@ -532,6 +647,7 @@ fn comments() {
         iterable: JsonPath {
             variable: "members",
             path: "$.[\"users\"]",
+            should_flatten: false,
         },
         iterator: "m",
         instruction: Rc::new(null()),
