@@ -345,6 +345,35 @@ mod tests {
     }
 
     #[test]
+    fn fold_with_join() {
+        use crate::contexts::execution_trace::CallResult::*;
+        use crate::contexts::execution_trace::ExecutedState::*;
+
+        let mut vm = create_aqua_vm(echo_number_call_service(), "A");
+        let mut set_variable_vm = create_aqua_vm(set_variable_call_service(r#"[]"#), "set_variable");
+
+        let fold_with_join = String::from(
+            r#"
+            (seq
+                (call "set_variable" ("" "") [] Iterable)
+                (fold Iterable i
+                    (seq
+                        (call "A" ("" "") [non_exist_variable.$.hash!] acc[])
+                        (next i)
+                    )
+                )
+            )"#,
+        );
+
+        let res = call_vm!(set_variable_vm, "", &fold_with_join, "[]", "[]");
+        let res = call_vm!(vm, "", fold_with_join, "[]", res.data);
+        let res: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid executed trace");
+
+        assert_eq!(res.len(), 1);
+        assert_eq!(res[0], Call(Executed(Rc::new(json!([])))));
+    }
+
+    #[test]
     fn json_path() {
         use crate::contexts::execution_trace::CallResult::*;
         use crate::contexts::execution_trace::ExecutedState::*;
