@@ -157,28 +157,20 @@ fn cleanup_variables(exec_ctx: &mut ExecutionCtx<'_>, iterator: &str) {
 
 #[cfg(test)]
 mod tests {
-    use crate::contexts::execution_trace::ExecutionTrace;
-    use crate::contexts::execution_trace::ValueType;
-    use crate::JValue;
-
     use aqua_test_utils::call_vm;
     use aqua_test_utils::create_aqua_vm;
     use aqua_test_utils::echo_number_call_service;
     use aqua_test_utils::echo_string_call_service;
+    use aqua_test_utils::executed_state;
     use aqua_test_utils::set_variable_call_service;
     use aqua_test_utils::AquamarineVMError;
+    use aqua_test_utils::ExecutionTrace;
     use aqua_test_utils::InterpreterOutcome;
 
     use serde_json::json;
-    use std::rc::Rc;
 
     #[test]
     fn lfold() {
-        env_logger::try_init().ok();
-
-        use crate::contexts::execution_trace::CallResult::*;
-        use crate::contexts::execution_trace::ExecutedState::*;
-
         let mut vm = create_aqua_vm(echo_number_call_service(), "A");
         let mut set_variable_vm = create_aqua_vm(set_variable_call_service(r#"["1","2","3","4","5"]"#), "set_variable");
 
@@ -197,28 +189,20 @@ mod tests {
 
         let res = call_vm!(set_variable_vm, "", lfold.clone(), "[]", "[]");
         let res = call_vm!(vm, "", lfold, "[]", res.data);
-        let res: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid executed trace");
+        let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid executed trace");
+        let expected_state = executed_state::scalar_string_array(vec!["1", "2", "3", "4", "5"]);
 
-        assert_eq!(res.len(), 6);
-        let executed_value = Executed(Rc::new(json!(["1", "2", "3", "4", "5"])), ValueType::Scalar);
-        assert_eq!(res[0], Call(executed_value));
+        assert_eq!(actual_trace.len(), 6);
+        assert_eq!(actual_trace[0], expected_state);
 
         for i in 1..=5 {
-            assert_eq!(
-                res[i],
-                Call(Executed(
-                    Rc::new(JValue::Number(i.into())),
-                    ValueType::Stream(String::from("acc"))
-                ))
-            );
+            let expected_state = executed_state::stream_number(i, "acc");
+            assert_eq!(actual_trace[i], expected_state);
         }
     }
 
     #[test]
     fn rfold() {
-        use crate::contexts::execution_trace::CallResult::*;
-        use crate::contexts::execution_trace::ExecutedState::*;
-
         let mut vm = create_aqua_vm(echo_number_call_service(), "A");
         let mut set_variable_vm = create_aqua_vm(set_variable_call_service(r#"["1","2","3","4","5"]"#), "set_variable");
 
@@ -237,28 +221,20 @@ mod tests {
 
         let res = call_vm!(set_variable_vm, "", rfold.clone(), "[]", "[]");
         let res = call_vm!(vm, "", rfold, "[]", res.data);
-        let res: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid executed trace");
+        let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid executed trace");
 
-        assert_eq!(res.len(), 6);
-        let executed_value = Executed(Rc::new(json!(["1", "2", "3", "4", "5"])), ValueType::Scalar);
-        assert_eq!(res[0], Call(executed_value));
+        assert_eq!(actual_trace.len(), 6);
+        let expected_state = executed_state::scalar_string_array(vec!["1", "2", "3", "4", "5"]);
+        assert_eq!(actual_trace[0], expected_state);
 
         for i in 1..=5 {
-            assert_eq!(
-                res[i],
-                Call(Executed(
-                    Rc::new(JValue::Number((6 - i).into())),
-                    ValueType::Stream(String::from("acc"))
-                ))
-            );
+            let expected_state = executed_state::stream_number(i, "acc");
+            assert_eq!(actual_trace[i], expected_state);
         }
     }
 
     #[test]
     fn inner_fold() {
-        use crate::contexts::execution_trace::CallResult::*;
-        use crate::contexts::execution_trace::ExecutedState::*;
-
         let mut vm = create_aqua_vm(echo_number_call_service(), "A");
         let mut set_variable_vm = create_aqua_vm(set_variable_call_service(r#"["1","2","3","4","5"]"#), "set_variable");
 
@@ -285,22 +261,18 @@ mod tests {
 
         let res = call_vm!(set_variable_vm, "", script.clone(), "[]", "[]");
         let res = call_vm!(vm, "", script, "[]", res.data);
-        let res: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid executed trace");
+        let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid executed trace");
 
-        assert_eq!(res.len(), 27);
-        let executed_value = Executed(Rc::new(json!(["1", "2", "3", "4", "5"])), ValueType::Scalar);
-        assert_eq!(res[0], Call(executed_value.clone()));
-        assert_eq!(res[1], Call(executed_value));
+        assert_eq!(actual_trace.len(), 27);
+
+        let expected_state = executed_state::scalar_string_array(vec!["1", "2", "3", "4", "5"]);
+        assert_eq!(actual_trace[0], expected_state);
+        assert_eq!(actual_trace[1], expected_state);
 
         for i in 1..=5 {
             for j in 1..=5 {
-                assert_eq!(
-                    res[1 + 5 * (i - 1) + j],
-                    Call(Executed(
-                        Rc::new(JValue::Number(i.into())),
-                        ValueType::Stream(String::from("acc"))
-                    ))
-                );
+                let expected_state = executed_state::stream_number(i, "acc");
+                assert_eq!(actual_trace[1 + 5 * (i - 1) + j], expected_state);
             }
         }
     }
@@ -337,9 +309,6 @@ mod tests {
 
     #[test]
     fn empty_fold() {
-        use crate::contexts::execution_trace::CallResult::*;
-        use crate::contexts::execution_trace::ExecutedState::*;
-
         let mut vm = create_aqua_vm(echo_number_call_service(), "A");
         let mut set_variable_vm = create_aqua_vm(set_variable_call_service(r#"[]"#), "set_variable");
 
@@ -358,17 +327,15 @@ mod tests {
 
         let res = call_vm!(set_variable_vm, "", empty_fold.clone(), "[]", "[]");
         let res = call_vm!(vm, "", empty_fold, "[]", res.data);
-        let res: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid executed trace");
+        let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid executed trace");
+        let expected_state = executed_state::scalar_jvalue(json!([]));
 
-        assert_eq!(res.len(), 1);
-        assert_eq!(res[0], Call(Executed(Rc::new(json!([])), ValueType::Scalar)));
+        assert_eq!(actual_trace.len(), 1);
+        assert_eq!(actual_trace[0], expected_state);
     }
 
     #[test]
     fn json_path() {
-        use crate::contexts::execution_trace::CallResult::*;
-        use crate::contexts::execution_trace::ExecutedState::*;
-
         let mut vm = create_aqua_vm(echo_number_call_service(), "A");
         let mut set_variable_vm = create_aqua_vm(
             set_variable_call_service(r#"{ "array": ["1","2","3","4","5"] }"#),
@@ -390,30 +357,21 @@ mod tests {
 
         let res = call_vm!(set_variable_vm, "", lfold.clone(), "[]", "[]");
         let res = call_vm!(vm, "", lfold, "[]", res.data);
-        let res: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid executed trace");
+        let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid executed trace");
+        let expected_state = executed_state::scalar_jvalue(json!({ "array": ["1", "2", "3", "4", "5"] }));
 
-        assert_eq!(res.len(), 6);
-        let executed_value = Executed(
-            Rc::new(json!({ "array": ["1", "2", "3", "4", "5"] })),
-            ValueType::Scalar,
-        );
-        assert_eq!(res[0], Call(executed_value));
+        assert_eq!(actual_trace.len(), 6);
+        assert_eq!(actual_trace[0], expected_state);
 
         for i in 1..=5 {
-            assert_eq!(
-                res[i],
-                Call(Executed(
-                    Rc::new(JValue::Number(i.into())),
-                    ValueType::Stream(String::from("acc"))
-                ))
-            );
+            let expected_state = executed_state::stream_number(i, "acc");
+            assert_eq!(actual_trace[i], expected_state);
         }
     }
 
     #[test]
     fn shadowing() {
-        use crate::contexts::execution_trace::CallResult::*;
-        use crate::contexts::execution_trace::ExecutedState::*;
+        use executed_state::*;
 
         let mut set_variables_vm = create_aqua_vm(set_variable_call_service(r#"["1","2"]"#), "set_variable");
         let mut vm_a = create_aqua_vm(echo_string_call_service(), "A");
@@ -457,18 +415,28 @@ mod tests {
         let res = call_vm!(vm_a, "", script.clone(), "[]", res.data);
         let res = call_vm!(vm_b, "", script, "[]", res.data);
 
-        let res: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid executed trace");
+        let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid executed trace");
+        let expected_trace = vec![
+            scalar_string_array(vec!["1", "2"]),
+            scalar_string_array(vec!["1", "2"]),
+            scalar_string("1"),
+            scalar_string("1"),
+            scalar_string("1"),
+            scalar_string("1"),
+            par(1, 1),
+            scalar_string("1"),
+            scalar_string("1"),
+            scalar_string("2"),
+            scalar_string("2"),
+            request_sent_by("B"),
+        ];
 
-        assert_eq!(res.len(), 12);
-        for i in 2..11 {
-            assert!(matches!(res[i], Call(Executed(..))) || matches!(res[i], Par(..)));
-        }
+        assert_eq!(actual_trace, expected_trace);
     }
 
     #[test]
     fn shadowing_scope() {
-        use crate::contexts::execution_trace::CallResult::*;
-        use crate::contexts::execution_trace::ExecutedState::*;
+        use executed_state::*;
 
         fn execute_script(script: String) -> Result<InterpreterOutcome, AquamarineVMError> {
             let mut set_variables_vm = create_aqua_vm(set_variable_call_service(r#"["1","2"]"#), "set_variable");
@@ -515,11 +483,21 @@ mod tests {
         );
 
         let res = execute_script(variable_shadowing_script).unwrap();
-        let res: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid executed trace");
+        let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid executed trace");
+        let expected_trace = vec![
+            scalar_string_array(vec!["1", "2"]),
+            scalar_string_array(vec!["1", "2"]),
+            scalar_string("value"),
+            scalar_string("1"),
+            scalar_string("1"),
+            scalar_string("1"),
+            scalar_string("1"),
+            scalar_string("value"),
+            scalar_string("value"),
+            scalar_string("2"),
+            request_sent_by("A"),
+        ];
 
-        assert_eq!(res.len(), 11);
-        for i in 0..10 {
-            assert!(matches!(res[i], Call(Executed(..))));
-        }
+        assert_eq!(actual_trace, expected_trace);
     }
 }

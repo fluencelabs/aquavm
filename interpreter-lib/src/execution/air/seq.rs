@@ -40,9 +40,8 @@ impl<'i> super::ExecutableInstruction<'i> for Seq<'i> {
 mod tests {
     use aqua_test_utils::call_vm;
     use aqua_test_utils::create_aqua_vm;
+    use aqua_test_utils::executed_state;
     use aqua_test_utils::unit_call_service;
-
-    use serde_json::json;
 
     #[test]
     fn seq_remote_remote() {
@@ -59,7 +58,9 @@ mod tests {
         let res = call_vm!(vm, "asd", script.clone(), "[]", "[]");
         assert_eq!(res.next_peer_pks, vec![String::from("remote_peer_id_1")]);
 
-        let initial_data = json!([{"call": {"executed": ["", "scalar"]}}]).to_string();
+        let initial_data = executed_state::scalar_string("");
+        let initial_data = serde_json::to_string(&initial_data).expect("default serializer shouldn't fail");
+
         let res = call_vm!(vm, "asd", script, "", initial_data);
         assert_eq!(res.next_peer_pks, vec![String::from("remote_peer_id_2")]);
     }

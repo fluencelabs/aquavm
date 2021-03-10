@@ -39,21 +39,14 @@ impl<'i> super::ExecutableInstruction<'i> for Match<'i> {
 
 #[cfg(test)]
 mod tests {
-    use crate::contexts::execution_trace::ExecutionTrace;
-    use crate::contexts::execution_trace::ValueType;
-    use crate::JValue;
-
     use aqua_test_utils::call_vm;
     use aqua_test_utils::create_aqua_vm;
     use aqua_test_utils::echo_string_call_service;
-
-    use std::rc::Rc;
+    use aqua_test_utils::executed_state;
+    use aqua_test_utils::ExecutionTrace;
 
     #[test]
     fn match_equal() {
-        use crate::contexts::execution_trace::CallResult::*;
-        use crate::contexts::execution_trace::ExecutedState::*;
-
         let set_variable_peer_id = "set_variable_peer_id";
         let mut set_variable_vm = create_aqua_vm(echo_string_call_service(), set_variable_peer_id);
 
@@ -81,18 +74,14 @@ mod tests {
         let res = call_vm!(vm, "asd", script, "", res.data);
 
         let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid json");
-        let executed_value = Executed(Rc::new(JValue::String(String::from("result_1"))), ValueType::Scalar);
-        let expected_executed_call_result = Call(executed_value);
+        let expected_state = executed_state::scalar_string("result_1");
 
         assert_eq!(actual_trace.len(), 3);
-        assert_eq!(actual_trace[2], expected_executed_call_result);
+        assert_eq!(actual_trace[2], expected_state);
     }
 
     #[test]
     fn match_not_equal() {
-        use crate::contexts::execution_trace::CallResult::*;
-        use crate::contexts::execution_trace::ExecutedState::*;
-
         let set_variable_peer_id = "set_variable_peer_id";
         let mut set_variable_vm = create_aqua_vm(echo_string_call_service(), set_variable_peer_id);
 
@@ -120,18 +109,14 @@ mod tests {
         let res = call_vm!(vm, "asd", script, "", res.data);
 
         let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid json");
-        let executed_value = Executed(Rc::new(JValue::String(String::from("result_2"))), ValueType::Scalar);
-        let expected_executed_call_result = Call(executed_value);
+        let expected_state = executed_state::scalar_string("result_2");
 
         assert_eq!(actual_trace.len(), 3);
-        assert_eq!(actual_trace[2], expected_executed_call_result);
+        assert_eq!(actual_trace[2], expected_state);
     }
 
     #[test]
     fn match_with_string() {
-        use crate::contexts::execution_trace::CallResult::*;
-        use crate::contexts::execution_trace::ExecutedState::*;
-
         let set_variable_peer_id = "set_variable_peer_id";
         let mut set_variable_vm = create_aqua_vm(echo_string_call_service(), set_variable_peer_id);
 
@@ -156,11 +141,10 @@ mod tests {
         let res = call_vm!(vm, "asd", script, "", res.data);
 
         let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid json");
-        let executed_value = Executed(Rc::new(JValue::String(String::from("result_1"))), ValueType::Scalar);
-        let expected_executed_call_result = Call(executed_value);
+        let expected_state = executed_state::scalar_string("result_1");
 
         assert_eq!(actual_trace.len(), 2);
-        assert_eq!(actual_trace[1], expected_executed_call_result);
+        assert_eq!(actual_trace[1], expected_state);
     }
 
     #[test]
