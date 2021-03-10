@@ -208,6 +208,26 @@ mod tests {
         assert!(res.next_peer_pks.is_empty());
     }
 
+    // Check that duplicate variables are impossible.
+    #[test]
+    fn duplicate_variables() {
+        let mut vm = create_aqua_vm(unit_call_service(), "some_peer_id");
+
+        let script = format!(
+            r#"
+            (seq
+                (call "some_peer_id" ("some_service_id" "local_fn_name") [] modules)
+                (call "some_peer_id" ("some_service_id" "local_fn_name") [] modules)
+            )
+        "#,
+        );
+
+        let res = call_vm!(vm, "asd", script, "", "");
+
+        assert_eq!(res.ret_code, 1005);
+        assert!(res.next_peer_pks.is_empty());
+    }
+
     // Check that string literals can be used as call parameters.
     #[test]
     fn string_parameters() {
