@@ -221,14 +221,15 @@ mod tests {
 
         let res = call_vm!(set_variable_vm, "", rfold.clone(), "[]", "[]");
         let res = call_vm!(vm, "", rfold, "[]", res.data);
-        let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid executed trace");
 
+        let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid executed trace");
         assert_eq!(actual_trace.len(), 6);
+
         let expected_state = executed_state::scalar_string_array(vec!["1", "2", "3", "4", "5"]);
         assert_eq!(actual_trace[0], expected_state);
 
         for i in 1..=5 {
-            let expected_state = executed_state::stream_number(i, "acc");
+            let expected_state = executed_state::stream_number(6 - i, "acc");
             assert_eq!(actual_trace[i], expected_state);
         }
     }

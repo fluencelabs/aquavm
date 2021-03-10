@@ -56,11 +56,13 @@ impl<'i> TraceMerger<'i> {
     }
 
     pub(crate) fn merge(mut self) -> MergeResult<ExecutionTrace> {
-        use crate::log_targets::EXECUTED_TRACE_MERGE;
-
         self.merge_subtree()?;
 
-        log::trace!(target: EXECUTED_TRACE_MERGE, "merged trace: {:?}", self.result_trace);
+        log::trace!(
+            target: crate::log_targets::EXECUTED_TRACE_MERGE,
+            "merged trace: {:?}",
+            self.result_trace
+        );
 
         Ok(self.result_trace)
     }
@@ -77,18 +79,12 @@ impl<'i> TraceMerger<'i> {
                 (Some(Call(prev_call)), Some(Call(current_call))) => self.merge_calls(prev_call, current_call)?,
                 (Some(Par(prev_par)), Some(Par(current_par))) => self.merge_pars(prev_par, current_par)?,
                 (Some(Fold(prev_fold)), Some(Fold(current_fold))) => self.merge_folds(prev_fold, current_fold)?,
-                (None, Some(s)) => {
-                    self.result_trace.push_back(s);
-
-                    let current_states = self.current_ctx.slider.drain_interval()?;
-                    self.result_trace.extend(current_states);
+                (None, Some(state)) => {
+                    self.merge_tail(state, MergingCtxType::Current)?;
                     break;
                 }
-                (Some(s), None) => {
-                    self.result_trace.push_back(s);
-
-                    let prev_states = self.prev_ctx.slider.drain_interval()?;
-                    self.result_trace.extend(prev_states);
+                (Some(state), None) => {
+                    self.merge_tail(state, MergingCtxType::Previous)?;
                     break;
                 }
                 (None, None) => break,
@@ -310,6 +306,25 @@ impl<'i> TraceMerger<'i> {
 
         Ok((prev_stream, current_stream))
     }
+
+    fn merge_tail(&mut self, state: ExecutedState, ctx_type: MergingCtxType) -> MergeResult<()> {
+        self.result_trace.push_back(state);
+
+        let ctx = match ctx_type {
+            MergingCtxType::Current => &mut self.current_ctx,
+            MergingCtxType::Previous => &mut self.prev_ctx,
+        };
+
+        let current_states = ctx.slider.drain_interval()?;
+        self.result_trace.extend(current_states);
+
+        Ok(())
+    }
+}
+
+enum MergingCtxType {
+    Current,
+    Previous,
 }
 
 fn extract_stream(merge_ctx: &MergeCtx, stream_name: &str) -> MergingStream {

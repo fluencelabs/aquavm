@@ -55,10 +55,10 @@ mod tests {
             )"#,
         );
 
-        let res = call_vm!(vm, "asd", script.clone(), "[]", "[]");
+        let res = call_vm!(vm, "asd", script.clone(), "", "");
         assert_eq!(res.next_peer_pks, vec![String::from("remote_peer_id_1")]);
 
-        let initial_data = executed_state::scalar_string("");
+        let initial_data = vec![executed_state::scalar_string("")];
         let initial_data = serde_json::to_string(&initial_data).expect("default serializer shouldn't fail");
 
         let res = call_vm!(vm, "asd", script, "", initial_data);
