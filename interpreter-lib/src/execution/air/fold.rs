@@ -344,6 +344,7 @@ mod tests {
         assert_eq!(res[0], Call(Executed(Rc::new(json!([])))));
     }
 
+    // Check that fold works with the join behaviour without hanging up.
     #[test]
     fn fold_with_join() {
         use crate::contexts::execution_trace::CallResult::*;
@@ -365,8 +366,8 @@ mod tests {
             )"#,
         );
 
-        let res = call_vm!(set_variable_vm, "", &fold_with_join, "[]", "[]");
-        let res = call_vm!(vm, "", fold_with_join, "[]", res.data);
+        let res = call_vm!(set_variable_vm, "", &fold_with_join, "", "");
+        let res = call_vm!(vm, "", fold_with_join, "", res.data);
         let res: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid executed trace");
 
         assert_eq!(res.len(), 1);
