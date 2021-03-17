@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-/*
 #![deny(
     dead_code,
     nonstandard_style,
@@ -24,8 +23,6 @@
     unused_unsafe,
     unreachable_patterns
 )]
-
- */
 
 mod parser;
 
