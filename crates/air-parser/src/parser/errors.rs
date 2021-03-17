@@ -17,9 +17,6 @@
 use crate::parser::lexer::LexerError;
 use thiserror::Error as ThisError;
 
-use std::num::ParseFloatError;
-use std::num::ParseIntError;
-
 #[derive(ThisError, Debug, Clone, PartialEq, Eq)]
 pub enum ParserError {
     #[error("{0}")]

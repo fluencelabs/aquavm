@@ -35,3 +35,9 @@ pub use lexer::AIRLexer;
 
 use errors::ParserError;
 use validator::VariableValidator;
+
+#[derive(Debug, Clone, Copy)]
+pub struct Span {
+    pub left: usize,
+    pub right: usize,
+}

@@ -3,6 +3,7 @@ use crate::parser::air_parser::into_variable_and_path;
 use crate::parser::air_parser::make_flattened_error;
 use crate::parser::ParserError;
 use crate::parser::VariableValidator;
+use crate::parser::Span;
 use crate::parser::lexer::Token;
 use crate::parser::lexer::Number;
 
@@ -15,10 +16,13 @@ grammar<'err, 'input, 'i>(input: &'input str, errors: &'err mut Vec<ErrorRecover
 pub AIR = Instr;
 
 Instr: Box<Instruction<'input>> = {
-    "(" call <p:PeerPart> <f:FPart> <args:Args> <output:Output?> ")" => {
+    <left: @L> "(" call <p:PeerPart> <f:FPart> <args:Args> <output:Output?> ")" <right: @R> => {
         let output = output.unwrap_or(CallOutputValue::None);
         let args = Rc::new(args);
         let call = Call { peer_part: p, function_part: f, args, output };
+        let span = Span { left, right };
+        validator.check_call(&call, errors, span);
+
         Box::new(Instruction::Call(call))
     },
 
@@ -26,12 +30,21 @@ Instr: Box<Instruction<'input>> = {
     "(" par <l:Instr> <r:Instr> ")" => Box::new(Instruction::Par(Par(l, r))),
     "(" null ")" => Box::new(Instruction::Null(Null)),
 
-    "(" fold <iterable:Iterable> <iterator:Alphanumeric> <i:Instr> ")" => {
+    <left: @L> "(" fold <iterable:Iterable> <iterator:Alphanumeric> <i:Instr> ")" <right: @R> => {
         let instruction = Rc::new(*i);
         let fold = Fold { iterable, iterator, instruction };
+        let span = Span { left, right };
+        validator.check_fold(&fold, errors, span);
+
         Box::new(Instruction::Fold(fold))
     },
-    "(" next <i:Alphanumeric> ")" => Box::new(Instruction::Next(Next(i))),
+    <left: @L> "(" next <i:Alphanumeric> ")" <right: @R> => {
+        let next = Next(i);
+        let span = Span { left, right };
+        validator.check_next(&next, errors, span);
+
+        Box::new(Instruction::Next(next))
+    },
 
 
     "(" xor <l:Instr> <r:Instr> ")" => Box::new(Instruction::Xor(Xor(l, r))),
