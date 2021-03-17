@@ -1,7 +1,7 @@
 use crate::parser::ast::*;
 use crate::parser::air_parser::into_variable_and_path;
 use crate::parser::air_parser::make_flattened_error;
-use crate::parser::lexer::LexerError;
+use crate::parser::ParserError;
 use crate::parser::VariableValidator;
 use crate::parser::lexer::Token;
 use crate::parser::lexer::Number;
@@ -10,7 +10,7 @@ use lalrpop_util::ErrorRecovery;
 use std::rc::Rc;
 
 // the only thing why input matters here is just introducing lifetime for Token
-grammar<'err, 'input, 'i>(input: &'input str, errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>, validator: &'i mut VariableValidator<'input>);
+grammar<'err, 'input, 'i>(input: &'input str, errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>, validator: &'i mut VariableValidator<'input>);
 
 pub AIR = Instr;
 
@@ -18,10 +18,8 @@ Instr: Box<Instruction<'input>> = {
     "(" call <p:PeerPart> <f:FPart> <args:Args> <output:Output?> ")" => {
         let output = output.unwrap_or(CallOutputValue::None);
         let args = Rc::new(args);
-        let call = Call {peer_part: p, function_part: f, args, output};
-
-        let call = Box::new(Instruction::Call(call));
-        call
+        let call = Call { peer_part: p, function_part: f, args, output };
+        Box::new(Instruction::Call(call))
     },
 
     "(" seq <l:Instr> <r:Instr> ")" => Box::new(Instruction::Seq(Seq(l, r))),
@@ -137,7 +135,7 @@ Matchable: MatchableValue<'input> = {
 
 extern {
     type Location = usize;
-    type Error = LexerError;
+    type Error = ParserError;
 
     enum Token<'input> {
         "(" => Token::OpenRoundBracket,

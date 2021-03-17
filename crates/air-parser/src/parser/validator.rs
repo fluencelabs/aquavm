@@ -42,7 +42,9 @@ impl<'i> VariableValidator<'i> {
         <_>::default()
     }
 
-    pub(super) fn met_call(&mut self, _call: &'i Box<Instruction>) {}
+    pub(super) fn check_call(&self, call: &Call) {}
+
+    pub(super) fn check_fold(&self, fold: &Fold) {}
 
     pub(super) fn met_fold(&self, _fold: &'i Fold) {}
 

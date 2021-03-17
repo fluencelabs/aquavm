@@ -19,6 +19,7 @@ use super::ast::Instruction;
 use super::lexer::AIRLexer;
 use super::lexer::LexerError;
 use super::lexer::Token;
+use super::ParserError;
 
 use crate::parser::VariableValidator;
 use air::AIRParser;
@@ -60,7 +61,7 @@ pub fn parse(air_script: &str) -> Result<Box<Instruction<'_>>, String> {
 fn report_errors(
     file_id: usize,
     files: SimpleFiles<&str, &str>,
-    errors: Vec<ErrorRecovery<usize, Token<'_>, LexerError>>,
+    errors: Vec<ErrorRecovery<usize, Token<'_>, ParserError>>,
 ) -> String {
     let labels = errors_to_labels(file_id, errors);
     let diagnostic = Diagnostic::error().with_labels(labels);
@@ -80,7 +81,7 @@ fn report_errors(
 
 fn errors_to_labels(
     file_id: usize,
-    errors: Vec<ErrorRecovery<usize, Token<'_>, LexerError>>,
+    errors: Vec<ErrorRecovery<usize, Token<'_>, ParserError>>,
 ) -> Vec<Label<usize>> {
     errors
         .into_iter()
@@ -100,7 +101,7 @@ fn errors_to_labels(
                 Label::primary(file_id, location..(location + 1))
                     .with_message(format!("expected {}", pretty_expected(expected)))
             }
-            ParseError::User { error } => lexical_error_to_label(file_id, error),
+            ParseError::User { error } => parser_error_to_label(file_id, error),
         })
         .collect()
 }
@@ -110,6 +111,20 @@ fn pretty_expected(expected: Vec<String>) -> String {
         "<nothing>".to_string()
     } else {
         expected.join(" or ")
+    }
+}
+
+fn parser_error_to_label(file_id: usize, error: ParserError) -> Label<usize> {
+    use ParserError::*;
+
+    match error {
+        LexerError(error) => lexical_error_to_label(file_id, error),
+        UndefinedIterable(start, end, _) => {
+            Label::primary(file_id, start..end).with_message(error.to_string())
+        }
+        UndefinedVariable(start, end, _) => {
+            Label::primary(file_id, start..end).with_message(error.to_string())
+        }
     }
 }
 
@@ -169,8 +184,9 @@ pub(super) fn make_flattened_error(
     start_pos: usize,
     token: Token<'_>,
     end_pos: usize,
-) -> ErrorRecovery<usize, Token<'_>, LexerError> {
+) -> ErrorRecovery<usize, Token<'_>, ParserError> {
     let error = LexerError::CallArgsNotFlattened(start_pos, end_pos);
+    let error = ParserError::LexerError(error);
     let error = ParseError::User { error };
 
     let dropped_tokens = vec![(start_pos, token, end_pos)];

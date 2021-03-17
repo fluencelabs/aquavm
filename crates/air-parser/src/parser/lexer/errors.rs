@@ -58,6 +58,29 @@ pub enum LexerError {
     CallArgsNotFlattened(usize, usize),
 }
 
+use super::Token;
+use crate::parser::air::__ToTriple;
+use crate::parser::ParserError;
+
+impl<'err, 'input, 'i> __ToTriple<'err, 'input, 'i>
+    for Result<(usize, Token<'input>, usize), LexerError>
+{
+    fn to_triple(
+        value: Self,
+    ) -> Result<
+        (usize, Token<'input>, usize),
+        lalrpop_util::ParseError<usize, Token<'input>, ParserError>,
+    > {
+        match value {
+            Ok(v) => Ok(v),
+            Err(error) => {
+                let error = ParserError::LexerError(error);
+                Err(lalrpop_util::ParseError::User { error })
+            }
+        }
+    }
+}
+
 impl From<std::convert::Infallible> for LexerError {
     fn from(_: std::convert::Infallible) -> Self {
         unreachable!()

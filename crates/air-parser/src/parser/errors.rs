@@ -14,24 +14,26 @@
  * limitations under the License.
  */
 
-pub mod air_parser;
-mod lexer;
+use crate::parser::lexer::LexerError;
+use thiserror::Error as ThisError;
 
-// air is auto-generated, so exclude it from `cargo fmt -- --check` and `cargo clippy`
-#[rustfmt::skip]
-#[allow(clippy::all)]
-mod air;
+use std::num::ParseFloatError;
+use std::num::ParseIntError;
 
-pub mod ast;
-mod errors;
-mod validator;
+#[derive(ThisError, Debug, Clone, PartialEq, Eq)]
+pub enum ParserError {
+    #[error("{0}")]
+    LexerError(#[from] LexerError),
 
-#[cfg(test)]
-pub mod tests;
+    #[error("variable '{2}' wasn't defined")]
+    UndefinedVariable(usize, usize, String),
 
-pub use self::air_parser::parse;
-pub use air::AIRParser;
-pub use lexer::AIRLexer;
+    #[error("iterable '{2}' wasn't defined")]
+    UndefinedIterable(usize, usize, String),
+}
 
-use errors::ParserError;
-use validator::VariableValidator;
+impl From<std::convert::Infallible> for ParserError {
+    fn from(_: std::convert::Infallible) -> Self {
+        unreachable!()
+    }
+}
