@@ -119,6 +119,9 @@ fn parser_error_to_label(file_id: usize, error: ParserError) -> Label<usize> {
 
     match error {
         LexerError(error) => lexical_error_to_label(file_id, error),
+        CallArgsNotFlattened(start, end) => {
+            Label::primary(file_id, start..end).with_message(error.to_string())
+        }
         UndefinedIterable(start, end, _) => {
             Label::primary(file_id, start..end).with_message(error.to_string())
         }
@@ -164,9 +167,6 @@ fn lexical_error_to_label(file_id: usize, error: LexerError) -> Label<usize> {
         LeadingDot(start, end) => {
             Label::primary(file_id, start..end).with_message(error.to_string())
         }
-        CallArgsNotFlattened(start, end) => {
-            Label::primary(file_id, start..end).with_message(error.to_string())
-        }
     }
 }
 
@@ -185,8 +185,7 @@ pub(super) fn make_flattened_error(
     token: Token<'_>,
     end_pos: usize,
 ) -> ErrorRecovery<usize, Token<'_>, ParserError> {
-    let error = LexerError::CallArgsNotFlattened(start_pos, end_pos);
-    let error = ParserError::LexerError(error);
+    let error = ParserError::CallArgsNotFlattened(start_pos, end_pos);
     let error = ParseError::User { error };
 
     let dropped_tokens = vec![(start_pos, token, end_pos)];

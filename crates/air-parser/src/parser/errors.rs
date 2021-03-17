@@ -25,6 +25,9 @@ pub enum ParserError {
     #[error("{0}")]
     LexerError(#[from] LexerError),
 
+    #[error("while using json path in call triplet, result should be flattened, add ! at the end")]
+    CallArgsNotFlattened(usize, usize),
+
     #[error("variable '{2}' wasn't defined")]
     UndefinedVariable(usize, usize, String),
 

@@ -53,9 +53,6 @@ pub enum LexerError {
 
     #[error("leading dot without any symbols before - please write 0 if it's float or variable name if it's json path")]
     LeadingDot(usize, usize),
-
-    #[error("while using json path in call triplet, result should be flattened, add ! at the end")]
-    CallArgsNotFlattened(usize, usize),
 }
 
 use super::Token;
