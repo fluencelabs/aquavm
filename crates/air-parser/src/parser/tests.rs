@@ -15,13 +15,25 @@
  */
 
 use crate::ast;
+use crate::parser::AIRParser;
+use crate::parser::ParserError;
 use ast::Instruction;
 
 use fstrings::f;
+use lalrpop_util::ParseError;
 use std::rc::Rc;
 
+thread_local!(static TEST_PARSER: AIRParser = AIRParser::new());
+
 fn parse(source_code: &str) -> Instruction {
-    *crate::parse(source_code).expect("parsing failed")
+    *TEST_PARSER.with(|parser| {
+        let mut errors = Vec::new();
+        let lexer = crate::parser::AIRLexer::new(source_code);
+        let mut validator = crate::parser::VariableValidator::new();
+        parser
+            .parse(source_code, &mut errors, &mut validator, lexer)
+            .expect("parsing should be successfull")
+    })
 }
 
 #[test]
@@ -152,12 +164,52 @@ fn parse_json_path_without_flattening() {
 
     let parser = crate::AIRParser::new();
     let mut errors = Vec::new();
+    let mut validator = super::VariableValidator::new();
     parser
-        .parse(source_code, &mut errors, lexer)
+        .parse(source_code, &mut errors, &mut validator, lexer)
         .expect("parser shoudn't fail");
 
-    assert_eq!(errors.len(), 1);
-    assert!(matches!(errors[0], lalrpop_util::ErrorRecovery { .. }));
+    assert_eq!(errors.len(), 3);
+    for i in 0..3 {
+        let error = &errors[i].error;
+        let parser_error = match error {
+            ParseError::User { error } => error,
+            _ => panic!("unexpected error type"),
+        };
+
+        assert!(
+            matches!(parser_error, ParserError::UndefinedVariable(..))
+                || matches!(parser_error, ParserError::CallArgsNotFlattened(..))
+        );
+    }
+}
+
+#[test]
+fn parse_non_defined_variable() {
+    let source_code = r#"
+        (call id "f" ["hello" name] void[])
+        "#;
+
+    let lexer = crate::AIRLexer::new(source_code);
+
+    let parser = crate::AIRParser::new();
+    let mut errors = Vec::new();
+    let mut validator = super::VariableValidator::new();
+    parser
+        .parse(source_code, &mut errors, &mut validator, lexer)
+        .expect("parser shoudn't fail");
+
+    assert_eq!(errors.len(), 2);
+
+    for i in 0..2 {
+        let error = &errors[i].error;
+        let parser_error = match error {
+            ParseError::User { error } => error,
+            _ => panic!("unexpected error type"),
+        };
+
+        assert!(matches!(parser_error, ParserError::UndefinedVariable(..)));
+    }
 }
 
 #[test]

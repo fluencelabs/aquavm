@@ -67,12 +67,14 @@ impl<'i> VariableValidator<'i> {
         }
     }
 
-    pub(super) fn met_variable(&mut self, str: &'i str) {
-        self.met_variables.insert(str);
+    pub(super) fn met_variable(&mut self, variable: &'i str) {
+        println!("met variable: {}", variable);
+        self.met_variables.insert(variable);
     }
 
-    pub(super) fn met_iterable(&mut self, str: &'i str) {
-        self.met_iterable.insert(str);
+    pub(super) fn met_iterable(&mut self, iterable: &'i str) {
+        println!("met iterable: {}", iterable);
+        self.met_iterable.insert(iterable);
     }
 
     fn check_peer_part<'err>(
@@ -170,7 +172,7 @@ impl<'i> VariableValidator<'i> {
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'i>, ParserError>>,
         span: Span,
     ) {
-        if !self.met_variables.contains(variable_name) || !self.met_iterable.contains(variable_name)
+        if !self.met_variables.contains(variable_name) && !self.met_iterable.contains(variable_name)
         {
             add_to_errors(variable_name.to_string(), errors, span, Token::Call);
         }
