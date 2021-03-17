@@ -25,6 +25,11 @@ use lalrpop_util::ParseError;
 
 use std::collections::HashSet;
 
+/// This is an intermediate realization of variable and iterable validator.
+/// Now it checks them in a non strict way, by just tracking all met variables
+/// set in call and iterables set in fold without any context. Then checking
+/// all other values used inside call, fold, next instructions are checked to
+/// be set in one of preceding calls or fold.
 #[derive(Debug, Default, Clone)]
 pub struct VariableValidator<'i> {
     met_variables: HashSet<&'i str>,
@@ -68,12 +73,10 @@ impl<'i> VariableValidator<'i> {
     }
 
     pub(super) fn met_variable(&mut self, variable: &'i str) {
-        println!("met variable: {}", variable);
         self.met_variables.insert(variable);
     }
 
     pub(super) fn met_iterable(&mut self, iterable: &'i str) {
-        println!("met iterable: {}", iterable);
         self.met_iterable.insert(iterable);
     }
 
