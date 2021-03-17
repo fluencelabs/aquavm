@@ -23,6 +23,7 @@ mod lexer;
 mod air;
 
 pub mod ast;
+mod validator;
 
 #[cfg(test)]
 pub mod tests;
@@ -30,3 +31,4 @@ pub mod tests;
 pub use self::air_parser::parse;
 pub use air::AIRParser;
 pub use lexer::AIRLexer;
+use validator::VariableValidator;

@@ -20,13 +20,14 @@ use super::lexer::AIRLexer;
 use super::lexer::LexerError;
 use super::lexer::Token;
 
+use crate::parser::VariableValidator;
+use air::AIRParser;
+
 use codespan_reporting::diagnostic::{Diagnostic, Label};
 use codespan_reporting::files::SimpleFiles;
 use codespan_reporting::term;
 use codespan_reporting::term::termcolor::{Buffer, ColorChoice, StandardStream};
 use lalrpop_util::{ErrorRecovery, ParseError};
-
-use air::AIRParser;
 
 // Caching parser to cache internal regexes, which are expensive to instantiate
 // See also https://github.com/lalrpop/lalrpop/issues/269
@@ -40,7 +41,8 @@ pub fn parse(air_script: &str) -> Result<Box<Instruction<'_>>, String> {
     PARSER.with(|parser| {
         let mut errors = Vec::new();
         let lexer = AIRLexer::new(air_script);
-        match parser.parse(air_script, &mut errors, lexer) {
+        let mut validator = VariableValidator::new();
+        match parser.parse(air_script, &mut errors, &mut validator, lexer) {
             Ok(r) if errors.is_empty() => Ok(r),
             Ok(_) => Err(report_errors(file_id, files, errors)),
             Err(err) => Err(report_errors(
