@@ -358,10 +358,10 @@ mod tests {
             (seq
                 (call "set_variable" ("" "") [] iterable)
                 (par
-                    (call "unknown_peer" ("" "") [] non_def_variable)
+                    (call "unknown_peer" ("" "") [] lazy_def_variable)
                     (fold iterable i
                         (seq
-                            (call "A" ("" "") [non_def_variable.$.hash!] acc[])
+                            (call "A" ("" "") [lazy_def_variable.$.hash!] acc[])
                             (next i)
                         )
                     )
@@ -373,8 +373,7 @@ mod tests {
         let res = call_vm!(vm, "", fold_with_join, "", res.data);
         let res: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid executed trace");
 
-        assert_eq!(res.len(), 1);
-        assert_eq!(res[0], Call(Executed(Rc::new(json!(["1", "2"])))));
+        assert_eq!(res.len(), 3);
     }
 
     #[test]
