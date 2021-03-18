@@ -11,7 +11,7 @@ use lalrpop_util::ErrorRecovery;
 use std::rc::Rc;
 
 // the only thing why input matters here is just introducing lifetime for Token
-grammar<'err, 'input, 'i>(input: &'input str, errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>, validator: &'i mut VariableValidator<'input>);
+grammar<'err, 'input, 'v>(input: &'input str, errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>, validator: &'v mut VariableValidator<'input>);
 
 pub AIR = Instr;
 
@@ -21,7 +21,7 @@ Instr: Box<Instruction<'input>> = {
         let args = Rc::new(args);
         let call = Call { peer_part: p, function_part: f, args, output };
         let span = Span { left, right };
-        validator.check_call(&call, errors, span);
+        validator.meet_call(&call, span);
 
         Box::new(Instruction::Call(call))
     },
@@ -34,18 +34,17 @@ Instr: Box<Instruction<'input>> = {
         let instruction = Rc::new(*i);
         let fold = Fold { iterable, iterator, instruction };
         let span = Span { left, right };
-        validator.check_fold(&fold, errors, span);
+        validator.meet_fold(&fold, span);
 
         Box::new(Instruction::Fold(fold))
     },
     <left: @L> "(" next <i:Alphanumeric> ")" <right: @R> => {
         let next = Next(i);
         let span = Span { left, right };
-        validator.check_next(&next, errors, span);
+        validator.meet_next(&next, span);
 
         Box::new(Instruction::Next(next))
     },
-
 
     "(" xor <l:Instr> <r:Instr> ")" => Box::new(Instruction::Xor(Xor(l, r))),
 
@@ -77,14 +76,8 @@ PeerPart: PeerPart<'input> = {
 }
 
 Output: CallOutputValue<'input> = {
-    <s:Alphanumeric> => {
-        validator.met_variable(s);
-        CallOutputValue::Scalar(s)
-    },
-    <a:Accumulator> => {
-        validator.met_variable(a);
-        CallOutputValue::Accumulator(a)
-    }
+    <s:Alphanumeric> => CallOutputValue::Scalar(s),
+    <a:Accumulator> => CallOutputValue::Accumulator(a),
 };
 
 Function = CallInstrValue;
@@ -123,13 +116,9 @@ CallInstrArgValue: CallInstrArgValue<'input> = {
 }
 
 Iterable: IterableValue<'input> = {
-    <s:Alphanumeric> => {
-        validator.met_iterable(s);
-        IterableValue::Variable(s)
-    },
+    <s:Alphanumeric> => IterableValue::Variable(s),
     <v:JsonPath> => {
         let (variable, path) = into_variable_and_path(v.0, v.1, v.2);
-        validator.met_iterable(variable);
 
         let should_flatten = v.2;
         IterableValue::JsonPath { variable, path, should_flatten }

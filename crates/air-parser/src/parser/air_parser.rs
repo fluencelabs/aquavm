@@ -43,7 +43,12 @@ pub fn parse(air_script: &str) -> Result<Box<Instruction<'_>>, String> {
         let mut errors = Vec::new();
         let lexer = AIRLexer::new(air_script);
         let mut validator = VariableValidator::new();
-        match parser.parse(air_script, &mut errors, &mut validator, lexer) {
+        let result = parser.parse(air_script, &mut errors, &mut validator, lexer);
+
+        let validator_errors = validator.finalize();
+        errors.extend(validator_errors);
+
+        match result {
             Ok(r) if errors.is_empty() => Ok(r),
             Ok(_) => Err(report_errors(file_id, files, errors)),
             Err(err) => Err(report_errors(

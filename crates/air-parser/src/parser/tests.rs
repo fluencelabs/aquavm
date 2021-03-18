@@ -155,7 +155,7 @@ fn parse_json_path() {
 }
 
 #[test]
-fn parse_json_path_without_flattening() {
+fn parse_undefined_variable() {
     let source_code = r#"
         (call id.$.a "f" ["hello" name] void[])
         "#;
@@ -169,25 +169,32 @@ fn parse_json_path_without_flattening() {
         .parse(source_code, &mut errors, &mut validator, lexer)
         .expect("parser shoudn't fail");
 
-    assert_eq!(errors.len(), 3);
-    for i in 0..3 {
+    let errors = validator.finalize();
+
+    assert_eq!(errors.len(), 2);
+    for i in 0..2 {
         let error = &errors[i].error;
         let parser_error = match error {
             ParseError::User { error } => error,
             _ => panic!("unexpected error type"),
         };
 
-        assert!(
-            matches!(parser_error, ParserError::UndefinedVariable(..))
-                || matches!(parser_error, ParserError::CallArgsNotFlattened(..))
-        );
+        assert!(matches!(parser_error, ParserError::UndefinedVariable(..)));
     }
 }
 
 #[test]
-fn parse_non_defined_variable() {
+fn parse_undefined_iterable() {
     let source_code = r#"
-        (call id "f" ["hello" name] void[])
+        (seq
+            (call "" ("" "") [] iterable)
+            (fold iterable i
+                (seq
+                    (call "" ("" "") ["hello" ""] void[])
+                    (next j)
+                )
+            )
+        )
         "#;
 
     let lexer = crate::AIRLexer::new(source_code);
@@ -199,17 +206,17 @@ fn parse_non_defined_variable() {
         .parse(source_code, &mut errors, &mut validator, lexer)
         .expect("parser shoudn't fail");
 
-    assert_eq!(errors.len(), 2);
+    let errors = validator.finalize();
 
-    for i in 0..2 {
-        let error = &errors[i].error;
-        let parser_error = match error {
-            ParseError::User { error } => error,
-            _ => panic!("unexpected error type"),
-        };
+    assert_eq!(errors.len(), 1);
 
-        assert!(matches!(parser_error, ParserError::UndefinedVariable(..)));
-    }
+    let error = &errors[0].error;
+    let parser_error = match error {
+        ParseError::User { error } => error,
+        _ => panic!("unexpected error type"),
+    };
+
+    assert!(matches!(parser_error, ParserError::UndefinedIterable(..)));
 }
 
 #[test]

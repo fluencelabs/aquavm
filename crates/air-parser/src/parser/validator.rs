@@ -23,7 +23,7 @@ use crate::parser::Span;
 use lalrpop_util::ErrorRecovery;
 use lalrpop_util::ParseError;
 
-use std::collections::HashSet;
+use multimap::MultiMap;
 
 /// This is an intermediate realization of variable and iterable validator.
 /// Now it checks them in a non strict way, by just tracking all met variables
@@ -32,8 +32,18 @@ use std::collections::HashSet;
 /// be set in one of preceding calls or fold.
 #[derive(Debug, Default, Clone)]
 pub struct VariableValidator<'i> {
-    met_variables: HashSet<&'i str>,
-    met_iterable: HashSet<&'i str>,
+    /// Contains variables met in call outputs.
+    met_variables: MultiMap<&'i str, Span>,
+
+    /// Contains iterables met in fold iterables.
+    met_iterable: MultiMap<&'i str, Span>,
+
+    /// These variables from calls and folds haven't been resolved at the first meet
+    unresolved_variables: MultiMap<&'i str, Span>,
+
+    /// Contains all met iterable in call and next, they will be resolved after the whole parsing
+    /// due to the way how lalrpop work.
+    unresolved_iterables: MultiMap<&'i str, Span>,
 }
 
 impl<'i> VariableValidator<'i> {
@@ -41,165 +51,151 @@ impl<'i> VariableValidator<'i> {
         <_>::default()
     }
 
-    pub(super) fn check_call<'err>(
-        &self,
-        call: &Call,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'i>, ParserError>>,
-        span: Span,
-    ) {
-        self.check_peer_part(&call.peer_part, errors, span);
-        self.check_function_part(&call.function_part, errors, span);
-        self.check_args(&call.args, errors, span);
+    pub(super) fn meet_call(&mut self, call: &Call<'i>, span: Span) {
+        self.meet_peer_part(&call.peer_part, span);
+        self.meet_function_part(&call.function_part, span);
+        self.meet_args(&call.args, span);
+        self.meet_call_output(&call.output, span)
     }
 
-    pub(super) fn check_fold<'err>(
-        &self,
-        fold: &Fold,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'i>, ParserError>>,
-        span: Span,
-    ) {
-        self.check_iterable_value(&fold.iterable, errors, span);
+    pub(super) fn meet_fold(&mut self, fold: &Fold<'i>, span: Span) {
+        self.meet_iterable_value(&fold.iterable, span);
+        self.meet_iterator(&fold.iterator, span);
     }
 
-    pub(super) fn check_next<'err>(
-        &self,
-        next: &Next,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'i>, ParserError>>,
-        span: Span,
-    ) {
-        if !self.met_iterable.contains(next.0) {
-            add_to_errors(next.0.to_string(), errors, span, Token::Next);
+    pub(super) fn meet_next(&mut self, next: &Next<'i>, span: Span) {
+        let iterable_name = next.0;
+        // due to the right to left convolution in lalrpop, next will be met earlier than
+        // a corresponding fold with the definition of this iterable, so they're just put
+        // without a check for being already met
+        self.unresolved_iterables.insert(iterable_name, span);
+    }
+
+    pub(super) fn finalize<'err>(&self) -> Vec<ErrorRecovery<usize, Token<'i>, ParserError>> {
+        let mut errors = Vec::new();
+        for (name, span) in self.unresolved_variables.iter() {
+            if !contains(&self.met_variables, name, *span)
+                && !contains(&self.met_iterable, name, *span)
+            {
+                add_to_errors(*name, &mut errors, *span, Token::Call);
+            }
         }
+
+        for (name, span) in self.unresolved_iterables.iter() {
+            if !contains(&self.met_iterable, name, *span) {
+                add_to_errors(*name, &mut errors, *span, Token::Next);
+            }
+        }
+
+        errors
     }
 
-    pub(super) fn met_variable(&mut self, variable: &'i str) {
-        self.met_variables.insert(variable);
-    }
-
-    pub(super) fn met_iterable(&mut self, iterable: &'i str) {
-        self.met_iterable.insert(iterable);
-    }
-
-    fn check_peer_part<'err>(
-        &self,
-        peer_part: &PeerPart<'_>,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'i>, ParserError>>,
-        span: Span,
-    ) {
+    fn meet_peer_part(&mut self, peer_part: &PeerPart<'i>, span: Span) {
         match peer_part {
-            PeerPart::PeerPk(peer_pk) => self.check_instr_value(peer_pk, errors, span),
+            PeerPart::PeerPk(peer_pk) => self.meet_instr_value(peer_pk, span),
             PeerPart::PeerPkWithServiceId(peer_pk, service_id) => {
-                self.check_instr_value(peer_pk, errors, span);
-                self.check_instr_value(service_id, errors, span);
+                self.meet_instr_value(peer_pk, span);
+                self.meet_instr_value(service_id, span);
             }
         }
     }
 
-    fn check_function_part<'err>(
-        &self,
-        function_part: &FunctionPart<'_>,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'i>, ParserError>>,
-        span: Span,
-    ) {
+    fn meet_function_part(&mut self, function_part: &FunctionPart<'i>, span: Span) {
         match function_part {
-            FunctionPart::FuncName(func_name) => self.check_instr_value(func_name, errors, span),
+            FunctionPart::FuncName(func_name) => self.meet_instr_value(func_name, span),
             FunctionPart::ServiceIdWithFuncName(service_id, func_name) => {
-                self.check_instr_value(service_id, errors, span);
-                self.check_instr_value(func_name, errors, span);
+                self.meet_instr_value(service_id, span);
+                self.meet_instr_value(func_name, span);
             }
         }
     }
 
-    fn check_args<'err>(
-        &self,
-        args: &[CallInstrArgValue<'_>],
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'i>, ParserError>>,
-        span: Span,
-    ) {
+    fn meet_args(&mut self, args: &[CallInstrArgValue<'i>], span: Span) {
         for arg in args {
-            self.check_instr_arg_value(arg, errors, span);
+            self.meet_instr_arg_value(arg, span);
         }
     }
 
-    fn check_instr_value<'err>(
-        &self,
-        instr_value: &CallInstrValue,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'i>, ParserError>>,
-        span: Span,
-    ) {
+    fn meet_instr_value(&mut self, instr_value: &CallInstrValue<'i>, span: Span) {
         match instr_value {
-            CallInstrValue::JsonPath { variable, .. } => {
-                self.check_call_variable(variable, errors, span)
-            }
-            CallInstrValue::Variable(variable) => self.check_call_variable(variable, errors, span),
+            CallInstrValue::JsonPath { variable, .. } => self.meet_variable(variable, span),
+            CallInstrValue::Variable(variable) => self.meet_variable(variable, span),
             _ => {}
         }
     }
 
-    fn check_instr_arg_value<'err>(
-        &self,
-        instr_arg_value: &CallInstrArgValue,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'i>, ParserError>>,
-        span: Span,
-    ) {
+    fn meet_instr_arg_value(&mut self, instr_arg_value: &CallInstrArgValue<'i>, span: Span) {
         match instr_arg_value {
-            CallInstrArgValue::JsonPath { variable, .. } => {
-                self.check_call_variable(variable, errors, span)
-            }
-            CallInstrArgValue::Variable(variable) => {
-                self.check_call_variable(variable, errors, span)
-            }
+            CallInstrArgValue::JsonPath { variable, .. } => self.meet_variable(variable, span),
+            CallInstrArgValue::Variable(variable) => self.meet_variable(variable, span),
             _ => {}
         }
     }
 
-    fn check_iterable_value<'err>(
-        &self,
-        iterable_value: &IterableValue,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'i>, ParserError>>,
-        span: Span,
-    ) {
+    fn meet_variable(&mut self, name: &'i str, span: Span) {
+        if !contains(&self.met_variables, name, span) && !contains(&self.met_iterable, name, span) {
+            self.unresolved_variables.insert(name, span);
+        }
+    }
+
+    fn meet_call_output(&mut self, call_output: &CallOutputValue<'i>, span: Span) {
+        let variable_name = match call_output {
+            CallOutputValue::Scalar(variable) => variable,
+            CallOutputValue::Accumulator(accumulator) => accumulator,
+            CallOutputValue::None => return,
+        };
+
+        self.met_variables.insert(variable_name, span);
+    }
+
+    fn meet_iterable_value(&mut self, iterable_value: &IterableValue<'i>, span: Span) {
         match iterable_value {
-            IterableValue::JsonPath { variable, .. } => {
-                self.check_iterable_variable(variable, errors, span)
-            }
-            IterableValue::Variable(variable) => {
-                self.check_iterable_variable(variable, errors, span)
-            }
+            IterableValue::JsonPath { variable, .. } => self.meet_variable(variable, span),
+            IterableValue::Variable(variable) => self.meet_variable(variable, span),
         }
     }
 
-    fn check_call_variable<'err>(
-        &self,
-        variable_name: &str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'i>, ParserError>>,
-        span: Span,
-    ) {
-        if !self.met_variables.contains(variable_name) && !self.met_iterable.contains(variable_name)
-        {
-            add_to_errors(variable_name.to_string(), errors, span, Token::Call);
-        }
+    fn meet_iterator(&mut self, iterator: &'i str, span: Span) {
+        self.met_iterable.insert(iterator, span);
     }
+}
 
-    fn check_iterable_variable<'err>(
-        &self,
-        variable_name: &str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'i>, ParserError>>,
-        span: Span,
-    ) {
-        if !self.met_iterable.contains(variable_name) {
-            add_to_errors(variable_name.to_string(), errors, span, Token::Fold);
+use std::cmp::Ordering;
+impl PartialOrd for Span {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        let self_min = std::cmp::min(self.left, self.right);
+        let other_min = std::cmp::min(other.left, other.right);
+
+        if self_min < other_min {
+            Some(Ordering::Less)
+        } else if self == other {
+            Some(Ordering::Equal)
+        } else {
+            Some(Ordering::Greater)
         }
     }
 }
 
+fn contains(multimap: &MultiMap<&str, Span>, key: &str, key_span: Span) -> bool {
+    let found_spans = match multimap.get_vec(key) {
+        Some(found_spans) => found_spans,
+        None => return false,
+    };
+
+    found_spans.iter().any(|s| s < &key_span)
+}
+
 fn add_to_errors<'err, 'i>(
-    variable_name: String,
+    variable_name: impl Into<String>,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'i>, ParserError>>,
     span: Span,
     token: Token<'i>,
 ) {
-    let error = ParserError::UndefinedVariable(span.left, span.right, variable_name);
+    let variable_name = variable_name.into();
+    let error = match token {
+        Token::Next => ParserError::UndefinedIterable(span.left, span.right, variable_name),
+        _ => ParserError::UndefinedVariable(span.left, span.right, variable_name),
+    };
     let error = ParseError::User { error };
 
     let dropped_tokens = vec![(span.left, token, span.right)];

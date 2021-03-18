@@ -36,7 +36,7 @@ pub use lexer::AIRLexer;
 use errors::ParserError;
 use validator::VariableValidator;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Span {
     pub left: usize,
     pub right: usize,
