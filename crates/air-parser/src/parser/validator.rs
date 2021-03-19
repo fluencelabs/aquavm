@@ -24,6 +24,7 @@ use lalrpop_util::ErrorRecovery;
 use lalrpop_util::ParseError;
 
 use multimap::MultiMap;
+use std::collections::HashMap;
 
 /// This is an intermediate realization of variable and iterable validator.
 /// Now it checks them in a non strict way, by just tracking all met variables
@@ -32,8 +33,8 @@ use multimap::MultiMap;
 /// be set in one of preceding calls or fold.
 #[derive(Debug, Default, Clone)]
 pub struct VariableValidator<'i> {
-    /// Contains variables met in call outputs.
-    met_variables: MultiMap<&'i str, Span>,
+    /// Contains the most left definition of a variables met in call outputs.
+    met_variables: HashMap<&'i str, Span>,
 
     /// Contains iterables met in fold iterables.
     met_iterators: MultiMap<&'i str, Span>,
@@ -74,15 +75,13 @@ impl<'i> VariableValidator<'i> {
     pub(super) fn finalize<'err>(&self) -> Vec<ErrorRecovery<usize, Token<'i>, ParserError>> {
         let mut errors = Vec::new();
         for (name, span) in self.unresolved_variables.iter() {
-            if !contains_variable(&self.met_variables, name, *span)
-                && !contains_variable(&self.met_iterators, name, *span)
-            {
+            if !self.contains_variable(name, *span) {
                 add_to_errors(*name, &mut errors, *span, Token::Call);
             }
         }
 
         for (name, span) in self.unresolved_iterables.iter() {
-            if !contains_iterable(&self.met_iterators, name, *span) {
+            if !self.contains_iterable(name, *span) {
                 add_to_errors(*name, &mut errors, *span, Token::Next);
             }
         }
@@ -133,21 +132,57 @@ impl<'i> VariableValidator<'i> {
     }
 
     fn meet_variable(&mut self, name: &'i str, span: Span) {
-        if !contains_variable(&self.met_variables, name, span)
-            && !contains_variable(&self.met_iterators, name, span)
-        {
+        if !self.contains_variable(name, span) {
             self.unresolved_variables.insert(name, span);
         }
     }
 
+    fn contains_variable(&self, key: &str, key_span: Span) -> bool {
+        if let Some(found_span) = self.met_variables.get(key) {
+            if found_span < &key_span {
+                return true;
+            }
+        }
+
+        let found_spans = match self.unresolved_iterables.get_vec(key) {
+            Some(found_spans) => found_spans,
+            None => return false,
+        };
+
+        found_spans.iter().any(|s| s < &key_span)
+    }
+
     fn meet_call_output_definition(&mut self, call_output: &CallOutputValue<'i>, span: Span) {
+        use std::collections::hash_map::Entry;
+
         let variable_name = match call_output {
             CallOutputValue::Scalar(variable) => variable,
             CallOutputValue::Accumulator(accumulator) => accumulator,
             CallOutputValue::None => return,
         };
 
-        self.met_variables.insert(variable_name, span);
+        match self.met_variables.entry(variable_name) {
+            Entry::Occupied(occupied) => {
+                if occupied.get() > &span {
+                    *occupied.into_mut() = span;
+                }
+            }
+            Entry::Vacant(vacant) => {
+                vacant.insert(span);
+            }
+        }
+    }
+
+    /// Checks that multimap contains a span for given key such that provided span lies inside it.
+    fn contains_iterable(&self, key: &str, key_span: Span) -> bool {
+        let found_spans = match self.unresolved_iterables.get_vec(key) {
+            Some(found_spans) => found_spans,
+            None => return false,
+        };
+
+        found_spans
+            .iter()
+            .any(|s| s.left < key_span.left && s.right > key_span.right)
     }
 
     fn meet_iterable_value(&mut self, iterable_value: &IterableValue<'i>, span: Span) {
@@ -176,27 +211,6 @@ impl PartialOrd for Span {
             Some(Ordering::Greater)
         }
     }
-}
-
-fn contains_variable(multimap: &MultiMap<&str, Span>, key: &str, key_span: Span) -> bool {
-    let found_spans = match multimap.get_vec(key) {
-        Some(found_spans) => found_spans,
-        None => return false,
-    };
-
-    found_spans.iter().any(|s| s < &key_span)
-}
-
-/// Checks that multimap contains a span for given key such that provided span lies inside it.
-fn contains_iterable(multimap: &MultiMap<&str, Span>, key: &str, key_span: Span) -> bool {
-    let found_spans = match multimap.get_vec(key) {
-        Some(found_spans) => found_spans,
-        None => return false,
-    };
-
-    found_spans
-        .iter()
-        .any(|s| s.left < key_span.left && s.right > key_span.right)
 }
 
 fn add_to_errors<'err, 'i>(
