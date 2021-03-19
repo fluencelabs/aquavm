@@ -26,11 +26,13 @@ use lalrpop_util::ParseError;
 use multimap::MultiMap;
 use std::collections::HashMap;
 
-/// This is an intermediate realization of variable and iterable validator.
-/// Now it checks them in a non strict way, by just tracking all met variables
-/// set in call and iterables set in fold without any context. Then checking
-/// all other values used inside call, fold, next instructions are checked to
-/// be set in one of preceding calls or fold.
+/// Intermediate implementation of variable validator.
+///
+/// It is intended to track variables (i.e., those that were defined as
+/// a result of the `call` instruction) and iterables (i.e., those X's defined
+/// in a `fold array X` call).
+///
+/// Validator will catch any undefined variables or iterables and raise an error.
 #[derive(Debug, Default, Clone)]
 pub struct VariableValidator<'i> {
     /// Contains the most left definition of a variables met in call outputs.
@@ -39,7 +41,7 @@ pub struct VariableValidator<'i> {
     /// Contains iterables met in fold iterables.
     met_iterators: MultiMap<&'i str, Span>,
 
-    /// These variables from calls and folds haven't been resolved at the first meet
+    /// These variables from calls and folds haven't been resolved at the first meet.
     unresolved_variables: MultiMap<&'i str, Span>,
 
     /// Contains all met iterable in call and next, they will be resolved after the whole parsing
@@ -52,19 +54,19 @@ impl<'i> VariableValidator<'i> {
         <_>::default()
     }
 
-    pub(super) fn meet_call(&mut self, call: &Call<'i>, span: Span) {
-        self.meet_peer_part(&call.peer_part, span);
-        self.meet_function_part(&call.function_part, span);
-        self.meet_args(&call.args, span);
-        self.meet_call_output_definition(&call.output, span)
+    pub(super) fn met_call(&mut self, call: &Call<'i>, span: Span) {
+        self.met_peer_part(&call.peer_part, span);
+        self.met_function_part(&call.function_part, span);
+        self.met_args(&call.args, span);
+        self.met_call_output_definition(&call.output, span)
     }
 
-    pub(super) fn meet_fold(&mut self, fold: &Fold<'i>, span: Span) {
-        self.meet_iterable_value(&fold.iterable, span);
-        self.meet_iterator_definition(&fold.iterator, span);
+    pub(super) fn met_fold(&mut self, fold: &Fold<'i>, span: Span) {
+        self.met_iterable_value(&fold.iterable, span);
+        self.met_iterator_definition(&fold.iterator, span);
     }
 
-    pub(super) fn meet_next(&mut self, next: &Next<'i>, span: Span) {
+    pub(super) fn met_next(&mut self, next: &Next<'i>, span: Span) {
         let iterable_name = next.0;
         // due to the right to left convolution in lalrpop, next will be met earlier than
         // a corresponding fold with the definition of this iterable, so they're just put
@@ -89,49 +91,49 @@ impl<'i> VariableValidator<'i> {
         errors
     }
 
-    fn meet_peer_part(&mut self, peer_part: &PeerPart<'i>, span: Span) {
+    fn met_peer_part(&mut self, peer_part: &PeerPart<'i>, span: Span) {
         match peer_part {
-            PeerPart::PeerPk(peer_pk) => self.meet_instr_value(peer_pk, span),
+            PeerPart::PeerPk(peer_pk) => self.met_instr_value(peer_pk, span),
             PeerPart::PeerPkWithServiceId(peer_pk, service_id) => {
-                self.meet_instr_value(peer_pk, span);
-                self.meet_instr_value(service_id, span);
+                self.met_instr_value(peer_pk, span);
+                self.met_instr_value(service_id, span);
             }
         }
     }
 
-    fn meet_function_part(&mut self, function_part: &FunctionPart<'i>, span: Span) {
+    fn met_function_part(&mut self, function_part: &FunctionPart<'i>, span: Span) {
         match function_part {
-            FunctionPart::FuncName(func_name) => self.meet_instr_value(func_name, span),
+            FunctionPart::FuncName(func_name) => self.met_instr_value(func_name, span),
             FunctionPart::ServiceIdWithFuncName(service_id, func_name) => {
-                self.meet_instr_value(service_id, span);
-                self.meet_instr_value(func_name, span);
+                self.met_instr_value(service_id, span);
+                self.met_instr_value(func_name, span);
             }
         }
     }
 
-    fn meet_args(&mut self, args: &[CallInstrArgValue<'i>], span: Span) {
+    fn met_args(&mut self, args: &[CallInstrArgValue<'i>], span: Span) {
         for arg in args {
-            self.meet_instr_arg_value(arg, span);
+            self.met_instr_arg_value(arg, span);
         }
     }
 
-    fn meet_instr_value(&mut self, instr_value: &CallInstrValue<'i>, span: Span) {
+    fn met_instr_value(&mut self, instr_value: &CallInstrValue<'i>, span: Span) {
         match instr_value {
-            CallInstrValue::JsonPath { variable, .. } => self.meet_variable(variable, span),
-            CallInstrValue::Variable(variable) => self.meet_variable(variable, span),
+            CallInstrValue::JsonPath { variable, .. } => self.met_variable(variable, span),
+            CallInstrValue::Variable(variable) => self.met_variable(variable, span),
             _ => {}
         }
     }
 
-    fn meet_instr_arg_value(&mut self, instr_arg_value: &CallInstrArgValue<'i>, span: Span) {
+    fn met_instr_arg_value(&mut self, instr_arg_value: &CallInstrArgValue<'i>, span: Span) {
         match instr_arg_value {
-            CallInstrArgValue::JsonPath { variable, .. } => self.meet_variable(variable, span),
-            CallInstrArgValue::Variable(variable) => self.meet_variable(variable, span),
+            CallInstrArgValue::JsonPath { variable, .. } => self.met_variable(variable, span),
+            CallInstrArgValue::Variable(variable) => self.met_variable(variable, span),
             _ => {}
         }
     }
 
-    fn meet_variable(&mut self, name: &'i str, span: Span) {
+    fn met_variable(&mut self, name: &'i str, span: Span) {
         if !self.contains_variable(name, span) {
             self.unresolved_variables.insert(name, span);
         }
@@ -152,7 +154,7 @@ impl<'i> VariableValidator<'i> {
         found_spans.iter().any(|s| s < &key_span)
     }
 
-    fn meet_call_output_definition(&mut self, call_output: &CallOutputValue<'i>, span: Span) {
+    fn met_call_output_definition(&mut self, call_output: &CallOutputValue<'i>, span: Span) {
         use std::collections::hash_map::Entry;
 
         let variable_name = match call_output {
@@ -185,14 +187,14 @@ impl<'i> VariableValidator<'i> {
             .any(|s| s.left < key_span.left && s.right > key_span.right)
     }
 
-    fn meet_iterable_value(&mut self, iterable_value: &IterableValue<'i>, span: Span) {
+    fn met_iterable_value(&mut self, iterable_value: &IterableValue<'i>, span: Span) {
         match iterable_value {
-            IterableValue::JsonPath { variable, .. } => self.meet_variable(variable, span),
-            IterableValue::Variable(variable) => self.meet_variable(variable, span),
+            IterableValue::JsonPath { variable, .. } => self.met_variable(variable, span),
+            IterableValue::Variable(variable) => self.met_variable(variable, span),
         }
     }
 
-    fn meet_iterator_definition(&mut self, iterator: &'i str, span: Span) {
+    fn met_iterator_definition(&mut self, iterator: &'i str, span: Span) {
         self.met_iterators.insert(iterator, span);
     }
 }

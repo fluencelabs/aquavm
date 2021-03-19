@@ -1,5 +1,5 @@
 // auto-generated: "lalrpop 0.19.5"
-// sha3: f27ac84f98682c9dd40e7d7e4ca710e2fdcd2fb1bf4b1e4439c38a3583
+// sha3: 9261142c295e3b691816383a436d7d9ae0591e6fd2e556966d1dfe61ccff84
 use crate::parser::ast::*;
 use crate::parser::air_parser::into_variable_and_path;
 use crate::parser::air_parser::make_flattened_error;
@@ -2567,7 +2567,7 @@ fn __action2<
         let args = Rc::new(args);
         let call = Call { peer_part: p, function_part: f, args, output };
         let span = Span { left, right };
-        validator.meet_call(&call, span);
+        validator.met_call(&call, span);
 
         Box::new(Instruction::Call(call))
     }
@@ -2651,7 +2651,7 @@ fn __action6<
         let instruction = Rc::new(*i);
         let fold = Fold { iterable, iterator, instruction };
         let span = Span { left, right };
-        validator.meet_fold(&fold, span);
+        validator.met_fold(&fold, span);
 
         Box::new(Instruction::Fold(fold))
     }
@@ -2677,7 +2677,7 @@ fn __action7<
     {
         let next = Next(i);
         let span = Span { left, right };
-        validator.meet_next(&next, span);
+        validator.met_next(&next, span);
 
         Box::new(Instruction::Next(next))
     }

@@ -21,7 +21,7 @@ Instr: Box<Instruction<'input>> = {
         let args = Rc::new(args);
         let call = Call { peer_part: p, function_part: f, args, output };
         let span = Span { left, right };
-        validator.meet_call(&call, span);
+        validator.met_call(&call, span);
 
         Box::new(Instruction::Call(call))
     },
@@ -34,14 +34,14 @@ Instr: Box<Instruction<'input>> = {
         let instruction = Rc::new(*i);
         let fold = Fold { iterable, iterator, instruction };
         let span = Span { left, right };
-        validator.meet_fold(&fold, span);
+        validator.met_fold(&fold, span);
 
         Box::new(Instruction::Fold(fold))
     },
     <left: @L> "(" next <i:Alphanumeric> ")" <right: @R> => {
         let next = Next(i);
         let span = Span { left, right };
-        validator.meet_next(&next, span);
+        validator.met_next(&next, span);
 
         Box::new(Instruction::Next(next))
     },
