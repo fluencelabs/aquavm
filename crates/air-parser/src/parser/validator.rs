@@ -36,7 +36,7 @@ pub struct VariableValidator<'i> {
     met_variables: MultiMap<&'i str, Span>,
 
     /// Contains iterables met in fold iterables.
-    met_iterable: MultiMap<&'i str, Span>,
+    met_iterators: MultiMap<&'i str, Span>,
 
     /// These variables from calls and folds haven't been resolved at the first meet
     unresolved_variables: MultiMap<&'i str, Span>,
@@ -55,12 +55,12 @@ impl<'i> VariableValidator<'i> {
         self.meet_peer_part(&call.peer_part, span);
         self.meet_function_part(&call.function_part, span);
         self.meet_args(&call.args, span);
-        self.meet_call_output(&call.output, span)
+        self.meet_call_output_definition(&call.output, span)
     }
 
     pub(super) fn meet_fold(&mut self, fold: &Fold<'i>, span: Span) {
         self.meet_iterable_value(&fold.iterable, span);
-        self.meet_iterator(&fold.iterator, span);
+        self.meet_iterator_definition(&fold.iterator, span);
     }
 
     pub(super) fn meet_next(&mut self, next: &Next<'i>, span: Span) {
@@ -74,15 +74,15 @@ impl<'i> VariableValidator<'i> {
     pub(super) fn finalize<'err>(&self) -> Vec<ErrorRecovery<usize, Token<'i>, ParserError>> {
         let mut errors = Vec::new();
         for (name, span) in self.unresolved_variables.iter() {
-            if !contains(&self.met_variables, name, *span)
-                && !contains(&self.met_iterable, name, *span)
+            if !contains_variable(&self.met_variables, name, *span)
+                && !contains_variable(&self.met_iterators, name, *span)
             {
                 add_to_errors(*name, &mut errors, *span, Token::Call);
             }
         }
 
         for (name, span) in self.unresolved_iterables.iter() {
-            if !contains(&self.met_iterable, name, *span) {
+            if !contains_iterable(&self.met_iterators, name, *span) {
                 add_to_errors(*name, &mut errors, *span, Token::Next);
             }
         }
@@ -133,12 +133,14 @@ impl<'i> VariableValidator<'i> {
     }
 
     fn meet_variable(&mut self, name: &'i str, span: Span) {
-        if !contains(&self.met_variables, name, span) && !contains(&self.met_iterable, name, span) {
+        if !contains_variable(&self.met_variables, name, span)
+            && !contains_variable(&self.met_iterators, name, span)
+        {
             self.unresolved_variables.insert(name, span);
         }
     }
 
-    fn meet_call_output(&mut self, call_output: &CallOutputValue<'i>, span: Span) {
+    fn meet_call_output_definition(&mut self, call_output: &CallOutputValue<'i>, span: Span) {
         let variable_name = match call_output {
             CallOutputValue::Scalar(variable) => variable,
             CallOutputValue::Accumulator(accumulator) => accumulator,
@@ -155,8 +157,8 @@ impl<'i> VariableValidator<'i> {
         }
     }
 
-    fn meet_iterator(&mut self, iterator: &'i str, span: Span) {
-        self.met_iterable.insert(iterator, span);
+    fn meet_iterator_definition(&mut self, iterator: &'i str, span: Span) {
+        self.met_iterators.insert(iterator, span);
     }
 }
 
@@ -176,13 +178,25 @@ impl PartialOrd for Span {
     }
 }
 
-fn contains(multimap: &MultiMap<&str, Span>, key: &str, key_span: Span) -> bool {
+fn contains_variable(multimap: &MultiMap<&str, Span>, key: &str, key_span: Span) -> bool {
     let found_spans = match multimap.get_vec(key) {
         Some(found_spans) => found_spans,
         None => return false,
     };
 
     found_spans.iter().any(|s| s < &key_span)
+}
+
+/// Checks that multimap contains a span for given key such that provided span lies inside it.
+fn contains_iterable(multimap: &MultiMap<&str, Span>, key: &str, key_span: Span) -> bool {
+    let found_spans = match multimap.get_vec(key) {
+        Some(found_spans) => found_spans,
+        None => return false,
+    };
+
+    found_spans
+        .iter()
+        .any(|s| s.left < key_span.left && s.right > key_span.right)
 }
 
 fn add_to_errors<'err, 'i>(
