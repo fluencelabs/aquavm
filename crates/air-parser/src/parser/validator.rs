@@ -146,7 +146,7 @@ impl<'i> VariableValidator<'i> {
             }
         }
 
-        let found_spans = match self.unresolved_iterables.get_vec(key) {
+        let found_spans = match self.met_iterators.get_vec(key) {
             Some(found_spans) => found_spans,
             None => return false,
         };
@@ -177,7 +177,7 @@ impl<'i> VariableValidator<'i> {
 
     /// Checks that multimap contains a span for given key such that provided span lies inside it.
     fn contains_iterable(&self, key: &str, key_span: Span) -> bool {
-        let found_spans = match self.unresolved_iterables.get_vec(key) {
+        let found_spans = match self.met_iterators.get_vec(key) {
             Some(found_spans) => found_spans,
             None => return false,
         };
