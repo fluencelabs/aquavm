@@ -104,6 +104,8 @@ mod tests {
 
     #[test]
     fn xor_var_not_found() {
+        use crate::contexts::execution_trace::CallResult::*;
+        use crate::contexts::execution_trace::ExecutedState::*;
         use aqua_test_utils::echo_string_call_service;
 
         let local_peer_id = "local_peer_id";
@@ -112,7 +114,10 @@ mod tests {
         let script = format!(
             r#"
             (xor
-                (call "{0}" ("service_id_1" "local_fn_name") [non_existent_variable] result)
+                (par
+                    (call "unknown_peer" ("service_id_1" "local_fn_name") [] lazy_defined_variable)
+                    (call "{0}" ("service_id_1" "local_fn_name") [lazy_defined_variable] result)
+                )
                 (call "{0}" ("service_id_2" "local_fn_name") ["expected"] result)
             )"#,
             local_peer_id,
@@ -120,9 +125,8 @@ mod tests {
 
         let res = call_vm!(vm, "asd", script, "[]", "[]");
         let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid json");
-
-        assert!(actual_trace.is_empty());
-        assert!(res.next_peer_pks.is_empty());
+        assert_eq!(actual_trace[0], Par(1, 0));
+        assert_eq!(actual_trace[1], Call(RequestSentBy(String::from("local_peer_id"))));
     }
 
     #[test]

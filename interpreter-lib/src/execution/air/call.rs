@@ -175,7 +175,7 @@ mod tests {
 
         let remote_peer_id = String::from("some_remote_peer_id");
         let script = format!(
-            r#"(call "{}" ("local_service_id" "local_fn_name") [value] result_name)"#,
+            r#"(call "{}" ("local_service_id" "local_fn_name") ["arg"] result_name)"#,
             remote_peer_id
         );
 

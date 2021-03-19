@@ -19,14 +19,16 @@ use super::ast::Instruction;
 use super::lexer::AIRLexer;
 use super::lexer::LexerError;
 use super::lexer::Token;
+use super::ParserError;
+
+use crate::parser::VariableValidator;
+use air::AIRParser;
 
 use codespan_reporting::diagnostic::{Diagnostic, Label};
 use codespan_reporting::files::SimpleFiles;
 use codespan_reporting::term;
 use codespan_reporting::term::termcolor::{Buffer, ColorChoice, StandardStream};
 use lalrpop_util::{ErrorRecovery, ParseError};
-
-use air::AIRParser;
 
 // Caching parser to cache internal regexes, which are expensive to instantiate
 // See also https://github.com/lalrpop/lalrpop/issues/269
@@ -40,7 +42,13 @@ pub fn parse(air_script: &str) -> Result<Box<Instruction<'_>>, String> {
     PARSER.with(|parser| {
         let mut errors = Vec::new();
         let lexer = AIRLexer::new(air_script);
-        match parser.parse(air_script, &mut errors, lexer) {
+        let mut validator = VariableValidator::new();
+        let result = parser.parse(air_script, &mut errors, &mut validator, lexer);
+
+        let validator_errors = validator.finalize();
+        errors.extend(validator_errors);
+
+        match result {
             Ok(r) if errors.is_empty() => Ok(r),
             Ok(_) => Err(report_errors(file_id, files, errors)),
             Err(err) => Err(report_errors(
@@ -58,7 +66,7 @@ pub fn parse(air_script: &str) -> Result<Box<Instruction<'_>>, String> {
 fn report_errors(
     file_id: usize,
     files: SimpleFiles<&str, &str>,
-    errors: Vec<ErrorRecovery<usize, Token<'_>, LexerError>>,
+    errors: Vec<ErrorRecovery<usize, Token<'_>, ParserError>>,
 ) -> String {
     let labels = errors_to_labels(file_id, errors);
     let diagnostic = Diagnostic::error().with_labels(labels);
@@ -78,7 +86,7 @@ fn report_errors(
 
 fn errors_to_labels(
     file_id: usize,
-    errors: Vec<ErrorRecovery<usize, Token<'_>, LexerError>>,
+    errors: Vec<ErrorRecovery<usize, Token<'_>, ParserError>>,
 ) -> Vec<Label<usize>> {
     errors
         .into_iter()
@@ -98,7 +106,7 @@ fn errors_to_labels(
                 Label::primary(file_id, location..(location + 1))
                     .with_message(format!("expected {}", pretty_expected(expected)))
             }
-            ParseError::User { error } => lexical_error_to_label(file_id, error),
+            ParseError::User { error } => parser_error_to_label(file_id, error),
         })
         .collect()
 }
@@ -108,6 +116,23 @@ fn pretty_expected(expected: Vec<String>) -> String {
         "<nothing>".to_string()
     } else {
         expected.join(" or ")
+    }
+}
+
+fn parser_error_to_label(file_id: usize, error: ParserError) -> Label<usize> {
+    use ParserError::*;
+
+    match error {
+        LexerError(error) => lexical_error_to_label(file_id, error),
+        CallArgsNotFlattened(start, end) => {
+            Label::primary(file_id, start..end).with_message(error.to_string())
+        }
+        UndefinedIterable(start, end, _) => {
+            Label::primary(file_id, start..end).with_message(error.to_string())
+        }
+        UndefinedVariable(start, end, _) => {
+            Label::primary(file_id, start..end).with_message(error.to_string())
+        }
     }
 }
 
@@ -147,9 +172,6 @@ fn lexical_error_to_label(file_id: usize, error: LexerError) -> Label<usize> {
         LeadingDot(start, end) => {
             Label::primary(file_id, start..end).with_message(error.to_string())
         }
-        CallArgsNotFlattened(start, end) => {
-            Label::primary(file_id, start..end).with_message(error.to_string())
-        }
     }
 }
 
@@ -167,8 +189,8 @@ pub(super) fn make_flattened_error(
     start_pos: usize,
     token: Token<'_>,
     end_pos: usize,
-) -> ErrorRecovery<usize, Token<'_>, LexerError> {
-    let error = LexerError::CallArgsNotFlattened(start_pos, end_pos);
+) -> ErrorRecovery<usize, Token<'_>, ParserError> {
+    let error = ParserError::CallArgsNotFlattened(start_pos, end_pos);
     let error = ParseError::User { error };
 
     let dropped_tokens = vec![(start_pos, token, end_pos)];

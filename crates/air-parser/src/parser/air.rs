@@ -1,9 +1,11 @@
 // auto-generated: "lalrpop 0.19.5"
-// sha3: 13a01be9e7bfafe105fe6361390cdd12c867e4697238a32a5ba72af895616ee
+// sha3: 9261142c295e3b691816383a436d7d9ae0591e6fd2e556966d1dfe61ccff84
 use crate::parser::ast::*;
 use crate::parser::air_parser::into_variable_and_path;
 use crate::parser::air_parser::make_flattened_error;
-use crate::parser::lexer::LexerError;
+use crate::parser::ParserError;
+use crate::parser::VariableValidator;
+use crate::parser::Span;
 use crate::parser::lexer::Token;
 use crate::parser::lexer::Number;
 use lalrpop_util::ErrorRecovery;
@@ -22,7 +24,9 @@ mod __parse__AIR {
     use crate::parser::ast::*;
     use crate::parser::air_parser::into_variable_and_path;
     use crate::parser::air_parser::make_flattened_error;
-    use crate::parser::lexer::LexerError;
+    use crate::parser::ParserError;
+    use crate::parser::VariableValidator;
+    use crate::parser::Span;
     use crate::parser::lexer::Token;
     use crate::parser::lexer::Number;
     use lalrpop_util::ErrorRecovery;
@@ -42,7 +46,7 @@ mod __parse__AIR {
         Variant2(bool),
         Variant3((&'input str, usize, bool)),
         Variant4(Number),
-        Variant5(__lalrpop_util::ErrorRecovery<usize, Token<'input>, LexerError>),
+        Variant5(__lalrpop_util::ErrorRecovery<usize, Token<'input>, ParserError>),
         Variant6(CallInstrArgValue<'input>),
         Variant7(alloc::vec::Vec<CallInstrArgValue<'input>>),
         Variant8(usize),
@@ -476,18 +480,19 @@ mod __parse__AIR {
             }
         }).collect()
     }
-    pub(crate) struct __StateMachine<'err, 'input>
-    where 'input: 'err
+    pub(crate) struct __StateMachine<'err, 'input, 'v>
+    where 'input: 'err, 'input: 'v
     {
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
-        __phantom: core::marker::PhantomData<(&'err (), &'input ())>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
+        __phantom: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     }
-    impl<'err, 'input> __state_machine::ParserDefinition for __StateMachine<'err, 'input>
-    where 'input: 'err
+    impl<'err, 'input, 'v> __state_machine::ParserDefinition for __StateMachine<'err, 'input, 'v>
+    where 'input: 'err, 'input: 'v
     {
         type Location = usize;
-        type Error = LexerError;
+        type Error = ParserError;
         type Token = Token<'input>;
         type TokenIndex = usize;
         type Symbol = __Symbol<'input>;
@@ -509,7 +514,7 @@ mod __parse__AIR {
 
         #[inline]
         fn token_to_index(&self, token: &Self::Token) -> Option<usize> {
-            __token_to_integer(token, core::marker::PhantomData::<(&(), &())>)
+            __token_to_integer(token, core::marker::PhantomData::<(&(), &(), &())>)
         }
 
         #[inline]
@@ -533,7 +538,7 @@ mod __parse__AIR {
         }
 
         fn token_to_symbol(&self, token_index: usize, token: Self::Token) -> Self::Symbol {
-            __token_to_symbol(token_index, token, core::marker::PhantomData::<(&(), &())>)
+            __token_to_symbol(token_index, token, core::marker::PhantomData::<(&(), &(), &())>)
         }
 
         fn expected_tokens(&self, state: i8) -> alloc::vec::Vec<alloc::string::String> {
@@ -563,24 +568,26 @@ mod __parse__AIR {
             __reduce(
                 self.input,
                 self.errors,
+                self.validator,
                 action,
                 start_location,
                 states,
                 symbols,
-                core::marker::PhantomData::<(&(), &())>,
+                core::marker::PhantomData::<(&(), &(), &())>,
             )
         }
 
         fn simulate_reduce(&self, action: i8) -> __state_machine::SimulatedReduce<Self> {
-            __simulate_reduce(action, core::marker::PhantomData::<(&(), &())>)
+            __simulate_reduce(action, core::marker::PhantomData::<(&(), &(), &())>)
         }
     }
     fn __token_to_integer<
         'err,
         'input,
+        'v,
     >(
         __token: &Token<'input>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> Option<usize>
     {
         match *__token {
@@ -611,10 +618,11 @@ mod __parse__AIR {
     fn __token_to_symbol<
         'err,
         'input,
+        'v,
     >(
         __token_index: usize,
         __token: Token<'input>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> __Symbol<'input>
     {
         match __token_index {
@@ -641,12 +649,14 @@ mod __parse__AIR {
     fn __simulate_reduce<
         'err,
         'input,
+        'v,
     >(
         __reduce_index: i8,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
-    ) -> __state_machine::SimulatedReduce<__StateMachine<'err, 'input>>
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
+    ) -> __state_machine::SimulatedReduce<__StateMachine<'err, 'input, 'v>>
     where
         'input: 'err,
+        'input: 'v,
     {
         match __reduce_index {
             0 => {
@@ -962,14 +972,16 @@ mod __parse__AIR {
         pub fn parse<
             'err,
             'input,
-            __TOKEN: __ToTriple<'err, 'input, >,
+            'v,
+            __TOKEN: __ToTriple<'err, 'input, 'v, >,
             __TOKENS: IntoIterator<Item=__TOKEN>,
         >(
             &self,
             input: &'input str,
-            errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+            errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+            validator: &'v mut VariableValidator<'input>,
             __tokens0: __TOKENS,
-        ) -> Result<Box<Instruction<'input>>, __lalrpop_util::ParseError<usize, Token<'input>, LexerError>>
+        ) -> Result<Box<Instruction<'input>>, __lalrpop_util::ParseError<usize, Token<'input>, ParserError>>
         {
             let __tokens = __tokens0.into_iter();
             let mut __tokens = __tokens.map(|t| __ToTriple::to_triple(t));
@@ -977,7 +989,8 @@ mod __parse__AIR {
                 __StateMachine {
                     input,
                     errors,
-                    __phantom: core::marker::PhantomData::<(&(), &())>,
+                    validator,
+                    __phantom: core::marker::PhantomData::<(&(), &(), &())>,
                 },
                 __tokens,
             )
@@ -986,13 +999,15 @@ mod __parse__AIR {
     fn __accepts<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __error_state: i8,
         __states: & [i8],
         __opt_integer: Option<usize>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> bool
     {
         let mut __states = __states.to_vec();
@@ -1006,7 +1021,7 @@ mod __parse__AIR {
             };
             if __action == 0 { return false; }
             if __action > 0 { return true; }
-            let (__to_pop, __nt) = match __simulate_reduce(-(__action + 1), core::marker::PhantomData::<(&(), &())>) {
+            let (__to_pop, __nt) = match __simulate_reduce(-(__action + 1), core::marker::PhantomData::<(&(), &(), &())>) {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop, nonterminal_produced
                 } => (states_to_pop, nonterminal_produced),
@@ -1022,170 +1037,172 @@ mod __parse__AIR {
     pub(crate) fn __reduce<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __action: i8,
         __lookahead_start: Option<&usize>,
         __states: &mut alloc::vec::Vec<i8>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
-    ) -> Option<Result<Box<Instruction<'input>>,__lalrpop_util::ParseError<usize, Token<'input>, LexerError>>>
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
+    ) -> Option<Result<Box<Instruction<'input>>,__lalrpop_util::ParseError<usize, Token<'input>, ParserError>>>
     {
         let (__pop_states, __nonterminal) = match __action {
             0 => {
-                __reduce0(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce0(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             1 => {
-                __reduce1(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce1(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             2 => {
-                __reduce2(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce2(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             3 => {
-                __reduce3(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce3(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             4 => {
-                __reduce4(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce4(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             5 => {
-                __reduce5(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce5(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             6 => {
-                __reduce6(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce6(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             7 => {
-                __reduce7(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce7(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             8 => {
-                __reduce8(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce8(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             9 => {
-                __reduce9(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce9(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             10 => {
-                __reduce10(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce10(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             11 => {
-                __reduce11(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce11(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             12 => {
-                __reduce12(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce12(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             13 => {
-                __reduce13(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce13(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             14 => {
-                __reduce14(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce14(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             15 => {
-                __reduce15(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce15(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             16 => {
-                __reduce16(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce16(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             17 => {
-                __reduce17(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce17(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             18 => {
-                __reduce18(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce18(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             19 => {
-                __reduce19(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce19(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             20 => {
-                __reduce20(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce20(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             21 => {
-                __reduce21(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce21(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             22 => {
-                __reduce22(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce22(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             23 => {
-                __reduce23(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce23(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             24 => {
-                __reduce24(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce24(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             25 => {
-                __reduce25(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce25(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             26 => {
-                __reduce26(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce26(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             27 => {
-                __reduce27(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce27(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             28 => {
-                __reduce28(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce28(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             29 => {
-                __reduce29(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce29(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             30 => {
-                __reduce30(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce30(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             31 => {
-                __reduce31(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce31(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             32 => {
-                __reduce32(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce32(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             33 => {
-                __reduce33(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce33(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             34 => {
-                __reduce34(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce34(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             35 => {
-                __reduce35(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce35(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             36 => {
-                __reduce36(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce36(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             37 => {
-                __reduce37(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce37(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             38 => {
-                __reduce38(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce38(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             39 => {
-                __reduce39(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce39(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             40 => {
-                __reduce40(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce40(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             41 => {
-                __reduce41(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce41(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             42 => {
-                __reduce42(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce42(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             43 => {
-                __reduce43(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce43(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             44 => {
-                __reduce44(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce44(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             45 => {
-                __reduce45(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce45(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             46 => {
-                __reduce46(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce46(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             47 => {
-                __reduce47(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce47(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             48 => {
-                __reduce48(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce48(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             49 => {
                 // __AIR = AIR => ActionFn(0);
                 let __sym0 = __pop_Variant9(__symbols);
                 let __start = __sym0.0.clone();
                 let __end = __sym0.2.clone();
-                let __nt = super::__action0::<>(input, errors, __sym0);
+                let __nt = super::__action0::<>(input, errors, validator, __sym0);
                 return Some(Ok(__nt));
             }
             _ => panic!("invalid action code {}", __action)
@@ -1337,7 +1354,7 @@ mod __parse__AIR {
       'input,
     >(
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, __lalrpop_util::ErrorRecovery<usize, Token<'input>, LexerError>, usize)
+    ) -> (usize, __lalrpop_util::ErrorRecovery<usize, Token<'input>, ParserError>, usize)
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant5(__v), __r)) => (__l, __v, __r),
@@ -1402,87 +1419,97 @@ mod __parse__AIR {
     pub(crate) fn __reduce0<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // (<Arg>) = Arg => ActionFn(43);
+        // (<Arg>) = Arg => ActionFn(41);
         let __sym0 = __pop_Variant6(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action43::<>(input, errors, __sym0);
+        let __nt = super::__action41::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (1, 0)
     }
     pub(crate) fn __reduce1<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // (<Arg>)* =  => ActionFn(41);
+        // (<Arg>)* =  => ActionFn(39);
         let __start = __lookahead_start.cloned().or_else(|| __symbols.last().map(|s| s.2.clone())).unwrap_or_default();
         let __end = __start.clone();
-        let __nt = super::__action41::<>(input, errors, &__start, &__end);
+        let __nt = super::__action39::<>(input, errors, validator, &__start, &__end);
         __symbols.push((__start, __Symbol::Variant7(__nt), __end));
         (0, 1)
     }
     pub(crate) fn __reduce2<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // (<Arg>)* = (<Arg>)+ => ActionFn(42);
+        // (<Arg>)* = (<Arg>)+ => ActionFn(40);
         let __sym0 = __pop_Variant7(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action42::<>(input, errors, __sym0);
+        let __nt = super::__action40::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant7(__nt), __end));
         (1, 1)
     }
     pub(crate) fn __reduce3<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
         // (<Arg>)+ = Arg => ActionFn(48);
         let __sym0 = __pop_Variant6(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action48::<>(input, errors, __sym0);
+        let __nt = super::__action48::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant7(__nt), __end));
         (1, 2)
     }
     pub(crate) fn __reduce4<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
         // (<Arg>)+ = (<Arg>)+, Arg => ActionFn(49);
@@ -1491,93 +1518,103 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant7(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym1.2.clone();
-        let __nt = super::__action49::<>(input, errors, __sym0, __sym1);
+        let __nt = super::__action49::<>(input, errors, validator, __sym0, __sym1);
         __symbols.push((__start, __Symbol::Variant7(__nt), __end));
         (2, 2)
     }
     pub(crate) fn __reduce5<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // @L =  => ActionFn(40);
+        // @L =  => ActionFn(45);
         let __start = __lookahead_start.cloned().or_else(|| __symbols.last().map(|s| s.2.clone())).unwrap_or_default();
         let __end = __start.clone();
-        let __nt = super::__action40::<>(input, errors, &__start, &__end);
+        let __nt = super::__action45::<>(input, errors, validator, &__start, &__end);
         __symbols.push((__start, __Symbol::Variant8(__nt), __end));
         (0, 3)
     }
     pub(crate) fn __reduce6<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // @R =  => ActionFn(39);
+        // @R =  => ActionFn(42);
         let __start = __lookahead_start.cloned().or_else(|| __symbols.last().map(|s| s.2.clone())).unwrap_or_default();
         let __end = __start.clone();
-        let __nt = super::__action39::<>(input, errors, &__start, &__end);
+        let __nt = super::__action42::<>(input, errors, validator, &__start, &__end);
         __symbols.push((__start, __Symbol::Variant8(__nt), __end));
         (0, 4)
     }
     pub(crate) fn __reduce7<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
         // AIR = Instr => ActionFn(1);
         let __sym0 = __pop_Variant9(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action1::<>(input, errors, __sym0);
+        let __nt = super::__action1::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (1, 5)
     }
     pub(crate) fn __reduce8<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
         // Arg = CallInstrArgValue => ActionFn(26);
         let __sym0 = __pop_Variant6(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action26::<>(input, errors, __sym0);
+        let __nt = super::__action26::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (1, 6)
     }
     pub(crate) fn __reduce9<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
         // Args = "[", "]" => ActionFn(50);
@@ -1586,19 +1623,21 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym1.2.clone();
-        let __nt = super::__action50::<>(input, errors, __sym0, __sym1);
+        let __nt = super::__action50::<>(input, errors, validator, __sym0, __sym1);
         __symbols.push((__start, __Symbol::Variant10(__nt), __end));
         (2, 7)
     }
     pub(crate) fn __reduce10<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
         // Args = "[", (<Arg>)+, "]" => ActionFn(51);
@@ -1608,247 +1647,273 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym2.2.clone();
-        let __nt = super::__action51::<>(input, errors, __sym0, __sym1, __sym2);
+        let __nt = super::__action51::<>(input, errors, validator, __sym0, __sym1, __sym2);
         __symbols.push((__start, __Symbol::Variant10(__nt), __end));
         (3, 7)
     }
     pub(crate) fn __reduce11<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
         // CallInstrArgValue = Literal => ActionFn(27);
         let __sym0 = __pop_Variant1(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action27::<>(input, errors, __sym0);
+        let __nt = super::__action27::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (1, 8)
     }
     pub(crate) fn __reduce12<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
         // CallInstrArgValue = Alphanumeric => ActionFn(28);
         let __sym0 = __pop_Variant1(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action28::<>(input, errors, __sym0);
+        let __nt = super::__action28::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (1, 8)
     }
     pub(crate) fn __reduce13<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
         // CallInstrArgValue = JsonPath => ActionFn(29);
         let __sym0 = __pop_Variant3(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action29::<>(input, errors, __sym0);
+        let __nt = super::__action29::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (1, 8)
     }
     pub(crate) fn __reduce14<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
         // CallInstrArgValue = Number => ActionFn(30);
         let __sym0 = __pop_Variant4(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action30::<>(input, errors, __sym0);
+        let __nt = super::__action30::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (1, 8)
     }
     pub(crate) fn __reduce15<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
         // CallInstrArgValue = Boolean => ActionFn(31);
         let __sym0 = __pop_Variant2(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action31::<>(input, errors, __sym0);
+        let __nt = super::__action31::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (1, 8)
     }
     pub(crate) fn __reduce16<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
         // CallInstrArgValue = InitPeerId => ActionFn(32);
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action32::<>(input, errors, __sym0);
+        let __nt = super::__action32::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (1, 8)
     }
     pub(crate) fn __reduce17<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
         // CallInstrArgValue = LastError => ActionFn(33);
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action33::<>(input, errors, __sym0);
+        let __nt = super::__action33::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (1, 8)
     }
     pub(crate) fn __reduce18<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
         // CallInstrValue = Literal => ActionFn(22);
         let __sym0 = __pop_Variant1(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action22::<>(input, errors, __sym0);
+        let __nt = super::__action22::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant11(__nt), __end));
         (1, 9)
     }
     pub(crate) fn __reduce19<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
         // CallInstrValue = Alphanumeric => ActionFn(23);
         let __sym0 = __pop_Variant1(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action23::<>(input, errors, __sym0);
+        let __nt = super::__action23::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant11(__nt), __end));
         (1, 9)
     }
     pub(crate) fn __reduce20<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // CallInstrValue = JsonPath => ActionFn(53);
+        // CallInstrValue = JsonPath => ActionFn(56);
         let __sym0 = __pop_Variant3(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action53::<>(input, errors, __sym0);
+        let __nt = super::__action56::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant11(__nt), __end));
         (1, 9)
     }
     pub(crate) fn __reduce21<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
         // CallInstrValue = InitPeerId => ActionFn(25);
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action25::<>(input, errors, __sym0);
+        let __nt = super::__action25::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant11(__nt), __end));
         (1, 9)
     }
     pub(crate) fn __reduce22<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
         // FPart = Function => ActionFn(13);
         let __sym0 = __pop_Variant11(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action13::<>(input, errors, __sym0);
+        let __nt = super::__action13::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (1, 10)
     }
     pub(crate) fn __reduce23<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
         // FPart = "(", ServiceId, Function, ")" => ActionFn(14);
@@ -1859,41 +1924,45 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym3.2.clone();
-        let __nt = super::__action14::<>(input, errors, __sym0, __sym1, __sym2, __sym3);
+        let __nt = super::__action14::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (4, 10)
     }
     pub(crate) fn __reduce24<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
         // Function = CallInstrValue => ActionFn(19);
         let __sym0 = __pop_Variant11(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action19::<>(input, errors, __sym0);
+        let __nt = super::__action19::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant11(__nt), __end));
         (1, 11)
     }
     pub(crate) fn __reduce25<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Instr = "(", call, PeerPart, FPart, Args, Output, ")" => ActionFn(54);
+        // Instr = "(", call, PeerPart, FPart, Args, Output, ")" => ActionFn(60);
         assert!(__symbols.len() >= 7);
         let __sym6 = __pop_Variant0(__symbols);
         let __sym5 = __pop_Variant15(__symbols);
@@ -1904,22 +1973,24 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym6.2.clone();
-        let __nt = super::__action54::<>(input, errors, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5, __sym6);
+        let __nt = super::__action60::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5, __sym6);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (7, 12)
     }
     pub(crate) fn __reduce26<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Instr = "(", call, PeerPart, FPart, Args, ")" => ActionFn(55);
+        // Instr = "(", call, PeerPart, FPart, Args, ")" => ActionFn(61);
         assert!(__symbols.len() >= 6);
         let __sym5 = __pop_Variant0(__symbols);
         let __sym4 = __pop_Variant10(__symbols);
@@ -1929,19 +2000,21 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym5.2.clone();
-        let __nt = super::__action55::<>(input, errors, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
+        let __nt = super::__action61::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (6, 12)
     }
     pub(crate) fn __reduce27<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
         // Instr = "(", seq, Instr, Instr, ")" => ActionFn(3);
@@ -1953,19 +2026,21 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym4.2.clone();
-        let __nt = super::__action3::<>(input, errors, __sym0, __sym1, __sym2, __sym3, __sym4);
+        let __nt = super::__action3::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (5, 12)
     }
     pub(crate) fn __reduce28<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
         // Instr = "(", par, Instr, Instr, ")" => ActionFn(4);
@@ -1977,19 +2052,21 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym4.2.clone();
-        let __nt = super::__action4::<>(input, errors, __sym0, __sym1, __sym2, __sym3, __sym4);
+        let __nt = super::__action4::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (5, 12)
     }
     pub(crate) fn __reduce29<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
         // Instr = "(", null, ")" => ActionFn(5);
@@ -1999,22 +2076,24 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym2.2.clone();
-        let __nt = super::__action5::<>(input, errors, __sym0, __sym1, __sym2);
+        let __nt = super::__action5::<>(input, errors, validator, __sym0, __sym1, __sym2);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (3, 12)
     }
     pub(crate) fn __reduce30<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Instr = "(", fold, Iterable, Alphanumeric, Instr, ")" => ActionFn(6);
+        // Instr = "(", fold, Iterable, Alphanumeric, Instr, ")" => ActionFn(58);
         assert!(__symbols.len() >= 6);
         let __sym5 = __pop_Variant0(__symbols);
         let __sym4 = __pop_Variant9(__symbols);
@@ -2024,22 +2103,24 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym5.2.clone();
-        let __nt = super::__action6::<>(input, errors, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
+        let __nt = super::__action58::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (6, 12)
     }
     pub(crate) fn __reduce31<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Instr = "(", next, Alphanumeric, ")" => ActionFn(7);
+        // Instr = "(", next, Alphanumeric, ")" => ActionFn(59);
         assert!(__symbols.len() >= 4);
         let __sym3 = __pop_Variant0(__symbols);
         let __sym2 = __pop_Variant1(__symbols);
@@ -2047,19 +2128,21 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym3.2.clone();
-        let __nt = super::__action7::<>(input, errors, __sym0, __sym1, __sym2, __sym3);
+        let __nt = super::__action59::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (4, 12)
     }
     pub(crate) fn __reduce32<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
         // Instr = "(", xor, Instr, Instr, ")" => ActionFn(8);
@@ -2071,19 +2154,21 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym4.2.clone();
-        let __nt = super::__action8::<>(input, errors, __sym0, __sym1, __sym2, __sym3, __sym4);
+        let __nt = super::__action8::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (5, 12)
     }
     pub(crate) fn __reduce33<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
         // Instr = "(", match_, Matchable, Matchable, Instr, ")" => ActionFn(9);
@@ -2096,19 +2181,21 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym5.2.clone();
-        let __nt = super::__action9::<>(input, errors, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
+        let __nt = super::__action9::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (6, 12)
     }
     pub(crate) fn __reduce34<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
         // Instr = "(", mismatch, Matchable, Matchable, Instr, ")" => ActionFn(10);
@@ -2121,246 +2208,272 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym5.2.clone();
-        let __nt = super::__action10::<>(input, errors, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
+        let __nt = super::__action10::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (6, 12)
     }
     pub(crate) fn __reduce35<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
         // Instr = error => ActionFn(11);
         let __sym0 = __pop_Variant5(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action11::<>(input, errors, __sym0);
+        let __nt = super::__action11::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (1, 12)
     }
     pub(crate) fn __reduce36<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
         // Iterable = Alphanumeric => ActionFn(34);
         let __sym0 = __pop_Variant1(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action34::<>(input, errors, __sym0);
+        let __nt = super::__action34::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant13(__nt), __end));
         (1, 13)
     }
     pub(crate) fn __reduce37<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
         // Iterable = JsonPath => ActionFn(35);
         let __sym0 = __pop_Variant3(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action35::<>(input, errors, __sym0);
+        let __nt = super::__action35::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant13(__nt), __end));
         (1, 13)
     }
     pub(crate) fn __reduce38<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
         // Matchable = Alphanumeric => ActionFn(36);
         let __sym0 = __pop_Variant1(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action36::<>(input, errors, __sym0);
+        let __nt = super::__action36::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant14(__nt), __end));
         (1, 14)
     }
     pub(crate) fn __reduce39<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
         // Matchable = Literal => ActionFn(37);
         let __sym0 = __pop_Variant1(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action37::<>(input, errors, __sym0);
+        let __nt = super::__action37::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant14(__nt), __end));
         (1, 14)
     }
     pub(crate) fn __reduce40<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
         // Matchable = JsonPath => ActionFn(38);
         let __sym0 = __pop_Variant3(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action38::<>(input, errors, __sym0);
+        let __nt = super::__action38::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant14(__nt), __end));
         (1, 14)
     }
     pub(crate) fn __reduce41<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
         // Output = Alphanumeric => ActionFn(17);
         let __sym0 = __pop_Variant1(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action17::<>(input, errors, __sym0);
+        let __nt = super::__action17::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant15(__nt), __end));
         (1, 15)
     }
     pub(crate) fn __reduce42<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
         // Output = Accumulator => ActionFn(18);
         let __sym0 = __pop_Variant1(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action18::<>(input, errors, __sym0);
+        let __nt = super::__action18::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant15(__nt), __end));
         (1, 15)
     }
     pub(crate) fn __reduce43<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Output? = Output => ActionFn(44);
+        // Output? = Output => ActionFn(43);
         let __sym0 = __pop_Variant15(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action44::<>(input, errors, __sym0);
+        let __nt = super::__action43::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant16(__nt), __end));
         (1, 16)
     }
     pub(crate) fn __reduce44<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Output? =  => ActionFn(45);
+        // Output? =  => ActionFn(44);
         let __start = __lookahead_start.cloned().or_else(|| __symbols.last().map(|s| s.2.clone())).unwrap_or_default();
         let __end = __start.clone();
-        let __nt = super::__action45::<>(input, errors, &__start, &__end);
+        let __nt = super::__action44::<>(input, errors, validator, &__start, &__end);
         __symbols.push((__start, __Symbol::Variant16(__nt), __end));
         (0, 16)
     }
     pub(crate) fn __reduce45<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
         // PeerId = CallInstrValue => ActionFn(20);
         let __sym0 = __pop_Variant11(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action20::<>(input, errors, __sym0);
+        let __nt = super::__action20::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant11(__nt), __end));
         (1, 17)
     }
     pub(crate) fn __reduce46<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
         // PeerPart = PeerId => ActionFn(15);
         let __sym0 = __pop_Variant11(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action15::<>(input, errors, __sym0);
+        let __nt = super::__action15::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant17(__nt), __end));
         (1, 18)
     }
     pub(crate) fn __reduce47<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
         // PeerPart = "(", PeerId, ServiceId, ")" => ActionFn(16);
@@ -2371,26 +2484,28 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym3.2.clone();
-        let __nt = super::__action16::<>(input, errors, __sym0, __sym1, __sym2, __sym3);
+        let __nt = super::__action16::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3);
         __symbols.push((__start, __Symbol::Variant17(__nt), __end));
         (4, 18)
     }
     pub(crate) fn __reduce48<
         'err,
         'input,
+        'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input ())>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
         // ServiceId = CallInstrValue => ActionFn(21);
         let __sym0 = __pop_Variant11(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action21::<>(input, errors, __sym0);
+        let __nt = super::__action21::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant11(__nt), __end));
         (1, 19)
     }
@@ -2401,9 +2516,11 @@ pub use self::__parse__AIR::AIRParser;
 fn __action0<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     (_, __0, _): (usize, Box<Instruction<'input>>, usize),
 ) -> Box<Instruction<'input>>
 {
@@ -2414,9 +2531,11 @@ fn __action0<
 fn __action1<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     (_, __0, _): (usize, Box<Instruction<'input>>, usize),
 ) -> Box<Instruction<'input>>
 {
@@ -2427,9 +2546,12 @@ fn __action1<
 fn __action2<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
+    (_, left, _): (usize, usize, usize),
     (_, _, _): (usize, Token<'input>, usize),
     (_, _, _): (usize, Token<'input>, usize),
     (_, p, _): (usize, PeerPart<'input>, usize),
@@ -2437,12 +2559,17 @@ fn __action2<
     (_, args, _): (usize, Vec<CallInstrArgValue<'input>>, usize),
     (_, output, _): (usize, core::option::Option<CallOutputValue<'input>>, usize),
     (_, _, _): (usize, Token<'input>, usize),
+    (_, right, _): (usize, usize, usize),
 ) -> Box<Instruction<'input>>
 {
     {
         let output = output.unwrap_or(CallOutputValue::None);
         let args = Rc::new(args);
-        Box::new(Instruction::Call(Call{peer_part: p, function_part: f, args, output}))
+        let call = Call { peer_part: p, function_part: f, args, output };
+        let span = Span { left, right };
+        validator.met_call(&call, span);
+
+        Box::new(Instruction::Call(call))
     }
 }
 
@@ -2450,9 +2577,11 @@ fn __action2<
 fn __action3<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     (_, _, _): (usize, Token<'input>, usize),
     (_, _, _): (usize, Token<'input>, usize),
     (_, l, _): (usize, Box<Instruction<'input>>, usize),
@@ -2467,9 +2596,11 @@ fn __action3<
 fn __action4<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     (_, _, _): (usize, Token<'input>, usize),
     (_, _, _): (usize, Token<'input>, usize),
     (_, l, _): (usize, Box<Instruction<'input>>, usize),
@@ -2484,9 +2615,11 @@ fn __action4<
 fn __action5<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     (_, __0, _): (usize, Token<'input>, usize),
     (_, __1, _): (usize, Token<'input>, usize),
     (_, __2, _): (usize, Token<'input>, usize),
@@ -2499,20 +2632,28 @@ fn __action5<
 fn __action6<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
+    (_, left, _): (usize, usize, usize),
     (_, _, _): (usize, Token<'input>, usize),
     (_, _, _): (usize, Token<'input>, usize),
     (_, iterable, _): (usize, IterableValue<'input>, usize),
     (_, iterator, _): (usize, &'input str, usize),
     (_, i, _): (usize, Box<Instruction<'input>>, usize),
     (_, _, _): (usize, Token<'input>, usize),
+    (_, right, _): (usize, usize, usize),
 ) -> Box<Instruction<'input>>
 {
     {
         let instruction = Rc::new(*i);
-        Box::new(Instruction::Fold(Fold{ iterable, iterator, instruction }))
+        let fold = Fold { iterable, iterator, instruction };
+        let span = Span { left, right };
+        validator.met_fold(&fold, span);
+
+        Box::new(Instruction::Fold(fold))
     }
 }
 
@@ -2520,25 +2661,37 @@ fn __action6<
 fn __action7<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
+    (_, left, _): (usize, usize, usize),
     (_, _, _): (usize, Token<'input>, usize),
     (_, _, _): (usize, Token<'input>, usize),
     (_, i, _): (usize, &'input str, usize),
     (_, _, _): (usize, Token<'input>, usize),
+    (_, right, _): (usize, usize, usize),
 ) -> Box<Instruction<'input>>
 {
-    Box::new(Instruction::Next(Next(i)))
+    {
+        let next = Next(i);
+        let span = Span { left, right };
+        validator.met_next(&next, span);
+
+        Box::new(Instruction::Next(next))
+    }
 }
 
 #[allow(unused_variables)]
 fn __action8<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     (_, _, _): (usize, Token<'input>, usize),
     (_, _, _): (usize, Token<'input>, usize),
     (_, l, _): (usize, Box<Instruction<'input>>, usize),
@@ -2553,9 +2706,11 @@ fn __action8<
 fn __action9<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     (_, _, _): (usize, Token<'input>, usize),
     (_, _, _): (usize, Token<'input>, usize),
     (_, l, _): (usize, MatchableValue<'input>, usize),
@@ -2574,9 +2729,11 @@ fn __action9<
 fn __action10<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     (_, _, _): (usize, Token<'input>, usize),
     (_, _, _): (usize, Token<'input>, usize),
     (_, l, _): (usize, MatchableValue<'input>, usize),
@@ -2595,10 +2752,12 @@ fn __action10<
 fn __action11<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
-    (_, __0, _): (usize, __lalrpop_util::ErrorRecovery<usize, Token<'input>, LexerError>, usize),
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
+    (_, __0, _): (usize, __lalrpop_util::ErrorRecovery<usize, Token<'input>, ParserError>, usize),
 ) -> Box<Instruction<'input>>
 {
     { errors.push(__0); Box::new(Instruction::Error) }
@@ -2608,9 +2767,11 @@ fn __action11<
 fn __action12<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     (_, _, _): (usize, Token<'input>, usize),
     (_, args, _): (usize, alloc::vec::Vec<CallInstrArgValue<'input>>, usize),
     (_, _, _): (usize, Token<'input>, usize),
@@ -2623,9 +2784,11 @@ fn __action12<
 fn __action13<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     (_, f, _): (usize, CallInstrValue<'input>, usize),
 ) -> FunctionPart<'input>
 {
@@ -2636,9 +2799,11 @@ fn __action13<
 fn __action14<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     (_, _, _): (usize, Token<'input>, usize),
     (_, sid, _): (usize, CallInstrValue<'input>, usize),
     (_, f, _): (usize, CallInstrValue<'input>, usize),
@@ -2652,9 +2817,11 @@ fn __action14<
 fn __action15<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     (_, pid, _): (usize, CallInstrValue<'input>, usize),
 ) -> PeerPart<'input>
 {
@@ -2665,9 +2832,11 @@ fn __action15<
 fn __action16<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     (_, _, _): (usize, Token<'input>, usize),
     (_, pid, _): (usize, CallInstrValue<'input>, usize),
     (_, sid, _): (usize, CallInstrValue<'input>, usize),
@@ -2681,9 +2850,11 @@ fn __action16<
 fn __action17<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     (_, s, _): (usize, &'input str, usize),
 ) -> CallOutputValue<'input>
 {
@@ -2694,9 +2865,11 @@ fn __action17<
 fn __action18<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     (_, a, _): (usize, &'input str, usize),
 ) -> CallOutputValue<'input>
 {
@@ -2707,9 +2880,11 @@ fn __action18<
 fn __action19<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     (_, __0, _): (usize, CallInstrValue<'input>, usize),
 ) -> CallInstrValue<'input>
 {
@@ -2720,9 +2895,11 @@ fn __action19<
 fn __action20<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     (_, __0, _): (usize, CallInstrValue<'input>, usize),
 ) -> CallInstrValue<'input>
 {
@@ -2733,9 +2910,11 @@ fn __action20<
 fn __action21<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     (_, __0, _): (usize, CallInstrValue<'input>, usize),
 ) -> CallInstrValue<'input>
 {
@@ -2746,9 +2925,11 @@ fn __action21<
 fn __action22<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     (_, s, _): (usize, &'input str, usize),
 ) -> CallInstrValue<'input>
 {
@@ -2759,9 +2940,11 @@ fn __action22<
 fn __action23<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     (_, s, _): (usize, &'input str, usize),
 ) -> CallInstrValue<'input>
 {
@@ -2772,9 +2955,11 @@ fn __action23<
 fn __action24<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     (_, l, _): (usize, usize, usize),
     (_, v, _): (usize, (&'input str, usize, bool), usize),
     (_, r, _): (usize, usize, usize),
@@ -2795,9 +2980,11 @@ fn __action24<
 fn __action25<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     (_, __0, _): (usize, Token<'input>, usize),
 ) -> CallInstrValue<'input>
 {
@@ -2808,9 +2995,11 @@ fn __action25<
 fn __action26<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     (_, __0, _): (usize, CallInstrArgValue<'input>, usize),
 ) -> CallInstrArgValue<'input>
 {
@@ -2821,9 +3010,11 @@ fn __action26<
 fn __action27<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     (_, s, _): (usize, &'input str, usize),
 ) -> CallInstrArgValue<'input>
 {
@@ -2834,9 +3025,11 @@ fn __action27<
 fn __action28<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     (_, s, _): (usize, &'input str, usize),
 ) -> CallInstrArgValue<'input>
 {
@@ -2847,9 +3040,11 @@ fn __action28<
 fn __action29<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     (_, v, _): (usize, (&'input str, usize, bool), usize),
 ) -> CallInstrArgValue<'input>
 {
@@ -2864,9 +3059,11 @@ fn __action29<
 fn __action30<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     (_, n, _): (usize, Number, usize),
 ) -> CallInstrArgValue<'input>
 {
@@ -2877,9 +3074,11 @@ fn __action30<
 fn __action31<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     (_, b, _): (usize, bool, usize),
 ) -> CallInstrArgValue<'input>
 {
@@ -2890,9 +3089,11 @@ fn __action31<
 fn __action32<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     (_, __0, _): (usize, Token<'input>, usize),
 ) -> CallInstrArgValue<'input>
 {
@@ -2903,9 +3104,11 @@ fn __action32<
 fn __action33<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     (_, __0, _): (usize, Token<'input>, usize),
 ) -> CallInstrArgValue<'input>
 {
@@ -2916,9 +3119,11 @@ fn __action33<
 fn __action34<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     (_, s, _): (usize, &'input str, usize),
 ) -> IterableValue<'input>
 {
@@ -2929,14 +3134,17 @@ fn __action34<
 fn __action35<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     (_, v, _): (usize, (&'input str, usize, bool), usize),
 ) -> IterableValue<'input>
 {
     {
         let (variable, path) = into_variable_and_path(v.0, v.1, v.2);
+
         let should_flatten = v.2;
         IterableValue::JsonPath { variable, path, should_flatten }
     }
@@ -2946,9 +3154,11 @@ fn __action35<
 fn __action36<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     (_, s, _): (usize, &'input str, usize),
 ) -> MatchableValue<'input>
 {
@@ -2959,9 +3169,11 @@ fn __action36<
 fn __action37<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     (_, s, _): (usize, &'input str, usize),
 ) -> MatchableValue<'input>
 {
@@ -2972,9 +3184,11 @@ fn __action37<
 fn __action38<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     (_, v, _): (usize, (&'input str, usize, bool), usize),
 ) -> MatchableValue<'input>
 {
@@ -2989,37 +3203,11 @@ fn __action38<
 fn __action39<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
-    __lookbehind: &usize,
-    __lookahead: &usize,
-) -> usize
-{
-    __lookbehind.clone()
-}
-
-#[allow(unused_variables)]
-fn __action40<
-    'err,
-    'input,
->(
-    input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
-    __lookbehind: &usize,
-    __lookahead: &usize,
-) -> usize
-{
-    __lookahead.clone()
-}
-
-#[allow(unused_variables)]
-fn __action41<
-    'err,
-    'input,
->(
-    input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     __lookbehind: &usize,
     __lookahead: &usize,
 ) -> alloc::vec::Vec<CallInstrArgValue<'input>>
@@ -3028,12 +3216,14 @@ fn __action41<
 }
 
 #[allow(unused_variables)]
-fn __action42<
+fn __action40<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     (_, v, _): (usize, alloc::vec::Vec<CallInstrArgValue<'input>>, usize),
 ) -> alloc::vec::Vec<CallInstrArgValue<'input>>
 {
@@ -3041,12 +3231,14 @@ fn __action42<
 }
 
 #[allow(unused_variables)]
-fn __action43<
+fn __action41<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     (_, __0, _): (usize, CallInstrArgValue<'input>, usize),
 ) -> CallInstrArgValue<'input>
 {
@@ -3054,12 +3246,30 @@ fn __action43<
 }
 
 #[allow(unused_variables)]
-fn __action44<
+fn __action42<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
+    __lookbehind: &usize,
+    __lookahead: &usize,
+) -> usize
+{
+    __lookbehind.clone()
+}
+
+#[allow(unused_variables)]
+fn __action43<
+    'err,
+    'input,
+    'v,
+>(
+    input: &'input str,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     (_, __0, _): (usize, CallOutputValue<'input>, usize),
 ) -> core::option::Option<CallOutputValue<'input>>
 {
@@ -3067,12 +3277,14 @@ fn __action44<
 }
 
 #[allow(unused_variables)]
-fn __action45<
+fn __action44<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     __lookbehind: &usize,
     __lookahead: &usize,
 ) -> core::option::Option<CallOutputValue<'input>>
@@ -3081,12 +3293,30 @@ fn __action45<
 }
 
 #[allow(unused_variables)]
+fn __action45<
+    'err,
+    'input,
+    'v,
+>(
+    input: &'input str,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
+    __lookbehind: &usize,
+    __lookahead: &usize,
+) -> usize
+{
+    __lookahead.clone()
+}
+
+#[allow(unused_variables)]
 fn __action46<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     (_, __0, _): (usize, CallInstrArgValue<'input>, usize),
 ) -> alloc::vec::Vec<CallInstrArgValue<'input>>
 {
@@ -3097,9 +3327,11 @@ fn __action46<
 fn __action47<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     (_, v, _): (usize, alloc::vec::Vec<CallInstrArgValue<'input>>, usize),
     (_, e, _): (usize, CallInstrArgValue<'input>, usize),
 ) -> alloc::vec::Vec<CallInstrArgValue<'input>>
@@ -3111,23 +3343,27 @@ fn __action47<
 fn __action48<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     __0: (usize, CallInstrArgValue<'input>, usize),
 ) -> alloc::vec::Vec<CallInstrArgValue<'input>>
 {
     let __start0 = __0.0.clone();
     let __end0 = __0.2.clone();
-    let __temp0 = __action43(
+    let __temp0 = __action41(
         input,
         errors,
+        validator,
         __0,
     );
     let __temp0 = (__start0, __temp0, __end0);
     __action46(
         input,
         errors,
+        validator,
         __temp0,
     )
 }
@@ -3136,24 +3372,28 @@ fn __action48<
 fn __action49<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     __0: (usize, alloc::vec::Vec<CallInstrArgValue<'input>>, usize),
     __1: (usize, CallInstrArgValue<'input>, usize),
 ) -> alloc::vec::Vec<CallInstrArgValue<'input>>
 {
     let __start0 = __1.0.clone();
     let __end0 = __1.2.clone();
-    let __temp0 = __action43(
+    let __temp0 = __action41(
         input,
         errors,
+        validator,
         __1,
     );
     let __temp0 = (__start0, __temp0, __end0);
     __action47(
         input,
         errors,
+        validator,
         __0,
         __temp0,
     )
@@ -3163,18 +3403,21 @@ fn __action49<
 fn __action50<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     __0: (usize, Token<'input>, usize),
     __1: (usize, Token<'input>, usize),
 ) -> Vec<CallInstrArgValue<'input>>
 {
     let __start0 = __0.2.clone();
     let __end0 = __1.0.clone();
-    let __temp0 = __action41(
+    let __temp0 = __action39(
         input,
         errors,
+        validator,
         &__start0,
         &__end0,
     );
@@ -3182,6 +3425,7 @@ fn __action50<
     __action12(
         input,
         errors,
+        validator,
         __0,
         __temp0,
         __1,
@@ -3192,9 +3436,11 @@ fn __action50<
 fn __action51<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     __0: (usize, Token<'input>, usize),
     __1: (usize, alloc::vec::Vec<CallInstrArgValue<'input>>, usize),
     __2: (usize, Token<'input>, usize),
@@ -3202,15 +3448,17 @@ fn __action51<
 {
     let __start0 = __1.0.clone();
     let __end0 = __1.2.clone();
-    let __temp0 = __action42(
+    let __temp0 = __action40(
         input,
         errors,
+        validator,
         __1,
     );
     let __temp0 = (__start0, __temp0, __end0);
     __action12(
         input,
         errors,
+        validator,
         __0,
         __temp0,
         __2,
@@ -3221,18 +3469,21 @@ fn __action51<
 fn __action52<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     __0: (usize, (&'input str, usize, bool), usize),
     __1: (usize, usize, usize),
 ) -> CallInstrValue<'input>
 {
     let __start0 = __0.0.clone();
     let __end0 = __0.0.clone();
-    let __temp0 = __action40(
+    let __temp0 = __action45(
         input,
         errors,
+        validator,
         &__start0,
         &__end0,
     );
@@ -3240,6 +3491,7 @@ fn __action52<
     __action24(
         input,
         errors,
+        validator,
         __temp0,
         __0,
         __1,
@@ -3250,26 +3502,44 @@ fn __action52<
 fn __action53<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
-    __0: (usize, (&'input str, usize, bool), usize),
-) -> CallInstrValue<'input>
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
+    __0: (usize, Token<'input>, usize),
+    __1: (usize, Token<'input>, usize),
+    __2: (usize, PeerPart<'input>, usize),
+    __3: (usize, FunctionPart<'input>, usize),
+    __4: (usize, Vec<CallInstrArgValue<'input>>, usize),
+    __5: (usize, core::option::Option<CallOutputValue<'input>>, usize),
+    __6: (usize, Token<'input>, usize),
+    __7: (usize, usize, usize),
+) -> Box<Instruction<'input>>
 {
-    let __start0 = __0.2.clone();
-    let __end0 = __0.2.clone();
-    let __temp0 = __action39(
+    let __start0 = __0.0.clone();
+    let __end0 = __0.0.clone();
+    let __temp0 = __action45(
         input,
         errors,
+        validator,
         &__start0,
         &__end0,
     );
     let __temp0 = (__start0, __temp0, __end0);
-    __action52(
+    __action2(
         input,
         errors,
-        __0,
+        validator,
         __temp0,
+        __0,
+        __1,
+        __2,
+        __3,
+        __4,
+        __5,
+        __6,
+        __7,
     )
 }
 
@@ -3277,9 +3547,245 @@ fn __action53<
 fn __action54<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
+    __0: (usize, Token<'input>, usize),
+    __1: (usize, Token<'input>, usize),
+    __2: (usize, IterableValue<'input>, usize),
+    __3: (usize, &'input str, usize),
+    __4: (usize, Box<Instruction<'input>>, usize),
+    __5: (usize, Token<'input>, usize),
+    __6: (usize, usize, usize),
+) -> Box<Instruction<'input>>
+{
+    let __start0 = __0.0.clone();
+    let __end0 = __0.0.clone();
+    let __temp0 = __action45(
+        input,
+        errors,
+        validator,
+        &__start0,
+        &__end0,
+    );
+    let __temp0 = (__start0, __temp0, __end0);
+    __action6(
+        input,
+        errors,
+        validator,
+        __temp0,
+        __0,
+        __1,
+        __2,
+        __3,
+        __4,
+        __5,
+        __6,
+    )
+}
+
+#[allow(unused_variables)]
+fn __action55<
+    'err,
+    'input,
+    'v,
+>(
+    input: &'input str,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
+    __0: (usize, Token<'input>, usize),
+    __1: (usize, Token<'input>, usize),
+    __2: (usize, &'input str, usize),
+    __3: (usize, Token<'input>, usize),
+    __4: (usize, usize, usize),
+) -> Box<Instruction<'input>>
+{
+    let __start0 = __0.0.clone();
+    let __end0 = __0.0.clone();
+    let __temp0 = __action45(
+        input,
+        errors,
+        validator,
+        &__start0,
+        &__end0,
+    );
+    let __temp0 = (__start0, __temp0, __end0);
+    __action7(
+        input,
+        errors,
+        validator,
+        __temp0,
+        __0,
+        __1,
+        __2,
+        __3,
+        __4,
+    )
+}
+
+#[allow(unused_variables)]
+fn __action56<
+    'err,
+    'input,
+    'v,
+>(
+    input: &'input str,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
+    __0: (usize, (&'input str, usize, bool), usize),
+) -> CallInstrValue<'input>
+{
+    let __start0 = __0.2.clone();
+    let __end0 = __0.2.clone();
+    let __temp0 = __action42(
+        input,
+        errors,
+        validator,
+        &__start0,
+        &__end0,
+    );
+    let __temp0 = (__start0, __temp0, __end0);
+    __action52(
+        input,
+        errors,
+        validator,
+        __0,
+        __temp0,
+    )
+}
+
+#[allow(unused_variables)]
+fn __action57<
+    'err,
+    'input,
+    'v,
+>(
+    input: &'input str,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
+    __0: (usize, Token<'input>, usize),
+    __1: (usize, Token<'input>, usize),
+    __2: (usize, PeerPart<'input>, usize),
+    __3: (usize, FunctionPart<'input>, usize),
+    __4: (usize, Vec<CallInstrArgValue<'input>>, usize),
+    __5: (usize, core::option::Option<CallOutputValue<'input>>, usize),
+    __6: (usize, Token<'input>, usize),
+) -> Box<Instruction<'input>>
+{
+    let __start0 = __6.2.clone();
+    let __end0 = __6.2.clone();
+    let __temp0 = __action42(
+        input,
+        errors,
+        validator,
+        &__start0,
+        &__end0,
+    );
+    let __temp0 = (__start0, __temp0, __end0);
+    __action53(
+        input,
+        errors,
+        validator,
+        __0,
+        __1,
+        __2,
+        __3,
+        __4,
+        __5,
+        __6,
+        __temp0,
+    )
+}
+
+#[allow(unused_variables)]
+fn __action58<
+    'err,
+    'input,
+    'v,
+>(
+    input: &'input str,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
+    __0: (usize, Token<'input>, usize),
+    __1: (usize, Token<'input>, usize),
+    __2: (usize, IterableValue<'input>, usize),
+    __3: (usize, &'input str, usize),
+    __4: (usize, Box<Instruction<'input>>, usize),
+    __5: (usize, Token<'input>, usize),
+) -> Box<Instruction<'input>>
+{
+    let __start0 = __5.2.clone();
+    let __end0 = __5.2.clone();
+    let __temp0 = __action42(
+        input,
+        errors,
+        validator,
+        &__start0,
+        &__end0,
+    );
+    let __temp0 = (__start0, __temp0, __end0);
+    __action54(
+        input,
+        errors,
+        validator,
+        __0,
+        __1,
+        __2,
+        __3,
+        __4,
+        __5,
+        __temp0,
+    )
+}
+
+#[allow(unused_variables)]
+fn __action59<
+    'err,
+    'input,
+    'v,
+>(
+    input: &'input str,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
+    __0: (usize, Token<'input>, usize),
+    __1: (usize, Token<'input>, usize),
+    __2: (usize, &'input str, usize),
+    __3: (usize, Token<'input>, usize),
+) -> Box<Instruction<'input>>
+{
+    let __start0 = __3.2.clone();
+    let __end0 = __3.2.clone();
+    let __temp0 = __action42(
+        input,
+        errors,
+        validator,
+        &__start0,
+        &__end0,
+    );
+    let __temp0 = (__start0, __temp0, __end0);
+    __action55(
+        input,
+        errors,
+        validator,
+        __0,
+        __1,
+        __2,
+        __3,
+        __temp0,
+    )
+}
+
+#[allow(unused_variables)]
+fn __action60<
+    'err,
+    'input,
+    'v,
+>(
+    input: &'input str,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     __0: (usize, Token<'input>, usize),
     __1: (usize, Token<'input>, usize),
     __2: (usize, PeerPart<'input>, usize),
@@ -3291,15 +3797,17 @@ fn __action54<
 {
     let __start0 = __5.0.clone();
     let __end0 = __5.2.clone();
-    let __temp0 = __action44(
+    let __temp0 = __action43(
         input,
         errors,
+        validator,
         __5,
     );
     let __temp0 = (__start0, __temp0, __end0);
-    __action2(
+    __action57(
         input,
         errors,
+        validator,
         __0,
         __1,
         __2,
@@ -3311,12 +3819,14 @@ fn __action54<
 }
 
 #[allow(unused_variables)]
-fn __action55<
+fn __action61<
     'err,
     'input,
+    'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
     __0: (usize, Token<'input>, usize),
     __1: (usize, Token<'input>, usize),
     __2: (usize, PeerPart<'input>, usize),
@@ -3327,16 +3837,18 @@ fn __action55<
 {
     let __start0 = __4.2.clone();
     let __end0 = __5.0.clone();
-    let __temp0 = __action45(
+    let __temp0 = __action44(
         input,
         errors,
+        validator,
         &__start0,
         &__end0,
     );
     let __temp0 = (__start0, __temp0, __end0);
-    __action2(
+    __action57(
         input,
         errors,
+        validator,
         __0,
         __1,
         __2,
@@ -3347,17 +3859,17 @@ fn __action55<
     )
 }
 
-pub trait __ToTriple<'err, 'input, > {
-    fn to_triple(value: Self) -> Result<(usize,Token<'input>,usize), __lalrpop_util::ParseError<usize, Token<'input>, LexerError>>;
+pub trait __ToTriple<'err, 'input, 'v, > {
+    fn to_triple(value: Self) -> Result<(usize,Token<'input>,usize), __lalrpop_util::ParseError<usize, Token<'input>, ParserError>>;
 }
 
-impl<'err, 'input, > __ToTriple<'err, 'input, > for (usize, Token<'input>, usize) {
-    fn to_triple(value: Self) -> Result<(usize,Token<'input>,usize), __lalrpop_util::ParseError<usize, Token<'input>, LexerError>> {
+impl<'err, 'input, 'v, > __ToTriple<'err, 'input, 'v, > for (usize, Token<'input>, usize) {
+    fn to_triple(value: Self) -> Result<(usize,Token<'input>,usize), __lalrpop_util::ParseError<usize, Token<'input>, ParserError>> {
         Ok(value)
     }
 }
-impl<'err, 'input, > __ToTriple<'err, 'input, > for Result<(usize, Token<'input>, usize), LexerError> {
-    fn to_triple(value: Self) -> Result<(usize,Token<'input>,usize), __lalrpop_util::ParseError<usize, Token<'input>, LexerError>> {
+impl<'err, 'input, 'v, > __ToTriple<'err, 'input, 'v, > for Result<(usize, Token<'input>, usize), ParserError> {
+    fn to_triple(value: Self) -> Result<(usize,Token<'input>,usize), __lalrpop_util::ParseError<usize, Token<'input>, ParserError>> {
         match value {
             Ok(v) => Ok(v),
             Err(error) => Err(__lalrpop_util::ParseError::User { error }),

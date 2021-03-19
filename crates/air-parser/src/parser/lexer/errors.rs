@@ -53,9 +53,29 @@ pub enum LexerError {
 
     #[error("leading dot without any symbols before - please write 0 if it's float or variable name if it's json path")]
     LeadingDot(usize, usize),
+}
 
-    #[error("while using json path in call triplet, result should be flattened, add ! at the end")]
-    CallArgsNotFlattened(usize, usize),
+use super::Token;
+use crate::parser::air::__ToTriple;
+use crate::parser::ParserError;
+
+impl<'err, 'input, 'i> __ToTriple<'err, 'input, 'i>
+    for Result<(usize, Token<'input>, usize), LexerError>
+{
+    fn to_triple(
+        value: Self,
+    ) -> Result<
+        (usize, Token<'input>, usize),
+        lalrpop_util::ParseError<usize, Token<'input>, ParserError>,
+    > {
+        match value {
+            Ok(v) => Ok(v),
+            Err(error) => {
+                let error = ParserError::LexerError(error);
+                Err(lalrpop_util::ParseError::User { error })
+            }
+        }
+    }
 }
 
 impl From<std::convert::Infallible> for LexerError {
