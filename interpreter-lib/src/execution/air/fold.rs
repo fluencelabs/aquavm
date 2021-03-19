@@ -347,9 +347,6 @@ mod tests {
     // Check that fold works with the join behaviour without hanging up.
     #[test]
     fn fold_with_join() {
-        use crate::contexts::execution_trace::CallResult::*;
-        use crate::contexts::execution_trace::ExecutedState::*;
-
         let mut vm = create_aqua_vm(echo_number_call_service(), "A");
         let mut set_variable_vm = create_aqua_vm(set_variable_call_service(r#"["1","2"]"#), "set_variable");
 
