@@ -148,26 +148,13 @@ macro_rules! log_instruction {
     };
 }
 
-/// This macro converts joinable errors to Ok and sets subtree complete to true.
-#[macro_export]
-macro_rules! joinable_complete {
-    ($cmd:expr, $exec_ctx:expr) => {
-        match $cmd {
-            Err(e) if crate::execution::air::is_joinable_error_type(&e) => {
-                $exec_ctx.subtree_complete = false;
-                return Ok(());
-            }
-            v => v,
-        }
-    };
-}
-
-/// This macro converts joinable errors to Ok.
+/// This macro converts joinable errors to Ok and sets subtree complete to false.
 #[macro_export]
 macro_rules! joinable {
     ($cmd:expr, $exec_ctx:expr) => {
         match $cmd {
             Err(e) if crate::execution::air::is_joinable_error_type(&e) => {
+                $exec_ctx.subtree_complete = false;
                 return Ok(());
             }
             v => v,
