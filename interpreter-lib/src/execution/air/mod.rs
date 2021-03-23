@@ -150,11 +150,24 @@ macro_rules! log_instruction {
 
 /// This macro converts joinable errors to Ok and sets subtree complete to true.
 #[macro_export]
-macro_rules! joinable {
+macro_rules! joinable_complete {
     ($cmd:expr, $exec_ctx:expr) => {
         match $cmd {
             Err(e) if crate::execution::air::is_joinable_error_type(&e) => {
                 $exec_ctx.subtree_complete = false;
+                return Ok(());
+            }
+            v => v,
+        }
+    };
+}
+
+/// This macro converts joinable errors to Ok.
+#[macro_export]
+macro_rules! joinable {
+    ($cmd:expr, $exec_ctx:expr) => {
+        match $cmd {
+            Err(e) if crate::execution::air::is_joinable_error_type(&e) => {
                 return Ok(());
             }
             v => v,
@@ -176,15 +189,15 @@ fn is_joinable_error_type(exec_error: &ExecutionError) -> bool {
 
     match exec_error {
         VariableNotFound(var_name) => {
-            log_join!("  call is waiting for an argument with name '{}'", var_name);
+            log_join!("  waiting for an argument with name '{}'", var_name);
             true
         }
         JValueJsonPathError(value, json_path, _) => {
-            log_join!("  call is waiting for an argument with path '{}' on jvalue '{:?}'", json_path, value);
+            log_join!("  waiting for an argument with path '{}' on jvalue '{:?}'", json_path, value);
             true
         }
         JValueAccJsonPathError(acc, json_path, _) => {
-            log_join!("  call is waiting for an argument with path '{}' on accumulator '{:?}'", json_path, acc);
+            log_join!("  waiting for an argument with path '{}' on accumulator '{:?}'", json_path, acc);
             true
         }
         _ => false,
