@@ -61,6 +61,16 @@ impl<'i> VariableValidator<'i> {
         self.met_call_output_definition(&call.output, span)
     }
 
+    pub(super) fn met_match(&mut self, match_: &Match<'i>, span: Span) {
+        self.met_matchable(&match_.left_value, span);
+        self.met_matchable(&match_.right_value, span);
+    }
+
+    pub(super) fn met_mismatch(&mut self, mismatch: &MisMatch<'i>, span: Span) {
+        self.met_matchable(&mismatch.left_value, span);
+        self.met_matchable(&mismatch.right_value, span);
+    }
+
     pub(super) fn met_fold(&mut self, fold: &Fold<'i>, span: Span) {
         self.met_iterable_value(&fold.iterable, span);
         self.met_iterator_definition(&fold.iterator, span);
@@ -172,6 +182,15 @@ impl<'i> VariableValidator<'i> {
             Entry::Vacant(vacant) => {
                 vacant.insert(span);
             }
+        }
+    }
+
+    fn met_matchable(&mut self, matchable: &MatchableValue<'i>, span: Span) {
+        match matchable {
+            MatchableValue::Number(_) | MatchableValue::Boolean(_) | MatchableValue::Literal(_) => {
+            }
+            MatchableValue::Variable(variable) => self.met_variable(variable, span),
+            MatchableValue::JsonPath { variable, .. } => self.met_variable(variable, span),
         }
     }
 

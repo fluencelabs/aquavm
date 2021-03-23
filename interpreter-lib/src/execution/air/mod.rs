@@ -147,3 +147,46 @@ macro_rules! log_instruction {
         );
     };
 }
+
+/// This macro converts joinable errors to Ok and sets subtree complete to true.
+#[macro_export]
+macro_rules! joinable {
+    ($cmd:expr, $exec_ctx:expr) => {
+        match $cmd {
+            Err(e) if crate::execution::air::is_joinable_error_type(&e) => {
+                $exec_ctx.subtree_complete = false;
+                return Ok(());
+            }
+            v => v,
+        }
+    };
+}
+
+macro_rules! log_join {
+    ($($args:tt)*) => {
+        log::info!(target: crate::log_targets::JOIN_BEHAVIOUR, $($args)*)
+    }
+}
+
+/// Returns true, if supplied error is related to variable not found errors type.
+/// Print log if this is joinable error type.
+#[rustfmt::skip::macros(log_join)]
+fn is_joinable_error_type(exec_error: &ExecutionError) -> bool {
+    use ExecutionError::*;
+
+    match exec_error {
+        VariableNotFound(var_name) => {
+            log_join!("  call is waiting for an argument with name '{}'", var_name);
+            true
+        }
+        JValueJsonPathError(value, json_path, _) => {
+            log_join!("  call is waiting for an argument with path '{}' on jvalue '{:?}'", json_path, value);
+            true
+        }
+        JValueAccJsonPathError(acc, json_path, _) => {
+            log_join!("  call is waiting for an argument with path '{}' on accumulator '{:?}'", json_path, acc);
+            true
+        }
+        _ => false,
+    }
+}
