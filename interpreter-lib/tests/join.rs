@@ -210,7 +210,7 @@ fn join() {
     let script = String::from(
         r#"
             (seq
-                (call "Relay1" ("identity" "") [] void1[])
+                (call "Relay1" ("identity" "") [] $void1)
                 (seq
                     (call "Remote" ("920e3ba3-cbdf-4ae3-8972-0fa2f31fffd9" "get_users") [] members)
                     (fold members m

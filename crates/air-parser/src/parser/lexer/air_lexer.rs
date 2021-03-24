@@ -15,7 +15,6 @@
  */
 
 use super::errors::LexerError;
-use super::is_aqua_alphanumeric;
 use super::token::Token;
 use super::LexerResult;
 
@@ -191,29 +190,8 @@ fn string_to_token(input: &str, start_pos: usize) -> LexerResult<Token> {
         TRUE_VALUE => Ok(Token::Boolean(true)),
         FALSE_VALUE => Ok(Token::Boolean(false)),
 
-        str if str.starts_with(STREAM_START_TAG) => try_parse_stream(str, start_pos),
         str => super::call_variable_parser::try_parse_call_variable(str, start_pos),
     }
-}
-
-fn try_parse_stream(maybe_stream: &str, start: usize) -> LexerResult<Token> {
-    const STREAM_TAG_SIZE: usize = 1;
-
-    let str_len = maybe_stream.len();
-    if str_len == STREAM_TAG_SIZE {
-        return Err(LexerError::EmptyStreamName(start, start));
-    }
-
-    // this slice is safe here because str's been checked for ending with "[]"
-    let maybe_stream = &maybe_stream[STREAM_TAG_SIZE..str_len];
-
-    for (pos, ch) in maybe_stream.chars().enumerate() {
-        if !is_aqua_alphanumeric(ch) {
-            return Err(LexerError::IsNotAlphanumeric(start + pos, start + pos));
-        }
-    }
-
-    Ok(Token::Stream(maybe_stream))
 }
 
 const CALL_INSTR: &str = "call";
@@ -231,5 +209,3 @@ const LAST_ERROR: &str = "%last_error%";
 
 const TRUE_VALUE: &str = "true";
 const FALSE_VALUE: &str = "false";
-
-const STREAM_START_TAG: &str = "$";

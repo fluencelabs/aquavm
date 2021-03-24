@@ -167,7 +167,7 @@ impl<'input> CallVariableParser<'input> {
     }
 
     fn try_parse_as_variable(&mut self) -> LexerResult<()> {
-        if self.try_parser_as_stream_start() || self.try_parse_as_json_path_start()? {
+        if self.try_parser_as_stream_start()? || self.try_parse_as_json_path_start()? {
             return Ok(());
         } else if self.is_json_path_started() {
             self.try_parse_as_json_path()?;
@@ -178,13 +178,18 @@ impl<'input> CallVariableParser<'input> {
         Ok(())
     }
 
-    fn try_parser_as_stream_start(&mut self) -> bool {
-        if self.current_pos() == 0 && self.current_char() == '$' {
+    fn try_parser_as_stream_start(&mut self) -> LexerResult<bool> {
+        if self.current_pos() == 0 && self.current_char() == STREAM_START_TAG {
+            if self.string_to_parse.len() == 1 {
+                let error_pos = self.pos_in_string_to_parse();
+                return Err(LexerError::EmptyStreamName(error_pos, error_pos));
+            }
+
             self.state.is_first_stream_tag = true;
-            return true;
+            return Ok(true);
         }
 
-        false
+        Ok(false)
     }
 
     fn try_parse_as_json_path_start(&mut self) -> LexerResult<bool> {
@@ -267,6 +272,7 @@ impl<'input> CallVariableParser<'input> {
 
     fn to_variable<'v>(&self, variable_name: &'v str) -> Variable<'v> {
         if self.state.is_first_stream_tag {
+            // TODO: cut the stream tag after the refactoring.
             Variable::Stream(variable_name)
         } else {
             Variable::Scalar(variable_name)
@@ -313,6 +319,8 @@ impl<'input> CallVariableParser<'input> {
         }
     }
 }
+
+const STREAM_START_TAG: char = '$';
 
 fn to_variable_and_path(str: &str, pos: usize, should_flatten: bool) -> (&str, &str) {
     let json_path = if should_flatten {

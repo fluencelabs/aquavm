@@ -156,14 +156,7 @@ fn init_peer_id() {
 fn stream() {
     const STREAM: &str = "$stream____asdasd";
 
-    lexer_test(
-        STREAM,
-        Single(Ok((
-            0,
-            Token::Stream(&STREAM[1..STREAM.len()]),
-            STREAM.len(),
-        ))),
-    );
+    lexer_test(STREAM, Single(Ok((0, Token::Stream(STREAM), STREAM.len()))));
 }
 
 #[test]

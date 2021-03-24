@@ -9,10 +9,6 @@ license = "Apache-2.0"
 name = "aqua_test_utils"
 path = "src/lib.rs"
 
-[[bin]]
-name = "foo"
-path = "src/lib.rs"
-
 [dependencies]
 fluence = { version = "0.4.2", features = ["logger"] }
 aquamarine-vm = { version = "0.5.1", features = ["raw-aquamarine-vm-api"] }

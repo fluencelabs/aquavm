@@ -118,7 +118,7 @@ fn parse_seq_seq() {
                 CallInstrArgValue::Literal("hello"),
                 CallInstrArgValue::Variable(Scalar("name")),
             ]),
-            output: Variable(Stream("output")),
+            output: Variable(Stream("$output")),
         }),
     );
     assert_eq!(instruction, expected);
@@ -145,7 +145,7 @@ fn parse_json_path() {
             CallInstrArgValue::Literal("hello"),
             CallInstrArgValue::Variable(Scalar("name")),
         ]),
-        output: Variable(Stream("void")),
+        output: Variable(Stream("$void")),
     });
     assert_eq!(instruction, expected);
 }
@@ -285,7 +285,7 @@ fn json_path_square_braces() {
                 should_flatten: false,
             },
         ]),
-        output: Variable(Stream("void")),
+        output: Variable(Stream("$void")),
     });
 
     assert_eq!(instruction, expected);

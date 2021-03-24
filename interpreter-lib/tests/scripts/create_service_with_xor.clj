@@ -18,7 +18,7 @@
     )
    )
   (seq
-   (call "{1}" ("op" "identity") ["XOR: create_greeting_service failed"] fail[])
+   (call "{1}" ("op" "identity") ["XOR: create_greeting_service failed"] $fail)
    (call "{2}" ("return" "") [%last_error%])
    )
   )

@@ -16,6 +16,7 @@
 
 use super::*;
 use crate::exec_err;
+use crate::execution::utils::get_variable_name;
 use crate::JValue;
 use crate::ResolvedTriplet;
 use crate::SecurityTetraplet;
@@ -36,12 +37,18 @@ pub(super) fn construct_iterable_value<'ctx>(
     exec_ctx: &ExecutionCtx<'ctx>,
 ) -> ExecutionResult<Option<IterableValue>> {
     match ast_iterable {
-        ast::IterableValue::Variable(name) => handle_instruction_variable(exec_ctx, name),
+        ast::IterableValue::Variable(variable) => {
+            let name = get_variable_name(variable);
+            handle_instruction_variable(exec_ctx, name)
+        }
         ast::IterableValue::JsonPath {
             variable,
             path,
             should_flatten,
-        } => handle_instruction_json_path(exec_ctx, variable, path, *should_flatten),
+        } => {
+            let name = get_variable_name(variable);
+            handle_instruction_json_path(exec_ctx, name, path, *should_flatten)
+        }
     }
 }
 

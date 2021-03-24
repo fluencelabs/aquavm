@@ -20,6 +20,7 @@ use super::ExecutionResult;
 use crate::contexts::execution::ResolvedCallResult;
 use crate::contexts::execution_trace::*;
 use crate::exec_err;
+use crate::execution::Variable;
 use crate::log_targets::EXECUTED_STATE_CHANGING;
 use crate::JValue;
 
@@ -43,7 +44,7 @@ pub(super) fn set_local_call_result<'i>(
     let executed_result = ResolvedCallResult { result, triplet };
 
     match output {
-        CallOutputValue::Scalar(name) => {
+        CallOutputValue::Variable(Variable::Scalar(name)) => {
             if let Some(fold_block_name) = exec_ctx.met_folds.back() {
                 let fold_state = match exec_ctx.data_cache.get_mut(*fold_block_name) {
                     Some(AValue::JValueFoldCursor(fold_state)) => fold_state,
@@ -74,7 +75,7 @@ pub(super) fn set_local_call_result<'i>(
                 }
             };
         }
-        CallOutputValue::Stream(name) => {
+        CallOutputValue::Variable(Variable::Stream(name)) => {
             match exec_ctx.data_cache.entry(name.to_string()) {
                 Occupied(mut entry) => match entry.get_mut() {
                     // if result is an array, insert result to the end of the array
