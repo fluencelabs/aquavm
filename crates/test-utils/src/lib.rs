@@ -57,6 +57,10 @@ pub fn create_aqua_vm(
     AquamarineVM::new(config).expect("vm should be created")
 }
 
+pub fn main() {
+    let _vm = create_aqua_vm(unit_call_service(), "");
+}
+
 pub fn unit_call_service() -> CallServiceClosure {
     Box::new(|_, _| -> Option<IValue> {
         Some(IValue::Record(

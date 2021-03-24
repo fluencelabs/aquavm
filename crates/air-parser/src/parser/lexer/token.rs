@@ -17,7 +17,7 @@
 use serde::Deserialize;
 use serde::Serialize;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum Token<'input> {
     OpenRoundBracket,
     CloseRoundBracket,
@@ -26,8 +26,8 @@ pub enum Token<'input> {
 
     StringLiteral(&'input str),
     Alphanumeric(&'input str),
-    JsonPath(&'input str, usize, bool),
     Stream(&'input str),
+    VariableWithJsonPath(Variable<'input>, &'input str, bool),
     Number(Number),
     Boolean(bool),
 
@@ -45,6 +45,12 @@ pub enum Token<'input> {
     MisMatch,
 }
 
+#[derive(Debug, Clone, PartialEq, Hash, Serialize, Deserialize)]
+pub enum Variable<'input> {
+    Scalar(&'input str),
+    Stream(&'input str),
+}
+
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum Number {
     Int(i64),
@@ -60,6 +66,17 @@ impl fmt::Display for Number {
         match self {
             Int(number) => write!(f, "{}", number),
             Float(number) => write!(f, "{}", number),
+        }
+    }
+}
+
+impl fmt::Display for Variable<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use Variable::*;
+
+        match self {
+            Scalar(name) => write!(f, "{}", name),
+            Stream(name) => write!(f, "&{}", name),
         }
     }
 }

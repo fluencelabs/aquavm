@@ -17,6 +17,7 @@
 mod traits;
 
 pub use crate::parser::lexer::Number;
+pub use crate::parser::lexer::Variable;
 
 use serde::Deserialize;
 use serde::Serialize;
@@ -62,9 +63,9 @@ pub struct Call<'i> {
 pub enum CallInstrValue<'i> {
     InitPeerId,
     Literal(&'i str),
-    Variable(&'i str),
+    Variable(Variable<'i>),
     JsonPath {
-        variable: &'i str,
+        variable: Variable<'i>,
         path: &'i str,
         should_flatten: bool,
     },
@@ -77,9 +78,9 @@ pub enum CallInstrArgValue<'i> {
     Literal(&'i str),
     Number(Number),
     Boolean(bool),
-    Variable(&'i str),
+    Variable(Variable<'i>),
     JsonPath {
-        variable: &'i str,
+        variable: Variable<'i>,
         path: &'i str,
         should_flatten: bool,
     },
@@ -87,9 +88,9 @@ pub enum CallInstrArgValue<'i> {
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum IterableValue<'i> {
-    Variable(&'i str),
+    Variable(Variable<'i>),
     JsonPath {
-        variable: &'i str,
+        variable: Variable<'i>,
         path: &'i str,
         should_flatten: bool,
     },
@@ -100,9 +101,9 @@ pub enum MatchableValue<'i> {
     Literal(&'i str),
     Number(Number),
     Boolean(bool),
-    Variable(&'i str),
+    Variable(Variable<'i>),
     JsonPath {
-        variable: &'i str,
+        variable: Variable<'i>,
         path: &'i str,
         should_flatten: bool,
     },
@@ -110,8 +111,7 @@ pub enum MatchableValue<'i> {
 
 #[derive(Serialize, Debug, PartialEq, Clone)]
 pub enum CallOutputValue<'i> {
-    Scalar(&'i str),
-    Stream(&'i str),
+    Variable(Variable<'i>),
     None,
 }
 

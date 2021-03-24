@@ -275,7 +275,7 @@ fn json_path() {
         JSON_PATH,
         Single(Ok((
             0,
-            Token::JsonPath(JSON_PATH, 5, false),
+            Token::VariableWithJsonPath(JSON_PATH, 5, false),
             JSON_PATH.len(),
         ))),
     );
