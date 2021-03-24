@@ -196,24 +196,24 @@ fn string_to_token(input: &str, start_pos: usize) -> LexerResult<Token> {
     }
 }
 
-fn try_parse_stream(maybe_acc: &str, start: usize) -> LexerResult<Token> {
-    const ACC_END_TAG_SIZE: usize = 2;
+fn try_parse_stream(maybe_stream: &str, start: usize) -> LexerResult<Token> {
+    const STREAM_TAG_SIZE: usize = 1;
 
-    let str_len = maybe_acc.len();
-    if str_len == ACC_END_TAG_SIZE {
+    let str_len = maybe_stream.len();
+    if str_len == STREAM_TAG_SIZE {
         return Err(LexerError::EmptyStreamName(start, start));
     }
 
     // this slice is safe here because str's been checked for ending with "[]"
-    let maybe_acc = &maybe_acc[0..str_len - ACC_END_TAG_SIZE];
+    let maybe_stream = &maybe_stream[STREAM_TAG_SIZE..str_len];
 
-    for (pos, ch) in maybe_acc.chars().enumerate() {
+    for (pos, ch) in maybe_stream.chars().enumerate() {
         if !is_aqua_alphanumeric(ch) {
             return Err(LexerError::IsNotAlphanumeric(start + pos, start + pos));
         }
     }
 
-    Ok(Token::Stream(maybe_acc))
+    Ok(Token::Stream(maybe_stream))
 }
 
 const CALL_INSTR: &str = "call";

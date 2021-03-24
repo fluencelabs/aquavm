@@ -83,7 +83,7 @@ PeerPart: PeerPart<'input> = {
 
 Output: CallOutputValue<'input> = {
     <s:Alphanumeric> => CallOutputValue::Scalar(s),
-    <a:Accumulator> => CallOutputValue::Accumulator(a),
+    <a:Stream> => CallOutputValue::Stream(a),
 };
 
 Function = CallInstrValue;
@@ -154,7 +154,7 @@ extern {
         Alphanumeric => Token::Alphanumeric(<&'input str>),
         Literal => Token::StringLiteral(<&'input str>),
         JsonPath => Token::JsonPath(<&'input str>, <usize>, <bool>),
-        Accumulator => Token::Accumulator(<&'input str>),
+        Stream => Token::Stream(<&'input str>),
         Number => Token::Number(<Number>),
         Boolean => Token::Boolean(<bool>),
 

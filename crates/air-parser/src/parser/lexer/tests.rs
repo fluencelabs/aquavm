@@ -153,11 +153,15 @@ fn init_peer_id() {
 
 #[test]
 fn stream() {
-    const ACC: &str = "accumulator____asdasd[]";
+    const STREAM: &str = "$stream____asdasd";
 
     lexer_test(
-        ACC,
-        Single(Ok((0, Token::Stream(&ACC[0..ACC.len() - 2]), ACC.len()))),
+        STREAM,
+        Single(Ok((
+            0,
+            Token::Stream(&STREAM[1..STREAM.len()]),
+            STREAM.len(),
+        ))),
     );
 }
 

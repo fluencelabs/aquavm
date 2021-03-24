@@ -87,7 +87,7 @@ fn parse_seq_seq() {
                 (call peerid function [])
                 (call (peerid serviceA) ("serviceB" function) [])
             )
-            (call "id" "f" ["hello" name] output[])
+            (call "id" "f" ["hello" name] $output)
         )
         "#;
     let instruction = parse(source_code);
@@ -135,7 +135,7 @@ fn parse_json_path() {
     use ast::PeerPart::*;
 
     let source_code = r#"
-        (call id.$.a! "f" ["hello" name] void[])
+        (call id.$.a! "f" ["hello" name] $void)
         "#;
     let instruction = parse(source_code);
     let expected = Instruction::Call(Call {
@@ -157,7 +157,7 @@ fn parse_json_path() {
 #[test]
 fn parse_undefined_variable() {
     let source_code = r#"
-        (call id.$.a "f" ["hello" name] void[])
+        (call id.$.a "f" ["hello" name] $void)
         "#;
 
     let lexer = crate::AIRLexer::new(source_code);
@@ -190,7 +190,7 @@ fn parse_undefined_iterable() {
             (call "" ("" "") [] iterable)
             (fold iterable i
                 (seq
-                    (call "" ("" "") ["hello" ""] void[])
+                    (call "" ("" "") ["hello" ""] $void)
                     (next j)
                 )
             )
@@ -269,7 +269,7 @@ fn json_path_square_braces() {
     use ast::PeerPart::*;
 
     let source_code = r#"
-        (call u.$["peer_id"]! ("return" "") [u.$["peer_id"].cde[0]["abc"].abc u.$["name"]] void[])
+        (call u.$["peer_id"]! ("return" "") [u.$["peer_id"].cde[0]["abc"].abc u.$["name"]] $void)
         "#;
     let instruction = parse(source_code);
     let expected = Instruction::Call(Call {
