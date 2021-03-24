@@ -25,25 +25,13 @@ use super::ExecutionError;
 use super::ExecutionResult;
 use super::ExecutionTraceCtx;
 use crate::contexts::execution::LastErrorDescriptor;
+use crate::joinable;
 use crate::log_instruction;
 use crate::SecurityTetraplet;
 
 use air_parser::ast::Call;
 
 use std::rc::Rc;
-
-/// This macro converts joinable errors to Ok and sets subtree complete to true.
-macro_rules! joinable {
-    ($cmd:expr, $exec_ctx:expr) => {
-        match $cmd {
-            Err(e) if is_joinable_error_type(&e) => {
-                $exec_ctx.subtree_complete = false;
-                return Ok(());
-            }
-            v => v,
-        }
-    };
-}
 
 impl<'i> super::ExecutableInstruction<'i> for Call<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut ExecutionTraceCtx) -> ExecutionResult<()> {
@@ -76,35 +64,6 @@ fn set_last_error<'i>(
     let last_error = LastErrorDescriptor::new(e, instruction, tetraplet);
     exec_ctx.last_error = Some(last_error);
     exec_ctx.last_error_could_be_set = false;
-}
-
-macro_rules! log_join {
-    ($($args:tt)*) => {
-        log::info!(target: crate::log_targets::JOIN_BEHAVIOUR, $($args)*)
-    }
-}
-
-/// Returns true, if supplied error is related to variable not found errors type.
-/// Print log if this is joinable error type.
-#[rustfmt::skip::macros(log_join)]
-fn is_joinable_error_type(exec_error: &ExecutionError) -> bool {
-    use ExecutionError::*;
-
-    match exec_error {
-        VariableNotFound(var_name) => {
-            log_join!("  call is waiting for an argument with name '{}'", var_name);
-            true
-        }
-        JValueJsonPathError(value, json_path, _) => {
-            log_join!("  call is waiting for an argument with path '{}' on jvalue '{:?}'", json_path, value);
-            true
-        }
-        JValueAccJsonPathError(acc, json_path, _) => {
-            log_join!("  call is waiting for an argument with path '{}' on accumulator '{:?}'", json_path, acc);
-            true
-        }
-        _ => false,
-    }
 }
 
 #[cfg(test)]

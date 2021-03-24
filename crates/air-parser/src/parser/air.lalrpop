@@ -48,13 +48,19 @@ Instr: Box<Instruction<'input>> = {
 
     "(" xor <l:Instr> <r:Instr> ")" => Box::new(Instruction::Xor(Xor(l, r))),
 
-    "(" match_ <l:Matchable> <r:Matchable> <i:Instr> ")" => {
+    <left: @L> "(" match_ <l:Matchable> <r:Matchable> <i:Instr> ")" <right: @R> => {
         let match_ = Match { left_value: l, right_value: r, instruction: i};
+        let span = Span { left, right };
+        validator.met_match(&match_, span);
+
         Box::new(Instruction::Match(match_))
     },
 
-    "(" mismatch <l:Matchable> <r:Matchable> <i:Instr> ")" => {
+    <left: @L> "(" mismatch <l:Matchable> <r:Matchable> <i:Instr> ")" <right: @R> => {
         let mismatch = MisMatch { left_value: l, right_value: r, instruction: i};
+        let span = Span { left, right };
+        validator.met_mismatch(&mismatch, span);
+
         Box::new(Instruction::MisMatch(mismatch))
      },
 
