@@ -12,7 +12,7 @@
           (next n)
           )
          )
-   (fold neighs_inner ns
+   (fold $neighs_inner ns
          (seq
           (fold ns n
                 (seq
