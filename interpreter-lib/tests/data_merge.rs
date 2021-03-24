@@ -197,8 +197,8 @@ fn acc_merge() {
                     (seq 
                         (call "A" ("get_providers" "") [] $providers)
                         (seq 
-                            (call "B" ("" "2") [providers] $void)
-                            (call "B" ("" "3") [void] $void)
+                            (call "B" ("" "2") [$providers] $void)
+                            (call "B" ("" "3") [$void] $void)
                         )
                     )
                 )

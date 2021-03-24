@@ -135,7 +135,7 @@ fn flattening_streams() {
                 )
                 (call "{0}" ("" "") [] $stream)
             )
-            (fold stream.$.[0,1,2] v
+            (fold $stream.$.[0,1,2] v
                 (seq
                     (call v.$.peer_id! (v.$.service_id! v.$.function_name!) [v.$.args[0]! v.$.args[1]!])
                     (next v)
@@ -185,7 +185,7 @@ fn test_handling_non_flattening_values() {
                 )
                 (call "{0}" ("" "") [] $stream)
             )
-            (fold stream.$.[0,1,2]! v
+            (fold $stream.$.[0,1,2]! v
                 (seq
                     (call v.$.peer_id! (v.$.service_id! v.$.function_name!) [v.$.args[0]! v.$.args[1]!])
                     (next v)
