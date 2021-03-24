@@ -19,6 +19,7 @@ use super::AIRLexer;
 use super::LexerError;
 use super::Number;
 use super::Token;
+use super::Variable;
 
 fn run_lexer(input: &str) -> Vec<Spanned<Token<'_>, usize, LexerError>> {
     let lexer = AIRLexer::new(input);
@@ -268,14 +269,15 @@ fn too_big_float_number() {
 
 #[test]
 fn json_path() {
-    // this json path contains all allowed in json path charactes
+    // this json path contains all allowed in json path characters
     const JSON_PATH: &str = r#"value.$[$@[]():?.*,"]"#;
+    let variable = Variable::Scalar("value");
 
     lexer_test(
         JSON_PATH,
         Single(Ok((
             0,
-            Token::VariableWithJsonPath(JSON_PATH, 5, false),
+            Token::VariableWithJsonPath(variable, r#"$[$@[]():?.*,"]"#, false),
             JSON_PATH.len(),
         ))),
     );
