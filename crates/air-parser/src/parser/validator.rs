@@ -169,7 +169,7 @@ impl<'i> VariableValidator<'i> {
 
         let variable_name = match call_output {
             CallOutputValue::Scalar(variable) => variable,
-            CallOutputValue::Accumulator(accumulator) => accumulator,
+            CallOutputValue::Stream(stream) => stream,
             CallOutputValue::None => return,
         };
 

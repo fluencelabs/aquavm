@@ -196,8 +196,8 @@ fn is_joinable_error_type(exec_error: &ExecutionError) -> bool {
             log_join!("  waiting for an argument with path '{}' on jvalue '{:?}'", json_path, value);
             true
         }
-        JValueAccJsonPathError(acc, json_path, _) => {
-            log_join!("  waiting for an argument with path '{}' on accumulator '{:?}'", json_path, acc);
+        JValueStreamJsonPathError(stream, json_path, _) => {
+            log_join!("  waiting for an argument with path '{}' on stream '{:?}'", json_path, stream);
             true
         }
         _ => false,

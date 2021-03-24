@@ -119,7 +119,7 @@ fn parse_seq_seq() {
                 CallInstrArgValue::Literal("hello"),
                 CallInstrArgValue::Variable("name"),
             ]),
-            output: Accumulator("output"),
+            output: Stream("output"),
         }),
     );
     assert_eq!(instruction, expected);
@@ -149,7 +149,7 @@ fn parse_json_path() {
             CallInstrArgValue::Literal("hello"),
             CallInstrArgValue::Variable("name"),
         ]),
-        output: Accumulator("void"),
+        output: Stream("void"),
     });
     assert_eq!(instruction, expected);
 }
@@ -294,7 +294,7 @@ fn json_path_square_braces() {
                 should_flatten: false,
             },
         ]),
-        output: Accumulator("void"),
+        output: Stream("void"),
     });
 
     assert_eq!(instruction, expected);

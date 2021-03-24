@@ -105,7 +105,7 @@ impl fmt::Display for CallOutputValue<'_> {
 
         match self {
             Scalar(str) => write!(f, "{}", str),
-            Accumulator(str) => write!(f, "{}[]", str),
+            Stream(str) => write!(f, "{}[]", str),
             None => Ok(()),
         }
     }

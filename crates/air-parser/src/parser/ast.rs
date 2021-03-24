@@ -111,7 +111,7 @@ pub enum MatchableValue<'i> {
 #[derive(Serialize, Debug, PartialEq, Clone)]
 pub enum CallOutputValue<'i> {
     Scalar(&'i str),
-    Accumulator(&'i str),
+    Stream(&'i str),
     None,
 }
 

@@ -595,7 +595,7 @@ mod __parse__AIR {
             Token::CloseRoundBracket if true => Some(1),
             Token::OpenSquareBracket if true => Some(2),
             Token::CloseSquareBracket if true => Some(3),
-            Token::Accumulator(_) if true => Some(4),
+            Token::Stream(_) if true => Some(4),
             Token::Alphanumeric(_) if true => Some(5),
             Token::Boolean(_) if true => Some(6),
             Token::InitPeerId if true => Some(7),
@@ -628,7 +628,7 @@ mod __parse__AIR {
         match __token_index {
             0 | 1 | 2 | 3 | 7 | 9 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 => __Symbol::Variant0(__token),
             4 | 5 | 10 => match __token {
-                Token::Accumulator(__tok0) | Token::Alphanumeric(__tok0) | Token::StringLiteral(__tok0) if true => __Symbol::Variant1(__tok0),
+                Token::Stream(__tok0) | Token::Alphanumeric(__tok0) | Token::StringLiteral(__tok0) if true => __Symbol::Variant1(__tok0),
                 _ => unreachable!(),
             },
             6 => match __token {
@@ -2883,7 +2883,7 @@ fn __action18<
     (_, a, _): (usize, &'input str, usize),
 ) -> CallOutputValue<'input>
 {
-    CallOutputValue::Accumulator(a)
+    CallOutputValue::Stream(a)
 }
 
 #[allow(unused_variables)]

@@ -30,8 +30,8 @@ pub enum LexerError {
     #[error("only alphanumeric, '_', and '-' characters are allowed in this position")]
     IsNotAlphanumeric(usize, usize),
 
-    #[error("an accumulator name should be non empty")]
-    EmptyAccName(usize, usize),
+    #[error("an stream name should be non empty")]
+    EmptyStreamName(usize, usize),
 
     #[error("this variable or constant shouldn't have empty name")]
     EmptyVariableOrConst(usize, usize),

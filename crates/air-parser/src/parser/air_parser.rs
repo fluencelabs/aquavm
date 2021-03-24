@@ -148,7 +148,7 @@ fn lexical_error_to_label(file_id: usize, error: LexerError) -> Label<usize> {
         IsNotAlphanumeric(start, end) => {
             Label::primary(file_id, start..end).with_message(error.to_string())
         }
-        EmptyAccName(start, end) => {
+        EmptyStreamName(start, end) => {
             Label::primary(file_id, start..end).with_message(error.to_string())
         }
         EmptyVariableOrConst(start, end) => {

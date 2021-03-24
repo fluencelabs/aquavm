@@ -74,15 +74,15 @@ pub(super) fn set_local_call_result<'i>(
                 }
             };
         }
-        CallOutputValue::Accumulator(name) => {
+        CallOutputValue::Stream(name) => {
             match exec_ctx.data_cache.entry(name.to_string()) {
                 Occupied(mut entry) => match entry.get_mut() {
                     // if result is an array, insert result to the end of the array
-                    AValue::JValueAccumulatorRef(values) => values.borrow_mut().push(executed_result),
+                    AValue::JValueStreamRef(values) => values.borrow_mut().push(executed_result),
                     v => return exec_err!(IncompatibleAValueType(format!("{}", v), String::from("Array"))),
                 },
                 Vacant(entry) => {
-                    entry.insert(AValue::JValueAccumulatorRef(RefCell::new(vec![executed_result])));
+                    entry.insert(AValue::JValueStreamRef(RefCell::new(vec![executed_result])));
                 }
             };
         }

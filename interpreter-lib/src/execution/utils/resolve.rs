@@ -121,7 +121,7 @@ pub(crate) fn resolve_to_jvaluable<'name, 'i, 'ctx>(
 
     match value {
         AValue::JValueRef(value) => Ok(Box::new(value.clone())),
-        AValue::JValueAccumulatorRef(acc) => Ok(Box::new(acc.borrow())),
+        AValue::JValueStreamRef(stream) => Ok(Box::new(stream.borrow())),
         AValue::JValueFoldCursor(fold_state) => {
             let peeked_value = fold_state.iterable.peek().unwrap();
             Ok(Box::new(peeked_value))

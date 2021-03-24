@@ -51,13 +51,13 @@ fn handle_instruction_variable<'ctx>(
 ) -> ExecutionResult<Option<IterableValue>> {
     let iterable: Option<IterableValue> = match exec_ctx.data_cache.get(variable_name) {
         Some(AValue::JValueRef(call_result)) => from_call_result(call_result.clone())?,
-        Some(AValue::JValueAccumulatorRef(acc)) => {
-            let acc = acc.borrow();
-            if acc.is_empty() {
+        Some(AValue::JValueStreamRef(stream)) => {
+            let stream = stream.borrow();
+            if stream.is_empty() {
                 return Ok(None);
             }
 
-            let call_results = acc.iter().cloned().collect::<Vec<_>>();
+            let call_results = stream.iter().cloned().collect::<Vec<_>>();
             let foldable = IterableVecResolvedCall::init(call_results);
             Some(Box::new(foldable))
         }
@@ -103,28 +103,28 @@ fn handle_instruction_json_path<'ctx>(
     json_path: &str,
     should_flatten: bool,
 ) -> ExecutionResult<Option<IterableValue>> {
-    use ExecutionError::JValueAccJsonPathError;
+    use ExecutionError::JValueStreamJsonPathError;
 
     match exec_ctx.data_cache.get(variable_name) {
         Some(AValue::JValueRef(variable)) => {
             let jvalues = apply_json_path(&variable.result, json_path)?;
             from_jvalues(jvalues, variable.triplet.clone(), json_path, should_flatten)
         }
-        Some(AValue::JValueAccumulatorRef(acc)) => {
-            let acc = acc.borrow();
-            if acc.is_empty() {
+        Some(AValue::JValueStreamRef(stream)) => {
+            let stream = stream.borrow();
+            if stream.is_empty() {
                 return Ok(None);
             }
 
-            let acc_iter = acc.iter().map(|v| v.result.deref());
+            let acc_iter = stream.iter().map(|v| v.result.deref());
             let (jvalues, tetraplet_indices) = select_with_iter(acc_iter, &json_path)
-                .map_err(|e| JValueAccJsonPathError(acc.clone(), json_path.to_string(), e))?;
+                .map_err(|e| JValueStreamJsonPathError(stream.clone(), json_path.to_string(), e))?;
 
             let jvalues = construct_iterable_jvalues(jvalues, should_flatten)?;
             let tetraplets = tetraplet_indices
                 .into_iter()
                 .map(|id| SecurityTetraplet {
-                    triplet: acc[id].triplet.clone(),
+                    triplet: stream[id].triplet.clone(),
                     json_path: json_path.to_string(),
                 })
                 .collect::<Vec<_>>();

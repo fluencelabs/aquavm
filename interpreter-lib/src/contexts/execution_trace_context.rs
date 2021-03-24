@@ -37,7 +37,7 @@ pub(crate) struct ExecutionTraceCtx {
     pub(crate) current_subtree_size: usize,
 
     // TODO: consider change it to Vec for optimization
-    /// Accumulator for resulted path produced by the interpreter after execution.
+    /// stream for resulted path produced by the interpreter after execution.
     pub(crate) new_trace: ExecutionTrace,
 }
 

@@ -152,16 +152,12 @@ fn init_peer_id() {
 }
 
 #[test]
-fn accumulator() {
+fn stream() {
     const ACC: &str = "accumulator____asdasd[]";
 
     lexer_test(
         ACC,
-        Single(Ok((
-            0,
-            Token::Accumulator(&ACC[0..ACC.len() - 2]),
-            ACC.len(),
-        ))),
+        Single(Ok((0, Token::Stream(&ACC[0..ACC.len() - 2]), ACC.len()))),
     );
 }
 
