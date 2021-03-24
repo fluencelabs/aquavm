@@ -130,10 +130,10 @@ fn flattening_streams() {
         (seq
             (seq
                 (seq
-                    (call "{0}" ("" "") [] stream[])
-                    (call "{0}" ("" "") [] stream[])
+                    (call "{0}" ("" "") [] $stream)
+                    (call "{0}" ("" "") [] $stream)
                 )
-                (call "{0}" ("" "") [] stream[])
+                (call "{0}" ("" "") [] $stream)
             )
             (fold stream.$.[0,1,2] v
                 (seq
@@ -180,10 +180,10 @@ fn test_handling_non_flattening_values() {
         (seq
             (seq
                 (seq
-                    (call "{0}" ("" "") [] stream[])
-                    (call "{0}" ("" "") [] stream[])
+                    (call "{0}" ("" "") [] $stream)
+                    (call "{0}" ("" "") [] $stream)
                 )
-                (call "{0}" ("" "") [] stream[])
+                (call "{0}" ("" "") [] $stream)
             )
             (fold stream.$.[0,1,2]! v
                 (seq

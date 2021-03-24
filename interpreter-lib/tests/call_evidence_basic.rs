@@ -254,7 +254,7 @@ fn executed_trace_par_seq_fold_call() {
                 (call "some_peer_id_1" ("local_service_id" "local_fn_name") [] IterableResultPeer1)
                 (fold IterableResultPeer1 i
                     (par
-                        (call "some_peer_id_2" ("local_service_id" "local_fn_name") [i] acc[])
+                        (call "some_peer_id_2" ("local_service_id" "local_fn_name") [i] $acc)
                         (next i)
                     )
                 )
@@ -330,7 +330,7 @@ fn executed_trace_par_seq_fold_in_cycle_call() {
                 (call "some_peer_id_1" ("local_service_id" "local_fn_name") [] IterableResultPeer1)
                 (fold IterableResultPeer1 i
                     (par 
-                        (call "some_peer_id_2" ("local_service_id" "local_fn_name") [i] acc[])
+                        (call "some_peer_id_2" ("local_service_id" "local_fn_name") [i] $acc)
                         (next i)
                     )
                 )
