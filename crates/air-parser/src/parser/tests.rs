@@ -330,7 +330,7 @@ fn source_seq_with(name: &'static str) -> String {
 fn parse_seq_par_xor_seq() {
     for name in &["xor", "par", "seq"] {
         let source_code = source_seq_with(name);
-        let instruction = parse(&source_code.as_ref());
+        let instruction = parse(&source_code);
         let instr = binary_instruction(*name);
         let expected = seq(instr(seqnn(), null()), instr(null(), seqnn()));
         assert_eq!(instruction, expected);
@@ -344,7 +344,7 @@ fn parse_fold() {
             (null)
         )
         "#;
-    let instruction = parse(&source_code.as_ref());
+    let instruction = parse(source_code);
     let expected = fold(ast::IterableValue::Variable("iterable"), "i", null());
     assert_eq!(instruction, expected);
 }
@@ -358,7 +358,7 @@ fn parse_match() {
             (null)
         )
         "#;
-    let instruction = parse(&source_code.as_ref());
+    let instruction = parse(source_code);
     let expected = match_(Variable("v1"), Variable("v2"), null());
     assert_eq!(instruction, expected);
 }
@@ -372,7 +372,7 @@ fn parse_mismatch() {
             (null)
         )
         "#;
-    let instruction = parse(&source_code.as_ref());
+    let instruction = parse(source_code);
     let expected = mismatch(Variable("v1"), Variable("v2"), null());
     assert_eq!(instruction, expected);
 }
@@ -386,7 +386,7 @@ fn source_fold_with(name: &str) -> String {
 fn parse_fold_with_xor_par_seq() {
     for name in &["xor", "par", "seq"] {
         let source_code = source_fold_with(name);
-        let instruction = parse(&source_code.as_ref());
+        let instruction = parse(&source_code);
         let instr = binary_instruction(*name);
         let expected = fold(
             ast::IterableValue::Variable("iterable"),
@@ -415,7 +415,7 @@ fn parse_init_peer_id() {
         peer_id
     );
 
-    let instruction = parse(&source_code.as_ref());
+    let instruction = parse(&source_code);
     let expected = seq(
         Instruction::Call(Call {
             peer_part: PeerPk(CallInstrValue::Literal(&peer_id)),
@@ -457,7 +457,7 @@ fn parse_last_error() {
         )"#,
     );
 
-    let instruction = parse(&source_code.as_ref());
+    let instruction = parse(&source_code);
     let expected = seq(
         Instruction::Call(Call {
             peer_part: PeerPk(CallInstrValue::InitPeerId),
@@ -495,7 +495,7 @@ fn seq_par_call() {
         peer_id,
     );
 
-    let instruction = parse(&source_code.as_ref());
+    let instruction = parse(&source_code);
     let expected = seq(
         par(
             Instruction::Call(Call {
@@ -561,7 +561,7 @@ fn seq_with_empty_and_dash() {
             )
         )
         "#;
-    let instruction = parse(&source_code.as_ref());
+    let instruction = parse(source_code);
     let expected = seq(
         seq(
             seq(
@@ -645,6 +645,44 @@ fn seq_with_empty_and_dash() {
 }
 
 #[test]
+fn match_with_bool() {
+    use ast::MatchableValue::*;
+
+    let source_code = r#"
+         (match isOnline true
+            (null)
+         )
+        "#;
+
+    let left_value = Variable("isOnline");
+    let right_value = Boolean(true);
+    let null = null();
+    let expected = match_(left_value, right_value, null);
+
+    let instruction = parse(source_code);
+    assert_eq!(expected, instruction);
+}
+
+#[test]
+fn mismatch_with_bool() {
+    use ast::MatchableValue::*;
+
+    let source_code = r#"
+         (mismatch true isOnline
+            (null)
+         )
+        "#;
+
+    let left_value = Boolean(true);
+    let right_value = Variable("isOnline");
+    let null = null();
+    let expected = mismatch(left_value, right_value, null);
+
+    let instruction = parse(source_code);
+    assert_eq!(expected, instruction);
+}
+
+#[test]
 fn no_output() {
     use ast::Call;
     use ast::CallInstrValue;
@@ -655,7 +693,7 @@ fn no_output() {
     let source_code = r#"
     (call peer (service fname) [])
     "#;
-    let instruction = parse(&source_code.as_ref());
+    let instruction = parse(source_code);
     let expected = Instruction::Call(Call {
         peer_part: PeerPk(CallInstrValue::Variable("peer")),
         function_part: ServiceIdWithFuncName(
@@ -678,7 +716,7 @@ fn fold_json_path() {
     (fold members.$.["users"] m (null)) ;;; comment
     ;;; comment
     "#;
-    let instruction = parse(&source_code.as_ref());
+    let instruction = parse(source_code);
     let expected = Instruction::Fold(Fold {
         iterable: JsonPath {
             variable: "members",
@@ -701,7 +739,7 @@ fn comments() {
     (fold members.$.["users"] m (null)) ;;; comment ;;?()()
     ;;; comme;?!.$.  nt[][][][()()()null;$::!
     "#;
-    let instruction = parse(&source_code.as_ref());
+    let instruction = parse(source_code);
     let expected = Instruction::Fold(Fold {
         iterable: JsonPath {
             variable: "members",
