@@ -649,7 +649,7 @@ fn match_with_bool() {
          )
         "#;
 
-    let left_value = Variable("isOnline");
+    let left_value = Variable(Scalar("isOnline"));
     let right_value = Boolean(true);
     let null = null();
     let expected = match_(left_value, right_value, null);
@@ -669,7 +669,7 @@ fn mismatch_with_bool() {
         "#;
 
     let left_value = Boolean(true);
-    let right_value = Variable("isOnline");
+    let right_value = Variable(Scalar("isOnline"));
     let null = null();
     let expected = mismatch(left_value, right_value, null);
 
