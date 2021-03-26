@@ -21,7 +21,7 @@ use crate::foldable_next;
 use crate::foldable_prev;
 use crate::SecurityTetraplet;
 
-/// Used for iterating over accumulator with JValues.
+/// Used for iterating over stream with JValues.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) struct IterableVecResolvedCall {
     pub(crate) call_results: Vec<ResolvedCallResult>,

@@ -27,6 +27,7 @@ pub use air_lexer::AIRLexer;
 pub use errors::LexerError;
 pub use token::Number;
 pub use token::Token;
+pub use token::Variable;
 
 pub(super) type LexerResult<T> = std::result::Result<T, LexerError>;
 

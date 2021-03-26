@@ -13,7 +13,7 @@ dependencies = [
 
 [[package]]
 name = "air-parser"
-version = "0.5.0"
+version = "0.7.0"
 dependencies = [
  "codespan",
  "codespan-reporting",
@@ -22,6 +22,7 @@ dependencies = [
  "itertools 0.10.0",
  "lalrpop",
  "lalrpop-util",
+ "multimap",
  "regex",
  "serde",
  "serde_json",
@@ -1226,9 +1227,9 @@ checksum = "bba551d6d795f74a01767577ea8339560bf0a65354e0417b7e915ed608443d46"
 
 [[package]]
 name = "multimap"
-version = "0.8.2"
+version = "0.8.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1255076139a83bb467426e7f8d0134968a8118844faa755985e077cf31850333"
+checksum = "e5ce46fe64a9d73be07dcbe690a38ce1b293be448fd8ce1e6c1b8062c9f72c6a"
 dependencies = [
  "serde",
 ]

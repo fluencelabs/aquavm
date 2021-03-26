@@ -23,6 +23,8 @@ mod lexer;
 mod air;
 
 pub mod ast;
+mod errors;
+mod validator;
 
 #[cfg(test)]
 pub mod tests;
@@ -30,3 +32,12 @@ pub mod tests;
 pub use self::air_parser::parse;
 pub use air::AIRParser;
 pub use lexer::AIRLexer;
+
+use errors::ParserError;
+use validator::VariableValidator;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Span {
+    pub left: usize,
+    pub right: usize,
+}

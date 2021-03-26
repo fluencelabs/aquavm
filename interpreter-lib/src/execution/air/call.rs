@@ -25,6 +25,7 @@ use super::ExecutionError;
 use super::ExecutionResult;
 use super::ExecutionTraceCtx;
 use crate::contexts::execution::LastErrorDescriptor;
+use crate::joinable_call;
 use crate::log_instruction;
 use crate::SecurityTetraplet;
 
@@ -32,30 +33,17 @@ use air_parser::ast::Call;
 
 use std::rc::Rc;
 
-/// This macro converts joinable errors to Ok and sets subtree complete to true.
-macro_rules! joinable {
-    ($cmd:expr, $exec_ctx:expr) => {
-        match $cmd {
-            Err(e) if is_joinable_error_type(&e) => {
-                $exec_ctx.subtree_complete = false;
-                return Ok(());
-            }
-            v => v,
-        }
-    };
-}
-
 impl<'i> super::ExecutableInstruction<'i> for Call<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut ExecutionTraceCtx) -> ExecutionResult<()> {
         log_instruction!(call, exec_ctx, trace_ctx);
 
-        let resolved_call = joinable!(ResolvedCall::new(self, exec_ctx), exec_ctx).map_err(|e| {
+        let resolved_call = joinable_call!(ResolvedCall::new(self, exec_ctx), exec_ctx).map_err(|e| {
             set_last_error(self, exec_ctx, e.clone(), None);
             e
         })?;
 
         let triplet = resolved_call.as_triplet();
-        joinable!(resolved_call.execute(exec_ctx, trace_ctx), exec_ctx).map_err(|e| {
+        joinable_call!(resolved_call.execute(exec_ctx, trace_ctx), exec_ctx).map_err(|e| {
             let tetraplet = SecurityTetraplet::from_triplet(triplet);
             set_last_error(self, exec_ctx, e.clone(), Some(tetraplet));
 
@@ -76,35 +64,6 @@ fn set_last_error<'i>(
     let last_error = LastErrorDescriptor::new(e, instruction, tetraplet);
     exec_ctx.last_error = Some(last_error);
     exec_ctx.last_error_could_be_set = false;
-}
-
-macro_rules! log_join {
-    ($($args:tt)*) => {
-        log::info!(target: crate::log_targets::JOIN_BEHAVIOUR, $($args)*)
-    }
-}
-
-/// Returns true, if supplied error is related to variable not found errors type.
-/// Print log if this is joinable error type.
-#[rustfmt::skip::macros(log_join)]
-fn is_joinable_error_type(exec_error: &ExecutionError) -> bool {
-    use ExecutionError::*;
-
-    match exec_error {
-        VariableNotFound(var_name) => {
-            log_join!("  call is waiting for an argument with name '{}'", var_name);
-            true
-        }
-        JValueJsonPathError(value, json_path, _) => {
-            log_join!("  call is waiting for an argument with path '{}' on jvalue '{:?}'", json_path, value);
-            true
-        }
-        JValueAccJsonPathError(acc, json_path, _) => {
-            log_join!("  call is waiting for an argument with path '{}' on accumulator '{:?}'", json_path, acc);
-            true
-        }
-        _ => false,
-    }
 }
 
 #[cfg(test)]
@@ -167,7 +126,7 @@ mod tests {
 
         let remote_peer_id = String::from("some_remote_peer_id");
         let script = format!(
-            r#"(call "{}" ("local_service_id" "local_fn_name") [value] result_name)"#,
+            r#"(call "{}" ("local_service_id" "local_fn_name") ["arg"] result_name)"#,
             remote_peer_id
         );
 
@@ -199,6 +158,26 @@ mod tests {
         let res = call_vm!(set_variable_vm, "asd", script.clone(), "[]", "[]");
         let res = call_vm!(vm, "asd", script, "[]", res.data);
 
+        assert!(res.next_peer_pks.is_empty());
+    }
+
+    // Check that duplicate variables are impossible.
+    #[test]
+    fn duplicate_variables() {
+        let mut vm = create_aqua_vm(unit_call_service(), "some_peer_id");
+
+        let script = format!(
+            r#"
+            (seq
+                (call "some_peer_id" ("some_service_id" "local_fn_name") [] modules)
+                (call "some_peer_id" ("some_service_id" "local_fn_name") [] modules)
+            )
+        "#,
+        );
+
+        let res = call_vm!(vm, "asd", script, "", "");
+
+        assert_eq!(res.ret_code, 1005);
         assert!(res.next_peer_pks.is_empty());
     }
 

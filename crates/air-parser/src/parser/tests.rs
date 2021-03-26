@@ -15,20 +15,34 @@
  */
 
 use crate::ast;
+use crate::parser::AIRParser;
+use crate::parser::ParserError;
+use ast::Call;
+use ast::CallInstrArgValue;
+use ast::CallInstrValue;
 use ast::Instruction;
+use ast::Variable::Scalar;
+use ast::Variable::Stream;
 
 use fstrings::f;
+use lalrpop_util::ParseError;
 use std::rc::Rc;
 
+thread_local!(static TEST_PARSER: AIRParser = AIRParser::new());
+
 fn parse(source_code: &str) -> Instruction {
-    *crate::parse(source_code).expect("parsing failed")
+    *TEST_PARSER.with(|parser| {
+        let mut errors = Vec::new();
+        let lexer = crate::parser::AIRLexer::new(source_code);
+        let mut validator = crate::parser::VariableValidator::new();
+        parser
+            .parse(source_code, &mut errors, &mut validator, lexer)
+            .expect("parsing should be successful")
+    })
 }
 
 #[test]
 fn parse_seq() {
-    use ast::Call;
-    use ast::CallInstrArgValue;
-    use ast::CallInstrValue;
     use ast::CallOutputValue::*;
     use ast::FunctionPart::*;
     use ast::PeerPart::*;
@@ -42,17 +56,17 @@ fn parse_seq() {
     let instruction = parse(source_code);
     let expected = seq(
         Instruction::Call(Call {
-            peer_part: PeerPk(CallInstrValue::Variable("peerid")),
-            function_part: FuncName(CallInstrValue::Variable("function")),
+            peer_part: PeerPk(CallInstrValue::Variable(Scalar("peerid"))),
+            function_part: FuncName(CallInstrValue::Variable(Scalar("function"))),
             args: Rc::new(vec![]),
-            output: Scalar("output"),
+            output: Variable(Scalar("output")),
         }),
         Instruction::Call(Call {
             peer_part: PeerPk(CallInstrValue::Literal("id")),
             function_part: FuncName(CallInstrValue::Literal("f")),
             args: Rc::new(vec![
                 CallInstrArgValue::Literal("hello"),
-                CallInstrArgValue::Variable("name"),
+                CallInstrArgValue::Variable(Scalar("name")),
             ]),
             output: None,
         }),
@@ -62,9 +76,6 @@ fn parse_seq() {
 
 #[test]
 fn parse_seq_seq() {
-    use ast::Call;
-    use ast::CallInstrArgValue;
-    use ast::CallInstrValue;
     use ast::CallOutputValue::*;
     use ast::FunctionPart::*;
     use ast::PeerPart::*;
@@ -75,26 +86,26 @@ fn parse_seq_seq() {
                 (call peerid function [])
                 (call (peerid serviceA) ("serviceB" function) [])
             )
-            (call "id" "f" ["hello" name] output[])
+            (call "id" "f" ["hello" name] $output)
         )
         "#;
     let instruction = parse(source_code);
     let expected = seq(
         seq(
             Instruction::Call(Call {
-                peer_part: PeerPk(CallInstrValue::Variable("peerid")),
-                function_part: FuncName(CallInstrValue::Variable("function")),
+                peer_part: PeerPk(CallInstrValue::Variable(Scalar("peerid"))),
+                function_part: FuncName(CallInstrValue::Variable(Scalar("function"))),
                 args: Rc::new(vec![]),
                 output: None,
             }),
             Instruction::Call(Call {
                 peer_part: PeerPkWithServiceId(
-                    CallInstrValue::Variable("peerid"),
-                    CallInstrValue::Variable("serviceA"),
+                    CallInstrValue::Variable(Scalar("peerid")),
+                    CallInstrValue::Variable(Scalar("serviceA")),
                 ),
                 function_part: ServiceIdWithFuncName(
                     CallInstrValue::Literal("serviceB"),
-                    CallInstrValue::Variable("function"),
+                    CallInstrValue::Variable(Scalar("function")),
                 ),
                 args: Rc::new(vec![]),
                 output: None,
@@ -105,9 +116,9 @@ fn parse_seq_seq() {
             function_part: FuncName(CallInstrValue::Literal("f")),
             args: Rc::new(vec![
                 CallInstrArgValue::Literal("hello"),
-                CallInstrArgValue::Variable("name"),
+                CallInstrArgValue::Variable(Scalar("name")),
             ]),
-            output: Accumulator("output"),
+            output: Variable(Stream("$output")),
         }),
     );
     assert_eq!(instruction, expected);
@@ -115,55 +126,97 @@ fn parse_seq_seq() {
 
 #[test]
 fn parse_json_path() {
-    use ast::Call;
-    use ast::CallInstrArgValue;
-    use ast::CallInstrValue;
     use ast::CallOutputValue::*;
     use ast::FunctionPart::*;
     use ast::PeerPart::*;
 
     let source_code = r#"
-        (call id.$.a! "f" ["hello" name] void[])
+        (call id.$.a! "f" ["hello" name] $void)
         "#;
     let instruction = parse(source_code);
     let expected = Instruction::Call(Call {
         peer_part: PeerPk(CallInstrValue::JsonPath {
-            variable: "id",
+            variable: Scalar("id"),
             path: "$.a",
             should_flatten: true,
         }),
         function_part: FuncName(CallInstrValue::Literal("f")),
         args: Rc::new(vec![
             CallInstrArgValue::Literal("hello"),
-            CallInstrArgValue::Variable("name"),
+            CallInstrArgValue::Variable(Scalar("name")),
         ]),
-        output: Accumulator("void"),
+        output: Variable(Stream("$void")),
     });
     assert_eq!(instruction, expected);
 }
 
 #[test]
-fn parse_json_path_without_flattening() {
+fn parse_undefined_variable() {
     let source_code = r#"
-        (call id.$.a "f" ["hello" name] void[])
+        (call id.$.a "f" ["hello" name] $void)
         "#;
 
     let lexer = crate::AIRLexer::new(source_code);
 
     let parser = crate::AIRParser::new();
     let mut errors = Vec::new();
+    let mut validator = super::VariableValidator::new();
     parser
-        .parse(source_code, &mut errors, lexer)
+        .parse(source_code, &mut errors, &mut validator, lexer)
         .expect("parser shoudn't fail");
 
+    let errors = validator.finalize();
+
+    assert_eq!(errors.len(), 2);
+    for i in 0..2 {
+        let error = &errors[i].error;
+        let parser_error = match error {
+            ParseError::User { error } => error,
+            _ => panic!("unexpected error type"),
+        };
+
+        assert!(matches!(parser_error, ParserError::UndefinedVariable(..)));
+    }
+}
+
+#[test]
+fn parse_undefined_iterable() {
+    let source_code = r#"
+        (seq
+            (call "" ("" "") [] iterable)
+            (fold iterable i
+                (seq
+                    (call "" ("" "") ["hello" ""] $void)
+                    (next j)
+                )
+            )
+        )
+        "#;
+
+    let lexer = crate::AIRLexer::new(source_code);
+
+    let parser = crate::AIRParser::new();
+    let mut errors = Vec::new();
+    let mut validator = super::VariableValidator::new();
+    parser
+        .parse(source_code, &mut errors, &mut validator, lexer)
+        .expect("parser shoudn't fail");
+
+    let errors = validator.finalize();
+
     assert_eq!(errors.len(), 1);
-    assert!(matches!(errors[0], lalrpop_util::ErrorRecovery { .. }));
+
+    let error = &errors[0].error;
+    let parser_error = match error {
+        ParseError::User { error } => error,
+        _ => panic!("unexpected error type"),
+    };
+
+    assert!(matches!(parser_error, ParserError::UndefinedIterable(..)));
 }
 
 #[test]
 fn parse_json_path_complex() {
-    use ast::Call;
-    use ast::CallInstrValue;
     use ast::CallOutputValue::*;
     use ast::FunctionPart::*;
     use ast::PeerPart::*;
@@ -178,23 +231,23 @@ fn parse_json_path_complex() {
     let expected = seq(
         Instruction::Call(Call {
             peer_part: PeerPk(CallInstrValue::JsonPath {
-                variable: "m",
+                variable: Scalar("m"),
                 path: "$.[1]",
                 should_flatten: true,
             }),
             function_part: FuncName(CallInstrValue::Literal("f")),
             args: Rc::new(vec![]),
-            output: Scalar("void"),
+            output: Variable(Scalar("void")),
         }),
         Instruction::Call(Call {
             peer_part: PeerPk(CallInstrValue::JsonPath {
-                variable: "m",
+                variable: Scalar("m"),
                 path: r#"$.abc["c"].cde[a][0].cde["bcd"]"#,
                 should_flatten: true,
             }),
             function_part: FuncName(CallInstrValue::Literal("f")),
             args: Rc::new(vec![]),
-            output: Scalar("void"),
+            output: Variable(Scalar("void")),
         }),
     );
     assert_eq!(instruction, expected);
@@ -202,20 +255,17 @@ fn parse_json_path_complex() {
 
 #[test]
 fn json_path_square_braces() {
-    use ast::Call;
-    use ast::CallInstrArgValue;
-    use ast::CallInstrValue;
     use ast::CallOutputValue::*;
     use ast::FunctionPart::*;
     use ast::PeerPart::*;
 
     let source_code = r#"
-        (call u.$["peer_id"]! ("return" "") [u.$["peer_id"].cde[0]["abc"].abc u.$["name"]] void[])
+        (call u.$["peer_id"]! ("return" "") [u.$["peer_id"].cde[0]["abc"].abc u.$["name"]] $void)
         "#;
     let instruction = parse(source_code);
     let expected = Instruction::Call(Call {
         peer_part: PeerPk(CallInstrValue::JsonPath {
-            variable: "u",
+            variable: Scalar("u"),
             path: r#"$["peer_id"]"#,
             should_flatten: true,
         }),
@@ -225,17 +275,17 @@ fn json_path_square_braces() {
         ),
         args: Rc::new(vec![
             CallInstrArgValue::JsonPath {
-                variable: "u",
+                variable: Scalar("u"),
                 path: r#"$["peer_id"].cde[0]["abc"].abc"#,
                 should_flatten: false,
             },
             CallInstrArgValue::JsonPath {
-                variable: "u",
+                variable: Scalar("u"),
                 path: r#"$["name"]"#,
                 should_flatten: false,
             },
         ]),
-        output: Accumulator("void"),
+        output: Variable(Stream("$void")),
     });
 
     assert_eq!(instruction, expected);
@@ -271,7 +321,7 @@ fn source_seq_with(name: &'static str) -> String {
 fn parse_seq_par_xor_seq() {
     for name in &["xor", "par", "seq"] {
         let source_code = source_seq_with(name);
-        let instruction = parse(&source_code.as_ref());
+        let instruction = parse(&source_code);
         let instr = binary_instruction(*name);
         let expected = seq(instr(seqnn(), null()), instr(null(), seqnn()));
         assert_eq!(instruction, expected);
@@ -285,8 +335,12 @@ fn parse_fold() {
             (null)
         )
         "#;
-    let instruction = parse(&source_code.as_ref());
-    let expected = fold(ast::IterableValue::Variable("iterable"), "i", null());
+    let instruction = parse(&source_code);
+    let expected = fold(
+        ast::IterableValue::Variable(Scalar("iterable")),
+        "i",
+        null(),
+    );
     assert_eq!(instruction, expected);
 }
 
@@ -299,8 +353,8 @@ fn parse_match() {
             (null)
         )
         "#;
-    let instruction = parse(&source_code.as_ref());
-    let expected = match_(Variable("v1"), Variable("v2"), null());
+    let instruction = parse(&source_code);
+    let expected = match_(Variable(Scalar("v1")), Variable(Scalar("v2")), null());
     assert_eq!(instruction, expected);
 }
 
@@ -313,8 +367,8 @@ fn parse_mismatch() {
             (null)
         )
         "#;
-    let instruction = parse(&source_code.as_ref());
-    let expected = mismatch(Variable("v1"), Variable("v2"), null());
+    let instruction = parse(&source_code);
+    let expected = mismatch(Variable(Scalar("v1")), Variable(Scalar("v2")), null());
     assert_eq!(instruction, expected);
 }
 
@@ -327,10 +381,10 @@ fn source_fold_with(name: &str) -> String {
 fn parse_fold_with_xor_par_seq() {
     for name in &["xor", "par", "seq"] {
         let source_code = source_fold_with(name);
-        let instruction = parse(&source_code.as_ref());
+        let instruction = parse(&source_code);
         let instr = binary_instruction(*name);
         let expected = fold(
-            ast::IterableValue::Variable("iterable"),
+            ast::IterableValue::Variable(Scalar("iterable")),
             "i",
             instr(null(), null()),
         );
@@ -356,7 +410,7 @@ fn parse_init_peer_id() {
         peer_id
     );
 
-    let instruction = parse(&source_code.as_ref());
+    let instruction = parse(&source_code);
     let expected = seq(
         Instruction::Call(Call {
             peer_part: PeerPk(CallInstrValue::Literal(&peer_id)),
@@ -398,7 +452,7 @@ fn parse_last_error() {
         )"#,
     );
 
-    let instruction = parse(&source_code.as_ref());
+    let instruction = parse(&source_code);
     let expected = seq(
         Instruction::Call(Call {
             peer_part: PeerPk(CallInstrValue::InitPeerId),
@@ -436,7 +490,7 @@ fn seq_par_call() {
         peer_id,
     );
 
-    let instruction = parse(&source_code.as_ref());
+    let instruction = parse(&source_code);
     let expected = seq(
         par(
             Instruction::Call(Call {
@@ -446,7 +500,7 @@ fn seq_par_call() {
                     CallInstrValue::Literal("local_fn_name"),
                 ),
                 args: Rc::new(vec![]),
-                output: Scalar("result_1"),
+                output: Variable(Scalar("result_1")),
             }),
             Instruction::Call(Call {
                 peer_part: PeerPk(CallInstrValue::Literal(&peer_id)),
@@ -455,7 +509,7 @@ fn seq_par_call() {
                     CallInstrValue::Literal("fn_name"),
                 ),
                 args: Rc::new(vec![]),
-                output: Scalar("g"),
+                output: Variable(Scalar("g")),
             }),
         ),
         Instruction::Call(Call {
@@ -465,7 +519,7 @@ fn seq_par_call() {
                 CallInstrValue::Literal("local_fn_name"),
             ),
             args: Rc::new(vec![]),
-            output: Scalar("result_2"),
+            output: Variable(Scalar("result_2")),
         }),
     );
 
@@ -502,7 +556,7 @@ fn seq_with_empty_and_dash() {
             )
         )
         "#;
-    let instruction = parse(&source_code.as_ref());
+    let instruction = parse(source_code);
     let expected = seq(
         seq(
             seq(
@@ -513,7 +567,7 @@ fn seq_with_empty_and_dash() {
                         CallInstrValue::Literal(""),
                     ),
                     args: Rc::new(vec![CallInstrArgValue::Literal("module-bytes")]),
-                    output: Scalar("module-bytes"),
+                    output: Variable(Scalar("module-bytes")),
                 }),
                 Instruction::Call(Call {
                     peer_part: PeerPk(CallInstrValue::Literal("set_variables")),
@@ -522,7 +576,7 @@ fn seq_with_empty_and_dash() {
                         CallInstrValue::Literal(""),
                     ),
                     args: Rc::new(vec![CallInstrArgValue::Literal("module_config")]),
-                    output: Scalar("module_config"),
+                    output: Variable(Scalar("module_config")),
                 }),
             ),
             Instruction::Call(Call {
@@ -532,7 +586,7 @@ fn seq_with_empty_and_dash() {
                     CallInstrValue::Literal(""),
                 ),
                 args: Rc::new(vec![CallInstrArgValue::Literal("blueprint")]),
-                output: Scalar("blueprint"),
+                output: Variable(Scalar("blueprint")),
             }),
         ),
         seq(
@@ -543,10 +597,10 @@ fn seq_with_empty_and_dash() {
                     CallInstrValue::Literal(""),
                 ),
                 args: Rc::new(vec![
-                    CallInstrArgValue::Variable("module-bytes"),
-                    CallInstrArgValue::Variable("module_config"),
+                    CallInstrArgValue::Variable(Scalar("module-bytes")),
+                    CallInstrArgValue::Variable(Scalar("module_config")),
                 ]),
-                output: Scalar("module"),
+                output: Variable(Scalar("module")),
             }),
             seq(
                 Instruction::Call(Call {
@@ -555,8 +609,8 @@ fn seq_with_empty_and_dash() {
                         CallInstrValue::Literal("add_blueprint"),
                         CallInstrValue::Literal(""),
                     ),
-                    args: Rc::new(vec![CallInstrArgValue::Variable("blueprint")]),
-                    output: Scalar("blueprint_id"),
+                    args: Rc::new(vec![CallInstrArgValue::Variable(Scalar("blueprint"))]),
+                    output: Variable(Scalar("blueprint_id")),
                 }),
                 seq(
                     Instruction::Call(Call {
@@ -565,8 +619,8 @@ fn seq_with_empty_and_dash() {
                             CallInstrValue::Literal("create"),
                             CallInstrValue::Literal(""),
                         ),
-                        args: Rc::new(vec![CallInstrArgValue::Variable("blueprint_id")]),
-                        output: Scalar("service_id"),
+                        args: Rc::new(vec![CallInstrArgValue::Variable(Scalar("blueprint_id"))]),
+                        output: Variable(Scalar("service_id")),
                     }),
                     Instruction::Call(Call {
                         peer_part: PeerPk(CallInstrValue::Literal("remote_peer_id")),
@@ -574,8 +628,8 @@ fn seq_with_empty_and_dash() {
                             CallInstrValue::Literal(""),
                             CallInstrValue::Literal(""),
                         ),
-                        args: Rc::new(vec![CallInstrArgValue::Variable("service_id")]),
-                        output: Scalar("client_result"),
+                        args: Rc::new(vec![CallInstrArgValue::Variable(Scalar("service_id"))]),
+                        output: Variable(Scalar("client_result")),
                     }),
                 ),
             ),
@@ -583,6 +637,44 @@ fn seq_with_empty_and_dash() {
     );
 
     assert_eq!(instruction, expected);
+}
+
+#[test]
+fn match_with_bool() {
+    use ast::MatchableValue::*;
+
+    let source_code = r#"
+         (match isOnline true
+            (null)
+         )
+        "#;
+
+    let left_value = Variable("isOnline");
+    let right_value = Boolean(true);
+    let null = null();
+    let expected = match_(left_value, right_value, null);
+
+    let instruction = parse(source_code);
+    assert_eq!(expected, instruction);
+}
+
+#[test]
+fn mismatch_with_bool() {
+    use ast::MatchableValue::*;
+
+    let source_code = r#"
+         (mismatch true isOnline
+            (null)
+         )
+        "#;
+
+    let left_value = Boolean(true);
+    let right_value = Variable("isOnline");
+    let null = null();
+    let expected = mismatch(left_value, right_value, null);
+
+    let instruction = parse(source_code);
+    assert_eq!(expected, instruction);
 }
 
 #[test]
@@ -596,12 +688,12 @@ fn no_output() {
     let source_code = r#"
     (call peer (service fname) [])
     "#;
-    let instruction = parse(&source_code.as_ref());
+    let instruction = parse(source_code);
     let expected = Instruction::Call(Call {
-        peer_part: PeerPk(CallInstrValue::Variable("peer")),
+        peer_part: PeerPk(CallInstrValue::Variable(Scalar("peer"))),
         function_part: ServiceIdWithFuncName(
-            CallInstrValue::Variable("service"),
-            CallInstrValue::Variable("fname"),
+            CallInstrValue::Variable(Scalar("service")),
+            CallInstrValue::Variable(Scalar("fname")),
         ),
         args: Rc::new(vec![]),
         output: None,
@@ -619,10 +711,10 @@ fn fold_json_path() {
     (fold members.$.["users"] m (null)) ;;; comment
     ;;; comment
     "#;
-    let instruction = parse(&source_code.as_ref());
+    let instruction = parse(source_code);
     let expected = Instruction::Fold(Fold {
         iterable: JsonPath {
-            variable: "members",
+            variable: Scalar("members"),
             path: "$.[\"users\"]",
             should_flatten: false,
         },
@@ -642,10 +734,10 @@ fn comments() {
     (fold members.$.["users"] m (null)) ;;; comment ;;?()()
     ;;; comme;?!.$.  nt[][][][()()()null;$::!
     "#;
-    let instruction = parse(&source_code.as_ref());
+    let instruction = parse(source_code);
     let expected = Instruction::Fold(Fold {
         iterable: JsonPath {
-            variable: "members",
+            variable: Scalar("members"),
             path: "$.[\"users\"]",
             should_flatten: false,
         },

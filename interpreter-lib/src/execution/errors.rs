@@ -52,9 +52,9 @@ pub(crate) enum ExecutionError {
     #[error("variable with path '{1}' not found in '{0}' with an error: '{2}'")]
     JValueJsonPathError(JValue, String, JsonPathError),
 
-    /// An error occurred while trying to apply json path to this accumulator with JValue's.
+    /// An error occurred while trying to apply json path to this stream with JValue's.
     #[error("variable with path '{1}' not found in '{0:?}' with error: '{2}'")]
-    JValueAccJsonPathError(Vec<ResolvedCallResult>, String, JsonPathError),
+    JValueStreamJsonPathError(Vec<ResolvedCallResult>, String, JsonPathError),
 
     /// Provided JValue has incompatible with target type.
     #[error("expected JValue type '{1}', but got '{0}' JValue")]
@@ -108,7 +108,7 @@ impl ExecutionError {
             VariableNotFound(_) => 4,
             MultipleVariablesFound(_) => 5,
             JValueJsonPathError(..) => 6,
-            JValueAccJsonPathError(..) => 7,
+            JValueStreamJsonPathError(..) => 7,
             IncompatibleJValueType(..) => 8,
             IncompatibleAValueType(..) => 9,
             MultipleValuesInJsonPath(_) => 10,

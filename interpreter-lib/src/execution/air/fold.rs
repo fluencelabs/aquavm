@@ -180,7 +180,7 @@ mod tests {
                 (call "set_variable" ("" "") [] Iterable)
                 (fold Iterable i
                     (seq
-                        (call "A" ("" "") [i] acc[])
+                        (call "A" ("" "") [i] $acc)
                         (next i)
                     )
                 )
@@ -213,7 +213,7 @@ mod tests {
                 (fold Iterable i
                     (seq
                         (next i)
-                        (call "A" ("" "") [i] acc[])
+                        (call "A" ("" "") [i] $acc)
                     )
                 )
             )"#,
@@ -250,7 +250,7 @@ mod tests {
                     (seq
                         (fold Iterable2 j
                             (seq
-                                (call "A" ("" "") [i] acc[])
+                                (call "A" ("" "") [i] $acc)
                                 (next j)
                             )
                         )
@@ -293,7 +293,7 @@ mod tests {
                     (seq
                         (fold Iterable2 i
                             (seq
-                                (call "A" ("" "") [i] acc[])
+                                (call "A" ("" "") [i] $acc)
                                 (next i)
                             )
                         )
@@ -319,7 +319,7 @@ mod tests {
                 (call "set_variable" ("" "") [] Iterable)
                 (fold Iterable i
                     (seq
-                        (call "A" ("" "") [i] acc[])
+                        (call "A" ("" "") [i] $acc)
                         (next i)
                     )
                 )
@@ -335,6 +335,35 @@ mod tests {
         assert_eq!(actual_trace[0], expected_state);
     }
 
+    // Check that fold works with the join behaviour without hanging up.
+    #[test]
+    fn fold_with_join() {
+        let mut vm = create_aqua_vm(echo_number_call_service(), "A");
+        let mut set_variable_vm = create_aqua_vm(set_variable_call_service(r#"["1","2"]"#), "set_variable");
+
+        let fold_with_join = String::from(
+            r#"
+            (seq
+                (call "set_variable" ("" "") [] iterable)
+                (par
+                    (call "unknown_peer" ("" "") [] lazy_def_variable)
+                    (fold iterable i
+                        (seq
+                            (call "A" ("" "") [lazy_def_variable.$.hash!] $acc)
+                            (next i)
+                        )
+                    )
+                )
+            )"#,
+        );
+
+        let res = call_vm!(set_variable_vm, "", &fold_with_join, "", "");
+        let res = call_vm!(vm, "", fold_with_join, "", res.data);
+        let res: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid executed trace");
+
+        assert_eq!(res.len(), 3);
+    }
+
     #[test]
     fn json_path() {
         let mut vm = create_aqua_vm(echo_number_call_service(), "A");
@@ -346,10 +375,10 @@ mod tests {
         let lfold = String::from(
             r#"
             (seq
-                (call "set_variable" ("" "") [] Iterable)
-                (fold Iterable.$.array! i
+                (call "set_variable" ("" "") [] iterable)
+                (fold iterable.$.array! i
                     (seq
-                        (call "A" ("" "") [i] acc[])
+                        (call "A" ("" "") [i] $acc)
                         (next i)
                     )
                 )
@@ -382,13 +411,13 @@ mod tests {
             r#"
             (seq
                 (seq
-                    (call "set_variable" ("" "") [] Iterable1)
-                    (call "set_variable" ("" "") [] Iterable2)
+                    (call "set_variable" ("" "") [] iterable1)
+                    (call "set_variable" ("" "") [] iterable2)
                 )
-                (fold Iterable1 i
+                (fold iterable1 i
                     (seq
                         (seq
-                            (fold Iterable2 j
+                            (fold iterable2 j
                                 (seq
                                     (seq
                                         (call "A" ("" "") [i] local_j)
@@ -457,15 +486,15 @@ mod tests {
             r#"
             (seq
                 (seq
-                    (call "set_variable" ("" "") [] Iterable1)
-                    (call "set_variable" ("" "") [] Iterable2)
+                    (call "set_variable" ("" "") [] iterable1)
+                    (call "set_variable" ("" "") [] iterable2)
                 )
-                (fold Iterable1 i
+                (fold iterable1 i
                     (seq
                         (seq
                             (call "A" ("" "") ["value"] local_j)
                             (seq
-                                (fold Iterable2 j
+                                (fold iterable2 j
                                     (seq
                                         (seq
                                             (call "A" ("" "") [i] local_j)

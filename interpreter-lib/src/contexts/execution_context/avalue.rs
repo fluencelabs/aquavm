@@ -34,7 +34,7 @@ pub struct ResolvedCallResult {
 
 pub(crate) enum AValue<'i> {
     JValueRef(ResolvedCallResult),
-    JValueAccumulatorRef(RefCell<Vec<ResolvedCallResult>>),
+    JValueStreamRef(RefCell<Vec<ResolvedCallResult>>),
     JValueFoldCursor(FoldState<'i>),
 }
 
@@ -42,9 +42,9 @@ impl<'i> Display for AValue<'i> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             AValue::JValueRef(value) => write!(f, "{:?}", value)?,
-            AValue::JValueAccumulatorRef(acc) => {
+            AValue::JValueStreamRef(stream) => {
                 write!(f, "[ ")?;
-                for value in acc.borrow().iter() {
+                for value in stream.borrow().iter() {
                     write!(f, "{:?} ", value)?;
                 }
                 write!(f, "]")?;

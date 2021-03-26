@@ -82,7 +82,7 @@ fn simple_fold() {
             (call "{}" ("{}" "{}") [] IterableResultPeer1)
             (fold IterableResultPeer1 i
                 (par
-                    (call i ("local_service_id" "local_fn_name") [i "some_text_literal"] acc[])
+                    (call i ("local_service_id" "local_fn_name") [i "some_text_literal"] $acc)
                     (next i)
                 )
             )
@@ -156,7 +156,7 @@ fn fold_json_path() {
             (call "{}" ("{}" "{}") [] IterableResultPeer1)
             (fold IterableResultPeer1.$.arg i
                 (par
-                    (call "{}" ("local_service_id" "local_fn_name") [i "some_text_literal"] acc[])
+                    (call "{}" ("local_service_id" "local_fn_name") [i "some_text_literal"] $acc)
                     (next i)
                 )
             )

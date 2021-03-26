@@ -19,6 +19,7 @@ use super::ExecutionCtx;
 use super::ExecutionError;
 use super::ExecutionResult;
 use super::ExecutionTraceCtx;
+use crate::joinable;
 use crate::log_instruction;
 
 use air_parser::ast::Match;
@@ -27,7 +28,10 @@ impl<'i> super::ExecutableInstruction<'i> for Match<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut ExecutionTraceCtx) -> ExecutionResult<()> {
         log_instruction!(match_, exec_ctx, trace_ctx);
 
-        let are_values_equal = are_matchable_eq(&self.left_value, &self.right_value, exec_ctx)?;
+        let are_values_equal = joinable!(
+            are_matchable_eq(&self.left_value, &self.right_value, exec_ctx),
+            exec_ctx
+        )?;
 
         if !are_values_equal {
             return crate::exec_err!(ExecutionError::MatchWithoutXorError);

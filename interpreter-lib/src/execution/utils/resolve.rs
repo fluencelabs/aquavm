@@ -35,12 +35,18 @@ pub(crate) fn resolve_to_args<'i>(
         CallInstrArgValue::Literal(value) => prepare_consts(value.to_string(), ctx),
         CallInstrArgValue::Boolean(value) => prepare_consts(*value, ctx),
         CallInstrArgValue::Number(value) => prepare_consts(value, ctx),
-        CallInstrArgValue::Variable(name) => prepare_variable(name, ctx),
+        CallInstrArgValue::Variable(variable) => {
+            let name = get_variable_name(variable);
+            prepare_variable(name, ctx)
+        }
         CallInstrArgValue::JsonPath {
             variable,
             path,
             should_flatten,
-        } => prepare_json_path(variable, path, *should_flatten, ctx),
+        } => {
+            let name = get_variable_name(variable);
+            prepare_json_path(name, path, *should_flatten, ctx)
+        }
     }
 }
 
@@ -121,10 +127,19 @@ pub(crate) fn resolve_to_jvaluable<'name, 'i, 'ctx>(
 
     match value {
         AValue::JValueRef(value) => Ok(Box::new(value.clone())),
-        AValue::JValueAccumulatorRef(acc) => Ok(Box::new(acc.borrow())),
+        AValue::JValueStreamRef(stream) => Ok(Box::new(stream.borrow())),
         AValue::JValueFoldCursor(fold_state) => {
             let peeked_value = fold_state.iterable.peek().unwrap();
             Ok(Box::new(peeked_value))
         }
+    }
+}
+
+use air_parser::ast::Variable;
+
+pub(crate) fn get_variable_name<'a>(variable: &'a Variable<'_>) -> &'a str {
+    match variable {
+        Variable::Scalar(name) => name,
+        Variable::Stream(name) => name,
     }
 }

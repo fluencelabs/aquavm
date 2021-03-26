@@ -28,24 +28,24 @@ use air_parser::AIRParser;
 
 const SOURCE_CODE_BAD: &'static str = r#"(seq
         (seq
-            (call node ("identity" "") [] void[])
+            (call node ("identity" "") [] $void)
             (call provider (service_id "{fname}") {arg_list} result)
         )
         (seq
-            (call node ("identity" "") [] void[])
-            (call "{LOCAL_VM}" ("return" "result") [result] void[])
+            (call node ("identity" "") [] $void)
+            (call "{LOCAL_VM}" ("return" "result") [result] $void)
         )
     )"#;
 
 const SOURCE_CODE_GOOD: &'static str = r#"
     (seq
         (seq
-            (call node ("identity" "") [] void[])
+            (call node ("identity" "") [] $void)
             (call provider (service_id "fname") [arg list] result)
         )
         (seq
-            (call node ("identity" "") [] void[])
-            (call "local_vm" ("return" "result") [result] void[])
+            (call node ("identity" "") [] $void)
+            (call "local_vm" ("return" "result") [result] $void)
         )
     )"#;
 

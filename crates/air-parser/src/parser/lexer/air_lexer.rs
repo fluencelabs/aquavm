@@ -15,7 +15,6 @@
  */
 
 use super::errors::LexerError;
-use super::is_aqua_alphanumeric;
 use super::token::Token;
 use super::LexerResult;
 
@@ -191,29 +190,8 @@ fn string_to_token(input: &str, start_pos: usize) -> LexerResult<Token> {
         TRUE_VALUE => Ok(Token::Boolean(true)),
         FALSE_VALUE => Ok(Token::Boolean(false)),
 
-        str if str.ends_with(ACC_END_TAG) => try_parse_accumulator(str, start_pos),
         str => super::call_variable_parser::try_parse_call_variable(str, start_pos),
     }
-}
-
-fn try_parse_accumulator(maybe_acc: &str, start: usize) -> LexerResult<Token> {
-    const ACC_END_TAG_SIZE: usize = 2;
-
-    let str_len = maybe_acc.len();
-    if str_len == ACC_END_TAG_SIZE {
-        return Err(LexerError::EmptyAccName(start, start));
-    }
-
-    // this slice is safe here because str's been checked for ending with "[]"
-    let maybe_acc = &maybe_acc[0..str_len - ACC_END_TAG_SIZE];
-
-    for (pos, ch) in maybe_acc.chars().enumerate() {
-        if !is_aqua_alphanumeric(ch) {
-            return Err(LexerError::IsNotAlphanumeric(start + pos, start + pos));
-        }
-    }
-
-    Ok(Token::Accumulator(maybe_acc))
 }
 
 const CALL_INSTR: &str = "call";
@@ -231,5 +209,3 @@ const LAST_ERROR: &str = "%last_error%";
 
 const TRUE_VALUE: &str = "true";
 const FALSE_VALUE: &str = "false";
-
-const ACC_END_TAG: &str = "[]";

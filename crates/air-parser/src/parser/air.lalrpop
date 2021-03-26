@@ -1,45 +1,66 @@
 use crate::parser::ast::*;
-use crate::parser::air_parser::into_variable_and_path;
 use crate::parser::air_parser::make_flattened_error;
-use crate::parser::lexer::LexerError;
+use crate::parser::ParserError;
+use crate::parser::VariableValidator;
+use crate::parser::Span;
 use crate::parser::lexer::Token;
 use crate::parser::lexer::Number;
+use crate::parser::lexer::Variable;
 
 use lalrpop_util::ErrorRecovery;
 use std::rc::Rc;
 
 // the only thing why input matters here is just introducing lifetime for Token
-grammar<'err, 'input>(input: &'input str, errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>);
+grammar<'err, 'input, 'v>(input: &'input str, errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>, validator: &'v mut VariableValidator<'input>);
 
 pub AIR = Instr;
 
 Instr: Box<Instruction<'input>> = {
-    "(" call <p:PeerPart> <f:FPart> <args:Args> <output:Output?> ")" => {
+    <left: @L> "(" call <peer_part:PeerPart> <function_part:FPart> <args:Args> <output:Output?> ")" <right: @R> => {
         let output = output.unwrap_or(CallOutputValue::None);
         let args = Rc::new(args);
-        Box::new(Instruction::Call(Call{peer_part: p, function_part: f, args, output}))
+        let call = Call { peer_part, function_part, args, output };
+        let span = Span { left, right };
+        validator.met_call(&call, span);
+
+        Box::new(Instruction::Call(call))
     },
 
     "(" seq <l:Instr> <r:Instr> ")" => Box::new(Instruction::Seq(Seq(l, r))),
     "(" par <l:Instr> <r:Instr> ")" => Box::new(Instruction::Par(Par(l, r))),
     "(" null ")" => Box::new(Instruction::Null(Null)),
 
-    "(" fold <iterable:Iterable> <iterator:Alphanumeric> <i:Instr> ")" => {
+    <left: @L> "(" fold <iterable:Iterable> <iterator:Alphanumeric> <i:Instr> ")" <right: @R> => {
         let instruction = Rc::new(*i);
-        Box::new(Instruction::Fold(Fold{ iterable, iterator, instruction }))
-    },
-    "(" next <i:Alphanumeric> ")" => Box::new(Instruction::Next(Next(i))),
+        let fold = Fold { iterable, iterator, instruction };
+        let span = Span { left, right };
+        validator.met_fold(&fold, span);
 
+        Box::new(Instruction::Fold(fold))
+    },
+    <left: @L> "(" next <i:Alphanumeric> ")" <right: @R> => {
+        let next = Next(i);
+        let span = Span { left, right };
+        validator.met_next(&next, span);
+
+        Box::new(Instruction::Next(next))
+    },
 
     "(" xor <l:Instr> <r:Instr> ")" => Box::new(Instruction::Xor(Xor(l, r))),
 
-    "(" match_ <l:Matchable> <r:Matchable> <i:Instr> ")" => {
+    <left: @L> "(" match_ <l:Matchable> <r:Matchable> <i:Instr> ")" <right: @R> => {
         let match_ = Match { left_value: l, right_value: r, instruction: i};
+        let span = Span { left, right };
+        validator.met_match(&match_, span);
+
         Box::new(Instruction::Match(match_))
     },
 
-    "(" mismatch <l:Matchable> <r:Matchable> <i:Instr> ")" => {
+    <left: @L> "(" mismatch <l:Matchable> <r:Matchable> <i:Instr> ")" <right: @R> => {
         let mismatch = MisMatch { left_value: l, right_value: r, instruction: i};
+        let span = Span { left, right };
+        validator.met_mismatch(&mismatch, span);
+
         Box::new(Instruction::MisMatch(mismatch))
      },
 
@@ -61,8 +82,8 @@ PeerPart: PeerPart<'input> = {
 }
 
 Output: CallOutputValue<'input> = {
-    <s:Alphanumeric> => CallOutputValue::Scalar(s),
-    <a:Accumulator> => CallOutputValue::Accumulator(a),
+    <a:Alphanumeric> => CallOutputValue::Variable(Variable::Scalar(a)),
+    <s:Stream> => CallOutputValue::Variable(Variable::Stream(s)),
 };
 
 Function = CallInstrValue;
@@ -70,16 +91,17 @@ PeerId = CallInstrValue;
 ServiceId = CallInstrValue;
 
 CallInstrValue: CallInstrValue<'input> = {
-    <s:Literal> => CallInstrValue::Literal(s),
-    <s:Alphanumeric> => CallInstrValue::Variable(s),
+    <l:Literal> => CallInstrValue::Literal(l),
+    <a:Alphanumeric> => CallInstrValue::Variable(Variable::Scalar(a)),
+    <s:Stream> => CallInstrValue::Variable(Variable::Stream(s)),
     <l: @L> <v:JsonPath> <r: @R> => {
-        let (variable, path) = into_variable_and_path(v.0, v.1, v.2);
         let should_flatten = v.2;
+        // Due the json path constraints json path should be flattened in a call triplet.
         if !should_flatten {
-            let token = Token::JsonPath(v.0, v.1, v.2);
+            let token = Token::VariableWithJsonPath(v.0.clone(), v.1, v.2);
             errors.push(make_flattened_error(l, token, r));
         }
-        CallInstrValue::JsonPath { variable, path, should_flatten }
+        CallInstrValue::JsonPath { variable: v.0, path: v.1, should_flatten }
     },
     InitPeerId => CallInstrValue::InitPeerId,
 }
@@ -88,12 +110,9 @@ Arg = CallInstrArgValue;
 
 CallInstrArgValue: CallInstrArgValue<'input> = {
     <s:Literal> => CallInstrArgValue::Literal(s),
-    <s:Alphanumeric> => CallInstrArgValue::Variable(s),
-    <v:JsonPath> => {
-        let (variable, path) = into_variable_and_path(v.0, v.1, v.2);
-        let should_flatten = v.2;
-        CallInstrArgValue::JsonPath { variable, path, should_flatten }
-    },
+    <v:Alphanumeric> => CallInstrArgValue::Variable(Variable::Scalar(v)),
+    <v:Stream> => CallInstrArgValue::Variable(Variable::Stream(v)),
+    <j:JsonPath> => CallInstrArgValue::JsonPath { variable: j.0, path: j.1, should_flatten: j.2 },
     <n:Number> => CallInstrArgValue::Number(n),
     <b:Boolean> => CallInstrArgValue::Boolean(b),
     InitPeerId => CallInstrArgValue::InitPeerId,
@@ -101,27 +120,23 @@ CallInstrArgValue: CallInstrArgValue<'input> = {
 }
 
 Iterable: IterableValue<'input> = {
-    <s:Alphanumeric> => IterableValue::Variable(s),
-    <v:JsonPath> => {
-        let (variable, path) = into_variable_and_path(v.0, v.1, v.2);
-        let should_flatten = v.2;
-        IterableValue::JsonPath { variable, path, should_flatten }
-    },
+    <v:Alphanumeric> => IterableValue::Variable(Variable::Scalar(v)),
+    <v:Stream> => IterableValue::Variable(Variable::Stream(v)),
+    <j:JsonPath> => IterableValue::JsonPath { variable: j.0, path: j.1, should_flatten: j.2 },
 }
 
 Matchable: MatchableValue<'input> = {
-    <s:Alphanumeric> => MatchableValue::Variable(s),
+    <v:Alphanumeric> => MatchableValue::Variable(Variable::Scalar(v)),
+    <v:Stream> => MatchableValue::Variable(Variable::Stream(v)),
     <s:Literal> => MatchableValue::Literal(s),
-    <v:JsonPath> => {
-        let (variable, path) = into_variable_and_path(v.0, v.1, v.2);
-        let should_flatten = v.2;
-        MatchableValue::JsonPath { variable, path, should_flatten }
-    },
+    <b:Boolean> => MatchableValue::Boolean(b),
+    <n:Number> => MatchableValue::Number(n),
+    <j:JsonPath> => MatchableValue::JsonPath { variable: j.0, path: j.1, should_flatten: j.2 },
 }
 
 extern {
     type Location = usize;
-    type Error = LexerError;
+    type Error = ParserError;
 
     enum Token<'input> {
         "(" => Token::OpenRoundBracket,
@@ -129,10 +144,10 @@ extern {
         "[" => Token::OpenSquareBracket,
         "]" => Token::CloseSquareBracket,
 
-        Alphanumeric => Token::Alphanumeric(<&'input str>),
         Literal => Token::StringLiteral(<&'input str>),
-        JsonPath => Token::JsonPath(<&'input str>, <usize>, <bool>),
-        Accumulator => Token::Accumulator(<&'input str>),
+        Alphanumeric => Token::Alphanumeric(<&'input str>),
+        Stream => Token::Stream(<&'input str>),
+        JsonPath => Token::VariableWithJsonPath(<Variable<'input>>, <&'input str>, <bool>),
         Number => Token::Number(<Number>),
         Boolean => Token::Boolean(<bool>),
 

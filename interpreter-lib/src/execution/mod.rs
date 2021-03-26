@@ -26,6 +26,7 @@ pub(super) use errors::ExecutionError;
 use std::rc::Rc;
 
 pub(self) type ExecutionResult<T> = std::result::Result<T, Rc<ExecutionError>>;
+pub(self) use air_parser::ast::Variable;
 
 #[macro_export]
 macro_rules! exec_err {
