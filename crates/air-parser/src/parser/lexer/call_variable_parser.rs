@@ -167,7 +167,7 @@ impl<'input> CallVariableParser<'input> {
     }
 
     fn try_parse_as_variable(&mut self) -> LexerResult<()> {
-        if self.try_parser_as_stream_start()? || self.try_parse_as_json_path_start()? {
+        if self.try_parse_as_stream_start()? || self.try_parse_as_json_path_start()? {
             return Ok(());
         } else if self.is_json_path_started() {
             self.try_parse_as_json_path()?;
@@ -178,7 +178,7 @@ impl<'input> CallVariableParser<'input> {
         Ok(())
     }
 
-    fn try_parser_as_stream_start(&mut self) -> LexerResult<bool> {
+    fn try_parse_as_stream_start(&mut self) -> LexerResult<bool> {
         if self.current_pos() == 0 && self.current_char() == STREAM_START_TAG {
             if self.string_to_parse.len() == 1 {
                 let error_pos = self.pos_in_string_to_parse();
@@ -324,6 +324,7 @@ const STREAM_START_TAG: char = '$';
 
 fn to_variable_and_path(str: &str, pos: usize, should_flatten: bool) -> (&str, &str) {
     let json_path = if should_flatten {
+        // -1 to not include the flattening symbol ! to the resulted json path
         &str[pos + 1..str.len() - 1]
     } else {
         &str[pos + 1..]

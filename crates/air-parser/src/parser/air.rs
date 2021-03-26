@@ -1,5 +1,5 @@
 // auto-generated: "lalrpop 0.19.5"
-// sha3: 8eb6b6cd8ab7e55cb4179a6996e6ad262aaedfbb870e0fa63683972cb34b77a
+// sha3: 459487c956989dc625789699836b2960f7bc355b78ff9a139d2fa6938832545
 use crate::parser::ast::*;
 use crate::parser::air_parser::make_flattened_error;
 use crate::parser::ParserError;
@@ -3190,18 +3190,20 @@ fn __action25<
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
     (_, l, _): (usize, usize, usize),
-    (_, v, _): (usize, (Variable<'input>, &'input str, bool), usize),
+    (_, j, _): (usize, (Variable<'input>, &'input str, bool), usize),
     (_, r, _): (usize, usize, usize),
 ) -> CallInstrValue<'input>
 {
     {
-        let should_flatten = v.2;
+        let variable = j.0;
+        let path = j.1;
+        let should_flatten = j.2;
         // Due the json path constraints json path should be flattened in a call triplet.
         if !should_flatten {
-            let token = Token::VariableWithJsonPath(v.0.clone(), v.1, v.2);
+            let token = Token::VariableWithJsonPath(variable.clone(), path, should_flatten);
             errors.push(make_flattened_error(l, token, r));
         }
-        CallInstrValue::JsonPath { variable: v.0, path: v.1, should_flatten }
+        CallInstrValue::JsonPath { variable, path, should_flatten }
     }
 }
 
