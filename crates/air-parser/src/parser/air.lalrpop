@@ -129,6 +129,8 @@ Matchable: MatchableValue<'input> = {
     <v:Alphanumeric> => MatchableValue::Variable(Variable::Scalar(v)),
     <v:Stream> => MatchableValue::Variable(Variable::Stream(v)),
     <s:Literal> => MatchableValue::Literal(s),
+    <b:Boolean> => MatchableValue::Boolean(b),
+    <n:Number> => MatchableValue::Number(n),
     <j:JsonPath> => MatchableValue::JsonPath { variable: j.0, path: j.1, should_flatten: j.2 },
 }
 
