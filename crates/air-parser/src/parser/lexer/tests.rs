@@ -19,6 +19,7 @@ use super::AIRLexer;
 use super::LexerError;
 use super::Number;
 use super::Token;
+use super::Variable;
 
 fn run_lexer(input: &str) -> Vec<Spanned<Token<'_>, usize, LexerError>> {
     let lexer = AIRLexer::new(input);
@@ -152,17 +153,10 @@ fn init_peer_id() {
 }
 
 #[test]
-fn accumulator() {
-    const ACC: &str = "accumulator____asdasd[]";
+fn stream() {
+    const STREAM: &str = "$stream____asdasd";
 
-    lexer_test(
-        ACC,
-        Single(Ok((
-            0,
-            Token::Accumulator(&ACC[0..ACC.len() - 2]),
-            ACC.len(),
-        ))),
-    );
+    lexer_test(STREAM, Single(Ok((0, Token::Stream(STREAM), STREAM.len()))));
 }
 
 #[test]
@@ -268,14 +262,15 @@ fn too_big_float_number() {
 
 #[test]
 fn json_path() {
-    // this json path contains all allowed in json path charactes
+    // this json path contains all allowed in json path characters
     const JSON_PATH: &str = r#"value.$[$@[]():?.*,"]"#;
+    let variable = Variable::Scalar("value");
 
     lexer_test(
         JSON_PATH,
         Single(Ok((
             0,
-            Token::JsonPath(JSON_PATH, 5, false),
+            Token::VariableWithJsonPath(variable, r#"$[$@[]():?.*,"]"#, false),
             JSON_PATH.len(),
         ))),
     );

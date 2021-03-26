@@ -148,7 +148,7 @@ fn lexical_error_to_label(file_id: usize, error: LexerError) -> Label<usize> {
         IsNotAlphanumeric(start, end) => {
             Label::primary(file_id, start..end).with_message(error.to_string())
         }
-        EmptyAccName(start, end) => {
+        EmptyStreamName(start, end) => {
             Label::primary(file_id, start..end).with_message(error.to_string())
         }
         EmptyVariableOrConst(start, end) => {
@@ -173,16 +173,6 @@ fn lexical_error_to_label(file_id: usize, error: LexerError) -> Label<usize> {
             Label::primary(file_id, start..end).with_message(error.to_string())
         }
     }
-}
-
-pub(super) fn into_variable_and_path(str: &str, pos: usize, should_flatten: bool) -> (&str, &str) {
-    let json_path = if should_flatten {
-        &str[pos + 1..str.len() - 1]
-    } else {
-        &str[pos + 1..]
-    };
-
-    (&str[0..pos], json_path)
 }
 
 pub(super) fn make_flattened_error(

@@ -38,8 +38,8 @@ impl fmt::Display for CallInstrArgValue<'_> {
     }
 }
 
-fn print_json_path(
-    variable: &str,
+fn print_json_path<'a>(
+    variable: &Variable<'a>,
     path: &str,
     should_flatten: &bool,
     f: &mut fmt::Formatter,
@@ -104,8 +104,7 @@ impl fmt::Display for CallOutputValue<'_> {
         use CallOutputValue::*;
 
         match self {
-            Scalar(str) => write!(f, "{}", str),
-            Accumulator(str) => write!(f, "{}[]", str),
+            Variable(variable) => write!(f, "{}", variable),
             None => Ok(()),
         }
     }

@@ -16,5 +16,6 @@
 
 mod resolve;
 
+pub(crate) use resolve::get_variable_name;
 pub(crate) use resolve::resolve_to_args;
 pub(crate) use resolve::resolve_to_jvaluable;

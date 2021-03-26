@@ -143,7 +143,12 @@ impl<'i> VariableValidator<'i> {
         }
     }
 
-    fn met_variable(&mut self, name: &'i str, span: Span) {
+    fn met_variable(&mut self, variable: &Variable<'i>, span: Span) {
+        let name = match variable {
+            Variable::Scalar(name) => name,
+            Variable::Stream(name) => name,
+        };
+
         if !self.contains_variable(name, span) {
             self.unresolved_variables.insert(name, span);
         }
@@ -168,8 +173,8 @@ impl<'i> VariableValidator<'i> {
         use std::collections::hash_map::Entry;
 
         let variable_name = match call_output {
-            CallOutputValue::Scalar(variable) => variable,
-            CallOutputValue::Accumulator(accumulator) => accumulator,
+            CallOutputValue::Variable(Variable::Scalar(name)) => name,
+            CallOutputValue::Variable(Variable::Stream(name)) => name,
             CallOutputValue::None => return,
         };
 

@@ -17,6 +17,7 @@
 use super::LexerError;
 use super::LexerResult;
 use super::Token;
+use super::Variable;
 
 use std::convert::TryInto;
 use std::iter::Peekable;
@@ -36,6 +37,7 @@ struct ParserState {
     pub(self) digit_met: bool,
     pub(self) flattening_met: bool,
     pub(self) is_first_char: bool,
+    pub(self) is_first_stream_tag: bool,
     pub(self) current_char: char,
     pub(self) current_pos: usize,
 }
@@ -61,6 +63,7 @@ impl<'input> CallVariableParser<'input> {
             digit_met: false,
             flattening_met: false,
             is_first_char: true,
+            is_first_stream_tag: false,
             current_char,
             current_pos,
         };
@@ -164,7 +167,7 @@ impl<'input> CallVariableParser<'input> {
     }
 
     fn try_parse_as_variable(&mut self) -> LexerResult<()> {
-        if self.try_parse_as_json_path_start()? {
+        if self.try_parse_as_stream_start()? || self.try_parse_as_json_path_start()? {
             return Ok(());
         } else if self.is_json_path_started() {
             self.try_parse_as_json_path()?;
@@ -173,6 +176,20 @@ impl<'input> CallVariableParser<'input> {
         }
 
         Ok(())
+    }
+
+    fn try_parse_as_stream_start(&mut self) -> LexerResult<bool> {
+        if self.current_pos() == 0 && self.current_char() == STREAM_START_TAG {
+            if self.string_to_parse.len() == 1 {
+                let error_pos = self.pos_in_string_to_parse();
+                return Err(LexerError::EmptyStreamName(error_pos, error_pos));
+            }
+
+            self.state.is_first_stream_tag = true;
+            return Ok(true);
+        }
+
+        Ok(false)
     }
 
     fn try_parse_as_json_path_start(&mut self) -> LexerResult<bool> {
@@ -253,6 +270,15 @@ impl<'input> CallVariableParser<'input> {
         self.current_pos() == self.string_to_parse.len() - 1
     }
 
+    fn to_variable<'v>(&self, variable_name: &'v str) -> Variable<'v> {
+        if self.state.is_first_stream_tag {
+            // TODO: cut the stream tag after the refactoring.
+            Variable::Stream(variable_name)
+        } else {
+            Variable::Scalar(variable_name)
+        }
+    }
+
     fn to_token(&self) -> LexerResult<Token<'input>> {
         use super::token::UnparsedNumber;
 
@@ -267,12 +293,42 @@ impl<'input> CallVariableParser<'input> {
                 let number: super::Number = number.try_into()?;
                 Ok(number.into())
             }
-            (false, false) => Ok(Token::Alphanumeric(self.string_to_parse)),
-            (false, true) => Ok(Token::JsonPath(
-                self.string_to_parse,
-                self.state.first_dot_met_pos.unwrap(),
-                self.state.flattening_met,
-            )),
+            (false, false) => {
+                if self.state.is_first_stream_tag {
+                    Ok(Token::Stream(&self.string_to_parse))
+                } else {
+                    Ok(Token::Alphanumeric(&self.string_to_parse))
+                }
+            }
+            (false, true) => {
+                let json_path_start_pos = self.state.first_dot_met_pos.unwrap();
+                let should_flatten = self.state.flattening_met;
+                let (variable, json_path) = to_variable_and_path(
+                    &self.string_to_parse,
+                    json_path_start_pos,
+                    should_flatten,
+                );
+                let variable = self.to_variable(variable);
+
+                Ok(Token::VariableWithJsonPath(
+                    variable,
+                    json_path,
+                    should_flatten,
+                ))
+            }
         }
     }
+}
+
+const STREAM_START_TAG: char = '$';
+
+fn to_variable_and_path(str: &str, pos: usize, should_flatten: bool) -> (&str, &str) {
+    let json_path = if should_flatten {
+        // -1 to not include the flattening symbol ! to the resulted json path
+        &str[pos + 1..str.len() - 1]
+    } else {
+        &str[pos + 1..]
+    };
+
+    (&str[0..pos], json_path)
 }

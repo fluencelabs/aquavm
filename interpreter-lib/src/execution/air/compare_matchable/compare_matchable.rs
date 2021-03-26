@@ -16,6 +16,7 @@
 
 use crate::contexts::execution::ExecutionCtx;
 use crate::execution::air::ExecutionResult;
+use crate::execution::utils::get_variable_name;
 use crate::execution::utils::resolve_to_jvaluable;
 use crate::JValue;
 
@@ -41,10 +42,12 @@ pub(crate) fn are_matchable_eq<'ctx>(
         (Number(value), matchable) => compare_matchable(matchable, exec_ctx, make_number_comparator(value)),
         (matchable, Number(value)) => compare_matchable(matchable, exec_ctx, make_number_comparator(value)),
 
-        (Variable(left_name), Variable(right_name)) => {
+        (Variable(left_variable), Variable(right_variable)) => {
+            let left_name = get_variable_name(left_variable);
             let left_jvaluable = resolve_to_jvaluable(left_name, exec_ctx)?;
             let left_value = left_jvaluable.as_jvalue();
 
+            let right_name = get_variable_name(right_variable);
             let right_jvaluable = resolve_to_jvaluable(right_name, exec_ctx)?;
             let right_value = right_jvaluable.as_jvalue();
 
@@ -67,10 +70,12 @@ pub(crate) fn are_matchable_eq<'ctx>(
                 return Ok(false);
             }
 
-            let left_jvaluable = resolve_to_jvaluable(lv, exec_ctx)?;
+            let left_name = get_variable_name(lv);
+            let left_jvaluable = resolve_to_jvaluable(left_name, exec_ctx)?;
             let left_value = left_jvaluable.apply_json_path(lp)?;
 
-            let right_jvaluable = resolve_to_jvaluable(rv, exec_ctx)?;
+            let right_name = get_variable_name(rv);
+            let right_jvaluable = resolve_to_jvaluable(right_name, exec_ctx)?;
             let right_value = right_jvaluable.apply_json_path(rp)?;
 
             Ok(left_value == right_value)
@@ -102,7 +107,8 @@ fn compare_matchable<'ctx>(
             let jvalue = (*bool).into();
             Ok(comparator(Cow::Owned(jvalue)))
         }
-        Variable(name) => {
+        Variable(variable) => {
+            let name = get_variable_name(variable);
             let jvaluable = resolve_to_jvaluable(name, exec_ctx)?;
             let jvalue = jvaluable.as_jvalue();
             Ok(comparator(jvalue))
@@ -112,7 +118,8 @@ fn compare_matchable<'ctx>(
             path,
             should_flatten,
         } => {
-            let jvaluable = resolve_to_jvaluable(variable, exec_ctx)?;
+            let var_name = get_variable_name(variable);
+            let jvaluable = resolve_to_jvaluable(var_name, exec_ctx)?;
             let jvalues = jvaluable.apply_json_path(path)?;
 
             let jvalue = if *should_flatten {

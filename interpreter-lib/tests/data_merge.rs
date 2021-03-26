@@ -51,19 +51,19 @@ fn data_merge() {
                 (seq
                     (fold neighborhood i
                         (par
-                            (call i ("add_provider" "") [] void[])
+                            (call i ("add_provider" "") [] $void)
                             (next i)
                         )
                     )
                     (fold neighborhood i
                         (par 
-                            (call i ("get_providers" "") [] providers[])
+                            (call i ("get_providers" "") [] $providers)
                             (next i)
                         )
                     )
                 )
                 (seq 
-                    (call "A" ("identity" "") [] void[])
+                    (call "A" ("identity" "") [] $void)
                     (call "B" ("" "") [] none)
                 )
             )
@@ -189,16 +189,16 @@ fn acc_merge() {
     let script = String::from(
         r#"
         (seq 
-            (call "A" ("add_provider" "") [] void[])
+            (call "A" ("add_provider" "") [] $void)
             (seq 
-                (call "A" ("add_provider" "") [] void[])
+                (call "A" ("add_provider" "") [] $void)
                 (seq 
-                    (call "A" ("get_providers" "") [] providers[])
+                    (call "A" ("get_providers" "") [] $providers)
                     (seq 
-                        (call "A" ("get_providers" "") [] providers[])
+                        (call "A" ("get_providers" "") [] $providers)
                         (seq 
-                            (call "B" ("" "2") [providers] void[])
-                            (call "B" ("" "3") [void] void[])
+                            (call "B" ("" "2") [$providers] $void)
+                            (call "B" ("" "3") [$void] $void)
                         )
                     )
                 )

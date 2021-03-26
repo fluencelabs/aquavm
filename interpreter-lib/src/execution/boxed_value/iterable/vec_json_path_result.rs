@@ -21,7 +21,7 @@ use crate::foldable_prev;
 use crate::JValue;
 use crate::SecurityTetraplet;
 
-/// Used for iterating over a result of applied to an accumulator json path.
+/// Used for iterating over a result of applied to an stream json path.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) struct IterableVecJsonPathResult {
     pub(crate) jvalues: Vec<JValue>,

@@ -186,7 +186,7 @@ mod tests {
                 (call "set_variable" ("" "") [] Iterable)
                 (fold Iterable i
                     (seq
-                        (call "A" ("" "") [i] acc[])
+                        (call "A" ("" "") [i] $acc)
                         (next i)
                     )
                 )
@@ -220,7 +220,7 @@ mod tests {
                 (fold Iterable i
                     (seq
                         (next i)
-                        (call "A" ("" "") [i] acc[])
+                        (call "A" ("" "") [i] $acc)
                     )
                 )
             )"#,
@@ -257,7 +257,7 @@ mod tests {
                     (seq
                         (fold Iterable2 j
                             (seq
-                                (call "A" ("" "") [i] acc[])
+                                (call "A" ("" "") [i] $acc)
                                 (next j)
                             )
                         )
@@ -300,7 +300,7 @@ mod tests {
                     (seq
                         (fold Iterable2 i
                             (seq
-                                (call "A" ("" "") [i] acc[])
+                                (call "A" ("" "") [i] $acc)
                                 (next i)
                             )
                         )
@@ -329,7 +329,7 @@ mod tests {
                 (call "set_variable" ("" "") [] Iterable)
                 (fold Iterable i
                     (seq
-                        (call "A" ("" "") [i] acc[])
+                        (call "A" ("" "") [i] $acc)
                         (next i)
                     )
                 )
@@ -358,7 +358,7 @@ mod tests {
                     (call "unknown_peer" ("" "") [] lazy_def_variable)
                     (fold iterable i
                         (seq
-                            (call "A" ("" "") [lazy_def_variable.$.hash!] acc[])
+                            (call "A" ("" "") [lazy_def_variable.$.hash!] $acc)
                             (next i)
                         )
                     )
@@ -390,7 +390,7 @@ mod tests {
                 (call "set_variable" ("" "") [] iterable)
                 (fold iterable.$.array! i
                     (seq
-                        (call "A" ("" "") [i] acc[])
+                        (call "A" ("" "") [i] $acc)
                         (next i)
                     )
                 )
