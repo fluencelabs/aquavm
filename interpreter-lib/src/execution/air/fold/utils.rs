@@ -166,11 +166,11 @@ fn from_jvalues(
     json_path: &str,
     should_flatten: bool,
 ) -> ExecutionResult<Option<IterableValue>> {
+    let jvalues = construct_iterable_jvalues(jvalues, should_flatten)?;
+
     if jvalues.is_empty() {
         return Ok(None);
     }
-
-    let jvalues = construct_iterable_jvalues(jvalues, should_flatten)?;
 
     let tetraplet = SecurityTetraplet {
         triplet,

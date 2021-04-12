@@ -344,6 +344,33 @@ mod tests {
         assert_eq!(res[0], Call(Executed(Rc::new(json!([])))));
     }
 
+    #[test]
+    fn empty_fold_json_path() {
+        use crate::contexts::execution_trace::CallResult::*;
+        use crate::contexts::execution_trace::ExecutedState::*;
+
+        let mut vm = create_aqua_vm(echo_number_call_service(), "A");
+        let mut set_variable_vm = create_aqua_vm(set_variable_call_service(r#"{ "messages": [] }"#), "set_variable");
+
+        let empty_fold = r#"
+            (seq
+                (call "set_variable" ("" "") [] messages)
+                (fold messages.$.messages! i
+                    (seq
+                        (call "A" ("" "") [i] $acc)
+                        (next i)
+                    )
+                )
+            )"#;
+
+        let res = call_vm!(set_variable_vm, "", empty_fold, "", "");
+        let res = call_vm!(vm, "", empty_fold, "", res.data);
+        let res: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid executed trace");
+
+        assert_eq!(res.len(), 1);
+        assert_eq!(res[0], Call(Executed(Rc::new(json!({ "messages": [] })))));
+    }
+
     // Check that fold works with the join behaviour without hanging up.
     #[test]
     fn fold_with_join() {
