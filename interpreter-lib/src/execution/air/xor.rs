@@ -49,7 +49,7 @@ fn is_catchable_by_xor(exec_error: &ExecutionError) -> bool {
 fn print_xor_log(e: &ExecutionError) {
     match e {
         // This errors actually aren't real errors, but a way to bubble execution up from match
-        // to a corresponding xor. They became errors iff there is no such xor and execution is
+        // to a corresponding xor. They'll become errors iff there is no such xor and execution is
         // bubble up until the very beginning of current subtree. So the error message shouldn't
         // be print out in order not to confuse users.
         ExecutionError::MatchWithoutXorError | ExecutionError::MismatchWithoutXorError => {}
