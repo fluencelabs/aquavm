@@ -46,9 +46,9 @@ mod tests {
     use crate::contexts::execution_trace::ExecutionTrace;
     use crate::JValue;
 
-    use aqua_test_utils::call_vm;
     use aqua_test_utils::create_aqua_vm;
     use aqua_test_utils::echo_string_call_service;
+    use aqua_test_utils::{call_vm, set_variable_call_service};
 
     use std::rc::Rc;
 
@@ -193,5 +193,48 @@ mod tests {
         let res = call_vm!(vm, "asd", script, "", res.data);
 
         assert_eq!(res.ret_code, 1015);
+    }
+
+    #[test]
+    fn match_with_two_xors() {
+        use crate::contexts::execution_trace::CallResult::*;
+        use crate::contexts::execution_trace::ExecutedState::*;
+
+        let local_peer_id = "local_peer_id";
+        let mut vm = create_aqua_vm(
+            set_variable_call_service(serde_json::json!(false).to_string()),
+            local_peer_id,
+        );
+
+        let local_peer_id_2 = "local_peer_id_2";
+
+        let script = format!(
+            r#"
+            (xor
+                (seq
+                    (seq
+                        (call "{0}" ("getDataSrv" "condition") [] condition)
+                        (call "{0}" ("getDataSrv" "relay") [] relay)
+                    )
+                    (xor
+                        (match condition true
+                            (call "{0}" ("println" "print") ["it is true"])
+                        )
+                        (call "{1}" ("println" "print") ["it is false"])
+                    )
+                )
+                (call "{0}" ("errorHandlingSrv" "error") [%last_error%])
+            )
+            "#,
+            local_peer_id, local_peer_id_2
+        );
+
+        let res = call_vm!(vm, "", script, "", "");
+        let mut trace: ExecutionTrace =
+            serde_json::from_slice(&res.data).expect("the interpreter should provide correct trace");
+
+        let expected_executed_call_result = Call(RequestSentBy(local_peer_id.to_string()));
+        assert_eq!(res.ret_code, 0);
+        assert_eq!(trace.pop_back().unwrap(), expected_executed_call_result);
     }
 }

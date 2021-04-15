@@ -31,7 +31,7 @@ impl<'i> super::ExecutableInstruction<'i> for Xor<'i> {
             Err(e) if is_catchable_by_xor(&e) => {
                 exec_ctx.subtree_complete = true;
                 exec_ctx.last_error_could_be_set = true;
-                log::warn!("xor caught an error: {}", e);
+                print_xor_log(&e);
 
                 self.1.execute(exec_ctx, trace_ctx)
             }
@@ -44,6 +44,17 @@ impl<'i> super::ExecutableInstruction<'i> for Xor<'i> {
 fn is_catchable_by_xor(exec_error: &ExecutionError) -> bool {
     // this type of errors related to invalid data and should treat as hard errors.
     !matches!(exec_error, ExecutionError::InvalidExecutedState(..))
+}
+
+fn print_xor_log(e: &ExecutionError) {
+    match e {
+        // These errors actually aren't real errors, but a way to bubble execution up from match
+        // to a corresponding xor. They'll become errors iff there is no such xor and execution is
+        // bubble up until the very beginning of current subtree. So the error message shouldn't
+        // be print out in order not to confuse users.
+        ExecutionError::MatchWithoutXorError | ExecutionError::MismatchWithoutXorError => {}
+        e => log::warn!("xor caught an error: {}", e),
+    }
 }
 
 #[cfg(test)]
