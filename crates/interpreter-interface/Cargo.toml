@@ -12,6 +12,6 @@ path = "src/lib.rs"
 
 [dependencies]
 fluence = { version = "0.4.2", features = ["logger"] }
-fluence-it-types = "0.1.0"
+fluence-it-types = "0.2.0"
 
 serde = "=1.0.118"
