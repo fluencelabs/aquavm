@@ -752,7 +752,7 @@ version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1b81c770e52b35e2406f8251f6c01b3b882c3eaed3029731d8c19c74dc1b423c"
 dependencies = [
- "it-to-bytes",
+ "it-to-bytes 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "nom",
  "serde",
  "wast",
@@ -761,10 +761,9 @@ dependencies = [
 [[package]]
 name = "fluence-it-types"
 version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "59c3c0b0dea71548d1781f2bb974ded7490ebc7de5837f7f5e2f3a9debc4ce4f"
+source = "git+https://github.com/fluencelabs/interface-types?branch=optimizations#5df263876fb5645674228cbbdd6288b33d361d8e"
 dependencies = [
- "it-to-bytes",
+ "it-to-bytes 0.1.0 (git+https://github.com/fluencelabs/interface-types?branch=optimizations)",
  "serde",
 ]
 
@@ -1053,6 +1052,11 @@ dependencies = [
  "quote",
  "syn",
 ]
+
+[[package]]
+name = "it-to-bytes"
+version = "0.1.0"
+source = "git+https://github.com/fluencelabs/interface-types?branch=optimizations#5df263876fb5645674228cbbdd6288b33d361d8e"
 
 [[package]]
 name = "it-to-bytes"
@@ -1561,9 +1565,9 @@ dependencies = [
 
 [[package]]
 name = "regex"
-version = "1.4.5"
+version = "1.4.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "957056ecddbeba1b26965114e191d2e8589ce74db242b6ea25fc4062427a5c19"
+checksum = "2a26af418b574bd56588335b3a3659a65725d4e636eb1016c2f9e3b38c7cc759"
 dependencies = [
  "aho-corasick",
  "memchr",
@@ -2080,7 +2084,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e29cd6c3670db55e8aa3dfe6fb02c8ec9e7a17789e0204cef0a7cb50e0b8c5cb"
 dependencies = [
  "fluence-it-types 0.1.1",
- "it-to-bytes",
+ "it-to-bytes 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "log",
  "nom",
  "safe-transmute",
