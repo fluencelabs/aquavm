@@ -59,7 +59,7 @@ dependencies = [
 name = "aqua-interpreter-interface"
 version = "0.4.0"
 dependencies = [
- "fluence 0.4.2",
+ "fluence 0.6.0",
  "fluence-it-types 0.2.0",
  "serde",
 ]
@@ -68,7 +68,7 @@ dependencies = [
 name = "aqua-test-module"
 version = "0.1.0"
 dependencies = [
- "fluence 0.4.2",
+ "fluence 0.6.0",
 ]
 
 [[package]]
@@ -76,7 +76,7 @@ name = "aqua-test-utils"
 version = "0.1.0"
 dependencies = [
  "aquamarine-vm",
- "fluence 0.4.2",
+ "fluence 0.6.0",
  "serde_json",
 ]
 
@@ -84,7 +84,7 @@ dependencies = [
 name = "aquamarine"
 version = "0.8.0"
 dependencies = [
- "fluence 0.4.2",
+ "fluence 0.6.0",
  "interpreter-lib",
  "log",
  "serde",
@@ -269,6 +269,19 @@ name = "cfg-if"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
+
+[[package]]
+name = "chrono"
+version = "0.4.19"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "670ad68c9088c2a963aaa298cb369688cf3f9465ce5e2d4ca10e6e0098a1ce73"
+dependencies = [
+ "libc",
+ "num-integer",
+ "num-traits",
+ "time",
+ "winapi",
+]
 
 [[package]]
 name = "clap"
@@ -636,6 +649,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "fce-timestamp-macro"
+version = "0.6.0"
+source = "git+https://github.com/fluencelabs/rust-sdk?branch=optimizations#ba7af66ca834fbaa9e708029d950caf4b0729ba8"
+dependencies = [
+ "chrono",
+ "quote",
+]
+
+[[package]]
 name = "fce-utils"
 version = "0.1.29"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -698,12 +720,13 @@ dependencies = [
 
 [[package]]
 name = "fluence"
-version = "0.4.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "31068fe4873478f9c59f01230dc6f23d504d8c11a36d6b6c51693b20c6d2570e"
+version = "0.6.0"
+source = "git+https://github.com/fluencelabs/rust-sdk?branch=optimizations#ba7af66ca834fbaa9e708029d950caf4b0729ba8"
 dependencies = [
- "fluence-sdk-macro 0.4.2",
- "fluence-sdk-main 0.4.2",
+ "fce-timestamp-macro",
+ "fluence-sdk-macro 0.6.0",
+ "fluence-sdk-main 0.6.0",
+ "serde",
 ]
 
 [[package]]
@@ -786,6 +809,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "fluence-sdk-macro"
+version = "0.6.0"
+source = "git+https://github.com/fluencelabs/rust-sdk?branch=optimizations#ba7af66ca834fbaa9e708029d950caf4b0729ba8"
+dependencies = [
+ "fluence-sdk-wit 0.6.0",
+]
+
+[[package]]
 name = "fluence-sdk-main"
 version = "0.2.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -803,6 +834,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "29cce53288e08ed86ebe36c64d8eb641a95e1d0f7f75da969b29e16ab0d7d406"
 dependencies = [
  "fluence-sdk-macro 0.4.2",
+ "log",
+ "serde",
+]
+
+[[package]]
+name = "fluence-sdk-main"
+version = "0.6.0"
+source = "git+https://github.com/fluencelabs/rust-sdk?branch=optimizations#ba7af66ca834fbaa9e708029d950caf4b0729ba8"
+dependencies = [
+ "fluence-sdk-macro 0.6.0",
  "log",
  "serde",
 ]
@@ -826,6 +867,19 @@ name = "fluence-sdk-wit"
 version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "56d835812bab8fb6f261b9e37355b9bf0a28a16123580145ce0fe44ef4363144"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "serde",
+ "serde_json",
+ "syn",
+ "uuid",
+]
+
+[[package]]
+name = "fluence-sdk-wit"
+version = "0.6.0"
+source = "git+https://github.com/fluencelabs/rust-sdk?branch=optimizations#ba7af66ca834fbaa9e708029d950caf4b0729ba8"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1017,7 +1071,7 @@ dependencies = [
  "criterion",
  "csv",
  "env_logger",
- "fluence 0.4.2",
+ "fluence 0.6.0",
  "fluence-app-service",
  "jsonpath_lib-fl",
  "log",
@@ -1277,6 +1331,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "num-integer"
+version = "0.1.44"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d2cc698a63b549a70bc047073d2949cce27cd1c7b0a4a862d08a8031bc2801db"
+dependencies = [
+ "autocfg",
+ "num-traits",
+]
+
+[[package]]
 name = "num-traits"
 version = "0.2.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1438,7 +1502,7 @@ dependencies = [
 name = "polyplets"
 version = "0.1.0"
 dependencies = [
- "fluence 0.4.2",
+ "fluence 0.6.0",
  "serde",
 ]
 
