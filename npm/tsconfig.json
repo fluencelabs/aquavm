@@ -1,5 +1,9 @@
 {
     "compilerOptions": {
+        "lib": [
+            "es2017",
+            "dom"
+        ],
         "outDir": "./dist/",
         "baseUrl": ".",
         "sourceMap": true,
@@ -27,6 +31,6 @@
         "src/__test__"
     ],
     "include": [
-        "src/**/*"
+        "src"
     ]
 }

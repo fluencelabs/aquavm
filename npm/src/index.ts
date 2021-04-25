@@ -17,10 +17,31 @@
 import { toByteArray } from 'base64-js';
 import * as wrapper from './wrapper';
 import { return_current_peer_id, return_call_service_result, getStringFromWasm0, free } from './wrapper';
-import { ParticleHandler, CallServiceResult, SecurityTetraplet } from './types';
 import wasmBs64 from './wasm';
 
 type LogLevel = 'info' | 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'off';
+
+interface CallServiceResult {
+    ret_code: number;
+    result: string;
+}
+
+interface ResolvedTriplet {
+    peer_pk: string;
+    service_id: string;
+    function_name: string;
+}
+
+interface SecurityTetraplet extends ResolvedTriplet {
+    json_path: string;
+}
+
+type ParticleHandler = (
+    serviceId: string,
+    fnName: string,
+    args: any[],
+    tetraplets: SecurityTetraplet[][],
+) => CallServiceResult;
 
 type ImportObject = {
     './aquamarine_client_bg.js': {

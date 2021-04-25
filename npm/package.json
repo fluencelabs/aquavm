@@ -1,10 +1,4 @@
 {
-    "files": [
-        "aquamarine.wasm.base64.js",
-        "aquamarine.wasm.base64.d.ts",
-        "index.js",
-        "index.d.ts"
-    ],
     "name": "@fluencelabs/air-interpreter",
     "description": "Aquamarine IR interpreter",
     "main": "index.js",
@@ -12,5 +6,20 @@
     "repository": "https://github.com/fluencelabs/air",
     "author": "Fluence Labs",
     "license": "Apache 2.0",
-    "private": false
+    "files": [
+        "aquamarine.wasm.base64.js",
+        "aquamarine.wasm.base64.d.ts",
+        "index.js",
+        "index.d.ts"
+    ],
+    "scripts": {
+        "build": "tsc"
+    },
+    "private": false,
+    "dependencies": {
+        "base64-js": "1.5.1"
+    },
+    "devDependencies": {
+        "typescript": "^3.9.5"
+    }
 }
