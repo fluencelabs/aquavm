@@ -43,8 +43,8 @@ fn chat_sent_message_benchmark() -> Result<InterpreterOutcome, AquamarineVMError
                         (fold members m
                             (par 
                                 (seq 
-                                    (call m.$.[1] ("identity" "") [] $void)
-                                    (call m.$.[0] ("fgemb3" "add") [] $void3)
+                                    (call m.$.[1]! ("identity" "") [] $void)
+                                    (call m.$.[0]! ("fgemb3" "add") [] $void3)
                                 )
                                 (next m)
                             )

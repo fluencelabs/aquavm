@@ -17,10 +17,13 @@
 use super::CallServiceResult;
 
 use fluence::fce;
+use fluence::module_manifest;
 
 use std::env::VarError;
 
 const CURRENT_PEER_ID_ENV_NAME: &str = "CURRENT_PEER_ID";
+
+module_manifest!();
 
 pub(crate) fn get_current_peer_id() -> std::result::Result<String, VarError> {
     std::env::var(CURRENT_PEER_ID_ENV_NAME)
@@ -29,10 +32,5 @@ pub(crate) fn get_current_peer_id() -> std::result::Result<String, VarError> {
 #[fce]
 #[link(wasm_import_module = "host")]
 extern "C" {
-    pub(crate) fn call_service(
-        service_id: String,
-        fn_name: String,
-        args: String,
-        tetraplets: String,
-    ) -> CallServiceResult;
+    pub(crate) fn call_service(service_id: &str, fn_name: &str, args: &str, tetraplets: &str) -> CallServiceResult;
 }
