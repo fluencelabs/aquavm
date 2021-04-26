@@ -20,7 +20,7 @@ jobs:
           rustup component add rustfmt
           rustup component add clippy
 
-          cargo install --force fcli --git https://github.com/fluencelabs/fce --branch sdk_optimizations
+          cargo install --force fcli --git https://github.com/fluencelabs/fce
 
           # build a Wasm binary for interpreter
           (cd interpreter; fce build --features fce)

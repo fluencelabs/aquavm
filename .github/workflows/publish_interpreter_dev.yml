@@ -197,7 +197,7 @@ jobs:
 
 ### === Rust package release ===
       - name: Install fcli
-        run: cargo install --force fcli --git https://github.com/fluencelabs/fce --branch sdk_optimizations
+        run: cargo install --force fcli --git https://github.com/fluencelabs/fce
 
       - name: Build aquamarine.wasm for node
         run: fce build -p aquamarine --release --features fce
