@@ -18,10 +18,10 @@ use wasm_bindgen::__rt::std::env::VarError;
 use wasm_bindgen::prelude::*;
 
 pub(crate) fn call_service(
-    service_id: String,
-    fn_name: String,
-    args: String,
-    security_tetraplets: String,
+    service_id: &str,
+    fn_name: &str,
+    args: &str,
+    security_tetraplets: &str,
 ) -> super::CallServiceResult {
     let result = call_service_impl(service_id, fn_name, args, security_tetraplets);
     log::trace!("result {}", result);
@@ -45,5 +45,5 @@ extern "C" {
 extern "C" {
     #[allow(unused_attributes)]
     #[link_name = "call_service"]
-    fn call_service_impl(service_id: String, fn_name: String, args: String, security_tetraplets: String) -> String;
+    fn call_service_impl(service_id: &str, fn_name: &str, args: &str, security_tetraplets: &str) -> String;
 }

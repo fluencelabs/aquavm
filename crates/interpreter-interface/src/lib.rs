@@ -83,6 +83,7 @@ impl InterpreterOutcome {
                     .collect();
                 array?
             }
+            IValue::ByteArray(array) => array,
             v => return Err(format!("expected Vec<u8> for data, got {:?}", v)),
         };
 
