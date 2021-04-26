@@ -47,10 +47,10 @@ checksum = "28b2cd92db5cbd74e8e5028f7e27dd7aa3090e89e4f2a197cc7c8dfb69c7063b"
 [[package]]
 name = "aqua-interpreter-interface"
 version = "0.4.0"
-source = "git+https://github.com/fluencelabs/air?branch=bwu#0b1ccf35c9d599d72b7efaba972e8463467ddd72"
+source = "git+https://github.com/fluencelabs/air?branch=bwu#ba3809ae175217ab20cb2763d5bb7612da982906"
 dependencies = [
- "fluence 0.6.0 (git+https://github.com/fluencelabs/rust-sdk?branch=optimizations)",
- "fluence-it-types 0.2.0",
+ "fluence",
+ "fluence-it-types 0.3.0",
  "serde",
 ]
 
@@ -58,8 +58,8 @@ dependencies = [
 name = "aqua-interpreter-interface"
 version = "0.4.0"
 dependencies = [
- "fluence 0.6.0 (git+https://github.com/fluencelabs/rust-sdk)",
- "fluence-it-types 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fluence",
+ "fluence-it-types 0.3.0",
  "serde",
 ]
 
@@ -67,7 +67,7 @@ dependencies = [
 name = "aqua-test-module"
 version = "0.1.0"
 dependencies = [
- "fluence 0.6.0 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence",
 ]
 
 [[package]]
@@ -75,7 +75,7 @@ name = "aqua-test-utils"
 version = "0.1.0"
 dependencies = [
  "aquamarine-vm",
- "fluence 0.6.0 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence",
  "serde_json",
 ]
 
@@ -83,7 +83,7 @@ dependencies = [
 name = "aquamarine"
 version = "0.8.0"
 dependencies = [
- "fluence 0.6.0 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence",
  "interpreter-lib",
  "log",
  "serde",
@@ -94,7 +94,7 @@ dependencies = [
 [[package]]
 name = "aquamarine-vm"
 version = "0.6.0"
-source = "git+https://github.com/fluencelabs/fce?branch=sdk_optimizations#e19f42852990c8b7ac6d82eda02238c4574aa9ea"
+source = "git+https://github.com/fluencelabs/fce#96c32b64d87fbf63b7910c712ec7cdf21debce13"
 dependencies = [
  "aqua-interpreter-interface 0.4.0 (git+https://github.com/fluencelabs/air?branch=bwu)",
  "fluence-faas 0.6.0",
@@ -660,12 +660,12 @@ dependencies = [
 [[package]]
 name = "fce"
 version = "0.4.0"
-source = "git+https://github.com/fluencelabs/fce?branch=sdk_optimizations#e19f42852990c8b7ac6d82eda02238c4574aa9ea"
+source = "git+https://github.com/fluencelabs/fce#96c32b64d87fbf63b7910c712ec7cdf21debce13"
 dependencies = [
  "anyhow",
  "boolinator",
  "fce-module-info-parser",
- "fce-utils 0.1.29 (git+https://github.com/fluencelabs/fce?branch=sdk_optimizations)",
+ "fce-utils 0.1.29 (git+https://github.com/fluencelabs/fce)",
  "fce-wit-generator 0.3.0",
  "fce-wit-interfaces 0.2.0",
  "fce-wit-parser 0.4.0",
@@ -688,25 +688,16 @@ dependencies = [
 [[package]]
 name = "fce-module-info-parser"
 version = "0.1.0"
-source = "git+https://github.com/fluencelabs/fce?branch=sdk_optimizations#e19f42852990c8b7ac6d82eda02238c4574aa9ea"
+source = "git+https://github.com/fluencelabs/fce#96c32b64d87fbf63b7910c712ec7cdf21debce13"
 dependencies = [
  "anyhow",
  "chrono",
- "fluence-sdk-main 0.6.0 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence-sdk-main 0.6.0",
  "semver 0.11.0",
  "serde",
  "thiserror",
  "walrus 0.18.0",
  "wasmer-runtime-core-fl",
-]
-
-[[package]]
-name = "fce-timestamp-macro"
-version = "0.6.0"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=optimizations#43c3908409b20cd875f2a42ae5563672453129a0"
-dependencies = [
- "chrono",
- "quote",
 ]
 
 [[package]]
@@ -721,7 +712,7 @@ dependencies = [
 [[package]]
 name = "fce-utils"
 version = "0.1.29"
-source = "git+https://github.com/fluencelabs/fce?branch=sdk_optimizations#e19f42852990c8b7ac6d82eda02238c4574aa9ea"
+source = "git+https://github.com/fluencelabs/fce#96c32b64d87fbf63b7910c712ec7cdf21debce13"
 
 [[package]]
 name = "fce-utils"
@@ -747,11 +738,11 @@ dependencies = [
 [[package]]
 name = "fce-wit-generator"
 version = "0.3.0"
-source = "git+https://github.com/fluencelabs/fce?branch=sdk_optimizations#e19f42852990c8b7ac6d82eda02238c4574aa9ea"
+source = "git+https://github.com/fluencelabs/fce#96c32b64d87fbf63b7910c712ec7cdf21debce13"
 dependencies = [
  "cargo_toml",
  "fce-wit-parser 0.4.0",
- "fluence-sdk-wit 0.6.0 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence-sdk-wit 0.6.0",
  "it-lilo",
  "once_cell",
  "serde",
@@ -774,7 +765,7 @@ dependencies = [
 [[package]]
 name = "fce-wit-interfaces"
 version = "0.2.0"
-source = "git+https://github.com/fluencelabs/fce?branch=sdk_optimizations#e19f42852990c8b7ac6d82eda02238c4574aa9ea"
+source = "git+https://github.com/fluencelabs/fce#96c32b64d87fbf63b7910c712ec7cdf21debce13"
 dependencies = [
  "multimap",
  "wasmer-interface-types-fl 0.20.0",
@@ -797,7 +788,7 @@ dependencies = [
 [[package]]
 name = "fce-wit-parser"
 version = "0.4.0"
-source = "git+https://github.com/fluencelabs/fce?branch=sdk_optimizations#e19f42852990c8b7ac6d82eda02238c4574aa9ea"
+source = "git+https://github.com/fluencelabs/fce#96c32b64d87fbf63b7910c712ec7cdf21debce13"
 dependencies = [
  "anyhow",
  "fce-wit-interfaces 0.2.0",
@@ -819,22 +810,11 @@ checksum = "37ab347416e802de484e4d03c7316c48f1ecb56574dfd4a46a80f173ce1de04d"
 [[package]]
 name = "fluence"
 version = "0.6.0"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=optimizations#43c3908409b20cd875f2a42ae5563672453129a0"
-dependencies = [
- "fce-timestamp-macro 0.6.0 (git+https://github.com/fluencelabs/rust-sdk?branch=optimizations)",
- "fluence-sdk-macro 0.6.0 (git+https://github.com/fluencelabs/rust-sdk?branch=optimizations)",
- "fluence-sdk-main 0.6.0 (git+https://github.com/fluencelabs/rust-sdk?branch=optimizations)",
- "serde",
-]
-
-[[package]]
-name = "fluence"
-version = "0.6.0"
 source = "git+https://github.com/fluencelabs/rust-sdk#e8bc1db0dff8550b97675d4835cf17e0f27848ef"
 dependencies = [
- "fce-timestamp-macro 0.6.0 (git+https://github.com/fluencelabs/rust-sdk)",
- "fluence-sdk-macro 0.6.0 (git+https://github.com/fluencelabs/rust-sdk)",
- "fluence-sdk-main 0.6.0 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fce-timestamp-macro",
+ "fluence-sdk-macro 0.6.0",
+ "fluence-sdk-main 0.6.0",
  "serde",
 ]
 
@@ -881,13 +861,13 @@ dependencies = [
 [[package]]
 name = "fluence-faas"
 version = "0.6.0"
-source = "git+https://github.com/fluencelabs/fce?branch=sdk_optimizations#e19f42852990c8b7ac6d82eda02238c4574aa9ea"
+source = "git+https://github.com/fluencelabs/fce#96c32b64d87fbf63b7910c712ec7cdf21debce13"
 dependencies = [
  "cmd_lib",
  "fce 0.4.0",
- "fce-utils 0.1.29 (git+https://github.com/fluencelabs/fce?branch=sdk_optimizations)",
- "fluence 0.6.0 (git+https://github.com/fluencelabs/rust-sdk)",
- "fluence-sdk-main 0.6.0 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fce-utils 0.1.29 (git+https://github.com/fluencelabs/fce)",
+ "fluence",
+ "fluence-sdk-main 0.6.0",
  "itertools 0.9.0",
  "log",
  "safe-transmute",
@@ -908,27 +888,7 @@ version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1b81c770e52b35e2406f8251f6c01b3b882c3eaed3029731d8c19c74dc1b423c"
 dependencies = [
- "it-to-bytes 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "nom",
- "serde",
- "wast",
-]
-
-[[package]]
-name = "fluence-it-types"
-version = "0.2.0"
-source = "git+https://github.com/fluencelabs/interface-types?branch=optimizations#7f049c0551fce18dc9e106d0f2b1ff3bdd909280"
-dependencies = [
- "it-to-bytes 0.1.0 (git+https://github.com/fluencelabs/interface-types?branch=optimizations)",
- "serde",
-]
-
-[[package]]
-name = "fluence-it-types"
-version = "0.3.0"
-source = "git+https://github.com/fluencelabs/interface-types#f6afd03838ca73d3da43a7a973f2d189f392acea"
-dependencies = [
- "it-to-bytes 0.1.0 (git+https://github.com/fluencelabs/interface-types)",
+ "it-to-bytes",
  "nom",
  "serde",
  "wast",
@@ -940,8 +900,10 @@ version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5006d09553345421af5dd2334cc945fc34dc2a73d7c1ed842a39a3803699619d"
 dependencies = [
- "it-to-bytes 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "it-to-bytes",
+ "nom",
  "serde",
+ "wast",
 ]
 
 [[package]]
@@ -956,17 +918,9 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-macro"
 version = "0.6.0"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=optimizations#43c3908409b20cd875f2a42ae5563672453129a0"
-dependencies = [
- "fluence-sdk-wit 0.6.0 (git+https://github.com/fluencelabs/rust-sdk?branch=optimizations)",
-]
-
-[[package]]
-name = "fluence-sdk-macro"
-version = "0.6.0"
 source = "git+https://github.com/fluencelabs/rust-sdk#e8bc1db0dff8550b97675d4835cf17e0f27848ef"
 dependencies = [
- "fluence-sdk-wit 0.6.0 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence-sdk-wit 0.6.0",
 ]
 
 [[package]]
@@ -983,19 +937,9 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-main"
 version = "0.6.0"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=optimizations#43c3908409b20cd875f2a42ae5563672453129a0"
-dependencies = [
- "fluence-sdk-macro 0.6.0 (git+https://github.com/fluencelabs/rust-sdk?branch=optimizations)",
- "log",
- "serde",
-]
-
-[[package]]
-name = "fluence-sdk-main"
-version = "0.6.0"
 source = "git+https://github.com/fluencelabs/rust-sdk#e8bc1db0dff8550b97675d4835cf17e0f27848ef"
 dependencies = [
- "fluence-sdk-macro 0.6.0 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence-sdk-macro 0.6.0",
  "log",
  "serde",
 ]
@@ -1019,19 +963,6 @@ name = "fluence-sdk-wit"
 version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "56d835812bab8fb6f261b9e37355b9bf0a28a16123580145ce0fe44ef4363144"
-dependencies = [
- "proc-macro2",
- "quote",
- "serde",
- "serde_json",
- "syn",
- "uuid",
-]
-
-[[package]]
-name = "fluence-sdk-wit"
-version = "0.6.0"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=optimizations#43c3908409b20cd875f2a42ae5563672453129a0"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1236,7 +1167,7 @@ dependencies = [
  "criterion",
  "csv",
  "env_logger",
- "fluence 0.6.0 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence",
  "fluence-app-service",
  "jsonpath_lib-fl",
  "log",
@@ -1275,23 +1206,14 @@ dependencies = [
 [[package]]
 name = "it-lilo"
 version = "0.1.0"
-source = "git+https://github.com/fluencelabs/interface-types#f6afd03838ca73d3da43a7a973f2d189f392acea"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "99ccf40e1e08f6f47ffbafe3cfb2e3adb721ddde80b178240f038d07dc9652fb"
 dependencies = [
- "fluence-it-types 0.3.0 (git+https://github.com/fluencelabs/interface-types)",
+ "fluence-it-types 0.3.0",
  "log",
  "paste",
  "thiserror",
 ]
-
-[[package]]
-name = "it-to-bytes"
-version = "0.1.0"
-source = "git+https://github.com/fluencelabs/interface-types?branch=optimizations#7f049c0551fce18dc9e106d0f2b1ff3bdd909280"
-
-[[package]]
-name = "it-to-bytes"
-version = "0.1.0"
-source = "git+https://github.com/fluencelabs/interface-types#f6afd03838ca73d3da43a7a973f2d189f392acea"
 
 [[package]]
 name = "it-to-bytes"
@@ -1698,7 +1620,7 @@ dependencies = [
 name = "polyplets"
 version = "0.1.0"
 dependencies = [
- "fluence 0.6.0 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence",
  "serde",
 ]
 
@@ -2395,7 +2317,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e29cd6c3670db55e8aa3dfe6fb02c8ec9e7a17789e0204cef0a7cb50e0b8c5cb"
 dependencies = [
  "fluence-it-types 0.1.1",
- "it-to-bytes 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "it-to-bytes",
  "log",
  "nom",
  "safe-transmute",
@@ -2407,11 +2329,12 @@ dependencies = [
 [[package]]
 name = "wasmer-interface-types-fl"
 version = "0.20.0"
-source = "git+https://github.com/fluencelabs/interface-types#f6afd03838ca73d3da43a7a973f2d189f392acea"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b47648f6ed55acbd6ddf2a4efed8c2976ce19a55997eb159e511fbd11e366006"
 dependencies = [
- "fluence-it-types 0.3.0 (git+https://github.com/fluencelabs/interface-types)",
+ "fluence-it-types 0.3.0",
  "it-lilo",
- "it-to-bytes 0.1.0 (git+https://github.com/fluencelabs/interface-types)",
+ "it-to-bytes",
  "itertools 0.10.0",
  "log",
  "nom",
