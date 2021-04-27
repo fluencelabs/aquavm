@@ -50,7 +50,7 @@ version = "0.4.0"
 source = "git+https://github.com/fluencelabs/air#7097b255334c518ce52faf733a5fa295c0a5768e"
 dependencies = [
  "fluence",
- "fluence-it-types 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fluence-it-types 0.3.0",
  "serde",
 ]
 
@@ -59,7 +59,7 @@ name = "aqua-interpreter-interface"
 version = "0.4.0"
 dependencies = [
  "fluence",
- "fluence-it-types 0.3.0 (git+https://github.com/fluencelabs/interface-types)",
+ "fluence-it-types 0.3.0",
  "serde",
 ]
 
@@ -888,7 +888,7 @@ version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1b81c770e52b35e2406f8251f6c01b3b882c3eaed3029731d8c19c74dc1b423c"
 dependencies = [
- "it-to-bytes 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "it-to-bytes",
  "nom",
  "serde",
  "wast",
@@ -897,19 +897,10 @@ dependencies = [
 [[package]]
 name = "fluence-it-types"
 version = "0.3.0"
-source = "git+https://github.com/fluencelabs/interface-types#f6afd03838ca73d3da43a7a973f2d189f392acea"
-dependencies = [
- "it-to-bytes 0.1.0 (git+https://github.com/fluencelabs/interface-types)",
- "serde",
-]
-
-[[package]]
-name = "fluence-it-types"
-version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5006d09553345421af5dd2334cc945fc34dc2a73d7c1ed842a39a3803699619d"
 dependencies = [
- "it-to-bytes 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "it-to-bytes",
  "nom",
  "serde",
  "wast",
@@ -1218,16 +1209,11 @@ version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "99ccf40e1e08f6f47ffbafe3cfb2e3adb721ddde80b178240f038d07dc9652fb"
 dependencies = [
- "fluence-it-types 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fluence-it-types 0.3.0",
  "log",
  "paste",
  "thiserror",
 ]
-
-[[package]]
-name = "it-to-bytes"
-version = "0.1.0"
-source = "git+https://github.com/fluencelabs/interface-types#f6afd03838ca73d3da43a7a973f2d189f392acea"
 
 [[package]]
 name = "it-to-bytes"
@@ -2331,7 +2317,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e29cd6c3670db55e8aa3dfe6fb02c8ec9e7a17789e0204cef0a7cb50e0b8c5cb"
 dependencies = [
  "fluence-it-types 0.1.1",
- "it-to-bytes 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "it-to-bytes",
  "log",
  "nom",
  "safe-transmute",
@@ -2346,9 +2332,9 @@ version = "0.20.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b47648f6ed55acbd6ddf2a4efed8c2976ce19a55997eb159e511fbd11e366006"
 dependencies = [
- "fluence-it-types 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fluence-it-types 0.3.0",
  "it-lilo",
- "it-to-bytes 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "it-to-bytes",
  "itertools 0.10.0",
  "log",
  "nom",

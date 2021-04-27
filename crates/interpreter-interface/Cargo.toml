@@ -12,6 +12,6 @@ path = "src/lib.rs"
 
 [dependencies]
 fluence = { git = "https://github.com/fluencelabs/rust-sdk", features = ["logger"] }
-fluence-it-types = { git = "https://github.com/fluencelabs/interface-types" }
+fluence-it-types = "0.3.0"
 
 serde = "=1.0.118"
