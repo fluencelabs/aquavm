@@ -164,6 +164,23 @@ mod tests {
     }
 
     #[test]
+    fn match_with_equal_numbers() {
+        let local_peer_id = "local_peer_id";
+        let mut vm = create_aqua_vm(echo_string_call_service(), local_peer_id);
+
+        let script = "
+            (xor
+                (match 1 1
+                    (null)
+                )
+                (null)
+            )";
+
+        let res = call_vm!(vm, "asd", script, "", "");
+        assert_eq!(res.ret_code, 0);
+    }
+
+    #[test]
     fn match_without_xor() {
         let set_variable_peer_id = "set_variable_peer_id";
         let mut set_variable_vm = create_aqua_vm(echo_string_call_service(), set_variable_peer_id);

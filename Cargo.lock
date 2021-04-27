@@ -47,7 +47,6 @@ checksum = "28b2cd92db5cbd74e8e5028f7e27dd7aa3090e89e4f2a197cc7c8dfb69c7063b"
 [[package]]
 name = "aqua-interpreter-interface"
 version = "0.4.0"
-source = "git+https://github.com/fluencelabs/air?branch=bwu#ba3809ae175217ab20cb2763d5bb7612da982906"
 dependencies = [
  "fluence",
  "fluence-it-types 0.3.0",
@@ -57,6 +56,7 @@ dependencies = [
 [[package]]
 name = "aqua-interpreter-interface"
 version = "0.4.0"
+source = "git+https://github.com/fluencelabs/air?branch=bwu#ba3809ae175217ab20cb2763d5bb7612da982906"
 dependencies = [
  "fluence",
  "fluence-it-types 0.3.0",
@@ -712,13 +712,13 @@ dependencies = [
 [[package]]
 name = "fce-utils"
 version = "0.1.29"
-source = "git+https://github.com/fluencelabs/fce#96c32b64d87fbf63b7910c712ec7cdf21debce13"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b7a516882dccba04f0034e288c1aa5f06ce9da2711a7ce984ceebac8117e185e"
 
 [[package]]
 name = "fce-utils"
 version = "0.1.29"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b7a516882dccba04f0034e288c1aa5f06ce9da2711a7ce984ceebac8117e185e"
+source = "git+https://github.com/fluencelabs/fce#96c32b64d87fbf63b7910c712ec7cdf21debce13"
 
 [[package]]
 name = "fce-wit-generator"
