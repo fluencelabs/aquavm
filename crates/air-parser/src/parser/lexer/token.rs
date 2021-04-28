@@ -89,7 +89,7 @@ impl From<Number> for Token<'_> {
 
 impl From<Number> for serde_json::Value {
     fn from(number: Number) -> Self {
-        number.into()
+        (&number).into()
     }
 }
 

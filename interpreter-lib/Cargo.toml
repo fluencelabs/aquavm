@@ -1,6 +1,6 @@
 [package]
 name = "interpreter-lib"
-version = "0.8.0"
+version = "0.9.0"
 authors = ["Fluence Labs"]
 edition = "2018"
 
@@ -10,7 +10,7 @@ path = "src/lib.rs"
 
 [dependencies]
 air-parser = { path = "../crates/air-parser" }
-fluence = { git = "https://github.com/fluencelabs/rust-sdk", features = ["logger"] }
+fluence = { version = "0.6.1", features = ["logger"] }
 polyplets = { path = "../crates/polyplets" }
 aqua-interpreter-interface = { path = "../crates/interpreter-interface" }
 
@@ -28,7 +28,7 @@ wasm-bindgen = "=0.2.65"
 
 [dev_dependencies]
 aqua-test-utils = { path = "../crates/test-utils" }
-fluence-app-service = "0.5.1"
+fluence-app-service = "0.7.0"
 
 criterion = "0.3.3"
 csv = "1.1.5"

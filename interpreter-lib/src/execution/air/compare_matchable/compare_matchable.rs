@@ -100,7 +100,7 @@ fn compare_matchable<'ctx>(
             Ok(comparator(Cow::Owned(jvalue)))
         }
         Number(number) => {
-            let jvalue = number.clone().into();
+            let jvalue = number.into();
             Ok(comparator(Cow::Owned(jvalue)))
         }
         Boolean(bool) => {
@@ -166,6 +166,5 @@ fn make_number_comparator(comparable_number: &ast::Number) -> Comparator<'_> {
     use std::ops::Deref;
 
     let comparable_jvalue: JValue = comparable_number.into();
-
     Box::new(move |jvalue: Cow<'_, JValue>| -> bool { jvalue.deref() == &comparable_jvalue })
 }
