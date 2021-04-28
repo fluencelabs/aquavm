@@ -37,7 +37,7 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             ~/.cargo/bin
-          key: ${{ runner.os }}-cargo-1-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-v2-${{ hashFiles('**/Cargo.lock') }}
       - name: Install Rust toolchain with wasm32-unknown-unknown
         uses: actions-rs/toolchain@v1
         with:
@@ -197,7 +197,7 @@ jobs:
 
 ### === Rust package release ===
       - name: Install fcli
-        run: cargo install --force fcli --git https://github.com/fluencelabs/fce
+        run: cargo install fcli || true
 
       - name: Build aquamarine.wasm for node
         run: fce build -p aquamarine --release --features fce
