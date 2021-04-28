@@ -173,6 +173,18 @@ jobs:
       - name: Install fcli
         run: cargo install fcli || true
 
+      - name: Set interpreter version to ${{ env.FINAL_VERSION }} before the build
+        run: |
+          PATH="~/.cargo/bin:$PATH"
+          (
+            cd interepreter
+            toml set Cargo.toml package.version "${{ env.FINAL_VERSION }}" | sponge Cargo.toml
+          )
+          (
+            cd interpreter-lib
+            toml set Cargo.toml package.version "${{ env.FINAL_VERSION }}" | sponge Cargo.toml
+          )
+
       - name: Build aquamarine.wasm for node
         run: fce build --release -p aquamarine --features fce
         working-directory: interpreter
