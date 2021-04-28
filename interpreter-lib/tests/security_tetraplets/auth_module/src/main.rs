@@ -22,7 +22,7 @@ fn main() {}
 
 #[fce]
 struct AuthResult {
-    pub is_authorized: i32,
+    pub is_authorized: bool,
 }
 
 #[fce]
@@ -31,6 +31,6 @@ fn is_authorized() -> AuthResult {
     let is_authorized = call_parameters.init_peer_id == ADMIN_PEER_PK;
 
     AuthResult {
-        is_authorized: is_authorized.into(),
+        is_authorized
     }
 }
