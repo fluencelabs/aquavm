@@ -359,6 +359,21 @@ fn parse_match() {
 }
 
 #[test]
+fn parse_match_with_init_peer_id() {
+    use ast::MatchableValue::InitPeerId;
+    use ast::MatchableValue::Variable;
+
+    let source_code = r#"
+        (match v1 %init_peer_id%
+            (null)
+        )
+        "#;
+    let instruction = parse(&source_code);
+    let expected = match_(Variable(Scalar("v1")), InitPeerId, null());
+    assert_eq!(instruction, expected);
+}
+
+#[test]
 fn parse_mismatch() {
     use ast::MatchableValue::Variable;
 

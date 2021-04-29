@@ -192,8 +192,10 @@ impl<'i> VariableValidator<'i> {
 
     fn met_matchable(&mut self, matchable: &MatchableValue<'i>, span: Span) {
         match matchable {
-            MatchableValue::Number(_) | MatchableValue::Boolean(_) | MatchableValue::Literal(_) => {
-            }
+            MatchableValue::InitPeerId
+            | MatchableValue::Number(_)
+            | MatchableValue::Boolean(_)
+            | MatchableValue::Literal(_) => {}
             MatchableValue::Variable(variable) => self.met_variable(variable, span),
             MatchableValue::JsonPath { variable, .. } => self.met_variable(variable, span),
         }
