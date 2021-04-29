@@ -164,6 +164,41 @@ mod tests {
     }
 
     #[test]
+    fn match_with_init_peer_id() {
+        use crate::contexts::execution_trace::CallResult::*;
+        use crate::contexts::execution_trace::ExecutedState::*;
+
+        let set_variable_peer_id = "set_variable_peer_id";
+        let mut set_variable_vm = create_aqua_vm(echo_string_call_service(), set_variable_peer_id);
+
+        let local_peer_id = "local_peer_id";
+        let mut vm = create_aqua_vm(echo_string_call_service(), local_peer_id);
+
+        let script = format!(
+            r#"
+            (seq
+                (call "{0}" ("" "") ["{1}"] value_1)
+                (xor
+                    (match value_1 %init_peer_id%
+                        (call "{1}" ("service_id_2" "local_fn_name") ["result_1"] result_1)
+                    )
+                    (call "{1}" ("service_id_2" "local_fn_name") ["result_2"] result_2)
+                )
+            )"#,
+            set_variable_peer_id, local_peer_id
+        );
+
+        let res = call_vm!(set_variable_vm, local_peer_id, script.clone(), "", "");
+        let res = call_vm!(vm, local_peer_id, script, "", res.data);
+
+        let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid json");
+        let expected_executed_call_result = Call(Executed(Rc::new(JValue::String(String::from("result_1")))));
+
+        assert_eq!(actual_trace.len(), 2);
+        assert_eq!(actual_trace[1], expected_executed_call_result);
+    }
+
+    #[test]
     fn match_with_equal_numbers() {
         let local_peer_id = "local_peer_id";
         let mut vm = create_aqua_vm(echo_string_call_service(), local_peer_id);

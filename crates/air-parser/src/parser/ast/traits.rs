@@ -86,6 +86,7 @@ impl fmt::Display for MatchableValue<'_> {
         use MatchableValue::*;
 
         match self {
+            InitPeerId => write!(f, "%init_peer_id%"),
             Literal(str) => write!(f, r#""{}""#, str),
             Number(number) => write!(f, "{}", number),
             Boolean(bool) => write!(f, "{}", bool),

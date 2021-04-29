@@ -98,6 +98,7 @@ pub enum IterableValue<'i> {
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum MatchableValue<'i> {
+    InitPeerId,
     Literal(&'i str),
     Number(Number),
     Boolean(bool),

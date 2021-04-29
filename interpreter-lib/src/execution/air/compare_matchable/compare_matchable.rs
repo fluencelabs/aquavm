@@ -31,8 +31,19 @@ pub(crate) fn are_matchable_eq<'ctx>(
     use MatchableValue::*;
 
     match (left, right) {
-        (Literal(left_name), Literal(right_name)) => Ok(left_name == right_name),
+        (InitPeerId, InitPeerId) => Ok(true),
+        (InitPeerId, matchable) => compare_matchable(
+            matchable,
+            exec_ctx,
+            make_string_comparator(exec_ctx.init_peer_id.as_str()),
+        ),
+        (matchable, InitPeerId) => compare_matchable(
+            matchable,
+            exec_ctx,
+            make_string_comparator(exec_ctx.init_peer_id.as_str()),
+        ),
 
+        (Literal(left_name), Literal(right_name)) => Ok(left_name == right_name),
         (Literal(value), matchable) => compare_matchable(matchable, exec_ctx, make_string_comparator(value)),
         (matchable, Literal(value)) => compare_matchable(matchable, exec_ctx, make_string_comparator(value)),
 
@@ -95,6 +106,11 @@ fn compare_matchable<'ctx>(
     use MatchableValue::*;
 
     match matchable {
+        InitPeerId => {
+            let init_peer_id = exec_ctx.init_peer_id.clone();
+            let jvalue = init_peer_id.into();
+            Ok(comparator(Cow::Owned(jvalue)))
+        }
         Literal(str) => {
             let jvalue = str.to_string().into();
             Ok(comparator(Cow::Owned(jvalue)))
