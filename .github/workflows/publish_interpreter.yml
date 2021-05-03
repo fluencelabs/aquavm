@@ -99,7 +99,7 @@ jobs:
       - name: Build npm package
         working-directory: npm
         run: |
-          ./build_wasm
+          ./build_wasm.sh
           npm i
           npm run build
 

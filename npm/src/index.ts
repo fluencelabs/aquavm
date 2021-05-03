@@ -15,8 +15,7 @@
  */
 
 import { toByteArray } from 'base64-js';
-import * as wrapper from './wrapper';
-import { return_current_peer_id, return_call_service_result, getStringFromWasm0, free } from './wrapper';
+import { return_current_peer_id, return_call_service_result, getStringFromWasm0, free, invoke, ast } from './wrapper';
 import wasmBs64 from './wasm';
 
 type LogLevel = 'info' | 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'off';
@@ -207,10 +206,10 @@ export class AquamarineInterpreter {
     }
 
     invoke(init_peer_id: string, script: string, prev_data: Uint8Array, data: Uint8Array): string {
-        return wrapper.invoke(this.wasmWrapper.exports, init_peer_id, script, prev_data, data, this.logLevel);
+        return invoke(this.wasmWrapper.exports, init_peer_id, script, prev_data, data, this.logLevel);
     }
 
     parseAir(script: string): string {
-        return wrapper.ast(this.wasmWrapper.exports, script);
+        return ast(this.wasmWrapper.exports, script);
     }
 }

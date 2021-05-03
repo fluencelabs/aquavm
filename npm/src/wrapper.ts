@@ -20,14 +20,14 @@
  *
  */
 
-export function main(wasm) {
+function main(wasm) {
     wasm.main();
 }
 
-export let WASM_VECTOR_LEN = 0;
+let WASM_VECTOR_LEN = 0;
 
 let cachegetUint8Memory0 = null;
-export function getUint8Memory0(wasm) {
+function getUint8Memory0(wasm) {
     if (cachegetUint8Memory0 === null || cachegetUint8Memory0.buffer !== wasm.memory.buffer) {
         cachegetUint8Memory0 = new Uint8Array(wasm.memory.buffer);
     }
@@ -50,7 +50,7 @@ const encodeString =
               };
           };
 
-export function passStringToWasm0(wasm, arg, malloc, realloc) {
+function passStringToWasm0(wasm, arg, malloc, realloc) {
     if (realloc === undefined) {
         const buf = cachedTextEncoder.encode(arg);
         const ptr = malloc(buf.length);
@@ -90,7 +90,7 @@ export function passStringToWasm0(wasm, arg, malloc, realloc) {
 }
 
 let cachegetInt32Memory0 = null;
-export function getInt32Memory0(wasm) {
+function getInt32Memory0(wasm) {
     if (cachegetInt32Memory0 === null || cachegetInt32Memory0.buffer !== wasm.memory.buffer) {
         cachegetInt32Memory0 = new Int32Array(wasm.memory.buffer);
     }
