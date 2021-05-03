@@ -3,19 +3,25 @@ import { AquamarineInterpreter, ParticleHandler } from '..';
 const vmPeerId = '12D3KooWNzutuy8WHXDKFqFsATvCR6j9cj2FijYbnd47geRKaQZS';
 
 const createTestIntepreter = async (handler: ParticleHandler) => {
-    return AquamarineInterpreter.create(handler, vmPeerId, 'off', () => {});
+    return AquamarineInterpreter.create(handler, vmPeerId, 'trace', () => {});
 };
 
-describe('Tests', async () => {
-    const interpreter = await createTestIntepreter(undefined);
-    const testInvoke = (script, prevData, data): string => {
-        prevData = new TextEncoder().encode(prevData);
-        data = new TextEncoder().encode(data);
-        return interpreter.invoke(vmPeerId, script, prevData, data);
-    };
+const testInvoke = (interpreter, script, prevData, data): string => {
+    prevData = Buffer.from(prevData);
+    data = Buffer.from(data);
+    return interpreter.invoke(vmPeerId, script, prevData, data);
+};
 
+describe('Tests', () => {
     it('should work', async () => {
         // arrange
+        const i = await createTestIntepreter(() => {
+            return {
+                ret_code: 0,
+                result: '{}',
+            };
+        });
+
         const s = `(seq
             (par 
                 (call "${vmPeerId}" ("local_service_id" "local_fn_name") [] result_1)
@@ -25,7 +31,7 @@ describe('Tests', async () => {
         )`;
 
         // act
-        const res = testInvoke(s, '[]', '[]');
+        const res = testInvoke(i, s, [], []);
 
         // assert
         expect(res).not.toBeUndefined();
