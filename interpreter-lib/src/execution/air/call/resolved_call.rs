@@ -93,11 +93,10 @@ impl<'i> ResolvedCall<'i> {
 
         let service_result = unsafe {
             crate::build_targets::call_service(
-                // copying here is necessary because of current limitations of rust-sdk
-                self.triplet.service_id.clone(),
-                self.triplet.function_name.clone(),
-                call_arguments,
-                serialized_tetraplets,
+                &self.triplet.service_id,
+                &self.triplet.function_name,
+                &call_arguments,
+                &serialized_tetraplets,
             )
         };
 

@@ -37,7 +37,7 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             ~/.cargo/bin
-          key: ${{ runner.os }}-cargo-1-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-v2-${{ hashFiles('**/Cargo.lock') }}
       - name: Install Rust toolchain with wasm32-unknown-unknown
         uses: actions-rs/toolchain@v1
         with:
@@ -66,10 +66,12 @@ jobs:
 
       - name: Get versions from npm & crates.io, and take the highest one
         run: |
+          set -x
           # install semver and add it to PATH
           yarn global add semver
           PATH="$(yarn global bin):$PATH"
 
+          INTERPRETER_CARGO_TOML="interpreter/Cargo.toml"
           CARGO_TOML="crates/air-interpreter-wasm/Cargo.toml"
 
           # sanitize branch name so it can be used as a semver suffix (replace [^0-9a-zA-Z-] with hyphen)
@@ -104,7 +106,9 @@ jobs:
           ### (NOTE: the following code assumes that local versions do not contain prerelease suffix; existing suffix will be ignored)
           # take local Rust version
           LOCAL_RUST_VERSION="$(toml get "$CARGO_TOML" package.version | tr -d \")"
-          LOCAL_RUST_PRERELEASE_VERSION="$(semver --increment prerelease --preid "$SANITIZED_BRANCH" "${LOCAL_RUST_VERSION}-0")" # added '-0' here to avoid semver erroneously increment patch octet. Any suffix works, '-0' is chosen deliberately.
+          INTERPRETER_RUST_VERSION="$(toml get "$INTERPRETER_CARGO_TOML" package.version | tr -d \")"
+          MAX_RUST_VERSION="$(semver "$LOCAL_RUST_VERSION" "$INTERPRETER_RUST_VERSION" | tail -n1)"
+          LOCAL_RUST_PRERELEASE_VERSION="$(semver --increment prerelease --preid "$SANITIZED_BRANCH" "${MAX_RUST_VERSION}-0")" # added '-0' here to avoid semver erroneously increment patch octet. Any suffix works, '-0' is chosen deliberately.
 
           ### SAVE FINAL VERSION TO ENV
           # take the highest version
@@ -198,6 +202,12 @@ jobs:
 ### === Rust package release ===
       - name: Install fcli
         run: cargo install fcli || true
+
+      - name: Set interpreter version to ${{ env.FINAL_VERSION }} before the build
+        run: |
+          PATH="~/.cargo/bin:$PATH"
+          toml set Cargo.toml package.version "${{ env.FINAL_VERSION }}" | sponge Cargo.toml
+        working-directory: interpreter-lib
 
       - name: Build aquamarine.wasm for node
         run: fce build -p aquamarine --release --features fce

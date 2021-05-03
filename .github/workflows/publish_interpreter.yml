@@ -28,7 +28,7 @@ jobs:
             ~/.cargo/git
             ~/.cargo/bin
             target
-          key: ${{ runner.os }}-cargo-v1-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-v2-${{ hashFiles('**/Cargo.lock') }}
       - name: Install Rust toolchain with wasm32-unknown-unknown
         uses: actions-rs/toolchain@v1
         with:
@@ -172,6 +172,18 @@ jobs:
 ### === Rust package release ===
       - name: Install fcli
         run: cargo install fcli || true
+
+      - name: Set interpreter version to ${{ env.FINAL_VERSION }} before the build
+        run: |
+          PATH="~/.cargo/bin:$PATH"
+          (
+            cd interpreter
+            toml set Cargo.toml package.version "${{ env.FINAL_VERSION }}" | sponge Cargo.toml
+          )
+          (
+            cd interpreter-lib
+            toml set Cargo.toml package.version "${{ env.FINAL_VERSION }}" | sponge Cargo.toml
+          )
 
       - name: Build aquamarine.wasm for node
         run: fce build --release -p aquamarine --features fce
