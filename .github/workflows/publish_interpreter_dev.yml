@@ -17,7 +17,7 @@ jobs:
         shell: bash
 
     steps:
-    ### Extract branch name
+      ### Extract branch name
       - name: Extract branch name
         if: github.event_name != 'pull_request'
         run: echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
@@ -30,7 +30,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-### Prepare cargo & toolchains
+      ### Prepare cargo & toolchains
       - uses: actions/cache@v2
         with:
           path: |
@@ -57,7 +57,7 @@ jobs:
           command: update
           args: --aggressive
 
-### Calculate FINAL_VERSION
+      ### Calculate FINAL_VERSION
       - name: Install jq & sponge
         run: sudo apt-get update && sudo apt-get --yes --force-yes install jq moreutils
 
@@ -118,88 +118,34 @@ jobs:
           echo "PKG_NAME=$PKG_NAME" | tee -a $GITHUB_ENV
           echo "JS_PKG_NAME=$JS_PKG_NAME" | tee -a $GITHUB_ENV
 
-### === JavaScript package release ===
+      ### === JavaScript package release ===
       - name: Install wasm-pack
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
         continue-on-error: true
 
-      - name: Build aquamarine.wasm for JS clients
-        run: wasm-pack build $GITHUB_WORKSPACE/interpreter --no-typescript --release -d $(pwd)/pkg
-
-      - name: Generate aquamarine.wasm.base64.js
+      - name: Build npm package
+        working-directory: npm
         run: |
-          cat << EOF > pkg/aquamarine.wasm.base64.js
-          module.exports = "$(base64 -w0 pkg/aquamarine_client_bg.wasm)";
-          EOF
+          ./build_wasm
+          npm i
+          npm run build
 
-    ### Generate index files so import works as: | import {wasmBs64} from "@fluencelabs/aquamarine-interpreter"; |
-      - name: Generate index.js & index.d.ts
-        run: |
-          cat << EOF > index.js
-          const wasmBs64 = require("./aquamarine.wasm.base64.js");
-          module.exports = wasmBs64;
-          EOF
-
-          cat << EOF > index.d.ts
-          declare const wasmBs64: string;
-          export default wasmBs64;
-          EOF
-        working-directory: pkg
-
-      - name: Generate aquamarine.wasm.base64.d.ts
-        run: |
-          cat << EOF > aquamarine.wasm.base64.d.ts
-          declare const wasmBs64: string;
-          export default wasmBs64;
-          EOF
-        working-directory: pkg
-
-      - name: Prepare package.json for publishing of ${{ env.JS_PKG_NAME }} @ ${{ env.FINAL_VERSION }}
-        run: |
-          cat pkg/package.json | jq --arg name aquamarine.wasm.base64.js \
-            '. + {
-              files: [ "aquamarine.wasm.base64.js", "aquamarine.wasm.base64.d.ts",  "index.js", "index.d.ts" ],
-              "name": "${{ env.JS_PKG_NAME }}",
-              "description": "Aquamarine IR interpreter as base64 WASM",
-              "main": "index.js",
-              "repository": "https://github.com/fluencelabs/aquamarine",
-              "author": "Fluence Labs",
-              "license": "Apache 2.0",
-              "private": false,
-              "main": "index.js",
-              "types": "index.d.ts"
-            }' > pkg/package_new.json
-
-          cat pkg/package_new.json
-          mv pkg/package_new.json pkg/package.json
-
-      - run: cat pkg/package.json
-
-    ### Set version to FINAL_VERSION
+      ### Set version to FINAL_VERSION
       - run: yarn version --new-version ${{ env.FINAL_VERSION }} --no-git-tag-version || true
         working-directory: pkg
 
-      ### Add README so it appears on npmjs.org
-      - run: |
-          cat <<EOF > README.md
-          # Aquamarine IR interpreter as base64 WASM
-          Built from branch ${{ env.BRANCH_NAME }}
-          EOF
-        working-directory: pkg
-
-    ### Publish to NPM registry
+      ### Publish to NPM registry
       - uses: actions/setup-node@v1
         with:
-          node-version: '14'
-          registry-url: 'https://registry.npmjs.org'
+          node-version: "14"
+          registry-url: "https://registry.npmjs.org"
 
       - run: npm publish --access public --tag=beta
         working-directory: pkg
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-
-### === Rust package release ===
+      ### === Rust package release ===
       - name: Install fcli
         run: cargo install fcli || true
 
