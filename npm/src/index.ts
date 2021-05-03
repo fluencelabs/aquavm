@@ -36,7 +36,7 @@ interface SecurityTetraplet extends ResolvedTriplet {
     json_path: string;
 }
 
-type ParticleHandler = (
+export type ParticleHandler = (
     serviceId: string,
     fnName: string,
     args: any[],

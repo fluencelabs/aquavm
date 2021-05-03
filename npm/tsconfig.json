@@ -1,5 +1,8 @@
 {
     "compilerOptions": {
+        "typeRoots": [
+            "./node_modules/@types",
+        ],
         "lib": [
             "es2017",
             "dom"
@@ -28,7 +31,6 @@
         "node_modules",
         "dist",
         "bundle",
-        "src/__test__"
     ],
     "include": [
         "src"
