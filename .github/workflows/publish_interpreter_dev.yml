@@ -140,12 +140,6 @@ jobs:
           node-version: "14"
           registry-url: "https://registry.npmjs.org"
 
-      - name: testing stuff
-        working-directory: npm
-        run: |
-          ls
-          ls src
-
       - run: npm publish --access public --tag=beta
         working-directory: npm
         env:
