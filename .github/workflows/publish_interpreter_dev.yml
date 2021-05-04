@@ -132,7 +132,7 @@ jobs:
 
       ### Set version to FINAL_VERSION
       - run: yarn version --new-version ${{ env.FINAL_VERSION }} --no-git-tag-version || true
-        working-directory: pkg
+        working-directory: npm
 
       ### Publish to NPM registry
       - uses: actions/setup-node@v1
