@@ -141,9 +141,9 @@ jobs:
           registry-url: "https://registry.npmjs.org"
 
       - name: testing stuff
-      - run: |
-        ls
-        ls src
+        run: |
+          ls
+          ls src
 
       - run: npm publish --access public --tag=beta
         working-directory: npm
