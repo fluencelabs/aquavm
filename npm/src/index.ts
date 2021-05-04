@@ -135,39 +135,32 @@ function newImportObject(
             // prettier-ignore
             __wbg_callserviceimpl_d5849c05cb19df30: (arg0: any, arg1: any, arg2: any, arg3: any, arg4: any, arg5: any, arg6: any, arg7: any, arg8: any) => {
                 let wasm = cfg.exports;
+                let serviceId = getStringFromWasm0(wasm, arg1, arg2);
+                let fnName = getStringFromWasm0(wasm, arg3, arg4);
+                let args = getStringFromWasm0(wasm, arg5, arg6);
+                let tetraplets = getStringFromWasm0(wasm, arg7, arg8);
+                
+                let argsObject;
+                let tetrapletsObject: SecurityTetraplet[][];
+                let serviceResult;
                 try {
-                    let serviceId = getStringFromWasm0(wasm, arg1, arg2);
-                    let fnName = getStringFromWasm0(wasm, arg3, arg4);
-                    let args = getStringFromWasm0(wasm, arg5, arg6);
-                    let tetraplets = getStringFromWasm0(wasm, arg7, arg8);
-                    
-                    let argsObject;
-                    let tetrapletsObject: SecurityTetraplet[][];
-                    let serviceResult;
-                    try {
-                        argsObject = JSON.parse(args);
-                        if (!Array.isArray(argsObject)) {
-                            throw new Error('args is not an array');
-                        }
-
-                        tetrapletsObject = JSON.parse(tetraplets);
-                        serviceResult = particleHandler(serviceId, fnName, argsObject, tetrapletsObject);
-                    } catch (err) {
-                        logWasm(4, 'Cannot parse arguments: ' + JSON.stringify(err));
-                        serviceResult = {
-                            result: JSON.stringify('Cannot parse arguments: ' + JSON.stringify(err)),
-                            ret_code: 1,
-                        };
+                    argsObject = JSON.parse(args);
+                    if (!Array.isArray(argsObject)) {
+                        throw new Error('args is not an array');
                     }
 
-                    let resultStr = JSON.stringify(serviceResult);
-                    return_call_service_result(wasm, resultStr, arg0);
-                } finally {
-                    free(wasm, arg1, arg2);
-                    free(wasm, arg3, arg4);
-                    free(wasm, arg5, arg6);
-                    free(wasm, arg7, arg8);
+                    tetrapletsObject = JSON.parse(tetraplets);
+                    serviceResult = particleHandler(serviceId, fnName, argsObject, tetrapletsObject);
+                } catch (err) {
+                    logWasm(4, 'Cannot parse arguments: ' + JSON.stringify(err));
+                    serviceResult = {
+                        result: JSON.stringify('Cannot parse arguments: ' + JSON.stringify(err)),
+                        ret_code: 1,
+                    };
                 }
+
+                let resultStr = JSON.stringify(serviceResult);
+                return_call_service_result(wasm, resultStr, arg0);
             },
             __wbg_getcurrentpeeridimpl_20a1d2447bdbf3bc: (arg0: any) => {
                 let wasm = cfg.exports;
