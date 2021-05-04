@@ -5,7 +5,8 @@
 
 (
     cd ..
-    wasm-pack build ./interpreter --no-typescript --release -d ./npm/wasm
+    mkdir -p ./npm/wasm
+    wasm-pack build ./interpreter --no-typescript --release -d ../npm/wasm
 )
 
 cat << EOF > ./src/wasm.js
