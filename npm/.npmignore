@@ -1,0 +1,7 @@
+dist
+node_modules
+wasm
+*.tgz
+
+# this file is auto-generated, but MUST be included in the package
+!src/wasm.js

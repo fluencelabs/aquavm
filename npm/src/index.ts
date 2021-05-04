@@ -174,7 +174,7 @@ function newImportObject(
     };
 }
 
-export class AquamarineInterpreter {
+export class AirInterpreter {
     private wasmWrapper;
     private logLevel: LogLevel;
 
@@ -193,7 +193,7 @@ export class AquamarineInterpreter {
         });
 
         const instance = await interpreterInstance(cfg, logWasm);
-        const res = new AquamarineInterpreter(instance);
+        const res = new AirInterpreter(instance);
         res.logLevel = logLevel;
         return res;
     }

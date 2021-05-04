@@ -1,9 +1,9 @@
-import { AquamarineInterpreter, ParticleHandler } from '..';
+import { AirInterpreter, ParticleHandler } from '..';
 
 const vmPeerId = '12D3KooWNzutuy8WHXDKFqFsATvCR6j9cj2FijYbnd47geRKaQZS';
 
 const createTestIntepreter = async (handler: ParticleHandler) => {
-    return AquamarineInterpreter.create(handler, vmPeerId, 'trace', (level, message) => {
+    return AirInterpreter.create(handler, vmPeerId, 'trace', (level, message) => {
         switch (level) {
             case 0:
             case 1:
