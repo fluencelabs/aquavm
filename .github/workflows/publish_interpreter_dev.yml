@@ -141,6 +141,7 @@ jobs:
           registry-url: "https://registry.npmjs.org"
 
       - name: testing stuff
+        working-directory: npm
         run: |
           ls
           ls src
