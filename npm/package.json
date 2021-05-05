@@ -1,0 +1,27 @@
+{
+    "name": "@fluencelabs/air-interpreter",
+    "description": "Aqua intermediary representation interpreter",
+    "version": "0.0.0",
+    "main": "./dist/index.js",
+    "typings": "./dist/index.d.ts",
+    "repository": "https://github.com/fluencelabs/air",
+    "author": "Fluence Labs",
+    "license": "Apache 2.0",
+    "files": [
+        "dist/*"
+    ],
+    "scripts": {
+        "build": "tsc",
+        "test": "jest"
+    },
+    "private": false,
+    "dependencies": {
+        "base64-js": "1.5.1"
+    },
+    "devDependencies": {
+        "@types/jest": "^26.0.23",
+        "jest": "^26.6.3",
+        "ts-jest": "^26.5.5",
+        "typescript": "^3.9.5"
+    }
+}
