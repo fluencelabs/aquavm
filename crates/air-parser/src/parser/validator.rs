@@ -84,7 +84,7 @@ impl<'i> VariableValidator<'i> {
         self.unresolved_iterables.insert(iterable_name, span);
     }
 
-    pub(super) fn finalize<'err>(&self) -> Vec<ErrorRecovery<usize, Token<'i>, ParserError>> {
+    pub(super) fn finalize(&self) -> Vec<ErrorRecovery<usize, Token<'i>, ParserError>> {
         let mut errors = Vec::new();
         for (name, span) in self.unresolved_variables.iter() {
             if !self.contains_variable(name, *span) {
