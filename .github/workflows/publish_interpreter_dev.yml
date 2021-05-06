@@ -71,7 +71,7 @@ jobs:
           yarn global add semver
           PATH="$(yarn global bin):$PATH"
 
-          INTERPRETER_CARGO_TOML="interpreter/Cargo.toml"
+          INTERPRETER_CARGO_TOML="air-interpreter/Cargo.toml"
           CARGO_TOML="crates/air-interpreter-wasm/Cargo.toml"
 
           # sanitize branch name so it can be used as a semver suffix (replace [^0-9a-zA-Z-] with hyphen)
@@ -81,7 +81,7 @@ jobs:
 
           # get package name from Cargo.toml
           PKG_NAME="$(toml get "$CARGO_TOML" package.name | tr -d \")"
-          JS_PKG_NAME="@fluencelabs/aquamarine-interpreter"
+          JS_PKG_NAME="@fluencelabs/air-interpreter"
 
           ### NPM
           # take all versions from npm and replace single quotes with double quotes

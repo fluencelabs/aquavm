@@ -68,7 +68,7 @@ jobs:
           CARGO_TOML="crates/air-interpreter-wasm/Cargo.toml"
           # get package name from Cargo.toml
           RS_PKG_NAME="$(toml get "$CARGO_TOML" package.name | tr -d \")"
-          JS_PKG_NAME="@fluencelabs/aquamarine-interpreter"
+          JS_PKG_NAME="@fluencelabs/air-interpreter"
 
           # get version from Cargo.toml
           STEPPER_RUST_VERSION="$(toml get "$INTERPRETER_CARGO_TOML" package.version | tr -d \")"
