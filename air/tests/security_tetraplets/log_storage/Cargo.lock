@@ -12,6 +12,32 @@ dependencies = [
 ]
 
 [[package]]
+name = "air"
+version = "0.9.0"
+dependencies = [
+ "air-interpreter-interface",
+ "air-parser",
+ "boolinator",
+ "fluence",
+ "jsonpath_lib-fl",
+ "log",
+ "polyplets",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "wasm-bindgen",
+]
+
+[[package]]
+name = "air-interpreter-interface"
+version = "0.5.0"
+dependencies = [
+ "fluence",
+ "fluence-it-types",
+ "serde",
+]
+
+[[package]]
 name = "air-parser"
 version = "0.7.0"
 dependencies = [
@@ -25,15 +51,6 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror",
-]
-
-[[package]]
-name = "aqua-interpreter-interface"
-version = "0.5.0"
-dependencies = [
- "fluence",
- "fluence-it-types",
- "serde",
 ]
 
 [[package]]
@@ -371,23 +388,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "air"
-version = "0.9.0"
-dependencies = [
- "air-parser",
- "aqua-interpreter-interface",
- "boolinator",
- "fluence",
- "jsonpath_lib-fl",
- "log",
- "polyplets",
- "serde",
- "serde_json",
- "thiserror",
- "wasm-bindgen",
-]
-
-[[package]]
 name = "it-to-bytes"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -478,8 +478,8 @@ dependencies = [
 name = "log_storage"
 version = "0.1.0"
 dependencies = [
- "fluence",
  "air",
+ "fluence",
 ]
 
 [[package]]

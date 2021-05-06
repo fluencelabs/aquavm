@@ -1,8 +1,8 @@
 
 New-Item -ItemType Directory -Force -Path ./wasm
-wasm-pack build ../interpreter --no-typescript --release -d ../npm/wasm
+wasm-pack build ../../air-interpreter --no-typescript --release -d wasm
 
-$base64string = [Convert]::ToBase64String([IO.File]::ReadAllBytes('./npm/wasm/air_interpreter_client_bg.wasm'))
+$base64string = [Convert]::ToBase64String([IO.File]::ReadAllBytes('./wasm/air_interpreter_client_bg.wasm'))
 
 $data = "// auto-generated
 

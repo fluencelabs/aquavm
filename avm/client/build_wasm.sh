@@ -4,9 +4,9 @@
 ## > curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
 (
-    cd ..
-    mkdir -p ./npm/wasm
-    wasm-pack build ./interpreter --no-typescript --release -d ../npm/wasm
+    cd ../..;
+    mkdir -p ./avm/client/wasm || exit;
+    wasm-pack build ./air-interpreter --no-typescript --release -d ../avm/client/wasm
 )
 
 cat << EOF > ./src/wasm.js
