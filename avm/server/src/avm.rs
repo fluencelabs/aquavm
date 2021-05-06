@@ -127,7 +127,7 @@ impl AVM {
                 .call_with_ivalues(&self.wasm_filename, "invoke", &args, <_>::default())?;
 
         let outcome =
-            InterpreterOutcome::from_ivalues(result).map_err(AVMError::StepperResultDeError)?;
+            InterpreterOutcome::from_ivalues(result).map_err(AVMError::InterpreterResultDeError)?;
 
         // persist resulted data
         std::fs::write(&prev_data_path, &outcome.data)
@@ -265,7 +265,7 @@ impl AVM {
                 .call_with_ivalues(&self.wasm_filename, "invoke", &args, <_>::default())?;
 
         let outcome =
-            InterpreterOutcome::from_ivalues(result).map_err(AVMError::StepperResultDeError)?;
+            InterpreterOutcome::from_ivalues(result).map_err(AVMError::InterpreterResultDeError)?;
 
         Ok(outcome)
     }

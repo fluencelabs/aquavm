@@ -79,7 +79,7 @@ name = "auth_module"
 version = "0.1.0"
 dependencies = [
  "fluence",
- "interpreter-lib",
+ "air",
 ]
 
 [[package]]
@@ -379,7 +379,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "interpreter-lib"
+name = "air"
 version = "0.9.0"
 dependencies = [
  "air-parser",

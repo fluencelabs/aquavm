@@ -9,7 +9,7 @@ name = "auth_module"
 path = "src/main.rs"
 
 [dependencies]
-interpreter-lib = { path = "../../../../interpreter-lib" }
+air = { path = "../../../../air" }
 fluence = "0.6.1"
 
 [workspace]

@@ -153,7 +153,7 @@ jobs:
         run: |
           PATH="~/.cargo/bin:$PATH"
           toml set Cargo.toml package.version "${{ env.FINAL_VERSION }}" | sponge Cargo.toml
-        working-directory: interpreter-lib
+        working-directory: air
 
       - name: Build air_interpreter_server.wasm for node
         run: fce build -p air_interpreter_server --release --features fce

@@ -29,7 +29,7 @@ pub enum AVMError {
 
     /// AIR interpreter result deserialization errors.
     #[error("{0}")]
-    StepperResultDeError(String),
+    InterpreterResultDeError(String),
 
     /// I/O errors while persisting resulted data.
     #[error("an error occurred while saving prev data {0:?} by {1:?} path")]
