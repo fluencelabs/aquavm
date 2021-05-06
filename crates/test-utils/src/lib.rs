@@ -25,28 +25,25 @@
     unreachable_patterns
 )]
 
-pub use aquamarine_vm::ne_vec::NEVec;
-pub use aquamarine_vm::AquamarineVM;
-pub use aquamarine_vm::AquamarineVMConfig;
-pub use aquamarine_vm::AquamarineVMError;
-pub use aquamarine_vm::CallServiceClosure;
-pub use aquamarine_vm::IType;
-pub use aquamarine_vm::IValue;
-pub use aquamarine_vm::InterpreterOutcome;
-pub use aquamarine_vm::ParticleParameters;
+pub use avm_server::ne_vec::NEVec;
+pub use avm_server::AVMConfig;
+pub use avm_server::AVMError;
+pub use avm_server::CallServiceClosure;
+pub use avm_server::IType;
+pub use avm_server::IValue;
+pub use avm_server::InterpreterOutcome;
+pub use avm_server::ParticleParameters;
+pub use avm_server::AVM;
 
 use std::collections::HashMap;
 use std::path::PathBuf;
 
 type JValue = serde_json::Value;
 
-pub fn create_aqua_vm(
-    call_service: CallServiceClosure,
-    current_peer_id: impl Into<String>,
-) -> AquamarineVM {
+pub fn create_aqua_vm(call_service: CallServiceClosure, current_peer_id: impl Into<String>) -> AVM {
     let tmp_dir = std::env::temp_dir();
 
-    let config = AquamarineVMConfig {
+    let config = AVMConfig {
         aquamarine_wasm_path: PathBuf::from("../target/wasm32-wasi/debug/aquamarine.wasm"),
         call_service,
         current_peer_id: current_peer_id.into(),
@@ -54,7 +51,7 @@ pub fn create_aqua_vm(
         logging_mask: i32::max_value(),
     };
 
-    AquamarineVM::new(config).expect("vm should be created")
+    AVM::new(config).expect("vm should be created")
 }
 
 pub fn unit_call_service() -> CallServiceClosure {

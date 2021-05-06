@@ -16,25 +16,31 @@
 
 use fluence_faas::FaaSError;
 
+use thiserror::Error as ThisError;
+
 use std::io::Error as IOError;
-use std::error::Error;
 use std::path::PathBuf;
 
-#[derive(Debug)]
-pub enum AquamarineVMError {
+#[derive(Debug, ThisError)]
+pub enum AVMError {
     /// FaaS errors.
-    FaaSError(FaaSError),
+    #[error("{0}")]
+    FaaSError(#[from] FaaSError),
 
     /// Aquamarine stepper result deserialization errors.
+    #[error("{0}")]
     StepperResultDeError(String),
 
     /// I/O errors while persisting resulted data.
+    #[error("an error occurred while saving prev data {0:?} by {1:?} path")]
     PersistDataError(IOError, PathBuf),
 
     /// Errors related to particle_data_store path from supplied config.
+    #[error("an error occurred while creating data storage {0:?} by {1:?} path")]
     InvalidDataStorePath(IOError, PathBuf),
 
     /// Specified path to AIR interpreter .wasm file was invalid
+    #[error("path to AIR interpreter .wasm ({invalid_path:?}) is invalid: {reason}; IO Error: {io_error:?}")]
     InvalidAquamarinePath {
         invalid_path: PathBuf,
         io_error: Option<IOError>,
@@ -42,44 +48,7 @@ pub enum AquamarineVMError {
     },
 }
 
-impl Error for AquamarineVMError {}
-
-impl std::fmt::Display for AquamarineVMError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
-        match self {
-            AquamarineVMError::FaaSError(err) => write!(f, "{}", err),
-            AquamarineVMError::StepperResultDeError(err_msg) => write!(f, "{}", err_msg),
-            AquamarineVMError::PersistDataError(err, path) => write!(
-                f,
-                "an error occurred while saving prev data {:?} by {:?} path",
-                err, path
-            ),
-            AquamarineVMError::InvalidDataStorePath(err, path) => write!(
-                f,
-                "an error occurred while creating data storage {:?} by {:?} path",
-                err, path
-            ),
-
-            AquamarineVMError::InvalidAquamarinePath {
-                invalid_path,
-                io_error,
-                reason,
-            } => write!(
-                f,
-                "path to AIR interpreter .wasm ({:?}) is invalid: {}; IO Error: {:?}",
-                invalid_path, reason, io_error
-            ),
-        }
-    }
-}
-
-impl From<FaaSError> for AquamarineVMError {
-    fn from(err: FaaSError) -> Self {
-        AquamarineVMError::FaaSError(err)
-    }
-}
-
-impl From<std::convert::Infallible> for AquamarineVMError {
+impl From<std::convert::Infallible> for AVMError {
     fn from(_: std::convert::Infallible) -> Self {
         unreachable!()
     }

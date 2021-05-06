@@ -62,9 +62,9 @@ mod tests {
     use crate::contexts::execution_trace::ExecutionTrace;
     use crate::JValue;
 
-    use aqua_test_utils::call_vm;
-    use aqua_test_utils::create_aqua_vm;
-    use aqua_test_utils::fallible_call_service;
+    use air_test_utils::call_vm;
+    use air_test_utils::create_aqua_vm;
+    use air_test_utils::fallible_call_service;
 
     use std::rc::Rc;
 
@@ -117,7 +117,7 @@ mod tests {
     fn xor_var_not_found() {
         use crate::contexts::execution_trace::CallResult::*;
         use crate::contexts::execution_trace::ExecutedState::*;
-        use aqua_test_utils::echo_string_call_service;
+        use air_test_utils::echo_string_call_service;
 
         let local_peer_id = "local_peer_id";
         let mut vm = create_aqua_vm(echo_string_call_service(), local_peer_id);
@@ -144,7 +144,7 @@ mod tests {
     fn xor_multiple_variables_found() {
         use crate::contexts::execution_trace::CallResult::*;
         use crate::contexts::execution_trace::ExecutedState::*;
-        use aqua_test_utils::echo_string_call_service;
+        use air_test_utils::echo_string_call_service;
 
         let set_variables_peer_id = "set_variables_peer_id";
         let mut set_variables_vm = create_aqua_vm(echo_string_call_service(), set_variables_peer_id);
@@ -232,7 +232,7 @@ mod tests {
     fn last_error_with_xor() {
         use crate::contexts::execution_trace::CallResult::*;
         use crate::contexts::execution_trace::ExecutedState::*;
-        use aqua_test_utils::echo_string_call_service;
+        use air_test_utils::echo_string_call_service;
 
         let faillible_peer_id = "failible_peer_id";
         let mut faillible_vm = create_aqua_vm(fallible_call_service("service_id_1"), faillible_peer_id);

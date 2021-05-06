@@ -20,7 +20,7 @@ use crate::execution::ExecutableInstruction;
 use crate::preparation::prepare;
 use crate::preparation::PreparationDescriptor;
 
-use aqua_interpreter_interface::InterpreterOutcome;
+use air_interpreter_interface::InterpreterOutcome;
 
 pub fn execute_aqua(init_peer_id: String, aqua: String, prev_data: Vec<u8>, data: Vec<u8>) -> InterpreterOutcome {
     use std::convert::identity;

@@ -159,13 +159,13 @@ mod tests {
     use crate::contexts::execution_trace::ExecutionTrace;
     use crate::JValue;
 
-    use aqua_test_utils::call_vm;
-    use aqua_test_utils::create_aqua_vm;
-    use aqua_test_utils::echo_number_call_service;
-    use aqua_test_utils::echo_string_call_service;
-    use aqua_test_utils::set_variable_call_service;
-    use aqua_test_utils::AquamarineVMError;
-    use aqua_test_utils::InterpreterOutcome;
+    use air_test_utils::call_vm;
+    use air_test_utils::create_aqua_vm;
+    use air_test_utils::echo_number_call_service;
+    use air_test_utils::echo_string_call_service;
+    use air_test_utils::set_variable_call_service;
+    use air_test_utils::AVMError;
+    use air_test_utils::InterpreterOutcome;
 
     use serde_json::json;
     use std::rc::Rc;
@@ -499,7 +499,7 @@ mod tests {
         use crate::contexts::execution_trace::CallResult::*;
         use crate::contexts::execution_trace::ExecutedState::*;
 
-        fn execute_script(script: String) -> Result<InterpreterOutcome, AquamarineVMError> {
+        fn execute_script(script: String) -> Result<InterpreterOutcome, AVMError> {
             let mut set_variables_vm = create_aqua_vm(set_variable_call_service(r#"["1","2"]"#), "set_variable");
             let mut vm_a = create_aqua_vm(echo_string_call_service(), "A");
             let mut vm_b = create_aqua_vm(echo_string_call_service(), "B");

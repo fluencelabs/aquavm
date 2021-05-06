@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-use aqua_test_utils::call_vm;
-use aqua_test_utils::create_aqua_vm;
-use aqua_test_utils::set_variables_call_service;
+use air_test_utils::call_vm;
+use air_test_utils::create_aqua_vm;
+use air_test_utils::set_variables_call_service;
 
 use serde_json::json;
 
@@ -38,15 +38,15 @@ fn network_explore() {
     let client_1_id = String::from("12D3KooWFX27Tg3cNJkFk3W2iapnyRhwfwdQ4ZiTucsy1Go3MSGL");
     let client_2_id = String::from("12D3KooWGNJoFmCNEHq8NpunB4pZSUh9UBHM53W1NwE7gM8L3RjZ");
     let relay_call_service =
-        aqua_test_utils::set_variable_call_service(format!(r#"["{}", "{}"]"#, client_1_id, client_2_id));
+        air_test_utils::set_variable_call_service(format!(r#"["{}", "{}"]"#, client_1_id, client_2_id));
     let mut relay = create_aqua_vm(relay_call_service, relay_id.clone());
 
     let client_1_call_service =
-        aqua_test_utils::set_variable_call_service(format!(r#"["{}", "{}"]"#, relay_id, client_2_id));
+        air_test_utils::set_variable_call_service(format!(r#"["{}", "{}"]"#, relay_id, client_2_id));
     let mut client_1 = create_aqua_vm(client_1_call_service, client_1_id.clone());
 
     let client_2_call_service =
-        aqua_test_utils::set_variable_call_service(format!(r#"["{}", "{}"]"#, relay_id, client_1_id));
+        air_test_utils::set_variable_call_service(format!(r#"["{}", "{}"]"#, relay_id, client_1_id));
     let mut client_2 = create_aqua_vm(client_2_call_service, client_2_id.clone());
 
     let script = include_str!("./scripts/network_explore.clj");

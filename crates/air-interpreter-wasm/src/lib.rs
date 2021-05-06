@@ -1,4 +1,4 @@
-pub const INTERPRETER_WASM: &'static [u8] = include_bytes!("../aquamarine.wasm");
+pub const INTERPRETER_WASM: &'static [u8] = include_bytes!("../air_interpreter_server.wasm");
 
 pub mod build_info {
     include!(concat!(env!("OUT_DIR"), "/built.rs"));

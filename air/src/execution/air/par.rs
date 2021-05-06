@@ -166,9 +166,9 @@ fn update_par_state(
 
 #[cfg(test)]
 mod tests {
-    use aqua_test_utils::call_vm;
-    use aqua_test_utils::create_aqua_vm;
-    use aqua_test_utils::unit_call_service;
+    use air_test_utils::call_vm;
+    use air_test_utils::create_aqua_vm;
+    use air_test_utils::unit_call_service;
 
     #[test]
     fn par_remote_remote() {

@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-use crate::{Result, IType, CallServiceClosure};
-use crate::AquamarineVMError;
-use crate::config::AquamarineVMConfig;
+use crate::config::AVMConfig;
+use crate::AVMError;
+use crate::{CallServiceClosure, IType, Result};
 
-use fluence_faas::{FaaSConfig, HostExportedFunc, ModuleDescriptor};
+use crate::InterpreterOutcome;
 use fluence_faas::FluenceFaaS;
 use fluence_faas::HostImportDescriptor;
 use fluence_faas::IValue;
-use crate::InterpreterOutcome;
+use fluence_faas::{FaaSConfig, HostExportedFunc, ModuleDescriptor};
 
-use std::path::PathBuf;
+use parking_lot::Mutex;
 use std::ops::{Deref, DerefMut};
+use std::path::PathBuf;
 use std::sync::Arc;
-use parking_lot::{Mutex};
 
 const CALL_SERVICE_NAME: &str = "call_service";
 const CURRENT_PEER_ID_ENV_NAME: &str = "CURRENT_PEER_ID";
@@ -58,7 +58,7 @@ pub struct ParticleParameters {
     pub particle_id: String,
 }
 
-pub struct AquamarineVM {
+pub struct AVM {
     faas: SendSafeFaaS,
     particle_data_store: PathBuf,
     /// file name of the AIR interpreter .wasm
@@ -67,10 +67,10 @@ pub struct AquamarineVM {
     current_particle: Arc<Mutex<ParticleParameters>>,
 }
 
-impl AquamarineVM {
+impl AVM {
     /// Create AquamarineVM with provided config.
-    pub fn new(config: AquamarineVMConfig) -> Result<Self> {
-        use AquamarineVMError::InvalidDataStorePath;
+    pub fn new(config: AVMConfig) -> Result<Self> {
+        use AVMError::InvalidDataStorePath;
 
         let current_particle: Arc<Mutex<ParticleParameters>> = <_>::default();
         let call_service = call_service_descriptor(current_particle.clone(), config.call_service);
@@ -106,7 +106,7 @@ impl AquamarineVM {
         data: impl Into<Vec<u8>>,
         particle_id: impl Into<String>,
     ) -> Result<InterpreterOutcome> {
-        use AquamarineVMError::PersistDataError;
+        use AVMError::PersistDataError;
 
         let particle_id = particle_id.into();
         let init_user_id = init_user_id.into();
@@ -126,8 +126,8 @@ impl AquamarineVM {
             self.faas
                 .call_with_ivalues(&self.wasm_filename, "invoke", &args, <_>::default())?;
 
-        let outcome = InterpreterOutcome::from_ivalues(result)
-            .map_err(AquamarineVMError::StepperResultDeError)?;
+        let outcome =
+            InterpreterOutcome::from_ivalues(result).map_err(AVMError::StepperResultDeError)?;
 
         // persist resulted data
         std::fs::write(&prev_data_path, &outcome.data)
@@ -182,7 +182,7 @@ fn call_service_descriptor(
 /// # Example
 /// For path `/path/to/aquamarine.wasm` result will be `Ok(PathBuf(/path/to), "aquamarine.wasm")`
 fn split_dirname(path: PathBuf) -> Result<(PathBuf, String)> {
-    use AquamarineVMError::InvalidAquamarinePath;
+    use AVMError::InvalidAquamarinePath;
 
     let metadata = path.metadata().map_err(|err| InvalidAquamarinePath {
         invalid_path: path.clone(),
@@ -250,7 +250,7 @@ fn make_faas_config(
 
 // This API is intended for testing purposes
 #[cfg(feature = "raw-aquamarine-vm-api")]
-impl AquamarineVM {
+impl AVM {
     pub fn call_with_prev_data(
         &mut self,
         init_user_id: impl Into<String>,
@@ -264,8 +264,8 @@ impl AquamarineVM {
             self.faas
                 .call_with_ivalues(&self.wasm_filename, "invoke", &args, <_>::default())?;
 
-        let outcome = InterpreterOutcome::from_ivalues(result)
-            .map_err(AquamarineVMError::StepperResultDeError)?;
+        let outcome =
+            InterpreterOutcome::from_ivalues(result).map_err(AVMError::StepperResultDeError)?;
 
         Ok(outcome)
     }

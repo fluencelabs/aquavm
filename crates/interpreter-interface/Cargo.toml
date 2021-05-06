@@ -1,13 +1,13 @@
 [package]
-name = "aqua-interpreter-interface"
-description = "Interface of the Aquamarine interpreter"
+name = "air-interpreter-interface"
+description = "Interface of the AIR interpreter"
 version = "0.5.0"
 authors = ["Fluence Labs"]
 edition = "2018"
 license = "Apache-2.0"
 
 [lib]
-name = "aqua_interpreter_interface"
+name = "air_interpreter_interface"
 path = "src/lib.rs"
 
 [dependencies]

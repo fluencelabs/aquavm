@@ -15,9 +15,9 @@ dependencies = [
 name = "air"
 version = "0.9.0"
 dependencies = [
+ "air-interpreter-interface",
  "air-parser",
- "aqua-interpreter-interface 0.5.0",
- "aqua-test-utils",
+ "air-test-utils",
  "boolinator",
  "criterion",
  "csv",
@@ -49,6 +49,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "air-interpreter-interface"
+version = "0.5.0"
+dependencies = [
+ "fluence",
+ "fluence-it-types",
+ "serde",
+]
+
+[[package]]
 name = "air-parser"
 version = "0.7.0"
 dependencies = [
@@ -67,6 +76,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "air-test-utils"
+version = "0.1.0"
+dependencies = [
+ "avm-server",
+ "fluence",
+ "serde_json",
+]
+
+[[package]]
 name = "ansi_term"
 version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -82,54 +100,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "28b2cd92db5cbd74e8e5028f7e27dd7aa3090e89e4f2a197cc7c8dfb69c7063b"
 
 [[package]]
-name = "aqua-interpreter-interface"
-version = "0.5.0"
-dependencies = [
- "fluence",
- "fluence-it-types",
- "serde",
-]
-
-[[package]]
-name = "aqua-interpreter-interface"
-version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ddaec44ed96baa11fbbefcad1a25c9bd3aca704398cb71d5b35eb879c9f2ac52"
-dependencies = [
- "fluence",
- "fluence-it-types",
- "serde",
-]
-
-[[package]]
 name = "aqua-test-module"
 version = "0.1.0"
 dependencies = [
  "fluence",
-]
-
-[[package]]
-name = "aqua-test-utils"
-version = "0.1.0"
-dependencies = [
- "aquamarine-vm",
- "fluence",
- "serde_json",
-]
-
-[[package]]
-name = "aquamarine-vm"
-version = "0.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "847f21c580fbb315673c1601a87101d5a1bcd4755cee6d5a0ed39ad92544cd44"
-dependencies = [
- "aqua-interpreter-interface 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "fluence-faas",
- "log",
- "maplit",
- "parking_lot 0.11.1",
- "serde",
- "serde_json",
 ]
 
 [[package]]
@@ -180,13 +154,14 @@ checksum = "cdb031dd78e28731d87d56cc8ffef4a8f36ca26c38fe2de700543e627f8a464a"
 name = "avm-server"
 version = "0.7.0"
 dependencies = [
- "aqua-interpreter-interface 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "air-interpreter-interface",
  "fluence-faas",
  "log",
  "maplit",
  "parking_lot 0.11.1",
  "serde",
  "serde_json",
+ "thiserror",
 ]
 
 [[package]]

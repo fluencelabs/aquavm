@@ -24,26 +24,26 @@
     unreachable_patterns
 )]
 
-mod aquamarine_stepper_vm;
+mod avm;
 mod config;
 mod errors;
 
-pub use aquamarine_stepper_vm::AquamarineVM;
-pub use aquamarine_stepper_vm::ParticleParameters;
+pub use avm::ParticleParameters;
+pub use avm::AVM;
+pub use config::AVMConfig;
 pub use config::CallServiceClosure;
-pub use config::AquamarineVMConfig;
-pub use errors::AquamarineVMError;
+pub use errors::AVMError;
 
 // Re-exports
+pub use fluence_faas::ne_vec;
+pub use fluence_faas::Ctx;
 pub use fluence_faas::HostExportedFunc;
 pub use fluence_faas::HostImportDescriptor;
 pub use fluence_faas::HostImportError;
-pub use fluence_faas::IValue;
 pub use fluence_faas::IType;
-pub use fluence_faas::ne_vec;
-pub use fluence_faas::Ctx;
+pub use fluence_faas::IValue;
 
-pub use aqua_interpreter_interface::InterpreterOutcome;
-pub use aqua_interpreter_interface::INTERPRETER_SUCCESS;
+pub use air_interpreter_interface::InterpreterOutcome;
+pub use air_interpreter_interface::INTERPRETER_SUCCESS;
 
-pub(crate) type Result<T> = std::result::Result<T, AquamarineVMError>;
+pub(crate) type Result<T> = std::result::Result<T, AVMError>;

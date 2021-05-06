@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-use aqua_test_utils::call_vm;
-use aqua_test_utils::create_aqua_vm;
-use aqua_test_utils::CallServiceClosure;
-use aqua_test_utils::IValue;
-use aqua_test_utils::NEVec;
 use air::ResolvedTriplet;
 use air::SecurityTetraplet;
+use air_test_utils::call_vm;
+use air_test_utils::create_aqua_vm;
+use air_test_utils::CallServiceClosure;
+use air_test_utils::IValue;
+use air_test_utils::NEVec;
 
 use std::cell::RefCell;
 use std::rc::Rc;

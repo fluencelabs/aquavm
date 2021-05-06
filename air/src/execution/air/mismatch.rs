@@ -46,10 +46,10 @@ mod tests {
     use crate::contexts::execution_trace::ExecutionTrace;
     use crate::JValue;
 
-    use aqua_test_utils::call_vm;
-    use aqua_test_utils::create_aqua_vm;
-    use aqua_test_utils::echo_string_call_service;
-    use aqua_test_utils::set_variable_call_service;
+    use air_test_utils::call_vm;
+    use air_test_utils::create_aqua_vm;
+    use air_test_utils::echo_string_call_service;
+    use air_test_utils::set_variable_call_service;
 
     use std::rc::Rc;
 

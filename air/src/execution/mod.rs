@@ -19,8 +19,8 @@ mod boxed_value;
 mod errors;
 mod utils;
 
-pub(super) use air::ExecutableInstruction;
-pub(super) use air::FoldState;
+pub(super) use self::air::ExecutableInstruction;
+pub(super) use self::air::FoldState;
 pub(super) use errors::ExecutionError;
 
 use std::rc::Rc;

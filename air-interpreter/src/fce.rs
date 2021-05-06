@@ -29,9 +29,9 @@
 mod ast;
 mod logger;
 
-use fluence::fce;
 use air::execute_aqua;
 use air::InterpreterOutcome;
+use fluence::fce;
 
 pub fn main() {
     logger::init_logger();

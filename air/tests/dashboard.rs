@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-use aqua_test_utils::call_vm;
-use aqua_test_utils::create_aqua_vm;
-use aqua_test_utils::IValue;
-use aqua_test_utils::NEVec;
-use aqua_test_utils::{AquamarineVM, CallServiceClosure};
+use air_test_utils::call_vm;
+use air_test_utils::create_aqua_vm;
+use air_test_utils::IValue;
+use air_test_utils::NEVec;
+use air_test_utils::{CallServiceClosure, AVM};
 
 use std::cell::RefCell;
 use std::collections::HashSet;
@@ -175,7 +175,7 @@ fn create_peer_host_function(peer_id: String, known_peer_ids: Vec<String>) -> Ca
 }
 
 struct AquaVMState {
-    vm: AquamarineVM,
+    vm: AVM,
     peer_id: String,
     prev_result: Vec<u8>,
 }

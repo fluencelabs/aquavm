@@ -1,15 +1,15 @@
 [package]
-name = "aqua-test-utils"
+name = "air-test-utils"
 version = "0.1.0"
 authors = ["Fluence Labs"]
 edition = "2018"
 license = "Apache-2.0"
 
 [lib]
-name = "aqua_test_utils"
+name = "air_test_utils"
 path = "src/lib.rs"
 
 [dependencies]
 fluence = "0.6.1"
-aquamarine-vm = { version = "0.7.0", features = ["raw-aquamarine-vm-api"] }
+avm-server = { path = "../../avm/server", features = ["raw-aquamarine-vm-api"] }
 serde_json = "1.0.56"

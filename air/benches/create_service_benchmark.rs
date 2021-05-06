@@ -1,11 +1,11 @@
-use aqua_test_utils::create_aqua_vm;
-use aqua_test_utils::set_variables_call_service;
-use aqua_test_utils::AquamarineVM;
-use aqua_test_utils::AquamarineVMError;
-use aqua_test_utils::CallServiceClosure;
-use aqua_test_utils::IValue;
-use aqua_test_utils::InterpreterOutcome;
-use aqua_test_utils::NEVec;
+use air_test_utils::create_aqua_vm;
+use air_test_utils::set_variables_call_service;
+use air_test_utils::AVMError;
+use air_test_utils::CallServiceClosure;
+use air_test_utils::IValue;
+use air_test_utils::InterpreterOutcome;
+use air_test_utils::NEVec;
+use air_test_utils::AVM;
 
 use serde_json::json;
 
@@ -15,7 +15,7 @@ use criterion::Criterion;
 
 use std::cell::RefCell;
 
-thread_local!(static VM: RefCell<AquamarineVM> = RefCell::new({
+thread_local!(static VM: RefCell<AVM> = RefCell::new({
     let add_module_response = String::from("add_module response");
     let add_blueprint_response = String::from("add_blueprint response");
     let create_response = String::from("create response");
@@ -41,7 +41,7 @@ thread_local!(static VM: RefCell<AquamarineVM> = RefCell::new({
     create_aqua_vm(call_service, "A")
 }));
 
-thread_local!(static SET_VARIABLES_VM: RefCell<AquamarineVM> = RefCell::new({
+thread_local!(static SET_VARIABLES_VM: RefCell<AVM> = RefCell::new({
     let module = "greeting";
     let module_config = json!(
         {
@@ -68,7 +68,7 @@ thread_local!(static SET_VARIABLES_VM: RefCell<AquamarineVM> = RefCell::new({
     create_aqua_vm(set_variables_call_service(variables_mapping), "set_variables")
 }));
 
-fn create_service_benchmark() -> Result<InterpreterOutcome, AquamarineVMError> {
+fn create_service_benchmark() -> Result<InterpreterOutcome, AVMError> {
     let script = String::from(
         r#"
         (seq 

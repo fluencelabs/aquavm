@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-use std::path::PathBuf;
-
-use crate::aquamarine_stepper_vm::ParticleParameters;
+use crate::avm::ParticleParameters;
 use crate::IValue;
+
+use std::path::PathBuf;
 
 pub type CallServiceClosure =
     Box<dyn Fn(ParticleParameters, Vec<IValue>) -> Option<IValue> + 'static>;
 
 /// Describes behaviour of the Aquamarine VM stepper.
-pub struct AquamarineVMConfig {
+pub struct AVMConfig {
     /// Path to a aquamarine stepper Wasm file.
     pub aquamarine_wasm_path: PathBuf,
 

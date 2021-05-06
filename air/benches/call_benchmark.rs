@@ -1,8 +1,8 @@
-use aqua_test_utils::create_aqua_vm;
-use aqua_test_utils::unit_call_service;
-use aqua_test_utils::AquamarineVM;
-use aqua_test_utils::AquamarineVMError;
-use aqua_test_utils::InterpreterOutcome;
+use air_test_utils::create_aqua_vm;
+use air_test_utils::unit_call_service;
+use air_test_utils::AVMError;
+use air_test_utils::InterpreterOutcome;
+use air_test_utils::AVM;
 
 use criterion::criterion_group;
 use criterion::criterion_main;
@@ -10,7 +10,7 @@ use criterion::Criterion;
 
 use std::cell::RefCell;
 
-thread_local!(static VM: RefCell<AquamarineVM> = RefCell::new(create_aqua_vm(unit_call_service(), "test_peer_id")));
+thread_local!(static VM: RefCell<AVM> = RefCell::new(create_aqua_vm(unit_call_service(), "test_peer_id")));
 thread_local!(static SCRIPT: String = String::from(
         r#"
             (call "test_peer_id" ("local_service_id" "local_fn_name") [] result_name)
@@ -18,7 +18,7 @@ thread_local!(static SCRIPT: String = String::from(
     )
 );
 
-fn current_peer_id_call() -> Result<InterpreterOutcome, AquamarineVMError> {
+fn current_peer_id_call() -> Result<InterpreterOutcome, AVMError> {
     VM.with(|vm| SCRIPT.with(|script| vm.borrow_mut().call_with_prev_data("", script.clone(), "[]", "[]")))
 }
 
