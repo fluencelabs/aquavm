@@ -39,7 +39,7 @@ pub use air_interpreter_interface::INTERPRETER_SUCCESS;
 pub use polyplets::ResolvedTriplet;
 pub use polyplets::SecurityTetraplet;
 
-pub use air::execute_air;
+pub use crate::air::execute_air;
 
 pub mod execution_trace {
     pub use crate::contexts::execution_trace::CallResult;

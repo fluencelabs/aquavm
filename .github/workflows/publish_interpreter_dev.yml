@@ -124,7 +124,7 @@ jobs:
         continue-on-error: true
 
       - name: Build npm package
-        working-directory: npm
+        working-directory: avm/client
         run: |
           ./build_wasm.sh
           npm i
