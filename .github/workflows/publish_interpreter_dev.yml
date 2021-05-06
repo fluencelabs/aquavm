@@ -132,7 +132,7 @@ jobs:
 
       ### Set version to FINAL_VERSION
       - run: yarn version --new-version ${{ env.FINAL_VERSION }} --no-git-tag-version || true
-        working-directory: npm
+        working-directory: avm/client
 
       ### Publish to NPM registry
       - uses: actions/setup-node@v1
@@ -141,7 +141,7 @@ jobs:
           registry-url: "https://registry.npmjs.org"
 
       - run: npm publish --access public --tag=beta
-        working-directory: npm
+        working-directory: avm/client
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
