@@ -30,8 +30,8 @@ type JValue = serde_json::Value;
 
 #[test]
 fn executed_trace_seq_par_call() {
-    use interpreter_lib::execution_trace::CallResult::*;
-    use interpreter_lib::execution_trace::ExecutedState::{self, *};
+    use air::execution_trace::CallResult::*;
+    use air::execution_trace::ExecutedState::{self, *};
 
     let local_peer_id = "local_peer_id";
     let mut vm = create_aqua_vm(unit_call_service(), local_peer_id);
@@ -73,8 +73,8 @@ fn executed_trace_seq_par_call() {
 
 #[test]
 fn executed_trace_par_par_call() {
-    use interpreter_lib::execution_trace::CallResult::*;
-    use interpreter_lib::execution_trace::ExecutedState::{self, *};
+    use air::execution_trace::CallResult::*;
+    use air::execution_trace::ExecutedState::{self, *};
 
     let local_peer_id = "local_peer_id";
     let mut vm = create_aqua_vm(unit_call_service(), local_peer_id);
@@ -118,8 +118,8 @@ fn executed_trace_par_par_call() {
 
 #[test]
 fn executed_trace_seq_seq() {
-    use interpreter_lib::execution_trace::CallResult::*;
-    use interpreter_lib::execution_trace::ExecutedState::{self, *};
+    use air::execution_trace::CallResult::*;
+    use air::execution_trace::ExecutedState::{self, *};
 
     let peer_id_1 = String::from("12D3KooWHk9BjDQBUqnavciRPhAYFvqKBe4ZiPPvde7vDaqgn5er");
     let peer_id_2 = String::from("12D3KooWAzJcYitiZrerycVB4Wryrx22CFKdDGx7c4u31PFdfTbR");
@@ -162,8 +162,8 @@ fn executed_trace_seq_seq() {
 
 #[test]
 fn executed_trace_create_service() {
-    use interpreter_lib::execution_trace::CallResult::*;
-    use interpreter_lib::execution_trace::ExecutedState::{self, *};
+    use air::execution_trace::CallResult::*;
+    use air::execution_trace::ExecutedState::{self, *};
 
     let module = "greeting";
     let module_config = json!(

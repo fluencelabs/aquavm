@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#![allow(improper_ctypes)]
+#![allow(unused_attributes)]
 #![warn(rust_2018_idioms)]
 #![deny(
     dead_code,
@@ -29,20 +29,30 @@
 mod ast;
 mod logger;
 
-use fluence::fce;
-use interpreter_lib::execute_aqua;
-use interpreter_lib::InterpreterOutcome;
+use air::execute_aqua;
 
+use log::LevelFilter;
+use wasm_bindgen::prelude::*;
+
+pub const DEFAULT_LOG_LEVEL: LevelFilter = LevelFilter::Trace;
+
+#[wasm_bindgen(start)]
 pub fn main() {
     logger::init_logger();
 }
 
-#[fce]
-pub fn invoke(init_peer_id: String, aqua: String, prev_data: Vec<u8>, data: Vec<u8>) -> InterpreterOutcome {
-    execute_aqua(init_peer_id, aqua, prev_data, data)
+#[wasm_bindgen]
+pub fn invoke(init_peer_id: String, aqua: String, prev_data: Vec<u8>, data: Vec<u8>, log_level: &str) -> String {
+    use std::str::FromStr;
+
+    let log_level = log::LevelFilter::from_str(log_level).unwrap_or(DEFAULT_LOG_LEVEL);
+    log::set_max_level(log_level);
+
+    let outcome = execute_aqua(init_peer_id, aqua, prev_data, data);
+    serde_json::to_string(&outcome).expect("Cannot parse InterpreterOutcome")
 }
 
-#[fce]
+#[wasm_bindgen]
 pub fn ast(script: String) -> String {
     ast::ast(script)
 }

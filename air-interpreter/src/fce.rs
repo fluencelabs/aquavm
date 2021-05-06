@@ -14,13 +14,35 @@
  * limitations under the License.
  */
 
-use interpreter_lib::log_targets::TARGET_MAP;
+#![allow(improper_ctypes)]
+#![warn(rust_2018_idioms)]
+#![deny(
+    dead_code,
+    nonstandard_style,
+    unused_imports,
+    unused_mut,
+    unused_variables,
+    unused_unsafe,
+    unreachable_patterns
+)]
 
-pub fn init_logger() {
-    let target_map = TARGET_MAP.iter().cloned().collect();
-    fluence::WasmLoggerBuilder::new()
-        .with_target_map(target_map)
-        .filter("jsonpath_lib", log::LevelFilter::Info)
-        .build()
-        .unwrap();
+mod ast;
+mod logger;
+
+use fluence::fce;
+use air::execute_aqua;
+use air::InterpreterOutcome;
+
+pub fn main() {
+    logger::init_logger();
+}
+
+#[fce]
+pub fn invoke(init_peer_id: String, aqua: String, prev_data: Vec<u8>, data: Vec<u8>) -> InterpreterOutcome {
+    execute_aqua(init_peer_id, aqua, prev_data, data)
+}
+
+#[fce]
+pub fn ast(script: String) -> String {
+    ast::ast(script)
 }

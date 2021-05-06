@@ -13,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#![allow(unused_attributes)]
 #![warn(rust_2018_idioms)]
 #![deny(
     dead_code,
@@ -26,33 +24,26 @@
     unreachable_patterns
 )]
 
-mod ast;
-mod logger;
+mod aquamarine_stepper_vm;
+mod config;
+mod errors;
 
-use interpreter_lib::execute_aqua;
+pub use aquamarine_stepper_vm::AquamarineVM;
+pub use aquamarine_stepper_vm::ParticleParameters;
+pub use config::CallServiceClosure;
+pub use config::AquamarineVMConfig;
+pub use errors::AquamarineVMError;
 
-use log::LevelFilter;
-use wasm_bindgen::prelude::*;
+// Re-exports
+pub use fluence_faas::HostExportedFunc;
+pub use fluence_faas::HostImportDescriptor;
+pub use fluence_faas::HostImportError;
+pub use fluence_faas::IValue;
+pub use fluence_faas::IType;
+pub use fluence_faas::ne_vec;
+pub use fluence_faas::Ctx;
 
-pub const DEFAULT_LOG_LEVEL: LevelFilter = LevelFilter::Trace;
+pub use aqua_interpreter_interface::InterpreterOutcome;
+pub use aqua_interpreter_interface::INTERPRETER_SUCCESS;
 
-#[wasm_bindgen(start)]
-pub fn main() {
-    logger::init_logger();
-}
-
-#[wasm_bindgen]
-pub fn invoke(init_peer_id: String, aqua: String, prev_data: Vec<u8>, data: Vec<u8>, log_level: &str) -> String {
-    use std::str::FromStr;
-
-    let log_level = log::LevelFilter::from_str(log_level).unwrap_or(DEFAULT_LOG_LEVEL);
-    log::set_max_level(log_level);
-
-    let outcome = execute_aqua(init_peer_id, aqua, prev_data, data);
-    serde_json::to_string(&outcome).expect("Cannot parse InterpreterOutcome")
-}
-
-#[wasm_bindgen]
-pub fn ast(script: String) -> String {
-    ast::ast(script)
-}
+pub(crate) type Result<T> = std::result::Result<T, AquamarineVMError>;

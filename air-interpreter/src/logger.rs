@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-use interpreter_lib::parser::parse;
+use air::log_targets::TARGET_MAP;
 
-/// Parse AIR script and return it as minified JSON
-pub fn ast(script: String) -> String {
-    let do_parse = || -> std::result::Result<_, Box<dyn std::error::Error>> {
-        let ast = parse(&script)?;
-        serde_json::to_string(&ast).map_err(Into::into)
-    };
-
-    match do_parse() {
-        Ok(json) => json,
-        Err(err) => err.to_string(),
-    }
+pub fn init_logger() {
+    let target_map = TARGET_MAP.iter().cloned().collect();
+    fluence::WasmLoggerBuilder::new()
+        .with_target_map(target_map)
+        .filter("jsonpath_lib", log::LevelFilter::Info)
+        .build()
+        .unwrap();
 }

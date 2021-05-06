@@ -30,8 +30,8 @@ type JValue = serde_json::Value;
 
 #[test]
 fn seq_par_call() {
-    use interpreter_lib::execution_trace::CallResult::*;
-    use interpreter_lib::execution_trace::ExecutedState::{self, *};
+    use air::execution_trace::CallResult::*;
+    use air::execution_trace::ExecutedState::{self, *};
 
     let vm_peer_id = String::from("some_peer_id");
     let mut vm = create_aqua_vm(unit_call_service(), vm_peer_id.clone());
@@ -66,8 +66,8 @@ fn seq_par_call() {
 
 #[test]
 fn par_par_call() {
-    use interpreter_lib::execution_trace::CallResult::*;
-    use interpreter_lib::execution_trace::ExecutedState::{self, *};
+    use air::execution_trace::CallResult::*;
+    use air::execution_trace::ExecutedState::{self, *};
 
     let vm_peer_id = String::from("some_peer_id");
     let mut vm = create_aqua_vm(unit_call_service(), vm_peer_id.clone());
@@ -103,8 +103,8 @@ fn par_par_call() {
 
 #[test]
 fn create_service() {
-    use interpreter_lib::execution_trace::CallResult::*;
-    use interpreter_lib::execution_trace::ExecutedState::{self, *};
+    use air::execution_trace::CallResult::*;
+    use air::execution_trace::ExecutedState::{self, *};
 
     let module = "greeting";
     let module_config = json!(

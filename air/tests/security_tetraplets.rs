@@ -19,8 +19,8 @@ use aqua_test_utils::create_aqua_vm;
 use aqua_test_utils::CallServiceClosure;
 use aqua_test_utils::IValue;
 use aqua_test_utils::NEVec;
-use interpreter_lib::ResolvedTriplet;
-use interpreter_lib::SecurityTetraplet;
+use air::ResolvedTriplet;
+use air::SecurityTetraplet;
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -200,9 +200,9 @@ use fluence_app_service::AppServiceConfig;
 use fluence_app_service::FaaSConfig;
 use fluence_app_service::ModuleDescriptor;
 
-use interpreter_lib::execution_trace::CallResult;
-use interpreter_lib::execution_trace::ExecutedState;
-use interpreter_lib::execution_trace::ExecutionTrace;
+use air::execution_trace::CallResult;
+use air::execution_trace::ExecutedState;
+use air::execution_trace::ExecutionTrace;
 use std::path::PathBuf;
 
 fn construct_service_config(module_name: impl Into<String>) -> AppServiceConfig {

@@ -21,7 +21,7 @@ use aqua_test_utils::unit_call_service;
 use aqua_test_utils::CallServiceClosure;
 use aqua_test_utils::IValue;
 use aqua_test_utils::NEVec;
-use interpreter_lib::SecurityTetraplet;
+use air::SecurityTetraplet;
 
 use std::cell::RefCell;
 use std::rc::Rc;
