@@ -167,14 +167,14 @@ fn update_par_state(
 #[cfg(test)]
 mod tests {
     use air_test_utils::call_vm;
-    use air_test_utils::create_aqua_vm;
+    use air_test_utils::create_avm;
     use air_test_utils::unit_call_service;
 
     #[test]
     fn par_remote_remote() {
         use std::collections::HashSet;
 
-        let mut vm = create_aqua_vm(unit_call_service(), "");
+        let mut vm = create_avm(unit_call_service(), "");
 
         let script = String::from(
             r#"
@@ -196,7 +196,7 @@ mod tests {
     #[test]
     fn par_local_remote() {
         let local_peer_id = "local_peer_id";
-        let mut vm = create_aqua_vm(unit_call_service(), local_peer_id);
+        let mut vm = create_avm(unit_call_service(), local_peer_id);
 
         let script = format!(
             r#"

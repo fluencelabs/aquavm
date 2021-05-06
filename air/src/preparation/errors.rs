@@ -80,7 +80,7 @@ impl fmt::Display for PreparationError {
         use PreparationError::*;
 
         match self {
-            AIRParseError(err_msg) => write!(f, "aqua script can't be parsed:\n{}", err_msg),
+            AIRParseError(err_msg) => write!(f, "air can't be parsed:\n{}", err_msg),
             ExecutedTraceDeError(serde_error, executed_trace) => {
                 fn print_error(
                     f: &mut fmt::Formatter<'_>,

@@ -15,7 +15,7 @@
  */
 
 use air_test_utils::call_vm;
-use air_test_utils::create_aqua_vm;
+use air_test_utils::create_avm;
 use air_test_utils::IValue;
 use air_test_utils::NEVec;
 use air_test_utils::{CallServiceClosure, AVM};
@@ -174,7 +174,7 @@ fn create_peer_host_function(peer_id: String, known_peer_ids: Vec<String>) -> Ca
     )
 }
 
-struct AquaVMState {
+struct AVMState {
     vm: AVM,
     peer_id: String,
     prev_result: Vec<u8>,
@@ -190,8 +190,8 @@ fn dashboard() {
 
     let (host_function, all_info) = client_host_function(known_peer_ids.clone(), client_id.clone(), relay_id.clone());
 
-    let mut client = create_aqua_vm(host_function, client_id.clone());
-    let mut relay = create_aqua_vm(
+    let mut client = create_avm(host_function, client_id.clone());
+    let mut relay = create_avm(
         create_peer_host_function(relay_id.clone(), known_peer_ids.clone()),
         relay_id.clone(),
     );
@@ -200,11 +200,11 @@ fn dashboard() {
         .iter()
         .cloned()
         .map(|peer_id| {
-            let vm = create_aqua_vm(
+            let vm = create_avm(
                 create_peer_host_function(peer_id.clone(), known_peer_ids.clone()),
                 peer_id.clone(),
             );
-            AquaVMState {
+            AVMState {
                 vm,
                 peer_id,
                 prev_result: vec![],
@@ -246,10 +246,10 @@ fn dashboard() {
     let mut client_3_res = client_2_res.clone();
 
     // peers 1 -> relay 2 -> client 3
-    for aqua_vm in known_peers.iter_mut() {
-        let prev_result = std::mem::replace(&mut aqua_vm.prev_result, vec![]);
+    for avm in known_peers.iter_mut() {
+        let prev_result = std::mem::replace(&mut avm.prev_result, vec![]);
         let known_peer_res = call_vm!(
-            aqua_vm.vm,
+            avm.vm,
             client_id.clone(),
             script.clone(),
             prev_result,
@@ -257,14 +257,14 @@ fn dashboard() {
         );
         assert_eq!(known_peer_res.next_peer_pks, vec![relay_id.clone()]);
 
-        aqua_vm.prev_result = known_peer_res.data;
+        avm.prev_result = known_peer_res.data;
 
         relay_2_res = call_vm!(
             relay,
             client_id.clone(),
             script.clone(),
             relay_2_res.data.clone(),
-            aqua_vm.prev_result.clone()
+            avm.prev_result.clone()
         );
         assert_eq!(relay_2_res.next_peer_pks, vec![client_id.clone()]);
 
@@ -280,7 +280,7 @@ fn dashboard() {
             *all_info.borrow(),
             format!(
                 r#"["{peer_id}","{peer_id}_ident",["{peer_id}_interface_0","{peer_id}_interface_1","{peer_id}_interface_2"],["{peer_id}_blueprint_0","{peer_id}_blueprint_1","{peer_id}_blueprint_2"],["{peer_id}_module_0","{peer_id}_module_1","{peer_id}_module_2"]]"#,
-                peer_id = aqua_vm.peer_id
+                peer_id = avm.peer_id
             )
         )
     }
@@ -292,29 +292,29 @@ fn dashboard() {
     let mut client_4_res = client_3_res.clone();
 
     // peers 2 -> relay 3 -> client 4
-    for aqua_vm in known_peers.iter_mut() {
-        let prev_result = std::mem::replace(&mut aqua_vm.prev_result, vec![]);
+    for avm in known_peers.iter_mut() {
+        let prev_result = std::mem::replace(&mut avm.prev_result, vec![]);
         let known_peer_res = call_vm!(
-            aqua_vm.vm,
+            avm.vm,
             client_id.clone(),
             script.clone(),
             prev_result,
             relay_1_res.data.clone()
         );
-        all_peer_pks.remove(&aqua_vm.peer_id);
+        all_peer_pks.remove(&avm.peer_id);
         let next_peer_pks = into_hashset(known_peer_res.next_peer_pks.clone());
         assert_eq!(next_peer_pks, all_peer_pks);
 
-        all_peer_pks.insert(aqua_vm.peer_id.clone());
+        all_peer_pks.insert(avm.peer_id.clone());
 
-        aqua_vm.prev_result = known_peer_res.data;
+        avm.prev_result = known_peer_res.data;
 
         relay_3_res = call_vm!(
             relay,
             client_id.clone(),
             script.clone(),
             relay_3_res.data.clone(),
-            aqua_vm.prev_result.clone()
+            avm.prev_result.clone()
         );
         assert_eq!(relay_3_res.next_peer_pks, vec![client_id.clone()]);
 
@@ -331,7 +331,7 @@ fn dashboard() {
             *all_info.borrow(),
             format!(
                 r#"["{peer_id}","{peer_id}_ident",["{peer_id}_interface_0","{peer_id}_interface_1","{peer_id}_interface_2"],["{peer_id}_blueprint_0","{peer_id}_blueprint_1","{peer_id}_blueprint_2"],["{peer_id}_module_0","{peer_id}_module_1","{peer_id}_module_2"]]"#,
-                peer_id = aqua_vm.peer_id
+                peer_id = avm.peer_id
             )
         )
     }

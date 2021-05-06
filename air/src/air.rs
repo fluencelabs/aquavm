@@ -22,33 +22,33 @@ use crate::preparation::PreparationDescriptor;
 
 use air_interpreter_interface::InterpreterOutcome;
 
-pub fn execute_aqua(init_peer_id: String, aqua: String, prev_data: Vec<u8>, data: Vec<u8>) -> InterpreterOutcome {
+pub fn execute_air(init_peer_id: String, air: String, prev_data: Vec<u8>, data: Vec<u8>) -> InterpreterOutcome {
     use std::convert::identity;
 
     log::trace!(
-        "aquamarine version is {}, init user id is {}",
+        "air interpreter version is {}, init user id is {}",
         env!("CARGO_PKG_VERSION"),
         init_peer_id
     );
 
-    execute_aqua_impl(init_peer_id, aqua, prev_data, data).unwrap_or_else(identity)
+    execute_air_impl(init_peer_id, air, prev_data, data).unwrap_or_else(identity)
 }
 
-fn execute_aqua_impl(
+fn execute_air_impl(
     init_peer_id: String,
-    aqua: String,
+    air: String,
     prev_data: Vec<u8>,
     data: Vec<u8>,
 ) -> Result<InterpreterOutcome, InterpreterOutcome> {
     let PreparationDescriptor {
         mut exec_ctx,
         mut trace_ctx,
-        aqua,
-    } = prepare(&prev_data, &data, aqua.as_str(), init_peer_id)
+        air,
+    } = prepare(&prev_data, &data, air.as_str(), init_peer_id)
         // return the initial data in case of errors
         .map_err(|e| outcome::from_preparation_error(data, e))?;
 
-    aqua.execute(&mut exec_ctx, &mut trace_ctx)
+    air.execute(&mut exec_ctx, &mut trace_ctx)
         // return new collected trace in case of errors
         .map_err(|e| outcome::from_execution_error(&trace_ctx.new_trace, exec_ctx.next_peer_pks.clone(), e))?;
 

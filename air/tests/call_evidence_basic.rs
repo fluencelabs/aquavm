@@ -15,7 +15,7 @@
  */
 
 use air_test_utils::call_vm;
-use air_test_utils::create_aqua_vm;
+use air_test_utils::create_avm;
 use air_test_utils::echo_number_call_service;
 use air_test_utils::unit_call_service;
 use air_test_utils::CallServiceClosure;
@@ -34,7 +34,7 @@ fn executed_trace_seq_par_call() {
     use air::execution_trace::ExecutedState::{self, *};
 
     let local_peer_id = "local_peer_id";
-    let mut vm = create_aqua_vm(unit_call_service(), local_peer_id);
+    let mut vm = create_avm(unit_call_service(), local_peer_id);
 
     let script = format!(
         r#"
@@ -77,7 +77,7 @@ fn executed_trace_par_par_call() {
     use air::execution_trace::ExecutedState::{self, *};
 
     let local_peer_id = "local_peer_id";
-    let mut vm = create_aqua_vm(unit_call_service(), local_peer_id);
+    let mut vm = create_avm(unit_call_service(), local_peer_id);
 
     let script = format!(
         r#"
@@ -123,8 +123,8 @@ fn executed_trace_seq_seq() {
 
     let peer_id_1 = String::from("12D3KooWHk9BjDQBUqnavciRPhAYFvqKBe4ZiPPvde7vDaqgn5er");
     let peer_id_2 = String::from("12D3KooWAzJcYitiZrerycVB4Wryrx22CFKdDGx7c4u31PFdfTbR");
-    let mut vm1 = create_aqua_vm(unit_call_service(), peer_id_1.clone());
-    let mut vm2 = create_aqua_vm(unit_call_service(), peer_id_2.clone());
+    let mut vm1 = create_avm(unit_call_service(), peer_id_1.clone());
+    let mut vm2 = create_avm(unit_call_service(), peer_id_2.clone());
 
     let script = format!(
         r#"
@@ -204,7 +204,7 @@ fn executed_trace_create_service() {
         ))
     });
 
-    let mut vm = create_aqua_vm(call_service, "A");
+    let mut vm = create_avm(call_service, "A");
 
     let script = include_str!("./scripts/create_service.clj");
 
@@ -243,9 +243,9 @@ fn executed_trace_par_seq_fold_call() {
         ))
     });
 
-    let mut vm1 = create_aqua_vm(return_numbers_call_service, "some_peer_id_1");
-    let mut vm2 = create_aqua_vm(echo_number_call_service(), "some_peer_id_2");
-    let mut vm3 = create_aqua_vm(unit_call_service(), "some_peer_id_3");
+    let mut vm1 = create_avm(return_numbers_call_service, "some_peer_id_1");
+    let mut vm2 = create_avm(echo_number_call_service(), "some_peer_id_2");
+    let mut vm3 = create_avm(unit_call_service(), "some_peer_id_3");
 
     let script = String::from(
         r#"
@@ -319,9 +319,9 @@ fn executed_trace_par_seq_fold_in_cycle_call() {
         ))
     });
 
-    let mut vm1 = create_aqua_vm(return_numbers_call_service, "some_peer_id_1");
-    let mut vm2 = create_aqua_vm(echo_number_call_service(), "some_peer_id_2");
-    let mut vm3 = create_aqua_vm(unit_call_service(), "some_peer_id_3");
+    let mut vm1 = create_avm(return_numbers_call_service, "some_peer_id_1");
+    let mut vm2 = create_avm(echo_number_call_service(), "some_peer_id_2");
+    let mut vm3 = create_avm(unit_call_service(), "some_peer_id_3");
 
     let script = String::from(
         r#"
@@ -383,8 +383,8 @@ fn executed_trace_par_seq_fold_in_cycle_call() {
 fn executed_trace_seq_par_seq_seq() {
     let peer_id_1 = String::from("12D3KooWHk9BjDQBUqnavciRPhAYFvqKBe4ZiPPvde7vDaqgn5er");
     let peer_id_2 = String::from("12D3KooWAzJcYitiZrerycVB4Wryrx22CFKdDGx7c4u31PFdfTbR");
-    let mut vm1 = create_aqua_vm(unit_call_service(), peer_id_1.clone());
-    let mut vm2 = create_aqua_vm(unit_call_service(), peer_id_2.clone());
+    let mut vm1 = create_avm(unit_call_service(), peer_id_1.clone());
+    let mut vm2 = create_avm(unit_call_service(), peer_id_2.clone());
     let script = format!(
         r#"
         (seq 

@@ -155,12 +155,12 @@ jobs:
           toml set Cargo.toml package.version "${{ env.FINAL_VERSION }}" | sponge Cargo.toml
         working-directory: interpreter-lib
 
-      - name: Build aquamarine.wasm for node
-        run: fce build -p aquamarine --release --features fce
-        working-directory: interpreter
+      - name: Build air_interpreter_server.wasm for node
+        run: fce build -p air_interpreter_server --release --features fce
+        working-directory: air-interpreter
 
-      - name: Copy aquamarine.wasm to air-interpreter-wasm
-        run: cp target/wasm32-wasi/release/aquamarine.wasm crates/air-interpreter-wasm/aquamarine.wasm
+      - name: Copy air_interpreter_server.wasm to air-interpreter-wasm
+        run: cp target/wasm32-wasi/release/air_interpreter_server.wasm crates/air-interpreter-wasm/air_interpreter_server.wasm
 
       - name: Set project name@version to ${{ env.PKG_NAME }}@${{ env.FINAL_VERSION }}
         run: |

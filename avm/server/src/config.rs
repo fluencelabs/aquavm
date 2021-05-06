@@ -22,19 +22,19 @@ use std::path::PathBuf;
 pub type CallServiceClosure =
     Box<dyn Fn(ParticleParameters, Vec<IValue>) -> Option<IValue> + 'static>;
 
-/// Describes behaviour of the Aquamarine VM stepper.
+/// Describes behaviour of the AVM.
 pub struct AVMConfig {
-    /// Path to a aquamarine stepper Wasm file.
-    pub aquamarine_wasm_path: PathBuf,
+    /// Path to a AIR interpreter Wasm file.
+    pub air_wasm_path: PathBuf,
 
-    /// Descriptor of a closure that will be invoked on call_service call from Aquamarine stepper.
+    /// Descriptor of a closure that will be invoked on call_service call from the AIR interpreter.
     pub call_service: CallServiceClosure,
 
     /// Current peer id.
     pub current_peer_id: String,
 
     /// Path to a folder contains prev data.
-    /// AquamarineVM uses it to store data obtained after stepper execution, and load it as a prev_data by particle_id.
+    /// AVM uses it to store data obtained after stepper execution, and load it as a prev_data by particle_id.
     pub particle_data_store: PathBuf,
 
     /// Mask used to filter logs, for details see `log_utf8_string` in fluence-faas.

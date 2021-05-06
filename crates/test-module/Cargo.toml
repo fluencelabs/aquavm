@@ -1,12 +1,12 @@
 [package]
-name = "aqua-test-module"
+name = "air-test-module"
 version = "0.1.0"
 authors = ["Fluence Labs"]
 edition = "2018"
 license = "Apache-2.0"
 
 [[bin]]
-name = "aqua_test_module"
+name = "air_test_module"
 path = "src/main.rs"
 
 [dependencies]

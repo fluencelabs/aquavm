@@ -63,7 +63,7 @@ mod tests {
     use crate::JValue;
 
     use air_test_utils::call_vm;
-    use air_test_utils::create_aqua_vm;
+    use air_test_utils::create_avm;
     use air_test_utils::fallible_call_service;
 
     use std::rc::Rc;
@@ -75,7 +75,7 @@ mod tests {
 
         let local_peer_id = "local_peer_id";
         let fallible_service_id = String::from("service_id_1");
-        let mut vm = create_aqua_vm(fallible_call_service(fallible_service_id), local_peer_id);
+        let mut vm = create_avm(fallible_call_service(fallible_service_id), local_peer_id);
 
         let script = format!(
             r#"
@@ -120,7 +120,7 @@ mod tests {
         use air_test_utils::echo_string_call_service;
 
         let local_peer_id = "local_peer_id";
-        let mut vm = create_aqua_vm(echo_string_call_service(), local_peer_id);
+        let mut vm = create_avm(echo_string_call_service(), local_peer_id);
 
         let script = format!(
             r#"
@@ -147,10 +147,10 @@ mod tests {
         use air_test_utils::echo_string_call_service;
 
         let set_variables_peer_id = "set_variables_peer_id";
-        let mut set_variables_vm = create_aqua_vm(echo_string_call_service(), set_variables_peer_id);
+        let mut set_variables_vm = create_avm(echo_string_call_service(), set_variables_peer_id);
 
         let local_peer_id = "local_peer_id";
-        let mut vm = create_aqua_vm(echo_string_call_service(), local_peer_id);
+        let mut vm = create_avm(echo_string_call_service(), local_peer_id);
 
         let test_string_1 = String::from("some_string");
         let test_string_2 = String::from("expected_string");
@@ -182,7 +182,7 @@ mod tests {
 
         let fallible_service_id = String::from("service_id_1");
         let local_peer_id = "local_peer_id";
-        let mut vm = create_aqua_vm(fallible_call_service(fallible_service_id.clone()), local_peer_id);
+        let mut vm = create_avm(fallible_call_service(fallible_service_id.clone()), local_peer_id);
 
         let script = format!(
             r#"
@@ -235,9 +235,9 @@ mod tests {
         use air_test_utils::echo_string_call_service;
 
         let faillible_peer_id = "failible_peer_id";
-        let mut faillible_vm = create_aqua_vm(fallible_call_service("service_id_1"), faillible_peer_id);
+        let mut faillible_vm = create_avm(fallible_call_service("service_id_1"), faillible_peer_id);
         let local_peer_id = "local_peer_id";
-        let mut vm = create_aqua_vm(echo_string_call_service(), local_peer_id);
+        let mut vm = create_avm(echo_string_call_service(), local_peer_id);
 
         let script = format!(
             r#"

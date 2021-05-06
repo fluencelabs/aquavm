@@ -11,5 +11,5 @@ path = "src/lib.rs"
 
 [dependencies]
 fluence = "0.6.1"
-avm-server = { path = "../../avm/server", features = ["raw-aquamarine-vm-api"] }
+avm-server = { path = "../../avm/server", features = ["raw-avm-api"] }
 serde_json = "1.0.56"

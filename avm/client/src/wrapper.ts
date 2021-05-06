@@ -115,17 +115,17 @@ function passArray8ToWasm0(wasm, arg, malloc) {
 /**
  * @param {any} wasm
  * @param {string} init_peer_id
- * @param {string} aqua
+ * @param {string} air
  * @param {string} prev_data
  * @param {string} data
  * @param {string} log_level
  * @returns {string}
  */
-export function invoke(wasm, init_peer_id, aqua, prev_data, data, log_level) {
+export function invoke(wasm, init_peer_id, air, prev_data, data, log_level) {
     try {
         var ptr0 = passStringToWasm0(wasm, init_peer_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         var len0 = WASM_VECTOR_LEN;
-        var ptr1 = passStringToWasm0(wasm, aqua, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        var ptr1 = passStringToWasm0(wasm, air, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         var len1 = WASM_VECTOR_LEN;
         var ptr2 = passArray8ToWasm0(wasm, prev_data, wasm.__wbindgen_malloc);
         var len2 = WASM_VECTOR_LEN;

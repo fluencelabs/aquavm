@@ -27,7 +27,7 @@ pub enum AVMError {
     #[error("{0}")]
     FaaSError(#[from] FaaSError),
 
-    /// Aquamarine stepper result deserialization errors.
+    /// AIR interpreter result deserialization errors.
     #[error("{0}")]
     StepperResultDeError(String),
 
@@ -41,7 +41,7 @@ pub enum AVMError {
 
     /// Specified path to AIR interpreter .wasm file was invalid
     #[error("path to AIR interpreter .wasm ({invalid_path:?}) is invalid: {reason}; IO Error: {io_error:?}")]
-    InvalidAquamarinePath {
+    InvalidAIRPath {
         invalid_path: PathBuf,
         io_error: Option<IOError>,
         reason: &'static str,

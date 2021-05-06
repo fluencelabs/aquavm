@@ -30,7 +30,7 @@ use std::collections::VecDeque;
 
 use std::rc::Rc;
 
-/// Contains all necessary state needed to execute aqua script.
+/// Contains all necessary state needed to execute AIR script.
 #[derive(Default)]
 pub(crate) struct ExecutionCtx<'i> {
     /// Contains all set variables.
@@ -40,10 +40,10 @@ pub(crate) struct ExecutionCtx<'i> {
     /// Set of peer public keys that should receive resulted data.
     pub next_peer_pks: Vec<String>,
 
-    /// PeerId of a peer executing this aqua script at the moment.
+    /// PeerId of a peer executing this AIR script at the moment.
     pub current_peer_id: String,
 
-    /// PeerId of a peer send this aqua script.
+    /// PeerId of a peer send this AIR script.
     pub init_peer_id: String,
 
     /// Last error produced by local service.

@@ -68,13 +68,13 @@ pub struct AVM {
 }
 
 impl AVM {
-    /// Create AquamarineVM with provided config.
+    /// Create AVM with provided config.
     pub fn new(config: AVMConfig) -> Result<Self> {
         use AVMError::InvalidDataStorePath;
 
         let current_particle: Arc<Mutex<ParticleParameters>> = <_>::default();
         let call_service = call_service_descriptor(current_particle.clone(), config.call_service);
-        let (wasm_dir, wasm_filename) = split_dirname(config.aquamarine_wasm_path)?;
+        let (wasm_dir, wasm_filename) = split_dirname(config.air_wasm_path)?;
 
         let faas_config = make_faas_config(
             wasm_dir,
@@ -89,20 +89,20 @@ impl AVM {
         std::fs::create_dir_all(&particle_data_store)
             .map_err(|e| InvalidDataStorePath(e, particle_data_store.clone()))?;
 
-        let aqua_vm = Self {
+        let avm = Self {
             faas: SendSafeFaaS(faas),
             particle_data_store,
             wasm_filename,
             current_particle,
         };
 
-        Ok(aqua_vm)
+        Ok(avm)
     }
 
     pub fn call(
         &mut self,
         init_user_id: impl Into<String>,
-        aqua: impl Into<String>,
+        air: impl Into<String>,
         data: impl Into<Vec<u8>>,
         particle_id: impl Into<String>,
     ) -> Result<InterpreterOutcome> {
@@ -117,7 +117,7 @@ impl AVM {
             .unwrap_or_default()
             .into_bytes();
 
-        let args = prepare_args(prev_data, data, init_user_id.clone(), aqua);
+        let args = prepare_args(prev_data, data, init_user_id.clone(), air);
 
         // Update ParticleParams with the new values so subsequent calls to `call_service` can use them
         self.update_current_particle(particle_id, init_user_id);
@@ -147,11 +147,11 @@ fn prepare_args(
     prev_data: Vec<u8>,
     data: impl Into<Vec<u8>>,
     init_user_id: String,
-    aqua: impl Into<String>,
+    air: impl Into<String>,
 ) -> Vec<IValue> {
     vec![
         IValue::String(init_user_id),
-        IValue::String(aqua.into()),
+        IValue::String(air.into()),
         IValue::ByteArray(prev_data),
         IValue::ByteArray(data.into()),
     ]
@@ -180,18 +180,18 @@ fn call_service_descriptor(
 /// Splits given path into its directory and file name
 ///
 /// # Example
-/// For path `/path/to/aquamarine.wasm` result will be `Ok(PathBuf(/path/to), "aquamarine.wasm")`
+/// For path `/path/to/air_interpreter_server.wasm` result will be `Ok(PathBuf(/path/to), "air_interpreter_server.wasm")`
 fn split_dirname(path: PathBuf) -> Result<(PathBuf, String)> {
-    use AVMError::InvalidAquamarinePath;
+    use AVMError::InvalidAIRPath;
 
-    let metadata = path.metadata().map_err(|err| InvalidAquamarinePath {
+    let metadata = path.metadata().map_err(|err| InvalidAIRPath {
         invalid_path: path.clone(),
         reason: "failed to get file's metadata (doesn't exist or invalid permissions)",
         io_error: Some(err),
     })?;
 
     if !metadata.is_file() {
-        return Err(InvalidAquamarinePath {
+        return Err(InvalidAIRPath {
             invalid_path: path,
             reason: "is not a file",
             io_error: None,
@@ -211,8 +211,8 @@ fn split_dirname(path: PathBuf) -> Result<(PathBuf, String)> {
 }
 
 fn make_faas_config(
-    aquamarine_wasm_dir: PathBuf,
-    aquamarine_wasm_file: &str,
+    air_wasm_dir: PathBuf,
+    air_wasm_file: &str,
     call_service: HostImportDescriptor,
     current_peer_id: String,
     logging_mask: i32,
@@ -224,7 +224,7 @@ fn make_faas_config(
         String::from(CALL_SERVICE_NAME) => call_service
     };
 
-    let mut aquamarine_module_config = FaaSModuleConfig {
+    let mut air_module_config = FaaSModuleConfig {
         mem_pages_count: None,
         logger_enabled: true,
         host_imports,
@@ -235,30 +235,30 @@ fn make_faas_config(
     let envs = hashmap! {
         CURRENT_PEER_ID_ENV_NAME.as_bytes().to_vec() => current_peer_id.into_bytes(),
     };
-    aquamarine_module_config.extend_wasi_envs(envs);
+    air_module_config.extend_wasi_envs(envs);
 
     FaaSConfig {
-        modules_dir: Some(aquamarine_wasm_dir),
+        modules_dir: Some(air_wasm_dir),
         modules_config: vec![ModuleDescriptor {
-            file_name: String::from(aquamarine_wasm_file),
-            import_name: String::from(aquamarine_wasm_file),
-            config: aquamarine_module_config,
+            file_name: String::from(air_wasm_file),
+            import_name: String::from(air_wasm_file),
+            config: air_module_config,
         }],
         default_modules_config: None,
     }
 }
 
 // This API is intended for testing purposes
-#[cfg(feature = "raw-aquamarine-vm-api")]
+#[cfg(feature = "raw-avm-api")]
 impl AVM {
     pub fn call_with_prev_data(
         &mut self,
         init_user_id: impl Into<String>,
-        aqua: impl Into<String>,
+        air: impl Into<String>,
         prev_data: impl Into<Vec<u8>>,
         data: impl Into<Vec<u8>>,
     ) -> Result<InterpreterOutcome> {
-        let args = prepare_args(prev_data.into(), data, init_user_id.into(), aqua);
+        let args = prepare_args(prev_data.into(), data, init_user_id.into(), air);
 
         let result =
             self.faas

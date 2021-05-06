@@ -30,14 +30,14 @@ type PreparationResult<T> = Result<T, PreparationError>;
 pub(crate) struct PreparationDescriptor<'ctx, 'i> {
     pub(crate) exec_ctx: ExecutionCtx<'ctx>,
     pub(crate) trace_ctx: ExecutionTraceCtx,
-    pub(crate) aqua: Instruction<'i>,
+    pub(crate) air: Instruction<'i>,
 }
 
-/// Parse and prepare supplied data and aqua script.
+/// Parse and prepare supplied data and AIR script.
 pub(crate) fn prepare<'i>(
     prev_data: &[u8],
     data: &[u8],
-    raw_aqua: &'i str,
+    raw_air: &'i str,
     init_peer_id: String,
 ) -> PreparationResult<PreparationDescriptor<'static, 'i>> {
     fn to_executed_trace(raw_data: &[u8]) -> PreparationResult<ExecutionTrace> {
@@ -55,12 +55,12 @@ pub(crate) fn prepare<'i>(
     let prev_trace = to_executed_trace(prev_data)?;
     let trace = to_executed_trace(data)?;
 
-    let aqua: Instruction<'i> = *air_parser::parse(raw_aqua).map_err(PreparationError::AIRParseError)?;
+    let air: Instruction<'i> = *air_parser::parse(raw_air).map_err(PreparationError::AIRParseError)?;
 
     log::trace!(
         target: RUN_PARAMS,
-        "aqua: {:?}\nprev_trace: {:?}\ncurrent_trace: {:?}",
-        aqua,
+        "air: {:?}\nprev_trace: {:?}\ncurrent_trace: {:?}",
+        air,
         prev_trace,
         trace
     );
@@ -69,7 +69,7 @@ pub(crate) fn prepare<'i>(
     let result = PreparationDescriptor {
         exec_ctx,
         trace_ctx,
-        aqua,
+        air,
     };
 
     Ok(result)

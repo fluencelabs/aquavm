@@ -1,6 +1,6 @@
 version: 2
 jobs:
-  aqua:
+  air:
     docker:
       - image: circleci/rust:latest
     resource_class: medium+
@@ -11,7 +11,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - aqua01-{{ checksum "Cargo.lock" }}
+            - air01-{{ checksum "Cargo.lock" }}
       - run: |
           rustup toolchain install nightly-2021-03-24-x86_64-unknown-linux-gnu
           rustup default nightly-2021-03-24-x86_64-unknown-linux-gnu
@@ -20,13 +20,13 @@ jobs:
           rustup component add rustfmt
           rustup component add clippy
 
-          cargo install --force fcli --git https://github.com/fluencelabs/fce
+          cargo install --force fcli
 
           # build a Wasm binary for interpreter
-          (cd interpreter; fce build --features fce)
+          (cd air-interpreter; fce build --features fce)
 
           # build Wasm binaries for tests
-          (cd interpreter-lib/tests/; ./build_test_binaries.sh)
+          (cd air/tests/; ./build_test_binaries.sh)
 
           cargo fmt --all -- --check --color always
           cargo check
@@ -37,9 +37,9 @@ jobs:
           paths:
             - ~/.cargo
             - ~/.rustup
-          key: aqua01-{{ checksum "Cargo.lock" }}
+          key: air01-{{ checksum "Cargo.lock" }}
 workflows:
   version: 2
-  aqua:
+  air:
     jobs:
-      - aqua
+      - air

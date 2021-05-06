@@ -29,7 +29,7 @@
 mod ast;
 mod logger;
 
-use air::execute_aqua;
+use air::execute_air;
 use air::InterpreterOutcome;
 use fluence::fce;
 
@@ -38,8 +38,8 @@ pub fn main() {
 }
 
 #[fce]
-pub fn invoke(init_peer_id: String, aqua: String, prev_data: Vec<u8>, data: Vec<u8>) -> InterpreterOutcome {
-    execute_aqua(init_peer_id, aqua, prev_data, data)
+pub fn invoke(init_peer_id: String, air: String, prev_data: Vec<u8>, data: Vec<u8>) -> InterpreterOutcome {
+    execute_air(init_peer_id, air, prev_data, data)
 }
 
 #[fce]

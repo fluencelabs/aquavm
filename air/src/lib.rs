@@ -31,7 +31,7 @@ mod contexts;
 mod execution;
 mod preparation;
 
-mod aqua;
+mod air;
 pub mod log_targets;
 
 pub use air_interpreter_interface::InterpreterOutcome;
@@ -39,7 +39,7 @@ pub use air_interpreter_interface::INTERPRETER_SUCCESS;
 pub use polyplets::ResolvedTriplet;
 pub use polyplets::SecurityTetraplet;
 
-pub use aqua::execute_aqua;
+pub use air::execute_air;
 
 pub mod execution_trace {
     pub use crate::contexts::execution_trace::CallResult;

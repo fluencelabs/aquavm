@@ -47,7 +47,7 @@ mod tests {
     use crate::JValue;
 
     use air_test_utils::call_vm;
-    use air_test_utils::create_aqua_vm;
+    use air_test_utils::create_avm;
     use air_test_utils::echo_string_call_service;
     use air_test_utils::set_variable_call_service;
 
@@ -59,10 +59,10 @@ mod tests {
         use crate::contexts::execution_trace::ExecutedState::*;
 
         let set_variable_peer_id = "set_variable_peer_id";
-        let mut set_variable_vm = create_aqua_vm(echo_string_call_service(), set_variable_peer_id);
+        let mut set_variable_vm = create_avm(echo_string_call_service(), set_variable_peer_id);
 
         let local_peer_id = "local_peer_id";
-        let mut vm = create_aqua_vm(echo_string_call_service(), local_peer_id);
+        let mut vm = create_avm(echo_string_call_service(), local_peer_id);
 
         let script = format!(
             r#"
@@ -97,10 +97,10 @@ mod tests {
         use crate::contexts::execution_trace::ExecutedState::*;
 
         let set_variable_peer_id = "set_variable_peer_id";
-        let mut set_variable_vm = create_aqua_vm(echo_string_call_service(), set_variable_peer_id);
+        let mut set_variable_vm = create_avm(echo_string_call_service(), set_variable_peer_id);
 
         let local_peer_id = "local_peer_id";
-        let mut vm = create_aqua_vm(echo_string_call_service(), local_peer_id);
+        let mut vm = create_avm(echo_string_call_service(), local_peer_id);
 
         let script = format!(
             r#"
@@ -135,10 +135,10 @@ mod tests {
         use crate::contexts::execution_trace::ExecutedState::*;
 
         let set_variable_peer_id = "set_variable_peer_id";
-        let mut set_variable_vm = create_aqua_vm(echo_string_call_service(), set_variable_peer_id);
+        let mut set_variable_vm = create_avm(echo_string_call_service(), set_variable_peer_id);
 
         let local_peer_id = "local_peer_id";
-        let mut vm = create_aqua_vm(echo_string_call_service(), local_peer_id);
+        let mut vm = create_avm(echo_string_call_service(), local_peer_id);
 
         let script = format!(
             r#"
@@ -167,10 +167,10 @@ mod tests {
     #[test]
     fn mismatch_without_xor() {
         let set_variable_peer_id = "set_variable_peer_id";
-        let mut set_variable_vm = create_aqua_vm(echo_string_call_service(), set_variable_peer_id);
+        let mut set_variable_vm = create_avm(echo_string_call_service(), set_variable_peer_id);
 
         let local_peer_id = "local_peer_id";
-        let mut vm = create_aqua_vm(echo_string_call_service(), local_peer_id);
+        let mut vm = create_avm(echo_string_call_service(), local_peer_id);
 
         let script = format!(
             r#"
@@ -202,7 +202,7 @@ mod tests {
         use crate::contexts::execution_trace::ExecutedState::*;
 
         let local_peer_id = "local_peer_id";
-        let mut vm = create_aqua_vm(
+        let mut vm = create_avm(
             set_variable_call_service(serde_json::json!(false).to_string()),
             local_peer_id,
         );

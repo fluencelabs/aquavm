@@ -17,7 +17,7 @@
 use air::ResolvedTriplet;
 use air::SecurityTetraplet;
 use air_test_utils::call_vm;
-use air_test_utils::create_aqua_vm;
+use air_test_utils::create_avm;
 use air_test_utils::CallServiceClosure;
 use air_test_utils::IValue;
 use air_test_utils::NEVec;
@@ -64,12 +64,12 @@ fn simple_fold() {
     });
 
     let set_variable_vm_peer_id = String::from("some_peer_id_1");
-    let mut set_variable_vm = create_aqua_vm(return_numbers_call_service, set_variable_vm_peer_id.clone());
+    let mut set_variable_vm = create_avm(return_numbers_call_service, set_variable_vm_peer_id.clone());
 
     let mut client_vms = Vec::new();
     for i in 1..=10 {
         let (arg_host_func, arg_tetraplets) = arg_host_function();
-        let vm = create_aqua_vm(arg_host_func, i.to_string());
+        let vm = create_avm(arg_host_func, i.to_string());
         client_vms.push((vm, arg_tetraplets))
     }
 
@@ -141,11 +141,11 @@ fn fold_json_path() {
     });
 
     let set_variable_vm_peer_id = String::from("some_peer_id_1");
-    let mut set_variable_vm = create_aqua_vm(return_numbers_call_service, set_variable_vm_peer_id.clone());
+    let mut set_variable_vm = create_avm(return_numbers_call_service, set_variable_vm_peer_id.clone());
 
     let (arg_host_func, arg_tetraplets) = arg_host_function();
     let client_peer_id = String::from("client_id");
-    let mut client_vm = create_aqua_vm(arg_host_func, client_peer_id.clone());
+    let mut client_vm = create_avm(arg_host_func, client_peer_id.clone());
 
     let service_id = String::from("some_service_id");
     let function_name = String::from("some_function_name");
@@ -301,7 +301,7 @@ fn tetraplet_with_wasm_modules() {
         local_peer_id,
     );
 
-    let mut vm = create_aqua_vm(host_func, local_peer_id);
+    let mut vm = create_avm(host_func, local_peer_id);
 
     let result = call_vm!(vm, ADMIN_PEER_PK, script, "", "");
     let actual_trace: ExecutionTrace = serde_json::from_slice(&result.data).unwrap();

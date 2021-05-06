@@ -15,7 +15,7 @@
  */
 
 use air_test_utils::call_vm;
-use air_test_utils::create_aqua_vm;
+use air_test_utils::create_avm;
 use air_test_utils::set_variables_call_service;
 use air_test_utils::unit_call_service;
 
@@ -39,10 +39,10 @@ fn non_wait_on_json_path() {
     let set_variables_call_service = set_variables_call_service(variables);
 
     let set_variable_peer_id = "set_variable";
-    let mut set_variable_vm = create_aqua_vm(set_variables_call_service, set_variable_peer_id);
+    let mut set_variable_vm = create_avm(set_variables_call_service, set_variable_peer_id);
 
     let local_peer_id = "local_peer_id";
-    let mut local_vm = create_aqua_vm(unit_call_service(), local_peer_id);
+    let mut local_vm = create_avm(unit_call_service(), local_peer_id);
 
     let script = format!(
         r#"

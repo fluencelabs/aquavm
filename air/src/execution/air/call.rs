@@ -72,7 +72,7 @@ mod tests {
     use crate::JValue;
 
     use air_test_utils::call_vm;
-    use air_test_utils::create_aqua_vm;
+    use air_test_utils::create_avm;
     use air_test_utils::echo_string_call_service;
     use air_test_utils::set_variable_call_service;
     use air_test_utils::unit_call_service;
@@ -90,7 +90,7 @@ mod tests {
         use crate::contexts::execution_trace::ExecutedState::*;
 
         let vm_peer_id = String::from("test_peer_id");
-        let mut vm = create_aqua_vm(unit_call_service(), vm_peer_id.clone());
+        let mut vm = create_avm(unit_call_service(), vm_peer_id.clone());
 
         let service_id = String::from("local_service_id");
         let function_name = String::from("local_fn_name");
@@ -130,7 +130,7 @@ mod tests {
         use crate::contexts::execution_trace::ExecutedState::*;
 
         let some_local_peer_id = String::from("some_local_peer_id");
-        let mut vm = create_aqua_vm(echo_string_call_service(), some_local_peer_id.clone());
+        let mut vm = create_avm(echo_string_call_service(), some_local_peer_id.clone());
 
         let remote_peer_id = String::from("some_remote_peer_id");
         let script = format!(
@@ -149,8 +149,8 @@ mod tests {
     // Check that setting variables works as expected.
     #[test]
     fn variables() {
-        let mut vm = create_aqua_vm(unit_call_service(), "remote_peer_id");
-        let mut set_variable_vm = create_aqua_vm(set_variable_call_service(r#""remote_peer_id""#), "set_variable");
+        let mut vm = create_avm(unit_call_service(), "remote_peer_id");
+        let mut set_variable_vm = create_avm(set_variable_call_service(r#""remote_peer_id""#), "set_variable");
 
         let script = format!(
             r#"
@@ -170,7 +170,7 @@ mod tests {
     // Check that duplicate variables are impossible.
     #[test]
     fn duplicate_variables() {
-        let mut vm = create_aqua_vm(unit_call_service(), "some_peer_id");
+        let mut vm = create_avm(unit_call_service(), "some_peer_id");
 
         let script = format!(
             r#"
@@ -205,10 +205,10 @@ mod tests {
         });
 
         let vm_peer_id = String::from("A");
-        let mut vm = create_aqua_vm(call_service, vm_peer_id.clone());
+        let mut vm = create_avm(call_service, vm_peer_id.clone());
 
         let set_variable_vm_peer_id = String::from("set_variable");
-        let mut set_variable_vm = create_aqua_vm(
+        let mut set_variable_vm = create_avm(
             set_variable_call_service(r#""arg3_value""#),
             set_variable_vm_peer_id.clone(),
         );

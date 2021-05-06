@@ -15,7 +15,7 @@
  */
 
 use air_test_utils::call_vm;
-use air_test_utils::create_aqua_vm;
+use air_test_utils::create_avm;
 use air_test_utils::unit_call_service;
 use air_test_utils::CallServiceClosure;
 use air_test_utils::IValue;
@@ -40,11 +40,11 @@ fn join_chat() {
         ))
     });
 
-    let mut relay_1 = create_aqua_vm(unit_call_service(), "Relay1");
-    let mut relay_2 = create_aqua_vm(unit_call_service(), "Relay2");
-    let mut remote = create_aqua_vm(members_call_service1, "Remote");
-    let mut client_1 = create_aqua_vm(unit_call_service(), "A");
-    let mut client_2 = create_aqua_vm(unit_call_service(), "B");
+    let mut relay_1 = create_avm(unit_call_service(), "Relay1");
+    let mut relay_2 = create_avm(unit_call_service(), "Relay2");
+    let mut remote = create_avm(members_call_service1, "Remote");
+    let mut client_1 = create_avm(unit_call_service(), "A");
+    let mut client_2 = create_avm(unit_call_service(), "B");
 
     let script = String::from(
         r#"
@@ -203,9 +203,9 @@ fn join() {
         ))
     });
 
-    let mut relay_1 = create_aqua_vm(unit_call_service(), "Relay1");
-    let mut remote = create_aqua_vm(members_call_service1, "Remote");
-    let mut client_1 = create_aqua_vm(unit_call_service(), "A");
+    let mut relay_1 = create_avm(unit_call_service(), "Relay1");
+    let mut remote = create_avm(members_call_service1, "Remote");
+    let mut client_1 = create_avm(unit_call_service(), "A");
 
     let script = String::from(
         r#"
@@ -261,10 +261,10 @@ fn init_peer_id() {
 
     let initiator_peer_id = String::from("initiator");
 
-    let mut relay_1 = create_aqua_vm(unit_call_service(), "Relay1");
-    let mut remote = create_aqua_vm(members_call_service1, "Remote");
-    let mut client_1 = create_aqua_vm(unit_call_service(), "A");
-    let mut initiator = create_aqua_vm(unit_call_service(), initiator_peer_id.clone());
+    let mut relay_1 = create_avm(unit_call_service(), "Relay1");
+    let mut remote = create_avm(members_call_service1, "Remote");
+    let mut client_1 = create_avm(unit_call_service(), "A");
+    let mut initiator = create_avm(unit_call_service(), initiator_peer_id.clone());
 
     let script = String::from(
         r#"(seq

@@ -12,5 +12,5 @@
 cat << EOF > ./src/wasm.js
 // auto-generated
 
-module.exports = "$(base64 -w0 wasm/aquamarine_client_bg.wasm)";
+module.exports = "$(base64 -w0 wasm/air_interpreter_client_bg.wasm)";
 EOF

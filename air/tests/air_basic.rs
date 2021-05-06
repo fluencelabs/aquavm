@@ -15,7 +15,7 @@
  */
 
 use air_test_utils::call_vm;
-use air_test_utils::create_aqua_vm;
+use air_test_utils::create_avm;
 use air_test_utils::set_variables_call_service;
 use air_test_utils::unit_call_service;
 use air_test_utils::CallServiceClosure;
@@ -34,7 +34,7 @@ fn seq_par_call() {
     use air::execution_trace::ExecutedState::{self, *};
 
     let vm_peer_id = String::from("some_peer_id");
-    let mut vm = create_aqua_vm(unit_call_service(), vm_peer_id.clone());
+    let mut vm = create_avm(unit_call_service(), vm_peer_id.clone());
 
     let script = format!(
         r#"
@@ -70,7 +70,7 @@ fn par_par_call() {
     use air::execution_trace::ExecutedState::{self, *};
 
     let vm_peer_id = String::from("some_peer_id");
-    let mut vm = create_aqua_vm(unit_call_service(), vm_peer_id.clone());
+    let mut vm = create_avm(unit_call_service(), vm_peer_id.clone());
 
     let script = format!(
         r#"
@@ -129,7 +129,7 @@ fn create_service() {
         String::from("blueprint") => blueprint.to_string(),
     );
 
-    let mut set_variables_vm = create_aqua_vm(set_variables_call_service(variables_mapping), "set_variables");
+    let mut set_variables_vm = create_avm(set_variables_call_service(variables_mapping), "set_variables");
 
     let add_module_response = String::from("add_module response");
     let add_blueprint_response = String::from("add_blueprint response");
@@ -153,7 +153,7 @@ fn create_service() {
         ))
     });
 
-    let mut vm = create_aqua_vm(call_service, "A");
+    let mut vm = create_avm(call_service, "A");
 
     let script = include_str!("./scripts/create_service.clj");
 

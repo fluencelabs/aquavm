@@ -39,14 +39,14 @@ impl<'i> super::ExecutableInstruction<'i> for Seq<'i> {
 #[cfg(test)]
 mod tests {
     use air_test_utils::call_vm;
-    use air_test_utils::create_aqua_vm;
+    use air_test_utils::create_avm;
     use air_test_utils::unit_call_service;
 
     use serde_json::json;
 
     #[test]
     fn seq_remote_remote() {
-        let mut vm = create_aqua_vm(unit_call_service(), "");
+        let mut vm = create_avm(unit_call_service(), "");
 
         let script = String::from(
             r#"
@@ -67,7 +67,7 @@ mod tests {
     fn seq_local_remote() {
         let local_peer_id = "local_peer_id";
         let remote_peer_id = String::from("remote_peer_id");
-        let mut vm = create_aqua_vm(unit_call_service(), local_peer_id);
+        let mut vm = create_avm(unit_call_service(), local_peer_id);
 
         let script = format!(
             r#"

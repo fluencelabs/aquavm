@@ -160,7 +160,7 @@ mod tests {
     use crate::JValue;
 
     use air_test_utils::call_vm;
-    use air_test_utils::create_aqua_vm;
+    use air_test_utils::create_avm;
     use air_test_utils::echo_number_call_service;
     use air_test_utils::echo_string_call_service;
     use air_test_utils::set_variable_call_service;
@@ -177,8 +177,8 @@ mod tests {
         use crate::contexts::execution_trace::CallResult::*;
         use crate::contexts::execution_trace::ExecutedState::*;
 
-        let mut vm = create_aqua_vm(echo_number_call_service(), "A");
-        let mut set_variable_vm = create_aqua_vm(set_variable_call_service(r#"["1","2","3","4","5"]"#), "set_variable");
+        let mut vm = create_avm(echo_number_call_service(), "A");
+        let mut set_variable_vm = create_avm(set_variable_call_service(r#"["1","2","3","4","5"]"#), "set_variable");
 
         let lfold = String::from(
             r#"
@@ -210,8 +210,8 @@ mod tests {
         use crate::contexts::execution_trace::CallResult::*;
         use crate::contexts::execution_trace::ExecutedState::*;
 
-        let mut vm = create_aqua_vm(echo_number_call_service(), "A");
-        let mut set_variable_vm = create_aqua_vm(set_variable_call_service(r#"["1","2","3","4","5"]"#), "set_variable");
+        let mut vm = create_avm(echo_number_call_service(), "A");
+        let mut set_variable_vm = create_avm(set_variable_call_service(r#"["1","2","3","4","5"]"#), "set_variable");
 
         let rfold = String::from(
             r#"
@@ -243,8 +243,8 @@ mod tests {
         use crate::contexts::execution_trace::CallResult::*;
         use crate::contexts::execution_trace::ExecutedState::*;
 
-        let mut vm = create_aqua_vm(echo_number_call_service(), "A");
-        let mut set_variable_vm = create_aqua_vm(set_variable_call_service(r#"["1","2","3","4","5"]"#), "set_variable");
+        let mut vm = create_avm(echo_number_call_service(), "A");
+        let mut set_variable_vm = create_avm(set_variable_call_service(r#"["1","2","3","4","5"]"#), "set_variable");
 
         let script = String::from(
             r#"
@@ -287,7 +287,7 @@ mod tests {
 
     #[test]
     fn inner_fold_with_same_iterator() {
-        let mut vm = create_aqua_vm(set_variable_call_service(r#"["1","2","3","4","5"]"#), "set_variable");
+        let mut vm = create_avm(set_variable_call_service(r#"["1","2","3","4","5"]"#), "set_variable");
 
         let script = String::from(
             r#"
@@ -320,8 +320,8 @@ mod tests {
         use crate::contexts::execution_trace::CallResult::*;
         use crate::contexts::execution_trace::ExecutedState::*;
 
-        let mut vm = create_aqua_vm(echo_number_call_service(), "A");
-        let mut set_variable_vm = create_aqua_vm(set_variable_call_service(r#"[]"#), "set_variable");
+        let mut vm = create_avm(echo_number_call_service(), "A");
+        let mut set_variable_vm = create_avm(set_variable_call_service(r#"[]"#), "set_variable");
 
         let empty_fold = String::from(
             r#"
@@ -349,8 +349,8 @@ mod tests {
         use crate::contexts::execution_trace::CallResult::*;
         use crate::contexts::execution_trace::ExecutedState::*;
 
-        let mut vm = create_aqua_vm(echo_number_call_service(), "A");
-        let mut set_variable_vm = create_aqua_vm(set_variable_call_service(r#"{ "messages": [] }"#), "set_variable");
+        let mut vm = create_avm(echo_number_call_service(), "A");
+        let mut set_variable_vm = create_avm(set_variable_call_service(r#"{ "messages": [] }"#), "set_variable");
 
         let empty_fold = r#"
             (seq
@@ -374,8 +374,8 @@ mod tests {
     // Check that fold works with the join behaviour without hanging up.
     #[test]
     fn fold_with_join() {
-        let mut vm = create_aqua_vm(echo_number_call_service(), "A");
-        let mut set_variable_vm = create_aqua_vm(set_variable_call_service(r#"["1","2"]"#), "set_variable");
+        let mut vm = create_avm(echo_number_call_service(), "A");
+        let mut set_variable_vm = create_avm(set_variable_call_service(r#"["1","2"]"#), "set_variable");
 
         let fold_with_join = String::from(
             r#"
@@ -405,8 +405,8 @@ mod tests {
         use crate::contexts::execution_trace::CallResult::*;
         use crate::contexts::execution_trace::ExecutedState::*;
 
-        let mut vm = create_aqua_vm(echo_number_call_service(), "A");
-        let mut set_variable_vm = create_aqua_vm(
+        let mut vm = create_avm(echo_number_call_service(), "A");
+        let mut set_variable_vm = create_avm(
             set_variable_call_service(r#"{ "array": ["1","2","3","4","5"] }"#),
             "set_variable",
         );
@@ -444,9 +444,9 @@ mod tests {
         use crate::contexts::execution_trace::CallResult::*;
         use crate::contexts::execution_trace::ExecutedState::*;
 
-        let mut set_variables_vm = create_aqua_vm(set_variable_call_service(r#"["1","2"]"#), "set_variable");
-        let mut vm_a = create_aqua_vm(echo_string_call_service(), "A");
-        let mut vm_b = create_aqua_vm(echo_string_call_service(), "B");
+        let mut set_variables_vm = create_avm(set_variable_call_service(r#"["1","2"]"#), "set_variable");
+        let mut vm_a = create_avm(echo_string_call_service(), "A");
+        let mut vm_b = create_avm(echo_string_call_service(), "B");
 
         let script = String::from(
             r#"
@@ -500,9 +500,9 @@ mod tests {
         use crate::contexts::execution_trace::ExecutedState::*;
 
         fn execute_script(script: String) -> Result<InterpreterOutcome, AVMError> {
-            let mut set_variables_vm = create_aqua_vm(set_variable_call_service(r#"["1","2"]"#), "set_variable");
-            let mut vm_a = create_aqua_vm(echo_string_call_service(), "A");
-            let mut vm_b = create_aqua_vm(echo_string_call_service(), "B");
+            let mut set_variables_vm = create_avm(set_variable_call_service(r#"["1","2"]"#), "set_variable");
+            let mut vm_a = create_avm(echo_string_call_service(), "A");
+            let mut vm_b = create_avm(echo_string_call_service(), "B");
 
             let res = call_vm!(set_variables_vm, "", script.clone(), "[]", "[]");
             let res = call_vm!(vm_a, "", script.clone(), "[]", res.data);

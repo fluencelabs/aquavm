@@ -15,7 +15,7 @@
  */
 
 use air_test_utils::call_vm;
-use air_test_utils::create_aqua_vm;
+use air_test_utils::create_avm;
 use air_test_utils::set_variable_call_service;
 use air_test_utils::CallServiceClosure;
 use air_test_utils::IValue;
@@ -75,11 +75,11 @@ fn flattening_scalar_arrays() {
 
     let scalar_array = serde_json::to_string(&scalar_array).expect("the default serializer shouldn't fail");
     let set_variable_peer_id = "set_variable";
-    let mut set_variable_vm = create_aqua_vm(set_variable_call_service(scalar_array), set_variable_peer_id);
+    let mut set_variable_vm = create_avm(set_variable_call_service(scalar_array), set_variable_peer_id);
 
     let closure_call_args = ClosureCallArgs::default();
     let local_peer_id = "local_peer_id";
-    let mut local_vm = create_aqua_vm(create_check_service_closure(closure_call_args.clone()), local_peer_id);
+    let mut local_vm = create_avm(create_check_service_closure(closure_call_args.clone()), local_peer_id);
 
     let script = format!(
         r#"
@@ -119,11 +119,11 @@ fn flattening_streams() {
 
     let stream_value = serde_json::to_string(&stream_value).expect("the default serializer shouldn't fail");
     let set_variable_peer_id = "set_variable";
-    let mut set_variable_vm = create_aqua_vm(set_variable_call_service(stream_value), set_variable_peer_id);
+    let mut set_variable_vm = create_avm(set_variable_call_service(stream_value), set_variable_peer_id);
 
     let closure_call_args = ClosureCallArgs::default();
     let local_peer_id = "local_peer_id";
-    let mut local_vm = create_aqua_vm(create_check_service_closure(closure_call_args.clone()), local_peer_id);
+    let mut local_vm = create_avm(create_check_service_closure(closure_call_args.clone()), local_peer_id);
 
     let script = format!(
         r#"
@@ -169,11 +169,11 @@ fn test_handling_non_flattening_values() {
 
     let stream_value = serde_json::to_string(&stream_value).expect("the default serializer shouldn't fail");
     let set_variable_peer_id = "set_variable";
-    let mut set_variable_vm = create_aqua_vm(set_variable_call_service(stream_value), set_variable_peer_id);
+    let mut set_variable_vm = create_avm(set_variable_call_service(stream_value), set_variable_peer_id);
 
     let closure_call_args = ClosureCallArgs::default();
     let local_peer_id = "local_peer_id";
-    let mut local_vm = create_aqua_vm(create_check_service_closure(closure_call_args.clone()), local_peer_id);
+    let mut local_vm = create_avm(create_check_service_closure(closure_call_args.clone()), local_peer_id);
 
     let script = format!(
         r#"

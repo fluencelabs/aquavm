@@ -10,7 +10,7 @@ on:
 
 jobs:
   npm-publish:
-    name: "Publish Aquamarine to NPM & crates.io"
+    name: "Publish AIR to NPM & crates.io"
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -135,12 +135,12 @@ jobs:
             toml set Cargo.toml package.version "${{ env.FINAL_VERSION }}" | sponge Cargo.toml
           )
 
-      - name: Build aquamarine.wasm for node
+      - name: Build air_interpreter_server.wasm for node
         run: fce build --release -p aquamarine --features fce
         working-directory: interpreter
 
-      - name: Copy aquamarine.wasm to air-interpreter-wasm
-        run: cp target/wasm32-wasi/release/aquamarine.wasm crates/air-interpreter-wasm/aquamarine.wasm
+      - name: Copy air_interpreter_server.wasm to air-interpreter-wasm
+        run: cp target/wasm32-wasi/release/air_interpreter_server.wasm crates/air-interpreter-wasm/air_interpreter_server.wasm
 
       - name: Set project version to ${{ env.FINAL_VERSION }}
         run: |

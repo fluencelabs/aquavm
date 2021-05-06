@@ -1,4 +1,4 @@
-use air_test_utils::create_aqua_vm;
+use air_test_utils::create_avm;
 use air_test_utils::unit_call_service;
 use air_test_utils::AVMError;
 use air_test_utils::CallServiceClosure;
@@ -13,8 +13,8 @@ use criterion::Criterion;
 
 use std::cell::RefCell;
 
-thread_local!(static RELAY_1_VM: RefCell<AVM> = RefCell::new(create_aqua_vm(unit_call_service(), "Relay1")));
-thread_local!(static RELAY_2_VM: RefCell<AVM> = RefCell::new(create_aqua_vm(unit_call_service(), "Relay2")));
+thread_local!(static RELAY_1_VM: RefCell<AVM> = RefCell::new(create_avm(unit_call_service(), "Relay1")));
+thread_local!(static RELAY_2_VM: RefCell<AVM> = RefCell::new(create_avm(unit_call_service(), "Relay2")));
 thread_local!(static REMOTE_VM: RefCell<AVM> = RefCell::new({
     let members_call_service: CallServiceClosure = Box::new(|_, _| -> Option<IValue> {
         Some(IValue::Record(
@@ -26,10 +26,10 @@ thread_local!(static REMOTE_VM: RefCell<AVM> = RefCell::new({
         ))
     });
 
-    create_aqua_vm(members_call_service, "Remote")
+    create_avm(members_call_service, "Remote")
 }));
-thread_local!(static CLIENT_1_VM: RefCell<AVM> = RefCell::new(create_aqua_vm(unit_call_service(), "A")));
-thread_local!(static CLIENT_2_VM: RefCell<AVM> = RefCell::new(create_aqua_vm(unit_call_service(), "B")));
+thread_local!(static CLIENT_1_VM: RefCell<AVM> = RefCell::new(create_avm(unit_call_service(), "A")));
+thread_local!(static CLIENT_2_VM: RefCell<AVM> = RefCell::new(create_avm(unit_call_service(), "B")));
 
 fn chat_sent_message_benchmark() -> Result<InterpreterOutcome, AVMError> {
     let script = String::from(

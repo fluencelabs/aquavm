@@ -16,7 +16,7 @@
 
 use air::SecurityTetraplet;
 use air_test_utils::call_vm;
-use air_test_utils::create_aqua_vm;
+use air_test_utils::create_avm;
 use air_test_utils::fallible_call_service;
 use air_test_utils::unit_call_service;
 use air_test_utils::CallServiceClosure;
@@ -60,16 +60,16 @@ fn create_check_service_closure(
 #[test]
 fn last_error_tetraplets() {
     let set_variable_peer_id = "set_variable";
-    let mut set_variable_vm = create_aqua_vm(unit_call_service(), set_variable_peer_id);
+    let mut set_variable_vm = create_avm(unit_call_service(), set_variable_peer_id);
 
     let fallible_peer_id = "fallible_peer_id";
-    let mut fallible_vm = create_aqua_vm(fallible_call_service("fallible_call_service"), fallible_peer_id);
+    let mut fallible_vm = create_avm(fallible_call_service("fallible_call_service"), fallible_peer_id);
 
     let local_peer_id = "local_peer_id";
 
     let args = Rc::new(RefCell::new(None));
     let tetraplets = Rc::new(RefCell::new(None));
-    let mut local_vm = create_aqua_vm(
+    let mut local_vm = create_avm(
         create_check_service_closure(args.clone(), tetraplets.clone()),
         local_peer_id,
     );
@@ -98,13 +98,13 @@ fn last_error_tetraplets() {
 #[test]
 fn not_clear_last_error_in_match() {
     let set_variable_peer_id = "set_variable";
-    let mut set_variable_vm = create_aqua_vm(unit_call_service(), set_variable_peer_id);
+    let mut set_variable_vm = create_avm(unit_call_service(), set_variable_peer_id);
 
     let local_peer_id = "local_peer_id";
 
     let args = Rc::new(RefCell::new(None));
     let tetraplets = Rc::new(RefCell::new(None));
-    let mut local_vm = create_aqua_vm(
+    let mut local_vm = create_avm(
         create_check_service_closure(args.clone(), tetraplets.clone()),
         local_peer_id,
     );
@@ -136,13 +136,13 @@ fn not_clear_last_error_in_match() {
 #[test]
 fn not_clear_last_error_in_mismatch() {
     let set_variable_peer_id = "set_variable";
-    let mut set_variable_vm = create_aqua_vm(unit_call_service(), set_variable_peer_id);
+    let mut set_variable_vm = create_avm(unit_call_service(), set_variable_peer_id);
 
     let local_peer_id = "local_peer_id";
 
     let args = Rc::new(RefCell::new(None));
     let tetraplets = Rc::new(RefCell::new(None));
-    let mut local_vm = create_aqua_vm(
+    let mut local_vm = create_avm(
         create_check_service_closure(args.clone(), tetraplets.clone()),
         local_peer_id,
     );

@@ -36,7 +36,7 @@ jobs:
           command: update
 
       - name: fce build --release
-        working-directory: ./interpreter
+        working-directory: ./air-interpreter
         shell: bash
         run: fce build --release --features fce
 
@@ -48,4 +48,4 @@ jobs:
           prerelease: false
           files: |
             LICENSE
-            target/wasm32-wasi/release/aquamarine.wasm
+            target/wasm32-wasi/release/air_interpreter_server.wasm

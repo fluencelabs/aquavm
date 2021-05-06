@@ -40,11 +40,11 @@ use std::path::PathBuf;
 
 type JValue = serde_json::Value;
 
-pub fn create_aqua_vm(call_service: CallServiceClosure, current_peer_id: impl Into<String>) -> AVM {
+pub fn create_avm(call_service: CallServiceClosure, current_peer_id: impl Into<String>) -> AVM {
     let tmp_dir = std::env::temp_dir();
 
     let config = AVMConfig {
-        aquamarine_wasm_path: PathBuf::from("../target/wasm32-wasi/debug/aquamarine.wasm"),
+        air_wasm_path: PathBuf::from("../target/wasm32-wasi/debug/air_interpreter_server.wasm"),
         call_service,
         current_peer_id: current_peer_id.into(),
         particle_data_store: tmp_dir,

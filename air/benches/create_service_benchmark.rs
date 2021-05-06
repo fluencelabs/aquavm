@@ -1,4 +1,4 @@
-use air_test_utils::create_aqua_vm;
+use air_test_utils::create_avm;
 use air_test_utils::set_variables_call_service;
 use air_test_utils::AVMError;
 use air_test_utils::CallServiceClosure;
@@ -38,7 +38,7 @@ thread_local!(static VM: RefCell<AVM> = RefCell::new({
         ))
     });
 
-    create_aqua_vm(call_service, "A")
+    create_avm(call_service, "A")
 }));
 
 thread_local!(static SET_VARIABLES_VM: RefCell<AVM> = RefCell::new({
@@ -65,7 +65,7 @@ thread_local!(static SET_VARIABLES_VM: RefCell<AVM> = RefCell::new({
         String::from("blueprint") => blueprint.to_string(),
     );
 
-    create_aqua_vm(set_variables_call_service(variables_mapping), "set_variables")
+    create_avm(set_variables_call_service(variables_mapping), "set_variables")
 }));
 
 fn create_service_benchmark() -> Result<InterpreterOutcome, AVMError> {

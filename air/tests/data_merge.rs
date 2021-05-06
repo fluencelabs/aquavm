@@ -15,7 +15,7 @@
  */
 
 use air_test_utils::call_vm;
-use air_test_utils::create_aqua_vm;
+use air_test_utils::create_avm;
 use air_test_utils::set_variable_call_service;
 use air_test_utils::CallServiceClosure;
 use air_test_utils::IValue;
@@ -40,8 +40,8 @@ fn data_merge() {
         ))
     });
 
-    let mut vm1 = create_aqua_vm(neighborhood_call_service1, "A");
-    let mut vm2 = create_aqua_vm(neighborhood_call_service2, "B");
+    let mut vm1 = create_avm(neighborhood_call_service1, "A");
+    let mut vm2 = create_avm(neighborhood_call_service2, "B");
 
     let script = String::from(
         r#"
@@ -183,8 +183,8 @@ fn acc_merge() {
         ))
     });
 
-    let mut vm1 = create_aqua_vm(set_variable_call_service(r#""peer_id""#), "A");
-    let mut vm2 = create_aqua_vm(neighborhood_call_service, "B");
+    let mut vm1 = create_avm(set_variable_call_service(r#""peer_id""#), "A");
+    let mut vm2 = create_avm(neighborhood_call_service, "B");
 
     let script = String::from(
         r#"

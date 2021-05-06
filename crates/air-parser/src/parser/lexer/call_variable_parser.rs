@@ -197,7 +197,7 @@ impl<'input> CallVariableParser<'input> {
     }
 
     fn try_parse_as_alphanumeric(&self) -> LexerResult<()> {
-        if !self.aqua_alphanumeric() {
+        if !self.air_alphanumeric() {
             let error_pos = self.pos_in_string_to_parse();
             return Err(LexerError::IsNotAlphanumeric(error_pos, error_pos));
         }
@@ -246,8 +246,8 @@ impl<'input> CallVariableParser<'input> {
         self.state.first_dot_met_pos.is_some()
     }
 
-    fn aqua_alphanumeric(&self) -> bool {
-        super::is_aqua_alphanumeric(self.current_char())
+    fn air_alphanumeric(&self) -> bool {
+        super::is_air_alphanumeric(self.current_char())
     }
 
     fn json_path_allowed_char(&self) -> bool {
