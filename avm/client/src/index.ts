@@ -46,7 +46,7 @@ type ImportObject = {
     './air_interpreter_client_bg.js': {
         // fn call_service_impl(service_id: String, fn_name: String, args: String, security_tetraplets: String) -> String;
         // prettier-ignore
-        __wbg_callserviceimpl_d5849c05cb19df30: (arg0: any, arg1: any, arg2: any, arg3: any, arg4: any, arg5: any, arg6: any, arg7: any, arg8: any, ) => void;
+        __wbg_callserviceimpl_6ea5db923e95be46: (arg0: any, arg1: any, arg2: any, arg3: any, arg4: any, arg5: any, arg6: any, arg7: any, arg8: any, ) => void;
         __wbg_getcurrentpeeridimpl_20a1d2447bdbf3bc: (arg0: any) => void;
         __wbindgen_throw: (arg: any) => void;
     };
@@ -133,7 +133,7 @@ function newImportObject(
         // If so, an error with a new name will be occurred after wasm initialization.
         './air_interpreter_client_bg.js': {
             // prettier-ignore
-            __wbg_callserviceimpl_d5849c05cb19df30: (arg0: any, arg1: any, arg2: any, arg3: any, arg4: any, arg5: any, arg6: any, arg7: any, arg8: any) => {
+            __wbg_callserviceimpl_6ea5db923e95be46: (arg0: any, arg1: any, arg2: any, arg3: any, arg4: any, arg5: any, arg6: any, arg7: any, arg8: any) => {
                 let wasm = cfg.exports;
                 let serviceId = getStringFromWasm0(wasm, arg1, arg2);
                 let fnName = getStringFromWasm0(wasm, arg3, arg4);
