@@ -71,7 +71,7 @@ jobs:
           JS_PKG_NAME="@fluencelabs/air-interpreter"
 
           # get version from Cargo.toml
-          STEPPER_RUST_VERSION="$(toml get "$INTERPRETER_CARGO_TOML" package.version | tr -d \")"
+          INTERPRETER_RUST_VERSION="$(toml get "$INTERPRETER_CARGO_TOML" package.version | tr -d \")"
           LOCAL_RUST_VERSION="$(toml get "$CARGO_TOML" package.version | tr -d \")"
 
           # get & increment version from NPM
@@ -86,7 +86,7 @@ jobs:
           NEXT_RS_VERSION="$(semver --increment patch "$MAX_RS_VERSION" || true)"
 
           # take the highest version
-          MAX_VERSION="$(semver "$NEXT_JS_VERSION" "$NEXT_RS_VERSION" "$LOCAL_RUST_VERSION" "$STEPPER_RUST_VERSION" | tail -n1)"
+          MAX_VERSION="$(semver "$NEXT_JS_VERSION" "$NEXT_RS_VERSION" "$LOCAL_RUST_VERSION" "$INTERPRETER_RUST_VERSION" | tail -n1)"
 
           echo "FINAL_VERSION=$MAX_VERSION" | tee -a $GITHUB_ENV
           echo "JS_PKG_NAME=$JS_PKG_NAME" | tee -a $GITHUB_ENV

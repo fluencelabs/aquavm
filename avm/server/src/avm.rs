@@ -51,7 +51,7 @@ impl DerefMut for SendSafeFaaS {
     }
 }
 
-/// Information about the particle that is being executed by the stepper at the moment
+/// Information about the particle that is being executed by the interpreter at the moment
 #[derive(Debug, Default, Clone)]
 pub struct ParticleParameters {
     pub init_user_id: String,
