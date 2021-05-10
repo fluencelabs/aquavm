@@ -10,7 +10,7 @@ on:
 
 jobs:
   npm-publish:
-    name: "Publish Aquamarine to NPM & crates.io"
+    name: "Publish AIR to NPM & crates.io"
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -64,14 +64,18 @@ jobs:
           # JQ version regex pattern
           PAT="\\\\d+.\\\\d+.\\\\d+"
 
-          STEPPER_CARGO_TOML="interpreter/Cargo.toml"
+          INTERPRETER_CARGO_TOML="interpreter/Cargo.toml"
           CARGO_TOML="crates/air-interpreter-wasm/Cargo.toml"
+          PACKAGE_JSON="avm/client/package.json"
+
           # get package name from Cargo.toml
           RS_PKG_NAME="$(toml get "$CARGO_TOML" package.name | tr -d \")"
-          JS_PKG_NAME="@fluencelabs/aquamarine-interpreter"
+
+          # get package name from package.json
+          JS_PKG_NAME="$(cat "$PACKAGE_JSON" | jq -r .name)"
 
           # get version from Cargo.toml
-          STEPPER_RUST_VERSION="$(toml get "$STEPPER_CARGO_TOML" package.version | tr -d \")"
+          INTERPRETER_RUST_VERSION="$(toml get "$INTERPRETER_CARGO_TOML" package.version | tr -d \")"
           LOCAL_RUST_VERSION="$(toml get "$CARGO_TOML" package.version | tr -d \")"
 
           # get & increment version from NPM
@@ -86,7 +90,7 @@ jobs:
           NEXT_RS_VERSION="$(semver --increment patch "$MAX_RS_VERSION" || true)"
 
           # take the highest version
-          MAX_VERSION="$(semver "$NEXT_JS_VERSION" "$NEXT_RS_VERSION" "$LOCAL_RUST_VERSION" "$STEPPER_RUST_VERSION" | tail -n1)"
+          MAX_VERSION="$(semver "$NEXT_JS_VERSION" "$NEXT_RS_VERSION" "$LOCAL_RUST_VERSION" "$INTERPRETER_RUST_VERSION" | tail -n1)"
 
           echo "FINAL_VERSION=$MAX_VERSION" | tee -a $GITHUB_ENV
           echo "JS_PKG_NAME=$JS_PKG_NAME" | tee -a $GITHUB_ENV
@@ -97,7 +101,7 @@ jobs:
         continue-on-error: true
 
       - name: Build npm package
-        working-directory: npm
+        working-directory: avm/client
         run: |
           ./build_wasm.sh
           npm i
@@ -106,7 +110,7 @@ jobs:
       ### Set version
       - name: Set version to ${{ env.FINAL_VERSION }}
         run: yarn version --new-version ${{ env.FINAL_VERSION }} --no-git-tag-version
-        working-directory: npm
+        working-directory: avm/client
 
       ### Publish to NPM registry
       - uses: actions/setup-node@v1
@@ -115,7 +119,7 @@ jobs:
           registry-url: "https://registry.npmjs.org"
 
       - run: npm publish --access public
-        working-directory: npm
+        working-directory: avm/client
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -131,16 +135,16 @@ jobs:
             toml set Cargo.toml package.version "${{ env.FINAL_VERSION }}" | sponge Cargo.toml
           )
           (
-            cd interpreter-lib
+            cd air
             toml set Cargo.toml package.version "${{ env.FINAL_VERSION }}" | sponge Cargo.toml
           )
 
-      - name: Build aquamarine.wasm for node
-        run: fce build --release -p aquamarine --features fce
+      - name: Build air_interpreter_server.wasm for node
+        run: fce build --release -p air-interpreter --features fce
         working-directory: interpreter
 
-      - name: Copy aquamarine.wasm to air-interpreter-wasm
-        run: cp target/wasm32-wasi/release/aquamarine.wasm crates/air-interpreter-wasm/aquamarine.wasm
+      - name: Copy air_interpreter_server.wasm to air-interpreter-wasm
+        run: cp target/wasm32-wasi/release/air_interpreter_server.wasm crates/air-interpreter-wasm/air_interpreter_server.wasm
 
       - name: Set project version to ${{ env.FINAL_VERSION }}
         run: |

@@ -37,7 +37,7 @@ thread_local!(static PARSER: AIRParser = AIRParser::new());
 /// Parse AIR `source_code` to `Box<Instruction>`
 pub fn parse(air_script: &str) -> Result<Box<Instruction<'_>>, String> {
     let mut files = SimpleFiles::new();
-    let file_id = files.add("script.aqua", air_script);
+    let file_id = files.add("script.air", air_script);
 
     PARSER.with(|parser| {
         let mut errors = Vec::new();

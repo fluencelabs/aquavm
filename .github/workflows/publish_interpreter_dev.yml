@@ -71,8 +71,9 @@ jobs:
           yarn global add semver
           PATH="$(yarn global bin):$PATH"
 
-          INTERPRETER_CARGO_TOML="interpreter/Cargo.toml"
+          INTERPRETER_CARGO_TOML="air-interpreter/Cargo.toml"
           CARGO_TOML="crates/air-interpreter-wasm/Cargo.toml"
+          PACKAGE_JSON="avm/client/package.json"
 
           # sanitize branch name so it can be used as a semver suffix (replace [^0-9a-zA-Z-] with hyphen)
           SANITIZED_BRANCH="$(echo -n "${{ env.BRANCH_NAME }}" | tr -C '[:alnum:]-' -)"
@@ -81,7 +82,9 @@ jobs:
 
           # get package name from Cargo.toml
           PKG_NAME="$(toml get "$CARGO_TOML" package.name | tr -d \")"
-          JS_PKG_NAME="@fluencelabs/aquamarine-interpreter"
+
+          # get package name from package.json
+          JS_PKG_NAME="$(cat "$PACKAGE_JSON" | jq -r .name)"
 
           ### NPM
           # take all versions from npm and replace single quotes with double quotes
@@ -124,7 +127,7 @@ jobs:
         continue-on-error: true
 
       - name: Build npm package
-        working-directory: npm
+        working-directory: avm/client
         run: |
           ./build_wasm.sh
           npm i
@@ -132,7 +135,7 @@ jobs:
 
       ### Set version to FINAL_VERSION
       - run: yarn version --new-version ${{ env.FINAL_VERSION }} --no-git-tag-version || true
-        working-directory: npm
+        working-directory: avm/client
 
       ### Publish to NPM registry
       - uses: actions/setup-node@v1
@@ -141,7 +144,7 @@ jobs:
           registry-url: "https://registry.npmjs.org"
 
       - run: npm publish --access public --tag=beta
-        working-directory: npm
+        working-directory: avm/client
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -153,14 +156,14 @@ jobs:
         run: |
           PATH="~/.cargo/bin:$PATH"
           toml set Cargo.toml package.version "${{ env.FINAL_VERSION }}" | sponge Cargo.toml
-        working-directory: interpreter-lib
+        working-directory: air
 
-      - name: Build aquamarine.wasm for node
-        run: fce build -p aquamarine --release --features fce
-        working-directory: interpreter
+      - name: Build air_interpreter_server.wasm for node
+        run: fce build -p air-interpreter --release --features fce
+        working-directory: air-interpreter
 
-      - name: Copy aquamarine.wasm to air-interpreter-wasm
-        run: cp target/wasm32-wasi/release/aquamarine.wasm crates/air-interpreter-wasm/aquamarine.wasm
+      - name: Copy air_interpreter_server.wasm to air-interpreter-wasm
+        run: cp target/wasm32-wasi/release/air_interpreter_server.wasm crates/air-interpreter-wasm/air_interpreter_server.wasm
 
       - name: Set project name@version to ${{ env.PKG_NAME }}@${{ env.FINAL_VERSION }}
         run: |

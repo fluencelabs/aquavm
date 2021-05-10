@@ -8,7 +8,7 @@ edition = "2018"
 include = [
     "**/*.rs",
     "Cargo.toml",
-    "aquamarine.wasm"
+    "air_interpreter_server.wasm"
 ]
 
 [build-dependencies]

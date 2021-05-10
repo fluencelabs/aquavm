@@ -62,6 +62,7 @@ use crate::parser::ParserError;
 impl<'err, 'input, 'i> __ToTriple<'err, 'input, 'i>
     for Result<(usize, Token<'input>, usize), LexerError>
 {
+    #[allow(clippy::wrong_self_convention)]
     fn to_triple(
         value: Self,
     ) -> Result<

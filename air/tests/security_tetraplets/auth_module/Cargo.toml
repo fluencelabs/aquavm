@@ -1,0 +1,15 @@
+[package]
+name = "auth_module"
+version = "0.1.0"
+authors = ["Fluence Labs"]
+edition = "2018"
+
+[[bin]]
+name = "auth_module"
+path = "src/main.rs"
+
+[dependencies]
+air = { path = "../../../../air" }
+fluence = "0.6.1"
+
+[workspace]
