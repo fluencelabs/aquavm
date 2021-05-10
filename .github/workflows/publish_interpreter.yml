@@ -5,8 +5,8 @@ name: "publish-interpreter"
 
 on:
   push:
-#    branches:
-#      - "master"
+    branches:
+      - "master"
 
 jobs:
   npm-publish:
