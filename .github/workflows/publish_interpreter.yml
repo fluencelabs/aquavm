@@ -5,8 +5,8 @@ name: "publish-interpreter"
 
 on:
   push:
-    branches:
-      - "master"
+#    branches:
+#      - "master"
 
 jobs:
   npm-publish:
@@ -57,6 +57,8 @@ jobs:
 
       - name: Get versions from npm & crates.io, and take the highest one
         run: |
+          set -x
+
           # install semver and add it to PATH
           yarn global add semver
           PATH="$(yarn global bin):$PATH"
@@ -94,6 +96,8 @@ jobs:
 
           echo "FINAL_VERSION=$MAX_VERSION" | tee -a $GITHUB_ENV
           echo "JS_PKG_NAME=$JS_PKG_NAME" | tee -a $GITHUB_ENV
+
+          exit 777
 
       ### === JavaScript package release ===
       - name: Install wasm-pack
