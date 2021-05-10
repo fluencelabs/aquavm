@@ -15,7 +15,7 @@
 
 ## Fluence stack
 
-Fluence [nodes](https://github.com/fluencelabs/fluence) use Aqua to coordinate requests between different services run by [FCE](https://github.com/fluencelabs/fce):
+Fluence [nodes](https://github.com/fluencelabs/fluence) uses AIR to coordinate requests between different services run by [Marine](https://github.com/fluencelabs/marine):
 
 <br/>
 <p align="center" width="100%">
@@ -88,4 +88,3 @@ Scripts written in AIR look like this:
 
 - `null` takes no arguments
 - does nothing, useful for code generation
-
