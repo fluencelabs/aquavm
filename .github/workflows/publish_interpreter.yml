@@ -66,7 +66,7 @@ jobs:
           # JQ version regex pattern
           PAT="\\\\d+.\\\\d+.\\\\d+"
 
-          INTERPRETER_CARGO_TOML="interpreter/Cargo.toml"
+          INTERPRETER_CARGO_TOML="air-interpreter/Cargo.toml"
           CARGO_TOML="crates/air-interpreter-wasm/Cargo.toml"
           PACKAGE_JSON="avm/client/package.json"
 
