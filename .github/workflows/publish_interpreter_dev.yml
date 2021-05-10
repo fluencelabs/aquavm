@@ -73,6 +73,7 @@ jobs:
 
           INTERPRETER_CARGO_TOML="air-interpreter/Cargo.toml"
           CARGO_TOML="crates/air-interpreter-wasm/Cargo.toml"
+          PACKAGE_JSON="avm/client/package.json"
 
           # sanitize branch name so it can be used as a semver suffix (replace [^0-9a-zA-Z-] with hyphen)
           SANITIZED_BRANCH="$(echo -n "${{ env.BRANCH_NAME }}" | tr -C '[:alnum:]-' -)"
@@ -81,7 +82,9 @@ jobs:
 
           # get package name from Cargo.toml
           PKG_NAME="$(toml get "$CARGO_TOML" package.name | tr -d \")"
-          JS_PKG_NAME="@fluencelabs/air-interpreter"
+
+          # get package name from package.json
+          JS_PKG_NAME="$(cat "$PACKAGE_JSON" | jq -r .name)"
 
           ### NPM
           # take all versions from npm and replace single quotes with double quotes
