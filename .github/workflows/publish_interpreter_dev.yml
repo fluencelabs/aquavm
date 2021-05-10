@@ -156,7 +156,7 @@ jobs:
         working-directory: air
 
       - name: Build air_interpreter_server.wasm for node
-        run: fce build -p air_interpreter_server --release --features fce
+        run: fce build -p air-interpreter --release --features fce
         working-directory: air-interpreter
 
       - name: Copy air_interpreter_server.wasm to air-interpreter-wasm
