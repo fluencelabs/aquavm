@@ -34,7 +34,9 @@ function getUint8Memory0(wasm) {
     return cachegetUint8Memory0;
 }
 
-let cachedTextEncoder = new TextEncoder();
+const lTextEncoder = typeof TextEncoder === 'undefined' ? module.require('util').TextEncoder : TextEncoder;
+
+let cachedTextEncoder = new lTextEncoder('utf-8');
 
 const encodeString =
     typeof cachedTextEncoder.encodeInto === 'function'
@@ -97,9 +99,9 @@ function getInt32Memory0(wasm) {
     return cachegetInt32Memory0;
 }
 
-let cachedTextDecoder = new TextDecoder('utf-8', { ignoreBOM: true, fatal: true });
+const lTextDecoder = typeof TextDecoder === 'undefined' ? module.require('util').TextDecoder : TextDecoder;
 
-cachedTextDecoder.decode();
+let cachedTextDecoder = new lTextDecoder('utf-8', { ignoreBOM: true, fatal: true });
 
 export function getStringFromWasm0(wasm, ptr, len) {
     return cachedTextDecoder.decode(getUint8Memory0(wasm).subarray(ptr, ptr + len));
