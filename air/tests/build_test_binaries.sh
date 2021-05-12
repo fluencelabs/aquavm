@@ -6,5 +6,5 @@ for dir in ./security_tetraplets/*; do
     # skip non-directory entries
     [ -d "$dir" ] || continue
 
-    (cd "$dir"; fce build)
+    (cd "$dir"; marine build)
 done

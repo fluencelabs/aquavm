@@ -10,7 +10,7 @@ path = "src/lib.rs"
 
 [dependencies]
 air-parser = { path = "../crates/air-parser" }
-fluence = { version = "0.6.1", features = ["logger"] }
+fluence = { version = "0.6.5", features = ["logger"] }
 polyplets = { path = "../crates/polyplets" }
 air-interpreter-interface = { path = "../crates/interpreter-interface" }
 
@@ -53,4 +53,4 @@ harness = false
 [features]
 # indicates that this library should be compiled for the wasm bindgen target
 # otherwise it will be compiled to the FCE target
-fce = []
+marine = []

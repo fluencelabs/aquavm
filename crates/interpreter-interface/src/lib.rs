@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use fluence::fce;
+use fluence::marine;
 
 use fluence_it_types::IValue;
 use serde::Deserialize;
@@ -23,7 +23,7 @@ use serde::Serialize;
 pub const INTERPRETER_SUCCESS: i32 = 0;
 
 /// Describes a result returned at the end of the interpreter execution.
-#[fce]
+#[marine]
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct InterpreterOutcome {
     /// A return code, where INTERPRETER_SUCCESS means success.

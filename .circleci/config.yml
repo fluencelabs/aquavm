@@ -20,10 +20,10 @@ jobs:
           rustup component add rustfmt
           rustup component add clippy
 
-          cargo install --force fcli
+          cargo install --force marine
 
           # build a Wasm binary for interpreter
-          (cd air-interpreter; fce build --features fce)
+          (cd air-interpreter; marine build --features marine)
 
           # build Wasm binaries for tests
           (cd air/tests/; ./build_test_binaries.sh)

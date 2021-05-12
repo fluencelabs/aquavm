@@ -25,17 +25,17 @@
     unreachable_patterns
 )]
 
-use fluence::fce;
+use fluence::marine;
 
 fn main() {}
 
-#[fce]
+#[marine]
 pub struct CallServiceResult {
     pub ret_code: i32,
     pub result: String,
 }
 
-#[fce]
+#[marine]
 pub fn call_service(
     service_id: String,
     fn_name: String,
