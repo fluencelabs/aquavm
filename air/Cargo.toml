@@ -52,5 +52,5 @@ harness = false
 
 [features]
 # indicates that this library should be compiled for the wasm bindgen target
-# otherwise it will be compiled to the FCE target
+# otherwise it will be compiled to the Marine target
 marine = []
