@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-pub(super) fn is_aqua_alphanumeric(ch: char) -> bool {
+pub(super) fn is_air_alphanumeric(ch: char) -> bool {
     ch.is_alphanumeric() || ch == '_' || ch == '-'
 }
 
@@ -37,6 +37,6 @@ pub(super) fn is_json_path_allowed_char(ch: char) -> bool {
         ',' => true,
         '"' => true,
         '\'' => true,
-        ch => is_aqua_alphanumeric(ch),
+        ch => is_air_alphanumeric(ch),
     }
 }

@@ -84,7 +84,7 @@ impl<'i> VariableValidator<'i> {
         self.unresolved_iterables.insert(iterable_name, span);
     }
 
-    pub(super) fn finalize<'err>(&self) -> Vec<ErrorRecovery<usize, Token<'i>, ParserError>> {
+    pub(super) fn finalize(&self) -> Vec<ErrorRecovery<usize, Token<'i>, ParserError>> {
         let mut errors = Vec::new();
         for (name, span) in self.unresolved_variables.iter() {
             if !self.contains_variable(name, *span) {
@@ -192,8 +192,10 @@ impl<'i> VariableValidator<'i> {
 
     fn met_matchable(&mut self, matchable: &MatchableValue<'i>, span: Span) {
         match matchable {
-            MatchableValue::Number(_) | MatchableValue::Boolean(_) | MatchableValue::Literal(_) => {
-            }
+            MatchableValue::InitPeerId
+            | MatchableValue::Number(_)
+            | MatchableValue::Boolean(_)
+            | MatchableValue::Literal(_) => {}
             MatchableValue::Variable(variable) => self.met_variable(variable, span),
             MatchableValue::JsonPath { variable, .. } => self.met_variable(variable, span),
         }

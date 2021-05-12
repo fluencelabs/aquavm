@@ -1,5 +1,5 @@
 [![crates.io version](https://img.shields.io/crates/v/air-interpreter-wasm?style=flat-square)](https://crates.io/crates/air-interpreter-wasm)
-[![npm version](https://img.shields.io/npm/v/@fluencelabs/aquamarine-interpreter)](https://www.npmjs.com/package/@fluencelabs/aquamarine-interpreter)
+[![npm version](https://img.shields.io/npm/v/@fluencelabs/air-interpreter)](https://www.npmjs.com/package/@fluencelabs/air-interpreter)
 
 # Aquamarine
 
@@ -15,7 +15,7 @@
 
 ## Fluence stack
 
-Fluence [nodes](https://github.com/fluencelabs/fluence) use aquamarine to coordinate requests between different services run by [FCE](https://github.com/fluencelabs/fce):
+Fluence [nodes](https://github.com/fluencelabs/fluence) uses AIR to coordinate requests between different services run by [Marine](https://github.com/fluencelabs/marine):
 
 <br/>
 <p align="center" width="100%">
@@ -88,4 +88,3 @@ Scripts written in AIR look like this:
 
 - `null` takes no arguments
 - does nothing, useful for code generation
-

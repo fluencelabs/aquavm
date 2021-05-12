@@ -94,14 +94,16 @@ CallInstrValue: CallInstrValue<'input> = {
     <l:Literal> => CallInstrValue::Literal(l),
     <a:Alphanumeric> => CallInstrValue::Variable(Variable::Scalar(a)),
     <s:Stream> => CallInstrValue::Variable(Variable::Stream(s)),
-    <l: @L> <v:JsonPath> <r: @R> => {
-        let should_flatten = v.2;
+    <l: @L> <j:JsonPath> <r: @R> => {
+        let variable = j.0;
+        let path = j.1;
+        let should_flatten = j.2;
         // Due the json path constraints json path should be flattened in a call triplet.
         if !should_flatten {
-            let token = Token::VariableWithJsonPath(v.0.clone(), v.1, v.2);
+            let token = Token::VariableWithJsonPath(variable.clone(), path, should_flatten);
             errors.push(make_flattened_error(l, token, r));
         }
-        CallInstrValue::JsonPath { variable: v.0, path: v.1, should_flatten }
+        CallInstrValue::JsonPath { variable, path, should_flatten }
     },
     InitPeerId => CallInstrValue::InitPeerId,
 }
@@ -126,6 +128,7 @@ Iterable: IterableValue<'input> = {
 }
 
 Matchable: MatchableValue<'input> = {
+    InitPeerId => MatchableValue::InitPeerId,
     <v:Alphanumeric> => MatchableValue::Variable(Variable::Scalar(v)),
     <v:Stream> => MatchableValue::Variable(Variable::Stream(v)),
     <s:Literal> => MatchableValue::Literal(s),

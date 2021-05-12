@@ -1,18 +1,19 @@
 [workspace]
 members = [
+    "air",
+    "air-interpreter",
     "crates/air-parser",
     "crates/polyplets",
     "crates/interpreter-interface",
     "crates/test-module",
     "crates/test-utils",
-    "interpreter",
-    "interpreter-lib"
+    "avm/server",
 ]
 
 exclude = [
+    "air/tests/security_tetraplets/auth_module",
+    "air/tests/security_tetraplets/log_storage",
     "crates/air-interpreter-wasm",
-    "interpreter-lib/tests/security_tetraplets/auth_module",
-    "interpreter-lib/tests/security_tetraplets/log_storage",
 ]
 
 [profile.release]

@@ -10,7 +10,7 @@ on:
 
 jobs:
   npm-publish:
-    name: "Publish Aquamarine to NPM & crates.io"
+    name: "Publish AIR to NPM & crates.io"
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -20,7 +20,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-### Prepare cargo & toolchains
+      ### Prepare cargo & toolchains
       - uses: actions/cache@v2
         with:
           path: |
@@ -28,7 +28,7 @@ jobs:
             ~/.cargo/git
             ~/.cargo/bin
             target
-          key: ${{ runner.os }}-cargo-v1-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-v2-${{ hashFiles('**/Cargo.lock') }}
       - name: Install Rust toolchain with wasm32-unknown-unknown
         uses: actions-rs/toolchain@v1
         with:
@@ -48,7 +48,7 @@ jobs:
           command: update
           args: --aggressive
 
-### Calculate FINAL_VERSION
+      ### Calculate FINAL_VERSION
       - name: Install jq & sponge
         run: sudo apt-get update && sudo apt-get --yes --force-yes install jq moreutils
 
@@ -57,6 +57,8 @@ jobs:
 
       - name: Get versions from npm & crates.io, and take the highest one
         run: |
+          set -x
+
           # install semver and add it to PATH
           yarn global add semver
           PATH="$(yarn global bin):$PATH"
@@ -64,11 +66,15 @@ jobs:
           # JQ version regex pattern
           PAT="\\\\d+.\\\\d+.\\\\d+"
 
-          INTERPRETER_CARGO_TOML="interpreter/Cargo.toml"
+          INTERPRETER_CARGO_TOML="air-interpreter/Cargo.toml"
           CARGO_TOML="crates/air-interpreter-wasm/Cargo.toml"
+          PACKAGE_JSON="avm/client/package.json"
+
           # get package name from Cargo.toml
           RS_PKG_NAME="$(toml get "$CARGO_TOML" package.name | tr -d \")"
-          JS_PKG_NAME="@fluencelabs/aquamarine-interpreter"
+
+          # get package name from package.json
+          JS_PKG_NAME="$(cat "$PACKAGE_JSON" | jq -r .name)"
 
           # get version from Cargo.toml
           INTERPRETER_RUST_VERSION="$(toml get "$INTERPRETER_CARGO_TOML" package.version | tr -d \")"
@@ -91,94 +97,56 @@ jobs:
           echo "FINAL_VERSION=$MAX_VERSION" | tee -a $GITHUB_ENV
           echo "JS_PKG_NAME=$JS_PKG_NAME" | tee -a $GITHUB_ENV
 
-### === JavaScript package release ===
+      ### === JavaScript package release ===
       - name: Install wasm-pack
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
         continue-on-error: true
 
-      - name: Build aquamarine.wasm for JS clients
-        run: wasm-pack build $GITHUB_WORKSPACE/interpreter --no-typescript --release -d $(pwd)/pkg
-
-      - name: Generate aquamarine.wasm.base64.js
+      - name: Build npm package
+        working-directory: avm/client
         run: |
-          cat << EOF > pkg/aquamarine.wasm.base64.js
-          module.exports = "$(base64 -w0 pkg/aquamarine_client_bg.wasm)";
-          EOF
+          ./build_wasm.sh
+          npm i
+          npm run build
 
-    ### Generate index files so import works as: | import {wasmBs64} from "@fluencelabs/aquamarine-interpreter"; |
-      - name: Generate index.js & index.d.ts
-        run: |
-          cat << EOF > index.js
-          const wasmBs64 = require("./aquamarine.wasm.base64.js");
-          module.exports = wasmBs64;
-          EOF
-
-          cat << EOF > index.d.ts
-          declare const wasmBs64: string;
-          export default wasmBs64;
-          EOF
-        working-directory: pkg
-
-      - name: Generate aquamarine.wasm.base64.d.ts
-        run: |
-          cat << EOF > aquamarine.wasm.base64.d.ts
-          declare const wasmBs64: string;
-          export default wasmBs64;
-          EOF
-        working-directory: pkg
-
-      - name: Prepare package.json for publishing
-        run: |
-          cat pkg/package.json | jq --arg name aquamarine.wasm.base64.js \
-            '. + {
-              files: [ "aquamarine.wasm.base64.js", "aquamarine.wasm.base64.d.ts",  "index.js", "index.d.ts" ],
-              "name": "${{ env.JS_PKG_NAME }}",
-              "description": "Aquamarine IR interpreter as base64 WASM",
-              "main": "index.js",
-              "repository": "https://github.com/fluencelabs/aquamarine",
-              "author": "Fluence Labs",
-              "license": "Apache 2.0",
-              "private": false,
-              "main": "index.js",
-              "types": "index.d.ts"
-            }' > pkg/package_new.json
-
-             cat pkg/package_new.json
-             mv pkg/package_new.json pkg/package.json
-
-    ### Set version
+      ### Set version
       - name: Set version to ${{ env.FINAL_VERSION }}
         run: yarn version --new-version ${{ env.FINAL_VERSION }} --no-git-tag-version
-        working-directory: pkg
-
-    ### Add README so it appears on npmjs.org
-      - run: |
-          cat <<EOF > README.md
-          # Aquamarine IR interpreter as base64 WASM
-          EOF
-        working-directory: pkg
+        working-directory: avm/client
 
       ### Publish to NPM registry
       - uses: actions/setup-node@v1
         with:
-          node-version: '14'
-          registry-url: 'https://registry.npmjs.org'
+          node-version: "14"
+          registry-url: "https://registry.npmjs.org"
 
       - run: npm publish --access public
-        working-directory: pkg
+        working-directory: avm/client
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-### === Rust package release ===
+      ### === Rust package release ===
       - name: Install fcli
         run: cargo install fcli || true
 
-      - name: Build aquamarine.wasm for node
-        run: fce build --release -p aquamarine --features fce
+      - name: Set interpreter version to ${{ env.FINAL_VERSION }} before the build
+        run: |
+          PATH="~/.cargo/bin:$PATH"
+          (
+            cd interpreter
+            toml set Cargo.toml package.version "${{ env.FINAL_VERSION }}" | sponge Cargo.toml
+          )
+          (
+            cd air
+            toml set Cargo.toml package.version "${{ env.FINAL_VERSION }}" | sponge Cargo.toml
+          )
+
+      - name: Build air_interpreter_server.wasm for node
+        run: fce build --release -p air-interpreter --features fce
         working-directory: interpreter
 
-      - name: Copy aquamarine.wasm to air-interpreter-wasm
-        run: cp target/wasm32-wasi/release/aquamarine.wasm crates/air-interpreter-wasm/aquamarine.wasm
+      - name: Copy air_interpreter_server.wasm to air-interpreter-wasm
+        run: cp target/wasm32-wasi/release/air_interpreter_server.wasm crates/air-interpreter-wasm/air_interpreter_server.wasm
 
       - name: Set project version to ${{ env.FINAL_VERSION }}
         run: |
@@ -193,7 +161,7 @@ jobs:
         run: cargo publish --allow-dirty
         working-directory: crates/air-interpreter-wasm
 
-### Create a pre-release
+      ### Create a pre-release
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1

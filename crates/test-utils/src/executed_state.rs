@@ -15,10 +15,10 @@
  */
 
 use super::JValue;
-use interpreter_lib::execution_trace::CallResult;
-use interpreter_lib::execution_trace::ExecutedState;
-use interpreter_lib::execution_trace::ParResult;
-use interpreter_lib::execution_trace::ValueType;
+use air::execution_trace::CallResult;
+use air::execution_trace::ExecutedState;
+use air::execution_trace::ParResult;
+use air::execution_trace::ValueType;
 
 use std::rc::Rc;
 

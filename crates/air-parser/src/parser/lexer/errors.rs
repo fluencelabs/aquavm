@@ -30,7 +30,7 @@ pub enum LexerError {
     #[error("only alphanumeric, '_', and '-' characters are allowed in this position")]
     IsNotAlphanumeric(usize, usize),
 
-    #[error("an stream name should be non empty")]
+    #[error("a stream name should be non empty")]
     EmptyStreamName(usize, usize),
 
     #[error("this variable or constant shouldn't have empty name")]
@@ -62,6 +62,7 @@ use crate::parser::ParserError;
 impl<'err, 'input, 'i> __ToTriple<'err, 'input, 'i>
     for Result<(usize, Token<'input>, usize), LexerError>
 {
+    #[allow(clippy::wrong_self_convention)]
     fn to_triple(
         value: Self,
     ) -> Result<

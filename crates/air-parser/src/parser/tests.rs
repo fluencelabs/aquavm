@@ -359,6 +359,21 @@ fn parse_match() {
 }
 
 #[test]
+fn parse_match_with_init_peer_id() {
+    use ast::MatchableValue::InitPeerId;
+    use ast::MatchableValue::Variable;
+
+    let source_code = r#"
+        (match v1 %init_peer_id%
+            (null)
+        )
+        "#;
+    let instruction = parse(&source_code);
+    let expected = match_(Variable(Scalar("v1")), InitPeerId, null());
+    assert_eq!(instruction, expected);
+}
+
+#[test]
 fn parse_mismatch() {
     use ast::MatchableValue::Variable;
 
@@ -649,7 +664,7 @@ fn match_with_bool() {
          )
         "#;
 
-    let left_value = Variable("isOnline");
+    let left_value = Variable(Scalar("isOnline"));
     let right_value = Boolean(true);
     let null = null();
     let expected = match_(left_value, right_value, null);
@@ -669,7 +684,7 @@ fn mismatch_with_bool() {
         "#;
 
     let left_value = Boolean(true);
-    let right_value = Variable("isOnline");
+    let right_value = Variable(Scalar("isOnline"));
     let null = null();
     let expected = mismatch(left_value, right_value, null);
 
