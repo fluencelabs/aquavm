@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-use fluence::fce;
+use fluence::marine;
 
 fn main() {}
 
-#[fce]
+#[marine]
 fn delete(is_authorized: bool, _record_id: String) -> String {
     let call_parameters = fluence::get_call_parameters();
     let tetraplets = call_parameters.tetraplets;

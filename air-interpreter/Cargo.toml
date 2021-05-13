@@ -11,12 +11,12 @@ path = "src/wasm_bindgen.rs"
 
 [[bin]]
 name = "air_interpreter_server"
-path = "src/fce.rs"
+path = "src/marine.rs"
 
 [dependencies]
 air = { path = "../air" }
 
-fluence = { version = "0.6.2", features = ["logger"] }
+fluence = { version = "0.6.5", features = ["logger"] }
 
 # Keep 0.2.65 until this is resolved https://github.com/rustwasm/wasm-pack/issues/886
 wasm-bindgen = "=0.2.65"
@@ -26,4 +26,4 @@ serde = { version = "=1.0.118", features = [ "derive", "rc" ] }
 serde_json = "1.0"
 
 [features]
-fce = ["air/fce"]
+marine = ["air/marine"]

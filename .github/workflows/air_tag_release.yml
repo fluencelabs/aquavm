@@ -22,12 +22,12 @@ jobs:
           profile: minimal
           override: true
 
-      - name: Install fcli
+      - name: Install marine
         uses: actions-rs/cargo@v1
         with:
           toolchain: nightly
           command: install
-          args: fcli
+          args: marine
 
     ### Update & build
       - uses: actions-rs/cargo@v1
@@ -35,10 +35,10 @@ jobs:
           toolchain: nightly
           command: update
 
-      - name: fce build --release
+      - name: marine build --release
         working-directory: ./air-interpreter
         shell: bash
-        run: fce build --release --features fce
+        run: marine build --release --features marine
 
     ### Create release
       - uses: marvinpinto/action-automatic-releases@latest

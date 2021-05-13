@@ -149,8 +149,8 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       ### === Rust package release ===
-      - name: Install fcli
-        run: cargo install fcli || true
+      - name: Install marine
+        run: cargo install marine || true
 
       - name: Set interpreter version to ${{ env.FINAL_VERSION }} before the build
         run: |
@@ -159,7 +159,7 @@ jobs:
         working-directory: air
 
       - name: Build air_interpreter_server.wasm for node
-        run: fce build -p air-interpreter --release --features fce
+        run: marine build -p air-interpreter --release --features marine
         working-directory: air-interpreter
 
       - name: Copy air_interpreter_server.wasm to air-interpreter-wasm

@@ -31,18 +31,18 @@ mod logger;
 
 use air::execute_air;
 use air::InterpreterOutcome;
-use fluence::fce;
+use fluence::marine;
 
 pub fn main() {
     logger::init_logger();
 }
 
-#[fce]
+#[marine]
 pub fn invoke(init_peer_id: String, air: String, prev_data: Vec<u8>, data: Vec<u8>) -> InterpreterOutcome {
     execute_air(init_peer_id, air, prev_data, data)
 }
 
-#[fce]
+#[marine]
 pub fn ast(script: String) -> String {
     ast::ast(script)
 }
