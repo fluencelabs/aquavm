@@ -11,7 +11,7 @@ name = "air_interpreter_interface"
 path = "src/lib.rs"
 
 [dependencies]
-fluence = "0.6.1"
+fluence = "0.6.5"
 fluence-it-types = "0.3.0"
 
 serde = "=1.0.118"

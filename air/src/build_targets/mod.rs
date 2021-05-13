@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#[cfg(feature = "fce")]
-mod fce_target;
-#[cfg(not(feature = "fce"))]
+#[cfg(feature = "marine")]
+mod marine_target;
+#[cfg(not(feature = "marine"))]
 mod wasm_bindgen_target;
 
 use serde::Deserialize;
@@ -24,7 +24,7 @@ use serde::Serialize;
 
 pub const CALL_SERVICE_SUCCESS: i32 = 0;
 
-#[fluence::fce]
+#[fluence::marine]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CallServiceResult {
     pub ret_code: i32,
@@ -37,12 +37,12 @@ impl std::fmt::Display for CallServiceResult {
     }
 }
 
-#[cfg(feature = "fce")]
-pub(crate) use fce_target::call_service;
-#[cfg(feature = "fce")]
-pub(crate) use fce_target::get_current_peer_id;
+#[cfg(feature = "marine")]
+pub(crate) use marine_target::call_service;
+#[cfg(feature = "marine")]
+pub(crate) use marine_target::get_current_peer_id;
 
-#[cfg(not(feature = "fce"))]
+#[cfg(not(feature = "marine"))]
 pub(crate) use wasm_bindgen_target::call_service;
-#[cfg(not(feature = "fce"))]
+#[cfg(not(feature = "marine"))]
 pub(crate) use wasm_bindgen_target::get_current_peer_id;

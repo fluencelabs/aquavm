@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-use fluence::fce;
+use fluence::marine;
 
 const ADMIN_PEER_PK: &str = "12D3KooWEXNUbCXooUwHrHBbrmjsrpHXoEphPwbjQXEGyzbqKnE1";
 
 fn main() {}
 
-#[fce]
+#[marine]
 struct AuthResult {
     pub is_authorized: bool,
 }
 
-#[fce]
+#[marine]
 fn is_authorized() -> AuthResult {
     let call_parameters = fluence::get_call_parameters();
     let is_authorized = call_parameters.init_peer_id == ADMIN_PEER_PK;
