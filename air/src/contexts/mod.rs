@@ -19,6 +19,7 @@ mod execution_trace_context;
 
 pub mod execution_trace {
     pub use super::execution_trace_context::CallResult;
+    pub use super::execution_trace_context::ParResult;
     pub use super::execution_trace_context::ExecutedState;
     pub use super::execution_trace_context::ExecutionTrace;
     pub(crate) use super::execution_trace_context::ExecutionTraceCtx;

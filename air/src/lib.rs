@@ -43,6 +43,7 @@ pub use crate::air::execute_air;
 
 pub mod execution_trace {
     pub use crate::contexts::execution_trace::CallResult;
+    pub use crate::contexts::execution_trace::ParResult;
     pub use crate::contexts::execution_trace::ExecutedState;
     pub use crate::contexts::execution_trace::ExecutionTrace;
 }

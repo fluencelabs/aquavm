@@ -25,6 +25,8 @@
     unreachable_patterns
 )]
 
+pub mod executed_state;
+
 pub use avm_server::ne_vec::NEVec;
 pub use avm_server::AVMConfig;
 pub use avm_server::AVMError;
@@ -35,10 +37,12 @@ pub use avm_server::InterpreterOutcome;
 pub use avm_server::ParticleParameters;
 pub use avm_server::AVM;
 
+pub use air::execution_trace::ExecutionTrace;
+
 use std::collections::HashMap;
 use std::path::PathBuf;
 
-type JValue = serde_json::Value;
+pub(self) type JValue = serde_json::Value;
 
 pub fn create_avm(call_service: CallServiceClosure, current_peer_id: impl Into<String>) -> AVM {
     let tmp_dir = std::env::temp_dir();

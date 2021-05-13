@@ -18,6 +18,7 @@ use super::CallResult;
 use super::DataMergingError;
 use super::ExecutedState;
 use super::ExecutionTrace;
+use super::ParResult;
 use crate::log_targets::EXECUTED_TRACE_MERGE;
 
 type MergeResult<T> = Result<T, DataMergingError>;
@@ -75,10 +76,10 @@ fn merge_subtree(
                 let resulted_call = merge_call(prev_call, call)?;
                 result_trace.push_back(Call(resulted_call));
             }
-            (Some(Par(prev_left, prev_right)), Some(Par(current_left, current_right))) => {
+            (Some(Par(ParResult(prev_left, prev_right))), Some(Par(ParResult(current_left, current_right)))) => {
                 let par_position = result_trace.len();
                 // place temporary Par value to avoid insert in the middle
-                result_trace.push_back(Par(0, 0));
+                result_trace.push_back(ExecutedState::par(0, 0));
 
                 let before_result_len = result_trace.len();
 
@@ -89,7 +90,7 @@ fn merge_subtree(
                 let right_par_size = result_trace.len() - left_par_size - before_result_len;
 
                 // update temporary Par with final values
-                result_trace[par_position] = Par(left_par_size, right_par_size);
+                result_trace[par_position] = ExecutedState::par(left_par_size, right_par_size);
 
                 prev_subtree_size -= prev_left + prev_right;
                 current_subtree_size -= current_left + current_right;
@@ -154,137 +155,5 @@ fn merge_call(prev_call_result: CallResult, current_call_result: CallResult) -> 
         }
         (CallServiceFailed(..), Executed(..)) => Err(IncompatibleCallResults(prev_call_result, current_call_result)),
         (Executed(..), CallServiceFailed(..)) => Err(IncompatibleCallResults(prev_call_result, current_call_result)),
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::merge_execution_traces;
-    use super::CallResult;
-    use super::ExecutedState;
-    use super::ExecutionTrace;
-    use crate::JValue;
-
-    use std::rc::Rc;
-
-    #[test]
-    fn merge_call_states_1() {
-        use CallResult::*;
-        use ExecutedState::*;
-
-        let mut prev_trace = ExecutionTrace::new();
-        prev_trace.push_back(Par(1, 1));
-        prev_trace.push_back(Call(RequestSentBy(String::from("peer_1"))));
-        prev_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
-        prev_trace.push_back(Par(1, 1));
-        prev_trace.push_back(Call(RequestSentBy(String::from("peer_3"))));
-        prev_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
-
-        let mut current_trace = ExecutionTrace::new();
-        current_trace.push_back(Par(1, 1));
-        current_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
-        current_trace.push_back(Call(RequestSentBy(String::from("peer_2"))));
-        current_trace.push_back(Par(1, 1));
-        current_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
-        current_trace.push_back(Call(RequestSentBy(String::from("peer_4"))));
-
-        let actual_merged_trace =
-            merge_execution_traces(prev_trace, current_trace).expect("merging should be successful");
-
-        let mut expected_merged_trace = ExecutionTrace::new();
-        expected_merged_trace.push_back(Par(1, 1));
-        expected_merged_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
-        expected_merged_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
-        expected_merged_trace.push_back(Par(1, 1));
-        expected_merged_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
-        expected_merged_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
-
-        assert_eq!(actual_merged_trace, expected_merged_trace);
-    }
-
-    #[test]
-    fn merge_call_states_2() {
-        use CallResult::*;
-        use ExecutedState::*;
-
-        let mut prev_trace = ExecutionTrace::new();
-        prev_trace.push_back(Par(1, 0));
-        prev_trace.push_back(Call(RequestSentBy(String::from("peer_1"))));
-        prev_trace.push_back(Par(1, 1));
-        prev_trace.push_back(Call(RequestSentBy(String::from("peer_2"))));
-        prev_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
-
-        let mut current_trace = ExecutionTrace::new();
-        current_trace.push_back(Par(2, 2));
-        current_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
-        current_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
-        current_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
-        current_trace.push_back(Call(RequestSentBy(String::from("peer_1"))));
-        current_trace.push_back(Par(1, 1));
-        current_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
-        current_trace.push_back(Call(RequestSentBy(String::from("peer_2"))));
-
-        let actual_merged_trace =
-            merge_execution_traces(prev_trace, current_trace).expect("merging should be successful");
-
-        let mut expected_merged_trace = ExecutionTrace::new();
-        expected_merged_trace.push_back(Par(2, 2));
-        expected_merged_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
-        expected_merged_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
-        expected_merged_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
-        expected_merged_trace.push_back(Call(RequestSentBy(String::from("peer_1"))));
-        expected_merged_trace.push_back(Par(1, 1));
-        expected_merged_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
-        expected_merged_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
-
-        assert_eq!(actual_merged_trace, expected_merged_trace);
-    }
-
-    #[test]
-    fn merge_call_states_3() {
-        use CallResult::*;
-        use ExecutedState::*;
-
-        let mut prev_trace = ExecutionTrace::new();
-        prev_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
-        prev_trace.push_back(Par(2, 0));
-        prev_trace.push_back(Par(1, 0));
-        prev_trace.push_back(Call(RequestSentBy(String::from("peer_1"))));
-        prev_trace.push_back(Par(1, 2));
-        prev_trace.push_back(Call(RequestSentBy(String::from("peer_1"))));
-        prev_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
-        prev_trace.push_back(Call(RequestSentBy(String::from("peer_1"))));
-
-        let mut current_trace = ExecutionTrace::new();
-        current_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
-        current_trace.push_back(Par(3, 3));
-        current_trace.push_back(Par(1, 1));
-        current_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
-        current_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
-        current_trace.push_back(Par(1, 1));
-        current_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
-        current_trace.push_back(Call(RequestSentBy(String::from("peer_1"))));
-        current_trace.push_back(Par(1, 1));
-        current_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
-        current_trace.push_back(Call(RequestSentBy(String::from("peer_1"))));
-
-        let actual_merged_trace =
-            merge_execution_traces(prev_trace, current_trace).expect("merging should be successful");
-
-        let mut expected_merged_trace = ExecutionTrace::new();
-        expected_merged_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
-        expected_merged_trace.push_back(Par(3, 3));
-        expected_merged_trace.push_back(Par(1, 1));
-        expected_merged_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
-        expected_merged_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
-        expected_merged_trace.push_back(Par(1, 1));
-        expected_merged_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
-        expected_merged_trace.push_back(Call(RequestSentBy(String::from("peer_1"))));
-        expected_merged_trace.push_back(Par(1, 2));
-        expected_merged_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
-        expected_merged_trace.push_back(Call(Executed(Rc::new(JValue::Null))));
-        expected_merged_trace.push_back(Call(RequestSentBy(String::from("peer_1"))));
-
-        assert_eq!(actual_merged_trace, expected_merged_trace);
     }
 }
