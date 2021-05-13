@@ -133,7 +133,7 @@ jobs:
         run: |
           PATH="~/.cargo/bin:$PATH"
           (
-            cd interpreter
+            cd air-interpreter
             toml set Cargo.toml package.version "${{ env.FINAL_VERSION }}" | sponge Cargo.toml
           )
           (
