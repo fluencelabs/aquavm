@@ -196,7 +196,7 @@ mod tests {
         assert_eq!(actual_trace[0], expected_state);
 
         for i in 1..=5 {
-            let expected_state = executed_state::stream_number(i, "acc");
+            let expected_state = executed_state::stream_number(i, "$acc");
             assert_eq!(actual_trace[i], expected_state);
         }
     }
@@ -229,7 +229,7 @@ mod tests {
         assert_eq!(actual_trace[0], expected_state);
 
         for i in 1..=5 {
-            let expected_state = executed_state::stream_number(6 - i, "acc");
+            let expected_state = executed_state::stream_number(6 - i, "$acc");
             assert_eq!(actual_trace[i], expected_state);
         }
     }
@@ -272,7 +272,7 @@ mod tests {
 
         for i in 1..=5 {
             for j in 1..=5 {
-                let expected_state = executed_state::stream_number(i, "acc");
+                let expected_state = executed_state::stream_number(i, "$acc");
                 assert_eq!(actual_trace[1 + 5 * (i - 1) + j], expected_state);
             }
         }
@@ -418,7 +418,7 @@ mod tests {
         assert_eq!(actual_trace[0], expected_state);
 
         for i in 1..=5 {
-            let expected_state = executed_state::stream_number(i, "acc");
+            let expected_state = executed_state::stream_number(i, "$acc");
             assert_eq!(actual_trace[i], expected_state);
         }
     }

@@ -84,7 +84,7 @@ fn executed_trace_par_par_call() {
         par(3, 0),
         par(1, 0),
         request_sent_by("peer_id_1"),
-        stream_string("test", "acc"),
+        stream_string("test", "$acc"),
     ];
 
     let initial_state = serde_json::to_string(&initial_state).expect("default serializer shouldn't fail");
@@ -257,7 +257,7 @@ fn executed_trace_par_seq_fold_call() {
     let res = call_vm!(vm3, "asd", script, "", data);
     let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("a valid json");
 
-    let stream_name = "acc";
+    let stream_name = "$acc";
     let expected_trace = vec![
         par(21, 1),
         scalar_string_array(vec!["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]),
@@ -333,7 +333,7 @@ fn executed_trace_par_seq_fold_in_cycle_call() {
 
     let actual_trace: ExecutionTrace = serde_json::from_slice(&data).expect("interpreter should return valid json");
 
-    let stream_name = "acc";
+    let stream_name = "$acc";
     let expected_trace = vec![
         par(21, 1),
         scalar_string_array(vec!["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]),

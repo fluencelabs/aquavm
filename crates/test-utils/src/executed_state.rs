@@ -69,6 +69,21 @@ pub fn stream_number(
     ))
 }
 
+pub fn stream_string_array(
+    result: Vec<impl Into<String>>,
+    stream_name: impl Into<String>,
+) -> ExecutedState {
+    let result = result
+        .into_iter()
+        .map(|s| JValue::String(s.into()))
+        .collect::<Vec<_>>();
+
+    ExecutedState::Call(CallResult::Executed(
+        Rc::new(JValue::Array(result)),
+        ValueType::Stream(stream_name.into()),
+    ))
+}
+
 pub fn request_sent_by(sender: impl Into<String>) -> ExecutedState {
     ExecutedState::Call(CallResult::RequestSentBy(sender.into()))
 }
