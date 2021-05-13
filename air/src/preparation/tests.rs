@@ -65,7 +65,7 @@ fn merge_call_states_2() {
     let actual_merged_trace =
         merge_execution_traces(prev_trace.into(), current_trace.into()).expect("merging should be successful");
 
-    let expected_merged_trace = vec! [
+    let expected_merged_trace = vec![
         par(2, 2),
         scalar_jvalue(JValue::Null),
         scalar_jvalue(JValue::Null),
@@ -109,7 +109,7 @@ fn merge_call_states_3() {
     let actual_merged_trace =
         merge_execution_traces(prev_trace.into(), current_trace.into()).expect("merging should be successful");
 
-    let expected_merged_trace = vec! [
+    let expected_merged_trace = vec![
         scalar_jvalue(JValue::Null),
         par(3, 3),
         par(1, 1),

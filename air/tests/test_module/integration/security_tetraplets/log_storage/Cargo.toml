@@ -1,11 +1,11 @@
 [package]
-name = "auth_module"
+name = "log_storage"
 version = "0.1.0"
 authors = ["Fluence Labs"]
 edition = "2018"
 
 [[bin]]
-name = "auth_module"
+name = "log_storage"
 path = "src/main.rs"
 
 [dependencies]

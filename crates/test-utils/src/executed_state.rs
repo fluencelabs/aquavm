@@ -26,15 +26,11 @@ pub fn scalar_jvalue(result: JValue) -> ExecutedState {
 }
 
 pub fn stream_jvalue(result: JValue, _stream_name: impl Into<String>) -> ExecutedState {
-    ExecutedState::Call(CallResult::Executed(
-        Rc::new(result)
-    ))
+    ExecutedState::Call(CallResult::Executed(Rc::new(result)))
 }
 
 pub fn scalar_string(result: impl Into<String>) -> ExecutedState {
-    ExecutedState::Call(CallResult::Executed(
-        Rc::new(JValue::String(result.into()))
-    ))
+    ExecutedState::Call(CallResult::Executed(Rc::new(JValue::String(result.into()))))
 }
 
 pub fn scalar_string_array(result: Vec<impl Into<String>>) -> ExecutedState {
@@ -43,24 +39,18 @@ pub fn scalar_string_array(result: Vec<impl Into<String>>) -> ExecutedState {
         .map(|s| JValue::String(s.into()))
         .collect::<Vec<_>>();
 
-    ExecutedState::Call(CallResult::Executed(
-        Rc::new(JValue::Array(result)),
-    ))
+    ExecutedState::Call(CallResult::Executed(Rc::new(JValue::Array(result))))
 }
 
 pub fn stream_string(result: impl Into<String>, _stream_name: impl Into<String>) -> ExecutedState {
-    ExecutedState::Call(CallResult::Executed(
-        Rc::new(JValue::String(result.into())),
-    ))
+    ExecutedState::Call(CallResult::Executed(Rc::new(JValue::String(result.into()))))
 }
 
 pub fn stream_number(
     result: impl Into<serde_json::Number>,
     _stream_name: impl Into<String>,
 ) -> ExecutedState {
-    ExecutedState::Call(CallResult::Executed(
-        Rc::new(JValue::Number(result.into())),
-    ))
+    ExecutedState::Call(CallResult::Executed(Rc::new(JValue::Number(result.into()))))
 }
 
 pub fn stream_string_array(
@@ -72,9 +62,7 @@ pub fn stream_string_array(
         .map(|s| JValue::String(s.into()))
         .collect::<Vec<_>>();
 
-    ExecutedState::Call(CallResult::Executed(
-        Rc::new(JValue::Array(result)),
-    ))
+    ExecutedState::Call(CallResult::Executed(Rc::new(JValue::Array(result))))
 }
 
 pub fn request_sent_by(sender: impl Into<String>) -> ExecutedState {
