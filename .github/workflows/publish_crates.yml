@@ -2,8 +2,8 @@ name: "publish-crates"
 
 on:
   push:
-#    branches:
-#      - "master"
+    branches:
+      - "master"
 
 jobs:
   cargo-publish:
