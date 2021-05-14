@@ -4,6 +4,7 @@ version = "0.7.0"
 authors = ["Fluence Labs"]
 edition = "2018"
 license = "Apache-2.0"
+publish = false
 
 [build-dependencies]
 lalrpop = "0.19.5"
