@@ -17,7 +17,7 @@ path = "src/marine.rs"
 [dependencies]
 air = { path = "../air" }
 
-fluence = { version = "0.6.5", features = ["logger"] }
+fluence = { version = "0.6.8", features = ["logger"] }
 
 # Keep 0.2.65 until this is resolved https://github.com/rustwasm/wasm-pack/issues/886
 wasm-bindgen = "=0.2.65"
