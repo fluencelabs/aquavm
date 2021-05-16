@@ -1,6 +1,6 @@
 [package]
 name = "air-test-utils"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Fluence Labs"]
 edition = "2018"
 license = "Apache-2.0"
@@ -12,4 +12,6 @@ path = "src/lib.rs"
 [dependencies]
 fluence = "0.6.5"
 avm-server = { path = "../../avm/server", features = ["raw-avm-api"] }
+air = { path = "../../air" }
+
 serde_json = "1.0.56"

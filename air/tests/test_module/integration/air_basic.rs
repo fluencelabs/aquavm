@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+use air::execution_trace::ExecutionTrace;
 use air_test_utils::call_vm;
 use air_test_utils::create_avm;
+use air_test_utils::executed_state;
 use air_test_utils::set_variables_call_service;
 use air_test_utils::unit_call_service;
 use air_test_utils::CallServiceClosure;
@@ -24,15 +26,8 @@ use air_test_utils::NEVec;
 
 use serde_json::json;
 
-use std::rc::Rc;
-
-type JValue = serde_json::Value;
-
 #[test]
 fn seq_par_call() {
-    use air::execution_trace::CallResult::*;
-    use air::execution_trace::ExecutedState::{self, *};
-
     let vm_peer_id = String::from("some_peer_id");
     let mut vm = create_avm(unit_call_service(), vm_peer_id.clone());
 
@@ -49,15 +44,14 @@ fn seq_par_call() {
     );
 
     let res = call_vm!(vm, "asd", script, "[]", "[]");
-    let actual_trace: Vec<ExecutedState> =
-        serde_json::from_slice(&res.data).expect("interpreter should return valid json");
+    let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("interpreter should return valid json");
 
-    let test_string = String::from("test");
+    let test_string = "test";
     let expected_trace = vec![
-        Par(1, 1),
-        Call(Executed(Rc::new(JValue::String(test_string.clone())))),
-        Call(RequestSentBy(vm_peer_id)),
-        Call(Executed(Rc::new(JValue::String(test_string.clone())))),
+        executed_state::par(1, 1),
+        executed_state::scalar_string(test_string),
+        executed_state::request_sent_by(vm_peer_id),
+        executed_state::scalar_string(test_string),
     ];
 
     assert_eq!(actual_trace, expected_trace);
@@ -66,9 +60,6 @@ fn seq_par_call() {
 
 #[test]
 fn par_par_call() {
-    use air::execution_trace::CallResult::*;
-    use air::execution_trace::ExecutedState::{self, *};
-
     let vm_peer_id = String::from("some_peer_id");
     let mut vm = create_avm(unit_call_service(), vm_peer_id.clone());
 
@@ -85,16 +76,16 @@ fn par_par_call() {
     );
 
     let res = call_vm!(vm, "asd", script, "[]", "[]");
-    let resulted_trace: Vec<ExecutedState> =
+    let resulted_trace: ExecutionTrace =
         serde_json::from_slice(&res.data).expect("interpreter should return valid json");
 
-    let test_string = String::from("test");
+    let test_string = "test";
     let expected_trace = vec![
-        Par(3, 1),
-        Par(1, 1),
-        Call(Executed(Rc::new(JValue::String(test_string.clone())))),
-        Call(RequestSentBy(vm_peer_id)),
-        Call(Executed(Rc::new(JValue::String(test_string.clone())))),
+        executed_state::par(3, 1),
+        executed_state::par(1, 1),
+        executed_state::scalar_string(test_string),
+        executed_state::request_sent_by(vm_peer_id),
+        executed_state::scalar_string(test_string),
     ];
 
     assert_eq!(resulted_trace, expected_trace);
@@ -103,9 +94,6 @@ fn par_par_call() {
 
 #[test]
 fn create_service() {
-    use air::execution_trace::CallResult::*;
-    use air::execution_trace::ExecutedState::{self, *};
-
     let module = "greeting";
     let module_config = json!(
         {
@@ -160,18 +148,18 @@ fn create_service() {
     let res = call_vm!(set_variables_vm, "init_peer_id", script.clone(), "[]", "[]");
     let res = call_vm!(vm, "init_peer_id", script, "[]", res.data);
 
-    let add_module_response = String::from("add_module response");
-    let add_blueprint_response = String::from("add_blueprint response");
-    let create_response = String::from("create response");
-    let actual_trace: Vec<ExecutedState> = serde_json::from_slice(&res.data).expect("should be a correct json");
+    let add_module_response = "add_module response";
+    let add_blueprint_response = "add_blueprint response";
+    let create_response = "create response";
+    let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be a correct json");
     let expected_trace = vec![
-        Call(Executed(Rc::new(module_bytes))),
-        Call(Executed(Rc::new(module_config))),
-        Call(Executed(Rc::new(blueprint))),
-        Call(Executed(Rc::new(JValue::String(add_module_response)))),
-        Call(Executed(Rc::new(JValue::String(add_blueprint_response)))),
-        Call(Executed(Rc::new(JValue::String(create_response)))),
-        Call(RequestSentBy(String::from("A"))),
+        executed_state::scalar_jvalue(module_bytes),
+        executed_state::scalar_jvalue(module_config),
+        executed_state::scalar_jvalue(blueprint),
+        executed_state::scalar_string(add_module_response),
+        executed_state::scalar_string(add_blueprint_response),
+        executed_state::scalar_string(create_response),
+        executed_state::request_sent_by("A"),
     ];
 
     assert_eq!(actual_trace, expected_trace);

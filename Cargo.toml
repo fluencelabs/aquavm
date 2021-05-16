@@ -11,8 +11,8 @@ members = [
 ]
 
 exclude = [
-    "air/tests/security_tetraplets/auth_module",
-    "air/tests/security_tetraplets/log_storage",
+    "air/tests/test_module/integration/security_tetraplets/auth_module",
+    "air/tests/test_module/integration/security_tetraplets/log_storage",
     "crates/air-interpreter-wasm",
 ]
 

@@ -7,6 +7,7 @@ edition = "2018"
 [lib]
 name = "air"
 path = "src/lib.rs"
+doctest = false
 
 [dependencies]
 air-parser = { path = "../crates/air-parser" }

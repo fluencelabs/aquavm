@@ -14,24 +14,6 @@
  * limitations under the License.
  */
 
-use super::ExecutionCtx;
-use super::ExecutionResult;
-use super::ExecutionTraceCtx;
-use crate::log_instruction;
-
-use air_parser::ast::Seq;
-
-impl<'i> super::ExecutableInstruction<'i> for Seq<'i> {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut ExecutionTraceCtx) -> ExecutionResult<()> {
-        log_instruction!(seq, exec_ctx, trace_ctx);
-
-        exec_ctx.subtree_complete = true;
-        self.0.execute(exec_ctx, trace_ctx)?;
-
-        if exec_ctx.subtree_complete {
-            self.1.execute(exec_ctx, trace_ctx)?;
-        }
-
-        Ok(())
-    }
-}
+// https://matklad.github.io/2021/02/27/delete-cargo-integration-tests.html
+mod instructions;
+mod integration;
