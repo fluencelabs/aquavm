@@ -1,17 +1,21 @@
 [package]
 name = "air-interpreter-interface"
 description = "Interface of the AIR interpreter"
-version = "0.5.0"
+version = "0.5.1"
 authors = ["Fluence Labs"]
 edition = "2018"
 license = "Apache-2.0"
+documentation = "https://docs.rs/air-interpreter-interface"
+repository = "https://github.com/fluencelabs/air"
+keywords = ["fluence", "air", "webassembly", "programming-language"]
+categories = ["wasm"]
 
 [lib]
 name = "air_interpreter_interface"
 path = "src/lib.rs"
 
 [dependencies]
-fluence = "0.6.5"
+fluence = "0.6.8"
 fluence-it-types = "0.3.0"
 
 serde = "=1.0.118"

@@ -1,15 +1,20 @@
 [package]
 name = "polyplets"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Fluence Labs"]
 edition = "2018"
 license = "Apache-2.0"
+description = "Security primitives to verify origin of service calls in Fluence network"
+documentation = "https://docs.rs/polyplets"
+repository = "https://github.com/fluencelabs/crates/polyplets"
+keywords = ["fluence", "air", "webassembly", "security", "authorization"]
+categories = ["authentication"]
 
 [lib]
 name = "polyplets"
 path = "src/lib.rs"
 
 [dependencies]
-fluence = { version = "0.6.5", features = ["logger"] }
+fluence = { version = "0.6.8", features = ["logger"] }
 serde = { version = "=1.0.118", features = ["rc", "derive"] }
 

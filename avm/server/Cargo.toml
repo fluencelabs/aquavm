@@ -12,7 +12,7 @@ path = "src/lib.rs"
 
 [dependencies]
 fluence-faas = "0.7.0"
-air-interpreter-interface = { version = "0.5.0", path = "../../crates/interpreter-interface" }
+air-interpreter-interface = { version = "0.5.1", path = "../../crates/interpreter-interface" }
 
 thiserror = "1.0.24"
 maplit = "1.0.2"

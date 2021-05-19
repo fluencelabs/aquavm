@@ -3,6 +3,7 @@ name = "air"
 version = "0.9.0"
 authors = ["Fluence Labs"]
 edition = "2018"
+publish = false
 
 [lib]
 name = "air"
@@ -11,9 +12,9 @@ doctest = false
 
 [dependencies]
 air-parser = { path = "../crates/air-parser" }
-fluence = { version = "0.6.5", features = ["logger"] }
 polyplets = { path = "../crates/polyplets" }
 air-interpreter-interface = { path = "../crates/interpreter-interface" }
+fluence = { version = "0.6.8", features = ["logger"] }
 
 serde = { version = "=1.0.118", features = [ "derive", "rc" ] }
 serde_json = "=1.0.61"
