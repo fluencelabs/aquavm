@@ -155,8 +155,14 @@ jobs:
       - name: Set interpreter version to ${{ env.FINAL_VERSION }} before the build
         run: |
           PATH="~/.cargo/bin:$PATH"
-          toml set Cargo.toml package.version "${{ env.FINAL_VERSION }}" | sponge Cargo.toml
-        working-directory: air
+          (
+            cd air-interpreter
+            toml set Cargo.toml package.version "${{ env.FINAL_VERSION }}" | sponge Cargo.toml
+          )
+          (
+            cd air
+            toml set Cargo.toml package.version "${{ env.FINAL_VERSION }}" | sponge Cargo.toml
+          )
 
       - name: Build air_interpreter_server.wasm for node
         run: marine build -p air-interpreter --release --features marine

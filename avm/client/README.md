@@ -1,5 +1,5 @@
-# Air interpreter
+# Aquamarine VM
 
-[![npm](https://img.shields.io/npm/v/@fluencelabs/air-interpreter)](https://www.npmjs.com/package/@fluencelabs/air-interpreter)
+[![npm](https://img.shields.io/npm/v/@fluencelabs/avm)](https://www.npmjs.com/package/@fluencelabs/avm)
 
-Aqua intermediary representation interpreter
+Aquamarine VM, runs AIR on peers

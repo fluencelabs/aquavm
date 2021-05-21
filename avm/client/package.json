@@ -1,6 +1,6 @@
 {
-    "name": "@fluencelabs/air-interpreter",
-    "description": "Aqua intermediary representation interpreter",
+    "name": "@fluencelabs/avm",
+    "description": "Aquamarine VM",
     "version": "0.0.0",
     "main": "./dist/index.js",
     "typings": "./dist/index.d.ts",

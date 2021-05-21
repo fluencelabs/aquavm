@@ -20,18 +20,18 @@ import wasmBs64 from './wasm';
 
 type LogLevel = 'info' | 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'off';
 
-interface CallServiceResult {
+export interface CallServiceResult {
     ret_code: number;
     result: string;
 }
 
-interface ResolvedTriplet {
+export interface ResolvedTriplet {
     peer_pk: string;
     service_id: string;
     function_name: string;
 }
 
-interface SecurityTetraplet extends ResolvedTriplet {
+export interface SecurityTetraplet extends ResolvedTriplet {
     json_path: string;
 }
 

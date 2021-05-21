@@ -1,0 +1,49 @@
+name: "publish-crates"
+
+on:
+  push:
+    branches:
+      - "master"
+
+jobs:
+  cargo-publish:
+    name: "Publish crates"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      ### Prepare cargo & toolchains
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            ~/.cargo/bin
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          profile: minimal
+          override: true
+      - uses: actions-rs/cargo@v1
+        with:
+          toolchain: nightly
+          command: update
+          args: --aggressive
+
+      - name: Install cargo-workspaces
+        run: cargo install cargo-workspaces || true
+
+      ### === Rust package release ===
+      - name: Login to crates.io
+        run: cargo login ${{ secrets.CRATES_IO_TOKEN }}
+
+      - name: Publish to crates.io
+        run: cargo ws publish --no-git-commit --from-git --skip-published --yes

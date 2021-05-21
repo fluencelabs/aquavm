@@ -16,7 +16,10 @@
 
 mod errors;
 mod merging;
+mod preparation;
 mod preparation_utils;
+#[cfg(tests)]
+mod tests;
 
 pub(crate) use errors::DataMergingError;
 pub(crate) use errors::PreparationError;

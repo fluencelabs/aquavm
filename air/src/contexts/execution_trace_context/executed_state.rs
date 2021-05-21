@@ -82,6 +82,12 @@ pub enum ExecutedState {
     Fold(FoldResult),
 }
 
+impl ExecutedState {
+    pub fn par(left: usize, right: usize) -> Self {
+        Self::Par(ParResult(left, right))
+    }
+}
+
 impl std::fmt::Display for ExecutedState {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         use CallResult::*;
