@@ -14,30 +14,28 @@
  * limitations under the License.
  */
 
-use air_test_utils::IValue;
-use air_test_utils::CallServiceClosure;
-use air_test_utils::NEVec;
 use air_test_utils::call_vm;
 use air_test_utils::create_avm;
-use air_test_utils::set_variables_call_service;
-use air_test_utils::echo_call_service;
+use air_test_utils::CallServiceClosure;
+use air_test_utils::IValue;
+use air_test_utils::NEVec;
 
 use serde_json::Value as JValue;
 
 #[test]
-fn empty_stream_test() {
+fn empty_stream() {
     fn arg_type_check_closure() -> CallServiceClosure {
         Box::new(move |_, args| -> Option<IValue> {
-            use std::ops::Deref;
-
             let call_args = match &args[2] {
                 IValue::String(str) => str,
                 _ => unreachable!(),
             };
 
-            let call_args: Vec<Vec<JValue>> = serde_json::from_str(call_args).expect("json deserialization shouldn't fail");
+            let actual_call_args: Vec<Vec<JValue>> =
+                serde_json::from_str(call_args).expect("json deserialization shouldn't fail");
+            let expected_call_args: Vec<Vec<JValue>> = vec![];
 
-            assert_eq!(call_args, vec![vec![]]);
+            assert_eq!(actual_call_args, expected_call_args);
 
             Some(IValue::Record(
                 NEVec::new(vec![IValue::S32(0), IValue::String(r#""""#.to_string())]).unwrap(),
@@ -45,25 +43,13 @@ fn empty_stream_test() {
         })
     }
 
-    let mut vm = create_avm(arg_type_check_closure(), "");
-    let mut set_variable_vm = create_avm(arg_type_check_closure(), "");
+    let mut vm = create_avm(arg_type_check_closure(), "A");
 
     let script = r#"
         (seq
-                (call "Relay1" ("identity" "") [] $void1)
-                (seq
-                    (call "Remote" ("920e3ba3-cbdf-4ae3-8972-0fa2f31fffd9" "get_users") [] members)
-                    (fold members m
-                        (par
-                            (seq
-                                (call "Relay1" ("identity" "") [] $void)
-                                (call "A" ("fgemb3" "add") [m] $void3)
-                            )
-                            (next m)
-                        )
-                    )
-                )
-            )"#;
+            (call "A" ("" "") [$stream] $other_stream)
+            (null)
+        )"#;
 
-    let _ = call_vm!(vm, );
+    let _ = call_vm!(vm, "", script, "", "");
 }

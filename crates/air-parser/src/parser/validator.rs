@@ -87,7 +87,7 @@ impl<'i> VariableValidator<'i> {
     pub(super) fn finalize(&self) -> Vec<ErrorRecovery<usize, Token<'i>, ParserError>> {
         let mut errors = Vec::new();
         for (name, span) in self.unresolved_variables.iter() {
-            if !self.contains_variable(name, *span) {
+            if !self.contains_variable(name, *span) && !name.starts_with('$') {
                 add_to_errors(*name, &mut errors, *span, Token::Call);
             }
         }

@@ -83,7 +83,8 @@ fn prepare_variable<'i>(
     let resolved = match variable {
         Variable::Scalar(name) => resolve_to_jvaluable(name, ctx)?,
         Variable::Stream(name) => {
-            // return empty stream for
+            // return an empty stream for not found stream
+            // here it ignores the join behaviour
             if ctx.data_cache.get(*name).is_none() {
                 Box::new(())
             } else {
