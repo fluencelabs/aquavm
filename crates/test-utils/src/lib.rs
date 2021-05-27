@@ -38,6 +38,8 @@ pub use avm_server::ParticleParameters;
 pub use avm_server::AVM;
 
 pub use air::execution_trace::ExecutionTrace;
+pub use air::execution_trace::ExecutedState;
+pub use air::execution_trace::CallResult;
 
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -96,7 +98,7 @@ pub fn echo_number_call_service() -> CallServiceClosure {
         let arg: Vec<String> = serde_json::from_str(arg).unwrap();
 
         Some(IValue::Record(
-            NEVec::new(vec![IValue::S32(0), IValue::String(arg[0].clone())]).unwrap(),
+            NEVec::new(vec![IValue::S32(0), IValue::String(format!(r#""{}, {}""#, arg[0], arg[1]))]).unwrap(),
         ))
     })
 }

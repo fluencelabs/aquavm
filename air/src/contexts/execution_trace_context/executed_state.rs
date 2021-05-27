@@ -64,10 +64,8 @@ pub enum CallResult {
 #[derive(Debug, Default, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct FoldStatePositions {
-    pub left_begin: usize,
-    pub left_end: usize,
-    pub right_begin: usize,
-    pub right_end: usize,
+    pub begin: usize,
+    pub end: usize,
 }
 
 #[derive(Debug, Default, Clone, PartialEq, Eq, Serialize, Deserialize)]

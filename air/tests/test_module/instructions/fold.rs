@@ -136,6 +136,48 @@ fn inner_fold() {
 }
 
 #[test]
+fn several_nexts() {
+    let mut vm = create_avm(echo_number_call_service(), "A");
+    let mut set_variable_vm = create_avm(set_variable_call_service(r#"["1","2"]"#), "set_variable");
+
+    let script = String::from(
+        r#"
+            (seq
+                (call "set_variable" ("" "") [] Iterable1)
+                (fold Iterable1 i
+                    (seq
+                        (seq
+                            (seq
+                                (call "A" ("" "") [i "A"] $acc)
+                                (next i)
+                            )
+                            (seq
+                                (call "A" ("" "") [i "B"] $acc)
+                                (next i)
+                            )
+                        )
+                        (seq
+                            (call "A" ("" "") [i "C"] $acc)
+                            (next i)
+                        )
+                    )
+                )
+            )"#,
+    );
+
+    let res = call_vm!(set_variable_vm, "", &script, "", "");
+    let res = call_vm!(vm, "", script, "", res.data);
+    let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid executed trace");
+
+    for state in actual_trace {
+        match state {
+            air_test_utils::ExecutedState::Call(air_test_utils::CallResult::Executed(value, _)) => println!("{}", value),
+            _ => {}
+        }
+    }
+}
+
+#[test]
 fn inner_fold_with_same_iterator() {
     let mut vm = create_avm(set_variable_call_service(r#"["1","2","3","4","5"]"#), "set_variable");
 
