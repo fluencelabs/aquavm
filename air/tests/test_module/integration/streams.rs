@@ -33,7 +33,7 @@ fn empty_stream() {
 
             let actual_call_args: Vec<Vec<JValue>> =
                 serde_json::from_str(call_args).expect("json deserialization shouldn't fail");
-            let expected_call_args: Vec<Vec<JValue>> = vec![];
+            let expected_call_args: Vec<Vec<JValue>> = vec![vec![]];
 
             assert_eq!(actual_call_args, expected_call_args);
 
