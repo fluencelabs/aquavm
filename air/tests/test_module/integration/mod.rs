@@ -22,3 +22,4 @@ mod join;
 mod join_behaviour;
 mod last_error;
 mod network_explore;
+mod streams;

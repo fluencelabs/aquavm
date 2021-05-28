@@ -254,7 +254,8 @@ fn fold_merge() {
     let res = call_vm!(set_variable_vm, "", script.clone(), "", "");
     let res = call_vm!(local_vm, "", script, "", res.data);
 
-    let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("interpreter should return valid json");
+    let _actual_trace: ExecutionTrace =
+        serde_json::from_slice(&res.data).expect("interpreter should return valid json");
 
     // println!("res is {:?}", actual_trace);
 }
