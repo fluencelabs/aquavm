@@ -163,7 +163,7 @@ fn parse_undefined_variable() {
     let mut validator = super::VariableValidator::new();
     parser
         .parse(source_code, &mut errors, &mut validator, lexer)
-        .expect("parser shoudn't fail");
+        .expect("parser shouldn't fail");
 
     let errors = validator.finalize();
 
@@ -200,7 +200,7 @@ fn parse_undefined_iterable() {
     let mut validator = super::VariableValidator::new();
     parser
         .parse(source_code, &mut errors, &mut validator, lexer)
-        .expect("parser shoudn't fail");
+        .expect("parser shouldn't fail");
 
     let errors = validator.finalize();
 
@@ -213,6 +213,53 @@ fn parse_undefined_iterable() {
     };
 
     assert!(matches!(parser_error, ParserError::UndefinedIterable(..)));
+}
+
+#[test]
+fn parse_undefined_stream_without_json_path() {
+    let source_code = r#"
+        (call "" "" [$stream])
+        "#;
+
+    let lexer = crate::AIRLexer::new(source_code);
+
+    let parser = crate::AIRParser::new();
+    let mut errors = Vec::new();
+    let mut validator = super::VariableValidator::new();
+    parser
+        .parse(source_code, &mut errors, &mut validator, lexer)
+        .expect("parser shouldn't fail");
+
+    let errors = validator.finalize();
+
+    assert!(errors.is_empty());
+}
+
+#[test]
+fn parse_undefined_stream_with_json_path() {
+    let source_code = r#"
+        (call "" "" [$stream.$json_path])
+        "#;
+
+    let lexer = crate::AIRLexer::new(source_code);
+
+    let parser = crate::AIRParser::new();
+    let mut errors = Vec::new();
+    let mut validator = super::VariableValidator::new();
+    parser
+        .parse(source_code, &mut errors, &mut validator, lexer)
+        .expect("parser shouldn't fail");
+
+    let errors = validator.finalize();
+
+    assert_eq!(errors.len(), 1);
+    let error = &errors[0].error;
+    let parser_error = match error {
+        ParseError::User { error } => error,
+        _ => panic!("unexpected error type"),
+    };
+
+    assert!(matches!(parser_error, ParserError::UndefinedVariable(..)));
 }
 
 #[test]

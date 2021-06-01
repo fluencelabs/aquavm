@@ -80,23 +80,29 @@ fn prepare_variable<'i>(
     variable: &Variable<'_>,
     ctx: &ExecutionCtx<'i>,
 ) -> ExecutionResult<(JValue, Vec<SecurityTetraplet>)> {
-    let resolved = match variable {
-        Variable::Scalar(name) => resolve_to_jvaluable(name, ctx)?,
-        Variable::Stream(name) => {
-            // return an empty stream for not found stream
-            // here it ignores the join behaviour
-            if ctx.data_cache.get(*name).is_none() {
-                Box::new(())
-            } else {
-                resolve_to_jvaluable(name, ctx)?
-            }
-        }
-    };
-
+    let resolved = resolve_variable(variable, ctx)?;
     let tetraplets = resolved.as_tetraplets();
     let jvalue = resolved.into_jvalue();
 
     Ok((jvalue, tetraplets))
+}
+
+fn resolve_variable<'ctx, 'i>(
+    variable: &Variable<'_>,
+    ctx: &'ctx ExecutionCtx<'i>,
+) -> ExecutionResult<Box<dyn JValuable + 'ctx>> {
+    match variable {
+        Variable::Scalar(name) => resolve_to_jvaluable(name, ctx),
+        Variable::Stream(name) => {
+            // return an empty stream for not found stream
+            // here it ignores the join behaviour
+            if ctx.data_cache.get(*name).is_none() {
+                Ok(Box::new(()))
+            } else {
+                resolve_to_jvaluable(name, ctx)
+            }
+        }
+    }
 }
 
 fn prepare_json_path<'i>(

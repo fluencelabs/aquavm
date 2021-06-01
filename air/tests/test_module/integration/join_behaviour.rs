@@ -18,6 +18,7 @@ use air_test_utils::call_vm;
 use air_test_utils::create_avm;
 use air_test_utils::set_variables_call_service;
 use air_test_utils::unit_call_service;
+use air_test_utils::ExecutionTrace;
 
 use serde_json::json;
 
