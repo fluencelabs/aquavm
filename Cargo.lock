@@ -989,9 +989,9 @@ dependencies = [
 
 [[package]]
 name = "jsonpath_lib-fl"
-version = "0.3.6"
+version = "0.3.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5dbae63507feed9d5119436efed4240534ae7f9d6ab3554ffc79a46f2538343b"
+checksum = "33dcf980221b25366e8f0df601cf0df6ffcc97242cbbe4d139a79a7f0de5107f"
 dependencies = [
  "array_tool",
  "env_logger",
