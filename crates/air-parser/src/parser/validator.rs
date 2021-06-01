@@ -139,7 +139,7 @@ impl<'i> VariableValidator<'i> {
         match instr_arg_value {
             CallInstrArgValue::JsonPath { variable, .. } => self.met_variable(variable, span),
             CallInstrArgValue::Variable(variable) => {
-                // it's needed to allow join behavior on streams without json path
+                // skipping streams here allows treating non-defined streams as empty arrays
                 if let Variable::Scalar(_) = variable {
                     self.met_variable(variable, span)
                 }
