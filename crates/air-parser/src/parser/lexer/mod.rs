@@ -21,7 +21,7 @@ mod token;
 mod utils;
 
 #[cfg(test)]
-pub mod tests;
+mod tests;
 
 pub use air_lexer::AIRLexer;
 pub use errors::LexerError;
