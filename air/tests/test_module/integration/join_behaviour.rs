@@ -70,3 +70,39 @@ fn non_wait_on_json_path() {
 
     assert_eq!(res.next_peer_pks, vec![init_peer_id.to_string()]);
 }
+
+#[test]
+fn wait_on_stream_json_path_by_id() {
+    let local_peer_id = "local_peer_id";
+    let mut local_vm = create_avm(unit_call_service(), local_peer_id);
+
+    let non_join_stream_script = format!(
+        r#"
+    (par
+        (call "{0}" ("" "") [] $status)
+        (call "{0}" ("history" "add") [$status.$[0]!])
+     )"#,
+        local_peer_id
+    );
+
+    let res = call_vm!(local_vm, "", non_join_stream_script, "", "");
+    let trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid json");
+
+    assert_eq!(res.ret_code, 0);
+    assert_eq!(trace.len(), 3);
+
+    let join_stream_script = format!(
+        r#"
+    (par
+        (call "{0}" ("" "") [] $status)
+        (call "{0}" ("history" "add") [$status.$[1]!]) ; $status stream here has only one value
+     )"#,
+        local_peer_id
+    );
+
+    let res = call_vm!(local_vm, "", join_stream_script, "", "");
+    let trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid json");
+
+    assert_eq!(res.ret_code, 0);
+    assert_eq!(trace.len(), 2); // par and the first call emit traces, second call doesn't
+}
