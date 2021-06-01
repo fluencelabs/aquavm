@@ -162,6 +162,37 @@ fn flattening_streams() {
 }
 
 #[test]
+fn flattening_empty_values() {
+    let stream_value = json!(
+        {"args": []}
+    );
+
+    let stream_value = serde_json::to_string(&stream_value).expect("the default serializer shouldn't fail");
+    let set_variable_peer_id = "set_variable";
+    let mut set_variable_vm = create_avm(set_variable_call_service(stream_value), set_variable_peer_id);
+
+    let closure_call_args = ClosureCallArgs::default();
+    let local_peer_id = "local_peer_id";
+    let mut local_vm = create_avm(create_check_service_closure(closure_call_args.clone()), local_peer_id);
+
+    let script = format!(
+        r#"
+        (seq
+            (call "{0}" ("" "") [] $stream)
+            (call "{1}" ("" "") [$stream.$.args!]) ; here $stream.$.args returns an empty array
+        )
+        "#,
+        set_variable_peer_id, local_peer_id
+    );
+
+    let res = call_vm!(set_variable_vm, "asd", script.clone(), "", "");
+    let res = call_vm!(local_vm, "asd", script.clone(), "", res.data);
+
+    assert_eq!(res.ret_code, 0);
+    assert_eq!(closure_call_args.args_var, Rc::new(RefCell::new(vec![])));
+}
+
+#[test]
 fn test_handling_non_flattening_values() {
     let stream_value = json!(
         {"peer_id" : "local_peer_id", "service_id": "local_service_id", "function_name": "local_function_name", "args": [0, 1]}
@@ -203,7 +234,7 @@ fn test_handling_non_flattening_values() {
     assert_eq!(
         res.error_message,
         String::from(
-            r#"jvalue '[{"peer_id":"local_peer_id","service_id":"local_service_id","function_name":"local_function_name","args":[0,1]},{"peer_id":"local_peer_id","service_id":"local_service_id","function_name":"local_function_name","args":[0,1]},{"peer_id":"local_peer_id","service_id":"local_service_id","function_name":"local_function_name","args":[0,1]}]' can't be flattened, to be flattened a jvalue should have an array type and consist only one value"#
+            r#"jvalue '[{"peer_id":"local_peer_id","service_id":"local_service_id","function_name":"local_function_name","args":[0,1]},{"peer_id":"local_peer_id","service_id":"local_service_id","function_name":"local_function_name","args":[0,1]},{"peer_id":"local_peer_id","service_id":"local_service_id","function_name":"local_function_name","args":[0,1]}]' can't be flattened, to be flattened a jvalue should have an array type and consist of zero or one values"#
         )
     );
 }
