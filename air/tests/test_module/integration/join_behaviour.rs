@@ -80,7 +80,7 @@ fn wait_on_stream_json_path_by_id() {
         r#"
     (par
         (call "{0}" ("" "") [] $status)
-        (call "{0}" ("history" "add") [$status.$[0]!]) ; $status stream here has only one value
+        (call "{0}" ("history" "add") [$status.$[0]!])
      )"#,
         local_peer_id
     );
