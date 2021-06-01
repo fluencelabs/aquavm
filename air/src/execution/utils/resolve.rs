@@ -35,18 +35,12 @@ pub(crate) fn resolve_to_args<'i>(
         CallInstrArgValue::Literal(value) => prepare_consts(value.to_string(), ctx),
         CallInstrArgValue::Boolean(value) => prepare_consts(*value, ctx),
         CallInstrArgValue::Number(value) => prepare_consts(value, ctx),
-        CallInstrArgValue::Variable(variable) => {
-            let name = get_variable_name(variable);
-            prepare_variable(name, ctx)
-        }
+        CallInstrArgValue::Variable(variable) => prepare_variable(variable, ctx),
         CallInstrArgValue::JsonPath {
             variable,
             path,
             should_flatten,
-        } => {
-            let name = get_variable_name(variable);
-            prepare_json_path(name, path, *should_flatten, ctx)
-        }
+        } => prepare_json_path(variable, path, *should_flatten, ctx),
     }
 }
 
@@ -82,25 +76,48 @@ fn prepare_last_error(ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, Vec<Se
     Ok(result)
 }
 
-fn prepare_variable<'i>(name: &str, ctx: &ExecutionCtx<'i>) -> ExecutionResult<(JValue, Vec<SecurityTetraplet>)> {
-    let resolved = resolve_to_jvaluable(name, ctx)?;
+fn prepare_variable<'i>(
+    variable: &Variable<'_>,
+    ctx: &ExecutionCtx<'i>,
+) -> ExecutionResult<(JValue, Vec<SecurityTetraplet>)> {
+    let resolved = resolve_variable(variable, ctx)?;
     let tetraplets = resolved.as_tetraplets();
     let jvalue = resolved.into_jvalue();
 
     Ok((jvalue, tetraplets))
 }
 
+fn resolve_variable<'ctx, 'i>(
+    variable: &Variable<'_>,
+    ctx: &'ctx ExecutionCtx<'i>,
+) -> ExecutionResult<Box<dyn JValuable + 'ctx>> {
+    match variable {
+        Variable::Scalar(name) => resolve_to_jvaluable(name, ctx),
+        Variable::Stream(name) => {
+            // return an empty stream for not found stream
+            // here it ignores the join behaviour
+            if ctx.data_cache.get(*name).is_none() {
+                Ok(Box::new(()))
+            } else {
+                resolve_to_jvaluable(name, ctx)
+            }
+        }
+    }
+}
+
 fn prepare_json_path<'i>(
-    name: &str,
+    variable: &Variable<'_>,
     json_path: &str,
     should_flatten: bool,
     ctx: &ExecutionCtx<'i>,
 ) -> ExecutionResult<(JValue, Vec<SecurityTetraplet>)> {
+    let name = get_variable_name(variable);
+
     let resolved = resolve_to_jvaluable(name, ctx)?;
     let (jvalue, tetraplets) = resolved.apply_json_path_with_tetraplets(json_path)?;
 
     let jvalue = if should_flatten {
-        if jvalue.len() != 1 {
+        if jvalue.len() > 1 {
             let jvalue = jvalue.into_iter().cloned().collect::<Vec<_>>();
             return crate::exec_err!(ExecutionError::FlatteningError(JValue::Array(jvalue)));
         }

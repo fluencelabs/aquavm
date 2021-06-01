@@ -143,7 +143,7 @@ jobs:
 
       - name: Build air_interpreter_server.wasm for node
         run: marine build --release -p air-interpreter --features marine
-        working-directory: interpreter
+        working-directory: air-interpreter
 
       - name: Copy air_interpreter_server.wasm to air-interpreter-wasm
         run: cp target/wasm32-wasi/release/air_interpreter_server.wasm crates/air-interpreter-wasm/air_interpreter_server.wasm
