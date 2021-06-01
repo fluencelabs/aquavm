@@ -23,6 +23,8 @@ use std::convert::TryInto;
 use std::iter::Peekable;
 use std::str::CharIndices;
 
+const STREAM_START_TAG: char = '$';
+
 pub(super) fn try_parse_call_variable(
     string_to_parse: &str,
     start_pos: usize,
@@ -319,8 +321,6 @@ impl<'input> CallVariableParser<'input> {
         }
     }
 }
-
-const STREAM_START_TAG: char = '$';
 
 fn to_variable_and_path(str: &str, pos: usize, should_flatten: bool) -> (&str, &str) {
     let json_path = if should_flatten {

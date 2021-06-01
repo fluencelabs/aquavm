@@ -87,7 +87,7 @@ impl<'i> VariableValidator<'i> {
     pub(super) fn finalize(&self) -> Vec<ErrorRecovery<usize, Token<'i>, ParserError>> {
         let mut errors = Vec::new();
         for (name, span) in self.unresolved_variables.iter() {
-            if !self.contains_variable(name, *span) && !name.starts_with('$') {
+            if !self.contains_variable(name, *span) {
                 add_to_errors(*name, &mut errors, *span, Token::Call);
             }
         }
@@ -138,7 +138,12 @@ impl<'i> VariableValidator<'i> {
     fn met_instr_arg_value(&mut self, instr_arg_value: &CallInstrArgValue<'i>, span: Span) {
         match instr_arg_value {
             CallInstrArgValue::JsonPath { variable, .. } => self.met_variable(variable, span),
-            CallInstrArgValue::Variable(variable) => self.met_variable(variable, span),
+            CallInstrArgValue::Variable(variable) => {
+                // it's needed to allow join behavior on streams without json path
+                if let Variable::Scalar(_) = variable {
+                    self.met_variable(variable, span)
+                }
+            }
             _ => {}
         }
     }
