@@ -119,7 +119,7 @@ CallInstrArgValue: CallInstrArgValue<'input> = {
     <n:Number> => CallInstrArgValue::Number(n),
     <b:Boolean> => CallInstrArgValue::Boolean(b),
     InitPeerId => CallInstrArgValue::InitPeerId,
-    <j:LastError> => CallInstrArgValue::LastError(j),
+    <p:LastError> => CallInstrArgValue::LastError(p),
 }
 
 Iterable: IterableValue<'input> = {

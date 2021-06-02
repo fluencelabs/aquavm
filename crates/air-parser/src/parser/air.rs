@@ -1,5 +1,5 @@
 // auto-generated: "lalrpop 0.19.5"
-// sha3: c56e6b9ce9d22c16e41c4c06e9115827ef7541d36137d743fc5d55e28bd99
+// sha3: 829f4457beb3225fd27138a974f7b38a6c5f2b8672caca7dc588d2315ec560
 use crate::parser::ast::*;
 use crate::parser::air_parser::make_flattened_error;
 use crate::parser::ParserError;
@@ -3403,10 +3403,10 @@ fn __action35<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, j, _): (usize, LastErrorPath, usize),
+    (_, p, _): (usize, LastErrorPath, usize),
 ) -> CallInstrArgValue<'input>
 {
-    CallInstrArgValue::LastError(j)
+    CallInstrArgValue::LastError(p)
 }
 
 #[allow(unused_variables)]
