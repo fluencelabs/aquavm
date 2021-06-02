@@ -16,6 +16,7 @@
 
 mod traits;
 
+pub use crate::parser::lexer::LastErrorPath;
 pub use crate::parser::lexer::Number;
 pub use crate::parser::lexer::Variable;
 
@@ -74,7 +75,7 @@ pub enum CallInstrValue<'i> {
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum CallInstrArgValue<'i> {
     InitPeerId,
-    LastError,
+    LastError(LastErrorPath),
     Literal(&'i str),
     Number(Number),
     Boolean(bool),

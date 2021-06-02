@@ -15,20 +15,18 @@
  */
 
 mod avalue;
+pub(crate) mod error_descriptor;
 
 pub(crate) use avalue::AValue;
 pub(crate) use avalue::ResolvedCallResult;
 
 use crate::execution::ExecutionError;
 use crate::SecurityTetraplet;
-
-use serde::Deserialize;
-use serde::Serialize;
+use error_descriptor::LastErrorDescriptor;
+use error_descriptor::LastErrorWithTetraplets;
 
 use std::collections::HashMap;
 use std::collections::VecDeque;
-
-use std::rc::Rc;
 
 /// Contains all necessary state needed to execute AIR script.
 #[derive(Default)]
@@ -66,39 +64,6 @@ pub(crate) struct ExecutionCtx<'i> {
     pub met_folds: VecDeque<&'i str>,
 }
 
-#[derive(Debug)]
-pub(crate) struct LastErrorDescriptor {
-    pub(crate) error: Rc<ExecutionError>,
-    pub(crate) instruction: String,
-    pub(crate) tetraplet: Option<SecurityTetraplet>,
-}
-
-impl LastErrorDescriptor {
-    pub(crate) fn new(error: Rc<ExecutionError>, instruction: String, tetraplet: Option<SecurityTetraplet>) -> Self {
-        Self {
-            error,
-            instruction,
-            tetraplet,
-        }
-    }
-
-    pub(crate) fn serialize(&self) -> String {
-        #[derive(Serialize, Deserialize)]
-        pub(crate) struct LastError<'s> {
-            pub(crate) error: String,
-            pub(crate) instruction: &'s str,
-        }
-
-        let error = format!("{}", &self.error);
-        let error_with_location = LastError {
-            error,
-            instruction: &self.instruction,
-        };
-
-        serde_json::to_string(&error_with_location).expect("default serializer shouldn't fail")
-    }
-}
-
 impl<'i> ExecutionCtx<'i> {
     pub(crate) fn new(current_peer_id: String, init_peer_id: String) -> Self {
         Self {
@@ -107,6 +72,13 @@ impl<'i> ExecutionCtx<'i> {
             subtree_complete: true,
             last_error_could_be_set: true,
             ..<_>::default()
+        }
+    }
+
+    pub(crate) fn last_error(&self) -> LastErrorWithTetraplets {
+        match &self.last_error {
+            Some(error_descriptor) => LastErrorWithTetraplets::from_error_descriptor(error_descriptor, self),
+            None => <_>::default(),
         }
     }
 }

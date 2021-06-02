@@ -26,8 +26,10 @@ pub mod execution_trace {
 }
 
 pub(crate) mod execution {
+    pub use super::execution_context::error_descriptor::LastError;
+    pub(crate) use super::execution_context::error_descriptor::LastErrorDescriptor;
+    pub(crate) use super::execution_context::error_descriptor::LastErrorWithTetraplets;
     pub(crate) use super::execution_context::AValue;
     pub(crate) use super::execution_context::ExecutionCtx;
-    pub(crate) use super::execution_context::LastErrorDescriptor;
     pub(crate) use super::execution_context::ResolvedCallResult;
 }

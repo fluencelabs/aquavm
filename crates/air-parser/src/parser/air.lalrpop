@@ -5,6 +5,7 @@ use crate::parser::VariableValidator;
 use crate::parser::Span;
 use crate::parser::lexer::Token;
 use crate::parser::lexer::Number;
+use crate::parser::lexer::LastErrorPath;
 use crate::parser::lexer::Variable;
 
 use lalrpop_util::ErrorRecovery;
@@ -118,7 +119,7 @@ CallInstrArgValue: CallInstrArgValue<'input> = {
     <n:Number> => CallInstrArgValue::Number(n),
     <b:Boolean> => CallInstrArgValue::Boolean(b),
     InitPeerId => CallInstrArgValue::InitPeerId,
-    LastError => CallInstrArgValue::LastError,
+    <j:LastError> => CallInstrArgValue::LastError(j),
 }
 
 Iterable: IterableValue<'input> = {
@@ -155,7 +156,7 @@ extern {
         Boolean => Token::Boolean(<bool>),
 
         InitPeerId => Token::InitPeerId,
-        LastError => Token::LastError,
+        LastError => Token::LastError(<LastErrorPath>),
 
         call => Token::Call,
         seq => Token::Seq,

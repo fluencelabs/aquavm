@@ -34,6 +34,7 @@ mod preparation;
 mod air;
 pub mod log_targets;
 
+pub use crate::contexts::execution::LastError;
 pub use air_interpreter_interface::InterpreterOutcome;
 pub use air_interpreter_interface::INTERPRETER_SUCCESS;
 pub use polyplets::ResolvedTriplet;

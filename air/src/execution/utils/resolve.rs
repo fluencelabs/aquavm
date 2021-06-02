@@ -16,6 +16,7 @@
 
 use crate::contexts::execution::AValue;
 use crate::contexts::execution::ExecutionCtx;
+use crate::contexts::execution::LastErrorWithTetraplets;
 use crate::execution::boxed_value::JValuable;
 use crate::execution::ExecutionError;
 use crate::execution::ExecutionResult;
@@ -23,6 +24,7 @@ use crate::JValue;
 use crate::SecurityTetraplet;
 
 use air_parser::ast::CallInstrArgValue;
+use air_parser::ast::LastErrorPath;
 
 /// Resolve value to called function arguments.
 pub(crate) fn resolve_to_args<'i>(
@@ -31,7 +33,7 @@ pub(crate) fn resolve_to_args<'i>(
 ) -> ExecutionResult<(JValue, Vec<SecurityTetraplet>)> {
     match value {
         CallInstrArgValue::InitPeerId => prepare_consts(ctx.init_peer_id.clone(), ctx),
-        CallInstrArgValue::LastError => prepare_last_error(ctx),
+        CallInstrArgValue::LastError(path) => prepare_last_error(path, ctx),
         CallInstrArgValue::Literal(value) => prepare_consts(value.to_string(), ctx),
         CallInstrArgValue::Boolean(value) => prepare_consts(*value, ctx),
         CallInstrArgValue::Number(value) => prepare_consts(value, ctx),
@@ -53,27 +55,18 @@ fn prepare_consts(arg: impl Into<JValue>, ctx: &ExecutionCtx<'_>) -> ExecutionRe
 }
 
 #[allow(clippy::unnecessary_wraps)]
-fn prepare_last_error(ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, Vec<SecurityTetraplet>)> {
-    let result = match &ctx.last_error {
-        Some(error) => {
-            let serialized_error = error.serialize();
-            let jvalue = JValue::String(serialized_error);
-            let tetraplets = error
-                .tetraplet
-                .clone()
-                .unwrap_or_else(|| SecurityTetraplet::literal_tetraplet(ctx.init_peer_id.clone()));
-
-            (jvalue, vec![tetraplets])
-        }
-        None => {
-            let jvalue = JValue::String(String::new());
-            let tetraplets = vec![];
-
-            (jvalue, tetraplets)
-        }
+fn prepare_last_error(
+    path: &LastErrorPath,
+    ctx: &ExecutionCtx<'_>,
+) -> ExecutionResult<(JValue, Vec<SecurityTetraplet>)> {
+    let LastErrorWithTetraplets { last_error, tetraplets } = ctx.last_error();
+    let jvalue = match path {
+        LastErrorPath::Instruction => JValue::String(last_error.instruction),
+        LastErrorPath::Message => JValue::String(last_error.msg),
+        LastErrorPath::None => serde_json::to_value(last_error).expect("the default serializer shouldn't fail"),
     };
 
-    Ok(result)
+    Ok((jvalue, tetraplets))
 }
 
 fn prepare_variable<'i>(
