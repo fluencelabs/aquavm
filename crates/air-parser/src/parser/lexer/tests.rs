@@ -371,7 +371,7 @@ fn last_error() {
 
 #[test]
 fn last_error_instruction() {
-    const LAST_ERROR: &str = r#"%last_error%.instruction"#;
+    const LAST_ERROR: &str = r#"%last_error%.$.instruction"#;
 
     lexer_test(
         LAST_ERROR,
@@ -385,7 +385,7 @@ fn last_error_instruction() {
 
 #[test]
 fn last_error_msg() {
-    const LAST_ERROR: &str = r#"%last_error%.msg"#;
+    const LAST_ERROR: &str = r#"%last_error%.$.msg"#;
 
     lexer_test(
         LAST_ERROR,
@@ -399,14 +399,14 @@ fn last_error_msg() {
 
 #[test]
 fn last_error_incorrect_field() {
-    const LAST_ERROR: &str = r#"%last_error%.asdasd"#;
+    const LAST_ERROR: &str = r#"%last_error%.$.asdasd"#;
 
     lexer_test(
         LAST_ERROR,
         Single(Err(LexerError::LastErrorPathError(
             12,
             LAST_ERROR.len(),
-            ".asdasd".to_string(),
+            ".$.asdasd".to_string(),
         ))),
     );
 }

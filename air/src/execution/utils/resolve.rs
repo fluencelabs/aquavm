@@ -25,6 +25,7 @@ use crate::SecurityTetraplet;
 
 use air_parser::ast::CallInstrArgValue;
 use air_parser::ast::LastErrorPath;
+use serde_json::json;
 
 /// Resolve value to called function arguments.
 pub(crate) fn resolve_to_args<'i>(
@@ -63,7 +64,7 @@ fn prepare_last_error(
     let jvalue = match path {
         LastErrorPath::Instruction => JValue::String(last_error.instruction),
         LastErrorPath::Message => JValue::String(last_error.msg),
-        LastErrorPath::None => serde_json::to_value(last_error).expect("the default serializer shouldn't fail"),
+        LastErrorPath::None => json!(last_error),
     };
 
     Ok((jvalue, tetraplets))

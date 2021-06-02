@@ -180,7 +180,7 @@ fn last_error_with_xor() {
         r#"
             (xor
                 (call "{0}" ("service_id_1" "local_fn_name") [] result)
-                (call "{1}" ("service_id_2" "local_fn_name") [%last_error%.msg] result)
+                (call "{1}" ("service_id_2" "local_fn_name") [%last_error%.$.msg] result)
             )"#,
         faillible_peer_id, local_peer_id,
     );
