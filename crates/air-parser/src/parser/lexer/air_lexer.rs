@@ -199,8 +199,8 @@ fn parse_last_error(input: &str, start_pos: usize) -> LexerResult<Token<'_>> {
     let last_error_size = LAST_ERROR.len();
     let last_error_path = match &input[last_error_size..] {
         "" => LastErrorPath::None,
-        "instruction" => LastErrorPath::Instruction,
-        "msg" => LastErrorPath::Message,
+        ".instruction" => LastErrorPath::Instruction,
+        ".msg" => LastErrorPath::Message,
         p => {
             return Err(LexerError::LastErrorPathError(
                 start_pos,
