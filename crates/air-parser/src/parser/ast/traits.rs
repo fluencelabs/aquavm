@@ -24,7 +24,7 @@ impl fmt::Display for CallInstrArgValue<'_> {
 
         match self {
             InitPeerId => write!(f, "%init_peer_id%"),
-            LastError => write!(f, "%last_error%"),
+            LastError(json_path) => write!(f, "%last_error%{}", json_path),
             Literal(str) => write!(f, r#""{}""#, str),
             Number(number) => write!(f, "{}", number),
             Boolean(bool) => write!(f, "{}", bool),

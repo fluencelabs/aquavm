@@ -15,6 +15,7 @@
  */
 
 use super::errors::LexerError;
+use super::token::LastErrorPath;
 use super::token::Token;
 use super::LexerResult;
 
@@ -185,13 +186,32 @@ fn string_to_token(input: &str, start_pos: usize) -> LexerResult<Token> {
         MISMATCH_INSTR => Ok(Token::MisMatch),
 
         INIT_PEER_ID => Ok(Token::InitPeerId),
-        LAST_ERROR => Ok(Token::LastError),
+        _ if input.starts_with(LAST_ERROR) => parse_last_error(input, start_pos),
 
         TRUE_VALUE => Ok(Token::Boolean(true)),
         FALSE_VALUE => Ok(Token::Boolean(false)),
 
         str => super::call_variable_parser::try_parse_call_variable(str, start_pos),
     }
+}
+
+fn parse_last_error(input: &str, start_pos: usize) -> LexerResult<Token<'_>> {
+    let last_error_size = LAST_ERROR.len();
+    let last_error_path = match &input[last_error_size..] {
+        "" => LastErrorPath::None,
+        ".$.instruction" => LastErrorPath::Instruction,
+        ".$.msg" => LastErrorPath::Message,
+        path => {
+            return Err(LexerError::LastErrorPathError(
+                start_pos + last_error_size,
+                start_pos + input.len(),
+                path.to_string(),
+            ))
+        }
+    };
+
+    let last_error_token = Token::LastError(last_error_path);
+    Ok(last_error_token)
 }
 
 const CALL_INSTR: &str = "call";

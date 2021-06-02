@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use air::LastError;
 use air::SecurityTetraplet;
 use air_test_utils::call_vm;
 use air_test_utils::create_avm;
@@ -29,7 +30,7 @@ use std::rc::Rc;
 type ArgToCheck<T> = Rc<RefCell<Option<T>>>;
 
 fn create_check_service_closure(
-    args_to_check: ArgToCheck<Vec<String>>,
+    args_to_check: ArgToCheck<LastError>,
     tetraplets_to_check: ArgToCheck<Vec<Vec<SecurityTetraplet>>>,
 ) -> CallServiceClosure {
     Box::new(move |_, args| -> Option<IValue> {
@@ -38,7 +39,8 @@ fn create_check_service_closure(
             _ => unreachable!(),
         };
 
-        let call_args: Vec<String> = serde_json::from_str(call_args).expect("json deserialization shouldn't fail");
+        let mut call_args: Vec<LastError> =
+            serde_json::from_str(call_args).expect("json deserialization shouldn't fail");
 
         let tetraplets = match &args[3] {
             IValue::String(str) => str,
@@ -48,7 +50,7 @@ fn create_check_service_closure(
         let de_tetraplets: Vec<Vec<SecurityTetraplet>> =
             serde_json::from_str(tetraplets).expect("json deserialization shouldn't fail");
 
-        *args_to_check.borrow_mut() = Some(call_args);
+        *args_to_check.borrow_mut() = Some(call_args.remove(0));
         *tetraplets_to_check.borrow_mut() = Some(de_tetraplets);
 
         Some(IValue::Record(
@@ -83,9 +85,15 @@ fn last_error_tetraplets() {
     let res = call_vm!(fallible_vm, "asd", script.clone(), "", res.data);
     let _ = call_vm!(local_vm, "asd", script, "", res.data);
 
+    let actual_value = (*args.borrow()).as_ref().unwrap().clone();
     assert_eq!(
-        (*args.borrow()).as_ref().unwrap()[0],
-        r#"{"error":"Local service error: ret_code is 1, error message is 'error'","instruction":"call \"fallible_peer_id\" (\"fallible_call_service\" \"\") [service_id] client_result"}"#
+        actual_value.instruction,
+        r#"call "fallible_peer_id" ("fallible_call_service" "") [service_id] client_result"#
+    );
+
+    assert_eq!(
+        actual_value.msg,
+        r#"Local service error: ret_code is 1, error message is 'error'"#
     );
 
     let triplet = (*tetraplets.borrow()).as_ref().unwrap()[0][0].triplet.clone();
@@ -118,7 +126,7 @@ fn not_clear_last_error_in_match() {
                     (call "unknown_peer" ("" "") [%last_error%])
                 )
                 (seq
-                    (call "{1}" ("op" "identity") [])
+                    (null)
                     (call "{1}" ("" "") [%last_error%])
                 )
             )
@@ -130,7 +138,9 @@ fn not_clear_last_error_in_match() {
     let res = call_vm!(set_variable_vm, "asd", &script, "", "");
     let _ = call_vm!(local_vm, "asd", &script, "", res.data);
 
-    assert_eq!((*args.borrow()).as_ref().unwrap()[0], "");
+    let actual_value = (*args.borrow()).as_ref().unwrap().clone();
+    assert_eq!(actual_value.instruction, "");
+    assert_eq!(actual_value.msg, "");
 }
 
 #[test]
@@ -156,7 +166,7 @@ fn not_clear_last_error_in_mismatch() {
                     (call "unknown_peer" ("" "") [%last_error%])
                 )
                 (seq
-                    (call "{1}" ("op" "identity") [])
+                    (null)
                     (call "{1}" ("" "") [%last_error%])
                 )
             )
@@ -168,5 +178,7 @@ fn not_clear_last_error_in_mismatch() {
     let res = call_vm!(set_variable_vm, "asd", &script, "", "");
     let _ = call_vm!(local_vm, "asd", &script, "", res.data);
 
-    assert_eq!((*args.borrow()).as_ref().unwrap()[0], "");
+    let actual_value = (*args.borrow()).as_ref().unwrap().clone();
+    assert_eq!(actual_value.instruction, "");
+    assert_eq!(actual_value.msg, "");
 }

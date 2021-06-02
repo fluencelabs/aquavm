@@ -15,6 +15,7 @@
  */
 
 use crate::ast;
+use crate::parser::lexer::LastErrorPath;
 use crate::parser::AIRParser;
 use crate::parser::ParserError;
 use ast::Call;
@@ -522,7 +523,7 @@ fn parse_last_error() {
                 CallInstrValue::Literal("service_id"),
                 CallInstrValue::Literal("fn_name"),
             ),
-            args: Rc::new(vec![CallInstrArgValue::LastError]),
+            args: Rc::new(vec![CallInstrArgValue::LastError(LastErrorPath::None)]),
             output: None,
         }),
         Instruction::Null(ast::Null),

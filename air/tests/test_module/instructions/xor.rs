@@ -180,7 +180,7 @@ fn last_error_with_xor() {
         r#"
             (xor
                 (call "{0}" ("service_id_1" "local_fn_name") [] result)
-                (call "{1}" ("service_id_2" "local_fn_name") [%last_error%] result)
+                (call "{1}" ("service_id_2" "local_fn_name") [%last_error%.$.msg] result)
             )"#,
         faillible_peer_id, local_peer_id,
     );
@@ -189,7 +189,7 @@ fn last_error_with_xor() {
     let res = call_vm!(vm, "asd", script, "", res.data);
     let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid json");
 
-    let expected_state = executed_state::scalar_string("{\"error\":\"Local service error: ret_code is 1, error message is \'error\'\",\"instruction\":\"call \\\"failible_peer_id\\\" (\\\"service_id_1\\\" \\\"local_fn_name\\\") [] result\"}");
+    let expected_state = executed_state::scalar_string("Local service error: ret_code is 1, error message is 'error'");
 
     assert_eq!(actual_trace[1], expected_state);
 }
