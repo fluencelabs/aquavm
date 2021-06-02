@@ -203,7 +203,7 @@ fn parse_last_error(input: &str, start_pos: usize) -> LexerResult<Token<'_>> {
         ".msg" => LastErrorPath::Message,
         p => {
             return Err(LexerError::LastErrorPathError(
-                start_pos,
+                start_pos + last_error_size,
                 start_pos + input.len(),
                 p.to_string(),
             ))
