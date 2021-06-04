@@ -48,6 +48,9 @@ pub enum LexerError {
     #[error("{2}")]
     ParseFloatError(usize, usize, #[source] ParseFloatError),
 
+    #[error("{2} is an incorrect path for %last_error%, only .instruction and .msg are allowed")]
+    LastErrorPathError(usize, usize, String),
+
     #[error("this float is too big, a float could contain less than 12 digits")]
     TooBigFloat(usize, usize),
 

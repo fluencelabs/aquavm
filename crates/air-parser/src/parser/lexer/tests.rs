@@ -16,6 +16,7 @@
 
 use super::air_lexer::Spanned;
 use super::AIRLexer;
+use super::LastErrorPath;
 use super::LexerError;
 use super::Number;
 use super::Token;
@@ -352,6 +353,62 @@ fn invalid_json_path_numbers() {
     const JSON_PATH: &str = r#"+12345$[$@[]():?.*,"!]"#;
 
     lexer_test(JSON_PATH, Single(Err(LexerError::IsNotAlphanumeric(6, 6))));
+}
+
+#[test]
+fn last_error() {
+    const LAST_ERROR: &str = r#"%last_error%"#;
+
+    lexer_test(
+        LAST_ERROR,
+        Single(Ok((
+            0,
+            Token::LastError(LastErrorPath::None),
+            LAST_ERROR.len(),
+        ))),
+    );
+}
+
+#[test]
+fn last_error_instruction() {
+    const LAST_ERROR: &str = r#"%last_error%.$.instruction"#;
+
+    lexer_test(
+        LAST_ERROR,
+        Single(Ok((
+            0,
+            Token::LastError(LastErrorPath::Instruction),
+            LAST_ERROR.len(),
+        ))),
+    );
+}
+
+#[test]
+fn last_error_msg() {
+    const LAST_ERROR: &str = r#"%last_error%.$.msg"#;
+
+    lexer_test(
+        LAST_ERROR,
+        Single(Ok((
+            0,
+            Token::LastError(LastErrorPath::Message),
+            LAST_ERROR.len(),
+        ))),
+    );
+}
+
+#[test]
+fn last_error_incorrect_field() {
+    const LAST_ERROR: &str = r#"%last_error%.$.asdasd"#;
+
+    lexer_test(
+        LAST_ERROR,
+        Single(Err(LexerError::LastErrorPathError(
+            12,
+            LAST_ERROR.len(),
+            ".$.asdasd".to_string(),
+        ))),
+    );
 }
 
 #[test]
