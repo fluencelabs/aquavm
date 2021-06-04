@@ -34,7 +34,7 @@ use air::InterpreterOutcome;
 use fluence::marine;
 
 pub fn main() {
-    logger::init_logger();
+    logger::init_logger(None);
 }
 
 #[marine]
