@@ -16,11 +16,19 @@
 
 use air::log_targets::TARGET_MAP;
 
-pub fn init_logger() {
+use log::LevelFilter;
+
+pub fn init_logger(default_level: Option<LevelFilter>) {
     let target_map = TARGET_MAP.iter().cloned().collect();
-    fluence::WasmLoggerBuilder::new()
+    let builder = fluence::WasmLoggerBuilder::new()
         .with_target_map(target_map)
-        .filter("jsonpath_lib", log::LevelFilter::Info)
-        .build()
-        .unwrap();
+        .filter("jsonpath_lib", log::LevelFilter::Info);
+
+    let builder = if let Some(default_level) = default_level {
+        builder.with_log_level(default_level)
+    } else {
+        builder
+    };
+
+    builder.build().unwrap();
 }

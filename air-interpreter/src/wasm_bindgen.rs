@@ -38,7 +38,10 @@ pub const DEFAULT_LOG_LEVEL: LevelFilter = LevelFilter::Trace;
 
 #[wasm_bindgen(start)]
 pub fn main() {
-    logger::init_logger();
+    // it's necessary to initialize it with the minimal allowed log level,
+    // because otherwise it's impossible to set less level than used in initialization.
+    const MIN_LOG_LEVEL: LevelFilter = LevelFilter::Trace;
+    logger::init_logger(Some(MIN_LOG_LEVEL));
 }
 
 #[wasm_bindgen]
