@@ -4,16 +4,7 @@ const vmPeerId = '12D3KooWNzutuy8WHXDKFqFsATvCR6j9cj2FijYbnd47geRKaQZS';
 
 const createTestIntepreter = async (handler: ParticleHandler) => {
     return AirInterpreter.create(handler, vmPeerId, 'trace', (level, message) => {
-        switch (level) {
-            case 0:
-            case 1:
-            case 2:
-                console.log(message);
-            case 3:
-                console.warn(message);
-            case 4:
-                console.error(message);
-        }
+        console.log(`level: ${level}, message=${message}`);
     });
 };
 
