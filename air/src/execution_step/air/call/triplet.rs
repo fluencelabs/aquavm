@@ -79,8 +79,8 @@ impl<'a, 'i> Triplet<'a, 'i> {
 /// Resolve value to string by either resolving variable from `ExecutionCtx`, taking literal value, or etc.
 // TODO: return Rc<String> to avoid excess cloning
 fn resolve_to_string<'i>(value: &CallInstrValue<'i>, ctx: &ExecutionCtx<'i>) -> ExecutionResult<String> {
-    use crate::execution::utils::get_variable_name;
-    use crate::execution::utils::resolve_to_jvaluable;
+    use crate::execution_step::utils::get_variable_name;
+    use crate::execution_step::utils::resolve_to_jvaluable;
 
     let resolved = match value {
         CallInstrValue::InitPeerId => ctx.init_peer_id.clone(),

@@ -20,13 +20,14 @@ pub(crate) mod error_descriptor;
 pub(crate) use avalue::AValue;
 pub(crate) use avalue::ResolvedCallResult;
 
-use crate::execution::ExecutionError;
+use crate::execution_step::ExecutionError;
 use crate::SecurityTetraplet;
 use error_descriptor::LastErrorDescriptor;
 use error_descriptor::LastErrorWithTetraplets;
 
 use std::collections::HashMap;
 use std::collections::VecDeque;
+use std::rc::Rc;
 
 /// Contains all necessary state needed to execute AIR script.
 #[derive(Default)]
@@ -39,7 +40,7 @@ pub(crate) struct ExecutionCtx<'i> {
     pub next_peer_pks: Vec<String>,
 
     /// PeerId of a peer executing this AIR script at the moment.
-    pub current_peer_id: String,
+    pub current_peer_id: Rc<String>,
 
     /// PeerId of a peer send this AIR script.
     pub init_peer_id: String,
@@ -66,6 +67,8 @@ pub(crate) struct ExecutionCtx<'i> {
 
 impl<'i> ExecutionCtx<'i> {
     pub(crate) fn new(current_peer_id: String, init_peer_id: String) -> Self {
+        let current_peer_id = Rc::new(current_peer_id);
+
         Self {
             current_peer_id,
             init_peer_id,

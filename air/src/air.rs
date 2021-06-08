@@ -16,9 +16,9 @@
 
 mod outcome;
 
-use crate::execution::ExecutableInstruction;
-use crate::preparation::prepare;
-use crate::preparation::PreparationDescriptor;
+use crate::execution_step::ExecutableInstruction;
+use crate::preparation_step::prepare;
+use crate::preparation_step::PreparationDescriptor;
 
 use air_interpreter_interface::InterpreterOutcome;
 

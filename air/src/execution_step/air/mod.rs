@@ -153,7 +153,7 @@ macro_rules! log_instruction {
 macro_rules! joinable_call {
     ($cmd:expr, $exec_ctx:expr) => {
         match $cmd {
-            Err(e) if crate::execution::air::is_joinable_error_type(&e) => {
+            Err(e) if crate::execution_step::air::is_joinable_error_type(&e) => {
                 $exec_ctx.subtree_complete = false;
                 return Ok(());
             }
@@ -167,7 +167,7 @@ macro_rules! joinable_call {
 macro_rules! joinable {
     ($cmd:expr, $exec_ctx:expr) => {
         match $cmd {
-            Err(e) if crate::execution::air::is_joinable_error_type(&e) => {
+            Err(e) if crate::execution_step::air::is_joinable_error_type(&e) => {
                 return Ok(());
             }
             v => v,

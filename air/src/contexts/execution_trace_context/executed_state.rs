@@ -20,25 +20,18 @@ use serde::Deserialize;
 use serde::Serialize;
 use std::rc::Rc;
 
-#[derive(Debug, Default, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct ParResult(pub usize, pub usize);
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub enum ValueType {
-    Scalar,
-    Stream(String),
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
 pub enum CallResult {
     /// Request was sent to a target node by node with such public key and it shouldn't be called again.
-    RequestSentBy(String),
+    RequestSentBy(Rc<String>),
 
     /// A corresponding call's been already executed with such value and result.
-    Executed(Rc<JValue>, ValueType),
+    Executed(Rc<JValue>),
 
     /// call_service ended with a service error.
     CallServiceFailed(i32, Rc<String>),
@@ -60,17 +53,21 @@ pub enum CallResult {
 ///
 /// From this example, it could be seen that each instruction sequence inside fold is divided into
 /// two intervals (left and right), each of these intervals has borders [begin, end).
-/// So, this struct describes position inside overall execution trace belongs to one fold iteration.
+/// So, this struct describes position inside overall execution_step trace belongs to one fold iteration.
 #[derive(Debug, Default, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub struct FoldStatePositions {
-    pub begin: usize,
-    pub end: usize,
+pub struct FoldSubTraceLore {
+    // position of current value in a trace
+    pub value_pos: usize,
+    // start position in a trace of a subtrace that was recorded with current value
+    pub begin_pos: usize,
+    // length of the subtrace
+    pub interval_len: usize,
 }
 
 #[derive(Debug, Default, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub struct FoldResult(pub String, pub Vec<FoldStatePositions>);
+pub struct FoldResult(pub Vec<Vec<FoldSubTraceLore>>);
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -78,6 +75,13 @@ pub enum ExecutedState {
     Par(ParResult),
     Call(CallResult),
     Fold(FoldResult),
+}
+
+impl ParResult {
+    // returns a size of subtrace that this par describes in execution_step trace.
+    pub fn size(&self) -> Option<usize> {
+        self.0.checked_add(self.1)
+    }
 }
 
 impl ExecutedState {
@@ -94,9 +98,9 @@ impl std::fmt::Display for ExecutedState {
         match self {
             Par(ParResult(left, right)) => write!(f, "Par({}, {})", left, right),
             Call(RequestSentBy(peer_id)) => write!(f, "RequestSentBy({})", peer_id),
-            Call(Executed(result, value_type)) => write!(f, "Executed({:?} {:?})", result, value_type),
+            Call(Executed(result)) => write!(f, "Executed({:?})", result),
             Call(CallServiceFailed(ret_code, err_msg)) => write!(f, "CallServiceFailed({}, {})", ret_code, err_msg),
-            Fold(FoldResult(iterable, states)) => write!(f, "Fold({}, {:?})", iterable, states),
+            Fold(FoldResult(states)) => write!(f, "Fold({:?})", states),
         }
     }
 }

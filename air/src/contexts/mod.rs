@@ -22,9 +22,8 @@ pub mod execution_trace {
     pub use super::execution_trace_context::ExecutedState;
     pub use super::execution_trace_context::ExecutionTrace;
     pub use super::execution_trace_context::FoldResult;
-    pub use super::execution_trace_context::FoldStatePositions;
+    pub use super::execution_trace_context::FoldSubTraceLore;
     pub use super::execution_trace_context::ParResult;
-    pub use super::execution_trace_context::ValueType;
 
     pub(crate) use super::execution_trace_context::ExecutionTraceCtx;
 }

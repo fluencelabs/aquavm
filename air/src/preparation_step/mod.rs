@@ -17,21 +17,13 @@
 mod errors;
 mod merging;
 mod preparation;
-mod preparation_utils;
-#[cfg(tests)]
-mod tests;
 
-pub(crate) use errors::DataMergingError;
 pub(crate) use errors::PreparationError;
-pub(crate) use preparation_utils::prepare;
-pub(crate) use preparation_utils::PreparationDescriptor;
+pub(crate) use merging::DataMergingError;
+pub(crate) use preparation::prepare;
+pub(crate) use preparation::PreparationDescriptor;
 
 pub(self) use crate::contexts::execution::*;
-pub(self) use crate::contexts::execution_trace::CallResult;
-pub(self) use crate::contexts::execution_trace::ExecutedState;
 pub(self) use crate::contexts::execution_trace::ExecutionTrace;
 pub(self) use crate::contexts::execution_trace::ExecutionTraceCtx;
-pub(self) use crate::contexts::execution_trace::FoldResult;
-pub(self) use crate::contexts::execution_trace::ParResult;
-pub(self) use crate::contexts::execution_trace::ValueType;
 pub(self) use merging::merge_execution_traces;

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-use crate::execution::ExecutionError;
-use crate::preparation::PreparationError;
+use crate::execution_step::ExecutionError;
+use crate::preparation_step::PreparationError;
 
 use crate::InterpreterOutcome;
 use crate::INTERPRETER_SUCCESS;

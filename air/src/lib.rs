@@ -28,8 +28,8 @@
 
 mod build_targets;
 mod contexts;
-mod execution;
-mod preparation;
+mod execution_step;
+mod preparation_step;
 
 mod air;
 pub mod log_targets;
@@ -47,7 +47,6 @@ pub mod execution_trace {
     pub use crate::contexts::execution_trace::ExecutedState;
     pub use crate::contexts::execution_trace::ExecutionTrace;
     pub use crate::contexts::execution_trace::ParResult;
-    pub use crate::contexts::execution_trace::ValueType;
 }
 
 pub mod parser {

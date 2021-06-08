@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-/// Print out each instruction name at the beginning of its execution.
+/// Print out each instruction name at the beginning of its execution_step.
 pub const INSTRUCTION: &str = "instruction";
 
-/// Print out data cache at the beginning of each instruction execution.
+/// Print out data cache at the beginning of each instruction execution_step.
 pub const DATA_CACHE: &str = "data_cache";
 
-/// Print out next_peer_pks at the beginning of each instruction execution.
+/// Print out next_peer_pks at the beginning of each instruction execution_step.
 pub const NEXT_PEER_PKS: &str = "next_peer_pks";
 
-/// Print out subtree_complete value at the beginning of each instruction execution.
+/// Print out subtree_complete value at the beginning of each instruction execution_step.
 pub const SUBTREE_COMPLETE: &str = "subtree_complete";
 
-/// Print out current executed trace at the beginning of each instruction execution.
+/// Print out current executed trace at the beginning of each instruction execution_step.
 pub const EXECUTED_TRACE: &str = "executed_trace";
 
-/// Print out count of element in the current subtree at the beginning of each instruction execution.
+/// Print out count of element in the current subtree at the beginning of each instruction execution_step.
 pub const SUBTREE_ELEMENTS: &str = "subtree_elements_count";
 
-/// Print out state of data cache at the beginning of each instruction execution.
+/// Print out state of data cache at the beginning of each instruction execution_step.
 pub const NEW_EXECUTED_TRACE: &str = "new_executed_trace";
 
 /// Print out logs at the executed states merging stage.
@@ -41,7 +41,7 @@ pub const EXECUTED_TRACE_MERGE: &str = "executed_trace_merge";
 /// Print out running arguments and params of a script.
 pub const RUN_PARAMS: &str = "initial_params";
 
-/// Print out state of data cache at the beginning of each instruction execution.
+/// Print out state of data cache at the beginning of each instruction execution_step.
 pub const EXECUTED_STATE_CHANGING: &str = "executed_state_changing";
 
 /// Print log if call is postponed due the join behaviour.

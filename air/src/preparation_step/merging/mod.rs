@@ -14,27 +14,30 @@
  * limitations under the License.
  */
 
-mod merge_ctx;
+mod errors;
 #[cfg(test)]
 mod tests;
 mod trace_merger;
 mod trace_slider;
 
-pub(self) type MergeResult<T> = Result<T, crate::preparation::DataMergingError>;
+pub use errors::DataMergingError;
+
+pub(self) type MergeResult<T> = Result<T, crate::preparation_step::DataMergingError>;
+
+pub(self) use crate::contexts::execution_trace::CallResult;
+pub(self) use crate::contexts::execution_trace::ExecutedState;
+pub(self) use crate::contexts::execution_trace::FoldResult;
+pub(self) use crate::contexts::execution_trace::ParResult;
 
 use crate::contexts::execution_trace::ExecutionTrace;
 use trace_merger::TraceMerger;
 
-use air_parser::ast::Instruction;
-
-pub(crate) fn merge_execution_traces<'i>(
+pub(crate) fn merge_execution_traces(
     prev_trace: ExecutionTrace,
     current_trace: ExecutionTrace,
-    air: &'i Instruction<'i>,
 ) -> MergeResult<ExecutionTrace> {
-    let trace_merger = TraceMerger::new(prev_trace, current_trace, air);
+    let trace_merger = TraceMerger::new(prev_trace, current_trace);
     trace_merger.merge()
 }
 
-pub(self) use merge_ctx::MergeCtx;
 pub(self) use trace_slider::TraceSlider;

@@ -19,9 +19,8 @@ mod executed_state;
 pub use executed_state::CallResult;
 pub use executed_state::ExecutedState;
 pub use executed_state::FoldResult;
-pub use executed_state::FoldStatePositions;
+pub use executed_state::FoldSubTraceLore;
 pub use executed_state::ParResult;
-pub use executed_state::ValueType;
 
 use serde::Deserialize;
 use serde::Serialize;
@@ -41,14 +40,14 @@ pub(crate) struct ExecutionTraceCtx {
     pub(crate) current_subtree_size: usize,
 
     // TODO: consider change it to Vec for optimization
-    /// Stream for resulted path produced by the interpreter after execution.
+    /// Stream for resulted path produced by the interpreter after execution_step.
     pub(crate) new_trace: ExecutionTrace,
 }
 
 impl ExecutionTraceCtx {
     pub fn new(current_trace: ExecutionTrace) -> Self {
         let current_subtree_size = current_trace.len();
-        // a new execution trace will contain at least current_path.len() elements
+        // a new execution_step trace will contain at least current_path.len() elements
         let new_trace = ExecutionTrace::with_capacity(current_subtree_size);
 
         Self {

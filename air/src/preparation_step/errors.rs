@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-use super::CallResult;
-use super::ExecutedState;
+use super::merging::DataMergingError;
 
 use serde_json::Error as SerdeJsonError;
-use thiserror::Error as ThisError;
 
 use std::env::VarError;
 use std::error::Error;
 
-/// Errors happened during the interpreter preparation step.
+/// Errors happened during the interpreter preparation_step step.
 #[derive(Debug)]
 pub enum PreparationError {
     /// Error occurred while parsing AIR script
@@ -37,26 +35,6 @@ pub enum PreparationError {
 
     /// Errors occurred while merging previous and current data.
     StateMergingError(DataMergingError),
-}
-
-/// Errors arose out of merging previous data with a new.
-#[derive(ThisError, Debug)]
-pub enum DataMergingError {
-    /// Errors occurred when previous and current executed states are incompatible.
-    #[error("previous and current data have incompatible states: '{0:?}' '{1:?}'")]
-    IncompatibleExecutedStates(ExecutedState, ExecutedState),
-
-    /// Errors occurred when previous and current call results are incompatible.
-    #[error("previous and current call results are incompatible: '{0:?}' '{1:?}'")]
-    IncompatibleCallResults(CallResult, CallResult),
-
-    /// Errors occurred when executed trace contains less elements then corresponding Par has.
-    #[error("executed trace has {0} elements, but {1} requires by Par")]
-    ExecutedTraceTooSmall(usize, usize),
-
-    /// Errors occurred when corresponding fold have different iterable names.
-    #[error("saved folds have different iterable names: {0}, {1}")]
-    IncompatibleFoldIterableNames(String, String),
 }
 
 impl Error for PreparationError {}
@@ -73,7 +51,11 @@ impl PreparationError {
             StateMergingError(IncompatibleExecutedStates(..)) => 4,
             StateMergingError(IncompatibleCallResults(..)) => 5,
             StateMergingError(ExecutedTraceTooSmall(..)) => 6,
-            StateMergingError(IncompatibleFoldIterableNames(..)) => 7,
+            StateMergingError(IncompatibleState) => 8,
+            StateMergingError(ParLenOverflow(_)) => 9,
+            StateMergingError(FoldLenOverflow(_)) => 10,
+            StateMergingError(ParSubtreeUnderflow(..)) => 11,
+            StateMergingError(FoldSubtreeUnderflow(..)) => 12,
         }
     }
 }

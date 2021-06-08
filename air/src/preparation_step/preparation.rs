@@ -25,7 +25,7 @@ use air_parser::ast::Instruction;
 
 type PreparationResult<T> = Result<T, PreparationError>;
 
-/// Represents result of the preparation step.
+/// Represents result of the preparation_step step.
 pub(crate) struct PreparationDescriptor<'ctx, 'i> {
     pub(crate) exec_ctx: ExecutionCtx<'ctx>,
     pub(crate) trace_ctx: ExecutionTraceCtx,
@@ -64,7 +64,7 @@ pub(crate) fn prepare<'i>(
         trace
     );
 
-    let (exec_ctx, trace_ctx) = make_contexts(prev_trace, trace, init_peer_id, &air)?;
+    let (exec_ctx, trace_ctx) = make_contexts(prev_trace, trace, init_peer_id)?;
     let result = PreparationDescriptor {
         exec_ctx,
         trace_ctx,
@@ -74,21 +74,18 @@ pub(crate) fn prepare<'i>(
     Ok(result)
 }
 
-/// Make execution and execution trace contexts from supplied data.
+/// Make execution_step and execution_step trace contexts from supplied data.
 /// Internally, it unites variable from previous and current data and merges executed traces.
-fn make_contexts<'i>(
+fn make_contexts(
     prev_trace: ExecutionTrace,
     trace: ExecutionTrace,
     init_peer_id: String,
-    air: &Instruction<'i>,
 ) -> PreparationResult<(ExecutionCtx<'static>, ExecutionTraceCtx)> {
-    use super::merge_execution_traces;
-
     let current_peer_id = get_current_peer_id().map_err(PreparationError::CurrentPeerIdEnvError)?;
     log::trace!(target: RUN_PARAMS, "current peer id {}", current_peer_id);
 
     let exec_ctx = ExecutionCtx::new(current_peer_id, init_peer_id);
-    let current_trace = merge_execution_traces(prev_trace, trace, air)?;
+    let current_trace = super::merge_execution_traces(prev_trace, trace)?;
     let trace_ctx = ExecutionTraceCtx::new(current_trace);
 
     Ok((exec_ctx, trace_ctx))

@@ -20,7 +20,7 @@ use super::ExecutionResult;
 use crate::contexts::execution::ResolvedCallResult;
 use crate::contexts::execution_trace::*;
 use crate::exec_err;
-use crate::execution::Variable;
+use crate::execution_step::Variable;
 use crate::log_targets::EXECUTED_STATE_CHANGING;
 use crate::JValue;
 
@@ -59,7 +59,7 @@ pub(super) fn set_local_call_result<'i>(
                     entry.insert(AValue::JValueRef(executed_result));
                 }
                 Occupied(mut entry) => {
-                    // check that current execution flow is inside a fold block
+                    // check that current execution_step flow is inside a fold block
                     if exec_ctx.met_folds.is_empty() {
                         // shadowing is allowed only inside fold blocks
                         return exec_err!(MultipleVariablesFound(entry.key().clone()));
@@ -136,7 +136,7 @@ pub(super) fn handle_prev_state<'i>(
         Call(RequestSentBy(..)) => {
             let peer_pk = triplet.peer_pk.as_str();
             // check whether current node can execute this call
-            let is_current_peer = peer_pk == exec_ctx.current_peer_id;
+            let is_current_peer = peer_pk == exec_ctx.current_peer_id.as_str();
             if is_current_peer {
                 Ok(true)
             } else {
@@ -147,7 +147,7 @@ pub(super) fn handle_prev_state<'i>(
         }
         // TODO: use value_type
         // this instruction's been already executed
-        Call(Executed(result, _value_type)) => {
+        Call(Executed(result)) => {
             set_local_call_result(result.clone(), triplet.clone(), output, exec_ctx)?;
             trace_ctx.new_trace.push_back(prev_state);
             Ok(false)

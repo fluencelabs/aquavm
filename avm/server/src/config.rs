@@ -34,7 +34,7 @@ pub struct AVMConfig {
     pub current_peer_id: String,
 
     /// Path to a folder contains prev data.
-    /// AVM uses it to store data obtained after interpreter execution, and load it as a prev_data by particle_id.
+    /// AVM uses it to store data obtained after interpreter execution_step, and load it as a prev_data by particle_id.
     pub particle_data_store: PathBuf,
 
     /// Mask used to filter logs, for details see `log_utf8_string` in fluence-faas.

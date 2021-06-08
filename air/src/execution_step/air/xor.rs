@@ -40,7 +40,7 @@ impl<'i> super::ExecutableInstruction<'i> for Xor<'i> {
     }
 }
 
-/// Returns true, if this execution error type should be caught by xor.
+/// Returns true, if this execution_step error type should be caught by xor.
 fn is_catchable_by_xor(exec_error: &ExecutionError) -> bool {
     // this type of errors related to invalid data and should treat as hard errors.
     !matches!(exec_error, ExecutionError::InvalidExecutedState(..))
@@ -48,8 +48,8 @@ fn is_catchable_by_xor(exec_error: &ExecutionError) -> bool {
 
 fn print_xor_log(e: &ExecutionError) {
     match e {
-        // These errors actually aren't real errors, but a way to bubble execution up from match
-        // to a corresponding xor. They'll become errors iff there is no such xor and execution is
+        // These errors actually aren't real errors, but a way to bubble execution_step up from match
+        // to a corresponding xor. They'll become errors iff there is no such xor and execution_step is
         // bubble up until the very beginning of current subtree. So the error message shouldn't
         // be print out in order not to confuse users.
         ExecutionError::MatchWithoutXorError | ExecutionError::MismatchWithoutXorError => {}

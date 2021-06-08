@@ -62,7 +62,7 @@ impl<'i> ResolvedCall<'i> {
         })
     }
 
-    /// Executes resolved instruction, updates contexts based on a execution result.
+    /// Executes resolved instruction, updates contexts based on a execution_step result.
     pub(super) fn execute(
         &self,
         exec_ctx: &mut ExecutionCtx<'i>,
@@ -74,7 +74,7 @@ impl<'i> ResolvedCall<'i> {
         }
 
         // call can be executed only on peers with such peer_id
-        if self.triplet.peer_pk != exec_ctx.current_peer_id {
+        if self.triplet.peer_pk.as_str() == exec_ctx.current_peer_id.as_str() {
             set_remote_call_result(self.triplet.peer_pk.clone(), exec_ctx, trace_ctx);
 
             return Ok(());
@@ -114,7 +114,7 @@ impl<'i> ResolvedCall<'i> {
         let result = Rc::new(result);
 
         set_local_call_result(result.clone(), self.triplet.clone(), &self.output, exec_ctx)?;
-        let new_executed_state = self.prepare_new_executed_state(result);
+        let new_executed_state = ExecutedState::Call(CallResult::Executed(result));
 
         log::trace!(
             target: EXECUTED_STATE_CHANGING,
@@ -129,19 +129,6 @@ impl<'i> ResolvedCall<'i> {
 
     pub(super) fn as_triplet(&self) -> Rc<ResolvedTriplet> {
         self.triplet.clone()
-    }
-
-    fn prepare_new_executed_state(&self, result: Rc<JValue>) -> ExecutedState {
-        use air_parser::ast::Variable;
-        use CallResult::Executed;
-        use ExecutedState::Call;
-
-        let value_type = match self.output {
-            CallOutputValue::Variable(Variable::Stream(name)) => ValueType::Stream(String::from(name)),
-            _ => ValueType::Scalar,
-        };
-
-        Call(Executed(result, value_type))
     }
 
     /// Determine whether this call should be really called and adjust prev executed trace accordingly.
@@ -174,7 +161,7 @@ impl<'i> ResolvedCall<'i> {
 
     /// Prepare arguments of this call instruction by resolving and preparing their security tetraplets.
     fn resolve_args(&self, exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<ResolvedArguments> {
-        use crate::execution::utils::resolve_to_args;
+        use crate::execution_step::utils::resolve_to_args;
 
         let function_args = self.function_arg_paths.iter();
         let mut call_arguments = Vec::new();
