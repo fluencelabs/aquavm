@@ -20,6 +20,7 @@ mod data_merge;
 mod flattening;
 mod join;
 mod join_behaviour;
+mod json_path;
 mod last_error;
 mod network_explore;
 mod streams;
