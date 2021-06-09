@@ -23,11 +23,13 @@ use super::merge_execution_traces;
 use super::DataMergingError;
 use super::ExecutionTrace;
 use super::TraceSlider;
+use crate::preparation_step::merging::MergeResult;
 
 use super::CallResult;
 use super::ExecutedState;
-// use super::FoldResult;
+use super::FoldResult;
 use super::ParResult;
+use crate::contexts::execution_trace::FoldSubTraceLore;
 use crate::JValue;
 
 use std::rc::Rc;
@@ -46,4 +48,8 @@ pub fn par(left: usize, right: usize) -> ExecutedState {
 
 pub fn service_failed(ret_code: i32, error_message: impl Into<String>) -> ExecutedState {
     ExecutedState::Call(CallResult::CallServiceFailed(ret_code, Rc::new(error_message.into())))
+}
+
+pub fn fold(lores: Vec<Vec<FoldSubTraceLore>>) -> ExecutedState {
+    ExecutedState::Fold(FoldResult(lores))
 }

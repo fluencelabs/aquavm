@@ -16,9 +16,6 @@
 
 use super::*;
 
-use crate::execution_trace::ExecutionTrace;
-use crate::preparation_step::merging::MergeResult;
-
 use DataMergingError::IncompatibleCallResults;
 
 use serde_json::json;

@@ -15,6 +15,7 @@
  */
 
 use super::*;
+use crate::contexts::execution_trace::FoldSubTraceLore;
 
 impl TraceMerger {
     pub(super) fn merge_folds(&mut self, prev_fold: &FoldResult, current_fold: &FoldResult) -> MergeResult<()> {
@@ -48,7 +49,8 @@ fn read_fold_tale(slider: &TraceSlider, fold: &FoldResult) -> MergeResult<FoldTa
     let mut states_count: usize = 0;
 
     for subtrace_lores in fold.0.iter() {
-        for subtrace_lore in subtrace_lores.iter() {
+        check_subtrace_lore_size(subtrace_lores, fold)?;
+        for subtrace_lore in subtrace_lores[0].iter() {
             let value = slider.call_result_by_pos(subtrace_lore.value_pos)?.clone();
             let fold_value = ResolvedFoldSubTraceLore {
                 value,
@@ -72,6 +74,17 @@ fn read_fold_tale(slider: &TraceSlider, fold: &FoldResult) -> MergeResult<FoldTa
     Ok(fold_tale)
 }
 
+fn check_subtrace_lore_size(subtrace_lores: &[FoldSubTraceLore], fold: &FoldResult) -> MergeResult<()> {
+    if subtrace_lores.len() > 2 {
+        return Err(DataMergingError::FoldTooManySubtraces(
+            fold.clone(),
+            subtrace_lores.len(),
+        ));
+    }
+
+    Ok(())
+}
+
 struct FoldSubtreeSizeUpdater {
     new_prev_size: usize,
     new_current_size: usize,
@@ -90,12 +103,12 @@ impl FoldSubtreeSizeUpdater {
     }
 
     pub(crate) fn update(&self, trace_merger: &mut TraceMerger) {
-        trace_merger.prev_slider.set_interval(self.new_prev_size);
-        trace_merger.current_slider.set_interval(self.new_current_size);
+        trace_merger.prev_slider.set_interval_len(self.new_prev_size);
+        trace_merger.current_slider.set_interval_len(self.new_current_size);
     }
 
     fn compute_new_subtree_size(slider: &TraceSlider, fold_tale: &FoldTale) -> MergeResult<usize> {
-        let subtree_size = slider.subtree_size();
+        let subtree_size = slider.interval_len();
         let new_subtree_size = subtree_size
             .checked_sub(fold_tale.states_count)
             .ok_or_else(|| DataMergingError::FoldSubtreeUnderflow(fold_tale.clone(), subtree_size))?;
@@ -113,18 +126,18 @@ fn merge_folds(
         match remove_first(&mut current_fold_lore, prev_value) {
             Some(current_value) => {
                 trace_merger.prev_slider.set_position(prev_value.begin_pos);
-                trace_merger.prev_slider.set_interval(prev_value.interval_len);
+                trace_merger.prev_slider.set_interval_len(prev_value.interval_len);
 
                 trace_merger.current_slider.set_position(current_value.begin_pos);
-                trace_merger.current_slider.set_interval(current_value.interval_len);
+                trace_merger.current_slider.set_interval_len(current_value.interval_len);
 
                 trace_merger.merge_subtree()?;
             }
             None => {
                 trace_merger.prev_slider.set_position(prev_value.begin_pos);
-                trace_merger.prev_slider.set_interval(prev_value.interval_len);
+                trace_merger.prev_slider.set_interval_len(prev_value.interval_len);
 
-                trace_merger.current_slider.set_interval(0);
+                trace_merger.current_slider.set_interval_len(0);
 
                 trace_merger.merge_subtree()?;
             }

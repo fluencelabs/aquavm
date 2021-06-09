@@ -82,7 +82,7 @@ fn merge_par_states_2() {
         scalar_jvalue(json!([])),
         scalar_jvalue(json!([])),
         scalar_jvalue(json!([])),
-        scalar_jvalue(json!([])),
+        request_sent_by("peer_1"),
         par(1, 1),
         scalar_jvalue(json!([])),
         scalar_jvalue(json!([])),
@@ -137,4 +137,22 @@ fn merge_par_states_3() {
     ];
 
     assert_eq!(actual_merged_trace, expected_merged_trace);
+}
+
+#[test]
+fn par_overflow() {
+    let trace = vec![par(usize::MAX, 1), scalar_jvalue(json!([]))];
+
+    let actual_result = merge_execution_traces(trace.clone().into(), trace.into());
+    let expected_result: MergeResult<ExecutionTrace> = Err(DataMergingError::ParLenOverflow(ParResult(usize::MAX, 1)));
+    assert_eq!(actual_result, expected_result);
+}
+
+#[test]
+fn par_underflow() {
+    let trace = vec![par(2, 1), scalar_jvalue(json!([]))];
+
+    let actual_result = merge_execution_traces(trace.clone().into(), trace.into());
+    let expected_result: MergeResult<ExecutionTrace> = Err(DataMergingError::ParSubtreeUnderflow(ParResult(2, 1), 1));
+    assert_eq!(actual_result, expected_result);
 }

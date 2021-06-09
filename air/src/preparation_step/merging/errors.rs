@@ -56,4 +56,8 @@ pub enum DataMergingError {
     /// Errors occurred when sum_i { FoldResult_i.interval_len } value is bigger than current subtree size.
     #[error("fold '{0:?}' contains subtree size that is bigger than current one '{1}'")]
     FoldSubtreeUnderflow(FoldTale, usize),
+
+    /// Errors occurred when one of the fold lores contains more then two sublores.
+    #[error("fold '{0:?}' contains {1} sublores where maximum 2 is allowed")]
+    FoldTooManySubtraces(FoldResult, usize),
 }

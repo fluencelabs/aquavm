@@ -100,13 +100,14 @@ impl TraceMerger {
             SliderType::Previous => &mut self.prev_slider,
         };
 
-        let current_states = slider.remaining_interval()?;
-        self.result_trace.extend(current_states);
+        let tail_states = slider.remaining_interval()?;
+        self.result_trace.extend(tail_states);
 
         Ok(())
     }
 }
 
+#[derive(Debug)]
 enum SliderType {
     Current,
     Previous,

@@ -13,3 +13,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+use super::*;
+
+use serde_json::json;
+
+#[test]
+fn too_many_subtraces() {
+    let lore = FoldSubTraceLore::default();
+    let fold = fold(vec![vec![lore.clone(), lore.clone(), lore.clone()]]);
+    let trace = vec![fold];
+
+    let actual = merge_execution_traces(trace.clone().into(), trace.into());
+    let expected: MergeResult<ExecutionTrace> = Err(DataMergingError::FoldTooManySubtraces(
+        FoldResult(vec![vec![lore.clone(), lore.clone(), lore]]),
+        3,
+    ));
+    assert_eq!(actual, expected);
+}
+
+#[test]
+fn fold_subtraces_overflows() {
+    let lore = FoldSubTraceLore {
+        value_pos: 0,
+        begin_pos: 0,
+        interval_len: usize::MAX,
+    };
+    let fold = fold(vec![vec![lore.clone(), lore.clone()]]);
+    let trace = vec![scalar_jvalue(json!([])), fold];
+
+    let actual = merge_execution_traces(trace.clone().into(), trace.into());
+    let expected: MergeResult<ExecutionTrace> = Err(DataMergingError::FoldLenOverflow(FoldResult(vec![vec![
+        lore.clone(),
+        lore,
+    ]])));
+    assert_eq!(actual, expected);
+}

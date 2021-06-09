@@ -67,7 +67,7 @@ pub struct FoldSubTraceLore {
 
 #[derive(Debug, Default, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub struct FoldResult(pub Vec<Vec<FoldSubTraceLore>>);
+pub struct FoldResult(pub Vec<Vec<Vec<FoldSubTraceLore>>>);
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]

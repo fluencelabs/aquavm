@@ -70,7 +70,7 @@ impl TraceSlider {
         self.position.set(position);
     }
 
-    pub(super) fn set_interval(&self, interval_len: usize) {
+    pub(super) fn set_interval_len(&self, interval_len: usize) {
         self.seen_elements.set(0);
         self.interval_len.set(interval_len);
     }
@@ -93,11 +93,12 @@ impl TraceSlider {
         let remaining_len = self.interval_len.get() - self.seen_elements.get();
         let interval = self.trace.iter().cloned().skip(self.position.get()).take(remaining_len);
         self.seen_elements.set(self.interval_len.get());
+        self.position.set(self.position.get() + remaining_len);
 
         Ok(interval)
     }
 
-    pub(super) fn subtree_size(&self) -> usize {
+    pub(super) fn interval_len(&self) -> usize {
         self.interval_len.get() - self.seen_elements.get()
     }
 }
