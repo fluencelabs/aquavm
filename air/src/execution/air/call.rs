@@ -58,10 +58,17 @@ fn set_last_error<'i>(
     e: Rc<ExecutionError>,
     tetraplet: Option<SecurityTetraplet>,
 ) {
-    let current_peer_id = exec_ctx.current_peer_id.clone();
+    let current_peer_id = match &tetraplet {
+        // use tetraplet if they set, because an error could be propagated from data
+        // (from CallServiceFailed state) and exec_ctx.current_peer_id won't mean
+        // a peer where the error was occurred.
+        Some(tetraplet) => tetraplet.triplet.peer_pk.clone(),
+        None => exec_ctx.current_peer_id.clone(),
+    };
+
     log::warn!("call failed with an error `{}`, peerId `{}`", e, current_peer_id);
 
-    let instruction = format!("{}", call);
+    let instruction = call.to_string();
     let last_error = LastErrorDescriptor::new(e, instruction, current_peer_id, tetraplet);
     exec_ctx.last_error = Some(last_error);
     exec_ctx.last_error_could_be_set = false;
