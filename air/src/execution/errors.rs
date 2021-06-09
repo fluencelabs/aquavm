@@ -95,6 +95,13 @@ pub(crate) enum ExecutionError {
     /// This error type is produced by a mismatch to notify xor that compared values aren't equal.
     #[error("jvalue '{0}' can't be flattened, to be flattened a jvalue should have an array type and consist of zero or one values")]
     FlatteningError(JValue),
+
+    /// Json path is applied to scalar that have inappropriate type.
+    #[error(
+        "json path can't be applied to scalar '{0}',\
+    it could be applied only to streams and variables of array and object types"
+    )]
+    JsonPathVariableTypeError(JValue),
 }
 
 impl ExecutionError {
@@ -119,6 +126,7 @@ impl ExecutionError {
             MatchWithoutXorError => 15,
             MismatchWithoutXorError => 16,
             FlatteningError(_) => 17,
+            JsonPathVariableTypeError(_) => 18,
         }
     }
 }

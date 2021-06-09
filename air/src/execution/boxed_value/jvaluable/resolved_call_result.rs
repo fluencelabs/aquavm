@@ -40,6 +40,7 @@ impl JValuable for ResolvedCallResult {
     ) -> ExecutionResult<(Vec<&JValue>, Vec<SecurityTetraplet>)> {
         use super::ExecutionError::JValueJsonPathError as JsonPathError;
 
+        is_json_path_allowed(&self.result)?;
         let selected_jvalues = select(&self.result, json_path)
             .map_err(|e| JsonPathError(self.result.deref().clone(), String::from(json_path), e))?;
 
@@ -66,5 +67,16 @@ impl JValuable for ResolvedCallResult {
         };
 
         vec![tetraplet]
+    }
+}
+
+fn is_json_path_allowed(value: &JValue) -> ExecutionResult<()> {
+    use super::ExecutionError;
+    use crate::exec_err;
+
+    match value {
+        JValue::Array(_) => return Ok(()),
+        JValue::Object(_) => return Ok(()),
+        value => exec_err!(ExecutionError::JsonPathVariableTypeError(value.clone())),
     }
 }
