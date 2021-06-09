@@ -171,7 +171,7 @@ fn several_nexts() {
 
     for state in actual_trace {
         match state {
-            air_test_utils::ExecutedState::Call(air_test_utils::CallResult::Executed(value, _)) => {
+            air_test_utils::ExecutedState::Call(air_test_utils::CallResult::Executed(value)) => {
                 println!("{}", value)
             }
             _ => {}

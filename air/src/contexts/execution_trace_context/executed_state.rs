@@ -84,6 +84,20 @@ impl ParResult {
     }
 }
 
+impl CallResult {
+    pub fn sent(sender: impl Into<String>) -> CallResult {
+        CallResult::RequestSentBy(Rc::new(sender.into()))
+    }
+
+    pub fn executed(value: JValue) -> CallResult {
+        CallResult::Executed(Rc::new(value))
+    }
+
+    pub fn failed(ret_code: i32, error_msg: impl Into<String>) -> CallResult {
+        CallResult::CallServiceFailed(ret_code, Rc::new(error_msg.into()))
+    }
+}
+
 impl ExecutedState {
     pub fn par(left: usize, right: usize) -> Self {
         Self::Par(ParResult(left, right))

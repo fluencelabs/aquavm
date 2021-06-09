@@ -30,13 +30,13 @@ impl TraceMerger {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FoldTale {
     pub fold_lore: Vec<ResolvedFoldSubTraceLore>,
     pub states_count: usize,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ResolvedFoldSubTraceLore {
     value: Rc<JValue>,
     begin_pos: usize,

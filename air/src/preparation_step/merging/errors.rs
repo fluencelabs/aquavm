@@ -23,7 +23,7 @@ use super::ParResult;
 use thiserror::Error as ThisError;
 
 /// Errors arose out of merging previous data with a new.
-#[derive(ThisError, Debug)]
+#[derive(ThisError, Debug, PartialEq, Eq)]
 pub enum DataMergingError {
     /// Errors occurred when previous and current executed states are incompatible.
     #[error("previous and current data have incompatible states: '{0:?}' '{1:?}'")]

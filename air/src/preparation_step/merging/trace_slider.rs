@@ -56,7 +56,7 @@ impl TraceSlider {
     /// Returns the next state if interval length haven't been reached
     /// and None otherwise.
     pub(super) fn next_state(&self) -> Option<ExecutedState> {
-        if self.seen_elements.get() > self.interval_len.get() {
+        if self.seen_elements.get() >= self.interval_len.get() {
             return None;
         }
 
@@ -89,7 +89,7 @@ impl TraceSlider {
     }
 
     /// Returns remained states in range [position..position+interval_len].
-    pub(super) fn remaining_interval(&mut self) -> MergeResult<impl Iterator<Item = ExecutedState> + '_> {
+    pub(super) fn remaining_interval(&self) -> MergeResult<impl ExactSizeIterator<Item = ExecutedState> + '_> {
         let remaining_len = self.interval_len.get() - self.seen_elements.get();
         let interval = self.trace.iter().cloned().skip(self.position.get()).take(remaining_len);
         self.seen_elements.set(self.interval_len.get());
@@ -98,6 +98,6 @@ impl TraceSlider {
     }
 
     pub(super) fn subtree_size(&self) -> usize {
-        self.interval_len.get()
+        self.interval_len.get() - self.seen_elements.get()
     }
 }
