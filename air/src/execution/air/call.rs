@@ -58,10 +58,11 @@ fn set_last_error<'i>(
     e: Rc<ExecutionError>,
     tetraplet: Option<SecurityTetraplet>,
 ) {
-    log::warn!("call failed with an error: {}", e);
+    let current_peer_id = exec_ctx.current_peer_id.clone();
+    log::warn!("call failed with an error `{}`, peerId `{}`", e, current_peer_id);
 
     let instruction = format!("{}", call);
-    let last_error = LastErrorDescriptor::new(e, instruction, tetraplet);
+    let last_error = LastErrorDescriptor::new(e, instruction, current_peer_id, tetraplet);
     exec_ctx.last_error = Some(last_error);
     exec_ctx.last_error_could_be_set = false;
 }

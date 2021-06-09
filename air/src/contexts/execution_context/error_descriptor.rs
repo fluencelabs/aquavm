@@ -28,6 +28,7 @@ use std::rc::Rc;
 pub(crate) struct LastErrorDescriptor {
     pub(crate) error: Rc<ExecutionError>,
     pub(crate) instruction: String,
+    pub(crate) peer_id: String,
     pub(crate) tetraplet: Option<SecurityTetraplet>,
 }
 
@@ -40,6 +41,9 @@ pub struct LastError {
 
     /// text representation of an error message
     pub msg: String,
+
+    /// Id of a peer where an error occurred
+    pub peer_id: String,
 }
 
 /// Helper struct to return last error with tetraplets from the last_error ExecutionCtx method.
@@ -63,10 +67,16 @@ impl<'s> LastErrorWithTetraplets {
 }
 
 impl LastErrorDescriptor {
-    pub(crate) fn new(error: Rc<ExecutionError>, instruction: String, tetraplet: Option<SecurityTetraplet>) -> Self {
+    pub(crate) fn new(
+        error: Rc<ExecutionError>,
+        instruction: String,
+        peer_id: String,
+        tetraplet: Option<SecurityTetraplet>,
+    ) -> Self {
         Self {
             error,
             instruction,
+            peer_id,
             tetraplet,
         }
     }
@@ -78,6 +88,7 @@ impl LastErrorDescriptor {
         LastError {
             msg: error,
             instruction: self.instruction.clone(),
+            peer_id: self.peer_id.clone(),
         }
     }
 }

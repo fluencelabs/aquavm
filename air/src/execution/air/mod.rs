@@ -44,7 +44,8 @@ macro_rules! execute {
                 }
 
                 let instruction = format!("{}", $self);
-                let last_error = LastErrorDescriptor::new(e.clone(), instruction, None);
+                let last_error =
+                    LastErrorDescriptor::new(e.clone(), instruction, $exec_ctx.current_peer_id.clone(), None);
                 $exec_ctx.last_error = Some(last_error);
                 Err(e)
             }
@@ -69,7 +70,8 @@ macro_rules! execute_match_mismatch {
                 }
 
                 let instruction = format!("{}", $self);
-                let last_error = LastErrorDescriptor::new(e.clone(), instruction, None);
+                let last_error =
+                    LastErrorDescriptor::new(e.clone(), instruction, $exec_ctx.current_peer_id.clone(), None);
                 $exec_ctx.last_error = Some(last_error);
                 Err(e)
             }

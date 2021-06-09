@@ -64,6 +64,7 @@ fn prepare_last_error(
     let jvalue = match path {
         LastErrorPath::Instruction => JValue::String(last_error.instruction),
         LastErrorPath::Message => JValue::String(last_error.msg),
+        LastErrorPath::PeerId => JValue::String(last_error.peer_id),
         LastErrorPath::None => json!(last_error),
     };
 
