@@ -36,13 +36,13 @@ pub(crate) struct LastErrorDescriptor {
 /// %last_error% will have such type.
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 pub struct LastError {
-    /// text representation of an instruction that caused the last error
+    /// Text representation of an instruction that caused the last error.
     pub instruction: String,
 
-    /// text representation of an error message
+    /// Text representation of an error message.
     pub msg: String,
 
-    /// Id of a peer where an error occurred
+    /// Id of a peer where an error occurred.
     pub peer_id: String,
 }
 
