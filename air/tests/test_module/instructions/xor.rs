@@ -189,7 +189,7 @@ fn last_error_with_xor() {
     let res = call_vm!(vm, "asd", script, "", res.data);
     let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid json");
 
-    let expected_state = executed_state::scalar_string("Local service error: ret_code is 1, error message is 'error'");
+    let expected_state = executed_state::scalar_string("Local service error, ret_code is 1, error message is 'error'");
 
     assert_eq!(actual_trace[1], expected_state);
 }

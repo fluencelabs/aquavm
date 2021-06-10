@@ -93,7 +93,7 @@ fn last_error_tetraplets() {
 
     assert_eq!(
         actual_value.msg,
-        r#"Local service error: ret_code is 1, error message is 'error'"#
+        r#"Local service error, ret_code is 1, error message is 'error'"#
     );
 
     let triplet = (*tetraplets.borrow()).as_ref().unwrap()[0][0].triplet.clone();
@@ -181,4 +181,35 @@ fn not_clear_last_error_in_mismatch() {
     let actual_value = (*args.borrow()).as_ref().unwrap().clone();
     assert_eq!(actual_value.instruction, "");
     assert_eq!(actual_value.msg, "");
+}
+
+#[test]
+fn track_current_peer_id() {
+    let fallible_peer_id = "fallible_peer_id";
+    let mut fallible_vm = create_avm(fallible_call_service("fallible_call_service"), fallible_peer_id);
+
+    let local_peer_id = "local_peer_id";
+
+    let args = Rc::new(RefCell::new(None));
+    let tetraplets = Rc::new(RefCell::new(None));
+    let mut local_vm = create_avm(
+        create_check_service_closure(args.clone(), tetraplets.clone()),
+        local_peer_id,
+    );
+
+    let script = format!(
+        r#"
+        (xor
+            (call "{0}" ("fallible_call_service" "") [""])
+            (call "{1}" ("" "") [%last_error%])
+        )
+    "#,
+        fallible_peer_id, local_peer_id
+    );
+
+    let res = call_vm!(fallible_vm, "asd", &script, "", "");
+    let _ = call_vm!(local_vm, "asd", script, "", res.data);
+
+    let actual_value = (*args.borrow()).as_ref().unwrap().clone();
+    assert_eq!(actual_value.peer_id, fallible_peer_id);
 }

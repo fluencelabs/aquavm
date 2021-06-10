@@ -62,6 +62,8 @@ pub enum LastErrorPath {
     Instruction,
     // %last_error%.msg
     Message,
+    // %last_error%.peer_id
+    PeerId,
     // %last_error%
     None,
 }

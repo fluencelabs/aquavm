@@ -17,11 +17,13 @@
 mod air;
 mod boxed_value;
 mod errors;
+mod joinable;
 mod utils;
 
 pub(super) use self::air::ExecutableInstruction;
 pub(super) use self::air::FoldState;
 pub(super) use errors::ExecutionError;
+pub(self) use joinable::Joinable;
 
 use std::rc::Rc;
 

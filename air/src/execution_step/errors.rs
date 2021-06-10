@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use super::Joinable;
 use crate::build_targets::CallServiceResult;
 use crate::contexts::execution::ResolvedCallResult;
 use crate::contexts::execution_trace::ExecutedState;
@@ -37,7 +38,7 @@ pub(crate) enum ExecutionError {
     InstructionError(String),
 
     /// An error is occurred while calling local service via call_service.
-    #[error("Local service error: ret_code is {0}, error message is '{1}'")]
+    #[error("Local service error, ret_code is {0}, error message is '{1}'")]
     LocalServiceError(i32, Rc<String>),
 
     /// Value for such name isn't presence in data.
@@ -95,6 +96,13 @@ pub(crate) enum ExecutionError {
     /// This error type is produced by a mismatch to notify xor that compared values aren't equal.
     #[error("jvalue '{0}' can't be flattened, to be flattened a jvalue should have an array type and consist of zero or one values")]
     FlatteningError(JValue),
+
+    /// Json path is applied to scalar that have inappropriate type.
+    #[error(
+        "json path can't be applied to scalar '{0}',\
+    it could be applied only to streams and variables of array and object types"
+    )]
+    JsonPathVariableTypeError(JValue),
 }
 
 impl ExecutionError {
@@ -119,6 +127,34 @@ impl ExecutionError {
             MatchWithoutXorError => 15,
             MismatchWithoutXorError => 16,
             FlatteningError(_) => 17,
+            JsonPathVariableTypeError(_) => 18,
+        }
+    }
+}
+
+macro_rules! log_join {
+    ($($args:tt)*) => {
+        log::info!(target: crate::log_targets::JOIN_BEHAVIOUR, $($args)*)
+    }
+}
+
+#[rustfmt::skip::macros(log_join)]
+impl Joinable for ExecutionError {
+    /// Returns true, if supplied error is related to variable not found errors type.
+    /// Print log if this is joinable error type.
+    fn is_joinable(&self) -> bool {
+        use ExecutionError::*;
+
+        match self {
+            VariableNotFound(var_name) => {
+                log_join!("  waiting for an argument with name '{}'", var_name);
+                true
+            }
+            JValueStreamJsonPathError(stream, json_path, _) => {
+                log_join!("  waiting for an argument with path '{}' on stream '{:?}'", json_path, stream);
+                true
+            }
+            _ => false,
         }
     }
 }

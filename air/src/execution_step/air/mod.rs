@@ -44,7 +44,8 @@ macro_rules! execute {
                 }
 
                 let instruction = format!("{}", $self);
-                let last_error = LastErrorDescriptor::new(e.clone(), instruction, None);
+                let last_error =
+                    LastErrorDescriptor::new(e.clone(), instruction, $exec_ctx.current_peer_id.clone(), None);
                 $exec_ctx.last_error = Some(last_error);
                 Err(e)
             }
@@ -69,7 +70,8 @@ macro_rules! execute_match_mismatch {
                 }
 
                 let instruction = format!("{}", $self);
-                let last_error = LastErrorDescriptor::new(e.clone(), instruction, None);
+                let last_error =
+                    LastErrorDescriptor::new(e.clone(), instruction, $exec_ctx.current_peer_id.clone(), None);
                 $exec_ctx.last_error = Some(last_error);
                 Err(e)
             }
@@ -153,7 +155,7 @@ macro_rules! log_instruction {
 macro_rules! joinable_call {
     ($cmd:expr, $exec_ctx:expr) => {
         match $cmd {
-            Err(e) if crate::execution_step::air::is_joinable_error_type(&e) => {
+            Err(e) if e.is_joinable() => {
                 $exec_ctx.subtree_complete = false;
                 return Ok(());
             }
@@ -167,39 +169,10 @@ macro_rules! joinable_call {
 macro_rules! joinable {
     ($cmd:expr, $exec_ctx:expr) => {
         match $cmd {
-            Err(e) if crate::execution_step::air::is_joinable_error_type(&e) => {
+            Err(e) if e.is_joinable() => {
                 return Ok(());
             }
             v => v,
         }
     };
-}
-
-macro_rules! log_join {
-    ($($args:tt)*) => {
-        log::info!(target: crate::log_targets::JOIN_BEHAVIOUR, $($args)*)
-    }
-}
-
-/// Returns true, if supplied error is related to variable not found errors type.
-/// Print log if this is joinable error type.
-#[rustfmt::skip::macros(log_join)]
-fn is_joinable_error_type(exec_error: &ExecutionError) -> bool {
-    use ExecutionError::*;
-
-    match exec_error {
-        VariableNotFound(var_name) => {
-            log_join!("  waiting for an argument with name '{}'", var_name);
-            true
-        }
-        JValueJsonPathError(value, json_path, _) => {
-            log_join!("  waiting for an argument with path '{}' on jvalue '{:?}'", json_path, value);
-            true
-        }
-        JValueStreamJsonPathError(stream, json_path, _) => {
-            log_join!("  waiting for an argument with path '{}' on stream '{:?}'", json_path, stream);
-            true
-        }
-        _ => false,
-    }
 }

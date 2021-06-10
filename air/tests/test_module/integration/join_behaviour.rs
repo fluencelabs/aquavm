@@ -23,7 +23,7 @@ use air_test_utils::ExecutionTrace;
 use serde_json::json;
 
 #[test]
-fn non_wait_on_json_path() {
+fn dont_wait_on_json_path() {
     let status = json!({
         "err_msg": "",
         "is_authenticated": 1,
@@ -105,4 +105,63 @@ fn wait_on_stream_json_path_by_id() {
 
     assert_eq!(res.ret_code, 0);
     assert_eq!(trace.len(), 2); // par and the first call emit traces, second call doesn't
+}
+
+#[test]
+fn dont_wait_on_json_path_on_scalars() {
+    let array = json!([1, 2, 3, 4, 5]);
+
+    let object = json!({
+        "err_msg": "",
+        "is_authenticated": 1,
+        "ret_code": 0,
+    });
+
+    let variables = maplit::hashmap!(
+        "array".to_string() => array.to_string(),
+        "object".to_string() => object.to_string(),
+    );
+
+    let set_variables_call_service = set_variables_call_service(variables);
+
+    let set_variable_peer_id = "set_variable";
+    let mut set_variable_vm = create_avm(set_variables_call_service, set_variable_peer_id);
+
+    let array_consumer_peer_id = "array_consumer_peer_id";
+    let mut array_consumer = create_avm(unit_call_service(), array_consumer_peer_id);
+
+    let object_consumer_peer_id = "object_consumer_peer_id";
+    let mut object_consumer = create_avm(unit_call_service(), object_consumer_peer_id);
+
+    let script = format!(
+        r#"
+        (seq
+            (seq
+                (call "{0}" ("" "") ["array"] array)
+                (call "{0}" ("" "") ["object"] object)
+            )
+            (par
+                (call "{1}" ("" "") [array.$.[5]!] auth_result)
+                (call "{2}" ("" "") [object.$.non_exist_path])
+            )
+        )
+    "#,
+        set_variable_peer_id, array_consumer_peer_id, object_consumer_peer_id,
+    );
+
+    let init_peer_id = "asd";
+    let res = call_vm!(set_variable_vm, init_peer_id, &script, "", "");
+    let array_res = call_vm!(array_consumer, init_peer_id, &script, "", res.data.clone());
+    assert_eq!(array_res.ret_code, 1006);
+    assert_eq!(
+        array_res.error_message,
+        r#"variable with path '$.[5]' not found in '[1,2,3,4,5]' with an error: 'json value not set'"#
+    );
+
+    let object_res = call_vm!(object_consumer, init_peer_id, script, "", res.data);
+    assert_eq!(object_res.ret_code, 1006);
+    assert_eq!(
+        object_res.error_message,
+        r#"variable with path '$.non_exist_path' not found in '{"err_msg":"","is_authenticated":1,"ret_code":0}' with an error: 'json value not set'"#
+    );
 }

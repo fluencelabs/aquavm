@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-mod air_basic;
-mod dashboard;
-mod data_merge;
-mod flattening;
-mod join;
-mod join_behaviour;
-mod json_path;
-mod last_error;
-mod network_explore;
-mod streams;
+/// This trait is intended to differentiate between joinable and non-joinable objects.
+/// Joinable objects are those that interpreter should wait on. F.e. if at least one of
+/// arguments of a call instructions is joinable, the interpreter won't execute such
+/// call and won't write any state for it in data. This is needed to handle collecting
+/// variable from different peers in parallel.
+///
+/// At the moment, this trait's applied only to errors.
+pub(crate) trait Joinable {
+    /// Return true, if supplied object is joinable
+    fn is_joinable(&self) -> bool;
+}

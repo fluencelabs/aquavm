@@ -398,6 +398,20 @@ fn last_error_msg() {
 }
 
 #[test]
+fn last_error_peer_id() {
+    const LAST_ERROR: &str = r#"%last_error%.$.peer_id"#;
+
+    lexer_test(
+        LAST_ERROR,
+        Single(Ok((
+            0,
+            Token::LastError(LastErrorPath::PeerId),
+            LAST_ERROR.len(),
+        ))),
+    );
+}
+
+#[test]
 fn last_error_incorrect_field() {
     const LAST_ERROR: &str = r#"%last_error%.$.asdasd"#;
 
