@@ -25,6 +25,7 @@ use super::ExecutionError;
 use super::ExecutionResult;
 use super::ExecutionTraceCtx;
 use crate::contexts::execution::LastErrorDescriptor;
+use crate::execution::joinable::Joinable;
 use crate::joinable_call;
 use crate::log_instruction;
 use crate::SecurityTetraplet;
