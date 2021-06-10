@@ -17,7 +17,6 @@
 use air_test_utils::call_vm;
 use air_test_utils::create_avm;
 use air_test_utils::echo_string_call_service;
-use air_test_utils::ExecutionTrace;
 
 #[test]
 fn json_path_not_allowed_for_non_objects_and_arrays() {
