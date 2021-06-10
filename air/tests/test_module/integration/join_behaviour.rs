@@ -23,7 +23,7 @@ use air_test_utils::ExecutionTrace;
 use serde_json::json;
 
 #[test]
-fn non_wait_on_json_path() {
+fn dont_wait_on_json_path() {
     let status = json!({
         "err_msg": "",
         "is_authenticated": 1,
@@ -108,7 +108,7 @@ fn wait_on_stream_json_path_by_id() {
 }
 
 #[test]
-fn non_wait_on_json_path_on_scalars() {
+fn dont_wait_on_json_path_on_scalars() {
     let array = json!([1, 2, 3, 4, 5]);
 
     let object = json!({
