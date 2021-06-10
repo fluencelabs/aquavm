@@ -6,9 +6,23 @@
 
 - `%last_error%` includes `peer_id` now, that contains id of a peer where an error occurred ([PR 117](https://github.com/fluencelabs/aquavm/pull/117)).
 
-## Version 0.10.2 (2021-06-09)
+## Version 0.10.2-0.10.1 (2021-06-04)
 
-- improved logger initialization for wasm-bindgen target ([PR 116](https://github.com/fluencelabs/aquavm/pull/116)).
+- improved logger initialization and interface for wasm-bindgen target ([PR 116](https://github.com/fluencelabs/aquavm/pull/116), [PR 115](https://github.com/fluencelabs/aquavm/pull/115)).
+
+## Version 0.10.0 (2021-06-09)
+
+- `%last_error%` becomes an object of type
+```rust
+pub struct LastError {
+    /// text representation of an instruction that caused the last error
+    pub instruction: String,
+
+    /// text representation of an error message
+    pub msg: String,
+}
+```
+and it's possible to address its fields separately: `%last_error%.$.instruction`, `%last_error%.$.msg` ([PR 112](https://github.com/fluencelabs/aquavm/pull/112)).
 
 ## Version 0.1.3 (2020-11-11)
 
