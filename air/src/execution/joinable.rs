@@ -17,7 +17,7 @@
 /// This trait is intended to differentiate between joinable and non-joinable objects.
 /// Joinable objects are those that interpreter should wait on. F.e. if at least one of
 /// arguments of a call instructions is joinable, the interpreter won't execute such
-/// call and won't write any state for that in data. This is needed to handle collecting
+/// call and won't write any state for it in data. This is needed to handle collecting
 /// variable from different peers in parallel.
 ///
 /// At the moment, this trait's applied only to errors.
