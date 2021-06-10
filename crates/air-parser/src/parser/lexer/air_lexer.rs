@@ -203,6 +203,7 @@ fn parse_last_error(input: &str, start_pos: usize) -> LexerResult<Token<'_>> {
         // However version without ! returns just a error, because the opposite is unsound.
         ".$.instruction" | ".$.instruction!" => LastErrorPath::Instruction,
         ".$.msg" | ".$.msg!" => LastErrorPath::Message,
+        ".$.peer_id" | ".$.peer_id!" => LastErrorPath::PeerId,
         path => {
             return Err(LexerError::LastErrorPathError(
                 start_pos + last_error_size,

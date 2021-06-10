@@ -24,8 +24,9 @@ impl fmt::Display for LastErrorPath {
         use LastErrorPath::*;
 
         match self {
-            Instruction => write!(f, ".instruction"),
-            Message => write!(f, ".msg"),
+            Instruction => write!(f, ".$.instruction"),
+            Message => write!(f, ".$.msg"),
+            PeerId => write!(f, ".$.peer_id"),
             None => write!(f, ""),
         }
     }

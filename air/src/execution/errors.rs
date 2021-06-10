@@ -37,7 +37,7 @@ pub(crate) enum ExecutionError {
     InstructionError(String),
 
     /// An error is occurred while calling local service via call_service.
-    #[error("Local service error: ret_code is {0}, error message is '{1}'")]
+    #[error("Local service error, ret_code is {0}, error message is '{1}'")]
     LocalServiceError(i32, Rc<String>),
 
     /// Value for such name isn't presence in data.
