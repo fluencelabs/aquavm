@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use super::Joinable;
 use crate::build_targets::CallServiceResult;
 use crate::contexts::execution::ResolvedCallResult;
 use crate::contexts::execution_trace::ExecutedState;
@@ -127,6 +128,33 @@ impl ExecutionError {
             MismatchWithoutXorError => 16,
             FlatteningError(_) => 17,
             JsonPathVariableTypeError(_) => 18,
+        }
+    }
+}
+
+macro_rules! log_join {
+    ($($args:tt)*) => {
+        log::info!(target: crate::log_targets::JOIN_BEHAVIOUR, $($args)*)
+    }
+}
+
+#[rustfmt::skip::macros(log_join)]
+impl Joinable for ExecutionError {
+    /// Returns true, if supplied error is related to variable not found errors type.
+    /// Print log if this is joinable error type.
+    fn is_joinable(&self) -> bool {
+        use ExecutionError::*;
+
+        match self {
+            VariableNotFound(var_name) => {
+                log_join!("  waiting for an argument with name '{}'", var_name);
+                true
+            }
+            JValueStreamJsonPathError(stream, json_path, _) => {
+                log_join!("  waiting for an argument with path '{}' on stream '{:?}'", json_path, stream);
+                true
+            }
+            _ => false,
         }
     }
 }

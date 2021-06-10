@@ -14,25 +14,14 @@
  * limitations under the License.
  */
 
-mod air;
-mod boxed_value;
-mod errors;
-mod joinable;
-mod utils;
-
-pub(super) use self::air::ExecutableInstruction;
-pub(super) use self::air::FoldState;
-pub(super) use errors::ExecutionError;
-pub(self) use joinable::Joinable;
-
-use std::rc::Rc;
-
-pub(self) type ExecutionResult<T> = std::result::Result<T, Rc<ExecutionError>>;
-pub(self) use air_parser::ast::Variable;
-
-#[macro_export]
-macro_rules! exec_err {
-    ($err:expr) => {
-        Err(std::rc::Rc::new($err))
-    };
+/// This trait is intended to differentiate between joinable and non-joinable objects.
+/// Joinable objects are those that interpreter should wait on. F.e. if at least one of
+/// arguments of a call instructions is joinable, the interpreter won't execute such
+/// call and won't write any state for that in data. This is needed to handle collecting
+/// variable from different peers in parallel.
+///
+/// At the moment, this trait's applied only to errors.
+pub(crate) trait Joinable {
+    /// Return true, if supplied object is joinable
+    fn is_joinable(&self) -> bool;
 }
