@@ -1,7 +1,19 @@
+## Version 0.10.4 (2021-06-10)
+
+- json path applied to scalar values becomes non-joinable ([PR 118](https://github.com/fluencelabs/aquavm/pull/118))
+
+## Version 0.10.3 (2021-06-09)
+
+- `%last_error%` includes `peer_id` now, that contains id of a peer where an error occurred ([PR 117](https://github.com/fluencelabs/aquavm/pull/117)).
+
+## Version 0.10.2 (2021-06-09)
+
+- improved logger initialization for wasm-bindgen target ([PR 116](https://github.com/fluencelabs/aquavm/pull/116)).
+
 ## Version 0.1.3 (2020-11-11)
 
 - Switched to the new LALRPOP parser ([PR 13](https://github.com/fluencelabs/air/pull/13)):
-    - arguments should be wrapped wit square braces []
+    - arguments should be wrapped with square braces []
     - empty results in call allowed and lead to forget a call result
     
  - Added a few benchmarks
