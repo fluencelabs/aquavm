@@ -65,6 +65,7 @@ pub struct FoldSubTraceLore {
     pub interval_len: usize,
 }
 
+/// first Vec is needed for
 #[derive(Debug, Default, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct FoldResult(pub Vec<Vec<Vec<FoldSubTraceLore>>>);
@@ -95,6 +96,16 @@ impl CallResult {
 
     pub fn failed(ret_code: i32, error_msg: impl Into<String>) -> CallResult {
         CallResult::CallServiceFailed(ret_code, Rc::new(error_msg.into()))
+    }
+}
+
+impl FoldSubTraceLore {
+    pub fn new(value_pos: usize, begin_pos: usize, interval_len: usize) -> Self {
+        Self {
+            value_pos,
+            begin_pos,
+            interval_len,
+        }
     }
 }
 

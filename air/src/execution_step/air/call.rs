@@ -25,7 +25,7 @@ use super::ExecutionError;
 use super::ExecutionResult;
 use super::ExecutionTraceCtx;
 use crate::contexts::execution::LastErrorDescriptor;
-use crate::execution::joinable::Joinable;
+use crate::execution_step::joinable::Joinable;
 use crate::joinable_call;
 use crate::log_instruction;
 use crate::SecurityTetraplet;
@@ -64,7 +64,7 @@ fn set_last_error<'i>(
         // (from CallServiceFailed state) and exec_ctx.current_peer_id won't mean
         // a peer where the error was occurred
         Some(tetraplet) => tetraplet.triplet.peer_pk.clone(),
-        None => exec_ctx.current_peer_id.clone(),
+        None => exec_ctx.current_peer_id.to_string(),
     };
 
     log::warn!("call failed with an error `{}`, peerId `{}`", e, current_peer_id);

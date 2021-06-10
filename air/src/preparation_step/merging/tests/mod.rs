@@ -50,6 +50,6 @@ pub fn service_failed(ret_code: i32, error_message: impl Into<String>) -> Execut
     ExecutedState::Call(CallResult::CallServiceFailed(ret_code, Rc::new(error_message.into())))
 }
 
-pub fn fold(lores: Vec<Vec<FoldSubTraceLore>>) -> ExecutedState {
+pub fn fold(lores: Vec<Vec<Vec<FoldSubTraceLore>>>) -> ExecutedState {
     ExecutedState::Fold(FoldResult(lores))
 }

@@ -33,8 +33,8 @@ use std::rc::Rc;
 /// Basically, the API of this slider provides us facilities to set position from
 /// which states will be extracted and interval length from reaching that states
 /// woudn't be extracted (None will be returned).
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub(super) struct TraceSlider {
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
+pub(crate) struct TraceSlider {
     trace: ExecutionTrace,
     position: Cell<usize>,
     seen_elements: Cell<usize>,
@@ -56,10 +56,17 @@ impl TraceSlider {
     /// Returns the next state if interval length haven't been reached
     /// and None otherwise.
     pub(super) fn next_state(&self) -> Option<ExecutedState> {
-        if self.seen_elements.get() >= self.interval_len.get() {
+        if self.seen_elements.get() >= self.interval_len.get() || self.position.get() >= self.trace.len() {
             return None;
         }
 
+        println!(
+            "position {}, seen {}, interval len {}, trace len {}",
+            self.position.get(),
+            self.seen_elements.get(),
+            self.interval_len.get(),
+            self.trace.len()
+        );
         let result = self.trace[self.position.get()].clone();
         self.position.set(self.position.get() + 1);
         self.seen_elements.set(self.seen_elements.get() + 1);
@@ -96,6 +103,10 @@ impl TraceSlider {
         self.position.set(self.position.get() + remaining_len);
 
         Ok(interval)
+    }
+
+    pub(super) fn position(&self) -> usize {
+        self.position.get()
     }
 
     pub(super) fn interval_len(&self) -> usize {

@@ -25,6 +25,7 @@ use super::DataMergingError;
 use super::ExecutedState;
 use super::ExecutionTrace;
 use super::FoldResult;
+use super::MergeCtx;
 use super::MergeResult;
 use super::ParResult;
 use super::TraceSlider;
@@ -34,8 +35,8 @@ use std::rc::Rc;
 
 #[derive(Debug, PartialEq)]
 pub(crate) struct TraceMerger {
-    prev_slider: TraceSlider,
-    current_slider: TraceSlider,
+    prev_ctx: MergeCtx,
+    current_ctx: MergeCtx,
     result_trace: ExecutionTrace,
 }
 
@@ -44,12 +45,12 @@ impl TraceMerger {
         let max_trace_len = std::cmp::max(prev_trace.len(), current_trace.len());
         let result_trace = ExecutionTrace::with_capacity(max_trace_len);
 
-        let prev_slider = TraceSlider::new(prev_trace);
-        let current_slider = TraceSlider::new(current_trace);
+        let prev_ctx = MergeCtx::from_trace(prev_trace);
+        let current_ctx = MergeCtx::from_trace(current_trace);
 
         Self {
-            prev_slider,
-            current_slider,
+            prev_ctx,
+            current_ctx,
             result_trace,
         }
     }
@@ -71,15 +72,15 @@ impl TraceMerger {
         use ExecutedState::*;
 
         loop {
-            let prev_state = self.prev_slider.next_state();
-            let current_state = self.current_slider.next_state();
+            let prev_state = self.prev_ctx.slider.next_state();
+            let current_state = self.current_ctx.slider.next_state();
 
             match (&prev_state, &current_state) {
                 (Some(Call(prev_call)), Some(Call(current_call))) => self.merge_calls(prev_call, current_call)?,
                 (Some(Par(prev_par)), Some(Par(current_par))) => self.merge_pars(*prev_par, *current_par)?,
                 (Some(Fold(prev_fold)), Some(Fold(current_fold))) => self.merge_folds(prev_fold, current_fold)?,
-                (None, Some(state)) => self.merge_tail(state.clone(), SliderType::Current)?,
-                (Some(state), None) => self.merge_tail(state.clone(), SliderType::Previous)?,
+                (None, Some(state)) => self.merge_tail(state.clone(), MergeCtxType::Current)?,
+                (Some(state), None) => self.merge_tail(state.clone(), MergeCtxType::Previous)?,
                 (None, None) => break,
 
                 // this match arm represents incompatible (Call, Par), (Par, Call), (Fold, Call) ... states
@@ -92,23 +93,32 @@ impl TraceMerger {
         Ok(())
     }
 
-    fn merge_tail(&mut self, state: ExecutedState, slider_type: SliderType) -> MergeResult<()> {
+    fn merge_tail(&mut self, state: ExecutedState, ctx_type: MergeCtxType) -> MergeResult<()> {
         self.result_trace.push_back(state);
 
-        let slider = match slider_type {
-            SliderType::Current => &mut self.current_slider,
-            SliderType::Previous => &mut self.prev_slider,
+        let ctx = match ctx_type {
+            MergeCtxType::Current => &mut self.current_ctx,
+            MergeCtxType::Previous => &mut self.prev_ctx,
         };
 
-        let tail_states = slider.remaining_interval()?;
-        self.result_trace.extend(tail_states);
+        let tail_states = ctx.slider.remaining_interval()?;
+        for state in tail_states {
+            // update correspondence only for executed calls
+            if let ExecutedState::Call(CallResult::Executed(_)) = state {
+                let old_pos = ctx.slider.position() - 1;
+                let new_pos = self.result_trace.len();
+                ctx.old_pos_to_new.insert(old_pos, new_pos);
+            }
+
+            self.result_trace.push_back(state);
+        }
 
         Ok(())
     }
 }
 
-#[derive(Debug)]
-enum SliderType {
+#[derive(Debug, Copy, Clone)]
+enum MergeCtxType {
     Current,
     Previous,
 }

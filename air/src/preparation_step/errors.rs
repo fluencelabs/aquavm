@@ -56,7 +56,9 @@ impl PreparationError {
             StateMergingError(FoldLenOverflow(_)) => 10,
             StateMergingError(ParSubtreeUnderflow(..)) => 11,
             StateMergingError(FoldSubtreeUnderflow(..)) => 12,
-            StateMergingError(FoldTooManySubtraces(..)) => 13,
+            StateMergingError(FoldIncorrectSubtracesCount(..)) => 13,
+            StateMergingError(FoldIncorrectValuePos(..)) => 14,
+            StateMergingError(FoldValuesPosNotStream(..)) => 15,
         }
     }
 }

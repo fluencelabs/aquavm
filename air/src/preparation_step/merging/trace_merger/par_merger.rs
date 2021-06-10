@@ -37,8 +37,8 @@ struct ParSubtreeSizeUpdater {
 
 impl ParSubtreeSizeUpdater {
     pub(crate) fn new(trace_merger: &TraceMerger, prev_par: ParResult, current_par: ParResult) -> MergeResult<Self> {
-        let new_prev_size = Self::compute_new_subtree_size(&trace_merger.prev_slider, prev_par)?;
-        let new_current_size = Self::compute_new_subtree_size(&trace_merger.current_slider, current_par)?;
+        let new_prev_size = Self::compute_new_subtree_size(&trace_merger.prev_ctx.slider, prev_par)?;
+        let new_current_size = Self::compute_new_subtree_size(&trace_merger.current_ctx.slider, current_par)?;
 
         let updater = Self {
             new_prev_size,
@@ -48,8 +48,8 @@ impl ParSubtreeSizeUpdater {
     }
 
     pub(crate) fn update(&self, trace_merger: &mut TraceMerger) {
-        trace_merger.prev_slider.set_interval_len(self.new_prev_size);
-        trace_merger.current_slider.set_interval_len(self.new_current_size);
+        trace_merger.prev_ctx.slider.set_interval_len(self.new_prev_size);
+        trace_merger.current_ctx.slider.set_interval_len(self.new_current_size);
     }
 
     fn compute_new_subtree_size(slider: &TraceSlider, par: ParResult) -> MergeResult<usize> {
@@ -142,8 +142,8 @@ impl ParMerger {
     }
 
     fn merge_subtree(trace_merger: &mut TraceMerger, prev_interval: usize, current_interval: usize) -> MergeResult<()> {
-        trace_merger.prev_slider.set_interval_len(prev_interval);
-        trace_merger.current_slider.set_interval_len(current_interval);
+        trace_merger.prev_ctx.slider.set_interval_len(prev_interval);
+        trace_merger.current_ctx.slider.set_interval_len(current_interval);
         trace_merger.merge_subtree()
     }
 

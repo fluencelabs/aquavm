@@ -15,6 +15,7 @@
  */
 
 mod errors;
+mod merge_ctx;
 #[cfg(test)]
 mod tests;
 mod trace_merger;
@@ -30,6 +31,7 @@ pub(self) use crate::contexts::execution_trace::FoldResult;
 pub(self) use crate::contexts::execution_trace::ParResult;
 
 use crate::contexts::execution_trace::ExecutionTrace;
+use merge_ctx::MergeCtx;
 use trace_merger::TraceMerger;
 
 pub(crate) fn merge_execution_traces(

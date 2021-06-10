@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-use super::trace_merger::FoldTale;
 use super::CallResult;
 use super::ExecutedState;
 use super::FoldResult;
@@ -55,9 +54,16 @@ pub enum DataMergingError {
 
     /// Errors occurred when sum_i { FoldResult_i.interval_len } value is bigger than current subtree size.
     #[error("fold '{0:?}' contains subtree size that is bigger than current one '{1}'")]
-    FoldSubtreeUnderflow(FoldTale, usize),
+    FoldSubtreeUnderflow(FoldResult, usize),
 
     /// Errors occurred when one of the fold lores contains more then two sublores.
-    #[error("fold '{0:?}' contains {1} sublores where maximum 2 is allowed")]
-    FoldTooManySubtraces(FoldResult, usize),
+    #[error("fold contains {0} sublores, but 2 is expected")]
+    FoldIncorrectSubtracesCount(usize),
+
+    /// Errors occurred when one of the fold lores contains more then two sublores.
+    #[error("fold sublores have different value_pos: {0}, {1}")]
+    FoldIncorrectValuePos(usize, usize),
+
+    #[error("value_pos of a FoldResult points to '{0}', but this element isn't an element of a stream")]
+    FoldValuesPosNotStream(usize),
 }

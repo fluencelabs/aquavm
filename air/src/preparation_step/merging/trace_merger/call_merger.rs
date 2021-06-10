@@ -36,9 +36,18 @@ impl TraceMerger {
                 check_for_equal(prev_call_result, current_call_result)?;
                 prev_call_result
             }
-            (RequestSentBy(_), Executed(_)) => current_call_result,
-            (Executed(_), RequestSentBy(_)) => prev_call_result,
+            (RequestSentBy(_), Executed(_)) => {
+                self.update_correspondence(MergeCtxType::Current);
+                current_call_result
+            }
+            (Executed(_), RequestSentBy(_)) => {
+                self.update_correspondence(MergeCtxType::Previous);
+                prev_call_result
+            }
             (Executed(_), Executed(_)) => {
+                self.update_correspondence(MergeCtxType::Current);
+                self.update_correspondence(MergeCtxType::Previous);
+
                 check_for_equal(prev_call_result, current_call_result)?;
                 prev_call_result
             }
@@ -54,6 +63,17 @@ impl TraceMerger {
         self.result_trace.push_back(ExecutedState::Call(call_result.clone()));
 
         Ok(())
+    }
+
+    pub(super) fn update_correspondence(&mut self, ctx_type: MergeCtxType) {
+        let ctx = match ctx_type {
+            MergeCtxType::Current => &mut self.current_ctx,
+            MergeCtxType::Previous => &mut self.prev_ctx,
+        };
+
+        let old_pos = ctx.slider.position() - 1;
+        let new_pos = self.result_trace.len();
+        ctx.add_correspondence(old_pos, new_pos);
     }
 }
 
