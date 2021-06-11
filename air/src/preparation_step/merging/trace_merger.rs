@@ -74,6 +74,7 @@ impl TraceMerger {
         loop {
             let prev_state = self.prev_ctx.slider.next_state();
             let current_state = self.current_ctx.slider.next_state();
+            println!("{:?} - {:?}", prev_state, current_state);
 
             match (&prev_state, &current_state) {
                 (Some(Call(prev_call)), Some(Call(current_call))) => self.merge_calls(prev_call, current_call)?,

@@ -60,13 +60,6 @@ impl TraceSlider {
             return None;
         }
 
-        println!(
-            "position {}, seen {}, interval len {}, trace len {}",
-            self.position.get(),
-            self.seen_elements.get(),
-            self.interval_len.get(),
-            self.trace.len()
-        );
         let result = self.trace[self.position.get()].clone();
         self.position.set(self.position.get() + 1);
         self.seen_elements.set(self.seen_elements.get() + 1);

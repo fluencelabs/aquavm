@@ -42,7 +42,6 @@ impl MergeCtx {
     }
 
     pub(crate) fn try_get_new_pos(&self, old_pos: usize) -> MergeResult<usize> {
-        println!("old_pos_to_new: {:?}", self.old_pos_to_new);
         self.old_pos_to_new
             .get(&old_pos)
             .map(|v| *v)

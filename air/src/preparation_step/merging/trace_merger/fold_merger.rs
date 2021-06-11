@@ -24,7 +24,7 @@ impl TraceMerger {
             fold_lore,
             states_count: current_states_count,
         } = read_fold_tale(&self.current_ctx.slider, current_fold)?;
-        let subtree_size_updater = FoldSubtreeSizeUpdater::new(self);
+        let subtree_size_updater = FoldSliderUpdater::new(self);
         let fold_state_adder = FoldStateAdder::new(self);
 
         let (new_fold_result, prev_states_count) = merge_folds(self, prev_fold, fold_lore)?;
@@ -106,19 +106,25 @@ fn check_subtrace_lore(subtrace_lores: &[FoldSubTraceLore]) -> MergeResult<()> {
     Ok(())
 }
 
-struct FoldSubtreeSizeUpdater {
+struct FoldSliderUpdater {
+    prev_pos: usize,
     prev_len: usize,
+    current_pos: usize,
     current_len: usize,
 }
 
-impl FoldSubtreeSizeUpdater {
+impl FoldSliderUpdater {
     pub(crate) fn new(trace_merger: &TraceMerger) -> Self {
-        let prev_size = trace_merger.prev_ctx.slider.interval_len();
-        let current_size = trace_merger.current_ctx.slider.interval_len();
+        let prev_pos = trace_merger.prev_ctx.slider.position();
+        let prev_len = trace_merger.prev_ctx.slider.interval_len();
+        let current_pos = trace_merger.current_ctx.slider.position();
+        let current_len = trace_merger.current_ctx.slider.interval_len();
 
         Self {
-            prev_len: prev_size,
-            current_len: current_size,
+            prev_pos,
+            prev_len,
+            current_pos,
+            current_len,
         }
     }
 
@@ -130,17 +136,21 @@ impl FoldSubtreeSizeUpdater {
         prev_seen_states: usize,
         current_seen_states: usize,
     ) -> MergeResult<()> {
+        let new_prev_pos = self.prev_pos + prev_seen_states;
         let new_prev_len = self
             .prev_len
             .checked_sub(prev_seen_states)
             .ok_or_else(|| DataMergingError::FoldSubtreeUnderflow(prev_fold.clone(), self.prev_len))?;
 
+        let new_current_pos = self.current_pos + current_seen_states;
         let new_current_len = self
             .current_len
             .checked_sub(current_seen_states)
             .ok_or_else(|| DataMergingError::FoldSubtreeUnderflow(current_fold.clone(), self.prev_len))?;
 
+        trace_merger.prev_ctx.slider.set_position(new_prev_pos);
         trace_merger.prev_ctx.slider.set_interval_len(new_prev_len);
+        trace_merger.current_ctx.slider.set_position(new_current_pos);
         trace_merger.current_ctx.slider.set_interval_len(new_current_len);
 
         Ok(())
