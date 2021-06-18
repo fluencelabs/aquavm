@@ -19,6 +19,7 @@ mod compare_matchable;
 mod fold;
 mod match_;
 mod mismatch;
+mod next;
 mod null;
 mod par;
 mod seq;
@@ -26,11 +27,11 @@ mod xor;
 
 pub(crate) use fold::FoldState;
 
+pub(self) use super::execution_context::*;
+pub(self) use super::ExecutionCtx;
 pub(self) use super::ExecutionError;
 pub(self) use super::ExecutionResult;
-pub(self) use crate::contexts::execution::ExecutionCtx;
-pub(self) use crate::contexts::execution::LastErrorDescriptor;
-pub(self) use crate::contexts::execution_trace::ExecutionTraceCtx;
+pub(self) use crate::execution_step::TraceHandler;
 
 use air_parser::ast::Instruction;
 
@@ -81,11 +82,11 @@ macro_rules! execute_match_mismatch {
 }
 
 pub(crate) trait ExecutableInstruction<'i> {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut ExecutionTraceCtx) -> ExecutionResult<()>;
+    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()>;
 }
 
 impl<'i> ExecutableInstruction<'i> for Instruction<'i> {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut ExecutionTraceCtx) -> ExecutionResult<()> {
+    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         match self {
             // call isn't wrapped by the execute macro because
             // it internally sets last_error with resolved triplet

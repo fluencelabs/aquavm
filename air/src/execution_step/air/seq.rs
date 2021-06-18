@@ -16,13 +16,13 @@
 
 use super::ExecutionCtx;
 use super::ExecutionResult;
-use super::ExecutionTraceCtx;
+use super::TraceHandler;
 use crate::log_instruction;
 
 use air_parser::ast::Seq;
 
 impl<'i> super::ExecutableInstruction<'i> for Seq<'i> {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut ExecutionTraceCtx) -> ExecutionResult<()> {
+    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         log_instruction!(seq, exec_ctx, trace_ctx);
 
         exec_ctx.subtree_complete = true;

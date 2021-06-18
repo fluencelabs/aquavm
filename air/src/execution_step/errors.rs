@@ -103,6 +103,10 @@ pub(crate) enum ExecutionError {
     it could be applied only to streams and variables of array and object types"
     )]
     JsonPathVariableTypeError(JValue),
+
+    /// Internal error, this error type shouldn't be happened.
+    #[error("an internal error occurred: {0}")]
+    InternalError(String),
 }
 
 impl ExecutionError {

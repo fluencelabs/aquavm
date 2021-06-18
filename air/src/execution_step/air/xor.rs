@@ -17,13 +17,13 @@
 use super::ExecutionCtx;
 use super::ExecutionError;
 use super::ExecutionResult;
-use super::ExecutionTraceCtx;
+use super::TraceHandler;
 use crate::log_instruction;
 
 use air_parser::ast::Xor;
 
 impl<'i> super::ExecutableInstruction<'i> for Xor<'i> {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut ExecutionTraceCtx) -> ExecutionResult<()> {
+    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         log_instruction!(xor, exec_ctx, trace_ctx);
 
         exec_ctx.subtree_complete = true;

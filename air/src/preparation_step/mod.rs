@@ -15,15 +15,9 @@
  */
 
 mod errors;
-mod merging;
 mod preparation;
 
 pub(crate) use errors::PreparationError;
 pub(crate) use merging::DataMergingError;
 pub(crate) use preparation::prepare;
 pub(crate) use preparation::PreparationDescriptor;
-
-pub(self) use crate::contexts::execution::*;
-pub(self) use crate::contexts::execution_trace::ExecutionTrace;
-pub(self) use crate::contexts::execution_trace::ExecutionTraceCtx;
-pub(self) use merging::merge_execution_traces;

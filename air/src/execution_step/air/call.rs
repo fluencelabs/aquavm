@@ -23,8 +23,8 @@ use resolved_call::ResolvedCall;
 use super::ExecutionCtx;
 use super::ExecutionError;
 use super::ExecutionResult;
-use super::ExecutionTraceCtx;
-use crate::contexts::execution::LastErrorDescriptor;
+use super::LastErrorDescriptor;
+use super::TraceHandler;
 use crate::execution_step::joinable::Joinable;
 use crate::joinable_call;
 use crate::log_instruction;
@@ -35,7 +35,7 @@ use air_parser::ast::Call;
 use std::rc::Rc;
 
 impl<'i> super::ExecutableInstruction<'i> for Call<'i> {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut ExecutionTraceCtx) -> ExecutionResult<()> {
+    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         log_instruction!(call, exec_ctx, trace_ctx);
 
         let resolved_call = joinable_call!(ResolvedCall::new(self, exec_ctx), exec_ctx).map_err(|e| {

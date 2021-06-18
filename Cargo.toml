@@ -5,6 +5,7 @@ members = [
     "crates/air-parser",
     "crates/polyplets",
     "crates/interpreter-interface",
+    "crates/interpreter-data",
     "crates/test-module",
     "crates/test-utils",
     "avm/server",

@@ -30,43 +30,53 @@ use std::rc::Rc;
 
 pub(super) type IterableValue = Box<dyn for<'ctx> Iterable<'ctx, Item = IterableItem<'ctx>>>;
 
+pub(crate) enum FoldIterable {
+    Empty,
+    Scalar(IterableValue),
+    Stream(Vec<IterableValue>),
+}
+
 /// Constructs iterable value for given instruction value,
 /// return Some if iterable isn't empty and None otherwise.
 pub(super) fn construct_iterable_value<'ctx>(
     ast_iterable: &ast::IterableValue<'ctx>,
     exec_ctx: &ExecutionCtx<'ctx>,
-) -> ExecutionResult<Option<IterableValue>> {
+) -> ExecutionResult<FoldIterable> {
     match ast_iterable {
         ast::IterableValue::Variable(variable) => {
             let name = get_variable_name(variable);
             handle_instruction_variable(exec_ctx, name)
         }
         ast::IterableValue::JsonPath {
-            variable,
+            scalar_name,
             path,
             should_flatten,
-        } => {
-            let name = get_variable_name(variable);
-            handle_instruction_json_path(exec_ctx, name, path, *should_flatten)
-        }
+        } => handle_instruction_json_path(exec_ctx, scalar_name, path, *should_flatten),
     }
 }
 
 fn handle_instruction_variable<'ctx>(
     exec_ctx: &ExecutionCtx<'ctx>,
     variable_name: &str,
-) -> ExecutionResult<Option<IterableValue>> {
-    let iterable: Option<IterableValue> = match exec_ctx.data_cache.get(variable_name) {
-        Some(AValue::JValueRef(call_result)) => from_call_result(call_result.clone())?,
-        Some(AValue::JValueStreamRef(stream)) => {
+) -> ExecutionResult<FoldIterable> {
+    match exec_ctx.data_cache.get(variable_name) {
+        Some(AValue::JValueRef(call_result)) => from_call_result(call_result.clone()),
+        Some(AValue::StreamRef(stream)) => {
             let stream = stream.borrow();
             if stream.is_empty() {
-                return Ok(None);
+                return Ok(FoldIterable::Empty);
             }
 
-            let call_results = stream.iter().cloned().collect::<Vec<_>>();
-            let foldable = IterableVecResolvedCall::init(call_results);
-            Some(Box::new(foldable))
+            let mut iterables = Vec::with_capacity(stream.0.len());
+
+            for iterable in stream.0.iter() {
+                let call_results = iterable.iter().cloned().collect::<Vec<_>>();
+                let foldable = IterableVecResolvedCall::init(call_results);
+                let foldable = Box::new(foldable);
+                iterables.push(foldable);
+            }
+
+            Ok(FoldIterable::Stream(iterables))
         }
         Some(AValue::JValueFoldCursor(fold_state)) => {
             let iterable_value = fold_state.iterable.peek().unwrap();
@@ -78,13 +88,11 @@ fn handle_instruction_variable<'ctx>(
             from_call_result(call_result)?
         }
         _ => return exec_err!(ExecutionError::VariableNotFound(variable_name.to_string())),
-    };
-
-    Ok(iterable)
+    }
 }
 
 /// Constructs iterable value from resolved call result.
-fn from_call_result(call_result: ResolvedCallResult) -> ExecutionResult<Option<IterableValue>> {
+fn from_call_result(call_result: ResolvedCallResult) -> ExecutionResult<FoldIterable> {
     use ExecutionError::IncompatibleJValueType;
 
     let len = match &call_result.result.deref() {
@@ -100,8 +108,9 @@ fn from_call_result(call_result: ResolvedCallResult) -> ExecutionResult<Option<I
 
     let foldable = IterableResolvedCall::init(call_result, len);
     let foldable = Box::new(foldable);
+    let iterable = FoldIterable::Scalar(foldable);
 
-    Ok(Some(foldable))
+    Ok(iterable)
 }
 
 fn handle_instruction_json_path<'ctx>(
@@ -109,7 +118,7 @@ fn handle_instruction_json_path<'ctx>(
     variable_name: &str,
     json_path: &str,
     should_flatten: bool,
-) -> ExecutionResult<Option<IterableValue>> {
+) -> ExecutionResult<FoldIterable> {
     use ExecutionError::JValueStreamJsonPathError;
 
     match exec_ctx.data_cache.get(variable_name) {
@@ -117,28 +126,11 @@ fn handle_instruction_json_path<'ctx>(
             let jvalues = apply_json_path(&variable.result, json_path)?;
             from_jvalues(jvalues, variable.triplet.clone(), json_path, should_flatten)
         }
-        Some(AValue::JValueStreamRef(stream)) => {
-            let stream = stream.borrow();
-            if stream.is_empty() {
-                return Ok(None);
-            }
-
-            let acc_iter = stream.iter().map(|v| v.result.deref());
-            let (jvalues, tetraplet_indices) = select_with_iter(acc_iter, &json_path)
-                .map_err(|e| JValueStreamJsonPathError(stream.clone(), json_path.to_string(), e))?;
-
-            let jvalues = construct_iterable_jvalues(jvalues, should_flatten)?;
-            let tetraplets = tetraplet_indices
-                .into_iter()
-                .map(|id| SecurityTetraplet {
-                    triplet: stream[id].triplet.clone(),
-                    json_path: json_path.to_string(),
-                })
-                .collect::<Vec<_>>();
-
-            let foldable = IterableVecJsonPathResult::init(jvalues, tetraplets);
-            Ok(Some(Box::new(foldable)))
-        }
+        // TODO: refactor this after switching to bexed value, stream and scalar should live in a separate fields
+        Some(AValue::StreamRef(stream)) => exec_err!(ExecutionError::InternalError(format!(
+            "scalar name points to stream: {:?}",
+            stream
+        ))),
         Some(AValue::JValueFoldCursor(fold_state)) => {
             let iterable_value = fold_state.iterable.peek().unwrap();
             let jvalues = iterable_value.apply_json_path(json_path)?;
@@ -165,11 +157,11 @@ fn from_jvalues(
     triplet: Rc<ResolvedTriplet>,
     json_path: &str,
     should_flatten: bool,
-) -> ExecutionResult<Option<IterableValue>> {
+) -> ExecutionResult<FoldIterable> {
     let jvalues = construct_iterable_jvalues(jvalues, should_flatten)?;
 
     if jvalues.is_empty() {
-        return Ok(None);
+        return Ok(FoldIterable::Empty);
     }
 
     let tetraplet = SecurityTetraplet {
@@ -178,7 +170,8 @@ fn from_jvalues(
     };
 
     let foldable = IterableJsonPathResult::init(jvalues, tetraplet);
-    Ok(Some(Box::new(foldable)))
+    let iterable = FoldIterable::Scalar(Box::new(foldable));
+    Ok(iterable)
 }
 
 fn construct_iterable_jvalues(jvalues: Vec<&JValue>, should_flatten: bool) -> ExecutionResult<Vec<JValue>> {

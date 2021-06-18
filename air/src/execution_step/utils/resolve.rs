@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-use crate::contexts::execution::AValue;
-use crate::contexts::execution::ExecutionCtx;
-use crate::contexts::execution::LastErrorWithTetraplets;
 use crate::execution_step::boxed_value::JValuable;
+use crate::execution_step::execution_context::AValue;
+use crate::execution_step::execution_context::ExecutionCtx;
+use crate::execution_step::execution_context::LastErrorWithTetraplets;
 use crate::execution_step::ExecutionError;
 use crate::execution_step::ExecutionResult;
 use crate::JValue;
@@ -139,7 +139,7 @@ pub(crate) fn resolve_to_jvaluable<'name, 'i, 'ctx>(
 
     match value {
         AValue::JValueRef(value) => Ok(Box::new(value.clone())),
-        AValue::JValueStreamRef(stream) => Ok(Box::new(stream.borrow())),
+        AValue::StreamRef(stream) => Ok(Box::new(stream.borrow())),
         AValue::JValueFoldCursor(fold_state) => {
             let peeked_value = fold_state.iterable.peek().unwrap();
             Ok(Box::new(peeked_value))

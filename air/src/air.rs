@@ -42,17 +42,17 @@ fn execute_air_impl(
 ) -> Result<InterpreterOutcome, InterpreterOutcome> {
     let PreparationDescriptor {
         mut exec_ctx,
-        mut trace_ctx,
+        mut trace_handler,
         air,
     } = prepare(&prev_data, &data, air.as_str(), init_peer_id)
         // return the initial data in case of errors
         .map_err(|e| outcome::from_preparation_error(data, e))?;
 
-    air.execute(&mut exec_ctx, &mut trace_ctx)
+    air.execute(&mut exec_ctx, &mut trace_handler)
         // return new collected trace in case of errors
-        .map_err(|e| outcome::from_execution_error(&trace_ctx.new_trace, exec_ctx.next_peer_pks.clone(), e))?;
+        .map_err(|e| outcome::from_execution_error(&trace_handler.new_trace, exec_ctx.next_peer_pks.clone(), e))?;
 
-    let outcome = outcome::from_path_and_peers(&trace_ctx.new_trace, exec_ctx.next_peer_pks);
+    let outcome = outcome::from_path_and_peers(&trace_handler.new_trace, exec_ctx.next_peer_pks);
 
     Ok(outcome)
 }

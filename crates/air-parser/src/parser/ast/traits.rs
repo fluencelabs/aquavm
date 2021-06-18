@@ -68,15 +68,21 @@ impl fmt::Display for CallInstrValue<'_> {
 
 impl fmt::Display for IterableValue<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use crate::parser::lexer;
         use IterableValue::*;
 
         match self {
             Variable(str) => write!(f, "{}", str),
             JsonPath {
-                variable,
+                scalar_name,
                 path,
                 should_flatten,
-            } => print_json_path(variable, path, should_flatten, f),
+            } => print_json_path(
+                &lexer::Variable::Scalar(scalar_name),
+                path,
+                should_flatten,
+                f,
+            ),
         }
     }
 }

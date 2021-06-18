@@ -25,6 +25,9 @@ pub enum ParserError {
     #[error("while using json path in call triplet, result should be flattened, add ! at the end")]
     CallArgsNotFlattened(usize, usize),
 
+    #[error("json path can't be applied to streams in iterable positions of a fold")]
+    JsonPathAppliedToStream(usize, usize),
+
     #[error("variable '{2}' wasn't defined")]
     UndefinedVariable(usize, usize, String),
 

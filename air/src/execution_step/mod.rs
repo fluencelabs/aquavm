@@ -17,13 +17,17 @@
 mod air;
 mod boxed_value;
 mod errors;
+mod execution_context;
 mod joinable;
+mod trace_handler;
 mod utils;
 
 pub(super) use self::air::ExecutableInstruction;
 pub(super) use self::air::FoldState;
 pub(super) use errors::ExecutionError;
+pub(crate) use execution_context::ExecutionCtx;
 pub(self) use joinable::Joinable;
+pub(crate) use trace_handler::TraceHandler;
 
 use std::rc::Rc;
 

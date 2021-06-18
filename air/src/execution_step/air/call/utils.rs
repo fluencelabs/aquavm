@@ -79,11 +79,11 @@ pub(super) fn set_local_call_result<'i>(
             match exec_ctx.data_cache.entry(name.to_string()) {
                 Occupied(mut entry) => match entry.get_mut() {
                     // if result is an array, insert result to the end of the array
-                    AValue::JValueStreamRef(values) => values.borrow_mut().push(executed_result),
+                    AValue::StreamRef(values) => values.borrow_mut().push(executed_result),
                     v => return exec_err!(IncompatibleAValueType(format!("{}", v), String::from("Array"))),
                 },
                 Vacant(entry) => {
-                    entry.insert(AValue::JValueStreamRef(RefCell::new(vec![executed_result])));
+                    entry.insert(AValue::StreamRef(RefCell::new(vec![executed_result])));
                 }
             };
         }
@@ -97,7 +97,7 @@ pub(super) fn set_local_call_result<'i>(
 pub(super) fn set_remote_call_result<'i>(
     peer_pk: String,
     exec_ctx: &mut ExecutionCtx<'i>,
-    trace_ctx: &mut ExecutionTraceCtx,
+    trace_ctx: &mut TraceHandler,
 ) {
     exec_ctx.next_peer_pks.push(peer_pk);
     exec_ctx.subtree_complete = false;
@@ -116,51 +116,38 @@ pub(super) fn set_remote_call_result<'i>(
 pub(super) fn handle_prev_state<'i>(
     triplet: &Rc<ResolvedTriplet>,
     output: &CallOutputValue<'i>,
-    prev_state: ExecutedState,
+    prev_result: CallResult,
     exec_ctx: &mut ExecutionCtx<'i>,
-    trace_ctx: &mut ExecutionTraceCtx,
+    trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<bool> {
     use CallResult::*;
-    use ExecutedState::*;
 
-    match &prev_state {
+    match &prev_result {
         // this call was failed on one of the previous executions,
         // here it's needed to bubble this special error up
-        Call(CallServiceFailed(ret_code, err_msg)) => {
-            let ret_code = *ret_code;
-            let err_msg = err_msg.clone();
-            trace_ctx.new_trace.push_back(prev_state);
+        CallServiceFailed(ret_code, err_msg) => {
             exec_ctx.subtree_complete = false;
-            exec_err!(ExecutionError::LocalServiceError(ret_code, err_msg))
+            trace_ctx.meet_call_end(call_result);
+            exec_err!(ExecutionError::LocalServiceError(*ret_code, err_msg.clone()))
         }
-        Call(RequestSentBy(..)) => {
+        RequestSentBy(..) => {
             let peer_pk = triplet.peer_pk.as_str();
+
             // check whether current node can execute this call
             let is_current_peer = peer_pk == exec_ctx.current_peer_id.as_str();
             if is_current_peer {
-                Ok(true)
-            } else {
-                exec_ctx.subtree_complete = false;
-                trace_ctx.new_trace.push_back(prev_state);
-                Ok(false)
+                return Ok(true);
             }
-        }
-        // TODO: use value_type
-        // this instruction's been already executed
-        Call(Executed(result)) => {
-            set_local_call_result(result.clone(), triplet.clone(), output, exec_ctx)?;
-            trace_ctx.new_trace.push_back(prev_state);
+
+            exec_ctx.subtree_complete = false;
+            trace_ctx.meet_call_end(call_result);
             Ok(false)
         }
-        // state has inconsistent order - return a error, call shouldn't be executed
-        par_state @ Par(..) => exec_err!(ExecutionError::InvalidExecutedState(
-            String::from("call"),
-            par_state.clone(),
-        )),
-        // state has inconsistent order - return a error, call shouldn't be executed
-        fold_state @ Fold(..) => exec_err!(ExecutionError::InvalidExecutedState(
-            String::from("fold"),
-            fold_state.clone(),
-        )),
+        // this instruction's been already executed
+        Executed(result) => {
+            set_local_call_result(result.clone(), triplet.clone(), output, exec_ctx)?;
+            trace_ctx.meet_call_end(prev_result);
+            Ok(false)
+        }
     }
 }
