@@ -21,7 +21,7 @@ use std::path::PathBuf;
 pub type Effect<T> = Box<dyn Fn() -> Result<T, AVMError> + 'static>;
 pub struct CallServiceArgs {
     pub particle_parameters: ParticleParameters,
-    pub args: Vec<IValue>,
+    pub function_args: Vec<IValue>,
     pub create_vault: Effect<PathBuf>,
 }
 

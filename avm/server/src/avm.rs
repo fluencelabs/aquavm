@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
+use crate::call_service::CallServiceArgs;
 use crate::config::AVMConfig;
+use crate::data_store::{create_vault_effect, prev_data_file, vault_dir};
+use crate::errors::AVMError::CleanupParticleError;
 use crate::AVMError;
 use crate::InterpreterOutcome;
 use crate::{CallServiceClosure, IType, Result};
@@ -24,13 +27,9 @@ use fluence_faas::HostImportDescriptor;
 use fluence_faas::IValue;
 use fluence_faas::{FaaSConfig, HostExportedFunc, ModuleDescriptor};
 
-use crate::call_service::{CallServiceArgs, Effect};
-use crate::data_store::{create_vault_effect, prev_data_file, vault_dir};
-use crate::errors::AVMError::{CleanupParticleError, CreateVaultDirError, RemoveDataStoreError};
 use parking_lot::Mutex;
-use std::env::args;
 use std::ops::{Deref, DerefMut};
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::sync::Arc;
 
 const CALL_SERVICE_NAME: &str = "call_service";
@@ -81,7 +80,7 @@ impl AVM {
         let call_service = call_service_descriptor(
             current_particle.clone(),
             config.call_service,
-            &particle_data_store,
+            particle_data_store.clone(),
         );
         let (wasm_dir, wasm_filename) = split_dirname(config.air_wasm_path)?;
 
@@ -181,7 +180,7 @@ fn prepare_args(
 fn call_service_descriptor(
     params: Arc<Mutex<ParticleParameters>>,
     call_service: CallServiceClosure,
-    particle_data_store: &Path,
+    particle_data_store: PathBuf,
 ) -> HostImportDescriptor {
     let call_service_closure: HostExportedFunc = Box::new(move |_, ivalues: Vec<IValue>| {
         let params = {
@@ -189,11 +188,11 @@ fn call_service_descriptor(
             lock.deref().clone()
         };
 
-        let create_vault = create_vault_effect(particle_data_store, &params.particle_id);
+        let create_vault = create_vault_effect(&particle_data_store, &params.particle_id);
 
         let args = CallServiceArgs {
             particle_parameters: params,
-            args: ivalues,
+            function_args: ivalues,
             create_vault,
         };
         call_service(args)

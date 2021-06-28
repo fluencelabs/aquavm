@@ -130,8 +130,8 @@ fn duplicate_variables() {
 // Check that string literals can be used as call parameters.
 #[test]
 fn string_parameters() {
-    let call_service: CallServiceClosure = Box::new(|_, args| -> Option<IValue> {
-        let arg = match &args[2] {
+    let call_service: CallServiceClosure = Box::new(|args| -> Option<IValue> {
+        let arg = match &args.function_args[2] {
             IValue::String(str) => str,
             _ => unreachable!(),
         };

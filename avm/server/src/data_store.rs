@@ -16,8 +16,7 @@
 
 use crate::call_service::Effect;
 use crate::errors::AVMError::CreateVaultDirError;
-use std::fmt::Debug;
-use std::io::ErrorKind;
+
 use std::path::{Path, PathBuf};
 
 pub fn create_vault_effect(particle_data_store: &Path, particle_id: &str) -> Effect<PathBuf> {

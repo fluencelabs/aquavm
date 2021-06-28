@@ -33,8 +33,8 @@ fn create_check_service_closure(
     args_to_check: ArgToCheck<LastError>,
     tetraplets_to_check: ArgToCheck<Vec<Vec<SecurityTetraplet>>>,
 ) -> CallServiceClosure {
-    Box::new(move |_, args| -> Option<IValue> {
-        let call_args = match &args[2] {
+    Box::new(move |args| -> Option<IValue> {
+        let call_args = match &args.function_args[2] {
             IValue::String(str) => str,
             _ => unreachable!(),
         };
@@ -42,7 +42,7 @@ fn create_check_service_closure(
         let mut call_args: Vec<LastError> =
             serde_json::from_str(call_args).expect("json deserialization shouldn't fail");
 
-        let tetraplets = match &args[3] {
+        let tetraplets = match &args.function_args[3] {
             IValue::String(str) => str,
             _ => unreachable!(),
         };
