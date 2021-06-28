@@ -16,17 +16,21 @@
 
 use crate::config::AVMConfig;
 use crate::AVMError;
+use crate::InterpreterOutcome;
 use crate::{CallServiceClosure, IType, Result};
 
-use crate::InterpreterOutcome;
 use fluence_faas::FluenceFaaS;
 use fluence_faas::HostImportDescriptor;
 use fluence_faas::IValue;
 use fluence_faas::{FaaSConfig, HostExportedFunc, ModuleDescriptor};
 
+use crate::call_service::{CallServiceArgs, Effect};
+use crate::data_store::{create_vault_effect, prev_data_file, vault_dir};
+use crate::errors::AVMError::{CleanupParticleError, CreateVaultDirError, RemoveDataStoreError};
 use parking_lot::Mutex;
+use std::env::args;
 use std::ops::{Deref, DerefMut};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 const CALL_SERVICE_NAME: &str = "call_service";
@@ -73,7 +77,12 @@ impl AVM {
         use AVMError::InvalidDataStorePath;
 
         let current_particle: Arc<Mutex<ParticleParameters>> = <_>::default();
-        let call_service = call_service_descriptor(current_particle.clone(), config.call_service);
+        let particle_data_store = config.particle_data_store;
+        let call_service = call_service_descriptor(
+            current_particle.clone(),
+            config.call_service,
+            &particle_data_store,
+        );
         let (wasm_dir, wasm_filename) = split_dirname(config.air_wasm_path)?;
 
         let faas_config = make_faas_config(
@@ -85,7 +94,6 @@ impl AVM {
         );
         let faas = FluenceFaaS::with_raw_config(faas_config)?;
 
-        let particle_data_store = config.particle_data_store;
         std::fs::create_dir_all(&particle_data_store)
             .map_err(|e| InvalidDataStorePath(e, particle_data_store.clone()))?;
 
@@ -136,6 +144,19 @@ impl AVM {
         Ok(outcome)
     }
 
+    /// Remove particle directories and files:
+    /// - prev data file
+    /// - particle file vault directory
+    pub fn cleanup_particle(&self, particle_id: &str) -> Result<()> {
+        let prev_data = prev_data_file(&self.particle_data_store, particle_id);
+        std::fs::remove_file(&prev_data).map_err(|err| CleanupParticleError(err, prev_data))?;
+
+        let vault_dir = vault_dir(&self.particle_data_store, particle_id);
+        std::fs::remove_dir_all(&vault_dir).map_err(|err| CleanupParticleError(err, vault_dir))?;
+
+        Ok(())
+    }
+
     fn update_current_particle(&self, particle_id: String, init_user_id: String) {
         let mut params = self.current_particle.lock();
         params.particle_id = particle_id;
@@ -160,13 +181,22 @@ fn prepare_args(
 fn call_service_descriptor(
     params: Arc<Mutex<ParticleParameters>>,
     call_service: CallServiceClosure,
+    particle_data_store: &Path,
 ) -> HostImportDescriptor {
     let call_service_closure: HostExportedFunc = Box::new(move |_, ivalues: Vec<IValue>| {
         let params = {
             let lock = params.lock();
             lock.deref().clone()
         };
-        call_service(params, ivalues)
+
+        let create_vault = create_vault_effect(particle_data_store, &params.particle_id);
+
+        let args = CallServiceArgs {
+            particle_parameters: params,
+            args: ivalues,
+            create_vault,
+        };
+        call_service(args)
     });
 
     HostImportDescriptor {

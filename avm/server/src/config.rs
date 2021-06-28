@@ -15,12 +15,10 @@
  */
 
 use crate::avm::ParticleParameters;
+use crate::CallServiceClosure;
 use crate::IValue;
 
 use std::path::PathBuf;
-
-pub type CallServiceClosure =
-    Box<dyn Fn(ParticleParameters, Vec<IValue>) -> Option<IValue> + 'static>;
 
 /// Describes behaviour of the AVM.
 pub struct AVMConfig {
