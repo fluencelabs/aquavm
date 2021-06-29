@@ -19,19 +19,19 @@ use crate::errors::AVMError::CreateVaultDirError;
 
 use std::path::{Path, PathBuf};
 
-pub fn create_vault_effect(particle_data_store: &Path, particle_id: &str) -> Effect<PathBuf> {
-    let vault_dir = vault_dir(particle_data_store, particle_id);
+pub fn create_vault_effect(vault_dir: &Path, particle_id: &str) -> Effect<PathBuf> {
+    let particle_vault_dir = particle_vault_dir(vault_dir, particle_id);
     let closure = move || {
-        std::fs::create_dir_all(&vault_dir)
-            .map_err(|err| CreateVaultDirError(err, vault_dir.clone()))?;
-        Ok(vault_dir.clone())
+        std::fs::create_dir_all(&particle_vault_dir)
+            .map_err(|err| CreateVaultDirError(err, particle_vault_dir.clone()))?;
+        Ok(particle_vault_dir.clone())
     };
 
     Box::new(closure)
 }
 
-pub fn vault_dir(particle_data_store: &Path, particle_id: &str) -> PathBuf {
-    particle_data_store.join("vault").join(particle_id)
+pub fn particle_vault_dir(vault_dir: &Path, particle_id: &str) -> PathBuf {
+    vault_dir.join(particle_id)
 }
 
 pub fn prev_data_file(particle_data_store: &Path, particle_id: &str) -> PathBuf {
