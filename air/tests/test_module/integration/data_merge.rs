@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+use pretty_assertions::assert_eq;
+use serde_json::json;
+
 use air_test_utils::call_vm;
 use air_test_utils::create_avm;
 use air_test_utils::executed_state;
@@ -24,22 +27,19 @@ use air_test_utils::ExecutionTrace;
 use air_test_utils::IValue;
 use air_test_utils::NEVec;
 
-use pretty_assertions::assert_eq;
-use serde_json::json;
-
 type JValue = serde_json::Value;
 
 #[test]
 fn data_merge() {
     use executed_state::*;
 
-    let neighborhood_call_service1: CallServiceClosure = Box::new(|_, _| -> Option<IValue> {
+    let neighborhood_call_service1: CallServiceClosure = Box::new(|_| -> Option<IValue> {
         Some(IValue::Record(
             NEVec::new(vec![IValue::S32(0), IValue::String(String::from("[\"A\", \"B\"]"))]).unwrap(),
         ))
     });
 
-    let neighborhood_call_service2: CallServiceClosure = Box::new(|_, _| -> Option<IValue> {
+    let neighborhood_call_service2: CallServiceClosure = Box::new(|_| -> Option<IValue> {
         Some(IValue::Record(
             NEVec::new(vec![IValue::S32(0), IValue::String(String::from("[\"A\", \"B\"]"))]).unwrap(),
         ))
@@ -166,15 +166,15 @@ fn data_merge() {
 fn acc_merge() {
     env_logger::init();
 
-    let neighborhood_call_service: CallServiceClosure = Box::new(|_, args| -> Option<IValue> {
-        let args_count = match &args[1] {
+    let neighborhood_call_service: CallServiceClosure = Box::new(|args| -> Option<IValue> {
+        let args_count = match &args.function_args[1] {
             IValue::String(str) => str,
             _ => unreachable!(),
         };
 
         let args_count = (args_count.as_bytes()[0] - b'0') as usize;
 
-        let args_json = match &args[2] {
+        let args_json = match &args.function_args[2] {
             IValue::String(str) => str,
             _ => unreachable!(),
         };
@@ -231,8 +231,8 @@ fn fold_merge() {
         "stream2".to_string() => r#"["s4", "s5", "s6"]"#.to_string(),
     };
 
-    let local_vm_service_call: CallServiceClosure = Box::new(|_, values| -> Option<IValue> {
-        let args = match &values[2] {
+    let local_vm_service_call: CallServiceClosure = Box::new(|args| -> Option<IValue> {
+        let args = match &args.function_args[2] {
             IValue::String(str) => str,
             _ => unreachable!(),
         };

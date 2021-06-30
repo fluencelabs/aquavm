@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
+use crate::call_service::CallServiceArgs;
 use crate::config::AVMConfig;
+use crate::data_store::{create_vault_effect, particle_vault_dir, prev_data_file};
+use crate::errors::AVMError::CleanupParticleError;
 use crate::AVMError;
+use crate::InterpreterOutcome;
 use crate::{CallServiceClosure, IType, Result};
 
-use crate::InterpreterOutcome;
 use fluence_faas::FluenceFaaS;
 use fluence_faas::HostImportDescriptor;
 use fluence_faas::IValue;
@@ -61,6 +64,7 @@ pub struct ParticleParameters {
 pub struct AVM {
     faas: SendSafeFaaS,
     particle_data_store: PathBuf,
+    vault_dir: PathBuf,
     /// file name of the AIR interpreter .wasm
     wasm_filename: String,
     /// information about the particle that is being executed at the moment
@@ -70,10 +74,16 @@ pub struct AVM {
 impl AVM {
     /// Create AVM with provided config.
     pub fn new(config: AVMConfig) -> Result<Self> {
-        use AVMError::InvalidDataStorePath;
+        use AVMError::{CreateVaultDirError, InvalidDataStorePath};
 
         let current_particle: Arc<Mutex<ParticleParameters>> = <_>::default();
-        let call_service = call_service_descriptor(current_particle.clone(), config.call_service);
+        let particle_data_store = config.particle_data_store;
+        let vault_dir = config.vault_dir;
+        let call_service = call_service_descriptor(
+            current_particle.clone(),
+            config.call_service,
+            vault_dir.clone(),
+        );
         let (wasm_dir, wasm_filename) = split_dirname(config.air_wasm_path)?;
 
         let faas_config = make_faas_config(
@@ -85,13 +95,15 @@ impl AVM {
         );
         let faas = FluenceFaaS::with_raw_config(faas_config)?;
 
-        let particle_data_store = config.particle_data_store;
         std::fs::create_dir_all(&particle_data_store)
             .map_err(|e| InvalidDataStorePath(e, particle_data_store.clone()))?;
+        std::fs::create_dir_all(&vault_dir)
+            .map_err(|e| CreateVaultDirError(e, vault_dir.clone()))?;
 
         let avm = Self {
             faas: SendSafeFaaS(faas),
             particle_data_store,
+            vault_dir,
             wasm_filename,
             current_particle,
         };
@@ -111,7 +123,7 @@ impl AVM {
         let particle_id = particle_id.into();
         let init_user_id = init_user_id.into();
 
-        let prev_data_path = self.particle_data_store.join(&particle_id);
+        let prev_data_path = prev_data_file(&self.particle_data_store, &particle_id);
         // TODO: check for errors related to invalid file content (such as invalid UTF8 string)
         let prev_data = std::fs::read_to_string(&prev_data_path)
             .unwrap_or_default()
@@ -134,6 +146,19 @@ impl AVM {
             .map_err(|e| PersistDataError(e, prev_data_path))?;
 
         Ok(outcome)
+    }
+
+    /// Remove particle directories and files:
+    /// - prev data file
+    /// - particle file vault directory
+    pub fn cleanup_particle(&self, particle_id: &str) -> Result<()> {
+        let prev_data = prev_data_file(&self.particle_data_store, particle_id);
+        std::fs::remove_file(&prev_data).map_err(|err| CleanupParticleError(err, prev_data))?;
+
+        let vault_dir = particle_vault_dir(&self.vault_dir, particle_id);
+        std::fs::remove_dir_all(&vault_dir).map_err(|err| CleanupParticleError(err, vault_dir))?;
+
+        Ok(())
     }
 
     fn update_current_particle(&self, particle_id: String, init_user_id: String) {
@@ -160,13 +185,22 @@ fn prepare_args(
 fn call_service_descriptor(
     params: Arc<Mutex<ParticleParameters>>,
     call_service: CallServiceClosure,
+    vault_dir: PathBuf,
 ) -> HostImportDescriptor {
     let call_service_closure: HostExportedFunc = Box::new(move |_, ivalues: Vec<IValue>| {
         let params = {
             let lock = params.lock();
             lock.deref().clone()
         };
-        call_service(params, ivalues)
+
+        let create_vault = create_vault_effect(&vault_dir, &params.particle_id);
+
+        let args = CallServiceArgs {
+            particle_parameters: params,
+            function_args: ivalues,
+            create_vault,
+        };
+        call_service(args)
     });
 
     HostImportDescriptor {

@@ -37,22 +37,22 @@ struct ClosureCallArgs {
 }
 
 fn create_check_service_closure(closure_call_args: ClosureCallArgs) -> CallServiceClosure {
-    Box::new(move |_, args| -> Option<IValue> {
+    Box::new(move |args| -> Option<IValue> {
         use std::ops::Deref;
 
-        let service_id = match &args[0] {
+        let service_id = match &args.function_args[0] {
             IValue::String(str) => str,
             _ => unreachable!(),
         };
         *closure_call_args.service_id_var.deref().borrow_mut() = service_id.clone();
 
-        let function_name = match &args[1] {
+        let function_name = match &args.function_args[1] {
             IValue::String(str) => str,
             _ => unreachable!(),
         };
         *closure_call_args.function_name_var.deref().borrow_mut() = function_name.clone();
 
-        let call_args = match &args[2] {
+        let call_args = match &args.function_args[2] {
             IValue::String(str) => str,
             _ => unreachable!(),
         };

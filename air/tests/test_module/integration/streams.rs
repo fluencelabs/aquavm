@@ -25,8 +25,8 @@ use serde_json::Value as JValue;
 #[test]
 fn empty_stream() {
     fn arg_type_check_closure() -> CallServiceClosure {
-        Box::new(move |_, args| -> Option<IValue> {
-            let call_args = match &args[2] {
+        Box::new(move |args| -> Option<IValue> {
+            let call_args = match &args.function_args[2] {
                 IValue::String(str) => str,
                 _ => unreachable!(),
             };

@@ -29,7 +29,7 @@ use serde_json::json;
 fn join_chat() {
     use std::collections::HashSet;
 
-    let members_call_service1: CallServiceClosure = Box::new(|_, _| -> Option<IValue> {
+    let members_call_service1: CallServiceClosure = Box::new(|_| -> Option<IValue> {
         Some(IValue::Record(
             NEVec::new(vec![
                 IValue::S32(0),
@@ -193,7 +193,7 @@ fn join_chat() {
 
 #[test]
 fn join() {
-    let members_call_service1: CallServiceClosure = Box::new(|_, _| -> Option<IValue> {
+    let members_call_service1: CallServiceClosure = Box::new(|_| -> Option<IValue> {
         Some(IValue::Record(
             NEVec::new(vec![IValue::S32(0), IValue::String(String::from(r#"[["A"], ["B"]]"#))]).unwrap(),
         ))
@@ -249,7 +249,7 @@ fn join() {
 
 #[test]
 fn init_peer_id() {
-    let members_call_service1: CallServiceClosure = Box::new(|_, _| -> Option<IValue> {
+    let members_call_service1: CallServiceClosure = Box::new(|_| -> Option<IValue> {
         Some(IValue::Record(
             NEVec::new(vec![IValue::S32(0), IValue::String(String::from(r#"[["A"], ["B"]]"#))]).unwrap(),
         ))
