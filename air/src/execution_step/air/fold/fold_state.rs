@@ -14,19 +14,9 @@
  * limitations under the License.
  */
 
-use super::AValue;
-use super::ExecutionCtx;
-use super::ExecutionError;
-use super::ExecutionResult;
 use super::Instruction;
 use super::IterableValue;
 use super::ResolvedCallResult;
-use super::TraceHandler;
-use crate::exec_err;
-use crate::execution_step::boxed_value::*;
-use crate::log_instruction;
-
-use air_parser::ast;
 
 use std::collections::HashMap;
 use std::rc::Rc;

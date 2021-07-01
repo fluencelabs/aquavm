@@ -37,7 +37,7 @@ fn slider_is_exhaustive() {
 
     let slider = TraceSlider::new(trace.clone().into());
 
-    assert_eq!(slider.interval_len(), trace.len());
+    assert_eq!(slider.subtrace_len(), trace.len());
 
     let trace_len = trace.len();
     for (id, state) in trace.into_iter().enumerate() {
@@ -45,7 +45,7 @@ fn slider_is_exhaustive() {
         let expected_value = Some(state);
         assert_eq!(actual_value, expected_value);
 
-        assert_eq!(slider.interval_len(), trace_len - id - 1);
+        assert_eq!(slider.subtrace_len(), trace_len - id - 1);
     }
 
     let actual_value = slider.next_state();
@@ -57,7 +57,7 @@ fn none_on_empty() {
     let trace = vec![];
     let slider = TraceSlider::new(trace.clone().into());
 
-    assert_eq!(slider.interval_len(), trace.len());
+    assert_eq!(slider.subtrace_len(), trace.len());
 
     let actual_value = slider.next_state();
     assert_eq!(actual_value, None);
@@ -68,7 +68,7 @@ fn none_on_empty_interval() {
     let trace = generate_test_trace();
 
     let slider = TraceSlider::new(trace.clone().into());
-    slider.set_interval_len(0);
+    slider.set_subtrace_len(0);
 
     let actual_value = slider.next_state();
     assert_eq!(actual_value, None);
@@ -100,5 +100,5 @@ fn none_after_remainder() {
 
     let actual_value = slider.next_state();
     assert_eq!(actual_value, None);
-    assert_eq!(slider.interval_len(), 0);
+    assert_eq!(slider.subtrace_len(), 0);
 }

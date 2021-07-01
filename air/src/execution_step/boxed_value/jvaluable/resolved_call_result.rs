@@ -16,7 +16,7 @@
 
 use super::ExecutionResult;
 use super::JValuable;
-use crate::contexts::execution::ResolvedCallResult;
+use crate::execution_step::execution_context::ResolvedCallResult;
 use crate::JValue;
 use crate::SecurityTetraplet;
 

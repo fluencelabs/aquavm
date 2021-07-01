@@ -20,23 +20,24 @@ mod lore_ctor_queue;
 mod size_updater;
 
 use super::*;
-use crate::execution_step::trace_handler::merger::ResolvedFoldSubTraceLore;
 use crate::JValue;
 use lore_applier::*;
 use lore_ctor::*;
 use lore_ctor_queue::*;
-use size_updater::IntervalLenUpdater;
+use size_updater::SubTreeSizeUpdater;
+
+use air_interpreter_data::FoldLore;
 
 use std::rc::Rc;
 
 #[derive(Debug, Default, Clone)]
 pub(crate) struct FoldFSM {
-    position: usize,
-    prev_fold_tale: FoldTale,
-    current_fold_tale: FoldTale,
+    prev_fold_lore: ResolvedFoldLore,
+    current_fold_lore: ResolvedFoldLore,
+    state_inserter: StateInserter,
     ctor_queue: LoreCtorQueue,
-    result_tale: Vec<Vec<FoldSubTraceLore>>,
-    len_updater: IntervalLenUpdater,
+    result_tale: FoldLore,
+    len_updater: SubTreeSizeUpdater,
 }
 
 pub(crate) struct ValueAndPos {
@@ -46,14 +47,13 @@ pub(crate) struct ValueAndPos {
 
 impl FoldFSM {
     pub(crate) fn from_fold_start(fold_result: MergerFoldResult, data_keeper: &mut DataKeeper) -> FSMResult<Self> {
-        let position = data_keeper.result_trace.len();
-        data_keeper.push(ExecutedState::Fold(<_>::default));
-        let len_updater = IntervalLenUpdater::new(data_keeper);
+        let state_inserter = StateInserter::from_keeper(data_keeper);
+        let len_updater = SubTreeSizeUpdater::new(data_keeper);
 
         let fold_fsm = Self {
-            position,
-            prev_fold_tale: fold_result.prev_fold_tale,
-            current_fold_tale: fold_result.current_fold_tale,
+            prev_fold_lore: fold_result.prev_fold_lore,
+            current_fold_lore: fold_result.current_fold_lore,
+            state_inserter,
             len_updater,
             ..<_>::default()
         };
@@ -66,46 +66,46 @@ impl FoldFSM {
     }
 
     pub(crate) fn meet_next(&mut self, value: ValueAndPos, data_keeper: &mut DataKeeper) -> FSMResult<()> {
-        self.ctor_queue.straight_ctor_mut().lore_ctor.before_end(data_keeper);
+        self.ctor_queue.forward_ctor_mut().lore_ctor.before_end(data_keeper);
         self.meet_before_state(value, data_keeper)
     }
 
     pub(crate) fn meet_prev(&mut self, data_keeper: &mut DataKeeper) -> FSMResult<()> {
-        let lore_ctor = if self.ctor_queue.were_no_back_traversals() {
-            let lore_ctor = &mut self.ctor_queue.straight_ctor_mut().lore_ctor;
-            lore_ctor.before_end(data_keeper);
-            lore_ctor.after_start(data_keeper);
-            lore_ctor
+        let lore_elem = if self.ctor_queue.were_no_back_traversals() {
+            let lore_elem = self.ctor_queue.forward_ctor_mut();
+            lore_elem.lore_ctor.before_end(data_keeper);
+            lore_elem.lore_ctor.after_start(data_keeper);
+            lore_elem
         } else {
             self.ctor_queue.backward_ctor_mut().lore_ctor.after_end(data_keeper);
 
             self.ctor_queue.backward_traverse();
-            let lore_ctor = self.ctor_queue.backward_ctor_mut();
-            lore_ctor.lore_ctor.after_start(data_keeper);
+            let lore_elem = self.ctor_queue.backward_ctor_mut();
+            lore_elem.lore_ctor.after_start(data_keeper);
 
-            lore_ctor
+            lore_elem
         };
 
-        apply_fold_lore_after(data_keeper, &lore_ctor.prev_lore, &lore_ctor.current_lore)
+        apply_fold_lore_after(data_keeper, &lore_elem.prev_lore, &lore_elem.current_lore)
     }
 
     pub(crate) fn meet_generation_end(&mut self, data_keeper: &mut DataKeeper) {
         self.ctor_queue.backward_ctor_mut().lore_ctor.after_end(data_keeper);
 
-        let subtale = self.ctor_queue.transform_to_subtale();
+        let subtale = self.ctor_queue.transform_to_lore();
         self.result_tale.extend(subtale);
     }
 
     pub(crate) fn meet_fold_end(self, data_keeper: &mut DataKeeper) {
         // TODO: check for prev and current tale emptiness
-        self.len_updater.update(data_keeper)?;
         let fold_result = FoldResult(self.result_tale);
-        data_keeper.result_trace[self.position] = ExecutedState::Fold(fold_result);
+        let state = ExecutedState::Fold(fold_result);
+        self.state_inserter.insert(data_keeper, state);
     }
 
     fn meet_before_state(&mut self, value: ValueAndPos, data_keeper: &mut DataKeeper) -> FSMResult<()> {
-        let prev_lore = remove_first(&mut self.prev_fold_tale, &value.value);
-        let current_lore = remove_first(&mut self.prev_fold_tale, &value.value);
+        let prev_lore = remove_first(&mut self.prev_fold_lore, &value.value);
+        let current_lore = remove_first(&mut self.current_fold_lore, &value.value);
         apply_fold_lore_before(data_keeper, &prev_lore, &current_lore)?;
 
         let lore_ctor = FoldLoreCtor::from_before_start(value.pos, data_keeper);

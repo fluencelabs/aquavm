@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
-use super::merging::DataMergingError;
-
 use serde_json::Error as SerdeJsonError;
 use thiserror::Error as ThisError;
 
 use std::env::VarError;
-use std::error::Error;
 
 /// Errors happened during the interpreter preparation_step step.
 #[derive(Debug, ThisError)]

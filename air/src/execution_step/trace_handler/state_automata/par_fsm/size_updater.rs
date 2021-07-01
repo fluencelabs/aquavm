@@ -16,18 +16,21 @@
 
 use super::*;
 
-#[derive(Debug, Default)]
-pub(super) struct SubtreeSizeUpdater {
+/// At the end of a Par execution it's needed to reduce subtrace_len of both sliders on a count
+/// of seen states. This count could be taken from the Par left and right subtree sizes.
+/// This struct manage to save the updated lens and update subtrace_len of sliders.
+#[derive(Debug, Default, Clone)]
+pub(super) struct SubTraceSizeUpdater {
     pub(self) prev_size: usize,
     pub(self) current_size: usize,
 }
 
-impl SubtreeSizeUpdater {
+impl SubTraceSizeUpdater {
     pub(super) fn from_data_keeper(data_keeper: &DataKeeper, ingredients: MergerParResult) -> FSMResult<Self> {
-        let prev_subtree_size = data_keeper.prev_ctx.slider.interval_len();
+        let prev_subtree_size = data_keeper.prev_ctx.slider.subtrace_len();
         let prev_size = Self::compute_new_size(prev_subtree_size, ingredients.prev_par)?;
 
-        let current_subtree_size = data_keeper.current_ctx.slider.interval_len();
+        let current_subtree_size = data_keeper.current_ctx.slider.subtrace_len();
         let current_size = Self::compute_new_size(current_subtree_size, ingredients.current_par)?;
 
         let updater = Self {
@@ -39,8 +42,8 @@ impl SubtreeSizeUpdater {
     }
 
     pub(super) fn update(self, data_keeper: &mut DataKeeper) {
-        data_keeper.prev_ctx.slider.set_interval_len(self.prev_size);
-        data_keeper.current_ctx.slider.set_interval_len(self.current_size);
+        data_keeper.prev_ctx.slider.set_subtrace_len(self.prev_size);
+        data_keeper.current_ctx.slider.set_subtrace_len(self.current_size);
     }
 
     fn compute_new_size(initial_size: usize, par_result: Option<ParResult>) -> FSMResult<usize> {

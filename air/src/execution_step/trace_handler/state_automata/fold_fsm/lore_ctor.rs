@@ -15,6 +15,7 @@
  */
 
 use super::*;
+use air_interpreter_data::SubTraceDesc;
 
 #[derive(Debug, Default, PartialEq, Eq, Clone, Copy)]
 pub(super) struct FoldLoreCtor {
@@ -55,20 +56,21 @@ impl FoldLoreCtor {
         self.after_tracker.end_pos = data_keeper.result_states_count();
     }
 
-    pub(super) fn into_subtrace(self) -> Vec<FoldSubTraceLore> {
-        let before_lore = FoldSubTraceLore {
-            value_pos: self.value_pos,
-            begin_pos: self.before_tracker.start_pos,
-            interval_len: self.before_tracker.len(),
+    pub(super) fn into_subtrace_lore(self) -> FoldSubTraceLore {
+        let before = SubTraceDesc {
+            begin_pos: self.before_tracker.start_pos as _,
+            subtrace_len: self.before_tracker.len() as _,
         };
 
-        let after_lore = FoldSubTraceLore {
-            value_pos: self.value_pos,
-            begin_pos: self.after_tracker.start_pos,
-            interval_len: self.after_tracker.len(),
+        let after = SubTraceDesc {
+            begin_pos: self.after_tracker.start_pos as _,
+            subtrace_len: self.after_tracker.len() as _,
         };
 
-        vec![before_lore, after_lore]
+        FoldSubTraceLore {
+            value_pos: self.value_pos as _,
+            subtraces_desc: vec![before, after],
+        }
     }
 }
 

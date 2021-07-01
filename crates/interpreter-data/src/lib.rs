@@ -19,3 +19,10 @@ mod interpreter_data;
 
 pub use executed_state::*;
 pub use interpreter_data::*;
+
+use once_cell::sync::Lazy;
+use std::str::FromStr;
+
+pub static DATA_FORMAT_VERSION: Lazy<semver::Version> = Lazy::new(|| {
+    semver::Version::from_str("0.2.0").expect("invalid data format version specified")
+});

@@ -16,11 +16,12 @@
 
 mod data_keeper;
 mod errors;
-pub(self) mod merger;
+mod merger;
 mod state_automata;
 mod trace_handler;
 
 pub(crate) use errors::TraceHandlerError;
+pub(crate) use merger::MergerCallResult;
 pub(crate) use state_automata::SubtreeType;
 pub(crate) use state_automata::ValueAndPos;
 pub(crate) use trace_handler::TraceHandler;
@@ -30,10 +31,10 @@ pub(crate) type TraceHandlerResult<T> = std::result::Result<T, TraceHandlerError
 pub(self) use air_interpreter_data::*;
 pub(self) use data_keeper::DataKeeper;
 pub(self) use data_keeper::TraceSlider;
-pub(self) use merger::FoldSubtraceInfo;
-pub(self) use merger::FoldTale;
 pub(self) use merger::MergeCtxType;
 pub(self) use merger::MergerFoldResult;
+pub(self) use merger::ResolvedFoldLore;
+pub(self) use merger::ResolvedFoldSubTraceLore;
 pub(self) use state_automata::FSMQueue;
 pub(self) use state_automata::FoldFSM;
 pub(self) use state_automata::ParFSM;

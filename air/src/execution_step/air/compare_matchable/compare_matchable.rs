@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-use crate::contexts::execution::ExecutionCtx;
 use crate::execution_step::air::ExecutionResult;
+use crate::execution_step::execution_context::ExecutionCtx;
 use crate::execution_step::utils::get_variable_name;
 use crate::execution_step::utils::resolve_to_jvaluable;
 use crate::JValue;

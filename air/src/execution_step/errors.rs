@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
+use super::trace_handler::TraceHandlerError;
 use super::Joinable;
 use crate::build_targets::CallServiceResult;
-use crate::contexts::execution::ResolvedCallResult;
-use crate::contexts::execution_trace::ExecutedState;
+use crate::execution_step::boxed_value::Stream;
+use crate::execution_step::execution_context::ResolvedCallResult;
 use crate::JValue;
 
+use air_interpreter_data::ExecutedState;
 use jsonpath_lib::JsonPathError;
 use serde_json::Error as SerdeJsonError;
 use thiserror::Error as ThisError;
@@ -56,6 +58,11 @@ pub(crate) enum ExecutionError {
     /// An error occurred while trying to apply json path to this stream with JValue's.
     #[error("variable with path '{1}' not found in '{0:?}' with error: '{2}'")]
     JValueStreamJsonPathError(Vec<ResolvedCallResult>, String, JsonPathError),
+
+    /// An error occurred while trying to apply json path to stream in call args.
+    /// TODO: it will be checked on the parser side soon.
+    #[error("json path can't be applied to stream `{0:?}` in call args")]
+    JsonPathAppliedToStream(Stream),
 
     /// Provided JValue has incompatible with target type.
     #[error("expected JValue type '{1}', but got '{0}' JValue")]
@@ -107,6 +114,16 @@ pub(crate) enum ExecutionError {
     /// Internal error, this error type shouldn't be happened.
     #[error("an internal error occurred: {0}")]
     InternalError(String),
+
+    /// Errors bubbled from a trace handler.
+    #[error("{0}")]
+    TraceError(#[from] TraceHandlerError),
+}
+
+impl From<TraceHandlerError> for Rc<ExecutionError> {
+    fn from(trace_error: TraceHandlerError) -> Self {
+        Rc::new(ExecutionError::TraceError(trace_error))
+    }
 }
 
 impl ExecutionError {

@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-use crate::contexts::execution_trace::*;
-
 use thiserror::Error as ThisError;
 
-/// Errors arose out of merging previous data with a new.
+/// Errors arose out while accessing various interpreter data.
 #[derive(ThisError, Debug, PartialEq, Eq)]
 pub enum KeeperError {
     /// Errors occurred when executed trace contains less elements then corresponding Par has.
@@ -28,8 +26,4 @@ pub enum KeeperError {
     /// Errors occurred when data contains no generation for stream with the following name.
     #[error("data doesn't contain generation for stream with name '{0}'")]
     NoSuchStream(String),
-
-    /// Errors occurred when there were no correspondence between new position and old position.
-    #[error("context doesn't contain correspondence for position {0}")]
-    NoSuchCorrespondence(usize),
 }

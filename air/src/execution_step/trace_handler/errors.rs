@@ -21,7 +21,7 @@ use super::state_automata::StateFSMError;
 use thiserror::Error as ThisError;
 
 /// Errors arose out of merging previous data with a new.
-#[derive(ThisError, Debug, PartialEq, Eq)]
+#[derive(ThisError, Debug)]
 pub enum TraceHandlerError {
     #[error("{0}")]
     KeeperError(#[from] KeeperError),

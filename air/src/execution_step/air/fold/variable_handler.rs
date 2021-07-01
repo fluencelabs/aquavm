@@ -16,7 +16,6 @@
 
 use super::AValue;
 use super::ExecutionCtx;
-use super::ExecutionError;
 use super::ExecutionResult;
 use super::FoldState;
 
@@ -27,10 +26,10 @@ pub(super) struct VariableHandler<'i> {
 }
 
 impl<'i> VariableHandler<'i> {
-    pub(super) fn init<'ctx>(
+    pub(super) fn init<'ctx: 'i>(
         exec_ctx: &mut ExecutionCtx<'ctx>,
-        iterator: &'i str,
-        fold_state: FoldState,
+        iterator: &'ctx str,
+        fold_state: FoldState<'ctx>,
     ) -> ExecutionResult<Self> {
         Self::try_insert_fold_state(exec_ctx, iterator, fold_state)?;
         Self::meet_iterator(exec_ctx, iterator);
@@ -40,7 +39,7 @@ impl<'i> VariableHandler<'i> {
     }
 
     pub(super) fn cleanup(self, exec_ctx: &mut ExecutionCtx<'_>) {
-        let fold_state = match exec_ctx.data_cache.remove(iterator) {
+        let fold_state = match exec_ctx.data_cache.remove(self.iterator) {
             Some(AValue::JValueFoldCursor(fold_state)) => fold_state,
             _ => unreachable!("fold cursor is changed only inside fold block"),
         };
@@ -68,23 +67,23 @@ impl<'i> VariableHandler<'i> {
 
     fn try_insert_fold_state<'ctx>(
         exec_ctx: &mut ExecutionCtx<'ctx>,
-        iterator: &'i str,
-        fold_state: FoldState,
+        iterator: &'ctx str,
+        fold_state: FoldState<'ctx>,
     ) -> ExecutionResult<()> {
-        use ExecutionError::MultipleFoldStates;
+        use super::ExecutionError::MultipleFoldStates;
 
         let previous_value = exec_ctx
             .data_cache
             .insert(iterator.to_string(), AValue::JValueFoldCursor(fold_state));
 
         if previous_value.is_some() {
-            return exec_err!(MultipleFoldStates(iterator.to_string()));
+            return crate::exec_err!(MultipleFoldStates(iterator.to_string()));
         }
 
         Ok(())
     }
 
-    fn meet_iterator<'ctx>(exec_ctx: &mut ExecutionCtx<'ctx>, iterator: &'i str) {
+    fn meet_iterator<'ctx>(exec_ctx: &mut ExecutionCtx<'ctx>, iterator: &'ctx str) {
         exec_ctx.met_folds.push_back(iterator);
     }
 }

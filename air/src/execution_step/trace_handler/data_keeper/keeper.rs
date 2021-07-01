@@ -19,6 +19,7 @@ use super::MergeCtx;
 
 use air_interpreter_data::InterpreterData;
 
+/// Keeps all necessary data for merging.
 #[derive(Debug, Default, PartialEq)]
 pub(crate) struct DataKeeper {
     pub(crate) prev_ctx: MergeCtx,

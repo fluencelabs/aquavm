@@ -18,35 +18,29 @@ mod fold_state;
 mod utils;
 mod variable_handler;
 
-use fold_state::FoldState;
+pub(crate) use fold_state::FoldState;
 use utils::FoldIterable;
 use variable_handler::VariableHandler;
 
 use super::AValue;
+use super::ExecutableInstruction;
 use super::ExecutionCtx;
 use super::ExecutionError;
 use super::ExecutionResult;
 use super::Instruction;
 use super::ResolvedCallResult;
 use super::TraceHandler;
-use crate::exec_err;
 use crate::execution_step::boxed_value::*;
 use crate::log_instruction;
-
-use air_parser::ast;
-use air_parser::ast::Fold;
-use air_parser::ast::Next;
-
-use std::collections::HashMap;
-use std::rc::Rc;
-
 use utils::IterableValue;
 
-impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
+use air_parser::ast::Fold;
+
+impl<'i> ExecutableInstruction<'i> for Fold<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         log_instruction!(fold, exec_ctx, trace_ctx);
 
-        match utils::construct_iterable_value(iterable, exec_ctx)? {
+        match utils::construct_iterable_value(&self.iterable, exec_ctx)? {
             FoldIterable::Empty => Ok(()),
             FoldIterable::Scalar(iterable) => fold_scalar(&self, iterable, exec_ctx, trace_ctx),
             FoldIterable::Stream(iterables) => fold_stream(&self, iterables, exec_ctx, trace_ctx),
@@ -54,7 +48,7 @@ impl<'i> super::ExecutableInstruction<'i> for Fold<'i> {
     }
 }
 
-fn fold<'i>(
+fn fold_scalar<'i>(
     fold: &Fold<'i>,
     iterable: IterableValue,
     exec_ctx: &mut ExecutionCtx<'i>,

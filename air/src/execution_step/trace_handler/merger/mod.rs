@@ -22,22 +22,20 @@ mod par_merger;
 pub(super) use call_merger::try_merge_next_state_as_call;
 pub(crate) use call_merger::MergerCallResult;
 pub(crate) use errors::MergeError;
-pub(super) use fold_merger::try_merge_next_state_as_fold;
-pub(super) use fold_merger::FoldSubtraceInfo;
-pub(super) use fold_merger::FoldTale;
-pub(super) use fold_merger::MergerFoldResult;
-pub(super) use fold_merger::ResolvedFoldSubTraceLore;
-pub(super) use par_merger::try_merge_next_state_as_par;
-pub(super) use par_merger::MergerParResult;
+pub(crate) use fold_merger::try_merge_next_state_as_fold;
+pub(crate) use fold_merger::MergerFoldResult;
+pub(crate) use fold_merger::ResolvedFoldLore;
+pub(crate) use fold_merger::ResolvedFoldSubTraceLore;
+pub(crate) use par_merger::try_merge_next_state_as_par;
+pub(crate) use par_merger::MergerParResult;
 
 pub(self) type MergeResult<T> = std::result::Result<T, MergeError>;
 
-pub(self) use super::data_keeper::MergeCtx;
+pub(self) use super::data_keeper::KeeperError;
 pub(self) use super::DataKeeper;
 pub(self) use super::TraceSlider;
 
 use air_interpreter_data::*;
-use trace_slider::TraceSlider;
 
 #[derive(Debug, Copy, Clone)]
 pub(super) enum MergeCtxType {

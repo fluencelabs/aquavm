@@ -17,6 +17,7 @@
 use crate::execution_step::execution_context::ResolvedCallResult;
 
 // TODO: make it non-pub after boxed value refactoring.
+#[derive(Debug, Default, Clone)]
 pub(crate) struct Stream(pub(crate) Vec<Vec<ResolvedCallResult>>);
 
 impl Stream {
@@ -24,8 +25,12 @@ impl Stream {
         let mut streams_count = self.0.len();
 
         if self.0.len() > generation as usize {
-            self.0[generation].push(value);
+            self.0[generation as usize].push(value);
             return;
         }
+    }
+
+    pub(crate) fn is_empty(&self) -> bool {
+        self.0.is_empty()
     }
 }

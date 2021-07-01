@@ -23,7 +23,6 @@ use super::Instruction;
 use super::TraceHandler;
 use crate::execution_step::trace_handler::SubtreeType;
 use crate::log_instruction;
-use crate::log_targets::EXECUTED_STATE_CHANGING;
 use completeness_updater::ParCompletenessUpdater;
 
 use air_parser::ast::Par;
@@ -56,8 +55,6 @@ fn execute_subtree<'i>(
     completeness_updater: &mut ParCompletenessUpdater,
     subtree_type: SubtreeType,
 ) -> ExecutionResult<()> {
-    use super::ExecutionError::LocalServiceError;
-
     exec_ctx.subtree_complete = determine_subtree_complete(&subtree);
 
     // execute a subtree

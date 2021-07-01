@@ -15,7 +15,6 @@
  */
 
 use super::ExecutionTrace;
-use super::InterpreterData;
 use super::KeeperError;
 use super::KeeperResult;
 use super::TraceSlider;
@@ -25,6 +24,7 @@ use air_interpreter_data::StreamGenerations;
 
 use std::collections::HashMap;
 
+/// Contains all necessary information about data.
 #[derive(Debug, Default, PartialEq)]
 pub(crate) struct MergeCtx {
     pub(crate) slider: TraceSlider,
@@ -55,12 +55,5 @@ impl MergeCtx {
             .get(stream_name)
             .map(|v| *v)
             .ok_or_else(|| KeeperError::NoSuchStream(stream_name.to_string()))
-    }
-
-    pub(crate) fn try_get_new_pos(&self, old_pos: usize) -> KeeperResult<usize> {
-        self.old_pos_to_new
-            .get(&old_pos)
-            .map(|v| *v)
-            .ok_or_else(|| KeeperError::NoSuchCorrespondence(old_pos))
     }
 }

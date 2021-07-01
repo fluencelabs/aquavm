@@ -21,7 +21,6 @@ mod vec_resolved_call;
 
 pub(crate) use json_path_result::IterableJsonPathResult;
 pub(crate) use resolved_call::IterableResolvedCall;
-pub(crate) use vec_json_path_result::IterableVecJsonPathResult;
 pub(crate) use vec_resolved_call::IterableVecResolvedCall;
 
 use crate::execution_step::trace_handler::ValueAndPos;
@@ -61,7 +60,7 @@ pub(crate) enum IterableItem<'ctx> {
 
 impl IterableItem<'_> {
     pub(crate) fn into_value_and_pos(self) -> ValueAndPos {
-        use Self::*;
+        use IterableItem::*;
 
         // this method is called only from RcValue (in fold_stream and next),
         // so copying isn't actually happened here

@@ -15,17 +15,13 @@
  */
 
 use super::*;
-use crate::execution_step::execution_context::ResolvedCallResult;
 use crate::log_targets::EXECUTED_STATE_CHANGING;
-use crate::JValue;
 use merger::*;
 
 use air_interpreter_data::InterpreterData;
 use air_parser::ast::CallOutputValue;
 
-use std::rc::Rc;
-
-#[derive(Debug, Default, PartialEq)]
+#[derive(Debug, Default)]
 pub(crate) struct TraceHandler {
     data_keeper: DataKeeper,
     state_fsm_queue: FSMQueue,
@@ -41,11 +37,11 @@ impl TraceHandler {
         }
     }
 
-    /// Should be called at the beginning of a call execution. Returns
-    ///   Err         - an error occurred while merging states
-    ///   Ok(None)    - there is no state for this call in prev and current traces
-    ///   Ok(Some(_)) - merging was successful and the returned state is a resulted one
-    pub(crate) fn meet_call_start(&mut self, output_value: &CallOutputValue) -> TraceHandlerResult<MergerCallResult> {
+    /// Should be called at the beginning of a call execution.
+    pub(crate) fn meet_call_start(
+        &mut self,
+        output_value: &CallOutputValue<'_>,
+    ) -> TraceHandlerResult<MergerCallResult> {
         try_merge_next_state_as_call(&mut self.data_keeper, output_value).map_err(Into::into)
     }
 
@@ -55,10 +51,10 @@ impl TraceHandler {
         log::trace!(
             target: EXECUTED_STATE_CHANGING,
             "  adding new call executed state {:?}",
-            new_executed_state
+            call_result
         );
 
-        self.result_trace.push(ExecutedState::Call(call_result));
+        self.data_keeper.result_trace.push(ExecutedState::Call(call_result));
     }
 
     pub(crate) fn meet_par_start(&mut self) -> TraceHandlerResult<()> {
@@ -111,13 +107,28 @@ impl TraceHandler {
 
     pub(crate) fn meet_generation_end(&mut self) -> TraceHandlerResult<()> {
         let fold_fsm = self.state_fsm_queue.last_as_mut_fold()?;
-        fold_fsm.meet_generation_end(&mut self.data_keeper)?;
+        fold_fsm.meet_generation_end(&mut self.data_keeper);
         Ok(())
     }
 
     pub(crate) fn meet_fold_end(&mut self) -> TraceHandlerResult<()> {
         let fold_fsm = self.state_fsm_queue.pop_as_fold()?;
-        fold_fsm.meet_fold_end(&mut self.data_keeper)?;
+        fold_fsm.meet_fold_end(&mut self.data_keeper);
         Ok(())
+    }
+
+    pub(crate) fn result_trace(&self) -> &ExecutionTrace {
+        &self.data_keeper.result_trace
+    }
+
+    pub(crate) fn subtree_sizes(&self) -> (usize, usize) {
+        let prev_size = self.data_keeper.prev_ctx.slider.subtrace_len();
+        let current_size = self.data_keeper.current_ctx.slider.subtrace_len();
+
+        (prev_size, current_size)
+    }
+
+    pub(crate) fn into_result_trace(self) -> ExecutionTrace {
+        self.data_keeper.into_result_trace()
     }
 }

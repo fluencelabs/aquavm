@@ -17,7 +17,7 @@
 mod air;
 mod boxed_value;
 mod errors;
-mod execution_context;
+pub(crate) mod execution_context;
 mod joinable;
 mod trace_handler;
 mod utils;

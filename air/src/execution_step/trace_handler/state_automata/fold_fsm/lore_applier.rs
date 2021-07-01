@@ -72,12 +72,12 @@ fn apply_fold_lore(
 
     match next_position {
         ByNextPosition::Before => {
-            slider.set_interval_len(fold_lore.interval_len.before)?;
-            slider.set_position(fold_lore.begin_pos.before)?;
+            slider.set_subtrace_len(fold_lore.before_subtrace.subtrace_len as _)?;
+            slider.set_position(fold_lore.before_subtrace.begin_pos as _)?;
         }
         ByNextPosition::After => {
-            slider.set_interval_len(fold_lore.interval_len.after)?;
-            slider.set_position(fold_lore.begin_pos.after)?;
+            slider.set_subtrace_len(fold_lore.after_subtrace.subtrace_len as _)?;
+            slider.set_position(fold_lore.after_subtrace.begin_pos as _)?;
         }
     }
     Ok(())

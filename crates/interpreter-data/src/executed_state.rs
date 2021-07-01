@@ -19,9 +19,11 @@ use serde::Serialize;
 use serde_json::Value as JValue;
 use std::rc::Rc;
 
+pub const SCALAR_GENERATION: usize = 0;
+
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub struct ParResult(pub usize, pub usize);
+pub struct ParResult(pub u32, pub u32);
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -29,8 +31,10 @@ pub enum CallResult {
     /// Request was sent to a target node by node with such public key and it shouldn't be called again.
     RequestSentBy(Rc<String>),
 
-    /// A corresponding call's been already executed with such value and result.
-    Executed(Rc<JValue>),
+    /// A corresponding call's been already executed with such value as a result.
+    /// The second value is a generation, for scalar it means nothing and should be equal zero,
+    /// for streams it's used for merging.
+    Executed(Rc<JValue>, u32),
 
     /// call_service ended with a service error.
     CallServiceFailed(i32, Rc<String>),
@@ -56,21 +60,33 @@ pub enum CallResult {
 #[derive(Debug, Default, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct FoldSubTraceLore {
-    // position of current value in a trace
-    pub value_pos: usize,
-    // start position in a trace of a subtrace that was recorded with current value
-    pub begin_pos: usize,
-    // length of the subtrace
-    pub interval_len: usize,
+    /// Position of current value in a trace.
+    pub value_pos: u32,
+
+    /// Descriptors of a subtrace that are corresponded to the current value. Technically, now
+    /// it always contains two values, and Vec here is used to have a possibility to handle more
+    /// than one next inside fold in future.
+    pub subtraces_desc: Vec<SubTraceDesc>,
 }
 
-/// The first Vec is needed to track information about different values that was used to execute calls
-/// inside a fold instruction. The second one is needed to handle two parts of this trace - for more
-/// info please see the comment above. The second is Vec and not a pair to have a possibility to
-/// handle more than one next inside fold.
+/// Descriptor of a subtrace inside execution trace.
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub struct SubTraceDesc {
+    /// Start position in a trace of this subtrace.
+    pub begin_pos: u32,
+
+    /// Length of the subtrace.
+    pub subtrace_len: u32,
+}
+
+/// This type represents all information in an execution trace about states executed during
+/// a fold execution.
+pub type FoldLore = Vec<FoldSubTraceLore>;
+
 #[derive(Debug, Default, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub struct FoldResult(pub Vec<Vec<FoldSubTraceLore>>);
+pub struct FoldResult(pub FoldLore);
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -81,9 +97,9 @@ pub enum ExecutedState {
 }
 
 impl ParResult {
-    // returns a size of subtrace that this par describes in execution_step trace.
+    /// Returns a size of subtrace that this par describes in execution_step trace.
     pub fn size(&self) -> Option<usize> {
-        self.0.checked_add(self.1)
+        self.0.checked_add(self.1).map(|v| v as usize)
     }
 }
 
@@ -92,8 +108,12 @@ impl CallResult {
         CallResult::RequestSentBy(Rc::new(sender.into()))
     }
 
-    pub fn executed(value: JValue) -> CallResult {
-        CallResult::Executed(Rc::new(value))
+    pub fn executed_scalar(value: JValue) -> CallResult {
+        CallResult::Executed(Rc::new(value), 0)
+    }
+
+    pub fn executed_stream(value: JValue, generation: u32) -> CallResult {
+        CallResult::Executed(Rc::new(value), generation)
     }
 
     pub fn failed(ret_code: i32, error_msg: impl Into<String>) -> CallResult {
@@ -101,19 +121,18 @@ impl CallResult {
     }
 }
 
-impl FoldSubTraceLore {
-    pub fn new(value_pos: usize, begin_pos: usize, interval_len: usize) -> Self {
+impl SubTraceDesc {
+    pub fn new(begin_pos: usize, subtrace_len: usize) -> Self {
         Self {
-            value_pos,
-            begin_pos,
-            interval_len,
+            begin_pos: begin_pos as _,
+            subtrace_len: subtrace_len as _,
         }
     }
 }
 
 impl ExecutedState {
     pub fn par(left: usize, right: usize) -> Self {
-        Self::Par(ParResult(left, right))
+        Self::Par(ParResult(left as _, right as _))
     }
 }
 
@@ -125,7 +144,9 @@ impl std::fmt::Display for ExecutedState {
         match self {
             Par(ParResult(left, right)) => write!(f, "Par({}, {})", left, right),
             Call(RequestSentBy(peer_id)) => write!(f, "RequestSentBy({})", peer_id),
-            Call(Executed(result)) => write!(f, "Executed({:?})", result),
+            Call(Executed(result, generation)) => {
+                write!(f, "Executed({:?}, {})", result, generation)
+            }
             Call(CallServiceFailed(ret_code, err_msg)) => {
                 write!(f, "CallServiceFailed({}, {})", ret_code, err_msg)
             }

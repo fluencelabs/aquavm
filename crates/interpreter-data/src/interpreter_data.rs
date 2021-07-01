@@ -15,9 +15,11 @@
  */
 
 use super::ExecutedState;
+use super::DATA_FORMAT_VERSION;
 use serde::Deserialize;
 use serde::Serialize;
 use std::collections::HashMap;
+use std::ops::Deref;
 
 pub type StreamGenerations = HashMap<String, u32>;
 pub type ExecutionTrace = Vec<ExecutedState>;
@@ -26,10 +28,25 @@ pub type ExecutionTrace = Vec<ExecutedState>;
 /// f(prev_data: InterpreterData, current_data: InterpreterData, ... ) -> (result_data: InterpreterData, ...).
 /// This function receives prev and current data and produces a result data. All these data
 /// have the following format.
-#[derive(Debug, Default, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct InterpreterData {
-    /// Contains maximum generation for each stream.
+    /// Contains maximum generation for each stream. This info will be used while merging
+    /// values in streams.
     pub streams: StreamGenerations,
+
     /// Trace of AIR execution, which contains executed call, par and fold states.
     pub trace: ExecutionTrace,
+
+    /// Version of this data format.
+    pub version: semver::Version,
+}
+
+impl InterpreterData {
+    pub fn new() -> Self {
+        Self {
+            streams: <_>::default(),
+            trace: <_>::default(),
+            version: DATA_FORMAT_VERSION.deref().clone(),
+        }
+    }
 }

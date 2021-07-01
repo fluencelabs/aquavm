@@ -16,46 +16,44 @@
 
 use super::ExecutedState;
 use super::ExecutionTrace;
-use super::KeeperError;
 use super::KeeperError::ExecutedTraceTooSmall;
 use super::KeeperResult;
 
 use std::cell::Cell;
-use std::rc::Rc;
 
-/// This slider is intended to extract states from execution_step trace in such a way
-/// that it keeps count of deleted states. It allows to set position from which
-/// states will be deleted according the initial version of trace. This one is
-/// especially needed to handle fold states that consist of several non-intersecting
-/// intervals.
-///
-/// Basically, the API of this slider provides us facilities to set position from
-/// which states will be extracted and interval length from reaching that states
-/// woudn't be extracted (None will be returned).
+/// This slider is intended to slide on a subtrace inside provided trace. This subtrace
+/// is identified by position and len.
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub(crate) struct TraceSlider {
+    /// Trace that slider slide on.
     trace: ExecutionTrace,
+
+    /// Position of current subtrace inside trace.
     position: Cell<usize>,
+
+    /// Length of a current subtrace.
+    subtrace_len: Cell<usize>,
+
+    /// Count of seen elements since the last position update.
     seen_elements: Cell<usize>,
-    interval_len: Cell<usize>,
 }
 
 impl TraceSlider {
     pub(super) fn new(trace: ExecutionTrace) -> Self {
-        let interval_len = Cell::new(trace.len());
+        let subtrace_len = Cell::new(trace.len());
 
         Self {
             trace,
             position: Cell::new(0),
+            subtrace_len,
             seen_elements: Cell::new(0),
-            interval_len,
         }
     }
 
-    /// Returns the next state if interval length haven't been reached
+    /// Returns the next state if current interval length hasn't been reached
     /// and None otherwise.
     pub(crate) fn next_state(&self) -> Option<ExecutedState> {
-        if self.seen_elements.get() >= self.interval_len.get() || self.position.get() >= self.trace.len() {
+        if self.seen_elements.get() >= self.subtrace_len.get() || self.position.get() >= self.trace.len() {
             return None;
         }
 
@@ -74,21 +72,22 @@ impl TraceSlider {
         Ok(())
     }
 
-    pub(crate) fn set_interval_len(&self, interval_len: usize) -> KeeperResult<()> {
-        if self.trace.len() - self.position.get() < interval_len {
+    pub(crate) fn set_subtrace_len(&self, subtrace_len: usize) -> KeeperResult<()> {
+        if self.trace.len() - self.position.get() < subtrace_len {
             return Err(ExecutedTraceTooSmall(
                 self.trace.len() - self.position.get(),
-                interval_len,
+                subtrace_len,
             ));
         }
 
         self.seen_elements.set(0);
-        self.interval_len.set(interval_len);
+        self.subtrace_len.set(subtrace_len);
 
         Ok(())
     }
 
-    pub(crate) fn state_by_pos(&self, pos: usize) -> KeeperResult<&ExecutedState> {
+    pub(crate) fn state_by_pos(&self, pos: u32) -> KeeperResult<&ExecutedState> {
+        let pos = pos as usize;
         if pos >= self.trace.len() {
             return Err(ExecutedTraceTooSmall(self.trace.len(), pos));
         }
@@ -101,7 +100,7 @@ impl TraceSlider {
         self.position.get()
     }
 
-    pub(crate) fn interval_len(&self) -> usize {
-        self.interval_len.get() - self.seen_elements.get()
+    pub(crate) fn subtrace_len(&self) -> usize {
+        self.subtrace_len.get() - self.seen_elements.get()
     }
 }

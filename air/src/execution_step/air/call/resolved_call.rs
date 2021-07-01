@@ -24,12 +24,13 @@ use super::ExecutionError;
 use super::ExecutionResult;
 use crate::build_targets::CallServiceResult;
 use crate::build_targets::CALL_SERVICE_SUCCESS;
-use crate::contexts::execution_trace::*;
-use crate::log_targets::EXECUTED_STATE_CHANGING;
+use crate::execution_step::trace_handler::MergerCallResult;
+use crate::execution_step::trace_handler::TraceHandler;
 use crate::JValue;
 use crate::ResolvedTriplet;
 use crate::SecurityTetraplet;
 
+use air_interpreter_data::CallResult;
 use air_parser::ast::{CallInstrArgValue, CallOutputValue};
 
 use std::rc::Rc;
@@ -109,8 +110,8 @@ impl<'i> ResolvedCall<'i> {
         let result: JValue = serde_json::from_str(&service_result.result).map_err(|e| DeError(service_result, e))?;
         let result = Rc::new(result);
 
-        set_local_call_result(result.clone(), self.triplet.clone(), &self.output, exec_ctx)?;
-        let new_call_result = CallResult::Executed(result);
+        set_local_call_result(result.clone(), 0, self.triplet.clone(), &self.output, exec_ctx)?;
+        let new_call_result = CallResult::Executed(result, 0);
         trace_ctx.meet_call_end(new_call_result);
 
         Ok(())
@@ -126,12 +127,12 @@ impl<'i> ResolvedCall<'i> {
         exec_ctx: &mut ExecutionCtx<'i>,
         trace_ctx: &mut TraceHandler,
     ) -> ExecutionResult<bool> {
-        let call_result = match trace_ctx.meet_call(&self.output)? {
-            Some(state) => state,
-            None => return Ok(true),
+        let (call_result, trace_pos) = match trace_ctx.meet_call_start(&self.output)? {
+            MergerCallResult::CallResult { value, trace_pos } => (value, trace_pos),
+            MergerCallResult::Empty => return Ok(true),
         };
 
-        handle_prev_state(&self.triplet, &self.output, call_result, exec_ctx, trace_ctx)
+        handle_prev_state(&self.triplet, &self.output, call_result, trace_pos, exec_ctx, trace_ctx)
     }
 
     /// Prepare arguments of this call instruction by resolving and preparing their security tetraplets.
@@ -164,7 +165,6 @@ fn handle_service_error(
     trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<CallServiceResult> {
     use CallResult::CallServiceFailed;
-    use ExecutedState::Call;
 
     if service_result.ret_code == CALL_SERVICE_SUCCESS {
         return Ok(service_result);
@@ -174,9 +174,7 @@ fn handle_service_error(
     let error = ExecutionError::LocalServiceError(service_result.ret_code, error_message.clone());
     let error = Rc::new(error);
 
-    trace_ctx
-        .new_trace
-        .push_back(Call(CallServiceFailed(service_result.ret_code, error_message)));
+    trace_ctx.meet_call_end(CallServiceFailed(service_result.ret_code, error_message));
 
     Err(error)
 }

@@ -38,7 +38,7 @@ fn fold_subtraces_overflows() {
     let lore = FoldSubTraceLore {
         value_pos: 0,
         begin_pos: 0,
-        interval_len: usize::MAX,
+        subtrace_len: usize::MAX,
     };
     let fold = fold(vec![vec![vec![lore.clone(), lore.clone()]]]);
     let trace = vec![test_state(1), fold];

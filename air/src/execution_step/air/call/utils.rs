@@ -17,13 +17,14 @@
 use super::ExecutionCtx;
 use super::ExecutionError;
 use super::ExecutionResult;
-use crate::contexts::execution::ResolvedCallResult;
-use crate::contexts::execution_trace::*;
 use crate::exec_err;
+use crate::execution_step::execution_context::*;
+use crate::execution_step::trace_handler::TraceHandler;
 use crate::execution_step::Variable;
-use crate::log_targets::EXECUTED_STATE_CHANGING;
 use crate::JValue;
 
+use air_interpreter_data::CallResult;
+use air_interpreter_data::SCALAR_GENERATION;
 use air_parser::ast::CallOutputValue;
 use polyplets::ResolvedTriplet;
 
@@ -32,18 +33,22 @@ use std::rc::Rc;
 /// Writes result of a local `Call` instruction to `ExecutionCtx` at `output`.
 pub(super) fn set_local_call_result<'i>(
     result: Rc<JValue>,
+    trace_pos: usize,
     triplet: Rc<ResolvedTriplet>,
     output: &CallOutputValue<'i>,
     exec_ctx: &mut ExecutionCtx<'i>,
-) -> ExecutionResult<()> {
-    use crate::contexts::execution::AValue;
+) -> ExecutionResult<usize> {
     use std::cell::RefCell;
     use std::collections::hash_map::Entry::{Occupied, Vacant};
     use ExecutionError::*;
 
-    let executed_result = ResolvedCallResult { result, triplet };
+    let executed_result = ResolvedCallResult {
+        result,
+        triplet,
+        trace_pos,
+    };
 
-    match output {
+    let generation = match output {
         CallOutputValue::Variable(Variable::Scalar(name)) => {
             if let Some(fold_block_name) = exec_ctx.met_folds.back() {
                 let fold_state = match exec_ctx.data_cache.get_mut(*fold_block_name) {
@@ -74,6 +79,8 @@ pub(super) fn set_local_call_result<'i>(
                     entry.insert(AValue::JValueRef(executed_result));
                 }
             };
+
+            SCALAR_GENERATION
         }
         CallOutputValue::Variable(Variable::Stream(name)) => {
             match exec_ctx.data_cache.entry(name.to_string()) {
@@ -86,11 +93,12 @@ pub(super) fn set_local_call_result<'i>(
                     entry.insert(AValue::StreamRef(RefCell::new(vec![executed_result])));
                 }
             };
+            SCALAR_GENERATION
         }
-        CallOutputValue::None => {}
-    }
+        CallOutputValue::None => SCALAR_GENERATION,
+    };
 
-    Ok(())
+    Ok(generation)
 }
 
 /// Writes an executed state of a particle being sent to remote node
@@ -102,13 +110,8 @@ pub(super) fn set_remote_call_result<'i>(
     exec_ctx.next_peer_pks.push(peer_pk);
     exec_ctx.subtree_complete = false;
 
-    let new_executed_state = ExecutedState::Call(CallResult::RequestSentBy(exec_ctx.current_peer_id.clone()));
-    log::trace!(
-        target: EXECUTED_STATE_CHANGING,
-        "  adding new call executed state {:?}",
-        new_executed_state
-    );
-    trace_ctx.new_trace.push_back(new_executed_state);
+    let new_call_result = CallResult::RequestSentBy(exec_ctx.current_peer_id.clone());
+    trace_ctx.meet_call_end(new_call_result);
 }
 
 /// This function looks at the existing call state, validates it,
@@ -117,6 +120,7 @@ pub(super) fn handle_prev_state<'i>(
     triplet: &Rc<ResolvedTriplet>,
     output: &CallOutputValue<'i>,
     prev_result: CallResult,
+    trace_pos: usize,
     exec_ctx: &mut ExecutionCtx<'i>,
     trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<bool> {
@@ -127,7 +131,7 @@ pub(super) fn handle_prev_state<'i>(
         // here it's needed to bubble this special error up
         CallServiceFailed(ret_code, err_msg) => {
             exec_ctx.subtree_complete = false;
-            trace_ctx.meet_call_end(call_result);
+            trace_ctx.meet_call_end(prev_result);
             exec_err!(ExecutionError::LocalServiceError(*ret_code, err_msg.clone()))
         }
         RequestSentBy(..) => {
@@ -140,12 +144,12 @@ pub(super) fn handle_prev_state<'i>(
             }
 
             exec_ctx.subtree_complete = false;
-            trace_ctx.meet_call_end(call_result);
+            trace_ctx.meet_call_end(prev_result);
             Ok(false)
         }
         // this instruction's been already executed
-        Executed(result) => {
-            set_local_call_result(result.clone(), triplet.clone(), output, exec_ctx)?;
+        Executed(result, generation) => {
+            set_local_call_result(result.clone(), trace_pos, triplet.clone(), output, exec_ctx)?;
             trace_ctx.meet_call_end(prev_result);
             Ok(false)
         }

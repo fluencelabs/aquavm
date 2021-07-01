@@ -19,26 +19,18 @@ use super::ExecutionCtx;
 use super::ExecutionError;
 use super::ExecutionResult;
 use super::FoldState;
-use super::Instruction;
-use super::ResolvedCallResult;
 use super::TraceHandler;
 use crate::exec_err;
-use crate::execution_step::boxed_value::*;
 use crate::log_instruction;
 
-use air_parser::ast::Fold;
 use air_parser::ast::Next;
-
-use std::collections::HashMap;
-use std::rc::Rc;
-
-use utils::IterableValue;
 
 impl<'i> super::ExecutableInstruction<'i> for Next<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         log_instruction!(next, exec_ctx, trace_ctx);
 
-        let fold_state = try_get_fold_state(exec_ctx, &self.0)?;
+        let iterator_name = self.0;
+        let fold_state = try_get_fold_state(exec_ctx, iterator_name)?;
 
         if !fold_state.iterable.next() {
             // just do nothing to exit
@@ -69,7 +61,10 @@ impl<'i> super::ExecutableInstruction<'i> for Next<'i> {
     }
 }
 
-fn try_get_fold_state(exec_ctx: &ExecutionContext<'_>, iterator_name: &str) -> ExecutionResult<FoldState> {
+fn try_get_fold_state<'i, 'ctx>(
+    exec_ctx: &'ctx mut ExecutionCtx<'i>,
+    iterator_name: &str,
+) -> ExecutionResult<&'ctx mut FoldState<'i>> {
     use ExecutionError::FoldStateNotFound;
     use ExecutionError::IncompatibleAValueType;
 

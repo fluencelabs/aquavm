@@ -19,6 +19,7 @@ use super::FoldFSM;
 use super::ParFSM;
 use super::StateFSMError;
 
+#[derive(Clone, Debug)]
 pub(crate) enum StateFSM {
     Par(ParFSM),
     Fold(FoldFSM),
@@ -39,29 +40,29 @@ impl FSMQueue {
     }
 
     pub(crate) fn last_as_mut_par(&mut self) -> FSMResult<&mut ParFSM> {
-        match self.states.last_mut().ok_or(|| StateFSMError::QueueIsEmpty("par"))? {
+        match self.states.last_mut().ok_or(StateFSMError::QueueIsEmpty("par"))? {
             StateFSM::Par(par) => Ok(par),
             fold @ StateFSM::Fold(_) => Err(StateFSMError::IncompatibleFSM("par", fold.clone())),
         }
     }
 
     pub(crate) fn pop_as_par(&mut self) -> FSMResult<ParFSM> {
-        match self.states.pop().ok_or(|| StateFSMError::QueueIsEmpty("par"))? {
+        match self.states.pop().ok_or(StateFSMError::QueueIsEmpty("par"))? {
             StateFSM::Par(par) => Ok(par),
             fold @ StateFSM::Fold(_) => Err(StateFSMError::IncompatibleFSM("par", fold)),
         }
     }
 
     pub(crate) fn last_as_mut_fold(&mut self) -> FSMResult<&mut FoldFSM> {
-        match self.states.last_mut().ok_or(|| StateFSMError::QueueIsEmpty("fold"))? {
-            par @ StateFSM::Par(par) => Err(StateFSMError::IncompatibleFSM("fold", par.clone())),
+        match self.states.last_mut().ok_or(StateFSMError::QueueIsEmpty("fold"))? {
+            par @ StateFSM::Par(_) => Err(StateFSMError::IncompatibleFSM("fold", par.clone())),
             StateFSM::Fold(fold) => Ok(fold),
         }
     }
 
     pub(crate) fn pop_as_fold(&mut self) -> FSMResult<FoldFSM> {
-        match self.states.pop().ok_or(|| StateFSMError::QueueIsEmpty("fold"))? {
-            par @ StateFSM::Par(par) => Err(StateFSMError::IncompatibleFSM("fold", par.clone())),
+        match self.states.pop().ok_or(StateFSMError::QueueIsEmpty("fold"))? {
+            par @ StateFSM::Par(_) => Err(StateFSMError::IncompatibleFSM("fold", par)),
             StateFSM::Fold(fold) => Ok(fold),
         }
     }

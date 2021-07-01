@@ -17,8 +17,6 @@
 use super::AValue;
 use super::LastErrorDescriptor;
 use super::LastErrorWithTetraplets;
-use crate::execution_step::ExecutionError;
-use crate::SecurityTetraplet;
 
 use std::collections::HashMap;
 use std::collections::VecDeque;

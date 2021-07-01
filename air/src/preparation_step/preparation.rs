@@ -70,7 +70,7 @@ fn try_to_data(raw_data: &[u8]) -> PreparationResult<InterpreterData> {
     // treat empty string as an empty executed trace allows abstracting from
     // the internal format for empty data.
     if raw_data.is_empty() {
-        Ok(InterpreterData::default())
+        Ok(InterpreterData::new())
     } else {
         serde_json::from_slice(&raw_data).map_err(|err| DataDeError(err, raw_data.to_vec()))
     }

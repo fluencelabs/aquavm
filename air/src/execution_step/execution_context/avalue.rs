@@ -45,9 +45,17 @@ impl<'i> Display for AValue<'i> {
         match self {
             AValue::JValueRef(value) => write!(f, "{:?}", value)?,
             AValue::StreamRef(stream) => {
+                if stream.borrow().0.is_empty() {
+                    return write!(f, "[]");
+                }
+
                 write!(f, "[ ")?;
-                for value in stream.borrow().iter() {
-                    write!(f, "{:?} ", value)?;
+                for (id, generation) in stream.borrow().0.iter().enumerate() {
+                    write!(f, " -- {}: ", id)?;
+                    for value in generation.iter() {
+                        write!(f, "{:?}, ", value)?;
+                    }
+                    writeln!(f, "")?;
                 }
                 write!(f, "]")?;
             }

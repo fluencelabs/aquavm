@@ -133,20 +133,15 @@ macro_rules! log_instruction {
             $exec_ctx.subtree_complete
         );
 
-        log::debug!(
-            target: crate::log_targets::EXECUTED_TRACE,
-            "  current call executed trace: {:?}",
-            $trace_ctx.current_trace
-        );
         log::trace!(
             target: crate::log_targets::SUBTREE_ELEMENTS,
             "  subtree elements count: {:?}",
-            $trace_ctx.current_subtree_size
+            $trace_ctx.subtree_sizes()
         );
         log::debug!(
             target: crate::log_targets::NEW_EXECUTED_TRACE,
             "  new call executed trace: {:?}",
-            $trace_ctx.new_trace
+            $trace_ctx.result_trace()
         );
     };
 }

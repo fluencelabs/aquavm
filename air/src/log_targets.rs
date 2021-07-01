@@ -26,9 +26,6 @@ pub const NEXT_PEER_PKS: &str = "next_peer_pks";
 /// Print out subtree_complete value at the beginning of each instruction execution_step.
 pub const SUBTREE_COMPLETE: &str = "subtree_complete";
 
-/// Print out current executed trace at the beginning of each instruction execution_step.
-pub const EXECUTED_TRACE: &str = "executed_trace";
-
 /// Print out count of element in the current subtree at the beginning of each instruction execution_step.
 pub const SUBTREE_ELEMENTS: &str = "subtree_elements_count";
 
@@ -48,16 +45,15 @@ pub const EXECUTED_STATE_CHANGING: &str = "executed_state_changing";
 pub const JOIN_BEHAVIOUR: &str = "join_behaviour";
 
 /// This map should be used by rust-sdk logger that allows print only necessary targets by id.
-pub const TARGET_MAP: [(&str, i32); 11] = [
+pub const TARGET_MAP: [(&str, i32); 10] = [
     (INSTRUCTION, 1 << 1),
     (DATA_CACHE, 1 << 2),
     (NEXT_PEER_PKS, 1 << 3),
     (SUBTREE_COMPLETE, 1 << 4),
-    (EXECUTED_TRACE, 1 << 5),
-    (SUBTREE_ELEMENTS, 1 << 6),
-    (NEW_EXECUTED_TRACE, 1 << 7),
-    (EXECUTED_TRACE_MERGE, 1 << 8),
-    (RUN_PARAMS, 1 << 9),
+    (SUBTREE_ELEMENTS, 1 << 5),
+    (NEW_EXECUTED_TRACE, 1 << 6),
+    (EXECUTED_TRACE_MERGE, 1 << 7),
+    (RUN_PARAMS, 1 << 8),
     (EXECUTED_STATE_CHANGING, 1 << 9),
     (JOIN_BEHAVIOUR, 1 << 10),
 ];

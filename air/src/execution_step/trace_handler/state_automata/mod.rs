@@ -18,6 +18,7 @@ mod errors;
 mod fold_fsm;
 mod fsm_queue;
 mod par_fsm;
+mod state_inserter;
 
 pub(crate) use errors::StateFSMError;
 pub(crate) use fold_fsm::ValueAndPos;
@@ -29,13 +30,15 @@ pub(super) use fsm_queue::FSMQueue;
 pub(super) use fsm_queue::StateFSM;
 pub(super) use par_fsm::ParFSM;
 
+use super::data_keeper::KeeperError;
 use super::merger::MergerParResult;
 use super::DataKeeper;
 use super::ExecutedState;
 use super::FoldResult;
 use super::FoldSubTraceLore;
-use super::FoldSubtraceInfo;
-use super::FoldTale;
 use super::MergeCtxType;
 use super::MergerFoldResult;
 use super::ParResult;
+use super::ResolvedFoldLore;
+use super::ResolvedFoldSubTraceLore;
+use state_inserter::StateInserter;

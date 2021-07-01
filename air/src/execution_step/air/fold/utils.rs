@@ -23,7 +23,6 @@ use crate::SecurityTetraplet;
 
 use air_parser::ast;
 use jsonpath_lib::select;
-use jsonpath_lib::select_with_iter;
 
 use std::ops::Deref;
 use std::rc::Rc;
@@ -72,7 +71,7 @@ fn handle_instruction_variable<'ctx>(
             for iterable in stream.0.iter() {
                 let call_results = iterable.iter().cloned().collect::<Vec<_>>();
                 let foldable = IterableVecResolvedCall::init(call_results);
-                let foldable = Box::new(foldable);
+                let foldable: IterableValue = Box::new(foldable);
                 iterables.push(foldable);
             }
 
@@ -84,8 +83,14 @@ fn handle_instruction_variable<'ctx>(
             let result = Rc::new(jvalue.into_owned());
             let triplet = as_triplet(&iterable_value);
 
-            let call_result = ResolvedCallResult { result, triplet };
-            from_call_result(call_result)?
+            // TODO: it's safe to use 0 here, because trace_pos isn't needed to scalars,
+            // but it's needed to be refactored in future
+            let call_result = ResolvedCallResult {
+                result,
+                triplet,
+                trace_pos: 0,
+            };
+            from_call_result(call_result)
         }
         _ => return exec_err!(ExecutionError::VariableNotFound(variable_name.to_string())),
     }
@@ -99,7 +104,7 @@ fn from_call_result(call_result: ResolvedCallResult) -> ExecutionResult<FoldIter
         JValue::Array(array) => {
             if array.is_empty() {
                 // skip fold if array is empty
-                return Ok(None);
+                return Ok(FoldIterable::Empty);
             }
             array.len()
         }
@@ -119,8 +124,6 @@ fn handle_instruction_json_path<'ctx>(
     json_path: &str,
     should_flatten: bool,
 ) -> ExecutionResult<FoldIterable> {
-    use ExecutionError::JValueStreamJsonPathError;
-
     match exec_ctx.data_cache.get(variable_name) {
         Some(AValue::JValueRef(variable)) => {
             let jvalues = apply_json_path(&variable.result, json_path)?;
@@ -200,9 +203,9 @@ fn as_triplet(iterable: &IterableItem<'_>) -> Rc<ResolvedTriplet> {
     use IterableItem::*;
 
     let tetraplet = match iterable {
-        RefRef((_, tetraplet)) => tetraplet,
-        RefValue((_, tetraplet)) => tetraplet,
-        RcValue((_, tetraplet)) => tetraplet,
+        RefRef((_, tetraplet, _)) => tetraplet,
+        RefValue((_, tetraplet, _)) => tetraplet,
+        RcValue((_, tetraplet, _)) => tetraplet,
     };
 
     // clone is cheap here, because triplet is under Rc

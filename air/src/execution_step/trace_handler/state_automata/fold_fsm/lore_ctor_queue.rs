@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+use super::FoldLore;
 use super::FoldLoreCtor;
-use super::FoldSubTraceLore;
 use super::ResolvedFoldSubTraceLore;
 
 #[derive(Debug, Default, Clone)]
@@ -25,7 +25,7 @@ pub(super) struct LoreCtorQueue {
 }
 
 impl LoreCtorQueue {
-    pub(super) fn straight_ctor_mut(&mut self) -> &mut LoreCtorElement {
+    pub(super) fn forward_ctor_mut(&mut self) -> &mut LoreCtorElement {
         &mut self.queue.last_mut().unwrap()
     }
 
@@ -46,10 +46,10 @@ impl LoreCtorQueue {
         self.queue.len() == self.back_traversal_pos
     }
 
-    pub(super) fn transform_to_subtale(&mut self) -> Vec<Vec<FoldSubTraceLore>> {
+    pub(super) fn transform_to_lore(&mut self) -> FoldLore {
         self.queue
             .drain(..)
-            .map(|l| l.lore_ctor.into_subtrace())
+            .map(|l| l.lore_ctor.into_subtrace_lore())
             .collect::<Vec<_>>()
     }
 }

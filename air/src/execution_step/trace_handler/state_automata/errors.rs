@@ -15,13 +15,14 @@
  */
 
 use super::par_fsm::SubtreeType;
+use super::KeeperError;
 use super::ParResult;
 use super::StateFSM;
 
 use thiserror::Error as ThisError;
 
 /// Errors arose out of merging previous data with a new.
-#[derive(ThisError, Debug, PartialEq, Eq)]
+#[derive(ThisError, Debug)]
 pub enum StateFSMError {
     /// Error occurred while trying to access or pop elements from an empty queue.
     #[error("queue is empty, while fsm of type {0} requested")]
@@ -46,6 +47,10 @@ pub enum StateFSMError {
     )]
     ParSubtreeNonExhausted(SubtreeType, ParResult, usize),
 
+    /// Errors bubbled from DataKeeper.
+    #[error("{0}")]
+    KeeperError(#[from] KeeperError),
+    /*
     /// Errors occurred when previous and current executed states are incompatible.
     #[error("previous and current data have incompatible states: '{0:?}' '{1:?}'")]
     IncompatibleExecutedStates(ExecutedState, ExecutedState),
@@ -62,11 +67,11 @@ pub enum StateFSMError {
     #[error("tried to find CallResult::Resolved, but the actual type is different")]
     IncompatibleState,
 
-    /// Errors occurred when sum_i { FoldResult_i.interval_len } overflows.
+    /// Errors occurred when sum_i { FoldResult_i.subtrace_len } overflows.
     #[error("overflow is occurred while calculating the entire len occupied by executed states corresponded to current fold: '{0:?}'")]
     FoldLenOverflow(FoldResult),
 
-    /// Errors occurred when sum_i { FoldResult_i.interval_len } value is bigger than current subtree size.
+    /// Errors occurred when sum_i { FoldResult_i.subtrace_len } value is bigger than current subtree size.
     #[error("fold '{0:?}' contains subtree size that is bigger than current one '{1}'")]
     FoldSubtreeUnderflow(FoldResult, usize),
 
@@ -80,4 +85,5 @@ pub enum StateFSMError {
 
     #[error("value_pos of a FoldResult points to '{0}', but this element isn't an element of a stream")]
     FoldValuesPosNotStream(usize),
+    */
 }

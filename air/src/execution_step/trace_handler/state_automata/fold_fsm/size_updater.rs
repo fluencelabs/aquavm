@@ -18,21 +18,21 @@ use super::DataKeeper;
 use super::FSMResult;
 
 #[derive(Debug, Default, Clone)]
-pub(super) struct IntervalLenUpdater {
+pub(super) struct SubTreeSizeUpdater {
     pub(super) prev_states_seen: usize,
     pub(super) current_states_seen: usize,
-    pub(super) prev_interval_len: usize,
-    pub(super) current_interval_len: usize,
+    pub(super) prev_subtrace_len: usize,
+    pub(super) current_subtrace_len: usize,
 }
 
-impl IntervalLenUpdater {
+impl SubTreeSizeUpdater {
     pub(super) fn new(data_keeper: &DataKeeper) -> Self {
-        let prev_interval_len = data_keeper.prev_ctx.slider.interval_len();
-        let current_interval_len = data_keeper.current_ctx.slider.interval_len();
+        let prev_subtrace_len = data_keeper.prev_ctx.slider.subtrace_len();
+        let current_subtrace_len = data_keeper.current_ctx.slider.subtrace_len();
 
         Self {
-            prev_interval_len,
-            current_interval_len,
+            prev_subtrace_len,
+            current_subtrace_len,
             ..<_>::default()
         }
     }
@@ -40,11 +40,11 @@ impl IntervalLenUpdater {
     pub(super) fn track() {}
 
     pub(super) fn update(self, data_keeper: &mut DataKeeper) -> FSMResult<()> {
-        let new_prev_interval = self.prev_interval_len - self.prev_states_seen;
-        data_keeper.prev_ctx.slider.set_interval_len(new_prev_interval)?;
+        let new_prev_interval = self.prev_subtrace_len - self.prev_states_seen;
+        data_keeper.prev_ctx.slider.set_subtrace_len(new_prev_interval)?;
 
-        let new_current_interval = self.current_interval_len - self.current_states_seen;
-        data_keeper.prev_ctx.slider.set_interval_len(new_current_interval)?;
+        let new_current_interval = self.current_subtrace_len - self.current_states_seen;
+        data_keeper.prev_ctx.slider.set_subtrace_len(new_current_interval)?;
         Ok(())
     }
 }

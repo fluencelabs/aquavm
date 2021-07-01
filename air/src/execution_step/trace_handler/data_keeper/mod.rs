@@ -21,9 +21,10 @@ mod trace_slider;
 
 pub(crate) use errors::KeeperError;
 pub(crate) use keeper::DataKeeper;
+pub(super) use merge_ctx::MergeCtx;
 pub(super) use trace_slider::TraceSlider;
+
 pub(self) type KeeperResult<T> = std::result::Result<T, KeeperError>;
 
 use super::ExecutedState;
 use super::ExecutionTrace;
-use merge_ctx::MergeCtx;
