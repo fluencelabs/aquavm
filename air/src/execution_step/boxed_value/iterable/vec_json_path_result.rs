@@ -30,6 +30,7 @@ pub(crate) struct IterableVecJsonPathResult {
 }
 
 impl IterableVecJsonPathResult {
+    #[allow(dead_code)]
     pub(crate) fn init(jvalues: Vec<JValue>, tetraplets: Vec<SecurityTetraplet>) -> Self {
         // TODO: add assert on length
         Self {

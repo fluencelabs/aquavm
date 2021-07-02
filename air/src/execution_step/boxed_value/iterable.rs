@@ -59,15 +59,15 @@ pub(crate) enum IterableItem<'ctx> {
 }
 
 impl IterableItem<'_> {
-    pub(crate) fn into_value_and_pos(self) -> ValueAndPos {
+    pub(crate) fn as_value_and_pos(&self) -> ValueAndPos {
         use IterableItem::*;
 
         // this method is called only from RcValue (in fold_stream and next),
-        // so copying isn't actually happened here
+        // so copying of JValue isn't actually happened here
         let (value, pos) = match self {
-            RefRef((value, _, pos)) => (Rc::new(value.clone()), pos),
-            RefValue((value, _, pos)) => (Rc::new(value.clone()), pos),
-            RcValue((value, _, pos)) => (value, pos),
+            RefRef((value, _, pos)) => (Rc::new((*value).clone()), *pos),
+            RefValue((value, _, pos)) => (Rc::new((*value).clone()), *pos),
+            RcValue((value, _, pos)) => (value.clone(), *pos),
         };
 
         ValueAndPos { value, pos }

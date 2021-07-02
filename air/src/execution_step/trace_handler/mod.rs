@@ -16,15 +16,15 @@
 
 mod data_keeper;
 mod errors;
+mod handler;
 mod merger;
 mod state_automata;
-mod trace_handler;
 
 pub(crate) use errors::TraceHandlerError;
+pub(crate) use handler::TraceHandler;
 pub(crate) use merger::MergerCallResult;
 pub(crate) use state_automata::SubtreeType;
 pub(crate) use state_automata::ValueAndPos;
-pub(crate) use trace_handler::TraceHandler;
 
 pub(crate) type TraceHandlerResult<T> = std::result::Result<T, TraceHandlerError>;
 

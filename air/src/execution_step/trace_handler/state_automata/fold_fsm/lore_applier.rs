@@ -15,24 +15,16 @@
  */
 
 use super::*;
+use ByNextPosition::*;
+use MergeCtxType::*;
 
 pub(super) fn apply_fold_lore_before(
     data_keeper: &mut DataKeeper,
     prev_fold_lore: &Option<ResolvedFoldSubTraceLore>,
     current_fold_lore: &Option<ResolvedFoldSubTraceLore>,
 ) -> FSMResult<()> {
-    apply_fold_lore(
-        data_keeper,
-        prev_fold_lore,
-        MergeCtxType::Previous,
-        ByNextPosition::Before,
-    )?;
-    apply_fold_lore(
-        data_keeper,
-        current_fold_lore,
-        MergeCtxType::Current,
-        ByNextPosition::Before,
-    )
+    apply_fold_lore(data_keeper, prev_fold_lore, Previous, Before)?;
+    apply_fold_lore(data_keeper, current_fold_lore, Current, Before)
 }
 
 pub(super) fn apply_fold_lore_after(
@@ -40,18 +32,8 @@ pub(super) fn apply_fold_lore_after(
     prev_fold_lore: &Option<ResolvedFoldSubTraceLore>,
     current_fold_lore: &Option<ResolvedFoldSubTraceLore>,
 ) -> FSMResult<()> {
-    apply_fold_lore(
-        data_keeper,
-        prev_fold_lore,
-        MergeCtxType::Previous,
-        ByNextPosition::After,
-    )?;
-    apply_fold_lore(
-        data_keeper,
-        current_fold_lore,
-        MergeCtxType::Current,
-        ByNextPosition::After,
-    )
+    apply_fold_lore(data_keeper, prev_fold_lore, Previous, After)?;
+    apply_fold_lore(data_keeper, current_fold_lore, Current, After)
 }
 
 fn apply_fold_lore(
@@ -66,24 +48,19 @@ fn apply_fold_lore(
     };
 
     let slider = match ctx_type {
-        MergeCtxType::Previous => &data_keeper.prev_ctx.slider,
-        MergeCtxType::Current => &data_keeper.current_ctx.slider,
+        Previous => &data_keeper.prev_ctx.slider,
+        Current => &data_keeper.current_ctx.slider,
     };
 
     match next_position {
-        ByNextPosition::Before => {
+        Before => {
             slider.set_subtrace_len(fold_lore.before_subtrace.subtrace_len as _)?;
             slider.set_position(fold_lore.before_subtrace.begin_pos as _)?;
         }
-        ByNextPosition::After => {
+        After => {
             slider.set_subtrace_len(fold_lore.after_subtrace.subtrace_len as _)?;
             slider.set_position(fold_lore.after_subtrace.begin_pos as _)?;
         }
     }
     Ok(())
-}
-
-enum ByNextPosition {
-    Before,
-    After,
 }

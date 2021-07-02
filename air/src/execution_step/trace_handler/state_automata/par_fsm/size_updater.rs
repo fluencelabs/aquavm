@@ -41,14 +41,16 @@ impl SubTraceSizeUpdater {
         Ok(updater)
     }
 
-    pub(super) fn update(self, data_keeper: &mut DataKeeper) {
-        data_keeper.prev_ctx.slider.set_subtrace_len(self.prev_size);
-        data_keeper.current_ctx.slider.set_subtrace_len(self.current_size);
+    pub(super) fn update(self, data_keeper: &mut DataKeeper) -> FSMResult<()> {
+        data_keeper.prev_ctx.slider.set_subtrace_len(self.prev_size)?;
+        data_keeper.current_ctx.slider.set_subtrace_len(self.current_size)?;
+
+        Ok(())
     }
 
     fn compute_new_size(initial_size: usize, par_result: Option<ParResult>) -> FSMResult<usize> {
         let par_size = par_result
-            .map(|p| p.size().ok_or_else(|| StateFSMError::ParLenOverflow(p.clone())))
+            .map(|p| p.size().ok_or(StateFSMError::ParLenOverflow(p)))
             .transpose()?
             .unwrap_or_default();
 

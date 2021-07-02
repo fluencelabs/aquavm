@@ -41,7 +41,7 @@ pub use polyplets::SecurityTetraplet;
 
 pub use crate::air::execute_air;
 
-pub mod execution_trace {
+pub mod interpreter_data {
     pub use air_interpreter_data::*;
 }
 

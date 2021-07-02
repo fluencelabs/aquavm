@@ -80,11 +80,11 @@ fn fold_stream<'i>(
             None => continue,
         };
 
+        let value = value.as_value_and_pos();
+        trace_ctx.meet_generation_start(&value)?;
+
         let fold_state = FoldState::from_iterable(iterable, fold.instruction.clone(), true);
         let variable_handler = VariableHandler::init(exec_ctx, fold.iterator, fold_state)?;
-
-        let value = value.into_value_and_pos();
-        trace_ctx.meet_generation_start(value);
 
         fold.instruction.execute(exec_ctx, trace_ctx)?;
 

@@ -51,10 +51,10 @@ fn execute_air_impl(
     air.execute(&mut exec_ctx, &mut trace_handler)
         // return new collected trace in case of errors
         .map_err(|e| {
-            outcome::from_execution_error(&trace_handler.into_result_trace(), exec_ctx.next_peer_pks.clone(), e)
+            outcome::from_execution_error(&trace_handler.as_result_trace(), exec_ctx.next_peer_pks.clone(), e)
         })?;
 
-    let outcome = outcome::from_path_and_peers(&trace_handler.into_result_trace(), exec_ctx.next_peer_pks);
+    let outcome = outcome::from_path_and_peers(&trace_handler.as_result_trace(), exec_ctx.next_peer_pks);
 
     Ok(outcome)
 }

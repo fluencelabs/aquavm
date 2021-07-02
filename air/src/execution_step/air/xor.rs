@@ -43,7 +43,7 @@ impl<'i> super::ExecutableInstruction<'i> for Xor<'i> {
 /// Returns true, if this execution_step error type should be caught by xor.
 fn is_catchable_by_xor(exec_error: &ExecutionError) -> bool {
     // this type of errors related to invalid data and should treat as hard errors.
-    !matches!(exec_error, ExecutionError::InvalidExecutedState(..))
+    !matches!(exec_error, ExecutionError::TraceError(_))
 }
 
 fn print_xor_log(e: &ExecutionError) {

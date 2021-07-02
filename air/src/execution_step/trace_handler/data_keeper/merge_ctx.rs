@@ -32,6 +32,7 @@ pub(crate) struct MergeCtx {
 }
 
 impl MergeCtx {
+    #[allow(dead_code)]
     pub(crate) fn from_trace(trace: ExecutionTrace) -> Self {
         let slider = TraceSlider::new(trace);
 
@@ -53,7 +54,7 @@ impl MergeCtx {
     pub(crate) fn stream_generation(&self, stream_name: &str) -> KeeperResult<u32> {
         self.streams
             .get(stream_name)
-            .map(|v| *v)
+            .copied()
             .ok_or_else(|| KeeperError::NoSuchStream(stream_name.to_string()))
     }
 }

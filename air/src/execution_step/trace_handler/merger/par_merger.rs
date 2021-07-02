@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-use super::MergeError::IncompatibleExecutedStates;
 use super::*;
 use ExecutedState::Par;
 
@@ -30,12 +29,10 @@ pub(crate) fn try_merge_next_state_as_par(data_keeper: &mut DataKeeper) -> Merge
 
     let result = match (prev_state, current_state) {
         (Some(Par(prev_par)), Some(Par(current_par))) => MergerParResult::from_pars(prev_par, current_par),
-        (None, Some(Par(current_par @ _))) => MergerParResult::from_current_par(current_par),
-        (Some(Par(prev_par @ _)), None) => MergerParResult::from_prev_par(prev_par),
+        (None, Some(Par(current_par))) => MergerParResult::from_current_par(current_par),
+        (Some(Par(prev_par)), None) => MergerParResult::from_prev_par(prev_par),
         (None, None) => MergerParResult::default(),
-        (Some(prev_state), Some(current_state)) => {
-            return Err(IncompatibleExecutedStates(prev_state.clone(), current_state.clone()))
-        }
+        (prev_state, current_state) => return Err(MergeError::incompatible_states(prev_state, current_state, "par")),
     };
 
     Ok(result)

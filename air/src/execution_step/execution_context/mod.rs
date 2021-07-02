@@ -15,12 +15,12 @@
  */
 
 mod avalue;
+mod context;
 mod error_descriptor;
-mod execution_context;
 
 pub(crate) use avalue::AValue;
 pub(crate) use avalue::ResolvedCallResult;
+pub(crate) use context::ExecutionCtx;
 pub use error_descriptor::LastError;
 pub(crate) use error_descriptor::LastErrorDescriptor;
 pub(crate) use error_descriptor::LastErrorWithTetraplets;
-pub(crate) use execution_context::ExecutionCtx;

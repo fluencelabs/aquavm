@@ -50,3 +50,9 @@ impl InterpreterData {
         }
     }
 }
+
+impl Default for InterpreterData {
+    fn default() -> Self {
+        Self::new()
+    }
+}

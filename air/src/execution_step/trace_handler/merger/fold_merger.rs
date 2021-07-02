@@ -20,8 +20,6 @@ use super::*;
 use crate::JValue;
 pub(crate) use utils::*;
 
-use MergeError::IncompatibleExecutedStates;
-
 use std::rc::Rc;
 
 #[derive(Debug, Default, Clone)]
@@ -40,14 +38,14 @@ pub(crate) fn try_merge_next_state_as_fold(data_keeper: &mut DataKeeper) -> Merg
         (Some(Fold(prev_fold)), Some(Fold(current_fold))) => {
             MergerFoldResult::from_fold_results(&prev_fold, &current_fold, data_keeper)
         }
-        (None, Some(Fold(current_fold @ _))) => {
+        (None, Some(Fold(current_fold))) => {
             MergerFoldResult::from_fold_result(&current_fold, data_keeper, MergeCtxType::Current)
         }
-        (Some(Fold(prev_fold @ _)), None) => {
+        (Some(Fold(prev_fold)), None) => {
             MergerFoldResult::from_fold_result(&prev_fold, data_keeper, MergeCtxType::Previous)
         }
         (None, None) => return Ok(MergerFoldResult::default()),
-        (Some(prev_state), Some(current_state)) => return Err(IncompatibleExecutedStates(prev_state, current_state)),
+        (prev_state, current_state) => return Err(MergeError::incompatible_states(prev_state, current_state, "fold")),
     }?;
 
     Ok(fold_result)
@@ -61,12 +59,12 @@ impl MergerFoldResult {
     ) -> MergeResult<Self> {
         let (prev_fold_lore, current_fold_lore) = match ctx_type {
             MergeCtxType::Previous => {
-                let fold_tale = resolve_fold_lore(&data_keeper.prev_ctx.slider, fold)?;
-                (fold_tale, <_>::default())
+                let fold_lore = resolve_fold_lore(&data_keeper.prev_ctx.slider, fold)?;
+                (fold_lore, <_>::default())
             }
             MergeCtxType::Current => {
-                let fold_tale = resolve_fold_lore(&data_keeper.current_ctx.slider, fold)?;
-                (<_>::default(), fold_tale)
+                let fold_lore = resolve_fold_lore(&data_keeper.current_ctx.slider, fold)?;
+                (<_>::default(), fold_lore)
             }
         };
 

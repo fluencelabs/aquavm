@@ -14,23 +14,78 @@
  * limitations under the License.
  */
 
+use super::ExecutionError;
+use super::ExecutionResult;
+use crate::exec_err;
 use crate::execution_step::execution_context::ResolvedCallResult;
+use crate::JValue;
 
+/// Streams are CRDT-like append only data structures. They are guaranteed to have the same order
+/// of values on each peer.
+///
+/// The first Vec represents generations, the second values in a generation. Generation is a set
+/// of values that interpreter obtained from one particle. It means that number of generation on
+/// a peer is equal to number of the interpreter runs in context of one particle. And each set of
+/// obtained values from a current_data that were not present in prev_data becomes a new generation.
 // TODO: make it non-pub after boxed value refactoring.
 #[derive(Debug, Default, Clone)]
 pub(crate) struct Stream(pub(crate) Vec<Vec<ResolvedCallResult>>);
 
 impl Stream {
-    pub(crate) fn add_value(&mut self, value: ResolvedCallResult, generation: u32) {
-        let mut streams_count = self.0.len();
+    pub(crate) fn from_generations_count(count: usize) -> Self {
+        Self(vec![vec![]; count + 1])
+    }
 
-        if self.0.len() > generation as usize {
-            self.0[generation as usize].push(value);
-            return;
+    pub(crate) fn from_value(value: ResolvedCallResult) -> Self {
+        Self(vec![vec![value]])
+    }
+
+    // if generation is None, value would be added to the last generation, otherwise it would
+    // be added to given generation
+    pub(crate) fn add_value(&mut self, value: ResolvedCallResult, generation: Generation) -> ExecutionResult<u32> {
+        let generation = match generation {
+            Generation::Last => self.0.len() - 1,
+            Generation::Nth(id) => id as usize,
+        };
+
+        if self.0.len() >= generation {
+            return exec_err!(ExecutionError::StreamDontHaveSuchGeneration(self.clone(), generation));
+        }
+
+        self.0[generation].push(value);
+        Ok(generation as u32)
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn generations_count(&self) -> usize {
+        let generations_count = self.0.len();
+
+        // the last generation could be empty due to the logic of from_generations_count ctor
+        if generations_count > 0 && self.0[generations_count - 1].is_empty() {
+            generations_count - 1
+        } else {
+            generations_count
         }
     }
 
     pub(crate) fn is_empty(&self) -> bool {
         self.0.is_empty()
     }
+
+    pub(crate) fn into_jvalue(self) -> JValue {
+        use std::ops::Deref;
+
+        let jvalue_array = self
+            .0
+            .iter()
+            .flat_map(|g| g.iter().map(|v| v.result.deref().clone()))
+            .collect::<Vec<_>>();
+        JValue::Array(jvalue_array)
+    }
+}
+
+#[derive(Clone, Copy, Debug)]
+pub(crate) enum Generation {
+    Last,
+    Nth(u32),
 }

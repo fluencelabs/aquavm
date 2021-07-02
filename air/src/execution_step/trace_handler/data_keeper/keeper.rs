@@ -38,11 +38,6 @@ impl DataKeeper {
             result_trace: <_>::default(),
         }
     }
-
-    pub(crate) fn into_result_trace(self) -> ExecutionTrace {
-        self.result_trace
-    }
-
     pub(crate) fn result_states_count(&self) -> usize {
         self.result_trace.len()
     }

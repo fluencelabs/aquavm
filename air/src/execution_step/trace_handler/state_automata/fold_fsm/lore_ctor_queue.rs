@@ -15,25 +15,28 @@
  */
 
 use super::FoldLore;
-use super::FoldLoreCtor;
 use super::ResolvedFoldSubTraceLore;
+use super::SubTraceLoreCtor;
 
+/// This queue emulates behaviour of fold states traversal:
+///  - at first states are traversal forward until the end of states
+///  - then states are traversal backward the same times
 #[derive(Debug, Default, Clone)]
-pub(super) struct LoreCtorQueue {
-    queue: Vec<LoreCtorElement>,
+pub(super) struct SubTraceLoreCtorQueue {
+    queue: Vec<LoreCtorDesc>,
     back_traversal_pos: usize,
 }
 
-impl LoreCtorQueue {
-    pub(super) fn forward_ctor_mut(&mut self) -> &mut LoreCtorElement {
-        &mut self.queue.last_mut().unwrap()
+impl SubTraceLoreCtorQueue {
+    pub(super) fn forward_ctor_mut(&mut self) -> Option<&mut LoreCtorDesc> {
+        self.queue.last_mut()
     }
 
-    pub(super) fn backward_ctor_mut(&mut self) -> &mut LoreCtorElement {
+    pub(super) fn backward_ctor_mut(&mut self) -> &mut LoreCtorDesc {
         &mut self.queue[self.back_traversal_pos - 1]
     }
 
-    pub(super) fn add_element(&mut self, element: LoreCtorElement) {
+    pub(super) fn add_element(&mut self, element: LoreCtorDesc) {
         self.queue.push(element);
         self.back_traversal_pos += 1;
     }
@@ -49,14 +52,14 @@ impl LoreCtorQueue {
     pub(super) fn transform_to_lore(&mut self) -> FoldLore {
         self.queue
             .drain(..)
-            .map(|l| l.lore_ctor.into_subtrace_lore())
+            .map(|l| l.ctor.into_subtrace_lore())
             .collect::<Vec<_>>()
     }
 }
 
 #[derive(Debug, Clone)]
-pub(super) struct LoreCtorElement {
+pub(super) struct LoreCtorDesc {
     pub(super) prev_lore: Option<ResolvedFoldSubTraceLore>,
     pub(super) current_lore: Option<ResolvedFoldSubTraceLore>,
-    pub(super) lore_ctor: FoldLoreCtor,
+    pub(super) ctor: SubTraceLoreCtor,
 }

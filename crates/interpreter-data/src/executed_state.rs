@@ -19,7 +19,7 @@ use serde::Serialize;
 use serde_json::Value as JValue;
 use std::rc::Rc;
 
-pub const SCALAR_GENERATION: usize = 0;
+pub const SCALAR_GENERATION: u32 = 0;
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]

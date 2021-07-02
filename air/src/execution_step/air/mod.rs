@@ -141,7 +141,7 @@ macro_rules! log_instruction {
         log::debug!(
             target: crate::log_targets::NEW_EXECUTED_TRACE,
             "  new call executed trace: {:?}",
-            $trace_ctx.result_trace()
+            $trace_ctx.as_result_trace()
         );
     };
 }

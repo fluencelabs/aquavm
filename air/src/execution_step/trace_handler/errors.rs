@@ -22,7 +22,8 @@ use thiserror::Error as ThisError;
 
 /// Errors arose out of merging previous data with a new.
 #[derive(ThisError, Debug)]
-pub enum TraceHandlerError {
+#[allow(clippy::enum_variant_names)]
+pub(crate) enum TraceHandlerError {
     #[error("{0}")]
     KeeperError(#[from] KeeperError),
 

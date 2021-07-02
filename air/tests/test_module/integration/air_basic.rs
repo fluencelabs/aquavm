@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use air::execution_trace::ExecutionTrace;
+use air::interpreter_data::ExecutionTrace;
 use air_test_utils::call_vm;
 use air_test_utils::create_avm;
 use air_test_utils::executed_state;

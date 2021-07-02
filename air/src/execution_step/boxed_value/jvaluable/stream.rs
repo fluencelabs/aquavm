@@ -34,27 +34,18 @@ impl JValuable for std::cell::Ref<'_, Stream> {
 
     fn apply_json_path_with_tetraplets(
         &self,
-        json_path: &str,
+        _json_path: &str,
     ) -> ExecutionResult<(Vec<&JValue>, Vec<SecurityTetraplet>)> {
         return exec_err!(JsonPathAppliedToStream(Stream(self.0.clone())));
     }
 
     fn as_jvalue(&self) -> Cow<'_, JValue> {
-        let jvalue_array = self
-            .0
-            .iter()
-            .flat_map(|g| g.iter().map(|v| v.result.deref().clone()))
-            .collect::<Vec<_>>();
-        Cow::Owned(JValue::Array(jvalue_array))
+        let jvalue = self.deref().clone().into_jvalue();
+        Cow::Owned(jvalue)
     }
 
     fn into_jvalue(self: Box<Self>) -> JValue {
-        let jvalue_array = self
-            .0
-            .iter()
-            .flat_map(|g| g.iter().map(|v| v.result.deref().clone()))
-            .collect::<Vec<_>>();
-        JValue::Array(jvalue_array)
+        self.clone().into_jvalue()
     }
 
     fn as_tetraplets(&self) -> Vec<SecurityTetraplet> {

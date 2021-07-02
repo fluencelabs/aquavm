@@ -75,8 +75,8 @@ fn is_json_path_allowed(value: &JValue) -> ExecutionResult<()> {
     use crate::exec_err;
 
     match value {
-        JValue::Array(_) => return Ok(()),
-        JValue::Object(_) => return Ok(()),
+        JValue::Array(_) => Ok(()),
+        JValue::Object(_) => Ok(()),
         value => exec_err!(ExecutionError::JsonPathVariableTypeError(value.clone())),
     }
 }

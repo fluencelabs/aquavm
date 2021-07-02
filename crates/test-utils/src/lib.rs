@@ -37,9 +37,9 @@ pub use avm_server::InterpreterOutcome;
 pub use avm_server::ParticleParameters;
 pub use avm_server::AVM;
 
-pub use air::execution_trace::CallResult;
-pub use air::execution_trace::ExecutedState;
-pub use air::execution_trace::ExecutionTrace;
+pub use air::interpreter_data::CallResult;
+pub use air::interpreter_data::ExecutedState;
+pub use air::interpreter_data::ExecutionTrace;
 
 use std::collections::HashMap;
 use std::path::PathBuf;

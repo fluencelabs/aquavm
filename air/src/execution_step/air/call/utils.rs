@@ -14,105 +14,18 @@
  * limitations under the License.
  */
 
-use super::ExecutionCtx;
-use super::ExecutionError;
-use super::ExecutionResult;
+use super::call_result_setter::set_local_call_result;
+use super::*;
 use crate::exec_err;
-use crate::execution_step::execution_context::*;
+use crate::execution_step::execution_context::ResolvedCallResult;
 use crate::execution_step::trace_handler::TraceHandler;
-use crate::execution_step::Variable;
-use crate::JValue;
+use crate::execution_step::Generation;
 
 use air_interpreter_data::CallResult;
-use air_interpreter_data::SCALAR_GENERATION;
 use air_parser::ast::CallOutputValue;
 use polyplets::ResolvedTriplet;
 
 use std::rc::Rc;
-
-/// Writes result of a local `Call` instruction to `ExecutionCtx` at `output`.
-pub(super) fn set_local_call_result<'i>(
-    result: Rc<JValue>,
-    trace_pos: usize,
-    triplet: Rc<ResolvedTriplet>,
-    output: &CallOutputValue<'i>,
-    exec_ctx: &mut ExecutionCtx<'i>,
-) -> ExecutionResult<usize> {
-    use std::cell::RefCell;
-    use std::collections::hash_map::Entry::{Occupied, Vacant};
-    use ExecutionError::*;
-
-    let executed_result = ResolvedCallResult {
-        result,
-        triplet,
-        trace_pos,
-    };
-
-    let generation = match output {
-        CallOutputValue::Variable(Variable::Scalar(name)) => {
-            if let Some(fold_block_name) = exec_ctx.met_folds.back() {
-                let fold_state = match exec_ctx.data_cache.get_mut(*fold_block_name) {
-                    Some(AValue::JValueFoldCursor(fold_state)) => fold_state,
-                    _ => unreachable!("fold block data must be represented as fold cursor"),
-                };
-
-                fold_state.met_variables.insert(name, executed_result.clone());
-            }
-
-            match exec_ctx.data_cache.entry(name.to_string()) {
-                Vacant(entry) => {
-                    entry.insert(AValue::JValueRef(executed_result));
-                }
-                Occupied(mut entry) => {
-                    // check that current execution_step flow is inside a fold block
-                    if exec_ctx.met_folds.is_empty() {
-                        // shadowing is allowed only inside fold blocks
-                        return exec_err!(MultipleVariablesFound(entry.key().clone()));
-                    }
-
-                    match entry.get() {
-                        AValue::JValueRef(_) => {}
-                        // shadowing is allowed only for scalar values
-                        _ => return exec_err!(ShadowingError(entry.key().clone())),
-                    };
-
-                    entry.insert(AValue::JValueRef(executed_result));
-                }
-            };
-
-            SCALAR_GENERATION
-        }
-        CallOutputValue::Variable(Variable::Stream(name)) => {
-            match exec_ctx.data_cache.entry(name.to_string()) {
-                Occupied(mut entry) => match entry.get_mut() {
-                    // if result is an array, insert result to the end of the array
-                    AValue::StreamRef(values) => values.borrow_mut().push(executed_result),
-                    v => return exec_err!(IncompatibleAValueType(format!("{}", v), String::from("Array"))),
-                },
-                Vacant(entry) => {
-                    entry.insert(AValue::StreamRef(RefCell::new(vec![executed_result])));
-                }
-            };
-            SCALAR_GENERATION
-        }
-        CallOutputValue::None => SCALAR_GENERATION,
-    };
-
-    Ok(generation)
-}
-
-/// Writes an executed state of a particle being sent to remote node
-pub(super) fn set_remote_call_result<'i>(
-    peer_pk: String,
-    exec_ctx: &mut ExecutionCtx<'i>,
-    trace_ctx: &mut TraceHandler,
-) {
-    exec_ctx.next_peer_pks.push(peer_pk);
-    exec_ctx.subtree_complete = false;
-
-    let new_call_result = CallResult::RequestSentBy(exec_ctx.current_peer_id.clone());
-    trace_ctx.meet_call_end(new_call_result);
-}
 
 /// This function looks at the existing call state, validates it,
 /// and returns Ok(true) if the call should be executed further.
@@ -126,12 +39,11 @@ pub(super) fn handle_prev_state<'i>(
 ) -> ExecutionResult<bool> {
     use CallResult::*;
 
-    match &prev_result {
+    let result = match &prev_result {
         // this call was failed on one of the previous executions,
         // here it's needed to bubble this special error up
         CallServiceFailed(ret_code, err_msg) => {
             exec_ctx.subtree_complete = false;
-            trace_ctx.meet_call_end(prev_result);
             exec_err!(ExecutionError::LocalServiceError(*ret_code, err_msg.clone()))
         }
         RequestSentBy(..) => {
@@ -140,18 +52,21 @@ pub(super) fn handle_prev_state<'i>(
             // check whether current node can execute this call
             let is_current_peer = peer_pk == exec_ctx.current_peer_id.as_str();
             if is_current_peer {
+                // if this peer could execute this call early return and
                 return Ok(true);
             }
 
             exec_ctx.subtree_complete = false;
-            trace_ctx.meet_call_end(prev_result);
             Ok(false)
         }
         // this instruction's been already executed
         Executed(result, generation) => {
-            set_local_call_result(result.clone(), trace_pos, triplet.clone(), output, exec_ctx)?;
-            trace_ctx.meet_call_end(prev_result);
+            let executed_result = ResolvedCallResult::new(result.clone(), triplet.clone(), trace_pos);
+            set_local_call_result(executed_result, Generation::Nth(*generation), output, exec_ctx)?;
             Ok(false)
         }
-    }
+    };
+
+    trace_ctx.meet_call_end(prev_result);
+    result
 }

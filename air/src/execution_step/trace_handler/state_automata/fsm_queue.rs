@@ -31,10 +31,6 @@ pub(crate) struct FSMQueue {
 }
 
 impl FSMQueue {
-    pub(crate) fn new() -> Self {
-        <_>::default()
-    }
-
     pub(crate) fn push_fsm(&mut self, fsm: StateFSM) {
         self.states.push(fsm);
     }

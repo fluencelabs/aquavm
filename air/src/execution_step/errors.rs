@@ -21,7 +21,6 @@ use crate::execution_step::boxed_value::Stream;
 use crate::execution_step::execution_context::ResolvedCallResult;
 use crate::JValue;
 
-use air_interpreter_data::ExecutedState;
 use jsonpath_lib::JsonPathError;
 use serde_json::Error as SerdeJsonError;
 use thiserror::Error as ThisError;
@@ -84,13 +83,9 @@ pub(crate) enum ExecutionError {
     #[error("multiple fold states found for iterable '{0}'")]
     MultipleFoldStates(String),
 
-    /// Expected executed state of a different type.
-    #[error("invalid executed state: expected '{0}', but actual {1:?}")]
-    InvalidExecutedState(String, ExecutedState),
-
     /// Errors encountered while shadowing non-scalar values.
     #[error("variable with name '{0}' can't be shadowed, shadowing is supported only for scalar values")]
-    ShadowingError(String),
+    NonScalarShadowing(String),
 
     /// This error type is produced by a match to notify xor that compared values aren't equal.
     #[error("match is used without corresponding xor")]
@@ -118,6 +113,10 @@ pub(crate) enum ExecutionError {
     /// Errors bubbled from a trace handler.
     #[error("{0}")]
     TraceError(#[from] TraceHandlerError),
+
+    /// Errors occurred while insertion of a value inside stream that doesn't have corresponding generation.
+    #[error("stream {0:?} doesn't have generation with number {1}, probably the supplied data to the interpreter is corrupted")]
+    StreamDontHaveSuchGeneration(Stream, usize),
 }
 
 impl From<TraceHandlerError> for Rc<ExecutionError> {
@@ -143,12 +142,15 @@ impl ExecutionError {
             MultipleValuesInJsonPath(_) => 10,
             FoldStateNotFound(_) => 11,
             MultipleFoldStates(_) => 12,
-            InvalidExecutedState(..) => 13,
-            ShadowingError(_) => 14,
-            MatchWithoutXorError => 15,
-            MismatchWithoutXorError => 16,
-            FlatteningError(_) => 17,
-            JsonPathVariableTypeError(_) => 18,
+            NonScalarShadowing(_) => 13,
+            MatchWithoutXorError => 14,
+            MismatchWithoutXorError => 15,
+            FlatteningError(_) => 16,
+            JsonPathVariableTypeError(_) => 17,
+            JsonPathAppliedToStream(_) => 18,
+            InternalError(_) => 19,
+            StreamDontHaveSuchGeneration(..) => 20,
+            TraceError(_) => 21,
         }
     }
 }

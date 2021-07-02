@@ -82,18 +82,18 @@ impl TraceHandler {
 
     pub(crate) fn meet_fold_start(&mut self) -> TraceHandlerResult<()> {
         let ingredients = try_merge_next_state_as_fold(&mut self.data_keeper)?;
-        let mut fold_fsm = FoldFSM::from_fold_start(ingredients, &mut self.data_keeper)?;
+        let fold_fsm = FoldFSM::from_fold_start(ingredients, &mut self.data_keeper)?;
         self.state_fsm_queue.push_fsm(StateFSM::Fold(fold_fsm));
         Ok(())
     }
 
-    pub(crate) fn meet_generation_start(&mut self, value: ValueAndPos) -> TraceHandlerResult<()> {
+    pub(crate) fn meet_generation_start(&mut self, value: &ValueAndPos) -> TraceHandlerResult<()> {
         let fold_fsm = self.state_fsm_queue.last_as_mut_fold()?;
         fold_fsm.meet_generation_start(value, &mut self.data_keeper)?;
         Ok(())
     }
 
-    pub(crate) fn meet_next(&mut self, value: ValueAndPos) -> TraceHandlerResult<()> {
+    pub(crate) fn meet_next(&mut self, value: &ValueAndPos) -> TraceHandlerResult<()> {
         let fold_fsm = self.state_fsm_queue.last_as_mut_fold()?;
         fold_fsm.meet_next(value, &mut self.data_keeper)?;
         Ok(())
@@ -113,11 +113,18 @@ impl TraceHandler {
 
     pub(crate) fn meet_fold_end(&mut self) -> TraceHandlerResult<()> {
         let fold_fsm = self.state_fsm_queue.pop_as_fold()?;
-        fold_fsm.meet_fold_end(&mut self.data_keeper);
+        fold_fsm.meet_fold_end(&mut self.data_keeper)?;
+
         Ok(())
     }
 
-    pub(crate) fn result_trace(&self) -> &ExecutionTrace {
+    /// Returns size of elements inside result trace and intended to provide
+    /// a position of next inserted elements.
+    pub(crate) fn trace_pos(&self) -> usize {
+        self.data_keeper.result_trace.len()
+    }
+
+    pub(crate) fn as_result_trace(&self) -> &ExecutionTrace {
         &self.data_keeper.result_trace
     }
 
@@ -126,9 +133,5 @@ impl TraceHandler {
         let current_size = self.data_keeper.current_ctx.slider.subtrace_len();
 
         (prev_size, current_size)
-    }
-
-    pub(crate) fn into_result_trace(self) -> ExecutionTrace {
-        self.data_keeper.into_result_trace()
     }
 }

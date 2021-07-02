@@ -61,14 +61,14 @@ impl ParFSM {
             ..<_>::default()
         };
 
-        par_fsm.prepare_data(data_keeper, SubtreeType::Left);
+        par_fsm.prepare_data(data_keeper, SubtreeType::Left)?;
         Ok(par_fsm)
     }
 
     pub(crate) fn left_completed(&mut self, data_keeper: &mut DataKeeper) -> FSMResult<()> {
         self.check_subtrace_lens(data_keeper, SubtreeType::Left)?;
         self.par_builder.track(data_keeper, SubtreeType::Left);
-        self.prepare_data(data_keeper, SubtreeType::Right);
+        self.prepare_data(data_keeper, SubtreeType::Right)?;
 
         Ok(())
     }
@@ -79,18 +79,21 @@ impl ParFSM {
 
         let state = self.par_builder.build();
         self.state_inserter.insert(data_keeper, state);
+        self.size_updater.update(data_keeper)?;
 
         Ok(())
     }
 
-    fn prepare_data(&self, data_keeper: &mut DataKeeper, subtree_type: SubtreeType) {
+    fn prepare_data(&self, data_keeper: &mut DataKeeper, subtree_type: SubtreeType) -> FSMResult<()> {
         let (prev_size, current_size) = match subtree_type {
             SubtreeType::Left => (par_left!(&self.prev_par), par_left!(&self.current_par)),
             SubtreeType::Right => (par_right!(&self.prev_par), par_right!(&self.current_par)),
         };
 
-        data_keeper.prev_ctx.slider.set_subtrace_len(prev_size as usize);
-        data_keeper.current_ctx.slider.set_subtrace_len(current_size as usize);
+        data_keeper.prev_ctx.slider.set_subtrace_len(prev_size as usize)?;
+        data_keeper.current_ctx.slider.set_subtrace_len(current_size as usize)?;
+
+        Ok(())
     }
 
     /// Check that all values from interval were seen. Otherwise it's a error points out

@@ -39,7 +39,7 @@ impl<'i> super::ExecutableInstruction<'i> for Next<'i> {
 
         if fold_state.is_iterable_stream {
             let next_state = fold_state.iterable.peek().unwrap();
-            trace_ctx.meet_next(next_state.into_value_and_pos())?;
+            trace_ctx.meet_next(&next_state.as_value_and_pos())?;
         }
 
         let next_instr = fold_state.instr_head.clone();
@@ -53,6 +53,8 @@ impl<'i> super::ExecutableInstruction<'i> for Next<'i> {
             _ => unreachable!("iterator value shouldn't changed inside fold"),
         };
 
+        // get this fold state the second time to bypass borrow checker
+        let fold_state = try_get_fold_state(exec_ctx, iterator_name)?;
         if fold_state.is_iterable_stream {
             trace_ctx.meet_prev()?;
         }

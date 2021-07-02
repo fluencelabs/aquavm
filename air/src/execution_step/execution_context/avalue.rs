@@ -40,6 +40,16 @@ pub(crate) enum AValue<'i> {
     JValueFoldCursor(FoldState<'i>),
 }
 
+impl ResolvedCallResult {
+    pub(crate) fn new(result: Rc<JValue>, triplet: Rc<ResolvedTriplet>, trace_pos: usize) -> Self {
+        Self {
+            result,
+            triplet,
+            trace_pos,
+        }
+    }
+}
+
 impl<'i> Display for AValue<'i> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -55,7 +65,7 @@ impl<'i> Display for AValue<'i> {
                     for value in generation.iter() {
                         write!(f, "{:?}, ", value)?;
                     }
-                    writeln!(f, "")?;
+                    writeln!(f)?;
                 }
                 write!(f, "]")?;
             }

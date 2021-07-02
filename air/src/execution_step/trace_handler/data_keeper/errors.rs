@@ -18,7 +18,7 @@ use thiserror::Error as ThisError;
 
 /// Errors arose out while accessing various interpreter data.
 #[derive(ThisError, Debug, PartialEq, Eq)]
-pub enum KeeperError {
+pub(crate) enum KeeperError {
     /// Errors occurred when executed trace contains less elements then corresponding Par has.
     #[error("executed trace has {0} elements, but {1} requires by Par")]
     ExecutedTraceTooSmall(usize, usize),

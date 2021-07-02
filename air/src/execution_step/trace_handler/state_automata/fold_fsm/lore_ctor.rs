@@ -17,8 +17,9 @@
 use super::*;
 use air_interpreter_data::SubTraceDesc;
 
+/// This struct is a form of FSM and is intended to construct a fold subtrace lore element.
 #[derive(Debug, Default, PartialEq, Eq, Clone, Copy)]
-pub(super) struct FoldLoreCtor {
+pub(super) struct SubTraceLoreCtor {
     value_pos: usize,
     before_tracker: PositionsTracker,
     after_tracker: PositionsTracker,
@@ -30,7 +31,7 @@ struct PositionsTracker {
     pub(self) end_pos: usize,
 }
 
-impl FoldLoreCtor {
+impl SubTraceLoreCtor {
     pub(super) fn from_before_start(value_pos: usize, data_keeper: &DataKeeper) -> Self {
         let before_tracker = PositionsTracker {
             start_pos: data_keeper.result_states_count(),

@@ -16,16 +16,15 @@
 
 #![allow(unused_unsafe)] // for wasm_bindgen target where calling FFI is safe
 
+use super::call_result_setter::*;
 use super::triplet::Triplet;
 use super::utils::*;
-use super::Call;
-use super::ExecutionCtx;
-use super::ExecutionError;
-use super::ExecutionResult;
+use super::*;
 use crate::build_targets::CallServiceResult;
 use crate::build_targets::CALL_SERVICE_SUCCESS;
 use crate::execution_step::trace_handler::MergerCallResult;
 use crate::execution_step::trace_handler::TraceHandler;
+use crate::execution_step::Generation;
 use crate::JValue;
 use crate::ResolvedTriplet;
 use crate::SecurityTetraplet;
@@ -33,6 +32,7 @@ use crate::SecurityTetraplet;
 use air_interpreter_data::CallResult;
 use air_parser::ast::{CallInstrArgValue, CallOutputValue};
 
+use crate::execution_step::air::ResolvedCallResult;
 use std::rc::Rc;
 
 /// Represents Call instruction with resolved internal parts.
@@ -110,8 +110,12 @@ impl<'i> ResolvedCall<'i> {
         let result: JValue = serde_json::from_str(&service_result.result).map_err(|e| DeError(service_result, e))?;
         let result = Rc::new(result);
 
-        set_local_call_result(result.clone(), 0, self.triplet.clone(), &self.output, exec_ctx)?;
-        let new_call_result = CallResult::Executed(result, 0);
+        let trace_pos = trace_ctx.trace_pos();
+
+        // TODO: refactor this scheme with passing and obtaining generation here in next PR
+        let executed_result = ResolvedCallResult::new(result.clone(), self.triplet.clone(), trace_pos);
+        let generation = set_local_call_result(executed_result, Generation::Last, &self.output, exec_ctx)?;
+        let new_call_result = CallResult::Executed(result, generation);
         trace_ctx.meet_call_end(new_call_result);
 
         Ok(())

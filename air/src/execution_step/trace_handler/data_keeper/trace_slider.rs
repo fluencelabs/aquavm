@@ -52,6 +52,7 @@ impl TraceSlider {
 
     /// Returns the next state if current interval length hasn't been reached
     /// and None otherwise.
+    #[allow(clippy::suspicious_operation_groupings)]
     pub(crate) fn next_state(&self) -> Option<ExecutedState> {
         if self.seen_elements.get() >= self.subtrace_len.get() || self.position.get() >= self.trace.len() {
             return None;
@@ -96,6 +97,7 @@ impl TraceSlider {
         Ok(state)
     }
 
+    #[allow(dead_code)]
     pub(crate) fn position(&self) -> usize {
         self.position.get()
     }

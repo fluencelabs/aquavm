@@ -22,18 +22,19 @@ use thiserror::Error as ThisError;
 
 /// Errors arose out of merging previous data with a new.
 #[derive(ThisError, Debug)]
-pub enum MergeError {
+pub(crate) enum MergeError {
     /// Errors occurred when previous and current executed states are incompatible.
     #[error("previous and current data have incompatible states: '{0:?}' '{1:?}'")]
     IncompatibleExecutedStates(ExecutedState, ExecutedState),
 
+    /// Merger was expected to see other state that was obtained from one of traces
+    /// (the other state was absent).
+    #[error("state from {1} `{0:?}` is incompatible with expected {2}")]
+    DifferentExecutedStateExpected(ExecutedState, DataType, &'static str),
+
     /// Errors occurred when previous and current call results are incompatible.
     #[error("previous and current call results are incompatible: '{0:?}' '{1:?}'")]
     IncompatibleCallResults(CallResult, CallResult),
-
-    /// Errors occurred when executed trace contains less elements then corresponding Par has.
-    #[error("executed trace has {0} elements, but {1} requires by Par")]
-    ExecutedTraceTooSmall(usize, usize),
 
     /// Errors occurred when executed state contains not call result that was expected to see from fold result value pos.
     #[error("tried to obtain CallResult::Resolved by fold_result.value_pos position, but the actual state is {0:?}")]
@@ -46,28 +47,43 @@ pub enum MergeError {
     /// Errors bubbled from DataKeeper.
     #[error("{0}")]
     KeeperError(#[from] KeeperError),
-    /*
-    /// Errors occurred when ParResult.0 + ParResult.1 overflows.
-    #[error("overflow is occurred while calculating the entire len occupied by executed states corresponded to current par: '{0:?}'")]
-    ParLenOverflow(ParResult),
+}
 
-    /// Errors occurred when sum_i { FoldResult_i.subtrace_len } overflows.
-    #[error("overflow is occurred while calculating the entire len occupied by executed states corresponded to current fold: '{0:?}'")]
-    FoldLenOverflow(FoldResult),
+impl MergeError {
+    // shouldn't be called with both Nones
+    pub(crate) fn incompatible_states(
+        prev_state: Option<ExecutedState>,
+        current_state: Option<ExecutedState>,
+        expected_state: &'static str,
+    ) -> Self {
+        match (prev_state, current_state) {
+            (Some(prev_state), Some(current_state)) => {
+                MergeError::IncompatibleExecutedStates(prev_state, current_state)
+            }
+            (None, Some(current_state)) => {
+                MergeError::DifferentExecutedStateExpected(current_state, DataType::Current, expected_state)
+            }
+            (Some(prev_state), None) => {
+                MergeError::DifferentExecutedStateExpected(prev_state, DataType::Previous, expected_state)
+            }
+            (None, None) => unreachable!("shouldn't be called with both None"),
+        }
+    }
+}
 
-    /// Errors occurred when ParResult.0 + ParResult.1 value is bigger than current subtree size.
-    #[error("par '{0:?}' contains subtree size that is bigger than current one '{1}'")]
-    ParSubtreeUnderflow(ParResult, usize),
+#[derive(Clone, Copy, Debug)]
+pub enum DataType {
+    Previous,
+    Current,
+}
 
-    /// Errors occurred when sum_i { FoldResult_i.subtrace_len } value is bigger than current subtree size.
-    #[error("fold '{0:?}' contains subtree size that is bigger than current one '{1}'")]
-    FoldSubtreeUnderflow(FoldResult, usize),
+use std::fmt;
 
-    /// Errors occurred when one of the fold lores contains more then two sublores.
-    #[error("fold sublores have different value_pos: {0}, {1}")]
-    FoldIncorrectValuePos(usize, usize),
-
-    #[error("value_pos of a FoldResult points to '{0}', but this element isn't an element of a stream")]
-    FoldValuesPosNotStream(usize),
-     */
+impl fmt::Display for DataType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            DataType::Previous => write!(f, "previous"),
+            DataType::Current => write!(f, "current"),
+        }
+    }
 }
