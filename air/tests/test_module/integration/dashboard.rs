@@ -16,9 +16,10 @@
 
 use air_test_utils::call_vm;
 use air_test_utils::create_avm;
+use air_test_utils::CallServiceClosure;
 use air_test_utils::IValue;
 use air_test_utils::NEVec;
-use air_test_utils::{CallServiceClosure, AVM};
+use air_test_utils::AVM;
 
 use std::cell::RefCell;
 use std::collections::HashSet;
@@ -213,28 +214,34 @@ fn dashboard() {
         .collect::<Vec<_>>();
 
     // -> client 1
-    let client_1_res = call_vm!(client, client_id.clone(), script.clone(), "", "");
-    let next_peer_pks = into_hashset(client_1_res.next_peer_pks);
+    let client_1_result = call_vm!(client, client_id.clone(), script.clone(), "", "");
+    let next_peer_pks = into_hashset(client_1_result.next_peer_pks);
     let mut all_peer_pks = into_hashset(known_peer_ids.clone());
     all_peer_pks.insert(relay_id.clone());
     assert_eq!(next_peer_pks, all_peer_pks);
 
     // client 1 -> relay 1
-    let relay_1_res = call_vm!(relay, client_id.clone(), script.clone(), client_1_res.data.clone(), "");
-    let next_peer_pks = into_hashset(relay_1_res.next_peer_pks.clone());
+    let relay_1_result = call_vm!(
+        relay,
+        client_id.clone(),
+        script.clone(),
+        client_1_result.data.clone(),
+        ""
+    );
+    let next_peer_pks = into_hashset(relay_1_result.next_peer_pks.clone());
     all_peer_pks.remove(&relay_id);
     all_peer_pks.insert(client_id.clone());
     assert_eq!(next_peer_pks, all_peer_pks);
 
     // relay 1 -> client 2
-    let client_2_res = call_vm!(
+    let client_2_result = call_vm!(
         client,
         client_id.clone(),
         script.clone(),
-        client_1_res.data.clone(),
-        relay_1_res.data.clone()
+        client_1_result.data.clone(),
+        relay_1_result.data.clone()
     );
-    assert!(client_2_res.next_peer_pks.is_empty());
+    assert!(client_2_result.next_peer_pks.is_empty());
     assert_eq!(
         *all_info.borrow(),
         String::from(
@@ -242,40 +249,40 @@ fn dashboard() {
         )
     );
 
-    let mut relay_2_res = relay_1_res.clone();
-    let mut client_3_res = client_2_res.clone();
+    let mut relay_2_result = relay_1_result.clone();
+    let mut client_3_result = client_2_result.clone();
 
     // peers 1 -> relay 2 -> client 3
     for avm in known_peers.iter_mut() {
         let prev_result = std::mem::replace(&mut avm.prev_result, vec![]);
-        let known_peer_res = call_vm!(
+        let known_peer_result = call_vm!(
             avm.vm,
             client_id.clone(),
             script.clone(),
             prev_result,
-            client_1_res.data.clone()
+            client_1_result.data.clone()
         );
-        assert_eq!(known_peer_res.next_peer_pks, vec![relay_id.clone()]);
+        assert_eq!(known_peer_result.next_peer_pks, vec![relay_id.clone()]);
 
-        avm.prev_result = known_peer_res.data;
+        avm.prev_result = known_peer_result.data;
 
-        relay_2_res = call_vm!(
+        relay_2_result = call_vm!(
             relay,
             client_id.clone(),
             script.clone(),
-            relay_2_res.data.clone(),
+            relay_2_result.data.clone(),
             avm.prev_result.clone()
         );
-        assert_eq!(relay_2_res.next_peer_pks, vec![client_id.clone()]);
+        assert_eq!(relay_2_result.next_peer_pks, vec![client_id.clone()]);
 
-        client_3_res = call_vm!(
+        client_3_result = call_vm!(
             client,
             client_id.clone(),
             script.clone(),
-            client_3_res.data.clone(),
-            relay_2_res.data.clone()
+            client_3_result.data.clone(),
+            relay_2_result.data.clone()
         );
-        assert!(client_3_res.next_peer_pks.is_empty());
+        assert!(client_3_result.next_peer_pks.is_empty());
         assert_eq!(
             *all_info.borrow(),
             format!(
@@ -288,45 +295,45 @@ fn dashboard() {
     all_peer_pks.remove(&client_id);
     all_peer_pks.insert(relay_id.clone());
 
-    let mut relay_3_res = relay_2_res.clone();
-    let mut client_4_res = client_3_res.clone();
+    let mut relay_3_result = relay_2_result.clone();
+    let mut client_4_result = client_3_result.clone();
 
     // peers 2 -> relay 3 -> client 4
     for avm in known_peers.iter_mut() {
         let prev_result = std::mem::replace(&mut avm.prev_result, vec![]);
-        let known_peer_res = call_vm!(
+        let known_peer_result = call_vm!(
             avm.vm,
             client_id.clone(),
             script.clone(),
             prev_result,
-            relay_1_res.data.clone()
+            relay_1_result.data.clone()
         );
         all_peer_pks.remove(&avm.peer_id);
-        let next_peer_pks = into_hashset(known_peer_res.next_peer_pks.clone());
+        let next_peer_pks = into_hashset(known_peer_result.next_peer_pks.clone());
         assert_eq!(next_peer_pks, all_peer_pks);
 
         all_peer_pks.insert(avm.peer_id.clone());
 
-        avm.prev_result = known_peer_res.data;
+        avm.prev_result = known_peer_result.data;
 
-        relay_3_res = call_vm!(
+        relay_3_result = call_vm!(
             relay,
             client_id.clone(),
             script.clone(),
-            relay_3_res.data.clone(),
+            relay_3_result.data.clone(),
             avm.prev_result.clone()
         );
-        assert_eq!(relay_3_res.next_peer_pks, vec![client_id.clone()]);
+        assert_eq!(relay_3_result.next_peer_pks, vec![client_id.clone()]);
 
         // client -> peers -> relay -> client
-        client_4_res = call_vm!(
+        client_4_result = call_vm!(
             client,
             client_id.clone(),
             script.clone(),
-            client_4_res.data.clone(),
-            relay_3_res.data.clone()
+            client_4_result.data.clone(),
+            relay_3_result.data.clone()
         );
-        assert!(client_4_res.next_peer_pks.is_empty());
+        assert!(client_4_result.next_peer_pks.is_empty());
         assert_eq!(
             *all_info.borrow(),
             format!(
@@ -336,8 +343,8 @@ fn dashboard() {
         )
     }
 
-    let mut relay_4_res = relay_3_res.clone();
-    let mut client_5_res = client_4_res.clone();
+    let mut relay_4_result = relay_3_result.clone();
+    let mut client_5_result = client_4_result.clone();
 
     // peers 2 -> peers 3 -> relay 4 -> client 5
     for i in 0..known_peers.len() {
@@ -348,29 +355,29 @@ fn dashboard() {
 
             let prev_data = known_peers[j].prev_result.clone();
             let data = known_peers[i].prev_result.clone();
-            let known_peer_i_j_res = call_vm!(known_peers[j].vm, client_id.clone(), script.clone(), prev_data, data);
-            assert_eq!(known_peer_i_j_res.next_peer_pks, vec![relay_id.clone()]);
+            let known_peer_i_j_result = call_vm!(known_peers[j].vm, client_id.clone(), script.clone(), prev_data, data);
+            assert_eq!(known_peer_i_j_result.next_peer_pks, vec![relay_id.clone()]);
 
-            known_peers[j].prev_result = known_peer_i_j_res.data;
+            known_peers[j].prev_result = known_peer_i_j_result.data;
 
-            relay_4_res = call_vm!(
+            relay_4_result = call_vm!(
                 relay,
                 client_id.clone(),
                 script.clone(),
-                relay_4_res.data.clone(),
+                relay_4_result.data.clone(),
                 known_peers[j].prev_result.clone()
             );
-            assert_eq!(relay_4_res.next_peer_pks, vec![client_id.clone()]);
+            assert_eq!(relay_4_result.next_peer_pks, vec![client_id.clone()]);
 
             // client -> peers -> relay -> client
-            client_5_res = call_vm!(
+            client_5_result = call_vm!(
                 client,
                 client_id.clone(),
                 script.clone(),
-                client_5_res.data.clone(),
-                relay_4_res.data.clone()
+                client_5_result.data.clone(),
+                relay_4_result.data.clone()
             );
-            assert!(client_5_res.next_peer_pks.is_empty());
+            assert!(client_5_result.next_peer_pks.is_empty());
             assert_eq!(
                 *all_info.borrow(),
                 format!(

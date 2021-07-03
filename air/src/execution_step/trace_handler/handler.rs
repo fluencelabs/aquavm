@@ -118,10 +118,26 @@ impl TraceHandler {
         Ok(())
     }
 
+    pub(crate) fn error_exit(&mut self) {
+        let state = match self.state_fsm_queue.pop() {
+            Some(state) => state,
+            None => return,
+        };
+
+        match state {
+            StateFSM::Par(par) => par.error_exit(&mut self.data_keeper),
+            StateFSM::Fold(fold) => fold.error_exit(&mut self.data_keeper),
+        }
+    }
+
     /// Returns size of elements inside result trace and intended to provide
     /// a position of next inserted elements.
     pub(crate) fn trace_pos(&self) -> usize {
         self.data_keeper.result_trace.len()
+    }
+
+    pub(crate) fn into_result_trace(self) -> ExecutionTrace {
+        self.data_keeper.result_trace
     }
 
     pub(crate) fn as_result_trace(&self) -> &ExecutionTrace {

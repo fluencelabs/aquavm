@@ -62,4 +62,8 @@ impl FSMQueue {
             StateFSM::Fold(fold) => Ok(fold),
         }
     }
+
+    pub(crate) fn pop(&mut self) -> Option<StateFSM> {
+        self.states.pop()
+    }
 }

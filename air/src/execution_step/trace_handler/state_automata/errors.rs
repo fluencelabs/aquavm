@@ -43,7 +43,7 @@ pub(crate) enum StateFSMError {
 
     /// Errors occurred when a subtree of a Par instructions was finished but remaining interval isn't empty.
     #[error(
-        "par {0} subtree of '{1:?}' was completed, but interval does not fully exhausted and contains {2} elements"
+        "par {0} subtree of '{1:?}' was completed, but its interval was not fully exhausted and contains {2} elements"
     )]
     ParSubtreeNonExhausted(SubtreeType, ParResult, usize),
 

@@ -20,8 +20,8 @@ use air_test_utils::echo_number_call_service;
 use air_test_utils::echo_string_call_service;
 use air_test_utils::executed_state;
 use air_test_utils::set_variable_call_service;
+use air_test_utils::trace_from_result;
 use air_test_utils::AVMError;
-use air_test_utils::ExecutionTrace;
 use air_test_utils::InterpreterOutcome;
 
 use serde_json::json;
@@ -31,8 +31,7 @@ fn lfold() {
     let mut vm = create_avm(echo_number_call_service(), "A");
     let mut set_variable_vm = create_avm(set_variable_call_service(r#"["1","2","3","4","5"]"#), "set_variable");
 
-    let lfold = String::from(
-        r#"
+    let lfold = r#"
             (seq
                 (call "set_variable" ("" "") [] Iterable)
                 (fold Iterable i
@@ -41,12 +40,12 @@ fn lfold() {
                         (next i)
                     )
                 )
-            )"#,
-    );
+            )"#;
 
-    let res = call_vm!(set_variable_vm, "", lfold.clone(), "[]", "[]");
-    let res = call_vm!(vm, "", lfold, "[]", res.data);
-    let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid executed trace");
+    let result = call_vm!(set_variable_vm, "", lfold, "", "");
+    let result = call_vm!(vm, "", lfold, "", result.data);
+
+    let actual_trace = trace_from_result(&result);
     let expected_state = executed_state::scalar_string_array(vec!["1", "2", "3", "4", "5"]);
 
     assert_eq!(actual_trace.len(), 6);
@@ -63,8 +62,7 @@ fn rfold() {
     let mut vm = create_avm(echo_number_call_service(), "A");
     let mut set_variable_vm = create_avm(set_variable_call_service(r#"["1","2","3","4","5"]"#), "set_variable");
 
-    let rfold = String::from(
-        r#"
+    let rfold = r#"
             (seq
                 (call "set_variable" ("" "") [] Iterable)
                 (fold Iterable i
@@ -73,13 +71,12 @@ fn rfold() {
                         (call "A" ("" "") [i] $acc)
                     )
                 )
-            )"#,
-    );
+            )"#;
 
-    let res = call_vm!(set_variable_vm, "", rfold.clone(), "[]", "[]");
-    let res = call_vm!(vm, "", rfold, "[]", res.data);
+    let result = call_vm!(set_variable_vm, "", rfold, "", "");
+    let result = call_vm!(vm, "", rfold, "", result.data);
 
-    let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid executed trace");
+    let actual_trace = trace_from_result(&result);
     assert_eq!(actual_trace.len(), 6);
 
     let expected_state = executed_state::scalar_string_array(vec!["1", "2", "3", "4", "5"]);
@@ -96,8 +93,7 @@ fn inner_fold() {
     let mut vm = create_avm(echo_number_call_service(), "A");
     let mut set_variable_vm = create_avm(set_variable_call_service(r#"["1","2","3","4","5"]"#), "set_variable");
 
-    let script = String::from(
-        r#"
+    let script = r#"
             (seq
                 (seq
                     (call "set_variable" ("" "") [] Iterable1)
@@ -114,13 +110,12 @@ fn inner_fold() {
                         (next i)
                     )
                 )
-            )"#,
-    );
+            )"#;
 
-    let res = call_vm!(set_variable_vm, "", script.clone(), "[]", "[]");
-    let res = call_vm!(vm, "", script, "[]", res.data);
-    let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid executed trace");
+    let result = call_vm!(set_variable_vm, "", script, "", "");
+    let result = call_vm!(vm, "", script, "", result.data);
 
+    let actual_trace = trace_from_result(&result);
     assert_eq!(actual_trace.len(), 27);
 
     let expected_state = executed_state::scalar_string_array(vec!["1", "2", "3", "4", "5"]);
@@ -136,55 +131,10 @@ fn inner_fold() {
 }
 
 #[test]
-fn several_nexts() {
-    let mut vm = create_avm(echo_number_call_service(), "A");
-    let mut set_variable_vm = create_avm(set_variable_call_service(r#"["1","2"]"#), "set_variable");
-
-    let script = String::from(
-        r#"
-            (seq
-                (call "set_variable" ("" "") [] Iterable1)
-                (fold Iterable1 i
-                    (seq
-                        (seq
-                            (seq
-                                (call "A" ("" "") [i "A"] $acc)
-                                (next i)
-                            )
-                            (seq
-                                (call "A" ("" "") [i "B"] $acc)
-                                (next i)
-                            )
-                        )
-                        (seq
-                            (call "A" ("" "") [i "C"] $acc)
-                            (next i)
-                        )
-                    )
-                )
-            )"#,
-    );
-
-    let res = call_vm!(set_variable_vm, "", &script, "", "");
-    let res = call_vm!(vm, "", script, "", res.data);
-    let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid executed trace");
-
-    for state in actual_trace {
-        match state {
-            air_test_utils::ExecutedState::Call(air_test_utils::CallResult::Executed(value, 0)) => {
-                println!("{}", value)
-            }
-            _ => {}
-        }
-    }
-}
-
-#[test]
 fn inner_fold_with_same_iterator() {
     let mut vm = create_avm(set_variable_call_service(r#"["1","2","3","4","5"]"#), "set_variable");
 
-    let script = String::from(
-        r#"
+    let script = r#"
             (seq
                 (seq
                     (call "set_variable" ("" "") [] Iterable1)
@@ -201,12 +151,11 @@ fn inner_fold_with_same_iterator() {
                         (next i)
                     )
                 )
-            )"#,
-    );
+            )"#;
 
-    let res = call_vm!(vm, "", script, "[]", "[]");
+    let result = call_vm!(vm, "", script, "", "");
 
-    assert_eq!(res.ret_code, 1012);
+    assert_eq!(result.ret_code, 1012);
 }
 
 #[test]
@@ -214,8 +163,7 @@ fn empty_fold() {
     let mut vm = create_avm(echo_number_call_service(), "A");
     let mut set_variable_vm = create_avm(set_variable_call_service(r#"[]"#), "set_variable");
 
-    let empty_fold = String::from(
-        r#"
+    let empty_fold = r#"
             (seq
                 (call "set_variable" ("" "") [] Iterable)
                 (fold Iterable i
@@ -224,12 +172,12 @@ fn empty_fold() {
                         (next i)
                     )
                 )
-            )"#,
-    );
+            )"#;
 
-    let res = call_vm!(set_variable_vm, "", empty_fold.clone(), "[]", "[]");
-    let res = call_vm!(vm, "", empty_fold, "[]", res.data);
-    let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid executed trace");
+    let result = call_vm!(set_variable_vm, "", empty_fold, "", "");
+    let result = call_vm!(vm, "", empty_fold, "", result.data);
+
+    let actual_trace = trace_from_result(&result);
     let expected_state = executed_state::scalar_jvalue(json!([]));
 
     assert_eq!(actual_trace.len(), 1);
@@ -252,12 +200,13 @@ fn empty_fold_json_path() {
                 )
             )"#;
 
-    let res = call_vm!(set_variable_vm, "", empty_fold, "", "");
-    let res = call_vm!(vm, "", empty_fold, "", res.data);
-    let res: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid executed trace");
+    let result = call_vm!(set_variable_vm, "", empty_fold, "", "");
+    let result = call_vm!(vm, "", empty_fold, "", result.data);
 
-    assert_eq!(res.len(), 1);
-    assert_eq!(res[0], executed_state::scalar_jvalue(json!({ "messages": [] })));
+    let actual_trace = trace_from_result(&result);
+    let expected_trace = vec![executed_state::scalar_jvalue(json!({ "messages": [] }))];
+
+    assert_eq!(actual_trace, expected_trace);
 }
 
 // Check that fold works with the join behaviour without hanging up.
@@ -266,8 +215,7 @@ fn fold_with_join() {
     let mut vm = create_avm(echo_number_call_service(), "A");
     let mut set_variable_vm = create_avm(set_variable_call_service(r#"["1","2"]"#), "set_variable");
 
-    let fold_with_join = String::from(
-        r#"
+    let fold_with_join = r#"
             (seq
                 (call "set_variable" ("" "") [] iterable)
                 (par
@@ -279,14 +227,13 @@ fn fold_with_join() {
                         )
                     )
                 )
-            )"#,
-    );
+            )"#;
 
-    let res = call_vm!(set_variable_vm, "", &fold_with_join, "", "");
-    let res = call_vm!(vm, "", fold_with_join, "", res.data);
-    let res: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid executed trace");
+    let result = call_vm!(set_variable_vm, "", fold_with_join, "", "");
+    let result = call_vm!(vm, "", fold_with_join, "", result.data);
 
-    assert_eq!(res.len(), 3);
+    let actual_trace = trace_from_result(&result);
+    assert_eq!(actual_trace.len(), 3);
 }
 
 #[test]
@@ -297,8 +244,7 @@ fn json_path() {
         "set_variable",
     );
 
-    let lfold = String::from(
-        r#"
+    let lfold = r#"
             (seq
                 (call "set_variable" ("" "") [] iterable)
                 (fold iterable.$.array! i
@@ -307,12 +253,12 @@ fn json_path() {
                         (next i)
                     )
                 )
-            )"#,
-    );
+            )"#;
 
-    let res = call_vm!(set_variable_vm, "", lfold.clone(), "[]", "[]");
-    let res = call_vm!(vm, "", lfold, "[]", res.data);
-    let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid executed trace");
+    let result = call_vm!(set_variable_vm, "", lfold, "", "");
+    let result = call_vm!(vm, "", lfold, "", result.data);
+
+    let actual_trace = trace_from_result(&result);
     let expected_state = executed_state::scalar_jvalue(json!({ "array": ["1", "2", "3", "4", "5"] }));
 
     assert_eq!(actual_trace.len(), 6);
@@ -332,8 +278,7 @@ fn shadowing() {
     let mut vm_a = create_avm(echo_string_call_service(), "A");
     let mut vm_b = create_avm(echo_string_call_service(), "B");
 
-    let script = String::from(
-        r#"
+    let script = r#"
             (seq
                 (seq
                     (call "set_variable" ("" "") [] iterable1)
@@ -359,18 +304,17 @@ fn shadowing() {
                         (next i)
                     )
                 )
-            )"#,
-    );
+            )"#;
 
-    let res = call_vm!(set_variables_vm, "", script.clone(), "[]", "[]");
-    let res = call_vm!(vm_a, "", script.clone(), "[]", res.data);
-    let res = call_vm!(vm_b, "", script.clone(), "[]", res.data);
-    let res = call_vm!(vm_a, "", script.clone(), "[]", res.data);
-    let res = call_vm!(vm_b, "", script.clone(), "[]", res.data);
-    let res = call_vm!(vm_a, "", script.clone(), "[]", res.data);
-    let res = call_vm!(vm_b, "", script, "[]", res.data);
+    let result = call_vm!(set_variables_vm, "", script, "", "");
+    let result = call_vm!(vm_a, "", script, "", result.data);
+    let result = call_vm!(vm_b, "", script, "", result.data);
+    let result = call_vm!(vm_a, "", script, "", result.data);
+    let result = call_vm!(vm_b, "", script, "", result.data);
+    let result = call_vm!(vm_a, "", script, "", result.data);
+    let result = call_vm!(vm_b, "", script, "", result.data);
 
-    let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid executed trace");
+    let actual_trace = trace_from_result(&result);
     let expected_trace = vec![
         scalar_string_array(vec!["1", "2"]),
         scalar_string_array(vec!["1", "2"]),
@@ -398,17 +342,16 @@ fn shadowing_scope() {
         let mut vm_a = create_avm(echo_string_call_service(), "A");
         let mut vm_b = create_avm(echo_string_call_service(), "B");
 
-        let res = call_vm!(set_variables_vm, "", script.clone(), "[]", "[]");
-        let res = call_vm!(vm_a, "", script.clone(), "[]", res.data);
-        let res = call_vm!(vm_b, "", script.clone(), "[]", res.data);
-        let res = call_vm!(vm_a, "", script.clone(), "[]", res.data);
-        let res = call_vm!(vm_b, "", script.clone(), "[]", res.data);
+        let result = call_vm!(set_variables_vm, "", script.clone(), "", "");
+        let result = call_vm!(vm_a, "", script.clone(), "", result.data);
+        let result = call_vm!(vm_b, "", script.clone(), "", result.data);
+        let result = call_vm!(vm_a, "", script.clone(), "", result.data);
+        let result = call_vm!(vm_b, "", script.clone(), "", result.data);
 
-        vm_a.call_with_prev_data("", script, "[]", res.data)
+        vm_a.call_with_prev_data("", script, "", result.data)
     }
 
-    let variable_shadowing_script = String::from(
-        r#"
+    let variable_shadowing_script = r#"
             (seq
                 (seq
                     (call "set_variable" ("" "") [] iterable1)
@@ -434,11 +377,11 @@ fn shadowing_scope() {
                         (next i)
                     )
                 )
-            )"#,
-    );
+            )"#;
 
-    let res = execute_script(variable_shadowing_script).unwrap();
-    let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid executed trace");
+    let result = execute_script(String::from(variable_shadowing_script)).unwrap();
+
+    let actual_trace = trace_from_result(&result);
     let expected_trace = vec![
         scalar_string_array(vec!["1", "2"]),
         scalar_string_array(vec!["1", "2"]),

@@ -30,12 +30,12 @@ pub type ExecutionTrace = Vec<ExecutedState>;
 /// have the following format.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct InterpreterData {
+    /// Trace of AIR execution, which contains executed call, par and fold states.
+    pub trace: ExecutionTrace,
+
     /// Contains maximum generation for each stream. This info will be used while merging
     /// values in streams.
     pub streams: StreamGenerations,
-
-    /// Trace of AIR execution, which contains executed call, par and fold states.
-    pub trace: ExecutionTrace,
 
     /// Version of this data format.
     pub version: semver::Version,
@@ -44,8 +44,16 @@ pub struct InterpreterData {
 impl InterpreterData {
     pub fn new() -> Self {
         Self {
-            streams: <_>::default(),
             trace: <_>::default(),
+            streams: <_>::default(),
+            version: DATA_FORMAT_VERSION.deref().clone(),
+        }
+    }
+
+    pub fn from_execution_result(trace: ExecutionTrace, streams: StreamGenerations) -> Self {
+        Self {
+            trace,
+            streams,
             version: DATA_FORMAT_VERSION.deref().clone(),
         }
     }

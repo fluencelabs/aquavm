@@ -36,8 +36,8 @@ fn json_path_not_allowed_for_non_objects_and_arrays() {
         set_variable_peer_id, local_peer_id
     );
 
-    let res = call_vm!(set_variable_vm, "asd", &script, "", "");
-    let res = call_vm!(local_vm, "asd", script, "", res.data);
+    let result = call_vm!(set_variable_vm, "asd", &script, "", "");
+    let result = call_vm!(local_vm, "asd", script, "", result.data);
 
-    assert_eq!(res.ret_code, 1018);
+    assert_eq!(result.ret_code, 1018);
 }

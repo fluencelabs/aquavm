@@ -51,27 +51,27 @@ fn network_explore() {
 
     let script = include_str!("./scripts/network_explore.clj");
 
-    let client_res = call_vm!(client, "", script, "[]", "[]");
-    assert_eq!(client_res.next_peer_pks, vec![relay_id.clone()]);
+    let client_result = call_vm!(client, "", script, "", "");
+    assert_eq!(client_result.next_peer_pks, vec![relay_id.clone()]);
 
-    let relay_res = call_vm!(relay, "", script, "", client_res.data);
-    assert_eq!(relay_res.next_peer_pks, vec![client_1_id.clone()]);
+    let relay_result = call_vm!(relay, "", script, "", client_result.data);
+    assert_eq!(relay_result.next_peer_pks, vec![client_1_id.clone()]);
 
-    let client_1_res = call_vm!(client_1, "", script, "", relay_res.data.clone());
-    assert_eq!(client_1_res.next_peer_pks, vec![client_2_id.clone()]);
+    let client_1_result = call_vm!(client_1, "", script, "", relay_result.data.clone());
+    assert_eq!(client_1_result.next_peer_pks, vec![client_2_id.clone()]);
 
-    let client_2_res = call_vm!(client_2, "", script, "", client_1_res.data.clone());
-    assert_eq!(client_2_res.next_peer_pks, vec![relay_id.clone()]);
+    let client_2_result = call_vm!(client_2, "", script, "", client_1_result.data.clone());
+    assert_eq!(client_2_result.next_peer_pks, vec![relay_id.clone()]);
 
-    let relay_res = call_vm!(relay, "", script, relay_res.data, client_2_res.data.clone());
-    assert_eq!(relay_res.next_peer_pks, vec![client_2_id.clone()]);
+    let relay_result = call_vm!(relay, "", script, relay_result.data, client_2_result.data.clone());
+    assert_eq!(relay_result.next_peer_pks, vec![client_2_id.clone()]);
 
-    let client_2_res = call_vm!(client_2, "", script, client_2_res.data, relay_res.data.clone());
-    assert_eq!(client_2_res.next_peer_pks, vec![relay_id.clone()]);
+    let client_2_result = call_vm!(client_2, "", script, client_2_result.data, relay_result.data.clone());
+    assert_eq!(client_2_result.next_peer_pks, vec![relay_id.clone()]);
 
-    let relay_res = call_vm!(relay, "", script, relay_res.data, client_2_res.data);
-    assert_eq!(relay_res.next_peer_pks, vec![client_1_id.clone()]);
+    let relay_result = call_vm!(relay, "", script, relay_result.data, client_2_result.data);
+    assert_eq!(relay_result.next_peer_pks, vec![client_1_id.clone()]);
 
-    let client_1_res = call_vm!(client_1, "", script, client_1_res.data, relay_res.data);
-    assert_eq!(client_1_res.next_peer_pks, Vec::<String>::new());
+    let client_1_result = call_vm!(client_1, "", script, client_1_result.data, relay_result.data);
+    assert_eq!(client_1_result.next_peer_pks, Vec::<String>::new());
 }

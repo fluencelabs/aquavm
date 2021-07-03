@@ -109,6 +109,10 @@ impl FoldFSM {
         Ok(())
     }
 
+    pub(crate) fn error_exit(self, _data_keeper: &mut DataKeeper) {
+        unimplemented!();
+    }
+
     fn meet_before_state(&mut self, value: &ValueAndPos, data_keeper: &mut DataKeeper) -> FSMResult<()> {
         let prev_lore = remove_first(&mut self.prev_fold_lore, &value.value);
         // TODO: this one could be quadratic on stream len and it could be improved by comparing

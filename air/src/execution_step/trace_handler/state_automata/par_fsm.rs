@@ -15,10 +15,12 @@
  */
 
 mod par_builder;
+mod par_fsm_state;
 mod size_updater;
 
 use super::*;
 use par_builder::ParBuilder;
+use par_fsm_state::ParFSMState;
 use size_updater::SubTraceSizeUpdater;
 
 #[derive(Debug, Default, Clone)]
@@ -28,6 +30,7 @@ pub(crate) struct ParFSM {
     state_inserter: StateInserter,
     size_updater: SubTraceSizeUpdater,
     par_builder: ParBuilder,
+    state: ParFSMState,
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
@@ -51,14 +54,17 @@ macro_rules! par_right {
 impl ParFSM {
     pub(crate) fn new(ingredients: MergerParResult, data_keeper: &mut DataKeeper) -> FSMResult<Self> {
         let state_inserter = StateInserter::from_keeper(data_keeper);
-        let size_updater = SubTraceSizeUpdater::from_data_keeper(data_keeper, ingredients)?;
+        let size_updater = SubTraceSizeUpdater::from_keeper(data_keeper, ingredients)?;
+        let par_builder = ParBuilder::from_keeper(data_keeper, &state_inserter);
+        let state = ParFSMState::Initialized;
 
         let par_fsm = Self {
             prev_par: ingredients.prev_par,
             current_par: ingredients.current_par,
             state_inserter,
             size_updater,
-            ..<_>::default()
+            par_builder,
+            state,
         };
 
         par_fsm.prepare_data(data_keeper, SubtreeType::Left)?;
@@ -66,6 +72,8 @@ impl ParFSM {
     }
 
     pub(crate) fn left_completed(&mut self, data_keeper: &mut DataKeeper) -> FSMResult<()> {
+        self.state.next();
+
         self.check_subtrace_lens(data_keeper, SubtreeType::Left)?;
         self.par_builder.track(data_keeper, SubtreeType::Left);
         self.prepare_data(data_keeper, SubtreeType::Right)?;
@@ -74,6 +82,8 @@ impl ParFSM {
     }
 
     pub(crate) fn right_completed(mut self, data_keeper: &mut DataKeeper) -> FSMResult<()> {
+        self.state.next(); // it is needed here only for consistency with left_completed
+
         self.check_subtrace_lens(data_keeper, SubtreeType::Right)?;
         self.par_builder.track(data_keeper, SubtreeType::Right);
 
@@ -82,6 +92,21 @@ impl ParFSM {
         self.size_updater.update(data_keeper)?;
 
         Ok(())
+    }
+
+    // handle error bubbling
+    pub(crate) fn error_exit(mut self, data_keeper: &mut DataKeeper) {
+        match self.state {
+            ParFSMState::Initialized => {
+                self.par_builder.track(data_keeper, SubtreeType::Left);
+                self.par_builder.track(data_keeper, SubtreeType::Right);
+            }
+            ParFSMState::LeftCompleted => self.par_builder.track(data_keeper, SubtreeType::Right),
+            ParFSMState::RightCompleted => {}
+        }
+
+        let state = self.par_builder.build();
+        self.state_inserter.insert(data_keeper, state);
     }
 
     fn prepare_data(&self, data_keeper: &mut DataKeeper, subtree_type: SubtreeType) -> FSMResult<()> {

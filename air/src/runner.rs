@@ -46,15 +46,17 @@ fn execute_air_impl(
         air,
     } = prepare(&prev_data, &data, air.as_str(), init_peer_id)
         // return the initial data in case of errors
-        .map_err(|e| outcome::from_preparation_error(data, e))?;
+        .map_err(|e| outcome::from_preparation_error(prev_data, e))?;
 
-    air.execute(&mut exec_ctx, &mut trace_handler)
+    // match here is used instead of map_err, because the compiler can't determine that
+    // they are exclusive and would treat exec_ctx and trace_handler as moved
+    match air.execute(&mut exec_ctx, &mut trace_handler) {
+        Ok(_) => {}
         // return new collected trace in case of errors
-        .map_err(|e| {
-            outcome::from_execution_error(&trace_handler.as_result_trace(), exec_ctx.next_peer_pks.clone(), e)
-        })?;
+        Err(e) => return Err(outcome::from_execution_error(exec_ctx, trace_handler, e)),
+    }
 
-    let outcome = outcome::from_path_and_peers(&trace_handler.as_result_trace(), exec_ctx.next_peer_pks);
+    let outcome = outcome::from_success_result(exec_ctx, trace_handler);
 
     Ok(outcome)
 }

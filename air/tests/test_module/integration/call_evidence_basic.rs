@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-use air::execution_trace::ExecutionTrace;
 use air_test_utils::call_vm;
 use air_test_utils::create_avm;
 use air_test_utils::echo_number_call_service;
 use air_test_utils::executed_state::*;
+use air_test_utils::raw_data_from_trace;
+use air_test_utils::trace_from_result;
 use air_test_utils::unit_call_service;
 use air_test_utils::CallServiceClosure;
 use air_test_utils::IValue;
@@ -47,8 +48,8 @@ fn executed_trace_seq_par_call() {
 
     let initial_state = serde_json::to_string(&initial_state).expect("default serializer shouldn't fail");
 
-    let res = call_vm!(vm, "asd", script, "[]", initial_state);
-    let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("interpreter should return valid json");
+    let result = call_vm!(vm, "asd", script, "", initial_state);
+    let actual_trace = trace_from_result(&result);
 
     let test_string = "test";
 
@@ -60,7 +61,7 @@ fn executed_trace_seq_par_call() {
     ];
 
     assert_eq!(actual_trace, expected_trace);
-    assert!(res.next_peer_pks.is_empty());
+    assert!(result.next_peer_pks.is_empty());
 }
 
 #[test]
@@ -87,10 +88,11 @@ fn executed_trace_par_par_call() {
         stream_string("test", "$acc"),
     ];
 
-    let initial_state = serde_json::to_string(&initial_state).expect("default serializer shouldn't fail");
+    let initial_data = raw_data_from_trace(initial_state);
 
-    let res = call_vm!(vm, "asd", script, "", initial_state);
-    let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("interpreter should return valid json");
+    let result = call_vm!(vm, "asd", script, "", initial_data);
+    println!("error: {:?}", result);
+    let actual_trace = trace_from_result(&result);
 
     let test_string = "test";
     let expected_trace = vec![
@@ -102,7 +104,7 @@ fn executed_trace_par_par_call() {
     ];
 
     assert_eq!(actual_trace, expected_trace);
-    assert_eq!(res.next_peer_pks, vec![String::from("remote_peer_id")]);
+    assert_eq!(result.next_peer_pks, vec![String::from("remote_peer_id")]);
 }
 
 #[test]
@@ -125,15 +127,15 @@ fn executed_trace_seq_seq() {
         peer_id_1, peer_id_1, peer_id_2
     );
 
-    let res = call_vm!(vm2, "asd", script.clone(), "[]", "[]");
-    assert_eq!(res.next_peer_pks, vec![peer_id_1.clone()]);
+    let result = call_vm!(vm2, "asd", script.clone(), "", "");
+    assert_eq!(result.next_peer_pks, vec![peer_id_1.clone()]);
 
-    let res = call_vm!(vm1, "asd", script.clone(), "[]", res.data);
-    assert_eq!(res.next_peer_pks, vec![peer_id_2.clone()]);
+    let result = call_vm!(vm1, "asd", script.clone(), "", result.data);
+    assert_eq!(result.next_peer_pks, vec![peer_id_2.clone()]);
 
-    let res = call_vm!(vm2, "asd", script, "[]", res.data);
+    let result = call_vm!(vm2, "asd", script, "", result.data);
 
-    let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("interpreter should return valid json");
+    let actual_trace = trace_from_result(&result);
 
     let test_string = "test";
     let expected_trace = vec![
@@ -168,8 +170,8 @@ fn executed_trace_create_service() {
     let add_blueprint_response = String::from("add_blueprint response");
     let create_response = String::from("create response");
 
-    let call_service: CallServiceClosure = Box::new(move |_, args| -> Option<IValue> {
-        let builtin_service = match &args[0] {
+    let call_service: CallServiceClosure = Box::new(move |args| -> Option<IValue> {
+        let builtin_service = match &args.function_args[0] {
             IValue::String(str) => str,
             _ => unreachable!(),
         };
@@ -202,18 +204,19 @@ fn executed_trace_create_service() {
         scalar_string(create_response),
         scalar_string("test"),
     ];
+    let initial_data = raw_data_from_trace(expected_trace.clone());
 
-    let res = call_vm!(vm, "init_peer_id", script, "[]", json!(expected_trace).to_string());
+    let result = call_vm!(vm, "init_peer_id", script, "", initial_data);
 
-    let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be a correct json");
+    let actual_trace = trace_from_result(&result);
 
     assert_eq!(actual_trace, expected_trace);
-    assert!(res.next_peer_pks.is_empty());
+    assert!(result.next_peer_pks.is_empty());
 }
 
 #[test]
 fn executed_trace_par_seq_fold_call() {
-    let return_numbers_call_service: CallServiceClosure = Box::new(|_, _| -> Option<IValue> {
+    let return_numbers_call_service: CallServiceClosure = Box::new(|_| -> Option<IValue> {
         Some(IValue::Record(
             NEVec::new(vec![
                 IValue::S32(0),
@@ -245,17 +248,17 @@ fn executed_trace_par_seq_fold_call() {
         )"#,
     );
 
-    let res = call_vm!(vm2, "asd", script.clone(), "[]", "[]");
-    let res = call_vm!(vm1, "asd", script.clone(), "[]", res.data);
-    let mut data = res.data;
+    let result = call_vm!(vm2, "asd", script.clone(), "", "");
+    let result = call_vm!(vm1, "asd", script.clone(), "", result.data);
+    let mut data = result.data;
 
     for _ in 0..100 {
-        let res = call_vm!(vm2, "asd", script.clone(), "[]", data);
-        data = res.data;
+        let result = call_vm!(vm2, "asd", script.clone(), "", data);
+        data = result.data;
     }
 
-    let res = call_vm!(vm3, "asd", script, "", data);
-    let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("a valid json");
+    let result = call_vm!(vm3, "asd", script, "", data);
+    let actual_trace = trace_from_result(&result);
 
     let stream_name = "$acc";
     let expected_trace = vec![
@@ -285,12 +288,12 @@ fn executed_trace_par_seq_fold_call() {
     ];
 
     assert_eq!(actual_trace, expected_trace);
-    assert!(res.next_peer_pks.is_empty());
+    assert!(result.next_peer_pks.is_empty());
 }
 
 #[test]
 fn executed_trace_par_seq_fold_in_cycle_call() {
-    let return_numbers_call_service: CallServiceClosure = Box::new(|_, _| -> Option<IValue> {
+    let return_numbers_call_service: CallServiceClosure = Box::new(|_| -> Option<IValue> {
         Some(IValue::Record(
             NEVec::new(vec![
                 IValue::S32(0),
@@ -325,42 +328,43 @@ fn executed_trace_par_seq_fold_in_cycle_call() {
     let mut data = vec![];
 
     for _ in 0..100 {
-        let res = call_vm!(vm1, "asd", script.clone(), "[]", data);
-        let res = call_vm!(vm2, "asd", script.clone(), "[]", res.data);
-        let res = call_vm!(vm3, "asd", script.clone(), "[]", res.data);
-        data = res.data;
+        let result = call_vm!(vm1, "asd", script.clone(), "", data);
+        let result = call_vm!(vm2, "asd", script.clone(), "", result.data);
+        let result = call_vm!(vm3, "asd", script.clone(), "", result.data);
+
+        let actual_trace = trace_from_result(&result);
+
+        let stream_name = "$acc";
+        let expected_trace = vec![
+            par(21, 1),
+            scalar_string_array(vec!["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]),
+            par(1, 18),
+            stream_number(1, stream_name),
+            par(1, 16),
+            stream_number(2, stream_name),
+            par(1, 14),
+            stream_number(3, stream_name),
+            par(1, 12),
+            stream_number(4, stream_name),
+            par(1, 10),
+            stream_number(5, stream_name),
+            par(1, 8),
+            stream_number(6, stream_name),
+            par(1, 6),
+            stream_number(7, stream_name),
+            par(1, 4),
+            stream_number(8, stream_name),
+            par(1, 2),
+            stream_number(9, stream_name),
+            par(1, 0),
+            stream_number(10, stream_name),
+            scalar_string("test"),
+        ];
+
+        assert_eq!(actual_trace, expected_trace);
+
+        data = result.data;
     }
-
-    let actual_trace: ExecutionTrace = serde_json::from_slice(&data).expect("interpreter should return valid json");
-
-    let stream_name = "$acc";
-    let expected_trace = vec![
-        par(21, 1),
-        scalar_string_array(vec!["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]),
-        par(1, 18),
-        stream_number(1, stream_name),
-        par(1, 16),
-        stream_number(2, stream_name),
-        par(1, 14),
-        stream_number(3, stream_name),
-        par(1, 12),
-        stream_number(4, stream_name),
-        par(1, 10),
-        stream_number(5, stream_name),
-        par(1, 8),
-        stream_number(6, stream_name),
-        par(1, 6),
-        stream_number(7, stream_name),
-        par(1, 4),
-        stream_number(8, stream_name),
-        par(1, 2),
-        stream_number(9, stream_name),
-        par(1, 0),
-        stream_number(10, stream_name),
-        scalar_string("test"),
-    ];
-
-    assert_eq!(actual_trace, expected_trace);
 }
 
 #[test]
@@ -388,15 +392,15 @@ fn executed_trace_seq_par_seq_seq() {
         peer_id_1, peer_id_2, peer_id_2, peer_id_1, peer_id_2
     );
 
-    let res = call_vm!(vm2, "asd", script.clone(), "[]", "[]");
-    assert_eq!(res.next_peer_pks, vec![peer_id_1.clone()]);
+    let result = call_vm!(vm2, "asd", script.clone(), "", "");
+    assert_eq!(result.next_peer_pks, vec![peer_id_1.clone()]);
 
-    let res = call_vm!(vm1, "asd", script.clone(), "[]", res.data);
-    assert_eq!(res.next_peer_pks, vec![peer_id_2.clone()]);
+    let result = call_vm!(vm1, "asd", script.clone(), "", result.data);
+    assert_eq!(result.next_peer_pks, vec![peer_id_2.clone()]);
 
-    let res = call_vm!(vm2, "asd", script, "[]", res.data);
+    let result = call_vm!(vm2, "asd", script, "", result.data);
 
-    let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("interpreter should return valid json");
+    let actual_trace = trace_from_result(&result);
 
     let service_result_string = "test";
     let executed_trace = vec![
@@ -409,5 +413,5 @@ fn executed_trace_seq_par_seq_seq() {
     ];
 
     assert_eq!(actual_trace, executed_trace);
-    assert!(res.next_peer_pks.is_empty());
+    assert!(result.next_peer_pks.is_empty());
 }

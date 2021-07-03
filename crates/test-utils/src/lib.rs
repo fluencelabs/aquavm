@@ -39,9 +39,7 @@ pub use avm_server::ParticleParameters;
 pub use avm_server::AVM;
 pub use call_services::*;
 
-pub use air::interpreter_data::CallResult;
-pub use air::interpreter_data::ExecutedState;
-pub use air::interpreter_data::ExecutionTrace;
+pub use air::interpreter_data::*;
 
 use std::path::PathBuf;
 
@@ -70,4 +68,18 @@ macro_rules! call_vm {
             Err(err) => panic!("VM call failed: {}", err),
         }
     };
+}
+
+pub fn trace_from_result(result: &InterpreterOutcome) -> ExecutionTrace {
+    let data = data_from_result(result);
+    data.trace
+}
+
+pub fn data_from_result(result: &InterpreterOutcome) -> InterpreterData {
+    serde_json::from_slice(&result.data).expect("default serializer shouldn't fail")
+}
+
+pub fn raw_data_from_trace(trace: ExecutionTrace) -> Vec<u8> {
+    let data = InterpreterData::from_execution_result(trace, <_>::default());
+    serde_json::to_vec(&data).expect("default serializer shouldn't fail")
 }

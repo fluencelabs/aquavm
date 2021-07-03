@@ -14,27 +14,31 @@
  * limitations under the License.
  */
 
+use crate::execution_step::AValue;
+use crate::execution_step::ExecutionCtx;
 use crate::execution_step::ExecutionError;
+use crate::execution_step::TraceHandler;
 use crate::preparation_step::PreparationError;
-
 use crate::InterpreterOutcome;
 use crate::INTERPRETER_SUCCESS;
 
-use serde::Serialize;
+use air_interpreter_data::InterpreterData;
+use air_interpreter_data::StreamGenerations;
 
+use std::collections::HashMap;
 use std::hash::Hash;
 use std::rc::Rc;
 
 const EXECUTION_ERRORS_START_ID: i32 = 1000;
 
-/// Create InterpreterOutcome from supplied data and next_peer_pks,
+/// Create InterpreterOutcome from supplied execution context and trace handler,
 /// set ret_code to INTERPRETER_SUCCESS.
-pub(crate) fn from_path_and_peers<T>(data: &T, next_peer_pks: Vec<String>) -> InterpreterOutcome
-where
-    T: ?Sized + Serialize,
-{
-    let data = serde_json::to_vec(data).expect("default serializer shouldn't fail");
-    let next_peer_pks = dedup(next_peer_pks);
+pub(crate) fn from_success_result(exec_ctx: ExecutionCtx<'_>, trace_handler: TraceHandler) -> InterpreterOutcome {
+    let streams = extract_stream_generations(exec_ctx.data_cache);
+    let data = InterpreterData::from_execution_result(trace_handler.into_result_trace(), streams);
+    let data = serde_json::to_vec(&data).expect("default serializer shouldn't fail");
+
+    let next_peer_pks = dedup(exec_ctx.next_peer_pks);
 
     InterpreterOutcome {
         ret_code: INTERPRETER_SUCCESS,
@@ -58,21 +62,21 @@ pub(crate) fn from_preparation_error(data: impl Into<Vec<u8>>, err: PreparationE
     }
 }
 
-/// Create InterpreterOutcome from supplied data, next_peer_pks and error,
+/// Create InterpreterOutcome from supplied execution context, trace handler, and error,
 /// set ret_code based on the error.
-pub(crate) fn from_execution_error<T>(
-    data: &T,
-    next_peer_pks: Vec<String>,
+pub(crate) fn from_execution_error(
+    exec_ctx: ExecutionCtx<'_>,
+    trace_handler: TraceHandler,
     err: Rc<ExecutionError>,
-) -> InterpreterOutcome
-where
-    T: ?Sized + Serialize,
-{
+) -> InterpreterOutcome {
     let ret_code = err.to_error_code() as i32;
     let ret_code = EXECUTION_ERRORS_START_ID + ret_code;
 
-    let data = serde_json::to_vec(data).expect("default serializer shouldn't fail");
-    let next_peer_pks = dedup(next_peer_pks);
+    let streams = extract_stream_generations(exec_ctx.data_cache);
+    let data = InterpreterData::from_execution_result(trace_handler.into_result_trace(), streams);
+    let data = serde_json::to_vec(&data).expect("default serializer shouldn't fail");
+
+    let next_peer_pks = dedup(exec_ctx.next_peer_pks);
 
     InterpreterOutcome {
         ret_code,
@@ -88,4 +92,14 @@ fn dedup<T: Eq + Hash>(mut vec: Vec<T>) -> Vec<T> {
 
     let set: HashSet<_> = vec.drain(..).collect();
     set.into_iter().collect()
+}
+
+fn extract_stream_generations(data_cache: HashMap<String, AValue<'_>>) -> StreamGenerations {
+    data_cache
+        .into_iter()
+        .filter_map(|(name, value)| match value {
+            AValue::StreamRef(stream) => Some((name, stream.borrow().generations_count() as u32)),
+            _ => None,
+        })
+        .collect::<_>()
 }

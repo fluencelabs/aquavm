@@ -48,7 +48,7 @@ impl Stream {
             Generation::Nth(id) => id as usize,
         };
 
-        if self.0.len() >= generation {
+        if generation >= self.0.len() {
             return exec_err!(ExecutionError::StreamDontHaveSuchGeneration(self.clone(), generation));
         }
 

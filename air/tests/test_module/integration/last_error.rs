@@ -81,9 +81,9 @@ fn last_error_tetraplets() {
         set_variable_peer_id, fallible_peer_id, local_peer_id
     );
 
-    let res = call_vm!(set_variable_vm, "asd", script.clone(), "", "");
-    let res = call_vm!(fallible_vm, "asd", script.clone(), "", res.data);
-    let _ = call_vm!(local_vm, "asd", script, "", res.data);
+    let result = call_vm!(set_variable_vm, "asd", script.clone(), "", "");
+    let result = call_vm!(fallible_vm, "asd", script.clone(), "", result.data);
+    let _ = call_vm!(local_vm, "asd", script, "", result.data);
 
     let actual_value = (*args.borrow()).as_ref().unwrap().clone();
     assert_eq!(
@@ -135,8 +135,8 @@ fn not_clear_last_error_in_match() {
         set_variable_peer_id, local_peer_id
     );
 
-    let res = call_vm!(set_variable_vm, "asd", &script, "", "");
-    let _ = call_vm!(local_vm, "asd", &script, "", res.data);
+    let result = call_vm!(set_variable_vm, "asd", &script, "", "");
+    let _ = call_vm!(local_vm, "asd", &script, "", result.data);
 
     let actual_value = (*args.borrow()).as_ref().unwrap().clone();
     assert_eq!(actual_value.instruction, "");
@@ -175,8 +175,8 @@ fn not_clear_last_error_in_mismatch() {
         set_variable_peer_id, local_peer_id
     );
 
-    let res = call_vm!(set_variable_vm, "asd", &script, "", "");
-    let _ = call_vm!(local_vm, "asd", &script, "", res.data);
+    let result = call_vm!(set_variable_vm, "asd", &script, "", "");
+    let _ = call_vm!(local_vm, "asd", &script, "", result.data);
 
     let actual_value = (*args.borrow()).as_ref().unwrap().clone();
     assert_eq!(actual_value.instruction, "");
@@ -207,8 +207,8 @@ fn track_current_peer_id() {
         fallible_peer_id, local_peer_id
     );
 
-    let res = call_vm!(fallible_vm, "asd", &script, "", "");
-    let _ = call_vm!(local_vm, "asd", script, "", res.data);
+    let result = call_vm!(fallible_vm, "asd", &script, "", "");
+    let _ = call_vm!(local_vm, "asd", script, "", result.data);
 
     let actual_value = (*args.borrow()).as_ref().unwrap().clone();
     assert_eq!(actual_value.peer_id, fallible_peer_id);

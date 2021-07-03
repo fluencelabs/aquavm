@@ -15,6 +15,7 @@
  */
 
 mod air_basic;
+mod call_evidence_basic;
 mod dashboard;
 mod data_merge;
 mod flattening;
@@ -23,4 +24,5 @@ mod join_behaviour;
 mod json_path;
 mod last_error;
 mod network_explore;
+mod security_tetraplets;
 mod streams;

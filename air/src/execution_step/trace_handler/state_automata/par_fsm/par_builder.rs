@@ -25,9 +25,20 @@ pub(super) struct ParBuilder {
 }
 
 impl ParBuilder {
+    // StateInserter here needs to guaranteed that ParBuilder creates after it,
+    // it must be so to right track a left subtree size
+    pub(super) fn from_keeper(data_keeper: &DataKeeper, _: &StateInserter) -> Self {
+        let saved_states_count = data_keeper.result_states_count();
+        Self {
+            saved_states_count,
+            left_subtree_size: 0,
+            right_subtree_size: 0,
+        }
+    }
+
     pub(super) fn track(&mut self, data_keeper: &DataKeeper, subtree_type: SubtreeType) {
         let prev_states_count = self.saved_states_count;
-        let states_count = data_keeper.result_trace.len();
+        let states_count = data_keeper.result_states_count();
         let resulted_states_count = states_count - prev_states_count;
 
         match subtree_type {

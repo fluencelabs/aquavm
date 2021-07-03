@@ -1,4 +1,4 @@
-// auto-generated: "lalrpop 0.19.5"
+// auto-generated: "lalrpop 0.19.6"
 // sha3: 8a70ed8297bd8118c9f1db6670700316ac9801f5c1ed85407d4bd31fc4b210
 use crate::parser::ast::*;
 use crate::parser::air_parser::make_flattened_error;

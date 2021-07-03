@@ -30,8 +30,8 @@ mod build_targets;
 mod execution_step;
 mod preparation_step;
 
-mod air;
 pub mod log_targets;
+mod runner;
 
 pub use air_interpreter_interface::InterpreterOutcome;
 pub use air_interpreter_interface::INTERPRETER_SUCCESS;
@@ -39,7 +39,7 @@ pub use execution_step::execution_context::LastError;
 pub use polyplets::ResolvedTriplet;
 pub use polyplets::SecurityTetraplet;
 
-pub use crate::air::execute_air;
+pub use crate::runner::execute_air;
 
 pub mod interpreter_data {
     pub use air_interpreter_data::*;

@@ -71,7 +71,7 @@ impl<'i> ResolvedCall<'i> {
         }
 
         // call can be executed only on peers with such peer_id
-        if self.triplet.peer_pk.as_str() == exec_ctx.current_peer_id.as_str() {
+        if self.triplet.peer_pk.as_str() != exec_ctx.current_peer_id.as_str() {
             set_remote_call_result(self.triplet.peer_pk.clone(), exec_ctx, trace_ctx);
 
             return Ok(());
