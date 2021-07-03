@@ -54,8 +54,9 @@ pub fn create_avm(call_service: CallServiceClosure, current_peer_id: impl Into<S
         air_wasm_path: PathBuf::from("../target/wasm32-wasi/debug/air_interpreter_server.wasm"),
         call_service,
         current_peer_id: current_peer_id.into(),
+        vault_dir: tmp_dir.join("vault"),
         particle_data_store: tmp_dir,
-        logging_mask: i32::max_value(),
+        logging_mask: i32::MAX,
     };
 
     AVM::new(config).expect("vm should be created")

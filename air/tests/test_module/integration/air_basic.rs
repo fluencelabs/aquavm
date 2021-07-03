@@ -123,8 +123,8 @@ fn create_service() {
     let add_blueprint_response = String::from("add_blueprint response");
     let create_response = String::from("create response");
 
-    let call_service: CallServiceClosure = Box::new(move |_, args| -> Option<IValue> {
-        let builtin_service = match &args[0] {
+    let call_service: CallServiceClosure = Box::new(move |args| -> Option<IValue> {
+        let builtin_service = match &args.function_args[0] {
             IValue::String(str) => str,
             _ => unreachable!(),
         };

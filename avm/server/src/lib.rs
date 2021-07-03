@@ -25,13 +25,16 @@
 )]
 
 mod avm;
+mod call_service;
 mod config;
+mod data_store;
 mod errors;
 
 pub use avm::ParticleParameters;
 pub use avm::AVM;
+pub use call_service::CallServiceArgs;
+pub use call_service::CallServiceClosure;
 pub use config::AVMConfig;
-pub use config::CallServiceClosure;
 pub use errors::AVMError;
 
 // Re-exports

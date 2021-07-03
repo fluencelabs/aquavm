@@ -72,18 +72,18 @@ fn client_host_function(
     );
 
     let all_info_inner = all_info.clone();
-    let host_function: CallServiceClosure = Box::new(move |_, args| -> Option<IValue> {
-        let service_name = match &args[0] {
+    let host_function: CallServiceClosure = Box::new(move |args| -> Option<IValue> {
+        let service_name = match &args.function_args[0] {
             IValue::String(str) => str,
             _ => unreachable!(),
         };
 
-        let function_name = match &args[1] {
+        let function_name = match &args.function_args[1] {
             IValue::String(str) => str,
             _ => unreachable!(),
         };
 
-        let function_args = match &args[2] {
+        let function_args = match &args.function_args[2] {
             IValue::String(str) => str,
             _ => unreachable!(),
         };
@@ -132,18 +132,18 @@ fn peer_host_function(
         },
     );
 
-    Box::new(move |_, args| -> Option<IValue> {
-        let service_name = match &args[0] {
+    Box::new(move |args| -> Option<IValue> {
+        let service_name = match &args.function_args[0] {
             IValue::String(str) => str,
             _ => unreachable!(),
         };
 
-        let function_name = match &args[1] {
+        let function_name = match &args.function_args[1] {
             IValue::String(str) => str,
             _ => unreachable!(),
         };
 
-        let function_args = match &args[2] {
+        let function_args = match &args.function_args[2] {
             IValue::String(str) => str,
             _ => unreachable!(),
         };
