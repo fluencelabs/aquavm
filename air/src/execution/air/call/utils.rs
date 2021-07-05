@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use super::Call;
 use super::ExecutionCtx;
 use super::ExecutionError;
 use super::ExecutionResult;
@@ -119,6 +120,7 @@ pub(super) fn handle_prev_state<'i>(
     prev_state: ExecutedState,
     exec_ctx: &mut ExecutionCtx<'i>,
     trace_ctx: &mut ExecutionTraceCtx,
+    instruction: &Call<'i>,
 ) -> ExecutionResult<bool> {
     use CallResult::*;
     use ExecutedState::*;
@@ -152,9 +154,13 @@ pub(super) fn handle_prev_state<'i>(
             Ok(false)
         }
         // state has inconsistent order - return a error, call shouldn't be executed
-        par_state @ Par(..) => exec_err!(ExecutionError::InvalidExecutedState(
-            String::from("call"),
-            par_state.clone(),
-        )),
+        par_state @ Par(..) => exec_err!(ExecutionError::InvalidExecutedState {
+            instruction: instruction.to_string(),
+            expected_state: "call",
+            actual_state: par_state.clone(),
+            current_trace: trace_ctx.current_trace.clone(),
+            new_trace: trace_ctx.new_trace.clone(),
+            current_subtree_size: trace_ctx.current_subtree_size,
+        }),
     }
 }

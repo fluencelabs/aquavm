@@ -18,6 +18,7 @@ use super::Joinable;
 use crate::build_targets::CallServiceResult;
 use crate::contexts::execution::ResolvedCallResult;
 use crate::contexts::execution_trace::ExecutedState;
+use crate::contexts::execution_trace::ExecutionTrace;
 use crate::JValue;
 
 use jsonpath_lib::JsonPathError;
@@ -78,8 +79,30 @@ pub(crate) enum ExecutionError {
     MultipleFoldStates(String),
 
     /// Expected executed state of a different type.
-    #[error("invalid executed state: expected '{0}', but actual {1:?}")]
-    InvalidExecutedState(String, ExecutedState),
+    #[error(
+        r#"
+    ======================================================================
+    Below is a crucial debug information, please send this to the Fluence Labs:
+
+    invalid executed state error:
+      current instruction: {instruction},
+      expected state: {expected_state},
+      actual_state: '{actual_state}',
+      current_trace: '{current_trace:?}',
+      new_trace: '{new_trace:?}',
+      current_subtree_size: {current_subtree_size},
+
+    ======================================================================
+    "#
+    )]
+    InvalidExecutedState {
+        instruction: String,
+        expected_state: &'static str,
+        actual_state: ExecutedState,
+        current_trace: ExecutionTrace,
+        new_trace: ExecutionTrace,
+        current_subtree_size: usize,
+    },
 
     /// Errors encountered while shadowing non-scalar values.
     #[error("variable with name '{0}' can't be shadowed, shadowing is supported only for scalar values")]
@@ -122,7 +145,7 @@ impl ExecutionError {
             MultipleValuesInJsonPath(_) => 10,
             FoldStateNotFound(_) => 11,
             MultipleFoldStates(_) => 12,
-            InvalidExecutedState(..) => 13,
+            InvalidExecutedState { .. } => 13,
             ShadowingError(_) => 14,
             MatchWithoutXorError => 15,
             MismatchWithoutXorError => 16,
