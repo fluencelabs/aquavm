@@ -1,3 +1,11 @@
+## Version 0.10.8 (2021-07-06)
+
+- improve the error message of the invalid executed state error ([PR 121](https://github.com/fluencelabs/aquavm/pull/121))
+
+## Version 0.10.7 (2021-07-01)
+
+- add support of a particle file vault ([PR 120](https://github.com/fluencelabs/aquavm/pull/120))
+
 ## Version 0.10.6 (2021-06-10)
 
 - fixed the error message for incorrect json path in `%last_error%` ([PR 119](https://github.com/fluencelabs/aquavm/pull/119))
