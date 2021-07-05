@@ -22,8 +22,4 @@ pub(crate) enum KeeperError {
     /// Errors occurred when executed trace contains less elements then corresponding Par has.
     #[error("executed trace has {0} elements, but {1} requires by Par")]
     ExecutedTraceTooSmall(usize, usize),
-
-    /// Errors occurred when data contains no generation for stream with the following name.
-    #[error("data doesn't contain generation for stream with name '{0}'")]
-    NoSuchStream(String),
 }

@@ -52,7 +52,7 @@ fn lfold() {
     assert_eq!(actual_trace[0], expected_state);
 
     for i in 1..=5 {
-        let expected_state = executed_state::stream_number(i, "$acc");
+        let expected_state = executed_state::stream_number(i, 0);
         assert_eq!(actual_trace[i], expected_state);
     }
 }
@@ -83,7 +83,7 @@ fn rfold() {
     assert_eq!(actual_trace[0], expected_state);
 
     for i in 1..=5 {
-        let expected_state = executed_state::stream_number(6 - i, "$acc");
+        let expected_state = executed_state::stream_number(6 - i, 0);
         assert_eq!(actual_trace[i], expected_state);
     }
 }
@@ -124,7 +124,7 @@ fn inner_fold() {
 
     for i in 1..=5 {
         for j in 1..=5 {
-            let expected_state = executed_state::stream_number(i, "$acc");
+            let expected_state = executed_state::stream_number(i, 0);
             assert_eq!(actual_trace[1 + 5 * (i - 1) + j], expected_state);
         }
     }
@@ -265,7 +265,7 @@ fn json_path() {
     assert_eq!(actual_trace[0], expected_state);
 
     for i in 1..=5 {
-        let expected_state = executed_state::stream_number(i, "$acc");
+        let expected_state = executed_state::stream_number(i, 0);
         assert_eq!(actual_trace[i], expected_state);
     }
 }

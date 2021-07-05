@@ -54,14 +54,13 @@ pub(crate) enum ExecutionError {
     #[error("variable with path '{1}' not found in '{0}' with an error: '{2}'")]
     JValueJsonPathError(JValue, String, JsonPathError),
 
+    /// An error occurred while trying to apply json path to this stream generation with JValue's.
+    #[error("variable with path '{1}' not found in '{0:?}' with error: '{2}'")]
+    GenerationStreamJsonPathError(Vec<ResolvedCallResult>, String, JsonPathError),
+
     /// An error occurred while trying to apply json path to this stream with JValue's.
     #[error("variable with path '{1}' not found in '{0:?}' with error: '{2}'")]
-    JValueStreamJsonPathError(Vec<ResolvedCallResult>, String, JsonPathError),
-
-    /// An error occurred while trying to apply json path to stream in call args.
-    /// TODO: it will be checked on the parser side soon.
-    #[error("json path can't be applied to stream `{0:?}` in call args")]
-    JsonPathAppliedToStream(Stream),
+    StreamJsonPathError(Stream, String, JsonPathError),
 
     /// Provided JValue has incompatible with target type.
     #[error("expected JValue type '{1}', but got '{0}' JValue")]
@@ -136,7 +135,7 @@ impl ExecutionError {
             VariableNotFound(_) => 4,
             MultipleVariablesFound(_) => 5,
             JValueJsonPathError(..) => 6,
-            JValueStreamJsonPathError(..) => 7,
+            GenerationStreamJsonPathError(..) => 7,
             IncompatibleJValueType(..) => 8,
             IncompatibleAValueType(..) => 9,
             MultipleValuesInJsonPath(_) => 10,
@@ -147,7 +146,7 @@ impl ExecutionError {
             MismatchWithoutXorError => 15,
             FlatteningError(_) => 16,
             JsonPathVariableTypeError(_) => 17,
-            JsonPathAppliedToStream(_) => 18,
+            StreamJsonPathError(..) => 18,
             InternalError(_) => 19,
             StreamDontHaveSuchGeneration(..) => 20,
             TraceError(_) => 21,
@@ -173,10 +172,11 @@ impl Joinable for ExecutionError {
                 log_join!("  waiting for an argument with name '{}'", var_name);
                 true
             }
-            JValueStreamJsonPathError(stream, json_path, _) => {
+            StreamJsonPathError(stream, json_path, _) => {
                 log_join!("  waiting for an argument with path '{}' on stream '{:?}'", json_path, stream);
                 true
             }
+
             _ => false,
         }
     }

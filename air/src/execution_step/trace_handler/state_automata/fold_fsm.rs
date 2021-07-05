@@ -48,13 +48,13 @@ pub(crate) struct ValueAndPos {
 impl FoldFSM {
     pub(crate) fn from_fold_start(fold_result: MergerFoldResult, data_keeper: &mut DataKeeper) -> FSMResult<Self> {
         let state_inserter = StateInserter::from_keeper(data_keeper);
-        let len_updater = SubTreeSizeUpdater::new(data_keeper);
+        let size_updater = SubTreeSizeUpdater::new(data_keeper);
 
         let fold_fsm = Self {
             prev_fold_lore: fold_result.prev_fold_lore,
             current_fold_lore: fold_result.current_fold_lore,
             state_inserter,
-            size_updater: len_updater,
+            size_updater,
             ..<_>::default()
         };
 
@@ -75,6 +75,7 @@ impl FoldFSM {
             let lore_desc = self.ctor_queue.forward_ctor_mut().unwrap();
             lore_desc.ctor.before_end(data_keeper);
             lore_desc.ctor.after_start(data_keeper);
+
             lore_desc
         } else {
             self.ctor_queue.backward_ctor_mut().ctor.after_end(data_keeper);

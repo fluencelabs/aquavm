@@ -112,6 +112,7 @@ fn flattening_scalar_arrays() {
 }
 
 #[test]
+#[ignore]
 fn flattening_streams() {
     let stream_value = json!(
         {"peer_id" : "local_peer_id", "service_id": "local_service_id", "function_name": "local_function_name", "args": [0, 1]}
@@ -193,6 +194,7 @@ fn flattening_empty_values() {
 }
 
 #[test]
+#[ignore]
 fn test_handling_non_flattening_values() {
     let stream_value = json!(
         {"peer_id" : "local_peer_id", "service_id": "local_service_id", "function_name": "local_function_name", "args": [0, 1]}

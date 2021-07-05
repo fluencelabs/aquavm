@@ -32,14 +32,14 @@ impl<'i> super::ExecutableInstruction<'i> for Next<'i> {
         let iterator_name = self.0;
         let fold_state = try_get_fold_state(exec_ctx, iterator_name)?;
 
-        if !fold_state.iterable.next() {
-            // just do nothing to exit
-            return Ok(());
-        }
-
         if fold_state.is_iterable_stream {
             let next_state = fold_state.iterable.peek().unwrap();
             trace_ctx.meet_next(&next_state.as_value_and_pos())?;
+        }
+
+        if !fold_state.iterable.next() {
+            // just do nothing to exit
+            return Ok(());
         }
 
         let next_instr = fold_state.instr_head.clone();

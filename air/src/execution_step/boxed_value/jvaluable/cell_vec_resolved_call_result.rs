@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use super::ExecutionError::JValueStreamJsonPathError;
+use super::ExecutionError::GenerationStreamJsonPathError;
 use super::ExecutionResult;
 use super::JValuable;
 use crate::execution_step::execution_context::ResolvedCallResult;
@@ -30,7 +30,7 @@ impl JValuable for std::cell::Ref<'_, Vec<ResolvedCallResult>> {
     fn apply_json_path(&self, json_path: &str) -> ExecutionResult<Vec<&JValue>> {
         let acc_iter = self.iter().map(|r| r.result.deref());
         let (selected_values, _) = select_with_iter(acc_iter, json_path).map_err(|e| {
-            JValueStreamJsonPathError(self.iter().cloned().collect::<Vec<_>>(), json_path.to_string(), e)
+            GenerationStreamJsonPathError(self.iter().cloned().collect::<Vec<_>>(), json_path.to_string(), e)
         })?;
 
         Ok(selected_values)
@@ -43,7 +43,7 @@ impl JValuable for std::cell::Ref<'_, Vec<ResolvedCallResult>> {
         let acc_iter = self.iter().map(|r| r.result.deref());
 
         let (selected_values, tetraplet_indices) = select_with_iter(acc_iter, json_path).map_err(|e| {
-            JValueStreamJsonPathError(self.iter().cloned().collect::<Vec<_>>(), json_path.to_string(), e)
+            GenerationStreamJsonPathError(self.iter().cloned().collect::<Vec<_>>(), json_path.to_string(), e)
         })?;
 
         let tetraplets = tetraplet_indices

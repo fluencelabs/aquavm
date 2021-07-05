@@ -85,14 +85,14 @@ fn data_merge() {
     let expected_trace_1 = vec![
         scalar_string_array(vec!["A", "B"]),
         par(1, 2),
-        stream_string_array(vec!["A", "B"], "$void"),
+        stream_string_array(vec!["A", "B"], 0),
         par(1, 0),
         request_sent_by("A"),
         par(1, 2),
-        stream_string_array(vec!["A", "B"], "$providers"),
+        stream_string_array(vec!["A", "B"], 0),
         par(1, 0),
         request_sent_by("A"),
-        stream_string_array(vec!["A", "B"], "$void"),
+        stream_string_array(vec!["A", "B"], 0),
         request_sent_by("A"),
     ];
 
@@ -106,11 +106,11 @@ fn data_merge() {
         par(1, 2),
         request_sent_by("B"),
         par(1, 0),
-        stream_string_array(vec!["A", "B"], "$void"),
+        stream_string_array(vec!["A", "B"], 0),
         par(1, 2),
         request_sent_by("B"),
         par(1, 0),
-        stream_string_array(vec!["A", "B"], "$providers"),
+        stream_string_array(vec!["A", "B"], 0),
         request_sent_by("B"),
     ];
 
@@ -122,14 +122,14 @@ fn data_merge() {
     let expected_trace_3 = vec![
         scalar_string_array(vec!["A", "B"]),
         par(1, 2),
-        stream_string_array(vec!["A", "B"], "$void"),
+        stream_string_array(vec!["A", "B"], 0),
         par(1, 0),
-        stream_string_array(vec!["A", "B"], "$void"),
+        stream_string_array(vec!["A", "B"], 1),
         par(1, 2),
-        stream_string_array(vec!["A", "B"], "$providers"),
+        stream_string_array(vec!["A", "B"], 0),
         par(1, 0),
-        stream_string_array(vec!["A", "B"], "$providers"),
-        stream_string_array(vec!["A", "B"], "$void"),
+        stream_string_array(vec!["A", "B"], 1),
+        stream_string_array(vec!["A", "B"], 0),
         request_sent_by("A"),
     ];
 
@@ -141,14 +141,14 @@ fn data_merge() {
     let expected_trace_4 = vec![
         scalar_string_array(vec!["A", "B"]),
         par(1, 2),
-        stream_string_array(vec!["A", "B"], "$void"),
+        stream_string_array(vec!["A", "B"], 0),
         par(1, 0),
-        stream_string_array(vec!["A", "B"], "$void"),
+        stream_string_array(vec!["A", "B"], 1),
         par(1, 2),
-        stream_string_array(vec!["A", "B"], "$providers"),
+        stream_string_array(vec!["A", "B"], 0),
         par(1, 0),
-        stream_string_array(vec!["A", "B"], "$providers"),
-        stream_string_array(vec!["A", "B"], "$void"),
+        stream_string_array(vec!["A", "B"], 1),
+        stream_string_array(vec!["A", "B"], 0),
         scalar_string_array(vec!["A", "B"]),
     ];
 

@@ -78,7 +78,7 @@ fn join_chat() {
 
     let relay_1_actual_trace = trace_from_result(&relay_1_result);
     let relay_1_expected_trace = vec![
-        executed_state::stream_string("test", "$void1"),
+        executed_state::stream_string("test", 0),
         executed_state::request_sent_by("Relay1"),
     ];
 
@@ -89,8 +89,8 @@ fn join_chat() {
 
     let remote_actual_trace = trace_from_result(&remote_result);
     let remote_expected_trace = vec![
-        executed_state::stream_string("test", "$void1"),
-        executed_state::stream_jvalue(json!([["A", "Relay1"], ["B", "Relay2"]]), "$void2"),
+        executed_state::stream_string("test", 0),
+        executed_state::stream_jvalue(json!([["A", "Relay1"], ["B", "Relay2"]]), 0),
         executed_state::scalar_jvalue(json!([["A", "Relay1"], ["B", "Relay2"]])),
         executed_state::par(1, 2),
         executed_state::request_sent_by("Remote"),
@@ -112,11 +112,11 @@ fn join_chat() {
     let relay_1_actual_trace = trace_from_result(&relay_1_result);
 
     let relay_1_expected_trace = vec![
-        executed_state::stream_string("test", "$void1"),
-        executed_state::stream_jvalue(json!([["A", "Relay1"], ["B", "Relay2"]]), "$void2"),
+        executed_state::stream_string("test", 0),
+        executed_state::stream_jvalue(json!([["A", "Relay1"], ["B", "Relay2"]]), 0),
         executed_state::scalar_jvalue(json!([["A", "Relay1"], ["B", "Relay2"]])),
         executed_state::par(2, 2),
-        executed_state::stream_string("test", "$void"),
+        executed_state::stream_string("test", 0),
         executed_state::request_sent_by("Relay1"),
         executed_state::par(1, 0),
         executed_state::request_sent_by("Remote"),
@@ -130,12 +130,12 @@ fn join_chat() {
     let client_1_actual_trace = trace_from_result(&client_1_result);
 
     let client_1_expected_trace = vec![
-        executed_state::stream_string("test", "$void1"),
-        executed_state::stream_jvalue(json!([["A", "Relay1"], ["B", "Relay2"]]), "$void2"),
+        executed_state::stream_string("test", 0),
+        executed_state::stream_jvalue(json!([["A", "Relay1"], ["B", "Relay2"]]), 0),
         executed_state::scalar_jvalue(json!([["A", "Relay1"], ["B", "Relay2"]])),
         executed_state::par(2, 2),
-        executed_state::stream_string("test", "$void"),
-        executed_state::stream_string("test", "$void3"),
+        executed_state::stream_string("test", 0),
+        executed_state::stream_string("test", 0),
         executed_state::par(1, 0),
         executed_state::request_sent_by("Remote"),
     ];
@@ -148,13 +148,13 @@ fn join_chat() {
     let relay_2_actual_trace = trace_from_result(&relay_2_result);
 
     let relay_2_expected_trace = vec![
-        executed_state::stream_string("test", "$void1"),
-        executed_state::stream_jvalue(json!([["A", "Relay1"], ["B", "Relay2"]]), "$void2"),
+        executed_state::stream_string("test", 0),
+        executed_state::stream_jvalue(json!([["A", "Relay1"], ["B", "Relay2"]]), 0),
         executed_state::scalar_jvalue(json!([["A", "Relay1"], ["B", "Relay2"]])),
         executed_state::par(1, 3),
         executed_state::request_sent_by("Remote"),
         executed_state::par(2, 0),
-        executed_state::stream_string("test", "$void"),
+        executed_state::stream_string("test", 0),
         executed_state::request_sent_by("Relay2"),
     ];
 
@@ -166,14 +166,14 @@ fn join_chat() {
     let client_2_actual_trace = trace_from_result(&client_2_result);
 
     let client_2_expected_trace = vec![
-        executed_state::stream_string("test", "$void1"),
-        executed_state::stream_jvalue(json!([["A", "Relay1"], ["B", "Relay2"]]), "$void2"),
+        executed_state::stream_string("test", 0),
+        executed_state::stream_jvalue(json!([["A", "Relay1"], ["B", "Relay2"]]), 0),
         executed_state::scalar_jvalue(json!([["A", "Relay1"], ["B", "Relay2"]])),
         executed_state::par(1, 3),
         executed_state::request_sent_by("Remote"),
         executed_state::par(2, 0),
-        executed_state::stream_string("test", "$void"),
-        executed_state::stream_string("test", "$void3"),
+        executed_state::stream_string("test", 0),
+        executed_state::stream_string("test", 0),
     ];
 
     assert_eq!(client_2_actual_trace, client_2_expected_trace);
@@ -219,14 +219,14 @@ fn join() {
     let client_1_actual_trace = trace_from_result(&client_1_result);
 
     let client_1_expected_trace = vec![
-        executed_state::stream_string("test", "$void1"),
+        executed_state::stream_string("test", 0),
         executed_state::scalar_jvalue(json!([["A"], ["B"]])),
         executed_state::par(2, 3),
-        executed_state::stream_string("test", "$void"),
-        executed_state::stream_string("test", "$void3"),
+        executed_state::stream_string("test", 0),
+        executed_state::stream_string("test", 0),
         executed_state::par(2, 0),
-        executed_state::stream_string("test", "$void"),
-        executed_state::stream_string("test", "$void3"),
+        executed_state::stream_string("test", 0),
+        executed_state::stream_string("test", 0),
     ];
 
     assert_eq!(client_1_actual_trace, client_1_expected_trace);

@@ -25,7 +25,7 @@ use thiserror::Error as ThisError;
 #[derive(ThisError, Debug)]
 pub(crate) enum StateFSMError {
     /// Error occurred while trying to access or pop elements from an empty queue.
-    #[error("queue is empty, while fsm of type {0} requested")]
+    #[error("queue is empty, while fsm of type {0} is requested")]
     QueueIsEmpty(&'static str),
 
     /// Errors occurred while trying to access or pop elements from queue,

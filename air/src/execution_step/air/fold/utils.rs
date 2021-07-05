@@ -83,7 +83,7 @@ fn handle_instruction_variable<'ctx>(
             let result = Rc::new(jvalue.into_owned());
             let triplet = as_triplet(&iterable_value);
 
-            // TODO: it's safe to use 0 here, because trace_pos isn't needed to scalars,
+            // TODO: it's safe to use 0 here, because trace_pos isn't needed for scalars,
             // but it's needed to be refactored in future
             let call_result = ResolvedCallResult {
                 result,

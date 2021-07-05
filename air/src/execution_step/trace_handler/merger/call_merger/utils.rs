@@ -44,7 +44,7 @@ pub(super) fn merge_current_executed(
 ) -> MergeResult<CallResult> {
     match value_type {
         ValueType::Stream(stream_name) => {
-            let generation = data_keeper.prev_ctx.stream_generation(stream_name)?;
+            let generation = data_keeper.prev_ctx.stream_generation(stream_name).unwrap_or_default();
             let value = match current_result {
                 CallResult::Executed(value, _) => value,
                 _ => unreachable!(

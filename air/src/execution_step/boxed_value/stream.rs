@@ -56,7 +56,6 @@ impl Stream {
         Ok(generation as u32)
     }
 
-    #[allow(dead_code)]
     pub(crate) fn generations_count(&self) -> usize {
         let generations_count = self.0.len();
 
@@ -66,6 +65,10 @@ impl Stream {
         } else {
             generations_count
         }
+    }
+
+    pub(crate) fn elements_count(&self) -> usize {
+        self.0.iter().map(|v| v.len()).sum()
     }
 
     pub(crate) fn is_empty(&self) -> bool {
@@ -82,6 +85,16 @@ impl Stream {
             .collect::<Vec<_>>();
         JValue::Array(jvalue_array)
     }
+
+    pub(crate) fn iter(&self) -> StreamIter<'_> {
+        let iter = self.0.iter().flat_map(|v| v.iter());
+        let len = self.elements_count();
+
+        StreamIter {
+            iter: Box::new(iter),
+            len,
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -89,3 +102,25 @@ pub(crate) enum Generation {
     Last,
     Nth(u32),
 }
+
+pub(crate) struct StreamIter<'a> {
+    iter: Box<dyn Iterator<Item = &'a ResolvedCallResult> + 'a>,
+    len: usize,
+}
+
+impl<'a> Iterator for StreamIter<'a> {
+    type Item = &'a ResolvedCallResult;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.len > 0 {
+            self.len -= 1;
+        }
+        self.iter.next()
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        (self.len, Some(self.len))
+    }
+}
+
+impl<'a> ExactSizeIterator for StreamIter<'a> {}

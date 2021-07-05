@@ -15,8 +15,6 @@
  */
 
 use super::ExecutionTrace;
-use super::KeeperError;
-use super::KeeperResult;
 use super::TraceSlider;
 
 use air_interpreter_data::InterpreterData;
@@ -51,10 +49,7 @@ impl MergeCtx {
         }
     }
 
-    pub(crate) fn stream_generation(&self, stream_name: &str) -> KeeperResult<u32> {
-        self.streams
-            .get(stream_name)
-            .copied()
-            .ok_or_else(|| KeeperError::NoSuchStream(stream_name.to_string()))
+    pub(crate) fn stream_generation(&self, stream_name: &str) -> Option<u32> {
+        self.streams.get(stream_name).copied()
     }
 }

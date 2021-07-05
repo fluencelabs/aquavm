@@ -39,5 +39,5 @@ fn json_path_not_allowed_for_non_objects_and_arrays() {
     let result = call_vm!(set_variable_vm, "asd", &script, "", "");
     let result = call_vm!(local_vm, "asd", script, "", result.data);
 
-    assert_eq!(result.ret_code, 1018);
+    assert_eq!(result.ret_code, 1017);
 }
