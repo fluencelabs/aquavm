@@ -45,7 +45,7 @@ impl<'i> super::ExecutableInstruction<'i> for Call<'i> {
         })?;
 
         let triplet = resolved_call.as_triplet();
-        joinable_call!(resolved_call.execute(exec_ctx, trace_ctx, &self), exec_ctx).map_err(|e| {
+        joinable_call!(resolved_call.execute(exec_ctx, trace_ctx), exec_ctx).map_err(|e| {
             let tetraplet = SecurityTetraplet::from_triplet(triplet);
             set_last_error(self, exec_ctx, e.clone(), Some(tetraplet));
 
