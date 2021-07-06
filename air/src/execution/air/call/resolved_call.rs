@@ -67,12 +67,13 @@ impl<'i> ResolvedCall<'i> {
         self,
         exec_ctx: &mut ExecutionCtx<'i>,
         trace_ctx: &mut ExecutionTraceCtx,
+        instruction: &Call<'i>,
     ) -> ExecutionResult<()> {
         use CallResult::Executed;
         use ExecutedState::Call;
         use ExecutionError::CallServiceResultDeError as DeError;
 
-        let should_execute = self.prepare_executed_state(exec_ctx, trace_ctx)?;
+        let should_execute = self.prepare_executed_state(exec_ctx, trace_ctx, instruction)?;
         if !should_execute {
             return Ok(());
         }
@@ -129,6 +130,7 @@ impl<'i> ResolvedCall<'i> {
         &self,
         exec_ctx: &mut ExecutionCtx<'i>,
         trace_ctx: &mut ExecutionTraceCtx,
+        instruction: &Call<'i>,
     ) -> ExecutionResult<bool> {
         if trace_ctx.current_subtree_size == 0 {
             log::trace!(
@@ -149,7 +151,14 @@ impl<'i> ResolvedCall<'i> {
             prev_state
         );
 
-        handle_prev_state(&self.triplet, &self.output, prev_state, exec_ctx, trace_ctx)
+        handle_prev_state(
+            &self.triplet,
+            &self.output,
+            prev_state,
+            exec_ctx,
+            trace_ctx,
+            instruction,
+        )
     }
 
     /// Prepare arguments of this call instruction by resolving and preparing their security tetraplets.

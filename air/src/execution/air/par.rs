@@ -46,7 +46,7 @@ impl<'i> ExecutableInstruction<'i> for Par<'i> {
 
         log_instruction!(par, exec_ctx, trace_ctx);
 
-        let (left_subtree_size, right_subtree_size) = extract_subtree_sizes(trace_ctx)?;
+        let (left_subtree_size, right_subtree_size) = extract_subtree_sizes(trace_ctx, &self)?;
 
         let par_pos = trace_ctx.new_trace.len();
         trace_ctx.new_trace.push_back(ExecutedState::par(0, 0));
@@ -66,7 +66,7 @@ impl<'i> ExecutableInstruction<'i> for Par<'i> {
     }
 }
 
-fn extract_subtree_sizes(trace_ctx: &mut ExecutionTraceCtx) -> ExecutionResult<(usize, usize)> {
+fn extract_subtree_sizes(trace_ctx: &mut ExecutionTraceCtx, instruction: &Par<'_>) -> ExecutionResult<(usize, usize)> {
     use super::ExecutionError::InvalidExecutedState;
 
     if trace_ctx.current_subtree_size == 0 {
@@ -84,7 +84,14 @@ fn extract_subtree_sizes(trace_ctx: &mut ExecutionTraceCtx) -> ExecutionResult<(
     // unwrap is safe here because of length's been checked
     match trace_ctx.current_trace.pop_front().unwrap() {
         ExecutedState::Par(ParResult(left, right)) => Ok((left, right)),
-        state => crate::exec_err!(InvalidExecutedState(String::from("par"), state)),
+        state => crate::exec_err!(InvalidExecutedState {
+            instruction: instruction.to_string(),
+            expected_state: "par",
+            actual_state: state,
+            current_trace: trace_ctx.current_trace.clone(),
+            new_trace: trace_ctx.new_trace.clone(),
+            current_subtree_size: trace_ctx.current_subtree_size,
+        }),
     }
 }
 
