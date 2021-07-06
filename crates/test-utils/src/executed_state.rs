@@ -14,23 +14,26 @@
  * limitations under the License.
  */
 
+use super::CallResult;
+use super::ExecutedState;
 use super::JValue;
-use air::execution_trace::CallResult;
-use air::execution_trace::ExecutedState;
-use air::execution_trace::ParResult;
+use super::ParResult;
 
 use std::rc::Rc;
 
 pub fn scalar_jvalue(result: JValue) -> ExecutedState {
-    ExecutedState::Call(CallResult::Executed(Rc::new(result)))
+    ExecutedState::Call(CallResult::Executed(Rc::new(result), 0))
 }
 
-pub fn stream_jvalue(result: JValue, _stream_name: impl Into<String>) -> ExecutedState {
-    ExecutedState::Call(CallResult::Executed(Rc::new(result)))
+pub fn stream_jvalue(result: JValue, generation: u32) -> ExecutedState {
+    ExecutedState::Call(CallResult::Executed(Rc::new(result), generation))
 }
 
 pub fn scalar_string(result: impl Into<String>) -> ExecutedState {
-    ExecutedState::Call(CallResult::Executed(Rc::new(JValue::String(result.into()))))
+    ExecutedState::Call(CallResult::Executed(
+        Rc::new(JValue::String(result.into())),
+        0,
+    ))
 }
 
 pub fn scalar_string_array(result: Vec<impl Into<String>>) -> ExecutedState {
@@ -39,30 +42,33 @@ pub fn scalar_string_array(result: Vec<impl Into<String>>) -> ExecutedState {
         .map(|s| JValue::String(s.into()))
         .collect::<Vec<_>>();
 
-    ExecutedState::Call(CallResult::Executed(Rc::new(JValue::Array(result))))
+    ExecutedState::Call(CallResult::Executed(Rc::new(JValue::Array(result)), 0))
 }
 
-pub fn stream_string(result: impl Into<String>, _stream_name: impl Into<String>) -> ExecutedState {
-    ExecutedState::Call(CallResult::Executed(Rc::new(JValue::String(result.into()))))
+pub fn stream_string(result: impl Into<String>, generation: u32) -> ExecutedState {
+    ExecutedState::Call(CallResult::Executed(
+        Rc::new(JValue::String(result.into())),
+        generation,
+    ))
 }
 
-pub fn stream_number(
-    result: impl Into<serde_json::Number>,
-    _stream_name: impl Into<String>,
-) -> ExecutedState {
-    ExecutedState::Call(CallResult::Executed(Rc::new(JValue::Number(result.into()))))
+pub fn stream_number(result: impl Into<serde_json::Number>, generation: u32) -> ExecutedState {
+    ExecutedState::Call(CallResult::Executed(
+        Rc::new(JValue::Number(result.into())),
+        generation,
+    ))
 }
 
-pub fn stream_string_array(
-    result: Vec<impl Into<String>>,
-    _stream_name: impl Into<String>,
-) -> ExecutedState {
+pub fn stream_string_array(result: Vec<impl Into<String>>, generation: u32) -> ExecutedState {
     let result = result
         .into_iter()
         .map(|s| JValue::String(s.into()))
         .collect::<Vec<_>>();
 
-    ExecutedState::Call(CallResult::Executed(Rc::new(JValue::Array(result))))
+    ExecutedState::Call(CallResult::Executed(
+        Rc::new(JValue::Array(result)),
+        generation,
+    ))
 }
 
 pub fn request_sent_by(sender: impl Into<String>) -> ExecutedState {
@@ -70,7 +76,7 @@ pub fn request_sent_by(sender: impl Into<String>) -> ExecutedState {
 }
 
 pub fn par(left: usize, right: usize) -> ExecutedState {
-    ExecutedState::Par(ParResult(left, right))
+    ExecutedState::Par(ParResult(left as u32, right as u32))
 }
 
 pub fn service_failed(ret_code: i32, error_message: impl Into<String>) -> ExecutedState {

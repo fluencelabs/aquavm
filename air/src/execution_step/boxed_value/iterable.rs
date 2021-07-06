@@ -21,9 +21,9 @@ mod vec_resolved_call;
 
 pub(crate) use json_path_result::IterableJsonPathResult;
 pub(crate) use resolved_call::IterableResolvedCall;
-pub(crate) use vec_json_path_result::IterableVecJsonPathResult;
 pub(crate) use vec_resolved_call::IterableVecResolvedCall;
 
+use crate::execution_step::trace_handler::ValueAndPos;
 use crate::JValue;
 use crate::SecurityTetraplet;
 
@@ -53,9 +53,25 @@ pub(crate) trait Iterable<'ctx> {
 /// through, i.e., it is the `iterable` in the `(fold collection iterable instruction)` statement.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) enum IterableItem<'ctx> {
-    RefRef((&'ctx JValue, &'ctx SecurityTetraplet)),
-    RefValue((&'ctx JValue, SecurityTetraplet)),
-    RcValue((Rc<JValue>, SecurityTetraplet)),
+    RefRef((&'ctx JValue, &'ctx SecurityTetraplet, usize)),
+    RefValue((&'ctx JValue, SecurityTetraplet, usize)),
+    RcValue((Rc<JValue>, SecurityTetraplet, usize)),
+}
+
+impl IterableItem<'_> {
+    pub(crate) fn as_value_and_pos(&self) -> ValueAndPos {
+        use IterableItem::*;
+
+        // this method is called only from RcValue (in fold_stream and next),
+        // so copying of JValue isn't actually happened here
+        let (value, pos) = match self {
+            RefRef((value, _, pos)) => (Rc::new((*value).clone()), *pos),
+            RefValue((value, _, pos)) => (Rc::new((*value).clone()), *pos),
+            RcValue((value, _, pos)) => (value.clone(), *pos),
+        };
+
+        ValueAndPos { value, pos }
+    }
 }
 
 #[macro_export]

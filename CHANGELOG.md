@@ -1,12 +1,16 @@
-## Version 0.10.4 (2021-06-10)
+## Version 0.10.6 (2021-06-10)
+
+- fixed the error message for incorrect json path in `%last_error%` ([PR 119](https://github.com/fluencelabs/aquavm/pull/119))
+
+## Version 0.10.5 (2021-06-10)
 
 - json path applied to scalar values becomes non-joinable ([PR 118](https://github.com/fluencelabs/aquavm/pull/118))
 
-## Version 0.10.3 (2021-06-09)
+## Version 0.10.4 (2021-06-09)
 
 - `%last_error%` includes `peer_id` now, that contains id of a peer where an error occurred ([PR 117](https://github.com/fluencelabs/aquavm/pull/117)).
 
-## Version 0.10.2-0.10.1 (2021-06-04)
+## Version 0.10.3-0.10.1 (2021-06-04)
 
 - improved logger initialization and interface for wasm-bindgen target ([PR 116](https://github.com/fluencelabs/aquavm/pull/116), [PR 115](https://github.com/fluencelabs/aquavm/pull/115)).
 

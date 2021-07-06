@@ -19,7 +19,7 @@ use air_test_utils::create_avm;
 use air_test_utils::echo_string_call_service;
 use air_test_utils::executed_state;
 use air_test_utils::fallible_call_service;
-use air_test_utils::ExecutionTrace;
+use air_test_utils::trace_from_result;
 
 #[test]
 fn xor() {
@@ -36,8 +36,9 @@ fn xor() {
         local_peer_id,
     );
 
-    let res = call_vm!(vm, "asd", script, "[]", "[]");
-    let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid json");
+    let result = call_vm!(vm, "asd", script, "", "");
+
+    let actual_trace = trace_from_result(&result);
     let expected_call_result = executed_state::scalar_string("res");
 
     assert_eq!(actual_trace.len(), 2);
@@ -53,9 +54,9 @@ fn xor() {
         local_peer_id
     );
 
-    let res = call_vm!(vm, "asd", script, "[]", "[]");
-    let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid json");
+    let result = call_vm!(vm, "asd", script, "", "");
 
+    let actual_trace = trace_from_result(&result);
     assert_eq!(actual_trace.len(), 1);
     assert_eq!(actual_trace[0], expected_call_result);
 }
@@ -77,8 +78,9 @@ fn xor_var_not_found() {
         local_peer_id,
     );
 
-    let res = call_vm!(vm, "asd", script, "[]", "[]");
-    let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid json");
+    let result = call_vm!(vm, "asd", script, "", "");
+
+    let actual_trace = trace_from_result(&result);
     assert_eq!(actual_trace[0], executed_state::par(1, 0));
     assert_eq!(actual_trace[1], executed_state::request_sent_by(local_peer_id));
 }
@@ -105,9 +107,10 @@ fn xor_multiple_variables_found() {
         set_variables_peer_id, local_peer_id, some_string, expected_string
     );
 
-    let res = call_vm!(set_variables_vm, "asd", script.clone(), "[]", "[]");
-    let res = call_vm!(vm, "asd", script, "[]", res.data);
-    let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid json");
+    let result = call_vm!(set_variables_vm, "asd", &script, "", "");
+    let result = call_vm!(vm, "asd", script, "", result.data);
+
+    let actual_trace = trace_from_result(&result);
     let some_string_call_result = executed_state::scalar_string(some_string);
     let expected_string_call_result = executed_state::scalar_string(expected_string);
 
@@ -145,25 +148,26 @@ fn xor_par() {
         local_peer_id
     );
 
-    let result = call_vm!(vm, "asd", script.clone(), "[]", "[]");
-    let actual_trace: ExecutionTrace = serde_json::from_slice(&result.data).expect("should be valid json");
+    let result = call_vm!(vm, "asd", &script, "", "");
+    let actual_trace = trace_from_result(&result);
 
-    let res = String::from("res");
+    let scalar_result = String::from("res");
 
     let expected_trace = vec![
         par(2, 2),
-        scalar_string(&res),
-        scalar_string(&res),
+        scalar_string(&scalar_result),
+        scalar_string(&scalar_result),
         par(1, 0),
         service_failed(1, "error"),
-        scalar_string(&res),
-        scalar_string(&res),
+        scalar_string(&scalar_result),
+        scalar_string(&scalar_result),
     ];
 
     assert_eq!(actual_trace, expected_trace);
 
-    let result = call_vm!(vm, "asd", script, "[]", result.data);
-    let actual_trace: ExecutionTrace = serde_json::from_slice(&result.data).expect("should be valid json");
+    let result = call_vm!(vm, "asd", script, "", result.data);
+
+    let actual_trace = trace_from_result(&result);
     assert_eq!(actual_trace, expected_trace);
 }
 
@@ -185,10 +189,10 @@ fn last_error_with_xor() {
         faillible_peer_id, local_peer_id,
     );
 
-    let res = call_vm!(faillible_vm, "asd", script.clone(), "", "");
-    let res = call_vm!(vm, "asd", script, "", res.data);
-    let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid json");
+    let result = call_vm!(faillible_vm, "asd", script.clone(), "", "");
+    let result = call_vm!(vm, "asd", script, "", result.data);
 
+    let actual_trace = trace_from_result(&result);
     let expected_state = executed_state::scalar_string("Local service error, ret_code is 1, error message is 'error'");
 
     assert_eq!(actual_trace[1], expected_state);

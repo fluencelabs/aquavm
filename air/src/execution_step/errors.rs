@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
+use super::trace_handler::TraceHandlerError;
 use super::Joinable;
 use crate::build_targets::CallServiceResult;
-use crate::contexts::execution::ResolvedCallResult;
-use crate::contexts::execution_trace::ExecutedState;
+use crate::execution_step::boxed_value::Stream;
+use crate::execution_step::execution_context::ResolvedCallResult;
 use crate::JValue;
 
 use jsonpath_lib::JsonPathError;
@@ -53,9 +54,13 @@ pub(crate) enum ExecutionError {
     #[error("variable with path '{1}' not found in '{0}' with an error: '{2}'")]
     JValueJsonPathError(JValue, String, JsonPathError),
 
+    /// An error occurred while trying to apply json path to this stream generation with JValue's.
+    #[error("variable with path '{1}' not found in '{0:?}' with error: '{2}'")]
+    GenerationStreamJsonPathError(Vec<ResolvedCallResult>, String, JsonPathError),
+
     /// An error occurred while trying to apply json path to this stream with JValue's.
     #[error("variable with path '{1}' not found in '{0:?}' with error: '{2}'")]
-    JValueStreamJsonPathError(Vec<ResolvedCallResult>, String, JsonPathError),
+    StreamJsonPathError(Stream, String, JsonPathError),
 
     /// Provided JValue has incompatible with target type.
     #[error("expected JValue type '{1}', but got '{0}' JValue")]
@@ -77,13 +82,9 @@ pub(crate) enum ExecutionError {
     #[error("multiple fold states found for iterable '{0}'")]
     MultipleFoldStates(String),
 
-    /// Expected executed state of a different type.
-    #[error("invalid executed state: expected '{0}', but actual {1:?}")]
-    InvalidExecutedState(String, ExecutedState),
-
     /// Errors encountered while shadowing non-scalar values.
     #[error("variable with name '{0}' can't be shadowed, shadowing is supported only for scalar values")]
-    ShadowingError(String),
+    NonScalarShadowing(String),
 
     /// This error type is produced by a match to notify xor that compared values aren't equal.
     #[error("match is used without corresponding xor")]
@@ -103,6 +104,24 @@ pub(crate) enum ExecutionError {
     it could be applied only to streams and variables of array and object types"
     )]
     JsonPathVariableTypeError(JValue),
+
+    /// Internal error, this error type shouldn't be happened.
+    #[error("an internal error occurred: {0}")]
+    InternalError(String),
+
+    /// Errors bubbled from a trace handler.
+    #[error("{0}")]
+    TraceError(#[from] TraceHandlerError),
+
+    /// Errors occurred while insertion of a value inside stream that doesn't have corresponding generation.
+    #[error("stream {0:?} doesn't have generation with number {1}, probably the supplied data to the interpreter is corrupted")]
+    StreamDontHaveSuchGeneration(Stream, usize),
+}
+
+impl From<TraceHandlerError> for Rc<ExecutionError> {
+    fn from(trace_error: TraceHandlerError) -> Self {
+        Rc::new(ExecutionError::TraceError(trace_error))
+    }
 }
 
 impl ExecutionError {
@@ -116,18 +135,21 @@ impl ExecutionError {
             VariableNotFound(_) => 4,
             MultipleVariablesFound(_) => 5,
             JValueJsonPathError(..) => 6,
-            JValueStreamJsonPathError(..) => 7,
+            GenerationStreamJsonPathError(..) => 7,
             IncompatibleJValueType(..) => 8,
             IncompatibleAValueType(..) => 9,
             MultipleValuesInJsonPath(_) => 10,
             FoldStateNotFound(_) => 11,
             MultipleFoldStates(_) => 12,
-            InvalidExecutedState(..) => 13,
-            ShadowingError(_) => 14,
-            MatchWithoutXorError => 15,
-            MismatchWithoutXorError => 16,
-            FlatteningError(_) => 17,
-            JsonPathVariableTypeError(_) => 18,
+            NonScalarShadowing(_) => 13,
+            MatchWithoutXorError => 14,
+            MismatchWithoutXorError => 15,
+            FlatteningError(_) => 16,
+            JsonPathVariableTypeError(_) => 17,
+            StreamJsonPathError(..) => 18,
+            InternalError(_) => 19,
+            StreamDontHaveSuchGeneration(..) => 20,
+            TraceError(_) => 21,
         }
     }
 }
@@ -150,10 +172,11 @@ impl Joinable for ExecutionError {
                 log_join!("  waiting for an argument with name '{}'", var_name);
                 true
             }
-            JValueStreamJsonPathError(stream, json_path, _) => {
+            StreamJsonPathError(stream, json_path, _) => {
                 log_join!("  waiting for an argument with path '{}' on stream '{:?}'", json_path, stream);
                 true
             }
+
             _ => false,
         }
     }

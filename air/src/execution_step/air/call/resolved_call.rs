@@ -16,22 +16,23 @@
 
 #![allow(unused_unsafe)] // for wasm_bindgen target where calling FFI is safe
 
+use super::call_result_setter::*;
 use super::triplet::Triplet;
 use super::utils::*;
-use super::Call;
-use super::ExecutionCtx;
-use super::ExecutionError;
-use super::ExecutionResult;
+use super::*;
 use crate::build_targets::CallServiceResult;
 use crate::build_targets::CALL_SERVICE_SUCCESS;
-use crate::contexts::execution_trace::*;
-use crate::log_targets::EXECUTED_STATE_CHANGING;
+use crate::execution_step::trace_handler::MergerCallResult;
+use crate::execution_step::trace_handler::TraceHandler;
+use crate::execution_step::Generation;
 use crate::JValue;
 use crate::ResolvedTriplet;
 use crate::SecurityTetraplet;
 
+use air_interpreter_data::CallResult;
 use air_parser::ast::{CallInstrArgValue, CallOutputValue};
 
+use crate::execution_step::air::ResolvedCallResult;
 use std::rc::Rc;
 
 /// Represents Call instruction with resolved internal parts.
@@ -63,20 +64,15 @@ impl<'i> ResolvedCall<'i> {
     }
 
     /// Executes resolved instruction, updates contexts based on a execution_step result.
-    pub(super) fn execute(
-        &self,
-        exec_ctx: &mut ExecutionCtx<'i>,
-        trace_ctx: &mut ExecutionTraceCtx,
-    ) -> ExecutionResult<()> {
+    pub(super) fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         let should_execute = self.prepare_current_executed_state(exec_ctx, trace_ctx)?;
         if !should_execute {
             return Ok(());
         }
 
         // call can be executed only on peers with such peer_id
-        if self.triplet.peer_pk.as_str() == exec_ctx.current_peer_id.as_str() {
+        if self.triplet.peer_pk.as_str() != exec_ctx.current_peer_id.as_str() {
             set_remote_call_result(self.triplet.peer_pk.clone(), exec_ctx, trace_ctx);
-
             return Ok(());
         }
 
@@ -103,7 +99,7 @@ impl<'i> ResolvedCall<'i> {
         &self,
         service_result: CallServiceResult,
         exec_ctx: &mut ExecutionCtx<'i>,
-        trace_ctx: &mut ExecutionTraceCtx,
+        trace_ctx: &mut TraceHandler,
     ) -> ExecutionResult<()> {
         use ExecutionError::CallServiceResultDeError as DeError;
 
@@ -113,16 +109,13 @@ impl<'i> ResolvedCall<'i> {
         let result: JValue = serde_json::from_str(&service_result.result).map_err(|e| DeError(service_result, e))?;
         let result = Rc::new(result);
 
-        set_local_call_result(result.clone(), self.triplet.clone(), &self.output, exec_ctx)?;
-        let new_executed_state = ExecutedState::Call(CallResult::Executed(result));
+        let trace_pos = trace_ctx.trace_pos();
 
-        log::trace!(
-            target: EXECUTED_STATE_CHANGING,
-            "  adding new call executed state {:?}",
-            new_executed_state
-        );
-
-        trace_ctx.new_trace.push_back(new_executed_state);
+        // TODO: refactor this scheme with passing and obtaining generation here in next PR
+        let executed_result = ResolvedCallResult::new(result.clone(), self.triplet.clone(), trace_pos);
+        let generation = set_local_call_result(executed_result, Generation::Last, &self.output, exec_ctx)?;
+        let new_call_result = CallResult::Executed(result, generation);
+        trace_ctx.meet_call_end(new_call_result);
 
         Ok(())
     }
@@ -135,28 +128,14 @@ impl<'i> ResolvedCall<'i> {
     fn prepare_current_executed_state(
         &self,
         exec_ctx: &mut ExecutionCtx<'i>,
-        trace_ctx: &mut ExecutionTraceCtx,
+        trace_ctx: &mut TraceHandler,
     ) -> ExecutionResult<bool> {
-        if trace_ctx.current_subtree_size == 0 {
-            log::trace!(
-                target: EXECUTED_STATE_CHANGING,
-                "  previous executed trace state wasn't found"
-            );
-            return Ok(true);
-        }
+        let (call_result, trace_pos) = match trace_ctx.meet_call_start(&self.output)? {
+            MergerCallResult::CallResult { value, trace_pos } => (value, trace_pos),
+            MergerCallResult::Empty => return Ok(true),
+        };
 
-        trace_ctx.current_subtree_size -= 1;
-        // unwrap is safe here, because current_subtree_size depends on current_path len,
-        // and it's been checked previously
-        let prev_state = trace_ctx.current_trace.pop_front().unwrap();
-
-        log::trace!(
-            target: EXECUTED_STATE_CHANGING,
-            "  previous executed trace found {:?}",
-            prev_state
-        );
-
-        handle_prev_state(&self.triplet, &self.output, prev_state, exec_ctx, trace_ctx)
+        handle_prev_state(&self.triplet, &self.output, call_result, trace_pos, exec_ctx, trace_ctx)
     }
 
     /// Prepare arguments of this call instruction by resolving and preparing their security tetraplets.
@@ -186,10 +165,9 @@ impl<'i> ResolvedCall<'i> {
 
 fn handle_service_error(
     service_result: CallServiceResult,
-    trace_ctx: &mut ExecutionTraceCtx,
+    trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<CallServiceResult> {
     use CallResult::CallServiceFailed;
-    use ExecutedState::Call;
 
     if service_result.ret_code == CALL_SERVICE_SUCCESS {
         return Ok(service_result);
@@ -199,9 +177,7 @@ fn handle_service_error(
     let error = ExecutionError::LocalServiceError(service_result.ret_code, error_message.clone());
     let error = Rc::new(error);
 
-    trace_ctx
-        .new_trace
-        .push_back(Call(CallServiceFailed(service_result.ret_code, error_message)));
+    trace_ctx.meet_call_end(CallServiceFailed(service_result.ret_code, error_message));
 
     Err(error)
 }

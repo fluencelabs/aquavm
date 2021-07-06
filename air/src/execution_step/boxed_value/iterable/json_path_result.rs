@@ -57,7 +57,7 @@ impl<'ctx> Iterable<'ctx> for IterableJsonPathResult {
         }
 
         let jvalue = &self.jvalues[self.cursor];
-        let result = IterableItem::RefRef((jvalue, &self.tetraplet));
+        let result = IterableItem::RefRef((jvalue, &self.tetraplet, 0));
 
         Some(result)
     }

@@ -777,7 +777,7 @@ fn fold_json_path() {
     let instruction = parse(source_code);
     let expected = Instruction::Fold(Fold {
         iterable: JsonPath {
-            variable: Scalar("members"),
+            scalar_name: "members",
             path: "$.[\"users\"]",
             should_flatten: false,
         },
@@ -800,7 +800,7 @@ fn comments() {
     let instruction = parse(source_code);
     let expected = Instruction::Fold(Fold {
         iterable: JsonPath {
-            variable: Scalar("members"),
+            scalar_name: "members",
             path: "$.[\"users\"]",
             should_flatten: false,
         },

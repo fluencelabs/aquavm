@@ -31,9 +31,9 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
         use super::IterableItem::*;
 
         let jvalue = match self {
-            RefRef((jvalue, _)) => *jvalue,
-            RefValue((jvalue, _)) => jvalue,
-            RcValue((jvalue, _)) => jvalue.deref(),
+            RefRef((jvalue, ..)) => *jvalue,
+            RefValue((jvalue, ..)) => jvalue,
+            RcValue((jvalue, ..)) => jvalue.deref(),
         };
 
         let selected_jvalues =
@@ -48,9 +48,9 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
         use super::IterableItem::*;
 
         let (jvalue, tetraplet) = match self {
-            RefRef((jvalue, tetraplet)) => (*jvalue, *tetraplet),
-            RefValue((jvalue, tetraplet)) => (*jvalue, tetraplet),
-            RcValue((jvalue, tetraplet)) => (jvalue.deref(), tetraplet),
+            RefRef((jvalue, tetraplet, _)) => (*jvalue, *tetraplet),
+            RefValue((jvalue, tetraplet, _)) => (*jvalue, tetraplet),
+            RcValue((jvalue, tetraplet, _)) => (jvalue.deref(), tetraplet),
         };
 
         let selected_jvalues =
@@ -62,9 +62,9 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
         use super::IterableItem::*;
 
         match self {
-            RefRef((jvalue, _)) => Cow::Borrowed(jvalue),
-            RefValue((jvalue, _)) => Cow::Borrowed(jvalue),
-            RcValue((jvalue, _)) => Cow::Borrowed(jvalue.deref()),
+            RefRef((jvalue, ..)) => Cow::Borrowed(jvalue),
+            RefValue((jvalue, ..)) => Cow::Borrowed(jvalue),
+            RcValue((jvalue, ..)) => Cow::Borrowed(jvalue.deref()),
         }
     }
 
@@ -72,9 +72,9 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
         use super::IterableItem::*;
 
         match *self {
-            RefRef((jvalue, _)) => jvalue.deref().clone(),
-            RefValue((jvalue, _)) => jvalue.clone(),
-            RcValue((jvalue, _)) => jvalue.deref().clone(),
+            RefRef((jvalue, ..)) => jvalue.deref().clone(),
+            RefValue((jvalue, ..)) => jvalue.clone(),
+            RcValue((jvalue, ..)) => jvalue.deref().clone(),
         }
     }
 
@@ -83,12 +83,12 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
 
         // these clones are needed because rust-sdk allows passing arguments only by value
         match self {
-            RefRef((_, tetraplet)) => {
+            RefRef((_, tetraplet, _)) => {
                 let tetraplet = tetraplet.deref().clone();
                 vec![tetraplet]
             }
-            RefValue((_, tetraplet)) => vec![(*tetraplet).clone()],
-            RcValue((_, tetraplet)) => vec![(*tetraplet).clone()],
+            RefValue((_, tetraplet, _)) => vec![(*tetraplet).clone()],
+            RcValue((_, tetraplet, _)) => vec![(*tetraplet).clone()],
         }
     }
 }

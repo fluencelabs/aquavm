@@ -220,7 +220,9 @@ impl<'i> VariableValidator<'i> {
 
     fn met_iterable_value(&mut self, iterable_value: &IterableValue<'i>, span: Span) {
         match iterable_value {
-            IterableValue::JsonPath { variable, .. } => self.met_variable(variable, span),
+            IterableValue::JsonPath { scalar_name, .. } => {
+                self.met_variable(&Variable::Scalar(scalar_name), span)
+            }
             IterableValue::Variable(variable) => self.met_variable(variable, span),
         }
     }

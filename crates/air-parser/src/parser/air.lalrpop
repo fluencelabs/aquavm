@@ -1,5 +1,6 @@
 use crate::parser::ast::*;
 use crate::parser::air_parser::make_flattened_error;
+use crate::parser::air_parser::make_stream_iterable_error;
 use crate::parser::ParserError;
 use crate::parser::VariableValidator;
 use crate::parser::Span;
@@ -125,7 +126,20 @@ CallInstrArgValue: CallInstrArgValue<'input> = {
 Iterable: IterableValue<'input> = {
     <v:Alphanumeric> => IterableValue::Variable(Variable::Scalar(v)),
     <v:Stream> => IterableValue::Variable(Variable::Stream(v)),
-    <j:JsonPath> => IterableValue::JsonPath { variable: j.0, path: j.1, should_flatten: j.2 },
+    <l:@L> <j:JsonPath> <r:@R> => {
+        use crate::parser::air::Variable::*;
+
+        let variable = j.0;
+        let scalar_name = match variable {
+            Stream(name) => {
+                let token = Token::VariableWithJsonPath(variable, j.1, j.2);
+                errors.push(make_stream_iterable_error(l, token, r));
+                name
+            }
+            Scalar(name) => name,
+        };
+        IterableValue::JsonPath { scalar_name, path: j.1, should_flatten: j.2 }
+    }
 }
 
 Matchable: MatchableValue<'input> = {

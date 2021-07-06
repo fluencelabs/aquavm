@@ -14,101 +14,35 @@
  * limitations under the License.
  */
 
-use super::merging::DataMergingError;
-
 use serde_json::Error as SerdeJsonError;
+use thiserror::Error as ThisError;
 
 use std::env::VarError;
-use std::error::Error;
 
 /// Errors happened during the interpreter preparation_step step.
-#[derive(Debug)]
+#[derive(Debug, ThisError)]
 pub enum PreparationError {
     /// Error occurred while parsing AIR script
+    #[error("air can't be parsed:\n{0}")]
     AIRParseError(String),
 
     /// Errors occurred on executed trace deserialization.
-    ExecutedTraceDeError(SerdeJsonError, Vec<u8>),
+    #[error("an error occurred while executed trace deserialization on {1:?}:\n {0:?}")]
+    DataDeError(SerdeJsonError, Vec<u8>),
 
-    /// Point out that error is occured while getting current peer id.
+    /// Error occurred while getting current peer id.
+    #[error("current peer id can't be obtained: {0:?}")]
     CurrentPeerIdEnvError(VarError),
-
-    /// Errors occurred while merging previous and current data.
-    StateMergingError(DataMergingError),
 }
-
-impl Error for PreparationError {}
 
 impl PreparationError {
     pub(crate) fn to_error_code(&self) -> u32 {
-        use DataMergingError::*;
         use PreparationError::*;
 
         match self {
             AIRParseError(_) => 1,
-            ExecutedTraceDeError(..) => 2,
+            DataDeError(..) => 2,
             CurrentPeerIdEnvError(_) => 3,
-            StateMergingError(IncompatibleExecutedStates(..)) => 4,
-            StateMergingError(IncompatibleCallResults(..)) => 5,
-            StateMergingError(ExecutedTraceTooSmall(..)) => 6,
-            StateMergingError(IncompatibleState) => 8,
-            StateMergingError(ParLenOverflow(_)) => 9,
-            StateMergingError(FoldLenOverflow(_)) => 10,
-            StateMergingError(ParSubtreeUnderflow(..)) => 11,
-            StateMergingError(FoldSubtreeUnderflow(..)) => 12,
-            StateMergingError(FoldIncorrectSubtracesCount(..)) => 13,
-            StateMergingError(FoldIncorrectValuePos(..)) => 14,
-            StateMergingError(FoldValuesPosNotStream(..)) => 15,
         }
-    }
-}
-
-use std::fmt;
-
-impl fmt::Display for PreparationError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-        use PreparationError::*;
-
-        match self {
-            AIRParseError(err_msg) => write!(f, "air can't be parsed:\n{}", err_msg),
-            ExecutedTraceDeError(serde_error, executed_trace) => {
-                fn print_error(
-                    f: &mut fmt::Formatter<'_>,
-                    trace: impl std::fmt::Debug,
-                    serde_error: &SerdeJsonError,
-                ) -> Result<(), fmt::Error> {
-                    write!(
-                        f,
-                        "an error occurred while executed trace deserialization on '{:?}': {:?}",
-                        trace, serde_error
-                    )
-                }
-
-                match String::from_utf8(executed_trace.to_vec()) {
-                    Ok(str) => print_error(f, str, serde_error),
-                    Err(e) => print_error(f, e.into_bytes(), serde_error),
-                }
-            }
-            CurrentPeerIdEnvError(err) => write!(f, "current peer id can't be obtained: {:?}", err),
-            StateMergingError(err) => write!(f, "{}", err),
-        }
-    }
-}
-
-impl From<DataMergingError> for PreparationError {
-    fn from(err: DataMergingError) -> Self {
-        Self::StateMergingError(err)
-    }
-}
-
-impl From<std::convert::Infallible> for PreparationError {
-    fn from(_: std::convert::Infallible) -> Self {
-        unreachable!()
-    }
-}
-
-impl From<std::convert::Infallible> for DataMergingError {
-    fn from(_: std::convert::Infallible) -> Self {
-        unreachable!()
     }
 }

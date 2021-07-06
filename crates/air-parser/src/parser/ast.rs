@@ -91,7 +91,7 @@ pub enum CallInstrArgValue<'i> {
 pub enum IterableValue<'i> {
     Variable(Variable<'i>),
     JsonPath {
-        variable: Variable<'i>,
+        scalar_name: &'i str,
         path: &'i str,
         should_flatten: bool,
     },
