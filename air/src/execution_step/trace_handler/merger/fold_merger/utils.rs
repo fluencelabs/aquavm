@@ -27,7 +27,7 @@ pub(crate) struct ResolvedFoldSubTraceLore {
     pub(crate) after_subtrace: SubTraceDesc,
 }
 
-pub(super) fn resolve_fold_lore(slider: &TraceSlider, fold: &FoldResult) -> MergeResult<ResolvedFoldLore> {
+pub(super) fn resolve_fold_lore(slider: &mut TraceSlider, fold: &FoldResult) -> MergeResult<ResolvedFoldLore> {
     let mut resolved_fold_lore = Vec::with_capacity(fold.0.len());
 
     for subtrace_lore in fold.0.iter() {
@@ -60,7 +60,7 @@ fn check_subtrace_lore(subtrace_lore: &FoldSubTraceLore) -> MergeResult<()> {
     Ok(())
 }
 
-fn call_value_by_pos(slider: &TraceSlider, pos: u32) -> MergeResult<Rc<JValue>> {
+fn call_value_by_pos(slider: &mut TraceSlider, pos: u32) -> MergeResult<Rc<JValue>> {
     let state = slider.state_by_pos(pos)?;
     match state {
         ExecutedState::Call(CallResult::Executed(value, _)) => Ok(value.clone()),

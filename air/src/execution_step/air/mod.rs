@@ -41,6 +41,7 @@ macro_rules! execute {
         match $instr.execute($exec_ctx, $trace_ctx) {
             Err(e) => {
                 $trace_ctx.error_exit();
+                println!("error: {}", e);
 
                 if !$exec_ctx.last_error_could_be_set {
                     return Err(e);

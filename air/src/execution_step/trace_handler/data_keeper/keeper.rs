@@ -16,6 +16,7 @@
 
 use super::ExecutionTrace;
 use super::MergeCtx;
+use super::TraceSlider;
 
 use air_interpreter_data::InterpreterData;
 
@@ -38,7 +39,24 @@ impl DataKeeper {
             result_trace: <_>::default(),
         }
     }
+
     pub(crate) fn result_states_count(&self) -> usize {
         self.result_trace.len()
+    }
+
+    pub(crate) fn prev_slider(&self) -> &TraceSlider {
+        &self.prev_ctx.slider
+    }
+
+    pub(crate) fn prev_slider_mut(&mut self) -> &mut TraceSlider {
+        &mut self.prev_ctx.slider
+    }
+
+    pub(crate) fn current_slider(&self) -> &TraceSlider {
+        &self.current_ctx.slider
+    }
+
+    pub(crate) fn current_slider_mut(&mut self) -> &mut TraceSlider {
+        &mut self.current_ctx.slider
     }
 }

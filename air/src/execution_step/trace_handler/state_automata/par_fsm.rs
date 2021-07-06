@@ -23,6 +23,8 @@ use par_builder::ParBuilder;
 use par_fsm_state::ParFSMState;
 use size_updater::SubTraceSizeUpdater;
 
+/// This FSM manages par state, its state transitioning functions must work in the following way:
+///   new -> left_completed -> right_completed
 #[derive(Debug, Default, Clone)]
 pub(crate) struct ParFSM {
     prev_par: Option<ParResult>,
@@ -115,8 +117,10 @@ impl ParFSM {
             SubtreeType::Right => (par_right!(&self.prev_par), par_right!(&self.current_par)),
         };
 
-        data_keeper.prev_ctx.slider.set_subtrace_len(prev_size as usize)?;
-        data_keeper.current_ctx.slider.set_subtrace_len(current_size as usize)?;
+        data_keeper.prev_slider_mut().set_subtrace_len(prev_size as usize)?;
+        data_keeper
+            .current_slider_mut()
+            .set_subtrace_len(current_size as usize)?;
 
         Ok(())
     }
@@ -126,13 +130,13 @@ impl ParFSM {
     fn check_subtrace_lens(&self, data_keeper: &DataKeeper, subtree_type: SubtreeType) -> FSMResult<()> {
         use StateFSMError::ParSubtreeNonExhausted as NonExhausted;
 
-        let prev_len = data_keeper.prev_ctx.slider.subtrace_len();
+        let prev_len = data_keeper.prev_slider().subtrace_len();
         if prev_len != 0 {
             // unwrap is safe here because otherwise subtrace_len wouldn't be equal 0.
             return Err(NonExhausted(subtree_type, self.prev_par.unwrap(), prev_len));
         }
 
-        let current_len = data_keeper.current_ctx.slider.subtrace_len();
+        let current_len = data_keeper.current_slider().subtrace_len();
         if current_len != 0 {
             return Err(NonExhausted(subtree_type, self.current_par.unwrap(), current_len));
         }

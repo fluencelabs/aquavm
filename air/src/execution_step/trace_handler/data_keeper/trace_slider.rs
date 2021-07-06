@@ -16,81 +16,91 @@
 
 use super::ExecutedState;
 use super::ExecutionTrace;
-use super::KeeperError::ExecutedTraceTooSmall;
+use super::KeeperError::*;
 use super::KeeperResult;
-
-use std::cell::Cell;
 
 /// This slider is intended to slide on a subtrace inside provided trace. This subtrace
 /// is identified by position and len.
+// TODO: check for overflow
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub(crate) struct TraceSlider {
     /// Trace that slider slide on.
     trace: ExecutionTrace,
 
     /// Position of current subtrace inside trace.
-    position: Cell<usize>,
+    position: usize,
 
     /// Length of a current subtrace.
-    subtrace_len: Cell<usize>,
+    subtrace_len: usize,
 
     /// Count of seen elements since the last position update.
-    seen_elements: Cell<usize>,
+    seen_elements: usize,
 }
 
 impl TraceSlider {
     pub(super) fn new(trace: ExecutionTrace) -> Self {
-        let subtrace_len = Cell::new(trace.len());
+        let subtrace_len = trace.len();
 
         Self {
             trace,
-            position: Cell::new(0),
             subtrace_len,
-            seen_elements: Cell::new(0),
+            ..<_>::default()
         }
     }
 
     /// Returns the next state if current interval length hasn't been reached
     /// and None otherwise.
     #[allow(clippy::suspicious_operation_groupings)]
-    pub(crate) fn next_state(&self) -> Option<ExecutedState> {
-        if self.seen_elements.get() >= self.subtrace_len.get() || self.position.get() >= self.trace.len() {
+    pub(crate) fn next_state(&mut self) -> Option<ExecutedState> {
+        if self.seen_elements >= self.subtrace_len || self.position >= self.trace.len() {
             return None;
         }
 
-        let result = self.trace[self.position.get()].clone();
-        self.position.set(self.position.get() + 1);
-        self.seen_elements.set(self.seen_elements.get() + 1);
+        let result = self.trace[self.position].clone();
+        self.position += 1;
+        self.seen_elements += 1;
         Some(result)
     }
 
-    pub(crate) fn set_position(&self, position: usize) -> KeeperResult<()> {
-        if self.trace.len() >= position {
-            return Err(ExecutedTraceTooSmall(self.trace.len(), position));
+    pub(crate) fn set_position_and_len(&mut self, position: usize, subtrace_len: usize) -> KeeperResult<()> {
+        // it's possible to set empty subtrace_len and inconsistent position
+        if subtrace_len != 0 && position + subtrace_len > self.trace.len() {
+            return Err(SetSubtraceLenAndPosFailed {
+                requested_pos: position,
+                requested_subtrace_len: subtrace_len,
+                trace_len: self.trace.len(),
+            });
         }
 
-        self.position.set(position);
-        Ok(())
-    }
-
-    pub(crate) fn set_subtrace_len(&self, subtrace_len: usize) -> KeeperResult<()> {
-        if self.trace.len() - self.position.get() < subtrace_len {
-            return Err(ExecutedTraceTooSmall(
-                self.trace.len() - self.position.get(),
-                subtrace_len,
-            ));
-        }
-
-        self.seen_elements.set(0);
-        self.subtrace_len.set(subtrace_len);
+        self.position = position;
+        self.subtrace_len = subtrace_len;
 
         Ok(())
     }
 
-    pub(crate) fn state_by_pos(&self, pos: u32) -> KeeperResult<&ExecutedState> {
+    pub(crate) fn set_subtrace_len(&mut self, subtrace_len: usize) -> KeeperResult<()> {
+        let trace_remainder = self.trace.len() - self.position;
+        if trace_remainder < subtrace_len {
+            return Err(SetSubtraceLenFailed {
+                requested_subtrace_len: subtrace_len,
+                trace_position: self.position,
+                trace_len: self.trace.len(),
+            });
+        }
+
+        self.seen_elements = 0;
+        self.subtrace_len = subtrace_len;
+
+        Ok(())
+    }
+
+    pub(crate) fn state_by_pos(&mut self, pos: u32) -> KeeperResult<&ExecutedState> {
         let pos = pos as usize;
         if pos >= self.trace.len() {
-            return Err(ExecutedTraceTooSmall(self.trace.len(), pos));
+            return Err(GettingElementByPosFailed {
+                requested_pos: pos,
+                trace_len: self.trace.len(),
+            });
         }
 
         let state = &self.trace[pos];
@@ -99,10 +109,10 @@ impl TraceSlider {
 
     #[allow(dead_code)]
     pub(crate) fn position(&self) -> usize {
-        self.position.get()
+        self.position
     }
 
     pub(crate) fn subtrace_len(&self) -> usize {
-        self.subtrace_len.get() - self.seen_elements.get()
+        self.subtrace_len - self.seen_elements
     }
 }

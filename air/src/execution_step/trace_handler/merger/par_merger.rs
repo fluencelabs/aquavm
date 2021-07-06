@@ -24,8 +24,8 @@ pub(crate) struct MergerParResult {
 }
 
 pub(crate) fn try_merge_next_state_as_par(data_keeper: &mut DataKeeper) -> MergeResult<MergerParResult> {
-    let prev_state = data_keeper.prev_ctx.slider.next_state();
-    let current_state = data_keeper.current_ctx.slider.next_state();
+    let prev_state = data_keeper.prev_slider_mut().next_state();
+    let current_state = data_keeper.current_slider_mut().next_state();
 
     let result = match (prev_state, current_state) {
         (Some(Par(prev_par)), Some(Par(current_par))) => MergerParResult::from_pars(prev_par, current_par),

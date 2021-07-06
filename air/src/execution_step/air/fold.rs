@@ -54,6 +54,8 @@ fn fold_scalar<'i>(
     exec_ctx: &mut ExecutionCtx<'i>,
     trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<()> {
+    println!("fold scalar start");
+
     let fold_state = FoldState::from_iterable(iterable, fold.instruction.clone(), false);
     let variable_handler = VariableHandler::init(exec_ctx, fold.iterator, fold_state)?;
 
@@ -71,6 +73,7 @@ fn fold_stream<'i>(
     trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<()> {
     trace_ctx.meet_fold_start()?;
+    println!("fold_stream start");
 
     for iterable in stream_iterables {
         let value = match iterable.peek() {
@@ -86,10 +89,12 @@ fn fold_stream<'i>(
         let fold_state = FoldState::from_iterable(iterable, fold.instruction.clone(), true);
         let variable_handler = VariableHandler::init(exec_ctx, fold.iterator, fold_state)?;
 
-        fold.instruction.execute(exec_ctx, trace_ctx)?;
+        let execution_result = fold.instruction.execute(exec_ctx, trace_ctx);
 
         trace_ctx.meet_generation_end()?;
         variable_handler.cleanup(exec_ctx);
+
+        execution_result?;
     }
 
     trace_ctx.meet_fold_end()?;

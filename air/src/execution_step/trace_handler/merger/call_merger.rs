@@ -22,6 +22,7 @@ use MergeError::IncompatibleCallResults;
 
 use air_parser::ast::CallOutputValue;
 
+#[derive(Debug, Clone)]
 pub(crate) enum MergerCallResult {
     /// There is no corresponding state in a trace for this call.
     Empty,
@@ -37,8 +38,8 @@ pub(crate) fn try_merge_next_state_as_call(
 ) -> MergeResult<MergerCallResult> {
     use ExecutedState::Call;
 
-    let prev_state = data_keeper.prev_ctx.slider.next_state();
-    let current_state = data_keeper.current_ctx.slider.next_state();
+    let prev_state = data_keeper.prev_slider_mut().next_state();
+    let current_state = data_keeper.current_slider_mut().next_state();
     let value_type = ValueType::from_output_value(output_value);
 
     let (prev_call, current_call) = match (prev_state, current_state) {

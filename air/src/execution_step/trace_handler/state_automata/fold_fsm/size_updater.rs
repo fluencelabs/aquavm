@@ -32,8 +32,8 @@ pub(super) struct SubTreeSizeUpdater {
 
 impl SubTreeSizeUpdater {
     pub(super) fn new(data_keeper: &DataKeeper) -> Self {
-        let prev_subtrace_len = data_keeper.prev_ctx.slider.subtrace_len();
-        let current_subtrace_len = data_keeper.current_ctx.slider.subtrace_len();
+        let prev_subtrace_len = data_keeper.prev_slider().subtrace_len();
+        let current_subtrace_len = data_keeper.current_slider().subtrace_len();
 
         Self {
             prev_subtrace_len,
@@ -73,10 +73,10 @@ impl SubTreeSizeUpdater {
 
     pub(super) fn update(self, data_keeper: &mut DataKeeper) -> FSMResult<()> {
         let new_prev_interval = self.prev_subtrace_len - self.prev_states_seen;
-        data_keeper.prev_ctx.slider.set_subtrace_len(new_prev_interval)?;
+        data_keeper.prev_slider_mut().set_subtrace_len(new_prev_interval)?;
 
         let new_current_interval = self.current_subtrace_len - self.current_states_seen;
-        data_keeper.prev_ctx.slider.set_subtrace_len(new_current_interval)?;
+        data_keeper.prev_slider_mut().set_subtrace_len(new_current_interval)?;
         Ok(())
     }
 }

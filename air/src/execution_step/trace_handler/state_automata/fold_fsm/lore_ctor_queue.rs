@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use super::DataKeeper;
 use super::FoldLore;
 use super::ResolvedFoldSubTraceLore;
 use super::SubTraceLoreCtor;
@@ -28,20 +29,26 @@ pub(super) struct SubTraceLoreCtorQueue {
 }
 
 impl SubTraceLoreCtorQueue {
-    pub(super) fn forward_ctor_mut(&mut self) -> Option<&mut LoreCtorDesc> {
-        self.queue.last_mut()
-    }
-
-    pub(super) fn backward_ctor_mut(&mut self) -> &mut LoreCtorDesc {
+    pub(super) fn current(&mut self) -> &mut LoreCtorDesc {
         &mut self.queue[self.back_traversal_pos - 1]
     }
 
-    pub(super) fn add_element(&mut self, element: LoreCtorDesc) {
-        self.queue.push(element);
+    pub(super) fn add_element(
+        &mut self,
+        ctor: SubTraceLoreCtor,
+        prev_lore: Option<ResolvedFoldSubTraceLore>,
+        current_lore: Option<ResolvedFoldSubTraceLore>,
+    ) {
+        let new_element = LoreCtorDesc {
+            ctor,
+            prev_lore,
+            current_lore,
+        };
+        self.queue.push(new_element);
         self.back_traversal_pos += 1;
     }
 
-    pub(super) fn backward_traverse(&mut self) {
+    pub(super) fn traverse_back(&mut self) {
         self.back_traversal_pos -= 1;
     }
 
@@ -55,11 +62,32 @@ impl SubTraceLoreCtorQueue {
             .map(|l| l.ctor.into_subtrace_lore())
             .collect::<Vec<_>>()
     }
+
+    // this function should be called in a situation of early exit from fold, f.e.
+    // while last error propagation or join behaviour in the following situations:
+    //    (fold iterable iterator
+    //      (seq
+    //        (call .. [joined_variable])
+    //        (next iterator)
+    //      )
+    //    )
+    //
+    // In such example next wouldn't be called and correspondingly all pushed to
+    // ctor queue states wouldn't be properly finished. This function serves such
+    // situations, having called from generation_end.
+    pub(super) fn finish(&mut self, data_keeper: &DataKeeper) {
+        for ctor in self.queue.iter_mut() {
+            ctor.ctor.finish(data_keeper);
+        }
+
+        // set this to zero to correspond that all states were "observed" with back traversal
+        self.back_traversal_pos = 0;
+    }
 }
 
 #[derive(Debug, Clone)]
 pub(super) struct LoreCtorDesc {
+    pub(super) ctor: SubTraceLoreCtor,
     pub(super) prev_lore: Option<ResolvedFoldSubTraceLore>,
     pub(super) current_lore: Option<ResolvedFoldSubTraceLore>,
-    pub(super) ctor: SubTraceLoreCtor,
 }

@@ -81,6 +81,7 @@ impl<'i> ResolvedCall<'i> {
             call_arguments,
             tetraplets,
         } = self.resolve_args(exec_ctx)?;
+        println!("call args: {}", call_arguments);
 
         let serialized_tetraplets = serde_json::to_string(&tetraplets).expect("default serializer shouldn't fail");
 
@@ -131,7 +132,10 @@ impl<'i> ResolvedCall<'i> {
         exec_ctx: &mut ExecutionCtx<'i>,
         trace_ctx: &mut TraceHandler,
     ) -> ExecutionResult<bool> {
-        let (call_result, trace_pos) = match trace_ctx.meet_call_start(&self.output)? {
+        let t = trace_ctx.meet_call_start(&self.output)?;
+        println!("call prev result: {:?}", t);
+
+        let (call_result, trace_pos) = match t {
             MergerCallResult::CallResult { value, trace_pos } => (value, trace_pos),
             MergerCallResult::Empty => return Ok(true),
         };

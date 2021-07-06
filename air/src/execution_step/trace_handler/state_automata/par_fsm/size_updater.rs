@@ -27,10 +27,10 @@ pub(super) struct SubTraceSizeUpdater {
 
 impl SubTraceSizeUpdater {
     pub(super) fn from_keeper(data_keeper: &DataKeeper, ingredients: MergerParResult) -> FSMResult<Self> {
-        let prev_subtree_size = data_keeper.prev_ctx.slider.subtrace_len();
+        let prev_subtree_size = data_keeper.prev_slider().subtrace_len();
         let prev_size = Self::compute_new_size(prev_subtree_size, ingredients.prev_par)?;
 
-        let current_subtree_size = data_keeper.current_ctx.slider.subtrace_len();
+        let current_subtree_size = data_keeper.current_slider().subtrace_len();
         let current_size = Self::compute_new_size(current_subtree_size, ingredients.current_par)?;
 
         let updater = Self {
@@ -42,8 +42,8 @@ impl SubTraceSizeUpdater {
     }
 
     pub(super) fn update(self, data_keeper: &mut DataKeeper) -> FSMResult<()> {
-        data_keeper.prev_ctx.slider.set_subtrace_len(self.prev_size)?;
-        data_keeper.current_ctx.slider.set_subtrace_len(self.current_size)?;
+        data_keeper.prev_slider_mut().set_subtrace_len(self.prev_size)?;
+        data_keeper.current_slider_mut().set_subtrace_len(self.current_size)?;
 
         Ok(())
     }

@@ -23,12 +23,21 @@ pub(super) struct SubTraceLoreCtor {
     value_pos: usize,
     before_tracker: PositionsTracker,
     after_tracker: PositionsTracker,
+    state: CtorState,
 }
 
 #[derive(Debug, Default, PartialEq, Eq, Clone, Copy)]
 struct PositionsTracker {
     pub(self) start_pos: usize,
     pub(self) end_pos: usize,
+}
+
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+pub enum CtorState {
+    BeforeStarted,
+    BeforeCompleted,
+    AfterStarted,
+    AfterCompleted,
 }
 
 impl SubTraceLoreCtor {
@@ -46,15 +55,18 @@ impl SubTraceLoreCtor {
     }
 
     pub(super) fn before_end(&mut self, data_keeper: &DataKeeper) {
-        self.before_tracker.start_pos = data_keeper.result_states_count();
+        self.before_tracker.end_pos = data_keeper.result_states_count();
+        self.state.next();
     }
 
     pub(super) fn after_start(&mut self, data_keeper: &DataKeeper) {
         self.after_tracker.start_pos = data_keeper.result_states_count();
+        self.state.next();
     }
 
     pub(super) fn after_end(&mut self, data_keeper: &DataKeeper) {
         self.after_tracker.end_pos = data_keeper.result_states_count();
+        self.state.next();
     }
 
     pub(super) fn into_subtrace_lore(self) -> FoldSubTraceLore {
@@ -73,10 +85,53 @@ impl SubTraceLoreCtor {
             subtraces_desc: vec![before, after],
         }
     }
+
+    // this function should be called in a situation of early exit from fold,
+    // for more details see the comment above SubTraceLoreCtorQueue::finish().
+    pub(super) fn finish(&mut self, data_keeper: &DataKeeper) {
+        use CtorState::*;
+
+        match self.state {
+            BeforeStarted => {
+                self.before_end(data_keeper);
+                self.after_start(data_keeper);
+                self.after_end(data_keeper);
+            }
+            BeforeCompleted => {
+                self.after_start(data_keeper);
+                self.after_end(data_keeper);
+            }
+            AfterStarted => {
+                self.after_end(data_keeper);
+            }
+            AfterCompleted => {}
+        }
+    }
 }
 
 impl PositionsTracker {
     pub(self) fn len(&self) -> usize {
         self.end_pos - self.start_pos
+    }
+}
+
+impl Default for CtorState {
+    fn default() -> Self {
+        Self::BeforeStarted
+    }
+}
+
+impl CtorState {
+    pub(self) fn next(&mut self) {
+        use CtorState::*;
+
+        let next_state = match self {
+            BeforeStarted => BeforeCompleted,
+            BeforeCompleted => AfterStarted,
+            AfterStarted => AfterCompleted,
+            AfterCompleted => AfterCompleted,
+        };
+
+        *self = next_state;
     }
 }

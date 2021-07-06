@@ -18,6 +18,7 @@ use super::*;
 use ByNextPosition::*;
 use MergeCtxType::*;
 
+/// Adjusts sliders accordingly to a before fold lore state.
 pub(super) fn apply_fold_lore_before(
     data_keeper: &mut DataKeeper,
     prev_fold_lore: &Option<ResolvedFoldSubTraceLore>,
@@ -27,6 +28,7 @@ pub(super) fn apply_fold_lore_before(
     apply_fold_lore(data_keeper, current_fold_lore, Current, Before)
 }
 
+/// Adjusts sliders accordingly to an after fold lore state.
 pub(super) fn apply_fold_lore_after(
     data_keeper: &mut DataKeeper,
     prev_fold_lore: &Option<ResolvedFoldSubTraceLore>,
@@ -48,18 +50,22 @@ fn apply_fold_lore(
     };
 
     let slider = match ctx_type {
-        Previous => &data_keeper.prev_ctx.slider,
-        Current => &data_keeper.current_ctx.slider,
+        Previous => data_keeper.prev_slider_mut(),
+        Current => data_keeper.current_slider_mut(),
     };
 
     match next_position {
         Before => {
-            slider.set_subtrace_len(fold_lore.before_subtrace.subtrace_len as _)?;
-            slider.set_position(fold_lore.before_subtrace.begin_pos as _)?;
+            slider.set_position_and_len(
+                fold_lore.before_subtrace.begin_pos as _,
+                fold_lore.before_subtrace.subtrace_len as _,
+            )?;
         }
         After => {
-            slider.set_subtrace_len(fold_lore.after_subtrace.subtrace_len as _)?;
-            slider.set_position(fold_lore.after_subtrace.begin_pos as _)?;
+            slider.set_position_and_len(
+                fold_lore.after_subtrace.begin_pos as _,
+                fold_lore.after_subtrace.subtrace_len as _,
+            )?;
         }
     }
     Ok(())

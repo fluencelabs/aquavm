@@ -17,59 +17,65 @@
 use air_test_utils::call_vm;
 use air_test_utils::create_avm;
 use air_test_utils::set_variables_call_service;
+use air_test_utils::trace_from_result;
 
 use serde_json::json;
 
 #[test]
 fn network_explore() {
-    let relay_id = String::from("12D3KooWSpr929UacQSTUWQeK7CQPhcW2TSmLrGTdE1NcFWkuCvY");
-    let client_id = String::from("12D3KooWEDU1WwGtvHUKpGCaMjhcLWyCUq3MQiRKZBLLFcBVVMck");
+    let relay_id = "relay_id";
+    let client_id = "client_id";
     let set_variables_state = maplit::hashmap!(
-        String::from("relay") => json!(relay_id).to_string(),
-        String::from("client") => json!(client_id).to_string(),
+        "relay".to_string() => json!(relay_id).to_string(),
+        "client".to_string() => json!(client_id).to_string(),
     );
 
     let client_call_service = set_variables_call_service(set_variables_state);
-    let mut client = create_avm(
-        client_call_service,
-        "12D3KooWEDU1WwGtvHUKpGCaMjhcLWyCUq3MQiRKZBLLFcBVVMck",
-    );
+    let mut client = create_avm(client_call_service, client_id);
 
-    let client_1_id = String::from("12D3KooWFX27Tg3cNJkFk3W2iapnyRhwfwdQ4ZiTucsy1Go3MSGL");
-    let client_2_id = String::from("12D3KooWGNJoFmCNEHq8NpunB4pZSUh9UBHM53W1NwE7gM8L3RjZ");
-    let relay_call_service =
-        air_test_utils::set_variable_call_service(format!(r#"["{}", "{}"]"#, client_1_id, client_2_id));
-    let mut relay = create_avm(relay_call_service, relay_id.clone());
+    let client_1_id = "client_1_id";
+    let client_2_id = "client_2_id";
+    let relay_call_service = air_test_utils::set_variable_call_service(json!([client_1_id, client_2_id]).to_string());
+    let mut relay = create_avm(relay_call_service, relay_id);
 
-    let client_1_call_service =
-        air_test_utils::set_variable_call_service(format!(r#"["{}", "{}"]"#, relay_id, client_2_id));
-    let mut client_1 = create_avm(client_1_call_service, client_1_id.clone());
+    let client_1_call_service = air_test_utils::set_variable_call_service(json!([relay_id, client_2_id]).to_string());
+    let mut client_1 = create_avm(client_1_call_service, client_1_id);
 
-    let client_2_call_service =
-        air_test_utils::set_variable_call_service(format!(r#"["{}", "{}"]"#, relay_id, client_1_id));
-    let mut client_2 = create_avm(client_2_call_service, client_2_id.clone());
+    let client_2_call_service = air_test_utils::set_variable_call_service(json!([relay_id, client_1_id]).to_string());
+    let mut client_2 = create_avm(client_2_call_service, client_2_id);
 
     let script = include_str!("./scripts/network_explore.clj");
 
     let client_result = call_vm!(client, "", script, "", "");
-    assert_eq!(client_result.next_peer_pks, vec![relay_id.clone()]);
+    assert_eq!(client_result.next_peer_pks, vec![relay_id.to_string()]);
 
     let relay_result = call_vm!(relay, "", script, "", client_result.data);
-    assert_eq!(relay_result.next_peer_pks, vec![client_1_id.clone()]);
+    assert_eq!(relay_result.next_peer_pks, vec![client_1_id.to_string()]);
 
     let client_1_result = call_vm!(client_1, "", script, "", relay_result.data.clone());
-    assert_eq!(client_1_result.next_peer_pks, vec![client_2_id.clone()]);
+    assert_eq!(client_1_result.next_peer_pks, vec![client_2_id.to_string()]);
 
     let client_2_result = call_vm!(client_2, "", script, "", client_1_result.data.clone());
-    assert_eq!(client_2_result.next_peer_pks, vec![relay_id.clone()]);
+    assert_eq!(client_2_result.next_peer_pks, vec![relay_id.to_string()]);
 
     let relay_result = call_vm!(relay, "", script, relay_result.data, client_2_result.data.clone());
-    assert_eq!(relay_result.next_peer_pks, vec![client_2_id.clone()]);
+    assert_eq!(relay_result.next_peer_pks, vec![client_2_id.to_string()]);
 
     let client_2_result = call_vm!(client_2, "", script, client_2_result.data, relay_result.data.clone());
-    assert_eq!(client_2_result.next_peer_pks, vec![relay_id.clone()]);
+    assert_eq!(client_2_result.next_peer_pks, vec![relay_id.to_string()]);
 
+    let relay_trace = trace_from_result(&relay_result);
+    let client_2_trace = trace_from_result(&client_2_result);
+
+    // println!("relay trace: {:?}", relay_trace);
+    // println!("client 2 trace: {:?}", client_2_trace);
+
+    println!("relay run\n\n");
     let relay_result = call_vm!(relay, "", script, relay_result.data, client_2_result.data);
+
+    let result_trace = trace_from_result(&relay_result);
+    // println!("result trace: {:?}", result_trace);
+
     assert_eq!(relay_result.next_peer_pks, vec![client_1_id.clone()]);
 
     let client_1_result = call_vm!(client_1, "", script, client_1_result.data, relay_result.data);

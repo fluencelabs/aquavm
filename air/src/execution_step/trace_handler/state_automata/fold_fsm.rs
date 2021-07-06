@@ -30,6 +30,15 @@ use air_interpreter_data::FoldLore;
 
 use std::rc::Rc;
 
+/// This FSM manages fold and keeps internally queue of lore ctors.
+/// State transitioning functions must work in the following way:
+///     meet_fold_start.1 ->
+///         meet_generation_start.N ->
+///             meet_next.M ->
+///             meet_prev.M ->
+///         meet_generation_end.N ->
+///     meet_fold_end.1
+/// where .T means that this function should be called exactly T times.
 #[derive(Debug, Default, Clone)]
 pub(crate) struct FoldFSM {
     prev_fold_lore: ResolvedFoldLore,
@@ -66,35 +75,34 @@ impl FoldFSM {
     }
 
     pub(crate) fn meet_next(&mut self, value: &ValueAndPos, data_keeper: &mut DataKeeper) -> FSMResult<()> {
-        self.ctor_queue.forward_ctor_mut().unwrap().ctor.before_end(data_keeper);
+        self.ctor_queue.current().ctor.before_end(data_keeper);
         self.meet_before_state(value, data_keeper)
     }
 
     pub(crate) fn meet_prev(&mut self, data_keeper: &mut DataKeeper) -> FSMResult<()> {
-        let lore_desc = if self.ctor_queue.were_no_back_traversals() {
-            let lore_desc = self.ctor_queue.forward_ctor_mut().unwrap();
-            lore_desc.ctor.before_end(data_keeper);
-            lore_desc.ctor.after_start(data_keeper);
+        let were_no_back_traversals = self.ctor_queue.were_no_back_traversals();
 
-            lore_desc
-        } else {
-            self.ctor_queue.backward_ctor_mut().ctor.after_end(data_keeper);
+        let LoreCtorDesc {
+            ctor,
+            prev_lore,
+            current_lore,
+        } = self.ctor_queue.current();
 
-            self.ctor_queue.backward_traverse();
-            let lore_desc = self.ctor_queue.backward_ctor_mut();
-            lore_desc.ctor.after_start(data_keeper);
+        if were_no_back_traversals {
+            ctor.before_end(data_keeper);
+        }
 
-            lore_desc
-        };
-
-        let prev_lore = &lore_desc.prev_lore;
-        let current_lore = &lore_desc.current_lore;
+        ctor.after_start(data_keeper);
         self.size_updater.track_after(prev_lore, current_lore);
-        apply_fold_lore_after(data_keeper, prev_lore, current_lore)
+        apply_fold_lore_after(data_keeper, prev_lore, current_lore)?;
+
+        self.ctor_queue.traverse_back();
+
+        Ok(())
     }
 
     pub(crate) fn meet_generation_end(&mut self, data_keeper: &mut DataKeeper) {
-        self.ctor_queue.backward_ctor_mut().ctor.after_end(data_keeper);
+        self.ctor_queue.finish(data_keeper);
 
         let fold_lore = self.ctor_queue.transform_to_lore();
         self.result_lore.extend(fold_lore);
@@ -110,8 +118,8 @@ impl FoldFSM {
         Ok(())
     }
 
-    pub(crate) fn error_exit(self, _data_keeper: &mut DataKeeper) {
-        unimplemented!();
+    pub(crate) fn error_exit(mut self, data_keeper: &mut DataKeeper) {
+        self.meet_generation_end(data_keeper);
     }
 
     fn meet_before_state(&mut self, value: &ValueAndPos, data_keeper: &mut DataKeeper) -> FSMResult<()> {
@@ -124,12 +132,7 @@ impl FoldFSM {
         apply_fold_lore_before(data_keeper, &prev_lore, &current_lore)?;
 
         let ctor = SubTraceLoreCtor::from_before_start(value.pos, data_keeper);
-        let queue_elem = LoreCtorDesc {
-            prev_lore,
-            current_lore,
-            ctor,
-        };
-        self.ctor_queue.add_element(queue_elem);
+        self.ctor_queue.add_element(ctor, prev_lore, current_lore);
 
         Ok(())
     }

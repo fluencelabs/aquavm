@@ -31,8 +31,8 @@ pub(crate) struct MergerFoldResult {
 pub(crate) fn try_merge_next_state_as_fold(data_keeper: &mut DataKeeper) -> MergeResult<MergerFoldResult> {
     use ExecutedState::Fold;
 
-    let prev_state = data_keeper.prev_ctx.slider.next_state();
-    let current_state = data_keeper.current_ctx.slider.next_state();
+    let prev_state = data_keeper.prev_slider_mut().next_state();
+    let current_state = data_keeper.current_slider_mut().next_state();
 
     let fold_result = match (prev_state, current_state) {
         (Some(Fold(prev_fold)), Some(Fold(current_fold))) => {
@@ -54,16 +54,16 @@ pub(crate) fn try_merge_next_state_as_fold(data_keeper: &mut DataKeeper) -> Merg
 impl MergerFoldResult {
     pub(self) fn from_fold_result(
         fold: &FoldResult,
-        data_keeper: &DataKeeper,
+        data_keeper: &mut DataKeeper,
         ctx_type: MergeCtxType,
     ) -> MergeResult<Self> {
         let (prev_fold_lore, current_fold_lore) = match ctx_type {
             MergeCtxType::Previous => {
-                let fold_lore = resolve_fold_lore(&data_keeper.prev_ctx.slider, fold)?;
+                let fold_lore = resolve_fold_lore(&mut data_keeper.prev_slider_mut(), fold)?;
                 (fold_lore, <_>::default())
             }
             MergeCtxType::Current => {
-                let fold_lore = resolve_fold_lore(&data_keeper.current_ctx.slider, fold)?;
+                let fold_lore = resolve_fold_lore(&mut data_keeper.current_slider_mut(), fold)?;
                 (<_>::default(), fold_lore)
             }
         };
@@ -79,10 +79,10 @@ impl MergerFoldResult {
     pub(self) fn from_fold_results(
         prev_fold: &FoldResult,
         current_fold: &FoldResult,
-        data_keeper: &DataKeeper,
+        data_keeper: &mut DataKeeper,
     ) -> MergeResult<Self> {
-        let prev_fold_lore = resolve_fold_lore(&data_keeper.prev_ctx.slider, prev_fold)?;
-        let current_fold_lore = resolve_fold_lore(&data_keeper.current_ctx.slider, current_fold)?;
+        let prev_fold_lore = resolve_fold_lore(&mut data_keeper.prev_slider_mut(), prev_fold)?;
+        let current_fold_lore = resolve_fold_lore(&mut data_keeper.current_slider_mut(), current_fold)?;
 
         let merge_result = Self {
             prev_fold_lore,

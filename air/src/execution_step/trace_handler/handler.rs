@@ -145,8 +145,8 @@ impl TraceHandler {
     }
 
     pub(crate) fn subtree_sizes(&self) -> (usize, usize) {
-        let prev_size = self.data_keeper.prev_ctx.slider.subtrace_len();
-        let current_size = self.data_keeper.current_ctx.slider.subtrace_len();
+        let prev_size = self.data_keeper.prev_slider().subtrace_len();
+        let current_size = self.data_keeper.current_slider().subtrace_len();
 
         (prev_size, current_size)
     }
