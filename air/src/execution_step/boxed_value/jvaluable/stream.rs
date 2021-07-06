@@ -34,7 +34,7 @@ impl JValuable for std::cell::Ref<'_, Stream> {
         let (selected_values, _) = select_with_iter(iter, json_path)
             .map_err(|e| StreamJsonPathError(self.deref().clone(), json_path.to_string(), e))?;
 
-        return Ok(selected_values);
+        Ok(selected_values)
     }
 
     fn apply_json_path_with_tetraplets(
@@ -57,7 +57,7 @@ impl JValuable for std::cell::Ref<'_, Stream> {
             tetraplets.push(tetraplet);
         }
 
-        return Ok((selected_values, tetraplets));
+        Ok((selected_values, tetraplets))
     }
 
     fn as_jvalue(&self) -> Cow<'_, JValue> {

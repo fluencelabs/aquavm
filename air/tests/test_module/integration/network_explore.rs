@@ -17,7 +17,6 @@
 use air_test_utils::call_vm;
 use air_test_utils::create_avm;
 use air_test_utils::set_variables_call_service;
-use air_test_utils::trace_from_result;
 
 use serde_json::json;
 
@@ -64,18 +63,7 @@ fn network_explore() {
     let client_2_result = call_vm!(client_2, "", script, client_2_result.data, relay_result.data.clone());
     assert_eq!(client_2_result.next_peer_pks, vec![relay_id.to_string()]);
 
-    let relay_trace = trace_from_result(&relay_result);
-    let client_2_trace = trace_from_result(&client_2_result);
-
-    // println!("relay trace: {:?}", relay_trace);
-    // println!("client 2 trace: {:?}", client_2_trace);
-
-    println!("relay run\n\n");
     let relay_result = call_vm!(relay, "", script, relay_result.data, client_2_result.data);
-
-    let result_trace = trace_from_result(&relay_result);
-    // println!("result trace: {:?}", result_trace);
-
     assert_eq!(relay_result.next_peer_pks, vec![client_1_id.clone()]);
 
     let client_1_result = call_vm!(client_1, "", script, client_1_result.data, relay_result.data);

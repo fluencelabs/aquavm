@@ -231,6 +231,7 @@ fn construct_service_config(module_name: impl Into<String>) -> AppServiceConfig 
 }
 
 #[test]
+#[ignore]
 fn tetraplet_with_wasm_modules() {
     use fluence::CallParameters;
     use fluence::SecurityTetraplet as SDKTetraplet;

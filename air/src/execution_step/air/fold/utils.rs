@@ -69,6 +69,10 @@ fn handle_instruction_variable<'ctx>(
             let mut iterables = Vec::with_capacity(stream.0.len());
 
             for iterable in stream.0.iter() {
+                if iterable.is_empty() {
+                    continue;
+                }
+
                 let call_results = iterable.to_vec();
                 let foldable = IterableVecResolvedCall::init(call_results);
                 let foldable: IterableValue = Box::new(foldable);

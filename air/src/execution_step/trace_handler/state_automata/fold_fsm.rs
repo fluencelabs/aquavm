@@ -49,6 +49,7 @@ pub(crate) struct FoldFSM {
     size_updater: SubTreeSizeUpdater,
 }
 
+#[derive(Debug, Clone)]
 pub(crate) struct ValueAndPos {
     pub(crate) value: Rc<JValue>,
     pub(crate) pos: usize,

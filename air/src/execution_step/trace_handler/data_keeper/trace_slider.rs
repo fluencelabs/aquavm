@@ -74,6 +74,7 @@ impl TraceSlider {
 
         self.position = position;
         self.subtrace_len = subtrace_len;
+        self.seen_elements = 0;
 
         Ok(())
     }

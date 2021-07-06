@@ -63,6 +63,8 @@ pub(super) fn handle_prev_state<'i>(
         Executed(result, generation) => {
             let executed_result = ResolvedCallResult::new(result.clone(), triplet.clone(), trace_pos);
             set_local_call_result(executed_result, Generation::Nth(*generation), output, exec_ctx)?;
+
+            exec_ctx.subtree_complete = true;
             Ok(false)
         }
     };

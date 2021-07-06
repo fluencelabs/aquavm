@@ -52,26 +52,23 @@ pub fn stream_string(result: impl Into<String>, generation: u32) -> ExecutedStat
     ))
 }
 
-pub fn stream_number(
-    result: impl Into<serde_json::Number>,
-    generation: u32,
-) -> ExecutedState {
+pub fn stream_number(result: impl Into<serde_json::Number>, generation: u32) -> ExecutedState {
     ExecutedState::Call(CallResult::Executed(
         Rc::new(JValue::Number(result.into())),
         generation,
     ))
 }
 
-pub fn stream_string_array(
-    result: Vec<impl Into<String>>,
-    generation: u32
-) -> ExecutedState {
+pub fn stream_string_array(result: Vec<impl Into<String>>, generation: u32) -> ExecutedState {
     let result = result
         .into_iter()
         .map(|s| JValue::String(s.into()))
         .collect::<Vec<_>>();
 
-    ExecutedState::Call(CallResult::Executed(Rc::new(JValue::Array(result)), generation))
+    ExecutedState::Call(CallResult::Executed(
+        Rc::new(JValue::Array(result)),
+        generation,
+    ))
 }
 
 pub fn request_sent_by(sender: impl Into<String>) -> ExecutedState {

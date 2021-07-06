@@ -73,7 +73,6 @@ impl<'i> ResolvedCall<'i> {
         // call can be executed only on peers with such peer_id
         if self.triplet.peer_pk.as_str() != exec_ctx.current_peer_id.as_str() {
             set_remote_call_result(self.triplet.peer_pk.clone(), exec_ctx, trace_ctx);
-
             return Ok(());
         }
 
@@ -81,7 +80,6 @@ impl<'i> ResolvedCall<'i> {
             call_arguments,
             tetraplets,
         } = self.resolve_args(exec_ctx)?;
-        println!("call args: {}", call_arguments);
 
         let serialized_tetraplets = serde_json::to_string(&tetraplets).expect("default serializer shouldn't fail");
 
@@ -132,10 +130,7 @@ impl<'i> ResolvedCall<'i> {
         exec_ctx: &mut ExecutionCtx<'i>,
         trace_ctx: &mut TraceHandler,
     ) -> ExecutionResult<bool> {
-        let t = trace_ctx.meet_call_start(&self.output)?;
-        println!("call prev result: {:?}", t);
-
-        let (call_result, trace_pos) = match t {
+        let (call_result, trace_pos) = match trace_ctx.meet_call_start(&self.output)? {
             MergerCallResult::CallResult { value, trace_pos } => (value, trace_pos),
             MergerCallResult::Empty => return Ok(true),
         };
