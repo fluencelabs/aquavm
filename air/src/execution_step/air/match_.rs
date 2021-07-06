@@ -18,7 +18,7 @@ use super::compare_matchable::are_matchable_eq;
 use super::ExecutionCtx;
 use super::ExecutionError;
 use super::ExecutionResult;
-use super::ExecutionTraceCtx;
+use super::TraceHandler;
 use crate::execution_step::joinable::Joinable;
 use crate::joinable;
 use crate::log_instruction;
@@ -26,7 +26,7 @@ use crate::log_instruction;
 use air_parser::ast::Match;
 
 impl<'i> super::ExecutableInstruction<'i> for Match<'i> {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut ExecutionTraceCtx) -> ExecutionResult<()> {
+    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         log_instruction!(match_, exec_ctx, trace_ctx);
 
         let are_values_equal = joinable!(

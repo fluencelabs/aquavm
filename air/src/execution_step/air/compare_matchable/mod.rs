@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-mod compare_matchable;
+mod comparator;
 
-pub(super) use compare_matchable::are_matchable_eq;
+pub(super) use comparator::are_matchable_eq;

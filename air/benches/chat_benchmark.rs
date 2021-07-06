@@ -55,26 +55,26 @@ fn chat_sent_message_benchmark() -> Result<InterpreterOutcome, AVMError> {
         "#,
     );
 
-    let res = CLIENT_1_VM
-        .with(|vm| vm.borrow_mut().call_with_prev_data("", script.clone(), "[]", "[]"))
+    let result = CLIENT_1_VM
+        .with(|vm| vm.borrow_mut().call_with_prev_data("", script.clone(), "", ""))
         .unwrap();
-    let res = RELAY_1_VM
-        .with(|vm| vm.borrow_mut().call_with_prev_data("", script.clone(), "[]", res.data))
+    let result = RELAY_1_VM
+        .with(|vm| vm.borrow_mut().call_with_prev_data("", script.clone(), "", result.data))
         .unwrap();
-    let res = REMOTE_VM
-        .with(|vm| vm.borrow_mut().call_with_prev_data("", script.clone(), "[]", res.data))
+    let result = REMOTE_VM
+        .with(|vm| vm.borrow_mut().call_with_prev_data("", script.clone(), "", result.data))
         .unwrap();
-    let res_data = res.data.clone();
+    let res_data = result.data.clone();
     let res1 = RELAY_1_VM
-        .with(|vm| vm.borrow_mut().call_with_prev_data("", script.clone(), "[]", res_data))
+        .with(|vm| vm.borrow_mut().call_with_prev_data("", script.clone(), "", res_data))
         .unwrap();
     CLIENT_1_VM
-        .with(|vm| vm.borrow_mut().call_with_prev_data("", script.clone(), "[]", res1.data))
+        .with(|vm| vm.borrow_mut().call_with_prev_data("", script.clone(), "", res1.data))
         .unwrap();
     let res2 = RELAY_2_VM
-        .with(|vm| vm.borrow_mut().call_with_prev_data("", script.clone(), "[]", res.data))
+        .with(|vm| vm.borrow_mut().call_with_prev_data("", script.clone(), "", result.data))
         .unwrap();
-    CLIENT_2_VM.with(|vm| vm.borrow_mut().call_with_prev_data("", script.clone(), "[]", res2.data))
+    CLIENT_2_VM.with(|vm| vm.borrow_mut().call_with_prev_data("", script.clone(), "", res2.data))
 }
 
 fn criterion_benchmark(c: &mut Criterion) {

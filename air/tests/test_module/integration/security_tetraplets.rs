@@ -32,8 +32,8 @@ fn arg_host_function() -> (CallServiceClosure, Rc<RefCell<ArgTetraplets>>) {
     let arg_tetraplets = Rc::new(RefCell::new(ArgTetraplets::new()));
 
     let arg_tetraplets_inner = arg_tetraplets.clone();
-    let host_function: CallServiceClosure = Box::new(move |_, args| -> Option<IValue> {
-        let tetraplets = match &args[3] {
+    let host_function: CallServiceClosure = Box::new(move |args| -> Option<IValue> {
+        let tetraplets = match &args.function_args[3] {
             IValue::String(str) => str,
             _ => unreachable!(),
         };
@@ -52,7 +52,7 @@ fn arg_host_function() -> (CallServiceClosure, Rc<RefCell<ArgTetraplets>>) {
 
 #[test]
 fn simple_fold() {
-    let return_numbers_call_service: CallServiceClosure = Box::new(|_, _| -> Option<IValue> {
+    let return_numbers_call_service: CallServiceClosure = Box::new(|_| -> Option<IValue> {
         Some(IValue::Record(
             NEVec::new(vec![
                 IValue::S32(0),
@@ -92,8 +92,8 @@ fn simple_fold() {
     );
 
     let init_peer_id = String::from("some_init_peer_id");
-    let res = call_vm!(set_variable_vm, init_peer_id.clone(), script.clone(), "", "");
-    let mut data = res.data;
+    let result = call_vm!(set_variable_vm, init_peer_id.clone(), script.clone(), "", "");
+    let mut data = result.data;
 
     let first_arg_triplet = ResolvedTriplet {
         peer_pk: set_variable_vm_peer_id,
@@ -120,8 +120,8 @@ fn simple_fold() {
     let expected_tetraplets = vec![vec![first_arg_tetraplet], vec![second_arg_tetraplet]];
     let expected_tetraplets = Rc::new(RefCell::new(expected_tetraplets));
     for i in 0..10 {
-        let res = call_vm!(client_vms[i].0, init_peer_id.clone(), script.clone(), "[]", data);
-        data = res.data;
+        let result = call_vm!(client_vms[i].0, init_peer_id.clone(), script.clone(), "", data);
+        data = result.data;
 
         assert_eq!(client_vms[i].1, expected_tetraplets);
     }
@@ -129,7 +129,7 @@ fn simple_fold() {
 
 #[test]
 fn fold_json_path() {
-    let return_numbers_call_service: CallServiceClosure = Box::new(|_, _| -> Option<IValue> {
+    let return_numbers_call_service: CallServiceClosure = Box::new(|_| -> Option<IValue> {
         Some(IValue::Record(
             NEVec::new(vec![
                 IValue::S32(0),
@@ -166,7 +166,7 @@ fn fold_json_path() {
     );
 
     let init_peer_id = String::from("some_init_peer_id");
-    let res = call_vm!(set_variable_vm, init_peer_id.clone(), script.clone(), "", "");
+    let result = call_vm!(set_variable_vm, init_peer_id.clone(), script.clone(), "", "");
 
     let first_arg_triplet = ResolvedTriplet {
         peer_pk: set_variable_vm_peer_id,
@@ -192,7 +192,7 @@ fn fold_json_path() {
 
     let expected_tetraplets = vec![vec![first_arg_tetraplet], vec![second_arg_tetraplet]];
     let expected_tetraplets = Rc::new(RefCell::new(expected_tetraplets));
-    call_vm!(client_vm, init_peer_id.clone(), script.clone(), "[]", res.data);
+    call_vm!(client_vm, init_peer_id.clone(), script.clone(), "", result.data);
     assert_eq!(arg_tetraplets, expected_tetraplets);
 }
 
@@ -201,7 +201,7 @@ use fluence_app_service::AppServiceConfig;
 use fluence_app_service::FaaSConfig;
 use fluence_app_service::ModuleDescriptor;
 
-use air::execution_trace::ExecutionTrace;
+use air_test_utils::trace_from_result;
 use std::path::PathBuf;
 
 fn construct_service_config(module_name: impl Into<String>) -> AppServiceConfig {
@@ -231,6 +231,7 @@ fn construct_service_config(module_name: impl Into<String>) -> AppServiceConfig 
 }
 
 #[test]
+#[ignore]
 fn tetraplet_with_wasm_modules() {
     use fluence::CallParameters;
     use fluence::SecurityTetraplet as SDKTetraplet;
@@ -251,7 +252,9 @@ fn tetraplet_with_wasm_modules() {
 
     let services_inner = services.clone();
     const ADMIN_PEER_PK: &str = "12D3KooWEXNUbCXooUwHrHBbrmjsrpHXoEphPwbjQXEGyzbqKnE1";
-    let host_func: CallServiceClosure = Box::new(move |_, args: Vec<IValue>| -> Option<IValue> {
+    let host_func: CallServiceClosure = Box::new(move |args| -> Option<IValue> {
+        let args = &args.function_args;
+
         let service_id = match &args[0] {
             IValue::String(str) => str,
             _ => unreachable!(),
@@ -303,7 +306,7 @@ fn tetraplet_with_wasm_modules() {
     let mut vm = create_avm(host_func, local_peer_id);
 
     let result = call_vm!(vm, ADMIN_PEER_PK, script, "", "");
-    let actual_trace: ExecutionTrace = serde_json::from_slice(&result.data).unwrap();
+    let actual_trace = trace_from_result(&result);
     let expected_state = executed_state::scalar_string("Ok");
 
     assert_eq!(actual_trace[1], expected_state)

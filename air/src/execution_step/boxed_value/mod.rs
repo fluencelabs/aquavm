@@ -16,9 +16,12 @@
 
 mod iterable;
 mod jvaluable;
+mod stream;
 
 pub(crate) use super::ExecutionError;
 pub(crate) use iterable::*;
 pub(crate) use jvaluable::*;
+pub(crate) use stream::Generation;
+pub(crate) use stream::Stream;
 
 pub(self) use super::ExecutionResult;

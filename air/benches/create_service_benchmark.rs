@@ -92,10 +92,10 @@ fn create_service_benchmark() -> Result<InterpreterOutcome, AVMError> {
         )"#,
     );
 
-    let res = SET_VARIABLES_VM
-        .with(|vm| vm.borrow_mut().call_with_prev_data("", script.clone(), "[]", "[]"))
+    let result = SET_VARIABLES_VM
+        .with(|vm| vm.borrow_mut().call_with_prev_data("", script.clone(), "", ""))
         .unwrap();
-    VM.with(|vm| vm.borrow_mut().call_with_prev_data("", script, "[]", res.data))
+    VM.with(|vm| vm.borrow_mut().call_with_prev_data("", script, "", result.data))
 }
 
 fn criterion_benchmark(c: &mut Criterion) {

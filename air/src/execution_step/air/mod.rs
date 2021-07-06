@@ -19,6 +19,7 @@ mod compare_matchable;
 mod fold;
 mod match_;
 mod mismatch;
+mod next;
 mod null;
 mod par;
 mod seq;
@@ -26,11 +27,11 @@ mod xor;
 
 pub(crate) use fold::FoldState;
 
+pub(self) use super::execution_context::*;
+pub(self) use super::ExecutionCtx;
 pub(self) use super::ExecutionError;
 pub(self) use super::ExecutionResult;
-pub(self) use crate::contexts::execution::ExecutionCtx;
-pub(self) use crate::contexts::execution::LastErrorDescriptor;
-pub(self) use crate::contexts::execution_trace::ExecutionTraceCtx;
+pub(self) use crate::execution_step::TraceHandler;
 
 use air_parser::ast::Instruction;
 
@@ -39,6 +40,8 @@ macro_rules! execute {
     ($self:expr, $instr:expr, $exec_ctx:ident, $trace_ctx:ident) => {
         match $instr.execute($exec_ctx, $trace_ctx) {
             Err(e) => {
+                $trace_ctx.error_exit();
+
                 if !$exec_ctx.last_error_could_be_set {
                     return Err(e);
                 }
@@ -81,11 +84,11 @@ macro_rules! execute_match_mismatch {
 }
 
 pub(crate) trait ExecutableInstruction<'i> {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut ExecutionTraceCtx) -> ExecutionResult<()>;
+    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()>;
 }
 
 impl<'i> ExecutableInstruction<'i> for Instruction<'i> {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut ExecutionTraceCtx) -> ExecutionResult<()> {
+    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         match self {
             // call isn't wrapped by the execute macro because
             // it internally sets last_error with resolved triplet
@@ -132,20 +135,15 @@ macro_rules! log_instruction {
             $exec_ctx.subtree_complete
         );
 
-        log::debug!(
-            target: crate::log_targets::EXECUTED_TRACE,
-            "  current call executed trace: {:?}",
-            $trace_ctx.current_trace
-        );
         log::trace!(
             target: crate::log_targets::SUBTREE_ELEMENTS,
             "  subtree elements count: {:?}",
-            $trace_ctx.current_subtree_size
+            $trace_ctx.subtree_sizes()
         );
         log::debug!(
             target: crate::log_targets::NEW_EXECUTED_TRACE,
             "  new call executed trace: {:?}",
-            $trace_ctx.new_trace
+            $trace_ctx.as_result_trace()
         );
     };
 }

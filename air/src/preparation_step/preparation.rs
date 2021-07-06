@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-use super::ExecutionCtx;
-use super::ExecutionTrace;
-use super::ExecutionTraceCtx;
 use super::PreparationError;
 use crate::build_targets::get_current_peer_id;
+use crate::execution_step::AValue;
+use crate::execution_step::ExecutionCtx;
+use crate::execution_step::Stream;
+use crate::execution_step::TraceHandler;
 use crate::log_targets::RUN_PARAMS;
 
+use air_interpreter_data::InterpreterData;
 use air_parser::ast::Instruction;
 
 type PreparationResult<T> = Result<T, PreparationError>;
@@ -28,31 +30,19 @@ type PreparationResult<T> = Result<T, PreparationError>;
 /// Represents result of the preparation_step step.
 pub(crate) struct PreparationDescriptor<'ctx, 'i> {
     pub(crate) exec_ctx: ExecutionCtx<'ctx>,
-    pub(crate) trace_ctx: ExecutionTraceCtx,
+    pub(crate) trace_handler: TraceHandler,
     pub(crate) air: Instruction<'i>,
 }
 
 /// Parse and prepare supplied data and AIR script.
 pub(crate) fn prepare<'i>(
     prev_data: &[u8],
-    data: &[u8],
+    current_data: &[u8],
     raw_air: &'i str,
     init_peer_id: String,
 ) -> PreparationResult<PreparationDescriptor<'static, 'i>> {
-    fn to_executed_trace(raw_data: &[u8]) -> PreparationResult<ExecutionTrace> {
-        use PreparationError::ExecutedTraceDeError as CallDeError;
-
-        // treat empty string as an empty executed trace allows abstracting from
-        // the internal format for empty data.
-        if raw_data.is_empty() {
-            Ok(ExecutionTrace::new())
-        } else {
-            serde_json::from_slice(&raw_data).map_err(|err| CallDeError(err, raw_data.to_vec()))
-        }
-    }
-
-    let prev_trace = to_executed_trace(prev_data)?;
-    let trace = to_executed_trace(data)?;
+    let prev_data = try_to_data(prev_data)?;
+    let current_data = try_to_data(current_data)?;
 
     let air: Instruction<'i> = *air_parser::parse(raw_air).map_err(PreparationError::AIRParseError)?;
 
@@ -60,33 +50,52 @@ pub(crate) fn prepare<'i>(
         target: RUN_PARAMS,
         "air: {:?}\nprev_trace: {:?}\ncurrent_trace: {:?}",
         air,
-        prev_trace,
-        trace
+        prev_data,
+        current_data
     );
 
-    let (exec_ctx, trace_ctx) = make_contexts(prev_trace, trace, init_peer_id)?;
+    let exec_ctx = make_exec_ctx(init_peer_id, &prev_data)?;
+    let trace_handler = TraceHandler::from_data(prev_data, current_data);
+
     let result = PreparationDescriptor {
         exec_ctx,
-        trace_ctx,
+        trace_handler,
         air,
     };
 
     Ok(result)
 }
 
-/// Make execution_step and execution_step trace contexts from supplied data.
-/// Internally, it unites variable from previous and current data and merges executed traces.
-fn make_contexts(
-    prev_trace: ExecutionTrace,
-    trace: ExecutionTrace,
-    init_peer_id: String,
-) -> PreparationResult<(ExecutionCtx<'static>, ExecutionTraceCtx)> {
+fn try_to_data(raw_data: &[u8]) -> PreparationResult<InterpreterData> {
+    use PreparationError::DataDeError;
+
+    // treat empty slice as an empty interpreter data allows abstracting from
+    // the internal format for empty data.
+    if raw_data.is_empty() {
+        Ok(InterpreterData::new())
+    } else {
+        serde_json::from_slice(&raw_data).map_err(|err| DataDeError(err, raw_data.to_vec()))
+    }
+}
+
+fn make_exec_ctx(init_peer_id: String, prev_data: &InterpreterData) -> PreparationResult<ExecutionCtx<'static>> {
     let current_peer_id = get_current_peer_id().map_err(PreparationError::CurrentPeerIdEnvError)?;
     log::trace!(target: RUN_PARAMS, "current peer id {}", current_peer_id);
 
-    let exec_ctx = ExecutionCtx::new(current_peer_id, init_peer_id);
-    let current_trace = super::merge_execution_traces(prev_trace, trace)?;
-    let trace_ctx = ExecutionTraceCtx::new(current_trace);
+    let mut ctx = ExecutionCtx::new(current_peer_id, init_peer_id);
+    create_streams(&mut ctx, prev_data);
 
-    Ok((exec_ctx, trace_ctx))
+    Ok(ctx)
+}
+
+fn create_streams(ctx: &mut ExecutionCtx<'_>, prev_data: &InterpreterData) {
+    use std::cell::RefCell;
+
+    for (stream_name, generation_count) in prev_data.streams.iter() {
+        let new_stream = Stream::from_generations_count(*generation_count as usize);
+        let new_value = AValue::StreamRef(RefCell::new(new_stream));
+
+        // it's impossible to have duplicates of streams in data because of HashMap
+        ctx.data_cache.insert(stream_name.to_string(), new_value);
+    }
 }

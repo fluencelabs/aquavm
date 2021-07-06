@@ -127,6 +127,9 @@ fn parser_error_to_label(file_id: usize, error: ParserError) -> Label<usize> {
         CallArgsNotFlattened(start, end) => {
             Label::primary(file_id, start..end).with_message(error.to_string())
         }
+        JsonPathAppliedToStream(start, end) => {
+            Label::primary(file_id, start..end).with_message(error.to_string())
+        }
         UndefinedIterable(start, end, _) => {
             Label::primary(file_id, start..end).with_message(error.to_string())
         }
@@ -178,18 +181,32 @@ fn lexical_error_to_label(file_id: usize, error: LexerError) -> Label<usize> {
     }
 }
 
+macro_rules! make_user_error(
+    ($error_type:ident, $start_pos: ident, $token:ident, $end_pos: ident) => { {
+        let error = ParserError::$error_type($start_pos, $end_pos);
+        let error = ParseError::User { error };
+
+        let dropped_tokens = vec![($start_pos, $token, $end_pos)];
+
+        ErrorRecovery {
+            error,
+            dropped_tokens,
+        }
+    }}
+);
+
 pub(super) fn make_flattened_error(
     start_pos: usize,
     token: Token<'_>,
     end_pos: usize,
 ) -> ErrorRecovery<usize, Token<'_>, ParserError> {
-    let error = ParserError::CallArgsNotFlattened(start_pos, end_pos);
-    let error = ParseError::User { error };
+    make_user_error!(CallArgsNotFlattened, start_pos, token, end_pos)
+}
 
-    let dropped_tokens = vec![(start_pos, token, end_pos)];
-
-    ErrorRecovery {
-        error,
-        dropped_tokens,
-    }
+pub(super) fn make_stream_iterable_error(
+    start_pos: usize,
+    token: Token<'_>,
+    end_pos: usize,
+) -> ErrorRecovery<usize, Token<'_>, ParserError> {
+    make_user_error!(JsonPathAppliedToStream, start_pos, token, end_pos)
 }

@@ -17,8 +17,8 @@
 use air_test_utils::call_vm;
 use air_test_utils::create_avm;
 use air_test_utils::set_variables_call_service;
+use air_test_utils::trace_from_result;
 use air_test_utils::unit_call_service;
-use air_test_utils::ExecutionTrace;
 
 use serde_json::json;
 
@@ -65,10 +65,10 @@ fn dont_wait_on_json_path() {
     );
 
     let init_peer_id = "asd";
-    let res = call_vm!(set_variable_vm, init_peer_id, &script, "", "");
-    let res = call_vm!(local_vm, init_peer_id, script, "", res.data);
+    let result = call_vm!(set_variable_vm, init_peer_id, &script, "", "");
+    let result = call_vm!(local_vm, init_peer_id, script, "", result.data);
 
-    assert_eq!(res.next_peer_pks, vec![init_peer_id.to_string()]);
+    assert_eq!(result.next_peer_pks, vec![init_peer_id.to_string()]);
 }
 
 #[test]
@@ -85,11 +85,11 @@ fn wait_on_stream_json_path_by_id() {
         local_peer_id
     );
 
-    let res = call_vm!(local_vm, "", non_join_stream_script, "", "");
-    let trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid json");
+    let result = call_vm!(local_vm, "", non_join_stream_script, "", "");
+    let actual_trace = trace_from_result(&result);
 
-    assert_eq!(res.ret_code, 0);
-    assert_eq!(trace.len(), 3);
+    assert_eq!(result.ret_code, 0);
+    assert_eq!(actual_trace.len(), 3);
 
     let join_stream_script = format!(
         r#"
@@ -100,11 +100,11 @@ fn wait_on_stream_json_path_by_id() {
         local_peer_id
     );
 
-    let res = call_vm!(local_vm, "", join_stream_script, "", "");
-    let trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid json");
+    let result = call_vm!(local_vm, "", join_stream_script, "", "");
+    let actual_trace = trace_from_result(&result);
 
-    assert_eq!(res.ret_code, 0);
-    assert_eq!(trace.len(), 2); // par and the first call emit traces, second call doesn't
+    assert_eq!(result.ret_code, 0);
+    assert_eq!(actual_trace.len(), 2); // par and the first call emit traces, second call doesn't
 }
 
 #[test]
@@ -150,18 +150,18 @@ fn dont_wait_on_json_path_on_scalars() {
     );
 
     let init_peer_id = "asd";
-    let res = call_vm!(set_variable_vm, init_peer_id, &script, "", "");
-    let array_res = call_vm!(array_consumer, init_peer_id, &script, "", res.data.clone());
-    assert_eq!(array_res.ret_code, 1006);
+    let result = call_vm!(set_variable_vm, init_peer_id, &script, "", "");
+    let array_result = call_vm!(array_consumer, init_peer_id, &script, "", result.data.clone());
+    assert_eq!(array_result.ret_code, 1006);
     assert_eq!(
-        array_res.error_message,
+        array_result.error_message,
         r#"variable with path '$.[5]' not found in '[1,2,3,4,5]' with an error: 'json value not set'"#
     );
 
-    let object_res = call_vm!(object_consumer, init_peer_id, script, "", res.data);
-    assert_eq!(object_res.ret_code, 1006);
+    let object_result = call_vm!(object_consumer, init_peer_id, script, "", result.data);
+    assert_eq!(object_result.ret_code, 1006);
     assert_eq!(
-        object_res.error_message,
+        object_result.error_message,
         r#"variable with path '$.non_exist_path' not found in '{"err_msg":"","is_authenticated":1,"ret_code":0}' with an error: 'json value not set'"#
     );
 }

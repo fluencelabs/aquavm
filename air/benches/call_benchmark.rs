@@ -19,7 +19,7 @@ thread_local!(static SCRIPT: String = String::from(
 );
 
 fn current_peer_id_call() -> Result<InterpreterOutcome, AVMError> {
-    VM.with(|vm| SCRIPT.with(|script| vm.borrow_mut().call_with_prev_data("", script.clone(), "[]", "[]")))
+    VM.with(|vm| SCRIPT.with(|script| vm.borrow_mut().call_with_prev_data("", script.clone(), "", "")))
 }
 
 fn criterion_benchmark(c: &mut Criterion) {

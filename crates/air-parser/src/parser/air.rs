@@ -1,7 +1,8 @@
-// auto-generated: "lalrpop 0.19.5"
-// sha3: 829f4457beb3225fd27138a974f7b38a6c5f2b8672caca7dc588d2315ec560
+// auto-generated: "lalrpop 0.19.6"
+// sha3: 8a70ed8297bd8118c9f1db6670700316ac9801f5c1ed85407d4bd31fc4b210
 use crate::parser::ast::*;
 use crate::parser::air_parser::make_flattened_error;
+use crate::parser::air_parser::make_stream_iterable_error;
 use crate::parser::ParserError;
 use crate::parser::VariableValidator;
 use crate::parser::Span;
@@ -24,6 +25,7 @@ mod __parse__AIR {
 
     use crate::parser::ast::*;
     use crate::parser::air_parser::make_flattened_error;
+    use crate::parser::air_parser::make_stream_iterable_error;
     use crate::parser::ParserError;
     use crate::parser::VariableValidator;
     use crate::parser::Span;
@@ -2004,11 +2006,11 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // CallInstrValue = JsonPath => ActionFn(65);
+        // CallInstrValue = JsonPath => ActionFn(66);
         let __sym0 = __pop_Variant3(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action65::<>(input, errors, validator, __sym0);
+        let __nt = super::__action66::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (1, 9)
     }
@@ -2113,7 +2115,7 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Instr = "(", call, PeerPart, FPart, Args, Output, ")" => ActionFn(71);
+        // Instr = "(", call, PeerPart, FPart, Args, Output, ")" => ActionFn(73);
         assert!(__symbols.len() >= 7);
         let __sym6 = __pop_Variant0(__symbols);
         let __sym5 = __pop_Variant16(__symbols);
@@ -2124,7 +2126,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym6.2.clone();
-        let __nt = super::__action71::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5, __sym6);
+        let __nt = super::__action73::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5, __sym6);
         __symbols.push((__start, __Symbol::Variant10(__nt), __end));
         (7, 12)
     }
@@ -2141,7 +2143,7 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Instr = "(", call, PeerPart, FPart, Args, ")" => ActionFn(72);
+        // Instr = "(", call, PeerPart, FPart, Args, ")" => ActionFn(74);
         assert!(__symbols.len() >= 6);
         let __sym5 = __pop_Variant0(__symbols);
         let __sym4 = __pop_Variant11(__symbols);
@@ -2151,7 +2153,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym5.2.clone();
-        let __nt = super::__action72::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
+        let __nt = super::__action74::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
         __symbols.push((__start, __Symbol::Variant10(__nt), __end));
         (6, 12)
     }
@@ -2244,7 +2246,7 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Instr = "(", fold, Iterable, Alphanumeric, Instr, ")" => ActionFn(67);
+        // Instr = "(", fold, Iterable, Alphanumeric, Instr, ")" => ActionFn(68);
         assert!(__symbols.len() >= 6);
         let __sym5 = __pop_Variant0(__symbols);
         let __sym4 = __pop_Variant10(__symbols);
@@ -2254,7 +2256,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym5.2.clone();
-        let __nt = super::__action67::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
+        let __nt = super::__action68::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
         __symbols.push((__start, __Symbol::Variant10(__nt), __end));
         (6, 12)
     }
@@ -2271,7 +2273,7 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Instr = "(", next, Alphanumeric, ")" => ActionFn(68);
+        // Instr = "(", next, Alphanumeric, ")" => ActionFn(69);
         assert!(__symbols.len() >= 4);
         let __sym3 = __pop_Variant0(__symbols);
         let __sym2 = __pop_Variant1(__symbols);
@@ -2279,7 +2281,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym3.2.clone();
-        let __nt = super::__action68::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3);
+        let __nt = super::__action69::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3);
         __symbols.push((__start, __Symbol::Variant10(__nt), __end));
         (4, 12)
     }
@@ -2322,7 +2324,7 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Instr = "(", match_, Matchable, Matchable, Instr, ")" => ActionFn(69);
+        // Instr = "(", match_, Matchable, Matchable, Instr, ")" => ActionFn(70);
         assert!(__symbols.len() >= 6);
         let __sym5 = __pop_Variant0(__symbols);
         let __sym4 = __pop_Variant10(__symbols);
@@ -2332,7 +2334,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym5.2.clone();
-        let __nt = super::__action69::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
+        let __nt = super::__action70::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
         __symbols.push((__start, __Symbol::Variant10(__nt), __end));
         (6, 12)
     }
@@ -2349,7 +2351,7 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Instr = "(", mismatch, Matchable, Matchable, Instr, ")" => ActionFn(70);
+        // Instr = "(", mismatch, Matchable, Matchable, Instr, ")" => ActionFn(71);
         assert!(__symbols.len() >= 6);
         let __sym5 = __pop_Variant0(__symbols);
         let __sym4 = __pop_Variant10(__symbols);
@@ -2359,7 +2361,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym5.2.clone();
-        let __nt = super::__action70::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
+        let __nt = super::__action71::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
         __symbols.push((__start, __Symbol::Variant10(__nt), __end));
         (6, 12)
     }
@@ -2439,11 +2441,11 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Iterable = JsonPath => ActionFn(38);
+        // Iterable = JsonPath => ActionFn(72);
         let __sym0 = __pop_Variant3(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action38::<>(input, errors, validator, __sym0);
+        let __nt = super::__action72::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant14(__nt), __end));
         (1, 13)
     }
@@ -3448,10 +3450,25 @@ fn __action38<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    (_, l, _): (usize, usize, usize),
     (_, j, _): (usize, (Variable<'input>, &'input str, bool), usize),
+    (_, r, _): (usize, usize, usize),
 ) -> IterableValue<'input>
 {
-    IterableValue::JsonPath { variable: j.0, path: j.1, should_flatten: j.2 }
+    {
+        use crate::parser::air::Variable::*;
+
+        let variable = j.0;
+        let scalar_name = match variable {
+            Stream(name) => {
+                let token = Token::VariableWithJsonPath(variable, j.1, j.2);
+                errors.push(make_stream_iterable_error(l, token, r));
+                name
+            }
+            Scalar(name) => name,
+        };
+        IterableValue::JsonPath { scalar_name, path: j.1, should_flatten: j.2 }
+    }
 }
 
 #[allow(unused_variables)]
@@ -4081,6 +4098,39 @@ fn __action65<
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
     __0: (usize, (Variable<'input>, &'input str, bool), usize),
+    __1: (usize, usize, usize),
+) -> IterableValue<'input>
+{
+    let __start0 = __0.0.clone();
+    let __end0 = __0.0.clone();
+    let __temp0 = __action52(
+        input,
+        errors,
+        validator,
+        &__start0,
+        &__end0,
+    );
+    let __temp0 = (__start0, __temp0, __end0);
+    __action38(
+        input,
+        errors,
+        validator,
+        __temp0,
+        __0,
+        __1,
+    )
+}
+
+#[allow(unused_variables)]
+fn __action66<
+    'err,
+    'input,
+    'v,
+>(
+    input: &'input str,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
+    __0: (usize, (Variable<'input>, &'input str, bool), usize),
 ) -> CallInstrValue<'input>
 {
     let __start0 = __0.2.clone();
@@ -4103,7 +4153,7 @@ fn __action65<
 }
 
 #[allow(unused_variables)]
-fn __action66<
+fn __action67<
     'err,
     'input,
     'v,
@@ -4146,7 +4196,7 @@ fn __action66<
 }
 
 #[allow(unused_variables)]
-fn __action67<
+fn __action68<
     'err,
     'input,
     'v,
@@ -4187,7 +4237,7 @@ fn __action67<
 }
 
 #[allow(unused_variables)]
-fn __action68<
+fn __action69<
     'err,
     'input,
     'v,
@@ -4224,7 +4274,7 @@ fn __action68<
 }
 
 #[allow(unused_variables)]
-fn __action69<
+fn __action70<
     'err,
     'input,
     'v,
@@ -4265,7 +4315,7 @@ fn __action69<
 }
 
 #[allow(unused_variables)]
-fn __action70<
+fn __action71<
     'err,
     'input,
     'v,
@@ -4306,7 +4356,38 @@ fn __action70<
 }
 
 #[allow(unused_variables)]
-fn __action71<
+fn __action72<
+    'err,
+    'input,
+    'v,
+>(
+    input: &'input str,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
+    __0: (usize, (Variable<'input>, &'input str, bool), usize),
+) -> IterableValue<'input>
+{
+    let __start0 = __0.2.clone();
+    let __end0 = __0.2.clone();
+    let __temp0 = __action49(
+        input,
+        errors,
+        validator,
+        &__start0,
+        &__end0,
+    );
+    let __temp0 = (__start0, __temp0, __end0);
+    __action65(
+        input,
+        errors,
+        validator,
+        __0,
+        __temp0,
+    )
+}
+
+#[allow(unused_variables)]
+fn __action73<
     'err,
     'input,
     'v,
@@ -4332,7 +4413,7 @@ fn __action71<
         __5,
     );
     let __temp0 = (__start0, __temp0, __end0);
-    __action66(
+    __action67(
         input,
         errors,
         validator,
@@ -4347,7 +4428,7 @@ fn __action71<
 }
 
 #[allow(unused_variables)]
-fn __action72<
+fn __action74<
     'err,
     'input,
     'v,
@@ -4373,7 +4454,7 @@ fn __action72<
         &__end0,
     );
     let __temp0 = (__start0, __temp0, __end0);
-    __action66(
+    __action67(
         input,
         errors,
         validator,

@@ -13,8 +13,9 @@ dependencies = [
 
 [[package]]
 name = "air"
-version = "0.9.0"
+version = "0.10.0"
 dependencies = [
+ "air-interpreter-data",
  "air-interpreter-interface",
  "air-parser",
  "boolinator",
@@ -29,8 +30,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "air-interpreter-data"
+version = "0.1.0"
+dependencies = [
+ "once_cell",
+ "semver",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "air-interpreter-interface"
-version = "0.5.0"
+version = "0.5.1"
 dependencies = [
  "fluence",
  "fluence-it-types",
@@ -267,9 +278,9 @@ checksum = "37ab347416e802de484e4d03c7316c48f1ecb56574dfd4a46a80f173ce1de04d"
 
 [[package]]
 name = "fluence"
-version = "0.6.5"
+version = "0.6.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bd1f159a4da6aef89e8e4a0bf061a8031d669d03d9928266942581a52df03f56"
+checksum = "88b09e1cd11a51ba4d169db347d009fe41ece2714eef4d5df720343733a1d5a6"
 dependencies = [
  "fluence-sdk-main",
  "marine-macro",
@@ -289,9 +300,9 @@ dependencies = [
 
 [[package]]
 name = "fluence-sdk-main"
-version = "0.6.4"
+version = "0.6.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b3a5d1ca20ada064379d959a9a82f9c006e4d9388533cf06010186fef6dd583b"
+checksum = "68d93cde99e1494e11755a39b93863333397245c9959c774fe3bebd9e4143879"
 dependencies = [
  "log",
  "marine-macro",
@@ -377,9 +388,9 @@ checksum = "dd25036021b0de88a0aff6b850051563c6516d0bf53f8638938edbb9de732736"
 
 [[package]]
 name = "jsonpath_lib-fl"
-version = "0.2.5"
+version = "0.3.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e81233a3c2e1f4579f1fdb856eeec115dcb23817374268212ebad691bd53e664"
+checksum = "33dcf980221b25366e8f0df601cf0df6ffcc97242cbbe4d139a79a7f0de5107f"
 dependencies = [
  "array_tool",
  "env_logger",
@@ -451,18 +462,18 @@ dependencies = [
 
 [[package]]
 name = "marine-macro"
-version = "0.6.4"
+version = "0.6.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1c1652b6ac1bbdde9a66c16c8a2f9cd34d005a1f1b211a538c5b28764faa6ef4"
+checksum = "f63d927851847cc3dd9e3bd0f10bdeb313859d4822d5b5f650d9d34d461ed419"
 dependencies = [
  "marine-macro-impl",
 ]
 
 [[package]]
 name = "marine-macro-impl"
-version = "0.6.4"
+version = "0.6.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "80fee75eaf1a97ee9fe2d382c0537c06a79e5d7ab9d81bda6cb263fb8fd1a15a"
+checksum = "fb504be4a90e229ab453c7369cc8a9063acec819f3397802eea719cd0a232be1"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -474,9 +485,9 @@ dependencies = [
 
 [[package]]
 name = "marine-timestamp-macro"
-version = "0.6.2"
+version = "0.6.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f6feb612ccd3fd39ec3d50c9a1a96885e1fd32d36a92cf674a0fbe6f7c452613"
+checksum = "5994c7db5567d21609f2a2e5a40d9d4564f86c17ca35b2d77007152619b9d7fc"
 dependencies = [
  "chrono",
  "quote",
@@ -523,6 +534,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "once_cell"
+version = "1.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "692fcb63b64b1758029e0a96ee63e049ce8c5948587f2f7208df04625e5f6b56"
+
+[[package]]
 name = "petgraph"
 version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -549,7 +566,7 @@ checksum = "7d7afeb98c5a10e0bffcc7fc16e105b04d06729fac5fd6384aebf7ff5cb5a67d"
 
 [[package]]
 name = "polyplets"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "fluence",
  "serde",
@@ -636,6 +653,15 @@ name = "ryu"
 version = "1.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "71d301d4193d031abdd79ff7e3dd721168a9572ef3fe51a1517aba235bd8f86e"
+
+[[package]]
+name = "semver"
+version = "1.0.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5f3aac57ee7f3272d8395c6e4f502f434f0e289fcd62876f70daa008c20dcabe"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "serde"

@@ -16,13 +16,13 @@
 
 use super::ExecutionCtx;
 use super::ExecutionResult;
-use super::ExecutionTraceCtx;
+use super::TraceHandler;
 use crate::log_instruction;
 
 use air_parser::ast::Null;
 
 impl<'i> super::ExecutableInstruction<'i> for Null {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut ExecutionTraceCtx) -> ExecutionResult<()> {
+    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         log_instruction!(null, exec_ctx, trace_ctx);
 
         Ok(())

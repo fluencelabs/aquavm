@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-use air::execution_trace::ExecutionTrace;
 use air_test_utils::call_vm;
 use air_test_utils::create_avm;
 use air_test_utils::executed_state;
 use air_test_utils::set_variables_call_service;
+use air_test_utils::trace_from_result;
 use air_test_utils::unit_call_service;
 use air_test_utils::CallServiceClosure;
 use air_test_utils::IValue;
@@ -43,8 +43,8 @@ fn seq_par_call() {
         vm_peer_id
     );
 
-    let res = call_vm!(vm, "asd", script, "[]", "[]");
-    let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("interpreter should return valid json");
+    let result = call_vm!(vm, "asd", script, "", "");
+    let actual_trace = trace_from_result(&result);
 
     let test_string = "test";
     let expected_trace = vec![
@@ -55,7 +55,7 @@ fn seq_par_call() {
     ];
 
     assert_eq!(actual_trace, expected_trace);
-    assert_eq!(res.next_peer_pks, vec![String::from("remote_peer_id")]);
+    assert_eq!(result.next_peer_pks, vec![String::from("remote_peer_id")]);
 }
 
 #[test]
@@ -75,9 +75,8 @@ fn par_par_call() {
         vm_peer_id,
     );
 
-    let res = call_vm!(vm, "asd", script, "[]", "[]");
-    let resulted_trace: ExecutionTrace =
-        serde_json::from_slice(&res.data).expect("interpreter should return valid json");
+    let result = call_vm!(vm, "asd", script, "", "");
+    let actual_trace = trace_from_result(&result);
 
     let test_string = "test";
     let expected_trace = vec![
@@ -88,8 +87,8 @@ fn par_par_call() {
         executed_state::scalar_string(test_string),
     ];
 
-    assert_eq!(resulted_trace, expected_trace);
-    assert_eq!(res.next_peer_pks, vec![String::from("remote_peer_id")]);
+    assert_eq!(actual_trace, expected_trace);
+    assert_eq!(result.next_peer_pks, vec![String::from("remote_peer_id")]);
 }
 
 #[test]
@@ -123,8 +122,8 @@ fn create_service() {
     let add_blueprint_response = String::from("add_blueprint response");
     let create_response = String::from("create response");
 
-    let call_service: CallServiceClosure = Box::new(move |_, args| -> Option<IValue> {
-        let builtin_service = match &args[0] {
+    let call_service: CallServiceClosure = Box::new(move |args| -> Option<IValue> {
+        let builtin_service = match &args.function_args[0] {
             IValue::String(str) => str,
             _ => unreachable!(),
         };
@@ -145,13 +144,14 @@ fn create_service() {
 
     let script = include_str!("./scripts/create_service.clj");
 
-    let res = call_vm!(set_variables_vm, "init_peer_id", script.clone(), "[]", "[]");
-    let res = call_vm!(vm, "init_peer_id", script, "[]", res.data);
+    let result = call_vm!(set_variables_vm, "init_peer_id", script.clone(), "", "");
+    let result = call_vm!(vm, "init_peer_id", script, "", result.data);
 
     let add_module_response = "add_module response";
     let add_blueprint_response = "add_blueprint response";
     let create_response = "create response";
-    let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be a correct json");
+
+    let actual_trace = trace_from_result(&result);
     let expected_trace = vec![
         executed_state::scalar_jvalue(module_bytes),
         executed_state::scalar_jvalue(module_config),
@@ -163,5 +163,5 @@ fn create_service() {
     ];
 
     assert_eq!(actual_trace, expected_trace);
-    assert_eq!(res.next_peer_pks, vec![String::from("remote_peer_id")]);
+    assert_eq!(result.next_peer_pks, vec![String::from("remote_peer_id")]);
 }

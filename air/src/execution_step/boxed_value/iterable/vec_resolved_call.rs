@@ -16,7 +16,7 @@
 
 use super::Iterable;
 use super::IterableItem;
-use crate::contexts::execution::ResolvedCallResult;
+use crate::execution_step::execution_context::ResolvedCallResult;
 use crate::foldable_next;
 use crate::foldable_prev;
 use crate::SecurityTetraplet;
@@ -53,13 +53,17 @@ impl<'ctx> Iterable<'ctx> for IterableVecResolvedCall {
             return None;
         }
 
-        let ResolvedCallResult { result, triplet } = self.call_results[self.cursor].clone();
-        let tetraplet = SecurityTetraplet {
+        let ResolvedCallResult {
+            result,
             triplet,
+            trace_pos,
+        } = &self.call_results[self.cursor];
+        let tetraplet = SecurityTetraplet {
+            triplet: triplet.clone(),
             json_path: String::new(),
         };
 
-        let result = IterableItem::RcValue((result, tetraplet));
+        let result = IterableItem::RcValue((result.clone(), tetraplet, *trace_pos));
         Some(result)
     }
 }
