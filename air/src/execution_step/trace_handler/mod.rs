@@ -19,6 +19,8 @@ mod errors;
 mod handler;
 mod merger;
 mod state_automata;
+#[cfg(tests)]
+mod tests;
 
 pub(crate) use errors::TraceHandlerError;
 pub(crate) use handler::TraceHandler;
@@ -33,7 +35,7 @@ pub(self) use data_keeper::DataKeeper;
 pub(self) use data_keeper::TraceSlider;
 pub(self) use merger::MergeCtxType;
 pub(self) use merger::MergerFoldResult;
-pub(self) use merger::ResolvedFoldLore;
+pub(self) use merger::ResolvedFold;
 pub(self) use merger::ResolvedFoldSubTraceLore;
 pub(self) use state_automata::FSMQueue;
 pub(self) use state_automata::FoldFSM;

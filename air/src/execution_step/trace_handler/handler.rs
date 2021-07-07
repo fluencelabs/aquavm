@@ -37,6 +37,29 @@ impl TraceHandler {
         }
     }
 
+    /// Returns size of elements inside result trace and intended to provide
+    /// a position of next inserted elements.
+    pub(crate) fn trace_pos(&self) -> usize {
+        self.data_keeper.result_trace.len()
+    }
+
+    pub(crate) fn into_result_trace(self) -> ExecutionTrace {
+        self.data_keeper.result_trace
+    }
+
+    pub(crate) fn as_result_trace(&self) -> &ExecutionTrace {
+        &self.data_keeper.result_trace
+    }
+
+    pub(crate) fn subtree_sizes(&self) -> (usize, usize) {
+        let prev_size = self.data_keeper.prev_slider().subtrace_len();
+        let current_size = self.data_keeper.current_slider().subtrace_len();
+
+        (prev_size, current_size)
+    }
+}
+
+impl TraceHandler {
     /// Should be called at the beginning of a call execution.
     pub(crate) fn meet_call_start(
         &mut self,
@@ -56,7 +79,9 @@ impl TraceHandler {
 
         self.data_keeper.result_trace.push(ExecutedState::Call(call_result));
     }
+}
 
+impl TraceHandler {
     pub(crate) fn meet_par_start(&mut self) -> TraceHandlerResult<()> {
         let ingredients = merger::try_merge_next_state_as_par(&mut self.data_keeper)?;
         let par_fsm = ParFSM::new(ingredients, &mut self.data_keeper)?;
@@ -79,7 +104,9 @@ impl TraceHandler {
 
         Ok(())
     }
+}
 
+impl TraceHandler {
     pub(crate) fn meet_fold_start(&mut self) -> TraceHandlerResult<()> {
         let ingredients = try_merge_next_state_as_fold(&mut self.data_keeper)?;
         let fold_fsm = FoldFSM::from_fold_start(ingredients, &mut self.data_keeper)?;
@@ -113,41 +140,16 @@ impl TraceHandler {
 
     pub(crate) fn meet_fold_end(&mut self) -> TraceHandlerResult<()> {
         let fold_fsm = self.state_fsm_queue.pop_as_fold()?;
-        fold_fsm.meet_fold_end(&mut self.data_keeper)?;
+        fold_fsm.meet_fold_end(&mut self.data_keeper);
 
         Ok(())
     }
 
     pub(crate) fn error_exit(&mut self) {
-        let state = match self.state_fsm_queue.pop() {
-            Some(state) => state,
-            None => return,
+        match self.state_fsm_queue.pop() {
+            Some(StateFSM::Par(par)) => par.error_exit(&mut self.data_keeper),
+            Some(StateFSM::Fold(fold)) => fold.error_exit(&mut self.data_keeper),
+            None => {}
         };
-
-        match state {
-            StateFSM::Par(par) => par.error_exit(&mut self.data_keeper),
-            StateFSM::Fold(fold) => fold.error_exit(&mut self.data_keeper),
-        }
-    }
-
-    /// Returns size of elements inside result trace and intended to provide
-    /// a position of next inserted elements.
-    pub(crate) fn trace_pos(&self) -> usize {
-        self.data_keeper.result_trace.len()
-    }
-
-    pub(crate) fn into_result_trace(self) -> ExecutionTrace {
-        self.data_keeper.result_trace
-    }
-
-    pub(crate) fn as_result_trace(&self) -> &ExecutionTrace {
-        &self.data_keeper.result_trace
-    }
-
-    pub(crate) fn subtree_sizes(&self) -> (usize, usize) {
-        let prev_size = self.data_keeper.prev_slider().subtrace_len();
-        let current_size = self.data_keeper.current_slider().subtrace_len();
-
-        (prev_size, current_size)
     }
 }

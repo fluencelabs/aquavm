@@ -16,12 +16,11 @@
 
 mod par_builder;
 mod par_fsm_state;
-mod size_updater;
+mod state_updater;
 
 use super::*;
 use par_builder::ParBuilder;
-use par_fsm_state::ParFSMState;
-use size_updater::SubTraceSizeUpdater;
+use state_updater::SubTraceStateUpdater;
 
 /// This FSM manages par state, its state transitioning functions must work in the following way:
 ///   new -> left_completed -> right_completed
@@ -30,9 +29,8 @@ pub(crate) struct ParFSM {
     prev_par: Option<ParResult>,
     current_par: Option<ParResult>,
     state_inserter: StateInserter,
-    size_updater: SubTraceSizeUpdater,
+    state_updater: SubTraceStateUpdater,
     par_builder: ParBuilder,
-    state: ParFSMState,
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
@@ -56,17 +54,15 @@ macro_rules! par_right {
 impl ParFSM {
     pub(crate) fn new(ingredients: MergerParResult, data_keeper: &mut DataKeeper) -> FSMResult<Self> {
         let state_inserter = StateInserter::from_keeper(data_keeper);
-        let size_updater = SubTraceSizeUpdater::from_keeper(data_keeper, ingredients)?;
+        let size_updater = SubTraceStateUpdater::from_keeper(data_keeper, ingredients)?;
         let par_builder = ParBuilder::from_keeper(data_keeper, &state_inserter);
-        let state = ParFSMState::Initialized;
 
         let par_fsm = Self {
             prev_par: ingredients.prev_par,
             current_par: ingredients.current_par,
             state_inserter,
-            size_updater,
+            state_updater: size_updater,
             par_builder,
-            state,
         };
 
         par_fsm.prepare_data(data_keeper, SubtreeType::Left)?;
@@ -74,8 +70,6 @@ impl ParFSM {
     }
 
     pub(crate) fn left_completed(&mut self, data_keeper: &mut DataKeeper) -> FSMResult<()> {
-        self.state.next();
-
         self.check_subtrace_lens(data_keeper, SubtreeType::Left)?;
         self.par_builder.track(data_keeper, SubtreeType::Left);
         self.prepare_data(data_keeper, SubtreeType::Right)?;
@@ -84,31 +78,25 @@ impl ParFSM {
     }
 
     pub(crate) fn right_completed(mut self, data_keeper: &mut DataKeeper) -> FSMResult<()> {
-        self.state.next(); // it is needed here only for consistency with left_completed
-
         self.check_subtrace_lens(data_keeper, SubtreeType::Right)?;
         self.par_builder.track(data_keeper, SubtreeType::Right);
-
-        let state = self.par_builder.build();
-        self.state_inserter.insert(data_keeper, state);
-        self.size_updater.update(data_keeper)?;
+        self.finish(data_keeper);
 
         Ok(())
     }
 
     // handle error bubbling
     pub(crate) fn error_exit(mut self, data_keeper: &mut DataKeeper) {
-        match self.state {
-            ParFSMState::Initialized => {
-                self.par_builder.track(data_keeper, SubtreeType::Left);
-                self.par_builder.track(data_keeper, SubtreeType::Right);
-            }
-            ParFSMState::LeftCompleted => self.par_builder.track(data_keeper, SubtreeType::Right),
-            ParFSMState::RightCompleted => {}
-        }
+        self.par_builder.error_exit(data_keeper);
+        self.finish(data_keeper);
+    }
 
+    fn finish(self, data_keeper: &mut DataKeeper) {
         let state = self.par_builder.build();
         self.state_inserter.insert(data_keeper, state);
+
+        // it's important to update count of seen states
+        self.state_updater.update(data_keeper);
     }
 
     fn prepare_data(&self, data_keeper: &mut DataKeeper, subtree_type: SubtreeType) -> FSMResult<()> {
@@ -117,10 +105,8 @@ impl ParFSM {
             SubtreeType::Right => (par_right!(&self.prev_par), par_right!(&self.current_par)),
         };
 
-        data_keeper.prev_slider_mut().set_subtrace_len(prev_size as usize)?;
-        data_keeper
-            .current_slider_mut()
-            .set_subtrace_len(current_size as usize)?;
+        data_keeper.prev_slider_mut().set_subtrace_len(prev_size as _)?;
+        data_keeper.current_slider_mut().set_subtrace_len(current_size as _)?;
 
         Ok(())
     }
@@ -130,21 +116,22 @@ impl ParFSM {
     fn check_subtrace_lens(&self, data_keeper: &DataKeeper, subtree_type: SubtreeType) -> FSMResult<()> {
         use StateFSMError::ParSubtreeNonExhausted as NonExhausted;
 
-        let prev_len = data_keeper.prev_slider().subtrace_len();
-        if prev_len != 0 {
-            // unwrap is safe here because otherwise subtrace_len wouldn't be equal 0.
-            return Err(NonExhausted(subtree_type, self.prev_par.unwrap(), prev_len));
-        }
+        let len_checker = |slider: &TraceSlider| {
+            let prev_len = slider.subtrace_len();
+            if prev_len != 0 {
+                // unwrap is safe here because otherwise subtrace_len wouldn't be equal 0.
+                return Err(NonExhausted(subtree_type, self.prev_par.unwrap(), prev_len));
+            }
 
-        let current_len = data_keeper.current_slider().subtrace_len();
-        if current_len != 0 {
-            return Err(NonExhausted(subtree_type, self.current_par.unwrap(), current_len));
-        }
+            Ok(())
+        };
 
-        Ok(())
+        len_checker(data_keeper.prev_slider())?;
+        len_checker(data_keeper.current_slider())
     }
 }
 
+use crate::execution_step::trace_handler::TraceSlider;
 use std::fmt;
 
 impl fmt::Display for SubtreeType {

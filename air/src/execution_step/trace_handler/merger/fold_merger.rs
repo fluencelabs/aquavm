@@ -24,8 +24,8 @@ use std::rc::Rc;
 
 #[derive(Debug, Default, Clone)]
 pub(crate) struct MergerFoldResult {
-    pub(crate) prev_fold_lore: ResolvedFoldLore,
-    pub(crate) current_fold_lore: ResolvedFoldLore,
+    pub(crate) prev_fold_lore: ResolvedFold,
+    pub(crate) current_fold_lore: ResolvedFold,
 }
 
 pub(crate) fn try_merge_next_state_as_fold(data_keeper: &mut DataKeeper) -> MergeResult<MergerFoldResult> {

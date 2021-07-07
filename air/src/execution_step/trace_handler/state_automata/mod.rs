@@ -39,6 +39,6 @@ use super::FoldSubTraceLore;
 use super::MergeCtxType;
 use super::MergerFoldResult;
 use super::ParResult;
-use super::ResolvedFoldLore;
+use super::ResolvedFold;
 use super::ResolvedFoldSubTraceLore;
 use state_inserter::StateInserter;

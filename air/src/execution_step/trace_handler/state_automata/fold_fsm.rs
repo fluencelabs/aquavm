@@ -17,14 +17,14 @@
 mod lore_applier;
 mod lore_ctor;
 mod lore_ctor_queue;
-mod size_updater;
+mod state_updater;
 
 use super::*;
 use crate::JValue;
 use lore_applier::*;
 use lore_ctor::*;
 use lore_ctor_queue::*;
-use size_updater::SubTreeSizeUpdater;
+use state_updater::SubTreeStateUpdater;
 
 use air_interpreter_data::FoldLore;
 
@@ -41,12 +41,12 @@ use std::rc::Rc;
 /// where .T means that this function should be called exactly T times.
 #[derive(Debug, Default, Clone)]
 pub(crate) struct FoldFSM {
-    prev_fold_lore: ResolvedFoldLore,
-    current_fold_lore: ResolvedFoldLore,
+    prev_fold: ResolvedFold,
+    current_fold: ResolvedFold,
     state_inserter: StateInserter,
     ctor_queue: SubTraceLoreCtorQueue,
     result_lore: FoldLore,
-    size_updater: SubTreeSizeUpdater,
+    state_updater: SubTreeStateUpdater,
 }
 
 #[derive(Debug, Clone)]
@@ -58,13 +58,14 @@ pub(crate) struct ValueAndPos {
 impl FoldFSM {
     pub(crate) fn from_fold_start(fold_result: MergerFoldResult, data_keeper: &mut DataKeeper) -> FSMResult<Self> {
         let state_inserter = StateInserter::from_keeper(data_keeper);
-        let size_updater = SubTreeSizeUpdater::new(data_keeper);
+        let state_updater =
+            SubTreeStateUpdater::new(&fold_result.prev_fold_lore, &fold_result.current_fold_lore, data_keeper);
 
         let fold_fsm = Self {
-            prev_fold_lore: fold_result.prev_fold_lore,
-            current_fold_lore: fold_result.current_fold_lore,
+            prev_fold: fold_result.prev_fold_lore,
+            current_fold: fold_result.current_fold_lore,
             state_inserter,
-            size_updater,
+            state_updater,
             ..<_>::default()
         };
 
@@ -94,7 +95,6 @@ impl FoldFSM {
         }
 
         ctor.after_start(data_keeper);
-        self.size_updater.track_after(prev_lore, current_lore);
         apply_fold_lore_after(data_keeper, prev_lore, current_lore)?;
 
         self.ctor_queue.traverse_back();
@@ -109,27 +109,25 @@ impl FoldFSM {
         self.result_lore.extend(fold_lore);
     }
 
-    pub(crate) fn meet_fold_end(self, data_keeper: &mut DataKeeper) -> FSMResult<()> {
+    pub(crate) fn meet_fold_end(self, data_keeper: &mut DataKeeper) {
         // TODO: check for prev and current lore emptiness
         let fold_result = FoldResult(self.result_lore);
         let state = ExecutedState::Fold(fold_result);
         self.state_inserter.insert(data_keeper, state);
-        self.size_updater.update(data_keeper)?;
-
-        Ok(())
+        self.state_updater.update(data_keeper);
     }
 
     pub(crate) fn error_exit(mut self, data_keeper: &mut DataKeeper) {
         self.meet_generation_end(data_keeper);
+        self.meet_fold_end(data_keeper);
     }
 
     fn meet_before_state(&mut self, value: &ValueAndPos, data_keeper: &mut DataKeeper) -> FSMResult<()> {
-        let prev_lore = remove_first(&mut self.prev_fold_lore, &value.value);
+        let prev_lore = remove_first(&mut self.prev_fold.lore, &value.value);
         // TODO: this one could be quadratic on stream len and it could be improved by comparing
         // not values themself, but values indexes.
-        let current_lore = remove_first(&mut self.current_fold_lore, &value.value);
+        let current_lore = remove_first(&mut self.current_fold.lore, &value.value);
 
-        self.size_updater.track_before(&prev_lore, &current_lore);
         apply_fold_lore_before(data_keeper, &prev_lore, &current_lore)?;
 
         let ctor = SubTraceLoreCtor::from_before_start(value.pos, data_keeper);

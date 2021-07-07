@@ -63,8 +63,8 @@ impl SubTraceLoreCtorQueue {
             .collect::<Vec<_>>()
     }
 
-    // this function should be called in a situation of early exit from fold, f.e.
-    // while last error propagation or join behaviour in the following situations:
+    // this function should be called in a case of early exit from fold, f.e.
+    // in last error bubbling or join behaviour in the following situations:
     //    (fold iterable iterator
     //      (seq
     //        (call .. [joined_variable])

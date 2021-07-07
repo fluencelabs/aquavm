@@ -74,7 +74,7 @@ fn try_to_data(raw_data: &[u8]) -> PreparationResult<InterpreterData> {
     if raw_data.is_empty() {
         Ok(InterpreterData::new())
     } else {
-        serde_json::from_slice(&raw_data).map_err(|err| DataDeError(err, raw_data.to_vec()))
+        InterpreterData::try_from_slice(&raw_data).map_err(|err| DataDeError(err, raw_data.to_vec()))
     }
 }
 
