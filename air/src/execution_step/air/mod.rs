@@ -17,6 +17,8 @@
 mod call;
 mod compare_matchable;
 mod fold;
+mod fold_scalar;
+mod fold_stream;
 mod match_;
 mod mismatch;
 mod next;
@@ -40,6 +42,27 @@ macro_rules! execute {
     ($self:expr, $instr:expr, $exec_ctx:ident, $trace_ctx:ident) => {
         match $instr.execute($exec_ctx, $trace_ctx) {
             Err(e) => {
+                if !$exec_ctx.last_error_could_be_set {
+                    return Err(e);
+                }
+
+                let instruction = format!("{}", $self);
+                let last_error =
+                    LastErrorDescriptor::new(e.clone(), instruction, $exec_ctx.current_peer_id.to_string(), None);
+                $exec_ctx.last_error = Some(last_error);
+                Err(e)
+            }
+            v => v,
+        }
+    };
+}
+
+/// Executes instruction, updates last error if needed, and call error_exit of TraceHandler.
+macro_rules! execute_with_error_exit {
+    ($self:expr, $instr:expr, $exec_ctx:ident, $trace_ctx:ident) => {
+        match $instr.execute($exec_ctx, $trace_ctx) {
+            Err(e) => {
+                println!("error: {}", e);
                 $trace_ctx.error_exit();
 
                 if !$exec_ctx.last_error_could_be_set {
@@ -94,10 +117,11 @@ impl<'i> ExecutableInstruction<'i> for Instruction<'i> {
             // it internally sets last_error with resolved triplet
             Instruction::Call(call) => call.execute(exec_ctx, trace_ctx),
 
-            Instruction::Fold(fold) => execute!(self, fold, exec_ctx, trace_ctx),
+            Instruction::FoldScalar(fold) => execute!(self, fold, exec_ctx, trace_ctx),
+            Instruction::FoldStream(fold) => execute_with_error_exit!(self, fold, exec_ctx, trace_ctx),
             Instruction::Next(next) => execute!(self, next, exec_ctx, trace_ctx),
             Instruction::Null(null) => execute!(self, null, exec_ctx, trace_ctx),
-            Instruction::Par(par) => execute!(self, par, exec_ctx, trace_ctx),
+            Instruction::Par(par) => execute_with_error_exit!(self, par, exec_ctx, trace_ctx),
             Instruction::Seq(seq) => execute!(self, seq, exec_ctx, trace_ctx),
             Instruction::Xor(xor) => execute!(self, xor, exec_ctx, trace_ctx),
 

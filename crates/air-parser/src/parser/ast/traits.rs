@@ -66,13 +66,13 @@ impl fmt::Display for CallInstrValue<'_> {
     }
 }
 
-impl fmt::Display for IterableValue<'_> {
+impl fmt::Display for IterableScalarValue<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use crate::parser::lexer;
-        use IterableValue::*;
+        use IterableScalarValue::*;
 
         match self {
-            Variable(str) => write!(f, "{}", str),
+            ScalarVariable(str) => write!(f, "{}", str),
             JsonPath {
                 scalar_name,
                 path,
@@ -153,7 +153,8 @@ impl fmt::Display for Instruction<'_> {
             Xor(xor) => write!(f, "{}", xor),
             Match(match_) => write!(f, "{}", match_),
             MisMatch(mismatch) => write!(f, "{}", mismatch),
-            Fold(fold) => write!(f, "{}", fold),
+            FoldScalar(fold) => write!(f, "{}", fold),
+            FoldStream(fold) => write!(f, "{}", fold),
             Next(next) => write!(f, "{}", next),
             Error => Ok(()),
         }
@@ -173,9 +174,15 @@ impl fmt::Display for Call<'_> {
     }
 }
 
-impl fmt::Display for Fold<'_> {
+impl fmt::Display for FoldScalar<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "fold {} {}", self.iterable, self.iterator)
+    }
+}
+
+impl fmt::Display for FoldStream<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "fold {} {}", self.stream_name, self.iterator)
     }
 }
 

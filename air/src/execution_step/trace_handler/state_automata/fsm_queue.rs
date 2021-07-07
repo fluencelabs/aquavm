@@ -42,17 +42,17 @@ impl FSMQueue {
         }
     }
 
-    pub(crate) fn pop_as_par(&mut self) -> FSMResult<ParFSM> {
-        match self.states.pop().ok_or(StateFSMError::QueueIsEmpty("par"))? {
-            StateFSM::Par(par) => Ok(par),
-            fold @ StateFSM::Fold(_) => Err(StateFSMError::IncompatibleFSM("par", fold)),
-        }
-    }
-
     pub(crate) fn last_as_mut_fold(&mut self) -> FSMResult<&mut FoldFSM> {
         match self.states.last_mut().ok_or(StateFSMError::QueueIsEmpty("fold"))? {
             par @ StateFSM::Par(_) => Err(StateFSMError::IncompatibleFSM("fold", par.clone())),
             StateFSM::Fold(fold) => Ok(fold),
+        }
+    }
+
+    pub(crate) fn pop_as_par(&mut self) -> FSMResult<ParFSM> {
+        match self.states.pop().ok_or(StateFSMError::QueueIsEmpty("par"))? {
+            StateFSM::Par(par) => Ok(par),
+            fold @ StateFSM::Fold(_) => Err(StateFSMError::IncompatibleFSM("par", fold)),
         }
     }
 

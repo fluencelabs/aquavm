@@ -25,9 +25,9 @@ use crate::execution_step::trace_handler::ResolvedFold;
 #[derive(Debug, Default, Clone)]
 pub(super) struct SubTreeStateUpdater {
     prev_pos: usize,
-    prev_size: usize,
+    prev_len: usize,
     current_pos: usize,
-    current_size: usize,
+    current_len: usize,
 }
 
 impl SubTreeStateUpdater {
@@ -36,14 +36,14 @@ impl SubTreeStateUpdater {
         current_fold: &ResolvedFold,
         data_keeper: &DataKeeper,
     ) -> FSMResult<Self> {
-        let (prev_pos, prev_size) = compute_new_pos_and_len(prev_fold, data_keeper, MergeCtxType::Previous)?;
-        let (current_pos, current_size) = compute_new_pos_and_len(current_fold, data_keeper, MergeCtxType::Current)?;
+        let (prev_pos, prev_len) = compute_new_pos_and_len(prev_fold, data_keeper, MergeCtxType::Previous)?;
+        let (current_pos, current_len) = compute_new_pos_and_len(current_fold, data_keeper, MergeCtxType::Current)?;
 
         let updater = Self {
             prev_pos,
-            prev_size,
+            prev_len,
             current_pos,
-            current_size,
+            current_len,
         };
 
         Ok(updater)
@@ -56,10 +56,10 @@ impl SubTreeStateUpdater {
         // shouldn't fail.
         let _ = data_keeper
             .prev_slider_mut()
-            .set_position_and_len(self.prev_pos, self.prev_size);
+            .set_position_and_len(self.prev_pos, self.prev_len);
         let _ = data_keeper
             .current_slider_mut()
-            .set_position_and_len(self.current_pos, self.current_size);
+            .set_position_and_len(self.current_pos, self.current_len);
     }
 }
 

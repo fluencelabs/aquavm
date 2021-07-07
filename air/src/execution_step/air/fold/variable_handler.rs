@@ -21,12 +21,12 @@ use super::FoldState;
 
 use std::collections::HashMap;
 
-pub(super) struct VariableHandler<'i> {
+pub(crate) struct VariableHandler<'i> {
     iterator: &'i str,
 }
 
 impl<'i> VariableHandler<'i> {
-    pub(super) fn init<'ctx: 'i>(
+    pub(crate) fn init<'ctx: 'i>(
         exec_ctx: &mut ExecutionCtx<'ctx>,
         iterator: &'ctx str,
         fold_state: FoldState<'ctx>,
@@ -38,7 +38,7 @@ impl<'i> VariableHandler<'i> {
         Ok(handler)
     }
 
-    pub(super) fn cleanup(self, exec_ctx: &mut ExecutionCtx<'_>) {
+    pub(crate) fn cleanup(self, exec_ctx: &mut ExecutionCtx<'_>) {
         let fold_state = match exec_ctx.data_cache.remove(self.iterator) {
             Some(AValue::JValueFoldCursor(fold_state)) => fold_state,
             _ => unreachable!("fold cursor is changed only inside fold block"),

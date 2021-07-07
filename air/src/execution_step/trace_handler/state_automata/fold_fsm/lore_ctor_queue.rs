@@ -76,6 +76,7 @@ impl SubTraceLoreCtorQueue {
     // ctor queue states wouldn't be properly finished. This function serves such
     // situations, having called from generation_end.
     pub(super) fn finish(&mut self, data_keeper: &DataKeeper) {
+        // TODO: optimize it
         for ctor in self.queue.iter_mut() {
             ctor.ctor.finish(data_keeper);
         }

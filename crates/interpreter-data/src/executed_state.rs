@@ -142,15 +142,15 @@ impl std::fmt::Display for ExecutedState {
         use ExecutedState::*;
 
         match self {
-            Par(ParResult(left, right)) => write!(f, "Par({}, {})", left, right),
-            Call(RequestSentBy(peer_id)) => write!(f, "RequestSentBy({})", peer_id),
+            Par(ParResult(left, right)) => write!(f, "par({}, {})", left, right),
+            Call(RequestSentBy(peer_id)) => write!(f, r#"request_sent_by("{}")"#, peer_id),
             Call(Executed(result, generation)) => {
-                write!(f, "Executed({:?}, {})", result, generation)
+                write!(f, "executed({:?}, {})", result, generation)
             }
             Call(CallServiceFailed(ret_code, err_msg)) => {
-                write!(f, "CallServiceFailed({}, {})", ret_code, err_msg)
+                write!(f, "call_service_failed({}, {})", ret_code, err_msg)
             }
-            Fold(FoldResult(states)) => write!(f, "Fold({:?})", states),
+            Fold(FoldResult(states)) => write!(f, "fold({:?})", states),
         }
     }
 }

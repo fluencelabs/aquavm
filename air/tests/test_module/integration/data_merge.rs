@@ -17,17 +17,21 @@
 use pretty_assertions::assert_eq;
 use serde_json::json;
 
-use air_test_utils::call_vm;
-use air_test_utils::create_avm;
 use air_test_utils::executed_state;
 use air_test_utils::set_variable_call_service;
 use air_test_utils::set_variables_call_service;
 use air_test_utils::trace_from_result;
+use air_test_utils::CallResult;
 use air_test_utils::CallServiceClosure;
+use air_test_utils::ExecutedState;
 use air_test_utils::IValue;
 use air_test_utils::NEVec;
+use air_test_utils::{call_vm, echo_string_call_service};
+use air_test_utils::{create_avm, InterpreterData};
 
 type JValue = serde_json::Value;
+
+use std::collections::HashMap;
 
 #[test]
 fn data_merge() {
@@ -215,40 +219,128 @@ fn acc_merge() {
 }
 
 #[test]
-#[ignore]
 fn fold_merge() {
+    use std::ops::Deref;
+
     let set_variable_vm_id = "set_variable";
     let local_vm_id = "local_vm";
 
     let variables = maplit::hashmap! {
-        "stream1".to_string() => r#"["s1", "s2", "s3"]"#.to_string(),
-        "stream2".to_string() => r#"["s4", "s5", "s6"]"#.to_string(),
+        "stream_1".to_string() => json!(["peer_0", "peer_1", "peer_2", "peer_3"]).to_string(),
+        "stream_2".to_string() => json!(["peer_4", "peer_5", "peer_6"]).to_string(),
     };
-
-    let local_vm_service_call: CallServiceClosure = Box::new(|args| -> Option<IValue> {
-        let args = match &args.function_args[2] {
-            IValue::String(str) => str,
-            _ => unreachable!(),
-        };
-        println!("args {:?}", args);
-
-        Some(IValue::Record(
-            NEVec::new(vec![IValue::S32(0), IValue::String(format!("{}", args))]).unwrap(),
-        ))
-    });
-
     let mut set_variable_vm = create_avm(set_variables_call_service(variables), set_variable_vm_id);
-    let mut local_vm = create_avm(local_vm_service_call, local_vm_id);
 
     let script = format!(
         include_str!("./scripts/inner_folds_v1.clj"),
         set_variable_vm_id, local_vm_id
     );
 
-    let result = call_vm!(set_variable_vm, "", &script, "", "");
-    let result = call_vm!(local_vm, "", script, "", result.data);
+    let set_variable_result = call_vm!(set_variable_vm, "", &script, "", "");
 
-    let _actual_trace = trace_from_result(&result);
+    let mut local_vms = Vec::with_capacity(7);
+    let mut local_vms_results = Vec::with_capacity(7);
+    for vm_id in 0..7 {
+        let peer_id = format!("peer_{}", vm_id);
+        let mut vm = create_avm(echo_string_call_service(), peer_id);
+        let result = call_vm!(
+            vm,
+            "",
+            &script,
+            set_variable_result.data.clone(),
+            set_variable_result.data.clone()
+        );
 
-    // println!("res is {:?}", actual_trace);
+        local_vms.push(vm);
+        local_vms_results.push(result);
+    }
+
+    let mut local_vm = create_avm(echo_string_call_service(), local_vm_id);
+    let result_1 = call_vm!(local_vm, "", &script, "", local_vms_results[0].data.clone());
+    let result_2 = call_vm!(
+        local_vm,
+        "",
+        &script,
+        result_1.data.clone(),
+        local_vms_results[3].data.clone()
+    );
+    let result_3 = call_vm!(
+        local_vm,
+        "",
+        &script,
+        result_2.data.clone(),
+        local_vms_results[4].data.clone()
+    );
+    let result_4 = call_vm!(
+        local_vm,
+        "",
+        &script,
+        result_3.data.clone(),
+        local_vms_results[5].data.clone()
+    );
+    let result_5 = call_vm!(
+        local_vm,
+        "",
+        &script,
+        result_4.data.clone(),
+        local_vms_results[1].data.clone()
+    );
+    let result_6 = call_vm!(
+        local_vm,
+        "",
+        &script,
+        result_5.data.clone(),
+        local_vms_results[2].data.clone()
+    );
+    let result_7 = call_vm!(
+        local_vm,
+        "",
+        &script,
+        result_6.data.clone(),
+        local_vms_results[6].data.clone()
+    );
+
+    let data = InterpreterData::try_from_slice(&result_7.data).expect("data should be well-formed");
+    let stream_1_generations = data
+        .streams
+        .get("$stream_1")
+        .expect("$stream_1 should presence in data");
+    let stream_2_generations = data
+        .streams
+        .get("$stream_2")
+        .expect("$stream_2 should presence in data");
+
+    assert_eq!(*stream_1_generations, 4);
+    assert_eq!(*stream_2_generations, 3);
+
+    let mut fold_states_count = 0;
+    let mut calls_count = HashMap::new();
+
+    for state in data.trace.iter() {
+        if matches!(state, ExecutedState::Fold(_)) {
+            fold_states_count += 1;
+        }
+
+        if let ExecutedState::Fold(fold) = state {
+            for subtrace_lore in fold.0.iter() {
+                let value_pos = subtrace_lore.value_pos as usize;
+                if let ExecutedState::Call(CallResult::Executed(value, _)) = &data.trace[value_pos] {
+                    if let JValue::String(var_name) = value.deref() {
+                        let current_count: usize = calls_count.get(var_name).map(|v| *v).unwrap_or_default();
+                        calls_count.insert(var_name, current_count + 1);
+                    }
+                }
+            }
+        }
+    }
+
+    assert_eq!(fold_states_count, 9);
+
+    for (call_result, call_count) in calls_count {
+        if call_result.as_str() < "peer_4" {
+            assert_eq!(call_count, 3);
+        } else {
+            assert_eq!(call_count, 24);
+        }
+    }
 }

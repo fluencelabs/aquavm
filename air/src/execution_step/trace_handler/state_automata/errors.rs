@@ -39,16 +39,20 @@ pub(crate) enum StateFSMError {
     #[error("overflow is occurred while calculating the entire len occupied by executed states corresponded to current par: '{0:?}'")]
     ParLenOverflow(ParResult),
 
+    /// Errors occurred when slider.position() + ParResult.0 + ParResult.1 overflows.
+    #[error("overflow is occurred while calculating the new position of a {2} slider for resolved par {0:?} and current position {1}'")]
+    ParPosOverflow(ParResult, usize, MergeCtxType),
+
     /// Errors occurred when ParResult.0 + ParResult.1 value is bigger than current subtree size.
-    #[error("par '{0:?}' contains subtree size that is bigger than current one '{1}'")]
-    ParSubtreeUnderflow(ParResult, usize),
+    #[error("underflow is occurred while calculating the new position of a {2} slider for resolved par {0:?} and current subtrace len {1}'")]
+    ParLenUnderflow(ParResult, usize, MergeCtxType),
 
     /// Errors occurred when {0}.fold_states_count + {1} overflows.
     #[error("overflow is occurred while calculating the new position of a {2} slider for resolved fold {0:?} and current position {1}'")]
     FoldPosOverflow(ResolvedFold, usize, MergeCtxType),
 
     /// Errors occurred when {1} - 1{0}.fold_states_count underflows.
-    #[error("overflow is occurred while calculating the new position of a {2} slider for resolved fold {0:?} and current subtrace len {1}'")]
+    #[error("underflow is occurred while calculating the new position of a {2} slider for resolved fold {0:?} and current subtrace len {1}'")]
     FoldLenUnderflow(ResolvedFold, usize, MergeCtxType),
 
     /// Errors occurred when a subtree of a Par instructions was finished but remaining interval isn't empty.

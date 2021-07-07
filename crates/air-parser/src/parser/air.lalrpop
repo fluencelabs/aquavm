@@ -32,14 +32,24 @@ Instr: Box<Instruction<'input>> = {
     "(" par <l:Instr> <r:Instr> ")" => Box::new(Instruction::Par(Par(l, r))),
     "(" null ")" => Box::new(Instruction::Null(Null)),
 
-    <left: @L> "(" fold <iterable:Iterable> <iterator:Alphanumeric> <i:Instr> ")" <right: @R> => {
+    <left: @L> "(" fold <iterable:ScalarIterable> <iterator:Alphanumeric> <i:Instr> ")" <right: @R> => {
         let instruction = Rc::new(*i);
-        let fold = Fold { iterable, iterator, instruction };
+        let fold = FoldScalar { iterable, iterator, instruction };
         let span = Span { left, right };
-        validator.met_fold(&fold, span);
+        validator.met_fold_scalar(&fold, span);
 
-        Box::new(Instruction::Fold(fold))
+        Box::new(Instruction::FoldScalar(fold))
     },
+
+    <left: @L> "(" fold <stream:Stream> <iterator:Alphanumeric> <i:Instr> ")" <right: @R> => {
+        let instruction = Rc::new(*i);
+        let fold = FoldStream { stream_name: stream, iterator, instruction };
+        let span = Span { left, right };
+        validator.met_fold_stream(&fold, span);
+
+        Box::new(Instruction::FoldStream(fold))
+    },
+
     <left: @L> "(" next <i:Alphanumeric> ")" <right: @R> => {
         let next = Next(i);
         let span = Span { left, right };
@@ -123,9 +133,8 @@ CallInstrArgValue: CallInstrArgValue<'input> = {
     <p:LastError> => CallInstrArgValue::LastError(p),
 }
 
-Iterable: IterableValue<'input> = {
-    <v:Alphanumeric> => IterableValue::Variable(Variable::Scalar(v)),
-    <v:Stream> => IterableValue::Variable(Variable::Stream(v)),
+ScalarIterable: IterableScalarValue<'input> = {
+    <v:Alphanumeric> => IterableScalarValue::ScalarVariable(v),
     <l:@L> <j:JsonPath> <r:@R> => {
         use crate::parser::air::Variable::*;
 
@@ -138,7 +147,7 @@ Iterable: IterableValue<'input> = {
             }
             Scalar(name) => name,
         };
-        IterableValue::JsonPath { scalar_name, path: j.1, should_flatten: j.2 }
+        IterableScalarValue::JsonPath { scalar_name, path: j.1, should_flatten: j.2 }
     }
 }
 

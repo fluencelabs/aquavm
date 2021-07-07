@@ -58,26 +58,21 @@ use super::*;
 #[derive(Debug, Default, Clone)]
 pub(super) struct SubTraceStateUpdater {
     prev_pos: usize,
-    prev_size: usize,
+    prev_len: usize,
     current_pos: usize,
-    current_size: usize,
+    current_len: usize,
 }
 
 impl SubTraceStateUpdater {
     pub(super) fn from_keeper(data_keeper: &DataKeeper, ingredients: MergerParResult) -> FSMResult<Self> {
-        let prev_subtree_size = data_keeper.prev_slider().subtrace_len();
-        // overflow here was checked in slider
-        let prev_pos = data_keeper.prev_slider().position() + prev_subtree_size;
-        let prev_size = Self::compute_new_size(prev_subtree_size, ingredients.prev_par)?;
-
-        let current_subtree_size = data_keeper.current_slider().subtrace_len();
-        let current_pos = data_keeper.current_slider().position() + current_subtree_size;
-        let current_size = Self::compute_new_size(current_subtree_size, ingredients.current_par)?;
+        let (prev_pos, prev_len) = compute_new_pos_and_len(data_keeper, &ingredients.prev_par, MergeCtxType::Previous)?;
+        let (current_pos, current_len) =
+            compute_new_pos_and_len(data_keeper, &ingredients.current_par, MergeCtxType::Current)?;
 
         let updater = Self {
-            prev_size,
+            prev_len,
             prev_pos,
-            current_size,
+            current_len,
             current_pos,
         };
 
@@ -91,23 +86,39 @@ impl SubTraceStateUpdater {
         // shouldn't fail.
         let _ = data_keeper
             .prev_slider_mut()
-            .set_position_and_len(self.prev_pos, self.prev_size);
+            .set_position_and_len(self.prev_pos, self.prev_len);
         let _ = data_keeper
             .current_slider_mut()
-            .set_position_and_len(self.current_pos, self.current_size);
+            .set_position_and_len(self.current_pos, self.current_len);
     }
+}
 
-    fn compute_new_size(initial_size: usize, par_result: Option<ParResult>) -> FSMResult<usize> {
-        let par_size = par_result
-            .map(|p| p.size().ok_or(StateFSMError::ParLenOverflow(p)))
-            .transpose()?
-            .unwrap_or_default();
+fn compute_new_pos_and_len(
+    data_keeper: &DataKeeper,
+    par_result: &Option<ParResult>,
+    ctx_type: MergeCtxType,
+) -> FSMResult<(usize, usize)> {
+    let slider = match ctx_type {
+        MergeCtxType::Previous => data_keeper.prev_slider(),
+        MergeCtxType::Current => data_keeper.current_slider(),
+    };
 
-        let new_size = initial_size
-            .checked_sub(par_size)
-            // unwrap is safe here, because underflow could be caused only if par is Some
-            .ok_or_else(|| StateFSMError::ParSubtreeUnderflow(par_result.unwrap(), initial_size))?;
+    let par_size = par_result
+        .map(|p| p.size().ok_or(StateFSMError::ParLenOverflow(p)))
+        .transpose()?
+        .unwrap_or_default();
 
-        Ok(new_size)
-    }
+    let position = slider
+        .position()
+        .checked_add(par_size)
+        // unwrap is safe here, because underflow could be caused only if par is Some
+        .ok_or_else(|| StateFSMError::ParPosOverflow(par_result.unwrap(), slider.subtrace_len(), ctx_type))?;
+
+    let len = slider
+        .subtrace_len()
+        .checked_sub(par_size)
+        // unwrap is safe here, because underflow could be caused only if par is Some
+        .ok_or_else(|| StateFSMError::ParLenUnderflow(par_result.unwrap(), slider.subtrace_len(), ctx_type))?;
+
+    Ok((position, len))
 }

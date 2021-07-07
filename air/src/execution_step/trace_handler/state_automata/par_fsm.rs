@@ -100,13 +100,13 @@ impl ParFSM {
     }
 
     fn prepare_data(&self, data_keeper: &mut DataKeeper, subtree_type: SubtreeType) -> FSMResult<()> {
-        let (prev_size, current_size) = match subtree_type {
+        let (prev_len, current_len) = match subtree_type {
             SubtreeType::Left => (par_left!(&self.prev_par), par_left!(&self.current_par)),
             SubtreeType::Right => (par_right!(&self.prev_par), par_right!(&self.current_par)),
         };
 
-        data_keeper.prev_slider_mut().set_subtrace_len(prev_size as _)?;
-        data_keeper.current_slider_mut().set_subtrace_len(current_size as _)?;
+        data_keeper.prev_slider_mut().set_subtrace_len(prev_len as _)?;
+        data_keeper.current_slider_mut().set_subtrace_len(current_len as _)?;
 
         Ok(())
     }

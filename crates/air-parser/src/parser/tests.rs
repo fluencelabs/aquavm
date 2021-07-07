@@ -384,8 +384,8 @@ fn parse_fold() {
         )
         "#;
     let instruction = parse(&source_code);
-    let expected = fold(
-        ast::IterableValue::Variable(Scalar("iterable")),
+    let expected = fold_scalar(
+        ast::IterableScalarValue::ScalarVariable("iterable"),
         "i",
         null(),
     );
@@ -446,8 +446,8 @@ fn parse_fold_with_xor_par_seq() {
         let source_code = source_fold_with(name);
         let instruction = parse(&source_code);
         let instr = binary_instruction(*name);
-        let expected = fold(
-            ast::IterableValue::Variable(Scalar("iterable")),
+        let expected = fold_scalar(
+            ast::IterableScalarValue::ScalarVariable("iterable"),
             "i",
             instr(null(), null()),
         );
@@ -766,8 +766,8 @@ fn no_output() {
 
 #[test]
 fn fold_json_path() {
-    use ast::Fold;
-    use ast::IterableValue::*;
+    use ast::FoldScalar;
+    use ast::IterableScalarValue::*;
 
     let source_code = r#"
     ; comment
@@ -775,7 +775,7 @@ fn fold_json_path() {
     ;;; comment
     "#;
     let instruction = parse(source_code);
-    let expected = Instruction::Fold(Fold {
+    let expected = Instruction::FoldScalar(FoldScalar {
         iterable: JsonPath {
             scalar_name: "members",
             path: "$.[\"users\"]",
@@ -788,9 +788,25 @@ fn fold_json_path() {
 }
 
 #[test]
+fn fold_on_stream() {
+    use ast::FoldStream;
+
+    let source_code = r#"
+        (fold $stream iterator (null))
+    "#;
+    let instruction = parse(source_code);
+    let expected = Instruction::FoldStream(FoldStream {
+        stream_name: "$stream",
+        iterator: "iterator",
+        instruction: Rc::new(null()),
+    });
+    assert_eq!(instruction, expected);
+}
+
+#[test]
 fn comments() {
-    use ast::Fold;
-    use ast::IterableValue::*;
+    use ast::FoldScalar;
+    use ast::IterableScalarValue::*;
 
     let source_code = r#"
     ; comment
@@ -798,7 +814,7 @@ fn comments() {
     ;;; comme;?!.$.  nt[][][][()()()null;$::!
     "#;
     let instruction = parse(source_code);
-    let expected = Instruction::Fold(Fold {
+    let expected = Instruction::FoldScalar(FoldScalar {
         iterable: JsonPath {
             scalar_name: "members",
             path: "$.[\"users\"]",
@@ -832,12 +848,12 @@ fn null() -> Instruction<'static> {
     Instruction::Null(ast::Null)
 }
 
-fn fold<'a>(
-    iterable: ast::IterableValue<'a>,
+fn fold_scalar<'a>(
+    iterable: ast::IterableScalarValue<'a>,
     iterator: &'a str,
     instruction: Instruction<'a>,
 ) -> Instruction<'a> {
-    Instruction::Fold(ast::Fold {
+    Instruction::FoldScalar(ast::FoldScalar {
         iterable,
         iterator,
         instruction: std::rc::Rc::new(instruction),
