@@ -57,10 +57,10 @@ use super::*;
 ///
 #[derive(Debug, Default, Clone)]
 pub(super) struct SubTraceStateUpdater {
-    pub(self) prev_size: usize,
-    pub(self) prev_pos: usize,
-    pub(self) current_size: usize,
-    pub(self) current_pos: usize,
+    prev_pos: usize,
+    prev_size: usize,
+    current_pos: usize,
+    current_size: usize,
 }
 
 impl SubTraceStateUpdater {

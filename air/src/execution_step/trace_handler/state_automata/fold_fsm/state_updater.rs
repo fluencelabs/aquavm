@@ -15,6 +15,9 @@
  */
 
 use super::DataKeeper;
+use super::FSMResult;
+use super::StateFSMError;
+use crate::execution_step::trace_handler::MergeCtxType;
 use crate::execution_step::trace_handler::ResolvedFold;
 
 /// This state updater manage to do the same thing as SubTreeStateUpdater in ParFSM,
@@ -28,20 +31,22 @@ pub(super) struct SubTreeStateUpdater {
 }
 
 impl SubTreeStateUpdater {
-    pub(super) fn new(prev_fold: &ResolvedFold, current_fold: &ResolvedFold, data_keeper: &DataKeeper) -> Self {
-        // TODO: check for overflow
-        let prev_pos = data_keeper.prev_slider().position() + prev_fold.fold_states_count;
-        let prev_size = data_keeper.prev_slider().subtrace_len() - prev_fold.fold_states_count;
+    pub(super) fn new(
+        prev_fold: &ResolvedFold,
+        current_fold: &ResolvedFold,
+        data_keeper: &DataKeeper,
+    ) -> FSMResult<Self> {
+        let (prev_pos, prev_size) = compute_new_pos_and_len(prev_fold, data_keeper, MergeCtxType::Previous)?;
+        let (current_pos, current_size) = compute_new_pos_and_len(current_fold, data_keeper, MergeCtxType::Current)?;
 
-        let current_pos = data_keeper.current_slider().position() + current_fold.fold_states_count;
-        let current_size = data_keeper.current_slider().subtrace_len() - current_fold.fold_states_count;
-
-        Self {
+        let updater = Self {
             prev_pos,
             prev_size,
             current_pos,
             current_size,
-        }
+        };
+
+        Ok(updater)
     }
 
     pub(super) fn update(self, data_keeper: &mut DataKeeper) {
@@ -56,4 +61,32 @@ impl SubTreeStateUpdater {
             .current_slider_mut()
             .set_position_and_len(self.current_pos, self.current_size);
     }
+}
+
+fn compute_new_pos_and_len(
+    fold: &ResolvedFold,
+    data_keeper: &DataKeeper,
+    ctx_type: MergeCtxType,
+) -> FSMResult<(usize, usize)> {
+    let slider = match ctx_type {
+        MergeCtxType::Previous => data_keeper.prev_slider(),
+        MergeCtxType::Current => data_keeper.current_slider(),
+    };
+
+    let current_position = slider.position();
+    let current_len = slider.subtrace_len();
+
+    let position = current_position
+        .checked_add(fold.fold_states_count)
+        .ok_or(StateFSMError::FoldPosOverflow(fold.clone(), current_position, ctx_type))?;
+
+    let len = current_len
+        .checked_sub(fold.fold_states_count)
+        .ok_or(StateFSMError::FoldLenUnderflow(
+            fold.clone(),
+            current_position,
+            ctx_type,
+        ))?;
+
+    Ok((position, len))
 }

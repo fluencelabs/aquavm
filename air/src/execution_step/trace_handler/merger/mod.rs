@@ -38,7 +38,18 @@ pub(self) use super::TraceSlider;
 use air_interpreter_data::*;
 
 #[derive(Debug, Copy, Clone)]
-pub(super) enum MergeCtxType {
+pub(crate) enum MergeCtxType {
     Current,
     Previous,
+}
+
+use std::fmt;
+
+impl fmt::Display for MergeCtxType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            MergeCtxType::Previous => write!(f, "previous"),
+            MergeCtxType::Current => write!(f, "current"),
+        }
+    }
 }

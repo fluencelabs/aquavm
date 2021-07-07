@@ -59,7 +59,7 @@ impl FoldFSM {
     pub(crate) fn from_fold_start(fold_result: MergerFoldResult, data_keeper: &mut DataKeeper) -> FSMResult<Self> {
         let state_inserter = StateInserter::from_keeper(data_keeper);
         let state_updater =
-            SubTreeStateUpdater::new(&fold_result.prev_fold_lore, &fold_result.current_fold_lore, data_keeper);
+            SubTreeStateUpdater::new(&fold_result.prev_fold_lore, &fold_result.current_fold_lore, data_keeper)?;
 
         let fold_fsm = Self {
             prev_fold: fold_result.prev_fold_lore,

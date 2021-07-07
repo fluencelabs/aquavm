@@ -18,6 +18,8 @@ use super::par_fsm::SubtreeType;
 use super::KeeperError;
 use super::ParResult;
 use super::StateFSM;
+use crate::execution_step::trace_handler::MergeCtxType;
+use crate::execution_step::trace_handler::ResolvedFold;
 
 use thiserror::Error as ThisError;
 
@@ -40,6 +42,14 @@ pub(crate) enum StateFSMError {
     /// Errors occurred when ParResult.0 + ParResult.1 value is bigger than current subtree size.
     #[error("par '{0:?}' contains subtree size that is bigger than current one '{1}'")]
     ParSubtreeUnderflow(ParResult, usize),
+
+    /// Errors occurred when {0}.fold_states_count + {1} overflows.
+    #[error("overflow is occurred while calculating the new position of a {2} slider for resolved fold {0:?} and current position {1}'")]
+    FoldPosOverflow(ResolvedFold, usize, MergeCtxType),
+
+    /// Errors occurred when {1} - 1{0}.fold_states_count underflows.
+    #[error("overflow is occurred while calculating the new position of a {2} slider for resolved fold {0:?} and current subtrace len {1}'")]
+    FoldLenUnderflow(ResolvedFold, usize, MergeCtxType),
 
     /// Errors occurred when a subtree of a Par instructions was finished but remaining interval isn't empty.
     #[error(
