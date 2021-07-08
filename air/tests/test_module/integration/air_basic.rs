@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use air_test_utils::call_vm;
+use air_test_utils::checked_call_vm;
 use air_test_utils::create_avm;
 use air_test_utils::executed_state;
 use air_test_utils::set_variables_call_service;
@@ -43,7 +43,7 @@ fn seq_par_call() {
         vm_peer_id
     );
 
-    let result = call_vm!(vm, "asd", script, "", "");
+    let result = checked_call_vm!(vm, "asd", script, "", "");
     let actual_trace = trace_from_result(&result);
 
     let test_string = "test";
@@ -75,7 +75,7 @@ fn par_par_call() {
         vm_peer_id,
     );
 
-    let result = call_vm!(vm, "asd", script, "", "");
+    let result = checked_call_vm!(vm, "asd", script, "", "");
     let actual_trace = trace_from_result(&result);
 
     let test_string = "test";
@@ -144,8 +144,8 @@ fn create_service() {
 
     let script = include_str!("./scripts/create_service.clj");
 
-    let result = call_vm!(set_variables_vm, "init_peer_id", script.clone(), "", "");
-    let result = call_vm!(vm, "init_peer_id", script, "", result.data);
+    let result = checked_call_vm!(set_variables_vm, "init_peer_id", script.clone(), "", "");
+    let result = checked_call_vm!(vm, "init_peer_id", script, "", result.data);
 
     let add_module_response = "add_module response";
     let add_blueprint_response = "add_blueprint response";

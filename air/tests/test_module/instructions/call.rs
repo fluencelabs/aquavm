@@ -15,6 +15,7 @@
  */
 
 use air_test_utils::call_vm;
+use air_test_utils::checked_call_vm;
 use air_test_utils::create_avm;
 use air_test_utils::echo_string_call_service;
 use air_test_utils::executed_state;
@@ -41,7 +42,7 @@ fn current_peer_id_call() {
         service_id, function_name
     );
 
-    let result = call_vm!(vm, &vm_peer_id, script, "", "");
+    let result = checked_call_vm!(vm, &vm_peer_id, script, "", "");
 
     let actual_trace = trace_from_result(&result);
     let expected_state = executed_state::scalar_string("test");
@@ -57,10 +58,10 @@ fn current_peer_id_call() {
         vm_peer_id, service_id, function_name
     );
 
-    let result = call_vm!(vm, "asd", script.clone(), "", "");
+    let result = checked_call_vm!(vm, "asd", script.clone(), "", "");
 
     // test that empty string for data works
-    let result_with_empty_string = call_vm!(vm, "asd", script, "", "");
+    let result_with_empty_string = checked_call_vm!(vm, "asd", script, "", "");
     assert_eq!(result_with_empty_string, result);
 }
 
@@ -76,7 +77,7 @@ fn remote_peer_id_call() {
         remote_peer_id
     );
 
-    let result = call_vm!(vm, "asd", script, "", "");
+    let result = checked_call_vm!(vm, "asd", script, "", "");
 
     let actual_trace = trace_from_result(&result);
     let expected_state = executed_state::request_sent_by(some_local_peer_id);
@@ -99,8 +100,8 @@ fn variables() {
             )
         "#;
 
-    let result = call_vm!(set_variable_vm, "asd", script, "", "");
-    let result = call_vm!(vm, "asd", script, "", result.data);
+    let result = checked_call_vm!(set_variable_vm, "asd", script, "", "");
+    let result = checked_call_vm!(vm, "asd", script, "", result.data);
 
     assert!(result.next_peer_pks.is_empty());
 }
@@ -158,8 +159,8 @@ fn string_parameters() {
         set_variable_vm_peer_id, service_id, function_name, vm_peer_id, service_id, function_name
     );
 
-    let result = call_vm!(set_variable_vm, "asd", &script, "", "");
-    let result = call_vm!(vm, "asd", script, "", result.data);
+    let result = checked_call_vm!(set_variable_vm, "asd", &script, "", "");
+    let result = checked_call_vm!(vm, "asd", script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
     let expected_state = executed_state::scalar_string_array(vec!["arg1", "arg2", "arg3_value"]);

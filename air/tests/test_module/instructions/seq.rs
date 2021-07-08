@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use air_test_utils::call_vm;
+use air_test_utils::checked_call_vm;
 use air_test_utils::create_avm;
 use air_test_utils::executed_state;
 use air_test_utils::raw_data_from_trace;
@@ -30,13 +30,13 @@ fn seq_remote_remote() {
                 (call "remote_peer_id_2" ("service_id" "fn_name") [] g)
             )"#;
 
-    let result = call_vm!(vm, "asd", script, "", "");
+    let result = checked_call_vm!(vm, "asd", script, "", "");
     assert_eq!(result.next_peer_pks, vec![String::from("remote_peer_id_1")]);
 
     let initial_trace = vec![executed_state::scalar_string("")];
     let initial_data = raw_data_from_trace(initial_trace);
 
-    let result = call_vm!(vm, "asd", script, "", initial_data);
+    let result = checked_call_vm!(vm, "asd", script, "", initial_data);
 
     assert_eq!(result.next_peer_pks, vec![String::from("remote_peer_id_2")]);
 }
@@ -56,6 +56,6 @@ fn seq_local_remote() {
         local_peer_id, remote_peer_id
     );
 
-    let result = call_vm!(vm, "asd", script, "", "");
+    let result = checked_call_vm!(vm, "asd", script, "", "");
     assert_eq!(result.next_peer_pks, vec![remote_peer_id]);
 }

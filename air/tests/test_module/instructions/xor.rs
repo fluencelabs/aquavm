@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use air_test_utils::call_vm;
+use air_test_utils::checked_call_vm;
 use air_test_utils::create_avm;
 use air_test_utils::echo_string_call_service;
 use air_test_utils::executed_state;
@@ -36,7 +36,7 @@ fn xor() {
         local_peer_id,
     );
 
-    let result = call_vm!(vm, "asd", script, "", "");
+    let result = checked_call_vm!(vm, "asd", script, "", "");
 
     let actual_trace = trace_from_result(&result);
     let expected_call_result = executed_state::scalar_string("res");
@@ -54,7 +54,7 @@ fn xor() {
         local_peer_id
     );
 
-    let result = call_vm!(vm, "asd", script, "", "");
+    let result = checked_call_vm!(vm, "asd", script, "", "");
 
     let actual_trace = trace_from_result(&result);
     assert_eq!(actual_trace.len(), 1);
@@ -78,7 +78,7 @@ fn xor_var_not_found() {
         local_peer_id,
     );
 
-    let result = call_vm!(vm, "asd", script, "", "");
+    let result = checked_call_vm!(vm, "asd", script, "", "");
 
     let actual_trace = trace_from_result(&result);
     assert_eq!(actual_trace[0], executed_state::par(1, 0));
@@ -107,8 +107,8 @@ fn xor_multiple_variables_found() {
         set_variables_peer_id, local_peer_id, some_string, expected_string
     );
 
-    let result = call_vm!(set_variables_vm, "asd", &script, "", "");
-    let result = call_vm!(vm, "asd", script, "", result.data);
+    let result = checked_call_vm!(set_variables_vm, "asd", &script, "", "");
+    let result = checked_call_vm!(vm, "asd", script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
     let some_string_call_result = executed_state::scalar_string(some_string);
@@ -148,7 +148,7 @@ fn xor_par() {
         local_peer_id
     );
 
-    let result = call_vm!(vm, "asd", &script, "", "");
+    let result = checked_call_vm!(vm, "asd", &script, "", "");
     let actual_trace = trace_from_result(&result);
 
     let scalar_result = String::from("res");
@@ -165,7 +165,7 @@ fn xor_par() {
 
     assert_eq!(actual_trace, expected_trace);
 
-    let result = call_vm!(vm, "asd", script, "", result.data);
+    let result = checked_call_vm!(vm, "asd", script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
     assert_eq!(actual_trace, expected_trace);
@@ -189,8 +189,8 @@ fn last_error_with_xor() {
         faillible_peer_id, local_peer_id,
     );
 
-    let result = call_vm!(faillible_vm, "asd", script.clone(), "", "");
-    let result = call_vm!(vm, "asd", script, "", result.data);
+    let result = checked_call_vm!(faillible_vm, "asd", script.clone(), "", "");
+    let result = checked_call_vm!(vm, "asd", script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
     let expected_state = executed_state::scalar_string("Local service error, ret_code is 1, error message is 'error'");

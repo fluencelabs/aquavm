@@ -66,4 +66,8 @@ impl<'ctx> Iterable<'ctx> for IterableVecResolvedCall {
         let result = IterableItem::RcValue((result.clone(), tetraplet, *trace_pos));
         Some(result)
     }
+
+    fn len(&self) -> usize {
+        self.call_results.len()
+    }
 }

@@ -15,6 +15,7 @@
  */
 
 use air_test_utils::call_vm;
+use air_test_utils::checked_call_vm;
 use air_test_utils::create_avm;
 use air_test_utils::echo_string_call_service;
 use air_test_utils::executed_state;
@@ -45,8 +46,8 @@ fn match_equal() {
         set_variable_peer_id, local_peer_id
     );
 
-    let result = call_vm!(set_variable_vm, "asd", &script, "", "");
-    let result = call_vm!(vm, "asd", script, "", result.data);
+    let result = checked_call_vm!(set_variable_vm, "asd", &script, "", "");
+    let result = checked_call_vm!(vm, "asd", script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
     let expected_state = executed_state::scalar_string("result_1");
@@ -80,8 +81,8 @@ fn match_not_equal() {
         set_variable_peer_id, local_peer_id
     );
 
-    let result = call_vm!(set_variable_vm, "asd", &script, "", "");
-    let result = call_vm!(vm, "asd", script, "", result.data);
+    let result = checked_call_vm!(set_variable_vm, "asd", &script, "", "");
+    let result = checked_call_vm!(vm, "asd", script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
     let expected_state = executed_state::scalar_string("result_2");
@@ -112,8 +113,8 @@ fn match_with_string() {
         set_variable_peer_id, local_peer_id
     );
 
-    let result = call_vm!(set_variable_vm, "asd", &script, "", "");
-    let result = call_vm!(vm, "asd", script, "", result.data);
+    let result = checked_call_vm!(set_variable_vm, "asd", &script, "", "");
+    let result = checked_call_vm!(vm, "asd", script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
     let expected_state = executed_state::scalar_string("result_1");
@@ -144,8 +145,8 @@ fn match_with_init_peer_id() {
         set_variable_peer_id, local_peer_id
     );
 
-    let result = call_vm!(set_variable_vm, local_peer_id, &script, "", "");
-    let result = call_vm!(vm, local_peer_id, script, "", result.data);
+    let result = checked_call_vm!(set_variable_vm, local_peer_id, &script, "", "");
+    let result = checked_call_vm!(vm, local_peer_id, script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
     let expected_executed_call_result = executed_state::scalar_string("result_1");
@@ -167,7 +168,7 @@ fn match_with_equal_numbers() {
                 (null)
             )";
 
-    let result = call_vm!(vm, "asd", script, "", "");
+    let result = checked_call_vm!(vm, "asd", script, "", "");
     assert_eq!(result.ret_code, 0);
 }
 
@@ -193,7 +194,7 @@ fn match_without_xor() {
         set_variable_peer_id, local_peer_id
     );
 
-    let result = call_vm!(set_variable_vm, "asd", &script, "", "");
+    let result = checked_call_vm!(set_variable_vm, "asd", &script, "", "");
     let result = call_vm!(vm, "asd", script.clone(), "", result.data);
 
     assert_eq!(result.ret_code, 1014);
@@ -236,11 +237,10 @@ fn match_with_two_xors() {
         local_peer_id, local_peer_id_2
     );
 
-    let result = call_vm!(vm, "", script, "", "");
+    let result = checked_call_vm!(vm, "", script, "", "");
 
     let mut actual_trace = trace_from_result(&result);
     let expected_executed_call_result = executed_state::request_sent_by(local_peer_id);
 
-    assert_eq!(result.ret_code, 0);
     assert_eq!(actual_trace.pop().unwrap(), expected_executed_call_result);
 }

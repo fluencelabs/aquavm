@@ -45,6 +45,9 @@ pub(crate) trait Iterable<'ctx> {
 
     /// Return current iterable value if Iterable value is not empty and None otherwise.
     fn peek(&'ctx self) -> Option<Self::Item>;
+
+    /// Returns length of the current iterator.
+    fn len(&self) -> usize;
 }
 
 /// Combines all possible iterable item types.

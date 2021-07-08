@@ -15,6 +15,7 @@
  */
 
 use air_test_utils::call_vm;
+use air_test_utils::checked_call_vm;
 use air_test_utils::create_avm;
 use air_test_utils::echo_number_call_service;
 use air_test_utils::echo_string_call_service;
@@ -42,8 +43,8 @@ fn lfold() {
                 )
             )"#;
 
-    let result = call_vm!(set_variable_vm, "", lfold, "", "");
-    let result = call_vm!(vm, "", lfold, "", result.data);
+    let result = checked_call_vm!(set_variable_vm, "", lfold, "", "");
+    let result = checked_call_vm!(vm, "", lfold, "", result.data);
 
     let actual_trace = trace_from_result(&result);
     let expected_state = executed_state::scalar_string_array(vec!["1", "2", "3", "4", "5"]);
@@ -73,8 +74,8 @@ fn rfold() {
                 )
             )"#;
 
-    let result = call_vm!(set_variable_vm, "", rfold, "", "");
-    let result = call_vm!(vm, "", rfold, "", result.data);
+    let result = checked_call_vm!(set_variable_vm, "", rfold, "", "");
+    let result = checked_call_vm!(vm, "", rfold, "", result.data);
 
     let actual_trace = trace_from_result(&result);
     assert_eq!(actual_trace.len(), 6);
@@ -112,8 +113,8 @@ fn inner_fold() {
                 )
             )"#;
 
-    let result = call_vm!(set_variable_vm, "", script, "", "");
-    let result = call_vm!(vm, "", script, "", result.data);
+    let result = checked_call_vm!(set_variable_vm, "", script, "", "");
+    let result = checked_call_vm!(vm, "", script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
     assert_eq!(actual_trace.len(), 27);
@@ -174,8 +175,8 @@ fn empty_fold() {
                 )
             )"#;
 
-    let result = call_vm!(set_variable_vm, "", empty_fold, "", "");
-    let result = call_vm!(vm, "", empty_fold, "", result.data);
+    let result = checked_call_vm!(set_variable_vm, "", empty_fold, "", "");
+    let result = checked_call_vm!(vm, "", empty_fold, "", result.data);
 
     let actual_trace = trace_from_result(&result);
     let expected_state = executed_state::scalar_jvalue(json!([]));
@@ -200,8 +201,8 @@ fn empty_fold_json_path() {
                 )
             )"#;
 
-    let result = call_vm!(set_variable_vm, "", empty_fold, "", "");
-    let result = call_vm!(vm, "", empty_fold, "", result.data);
+    let result = checked_call_vm!(set_variable_vm, "", empty_fold, "", "");
+    let result = checked_call_vm!(vm, "", empty_fold, "", result.data);
 
     let actual_trace = trace_from_result(&result);
     let expected_trace = vec![executed_state::scalar_jvalue(json!({ "messages": [] }))];
@@ -229,8 +230,8 @@ fn fold_with_join() {
                 )
             )"#;
 
-    let result = call_vm!(set_variable_vm, "", fold_with_join, "", "");
-    let result = call_vm!(vm, "", fold_with_join, "", result.data);
+    let result = checked_call_vm!(set_variable_vm, "", fold_with_join, "", "");
+    let result = checked_call_vm!(vm, "", fold_with_join, "", result.data);
 
     let actual_trace = trace_from_result(&result);
     assert_eq!(actual_trace.len(), 3);
@@ -255,8 +256,8 @@ fn json_path() {
                 )
             )"#;
 
-    let result = call_vm!(set_variable_vm, "", lfold, "", "");
-    let result = call_vm!(vm, "", lfold, "", result.data);
+    let result = checked_call_vm!(set_variable_vm, "", lfold, "", "");
+    let result = checked_call_vm!(vm, "", lfold, "", result.data);
 
     let actual_trace = trace_from_result(&result);
     let expected_state = executed_state::scalar_jvalue(json!({ "array": ["1", "2", "3", "4", "5"] }));
@@ -306,13 +307,13 @@ fn shadowing() {
                 )
             )"#;
 
-    let result = call_vm!(set_variables_vm, "", script, "", "");
-    let result = call_vm!(vm_a, "", script, "", result.data);
-    let result = call_vm!(vm_b, "", script, "", result.data);
-    let result = call_vm!(vm_a, "", script, "", result.data);
-    let result = call_vm!(vm_b, "", script, "", result.data);
-    let result = call_vm!(vm_a, "", script, "", result.data);
-    let result = call_vm!(vm_b, "", script, "", result.data);
+    let result = checked_call_vm!(set_variables_vm, "", script, "", "");
+    let result = checked_call_vm!(vm_a, "", script, "", result.data);
+    let result = checked_call_vm!(vm_b, "", script, "", result.data);
+    let result = checked_call_vm!(vm_a, "", script, "", result.data);
+    let result = checked_call_vm!(vm_b, "", script, "", result.data);
+    let result = checked_call_vm!(vm_a, "", script, "", result.data);
+    let result = checked_call_vm!(vm_b, "", script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
     let expected_trace = vec![
@@ -342,11 +343,11 @@ fn shadowing_scope() {
         let mut vm_a = create_avm(echo_string_call_service(), "A");
         let mut vm_b = create_avm(echo_string_call_service(), "B");
 
-        let result = call_vm!(set_variables_vm, "", script.clone(), "", "");
-        let result = call_vm!(vm_a, "", script.clone(), "", result.data);
-        let result = call_vm!(vm_b, "", script.clone(), "", result.data);
-        let result = call_vm!(vm_a, "", script.clone(), "", result.data);
-        let result = call_vm!(vm_b, "", script.clone(), "", result.data);
+        let result = checked_call_vm!(set_variables_vm, "", script.clone(), "", "");
+        let result = checked_call_vm!(vm_a, "", script.clone(), "", result.data);
+        let result = checked_call_vm!(vm_b, "", script.clone(), "", result.data);
+        let result = checked_call_vm!(vm_a, "", script.clone(), "", result.data);
+        let result = checked_call_vm!(vm_b, "", script.clone(), "", result.data);
 
         vm_a.call_with_prev_data("", script, "", result.data)
     }

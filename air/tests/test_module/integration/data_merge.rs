@@ -26,7 +26,7 @@ use air_test_utils::CallServiceClosure;
 use air_test_utils::ExecutedState;
 use air_test_utils::IValue;
 use air_test_utils::NEVec;
-use air_test_utils::{call_vm, echo_string_call_service};
+use air_test_utils::{checked_call_vm, echo_string_call_service};
 use air_test_utils::{create_avm, InterpreterData};
 
 type JValue = serde_json::Value;
@@ -79,10 +79,10 @@ fn data_merge() {
         "#;
 
     // little hack here with init_peer_id to execute the first call from both VMs
-    let result_1 = call_vm!(vm1, "A", script, "", "");
-    let result_2 = call_vm!(vm2, "B", script, "", "");
-    let result_3 = call_vm!(vm1, "asd", script, result_1.data.clone(), result_2.data.clone());
-    let result_4 = call_vm!(vm2, "asd", script, result_1.data.clone(), result_2.data.clone());
+    let result_1 = checked_call_vm!(vm1, "A", script, "", "");
+    let result_2 = checked_call_vm!(vm2, "B", script, "", "");
+    let result_3 = checked_call_vm!(vm1, "asd", script, result_1.data.clone(), result_2.data.clone());
+    let result_4 = checked_call_vm!(vm2, "asd", script, result_1.data.clone(), result_2.data.clone());
 
     let actual_trace_1 = trace_from_result(&result_1);
 
@@ -214,8 +214,8 @@ fn acc_merge() {
         "#,
     );
 
-    let result = call_vm!(vm1, "asd", script.clone(), "", "");
-    call_vm!(vm2, "asd", script, "", result.data);
+    let result = checked_call_vm!(vm1, "asd", script.clone(), "", "");
+    checked_call_vm!(vm2, "asd", script, "", result.data);
 }
 
 #[test]
@@ -236,14 +236,14 @@ fn fold_merge() {
         set_variable_vm_id, local_vm_id
     );
 
-    let set_variable_result = call_vm!(set_variable_vm, "", &script, "", "");
+    let set_variable_result = checked_call_vm!(set_variable_vm, "", &script, "", "");
 
     let mut local_vms = Vec::with_capacity(7);
     let mut local_vms_results = Vec::with_capacity(7);
     for vm_id in 0..7 {
         let peer_id = format!("peer_{}", vm_id);
         let mut vm = create_avm(echo_string_call_service(), peer_id);
-        let result = call_vm!(
+        let result = checked_call_vm!(
             vm,
             "",
             &script,
@@ -256,43 +256,44 @@ fn fold_merge() {
     }
 
     let mut local_vm = create_avm(echo_string_call_service(), local_vm_id);
-    let result_1 = call_vm!(local_vm, "", &script, "", local_vms_results[0].data.clone());
-    let result_2 = call_vm!(
+    let result_1 = checked_call_vm!(local_vm, "", &script, "", local_vms_results[0].data.clone());
+    let result_2 = checked_call_vm!(
         local_vm,
         "",
         &script,
         result_1.data.clone(),
         local_vms_results[3].data.clone()
     );
-    let result_3 = call_vm!(
+    let result_3 = checked_call_vm!(
         local_vm,
         "",
         &script,
         result_2.data.clone(),
         local_vms_results[4].data.clone()
     );
-    let result_4 = call_vm!(
+    let result_4 = checked_call_vm!(
         local_vm,
         "",
         &script,
         result_3.data.clone(),
         local_vms_results[5].data.clone()
     );
-    let result_5 = call_vm!(
+    let result_5 = checked_call_vm!(
         local_vm,
         "",
         &script,
         result_4.data.clone(),
         local_vms_results[1].data.clone()
     );
-    let result_6 = call_vm!(
+    let result_6 = checked_call_vm!(
         local_vm,
         "",
         &script,
         result_5.data.clone(),
         local_vms_results[2].data.clone()
     );
-    let result_7 = call_vm!(
+
+    let result_7 = checked_call_vm!(
         local_vm,
         "",
         &script,
@@ -334,13 +335,15 @@ fn fold_merge() {
         }
     }
 
-    assert_eq!(fold_states_count, 9);
+    // $stream_1 contains 4 generation each with 2 elements, it means that inner fold for $stream_2
+    // runs 2*4 times and produces 2*4 fold states, and 1 state comes from fold for $stream_1
+    assert_eq!(fold_states_count, 2 * 4 + 1);
 
     for (call_result, call_count) in calls_count {
         if call_result.as_str() < "peer_4" {
-            assert_eq!(call_count, 3);
+            assert_eq!(call_count, 1);
         } else {
-            assert_eq!(call_count, 24);
+            assert_eq!(call_count, 8);
         }
     }
 }

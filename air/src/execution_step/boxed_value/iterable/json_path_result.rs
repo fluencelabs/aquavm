@@ -61,4 +61,8 @@ impl<'ctx> Iterable<'ctx> for IterableJsonPathResult {
 
         Some(result)
     }
+
+    fn len(&self) -> usize {
+        self.jvalues.len()
+    }
 }

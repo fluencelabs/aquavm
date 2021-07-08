@@ -16,7 +16,7 @@
 
 use air::ResolvedTriplet;
 use air::SecurityTetraplet;
-use air_test_utils::call_vm;
+use air_test_utils::checked_call_vm;
 use air_test_utils::create_avm;
 use air_test_utils::executed_state;
 use air_test_utils::CallServiceClosure;
@@ -92,7 +92,7 @@ fn simple_fold() {
     );
 
     let init_peer_id = String::from("some_init_peer_id");
-    let result = call_vm!(set_variable_vm, init_peer_id.clone(), script.clone(), "", "");
+    let result = checked_call_vm!(set_variable_vm, init_peer_id.clone(), script.clone(), "", "");
     let mut data = result.data;
 
     let first_arg_triplet = ResolvedTriplet {
@@ -120,7 +120,7 @@ fn simple_fold() {
     let expected_tetraplets = vec![vec![first_arg_tetraplet], vec![second_arg_tetraplet]];
     let expected_tetraplets = Rc::new(RefCell::new(expected_tetraplets));
     for i in 0..10 {
-        let result = call_vm!(client_vms[i].0, init_peer_id.clone(), script.clone(), "", data);
+        let result = checked_call_vm!(client_vms[i].0, init_peer_id.clone(), script.clone(), "", data);
         data = result.data;
 
         assert_eq!(client_vms[i].1, expected_tetraplets);
@@ -166,7 +166,7 @@ fn fold_json_path() {
     );
 
     let init_peer_id = String::from("some_init_peer_id");
-    let result = call_vm!(set_variable_vm, init_peer_id.clone(), script.clone(), "", "");
+    let result = checked_call_vm!(set_variable_vm, init_peer_id.clone(), script.clone(), "", "");
 
     let first_arg_triplet = ResolvedTriplet {
         peer_pk: set_variable_vm_peer_id,
@@ -192,7 +192,7 @@ fn fold_json_path() {
 
     let expected_tetraplets = vec![vec![first_arg_tetraplet], vec![second_arg_tetraplet]];
     let expected_tetraplets = Rc::new(RefCell::new(expected_tetraplets));
-    call_vm!(client_vm, init_peer_id.clone(), script.clone(), "", result.data);
+    checked_call_vm!(client_vm, init_peer_id.clone(), script.clone(), "", result.data);
     assert_eq!(arg_tetraplets, expected_tetraplets);
 }
 
@@ -305,7 +305,7 @@ fn tetraplet_with_wasm_modules() {
 
     let mut vm = create_avm(host_func, local_peer_id);
 
-    let result = call_vm!(vm, ADMIN_PEER_PK, script, "", "");
+    let result = checked_call_vm!(vm, ADMIN_PEER_PK, script, "", "");
     let actual_trace = trace_from_result(&result);
     let expected_state = executed_state::scalar_string("Ok");
 

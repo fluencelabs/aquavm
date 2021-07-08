@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use air_test_utils::call_vm;
+use air_test_utils::checked_call_vm;
 use air_test_utils::create_avm;
 use air_test_utils::unit_call_service;
 
@@ -30,7 +30,7 @@ fn par_remote_remote() {
                 (call "remote_peer_id_2" ("service_id" "fn_name") [] g)
             )"#;
 
-    let mut result = call_vm!(vm, "", script, "", "");
+    let mut result = checked_call_vm!(vm, "", script, "", "");
 
     let actual_peers: HashSet<_> = result.next_peer_pks.drain(..).collect();
     let expected_peers: HashSet<_> =
@@ -53,7 +53,7 @@ fn par_local_remote() {
         local_peer_id
     );
 
-    let result = call_vm!(vm, "", script, "", "");
+    let result = checked_call_vm!(vm, "", script, "", "");
 
     assert_eq!(result.next_peer_pks, vec![String::from("remote_peer_id_2")]);
 }

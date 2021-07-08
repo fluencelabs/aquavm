@@ -63,4 +63,8 @@ impl<'ctx> Iterable<'ctx> for IterableVecJsonPathResult {
 
         Some(result)
     }
+
+    fn len(&self) -> usize {
+        self.jvalues.len()
+    }
 }

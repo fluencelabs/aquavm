@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use air_test_utils::call_vm;
+use air_test_utils::checked_call_vm;
 use air_test_utils::create_avm;
 use air_test_utils::CallServiceClosure;
 use air_test_utils::IValue;
@@ -51,5 +51,5 @@ fn empty_stream() {
             (null)
         )"#;
 
-    let _ = call_vm!(vm, "", script, "", "");
+    let _ = checked_call_vm!(vm, "", script, "", "");
 }

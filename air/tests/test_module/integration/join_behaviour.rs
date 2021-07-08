@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use air_test_utils::call_vm;
+use air_test_utils::checked_call_vm;
 use air_test_utils::create_avm;
 use air_test_utils::set_variables_call_service;
 use air_test_utils::trace_from_result;
@@ -65,8 +65,8 @@ fn dont_wait_on_json_path() {
     );
 
     let init_peer_id = "asd";
-    let result = call_vm!(set_variable_vm, init_peer_id, &script, "", "");
-    let result = call_vm!(local_vm, init_peer_id, script, "", result.data);
+    let result = checked_call_vm!(set_variable_vm, init_peer_id, &script, "", "");
+    let result = checked_call_vm!(local_vm, init_peer_id, script, "", result.data);
 
     assert_eq!(result.next_peer_pks, vec![init_peer_id.to_string()]);
 }
@@ -85,7 +85,7 @@ fn wait_on_stream_json_path_by_id() {
         local_peer_id
     );
 
-    let result = call_vm!(local_vm, "", non_join_stream_script, "", "");
+    let result = checked_call_vm!(local_vm, "", non_join_stream_script, "", "");
     let actual_trace = trace_from_result(&result);
 
     assert_eq!(result.ret_code, 0);
@@ -100,7 +100,7 @@ fn wait_on_stream_json_path_by_id() {
         local_peer_id
     );
 
-    let result = call_vm!(local_vm, "", join_stream_script, "", "");
+    let result = checked_call_vm!(local_vm, "", join_stream_script, "", "");
     let actual_trace = trace_from_result(&result);
 
     assert_eq!(result.ret_code, 0);
@@ -150,15 +150,15 @@ fn dont_wait_on_json_path_on_scalars() {
     );
 
     let init_peer_id = "asd";
-    let result = call_vm!(set_variable_vm, init_peer_id, &script, "", "");
-    let array_result = call_vm!(array_consumer, init_peer_id, &script, "", result.data.clone());
+    let result = checked_call_vm!(set_variable_vm, init_peer_id, &script, "", "");
+    let array_result = checked_call_vm!(array_consumer, init_peer_id, &script, "", result.data.clone());
     assert_eq!(array_result.ret_code, 1006);
     assert_eq!(
         array_result.error_message,
         r#"variable with path '$.[5]' not found in '[1,2,3,4,5]' with an error: 'json value not set'"#
     );
 
-    let object_result = call_vm!(object_consumer, init_peer_id, script, "", result.data);
+    let object_result = checked_call_vm!(object_consumer, init_peer_id, script, "", result.data);
     assert_eq!(object_result.ret_code, 1006);
     assert_eq!(
         object_result.error_message,

@@ -15,6 +15,7 @@
  */
 
 use air_test_utils::call_vm;
+use air_test_utils::checked_call_vm;
 use air_test_utils::create_avm;
 use air_test_utils::set_variable_call_service;
 use air_test_utils::CallServiceClosure;
@@ -96,8 +97,8 @@ fn flattening_scalar_arrays() {
         set_variable_peer_id
     );
 
-    let result = call_vm!(set_variable_vm, "asd", script.clone(), "", "");
-    let result = call_vm!(local_vm, "asd", script.clone(), "", result.data);
+    let result = checked_call_vm!(set_variable_vm, "asd", script.clone(), "", "");
+    let result = checked_call_vm!(local_vm, "asd", script.clone(), "", result.data);
 
     assert_eq!(result.ret_code, 0);
     assert_eq!(
@@ -147,8 +148,8 @@ fn flattening_streams() {
         set_variable_peer_id
     );
 
-    let result = call_vm!(set_variable_vm, "asd", script.clone(), "", "");
-    let result = call_vm!(local_vm, "asd", script.clone(), "", result.data);
+    let result = checked_call_vm!(set_variable_vm, "asd", script.clone(), "", "");
+    let result = checked_call_vm!(local_vm, "asd", script.clone(), "", result.data);
 
     assert_eq!(result.ret_code, 0);
     assert_eq!(
@@ -186,8 +187,8 @@ fn flattening_empty_values() {
         set_variable_peer_id, local_peer_id
     );
 
-    let result = call_vm!(set_variable_vm, "asd", script.clone(), "", "");
-    let result = call_vm!(local_vm, "asd", script.clone(), "", result.data);
+    let result = checked_call_vm!(set_variable_vm, "asd", script.clone(), "", "");
+    let result = checked_call_vm!(local_vm, "asd", script.clone(), "", result.data);
 
     assert_eq!(result.ret_code, 0);
     assert_eq!(closure_call_args.args_var, Rc::new(RefCell::new(vec![])));
@@ -229,7 +230,7 @@ fn test_handling_non_flattening_values() {
         set_variable_peer_id
     );
 
-    let result = call_vm!(set_variable_vm, "asd", &script, "", "");
+    let result = checked_call_vm!(set_variable_vm, "asd", &script, "", "");
     let result = call_vm!(local_vm, "asd", &script, "", result.data);
 
     assert_eq!(result.ret_code, 1017);

@@ -61,12 +61,22 @@ pub fn create_avm(call_service: CallServiceClosure, current_peer_id: impl Into<S
 }
 
 #[macro_export]
-macro_rules! call_vm {
+macro_rules! checked_call_vm {
     ($vm:expr, $init_peer_id:expr, $script:expr, $prev_data:expr, $data:expr) => {
         match $vm.call_with_prev_data($init_peer_id, $script, $prev_data, $data) {
             Ok(v) if v.ret_code != 0 => {
                 panic!("VM returns a error: {} {}", v.ret_code, v.error_message)
             }
+            Ok(v) => v,
+            Err(err) => panic!("VM call failed: {}", err),
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! call_vm {
+    ($vm:expr, $init_peer_id:expr, $script:expr, $prev_data:expr, $data:expr) => {
+        match $vm.call_with_prev_data($init_peer_id, $script, $prev_data, $data) {
             Ok(v) => v,
             Err(err) => panic!("VM call failed: {}", err),
         }

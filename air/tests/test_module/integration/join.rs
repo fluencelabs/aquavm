@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use air_test_utils::call_vm;
+use air_test_utils::checked_call_vm;
 use air_test_utils::create_avm;
 use air_test_utils::executed_state;
 use air_test_utils::trace_from_result;
@@ -66,7 +66,7 @@ fn join_chat() {
             )
         "#;
 
-    let client_1_result = call_vm!(client_1, "asd", script, "", "");
+    let client_1_result = checked_call_vm!(client_1, "asd", script, "", "");
 
     let client_1_actual_trace = trace_from_result(&client_1_result);
     let client_1_expected_trace = vec![executed_state::request_sent_by("A")];
@@ -74,7 +74,7 @@ fn join_chat() {
     assert_eq!(client_1_actual_trace, client_1_expected_trace);
     assert_eq!(client_1_result.next_peer_pks, vec![String::from("Relay1")]);
 
-    let relay_1_result = call_vm!(relay_1, "asd", script.clone(), client_1_result.data, "");
+    let relay_1_result = checked_call_vm!(relay_1, "asd", script.clone(), client_1_result.data, "");
 
     let relay_1_actual_trace = trace_from_result(&relay_1_result);
     let relay_1_expected_trace = vec![
@@ -85,7 +85,7 @@ fn join_chat() {
     assert_eq!(relay_1_actual_trace, relay_1_expected_trace);
     assert_eq!(relay_1_result.next_peer_pks, vec![String::from("Remote")]);
 
-    let remote_result = call_vm!(remote, "asd", script.clone(), relay_1_result.data, "");
+    let remote_result = checked_call_vm!(remote, "asd", script.clone(), relay_1_result.data, "");
 
     let remote_actual_trace = trace_from_result(&remote_result);
     let remote_expected_trace = vec![
@@ -107,7 +107,7 @@ fn join_chat() {
     assert_eq!(remote_actual_trace, remote_expected_trace);
     assert_eq!(remote_result_next_peer_pks, next_peer_pks_right);
 
-    let relay_1_result = call_vm!(relay_1, "asd", script.clone(), remote_result.data.clone(), "");
+    let relay_1_result = checked_call_vm!(relay_1, "asd", script.clone(), remote_result.data.clone(), "");
 
     let relay_1_actual_trace = trace_from_result(&relay_1_result);
 
@@ -125,7 +125,7 @@ fn join_chat() {
     assert_eq!(relay_1_actual_trace, relay_1_expected_trace);
     assert_eq!(relay_1_result.next_peer_pks, vec![String::from("A")]);
 
-    let client_1_result = call_vm!(client_1, "asd", script.clone(), relay_1_result.data, "");
+    let client_1_result = checked_call_vm!(client_1, "asd", script.clone(), relay_1_result.data, "");
 
     let client_1_actual_trace = trace_from_result(&client_1_result);
 
@@ -143,7 +143,7 @@ fn join_chat() {
     assert_eq!(client_1_actual_trace, client_1_expected_trace);
     assert_eq!(client_1_result.next_peer_pks, Vec::<String>::new());
 
-    let relay_2_result = call_vm!(relay_2, "asd", script.clone(), remote_result.data, "");
+    let relay_2_result = checked_call_vm!(relay_2, "asd", script.clone(), remote_result.data, "");
 
     let relay_2_actual_trace = trace_from_result(&relay_2_result);
 
@@ -161,7 +161,7 @@ fn join_chat() {
     assert_eq!(relay_2_actual_trace, relay_2_expected_trace);
     assert_eq!(relay_2_result.next_peer_pks, vec![String::from("B")]);
 
-    let client_2_result = call_vm!(client_2, "asd", script, relay_2_result.data, "");
+    let client_2_result = checked_call_vm!(client_2, "asd", script, relay_2_result.data, "");
 
     let client_2_actual_trace = trace_from_result(&client_2_result);
 
@@ -210,11 +210,11 @@ fn join() {
             )
         "#;
 
-    let client_1_result = call_vm!(client_1, "asd", script, "", "");
-    let relay_1_result = call_vm!(relay_1, "asd", script, client_1_result.data, "");
-    let remote_result = call_vm!(remote, "asd", script, relay_1_result.data, "");
-    let relay_1_result = call_vm!(relay_1, "asd", script, remote_result.data, "");
-    let client_1_result = call_vm!(client_1, "asd", script, relay_1_result.data, "");
+    let client_1_result = checked_call_vm!(client_1, "asd", script, "", "");
+    let relay_1_result = checked_call_vm!(relay_1, "asd", script, client_1_result.data, "");
+    let remote_result = checked_call_vm!(remote, "asd", script, relay_1_result.data, "");
+    let relay_1_result = checked_call_vm!(relay_1, "asd", script, remote_result.data, "");
+    let client_1_result = checked_call_vm!(client_1, "asd", script, relay_1_result.data, "");
 
     let client_1_actual_trace = trace_from_result(&client_1_result);
 
@@ -268,12 +268,12 @@ fn init_peer_id() {
             )
         "#;
 
-    let initiator_1_result = call_vm!(initiator, &initiator_peer_id, script, "", "");
-    let client_1_result = call_vm!(client_1, &initiator_peer_id, script, initiator_1_result.data, "");
-    let relay_1_result = call_vm!(relay_1, &initiator_peer_id, script, client_1_result.data, "");
-    let remote_result = call_vm!(remote, &initiator_peer_id, script, relay_1_result.data, "");
-    let relay_1_result = call_vm!(relay_1, &initiator_peer_id, script, remote_result.data, "");
-    let client_1_result = call_vm!(client_1, &initiator_peer_id, script, relay_1_result.data, "");
+    let initiator_1_result = checked_call_vm!(initiator, &initiator_peer_id, script, "", "");
+    let client_1_result = checked_call_vm!(client_1, &initiator_peer_id, script, initiator_1_result.data, "");
+    let relay_1_result = checked_call_vm!(relay_1, &initiator_peer_id, script, client_1_result.data, "");
+    let remote_result = checked_call_vm!(remote, &initiator_peer_id, script, relay_1_result.data, "");
+    let relay_1_result = checked_call_vm!(relay_1, &initiator_peer_id, script, remote_result.data, "");
+    let client_1_result = checked_call_vm!(client_1, &initiator_peer_id, script, relay_1_result.data, "");
 
     let client_1_actual_trace = trace_from_result(&client_1_result);
 
@@ -292,7 +292,7 @@ fn init_peer_id() {
     assert_eq!(client_1_actual_trace, client_1_expected_trace);
     assert_eq!(client_1_result.next_peer_pks, vec![initiator_peer_id.clone()]);
 
-    let initiator_1_result = call_vm!(initiator, initiator_peer_id, script, client_1_result.data, "");
+    let initiator_1_result = checked_call_vm!(initiator, initiator_peer_id, script, client_1_result.data, "");
 
     let initiator_1_actual_trace = trace_from_result(&initiator_1_result);
 
