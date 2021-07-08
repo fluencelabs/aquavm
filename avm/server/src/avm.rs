@@ -134,7 +134,7 @@ impl AVM {
         let args = prepare_args(prev_data, data, init_user_id.clone(), air);
 
         // Update ParticleParams with the new values so subsequent calls to `call_service` can use them
-        self.update_current_particle(particle_id, init_user_id, execution_id);
+        self.update_current_particle(particle_id, init_user_id, execution_id.into());
 
         let result =
             self.faas
