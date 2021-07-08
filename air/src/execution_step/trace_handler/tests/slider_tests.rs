@@ -78,7 +78,7 @@ fn none_on_empty_interval() {
 }
 
 #[test]
-fn remainer_on_subinterval() {
+fn remainder_on_subinterval() {
     let mut trace = generate_test_trace();
 
     let slider = TraceSlider::new(trace.clone().into());
