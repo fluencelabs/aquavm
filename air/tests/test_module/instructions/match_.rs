@@ -194,7 +194,7 @@ fn match_without_xor() {
         set_variable_peer_id, local_peer_id
     );
 
-    let result = checked_call_vm!(set_variable_vm, "asd", &script, "", "");
+    let result = call_vm!(set_variable_vm, "asd", &script, "", "");
     let result = call_vm!(vm, "asd", script.clone(), "", result.data);
 
     assert_eq!(result.ret_code, 1014);
