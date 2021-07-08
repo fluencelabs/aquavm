@@ -59,6 +59,7 @@ impl DerefMut for SendSafeFaaS {
 pub struct ParticleParameters {
     pub init_user_id: String,
     pub particle_id: String,
+    pub execution_id: String,
 }
 
 pub struct AVM {
@@ -117,6 +118,7 @@ impl AVM {
         air: impl Into<String>,
         data: impl Into<Vec<u8>>,
         particle_id: impl Into<String>,
+        execution_id: impl Into<String>,
     ) -> Result<InterpreterOutcome> {
         use AVMError::PersistDataError;
 
@@ -132,7 +134,7 @@ impl AVM {
         let args = prepare_args(prev_data, data, init_user_id.clone(), air);
 
         // Update ParticleParams with the new values so subsequent calls to `call_service` can use them
-        self.update_current_particle(particle_id, init_user_id);
+        self.update_current_particle(particle_id, init_user_id, execution_id);
 
         let result =
             self.faas
@@ -161,10 +163,16 @@ impl AVM {
         Ok(())
     }
 
-    fn update_current_particle(&self, particle_id: String, init_user_id: String) {
+    fn update_current_particle(
+        &self,
+        particle_id: String,
+        init_user_id: String,
+        execution_id: String,
+    ) {
         let mut params = self.current_particle.lock();
         params.particle_id = particle_id;
         params.init_user_id = init_user_id;
+        params.execution_id = execution_id;
     }
 }
 
