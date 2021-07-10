@@ -1,4 +1,5 @@
 (seq
+(seq
  (seq
   (call "client_id" ("" "") ["relay"] relay)
   (call "client_id" ("" "") ["client"] client)
@@ -24,5 +25,10 @@
           )
          )
    )
+  )
+ )
+ (seq
+  (call relay ("op" "identity") [])
+  (call client ("return" "") [$services $neighs_inner neighs_top])
   )
  )

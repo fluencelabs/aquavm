@@ -114,21 +114,21 @@ impl TraceHandler {
         Ok(())
     }
 
-    pub(crate) fn meet_generation_start(&mut self, value: &ValueAndPos) -> TraceHandlerResult<()> {
+    pub(crate) fn meet_iteration_start(&mut self, value: &ValueAndPos) -> TraceHandlerResult<()> {
         let fold_fsm = self.state_fsm_queue.last_as_mut_fold()?;
-        fold_fsm.meet_generation_start(value, &mut self.data_keeper)?;
+        fold_fsm.meet_iteration_start(value, &mut self.data_keeper)?;
         Ok(())
     }
 
-    pub(crate) fn meet_next(&mut self, value: &ValueAndPos) -> TraceHandlerResult<()> {
+    pub(crate) fn meet_iteration_end(&mut self) -> TraceHandlerResult<()> {
         let fold_fsm = self.state_fsm_queue.last_as_mut_fold()?;
-        fold_fsm.meet_next(value, &mut self.data_keeper)?;
+        fold_fsm.meet_iteration_end(&mut self.data_keeper);
         Ok(())
     }
 
-    pub(crate) fn meet_prev(&mut self) -> TraceHandlerResult<()> {
+    pub(crate) fn meet_back_iterator(&mut self) -> TraceHandlerResult<()> {
         let fold_fsm = self.state_fsm_queue.last_as_mut_fold()?;
-        fold_fsm.meet_prev(&mut self.data_keeper)?;
+        fold_fsm.meet_back_iterator(&mut self.data_keeper)?;
         Ok(())
     }
 

@@ -72,16 +72,25 @@ impl FoldFSM {
         Ok(fold_fsm)
     }
 
-    pub(crate) fn meet_generation_start(&mut self, value: &ValueAndPos, data_keeper: &mut DataKeeper) -> FSMResult<()> {
-        self.meet_before_state(value, data_keeper)
+    pub(crate) fn meet_iteration_start(&mut self, value: &ValueAndPos, data_keeper: &mut DataKeeper) -> FSMResult<()> {
+        let prev_lore = remove_first(&mut self.prev_fold.lore, &value.value);
+        // TODO: this one could be quadratic on stream len and it could be improved by comparing
+        // not values themself, but values indexes.
+        let current_lore = remove_first(&mut self.current_fold.lore, &value.value);
+
+        apply_fold_lore_before(data_keeper, &prev_lore, &current_lore)?;
+
+        let ctor = SubTraceLoreCtor::from_before_start(value.pos, data_keeper);
+        self.ctor_queue.add_element(ctor, prev_lore, current_lore);
+
+        Ok(())
     }
 
-    pub(crate) fn meet_next(&mut self, value: &ValueAndPos, data_keeper: &mut DataKeeper) -> FSMResult<()> {
+    pub(crate) fn meet_iteration_end(&mut self, data_keeper: &mut DataKeeper) {
         self.ctor_queue.current().ctor.before_end(data_keeper);
-        self.meet_before_state(value, data_keeper)
     }
 
-    pub(crate) fn meet_prev(&mut self, data_keeper: &mut DataKeeper) -> FSMResult<()> {
+    pub(crate) fn meet_back_iterator(&mut self, data_keeper: &mut DataKeeper) -> FSMResult<()> {
         let were_no_back_traversals = self.ctor_queue.were_no_back_traversals();
 
         let LoreCtorDesc {
@@ -91,13 +100,21 @@ impl FoldFSM {
         } = self.ctor_queue.current();
 
         if were_no_back_traversals {
-            ctor.before_end(data_keeper);
+            ctor.after_start(data_keeper);
+            apply_fold_lore_after(data_keeper, prev_lore, current_lore)?;
+        } else {
+            ctor.after_end(data_keeper);
+            self.ctor_queue.traverse_back();
+
+            let LoreCtorDesc {
+                ctor,
+                prev_lore,
+                current_lore,
+            } = self.ctor_queue.current();
+
+            ctor.after_start(data_keeper);
+            apply_fold_lore_after(data_keeper, prev_lore, current_lore)?;
         }
-
-        ctor.after_start(data_keeper);
-        apply_fold_lore_after(data_keeper, prev_lore, current_lore)?;
-
-        self.ctor_queue.traverse_back();
 
         Ok(())
     }
@@ -120,20 +137,6 @@ impl FoldFSM {
     pub(crate) fn error_exit(mut self, data_keeper: &mut DataKeeper) {
         self.meet_generation_end(data_keeper);
         self.meet_fold_end(data_keeper);
-    }
-
-    fn meet_before_state(&mut self, value: &ValueAndPos, data_keeper: &mut DataKeeper) -> FSMResult<()> {
-        let prev_lore = remove_first(&mut self.prev_fold.lore, &value.value);
-        // TODO: this one could be quadratic on stream len and it could be improved by comparing
-        // not values themself, but values indexes.
-        let current_lore = remove_first(&mut self.current_fold.lore, &value.value);
-
-        apply_fold_lore_before(data_keeper, &prev_lore, &current_lore)?;
-
-        let ctor = SubTraceLoreCtor::from_before_start(value.pos, data_keeper);
-        self.ctor_queue.add_element(ctor, prev_lore, current_lore);
-
-        Ok(())
     }
 }
 

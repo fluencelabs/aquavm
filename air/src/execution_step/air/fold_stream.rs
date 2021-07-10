@@ -44,8 +44,15 @@ impl<'i> ExecutableInstruction<'i> for FoldStream<'i> {
             };
 
             let value = value.as_value_and_pos();
-            trace_ctx.meet_generation_start(&value)?;
-            let execution_result = fold(iterable, self.iterator, self.instruction.clone(), exec_ctx, trace_ctx);
+            trace_ctx.meet_iteration_start(&value)?;
+            let execution_result = fold(
+                iterable,
+                self.iterator,
+                self.instruction.clone(),
+                true,
+                exec_ctx,
+                trace_ctx,
+            );
             trace_ctx.meet_generation_end()?;
 
             execution_result?;

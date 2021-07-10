@@ -101,8 +101,8 @@ pub fn print_trace(result: &InterpreterOutcome, trace_name: &str) {
     let trace = trace_from_result(result);
 
     println!("trace {} (states_count: {}): [", trace_name, trace.len());
-    for state in trace.iter() {
-        println!("  {}", state);
+    for (id, state) in trace.iter().enumerate() {
+        println!("  {}: {}", id, state);
     }
     println!("]");
 }

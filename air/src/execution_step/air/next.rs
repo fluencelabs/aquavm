@@ -25,24 +25,35 @@ use crate::log_instruction;
 
 use air_parser::ast::Next;
 
+macro_rules! call_if_stream(
+    ($fold_state:ident, $stmt:stmt) => {
+        if $fold_state.is_iterable_stream {
+            $stmt
+        }
+    }
+);
+
 impl<'i> super::ExecutableInstruction<'i> for Next<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         log_instruction!(next, exec_ctx, trace_ctx);
 
         let iterator_name = self.0;
         let fold_state = try_get_fold_state(exec_ctx, iterator_name)?;
-
-        if fold_state.is_iterable_stream {
-            let next_state = fold_state.iterable.peek().unwrap();
-            trace_ctx.meet_next(&next_state.as_value_and_pos())?;
-        }
+        call_if_stream!(fold_state, trace_ctx.meet_iteration_end()?);
 
         if !fold_state.iterable.next() {
+            call_if_stream!(fold_state, trace_ctx.meet_back_iterator()?);
+
             // just do nothing to exit
             return Ok(());
         }
 
         let next_instr = fold_state.instr_head.clone();
+        call_if_stream!(
+            fold_state,
+            trace_ctx.meet_iteration_start(&fold_state.iterable.peek().unwrap().as_value_and_pos())?
+        );
+
         next_instr.execute(exec_ctx, trace_ctx)?;
 
         // get the same fold state again because of borrow checker
@@ -54,10 +65,7 @@ impl<'i> super::ExecutableInstruction<'i> for Next<'i> {
         };
 
         // get this fold state the second time to bypass borrow checker
-        let fold_state = try_get_fold_state(exec_ctx, iterator_name)?;
-        if fold_state.is_iterable_stream {
-            trace_ctx.meet_prev()?;
-        }
+        //let fold_state = try_get_fold_state(exec_ctx, iterator_name)?;
 
         Ok(())
     }
