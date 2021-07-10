@@ -70,7 +70,7 @@ impl<'input> AIRLexer<'input> {
     fn skip_comment(&mut self) {
         const NEW_LINE: char = '\n'; // TODO: consider '\n\r'
 
-        while let Some((_, ch)) = self.chars.next() {
+        for (_, ch) in &mut self.chars {
             if ch == NEW_LINE {
                 break;
             }
@@ -82,7 +82,7 @@ impl<'input> AIRLexer<'input> {
         &mut self,
         start_pos: usize,
     ) -> Option<Spanned<Token<'input>, usize, LexerError>> {
-        while let Some((pos, ch)) = self.chars.next() {
+        for (pos, ch) in &mut self.chars {
             if ch == '"' {
                 // + 1 to count an open double quote
                 let string_size = pos - start_pos + 1;

@@ -78,15 +78,11 @@ fn compute_new_pos_and_len(
 
     let position = current_position
         .checked_add(fold.fold_states_count)
-        .ok_or(StateFSMError::FoldPosOverflow(fold.clone(), current_position, ctx_type))?;
+        .ok_or_else(|| StateFSMError::FoldPosOverflow(fold.clone(), current_position, ctx_type))?;
 
     let len = current_len
         .checked_sub(fold.fold_states_count)
-        .ok_or(StateFSMError::FoldLenUnderflow(
-            fold.clone(),
-            current_position,
-            ctx_type,
-        ))?;
+        .ok_or_else(|| StateFSMError::FoldLenUnderflow(fold.clone(), current_position, ctx_type))?;
 
     Ok((position, len))
 }

@@ -82,7 +82,9 @@ pub(crate) fn construct_stream_iterable_value<'ctx>(
 
             Ok(FoldIterableStream::Stream(iterables))
         }
-        Some(_) => exec_err!(ExecutionError::InternalError(format!("stream points to scalar value",))),
+        Some(_) => exec_err!(ExecutionError::InternalError(
+            "stream points to scalar value".to_string()
+        )),
         // it's possible to met streams without variables at the moment in fold,
         // they should be treated as empty.
         _ => Ok(FoldIterableStream::Empty),

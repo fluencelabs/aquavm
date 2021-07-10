@@ -297,16 +297,16 @@ impl<'input> CallVariableParser<'input> {
             }
             (false, false) => {
                 if self.state.is_first_stream_tag {
-                    Ok(Token::Stream(&self.string_to_parse))
+                    Ok(Token::Stream(self.string_to_parse))
                 } else {
-                    Ok(Token::Alphanumeric(&self.string_to_parse))
+                    Ok(Token::Alphanumeric(self.string_to_parse))
                 }
             }
             (false, true) => {
                 let json_path_start_pos = self.state.first_dot_met_pos.unwrap();
                 let should_flatten = self.state.flattening_met;
                 let (variable, json_path) = to_variable_and_path(
-                    &self.string_to_parse,
+                    self.string_to_parse,
                     json_path_start_pos,
                     should_flatten,
                 );

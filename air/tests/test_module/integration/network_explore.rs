@@ -74,6 +74,6 @@ fn network_explore() {
     let relay_result = checked_call_vm!(relay, "", script, relay_result.data.clone(), client_1_result.data);
     assert_eq!(relay_result.next_peer_pks, vec![client_id.to_string()]);
 
-    let relay_result = checked_call_vm!(client, "", script, client_result.data, relay_result.data);
-    assert_eq!(relay_result.next_peer_pks, Vec::<String>::new());
+    let client_result = checked_call_vm!(client, "", script, client_result.data, relay_result.data);
+    assert_eq!(client_result.next_peer_pks, Vec::<String>::new());
 }

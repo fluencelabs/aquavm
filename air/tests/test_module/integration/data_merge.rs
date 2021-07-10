@@ -341,9 +341,9 @@ fn fold_merge() {
 
     for (call_result, call_count) in calls_count {
         if call_result.as_str() < "peer_4" {
-            assert_eq!(call_count, 1);
+            assert_eq!(call_count, 2);
         } else {
-            assert_eq!(call_count, 8);
+            assert_eq!(call_count, 16);
         }
     }
 }

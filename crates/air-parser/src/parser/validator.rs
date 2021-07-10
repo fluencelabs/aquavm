@@ -73,12 +73,12 @@ impl<'i> VariableValidator<'i> {
 
     pub(super) fn met_fold_scalar(&mut self, fold: &FoldScalar<'i>, span: Span) {
         self.met_iterable_value(&fold.iterable, span);
-        self.met_iterator_definition(&fold.iterator, span);
+        self.met_iterator_definition(fold.iterator, span);
     }
 
     pub(super) fn met_fold_stream(&mut self, fold: &FoldStream<'i>, span: Span) {
         self.met_variable(&Variable::Stream(fold.stream_name), span);
-        self.met_iterator_definition(&fold.iterator, span);
+        self.met_iterator_definition(fold.iterator, span);
     }
 
     pub(super) fn met_next(&mut self, next: &Next<'i>, span: Span) {

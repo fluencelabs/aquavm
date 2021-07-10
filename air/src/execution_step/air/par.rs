@@ -55,7 +55,7 @@ fn execute_subtree<'i>(
     completeness_updater: &mut ParCompletenessUpdater,
     subtree_type: SubtreeType,
 ) -> ExecutionResult<()> {
-    exec_ctx.subtree_complete = determine_subtree_complete(&subtree);
+    exec_ctx.subtree_complete = determine_subtree_complete(subtree);
 
     // execute a subtree
     let exec_result = subtree.execute(exec_ctx, trace_ctx);
