@@ -7,13 +7,13 @@ license = "Apache-2.0"
 publish = false
 
 [build-dependencies]
-lalrpop = "0.19.5"
+lalrpop = "0.19.6"
 
 [dependencies]
-lalrpop-util = "0.19.5"
-regex = "1.4.1"
-codespan = "0.9.5"
-codespan-reporting = "0.9.5"
+lalrpop-util = "0.19.6"
+regex = "1.5.4"
+codespan = "0.11.1"
+codespan-reporting = "0.11.1"
 multimap = "0.8.3"
 
 # TODO: hide serde behind a feature

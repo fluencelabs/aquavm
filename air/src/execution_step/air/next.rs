@@ -65,7 +65,8 @@ impl<'i> super::ExecutableInstruction<'i> for Next<'i> {
         };
 
         // get this fold state the second time to bypass borrow checker
-        //let fold_state = try_get_fold_state(exec_ctx, iterator_name)?;
+        let fold_state = try_get_fold_state(exec_ctx, iterator_name)?;
+        call_if_stream!(fold_state, trace_ctx.meet_back_iterator()?);
 
         Ok(())
     }

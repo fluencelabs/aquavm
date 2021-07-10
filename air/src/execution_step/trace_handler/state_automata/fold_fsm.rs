@@ -91,7 +91,7 @@ impl FoldFSM {
     }
 
     pub(crate) fn meet_back_iterator(&mut self, data_keeper: &mut DataKeeper) -> FSMResult<()> {
-        let were_no_back_traversals = self.ctor_queue.were_no_back_traversals();
+        let back_traversal_started = self.ctor_queue.back_traversal_started();
 
         let LoreCtorDesc {
             ctor,
@@ -99,9 +99,10 @@ impl FoldFSM {
             current_lore,
         } = self.ctor_queue.current();
 
-        if were_no_back_traversals {
+        if !back_traversal_started {
             ctor.after_start(data_keeper);
             apply_fold_lore_after(data_keeper, prev_lore, current_lore)?;
+            self.ctor_queue.start_back_traverse();
         } else {
             ctor.after_end(data_keeper);
             self.ctor_queue.traverse_back();
@@ -121,6 +122,7 @@ impl FoldFSM {
 
     pub(crate) fn meet_generation_end(&mut self, data_keeper: &mut DataKeeper) {
         self.ctor_queue.finish(data_keeper);
+        self.ctor_queue.end_back_traverse();
 
         let fold_lore = self.ctor_queue.transform_to_lore();
         self.result_lore.extend(fold_lore);

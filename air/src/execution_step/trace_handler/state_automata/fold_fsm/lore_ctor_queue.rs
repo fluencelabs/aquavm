@@ -26,6 +26,7 @@ use super::SubTraceLoreCtor;
 pub(super) struct SubTraceLoreCtorQueue {
     queue: Vec<LoreCtorDesc>,
     back_traversal_pos: usize,
+    back_traversal_started: bool,
 }
 
 impl SubTraceLoreCtorQueue {
@@ -52,8 +53,16 @@ impl SubTraceLoreCtorQueue {
         self.back_traversal_pos -= 1;
     }
 
-    pub(super) fn were_no_back_traversals(&self) -> bool {
-        self.queue.len() == self.back_traversal_pos
+    pub(super) fn start_back_traverse(&mut self) {
+        self.back_traversal_started = true;
+    }
+
+    pub(super) fn end_back_traverse(&mut self) {
+        self.back_traversal_started = false;
+    }
+
+    pub(super) fn back_traversal_started(&self) -> bool {
+        self.back_traversal_started
     }
 
     pub(super) fn transform_to_lore(&mut self) -> FoldLore {
