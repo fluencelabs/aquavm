@@ -17,11 +17,11 @@
 use super::CallResult;
 use super::ExecutedState;
 use super::JValue;
+use super::ParResult;
 use crate::FoldLore;
+use crate::FoldResult;
 use crate::FoldSubTraceLore;
 use crate::SubTraceDesc;
-use crate::FoldResult;
-use super::ParResult;
 
 use std::rc::Rc;
 
@@ -95,12 +95,13 @@ pub fn fold(lore: FoldLore) -> ExecutedState {
     ExecutedState::Fold(result)
 }
 
-pub fn subtrace_lore(value_pos: u32, before: SubTraceDesc, after: SubTraceDesc) -> FoldSubTraceLore {
+pub fn subtrace_lore(
+    value_pos: u32,
+    before: SubTraceDesc,
+    after: SubTraceDesc,
+) -> FoldSubTraceLore {
     FoldSubTraceLore {
         value_pos,
-        subtraces_desc: vec! [
-            before,
-            after
-        ]
+        subtraces_desc: vec![before, after],
     }
 }

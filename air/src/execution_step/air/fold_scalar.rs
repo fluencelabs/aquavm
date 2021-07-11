@@ -33,9 +33,9 @@ impl<'i> ExecutableInstruction<'i> for FoldScalar<'i> {
             FoldIterableScalar::Empty => Ok(()),
             FoldIterableScalar::Scalar(iterable) => fold(
                 iterable,
+                IterableType::Scalar,
                 self.iterator,
                 self.instruction.clone(),
-                false,
                 exec_ctx,
                 trace_ctx,
             ),
@@ -45,13 +45,13 @@ impl<'i> ExecutableInstruction<'i> for FoldScalar<'i> {
 
 pub(super) fn fold<'i>(
     iterable: IterableValue,
+    iterable_type: IterableType,
     iterator: &'i str,
     instruction: Rc<Instruction<'i>>,
-    is_iterable_stream: bool,
     exec_ctx: &mut ExecutionCtx<'i>,
     trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<()> {
-    let fold_state = FoldState::from_iterable(iterable, instruction.clone(), is_iterable_stream);
+    let fold_state = FoldState::from_iterable(iterable, iterable_type, instruction.clone());
     let variable_handler = VariableHandler::init(exec_ctx, iterator, fold_state)?;
 
     instruction.execute(exec_ctx, trace_ctx)?;

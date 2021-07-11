@@ -17,7 +17,6 @@
 use super::par_fsm::SubtreeType;
 use super::KeeperError;
 use super::ParResult;
-use super::StateFSM;
 use crate::execution_step::trace_handler::MergeCtxType;
 use crate::execution_step::trace_handler::ResolvedFold;
 
@@ -26,14 +25,14 @@ use thiserror::Error as ThisError;
 /// Errors arose out of merging previous data with a new.
 #[derive(ThisError, Debug)]
 pub(crate) enum StateFSMError {
-    /// Error occurred while trying to access or pop elements from an empty queue.
-    #[error("queue is empty, while fsm of type {0} is requested")]
-    QueueIsEmpty(&'static str),
+    /// Error occurred while trying to access or pop elements from an empty par queue.
+    #[error("par queue is empty, while par FSM is requested")]
+    ParQueueIsEmpty(),
 
     /// Errors occurred while trying to access or pop elements from queue,
     /// which contains element of different type.
-    #[error("queue last top element is '{1:?}', while fsm of type {0} requested")]
-    IncompatibleFSM(&'static str, StateFSM),
+    #[error("fold FSM for stream name '{0}' wasn't found")]
+    FoldFSMNotFound(String),
 
     /// Errors occurred when ParResult.0 + ParResult.1 overflows.
     #[error("overflow is occurred while calculating the entire len occupied by executed states corresponded to current par: '{0:?}'")]

@@ -62,6 +62,21 @@ pub(crate) fn from_preparation_error(data: impl Into<Vec<u8>>, err: PreparationE
     }
 }
 
+/// Create InterpreterOutcome from supplied data and error,
+/// set ret_code based on the error.
+pub(crate) fn from_trace_error(data: impl Into<Vec<u8>>, err: Rc<ExecutionError>) -> InterpreterOutcome {
+    let ret_code = err.to_error_code() as i32;
+    let ret_code = EXECUTION_ERRORS_START_ID + ret_code;
+    let data = data.into();
+
+    InterpreterOutcome {
+        ret_code,
+        error_message: format!("{}", err),
+        data,
+        next_peer_pks: vec![],
+    }
+}
+
 /// Create InterpreterOutcome from supplied execution context, trace handler, and error,
 /// set ret_code based on the error.
 pub(crate) fn from_execution_error(

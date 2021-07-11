@@ -100,6 +100,7 @@ impl FoldFSM {
         } = self.ctor_queue.current();
 
         if !back_traversal_started {
+            ctor.maybe_before_end(data_keeper);
             ctor.after_start(data_keeper);
             apply_fold_lore_after(data_keeper, prev_lore, current_lore)?;
             self.ctor_queue.start_back_traverse();
@@ -136,7 +137,7 @@ impl FoldFSM {
         self.state_updater.update(data_keeper);
     }
 
-    pub(crate) fn error_exit(mut self, data_keeper: &mut DataKeeper) {
+    pub(crate) fn bubble_error_up(mut self, data_keeper: &mut DataKeeper) {
         self.meet_generation_end(data_keeper);
         self.meet_fold_end(data_keeper);
     }

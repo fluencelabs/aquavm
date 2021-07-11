@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use super::fold::IterableType;
 use super::AValue;
 use super::ExecutionCtx;
 use super::ExecutionError;
@@ -25,34 +26,23 @@ use crate::log_instruction;
 
 use air_parser::ast::Next;
 
-macro_rules! call_if_stream(
-    ($fold_state:ident, $stmt:stmt) => {
-        if $fold_state.is_iterable_stream {
-            $stmt
-        }
-    }
-);
-
 impl<'i> super::ExecutableInstruction<'i> for Next<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         log_instruction!(next, exec_ctx, trace_ctx);
 
         let iterator_name = self.0;
         let fold_state = try_get_fold_state(exec_ctx, iterator_name)?;
-        call_if_stream!(fold_state, trace_ctx.meet_iteration_end()?);
+        maybe_meet_iteration_end(&fold_state, trace_ctx)?;
 
         if !fold_state.iterable.next() {
-            call_if_stream!(fold_state, trace_ctx.meet_back_iterator()?);
+            maybe_meet_back_iterator(&fold_state, trace_ctx)?;
 
             // just do nothing to exit
             return Ok(());
         }
 
         let next_instr = fold_state.instr_head.clone();
-        call_if_stream!(
-            fold_state,
-            trace_ctx.meet_iteration_start(&fold_state.iterable.peek().unwrap().as_value_and_pos())?
-        );
+        maybe_meet_iteration_start(&fold_state, trace_ctx)?;
 
         next_instr.execute(exec_ctx, trace_ctx)?;
 
@@ -66,7 +56,7 @@ impl<'i> super::ExecutableInstruction<'i> for Next<'i> {
 
         // get this fold state the second time to bypass borrow checker
         let fold_state = try_get_fold_state(exec_ctx, iterator_name)?;
-        call_if_stream!(fold_state, trace_ctx.meet_back_iterator()?);
+        maybe_meet_back_iterator(&fold_state, trace_ctx)?;
 
         Ok(())
     }
@@ -95,4 +85,31 @@ fn try_get_fold_state<'i, 'ctx>(
             ))
         }
     }
+}
+
+fn maybe_meet_iteration_start(fold_state: &FoldState<'_>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
+    if let IterableType::Stream(stream_name) = &fold_state.iterable_type {
+        trace_ctx.meet_iteration_start(
+            stream_name.as_str(),
+            &fold_state.iterable.peek().unwrap().as_value_and_pos(),
+        )?;
+    }
+
+    Ok(())
+}
+
+fn maybe_meet_iteration_end(fold_state: &FoldState<'_>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
+    if let IterableType::Stream(stream_name) = &fold_state.iterable_type {
+        trace_ctx.meet_iteration_end(stream_name.as_str())?;
+    }
+
+    Ok(())
+}
+
+fn maybe_meet_back_iterator(fold_state: &FoldState<'_>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
+    if let IterableType::Stream(stream_name) = &fold_state.iterable_type {
+        trace_ctx.meet_back_iterator(stream_name.as_str())?;
+    }
+
+    Ok(())
 }

@@ -37,7 +37,6 @@ pub(self) use merger::MergeCtxType;
 pub(self) use merger::MergerFoldResult;
 pub(self) use merger::ResolvedFold;
 pub(self) use merger::ResolvedFoldSubTraceLore;
-pub(self) use state_automata::FSMQueue;
+pub(self) use state_automata::FSMKeeper;
 pub(self) use state_automata::FoldFSM;
 pub(self) use state_automata::ParFSM;
-pub(self) use state_automata::StateFSM;

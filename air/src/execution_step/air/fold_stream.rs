@@ -33,7 +33,7 @@ impl<'i> ExecutableInstruction<'i> for FoldStream<'i> {
             FoldIterableStream::Stream(iterables) => iterables,
         };
 
-        trace_ctx.meet_fold_start()?;
+        trace_ctx.meet_fold_start(self.id.to_string())?;
 
         for iterable in iterables {
             let value = match iterable.peek() {
@@ -44,21 +44,19 @@ impl<'i> ExecutableInstruction<'i> for FoldStream<'i> {
             };
 
             let value = value.as_value_and_pos();
-            trace_ctx.meet_iteration_start(&value)?;
-            let execution_result = fold(
+            trace_ctx.meet_iteration_start(self.id.as_str(), &value)?;
+            fold(
                 iterable,
+                IterableType::Stream(self.id.clone()),
                 self.iterator,
                 self.instruction.clone(),
-                true,
                 exec_ctx,
                 trace_ctx,
-            );
-            trace_ctx.meet_generation_end()?;
-
-            execution_result?;
+            )?;
+            trace_ctx.meet_generation_end(self.id.as_str())?;
         }
 
-        trace_ctx.meet_fold_end()?;
+        trace_ctx.meet_fold_end(self.id.as_str())?;
 
         Ok(())
     }

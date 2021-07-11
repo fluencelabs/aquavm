@@ -58,11 +58,11 @@ fn execute_subtree<'i>(
     exec_ctx.subtree_complete = determine_subtree_complete(subtree);
 
     // execute a subtree
-    let exec_result = subtree.execute(exec_ctx, trace_ctx);
+    subtree.execute(exec_ctx, trace_ctx)?;
     completeness_updater.update_completeness(exec_ctx, subtree_type);
     trace_ctx.meet_par_subtree_end(subtree_type)?;
 
-    exec_result
+    Ok(())
 }
 
 fn determine_subtree_complete(next_instruction: &Instruction<'_>) -> bool {

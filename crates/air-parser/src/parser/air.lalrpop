@@ -43,7 +43,8 @@ Instr: Box<Instruction<'input>> = {
 
     <left: @L> "(" fold <stream:Stream> <iterator:Alphanumeric> <i:Instr> ")" <right: @R> => {
         let instruction = Rc::new(*i);
-        let fold = FoldStream { stream_name: stream, iterator, instruction };
+        let id = create_fold_id(stream, left);
+        let fold = FoldStream { stream_name: stream, id, iterator, instruction };
         let span = Span { left, right };
         validator.met_fold_stream(&fold, span);
 

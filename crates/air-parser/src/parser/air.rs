@@ -1,5 +1,5 @@
 // auto-generated: "lalrpop 0.19.6"
-// sha3: a73851a8eeb38baa172976c1b8f246338a9112abacdff4f2a32eed78d6b11
+// sha3: 9c881e242bd8772563cebcbeb25c55d5dc5e5819c26f4ffb78d2b1c0f6b2d3
 use crate::parser::ast::*;
 use crate::parser::air_parser::make_flattened_error;
 use crate::parser::air_parser::make_stream_iterable_error;
@@ -2955,7 +2955,8 @@ fn __action7<
 {
     {
         let instruction = Rc::new(*i);
-        let fold = FoldStream { stream_name: stream, iterator, instruction };
+        let id = create_fold_id(stream, left);
+        let fold = FoldStream { stream_name: stream, id, iterator, instruction };
         let span = Span { left, right };
         validator.met_fold_stream(&fold, span);
 

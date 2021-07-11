@@ -23,23 +23,29 @@ use std::rc::Rc;
 
 pub(crate) struct FoldState<'i> {
     pub(crate) iterable: IterableValue,
+    pub(crate) iterable_type: IterableType,
     pub(crate) instr_head: Rc<Instruction<'i>>,
     // map of met variables inside this (not any inner) fold block with their initial values
     pub(crate) met_variables: HashMap<&'i str, ResolvedCallResult>,
-    pub(crate) is_iterable_stream: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) enum IterableType {
+    Scalar,
+    Stream(Rc<String>),
 }
 
 impl<'i> FoldState<'i> {
     pub(crate) fn from_iterable(
         iterable: IterableValue,
+        iterable_type: IterableType,
         instr_head: Rc<Instruction<'i>>,
-        is_iterable_stream: bool,
     ) -> Self {
         Self {
             iterable,
+            iterable_type,
             instr_head,
             met_variables: HashMap::new(),
-            is_iterable_stream,
         }
     }
 }

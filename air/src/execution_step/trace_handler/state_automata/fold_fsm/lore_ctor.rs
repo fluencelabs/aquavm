@@ -59,6 +59,15 @@ impl SubTraceLoreCtor {
         self.state.next();
     }
 
+    pub(super) fn maybe_before_end(&mut self, data_keeper: &DataKeeper) {
+        if !matches!(self.state, CtorState::BeforeStarted) {
+            return;
+        }
+
+        self.before_tracker.end_pos = data_keeper.result_states_count();
+        self.state.next();
+    }
+
     pub(super) fn after_start(&mut self, data_keeper: &DataKeeper) {
         self.after_tracker.start_pos = data_keeper.result_states_count();
         self.state.next();

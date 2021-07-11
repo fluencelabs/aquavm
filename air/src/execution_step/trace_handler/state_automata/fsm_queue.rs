@@ -19,51 +19,40 @@ use super::FoldFSM;
 use super::ParFSM;
 use super::StateFSMError;
 
-#[derive(Clone, Debug)]
-pub(crate) enum StateFSM {
-    Par(ParFSM),
-    Fold(FoldFSM),
-}
+use std::collections::HashMap;
 
 #[derive(Debug, Default)]
-pub(crate) struct FSMQueue {
-    states: Vec<StateFSM>,
+pub(crate) struct FSMKeeper {
+    par_stack: Vec<ParFSM>,
+    fold_map: HashMap<String, FoldFSM>,
 }
 
-impl FSMQueue {
-    pub(crate) fn push_fsm(&mut self, fsm: StateFSM) {
-        self.states.push(fsm);
+impl FSMKeeper {
+    pub(crate) fn push_par(&mut self, par_fsm: ParFSM) {
+        self.par_stack.push(par_fsm);
     }
 
-    pub(crate) fn last_as_mut_par(&mut self) -> FSMResult<&mut ParFSM> {
-        match self.states.last_mut().ok_or(StateFSMError::QueueIsEmpty("par"))? {
-            StateFSM::Par(par) => Ok(par),
-            fold @ StateFSM::Fold(_) => Err(StateFSMError::IncompatibleFSM("par", fold.clone())),
-        }
+    pub(crate) fn add_fold(&mut self, fold_id: String, fold_fsm: FoldFSM) {
+        self.fold_map.insert(fold_id, fold_fsm);
     }
 
-    pub(crate) fn last_as_mut_fold(&mut self) -> FSMResult<&mut FoldFSM> {
-        match self.states.last_mut().ok_or(StateFSMError::QueueIsEmpty("fold"))? {
-            par @ StateFSM::Par(_) => Err(StateFSMError::IncompatibleFSM("fold", par.clone())),
-            StateFSM::Fold(fold) => Ok(fold),
-        }
+    pub(crate) fn last_par(&mut self) -> FSMResult<&mut ParFSM> {
+        self.par_stack.last_mut().ok_or(StateFSMError::ParQueueIsEmpty())
     }
 
-    pub(crate) fn pop_as_par(&mut self) -> FSMResult<ParFSM> {
-        match self.states.pop().ok_or(StateFSMError::QueueIsEmpty("par"))? {
-            StateFSM::Par(par) => Ok(par),
-            fold @ StateFSM::Fold(_) => Err(StateFSMError::IncompatibleFSM("par", fold)),
-        }
+    pub(crate) fn pop_par(&mut self) -> FSMResult<ParFSM> {
+        self.par_stack.pop().ok_or(StateFSMError::ParQueueIsEmpty())
     }
 
-    pub(crate) fn pop_as_fold(&mut self) -> FSMResult<FoldFSM> {
-        match self.states.pop().ok_or(StateFSMError::QueueIsEmpty("fold"))? {
-            par @ StateFSM::Par(_) => Err(StateFSMError::IncompatibleFSM("fold", par)),
-            StateFSM::Fold(fold) => Ok(fold),
-        }
+    pub(crate) fn fold_mut(&mut self, fold_id: &str) -> FSMResult<&mut FoldFSM> {
+        self.fold_map
+            .get_mut(fold_id)
+            .ok_or_else(|| StateFSMError::FoldFSMNotFound(fold_id.to_string()))
     }
 
-    pub(crate) fn pop(&mut self) -> Option<StateFSM> {
-        self.states.pop()
+    pub(crate) fn extract_fold(&mut self, fold_id: &str) -> FSMResult<FoldFSM> {
+        self.fold_map
+            .remove(fold_id)
+            .ok_or_else(|| StateFSMError::FoldFSMNotFound(fold_id.to_string()))
     }
 }

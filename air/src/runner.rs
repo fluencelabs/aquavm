@@ -17,10 +17,12 @@
 mod outcome;
 
 use crate::execution_step::ExecutableInstruction;
+use crate::execution_step::ExecutionError;
 use crate::preparation_step::prepare;
 use crate::preparation_step::PreparationDescriptor;
 
 use air_interpreter_interface::InterpreterOutcome;
+use std::ops::Deref;
 
 pub fn execute_air(init_peer_id: String, air: String, prev_data: Vec<u8>, data: Vec<u8>) -> InterpreterOutcome {
     use std::convert::identity;
@@ -44,14 +46,20 @@ fn execute_air_impl(
         mut exec_ctx,
         mut trace_handler,
         air,
-    } = prepare(&prev_data, &data, air.as_str(), init_peer_id)
+    } = match prepare(&prev_data, &data, air.as_str(), init_peer_id) {
+        Ok(desc) => desc,
         // return the initial data in case of errors
-        .map_err(|e| outcome::from_preparation_error(prev_data, e))?;
+        Err(error) => return Err(outcome::from_preparation_error(prev_data, error)),
+    };
 
     // match here is used instead of map_err, because the compiler can't determine that
     // they are exclusive and would treat exec_ctx and trace_handler as moved
     match air.execute(&mut exec_ctx, &mut trace_handler) {
         Ok(_) => {}
+        // return the old data in case of any trace errors
+        Err(e) if matches!(e.deref(), ExecutionError::TraceError(..)) => {
+            return Err(outcome::from_trace_error(prev_data, e))
+        }
         // return new collected trace in case of errors
         Err(e) => return Err(outcome::from_execution_error(exec_ctx, trace_handler, e)),
     }

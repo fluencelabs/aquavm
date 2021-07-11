@@ -26,3 +26,4 @@ mod last_error;
 mod network_explore;
 mod security_tetraplets;
 mod streams;
+mod streams_early_exit;

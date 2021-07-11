@@ -14,19 +14,9 @@
  * limitations under the License.
  */
 
-mod fold_state;
-mod utils;
-mod variable_handler;
+use std::rc::Rc;
 
-pub(crate) use fold_state::FoldState;
-pub(crate) use fold_state::IterableType;
-pub(super) use utils::*;
-pub(super) use variable_handler::VariableHandler;
-
-use super::AValue;
-use super::ExecutionCtx;
-use super::ExecutionError;
-use super::ExecutionResult;
-use super::Instruction;
-use super::ResolvedCallResult;
-use crate::execution_step::boxed_value::*;
+pub(crate) fn create_fold_id(stream_name: &str, script_offset: usize) -> Rc<String> {
+    let fold_id = format!("{}_{}", stream_name, script_offset);
+    Rc::new(fold_id)
+}

@@ -305,11 +305,8 @@ impl<'input> CallVariableParser<'input> {
             (false, true) => {
                 let json_path_start_pos = self.state.first_dot_met_pos.unwrap();
                 let should_flatten = self.state.flattening_met;
-                let (variable, json_path) = to_variable_and_path(
-                    self.string_to_parse,
-                    json_path_start_pos,
-                    should_flatten,
-                );
+                let (variable, json_path) =
+                    to_variable_and_path(self.string_to_parse, json_path_start_pos, should_flatten);
                 let variable = self.to_variable(variable);
 
                 Ok(Token::VariableWithJsonPath(

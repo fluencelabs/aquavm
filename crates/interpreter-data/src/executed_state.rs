@@ -148,7 +148,7 @@ impl std::fmt::Display for ExecutedState {
                 write!(f, "executed({:?}, {})", result, generation)
             }
             Call(CallServiceFailed(ret_code, err_msg)) => {
-                write!(f, "call_service_failed({}, {})", ret_code, err_msg)
+                write!(f, r#"call_service_failed({}, "{}")"#, ret_code, err_msg)
             }
             Fold(FoldResult(states)) => write!(f, "fold({:?})", states),
         }

@@ -86,7 +86,7 @@ impl ParFSM {
     }
 
     // handle error bubbling
-    pub(crate) fn error_exit(mut self, data_keeper: &mut DataKeeper) {
+    pub(crate) fn bubble_error_up(mut self, data_keeper: &mut DataKeeper) {
         self.par_builder.error_exit(data_keeper);
         self.finish(data_keeper);
     }

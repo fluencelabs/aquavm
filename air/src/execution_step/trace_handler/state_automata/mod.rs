@@ -26,8 +26,7 @@ pub(crate) use par_fsm::SubtreeType;
 pub(crate) type FSMResult<T> = std::result::Result<T, StateFSMError>;
 
 pub(super) use fold_fsm::FoldFSM;
-pub(super) use fsm_queue::FSMQueue;
-pub(super) use fsm_queue::StateFSM;
+pub(super) use fsm_queue::FSMKeeper;
 pub(super) use par_fsm::ParFSM;
 
 use super::data_keeper::KeeperError;
