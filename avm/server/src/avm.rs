@@ -125,11 +125,9 @@ impl AVM {
 
         let prev_data_path = prev_data_file(&self.particle_data_store, &particle_id);
         // TODO: check for errors related to invalid file content (such as invalid UTF8 string)
-        let prev_data = std::fs::read_to_string(&prev_data_path)
-            .unwrap_or_default()
-            .into_bytes();
-
+        let prev_data = std::fs::read_to_string(&prev_data_path).unwrap_or_default();
         log::info!("prev_data: {}", prev_data);
+        let prev_data = prev_data.into_bytes();
 
         let args = prepare_args(prev_data, data, init_user_id.clone(), air);
 
