@@ -129,6 +129,8 @@ impl AVM {
             .unwrap_or_default()
             .into_bytes();
 
+        log::info!("prev_data: {}", prev_data);
+
         let args = prepare_args(prev_data, data, init_user_id.clone(), air);
 
         // Update ParticleParams with the new values so subsequent calls to `call_service` can use them
