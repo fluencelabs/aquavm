@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-use super::par_fsm_state::ParFSMState;
 use super::*;
 
 /// Tracks lens of data_keeper.result_trace to build resulted Par state at the end.
@@ -23,7 +22,6 @@ pub(super) struct ParBuilder {
     saved_states_count: usize,
     left_subtree_size: usize,
     right_subtree_size: usize,
-    state: ParFSMState,
 }
 
 impl ParBuilder {
@@ -36,13 +34,10 @@ impl ParBuilder {
             saved_states_count,
             left_subtree_size: 0,
             right_subtree_size: 0,
-            state: ParFSMState::Initialized,
         }
     }
 
     pub(super) fn track(&mut self, data_keeper: &DataKeeper, subtree_type: SubtreeType) {
-        self.state.next();
-
         let prev_states_count = self.saved_states_count;
         let states_count = data_keeper.result_states_count();
         let resulted_states_count = states_count - prev_states_count;
@@ -57,16 +52,5 @@ impl ParBuilder {
     pub(super) fn build(self) -> ExecutedState {
         // TODO: check that usize could be converted into u32
         ExecutedState::par(self.left_subtree_size, self.right_subtree_size)
-    }
-
-    pub(super) fn error_exit(&mut self, data_keeper: &DataKeeper) {
-        match self.state {
-            ParFSMState::Initialized => {
-                self.track(data_keeper, SubtreeType::Left);
-                self.track(data_keeper, SubtreeType::Right);
-            }
-            ParFSMState::LeftCompleted => self.track(data_keeper, SubtreeType::Right),
-            ParFSMState::RightCompleted => {}
-        }
     }
 }

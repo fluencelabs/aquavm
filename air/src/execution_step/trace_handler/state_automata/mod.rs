@@ -19,6 +19,7 @@ mod fold_fsm;
 mod fsm_queue;
 mod par_fsm;
 mod state_inserter;
+mod utils;
 
 pub(crate) use errors::StateFSMError;
 pub(crate) use fold_fsm::ValueAndPos;
@@ -41,3 +42,4 @@ use super::ParResult;
 use super::ResolvedFold;
 use super::ResolvedFoldSubTraceLore;
 use state_inserter::StateInserter;
+use utils::*;

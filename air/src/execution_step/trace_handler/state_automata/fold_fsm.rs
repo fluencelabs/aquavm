@@ -61,6 +61,13 @@ impl FoldFSM {
         let state_updater =
             SubTreeStateUpdater::new(&fold_result.prev_fold_lore, &fold_result.current_fold_lore, data_keeper)?;
 
+        data_keeper
+            .prev_ctx
+            .set_total_subtrace_len(fold_result.prev_fold_lore.fold_states_count);
+        data_keeper
+            .current_ctx
+            .set_total_subtrace_len(fold_result.current_fold_lore.fold_states_count);
+
         let fold_fsm = Self {
             prev_fold: fold_result.prev_fold_lore,
             current_fold: fold_result.current_fold_lore,
@@ -137,7 +144,7 @@ impl FoldFSM {
         self.state_updater.update(data_keeper);
     }
 
-    pub(crate) fn bubble_error_up(mut self, data_keeper: &mut DataKeeper) {
+    pub(crate) fn fold_end_with_error(mut self, data_keeper: &mut DataKeeper) {
         self.meet_generation_end(data_keeper);
         self.meet_fold_end(data_keeper);
     }

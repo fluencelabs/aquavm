@@ -108,7 +108,6 @@ impl TraceSlider {
         Ok(state)
     }
 
-    #[allow(dead_code)]
     pub(crate) fn position(&self) -> usize {
         self.position
     }

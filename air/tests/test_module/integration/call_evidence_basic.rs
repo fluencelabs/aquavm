@@ -408,6 +408,7 @@ fn executed_trace_seq_par_seq_seq() {
     let result = checked_call_vm!(vm1, "asd", script.clone(), "", result.data);
     assert_eq!(result.next_peer_pks, vec![peer_id_2.clone()]);
 
+    println!("\n\nlast call\n\n");
     let result = checked_call_vm!(vm2, "asd", script, "", result.data);
 
     let actual_trace = trace_from_result(&result);

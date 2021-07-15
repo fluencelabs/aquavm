@@ -15,21 +15,23 @@
  */
 
 mod par_builder;
-mod par_fsm_state;
-mod state_updater;
+mod state_handler;
 
 use super::*;
 use par_builder::ParBuilder;
-use state_updater::SubTraceStateUpdater;
+use state_handler::CtxStateHandler;
 
-/// This FSM manages par state, its state transitioning functions must work in the following way:
-///   new -> left_completed -> right_completed
+/// Manages a par state, its state transitioning functions must be called in the following way:
+///   from_left_started
+///     -> left_completed(_with_error)
+///     -> right_started
+///     -> right_completed(_with_error)
 #[derive(Debug, Default, Clone)]
 pub(crate) struct ParFSM {
-    prev_par: Option<ParResult>,
-    current_par: Option<ParResult>,
+    prev_par: ParResult,
+    current_par: ParResult,
     state_inserter: StateInserter,
-    state_updater: SubTraceStateUpdater,
+    state_handler: CtxStateHandler,
     par_builder: ParBuilder,
 }
 
@@ -39,76 +41,57 @@ pub(crate) enum SubtreeType {
     Right,
 }
 
-macro_rules! par_left {
-    ($par:expr) => {
-        $par.map(|p| p.0).unwrap_or_default()
-    };
-}
-
-macro_rules! par_right {
-    ($par:expr) => {
-        $par.map(|p| p.1).unwrap_or_default()
-    };
-}
-
 impl ParFSM {
-    pub(crate) fn new(ingredients: MergerParResult, data_keeper: &mut DataKeeper) -> FSMResult<Self> {
+    pub(crate) fn from_left_started(ingredients: MergerParResult, data_keeper: &mut DataKeeper) -> FSMResult<Self> {
+        // default is a par with empty left and right subtrees
+        let prev_par = ingredients.prev_par.unwrap_or_default();
+        let current_par = ingredients.current_par.unwrap_or_default();
+
         let state_inserter = StateInserter::from_keeper(data_keeper);
-        let size_updater = SubTraceStateUpdater::from_keeper(data_keeper, ingredients)?;
+        let state_updater = CtxStateHandler::prepare_left_start(data_keeper, prev_par, current_par)?;
         let par_builder = ParBuilder::from_keeper(data_keeper, &state_inserter);
 
         let par_fsm = Self {
-            prev_par: ingredients.prev_par,
-            current_par: ingredients.current_par,
+            prev_par,
+            current_par,
             state_inserter,
-            state_updater: size_updater,
+            state_handler: state_updater,
             par_builder,
         };
 
-        par_fsm.prepare_data(data_keeper, SubtreeType::Left)?;
         Ok(par_fsm)
+    }
+
+    pub(crate) fn meet_right_start(&mut self, data_keeper: &mut DataKeeper) -> FSMResult<()> {
+        self.state_handler
+            .prepare_right_start(data_keeper, self.prev_par, self.current_par)
     }
 
     pub(crate) fn left_completed(&mut self, data_keeper: &mut DataKeeper) -> FSMResult<()> {
         self.check_subtrace_lens(data_keeper, SubtreeType::Left)?;
+        self.left_completed_with_error(data_keeper);
+
+        Ok(())
+    }
+
+    pub(crate) fn left_completed_with_error(&mut self, data_keeper: &mut DataKeeper) {
         self.par_builder.track(data_keeper, SubtreeType::Left);
-        self.prepare_data(data_keeper, SubtreeType::Right)?;
-
-        Ok(())
+        self.state_handler.handle_subtree_end(data_keeper);
     }
 
-    pub(crate) fn right_completed(mut self, data_keeper: &mut DataKeeper) -> FSMResult<()> {
+    pub(crate) fn right_completed(self, data_keeper: &mut DataKeeper) -> FSMResult<()> {
         self.check_subtrace_lens(data_keeper, SubtreeType::Right)?;
-        self.par_builder.track(data_keeper, SubtreeType::Right);
-        self.finish(data_keeper);
+        self.right_completed_with_error(data_keeper);
 
         Ok(())
     }
 
-    // handle error bubbling
-    pub(crate) fn bubble_error_up(mut self, data_keeper: &mut DataKeeper) {
-        self.par_builder.error_exit(data_keeper);
-        self.finish(data_keeper);
-    }
-
-    fn finish(self, data_keeper: &mut DataKeeper) {
+    pub(crate) fn right_completed_with_error(mut self, data_keeper: &mut DataKeeper) {
+        self.par_builder.track(data_keeper, SubtreeType::Right);
         let state = self.par_builder.build();
         self.state_inserter.insert(data_keeper, state);
 
-        // it's important to update count of seen states
-        self.state_updater.update(data_keeper);
-    }
-
-    fn prepare_data(&self, data_keeper: &mut DataKeeper, subtree_type: SubtreeType) -> FSMResult<()> {
-        let (prev_len, current_len) = match subtree_type {
-            SubtreeType::Left => (par_left!(&self.prev_par), par_left!(&self.current_par)),
-            SubtreeType::Right => (par_right!(&self.prev_par), par_right!(&self.current_par)),
-        };
-
-        data_keeper.prev_slider_mut().set_subtrace_len(prev_len as _)?;
-        data_keeper.current_slider_mut().set_subtrace_len(current_len as _)?;
-
-        Ok(())
+        self.state_handler.handle_subtree_end(data_keeper);
     }
 
     /// Check that all values from interval were seen. Otherwise it's a error points out
@@ -116,18 +99,18 @@ impl ParFSM {
     fn check_subtrace_lens(&self, data_keeper: &DataKeeper, subtree_type: SubtreeType) -> FSMResult<()> {
         use StateFSMError::ParSubtreeNonExhausted as NonExhausted;
 
-        let len_checker = |slider: &TraceSlider| {
+        let len_checker = |slider: &TraceSlider, par: ParResult| {
             let prev_len = slider.subtrace_len();
             if prev_len != 0 {
                 // unwrap is safe here because otherwise subtrace_len wouldn't be equal 0.
-                return Err(NonExhausted(subtree_type, self.prev_par.unwrap(), prev_len));
+                return Err(NonExhausted(subtree_type, par, prev_len));
             }
 
             Ok(())
         };
 
-        len_checker(data_keeper.prev_slider())?;
-        len_checker(data_keeper.current_slider())
+        len_checker(data_keeper.prev_slider(), self.prev_par)?;
+        len_checker(data_keeper.current_slider(), self.current_par)
     }
 }
 

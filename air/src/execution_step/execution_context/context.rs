@@ -49,7 +49,7 @@ pub(crate) struct ExecutionCtx<'i> {
     /// Indicates that previous executed subtree is complete.
     /// A subtree treats as a complete if all subtree elements satisfy the following rules:
     ///   - at least one of par subtrees is completed
-    ///   - at least one of xor substree is completed without an error
+    ///   - at least one of xor subtrees is completed without an error
     ///   - all of seq subtrees are completed
     ///   - call executed successfully (executed state is Executed)
     pub subtree_complete: bool,

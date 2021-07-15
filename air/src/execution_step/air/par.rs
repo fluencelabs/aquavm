@@ -18,6 +18,7 @@ mod completeness_updater;
 
 use super::ExecutableInstruction;
 use super::ExecutionCtx;
+use super::ExecutionError;
 use super::ExecutionResult;
 use super::Instruction;
 use super::TraceHandler;
@@ -26,24 +27,23 @@ use crate::log_instruction;
 use completeness_updater::ParCompletenessUpdater;
 
 use air_parser::ast::Par;
+use std::rc::Rc;
 
 #[rustfmt::skip]
 impl<'i> ExecutableInstruction<'i> for Par<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         log_instruction!(par, exec_ctx, trace_ctx);
 
-        trace_ctx.meet_par_start()?;
         let mut completeness_updater = ParCompletenessUpdater::new();
 
         // execute a left subtree of par
-        execute_subtree(&self.0, exec_ctx, trace_ctx, &mut completeness_updater, SubtreeType::Left)?;
+        let left_result = execute_subtree(&self.0, exec_ctx, trace_ctx, &mut completeness_updater, SubtreeType::Left)?;
 
         // execute a right subtree of par
-        execute_subtree(&self.1, exec_ctx, trace_ctx, &mut completeness_updater, SubtreeType::Right)?;
+        let right_result = execute_subtree(&self.1, exec_ctx, trace_ctx, &mut completeness_updater, SubtreeType::Right)?;
 
         completeness_updater.set_completeness(exec_ctx);
-
-        Ok(())
+        prepare_par_result(left_result, right_result, exec_ctx)
     }
 }
 
@@ -54,15 +54,49 @@ fn execute_subtree<'i>(
     trace_ctx: &mut TraceHandler,
     completeness_updater: &mut ParCompletenessUpdater,
     subtree_type: SubtreeType,
-) -> ExecutionResult<()> {
+) -> ExecutionResult<SubtreeResult> {
+    use std::ops::Deref;
+
     exec_ctx.subtree_complete = determine_subtree_complete(subtree);
+    trace_ctx.meet_par_subtree_start(subtree_type)?;
 
     // execute a subtree
-    subtree.execute(exec_ctx, trace_ctx)?;
-    completeness_updater.update_completeness(exec_ctx, subtree_type);
-    trace_ctx.meet_par_subtree_end(subtree_type)?;
+    let result = match subtree.execute(exec_ctx, trace_ctx) {
+        Ok(_) => {
+            trace_ctx.meet_par_subtree_end(subtree_type)?;
+            SubtreeResult::Succeeded
+        }
+        Err(e) if matches!(e.deref(), ExecutionError::TraceError(_)) => {
+            return Err(e);
+        }
+        Err(e) => {
+            trace_ctx.meet_par_subtree_end_with_error(subtree_type)?;
+            SubtreeResult::Failed(e)
+        }
+    };
 
-    Ok(())
+    completeness_updater.update_completeness(exec_ctx, subtree_type);
+    Ok(result)
+}
+
+enum SubtreeResult {
+    Succeeded,
+    Failed(Rc<ExecutionError>),
+}
+
+fn prepare_par_result(
+    left_result: SubtreeResult,
+    right_result: SubtreeResult,
+    exec_ctx: &mut ExecutionCtx<'_>,
+) -> ExecutionResult<()> {
+    match (left_result, right_result) {
+        (SubtreeResult::Succeeded, _) | (_, SubtreeResult::Succeeded) => {
+            // clear the last error in case of par succeeded
+            exec_ctx.last_error = None;
+            Ok(())
+        }
+        (SubtreeResult::Failed(_), SubtreeResult::Failed(err)) => Err(err),
+    }
 }
 
 fn determine_subtree_complete(next_instruction: &Instruction<'_>) -> bool {

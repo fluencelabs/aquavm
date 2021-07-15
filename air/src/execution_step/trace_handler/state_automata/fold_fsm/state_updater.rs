@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+use super::update_with_states;
+use super::CtxState;
 use super::DataKeeper;
 use super::FSMResult;
 use super::StateFSMError;
@@ -24,10 +26,8 @@ use crate::execution_step::trace_handler::ResolvedFold;
 /// for details please see its detailed comment.
 #[derive(Debug, Default, Clone)]
 pub(super) struct SubTreeStateUpdater {
-    prev_pos: usize,
-    prev_len: usize,
-    current_pos: usize,
-    current_len: usize,
+    prev_state: CtxState,
+    current_state: CtxState,
 }
 
 impl SubTreeStateUpdater {
@@ -36,53 +36,41 @@ impl SubTreeStateUpdater {
         current_fold: &ResolvedFold,
         data_keeper: &DataKeeper,
     ) -> FSMResult<Self> {
-        let (prev_pos, prev_len) = compute_new_pos_and_len(prev_fold, data_keeper, MergeCtxType::Previous)?;
-        let (current_pos, current_len) = compute_new_pos_and_len(current_fold, data_keeper, MergeCtxType::Current)?;
+        let prev_state = compute_new_state(prev_fold, data_keeper, MergeCtxType::Previous)?;
+        let current_state = compute_new_state(current_fold, data_keeper, MergeCtxType::Current)?;
 
         let updater = Self {
-            prev_pos,
-            prev_len,
-            current_pos,
-            current_len,
+            prev_state,
+            current_state,
         };
 
         Ok(updater)
     }
 
     pub(super) fn update(self, data_keeper: &mut DataKeeper) {
-        // these calls shouldn't produce a error, because sizes become less and
-        // they have been already checked in the ctor. It's important to make it
-        // in a such way, because this functions is called from error_exit that
-        // shouldn't fail.
-        let _ = data_keeper
-            .prev_slider_mut()
-            .set_position_and_len(self.prev_pos, self.prev_len);
-        let _ = data_keeper
-            .current_slider_mut()
-            .set_position_and_len(self.current_pos, self.current_len);
+        update_with_states(self.prev_state, self.current_state, data_keeper)
     }
 }
 
-fn compute_new_pos_and_len(
-    fold: &ResolvedFold,
-    data_keeper: &DataKeeper,
-    ctx_type: MergeCtxType,
-) -> FSMResult<(usize, usize)> {
-    let slider = match ctx_type {
-        MergeCtxType::Previous => data_keeper.prev_slider(),
-        MergeCtxType::Current => data_keeper.current_slider(),
+fn compute_new_state(fold: &ResolvedFold, data_keeper: &DataKeeper, ctx_type: MergeCtxType) -> FSMResult<CtxState> {
+    let ctx = match ctx_type {
+        MergeCtxType::Previous => &data_keeper.prev_ctx,
+        MergeCtxType::Current => &data_keeper.current_ctx,
     };
 
-    let current_position = slider.position();
-    let current_len = slider.subtrace_len();
+    let current_position = ctx.slider.position();
+    let current_len = ctx.slider.subtrace_len();
 
-    let position = current_position
+    let pos = current_position
         .checked_add(fold.fold_states_count)
         .ok_or_else(|| StateFSMError::FoldPosOverflow(fold.clone(), current_position, ctx_type))?;
 
-    let len = current_len
+    let subtrace_len = current_len
         .checked_sub(fold.fold_states_count)
         .ok_or_else(|| StateFSMError::FoldLenUnderflow(fold.clone(), current_position, ctx_type))?;
 
-    Ok((position, len))
+    let total_subtrace_len = ctx.total_subtrace_len() - fold.fold_states_count;
+
+    let state = CtxState::new(pos, subtrace_len, total_subtrace_len);
+    Ok(state)
 }

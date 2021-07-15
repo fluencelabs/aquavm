@@ -32,17 +32,17 @@ impl<'i> super::ExecutableInstruction<'i> for Next<'i> {
 
         let iterator_name = self.0;
         let fold_state = try_get_fold_state(exec_ctx, iterator_name)?;
-        maybe_meet_iteration_end(&fold_state, trace_ctx)?;
+        maybe_meet_iteration_end(fold_state, trace_ctx)?;
 
         if !fold_state.iterable.next() {
-            maybe_meet_back_iterator(&fold_state, trace_ctx)?;
+            maybe_meet_back_iterator(fold_state, trace_ctx)?;
 
             // just do nothing to exit
             return Ok(());
         }
 
         let next_instr = fold_state.instr_head.clone();
-        maybe_meet_iteration_start(&fold_state, trace_ctx)?;
+        maybe_meet_iteration_start(fold_state, trace_ctx)?;
 
         next_instr.execute(exec_ctx, trace_ctx)?;
 
@@ -56,7 +56,7 @@ impl<'i> super::ExecutableInstruction<'i> for Next<'i> {
 
         // get this fold state the second time to bypass borrow checker
         let fold_state = try_get_fold_state(exec_ctx, iterator_name)?;
-        maybe_meet_back_iterator(&fold_state, trace_ctx)?;
+        maybe_meet_back_iterator(fold_state, trace_ctx)?;
 
         Ok(())
     }

@@ -54,6 +54,10 @@ pub(crate) enum StateFSMError {
     #[error("underflow is occurred while calculating the new position of a {2} slider for resolved fold {0:?} and current subtrace len {1}'")]
     FoldLenUnderflow(ResolvedFold, usize, MergeCtxType),
 
+    /// Errors occurred while trying to set a total_subtrace_len that is less than
+    #[error("trying to set total_subtrace_len {0} that is less then len set before {1}")]
+    TotalSubtraceLenIsLess(usize, usize, MergeCtxType),
+
     /// Errors occurred when a subtree of a Par instructions was finished but remaining interval isn't empty.
     #[error(
         "par {0} subtree of '{1:?}' was completed, but its interval was not fully exhausted and contains {2} elements"

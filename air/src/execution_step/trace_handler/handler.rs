@@ -82,10 +82,19 @@ impl TraceHandler {
 }
 
 impl TraceHandler {
-    pub(crate) fn meet_par_start(&mut self) -> TraceHandlerResult<()> {
-        let ingredients = merger::try_merge_next_state_as_par(&mut self.data_keeper)?;
-        let par_fsm = ParFSM::new(ingredients, &mut self.data_keeper)?;
-        self.fsm_keeper.push_par(par_fsm);
+    pub(crate) fn meet_par_subtree_start(&mut self, subtree_type: SubtreeType) -> TraceHandlerResult<()> {
+        match subtree_type {
+            SubtreeType::Left => {
+                // meeting of a left subtree creates a new Par FSM
+                let ingredients = merger::try_merge_next_state_as_par(&mut self.data_keeper)?;
+                let par_fsm = ParFSM::from_left_started(ingredients, &mut self.data_keeper)?;
+                self.fsm_keeper.push_par(par_fsm);
+            }
+            SubtreeType::Right => {
+                let par_fsm = self.fsm_keeper.last_par()?;
+                par_fsm.meet_right_start(&mut self.data_keeper)?;
+            }
+        }
 
         Ok(())
     }
@@ -99,6 +108,21 @@ impl TraceHandler {
             SubtreeType::Right => {
                 let par_fsm = self.fsm_keeper.pop_par()?;
                 par_fsm.right_completed(&mut self.data_keeper)?;
+            }
+        }
+
+        Ok(())
+    }
+
+    pub(crate) fn meet_par_subtree_end_with_error(&mut self, subtree_type: SubtreeType) -> TraceHandlerResult<()> {
+        match subtree_type {
+            SubtreeType::Left => {
+                let par_fsm = self.fsm_keeper.last_par()?;
+                par_fsm.left_completed_with_error(&mut self.data_keeper);
+            }
+            SubtreeType::Right => {
+                let par_fsm = self.fsm_keeper.pop_par()?;
+                par_fsm.right_completed_with_error(&mut self.data_keeper);
             }
         }
 
@@ -150,18 +174,11 @@ impl TraceHandler {
         Ok(())
     }
 
-    pub(crate) fn fold_bubble_error_up(&mut self, fold_id: &str) {
+    pub(crate) fn fold_end_with_error(&mut self, fold_id: &str) {
         // unwrap here is used because this function must be called from a fold block with
         // corresponding fold_id and since it's a error handling, it's better not to produce
         // a new error
         let fold_fsm = self.fsm_keeper.extract_fold(fold_id).unwrap();
-        fold_fsm.bubble_error_up(&mut self.data_keeper);
-    }
-
-    pub(crate) fn par_bubble_error_up(&mut self) {
-        // unwrap here is used because this function must be called from a par block and since
-        // it's a error handling, it's better not to produce a new error
-        let par_fsm = self.fsm_keeper.pop_par().unwrap();
-        par_fsm.bubble_error_up(&mut self.data_keeper);
+        fold_fsm.fold_end_with_error(&mut self.data_keeper);
     }
 }
