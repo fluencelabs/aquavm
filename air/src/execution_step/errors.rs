@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
+mod catchable;
+
 use super::trace_handler::TraceHandlerError;
 use super::Joinable;
 use crate::build_targets::CallServiceResult;
 use crate::execution_step::boxed_value::Stream;
 use crate::execution_step::execution_context::ResolvedCallResult;
 use crate::JValue;
+pub(crate) use catchable::Catchable;
 
 use jsonpath_lib::JsonPathError;
 use serde_json::Error as SerdeJsonError;
@@ -179,6 +182,13 @@ impl Joinable for ExecutionError {
 
             _ => false,
         }
+    }
+}
+
+impl Catchable for ExecutionError {
+    fn is_catchable(&self) -> bool {
+        // this kind is related to an invalid data and should treat as a non-catchable error
+        !matches!(self, ExecutionError::TraceError(_))
     }
 }
 

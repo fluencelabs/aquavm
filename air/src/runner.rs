@@ -16,13 +16,12 @@
 
 mod outcome;
 
+use crate::execution_step::Catchable;
 use crate::execution_step::ExecutableInstruction;
-use crate::execution_step::ExecutionError;
 use crate::preparation_step::prepare;
 use crate::preparation_step::PreparationDescriptor;
 
 use air_interpreter_interface::InterpreterOutcome;
-use std::ops::Deref;
 
 pub fn execute_air(init_peer_id: String, air: String, prev_data: Vec<u8>, data: Vec<u8>) -> InterpreterOutcome {
     use std::convert::identity;
@@ -57,9 +56,7 @@ fn execute_air_impl(
     match air.execute(&mut exec_ctx, &mut trace_handler) {
         Ok(_) => {}
         // return the old data in case of any trace errors
-        Err(e) if matches!(e.deref(), ExecutionError::TraceError(..)) => {
-            return Err(outcome::from_trace_error(prev_data, e))
-        }
+        Err(e) if e.is_catchable() => return Err(outcome::from_trace_error(prev_data, e)),
         // return new collected trace in case of errors
         Err(e) => return Err(outcome::from_execution_error(exec_ctx, trace_handler, e)),
     }

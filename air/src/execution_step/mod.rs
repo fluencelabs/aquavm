@@ -26,6 +26,7 @@ pub(super) use self::air::ExecutableInstruction;
 pub(super) use self::air::FoldState;
 pub(super) use boxed_value::Generation;
 pub(super) use boxed_value::Stream;
+pub(crate) use errors::Catchable;
 pub(super) use errors::ExecutionError;
 pub(super) use execution_context::AValue;
 pub(crate) use execution_context::ExecutionCtx;

@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-/// This trait is intended to differentiate between joinable and non-joinable objects.
-/// Joinable objects are those that interpreter should wait on. F.e. if at least one of
-/// arguments of a call instructions is joinable, the interpreter won't execute such
-/// call and won't write any state for it in data. This is needed to handle collecting
-/// variable from different peers in parallel.
-///
-/// At the moment, this trait's applied only to errors.
-pub(crate) trait Joinable {
-    /// Return true, if supplied object is joinable.
-    fn is_joinable(&self) -> bool;
+/// This trait is intended to differentiate between catchable and non-catchable error types.
+/// Errors of the first type could be caught by xor, the second couldn't and should stop
+/// AIR execution. This is needed to prevent some malicious data merging and manage
+/// prev_data always in a valid state.
+pub(crate) trait Catchable {
+    /// Return true, if error is catchable.
+    fn is_catchable(&self) -> bool;
 }

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use super::Catchable;
 use super::ExecutionCtx;
 use super::ExecutionError;
 use super::ExecutionResult;
@@ -28,7 +29,7 @@ impl<'i> super::ExecutableInstruction<'i> for Xor<'i> {
 
         exec_ctx.subtree_complete = true;
         match self.0.execute(exec_ctx, trace_ctx) {
-            Err(e) if is_catchable_by_xor(&e) => {
+            Err(e) if e.is_catchable() => {
                 exec_ctx.subtree_complete = true;
                 exec_ctx.last_error_could_be_set = true;
                 print_xor_log(&e);
@@ -38,12 +39,6 @@ impl<'i> super::ExecutableInstruction<'i> for Xor<'i> {
             res => res,
         }
     }
-}
-
-/// Returns true, if this execution_step error type should be caught by xor.
-fn is_catchable_by_xor(exec_error: &ExecutionError) -> bool {
-    // this type of errors related to invalid data and should treat as hard errors.
-    !matches!(exec_error, ExecutionError::TraceError(_))
 }
 
 fn print_xor_log(e: &ExecutionError) {

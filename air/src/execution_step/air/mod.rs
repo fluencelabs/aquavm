@@ -30,6 +30,7 @@ mod xor;
 pub(crate) use fold::FoldState;
 
 pub(self) use super::execution_context::*;
+pub(self) use super::Catchable;
 pub(self) use super::ExecutionCtx;
 pub(self) use super::ExecutionError;
 pub(self) use super::ExecutionResult;

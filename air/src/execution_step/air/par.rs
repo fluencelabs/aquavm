@@ -16,6 +16,7 @@
 
 mod completeness_updater;
 
+use super::Catchable;
 use super::ExecutableInstruction;
 use super::ExecutionCtx;
 use super::ExecutionError;
@@ -55,8 +56,6 @@ fn execute_subtree<'i>(
     completeness_updater: &mut ParCompletenessUpdater,
     subtree_type: SubtreeType,
 ) -> ExecutionResult<SubtreeResult> {
-    use std::ops::Deref;
-
     exec_ctx.subtree_complete = determine_subtree_complete(subtree);
     trace_ctx.meet_par_subtree_start(subtree_type)?;
 
@@ -66,7 +65,7 @@ fn execute_subtree<'i>(
             trace_ctx.meet_par_subtree_end(subtree_type)?;
             SubtreeResult::Succeeded
         }
-        Err(e) if matches!(e.deref(), ExecutionError::TraceError(_)) => {
+        Err(e) if e.is_catchable() => {
             return Err(e);
         }
         Err(e) => {
