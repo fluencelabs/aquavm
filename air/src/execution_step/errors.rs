@@ -37,9 +37,9 @@ pub(crate) enum ExecutionError {
     #[error("call_service result '{0}' can't be serialized or deserialized with an error: {1}")]
     CallServiceResultDeError(CallServiceResult, SerdeJsonError),
 
-    /// Semantic errors in instructions.
-    #[error("{0}")]
-    InstructionError(String),
+    /// Semantic errors in a call instructions.
+    #[error("call should have service id specified by peer part or function part")]
+    IncorrectCallTriplet,
 
     /// An error is occurred while calling local service via call_service.
     #[error("Local service error, ret_code is {0}, error message is '{1}'")]
@@ -133,7 +133,7 @@ impl ExecutionError {
 
         match self {
             CallServiceResultDeError(..) => 1,
-            InstructionError(_) => 2,
+            IncorrectCallTriplet => 2,
             LocalServiceError(..) => 3,
             VariableNotFound(_) => 4,
             MultipleVariablesFound(_) => 5,

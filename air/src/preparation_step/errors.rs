@@ -17,6 +17,7 @@
 use serde_json::Error as SerdeJsonError;
 use thiserror::Error as ThisError;
 
+use air_interpreter_data::DATA_FORMAT_VERSION;
 use std::env::VarError;
 
 /// Errors happened during the interpreter preparation_step step.
@@ -27,7 +28,8 @@ pub enum PreparationError {
     AIRParseError(String),
 
     /// Errors occurred on executed trace deserialization.
-    #[error("an error occurred while executed trace deserialization on {1:?}:\n {0:?}")]
+    #[error("an error occurred while executed trace deserialization on {1:?}:\n{0:?}.\
+    Probably it's a data of an old version that couldn't be converted to '{}'", *DATA_FORMAT_VERSION)]
     DataDeError(SerdeJsonError, Vec<u8>),
 
     /// Error occurred while getting current peer id.
