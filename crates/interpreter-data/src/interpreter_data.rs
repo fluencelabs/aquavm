@@ -60,21 +60,13 @@ impl InterpreterData {
 
     /// Tries to de InterpreterData from slice according to the data version.
     pub fn try_from_slice(slice: &[u8]) -> Result<Self, serde_json::Error> {
-        let result: Result<Self, _> = serde_json::from_slice(slice);
-        let err = match result {
-            data @ Ok(_) => return data,
-            Err(err) => err,
-        };
+        // treat empty slice as an empty interpreter data allows abstracting from
+        // the internal format for empty data.
+        if slice.is_empty() {
+            return Ok(Self::default());
+        }
 
-        // it's known that the older versions were just trace-like without versions
-        let trace: Result<ExecutionTrace, _> = serde_json::from_slice(slice);
-        let trace = match trace {
-            Ok(trace) => trace,
-            Err(_) => return Err(err),
-        };
-
-        let data = Self::from_execution_result(trace, <_>::default());
-        Ok(data)
+        serde_json::from_slice(slice)
     }
 }
 
