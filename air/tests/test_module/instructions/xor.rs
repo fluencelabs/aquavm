@@ -131,13 +131,13 @@ fn xor_par() {
         r#"
             (xor
                 (par
-                    (seq
-                        (call "{0}" ("service_id_2" "local_fn_name") [] result_1)
-                        (call "{0}" ("service_id_2" "local_fn_name") [] result_2)
+                    (par
+                        (call "{0}" ("service_id_1" "local_fn_name") [] result_1)
+                        (call "{0}" ("service_id_1" "local_fn_name") [] result_2)
                     )
                     (par
                         (call "{0}" ("service_id_1" "local_fn_name") [] result_3)
-                        (call "{0}" ("service_id_2" "local_fn_name") [] result_4)
+                        (call "{0}" ("service_id_1" "local_fn_name") [] result_4)
                     )
                 )
                 (seq
@@ -154,10 +154,12 @@ fn xor_par() {
     let scalar_result = String::from("res");
 
     let expected_trace = vec![
-        par(2, 2),
-        scalar_string(&scalar_result),
-        scalar_string(&scalar_result),
-        par(1, 0),
+        par(3, 3),
+        par(1, 1),
+        service_failed(1, "error"),
+        service_failed(1, "error"),
+        par(1, 1),
+        service_failed(1, "error"),
         service_failed(1, "error"),
         scalar_string(&scalar_result),
         scalar_string(&scalar_result),

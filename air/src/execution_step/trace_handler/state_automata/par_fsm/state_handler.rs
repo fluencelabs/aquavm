@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
+mod new_states_calculation;
+mod total_len_preparation;
+
 use super::*;
+use new_states_calculation::compute_new_states;
+use total_len_preparation::prepare_total_lens;
 
 /// At the end of a Par execution it's needed to update subtrace_len and positions of both sliders.
 ///
@@ -107,51 +112,6 @@ impl CtxStateHandler {
     }
 }
 
-fn compute_new_states(
-    data_keeper: &DataKeeper,
-    prev_par: ParResult,
-    current_par: ParResult,
-    subtree_type: SubtreeType,
-) -> FSMResult<(CtxState, CtxState)> {
-    let (prev_len, current_len) = match subtree_type {
-        SubtreeType::Left => (prev_par.0, current_par.0),
-        SubtreeType::Right => (prev_par.1, current_par.1),
-    };
-
-    let prev_state = compute_new_state(data_keeper, prev_len as usize, MergeCtxType::Previous, prev_par)?;
-    let current_state = compute_new_state(data_keeper, current_len as usize, MergeCtxType::Current, current_par)?;
-
-    Ok((prev_state, current_state))
-}
-
-fn compute_new_state(
-    data_keeper: &DataKeeper,
-    par_subtree_len: usize,
-    ctx_type: MergeCtxType,
-    par: ParResult,
-) -> FSMResult<CtxState> {
-    let (slider, total_subtrace_len) = match ctx_type {
-        MergeCtxType::Previous => (data_keeper.prev_slider(), data_keeper.prev_ctx.total_subtrace_len()),
-        MergeCtxType::Current => (
-            data_keeper.current_slider(),
-            data_keeper.current_ctx.total_subtrace_len(),
-        ),
-    };
-
-    let pos = slider
-        .position()
-        .checked_add(par_subtree_len)
-        .ok_or_else(|| StateFSMError::ParPosOverflow(par, slider.position(), MergeCtxType::Previous))?;
-
-    let subtrace_len = total_subtrace_len
-        .checked_sub(par_subtree_len)
-        .ok_or_else(|| StateFSMError::ParLenUnderflow(par, slider.subtrace_len(), MergeCtxType::Current))?;
-
-    let state = CtxState::new(pos, subtrace_len, subtrace_len);
-
-    Ok(state)
-}
-
 fn prepare_sliders(
     prev_par: ParResult,
     current_par: ParResult,
@@ -169,48 +129,3 @@ fn prepare_sliders(
     Ok(())
 }
 
-fn prepare_total_lens(
-    prev_par: ParResult,
-    current_par: ParResult,
-    data_keeper: &mut DataKeeper,
-) -> FSMResult<(usize, usize)> {
-    let (prev_size, current_size) = compute_par_total_lens(prev_par, current_par)?;
-    sizes_suits(prev_size, current_size, data_keeper)?;
-
-    let prev_total_len = data_keeper.prev_ctx.total_subtrace_len() - prev_size;
-    let current_total_len = data_keeper.current_ctx.total_subtrace_len() - current_size;
-
-    data_keeper.prev_ctx.set_total_subtrace_len(prev_size);
-    data_keeper.current_ctx.set_total_subtrace_len(current_size);
-
-    Ok((prev_total_len, current_total_len))
-}
-
-fn compute_par_total_lens(prev_par: ParResult, current_par: ParResult) -> FSMResult<(usize, usize)> {
-    let prev_par_len = prev_par.size().ok_or(StateFSMError::ParLenOverflow(prev_par))?;
-    let current_par_len = current_par.size().ok_or(StateFSMError::ParLenOverflow(prev_par))?;
-
-    Ok((prev_par_len, current_par_len))
-}
-
-fn sizes_suits(prev_par_len: usize, current_par_len: usize, data_keeper: &DataKeeper) -> FSMResult<()> {
-    let prev_total_len = data_keeper.prev_ctx.total_subtrace_len();
-    if prev_par_len > prev_total_len {
-        return Err(StateFSMError::TotalSubtraceLenIsLess(
-            prev_par_len,
-            prev_total_len,
-            MergeCtxType::Previous,
-        ));
-    }
-
-    let current_total_len = data_keeper.current_ctx.total_subtrace_len();
-    if current_par_len > current_total_len {
-        return Err(StateFSMError::TotalSubtraceLenIsLess(
-            prev_par_len,
-            current_total_len,
-            MergeCtxType::Current,
-        ));
-    }
-
-    Ok(())
-}

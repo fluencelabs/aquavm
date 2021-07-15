@@ -137,17 +137,11 @@ fn dont_wait_on_json_path_on_scalars() {
     let script = format!(
         r#"
         (seq
-            (seq
-                (call "{0}" ("" "") ["array"] array)
-                (call "{0}" ("" "") ["object"] object)
-            )
-            (par
-                (call "{1}" ("" "") [array.$.[5]!] auth_result)
-                (call "{2}" ("" "") [object.$.non_exist_path])
-            )
+            (call "{0}" ("" "") ["array"] array)
+            (call "{1}" ("" "") [array.$.[5]!] auth_result)
         )
     "#,
-        set_variable_peer_id, array_consumer_peer_id, object_consumer_peer_id,
+        set_variable_peer_id, array_consumer_peer_id,
     );
 
     let init_peer_id = "asd";
@@ -159,6 +153,18 @@ fn dont_wait_on_json_path_on_scalars() {
         r#"variable with path '$.[5]' not found in '[1,2,3,4,5]' with an error: 'json value not set'"#
     );
 
+    let script = format!(
+        r#"
+        (seq
+            (call "{0}" ("" "") ["object"] object)
+            (call "{1}" ("" "") [object.$.non_exist_path])
+        )
+    "#,
+        set_variable_peer_id, object_consumer_peer_id,
+    );
+
+    let init_peer_id = "asd";
+    let result = call_vm!(set_variable_vm, init_peer_id, &script, "", "");
     let object_result = call_vm!(object_consumer, init_peer_id, script, "", result.data);
     assert_eq!(object_result.ret_code, 1006);
     assert_eq!(
