@@ -5,3 +5,4 @@ wasm
 
 # this file is auto-generated
 src/wasm.js
+src/importObject.ts
