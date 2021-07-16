@@ -27,5 +27,3 @@ cat << EOF > ./src/importObject.ts
 export const __wbg_callserviceimpl = "$callserviceimpl";
 export const __wbg_getcurrentpeeridimpl = "$getcurrentpeeridimpl";
 EOF
-
-cat ./src/importObject.ts
