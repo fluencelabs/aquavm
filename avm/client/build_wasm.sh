@@ -21,8 +21,8 @@ __wbg_getcurrentpeeridimpl=$(cat wasm/air_interpreter_client_bg.js | grep -o __w
 cat << EOF > ./src/importObject.ts
 // auto-generated
 
-export const __wbg_callserviceimpl = '${__wbg_callserviceimpl}';
-export const __wbg_getcurrentpeeridimpl = '${__wbg_getcurrentpeeridimpl}';
+export const __wbg_callserviceimpl = "${__wbg_callserviceimpl}";
+export const __wbg_getcurrentpeeridimpl = "${__wbg_getcurrentpeeridimpl}";
 EOF
 
 cat ./src/importObject.ts
