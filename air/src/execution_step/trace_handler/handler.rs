@@ -23,7 +23,7 @@ use air_parser::ast::CallOutputValue;
 
 #[derive(Debug, Default)]
 pub(crate) struct TraceHandler {
-    data_keeper: DataKeeper,
+    pub(crate) data_keeper: DataKeeper,
     fsm_keeper: FSMKeeper,
 }
 
@@ -76,25 +76,15 @@ impl TraceHandler {
             "  adding new call executed state {:?}",
             call_result
         );
-
         self.data_keeper.result_trace.push(ExecutedState::Call(call_result));
     }
 }
 
 impl TraceHandler {
-    pub(crate) fn meet_par_subtree_start(&mut self, subtree_type: SubtreeType) -> TraceHandlerResult<()> {
-        match subtree_type {
-            SubtreeType::Left => {
-                // meeting of a left subtree creates a new Par FSM
-                let ingredients = merger::try_merge_next_state_as_par(&mut self.data_keeper)?;
-                let par_fsm = ParFSM::from_left_started(ingredients, &mut self.data_keeper)?;
-                self.fsm_keeper.push_par(par_fsm);
-            }
-            SubtreeType::Right => {
-                let par_fsm = self.fsm_keeper.last_par()?;
-                par_fsm.meet_right_start(&mut self.data_keeper)?;
-            }
-        }
+    pub(crate) fn meet_par_start(&mut self) -> TraceHandlerResult<()> {
+        let ingredients = merger::try_merge_next_state_as_par(&mut self.data_keeper)?;
+        let par_fsm = ParFSM::from_left_started(ingredients, &mut self.data_keeper)?;
+        self.fsm_keeper.push_par(par_fsm);
 
         Ok(())
     }

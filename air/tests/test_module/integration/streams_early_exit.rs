@@ -43,8 +43,8 @@ fn par_early_exit() {
 
     let expected_trace = vec![
         executed_state::scalar_string("test"),
-        executed_state::par(10, 0),
-        executed_state::par(9, 0),
+        executed_state::par(12, 1),
+        executed_state::par(9, 1),
         executed_state::par(7, 1),
         executed_state::par(5, 1),
         executed_state::par(3, 1),
@@ -54,6 +54,9 @@ fn par_early_exit() {
         executed_state::request_sent_by(init_peer_id),
         executed_state::stream_string("res", 0),
         executed_state::service_failed(1, "error"),
+        executed_state::stream_string("res", 0),
+        executed_state::service_failed(1, "error"),
+        executed_state::service_failed(1, "error"),
         executed_state::request_sent_by(setter_3_id),
     ];
     assert_eq!(actual_trace_3, expected_trace);
@@ -62,11 +65,12 @@ fn par_early_exit() {
     let init_result_3 = checked_call_vm!(init, "", &script, init_result_2.data.clone(), setter_2_res.data.clone());
     let init_result_4 = checked_call_vm!(init, "", &script, init_result_3.data.clone(), setter_3_res.data.clone());
     let actual_trace_4 = trace_from_result(&init_result_4);
+    print_trace(&init_result_4, "init result 4");
 
     let expected_trace = vec![
         executed_state::scalar_string("test"),
-        executed_state::par(10, 0),
-        executed_state::par(9, 0),
+        executed_state::par(12, 1),
+        executed_state::par(9, 1),
         executed_state::par(7, 1),
         executed_state::par(5, 1),
         executed_state::par(3, 1),
@@ -75,6 +79,9 @@ fn par_early_exit() {
         executed_state::stream_string("2", 1),
         executed_state::stream_string("1", 0),
         executed_state::stream_string("res", 2),
+        executed_state::service_failed(1, "error"),
+        executed_state::stream_string("res", 2),
+        executed_state::service_failed(1, "error"),
         executed_state::service_failed(1, "error"),
         executed_state::scalar_string("test"),
     ];
@@ -228,17 +235,11 @@ fn fold_par_early_exit() {
         last_peer_checker_id
     );
 
-    println!("1");
     let variables_setter_result = checked_call_vm!(variables_setter, "", &script, "", "");
-    println!("2");
     let stream_setter_result = checked_call_vm!(stream_setter, "", &script, "", variables_setter_result.data);
-    println!("3");
     let fold_executor_result = checked_call_vm!(fold_executor, "", &script, "", stream_setter_result.data);
-    println!("4");
     let error_trigger_result = checked_call_vm!(error_trigger, "", &script, "", fold_executor_result.data);
-    println!("5");
     let last_error_receiver_result = checked_call_vm!(last_error_receiver, "", &script, "", error_trigger_result.data);
-    println!("6");
     let last_peer_checker_result =
         checked_call_vm!(last_peer_checker, "", &script, "", last_error_receiver_result.data);
     let actual_trace = trace_from_result(&last_peer_checker_result);
@@ -259,17 +260,17 @@ fn fold_par_early_exit() {
         executed_state::stream_string("c2", 0),
         executed_state::stream_string("d1", 0),
         executed_state::stream_string("d2", 0),
-        executed_state::par(11, 1),
-        executed_state::fold(vec![executed_state::subtrace_lore(
-            4,
-            SubTraceDesc::new(14, 9),
-            SubTraceDesc::new(23, 0),
-        )]),
-        executed_state::fold(vec![executed_state::subtrace_lore(
-            6,
-            SubTraceDesc::new(15, 8),
-            SubTraceDesc::new(23, 0),
-        )]),
+        executed_state::par(69, 1),
+        executed_state::fold(vec![
+            executed_state::subtrace_lore(4, SubTraceDesc::new(14, 34), SubTraceDesc::new(82, 0)),
+            executed_state::subtrace_lore(5, SubTraceDesc::new(48, 34), SubTraceDesc::new(82, 0)),
+        ]),
+        executed_state::par(33, 34),
+        executed_state::fold(vec![
+            executed_state::subtrace_lore(6, SubTraceDesc::new(16, 16), SubTraceDesc::new(48, 0)),
+            executed_state::subtrace_lore(7, SubTraceDesc::new(32, 16), SubTraceDesc::new(48, 0)),
+        ]),
+        executed_state::par(15, 16),
         executed_state::fold(vec![
             executed_state::subtrace_lore(8, SubTraceDesc::new(16, 3), SubTraceDesc::new(22, 0)),
             executed_state::subtrace_lore(9, SubTraceDesc::new(19, 3), SubTraceDesc::new(22, 0)),

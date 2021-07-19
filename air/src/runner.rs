@@ -56,7 +56,7 @@ fn execute_air_impl(
     match air.execute(&mut exec_ctx, &mut trace_handler) {
         Ok(_) => {}
         // return the old data in case of any trace errors
-        Err(e) if e.is_catchable() => return Err(outcome::from_trace_error(prev_data, e)),
+        Err(e) if !e.is_catchable() => return Err(outcome::from_trace_error(prev_data, e)),
         // return new collected trace in case of errors
         Err(e) => return Err(outcome::from_execution_error(exec_ctx, trace_handler, e)),
     }

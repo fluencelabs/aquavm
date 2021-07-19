@@ -14,41 +14,33 @@
  * limitations under the License.
  */
 
-use super::update_with_states;
-use super::CtxState;
-use super::DataKeeper;
-use super::FSMResult;
-use super::StateFSMError;
+use super::*;
 use crate::execution_step::trace_handler::MergeCtxType;
 use crate::execution_step::trace_handler::ResolvedFold;
 
 /// This state updater manage to do the same thing as SubTreeStateUpdater in ParFSM,
 /// for details please see its detailed comment.
 #[derive(Debug, Default, Clone)]
-pub(super) struct SubTreeStateUpdater {
-    prev_state: CtxState,
-    current_state: CtxState,
+pub(super) struct CtxStateHandler {
+    state_pair: CtxStatesPair,
 }
 
-impl SubTreeStateUpdater {
-    pub(super) fn new(
+impl CtxStateHandler {
+    pub(super) fn prepare(
         prev_fold: &ResolvedFold,
         current_fold: &ResolvedFold,
         data_keeper: &DataKeeper,
     ) -> FSMResult<Self> {
         let prev_state = compute_new_state(prev_fold, data_keeper, MergeCtxType::Previous)?;
         let current_state = compute_new_state(current_fold, data_keeper, MergeCtxType::Current)?;
+        let state_pair = CtxStatesPair::new(prev_state, current_state);
 
-        let updater = Self {
-            prev_state,
-            current_state,
-        };
-
+        let updater = Self { state_pair };
         Ok(updater)
     }
 
-    pub(super) fn update(self, data_keeper: &mut DataKeeper) {
-        update_with_states(self.prev_state, self.current_state, data_keeper)
+    pub(super) fn set_final_states(self, data_keeper: &mut DataKeeper) {
+        update_ctx_states(self.state_pair, data_keeper)
     }
 }
 

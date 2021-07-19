@@ -96,6 +96,20 @@ pub fn set_variables_call_service(ret_mapping: HashMap<String, String>) -> CallS
     })
 }
 
+pub fn return_string_call_service(ret_str: impl Into<String>) -> CallServiceClosure {
+    let ret_str = ret_str.into();
+
+    Box::new(move |_| -> Option<IValue> {
+        Some(IValue::Record(
+            NEVec::new(vec![
+                IValue::S32(0),
+                IValue::String(format!(r#""{}""#, ret_str)),
+            ])
+            .unwrap(),
+        ))
+    })
+}
+
 pub fn fallible_call_service(fallible_service_id: impl Into<String>) -> CallServiceClosure {
     let fallible_service_id = fallible_service_id.into();
 

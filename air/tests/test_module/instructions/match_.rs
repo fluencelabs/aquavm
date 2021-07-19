@@ -14,12 +14,7 @@
  * limitations under the License.
  */
 
-use air_test_utils::call_vm;
-use air_test_utils::checked_call_vm;
-use air_test_utils::create_avm;
-use air_test_utils::echo_string_call_service;
-use air_test_utils::executed_state;
-use air_test_utils::trace_from_result;
+use air_test_utils::*;
 
 #[test]
 fn match_equal() {
@@ -194,12 +189,12 @@ fn match_without_xor() {
         set_variable_peer_id, local_peer_id
     );
 
-    let result = call_vm!(set_variable_vm, "asd", &script, "", "");
-    let result = call_vm!(vm, "asd", script.clone(), "", result.data);
+    let result = call_vm!(set_variable_vm, "", &script, "", "");
+    let result = call_vm!(vm, "", &script, "", result.data);
 
     assert_eq!(result.ret_code, 1014);
 
-    let result = call_vm!(vm, "asd", script, "", result.data);
+    let result = call_vm!(vm, "", script, "", result.data);
 
     assert_eq!(result.ret_code, 1014);
 }

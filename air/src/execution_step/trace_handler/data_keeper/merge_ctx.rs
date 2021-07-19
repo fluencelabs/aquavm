@@ -66,10 +66,18 @@ impl MergeCtx {
     }
 
     pub(crate) fn set_total_subtrace_len(&mut self, total_subtrace_len: usize) {
+        if total_subtrace_len == 0 {
+            // setting empty subtrace_len is always possible
+            let _ = self.slider.set_subtrace_len(0);
+        }
+
         self.total_subtrace_len = total_subtrace_len;
     }
 
     pub(crate) fn total_subtrace_len(&self) -> usize {
-        self.total_subtrace_len
+        if self.total_subtrace_len < self.slider.seen_elements() {
+            return self.slider.subtrace_len();
+        }
+        self.total_subtrace_len - self.slider.seen_elements()
     }
 }

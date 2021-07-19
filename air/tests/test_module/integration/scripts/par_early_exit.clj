@@ -3,6 +3,7 @@
   (seq
    (call "{0}" ("" "") []) ;; initiator that should send data to stream generators
    (par
+    (seq
     (par
      (par
       (par
@@ -15,11 +16,13 @@
         )
        (call "{3}" ("" "") [] $stream)
        )
-      (call "{3}" ("error" "") [] $stream) ;; will trigger an error
+      (call "{3}" ("error" "") [] $stream)
       )
      (call "{3}" ("" "") [] $stream)
      )
-    (call "{2}" ("" "") [] $stream)
+     (call "{3}" ("error" "") [] $stream)
+     )
+    (call "{3}" ("error" "") [] $stream)
     )
    )
   (null)

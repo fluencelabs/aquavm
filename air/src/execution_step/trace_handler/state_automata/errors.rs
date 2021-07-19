@@ -55,7 +55,7 @@ pub(crate) enum StateFSMError {
     FoldLenUnderflow(ResolvedFold, usize, MergeCtxType),
 
     /// Errors occurred while trying to set a total_subtrace_len that is less than
-    #[error("trying to set total_subtrace_len {0} that is less then len set before {1}")]
+    #[error("trying to set total_subtrace_len {0} that is less then len set before {1} for {2} ctx")]
     TotalSubtraceLenIsLess(usize, usize, MergeCtxType),
 
     /// Errors occurred when a subtree of a Par instructions was finished but remaining interval isn't empty.

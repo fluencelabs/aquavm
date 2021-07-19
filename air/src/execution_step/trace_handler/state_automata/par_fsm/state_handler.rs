@@ -15,11 +15,12 @@
  */
 
 mod new_states_calculation;
-mod total_len_preparation;
+mod utils;
 
 use super::*;
+use crate::execution_step::trace_handler::state_automata::par_fsm::state_handler::utils::compute_par_total_lens;
 use new_states_calculation::compute_new_states;
-use total_len_preparation::prepare_total_lens;
+use utils::prepare_total_lens;
 
 /// At the end of a Par execution it's needed to update subtrace_len and positions of both sliders.
 ///
@@ -62,70 +63,59 @@ use total_len_preparation::prepare_total_lens;
 ///
 #[derive(Debug, Default, Clone, Copy)]
 pub(super) struct CtxStateHandler {
-    prev_total_len: usize,
-    current_total_len: usize,
-    prev_state: CtxState,
-    current_state: CtxState,
+    left_pair: CtxStatesPair,
+    right_pair: CtxStatesPair,
 }
 
 impl CtxStateHandler {
-    pub(super) fn prepare_left_start(
-        data_keeper: &mut DataKeeper,
+    pub(super) fn prepare(
         prev_par: ParResult,
         current_par: ParResult,
+        data_keeper: &mut DataKeeper,
     ) -> FSMResult<Self> {
-        let (prev_total_len, current_total_len) = prepare_total_lens(prev_par, current_par, data_keeper)?;
-        let (prev_state, current_state) = compute_new_states(data_keeper, prev_par, current_par, SubtreeType::Left)?;
-        prepare_sliders(prev_par, current_par, data_keeper, SubtreeType::Left)?;
+        let left_pair = prepare_left_pair(prev_par, current_par, data_keeper)?;
+        let right_pair = prepare_right_pair(prev_par, current_par, data_keeper)?;
 
-        let handler = Self {
-            prev_total_len,
-            current_total_len,
-            prev_state,
-            current_state,
-        };
+        let handler = Self { left_pair, right_pair };
 
         Ok(handler)
     }
 
-    pub(super) fn prepare_right_start(
-        &mut self,
-        data_keeper: &mut DataKeeper,
-        prev_par: ParResult,
-        current_par: ParResult,
-    ) -> FSMResult<()> {
-        let (mut prev_state, mut current_state) =
-            compute_new_states(data_keeper, prev_par, current_par, SubtreeType::Right)?;
-        prev_state.total_subtrace_len = self.prev_total_len;
-        current_state.total_subtrace_len = self.current_total_len;
-
-        self.prev_state = prev_state;
-        self.current_state = current_state;
-
-        prepare_sliders(prev_par, current_par, data_keeper, SubtreeType::Right)?;
-
-        Ok(())
-    }
-
-    pub(super) fn handle_subtree_end(self, data_keeper: &mut DataKeeper) {
-        update_with_states(self.prev_state, self.current_state, data_keeper)
+    pub(super) fn handle_subtree_end(self, data_keeper: &mut DataKeeper, subtree_type: SubtreeType) {
+        match subtree_type {
+            SubtreeType::Left => update_ctx_states(self.left_pair, data_keeper),
+            SubtreeType::Right => update_ctx_states(self.right_pair, data_keeper),
+        }
     }
 }
 
-fn prepare_sliders(
+fn prepare_left_pair(
     prev_par: ParResult,
     current_par: ParResult,
     data_keeper: &mut DataKeeper,
-    subtree_type: SubtreeType,
-) -> FSMResult<()> {
-    let (prev_len, current_len) = match subtree_type {
-        SubtreeType::Left => (prev_par.0, current_par.0),
-        SubtreeType::Right => (prev_par.1, current_par.1),
-    };
+) -> FSMResult<CtxStatesPair> {
+    let (prev_nibble, current_nibble) = compute_new_states(data_keeper, prev_par, current_par, SubtreeType::Left)?;
+    let prev_state = CtxState::from_nibble(prev_nibble, prev_nibble.subtrace_len);
+    let current_state = CtxState::from_nibble(current_nibble, current_nibble.subtrace_len);
+    let pair = CtxStatesPair::new(prev_state, current_state);
 
-    data_keeper.prev_slider_mut().set_subtrace_len(prev_len as _)?;
-    data_keeper.current_slider_mut().set_subtrace_len(current_len as _)?;
-
-    Ok(())
+    Ok(pair)
 }
 
+fn prepare_right_pair(
+    prev_par: ParResult,
+    current_par: ParResult,
+    data_keeper: &mut DataKeeper,
+) -> FSMResult<CtxStatesPair> {
+    let (prev_par_len, current_par_len) = compute_par_total_lens(prev_par, current_par)?;
+    let (prev_total_len, current_total_len) = prepare_total_lens(prev_par_len, current_par_len, data_keeper)?;
+
+    let prev_pos = data_keeper.prev_slider().position() + prev_par_len;
+    let current_pos = data_keeper.current_slider().position() + current_par_len;
+
+    let prev_state = CtxState::new(prev_pos, prev_total_len, prev_total_len);
+    let current_state = CtxState::new(current_pos, current_total_len, current_total_len);
+    let pair = CtxStatesPair::new(prev_state, current_state);
+
+    Ok(pair)
+}

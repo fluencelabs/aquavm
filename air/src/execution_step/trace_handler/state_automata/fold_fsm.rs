@@ -17,14 +17,14 @@
 mod lore_applier;
 mod lore_ctor;
 mod lore_ctor_queue;
-mod state_updater;
+mod state_handler;
 
 use super::*;
 use crate::JValue;
 use lore_applier::*;
 use lore_ctor::*;
 use lore_ctor_queue::*;
-use state_updater::SubTreeStateUpdater;
+use state_handler::CtxStateHandler;
 
 use air_interpreter_data::FoldLore;
 
@@ -46,7 +46,7 @@ pub(crate) struct FoldFSM {
     state_inserter: StateInserter,
     ctor_queue: SubTraceLoreCtorQueue,
     result_lore: FoldLore,
-    state_updater: SubTreeStateUpdater,
+    state_handler: CtxStateHandler,
 }
 
 #[derive(Debug, Clone)]
@@ -59,7 +59,7 @@ impl FoldFSM {
     pub(crate) fn from_fold_start(fold_result: MergerFoldResult, data_keeper: &mut DataKeeper) -> FSMResult<Self> {
         let state_inserter = StateInserter::from_keeper(data_keeper);
         let state_updater =
-            SubTreeStateUpdater::new(&fold_result.prev_fold_lore, &fold_result.current_fold_lore, data_keeper)?;
+            CtxStateHandler::prepare(&fold_result.prev_fold_lore, &fold_result.current_fold_lore, data_keeper)?;
 
         data_keeper
             .prev_ctx
@@ -72,7 +72,7 @@ impl FoldFSM {
             prev_fold: fold_result.prev_fold_lore,
             current_fold: fold_result.current_fold_lore,
             state_inserter,
-            state_updater,
+            state_handler: state_updater,
             ..<_>::default()
         };
 
@@ -141,7 +141,7 @@ impl FoldFSM {
         let fold_result = FoldResult(self.result_lore);
         let state = ExecutedState::Fold(fold_result);
         self.state_inserter.insert(data_keeper, state);
-        self.state_updater.update(data_keeper);
+        self.state_handler.set_final_states(data_keeper);
     }
 
     pub(crate) fn fold_end_with_error(mut self, data_keeper: &mut DataKeeper) {

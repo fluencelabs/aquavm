@@ -115,4 +115,8 @@ impl TraceSlider {
     pub(crate) fn subtrace_len(&self) -> usize {
         self.subtrace_len - self.seen_elements
     }
+
+    pub(crate) fn seen_elements(&self) -> usize {
+        self.seen_elements
+    }
 }
