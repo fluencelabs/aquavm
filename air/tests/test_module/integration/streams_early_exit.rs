@@ -16,6 +16,7 @@
 
 use air_test_utils::*;
 
+use pretty_assertions::assert_eq;
 use serde_json::json;
 
 #[test]
@@ -244,8 +245,6 @@ fn fold_par_early_exit() {
         checked_call_vm!(last_peer_checker, "", &script, "", last_error_receiver_result.data);
     let actual_trace = trace_from_result(&last_peer_checker_result);
 
-    print_trace(&last_peer_checker_result, "last peer checker");
-
     let test_value = "test";
     let expected_trace = vec![
         executed_state::scalar_string_array(vec!["a1", "a2"]),
@@ -271,26 +270,38 @@ fn fold_par_early_exit() {
             executed_state::subtrace_lore(7, SubTraceDesc::new(32, 16), SubTraceDesc::new(48, 0)),
         ]),
         executed_state::par(15, 16),
+        executed_state::par(13, 1),
         executed_state::fold(vec![
-            executed_state::subtrace_lore(8, SubTraceDesc::new(16, 3), SubTraceDesc::new(22, 0)),
-            executed_state::subtrace_lore(9, SubTraceDesc::new(19, 3), SubTraceDesc::new(22, 0)),
+            executed_state::subtrace_lore(8, SubTraceDesc::new(19, 6), SubTraceDesc::new(31, 0)),
+            executed_state::subtrace_lore(9, SubTraceDesc::new(25, 6), SubTraceDesc::new(31, 0)),
         ]),
+        executed_state::par(5, 6),
         executed_state::fold(vec![
-            executed_state::subtrace_lore(10, SubTraceDesc::new(17, 1), SubTraceDesc::new(19, 0)),
-            executed_state::subtrace_lore(11, SubTraceDesc::new(18, 1), SubTraceDesc::new(19, 0)),
+            executed_state::subtrace_lore(10, SubTraceDesc::new(21, 2), SubTraceDesc::new(25, 0)),
+            executed_state::subtrace_lore(11, SubTraceDesc::new(23, 2), SubTraceDesc::new(25, 0)),
         ]),
+        executed_state::par(1, 2),
         executed_state::scalar_string(test_value),
+        executed_state::par(1, 0),
         executed_state::scalar_string(test_value),
+        executed_state::par(5, 0),
         executed_state::fold(vec![
-            executed_state::subtrace_lore(10, SubTraceDesc::new(20, 1), SubTraceDesc::new(22, 0)),
-            executed_state::subtrace_lore(11, SubTraceDesc::new(21, 1), SubTraceDesc::new(22, 0)),
+            executed_state::subtrace_lore(10, SubTraceDesc::new(27, 2), SubTraceDesc::new(31, 0)),
+            executed_state::subtrace_lore(11, SubTraceDesc::new(29, 2), SubTraceDesc::new(31, 0)),
         ]),
+        executed_state::par(1, 2),
         executed_state::scalar_string(test_value),
+        executed_state::par(1, 0),
         executed_state::scalar_string(test_value),
         executed_state::service_failed(1, "error"),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
+        executed_state::par(15, 0),
+        executed_state::par(13, 1),
+        executed_state::fold(vec![
+            executed_state::subtrace_lore(8, SubTraceDesc::new(35, 6), SubTraceDesc::new(47, 0)),
+            executed_state::subtrace_lore(9, SubTraceDesc::new(41, 6), SubTraceDesc::new(47, 0)),
+        ]),
     ];
+    let trace_len = expected_trace.len();
 
-    assert_eq!(actual_trace, expected_trace);
+    assert_eq!(&actual_trace[0..trace_len], expected_trace);
 }
