@@ -80,10 +80,8 @@ impl FoldFSM {
     }
 
     pub(crate) fn meet_iteration_start(&mut self, value: &ValueAndPos, data_keeper: &mut DataKeeper) -> FSMResult<()> {
-        let prev_lore = remove_first(&mut self.prev_fold.lore, &value.value);
-        // TODO: this one could be quadratic on stream len and it could be improved by comparing
-        // not values themself, but values indexes.
-        let current_lore = remove_first(&mut self.current_fold.lore, &value.value);
+        let prev_lore = self.prev_fold.lore.remove(&value.pos);
+        let current_lore = self.current_fold.lore.remove(&value.pos);
 
         apply_fold_lore_before(data_keeper, &prev_lore, &current_lore)?;
 
@@ -148,13 +146,6 @@ impl FoldFSM {
         self.meet_generation_end(data_keeper);
         self.meet_fold_end(data_keeper);
     }
-}
-
-fn remove_first(elems: &mut Vec<ResolvedFoldSubTraceLore>, elem: &Rc<JValue>) -> Option<ResolvedFoldSubTraceLore> {
-    let elem_pos = elems.iter().position(|e| &e.value == elem)?;
-    let result = elems.swap_remove(elem_pos);
-
-    Some(result)
 }
 
 #[derive(Clone, Copy)]

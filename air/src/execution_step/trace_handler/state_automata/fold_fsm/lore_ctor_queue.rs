@@ -16,7 +16,7 @@
 
 use super::DataKeeper;
 use super::FoldLore;
-use super::ResolvedFoldSubTraceLore;
+use super::ResolvedSubTraceDescs;
 use super::SubTraceLoreCtor;
 
 /// This queue emulates behaviour of fold states traversal:
@@ -37,8 +37,8 @@ impl SubTraceLoreCtorQueue {
     pub(super) fn add_element(
         &mut self,
         ctor: SubTraceLoreCtor,
-        prev_lore: Option<ResolvedFoldSubTraceLore>,
-        current_lore: Option<ResolvedFoldSubTraceLore>,
+        prev_lore: Option<ResolvedSubTraceDescs>,
+        current_lore: Option<ResolvedSubTraceDescs>,
     ) {
         let new_element = LoreCtorDesc {
             ctor,
@@ -98,6 +98,6 @@ impl SubTraceLoreCtorQueue {
 #[derive(Debug, Clone)]
 pub(super) struct LoreCtorDesc {
     pub(super) ctor: SubTraceLoreCtor,
-    pub(super) prev_lore: Option<ResolvedFoldSubTraceLore>,
-    pub(super) current_lore: Option<ResolvedFoldSubTraceLore>,
+    pub(super) prev_lore: Option<ResolvedSubTraceDescs>,
+    pub(super) current_lore: Option<ResolvedSubTraceDescs>,
 }

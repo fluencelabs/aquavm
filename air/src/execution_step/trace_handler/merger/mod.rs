@@ -25,7 +25,7 @@ pub(crate) use errors::MergeError;
 pub(crate) use fold_merger::try_merge_next_state_as_fold;
 pub(crate) use fold_merger::MergerFoldResult;
 pub(crate) use fold_merger::ResolvedFold;
-pub(crate) use fold_merger::ResolvedFoldSubTraceLore;
+pub(crate) use fold_merger::ResolvedSubTraceDescs;
 pub(crate) use par_merger::try_merge_next_state_as_par;
 pub(crate) use par_merger::MergerParResult;
 

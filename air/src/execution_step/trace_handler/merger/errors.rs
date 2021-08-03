@@ -16,6 +16,7 @@
 
 use super::CallResult;
 use super::ExecutedState;
+use super::FoldResult;
 use super::KeeperError;
 
 use thiserror::Error as ThisError;
@@ -31,6 +32,9 @@ pub(crate) enum MergeError {
     /// (the other state was absent).
     #[error("state from {1} `{0:?}` is incompatible with expected {2}")]
     DifferentExecutedStateExpected(ExecutedState, DataType, &'static str),
+
+    #[error("{0:?} contains several subtraces with the same value_pos {1}")]
+    ManyRecordsWithSamePos(FoldResult, usize),
 
     /// Errors occurred when previous and current call results are incompatible.
     #[error("previous and current call results are incompatible: '{0:?}' '{1:?}'")]

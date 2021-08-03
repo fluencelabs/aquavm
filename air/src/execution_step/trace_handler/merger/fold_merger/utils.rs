@@ -18,38 +18,43 @@ use super::*;
 use air_interpreter_data::FoldSubTraceLore;
 use air_interpreter_data::SubTraceDesc;
 
+use std::collections::HashMap;
+
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub(crate) struct ResolvedFold {
-    pub(crate) lore: Vec<ResolvedFoldSubTraceLore>,
+    pub(crate) lore: HashMap<usize, ResolvedSubTraceDescs>,
     pub(crate) fold_states_count: usize,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub(crate) struct ResolvedFoldSubTraceLore {
-    pub(crate) value: Rc<JValue>,
+pub(crate) struct ResolvedSubTraceDescs {
     pub(crate) before_subtrace: SubTraceDesc,
     pub(crate) after_subtrace: SubTraceDesc,
 }
 
-pub(super) fn resolve_fold_lore(slider: &mut TraceSlider, fold: &FoldResult) -> MergeResult<ResolvedFold> {
-    let mut resolved_fold_lore = Vec::with_capacity(fold.0.len());
-    let mut fold_states_count = 0;
+pub(super) fn resolve_fold_lore(fold: &FoldResult) -> MergeResult<ResolvedFold> {
+    let mut lore = HashMap::with_capacity(fold.0.len());
+    let mut fold_states_count = 0usize;
 
     for subtrace_lore in fold.0.iter() {
         check_subtrace_lore(subtrace_lore)?;
 
-        let value = call_value_by_pos(slider, subtrace_lore.value_pos)?;
-        let fold_value = ResolvedFoldSubTraceLore {
-            value,
+        let resolved_descs = ResolvedSubTraceDescs {
             before_subtrace: subtrace_lore.subtraces_desc[0],
             after_subtrace: subtrace_lore.subtraces_desc[1],
         };
 
-        fold_states_count += fold_value.len();
-        resolved_fold_lore.push(fold_value);
+        fold_states_count += resolved_descs.len();
+
+        if let Some(_) = lore.insert(subtrace_lore.value_pos as usize, resolved_descs) {
+            return Err(MergeError::ManyRecordsWithSamePos(
+                fold.clone(),
+                subtrace_lore.value_pos as usize,
+            ));
+        }
     }
 
-    let resolved_fold_lore = ResolvedFold::new(resolved_fold_lore, fold_states_count);
+    let resolved_fold_lore = ResolvedFold::new(lore, fold_states_count);
     Ok(resolved_fold_lore)
 }
 
@@ -76,7 +81,7 @@ fn call_value_by_pos(slider: &mut TraceSlider, pos: u32) -> MergeResult<Rc<JValu
 }
 
 impl ResolvedFold {
-    pub(crate) fn new(lore: Vec<ResolvedFoldSubTraceLore>, fold_states_count: usize) -> Self {
+    pub(crate) fn new(lore: HashMap<usize, ResolvedSubTraceDescs>, fold_states_count: usize) -> Self {
         Self {
             lore,
             fold_states_count,
@@ -84,7 +89,7 @@ impl ResolvedFold {
     }
 }
 
-impl ResolvedFoldSubTraceLore {
+impl ResolvedSubTraceDescs {
     pub(crate) fn len(&self) -> usize {
         self.before_subtrace.subtrace_len as usize + self.after_subtrace.subtrace_len as usize
     }

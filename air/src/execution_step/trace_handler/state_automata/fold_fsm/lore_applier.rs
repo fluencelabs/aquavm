@@ -21,8 +21,8 @@ use MergeCtxType::*;
 /// Adjusts sliders accordingly to a before fold lore state.
 pub(super) fn apply_fold_lore_before(
     data_keeper: &mut DataKeeper,
-    prev_fold_lore: &Option<ResolvedFoldSubTraceLore>,
-    current_fold_lore: &Option<ResolvedFoldSubTraceLore>,
+    prev_fold_lore: &Option<ResolvedSubTraceDescs>,
+    current_fold_lore: &Option<ResolvedSubTraceDescs>,
 ) -> FSMResult<()> {
     apply_fold_lore(data_keeper, prev_fold_lore, Previous, Before)?;
     apply_fold_lore(data_keeper, current_fold_lore, Current, Before)
@@ -31,8 +31,8 @@ pub(super) fn apply_fold_lore_before(
 /// Adjusts sliders accordingly to an after fold lore state.
 pub(super) fn apply_fold_lore_after(
     data_keeper: &mut DataKeeper,
-    prev_fold_lore: &Option<ResolvedFoldSubTraceLore>,
-    current_fold_lore: &Option<ResolvedFoldSubTraceLore>,
+    prev_fold_lore: &Option<ResolvedSubTraceDescs>,
+    current_fold_lore: &Option<ResolvedSubTraceDescs>,
 ) -> FSMResult<()> {
     apply_fold_lore(data_keeper, prev_fold_lore, Previous, After)?;
     apply_fold_lore(data_keeper, current_fold_lore, Current, After)
@@ -40,7 +40,7 @@ pub(super) fn apply_fold_lore_after(
 
 fn apply_fold_lore(
     data_keeper: &mut DataKeeper,
-    fold_lore: &Option<ResolvedFoldSubTraceLore>,
+    fold_lore: &Option<ResolvedSubTraceDescs>,
     ctx_type: MergeCtxType,
     next_position: ByNextPosition,
 ) -> FSMResult<()> {

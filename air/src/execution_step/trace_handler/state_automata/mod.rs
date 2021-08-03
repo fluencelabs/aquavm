@@ -40,6 +40,6 @@ use super::MergeCtxType;
 use super::MergerFoldResult;
 use super::ParResult;
 use super::ResolvedFold;
-use super::ResolvedFoldSubTraceLore;
+use super::ResolvedSubTraceDescs;
 use state_inserter::StateInserter;
 use utils::*;
