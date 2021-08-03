@@ -169,15 +169,15 @@ impl AVM {
 }
 
 fn prepare_args(
-    prev_data: Vec<u8>,
+    prev_data: impl Into<Vec<u8>>,
     data: impl Into<Vec<u8>>,
-    init_user_id: String,
+    init_user_id: impl Into<String>,
     air: impl Into<String>,
 ) -> Vec<IValue> {
     vec![
-        IValue::String(init_user_id),
+        IValue::String(init_user_id.into()),
         IValue::String(air.into()),
-        IValue::ByteArray(prev_data),
+        IValue::ByteArray(prev_data.into()),
         IValue::ByteArray(data.into()),
     ]
 }
@@ -292,7 +292,7 @@ impl AVM {
         prev_data: impl Into<Vec<u8>>,
         data: impl Into<Vec<u8>>,
     ) -> Result<InterpreterOutcome> {
-        let args = prepare_args(prev_data.into(), data, init_user_id.into(), air);
+        let args = prepare_args(prev_data, data, init_user_id, air);
 
         let result =
             self.faas

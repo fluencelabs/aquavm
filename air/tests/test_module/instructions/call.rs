@@ -42,7 +42,7 @@ fn current_peer_id_call() {
         service_id, function_name
     );
 
-    let result = checked_call_vm!(vm, &vm_peer_id, script, "", "");
+    let result = checked_call_vm!(vm, &vm_peer_id, script, [], []);
 
     let actual_trace = trace_from_result(&result);
     let expected_state = executed_state::scalar_string("test");

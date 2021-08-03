@@ -62,7 +62,7 @@ pub fn create_avm(call_service: CallServiceClosure, current_peer_id: impl Into<S
 
 #[macro_export]
 macro_rules! checked_call_vm {
-    ($vm:expr, $init_peer_id:expr, $script:expr, $prev_data:expr, $data:expr) => {
+    ($vm:expr, $init_peer_id:expr, $script:expr, $prev_data:expr, $data:expr) => {{
         match $vm.call_with_prev_data($init_peer_id, $script, $prev_data, $data) {
             Ok(v) if v.ret_code != 0 => {
                 panic!("VM returns a error: {} {}", v.ret_code, v.error_message)
@@ -70,7 +70,7 @@ macro_rules! checked_call_vm {
             Ok(v) => v,
             Err(err) => panic!("VM call failed: {}", err),
         }
-    };
+    }};
 }
 
 #[macro_export]
@@ -95,6 +95,17 @@ pub fn data_from_result(result: &InterpreterOutcome) -> InterpreterData {
 pub fn raw_data_from_trace(trace: ExecutionTrace) -> Vec<u8> {
     let data = InterpreterData::from_execution_result(trace, <_>::default());
     serde_json::to_vec(&data).expect("default serializer shouldn't fail")
+}
+
+#[macro_export]
+macro_rules! assert_next_pks {
+    ($expected:expr, $actual:expr) => {
+        let expected: std::collections::HashSet<_> =
+            $expected.into_iter().map(|s| s.as_str()).collect();
+        let actual: std::collections::HashSet<_> = $actual.into_iter().map(|s| *s).collect();
+
+        assert_eq!(expected, actual)
+    };
 }
 
 pub fn print_trace(result: &InterpreterOutcome, trace_name: &str) {

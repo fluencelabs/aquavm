@@ -150,7 +150,21 @@ impl std::fmt::Display for ExecutedState {
             Call(CallServiceFailed(ret_code, err_msg)) => {
                 write!(f, r#"call_service_failed({}, "{}")"#, ret_code, err_msg)
             }
-            Fold(FoldResult(states)) => write!(f, "fold({:?})", states),
+            Fold(FoldResult(lore)) => {
+                writeln!(f, "fold(",)?;
+                for sublore in lore {
+                    writeln!(
+                        f,
+                        "          {} - [{}, {}], [{}, {}]",
+                        sublore.value_pos,
+                        sublore.subtraces_desc[0].begin_pos,
+                        sublore.subtraces_desc[0].subtrace_len,
+                        sublore.subtraces_desc[1].begin_pos,
+                        sublore.subtraces_desc[1].subtrace_len
+                    )?;
+                }
+                write!(f, "     )")
+            }
         }
     }
 }

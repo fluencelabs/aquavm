@@ -54,6 +54,10 @@ impl<'i> ExecutableInstruction<'i> for FoldStream<'i> {
                 trace_ctx,
             )?;
             trace_ctx.meet_generation_end(self.id.as_str())?;
+
+            if !exec_ctx.subtree_complete {
+                break;
+            }
         }
 
         trace_ctx.meet_fold_end(self.id.as_str())?;
