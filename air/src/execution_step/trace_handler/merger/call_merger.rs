@@ -95,7 +95,7 @@ impl MergerCallResult {
     pub(self) fn call_result(value: CallResult, data_keeper: &DataKeeper) -> Self {
         Self::CallResult {
             value,
-            trace_pos: data_keeper.result_trace.len(),
+            trace_pos: data_keeper.result_states_count(),
         }
     }
 }
