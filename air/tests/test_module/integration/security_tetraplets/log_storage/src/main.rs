@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-use fluence::marine;
+use marine_rs_sdk::marine;
 
 fn main() {}
 
 #[marine]
 fn delete(is_authorized: bool, _record_id: String) -> String {
-    let call_parameters = fluence::get_call_parameters();
+    let call_parameters = marine_rs_sdk::get_call_parameters();
     let tetraplets = call_parameters.tetraplets;
     let tetraplet = &tetraplets[0];
 
