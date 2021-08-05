@@ -23,7 +23,6 @@ pub(crate) use json_path_result::IterableJsonPathResult;
 pub(crate) use resolved_call::IterableResolvedCall;
 pub(crate) use vec_resolved_call::IterableVecResolvedCall;
 
-use crate::execution_step::trace_handler::ValueAndPos;
 use crate::JValue;
 use crate::SecurityTetraplet;
 
@@ -62,18 +61,16 @@ pub(crate) enum IterableItem<'ctx> {
 }
 
 impl IterableItem<'_> {
-    pub(crate) fn as_value_and_pos(&self) -> ValueAndPos {
+    pub(crate) fn pos(&self) -> usize {
         use IterableItem::*;
 
-        // this method is called only from RcValue (in fold_stream and next),
-        // so copying of JValue isn't actually happened here
-        let (value, pos) = match self {
-            RefRef((value, _, pos)) => (Rc::new((*value).clone()), *pos),
-            RefValue((value, _, pos)) => (Rc::new((*value).clone()), *pos),
-            RcValue((value, _, pos)) => (value.clone(), *pos),
+        let pos = match self {
+            RefRef((.., pos)) => pos,
+            RefValue((.., pos)) => pos,
+            RcValue((.., pos)) => pos,
         };
 
-        ValueAndPos { value, pos }
+        *pos
     }
 }
 

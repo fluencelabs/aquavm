@@ -43,8 +43,8 @@ impl<'i> ExecutableInstruction<'i> for FoldStream<'i> {
                 None => continue,
             };
 
-            let value = value.as_value_and_pos();
-            trace_ctx.meet_iteration_start(self.id.as_str(), &value)?;
+            let value_pos = value.pos();
+            trace_ctx.meet_iteration_start(self.id.as_str(), value_pos)?;
             fold(
                 iterable,
                 IterableType::Stream(self.id.clone()),

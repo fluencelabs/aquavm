@@ -69,7 +69,7 @@ fn execute_subtree<'i>(
             return Err(e);
         }
         Err(e) => {
-            trace_ctx.meet_par_subtree_end_with_error(subtree_type)?;
+            trace_ctx.meet_par_subtree_end(subtree_type)?;
             SubtreeResult::Failed(e)
         }
     };

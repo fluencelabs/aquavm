@@ -20,11 +20,14 @@ use super::TraceSlider;
 
 use air_interpreter_data::InterpreterData;
 
+use std::collections::HashMap;
+
 /// Keeps all necessary data for merging.
 #[derive(Debug, Default, PartialEq)]
 pub(crate) struct DataKeeper {
     pub(crate) prev_ctx: MergeCtx,
     pub(crate) current_ctx: MergeCtx,
+    pub(crate) new_to_old_pos: HashMap<usize, DataPositions>,
     pub(crate) result_trace: ExecutionTrace,
 }
 
@@ -36,6 +39,7 @@ impl DataKeeper {
         Self {
             prev_ctx,
             current_ctx,
+            new_to_old_pos: <_>::default(),
             result_trace: <_>::default(),
         }
     }
@@ -59,4 +63,10 @@ impl DataKeeper {
     pub(crate) fn current_slider_mut(&mut self) -> &mut TraceSlider {
         &mut self.current_ctx.slider
     }
+}
+
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
+pub(crate) struct DataPositions {
+    pub(crate) prev_pos: Option<usize>,
+    pub(crate) current_pos: Option<usize>,
 }

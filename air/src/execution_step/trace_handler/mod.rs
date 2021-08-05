@@ -26,13 +26,11 @@ pub(crate) use errors::TraceHandlerError;
 pub(crate) use handler::TraceHandler;
 pub(crate) use merger::MergerCallResult;
 pub(crate) use state_automata::SubtreeType;
-pub(crate) use state_automata::ValueAndPos;
 
 pub(crate) type TraceHandlerResult<T> = std::result::Result<T, TraceHandlerError>;
 
 pub(self) use air_interpreter_data::*;
 pub(self) use data_keeper::DataKeeper;
-pub(self) use data_keeper::TraceSlider;
 pub(self) use merger::MergeCtxType;
 pub(self) use merger::MergerFoldResult;
 pub(self) use merger::ResolvedFold;

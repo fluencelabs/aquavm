@@ -64,28 +64,15 @@ impl ParFSM {
         Ok(par_fsm)
     }
 
-    pub(crate) fn left_completed(&mut self, data_keeper: &mut DataKeeper) -> FSMResult<()> {
-        // self.check_subtraces_len(data_keeper, SubtreeType::Left)?;
-        self.left_completed_with_error(data_keeper);
-
-        Ok(())
-    }
-
-    pub(crate) fn left_completed_with_error(&mut self, data_keeper: &mut DataKeeper) {
+    pub(crate) fn left_completed(&mut self, data_keeper: &mut DataKeeper) {
         self.par_builder.track(data_keeper, SubtreeType::Left);
         self.state_handler.handle_subtree_end(data_keeper, SubtreeType::Left);
+
         // all invariants were checked in the ctor
         let _ = self.prepare_sliders(data_keeper, SubtreeType::Right);
     }
 
-    pub(crate) fn right_completed(self, data_keeper: &mut DataKeeper) -> FSMResult<()> {
-        // self.check_subtraces_len(data_keeper, SubtreeType::Right)?;
-        self.right_completed_with_error(data_keeper);
-
-        Ok(())
-    }
-
-    pub(crate) fn right_completed_with_error(mut self, data_keeper: &mut DataKeeper) {
+    pub(crate) fn right_completed(mut self, data_keeper: &mut DataKeeper) {
         self.par_builder.track(data_keeper, SubtreeType::Right);
         let state = self.par_builder.build();
         self.state_inserter.insert(data_keeper, state);
@@ -104,28 +91,8 @@ impl ParFSM {
 
         Ok(())
     }
-
-    /// Check that all values from interval were seen. Otherwise it's a error points out
-    /// that a trace contains more values in a left or right subtree of this par.
-    fn check_subtraces_len(&self, data_keeper: &DataKeeper, subtree_type: SubtreeType) -> FSMResult<()> {
-        use StateFSMError::ParSubtreeNonExhausted as NonExhausted;
-
-        let len_checker = |slider: &TraceSlider, par: ParResult| {
-            let subtrace_len = slider.subtrace_len();
-            if subtrace_len != 0 {
-                // unwrap is safe here because otherwise subtrace_len wouldn't be equal 0.
-                return Err(NonExhausted(subtree_type, par, subtrace_len));
-            }
-
-            Ok(())
-        };
-
-        len_checker(data_keeper.prev_slider(), self.prev_par)?;
-        len_checker(data_keeper.current_slider(), self.current_par)
-    }
 }
 
-use crate::execution_step::trace_handler::TraceSlider;
 use std::fmt;
 
 impl fmt::Display for SubtreeType {

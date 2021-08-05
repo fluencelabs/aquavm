@@ -22,7 +22,6 @@ mod state_inserter;
 mod utils;
 
 pub(crate) use errors::StateFSMError;
-pub(crate) use fold_fsm::ValueAndPos;
 pub(crate) use par_fsm::SubtreeType;
 pub(crate) type FSMResult<T> = std::result::Result<T, StateFSMError>;
 
@@ -30,6 +29,7 @@ pub(super) use fold_fsm::FoldFSM;
 pub(super) use fsm_queue::FSMKeeper;
 pub(super) use par_fsm::ParFSM;
 
+use super::data_keeper::DataPositions;
 use super::data_keeper::KeeperError;
 use super::merger::MergerParResult;
 use super::DataKeeper;

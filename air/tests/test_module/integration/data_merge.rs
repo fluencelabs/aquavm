@@ -204,7 +204,7 @@ fn acc_merge() {
 }
 
 #[test]
-fn fold_merge__() {
+fn fold_merge() {
     use std::ops::Deref;
 
     let set_variable_vm_id = "set_variable";

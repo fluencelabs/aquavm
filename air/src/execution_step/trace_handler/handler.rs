@@ -93,26 +93,11 @@ impl TraceHandler {
         match subtree_type {
             SubtreeType::Left => {
                 let par_fsm = self.fsm_keeper.last_par()?;
-                par_fsm.left_completed(&mut self.data_keeper)?;
+                par_fsm.left_completed(&mut self.data_keeper);
             }
             SubtreeType::Right => {
                 let par_fsm = self.fsm_keeper.pop_par()?;
-                par_fsm.right_completed(&mut self.data_keeper)?;
-            }
-        }
-
-        Ok(())
-    }
-
-    pub(crate) fn meet_par_subtree_end_with_error(&mut self, subtree_type: SubtreeType) -> TraceHandlerResult<()> {
-        match subtree_type {
-            SubtreeType::Left => {
-                let par_fsm = self.fsm_keeper.last_par()?;
-                par_fsm.left_completed_with_error(&mut self.data_keeper);
-            }
-            SubtreeType::Right => {
-                let par_fsm = self.fsm_keeper.pop_par()?;
-                par_fsm.right_completed_with_error(&mut self.data_keeper);
+                par_fsm.right_completed(&mut self.data_keeper);
             }
         }
 
@@ -129,9 +114,9 @@ impl TraceHandler {
         Ok(())
     }
 
-    pub(crate) fn meet_iteration_start(&mut self, fold_id: &str, value: &ValueAndPos) -> TraceHandlerResult<()> {
+    pub(crate) fn meet_iteration_start(&mut self, fold_id: &str, value_pos: usize) -> TraceHandlerResult<()> {
         let fold_fsm = self.fsm_keeper.fold_mut(fold_id)?;
-        fold_fsm.meet_iteration_start(value, &mut self.data_keeper)?;
+        fold_fsm.meet_iteration_start(value_pos, &mut self.data_keeper)?;
 
         Ok(())
     }

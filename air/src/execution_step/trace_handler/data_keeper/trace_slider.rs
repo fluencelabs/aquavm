@@ -95,19 +95,6 @@ impl TraceSlider {
         Ok(())
     }
 
-    pub(crate) fn state_by_pos(&mut self, pos: u32) -> KeeperResult<&ExecutedState> {
-        let pos = pos as usize;
-        if pos >= self.trace.len() {
-            return Err(GettingElementByPosFailed {
-                requested_pos: pos,
-                trace_len: self.trace.len(),
-            });
-        }
-
-        let state = &self.trace[pos];
-        Ok(state)
-    }
-
     pub(crate) fn position(&self) -> usize {
         self.position
     }

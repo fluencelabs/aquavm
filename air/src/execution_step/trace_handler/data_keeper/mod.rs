@@ -21,6 +21,7 @@ mod trace_slider;
 
 pub(crate) use errors::KeeperError;
 pub(crate) use keeper::DataKeeper;
+pub(crate) use keeper::DataPositions;
 pub(super) use merge_ctx::MergeCtx;
 pub(super) use trace_slider::TraceSlider;
 

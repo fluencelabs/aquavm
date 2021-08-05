@@ -40,10 +40,6 @@ pub(crate) enum MergeError {
     #[error("previous and current call results are incompatible: '{0:?}' '{1:?}'")]
     IncompatibleCallResults(CallResult, CallResult),
 
-    /// Errors occurred when executed state contains not call result that was expected to see from fold result value pos.
-    #[error("tried to obtain CallResult::Resolved by fold_result.value_pos position, but the actual state is {0:?}")]
-    FoldPointsToNonCallResult(ExecutedState),
-
     /// Errors occurred when one of the fold subtrace lore doesn't contain 2 descriptors.
     #[error("fold contains {0} sublore descriptors, but 2 is expected")]
     FoldIncorrectSubtracesCount(usize),

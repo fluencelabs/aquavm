@@ -72,14 +72,6 @@ fn check_subtrace_lore(subtrace_lore: &FoldSubTraceLore) -> MergeResult<()> {
     Ok(())
 }
 
-fn call_value_by_pos(slider: &mut TraceSlider, pos: u32) -> MergeResult<Rc<JValue>> {
-    let state = slider.state_by_pos(pos)?;
-    match state {
-        ExecutedState::Call(CallResult::Executed(value, _)) => Ok(value.clone()),
-        _ => Err(MergeError::FoldPointsToNonCallResult(state.clone())),
-    }
-}
-
 impl ResolvedFold {
     pub(crate) fn new(lore: HashMap<usize, ResolvedSubTraceDescs>, fold_states_count: usize) -> Self {
         Self {

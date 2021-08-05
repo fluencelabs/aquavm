@@ -63,7 +63,6 @@ macro_rules! execute_fold {
     ($self:expr, $instr:expr, $exec_ctx:ident, $trace_ctx:ident) => {
         match $instr.execute($exec_ctx, $trace_ctx) {
             Err(e) => {
-                println!("error from fold: {}", e);
                 $trace_ctx.fold_end_with_error($instr.id.as_str());
 
                 if !$exec_ctx.last_error_could_be_set {

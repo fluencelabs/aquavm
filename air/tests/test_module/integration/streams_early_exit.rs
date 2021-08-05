@@ -66,7 +66,6 @@ fn par_early_exit() {
     let init_result_3 = checked_call_vm!(init, "", &script, init_result_2.data.clone(), setter_2_res.data.clone());
     let init_result_4 = checked_call_vm!(init, "", &script, init_result_3.data.clone(), setter_3_res.data.clone());
     let actual_trace_4 = trace_from_result(&init_result_4);
-    print_trace(&init_result_4, "init result 4");
 
     let expected_trace = vec![
         executed_state::scalar_string("test"),

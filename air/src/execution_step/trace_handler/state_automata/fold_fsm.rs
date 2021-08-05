@@ -20,15 +20,12 @@ mod lore_ctor_queue;
 mod state_handler;
 
 use super::*;
-use crate::JValue;
 use lore_applier::*;
 use lore_ctor::*;
 use lore_ctor_queue::*;
 use state_handler::CtxStateHandler;
 
 use air_interpreter_data::FoldLore;
-
-use std::rc::Rc;
 
 /// This FSM manages fold and keeps internally queue of lore ctors.
 /// State transitioning functions must work in the following way:
@@ -47,12 +44,6 @@ pub(crate) struct FoldFSM {
     ctor_queue: SubTraceLoreCtorQueue,
     result_lore: FoldLore,
     state_handler: CtxStateHandler,
-}
-
-#[derive(Debug, Clone)]
-pub(crate) struct ValueAndPos {
-    pub(crate) value: Rc<JValue>,
-    pub(crate) pos: usize,
 }
 
 impl FoldFSM {
@@ -79,13 +70,28 @@ impl FoldFSM {
         Ok(fold_fsm)
     }
 
-    pub(crate) fn meet_iteration_start(&mut self, value: &ValueAndPos, data_keeper: &mut DataKeeper) -> FSMResult<()> {
-        let prev_lore = self.prev_fold.lore.remove(&value.pos);
-        let current_lore = self.current_fold.lore.remove(&value.pos);
+    pub(crate) fn meet_iteration_start(&mut self, value_pos: usize, data_keeper: &mut DataKeeper) -> FSMResult<()> {
+        let (prev_pos, current_pos) = match data_keeper.new_to_old_pos.get(&value_pos) {
+            Some(DataPositions { prev_pos, current_pos }) => (prev_pos, current_pos),
+            None => return self.prepare(None, None, value_pos, data_keeper),
+        };
 
+        let prev_lore = prev_pos.map(|pos| self.prev_fold.lore.remove(&pos)).flatten();
+        let current_lore = current_pos.map(|pos| self.current_fold.lore.remove(&pos)).flatten();
+
+        self.prepare(prev_lore, current_lore, value_pos, data_keeper)
+    }
+
+    fn prepare(
+        &mut self,
+        prev_lore: Option<ResolvedSubTraceDescs>,
+        current_lore: Option<ResolvedSubTraceDescs>,
+        value_pos: usize,
+        data_keeper: &mut DataKeeper,
+    ) -> FSMResult<()> {
         apply_fold_lore_before(data_keeper, &prev_lore, &current_lore)?;
 
-        let ctor = SubTraceLoreCtor::from_before_start(value.pos, data_keeper);
+        let ctor = SubTraceLoreCtor::from_before_start(value_pos, data_keeper);
         self.ctor_queue.add_element(ctor, prev_lore, current_lore);
 
         Ok(())

@@ -31,9 +31,9 @@ pub(crate) use par_merger::MergerParResult;
 
 pub(self) type MergeResult<T> = std::result::Result<T, MergeError>;
 
+use super::data_keeper::DataPositions;
 pub(self) use super::data_keeper::KeeperError;
 pub(self) use super::DataKeeper;
-pub(self) use super::TraceSlider;
 
 use air_interpreter_data::*;
 

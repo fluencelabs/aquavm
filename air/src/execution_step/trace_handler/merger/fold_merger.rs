@@ -17,10 +17,7 @@
 mod utils;
 
 use super::*;
-use crate::JValue;
 pub(crate) use utils::*;
-
-use std::rc::Rc;
 
 #[derive(Debug, Default, Clone)]
 pub(crate) struct MergerFoldResult {

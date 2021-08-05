@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+mod call_result_constructor;
 mod utils;
 
 use super::*;
+use call_result_constructor::*;
 use utils::*;
 use MergeError::IncompatibleCallResults;
 
@@ -37,6 +39,7 @@ pub(crate) fn try_merge_next_state_as_call(
     output_value: &CallOutputValue<'_>,
 ) -> MergeResult<MergerCallResult> {
     use ExecutedState::Call;
+    use PrepareScheme::*;
 
     let prev_state = data_keeper.prev_slider_mut().next_state();
     let current_state = data_keeper.current_slider_mut().next_state();
@@ -47,17 +50,18 @@ pub(crate) fn try_merge_next_state_as_call(
         // this special case is needed to merge stream generation in a right way
         (None, Some(Call(call @ CallResult::Executed(..)))) => {
             let call_result = merge_current_executed(call, value_type, data_keeper)?;
-            return Ok(MergerCallResult::call_result(call_result, data_keeper));
+            return Ok(prepare_call_result(call_result, Current, data_keeper));
         }
-        (None, Some(Call(current_call))) => return Ok(MergerCallResult::call_result(current_call, data_keeper)),
-        (Some(Call(prev_call)), None) => return Ok(MergerCallResult::call_result(prev_call, data_keeper)),
+        (None, Some(Call(current_call))) => return Ok(prepare_call_result(current_call, Current, data_keeper)),
+        (Some(Call(prev_call)), None) => return Ok(prepare_call_result(prev_call, Previous, data_keeper)),
         (None, None) => return Ok(MergerCallResult::Empty),
         (prev_state, current_state) => return Err(MergeError::incompatible_states(prev_state, current_state, "call")),
     };
 
     let merged_call = merge_call_result(prev_call, current_call, value_type, data_keeper)?;
+    let call_result = prepare_call_result(merged_call, Both, data_keeper);
 
-    Ok(MergerCallResult::call_result(merged_call, data_keeper))
+    Ok(call_result)
 }
 
 fn merge_call_result(
@@ -89,15 +93,6 @@ fn merge_call_result(
     };
 
     Ok(merged_state)
-}
-
-impl MergerCallResult {
-    pub(self) fn call_result(value: CallResult, data_keeper: &DataKeeper) -> Self {
-        Self::CallResult {
-            value,
-            trace_pos: data_keeper.result_states_count(),
-        }
-    }
 }
 
 #[derive(Debug, Copy, Clone)]

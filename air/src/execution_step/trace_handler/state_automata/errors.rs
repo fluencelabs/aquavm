@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-use super::par_fsm::SubtreeType;
 use super::KeeperError;
 use super::ParResult;
 use crate::execution_step::trace_handler::MergeCtxType;
@@ -57,12 +56,6 @@ pub(crate) enum StateFSMError {
     /// Errors occurred while trying to set a total_subtrace_len that is less than
     #[error("trying to set total_subtrace_len {0} that is less then len set before {1} for {2} ctx")]
     TotalSubtraceLenIsLess(usize, usize, MergeCtxType),
-
-    /// Errors occurred when a subtree of a Par instructions was finished but remaining interval isn't empty.
-    #[error(
-        "par {0} subtree of '{1:?}' was completed, but its interval was not fully exhausted and contains {2} elements"
-    )]
-    ParSubtreeNonExhausted(SubtreeType, ParResult, usize),
 
     /// Errors bubbled from DataKeeper.
     #[error("{0}")]

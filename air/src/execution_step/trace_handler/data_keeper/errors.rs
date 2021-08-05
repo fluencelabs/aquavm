@@ -41,11 +41,4 @@ pub(crate) enum KeeperError {
         requested_subtrace_len: usize,
         trace_len: usize,
     },
-
-    /// Errors occurred when executing trace contains less elements then requested position.
-    #[error(
-        "getting element by position {requested_pos} from trace failed,\
-        because trace contains only {trace_len} elements"
-    )]
-    GettingElementByPosFailed { requested_pos: usize, trace_len: usize },
 }
