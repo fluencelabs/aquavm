@@ -31,7 +31,7 @@ mod logger;
 
 use air::execute_air;
 use air::InterpreterOutcome;
-use fluence::marine;
+use marine_rs_sdk::marine;
 
 pub fn main() {
     logger::init_logger(None);

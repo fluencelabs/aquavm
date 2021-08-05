@@ -14,7 +14,7 @@ doctest = false
 air-parser = { path = "../crates/air-parser" }
 polyplets = { path = "../crates/polyplets" }
 air-interpreter-interface = { path = "../crates/interpreter-interface" }
-fluence = { version = "0.6.8", features = ["logger"] }
+marine-rs-sdk = { version = "0.6.11", features = ["logger"] }
 
 serde = { version = "=1.0.118", features = [ "derive", "rc" ] }
 serde_json = "=1.0.61"
@@ -30,7 +30,7 @@ wasm-bindgen = "=0.2.65"
 
 [dev_dependencies]
 air-test-utils = { path = "../crates/test-utils" }
-fluence-app-service = "0.7.0"
+fluence-app-service = "0.9.0"
 
 criterion = "0.3.3"
 csv = "1.1.5"

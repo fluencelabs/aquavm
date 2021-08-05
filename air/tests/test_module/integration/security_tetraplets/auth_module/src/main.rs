@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use fluence::marine;
+use marine_rs_sdk::marine;
 
 const ADMIN_PEER_PK: &str = "12D3KooWEXNUbCXooUwHrHBbrmjsrpHXoEphPwbjQXEGyzbqKnE1";
 
@@ -27,7 +27,7 @@ struct AuthResult {
 
 #[marine]
 fn is_authorized() -> AuthResult {
-    let call_parameters = fluence::get_call_parameters();
+    let call_parameters = marine_rs_sdk::get_call_parameters();
     let is_authorized = call_parameters.init_peer_id == ADMIN_PEER_PK;
 
     AuthResult {

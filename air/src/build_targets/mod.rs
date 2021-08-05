@@ -24,7 +24,7 @@ use serde::Serialize;
 
 pub const CALL_SERVICE_SUCCESS: i32 = 0;
 
-#[fluence::marine]
+#[marine_rs_sdk::marine]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CallServiceResult {
     pub ret_code: i32,
