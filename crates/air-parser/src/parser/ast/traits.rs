@@ -148,6 +148,7 @@ impl fmt::Display for Instruction<'_> {
         match self {
             Null(null) => write!(f, "{}", null),
             Call(call) => write!(f, "{}", call),
+            Ap(ap) => write!(f, "{}", ap),
             Seq(seq) => write!(f, "{}", seq),
             Par(par) => write!(f, "{}", par),
             Xor(xor) => write!(f, "{}", xor),
@@ -171,6 +172,16 @@ impl fmt::Display for Call<'_> {
         write!(f, " [{}]", args)?;
 
         write!(f, " {}", self.output)
+    }
+}
+
+impl fmt::Display for Ap<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "ap {}.{}{} {}",
+            self.variable, self.path, self.should_flatten, self.output
+        )
     }
 }
 

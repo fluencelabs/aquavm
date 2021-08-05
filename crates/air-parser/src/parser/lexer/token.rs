@@ -40,6 +40,7 @@ pub enum Token<'input> {
     LastError(LastErrorPath),
 
     Call,
+    Ap,
     Seq,
     Par,
     Null,

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+mod ap;
 mod call;
 mod compare_matchable;
 mod fold;
@@ -117,6 +118,7 @@ impl<'i> ExecutableInstruction<'i> for Instruction<'i> {
             // it internally sets last_error with resolved triplet
             Instruction::Call(call) => call.execute(exec_ctx, trace_ctx),
 
+            Instruction::Ap(ap) => execute!(self, ap, exec_ctx, trace_ctx),
             Instruction::FoldScalar(fold) => execute!(self, fold, exec_ctx, trace_ctx),
             Instruction::FoldStream(fold) => execute_fold!(self, fold, exec_ctx, trace_ctx),
             Instruction::Next(next) => execute!(self, next, exec_ctx, trace_ctx),

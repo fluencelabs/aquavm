@@ -19,13 +19,28 @@ pub AIR = Instr;
 
 Instr: Box<Instruction<'input>> = {
     <left: @L> "(" call <peer_part:PeerPart> <function_part:FPart> <args:Args> <output:Output?> ")" <right: @R> => {
-        let output = output.unwrap_or(CallOutputValue::None);
+        let output = output.map(CallOutputValue::Variable).unwrap_or(CallOutputValue::None);
         let args = Rc::new(args);
         let call = Call { peer_part, function_part, args, output };
         let span = Span { left, right };
         validator.met_call(&call, span);
 
         Box::new(Instruction::Call(call))
+    },
+
+    <left: @L> "(" ap <arg:JsonPath> <output:Output> ")" <right: @R> => {
+        let variable = arg.0;
+        let path = arg.1;
+        let should_flatten = arg.2;
+
+        let apply = Ap {
+            variable,
+            path,
+            should_flatten,
+            output
+        };
+
+        Box::new(Instruction::Ap(apply))
     },
 
     "(" seq <l:Instr> <r:Instr> ")" => Box::new(Instruction::Seq(Seq(l, r))),
@@ -94,9 +109,9 @@ PeerPart: PeerPart<'input> = {
     "(" <pid:PeerId> <sid:ServiceId> ")" => PeerPart::PeerPkWithServiceId(pid, sid),
 }
 
-Output: CallOutputValue<'input> = {
-    <a:Alphanumeric> => CallOutputValue::Variable(Variable::Scalar(a)),
-    <s:Stream> => CallOutputValue::Variable(Variable::Stream(s)),
+Output: Variable<'input> = {
+    <a:Alphanumeric> => Variable::Scalar(a),
+    <s:Stream> => Variable::Stream(s),
 };
 
 Function = CallInstrValue;
@@ -183,6 +198,7 @@ extern {
         LastError => Token::LastError(<LastErrorPath>),
 
         call => Token::Call,
+        ap => Token::Ap,
         seq => Token::Seq,
         par => Token::Par,
         null => Token::Null,

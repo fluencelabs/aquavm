@@ -32,6 +32,7 @@ use std::rc::Rc;
 pub enum Instruction<'i> {
     Null(Null),
     Call(Call<'i>),
+    Ap(Ap<'i>),
     Seq(Seq<'i>),
     Par(Par<'i>),
     Xor(Xor<'i>),
@@ -61,6 +62,14 @@ pub struct Call<'i> {
     pub function_part: FunctionPart<'i>,
     pub args: Rc<Vec<CallInstrArgValue<'i>>>,
     pub output: CallOutputValue<'i>,
+}
+
+#[derive(Serialize, Debug, PartialEq)]
+pub struct Ap<'i> {
+    pub variable: Variable<'i>,
+    pub path: &'i str,
+    pub should_flatten: bool,
+    pub output: Variable<'i>,
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
