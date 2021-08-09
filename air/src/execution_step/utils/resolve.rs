@@ -15,9 +15,9 @@
  */
 
 use crate::execution_step::boxed_value::JValuable;
-use crate::execution_step::execution_context::AValue;
 use crate::execution_step::execution_context::ExecutionCtx;
 use crate::execution_step::execution_context::LastErrorWithTetraplets;
+use crate::execution_step::execution_context::ScalarValue;
 use crate::execution_step::ExecutionError;
 use crate::execution_step::ExecutionResult;
 use crate::JValue;
@@ -89,12 +89,11 @@ fn resolve_variable<'ctx, 'i>(
     match variable {
         Variable::Scalar(name) => resolve_to_jvaluable(name, ctx),
         Variable::Stream(name) => {
-            // return an empty stream for not found stream
-            // here it ignores the join behaviour
-            if ctx.data_cache.get(*name).is_none() {
-                Ok(Box::new(()))
-            } else {
-                resolve_to_jvaluable(name, ctx)
+            match ctx.streams.get(*name) {
+                Some(stream) => Ok(Box::new(stream.borrow())),
+                // return an empty stream for not found stream
+                // here it ignores the join behaviour
+                None => Ok(Box::new(())),
             }
         }
     }
@@ -133,14 +132,13 @@ pub(crate) fn resolve_to_jvaluable<'name, 'i, 'ctx>(
     use ExecutionError::VariableNotFound;
 
     let value = ctx
-        .data_cache
+        .scalars
         .get(name)
         .ok_or_else(|| VariableNotFound(name.to_string()))?;
 
     match value {
-        AValue::JValueRef(value) => Ok(Box::new(value.clone())),
-        AValue::StreamRef(stream) => Ok(Box::new(stream.borrow())),
-        AValue::JValueFoldCursor(fold_state) => {
+        ScalarValue::JValueRef(value) => Ok(Box::new(value.clone())),
+        ScalarValue::JValueFoldCursor(fold_state) => {
             let peeked_value = fold_state.iterable.peek().unwrap();
             Ok(Box::new(peeked_value))
         }

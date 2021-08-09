@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-use super::AValue;
 use super::ExecutionCtx;
 use super::ExecutionResult;
 use super::FoldState;
+use super::ScalarValue;
 
 use std::collections::HashMap;
 
@@ -39,29 +39,29 @@ impl<'i> VariableHandler<'i> {
     }
 
     pub(crate) fn cleanup(self, exec_ctx: &mut ExecutionCtx<'_>) {
-        let fold_state = match exec_ctx.data_cache.remove(self.iterator) {
-            Some(AValue::JValueFoldCursor(fold_state)) => fold_state,
+        let fold_state = match exec_ctx.scalars.remove(self.iterator) {
+            Some(ScalarValue::JValueFoldCursor(fold_state)) => fold_state,
             _ => unreachable!("fold cursor is changed only inside fold block"),
         };
 
         for (variable_name, _) in fold_state.met_variables {
-            exec_ctx.data_cache.remove(variable_name);
+            exec_ctx.scalars.remove(variable_name);
         }
         exec_ctx.met_folds.pop_back();
 
         // TODO: fix 3 or more inner folds behaviour
         if let Some(fold_block_name) = exec_ctx.met_folds.back() {
-            let fold_state = match exec_ctx.data_cache.get(*fold_block_name) {
-                Some(AValue::JValueFoldCursor(fold_state)) => fold_state,
+            let fold_state = match exec_ctx.scalars.get(*fold_block_name) {
+                Some(ScalarValue::JValueFoldCursor(fold_state)) => fold_state,
                 _ => unreachable!("fold block data must be represented as fold cursor"),
             };
 
             let mut upper_fold_values = HashMap::new();
             for (variable_name, variable) in fold_state.met_variables.iter() {
-                upper_fold_values.insert(variable_name.to_string(), AValue::JValueRef(variable.clone()));
+                upper_fold_values.insert(variable_name.to_string(), ScalarValue::JValueRef(variable.clone()));
             }
 
-            exec_ctx.data_cache.extend(upper_fold_values);
+            exec_ctx.scalars.extend(upper_fold_values);
         }
     }
 
@@ -73,8 +73,8 @@ impl<'i> VariableHandler<'i> {
         use super::ExecutionError::MultipleFoldStates;
 
         let previous_value = exec_ctx
-            .data_cache
-            .insert(iterator.to_string(), AValue::JValueFoldCursor(fold_state));
+            .scalars
+            .insert(iterator.to_string(), ScalarValue::JValueFoldCursor(fold_state));
 
         if previous_value.is_some() {
             return crate::exec_err!(MultipleFoldStates(iterator.to_string()));

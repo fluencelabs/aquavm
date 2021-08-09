@@ -88,12 +88,18 @@ pub type FoldLore = Vec<FoldSubTraceLore>;
 #[serde(rename_all = "snake_case")]
 pub struct FoldResult(pub FoldLore);
 
+/// Describes result of applying functor `apply` to streams. This functor has the
+#[derive(Debug, Default, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub struct ApResult(pub Vec<u32>, Vec<u32>);
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum ExecutedState {
     Par(ParResult),
     Call(CallResult),
     Fold(FoldResult),
+    Ap(ApResult),
 }
 
 impl ParResult {
@@ -164,7 +170,8 @@ impl std::fmt::Display for ExecutedState {
                     )?;
                 }
                 write!(f, "     )")
-            }
+            },
+            Ap(ap) => Ok(()),
         }
     }
 }

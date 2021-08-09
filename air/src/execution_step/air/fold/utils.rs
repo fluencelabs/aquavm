@@ -60,8 +60,8 @@ pub(crate) fn construct_stream_iterable_value<'ctx>(
     stream_name: &'ctx str,
     exec_ctx: &ExecutionCtx<'ctx>,
 ) -> ExecutionResult<FoldIterableStream> {
-    match exec_ctx.data_cache.get(stream_name) {
-        Some(AValue::StreamRef(stream)) => {
+    match exec_ctx.streams.get(stream_name) {
+        Some(stream) => {
             let stream = stream.borrow();
             if stream.is_empty() {
                 return Ok(FoldIterableStream::Empty);
@@ -82,12 +82,9 @@ pub(crate) fn construct_stream_iterable_value<'ctx>(
 
             Ok(FoldIterableStream::Stream(iterables))
         }
-        Some(_) => exec_err!(ExecutionError::InternalError(
-            "stream points to scalar value".to_string()
-        )),
         // it's possible to met streams without variables at the moment in fold,
         // they should be treated as empty.
-        _ => Ok(FoldIterableStream::Empty),
+        None => Ok(FoldIterableStream::Empty),
     }
 }
 
@@ -95,14 +92,9 @@ fn create_scalar_iterable<'ctx>(
     exec_ctx: &ExecutionCtx<'ctx>,
     variable_name: &str,
 ) -> ExecutionResult<FoldIterableScalar> {
-    match exec_ctx.data_cache.get(variable_name) {
-        Some(AValue::JValueRef(call_result)) => from_call_result(call_result.clone()),
-        // TODO: refactor this after switching to boxed value, stream and scalar should live in a separate fields
-        Some(AValue::StreamRef(stream)) => exec_err!(ExecutionError::InternalError(format!(
-            "scalar name points to stream: {:?}",
-            stream
-        ))),
-        Some(AValue::JValueFoldCursor(fold_state)) => {
+    match exec_ctx.scalars.get(variable_name) {
+        Some(ScalarValue::JValueRef(call_result)) => from_call_result(call_result.clone()),
+        Some(ScalarValue::JValueFoldCursor(fold_state)) => {
             let iterable_value = fold_state.iterable.peek().unwrap();
             let jvalue = iterable_value.as_jvalue();
             let result = Rc::new(jvalue.into_owned());
@@ -145,28 +137,23 @@ fn from_call_result(call_result: ResolvedCallResult) -> ExecutionResult<FoldIter
 
 fn create_scalar_json_path_iterable<'ctx>(
     exec_ctx: &ExecutionCtx<'ctx>,
-    variable_name: &str,
+    scalar_name: &str,
     json_path: &str,
     should_flatten: bool,
 ) -> ExecutionResult<FoldIterableScalar> {
-    match exec_ctx.data_cache.get(variable_name) {
-        Some(AValue::JValueRef(variable)) => {
+    match exec_ctx.scalars.get(scalar_name) {
+        Some(ScalarValue::JValueRef(variable)) => {
             let jvalues = apply_json_path(&variable.result, json_path)?;
             from_jvalues(jvalues, variable.triplet.clone(), json_path, should_flatten)
         }
-        // TODO: refactor this after switching to boxed value, stream and scalar should live in a separate fields
-        Some(AValue::StreamRef(stream)) => exec_err!(ExecutionError::InternalError(format!(
-            "scalar name points to stream: {:?}",
-            stream
-        ))),
-        Some(AValue::JValueFoldCursor(fold_state)) => {
+        Some(ScalarValue::JValueFoldCursor(fold_state)) => {
             let iterable_value = fold_state.iterable.peek().unwrap();
             let jvalues = iterable_value.apply_json_path(json_path)?;
             let triplet = as_triplet(&iterable_value);
 
             from_jvalues(jvalues, triplet, json_path, should_flatten)
         }
-        _ => return exec_err!(ExecutionError::VariableNotFound(variable_name.to_string())),
+        _ => return exec_err!(ExecutionError::VariableNotFound(scalar_name.to_string())),
     }
 }
 

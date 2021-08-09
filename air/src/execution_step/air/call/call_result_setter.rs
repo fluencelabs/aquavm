@@ -60,9 +60,9 @@ macro_rules! shadowing_allowed(
         }
 
         match $entry.get() {
-            AValue::JValueRef(_) => {}
-            // shadowing is allowed only for scalar values
-            _ => return exec_err!(ExecutionError::NonScalarShadowing($entry.key().clone())),
+            ScalarValue::JValueRef(_) => {}
+            // shadowing is allowed only for JValue not iterable
+            _ => return exec_err!(ExecutionError::IterableShadowing($entry.key().clone())),
         };
 
         ExecutionResult::Ok(())
@@ -76,14 +76,14 @@ fn set_scalar_result<'i>(
 ) -> ExecutionResult<()> {
     meet_scalar(scalar_name, executed_result.clone(), exec_ctx)?;
 
-    match exec_ctx.data_cache.entry(scalar_name.to_string()) {
+    match exec_ctx.scalars.entry(scalar_name.to_string()) {
         Vacant(entry) => {
-            entry.insert(AValue::JValueRef(executed_result));
+            entry.insert(ScalarValue::JValueRef(executed_result));
         }
         Occupied(mut entry) => {
             // the macro instead of a function because of borrowing
             shadowing_allowed!(exec_ctx, entry)?;
-            entry.insert(AValue::JValueRef(executed_result));
+            entry.insert(ScalarValue::JValueRef(executed_result));
         }
     };
 
@@ -97,8 +97,8 @@ fn meet_scalar<'i>(
     exec_ctx: &mut ExecutionCtx<'i>,
 ) -> ExecutionResult<()> {
     if let Some(fold_block_name) = exec_ctx.met_folds.back() {
-        let fold_state = match exec_ctx.data_cache.get_mut(*fold_block_name) {
-            Some(AValue::JValueFoldCursor(fold_state)) => fold_state,
+        let fold_state = match exec_ctx.scalars.get_mut(*fold_block_name) {
+            Some(ScalarValue::JValueFoldCursor(fold_state)) => fold_state,
             _ => unreachable!("fold block data must be represented as fold cursor"),
         };
 
@@ -114,17 +114,14 @@ fn set_stream_result(
     stream_name: String,
     exec_ctx: &mut ExecutionCtx<'_>,
 ) -> ExecutionResult<u32> {
-    use ExecutionError::IncompatibleAValueType;
-
-    let generation = match exec_ctx.data_cache.entry(stream_name) {
-        Occupied(mut entry) => match entry.get_mut() {
+    let generation = match exec_ctx.streams.entry(stream_name) {
+        Occupied(mut entry) => {
             // if result is an array, insert result to the end of the array
-            AValue::StreamRef(stream) => stream.borrow_mut().add_value(executed_result, generation)?,
-            v => return exec_err!(IncompatibleAValueType(format!("{}", v), String::from("Array"))),
-        },
+            entry.get_mut().borrow_mut().add_value(executed_result, generation)?
+        }
         Vacant(entry) => {
             let stream = Stream::from_value(executed_result);
-            entry.insert(AValue::StreamRef(RefCell::new(stream)));
+            entry.insert(RefCell::new(stream));
             0
         }
     };

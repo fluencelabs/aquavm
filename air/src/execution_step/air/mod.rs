@@ -141,15 +141,23 @@ macro_rules! log_instruction {
     ($instr_name:expr, $exec_ctx:expr, $trace_ctx:expr) => {
         log::debug!(target: crate::log_targets::INSTRUCTION, "> {}", stringify!($instr_name));
 
-        let mut data_cache_log = String::from("  data cache:");
-        if $exec_ctx.data_cache.is_empty() {
-            data_cache_log.push_str(" empty");
+        let mut variables = String::from("  scalars:");
+        if $exec_ctx.scalars.is_empty() {
+            variables.push_str("   empty");
         }
-        for (key, value) in $exec_ctx.data_cache.iter() {
-            data_cache_log.push_str(&format!("\n    {} => {}", key, value));
+        for (key, value) in $exec_ctx.scalars.iter() {
+            variables.push_str(&format!("\n    {} => {}", key, value));
         }
 
-        log::trace!(target: crate::log_targets::DATA_CACHE, "{}", data_cache_log);
+        variables.push_str("  streams:");
+        if $exec_ctx.streams.is_empty() {
+            variables.push_str("   empty");
+        }
+        for (key, value) in $exec_ctx.streams.iter() {
+            variables.push_str(&format!("\n    {} => {}", key, value.borrow()));
+        }
+
+        log::trace!(target: crate::log_targets::DATA_CACHE, "{}", variables);
         log::trace!(
             target: crate::log_targets::NEXT_PEER_PKS,
             "  next peers pk: {:?}",

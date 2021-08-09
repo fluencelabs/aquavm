@@ -17,11 +17,11 @@
 use super::ExecutionCtx;
 use super::ExecutionResult;
 use super::TraceHandler;
+use crate::execution_step::utils::get_variable_name;
 use crate::execution_step::utils::resolve_to_args;
-use crate::execution_step::AValue;
 use crate::execution_step::Generation;
 
-use air_parser::ast::{Ap, CallInstrArgValue, Variable};
+use air_parser::ast::{Ap, CallInstrArgValue};
 
 use crate::execution_step::air::ResolvedCallResult;
 use std::rc::Rc;
@@ -38,22 +38,14 @@ impl<'i> super::ExecutableInstruction<'i> for Ap<'i> {
 
         let output = &self.output;
         let variable_name = get_variable_name(output);
-        match exec_ctx.data_cache.get(variable_name) {
-            Some(AValue::StreamRef(stream)) => {
+        match exec_ctx.streams.get(variable_name) {
+            Some(stream) => {
                 let resolved_call = ResolvedCallResult::new(Rc::new(jvalue), tetraplet[0].triplet.clone(), 0);
                 stream.borrow_mut().add_value(resolved_call, Generation::Last)?;
             }
-            // TODO: change this after boxed value refactoring
-            _ => unreachable!(),
+            _ => unreachable!("return a error"),
         };
 
         Ok(())
-    }
-}
-
-pub(crate) fn get_variable_name<'a>(variable: &'a Variable<'_>) -> &'a str {
-    match variable {
-        Variable::Scalar(name) => name,
-        Variable::Stream(name) => name,
     }
 }

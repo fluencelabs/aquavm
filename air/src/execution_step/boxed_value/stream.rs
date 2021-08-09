@@ -19,6 +19,7 @@ use super::ExecutionResult;
 use crate::exec_err;
 use crate::execution_step::execution_context::ResolvedCallResult;
 use crate::JValue;
+use std::fmt::Formatter;
 
 /// Streams are CRDT-like append only data structures. They are guaranteed to have the same order
 /// of values on each peer.
@@ -124,3 +125,23 @@ impl<'a> Iterator for StreamIter<'a> {
 }
 
 impl<'a> ExactSizeIterator for StreamIter<'a> {}
+
+use std::fmt;
+impl fmt::Display for Stream {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        if self.0.is_empty() {
+            return write!(f, "[]");
+        }
+
+        write!(f, "[ ")?;
+        for (id, generation) in self.0.iter().enumerate() {
+            write!(f, " -- {}: ", id)?;
+            for value in generation.iter() {
+                write!(f, "{:?}, ", value)?;
+            }
+            writeln!(f)?;
+        }
+
+        write!(f, "]")
+    }
+}

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-use crate::execution_step::boxed_value::Stream;
 use crate::execution_step::FoldState;
 use crate::JValue;
 use crate::ResolvedTriplet;
@@ -22,7 +21,6 @@ use crate::ResolvedTriplet;
 use serde::Deserialize;
 use serde::Serialize;
 
-use std::cell::RefCell;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::rc::Rc;
@@ -34,9 +32,8 @@ pub struct ResolvedCallResult {
     pub trace_pos: usize,
 }
 
-pub(crate) enum AValue<'i> {
+pub(crate) enum ScalarValue<'i> {
     JValueRef(ResolvedCallResult),
-    StreamRef(RefCell<Stream>),
     JValueFoldCursor(FoldState<'i>),
 }
 
@@ -50,27 +47,13 @@ impl ResolvedCallResult {
     }
 }
 
-impl<'i> Display for AValue<'i> {
+impl<'i> Display for ScalarValue<'i> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            AValue::JValueRef(value) => write!(f, "{:?}", value)?,
-            AValue::StreamRef(stream) => {
-                if stream.borrow().0.is_empty() {
-                    return write!(f, "[]");
-                }
-
-                write!(f, "[ ")?;
-                for (id, generation) in stream.borrow().0.iter().enumerate() {
-                    write!(f, " -- {}: ", id)?;
-                    for value in generation.iter() {
-                        write!(f, "{:?}, ", value)?;
-                    }
-                    writeln!(f)?;
-                }
-                write!(f, "]")?;
-            }
-            AValue::JValueFoldCursor(_) => {
-                write!(f, "cursor")?;
+            ScalarValue::JValueRef(value) => write!(f, "{:?}", value)?,
+            ScalarValue::JValueFoldCursor(cursor) => {
+                let iterable = &cursor.iterable;
+                write!(f, "cursor, current value: {:?}", iterable.peek())?;
             }
         }
 

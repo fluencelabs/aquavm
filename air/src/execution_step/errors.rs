@@ -86,8 +86,8 @@ pub(crate) enum ExecutionError {
     MultipleFoldStates(String),
 
     /// Errors encountered while shadowing non-scalar values.
-    #[error("variable with name '{0}' can't be shadowed, shadowing is supported only for scalar values")]
-    NonScalarShadowing(String),
+    #[error("variable with name '{0}' can't be shadowed, shadowing isn't supported for iterables")]
+    IterableShadowing(String),
 
     /// This error type is produced by a match to notify xor that compared values aren't equal.
     #[error("match is used without corresponding xor")]
@@ -107,10 +107,6 @@ pub(crate) enum ExecutionError {
     it could be applied only to streams and variables of array and object types"
     )]
     JsonPathVariableTypeError(JValue),
-
-    /// Internal error, this error type shouldn't be happened.
-    #[error("an internal error occurred: {0}")]
-    InternalError(String),
 
     /// Errors bubbled from a trace handler.
     #[error("{0}")]
@@ -144,13 +140,12 @@ impl ExecutionError {
             MultipleValuesInJsonPath(_) => 10,
             FoldStateNotFound(_) => 11,
             MultipleFoldStates(_) => 12,
-            NonScalarShadowing(_) => 13,
+            IterableShadowing(_) => 13,
             MatchWithoutXorError => 14,
             MismatchWithoutXorError => 15,
             FlatteningError(_) => 16,
             JsonPathVariableTypeError(_) => 17,
             StreamJsonPathError(..) => 18,
-            InternalError(_) => 19,
             StreamDontHaveSuchGeneration(..) => 20,
             TraceError(_) => 21,
         }
