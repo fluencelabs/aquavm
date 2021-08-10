@@ -30,12 +30,14 @@ mod xor;
 
 pub(crate) use fold::FoldState;
 
-pub(self) use super::execution_context::*;
-pub(self) use super::Catchable;
-pub(self) use super::ExecutionCtx;
-pub(self) use super::ExecutionError;
-pub(self) use super::ExecutionResult;
-pub(self) use crate::execution_step::TraceHandler;
+use super::boxed_value::ResolvedCallResult;
+use super::boxed_value::Scalar;
+use super::execution_context::*;
+use super::Catchable;
+use super::ExecutionCtx;
+use super::ExecutionError;
+use super::ExecutionResult;
+use crate::execution_step::TraceHandler;
 
 use air_parser::ast::Instruction;
 

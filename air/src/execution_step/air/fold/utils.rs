@@ -93,8 +93,8 @@ fn create_scalar_iterable<'ctx>(
     variable_name: &str,
 ) -> ExecutionResult<FoldIterableScalar> {
     match exec_ctx.scalars.get(variable_name) {
-        Some(ScalarValue::JValueRef(call_result)) => from_call_result(call_result.clone()),
-        Some(ScalarValue::JValueFoldCursor(fold_state)) => {
+        Some(Scalar::JValueRef(call_result)) => from_call_result(call_result.clone()),
+        Some(Scalar::JValueFoldCursor(fold_state)) => {
             let iterable_value = fold_state.iterable.peek().unwrap();
             let jvalue = iterable_value.as_jvalue();
             let result = Rc::new(jvalue.into_owned());
@@ -142,11 +142,11 @@ fn create_scalar_json_path_iterable<'ctx>(
     should_flatten: bool,
 ) -> ExecutionResult<FoldIterableScalar> {
     match exec_ctx.scalars.get(scalar_name) {
-        Some(ScalarValue::JValueRef(variable)) => {
+        Some(Scalar::JValueRef(variable)) => {
             let jvalues = apply_json_path(&variable.result, json_path)?;
             from_jvalues(jvalues, variable.triplet.clone(), json_path, should_flatten)
         }
-        Some(ScalarValue::JValueFoldCursor(fold_state)) => {
+        Some(Scalar::JValueFoldCursor(fold_state)) => {
             let iterable_value = fold_state.iterable.peek().unwrap();
             let jvalues = iterable_value.apply_json_path(json_path)?;
             let triplet = as_triplet(&iterable_value);

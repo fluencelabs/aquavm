@@ -19,8 +19,10 @@ use crate::exec_err;
 use crate::execution_step::execution_context::*;
 use crate::execution_step::trace_handler::TraceHandler;
 use crate::execution_step::Generation;
+use crate::execution_step::ResolvedCallResult;
+use crate::execution_step::Scalar;
 use crate::execution_step::Stream;
-use crate::execution_step::Variable;
+use crate::execution_step::AstVariable;
 
 use air_interpreter_data::CallResult;
 use air_interpreter_data::SCALAR_GENERATION;
@@ -38,11 +40,11 @@ pub(crate) fn set_local_call_result<'i>(
     exec_ctx: &mut ExecutionCtx<'i>,
 ) -> ExecutionResult<u32> {
     let generation = match output {
-        CallOutputValue::Variable(Variable::Scalar(name)) => {
+        CallOutputValue::Variable(AstVariable::Scalar(name)) => {
             set_scalar_result(executed_result, name, exec_ctx)?;
             SCALAR_GENERATION
         }
-        CallOutputValue::Variable(Variable::Stream(name)) => {
+        CallOutputValue::Variable(AstVariable::Stream(name)) => {
             set_stream_result(executed_result, generation, name.to_string(), exec_ctx)?
         }
         CallOutputValue::None => SCALAR_GENERATION,
@@ -60,7 +62,7 @@ macro_rules! shadowing_allowed(
         }
 
         match $entry.get() {
-            ScalarValue::JValueRef(_) => {}
+            Scalar::JValueRef(_) => {}
             // shadowing is allowed only for JValue not iterable
             _ => return exec_err!(ExecutionError::IterableShadowing($entry.key().clone())),
         };
@@ -78,12 +80,12 @@ fn set_scalar_result<'i>(
 
     match exec_ctx.scalars.entry(scalar_name.to_string()) {
         Vacant(entry) => {
-            entry.insert(ScalarValue::JValueRef(executed_result));
+            entry.insert(Scalar::JValueRef(executed_result));
         }
         Occupied(mut entry) => {
             // the macro instead of a function because of borrowing
             shadowing_allowed!(exec_ctx, entry)?;
-            entry.insert(ScalarValue::JValueRef(executed_result));
+            entry.insert(Scalar::JValueRef(executed_result));
         }
     };
 
@@ -98,7 +100,7 @@ fn meet_scalar<'i>(
 ) -> ExecutionResult<()> {
     if let Some(fold_block_name) = exec_ctx.met_folds.back() {
         let fold_state = match exec_ctx.scalars.get_mut(*fold_block_name) {
-            Some(ScalarValue::JValueFoldCursor(fold_state)) => fold_state,
+            Some(Scalar::JValueFoldCursor(fold_state)) => fold_state,
             _ => unreachable!("fold block data must be represented as fold cursor"),
         };
 

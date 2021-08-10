@@ -15,29 +15,30 @@
  */
 
 use super::ExecutionCtx;
+use super::ExecutionError;
 use super::ExecutionResult;
 use super::TraceHandler;
-use crate::execution_step::utils::get_variable_name;
-use crate::execution_step::utils::resolve_to_args;
+use crate::execution_step::trace_handler::MergerApResult;
+use crate::execution_step::utils::apply_json_path;
+use crate::execution_step::utils::variable_name;
 use crate::execution_step::Generation;
 
-use air_parser::ast::{Ap, CallInstrArgValue};
+use air_parser::ast::Ap;
+use air_parser::ast::CallInstrArgValue;
+use air_parser::ast::AstVariable;
 
 use crate::execution_step::air::ResolvedCallResult;
 use std::rc::Rc;
 
 impl<'i> super::ExecutableInstruction<'i> for Ap<'i> {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, _trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
-        let arg_value = CallInstrArgValue::JsonPath {
-            variable: self.variable.clone(),
-            path: self.path,
-            should_flatten: self.should_flatten,
-        };
+    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
+        let ap_result = trace_ctx.meet_ap()?;
+        try_match_result_to_instr(&ap_result, self)?;
 
-        let (jvalue, tetraplet) = resolve_to_args(&arg_value, exec_ctx)?;
+        let src = &self.src;
+        let (value, tetraplet) = apply_json_path(&src.variable, &src.path, src.should_flatten, exec_ctx)?;
 
-        let output = &self.output;
-        let variable_name = get_variable_name(output);
+        let dst_variable = &self.dst;
         match exec_ctx.streams.get(variable_name) {
             Some(stream) => {
                 let resolved_call = ResolvedCallResult::new(Rc::new(jvalue), tetraplet[0].triplet.clone(), 0);
@@ -48,4 +49,29 @@ impl<'i> super::ExecutableInstruction<'i> for Ap<'i> {
 
         Ok(())
     }
+}
+
+fn try_match_result_to_instr(merger_ap_result: &MergerApResult, ap: &Ap<'_>) -> ExecutionResult<()> {
+    fn match_position(
+        variable: &AstVariable<'_>,
+        generation: Option<u32>,
+        ap_result: &MergerApResult,
+    ) -> ExecutionResult<()> {
+        match (variable, generation) {
+            (AstVariable::Stream(_), Some(_)) => Ok(()),
+            (AstVariable::Scalar(_), None) => Ok(()),
+            _ => return crate::exec_err!(ExecutionError::ApResultNotCorrespondToInstr(ap_result.clone())),
+        }
+    }
+
+    let (src_generation, dst_generation) = match merger_ap_result {
+        MergerApResult::ApResult {
+            src_generation,
+            dst_generation,
+        } => (*src_generation, *dst_generation),
+        MergerApResult::Empty => return Ok(()),
+    };
+
+    match_position(&ap.src.variable, src_generation, merger_ap_result)?;
+    match_position(&ap.dst, dst_generation, merger_ap_result)
 }

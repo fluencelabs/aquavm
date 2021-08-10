@@ -15,9 +15,9 @@
  */
 
 use crate::execution_step::boxed_value::JValuable;
+use crate::execution_step::boxed_value::Variable;
 use crate::execution_step::execution_context::ExecutionCtx;
 use crate::execution_step::execution_context::LastErrorWithTetraplets;
-use crate::execution_step::execution_context::ScalarValue;
 use crate::execution_step::ExecutionError;
 use crate::execution_step::ExecutionResult;
 use crate::JValue;
@@ -38,12 +38,18 @@ pub(crate) fn resolve_to_args<'i>(
         CallInstrArgValue::Literal(value) => prepare_consts(value.to_string(), ctx),
         CallInstrArgValue::Boolean(value) => prepare_consts(*value, ctx),
         CallInstrArgValue::Number(value) => prepare_consts(value, ctx),
-        CallInstrArgValue::Variable(variable) => prepare_variable(variable, ctx),
+        CallInstrArgValue::Variable(variable) => {
+            let variable = Variable::from_ast(variable);
+            prepare_variable(variable, ctx)
+        },
         CallInstrArgValue::JsonPath {
             variable,
             path,
             should_flatten,
-        } => prepare_json_path(variable, path, *should_flatten, ctx),
+        } => {
+            let variable = Variable::from_ast(variable);
+            apply_json_path(variable, path, *should_flatten, ctx)
+        },
     }
 }
 
@@ -72,7 +78,7 @@ fn prepare_last_error(
 }
 
 fn prepare_variable<'i>(
-    variable: &Variable<'_>,
+    variable: Variable<'_>,
     ctx: &ExecutionCtx<'i>,
 ) -> ExecutionResult<(JValue, Vec<SecurityTetraplet>)> {
     let resolved = resolve_variable(variable, ctx)?;
@@ -82,14 +88,14 @@ fn prepare_variable<'i>(
     Ok((jvalue, tetraplets))
 }
 
-fn resolve_variable<'ctx, 'i>(
-    variable: &Variable<'_>,
+pub(crate) fn resolve_variable<'ctx, 'i>(
+    variable: Variable<'_>,
     ctx: &'ctx ExecutionCtx<'i>,
 ) -> ExecutionResult<Box<dyn JValuable + 'ctx>> {
     match variable {
-        Variable::Scalar(name) => resolve_to_jvaluable(name, ctx),
-        Variable::Stream(name) => {
-            match ctx.streams.get(*name) {
+        Variable::Scalar(name) => scalar_to_jvaluable(name, ctx),
+        Variable::Stream { name, generation } => {
+            match ctx.streams.get(name) {
                 Some(stream) => Ok(Box::new(stream.borrow())),
                 // return an empty stream for not found stream
                 // here it ignores the join behaviour
@@ -99,15 +105,13 @@ fn resolve_variable<'ctx, 'i>(
     }
 }
 
-fn prepare_json_path<'i>(
-    variable: &Variable<'_>,
+pub(crate) fn apply_json_path<'i>(
+    variable: Variable<'_>,
     json_path: &str,
     should_flatten: bool,
     ctx: &ExecutionCtx<'i>,
 ) -> ExecutionResult<(JValue, Vec<SecurityTetraplet>)> {
-    let name = get_variable_name(variable);
-
-    let resolved = resolve_to_jvaluable(name, ctx)?;
+    let resolved = resolve_variable(variable, ctx)?;
     let (jvalue, tetraplets) = resolved.apply_json_path_with_tetraplets(json_path)?;
 
     let jvalue = if should_flatten {
@@ -124,8 +128,8 @@ fn prepare_json_path<'i>(
     Ok((jvalue, tetraplets))
 }
 
-/// Constructs jvaluable result from `ExecutionCtx::data_cache` by name.
-pub(crate) fn resolve_to_jvaluable<'name, 'i, 'ctx>(
+/// Constructs jvaluable result from scalars by name.
+fn scalar_to_jvaluable<'name, 'i, 'ctx>(
     name: &'name str,
     ctx: &'ctx ExecutionCtx<'i>,
 ) -> ExecutionResult<Box<dyn JValuable + 'ctx>> {
@@ -136,20 +140,5 @@ pub(crate) fn resolve_to_jvaluable<'name, 'i, 'ctx>(
         .get(name)
         .ok_or_else(|| VariableNotFound(name.to_string()))?;
 
-    match value {
-        ScalarValue::JValueRef(value) => Ok(Box::new(value.clone())),
-        ScalarValue::JValueFoldCursor(fold_state) => {
-            let peeked_value = fold_state.iterable.peek().unwrap();
-            Ok(Box::new(peeked_value))
-        }
-    }
-}
-
-use air_parser::ast::Variable;
-
-pub(crate) fn get_variable_name<'a>(variable: &'a Variable<'_>) -> &'a str {
-    match variable {
-        Variable::Scalar(name) => name,
-        Variable::Stream(name) => name,
-    }
+    Ok(value.to_jvaluable())
 }

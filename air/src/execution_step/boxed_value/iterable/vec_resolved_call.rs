@@ -16,7 +16,7 @@
 
 use super::Iterable;
 use super::IterableItem;
-use crate::execution_step::execution_context::ResolvedCallResult;
+use super::ResolvedCallResult;
 use crate::foldable_next;
 use crate::foldable_prev;
 use crate::SecurityTetraplet;

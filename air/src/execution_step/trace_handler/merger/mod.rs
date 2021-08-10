@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
+mod ap_merger;
 mod call_merger;
 mod errors;
 mod fold_merger;
 mod par_merger;
 
+pub(super) use ap_merger::try_merge_next_state_as_ap;
+pub(crate) use ap_merger::MergerApResult;
 pub(super) use call_merger::try_merge_next_state_as_call;
 pub(crate) use call_merger::MergerCallResult;
+pub(crate) use errors::ApResultError;
 pub(crate) use errors::MergeError;
 pub(crate) use fold_merger::try_merge_next_state_as_fold;
 pub(crate) use fold_merger::MergerFoldResult;
@@ -29,11 +33,11 @@ pub(crate) use fold_merger::ResolvedSubTraceDescs;
 pub(crate) use par_merger::try_merge_next_state_as_par;
 pub(crate) use par_merger::MergerParResult;
 
-pub(self) type MergeResult<T> = std::result::Result<T, MergeError>;
+type MergeResult<T> = std::result::Result<T, MergeError>;
 
 use super::data_keeper::DataPositions;
-pub(self) use super::data_keeper::KeeperError;
-pub(self) use super::DataKeeper;
+use super::data_keeper::KeeperError;
+use super::DataKeeper;
 
 use air_interpreter_data::*;
 

@@ -33,11 +33,15 @@ Instr: Box<Instruction<'input>> = {
         let path = arg.1;
         let should_flatten = arg.2;
 
-        let apply = Ap {
+        let src = ApSource {
             variable,
             path,
             should_flatten,
-            output
+        };
+
+        let apply = Ap {
+            src,
+            dst: output,
         };
 
         Box::new(Instruction::Ap(apply))

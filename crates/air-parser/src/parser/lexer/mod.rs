@@ -28,7 +28,7 @@ pub use errors::LexerError;
 pub use token::LastErrorPath;
 pub use token::Number;
 pub use token::Token;
-pub use token::Variable;
+pub use token::AstVariable;
 
 pub(super) type LexerResult<T> = std::result::Result<T, LexerError>;
 

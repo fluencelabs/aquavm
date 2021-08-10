@@ -16,7 +16,7 @@
 
 use super::LastErrorDescriptor;
 use super::LastErrorWithTetraplets;
-use super::ScalarValue;
+use crate::execution_step::boxed_value::Scalar;
 use crate::execution_step::boxed_value::Stream;
 
 use std::cell::RefCell;
@@ -29,7 +29,7 @@ use std::rc::Rc;
 pub(crate) struct ExecutionCtx<'i> {
     /// Contains all scalars.
     // TODO: use shared string (Rc<String>) to avoid copying.
-    pub scalars: HashMap<String, ScalarValue<'i>>,
+    pub scalars: HashMap<String, Scalar<'i>>,
 
     /// Contains all streams.
     // TODO: use shared string (Rc<String>) to avoid copying.

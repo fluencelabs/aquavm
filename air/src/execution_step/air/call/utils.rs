@@ -17,7 +17,6 @@
 use super::call_result_setter::set_local_call_result;
 use super::*;
 use crate::exec_err;
-use crate::execution_step::execution_context::ResolvedCallResult;
 use crate::execution_step::trace_handler::TraceHandler;
 use crate::execution_step::Generation;
 

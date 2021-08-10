@@ -25,6 +25,7 @@ use super::ExecutionCtx;
 use super::ExecutionError;
 use super::ExecutionResult;
 use super::LastErrorDescriptor;
+use super::ResolvedCallResult;
 use super::TraceHandler;
 use crate::execution_step::joinable::Joinable;
 use crate::joinable_call;

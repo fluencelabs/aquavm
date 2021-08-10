@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use super::JValuable;
 use crate::execution_step::FoldState;
 use crate::JValue;
 use crate::ResolvedTriplet;
@@ -32,9 +33,21 @@ pub struct ResolvedCallResult {
     pub trace_pos: usize,
 }
 
-pub(crate) enum ScalarValue<'i> {
+pub(crate) enum Scalar<'i> {
     JValueRef(ResolvedCallResult),
     JValueFoldCursor(FoldState<'i>),
+}
+
+impl<'i> Scalar<'i> {
+    pub(crate) fn to_jvaluable<'ctx>(&'ctx self) -> Box<dyn JValuable + 'ctx> {
+        match self {
+            Scalar::JValueRef(value) => Box::new(value.clone()),
+            Scalar::JValueFoldCursor(fold_state) => {
+                let peeked_value = fold_state.iterable.peek().unwrap();
+                Box::new(peeked_value)
+            }
+        }
+    }
 }
 
 impl ResolvedCallResult {
@@ -47,11 +60,11 @@ impl ResolvedCallResult {
     }
 }
 
-impl<'i> Display for ScalarValue<'i> {
+impl<'i> Display for Scalar<'i> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            ScalarValue::JValueRef(value) => write!(f, "{:?}", value)?,
-            ScalarValue::JValueFoldCursor(cursor) => {
+            Scalar::JValueRef(value) => write!(f, "{:?}", value)?,
+            Scalar::JValueFoldCursor(cursor) => {
                 let iterable = &cursor.iterable;
                 write!(f, "cursor, current value: {:?}", iterable.peek())?;
             }

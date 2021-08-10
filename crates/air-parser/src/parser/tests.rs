@@ -22,8 +22,8 @@ use ast::Call;
 use ast::CallInstrArgValue;
 use ast::CallInstrValue;
 use ast::Instruction;
-use ast::Variable::Scalar;
-use ast::Variable::Stream;
+use ast::AstVariable::Scalar;
+use ast::AstVariable::Stream;
 
 use fstrings::f;
 use lalrpop_util::ParseError;

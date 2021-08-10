@@ -23,6 +23,7 @@ mod stream;
 use super::iterable::IterableItem;
 use super::ExecutionError;
 use super::ExecutionResult;
+use super::ResolvedCallResult;
 use crate::JValue;
 use crate::SecurityTetraplet;
 

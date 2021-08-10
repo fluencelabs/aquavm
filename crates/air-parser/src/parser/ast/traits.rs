@@ -39,7 +39,7 @@ impl fmt::Display for CallInstrArgValue<'_> {
 }
 
 fn print_json_path<'a>(
-    variable: &Variable<'a>,
+    variable: &AstVariable<'a>,
     path: &str,
     should_flatten: &bool,
     f: &mut fmt::Formatter,
@@ -78,7 +78,7 @@ impl fmt::Display for IterableScalarValue<'_> {
                 path,
                 should_flatten,
             } => print_json_path(
-                &lexer::Variable::Scalar(scalar_name),
+                &lexer::AstVariable::Scalar(scalar_name),
                 path,
                 should_flatten,
                 f,
@@ -177,10 +177,11 @@ impl fmt::Display for Call<'_> {
 
 impl fmt::Display for Ap<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let src = &self.src;
         write!(
             f,
             "ap {}.{}{} {}",
-            self.variable, self.path, self.should_flatten, self.output
+            src.variable, src.path, src.should_flatten, self.dst
         )
     }
 }

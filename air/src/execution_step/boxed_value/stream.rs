@@ -16,8 +16,8 @@
 
 use super::ExecutionError;
 use super::ExecutionResult;
+use super::ResolvedCallResult;
 use crate::exec_err;
-use crate::execution_step::execution_context::ResolvedCallResult;
 use crate::JValue;
 use std::fmt::Formatter;
 

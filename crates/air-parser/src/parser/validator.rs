@@ -77,7 +77,7 @@ impl<'i> VariableValidator<'i> {
     }
 
     pub(super) fn met_fold_stream(&mut self, fold: &FoldStream<'i>, span: Span) {
-        self.met_variable(&Variable::Stream(fold.stream_name), span);
+        self.met_variable(&AstVariable::Stream(fold.stream_name), span);
         self.met_iterator_definition(fold.iterator, span);
     }
 
@@ -145,7 +145,7 @@ impl<'i> VariableValidator<'i> {
             CallInstrArgValue::JsonPath { variable, .. } => self.met_variable(variable, span),
             CallInstrArgValue::Variable(variable) => {
                 // skipping streams here allows treating non-defined streams as empty arrays
-                if let Variable::Scalar(_) = variable {
+                if let AstVariable::Scalar(_) = variable {
                     self.met_variable(variable, span)
                 }
             }
@@ -153,10 +153,10 @@ impl<'i> VariableValidator<'i> {
         }
     }
 
-    fn met_variable(&mut self, variable: &Variable<'i>, span: Span) {
+    fn met_variable(&mut self, variable: &AstVariable<'i>, span: Span) {
         let name = match variable {
-            Variable::Scalar(name) => name,
-            Variable::Stream(name) => name,
+            AstVariable::Scalar(name) => name,
+            AstVariable::Stream(name) => name,
         };
 
         if !self.contains_variable(name, span) {
@@ -183,8 +183,8 @@ impl<'i> VariableValidator<'i> {
         use std::collections::hash_map::Entry;
 
         let variable_name = match call_output {
-            CallOutputValue::Variable(Variable::Scalar(name)) => name,
-            CallOutputValue::Variable(Variable::Stream(name)) => name,
+            CallOutputValue::Variable(AstVariable::Scalar(name)) => name,
+            CallOutputValue::Variable(AstVariable::Stream(name)) => name,
             CallOutputValue::None => return,
         };
 
@@ -226,10 +226,10 @@ impl<'i> VariableValidator<'i> {
     fn met_iterable_value(&mut self, iterable_value: &IterableScalarValue<'i>, span: Span) {
         match iterable_value {
             IterableScalarValue::JsonPath { scalar_name, .. } => {
-                self.met_variable(&Variable::Scalar(scalar_name), span)
+                self.met_variable(&AstVariable::Scalar(scalar_name), span)
             }
             IterableScalarValue::ScalarVariable(variable) => {
-                self.met_variable(&Variable::Scalar(variable), span)
+                self.met_variable(&AstVariable::Scalar(variable), span)
             }
         }
     }

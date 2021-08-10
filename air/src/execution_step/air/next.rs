@@ -19,7 +19,7 @@ use super::ExecutionCtx;
 use super::ExecutionError;
 use super::ExecutionResult;
 use super::FoldState;
-use super::ScalarValue;
+use super::Scalar;
 use super::TraceHandler;
 use crate::exec_err;
 use crate::log_instruction;
@@ -50,7 +50,7 @@ impl<'i> super::ExecutableInstruction<'i> for Next<'i> {
         match exec_ctx.scalars.get_mut(iterator_name) {
             // move iterator back to provide correct value for possible subtree after next
             // (for example for cases such as right fold)
-            Some(ScalarValue::JValueFoldCursor(fold_state)) => fold_state.iterable.prev(),
+            Some(Scalar::JValueFoldCursor(fold_state)) => fold_state.iterable.prev(),
             _ => unreachable!("iterator value shouldn't changed inside fold"),
         };
 
@@ -75,7 +75,7 @@ fn try_get_fold_state<'i, 'ctx>(
         .ok_or_else(|| FoldStateNotFound(iterator_name.to_string()))?;
 
     match avalue {
-        ScalarValue::JValueFoldCursor(state) => Ok(state),
+        Scalar::JValueFoldCursor(state) => Ok(state),
         v => {
             // it's not possible to use unreachable here
             // because at now next syntactically could be used without fold

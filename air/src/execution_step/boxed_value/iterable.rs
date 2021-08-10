@@ -23,6 +23,7 @@ pub(crate) use json_path_result::IterableJsonPathResult;
 pub(crate) use resolved_call::IterableResolvedCall;
 pub(crate) use vec_resolved_call::IterableVecResolvedCall;
 
+use super::ResolvedCallResult;
 use crate::JValue;
 use crate::SecurityTetraplet;
 

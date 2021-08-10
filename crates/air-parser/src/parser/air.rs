@@ -1,5 +1,5 @@
 // auto-generated: "lalrpop 0.19.6"
-// sha3: 807295058387170c63e57ca6d956f4d8ae76cdbe08e4eee79522da158f8d
+// sha3: feba9e9c22a654886071b542b755c7736b0247067aa8f9bf4d1747e8fe7a
 use crate::parser::ast::*;
 use crate::parser::air_parser::make_flattened_error;
 use crate::parser::air_parser::make_stream_iterable_error;
@@ -9,7 +9,7 @@ use crate::parser::Span;
 use crate::parser::lexer::Token;
 use crate::parser::lexer::Number;
 use crate::parser::lexer::LastErrorPath;
-use crate::parser::lexer::Variable;
+use crate::parser::lexer::AstVariable;
 use lalrpop_util::ErrorRecovery;
 use std::rc::Rc;
 #[allow(unused_extern_crates)]
@@ -32,7 +32,7 @@ mod __parse__AIR {
     use crate::parser::lexer::Token;
     use crate::parser::lexer::Number;
     use crate::parser::lexer::LastErrorPath;
-    use crate::parser::lexer::Variable;
+    use crate::parser::lexer::AstVariable;
     use lalrpop_util::ErrorRecovery;
     use std::rc::Rc;
     #[allow(unused_extern_crates)]
@@ -48,7 +48,7 @@ mod __parse__AIR {
         Variant0(Token<'input>),
         Variant1(&'input str),
         Variant2(bool),
-        Variant3((Variable<'input>, &'input str, bool)),
+        Variant3((AstVariable<'input>, &'input str, bool)),
         Variant4(LastErrorPath),
         Variant5(Number),
         Variant6(__lalrpop_util::ErrorRecovery<usize, Token<'input>, ParserError>),
@@ -60,8 +60,8 @@ mod __parse__AIR {
         Variant12(CallInstrValue<'input>),
         Variant13(FunctionPart<'input>),
         Variant14(MatchableValue<'input>),
-        Variant15(Variable<'input>),
-        Variant16(core::option::Option<Variable<'input>>),
+        Variant15(AstVariable<'input>),
+        Variant16(core::option::Option<AstVariable<'input>>),
         Variant17(PeerPart<'input>),
         Variant18(IterableScalarValue<'input>),
     }
@@ -1365,7 +1365,7 @@ mod __parse__AIR {
       'input,
     >(
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, (Variable<'input>, &'input str, bool), usize)
+    ) -> (usize, (AstVariable<'input>, &'input str, bool), usize)
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant3(__v), __r)) => (__l, __v, __r),
@@ -1486,7 +1486,7 @@ mod __parse__AIR {
       'input,
     >(
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, Variable<'input>, usize)
+    ) -> (usize, AstVariable<'input>, usize)
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant15(__v), __r)) => (__l, __v, __r),
@@ -1541,7 +1541,7 @@ mod __parse__AIR {
       'input,
     >(
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, core::option::Option<Variable<'input>>, usize)
+    ) -> (usize, core::option::Option<AstVariable<'input>>, usize)
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant16(__v), __r)) => (__l, __v, __r),
@@ -2890,7 +2890,7 @@ fn __action2<
     (_, peer_part, _): (usize, PeerPart<'input>, usize),
     (_, function_part, _): (usize, FunctionPart<'input>, usize),
     (_, args, _): (usize, Vec<CallInstrArgValue<'input>>, usize),
-    (_, output, _): (usize, core::option::Option<Variable<'input>>, usize),
+    (_, output, _): (usize, core::option::Option<AstVariable<'input>>, usize),
     (_, _, _): (usize, Token<'input>, usize),
     (_, right, _): (usize, usize, usize),
 ) -> Box<Instruction<'input>>
@@ -2918,8 +2918,8 @@ fn __action3<
     (_, left, _): (usize, usize, usize),
     (_, _, _): (usize, Token<'input>, usize),
     (_, _, _): (usize, Token<'input>, usize),
-    (_, arg, _): (usize, (Variable<'input>, &'input str, bool), usize),
-    (_, output, _): (usize, Variable<'input>, usize),
+    (_, arg, _): (usize, (AstVariable<'input>, &'input str, bool), usize),
+    (_, output, _): (usize, AstVariable<'input>, usize),
     (_, _, _): (usize, Token<'input>, usize),
     (_, right, _): (usize, usize, usize),
 ) -> Box<Instruction<'input>>
@@ -2929,11 +2929,15 @@ fn __action3<
         let path = arg.1;
         let should_flatten = arg.2;
 
-        let apply = Ap {
+        let src = ApSource {
             variable,
             path,
             should_flatten,
-            output
+        };
+
+        let apply = Ap {
+            src,
+            dst: output,
         };
 
         Box::new(Instruction::Ap(apply))
@@ -3263,9 +3267,9 @@ fn __action19<
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
     (_, a, _): (usize, &'input str, usize),
-) -> Variable<'input>
+) -> AstVariable<'input>
 {
-    Variable::Scalar(a)
+    AstVariable::Scalar(a)
 }
 
 #[allow(unused_variables)]
@@ -3278,9 +3282,9 @@ fn __action20<
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
     (_, s, _): (usize, &'input str, usize),
-) -> Variable<'input>
+) -> AstVariable<'input>
 {
-    Variable::Stream(s)
+    AstVariable::Stream(s)
 }
 
 #[allow(unused_variables)]
@@ -3355,7 +3359,7 @@ fn __action25<
     (_, a, _): (usize, &'input str, usize),
 ) -> CallInstrValue<'input>
 {
-    CallInstrValue::Variable(Variable::Scalar(a))
+    CallInstrValue::Variable(AstVariable::Scalar(a))
 }
 
 #[allow(unused_variables)]
@@ -3370,7 +3374,7 @@ fn __action26<
     (_, s, _): (usize, &'input str, usize),
 ) -> CallInstrValue<'input>
 {
-    CallInstrValue::Variable(Variable::Stream(s))
+    CallInstrValue::Variable(AstVariable::Stream(s))
 }
 
 #[allow(unused_variables)]
@@ -3383,7 +3387,7 @@ fn __action27<
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
     (_, l, _): (usize, usize, usize),
-    (_, j, _): (usize, (Variable<'input>, &'input str, bool), usize),
+    (_, j, _): (usize, (AstVariable<'input>, &'input str, bool), usize),
     (_, r, _): (usize, usize, usize),
 ) -> CallInstrValue<'input>
 {
@@ -3457,7 +3461,7 @@ fn __action31<
     (_, v, _): (usize, &'input str, usize),
 ) -> CallInstrArgValue<'input>
 {
-    CallInstrArgValue::Variable(Variable::Scalar(v))
+    CallInstrArgValue::Variable(AstVariable::Scalar(v))
 }
 
 #[allow(unused_variables)]
@@ -3472,7 +3476,7 @@ fn __action32<
     (_, v, _): (usize, &'input str, usize),
 ) -> CallInstrArgValue<'input>
 {
-    CallInstrArgValue::Variable(Variable::Stream(v))
+    CallInstrArgValue::Variable(AstVariable::Stream(v))
 }
 
 #[allow(unused_variables)]
@@ -3484,7 +3488,7 @@ fn __action33<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, j, _): (usize, (Variable<'input>, &'input str, bool), usize),
+    (_, j, _): (usize, (AstVariable<'input>, &'input str, bool), usize),
 ) -> CallInstrArgValue<'input>
 {
     CallInstrArgValue::JsonPath { variable: j.0, path: j.1, should_flatten: j.2 }
@@ -3575,12 +3579,12 @@ fn __action39<
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
     (_, l, _): (usize, usize, usize),
-    (_, j, _): (usize, (Variable<'input>, &'input str, bool), usize),
+    (_, j, _): (usize, (AstVariable<'input>, &'input str, bool), usize),
     (_, r, _): (usize, usize, usize),
 ) -> IterableScalarValue<'input>
 {
     {
-        use crate::parser::air::Variable::*;
+        use crate::parser::air::AstVariable::*;
 
         let variable = j.0;
         let scalar_name = match variable {
@@ -3622,7 +3626,7 @@ fn __action41<
     (_, v, _): (usize, &'input str, usize),
 ) -> MatchableValue<'input>
 {
-    MatchableValue::Variable(Variable::Scalar(v))
+    MatchableValue::Variable(AstVariable::Scalar(v))
 }
 
 #[allow(unused_variables)]
@@ -3637,7 +3641,7 @@ fn __action42<
     (_, v, _): (usize, &'input str, usize),
 ) -> MatchableValue<'input>
 {
-    MatchableValue::Variable(Variable::Stream(v))
+    MatchableValue::Variable(AstVariable::Stream(v))
 }
 
 #[allow(unused_variables)]
@@ -3694,7 +3698,7 @@ fn __action46<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, j, _): (usize, (Variable<'input>, &'input str, bool), usize),
+    (_, j, _): (usize, (AstVariable<'input>, &'input str, bool), usize),
 ) -> MatchableValue<'input>
 {
     MatchableValue::JsonPath { variable: j.0, path: j.1, should_flatten: j.2 }
@@ -3771,8 +3775,8 @@ fn __action51<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, __0, _): (usize, Variable<'input>, usize),
-) -> core::option::Option<Variable<'input>>
+    (_, __0, _): (usize, AstVariable<'input>, usize),
+) -> core::option::Option<AstVariable<'input>>
 {
     Some(__0)
 }
@@ -3788,7 +3792,7 @@ fn __action52<
     validator: &'v mut VariableValidator<'input>,
     __lookbehind: &usize,
     __lookahead: &usize,
-) -> core::option::Option<Variable<'input>>
+) -> core::option::Option<AstVariable<'input>>
 {
     None
 }
@@ -3975,7 +3979,7 @@ fn __action60<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    __0: (usize, (Variable<'input>, &'input str, bool), usize),
+    __0: (usize, (AstVariable<'input>, &'input str, bool), usize),
     __1: (usize, usize, usize),
 ) -> CallInstrValue<'input>
 {
@@ -4013,7 +4017,7 @@ fn __action61<
     __2: (usize, PeerPart<'input>, usize),
     __3: (usize, FunctionPart<'input>, usize),
     __4: (usize, Vec<CallInstrArgValue<'input>>, usize),
-    __5: (usize, core::option::Option<Variable<'input>>, usize),
+    __5: (usize, core::option::Option<AstVariable<'input>>, usize),
     __6: (usize, Token<'input>, usize),
     __7: (usize, usize, usize),
 ) -> Box<Instruction<'input>>
@@ -4055,8 +4059,8 @@ fn __action62<
     validator: &'v mut VariableValidator<'input>,
     __0: (usize, Token<'input>, usize),
     __1: (usize, Token<'input>, usize),
-    __2: (usize, (Variable<'input>, &'input str, bool), usize),
-    __3: (usize, Variable<'input>, usize),
+    __2: (usize, (AstVariable<'input>, &'input str, bool), usize),
+    __3: (usize, AstVariable<'input>, usize),
     __4: (usize, Token<'input>, usize),
     __5: (usize, usize, usize),
 ) -> Box<Instruction<'input>>
@@ -4305,7 +4309,7 @@ fn __action68<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    __0: (usize, (Variable<'input>, &'input str, bool), usize),
+    __0: (usize, (AstVariable<'input>, &'input str, bool), usize),
     __1: (usize, usize, usize),
 ) -> IterableScalarValue<'input>
 {
@@ -4338,7 +4342,7 @@ fn __action69<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    __0: (usize, (Variable<'input>, &'input str, bool), usize),
+    __0: (usize, (AstVariable<'input>, &'input str, bool), usize),
 ) -> CallInstrValue<'input>
 {
     let __start0 = __0.2.clone();
@@ -4374,7 +4378,7 @@ fn __action70<
     __2: (usize, PeerPart<'input>, usize),
     __3: (usize, FunctionPart<'input>, usize),
     __4: (usize, Vec<CallInstrArgValue<'input>>, usize),
-    __5: (usize, core::option::Option<Variable<'input>>, usize),
+    __5: (usize, core::option::Option<AstVariable<'input>>, usize),
     __6: (usize, Token<'input>, usize),
 ) -> Box<Instruction<'input>>
 {
@@ -4414,8 +4418,8 @@ fn __action71<
     validator: &'v mut VariableValidator<'input>,
     __0: (usize, Token<'input>, usize),
     __1: (usize, Token<'input>, usize),
-    __2: (usize, (Variable<'input>, &'input str, bool), usize),
-    __3: (usize, Variable<'input>, usize),
+    __2: (usize, (AstVariable<'input>, &'input str, bool), usize),
+    __3: (usize, AstVariable<'input>, usize),
     __4: (usize, Token<'input>, usize),
 ) -> Box<Instruction<'input>>
 {
@@ -4652,7 +4656,7 @@ fn __action77<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    __0: (usize, (Variable<'input>, &'input str, bool), usize),
+    __0: (usize, (AstVariable<'input>, &'input str, bool), usize),
 ) -> IterableScalarValue<'input>
 {
     let __start0 = __0.2.clone();
@@ -4688,7 +4692,7 @@ fn __action78<
     __2: (usize, PeerPart<'input>, usize),
     __3: (usize, FunctionPart<'input>, usize),
     __4: (usize, Vec<CallInstrArgValue<'input>>, usize),
-    __5: (usize, Variable<'input>, usize),
+    __5: (usize, AstVariable<'input>, usize),
     __6: (usize, Token<'input>, usize),
 ) -> Box<Instruction<'input>>
 {

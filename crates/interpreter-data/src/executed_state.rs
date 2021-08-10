@@ -91,7 +91,10 @@ pub struct FoldResult(pub FoldLore);
 /// Describes result of applying functor `apply` to streams. This functor has the
 #[derive(Debug, Default, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub struct ApResult(pub Vec<u32>, Vec<u32>);
+pub struct ApResult {
+    pub src_generations: Vec<u32>,
+    pub dst_generations: Vec<u32>,
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]

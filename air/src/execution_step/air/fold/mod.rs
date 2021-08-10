@@ -28,5 +28,5 @@ use super::ExecutionError;
 use super::ExecutionResult;
 use super::Instruction;
 use super::ResolvedCallResult;
-use super::ScalarValue;
+use super::Scalar;
 use crate::execution_step::boxed_value::*;

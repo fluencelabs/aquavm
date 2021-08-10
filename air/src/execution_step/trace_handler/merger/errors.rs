@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use super::ApResult;
 use super::CallResult;
 use super::ExecutedState;
 use super::FoldResult;
@@ -47,6 +48,21 @@ pub(crate) enum MergeError {
     /// Errors bubbled from DataKeeper.
     #[error("{0}")]
     KeeperError(#[from] KeeperError),
+
+    /// Too many generation in ApResult src vectors
+    #[error("{0}")]
+    IncorrectApResult(#[from] ApResultError),
+}
+
+#[derive(ThisError, Debug)]
+pub(crate) enum ApResultError {
+    /// Error occurred when Ap results contains more then 1 generation in source.
+    #[error("{0:?} ap result contains too many generations in source")]
+    TooManySrcGenerations(ApResult),
+
+    /// Error occurred when Ap results contains more then 1 generation in destination.
+    #[error("{0:?} ap result contains too many generations in destination")]
+    TooManyDstGenerations(ApResult),
 }
 
 impl MergeError {

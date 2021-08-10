@@ -18,6 +18,7 @@ use super::ExecutionError::StreamJsonPathError;
 use super::ExecutionResult;
 use super::JValuable;
 use crate::execution_step::boxed_value::Stream;
+use crate::execution_step::boxed_value::Generation;
 use crate::JValue;
 use crate::SecurityTetraplet;
 
@@ -28,7 +29,7 @@ use std::ops::Deref;
 
 // TODO: this will be deleted soon, because it would be impossible to use streams without
 // canonicalization as an arg of a call
-impl JValuable for std::cell::Ref<'_, Stream> {
+impl JValuable for (std::cell::Ref<'_, Stream>, Generation) {
     fn apply_json_path(&self, json_path: &str) -> ExecutionResult<Vec<&JValue>> {
         let iter = self.iter().map(|v| v.result.deref());
         let (selected_values, _) = select_with_iter(iter, json_path)

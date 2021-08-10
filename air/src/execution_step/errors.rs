@@ -16,13 +16,15 @@
 
 mod catchable;
 
+pub(crate) use catchable::Catchable;
+
+use super::trace_handler::MergerApResult;
 use super::trace_handler::TraceHandlerError;
 use super::Joinable;
+use super::ResolvedCallResult;
+use super::Stream;
 use crate::build_targets::CallServiceResult;
-use crate::execution_step::boxed_value::Stream;
-use crate::execution_step::execution_context::ResolvedCallResult;
 use crate::JValue;
-pub(crate) use catchable::Catchable;
 
 use jsonpath_lib::JsonPathError;
 use serde_json::Error as SerdeJsonError;
@@ -115,6 +117,11 @@ pub(crate) enum ExecutionError {
     /// Errors occurred while insertion of a value inside stream that doesn't have corresponding generation.
     #[error("stream {0:?} doesn't have generation with number {1}, probably the supplied data to the interpreter is corrupted")]
     StreamDontHaveSuchGeneration(Stream, usize),
+
+    /// Errors occurred when result from data doesn't match to a instruction, f.e. an instruction
+    /// could be applied to a stream, but result doesn't contain generation in a source position.
+    #[error("ap result doesn't match corresponding instruction")]
+    ApResultNotCorrespondToInstr(MergerApResult),
 }
 
 impl From<TraceHandlerError> for Rc<ExecutionError> {
@@ -146,7 +153,8 @@ impl ExecutionError {
             FlatteningError(_) => 16,
             JsonPathVariableTypeError(_) => 17,
             StreamJsonPathError(..) => 18,
-            StreamDontHaveSuchGeneration(..) => 20,
+            StreamDontHaveSuchGeneration(..) => 19,
+            ApResultNotCorrespondToInstr(_) => 20,
             TraceError(_) => 21,
         }
     }

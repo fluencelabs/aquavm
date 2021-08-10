@@ -17,7 +17,7 @@
 use super::ExecutionCtx;
 use super::ExecutionResult;
 use super::FoldState;
-use super::ScalarValue;
+use super::Scalar;
 
 use std::collections::HashMap;
 
@@ -40,7 +40,7 @@ impl<'i> VariableHandler<'i> {
 
     pub(crate) fn cleanup(self, exec_ctx: &mut ExecutionCtx<'_>) {
         let fold_state = match exec_ctx.scalars.remove(self.iterator) {
-            Some(ScalarValue::JValueFoldCursor(fold_state)) => fold_state,
+            Some(Scalar::JValueFoldCursor(fold_state)) => fold_state,
             _ => unreachable!("fold cursor is changed only inside fold block"),
         };
 
@@ -52,13 +52,13 @@ impl<'i> VariableHandler<'i> {
         // TODO: fix 3 or more inner folds behaviour
         if let Some(fold_block_name) = exec_ctx.met_folds.back() {
             let fold_state = match exec_ctx.scalars.get(*fold_block_name) {
-                Some(ScalarValue::JValueFoldCursor(fold_state)) => fold_state,
+                Some(Scalar::JValueFoldCursor(fold_state)) => fold_state,
                 _ => unreachable!("fold block data must be represented as fold cursor"),
             };
 
             let mut upper_fold_values = HashMap::new();
             for (variable_name, variable) in fold_state.met_variables.iter() {
-                upper_fold_values.insert(variable_name.to_string(), ScalarValue::JValueRef(variable.clone()));
+                upper_fold_values.insert(variable_name.to_string(), Scalar::JValueRef(variable.clone()));
             }
 
             exec_ctx.scalars.extend(upper_fold_values);
@@ -74,7 +74,7 @@ impl<'i> VariableHandler<'i> {
 
         let previous_value = exec_ctx
             .scalars
-            .insert(iterator.to_string(), ScalarValue::JValueFoldCursor(fold_state));
+            .insert(iterator.to_string(), Scalar::JValueFoldCursor(fold_state));
 
         if previous_value.is_some() {
             return crate::exec_err!(MultipleFoldStates(iterator.to_string()));

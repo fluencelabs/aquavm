@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-mod avalue;
 mod context;
 mod error_descriptor;
 
-pub(crate) use avalue::ResolvedCallResult;
-pub(crate) use avalue::ScalarValue;
 pub(crate) use context::ExecutionCtx;
 pub use error_descriptor::LastError;
 pub(crate) use error_descriptor::LastErrorDescriptor;

@@ -17,7 +17,7 @@
 use super::ExecutionError::GenerationStreamJsonPathError;
 use super::ExecutionResult;
 use super::JValuable;
-use crate::execution_step::execution_context::ResolvedCallResult;
+use super::ResolvedCallResult;
 use crate::JValue;
 use crate::SecurityTetraplet;
 

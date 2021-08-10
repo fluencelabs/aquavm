@@ -19,7 +19,7 @@ mod traits;
 
 pub use crate::parser::lexer::LastErrorPath;
 pub use crate::parser::lexer::Number;
-pub use crate::parser::lexer::Variable;
+pub use crate::parser::lexer::AstVariable;
 pub(super) use fold_id::create_fold_id;
 
 use serde::Deserialize;
@@ -65,20 +65,25 @@ pub struct Call<'i> {
 }
 
 #[derive(Serialize, Debug, PartialEq)]
-pub struct Ap<'i> {
-    pub variable: Variable<'i>,
+pub struct ApSource<'i> {
+    pub variable: AstVariable<'i>,
     pub path: &'i str,
     pub should_flatten: bool,
-    pub output: Variable<'i>,
+}
+
+#[derive(Serialize, Debug, PartialEq)]
+pub struct Ap<'i> {
+    pub src: ApSource<'i>,
+    pub dst: AstVariable<'i>,
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum CallInstrValue<'i> {
     InitPeerId,
     Literal(&'i str),
-    Variable(Variable<'i>),
+    Variable(AstVariable<'i>),
     JsonPath {
-        variable: Variable<'i>,
+        variable: AstVariable<'i>,
         path: &'i str,
         should_flatten: bool,
     },
@@ -91,9 +96,9 @@ pub enum CallInstrArgValue<'i> {
     Literal(&'i str),
     Number(Number),
     Boolean(bool),
-    Variable(Variable<'i>),
+    Variable(AstVariable<'i>),
     JsonPath {
-        variable: Variable<'i>,
+        variable: AstVariable<'i>,
         path: &'i str,
         should_flatten: bool,
     },
@@ -115,9 +120,9 @@ pub enum MatchableValue<'i> {
     Literal(&'i str),
     Number(Number),
     Boolean(bool),
-    Variable(Variable<'i>),
+    Variable(AstVariable<'i>),
     JsonPath {
-        variable: Variable<'i>,
+        variable: AstVariable<'i>,
         path: &'i str,
         should_flatten: bool,
     },
@@ -125,7 +130,7 @@ pub enum MatchableValue<'i> {
 
 #[derive(Serialize, Debug, PartialEq, Clone)]
 pub enum CallOutputValue<'i> {
-    Variable(Variable<'i>),
+    Variable(AstVariable<'i>),
     None,
 }
 
