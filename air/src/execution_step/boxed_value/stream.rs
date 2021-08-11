@@ -31,7 +31,7 @@ use std::fmt::Formatter;
 /// obtained values from a current_data that were not present in prev_data becomes a new generation.
 // TODO: make it non-pub after boxed value refactoring.
 #[derive(Debug, Default, Clone)]
-pub(crate) struct Stream(pub(crate) Vec<Vec<ResolvedCallResult>>);
+pub(crate) struct Stream(Vec<Vec<ResolvedCallResult>>);
 
 impl Stream {
     pub(crate) fn from_generations_count(count: usize) -> Self {
@@ -78,14 +78,17 @@ impl Stream {
     }
 
     pub(crate) fn is_empty(&self) -> bool {
-        self.0.is_empty()
+        if self.0.is_empty() {
+            return false;
+        }
+
+        self.0.iter().all(|v| v.is_empty())
     }
 
     pub(crate) fn as_jvalue(&self, generation: Generation) -> Option<JValue> {
         use std::ops::Deref;
 
         let iter = self.iter(generation)?;
-
         let jvalue_array = iter.map(|r| r.result.deref().clone()).collect::<Vec<_>>();
 
         Some(JValue::Array(jvalue_array))
@@ -101,6 +104,23 @@ impl Stream {
         let len = self.elements_count(generation).unwrap();
 
         let iter = StreamIter { iter, len };
+
+        Some(iter)
+    }
+
+    pub(crate) fn slice_iter(&self, generation: Generation) -> Option<StreamSliceIter<'_>> {
+        let iter: Box<dyn Iterator<Item = &[ResolvedCallResult]>> = match generation {
+            Generation::Nth(generation) if generation as usize > self.generations_count() => return None,
+            Generation::Nth(generation) => Box::new(self.0.iter().take(generation as usize).map(|v| v.as_slice())),
+            Generation::Last => Box::new(self.0.iter().map(|v| v.as_slice())),
+        };
+
+        let len = match generation {
+            Generation::Nth(generation) => generation as usize,
+            Generation::Last => self.0.len()
+        };
+
+        let iter = StreamSliceIter { iter, len };
 
         Some(iter)
     }
@@ -121,13 +141,13 @@ impl Generation {
     }
 }
 
-pub(crate) struct StreamIter<'a> {
-    iter: Box<dyn Iterator<Item = &'a ResolvedCallResult> + 'a>,
+pub(crate) struct StreamIter<'result> {
+    iter: Box<dyn Iterator<Item = &'result ResolvedCallResult> + 'result>,
     len: usize,
 }
 
-impl<'a> Iterator for StreamIter<'a> {
-    type Item = &'a ResolvedCallResult;
+impl<'result> Iterator for StreamIter<'result> {
+    type Item = &'result ResolvedCallResult;
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.len > 0 {
@@ -141,7 +161,27 @@ impl<'a> Iterator for StreamIter<'a> {
     }
 }
 
-impl<'a> ExactSizeIterator for StreamIter<'a> {}
+impl<'result> ExactSizeIterator for StreamIter<'result> {}
+
+pub(crate) struct StreamSliceIter<'slice> {
+    iter: Box<dyn Iterator<Item = &'slice [ResolvedCallResult]> + 'slice>,
+    len: usize,
+}
+
+impl<'slice> Iterator for StreamSliceIter<'slice> {
+    type Item = &'slice [ResolvedCallResult];
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.len > 0 {
+            self.len -= 1;
+        }
+        self.iter.next()
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        (self.len, Some(self.len))
+    }
+}
 
 use std::fmt;
 

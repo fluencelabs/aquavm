@@ -67,9 +67,9 @@ pub(crate) fn construct_stream_iterable_value<'ctx>(
                 return Ok(FoldIterableStream::Empty);
             }
 
-            let mut iterables = Vec::with_capacity(stream.0.len());
+            let mut iterables = Vec::with_capacity(stream.generations_count());
 
-            for iterable in stream.0.iter() {
+            for iterable in stream.slice_iter(Generation::Last).unwrap() {
                 if iterable.is_empty() {
                     continue;
                 }

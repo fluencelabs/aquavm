@@ -28,7 +28,8 @@ use crate::execution_step::utils::apply_json_path;
 use utils::*;
 
 use air_parser::ast::AstVariable;
-use air_parser::ast::{Ap, ApSource};
+use air_parser::ast::Ap;
+use air_parser::ast::ApSource;
 
 use std::rc::Rc;
 
