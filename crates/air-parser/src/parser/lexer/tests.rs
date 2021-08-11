@@ -16,11 +16,11 @@
 
 use super::air_lexer::Spanned;
 use super::AIRLexer;
+use super::AstVariable;
 use super::LastErrorPath;
 use super::LexerError;
 use super::Number;
 use super::Token;
-use super::AstVariable;
 
 fn run_lexer(input: &str) -> Vec<Spanned<Token<'_>, usize, LexerError>> {
     let lexer = AIRLexer::new(input);

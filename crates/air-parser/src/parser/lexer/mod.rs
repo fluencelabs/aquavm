@@ -25,10 +25,10 @@ mod tests;
 
 pub use air_lexer::AIRLexer;
 pub use errors::LexerError;
+pub use token::AstVariable;
 pub use token::LastErrorPath;
 pub use token::Number;
 pub use token::Token;
-pub use token::AstVariable;
 
 pub(super) type LexerResult<T> = std::result::Result<T, LexerError>;
 

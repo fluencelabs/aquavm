@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+use super::AstVariable;
 use super::LexerError;
 use super::LexerResult;
 use super::Token;
-use super::AstVariable;
 
 use std::convert::TryInto;
 use std::iter::Peekable;

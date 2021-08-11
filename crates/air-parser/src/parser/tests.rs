@@ -18,12 +18,12 @@ use crate::ast;
 use crate::parser::lexer::LastErrorPath;
 use crate::parser::AIRParser;
 use crate::parser::ParserError;
+use ast::AstVariable::Scalar;
+use ast::AstVariable::Stream;
 use ast::Call;
 use ast::CallInstrArgValue;
 use ast::CallInstrValue;
 use ast::Instruction;
-use ast::AstVariable::Scalar;
-use ast::AstVariable::Stream;
 
 use fstrings::f;
 use lalrpop_util::ParseError;

@@ -17,9 +17,9 @@
 mod fold_id;
 mod traits;
 
+pub use crate::parser::lexer::AstVariable;
 pub use crate::parser::lexer::LastErrorPath;
 pub use crate::parser::lexer::Number;
-pub use crate::parser::lexer::AstVariable;
 pub(super) use fold_id::create_fold_id;
 
 use serde::Deserialize;
