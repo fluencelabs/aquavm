@@ -174,7 +174,9 @@ impl std::fmt::Display for ExecutedState {
                 }
                 write!(f, "     )")
             },
-            Ap(ap) => Ok(()),
+            Ap(ap) => {
+                write!(f, "ap: {:?} -> {:?}", ap.src_generations, ap.dst_generations)
+            },
         }
     }
 }

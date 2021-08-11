@@ -27,6 +27,7 @@ pub(crate) use scalar::ResolvedCallResult;
 pub(crate) use scalar::Scalar;
 pub(crate) use stream::Generation;
 pub(crate) use stream::Stream;
+pub(crate) use stream::StreamIter;
 pub(crate) use variable::Variable;
 
 use super::ExecutionResult;

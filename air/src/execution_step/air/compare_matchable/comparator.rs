@@ -16,7 +16,7 @@
 
 use crate::execution_step::air::ExecutionResult;
 use crate::execution_step::execution_context::ExecutionCtx;
-use crate::execution_step::utils::resolve_variable;
+use crate::execution_step::utils::resolve_ast_variable;
 use crate::JValue;
 
 use air_parser::ast;
@@ -53,10 +53,10 @@ pub(crate) fn are_matchable_eq<'ctx>(
         (matchable, Number(value)) => compare_matchable(matchable, exec_ctx, make_number_comparator(value)),
 
         (Variable(left_variable), Variable(right_variable)) => {
-            let left_jvaluable = resolve_variable(left_variable, exec_ctx)?;
+            let left_jvaluable = resolve_ast_variable(left_variable, exec_ctx)?;
             let left_value = left_jvaluable.as_jvalue();
 
-            let right_jvaluable = resolve_variable(right_variable, exec_ctx)?;
+            let right_jvaluable = resolve_ast_variable(right_variable, exec_ctx)?;
             let right_value = right_jvaluable.as_jvalue();
 
             Ok(left_value == right_value)
@@ -78,10 +78,10 @@ pub(crate) fn are_matchable_eq<'ctx>(
                 return Ok(false);
             }
 
-            let left_jvaluable = resolve_variable(lv, exec_ctx)?;
+            let left_jvaluable = resolve_ast_variable(lv, exec_ctx)?;
             let left_value = left_jvaluable.apply_json_path(lp)?;
 
-            let right_jvaluable = resolve_variable(rv, exec_ctx)?;
+            let right_jvaluable = resolve_ast_variable(rv, exec_ctx)?;
             let right_value = right_jvaluable.apply_json_path(rp)?;
 
             Ok(left_value == right_value)
@@ -119,7 +119,7 @@ fn compare_matchable<'ctx>(
             Ok(comparator(Cow::Owned(jvalue)))
         }
         Variable(variable) => {
-            let jvaluable = resolve_variable(variable, exec_ctx)?;
+            let jvaluable = resolve_ast_variable(variable, exec_ctx)?;
             let jvalue = jvaluable.as_jvalue();
             Ok(comparator(jvalue))
         }
@@ -128,7 +128,7 @@ fn compare_matchable<'ctx>(
             path,
             should_flatten,
         } => {
-            let jvaluable = resolve_variable(variable, exec_ctx)?;
+            let jvaluable = resolve_ast_variable(variable, exec_ctx)?;
             let jvalues = jvaluable.apply_json_path(path)?;
 
             let jvalue = if *should_flatten {

@@ -46,7 +46,7 @@ pub(super) fn resolve_fold_lore(fold: &FoldResult) -> MergeResult<ResolvedFold> 
 
         fold_states_count += resolved_descs.len();
 
-        if let Some(_) = lore.insert(subtrace_lore.value_pos as usize, resolved_descs) {
+        if lore.insert(subtrace_lore.value_pos as usize, resolved_descs).is_some() {
             return Err(MergeError::ManyRecordsWithSamePos(
                 fold.clone(),
                 subtrace_lore.value_pos as usize,

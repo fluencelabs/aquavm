@@ -18,11 +18,11 @@ use super::*;
 use crate::exec_err;
 use crate::execution_step::execution_context::*;
 use crate::execution_step::trace_handler::TraceHandler;
+use crate::execution_step::AstVariable;
 use crate::execution_step::Generation;
 use crate::execution_step::ResolvedCallResult;
 use crate::execution_step::Scalar;
 use crate::execution_step::Stream;
-use crate::execution_step::AstVariable;
 
 use air_interpreter_data::CallResult;
 use air_interpreter_data::SCALAR_GENERATION;
@@ -71,7 +71,8 @@ macro_rules! shadowing_allowed(
     }}
 );
 
-fn set_scalar_result<'i>(
+// TODO: decouple this function to a separate module
+pub(crate) fn set_scalar_result<'i>(
     executed_result: ResolvedCallResult,
     scalar_name: &'i str,
     exec_ctx: &mut ExecutionCtx<'i>,
@@ -110,7 +111,8 @@ fn meet_scalar<'i>(
     Ok(())
 }
 
-fn set_stream_result(
+// TODO: decouple this function to a separate module
+pub(crate) fn set_stream_result(
     executed_result: ResolvedCallResult,
     generation: Generation,
     stream_name: String,

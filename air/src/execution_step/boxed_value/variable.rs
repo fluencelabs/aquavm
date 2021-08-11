@@ -20,27 +20,29 @@ use air_parser::ast::AstVariable;
 #[derive(Clone, Copy, Debug)]
 pub(crate) enum Variable<'i> {
     Scalar(&'i str),
-    Stream {
-        name: &'i str,
-        generation: Generation,
-    }
+    Stream { name: &'i str, generation: Generation },
 }
 
-impl Variable {
-    pub(crate) fn from_ast(ast_variable: &AstVariable) -> Self {
+impl<'i> Variable<'i> {
+    pub(crate) fn from_ast(ast_variable: &AstVariable<'i>) -> Self {
         match ast_variable {
             AstVariable::Scalar(name) => Variable::Scalar(name),
             AstVariable::Stream(name) => Variable::Stream {
                 name,
                 generation: Generation::Last,
-            }
+            },
         }
     }
 
-    pub(crate) fn from_stream(name: &str, generation: Generation) -> Self {
-        Self {
-            name,
-            generation,
+    pub(crate) fn from_ast_with_generation(ast_variable: &AstVariable<'i>, generation: Generation) -> Self {
+        match ast_variable {
+            AstVariable::Scalar(name) => Variable::Scalar(name),
+            AstVariable::Stream(name) => Variable::Stream { name, generation },
         }
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn from_stream(name: &'i str, generation: Generation) -> Self {
+        Self::Stream { name, generation }
     }
 }

@@ -19,6 +19,7 @@ use super::ExecutionResult;
 use super::ResolvedCallResult;
 use crate::exec_err;
 use crate::JValue;
+
 use std::fmt::Formatter;
 
 /// Streams are CRDT-like append only data structures. They are guaranteed to have the same order
@@ -68,40 +69,56 @@ impl Stream {
         }
     }
 
-    pub(crate) fn elements_count(&self) -> usize {
-        self.0.iter().map(|v| v.len()).sum()
+    pub(crate) fn elements_count(&self, generation: Generation) -> Option<usize> {
+        match generation {
+            Generation::Nth(generation) if generation as usize > self.generations_count() => None,
+            Generation::Nth(generation) => Some(self.0.iter().take(generation as usize).map(|v| v.len()).sum()),
+            Generation::Last => Some(self.0.iter().map(|v| v.len()).sum()),
+        }
     }
 
     pub(crate) fn is_empty(&self) -> bool {
         self.0.is_empty()
     }
 
-    pub(crate) fn into_jvalue(self) -> JValue {
+    pub(crate) fn as_jvalue(&self, generation: Generation) -> Option<JValue> {
         use std::ops::Deref;
 
-        let jvalue_array = self
-            .0
-            .iter()
-            .flat_map(|g| g.iter().map(|v| v.result.deref().clone()))
-            .collect::<Vec<_>>();
-        JValue::Array(jvalue_array)
+        let iter = self.iter(generation)?;
+
+        let jvalue_array = iter.map(|r| r.result.deref().clone()).collect::<Vec<_>>();
+
+        Some(JValue::Array(jvalue_array))
     }
 
-    pub(crate) fn iter(&self) -> StreamIter<'_> {
-        let iter = self.0.iter().flat_map(|v| v.iter());
-        let len = self.elements_count();
+    pub(crate) fn iter(&self, generation: Generation) -> Option<StreamIter<'_>> {
+        let iter: Box<dyn Iterator<Item = &ResolvedCallResult>> = match generation {
+            Generation::Nth(generation) if generation as usize > self.generations_count() => return None,
+            Generation::Nth(generation) => Box::new(self.0.iter().take(generation as usize).flat_map(|v| v.iter())),
+            Generation::Last => Box::new(self.0.iter().flat_map(|v| v.iter())),
+        };
+        // unwrap is safe here, because generation's been already checked
+        let len = self.elements_count(generation).unwrap();
 
-        StreamIter {
-            iter: Box::new(iter),
-            len,
-        }
+        let iter = StreamIter { iter, len };
+
+        Some(iter)
     }
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum Generation {
     Last,
     Nth(u32),
+}
+
+impl Generation {
+    pub(crate) fn from_option(raw_generation: Option<u32>) -> Self {
+        match raw_generation {
+            Some(generation) => Generation::Nth(generation),
+            None => Generation::Last,
+        }
+    }
 }
 
 pub(crate) struct StreamIter<'a> {
@@ -127,6 +144,7 @@ impl<'a> Iterator for StreamIter<'a> {
 impl<'a> ExactSizeIterator for StreamIter<'a> {}
 
 use std::fmt;
+
 impl fmt::Display for Stream {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         if self.0.is_empty() {

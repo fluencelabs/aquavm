@@ -60,8 +60,6 @@ macro_rules! to_maybe_generation {
 }
 
 fn to_merger_result(ap_result: ApResult) -> MergeResult<MergerApResult> {
-    const MAXIMUM_GENERATIONS_COUNT: usize = 1;
-
     let src_generation = to_maybe_generation!(ap_result, &ap_result.src_generations, TooManySrcGenerations);
     let dst_generation = to_maybe_generation!(ap_result, &ap_result.dst_generations, TooManyDstGenerations);
 

@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
+use super::call::call_result_setter::set_scalar_result;
+use super::call::call_result_setter::set_stream_result;
 use super::ExecutionCtx;
 use super::ExecutionError;
 use super::ExecutionResult;
 use super::TraceHandler;
+use crate::execution_step::boxed_value::Variable;
 use crate::execution_step::trace_handler::MergerApResult;
 use crate::execution_step::utils::apply_json_path;
-use crate::execution_step::utils::variable_name;
 use crate::execution_step::Generation;
 
 use air_parser::ast::Ap;
-use air_parser::ast::CallInstrArgValue;
 use air_parser::ast::AstVariable;
 
 use crate::execution_step::air::ResolvedCallResult;
@@ -36,18 +37,38 @@ impl<'i> super::ExecutableInstruction<'i> for Ap<'i> {
         try_match_result_to_instr(&ap_result, self)?;
 
         let src = &self.src;
-        let (value, tetraplet) = apply_json_path(&src.variable, &src.path, src.should_flatten, exec_ctx)?;
+        let generation = ap_result_to_generation(&ap_result, ApInstrPosition::Source);
+        let variable = Variable::from_ast_with_generation(&src.variable, generation);
+        let (jvalue, tetraplet) = apply_json_path(variable, &src.path, src.should_flatten, exec_ctx)?;
 
-        let dst_variable = &self.dst;
-        match exec_ctx.streams.get(variable_name) {
-            Some(stream) => {
-                let resolved_call = ResolvedCallResult::new(Rc::new(jvalue), tetraplet[0].triplet.clone(), 0);
-                stream.borrow_mut().add_value(resolved_call, Generation::Last)?;
+        let result = ResolvedCallResult::new(Rc::new(jvalue), tetraplet[0].triplet.clone(), trace_ctx.trace_pos());
+        match &self.dst {
+            AstVariable::Scalar(name) => set_scalar_result(result, name, exec_ctx)?,
+            AstVariable::Stream(name) => {
+                let generation = ap_result_to_generation(&ap_result, ApInstrPosition::Destination);
+                set_stream_result(result, generation, name.to_string(), exec_ctx)?;
             }
-            _ => unreachable!("return a error"),
-        };
+        }
 
         Ok(())
+    }
+}
+
+#[derive(Clone, Copy, Debug)]
+enum ApInstrPosition {
+    Source,
+    Destination,
+}
+
+fn ap_result_to_generation(ap_result: &MergerApResult, position: ApInstrPosition) -> Generation {
+    match (position, ap_result) {
+        (_, MergerApResult::Empty) => Generation::Last,
+        (ApInstrPosition::Source, MergerApResult::ApResult { src_generation, .. }) => {
+            Generation::from_option(*src_generation)
+        }
+        (ApInstrPosition::Destination, MergerApResult::ApResult { dst_generation, .. }) => {
+            Generation::from_option(*dst_generation)
+        }
     }
 }
 

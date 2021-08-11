@@ -17,8 +17,9 @@
 use super::ExecutionError::StreamJsonPathError;
 use super::ExecutionResult;
 use super::JValuable;
-use crate::execution_step::boxed_value::Stream;
+use crate::exec_err;
 use crate::execution_step::boxed_value::Generation;
+use crate::execution_step::boxed_value::Stream;
 use crate::JValue;
 use crate::SecurityTetraplet;
 
@@ -27,13 +28,18 @@ use jsonpath_lib::select_with_iter;
 use std::borrow::Cow;
 use std::ops::Deref;
 
+pub(crate) struct StreamJvaluableIngredients<'stream> {
+    pub(crate) stream: std::cell::Ref<'stream, Stream>,
+    pub(crate) generation: Generation,
+}
+
 // TODO: this will be deleted soon, because it would be impossible to use streams without
 // canonicalization as an arg of a call
-impl JValuable for (std::cell::Ref<'_, Stream>, Generation) {
+impl JValuable for StreamJvaluableIngredients<'_> {
     fn apply_json_path(&self, json_path: &str) -> ExecutionResult<Vec<&JValue>> {
-        let iter = self.iter().map(|v| v.result.deref());
+        let iter = self.iter()?.map(|v| v.result.deref());
         let (selected_values, _) = select_with_iter(iter, json_path)
-            .map_err(|e| StreamJsonPathError(self.deref().clone(), json_path.to_string(), e))?;
+            .map_err(|e| StreamJsonPathError(self.stream.deref().clone(), json_path.to_string(), e))?;
 
         Ok(selected_values)
     }
@@ -42,15 +48,15 @@ impl JValuable for (std::cell::Ref<'_, Stream>, Generation) {
         &self,
         json_path: &str,
     ) -> ExecutionResult<(Vec<&JValue>, Vec<SecurityTetraplet>)> {
-        let iter = self.iter().map(|v| v.result.deref());
+        let iter = self.iter()?.map(|v| v.result.deref());
 
         let (selected_values, tetraplet_indices) = select_with_iter(iter, json_path)
-            .map_err(|e| StreamJsonPathError(self.deref().clone(), json_path.to_string(), e))?;
+            .map_err(|e| StreamJsonPathError(self.stream.deref().clone(), json_path.to_string(), e))?;
 
         let mut tetraplets = Vec::with_capacity(tetraplet_indices.len());
 
         for idx in tetraplet_indices.iter() {
-            let resolved_call = self.iter().nth(*idx).unwrap();
+            let resolved_call = self.iter()?.nth(*idx).unwrap();
             let tetraplet = SecurityTetraplet {
                 triplet: resolved_call.triplet.clone(),
                 json_path: json_path.to_string(),
@@ -62,23 +68,49 @@ impl JValuable for (std::cell::Ref<'_, Stream>, Generation) {
     }
 
     fn as_jvalue(&self) -> Cow<'_, JValue> {
-        let jvalue = self.deref().clone().into_jvalue();
+        let jvalue = self.stream.deref().clone().as_jvalue(self.generation).unwrap();
         Cow::Owned(jvalue)
     }
 
     fn into_jvalue(self: Box<Self>) -> JValue {
-        self.clone().into_jvalue()
+        self.stream.as_jvalue(self.generation).unwrap()
     }
 
     fn as_tetraplets(&self) -> Vec<SecurityTetraplet> {
-        self.0
-            .iter()
-            .flat_map(|g| {
-                g.iter().map(|r| SecurityTetraplet {
-                    triplet: r.triplet.clone(),
-                    json_path: String::new(),
-                })
+        self.stream
+            .iter(self.generation)
+            .unwrap()
+            .map(|r| SecurityTetraplet {
+                triplet: r.triplet.clone(),
+                json_path: String::new(),
             })
             .collect::<Vec<_>>()
+    }
+}
+
+use crate::execution_step::boxed_value::StreamIter;
+
+impl<'stream> StreamJvaluableIngredients<'stream> {
+    pub(crate) fn new(stream: std::cell::Ref<'stream, Stream>, generation: Generation) -> Self {
+        Self { stream, generation }
+    }
+
+    pub(self) fn iter(&self) -> ExecutionResult<StreamIter<'_>> {
+        use super::ExecutionError::StreamDontHaveSuchGeneration;
+
+        match self.stream.iter(self.generation) {
+            Some(iter) => Ok(iter),
+            None => {
+                let generation = match self.generation {
+                    Generation::Nth(generation) => generation,
+                    Generation::Last => unreachable!(),
+                };
+
+                exec_err!(StreamDontHaveSuchGeneration(
+                    self.stream.deref().clone(),
+                    generation as usize
+                ))
+            }
+        }
     }
 }

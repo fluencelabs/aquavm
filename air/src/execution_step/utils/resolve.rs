@@ -23,6 +23,7 @@ use crate::execution_step::ExecutionResult;
 use crate::JValue;
 use crate::SecurityTetraplet;
 
+use air_parser::ast::AstVariable;
 use air_parser::ast::CallInstrArgValue;
 use air_parser::ast::LastErrorPath;
 use serde_json::json;
@@ -41,7 +42,7 @@ pub(crate) fn resolve_to_args<'i>(
         CallInstrArgValue::Variable(variable) => {
             let variable = Variable::from_ast(variable);
             prepare_variable(variable, ctx)
-        },
+        }
         CallInstrArgValue::JsonPath {
             variable,
             path,
@@ -49,7 +50,7 @@ pub(crate) fn resolve_to_args<'i>(
         } => {
             let variable = Variable::from_ast(variable);
             apply_json_path(variable, path, *should_flatten, ctx)
-        },
+        }
     }
 }
 
@@ -92,17 +93,30 @@ pub(crate) fn resolve_variable<'ctx, 'i>(
     variable: Variable<'_>,
     ctx: &'ctx ExecutionCtx<'i>,
 ) -> ExecutionResult<Box<dyn JValuable + 'ctx>> {
+    use crate::execution_step::boxed_value::StreamJvaluableIngredients;
+
     match variable {
         Variable::Scalar(name) => scalar_to_jvaluable(name, ctx),
         Variable::Stream { name, generation } => {
             match ctx.streams.get(name) {
-                Some(stream) => Ok(Box::new(stream.borrow())),
+                Some(stream) => {
+                    let ingredients = StreamJvaluableIngredients::new(stream.borrow(), generation);
+                    Ok(Box::new(ingredients))
+                }
                 // return an empty stream for not found stream
                 // here it ignores the join behaviour
                 None => Ok(Box::new(())),
             }
         }
     }
+}
+
+pub(crate) fn resolve_ast_variable<'ctx, 'i>(
+    variable: &AstVariable<'_>,
+    ctx: &'ctx ExecutionCtx<'i>,
+) -> ExecutionResult<Box<dyn JValuable + 'ctx>> {
+    let variable = Variable::from_ast(variable);
+    resolve_variable(variable, ctx)
 }
 
 pub(crate) fn apply_json_path<'i>(
