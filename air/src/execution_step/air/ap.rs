@@ -20,6 +20,7 @@ use super::ExecutionCtx;
 use super::ExecutionError;
 use super::ExecutionResult;
 use super::TraceHandler;
+use crate::execution_step::air::ResolvedCallResult;
 use crate::execution_step::boxed_value::Variable;
 use crate::execution_step::trace_handler::MergerApResult;
 use crate::execution_step::utils::apply_json_path;
@@ -28,16 +29,15 @@ use crate::execution_step::Generation;
 use air_parser::ast::Ap;
 use air_parser::ast::AstVariable;
 
-use crate::execution_step::air::ResolvedCallResult;
 use std::rc::Rc;
 
 impl<'i> super::ExecutableInstruction<'i> for Ap<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
-        let ap_result = trace_ctx.meet_ap()?;
-        try_match_result_to_instr(&ap_result, self)?;
+        let merger_ap_result = trace_ctx.meet_ap_start()?;
+        try_match_result_to_instr(&merger_ap_result, self)?;
 
         let src = &self.src;
-        let generation = ap_result_to_generation(&ap_result, ApInstrPosition::Source);
+        let generation = ap_result_to_generation(&merger_ap_result, ApInstrPosition::Source);
         let variable = Variable::from_ast_with_generation(&src.variable, generation);
         let (jvalue, tetraplet) = apply_json_path(variable, &src.path, src.should_flatten, exec_ctx)?;
 
@@ -45,10 +45,13 @@ impl<'i> super::ExecutableInstruction<'i> for Ap<'i> {
         match &self.dst {
             AstVariable::Scalar(name) => set_scalar_result(result, name, exec_ctx)?,
             AstVariable::Stream(name) => {
-                let generation = ap_result_to_generation(&ap_result, ApInstrPosition::Destination);
+                let generation = ap_result_to_generation(&merger_ap_result, ApInstrPosition::Destination);
                 set_stream_result(result, generation, name.to_string(), exec_ctx)?;
             }
         }
+
+        let ap_result = to_ap_result(&merger_ap_result, self, exec_ctx);
+        trace_ctx.meet_ap_end(ap_result);
 
         Ok(())
     }
@@ -72,7 +75,7 @@ fn ap_result_to_generation(ap_result: &MergerApResult, position: ApInstrPosition
     }
 }
 
-fn try_match_result_to_instr(merger_ap_result: &MergerApResult, ap: &Ap<'_>) -> ExecutionResult<()> {
+fn try_match_result_to_instr(merger_ap_result: &MergerApResult, instr: &Ap<'_>) -> ExecutionResult<()> {
     fn match_position(
         variable: &AstVariable<'_>,
         generation: Option<u32>,
@@ -93,6 +96,52 @@ fn try_match_result_to_instr(merger_ap_result: &MergerApResult, ap: &Ap<'_>) -> 
         MergerApResult::Empty => return Ok(()),
     };
 
-    match_position(&ap.src.variable, src_generation, merger_ap_result)?;
-    match_position(&ap.dst, dst_generation, merger_ap_result)
+    match_position(&instr.src.variable, src_generation, merger_ap_result)?;
+    match_position(&instr.dst, dst_generation, merger_ap_result)
+}
+
+use air_interpreter_data::ApResult;
+
+fn to_ap_result(merger_ap_result: &MergerApResult, instr: &Ap<'_>, exec_ctx: &ExecutionCtx<'_>) -> ApResult {
+    fn option_to_vec(value: Option<u32>) -> Vec<u32> {
+        match value {
+            Some(value) => vec![value],
+            None => vec![],
+        }
+    }
+
+    if let MergerApResult::ApResult {
+        src_generation,
+        dst_generation,
+    } = merger_ap_result
+    {
+        let src_generations = option_to_vec(*src_generation);
+        let dst_generations = option_to_vec(*dst_generation);
+
+        return ApResult {
+            src_generations,
+            dst_generations,
+        };
+    }
+
+    let src_generations = match instr.src.variable {
+        AstVariable::Scalar(_) => vec![],
+        AstVariable::Stream(name) => {
+            let stream = exec_ctx.streams.get(name).unwrap();
+            vec![stream.borrow().generations_count() as u32]
+        }
+    };
+
+    let dst_generations = match instr.dst {
+        AstVariable::Scalar(_) => vec![],
+        AstVariable::Stream(name) => {
+            let stream = exec_ctx.streams.get(name).unwrap();
+            vec![stream.borrow().generations_count() as u32]
+        }
+    };
+
+    ApResult {
+        src_generations,
+        dst_generations,
+    }
 }
