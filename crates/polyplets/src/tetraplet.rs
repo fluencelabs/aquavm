@@ -18,14 +18,13 @@ use crate::ResolvedTriplet;
 
 use serde::Deserialize;
 use serde::Serialize;
-use std::rc::Rc;
 
 /// Describes an origin returned corresponding value.
-#[derive(Clone, Debug, Eq, PartialEq, Hash, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Hash, Serialize, Deserialize)]
 pub struct SecurityTetraplet {
     /// Describes origin of the value in the network.
     #[serde(flatten)]
-    pub triplet: Rc<ResolvedTriplet>,
+    pub triplet: ResolvedTriplet,
 
     /// Value was produced by applying this `json_path` to the output from `call_service`.
     pub json_path: String,
@@ -41,7 +40,6 @@ impl SecurityTetraplet {
             service_id: String::new(),
             function_name: String::new(),
         };
-        let triplet = Rc::new(triplet);
 
         Self {
             triplet,
@@ -50,10 +48,14 @@ impl SecurityTetraplet {
         }
     }
 
-    pub fn from_triplet(triplet: Rc<ResolvedTriplet>) -> Self {
+    pub fn from_triplet(triplet: ResolvedTriplet) -> Self {
         Self {
             triplet,
             json_path: String::new(),
         }
+    }
+
+    pub fn add_json_path(&mut self, json_path: &str) {
+        self.json_path.push_str(json_path)
     }
 }

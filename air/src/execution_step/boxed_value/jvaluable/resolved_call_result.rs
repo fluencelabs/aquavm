@@ -17,8 +17,8 @@
 use super::ExecutionResult;
 use super::JValuable;
 use super::ResolvedCallResult;
+use crate::execution_step::SecurityTetraplets;
 use crate::JValue;
-use crate::SecurityTetraplet;
 
 use jsonpath_lib::select;
 
@@ -34,20 +34,15 @@ impl JValuable for ResolvedCallResult {
         Ok(selected_jvalues)
     }
 
-    fn apply_json_path_with_tetraplets(
-        &self,
-        json_path: &str,
-    ) -> ExecutionResult<(Vec<&JValue>, Vec<SecurityTetraplet>)> {
+    fn apply_json_path_with_tetraplets(&self, json_path: &str) -> ExecutionResult<(Vec<&JValue>, SecurityTetraplets)> {
         use super::ExecutionError::JValueJsonPathError as JsonPathError;
 
         is_json_path_allowed(&self.result)?;
         let selected_jvalues = select(&self.result, json_path)
             .map_err(|e| JsonPathError(self.result.deref().clone(), String::from(json_path), e))?;
 
-        let tetraplet = SecurityTetraplet {
-            triplet: self.triplet.clone(),
-            json_path: json_path.to_string(),
-        };
+        let tetraplet = self.tetraplet.clone();
+        tetraplet.borrow_mut().add_json_path(json_path);
 
         Ok((selected_jvalues, vec![tetraplet]))
     }
@@ -60,13 +55,8 @@ impl JValuable for ResolvedCallResult {
         self.result.deref().clone()
     }
 
-    fn as_tetraplets(&self) -> Vec<SecurityTetraplet> {
-        let tetraplet = SecurityTetraplet {
-            triplet: self.triplet.clone(),
-            json_path: String::new(),
-        };
-
-        vec![tetraplet]
+    fn as_tetraplets(&self) -> SecurityTetraplets {
+        vec![self.tetraplet.clone()]
     }
 }
 

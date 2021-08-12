@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use super::SecurityTetraplets;
 use crate::execution_step::boxed_value::JValuable;
 use crate::execution_step::boxed_value::Variable;
 use crate::execution_step::execution_context::ExecutionCtx;
@@ -27,12 +28,14 @@ use air_parser::ast::AstVariable;
 use air_parser::ast::CallInstrArgValue;
 use air_parser::ast::LastErrorPath;
 use serde_json::json;
+use std::cell::RefCell;
+use std::rc::Rc;
 
 /// Resolve value to called function arguments.
 pub(crate) fn resolve_to_args<'i>(
     value: &CallInstrArgValue<'i>,
     ctx: &ExecutionCtx<'i>,
-) -> ExecutionResult<(JValue, Vec<SecurityTetraplet>)> {
+) -> ExecutionResult<(JValue, SecurityTetraplets)> {
     match value {
         CallInstrArgValue::InitPeerId => prepare_consts(ctx.init_peer_id.clone(), ctx),
         CallInstrArgValue::LastError(path) => prepare_last_error(path, ctx),
@@ -55,18 +58,16 @@ pub(crate) fn resolve_to_args<'i>(
 }
 
 #[allow(clippy::unnecessary_wraps)]
-fn prepare_consts(arg: impl Into<JValue>, ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, Vec<SecurityTetraplet>)> {
+fn prepare_consts(arg: impl Into<JValue>, ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, SecurityTetraplets)> {
     let jvalue = arg.into();
     let tetraplet = SecurityTetraplet::literal_tetraplet(ctx.init_peer_id.clone());
+    let tetraplet = Rc::new(RefCell::new(tetraplet));
 
     Ok((jvalue, vec![tetraplet]))
 }
 
 #[allow(clippy::unnecessary_wraps)]
-fn prepare_last_error(
-    path: &LastErrorPath,
-    ctx: &ExecutionCtx<'_>,
-) -> ExecutionResult<(JValue, Vec<SecurityTetraplet>)> {
+fn prepare_last_error(path: &LastErrorPath, ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, SecurityTetraplets)> {
     let LastErrorWithTetraplets { last_error, tetraplets } = ctx.last_error();
     let jvalue = match path {
         LastErrorPath::Instruction => JValue::String(last_error.instruction),
@@ -81,7 +82,7 @@ fn prepare_last_error(
 fn prepare_variable<'i>(
     variable: Variable<'_>,
     ctx: &ExecutionCtx<'i>,
-) -> ExecutionResult<(JValue, Vec<SecurityTetraplet>)> {
+) -> ExecutionResult<(JValue, SecurityTetraplets)> {
     let resolved = resolve_variable(variable, ctx)?;
     let tetraplets = resolved.as_tetraplets();
     let jvalue = resolved.into_jvalue();
@@ -124,7 +125,7 @@ pub(crate) fn apply_json_path<'i>(
     json_path: &str,
     should_flatten: bool,
     ctx: &ExecutionCtx<'i>,
-) -> ExecutionResult<(JValue, Vec<SecurityTetraplet>)> {
+) -> ExecutionResult<(JValue, SecurityTetraplets)> {
     let resolved = resolve_variable(variable, ctx)?;
     let (jvalue, tetraplets) = resolved.apply_json_path_with_tetraplets(json_path)?;
 

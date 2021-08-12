@@ -34,9 +34,13 @@ pub(crate) use execution_context::ExecutionCtx;
 use joinable::Joinable;
 pub(crate) use trace_handler::TraceHandler;
 
+use std::cell::RefCell;
 use std::rc::Rc;
 
 type ExecutionResult<T> = std::result::Result<T, Rc<ExecutionError>>;
+type RSecurityTetraplet = Rc<RefCell<crate::SecurityTetraplet>>;
+type SecurityTetraplets = Vec<RSecurityTetraplet>;
+
 use air_parser::ast::AstVariable;
 
 #[macro_export]

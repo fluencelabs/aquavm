@@ -16,8 +16,8 @@
 
 use super::JValuable;
 use crate::execution_step::FoldState;
+use crate::execution_step::RSecurityTetraplet;
 use crate::JValue;
-use crate::ResolvedTriplet;
 
 use serde::Deserialize;
 use serde::Serialize;
@@ -29,7 +29,7 @@ use std::rc::Rc;
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct ResolvedCallResult {
     pub result: Rc<JValue>,
-    pub triplet: Rc<ResolvedTriplet>,
+    pub tetraplet: RSecurityTetraplet,
     pub trace_pos: usize,
 }
 
@@ -51,10 +51,10 @@ impl<'i> Scalar<'i> {
 }
 
 impl ResolvedCallResult {
-    pub(crate) fn new(result: Rc<JValue>, triplet: Rc<ResolvedTriplet>, trace_pos: usize) -> Self {
+    pub(crate) fn new(result: Rc<JValue>, tetraplet: RSecurityTetraplet, trace_pos: usize) -> Self {
         Self {
             result,
-            triplet,
+            tetraplet,
             trace_pos,
         }
     }

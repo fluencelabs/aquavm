@@ -117,7 +117,7 @@ impl Stream {
 
         let len = match generation {
             Generation::Nth(generation) => generation as usize,
-            Generation::Last => self.0.len()
+            Generation::Last => self.0.len(),
         };
 
         let iter = StreamSliceIter { iter, len };

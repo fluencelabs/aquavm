@@ -24,8 +24,8 @@ use super::iterable::IterableItem;
 use super::ExecutionError;
 use super::ExecutionResult;
 use super::ResolvedCallResult;
+use crate::execution_step::SecurityTetraplets;
 use crate::JValue;
-use crate::SecurityTetraplet;
 
 pub(crate) use stream::StreamJvaluableIngredients;
 
@@ -37,10 +37,7 @@ pub(crate) trait JValuable {
     fn apply_json_path(&self, json_path: &str) -> ExecutionResult<Vec<&JValue>>;
 
     /// Applies json path to the internal value, produces JValue with tetraplet.
-    fn apply_json_path_with_tetraplets(
-        &self,
-        json_path: &str,
-    ) -> ExecutionResult<(Vec<&JValue>, Vec<SecurityTetraplet>)>;
+    fn apply_json_path_with_tetraplets(&self, json_path: &str) -> ExecutionResult<(Vec<&JValue>, SecurityTetraplets)>;
 
     /// Return internal value as borrowed if it's possible, owned otherwise.
     fn as_jvalue(&self) -> Cow<'_, JValue>;
@@ -49,5 +46,5 @@ pub(crate) trait JValuable {
     fn into_jvalue(self: Box<Self>) -> JValue;
 
     /// Return tetraplets associating with internal value.
-    fn as_tetraplets(&self) -> Vec<SecurityTetraplet>;
+    fn as_tetraplets(&self) -> SecurityTetraplets;
 }

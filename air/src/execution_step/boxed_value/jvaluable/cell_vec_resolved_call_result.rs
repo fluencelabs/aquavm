@@ -18,8 +18,8 @@ use super::ExecutionError::GenerationStreamJsonPathError;
 use super::ExecutionResult;
 use super::JValuable;
 use super::ResolvedCallResult;
+use crate::execution_step::SecurityTetraplets;
 use crate::JValue;
-use crate::SecurityTetraplet;
 
 use jsonpath_lib::select_with_iter;
 
@@ -36,10 +36,7 @@ impl JValuable for std::cell::Ref<'_, Vec<ResolvedCallResult>> {
         Ok(selected_values)
     }
 
-    fn apply_json_path_with_tetraplets(
-        &self,
-        json_path: &str,
-    ) -> ExecutionResult<(Vec<&JValue>, Vec<SecurityTetraplet>)> {
+    fn apply_json_path_with_tetraplets(&self, json_path: &str) -> ExecutionResult<(Vec<&JValue>, SecurityTetraplets)> {
         let acc_iter = self.iter().map(|r| r.result.deref());
 
         let (selected_values, tetraplet_indices) = select_with_iter(acc_iter, json_path).map_err(|e| {
@@ -48,9 +45,10 @@ impl JValuable for std::cell::Ref<'_, Vec<ResolvedCallResult>> {
 
         let tetraplets = tetraplet_indices
             .into_iter()
-            .map(|id| SecurityTetraplet {
-                triplet: self[id].triplet.clone(),
-                json_path: json_path.to_string(),
+            .map(|id| {
+                let tetraplet = self[id].tetraplet.clone();
+                tetraplet.borrow_mut().add_json_path(json_path);
+                tetraplet
             })
             .collect::<Vec<_>>();
 
@@ -67,12 +65,7 @@ impl JValuable for std::cell::Ref<'_, Vec<ResolvedCallResult>> {
         JValue::Array(jvalue_array)
     }
 
-    fn as_tetraplets(&self) -> Vec<SecurityTetraplet> {
-        self.iter()
-            .map(|r| SecurityTetraplet {
-                triplet: r.triplet.clone(),
-                json_path: String::new(),
-            })
-            .collect::<Vec<_>>()
+    fn as_tetraplets(&self) -> SecurityTetraplets {
+        self.iter().map(|r| r.tetraplet.clone()).collect::<Vec<_>>()
     }
 }

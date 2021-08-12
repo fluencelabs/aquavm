@@ -20,7 +20,6 @@ use super::ResolvedCallResult;
 use crate::foldable_next;
 use crate::foldable_prev;
 use crate::JValue;
-use crate::SecurityTetraplet;
 
 use std::ops::Deref;
 
@@ -60,22 +59,16 @@ impl<'ctx> Iterable<'ctx> for IterableResolvedCall {
 
         let ResolvedCallResult {
             result,
-            triplet,
+            tetraplet,
             trace_pos,
         } = &self.call_result;
-
-        let tetraplet = SecurityTetraplet {
-            triplet: triplet.clone(),
-            // TODO: consider set json_path to the current cursor here
-            json_path: String::new(),
-        };
 
         let jvalue = match &result.deref() {
             JValue::Array(array) => &array[self.cursor],
             _ => unimplemented!("this jvalue is set only by fold instruction, so it must have an array type"),
         };
 
-        let result = IterableItem::RefValue((jvalue, tetraplet, *trace_pos));
+        let result = IterableItem::RefValue((jvalue, tetraplet.clone(), *trace_pos));
         Some(result)
     }
 

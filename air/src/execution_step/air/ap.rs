@@ -25,12 +25,14 @@ use crate::execution_step::air::ResolvedCallResult;
 use crate::execution_step::boxed_value::Variable;
 use crate::execution_step::trace_handler::MergerApResult;
 use crate::execution_step::utils::apply_json_path;
+use crate::SecurityTetraplet;
 use utils::*;
 
-use air_parser::ast::AstVariable;
 use air_parser::ast::Ap;
 use air_parser::ast::ApSource;
+use air_parser::ast::AstVariable;
 
+use std::cell::RefCell;
 use std::rc::Rc;
 
 impl<'i> super::ExecutableInstruction<'i> for Ap<'i> {
@@ -56,9 +58,12 @@ fn apply(
 ) -> ExecutionResult<ResolvedCallResult> {
     let generation = ap_result_to_generation(&merger_ap_result, ApInstrPosition::Source);
     let variable = Variable::from_ast_with_generation(&ap_source.variable, generation);
-    let (jvalue, tetraplet) = apply_json_path(variable, &ap_source.path, ap_source.should_flatten, exec_ctx)?;
+    let (jvalue, mut tetraplets) = apply_json_path(variable, &ap_source.path, ap_source.should_flatten, exec_ctx)?;
 
-    let result = ResolvedCallResult::new(Rc::new(jvalue), tetraplet[0].triplet.clone(), trace_ctx.trace_pos());
+    let tetraplet = tetraplets
+        .pop()
+        .unwrap_or_else(|| Rc::new(RefCell::new(SecurityTetraplet::default())));
+    let result = ResolvedCallResult::new(Rc::new(jvalue), tetraplet, trace_ctx.trace_pos());
 
     Ok(result)
 }

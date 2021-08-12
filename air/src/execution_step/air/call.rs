@@ -28,9 +28,9 @@ use super::LastErrorDescriptor;
 use super::ResolvedCallResult;
 use super::TraceHandler;
 use crate::execution_step::joinable::Joinable;
+use crate::execution_step::RSecurityTetraplet;
 use crate::joinable_call;
 use crate::log_instruction;
-use crate::SecurityTetraplet;
 
 use air_parser::ast::Call;
 
@@ -45,11 +45,9 @@ impl<'i> super::ExecutableInstruction<'i> for Call<'i> {
             e
         })?;
 
-        let triplet = resolved_call.as_triplet();
+        let tetraplet = resolved_call.as_tetraplet();
         joinable_call!(resolved_call.execute(exec_ctx, trace_ctx), exec_ctx).map_err(|e| {
-            let tetraplet = SecurityTetraplet::from_triplet(triplet);
             set_last_error(self, exec_ctx, e.clone(), Some(tetraplet));
-
             e
         })
     }
@@ -59,13 +57,13 @@ fn set_last_error<'i>(
     call: &Call<'i>,
     exec_ctx: &mut ExecutionCtx<'i>,
     e: Rc<ExecutionError>,
-    tetraplet: Option<SecurityTetraplet>,
+    tetraplet: Option<RSecurityTetraplet>,
 ) {
     let current_peer_id = match &tetraplet {
         // use tetraplet if they set, because an error could be propagated from data
         // (from CallServiceFailed state) and exec_ctx.current_peer_id won't mean
         // a peer where the error was occurred
-        Some(tetraplet) => tetraplet.triplet.peer_pk.clone(),
+        Some(tetraplet) => tetraplet.borrow().triplet.peer_pk.clone(),
         None => exec_ctx.current_peer_id.to_string(),
     };
 

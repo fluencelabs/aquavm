@@ -20,8 +20,8 @@ use super::JValuable;
 use crate::exec_err;
 use crate::execution_step::boxed_value::Generation;
 use crate::execution_step::boxed_value::Stream;
+use crate::execution_step::SecurityTetraplets;
 use crate::JValue;
-use crate::SecurityTetraplet;
 
 use jsonpath_lib::select_with_iter;
 
@@ -44,10 +44,7 @@ impl JValuable for StreamJvaluableIngredients<'_> {
         Ok(selected_values)
     }
 
-    fn apply_json_path_with_tetraplets(
-        &self,
-        json_path: &str,
-    ) -> ExecutionResult<(Vec<&JValue>, Vec<SecurityTetraplet>)> {
+    fn apply_json_path_with_tetraplets(&self, json_path: &str) -> ExecutionResult<(Vec<&JValue>, SecurityTetraplets)> {
         let iter = self.iter()?.map(|v| v.result.deref());
 
         let (selected_values, tetraplet_indices) = select_with_iter(iter, json_path)
@@ -57,10 +54,8 @@ impl JValuable for StreamJvaluableIngredients<'_> {
 
         for idx in tetraplet_indices.iter() {
             let resolved_call = self.iter()?.nth(*idx).unwrap();
-            let tetraplet = SecurityTetraplet {
-                triplet: resolved_call.triplet.clone(),
-                json_path: json_path.to_string(),
-            };
+            let tetraplet = resolved_call.tetraplet.clone();
+            tetraplet.borrow_mut().add_json_path(json_path);
             tetraplets.push(tetraplet);
         }
 
@@ -76,14 +71,11 @@ impl JValuable for StreamJvaluableIngredients<'_> {
         self.stream.as_jvalue(self.generation).unwrap()
     }
 
-    fn as_tetraplets(&self) -> Vec<SecurityTetraplet> {
+    fn as_tetraplets(&self) -> SecurityTetraplets {
         self.stream
             .iter(self.generation)
             .unwrap()
-            .map(|r| SecurityTetraplet {
-                triplet: r.triplet.clone(),
-                json_path: String::new(),
-            })
+            .map(|r| r.tetraplet.clone())
             .collect::<Vec<_>>()
     }
 }
