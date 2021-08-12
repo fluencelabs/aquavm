@@ -1,5 +1,5 @@
 // auto-generated: "lalrpop 0.19.6"
-// sha3: feba9e9c22a654886071b542b755c7736b0247067aa8f9bf4d1747e8fe7a
+// sha3: 2eece3323029dd5a8a71d444628738f99d93047cd8b9a52329767bd28efd6
 use crate::parser::ast::*;
 use crate::parser::air_parser::make_flattened_error;
 use crate::parser::air_parser::make_stream_iterable_error;
@@ -7,9 +7,6 @@ use crate::parser::ParserError;
 use crate::parser::VariableValidator;
 use crate::parser::Span;
 use crate::parser::lexer::Token;
-use crate::parser::lexer::Number;
-use crate::parser::lexer::LastErrorPath;
-use crate::parser::lexer::AstVariable;
 use lalrpop_util::ErrorRecovery;
 use std::rc::Rc;
 #[allow(unused_extern_crates)]
@@ -30,9 +27,6 @@ mod __parse__AIR {
     use crate::parser::VariableValidator;
     use crate::parser::Span;
     use crate::parser::lexer::Token;
-    use crate::parser::lexer::Number;
-    use crate::parser::lexer::LastErrorPath;
-    use crate::parser::lexer::AstVariable;
     use lalrpop_util::ErrorRecovery;
     use std::rc::Rc;
     #[allow(unused_extern_crates)]
@@ -1372,6 +1366,17 @@ mod __parse__AIR {
             _ => __symbol_type_mismatch()
         }
     }
+    fn __pop_Variant15<
+      'input,
+    >(
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
+    ) -> (usize, AstVariable<'input>, usize)
+     {
+        match __symbols.pop() {
+            Some((__l, __Symbol::Variant15(__v), __r)) => (__l, __v, __r),
+            _ => __symbol_type_mismatch()
+        }
+    }
     fn __pop_Variant10<
       'input,
     >(
@@ -1479,17 +1484,6 @@ mod __parse__AIR {
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant0(__v), __r)) => (__l, __v, __r),
-            _ => __symbol_type_mismatch()
-        }
-    }
-    fn __pop_Variant15<
-      'input,
-    >(
-        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, AstVariable<'input>, usize)
-     {
-        match __symbols.pop() {
-            Some((__l, __Symbol::Variant15(__v), __r)) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
@@ -2918,27 +2912,27 @@ fn __action3<
     (_, left, _): (usize, usize, usize),
     (_, _, _): (usize, Token<'input>, usize),
     (_, _, _): (usize, Token<'input>, usize),
-    (_, arg, _): (usize, (AstVariable<'input>, &'input str, bool), usize),
-    (_, output, _): (usize, AstVariable<'input>, usize),
+    (_, src, _): (usize, (AstVariable<'input>, &'input str, bool), usize),
+    (_, dst, _): (usize, AstVariable<'input>, usize),
     (_, _, _): (usize, Token<'input>, usize),
     (_, right, _): (usize, usize, usize),
 ) -> Box<Instruction<'input>>
 {
     {
-        let variable = arg.0;
-        let path = arg.1;
-        let should_flatten = arg.2;
+        let variable = src.0;
+        let path = src.1;
+        let should_flatten = src.2;
 
-        let src = ApSource {
-            variable,
-            path,
-            should_flatten,
-        };
+        // Due the json path constraints json path should be flattened in a call triplet.
+        if !should_flatten {
+            let token = Token::VariableWithJsonPath(variable.clone(), path, should_flatten);
+            errors.push(make_flattened_error(left, token, right));
+        }
 
-        let apply = Ap {
-            src,
-            dst: output,
-        };
+        let src = ApSource::new(variable, path);
+        let apply = Ap::new(src, dst);
+        let span = Span { left, right };
+        validator.met_ap(&apply, span);
 
         Box::new(Instruction::Ap(apply))
     }
@@ -3386,20 +3380,22 @@ fn __action27<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, l, _): (usize, usize, usize),
+    (_, left, _): (usize, usize, usize),
     (_, j, _): (usize, (AstVariable<'input>, &'input str, bool), usize),
-    (_, r, _): (usize, usize, usize),
+    (_, right, _): (usize, usize, usize),
 ) -> CallInstrValue<'input>
 {
     {
         let variable = j.0;
         let path = j.1;
         let should_flatten = j.2;
+
         // Due the json path constraints json path should be flattened in a call triplet.
         if !should_flatten {
             let token = Token::VariableWithJsonPath(variable.clone(), path, should_flatten);
-            errors.push(make_flattened_error(l, token, r));
+            errors.push(make_flattened_error(left, token, right));
         }
+
         CallInstrValue::JsonPath { variable, path, should_flatten }
     }
 }

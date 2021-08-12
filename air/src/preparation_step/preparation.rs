@@ -66,9 +66,9 @@ pub(crate) fn prepare<'i>(
 }
 
 fn try_to_data(raw_data: &[u8]) -> PreparationResult<InterpreterData> {
-    use PreparationError::DataDeError;
+    use PreparationError::DataDeFailed;
 
-    InterpreterData::try_from_slice(raw_data).map_err(|err| DataDeError(err, raw_data.to_vec()))
+    InterpreterData::try_from_slice(raw_data).map_err(|err| DataDeFailed(err, raw_data.to_vec()))
 }
 
 fn make_exec_ctx(init_peer_id: String, prev_data: &InterpreterData) -> PreparationResult<ExecutionCtx<'static>> {

@@ -33,8 +33,8 @@ fn current_peer_id_call() {
     let vm_peer_id = String::from("test_peer_id");
     let mut vm = create_avm(unit_call_service(), vm_peer_id.clone());
 
-    let service_id = String::from("local_service_id");
-    let function_name = String::from("local_fn_name");
+    let service_id = "local_service_id";
+    let function_name = "local_fn_name";
     let script = format!(
         r#"
                (call %init_peer_id% ("{}" "{}") [] result_name)

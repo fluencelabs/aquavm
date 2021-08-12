@@ -58,7 +58,11 @@ impl<'i> VariableValidator<'i> {
         self.met_peer_part(&call.peer_part, span);
         self.met_function_part(&call.function_part, span);
         self.met_args(&call.args, span);
-        self.met_call_output_definition(&call.output, span)
+
+        match &call.output {
+            CallOutputValue::Variable(variable) => self.met_variable_definition(variable, span),
+            CallOutputValue::None => return,
+        };
     }
 
     pub(super) fn met_match(&mut self, match_: &Match<'i>, span: Span) {
@@ -87,6 +91,11 @@ impl<'i> VariableValidator<'i> {
         // a corresponding fold with the definition of this iterable, so they're just put
         // without a check for being already met
         self.unresolved_iterables.insert(iterable_name, span);
+    }
+
+    pub(super) fn met_ap(&mut self, ap: &Ap<'i>, span: Span) {
+        self.met_variable(&ap.src.variable, span);
+        self.met_variable_definition(&ap.dst, span);
     }
 
     pub(super) fn finalize(&self) -> Vec<ErrorRecovery<usize, Token<'i>, ParserError>> {
@@ -179,13 +188,12 @@ impl<'i> VariableValidator<'i> {
         found_spans.iter().any(|s| s < &key_span)
     }
 
-    fn met_call_output_definition(&mut self, call_output: &CallOutputValue<'i>, span: Span) {
+    fn met_variable_definition(&mut self, variable: &AstVariable<'i>, span: Span) {
         use std::collections::hash_map::Entry;
 
-        let variable_name = match call_output {
-            CallOutputValue::Variable(AstVariable::Scalar(name)) => name,
-            CallOutputValue::Variable(AstVariable::Stream(name)) => name,
-            CallOutputValue::None => return,
+        let variable_name = match variable {
+            AstVariable::Scalar(name) => name,
+            AstVariable::Stream(name) => name,
         };
 
         match self.met_variables.entry(variable_name) {

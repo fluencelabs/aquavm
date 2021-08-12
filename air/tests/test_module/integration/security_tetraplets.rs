@@ -100,7 +100,6 @@ fn simple_fold() {
         service_id,
         function_name,
     };
-    let first_arg_triplet = Rc::new(first_arg_triplet);
     let first_arg_tetraplet = SecurityTetraplet {
         triplet: first_arg_triplet,
         json_path: String::new(),
@@ -111,7 +110,6 @@ fn simple_fold() {
         service_id: String::new(),
         function_name: String::new(),
     };
-    let second_arg_triplet = Rc::new(second_arg_triplet);
     let second_arg_tetraplet = SecurityTetraplet {
         triplet: second_arg_triplet,
         json_path: String::new(),
@@ -173,7 +171,6 @@ fn fold_json_path() {
         service_id,
         function_name,
     };
-    let first_arg_triplet = Rc::new(first_arg_triplet);
     let first_arg_tetraplet = SecurityTetraplet {
         triplet: first_arg_triplet,
         json_path: String::from("$.arg"),
@@ -184,7 +181,6 @@ fn fold_json_path() {
         service_id: String::new(),
         function_name: String::new(),
     };
-    let second_arg_triplet = Rc::new(second_arg_triplet);
     let second_arg_tetraplet = SecurityTetraplet {
         triplet: second_arg_triplet,
         json_path: String::new(),

@@ -15,6 +15,7 @@
  */
 
 mod fold_id;
+mod impls;
 mod traits;
 
 pub use crate::parser::lexer::AstVariable;

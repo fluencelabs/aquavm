@@ -14,33 +14,33 @@
  * limitations under the License.
  */
 
-use air_test_utils::call_vm;
-use air_test_utils::checked_call_vm;
-use air_test_utils::create_avm;
-use air_test_utils::echo_string_call_service;
-use air_test_utils::executed_state;
-use air_test_utils::set_variable_call_service;
-use air_test_utils::trace_from_result;
-use air_test_utils::unit_call_service;
-use air_test_utils::CallServiceClosure;
-use air_test_utils::IValue;
-use air_test_utils::NEVec;
+use air_test_utils::*;
 
 #[test]
 fn ap_with_scalars() {
-    let vm_peer_id = String::from("test_peer_id");
-    let mut vm = create_avm(unit_call_service(), vm_peer_id.clone());
+    let vm_1_peer_id = "vm_1_peer_id";
+    let mut vm_1 = create_avm(set_variable_call_service(r#"{"field": "scalar_2"}"#), vm_1_peer_id);
 
-    let service_id = String::from("local_service_id");
-    let function_name = String::from("local_fn_name");
+    let vm_2_peer_id = "vm_2_peer_id";
+    let mut vm_2 = create_avm(echo_string_call_service(), vm_2_peer_id);
+
     let script = format!(
         r#"
-               (call %init_peer_id% ("{}" "{}") [] result_name)
-            "#,
-        service_id, function_name
+        (seq
+            (seq
+                (call "{}" ("" "") ["scalar_1_result"] scalar_1)
+                (ap scalar.$.field! scalar_2)
+            )
+            (call "{}" ("" "") [scalar_2] scalar_3)
+        )
+        "#,
+        vm_1_peer_id, vm_2_peer_id
     );
 
-    let result = checked_call_vm!(vm, &vm_peer_id, script, [], []);
+    let result = checked_call_vm!(vm_1, "", &script, "", "");
+    let result = checked_call_vm!(vm_2, "", script, "", result.data);
+
+    print_trace(&result, "result trace");
 
     let actual_trace = trace_from_result(&result);
     let expected_state = executed_state::scalar_string("test");
@@ -48,19 +48,6 @@ fn ap_with_scalars() {
     assert_eq!(actual_trace.len(), 1);
     assert_eq!(actual_trace[0], expected_state);
     assert!(result.next_peer_pks.is_empty());
-
-    let script = format!(
-        r#"
-               (call "{}" ("{}" "{}") [] result_name)
-            "#,
-        vm_peer_id, service_id, function_name
-    );
-
-    let result = checked_call_vm!(vm, "asd", script.clone(), "", "");
-
-    // test that empty string for data works
-    let result_with_empty_string = checked_call_vm!(vm, "asd", script, "", "");
-    assert_eq!(result_with_empty_string, result);
 }
 
 // Check that specifying remote peer id in call will result its appearing in next_peer_pks.

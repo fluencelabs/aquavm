@@ -56,9 +56,9 @@ fn apply(
     exec_ctx: &ExecutionCtx<'_>,
     trace_ctx: &TraceHandler,
 ) -> ExecutionResult<ResolvedCallResult> {
-    let generation = ap_result_to_generation(&merger_ap_result, ApInstrPosition::Source);
+    let generation = ap_result_to_generation(merger_ap_result, ApInstrPosition::Source);
     let variable = Variable::from_ast_with_generation(&ap_source.variable, generation);
-    let (jvalue, mut tetraplets) = apply_json_path(variable, &ap_source.path, ap_source.should_flatten, exec_ctx)?;
+    let (jvalue, mut tetraplets) = apply_json_path(variable, ap_source.path, ap_source.should_flatten, exec_ctx)?;
 
     let tetraplet = tetraplets
         .pop()
@@ -77,7 +77,7 @@ fn save_result<'ctx>(
     match destination {
         AstVariable::Scalar(name) => set_scalar_result(result, name, exec_ctx),
         AstVariable::Stream(name) => {
-            let generation = ap_result_to_generation(&merger_ap_result, ApInstrPosition::Destination);
+            let generation = ap_result_to_generation(merger_ap_result, ApInstrPosition::Destination);
             set_stream_result(result, generation, name.to_string(), exec_ctx).map(|_| ())
         }
     }
