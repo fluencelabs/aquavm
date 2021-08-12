@@ -96,8 +96,8 @@ impl Stream {
 
     pub(crate) fn iter(&self, generation: Generation) -> Option<StreamIter<'_>> {
         let iter: Box<dyn Iterator<Item = &ResolvedCallResult>> = match generation {
-            Generation::Nth(generation) if generation as usize > self.generations_count() => return None,
-            Generation::Nth(generation) => Box::new(self.0.iter().take(generation as usize).flat_map(|v| v.iter())),
+            Generation::Nth(generation) if generation as usize >= self.generations_count() => return None,
+            Generation::Nth(generation) => Box::new(self.0.iter().take(generation as usize + 1).flat_map(|v| v.iter())),
             Generation::Last => Box::new(self.0.iter().flat_map(|v| v.iter())),
         };
         // unwrap is safe here, because generation's been already checked
@@ -110,8 +110,8 @@ impl Stream {
 
     pub(crate) fn slice_iter(&self, generation: Generation) -> Option<StreamSliceIter<'_>> {
         let iter: Box<dyn Iterator<Item = &[ResolvedCallResult]>> = match generation {
-            Generation::Nth(generation) if generation as usize > self.generations_count() => return None,
-            Generation::Nth(generation) => Box::new(self.0.iter().take(generation as usize).map(|v| v.as_slice())),
+            Generation::Nth(generation) if generation as usize >= self.generations_count() => return None,
+            Generation::Nth(generation) => Box::new(self.0.iter().take(generation as usize + 1).map(|v| v.as_slice())),
             Generation::Last => Box::new(self.0.iter().map(|v| v.as_slice())),
         };
 

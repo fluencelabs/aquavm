@@ -29,6 +29,21 @@ pub fn unit_call_service() -> CallServiceClosure {
     })
 }
 
+pub fn echo_call_service() -> CallServiceClosure {
+    Box::new(|args| -> Option<IValue> {
+        let arg = match &args.function_args[2] {
+            IValue::String(str) => str,
+            _ => unreachable!(),
+        };
+
+        let arg: Vec<serde_json::Value> = serde_json::from_str(arg).unwrap();
+
+        Some(IValue::Record(
+            NEVec::new(vec![IValue::S32(0), IValue::String(arg[0].to_string())]).unwrap(),
+        ))
+    })
+}
+
 pub fn echo_string_call_service() -> CallServiceClosure {
     Box::new(|args| -> Option<IValue> {
         let arg = match &args.function_args[2] {

@@ -40,7 +40,7 @@ pub(crate) fn try_merge_next_state_as_ap(data_keeper: &mut DataKeeper) -> MergeR
         // this special case is needed to merge stream generation in a right way
         (None, Some(Ap(current_ap))) => current_ap,
         (None, None) => return Ok(MergerApResult::Empty),
-        (prev_state, current_state) => return Err(MergeError::incompatible_states(prev_state, current_state, "call")),
+        (prev_state, current_state) => return Err(MergeError::incompatible_states(prev_state, current_state, "ap")),
     };
 
     to_merger_result(ap)

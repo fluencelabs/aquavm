@@ -29,36 +29,67 @@ use crate::SecurityTetraplet;
 use utils::*;
 
 use air_parser::ast::Ap;
-use air_parser::ast::ApSource;
+use air_parser::ast::ApArgument;
 use air_parser::ast::AstVariable;
+use air_parser::ast::JsonPath;
 
 use std::cell::RefCell;
 use std::rc::Rc;
 
 impl<'i> super::ExecutableInstruction<'i> for Ap<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
-        let merger_ap_result = trace_ctx.meet_ap_start()?;
-        try_match_result_to_instr(&merger_ap_result, self)?;
+        let should_touch_trace = should_touch_trace(self);
 
-        let result = apply(&self.src, &merger_ap_result, exec_ctx, trace_ctx)?;
-        save_result(&self.dst, &merger_ap_result, result, exec_ctx)?;
+        let merger_ap_result = if should_touch_trace {
+            let merger_ap_result = trace_ctx.meet_ap_start()?;
+            try_match_result_to_instr(&merger_ap_result, self)?;
+            merger_ap_result
+        } else {
+            MergerApResult::Empty
+        };
 
-        let ap_result = to_ap_result(&merger_ap_result, self, exec_ctx);
-        trace_ctx.meet_ap_end(ap_result);
+        let result = match &self.argument {
+            ApArgument::ScalarVariable(scalar_name) => apply_scalar(scalar_name, exec_ctx)?,
+            ApArgument::JsonPath(json_arg) => apply_json_argument(json_arg, &merger_ap_result, exec_ctx, trace_ctx)?,
+        };
+        save_result(&self.result, &merger_ap_result, result, exec_ctx)?;
+
+        if should_touch_trace {
+            // if generations are empty, then this ap instruction operates only with scalars and data
+            // shouldn't be updated
+            let final_ap_result = to_ap_result(&merger_ap_result, self, exec_ctx);
+            trace_ctx.meet_ap_end(final_ap_result);
+        }
 
         Ok(())
     }
 }
 
-fn apply(
-    ap_source: &ApSource<'_>,
+fn apply_scalar(scalar_name: &str, exec_ctx: &ExecutionCtx<'_>) -> ExecutionResult<ResolvedCallResult> {
+    use super::ExecutionError;
+    use crate::execution_step::Scalar;
+
+    let scalar = exec_ctx
+        .scalars
+        .get(scalar_name)
+        .ok_or_else(|| ExecutionError::VariableNotFound(scalar_name.to_string()))?;
+
+    match scalar {
+        Scalar::JValueRef(result) => Ok(result.clone()),
+        Scalar::JValueFoldCursor(_) => crate::exec_err!(ExecutionError::ApArgumentIsIterable(scalar_name.to_string())),
+    }
+}
+
+fn apply_json_argument(
+    json_arg: &JsonPath<'_>,
     merger_ap_result: &MergerApResult,
     exec_ctx: &ExecutionCtx<'_>,
     trace_ctx: &TraceHandler,
 ) -> ExecutionResult<ResolvedCallResult> {
     let generation = ap_result_to_generation(merger_ap_result, ApInstrPosition::Source);
-    let variable = Variable::from_ast_with_generation(&ap_source.variable, generation);
-    let (jvalue, mut tetraplets) = apply_json_path(variable, ap_source.path, ap_source.should_flatten, exec_ctx)?;
+    let variable = Variable::from_ast_with_generation(&json_arg.variable, generation);
+
+    let (jvalue, mut tetraplets) = apply_json_path(variable, json_arg.path, json_arg.should_flatten, exec_ctx)?;
 
     let tetraplet = tetraplets
         .pop()
@@ -80,5 +111,16 @@ fn save_result<'ctx>(
             let generation = ap_result_to_generation(merger_ap_result, ApInstrPosition::Destination);
             set_stream_result(result, generation, name.to_string(), exec_ctx).map(|_| ())
         }
+    }
+}
+
+fn should_touch_trace(ap: &Ap<'_>) -> bool {
+    match (&ap.argument, &ap.result) {
+        (_, AstVariable::Stream(_)) => true,
+        (ApArgument::JsonPath(json_path), _) => match &json_path.variable {
+            AstVariable::Scalar(_) => false,
+            AstVariable::Stream(_) => true,
+        },
+        _ => false,
     }
 }

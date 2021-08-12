@@ -145,6 +145,15 @@ impl ExecutedState {
     }
 }
 
+impl ApResult {
+    pub fn new(src_generations: Vec<u32>, dst_generations: Vec<u32>) -> Self {
+        Self {
+            src_generations,
+            dst_generations,
+        }
+    }
+}
+
 impl std::fmt::Display for ExecutedState {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         use CallResult::*;

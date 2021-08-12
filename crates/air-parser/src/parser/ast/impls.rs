@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-use super::Ap;
-use super::ApSource;
-use super::AstVariable;
+use super::*;
 
 impl<'i> Ap<'i> {
-    pub fn new(src: ApSource<'i>, dst: AstVariable<'i>) -> Self {
-        Self { src, dst }
+    pub fn new(argument: ApArgument<'i>, result: AstVariable<'i>) -> Self {
+        Self { argument, result }
     }
 }
 
-impl<'i> ApSource<'i> {
-    pub fn new(variable: AstVariable<'i>, path: &'i str) -> Self {
+impl<'i> JsonPath<'i> {
+    pub fn new(variable: AstVariable<'i>, path: &'i str, should_flatten: bool) -> Self {
         Self {
             variable,
             path,
-            should_flatten: true,
+            should_flatten,
         }
     }
 }

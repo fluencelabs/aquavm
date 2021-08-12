@@ -20,8 +20,8 @@ use crate::execution_step::trace_handler::MergerApResult;
 use crate::execution_step::Generation;
 
 use air_interpreter_data::ApResult;
-use air_parser::ast::Ap;
 use air_parser::ast::AstVariable;
+use air_parser::ast::{Ap, ApArgument};
 
 #[derive(Clone, Copy, Debug)]
 pub(super) enum ApInstrPosition {
@@ -50,11 +50,25 @@ pub(super) fn try_match_result_to_instr(merger_ap_result: &MergerApResult, instr
         MergerApResult::Empty => return Ok(()),
     };
 
-    match_position(&instr.src.variable, src_generation, merger_ap_result)?;
-    match_position(&instr.dst, dst_generation, merger_ap_result)
+    match_position_arg(&instr.argument, src_generation, merger_ap_result)?;
+    match_position_variable(&instr.result, dst_generation, merger_ap_result)
 }
 
-fn match_position(
+fn match_position_arg(
+    variable: &ApArgument<'_>,
+    generation: Option<u32>,
+    ap_result: &MergerApResult,
+) -> ExecutionResult<()> {
+    use crate::execution_step::ExecutionError::ApResultNotCorrespondToInstr;
+
+    match (variable, generation) {
+        (ApArgument::ScalarVariable(_), None) => Ok(()),
+        (ApArgument::JsonPath(json_path), _) => match_position_variable(&json_path.variable, generation, ap_result),
+        _ => return crate::exec_err!(ApResultNotCorrespondToInstr(ap_result.clone())),
+    }
+}
+
+fn match_position_variable(
     variable: &AstVariable<'_>,
     generation: Option<u32>,
     ap_result: &MergerApResult,
@@ -77,25 +91,26 @@ pub(super) fn to_ap_result(merger_ap_result: &MergerApResult, instr: &Ap<'_>, ex
         let src_generations = option_to_vec(*src_generation);
         let dst_generations = option_to_vec(*dst_generation);
 
-        return ApResult {
-            src_generations,
-            dst_generations,
-        };
+        return ApResult::new(src_generations, dst_generations);
     }
 
-    let src_generations = variable_to_generations(&instr.src.variable, exec_ctx);
-    let dst_generations = variable_to_generations(&instr.dst, exec_ctx);
+    let src_generations = arg_to_generations(&instr.argument, exec_ctx);
+    let dst_generations = variable_to_generations(&instr.result, exec_ctx);
 
-    ApResult {
-        src_generations,
-        dst_generations,
-    }
+    ApResult::new(src_generations, dst_generations)
 }
 
 fn option_to_vec(value: Option<u32>) -> Vec<u32> {
     match value {
         Some(value) => vec![value],
         None => vec![],
+    }
+}
+
+fn arg_to_generations(arg: &ApArgument<'_>, exec_ctx: &ExecutionCtx<'_>) -> Vec<u32> {
+    match arg {
+        ApArgument::ScalarVariable(_) => return vec![],
+        ApArgument::JsonPath(json_path) => variable_to_generations(&json_path.variable, exec_ctx),
     }
 }
 
@@ -106,7 +121,12 @@ fn variable_to_generations(variable: &AstVariable<'_>, exec_ctx: &ExecutionCtx<'
             // unwrap here is safe because this function will be called only
             // when this stream's been created
             let stream = exec_ctx.streams.get(*name).unwrap();
-            vec![stream.borrow().generations_count() as u32]
+            let generation = match stream.borrow().generations_count() {
+                0 => 0,
+                n => n - 1,
+            };
+
+            vec![generation as u32]
         }
     }
 }

@@ -65,17 +65,16 @@ pub struct Call<'i> {
     pub output: CallOutputValue<'i>,
 }
 
-#[derive(Serialize, Debug, PartialEq)]
-pub struct ApSource<'i> {
-    pub variable: AstVariable<'i>,
-    pub path: &'i str,
-    pub should_flatten: bool,
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+pub enum ApArgument<'i> {
+    ScalarVariable(&'i str),
+    JsonPath(JsonPath<'i>),
 }
 
 #[derive(Serialize, Debug, PartialEq)]
 pub struct Ap<'i> {
-    pub src: ApSource<'i>,
-    pub dst: AstVariable<'i>,
+    pub argument: ApArgument<'i>,
+    pub result: AstVariable<'i>,
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
@@ -83,11 +82,7 @@ pub enum CallInstrValue<'i> {
     InitPeerId,
     Literal(&'i str),
     Variable(AstVariable<'i>),
-    JsonPath {
-        variable: AstVariable<'i>,
-        path: &'i str,
-        should_flatten: bool,
-    },
+    JsonPath(JsonPath<'i>),
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
@@ -98,11 +93,7 @@ pub enum CallInstrArgValue<'i> {
     Number(Number),
     Boolean(bool),
     Variable(AstVariable<'i>),
-    JsonPath {
-        variable: AstVariable<'i>,
-        path: &'i str,
-        should_flatten: bool,
-    },
+    JsonPath(JsonPath<'i>),
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
@@ -122,11 +113,7 @@ pub enum MatchableValue<'i> {
     Number(Number),
     Boolean(bool),
     Variable(AstVariable<'i>),
-    JsonPath {
-        variable: AstVariable<'i>,
-        path: &'i str,
-        should_flatten: bool,
-    },
+    JsonPath(JsonPath<'i>),
 }
 
 #[derive(Serialize, Debug, PartialEq, Clone)]
@@ -179,3 +166,10 @@ pub struct Next<'i>(pub &'i str);
 
 #[derive(Serialize, Debug, PartialEq)]
 pub struct Null;
+
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+pub struct JsonPath<'i> {
+    pub variable: AstVariable<'i>,
+    pub path: &'i str,
+    pub should_flatten: bool,
+}

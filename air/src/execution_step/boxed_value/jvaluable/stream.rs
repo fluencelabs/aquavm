@@ -28,6 +28,7 @@ use jsonpath_lib::select_with_iter;
 use std::borrow::Cow;
 use std::ops::Deref;
 
+#[derive(Debug)]
 pub(crate) struct StreamJvaluableIngredients<'stream> {
     pub(crate) stream: std::cell::Ref<'stream, Stream>,
     pub(crate) generation: Generation,
@@ -38,6 +39,7 @@ pub(crate) struct StreamJvaluableIngredients<'stream> {
 impl JValuable for StreamJvaluableIngredients<'_> {
     fn apply_json_path(&self, json_path: &str) -> ExecutionResult<Vec<&JValue>> {
         let iter = self.iter()?.map(|v| v.result.deref());
+
         let (selected_values, _) = select_with_iter(iter, json_path)
             .map_err(|e| StreamJsonPathError(self.stream.deref().clone(), json_path.to_string(), e))?;
 

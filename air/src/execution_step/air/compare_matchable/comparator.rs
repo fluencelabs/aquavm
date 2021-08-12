@@ -61,28 +61,17 @@ pub(crate) fn are_matchable_eq<'ctx>(
 
             Ok(left_value == right_value)
         }
-        (
-            JsonPath {
-                variable: lv,
-                path: lp,
-                should_flatten: lsf,
-            },
-            JsonPath {
-                variable: rv,
-                path: rp,
-                should_flatten: rsf,
-            },
-        ) => {
+        (JsonPath(lhs), JsonPath(rhs)) => {
             // TODO: improve comparison
-            if lsf != rsf {
+            if lhs.should_flatten != rhs.should_flatten {
                 return Ok(false);
             }
 
-            let left_jvaluable = resolve_ast_variable(lv, exec_ctx)?;
-            let left_value = left_jvaluable.apply_json_path(lp)?;
+            let left_jvaluable = resolve_ast_variable(&lhs.variable, exec_ctx)?;
+            let left_value = left_jvaluable.apply_json_path(&lhs.path)?;
 
-            let right_jvaluable = resolve_ast_variable(rv, exec_ctx)?;
-            let right_value = right_jvaluable.apply_json_path(rp)?;
+            let right_jvaluable = resolve_ast_variable(&rhs.variable, exec_ctx)?;
+            let right_value = right_jvaluable.apply_json_path(&rhs.path)?;
 
             Ok(left_value == right_value)
         }
@@ -123,15 +112,11 @@ fn compare_matchable<'ctx>(
             let jvalue = jvaluable.as_jvalue();
             Ok(comparator(jvalue))
         }
-        JsonPath {
-            variable,
-            path,
-            should_flatten,
-        } => {
-            let jvaluable = resolve_ast_variable(variable, exec_ctx)?;
-            let jvalues = jvaluable.apply_json_path(path)?;
+        JsonPath(json_path) => {
+            let jvaluable = resolve_ast_variable(&json_path.variable, exec_ctx)?;
+            let jvalues = jvaluable.apply_json_path(&json_path.path)?;
 
-            let jvalue = if *should_flatten {
+            let jvalue = if json_path.should_flatten {
                 if jvalues.len() != 1 {
                     return Ok(false);
                 }

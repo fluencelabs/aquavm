@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use super::ApResult;
 use super::CallResult;
 use super::ExecutedState;
 use super::JValue;
@@ -103,5 +104,20 @@ pub fn subtrace_lore(
     FoldSubTraceLore {
         value_pos,
         subtraces_desc: vec![before, after],
+    }
+}
+
+pub fn ap(src: Option<u32>, dst: Option<u32>) -> ExecutedState {
+    let src_generations = option_to_vec(src);
+    let dst_generations = option_to_vec(dst);
+    let ap_result = ApResult::new(src_generations, dst_generations);
+
+    ExecutedState::Ap(ap_result)
+}
+
+fn option_to_vec(maybe_value: Option<u32>) -> Vec<u32> {
+    match maybe_value {
+        Some(value) => vec![value],
+        None => vec![],
     }
 }

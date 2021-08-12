@@ -29,24 +29,9 @@ impl fmt::Display for CallInstrArgValue<'_> {
             Number(number) => write!(f, "{}", number),
             Boolean(bool) => write!(f, "{}", bool),
             Variable(str) => write!(f, "{}", str),
-            JsonPath {
-                variable,
-                path,
-                should_flatten,
-            } => print_json_path(variable, path, should_flatten, f),
+            JsonPath(json_path) => write!(f, "{}", json_path),
         }
     }
-}
-
-fn print_json_path<'a>(
-    variable: &AstVariable<'a>,
-    path: &str,
-    should_flatten: &bool,
-    f: &mut fmt::Formatter,
-) -> fmt::Result {
-    let maybe_flatten_char = if *should_flatten { "!" } else { "" };
-
-    write!(f, "{}.{}{}", variable, path, maybe_flatten_char)
 }
 
 impl fmt::Display for CallInstrValue<'_> {
@@ -57,18 +42,13 @@ impl fmt::Display for CallInstrValue<'_> {
             InitPeerId => write!(f, "%init_peer_id%"),
             Literal(str) => write!(f, r#""{}""#, str),
             Variable(str) => write!(f, "{}", str),
-            JsonPath {
-                variable,
-                path,
-                should_flatten,
-            } => print_json_path(variable, path, should_flatten, f),
+            JsonPath(json_path) => write!(f, "{}", json_path),
         }
     }
 }
 
 impl fmt::Display for IterableScalarValue<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        use crate::parser::lexer;
         use IterableScalarValue::*;
 
         match self {
@@ -77,11 +57,12 @@ impl fmt::Display for IterableScalarValue<'_> {
                 scalar_name,
                 path,
                 should_flatten,
-            } => print_json_path(
-                &lexer::AstVariable::Scalar(scalar_name),
-                path,
-                should_flatten,
+            } => write!(
                 f,
+                "{}.{}{}",
+                scalar_name,
+                path,
+                maybe_flatten_char(*should_flatten)
             ),
         }
     }
@@ -97,11 +78,7 @@ impl fmt::Display for MatchableValue<'_> {
             Number(number) => write!(f, "{}", number),
             Boolean(bool) => write!(f, "{}", bool),
             Variable(str) => write!(f, "{}", str),
-            JsonPath {
-                variable,
-                path,
-                should_flatten,
-            } => print_json_path(variable, path, should_flatten, f),
+            JsonPath(json_path) => write!(f, "{}", json_path),
         }
     }
 }
@@ -177,12 +154,16 @@ impl fmt::Display for Call<'_> {
 
 impl fmt::Display for Ap<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let src = &self.src;
-        write!(
-            f,
-            "ap {}.{}{} {}",
-            src.variable, src.path, src.should_flatten, self.dst
-        )
+        write!(f, "ap {} {}", self.argument, self.result)
+    }
+}
+
+impl fmt::Display for ApArgument<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            ApArgument::ScalarVariable(name) => write!(f, "{}", name),
+            ApArgument::JsonPath(json_path) => write!(f, "{}", json_path),
+        }
     }
 }
 
@@ -237,5 +218,25 @@ impl fmt::Display for MisMatch<'_> {
 impl fmt::Display for Next<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "next")
+    }
+}
+
+impl fmt::Display for JsonPath<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{}.{}{}",
+            self.variable,
+            self.path,
+            maybe_flatten_char(self.should_flatten)
+        )
+    }
+}
+
+fn maybe_flatten_char(should_flatten: bool) -> &'static str {
+    if should_flatten {
+        "!"
+    } else {
+        ""
     }
 }
