@@ -27,7 +27,7 @@ pub enum ParserError {
     )]
     CallArgsNotFlattened(usize, usize),
 
-    #[error("json path can't be applied to streams in iterable positions of a fold")]
+    #[error("json path can't be applied to streams in this position")]
     JsonPathAppliedToStream(usize, usize),
 
     #[error("variable '{2}' wasn't defined")]

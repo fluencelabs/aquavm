@@ -34,6 +34,7 @@ impl<'i> Variable<'i> {
         }
     }
 
+    #[allow(dead_code)]
     pub(crate) fn from_ast_with_generation(ast_variable: &AstVariable<'i>, generation: Generation) -> Self {
         match ast_variable {
             AstVariable::Scalar(name) => Variable::Scalar(name),

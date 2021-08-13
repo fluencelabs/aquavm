@@ -56,45 +56,6 @@ fn ap_with_scalars() {
 }
 
 #[test]
-fn ap_with_src_stream() {
-    let vm_1_peer_id = "vm_1_peer_id";
-    let test_value = "scalar_2";
-    let mut vm_1 = create_avm(
-        set_variable_call_service(json!({ "field": test_value }).to_string()),
-        vm_1_peer_id,
-    );
-
-    let vm_2_peer_id = "vm_2_peer_id";
-    let mut vm_2 = create_avm(echo_string_call_service(), vm_2_peer_id);
-
-    let script = format!(
-        r#"
-        (seq
-            (seq
-                (call "{}" ("" "") ["stream_result"] $stream)
-                (ap $stream.$.[0].field! scalar)
-            )
-            (call "{}" ("" "") [scalar])
-        )
-        "#,
-        vm_1_peer_id, vm_2_peer_id
-    );
-
-    let result = checked_call_vm!(vm_1, "", &script, "", "");
-    let result = checked_call_vm!(vm_2, "", script, "", result.data);
-
-    let actual_trace = trace_from_result(&result);
-    let expected_state = vec![
-        executed_state::stream_jvalue(json!({ "field": test_value }), 0),
-        executed_state::ap(Some(0), None),
-        executed_state::scalar_string(test_value),
-    ];
-
-    assert_eq!(actual_trace, expected_state);
-    assert!(result.next_peer_pks.is_empty());
-}
-
-#[test]
 fn ap_with_dst_stream() {
     let vm_1_peer_id = "vm_1_peer_id";
     let test_value = "scalar_2";
@@ -125,46 +86,7 @@ fn ap_with_dst_stream() {
     let actual_trace = trace_from_result(&result);
     let expected_state = vec![
         executed_state::scalar_jvalue(json!({ "field": test_value })),
-        executed_state::ap(None, Some(0)),
-        executed_state::scalar_jvalue(json!([{ "field": test_value }])),
-    ];
-
-    assert_eq!(actual_trace, expected_state);
-    assert!(result.next_peer_pks.is_empty());
-}
-
-#[test]
-fn ap_with_stream() {
-    let vm_1_peer_id = "vm_1_peer_id";
-    let test_value = "scalar_2";
-    let mut vm_1 = create_avm(
-        set_variable_call_service(json!({ "field": test_value }).to_string()),
-        vm_1_peer_id,
-    );
-
-    let vm_2_peer_id = "vm_2_peer_id";
-    let mut vm_2 = create_avm(echo_call_service(), vm_2_peer_id);
-
-    let script = format!(
-        r#"
-        (seq
-            (seq
-                (call "{}" ("" "") ["scalar_1_result"] $arg_stream)
-                (ap $arg_stream.$.[0]! $res_stream)
-            )
-            (call "{}" ("" "") [$res_stream])
-        )
-        "#,
-        vm_1_peer_id, vm_2_peer_id
-    );
-
-    let result = checked_call_vm!(vm_1, "", &script, "", "");
-    let result = checked_call_vm!(vm_2, "", script, "", result.data);
-
-    let actual_trace = trace_from_result(&result);
-    let expected_state = vec![
-        executed_state::stream_jvalue(json!({ "field": test_value }), 0),
-        executed_state::ap(Some(0), Some(0)),
+        executed_state::ap(Some(0)),
         executed_state::scalar_jvalue(json!([{ "field": test_value }])),
     ];
 

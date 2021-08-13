@@ -83,8 +83,8 @@ pub fn request_sent_by(sender: impl Into<String>) -> ExecutedState {
 
 pub fn par(left: usize, right: usize) -> ExecutedState {
     let par_result = ParResult {
-        left_subtree_size: left as _,
-        right_subtree_size: right as _,
+        left_size: left as _,
+        right_size: right as _,
     };
 
     ExecutedState::Par(par_result)
@@ -113,10 +113,9 @@ pub fn subtrace_lore(
     }
 }
 
-pub fn ap(src: Option<u32>, dst: Option<u32>) -> ExecutedState {
-    let src_generations = option_to_vec(src);
-    let dst_generations = option_to_vec(dst);
-    let ap_result = ApResult::new(src_generations, dst_generations);
+pub fn ap(dst: Option<u32>) -> ExecutedState {
+    let res_generations = option_to_vec(dst);
+    let ap_result = ApResult::new(res_generations);
 
     ExecutedState::Ap(ap_result)
 }

@@ -82,8 +82,8 @@ impl ParFSM {
 
     fn prepare_sliders(&self, data_keeper: &mut DataKeeper, subtree_type: SubtreeType) -> FSMResult<()> {
         let (prev_len, current_len) = match subtree_type {
-            SubtreeType::Left => (self.prev_par.left_subtree_size, self.current_par.left_subtree_size),
-            SubtreeType::Right => (self.prev_par.right_subtree_size, self.current_par.right_subtree_size),
+            SubtreeType::Left => (self.prev_par.left_size, self.current_par.left_size),
+            SubtreeType::Right => (self.prev_par.right_size, self.current_par.right_size),
         };
 
         data_keeper.prev_slider_mut().set_subtrace_len(prev_len as _)?;

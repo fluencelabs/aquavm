@@ -50,7 +50,7 @@ impl<'i> super::ExecutableInstruction<'i> for Ap<'i> {
 
         let result = match &self.argument {
             ApArgument::ScalarVariable(scalar_name) => apply_scalar(scalar_name, exec_ctx)?,
-            ApArgument::JsonPath(json_arg) => apply_json_argument(json_arg, &merger_ap_result, exec_ctx, trace_ctx)?,
+            ApArgument::JsonPath(json_arg) => apply_json_argument(json_arg, exec_ctx, trace_ctx)?,
         };
         save_result(&self.result, &merger_ap_result, result, exec_ctx)?;
 
@@ -82,13 +82,10 @@ fn apply_scalar(scalar_name: &str, exec_ctx: &ExecutionCtx<'_>) -> ExecutionResu
 
 fn apply_json_argument(
     json_arg: &JsonPath<'_>,
-    merger_ap_result: &MergerApResult,
     exec_ctx: &ExecutionCtx<'_>,
     trace_ctx: &TraceHandler,
 ) -> ExecutionResult<ResolvedCallResult> {
-    let generation = ap_result_to_generation(merger_ap_result, ApInstrPosition::Source);
-    let variable = Variable::from_ast_with_generation(&json_arg.variable, generation);
-
+    let variable = Variable::from_ast(&json_arg.variable);
     let (jvalue, mut tetraplets) = apply_json_path(variable, json_arg.path, json_arg.should_flatten, exec_ctx)?;
 
     let tetraplet = tetraplets
@@ -100,15 +97,15 @@ fn apply_json_argument(
 }
 
 fn save_result<'ctx>(
-    destination: &AstVariable<'ctx>,
+    ap_result_type: &AstVariable<'ctx>,
     merger_ap_result: &MergerApResult,
     result: ResolvedCallResult,
     exec_ctx: &mut ExecutionCtx<'ctx>,
 ) -> ExecutionResult<()> {
-    match destination {
+    match ap_result_type {
         AstVariable::Scalar(name) => set_scalar_result(result, name, exec_ctx),
         AstVariable::Stream(name) => {
-            let generation = ap_result_to_generation(merger_ap_result, ApInstrPosition::Destination);
+            let generation = ap_result_to_generation(merger_ap_result);
             set_stream_result(result, generation, name.to_string(), exec_ctx).map(|_| ())
         }
     }

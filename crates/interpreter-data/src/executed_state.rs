@@ -23,8 +23,8 @@ use std::rc::Rc;
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct ParResult {
-    pub left_subtree_size: u32,
-    pub right_subtree_size: u32,
+    pub left_size: u32,
+    pub right_size: u32,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -94,12 +94,11 @@ pub type FoldLore = Vec<FoldSubTraceLore>;
 #[serde(rename_all = "snake_case")]
 pub struct FoldResult(pub FoldLore);
 
-/// Describes result of applying functor `apply` to streams. This functor has the
+/// Describes result of applying functor `apply` to streams.
 #[derive(Debug, Default, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct ApResult {
-    pub src_generations: Vec<u32>,
-    pub dst_generations: Vec<u32>,
+    pub res_gens: Vec<u32>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -114,8 +113,8 @@ pub enum ExecutedState {
 impl ParResult {
     /// Returns a size of subtrace that this par describes in execution_step trace.
     pub fn size(&self) -> Option<usize> {
-        self.left_subtree_size
-            .checked_add(self.right_subtree_size)
+        self.left_size
+            .checked_add(self.right_size)
             .map(|v| v as usize)
     }
 }
@@ -154,8 +153,8 @@ impl SubTraceDesc {
 impl ExecutedState {
     pub fn par(left_subtree_size: usize, right_subtree_size: usize) -> Self {
         let par_result = ParResult {
-            left_subtree_size: left_subtree_size as _,
-            right_subtree_size: right_subtree_size as _,
+            left_size: left_subtree_size as _,
+            right_size: right_subtree_size as _,
         };
 
         Self::Par(par_result)
@@ -163,11 +162,8 @@ impl ExecutedState {
 }
 
 impl ApResult {
-    pub fn new(src_generations: Vec<u32>, dst_generations: Vec<u32>) -> Self {
-        Self {
-            src_generations,
-            dst_generations,
-        }
+    pub fn new(res_gens: Vec<u32>) -> Self {
+        Self { res_gens }
     }
 }
 
@@ -178,8 +174,8 @@ impl std::fmt::Display for ExecutedState {
 
         match self {
             Par(ParResult {
-                left_subtree_size,
-                right_subtree_size,
+                left_size: left_subtree_size,
+                right_size: right_subtree_size,
             }) => write!(f, "par({}, {})", left_subtree_size, right_subtree_size),
             Call(RequestSentBy(peer_id)) => write!(f, r#"request_sent_by("{}")"#, peer_id),
             Call(Executed(value)) => {
@@ -204,11 +200,7 @@ impl std::fmt::Display for ExecutedState {
                 write!(f, "     )")
             }
             Ap(ap) => {
-                write!(
-                    f,
-                    "ap: {:?} -> {:?}",
-                    ap.src_generations, ap.dst_generations
-                )
+                write!(f, "ap: _ -> {:?}", ap.res_gens)
             }
         }
     }

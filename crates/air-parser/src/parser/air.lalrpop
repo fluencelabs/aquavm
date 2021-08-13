@@ -27,6 +27,11 @@ Instr: Box<Instruction<'input>> = {
 
     <left: @L> "(" ap <arg:ApArgument> <res:Output> ")" <right: @R> => {
         if let ApArgument::JsonPath(json_path) = &arg {
+            if let AstVariable::Stream(_) = &json_path.variable {
+                let token = Token::VariableWithJsonPath(json_path.variable.clone(), json_path.path, json_path.should_flatten);
+                errors.push(make_stream_iterable_error(left, token, right));
+            };
+
             // Due the json path constraints json path should be flattened in a apply arguments.
             if !json_path.should_flatten {
                 let token = Token::VariableWithJsonPath(json_path.variable.clone(), json_path.path, json_path.should_flatten);

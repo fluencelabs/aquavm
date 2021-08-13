@@ -1,5 +1,5 @@
 // auto-generated: "lalrpop 0.19.6"
-// sha3: afadd2ad124cd9a944a55de817741594f9c957b06c4419aab89c762b31612
+// sha3: 95a8c8bf4f8fedee189c17bf1cdd2d654b5797354d29a6cca5e0f1d6c94dfcf
 use crate::parser::ast::*;
 use crate::parser::air_parser::make_flattened_error;
 use crate::parser::air_parser::make_stream_iterable_error;
@@ -3001,6 +3001,11 @@ fn __action3<
 {
     {
         if let ApArgument::JsonPath(json_path) = &arg {
+            if let AstVariable::Stream(_) = &json_path.variable {
+                let token = Token::VariableWithJsonPath(json_path.variable.clone(), json_path.path, json_path.should_flatten);
+                errors.push(make_stream_iterable_error(left, token, right));
+            };
+
             // Due the json path constraints json path should be flattened in a apply arguments.
             if !json_path.should_flatten {
                 let token = Token::VariableWithJsonPath(json_path.variable.clone(), json_path.path, json_path.should_flatten);

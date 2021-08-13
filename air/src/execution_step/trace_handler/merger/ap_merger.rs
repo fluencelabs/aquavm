@@ -23,10 +23,7 @@ pub(crate) enum MergerApResult {
 
     /// There was a state in at least one of the contexts. If there were two states in
     /// both contexts, they were successfully merged.
-    ApResult {
-        src_generation: Option<u32>,
-        dst_generation: Option<u32>,
-    },
+    ApResult { res_generation: Option<u32> },
 }
 
 pub(crate) fn try_merge_next_state_as_ap(data_keeper: &mut DataKeeper) -> MergeResult<MergerApResult> {
@@ -60,13 +57,9 @@ macro_rules! to_maybe_generation {
 }
 
 fn to_merger_result(ap_result: ApResult) -> MergeResult<MergerApResult> {
-    let src_generation = to_maybe_generation!(ap_result, &ap_result.src_generations, TooManySrcGenerations);
-    let dst_generation = to_maybe_generation!(ap_result, &ap_result.dst_generations, TooManyDstGenerations);
+    let res_generation = to_maybe_generation!(ap_result, &ap_result.res_gens, TooManyDstGenerations);
 
-    let ap_result = MergerApResult::ApResult {
-        src_generation,
-        dst_generation,
-    };
+    let ap_result = MergerApResult::ApResult { res_generation };
 
     Ok(ap_result)
 }

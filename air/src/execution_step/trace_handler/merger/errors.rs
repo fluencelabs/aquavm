@@ -56,10 +56,6 @@ pub(crate) enum MergeError {
 
 #[derive(ThisError, Debug)]
 pub(crate) enum ApResultError {
-    /// Error occurred when Ap results contains more then 1 generation in source.
-    #[error("{0:?} ap result contains too many generations in source")]
-    TooManySrcGenerations(ApResult),
-
     /// Error occurred when Ap results contains more then 1 generation in destination.
     #[error("{0:?} ap result contains too many generations in destination")]
     TooManyDstGenerations(ApResult),
