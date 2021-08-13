@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-use super::call_result_setter::set_local_call_result;
 use super::*;
 use crate::exec_err;
 use crate::execution_step::trace_handler::TraceHandler;
-use crate::execution_step::Generation;
 use crate::execution_step::RSecurityTetraplet;
 
+use crate::execution_step::air::call::call_result_setter::set_result_from_value;
 use air_interpreter_data::CallResult;
 use air_parser::ast::CallOutputValue;
 
@@ -55,9 +54,8 @@ pub(super) fn handle_prev_state<'i>(
             Ok(false)
         }
         // this instruction's been already executed
-        Executed(result, generation) => {
-            let executed_result = ResolvedCallResult::new(result.clone(), tetraplet.clone(), trace_pos);
-            set_local_call_result(executed_result, Generation::Nth(*generation), output, exec_ctx)?;
+        Executed(value) => {
+            set_result_from_value(value.clone(), tetraplet.clone(), trace_pos, output, exec_ctx)?;
 
             exec_ctx.subtree_complete = true;
             Ok(false)

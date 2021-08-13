@@ -84,7 +84,7 @@ fn executed_trace_par_par_call() {
         par(2, 1),
         par(1, 0),
         request_sent_by("peer_id_1"),
-        stream_string("test", 0),
+        scalar_string("test"),
     ];
 
     let initial_data = raw_data_from_trace(initial_state);

@@ -61,7 +61,7 @@ impl<'i> VariableValidator<'i> {
 
         match &call.output {
             CallOutputValue::Variable(variable) => self.met_variable_definition(variable, span),
-            CallOutputValue::None => return,
+            CallOutputValue::None => {}
         };
     }
 

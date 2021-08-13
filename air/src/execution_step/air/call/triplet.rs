@@ -92,8 +92,8 @@ fn resolve_to_string<'i>(value: &CallInstrValue<'i>, ctx: &ExecutionCtx<'i>) -> 
             debug_assert!(json_path.should_flatten);
 
             let resolved = resolve_ast_variable(&json_path.variable, ctx)?;
-            let resolved = resolved.apply_json_path(&json_path.path)?;
-            vec_to_string(resolved, &json_path.path)?
+            let resolved = resolved.apply_json_path(json_path.path)?;
+            vec_to_string(resolved, json_path.path)?
         }
     };
 

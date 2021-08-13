@@ -68,10 +68,10 @@ pub(crate) fn are_matchable_eq<'ctx>(
             }
 
             let left_jvaluable = resolve_ast_variable(&lhs.variable, exec_ctx)?;
-            let left_value = left_jvaluable.apply_json_path(&lhs.path)?;
+            let left_value = left_jvaluable.apply_json_path(lhs.path)?;
 
             let right_jvaluable = resolve_ast_variable(&rhs.variable, exec_ctx)?;
-            let right_value = right_jvaluable.apply_json_path(&rhs.path)?;
+            let right_value = right_jvaluable.apply_json_path(rhs.path)?;
 
             Ok(left_value == right_value)
         }
@@ -114,7 +114,7 @@ fn compare_matchable<'ctx>(
         }
         JsonPath(json_path) => {
             let jvaluable = resolve_ast_variable(&json_path.variable, exec_ctx)?;
-            let jvalues = jvaluable.apply_json_path(&json_path.path)?;
+            let jvalues = jvaluable.apply_json_path(json_path.path)?;
 
             let jvalue = if json_path.should_flatten {
                 if jvalues.len() != 1 {

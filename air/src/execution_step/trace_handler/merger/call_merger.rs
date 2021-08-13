@@ -18,11 +18,9 @@ mod call_result_constructor;
 mod utils;
 
 use super::*;
+use air_parser::ast::CallOutputValue;
 use call_result_constructor::*;
 use utils::*;
-use MergeError::IncompatibleCallResults;
-
-use air_parser::ast::CallOutputValue;
 
 #[derive(Debug, Clone)]
 pub(crate) enum MergerCallResult {
@@ -48,8 +46,8 @@ pub(crate) fn try_merge_next_state_as_call(
     let (prev_call, current_call) = match (prev_state, current_state) {
         (Some(Call(prev_call)), Some(Call(current_call))) => (prev_call, current_call),
         // this special case is needed to merge stream generation in a right way
-        (None, Some(Call(call @ CallResult::Executed(..)))) => {
-            let call_result = merge_current_executed(call, value_type, data_keeper)?;
+        (None, Some(Call(CallResult::Executed(value)))) => {
+            let call_result = merge_current_executed(value, value_type, data_keeper)?;
             return Ok(prepare_call_result(call_result, Current, data_keeper));
         }
         (None, Some(Call(current_call))) => return Ok(prepare_call_result(current_call, Current, data_keeper)),
@@ -60,6 +58,7 @@ pub(crate) fn try_merge_next_state_as_call(
 
     let merged_call = merge_call_result(prev_call, current_call, value_type, data_keeper)?;
     let call_result = prepare_call_result(merged_call, Both, data_keeper);
+    try_match_value_type(&call_result, value_type)?;
 
     Ok(call_result)
 }
@@ -72,31 +71,29 @@ fn merge_call_result(
 ) -> MergeResult<CallResult> {
     use CallResult::*;
 
-    let merged_state = match (&prev_call, &current_call) {
-        (CallServiceFailed(..), CallServiceFailed(..)) => {
-            check_equal(&prev_call, &current_call)?;
-            current_call
+    let merged_state = match (prev_call, current_call) {
+        (prev @ CallServiceFailed(..), current @ CallServiceFailed(..)) => {
+            check_equal(&prev, &current)?;
+            prev
         }
-        (RequestSentBy(_), CallServiceFailed(..)) => current_call,
-        (CallServiceFailed(..), RequestSentBy(_)) => prev_call,
-        (RequestSentBy(_), RequestSentBy(_)) => {
-            check_equal(&prev_call, &current_call)?;
-            prev_call
+        (RequestSentBy(_), current @ CallServiceFailed(..)) => current,
+        (prev @ CallServiceFailed(..), RequestSentBy(_)) => prev,
+        (prev @ RequestSentBy(_), current @ RequestSentBy(_)) => {
+            check_equal(&prev, &current)?;
+            prev
         }
         // this special case is needed to merge stream generation in a right way
-        (RequestSentBy(_), Executed(..)) => merge_current_executed(current_call, value_type, data_keeper)?,
-        (Executed(..), RequestSentBy(_)) => prev_call,
-        (Executed(..), Executed(..)) => merge_executed(prev_call, current_call, value_type)?,
-        (Executed(..), CallServiceFailed(..)) | (CallServiceFailed(..), Executed(..)) => {
-            return Err(IncompatibleCallResults(prev_call.clone(), current_call.clone()))
-        }
+        (RequestSentBy(_), Executed(value)) => merge_current_executed(value, value_type, data_keeper)?,
+        (prev @ Executed(..), RequestSentBy(_)) => prev,
+        (Executed(prev_value), Executed(current_value)) => merge_executed(prev_value, current_value)?,
+        (prev_call, current_call) => return Err(CallResultError::incompatible_calls(prev_call, current_call)),
     };
 
     Ok(merged_state)
 }
 
 #[derive(Debug, Copy, Clone)]
-enum ValueType<'i> {
+pub(crate) enum ValueType<'i> {
     Scalar,
     Stream(&'i str),
 }
@@ -108,6 +105,16 @@ impl<'i> ValueType<'i> {
         match output_value {
             CallOutputValue::Variable(AstVariable::Stream(stream_name)) => ValueType::Stream(stream_name),
             _ => ValueType::Scalar,
+        }
+    }
+}
+
+use std::fmt;
+impl fmt::Display for ValueType<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            ValueType::Scalar => write!(f, "scalar"),
+            ValueType::Stream(stream_name) => write!(f, "${}", stream_name),
         }
     }
 }

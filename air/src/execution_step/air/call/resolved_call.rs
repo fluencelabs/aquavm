@@ -23,7 +23,6 @@ use super::*;
 use crate::execution_step::air::ResolvedCallResult;
 use crate::execution_step::trace_handler::MergerCallResult;
 use crate::execution_step::trace_handler::TraceHandler;
-use crate::execution_step::Generation;
 use crate::execution_step::RSecurityTetraplet;
 use crate::execution_step::SecurityTetraplets;
 use crate::JValue;
@@ -113,10 +112,8 @@ impl<'i> ResolvedCall<'i> {
 
         let trace_pos = trace_ctx.trace_pos();
 
-        // TODO: refactor this scheme with passing and obtaining generation here in next PR
-        let executed_result = ResolvedCallResult::new(result.clone(), self.tetraplet.clone(), trace_pos);
-        let generation = set_local_call_result(executed_result, Generation::Last, &self.output, exec_ctx)?;
-        let new_call_result = CallResult::Executed(result, generation);
+        let executed_result = ResolvedCallResult::new(result, self.tetraplet.clone(), trace_pos);
+        let new_call_result = set_local_result(executed_result, &self.output, exec_ctx)?;
         trace_ctx.meet_call_end(new_call_result);
 
         Ok(())

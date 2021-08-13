@@ -15,68 +15,94 @@
  */
 
 use super::*;
+use crate::JValue;
 
-pub(super) fn merge_executed(
-    prev_result: CallResult,
-    current_result: CallResult,
-    value_type: ValueType<'_>,
-) -> MergeResult<CallResult> {
-    match value_type {
-        ValueType::Stream(_) => {
-            // values from streams could have different generations and it's ok
-            check_stream_equal(&prev_result, &current_result)?;
-            Ok(prev_result)
+use std::rc::Rc;
+
+pub(super) fn merge_executed(prev_value: Value, current_value: Value) -> MergeResult<CallResult> {
+    match (&prev_value, &current_value) {
+        (Value::Scalar(_), Value::Scalar(_)) => {
+            are_scalars_equal(&prev_value, &current_value)?;
+            Ok(CallResult::Executed(prev_value))
         }
-        ValueType::Scalar => {
-            check_equal(&prev_result, &current_result)?;
-            Ok(prev_result)
+        (Value::Stream { value: pr, .. }, Value::Stream { value: cr, .. }) => {
+            are_streams_equal(pr, cr, &prev_value, &current_value)?;
+            Ok(CallResult::Executed(prev_value))
         }
+        _ => Err(CallResultError::not_equal_values(prev_value, current_value)),
     }
+}
+
+fn are_scalars_equal(prev_value: &Value, current_value: &Value) -> MergeResult<()> {
+    if prev_value == current_value {
+        return Ok(());
+    }
+
+    Err(CallResultError::not_equal_values(
+        prev_value.clone(),
+        current_value.clone(),
+    ))
+}
+
+fn are_streams_equal(
+    prev_result_value: &Rc<JValue>,
+    current_result_value: &Rc<JValue>,
+    prev_value: &Value,
+    current_value: &Value,
+) -> MergeResult<()> {
+    // values from streams could have different generations and it's ok
+    if prev_result_value == current_result_value {
+        return Ok(());
+    }
+
+    Err(CallResultError::not_equal_values(
+        prev_value.clone(),
+        current_value.clone(),
+    ))
 }
 
 /// Merging of value from only current data to a stream is a something special, because it's
 /// needed to choose generation not from current data, but a maximum from streams on a current peer.
 /// Maximum versions are tracked in data in a special field called streams.
 pub(super) fn merge_current_executed(
-    current_result: CallResult,
+    value: Value,
     value_type: ValueType<'_>,
     data_keeper: &DataKeeper,
 ) -> MergeResult<CallResult> {
-    match value_type {
-        ValueType::Stream(stream_name) => {
+    match (value, value_type) {
+        (scalar @ Value::Scalar(_), ValueType::Scalar) => Ok(CallResult::Executed(scalar)),
+        (Value::Stream { value, .. }, ValueType::Stream(stream_name)) => {
             let generation = data_keeper.prev_ctx.stream_generation(stream_name).unwrap_or_default();
-            let value = match current_result {
-                CallResult::Executed(value, _) => value,
-                _ => unreachable!(
-                    "this function should be called only when it's checked that call results are executed states"
-                ),
-            };
-            let call_result = CallResult::Executed(value, generation);
-            Ok(call_result)
+            let stream = Value::Stream { value, generation };
+            Ok(CallResult::Executed(stream))
         }
-        ValueType::Scalar => Ok(current_result),
+        (value, value_type) => Err(CallResultError::data_not_match(value, value_type)),
     }
 }
 
-pub(super) fn check_equal(prev_result: &CallResult, current_result: &CallResult) -> MergeResult<()> {
-    if prev_result != current_result {
-        Err(IncompatibleCallResults(prev_result.clone(), current_result.clone()))
+pub(super) fn check_equal(prev_call: &CallResult, current_call: &CallResult) -> MergeResult<()> {
+    if prev_call != current_call {
+        Err(CallResultError::incompatible_calls(
+            prev_call.clone(),
+            current_call.clone(),
+        ))
     } else {
         Ok(())
     }
 }
 
-pub(super) fn check_stream_equal(prev_result: &CallResult, current_result: &CallResult) -> MergeResult<()> {
-    match (prev_result, current_result) {
-        (CallResult::Executed(prev_value, _), CallResult::Executed(current_value, _)) => {
-            if prev_value != current_value {
-                Err(IncompatibleCallResults(prev_result.clone(), current_result.clone()))
-            } else {
-                Ok(())
+pub(super) fn try_match_value_type(merged_call: &MergerCallResult, value_type: ValueType<'_>) -> MergeResult<()> {
+    if let MergerCallResult::CallResult { value, .. } = merged_call {
+        return match (value, value_type) {
+            (CallResult::Executed(value @ Value::Scalar(_)), ValueType::Stream(_)) => {
+                Err(CallResultError::data_not_match(value.clone(), value_type))
             }
-        }
-        _ => {
-            unreachable!("this function should be called only when it's checked that call results are executed states")
-        }
+            (CallResult::Executed(value @ Value::Stream { .. }), ValueType::Scalar) => {
+                Err(CallResultError::data_not_match(value.clone(), value_type))
+            }
+            _ => Ok(()),
+        };
     }
+
+    Ok(())
 }

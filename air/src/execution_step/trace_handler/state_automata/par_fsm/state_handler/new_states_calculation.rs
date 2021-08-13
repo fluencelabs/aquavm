@@ -23,8 +23,8 @@ pub(super) fn compute_new_states(
     subtree_type: SubtreeType,
 ) -> FSMResult<(CtxStateNibble, CtxStateNibble)> {
     let (prev_len, current_len) = match subtree_type {
-        SubtreeType::Left => (prev_par.0, current_par.0),
-        SubtreeType::Right => (prev_par.1, current_par.1),
+        SubtreeType::Left => (prev_par.left_subtree_size, current_par.left_subtree_size),
+        SubtreeType::Right => (prev_par.right_subtree_size, current_par.right_subtree_size),
     };
 
     let prev_nibble = compute_new_state(data_keeper, prev_len as usize, MergeCtxType::Previous, prev_par)?;

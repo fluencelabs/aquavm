@@ -25,32 +25,56 @@ use crate::execution_step::Scalar;
 use crate::execution_step::Stream;
 
 use air_interpreter_data::CallResult;
-use air_interpreter_data::SCALAR_GENERATION;
+use air_interpreter_data::Value;
 use air_parser::ast::CallOutputValue;
 
 use std::cell::RefCell;
 use std::collections::hash_map::Entry::{Occupied, Vacant};
 
-// TODO: refactor this function, it receives and produces generation id.
 /// Writes result of a local `Call` instruction to `ExecutionCtx` at `output`.
-pub(crate) fn set_local_call_result<'i>(
+/// Returns call result.
+pub(crate) fn set_local_result<'i>(
     executed_result: ResolvedCallResult,
-    generation: Generation,
     output: &CallOutputValue<'i>,
     exec_ctx: &mut ExecutionCtx<'i>,
-) -> ExecutionResult<u32> {
-    let generation = match output {
+) -> ExecutionResult<CallResult> {
+    let result_value = executed_result.result.clone();
+    match output {
         CallOutputValue::Variable(AstVariable::Scalar(name)) => {
             set_scalar_result(executed_result, name, exec_ctx)?;
-            SCALAR_GENERATION
+            Ok(CallResult::executed_scalar(result_value))
         }
         CallOutputValue::Variable(AstVariable::Stream(name)) => {
-            set_stream_result(executed_result, generation, name.to_string(), exec_ctx)?
+            let generation = set_stream_result(executed_result, Generation::Last, name.to_string(), exec_ctx)?;
+            Ok(CallResult::executed_stream(result_value, generation))
         }
-        CallOutputValue::None => SCALAR_GENERATION,
+        CallOutputValue::None => Ok(CallResult::executed_scalar(result_value)),
+    }
+}
+
+pub(crate) fn set_result_from_value<'i>(
+    value: Value,
+    tetraplet: RSecurityTetraplet,
+    trace_pos: usize,
+    output: &CallOutputValue<'i>,
+    exec_ctx: &mut ExecutionCtx<'i>,
+) -> ExecutionResult<()> {
+    match (output, value) {
+        (CallOutputValue::Variable(AstVariable::Scalar(name)), Value::Scalar(value)) => {
+            let result = ResolvedCallResult::new(value, tetraplet, trace_pos);
+            set_scalar_result(result, name, exec_ctx)?;
+        }
+        (CallOutputValue::Variable(AstVariable::Stream(name)), Value::Stream { value, generation }) => {
+            let result = ResolvedCallResult::new(value, tetraplet, trace_pos);
+            let generation = Generation::Nth(generation);
+            let _ = set_stream_result(result, generation, name.to_string(), exec_ctx)?;
+        }
+        // it isn't needed to check there that output and value matches because
+        // it's been already in trace handler
+        _ => {}
     };
 
-    Ok(generation)
+    Ok(())
 }
 
 macro_rules! shadowing_allowed(

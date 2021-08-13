@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
+use super::call_merger::ValueType;
 use super::ApResult;
 use super::CallResult;
 use super::ExecutedState;
 use super::FoldResult;
 use super::KeeperError;
+use super::Value;
 
 use thiserror::Error as ThisError;
 
@@ -37,10 +39,6 @@ pub(crate) enum MergeError {
     #[error("{0:?} contains several subtraces with the same value_pos {1}")]
     ManyRecordsWithSamePos(FoldResult, usize),
 
-    /// Errors occurred when previous and current call results are incompatible.
-    #[error("previous and current call results are incompatible: '{0:?}' '{1:?}'")]
-    IncompatibleCallResults(CallResult, CallResult),
-
     /// Errors occurred when one of the fold subtrace lore doesn't contain 2 descriptors.
     #[error("fold contains {0} sublore descriptors, but 2 is expected")]
     FoldIncorrectSubtracesCount(usize),
@@ -49,9 +47,11 @@ pub(crate) enum MergeError {
     #[error("{0}")]
     KeeperError(#[from] KeeperError),
 
-    /// Too many generation in ApResult src vectors
     #[error("{0}")]
     IncorrectApResult(#[from] ApResultError),
+
+    #[error("{0}")]
+    IncorrectCallResult(#[from] CallResultError),
 }
 
 #[derive(ThisError, Debug)]
@@ -63,6 +63,22 @@ pub(crate) enum ApResultError {
     /// Error occurred when Ap results contains more then 1 generation in destination.
     #[error("{0:?} ap result contains too many generations in destination")]
     TooManyDstGenerations(ApResult),
+}
+
+#[derive(ThisError, Debug)]
+pub(crate) enum CallResultError {
+    #[error("values in call results are not equal: {prev_value:?} != {current_value:?}")]
+    ValuesNotEqual { prev_value: Value, current_value: Value },
+
+    /// Errors occurred when previous and current call results are incompatible.
+    #[error("previous and current call results are incompatible: '{prev_call:?}' '{current_call:?}'")]
+    IncompatibleCallResults {
+        prev_call: CallResult,
+        current_call: CallResult,
+    },
+
+    #[error("air scripts has the following value type '{air_type}' while data other '{data_value:?}'")]
+    DataNotMatchAIR { air_type: String, data_value: Value },
 }
 
 impl MergeError {
@@ -84,6 +100,35 @@ impl MergeError {
             }
             (None, None) => unreachable!("shouldn't be called with both None"),
         }
+    }
+}
+
+// these impl methods allow construction of MergeError and are used to make code more clean
+impl CallResultError {
+    pub(crate) fn not_equal_values(prev_value: Value, current_value: Value) -> MergeError {
+        let call_result_error = CallResultError::ValuesNotEqual {
+            prev_value,
+            current_value,
+        };
+
+        MergeError::IncorrectCallResult(call_result_error)
+    }
+
+    pub(crate) fn incompatible_calls(prev_call: CallResult, current_call: CallResult) -> MergeError {
+        let call_result_error = CallResultError::IncompatibleCallResults {
+            prev_call,
+            current_call,
+        };
+
+        MergeError::IncorrectCallResult(call_result_error)
+    }
+
+    pub(crate) fn data_not_match(data_value: Value, air_type: ValueType<'_>) -> MergeError {
+        let air_type = air_type.to_string();
+
+        let call_result_error = CallResultError::DataNotMatchAIR { air_type, data_value };
+
+        MergeError::IncorrectCallResult(call_result_error)
     }
 }
 

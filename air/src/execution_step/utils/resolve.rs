@@ -48,7 +48,7 @@ pub(crate) fn resolve_to_args<'i>(
         }
         CallInstrArgValue::JsonPath(json_path) => {
             let variable = Variable::from_ast(&json_path.variable);
-            apply_json_path(variable, &json_path.path, json_path.should_flatten, ctx)
+            apply_json_path(variable, json_path.path, json_path.should_flatten, ctx)
         }
     }
 }

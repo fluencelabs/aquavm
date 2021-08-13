@@ -83,11 +83,9 @@ fn ap_with_src_stream() {
     let result = checked_call_vm!(vm_1, "", &script, "", "");
     let result = checked_call_vm!(vm_2, "", script, "", result.data);
 
-    print_trace(&result, "result trace");
-
     let actual_trace = trace_from_result(&result);
     let expected_state = vec![
-        executed_state::scalar_jvalue(json!({ "field": test_value })),
+        executed_state::stream_jvalue(json!({ "field": test_value }), 0),
         executed_state::ap(Some(0), None),
         executed_state::scalar_string(test_value),
     ];
@@ -165,7 +163,7 @@ fn ap_with_stream() {
 
     let actual_trace = trace_from_result(&result);
     let expected_state = vec![
-        executed_state::scalar_jvalue(json!({ "field": test_value })),
+        executed_state::stream_jvalue(json!({ "field": test_value }), 0),
         executed_state::ap(Some(0), Some(0)),
         executed_state::scalar_jvalue(json!([{ "field": test_value }])),
     ];
