@@ -16,10 +16,9 @@
 
 use super::Iterable;
 use super::IterableItem;
-use crate::execution_step::execution_context::ResolvedCallResult;
+use super::ResolvedCallResult;
 use crate::foldable_next;
 use crate::foldable_prev;
-use crate::SecurityTetraplet;
 
 /// Used for iterating over stream with JValues.
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -55,15 +54,11 @@ impl<'ctx> Iterable<'ctx> for IterableVecResolvedCall {
 
         let ResolvedCallResult {
             result,
-            triplet,
+            tetraplet,
             trace_pos,
         } = &self.call_results[self.cursor];
-        let tetraplet = SecurityTetraplet {
-            triplet: triplet.clone(),
-            json_path: String::new(),
-        };
 
-        let result = IterableItem::RcValue((result.clone(), tetraplet, *trace_pos));
+        let result = IterableItem::RcValue((result.clone(), tetraplet.clone(), *trace_pos));
         Some(result)
     }
 

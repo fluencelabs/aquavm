@@ -16,8 +16,7 @@
 
 use crate::execution_step::air::ExecutionResult;
 use crate::execution_step::execution_context::ExecutionCtx;
-use crate::execution_step::utils::get_variable_name;
-use crate::execution_step::utils::resolve_to_jvaluable;
+use crate::execution_step::utils::resolve_ast_variable;
 use crate::JValue;
 
 use air_parser::ast;
@@ -54,40 +53,25 @@ pub(crate) fn are_matchable_eq<'ctx>(
         (matchable, Number(value)) => compare_matchable(matchable, exec_ctx, make_number_comparator(value)),
 
         (Variable(left_variable), Variable(right_variable)) => {
-            let left_name = get_variable_name(left_variable);
-            let left_jvaluable = resolve_to_jvaluable(left_name, exec_ctx)?;
+            let left_jvaluable = resolve_ast_variable(left_variable, exec_ctx)?;
             let left_value = left_jvaluable.as_jvalue();
 
-            let right_name = get_variable_name(right_variable);
-            let right_jvaluable = resolve_to_jvaluable(right_name, exec_ctx)?;
+            let right_jvaluable = resolve_ast_variable(right_variable, exec_ctx)?;
             let right_value = right_jvaluable.as_jvalue();
 
             Ok(left_value == right_value)
         }
-        (
-            JsonPath {
-                variable: lv,
-                path: lp,
-                should_flatten: lsf,
-            },
-            JsonPath {
-                variable: rv,
-                path: rp,
-                should_flatten: rsf,
-            },
-        ) => {
+        (JsonPath(lhs), JsonPath(rhs)) => {
             // TODO: improve comparison
-            if lsf != rsf {
+            if lhs.should_flatten != rhs.should_flatten {
                 return Ok(false);
             }
 
-            let left_name = get_variable_name(lv);
-            let left_jvaluable = resolve_to_jvaluable(left_name, exec_ctx)?;
-            let left_value = left_jvaluable.apply_json_path(lp)?;
+            let left_jvaluable = resolve_ast_variable(&lhs.variable, exec_ctx)?;
+            let left_value = left_jvaluable.apply_json_path(lhs.path)?;
 
-            let right_name = get_variable_name(rv);
-            let right_jvaluable = resolve_to_jvaluable(right_name, exec_ctx)?;
-            let right_value = right_jvaluable.apply_json_path(rp)?;
+            let right_jvaluable = resolve_ast_variable(&rhs.variable, exec_ctx)?;
+            let right_value = right_jvaluable.apply_json_path(rhs.path)?;
 
             Ok(left_value == right_value)
         }
@@ -124,21 +108,15 @@ fn compare_matchable<'ctx>(
             Ok(comparator(Cow::Owned(jvalue)))
         }
         Variable(variable) => {
-            let name = get_variable_name(variable);
-            let jvaluable = resolve_to_jvaluable(name, exec_ctx)?;
+            let jvaluable = resolve_ast_variable(variable, exec_ctx)?;
             let jvalue = jvaluable.as_jvalue();
             Ok(comparator(jvalue))
         }
-        JsonPath {
-            variable,
-            path,
-            should_flatten,
-        } => {
-            let var_name = get_variable_name(variable);
-            let jvaluable = resolve_to_jvaluable(var_name, exec_ctx)?;
-            let jvalues = jvaluable.apply_json_path(path)?;
+        JsonPath(json_path) => {
+            let jvaluable = resolve_ast_variable(&json_path.variable, exec_ctx)?;
+            let jvalues = jvaluable.apply_json_path(json_path.path)?;
 
-            let jvalue = if *should_flatten {
+            let jvalue = if json_path.should_flatten {
                 if jvalues.len() != 1 {
                     return Ok(false);
                 }

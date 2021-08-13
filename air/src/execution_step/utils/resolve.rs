@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+use super::SecurityTetraplets;
 use crate::execution_step::boxed_value::JValuable;
-use crate::execution_step::execution_context::AValue;
+use crate::execution_step::boxed_value::Variable;
 use crate::execution_step::execution_context::ExecutionCtx;
 use crate::execution_step::execution_context::LastErrorWithTetraplets;
 use crate::execution_step::ExecutionError;
@@ -23,43 +24,46 @@ use crate::execution_step::ExecutionResult;
 use crate::JValue;
 use crate::SecurityTetraplet;
 
+use air_parser::ast::AstVariable;
 use air_parser::ast::CallInstrArgValue;
 use air_parser::ast::LastErrorPath;
 use serde_json::json;
+use std::cell::RefCell;
+use std::rc::Rc;
 
 /// Resolve value to called function arguments.
 pub(crate) fn resolve_to_args<'i>(
     value: &CallInstrArgValue<'i>,
     ctx: &ExecutionCtx<'i>,
-) -> ExecutionResult<(JValue, Vec<SecurityTetraplet>)> {
+) -> ExecutionResult<(JValue, SecurityTetraplets)> {
     match value {
         CallInstrArgValue::InitPeerId => prepare_consts(ctx.init_peer_id.clone(), ctx),
         CallInstrArgValue::LastError(path) => prepare_last_error(path, ctx),
         CallInstrArgValue::Literal(value) => prepare_consts(value.to_string(), ctx),
         CallInstrArgValue::Boolean(value) => prepare_consts(*value, ctx),
         CallInstrArgValue::Number(value) => prepare_consts(value, ctx),
-        CallInstrArgValue::Variable(variable) => prepare_variable(variable, ctx),
-        CallInstrArgValue::JsonPath {
-            variable,
-            path,
-            should_flatten,
-        } => prepare_json_path(variable, path, *should_flatten, ctx),
+        CallInstrArgValue::Variable(variable) => {
+            let variable = Variable::from_ast(variable);
+            prepare_variable(variable, ctx)
+        }
+        CallInstrArgValue::JsonPath(json_path) => {
+            let variable = Variable::from_ast(&json_path.variable);
+            apply_json_path(variable, json_path.path, json_path.should_flatten, ctx)
+        }
     }
 }
 
 #[allow(clippy::unnecessary_wraps)]
-fn prepare_consts(arg: impl Into<JValue>, ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, Vec<SecurityTetraplet>)> {
+fn prepare_consts(arg: impl Into<JValue>, ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, SecurityTetraplets)> {
     let jvalue = arg.into();
     let tetraplet = SecurityTetraplet::literal_tetraplet(ctx.init_peer_id.clone());
+    let tetraplet = Rc::new(RefCell::new(tetraplet));
 
     Ok((jvalue, vec![tetraplet]))
 }
 
 #[allow(clippy::unnecessary_wraps)]
-fn prepare_last_error(
-    path: &LastErrorPath,
-    ctx: &ExecutionCtx<'_>,
-) -> ExecutionResult<(JValue, Vec<SecurityTetraplet>)> {
+fn prepare_last_error(path: &LastErrorPath, ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, SecurityTetraplets)> {
     let LastErrorWithTetraplets { last_error, tetraplets } = ctx.last_error();
     let jvalue = match path {
         LastErrorPath::Instruction => JValue::String(last_error.instruction),
@@ -72,9 +76,9 @@ fn prepare_last_error(
 }
 
 fn prepare_variable<'i>(
-    variable: &Variable<'_>,
+    variable: Variable<'_>,
     ctx: &ExecutionCtx<'i>,
-) -> ExecutionResult<(JValue, Vec<SecurityTetraplet>)> {
+) -> ExecutionResult<(JValue, SecurityTetraplets)> {
     let resolved = resolve_variable(variable, ctx)?;
     let tetraplets = resolved.as_tetraplets();
     let jvalue = resolved.into_jvalue();
@@ -82,33 +86,43 @@ fn prepare_variable<'i>(
     Ok((jvalue, tetraplets))
 }
 
-fn resolve_variable<'ctx, 'i>(
-    variable: &Variable<'_>,
+pub(crate) fn resolve_variable<'ctx, 'i>(
+    variable: Variable<'_>,
     ctx: &'ctx ExecutionCtx<'i>,
 ) -> ExecutionResult<Box<dyn JValuable + 'ctx>> {
+    use crate::execution_step::boxed_value::StreamJvaluableIngredients;
+
     match variable {
-        Variable::Scalar(name) => resolve_to_jvaluable(name, ctx),
-        Variable::Stream(name) => {
-            // return an empty stream for not found stream
-            // here it ignores the join behaviour
-            if ctx.data_cache.get(*name).is_none() {
-                Ok(Box::new(()))
-            } else {
-                resolve_to_jvaluable(name, ctx)
+        Variable::Scalar(name) => scalar_to_jvaluable(name, ctx),
+        Variable::Stream { name, generation } => {
+            match ctx.streams.get(name) {
+                Some(stream) => {
+                    let ingredients = StreamJvaluableIngredients::new(stream.borrow(), generation);
+                    Ok(Box::new(ingredients))
+                }
+                // return an empty stream for not found stream
+                // here it ignores the join behaviour
+                None => Ok(Box::new(())),
             }
         }
     }
 }
 
-fn prepare_json_path<'i>(
-    variable: &Variable<'_>,
+pub(crate) fn resolve_ast_variable<'ctx, 'i>(
+    variable: &AstVariable<'_>,
+    ctx: &'ctx ExecutionCtx<'i>,
+) -> ExecutionResult<Box<dyn JValuable + 'ctx>> {
+    let variable = Variable::from_ast(variable);
+    resolve_variable(variable, ctx)
+}
+
+pub(crate) fn apply_json_path<'i>(
+    variable: Variable<'_>,
     json_path: &str,
     should_flatten: bool,
     ctx: &ExecutionCtx<'i>,
-) -> ExecutionResult<(JValue, Vec<SecurityTetraplet>)> {
-    let name = get_variable_name(variable);
-
-    let resolved = resolve_to_jvaluable(name, ctx)?;
+) -> ExecutionResult<(JValue, SecurityTetraplets)> {
+    let resolved = resolve_variable(variable, ctx)?;
     let (jvalue, tetraplets) = resolved.apply_json_path_with_tetraplets(json_path)?;
 
     let jvalue = if should_flatten {
@@ -125,33 +139,17 @@ fn prepare_json_path<'i>(
     Ok((jvalue, tetraplets))
 }
 
-/// Constructs jvaluable result from `ExecutionCtx::data_cache` by name.
-pub(crate) fn resolve_to_jvaluable<'name, 'i, 'ctx>(
+/// Constructs jvaluable result from scalars by name.
+fn scalar_to_jvaluable<'name, 'i, 'ctx>(
     name: &'name str,
     ctx: &'ctx ExecutionCtx<'i>,
 ) -> ExecutionResult<Box<dyn JValuable + 'ctx>> {
     use ExecutionError::VariableNotFound;
 
     let value = ctx
-        .data_cache
+        .scalars
         .get(name)
         .ok_or_else(|| VariableNotFound(name.to_string()))?;
 
-    match value {
-        AValue::JValueRef(value) => Ok(Box::new(value.clone())),
-        AValue::StreamRef(stream) => Ok(Box::new(stream.borrow())),
-        AValue::JValueFoldCursor(fold_state) => {
-            let peeked_value = fold_state.iterable.peek().unwrap();
-            Ok(Box::new(peeked_value))
-        }
-    }
-}
-
-use air_parser::ast::Variable;
-
-pub(crate) fn get_variable_name<'a>(variable: &'a Variable<'_>) -> &'a str {
-    match variable {
-        Variable::Scalar(name) => name,
-        Variable::Stream(name) => name,
-    }
+    Ok(value.to_jvaluable())
 }

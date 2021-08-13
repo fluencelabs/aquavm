@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-mod iterable;
-mod jvaluable;
-mod scalar;
-mod stream;
-mod variable;
+use super::*;
 
-pub(crate) use super::ExecutionError;
-pub(crate) use iterable::*;
-pub(crate) use jvaluable::*;
-pub(crate) use scalar::ResolvedCallResult;
-pub(crate) use scalar::Scalar;
-pub(crate) use stream::Generation;
-pub(crate) use stream::Stream;
-pub(crate) use stream::StreamIter;
-pub(crate) use variable::Variable;
+impl<'i> Ap<'i> {
+    pub fn new(argument: ApArgument<'i>, result: AstVariable<'i>) -> Self {
+        Self { argument, result }
+    }
+}
 
-use super::ExecutionResult;
+impl<'i> JsonPath<'i> {
+    pub fn new(variable: AstVariable<'i>, path: &'i str, should_flatten: bool) -> Self {
+        Self {
+            variable,
+            path,
+            should_flatten,
+        }
+    }
+}

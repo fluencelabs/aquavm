@@ -18,8 +18,8 @@ use super::ExecutionError::JValueJsonPathError as JsonPathError;
 use super::ExecutionResult;
 use super::IterableItem;
 use super::JValuable;
+use crate::execution_step::SecurityTetraplets;
 use crate::JValue;
-use crate::SecurityTetraplet;
 
 use jsonpath_lib::select;
 
@@ -41,10 +41,7 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
         Ok(selected_jvalues)
     }
 
-    fn apply_json_path_with_tetraplets(
-        &self,
-        json_path: &str,
-    ) -> ExecutionResult<(Vec<&JValue>, Vec<SecurityTetraplet>)> {
+    fn apply_json_path_with_tetraplets(&self, json_path: &str) -> ExecutionResult<(Vec<&JValue>, SecurityTetraplets)> {
         use super::IterableItem::*;
 
         let (jvalue, tetraplet) = match self {
@@ -78,7 +75,7 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
         }
     }
 
-    fn as_tetraplets(&self) -> Vec<SecurityTetraplet> {
+    fn as_tetraplets(&self) -> SecurityTetraplets {
         use super::IterableItem::*;
 
         // these clones are needed because rust-sdk allows passing arguments only by value
@@ -87,8 +84,8 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
                 let tetraplet = tetraplet.deref().clone();
                 vec![tetraplet]
             }
-            RefValue((_, tetraplet, _)) => vec![(*tetraplet).clone()],
-            RcValue((_, tetraplet, _)) => vec![(*tetraplet).clone()],
+            RefValue((_, tetraplet, _)) => vec![tetraplet.clone()],
+            RcValue((_, tetraplet, _)) => vec![tetraplet.clone()],
         }
     }
 }

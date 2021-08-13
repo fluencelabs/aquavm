@@ -16,8 +16,8 @@
 
 use super::ExecutionResult;
 use super::JValuable;
+use crate::execution_step::SecurityTetraplets;
 use crate::JValue;
-use crate::SecurityTetraplet;
 
 use std::borrow::Cow;
 
@@ -26,10 +26,7 @@ impl JValuable for () {
         Ok(vec![])
     }
 
-    fn apply_json_path_with_tetraplets(
-        &self,
-        _json_path: &str,
-    ) -> ExecutionResult<(Vec<&JValue>, Vec<SecurityTetraplet>)> {
+    fn apply_json_path_with_tetraplets(&self, _json_path: &str) -> ExecutionResult<(Vec<&JValue>, SecurityTetraplets)> {
         Ok((vec![], vec![]))
     }
 
@@ -41,7 +38,7 @@ impl JValuable for () {
         JValue::Array(vec![])
     }
 
-    fn as_tetraplets(&self) -> Vec<SecurityTetraplet> {
+    fn as_tetraplets(&self) -> SecurityTetraplets {
         vec![]
     }
 }

@@ -24,17 +24,18 @@ mod tests;
 
 pub(crate) use errors::TraceHandlerError;
 pub(crate) use handler::TraceHandler;
+pub(crate) use merger::MergerApResult;
 pub(crate) use merger::MergerCallResult;
 pub(crate) use state_automata::SubtreeType;
 
 pub(crate) type TraceHandlerResult<T> = std::result::Result<T, TraceHandlerError>;
 
-pub(self) use air_interpreter_data::*;
-pub(self) use data_keeper::DataKeeper;
-pub(self) use merger::MergeCtxType;
-pub(self) use merger::MergerFoldResult;
-pub(self) use merger::ResolvedFold;
-pub(self) use merger::ResolvedSubTraceDescs;
-pub(self) use state_automata::FSMKeeper;
-pub(self) use state_automata::FoldFSM;
-pub(self) use state_automata::ParFSM;
+use air_interpreter_data::*;
+use data_keeper::DataKeeper;
+use merger::MergeCtxType;
+use merger::MergerFoldResult;
+use merger::ResolvedFold;
+use merger::ResolvedSubTraceDescs;
+use state_automata::FSMKeeper;
+use state_automata::FoldFSM;
+use state_automata::ParFSM;

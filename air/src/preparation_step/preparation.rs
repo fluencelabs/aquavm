@@ -16,7 +16,6 @@
 
 use super::PreparationError;
 use crate::build_targets::get_current_peer_id;
-use crate::execution_step::AValue;
 use crate::execution_step::ExecutionCtx;
 use crate::execution_step::Stream;
 use crate::execution_step::TraceHandler;
@@ -67,9 +66,9 @@ pub(crate) fn prepare<'i>(
 }
 
 fn try_to_data(raw_data: &[u8]) -> PreparationResult<InterpreterData> {
-    use PreparationError::DataDeError;
+    use PreparationError::DataDeFailed;
 
-    InterpreterData::try_from_slice(raw_data).map_err(|err| DataDeError(err, raw_data.to_vec()))
+    InterpreterData::try_from_slice(raw_data).map_err(|err| DataDeFailed(err, raw_data.to_vec()))
 }
 
 fn make_exec_ctx(init_peer_id: String, prev_data: &InterpreterData) -> PreparationResult<ExecutionCtx<'static>> {
@@ -87,9 +86,9 @@ fn create_streams(ctx: &mut ExecutionCtx<'_>, prev_data: &InterpreterData) {
 
     for (stream_name, generation_count) in prev_data.streams.iter() {
         let new_stream = Stream::from_generations_count(*generation_count as usize);
-        let new_value = AValue::StreamRef(RefCell::new(new_stream));
+        let new_stream = RefCell::new(new_stream);
 
-        // it's impossible to have duplicates of streams in data because of HashMap
-        ctx.data_cache.insert(stream_name.to_string(), new_value);
+        // it's impossible to have duplicates of streams in data because of HashMap in data
+        ctx.streams.insert(stream_name.to_string(), new_stream);
     }
 }

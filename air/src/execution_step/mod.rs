@@ -25,18 +25,23 @@ mod utils;
 pub(super) use self::air::ExecutableInstruction;
 pub(super) use self::air::FoldState;
 pub(super) use boxed_value::Generation;
+pub(super) use boxed_value::ResolvedCallResult;
+pub(super) use boxed_value::Scalar;
 pub(super) use boxed_value::Stream;
 pub(crate) use errors::Catchable;
 pub(super) use errors::ExecutionError;
-pub(super) use execution_context::AValue;
 pub(crate) use execution_context::ExecutionCtx;
-pub(self) use joinable::Joinable;
+use joinable::Joinable;
 pub(crate) use trace_handler::TraceHandler;
 
+use std::cell::RefCell;
 use std::rc::Rc;
 
-pub(self) type ExecutionResult<T> = std::result::Result<T, Rc<ExecutionError>>;
-pub(self) use air_parser::ast::Variable;
+type ExecutionResult<T> = std::result::Result<T, Rc<ExecutionError>>;
+type RSecurityTetraplet = Rc<RefCell<crate::SecurityTetraplet>>;
+type SecurityTetraplets = Vec<RSecurityTetraplet>;
+
+use air_parser::ast::AstVariable;
 
 #[macro_export]
 macro_rules! exec_err {

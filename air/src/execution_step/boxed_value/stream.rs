@@ -16,9 +16,11 @@
 
 use super::ExecutionError;
 use super::ExecutionResult;
+use super::ResolvedCallResult;
 use crate::exec_err;
-use crate::execution_step::execution_context::ResolvedCallResult;
 use crate::JValue;
+
+use std::fmt::Formatter;
 
 /// Streams are CRDT-like append only data structures. They are guaranteed to have the same order
 /// of values on each peer.
@@ -29,7 +31,7 @@ use crate::JValue;
 /// obtained values from a current_data that were not present in prev_data becomes a new generation.
 // TODO: make it non-pub after boxed value refactoring.
 #[derive(Debug, Default, Clone)]
-pub(crate) struct Stream(pub(crate) Vec<Vec<ResolvedCallResult>>);
+pub(crate) struct Stream(Vec<Vec<ResolvedCallResult>>);
 
 impl Stream {
     pub(crate) fn from_generations_count(count: usize) -> Self {
@@ -67,49 +69,85 @@ impl Stream {
         }
     }
 
-    pub(crate) fn elements_count(&self) -> usize {
-        self.0.iter().map(|v| v.len()).sum()
+    pub(crate) fn elements_count(&self, generation: Generation) -> Option<usize> {
+        match generation {
+            Generation::Nth(generation) if generation as usize > self.generations_count() => None,
+            Generation::Nth(generation) => Some(self.0.iter().take(generation as usize).map(|v| v.len()).sum()),
+            Generation::Last => Some(self.0.iter().map(|v| v.len()).sum()),
+        }
     }
 
     pub(crate) fn is_empty(&self) -> bool {
-        self.0.is_empty()
+        if self.0.is_empty() {
+            return false;
+        }
+
+        self.0.iter().all(|v| v.is_empty())
     }
 
-    pub(crate) fn into_jvalue(self) -> JValue {
+    pub(crate) fn as_jvalue(&self, generation: Generation) -> Option<JValue> {
         use std::ops::Deref;
 
-        let jvalue_array = self
-            .0
-            .iter()
-            .flat_map(|g| g.iter().map(|v| v.result.deref().clone()))
-            .collect::<Vec<_>>();
-        JValue::Array(jvalue_array)
+        let iter = self.iter(generation)?;
+        let jvalue_array = iter.map(|r| r.result.deref().clone()).collect::<Vec<_>>();
+
+        Some(JValue::Array(jvalue_array))
     }
 
-    pub(crate) fn iter(&self) -> StreamIter<'_> {
-        let iter = self.0.iter().flat_map(|v| v.iter());
-        let len = self.elements_count();
+    pub(crate) fn iter(&self, generation: Generation) -> Option<StreamIter<'_>> {
+        let iter: Box<dyn Iterator<Item = &ResolvedCallResult>> = match generation {
+            Generation::Nth(generation) if generation as usize >= self.generations_count() => return None,
+            Generation::Nth(generation) => Box::new(self.0.iter().take(generation as usize + 1).flat_map(|v| v.iter())),
+            Generation::Last => Box::new(self.0.iter().flat_map(|v| v.iter())),
+        };
+        // unwrap is safe here, because generation's been already checked
+        let len = self.elements_count(generation).unwrap();
 
-        StreamIter {
-            iter: Box::new(iter),
-            len,
-        }
+        let iter = StreamIter { iter, len };
+
+        Some(iter)
+    }
+
+    pub(crate) fn slice_iter(&self, generation: Generation) -> Option<StreamSliceIter<'_>> {
+        let iter: Box<dyn Iterator<Item = &[ResolvedCallResult]>> = match generation {
+            Generation::Nth(generation) if generation as usize >= self.generations_count() => return None,
+            Generation::Nth(generation) => Box::new(self.0.iter().take(generation as usize + 1).map(|v| v.as_slice())),
+            Generation::Last => Box::new(self.0.iter().map(|v| v.as_slice())),
+        };
+
+        let len = match generation {
+            Generation::Nth(generation) => generation as usize,
+            Generation::Last => self.0.len(),
+        };
+
+        let iter = StreamSliceIter { iter, len };
+
+        Some(iter)
     }
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum Generation {
     Last,
     Nth(u32),
 }
 
-pub(crate) struct StreamIter<'a> {
-    iter: Box<dyn Iterator<Item = &'a ResolvedCallResult> + 'a>,
+impl Generation {
+    pub(crate) fn from_option(raw_generation: Option<u32>) -> Self {
+        match raw_generation {
+            Some(generation) => Generation::Nth(generation),
+            None => Generation::Last,
+        }
+    }
+}
+
+pub(crate) struct StreamIter<'result> {
+    iter: Box<dyn Iterator<Item = &'result ResolvedCallResult> + 'result>,
     len: usize,
 }
 
-impl<'a> Iterator for StreamIter<'a> {
-    type Item = &'a ResolvedCallResult;
+impl<'result> Iterator for StreamIter<'result> {
+    type Item = &'result ResolvedCallResult;
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.len > 0 {
@@ -123,4 +161,45 @@ impl<'a> Iterator for StreamIter<'a> {
     }
 }
 
-impl<'a> ExactSizeIterator for StreamIter<'a> {}
+impl<'result> ExactSizeIterator for StreamIter<'result> {}
+
+pub(crate) struct StreamSliceIter<'slice> {
+    iter: Box<dyn Iterator<Item = &'slice [ResolvedCallResult]> + 'slice>,
+    len: usize,
+}
+
+impl<'slice> Iterator for StreamSliceIter<'slice> {
+    type Item = &'slice [ResolvedCallResult];
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.len > 0 {
+            self.len -= 1;
+        }
+        self.iter.next()
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        (self.len, Some(self.len))
+    }
+}
+
+use std::fmt;
+
+impl fmt::Display for Stream {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        if self.0.is_empty() {
+            return write!(f, "[]");
+        }
+
+        write!(f, "[ ")?;
+        for (id, generation) in self.0.iter().enumerate() {
+            write!(f, " -- {}: ", id)?;
+            for value in generation.iter() {
+                write!(f, "{:?}, ", value)?;
+            }
+            writeln!(f)?;
+        }
+
+        write!(f, "]")
+    }
+}

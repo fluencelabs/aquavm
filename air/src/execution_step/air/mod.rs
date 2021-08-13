@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+mod ap;
 mod call;
 mod compare_matchable;
 mod fold;
@@ -29,12 +30,14 @@ mod xor;
 
 pub(crate) use fold::FoldState;
 
-pub(self) use super::execution_context::*;
-pub(self) use super::Catchable;
-pub(self) use super::ExecutionCtx;
-pub(self) use super::ExecutionError;
-pub(self) use super::ExecutionResult;
-pub(self) use crate::execution_step::TraceHandler;
+use super::boxed_value::ResolvedCallResult;
+use super::boxed_value::Scalar;
+use super::execution_context::*;
+use super::Catchable;
+use super::ExecutionCtx;
+use super::ExecutionError;
+use super::ExecutionResult;
+use crate::execution_step::TraceHandler;
 
 use air_parser::ast::Instruction;
 
@@ -117,6 +120,7 @@ impl<'i> ExecutableInstruction<'i> for Instruction<'i> {
             // it internally sets last_error with resolved triplet
             Instruction::Call(call) => call.execute(exec_ctx, trace_ctx),
 
+            Instruction::Ap(ap) => execute!(self, ap, exec_ctx, trace_ctx),
             Instruction::FoldScalar(fold) => execute!(self, fold, exec_ctx, trace_ctx),
             Instruction::FoldStream(fold) => execute_fold!(self, fold, exec_ctx, trace_ctx),
             Instruction::Next(next) => execute!(self, next, exec_ctx, trace_ctx),
@@ -139,15 +143,23 @@ macro_rules! log_instruction {
     ($instr_name:expr, $exec_ctx:expr, $trace_ctx:expr) => {
         log::debug!(target: crate::log_targets::INSTRUCTION, "> {}", stringify!($instr_name));
 
-        let mut data_cache_log = String::from("  data cache:");
-        if $exec_ctx.data_cache.is_empty() {
-            data_cache_log.push_str(" empty");
+        let mut variables = String::from("  scalars:");
+        if $exec_ctx.scalars.is_empty() {
+            variables.push_str("   empty");
         }
-        for (key, value) in $exec_ctx.data_cache.iter() {
-            data_cache_log.push_str(&format!("\n    {} => {}", key, value));
+        for (key, value) in $exec_ctx.scalars.iter() {
+            variables.push_str(&format!("\n    {} => {}", key, value));
         }
 
-        log::trace!(target: crate::log_targets::DATA_CACHE, "{}", data_cache_log);
+        variables.push_str("  streams:");
+        if $exec_ctx.streams.is_empty() {
+            variables.push_str("   empty");
+        }
+        for (key, value) in $exec_ctx.streams.iter() {
+            variables.push_str(&format!("\n    {} => {}", key, value.borrow()));
+        }
+
+        log::trace!(target: crate::log_targets::DATA_CACHE, "{}", variables);
         log::trace!(
             target: crate::log_targets::NEXT_PEER_PKS,
             "  next peers pk: {:?}",

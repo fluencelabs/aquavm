@@ -18,12 +18,12 @@ use crate::ast;
 use crate::parser::lexer::LastErrorPath;
 use crate::parser::AIRParser;
 use crate::parser::ParserError;
+use ast::AstVariable::Scalar;
+use ast::AstVariable::Stream;
 use ast::Call;
 use ast::CallInstrArgValue;
 use ast::CallInstrValue;
 use ast::Instruction;
-use ast::Variable::Scalar;
-use ast::Variable::Stream;
 
 use fstrings::f;
 use lalrpop_util::ParseError;
@@ -136,11 +136,11 @@ fn parse_json_path() {
         "#;
     let instruction = parse(source_code);
     let expected = Instruction::Call(Call {
-        peer_part: PeerPk(CallInstrValue::JsonPath {
-            variable: Scalar("id"),
-            path: "$.a",
-            should_flatten: true,
-        }),
+        peer_part: PeerPk(CallInstrValue::JsonPath(ast::JsonPath::new(
+            Scalar("id"),
+            "$.a",
+            true,
+        ))),
         function_part: FuncName(CallInstrValue::Literal("f")),
         args: Rc::new(vec![
             CallInstrArgValue::Literal("hello"),
@@ -278,21 +278,21 @@ fn parse_json_path_complex() {
     let instruction = parse(source_code);
     let expected = seq(
         Instruction::Call(Call {
-            peer_part: PeerPk(CallInstrValue::JsonPath {
-                variable: Scalar("m"),
-                path: "$.[1]",
-                should_flatten: true,
-            }),
+            peer_part: PeerPk(CallInstrValue::JsonPath(ast::JsonPath::new(
+                Scalar("m"),
+                "$.[1]",
+                true,
+            ))),
             function_part: FuncName(CallInstrValue::Literal("f")),
             args: Rc::new(vec![]),
             output: Variable(Scalar("void")),
         }),
         Instruction::Call(Call {
-            peer_part: PeerPk(CallInstrValue::JsonPath {
-                variable: Scalar("m"),
-                path: r#"$.abc["c"].cde[a][0].cde["bcd"]"#,
-                should_flatten: true,
-            }),
+            peer_part: PeerPk(CallInstrValue::JsonPath(ast::JsonPath::new(
+                Scalar("m"),
+                r#"$.abc["c"].cde[a][0].cde["bcd"]"#,
+                true,
+            ))),
             function_part: FuncName(CallInstrValue::Literal("f")),
             args: Rc::new(vec![]),
             output: Variable(Scalar("void")),
@@ -312,26 +312,22 @@ fn json_path_square_braces() {
         "#;
     let instruction = parse(source_code);
     let expected = Instruction::Call(Call {
-        peer_part: PeerPk(CallInstrValue::JsonPath {
-            variable: Scalar("u"),
-            path: r#"$["peer_id"]"#,
-            should_flatten: true,
-        }),
+        peer_part: PeerPk(CallInstrValue::JsonPath(ast::JsonPath::new(
+            Scalar("u"),
+            r#"$["peer_id"]"#,
+            true,
+        ))),
         function_part: ServiceIdWithFuncName(
             CallInstrValue::Literal("return"),
             CallInstrValue::Literal(""),
         ),
         args: Rc::new(vec![
-            CallInstrArgValue::JsonPath {
-                variable: Scalar("u"),
-                path: r#"$["peer_id"].cde[0]["abc"].abc"#,
-                should_flatten: false,
-            },
-            CallInstrArgValue::JsonPath {
-                variable: Scalar("u"),
-                path: r#"$["name"]"#,
-                should_flatten: false,
-            },
+            CallInstrArgValue::JsonPath(ast::JsonPath::new(
+                Scalar("u"),
+                r#"$["peer_id"].cde[0]["abc"].abc"#,
+                false,
+            )),
+            CallInstrArgValue::JsonPath(ast::JsonPath::new(Scalar("u"), r#"$["name"]"#, false)),
         ]),
         output: Variable(Stream("$void")),
     });

@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-use crate::execution_step::boxed_value::Stream;
+use super::JValuable;
 use crate::execution_step::FoldState;
+use crate::execution_step::RSecurityTetraplet;
 use crate::JValue;
-use crate::ResolvedTriplet;
 
 use serde::Deserialize;
 use serde::Serialize;
 
-use std::cell::RefCell;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::rc::Rc;
@@ -30,47 +29,44 @@ use std::rc::Rc;
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct ResolvedCallResult {
     pub result: Rc<JValue>,
-    pub triplet: Rc<ResolvedTriplet>,
+    pub tetraplet: RSecurityTetraplet,
     pub trace_pos: usize,
 }
 
-pub(crate) enum AValue<'i> {
+pub(crate) enum Scalar<'i> {
     JValueRef(ResolvedCallResult),
-    StreamRef(RefCell<Stream>),
     JValueFoldCursor(FoldState<'i>),
 }
 
+impl<'i> Scalar<'i> {
+    pub(crate) fn to_jvaluable<'ctx>(&'ctx self) -> Box<dyn JValuable + 'ctx> {
+        match self {
+            Scalar::JValueRef(value) => Box::new(value.clone()),
+            Scalar::JValueFoldCursor(fold_state) => {
+                let peeked_value = fold_state.iterable.peek().unwrap();
+                Box::new(peeked_value)
+            }
+        }
+    }
+}
+
 impl ResolvedCallResult {
-    pub(crate) fn new(result: Rc<JValue>, triplet: Rc<ResolvedTriplet>, trace_pos: usize) -> Self {
+    pub(crate) fn new(result: Rc<JValue>, tetraplet: RSecurityTetraplet, trace_pos: usize) -> Self {
         Self {
             result,
-            triplet,
+            tetraplet,
             trace_pos,
         }
     }
 }
 
-impl<'i> Display for AValue<'i> {
+impl<'i> Display for Scalar<'i> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            AValue::JValueRef(value) => write!(f, "{:?}", value)?,
-            AValue::StreamRef(stream) => {
-                if stream.borrow().0.is_empty() {
-                    return write!(f, "[]");
-                }
-
-                write!(f, "[ ")?;
-                for (id, generation) in stream.borrow().0.iter().enumerate() {
-                    write!(f, " -- {}: ", id)?;
-                    for value in generation.iter() {
-                        write!(f, "{:?}, ", value)?;
-                    }
-                    writeln!(f)?;
-                }
-                write!(f, "]")?;
-            }
-            AValue::JValueFoldCursor(_) => {
-                write!(f, "cursor")?;
+            Scalar::JValueRef(value) => write!(f, "{:?}", value)?,
+            Scalar::JValueFoldCursor(cursor) => {
+                let iterable = &cursor.iterable;
+                write!(f, "cursor, current value: {:?}", iterable.peek())?;
             }
         }
 

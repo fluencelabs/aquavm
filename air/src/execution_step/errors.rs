@@ -16,13 +16,15 @@
 
 mod catchable;
 
+pub(crate) use catchable::Catchable;
+
+use super::trace_handler::MergerApResult;
 use super::trace_handler::TraceHandlerError;
 use super::Joinable;
+use super::ResolvedCallResult;
+use super::Stream;
 use crate::build_targets::CallServiceResult;
-use crate::execution_step::boxed_value::Stream;
-use crate::execution_step::execution_context::ResolvedCallResult;
 use crate::JValue;
-pub(crate) use catchable::Catchable;
 
 use jsonpath_lib::JsonPathError;
 use serde_json::Error as SerdeJsonError;
@@ -86,8 +88,8 @@ pub(crate) enum ExecutionError {
     MultipleFoldStates(String),
 
     /// Errors encountered while shadowing non-scalar values.
-    #[error("variable with name '{0}' can't be shadowed, shadowing is supported only for scalar values")]
-    NonScalarShadowing(String),
+    #[error("variable with name '{0}' can't be shadowed, shadowing isn't supported for iterables")]
+    IterableShadowing(String),
 
     /// This error type is produced by a match to notify xor that compared values aren't equal.
     #[error("match is used without corresponding xor")]
@@ -108,10 +110,6 @@ pub(crate) enum ExecutionError {
     )]
     JsonPathVariableTypeError(JValue),
 
-    /// Internal error, this error type shouldn't be happened.
-    #[error("an internal error occurred: {0}")]
-    InternalError(String),
-
     /// Errors bubbled from a trace handler.
     #[error("{0}")]
     TraceError(#[from] TraceHandlerError),
@@ -119,6 +117,15 @@ pub(crate) enum ExecutionError {
     /// Errors occurred while insertion of a value inside stream that doesn't have corresponding generation.
     #[error("stream {0:?} doesn't have generation with number {1}, probably the supplied data to the interpreter is corrupted")]
     StreamDontHaveSuchGeneration(Stream, usize),
+
+    /// Errors occurred when result from data doesn't match to a instruction, f.e. an instruction
+    /// could be applied to a stream, but result doesn't contain generation in a source position.
+    #[error("ap result {0:?} doesn't match corresponding instruction")]
+    ApResultNotCorrespondToInstr(MergerApResult),
+
+    /// Errors occurred when ap is applied to a iterable.
+    #[error("ap result is applied to an iterable '{0}', that isn't allowed")]
+    ApArgumentIsIterable(String),
 }
 
 impl From<TraceHandlerError> for Rc<ExecutionError> {
@@ -144,15 +151,16 @@ impl ExecutionError {
             MultipleValuesInJsonPath(_) => 10,
             FoldStateNotFound(_) => 11,
             MultipleFoldStates(_) => 12,
-            NonScalarShadowing(_) => 13,
+            IterableShadowing(_) => 13,
             MatchWithoutXorError => 14,
             MismatchWithoutXorError => 15,
             FlatteningError(_) => 16,
             JsonPathVariableTypeError(_) => 17,
             StreamJsonPathError(..) => 18,
-            InternalError(_) => 19,
-            StreamDontHaveSuchGeneration(..) => 20,
-            TraceError(_) => 21,
+            StreamDontHaveSuchGeneration(..) => 19,
+            ApResultNotCorrespondToInstr(_) => 20,
+            ApArgumentIsIterable(_) => 21,
+            TraceError(_) => 22,
         }
     }
 }

@@ -16,9 +16,8 @@
 
 use super::*;
 use crate::exec_err;
+use crate::execution_step::RSecurityTetraplet;
 use crate::JValue;
-use crate::ResolvedTriplet;
-use crate::SecurityTetraplet;
 
 use air_parser::ast;
 use jsonpath_lib::select;
@@ -60,16 +59,16 @@ pub(crate) fn construct_stream_iterable_value<'ctx>(
     stream_name: &'ctx str,
     exec_ctx: &ExecutionCtx<'ctx>,
 ) -> ExecutionResult<FoldIterableStream> {
-    match exec_ctx.data_cache.get(stream_name) {
-        Some(AValue::StreamRef(stream)) => {
+    match exec_ctx.streams.get(stream_name) {
+        Some(stream) => {
             let stream = stream.borrow();
             if stream.is_empty() {
                 return Ok(FoldIterableStream::Empty);
             }
 
-            let mut iterables = Vec::with_capacity(stream.0.len());
+            let mut iterables = Vec::with_capacity(stream.generations_count());
 
-            for iterable in stream.0.iter() {
+            for iterable in stream.slice_iter(Generation::Last).unwrap() {
                 if iterable.is_empty() {
                     continue;
                 }
@@ -82,12 +81,9 @@ pub(crate) fn construct_stream_iterable_value<'ctx>(
 
             Ok(FoldIterableStream::Stream(iterables))
         }
-        Some(_) => exec_err!(ExecutionError::InternalError(
-            "stream points to scalar value".to_string()
-        )),
         // it's possible to met streams without variables at the moment in fold,
         // they should be treated as empty.
-        _ => Ok(FoldIterableStream::Empty),
+        None => Ok(FoldIterableStream::Empty),
     }
 }
 
@@ -95,24 +91,19 @@ fn create_scalar_iterable<'ctx>(
     exec_ctx: &ExecutionCtx<'ctx>,
     variable_name: &str,
 ) -> ExecutionResult<FoldIterableScalar> {
-    match exec_ctx.data_cache.get(variable_name) {
-        Some(AValue::JValueRef(call_result)) => from_call_result(call_result.clone()),
-        // TODO: refactor this after switching to boxed value, stream and scalar should live in a separate fields
-        Some(AValue::StreamRef(stream)) => exec_err!(ExecutionError::InternalError(format!(
-            "scalar name points to stream: {:?}",
-            stream
-        ))),
-        Some(AValue::JValueFoldCursor(fold_state)) => {
+    match exec_ctx.scalars.get(variable_name) {
+        Some(Scalar::JValueRef(call_result)) => from_call_result(call_result.clone()),
+        Some(Scalar::JValueFoldCursor(fold_state)) => {
             let iterable_value = fold_state.iterable.peek().unwrap();
             let jvalue = iterable_value.as_jvalue();
             let result = Rc::new(jvalue.into_owned());
-            let triplet = as_triplet(&iterable_value);
+            let triplet = as_tetraplet(&iterable_value);
 
             // TODO: it's safe to use 0 here, because trace_pos isn't needed for scalars,
             // but it's needed to be refactored in future
             let call_result = ResolvedCallResult {
                 result,
-                triplet,
+                tetraplet: triplet,
                 trace_pos: 0,
             };
             from_call_result(call_result)
@@ -145,28 +136,23 @@ fn from_call_result(call_result: ResolvedCallResult) -> ExecutionResult<FoldIter
 
 fn create_scalar_json_path_iterable<'ctx>(
     exec_ctx: &ExecutionCtx<'ctx>,
-    variable_name: &str,
+    scalar_name: &str,
     json_path: &str,
     should_flatten: bool,
 ) -> ExecutionResult<FoldIterableScalar> {
-    match exec_ctx.data_cache.get(variable_name) {
-        Some(AValue::JValueRef(variable)) => {
+    match exec_ctx.scalars.get(scalar_name) {
+        Some(Scalar::JValueRef(variable)) => {
             let jvalues = apply_json_path(&variable.result, json_path)?;
-            from_jvalues(jvalues, variable.triplet.clone(), json_path, should_flatten)
+            from_jvalues(jvalues, variable.tetraplet.clone(), json_path, should_flatten)
         }
-        // TODO: refactor this after switching to boxed value, stream and scalar should live in a separate fields
-        Some(AValue::StreamRef(stream)) => exec_err!(ExecutionError::InternalError(format!(
-            "scalar name points to stream: {:?}",
-            stream
-        ))),
-        Some(AValue::JValueFoldCursor(fold_state)) => {
+        Some(Scalar::JValueFoldCursor(fold_state)) => {
             let iterable_value = fold_state.iterable.peek().unwrap();
             let jvalues = iterable_value.apply_json_path(json_path)?;
-            let triplet = as_triplet(&iterable_value);
+            let tetraplet = as_tetraplet(&iterable_value);
 
-            from_jvalues(jvalues, triplet, json_path, should_flatten)
+            from_jvalues(jvalues, tetraplet, json_path, should_flatten)
         }
-        _ => return exec_err!(ExecutionError::VariableNotFound(variable_name.to_string())),
+        _ => return exec_err!(ExecutionError::VariableNotFound(scalar_name.to_string())),
     }
 }
 
@@ -182,7 +168,7 @@ fn apply_json_path<'jvalue, 'str>(
 /// Applies json_path to provided jvalues and construct IterableValue from the result and given triplet.
 fn from_jvalues(
     jvalues: Vec<&JValue>,
-    triplet: Rc<ResolvedTriplet>,
+    tetraplet: RSecurityTetraplet,
     json_path: &str,
     should_flatten: bool,
 ) -> ExecutionResult<FoldIterableScalar> {
@@ -192,10 +178,7 @@ fn from_jvalues(
         return Ok(FoldIterableScalar::Empty);
     }
 
-    let tetraplet = SecurityTetraplet {
-        triplet,
-        json_path: json_path.to_string(),
-    };
+    tetraplet.borrow_mut().add_json_path(json_path);
 
     let foldable = IterableJsonPathResult::init(jvalues, tetraplet);
     let iterable = FoldIterableScalar::Scalar(Box::new(foldable));
@@ -224,7 +207,7 @@ fn construct_iterable_jvalues(jvalues: Vec<&JValue>, should_flatten: bool) -> Ex
     }
 }
 
-fn as_triplet(iterable: &IterableItem<'_>) -> Rc<ResolvedTriplet> {
+fn as_tetraplet(iterable: &IterableItem<'_>) -> RSecurityTetraplet {
     use IterableItem::*;
 
     let tetraplet = match iterable {
@@ -233,6 +216,5 @@ fn as_triplet(iterable: &IterableItem<'_>) -> Rc<ResolvedTriplet> {
         RcValue((_, tetraplet, _)) => tetraplet,
     };
 
-    // clone is cheap here, because triplet is under Rc
-    Rc::clone(&tetraplet.triplet)
+    (*tetraplet).clone()
 }

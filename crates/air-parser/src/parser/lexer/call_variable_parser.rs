@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+use super::AstVariable;
 use super::LexerError;
 use super::LexerResult;
 use super::Token;
-use super::Variable;
 
 use std::convert::TryInto;
 use std::iter::Peekable;
@@ -272,12 +272,12 @@ impl<'input> CallVariableParser<'input> {
         self.current_pos() == self.string_to_parse.len() - 1
     }
 
-    fn to_variable<'v>(&self, variable_name: &'v str) -> Variable<'v> {
+    fn to_variable<'v>(&self, variable_name: &'v str) -> AstVariable<'v> {
         if self.state.is_first_stream_tag {
             // TODO: cut the stream tag after the refactoring.
-            Variable::Stream(variable_name)
+            AstVariable::Stream(variable_name)
         } else {
-            Variable::Scalar(variable_name)
+            AstVariable::Scalar(variable_name)
         }
     }
 

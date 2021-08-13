@@ -1,5 +1,5 @@
 // auto-generated: "lalrpop 0.19.6"
-// sha3: 9c881e242bd8772563cebcbeb25c55d5dc5e5819c26f4ffb78d2b1c0f6b2d3
+// sha3: afadd2ad124cd9a944a55de817741594f9c957b06c4419aab89c762b31612
 use crate::parser::ast::*;
 use crate::parser::air_parser::make_flattened_error;
 use crate::parser::air_parser::make_stream_iterable_error;
@@ -7,9 +7,6 @@ use crate::parser::ParserError;
 use crate::parser::VariableValidator;
 use crate::parser::Span;
 use crate::parser::lexer::Token;
-use crate::parser::lexer::Number;
-use crate::parser::lexer::LastErrorPath;
-use crate::parser::lexer::Variable;
 use lalrpop_util::ErrorRecovery;
 use std::rc::Rc;
 #[allow(unused_extern_crates)]
@@ -30,9 +27,6 @@ mod __parse__AIR {
     use crate::parser::VariableValidator;
     use crate::parser::Span;
     use crate::parser::lexer::Token;
-    use crate::parser::lexer::Number;
-    use crate::parser::lexer::LastErrorPath;
-    use crate::parser::lexer::Variable;
     use lalrpop_util::ErrorRecovery;
     use std::rc::Rc;
     #[allow(unused_extern_crates)]
@@ -48,7 +42,7 @@ mod __parse__AIR {
         Variant0(Token<'input>),
         Variant1(&'input str),
         Variant2(bool),
-        Variant3((Variable<'input>, &'input str, bool)),
+        Variant3((AstVariable<'input>, &'input str, bool)),
         Variant4(LastErrorPath),
         Variant5(Number),
         Variant6(__lalrpop_util::ErrorRecovery<usize, Token<'input>, ParserError>),
@@ -56,203 +50,216 @@ mod __parse__AIR {
         Variant8(alloc::vec::Vec<CallInstrArgValue<'input>>),
         Variant9(usize),
         Variant10(Box<Instruction<'input>>),
-        Variant11(Vec<CallInstrArgValue<'input>>),
-        Variant12(CallInstrValue<'input>),
-        Variant13(FunctionPart<'input>),
-        Variant14(MatchableValue<'input>),
-        Variant15(CallOutputValue<'input>),
-        Variant16(core::option::Option<CallOutputValue<'input>>),
-        Variant17(PeerPart<'input>),
-        Variant18(IterableScalarValue<'input>),
+        Variant11(ApArgument<'input>),
+        Variant12(Vec<CallInstrArgValue<'input>>),
+        Variant13(CallInstrValue<'input>),
+        Variant14(FunctionPart<'input>),
+        Variant15(MatchableValue<'input>),
+        Variant16(AstVariable<'input>),
+        Variant17(core::option::Option<AstVariable<'input>>),
+        Variant18(PeerPart<'input>),
+        Variant19(IterableScalarValue<'input>),
     }
     const __ACTION: &[i8] = &[
         // State 0
-        29, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30,
+        31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32,
         // State 1
-        10, 0, 0, 0, 35, 0, 36, 37, 0, 38, 0, 39, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 35, 0, 0, 36, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 2
-        0, 0, 0, 0, 41, 0, 0, 42, 0, 0, 0, 43, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        12, 0, 0, 0, 39, 0, 40, 41, 0, 42, 0, 43, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 3
-        0, 0, 0, 0, 44, 45, 46, 47, 0, 48, 49, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 45, 0, 0, 46, 0, 0, 0, 47, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 4
-        0, 0, 0, 0, 44, 45, 46, 47, 0, 48, 49, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 48, 49, 50, 51, 0, 52, 53, 54, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 5
-        29, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30,
+        0, 0, 0, 0, 48, 49, 50, 51, 0, 52, 53, 54, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 6
-        29, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30,
+        31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32,
         // State 7
-        29, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30,
+        31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32,
         // State 8
-        17, 0, 0, 0, 35, 0, 36, 37, 0, 38, 0, 39, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32,
         // State 9
-        0, 0, 0, 0, 35, 0, 36, 37, 0, 38, 0, 39, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 58, 0, 0, 0, 0, 0, 0, 59, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 10
-        0, 0, 0, 0, 44, 45, 46, 47, 0, 48, 49, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        19, 0, 0, 0, 39, 0, 40, 41, 0, 42, 0, 43, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 11
-        0, 0, 0, 0, 44, 45, 46, 47, 0, 48, 49, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 39, 0, 40, 41, 0, 42, 0, 43, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 12
-        29, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30,
+        0, 0, 0, 0, 48, 49, 50, 51, 0, 52, 53, 54, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 13
-        29, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30,
+        0, 0, 0, 0, 48, 49, 50, 51, 0, 52, 53, 54, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 14
-        29, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30,
+        31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32,
         // State 15
-        0, 0, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32,
         // State 16
-        0, 0, 0, 0, 35, 0, 36, 37, 0, 38, 0, 39, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32,
         // State 17
-        0, 0, 0, 0, 35, 0, 36, 37, 0, 38, 0, 39, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 26, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 18
-        29, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30,
+        0, 0, 0, 0, 39, 0, 40, 41, 0, 42, 0, 43, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 19
-        29, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30,
+        0, 0, 0, 0, 39, 0, 40, 41, 0, 42, 0, 43, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 20
-        29, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30,
+        31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32,
         // State 21
-        29, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30,
+        31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32,
         // State 22
-        0, 69, 0, 0, 70, 0, 0, 0, 0, 0, 0, 71, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32,
         // State 23
-        0, 0, 0, 74, 75, 76, 77, 78, 79, 80, 81, 82, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32,
         // State 24
-        0, 0, 0, 0, 35, 0, 36, 37, 0, 38, 0, 39, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 77, 0, 0, 58, 0, 0, 0, 0, 0, 0, 59, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 25
-        0, 0, 0, 91, 75, 76, 77, 78, 79, 80, 81, 82, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 80, 81, 82, 83, 84, 85, 86, 87, 88, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 26
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 39, 0, 40, 41, 0, 42, 0, 43, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 27
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 97, 81, 82, 83, 84, 85, 86, 87, 88, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 28
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 4, 5, 31, 32, 6, 7, 8, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 29
-        -39, -39, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -39,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 30
-        0, 0, 0, 0, 51, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 4, 5, 6, 33, 34, 7, 8, 9, 0,
         // State 31
-        0, 52, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        -42, -42, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -42,
         // State 32
-        -51, 0, 0, 0, -51, 0, -51, -51, 0, -51, 0, -51, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 55, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 33
-        -52, 0, 0, 0, -52, 0, -52, -52, 0, -52, 0, -52, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 56, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 34
-        -21, -21, -21, 0, -21, 0, -21, -21, 0, -21, 0, -21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, -9, 0, 0, 0, 0, 0, 0, -9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 35
-        -24, -24, -24, 0, -24, 0, -24, -24, 0, -24, 0, -24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, -10, 0, 0, 0, 0, 0, 0, -10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 36
-        -23, -23, -23, 0, -23, 0, -23, -23, 0, -23, 0, -23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        -54, 0, 0, 0, -54, 0, -54, -54, 0, -54, 0, -54, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 37
-        -20, -20, -20, 0, -20, 0, -20, -20, 0, -20, 0, -20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        -55, 0, 0, 0, -55, 0, -55, -55, 0, -55, 0, -55, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 38
-        -22, -22, -22, 0, -22, 0, -22, -22, 0, -22, 0, -22, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        -23, -23, -23, 0, -23, 0, -23, -23, 0, -23, 0, -23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 39
-        0, 0, 0, 0, 19, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        -26, -26, -26, 0, -26, 0, -26, -26, 0, -26, 0, -26, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 40
-        0, 0, 0, 0, -54, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        -25, -25, -25, 0, -25, 0, -25, -25, 0, -25, 0, -25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 41
-        0, 0, 0, 0, -55, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        -22, -22, -22, 0, -22, 0, -22, -22, 0, -22, 0, -22, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 42
-        0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        -24, -24, -24, 0, -24, 0, -24, -24, 0, -24, 0, -24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 43
-        -41, 0, 0, 0, -41, -41, -41, -41, 0, -41, -41, -41, 0, 0, 0, 0, 0, 0, 0, 0, 0, -41,
+        0, 0, 0, 0, 21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 44
-        -44, 0, 0, 0, -44, -44, -44, -44, 0, -44, -44, -44, 0, 0, 0, 0, 0, 0, 0, 0, 0, -44,
+        0, 0, 0, 0, -57, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 45
-        -40, 0, 0, 0, -40, -40, -40, -40, 0, -40, -40, -40, 0, 0, 0, 0, 0, 0, 0, 0, 0, -40,
+        0, 0, 0, 0, -58, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 46
-        -46, 0, 0, 0, -46, -46, -46, -46, 0, -46, -46, -46, 0, 0, 0, 0, 0, 0, 0, 0, 0, -46,
+        0, 0, 0, 0, 22, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 47
-        -43, 0, 0, 0, -43, -43, -43, -43, 0, -43, -43, -43, 0, 0, 0, 0, 0, 0, 0, 0, 0, -43,
+        -44, 0, 0, 0, -44, -44, -44, -44, 0, -44, -44, -44, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -44,
         // State 48
-        -45, 0, 0, 0, -45, -45, -45, -45, 0, -45, -45, -45, 0, 0, 0, 0, 0, 0, 0, 0, 0, -45,
+        -47, 0, 0, 0, -47, -47, -47, -47, 0, -47, -47, -47, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -47,
         // State 49
-        -42, 0, 0, 0, -42, -42, -42, -42, 0, -42, -42, -42, 0, 0, 0, 0, 0, 0, 0, 0, 0, -42,
+        -43, 0, 0, 0, -43, -43, -43, -43, 0, -43, -43, -43, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -43,
         // State 50
-        0, 55, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        -49, 0, 0, 0, -49, -49, -49, -49, 0, -49, -49, -49, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -49,
         // State 51
-        -32, -32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -32,
+        -46, 0, 0, 0, -46, -46, -46, -46, 0, -46, -46, -46, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -46,
         // State 52
-        0, -27, -27, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        -48, 0, 0, 0, -48, -48, -48, -48, 0, -48, -48, -48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -48,
         // State 53
-        0, 0, -25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        -45, 0, 0, 0, -45, -45, -45, -45, 0, -45, -45, -45, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -45,
         // State 54
-        -35, -35, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -35,
+        0, 62, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 55
-        0, 65, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        -35, -35, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -35,
         // State 56
-        0, 66, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 66, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 57
-        0, 67, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, -50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 58
-        0, -56, 0, 0, -56, 0, -56, -56, 0, -56, 0, -56, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, -51, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 59
-        0, 84, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, -29, -29, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 60
-        0, 85, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, -27, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 61
-        0, 86, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        -38, -38, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -38,
         // State 62
-        0, 87, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 73, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 63
-        0, 88, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 74, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 64
-        -31, -31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -31,
+        0, 75, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 65
-        -30, -30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -30,
+        -32, -32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -32,
         // State 66
-        -36, -36, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -36,
+        0, -59, 0, 0, -59, 0, -59, -59, 0, -59, 0, -59, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 67
-        0, 89, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 90, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 68
-        -29, -29, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -29,
+        0, 91, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 69
-        0, -47, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 92, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 70
-        0, -48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 93, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 71
-        0, 0, 0, -4, -4, -4, -4, -4, -4, -4, -4, -4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 94, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 72
-        0, 0, 0, -9, -9, -9, -9, -9, -9, -9, -9, -9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        -34, -34, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -34,
         // State 73
-        0, -10, 0, 0, -10, 0, 0, 0, 0, 0, 0, -10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        -33, -33, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -33,
         // State 74
-        0, 0, 0, -13, -13, -13, -13, -13, -13, -13, -13, -13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        -39, -39, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -39,
         // State 75
-        0, 0, 0, -17, -17, -17, -17, -17, -17, -17, -17, -17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 95, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 76
-        0, 0, 0, -18, -18, -18, -18, -18, -18, -18, -18, -18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        -31, -31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -31,
         // State 77
-        0, 0, 0, -15, -15, -15, -15, -15, -15, -15, -15, -15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, -4, -4, -4, -4, -4, -4, -4, -4, -4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 78
-        0, 0, 0, -19, -19, -19, -19, -19, -19, -19, -19, -19, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, -11, -11, -11, -11, -11, -11, -11, -11, -11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 79
-        0, 0, 0, -12, -12, -12, -12, -12, -12, -12, -12, -12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, -12, 0, 0, -12, 0, 0, 0, 0, 0, 0, -12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 80
-        0, 0, 0, -16, -16, -16, -16, -16, -16, -16, -16, -16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, -15, -15, -15, -15, -15, -15, -15, -15, -15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 81
-        0, 0, 0, -14, -14, -14, -14, -14, -14, -14, -14, -14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, -19, -19, -19, -19, -19, -19, -19, -19, -19, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 82
-        0, 92, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, -20, -20, -20, -20, -20, -20, -20, -20, -20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 83
-        -53, 0, 0, 0, -53, 0, -53, -53, 0, -53, 0, -53, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, -17, -17, -17, -17, -17, -17, -17, -17, -17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 84
-        -33, -33, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -33,
+        0, 0, 0, -21, -21, -21, -21, -21, -21, -21, -21, -21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 85
-        -34, -34, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -34,
+        0, 0, 0, -14, -14, -14, -14, -14, -14, -14, -14, -14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 86
-        -37, -37, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -37,
+        0, 0, 0, -18, -18, -18, -18, -18, -18, -18, -18, -18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 87
-        -38, -38, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -38,
+        0, 0, 0, -16, -16, -16, -16, -16, -16, -16, -16, -16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 88
-        -28, -28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -28,
+        0, 98, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 89
-        0, 0, 0, -5, -5, -5, -5, -5, -5, -5, -5, -5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        -56, 0, 0, 0, -56, 0, -56, -56, 0, -56, 0, -56, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 90
-        0, -11, 0, 0, -11, 0, 0, 0, 0, 0, 0, -11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        -36, -36, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -36,
         // State 91
-        0, 0, -26, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        -37, -37, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -37,
+        // State 92
+        -40, -40, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -40,
+        // State 93
+        -41, -41, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -41,
+        // State 94
+        -30, -30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -30,
+        // State 95
+        0, 0, 0, -5, -5, -5, -5, -5, -5, -5, -5, -5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        // State 96
+        0, -13, 0, 0, -13, 0, 0, 0, 0, 0, 0, -13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        // State 97
+        0, 0, -28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     ];
     fn __action(state: i8, integer: usize) -> i8 {
-        __ACTION[(state as usize) * 22 + integer]
+        __ACTION[(state as usize) * 23 + integer]
     }
     const __EOF_ACTION: &[i8] = &[
         // State 0
@@ -308,17 +315,17 @@ mod __parse__AIR {
         // State 25
         0,
         // State 26
-        -57,
-        // State 27
-        -8,
-        // State 28
         0,
+        // State 27
+        0,
+        // State 28
+        -60,
         // State 29
-        -39,
+        -8,
         // State 30
         0,
         // State 31
-        0,
+        -42,
         // State 32
         0,
         // State 33
@@ -358,15 +365,15 @@ mod __parse__AIR {
         // State 50
         0,
         // State 51
-        -32,
+        0,
         // State 52
         0,
         // State 53
         0,
         // State 54
-        -35,
-        // State 55
         0,
+        // State 55
+        -35,
         // State 56
         0,
         // State 57
@@ -378,21 +385,21 @@ mod __parse__AIR {
         // State 60
         0,
         // State 61
-        0,
+        -38,
         // State 62
         0,
         // State 63
         0,
         // State 64
-        -31,
+        0,
         // State 65
-        -30,
+        -32,
         // State 66
-        -36,
+        0,
         // State 67
         0,
         // State 68
-        -29,
+        0,
         // State 69
         0,
         // State 70
@@ -400,15 +407,15 @@ mod __parse__AIR {
         // State 71
         0,
         // State 72
-        0,
+        -34,
         // State 73
-        0,
+        -33,
         // State 74
-        0,
+        -39,
         // State 75
         0,
         // State 76
-        0,
+        -31,
         // State 77
         0,
         // State 78
@@ -424,71 +431,87 @@ mod __parse__AIR {
         // State 83
         0,
         // State 84
-        -33,
+        0,
         // State 85
-        -34,
+        0,
         // State 86
-        -37,
+        0,
         // State 87
-        -38,
+        0,
         // State 88
-        -28,
+        0,
         // State 89
         0,
         // State 90
-        0,
+        -36,
         // State 91
+        -37,
+        // State 92
+        -40,
+        // State 93
+        -41,
+        // State 94
+        -30,
+        // State 95
+        0,
+        // State 96
+        0,
+        // State 97
         0,
     ];
     fn __goto(state: i8, nt: usize) -> i8 {
         match nt {
-            2 => 25,
-            5 => 26,
-            6 => match state {
-                25 => 89,
-                _ => 71,
+            2 => 27,
+            5 => 28,
+            6 => 9,
+            7 => match state {
+                27 => 95,
+                _ => 77,
             },
-            7 => 22,
-            8 => 72,
-            9 => match state {
-                8 | 24 => 52,
-                16..=17 => 58,
-                _ => 32,
+            8 => 24,
+            9 => 78,
+            10 => match state {
+                10 | 26 => 59,
+                18..=19 => 66,
+                _ => 36,
             },
-            10 => 15,
-            11 => match state {
-                24 => 82,
-                _ => 53,
-            },
+            11 => 17,
             12 => match state {
-                6 => 13,
-                7 => 14,
-                0 => 27,
-                12 => 55,
-                13 => 56,
-                14 => 57,
-                18 => 60,
-                19 => 61,
-                20 => 62,
-                21 => 63,
-                _ => 12,
+                26 => 88,
+                _ => 60,
             },
             13 => match state {
-                4 => 11,
-                10 => 20,
-                11 => 21,
-                _ => 10,
+                7 => 15,
+                8 => 16,
+                0 => 29,
+                14 => 62,
+                15 => 63,
+                16 => 64,
+                20 => 68,
+                21 => 69,
+                22 => 70,
+                23 => 71,
+                _ => 14,
             },
-            14 => 67,
-            16 => match state {
-                1 => 33,
-                _ => 17,
+            14 => match state {
+                5 => 13,
+                12 => 22,
+                13 => 23,
+                _ => 12,
             },
-            17 => 8,
-            18 => 39,
-            19 => match state {
-                17 => 59,
-                _ => 24,
+            15 => match state {
+                24 => 75,
+                _ => 56,
+            },
+            17 => match state {
+                2 => 37,
+                _ => 19,
+            },
+            18 => 10,
+            19 => 43,
+            20 => match state {
+                19 => 67,
+                _ => 26,
             },
             _ => 0,
         }
@@ -507,6 +530,7 @@ mod __parse__AIR {
             r###"Literal"###,
             r###"Number"###,
             r###"Stream"###,
+            r###"ap"###,
             r###"call"###,
             r###"fold"###,
             r###"match_"###,
@@ -570,7 +594,7 @@ mod __parse__AIR {
 
         #[inline]
         fn error_action(&self, state: i8) -> i8 {
-            __action(state, 22 - 1)
+            __action(state, 23 - 1)
         }
 
         #[inline]
@@ -649,15 +673,16 @@ mod __parse__AIR {
             Token::StringLiteral(_) if true => Some(9),
             Token::Number(_) if true => Some(10),
             Token::Stream(_) if true => Some(11),
-            Token::Call if true => Some(12),
-            Token::Fold if true => Some(13),
-            Token::Match if true => Some(14),
-            Token::MisMatch if true => Some(15),
-            Token::Next if true => Some(16),
-            Token::Null if true => Some(17),
-            Token::Par if true => Some(18),
-            Token::Seq if true => Some(19),
-            Token::Xor if true => Some(20),
+            Token::Ap if true => Some(12),
+            Token::Call if true => Some(13),
+            Token::Fold if true => Some(14),
+            Token::Match if true => Some(15),
+            Token::MisMatch if true => Some(16),
+            Token::Next if true => Some(17),
+            Token::Null if true => Some(18),
+            Token::Par if true => Some(19),
+            Token::Seq if true => Some(20),
+            Token::Xor if true => Some(21),
             _ => None,
         }
     }
@@ -672,7 +697,7 @@ mod __parse__AIR {
     ) -> __Symbol<'input>
     {
         match __token_index {
-            0 | 1 | 2 | 3 | 6 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 => __Symbol::Variant0(__token),
+            0 | 1 | 2 | 3 | 6 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 => __Symbol::Variant0(__token),
             4 | 9 | 11 => match __token {
                 Token::Alphanumeric(__tok0) | Token::StringLiteral(__tok0) | Token::Stream(__tok0) if true => __Symbol::Variant1(__tok0),
                 _ => unreachable!(),
@@ -765,62 +790,62 @@ mod __parse__AIR {
             }
             9 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 2,
-                    nonterminal_produced: 7,
+                    states_to_pop: 1,
+                    nonterminal_produced: 6,
                 }
             }
             10 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 3,
+                    states_to_pop: 1,
                     nonterminal_produced: 7,
                 }
             }
             11 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 1,
+                    states_to_pop: 2,
                     nonterminal_produced: 8,
                 }
             }
             12 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 1,
+                    states_to_pop: 3,
                     nonterminal_produced: 8,
                 }
             }
             13 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 8,
+                    nonterminal_produced: 9,
                 }
             }
             14 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 8,
+                    nonterminal_produced: 9,
                 }
             }
             15 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 8,
+                    nonterminal_produced: 9,
                 }
             }
             16 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 8,
+                    nonterminal_produced: 9,
                 }
             }
             17 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 8,
+                    nonterminal_produced: 9,
                 }
             }
             18 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 8,
+                    nonterminal_produced: 9,
                 }
             }
             19 => {
@@ -838,19 +863,19 @@ mod __parse__AIR {
             21 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 9,
+                    nonterminal_produced: 10,
                 }
             }
             22 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 9,
+                    nonterminal_produced: 10,
                 }
             }
             23 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 9,
+                    nonterminal_produced: 10,
                 }
             }
             24 => {
@@ -861,7 +886,7 @@ mod __parse__AIR {
             }
             25 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 4,
+                    states_to_pop: 1,
                     nonterminal_produced: 10,
                 }
             }
@@ -873,85 +898,85 @@ mod __parse__AIR {
             }
             27 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 7,
-                    nonterminal_produced: 12,
+                    states_to_pop: 4,
+                    nonterminal_produced: 11,
                 }
             }
             28 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 6,
+                    states_to_pop: 1,
                     nonterminal_produced: 12,
                 }
             }
             29 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 5,
-                    nonterminal_produced: 12,
+                    states_to_pop: 7,
+                    nonterminal_produced: 13,
                 }
             }
             30 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 5,
-                    nonterminal_produced: 12,
+                    states_to_pop: 6,
+                    nonterminal_produced: 13,
                 }
             }
             31 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 3,
-                    nonterminal_produced: 12,
+                    states_to_pop: 5,
+                    nonterminal_produced: 13,
                 }
             }
             32 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 6,
-                    nonterminal_produced: 12,
+                    states_to_pop: 5,
+                    nonterminal_produced: 13,
                 }
             }
             33 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 6,
-                    nonterminal_produced: 12,
+                    states_to_pop: 5,
+                    nonterminal_produced: 13,
                 }
             }
             34 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 4,
-                    nonterminal_produced: 12,
+                    states_to_pop: 3,
+                    nonterminal_produced: 13,
                 }
             }
             35 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 5,
-                    nonterminal_produced: 12,
+                    states_to_pop: 6,
+                    nonterminal_produced: 13,
                 }
             }
             36 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 6,
-                    nonterminal_produced: 12,
+                    nonterminal_produced: 13,
                 }
             }
             37 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 6,
-                    nonterminal_produced: 12,
+                    states_to_pop: 4,
+                    nonterminal_produced: 13,
                 }
             }
             38 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 1,
-                    nonterminal_produced: 12,
+                    states_to_pop: 5,
+                    nonterminal_produced: 13,
                 }
             }
             39 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 1,
+                    states_to_pop: 6,
                     nonterminal_produced: 13,
                 }
             }
             40 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 1,
+                    states_to_pop: 6,
                     nonterminal_produced: 13,
                 }
             }
@@ -964,25 +989,25 @@ mod __parse__AIR {
             42 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 13,
+                    nonterminal_produced: 14,
                 }
             }
             43 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 13,
+                    nonterminal_produced: 14,
                 }
             }
             44 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 13,
+                    nonterminal_produced: 14,
                 }
             }
             45 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 13,
+                    nonterminal_produced: 14,
                 }
             }
             46 => {
@@ -1000,37 +1025,37 @@ mod __parse__AIR {
             48 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 15,
+                    nonterminal_produced: 14,
                 }
             }
             49 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 0,
+                    states_to_pop: 1,
                     nonterminal_produced: 15,
                 }
             }
             50 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 16,
+                    nonterminal_produced: 15,
                 }
             }
             51 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 17,
+                    nonterminal_produced: 16,
                 }
             }
             52 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 4,
-                    nonterminal_produced: 17,
+                    states_to_pop: 0,
+                    nonterminal_produced: 16,
                 }
             }
             53 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 18,
+                    nonterminal_produced: 17,
                 }
             }
             54 => {
@@ -1041,11 +1066,29 @@ mod __parse__AIR {
             }
             55 => {
                 __state_machine::SimulatedReduce::Reduce {
+                    states_to_pop: 4,
+                    nonterminal_produced: 18,
+                }
+            }
+            56 => {
+                __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
                     nonterminal_produced: 19,
                 }
             }
-            56 => __state_machine::SimulatedReduce::Accept,
+            57 => {
+                __state_machine::SimulatedReduce::Reduce {
+                    states_to_pop: 1,
+                    nonterminal_produced: 19,
+                }
+            }
+            58 => {
+                __state_machine::SimulatedReduce::Reduce {
+                    states_to_pop: 1,
+                    nonterminal_produced: 20,
+                }
+            }
+            59 => __state_machine::SimulatedReduce::Accept,
             _ => panic!("invalid reduction index {}", __reduce_index)
         }
     }
@@ -1311,6 +1354,15 @@ mod __parse__AIR {
                 __reduce55(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             56 => {
+                __reduce56(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+            }
+            57 => {
+                __reduce57(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+            }
+            58 => {
+                __reduce58(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+            }
+            59 => {
                 // __AIR = AIR => ActionFn(0);
                 let __sym0 = __pop_Variant10(__symbols);
                 let __start = __sym0.0.clone();
@@ -1335,10 +1387,32 @@ mod __parse__AIR {
       'input,
     >(
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, (Variable<'input>, &'input str, bool), usize)
+    ) -> (usize, (AstVariable<'input>, &'input str, bool), usize)
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant3(__v), __r)) => (__l, __v, __r),
+            _ => __symbol_type_mismatch()
+        }
+    }
+    fn __pop_Variant11<
+      'input,
+    >(
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
+    ) -> (usize, ApArgument<'input>, usize)
+     {
+        match __symbols.pop() {
+            Some((__l, __Symbol::Variant11(__v), __r)) => (__l, __v, __r),
+            _ => __symbol_type_mismatch()
+        }
+    }
+    fn __pop_Variant16<
+      'input,
+    >(
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
+    ) -> (usize, AstVariable<'input>, usize)
+     {
+        match __symbols.pop() {
+            Some((__l, __Symbol::Variant16(__v), __r)) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
@@ -1364,47 +1438,36 @@ mod __parse__AIR {
             _ => __symbol_type_mismatch()
         }
     }
-    fn __pop_Variant12<
+    fn __pop_Variant13<
       'input,
     >(
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
     ) -> (usize, CallInstrValue<'input>, usize)
      {
         match __symbols.pop() {
-            Some((__l, __Symbol::Variant12(__v), __r)) => (__l, __v, __r),
+            Some((__l, __Symbol::Variant13(__v), __r)) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
-    fn __pop_Variant15<
-      'input,
-    >(
-        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, CallOutputValue<'input>, usize)
-     {
-        match __symbols.pop() {
-            Some((__l, __Symbol::Variant15(__v), __r)) => (__l, __v, __r),
-            _ => __symbol_type_mismatch()
-        }
-    }
-    fn __pop_Variant13<
+    fn __pop_Variant14<
       'input,
     >(
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
     ) -> (usize, FunctionPart<'input>, usize)
      {
         match __symbols.pop() {
-            Some((__l, __Symbol::Variant13(__v), __r)) => (__l, __v, __r),
+            Some((__l, __Symbol::Variant14(__v), __r)) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
-    fn __pop_Variant18<
+    fn __pop_Variant19<
       'input,
     >(
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
     ) -> (usize, IterableScalarValue<'input>, usize)
      {
         match __symbols.pop() {
-            Some((__l, __Symbol::Variant18(__v), __r)) => (__l, __v, __r),
+            Some((__l, __Symbol::Variant19(__v), __r)) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
@@ -1419,14 +1482,14 @@ mod __parse__AIR {
             _ => __symbol_type_mismatch()
         }
     }
-    fn __pop_Variant14<
+    fn __pop_Variant15<
       'input,
     >(
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
     ) -> (usize, MatchableValue<'input>, usize)
      {
         match __symbols.pop() {
-            Some((__l, __Symbol::Variant14(__v), __r)) => (__l, __v, __r),
+            Some((__l, __Symbol::Variant15(__v), __r)) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
@@ -1441,14 +1504,14 @@ mod __parse__AIR {
             _ => __symbol_type_mismatch()
         }
     }
-    fn __pop_Variant17<
+    fn __pop_Variant18<
       'input,
     >(
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
     ) -> (usize, PeerPart<'input>, usize)
      {
         match __symbols.pop() {
-            Some((__l, __Symbol::Variant17(__v), __r)) => (__l, __v, __r),
+            Some((__l, __Symbol::Variant18(__v), __r)) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
@@ -1463,14 +1526,14 @@ mod __parse__AIR {
             _ => __symbol_type_mismatch()
         }
     }
-    fn __pop_Variant11<
+    fn __pop_Variant12<
       'input,
     >(
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
     ) -> (usize, Vec<CallInstrArgValue<'input>>, usize)
      {
         match __symbols.pop() {
-            Some((__l, __Symbol::Variant11(__v), __r)) => (__l, __v, __r),
+            Some((__l, __Symbol::Variant12(__v), __r)) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
@@ -1507,14 +1570,14 @@ mod __parse__AIR {
             _ => __symbol_type_mismatch()
         }
     }
-    fn __pop_Variant16<
+    fn __pop_Variant17<
       'input,
     >(
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, core::option::Option<CallOutputValue<'input>>, usize)
+    ) -> (usize, core::option::Option<AstVariable<'input>>, usize)
      {
         match __symbols.pop() {
-            Some((__l, __Symbol::Variant16(__v), __r)) => (__l, __v, __r),
+            Some((__l, __Symbol::Variant17(__v), __r)) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
@@ -1553,11 +1616,11 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // (<Arg>) = Arg => ActionFn(48);
+        // (<Arg>) = Arg => ActionFn(51);
         let __sym0 = __pop_Variant7(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action48::<>(input, errors, validator, __sym0);
+        let __nt = super::__action51::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant7(__nt), __end));
         (1, 0)
     }
@@ -1574,10 +1637,10 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // (<Arg>)* =  => ActionFn(46);
+        // (<Arg>)* =  => ActionFn(49);
         let __start = __lookahead_start.cloned().or_else(|| __symbols.last().map(|s| s.2.clone())).unwrap_or_default();
         let __end = __start.clone();
-        let __nt = super::__action46::<>(input, errors, validator, &__start, &__end);
+        let __nt = super::__action49::<>(input, errors, validator, &__start, &__end);
         __symbols.push((__start, __Symbol::Variant8(__nt), __end));
         (0, 1)
     }
@@ -1594,11 +1657,11 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // (<Arg>)* = (<Arg>)+ => ActionFn(47);
+        // (<Arg>)* = (<Arg>)+ => ActionFn(50);
         let __sym0 = __pop_Variant8(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action47::<>(input, errors, validator, __sym0);
+        let __nt = super::__action50::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant8(__nt), __end));
         (1, 1)
     }
@@ -1615,11 +1678,11 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // (<Arg>)+ = Arg => ActionFn(55);
+        // (<Arg>)+ = Arg => ActionFn(58);
         let __sym0 = __pop_Variant7(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action55::<>(input, errors, validator, __sym0);
+        let __nt = super::__action58::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant8(__nt), __end));
         (1, 2)
     }
@@ -1636,13 +1699,13 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // (<Arg>)+ = (<Arg>)+, Arg => ActionFn(56);
+        // (<Arg>)+ = (<Arg>)+, Arg => ActionFn(59);
         assert!(__symbols.len() >= 2);
         let __sym1 = __pop_Variant7(__symbols);
         let __sym0 = __pop_Variant8(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym1.2.clone();
-        let __nt = super::__action56::<>(input, errors, validator, __sym0, __sym1);
+        let __nt = super::__action59::<>(input, errors, validator, __sym0, __sym1);
         __symbols.push((__start, __Symbol::Variant8(__nt), __end));
         (2, 2)
     }
@@ -1659,10 +1722,10 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // @L =  => ActionFn(52);
+        // @L =  => ActionFn(55);
         let __start = __lookahead_start.cloned().or_else(|| __symbols.last().map(|s| s.2.clone())).unwrap_or_default();
         let __end = __start.clone();
-        let __nt = super::__action52::<>(input, errors, validator, &__start, &__end);
+        let __nt = super::__action55::<>(input, errors, validator, &__start, &__end);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (0, 3)
     }
@@ -1679,10 +1742,10 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // @R =  => ActionFn(49);
+        // @R =  => ActionFn(52);
         let __start = __lookahead_start.cloned().or_else(|| __symbols.last().map(|s| s.2.clone())).unwrap_or_default();
         let __end = __start.clone();
-        let __nt = super::__action49::<>(input, errors, validator, &__start, &__end);
+        let __nt = super::__action52::<>(input, errors, validator, &__start, &__end);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (0, 4)
     }
@@ -1720,12 +1783,12 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Arg = CallInstrArgValue => ActionFn(28);
-        let __sym0 = __pop_Variant7(__symbols);
+        // ApArgument = Alphanumeric => ActionFn(38);
+        let __sym0 = __pop_Variant1(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action28::<>(input, errors, validator, __sym0);
-        __symbols.push((__start, __Symbol::Variant7(__nt), __end));
+        let __nt = super::__action38::<>(input, errors, validator, __sym0);
+        __symbols.push((__start, __Symbol::Variant11(__nt), __end));
         (1, 6)
     }
     pub(crate) fn __reduce9<
@@ -1741,15 +1804,13 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Args = "[", "]" => ActionFn(57);
-        assert!(__symbols.len() >= 2);
-        let __sym1 = __pop_Variant0(__symbols);
-        let __sym0 = __pop_Variant0(__symbols);
+        // ApArgument = JsonPath => ActionFn(39);
+        let __sym0 = __pop_Variant3(__symbols);
         let __start = __sym0.0.clone();
-        let __end = __sym1.2.clone();
-        let __nt = super::__action57::<>(input, errors, validator, __sym0, __sym1);
+        let __end = __sym0.2.clone();
+        let __nt = super::__action39::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant11(__nt), __end));
-        (2, 7)
+        (1, 6)
     }
     pub(crate) fn __reduce10<
         'err,
@@ -1764,16 +1825,13 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Args = "[", (<Arg>)+, "]" => ActionFn(58);
-        assert!(__symbols.len() >= 3);
-        let __sym2 = __pop_Variant0(__symbols);
-        let __sym1 = __pop_Variant8(__symbols);
-        let __sym0 = __pop_Variant0(__symbols);
+        // Arg = CallInstrArgValue => ActionFn(29);
+        let __sym0 = __pop_Variant7(__symbols);
         let __start = __sym0.0.clone();
-        let __end = __sym2.2.clone();
-        let __nt = super::__action58::<>(input, errors, validator, __sym0, __sym1, __sym2);
-        __symbols.push((__start, __Symbol::Variant11(__nt), __end));
-        (3, 7)
+        let __end = __sym0.2.clone();
+        let __nt = super::__action29::<>(input, errors, validator, __sym0);
+        __symbols.push((__start, __Symbol::Variant7(__nt), __end));
+        (1, 7)
     }
     pub(crate) fn __reduce11<
         'err,
@@ -1788,13 +1846,15 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // CallInstrArgValue = Literal => ActionFn(29);
-        let __sym0 = __pop_Variant1(__symbols);
+        // Args = "[", "]" => ActionFn(60);
+        assert!(__symbols.len() >= 2);
+        let __sym1 = __pop_Variant0(__symbols);
+        let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
-        let __nt = super::__action29::<>(input, errors, validator, __sym0);
-        __symbols.push((__start, __Symbol::Variant7(__nt), __end));
-        (1, 8)
+        let __end = __sym1.2.clone();
+        let __nt = super::__action60::<>(input, errors, validator, __sym0, __sym1);
+        __symbols.push((__start, __Symbol::Variant12(__nt), __end));
+        (2, 8)
     }
     pub(crate) fn __reduce12<
         'err,
@@ -1809,13 +1869,16 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // CallInstrArgValue = Alphanumeric => ActionFn(30);
-        let __sym0 = __pop_Variant1(__symbols);
+        // Args = "[", (<Arg>)+, "]" => ActionFn(61);
+        assert!(__symbols.len() >= 3);
+        let __sym2 = __pop_Variant0(__symbols);
+        let __sym1 = __pop_Variant8(__symbols);
+        let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
-        let __nt = super::__action30::<>(input, errors, validator, __sym0);
-        __symbols.push((__start, __Symbol::Variant7(__nt), __end));
-        (1, 8)
+        let __end = __sym2.2.clone();
+        let __nt = super::__action61::<>(input, errors, validator, __sym0, __sym1, __sym2);
+        __symbols.push((__start, __Symbol::Variant12(__nt), __end));
+        (3, 8)
     }
     pub(crate) fn __reduce13<
         'err,
@@ -1830,13 +1893,13 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // CallInstrArgValue = Stream => ActionFn(31);
+        // CallInstrArgValue = Literal => ActionFn(30);
         let __sym0 = __pop_Variant1(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action31::<>(input, errors, validator, __sym0);
+        let __nt = super::__action30::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant7(__nt), __end));
-        (1, 8)
+        (1, 9)
     }
     pub(crate) fn __reduce14<
         'err,
@@ -1851,13 +1914,13 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // CallInstrArgValue = JsonPath => ActionFn(32);
-        let __sym0 = __pop_Variant3(__symbols);
+        // CallInstrArgValue = Alphanumeric => ActionFn(31);
+        let __sym0 = __pop_Variant1(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action32::<>(input, errors, validator, __sym0);
+        let __nt = super::__action31::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant7(__nt), __end));
-        (1, 8)
+        (1, 9)
     }
     pub(crate) fn __reduce15<
         'err,
@@ -1872,13 +1935,13 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // CallInstrArgValue = Number => ActionFn(33);
-        let __sym0 = __pop_Variant5(__symbols);
+        // CallInstrArgValue = Stream => ActionFn(32);
+        let __sym0 = __pop_Variant1(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action33::<>(input, errors, validator, __sym0);
+        let __nt = super::__action32::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant7(__nt), __end));
-        (1, 8)
+        (1, 9)
     }
     pub(crate) fn __reduce16<
         'err,
@@ -1893,13 +1956,13 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // CallInstrArgValue = Boolean => ActionFn(34);
-        let __sym0 = __pop_Variant2(__symbols);
+        // CallInstrArgValue = JsonPath => ActionFn(33);
+        let __sym0 = __pop_Variant3(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action34::<>(input, errors, validator, __sym0);
+        let __nt = super::__action33::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant7(__nt), __end));
-        (1, 8)
+        (1, 9)
     }
     pub(crate) fn __reduce17<
         'err,
@@ -1914,13 +1977,13 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // CallInstrArgValue = InitPeerId => ActionFn(35);
-        let __sym0 = __pop_Variant0(__symbols);
+        // CallInstrArgValue = Number => ActionFn(34);
+        let __sym0 = __pop_Variant5(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action35::<>(input, errors, validator, __sym0);
+        let __nt = super::__action34::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant7(__nt), __end));
-        (1, 8)
+        (1, 9)
     }
     pub(crate) fn __reduce18<
         'err,
@@ -1935,13 +1998,13 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // CallInstrArgValue = LastError => ActionFn(36);
-        let __sym0 = __pop_Variant4(__symbols);
+        // CallInstrArgValue = Boolean => ActionFn(35);
+        let __sym0 = __pop_Variant2(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action36::<>(input, errors, validator, __sym0);
+        let __nt = super::__action35::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant7(__nt), __end));
-        (1, 8)
+        (1, 9)
     }
     pub(crate) fn __reduce19<
         'err,
@@ -1956,12 +2019,12 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // CallInstrValue = Literal => ActionFn(23);
-        let __sym0 = __pop_Variant1(__symbols);
+        // CallInstrArgValue = InitPeerId => ActionFn(36);
+        let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action23::<>(input, errors, validator, __sym0);
-        __symbols.push((__start, __Symbol::Variant12(__nt), __end));
+        let __nt = super::__action36::<>(input, errors, validator, __sym0);
+        __symbols.push((__start, __Symbol::Variant7(__nt), __end));
         (1, 9)
     }
     pub(crate) fn __reduce20<
@@ -1977,12 +2040,12 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // CallInstrValue = Alphanumeric => ActionFn(24);
-        let __sym0 = __pop_Variant1(__symbols);
+        // CallInstrArgValue = LastError => ActionFn(37);
+        let __sym0 = __pop_Variant4(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action24::<>(input, errors, validator, __sym0);
-        __symbols.push((__start, __Symbol::Variant12(__nt), __end));
+        let __nt = super::__action37::<>(input, errors, validator, __sym0);
+        __symbols.push((__start, __Symbol::Variant7(__nt), __end));
         (1, 9)
     }
     pub(crate) fn __reduce21<
@@ -1998,13 +2061,13 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // CallInstrValue = Stream => ActionFn(25);
+        // CallInstrValue = Literal => ActionFn(24);
         let __sym0 = __pop_Variant1(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action25::<>(input, errors, validator, __sym0);
-        __symbols.push((__start, __Symbol::Variant12(__nt), __end));
-        (1, 9)
+        let __nt = super::__action24::<>(input, errors, validator, __sym0);
+        __symbols.push((__start, __Symbol::Variant13(__nt), __end));
+        (1, 10)
     }
     pub(crate) fn __reduce22<
         'err,
@@ -2019,13 +2082,13 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // CallInstrValue = JsonPath => ActionFn(67);
-        let __sym0 = __pop_Variant3(__symbols);
+        // CallInstrValue = Alphanumeric => ActionFn(25);
+        let __sym0 = __pop_Variant1(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action67::<>(input, errors, validator, __sym0);
-        __symbols.push((__start, __Symbol::Variant12(__nt), __end));
-        (1, 9)
+        let __nt = super::__action25::<>(input, errors, validator, __sym0);
+        __symbols.push((__start, __Symbol::Variant13(__nt), __end));
+        (1, 10)
     }
     pub(crate) fn __reduce23<
         'err,
@@ -2040,13 +2103,13 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // CallInstrValue = InitPeerId => ActionFn(27);
-        let __sym0 = __pop_Variant0(__symbols);
+        // CallInstrValue = Stream => ActionFn(26);
+        let __sym0 = __pop_Variant1(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action27::<>(input, errors, validator, __sym0);
-        __symbols.push((__start, __Symbol::Variant12(__nt), __end));
-        (1, 9)
+        let __nt = super::__action26::<>(input, errors, validator, __sym0);
+        __symbols.push((__start, __Symbol::Variant13(__nt), __end));
+        (1, 10)
     }
     pub(crate) fn __reduce24<
         'err,
@@ -2061,11 +2124,11 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // FPart = Function => ActionFn(14);
-        let __sym0 = __pop_Variant12(__symbols);
+        // CallInstrValue = JsonPath => ActionFn(71);
+        let __sym0 = __pop_Variant3(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action14::<>(input, errors, validator, __sym0);
+        let __nt = super::__action71::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant13(__nt), __end));
         (1, 10)
     }
@@ -2082,17 +2145,13 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // FPart = "(", ServiceId, Function, ")" => ActionFn(15);
-        assert!(__symbols.len() >= 4);
-        let __sym3 = __pop_Variant0(__symbols);
-        let __sym2 = __pop_Variant12(__symbols);
-        let __sym1 = __pop_Variant12(__symbols);
+        // CallInstrValue = InitPeerId => ActionFn(28);
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
-        let __end = __sym3.2.clone();
-        let __nt = super::__action15::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3);
+        let __end = __sym0.2.clone();
+        let __nt = super::__action28::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant13(__nt), __end));
-        (4, 10)
+        (1, 10)
     }
     pub(crate) fn __reduce26<
         'err,
@@ -2107,12 +2166,12 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Function = CallInstrValue => ActionFn(20);
-        let __sym0 = __pop_Variant12(__symbols);
+        // FPart = Function => ActionFn(15);
+        let __sym0 = __pop_Variant13(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action20::<>(input, errors, validator, __sym0);
-        __symbols.push((__start, __Symbol::Variant12(__nt), __end));
+        let __nt = super::__action15::<>(input, errors, validator, __sym0);
+        __symbols.push((__start, __Symbol::Variant14(__nt), __end));
         (1, 11)
     }
     pub(crate) fn __reduce27<
@@ -2128,20 +2187,17 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Instr = "(", call, PeerPart, FPart, Args, Output, ")" => ActionFn(75);
-        assert!(__symbols.len() >= 7);
-        let __sym6 = __pop_Variant0(__symbols);
-        let __sym5 = __pop_Variant15(__symbols);
-        let __sym4 = __pop_Variant11(__symbols);
-        let __sym3 = __pop_Variant13(__symbols);
-        let __sym2 = __pop_Variant17(__symbols);
-        let __sym1 = __pop_Variant0(__symbols);
+        // FPart = "(", ServiceId, Function, ")" => ActionFn(16);
+        assert!(__symbols.len() >= 4);
+        let __sym3 = __pop_Variant0(__symbols);
+        let __sym2 = __pop_Variant13(__symbols);
+        let __sym1 = __pop_Variant13(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
-        let __end = __sym6.2.clone();
-        let __nt = super::__action75::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5, __sym6);
-        __symbols.push((__start, __Symbol::Variant10(__nt), __end));
-        (7, 12)
+        let __end = __sym3.2.clone();
+        let __nt = super::__action16::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3);
+        __symbols.push((__start, __Symbol::Variant14(__nt), __end));
+        (4, 11)
     }
     pub(crate) fn __reduce28<
         'err,
@@ -2156,19 +2212,13 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Instr = "(", call, PeerPart, FPart, Args, ")" => ActionFn(76);
-        assert!(__symbols.len() >= 6);
-        let __sym5 = __pop_Variant0(__symbols);
-        let __sym4 = __pop_Variant11(__symbols);
-        let __sym3 = __pop_Variant13(__symbols);
-        let __sym2 = __pop_Variant17(__symbols);
-        let __sym1 = __pop_Variant0(__symbols);
-        let __sym0 = __pop_Variant0(__symbols);
+        // Function = CallInstrValue => ActionFn(21);
+        let __sym0 = __pop_Variant13(__symbols);
         let __start = __sym0.0.clone();
-        let __end = __sym5.2.clone();
-        let __nt = super::__action76::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
-        __symbols.push((__start, __Symbol::Variant10(__nt), __end));
-        (6, 12)
+        let __end = __sym0.2.clone();
+        let __nt = super::__action21::<>(input, errors, validator, __sym0);
+        __symbols.push((__start, __Symbol::Variant13(__nt), __end));
+        (1, 12)
     }
     pub(crate) fn __reduce29<
         'err,
@@ -2183,18 +2233,20 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Instr = "(", seq, Instr, Instr, ")" => ActionFn(3);
-        assert!(__symbols.len() >= 5);
-        let __sym4 = __pop_Variant0(__symbols);
-        let __sym3 = __pop_Variant10(__symbols);
-        let __sym2 = __pop_Variant10(__symbols);
+        // Instr = "(", call, PeerPart, FPart, Args, Output, ")" => ActionFn(80);
+        assert!(__symbols.len() >= 7);
+        let __sym6 = __pop_Variant0(__symbols);
+        let __sym5 = __pop_Variant16(__symbols);
+        let __sym4 = __pop_Variant12(__symbols);
+        let __sym3 = __pop_Variant14(__symbols);
+        let __sym2 = __pop_Variant18(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
-        let __end = __sym4.2.clone();
-        let __nt = super::__action3::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4);
+        let __end = __sym6.2.clone();
+        let __nt = super::__action80::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5, __sym6);
         __symbols.push((__start, __Symbol::Variant10(__nt), __end));
-        (5, 12)
+        (7, 13)
     }
     pub(crate) fn __reduce30<
         'err,
@@ -2209,18 +2261,19 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Instr = "(", par, Instr, Instr, ")" => ActionFn(4);
-        assert!(__symbols.len() >= 5);
-        let __sym4 = __pop_Variant0(__symbols);
-        let __sym3 = __pop_Variant10(__symbols);
-        let __sym2 = __pop_Variant10(__symbols);
+        // Instr = "(", call, PeerPart, FPart, Args, ")" => ActionFn(81);
+        assert!(__symbols.len() >= 6);
+        let __sym5 = __pop_Variant0(__symbols);
+        let __sym4 = __pop_Variant12(__symbols);
+        let __sym3 = __pop_Variant14(__symbols);
+        let __sym2 = __pop_Variant18(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
-        let __end = __sym4.2.clone();
-        let __nt = super::__action4::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4);
+        let __end = __sym5.2.clone();
+        let __nt = super::__action81::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
         __symbols.push((__start, __Symbol::Variant10(__nt), __end));
-        (5, 12)
+        (6, 13)
     }
     pub(crate) fn __reduce31<
         'err,
@@ -2235,16 +2288,18 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Instr = "(", null, ")" => ActionFn(5);
-        assert!(__symbols.len() >= 3);
-        let __sym2 = __pop_Variant0(__symbols);
+        // Instr = "(", ap, ApArgument, Output, ")" => ActionFn(73);
+        assert!(__symbols.len() >= 5);
+        let __sym4 = __pop_Variant0(__symbols);
+        let __sym3 = __pop_Variant16(__symbols);
+        let __sym2 = __pop_Variant11(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
-        let __end = __sym2.2.clone();
-        let __nt = super::__action5::<>(input, errors, validator, __sym0, __sym1, __sym2);
+        let __end = __sym4.2.clone();
+        let __nt = super::__action73::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4);
         __symbols.push((__start, __Symbol::Variant10(__nt), __end));
-        (3, 12)
+        (5, 13)
     }
     pub(crate) fn __reduce32<
         'err,
@@ -2259,19 +2314,18 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Instr = "(", fold, ScalarIterable, Alphanumeric, Instr, ")" => ActionFn(69);
-        assert!(__symbols.len() >= 6);
-        let __sym5 = __pop_Variant0(__symbols);
-        let __sym4 = __pop_Variant10(__symbols);
-        let __sym3 = __pop_Variant1(__symbols);
-        let __sym2 = __pop_Variant18(__symbols);
+        // Instr = "(", seq, Instr, Instr, ")" => ActionFn(4);
+        assert!(__symbols.len() >= 5);
+        let __sym4 = __pop_Variant0(__symbols);
+        let __sym3 = __pop_Variant10(__symbols);
+        let __sym2 = __pop_Variant10(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
-        let __end = __sym5.2.clone();
-        let __nt = super::__action69::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
+        let __end = __sym4.2.clone();
+        let __nt = super::__action4::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4);
         __symbols.push((__start, __Symbol::Variant10(__nt), __end));
-        (6, 12)
+        (5, 13)
     }
     pub(crate) fn __reduce33<
         'err,
@@ -2286,19 +2340,18 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Instr = "(", fold, Stream, Alphanumeric, Instr, ")" => ActionFn(70);
-        assert!(__symbols.len() >= 6);
-        let __sym5 = __pop_Variant0(__symbols);
-        let __sym4 = __pop_Variant10(__symbols);
-        let __sym3 = __pop_Variant1(__symbols);
-        let __sym2 = __pop_Variant1(__symbols);
+        // Instr = "(", par, Instr, Instr, ")" => ActionFn(5);
+        assert!(__symbols.len() >= 5);
+        let __sym4 = __pop_Variant0(__symbols);
+        let __sym3 = __pop_Variant10(__symbols);
+        let __sym2 = __pop_Variant10(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
-        let __end = __sym5.2.clone();
-        let __nt = super::__action70::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
+        let __end = __sym4.2.clone();
+        let __nt = super::__action5::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4);
         __symbols.push((__start, __Symbol::Variant10(__nt), __end));
-        (6, 12)
+        (5, 13)
     }
     pub(crate) fn __reduce34<
         'err,
@@ -2313,17 +2366,16 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Instr = "(", next, Alphanumeric, ")" => ActionFn(71);
-        assert!(__symbols.len() >= 4);
-        let __sym3 = __pop_Variant0(__symbols);
-        let __sym2 = __pop_Variant1(__symbols);
+        // Instr = "(", null, ")" => ActionFn(6);
+        assert!(__symbols.len() >= 3);
+        let __sym2 = __pop_Variant0(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
-        let __end = __sym3.2.clone();
-        let __nt = super::__action71::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3);
+        let __end = __sym2.2.clone();
+        let __nt = super::__action6::<>(input, errors, validator, __sym0, __sym1, __sym2);
         __symbols.push((__start, __Symbol::Variant10(__nt), __end));
-        (4, 12)
+        (3, 13)
     }
     pub(crate) fn __reduce35<
         'err,
@@ -2338,18 +2390,19 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Instr = "(", xor, Instr, Instr, ")" => ActionFn(9);
-        assert!(__symbols.len() >= 5);
-        let __sym4 = __pop_Variant0(__symbols);
-        let __sym3 = __pop_Variant10(__symbols);
-        let __sym2 = __pop_Variant10(__symbols);
+        // Instr = "(", fold, ScalarIterable, Alphanumeric, Instr, ")" => ActionFn(74);
+        assert!(__symbols.len() >= 6);
+        let __sym5 = __pop_Variant0(__symbols);
+        let __sym4 = __pop_Variant10(__symbols);
+        let __sym3 = __pop_Variant1(__symbols);
+        let __sym2 = __pop_Variant19(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
-        let __end = __sym4.2.clone();
-        let __nt = super::__action9::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4);
+        let __end = __sym5.2.clone();
+        let __nt = super::__action74::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
         __symbols.push((__start, __Symbol::Variant10(__nt), __end));
-        (5, 12)
+        (6, 13)
     }
     pub(crate) fn __reduce36<
         'err,
@@ -2364,19 +2417,19 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Instr = "(", match_, Matchable, Matchable, Instr, ")" => ActionFn(72);
+        // Instr = "(", fold, Stream, Alphanumeric, Instr, ")" => ActionFn(75);
         assert!(__symbols.len() >= 6);
         let __sym5 = __pop_Variant0(__symbols);
         let __sym4 = __pop_Variant10(__symbols);
-        let __sym3 = __pop_Variant14(__symbols);
-        let __sym2 = __pop_Variant14(__symbols);
+        let __sym3 = __pop_Variant1(__symbols);
+        let __sym2 = __pop_Variant1(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym5.2.clone();
-        let __nt = super::__action72::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
+        let __nt = super::__action75::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
         __symbols.push((__start, __Symbol::Variant10(__nt), __end));
-        (6, 12)
+        (6, 13)
     }
     pub(crate) fn __reduce37<
         'err,
@@ -2391,19 +2444,17 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Instr = "(", mismatch, Matchable, Matchable, Instr, ")" => ActionFn(73);
-        assert!(__symbols.len() >= 6);
-        let __sym5 = __pop_Variant0(__symbols);
-        let __sym4 = __pop_Variant10(__symbols);
-        let __sym3 = __pop_Variant14(__symbols);
-        let __sym2 = __pop_Variant14(__symbols);
+        // Instr = "(", next, Alphanumeric, ")" => ActionFn(76);
+        assert!(__symbols.len() >= 4);
+        let __sym3 = __pop_Variant0(__symbols);
+        let __sym2 = __pop_Variant1(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
-        let __end = __sym5.2.clone();
-        let __nt = super::__action73::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
+        let __end = __sym3.2.clone();
+        let __nt = super::__action76::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3);
         __symbols.push((__start, __Symbol::Variant10(__nt), __end));
-        (6, 12)
+        (4, 13)
     }
     pub(crate) fn __reduce38<
         'err,
@@ -2418,13 +2469,18 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Instr = error => ActionFn(12);
-        let __sym0 = __pop_Variant6(__symbols);
+        // Instr = "(", xor, Instr, Instr, ")" => ActionFn(10);
+        assert!(__symbols.len() >= 5);
+        let __sym4 = __pop_Variant0(__symbols);
+        let __sym3 = __pop_Variant10(__symbols);
+        let __sym2 = __pop_Variant10(__symbols);
+        let __sym1 = __pop_Variant0(__symbols);
+        let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
-        let __nt = super::__action12::<>(input, errors, validator, __sym0);
+        let __end = __sym4.2.clone();
+        let __nt = super::__action10::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4);
         __symbols.push((__start, __Symbol::Variant10(__nt), __end));
-        (1, 12)
+        (5, 13)
     }
     pub(crate) fn __reduce39<
         'err,
@@ -2439,13 +2495,19 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Matchable = InitPeerId => ActionFn(39);
+        // Instr = "(", match_, Matchable, Matchable, Instr, ")" => ActionFn(77);
+        assert!(__symbols.len() >= 6);
+        let __sym5 = __pop_Variant0(__symbols);
+        let __sym4 = __pop_Variant10(__symbols);
+        let __sym3 = __pop_Variant15(__symbols);
+        let __sym2 = __pop_Variant15(__symbols);
+        let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
-        let __nt = super::__action39::<>(input, errors, validator, __sym0);
-        __symbols.push((__start, __Symbol::Variant14(__nt), __end));
-        (1, 13)
+        let __end = __sym5.2.clone();
+        let __nt = super::__action77::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
+        __symbols.push((__start, __Symbol::Variant10(__nt), __end));
+        (6, 13)
     }
     pub(crate) fn __reduce40<
         'err,
@@ -2460,13 +2522,19 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Matchable = Alphanumeric => ActionFn(40);
-        let __sym0 = __pop_Variant1(__symbols);
+        // Instr = "(", mismatch, Matchable, Matchable, Instr, ")" => ActionFn(78);
+        assert!(__symbols.len() >= 6);
+        let __sym5 = __pop_Variant0(__symbols);
+        let __sym4 = __pop_Variant10(__symbols);
+        let __sym3 = __pop_Variant15(__symbols);
+        let __sym2 = __pop_Variant15(__symbols);
+        let __sym1 = __pop_Variant0(__symbols);
+        let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
-        let __nt = super::__action40::<>(input, errors, validator, __sym0);
-        __symbols.push((__start, __Symbol::Variant14(__nt), __end));
-        (1, 13)
+        let __end = __sym5.2.clone();
+        let __nt = super::__action78::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
+        __symbols.push((__start, __Symbol::Variant10(__nt), __end));
+        (6, 13)
     }
     pub(crate) fn __reduce41<
         'err,
@@ -2481,12 +2549,12 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Matchable = Stream => ActionFn(41);
-        let __sym0 = __pop_Variant1(__symbols);
+        // Instr = error => ActionFn(13);
+        let __sym0 = __pop_Variant6(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action41::<>(input, errors, validator, __sym0);
-        __symbols.push((__start, __Symbol::Variant14(__nt), __end));
+        let __nt = super::__action13::<>(input, errors, validator, __sym0);
+        __symbols.push((__start, __Symbol::Variant10(__nt), __end));
         (1, 13)
     }
     pub(crate) fn __reduce42<
@@ -2502,13 +2570,13 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Matchable = Literal => ActionFn(42);
-        let __sym0 = __pop_Variant1(__symbols);
+        // Matchable = InitPeerId => ActionFn(42);
+        let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action42::<>(input, errors, validator, __sym0);
-        __symbols.push((__start, __Symbol::Variant14(__nt), __end));
-        (1, 13)
+        __symbols.push((__start, __Symbol::Variant15(__nt), __end));
+        (1, 14)
     }
     pub(crate) fn __reduce43<
         'err,
@@ -2523,13 +2591,13 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Matchable = Boolean => ActionFn(43);
-        let __sym0 = __pop_Variant2(__symbols);
+        // Matchable = Alphanumeric => ActionFn(43);
+        let __sym0 = __pop_Variant1(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action43::<>(input, errors, validator, __sym0);
-        __symbols.push((__start, __Symbol::Variant14(__nt), __end));
-        (1, 13)
+        __symbols.push((__start, __Symbol::Variant15(__nt), __end));
+        (1, 14)
     }
     pub(crate) fn __reduce44<
         'err,
@@ -2544,13 +2612,13 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Matchable = Number => ActionFn(44);
-        let __sym0 = __pop_Variant5(__symbols);
+        // Matchable = Stream => ActionFn(44);
+        let __sym0 = __pop_Variant1(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action44::<>(input, errors, validator, __sym0);
-        __symbols.push((__start, __Symbol::Variant14(__nt), __end));
-        (1, 13)
+        __symbols.push((__start, __Symbol::Variant15(__nt), __end));
+        (1, 14)
     }
     pub(crate) fn __reduce45<
         'err,
@@ -2565,13 +2633,13 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Matchable = JsonPath => ActionFn(45);
-        let __sym0 = __pop_Variant3(__symbols);
+        // Matchable = Literal => ActionFn(45);
+        let __sym0 = __pop_Variant1(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action45::<>(input, errors, validator, __sym0);
-        __symbols.push((__start, __Symbol::Variant14(__nt), __end));
-        (1, 13)
+        __symbols.push((__start, __Symbol::Variant15(__nt), __end));
+        (1, 14)
     }
     pub(crate) fn __reduce46<
         'err,
@@ -2586,11 +2654,11 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Output = Alphanumeric => ActionFn(18);
-        let __sym0 = __pop_Variant1(__symbols);
+        // Matchable = Boolean => ActionFn(46);
+        let __sym0 = __pop_Variant2(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action18::<>(input, errors, validator, __sym0);
+        let __nt = super::__action46::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant15(__nt), __end));
         (1, 14)
     }
@@ -2607,11 +2675,11 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Output = Stream => ActionFn(19);
-        let __sym0 = __pop_Variant1(__symbols);
+        // Matchable = Number => ActionFn(47);
+        let __sym0 = __pop_Variant5(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action19::<>(input, errors, validator, __sym0);
+        let __nt = super::__action47::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant15(__nt), __end));
         (1, 14)
     }
@@ -2628,13 +2696,13 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Output? = Output => ActionFn(50);
-        let __sym0 = __pop_Variant15(__symbols);
+        // Matchable = JsonPath => ActionFn(48);
+        let __sym0 = __pop_Variant3(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action50::<>(input, errors, validator, __sym0);
-        __symbols.push((__start, __Symbol::Variant16(__nt), __end));
-        (1, 15)
+        let __nt = super::__action48::<>(input, errors, validator, __sym0);
+        __symbols.push((__start, __Symbol::Variant15(__nt), __end));
+        (1, 14)
     }
     pub(crate) fn __reduce49<
         'err,
@@ -2649,12 +2717,13 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Output? =  => ActionFn(51);
-        let __start = __lookahead_start.cloned().or_else(|| __symbols.last().map(|s| s.2.clone())).unwrap_or_default();
-        let __end = __start.clone();
-        let __nt = super::__action51::<>(input, errors, validator, &__start, &__end);
+        // Output = Alphanumeric => ActionFn(19);
+        let __sym0 = __pop_Variant1(__symbols);
+        let __start = __sym0.0.clone();
+        let __end = __sym0.2.clone();
+        let __nt = super::__action19::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant16(__nt), __end));
-        (0, 15)
+        (1, 15)
     }
     pub(crate) fn __reduce50<
         'err,
@@ -2669,13 +2738,13 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // PeerId = CallInstrValue => ActionFn(21);
-        let __sym0 = __pop_Variant12(__symbols);
+        // Output = Stream => ActionFn(20);
+        let __sym0 = __pop_Variant1(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action21::<>(input, errors, validator, __sym0);
-        __symbols.push((__start, __Symbol::Variant12(__nt), __end));
-        (1, 16)
+        let __nt = super::__action20::<>(input, errors, validator, __sym0);
+        __symbols.push((__start, __Symbol::Variant16(__nt), __end));
+        (1, 15)
     }
     pub(crate) fn __reduce51<
         'err,
@@ -2690,13 +2759,13 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // PeerPart = PeerId => ActionFn(16);
-        let __sym0 = __pop_Variant12(__symbols);
+        // Output? = Output => ActionFn(53);
+        let __sym0 = __pop_Variant16(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action16::<>(input, errors, validator, __sym0);
+        let __nt = super::__action53::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant17(__nt), __end));
-        (1, 17)
+        (1, 16)
     }
     pub(crate) fn __reduce52<
         'err,
@@ -2711,17 +2780,12 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // PeerPart = "(", PeerId, ServiceId, ")" => ActionFn(17);
-        assert!(__symbols.len() >= 4);
-        let __sym3 = __pop_Variant0(__symbols);
-        let __sym2 = __pop_Variant12(__symbols);
-        let __sym1 = __pop_Variant12(__symbols);
-        let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym3.2.clone();
-        let __nt = super::__action17::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3);
+        // Output? =  => ActionFn(54);
+        let __start = __lookahead_start.cloned().or_else(|| __symbols.last().map(|s| s.2.clone())).unwrap_or_default();
+        let __end = __start.clone();
+        let __nt = super::__action54::<>(input, errors, validator, &__start, &__end);
         __symbols.push((__start, __Symbol::Variant17(__nt), __end));
-        (4, 17)
+        (0, 16)
     }
     pub(crate) fn __reduce53<
         'err,
@@ -2736,13 +2800,13 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // ScalarIterable = Alphanumeric => ActionFn(37);
-        let __sym0 = __pop_Variant1(__symbols);
+        // PeerId = CallInstrValue => ActionFn(22);
+        let __sym0 = __pop_Variant13(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action37::<>(input, errors, validator, __sym0);
-        __symbols.push((__start, __Symbol::Variant18(__nt), __end));
-        (1, 18)
+        let __nt = super::__action22::<>(input, errors, validator, __sym0);
+        __symbols.push((__start, __Symbol::Variant13(__nt), __end));
+        (1, 17)
     }
     pub(crate) fn __reduce54<
         'err,
@@ -2757,11 +2821,11 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // ScalarIterable = JsonPath => ActionFn(74);
-        let __sym0 = __pop_Variant3(__symbols);
+        // PeerPart = PeerId => ActionFn(17);
+        let __sym0 = __pop_Variant13(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action74::<>(input, errors, validator, __sym0);
+        let __nt = super::__action17::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant18(__nt), __end));
         (1, 18)
     }
@@ -2778,13 +2842,80 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // ServiceId = CallInstrValue => ActionFn(22);
-        let __sym0 = __pop_Variant12(__symbols);
+        // PeerPart = "(", PeerId, ServiceId, ")" => ActionFn(18);
+        assert!(__symbols.len() >= 4);
+        let __sym3 = __pop_Variant0(__symbols);
+        let __sym2 = __pop_Variant13(__symbols);
+        let __sym1 = __pop_Variant13(__symbols);
+        let __sym0 = __pop_Variant0(__symbols);
+        let __start = __sym0.0.clone();
+        let __end = __sym3.2.clone();
+        let __nt = super::__action18::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3);
+        __symbols.push((__start, __Symbol::Variant18(__nt), __end));
+        (4, 18)
+    }
+    pub(crate) fn __reduce56<
+        'err,
+        'input,
+        'v,
+    >(
+        input: &'input str,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
+        __lookahead_start: Option<&usize>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
+    ) -> (usize, usize)
+    {
+        // ScalarIterable = Alphanumeric => ActionFn(40);
+        let __sym0 = __pop_Variant1(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action22::<>(input, errors, validator, __sym0);
-        __symbols.push((__start, __Symbol::Variant12(__nt), __end));
+        let __nt = super::__action40::<>(input, errors, validator, __sym0);
+        __symbols.push((__start, __Symbol::Variant19(__nt), __end));
         (1, 19)
+    }
+    pub(crate) fn __reduce57<
+        'err,
+        'input,
+        'v,
+    >(
+        input: &'input str,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
+        __lookahead_start: Option<&usize>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
+    ) -> (usize, usize)
+    {
+        // ScalarIterable = JsonPath => ActionFn(79);
+        let __sym0 = __pop_Variant3(__symbols);
+        let __start = __sym0.0.clone();
+        let __end = __sym0.2.clone();
+        let __nt = super::__action79::<>(input, errors, validator, __sym0);
+        __symbols.push((__start, __Symbol::Variant19(__nt), __end));
+        (1, 19)
+    }
+    pub(crate) fn __reduce58<
+        'err,
+        'input,
+        'v,
+    >(
+        input: &'input str,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
+        __lookahead_start: Option<&usize>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
+    ) -> (usize, usize)
+    {
+        // ServiceId = CallInstrValue => ActionFn(23);
+        let __sym0 = __pop_Variant13(__symbols);
+        let __start = __sym0.0.clone();
+        let __end = __sym0.2.clone();
+        let __nt = super::__action23::<>(input, errors, validator, __sym0);
+        __symbols.push((__start, __Symbol::Variant13(__nt), __end));
+        (1, 20)
     }
 }
 pub use self::__parse__AIR::AIRParser;
@@ -2834,13 +2965,13 @@ fn __action2<
     (_, peer_part, _): (usize, PeerPart<'input>, usize),
     (_, function_part, _): (usize, FunctionPart<'input>, usize),
     (_, args, _): (usize, Vec<CallInstrArgValue<'input>>, usize),
-    (_, output, _): (usize, core::option::Option<CallOutputValue<'input>>, usize),
+    (_, output, _): (usize, core::option::Option<AstVariable<'input>>, usize),
     (_, _, _): (usize, Token<'input>, usize),
     (_, right, _): (usize, usize, usize),
 ) -> Box<Instruction<'input>>
 {
     {
-        let output = output.unwrap_or(CallOutputValue::None);
+        let output = output.map(CallOutputValue::Variable).unwrap_or(CallOutputValue::None);
         let args = Rc::new(args);
         let call = Call { peer_part, function_part, args, output };
         let span = Span { left, right };
@@ -2859,14 +2990,30 @@ fn __action3<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    (_, left, _): (usize, usize, usize),
     (_, _, _): (usize, Token<'input>, usize),
     (_, _, _): (usize, Token<'input>, usize),
-    (_, l, _): (usize, Box<Instruction<'input>>, usize),
-    (_, r, _): (usize, Box<Instruction<'input>>, usize),
+    (_, arg, _): (usize, ApArgument<'input>, usize),
+    (_, res, _): (usize, AstVariable<'input>, usize),
     (_, _, _): (usize, Token<'input>, usize),
+    (_, right, _): (usize, usize, usize),
 ) -> Box<Instruction<'input>>
 {
-    Box::new(Instruction::Seq(Seq(l, r)))
+    {
+        if let ApArgument::JsonPath(json_path) = &arg {
+            // Due the json path constraints json path should be flattened in a apply arguments.
+            if !json_path.should_flatten {
+                let token = Token::VariableWithJsonPath(json_path.variable.clone(), json_path.path, json_path.should_flatten);
+                errors.push(make_flattened_error(left, token, right));
+            }
+        }
+
+        let apply = Ap::new(arg, res);
+        let span = Span { left, right };
+        validator.met_ap(&apply, span);
+
+        Box::new(Instruction::Ap(apply))
+    }
 }
 
 #[allow(unused_variables)]
@@ -2885,11 +3032,30 @@ fn __action4<
     (_, _, _): (usize, Token<'input>, usize),
 ) -> Box<Instruction<'input>>
 {
-    Box::new(Instruction::Par(Par(l, r)))
+    Box::new(Instruction::Seq(Seq(l, r)))
 }
 
 #[allow(unused_variables)]
 fn __action5<
+    'err,
+    'input,
+    'v,
+>(
+    input: &'input str,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
+    (_, _, _): (usize, Token<'input>, usize),
+    (_, _, _): (usize, Token<'input>, usize),
+    (_, l, _): (usize, Box<Instruction<'input>>, usize),
+    (_, r, _): (usize, Box<Instruction<'input>>, usize),
+    (_, _, _): (usize, Token<'input>, usize),
+) -> Box<Instruction<'input>>
+{
+    Box::new(Instruction::Par(Par(l, r)))
+}
+
+#[allow(unused_variables)]
+fn __action6<
     'err,
     'input,
     'v,
@@ -2906,7 +3072,7 @@ fn __action5<
 }
 
 #[allow(unused_variables)]
-fn __action6<
+fn __action7<
     'err,
     'input,
     'v,
@@ -2935,7 +3101,7 @@ fn __action6<
 }
 
 #[allow(unused_variables)]
-fn __action7<
+fn __action8<
     'err,
     'input,
     'v,
@@ -2965,7 +3131,7 @@ fn __action7<
 }
 
 #[allow(unused_variables)]
-fn __action8<
+fn __action9<
     'err,
     'input,
     'v,
@@ -2991,7 +3157,7 @@ fn __action8<
 }
 
 #[allow(unused_variables)]
-fn __action9<
+fn __action10<
     'err,
     'input,
     'v,
@@ -3010,7 +3176,7 @@ fn __action9<
 }
 
 #[allow(unused_variables)]
-fn __action10<
+fn __action11<
     'err,
     'input,
     'v,
@@ -3038,7 +3204,7 @@ fn __action10<
 }
 
 #[allow(unused_variables)]
-fn __action11<
+fn __action12<
     'err,
     'input,
     'v,
@@ -3066,7 +3232,7 @@ fn __action11<
 }
 
 #[allow(unused_variables)]
-fn __action12<
+fn __action13<
     'err,
     'input,
     'v,
@@ -3081,7 +3247,7 @@ fn __action12<
 }
 
 #[allow(unused_variables)]
-fn __action13<
+fn __action14<
     'err,
     'input,
     'v,
@@ -3098,7 +3264,7 @@ fn __action13<
 }
 
 #[allow(unused_variables)]
-fn __action14<
+fn __action15<
     'err,
     'input,
     'v,
@@ -3113,7 +3279,7 @@ fn __action14<
 }
 
 #[allow(unused_variables)]
-fn __action15<
+fn __action16<
     'err,
     'input,
     'v,
@@ -3131,7 +3297,7 @@ fn __action15<
 }
 
 #[allow(unused_variables)]
-fn __action16<
+fn __action17<
     'err,
     'input,
     'v,
@@ -3146,7 +3312,7 @@ fn __action16<
 }
 
 #[allow(unused_variables)]
-fn __action17<
+fn __action18<
     'err,
     'input,
     'v,
@@ -3164,21 +3330,6 @@ fn __action17<
 }
 
 #[allow(unused_variables)]
-fn __action18<
-    'err,
-    'input,
-    'v,
->(
-    input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
-    validator: &'v mut VariableValidator<'input>,
-    (_, a, _): (usize, &'input str, usize),
-) -> CallOutputValue<'input>
-{
-    CallOutputValue::Variable(Variable::Scalar(a))
-}
-
-#[allow(unused_variables)]
 fn __action19<
     'err,
     'input,
@@ -3187,10 +3338,10 @@ fn __action19<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, s, _): (usize, &'input str, usize),
-) -> CallOutputValue<'input>
+    (_, a, _): (usize, &'input str, usize),
+) -> AstVariable<'input>
 {
-    CallOutputValue::Variable(Variable::Stream(s))
+    AstVariable::Scalar(a)
 }
 
 #[allow(unused_variables)]
@@ -3202,10 +3353,10 @@ fn __action20<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, __0, _): (usize, CallInstrValue<'input>, usize),
-) -> CallInstrValue<'input>
+    (_, s, _): (usize, &'input str, usize),
+) -> AstVariable<'input>
 {
-    __0
+    AstVariable::Stream(s)
 }
 
 #[allow(unused_variables)]
@@ -3247,10 +3398,10 @@ fn __action23<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, l, _): (usize, &'input str, usize),
+    (_, __0, _): (usize, CallInstrValue<'input>, usize),
 ) -> CallInstrValue<'input>
 {
-    CallInstrValue::Literal(l)
+    __0
 }
 
 #[allow(unused_variables)]
@@ -3262,10 +3413,10 @@ fn __action24<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, a, _): (usize, &'input str, usize),
+    (_, l, _): (usize, &'input str, usize),
 ) -> CallInstrValue<'input>
 {
-    CallInstrValue::Variable(Variable::Scalar(a))
+    CallInstrValue::Literal(l)
 }
 
 #[allow(unused_variables)]
@@ -3277,10 +3428,10 @@ fn __action25<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, s, _): (usize, &'input str, usize),
+    (_, a, _): (usize, &'input str, usize),
 ) -> CallInstrValue<'input>
 {
-    CallInstrValue::Variable(Variable::Stream(s))
+    CallInstrValue::Variable(AstVariable::Scalar(a))
 }
 
 #[allow(unused_variables)]
@@ -3292,9 +3443,24 @@ fn __action26<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, l, _): (usize, usize, usize),
-    (_, j, _): (usize, (Variable<'input>, &'input str, bool), usize),
-    (_, r, _): (usize, usize, usize),
+    (_, s, _): (usize, &'input str, usize),
+) -> CallInstrValue<'input>
+{
+    CallInstrValue::Variable(AstVariable::Stream(s))
+}
+
+#[allow(unused_variables)]
+fn __action27<
+    'err,
+    'input,
+    'v,
+>(
+    input: &'input str,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
+    (_, left, _): (usize, usize, usize),
+    (_, j, _): (usize, (AstVariable<'input>, &'input str, bool), usize),
+    (_, right, _): (usize, usize, usize),
 ) -> CallInstrValue<'input>
 {
     {
@@ -3304,14 +3470,15 @@ fn __action26<
         // Due the json path constraints json path should be flattened in a call triplet.
         if !should_flatten {
             let token = Token::VariableWithJsonPath(variable.clone(), path, should_flatten);
-            errors.push(make_flattened_error(l, token, r));
+            errors.push(make_flattened_error(left, token, right));
         }
-        CallInstrValue::JsonPath { variable, path, should_flatten }
+
+        CallInstrValue::JsonPath(JsonPath::new(variable, path, should_flatten))
     }
 }
 
 #[allow(unused_variables)]
-fn __action27<
+fn __action28<
     'err,
     'input,
     'v,
@@ -3326,7 +3493,7 @@ fn __action27<
 }
 
 #[allow(unused_variables)]
-fn __action28<
+fn __action29<
     'err,
     'input,
     'v,
@@ -3341,7 +3508,7 @@ fn __action28<
 }
 
 #[allow(unused_variables)]
-fn __action29<
+fn __action30<
     'err,
     'input,
     'v,
@@ -3356,21 +3523,6 @@ fn __action29<
 }
 
 #[allow(unused_variables)]
-fn __action30<
-    'err,
-    'input,
-    'v,
->(
-    input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
-    validator: &'v mut VariableValidator<'input>,
-    (_, v, _): (usize, &'input str, usize),
-) -> CallInstrArgValue<'input>
-{
-    CallInstrArgValue::Variable(Variable::Scalar(v))
-}
-
-#[allow(unused_variables)]
 fn __action31<
     'err,
     'input,
@@ -3382,7 +3534,7 @@ fn __action31<
     (_, v, _): (usize, &'input str, usize),
 ) -> CallInstrArgValue<'input>
 {
-    CallInstrArgValue::Variable(Variable::Stream(v))
+    CallInstrArgValue::Variable(AstVariable::Scalar(v))
 }
 
 #[allow(unused_variables)]
@@ -3394,14 +3546,29 @@ fn __action32<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, j, _): (usize, (Variable<'input>, &'input str, bool), usize),
+    (_, v, _): (usize, &'input str, usize),
 ) -> CallInstrArgValue<'input>
 {
-    CallInstrArgValue::JsonPath { variable: j.0, path: j.1, should_flatten: j.2 }
+    CallInstrArgValue::Variable(AstVariable::Stream(v))
 }
 
 #[allow(unused_variables)]
 fn __action33<
+    'err,
+    'input,
+    'v,
+>(
+    input: &'input str,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
+    (_, j, _): (usize, (AstVariable<'input>, &'input str, bool), usize),
+) -> CallInstrArgValue<'input>
+{
+    CallInstrArgValue::JsonPath(JsonPath::new(j.0, j.1, j.2))
+}
+
+#[allow(unused_variables)]
+fn __action34<
     'err,
     'input,
     'v,
@@ -3416,7 +3583,7 @@ fn __action33<
 }
 
 #[allow(unused_variables)]
-fn __action34<
+fn __action35<
     'err,
     'input,
     'v,
@@ -3431,7 +3598,7 @@ fn __action34<
 }
 
 #[allow(unused_variables)]
-fn __action35<
+fn __action36<
     'err,
     'input,
     'v,
@@ -3446,7 +3613,7 @@ fn __action35<
 }
 
 #[allow(unused_variables)]
-fn __action36<
+fn __action37<
     'err,
     'input,
     'v,
@@ -3461,7 +3628,37 @@ fn __action36<
 }
 
 #[allow(unused_variables)]
-fn __action37<
+fn __action38<
+    'err,
+    'input,
+    'v,
+>(
+    input: &'input str,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
+    (_, a, _): (usize, &'input str, usize),
+) -> ApArgument<'input>
+{
+    ApArgument::ScalarVariable(a)
+}
+
+#[allow(unused_variables)]
+fn __action39<
+    'err,
+    'input,
+    'v,
+>(
+    input: &'input str,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
+    (_, j, _): (usize, (AstVariable<'input>, &'input str, bool), usize),
+) -> ApArgument<'input>
+{
+    ApArgument::JsonPath(JsonPath::new(j.0, j.1, j.2))
+}
+
+#[allow(unused_variables)]
+fn __action40<
     'err,
     'input,
     'v,
@@ -3476,7 +3673,7 @@ fn __action37<
 }
 
 #[allow(unused_variables)]
-fn __action38<
+fn __action41<
     'err,
     'input,
     'v,
@@ -3485,28 +3682,31 @@ fn __action38<
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
     (_, l, _): (usize, usize, usize),
-    (_, j, _): (usize, (Variable<'input>, &'input str, bool), usize),
+    (_, j, _): (usize, (AstVariable<'input>, &'input str, bool), usize),
     (_, r, _): (usize, usize, usize),
 ) -> IterableScalarValue<'input>
 {
     {
-        use crate::parser::air::Variable::*;
+        use crate::parser::air::AstVariable::*;
 
         let variable = j.0;
+        let path = j.1;
+        let should_flatten = j.2;
+
         let scalar_name = match variable {
             Stream(name) => {
-                let token = Token::VariableWithJsonPath(variable, j.1, j.2);
+                let token = Token::VariableWithJsonPath(variable, path, should_flatten);
                 errors.push(make_stream_iterable_error(l, token, r));
                 name
             }
             Scalar(name) => name,
         };
-        IterableScalarValue::JsonPath { scalar_name, path: j.1, should_flatten: j.2 }
+        IterableScalarValue::JsonPath { scalar_name, path, should_flatten }
     }
 }
 
 #[allow(unused_variables)]
-fn __action39<
+fn __action42<
     'err,
     'input,
     'v,
@@ -3521,7 +3721,7 @@ fn __action39<
 }
 
 #[allow(unused_variables)]
-fn __action40<
+fn __action43<
     'err,
     'input,
     'v,
@@ -3532,11 +3732,11 @@ fn __action40<
     (_, v, _): (usize, &'input str, usize),
 ) -> MatchableValue<'input>
 {
-    MatchableValue::Variable(Variable::Scalar(v))
+    MatchableValue::Variable(AstVariable::Scalar(v))
 }
 
 #[allow(unused_variables)]
-fn __action41<
+fn __action44<
     'err,
     'input,
     'v,
@@ -3547,11 +3747,11 @@ fn __action41<
     (_, v, _): (usize, &'input str, usize),
 ) -> MatchableValue<'input>
 {
-    MatchableValue::Variable(Variable::Stream(v))
+    MatchableValue::Variable(AstVariable::Stream(v))
 }
 
 #[allow(unused_variables)]
-fn __action42<
+fn __action45<
     'err,
     'input,
     'v,
@@ -3566,7 +3766,7 @@ fn __action42<
 }
 
 #[allow(unused_variables)]
-fn __action43<
+fn __action46<
     'err,
     'input,
     'v,
@@ -3581,7 +3781,7 @@ fn __action43<
 }
 
 #[allow(unused_variables)]
-fn __action44<
+fn __action47<
     'err,
     'input,
     'v,
@@ -3596,7 +3796,7 @@ fn __action44<
 }
 
 #[allow(unused_variables)]
-fn __action45<
+fn __action48<
     'err,
     'input,
     'v,
@@ -3604,14 +3804,14 @@ fn __action45<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, j, _): (usize, (Variable<'input>, &'input str, bool), usize),
+    (_, j, _): (usize, (AstVariable<'input>, &'input str, bool), usize),
 ) -> MatchableValue<'input>
 {
-    MatchableValue::JsonPath { variable: j.0, path: j.1, should_flatten: j.2 }
+    MatchableValue::JsonPath(JsonPath::new(j.0, j.1, j.2))
 }
 
 #[allow(unused_variables)]
-fn __action46<
+fn __action49<
     'err,
     'input,
     'v,
@@ -3627,7 +3827,7 @@ fn __action46<
 }
 
 #[allow(unused_variables)]
-fn __action47<
+fn __action50<
     'err,
     'input,
     'v,
@@ -3642,7 +3842,7 @@ fn __action47<
 }
 
 #[allow(unused_variables)]
-fn __action48<
+fn __action51<
     'err,
     'input,
     'v,
@@ -3654,53 +3854,6 @@ fn __action48<
 ) -> CallInstrArgValue<'input>
 {
     __0
-}
-
-#[allow(unused_variables)]
-fn __action49<
-    'err,
-    'input,
-    'v,
->(
-    input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
-    validator: &'v mut VariableValidator<'input>,
-    __lookbehind: &usize,
-    __lookahead: &usize,
-) -> usize
-{
-    __lookbehind.clone()
-}
-
-#[allow(unused_variables)]
-fn __action50<
-    'err,
-    'input,
-    'v,
->(
-    input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
-    validator: &'v mut VariableValidator<'input>,
-    (_, __0, _): (usize, CallOutputValue<'input>, usize),
-) -> core::option::Option<CallOutputValue<'input>>
-{
-    Some(__0)
-}
-
-#[allow(unused_variables)]
-fn __action51<
-    'err,
-    'input,
-    'v,
->(
-    input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
-    validator: &'v mut VariableValidator<'input>,
-    __lookbehind: &usize,
-    __lookahead: &usize,
-) -> core::option::Option<CallOutputValue<'input>>
-{
-    None
 }
 
 #[allow(unused_variables)]
@@ -3716,11 +3869,58 @@ fn __action52<
     __lookahead: &usize,
 ) -> usize
 {
-    __lookahead.clone()
+    __lookbehind.clone()
 }
 
 #[allow(unused_variables)]
 fn __action53<
+    'err,
+    'input,
+    'v,
+>(
+    input: &'input str,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
+    (_, __0, _): (usize, AstVariable<'input>, usize),
+) -> core::option::Option<AstVariable<'input>>
+{
+    Some(__0)
+}
+
+#[allow(unused_variables)]
+fn __action54<
+    'err,
+    'input,
+    'v,
+>(
+    input: &'input str,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
+    __lookbehind: &usize,
+    __lookahead: &usize,
+) -> core::option::Option<AstVariable<'input>>
+{
+    None
+}
+
+#[allow(unused_variables)]
+fn __action55<
+    'err,
+    'input,
+    'v,
+>(
+    input: &'input str,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
+    __lookbehind: &usize,
+    __lookahead: &usize,
+) -> usize
+{
+    __lookahead.clone()
+}
+
+#[allow(unused_variables)]
+fn __action56<
     'err,
     'input,
     'v,
@@ -3735,7 +3935,7 @@ fn __action53<
 }
 
 #[allow(unused_variables)]
-fn __action54<
+fn __action57<
     'err,
     'input,
     'v,
@@ -3751,7 +3951,7 @@ fn __action54<
 }
 
 #[allow(unused_variables)]
-fn __action55<
+fn __action58<
     'err,
     'input,
     'v,
@@ -3764,14 +3964,14 @@ fn __action55<
 {
     let __start0 = __0.0.clone();
     let __end0 = __0.2.clone();
-    let __temp0 = __action48(
+    let __temp0 = __action51(
         input,
         errors,
         validator,
         __0,
     );
     let __temp0 = (__start0, __temp0, __end0);
-    __action53(
+    __action56(
         input,
         errors,
         validator,
@@ -3780,7 +3980,7 @@ fn __action55<
 }
 
 #[allow(unused_variables)]
-fn __action56<
+fn __action59<
     'err,
     'input,
     'v,
@@ -3794,118 +3994,19 @@ fn __action56<
 {
     let __start0 = __1.0.clone();
     let __end0 = __1.2.clone();
-    let __temp0 = __action48(
+    let __temp0 = __action51(
         input,
         errors,
         validator,
         __1,
     );
     let __temp0 = (__start0, __temp0, __end0);
-    __action54(
+    __action57(
         input,
         errors,
         validator,
         __0,
         __temp0,
-    )
-}
-
-#[allow(unused_variables)]
-fn __action57<
-    'err,
-    'input,
-    'v,
->(
-    input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
-    validator: &'v mut VariableValidator<'input>,
-    __0: (usize, Token<'input>, usize),
-    __1: (usize, Token<'input>, usize),
-) -> Vec<CallInstrArgValue<'input>>
-{
-    let __start0 = __0.2.clone();
-    let __end0 = __1.0.clone();
-    let __temp0 = __action46(
-        input,
-        errors,
-        validator,
-        &__start0,
-        &__end0,
-    );
-    let __temp0 = (__start0, __temp0, __end0);
-    __action13(
-        input,
-        errors,
-        validator,
-        __0,
-        __temp0,
-        __1,
-    )
-}
-
-#[allow(unused_variables)]
-fn __action58<
-    'err,
-    'input,
-    'v,
->(
-    input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
-    validator: &'v mut VariableValidator<'input>,
-    __0: (usize, Token<'input>, usize),
-    __1: (usize, alloc::vec::Vec<CallInstrArgValue<'input>>, usize),
-    __2: (usize, Token<'input>, usize),
-) -> Vec<CallInstrArgValue<'input>>
-{
-    let __start0 = __1.0.clone();
-    let __end0 = __1.2.clone();
-    let __temp0 = __action47(
-        input,
-        errors,
-        validator,
-        __1,
-    );
-    let __temp0 = (__start0, __temp0, __end0);
-    __action13(
-        input,
-        errors,
-        validator,
-        __0,
-        __temp0,
-        __2,
-    )
-}
-
-#[allow(unused_variables)]
-fn __action59<
-    'err,
-    'input,
-    'v,
->(
-    input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
-    validator: &'v mut VariableValidator<'input>,
-    __0: (usize, (Variable<'input>, &'input str, bool), usize),
-    __1: (usize, usize, usize),
-) -> CallInstrValue<'input>
-{
-    let __start0 = __0.0.clone();
-    let __end0 = __0.0.clone();
-    let __temp0 = __action52(
-        input,
-        errors,
-        validator,
-        &__start0,
-        &__end0,
-    );
-    let __temp0 = (__start0, __temp0, __end0);
-    __action26(
-        input,
-        errors,
-        validator,
-        __temp0,
-        __0,
-        __1,
     )
 }
 
@@ -3920,17 +4021,116 @@ fn __action60<
     validator: &'v mut VariableValidator<'input>,
     __0: (usize, Token<'input>, usize),
     __1: (usize, Token<'input>, usize),
+) -> Vec<CallInstrArgValue<'input>>
+{
+    let __start0 = __0.2.clone();
+    let __end0 = __1.0.clone();
+    let __temp0 = __action49(
+        input,
+        errors,
+        validator,
+        &__start0,
+        &__end0,
+    );
+    let __temp0 = (__start0, __temp0, __end0);
+    __action14(
+        input,
+        errors,
+        validator,
+        __0,
+        __temp0,
+        __1,
+    )
+}
+
+#[allow(unused_variables)]
+fn __action61<
+    'err,
+    'input,
+    'v,
+>(
+    input: &'input str,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
+    __0: (usize, Token<'input>, usize),
+    __1: (usize, alloc::vec::Vec<CallInstrArgValue<'input>>, usize),
+    __2: (usize, Token<'input>, usize),
+) -> Vec<CallInstrArgValue<'input>>
+{
+    let __start0 = __1.0.clone();
+    let __end0 = __1.2.clone();
+    let __temp0 = __action50(
+        input,
+        errors,
+        validator,
+        __1,
+    );
+    let __temp0 = (__start0, __temp0, __end0);
+    __action14(
+        input,
+        errors,
+        validator,
+        __0,
+        __temp0,
+        __2,
+    )
+}
+
+#[allow(unused_variables)]
+fn __action62<
+    'err,
+    'input,
+    'v,
+>(
+    input: &'input str,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
+    __0: (usize, (AstVariable<'input>, &'input str, bool), usize),
+    __1: (usize, usize, usize),
+) -> CallInstrValue<'input>
+{
+    let __start0 = __0.0.clone();
+    let __end0 = __0.0.clone();
+    let __temp0 = __action55(
+        input,
+        errors,
+        validator,
+        &__start0,
+        &__end0,
+    );
+    let __temp0 = (__start0, __temp0, __end0);
+    __action27(
+        input,
+        errors,
+        validator,
+        __temp0,
+        __0,
+        __1,
+    )
+}
+
+#[allow(unused_variables)]
+fn __action63<
+    'err,
+    'input,
+    'v,
+>(
+    input: &'input str,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
+    __0: (usize, Token<'input>, usize),
+    __1: (usize, Token<'input>, usize),
     __2: (usize, PeerPart<'input>, usize),
     __3: (usize, FunctionPart<'input>, usize),
     __4: (usize, Vec<CallInstrArgValue<'input>>, usize),
-    __5: (usize, core::option::Option<CallOutputValue<'input>>, usize),
+    __5: (usize, core::option::Option<AstVariable<'input>>, usize),
     __6: (usize, Token<'input>, usize),
     __7: (usize, usize, usize),
 ) -> Box<Instruction<'input>>
 {
     let __start0 = __0.0.clone();
     let __end0 = __0.0.clone();
-    let __temp0 = __action52(
+    let __temp0 = __action55(
         input,
         errors,
         validator,
@@ -3955,7 +4155,48 @@ fn __action60<
 }
 
 #[allow(unused_variables)]
-fn __action61<
+fn __action64<
+    'err,
+    'input,
+    'v,
+>(
+    input: &'input str,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
+    __0: (usize, Token<'input>, usize),
+    __1: (usize, Token<'input>, usize),
+    __2: (usize, ApArgument<'input>, usize),
+    __3: (usize, AstVariable<'input>, usize),
+    __4: (usize, Token<'input>, usize),
+    __5: (usize, usize, usize),
+) -> Box<Instruction<'input>>
+{
+    let __start0 = __0.0.clone();
+    let __end0 = __0.0.clone();
+    let __temp0 = __action55(
+        input,
+        errors,
+        validator,
+        &__start0,
+        &__end0,
+    );
+    let __temp0 = (__start0, __temp0, __end0);
+    __action3(
+        input,
+        errors,
+        validator,
+        __temp0,
+        __0,
+        __1,
+        __2,
+        __3,
+        __4,
+        __5,
+    )
+}
+
+#[allow(unused_variables)]
+fn __action65<
     'err,
     'input,
     'v,
@@ -3974,50 +4215,7 @@ fn __action61<
 {
     let __start0 = __0.0.clone();
     let __end0 = __0.0.clone();
-    let __temp0 = __action52(
-        input,
-        errors,
-        validator,
-        &__start0,
-        &__end0,
-    );
-    let __temp0 = (__start0, __temp0, __end0);
-    __action6(
-        input,
-        errors,
-        validator,
-        __temp0,
-        __0,
-        __1,
-        __2,
-        __3,
-        __4,
-        __5,
-        __6,
-    )
-}
-
-#[allow(unused_variables)]
-fn __action62<
-    'err,
-    'input,
-    'v,
->(
-    input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
-    validator: &'v mut VariableValidator<'input>,
-    __0: (usize, Token<'input>, usize),
-    __1: (usize, Token<'input>, usize),
-    __2: (usize, &'input str, usize),
-    __3: (usize, &'input str, usize),
-    __4: (usize, Box<Instruction<'input>>, usize),
-    __5: (usize, Token<'input>, usize),
-    __6: (usize, usize, usize),
-) -> Box<Instruction<'input>>
-{
-    let __start0 = __0.0.clone();
-    let __end0 = __0.0.clone();
-    let __temp0 = __action52(
+    let __temp0 = __action55(
         input,
         errors,
         validator,
@@ -4041,7 +4239,7 @@ fn __action62<
 }
 
 #[allow(unused_variables)]
-fn __action63<
+fn __action66<
     'err,
     'input,
     'v,
@@ -4052,13 +4250,15 @@ fn __action63<
     __0: (usize, Token<'input>, usize),
     __1: (usize, Token<'input>, usize),
     __2: (usize, &'input str, usize),
-    __3: (usize, Token<'input>, usize),
-    __4: (usize, usize, usize),
+    __3: (usize, &'input str, usize),
+    __4: (usize, Box<Instruction<'input>>, usize),
+    __5: (usize, Token<'input>, usize),
+    __6: (usize, usize, usize),
 ) -> Box<Instruction<'input>>
 {
     let __start0 = __0.0.clone();
     let __end0 = __0.0.clone();
-    let __temp0 = __action52(
+    let __temp0 = __action55(
         input,
         errors,
         validator,
@@ -4076,11 +4276,13 @@ fn __action63<
         __2,
         __3,
         __4,
+        __5,
+        __6,
     )
 }
 
 #[allow(unused_variables)]
-fn __action64<
+fn __action67<
     'err,
     'input,
     'v,
@@ -4090,16 +4292,14 @@ fn __action64<
     validator: &'v mut VariableValidator<'input>,
     __0: (usize, Token<'input>, usize),
     __1: (usize, Token<'input>, usize),
-    __2: (usize, MatchableValue<'input>, usize),
-    __3: (usize, MatchableValue<'input>, usize),
-    __4: (usize, Box<Instruction<'input>>, usize),
-    __5: (usize, Token<'input>, usize),
-    __6: (usize, usize, usize),
+    __2: (usize, &'input str, usize),
+    __3: (usize, Token<'input>, usize),
+    __4: (usize, usize, usize),
 ) -> Box<Instruction<'input>>
 {
     let __start0 = __0.0.clone();
     let __end0 = __0.0.clone();
-    let __temp0 = __action52(
+    let __temp0 = __action55(
         input,
         errors,
         validator,
@@ -4107,7 +4307,7 @@ fn __action64<
         &__end0,
     );
     let __temp0 = (__start0, __temp0, __end0);
-    __action10(
+    __action9(
         input,
         errors,
         validator,
@@ -4117,13 +4317,11 @@ fn __action64<
         __2,
         __3,
         __4,
-        __5,
-        __6,
     )
 }
 
 #[allow(unused_variables)]
-fn __action65<
+fn __action68<
     'err,
     'input,
     'v,
@@ -4142,7 +4340,7 @@ fn __action65<
 {
     let __start0 = __0.0.clone();
     let __end0 = __0.0.clone();
-    let __temp0 = __action52(
+    let __temp0 = __action55(
         input,
         errors,
         validator,
@@ -4166,7 +4364,7 @@ fn __action65<
 }
 
 #[allow(unused_variables)]
-fn __action66<
+fn __action69<
     'err,
     'input,
     'v,
@@ -4174,13 +4372,18 @@ fn __action66<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    __0: (usize, (Variable<'input>, &'input str, bool), usize),
-    __1: (usize, usize, usize),
-) -> IterableScalarValue<'input>
+    __0: (usize, Token<'input>, usize),
+    __1: (usize, Token<'input>, usize),
+    __2: (usize, MatchableValue<'input>, usize),
+    __3: (usize, MatchableValue<'input>, usize),
+    __4: (usize, Box<Instruction<'input>>, usize),
+    __5: (usize, Token<'input>, usize),
+    __6: (usize, usize, usize),
+) -> Box<Instruction<'input>>
 {
     let __start0 = __0.0.clone();
     let __end0 = __0.0.clone();
-    let __temp0 = __action52(
+    let __temp0 = __action55(
         input,
         errors,
         validator,
@@ -4188,7 +4391,45 @@ fn __action66<
         &__end0,
     );
     let __temp0 = (__start0, __temp0, __end0);
-    __action38(
+    __action12(
+        input,
+        errors,
+        validator,
+        __temp0,
+        __0,
+        __1,
+        __2,
+        __3,
+        __4,
+        __5,
+        __6,
+    )
+}
+
+#[allow(unused_variables)]
+fn __action70<
+    'err,
+    'input,
+    'v,
+>(
+    input: &'input str,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
+    __0: (usize, (AstVariable<'input>, &'input str, bool), usize),
+    __1: (usize, usize, usize),
+) -> IterableScalarValue<'input>
+{
+    let __start0 = __0.0.clone();
+    let __end0 = __0.0.clone();
+    let __temp0 = __action55(
+        input,
+        errors,
+        validator,
+        &__start0,
+        &__end0,
+    );
+    let __temp0 = (__start0, __temp0, __end0);
+    __action41(
         input,
         errors,
         validator,
@@ -4199,7 +4440,7 @@ fn __action66<
 }
 
 #[allow(unused_variables)]
-fn __action67<
+fn __action71<
     'err,
     'input,
     'v,
@@ -4207,12 +4448,12 @@ fn __action67<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    __0: (usize, (Variable<'input>, &'input str, bool), usize),
+    __0: (usize, (AstVariable<'input>, &'input str, bool), usize),
 ) -> CallInstrValue<'input>
 {
     let __start0 = __0.2.clone();
     let __end0 = __0.2.clone();
-    let __temp0 = __action49(
+    let __temp0 = __action52(
         input,
         errors,
         validator,
@@ -4220,7 +4461,7 @@ fn __action67<
         &__end0,
     );
     let __temp0 = (__start0, __temp0, __end0);
-    __action59(
+    __action62(
         input,
         errors,
         validator,
@@ -4230,7 +4471,7 @@ fn __action67<
 }
 
 #[allow(unused_variables)]
-fn __action68<
+fn __action72<
     'err,
     'input,
     'v,
@@ -4243,13 +4484,13 @@ fn __action68<
     __2: (usize, PeerPart<'input>, usize),
     __3: (usize, FunctionPart<'input>, usize),
     __4: (usize, Vec<CallInstrArgValue<'input>>, usize),
-    __5: (usize, core::option::Option<CallOutputValue<'input>>, usize),
+    __5: (usize, core::option::Option<AstVariable<'input>>, usize),
     __6: (usize, Token<'input>, usize),
 ) -> Box<Instruction<'input>>
 {
     let __start0 = __6.2.clone();
     let __end0 = __6.2.clone();
-    let __temp0 = __action49(
+    let __temp0 = __action52(
         input,
         errors,
         validator,
@@ -4257,7 +4498,7 @@ fn __action68<
         &__end0,
     );
     let __temp0 = (__start0, __temp0, __end0);
-    __action60(
+    __action63(
         input,
         errors,
         validator,
@@ -4273,7 +4514,46 @@ fn __action68<
 }
 
 #[allow(unused_variables)]
-fn __action69<
+fn __action73<
+    'err,
+    'input,
+    'v,
+>(
+    input: &'input str,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
+    __0: (usize, Token<'input>, usize),
+    __1: (usize, Token<'input>, usize),
+    __2: (usize, ApArgument<'input>, usize),
+    __3: (usize, AstVariable<'input>, usize),
+    __4: (usize, Token<'input>, usize),
+) -> Box<Instruction<'input>>
+{
+    let __start0 = __4.2.clone();
+    let __end0 = __4.2.clone();
+    let __temp0 = __action52(
+        input,
+        errors,
+        validator,
+        &__start0,
+        &__end0,
+    );
+    let __temp0 = (__start0, __temp0, __end0);
+    __action64(
+        input,
+        errors,
+        validator,
+        __0,
+        __1,
+        __2,
+        __3,
+        __4,
+        __temp0,
+    )
+}
+
+#[allow(unused_variables)]
+fn __action74<
     'err,
     'input,
     'v,
@@ -4291,167 +4571,7 @@ fn __action69<
 {
     let __start0 = __5.2.clone();
     let __end0 = __5.2.clone();
-    let __temp0 = __action49(
-        input,
-        errors,
-        validator,
-        &__start0,
-        &__end0,
-    );
-    let __temp0 = (__start0, __temp0, __end0);
-    __action61(
-        input,
-        errors,
-        validator,
-        __0,
-        __1,
-        __2,
-        __3,
-        __4,
-        __5,
-        __temp0,
-    )
-}
-
-#[allow(unused_variables)]
-fn __action70<
-    'err,
-    'input,
-    'v,
->(
-    input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
-    validator: &'v mut VariableValidator<'input>,
-    __0: (usize, Token<'input>, usize),
-    __1: (usize, Token<'input>, usize),
-    __2: (usize, &'input str, usize),
-    __3: (usize, &'input str, usize),
-    __4: (usize, Box<Instruction<'input>>, usize),
-    __5: (usize, Token<'input>, usize),
-) -> Box<Instruction<'input>>
-{
-    let __start0 = __5.2.clone();
-    let __end0 = __5.2.clone();
-    let __temp0 = __action49(
-        input,
-        errors,
-        validator,
-        &__start0,
-        &__end0,
-    );
-    let __temp0 = (__start0, __temp0, __end0);
-    __action62(
-        input,
-        errors,
-        validator,
-        __0,
-        __1,
-        __2,
-        __3,
-        __4,
-        __5,
-        __temp0,
-    )
-}
-
-#[allow(unused_variables)]
-fn __action71<
-    'err,
-    'input,
-    'v,
->(
-    input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
-    validator: &'v mut VariableValidator<'input>,
-    __0: (usize, Token<'input>, usize),
-    __1: (usize, Token<'input>, usize),
-    __2: (usize, &'input str, usize),
-    __3: (usize, Token<'input>, usize),
-) -> Box<Instruction<'input>>
-{
-    let __start0 = __3.2.clone();
-    let __end0 = __3.2.clone();
-    let __temp0 = __action49(
-        input,
-        errors,
-        validator,
-        &__start0,
-        &__end0,
-    );
-    let __temp0 = (__start0, __temp0, __end0);
-    __action63(
-        input,
-        errors,
-        validator,
-        __0,
-        __1,
-        __2,
-        __3,
-        __temp0,
-    )
-}
-
-#[allow(unused_variables)]
-fn __action72<
-    'err,
-    'input,
-    'v,
->(
-    input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
-    validator: &'v mut VariableValidator<'input>,
-    __0: (usize, Token<'input>, usize),
-    __1: (usize, Token<'input>, usize),
-    __2: (usize, MatchableValue<'input>, usize),
-    __3: (usize, MatchableValue<'input>, usize),
-    __4: (usize, Box<Instruction<'input>>, usize),
-    __5: (usize, Token<'input>, usize),
-) -> Box<Instruction<'input>>
-{
-    let __start0 = __5.2.clone();
-    let __end0 = __5.2.clone();
-    let __temp0 = __action49(
-        input,
-        errors,
-        validator,
-        &__start0,
-        &__end0,
-    );
-    let __temp0 = (__start0, __temp0, __end0);
-    __action64(
-        input,
-        errors,
-        validator,
-        __0,
-        __1,
-        __2,
-        __3,
-        __4,
-        __5,
-        __temp0,
-    )
-}
-
-#[allow(unused_variables)]
-fn __action73<
-    'err,
-    'input,
-    'v,
->(
-    input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
-    validator: &'v mut VariableValidator<'input>,
-    __0: (usize, Token<'input>, usize),
-    __1: (usize, Token<'input>, usize),
-    __2: (usize, MatchableValue<'input>, usize),
-    __3: (usize, MatchableValue<'input>, usize),
-    __4: (usize, Box<Instruction<'input>>, usize),
-    __5: (usize, Token<'input>, usize),
-) -> Box<Instruction<'input>>
-{
-    let __start0 = __5.2.clone();
-    let __end0 = __5.2.clone();
-    let __temp0 = __action49(
+    let __temp0 = __action52(
         input,
         errors,
         validator,
@@ -4474,7 +4594,7 @@ fn __action73<
 }
 
 #[allow(unused_variables)]
-fn __action74<
+fn __action75<
     'err,
     'input,
     'v,
@@ -4482,12 +4602,17 @@ fn __action74<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    __0: (usize, (Variable<'input>, &'input str, bool), usize),
-) -> IterableScalarValue<'input>
+    __0: (usize, Token<'input>, usize),
+    __1: (usize, Token<'input>, usize),
+    __2: (usize, &'input str, usize),
+    __3: (usize, &'input str, usize),
+    __4: (usize, Box<Instruction<'input>>, usize),
+    __5: (usize, Token<'input>, usize),
+) -> Box<Instruction<'input>>
 {
-    let __start0 = __0.2.clone();
-    let __end0 = __0.2.clone();
-    let __temp0 = __action49(
+    let __start0 = __5.2.clone();
+    let __end0 = __5.2.clone();
+    let __temp0 = __action52(
         input,
         errors,
         validator,
@@ -4500,12 +4625,167 @@ fn __action74<
         errors,
         validator,
         __0,
+        __1,
+        __2,
+        __3,
+        __4,
+        __5,
         __temp0,
     )
 }
 
 #[allow(unused_variables)]
-fn __action75<
+fn __action76<
+    'err,
+    'input,
+    'v,
+>(
+    input: &'input str,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
+    __0: (usize, Token<'input>, usize),
+    __1: (usize, Token<'input>, usize),
+    __2: (usize, &'input str, usize),
+    __3: (usize, Token<'input>, usize),
+) -> Box<Instruction<'input>>
+{
+    let __start0 = __3.2.clone();
+    let __end0 = __3.2.clone();
+    let __temp0 = __action52(
+        input,
+        errors,
+        validator,
+        &__start0,
+        &__end0,
+    );
+    let __temp0 = (__start0, __temp0, __end0);
+    __action67(
+        input,
+        errors,
+        validator,
+        __0,
+        __1,
+        __2,
+        __3,
+        __temp0,
+    )
+}
+
+#[allow(unused_variables)]
+fn __action77<
+    'err,
+    'input,
+    'v,
+>(
+    input: &'input str,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
+    __0: (usize, Token<'input>, usize),
+    __1: (usize, Token<'input>, usize),
+    __2: (usize, MatchableValue<'input>, usize),
+    __3: (usize, MatchableValue<'input>, usize),
+    __4: (usize, Box<Instruction<'input>>, usize),
+    __5: (usize, Token<'input>, usize),
+) -> Box<Instruction<'input>>
+{
+    let __start0 = __5.2.clone();
+    let __end0 = __5.2.clone();
+    let __temp0 = __action52(
+        input,
+        errors,
+        validator,
+        &__start0,
+        &__end0,
+    );
+    let __temp0 = (__start0, __temp0, __end0);
+    __action68(
+        input,
+        errors,
+        validator,
+        __0,
+        __1,
+        __2,
+        __3,
+        __4,
+        __5,
+        __temp0,
+    )
+}
+
+#[allow(unused_variables)]
+fn __action78<
+    'err,
+    'input,
+    'v,
+>(
+    input: &'input str,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
+    __0: (usize, Token<'input>, usize),
+    __1: (usize, Token<'input>, usize),
+    __2: (usize, MatchableValue<'input>, usize),
+    __3: (usize, MatchableValue<'input>, usize),
+    __4: (usize, Box<Instruction<'input>>, usize),
+    __5: (usize, Token<'input>, usize),
+) -> Box<Instruction<'input>>
+{
+    let __start0 = __5.2.clone();
+    let __end0 = __5.2.clone();
+    let __temp0 = __action52(
+        input,
+        errors,
+        validator,
+        &__start0,
+        &__end0,
+    );
+    let __temp0 = (__start0, __temp0, __end0);
+    __action69(
+        input,
+        errors,
+        validator,
+        __0,
+        __1,
+        __2,
+        __3,
+        __4,
+        __5,
+        __temp0,
+    )
+}
+
+#[allow(unused_variables)]
+fn __action79<
+    'err,
+    'input,
+    'v,
+>(
+    input: &'input str,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
+    __0: (usize, (AstVariable<'input>, &'input str, bool), usize),
+) -> IterableScalarValue<'input>
+{
+    let __start0 = __0.2.clone();
+    let __end0 = __0.2.clone();
+    let __temp0 = __action52(
+        input,
+        errors,
+        validator,
+        &__start0,
+        &__end0,
+    );
+    let __temp0 = (__start0, __temp0, __end0);
+    __action70(
+        input,
+        errors,
+        validator,
+        __0,
+        __temp0,
+    )
+}
+
+#[allow(unused_variables)]
+fn __action80<
     'err,
     'input,
     'v,
@@ -4518,20 +4798,20 @@ fn __action75<
     __2: (usize, PeerPart<'input>, usize),
     __3: (usize, FunctionPart<'input>, usize),
     __4: (usize, Vec<CallInstrArgValue<'input>>, usize),
-    __5: (usize, CallOutputValue<'input>, usize),
+    __5: (usize, AstVariable<'input>, usize),
     __6: (usize, Token<'input>, usize),
 ) -> Box<Instruction<'input>>
 {
     let __start0 = __5.0.clone();
     let __end0 = __5.2.clone();
-    let __temp0 = __action50(
+    let __temp0 = __action53(
         input,
         errors,
         validator,
         __5,
     );
     let __temp0 = (__start0, __temp0, __end0);
-    __action68(
+    __action72(
         input,
         errors,
         validator,
@@ -4546,7 +4826,7 @@ fn __action75<
 }
 
 #[allow(unused_variables)]
-fn __action76<
+fn __action81<
     'err,
     'input,
     'v,
@@ -4564,7 +4844,7 @@ fn __action76<
 {
     let __start0 = __4.2.clone();
     let __end0 = __5.0.clone();
-    let __temp0 = __action51(
+    let __temp0 = __action54(
         input,
         errors,
         validator,
@@ -4572,7 +4852,7 @@ fn __action76<
         &__end0,
     );
     let __temp0 = (__start0, __temp0, __end0);
-    __action68(
+    __action72(
         input,
         errors,
         validator,

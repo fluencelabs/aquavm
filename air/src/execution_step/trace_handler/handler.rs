@@ -81,6 +81,16 @@ impl TraceHandler {
 }
 
 impl TraceHandler {
+    pub(crate) fn meet_ap_start(&mut self) -> TraceHandlerResult<MergerApResult> {
+        try_merge_next_state_as_ap(&mut self.data_keeper).map_err(Into::into)
+    }
+
+    pub(crate) fn meet_ap_end(&mut self, ap_result: ApResult) {
+        self.data_keeper.result_trace.push(ExecutedState::Ap(ap_result));
+    }
+}
+
+impl TraceHandler {
     pub(crate) fn meet_par_start(&mut self) -> TraceHandlerResult<()> {
         let ingredients = merger::try_merge_next_state_as_par(&mut self.data_keeper)?;
         let par_fsm = ParFSM::from_left_started(ingredients, &mut self.data_keeper)?;

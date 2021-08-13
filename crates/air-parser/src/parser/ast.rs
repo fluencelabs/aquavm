@@ -15,11 +15,12 @@
  */
 
 mod fold_id;
+mod impls;
 mod traits;
 
+pub use crate::parser::lexer::AstVariable;
 pub use crate::parser::lexer::LastErrorPath;
 pub use crate::parser::lexer::Number;
-pub use crate::parser::lexer::Variable;
 pub(super) use fold_id::create_fold_id;
 
 use serde::Deserialize;
@@ -32,6 +33,7 @@ use std::rc::Rc;
 pub enum Instruction<'i> {
     Null(Null),
     Call(Call<'i>),
+    Ap(Ap<'i>),
     Seq(Seq<'i>),
     Par(Par<'i>),
     Xor(Xor<'i>),
@@ -64,15 +66,23 @@ pub struct Call<'i> {
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+pub enum ApArgument<'i> {
+    ScalarVariable(&'i str),
+    JsonPath(JsonPath<'i>),
+}
+
+#[derive(Serialize, Debug, PartialEq)]
+pub struct Ap<'i> {
+    pub argument: ApArgument<'i>,
+    pub result: AstVariable<'i>,
+}
+
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum CallInstrValue<'i> {
     InitPeerId,
     Literal(&'i str),
-    Variable(Variable<'i>),
-    JsonPath {
-        variable: Variable<'i>,
-        path: &'i str,
-        should_flatten: bool,
-    },
+    Variable(AstVariable<'i>),
+    JsonPath(JsonPath<'i>),
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
@@ -82,12 +92,8 @@ pub enum CallInstrArgValue<'i> {
     Literal(&'i str),
     Number(Number),
     Boolean(bool),
-    Variable(Variable<'i>),
-    JsonPath {
-        variable: Variable<'i>,
-        path: &'i str,
-        should_flatten: bool,
-    },
+    Variable(AstVariable<'i>),
+    JsonPath(JsonPath<'i>),
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
@@ -106,17 +112,13 @@ pub enum MatchableValue<'i> {
     Literal(&'i str),
     Number(Number),
     Boolean(bool),
-    Variable(Variable<'i>),
-    JsonPath {
-        variable: Variable<'i>,
-        path: &'i str,
-        should_flatten: bool,
-    },
+    Variable(AstVariable<'i>),
+    JsonPath(JsonPath<'i>),
 }
 
 #[derive(Serialize, Debug, PartialEq, Clone)]
 pub enum CallOutputValue<'i> {
-    Variable(Variable<'i>),
+    Variable(AstVariable<'i>),
     None,
 }
 
@@ -164,3 +166,10 @@ pub struct Next<'i>(pub &'i str);
 
 #[derive(Serialize, Debug, PartialEq)]
 pub struct Null;
+
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+pub struct JsonPath<'i> {
+    pub variable: AstVariable<'i>,
+    pub path: &'i str,
+    pub should_flatten: bool,
+}

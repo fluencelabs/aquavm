@@ -20,25 +20,24 @@ use super::call_result_setter::*;
 use super::triplet::Triplet;
 use super::utils::*;
 use super::*;
-use crate::build_targets::CallServiceResult;
-use crate::build_targets::CALL_SERVICE_SUCCESS;
+use crate::execution_step::air::ResolvedCallResult;
 use crate::execution_step::trace_handler::MergerCallResult;
 use crate::execution_step::trace_handler::TraceHandler;
-use crate::execution_step::Generation;
+use crate::execution_step::RSecurityTetraplet;
+use crate::execution_step::SecurityTetraplets;
 use crate::JValue;
-use crate::ResolvedTriplet;
 use crate::SecurityTetraplet;
 
 use air_interpreter_data::CallResult;
 use air_parser::ast::{CallInstrArgValue, CallOutputValue};
 
-use crate::execution_step::air::ResolvedCallResult;
+use std::cell::RefCell;
 use std::rc::Rc;
 
 /// Represents Call instruction with resolved internal parts.
 #[derive(Debug, Clone, PartialEq)]
 pub(super) struct ResolvedCall<'i> {
-    triplet: Rc<ResolvedTriplet>,
+    tetraplet: RSecurityTetraplet,
     function_arg_paths: Rc<Vec<CallInstrArgValue<'i>>>,
     output: CallOutputValue<'i>,
 }
@@ -46,7 +45,7 @@ pub(super) struct ResolvedCall<'i> {
 #[derive(Debug, Clone, PartialEq)]
 struct ResolvedArguments {
     call_arguments: String,
-    tetraplets: Vec<Vec<SecurityTetraplet>>,
+    tetraplets: Vec<SecurityTetraplets>,
 }
 
 impl<'i> ResolvedCall<'i> {
@@ -54,10 +53,11 @@ impl<'i> ResolvedCall<'i> {
     pub(super) fn new(raw_call: &Call<'i>, exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<Self> {
         let triplet = Triplet::try_from(&raw_call.peer_part, &raw_call.function_part)?;
         let triplet = triplet.resolve(exec_ctx)?;
-        let triplet = Rc::new(triplet);
+        let tetraplet = SecurityTetraplet::from_triplet(triplet);
+        let tetraplet = Rc::new(RefCell::new(tetraplet));
 
         Ok(Self {
-            triplet,
+            tetraplet,
             function_arg_paths: raw_call.args.clone(),
             output: raw_call.output.clone(),
         })
@@ -71,8 +71,9 @@ impl<'i> ResolvedCall<'i> {
         }
 
         // call can be executed only on peers with such peer_id
-        if self.triplet.peer_pk.as_str() != exec_ctx.current_peer_id.as_str() {
-            set_remote_call_result(self.triplet.peer_pk.clone(), exec_ctx, trace_ctx);
+        let triplet = &self.tetraplet.borrow().triplet;
+        if triplet.peer_pk.as_str() != exec_ctx.current_peer_id.as_str() {
+            set_remote_call_result(triplet.peer_pk.clone(), exec_ctx, trace_ctx);
             return Ok(());
         }
 
@@ -85,8 +86,8 @@ impl<'i> ResolvedCall<'i> {
 
         let service_result = unsafe {
             crate::build_targets::call_service(
-                &self.triplet.service_id,
-                &self.triplet.function_name,
+                &triplet.service_id,
+                &triplet.function_name,
                 &call_arguments,
                 &serialized_tetraplets,
             )
@@ -111,17 +112,15 @@ impl<'i> ResolvedCall<'i> {
 
         let trace_pos = trace_ctx.trace_pos();
 
-        // TODO: refactor this scheme with passing and obtaining generation here in next PR
-        let executed_result = ResolvedCallResult::new(result.clone(), self.triplet.clone(), trace_pos);
-        let generation = set_local_call_result(executed_result, Generation::Last, &self.output, exec_ctx)?;
-        let new_call_result = CallResult::Executed(result, generation);
+        let executed_result = ResolvedCallResult::new(result, self.tetraplet.clone(), trace_pos);
+        let new_call_result = set_local_result(executed_result, &self.output, exec_ctx)?;
         trace_ctx.meet_call_end(new_call_result);
 
         Ok(())
     }
 
-    pub(super) fn as_triplet(&self) -> Rc<ResolvedTriplet> {
-        self.triplet.clone()
+    pub(super) fn as_tetraplet(&self) -> RSecurityTetraplet {
+        self.tetraplet.clone()
     }
 
     /// Determine whether this call should be really called and adjust prev executed trace accordingly.
@@ -135,7 +134,14 @@ impl<'i> ResolvedCall<'i> {
             MergerCallResult::Empty => return Ok(true),
         };
 
-        handle_prev_state(&self.triplet, &self.output, call_result, trace_pos, exec_ctx, trace_ctx)
+        handle_prev_state(
+            &self.tetraplet,
+            &self.output,
+            call_result,
+            trace_pos,
+            exec_ctx,
+            trace_ctx,
+        )
     }
 
     /// Prepare arguments of this call instruction by resolving and preparing their security tetraplets.
@@ -163,10 +169,13 @@ impl<'i> ResolvedCall<'i> {
     }
 }
 
+use crate::build_targets::CallServiceResult;
+
 fn handle_service_error(
     service_result: CallServiceResult,
     trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<CallServiceResult> {
+    use crate::build_targets::CALL_SERVICE_SUCCESS;
     use CallResult::CallServiceFailed;
 
     if service_result.ret_code == CALL_SERVICE_SUCCESS {

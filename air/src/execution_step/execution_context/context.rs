@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-use super::AValue;
 use super::LastErrorDescriptor;
 use super::LastErrorWithTetraplets;
+use crate::execution_step::boxed_value::Scalar;
+use crate::execution_step::boxed_value::Stream;
 
+use std::cell::RefCell;
 use std::collections::HashMap;
 use std::collections::VecDeque;
 use std::rc::Rc;
@@ -25,9 +27,13 @@ use std::rc::Rc;
 /// Contains all necessary state needed to execute AIR script.
 #[derive(Default)]
 pub(crate) struct ExecutionCtx<'i> {
-    /// Contains all set variables.
+    /// Contains all scalars.
     // TODO: use shared string (Rc<String>) to avoid copying.
-    pub data_cache: HashMap<String, AValue<'i>>,
+    pub scalars: HashMap<String, Scalar<'i>>,
+
+    /// Contains all streams.
+    // TODO: use shared string (Rc<String>) to avoid copying.
+    pub streams: HashMap<String, RefCell<Stream>>,
 
     /// Set of peer public keys that should receive resulted data.
     pub next_peer_pks: Vec<String>,
@@ -85,7 +91,7 @@ use std::fmt::Formatter;
 impl<'i> Display for ExecutionCtx<'i> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "data cache:")?;
-        for (key, value) in self.data_cache.iter() {
+        for (key, value) in self.scalars.iter() {
             writeln!(f, "  {} => {}", key, value)?;
         }
         writeln!(f, "current peer id: {}", self.current_peer_id)?;

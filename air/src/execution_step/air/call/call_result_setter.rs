@@ -18,37 +18,63 @@ use super::*;
 use crate::exec_err;
 use crate::execution_step::execution_context::*;
 use crate::execution_step::trace_handler::TraceHandler;
+use crate::execution_step::AstVariable;
 use crate::execution_step::Generation;
+use crate::execution_step::ResolvedCallResult;
+use crate::execution_step::Scalar;
 use crate::execution_step::Stream;
-use crate::execution_step::Variable;
 
 use air_interpreter_data::CallResult;
-use air_interpreter_data::SCALAR_GENERATION;
+use air_interpreter_data::Value;
 use air_parser::ast::CallOutputValue;
 
 use std::cell::RefCell;
 use std::collections::hash_map::Entry::{Occupied, Vacant};
 
-// TODO: refactor this function, it receives and produces generation id.
 /// Writes result of a local `Call` instruction to `ExecutionCtx` at `output`.
-pub(crate) fn set_local_call_result<'i>(
+/// Returns call result.
+pub(crate) fn set_local_result<'i>(
     executed_result: ResolvedCallResult,
-    generation: Generation,
     output: &CallOutputValue<'i>,
     exec_ctx: &mut ExecutionCtx<'i>,
-) -> ExecutionResult<u32> {
-    let generation = match output {
-        CallOutputValue::Variable(Variable::Scalar(name)) => {
+) -> ExecutionResult<CallResult> {
+    let result_value = executed_result.result.clone();
+    match output {
+        CallOutputValue::Variable(AstVariable::Scalar(name)) => {
             set_scalar_result(executed_result, name, exec_ctx)?;
-            SCALAR_GENERATION
+            Ok(CallResult::executed_scalar(result_value))
         }
-        CallOutputValue::Variable(Variable::Stream(name)) => {
-            set_stream_result(executed_result, generation, name.to_string(), exec_ctx)?
+        CallOutputValue::Variable(AstVariable::Stream(name)) => {
+            let generation = set_stream_result(executed_result, Generation::Last, name.to_string(), exec_ctx)?;
+            Ok(CallResult::executed_stream(result_value, generation))
         }
-        CallOutputValue::None => SCALAR_GENERATION,
+        CallOutputValue::None => Ok(CallResult::executed_scalar(result_value)),
+    }
+}
+
+pub(crate) fn set_result_from_value<'i>(
+    value: Value,
+    tetraplet: RSecurityTetraplet,
+    trace_pos: usize,
+    output: &CallOutputValue<'i>,
+    exec_ctx: &mut ExecutionCtx<'i>,
+) -> ExecutionResult<()> {
+    match (output, value) {
+        (CallOutputValue::Variable(AstVariable::Scalar(name)), Value::Scalar(value)) => {
+            let result = ResolvedCallResult::new(value, tetraplet, trace_pos);
+            set_scalar_result(result, name, exec_ctx)?;
+        }
+        (CallOutputValue::Variable(AstVariable::Stream(name)), Value::Stream { value, generation }) => {
+            let result = ResolvedCallResult::new(value, tetraplet, trace_pos);
+            let generation = Generation::Nth(generation);
+            let _ = set_stream_result(result, generation, name.to_string(), exec_ctx)?;
+        }
+        // it isn't needed to check there that output and value matches because
+        // it's been already in trace handler
+        _ => {}
     };
 
-    Ok(generation)
+    Ok(())
 }
 
 macro_rules! shadowing_allowed(
@@ -60,30 +86,31 @@ macro_rules! shadowing_allowed(
         }
 
         match $entry.get() {
-            AValue::JValueRef(_) => {}
-            // shadowing is allowed only for scalar values
-            _ => return exec_err!(ExecutionError::NonScalarShadowing($entry.key().clone())),
+            Scalar::JValueRef(_) => {}
+            // shadowing is allowed only for JValue not iterable
+            _ => return exec_err!(ExecutionError::IterableShadowing($entry.key().clone())),
         };
 
         ExecutionResult::Ok(())
     }}
 );
 
-fn set_scalar_result<'i>(
+// TODO: decouple this function to a separate module
+pub(crate) fn set_scalar_result<'i>(
     executed_result: ResolvedCallResult,
     scalar_name: &'i str,
     exec_ctx: &mut ExecutionCtx<'i>,
 ) -> ExecutionResult<()> {
     meet_scalar(scalar_name, executed_result.clone(), exec_ctx)?;
 
-    match exec_ctx.data_cache.entry(scalar_name.to_string()) {
+    match exec_ctx.scalars.entry(scalar_name.to_string()) {
         Vacant(entry) => {
-            entry.insert(AValue::JValueRef(executed_result));
+            entry.insert(Scalar::JValueRef(executed_result));
         }
         Occupied(mut entry) => {
             // the macro instead of a function because of borrowing
             shadowing_allowed!(exec_ctx, entry)?;
-            entry.insert(AValue::JValueRef(executed_result));
+            entry.insert(Scalar::JValueRef(executed_result));
         }
     };
 
@@ -97,8 +124,8 @@ fn meet_scalar<'i>(
     exec_ctx: &mut ExecutionCtx<'i>,
 ) -> ExecutionResult<()> {
     if let Some(fold_block_name) = exec_ctx.met_folds.back() {
-        let fold_state = match exec_ctx.data_cache.get_mut(*fold_block_name) {
-            Some(AValue::JValueFoldCursor(fold_state)) => fold_state,
+        let fold_state = match exec_ctx.scalars.get_mut(*fold_block_name) {
+            Some(Scalar::JValueFoldCursor(fold_state)) => fold_state,
             _ => unreachable!("fold block data must be represented as fold cursor"),
         };
 
@@ -108,23 +135,21 @@ fn meet_scalar<'i>(
     Ok(())
 }
 
-fn set_stream_result(
+// TODO: decouple this function to a separate module
+pub(crate) fn set_stream_result(
     executed_result: ResolvedCallResult,
     generation: Generation,
     stream_name: String,
     exec_ctx: &mut ExecutionCtx<'_>,
 ) -> ExecutionResult<u32> {
-    use ExecutionError::IncompatibleAValueType;
-
-    let generation = match exec_ctx.data_cache.entry(stream_name) {
-        Occupied(mut entry) => match entry.get_mut() {
+    let generation = match exec_ctx.streams.entry(stream_name) {
+        Occupied(mut entry) => {
             // if result is an array, insert result to the end of the array
-            AValue::StreamRef(stream) => stream.borrow_mut().add_value(executed_result, generation)?,
-            v => return exec_err!(IncompatibleAValueType(format!("{}", v), String::from("Array"))),
-        },
+            entry.get_mut().borrow_mut().add_value(executed_result, generation)?
+        }
         Vacant(entry) => {
             let stream = Stream::from_value(executed_result);
-            entry.insert(AValue::StreamRef(RefCell::new(stream)));
+            entry.insert(RefCell::new(stream));
             0
         }
     };

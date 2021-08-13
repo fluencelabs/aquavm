@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+use super::ApResult;
 use super::CallResult;
 use super::ExecutedState;
 use super::JValue;
 use super::ParResult;
+use super::Value;
 use crate::FoldLore;
 use crate::FoldResult;
 use crate::FoldSubTraceLore;
@@ -26,18 +28,19 @@ use crate::SubTraceDesc;
 use std::rc::Rc;
 
 pub fn scalar_jvalue(result: JValue) -> ExecutedState {
-    ExecutedState::Call(CallResult::Executed(Rc::new(result), 0))
+    let value = Value::Scalar(Rc::new(result));
+    ExecutedState::Call(CallResult::Executed(value))
 }
 
 pub fn stream_jvalue(result: JValue, generation: u32) -> ExecutedState {
-    ExecutedState::Call(CallResult::Executed(Rc::new(result), generation))
+    let call_result = CallResult::executed_stream(Rc::new(result), generation);
+    ExecutedState::Call(call_result)
 }
 
 pub fn scalar_string(result: impl Into<String>) -> ExecutedState {
-    ExecutedState::Call(CallResult::Executed(
-        Rc::new(JValue::String(result.into())),
-        0,
-    ))
+    let result = JValue::String(result.into());
+    let value = Rc::new(result);
+    ExecutedState::Call(CallResult::executed_scalar(value))
 }
 
 pub fn scalar_string_array(result: Vec<impl Into<String>>) -> ExecutedState {
@@ -45,22 +48,23 @@ pub fn scalar_string_array(result: Vec<impl Into<String>>) -> ExecutedState {
         .into_iter()
         .map(|s| JValue::String(s.into()))
         .collect::<Vec<_>>();
+    let value = Rc::new(JValue::Array(result));
 
-    ExecutedState::Call(CallResult::Executed(Rc::new(JValue::Array(result)), 0))
+    ExecutedState::Call(CallResult::executed_scalar(value))
 }
 
 pub fn stream_string(result: impl Into<String>, generation: u32) -> ExecutedState {
-    ExecutedState::Call(CallResult::Executed(
-        Rc::new(JValue::String(result.into())),
-        generation,
-    ))
+    let result = JValue::String(result.into());
+    let value = Rc::new(result);
+
+    ExecutedState::Call(CallResult::executed_stream(value, generation))
 }
 
 pub fn stream_number(result: impl Into<serde_json::Number>, generation: u32) -> ExecutedState {
-    ExecutedState::Call(CallResult::Executed(
-        Rc::new(JValue::Number(result.into())),
-        generation,
-    ))
+    let result = JValue::Number(result.into());
+    let value = Rc::new(result);
+
+    ExecutedState::Call(CallResult::executed_stream(value, generation))
 }
 
 pub fn stream_string_array(result: Vec<impl Into<String>>, generation: u32) -> ExecutedState {
@@ -68,11 +72,9 @@ pub fn stream_string_array(result: Vec<impl Into<String>>, generation: u32) -> E
         .into_iter()
         .map(|s| JValue::String(s.into()))
         .collect::<Vec<_>>();
+    let value = Rc::new(JValue::Array(result));
 
-    ExecutedState::Call(CallResult::Executed(
-        Rc::new(JValue::Array(result)),
-        generation,
-    ))
+    ExecutedState::Call(CallResult::executed_stream(value, generation))
 }
 
 pub fn request_sent_by(sender: impl Into<String>) -> ExecutedState {
@@ -80,7 +82,12 @@ pub fn request_sent_by(sender: impl Into<String>) -> ExecutedState {
 }
 
 pub fn par(left: usize, right: usize) -> ExecutedState {
-    ExecutedState::Par(ParResult(left as u32, right as u32))
+    let par_result = ParResult {
+        left_subtree_size: left as _,
+        right_subtree_size: right as _,
+    };
+
+    ExecutedState::Par(par_result)
 }
 
 pub fn service_failed(ret_code: i32, error_message: impl Into<String>) -> ExecutedState {
@@ -103,5 +110,20 @@ pub fn subtrace_lore(
     FoldSubTraceLore {
         value_pos,
         subtraces_desc: vec![before, after],
+    }
+}
+
+pub fn ap(src: Option<u32>, dst: Option<u32>) -> ExecutedState {
+    let src_generations = option_to_vec(src);
+    let dst_generations = option_to_vec(dst);
+    let ap_result = ApResult::new(src_generations, dst_generations);
+
+    ExecutedState::Ap(ap_result)
+}
+
+fn option_to_vec(maybe_value: Option<u32>) -> Vec<u32> {
+    match maybe_value {
+        Some(value) => vec![value],
+        None => vec![],
     }
 }

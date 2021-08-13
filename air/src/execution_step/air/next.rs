@@ -15,11 +15,11 @@
  */
 
 use super::fold::IterableType;
-use super::AValue;
 use super::ExecutionCtx;
 use super::ExecutionError;
 use super::ExecutionResult;
 use super::FoldState;
+use super::Scalar;
 use super::TraceHandler;
 use crate::exec_err;
 use crate::log_instruction;
@@ -47,10 +47,10 @@ impl<'i> super::ExecutableInstruction<'i> for Next<'i> {
         next_instr.execute(exec_ctx, trace_ctx)?;
 
         // get the same fold state again because of borrow checker
-        match exec_ctx.data_cache.get_mut(iterator_name) {
+        match exec_ctx.scalars.get_mut(iterator_name) {
             // move iterator back to provide correct value for possible subtree after next
             // (for example for cases such as right fold)
-            Some(AValue::JValueFoldCursor(fold_state)) => fold_state.iterable.prev(),
+            Some(Scalar::JValueFoldCursor(fold_state)) => fold_state.iterable.prev(),
             _ => unreachable!("iterator value shouldn't changed inside fold"),
         };
 
@@ -70,12 +70,12 @@ fn try_get_fold_state<'i, 'ctx>(
     use ExecutionError::IncompatibleAValueType;
 
     let avalue = exec_ctx
-        .data_cache
+        .scalars
         .get_mut(iterator_name)
         .ok_or_else(|| FoldStateNotFound(iterator_name.to_string()))?;
 
     match avalue {
-        AValue::JValueFoldCursor(state) => Ok(state),
+        Scalar::JValueFoldCursor(state) => Ok(state),
         v => {
             // it's not possible to use unreachable here
             // because at now next syntactically could be used without fold

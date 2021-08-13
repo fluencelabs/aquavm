@@ -16,11 +16,14 @@
 
 use super::ExecutionCtx;
 use crate::execution_step::ExecutionError;
+use crate::execution_step::RSecurityTetraplet;
+use crate::execution_step::SecurityTetraplets;
 use crate::SecurityTetraplet;
 
 use serde::Deserialize;
 use serde::Serialize;
 
+use std::cell::RefCell;
 use std::rc::Rc;
 
 /// This struct is intended to track the last arisen error.
@@ -29,7 +32,7 @@ pub(crate) struct LastErrorDescriptor {
     pub(crate) error: Rc<ExecutionError>,
     pub(crate) instruction: String,
     pub(crate) peer_id: String,
-    pub(crate) tetraplet: Option<SecurityTetraplet>,
+    pub(crate) tetraplet: Option<RSecurityTetraplet>,
 }
 
 /// This type is a serialization target for last error. It means that on the AIR script side
@@ -50,16 +53,17 @@ pub struct LastError {
 #[derive(Debug, Default)]
 pub(crate) struct LastErrorWithTetraplets {
     pub(crate) last_error: LastError,
-    pub(crate) tetraplets: Vec<SecurityTetraplet>,
+    pub(crate) tetraplets: SecurityTetraplets,
 }
 
 impl<'s> LastErrorWithTetraplets {
     pub(crate) fn from_error_descriptor(descriptor: &LastErrorDescriptor, ctx: &ExecutionCtx<'_>) -> Self {
         let last_error = descriptor.serialize();
-        let tetraplets = descriptor
-            .tetraplet
-            .clone()
-            .unwrap_or_else(|| SecurityTetraplet::literal_tetraplet(ctx.init_peer_id.clone()));
+        let tetraplets = descriptor.tetraplet.clone().unwrap_or_else(|| {
+            Rc::new(RefCell::new(SecurityTetraplet::literal_tetraplet(
+                ctx.init_peer_id.clone(),
+            )))
+        });
         let tetraplets = vec![tetraplets];
 
         Self { last_error, tetraplets }
@@ -71,7 +75,7 @@ impl LastErrorDescriptor {
         error: Rc<ExecutionError>,
         instruction: String,
         peer_id: String,
-        tetraplet: Option<SecurityTetraplet>,
+        tetraplet: Option<RSecurityTetraplet>,
     ) -> Self {
         Self {
             error,

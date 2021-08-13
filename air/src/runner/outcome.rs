@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-use crate::execution_step::AValue;
 use crate::execution_step::ExecutionCtx;
 use crate::execution_step::ExecutionError;
+use crate::execution_step::Stream;
 use crate::execution_step::TraceHandler;
 use crate::preparation_step::PreparationError;
 use crate::InterpreterOutcome;
@@ -25,6 +25,7 @@ use crate::INTERPRETER_SUCCESS;
 use air_interpreter_data::InterpreterData;
 use air_interpreter_data::StreamGenerations;
 
+use std::cell::RefCell;
 use std::collections::HashMap;
 use std::hash::Hash;
 use std::rc::Rc;
@@ -34,7 +35,7 @@ const EXECUTION_ERRORS_START_ID: i32 = 1000;
 /// Create InterpreterOutcome from supplied execution context and trace handler,
 /// set ret_code to INTERPRETER_SUCCESS.
 pub(crate) fn from_success_result(exec_ctx: ExecutionCtx<'_>, trace_handler: TraceHandler) -> InterpreterOutcome {
-    let streams = extract_stream_generations(exec_ctx.data_cache);
+    let streams = extract_stream_generations(exec_ctx.streams);
     let data = InterpreterData::from_execution_result(trace_handler.into_result_trace(), streams);
     let data = serde_json::to_vec(&data).expect("default serializer shouldn't fail");
 
@@ -87,7 +88,7 @@ pub(crate) fn from_execution_error(
     let ret_code = err.to_error_code() as i32;
     let ret_code = EXECUTION_ERRORS_START_ID + ret_code;
 
-    let streams = extract_stream_generations(exec_ctx.data_cache);
+    let streams = extract_stream_generations(exec_ctx.streams);
     let data = InterpreterData::from_execution_result(trace_handler.into_result_trace(), streams);
     let data = serde_json::to_vec(&data).expect("default serializer shouldn't fail");
 
@@ -109,12 +110,9 @@ fn dedup<T: Eq + Hash>(mut vec: Vec<T>) -> Vec<T> {
     set.into_iter().collect()
 }
 
-fn extract_stream_generations(data_cache: HashMap<String, AValue<'_>>) -> StreamGenerations {
-    data_cache
+fn extract_stream_generations(streams: HashMap<String, RefCell<Stream>>) -> StreamGenerations {
+    streams
         .into_iter()
-        .filter_map(|(name, value)| match value {
-            AValue::StreamRef(stream) => Some((name, stream.borrow().generations_count() as u32)),
-            _ => None,
-        })
+        .map(|(name, stream)| (name, stream.borrow().generations_count() as u32))
         .collect::<_>()
 }

@@ -30,7 +30,7 @@ pub enum PreparationError {
     /// Errors occurred on executed trace deserialization.
     #[error("an error occurred while executed trace deserialization on {1:?}:\n{0:?}.\
     Probably it's a data of an old version that couldn't be converted to '{}'", *DATA_FORMAT_VERSION)]
-    DataDeError(SerdeJsonError, Vec<u8>),
+    DataDeFailed(SerdeJsonError, Vec<u8>),
 
     /// Error occurred while getting current peer id.
     #[error("current peer id can't be obtained: {0:?}")]
@@ -43,7 +43,7 @@ impl PreparationError {
 
         match self {
             AIRParseError(_) => 1,
-            DataDeError(..) => 2,
+            DataDeFailed(..) => 2,
             CurrentPeerIdEnvError(_) => 3,
         }
     }

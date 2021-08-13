@@ -58,7 +58,11 @@ impl<'i> VariableValidator<'i> {
         self.met_peer_part(&call.peer_part, span);
         self.met_function_part(&call.function_part, span);
         self.met_args(&call.args, span);
-        self.met_call_output_definition(&call.output, span)
+
+        match &call.output {
+            CallOutputValue::Variable(variable) => self.met_variable_definition(variable, span),
+            CallOutputValue::None => {}
+        };
     }
 
     pub(super) fn met_match(&mut self, match_: &Match<'i>, span: Span) {
@@ -77,7 +81,7 @@ impl<'i> VariableValidator<'i> {
     }
 
     pub(super) fn met_fold_stream(&mut self, fold: &FoldStream<'i>, span: Span) {
-        self.met_variable(&Variable::Stream(fold.stream_name), span);
+        self.met_variable(&AstVariable::Stream(fold.stream_name), span);
         self.met_iterator_definition(fold.iterator, span);
     }
 
@@ -87,6 +91,14 @@ impl<'i> VariableValidator<'i> {
         // a corresponding fold with the definition of this iterable, so they're just put
         // without a check for being already met
         self.unresolved_iterables.insert(iterable_name, span);
+    }
+
+    pub(super) fn met_ap(&mut self, ap: &Ap<'i>, span: Span) {
+        match &ap.argument {
+            ApArgument::ScalarVariable(name) => self.met_variable(&AstVariable::Scalar(name), span),
+            ApArgument::JsonPath(json_path) => self.met_variable(&json_path.variable, span),
+        }
+        self.met_variable_definition(&ap.result, span);
     }
 
     pub(super) fn finalize(&self) -> Vec<ErrorRecovery<usize, Token<'i>, ParserError>> {
@@ -134,7 +146,7 @@ impl<'i> VariableValidator<'i> {
 
     fn met_instr_value(&mut self, instr_value: &CallInstrValue<'i>, span: Span) {
         match instr_value {
-            CallInstrValue::JsonPath { variable, .. } => self.met_variable(variable, span),
+            CallInstrValue::JsonPath(json_path) => self.met_variable(&json_path.variable, span),
             CallInstrValue::Variable(variable) => self.met_variable(variable, span),
             _ => {}
         }
@@ -142,10 +154,10 @@ impl<'i> VariableValidator<'i> {
 
     fn met_instr_arg_value(&mut self, instr_arg_value: &CallInstrArgValue<'i>, span: Span) {
         match instr_arg_value {
-            CallInstrArgValue::JsonPath { variable, .. } => self.met_variable(variable, span),
+            CallInstrArgValue::JsonPath(json_path) => self.met_variable(&json_path.variable, span),
             CallInstrArgValue::Variable(variable) => {
                 // skipping streams here allows treating non-defined streams as empty arrays
-                if let Variable::Scalar(_) = variable {
+                if let AstVariable::Scalar(_) = variable {
                     self.met_variable(variable, span)
                 }
             }
@@ -153,10 +165,10 @@ impl<'i> VariableValidator<'i> {
         }
     }
 
-    fn met_variable(&mut self, variable: &Variable<'i>, span: Span) {
+    fn met_variable(&mut self, variable: &AstVariable<'i>, span: Span) {
         let name = match variable {
-            Variable::Scalar(name) => name,
-            Variable::Stream(name) => name,
+            AstVariable::Scalar(name) => name,
+            AstVariable::Stream(name) => name,
         };
 
         if !self.contains_variable(name, span) {
@@ -179,13 +191,12 @@ impl<'i> VariableValidator<'i> {
         found_spans.iter().any(|s| s < &key_span)
     }
 
-    fn met_call_output_definition(&mut self, call_output: &CallOutputValue<'i>, span: Span) {
+    fn met_variable_definition(&mut self, variable: &AstVariable<'i>, span: Span) {
         use std::collections::hash_map::Entry;
 
-        let variable_name = match call_output {
-            CallOutputValue::Variable(Variable::Scalar(name)) => name,
-            CallOutputValue::Variable(Variable::Stream(name)) => name,
-            CallOutputValue::None => return,
+        let variable_name = match variable {
+            AstVariable::Scalar(name) => name,
+            AstVariable::Stream(name) => name,
         };
 
         match self.met_variables.entry(variable_name) {
@@ -207,7 +218,7 @@ impl<'i> VariableValidator<'i> {
             | MatchableValue::Boolean(_)
             | MatchableValue::Literal(_) => {}
             MatchableValue::Variable(variable) => self.met_variable(variable, span),
-            MatchableValue::JsonPath { variable, .. } => self.met_variable(variable, span),
+            MatchableValue::JsonPath(json_path) => self.met_variable(&json_path.variable, span),
         }
     }
 
@@ -226,10 +237,10 @@ impl<'i> VariableValidator<'i> {
     fn met_iterable_value(&mut self, iterable_value: &IterableScalarValue<'i>, span: Span) {
         match iterable_value {
             IterableScalarValue::JsonPath { scalar_name, .. } => {
-                self.met_variable(&Variable::Scalar(scalar_name), span)
+                self.met_variable(&AstVariable::Scalar(scalar_name), span)
             }
-            IterableScalarValue::ScalarVariable(variable) => {
-                self.met_variable(&Variable::Scalar(variable), span)
+            IterableScalarValue::ScalarVariable(name) => {
+                self.met_variable(&AstVariable::Scalar(name), span)
             }
         }
     }

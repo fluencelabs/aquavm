@@ -14,23 +14,19 @@
  * limitations under the License.
  */
 
-use super::call_result_setter::set_local_call_result;
 use super::*;
 use crate::exec_err;
-use crate::execution_step::execution_context::ResolvedCallResult;
 use crate::execution_step::trace_handler::TraceHandler;
-use crate::execution_step::Generation;
+use crate::execution_step::RSecurityTetraplet;
 
+use crate::execution_step::air::call::call_result_setter::set_result_from_value;
 use air_interpreter_data::CallResult;
 use air_parser::ast::CallOutputValue;
-use polyplets::ResolvedTriplet;
-
-use std::rc::Rc;
 
 /// This function looks at the existing call state, validates it,
 /// and returns Ok(true) if the call should be executed further.
 pub(super) fn handle_prev_state<'i>(
-    triplet: &Rc<ResolvedTriplet>,
+    tetraplet: &RSecurityTetraplet,
     output: &CallOutputValue<'i>,
     prev_result: CallResult,
     trace_pos: usize,
@@ -47,10 +43,8 @@ pub(super) fn handle_prev_state<'i>(
             exec_err!(ExecutionError::LocalServiceError(*ret_code, err_msg.clone()))
         }
         RequestSentBy(..) => {
-            let peer_pk = triplet.peer_pk.as_str();
-
             // check whether current node can execute this call
-            let is_current_peer = peer_pk == exec_ctx.current_peer_id.as_str();
+            let is_current_peer = tetraplet.borrow().triplet.peer_pk.as_str() == exec_ctx.current_peer_id.as_str();
             if is_current_peer {
                 // if this peer could execute this call early return and
                 return Ok(true);
@@ -60,9 +54,8 @@ pub(super) fn handle_prev_state<'i>(
             Ok(false)
         }
         // this instruction's been already executed
-        Executed(result, generation) => {
-            let executed_result = ResolvedCallResult::new(result.clone(), triplet.clone(), trace_pos);
-            set_local_call_result(executed_result, Generation::Nth(*generation), output, exec_ctx)?;
+        Executed(value) => {
+            set_result_from_value(value.clone(), tetraplet.clone(), trace_pos, output, exec_ctx)?;
 
             exec_ctx.subtree_complete = true;
             Ok(false)

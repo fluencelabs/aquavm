@@ -16,22 +16,22 @@
 
 use super::Iterable;
 use super::IterableItem;
+use crate::execution_step::RSecurityTetraplet;
 use crate::foldable_next;
 use crate::foldable_prev;
 use crate::JValue;
-use crate::SecurityTetraplet;
 
 /// Used for iterating over a result of applied to a JValue json path.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) struct IterableJsonPathResult {
     pub(crate) jvalues: Vec<JValue>,
     // consider adding index for each tetraplet
-    pub(crate) tetraplet: SecurityTetraplet,
+    pub(crate) tetraplet: RSecurityTetraplet,
     pub(crate) cursor: usize,
 }
 
 impl IterableJsonPathResult {
-    pub(crate) fn init(jvalues: Vec<JValue>, tetraplet: SecurityTetraplet) -> Self {
+    pub(crate) fn init(jvalues: Vec<JValue>, tetraplet: RSecurityTetraplet) -> Self {
         Self {
             jvalues,
             tetraplet,

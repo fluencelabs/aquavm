@@ -312,7 +312,12 @@ fn fold_merge() {
         if let ExecutedState::Fold(fold) = state {
             for subtrace_lore in fold.0.iter() {
                 let value_pos = subtrace_lore.value_pos as usize;
-                if let ExecutedState::Call(CallResult::Executed(value, _)) = &data.trace[value_pos] {
+                if let ExecutedState::Call(CallResult::Executed(value)) = &data.trace[value_pos] {
+                    let value = match value {
+                        Value::Scalar(value) => value,
+                        Value::Stream { value, .. } => value,
+                    };
+
                     if let JValue::String(var_name) = value.deref() {
                         let current_count: usize = calls_count.get(var_name).map(|v| *v).unwrap_or_default();
                         calls_count.insert(var_name, current_count + 1);

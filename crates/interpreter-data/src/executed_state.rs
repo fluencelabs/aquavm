@@ -17,13 +17,15 @@
 use serde::Deserialize;
 use serde::Serialize;
 use serde_json::Value as JValue;
+use std::fmt::Formatter;
 use std::rc::Rc;
-
-pub const SCALAR_GENERATION: u32 = 0;
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub struct ParResult(pub u32, pub u32);
+pub struct ParResult {
+    pub left_subtree_size: u32,
+    pub right_subtree_size: u32,
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -32,12 +34,16 @@ pub enum CallResult {
     RequestSentBy(Rc<String>),
 
     /// A corresponding call's been already executed with such value as a result.
-    /// The second value is a generation, for scalar it means nothing and should be equal zero,
-    /// for streams it's used for merging.
-    Executed(Rc<JValue>, u32),
+    Executed(Value),
 
     /// call_service ended with a service error.
     CallServiceFailed(i32, Rc<String>),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum Value {
+    Scalar(Rc<JValue>),
+    Stream { value: Rc<JValue>, generation: u32 },
 }
 
 /// Let's consider an example of trace that could be produces by the following fold:
@@ -88,18 +94,29 @@ pub type FoldLore = Vec<FoldSubTraceLore>;
 #[serde(rename_all = "snake_case")]
 pub struct FoldResult(pub FoldLore);
 
+/// Describes result of applying functor `apply` to streams. This functor has the
+#[derive(Debug, Default, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub struct ApResult {
+    pub src_generations: Vec<u32>,
+    pub dst_generations: Vec<u32>,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum ExecutedState {
     Par(ParResult),
     Call(CallResult),
     Fold(FoldResult),
+    Ap(ApResult),
 }
 
 impl ParResult {
     /// Returns a size of subtrace that this par describes in execution_step trace.
     pub fn size(&self) -> Option<usize> {
-        self.0.checked_add(self.1).map(|v| v as usize)
+        self.left_subtree_size
+            .checked_add(self.right_subtree_size)
+            .map(|v| v as usize)
     }
 }
 
@@ -108,12 +125,16 @@ impl CallResult {
         CallResult::RequestSentBy(Rc::new(sender.into()))
     }
 
-    pub fn executed_scalar(value: JValue) -> CallResult {
-        CallResult::Executed(Rc::new(value), 0)
+    pub fn executed_scalar(value: Rc<JValue>) -> CallResult {
+        let value = Value::Scalar(value);
+
+        CallResult::Executed(value)
     }
 
-    pub fn executed_stream(value: JValue, generation: u32) -> CallResult {
-        CallResult::Executed(Rc::new(value), generation)
+    pub fn executed_stream(value: Rc<JValue>, generation: u32) -> CallResult {
+        let value = Value::Stream { value, generation };
+
+        CallResult::Executed(value)
     }
 
     pub fn failed(ret_code: i32, error_msg: impl Into<String>) -> CallResult {
@@ -131,8 +152,22 @@ impl SubTraceDesc {
 }
 
 impl ExecutedState {
-    pub fn par(left: usize, right: usize) -> Self {
-        Self::Par(ParResult(left as _, right as _))
+    pub fn par(left_subtree_size: usize, right_subtree_size: usize) -> Self {
+        let par_result = ParResult {
+            left_subtree_size: left_subtree_size as _,
+            right_subtree_size: right_subtree_size as _,
+        };
+
+        Self::Par(par_result)
+    }
+}
+
+impl ApResult {
+    pub fn new(src_generations: Vec<u32>, dst_generations: Vec<u32>) -> Self {
+        Self {
+            src_generations,
+            dst_generations,
+        }
     }
 }
 
@@ -142,10 +177,13 @@ impl std::fmt::Display for ExecutedState {
         use ExecutedState::*;
 
         match self {
-            Par(ParResult(left, right)) => write!(f, "par({}, {})", left, right),
+            Par(ParResult {
+                left_subtree_size,
+                right_subtree_size,
+            }) => write!(f, "par({}, {})", left_subtree_size, right_subtree_size),
             Call(RequestSentBy(peer_id)) => write!(f, r#"request_sent_by("{}")"#, peer_id),
-            Call(Executed(result, generation)) => {
-                write!(f, "executed({:?}, {})", result, generation)
+            Call(Executed(value)) => {
+                write!(f, "executed({})", value)
             }
             Call(CallServiceFailed(ret_code, err_msg)) => {
                 write!(f, r#"call_service_failed({}, "{}")"#, ret_code, err_msg)
@@ -164,6 +202,24 @@ impl std::fmt::Display for ExecutedState {
                     )?;
                 }
                 write!(f, "     )")
+            }
+            Ap(ap) => {
+                write!(
+                    f,
+                    "ap: {:?} -> {:?}",
+                    ap.src_generations, ap.dst_generations
+                )
+            }
+        }
+    }
+}
+
+impl std::fmt::Display for Value {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Value::Scalar(value) => write!(f, "scalar: {}", value),
+            Value::Stream { value, generation } => {
+                write!(f, "stream: {} generation: {}", value, generation)
             }
         }
     }
