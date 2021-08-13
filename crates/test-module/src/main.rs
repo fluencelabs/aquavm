@@ -25,7 +25,7 @@
     unreachable_patterns
 )]
 
-use fluence::marine;
+use marine_rs_sdk::marine;
 
 fn main() {}
 
