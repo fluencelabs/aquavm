@@ -229,8 +229,8 @@ fn construct_service_config(module_name: impl Into<String>) -> AppServiceConfig 
 #[test]
 #[ignore]
 fn tetraplet_with_wasm_modules() {
-    use fluence::CallParameters;
-    use fluence::SecurityTetraplet as SDKTetraplet;
+    use marine_rs_sdk::CallParameters;
+    use marine_rs_sdk::SecurityTetraplet as SDKTetraplet;
 
     let auth_module_name = String::from("auth_module");
     let auth_service_config = construct_service_config(auth_module_name.clone());
