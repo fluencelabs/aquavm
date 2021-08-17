@@ -150,6 +150,7 @@ CallInstrArgValue: CallInstrArgValue<'input> = {
     <n:Number> => CallInstrArgValue::Number(n),
     <b:Boolean> => CallInstrArgValue::Boolean(b),
     InitPeerId => CallInstrArgValue::InitPeerId,
+    EmptyArray => CallInstrArgValue::EmptyArray,
     <p:LastError> => CallInstrArgValue::LastError(p),
 }
 
@@ -186,6 +187,7 @@ Matchable: MatchableValue<'input> = {
     <s:Literal> => MatchableValue::Literal(s),
     <b:Boolean> => MatchableValue::Boolean(b),
     <n:Number> => MatchableValue::Number(n),
+    EmptyArray => MatchableValue::EmptyArray,
     <j:JsonPath> => MatchableValue::JsonPath(JsonPath::new(j.0, j.1, j.2)),
 }
 
@@ -198,6 +200,7 @@ extern {
         ")" => Token::CloseRoundBracket,
         "[" => Token::OpenSquareBracket,
         "]" => Token::CloseSquareBracket,
+        EmptyArray => Token::SquareBrackets,
 
         Literal => Token::StringLiteral(<&'input str>),
         Alphanumeric => Token::Alphanumeric(<&'input str>),

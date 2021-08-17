@@ -107,6 +107,10 @@ fn compare_matchable<'ctx>(
             let jvalue = (*bool).into();
             Ok(comparator(Cow::Owned(jvalue)))
         }
+        EmptyArray => {
+            let jvalue = JValue::Array(vec![]);
+            Ok(comparator(Cow::Owned(jvalue)))
+        }
         Variable(variable) => {
             let jvaluable = resolve_ast_variable(variable, exec_ctx)?;
             let jvalue = jvaluable.as_jvalue();

@@ -42,6 +42,7 @@ pub(crate) fn resolve_to_args<'i>(
         CallInstrArgValue::Literal(value) => prepare_consts(value.to_string(), ctx),
         CallInstrArgValue::Boolean(value) => prepare_consts(*value, ctx),
         CallInstrArgValue::Number(value) => prepare_consts(value, ctx),
+        CallInstrArgValue::EmptyArray => prepare_consts(json!([]), ctx),
         CallInstrArgValue::Variable(variable) => {
             let variable = Variable::from_ast(variable);
             prepare_variable(variable, ctx)

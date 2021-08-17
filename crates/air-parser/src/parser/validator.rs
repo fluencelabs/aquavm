@@ -216,7 +216,8 @@ impl<'i> VariableValidator<'i> {
             MatchableValue::InitPeerId
             | MatchableValue::Number(_)
             | MatchableValue::Boolean(_)
-            | MatchableValue::Literal(_) => {}
+            | MatchableValue::Literal(_)
+            | MatchableValue::EmptyArray => {}
             MatchableValue::Variable(variable) => self.met_variable(variable, span),
             MatchableValue::JsonPath(json_path) => self.met_variable(&json_path.variable, span),
         }

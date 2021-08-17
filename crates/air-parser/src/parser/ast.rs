@@ -92,6 +92,7 @@ pub enum CallInstrArgValue<'i> {
     Literal(&'i str),
     Number(Number),
     Boolean(bool),
+    EmptyArray, // only empty arrays are allowed now
     Variable(AstVariable<'i>),
     JsonPath(JsonPath<'i>),
 }
@@ -112,6 +113,7 @@ pub enum MatchableValue<'i> {
     Literal(&'i str),
     Number(Number),
     Boolean(bool),
+    EmptyArray,
     Variable(AstVariable<'i>),
     JsonPath(JsonPath<'i>),
 }

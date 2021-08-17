@@ -152,6 +152,30 @@ fn parse_json_path() {
 }
 
 #[test]
+fn parse_empty_array() {
+    use ast::CallOutputValue::*;
+    use ast::FunctionPart::*;
+    use ast::PeerPart::*;
+
+    let source_code = r#"
+        (call id "f" ["" [] arg])
+        "#;
+    let actual = parse(source_code);
+    let expected = Instruction::Call(Call {
+        peer_part: PeerPk(CallInstrValue::Variable(ast::AstVariable::Scalar("id"))),
+        function_part: FuncName(CallInstrValue::Literal("f")),
+        args: Rc::new(vec![
+            CallInstrArgValue::Literal(""),
+            CallInstrArgValue::EmptyArray,
+            CallInstrArgValue::Variable(Scalar("arg")),
+        ]),
+        output: None,
+    });
+
+    assert_eq!(actual, expected);
+}
+
+#[test]
 fn parse_undefined_variable() {
     let source_code = r#"
         (call id.$.a "f" ["hello" name] $void)

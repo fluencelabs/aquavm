@@ -28,6 +28,7 @@ impl fmt::Display for CallInstrArgValue<'_> {
             Literal(str) => write!(f, r#""{}""#, str),
             Number(number) => write!(f, "{}", number),
             Boolean(bool) => write!(f, "{}", bool),
+            EmptyArray => write!(f, "[]"),
             Variable(str) => write!(f, "{}", str),
             JsonPath(json_path) => write!(f, "{}", json_path),
         }
@@ -77,6 +78,7 @@ impl fmt::Display for MatchableValue<'_> {
             Literal(str) => write!(f, r#""{}""#, str),
             Number(number) => write!(f, "{}", number),
             Boolean(bool) => write!(f, "{}", bool),
+            EmptyArray => write!(f, "[]"),
             Variable(str) => write!(f, "{}", str),
             JsonPath(json_path) => write!(f, "{}", json_path),
         }
