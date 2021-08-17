@@ -165,6 +165,7 @@ impl fmt::Display for ApArgument<'_> {
         match self {
             ApArgument::ScalarVariable(name) => write!(f, "{}", name),
             ApArgument::JsonPath(json_path) => write!(f, "{}", json_path),
+            ApArgument::LastError(error_path) => write!(f, "{}", error_path),
             ApArgument::Number(value) => write!(f, "{}", value),
             ApArgument::Boolean(value) => write!(f, "{}", value),
             ApArgument::Literal(value) => write!(f, "{}", value),

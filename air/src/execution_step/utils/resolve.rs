@@ -18,7 +18,7 @@ use super::SecurityTetraplets;
 use crate::execution_step::boxed_value::JValuable;
 use crate::execution_step::boxed_value::Variable;
 use crate::execution_step::execution_context::ExecutionCtx;
-use crate::execution_step::execution_context::LastErrorWithTetraplets;
+use crate::execution_step::execution_context::LastErrorWithTetraplet;
 use crate::execution_step::ExecutionError;
 use crate::execution_step::ExecutionResult;
 use crate::JValue;
@@ -55,7 +55,10 @@ pub(crate) fn resolve_to_args<'i>(
 }
 
 #[allow(clippy::unnecessary_wraps)]
-fn prepare_const(arg: impl Into<JValue>, ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, SecurityTetraplets)> {
+pub(crate) fn prepare_const(
+    arg: impl Into<JValue>,
+    ctx: &ExecutionCtx<'_>,
+) -> ExecutionResult<(JValue, SecurityTetraplets)> {
     let jvalue = arg.into();
     let tetraplet = SecurityTetraplet::literal_tetraplet(ctx.init_peer_id.clone());
     let tetraplet = Rc::new(RefCell::new(tetraplet));
@@ -64,8 +67,14 @@ fn prepare_const(arg: impl Into<JValue>, ctx: &ExecutionCtx<'_>) -> ExecutionRes
 }
 
 #[allow(clippy::unnecessary_wraps)]
-fn prepare_last_error(path: &LastErrorPath, ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, SecurityTetraplets)> {
-    let LastErrorWithTetraplets { last_error, tetraplets } = ctx.last_error();
+pub(crate) fn prepare_last_error(
+    path: &LastErrorPath,
+    ctx: &ExecutionCtx<'_>,
+) -> ExecutionResult<(JValue, SecurityTetraplets)> {
+    let LastErrorWithTetraplet {
+        last_error,
+        tetraplet: tetraplets,
+    } = ctx.last_error();
     let jvalue = match path {
         LastErrorPath::Instruction => JValue::String(last_error.instruction),
         LastErrorPath::Message => JValue::String(last_error.msg),
@@ -73,7 +82,7 @@ fn prepare_last_error(path: &LastErrorPath, ctx: &ExecutionCtx<'_>) -> Execution
         LastErrorPath::None => json!(last_error),
     };
 
-    Ok((jvalue, tetraplets))
+    Ok((jvalue, vec![tetraplets]))
 }
 
 fn prepare_variable<'i>(

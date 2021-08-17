@@ -100,7 +100,8 @@ impl<'i> VariableValidator<'i> {
             ApArgument::Number(_)
             | ApArgument::Boolean(_)
             | ApArgument::Literal(_)
-            | ApArgument::EmptyArray => {}
+            | ApArgument::EmptyArray
+            | ApArgument::LastError(_) => {}
         }
         self.met_variable_definition(&ap.result, span);
     }

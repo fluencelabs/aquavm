@@ -17,7 +17,6 @@
 use super::ExecutionCtx;
 use crate::execution_step::ExecutionError;
 use crate::execution_step::RSecurityTetraplet;
-use crate::execution_step::SecurityTetraplets;
 use crate::SecurityTetraplet;
 
 use serde::Deserialize;
@@ -51,22 +50,21 @@ pub struct LastError {
 
 /// Helper struct to return last error with tetraplets from the last_error ExecutionCtx method.
 #[derive(Debug, Default)]
-pub(crate) struct LastErrorWithTetraplets {
+pub(crate) struct LastErrorWithTetraplet {
     pub(crate) last_error: LastError,
-    pub(crate) tetraplets: SecurityTetraplets,
+    pub(crate) tetraplet: RSecurityTetraplet,
 }
 
-impl<'s> LastErrorWithTetraplets {
+impl<'s> LastErrorWithTetraplet {
     pub(crate) fn from_error_descriptor(descriptor: &LastErrorDescriptor, ctx: &ExecutionCtx<'_>) -> Self {
         let last_error = descriptor.serialize();
-        let tetraplets = descriptor.tetraplet.clone().unwrap_or_else(|| {
+        let tetraplet = descriptor.tetraplet.clone().unwrap_or_else(|| {
             Rc::new(RefCell::new(SecurityTetraplet::literal_tetraplet(
                 ctx.init_peer_id.clone(),
             )))
         });
-        let tetraplets = vec![tetraplets];
 
-        Self { last_error, tetraplets }
+        Self { last_error, tetraplet }
     }
 }
 

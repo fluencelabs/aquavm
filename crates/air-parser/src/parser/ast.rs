@@ -73,6 +73,7 @@ pub enum ApArgument<'i> {
     Boolean(bool),
     Literal(&'i str),
     EmptyArray,
+    LastError(LastErrorPath),
 }
 
 #[derive(Serialize, Debug, PartialEq)]

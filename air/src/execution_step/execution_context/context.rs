@@ -15,7 +15,7 @@
  */
 
 use super::LastErrorDescriptor;
-use super::LastErrorWithTetraplets;
+use super::LastErrorWithTetraplet;
 use crate::execution_step::boxed_value::Scalar;
 use crate::execution_step::boxed_value::Stream;
 
@@ -77,9 +77,9 @@ impl<'i> ExecutionCtx<'i> {
         }
     }
 
-    pub(crate) fn last_error(&self) -> LastErrorWithTetraplets {
+    pub(crate) fn last_error(&self) -> LastErrorWithTetraplet {
         match &self.last_error {
-            Some(error_descriptor) => LastErrorWithTetraplets::from_error_descriptor(error_descriptor, self),
+            Some(error_descriptor) => LastErrorWithTetraplet::from_error_descriptor(error_descriptor, self),
             None => <_>::default(),
         }
     }

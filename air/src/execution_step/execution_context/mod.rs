@@ -20,4 +20,4 @@ mod error_descriptor;
 pub(crate) use context::ExecutionCtx;
 pub use error_descriptor::LastError;
 pub(crate) use error_descriptor::LastErrorDescriptor;
-pub(crate) use error_descriptor::LastErrorWithTetraplets;
+pub(crate) use error_descriptor::LastErrorWithTetraplet;

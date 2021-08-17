@@ -838,6 +838,24 @@ fn ap_with_bool() {
 }
 
 #[test]
+fn ap_with_last_error() {
+    use ast::Ap;
+    use ast::LastErrorPath;
+
+    let source_code = r#"
+        (ap %last_error%.$.msg! $stream)
+    "#;
+
+    let actual = parse(source_code);
+    let expected = Instruction::Ap(Ap {
+        argument: ast::ApArgument::LastError(LastErrorPath::Message),
+        result: ast::AstVariable::Stream("$stream"),
+    });
+
+    assert_eq!(actual, expected);
+}
+
+#[test]
 fn fold_json_path() {
     use ast::FoldScalar;
     use ast::IterableScalarValue::*;

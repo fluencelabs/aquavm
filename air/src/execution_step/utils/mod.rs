@@ -16,8 +16,6 @@
 
 mod resolve;
 
-pub(crate) use resolve::apply_json_path;
-pub(crate) use resolve::resolve_ast_variable;
-pub(crate) use resolve::resolve_to_args;
+pub(crate) use resolve::*;
 
 use super::SecurityTetraplets;

@@ -29,10 +29,10 @@ use crate::JValue;
 use crate::SecurityTetraplet;
 use utils::*;
 
-use air_parser::ast::Ap;
 use air_parser::ast::ApArgument;
 use air_parser::ast::AstVariable;
 use air_parser::ast::JsonPath;
+use air_parser::ast::{Ap, LastErrorPath};
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -52,6 +52,7 @@ impl<'i> super::ExecutableInstruction<'i> for Ap<'i> {
         let result = match &self.argument {
             ApArgument::ScalarVariable(scalar_name) => apply_scalar(scalar_name, exec_ctx)?,
             ApArgument::JsonPath(json_arg) => apply_json_argument(json_arg, exec_ctx, trace_ctx)?,
+            ApArgument::LastError(error_path) => apply_last_error(error_path, exec_ctx, trace_ctx)?,
             ApArgument::Literal(value) => apply_const(value.to_string(), exec_ctx, trace_ctx),
             ApArgument::Number(value) => apply_const(value, exec_ctx, trace_ctx),
             ApArgument::Boolean(value) => apply_const(*value, exec_ctx, trace_ctx),
@@ -89,9 +90,21 @@ fn apply_const(value: impl Into<JValue>, exec_ctx: &ExecutionCtx<'_>, trace_ctx:
     let value = Rc::new(value.into());
     let tetraplet = SecurityTetraplet::literal_tetraplet(exec_ctx.init_peer_id.clone());
     let tetraplet = Rc::new(RefCell::new(tetraplet));
-    let trace_pos = trace_ctx.trace_pos();
 
-    ResolvedCallResult::new(value, tetraplet, trace_pos)
+    ResolvedCallResult::new(value, tetraplet, trace_ctx.trace_pos())
+}
+
+fn apply_last_error(
+    error_path: &LastErrorPath,
+    exec_ctx: &ExecutionCtx<'_>,
+    trace_ctx: &TraceHandler,
+) -> ExecutionResult<ResolvedCallResult> {
+    let (value, mut tetraplets) = crate::execution_step::utils::prepare_last_error(error_path, exec_ctx)?;
+    let value = Rc::new(value);
+    let tetraplet = tetraplets.remove(0);
+
+    let result = ResolvedCallResult::new(value, tetraplet, trace_ctx.trace_pos());
+    Ok(result)
 }
 
 fn apply_json_argument(

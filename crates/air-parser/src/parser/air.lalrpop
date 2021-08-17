@@ -161,6 +161,7 @@ ApArgument: ApArgument<'input> = {
     <b:Boolean> => ApArgument::Boolean(b),
     EmptyArray => ApArgument::EmptyArray,
     <s:Literal> => ApArgument::Literal(s),
+    <p:LastError> => ApArgument::LastError(p),
 };
 
 ScalarIterable: IterableScalarValue<'input> = {
