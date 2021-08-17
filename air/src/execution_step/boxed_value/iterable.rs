@@ -73,6 +73,18 @@ impl IterableItem<'_> {
 
         *pos
     }
+
+    pub(crate) fn into_resolved_result(self) -> ResolvedCallResult {
+        use IterableItem::*;
+
+        let (value, tetraplet, pos) = match self {
+            RefRef((value, tetraplet, pos)) => (Rc::new(value.clone()), tetraplet.clone(), pos),
+            RefValue((value, tetraplet, pos)) => (Rc::new(value.clone()), tetraplet, pos),
+            RcValue(ingredients) => ingredients,
+        };
+
+        ResolvedCallResult::new(value, tetraplet, pos)
+    }
 }
 
 #[macro_export]

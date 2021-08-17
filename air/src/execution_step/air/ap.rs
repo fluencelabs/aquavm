@@ -82,7 +82,13 @@ fn apply_scalar(scalar_name: &str, exec_ctx: &ExecutionCtx<'_>) -> ExecutionResu
 
     match scalar {
         Scalar::JValueRef(result) => Ok(result.clone()),
-        Scalar::JValueFoldCursor(_) => crate::exec_err!(ExecutionError::ApArgumentIsIterable(scalar_name.to_string())),
+        Scalar::JValueFoldCursor(iterator) => {
+            let result = iterator.iterable.peek().expect(
+                "peek always return elements inside fold,\
+            this guaranteed by implementation of next and avoiding empty folds",
+            );
+            Ok(result.into_resolved_result())
+        }
     }
 }
 

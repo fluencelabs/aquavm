@@ -95,17 +95,7 @@ fn create_scalar_iterable<'ctx>(
         Some(Scalar::JValueRef(call_result)) => from_call_result(call_result.clone()),
         Some(Scalar::JValueFoldCursor(fold_state)) => {
             let iterable_value = fold_state.iterable.peek().unwrap();
-            let jvalue = iterable_value.as_jvalue();
-            let result = Rc::new(jvalue.into_owned());
-            let triplet = as_tetraplet(&iterable_value);
-
-            // TODO: it's safe to use 0 here, because trace_pos isn't needed for scalars,
-            // but it's needed to be refactored in future
-            let call_result = ResolvedCallResult {
-                result,
-                tetraplet: triplet,
-                trace_pos: 0,
-            };
+            let call_result = iterable_value.into_resolved_result();
             from_call_result(call_result)
         }
         _ => return exec_err!(ExecutionError::VariableNotFound(variable_name.to_string())),

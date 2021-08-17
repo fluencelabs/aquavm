@@ -115,17 +115,13 @@ pub(crate) enum ExecutionError {
     TraceError(#[from] TraceHandlerError),
 
     /// Errors occurred while insertion of a value inside stream that doesn't have corresponding generation.
-    #[error("stream {0:?} doesn't have generation with number {1}, probably the supplied data to the interpreter is corrupted")]
+    #[error("stream {0:?} doesn't have generation with number {1}, probably a supplied to the interpreter data is corrupted")]
     StreamDontHaveSuchGeneration(Stream, usize),
 
     /// Errors occurred when result from data doesn't match to a instruction, f.e. an instruction
     /// could be applied to a stream, but result doesn't contain generation in a source position.
     #[error("ap result {0:?} doesn't match corresponding instruction")]
     ApResultNotCorrespondToInstr(MergerApResult),
-
-    /// Errors occurred when ap is applied to a iterable.
-    #[error("ap result is applied to an iterable '{0}', that isn't allowed")]
-    ApArgumentIsIterable(String),
 }
 
 impl From<TraceHandlerError> for Rc<ExecutionError> {
@@ -159,8 +155,7 @@ impl ExecutionError {
             StreamJsonPathError(..) => 18,
             StreamDontHaveSuchGeneration(..) => 19,
             ApResultNotCorrespondToInstr(_) => 20,
-            ApArgumentIsIterable(_) => 21,
-            TraceError(_) => 22,
+            TraceError(_) => 21,
         }
     }
 }
