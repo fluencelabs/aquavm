@@ -769,9 +769,10 @@ fn no_output() {
     use ast::PeerPart::*;
 
     let source_code = r#"
-    (call peer (service fname) [])
+        (call peer (service fname) [])
     "#;
-    let instruction = parse(source_code);
+    let actual = parse(source_code);
+
     let expected = Instruction::Call(Call {
         peer_part: PeerPk(CallInstrValue::Variable(Scalar("peer"))),
         function_part: ServiceIdWithFuncName(
@@ -781,7 +782,59 @@ fn no_output() {
         args: Rc::new(vec![]),
         output: None,
     });
-    assert_eq!(instruction, expected);
+    assert_eq!(actual, expected);
+}
+
+#[test]
+fn ap_with_literal() {
+    use ast::Ap;
+
+    let source_code = r#"
+        (ap "some_string" $stream)
+    "#;
+
+    let actual = parse(source_code);
+    let expected = Instruction::Ap(Ap {
+        argument: ast::ApArgument::Literal("some_string"),
+        result: ast::AstVariable::Stream("$stream"),
+    });
+
+    assert_eq!(actual, expected);
+}
+
+#[test]
+fn ap_with_number() {
+    use ast::Ap;
+    use ast::Number;
+
+    let source_code = r#"
+        (ap -100 $stream)
+    "#;
+
+    let actual = parse(source_code);
+    let expected = Instruction::Ap(Ap {
+        argument: ast::ApArgument::Number(Number::Int(-100)),
+        result: ast::AstVariable::Stream("$stream"),
+    });
+
+    assert_eq!(actual, expected);
+}
+
+#[test]
+fn ap_with_bool() {
+    use ast::Ap;
+
+    let source_code = r#"
+        (ap true $stream)
+    "#;
+
+    let actual = parse(source_code);
+    let expected = Instruction::Ap(Ap {
+        argument: ast::ApArgument::Boolean(true),
+        result: ast::AstVariable::Stream("$stream"),
+    });
+
+    assert_eq!(actual, expected);
 }
 
 #[test]

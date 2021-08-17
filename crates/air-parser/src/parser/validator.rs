@@ -97,6 +97,10 @@ impl<'i> VariableValidator<'i> {
         match &ap.argument {
             ApArgument::ScalarVariable(name) => self.met_variable(&AstVariable::Scalar(name), span),
             ApArgument::JsonPath(json_path) => self.met_variable(&json_path.variable, span),
+            ApArgument::Number(_)
+            | ApArgument::Boolean(_)
+            | ApArgument::Literal(_)
+            | ApArgument::EmptyArray => {}
         }
         self.met_variable_definition(&ap.result, span);
     }

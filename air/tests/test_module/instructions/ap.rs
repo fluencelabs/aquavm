@@ -56,6 +56,81 @@ fn ap_with_scalars() {
 }
 
 #[test]
+fn ap_with_string_literal() {
+    let vm_1_peer_id = "vm_1_peer_id";
+    let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
+
+    let script = format!(
+        r#"
+        (seq
+            (ap "some_string" $stream)
+            (call "{}" ("" "") [$stream])
+        )
+        "#,
+        vm_1_peer_id
+    );
+
+    let result = checked_call_vm!(vm_1, "", script, "", "");
+
+    let actual_trace = trace_from_result(&result);
+    let expected_state = vec![
+        executed_state::ap(Some(0)),
+        executed_state::scalar(json!(["some_string"])),
+    ];
+
+    assert_eq!(actual_trace, expected_state);
+    assert!(result.next_peer_pks.is_empty());
+}
+
+#[test]
+fn ap_with_bool_literal() {
+    let vm_1_peer_id = "vm_1_peer_id";
+    let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
+
+    let script = format!(
+        r#"
+        (seq
+            (ap true $stream)
+            (call "{}" ("" "") [$stream])
+        )
+        "#,
+        vm_1_peer_id
+    );
+
+    let result = checked_call_vm!(vm_1, "", script, "", "");
+
+    let actual_trace = trace_from_result(&result);
+    let expected_state = vec![executed_state::ap(Some(0)), executed_state::scalar(json!([true]))];
+
+    assert_eq!(actual_trace, expected_state);
+    assert!(result.next_peer_pks.is_empty());
+}
+
+#[test]
+fn ap_with_number_literal() {
+    let vm_1_peer_id = "vm_1_peer_id";
+    let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
+
+    let script = format!(
+        r#"
+        (seq
+            (ap 100 $stream)
+            (call "{}" ("" "") [$stream])
+        )
+        "#,
+        vm_1_peer_id
+    );
+
+    let result = checked_call_vm!(vm_1, "", script, "", "");
+
+    let actual_trace = trace_from_result(&result);
+    let expected_state = vec![executed_state::ap(Some(0)), executed_state::scalar(json!([100]))];
+
+    assert_eq!(actual_trace, expected_state);
+    assert!(result.next_peer_pks.is_empty());
+}
+
+#[test]
 fn ap_with_dst_stream() {
     let vm_1_peer_id = "vm_1_peer_id";
     let test_value = "scalar_2";

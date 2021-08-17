@@ -37,12 +37,12 @@ pub(crate) fn resolve_to_args<'i>(
     ctx: &ExecutionCtx<'i>,
 ) -> ExecutionResult<(JValue, SecurityTetraplets)> {
     match value {
-        CallInstrArgValue::InitPeerId => prepare_consts(ctx.init_peer_id.clone(), ctx),
+        CallInstrArgValue::InitPeerId => prepare_const(ctx.init_peer_id.clone(), ctx),
         CallInstrArgValue::LastError(path) => prepare_last_error(path, ctx),
-        CallInstrArgValue::Literal(value) => prepare_consts(value.to_string(), ctx),
-        CallInstrArgValue::Boolean(value) => prepare_consts(*value, ctx),
-        CallInstrArgValue::Number(value) => prepare_consts(value, ctx),
-        CallInstrArgValue::EmptyArray => prepare_consts(json!([]), ctx),
+        CallInstrArgValue::Literal(value) => prepare_const(value.to_string(), ctx),
+        CallInstrArgValue::Boolean(value) => prepare_const(*value, ctx),
+        CallInstrArgValue::Number(value) => prepare_const(value, ctx),
+        CallInstrArgValue::EmptyArray => prepare_const(json!([]), ctx),
         CallInstrArgValue::Variable(variable) => {
             let variable = Variable::from_ast(variable);
             prepare_variable(variable, ctx)
@@ -55,7 +55,7 @@ pub(crate) fn resolve_to_args<'i>(
 }
 
 #[allow(clippy::unnecessary_wraps)]
-fn prepare_consts(arg: impl Into<JValue>, ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, SecurityTetraplets)> {
+fn prepare_const(arg: impl Into<JValue>, ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, SecurityTetraplets)> {
     let jvalue = arg.into();
     let tetraplet = SecurityTetraplet::literal_tetraplet(ctx.init_peer_id.clone());
     let tetraplet = Rc::new(RefCell::new(tetraplet));

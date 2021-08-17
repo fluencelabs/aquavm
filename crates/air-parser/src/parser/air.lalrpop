@@ -157,6 +157,10 @@ CallInstrArgValue: CallInstrArgValue<'input> = {
 ApArgument: ApArgument<'input> = {
     <a:Alphanumeric> => ApArgument::ScalarVariable(a),
     <j:JsonPath> => ApArgument::JsonPath(JsonPath::new(j.0, j.1, j.2)),
+    <n:Number> => ApArgument::Number(n),
+    <b:Boolean> => ApArgument::Boolean(b),
+    EmptyArray => ApArgument::EmptyArray,
+    <s:Literal> => ApArgument::Literal(s),
 };
 
 ScalarIterable: IterableScalarValue<'input> = {

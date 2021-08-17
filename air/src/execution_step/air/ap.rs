@@ -25,6 +25,7 @@ use crate::execution_step::air::ResolvedCallResult;
 use crate::execution_step::boxed_value::Variable;
 use crate::execution_step::trace_handler::MergerApResult;
 use crate::execution_step::utils::apply_json_path;
+use crate::JValue;
 use crate::SecurityTetraplet;
 use utils::*;
 
@@ -51,6 +52,10 @@ impl<'i> super::ExecutableInstruction<'i> for Ap<'i> {
         let result = match &self.argument {
             ApArgument::ScalarVariable(scalar_name) => apply_scalar(scalar_name, exec_ctx)?,
             ApArgument::JsonPath(json_arg) => apply_json_argument(json_arg, exec_ctx, trace_ctx)?,
+            ApArgument::Literal(value) => apply_const(value.to_string(), exec_ctx, trace_ctx),
+            ApArgument::Number(value) => apply_const(value, exec_ctx, trace_ctx),
+            ApArgument::Boolean(value) => apply_const(*value, exec_ctx, trace_ctx),
+            ApArgument::EmptyArray => apply_const(serde_json::json!([]), exec_ctx, trace_ctx),
         };
         save_result(&self.result, &merger_ap_result, result, exec_ctx)?;
 
@@ -78,6 +83,15 @@ fn apply_scalar(scalar_name: &str, exec_ctx: &ExecutionCtx<'_>) -> ExecutionResu
         Scalar::JValueRef(result) => Ok(result.clone()),
         Scalar::JValueFoldCursor(_) => crate::exec_err!(ExecutionError::ApArgumentIsIterable(scalar_name.to_string())),
     }
+}
+
+fn apply_const(value: impl Into<JValue>, exec_ctx: &ExecutionCtx<'_>, trace_ctx: &TraceHandler) -> ResolvedCallResult {
+    let value = Rc::new(value.into());
+    let tetraplet = SecurityTetraplet::literal_tetraplet(exec_ctx.init_peer_id.clone());
+    let tetraplet = Rc::new(RefCell::new(tetraplet));
+    let trace_pos = trace_ctx.trace_pos();
+
+    ResolvedCallResult::new(value, tetraplet, trace_pos)
 }
 
 fn apply_json_argument(

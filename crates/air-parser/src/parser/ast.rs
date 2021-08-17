@@ -69,6 +69,10 @@ pub struct Call<'i> {
 pub enum ApArgument<'i> {
     ScalarVariable(&'i str),
     JsonPath(JsonPath<'i>),
+    Number(Number),
+    Boolean(bool),
+    Literal(&'i str),
+    EmptyArray,
 }
 
 #[derive(Serialize, Debug, PartialEq)]
