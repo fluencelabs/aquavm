@@ -208,9 +208,9 @@ fn executed_trace_create_service() {
     let add_blueprint_response = String::from("add_blueprint response");
     let create_response = String::from("create response");
     let expected_trace = vec![
-        scalar_jvalue(module_bytes),
-        scalar_jvalue(module_config),
-        scalar_jvalue(blueprint),
+        scalar(module_bytes),
+        scalar(module_config),
+        scalar(blueprint),
         scalar_string(add_module_response),
         scalar_string(add_blueprint_response),
         scalar_string(create_response),

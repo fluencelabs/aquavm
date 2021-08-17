@@ -18,6 +18,7 @@ mod air_basic;
 mod call_evidence_basic;
 mod dashboard;
 mod data_merge;
+mod empty_array;
 mod flattening;
 mod join;
 mod join_behaviour;

@@ -153,9 +153,9 @@ fn create_service() {
 
     let actual_trace = trace_from_result(&result);
     let expected_trace = vec![
-        executed_state::scalar_jvalue(module_bytes),
-        executed_state::scalar_jvalue(module_config),
-        executed_state::scalar_jvalue(blueprint),
+        executed_state::scalar(module_bytes),
+        executed_state::scalar(module_config),
+        executed_state::scalar(blueprint),
         executed_state::scalar_string(add_module_response),
         executed_state::scalar_string(add_blueprint_response),
         executed_state::scalar_string(create_response),

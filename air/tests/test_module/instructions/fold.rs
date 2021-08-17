@@ -179,7 +179,7 @@ fn empty_fold() {
     let result = checked_call_vm!(vm, "", empty_fold, "", result.data);
 
     let actual_trace = trace_from_result(&result);
-    let expected_state = executed_state::scalar_jvalue(json!([]));
+    let expected_state = executed_state::scalar(json!([]));
 
     assert_eq!(actual_trace.len(), 1);
     assert_eq!(actual_trace[0], expected_state);
@@ -205,7 +205,7 @@ fn empty_fold_json_path() {
     let result = checked_call_vm!(vm, "", empty_fold, "", result.data);
 
     let actual_trace = trace_from_result(&result);
-    let expected_trace = vec![executed_state::scalar_jvalue(json!({ "messages": [] }))];
+    let expected_trace = vec![executed_state::scalar(json!({ "messages": [] }))];
 
     assert_eq!(actual_trace, expected_trace);
 }
@@ -260,7 +260,7 @@ fn json_path() {
     let result = checked_call_vm!(vm, "", lfold, "", result.data);
 
     let actual_trace = trace_from_result(&result);
-    let expected_state = executed_state::scalar_jvalue(json!({ "array": ["1", "2", "3", "4", "5"] }));
+    let expected_state = executed_state::scalar(json!({ "array": ["1", "2", "3", "4", "5"] }));
 
     assert_eq!(actual_trace.len(), 6);
     assert_eq!(actual_trace[0], expected_state);

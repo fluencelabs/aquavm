@@ -27,7 +27,7 @@ use crate::SubTraceDesc;
 
 use std::rc::Rc;
 
-pub fn scalar_jvalue(result: JValue) -> ExecutedState {
+pub fn scalar(result: JValue) -> ExecutedState {
     let value = Value::Scalar(Rc::new(result));
     ExecutedState::Call(CallResult::Executed(value))
 }

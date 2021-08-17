@@ -47,7 +47,7 @@ fn ap_with_scalars() {
 
     let actual_trace = trace_from_result(&result);
     let expected_state = vec![
-        executed_state::scalar_jvalue(json!({ "field": test_value })),
+        executed_state::scalar(json!({ "field": test_value })),
         executed_state::scalar_string(test_value),
     ];
 
@@ -85,9 +85,9 @@ fn ap_with_dst_stream() {
 
     let actual_trace = trace_from_result(&result);
     let expected_state = vec![
-        executed_state::scalar_jvalue(json!({ "field": test_value })),
+        executed_state::scalar(json!({ "field": test_value })),
         executed_state::ap(Some(0)),
-        executed_state::scalar_jvalue(json!([{ "field": test_value }])),
+        executed_state::scalar(json!([{ "field": test_value }])),
     ];
 
     assert_eq!(actual_trace, expected_state);
