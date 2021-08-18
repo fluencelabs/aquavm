@@ -98,7 +98,7 @@ pub fn service_failed(ret_code: i32, error_message: impl Into<String>) -> Execut
 }
 
 pub fn fold(lore: FoldLore) -> ExecutedState {
-    let result = FoldResult(lore);
+    let result = FoldResult { lore };
     ExecutedState::Fold(result)
 }
 

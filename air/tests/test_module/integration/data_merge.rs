@@ -18,10 +18,9 @@
 use serde_json::json;
 
 use air_test_utils::*;
+use std::collections::HashMap;
 
 type JValue = serde_json::Value;
-
-use std::collections::HashMap;
 
 #[test]
 fn data_merge() {
@@ -310,7 +309,7 @@ fn fold_merge() {
         }
 
         if let ExecutedState::Fold(fold) = state {
-            for subtrace_lore in fold.0.iter() {
+            for subtrace_lore in fold.lore.iter() {
                 let value_pos = subtrace_lore.value_pos as usize;
                 if let ExecutedState::Call(CallResult::Executed(value)) = &data.trace[value_pos] {
                     let value = match value {
