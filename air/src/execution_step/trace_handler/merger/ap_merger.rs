@@ -34,6 +34,8 @@ pub(crate) fn try_merge_next_state_as_ap(data_keeper: &mut DataKeeper) -> MergeR
 
     let ap = match (prev_state, current_state) {
         (Some(Ap(prev_ap)), _) => prev_ap,
+        // check that current state is Ap, but it's impossible to use it, because prev_data
+        // could not have streams with such generations
         (None, Some(Ap(_))) => return Ok(MergerApResult::Empty),
         (None, None) => return Ok(MergerApResult::Empty),
         (prev_state, current_state) => return Err(MergeError::incompatible_states(prev_state, current_state, "ap")),
