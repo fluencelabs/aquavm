@@ -58,7 +58,7 @@ macro_rules! to_maybe_generation {
 }
 
 fn to_merger_result(ap_result: ApResult) -> MergeResult<MergerApResult> {
-    let res_generation = to_maybe_generation!(ap_result, &ap_result.res_gens, TooManyDstGenerations);
+    let res_generation = to_maybe_generation!(ap_result, &ap_result.res_generations, TooManyDstGenerations);
 
     let ap_result = MergerApResult::ApResult { res_generation };
 

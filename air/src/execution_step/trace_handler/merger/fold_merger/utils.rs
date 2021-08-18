@@ -33,10 +33,10 @@ pub(crate) struct ResolvedSubTraceDescs {
 }
 
 pub(super) fn resolve_fold_lore(fold: &FoldResult) -> MergeResult<ResolvedFold> {
-    let mut lore = HashMap::with_capacity(fold.0.len());
+    let mut lore = HashMap::with_capacity(fold.lore.len());
     let mut fold_states_count = 0usize;
 
-    for subtrace_lore in fold.0.iter() {
+    for subtrace_lore in fold.lore.iter() {
         check_subtrace_lore(subtrace_lore)?;
 
         let resolved_descs = ResolvedSubTraceDescs {

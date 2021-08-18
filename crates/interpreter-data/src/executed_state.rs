@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
+mod impls;
+mod se_de;
+
+use se_de::par_serializer;
 use serde::Deserialize;
 use serde::Serialize;
 use serde_json::Value as JValue;
 use std::fmt::Formatter;
 use std::rc::Rc;
 
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
 pub struct ParResult {
     pub left_size: u32,
     pub right_size: u32,
@@ -31,16 +34,19 @@ pub struct ParResult {
 #[serde(rename_all = "snake_case")]
 pub enum CallResult {
     /// Request was sent to a target node by node with such public key and it shouldn't be called again.
+    #[serde(rename = "sent_by")]
     RequestSentBy(Rc<String>),
 
     /// A corresponding call's been already executed with such value as a result.
     Executed(Value),
 
     /// call_service ended with a service error.
+    #[serde(rename = "failed")]
     CallServiceFailed(i32, Rc<String>),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum Value {
     Scalar(Rc<JValue>),
     Stream { value: Rc<JValue>, generation: u32 },
@@ -67,11 +73,13 @@ pub enum Value {
 #[serde(rename_all = "snake_case")]
 pub struct FoldSubTraceLore {
     /// Position of current value in a trace.
+    #[serde(rename = "pos")]
     pub value_pos: u32,
 
     /// Descriptors of a subtrace that are corresponded to the current value. Technically, now
     /// it always contains two values, and Vec here is used to have a possibility to handle more
     /// than one next inside fold in future.
+    #[serde(rename = "desc")]
     pub subtraces_desc: Vec<SubTraceDesc>,
 }
 
@@ -80,9 +88,11 @@ pub struct FoldSubTraceLore {
 #[serde(rename_all = "snake_case")]
 pub struct SubTraceDesc {
     /// Start position in a trace of this subtrace.
+    #[serde(rename = "pos")]
     pub begin_pos: u32,
 
     /// Length of the subtrace.
+    #[serde(rename = "len")]
     pub subtrace_len: u32,
 }
 
@@ -92,127 +102,24 @@ pub type FoldLore = Vec<FoldSubTraceLore>;
 
 #[derive(Debug, Default, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub struct FoldResult(pub FoldLore);
+pub struct FoldResult {
+    pub lore: FoldLore,
+}
 
 /// Describes result of applying functor `apply` to streams.
 #[derive(Debug, Default, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct ApResult {
-    pub res_gens: Vec<u32>,
+    #[serde(rename = "gens")]
+    pub res_generations: Vec<u32>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum ExecutedState {
+    #[serde(with = "par_serializer")]
     Par(ParResult),
     Call(CallResult),
     Fold(FoldResult),
     Ap(ApResult),
-}
-
-impl ParResult {
-    /// Returns a size of subtrace that this par describes in execution_step trace.
-    pub fn size(&self) -> Option<usize> {
-        self.left_size
-            .checked_add(self.right_size)
-            .map(|v| v as usize)
-    }
-}
-
-impl CallResult {
-    pub fn sent(sender: impl Into<String>) -> CallResult {
-        CallResult::RequestSentBy(Rc::new(sender.into()))
-    }
-
-    pub fn executed_scalar(value: Rc<JValue>) -> CallResult {
-        let value = Value::Scalar(value);
-
-        CallResult::Executed(value)
-    }
-
-    pub fn executed_stream(value: Rc<JValue>, generation: u32) -> CallResult {
-        let value = Value::Stream { value, generation };
-
-        CallResult::Executed(value)
-    }
-
-    pub fn failed(ret_code: i32, error_msg: impl Into<String>) -> CallResult {
-        CallResult::CallServiceFailed(ret_code, Rc::new(error_msg.into()))
-    }
-}
-
-impl SubTraceDesc {
-    pub fn new(begin_pos: usize, subtrace_len: usize) -> Self {
-        Self {
-            begin_pos: begin_pos as _,
-            subtrace_len: subtrace_len as _,
-        }
-    }
-}
-
-impl ExecutedState {
-    pub fn par(left_subtree_size: usize, right_subtree_size: usize) -> Self {
-        let par_result = ParResult {
-            left_size: left_subtree_size as _,
-            right_size: right_subtree_size as _,
-        };
-
-        Self::Par(par_result)
-    }
-}
-
-impl ApResult {
-    pub fn new(res_gens: Vec<u32>) -> Self {
-        Self { res_gens }
-    }
-}
-
-impl std::fmt::Display for ExecutedState {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use CallResult::*;
-        use ExecutedState::*;
-
-        match self {
-            Par(ParResult {
-                left_size: left_subtree_size,
-                right_size: right_subtree_size,
-            }) => write!(f, "par({}, {})", left_subtree_size, right_subtree_size),
-            Call(RequestSentBy(peer_id)) => write!(f, r#"request_sent_by("{}")"#, peer_id),
-            Call(Executed(value)) => {
-                write!(f, "executed({})", value)
-            }
-            Call(CallServiceFailed(ret_code, err_msg)) => {
-                write!(f, r#"call_service_failed({}, "{}")"#, ret_code, err_msg)
-            }
-            Fold(FoldResult(lore)) => {
-                writeln!(f, "fold(",)?;
-                for sublore in lore {
-                    writeln!(
-                        f,
-                        "          {} - [{}, {}], [{}, {}]",
-                        sublore.value_pos,
-                        sublore.subtraces_desc[0].begin_pos,
-                        sublore.subtraces_desc[0].subtrace_len,
-                        sublore.subtraces_desc[1].begin_pos,
-                        sublore.subtraces_desc[1].subtrace_len
-                    )?;
-                }
-                write!(f, "     )")
-            }
-            Ap(ap) => {
-                write!(f, "ap: _ -> {:?}", ap.res_gens)
-            }
-        }
-    }
-}
-
-impl std::fmt::Display for Value {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Value::Scalar(value) => write!(f, "scalar: {}", value),
-            Value::Stream { value, generation } => {
-                write!(f, "stream: {} generation: {}", value, generation)
-            }
-        }
-    }
 }

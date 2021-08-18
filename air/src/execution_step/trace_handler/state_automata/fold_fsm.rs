@@ -142,7 +142,7 @@ impl FoldFSM {
 
     pub(crate) fn meet_fold_end(self, data_keeper: &mut DataKeeper) {
         // TODO: check for prev and current lore emptiness
-        let fold_result = FoldResult(self.result_lore);
+        let fold_result = FoldResult { lore: self.result_lore };
         let state = ExecutedState::Fold(fold_result);
         self.state_inserter.insert(data_keeper, state);
         self.state_handler.set_final_states(data_keeper);
