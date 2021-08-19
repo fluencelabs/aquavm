@@ -88,24 +88,24 @@ fn try_get_fold_state<'i, 'ctx>(
 }
 
 fn maybe_meet_iteration_start(fold_state: &FoldState<'_>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
-    if let IterableType::Stream(stream_name) = &fold_state.iterable_type {
-        trace_ctx.meet_iteration_start(stream_name.as_str(), fold_state.iterable.peek().unwrap().pos())?;
+    if let IterableType::Stream(fold_id) = &fold_state.iterable_type {
+        trace_ctx.meet_iteration_start(fold_id.as_str(), fold_state.iterable.peek().unwrap().pos())?;
     }
 
     Ok(())
 }
 
 fn maybe_meet_iteration_end(fold_state: &FoldState<'_>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
-    if let IterableType::Stream(stream_name) = &fold_state.iterable_type {
-        trace_ctx.meet_iteration_end(stream_name.as_str())?;
+    if let IterableType::Stream(fold_id) = &fold_state.iterable_type {
+        trace_ctx.meet_iteration_end(fold_id.as_str())?;
     }
 
     Ok(())
 }
 
 fn maybe_meet_back_iterator(fold_state: &FoldState<'_>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
-    if let IterableType::Stream(stream_name) = &fold_state.iterable_type {
-        trace_ctx.meet_back_iterator(stream_name.as_str())?;
+    if let IterableType::Stream(fold_id) = &fold_state.iterable_type {
+        trace_ctx.meet_back_iterator(fold_id.as_str())?;
     }
 
     Ok(())

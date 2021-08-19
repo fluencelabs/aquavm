@@ -50,7 +50,9 @@ impl<'i> super::ExecutableInstruction<'i> for Ap<'i> {
         };
 
         let result = match &self.argument {
-            ApArgument::ScalarVariable(scalar_name) => apply_scalar(scalar_name, exec_ctx)?,
+            ApArgument::ScalarVariable(scalar_name) => {
+                apply_scalar(scalar_name, exec_ctx, trace_ctx, should_touch_trace)?
+            }
             ApArgument::JsonPath(json_arg) => apply_json_argument(json_arg, exec_ctx, trace_ctx)?,
             ApArgument::LastError(error_path) => apply_last_error(error_path, exec_ctx, trace_ctx)?,
             ApArgument::Literal(value) => apply_const(value.to_string(), exec_ctx, trace_ctx),
@@ -58,6 +60,7 @@ impl<'i> super::ExecutableInstruction<'i> for Ap<'i> {
             ApArgument::Boolean(value) => apply_const(*value, exec_ctx, trace_ctx),
             ApArgument::EmptyArray => apply_const(serde_json::json!([]), exec_ctx, trace_ctx),
         };
+
         save_result(&self.result, &merger_ap_result, result, exec_ctx)?;
 
         if should_touch_trace {
@@ -71,7 +74,12 @@ impl<'i> super::ExecutableInstruction<'i> for Ap<'i> {
     }
 }
 
-fn apply_scalar(scalar_name: &str, exec_ctx: &ExecutionCtx<'_>) -> ExecutionResult<ResolvedCallResult> {
+fn apply_scalar(
+    scalar_name: &str,
+    exec_ctx: &ExecutionCtx<'_>,
+    trace_ctx: &TraceHandler,
+    should_touch_trace: bool,
+) -> ExecutionResult<ResolvedCallResult> {
     use super::ExecutionError;
     use crate::execution_step::Scalar;
 
@@ -80,16 +88,22 @@ fn apply_scalar(scalar_name: &str, exec_ctx: &ExecutionCtx<'_>) -> ExecutionResu
         .get(scalar_name)
         .ok_or_else(|| ExecutionError::VariableNotFound(scalar_name.to_string()))?;
 
-    match scalar {
-        Scalar::JValueRef(result) => Ok(result.clone()),
+    let mut result = match scalar {
+        Scalar::JValueRef(result) => result.clone(),
         Scalar::JValueFoldCursor(iterator) => {
             let result = iterator.iterable.peek().expect(
                 "peek always return elements inside fold,\
             this guaranteed by implementation of next and avoiding empty folds",
             );
-            Ok(result.into_resolved_result())
+            result.into_resolved_result()
         }
+    };
+
+    if should_touch_trace {
+        result.trace_pos = trace_ctx.trace_pos();
     }
+
+    Ok(result)
 }
 
 fn apply_const(value: impl Into<JValue>, exec_ctx: &ExecutionCtx<'_>, trace_ctx: &TraceHandler) -> ResolvedCallResult {

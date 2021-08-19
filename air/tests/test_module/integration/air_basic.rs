@@ -28,8 +28,8 @@ use serde_json::json;
 
 #[test]
 fn seq_par_call() {
-    let vm_peer_id = String::from("some_peer_id");
-    let mut vm = create_avm(unit_call_service(), vm_peer_id.clone());
+    let vm_peer_id = "some_peer_id";
+    let mut vm = create_avm(unit_call_service(), vm_peer_id);
 
     let script = format!(
         r#"
@@ -60,8 +60,8 @@ fn seq_par_call() {
 
 #[test]
 fn par_par_call() {
-    let vm_peer_id = String::from("some_peer_id");
-    let mut vm = create_avm(unit_call_service(), vm_peer_id.clone());
+    let vm_peer_id = "some_peer_id";
+    let mut vm = create_avm(unit_call_service(), vm_peer_id);
 
     let script = format!(
         r#"

@@ -163,7 +163,10 @@ impl TraceHandler {
         // unwrap here is used because this function must be called from a fold block with
         // corresponding fold_id and since it's a error handling, it's better not to produce
         // a new error
-        let fold_fsm = self.fsm_keeper.extract_fold(fold_id).unwrap();
+        let fold_fsm = match self.fsm_keeper.extract_fold(fold_id) {
+            Ok(fold_fsm) => fold_fsm,
+            Err(_) => return,
+        };
         fold_fsm.fold_end_with_error(&mut self.data_keeper);
     }
 }
