@@ -62,7 +62,6 @@ impl<'i> ExecutableInstruction<'i> for FoldStream<'i> {
         }
 
         trace_ctx.meet_fold_end(fold_id)?;
-        exec_ctx.tracker.met_fold_stream();
 
         Ok(())
     }
