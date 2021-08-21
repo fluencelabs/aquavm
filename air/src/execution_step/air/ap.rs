@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+mod apply_to_arguments;
 mod utils;
 
 use super::call::call_result_setter::set_scalar_result;
@@ -27,6 +28,7 @@ use crate::execution_step::trace_handler::MergerApResult;
 use crate::execution_step::utils::apply_json_path;
 use crate::JValue;
 use crate::SecurityTetraplet;
+use apply_to_arguments::*;
 use utils::*;
 
 use air_parser::ast::ApArgument;
@@ -49,18 +51,7 @@ impl<'i> super::ExecutableInstruction<'i> for Ap<'i> {
             MergerApResult::Empty
         };
 
-        let result = match &self.argument {
-            ApArgument::ScalarVariable(scalar_name) => {
-                apply_scalar(scalar_name, exec_ctx, trace_ctx, should_touch_trace)?
-            }
-            ApArgument::JsonPath(json_arg) => apply_json_argument(json_arg, exec_ctx, trace_ctx)?,
-            ApArgument::LastError(error_path) => apply_last_error(error_path, exec_ctx, trace_ctx)?,
-            ApArgument::Literal(value) => apply_const(value.to_string(), exec_ctx, trace_ctx),
-            ApArgument::Number(value) => apply_const(value, exec_ctx, trace_ctx),
-            ApArgument::Boolean(value) => apply_const(*value, exec_ctx, trace_ctx),
-            ApArgument::EmptyArray => apply_const(serde_json::json!([]), exec_ctx, trace_ctx),
-        };
-
+        let result = apply_to_arg(&self.argument, exec_ctx, trace_ctx, should_touch_trace)?;
         save_result(&self.result, &merger_ap_result, result, exec_ctx)?;
 
         if should_touch_trace {
@@ -72,75 +63,6 @@ impl<'i> super::ExecutableInstruction<'i> for Ap<'i> {
 
         Ok(())
     }
-}
-
-fn apply_scalar(
-    scalar_name: &str,
-    exec_ctx: &ExecutionCtx<'_>,
-    trace_ctx: &TraceHandler,
-    should_touch_trace: bool,
-) -> ExecutionResult<ResolvedCallResult> {
-    use super::ExecutionError;
-    use crate::execution_step::Scalar;
-
-    let scalar = exec_ctx
-        .scalars
-        .get(scalar_name)
-        .ok_or_else(|| ExecutionError::VariableNotFound(scalar_name.to_string()))?;
-
-    let mut result = match scalar {
-        Scalar::JValueRef(result) => result.clone(),
-        Scalar::JValueFoldCursor(iterator) => {
-            let result = iterator.iterable.peek().expect(
-                "peek always return elements inside fold,\
-            this guaranteed by implementation of next and avoiding empty folds",
-            );
-            result.into_resolved_result()
-        }
-    };
-
-    if should_touch_trace {
-        result.trace_pos = trace_ctx.trace_pos();
-    }
-
-    Ok(result)
-}
-
-fn apply_const(value: impl Into<JValue>, exec_ctx: &ExecutionCtx<'_>, trace_ctx: &TraceHandler) -> ResolvedCallResult {
-    let value = Rc::new(value.into());
-    let tetraplet = SecurityTetraplet::literal_tetraplet(exec_ctx.init_peer_id.clone());
-    let tetraplet = Rc::new(RefCell::new(tetraplet));
-
-    ResolvedCallResult::new(value, tetraplet, trace_ctx.trace_pos())
-}
-
-fn apply_last_error(
-    error_path: &LastErrorPath,
-    exec_ctx: &ExecutionCtx<'_>,
-    trace_ctx: &TraceHandler,
-) -> ExecutionResult<ResolvedCallResult> {
-    let (value, mut tetraplets) = crate::execution_step::utils::prepare_last_error(error_path, exec_ctx)?;
-    let value = Rc::new(value);
-    let tetraplet = tetraplets.remove(0);
-
-    let result = ResolvedCallResult::new(value, tetraplet, trace_ctx.trace_pos());
-    Ok(result)
-}
-
-fn apply_json_argument(
-    json_arg: &JsonPath<'_>,
-    exec_ctx: &ExecutionCtx<'_>,
-    trace_ctx: &TraceHandler,
-) -> ExecutionResult<ResolvedCallResult> {
-    let variable = Variable::from_ast(&json_arg.variable);
-    let (jvalue, mut tetraplets) = apply_json_path(variable, json_arg.path, json_arg.should_flatten, exec_ctx)?;
-
-    let tetraplet = tetraplets
-        .pop()
-        .unwrap_or_else(|| Rc::new(RefCell::new(SecurityTetraplet::default())));
-    let result = ResolvedCallResult::new(Rc::new(jvalue), tetraplet, trace_ctx.trace_pos());
-
-    Ok(result)
 }
 
 fn save_result<'ctx>(
