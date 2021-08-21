@@ -888,7 +888,6 @@ fn fold_on_stream() {
     let instruction = parse(source_code);
     let expected = Instruction::FoldStream(FoldStream {
         stream_name: "$stream",
-        id: Rc::new("$stream_9".to_string()),
         iterator: "iterator",
         instruction: Rc::new(null()),
     });
