@@ -38,8 +38,8 @@ pub fn main() {
 }
 
 #[marine]
-pub fn invoke(init_peer_id: String, air: String, prev_data: Vec<u8>, data: Vec<u8>) -> InterpreterOutcome {
-    execute_air(init_peer_id, air, prev_data, data)
+pub fn invoke(init_peer_id: String, air: String, prev_data: Vec<u8>, data: Vec<u8>, call_results: Vec<u8>) -> InterpreterOutcome {
+    execute_air(init_peer_id, air, prev_data, data, call_results)
 }
 
 #[marine]

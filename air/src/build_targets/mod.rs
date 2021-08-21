@@ -19,24 +19,6 @@ mod marine_target;
 #[cfg(not(feature = "marine"))]
 mod wasm_bindgen_target;
 
-use serde::Deserialize;
-use serde::Serialize;
-
-pub const CALL_SERVICE_SUCCESS: i32 = 0;
-
-#[marine_rs_sdk::marine]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct CallServiceResult {
-    pub ret_code: i32,
-    pub result: String,
-}
-
-impl std::fmt::Display for CallServiceResult {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "ret_code: {}, result: '{}'", self.ret_code, self.result)
-    }
-}
-
 #[cfg(feature = "marine")]
 pub(crate) use marine_target::call_service;
 #[cfg(feature = "marine")]

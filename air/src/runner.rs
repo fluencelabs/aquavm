@@ -16,14 +16,23 @@
 
 mod outcome;
 
-use crate::execution_step::Catchable;
 use crate::execution_step::ExecutableInstruction;
+use crate::execution_step::ExecutionCtx;
+use crate::execution_step::ExecutionError;
+use crate::execution_step::{Catchable, TraceHandler};
 use crate::preparation_step::prepare;
 use crate::preparation_step::PreparationDescriptor;
 
 use air_interpreter_interface::InterpreterOutcome;
+use std::rc::Rc;
 
-pub fn execute_air(init_peer_id: String, air: String, prev_data: Vec<u8>, data: Vec<u8>, call_results: Vec<u8>) -> InterpreterOutcome {
+pub fn execute_air(
+    init_peer_id: String,
+    air: String,
+    prev_data: Vec<u8>,
+    data: Vec<u8>,
+    call_results: Vec<u8>,
+) -> InterpreterOutcome {
     use std::convert::identity;
 
     log::trace!(
@@ -46,7 +55,7 @@ fn execute_air_impl(
         mut exec_ctx,
         mut trace_handler,
         air,
-    } = match prepare(&prev_data, &data, air.as_str(), init_peer_id) {
+    } = match prepare(&prev_data, &data, air.as_str(), &call_results, init_peer_id) {
         Ok(desc) => desc,
         // return the initial data in case of errors
         Err(error) => return Err(outcome::from_preparation_error(prev_data, error)),
@@ -55,14 +64,29 @@ fn execute_air_impl(
     // match here is used instead of map_err, because the compiler can't determine that
     // they are exclusive and would treat exec_ctx and trace_handler as moved
     match air.execute(&mut exec_ctx, &mut trace_handler) {
-        Ok(_) => {}
+        Ok(_) => try_make_result(exec_ctx, trace_handler),
         // return the old data in case of any trace errors
-        Err(e) if !e.is_catchable() => return Err(outcome::from_trace_error(prev_data, e)),
+        Err(e) if !e.is_catchable() => Err(outcome::from_trace_error(prev_data, e)),
         // return new collected trace in case of errors
-        Err(e) => return Err(outcome::from_execution_error(exec_ctx, trace_handler, e)),
+        Err(e) => Err(outcome::from_execution_error(
+            exec_ctx.streams,
+            exec_ctx.next_peer_pks,
+            trace_handler,
+            e,
+        )),
+    }
+}
+
+fn try_make_result(
+    exec_ctx: ExecutionCtx<'_>,
+    trace_handler: TraceHandler,
+) -> Result<InterpreterOutcome, InterpreterOutcome> {
+    if exec_ctx.streams.is_empty() {
+        let outcome = outcome::from_success_result(exec_ctx, trace_handler);
+        return Ok(outcome);
     }
 
-    let outcome = outcome::from_success_result(exec_ctx, trace_handler);
-
-    Ok(outcome)
+    let exec_error = Rc::new(ExecutionError::CallResultsNotEmpty(exec_ctx.call_results));
+    let outcome = outcome::from_execution_error(exec_ctx.streams, exec_ctx.next_peer_pks, trace_handler, exec_error);
+    Err(outcome)
 }

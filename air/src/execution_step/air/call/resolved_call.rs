@@ -17,10 +17,9 @@
 #![allow(unused_unsafe)] // for wasm_bindgen target where calling FFI is safe
 
 use super::call_result_setter::*;
+use super::prev_result_handler::*;
 use super::triplet::Triplet;
-use super::utils::*;
 use super::*;
-use crate::execution_step::air::ResolvedCallResult;
 use crate::execution_step::trace_handler::MergerCallResult;
 use crate::execution_step::trace_handler::TraceHandler;
 use crate::execution_step::RSecurityTetraplet;
@@ -28,7 +27,6 @@ use crate::execution_step::SecurityTetraplets;
 use crate::JValue;
 use crate::SecurityTetraplet;
 
-use air_interpreter_data::CallResult;
 use air_parser::ast::{CallInstrArgValue, CallOutputValue};
 
 use std::cell::RefCell;
@@ -83,39 +81,18 @@ impl<'i> ResolvedCall<'i> {
         } = self.resolve_args(exec_ctx)?;
 
         let serialized_tetraplets = serde_json::to_string(&tetraplets).expect("default serializer shouldn't fail");
+        let call_id = exec_ctx.tracker.call.seen_count - exec_ctx.tracker.call.executed_count;
 
-        let service_result = unsafe {
+        unsafe {
             crate::build_targets::call_service(
                 &triplet.service_id,
                 &triplet.function_name,
                 &call_arguments,
                 &serialized_tetraplets,
+                call_id,
             )
         };
         exec_ctx.tracker.met_executed_call();
-
-        self.update_state_with_service_result(service_result, exec_ctx, trace_ctx)
-    }
-
-    fn update_state_with_service_result(
-        &self,
-        service_result: CallServiceResult,
-        exec_ctx: &mut ExecutionCtx<'i>,
-        trace_ctx: &mut TraceHandler,
-    ) -> ExecutionResult<()> {
-        use ExecutionError::CallServiceResultDeError as DeError;
-
-        // check that service call succeeded
-        let service_result = handle_service_error(service_result, trace_ctx)?;
-
-        let result: JValue = serde_json::from_str(&service_result.result).map_err(|e| DeError(service_result, e))?;
-        let result = Rc::new(result);
-
-        let trace_pos = trace_ctx.trace_pos();
-
-        let executed_result = ResolvedCallResult::new(result, self.tetraplet.clone(), trace_pos);
-        let new_call_result = set_local_result(executed_result, &self.output, exec_ctx)?;
-        trace_ctx.meet_call_end(new_call_result);
 
         Ok(())
     }
@@ -168,26 +145,4 @@ impl<'i> ResolvedCall<'i> {
 
         Ok(resolved_arguments)
     }
-}
-
-use crate::build_targets::CallServiceResult;
-
-fn handle_service_error(
-    service_result: CallServiceResult,
-    trace_ctx: &mut TraceHandler,
-) -> ExecutionResult<CallServiceResult> {
-    use crate::build_targets::CALL_SERVICE_SUCCESS;
-    use CallResult::CallServiceFailed;
-
-    if service_result.ret_code == CALL_SERVICE_SUCCESS {
-        return Ok(service_result);
-    }
-
-    let error_message = Rc::new(service_result.result);
-    let error = ExecutionError::LocalServiceError(service_result.ret_code, error_message.clone());
-    let error = Rc::new(error);
-
-    trace_ctx.meet_call_end(CallServiceFailed(service_result.ret_code, error_message));
-
-    Err(error)
 }

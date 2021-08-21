@@ -49,13 +49,13 @@ pub fn main() {
 }
 
 #[wasm_bindgen]
-pub fn invoke(init_peer_id: String, air: String, prev_data: Vec<u8>, data: Vec<u8>, log_level: &str) -> String {
+pub fn invoke(init_peer_id: String, air: String, prev_data: Vec<u8>, data: Vec<u8>, call_results: Vec<u8>, log_level: &str) -> String {
     use std::str::FromStr;
 
     let log_level = log::LevelFilter::from_str(log_level).unwrap_or(DEFAULT_LOG_LEVEL);
     log::set_max_level(log_level);
 
-    let outcome = execute_air(init_peer_id, air, prev_data, data);
+    let outcome = execute_air(init_peer_id, air, prev_data, data, call_results);
     serde_json::to_string(&outcome).expect("Cannot parse InterpreterOutcome")
 }
 

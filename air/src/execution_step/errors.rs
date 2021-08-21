@@ -23,7 +23,8 @@ use super::trace_handler::TraceHandlerError;
 use super::Joinable;
 use super::ResolvedCallResult;
 use super::Stream;
-use crate::build_targets::CallServiceResult;
+use crate::execution_step::execution_context::CallResults;
+use crate::execution_step::execution_context::CallServiceResult;
 use crate::JValue;
 
 use jsonpath_lib::JsonPathError;
@@ -122,6 +123,12 @@ pub(crate) enum ExecutionError {
     /// could be applied to a stream, but result doesn't contain generation in a source position.
     #[error("ap result {0:?} doesn't match corresponding instruction")]
     ApResultNotCorrespondToInstr(MergerApResult),
+
+    /// Call results should be empty at the end of execution thanks to a execution invariant.
+    #[error(
+        "after finishing execution of supplied AIR, call results aren't empty: `{0:?}`, probably wrong call_id used"
+    )]
+    CallResultsNotEmpty(CallResults),
 }
 
 impl From<TraceHandlerError> for Rc<ExecutionError> {
@@ -155,7 +162,8 @@ impl ExecutionError {
             StreamJsonPathError(..) => 18,
             StreamDontHaveSuchGeneration(..) => 19,
             ApResultNotCorrespondToInstr(_) => 20,
-            TraceError(_) => 21,
+            CallResultsNotEmpty(_) => 21,
+            TraceError(_) => 22,
         }
     }
 }

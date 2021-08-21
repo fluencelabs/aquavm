@@ -17,16 +17,8 @@
 use wasm_bindgen::__rt::std::env::VarError;
 use wasm_bindgen::prelude::*;
 
-pub(crate) fn call_service(
-    service_id: &str,
-    fn_name: &str,
-    args: &str,
-    security_tetraplets: &str,
-) -> super::CallServiceResult {
-    let result = call_service_impl(service_id, fn_name, args, security_tetraplets);
-    log::trace!("result {}", result);
-
-    serde_json::from_str(&result).expect("Cannot parse CallServiceResult")
+pub(crate) fn call_service(service_id: &str, fn_name: &str, args: &str, security_tetraplets: &str, call_id: u32) {
+    call_service_impl(service_id, fn_name, args, security_tetraplets, call_id);
 }
 
 #[allow(clippy::unnecessary_wraps)]
@@ -45,5 +37,11 @@ extern "C" {
 extern "C" {
     #[allow(unused_attributes)]
     #[link_name = "call_service"]
-    fn call_service_impl(service_id: &str, fn_name: &str, args: &str, security_tetraplets: &str) -> String;
+    fn call_service_impl(
+        service_id: &str,
+        fn_name: &str,
+        args: &str,
+        security_tetraplets: &str,
+        call_id: u32,
+    ) -> String;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Fluence Labs Limited
+ * Copyright 2021 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-use marine_rs_sdk::marine;
-use marine_rs_sdk::module_manifest;
+use serde::Deserialize;
+use serde::Serialize;
 
-use std::env::VarError;
+pub(crate) const CALL_SERVICE_SUCCESS: i32 = 0;
 
-const CURRENT_PEER_ID_ENV_NAME: &str = "CURRENT_PEER_ID";
-
-module_manifest!();
-
-pub(crate) fn get_current_peer_id() -> std::result::Result<String, VarError> {
-    std::env::var(CURRENT_PEER_ID_ENV_NAME)
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CallServiceResult {
+    pub ret_code: i32,
+    pub result: String,
 }
 
-#[marine]
-#[link(wasm_import_module = "host")]
-extern "C" {
-    pub(crate) fn call_service(service_id: &str, fn_name: &str, args: &str, tetraplets: &str, call_id: u32);
+use std::fmt;
+
+impl fmt::Display for CallServiceResult {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "ret_code: {}, result: '{}'", self.ret_code, self.result)
+    }
 }

@@ -19,14 +19,10 @@ use crate::build_targets::get_current_peer_id;
 use crate::execution_step::ExecutionCtx;
 use crate::execution_step::Stream;
 use crate::execution_step::TraceHandler;
-use crate::JValue;
 use crate::log_targets::RUN_PARAMS;
 
 use air_interpreter_data::InterpreterData;
 use air_parser::ast::Instruction;
-
-use std::rc::Rc;
-use std::collections::HashMap;
 
 type PreparationResult<T> = Result<T, PreparationError>;
 
@@ -35,7 +31,6 @@ pub(crate) struct PreparationDescriptor<'ctx, 'i> {
     pub(crate) exec_ctx: ExecutionCtx<'ctx>,
     pub(crate) trace_handler: TraceHandler,
     pub(crate) air: Instruction<'i>,
-    pub(crate) call_results: HashMap<usize, Rc<JValue>>
 }
 
 /// Parse and prepare supplied data and AIR script.
@@ -59,7 +54,7 @@ pub(crate) fn prepare<'i>(
         current_data
     );
 
-    let exec_ctx = make_exec_ctx(init_peer_id, &prev_data)?;
+    let exec_ctx = make_exec_ctx(init_peer_id, &prev_data, call_results)?;
     let trace_handler = TraceHandler::from_data(prev_data, current_data);
 
     let result = PreparationDescriptor {
@@ -77,11 +72,18 @@ fn try_to_data(raw_data: &[u8]) -> PreparationResult<InterpreterData> {
     InterpreterData::try_from_slice(raw_data).map_err(|err| DataDeFailed(err, raw_data.to_vec()))
 }
 
-fn make_exec_ctx(init_peer_id: String, prev_data: &InterpreterData) -> PreparationResult<ExecutionCtx<'static>> {
+fn make_exec_ctx(
+    init_peer_id: String,
+    prev_data: &InterpreterData,
+    call_results: &[u8],
+) -> PreparationResult<ExecutionCtx<'static>> {
     let current_peer_id = get_current_peer_id().map_err(PreparationError::CurrentPeerIdEnvError)?;
     log::trace!(target: RUN_PARAMS, "current peer id {}", current_peer_id);
 
-    let mut ctx = ExecutionCtx::new(current_peer_id, init_peer_id);
+    let call_results = serde_json::from_slice(call_results)
+        .map_err(|e| PreparationError::CallResultsDeFailed(e, call_results.to_vec()))?;
+
+    let mut ctx = ExecutionCtx::new(current_peer_id, init_peer_id, call_results);
     create_streams(&mut ctx, prev_data);
 
     Ok(ctx)

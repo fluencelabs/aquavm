@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use super::CallServiceResult;
 use super::InstrTracker;
 use super::LastErrorDescriptor;
 use super::LastErrorWithTetraplet;
@@ -24,6 +25,8 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::collections::VecDeque;
 use std::rc::Rc;
+
+pub(crate) type CallResults = std::collections::HashMap<u32, CallServiceResult>;
 
 /// Contains all necessary state needed to execute AIR script.
 #[derive(Default)]
@@ -66,10 +69,13 @@ pub(crate) struct ExecutionCtx<'i> {
 
     /// Tracker of all met instructions.
     pub tracker: InstrTracker,
+
+    /// Contains all executed results from a host side.
+    pub call_results: CallResults,
 }
 
 impl<'i> ExecutionCtx<'i> {
-    pub(crate) fn new(current_peer_id: String, init_peer_id: String) -> Self {
+    pub(crate) fn new(current_peer_id: String, init_peer_id: String, call_results: CallResults) -> Self {
         let current_peer_id = Rc::new(current_peer_id);
 
         Self {
@@ -77,6 +83,7 @@ impl<'i> ExecutionCtx<'i> {
             init_peer_id,
             subtree_complete: true,
             last_error_could_be_set: true,
+            call_results,
             ..<_>::default()
         }
     }

@@ -16,6 +16,7 @@
 
 use super::*;
 use crate::exec_err;
+use crate::execution_step::execution_context::CallServiceResult;
 use crate::execution_step::trace_handler::TraceHandler;
 use crate::execution_step::RSecurityTetraplet;
 
@@ -42,6 +43,17 @@ pub(super) fn handle_prev_state<'i>(
             exec_ctx.subtree_complete = false;
             exec_err!(ExecutionError::LocalServiceError(*ret_code, err_msg.clone()))
         }
+        RequestSentBy(sent_by) if sent_by.as_str() == exec_ctx.current_peer_id.as_str() => {
+            let call_id = exec_ctx.tracker.call.seen_count - exec_ctx.tracker.call.executed_count;
+            match exec_ctx.call_results.remove(&call_id) {
+                Some(call_result) => {
+                    update_state_with_service_result(tetraplet, output, call_result, exec_ctx, trace_ctx)?
+                }
+                // result hasn't been prepared yet
+                None => exec_ctx.subtree_complete = false,
+            }
+            Ok(false)
+        }
         RequestSentBy(..) => {
             // check whether current node can execute this call
             let is_current_peer = tetraplet.borrow().triplet.peer_pk.as_str() == exec_ctx.current_peer_id.as_str();
@@ -64,4 +76,52 @@ pub(super) fn handle_prev_state<'i>(
 
     trace_ctx.meet_call_end(prev_result);
     result
+}
+
+use super::call_result_setter::*;
+use crate::execution_step::ResolvedCallResult;
+use crate::JValue;
+
+fn update_state_with_service_result<'i>(
+    tetraplet: &RSecurityTetraplet,
+    output: &CallOutputValue<'i>,
+    service_result: CallServiceResult,
+    exec_ctx: &mut ExecutionCtx<'i>,
+    trace_ctx: &mut TraceHandler,
+) -> ExecutionResult<()> {
+    use ExecutionError::CallServiceResultDeError as DeError;
+
+    // check that service call succeeded
+    let service_result = handle_service_error(service_result, trace_ctx)?;
+
+    let result: JValue = serde_json::from_str(&service_result.result).map_err(|e| DeError(service_result, e))?;
+    let result = Rc::new(result);
+
+    let trace_pos = trace_ctx.trace_pos();
+
+    let executed_result = ResolvedCallResult::new(result, tetraplet.clone(), trace_pos);
+    let new_call_result = set_local_result(executed_result, output, exec_ctx)?;
+    trace_ctx.meet_call_end(new_call_result);
+
+    Ok(())
+}
+
+fn handle_service_error(
+    service_result: CallServiceResult,
+    trace_ctx: &mut TraceHandler,
+) -> ExecutionResult<CallServiceResult> {
+    use crate::execution_step::execution_context::CALL_SERVICE_SUCCESS;
+    use CallResult::CallServiceFailed;
+
+    if service_result.ret_code == CALL_SERVICE_SUCCESS {
+        return Ok(service_result);
+    }
+
+    let error_message = Rc::new(service_result.result);
+    let error = ExecutionError::LocalServiceError(service_result.ret_code, error_message.clone());
+    let error = Rc::new(error);
+
+    trace_ctx.meet_call_end(CallServiceFailed(service_result.ret_code, error_message));
+
+    Err(error)
 }

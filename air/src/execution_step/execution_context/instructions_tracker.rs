@@ -20,41 +20,41 @@ pub(crate) struct InstrTracker {
     pub(crate) ap: ApTracker,
     pub(crate) call: CallTracker,
     pub(crate) fold: FoldTracker,
-    pub(crate) match_count: usize,
-    pub(crate) mismatch_count: usize,
-    pub(crate) next_count: usize,
-    pub(crate) null_count: usize,
+    pub(crate) match_count: u32,
+    pub(crate) mismatch_count: u32,
+    pub(crate) next_count: u32,
+    pub(crate) null_count: u32,
     pub(crate) par: ParTracker,
-    pub(crate) seq_count: usize,
-    pub(crate) xor_count: usize,
+    pub(crate) seq_count: u32,
+    pub(crate) xor_count: u32,
 }
 
 #[derive(Default)]
 #[allow(dead_code)]
 pub(crate) struct ApTracker {
-    pub(crate) seen_count: usize,
-    pub(crate) executed_count: usize,
+    pub(crate) seen_count: u32,
+    pub(crate) executed_count: u32,
 }
 
 #[derive(Default)]
 #[allow(dead_code)]
 pub(crate) struct CallTracker {
-    pub(crate) seen_count: usize,
-    pub(crate) executed_count: usize,
+    pub(crate) seen_count: u32,
+    pub(crate) executed_count: u32,
 }
 
 #[derive(Default)]
 #[allow(dead_code)]
 pub(crate) struct FoldTracker {
-    pub(crate) seen_scalar_count: usize,
-    pub(crate) seen_stream_count: usize,
+    pub(crate) seen_scalar_count: u32,
+    pub(crate) seen_stream_count: u32,
 }
 
 #[derive(Default)]
 #[allow(dead_code)]
 pub(crate) struct ParTracker {
-    pub(crate) seen_count: usize,
-    pub(crate) executed_count: usize,
+    pub(crate) seen_count: u32,
+    pub(crate) executed_count: u32,
 }
 
 impl InstrTracker {

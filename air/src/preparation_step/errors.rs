@@ -35,6 +35,10 @@ pub enum PreparationError {
     /// Error occurred while getting current peer id.
     #[error("current peer id can't be obtained: {0:?}")]
     CurrentPeerIdEnvError(VarError),
+
+    /// Error occurred on call results deserialization.
+    #[error("error occurred while deserialize call results: {1:?}:\n{0:?}")]
+    CallResultsDeFailed(SerdeJsonError, Vec<u8>),
 }
 
 impl PreparationError {
@@ -45,6 +49,7 @@ impl PreparationError {
             AIRParseError(_) => 1,
             DataDeFailed(..) => 2,
             CurrentPeerIdEnvError(_) => 3,
+            CallResultsDeFailed(..) => 4,
         }
     }
 }
