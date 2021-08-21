@@ -23,7 +23,7 @@ use crate::preparation_step::PreparationDescriptor;
 
 use air_interpreter_interface::InterpreterOutcome;
 
-pub fn execute_air(init_peer_id: String, air: String, prev_data: Vec<u8>, data: Vec<u8>) -> InterpreterOutcome {
+pub fn execute_air(init_peer_id: String, air: String, prev_data: Vec<u8>, data: Vec<u8>, call_results: Vec<u8>) -> InterpreterOutcome {
     use std::convert::identity;
 
     log::trace!(
@@ -32,7 +32,7 @@ pub fn execute_air(init_peer_id: String, air: String, prev_data: Vec<u8>, data: 
         init_peer_id
     );
 
-    execute_air_impl(init_peer_id, air, prev_data, data).unwrap_or_else(identity)
+    execute_air_impl(init_peer_id, air, prev_data, data, call_results).unwrap_or_else(identity)
 }
 
 fn execute_air_impl(
@@ -40,6 +40,7 @@ fn execute_air_impl(
     air: String,
     prev_data: Vec<u8>,
     data: Vec<u8>,
+    call_results: Vec<u8>,
 ) -> Result<InterpreterOutcome, InterpreterOutcome> {
     let PreparationDescriptor {
         mut exec_ctx,

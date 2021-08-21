@@ -19,10 +19,14 @@ use crate::build_targets::get_current_peer_id;
 use crate::execution_step::ExecutionCtx;
 use crate::execution_step::Stream;
 use crate::execution_step::TraceHandler;
+use crate::JValue;
 use crate::log_targets::RUN_PARAMS;
 
 use air_interpreter_data::InterpreterData;
 use air_parser::ast::Instruction;
+
+use std::rc::Rc;
+use std::collections::HashMap;
 
 type PreparationResult<T> = Result<T, PreparationError>;
 
@@ -31,6 +35,7 @@ pub(crate) struct PreparationDescriptor<'ctx, 'i> {
     pub(crate) exec_ctx: ExecutionCtx<'ctx>,
     pub(crate) trace_handler: TraceHandler,
     pub(crate) air: Instruction<'i>,
+    pub(crate) call_results: HashMap<usize, Rc<JValue>>
 }
 
 /// Parse and prepare supplied data and AIR script.
@@ -38,6 +43,7 @@ pub(crate) fn prepare<'i>(
     prev_data: &[u8],
     current_data: &[u8],
     raw_air: &'i str,
+    call_results: &[u8],
     init_peer_id: String,
 ) -> PreparationResult<PreparationDescriptor<'static, 'i>> {
     let prev_data = try_to_data(prev_data)?;
