@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use super::InstrTracker;
 use super::LastErrorDescriptor;
 use super::LastErrorWithTetraplet;
 use crate::execution_step::boxed_value::Scalar;
@@ -62,6 +63,9 @@ pub(crate) struct ExecutionCtx<'i> {
 
     /// List of met folds used to determine whether a variable can be shadowed.
     pub met_folds: VecDeque<&'i str>,
+
+    /// Tracker of all met instructions.
+    pub tracker: InstrTracker,
 }
 
 impl<'i> ExecutionCtx<'i> {

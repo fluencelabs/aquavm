@@ -63,10 +63,11 @@ macro_rules! execute {
 
 /// Executes fold instruction, updates last error if needed, and call error_exit of TraceHandler.
 macro_rules! execute_fold {
-    ($self:expr, $instr:expr, $exec_ctx:ident, $trace_ctx:ident) => {
+    ($self:expr, $instr:expr, $exec_ctx:ident, $trace_ctx:ident) => {{
+        let fold_id = $exec_ctx.tracker.fold.seen_stream_count + 1;
         match $instr.execute($exec_ctx, $trace_ctx) {
             Err(e) => {
-                $trace_ctx.fold_end_with_error($instr.id.as_str());
+                $trace_ctx.fold_end_with_error(fold_id);
 
                 if !$exec_ctx.last_error_could_be_set {
                     return Err(e);
@@ -80,7 +81,7 @@ macro_rules! execute_fold {
             }
             v => v,
         }
-    };
+    }};
 }
 
 /// Executes match/mismatch instructions and updates last error if error type wasn't

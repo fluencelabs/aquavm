@@ -32,7 +32,7 @@ pub(crate) struct FoldState<'i> {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) enum IterableType {
     Scalar,
-    Stream(Rc<String>),
+    Stream(usize),
 }
 
 impl<'i> FoldState<'i> {

@@ -38,6 +38,7 @@ use std::rc::Rc;
 impl<'i> super::ExecutableInstruction<'i> for Call<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         log_instruction!(call, exec_ctx, trace_ctx);
+        exec_ctx.tracker.met_call();
 
         let resolved_call = joinable_call!(ResolvedCall::new(self, exec_ctx), exec_ctx).map_err(|e| {
             set_last_error(self, exec_ctx, e.clone(), None);

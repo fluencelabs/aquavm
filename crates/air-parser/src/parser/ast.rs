@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-mod fold_id;
 mod impls;
 mod traits;
 
 pub use crate::parser::lexer::AstVariable;
 pub use crate::parser::lexer::LastErrorPath;
 pub use crate::parser::lexer::Number;
-pub(super) use fold_id::create_fold_id;
 
 use serde::Deserialize;
 use serde::Serialize;
@@ -162,8 +160,6 @@ pub struct FoldScalar<'i> {
 #[derive(Serialize, Debug, PartialEq)]
 pub struct FoldStream<'i> {
     pub stream_name: &'i str,
-    // this identifier used to differentiate between fold FSM in trace handler
-    pub id: Rc<String>,
     pub iterator: &'i str,
     pub instruction: Rc<Instruction<'i>>,
 }

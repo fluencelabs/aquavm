@@ -24,7 +24,7 @@ use std::collections::HashMap;
 #[derive(Debug, Default)]
 pub(crate) struct FSMKeeper {
     par_stack: Vec<ParFSM>,
-    fold_map: HashMap<String, FoldFSM>,
+    fold_map: HashMap<usize, FoldFSM>,
 }
 
 impl FSMKeeper {
@@ -32,7 +32,7 @@ impl FSMKeeper {
         self.par_stack.push(par_fsm);
     }
 
-    pub(crate) fn add_fold(&mut self, fold_id: String, fold_fsm: FoldFSM) {
+    pub(crate) fn add_fold(&mut self, fold_id: usize, fold_fsm: FoldFSM) {
         self.fold_map.insert(fold_id, fold_fsm);
     }
 
@@ -44,15 +44,15 @@ impl FSMKeeper {
         self.par_stack.pop().ok_or(StateFSMError::ParQueueIsEmpty())
     }
 
-    pub(crate) fn fold_mut(&mut self, fold_id: &str) -> FSMResult<&mut FoldFSM> {
+    pub(crate) fn fold_mut(&mut self, fold_id: usize) -> FSMResult<&mut FoldFSM> {
         self.fold_map
-            .get_mut(fold_id)
+            .get_mut(&fold_id)
             .ok_or_else(|| StateFSMError::FoldFSMNotFound(fold_id.to_string()))
     }
 
-    pub(crate) fn extract_fold(&mut self, fold_id: &str) -> FSMResult<FoldFSM> {
+    pub(crate) fn extract_fold(&mut self, fold_id: usize) -> FSMResult<FoldFSM> {
         self.fold_map
-            .remove(fold_id)
+            .remove(&fold_id)
             .ok_or_else(|| StateFSMError::FoldFSMNotFound(fold_id.to_string()))
     }
 }

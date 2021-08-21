@@ -92,6 +92,7 @@ impl<'i> ResolvedCall<'i> {
                 &serialized_tetraplets,
             )
         };
+        exec_ctx.tracker.met_executed_call();
 
         self.update_state_with_service_result(service_result, exec_ctx, trace_ctx)
     }
