@@ -47,12 +47,12 @@ impl FSMKeeper {
     pub(crate) fn fold_mut(&mut self, fold_id: usize) -> FSMResult<&mut FoldFSM> {
         self.fold_map
             .get_mut(&fold_id)
-            .ok_or_else(|| StateFSMError::FoldFSMNotFound(fold_id.to_string()))
+            .ok_or(StateFSMError::FoldFSMNotFound(fold_id))
     }
 
     pub(crate) fn extract_fold(&mut self, fold_id: usize) -> FSMResult<FoldFSM> {
         self.fold_map
             .remove(&fold_id)
-            .ok_or_else(|| StateFSMError::FoldFSMNotFound(fold_id.to_string()))
+            .ok_or(StateFSMError::FoldFSMNotFound(fold_id))
     }
 }

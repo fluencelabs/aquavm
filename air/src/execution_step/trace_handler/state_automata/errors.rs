@@ -30,8 +30,8 @@ pub(crate) enum StateFSMError {
 
     /// Errors occurred while trying to access or pop elements from queue,
     /// which contains element of different type.
-    #[error("fold FSM for stream name '{0}' wasn't found")]
-    FoldFSMNotFound(String),
+    #[error("fold FSM for fold id {0} wasn't found")]
+    FoldFSMNotFound(usize),
 
     /// Errors occurred when ParResult.0 + ParResult.1 overflows.
     #[error("overflow is occurred while calculating the entire len occupied by executed states corresponded to current par: '{0:?}'")]
