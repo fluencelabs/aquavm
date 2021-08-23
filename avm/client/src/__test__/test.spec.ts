@@ -1,28 +1,17 @@
-import { AirInterpreter, ParticleHandler } from '..';
+import { AirInterpreter } from '..';
 
 const vmPeerId = '12D3KooWNzutuy8WHXDKFqFsATvCR6j9cj2FijYbnd47geRKaQZS';
 
-const createTestIntepreter = async (handler: ParticleHandler) => {
-    return AirInterpreter.create(handler, vmPeerId, 'trace', (level, message) => {
+const createTestIntepreter = async () => {
+    return AirInterpreter.create(vmPeerId, 'trace', (level, message) => {
         console.log(`level: ${level}, message=${message}`);
     });
-};
-
-const testInvoke = (interpreter, script, prevData, data): string => {
-    prevData = Buffer.from(prevData);
-    data = Buffer.from(data);
-    return interpreter.invoke(vmPeerId, script, prevData, data);
 };
 
 describe('Tests', () => {
     it('should work', async () => {
         // arrange
-        const i = await createTestIntepreter(() => {
-            return {
-                ret_code: 0,
-                result: '{}',
-            };
-        });
+        const i = await createTestIntepreter();
 
         const s = `(seq
             (par 
@@ -33,7 +22,7 @@ describe('Tests', () => {
         )`;
 
         // act
-        const res = testInvoke(i, s, [], []);
+        const res = i.invoke(s, Buffer.from([]), Buffer.from([]), Buffer.from([]), Buffer.from([]));
 
         // assert
         expect(res).not.toBeUndefined();

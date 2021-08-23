@@ -20,7 +20,9 @@
  *
  */
 
-function main(wasm) {
+/**
+ */
+export function main(wasm) {
     wasm.main();
 }
 
@@ -75,6 +77,7 @@ function passStringToWasm0(wasm, arg, malloc, realloc) {
         if (code > 0x7f) break;
         mem[ptr + offset] = code;
     }
+
     if (offset !== len) {
         if (offset !== 0) {
             arg = arg.slice(offset);
@@ -87,7 +90,13 @@ function passStringToWasm0(wasm, arg, malloc, realloc) {
     }
 
     WASM_VECTOR_LEN = offset;
+    return ptr;
+}
 
+function passArray8ToWasm0(wasm, arg, malloc) {
+    const ptr = malloc(arg.length * 1);
+    getUint8Memory0(wasm).set(arg, ptr / 1);
+    WASM_VECTOR_LEN = arg.length;
     return ptr;
 }
 
@@ -103,74 +112,40 @@ const lTextDecoder = typeof TextDecoder === 'undefined' ? module.require('util')
 
 let cachedTextDecoder = new lTextDecoder('utf-8', { ignoreBOM: true, fatal: true });
 
+cachedTextDecoder.decode();
+
 export function getStringFromWasm0(wasm, ptr, len) {
     return cachedTextDecoder.decode(getUint8Memory0(wasm).subarray(ptr, ptr + len));
 }
-
-function passArray8ToWasm0(wasm, arg, malloc) {
-    const ptr = malloc(arg.length * 1);
-    getUint8Memory0(wasm).set(arg, ptr / 1);
-    WASM_VECTOR_LEN = arg.length;
-    return ptr;
-}
-
 /**
- * @param {any} wasm
- * @param {string} init_peer_id
+ * @param {} wasm wrapper
  * @param {string} air
- * @param {string} prev_data
- * @param {string} data
+ * @param {Uint8Array} prev_data
+ * @param {Uint8Array} data
+ * @param {Uint8Array} params
+ * @param {Uint8Array} call_results
  * @param {string} log_level
  * @returns {string}
  */
-export function invoke(wasm, init_peer_id, air, prev_data, data, log_level) {
+export function invoke(wasm, air, prev_data, data, params, call_results, log_level) {
     try {
-        var ptr0 = passStringToWasm0(wasm, init_peer_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        var ptr0 = passStringToWasm0(wasm, air, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         var len0 = WASM_VECTOR_LEN;
-        var ptr1 = passStringToWasm0(wasm, air, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        var ptr1 = passArray8ToWasm0(wasm, prev_data, wasm.__wbindgen_malloc);
         var len1 = WASM_VECTOR_LEN;
-        var ptr2 = passArray8ToWasm0(wasm, prev_data, wasm.__wbindgen_malloc);
+        var ptr2 = passArray8ToWasm0(wasm, data, wasm.__wbindgen_malloc);
         var len2 = WASM_VECTOR_LEN;
-        var ptr3 = passArray8ToWasm0(wasm, data, wasm.__wbindgen_malloc);
+        var ptr3 = passArray8ToWasm0(wasm, params, wasm.__wbindgen_malloc);
         var len3 = WASM_VECTOR_LEN;
-        var ptr4 = passStringToWasm0(wasm, log_level, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        var ptr4 = passArray8ToWasm0(wasm, call_results, wasm.__wbindgen_malloc);
         var len4 = WASM_VECTOR_LEN;
-        wasm.invoke(8, ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4);
+        var ptr5 = passStringToWasm0(wasm, log_level, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        var len5 = WASM_VECTOR_LEN;
+        wasm.invoke(8, ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5);
         var r0 = getInt32Memory0(wasm)[8 / 4 + 0];
         var r1 = getInt32Memory0(wasm)[8 / 4 + 1];
         return getStringFromWasm0(wasm, r0, r1);
     } finally {
         wasm.__wbindgen_free(r0, r1);
     }
-}
-
-export function ast(wasm, script) {
-    try {
-        var ptr0 = passStringToWasm0(wasm, script, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        var len0 = WASM_VECTOR_LEN;
-        wasm.ast(8, ptr0, len0);
-        var r0 = getInt32Memory0(wasm)[8 / 4 + 0];
-        var r1 = getInt32Memory0(wasm)[8 / 4 + 1];
-        return getStringFromWasm0(wasm, r0, r1);
-    } finally {
-        wasm.__wbindgen_free(r0, r1);
-    }
-}
-
-export function return_current_peer_id(wasm, peerId, arg0) {
-    var ptr0 = passStringToWasm0(wasm, peerId, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-    var len0 = WASM_VECTOR_LEN;
-    getInt32Memory0(wasm)[arg0 / 4 + 1] = len0;
-    getInt32Memory0(wasm)[arg0 / 4 + 0] = ptr0;
-}
-
-export function return_call_service_result(wasm, ret, arg0) {
-    var ptr1 = passStringToWasm0(wasm, ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-    var len1 = WASM_VECTOR_LEN;
-    getInt32Memory0(wasm)[arg0 / 4 + 1] = len1;
-    getInt32Memory0(wasm)[arg0 / 4 + 0] = ptr1;
-}
-
-export function free(wasm, ptr, len) {
-    wasm.__wbindgen_free(ptr, len);
 }

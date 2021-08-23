@@ -22,13 +22,3 @@ cat << EOF > ./src/wasm.js
 
 module.exports = "$BASE64";
 EOF
-
-callserviceimpl=$(cat wasm/air_interpreter_client_bg.js | grep -o '__wbg_callserviceimpl_\w*')
-getcurrentpeeridimpl=$(cat wasm/air_interpreter_client_bg.js | grep -o '__wbg_getcurrentpeeridimpl_\w*')
-
-cat << EOF > ./src/importObject.ts
-// auto-generated
-
-export const __wbg_callserviceimpl = "$callserviceimpl";
-export const __wbg_getcurrentpeeridimpl = "$getcurrentpeeridimpl";
-EOF
