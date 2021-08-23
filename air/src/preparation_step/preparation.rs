@@ -15,11 +15,10 @@
  */
 
 use super::PreparationError;
-use crate::build_targets::get_current_peer_id;
 use crate::execution_step::ExecutionCtx;
 use crate::execution_step::Stream;
 use crate::execution_step::TraceHandler;
-use crate::log_targets::RUN_PARAMS;
+use crate::run_parameters::RunParameters;
 
 use air_interpreter_data::InterpreterData;
 use air_parser::ast::Instruction;
@@ -39,22 +38,14 @@ pub(crate) fn prepare<'i>(
     current_data: &[u8],
     raw_air: &'i str,
     call_results: &[u8],
-    init_peer_id: String,
+    run_parameters: RunParameters,
 ) -> PreparationResult<PreparationDescriptor<'static, 'i>> {
     let prev_data = try_to_data(prev_data)?;
     let current_data = try_to_data(current_data)?;
 
     let air: Instruction<'i> = *air_parser::parse(raw_air).map_err(PreparationError::AIRParseError)?;
 
-    log::trace!(
-        target: RUN_PARAMS,
-        "air: {:?}\nprev_trace: {:?}\ncurrent_trace: {:?}",
-        air,
-        prev_data,
-        current_data
-    );
-
-    let exec_ctx = make_exec_ctx(init_peer_id, &prev_data, call_results)?;
+    let exec_ctx = make_exec_ctx(&prev_data, call_results, run_parameters)?;
     let trace_handler = TraceHandler::from_data(prev_data, current_data);
 
     let result = PreparationDescriptor {
@@ -73,12 +64,14 @@ fn try_to_data(raw_data: &[u8]) -> PreparationResult<InterpreterData> {
 }
 
 fn make_exec_ctx(
-    init_peer_id: String,
     prev_data: &InterpreterData,
     call_results: &[u8],
+    run_parameters: RunParameters,
 ) -> PreparationResult<ExecutionCtx<'static>> {
-    let current_peer_id = get_current_peer_id().map_err(PreparationError::CurrentPeerIdEnvError)?;
-    log::trace!(target: RUN_PARAMS, "current peer id {}", current_peer_id);
+    let RunParameters {
+        init_peer_id,
+        current_peer_id,
+    } = run_parameters;
 
     let call_results = serde_json::from_slice(call_results)
         .map_err(|e| PreparationError::CallResultsDeFailed(e, call_results.to_vec()))?;

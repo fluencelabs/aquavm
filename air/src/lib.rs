@@ -26,11 +26,11 @@
     unreachable_patterns
 )]
 
-mod build_targets;
 mod execution_step;
 mod preparation_step;
 
 pub mod log_targets;
+mod run_parameters;
 mod runner;
 
 pub use air_interpreter_interface::InterpreterOutcome;
@@ -38,6 +38,7 @@ pub use air_interpreter_interface::INTERPRETER_SUCCESS;
 pub use execution_step::execution_context::LastError;
 pub use polyplets::ResolvedTriplet;
 pub use polyplets::SecurityTetraplet;
+pub use run_parameters::RunParameters;
 
 pub use crate::runner::execute_air;
 

@@ -38,14 +38,15 @@ pub(crate) fn from_success_result(exec_ctx: ExecutionCtx<'_>, trace_handler: Tra
     let streams = extract_stream_generations(exec_ctx.streams);
     let data = InterpreterData::from_execution_result(trace_handler.into_result_trace(), streams);
     let data = serde_json::to_vec(&data).expect("default serializer shouldn't fail");
-
     let next_peer_pks = dedup(exec_ctx.next_peer_pks);
+    let call_requests = serde_json::to_vec(&exec_ctx.call_requests).expect("default serializer shouldn't fail");
 
     InterpreterOutcome {
         ret_code: INTERPRETER_SUCCESS,
         error_message: String::new(),
         data,
         next_peer_pks,
+        call_requests,
     }
 }
 
@@ -60,6 +61,7 @@ pub(crate) fn from_preparation_error(data: impl Into<Vec<u8>>, err: PreparationE
         error_message: format!("{}", err),
         data,
         next_peer_pks: vec![],
+        call_requests: vec![],
     }
 }
 
@@ -75,31 +77,32 @@ pub(crate) fn from_trace_error(data: impl Into<Vec<u8>>, err: Rc<ExecutionError>
         error_message: format!("{}", err),
         data,
         next_peer_pks: vec![],
+        call_requests: vec![],
     }
 }
 
 /// Create InterpreterOutcome from supplied execution context, trace handler, and error,
 /// set ret_code based on the error.
 pub(crate) fn from_execution_error(
-    streams: HashMap<String, RefCell<Stream>>,
-    next_peer_pks: Vec<String>,
+    exec_ctx: ExecutionCtx<'_>,
     trace_handler: TraceHandler,
     err: Rc<ExecutionError>,
 ) -> InterpreterOutcome {
     let ret_code = err.to_error_code() as i32;
     let ret_code = EXECUTION_ERRORS_START_ID + ret_code;
 
-    let streams = extract_stream_generations(streams);
+    let streams = extract_stream_generations(exec_ctx.streams);
     let data = InterpreterData::from_execution_result(trace_handler.into_result_trace(), streams);
     let data = serde_json::to_vec(&data).expect("default serializer shouldn't fail");
-
-    let next_peer_pks = dedup(next_peer_pks);
+    let next_peer_pks = dedup(exec_ctx.next_peer_pks);
+    let call_requests = serde_json::to_vec(&exec_ctx.call_requests).expect("default serializer shouldn't fail");
 
     InterpreterOutcome {
         ret_code,
         error_message: format!("{}", err),
         data,
         next_peer_pks,
+        call_requests,
     }
 }
 

@@ -63,7 +63,7 @@ Instr: Box<Instruction<'input>> = {
         let instruction = Rc::new(*i);
         let fold = FoldStream { stream_name: stream, iterator, instruction };
         let span = Span { left, right };
-        validator.met_fold_stream(&fold, span);
+        validator.meet_fold_stream(&fold, span);
 
         Box::new(Instruction::FoldStream(fold))
     },

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Fluence Labs Limited
+ * Copyright 2021 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,20 +15,16 @@
  */
 
 use marine_rs_sdk::marine;
-use marine_rs_sdk::module_manifest;
+use serde::Deserialize;
+use serde::Serialize;
 
-use std::env::VarError;
-
-const CURRENT_PEER_ID_ENV_NAME: &str = "CURRENT_PEER_ID";
-
-module_manifest!();
-
-pub(crate) fn get_current_peer_id() -> std::result::Result<String, VarError> {
-    std::env::var(CURRENT_PEER_ID_ENV_NAME)
-}
-
+/// Parameters that a host side should pass to an interpreter and that necessary for execution.
 #[marine]
-#[link(wasm_import_module = "host")]
-extern "C" {
-    pub(crate) fn call_service(service_id: &str, fn_name: &str, args: &str, tetraplets: &str, call_id: u32);
+#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
+pub struct RunParameters {
+    /// Peer id of a peer that start this particle.
+    pub init_peer_id: String,
+
+    /// Peer id of a current peer.
+    pub current_peer_id: String,
 }

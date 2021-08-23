@@ -27,7 +27,10 @@ use crate::execution_step::SecurityTetraplets;
 use crate::JValue;
 use crate::SecurityTetraplet;
 
+use air_interpreter_data::CallResult;
+use air_interpreter_interface::CallRequestParams;
 use air_parser::ast::{CallInstrArgValue, CallOutputValue};
+use polyplets::ResolvedTriplet;
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -75,30 +78,40 @@ impl<'i> ResolvedCall<'i> {
             return Ok(());
         }
 
-        let ResolvedArguments {
-            call_arguments,
-            tetraplets,
-        } = self.resolve_args(exec_ctx)?;
-
-        let serialized_tetraplets = serde_json::to_string(&tetraplets).expect("default serializer shouldn't fail");
         let call_id = exec_ctx.tracker.call.seen_count - exec_ctx.tracker.call.executed_count;
+        let request_params = self.prepare_request_params(exec_ctx, triplet)?;
+        exec_ctx.call_requests.insert(call_id, request_params);
 
-        unsafe {
-            crate::build_targets::call_service(
-                &triplet.service_id,
-                &triplet.function_name,
-                &call_arguments,
-                &serialized_tetraplets,
-                call_id,
-            )
-        };
-        exec_ctx.tracker.met_executed_call();
+        exec_ctx.tracker.meet_executed_call();
+        trace_ctx.meet_call_end(CallResult::RequestSentBy(exec_ctx.current_peer_id.clone()));
 
         Ok(())
     }
 
     pub(super) fn as_tetraplet(&self) -> RSecurityTetraplet {
         self.tetraplet.clone()
+    }
+
+    fn prepare_request_params(
+        &self,
+        exec_ctx: &ExecutionCtx<'i>,
+        triplet: &ResolvedTriplet,
+    ) -> ExecutionResult<CallRequestParams> {
+        let ResolvedArguments {
+            call_arguments,
+            tetraplets,
+        } = self.resolve_args(exec_ctx)?;
+
+        let serialized_tetraplets = serde_json::to_string(&tetraplets).expect("default serializer shouldn't fail");
+
+        let request_params = CallRequestParams::new(
+            triplet.service_id.to_string(),
+            triplet.function_name.to_string(),
+            call_arguments,
+            serialized_tetraplets,
+        );
+
+        Ok(request_params)
     }
 
     /// Determine whether this call should be really called and adjust prev executed trace accordingly.

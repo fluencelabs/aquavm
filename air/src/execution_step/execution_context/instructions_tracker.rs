@@ -58,15 +58,15 @@ pub(crate) struct ParTracker {
 }
 
 impl InstrTracker {
-    pub(crate) fn met_call(&mut self) {
+    pub(crate) fn meet_call(&mut self) {
         self.call.seen_count += 1;
     }
 
-    pub(crate) fn met_executed_call(&mut self) {
+    pub(crate) fn meet_executed_call(&mut self) {
         self.call.executed_count += 1;
     }
 
-    pub(crate) fn met_fold_stream(&mut self) {
+    pub(crate) fn meet_fold_stream(&mut self) {
         self.fold.seen_stream_count += 1;
     }
 }

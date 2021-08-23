@@ -31,15 +31,25 @@ mod logger;
 
 use air::execute_air;
 use air::InterpreterOutcome;
+use air::RunParameters;
 use marine_rs_sdk::marine;
+use marine_rs_sdk::module_manifest;
+
+module_manifest!();
 
 pub fn main() {
     logger::init_logger(None);
 }
 
 #[marine]
-pub fn invoke(init_peer_id: String, air: String, prev_data: Vec<u8>, data: Vec<u8>, call_results: Vec<u8>) -> InterpreterOutcome {
-    execute_air(init_peer_id, air, prev_data, data, call_results)
+pub fn invoke(
+    air: String,
+    prev_data: Vec<u8>,
+    data: Vec<u8>,
+    params: RunParameters,
+    call_results: Vec<u8>,
+) -> InterpreterOutcome {
+    execute_air(air, prev_data, data, params, call_results)
 }
 
 #[marine]

@@ -21,12 +21,15 @@ use super::LastErrorWithTetraplet;
 use crate::execution_step::boxed_value::Scalar;
 use crate::execution_step::boxed_value::Stream;
 
+use air_interpreter_interface::CallRequestParams;
+
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::collections::VecDeque;
 use std::rc::Rc;
 
-pub(crate) type CallResults = std::collections::HashMap<u32, CallServiceResult>;
+pub(crate) type CallResults = HashMap<u32, CallServiceResult>;
+pub(crate) type CallRequests = HashMap<u32, CallRequestParams>;
 
 /// Contains all necessary state needed to execute AIR script.
 #[derive(Default)]
@@ -72,6 +75,9 @@ pub(crate) struct ExecutionCtx<'i> {
 
     /// Contains all executed results from a host side.
     pub call_results: CallResults,
+
+    /// Tracks all functions that should be called from services.
+    pub call_requests: CallRequests,
 }
 
 impl<'i> ExecutionCtx<'i> {
