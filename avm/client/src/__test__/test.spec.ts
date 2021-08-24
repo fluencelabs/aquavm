@@ -3,7 +3,7 @@ import { AirInterpreter } from '..';
 const vmPeerId = '12D3KooWNzutuy8WHXDKFqFsATvCR6j9cj2FijYbnd47geRKaQZS';
 
 const createTestIntepreter = async () => {
-    return AirInterpreter.create(vmPeerId, 'off', (level, message) => {
+    return AirInterpreter.create('off', (level, message) => {
         console.log(`level: ${level}, message=${message}`);
     });
 };

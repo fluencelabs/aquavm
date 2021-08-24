@@ -152,13 +152,12 @@ function newImportObject(cfg: HostImportsConfig, logFunction: LogFunction): Impo
 export class AirInterpreter {
     private wasmWrapper;
     private logLevel: LogLevel;
-    private peerId: string;
 
     constructor(wasmWrapper) {
         this.wasmWrapper = wasmWrapper;
     }
 
-    static async create(peerId: string, logLevel: LogLevel, logFunction: LogFunction) {
+    static async create(logLevel: LogLevel, logFunction: LogFunction) {
         const cfg = new HostImportsConfig((cfg) => {
             return newImportObject(cfg, logFunction);
         });
@@ -166,7 +165,6 @@ export class AirInterpreter {
         const instance = await interpreterInstance(cfg, logFunction);
         const res = new AirInterpreter(instance);
         res.logLevel = logLevel;
-        res.peerId = peerId;
         return res;
     }
 
