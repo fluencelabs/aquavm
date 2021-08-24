@@ -15,9 +15,11 @@
  */
 
 mod call_request_parameters;
+mod call_service_result;
 mod interpreter_data;
 mod run_parameters;
 
 pub use call_request_parameters::*;
+pub use call_service_result::*;
 pub use interpreter_data::*;
 pub use run_parameters::*;

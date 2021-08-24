@@ -17,6 +17,9 @@
 use marine_rs_sdk::marine;
 use serde::Deserialize;
 use serde::Serialize;
+use std::collections::HashMap;
+
+pub type CallRequests = HashMap<u32, CallRequestParams>;
 
 #[marine]
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

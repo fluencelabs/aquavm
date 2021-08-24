@@ -23,10 +23,10 @@ use super::trace_handler::TraceHandlerError;
 use super::Joinable;
 use super::ResolvedCallResult;
 use super::Stream;
-use crate::execution_step::execution_context::CallResults;
-use crate::execution_step::execution_context::CallServiceResult;
 use crate::JValue;
 
+use air_interpreter_interface::CallResults;
+use air_interpreter_interface::CallServiceResult;
 use jsonpath_lib::JsonPathError;
 use serde_json::Error as SerdeJsonError;
 use thiserror::Error as ThisError;

@@ -16,8 +16,10 @@
 
 use serde::Deserialize;
 use serde::Serialize;
+use std::collections::HashMap;
 
-pub(crate) const CALL_SERVICE_SUCCESS: i32 = 0;
+pub type CallResults = HashMap<u32, CallServiceResult>;
+pub const CALL_SERVICE_SUCCESS: i32 = 0;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CallServiceResult {

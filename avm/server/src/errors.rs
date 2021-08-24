@@ -15,6 +15,7 @@
  */
 
 use fluence_faas::FaaSError;
+use fluence_faas::IValue;
 
 use thiserror::Error as ThisError;
 
@@ -54,6 +55,12 @@ pub enum AVMError {
         io_error: Option<IOError>,
         reason: &'static str,
     },
+
+    /// FaaS call returns Vec<IValue> to support multi-value in a future,
+    /// but actually now it could return empty vec or a vec with one value.
+    /// This error is encountered when it returns vec with not a one value.
+    #[error("result `{0:?}` returned from FaaS should contain only one element")]
+    IncorrectInterpreterResult(Vec<IValue>),
 }
 
 impl From<std::convert::Infallible> for AVMError {

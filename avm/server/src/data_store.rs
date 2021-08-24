@@ -14,21 +14,7 @@
  * limitations under the License.
  */
 
-use crate::call_service::Effect;
-use crate::errors::AVMError::CreateVaultDirError;
-
 use std::path::{Path, PathBuf};
-
-pub fn create_vault_effect(vault_dir: &Path, particle_id: &str) -> Effect<PathBuf> {
-    let particle_vault_dir = particle_vault_dir(vault_dir, particle_id);
-    let closure = move || {
-        std::fs::create_dir_all(&particle_vault_dir)
-            .map_err(|err| CreateVaultDirError(err, particle_vault_dir.clone()))?;
-        Ok(particle_vault_dir.clone())
-    };
-
-    Box::new(closure)
-}
 
 pub fn particle_vault_dir(vault_dir: &Path, particle_id: &str) -> PathBuf {
     vault_dir.join(particle_id)

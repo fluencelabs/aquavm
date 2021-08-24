@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Fluence Labs Limited
+ * Copyright 2021 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,17 @@
  * limitations under the License.
  */
 
-use crate::call_service::CallServiceArgs;
-use crate::config::AVMConfig;
-use crate::data_store::{create_vault_effect, particle_vault_dir, prev_data_file};
-use crate::errors::AVMError::CleanupParticleError;
+use super::CallResults;
 use crate::AVMError;
+use crate::AVMResult;
 use crate::InterpreterOutcome;
-use crate::{CallServiceClosure, IType, Result};
 
 use fluence_faas::FluenceFaaS;
-use fluence_faas::HostImportDescriptor;
 use fluence_faas::IValue;
-use fluence_faas::{FaaSConfig, HostExportedFunc, ModuleDescriptor};
-use air_interpreter_interface::RunParameters;
+use fluence_faas::{FaaSConfig, ModuleDescriptor};
 
 use std::ops::{Deref, DerefMut};
 use std::path::PathBuf;
-use std::sync::Arc;
 
 /// A newtype needed to mark it as `unsafe impl Send`
 struct SendSafeFaaS(FluenceFaaS);
@@ -54,23 +48,26 @@ impl DerefMut for SendSafeFaaS {
 pub struct AVMRunner {
     faas: SendSafeFaaS,
     current_peer_id: String,
+    /// file name of the AIR interpreter .wasm
+    wasm_filename: String,
 }
 
 impl AVMRunner {
     /// Create AVM with provided config.
-    pub fn new(config: AVMConfig) -> Result<Self> {
-        let (wasm_dir, wasm_filename) = split_dirname(config.air_wasm_path)?;
+    pub fn new(
+        air_wasm_path: PathBuf,
+        logging_mask: i32,
+        current_peer_id: String,
+    ) -> AVMResult<Self> {
+        let (wasm_dir, wasm_filename) = split_dirname(air_wasm_path)?;
 
-        let faas_config = make_faas_config(
-            wasm_dir,
-            &wasm_filename,
-            config.logging_mask,
-        );
+        let faas_config = make_faas_config(wasm_dir, &wasm_filename, logging_mask);
         let faas = FluenceFaaS::with_raw_config(faas_config)?;
 
         let avm = Self {
             faas: SendSafeFaaS(faas),
-            current_peer_id: config.current_peer_id,
+            current_peer_id,
+            wasm_filename,
         };
 
         Ok(avm)
@@ -78,49 +75,99 @@ impl AVMRunner {
 
     pub fn call(
         &mut self,
-        init_user_id: impl Into<String>,
         air: impl Into<String>,
         prev_data: impl Into<Vec<u8>>,
         data: impl Into<Vec<u8>>,
-    ) -> Result<InterpreterOutcome> {
+        init_user_id: impl Into<String>,
+        call_results: &CallResults,
+    ) -> AVMResult<InterpreterOutcome> {
         let init_user_id = init_user_id.into();
-        let args = prepare_args(prev_data, data, init_user_id.clone(), air);
+        let args = prepare_args(
+            air,
+            prev_data,
+            data,
+            init_user_id,
+            self.current_peer_id.clone(),
+            call_results,
+        );
 
         let result =
             self.faas
                 .call_with_ivalues(&self.wasm_filename, "invoke", &args, <_>::default())?;
 
+        let result = try_as_one_value_vec(result)?;
         let outcome =
-            InterpreterOutcome::from_ivalues(result).map_err(AVMError::InterpreterResultDeError)?;
+            InterpreterOutcome::from_ivalue(result).map_err(AVMError::InterpreterResultDeError)?;
 
         Ok(outcome)
     }
 }
 
 fn prepare_args(
+    air: impl Into<String>,
     prev_data: impl Into<Vec<u8>>,
     data: impl Into<Vec<u8>>,
-    init_user_id: impl Into<String>,
+    init_peer_id: impl Into<String>,
     current_peer_id: String,
-    air: impl Into<String>,
+    call_results: &CallResults,
 ) -> Vec<IValue> {
+    use fluence_faas::ne_vec::NEVec;
+
+    let run_parameters = vec![
+        IValue::String(init_peer_id.into()),
+        IValue::String(current_peer_id),
+    ];
+    let run_parameters = NEVec::new(run_parameters).unwrap();
+
+    let call_results =
+        serde_json::to_vec(call_results).expect("the default serializer shouldn't fail");
     vec![
-        IValue::String(init_user_id.into()),
         IValue::String(air.into()),
         IValue::ByteArray(prev_data.into()),
         IValue::ByteArray(data.into()),
+        IValue::Record(run_parameters),
+        IValue::ByteArray(call_results),
     ]
 }
 
-fn make_faas_config(
-    air_wasm_dir: PathBuf,
-    air_wasm_file: &str,
-    logging_mask: i32,
-) -> FaaSConfig {
-    let mut air_module_config = fluence_faas::FaaSModuleConfig {
+/// Splits given path into its directory and file name
+///
+/// # Example
+/// For path `/path/to/air_interpreter_server.wasm` result will be `Ok(PathBuf(/path/to), "air_interpreter_server.wasm")`
+fn split_dirname(path: PathBuf) -> AVMResult<(PathBuf, String)> {
+    use AVMError::InvalidAIRPath;
+
+    let metadata = path.metadata().map_err(|err| InvalidAIRPath {
+        invalid_path: path.clone(),
+        reason: "failed to get file's metadata (doesn't exist or invalid permissions)",
+        io_error: Some(err),
+    })?;
+
+    if !metadata.is_file() {
+        return Err(InvalidAIRPath {
+            invalid_path: path,
+            reason: "is not a file",
+            io_error: None,
+        });
+    }
+
+    let file_name = path
+        .file_name()
+        .expect("checked to be a file, file name must be defined");
+    let file_name = file_name.to_string_lossy().into_owned();
+
+    let mut path = path;
+    // drop file name from path
+    path.pop();
+
+    Ok((path, file_name))
+}
+
+fn make_faas_config(air_wasm_dir: PathBuf, air_wasm_file: &str, logging_mask: i32) -> FaaSConfig {
+    let air_module_config = fluence_faas::FaaSModuleConfig {
         mem_pages_count: None,
         logger_enabled: true,
-        host_imports,
+        host_imports: <_>::default(),
         wasi: None,
         logging_mask,
     };
@@ -136,25 +183,12 @@ fn make_faas_config(
     }
 }
 
-// This API is intended for testing purposes
-#[cfg(feature = "raw-avm-api")]
-impl AVMRunner {
-    pub fn call_with_prev_data(
-        &mut self,
-        init_user_id: impl Into<String>,
-        air: impl Into<String>,
-        prev_data: impl Into<Vec<u8>>,
-        data: impl Into<Vec<u8>>,
-    ) -> Result<InterpreterOutcome> {
-        let args = prepare_args(prev_data, data, init_user_id, air);
+fn try_as_one_value_vec(mut ivalues: Vec<IValue>) -> AVMResult<IValue> {
+    use AVMError::IncorrectInterpreterResult;
 
-        let result =
-            self.faas
-                .call_with_ivalues(&self.wasm_filename, "invoke", &args, <_>::default())?;
-
-        let outcome =
-            InterpreterOutcome::from_ivalues(result).map_err(AVMError::InterpreterResultDeError)?;
-
-        Ok(outcome)
+    if ivalues.len() != 1 {
+        return Err(IncorrectInterpreterResult(ivalues));
     }
+
+    Ok(ivalues.remove(0))
 }

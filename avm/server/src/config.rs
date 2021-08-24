@@ -14,17 +14,12 @@
  * limitations under the License.
  */
 
-use crate::CallServiceClosure;
-
 use std::path::PathBuf;
 
 /// Describes behaviour of the AVM.
 pub struct AVMConfig {
     /// Path to a AIR interpreter Wasm file.
     pub air_wasm_path: PathBuf,
-
-    /// Descriptor of a closure that will be invoked on call_service call from the AIR interpreter.
-    pub call_service: CallServiceClosure,
 
     /// Current peer id.
     pub current_peer_id: String,
