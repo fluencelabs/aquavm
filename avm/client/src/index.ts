@@ -23,8 +23,15 @@ export type LogLevel = 'info' | 'trace' | 'debug' | 'info' | 'warn' | 'error' | 
 export type LogFunction = (level: LogLevel, message: string) => void;
 
 export interface CallServiceResult {
-    ret_code: number;
+    retCode: number;
     result: string;
+}
+
+export interface CallRequest {
+    serviceName: string;
+    functionName: string;
+    arguments: any[];
+    tetraplets: SecurityTetraplet[][];
 }
 
 export interface InterpreterResult {
@@ -33,12 +40,7 @@ export interface InterpreterResult {
     data: Uint8Array;
     nextPeerPks: Array<string>;
     callRequests: {
-        [key: number]: {
-            serviceName: string;
-            functionName: string;
-            arguments: string;
-            tetraplets: string;
-        };
+        [key: number]: CallRequest;
     };
 }
 
@@ -175,6 +177,12 @@ export class AirInterpreter {
         params: { initPeerId: string; currentPeerId: string },
         callResults: { [key: number]: CallServiceResult },
     ): InterpreterResult {
+        const callRequestsEx: any = { ...callResults };
+        for (let k in callRequestsEx) {
+            callRequestsEx[k].ret_code = callRequestsEx[k].retCode;
+            delete callRequestsEx[k].retCode;
+        }
+
         const resStr = invoke(
             // new line
             this.wasmWrapper.exports,
@@ -187,7 +195,7 @@ export class AirInterpreter {
                     current_peer_id: params.currentPeerId,
                 }),
             ),
-            Buffer.from(JSON.stringify(callResults)),
+            Buffer.from(JSON.stringify(callRequestsEx)),
             this.logLevel,
         );
         const res = JSON.parse(resStr);
@@ -198,8 +206,8 @@ export class AirInterpreter {
             res.call_requests[k] = {
                 serviceName: v.service_name,
                 functionName: v.function_name,
-                arguments: v.arguments,
-                tetraplets: v.tetraplets,
+                arguments: JSON.parse(v.arguments),
+                tetraplets: JSON.parse(v.tetraplets),
             };
         }
         return {
