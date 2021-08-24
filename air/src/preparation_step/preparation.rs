@@ -18,9 +18,9 @@ use super::PreparationError;
 use crate::execution_step::ExecutionCtx;
 use crate::execution_step::Stream;
 use crate::execution_step::TraceHandler;
-use crate::run_parameters::RunParameters;
 
 use air_interpreter_data::InterpreterData;
+use air_interpreter_interface::RunParameters;
 use air_parser::ast::Instruction;
 
 type PreparationResult<T> = Result<T, PreparationError>;
