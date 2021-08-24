@@ -23,9 +23,9 @@ use crate::execution_step::{Catchable, TraceHandler};
 use crate::log_targets::RUN_PARAMS;
 use crate::preparation_step::prepare;
 use crate::preparation_step::PreparationDescriptor;
-use crate::run_parameters::RunParameters;
 
 use air_interpreter_interface::InterpreterOutcome;
+use air_interpreter_interface::RunParameters;
 use std::rc::Rc;
 
 pub fn execute_air(

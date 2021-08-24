@@ -50,8 +50,8 @@ fn parse_seq() {
 
     let source_code = r#"
         (seq
-            (call peerid function [] output)
-            (call "id" "f" ["hello" name])
+            (call peerid function [[] []] output)
+            (call "id" "f" ["hello" [] name])
         )
         "#;
     let instruction = parse(source_code);
@@ -59,7 +59,10 @@ fn parse_seq() {
         Instruction::Call(Call {
             peer_part: PeerPk(CallInstrValue::Variable(Scalar("peerid"))),
             function_part: FuncName(CallInstrValue::Variable(Scalar("function"))),
-            args: Rc::new(vec![]),
+            args: Rc::new(vec![
+                CallInstrArgValue::EmptyArray,
+                CallInstrArgValue::EmptyArray,
+            ]),
             output: Variable(Scalar("output")),
         }),
         Instruction::Call(Call {
@@ -67,6 +70,7 @@ fn parse_seq() {
             function_part: FuncName(CallInstrValue::Literal("f")),
             args: Rc::new(vec![
                 CallInstrArgValue::Literal("hello"),
+                CallInstrArgValue::EmptyArray,
                 CallInstrArgValue::Variable(Scalar("name")),
             ]),
             output: None,
@@ -168,6 +172,32 @@ fn parse_empty_array() {
             CallInstrArgValue::Literal(""),
             CallInstrArgValue::EmptyArray,
             CallInstrArgValue::Variable(Scalar("arg")),
+        ]),
+        output: None,
+    });
+
+    assert_eq!(actual, expected);
+}
+
+#[test]
+<<<<<<< HEAD
+=======
+fn parse_empty_array_2() {
+    use ast::CallOutputValue::*;
+    use ast::FunctionPart::*;
+    use ast::PeerPart::*;
+
+    let source_code = r#"
+        (call id "f" [k [] []])
+        "#;
+    let actual = parse(source_code);
+    let expected = Instruction::Call(Call {
+        peer_part: PeerPk(CallInstrValue::Variable(ast::AstVariable::Scalar("id"))),
+        function_part: FuncName(CallInstrValue::Literal("f")),
+        args: Rc::new(vec![
+            CallInstrArgValue::Variable(ast::AstVariable::Scalar("k")),
+            CallInstrArgValue::EmptyArray,
+            CallInstrArgValue::EmptyArray,
         ]),
         output: None,
     });

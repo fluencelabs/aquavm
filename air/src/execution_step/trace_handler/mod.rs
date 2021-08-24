@@ -19,8 +19,6 @@ mod errors;
 mod handler;
 mod merger;
 mod state_automata;
-#[cfg(tests)]
-mod tests;
 
 pub(crate) use errors::TraceHandlerError;
 pub(crate) use handler::TraceHandler;
