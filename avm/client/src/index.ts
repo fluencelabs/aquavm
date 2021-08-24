@@ -27,6 +27,21 @@ export interface CallServiceResult {
     result: string;
 }
 
+export interface InterpreterResult {
+    retCode: number;
+    errorMessage: string;
+    data: Uint8Array;
+    nextPeerPks: Array<string>;
+    callRequests: {
+        [key: number]: {
+            serviceName: string;
+            functionName: string;
+            arguments: string;
+            tetraplets: string;
+        };
+    };
+}
+
 export interface ResolvedTriplet {
     peer_pk: string;
     service_id: string;
@@ -155,16 +170,46 @@ export class AirInterpreter {
         return res;
     }
 
-    invoke(air: string, prevData, data, params, callResults?): string {
-        return invoke(
+    invoke(
+        air: string,
+        prevData: Uint8Array,
+        data: Uint8Array,
+        params: { initPeerId: string; currentPeerId: string },
+        callResults: { [key: number]: CallServiceResult },
+    ): InterpreterResult {
+        const resStr = invoke(
             // new line
             this.wasmWrapper.exports,
             air,
             prevData,
             data,
-            params,
-            callResults,
+            Buffer.from(
+                JSON.stringify({
+                    init_peer_id: params.initPeerId,
+                    current_peer_id: params.currentPeerId,
+                }),
+            ),
+            Buffer.from(JSON.stringify(callResults)),
             this.logLevel,
         );
+        const res = JSON.parse(resStr);
+        res.call_requests = JSON.parse(new TextDecoder().decode(Buffer.from(res.call_requests)));
+
+        for (const k in res.call_requests) {
+            const v = res.call_requests[k];
+            res.call_requests[k] = {
+                serviceName: v.service_name,
+                functionName: v.function_name,
+                arguments: v.arguments,
+                tetraplets: v.tetraplets,
+            };
+        }
+        return {
+            retCode: res.ret_code,
+            errorMessage: res.error_message,
+            data: res.data,
+            nextPeerPks: res.next_peer_pks,
+            callRequests: res.call_requests,
+        };
     }
 }
