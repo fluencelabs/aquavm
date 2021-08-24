@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+use super::AstVariable;
 use super::LexerError;
 use super::LexerResult;
 use super::Token;
-use super::Variable;
 
 use std::convert::TryInto;
 use std::iter::Peekable;
@@ -272,12 +272,12 @@ impl<'input> CallVariableParser<'input> {
         self.current_pos() == self.string_to_parse.len() - 1
     }
 
-    fn to_variable<'v>(&self, variable_name: &'v str) -> Variable<'v> {
+    fn to_variable<'v>(&self, variable_name: &'v str) -> AstVariable<'v> {
         if self.state.is_first_stream_tag {
             // TODO: cut the stream tag after the refactoring.
-            Variable::Stream(variable_name)
+            AstVariable::Stream(variable_name)
         } else {
-            Variable::Scalar(variable_name)
+            AstVariable::Scalar(variable_name)
         }
     }
 
@@ -297,19 +297,16 @@ impl<'input> CallVariableParser<'input> {
             }
             (false, false) => {
                 if self.state.is_first_stream_tag {
-                    Ok(Token::Stream(&self.string_to_parse))
+                    Ok(Token::Stream(self.string_to_parse))
                 } else {
-                    Ok(Token::Alphanumeric(&self.string_to_parse))
+                    Ok(Token::Alphanumeric(self.string_to_parse))
                 }
             }
             (false, true) => {
                 let json_path_start_pos = self.state.first_dot_met_pos.unwrap();
                 let should_flatten = self.state.flattening_met;
-                let (variable, json_path) = to_variable_and_path(
-                    &self.string_to_parse,
-                    json_path_start_pos,
-                    should_flatten,
-                );
+                let (variable, json_path) =
+                    to_variable_and_path(self.string_to_parse, json_path_start_pos, should_flatten);
                 let variable = self.to_variable(variable);
 
                 Ok(Token::VariableWithJsonPath(

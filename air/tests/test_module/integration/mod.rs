@@ -15,12 +15,17 @@
  */
 
 mod air_basic;
+mod ap_with_fold;
+mod call_evidence_basic;
 mod dashboard;
 mod data_merge;
+mod empty_array;
 mod flattening;
 mod join;
 mod join_behaviour;
 mod json_path;
 mod last_error;
 mod network_explore;
+mod security_tetraplets;
 mod streams;
+mod streams_early_exit;

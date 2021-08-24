@@ -19,7 +19,7 @@ use serde::Serialize;
 
 /// ResolvedTriplet represents peer network location with all
 /// variables, literals and etc resolved into final string.
-#[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
 pub struct ResolvedTriplet {
     pub peer_pk: String,
     pub service_id: String,

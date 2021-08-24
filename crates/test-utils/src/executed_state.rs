@@ -14,23 +14,33 @@
  * limitations under the License.
  */
 
+use super::ApResult;
+use super::CallResult;
+use super::ExecutedState;
 use super::JValue;
-use air::execution_trace::CallResult;
-use air::execution_trace::ExecutedState;
-use air::execution_trace::ParResult;
+use super::ParResult;
+use super::Value;
+use crate::FoldLore;
+use crate::FoldResult;
+use crate::FoldSubTraceLore;
+use crate::SubTraceDesc;
 
 use std::rc::Rc;
 
-pub fn scalar_jvalue(result: JValue) -> ExecutedState {
-    ExecutedState::Call(CallResult::Executed(Rc::new(result)))
+pub fn scalar(result: JValue) -> ExecutedState {
+    let value = Value::Scalar(Rc::new(result));
+    ExecutedState::Call(CallResult::Executed(value))
 }
 
-pub fn stream_jvalue(result: JValue, _stream_name: impl Into<String>) -> ExecutedState {
-    ExecutedState::Call(CallResult::Executed(Rc::new(result)))
+pub fn stream_jvalue(result: JValue, generation: u32) -> ExecutedState {
+    let call_result = CallResult::executed_stream(Rc::new(result), generation);
+    ExecutedState::Call(call_result)
 }
 
 pub fn scalar_string(result: impl Into<String>) -> ExecutedState {
-    ExecutedState::Call(CallResult::Executed(Rc::new(JValue::String(result.into()))))
+    let result = JValue::String(result.into());
+    let value = Rc::new(result);
+    ExecutedState::Call(CallResult::executed_scalar(value))
 }
 
 pub fn scalar_string_array(result: Vec<impl Into<String>>) -> ExecutedState {
@@ -38,39 +48,46 @@ pub fn scalar_string_array(result: Vec<impl Into<String>>) -> ExecutedState {
         .into_iter()
         .map(|s| JValue::String(s.into()))
         .collect::<Vec<_>>();
+    let value = Rc::new(JValue::Array(result));
 
-    ExecutedState::Call(CallResult::Executed(Rc::new(JValue::Array(result))))
+    ExecutedState::Call(CallResult::executed_scalar(value))
 }
 
-pub fn stream_string(result: impl Into<String>, _stream_name: impl Into<String>) -> ExecutedState {
-    ExecutedState::Call(CallResult::Executed(Rc::new(JValue::String(result.into()))))
+pub fn stream_string(result: impl Into<String>, generation: u32) -> ExecutedState {
+    let result = JValue::String(result.into());
+    let value = Rc::new(result);
+
+    ExecutedState::Call(CallResult::executed_stream(value, generation))
 }
 
-pub fn stream_number(
-    result: impl Into<serde_json::Number>,
-    _stream_name: impl Into<String>,
-) -> ExecutedState {
-    ExecutedState::Call(CallResult::Executed(Rc::new(JValue::Number(result.into()))))
+pub fn stream_number(result: impl Into<serde_json::Number>, generation: u32) -> ExecutedState {
+    let result = JValue::Number(result.into());
+    let value = Rc::new(result);
+
+    ExecutedState::Call(CallResult::executed_stream(value, generation))
 }
 
-pub fn stream_string_array(
-    result: Vec<impl Into<String>>,
-    _stream_name: impl Into<String>,
-) -> ExecutedState {
+pub fn stream_string_array(result: Vec<impl Into<String>>, generation: u32) -> ExecutedState {
     let result = result
         .into_iter()
         .map(|s| JValue::String(s.into()))
         .collect::<Vec<_>>();
+    let value = Rc::new(JValue::Array(result));
 
-    ExecutedState::Call(CallResult::Executed(Rc::new(JValue::Array(result))))
+    ExecutedState::Call(CallResult::executed_stream(value, generation))
 }
 
 pub fn request_sent_by(sender: impl Into<String>) -> ExecutedState {
-    ExecutedState::Call(CallResult::RequestSentBy(sender.into()))
+    ExecutedState::Call(CallResult::RequestSentBy(Rc::new(sender.into())))
 }
 
 pub fn par(left: usize, right: usize) -> ExecutedState {
-    ExecutedState::Par(ParResult(left, right))
+    let par_result = ParResult {
+        left_size: left as _,
+        right_size: right as _,
+    };
+
+    ExecutedState::Par(par_result)
 }
 
 pub fn service_failed(ret_code: i32, error_message: impl Into<String>) -> ExecutedState {
@@ -78,4 +95,34 @@ pub fn service_failed(ret_code: i32, error_message: impl Into<String>) -> Execut
         ret_code,
         Rc::new(error_message.into()),
     ))
+}
+
+pub fn fold(lore: FoldLore) -> ExecutedState {
+    let result = FoldResult { lore };
+    ExecutedState::Fold(result)
+}
+
+pub fn subtrace_lore(
+    value_pos: u32,
+    before: SubTraceDesc,
+    after: SubTraceDesc,
+) -> FoldSubTraceLore {
+    FoldSubTraceLore {
+        value_pos,
+        subtraces_desc: vec![before, after],
+    }
+}
+
+pub fn ap(dst: Option<u32>) -> ExecutedState {
+    let res_generations = option_to_vec(dst);
+    let ap_result = ApResult::new(res_generations);
+
+    ExecutedState::Ap(ap_result)
+}
+
+fn option_to_vec(maybe_value: Option<u32>) -> Vec<u32> {
+    match maybe_value {
+        Some(value) => vec![value],
+        None => vec![],
+    }
 }

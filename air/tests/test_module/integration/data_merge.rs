@@ -14,18 +14,11 @@
  * limitations under the License.
  */
 
-use pretty_assertions::assert_eq;
+// use pretty_assertions::assert_eq;
 use serde_json::json;
 
-use air_test_utils::call_vm;
-use air_test_utils::create_avm;
-use air_test_utils::executed_state;
-use air_test_utils::set_variable_call_service;
-use air_test_utils::set_variables_call_service;
-use air_test_utils::CallServiceClosure;
-use air_test_utils::ExecutionTrace;
-use air_test_utils::IValue;
-use air_test_utils::NEVec;
+use air_test_utils::*;
+use std::collections::HashMap;
 
 type JValue = serde_json::Value;
 
@@ -33,25 +26,20 @@ type JValue = serde_json::Value;
 fn data_merge() {
     use executed_state::*;
 
-    let neighborhood_call_service1: CallServiceClosure = Box::new(|_| -> Option<IValue> {
-        Some(IValue::Record(
-            NEVec::new(vec![IValue::S32(0), IValue::String(String::from("[\"A\", \"B\"]"))]).unwrap(),
-        ))
-    });
+    let set_variable_id = "set_variable";
+    let vm_1_id = "A";
+    let vm_2_id = "B";
 
-    let neighborhood_call_service2: CallServiceClosure = Box::new(|_| -> Option<IValue> {
-        Some(IValue::Record(
-            NEVec::new(vec![IValue::S32(0), IValue::String(String::from("[\"A\", \"B\"]"))]).unwrap(),
-        ))
-    });
+    let mut set_variable = create_avm(
+        set_variable_call_service(json!([vm_1_id, vm_2_id]).to_string()),
+        set_variable_id,
+    );
+    let mut vm1 = create_avm(return_string_call_service(vm_1_id), vm_1_id);
+    let mut vm2 = create_avm(return_string_call_service(vm_2_id), vm_2_id);
 
-    let mut vm1 = create_avm(neighborhood_call_service1, "A");
-    let mut vm2 = create_avm(neighborhood_call_service2, "B");
-
-    let script = String::from(
-        r#"
+    let script = r#"
         (seq
-            (call %init_peer_id% ("neighborhood" "") [] neighborhood)
+            (call "set_variable" ("neighborhood" "") [] neighborhood)
             (seq
                 (seq
                     (fold neighborhood i
@@ -73,99 +61,93 @@ fn data_merge() {
                 )
             )
         )
-        "#,
-    );
+        "#;
 
     // little hack here with init_peer_id to execute the first call from both VMs
-    let res1 = call_vm!(vm1, "A", script.clone(), "[]", "[]");
-    let res2 = call_vm!(vm2, "B", script.clone(), "[]", "[]");
-    let res3 = call_vm!(vm1, "asd", script.clone(), res1.data.clone(), res2.data.clone());
-    let res4 = call_vm!(vm2, "asd", script, res1.data.clone(), res2.data.clone());
+    let result_0 = checked_call_vm!(set_variable, "", script, "", "");
+    let result_1 = checked_call_vm!(vm1, "", script, "", result_0.data.clone());
+    let result_2 = checked_call_vm!(vm2, "", script, "", result_0.data);
+    let result_3 = checked_call_vm!(vm1, "", script, result_1.data.clone(), result_2.data.clone());
+    let result_4 = checked_call_vm!(vm2, "", script, result_1.data.clone(), result_2.data.clone());
 
-    let actual_trace_1: ExecutionTrace =
-        serde_json::from_slice(&res1.data).expect("interpreter should return valid json");
+    let actual_trace_1 = trace_from_result(&result_1);
 
     let expected_trace_1 = vec![
         scalar_string_array(vec!["A", "B"]),
         par(1, 2),
-        stream_string_array(vec!["A", "B"], "$void"),
+        stream_string(vm_1_id, 0),
         par(1, 0),
-        request_sent_by("A"),
+        request_sent_by(set_variable_id),
         par(1, 2),
-        stream_string_array(vec!["A", "B"], "$providers"),
+        stream_string(vm_1_id, 0),
         par(1, 0),
-        request_sent_by("A"),
-        stream_string_array(vec!["A", "B"], "$void"),
-        request_sent_by("A"),
+        request_sent_by(vm_1_id),
+        stream_string(vm_1_id, 0),
+        request_sent_by(vm_1_id),
     ];
 
     assert_eq!(actual_trace_1, expected_trace_1);
-    assert_eq!(res1.next_peer_pks, vec![String::from("B")]);
+    assert_eq!(result_1.next_peer_pks, vec![String::from("B")]);
 
-    let actual_trace_2: ExecutionTrace =
-        serde_json::from_slice(&res2.data).expect("interpreter should return valid json");
+    let actual_trace_2 = trace_from_result(&result_2);
 
     let expected_trace_2 = vec![
         scalar_string_array(vec!["A", "B"]),
         par(1, 2),
-        request_sent_by("B"),
+        request_sent_by(set_variable_id),
         par(1, 0),
-        stream_string_array(vec!["A", "B"], "$void"),
+        stream_string(vm_2_id, 0),
         par(1, 2),
-        request_sent_by("B"),
+        request_sent_by(vm_2_id),
         par(1, 0),
-        stream_string_array(vec!["A", "B"], "$providers"),
-        request_sent_by("B"),
+        stream_string(vm_2_id, 0),
+        request_sent_by(vm_2_id),
     ];
 
     assert_eq!(actual_trace_2, expected_trace_2);
-    assert_eq!(res2.next_peer_pks, vec![String::from("A")]);
+    assert_eq!(result_2.next_peer_pks, vec![String::from("A")]);
 
-    let actual_trace_3: ExecutionTrace =
-        serde_json::from_slice(&res3.data).expect("interpreter should return valid json");
+    let actual_trace_3 = trace_from_result(&result_3);
 
     let expected_trace_3 = vec![
         scalar_string_array(vec!["A", "B"]),
         par(1, 2),
-        stream_string_array(vec!["A", "B"], "$void"),
+        stream_string(vm_1_id, 0),
         par(1, 0),
-        stream_string_array(vec!["A", "B"], "$void"),
+        stream_string(vm_2_id, 1),
         par(1, 2),
-        stream_string_array(vec!["A", "B"], "$providers"),
+        stream_string(vm_1_id, 0),
         par(1, 0),
-        stream_string_array(vec!["A", "B"], "$providers"),
-        stream_string_array(vec!["A", "B"], "$void"),
-        request_sent_by("A"),
+        stream_string(vm_2_id, 1),
+        stream_string(vm_1_id, 0),
+        request_sent_by(vm_1_id),
     ];
 
     assert_eq!(actual_trace_3, expected_trace_3);
-    assert!(res3.next_peer_pks.is_empty());
+    assert!(result_3.next_peer_pks.is_empty());
 
-    let actual_trace_4: ExecutionTrace =
-        serde_json::from_slice(&res4.data).expect("interpreter should return valid json");
+    let actual_trace_4 = trace_from_result(&result_4);
 
     let expected_trace_4 = vec![
         scalar_string_array(vec!["A", "B"]),
         par(1, 2),
-        stream_string_array(vec!["A", "B"], "$void"),
+        stream_string(vm_1_id, 0),
         par(1, 0),
-        stream_string_array(vec!["A", "B"], "$void"),
+        stream_string(vm_2_id, 1),
         par(1, 2),
-        stream_string_array(vec!["A", "B"], "$providers"),
+        stream_string(vm_1_id, 0),
         par(1, 0),
-        stream_string_array(vec!["A", "B"], "$providers"),
-        stream_string_array(vec!["A", "B"], "$void"),
-        scalar_string_array(vec!["A", "B"]),
+        stream_string(vm_2_id, 1),
+        stream_string(vm_1_id, 0),
+        scalar_string(vm_2_id),
     ];
 
     assert_eq!(actual_trace_4, expected_trace_4);
-    assert!(res4.next_peer_pks.is_empty());
+    assert!(result_4.next_peer_pks.is_empty());
 }
 
 #[test]
 fn acc_merge() {
-    env_logger::init();
-
     let neighborhood_call_service: CallServiceClosure = Box::new(|args| -> Option<IValue> {
         let args_count = match &args.function_args[1] {
             IValue::String(str) => str,
@@ -216,46 +198,143 @@ fn acc_merge() {
         "#,
     );
 
-    let res = call_vm!(vm1, "asd", script.clone(), "[]", "[]");
-    call_vm!(vm2, "asd", script, "[]", res.data);
+    let result = checked_call_vm!(vm1, "asd", script.clone(), "", "");
+    checked_call_vm!(vm2, "asd", script, "", result.data);
 }
 
 #[test]
-#[ignore]
 fn fold_merge() {
+    use std::ops::Deref;
+
     let set_variable_vm_id = "set_variable";
     let local_vm_id = "local_vm";
 
     let variables = maplit::hashmap! {
-        "stream1".to_string() => r#"["s1", "s2", "s3"]"#.to_string(),
-        "stream2".to_string() => r#"["s4", "s5", "s6"]"#.to_string(),
+        "stream_1".to_string() => json!(["peer_0", "peer_1", "peer_2", "peer_3"]).to_string(),
+        "stream_2".to_string() => json!(["peer_4", "peer_5", "peer_6"]).to_string(),
     };
-
-    let local_vm_service_call: CallServiceClosure = Box::new(|args| -> Option<IValue> {
-        let args = match &args.function_args[2] {
-            IValue::String(str) => str,
-            _ => unreachable!(),
-        };
-        println!("args {:?}", args);
-
-        Some(IValue::Record(
-            NEVec::new(vec![IValue::S32(0), IValue::String(format!("{}", args))]).unwrap(),
-        ))
-    });
-
     let mut set_variable_vm = create_avm(set_variables_call_service(variables), set_variable_vm_id);
-    let mut local_vm = create_avm(local_vm_service_call, local_vm_id);
 
     let script = format!(
         include_str!("./scripts/inner_folds_v1.clj"),
         set_variable_vm_id, local_vm_id
     );
 
-    let res = call_vm!(set_variable_vm, "", script.clone(), "", "");
-    let res = call_vm!(local_vm, "", script, "", res.data);
+    let set_variable_result = checked_call_vm!(set_variable_vm, "", &script, "", "");
 
-    let _actual_trace: ExecutionTrace =
-        serde_json::from_slice(&res.data).expect("interpreter should return valid json");
+    let mut local_vms = Vec::with_capacity(7);
+    let mut local_vms_results = Vec::with_capacity(7);
+    for vm_id in 0..7 {
+        let peer_id = format!("peer_{}", vm_id);
+        let mut vm = create_avm(echo_string_call_service(), peer_id);
+        let result = checked_call_vm!(
+            vm,
+            "",
+            &script,
+            set_variable_result.data.clone(),
+            set_variable_result.data.clone()
+        );
 
-    // println!("res is {:?}", actual_trace);
+        local_vms.push(vm);
+        local_vms_results.push(result);
+    }
+
+    let mut local_vm = create_avm(echo_string_call_service(), local_vm_id);
+    let result_1 = checked_call_vm!(local_vm, "", &script, "", local_vms_results[0].data.clone());
+    let result_2 = checked_call_vm!(
+        local_vm,
+        "",
+        &script,
+        result_1.data.clone(),
+        local_vms_results[3].data.clone()
+    );
+    let result_3 = checked_call_vm!(
+        local_vm,
+        "",
+        &script,
+        result_2.data.clone(),
+        local_vms_results[4].data.clone()
+    );
+    let result_4 = checked_call_vm!(
+        local_vm,
+        "",
+        &script,
+        result_3.data.clone(),
+        local_vms_results[5].data.clone()
+    );
+
+    let result_5 = checked_call_vm!(
+        local_vm,
+        "",
+        &script,
+        result_4.data.clone(),
+        local_vms_results[1].data.clone()
+    );
+
+    let result_6 = checked_call_vm!(
+        local_vm,
+        "",
+        &script,
+        result_5.data.clone(),
+        local_vms_results[2].data.clone()
+    );
+
+    let result_7 = checked_call_vm!(
+        local_vm,
+        "",
+        &script,
+        result_6.data.clone(),
+        local_vms_results[6].data.clone()
+    );
+
+    let data = InterpreterData::try_from_slice(&result_7.data).expect("data should be well-formed");
+    let stream_1_generations = data
+        .streams
+        .get("$stream_1")
+        .expect("$stream_1 should presence in data");
+    let stream_2_generations = data
+        .streams
+        .get("$stream_2")
+        .expect("$stream_2 should presence in data");
+
+    assert_eq!(*stream_1_generations, 4);
+    assert_eq!(*stream_2_generations, 3);
+
+    let mut fold_states_count = 0;
+    let mut calls_count = HashMap::new();
+
+    for state in data.trace.iter() {
+        if matches!(state, ExecutedState::Fold(_)) {
+            fold_states_count += 1;
+        }
+
+        if let ExecutedState::Fold(fold) = state {
+            for subtrace_lore in fold.lore.iter() {
+                let value_pos = subtrace_lore.value_pos as usize;
+                if let ExecutedState::Call(CallResult::Executed(value)) = &data.trace[value_pos] {
+                    let value = match value {
+                        Value::Scalar(value) => value,
+                        Value::Stream { value, .. } => value,
+                    };
+
+                    if let JValue::String(var_name) = value.deref() {
+                        let current_count: usize = calls_count.get(var_name).map(|v| *v).unwrap_or_default();
+                        calls_count.insert(var_name, current_count + 1);
+                    }
+                }
+            }
+        }
+    }
+
+    // $stream_1 contains 4 generation each with 2 elements, it means that inner fold for $stream_2
+    // runs 2*4 times and produces 2*4 fold states, and 1 state comes from fold for $stream_1
+    assert_eq!(fold_states_count, 2 * 4 + 1);
+
+    for (call_result, call_count) in calls_count {
+        if call_result.as_str() < "peer_4" {
+            assert_eq!(call_count, 2);
+        } else {
+            assert_eq!(call_count, 16);
+        }
+    }
 }

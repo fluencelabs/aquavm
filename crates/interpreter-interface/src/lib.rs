@@ -22,7 +22,7 @@ use serde::Serialize;
 
 pub const INTERPRETER_SUCCESS: i32 = 0;
 
-/// Describes a result returned at the end of the interpreter execution.
+/// Describes a result returned at the end of the interpreter execution_step.
 #[marine]
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct InterpreterOutcome {

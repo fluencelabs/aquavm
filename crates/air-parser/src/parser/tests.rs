@@ -18,12 +18,12 @@ use crate::ast;
 use crate::parser::lexer::LastErrorPath;
 use crate::parser::AIRParser;
 use crate::parser::ParserError;
+use ast::AstVariable::Scalar;
+use ast::AstVariable::Stream;
 use ast::Call;
 use ast::CallInstrArgValue;
 use ast::CallInstrValue;
 use ast::Instruction;
-use ast::Variable::Scalar;
-use ast::Variable::Stream;
 
 use fstrings::f;
 use lalrpop_util::ParseError;
@@ -50,8 +50,8 @@ fn parse_seq() {
 
     let source_code = r#"
         (seq
-            (call peerid function [] output)
-            (call "id" "f" ["hello" name])
+            (call peerid function [[] []] output)
+            (call "id" "f" ["hello" [] name])
         )
         "#;
     let instruction = parse(source_code);
@@ -59,7 +59,10 @@ fn parse_seq() {
         Instruction::Call(Call {
             peer_part: PeerPk(CallInstrValue::Variable(Scalar("peerid"))),
             function_part: FuncName(CallInstrValue::Variable(Scalar("function"))),
-            args: Rc::new(vec![]),
+            args: Rc::new(vec![
+                CallInstrArgValue::EmptyArray,
+                CallInstrArgValue::EmptyArray,
+            ]),
             output: Variable(Scalar("output")),
         }),
         Instruction::Call(Call {
@@ -67,6 +70,7 @@ fn parse_seq() {
             function_part: FuncName(CallInstrValue::Literal("f")),
             args: Rc::new(vec![
                 CallInstrArgValue::Literal("hello"),
+                CallInstrArgValue::EmptyArray,
                 CallInstrArgValue::Variable(Scalar("name")),
             ]),
             output: None,
@@ -136,11 +140,11 @@ fn parse_json_path() {
         "#;
     let instruction = parse(source_code);
     let expected = Instruction::Call(Call {
-        peer_part: PeerPk(CallInstrValue::JsonPath {
-            variable: Scalar("id"),
-            path: "$.a",
-            should_flatten: true,
-        }),
+        peer_part: PeerPk(CallInstrValue::JsonPath(ast::JsonPath::new(
+            Scalar("id"),
+            "$.a",
+            true,
+        ))),
         function_part: FuncName(CallInstrValue::Literal("f")),
         args: Rc::new(vec![
             CallInstrArgValue::Literal("hello"),
@@ -149,6 +153,54 @@ fn parse_json_path() {
         output: Variable(Stream("$void")),
     });
     assert_eq!(instruction, expected);
+}
+
+#[test]
+fn parse_empty_array() {
+    use ast::CallOutputValue::*;
+    use ast::FunctionPart::*;
+    use ast::PeerPart::*;
+
+    let source_code = r#"
+        (call id "f" ["" [] arg])
+        "#;
+    let actual = parse(source_code);
+    let expected = Instruction::Call(Call {
+        peer_part: PeerPk(CallInstrValue::Variable(ast::AstVariable::Scalar("id"))),
+        function_part: FuncName(CallInstrValue::Literal("f")),
+        args: Rc::new(vec![
+            CallInstrArgValue::Literal(""),
+            CallInstrArgValue::EmptyArray,
+            CallInstrArgValue::Variable(Scalar("arg")),
+        ]),
+        output: None,
+    });
+
+    assert_eq!(actual, expected);
+}
+
+#[test]
+fn parse_empty_array_2() {
+    use ast::CallOutputValue::*;
+    use ast::FunctionPart::*;
+    use ast::PeerPart::*;
+
+    let source_code = r#"
+        (call id "f" [k [] []])
+        "#;
+    let actual = parse(source_code);
+    let expected = Instruction::Call(Call {
+        peer_part: PeerPk(CallInstrValue::Variable(ast::AstVariable::Scalar("id"))),
+        function_part: FuncName(CallInstrValue::Literal("f")),
+        args: Rc::new(vec![
+            CallInstrArgValue::Variable(ast::AstVariable::Scalar("k")),
+            CallInstrArgValue::EmptyArray,
+            CallInstrArgValue::EmptyArray,
+        ]),
+        output: None,
+    });
+
+    assert_eq!(actual, expected);
 }
 
 #[test]
@@ -278,21 +330,21 @@ fn parse_json_path_complex() {
     let instruction = parse(source_code);
     let expected = seq(
         Instruction::Call(Call {
-            peer_part: PeerPk(CallInstrValue::JsonPath {
-                variable: Scalar("m"),
-                path: "$.[1]",
-                should_flatten: true,
-            }),
+            peer_part: PeerPk(CallInstrValue::JsonPath(ast::JsonPath::new(
+                Scalar("m"),
+                "$.[1]",
+                true,
+            ))),
             function_part: FuncName(CallInstrValue::Literal("f")),
             args: Rc::new(vec![]),
             output: Variable(Scalar("void")),
         }),
         Instruction::Call(Call {
-            peer_part: PeerPk(CallInstrValue::JsonPath {
-                variable: Scalar("m"),
-                path: r#"$.abc["c"].cde[a][0].cde["bcd"]"#,
-                should_flatten: true,
-            }),
+            peer_part: PeerPk(CallInstrValue::JsonPath(ast::JsonPath::new(
+                Scalar("m"),
+                r#"$.abc["c"].cde[a][0].cde["bcd"]"#,
+                true,
+            ))),
             function_part: FuncName(CallInstrValue::Literal("f")),
             args: Rc::new(vec![]),
             output: Variable(Scalar("void")),
@@ -312,26 +364,22 @@ fn json_path_square_braces() {
         "#;
     let instruction = parse(source_code);
     let expected = Instruction::Call(Call {
-        peer_part: PeerPk(CallInstrValue::JsonPath {
-            variable: Scalar("u"),
-            path: r#"$["peer_id"]"#,
-            should_flatten: true,
-        }),
+        peer_part: PeerPk(CallInstrValue::JsonPath(ast::JsonPath::new(
+            Scalar("u"),
+            r#"$["peer_id"]"#,
+            true,
+        ))),
         function_part: ServiceIdWithFuncName(
             CallInstrValue::Literal("return"),
             CallInstrValue::Literal(""),
         ),
         args: Rc::new(vec![
-            CallInstrArgValue::JsonPath {
-                variable: Scalar("u"),
-                path: r#"$["peer_id"].cde[0]["abc"].abc"#,
-                should_flatten: false,
-            },
-            CallInstrArgValue::JsonPath {
-                variable: Scalar("u"),
-                path: r#"$["name"]"#,
-                should_flatten: false,
-            },
+            CallInstrArgValue::JsonPath(ast::JsonPath::new(
+                Scalar("u"),
+                r#"$["peer_id"].cde[0]["abc"].abc"#,
+                false,
+            )),
+            CallInstrArgValue::JsonPath(ast::JsonPath::new(Scalar("u"), r#"$["name"]"#, false)),
         ]),
         output: Variable(Stream("$void")),
     });
@@ -384,8 +432,8 @@ fn parse_fold() {
         )
         "#;
     let instruction = parse(&source_code);
-    let expected = fold(
-        ast::IterableValue::Variable(Scalar("iterable")),
+    let expected = fold_scalar(
+        ast::IterableScalarValue::ScalarVariable("iterable"),
         "i",
         null(),
     );
@@ -446,8 +494,8 @@ fn parse_fold_with_xor_par_seq() {
         let source_code = source_fold_with(name);
         let instruction = parse(&source_code);
         let instr = binary_instruction(*name);
-        let expected = fold(
-            ast::IterableValue::Variable(Scalar("iterable")),
+        let expected = fold_scalar(
+            ast::IterableScalarValue::ScalarVariable("iterable"),
             "i",
             instr(null(), null()),
         );
@@ -749,9 +797,10 @@ fn no_output() {
     use ast::PeerPart::*;
 
     let source_code = r#"
-    (call peer (service fname) [])
+        (call peer (service fname) [])
     "#;
-    let instruction = parse(source_code);
+    let actual = parse(source_code);
+
     let expected = Instruction::Call(Call {
         peer_part: PeerPk(CallInstrValue::Variable(Scalar("peer"))),
         function_part: ServiceIdWithFuncName(
@@ -761,13 +810,83 @@ fn no_output() {
         args: Rc::new(vec![]),
         output: None,
     });
-    assert_eq!(instruction, expected);
+    assert_eq!(actual, expected);
+}
+
+#[test]
+fn ap_with_literal() {
+    use ast::Ap;
+
+    let source_code = r#"
+        (ap "some_string" $stream)
+    "#;
+
+    let actual = parse(source_code);
+    let expected = Instruction::Ap(Ap {
+        argument: ast::ApArgument::Literal("some_string"),
+        result: ast::AstVariable::Stream("$stream"),
+    });
+
+    assert_eq!(actual, expected);
+}
+
+#[test]
+fn ap_with_number() {
+    use ast::Ap;
+    use ast::Number;
+
+    let source_code = r#"
+        (ap -100 $stream)
+    "#;
+
+    let actual = parse(source_code);
+    let expected = Instruction::Ap(Ap {
+        argument: ast::ApArgument::Number(Number::Int(-100)),
+        result: ast::AstVariable::Stream("$stream"),
+    });
+
+    assert_eq!(actual, expected);
+}
+
+#[test]
+fn ap_with_bool() {
+    use ast::Ap;
+
+    let source_code = r#"
+        (ap true $stream)
+    "#;
+
+    let actual = parse(source_code);
+    let expected = Instruction::Ap(Ap {
+        argument: ast::ApArgument::Boolean(true),
+        result: ast::AstVariable::Stream("$stream"),
+    });
+
+    assert_eq!(actual, expected);
+}
+
+#[test]
+fn ap_with_last_error() {
+    use ast::Ap;
+    use ast::LastErrorPath;
+
+    let source_code = r#"
+        (ap %last_error%.$.msg! $stream)
+    "#;
+
+    let actual = parse(source_code);
+    let expected = Instruction::Ap(Ap {
+        argument: ast::ApArgument::LastError(LastErrorPath::Message),
+        result: ast::AstVariable::Stream("$stream"),
+    });
+
+    assert_eq!(actual, expected);
 }
 
 #[test]
 fn fold_json_path() {
-    use ast::Fold;
-    use ast::IterableValue::*;
+    use ast::FoldScalar;
+    use ast::IterableScalarValue::*;
 
     let source_code = r#"
     ; comment
@@ -775,9 +894,9 @@ fn fold_json_path() {
     ;;; comment
     "#;
     let instruction = parse(source_code);
-    let expected = Instruction::Fold(Fold {
+    let expected = Instruction::FoldScalar(FoldScalar {
         iterable: JsonPath {
-            variable: Scalar("members"),
+            scalar_name: "members",
             path: "$.[\"users\"]",
             should_flatten: false,
         },
@@ -788,9 +907,25 @@ fn fold_json_path() {
 }
 
 #[test]
+fn fold_on_stream() {
+    use ast::FoldStream;
+
+    let source_code = r#"
+        (fold $stream iterator (null))
+    "#;
+    let instruction = parse(source_code);
+    let expected = Instruction::FoldStream(FoldStream {
+        stream_name: "$stream",
+        iterator: "iterator",
+        instruction: Rc::new(null()),
+    });
+    assert_eq!(instruction, expected);
+}
+
+#[test]
 fn comments() {
-    use ast::Fold;
-    use ast::IterableValue::*;
+    use ast::FoldScalar;
+    use ast::IterableScalarValue::*;
 
     let source_code = r#"
     ; comment
@@ -798,9 +933,9 @@ fn comments() {
     ;;; comme;?!.$.  nt[][][][()()()null;$::!
     "#;
     let instruction = parse(source_code);
-    let expected = Instruction::Fold(Fold {
+    let expected = Instruction::FoldScalar(FoldScalar {
         iterable: JsonPath {
-            variable: Scalar("members"),
+            scalar_name: "members",
             path: "$.[\"users\"]",
             should_flatten: false,
         },
@@ -832,12 +967,12 @@ fn null() -> Instruction<'static> {
     Instruction::Null(ast::Null)
 }
 
-fn fold<'a>(
-    iterable: ast::IterableValue<'a>,
+fn fold_scalar<'a>(
+    iterable: ast::IterableScalarValue<'a>,
     iterator: &'a str,
     instruction: Instruction<'a>,
 ) -> Instruction<'a> {
-    Instruction::Fold(ast::Fold {
+    Instruction::FoldScalar(ast::FoldScalar {
         iterable,
         iterator,
         instruction: std::rc::Rc::new(instruction),

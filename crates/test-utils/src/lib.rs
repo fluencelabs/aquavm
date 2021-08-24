@@ -25,6 +25,7 @@
     unreachable_patterns
 )]
 
+mod call_services;
 pub mod executed_state;
 
 pub use avm_server::ne_vec::NEVec;
@@ -36,10 +37,10 @@ pub use avm_server::IValue;
 pub use avm_server::InterpreterOutcome;
 pub use avm_server::ParticleParameters;
 pub use avm_server::AVM;
+pub use call_services::*;
 
-pub use air::execution_trace::ExecutionTrace;
+pub use air::interpreter_data::*;
 
-use std::collections::HashMap;
 use std::path::PathBuf;
 
 pub(self) type JValue = serde_json::Value;
@@ -59,110 +60,17 @@ pub fn create_avm(call_service: CallServiceClosure, current_peer_id: impl Into<S
     AVM::new(config).expect("vm should be created")
 }
 
-pub fn unit_call_service() -> CallServiceClosure {
-    Box::new(|_| -> Option<IValue> {
-        Some(IValue::Record(
-            NEVec::new(vec![
-                IValue::S32(0),
-                IValue::String(String::from("\"test\"")),
-            ])
-            .unwrap(),
-        ))
-    })
-}
-
-pub fn echo_string_call_service() -> CallServiceClosure {
-    Box::new(|args| -> Option<IValue> {
-        let arg = match &args.function_args[2] {
-            IValue::String(str) => str,
-            _ => unreachable!(),
-        };
-
-        let arg: Vec<String> = serde_json::from_str(arg).unwrap();
-        let arg = serde_json::to_string(&arg[0]).unwrap();
-
-        Some(IValue::Record(
-            NEVec::new(vec![IValue::S32(0), IValue::String(arg)]).unwrap(),
-        ))
-    })
-}
-
-pub fn echo_number_call_service() -> CallServiceClosure {
-    Box::new(|args| -> Option<IValue> {
-        let arg = match &args.function_args[2] {
-            IValue::String(str) => str,
-            _ => unreachable!(),
-        };
-
-        let arg: Vec<String> = serde_json::from_str(arg).unwrap();
-
-        Some(IValue::Record(
-            NEVec::new(vec![IValue::S32(0), IValue::String(arg[0].clone())]).unwrap(),
-        ))
-    })
-}
-
-pub fn set_variable_call_service(json: impl Into<String>) -> CallServiceClosure {
-    let json = json.into();
-    Box::new(move |_| -> Option<IValue> {
-        Some(IValue::Record(
-            NEVec::new(vec![IValue::S32(0), IValue::String(json.clone())]).unwrap(),
-        ))
-    })
-}
-
-pub fn set_variables_call_service(ret_mapping: HashMap<String, String>) -> CallServiceClosure {
-    Box::new(move |args| -> Option<IValue> {
-        let arg_name = match &args.function_args[2] {
-            IValue::String(json_str) => {
-                let json = serde_json::from_str(json_str).expect("a valid json");
-                match json {
-                    JValue::Array(array) => match array.first() {
-                        Some(JValue::String(str)) => str.to_string(),
-                        _ => String::from("default"),
-                    },
-                    _ => String::from("default"),
-                }
+#[macro_export]
+macro_rules! checked_call_vm {
+    ($vm:expr, $init_peer_id:expr, $script:expr, $prev_data:expr, $data:expr) => {{
+        match $vm.call_with_prev_data($init_peer_id, $script, $prev_data, $data) {
+            Ok(v) if v.ret_code != 0 => {
+                panic!("VM returns a error: {} {}", v.ret_code, v.error_message)
             }
-            _ => String::from("default"),
-        };
-
-        let result = ret_mapping
-            .get(&arg_name)
-            .cloned()
-            .unwrap_or_else(|| String::from(r#""test""#));
-
-        Some(IValue::Record(
-            NEVec::new(vec![IValue::S32(0), IValue::String(result)]).unwrap(),
-        ))
-    })
-}
-
-pub fn fallible_call_service(fallible_service_id: impl Into<String>) -> CallServiceClosure {
-    let fallible_service_id = fallible_service_id.into();
-
-    Box::new(move |args| -> Option<IValue> {
-        let builtin_service = match &args.function_args[0] {
-            IValue::String(str) => str,
-            _ => unreachable!(),
-        };
-
-        // return a error for service with such id
-        if builtin_service == &fallible_service_id {
-            Some(IValue::Record(
-                NEVec::new(vec![IValue::S32(1), IValue::String(String::from("error"))]).unwrap(),
-            ))
-        } else {
-            // return success for services with other ids
-            Some(IValue::Record(
-                NEVec::new(vec![
-                    IValue::S32(0),
-                    IValue::String(String::from(r#""res""#)),
-                ])
-                .unwrap(),
-            ))
+            Ok(v) => v,
+            Err(err) => panic!("VM call failed: {}", err),
         }
-    })
+    }};
 }
 
 #[macro_export]
@@ -173,4 +81,39 @@ macro_rules! call_vm {
             Err(err) => panic!("VM call failed: {}", err),
         }
     };
+}
+
+pub fn trace_from_result(result: &InterpreterOutcome) -> ExecutionTrace {
+    let data = data_from_result(result);
+    data.trace
+}
+
+pub fn data_from_result(result: &InterpreterOutcome) -> InterpreterData {
+    serde_json::from_slice(&result.data).expect("default serializer shouldn't fail")
+}
+
+pub fn raw_data_from_trace(trace: ExecutionTrace) -> Vec<u8> {
+    let data = InterpreterData::from_execution_result(trace, <_>::default());
+    serde_json::to_vec(&data).expect("default serializer shouldn't fail")
+}
+
+#[macro_export]
+macro_rules! assert_next_pks {
+    ($expected:expr, $actual:expr) => {
+        let expected: std::collections::HashSet<_> =
+            $expected.into_iter().map(|s| s.as_str()).collect();
+        let actual: std::collections::HashSet<_> = $actual.into_iter().map(|s| *s).collect();
+
+        assert_eq!(expected, actual)
+    };
+}
+
+pub fn print_trace(result: &InterpreterOutcome, trace_name: &str) {
+    let trace = trace_from_result(result);
+
+    println!("trace {} (states_count: {}): [", trace_name, trace.len());
+    for (id, state) in trace.iter().enumerate() {
+        println!("  {}: {}", id, state);
+    }
+    println!("]");
 }

@@ -28,11 +28,12 @@ pub enum Token<'input> {
     CloseRoundBracket,
     OpenSquareBracket,
     CloseSquareBracket,
+    SquareBrackets, // [] symbolize empty array, it's possible to have it only in an argument position
 
     StringLiteral(&'input str),
     Alphanumeric(&'input str),
     Stream(&'input str),
-    VariableWithJsonPath(Variable<'input>, &'input str, bool),
+    VariableWithJsonPath(AstVariable<'input>, &'input str, bool),
     Number(Number),
     Boolean(bool),
 
@@ -40,6 +41,7 @@ pub enum Token<'input> {
     LastError(LastErrorPath),
 
     Call,
+    Ap,
     Seq,
     Par,
     Null,
@@ -51,7 +53,7 @@ pub enum Token<'input> {
 }
 
 #[derive(Debug, Clone, PartialEq, Hash, Serialize, Deserialize)]
-pub enum Variable<'input> {
+pub enum AstVariable<'input> {
     Scalar(&'input str),
     Stream(&'input str),
 }

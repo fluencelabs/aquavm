@@ -1,7 +1,8 @@
 (seq
+(seq
  (seq
-  (call "12D3KooWEDU1WwGtvHUKpGCaMjhcLWyCUq3MQiRKZBLLFcBVVMck" ("" "") ["relay"] relay)
-  (call "12D3KooWEDU1WwGtvHUKpGCaMjhcLWyCUq3MQiRKZBLLFcBVVMck" ("" "") ["client"] client)
+  (call "client_id" ("" "") ["relay"] relay)
+  (call "client_id" ("" "") ["client"] client)
   )
  (seq
   (call relay ("dht" "neighborhood") [relay] neighs_top)
@@ -24,5 +25,10 @@
           )
          )
    )
+  )
+ )
+ (seq
+  (call relay ("op" "identity") [])
+  (call client ("return" "") [$services $neighs_inner neighs_top])
   )
  )

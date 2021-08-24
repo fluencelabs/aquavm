@@ -43,9 +43,9 @@ impl fmt::Display for Number {
     }
 }
 
-impl fmt::Display for Variable<'_> {
+impl fmt::Display for AstVariable<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        use Variable::*;
+        use AstVariable::*;
 
         match self {
             Scalar(name) => write!(f, "{}", name),

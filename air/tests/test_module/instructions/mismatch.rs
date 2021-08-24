@@ -15,10 +15,11 @@
  */
 
 use air_test_utils::call_vm;
+use air_test_utils::checked_call_vm;
 use air_test_utils::create_avm;
 use air_test_utils::echo_string_call_service;
 use air_test_utils::executed_state;
-use air_test_utils::ExecutionTrace;
+use air_test_utils::trace_from_result;
 
 #[test]
 fn mismatch_equal() {
@@ -45,10 +46,10 @@ fn mismatch_equal() {
         set_variable_peer_id, local_peer_id
     );
 
-    let res = call_vm!(set_variable_vm, "asd", script.clone(), "", "");
-    let res = call_vm!(vm, "asd", script, "", res.data);
+    let result = checked_call_vm!(set_variable_vm, "asd", &script, "", "");
+    let result = checked_call_vm!(vm, "asd", script, "", result.data);
 
-    let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid json");
+    let actual_trace = trace_from_result(&result);
     let expected_state = executed_state::scalar_string("result_2");
 
     assert_eq!(actual_trace.len(), 3);
@@ -80,10 +81,10 @@ fn mismatch_not_equal() {
         set_variable_peer_id, local_peer_id
     );
 
-    let res = call_vm!(set_variable_vm, "asd", script.clone(), "", "");
-    let res = call_vm!(vm, "asd", script, "", res.data);
+    let result = checked_call_vm!(set_variable_vm, "asd", &script, "", "");
+    let result = checked_call_vm!(vm, "asd", script, "", result.data);
 
-    let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid json");
+    let actual_trace = trace_from_result(&result);
     let expected_state = executed_state::scalar_string("result_1");
 
     assert_eq!(actual_trace.len(), 3);
@@ -112,10 +113,10 @@ fn mismatch_with_string() {
         set_variable_peer_id, local_peer_id
     );
 
-    let res = call_vm!(set_variable_vm, "asd", script.clone(), "", "");
-    let res = call_vm!(vm, "asd", script, "", res.data);
+    let result = checked_call_vm!(set_variable_vm, "asd", &script, "", "");
+    let result = checked_call_vm!(vm, "asd", script, "", result.data);
 
-    let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be valid json");
+    let actual_trace = trace_from_result(&result);
     let expected_state = executed_state::scalar_string("result_2");
 
     assert_eq!(actual_trace.len(), 2);
@@ -144,14 +145,14 @@ fn mismatch_without_xor() {
         set_variable_peer_id, local_peer_id
     );
 
-    let res = call_vm!(set_variable_vm, "asd", script.clone(), "", "");
-    let res = call_vm!(vm, "asd", script.clone(), "", res.data);
+    let result = call_vm!(set_variable_vm, "asd", &script, "", "");
+    let result = call_vm!(vm, "asd", &script, "", result.data);
 
-    assert_eq!(res.ret_code, 1016);
+    assert_eq!(result.ret_code, 1015);
 
-    let res = call_vm!(vm, "asd", script, "", res.data);
+    let result = call_vm!(vm, "asd", script, "", result.data);
 
-    assert_eq!(res.ret_code, 1016);
+    assert_eq!(result.ret_code, 1015);
 }
 
 #[test]
@@ -187,11 +188,11 @@ fn mismatch_with_two_xors() {
         local_peer_id, local_peer_id_2
     );
 
-    let res = call_vm!(vm, "", script, "", "");
-    let mut trace: ExecutionTrace =
-        serde_json::from_slice(&res.data).expect("the interpreter should provide correct trace");
+    let result = checked_call_vm!(vm, "", script, "", "");
 
+    let mut actual_trace = trace_from_result(&result);
     let expected_executed_call_result = executed_state::request_sent_by(local_peer_id);
-    assert_eq!(res.ret_code, 0);
-    assert_eq!(trace.pop_back().unwrap(), expected_executed_call_result);
+
+    assert_eq!(result.ret_code, 0);
+    assert_eq!(actual_trace.pop().unwrap(), expected_executed_call_result);
 }

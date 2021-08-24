@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+mod impls;
 mod traits;
 
+pub use crate::parser::lexer::AstVariable;
 pub use crate::parser::lexer::LastErrorPath;
 pub use crate::parser::lexer::Number;
-pub use crate::parser::lexer::Variable;
 
 use serde::Deserialize;
 use serde::Serialize;
@@ -30,12 +31,14 @@ use std::rc::Rc;
 pub enum Instruction<'i> {
     Null(Null),
     Call(Call<'i>),
+    Ap(Ap<'i>),
     Seq(Seq<'i>),
     Par(Par<'i>),
     Xor(Xor<'i>),
     Match(Match<'i>),
     MisMatch(MisMatch<'i>),
-    Fold(Fold<'i>),
+    FoldScalar(FoldScalar<'i>),
+    FoldStream(FoldStream<'i>),
     Next(Next<'i>),
     Error,
 }
@@ -61,15 +64,28 @@ pub struct Call<'i> {
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+pub enum ApArgument<'i> {
+    ScalarVariable(&'i str),
+    JsonPath(JsonPath<'i>),
+    Number(Number),
+    Boolean(bool),
+    Literal(&'i str),
+    EmptyArray,
+    LastError(LastErrorPath),
+}
+
+#[derive(Serialize, Debug, PartialEq)]
+pub struct Ap<'i> {
+    pub argument: ApArgument<'i>,
+    pub result: AstVariable<'i>,
+}
+
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum CallInstrValue<'i> {
     InitPeerId,
     Literal(&'i str),
-    Variable(Variable<'i>),
-    JsonPath {
-        variable: Variable<'i>,
-        path: &'i str,
-        should_flatten: bool,
-    },
+    Variable(AstVariable<'i>),
+    JsonPath(JsonPath<'i>),
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
@@ -79,19 +95,16 @@ pub enum CallInstrArgValue<'i> {
     Literal(&'i str),
     Number(Number),
     Boolean(bool),
-    Variable(Variable<'i>),
-    JsonPath {
-        variable: Variable<'i>,
-        path: &'i str,
-        should_flatten: bool,
-    },
+    EmptyArray, // only empty arrays are allowed now
+    Variable(AstVariable<'i>),
+    JsonPath(JsonPath<'i>),
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
-pub enum IterableValue<'i> {
-    Variable(Variable<'i>),
+pub enum IterableScalarValue<'i> {
+    ScalarVariable(&'i str),
     JsonPath {
-        variable: Variable<'i>,
+        scalar_name: &'i str,
         path: &'i str,
         should_flatten: bool,
     },
@@ -103,17 +116,14 @@ pub enum MatchableValue<'i> {
     Literal(&'i str),
     Number(Number),
     Boolean(bool),
-    Variable(Variable<'i>),
-    JsonPath {
-        variable: Variable<'i>,
-        path: &'i str,
-        should_flatten: bool,
-    },
+    EmptyArray,
+    Variable(AstVariable<'i>),
+    JsonPath(JsonPath<'i>),
 }
 
 #[derive(Serialize, Debug, PartialEq, Clone)]
 pub enum CallOutputValue<'i> {
-    Variable(Variable<'i>),
+    Variable(AstVariable<'i>),
     None,
 }
 
@@ -141,8 +151,15 @@ pub struct MisMatch<'i> {
 }
 
 #[derive(Serialize, Debug, PartialEq)]
-pub struct Fold<'i> {
-    pub iterable: IterableValue<'i>,
+pub struct FoldScalar<'i> {
+    pub iterable: IterableScalarValue<'i>,
+    pub iterator: &'i str,
+    pub instruction: Rc<Instruction<'i>>,
+}
+
+#[derive(Serialize, Debug, PartialEq)]
+pub struct FoldStream<'i> {
+    pub stream_name: &'i str,
     pub iterator: &'i str,
     pub instruction: Rc<Instruction<'i>>,
 }
@@ -152,3 +169,10 @@ pub struct Next<'i>(pub &'i str);
 
 #[derive(Serialize, Debug, PartialEq)]
 pub struct Null;
+
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+pub struct JsonPath<'i> {
+    pub variable: AstVariable<'i>,
+    pub path: &'i str,
+    pub should_flatten: bool,
+}

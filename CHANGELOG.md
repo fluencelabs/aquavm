@@ -1,3 +1,14 @@
+## Version 0.14.0 (2021-08-24)
+
+[PR 74](https://github.com/fluencelabs/aquavm/pull/74):
+- introduced a new CRDT-like data format for streams:
+  - call results contains different values for streams and scalars
+  - introduced a new state for fold whose iterables are streams
+- merging scheme was rewritten, and became lazy
+- refactor the internal value mechanism
+- introduced a new instruction `(ap` responsible for applying json path to scalars and save results as a new scalar or add it to a stream. In the second case it'll produce a new state in a data. 
+- introduced a new string literal `[]` represents empty array
+
 ## Version 0.10.8 (2021-07-06)
 
 - improve the error message of the invalid executed state error ([PR 121](https://github.com/fluencelabs/aquavm/pull/121))

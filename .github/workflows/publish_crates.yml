@@ -29,12 +29,12 @@ jobs:
       - name: Install Rust toolchain
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly
+          toolchain: nightly-2021-05-16
           profile: minimal
           override: true
       - uses: actions-rs/cargo@v1
         with:
-          toolchain: nightly
+          toolchain: nightly-2021-05-16
           command: update
           args: --aggressive
 

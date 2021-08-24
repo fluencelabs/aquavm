@@ -15,13 +15,14 @@
  */
 
 use air_test_utils::call_vm;
+use air_test_utils::checked_call_vm;
 use air_test_utils::create_avm;
 use air_test_utils::echo_string_call_service;
 use air_test_utils::executed_state;
 use air_test_utils::set_variable_call_service;
+use air_test_utils::trace_from_result;
 use air_test_utils::unit_call_service;
 use air_test_utils::CallServiceClosure;
-use air_test_utils::ExecutionTrace;
 use air_test_utils::IValue;
 use air_test_utils::NEVec;
 
@@ -32,8 +33,8 @@ fn current_peer_id_call() {
     let vm_peer_id = String::from("test_peer_id");
     let mut vm = create_avm(unit_call_service(), vm_peer_id.clone());
 
-    let service_id = String::from("local_service_id");
-    let function_name = String::from("local_fn_name");
+    let service_id = "local_service_id";
+    let function_name = "local_fn_name";
     let script = format!(
         r#"
                (call %init_peer_id% ("{}" "{}") [] result_name)
@@ -41,14 +42,14 @@ fn current_peer_id_call() {
         service_id, function_name
     );
 
-    let res = call_vm!(vm, vm_peer_id.clone(), script.clone(), "[]", "[]");
-    let call_path: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be a valid json");
+    let result = checked_call_vm!(vm, &vm_peer_id, script, [], []);
 
+    let actual_trace = trace_from_result(&result);
     let expected_state = executed_state::scalar_string("test");
 
-    assert_eq!(call_path.len(), 1);
-    assert_eq!(call_path[0], expected_state);
-    assert!(res.next_peer_pks.is_empty());
+    assert_eq!(actual_trace.len(), 1);
+    assert_eq!(actual_trace[0], expected_state);
+    assert!(result.next_peer_pks.is_empty());
 
     let script = format!(
         r#"
@@ -57,18 +58,18 @@ fn current_peer_id_call() {
         vm_peer_id, service_id, function_name
     );
 
-    let res = call_vm!(vm, "asd", script.clone(), "[]", "[]");
+    let result = checked_call_vm!(vm, "asd", script.clone(), "", "");
 
     // test that empty string for data works
-    let res_with_empty_string = call_vm!(vm, "asd", script, "", "");
-    assert_eq!(res_with_empty_string, res);
+    let result_with_empty_string = checked_call_vm!(vm, "asd", script, "", "");
+    assert_eq!(result_with_empty_string, result);
 }
 
 // Check that specifying remote peer id in call will result its appearing in next_peer_pks.
 #[test]
 fn remote_peer_id_call() {
     let some_local_peer_id = String::from("some_local_peer_id");
-    let mut vm = create_avm(echo_string_call_service(), some_local_peer_id.clone());
+    let mut vm = create_avm(echo_string_call_service(), &some_local_peer_id);
 
     let remote_peer_id = String::from("some_remote_peer_id");
     let script = format!(
@@ -76,14 +77,14 @@ fn remote_peer_id_call() {
         remote_peer_id
     );
 
-    let res = call_vm!(vm, "asd", script, "[]", "[]");
-    let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be a valid json");
+    let result = checked_call_vm!(vm, "asd", script, "", "");
 
+    let actual_trace = trace_from_result(&result);
     let expected_state = executed_state::request_sent_by(some_local_peer_id);
 
     assert_eq!(actual_trace.len(), 1);
     assert_eq!(actual_trace[0], expected_state);
-    assert_eq!(res.next_peer_pks, vec![remote_peer_id]);
+    assert_eq!(result.next_peer_pks, vec![remote_peer_id]);
 }
 
 // Check that setting variables works as expected.
@@ -92,19 +93,17 @@ fn variables() {
     let mut vm = create_avm(unit_call_service(), "remote_peer_id");
     let mut set_variable_vm = create_avm(set_variable_call_service(r#""remote_peer_id""#), "set_variable");
 
-    let script = format!(
-        r#"
+    let script = r#"
             (seq
                 (call "set_variable" ("some_service_id" "local_fn_name") [] remote_peer_id)
                 (call remote_peer_id ("some_service_id" "local_fn_name") [] result_name)
             )
-        "#,
-    );
+        "#;
 
-    let res = call_vm!(set_variable_vm, "asd", script.clone(), "[]", "[]");
-    let res = call_vm!(vm, "asd", script, "[]", res.data);
+    let result = checked_call_vm!(set_variable_vm, "asd", script, "", "");
+    let result = checked_call_vm!(vm, "asd", script, "", result.data);
 
-    assert!(res.next_peer_pks.is_empty());
+    assert!(result.next_peer_pks.is_empty());
 }
 
 // Check that duplicate variables are impossible.
@@ -112,19 +111,17 @@ fn variables() {
 fn duplicate_variables() {
     let mut vm = create_avm(unit_call_service(), "some_peer_id");
 
-    let script = format!(
-        r#"
+    let script = r#"
             (seq
                 (call "some_peer_id" ("some_service_id" "local_fn_name") [] modules)
                 (call "some_peer_id" ("some_service_id" "local_fn_name") [] modules)
             )
-        "#,
-    );
+        "#;
 
-    let res = call_vm!(vm, "asd", script, "", "");
+    let result = call_vm!(vm, "asd", script, "", "");
 
-    assert_eq!(res.ret_code, 1005);
-    assert!(res.next_peer_pks.is_empty());
+    assert_eq!(result.ret_code, 1005);
+    assert!(result.next_peer_pks.is_empty());
 }
 
 // Check that string literals can be used as call parameters.
@@ -162,10 +159,10 @@ fn string_parameters() {
         set_variable_vm_peer_id, service_id, function_name, vm_peer_id, service_id, function_name
     );
 
-    let res = call_vm!(set_variable_vm, "asd", script.clone(), "[]", "[]");
-    let res = call_vm!(vm, "asd", script, "[]", res.data);
-    let actual_trace: ExecutionTrace = serde_json::from_slice(&res.data).expect("should be a valid json");
+    let result = checked_call_vm!(set_variable_vm, "asd", &script, "", "");
+    let result = checked_call_vm!(vm, "asd", script, "", result.data);
 
+    let actual_trace = trace_from_result(&result);
     let expected_state = executed_state::scalar_string_array(vec!["arg1", "arg2", "arg3_value"]);
 
     assert_eq!(actual_trace.len(), 2);

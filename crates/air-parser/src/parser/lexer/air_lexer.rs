@@ -26,6 +26,7 @@ pub type Spanned<Token, Loc, Error> = Result<(Loc, Token, Loc), Error>;
 
 pub struct AIRLexer<'input> {
     input: &'input str,
+    open_square_bracket_met: bool,
     chars: Peekable<CharIndices<'input>>,
 }
 
@@ -41,6 +42,7 @@ impl<'input> AIRLexer<'input> {
     pub fn new(input: &'input str) -> Self {
         Self {
             input,
+            open_square_bracket_met: false,
             chars: input.char_indices().peekable(),
         }
     }
@@ -51,8 +53,18 @@ impl<'input> AIRLexer<'input> {
                 '(' => return Some(Ok((start_pos, Token::OpenRoundBracket, start_pos + 1))),
                 ')' => return Some(Ok((start_pos, Token::CloseRoundBracket, start_pos + 1))),
 
-                '[' => return Some(Ok((start_pos, Token::OpenSquareBracket, start_pos + 1))),
-                ']' => return Some(Ok((start_pos, Token::CloseSquareBracket, start_pos + 1))),
+                '[' => {
+                    return if !self.open_square_bracket_met {
+                        self.open_square_bracket_met = true;
+                        Some(Ok((start_pos, Token::OpenSquareBracket, start_pos + 1)))
+                    } else {
+                        self.tokenize_string(start_pos, true)
+                    }
+                }
+                ']' => {
+                    self.open_square_bracket_met = false;
+                    return Some(Ok((start_pos, Token::CloseSquareBracket, start_pos + 1)));
+                }
 
                 ';' => self.skip_comment(),
 
@@ -60,7 +72,7 @@ impl<'input> AIRLexer<'input> {
 
                 '"' => return self.tokenize_string_literal(start_pos),
 
-                _ => return self.tokenize_string(start_pos),
+                _ => return self.tokenize_string(start_pos, false),
             }
         }
 
@@ -70,7 +82,7 @@ impl<'input> AIRLexer<'input> {
     fn skip_comment(&mut self) {
         const NEW_LINE: char = '\n'; // TODO: consider '\n\r'
 
-        while let Some((_, ch)) = self.chars.next() {
+        for (_, ch) in &mut self.chars {
             if ch == NEW_LINE {
                 break;
             }
@@ -82,7 +94,7 @@ impl<'input> AIRLexer<'input> {
         &mut self,
         start_pos: usize,
     ) -> Option<Spanned<Token<'input>, usize, LexerError>> {
-        while let Some((pos, ch)) = self.chars.next() {
+        for (pos, ch) in &mut self.chars {
             if ch == '"' {
                 // + 1 to count an open double quote
                 let string_size = pos - start_pos + 1;
@@ -102,8 +114,9 @@ impl<'input> AIRLexer<'input> {
     fn tokenize_string(
         &mut self,
         start_pos: usize,
+        open_square_bracket_met: bool,
     ) -> Option<Spanned<Token<'input>, usize, LexerError>> {
-        let end_pos = self.advance_to_token_end(start_pos);
+        let end_pos = self.advance_to_token_end(start_pos, open_square_bracket_met);
 
         // this slicing is safe here because borders come from the chars iterator
         let token_str = &self.input[start_pos..end_pos];
@@ -117,10 +130,10 @@ impl<'input> AIRLexer<'input> {
         Some(Ok((start_pos, token, start_pos + token_str_len)))
     }
 
-    fn advance_to_token_end(&mut self, start_pos: usize) -> usize {
+    fn advance_to_token_end(&mut self, start_pos: usize, square_met: bool) -> usize {
         let mut end_pos = start_pos;
         let mut round_brackets_balance: i64 = 0;
-        let mut square_brackets_balance: i64 = 0;
+        let mut square_brackets_balance: i64 = if square_met { 1 } else { 0 };
 
         while let Some((pos, ch)) = self.chars.peek() {
             end_pos = *pos;
@@ -176,6 +189,7 @@ fn string_to_token(input: &str, start_pos: usize) -> LexerResult<Token> {
         "" => Err(LexerError::EmptyString(start_pos, start_pos)),
 
         CALL_INSTR => Ok(Token::Call),
+        AP_INSTR => Ok(Token::Ap),
         SEQ_INSTR => Ok(Token::Seq),
         PAR_INSTR => Ok(Token::Par),
         NULL_INSTR => Ok(Token::Null),
@@ -184,6 +198,8 @@ fn string_to_token(input: &str, start_pos: usize) -> LexerResult<Token> {
         NEXT_INSTR => Ok(Token::Next),
         MATCH_INSTR => Ok(Token::Match),
         MISMATCH_INSTR => Ok(Token::MisMatch),
+
+        SQUARE_BRACKETS => Ok(Token::SquareBrackets),
 
         INIT_PEER_ID => Ok(Token::InitPeerId),
         _ if input.starts_with(LAST_ERROR) => parse_last_error(input, start_pos),
@@ -218,6 +234,7 @@ fn parse_last_error(input: &str, start_pos: usize) -> LexerResult<Token<'_>> {
 }
 
 const CALL_INSTR: &str = "call";
+const AP_INSTR: &str = "ap";
 const SEQ_INSTR: &str = "seq";
 const PAR_INSTR: &str = "par";
 const NULL_INSTR: &str = "null";
@@ -229,6 +246,8 @@ const MISMATCH_INSTR: &str = "mismatch";
 
 const INIT_PEER_ID: &str = "%init_peer_id%";
 const LAST_ERROR: &str = "%last_error%";
+
+const SQUARE_BRACKETS: &str = "[]";
 
 const TRUE_VALUE: &str = "true";
 const FALSE_VALUE: &str = "false";
