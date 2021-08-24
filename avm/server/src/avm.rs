@@ -32,9 +32,6 @@ use std::ops::{Deref, DerefMut};
 use std::path::PathBuf;
 use std::sync::Arc;
 
-const CALL_SERVICE_NAME: &str = "call_service";
-const CURRENT_PEER_ID_ENV_NAME: &str = "CURRENT_PEER_ID";
-
 /// A newtype needed to mark it as `unsafe impl Send`
 struct SendSafeFaaS(FluenceFaaS);
 
@@ -180,35 +177,6 @@ fn prepare_args(
         IValue::ByteArray(prev_data.into()),
         IValue::ByteArray(data.into()),
     ]
-}
-
-fn call_service_descriptor(
-    params: Arc<Mutex<ParticleParameters>>,
-    call_service: CallServiceClosure,
-    vault_dir: PathBuf,
-) -> HostImportDescriptor {
-    let call_service_closure: HostExportedFunc = Box::new(move |_, ivalues: Vec<IValue>| {
-        let params = {
-            let lock = params.lock();
-            lock.deref().clone()
-        };
-
-        let create_vault = create_vault_effect(&vault_dir, &params.particle_id);
-
-        let args = CallServiceArgs {
-            particle_parameters: params,
-            function_args: ivalues,
-            create_vault,
-        };
-        call_service(args)
-    });
-
-    HostImportDescriptor {
-        host_exported_func: call_service_closure,
-        argument_types: vec![IType::String, IType::String, IType::String, IType::String],
-        output_type: Some(IType::Record(0)),
-        error_handler: None,
-    }
 }
 
 /// Splits given path into its directory and file name

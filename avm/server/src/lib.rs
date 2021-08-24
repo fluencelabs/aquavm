@@ -25,10 +25,10 @@
 )]
 
 mod avm;
-mod call_service;
 mod config;
 mod data_store;
 mod errors;
+mod runner;
 
 pub use avm::ParticleParameters;
 pub use avm::AVM;
