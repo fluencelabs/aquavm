@@ -14,17 +14,7 @@
  * limitations under the License.
  */
 
-use air_test_utils::checked_call_vm;
-use air_test_utils::create_avm;
-use air_test_utils::executed_state;
-use air_test_utils::set_variables_call_service;
-use air_test_utils::trace_from_result;
-use air_test_utils::unit_call_service;
-use air_test_utils::CallServiceClosure;
-use air_test_utils::IValue;
-use air_test_utils::NEVec;
-
-use serde_json::json;
+use air_test_utils::prelude::*;
 
 #[test]
 fn seq_par_call() {
@@ -111,33 +101,26 @@ fn create_service() {
     let blueprint = json!({ "name": "blueprint", "dependencies": [module]});
 
     let variables_mapping = maplit::hashmap!(
-        String::from("module_bytes") => module_bytes.to_string(),
-        String::from("module_config") => module_config.to_string(),
-        String::from("blueprint") => blueprint.to_string(),
+        "module_bytes".to_string() => module_bytes.clone(),
+        "module_config".to_string() => module_config.clone(),
+        "blueprint".to_string() => blueprint.clone(),
     );
 
     let mut set_variables_vm = create_avm(set_variables_call_service(variables_mapping), "set_variables");
 
-    let add_module_response = String::from("add_module response");
-    let add_blueprint_response = String::from("add_blueprint response");
-    let create_response = String::from("create response");
+    let add_module_response = "add_module response";
+    let add_blueprint_response = "add_blueprint response";
+    let create_response = "create response";
 
-    let call_service: CallServiceClosure = Box::new(move |args| -> Option<IValue> {
-        let builtin_service = match &args.function_args[0] {
-            IValue::String(str) => str,
-            _ => unreachable!(),
+    let call_service: CallServiceClosure = Box::new(move |params| -> CallServiceResult {
+        let response = match params.service_id.as_str() {
+            "add_module" => add_module_response,
+            "add_blueprint" => add_blueprint_response,
+            "create" => create_response,
+            _ => "unknown response",
         };
 
-        let response = match builtin_service.as_str() {
-            "add_module" => add_module_response.clone(),
-            "add_blueprint" => add_blueprint_response.clone(),
-            "create" => create_response.clone(),
-            _ => String::from("unknown response"),
-        };
-
-        Some(IValue::Record(
-            NEVec::new(vec![IValue::S32(0), IValue::String(format!("\"{}\"", response))]).unwrap(),
-        ))
+        CallServiceResult::ok(&json!(response))
     });
 
     let mut vm = create_avm(call_service, "A");

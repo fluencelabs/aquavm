@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-use air_test_utils::*;
-
-use serde_json::json;
+use air_test_utils::prelude::*;
 
 #[test]
 fn empty_array() {

@@ -14,38 +14,19 @@
  * limitations under the License.
  */
 
-use air_test_utils::checked_call_vm;
-use air_test_utils::create_avm;
-use air_test_utils::executed_state;
-use air_test_utils::set_variable_call_service;
-use air_test_utils::trace_from_result;
-use air_test_utils::unit_call_service;
-use air_test_utils::CallServiceClosure;
-use air_test_utils::IValue;
-use air_test_utils::NEVec;
-use air_test_utils::SubTraceDesc;
-
-use serde_json::json;
-use serde_json::Value as JValue;
+use air_test_utils::prelude::*;
 
 #[test]
 fn empty_stream() {
     fn arg_type_check_closure() -> CallServiceClosure {
-        Box::new(move |args| -> Option<IValue> {
-            let call_args = match &args.function_args[2] {
-                IValue::String(str) => str,
-                _ => unreachable!(),
-            };
-
+        Box::new(move |params| -> CallServiceResult {
             let actual_call_args: Vec<Vec<JValue>> =
-                serde_json::from_str(call_args).expect("json deserialization shouldn't fail");
+                serde_json::from_str(&params.arguments).expect("json deserialization shouldn't fail");
             let expected_call_args: Vec<Vec<JValue>> = vec![vec![]];
 
             assert_eq!(actual_call_args, expected_call_args);
 
-            Some(IValue::Record(
-                NEVec::new(vec![IValue::S32(0), IValue::String(r#""""#.to_string())]).unwrap(),
-            ))
+            CallServiceResult::ok(&json!(""))
         })
     }
 
@@ -69,9 +50,9 @@ fn stream_merging_v0() {
     let executor_id = "stream_executor";
 
     let mut initiator = create_avm(unit_call_service(), initiator_id);
-    let mut setter_1 = create_avm(set_variable_call_service(json!("1").to_string()), setter_1_id);
-    let mut setter_2 = create_avm(set_variable_call_service(json!("2").to_string()), setter_2_id);
-    let mut setter_3 = create_avm(set_variable_call_service(json!("3").to_string()), setter_3_id);
+    let mut setter_1 = create_avm(set_variable_call_service(json!("1")), setter_1_id);
+    let mut setter_2 = create_avm(set_variable_call_service(json!("2")), setter_2_id);
+    let mut setter_3 = create_avm(set_variable_call_service(json!("3")), setter_3_id);
     let mut executor = create_avm(unit_call_service(), executor_id);
 
     let script = format!(
@@ -209,9 +190,9 @@ fn stream_merging_v1() {
     let executor_id = "stream_executor";
 
     let mut initiator = create_avm(unit_call_service(), initiator_id);
-    let mut setter_1 = create_avm(set_variable_call_service(json!("1").to_string()), setter_1_id);
-    let mut setter_2 = create_avm(set_variable_call_service(json!("2").to_string()), setter_2_id);
-    let mut setter_3 = create_avm(set_variable_call_service(json!("3").to_string()), setter_3_id);
+    let mut setter_1 = create_avm(set_variable_call_service(json!("1")), setter_1_id);
+    let mut setter_2 = create_avm(set_variable_call_service(json!("2")), setter_2_id);
+    let mut setter_3 = create_avm(set_variable_call_service(json!("3")), setter_3_id);
     let mut executor = create_avm(unit_call_service(), executor_id);
 
     let script = format!(
@@ -349,9 +330,9 @@ fn stream_merging_v2() {
     let executor_id = "stream_executor";
 
     let mut initiator = create_avm(unit_call_service(), initiator_id);
-    let mut setter_1 = create_avm(set_variable_call_service(json!("1").to_string()), setter_1_id);
-    let mut setter_2 = create_avm(set_variable_call_service(json!("2").to_string()), setter_2_id);
-    let mut setter_3 = create_avm(set_variable_call_service(json!("3").to_string()), setter_3_id);
+    let mut setter_1 = create_avm(set_variable_call_service(json!("1")), setter_1_id);
+    let mut setter_2 = create_avm(set_variable_call_service(json!("2")), setter_2_id);
+    let mut setter_3 = create_avm(set_variable_call_service(json!("3")), setter_3_id);
     let mut executor = create_avm(unit_call_service(), executor_id);
 
     let script = format!(

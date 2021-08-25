@@ -14,14 +14,7 @@
  * limitations under the License.
  */
 
-use air_test_utils::call_vm;
-use air_test_utils::checked_call_vm;
-use air_test_utils::create_avm;
-use air_test_utils::set_variables_call_service;
-use air_test_utils::trace_from_result;
-use air_test_utils::unit_call_service;
-
-use serde_json::json;
+use air_test_utils::prelude::*;
 
 #[test]
 fn dont_wait_on_json_path() {
@@ -31,11 +24,11 @@ fn dont_wait_on_json_path() {
         "ret_code": 0,
     });
 
-    let msg = String::from(r#""some message""#);
+    let msg = json!("some message");
 
     let variables = maplit::hashmap!(
         "msg".to_string() => msg,
-        "status".to_string() => status.to_string(),
+        "status".to_string() => status,
     );
 
     let set_variables_call_service = set_variables_call_service(variables);
@@ -119,8 +112,8 @@ fn dont_wait_on_json_path_on_scalars() {
     });
 
     let variables = maplit::hashmap!(
-        "array".to_string() => array.to_string(),
-        "object".to_string() => object.to_string(),
+        "array".to_string() => array,
+        "object".to_string() => object,
     );
 
     let set_variables_call_service = set_variables_call_service(variables);

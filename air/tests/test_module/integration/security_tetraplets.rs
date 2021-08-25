@@ -16,12 +16,7 @@
 
 use air::ResolvedTriplet;
 use air::SecurityTetraplet;
-use air_test_utils::checked_call_vm;
-use air_test_utils::create_avm;
-use air_test_utils::executed_state;
-use air_test_utils::CallServiceClosure;
-use air_test_utils::IValue;
-use air_test_utils::NEVec;
+use air_test_utils::prelude::*;
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -32,19 +27,12 @@ fn arg_host_function() -> (CallServiceClosure, Rc<RefCell<ArgTetraplets>>) {
     let arg_tetraplets = Rc::new(RefCell::new(ArgTetraplets::new()));
 
     let arg_tetraplets_inner = arg_tetraplets.clone();
-    let host_function: CallServiceClosure = Box::new(move |args| -> Option<IValue> {
-        let tetraplets = match &args.function_args[3] {
-            IValue::String(str) => str,
-            _ => unreachable!(),
-        };
-
+    let host_function: CallServiceClosure = Box::new(move |params| -> CallServiceResult {
         let de_tetraplets: ArgTetraplets =
-            serde_json::from_str(tetraplets).expect("json deserialization shouldn't fail");
+            serde_json::from_str(&params.tetraplets).expect("json deserialization shouldn't fail");
         *arg_tetraplets_inner.borrow_mut() = de_tetraplets;
 
-        Some(IValue::Record(
-            NEVec::new(vec![IValue::S32(0), IValue::String(tetraplets.clone())]).unwrap(),
-        ))
+        CallServiceResult::ok(&json!(params.tetraplets))
     });
 
     (host_function, arg_tetraplets)
@@ -52,16 +40,8 @@ fn arg_host_function() -> (CallServiceClosure, Rc<RefCell<ArgTetraplets>>) {
 
 #[test]
 fn simple_fold() {
-    let return_numbers_call_service: CallServiceClosure = Box::new(|_| -> Option<IValue> {
-        Some(IValue::Record(
-            NEVec::new(vec![
-                IValue::S32(0),
-                IValue::String(String::from(
-                    "[\"1\", \"2\", \"3\", \"4\", \"5\", \"6\", \"7\", \"8\", \"9\", \"10\"]",
-                )),
-            ])
-            .unwrap(),
-        ))
+    let return_numbers_call_service: CallServiceClosure = Box::new(|_| -> CallServiceResult {
+        CallServiceResult::ok(&json!({"args": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]}))
     });
 
     let set_variable_vm_peer_id = String::from("some_peer_id_1");
@@ -127,16 +107,8 @@ fn simple_fold() {
 
 #[test]
 fn fold_json_path() {
-    let return_numbers_call_service: CallServiceClosure = Box::new(|_| -> Option<IValue> {
-        Some(IValue::Record(
-            NEVec::new(vec![
-                IValue::S32(0),
-                IValue::String(String::from(
-                    "{\"arg\": [\"1\", \"2\", \"3\", \"4\", \"5\", \"6\", \"7\", \"8\", \"9\", \"10\"]}",
-                )),
-            ])
-            .unwrap(),
-        ))
+    let return_numbers_call_service: CallServiceClosure = Box::new(|_| -> CallServiceResult {
+        CallServiceResult::ok(&json!({"args": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]}))
     });
 
     let set_variable_vm_peer_id = String::from("some_peer_id_1");
@@ -248,44 +220,22 @@ fn tetraplet_with_wasm_modules() {
 
     let services_inner = services.clone();
     const ADMIN_PEER_PK: &str = "12D3KooWEXNUbCXooUwHrHBbrmjsrpHXoEphPwbjQXEGyzbqKnE1";
-    let host_func: CallServiceClosure = Box::new(move |args| -> Option<IValue> {
-        let args = &args.function_args;
-
-        let service_id = match &args[0] {
-            IValue::String(str) => str,
-            _ => unreachable!(),
-        };
-
-        let function_name = match &args[1] {
-            IValue::String(str) => str,
-            _ => unreachable!(),
-        };
-
-        let service_args = match &args[2] {
-            IValue::String(str) => str,
-            _ => unreachable!(),
-        };
-
-        let tetraplets = match &args[3] {
-            IValue::String(str) => str,
-            _ => unreachable!(),
-        };
-
-        let tetraplets: Vec<Vec<SDKTetraplet>> = serde_json::from_str(tetraplets).unwrap();
+    let host_func: CallServiceClosure = Box::new(move |params| -> CallServiceResult {
+        let tetraplets: Vec<Vec<SDKTetraplet>> = serde_json::from_str(&params.tetraplets).unwrap();
 
         let mut call_parameters = CallParameters::default();
         call_parameters.init_peer_id = ADMIN_PEER_PK.to_string();
         call_parameters.tetraplets = tetraplets;
 
-        let service_args = serde_json::from_str(service_args).unwrap();
+        let service_args = serde_json::from_str(&params.arguments).unwrap();
         let mut service = services_inner.borrow_mut();
-        let service: &mut AppService = service.get_mut(service_id.as_str()).unwrap();
+        let service: &mut AppService = service.get_mut(params.service_id.as_str()).unwrap();
 
-        let result = service.call(function_name, service_args, call_parameters).unwrap();
+        let result = service
+            .call(params.function_name, service_args, call_parameters)
+            .unwrap();
 
-        Some(IValue::Record(
-            NEVec::new(vec![IValue::S32(0), IValue::String(result.to_string())]).unwrap(),
-        ))
+        CallServiceResult::ok(&result)
     });
 
     let local_peer_id = "local_peer_id";

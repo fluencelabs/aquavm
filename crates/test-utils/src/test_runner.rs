@@ -40,8 +40,10 @@ impl TestRunner {
         let init_user_id = init_user_id.into();
         let mut call_results = HashMap::new();
 
+        let mut next_peer_pks = vec![];
+
         loop {
-            let outcome = self
+            let mut outcome = self
                 .runner
                 .call(
                     air.clone(),
@@ -54,8 +56,10 @@ impl TestRunner {
 
             let call_requests: CallRequests = serde_json::from_slice(&outcome.call_requests)
                 .expect("default serializer shouldn't fail");
+            next_peer_pks.extend(outcome.next_peer_pks);
 
             if call_requests.is_empty() {
+                outcome.next_peer_pks = next_peer_pks;
                 return Ok(outcome);
             }
 

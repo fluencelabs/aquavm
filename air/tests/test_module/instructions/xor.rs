@@ -14,17 +14,12 @@
  * limitations under the License.
  */
 
-use air_test_utils::checked_call_vm;
-use air_test_utils::create_avm;
-use air_test_utils::echo_string_call_service;
-use air_test_utils::executed_state;
-use air_test_utils::fallible_call_service;
-use air_test_utils::trace_from_result;
+use air_test_utils::prelude::*;
 
 #[test]
 fn xor() {
     let local_peer_id = "local_peer_id";
-    let fallible_service_id = String::from("service_id_1");
+    let fallible_service_id = "service_id_1";
     let mut vm = create_avm(fallible_call_service(fallible_service_id), local_peer_id);
 
     let script = format!(
@@ -64,7 +59,7 @@ fn xor() {
 #[test]
 fn xor_var_not_found() {
     let local_peer_id = "local_peer_id";
-    let mut vm = create_avm(echo_string_call_service(), local_peer_id);
+    let mut vm = create_avm(echo_call_service(), local_peer_id);
 
     let script = format!(
         r#"
@@ -88,10 +83,10 @@ fn xor_var_not_found() {
 #[test]
 fn xor_multiple_variables_found() {
     let set_variables_peer_id = "set_variables_peer_id";
-    let mut set_variables_vm = create_avm(echo_string_call_service(), set_variables_peer_id);
+    let mut set_variables_vm = create_avm(echo_call_service(), set_variables_peer_id);
 
     let local_peer_id = "local_peer_id";
-    let mut vm = create_avm(echo_string_call_service(), local_peer_id);
+    let mut vm = create_avm(echo_call_service(), local_peer_id);
 
     let some_string = String::from("some_string");
     let expected_string = String::from("expected_string");
@@ -108,15 +103,16 @@ fn xor_multiple_variables_found() {
     );
 
     let result = checked_call_vm!(set_variables_vm, "asd", &script, "", "");
-    let result = checked_call_vm!(vm, "asd", script, "", result.data);
+    let result = call_vm!(vm, "asd", script, "", result.data);
+    print_trace(&result, "second launch");
 
     let actual_trace = trace_from_result(&result);
-    let some_string_call_result = executed_state::scalar_string(some_string);
-    let expected_string_call_result = executed_state::scalar_string(expected_string);
+    let expected_trace = vec![
+        executed_state::scalar_string(some_string),
+        executed_state::scalar_string(expected_string),
+    ];
 
-    assert_eq!(actual_trace.len(), 2);
-    assert_eq!(actual_trace[0], some_string_call_result);
-    assert_eq!(actual_trace[1], expected_string_call_result);
+    assert_eq!(actual_trace, expected_trace);
 }
 
 #[test]
@@ -175,12 +171,10 @@ fn xor_par() {
 
 #[test]
 fn last_error_with_xor() {
-    use air_test_utils::echo_string_call_service;
-
     let faillible_peer_id = "failible_peer_id";
     let mut faillible_vm = create_avm(fallible_call_service("service_id_1"), faillible_peer_id);
     let local_peer_id = "local_peer_id";
-    let mut vm = create_avm(echo_string_call_service(), local_peer_id);
+    let mut vm = create_avm(echo_call_service(), local_peer_id);
 
     let script = format!(
         r#"
@@ -195,7 +189,8 @@ fn last_error_with_xor() {
     let result = checked_call_vm!(vm, "asd", script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
-    let expected_state = executed_state::scalar_string("Local service error, ret_code is 1, error message is 'error'");
+    let expected_state =
+        executed_state::scalar_string(r#"Local service error, ret_code is 1, error message is '"error"'"#);
 
     assert_eq!(actual_trace[1], expected_state);
 }

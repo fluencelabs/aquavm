@@ -17,8 +17,8 @@
 mod ap;
 mod call;
 mod fold;
-//mod match_;
-//mod mismatch;
-//mod par;
-//mod seq;
-//mod xor;
+mod match_;
+mod mismatch;
+mod par;
+mod seq;
+mod xor;

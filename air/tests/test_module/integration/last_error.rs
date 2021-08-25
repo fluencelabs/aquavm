@@ -16,13 +16,7 @@
 
 use air::LastError;
 use air::SecurityTetraplet;
-use air_test_utils::checked_call_vm;
-use air_test_utils::create_avm;
-use air_test_utils::fallible_call_service;
-use air_test_utils::unit_call_service;
-use air_test_utils::CallServiceClosure;
-use air_test_utils::IValue;
-use air_test_utils::NEVec;
+use air_test_utils::prelude::*;
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -33,29 +27,17 @@ fn create_check_service_closure(
     args_to_check: ArgToCheck<LastError>,
     tetraplets_to_check: ArgToCheck<Vec<Vec<SecurityTetraplet>>>,
 ) -> CallServiceClosure {
-    Box::new(move |args| -> Option<IValue> {
-        let call_args = match &args.function_args[2] {
-            IValue::String(str) => str,
-            _ => unreachable!(),
-        };
-
+    Box::new(move |params| -> CallServiceResult {
         let mut call_args: Vec<LastError> =
-            serde_json::from_str(call_args).expect("json deserialization shouldn't fail");
-
-        let tetraplets = match &args.function_args[3] {
-            IValue::String(str) => str,
-            _ => unreachable!(),
-        };
+            serde_json::from_str(&params.arguments).expect("json deserialization shouldn't fail");
 
         let de_tetraplets: Vec<Vec<SecurityTetraplet>> =
-            serde_json::from_str(tetraplets).expect("json deserialization shouldn't fail");
+            serde_json::from_str(&params.tetraplets).expect("json deserialization shouldn't fail");
 
         *args_to_check.borrow_mut() = Some(call_args.remove(0));
         *tetraplets_to_check.borrow_mut() = Some(de_tetraplets);
 
-        Some(IValue::Record(
-            NEVec::new(vec![IValue::S32(0), IValue::String(tetraplets.clone())]).unwrap(),
-        ))
+        CallServiceResult::ok(&json!(params.tetraplets))
     })
 }
 
