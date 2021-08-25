@@ -136,11 +136,14 @@ pub(crate) fn apply_json_path<'i>(
     let (jvalue, tetraplets) = resolved.apply_json_path_with_tetraplets(json_path)?;
 
     let jvalue = if should_flatten {
-        if jvalue.len() > 1 {
-            let jvalue = jvalue.into_iter().cloned().collect::<Vec<_>>();
-            return crate::exec_err!(ExecutionError::FlatteningError(JValue::Array(jvalue)));
+        match jvalue.len() {
+            0 => JValue::Array(vec![]),
+            1 => jvalue[0].clone(),
+            _ => {
+                let jvalue = jvalue.into_iter().cloned().collect::< Vec < _ >> ();
+                return crate::exec_err ! (ExecutionError::FlatteningError(JValue::Array(jvalue)));
+            }
         }
-        jvalue[0].clone()
     } else {
         let jvalue = jvalue.into_iter().cloned().collect::<Vec<_>>();
         JValue::Array(jvalue)
