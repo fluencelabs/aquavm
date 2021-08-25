@@ -167,6 +167,7 @@ name = "avm-server"
 version = "0.10.0"
 dependencies = [
  "air-interpreter-interface",
+ "anyhow",
  "fluence-faas",
  "log",
  "maplit",

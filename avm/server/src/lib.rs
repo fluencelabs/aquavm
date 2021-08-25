@@ -26,6 +26,7 @@
 
 mod avm;
 mod config;
+mod data_storable;
 mod data_store;
 mod errors;
 mod runner;
