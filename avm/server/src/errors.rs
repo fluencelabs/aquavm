@@ -32,22 +32,6 @@ pub enum AVMError {
     #[error("{0}")]
     InterpreterResultDeError(String),
 
-    /// I/O errors while persisting resulted data.
-    #[error("an error occurred while saving prev data {0:?} by {1:?} path")]
-    PersistDataError(#[source] IOError, PathBuf),
-
-    /// Errors related to particle_data_store path from supplied config.
-    #[error("an error occurred while creating data storage {0:?} by {1:?} path")]
-    InvalidDataStorePath(#[source] IOError, PathBuf),
-
-    /// Failed to create Particle File Vault directory (thrown inside Effect)
-    #[error("error creating Particle File Vault {1:?}: {0:?}")]
-    CreateVaultDirError(#[source] IOError, PathBuf),
-
-    /// Failed to remove particle directories (called by node after particle's ttl is expired)
-    #[error("error cleaning up particle directory {1:?}: {0:?}")]
-    CleanupParticleError(#[source] IOError, PathBuf),
-
     /// Specified path to AIR interpreter .wasm file was invalid
     #[error("path to AIR interpreter .wasm ({invalid_path:?}) is invalid: {reason}; IO Error: {io_error:?}")]
     InvalidAIRPath {
@@ -61,6 +45,10 @@ pub enum AVMError {
     /// This error is encountered when it returns vec with not a one value.
     #[error("result `{0:?}` returned from FaaS should contain only one element")]
     IncorrectInterpreterResult(Vec<IValue>),
+
+    /// This errors are encountered from a data store object.
+    #[error(transparent)]
+    DataStoreError(#[from] anyhow::Error),
 }
 
 impl From<std::convert::Infallible> for AVMError {

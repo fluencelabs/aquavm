@@ -56,8 +56,8 @@ impl AVMRunner {
     /// Create AVM with provided config.
     pub fn new(
         air_wasm_path: PathBuf,
-        logging_mask: i32,
         current_peer_id: String,
+        logging_mask: i32,
     ) -> AVMResult<Self> {
         let (wasm_dir, wasm_filename) = split_dirname(air_wasm_path)?;
 

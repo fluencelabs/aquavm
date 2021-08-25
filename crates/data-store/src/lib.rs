@@ -16,8 +16,13 @@
 
 use anyhow::Result;
 
-pub trait DataStorable {
+/// This trait should be used to persist prev_data between successive calls of an interpreter o.
+pub trait DataStore {
     fn initialize(&mut self) -> Result<()>;
 
-    fn persist_data(&mut self, data: Vec<u8>);
+    fn store_data(&mut self, data: &[u8], key: &str) -> Result<()>;
+
+    fn read_data(&mut self, key: &str) -> Result<Vec<u8>>;
+
+    fn cleanup_data(&mut self, key: &str) -> Result<()>;
 }

@@ -3,6 +3,7 @@ members = [
     "air",
     "air-interpreter",
     "crates/air-parser",
+    "crates/data-store",
     "crates/polyplets",
     "crates/interpreter-interface",
     "crates/interpreter-data",

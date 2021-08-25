@@ -26,8 +26,6 @@
 
 mod avm;
 mod config;
-mod data_storable;
-mod data_store;
 mod errors;
 mod runner;
 
@@ -48,5 +46,9 @@ pub use fluence_faas::IValue;
 pub use air_interpreter_interface::CallResults;
 pub use air_interpreter_interface::InterpreterOutcome;
 pub use air_interpreter_interface::INTERPRETER_SUCCESS;
+
+pub use avm_data_store::DataStore;
+
+pub type AVMDataStore = Box<dyn DataStore + 'static>;
 
 pub(crate) type AVMResult<T> = std::result::Result<T, AVMError>;
