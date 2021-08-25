@@ -36,7 +36,7 @@ pub use avm_server::IType;
 pub use avm_server::IValue;
 pub use avm_server::InterpreterOutcome;
 pub use avm_server::ParticleParameters;
-pub use avm_server::AVM;
+pub use avm_server::AVMRunner;
 pub use call_services::*;
 
 pub use air::interpreter_data::*;
@@ -45,25 +45,19 @@ use std::path::PathBuf;
 
 pub(self) type JValue = serde_json::Value;
 
-pub fn create_avm(call_service: CallServiceClosure, current_peer_id: impl Into<String>) -> AVM {
-    let tmp_dir = std::env::temp_dir();
+pub fn create_avm(current_peer_id: impl Into<String>) -> AVMRunner {
 
-    let config = AVMConfig {
-        air_wasm_path: PathBuf::from("../target/wasm32-wasi/debug/air_interpreter_server.wasm"),
-        call_service,
-        current_peer_id: current_peer_id.into(),
-        vault_dir: tmp_dir.join("vault"),
-        particle_data_store: tmp_dir,
-        logging_mask: i32::MAX,
-    };
+        let air_wasm_path = PathBuf::from("../target/wasm32-wasi/debug/air_interpreter_server.wasm");
+        let current_peer_id = current_peer_id.into();
+        let logging_mask = i32::MAX;
 
-    AVM::new(config).expect("vm should be created")
+    AVMRunner::new(air_wasm_path, current_peer_id, logging_mask).expect("vm should be created")
 }
 
 #[macro_export]
 macro_rules! checked_call_vm {
     ($vm:expr, $init_peer_id:expr, $script:expr, $prev_data:expr, $data:expr) => {{
-        match $vm.call_with_prev_data($init_peer_id, $script, $prev_data, $data) {
+        match $vm.call($init_peer_id, $script, $prev_data, $data) {
             Ok(v) if v.ret_code != 0 => {
                 panic!("VM returns a error: {} {}", v.ret_code, v.error_message)
             }

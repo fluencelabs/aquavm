@@ -56,13 +56,14 @@ impl AVMRunner {
     /// Create AVM with provided config.
     pub fn new(
         air_wasm_path: PathBuf,
-        current_peer_id: String,
+        current_peer_id: impl Into<String>,
         logging_mask: i32,
     ) -> AVMResult<Self> {
         let (wasm_dir, wasm_filename) = split_dirname(air_wasm_path)?;
 
         let faas_config = make_faas_config(wasm_dir, &wasm_filename, logging_mask);
         let faas = FluenceFaaS::with_raw_config(faas_config)?;
+        let current_peer_id = current_peer_id.into();
 
         let avm = Self {
             faas: SendSafeFaaS(faas),
