@@ -12,7 +12,8 @@ path = "src/lib.rs"
 
 [dependencies]
 marine-rs-sdk = "0.6.11"
-avm-server = { path = "../../avm/server", features = ["raw-avm-api"] }
+avm-server = { path = "../../avm/server" }
 air = { path = "../../air" }
+air-interpreter-interface = { path = "../../crates/interpreter-interface" }
 
 serde_json = "=1.0.61"

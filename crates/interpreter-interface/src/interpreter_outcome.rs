@@ -55,11 +55,11 @@ impl InterpreterOutcome {
             ));
         }
 
-        let ret_code = try_as_i32(record_values.pop().unwrap(), "ret_code")?;
-        let error_message = try_as_string(record_values.pop().unwrap(), "error_message")?;
-        let data = try_as_byte_vec(record_values.pop().unwrap(), "data")?;
-        let next_peer_pks = try_as_string_vec(record_values.pop().unwrap(), "next_peer_pks")?;
         let call_requests = try_as_byte_vec(record_values.pop().unwrap(), "call_requests")?;
+        let next_peer_pks = try_as_string_vec(record_values.pop().unwrap(), "next_peer_pks")?;
+        let data = try_as_byte_vec(record_values.pop().unwrap(), "data")?;
+        let error_message = try_as_string(record_values.pop().unwrap(), "error_message")?;
+        let ret_code = try_as_i32(record_values.pop().unwrap(), "ret_code")?;
 
         let outcome = Self {
             ret_code,

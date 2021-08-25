@@ -47,7 +47,8 @@ pub(super) fn handle_prev_state<'i>(
             let call_id = exec_ctx.tracker.call.seen_count - exec_ctx.tracker.call.executed_count;
             match exec_ctx.call_results.remove(&call_id) {
                 Some(call_result) => {
-                    update_state_with_service_result(tetraplet, output, call_result, exec_ctx, trace_ctx)?
+                    update_state_with_service_result(tetraplet, output, call_result, exec_ctx, trace_ctx)?;
+                    return Ok(false);
                 }
                 // result hasn't been prepared yet
                 None => exec_ctx.subtree_complete = false,

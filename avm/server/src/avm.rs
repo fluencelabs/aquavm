@@ -15,9 +15,9 @@
  */
 
 use super::AVMDataStore;
+use super::AVMOutcome;
 use super::AVMRunner;
 use super::CallResults;
-use super::AVMOutcome;
 use crate::config::AVMConfig;
 use crate::AVMResult;
 

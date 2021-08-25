@@ -66,6 +66,7 @@ dependencies = [
  "fluence-it-types",
  "marine-rs-sdk",
  "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -98,6 +99,7 @@ name = "air-test-utils"
 version = "0.2.0"
 dependencies = [
  "air",
+ "air-interpreter-interface",
  "avm-server",
  "marine-rs-sdk",
  "serde_json",
@@ -171,7 +173,7 @@ dependencies = [
 
 [[package]]
 name = "avm-server"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "air-interpreter-interface",
  "anyhow",

@@ -16,15 +16,32 @@
 
 use serde::Deserialize;
 use serde::Serialize;
+use serde_json::Value as JValue;
 use std::collections::HashMap;
 
 pub type CallResults = HashMap<u32, CallServiceResult>;
 pub const CALL_SERVICE_SUCCESS: i32 = 0;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct CallServiceResult {
     pub ret_code: i32,
     pub result: String,
+}
+
+impl CallServiceResult {
+    pub fn ok(result: &JValue) -> Self {
+        Self {
+            ret_code: CALL_SERVICE_SUCCESS,
+            result: result.to_string(),
+        }
+    }
+
+    pub fn err(err_code: i32, result: &JValue) -> Self {
+        Self {
+            ret_code: err_code,
+            result: result.to_string(),
+        }
+    }
 }
 
 use std::fmt;
