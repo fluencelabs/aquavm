@@ -82,7 +82,7 @@ fn try_make_outcome(
     exec_ctx: ExecutionCtx<'_>,
     trace_handler: TraceHandler,
 ) -> Result<InterpreterOutcome, InterpreterOutcome> {
-    if exec_ctx.streams.is_empty() {
+    if exec_ctx.call_results.is_empty() {
         let outcome = outcome::from_success_result(exec_ctx, trace_handler);
         return Ok(outcome);
     }

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-//mod ap;
+mod ap;
 mod call;
-//mod fold;
+mod fold;
 //mod match_;
 //mod mismatch;
 //mod par;

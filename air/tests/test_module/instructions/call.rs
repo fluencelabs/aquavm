@@ -36,7 +36,6 @@ fn current_peer_id_call() {
 
     let actual_trace = trace_from_result(&result);
     let expected_trace = vec![executed_state::scalar_string("test")];
-    print_trace(&result, "trace");
 
     assert_eq!(actual_trace, expected_trace);
     assert!(result.next_peer_pks.is_empty());
@@ -122,14 +121,11 @@ fn string_parameters() {
         CallServiceResult::ok(&args[0])
     });
 
-    let vm_peer_id = String::from("A");
-    let mut vm = create_avm(call_service, vm_peer_id.clone());
+    let vm_peer_id = "A";
+    let mut vm = create_avm(call_service, vm_peer_id);
 
     let set_variable_vm_peer_id = "set_variable";
-    let mut set_variable_vm = create_avm(
-        set_variable_call_service(json!("arg3_value")),
-        set_variable_vm_peer_id,
-    );
+    let mut set_variable_vm = create_avm(set_variable_call_service(json!("arg3_value")), set_variable_vm_peer_id);
 
     let service_id = "some_service_id";
     let function_name = "local_fn_name";
@@ -147,7 +143,7 @@ fn string_parameters() {
     let result = checked_call_vm!(vm, "asd", script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
-    let expected_state = executed_state::scalar_string_array(vec!["arg1", "arg2", "arg3_value"]);
+    let expected_state = executed_state::scalar_string("arg1");
 
     assert_eq!(actual_trace.len(), 2);
     assert_eq!(actual_trace[1], expected_state);
