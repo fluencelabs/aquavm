@@ -17,9 +17,9 @@
 use super::AVMDataStore;
 use super::AVMRunner;
 use super::CallResults;
+use super::AVMOutcome;
 use crate::config::AVMConfig;
 use crate::AVMResult;
-use crate::InterpreterOutcome;
 
 pub struct AVM {
     runner: AVMRunner,
@@ -51,7 +51,7 @@ impl AVM {
         init_user_id: impl Into<String>,
         particle_id: &str,
         call_results: &CallResults,
-    ) -> AVMResult<InterpreterOutcome> {
+    ) -> AVMResult<AVMOutcome> {
         let init_user_id = init_user_id.into();
         let prev_data = self.data_store.read_data(particle_id)?;
 
@@ -62,7 +62,7 @@ impl AVM {
         // persist resulted data
         self.data_store.store_data(&outcome.data, particle_id)?;
 
-        Ok(outcome)
+        super::outcome::to_avm_outcome(outcome)
     }
 
     /// Cleanup data that become obsolete.

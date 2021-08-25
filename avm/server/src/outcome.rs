@@ -1,0 +1,90 @@
+/*
+ * Copyright 2021 Fluence Labs Limited
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+use super::AVMResult;
+use super::CallRequests;
+use super::InterpreterOutcome;
+use crate::AVMError;
+
+use serde::Deserialize;
+use serde::Serialize;
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct AVMOutcome {
+    /// Contains script data that should be preserved in an executor of this interpreter
+    /// regardless of ret_code value.
+    pub data: Vec<u8>,
+
+    /// Collected parameters of all met call instructions that could be executed on a current peer.
+    pub call_requests: CallRequests,
+
+    /// Public keys of peers that should receive data.
+    pub next_peer_pks: Vec<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ErrorAVMOutcome {
+    error_code: i32,
+    error_msg: String,
+    outcome: AVMOutcome,
+}
+
+pub(super) fn to_avm_outcome(outcome: InterpreterOutcome) -> AVMResult<AVMOutcome> {
+    use air_interpreter_interface::INTERPRETER_SUCCESS;
+
+    let call_requests: CallRequests = match serde_json::from_slice(&outcome.call_requests) {
+        Ok(requests) => requests,
+        Err(error) => {
+            return Err(AVMError::CallRequestsDeError {
+                raw_call_request: outcome.call_requests,
+                error,
+            })
+        }
+    };
+
+    let avm_outcome = AVMOutcome::new(outcome.data, call_requests, outcome.next_peer_pks);
+
+    if outcome.ret_code == INTERPRETER_SUCCESS {
+        return Ok(avm_outcome);
+    }
+
+    let error_outcome = ErrorAVMOutcome::new(outcome.ret_code, outcome.error_message, avm_outcome);
+    Err(AVMError::InterpreterFailed(error_outcome))
+}
+
+impl AVMOutcome {
+    pub(self) fn new(
+        data: Vec<u8>,
+        call_requests: CallRequests,
+        next_peer_pks: Vec<String>,
+    ) -> Self {
+        Self {
+            data,
+            call_requests,
+            next_peer_pks,
+        }
+    }
+}
+
+impl ErrorAVMOutcome {
+    pub(self) fn new(error_code: i32, error_msg: String, outcome: AVMOutcome) -> Self {
+        Self {
+            error_code,
+            error_msg,
+            outcome,
+        }
+    }
+}

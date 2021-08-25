@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+use super::ErrorAVMOutcome;
 use fluence_faas::FaaSError;
 use fluence_faas::IValue;
 
+use serde_json::Error as SerdeError;
 use thiserror::Error as ThisError;
 
 use std::io::Error as IOError;
@@ -45,6 +47,18 @@ pub enum AVMError {
     /// This error is encountered when it returns vec with not a one value.
     #[error("result `{0:?}` returned from FaaS should contain only one element")]
     IncorrectInterpreterResult(Vec<IValue>),
+
+    /// This error is encountered when deserialization pof call requests failed for some reason.
+    #[error("'{raw_call_request:?}' can't been serialized with error '{error}'")]
+    CallRequestsDeError {
+        raw_call_request: Vec<u8>,
+        error: SerdeError,
+    },
+
+    /// This error contains interpreter outcome in case when execution failed on the interpreter
+    /// side. A host should match on this error type explicitly to save provided data.
+    #[error("interpreter failed with: {0:?}")]
+    InterpreterFailed(ErrorAVMOutcome),
 
     /// This errors are encountered from a data store object.
     #[error(transparent)]
