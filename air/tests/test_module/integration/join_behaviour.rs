@@ -102,6 +102,35 @@ fn wait_on_stream_json_path_by_id() {
 }
 
 #[test]
+fn wait_on_empty_stream_json_path() {
+    let local_peer_id = "local_peer_id";
+    let mut local_vm = create_avm(echo_call_service(), local_peer_id);
+
+    let join_stream_script = format!(
+        r#"
+
+    (seq
+        (seq
+            (call "{0}" ("" "") [[]] nodes)
+            (fold nodes n
+                (par
+                    (call n ("" "") [n] $ns)
+                    (next n)
+                )
+            )
+        )
+        (call "{0}" ("" "") [$ns.$.[0] $ns.$.[1] $ns])
+     )"#,
+        local_peer_id
+    );
+
+    let result = checked_call_vm!(local_vm, "", join_stream_script, "", "");
+    let actual_trace = trace_from_result(&result);
+
+    assert_eq!(actual_trace.len(), 1); // only the first call should produce a trace
+}
+
+#[test]
 fn dont_wait_on_json_path_on_scalars() {
     let array = json!([1, 2, 3, 4, 5]);
 
