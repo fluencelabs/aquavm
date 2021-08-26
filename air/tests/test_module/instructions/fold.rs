@@ -45,7 +45,7 @@ fn lfold() {
     assert_eq!(actual_trace[0], expected_state);
 
     for i in 1..=5 {
-        let expected_state = executed_state::stream_number(i, 0);
+        let expected_state = executed_state::stream_string(format!("{}", i), 0);
         assert_eq!(actual_trace[i], expected_state);
     }
 }
@@ -79,7 +79,7 @@ fn rfold() {
     assert_eq!(actual_trace[0], expected_state);
 
     for i in 1..=5 {
-        let expected_state = executed_state::stream_number(6 - i, 0);
+        let expected_state = executed_state::stream_string(format!("{}", 6 - i), 0);
         assert_eq!(actual_trace[i], expected_state);
     }
 }
@@ -247,7 +247,7 @@ fn json_path() {
         "set_variable",
     );
 
-    let lfold = r#"
+    let script = r#"
             (seq
                 (call "set_variable" ("" "") [] iterable)
                 (fold iterable.$.array! i
@@ -258,8 +258,8 @@ fn json_path() {
                 )
             )"#;
 
-    let result = checked_call_vm!(set_variable_vm, "", lfold, "", "");
-    let result = checked_call_vm!(vm, "", lfold, "", result.data);
+    let result = checked_call_vm!(set_variable_vm, "", script, "", "");
+    let result = checked_call_vm!(vm, "", script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
     let expected_state = executed_state::scalar(json!({ "array": ["1", "2", "3", "4", "5"] }));
@@ -268,7 +268,7 @@ fn json_path() {
     assert_eq!(actual_trace[0], expected_state);
 
     for i in 1..=5 {
-        let expected_state = executed_state::stream_number(i, 0);
+        let expected_state = executed_state::stream_string(format!("{}", i), 0);
         assert_eq!(actual_trace[i], expected_state);
     }
 }

@@ -21,8 +21,30 @@ use super::CallResults;
 use crate::config::AVMConfig;
 use crate::AVMResult;
 
+use std::ops::Deref;
+use std::ops::DerefMut;
+
+/// A newtype needed to mark it as `unsafe impl Send`
+struct SendSafeRunner(AVMRunner);
+
+/// Mark runtime as Send, so libp2p on the node (use-site) is happy
+unsafe impl Send for SendSafeRunner {}
+
+impl Deref for SendSafeRunner {
+    type Target = AVMRunner;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+impl DerefMut for SendSafeRunner {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
 pub struct AVM {
-    runner: AVMRunner,
+    runner: SendSafeRunner,
     data_store: AVMDataStore,
 }
 
@@ -39,6 +61,7 @@ impl AVM {
         data_store.initialize()?;
 
         let runner = AVMRunner::new(air_wasm_path, current_peer_id, logging_mask)?;
+        let runner = SendSafeRunner(runner);
         let avm = Self { runner, data_store };
 
         Ok(avm)

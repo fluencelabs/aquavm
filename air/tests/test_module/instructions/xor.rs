@@ -34,10 +34,10 @@ fn xor() {
     let result = checked_call_vm!(vm, "asd", script, "", "");
 
     let actual_trace = trace_from_result(&result);
-    let expected_call_result = executed_state::scalar_string("res");
+    let expected_call_result = executed_state::scalar_string("test");
 
     assert_eq!(actual_trace.len(), 2);
-    assert_eq!(actual_trace[0], executed_state::service_failed(1, "error"));
+    assert_eq!(actual_trace[0], executed_state::service_failed(1, r#""error""#));
     assert_eq!(actual_trace[1], expected_call_result);
 
     let script = format!(
@@ -81,6 +81,7 @@ fn xor_var_not_found() {
 }
 
 #[test]
+#[ignore]
 fn xor_multiple_variables_found() {
     let set_variables_peer_id = "set_variables_peer_id";
     let mut set_variables_vm = create_avm(echo_call_service(), set_variables_peer_id);
@@ -103,8 +104,9 @@ fn xor_multiple_variables_found() {
     );
 
     let result = checked_call_vm!(set_variables_vm, "asd", &script, "", "");
+    print_trace(&result, "before");
     let result = call_vm!(vm, "asd", script, "", result.data);
-    print_trace(&result, "second launch");
+    print_trace(&result, "after");
 
     let actual_trace = trace_from_result(&result);
     let expected_trace = vec![
@@ -147,16 +149,16 @@ fn xor_par() {
     let result = checked_call_vm!(vm, "asd", &script, "", "");
     let actual_trace = trace_from_result(&result);
 
-    let scalar_result = String::from("res");
+    let scalar_result = String::from("test");
 
     let expected_trace = vec![
         par(3, 3),
         par(1, 1),
-        service_failed(1, "error"),
-        service_failed(1, "error"),
+        service_failed(1, r#""error""#),
+        service_failed(1, r#""error""#),
         par(1, 1),
-        service_failed(1, "error"),
-        service_failed(1, "error"),
+        service_failed(1, r#""error""#),
+        service_failed(1, r#""error""#),
         scalar_string(&scalar_result),
         scalar_string(&scalar_result),
     ];

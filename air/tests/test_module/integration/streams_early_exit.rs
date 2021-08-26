@@ -50,11 +50,11 @@ fn par_early_exit() {
         executed_state::request_sent_by(init_peer_id),
         executed_state::request_sent_by(init_peer_id),
         executed_state::request_sent_by(init_peer_id),
-        executed_state::stream_string("res", 0),
-        executed_state::service_failed(1, "error"),
-        executed_state::stream_string("res", 0),
-        executed_state::service_failed(1, "error"),
-        executed_state::service_failed(1, "error"),
+        executed_state::stream_string("test", 0),
+        executed_state::service_failed(1, r#""error""#),
+        executed_state::stream_string("test", 0),
+        executed_state::service_failed(1, r#""error""#),
+        executed_state::service_failed(1, r#""error""#),
         executed_state::request_sent_by(setter_3_id),
     ];
     assert_eq!(actual_trace_3, expected_trace);
@@ -75,11 +75,11 @@ fn par_early_exit() {
         executed_state::stream_string("1", 0),
         executed_state::stream_string("2", 1),
         executed_state::stream_string("1", 0),
-        executed_state::stream_string("res", 2),
-        executed_state::service_failed(1, "error"),
-        executed_state::stream_string("res", 2),
-        executed_state::service_failed(1, "error"),
-        executed_state::service_failed(1, "error"),
+        executed_state::stream_string("test", 2),
+        executed_state::service_failed(1, r#""error""#),
+        executed_state::stream_string("test", 2),
+        executed_state::service_failed(1, r#""error""#),
+        executed_state::service_failed(1, r#""error""#),
         executed_state::scalar_string("test"),
     ];
     assert_eq!(actual_trace_4, expected_trace);
@@ -95,13 +95,13 @@ fn par_early_exit() {
         executed_state::request_sent_by(init_peer_id),
         executed_state::request_sent_by(init_peer_id),
         executed_state::stream_string("non_exist_value", 0),
-        executed_state::stream_string("res", 0),
-        executed_state::service_failed(1, "error"),
+        executed_state::stream_string("test", 0),
+        executed_state::service_failed(1, r#""error""#),
         executed_state::request_sent_by(setter_3_id),
     ];
     let setter_3_malicious_data = raw_data_from_trace(setter_3_malicious_trace);
     let init_result_5 = call_vm!(init, "", &script, init_result_3.data.clone(), setter_3_malicious_data);
-    assert_eq!(init_result_5.ret_code, 1022);
+    assert_eq!(init_result_5.ret_code, 1023);
 
     let actual_trace = trace_from_result(&init_result_5);
     let expected_trace = trace_from_result(&init_result_3);
@@ -191,7 +191,7 @@ fn fold_early_exit() {
         ]),
         executed_state::scalar_string(test_value),
         executed_state::scalar_string(test_value),
-        executed_state::service_failed(1, "error"),
+        executed_state::service_failed(1, r#""error""#),
         executed_state::scalar_string(test_value),
         executed_state::scalar_string(test_value),
     ];
@@ -289,7 +289,7 @@ fn fold_par_early_exit() {
         executed_state::scalar_string(test_value),
         executed_state::par(1, 0),
         executed_state::scalar_string(test_value),
-        executed_state::service_failed(1, "error"),
+        executed_state::service_failed(1, r#""error""#),
         executed_state::par(15, 0),
         executed_state::par(13, 1),
         executed_state::fold(vec![

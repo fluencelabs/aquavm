@@ -52,6 +52,6 @@ pub use air_interpreter_interface::CALL_SERVICE_SUCCESS;
 
 pub use avm_data_store::DataStore;
 
-pub type AVMDataStore = Box<dyn DataStore + 'static>;
+pub type AVMDataStore = Box<dyn DataStore + Send + Sync + 'static>;
 
 pub(crate) type AVMResult<T> = std::result::Result<T, AVMError>;

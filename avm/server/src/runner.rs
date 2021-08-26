@@ -23,30 +23,10 @@ use fluence_faas::FluenceFaaS;
 use fluence_faas::IValue;
 use fluence_faas::{FaaSConfig, ModuleDescriptor};
 
-use std::ops::{Deref, DerefMut};
 use std::path::PathBuf;
 
-/// A newtype needed to mark it as `unsafe impl Send`
-struct SendSafeFaaS(FluenceFaaS);
-
-/// Mark runtime as Send, so libp2p on the node (use-site) is happy
-unsafe impl Send for SendSafeFaaS {}
-
-impl Deref for SendSafeFaaS {
-    type Target = FluenceFaaS;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl DerefMut for SendSafeFaaS {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-
 pub struct AVMRunner {
-    faas: SendSafeFaaS,
+    faas: FluenceFaaS,
     current_peer_id: String,
     /// file name of the AIR interpreter .wasm
     wasm_filename: String,
@@ -66,7 +46,7 @@ impl AVMRunner {
         let current_peer_id = current_peer_id.into();
 
         let avm = Self {
-            faas: SendSafeFaaS(faas),
+            faas,
             current_peer_id,
             wasm_filename,
         };
