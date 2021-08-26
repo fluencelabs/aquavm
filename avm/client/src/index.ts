@@ -28,7 +28,7 @@ export interface CallServiceResult {
 }
 
 export interface CallRequest {
-    serviceName: string;
+    serviceId: string;
     functionName: string;
     arguments: any[];
     tetraplets: SecurityTetraplet[][];
@@ -235,7 +235,7 @@ export class AirInterpreter {
             resultCallRequests.push([
                 k as any,
                 {
-                    serviceName: v.service_name,
+                    serviceId: v.service_id,
                     functionName: v.function_name,
                     arguments: arguments_,
                     tetraplets: tetraplets,
