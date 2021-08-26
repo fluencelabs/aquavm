@@ -25,12 +25,12 @@ use std::borrow::Cow;
 
 impl JValuable for () {
     fn apply_json_path(&self, json_path: &str) -> ExecutionResult<Vec<&JValue>> {
-        // applying json path to a stream will produce a join behaviour
+        // applying json path to an empty stream will produce a join behaviour
         exec_err!(ExecutionError::EmptyStreamJsonPathError(json_path.to_string()))
     }
 
     fn apply_json_path_with_tetraplets(&self, json_path: &str) -> ExecutionResult<(Vec<&JValue>, SecurityTetraplets)> {
-        // applying json path to a stream will produce a join behaviour
+        // applying json path to an empty stream will produce a join behaviour
         exec_err!(ExecutionError::EmptyStreamJsonPathError(json_path.to_string()))
     }
 
