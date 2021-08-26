@@ -14,20 +14,24 @@
  * limitations under the License.
  */
 
+use super::ExecutionError;
 use super::ExecutionResult;
 use super::JValuable;
+use crate::exec_err;
 use crate::execution_step::SecurityTetraplets;
 use crate::JValue;
 
 use std::borrow::Cow;
 
 impl JValuable for () {
-    fn apply_json_path(&self, _json_path: &str) -> ExecutionResult<Vec<&JValue>> {
-        Ok(vec![])
+    fn apply_json_path(&self, json_path: &str) -> ExecutionResult<Vec<&JValue>> {
+        // applying json path to a stream will produce a join behaviour
+        exec_err!(ExecutionError::EmptyStreamJsonPathError(json_path.to_string()))
     }
 
-    fn apply_json_path_with_tetraplets(&self, _json_path: &str) -> ExecutionResult<(Vec<&JValue>, SecurityTetraplets)> {
-        Ok((vec![], vec![]))
+    fn apply_json_path_with_tetraplets(&self, json_path: &str) -> ExecutionResult<(Vec<&JValue>, SecurityTetraplets)> {
+        // applying json path to a stream will produce a join behaviour
+        exec_err!(ExecutionError::EmptyStreamJsonPathError(json_path.to_string()))
     }
 
     fn as_jvalue(&self) -> Cow<'_, JValue> {

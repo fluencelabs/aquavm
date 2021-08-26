@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-use air_test_utils::call_vm;
 use air_test_utils::checked_call_vm;
 use air_test_utils::create_avm;
 use air_test_utils::set_variables_call_service;
 use air_test_utils::trace_from_result;
 use air_test_utils::unit_call_service;
+use air_test_utils::{call_vm, echo_call_service};
 
 use serde_json::json;
 
@@ -106,6 +106,35 @@ fn wait_on_stream_json_path_by_id() {
 
     assert_eq!(result.ret_code, 0);
     assert_eq!(actual_trace.len(), 2); // par and the first call emit traces, second call doesn't
+}
+
+#[test]
+fn wait_on_stream_several_paths() {
+    let local_peer_id = "local_peer_id";
+    let mut local_vm = create_avm(echo_call_service(), local_peer_id);
+
+    let join_stream_script = format!(
+        r#"
+
+    (seq
+        (seq
+            (call "{0}" ("" "") [[]] nodes)
+            (fold nodes n
+                (par
+                    (call n ("" "") [n] $ns)
+                    (next n)
+                )
+            )
+        )
+        (call "{0}" ("" "") [$ns.$.[0] $ns.$.[1] $ns])
+     )"#,
+        local_peer_id
+    );
+
+    let result = checked_call_vm!(local_vm, "", join_stream_script, "", "");
+    let actual_trace = trace_from_result(&result);
+
+    assert_eq!(actual_trace.len(), 1); // only the first call should produce a trace
 }
 
 #[test]
