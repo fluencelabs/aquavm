@@ -109,7 +109,7 @@ fn wait_on_stream_json_path_by_id() {
 }
 
 #[test]
-fn non_wait_on_empty_stream() {
+fn wait_on_empty_stream_json_path() {
     let local_peer_id = "local_peer_id";
     let mut local_vm = create_avm(echo_call_service(), local_peer_id);
 
