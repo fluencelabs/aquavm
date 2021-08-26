@@ -17,11 +17,14 @@
 use marine_rs_sdk::marine;
 use serde::Deserialize;
 use serde::Serialize;
+use std::collections::HashMap;
+
+pub type CallRequests = HashMap<u32, CallRequestParams>;
 
 #[marine]
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct CallRequestParams {
-    pub service_name: String,
+    pub service_id: String,
     pub function_name: String,
     pub arguments: String,
     pub tetraplets: String,
@@ -29,13 +32,13 @@ pub struct CallRequestParams {
 
 impl CallRequestParams {
     pub fn new(
-        service_name: String,
+        service_id: String,
         function_name: String,
         arguments: String,
         tetraplets: String,
     ) -> Self {
         Self {
-            service_name,
+            service_id,
             function_name,
             arguments,
             tetraplets,

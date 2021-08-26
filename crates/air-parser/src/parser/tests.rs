@@ -180,8 +180,6 @@ fn parse_empty_array() {
 }
 
 #[test]
-<<<<<<< HEAD
-=======
 fn parse_empty_array_2() {
     use ast::CallOutputValue::*;
     use ast::FunctionPart::*;

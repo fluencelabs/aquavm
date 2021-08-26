@@ -15,18 +15,19 @@
  */
 
 mod catchable;
+mod joinable;
 
 pub(crate) use catchable::Catchable;
+pub(crate) use joinable::Joinable;
 
 use super::trace_handler::MergerApResult;
 use super::trace_handler::TraceHandlerError;
-use super::Joinable;
 use super::ResolvedCallResult;
 use super::Stream;
-use crate::execution_step::execution_context::CallResults;
-use crate::execution_step::execution_context::CallServiceResult;
 use crate::JValue;
 
+use air_interpreter_interface::CallResults;
+use air_interpreter_interface::CallServiceResult;
 use jsonpath_lib::JsonPathError;
 use serde_json::Error as SerdeJsonError;
 use thiserror::Error as ThisError;
@@ -67,6 +68,10 @@ pub(crate) enum ExecutionError {
     /// An error occurred while trying to apply json path to this stream with JValue's.
     #[error("variable with path '{1}' not found in '{0:?}' with error: '{2}'")]
     StreamJsonPathError(Stream, String, JsonPathError),
+
+    /// An error occurred while trying to apply json path to an empty stream.
+    #[error("json path {0} is applied to an empty stream")]
+    EmptyStreamJsonPathError(String),
 
     /// Provided JValue has incompatible with target type.
     #[error("expected JValue type '{1}', but got '{0}' JValue")]
@@ -163,7 +168,8 @@ impl ExecutionError {
             StreamDontHaveSuchGeneration(..) => 19,
             ApResultNotCorrespondToInstr(_) => 20,
             CallResultsNotEmpty(_) => 21,
-            TraceError(_) => 22,
+            EmptyStreamJsonPathError(_) => 22,
+            TraceError(_) => 23,
         }
     }
 }
@@ -188,6 +194,10 @@ impl Joinable for ExecutionError {
             }
             StreamJsonPathError(stream, json_path, _) => {
                 log_join!("  waiting for an argument with path '{}' on stream '{:?}'", json_path, stream);
+                true
+            }
+            EmptyStreamJsonPathError(json_path) => {
+                log_join!("  waiting on empty stream for path '{}'", json_path);
                 true
             }
 

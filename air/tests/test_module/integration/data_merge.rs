@@ -14,13 +14,8 @@
  * limitations under the License.
  */
 
-// use pretty_assertions::assert_eq;
-use serde_json::json;
-
-use air_test_utils::*;
+use air_test_utils::prelude::*;
 use std::collections::HashMap;
-
-type JValue = serde_json::Value;
 
 #[test]
 fn data_merge() {
@@ -30,10 +25,7 @@ fn data_merge() {
     let vm_1_id = "A";
     let vm_2_id = "B";
 
-    let mut set_variable = create_avm(
-        set_variable_call_service(json!([vm_1_id, vm_2_id]).to_string()),
-        set_variable_id,
-    );
+    let mut set_variable = create_avm(set_variable_call_service(json!([vm_1_id, vm_2_id])), set_variable_id);
     let mut vm1 = create_avm(return_string_call_service(vm_1_id), vm_1_id);
     let mut vm2 = create_avm(return_string_call_service(vm_2_id), vm_2_id);
 
@@ -148,33 +140,15 @@ fn data_merge() {
 
 #[test]
 fn acc_merge() {
-    let neighborhood_call_service: CallServiceClosure = Box::new(|args| -> Option<IValue> {
-        let args_count = match &args.function_args[1] {
-            IValue::String(str) => str,
-            _ => unreachable!(),
-        };
-
-        let args_count = (args_count.as_bytes()[0] - b'0') as usize;
-
-        let args_json = match &args.function_args[2] {
-            IValue::String(str) => str,
-            _ => unreachable!(),
-        };
-
-        let args: Vec<JValue> = serde_json::from_str(args_json).expect("valid json");
-        let args = match &args[0] {
-            JValue::Array(args) => args,
-            _ => unreachable!(),
-        };
-
+    let neighborhood_call_service: CallServiceClosure = Box::new(|params| -> CallServiceResult {
+        let args_count = (params.function_name.as_bytes()[0] - b'0') as usize;
+        let args: Vec<JValue> = serde_json::from_str(&params.arguments).expect("valid json");
         assert_eq!(args.len(), args_count);
 
-        Some(IValue::Record(
-            NEVec::new(vec![IValue::S32(0), IValue::String(json!(args).to_string())]).unwrap(),
-        ))
+        CallServiceResult::ok(&json!(args))
     });
 
-    let mut vm1 = create_avm(set_variable_call_service(r#""peer_id""#), "A");
+    let mut vm1 = create_avm(set_variable_call_service(json!("peer_id")), "A");
     let mut vm2 = create_avm(neighborhood_call_service, "B");
 
     let script = String::from(
@@ -210,8 +184,8 @@ fn fold_merge() {
     let local_vm_id = "local_vm";
 
     let variables = maplit::hashmap! {
-        "stream_1".to_string() => json!(["peer_0", "peer_1", "peer_2", "peer_3"]).to_string(),
-        "stream_2".to_string() => json!(["peer_4", "peer_5", "peer_6"]).to_string(),
+        "stream_1".to_string() => json!(["peer_0", "peer_1", "peer_2", "peer_3"]),
+        "stream_2".to_string() => json!(["peer_4", "peer_5", "peer_6"]),
     };
     let mut set_variable_vm = create_avm(set_variables_call_service(variables), set_variable_vm_id);
 
@@ -226,7 +200,7 @@ fn fold_merge() {
     let mut local_vms_results = Vec::with_capacity(7);
     for vm_id in 0..7 {
         let peer_id = format!("peer_{}", vm_id);
-        let mut vm = create_avm(echo_string_call_service(), peer_id);
+        let mut vm = create_avm(echo_call_service(), peer_id);
         let result = checked_call_vm!(
             vm,
             "",
@@ -239,7 +213,7 @@ fn fold_merge() {
         local_vms_results.push(result);
     }
 
-    let mut local_vm = create_avm(echo_string_call_service(), local_vm_id);
+    let mut local_vm = create_avm(echo_call_service(), local_vm_id);
     let result_1 = checked_call_vm!(local_vm, "", &script, "", local_vms_results[0].data.clone());
     let result_2 = checked_call_vm!(
         local_vm,

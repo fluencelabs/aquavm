@@ -19,7 +19,7 @@ use super::ExecutionCtx;
 use super::ExecutionError;
 use super::ExecutionResult;
 use super::TraceHandler;
-use crate::execution_step::joinable::Joinable;
+use crate::execution_step::Joinable;
 use crate::joinable;
 use crate::log_instruction;
 

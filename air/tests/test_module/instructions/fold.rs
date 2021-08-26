@@ -14,23 +14,15 @@
  * limitations under the License.
  */
 
-use air_test_utils::call_vm;
-use air_test_utils::checked_call_vm;
-use air_test_utils::create_avm;
-use air_test_utils::echo_number_call_service;
-use air_test_utils::echo_string_call_service;
-use air_test_utils::executed_state;
-use air_test_utils::set_variable_call_service;
-use air_test_utils::trace_from_result;
-use air_test_utils::AVMError;
-use air_test_utils::InterpreterOutcome;
-
-use serde_json::json;
+use air_test_utils::prelude::*;
 
 #[test]
 fn lfold() {
-    let mut vm = create_avm(echo_number_call_service(), "A");
-    let mut set_variable_vm = create_avm(set_variable_call_service(r#"["1","2","3","4","5"]"#), "set_variable");
+    let mut vm = create_avm(echo_call_service(), "A");
+    let mut set_variable_vm = create_avm(
+        set_variable_call_service(json!(["1", "2", "3", "4", "5"])),
+        "set_variable",
+    );
 
     let lfold = r#"
             (seq
@@ -60,8 +52,11 @@ fn lfold() {
 
 #[test]
 fn rfold() {
-    let mut vm = create_avm(echo_number_call_service(), "A");
-    let mut set_variable_vm = create_avm(set_variable_call_service(r#"["1","2","3","4","5"]"#), "set_variable");
+    let mut vm = create_avm(echo_call_service(), "A");
+    let mut set_variable_vm = create_avm(
+        set_variable_call_service(json!(["1", "2", "3", "4", "5"])),
+        "set_variable",
+    );
 
     let rfold = r#"
             (seq
@@ -91,8 +86,11 @@ fn rfold() {
 
 #[test]
 fn inner_fold() {
-    let mut vm = create_avm(echo_number_call_service(), "A");
-    let mut set_variable_vm = create_avm(set_variable_call_service(r#"["1","2","3","4","5"]"#), "set_variable");
+    let mut vm = create_avm(echo_call_service(), "A");
+    let mut set_variable_vm = create_avm(
+        set_variable_call_service(json!(["1", "2", "3", "4", "5"])),
+        "set_variable",
+    );
 
     let script = r#"
             (seq
@@ -115,6 +113,7 @@ fn inner_fold() {
 
     let result = checked_call_vm!(set_variable_vm, "", script, "", "");
     let result = checked_call_vm!(vm, "", script, "", result.data);
+    print_trace(&result, "inner fold test");
 
     let actual_trace = trace_from_result(&result);
     assert_eq!(actual_trace.len(), 27);
@@ -125,7 +124,7 @@ fn inner_fold() {
 
     for i in 1..=5 {
         for j in 1..=5 {
-            let expected_state = executed_state::stream_number(i, 0);
+            let expected_state = executed_state::stream_string(i.to_string(), 0);
             assert_eq!(actual_trace[1 + 5 * (i - 1) + j], expected_state);
         }
     }
@@ -133,7 +132,10 @@ fn inner_fold() {
 
 #[test]
 fn inner_fold_with_same_iterator() {
-    let mut vm = create_avm(set_variable_call_service(r#"["1","2","3","4","5"]"#), "set_variable");
+    let mut vm = create_avm(
+        set_variable_call_service(json!(["1", "2", "3", "4", "5"])),
+        "set_variable",
+    );
 
     let script = r#"
             (seq
@@ -161,8 +163,8 @@ fn inner_fold_with_same_iterator() {
 
 #[test]
 fn empty_fold() {
-    let mut vm = create_avm(echo_number_call_service(), "A");
-    let mut set_variable_vm = create_avm(set_variable_call_service(r#"[]"#), "set_variable");
+    let mut vm = create_avm(echo_call_service(), "A");
+    let mut set_variable_vm = create_avm(set_variable_call_service(json!([])), "set_variable");
 
     let empty_fold = r#"
             (seq
@@ -187,8 +189,8 @@ fn empty_fold() {
 
 #[test]
 fn empty_fold_json_path() {
-    let mut vm = create_avm(echo_number_call_service(), "A");
-    let mut set_variable_vm = create_avm(set_variable_call_service(r#"{ "messages": [] }"#), "set_variable");
+    let mut vm = create_avm(echo_call_service(), "A");
+    let mut set_variable_vm = create_avm(set_variable_call_service(json!({ "messages": [] })), "set_variable");
 
     let empty_fold = r#"
             (seq
@@ -213,8 +215,8 @@ fn empty_fold_json_path() {
 // Check that fold works with the join behaviour without hanging up.
 #[test]
 fn fold_with_join() {
-    let mut vm = create_avm(echo_number_call_service(), "A");
-    let mut set_variable_vm = create_avm(set_variable_call_service(r#"["1","2"]"#), "set_variable");
+    let mut vm = create_avm(echo_call_service(), "A");
+    let mut set_variable_vm = create_avm(set_variable_call_service(json!(["1", "2"])), "set_variable");
 
     let fold_with_join = r#"
             (seq
@@ -239,9 +241,9 @@ fn fold_with_join() {
 
 #[test]
 fn json_path() {
-    let mut vm = create_avm(echo_number_call_service(), "A");
+    let mut vm = create_avm(echo_call_service(), "A");
     let mut set_variable_vm = create_avm(
-        set_variable_call_service(r#"{ "array": ["1","2","3","4","5"] }"#),
+        set_variable_call_service(json!({ "array": ["1","2","3","4","5"] })),
         "set_variable",
     );
 
@@ -275,9 +277,9 @@ fn json_path() {
 fn shadowing() {
     use executed_state::*;
 
-    let mut set_variables_vm = create_avm(set_variable_call_service(r#"["1","2"]"#), "set_variable");
-    let mut vm_a = create_avm(echo_string_call_service(), "A");
-    let mut vm_b = create_avm(echo_string_call_service(), "B");
+    let mut set_variables_vm = create_avm(set_variable_call_service(json!(["1", "2"])), "set_variable");
+    let mut vm_a = create_avm(echo_call_service(), "A");
+    let mut vm_b = create_avm(echo_call_service(), "B");
 
     let script = r#"
             (seq
@@ -338,10 +340,10 @@ fn shadowing() {
 fn shadowing_scope() {
     use executed_state::*;
 
-    fn execute_script(script: String) -> Result<InterpreterOutcome, AVMError> {
-        let mut set_variables_vm = create_avm(set_variable_call_service(r#"["1","2"]"#), "set_variable");
-        let mut vm_a = create_avm(echo_string_call_service(), "A");
-        let mut vm_b = create_avm(echo_string_call_service(), "B");
+    fn execute_script(script: String) -> Result<InterpreterOutcome, String> {
+        let mut set_variables_vm = create_avm(set_variable_call_service(json!(["1", "2"])), "set_variable");
+        let mut vm_a = create_avm(echo_call_service(), "A");
+        let mut vm_b = create_avm(echo_call_service(), "B");
 
         let result = checked_call_vm!(set_variables_vm, "", script.clone(), "", "");
         let result = checked_call_vm!(vm_a, "", script.clone(), "", result.data);
@@ -349,7 +351,7 @@ fn shadowing_scope() {
         let result = checked_call_vm!(vm_a, "", script.clone(), "", result.data);
         let result = checked_call_vm!(vm_b, "", script.clone(), "", result.data);
 
-        vm_a.call_with_prev_data("", script, "", result.data)
+        vm_a.call(script, "", result.data, "")
     }
 
     let variable_shadowing_script = r#"

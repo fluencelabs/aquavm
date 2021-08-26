@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-use air_test_utils::*;
+use air_test_utils::prelude::*;
 
 #[test]
 fn match_equal() {
     let set_variable_peer_id = "set_variable_peer_id";
-    let mut set_variable_vm = create_avm(echo_string_call_service(), set_variable_peer_id);
+    let mut set_variable_vm = create_avm(echo_call_service(), set_variable_peer_id);
 
     let local_peer_id = "local_peer_id";
-    let mut vm = create_avm(echo_string_call_service(), local_peer_id);
+    let mut vm = create_avm(echo_call_service(), local_peer_id);
 
     let script = format!(
         r#"
@@ -54,10 +54,10 @@ fn match_equal() {
 #[test]
 fn match_not_equal() {
     let set_variable_peer_id = "set_variable_peer_id";
-    let mut set_variable_vm = create_avm(echo_string_call_service(), set_variable_peer_id);
+    let mut set_variable_vm = create_avm(echo_call_service(), set_variable_peer_id);
 
     let local_peer_id = "local_peer_id";
-    let mut vm = create_avm(echo_string_call_service(), local_peer_id);
+    let mut vm = create_avm(echo_call_service(), local_peer_id);
 
     let script = format!(
         r#"
@@ -89,10 +89,10 @@ fn match_not_equal() {
 #[test]
 fn match_with_string() {
     let set_variable_peer_id = "set_variable_peer_id";
-    let mut set_variable_vm = create_avm(echo_string_call_service(), set_variable_peer_id);
+    let mut set_variable_vm = create_avm(echo_call_service(), set_variable_peer_id);
 
     let local_peer_id = "local_peer_id";
-    let mut vm = create_avm(echo_string_call_service(), local_peer_id);
+    let mut vm = create_avm(echo_call_service(), local_peer_id);
 
     let script = format!(
         r#"
@@ -121,10 +121,10 @@ fn match_with_string() {
 #[test]
 fn match_with_init_peer_id() {
     let set_variable_peer_id = "set_variable_peer_id";
-    let mut set_variable_vm = create_avm(echo_string_call_service(), set_variable_peer_id);
+    let mut set_variable_vm = create_avm(echo_call_service(), set_variable_peer_id);
 
     let local_peer_id = "local_peer_id";
-    let mut vm = create_avm(echo_string_call_service(), local_peer_id);
+    let mut vm = create_avm(echo_call_service(), local_peer_id);
 
     let script = format!(
         r#"
@@ -153,7 +153,7 @@ fn match_with_init_peer_id() {
 #[test]
 fn match_with_equal_numbers() {
     let local_peer_id = "local_peer_id";
-    let mut vm = create_avm(echo_string_call_service(), local_peer_id);
+    let mut vm = create_avm(echo_call_service(), local_peer_id);
 
     let script = "
             (xor
@@ -170,10 +170,10 @@ fn match_with_equal_numbers() {
 #[test]
 fn match_without_xor() {
     let set_variable_peer_id = "set_variable_peer_id";
-    let mut set_variable_vm = create_avm(echo_string_call_service(), set_variable_peer_id);
+    let mut set_variable_vm = create_avm(echo_call_service(), set_variable_peer_id);
 
     let local_peer_id = "local_peer_id";
-    let mut vm = create_avm(echo_string_call_service(), local_peer_id);
+    let mut vm = create_avm(echo_call_service(), local_peer_id);
 
     let script = format!(
         r#"
@@ -201,13 +201,8 @@ fn match_without_xor() {
 
 #[test]
 fn match_with_two_xors() {
-    use air_test_utils::set_variable_call_service;
-
     let local_peer_id = "local_peer_id";
-    let mut vm = create_avm(
-        set_variable_call_service(serde_json::json!(false).to_string()),
-        local_peer_id,
-    );
+    let mut vm = create_avm(set_variable_call_service(serde_json::json!(false)), local_peer_id);
 
     let local_peer_id_2 = "local_peer_id_2";
 

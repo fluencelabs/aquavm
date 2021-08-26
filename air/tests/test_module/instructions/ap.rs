@@ -14,20 +14,16 @@
  * limitations under the License.
  */
 
-use air_test_utils::*;
-use serde_json::json;
+use air_test_utils::prelude::*;
 
 #[test]
 fn ap_with_scalars() {
     let vm_1_peer_id = "vm_1_peer_id";
     let test_value = "scalar_2";
-    let mut vm_1 = create_avm(
-        set_variable_call_service(json!({ "field": test_value }).to_string()),
-        vm_1_peer_id,
-    );
+    let mut vm_1 = create_avm(set_variable_call_service(json!({ "field": test_value })), vm_1_peer_id);
 
     let vm_2_peer_id = "vm_2_peer_id";
-    let mut vm_2 = create_avm(echo_string_call_service(), vm_2_peer_id);
+    let mut vm_2 = create_avm(echo_call_service(), vm_2_peer_id);
 
     let script = format!(
         r#"
@@ -158,10 +154,7 @@ fn ap_with_last_error() {
 fn ap_with_dst_stream() {
     let vm_1_peer_id = "vm_1_peer_id";
     let test_value = "scalar_2";
-    let mut vm_1 = create_avm(
-        set_variable_call_service(json!({ "field": test_value }).to_string()),
-        vm_1_peer_id,
-    );
+    let mut vm_1 = create_avm(set_variable_call_service(json!({ "field": test_value })), vm_1_peer_id);
 
     let vm_2_peer_id = "vm_2_peer_id";
     let mut vm_2 = create_avm(echo_call_service(), vm_2_peer_id);

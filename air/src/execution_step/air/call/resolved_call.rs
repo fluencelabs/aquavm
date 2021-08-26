@@ -82,6 +82,7 @@ impl<'i> ResolvedCall<'i> {
         let request_params = self.prepare_request_params(exec_ctx, triplet)?;
         exec_ctx.call_requests.insert(call_id, request_params);
 
+        exec_ctx.subtree_complete = false;
         exec_ctx.tracker.meet_executed_call();
         trace_ctx.meet_call_end(CallResult::RequestSentBy(exec_ctx.current_peer_id.clone()));
 

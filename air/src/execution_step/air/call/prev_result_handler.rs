@@ -16,12 +16,12 @@
 
 use super::*;
 use crate::exec_err;
-use crate::execution_step::execution_context::CallServiceResult;
+use crate::execution_step::air::call::call_result_setter::set_result_from_value;
 use crate::execution_step::trace_handler::TraceHandler;
 use crate::execution_step::RSecurityTetraplet;
 
-use crate::execution_step::air::call::call_result_setter::set_result_from_value;
 use air_interpreter_data::CallResult;
+use air_interpreter_interface::CallServiceResult;
 use air_parser::ast::CallOutputValue;
 
 /// This function looks at the existing call state, validates it,
@@ -47,7 +47,8 @@ pub(super) fn handle_prev_state<'i>(
             let call_id = exec_ctx.tracker.call.seen_count - exec_ctx.tracker.call.executed_count;
             match exec_ctx.call_results.remove(&call_id) {
                 Some(call_result) => {
-                    update_state_with_service_result(tetraplet, output, call_result, exec_ctx, trace_ctx)?
+                    update_state_with_service_result(tetraplet, output, call_result, exec_ctx, trace_ctx)?;
+                    return Ok(false);
                 }
                 // result hasn't been prepared yet
                 None => exec_ctx.subtree_complete = false,
@@ -110,7 +111,7 @@ fn handle_service_error(
     service_result: CallServiceResult,
     trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<CallServiceResult> {
-    use crate::execution_step::execution_context::CALL_SERVICE_SUCCESS;
+    use air_interpreter_interface::CALL_SERVICE_SUCCESS;
     use CallResult::CallServiceFailed;
 
     if service_result.ret_code == CALL_SERVICE_SUCCESS {

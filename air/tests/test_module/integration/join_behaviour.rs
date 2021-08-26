@@ -14,14 +14,7 @@
  * limitations under the License.
  */
 
-use air_test_utils::call_vm;
-use air_test_utils::checked_call_vm;
-use air_test_utils::create_avm;
-use air_test_utils::set_variables_call_service;
-use air_test_utils::trace_from_result;
-use air_test_utils::unit_call_service;
-
-use serde_json::json;
+use air_test_utils::prelude::*;
 
 #[test]
 fn dont_wait_on_json_path() {
@@ -31,11 +24,11 @@ fn dont_wait_on_json_path() {
         "ret_code": 0,
     });
 
-    let msg = String::from(r#""some message""#);
+    let msg = json!("some message");
 
     let variables = maplit::hashmap!(
         "msg".to_string() => msg,
-        "status".to_string() => status.to_string(),
+        "status".to_string() => status,
     );
 
     let set_variables_call_service = set_variables_call_service(variables);
@@ -109,6 +102,35 @@ fn wait_on_stream_json_path_by_id() {
 }
 
 #[test]
+fn wait_on_empty_stream_json_path() {
+    let local_peer_id = "local_peer_id";
+    let mut local_vm = create_avm(echo_call_service(), local_peer_id);
+
+    let join_stream_script = format!(
+        r#"
+
+    (seq
+        (seq
+            (call "{0}" ("" "") [[]] nodes)
+            (fold nodes n
+                (par
+                    (call n ("" "") [n] $ns)
+                    (next n)
+                )
+            )
+        )
+        (call "{0}" ("" "") [$ns.$.[0] $ns.$.[1] $ns])
+     )"#,
+        local_peer_id
+    );
+
+    let result = checked_call_vm!(local_vm, "", join_stream_script, "", "");
+    let actual_trace = trace_from_result(&result);
+
+    assert_eq!(actual_trace.len(), 1); // only the first call should produce a trace
+}
+
+#[test]
 fn dont_wait_on_json_path_on_scalars() {
     let array = json!([1, 2, 3, 4, 5]);
 
@@ -119,8 +141,8 @@ fn dont_wait_on_json_path_on_scalars() {
     });
 
     let variables = maplit::hashmap!(
-        "array".to_string() => array.to_string(),
-        "object".to_string() => object.to_string(),
+        "array".to_string() => array,
+        "object".to_string() => object,
     );
 
     let set_variables_call_service = set_variables_call_service(variables);

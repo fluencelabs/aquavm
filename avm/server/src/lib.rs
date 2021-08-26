@@ -26,16 +26,15 @@
 
 mod avm;
 mod config;
-mod data_store;
 mod errors;
+mod outcome;
 mod runner;
 
-pub use avm::ParticleParameters;
 pub use avm::AVM;
-pub use call_service::CallServiceArgs;
-pub use call_service::CallServiceClosure;
 pub use config::AVMConfig;
 pub use errors::AVMError;
+pub use outcome::*;
+pub use runner::AVMRunner;
 
 // Re-exports
 pub use fluence_faas::ne_vec;
@@ -46,7 +45,13 @@ pub use fluence_faas::HostImportError;
 pub use fluence_faas::IType;
 pub use fluence_faas::IValue;
 
+pub use air_interpreter_interface::CallRequests;
+pub use air_interpreter_interface::CallResults;
 pub use air_interpreter_interface::InterpreterOutcome;
-pub use air_interpreter_interface::INTERPRETER_SUCCESS;
+pub use air_interpreter_interface::CALL_SERVICE_SUCCESS;
 
-pub(crate) type Result<T> = std::result::Result<T, AVMError>;
+pub use avm_data_store::DataStore;
+
+pub type AVMDataStore = Box<dyn DataStore + 'static>;
+
+pub(crate) type AVMResult<T> = std::result::Result<T, AVMError>;

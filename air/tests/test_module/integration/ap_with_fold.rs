@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-use air_test_utils::*;
-use serde_json::json;
+use air_test_utils::prelude::*;
 
 #[test]
 fn ap_with_fold() {
@@ -29,7 +28,7 @@ fn ap_with_fold() {
         ("a".into(), vec),
     ];
     let set_variable_id = "set_variable_peer_id";
-    let mut set_variable_vm = create_avm(set_variable_call_service(json!(elems).to_string()), set_variable_id);
+    let mut set_variable_vm = create_avm(set_variable_call_service(json!(elems)), set_variable_id);
 
     let local_vm_peer_id = "local_peer_id";
     let mut local_vm = create_avm(unit_call_service(), local_vm_peer_id);

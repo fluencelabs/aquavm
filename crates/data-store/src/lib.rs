@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Fluence Labs Limited
+ * Copyright 2021 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,15 @@
  * limitations under the License.
  */
 
-use super::AVMDataStore;
-use std::path::PathBuf;
+use anyhow::Result;
 
-/// Describes behaviour of the AVM.
-pub struct AVMConfig {
-    /// Path to a AIR interpreter Wasm file.
-    pub air_wasm_path: PathBuf,
+/// This trait should be used to persist prev_data between successive calls of an interpreter o.
+pub trait DataStore {
+    fn initialize(&mut self) -> Result<()>;
 
-    /// Current peer id.
-    pub current_peer_id: String,
+    fn store_data(&mut self, data: &[u8], key: &str) -> Result<()>;
 
-    /// Mask used to filter logs, for details see `log_utf8_string` in fluence-faas.
-    pub logging_mask: i32,
+    fn read_data(&mut self, key: &str) -> Result<Vec<u8>>;
 
-    pub data_store: AVMDataStore,
+    fn cleanup_data(&mut self, key: &str) -> Result<()>;
 }

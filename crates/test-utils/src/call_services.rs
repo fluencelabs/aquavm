@@ -15,139 +15,58 @@
  */
 
 use super::*;
+
+use serde_json::json;
 use std::collections::HashMap;
 
 pub fn unit_call_service() -> CallServiceClosure {
-    Box::new(|_| -> Option<IValue> {
-        Some(IValue::Record(
-            NEVec::new(vec![
-                IValue::S32(0),
-                IValue::String(String::from("\"test\"")),
-            ])
-            .unwrap(),
-        ))
-    })
+    Box::new(|_| -> CallServiceResult { CallServiceResult::ok(&json!("test")) })
 }
 
 pub fn echo_call_service() -> CallServiceClosure {
-    Box::new(|args| -> Option<IValue> {
-        let arg = match &args.function_args[2] {
-            IValue::String(str) => str,
-            _ => unreachable!(),
-        };
-
-        let arg: Vec<serde_json::Value> = serde_json::from_str(arg).unwrap();
-
-        Some(IValue::Record(
-            NEVec::new(vec![IValue::S32(0), IValue::String(arg[0].to_string())]).unwrap(),
-        ))
+    Box::new(|params| -> CallServiceResult {
+        let args: Vec<serde_json::Value> = serde_json::from_str(&params.arguments).unwrap();
+        CallServiceResult::ok(&args[0])
     })
 }
 
-pub fn echo_string_call_service() -> CallServiceClosure {
-    Box::new(|args| -> Option<IValue> {
-        let arg = match &args.function_args[2] {
-            IValue::String(str) => str,
-            _ => unreachable!(),
-        };
-
-        let arg: Vec<String> = serde_json::from_str(arg).unwrap();
-        let arg = serde_json::to_string(&arg[0]).unwrap();
-
-        Some(IValue::Record(
-            NEVec::new(vec![IValue::S32(0), IValue::String(arg)]).unwrap(),
-        ))
-    })
+pub fn set_variable_call_service(json: JValue) -> CallServiceClosure {
+    Box::new(move |_| -> CallServiceResult { CallServiceResult::ok(&json) })
 }
 
-pub fn echo_number_call_service() -> CallServiceClosure {
-    Box::new(|args| -> Option<IValue> {
-        let arg = match &args.function_args[2] {
-            IValue::String(str) => str,
-            _ => unreachable!(),
+pub fn set_variables_call_service(
+    variables_mapping: HashMap<String, JValue>,
+) -> CallServiceClosure {
+    Box::new(move |params| -> CallServiceResult {
+        let args: Vec<serde_json::Value> = serde_json::from_str(&params.arguments).unwrap();
+        let var_name = match args.first() {
+            Some(JValue::String(name)) => name.clone(),
+            _ => "default".to_string(),
         };
 
-        let arg: Vec<String> = serde_json::from_str(arg).unwrap();
-
-        Some(IValue::Record(
-            NEVec::new(vec![IValue::S32(0), IValue::String(arg[0].clone())]).unwrap(),
-        ))
-    })
-}
-
-pub fn set_variable_call_service(json: impl Into<String>) -> CallServiceClosure {
-    let json = json.into();
-    Box::new(move |_| -> Option<IValue> {
-        Some(IValue::Record(
-            NEVec::new(vec![IValue::S32(0), IValue::String(json.clone())]).unwrap(),
-        ))
-    })
-}
-
-pub fn set_variables_call_service(ret_mapping: HashMap<String, String>) -> CallServiceClosure {
-    Box::new(move |args| -> Option<IValue> {
-        let arg_name = match &args.function_args[2] {
-            IValue::String(json_str) => {
-                let json = serde_json::from_str(json_str).expect("a valid json");
-                match json {
-                    JValue::Array(array) => match array.first() {
-                        Some(JValue::String(str)) => str.to_string(),
-                        _ => String::from("default"),
-                    },
-                    _ => String::from("default"),
-                }
-            }
-            _ => String::from("default"),
-        };
-
-        let result = ret_mapping
-            .get(&arg_name)
-            .cloned()
-            .unwrap_or_else(|| String::from(r#""test""#));
-
-        Some(IValue::Record(
-            NEVec::new(vec![IValue::S32(0), IValue::String(result)]).unwrap(),
-        ))
+        variables_mapping.get(&var_name).map_or_else(
+            || CallServiceResult::ok(&json!("test")),
+            |var| CallServiceResult::ok(var),
+        )
     })
 }
 
 pub fn return_string_call_service(ret_str: impl Into<String>) -> CallServiceClosure {
     let ret_str = ret_str.into();
 
-    Box::new(move |_| -> Option<IValue> {
-        Some(IValue::Record(
-            NEVec::new(vec![
-                IValue::S32(0),
-                IValue::String(format!(r#""{}""#, ret_str)),
-            ])
-            .unwrap(),
-        ))
-    })
+    Box::new(move |_| -> CallServiceResult { CallServiceResult::ok(&json!(ret_str)) })
 }
 
 pub fn fallible_call_service(fallible_service_id: impl Into<String>) -> CallServiceClosure {
     let fallible_service_id = fallible_service_id.into();
 
-    Box::new(move |args| -> Option<IValue> {
-        let builtin_service = match &args.function_args[0] {
-            IValue::String(str) => str,
-            _ => unreachable!(),
-        };
-
+    Box::new(move |params| -> CallServiceResult {
         // return a error for service with such id
-        if builtin_service == &fallible_service_id {
-            Some(IValue::Record(
-                NEVec::new(vec![IValue::S32(1), IValue::String(String::from("error"))]).unwrap(),
-            ))
+        if &params.service_id == &fallible_service_id {
+            CallServiceResult::err(1, &json!("error"))
         } else {
-            // return success for services with other ids
-            Some(IValue::Record(
-                NEVec::new(vec![
-                    IValue::S32(0),
-                    IValue::String(String::from(r#""res""#)),
-                ])
-                .unwrap(),
-            ))
+            // return success for services with other service id
+            CallServiceResult::ok(&json!("test"))
         }
     })
 }

@@ -14,18 +14,7 @@
  * limitations under the License.
  */
 
-use air_test_utils::checked_call_vm;
-use air_test_utils::create_avm;
-use air_test_utils::echo_number_call_service;
-use air_test_utils::executed_state::*;
-use air_test_utils::raw_data_from_trace;
-use air_test_utils::trace_from_result;
-use air_test_utils::unit_call_service;
-use air_test_utils::CallServiceClosure;
-use air_test_utils::IValue;
-use air_test_utils::NEVec;
-
-use serde_json::json;
+use air_test_utils::prelude::*;
 
 #[test]
 fn executed_trace_seq_par_call() {
@@ -178,26 +167,18 @@ fn executed_trace_create_service() {
     let module_bytes = json!([1, 2]);
     let blueprint = json!({ "name": "blueprint", "dependencies": [module]});
 
-    let add_module_response = String::from("add_module response");
-    let add_blueprint_response = String::from("add_blueprint response");
-    let create_response = String::from("create response");
+    let add_module_response = "add_module response";
+    let add_blueprint_response = "add_blueprint response";
+    let create_response = "create response";
 
-    let call_service: CallServiceClosure = Box::new(move |args| -> Option<IValue> {
-        let builtin_service = match &args.function_args[0] {
-            IValue::String(str) => str,
-            _ => unreachable!(),
+    let call_service: CallServiceClosure = Box::new(move |params| -> CallServiceResult {
+        let response = match params.service_id.as_str() {
+            "add_module" => add_module_response,
+            "add_blueprint" => add_blueprint_response,
+            "create" => create_response,
+            _ => "unknown response",
         };
-
-        let response = match builtin_service.as_str() {
-            "add_module" => add_module_response.clone(),
-            "add_blueprint" => add_blueprint_response.clone(),
-            "create" => create_response.clone(),
-            _ => String::from("unknown response"),
-        };
-
-        Some(IValue::Record(
-            NEVec::new(vec![IValue::S32(0), IValue::String(format!("\"{}\"", response))]).unwrap(),
-        ))
+        CallServiceResult::ok(&json!(response))
     });
 
     let mut vm = create_avm(call_service, "A");
@@ -228,20 +209,12 @@ fn executed_trace_create_service() {
 
 #[test]
 fn executed_trace_par_seq_fold_call() {
-    let return_numbers_call_service: CallServiceClosure = Box::new(|_| -> Option<IValue> {
-        Some(IValue::Record(
-            NEVec::new(vec![
-                IValue::S32(0),
-                IValue::String(String::from(
-                    "[\"1\", \"2\", \"3\", \"4\", \"5\", \"6\", \"7\", \"8\", \"9\", \"10\"]",
-                )),
-            ])
-            .unwrap(),
-        ))
+    let return_numbers_call_service: CallServiceClosure = Box::new(|_| -> CallServiceResult {
+        CallServiceResult::ok(&json!(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]))
     });
 
     let mut vm1 = create_avm(return_numbers_call_service, "some_peer_id_1");
-    let mut vm2 = create_avm(echo_number_call_service(), "some_peer_id_2");
+    let mut vm2 = create_avm(echo_call_service(), "some_peer_id_2");
     let mut vm3 = create_avm(unit_call_service(), "some_peer_id_3");
 
     let script = String::from(
@@ -305,20 +278,12 @@ fn executed_trace_par_seq_fold_call() {
 
 #[test]
 fn executed_trace_par_seq_fold_in_cycle_call() {
-    let return_numbers_call_service: CallServiceClosure = Box::new(|_| -> Option<IValue> {
-        Some(IValue::Record(
-            NEVec::new(vec![
-                IValue::S32(0),
-                IValue::String(String::from(
-                    "[\"1\", \"2\", \"3\", \"4\", \"5\", \"6\", \"7\", \"8\", \"9\", \"10\"]",
-                )),
-            ])
-            .unwrap(),
-        ))
+    let return_numbers_call_service: CallServiceClosure = Box::new(|_| -> CallServiceResult {
+        CallServiceResult::ok(&json!(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]))
     });
 
     let mut vm1 = create_avm(return_numbers_call_service, "some_peer_id_1");
-    let mut vm2 = create_avm(echo_number_call_service(), "some_peer_id_2");
+    let mut vm2 = create_avm(echo_call_service(), "some_peer_id_2");
     let mut vm3 = create_avm(unit_call_service(), "some_peer_id_3");
 
     let script = r#"

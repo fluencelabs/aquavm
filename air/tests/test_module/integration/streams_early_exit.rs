@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-use air_test_utils::*;
-
-use pretty_assertions::assert_eq;
-use serde_json::json;
+use air_test_utils::prelude::*;
 
 #[test]
 fn par_early_exit() {
@@ -27,8 +24,8 @@ fn par_early_exit() {
     let setter_3_id = "setter_3";
 
     let mut init = create_avm(unit_call_service(), init_peer_id);
-    let mut setter_1 = create_avm(set_variable_call_service(json!("1").to_string()), setter_1_id);
-    let mut setter_2 = create_avm(set_variable_call_service(json!("2").to_string()), setter_2_id);
+    let mut setter_1 = create_avm(set_variable_call_service(json!("1")), setter_1_id);
+    let mut setter_2 = create_avm(set_variable_call_service(json!("2")), setter_2_id);
     let mut setter_3 = create_avm(fallible_call_service("error"), setter_3_id);
 
     let script = format!(
@@ -104,7 +101,7 @@ fn par_early_exit() {
     ];
     let setter_3_malicious_data = raw_data_from_trace(setter_3_malicious_trace);
     let init_result_5 = call_vm!(init, "", &script, init_result_3.data.clone(), setter_3_malicious_data);
-    assert_eq!(init_result_5.ret_code, 1021);
+    assert_eq!(init_result_5.ret_code, 1022);
 
     let actual_trace = trace_from_result(&init_result_5);
     let expected_trace = trace_from_result(&init_result_3);
@@ -121,14 +118,14 @@ fn fold_early_exit() {
     let last_peer_checker_id = "last_peer_checker_id";
 
     let variables = maplit::hashmap!(
-        "stream_1".to_string() => json!(["a1", "a2"]).to_string(),
-        "stream_2".to_string() => json!(["b1", "b2"]).to_string(),
-        "stream_3".to_string() => json!(["c1", "c2"]).to_string(),
-        "stream_4".to_string() => json!(["d1", "d2"]).to_string(),
+        "stream_1".to_string() => json!(["a1", "a2"]),
+        "stream_2".to_string() => json!(["b1", "b2"]),
+        "stream_3".to_string() => json!(["c1", "c2"]),
+        "stream_4".to_string() => json!(["d1", "d2"]),
     );
 
     let mut variables_setter = create_avm(set_variables_call_service(variables), variables_setter_id);
-    let mut stream_setter = create_avm(echo_string_call_service(), stream_setter_id);
+    let mut stream_setter = create_avm(echo_call_service(), stream_setter_id);
     let mut fold_executor = create_avm(unit_call_service(), fold_executor_id);
     let mut error_trigger = create_avm(fallible_call_service("error"), error_trigger_id);
     let mut last_error_receiver = create_avm(unit_call_service(), last_error_receiver_id);
@@ -212,14 +209,14 @@ fn fold_par_early_exit() {
     let last_peer_checker_id = "last_peer_checker_id";
 
     let variables = maplit::hashmap!(
-        "stream_1".to_string() => json!(["a1", "a2"]).to_string(),
-        "stream_2".to_string() => json!(["b1", "b2"]).to_string(),
-        "stream_3".to_string() => json!(["c1", "c2"]).to_string(),
-        "stream_4".to_string() => json!(["d1", "d2"]).to_string(),
+        "stream_1".to_string() => json!(["a1", "a2"]),
+        "stream_2".to_string() => json!(["b1", "b2"]),
+        "stream_3".to_string() => json!(["c1", "c2"]),
+        "stream_4".to_string() => json!(["d1", "d2"]),
     );
 
     let mut variables_setter = create_avm(set_variables_call_service(variables), variables_setter_id);
-    let mut stream_setter = create_avm(echo_string_call_service(), stream_setter_id);
+    let mut stream_setter = create_avm(echo_call_service(), stream_setter_id);
     let mut fold_executor = create_avm(unit_call_service(), fold_executor_id);
     let mut error_trigger = create_avm(fallible_call_service("error"), error_trigger_id);
     let mut last_error_receiver = create_avm(unit_call_service(), last_error_receiver_id);

@@ -30,6 +30,7 @@ use marine_rs_sdk::marine;
 fn main() {}
 
 #[marine]
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct CallServiceResult {
     pub ret_code: i32,
     pub result: String,

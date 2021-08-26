@@ -14,22 +14,18 @@
  * limitations under the License.
  */
 
-use super::CallServiceResult;
 use super::InstrTracker;
 use super::LastErrorDescriptor;
 use super::LastErrorWithTetraplet;
 use crate::execution_step::boxed_value::Scalar;
 use crate::execution_step::boxed_value::Stream;
 
-use air_interpreter_interface::CallRequestParams;
+use air_interpreter_interface::*;
 
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::collections::VecDeque;
 use std::rc::Rc;
-
-pub(crate) type CallResults = HashMap<u32, CallServiceResult>;
-pub(crate) type CallRequests = HashMap<u32, CallRequestParams>;
 
 /// Contains all necessary state needed to execute AIR script.
 #[derive(Default)]
