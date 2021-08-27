@@ -209,7 +209,11 @@ export class AirInterpreter {
         const callRequestsStr = new TextDecoder().decode(Buffer.from(result.call_requests));
         let parsedCallRequests;
         try {
-            parsedCallRequests = JSON.parse(callRequestsStr);
+            if (callRequestsStr.length === 0) {
+                parsedCallRequests = {};
+            } else {
+                parsedCallRequests = JSON.parse(callRequestsStr);
+            }
         } catch (e) {
             throw "Couldn't parse call requests: " + e + '. Original string is: ' + callRequestsStr;
         }
