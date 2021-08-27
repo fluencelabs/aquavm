@@ -19,6 +19,7 @@ use air_interpreter_interface::*;
 use avm_server::*;
 
 use std::collections::HashMap;
+use std::collections::HashSet;
 use std::path::PathBuf;
 
 pub struct TestRunner {
@@ -40,7 +41,7 @@ impl TestRunner {
         let init_user_id = init_user_id.into();
         let mut call_results = HashMap::new();
 
-        let mut next_peer_pks = vec![];
+        let mut next_peer_pks = HashSet::new();
 
         loop {
             let mut outcome = self
@@ -56,10 +57,11 @@ impl TestRunner {
 
             let call_requests: CallRequests = serde_json::from_slice(&outcome.call_requests)
                 .expect("default serializer shouldn't fail");
+            println!("call_requests: {:?}", call_requests);
             next_peer_pks.extend(outcome.next_peer_pks);
 
             if call_requests.is_empty() {
-                outcome.next_peer_pks = next_peer_pks;
+                outcome.next_peer_pks = next_peer_pks.into_iter().collect::<Vec<_>>();
                 return Ok(outcome);
             }
 

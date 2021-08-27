@@ -78,9 +78,10 @@ impl<'i> ResolvedCall<'i> {
             return Ok(());
         }
 
-        let call_id = exec_ctx.tracker.call.seen_count - exec_ctx.tracker.call.executed_count;
         let request_params = self.prepare_request_params(exec_ctx, triplet)?;
-        exec_ctx.call_requests.insert(call_id, request_params);
+        exec_ctx
+            .call_requests
+            .insert(exec_ctx.tracker.call.seen_count, request_params);
 
         exec_ctx.subtree_complete = false;
         exec_ctx.tracker.meet_executed_call();

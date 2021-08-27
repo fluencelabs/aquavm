@@ -142,8 +142,9 @@ fn data_merge() {
 fn acc_merge() {
     let neighborhood_call_service: CallServiceClosure = Box::new(|params| -> CallServiceResult {
         let args_count = (params.function_name.as_bytes()[0] - b'0') as usize;
-        let args: Vec<JValue> = serde_json::from_str(&params.arguments).expect("valid json");
-        assert_eq!(args.len(), args_count);
+        println!("args: {}", params.arguments);
+        let args: Vec<Vec<JValue>> = serde_json::from_str(&params.arguments).expect("valid json");
+        assert_eq!(args[0].len(), args_count);
 
         CallServiceResult::ok(&json!(args))
     });
