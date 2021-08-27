@@ -62,6 +62,7 @@ impl InstrTracker {
         self.call.seen_count += 1;
     }
 
+    #[allow(dead_code)]
     pub(crate) fn meet_executed_call(&mut self) {
         self.call.executed_count += 1;
     }

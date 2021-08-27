@@ -41,7 +41,7 @@ fn arg_host_function() -> (CallServiceClosure, Rc<RefCell<ArgTetraplets>>) {
 #[test]
 fn simple_fold() {
     let return_numbers_call_service: CallServiceClosure = Box::new(|_| -> CallServiceResult {
-        CallServiceResult::ok(&json!({"args": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]}))
+        CallServiceResult::ok(&json!(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]))
     });
 
     let set_variable_vm_peer_id = String::from("some_peer_id_1");
@@ -124,7 +124,7 @@ fn fold_json_path() {
         r#"
         (seq
             (call "{}" ("{}" "{}") [] IterableResultPeer1)
-            (fold IterableResultPeer1.$.arg i
+            (fold IterableResultPeer1.$.args i
                 (par
                     (call "{}" ("local_service_id" "local_fn_name") [i "some_text_literal"] $acc)
                     (next i)

@@ -55,11 +55,15 @@ fn data_merge() {
         )
         "#;
 
-    // little hack here with init_peer_id to execute the first call from both VMs
     let result_0 = checked_call_vm!(set_variable, "", script, "", "");
     let result_1 = checked_call_vm!(vm1, "", script, "", result_0.data.clone());
     let result_2 = checked_call_vm!(vm2, "", script, "", result_0.data);
+    println!("\n\nbefore test");
+    print_trace(&result_1, "before vm1");
+    print_trace(&result_2, "before vm2");
     let result_3 = checked_call_vm!(vm1, "", script, result_1.data.clone(), result_2.data.clone());
+    print_trace(&result_3, "after");
+    println!("after test\n\n");
     let result_4 = checked_call_vm!(vm2, "", script, result_1.data.clone(), result_2.data.clone());
 
     let actual_trace_1 = trace_from_result(&result_1);
@@ -80,6 +84,8 @@ fn data_merge() {
 
     assert_eq!(actual_trace_1, expected_trace_1);
     assert_eq!(result_1.next_peer_pks, vec![String::from("B")]);
+
+    print_trace(&result_2, "result 2");
 
     let actual_trace_2 = trace_from_result(&result_2);
 
@@ -116,6 +122,7 @@ fn data_merge() {
     ];
 
     assert_eq!(actual_trace_3, expected_trace_3);
+    println!("{:?}", result_3.next_peer_pks);
     assert!(result_3.next_peer_pks.is_empty());
 
     let actual_trace_4 = trace_from_result(&result_4);

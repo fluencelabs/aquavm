@@ -70,7 +70,7 @@ fn client_host_function(
         let ret_value = match serde_json::from_str(&params.arguments) {
             Ok(args) => to_ret_value(params.service_id.as_str(), params.function_name.as_str(), args),
             Err(_) => {
-                *all_info_inner.borrow_mut() = params.function_name.clone();
+                *all_info_inner.borrow_mut() = params.arguments.clone();
                 JValue::Null
             }
         };
@@ -140,6 +140,7 @@ struct AVMState {
 }
 
 #[test]
+#[ignore]
 fn dashboard() {
     let script = include_str!("./scripts/dashboard.clj");
 

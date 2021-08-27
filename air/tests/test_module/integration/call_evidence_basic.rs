@@ -345,10 +345,10 @@ fn executed_trace_par_seq_fold_in_cycle_call() {
 
 #[test]
 fn executed_trace_seq_par_seq_seq() {
-    let peer_id_1 = String::from("12D3KooWHk9BjDQBUqnavciRPhAYFvqKBe4ZiPPvde7vDaqgn5er");
-    let peer_id_2 = String::from("12D3KooWAzJcYitiZrerycVB4Wryrx22CFKdDGx7c4u31PFdfTbR");
-    let mut vm1 = create_avm(unit_call_service(), peer_id_1.clone());
-    let mut vm2 = create_avm(unit_call_service(), peer_id_2.clone());
+    let peer_id_1 = "12D3KooWHk9BjDQBUqnavciRPhAYFvqKBe4ZiPPvde7vDaqgn5er";
+    let peer_id_2 = "12D3KooWAzJcYitiZrerycVB4Wryrx22CFKdDGx7c4u31PFdfTbR";
+    let mut vm1 = create_avm(unit_call_service(), peer_id_1);
+    let mut vm2 = create_avm(unit_call_service(), peer_id_2);
     let script = format!(
         r#"
         (seq 
@@ -368,11 +368,13 @@ fn executed_trace_seq_par_seq_seq() {
         peer_id_1, peer_id_2, peer_id_2, peer_id_1, peer_id_2
     );
 
-    let result = checked_call_vm!(vm2, "asd", script.clone(), "", "");
-    assert_eq!(result.next_peer_pks, vec![peer_id_1.clone()]);
+    let result = checked_call_vm!(vm2, "asd", &script, "", "");
+    assert_eq!(result.next_peer_pks, vec![peer_id_1.to_string()]);
 
-    let result = checked_call_vm!(vm1, "asd", script.clone(), "", result.data);
-    assert_eq!(result.next_peer_pks, vec![peer_id_2.clone()]);
+    print_trace(&result, "before");
+    let result = checked_call_vm!(vm1, "asd", &script, "", result.data);
+    print_trace(&result, "after");
+    assert_eq!(result.next_peer_pks, vec![peer_id_2.to_string()]);
 
     let result = checked_call_vm!(vm2, "asd", script, "", result.data);
 

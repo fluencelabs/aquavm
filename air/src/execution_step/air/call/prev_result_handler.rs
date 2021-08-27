@@ -44,25 +44,22 @@ pub(super) fn handle_prev_state<'i>(
             exec_err!(ExecutionError::LocalServiceError(*ret_code, err_msg.clone()))
         }
         RequestSentBy(sent_by) if sent_by.as_str() == exec_ctx.current_peer_id.as_str() => {
-            let call_id = exec_ctx.tracker.call.seen_count - exec_ctx.tracker.call.executed_count;
-            return match exec_ctx.call_results.remove(&call_id) {
+            let call_id = trace_ctx.prev_trace_pos() as u32;
+            let call_id = if call_id != 0 { call_id - 1 } else { call_id };
+
+            match exec_ctx.call_results.remove(&call_id) {
                 Some(call_result) => {
                     update_state_with_service_result(tetraplet, output, call_result, exec_ctx, trace_ctx)?;
-                    Ok(false)
+                    return Ok(false);
                 }
                 // result hasn't been prepared yet
                 None => {
-                    println!(
-                        "not found for {} - {} = {}\n{:?}",
-                        exec_ctx.tracker.call.seen_count,
-                        exec_ctx.tracker.call.executed_count,
-                        call_id,
-                        exec_ctx.call_results
-                    );
+                    println!("  not found for {}\n  {:?}", call_id, exec_ctx.call_results);
+
                     exec_ctx.subtree_complete = false;
-                    Ok(true)
+                    Ok(false)
                 }
-            };
+            }
         }
         RequestSentBy(..) => {
             // check whether current node can execute this call

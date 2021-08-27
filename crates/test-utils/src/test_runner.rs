@@ -57,7 +57,6 @@ impl TestRunner {
 
             let call_requests: CallRequests = serde_json::from_slice(&outcome.call_requests)
                 .expect("default serializer shouldn't fail");
-            println!("call_requests: {:?}", call_requests);
             next_peer_pks.extend(outcome.next_peer_pks);
 
             if call_requests.is_empty() {

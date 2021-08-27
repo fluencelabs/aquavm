@@ -75,7 +75,7 @@ fn last_error_tetraplets() {
 
     assert_eq!(
         actual_value.msg,
-        r#"Local service error, ret_code is 1, error message is 'error'"#
+        r#"Local service error, ret_code is 1, error message is '"error"'"#
     );
 
     let triplet = (*tetraplets.borrow()).as_ref().unwrap()[0][0].triplet.clone();

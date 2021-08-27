@@ -72,19 +72,18 @@ impl<'i> ResolvedCall<'i> {
         }
 
         // call can be executed only on peers with such peer_id
-        let triplet = &self.tetraplet.borrow().triplet;
-        if triplet.peer_pk.as_str() != exec_ctx.current_peer_id.as_str() {
-            set_remote_call_result(triplet.peer_pk.clone(), exec_ctx, trace_ctx);
+        let tetraplet = &self.tetraplet.borrow().triplet;
+        if tetraplet.peer_pk.as_str() != exec_ctx.current_peer_id.as_str() {
+            set_remote_call_result(tetraplet.peer_pk.clone(), exec_ctx, trace_ctx);
             return Ok(());
         }
 
-        let request_params = self.prepare_request_params(exec_ctx, triplet)?;
+        let request_params = self.prepare_request_params(exec_ctx, tetraplet)?;
         exec_ctx
             .call_requests
-            .insert(exec_ctx.tracker.call.seen_count, request_params);
+            .insert(trace_ctx.trace_pos() as u32, request_params);
 
         exec_ctx.subtree_complete = false;
-        exec_ctx.tracker.meet_executed_call();
         trace_ctx.meet_call_end(CallResult::RequestSentBy(exec_ctx.current_peer_id.clone()));
 
         Ok(())
