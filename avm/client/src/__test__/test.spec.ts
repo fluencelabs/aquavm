@@ -27,7 +27,7 @@ describe('Tests', () => {
 
         // act
         const params = { initPeerId: vmPeerId, currentPeerId: vmPeerId };
-        const res = i.invoke(s, b(''), b(''), params, {});
+        const res = i.invoke(s, b(''), b(''), params, []);
 
         // assert
         console.log(res);

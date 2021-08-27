@@ -28,7 +28,7 @@ export interface CallServiceResult {
 }
 
 export interface CallRequest {
-    serviceName: string;
+    serviceId: string;
     functionName: string;
     arguments: any[];
     tetraplets: SecurityTetraplet[][];
@@ -39,9 +39,7 @@ export interface InterpreterResult {
     errorMessage: string;
     data: Uint8Array;
     nextPeerPks: Array<string>;
-    callRequests: {
-        [key: number]: CallRequest;
-    };
+    callRequests: Array<[key: number, callRequest: CallRequest]>;
 }
 
 export interface ResolvedTriplet {
@@ -175,47 +173,81 @@ export class AirInterpreter {
         prevData: Uint8Array,
         data: Uint8Array,
         params: { initPeerId: string; currentPeerId: string },
-        callResults: { [key: number]: CallServiceResult },
+        callResults: Array<[key: number, callServiceResult: CallServiceResult]>,
     ): InterpreterResult {
-        const callRequestsEx: any = { ...callResults };
-        for (let k in callRequestsEx) {
-            callRequestsEx[k].ret_code = callRequestsEx[k].retCode;
-            delete callRequestsEx[k].retCode;
+        const callResultsToPass: any = {};
+        for (let [k, v] of callResults) {
+            callResultsToPass[k] = {
+                ret_code: v.retCode,
+                result: v.result,
+            };
         }
 
-        const resStr = invoke(
-            // new line
+        const paramsToPass = Buffer.from(
+            JSON.stringify({
+                init_peer_id: params.initPeerId,
+                current_peer_id: params.currentPeerId,
+            }),
+        );
+
+        const rawResult = invoke(
+            // force new line
             this.wasmWrapper.exports,
             air,
             prevData,
             data,
-            Buffer.from(
-                JSON.stringify({
-                    init_peer_id: params.initPeerId,
-                    current_peer_id: params.currentPeerId,
-                }),
-            ),
-            Buffer.from(JSON.stringify(callRequestsEx)),
+            paramsToPass,
+            Buffer.from(JSON.stringify(callResultsToPass)),
             this.logLevel,
         );
-        const res = JSON.parse(resStr);
-        res.call_requests = JSON.parse(new TextDecoder().decode(Buffer.from(res.call_requests)));
 
-        for (const k in res.call_requests) {
-            const v = res.call_requests[k];
-            res.call_requests[k] = {
-                serviceName: v.service_name,
-                functionName: v.function_name,
-                arguments: JSON.parse(v.arguments),
-                tetraplets: JSON.parse(v.tetraplets),
-            };
+        let result: any;
+        try {
+            result = JSON.parse(rawResult);
+        } catch (ex) {}
+
+        const callRequestsStr = new TextDecoder().decode(Buffer.from(result.call_requests));
+        let parsedCallRequests;
+        try {
+            parsedCallRequests = JSON.parse(callRequestsStr);
+        } catch (e) {
+            throw "Couldn't parse call requests: " + e + '. Original string is: ' + callRequestsStr;
+        }
+
+        let resultCallRequests: Array<[key: number, callRequest: CallRequest]> = [];
+        for (const k in parsedCallRequests) {
+            const v = parsedCallRequests[k];
+
+            let arguments_;
+            let tetraplets;
+            try {
+                arguments_ = JSON.parse(v.arguments);
+            } catch (e) {
+                throw "Couldn't parse arguments: " + e + '. Original string is: ' + arguments_;
+            }
+
+            try {
+                tetraplets = JSON.parse(v.tetraplets);
+            } catch (e) {
+                throw "Couldn't parse tetraplets: " + e + '. Original string is: ' + tetraplets;
+            }
+
+            resultCallRequests.push([
+                k as any,
+                {
+                    serviceId: v.service_id,
+                    functionName: v.function_name,
+                    arguments: arguments_,
+                    tetraplets: tetraplets,
+                },
+            ]);
         }
         return {
-            retCode: res.ret_code,
-            errorMessage: res.error_message,
-            data: res.data,
-            nextPeerPks: res.next_peer_pks,
-            callRequests: res.call_requests,
+            retCode: result.ret_code,
+            errorMessage: result.error_message,
+            data: result.data,
+            nextPeerPks: result.next_peer_pks,
+            callRequests: resultCallRequests,
         };
     }
 }
