@@ -54,8 +54,6 @@ pub(super) fn handle_prev_state<'i>(
                 }
                 // result hasn't been prepared yet
                 None => {
-                    println!("  not found for {}\n  {:?}", call_id, exec_ctx.call_results);
-
                     exec_ctx.subtree_complete = false;
                     Ok(false)
                 }
