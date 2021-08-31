@@ -58,7 +58,6 @@ impl<'input> AIRLexer<'input> {
                         self.open_square_bracket_met = true;
                         Some(Ok((start_pos, Token::OpenSquareBracket, start_pos + 1)))
                     } else {
-                        self.open_square_bracket_met = false;
                         self.tokenize_string(start_pos, true)
                     }
                 }
