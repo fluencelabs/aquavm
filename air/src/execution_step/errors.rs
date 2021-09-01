@@ -24,11 +24,9 @@ use super::trace_handler::MergerApResult;
 use super::trace_handler::TraceHandlerError;
 use super::ResolvedCallResult;
 use super::Stream;
-use crate::build_targets::CallServiceResult;
 use crate::JValue;
 
 use jsonpath_lib::JsonPathError;
-use serde_json::Error as SerdeJsonError;
 use thiserror::Error as ThisError;
 
 use std::rc::Rc;
@@ -36,15 +34,12 @@ use std::rc::Rc;
 /// Errors arised while executing AIR script.
 #[derive(ThisError, Debug)]
 pub(crate) enum ExecutionError {
-    /// Errors occurred while parsing returned by call_service value.
-    #[error("call_service result '{0}' can't be serialized or deserialized with an error: {1}")]
-    CallServiceResultDeError(CallServiceResult, SerdeJsonError),
-
     /// Semantic errors in a call instructions.
     #[error("call should have service id specified by peer part or function part")]
     IncorrectCallTriplet,
 
     /// An error is occurred while calling local service via call_service.
+    /// This error type includes both service error and de service result error.
     #[error("Local service error, ret_code is {0}, error message is '{1}'")]
     LocalServiceError(i32, Rc<String>),
 
@@ -140,28 +135,27 @@ impl ExecutionError {
         use ExecutionError::*;
 
         match self {
-            CallServiceResultDeError(..) => 1,
-            IncorrectCallTriplet => 2,
-            LocalServiceError(..) => 3,
-            VariableNotFound(_) => 4,
-            MultipleVariablesFound(_) => 5,
-            JValueJsonPathError(..) => 6,
-            GenerationStreamJsonPathError(..) => 7,
-            IncompatibleJValueType(..) => 8,
-            IncompatibleAValueType(..) => 9,
-            MultipleValuesInJsonPath(_) => 10,
-            FoldStateNotFound(_) => 11,
-            MultipleFoldStates(_) => 12,
-            IterableShadowing(_) => 13,
-            MatchWithoutXorError => 14,
-            MismatchWithoutXorError => 15,
-            FlatteningError(_) => 16,
-            JsonPathVariableTypeError(_) => 17,
-            StreamJsonPathError(..) => 18,
-            StreamDontHaveSuchGeneration(..) => 19,
-            ApResultNotCorrespondToInstr(_) => 20,
-            EmptyStreamJsonPathError(_) => 21,
-            TraceError(_) => 22,
+            IncorrectCallTriplet => 1,
+            LocalServiceError(..) => 2,
+            VariableNotFound(_) => 3,
+            MultipleVariablesFound(_) => 4,
+            JValueJsonPathError(..) => 5,
+            GenerationStreamJsonPathError(..) => 6,
+            IncompatibleJValueType(..) => 7,
+            IncompatibleAValueType(..) => 8,
+            MultipleValuesInJsonPath(_) => 9,
+            FoldStateNotFound(_) => 10,
+            MultipleFoldStates(_) => 11,
+            IterableShadowing(_) => 12,
+            MatchWithoutXorError => 13,
+            MismatchWithoutXorError => 14,
+            FlatteningError(_) => 15,
+            JsonPathVariableTypeError(_) => 16,
+            StreamJsonPathError(..) => 17,
+            StreamDontHaveSuchGeneration(..) => 18,
+            ApResultNotCorrespondToInstr(_) => 19,
+            EmptyStreamJsonPathError(_) => 20,
+            TraceError(_) => 21,
         }
     }
 }
