@@ -27,19 +27,22 @@ use super::Stream;
 use crate::JValue;
 
 use jsonpath_lib::JsonPathError;
+use strum::IntoEnumIterator;
+use strum_macros::EnumDiscriminants;
+use strum_macros::EnumIter;
 use thiserror::Error as ThisError;
 
 use std::rc::Rc;
 
 /// Errors arised while executing AIR script.
-#[derive(ThisError, Debug)]
+#[derive(ThisError, EnumDiscriminants, Debug)]
+#[strum_discriminants(derive(EnumIter))]
 pub(crate) enum ExecutionError {
     /// Semantic errors in a call instructions.
     #[error("call should have service id specified by peer part or function part")]
     IncorrectCallTriplet,
 
     /// An error is occurred while calling local service via call_service.
-    /// This error type includes both service error and de service result error.
     #[error("Local service error, ret_code is {0}, error message is '{1}'")]
     LocalServiceError(i32, Rc<String>),
 
@@ -132,31 +135,11 @@ impl From<TraceHandlerError> for Rc<ExecutionError> {
 
 impl ExecutionError {
     pub(crate) fn to_error_code(&self) -> u32 {
-        use ExecutionError::*;
+        let mut errors = ExecutionErrorDiscriminants::iter();
+        let actual_error_type = ExecutionErrorDiscriminants::from(self);
 
-        match self {
-            IncorrectCallTriplet => 1,
-            LocalServiceError(..) => 2,
-            VariableNotFound(_) => 3,
-            MultipleVariablesFound(_) => 4,
-            JValueJsonPathError(..) => 5,
-            GenerationStreamJsonPathError(..) => 6,
-            IncompatibleJValueType(..) => 7,
-            IncompatibleAValueType(..) => 8,
-            MultipleValuesInJsonPath(_) => 9,
-            FoldStateNotFound(_) => 10,
-            MultipleFoldStates(_) => 11,
-            IterableShadowing(_) => 12,
-            MatchWithoutXorError => 13,
-            MismatchWithoutXorError => 14,
-            FlatteningError(_) => 15,
-            JsonPathVariableTypeError(_) => 16,
-            StreamJsonPathError(..) => 17,
-            StreamDontHaveSuchGeneration(..) => 18,
-            ApResultNotCorrespondToInstr(_) => 19,
-            EmptyStreamJsonPathError(_) => 20,
-            TraceError(_) => 21,
-        }
+        // unwrap is safe here because errors are guaranteed to contain all errors variants
+        errors.position(|et| et == actual_error_type).unwrap() as _
     }
 }
 
