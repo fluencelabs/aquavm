@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
+use air_interpreter_data::DATA_FORMAT_VERSION;
+
 use serde_json::Error as SerdeJsonError;
+use strum::IntoEnumIterator;
+use strum_macros::EnumDiscriminants;
+use strum_macros::EnumIter;
 use thiserror::Error as ThisError;
 
-use air_interpreter_data::DATA_FORMAT_VERSION;
 use std::env::VarError;
 
 /// Errors happened during the interpreter preparation_step step.
-#[derive(Debug, ThisError)]
+#[derive(Debug, EnumDiscriminants, ThisError)]
+#[strum_discriminants(derive(EnumIter))]
 pub enum PreparationError {
     /// Error occurred while parsing AIR script
     #[error("air can't be parsed:\n{0}")]
@@ -39,12 +44,10 @@ pub enum PreparationError {
 
 impl PreparationError {
     pub(crate) fn to_error_code(&self) -> u32 {
-        use PreparationError::*;
+        let mut errors = PreparationErrorDiscriminants::iter();
+        let actual_error_type = PreparationErrorDiscriminants::from(self);
 
-        match self {
-            AIRParseError(_) => 1,
-            DataDeFailed(..) => 2,
-            CurrentPeerIdEnvError(_) => 3,
-        }
+        // unwrap is safe here because errors are guaranteed to contain all errors variants
+        errors.position(|et| et == actual_error_type).unwrap() as _
     }
 }

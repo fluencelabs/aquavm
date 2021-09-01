@@ -176,7 +176,7 @@ fn dont_wait_on_json_path_on_scalars() {
     let init_peer_id = "asd";
     let result = call_vm!(set_variable_vm, init_peer_id, &script, "", "");
     let array_result = call_vm!(array_consumer, init_peer_id, &script, "", result.data.clone());
-    assert_eq!(array_result.ret_code, 1006);
+    assert_eq!(array_result.ret_code, 1004);
     assert_eq!(
         array_result.error_message,
         r#"variable with path '$.[5]' not found in '[1,2,3,4,5]' with an error: 'json value not set'"#
@@ -195,7 +195,7 @@ fn dont_wait_on_json_path_on_scalars() {
     let init_peer_id = "asd";
     let result = call_vm!(set_variable_vm, init_peer_id, &script, "", "");
     let object_result = call_vm!(object_consumer, init_peer_id, script, "", result.data);
-    assert_eq!(object_result.ret_code, 1006);
+    assert_eq!(object_result.ret_code, 1004);
     assert_eq!(
         object_result.error_message,
         r#"variable with path '$.non_exist_path' not found in '{"err_msg":"","is_authenticated":1,"ret_code":0}' with an error: 'json value not set'"#
