@@ -25,6 +25,8 @@ jsonpath_lib-fl = "=0.3.7"
 boolinator = "2.4.0"
 log = "0.4.11"
 thiserror = "1.0.23"
+strum = "0.21"
+strum_macros = "0.21"
 
 # Keep 0.2.65 until this is resolved https://github.com/rustwasm/wasm-pack/issues/886
 wasm-bindgen = "=0.2.65"

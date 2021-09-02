@@ -104,7 +104,7 @@ fn par_early_exit() {
     ];
     let setter_3_malicious_data = raw_data_from_trace(setter_3_malicious_trace);
     let init_result_5 = call_vm!(init, "", &script, init_result_3.data.clone(), setter_3_malicious_data);
-    assert_eq!(init_result_5.ret_code, 1022);
+    assert_eq!(init_result_5.ret_code, 1018);
 
     let actual_trace = trace_from_result(&init_result_5);
     let expected_trace = trace_from_result(&init_result_3);
