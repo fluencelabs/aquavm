@@ -29,7 +29,7 @@ use crate::SecurityTetraplet;
 
 use air_interpreter_data::CallResult;
 use air_interpreter_interface::CallRequestParams;
-use air_parser::ast::{CallInstrArgValue, CallOutputValue};
+use air_parser::ast::{AstVariable, CallInstrArgValue, CallOutputValue};
 use polyplets::ResolvedTriplet;
 
 use std::cell::RefCell;
@@ -56,6 +56,8 @@ impl<'i> ResolvedCall<'i> {
         let triplet = triplet.resolve(exec_ctx)?;
         let tetraplet = SecurityTetraplet::from_triplet(triplet);
         let tetraplet = Rc::new(RefCell::new(tetraplet));
+
+        check_output_name(&raw_call.output, exec_ctx)?;
 
         Ok(Self {
             tetraplet,
@@ -158,5 +160,26 @@ impl<'i> ResolvedCall<'i> {
         };
 
         Ok(resolved_arguments)
+    }
+}
+
+/// Check output type name for being already in execution context.
+// TODO: this check should be moved on a parsing stage
+fn check_output_name(output: &CallOutputValue<'_>, exec_ctx: &ExecutionCtx<'_>) -> ExecutionResult<()> {
+    use crate::execution_step::boxed_value::Scalar;
+
+    let scalar_name = match output {
+        CallOutputValue::Variable(AstVariable::Scalar(ref name)) => *name,
+        _ => return Ok(()),
+    };
+
+    if exec_ctx.met_folds.is_empty() {
+        // shadowing is allowed only inside fold blocks
+        return crate::exec_err!(ExecutionError::MultipleVariablesFound(scalar_name.to_string()));
+    }
+
+    match exec_ctx.scalars.get(scalar_name) {
+        Some(Scalar::JValueRef(_)) => Ok(()),
+        _ => return crate::exec_err!(ExecutionError::IterableShadowing(scalar_name.to_string())),
     }
 }

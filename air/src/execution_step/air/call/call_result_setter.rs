@@ -83,6 +83,7 @@ pub(crate) fn set_result_from_value<'i>(
     Ok(())
 }
 
+#[macro_export]
 macro_rules! shadowing_allowed(
     ($exec_ctx:ident, $entry:ident) => { {
         // check that current execution_step flow is inside a fold block
