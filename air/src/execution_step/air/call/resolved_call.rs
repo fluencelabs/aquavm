@@ -173,13 +173,16 @@ fn check_output_name(output: &CallOutputValue<'_>, exec_ctx: &ExecutionCtx<'_>) 
         _ => return Ok(()),
     };
 
-    if exec_ctx.met_folds.is_empty() {
-        // shadowing is allowed only inside fold blocks
-        return crate::exec_err!(ExecutionError::MultipleVariablesFound(scalar_name.to_string()));
-    }
-
     match exec_ctx.scalars.get(scalar_name) {
-        Some(Scalar::JValueRef(_)) => Ok(()),
-        _ => return crate::exec_err!(ExecutionError::IterableShadowing(scalar_name.to_string())),
+        Some(Scalar::JValueRef(_)) => {
+            if exec_ctx.met_folds.is_empty() {
+                // shadowing is allowed only inside fold blocks
+                crate::exec_err!(ExecutionError::MultipleVariablesFound(scalar_name.to_string()))
+            } else {
+                Ok(())
+            }
+        },
+        Some(_) => crate::exec_err!(ExecutionError::IterableShadowing(scalar_name.to_string())),
+        None => Ok(())
     }
 }

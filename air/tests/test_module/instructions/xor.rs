@@ -81,7 +81,6 @@ fn xor_var_not_found() {
 }
 
 #[test]
-#[ignore]
 fn xor_multiple_variables_found() {
     let set_variables_peer_id = "set_variables_peer_id";
     let mut set_variables_vm = create_avm(echo_call_service(), set_variables_peer_id);
@@ -104,9 +103,7 @@ fn xor_multiple_variables_found() {
     );
 
     let result = checked_call_vm!(set_variables_vm, "asd", &script, "", "");
-    print_trace(&result, "before");
-    let result = call_vm!(vm, "asd", script, "", result.data);
-    print_trace(&result, "after");
+    let result = checked_call_vm!(vm, "asd", script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
     let expected_trace = vec![
