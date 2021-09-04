@@ -140,7 +140,6 @@ struct AVMState {
 }
 
 #[test]
-#[ignore]
 fn dashboard() {
     let script = include_str!("./scripts/dashboard.clj");
 

@@ -181,8 +181,8 @@ fn check_output_name(output: &CallOutputValue<'_>, exec_ctx: &ExecutionCtx<'_>) 
             } else {
                 Ok(())
             }
-        },
+        }
         Some(_) => crate::exec_err!(ExecutionError::IterableShadowing(scalar_name.to_string())),
-        None => Ok(())
+        None => Ok(()),
     }
 }
