@@ -27,20 +27,18 @@ use super::Stream;
 use crate::JValue;
 
 use air_interpreter_interface::CallResults;
-use air_interpreter_interface::CallServiceResult;
 use jsonpath_lib::JsonPathError;
-use serde_json::Error as SerdeJsonError;
+use strum::IntoEnumIterator;
+use strum_macros::EnumDiscriminants;
+use strum_macros::EnumIter;
 use thiserror::Error as ThisError;
 
 use std::rc::Rc;
 
 /// Errors arised while executing AIR script.
-#[derive(ThisError, Debug)]
+#[derive(ThisError, EnumDiscriminants, Debug)]
+#[strum_discriminants(derive(EnumIter))]
 pub(crate) enum ExecutionError {
-    /// Errors occurred while parsing returned by call_service value.
-    #[error("call_service result '{0}' can't be serialized or deserialized with an error: {1}")]
-    CallServiceResultDeError(CallServiceResult, SerdeJsonError),
-
     /// Semantic errors in a call instructions.
     #[error("call should have service id specified by peer part or function part")]
     IncorrectCallTriplet,
@@ -144,33 +142,11 @@ impl From<TraceHandlerError> for Rc<ExecutionError> {
 
 impl ExecutionError {
     pub(crate) fn to_error_code(&self) -> u32 {
-        use ExecutionError::*;
+        let mut errors = ExecutionErrorDiscriminants::iter();
+        let actual_error_type = ExecutionErrorDiscriminants::from(self);
 
-        match self {
-            CallServiceResultDeError(..) => 1,
-            IncorrectCallTriplet => 2,
-            LocalServiceError(..) => 3,
-            VariableNotFound(_) => 4,
-            MultipleVariablesFound(_) => 5,
-            JValueJsonPathError(..) => 6,
-            GenerationStreamJsonPathError(..) => 7,
-            IncompatibleJValueType(..) => 8,
-            IncompatibleAValueType(..) => 9,
-            MultipleValuesInJsonPath(_) => 10,
-            FoldStateNotFound(_) => 11,
-            MultipleFoldStates(_) => 12,
-            IterableShadowing(_) => 13,
-            MatchWithoutXorError => 14,
-            MismatchWithoutXorError => 15,
-            FlatteningError(_) => 16,
-            JsonPathVariableTypeError(_) => 17,
-            StreamJsonPathError(..) => 18,
-            StreamDontHaveSuchGeneration(..) => 19,
-            ApResultNotCorrespondToInstr(_) => 20,
-            CallResultsNotEmpty(_) => 21,
-            EmptyStreamJsonPathError(_) => 22,
-            TraceError(_) => 23,
-        }
+        // unwrap is safe here because errors are guaranteed to contain all errors variants
+        errors.position(|et| et == actual_error_type).unwrap() as _
     }
 }
 

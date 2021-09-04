@@ -94,13 +94,10 @@ fn update_state_with_service_result<'i>(
     exec_ctx: &mut ExecutionCtx<'i>,
     trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<()> {
-    use ExecutionError::CallServiceResultDeError as DeError;
-
     // check that service call succeeded
     let service_result = handle_service_error(service_result, trace_ctx)?;
-
-    let result: JValue = serde_json::from_str(&service_result.result).map_err(|e| DeError(service_result, e))?;
-    let result = Rc::new(result);
+    // try to get service result from call service result
+    let result = try_to_service_result(service_result, trace_ctx)?;
 
     let trace_pos = trace_ctx.trace_pos();
 
@@ -129,4 +126,27 @@ fn handle_service_error(
     trace_ctx.meet_call_end(CallServiceFailed(service_result.ret_code, error_message));
 
     Err(error)
+}
+
+fn try_to_service_result(
+    service_result: CallServiceResult,
+    trace_ctx: &mut TraceHandler,
+) -> ExecutionResult<Rc<JValue>> {
+    use CallResult::CallServiceFailed;
+
+    match serde_json::from_str(&service_result.result) {
+        Ok(result) => Ok(Rc::new(result)),
+        Err(e) => {
+            let error_msg = format!(
+                "call_service result '{0}' can't be serialized or deserialized with an error: {1}",
+                service_result.result, e
+            );
+            let error_msg = Rc::new(error_msg);
+
+            let error = CallServiceFailed(i32::MAX, error_msg.clone());
+            trace_ctx.meet_call_end(error);
+
+            Err(Rc::new(ExecutionError::LocalServiceError(i32::MAX, error_msg.clone())))
+        }
+    }
 }
