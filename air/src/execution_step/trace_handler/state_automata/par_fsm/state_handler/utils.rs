@@ -16,11 +16,27 @@
 
 use super::*;
 
+pub(super) struct PreparedTotalLens {
+
+}
+
 pub(super) fn prepare_total_lens(
     prev_size: usize,
     current_size: usize,
     data_keeper: &mut DataKeeper,
-) -> FSMResult<(usize, usize)> {
+) -> FSMResult<(Option<usize>, Option<usize>)> {
+    let prev_total_len = data_keeper.prev_ctx.total_subtrace_len();
+    let is_par_inside_fold = match prev_total_len {
+        None => false,
+        Some(len) => len > prev_size
+    };
+
+    if is_par_inside_fold {
+
+    }
+
+    let current_total_len = data_keeper.prev_ctx.total_subtrace_len();
+
     sizes_suits(prev_size, current_size, data_keeper)?;
 
     // these lens should be set after end of a par

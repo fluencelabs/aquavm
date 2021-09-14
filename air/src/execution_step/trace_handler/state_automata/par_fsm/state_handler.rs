@@ -89,19 +89,23 @@ impl CtxStateHandler {
     }
 }
 
+/// Prepare a new state that sliders will have after finishing executing of a left subtree.
 fn prepare_left_pair(
     prev_par: ParResult,
     current_par: ParResult,
     data_keeper: &mut DataKeeper,
 ) -> FSMResult<CtxStatesPair> {
     let (prev_nibble, current_nibble) = compute_new_states(data_keeper, prev_par, current_par, SubtreeType::Left)?;
-    let prev_state = CtxState::from_nibble(prev_nibble, prev_nibble.subtrace_len);
-    let current_state = CtxState::from_nibble(current_nibble, current_nibble.subtrace_len);
+
+    // according to the rule N total_subtrace_len isn't needed inside a par block
+    let prev_state = CtxState::from_nibble(prev_nibble, None);
+    let current_state = CtxState::from_nibble(current_nibble, None);
     let pair = CtxStatesPair::new(prev_state, current_state);
 
     Ok(pair)
 }
 
+/// Prepare a new state that sliders will have after finishing executing of a right subtree.
 fn prepare_right_pair(
     prev_par: ParResult,
     current_par: ParResult,

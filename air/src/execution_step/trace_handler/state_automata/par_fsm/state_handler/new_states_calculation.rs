@@ -21,7 +21,7 @@ pub(super) fn compute_new_states(
     prev_par: ParResult,
     current_par: ParResult,
     subtree_type: SubtreeType,
-) -> FSMResult<(CtxStateNibble, CtxStateNibble)> {
+) -> FSMResult<(CtxState, CtxState)> {
     let (prev_len, current_len) = match subtree_type {
         SubtreeType::Left => (prev_par.left_size, current_par.left_size),
         SubtreeType::Right => (prev_par.right_size, current_par.right_size),
@@ -38,7 +38,7 @@ fn compute_new_state(
     par_subtree_len: usize,
     ctx_type: MergeCtxType,
     par: ParResult,
-) -> FSMResult<CtxStateNibble> {
+) -> FSMResult<CtxState> {
     let slider = match ctx_type {
         MergeCtxType::Previous => data_keeper.prev_slider(),
         MergeCtxType::Current => data_keeper.current_slider(),
