@@ -17,8 +17,8 @@ air-interpreter-data = { path = "../crates/interpreter-data" }
 air-interpreter-interface = { path = "../crates/interpreter-interface" }
 marine-rs-sdk = { version = "0.6.11", features = ["logger"] }
 
-serde = { version = "=1.0.118", features = [ "derive", "rc" ] }
-serde_json = "=1.0.61"
+serde = { version = "1.0.118", features = [ "derive", "rc" ] }
+serde_json = "1.0.61"
 
 jsonpath_lib-fl = "=0.3.7"
 
