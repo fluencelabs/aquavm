@@ -1,6 +1,6 @@
 [package]
 name = "polyplets"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Fluence Labs"]
 edition = "2018"
 license = "Apache-2.0"
@@ -16,5 +16,5 @@ path = "src/lib.rs"
 
 [dependencies]
 marine-rs-sdk = { version = "0.6.11", features = ["logger"] }
-serde = { version = "=1.0.118", features = ["rc", "derive"] }
+serde = { version = "1.0.118", features = ["rc", "derive"] }
 
