@@ -15,7 +15,6 @@
  */
 
 use super::ExecutionTrace;
-use super::KeeperResult;
 use super::TraceSlider;
 
 use air_interpreter_data::InterpreterData;
@@ -47,6 +46,17 @@ impl MergeCtx {
         Self {
             slider,
             streams: data.streams,
+        }
+    }
+
+    pub(crate) fn element_generation(&self, position: u32) -> u32 {
+        use air_interpreter_data::CallResult;
+        use air_interpreter_data::ExecutedState;
+        use air_interpreter_data::Value;
+
+        match self.slider.element_at_position(position as usize).unwrap() {
+            ExecutedState::Call(CallResult::Executed(Value::Stream { generation, .. })) => *generation,
+            _ => unreachable!(),
         }
     }
 

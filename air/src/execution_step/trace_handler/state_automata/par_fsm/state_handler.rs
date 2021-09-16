@@ -15,12 +15,9 @@
  */
 
 mod new_states_calculation;
-mod utils;
 
 use super::*;
-use crate::execution_step::trace_handler::state_automata::par_fsm::state_handler::utils::compute_par_total_lens;
 use new_states_calculation::compute_new_states;
-use utils::prepare_total_lens;
 
 /// At the end of a Par execution it's needed to update subtrace_len and positions of both sliders.
 ///
@@ -68,13 +65,14 @@ pub(super) struct CtxStateHandler {
 }
 
 impl CtxStateHandler {
+    /// Prepare new states that sliders will have after finishing executing of each subtree.
     pub(super) fn prepare(
         prev_par: ParResult,
         current_par: ParResult,
         data_keeper: &mut DataKeeper,
     ) -> FSMResult<Self> {
-        let left_pair = prepare_left_pair(prev_par, current_par, data_keeper)?;
-        let right_pair = prepare_right_pair(prev_par, current_par, data_keeper)?;
+        let left_pair = compute_new_states(data_keeper, prev_par, current_par, SubtreeType::Left)?;
+        let right_pair = compute_new_states(data_keeper, prev_par, current_par, SubtreeType::Right)?;
 
         let handler = Self { left_pair, right_pair };
 
@@ -87,39 +85,4 @@ impl CtxStateHandler {
             SubtreeType::Right => update_ctx_states(self.right_pair, data_keeper),
         }
     }
-}
-
-/// Prepare a new state that sliders will have after finishing executing of a left subtree.
-fn prepare_left_pair(
-    prev_par: ParResult,
-    current_par: ParResult,
-    data_keeper: &mut DataKeeper,
-) -> FSMResult<CtxStatesPair> {
-    let (prev_nibble, current_nibble) = compute_new_states(data_keeper, prev_par, current_par, SubtreeType::Left)?;
-
-    // according to the rule N total_subtrace_len isn't needed inside a par block
-    let prev_state = CtxState::from_nibble(prev_nibble, None);
-    let current_state = CtxState::from_nibble(current_nibble, None);
-    let pair = CtxStatesPair::new(prev_state, current_state);
-
-    Ok(pair)
-}
-
-/// Prepare a new state that sliders will have after finishing executing of a right subtree.
-fn prepare_right_pair(
-    prev_par: ParResult,
-    current_par: ParResult,
-    data_keeper: &mut DataKeeper,
-) -> FSMResult<CtxStatesPair> {
-    let (prev_par_len, current_par_len) = compute_par_total_lens(prev_par, current_par)?;
-    let (prev_total_len, current_total_len) = prepare_total_lens(prev_par_len, current_par_len, data_keeper)?;
-
-    let prev_pos = data_keeper.prev_slider().position() + prev_par_len;
-    let current_pos = data_keeper.current_slider().position() + current_par_len;
-
-    let prev_state = CtxState::new(prev_pos, prev_total_len, prev_total_len);
-    let current_state = CtxState::new(current_pos, current_total_len, current_total_len);
-    let pair = CtxStatesPair::new(prev_state, current_state);
-
-    Ok(pair)
 }

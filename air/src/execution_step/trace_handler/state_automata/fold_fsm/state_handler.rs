@@ -60,14 +60,6 @@ fn compute_new_state(fold: &ResolvedFold, data_keeper: &DataKeeper, ctx_type: Me
         .checked_sub(fold.fold_states_count)
         .ok_or_else(|| StateFSMError::FoldLenUnderflow(fold.clone(), current_position, ctx_type))?;
 
-    let current_total_len = ctx.total_subtrace_len();
-    let total_subtrace_len = current_total_len
-        .map(|l| {
-            l.checked_sub(fold.fold_states_count)
-                .ok_or_else(|| StateFSMError::FoldLenUnderflow(fold.clone(), current_position, ctx_type))
-        })
-        .transpose()?;
-
-    let state = CtxState::new(pos, subtrace_len, total_subtrace_len);
+    let state = CtxState::new(pos, subtrace_len);
     Ok(state)
 }

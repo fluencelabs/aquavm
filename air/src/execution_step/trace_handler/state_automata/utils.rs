@@ -17,7 +17,6 @@
 use super::DataKeeper;
 use super::FSMResult;
 use super::MergeCtx;
-use crate::execution_step::trace_handler::data_keeper::MergeCtx;
 
 #[derive(Debug, Default, Clone, Copy)]
 pub(super) struct CtxState {
@@ -33,14 +32,13 @@ pub(super) struct CtxStatesPair {
 
 impl CtxState {
     pub(super) fn new(pos: usize, subtrace_len: usize) -> Self {
-        Self {
-            pos,
-            subtrace_len,
-        }
+        Self { pos, subtrace_len }
     }
 
     pub(super) fn update_ctx_state(self, ctx: &mut MergeCtx) -> FSMResult<()> {
-        ctx.slider.set_position_and_len(self.pos, self.subtrace_len).map_err(Into::into)
+        ctx.slider
+            .set_position_and_len(self.pos, self.subtrace_len)
+            .map_err(Into::into)
     }
 }
 

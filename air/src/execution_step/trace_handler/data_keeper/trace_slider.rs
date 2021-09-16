@@ -103,7 +103,7 @@ impl TraceSlider {
         self.subtrace_len - self.seen_elements
     }
 
-    pub(crate) fn seen_elements(&self) -> usize {
-        self.seen_elements
+    pub(crate) fn element_at_position(&self, position: usize) -> Option<&ExecutedState> {
+        self.trace.get(position)
     }
 }

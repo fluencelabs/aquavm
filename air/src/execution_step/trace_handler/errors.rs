@@ -24,12 +24,12 @@ use thiserror::Error as ThisError;
 #[derive(ThisError, Debug)]
 #[allow(clippy::enum_variant_names)]
 pub(crate) enum TraceHandlerError {
-    #[error("{0}")]
+    #[error(transparent)]
     KeeperError(#[from] KeeperError),
 
-    #[error("{0}")]
+    #[error(transparent)]
     MergeError(#[from] MergeError),
 
-    #[error("{0}")]
+    #[error(transparent)]
     StateFSMError(#[from] StateFSMError),
 }

@@ -21,7 +21,7 @@ use thiserror::Error as ThisError;
 pub(crate) enum KeeperError {
     /// Errors occurred when trace_len - trace_position < requested_subtrace_len.
     #[error(
-        "executed trace has {trace_len} elements and current position is {trace_position},\
+        "executed trace has {trace_len} elements and current position is {trace_position}, \
         but tried to set {requested_subtrace_len} subtrace_len"
     )]
     SetSubtraceLenFailed {
@@ -33,7 +33,7 @@ pub(crate) enum KeeperError {
     /// Errors occurred when
     ///     requested_subtrace_len != 0 && requested_pos + requested_subtrace_len > trace_len.
     #[error(
-        "executed trace has {trace_len} elements,\
+        "executed trace has {trace_len} elements, \
         but tried to set {requested_subtrace_len} subtrace_len and {requested_pos} position"
     )]
     SetSubtraceLenAndPosFailed {
