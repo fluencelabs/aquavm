@@ -78,6 +78,8 @@ fn merge_call_result(
         }
         (RequestSentBy(_), current @ CallServiceFailed(..)) => current,
         (prev @ CallServiceFailed(..), RequestSentBy(_)) => prev,
+        // senders shouldn't be checked for equality, for more info please look at
+        // github.com/fluencelabs/aquavm/issues/137
         (prev @ RequestSentBy(_), current @ RequestSentBy(_)) => {
             check_equal(&prev, &current)?;
             prev
