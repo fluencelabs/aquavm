@@ -34,7 +34,7 @@ pub(crate) struct ResolvedSubTraceDescs {
 }
 
 pub(super) fn resolve_fold_lore(fold: &FoldResult, merge_ctx: &MergeCtx) -> MergeResult<ResolvedFold> {
-    let (fold_states_count, lens) = compute_lore_lens(fold, merge_ctx)?;
+    let (fold_states_count, lens) = compute_lens_convolution(fold, merge_ctx)?;
 
     let lore = fold.lore.iter().zip(lens).try_fold::<_, _, MergeResult<_>>(
         HashMap::with_capacity(fold.lore.len()),
@@ -58,20 +58,27 @@ pub(super) fn resolve_fold_lore(fold: &FoldResult, merge_ctx: &MergeCtx) -> Merg
     Ok(resolved_fold_lore)
 }
 
-fn compute_before_lens(lore_lens: &mut [LoresLen], begin_pos: usize, end_pos: usize) {
-    let mut cum_before_len = 0;
+/// This function does conversion subtrace_lens of a fold result, it's better to explain it on
+/// examples.
+///
+/// Imagine a fold on stream with 3 elements that have the same generation, in this case the
+/// conversion will look like this:
+/// [1, 1] [2, 2] [3, 3] => [6, 1] [5, 3] [3, 6]
+///   g0     g0     g0
+/// here a number before comma represents count of elements before next, and after the comma - after
+///
+/// For fold with 5 elements of two generations:
+/// [1, 1] [2, 2] [3, 3] [4, 4] [5, 5] [1, 1] => [6, 1] [5, 3] [3, 6] [9, 4] [5, 9] [1, 1]
+///   g0     g0     g0     g1     g1     g2
+///
+/// It could be seen that this function does a convolution of lens with respect to generations.
+/// This is needed to handle (fold (par (next ... cases, because of subtrace_len of a Fold state
+/// describes only states inside this iteration without states that next brings, however a Par
+/// lens describe the whole subtree, where "next" states are included.
 
-    for subtrace_id in begin_pos..=end_pos {
-        let subtrace_id = end_pos - subtrace_id;
-        let lens = &mut lore_lens[subtrace_id];
-
-        let current_before_len = lens.before_len;
-        cum_before_len += current_before_len;
-        lens.before_len = cum_before_len;
-    }
-}
-
-fn compute_lore_lens(fold: &FoldResult, merge_ctx: &MergeCtx) -> MergeResult<(usize, Vec<LoresLen>)> {
+// TODO: in future it's possible to change a format of a Fold state to one behaves like Par,
+// because this function adds some overhead
+fn compute_lens_convolution(fold: &FoldResult, merge_ctx: &MergeCtx) -> MergeResult<(usize, Vec<LoresLen>)> {
     let subtraces_count = fold.lore.len();
     let mut lens = Vec::with_capacity(subtraces_count);
     let mut fold_states_count: usize = 0;
@@ -87,6 +94,7 @@ fn compute_lore_lens(fold: &FoldResult, merge_ctx: &MergeCtx) -> MergeResult<(us
         // TODO: check sequence for monotone
         if last_seen_generation != current_generation {
             if subtrace_id > 0 {
+                // do a back traversal for
                 compute_before_lens(&mut lens, last_seen_generation_pos, subtrace_id - 1);
             }
             last_seen_generation = current_generation;
@@ -117,6 +125,19 @@ fn compute_lore_lens(fold: &FoldResult, merge_ctx: &MergeCtx) -> MergeResult<(us
     }
 
     Ok((fold_states_count, lens))
+}
+
+fn compute_before_lens(lore_lens: &mut [LoresLen], begin_pos: usize, end_pos: usize) {
+    let mut cum_before_len = 0;
+
+    for subtrace_id in begin_pos..=end_pos {
+        let subtrace_id = end_pos - subtrace_id;
+        let lens = &mut lore_lens[subtrace_id];
+
+        let current_before_len = lens.before_len;
+        cum_before_len += current_before_len;
+        lens.before_len = cum_before_len;
+    }
 }
 
 fn check_subtrace_lore(subtrace_lore: &FoldSubTraceLore) -> MergeResult<()> {
