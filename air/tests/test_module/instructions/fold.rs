@@ -113,7 +113,6 @@ fn inner_fold() {
 
     let result = checked_call_vm!(set_variable_vm, "", script, "", "");
     let result = checked_call_vm!(vm, "", script, "", result.data);
-    print_trace(&result, "inner fold test");
 
     let actual_trace = trace_from_result(&result);
     assert_eq!(actual_trace.len(), 27);

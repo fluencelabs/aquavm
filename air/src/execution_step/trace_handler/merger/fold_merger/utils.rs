@@ -131,7 +131,7 @@ fn compute_before_lens(lore_lens: &mut [LoresLen], begin_pos: usize, end_pos: us
     let mut cum_before_len = 0;
 
     for subtrace_id in begin_pos..=end_pos {
-        let subtrace_id = end_pos - subtrace_id;
+        let subtrace_id = end_pos - (subtrace_id - begin_pos);
         let lens = &mut lore_lens[subtrace_id];
 
         let current_before_len = lens.before_len;

@@ -94,11 +94,11 @@ fn par_early_exit() {
         executed_state::stream_string("1", 1),
         executed_state::stream_string("2", 2),
         executed_state::stream_string("1", 1),
-        executed_state::stream_string("res", 0),
-        executed_state::service_failed(1, "error"),
-        executed_state::stream_string("res", 0),
-        executed_state::service_failed(1, "error"),
-        executed_state::service_failed(1, "error"),
+        executed_state::stream_string("test", 0),
+        executed_state::service_failed(1, r#""error""#),
+        executed_state::stream_string("test", 0),
+        executed_state::service_failed(1, r#""error""#),
+        executed_state::service_failed(1, r#""error""#),
         executed_state::request_sent_by("setter_3"),
     ];
     assert_eq!(actual_trace_2, expected_trace);
@@ -114,11 +114,11 @@ fn par_early_exit() {
         executed_state::stream_string("1", 0),
         executed_state::stream_string("2", 0),
         executed_state::stream_string("1", 0),
-        executed_state::stream_string("res", 0),
-        executed_state::service_failed(1, "error"),
-        executed_state::stream_string("res", 0),
-        executed_state::service_failed(1, "error"),
-        executed_state::service_failed(1, "error"),
+        executed_state::stream_string("test", 0),
+        executed_state::service_failed(1, r#""error""#),
+        executed_state::stream_string("test", 0),
+        executed_state::service_failed(1, r#""error""#),
+        executed_state::service_failed(1, r#""error""#),
         executed_state::scalar_string("test"),
     ];
     assert_eq!(actual_trace_3, expected_trace);
@@ -148,7 +148,7 @@ fn par_early_exit() {
 }
 
 #[test]
-fn fold_early_exit__() {
+fn fold_early_exit() {
     let variables_setter_id = "set_variable_id";
     let stream_setter_id = "stream_setter_id";
     let fold_executor_id = "fold_executor_id";

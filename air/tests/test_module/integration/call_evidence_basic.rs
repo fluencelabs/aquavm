@@ -243,7 +243,6 @@ fn executed_trace_par_seq_fold_call() {
     }
 
     let result = checked_call_vm!(vm3, "asd", script, "", data);
-    print_trace(&result, "vm3");
     let actual_trace = trace_from_result(&result);
 
     let generation = 0;
@@ -371,9 +370,7 @@ fn executed_trace_seq_par_seq_seq() {
     let result = checked_call_vm!(vm2, "asd", &script, "", "");
     assert_eq!(result.next_peer_pks, vec![peer_id_1.to_string()]);
 
-    print_trace(&result, "before");
     let result = checked_call_vm!(vm1, "asd", &script, "", result.data);
-    print_trace(&result, "after");
     assert_eq!(result.next_peer_pks, vec![peer_id_2.to_string()]);
 
     let result = checked_call_vm!(vm2, "asd", script, "", result.data);
