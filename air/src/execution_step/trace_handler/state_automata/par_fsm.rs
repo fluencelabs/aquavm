@@ -48,14 +48,14 @@ impl ParFSM {
         let current_par = ingredients.current_par.unwrap_or_default();
 
         let state_inserter = StateInserter::from_keeper(data_keeper);
-        let state_updater = CtxStateHandler::prepare(prev_par, current_par, data_keeper)?;
+        let state_handler = CtxStateHandler::prepare(prev_par, current_par, data_keeper)?;
         let par_builder = ParBuilder::from_keeper(data_keeper, &state_inserter);
 
         let par_fsm = Self {
             prev_par,
             current_par,
             state_inserter,
-            state_handler: state_updater,
+            state_handler,
             par_builder,
         };
 

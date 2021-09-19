@@ -36,8 +36,8 @@ fn par_early_exit() {
     let init_result_1 = checked_call_vm!(init, "", &script, "", "");
     let setter_1_res = checked_call_vm!(setter_1, "", &script, "", init_result_1.data.clone());
     let setter_2_res = checked_call_vm!(setter_2, "", &script, "", init_result_1.data.clone());
-    let setter_3_res = checked_call_vm!(setter_3, "", &script, "", init_result_1.data.clone());
-    let actual_trace_3 = trace_from_result(&setter_3_res);
+    let setter_3_res_1 = checked_call_vm!(setter_3, "", &script, "", init_result_1.data.clone());
+    let actual_trace_1 = trace_from_result(&setter_3_res_1);
 
     let expected_trace = vec![
         executed_state::scalar_string("test"),
@@ -57,12 +57,51 @@ fn par_early_exit() {
         executed_state::service_failed(1, r#""error""#),
         executed_state::request_sent_by(setter_3_id),
     ];
-    assert_eq!(actual_trace_3, expected_trace);
+    assert_eq!(actual_trace_1, expected_trace);
 
-    let init_result_2 = checked_call_vm!(init, "", &script, init_result_1.data.clone(), setter_1_res.data.clone());
-    let init_result_3 = checked_call_vm!(init, "", &script, init_result_2.data.clone(), setter_2_res.data.clone());
-    let init_result_4 = checked_call_vm!(init, "", &script, init_result_3.data.clone(), setter_3_res.data.clone());
-    let actual_trace_4 = trace_from_result(&init_result_4);
+    let setter_3_res_2 = checked_call_vm!(
+        setter_3,
+        "",
+        &script,
+        setter_3_res_1.data.clone(),
+        setter_1_res.data.clone()
+    );
+    let setter_3_res_3 = checked_call_vm!(
+        setter_3,
+        "",
+        &script,
+        setter_3_res_2.data.clone(),
+        setter_2_res.data.clone()
+    );
+    let init_result_2 = checked_call_vm!(
+        init,
+        "",
+        &script,
+        init_result_1.data.clone(),
+        setter_3_res_3.data.clone()
+    );
+    let actual_trace_2 = trace_from_result(&setter_3_res_3);
+    let actual_trace_3 = trace_from_result(&init_result_2);
+
+    let expected_trace = vec![
+        executed_state::scalar_string("test"),
+        executed_state::par(12, 1),
+        executed_state::par(9, 1),
+        executed_state::par(7, 1),
+        executed_state::par(5, 1),
+        executed_state::par(3, 1),
+        executed_state::par(1, 1),
+        executed_state::stream_string("1", 1),
+        executed_state::stream_string("2", 2),
+        executed_state::stream_string("1", 1),
+        executed_state::stream_string("res", 0),
+        executed_state::service_failed(1, "error"),
+        executed_state::stream_string("res", 0),
+        executed_state::service_failed(1, "error"),
+        executed_state::service_failed(1, "error"),
+        executed_state::request_sent_by("setter_3"),
+    ];
+    assert_eq!(actual_trace_2, expected_trace);
 
     let expected_trace = vec![
         executed_state::scalar_string("test"),
@@ -73,16 +112,16 @@ fn par_early_exit() {
         executed_state::par(3, 1),
         executed_state::par(1, 1),
         executed_state::stream_string("1", 0),
-        executed_state::stream_string("2", 1),
+        executed_state::stream_string("2", 0),
         executed_state::stream_string("1", 0),
-        executed_state::stream_string("test", 2),
-        executed_state::service_failed(1, r#""error""#),
-        executed_state::stream_string("test", 2),
-        executed_state::service_failed(1, r#""error""#),
-        executed_state::service_failed(1, r#""error""#),
+        executed_state::stream_string("res", 0),
+        executed_state::service_failed(1, "error"),
+        executed_state::stream_string("res", 0),
+        executed_state::service_failed(1, "error"),
+        executed_state::service_failed(1, "error"),
         executed_state::scalar_string("test"),
     ];
-    assert_eq!(actual_trace_4, expected_trace);
+    assert_eq!(actual_trace_3, expected_trace);
 
     let setter_3_malicious_trace = vec![
         executed_state::scalar_string("test"),
@@ -100,16 +139,16 @@ fn par_early_exit() {
         executed_state::request_sent_by(setter_3_id),
     ];
     let setter_3_malicious_data = raw_data_from_trace(setter_3_malicious_trace);
-    let init_result_5 = call_vm!(init, "", &script, init_result_3.data.clone(), setter_3_malicious_data);
-    assert_eq!(init_result_5.ret_code, 1018);
+    let init_result_3 = call_vm!(init, "", &script, init_result_2.data.clone(), setter_3_malicious_data);
+    assert_eq!(init_result_3.ret_code, 1018);
 
-    let actual_trace = trace_from_result(&init_result_5);
-    let expected_trace = trace_from_result(&init_result_3);
+    let actual_trace = trace_from_result(&init_result_3);
+    let expected_trace = trace_from_result(&init_result_2);
     assert_eq!(actual_trace, expected_trace);
 }
 
 #[test]
-fn fold_early_exit() {
+fn fold_early_exit__() {
     let variables_setter_id = "set_variable_id";
     let stream_setter_id = "stream_setter_id";
     let fold_executor_id = "fold_executor_id";

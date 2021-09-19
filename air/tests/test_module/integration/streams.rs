@@ -276,6 +276,8 @@ fn stream_merging_v1() {
     ];
     assert_eq!(actual_trace_2, expected_trace_2);
 
+    print_trace(&executor_result_2, "prev data");
+    print_trace(&setter_3_res, "current data");
     let executor_result_3 = checked_call_vm!(executor, "", &script, executor_result_2.data.clone(), setter_3_res.data);
     let actual_trace_3 = trace_from_result(&executor_result_3);
 
@@ -345,6 +347,7 @@ fn stream_merging_v2() {
     let setter_2_res = checked_call_vm!(setter_2, "", &script, "", initiator_result.data.clone());
     let setter_3_res = checked_call_vm!(setter_3, "", &script, "", initiator_result.data);
 
+    print_trace(&setter_1_res, "setter 1");
     let executor_result_1 = checked_call_vm!(executor, "", &script, "", setter_1_res.data);
     let actual_trace_1 = trace_from_result(&executor_result_1);
 

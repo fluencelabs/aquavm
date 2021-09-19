@@ -53,11 +53,7 @@ pub(crate) enum StateFSMError {
     #[error("underflow is occurred while calculating the new position of a {2} slider for resolved fold {0:?} and current subtrace len {1}'")]
     FoldLenUnderflow(ResolvedFold, usize, MergeCtxType),
 
-    /// Errors occurred while trying to set a total_subtrace_len that is less than
-    #[error("trying to set total_subtrace_len {0} that is less then len set before {1} for {2} ctx")]
-    TotalSubtraceLenIsLess(usize, usize, MergeCtxType),
-
     /// Errors bubbled from DataKeeper.
-    #[error("{0}")]
+    #[error(transparent)]
     KeeperError(#[from] KeeperError),
 }

@@ -36,6 +36,7 @@ use super::DataKeeper;
 use super::ExecutedState;
 use super::FoldResult;
 use super::FoldSubTraceLore;
+use super::MergeCtx;
 use super::MergeCtxType;
 use super::MergerFoldResult;
 use super::ParResult;

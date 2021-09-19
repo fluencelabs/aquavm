@@ -27,7 +27,7 @@ use std::path::PathBuf;
 #[derive(Debug, ThisError)]
 pub enum AVMError {
     /// FaaS errors.
-    #[error("{0}")]
+    #[error(transparent)]
     FaaSError(#[from] FaaSError),
 
     /// AIR interpreter result deserialization errors.

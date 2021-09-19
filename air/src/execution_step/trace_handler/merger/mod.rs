@@ -26,6 +26,7 @@ pub(super) use call_merger::try_merge_next_state_as_call;
 pub(crate) use call_merger::MergerCallResult;
 pub(crate) use errors::ApResultError;
 pub(crate) use errors::CallResultError;
+pub(crate) use errors::FoldResultError;
 pub(crate) use errors::MergeError;
 pub(crate) use fold_merger::try_merge_next_state_as_fold;
 pub(crate) use fold_merger::MergerFoldResult;

@@ -15,6 +15,8 @@
  */
 
 use super::ExecutionTrace;
+use super::KeeperError;
+use super::KeeperResult;
 use super::TraceSlider;
 
 use air_interpreter_data::InterpreterData;
@@ -27,57 +29,51 @@ use std::collections::HashMap;
 pub(crate) struct MergeCtx {
     pub(crate) slider: TraceSlider,
     pub(crate) streams: StreamGenerations,
-    /// This value is used to track the whole trace that each fold is described.
-    /// total_subtrace_len and subtrace_len from a slider are changed in the following way:
-    ///     fold:
-    ///         start: total = fold_states_count, subtrace_len = len of the first iteration
-    ///         i iteration_end: total -= iteration_i len, subtrace_len = len of the i+1 iteration
-    ///         end: total = 0
-    ///     par => total -= [left, right], new_subtrace_len = total - [left, right], pos += [left, right]
-    total_subtrace_len: usize,
 }
 
 impl MergeCtx {
     #[allow(dead_code)]
     pub(crate) fn from_trace(trace: ExecutionTrace) -> Self {
-        let total_subtrace_len = trace.len();
         let slider = TraceSlider::new(trace);
 
         Self {
             slider,
             streams: HashMap::new(),
-            total_subtrace_len,
         }
     }
 
     pub(crate) fn from_data(data: InterpreterData) -> Self {
-        let total_subtrace_len = data.trace.len();
         let slider = TraceSlider::new(data.trace);
 
         Self {
             slider,
             streams: data.streams,
-            total_subtrace_len,
+        }
+    }
+
+    pub(crate) fn try_get_generation(&self, position: u32) -> KeeperResult<u32> {
+        use air_interpreter_data::*;
+
+        let position = position as usize;
+        let state = self
+            .slider
+            .state_at_position(position)
+            .ok_or_else(|| KeeperError::NoElementAtPosition {
+                position,
+                trace_len: self.slider.trace_len(),
+            })?;
+
+        match state {
+            ExecutedState::Call(CallResult::Executed(Value::Stream { generation, .. })) => Ok(*generation),
+            // such Aps are always preceded by Fold where corresponding stream could be used,
+            // so it's been already checked that res_generation is well-formed
+            // and accessing 0th element is safe here
+            ExecutedState::Ap(ap_result) => Ok(ap_result.res_generations[0]),
+            state => Err(KeeperError::NoStreamState { state: state.clone() }),
         }
     }
 
     pub(crate) fn stream_generation(&self, stream_name: &str) -> Option<u32> {
         self.streams.get(stream_name).copied()
-    }
-
-    pub(crate) fn set_total_subtrace_len(&mut self, total_subtrace_len: usize) {
-        if total_subtrace_len == 0 {
-            // setting empty subtrace_len is always possible
-            let _ = self.slider.set_subtrace_len(0);
-        }
-
-        self.total_subtrace_len = total_subtrace_len;
-    }
-
-    pub(crate) fn total_subtrace_len(&self) -> usize {
-        if self.total_subtrace_len < self.slider.seen_elements() {
-            return self.slider.subtrace_len();
-        }
-        self.total_subtrace_len - self.slider.seen_elements()
     }
 }
