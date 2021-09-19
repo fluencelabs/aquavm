@@ -35,8 +35,6 @@ pub(crate) struct ResolvedSubTraceDescs {
 
 pub(super) fn resolve_fold_lore(fold: &FoldResult, merge_ctx: &MergeCtx) -> MergeResult<ResolvedFold> {
     let (fold_states_count, lens) = compute_lore_lens(fold, merge_ctx)?;
-    println!("fold: {:?}", fold);
-    println!("lens: {:?}", lens);
 
     let lore = fold.lore.iter().zip(lens).try_fold::<_, _, MergeResult<_>>(
         HashMap::with_capacity(fold.lore.len()),
@@ -55,7 +53,6 @@ pub(super) fn resolve_fold_lore(fold: &FoldResult, merge_ctx: &MergeCtx) -> Merg
             }
         },
     )?;
-    println!("prepared lore: {:?}\n", lore);
 
     let resolved_fold_lore = ResolvedFold::new(lore, fold_states_count);
     Ok(resolved_fold_lore)

@@ -50,12 +50,13 @@ impl MergeCtx {
     }
 
     pub(crate) fn element_generation(&self, position: u32) -> u32 {
-        use air_interpreter_data::CallResult;
-        use air_interpreter_data::ExecutedState;
-        use air_interpreter_data::Value;
+        use air_interpreter_data::*;
 
         match self.slider.element_at_position(position as usize).unwrap() {
             ExecutedState::Call(CallResult::Executed(Value::Stream { generation, .. })) => *generation,
+            // such Aps are always preceded by Fold where corresponding stream could be used,
+            // so it's been already checked that res_generation is well-formed
+            ExecutedState::Ap(ap_result) => ap_result.res_generations[0],
             _ => unreachable!(),
         }
     }
