@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use super::ExecutedState;
 use thiserror::Error as ThisError;
 
 /// Errors arose out while accessing various interpreter data.
@@ -41,4 +42,14 @@ pub(crate) enum KeeperError {
         requested_subtrace_len: usize,
         trace_len: usize,
     },
+
+    /// Errors occurred when Fold FSM tries to obtain stream generation by value_pos from a trace,
+    /// but this value_pos is bigger then trace.
+    #[error("requested an element at position '{position}', but executed trace contains only '{trace_len}' elements")]
+    NoElementAtPosition { position: usize, trace_len: usize },
+
+    /// Errors occurred when Fold FSM tries to obtain stream generation by value_pos from a trace,
+    /// but such state doesn't belong to values in streams (it doesn't contain a generation).
+    #[error("expected a state of CallResult(Value::Stream) or Ap types but '{state}' obtained")]
+    NoStreamState { state: ExecutedState },
 }

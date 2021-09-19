@@ -15,6 +15,8 @@
  */
 
 use super::ExecutionTrace;
+use super::KeeperError;
+use super::KeeperResult;
 use super::TraceSlider;
 
 use air_interpreter_data::InterpreterData;
@@ -49,15 +51,25 @@ impl MergeCtx {
         }
     }
 
-    pub(crate) fn element_generation(&self, position: u32) -> u32 {
+    pub(crate) fn try_get_generation(&self, position: u32) -> KeeperResult<u32> {
         use air_interpreter_data::*;
 
-        match self.slider.element_at_position(position as usize).unwrap() {
-            ExecutedState::Call(CallResult::Executed(Value::Stream { generation, .. })) => *generation,
+        let position = position as usize;
+        let state = self
+            .slider
+            .state_at_position(position)
+            .ok_or_else(|| KeeperError::NoElementAtPosition {
+                position,
+                trace_len: self.slider.trace_len(),
+            })?;
+
+        match state {
+            ExecutedState::Call(CallResult::Executed(Value::Stream { generation, .. })) => Ok(*generation),
             // such Aps are always preceded by Fold where corresponding stream could be used,
             // so it's been already checked that res_generation is well-formed
-            ExecutedState::Ap(ap_result) => ap_result.res_generations[0],
-            _ => unreachable!(),
+            // and accessing 0th element is safe here
+            ExecutedState::Ap(ap_result) => Ok(ap_result.res_generations[0]),
+            state => Err(KeeperError::NoStreamState { state: state.clone() }),
         }
     }
 

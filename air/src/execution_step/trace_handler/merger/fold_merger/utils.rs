@@ -83,7 +83,7 @@ fn compute_lore_lens(fold: &FoldResult, merge_ctx: &MergeCtx) -> MergeResult<(us
         let subtrace_lore = &fold.lore[subtrace_id];
         check_subtrace_lore(subtrace_lore)?;
 
-        let current_generation = merge_ctx.element_generation(subtrace_lore.value_pos);
+        let current_generation = merge_ctx.try_get_generation(subtrace_lore.value_pos)?;
         // TODO: check sequence for monotone
         if last_seen_generation != current_generation {
             if subtrace_id > 0 {
