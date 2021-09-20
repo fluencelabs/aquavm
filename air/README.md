@@ -19,7 +19,7 @@ pub fn executed_air(
     
     /// Results of calling services.
     call_results: Vec<u8>,
-) -> InterpreterOutcome
+) -> InterpreterOutcome {...}
 
 pub struct InterpreterOutcome {
     /// A return code, where 0 means success.
@@ -55,10 +55,10 @@ Even more, `f` is a free idempotent non-commutative monoid, because:
 
 The interpreter allows host (either node or browser) to call service asynchronously, by collecting all arguments and other stuff from `call` instructions that could be called during the execution and providing them in `InterpreterOutcome`. A host should then execute them at any time and call back the interpreter providing executed service results in the `call_results` argument.
 
-A good scheme of interacting with the interpreter should look as follows:
-1. for each new `current_data` received from a network, a host should call the interpreter with corresponding `prev_data` and `current_data` and empty `call_results`
+A scheme of interacting with the interpreter should look as follows:
+1. For each new `current_data` received from a network, a host should call the interpreter with corresponding `prev_data` and `current_data` and empty `call_results`. `prev_data` here is last `new_data` returned from the interpreter.
 
-2. after finishing execution step, there could be non-empty `next_peer_ids` and non-empty `call_requests` in `InterpreterOutcome`:
+2. Having obtained a result of the interpreter, there could be non-empty `next_peer_ids` and non-empty `call_requests` in `InterpreterOutcome`:
    1. re `next_peer_pks`: it's a host duty to decide should it send particle after each interpreter call or after the whole execution.
    2. re `call_requests`: `call_requests` is a `HashMap<u32, CallRequestParams>` and it's important for host to keep that correspondence between `u32` and call `CallRequestParams`, because they should be used when results are passed back on step 3. 
    
