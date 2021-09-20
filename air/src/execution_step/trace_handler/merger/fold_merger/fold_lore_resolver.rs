@@ -16,6 +16,7 @@
 
 use super::*;
 use crate::execution_step::trace_handler::data_keeper::MergeCtx;
+
 use air_interpreter_data::FoldSubTraceLore;
 use air_interpreter_data::SubTraceDesc;
 
@@ -130,8 +131,7 @@ fn compute_lens_convolution(fold: &FoldResult, merge_ctx: &MergeCtx) -> MergeRes
 fn compute_before_lens(lore_lens: &mut [LoresLen], begin_pos: usize, end_pos: usize) {
     let mut cum_before_len = 0;
 
-    for subtrace_id in begin_pos..=end_pos {
-        let subtrace_id = end_pos - (subtrace_id - begin_pos);
+    for subtrace_id in (begin_pos..=end_pos).rev() {
         let lens = &mut lore_lens[subtrace_id];
 
         let current_before_len = lens.before_len;
