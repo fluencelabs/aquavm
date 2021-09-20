@@ -13,7 +13,7 @@ dependencies = [
 
 [[package]]
 name = "air"
-version = "0.14.0"
+version = "0.14.1"
 dependencies = [
  "air-interpreter-data",
  "air-interpreter-interface",
@@ -41,7 +41,7 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter"
-version = "0.14.0"
+version = "0.14.1"
 dependencies = [
  "air",
  "log",
@@ -53,7 +53,7 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter-data"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "once_cell",
  "semver 1.0.4",
@@ -63,7 +63,7 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter-interface"
-version = "0.6.0"
+version = "0.6.1"
 dependencies = [
  "fluence-it-types",
  "marine-rs-sdk",
@@ -73,7 +73,7 @@ dependencies = [
 
 [[package]]
 name = "air-parser"
-version = "0.7.0"
+version = "0.7.1"
 dependencies = [
  "codespan",
  "codespan-reporting",
@@ -98,7 +98,7 @@ dependencies = [
 
 [[package]]
 name = "air-test-utils"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "air",
  "air-interpreter-interface",
@@ -1515,7 +1515,7 @@ dependencies = [
 
 [[package]]
 name = "polyplets"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "marine-rs-sdk",
  "serde",
@@ -1808,9 +1808,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.61"
+version = "1.0.68"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4fceb2595057b6891a4ee808f70054bd2d12f0e97f1cbb78689b59f676df325a"
+checksum = "0f690853975602e1bfe1ccbf50504d67174e3bcf340f23b5ea9992e0587a52d8"
 dependencies = [
  "indexmap",
  "itoa",

@@ -148,7 +148,7 @@ fn par_early_exit() {
 }
 
 #[test]
-fn fold_early_exit() {
+fn fold_early_exit__() {
     let variables_setter_id = "set_variable_id";
     let stream_setter_id = "stream_setter_id";
     let fold_executor_id = "fold_executor_id";
