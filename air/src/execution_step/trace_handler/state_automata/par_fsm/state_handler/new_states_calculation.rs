@@ -26,10 +26,8 @@ pub(super) fn compute_new_states(
     let (prev_len, current_len) = match subtree_type {
         SubtreeType::Left => (prev_par.left_size, current_par.left_size),
         SubtreeType::Right => {
-            let prev_par_size = prev_par.size().ok_or_else(|| StateFSMError::ParLenOverflow(prev_par))?;
-            let current_par_size = current_par
-                .size()
-                .ok_or_else(|| StateFSMError::ParLenOverflow(current_par))?;
+            let prev_par_size = prev_par.size().ok_or(StateFSMError::ParLenOverflow(prev_par))?;
+            let current_par_size = current_par.size().ok_or(StateFSMError::ParLenOverflow(current_par))?;
 
             (prev_par_size as u32, current_par_size as u32)
         }

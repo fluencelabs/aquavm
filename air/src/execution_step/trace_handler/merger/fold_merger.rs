@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-mod utils;
+mod fold_lore_resolver;
 
 use super::*;
-pub(crate) use utils::*;
+pub(crate) use fold_lore_resolver::*;
 
 #[derive(Debug, Default, Clone)]
 pub(crate) struct MergerFoldResult {
