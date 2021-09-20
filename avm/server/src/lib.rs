@@ -47,7 +47,6 @@ pub use fluence_faas::IValue;
 
 pub use air_interpreter_interface::CallRequests;
 pub use air_interpreter_interface::CallResults;
-pub use air_interpreter_interface::InterpreterOutcome;
 pub use air_interpreter_interface::CALL_SERVICE_SUCCESS;
 
 pub use avm_data_store::DataStore;

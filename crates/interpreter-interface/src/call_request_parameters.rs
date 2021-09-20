@@ -21,12 +21,21 @@ use std::collections::HashMap;
 
 pub type CallRequests = HashMap<u32, CallRequestParams>;
 
+/// Contains arguments of a call instruction and all other necessary information
+/// required for calling a service.
 #[marine]
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct CallRequestParams {
+    /// Id of a service that should be called.
     pub service_id: String,
+
+    /// Name of a function from service identified by service_id that should be called.
     pub function_name: String,
+
+    /// Serialized to JSON string Vec<IValue> of arguments that should be passed to a service.
     pub arguments: String,
+
+    /// Serialied to JSON string Vec<Vec<SecurityTetraplet>> that should be passed to a service.
     pub tetraplets: String,
 }
 

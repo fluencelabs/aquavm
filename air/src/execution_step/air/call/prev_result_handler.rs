@@ -44,6 +44,7 @@ pub(super) fn handle_prev_state<'i>(
             exec_err!(ExecutionError::LocalServiceError(*ret_code, err_msg.clone()))
         }
         RequestSentBy(sent_by) if sent_by.as_str() == exec_ctx.current_peer_id.as_str() => {
+            // call results are identified by a trace position
             let call_id = trace_ctx.prev_trace_pos() as u32;
             let call_id = if call_id != 0 { call_id - 1 } else { call_id };
 

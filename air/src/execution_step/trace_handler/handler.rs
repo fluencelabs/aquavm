@@ -43,6 +43,8 @@ impl TraceHandler {
         self.data_keeper.result_trace.len()
     }
 
+    /// Returns current position in a previous trace, that is used to identify call results
+    /// provided by a host.
     pub(crate) fn prev_trace_pos(&self) -> usize {
         self.data_keeper.prev_ctx.slider.position()
     }
