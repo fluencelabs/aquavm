@@ -25,29 +25,7 @@ use std::io::Error as IOError;
 use std::path::PathBuf;
 
 #[derive(Debug, ThisError)]
-pub enum AVMError {
-    /// FaaS errors.
-    #[error(transparent)]
-    FaaSError(#[from] FaaSError),
-
-    /// AIR interpreter result deserialization errors.
-    #[error("{0}")]
-    InterpreterResultDeError(String),
-
-    /// Specified path to AIR interpreter .wasm file was invalid
-    #[error("path to AIR interpreter .wasm ({invalid_path:?}) is invalid: {reason}; IO Error: {io_error:?}")]
-    InvalidAIRPath {
-        invalid_path: PathBuf,
-        io_error: Option<IOError>,
-        reason: &'static str,
-    },
-
-    /// FaaS call returns Vec<IValue> to support multi-value in a future,
-    /// but actually now it could return empty vec or a vec with one value.
-    /// This error is encountered when it returns vec with not a one value.
-    #[error("result `{0:?}` returned from FaaS should contain only one element")]
-    IncorrectInterpreterResult(Vec<IValue>),
-
+pub enum AVMError<E> {
     /// This error is encountered when deserialization pof call requests failed for some reason.
     #[error("'{raw_call_request:?}' can't been serialized with error '{error}'")]
     CallRequestsDeError {
@@ -60,13 +38,36 @@ pub enum AVMError {
     #[error("interpreter failed with: {0:?}")]
     InterpreterFailed(ErrorAVMOutcome),
 
+    /// This errors are encountered from an AVM runner.
+    #[error(transparent)]
+    RunnerError(RunnerError),
+
     /// This errors are encountered from a data store object.
     #[error(transparent)]
-    DataStoreError(#[from] eyre::Error),
+    DataStoreError(#[from] E),
 }
 
-impl From<std::convert::Infallible> for AVMError {
-    fn from(_: std::convert::Infallible) -> Self {
-        unreachable!()
-    }
+#[derive(Debug, ThisError)]
+pub enum RunnerError {
+    /// FaaS errors.
+    #[error(transparent)]
+    FaaSError(#[from] FaaSError),
+
+    /// Specified path to AIR interpreter .wasm file was invalid
+    #[error("path to AIR interpreter .wasm ({invalid_path:?}) is invalid: {reason}; IO Error: {io_error:?}")]
+    InvalidAIRPath {
+        invalid_path: PathBuf,
+        io_error: Option<IOError>,
+        reason: &'static str,
+    },
+
+    /// AIR interpreter result deserialization errors.
+    #[error("{0}")]
+    InterpreterResultDeError(String),
+
+    /// FaaS call returns Vec<IValue> to support multi-value in a future,
+    /// but actually now it could return empty vec or a vec with one value.
+    /// This error is encountered when it returns vec with not a one value.
+    #[error("result `{0:?}` returned from FaaS should contain only one element")]
+    IncorrectInterpreterResult(Vec<IValue>),
 }

@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-use eyre::Result;
-
 /// This trait should be used to persist prev_data between successive calls of an interpreter o.
-pub trait DataStore {
-    fn initialize(&mut self) -> Result<()>;
+pub trait DataStore<E> {
+    fn initialize(&mut self) -> Result<(), E>;
 
-    fn store_data(&mut self, data: &[u8], key: &str) -> Result<()>;
+    fn store_data(&mut self, data: &[u8], key: &str) -> Result<(), E>;
 
-    fn read_data(&mut self, key: &str) -> Result<Vec<u8>>;
+    fn read_data(&mut self, key: &str) -> Result<Vec<u8>, E>;
 
-    fn cleanup_data(&mut self, key: &str) -> Result<()>;
+    fn cleanup_data(&mut self, key: &str) -> Result<(), E>;
 }

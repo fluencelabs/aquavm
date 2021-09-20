@@ -15,6 +15,7 @@
  */
 
 use super::AVMDataStore;
+use super::AVMError;
 use super::AVMOutcome;
 use super::AVMRunner;
 use super::CallResults;
@@ -43,14 +44,14 @@ impl DerefMut for SendSafeRunner {
     }
 }
 
-pub struct AVM {
+pub struct AVM<E> {
     runner: SendSafeRunner,
-    data_store: AVMDataStore,
+    data_store: AVMDataStore<E>,
 }
 
-impl AVM {
+impl<E> AVM<E> {
     /// Create AVM with provided config.
-    pub fn new(config: AVMConfig) -> AVMResult<Self> {
+    pub fn new(config: AVMConfig<E>) -> AVMResult<Self, E> {
         let AVMConfig {
             air_wasm_path,
             current_peer_id,
@@ -60,7 +61,8 @@ impl AVM {
 
         data_store.initialize()?;
 
-        let runner = AVMRunner::new(air_wasm_path, current_peer_id, logging_mask)?;
+        let runner = AVMRunner::new(air_wasm_path, current_peer_id, logging_mask)
+            .map_err(AVMError::RunnerError)?;
         let runner = SendSafeRunner(runner);
         let avm = Self { runner, data_store };
 
@@ -74,13 +76,14 @@ impl AVM {
         init_user_id: impl Into<String>,
         particle_id: &str,
         call_results: &CallResults,
-    ) -> AVMResult<AVMOutcome> {
+    ) -> AVMResult<AVMOutcome, E> {
         let init_user_id = init_user_id.into();
         let prev_data = self.data_store.read_data(particle_id)?;
 
         let outcome = self
             .runner
-            .call(air, prev_data, data, init_user_id, call_results)?;
+            .call(air, prev_data, data, init_user_id, call_results)
+            .map_err(AVMError::RunnerError)?;
 
         // persist resulted data
         self.data_store.store_data(&outcome.data, particle_id)?;
@@ -89,7 +92,7 @@ impl AVM {
     }
 
     /// Cleanup data that become obsolete.
-    pub fn cleanup_data(&mut self, particle_id: &str) -> AVMResult<()> {
+    pub fn cleanup_data(&mut self, particle_id: &str) -> AVMResult<(), E> {
         self.data_store.cleanup_data(particle_id)?;
         Ok(())
     }

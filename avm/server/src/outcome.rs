@@ -42,7 +42,7 @@ pub struct ErrorAVMOutcome {
     outcome: AVMOutcome,
 }
 
-pub(super) fn to_avm_outcome(outcome: InterpreterOutcome) -> AVMResult<AVMOutcome> {
+pub(super) fn to_avm_outcome<E>(outcome: InterpreterOutcome) -> AVMResult<AVMOutcome, E> {
     use air_interpreter_interface::INTERPRETER_SUCCESS;
 
     let call_requests: CallRequests = match serde_json::from_slice(&outcome.call_requests) {

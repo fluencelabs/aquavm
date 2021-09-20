@@ -18,7 +18,7 @@ use super::AVMDataStore;
 use std::path::PathBuf;
 
 /// Describes behaviour of the AVM.
-pub struct AVMConfig {
+pub struct AVMConfig<E> {
     /// Path to a AIR interpreter Wasm file.
     pub air_wasm_path: PathBuf,
 
@@ -28,5 +28,5 @@ pub struct AVMConfig {
     /// Mask used to filter logs, for details see `log_utf8_string` in fluence-faas.
     pub logging_mask: i32,
 
-    pub data_store: AVMDataStore,
+    pub data_store: AVMDataStore<E>,
 }

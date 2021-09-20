@@ -15,8 +15,8 @@
  */
 
 use super::CallResults;
-use crate::AVMError;
-use crate::AVMResult;
+use crate::RunnerError;
+use crate::RunnerResult;
 
 use air_interpreter_interface::InterpreterOutcome;
 use fluence_faas::FluenceFaaS;
@@ -38,7 +38,7 @@ impl AVMRunner {
         air_wasm_path: PathBuf,
         current_peer_id: impl Into<String>,
         logging_mask: i32,
-    ) -> AVMResult<Self> {
+    ) -> RunnerResult<Self> {
         let (wasm_dir, wasm_filename) = split_dirname(air_wasm_path)?;
 
         let faas_config = make_faas_config(wasm_dir, &wasm_filename, logging_mask);
@@ -61,7 +61,7 @@ impl AVMRunner {
         data: impl Into<Vec<u8>>,
         init_user_id: impl Into<String>,
         call_results: &CallResults,
-    ) -> AVMResult<InterpreterOutcome> {
+    ) -> RunnerResult<InterpreterOutcome> {
         let init_user_id = init_user_id.into();
         let args = prepare_args(
             air,
@@ -77,8 +77,8 @@ impl AVMRunner {
                 .call_with_ivalues(&self.wasm_filename, "invoke", &args, <_>::default())?;
 
         let result = try_as_one_value_vec(result)?;
-        let outcome =
-            InterpreterOutcome::from_ivalue(result).map_err(AVMError::InterpreterResultDeError)?;
+        let outcome = InterpreterOutcome::from_ivalue(result)
+            .map_err(RunnerError::InterpreterResultDeError)?;
 
         Ok(outcome)
     }
@@ -115,8 +115,8 @@ fn prepare_args(
 ///
 /// # Example
 /// For path `/path/to/air_interpreter_server.wasm` result will be `Ok(PathBuf(/path/to), "air_interpreter_server.wasm")`
-fn split_dirname(path: PathBuf) -> AVMResult<(PathBuf, String)> {
-    use AVMError::InvalidAIRPath;
+fn split_dirname(path: PathBuf) -> RunnerResult<(PathBuf, String)> {
+    use RunnerError::InvalidAIRPath;
 
     let metadata = path.metadata().map_err(|err| InvalidAIRPath {
         invalid_path: path.clone(),
@@ -164,8 +164,8 @@ fn make_faas_config(air_wasm_dir: PathBuf, air_wasm_file: &str, logging_mask: i3
     }
 }
 
-fn try_as_one_value_vec(mut ivalues: Vec<IValue>) -> AVMResult<IValue> {
-    use AVMError::IncorrectInterpreterResult;
+fn try_as_one_value_vec(mut ivalues: Vec<IValue>) -> RunnerResult<IValue> {
+    use RunnerError::IncorrectInterpreterResult;
 
     if ivalues.len() != 1 {
         return Err(IncorrectInterpreterResult(ivalues));

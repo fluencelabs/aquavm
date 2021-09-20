@@ -8,6 +8,3 @@ license = "Apache-2.0"
 [lib]
 name = "avm_data_store"
 path = "src/lib.rs"
-
-[dependencies]
-eyre = "0.6.5"
