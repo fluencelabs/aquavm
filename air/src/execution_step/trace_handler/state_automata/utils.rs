@@ -15,12 +15,13 @@
  */
 
 use super::DataKeeper;
+use super::FSMResult;
+use super::MergeCtx;
 
 #[derive(Debug, Default, Clone, Copy)]
 pub(super) struct CtxState {
     pub(super) pos: usize,
     pub(super) subtrace_len: usize,
-    pub(super) total_subtrace_len: usize,
 }
 
 #[derive(Debug, Default, Clone, Copy)]
@@ -29,27 +30,15 @@ pub(super) struct CtxStatesPair {
     pub(super) current_state: CtxState,
 }
 
-#[derive(Clone, Copy, Debug, Default)]
-pub(crate) struct CtxStateNibble {
-    pub(crate) pos: usize,
-    pub(crate) subtrace_len: usize,
-}
-
 impl CtxState {
-    pub(super) fn new(pos: usize, subtrace_len: usize, total_subtrace_len: usize) -> Self {
-        Self {
-            pos,
-            subtrace_len,
-            total_subtrace_len,
-        }
+    pub(super) fn new(pos: usize, subtrace_len: usize) -> Self {
+        Self { pos, subtrace_len }
     }
 
-    pub(super) fn from_nibble(nibble: CtxStateNibble, total_subtrace_len: usize) -> Self {
-        Self {
-            pos: nibble.pos,
-            subtrace_len: nibble.subtrace_len,
-            total_subtrace_len,
-        }
+    pub(super) fn update_ctx_state(self, ctx: &mut MergeCtx) -> FSMResult<()> {
+        ctx.slider
+            .set_position_and_len(self.pos, self.subtrace_len)
+            .map_err(Into::into)
     }
 }
 
@@ -62,31 +51,11 @@ impl CtxStatesPair {
     }
 }
 
-impl CtxStateNibble {
-    pub(super) fn new(pos: usize, subtrace_len: usize) -> Self {
-        Self { pos, subtrace_len }
-    }
-}
-
 pub(super) fn update_ctx_states(state_pair: CtxStatesPair, data_keeper: &mut DataKeeper) {
     // these calls shouldn't produce a error, because sizes become less and
     // they have been already checked in a state updater ctor. It's important
     // to make it in a such way, because this function could be called from
     // error_exit that shouldn't fail.
-    let prev_state = state_pair.prev_state;
-    let current_state = state_pair.current_state;
-
-    let _ = data_keeper
-        .prev_slider_mut()
-        .set_position_and_len(prev_state.pos, prev_state.subtrace_len);
-    data_keeper
-        .prev_ctx
-        .set_total_subtrace_len(prev_state.total_subtrace_len);
-
-    let _ = data_keeper
-        .current_slider_mut()
-        .set_position_and_len(current_state.pos, current_state.subtrace_len);
-    data_keeper
-        .current_ctx
-        .set_total_subtrace_len(current_state.subtrace_len);
+    let _ = state_pair.prev_state.update_ctx_state(&mut data_keeper.prev_ctx);
+    let _ = state_pair.current_state.update_ctx_state(&mut data_keeper.current_ctx);
 }

@@ -30,6 +30,7 @@ pub(crate) type TraceHandlerResult<T> = std::result::Result<T, TraceHandlerError
 
 use air_interpreter_data::*;
 use data_keeper::DataKeeper;
+use data_keeper::MergeCtx;
 use merger::MergeCtxType;
 use merger::MergerFoldResult;
 use merger::ResolvedFold;
