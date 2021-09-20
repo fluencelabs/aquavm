@@ -19,7 +19,7 @@ use thiserror::Error as ThisError;
 
 #[derive(ThisError, Debug, Clone, PartialEq, Eq)]
 pub enum ParserError {
-    #[error("{0}")]
+    #[error(transparent)]
     LexerError(#[from] LexerError),
 
     #[error(

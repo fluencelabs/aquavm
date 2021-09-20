@@ -15,35 +15,32 @@
  */
 
 use super::*;
+use crate::execution_step::trace_handler::data_keeper::TraceSlider;
 
 pub(super) fn compute_new_states(
     data_keeper: &DataKeeper,
     prev_par: ParResult,
     current_par: ParResult,
     subtree_type: SubtreeType,
-) -> FSMResult<(CtxStateNibble, CtxStateNibble)> {
+) -> FSMResult<CtxStatesPair> {
     let (prev_len, current_len) = match subtree_type {
         SubtreeType::Left => (prev_par.left_size, current_par.left_size),
-        SubtreeType::Right => (prev_par.right_size, current_par.right_size),
+        SubtreeType::Right => {
+            let prev_par_size = prev_par.size().ok_or(StateFSMError::ParLenOverflow(prev_par))?;
+            let current_par_size = current_par.size().ok_or(StateFSMError::ParLenOverflow(current_par))?;
+
+            (prev_par_size as u32, current_par_size as u32)
+        }
     };
 
-    let prev_nibble = compute_new_state(data_keeper, prev_len as usize, MergeCtxType::Previous, prev_par)?;
-    let current_nibble = compute_new_state(data_keeper, current_len as usize, MergeCtxType::Current, current_par)?;
+    let prev_state = compute_new_state(prev_len as usize, data_keeper.prev_slider(), prev_par)?;
+    let current_state = compute_new_state(current_len as usize, data_keeper.current_slider(), current_par)?;
 
-    Ok((prev_nibble, current_nibble))
+    let pair = CtxStatesPair::new(prev_state, current_state);
+    Ok(pair)
 }
 
-fn compute_new_state(
-    data_keeper: &DataKeeper,
-    par_subtree_len: usize,
-    ctx_type: MergeCtxType,
-    par: ParResult,
-) -> FSMResult<CtxStateNibble> {
-    let slider = match ctx_type {
-        MergeCtxType::Previous => data_keeper.prev_slider(),
-        MergeCtxType::Current => data_keeper.current_slider(),
-    };
-
+fn compute_new_state(par_subtree_len: usize, slider: &TraceSlider, par: ParResult) -> FSMResult<CtxState> {
     let pos = slider
         .position()
         .checked_add(par_subtree_len)
@@ -54,6 +51,6 @@ fn compute_new_state(
         .checked_sub(par_subtree_len)
         .ok_or_else(|| StateFSMError::ParLenUnderflow(par, slider.subtrace_len(), MergeCtxType::Current))?;
 
-    let nibble = CtxStateNibble::new(pos, subtrace_len);
-    Ok(nibble)
+    let new_state = CtxState::new(pos, subtrace_len);
+    Ok(new_state)
 }

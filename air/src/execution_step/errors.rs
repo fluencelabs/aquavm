@@ -114,7 +114,7 @@ pub(crate) enum ExecutionError {
     JsonPathVariableTypeError(JValue),
 
     /// Errors bubbled from a trace handler.
-    #[error("{0}")]
+    #[error(transparent)]
     TraceError(#[from] TraceHandlerError),
 
     /// Errors occurred while insertion of a value inside stream that doesn't have corresponding generation.

@@ -49,21 +49,14 @@ pub(crate) struct FoldFSM {
 impl FoldFSM {
     pub(crate) fn from_fold_start(fold_result: MergerFoldResult, data_keeper: &mut DataKeeper) -> FSMResult<Self> {
         let state_inserter = StateInserter::from_keeper(data_keeper);
-        let state_updater =
+        let state_handler =
             CtxStateHandler::prepare(&fold_result.prev_fold_lore, &fold_result.current_fold_lore, data_keeper)?;
-
-        data_keeper
-            .prev_ctx
-            .set_total_subtrace_len(fold_result.prev_fold_lore.fold_states_count);
-        data_keeper
-            .current_ctx
-            .set_total_subtrace_len(fold_result.current_fold_lore.fold_states_count);
 
         let fold_fsm = Self {
             prev_fold: fold_result.prev_fold_lore,
             current_fold: fold_result.current_fold_lore,
             state_inserter,
-            state_handler: state_updater,
+            state_handler,
             ..<_>::default()
         };
 

@@ -36,22 +36,17 @@ pub(crate) enum MergeError {
     #[error("state from {1} `{0:?}` is incompatible with expected {2}")]
     DifferentExecutedStateExpected(ExecutedState, DataType, &'static str),
 
-    #[error("{0:?} contains several subtraces with the same value_pos {1}")]
-    ManyRecordsWithSamePos(FoldResult, usize),
-
-    /// Errors occurred when one of the fold subtrace lore doesn't contain 2 descriptors.
-    #[error("fold contains {0} sublore descriptors, but 2 is expected")]
-    FoldIncorrectSubtracesCount(usize),
-
-    /// Errors bubbled from DataKeeper.
-    #[error("{0}")]
+    #[error(transparent)]
     KeeperError(#[from] KeeperError),
 
-    #[error("{0}")]
+    #[error(transparent)]
     IncorrectApResult(#[from] ApResultError),
 
-    #[error("{0}")]
+    #[error(transparent)]
     IncorrectCallResult(#[from] CallResultError),
+
+    #[error(transparent)]
+    IncorrectFoldResult(#[from] FoldResultError),
 }
 
 #[derive(ThisError, Debug)]
@@ -75,6 +70,20 @@ pub(crate) enum CallResultError {
 
     #[error("air scripts has the following value type '{air_type}' while data other '{data_value:?}'")]
     DataNotMatchAIR { air_type: String, data_value: Value },
+}
+
+#[derive(ThisError, Debug)]
+pub(crate) enum FoldResultError {
+    #[error("the first {count} subtrace descriptors lens of fold {fold_result:?} overflows")]
+    SubtraceLenOverflow { fold_result: FoldResult, count: usize },
+
+    /// There are several lores with the same value_pos.
+    #[error("{0:?} contains several subtraces with the same value_pos {1}")]
+    SeveralRecordsWithSamePos(FoldResult, usize),
+
+    /// Errors occurred when one of the fold subtrace lore doesn't contain 2 descriptors.
+    #[error("fold contains {0} sublore descriptors, but 2 is expected")]
+    FoldIncorrectSubtracesCount(usize),
 }
 
 impl MergeError {
