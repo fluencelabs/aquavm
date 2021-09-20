@@ -16,8 +16,8 @@
 
 use super::AVMResult;
 use super::CallRequests;
-use super::InterpreterOutcome;
 use crate::AVMError;
+use air_interpreter_interface::InterpreterOutcome;
 
 use serde::Deserialize;
 use serde::Serialize;

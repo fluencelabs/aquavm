@@ -17,8 +17,8 @@
 use super::CallResults;
 use crate::AVMError;
 use crate::AVMResult;
-use crate::InterpreterOutcome;
 
+use air_interpreter_interface::InterpreterOutcome;
 use fluence_faas::FluenceFaaS;
 use fluence_faas::IValue;
 use fluence_faas::{FaaSConfig, ModuleDescriptor};
