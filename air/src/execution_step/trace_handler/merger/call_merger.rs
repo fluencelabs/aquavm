@@ -80,10 +80,7 @@ fn merge_call_result(
         (prev @ CallServiceFailed(..), RequestSentBy(_)) => prev,
         // senders shouldn't be checked for equality, for more info please look at
         // github.com/fluencelabs/aquavm/issues/137
-        (prev @ RequestSentBy(_), current @ RequestSentBy(_)) => {
-            check_equal(&prev, &current)?;
-            prev
-        }
+        (prev @ RequestSentBy(_), RequestSentBy(_)) => prev,
         // this special case is needed to merge stream generation in a right way
         (RequestSentBy(_), Executed(value)) => merge_current_executed(value, value_type, data_keeper)?,
         (prev @ Executed(..), RequestSentBy(_)) => prev,
