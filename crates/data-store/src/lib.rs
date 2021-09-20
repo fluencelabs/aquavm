@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use anyhow::Result;
+use eyre::Result;
 
 /// This trait should be used to persist prev_data between successive calls of an interpreter o.
 pub trait DataStore {

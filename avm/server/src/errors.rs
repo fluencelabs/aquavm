@@ -62,7 +62,7 @@ pub enum AVMError {
 
     /// This errors are encountered from a data store object.
     #[error(transparent)]
-    DataStoreError(#[from] anyhow::Error),
+    DataStoreError(#[from] eyre::Error),
 }
 
 impl From<std::convert::Infallible> for AVMError {

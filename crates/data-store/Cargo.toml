@@ -10,4 +10,4 @@ name = "avm_data_store"
 path = "src/lib.rs"
 
 [dependencies]
-anyhow = "1.0.43"
+eyre = "0.6.5"
