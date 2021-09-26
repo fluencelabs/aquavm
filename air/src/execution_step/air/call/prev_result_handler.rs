@@ -21,6 +21,7 @@ use crate::execution_step::trace_handler::TraceHandler;
 use crate::execution_step::RSecurityTetraplet;
 
 use air_interpreter_data::CallResult;
+use air_interpreter_data::Sender;
 use air_interpreter_interface::CallServiceResult;
 use air_parser::ast::CallOutputValue;
 
@@ -43,12 +44,11 @@ pub(super) fn handle_prev_state<'i>(
             exec_ctx.subtree_complete = false;
             exec_err!(ExecutionError::LocalServiceError(*ret_code, err_msg.clone()))
         }
-        RequestSentBy(sent_by) if sent_by.as_str() == exec_ctx.current_peer_id.as_str() => {
+        RequestSentBy(Sender::PeerIdWithCallId { peer_id, call_id })
+            if peer_id.as_str() == exec_ctx.current_peer_id.as_str() =>
+        {
             // call results are identified by a trace position
-            let call_id = trace_ctx.prev_trace_pos() as u32;
-            let call_id = if call_id != 0 { call_id - 1 } else { call_id };
-
-            match exec_ctx.call_results.remove(&call_id) {
+            match exec_ctx.call_results.remove(call_id) {
                 Some(call_result) => {
                     update_state_with_service_result(tetraplet, output, call_result, exec_ctx, trace_ctx)?;
                     return Ok(false);

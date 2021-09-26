@@ -173,6 +173,6 @@ pub(crate) fn set_remote_call_result<'i>(
     exec_ctx.next_peer_pks.push(peer_pk);
     exec_ctx.subtree_complete = false;
 
-    let new_call_result = CallResult::RequestSentBy(exec_ctx.current_peer_id.clone());
+    let new_call_result = CallResult::sent_peer_id(exec_ctx.current_peer_id.clone());
     trace_ctx.meet_call_end(new_call_result);
 }

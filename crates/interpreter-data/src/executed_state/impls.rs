@@ -33,8 +33,12 @@ impl ParResult {
 }
 
 impl CallResult {
-    pub fn sent(sender: impl Into<String>) -> CallResult {
-        CallResult::RequestSentBy(Rc::new(sender.into()))
+    pub fn sent_peer_id(peer_id: Rc<String>) -> CallResult {
+        CallResult::RequestSentBy(Sender::PeerId(peer_id))
+    }
+
+    pub fn sent_peer_id_with_call_id(peer_id: Rc<String>, call_id: u32) -> CallResult {
+        CallResult::RequestSentBy(Sender::PeerIdWithCallId { peer_id, call_id })
     }
 
     pub fn executed_scalar(value: Rc<JValue>) -> CallResult {
@@ -92,7 +96,7 @@ impl std::fmt::Display for ExecutedState {
                 left_size: left_subtree_size,
                 right_size: right_subtree_size,
             }) => write!(f, "par({}, {})", left_subtree_size, right_subtree_size),
-            Call(RequestSentBy(peer_id)) => write!(f, r#"request_sent_by("{}")"#, peer_id),
+            Call(RequestSentBy(sender)) => write!(f, r"{}", sender),
             Call(Executed(value)) => {
                 write!(f, "executed({})", value)
             }
@@ -127,6 +131,17 @@ impl std::fmt::Display for Value {
             Value::Scalar(value) => write!(f, "scalar: {}", value),
             Value::Stream { value, generation } => {
                 write!(f, "stream: {} generation: {}", value, generation)
+            }
+        }
+    }
+}
+
+impl std::fmt::Display for Sender {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Sender::PeerId(peer_id) => write!(f, "request_sent_by({})", peer_id),
+            Sender::PeerIdWithCallId { peer_id, call_id } => {
+                write!(f, "request_sent_by({}: {})", peer_id, call_id)
             }
         }
     }

@@ -81,12 +81,14 @@ impl<'i> ResolvedCall<'i> {
         }
 
         let request_params = self.prepare_request_params(exec_ctx, tetraplet)?;
-        exec_ctx
-            .call_requests
-            .insert(trace_ctx.trace_pos() as u32, request_params);
+        let call_id = trace_ctx.trace_pos() as u32;
+        exec_ctx.call_requests.insert(call_id, request_params);
 
         exec_ctx.subtree_complete = false;
-        trace_ctx.meet_call_end(CallResult::RequestSentBy(exec_ctx.current_peer_id.clone()));
+        trace_ctx.meet_call_end(CallResult::sent_peer_id_with_call_id(
+            exec_ctx.current_peer_id.clone(),
+            call_id,
+        ));
 
         Ok(())
     }
