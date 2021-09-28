@@ -1,3 +1,28 @@
+## Version 0.15.0 (2021-09-30)
+
+[PR 140](https://github.com/fluencelabs/aquavm/pull/130):
+  - The interpreter become async, not it's a pure function without any import functions from a peer. Instead of calling `call_service` import function from a peer, it now returns call results in the outcome structure, and receives their result in the `invoke` export.
+  - data structure now includes a new field to track last call request id to give peer more freedom.
+  - AVM server was completely refactored to support the new interpreter model and now exposes to peer a new trait storing data.
+
+[PR 144](https://github.com/fluencelabs/aquavm/pull/144)
+  The interpreter set to be built with `unwind` panic handler and some other debug options were turned on.
+
+[PR 139](https://github.com/fluencelabs/aquavm/pull/139)
+  Senders in `RequestSentBy` could be different.
+
+[PR 138](https://github.com/fluencelabs/aquavm/pull/138)
+  The computation algo for `subtrace_len` was completely refactored.
+
+[PR 136](https://github.com/fluencelabs/aquavm/pull/136)
+  `serde` and `serde_json` crates were used without locking their version
+
+[PR 133](https://github.com/fluencelabs/aquavm/pull/133)
+  fixed bug with applying json path to an empty stream
+
+[PR 132](https://github.com/fluencelabs/aquavm/pull/132)
+  fix bug with json flattening
+
 ## Version 0.14.0 (2021-08-24)
 
 [PR 74](https://github.com/fluencelabs/aquavm/pull/74):
