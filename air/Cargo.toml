@@ -3,6 +3,8 @@ name = "air"
 version = "0.14.1"
 authors = ["Fluence Labs"]
 edition = "2018"
+description = "Interpreter of AIR scripts intended to coordinate request flow in the Fluence network"
+repository = "https://github.com/fluencelabs/aquavm"
 publish = false
 
 [lib]

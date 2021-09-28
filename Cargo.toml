@@ -19,8 +19,8 @@ exclude = [
 
 [profile.release]
 opt-level = 3
-debug = false
-lto = true
-debug-assertions = false
-overflow-checks = false
-panic = "abort"
+# since the interpreter in actively development stage, these settings are true at least for a while
+debug = true
+debug-assertions = true
+overflow-checks = true
+panic = "unwind"
