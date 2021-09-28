@@ -83,7 +83,7 @@ pub fn data_from_result(result: &InterpreterOutcome) -> InterpreterData {
 }
 
 pub fn raw_data_from_trace(trace: ExecutionTrace) -> Vec<u8> {
-    let data = InterpreterData::from_execution_result(trace, <_>::default());
+    let data = InterpreterData::from_execution_result(trace, <_>::default(), 0);
     serde_json::to_vec(&data).expect("default serializer shouldn't fail")
 }
 

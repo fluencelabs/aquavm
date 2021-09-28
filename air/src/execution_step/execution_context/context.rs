@@ -69,6 +69,9 @@ pub(crate) struct ExecutionCtx<'i> {
     /// Tracker of all met instructions.
     pub tracker: InstrTracker,
 
+    /// Last call request id that was used as an id for call request in outcome.
+    pub last_call_request_id: u32,
+
     /// Contains all executed results from a host side.
     pub call_results: CallResults,
 
@@ -77,7 +80,12 @@ pub(crate) struct ExecutionCtx<'i> {
 }
 
 impl<'i> ExecutionCtx<'i> {
-    pub(crate) fn new(current_peer_id: String, init_peer_id: String, call_results: CallResults) -> Self {
+    pub(crate) fn new(
+        current_peer_id: String,
+        init_peer_id: String,
+        call_results: CallResults,
+        last_call_request_id: u32,
+    ) -> Self {
         let current_peer_id = Rc::new(current_peer_id);
 
         Self {
@@ -85,6 +93,7 @@ impl<'i> ExecutionCtx<'i> {
             init_peer_id,
             subtree_complete: true,
             last_error_could_be_set: true,
+            last_call_request_id,
             call_results,
             ..<_>::default()
         }
@@ -95,6 +104,11 @@ impl<'i> ExecutionCtx<'i> {
             Some(error_descriptor) => LastErrorWithTetraplet::from_error_descriptor(error_descriptor, self),
             None => <_>::default(),
         }
+    }
+
+    pub(crate) fn next_call_request_id(&mut self) -> u32 {
+        self.last_call_request_id += 1;
+        self.last_call_request_id
     }
 }
 

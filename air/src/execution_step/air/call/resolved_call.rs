@@ -81,7 +81,7 @@ impl<'i> ResolvedCall<'i> {
         }
 
         let request_params = self.prepare_request_params(exec_ctx, tetraplet)?;
-        let call_id = trace_ctx.trace_pos() as u32;
+        let call_id = exec_ctx.next_call_request_id();
         exec_ctx.call_requests.insert(call_id, request_params);
 
         exec_ctx.subtree_complete = false;

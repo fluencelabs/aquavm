@@ -24,5 +24,5 @@ use once_cell::sync::Lazy;
 use std::str::FromStr;
 
 pub static DATA_FORMAT_VERSION: Lazy<semver::Version> = Lazy::new(|| {
-    semver::Version::from_str("0.2.0").expect("invalid data format version specified")
+    semver::Version::from_str("0.2.1").expect("invalid data format version specified")
 });

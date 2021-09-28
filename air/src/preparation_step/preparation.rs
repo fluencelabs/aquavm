@@ -76,7 +76,12 @@ fn make_exec_ctx(
     let call_results = serde_json::from_slice(call_results)
         .map_err(|e| PreparationError::CallResultsDeFailed(e, call_results.to_vec()))?;
 
-    let mut ctx = ExecutionCtx::new(current_peer_id, init_peer_id, call_results);
+    let mut ctx = ExecutionCtx::new(
+        current_peer_id,
+        init_peer_id,
+        call_results,
+        prev_data.last_call_request_id,
+    );
     create_streams(&mut ctx, prev_data);
 
     Ok(ctx)

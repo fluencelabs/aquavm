@@ -37,7 +37,11 @@ const EXECUTION_ERRORS_START_ID: i32 = 1000;
 /// set ret_code to INTERPRETER_SUCCESS.
 pub(crate) fn from_success_result(exec_ctx: ExecutionCtx<'_>, trace_handler: TraceHandler) -> InterpreterOutcome {
     let streams = extract_stream_generations(exec_ctx.streams);
-    let data = InterpreterData::from_execution_result(trace_handler.into_result_trace(), streams);
+    let data = InterpreterData::from_execution_result(
+        trace_handler.into_result_trace(),
+        streams,
+        exec_ctx.last_call_request_id,
+    );
     let data = serde_json::to_vec(&data).expect("default serializer shouldn't fail");
     let next_peer_pks = dedup(exec_ctx.next_peer_pks);
     let call_requests = serde_json::to_vec(&exec_ctx.call_requests).expect("default serializer shouldn't fail");
@@ -95,7 +99,11 @@ pub(crate) fn from_execution_error(
     let ret_code = EXECUTION_ERRORS_START_ID + ret_code;
 
     let streams = extract_stream_generations(exec_ctx.streams);
-    let data = InterpreterData::from_execution_result(trace_handler.into_result_trace(), streams);
+    let data = InterpreterData::from_execution_result(
+        trace_handler.into_result_trace(),
+        streams,
+        exec_ctx.last_call_request_id,
+    );
     let data = serde_json::to_vec(&data).expect("default serializer shouldn't fail");
     let next_peer_pks = dedup(exec_ctx.next_peer_pks);
     let call_requests = serde_json::to_vec(&exec_ctx.call_requests).expect("default serializer shouldn't fail");
