@@ -34,12 +34,16 @@ export interface CallRequest {
     tetraplets: SecurityTetraplet[][];
 }
 
+export type CallRequestsArray = Array<[key: number, callRequest: CallRequest]>;
+
+export type CallResultsArray = Array<[key: number, callServiceResult: CallServiceResult]>;
+
 export interface InterpreterResult {
     retCode: number;
     errorMessage: string;
     data: Uint8Array;
     nextPeerPks: Array<string>;
-    callRequests: Array<[key: number, callRequest: CallRequest]>;
+    callRequests: CallRequestsArray;
 }
 
 export interface ResolvedTriplet {
@@ -173,7 +177,7 @@ export class AirInterpreter {
         prevData: Uint8Array,
         data: Uint8Array,
         params: { initPeerId: string; currentPeerId: string },
-        callResults: Array<[key: number, callServiceResult: CallServiceResult]>,
+        callResults: CallResultsArray,
     ): InterpreterResult {
         const callResultsToPass: any = {};
         for (let [k, v] of callResults) {
