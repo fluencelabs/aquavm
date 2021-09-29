@@ -147,7 +147,7 @@ fn try_to_service_result(
             let error = CallServiceFailed(i32::MAX, error_msg.clone());
             trace_ctx.meet_call_end(error);
 
-            Err(Rc::new(ExecutionError::LocalServiceError(i32::MAX, error_msg.clone())))
+            Err(Rc::new(ExecutionError::LocalServiceError(i32::MAX, error_msg)))
         }
     }
 }

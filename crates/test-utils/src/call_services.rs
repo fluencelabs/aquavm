@@ -62,7 +62,7 @@ pub fn fallible_call_service(fallible_service_id: impl Into<String>) -> CallServ
 
     Box::new(move |params| -> CallServiceResult {
         // return a error for service with such id
-        if &params.service_id == &fallible_service_id {
+        if params.service_id == fallible_service_id {
             CallServiceResult::err(1, &json!("error"))
         } else {
             // return success for services with other service id
