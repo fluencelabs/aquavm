@@ -47,7 +47,7 @@ pub(super) fn handle_prev_state<'i>(
         RequestSentBy(Sender::PeerIdWithCallId { peer_id, call_id })
             if peer_id.as_str() == exec_ctx.current_peer_id.as_str() =>
         {
-            // call results are identified by a trace position
+            // call results are identified by call_id that is saved in data
             match exec_ctx.call_results.remove(call_id) {
                 Some(call_result) => {
                     update_state_with_service_result(tetraplet, output, call_result, exec_ctx, trace_ctx)?;

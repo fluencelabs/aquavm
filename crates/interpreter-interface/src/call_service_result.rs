@@ -28,7 +28,7 @@ pub struct CallServiceResult {
     /// A error code service or builtin returned, where CALL_SERVICE_SUCCESS represents success.
     pub ret_code: i32,
 
-    /// Resulted IValue serialized to a string. It's impossible to wrap it with the marine macro,
+    /// Resulted JValue serialized to a string. It's impossible to wrap it with the marine macro,
     /// inasmuch as it's a enum uses HashMap inside.
     pub result: String,
 }
