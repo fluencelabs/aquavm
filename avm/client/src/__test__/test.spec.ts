@@ -2,7 +2,7 @@ import { AirInterpreter } from '..';
 
 const vmPeerId = '12D3KooWNzutuy8WHXDKFqFsATvCR6j9cj2FijYbnd47geRKaQZS';
 
-const createTestIntepreter = async () => {
+const createTestInterpreter = async () => {
     return AirInterpreter.create('off', (level, message) => {
         console.log(`level: ${level}, message=${message}`);
     });
@@ -15,7 +15,7 @@ const b = (s: string) => {
 describe('Tests', () => {
     it('should work', async () => {
         // arrange
-        const i = await createTestIntepreter();
+        const i = await createTestInterpreter();
 
         const s = `(seq
             (par 
