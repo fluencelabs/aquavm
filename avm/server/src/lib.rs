@@ -27,14 +27,18 @@
 mod avm;
 mod config;
 mod errors;
-mod outcome;
+mod interface;
 mod runner;
 
 pub use avm::AVM;
 pub use config::AVMConfig;
 pub use errors::AVMError;
-pub use outcome::*;
-pub use runner::AVMRunner;
+pub use interface::*;
+
+pub mod avm_runner {
+    pub use crate::interface::raw_outcome::RawAVMOutcome;
+    pub use crate::runner::AVMRunner;
+}
 
 // Re-exports
 pub use fluence_faas::ne_vec;
@@ -45,11 +49,7 @@ pub use fluence_faas::HostImportError;
 pub use fluence_faas::IType;
 pub use fluence_faas::IValue;
 
-pub use air_interpreter_interface::CallRequestParams;
-pub use air_interpreter_interface::CallRequests;
-pub use air_interpreter_interface::CallResults;
-pub use air_interpreter_interface::CallServiceResult;
-pub use air_interpreter_interface::CALL_SERVICE_SUCCESS;
+pub use polyplets::SecurityTetraplet;
 
 pub use avm_data_store::DataStore;
 

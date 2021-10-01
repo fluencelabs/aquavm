@@ -29,15 +29,13 @@ fn create_check_service_closure(
 ) -> CallServiceClosure {
     Box::new(move |params| -> CallServiceResult {
         let mut call_args: Vec<LastError> =
-            serde_json::from_str(&params.arguments).expect("json deserialization shouldn't fail");
+            serde_json::from_value(JValue::Array(params.arguments)).expect("json deserialization shouldn't fail");
 
-        let de_tetraplets: Vec<Vec<SecurityTetraplet>> =
-            serde_json::from_str(&params.tetraplets).expect("json deserialization shouldn't fail");
-
+        let result = json!(params.tetraplets);
         *args_to_check.borrow_mut() = Some(call_args.remove(0));
-        *tetraplets_to_check.borrow_mut() = Some(de_tetraplets);
+        *tetraplets_to_check.borrow_mut() = Some(params.tetraplets);
 
-        CallServiceResult::ok(&json!(params.tetraplets))
+        CallServiceResult::ok(result)
     })
 }
 

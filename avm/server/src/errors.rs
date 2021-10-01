@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use super::ErrorAVMOutcome;
+use crate::interface::ErrorAVMOutcome;
 use fluence_faas::FaaSError;
 use fluence_faas::IValue;
 
@@ -26,13 +26,6 @@ use std::path::PathBuf;
 
 #[derive(Debug, ThisError)]
 pub enum AVMError<E> {
-    /// This error is encountered when deserialization pof call requests failed for some reason.
-    #[error("'{raw_call_request:?}' can't been serialized with error '{error}'")]
-    CallRequestsDeError {
-        raw_call_request: Vec<u8>,
-        error: SerdeError,
-    },
-
     /// This error contains interpreter outcome in case when execution failed on the interpreter
     /// side. A host should match on this error type explicitly to save provided data.
     #[error("interpreter failed with: {0:?}")]
@@ -49,7 +42,7 @@ pub enum AVMError<E> {
 
 #[derive(Debug, ThisError)]
 pub enum RunnerError {
-    /// FaaS errors.
+    /// This errors are encountered from FaaS.
     #[error(transparent)]
     FaaSError(#[from] FaaSError),
 
@@ -70,4 +63,44 @@ pub enum RunnerError {
     /// This error is encountered when it returns vec with not a one value.
     #[error("result `{0:?}` returned from FaaS should contain only one element")]
     IncorrectInterpreterResult(Vec<IValue>),
+
+    /// This errors are encountered from an call results/params se/de.
+    #[error(transparent)]
+    CallSeDeErrors(#[from] CallSeDeErrors),
+}
+
+#[derive(Debug, ThisError)]
+#[allow(clippy::enum_variant_names)]
+pub enum CallSeDeErrors {
+    /// Errors encountered while trying to serialize call results.
+    #[error("error occurred while call results `{call_results:?}` deserialization: {se_error}")]
+    CallResultsSeFailed {
+        call_results: air_interpreter_interface::CallResults,
+        se_error: SerdeError,
+    },
+
+    /// This error is encountered when deserialization pof call requests failed for some reason.
+    #[error("'{raw_call_request:?}' can't been serialized with error '{error}'")]
+    CallRequestsDeError {
+        raw_call_request: Vec<u8>,
+        error: SerdeError,
+    },
+
+    /// Errors encountered while trying to deserialize arguments from call parameters returned
+    /// by the interpreter. In the corresponding struct such arguments are Vec<JValue> serialized
+    /// to a string.
+    #[error("error occurred while deserialization of arguments from call params `{call_params:?}`: {de_error}")]
+    CallParamsArgsDeFailed {
+        call_params: air_interpreter_interface::CallRequestParams,
+        de_error: SerdeError,
+    },
+
+    /// Errors encountered while trying to deserialize tetraplets from call parameters returned
+    /// by the interpreter. In the corresponding struct such tetraplets are
+    /// Vec<Vec<SecurityTetraplet>> serialized to a string.
+    #[error("error occurred while deserialization of tetraplets from call params `{call_params:?}`: {de_error}")]
+    CallParamsTetrapletsDeFailed {
+        call_params: air_interpreter_interface::CallRequestParams,
+        de_error: SerdeError,
+    },
 }

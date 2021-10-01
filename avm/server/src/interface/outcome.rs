@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-use super::AVMResult;
 use super::CallRequests;
+use crate::avm_runner::RawAVMOutcome;
 use crate::AVMError;
-use air_interpreter_interface::InterpreterOutcome;
+use crate::AVMResult;
 
 use serde::Deserialize;
 use serde::Serialize;
@@ -37,32 +37,9 @@ pub struct AVMOutcome {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ErrorAVMOutcome {
-    error_code: i32,
-    error_msg: String,
-    outcome: AVMOutcome,
-}
-
-pub(super) fn to_avm_outcome<E>(outcome: InterpreterOutcome) -> AVMResult<AVMOutcome, E> {
-    use air_interpreter_interface::INTERPRETER_SUCCESS;
-
-    let call_requests: CallRequests = match serde_json::from_slice(&outcome.call_requests) {
-        Ok(requests) => requests,
-        Err(error) => {
-            return Err(AVMError::CallRequestsDeError {
-                raw_call_request: outcome.call_requests,
-                error,
-            })
-        }
-    };
-
-    let avm_outcome = AVMOutcome::new(outcome.data, call_requests, outcome.next_peer_pks);
-
-    if outcome.ret_code == INTERPRETER_SUCCESS {
-        return Ok(avm_outcome);
-    }
-
-    let error_outcome = ErrorAVMOutcome::new(outcome.ret_code, outcome.error_message, avm_outcome);
-    Err(AVMError::InterpreterFailed(error_outcome))
+    pub error_code: i32,
+    pub error_message: String,
+    pub outcome: AVMOutcome,
 }
 
 impl AVMOutcome {
@@ -77,13 +54,34 @@ impl AVMOutcome {
             next_peer_pks,
         }
     }
+
+    pub(crate) fn from_raw_outcome<E>(raw_outcome: RawAVMOutcome) -> AVMResult<Self, E> {
+        use air_interpreter_interface::INTERPRETER_SUCCESS;
+
+        let RawAVMOutcome {
+            ret_code,
+            error_message,
+            data,
+            call_requests,
+            next_peer_pks,
+        } = raw_outcome;
+
+        let avm_outcome = AVMOutcome::new(data, call_requests, next_peer_pks);
+
+        if ret_code == INTERPRETER_SUCCESS {
+            return Ok(avm_outcome);
+        }
+
+        let error_outcome = ErrorAVMOutcome::new(ret_code, error_message, avm_outcome);
+        Err(AVMError::InterpreterFailed(error_outcome))
+    }
 }
 
 impl ErrorAVMOutcome {
     pub(self) fn new(error_code: i32, error_msg: String, outcome: AVMOutcome) -> Self {
         Self {
             error_code,
-            error_msg,
+            error_message: error_msg,
             outcome,
         }
     }

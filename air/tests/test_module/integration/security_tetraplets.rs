@@ -28,11 +28,10 @@ fn arg_host_function() -> (CallServiceClosure, Rc<RefCell<ArgTetraplets>>) {
 
     let arg_tetraplets_inner = arg_tetraplets.clone();
     let host_function: CallServiceClosure = Box::new(move |params| -> CallServiceResult {
-        let de_tetraplets: ArgTetraplets =
-            serde_json::from_str(&params.tetraplets).expect("json deserialization shouldn't fail");
-        *arg_tetraplets_inner.borrow_mut() = de_tetraplets;
+        let result = json!(params.tetraplets);
+        *arg_tetraplets_inner.borrow_mut() = params.tetraplets;
 
-        CallServiceResult::ok(&json!(params.tetraplets))
+        CallServiceResult::ok(result)
     });
 
     (host_function, arg_tetraplets)
@@ -41,7 +40,7 @@ fn arg_host_function() -> (CallServiceClosure, Rc<RefCell<ArgTetraplets>>) {
 #[test]
 fn simple_fold() {
     let return_numbers_call_service: CallServiceClosure = Box::new(|_| -> CallServiceResult {
-        CallServiceResult::ok(&json!(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]))
+        CallServiceResult::ok(json!(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]))
     });
 
     let set_variable_vm_peer_id = String::from("some_peer_id_1");
@@ -108,7 +107,7 @@ fn simple_fold() {
 #[test]
 fn fold_json_path() {
     let return_numbers_call_service: CallServiceClosure = Box::new(|_| -> CallServiceResult {
-        CallServiceResult::ok(&json!({"args": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]}))
+        CallServiceResult::ok(json!({"args": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]}))
     });
 
     let set_variable_vm_peer_id = String::from("some_peer_id_1");
@@ -221,21 +220,22 @@ fn tetraplet_with_wasm_modules() {
     let services_inner = services.clone();
     const ADMIN_PEER_PK: &str = "12D3KooWEXNUbCXooUwHrHBbrmjsrpHXoEphPwbjQXEGyzbqKnE1";
     let host_func: CallServiceClosure = Box::new(move |params| -> CallServiceResult {
-        let tetraplets: Vec<Vec<SDKTetraplet>> = serde_json::from_str(&params.tetraplets).unwrap();
+        let tetraplets = serde_json::to_vec(&params.tetraplets).expect("default serializer shouldn't fail");
+        let tetraplets: Vec<Vec<SDKTetraplet>> =
+            serde_json::from_slice(&tetraplets).expect("default deserializer shouldn't fail");
 
         let mut call_parameters = CallParameters::default();
         call_parameters.init_peer_id = ADMIN_PEER_PK.to_string();
         call_parameters.tetraplets = tetraplets;
 
-        let service_args = serde_json::from_str(&params.arguments).unwrap();
         let mut service = services_inner.borrow_mut();
         let service: &mut AppService = service.get_mut(params.service_id.as_str()).unwrap();
 
         let result = service
-            .call(params.function_name, service_args, call_parameters)
+            .call(params.function_name, JValue::Array(params.arguments), call_parameters)
             .unwrap();
 
-        CallServiceResult::ok(&result)
+        CallServiceResult::ok(result)
     });
 
     let local_peer_id = "local_peer_id";

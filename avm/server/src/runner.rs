@@ -15,13 +15,15 @@
  */
 
 use super::CallResults;
+use crate::raw_outcome::RawAVMOutcome;
 use crate::RunnerError;
 use crate::RunnerResult;
 
 use air_interpreter_interface::InterpreterOutcome;
+use fluence_faas::FaaSConfig;
 use fluence_faas::FluenceFaaS;
 use fluence_faas::IValue;
-use fluence_faas::{FaaSConfig, ModuleDescriptor};
+use fluence_faas::ModuleDescriptor;
 
 use std::path::PathBuf;
 
@@ -60,8 +62,8 @@ impl AVMRunner {
         prev_data: impl Into<Vec<u8>>,
         data: impl Into<Vec<u8>>,
         init_user_id: impl Into<String>,
-        call_results: &CallResults,
-    ) -> RunnerResult<InterpreterOutcome> {
+        call_results: CallResults,
+    ) -> RunnerResult<RawAVMOutcome> {
         let init_user_id = init_user_id.into();
         let args = prepare_args(
             air,
@@ -79,6 +81,7 @@ impl AVMRunner {
         let result = try_as_one_value_vec(result)?;
         let outcome = InterpreterOutcome::from_ivalue(result)
             .map_err(RunnerError::InterpreterResultDeError)?;
+        let outcome = RawAVMOutcome::from_interpreter_outcome(outcome)?;
 
         Ok(outcome)
     }
@@ -90,7 +93,7 @@ fn prepare_args(
     data: impl Into<Vec<u8>>,
     init_peer_id: impl Into<String>,
     current_peer_id: String,
-    call_results: &CallResults,
+    call_results: CallResults,
 ) -> Vec<IValue> {
     use fluence_faas::ne_vec::NEVec;
 
@@ -100,8 +103,10 @@ fn prepare_args(
     ];
     let run_parameters = NEVec::new(run_parameters).unwrap();
 
+    let call_results = crate::interface::into_raw_result(call_results);
     let call_results =
-        serde_json::to_vec(call_results).expect("the default serializer shouldn't fail");
+        serde_json::to_vec(&call_results).expect("the default serializer shouldn't fail");
+
     vec![
         IValue::String(air.into()),
         IValue::ByteArray(prev_data.into()),

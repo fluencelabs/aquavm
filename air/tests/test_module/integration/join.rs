@@ -21,7 +21,7 @@ fn join_chat() {
     use std::collections::HashSet;
 
     let members_call_service1: CallServiceClosure =
-        Box::new(|_| -> CallServiceResult { CallServiceResult::ok(&json!([["A", "Relay1"], ["B", "Relay2"]])) });
+        Box::new(|_| -> CallServiceResult { CallServiceResult::ok(json!([["A", "Relay1"], ["B", "Relay2"]])) });
 
     let mut relay_1 = create_avm(unit_call_service(), "Relay1");
     let mut relay_2 = create_avm(unit_call_service(), "Relay2");
@@ -167,7 +167,7 @@ fn join_chat() {
 #[test]
 fn join() {
     let members_call_service1: CallServiceClosure =
-        Box::new(|_| -> CallServiceResult { CallServiceResult::ok(&json!([["A"], ["B"]])) });
+        Box::new(|_| -> CallServiceResult { CallServiceResult::ok(json!([["A"], ["B"]])) });
 
     let mut relay_1 = create_avm(unit_call_service(), "Relay1");
     let mut remote = create_avm(members_call_service1, "Remote");
@@ -217,7 +217,7 @@ fn join() {
 #[test]
 fn init_peer_id() {
     let members_call_service1: CallServiceClosure =
-        Box::new(|_| -> CallServiceResult { CallServiceResult::ok(&json!([["A"], ["B"]])) });
+        Box::new(|_| -> CallServiceResult { CallServiceResult::ok(json!([["A"], ["B"]])) });
 
     let initiator_peer_id = String::from("initiator");
 

@@ -178,7 +178,7 @@ fn executed_trace_create_service() {
             "create" => create_response,
             _ => "unknown response",
         };
-        CallServiceResult::ok(&json!(response))
+        CallServiceResult::ok(json!(response))
     });
 
     let mut vm = create_avm(call_service, "A");
@@ -210,7 +210,7 @@ fn executed_trace_create_service() {
 #[test]
 fn executed_trace_par_seq_fold_call() {
     let return_numbers_call_service: CallServiceClosure = Box::new(|_| -> CallServiceResult {
-        CallServiceResult::ok(&json!(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]))
+        CallServiceResult::ok(json!(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]))
     });
 
     let mut vm1 = create_avm(return_numbers_call_service, "some_peer_id_1");
@@ -279,7 +279,7 @@ fn executed_trace_par_seq_fold_call() {
 #[test]
 fn executed_trace_par_seq_fold_in_cycle_call() {
     let return_numbers_call_service: CallServiceClosure = Box::new(|_| -> CallServiceResult {
-        CallServiceResult::ok(&json!(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]))
+        CallServiceResult::ok(json!(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]))
     });
 
     let mut vm1 = create_avm(return_numbers_call_service, "some_peer_id_1");

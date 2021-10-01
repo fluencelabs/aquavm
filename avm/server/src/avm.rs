@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+use super::avm_runner::AVMRunner;
 use super::AVMDataStore;
 use super::AVMError;
 use super::AVMOutcome;
-use super::AVMRunner;
 use super::CallResults;
 use crate::config::AVMConfig;
 use crate::AVMResult;
@@ -75,7 +75,7 @@ impl<E> AVM<E> {
         data: impl Into<Vec<u8>>,
         init_user_id: impl Into<String>,
         particle_id: &str,
-        call_results: &CallResults,
+        call_results: CallResults,
     ) -> AVMResult<AVMOutcome, E> {
         let init_user_id = init_user_id.into();
         let prev_data = self.data_store.read_data(particle_id)?;
@@ -87,8 +87,9 @@ impl<E> AVM<E> {
 
         // persist resulted data
         self.data_store.store_data(&outcome.data, particle_id)?;
+        let outcome = AVMOutcome::from_raw_outcome(outcome)?;
 
-        super::outcome::to_avm_outcome(outcome)
+        Ok(outcome)
     }
 
     /// Cleanup data that become obsolete.

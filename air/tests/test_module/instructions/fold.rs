@@ -339,7 +339,7 @@ fn shadowing() {
 fn shadowing_scope() {
     use executed_state::*;
 
-    fn execute_script(script: String) -> Result<InterpreterOutcome, String> {
+    fn execute_script(script: String) -> Result<RawAVMOutcome, String> {
         let mut set_variables_vm = create_avm(set_variable_call_service(json!(["1", "2"])), "set_variable");
         let mut vm_a = create_avm(echo_call_service(), "A");
         let mut vm_b = create_avm(echo_call_service(), "B");

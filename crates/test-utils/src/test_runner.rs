@@ -15,8 +15,7 @@
  */
 
 use super::CallServiceClosure;
-use air_interpreter_interface::*;
-use avm_server::*;
+use avm_server::avm_runner::*;
 
 use std::collections::HashMap;
 use std::collections::HashSet;
@@ -34,7 +33,7 @@ impl TestRunner {
         prev_data: impl Into<Vec<u8>>,
         data: impl Into<Vec<u8>>,
         init_user_id: impl Into<String>,
-    ) -> Result<InterpreterOutcome, String> {
+    ) -> Result<RawAVMOutcome, String> {
         let air = air.into();
         let mut prev_data = prev_data.into();
         let mut data = data.into();
@@ -51,20 +50,19 @@ impl TestRunner {
                     prev_data,
                     data,
                     init_user_id.clone(),
-                    &call_results,
+                    call_results,
                 )
                 .map_err(|e| e.to_string())?;
 
-            let call_requests: CallRequests = serde_json::from_slice(&outcome.call_requests)
-                .expect("default serializer shouldn't fail");
             next_peer_pks.extend(outcome.next_peer_pks);
 
-            if call_requests.is_empty() {
+            if outcome.call_requests.is_empty() {
                 outcome.next_peer_pks = next_peer_pks.into_iter().collect::<Vec<_>>();
                 return Ok(outcome);
             }
 
-            call_results = call_requests
+            call_results = outcome
+                .call_requests
                 .into_iter()
                 .map(|(id, call_parameters)| {
                     let service_result = (self.call_service)(call_parameters);

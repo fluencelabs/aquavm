@@ -20,33 +20,31 @@ use serde_json::json;
 use std::collections::HashMap;
 
 pub fn unit_call_service() -> CallServiceClosure {
-    Box::new(|_| -> CallServiceResult { CallServiceResult::ok(&json!("test")) })
+    Box::new(|_| -> CallServiceResult { CallServiceResult::ok(json!("test")) })
 }
 
 pub fn echo_call_service() -> CallServiceClosure {
-    Box::new(|params| -> CallServiceResult {
-        let args: Vec<serde_json::Value> = serde_json::from_str(&params.arguments).unwrap();
-        CallServiceResult::ok(&args[0])
+    Box::new(|mut params| -> CallServiceResult {
+        CallServiceResult::ok(params.arguments.remove(0))
     })
 }
 
 pub fn set_variable_call_service(json: JValue) -> CallServiceClosure {
-    Box::new(move |_| -> CallServiceResult { CallServiceResult::ok(&json) })
+    Box::new(move |_| -> CallServiceResult { CallServiceResult::ok(json.clone()) })
 }
 
 pub fn set_variables_call_service(
     variables_mapping: HashMap<String, JValue>,
 ) -> CallServiceClosure {
-    Box::new(move |params| -> CallServiceResult {
-        let args: Vec<serde_json::Value> = serde_json::from_str(&params.arguments).unwrap();
-        let var_name = match args.first() {
-            Some(JValue::String(name)) => name.clone(),
+    Box::new(move |mut params| -> CallServiceResult {
+        let var_name = match params.arguments.pop() {
+            Some(JValue::String(name)) => name,
             _ => "default".to_string(),
         };
 
         variables_mapping.get(&var_name).map_or_else(
-            || CallServiceResult::ok(&json!("test")),
-            |var| CallServiceResult::ok(var),
+            || CallServiceResult::ok(json!("test")),
+            |var| CallServiceResult::ok(var.clone()),
         )
     })
 }
@@ -54,7 +52,7 @@ pub fn set_variables_call_service(
 pub fn return_string_call_service(ret_str: impl Into<String>) -> CallServiceClosure {
     let ret_str = ret_str.into();
 
-    Box::new(move |_| -> CallServiceResult { CallServiceResult::ok(&json!(ret_str)) })
+    Box::new(move |_| -> CallServiceResult { CallServiceResult::ok(json!(ret_str)) })
 }
 
 pub fn fallible_call_service(fallible_service_id: impl Into<String>) -> CallServiceClosure {
@@ -63,10 +61,10 @@ pub fn fallible_call_service(fallible_service_id: impl Into<String>) -> CallServ
     Box::new(move |params| -> CallServiceResult {
         // return a error for service with such id
         if params.service_id == fallible_service_id {
-            CallServiceResult::err(1, &json!("error"))
+            CallServiceResult::err(1, json!("error"))
         } else {
             // return success for services with other service id
-            CallServiceResult::ok(&json!("test"))
+            CallServiceResult::ok(json!("test"))
         }
     })
 }

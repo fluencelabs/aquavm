@@ -116,10 +116,8 @@ fn duplicate_variables() {
 // Check that string literals can be used as call parameters.
 #[test]
 fn string_parameters() {
-    let call_service: CallServiceClosure = Box::new(|params| -> CallServiceResult {
-        let args: Vec<JValue> = serde_json::from_str(&params.arguments).unwrap();
-        CallServiceResult::ok(&args[0])
-    });
+    let call_service: CallServiceClosure =
+        Box::new(|mut params| -> CallServiceResult { CallServiceResult::ok(params.arguments.remove(0)) });
 
     let vm_peer_id = "A";
     let mut vm = create_avm(call_service, vm_peer_id);

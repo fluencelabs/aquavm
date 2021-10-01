@@ -120,7 +120,7 @@ fn create_service() {
             _ => "unknown response",
         };
 
-        CallServiceResult::ok(&json!(response))
+        CallServiceResult::ok(json!(response))
     });
 
     let mut vm = create_avm(call_service, "A");

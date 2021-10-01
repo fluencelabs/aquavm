@@ -30,7 +30,7 @@ pub mod executed_state;
 pub mod test_runner;
 
 pub use air::interpreter_data::*;
-pub use air_interpreter_interface::*;
+pub use avm_server::raw_outcome::*;
 pub use avm_server::*;
 
 pub mod prelude {
@@ -40,7 +40,6 @@ pub mod prelude {
     pub use test_runner::*;
 
     pub use air::interpreter_data::*;
-    pub use air_interpreter_interface::*;
     pub use avm_server::*;
 
     pub use serde_json::json;
@@ -73,12 +72,12 @@ macro_rules! call_vm {
     };
 }
 
-pub fn trace_from_result(result: &InterpreterOutcome) -> ExecutionTrace {
+pub fn trace_from_result(result: &RawAVMOutcome) -> ExecutionTrace {
     let data = data_from_result(result);
     data.trace
 }
 
-pub fn data_from_result(result: &InterpreterOutcome) -> InterpreterData {
+pub fn data_from_result(result: &RawAVMOutcome) -> InterpreterData {
     serde_json::from_slice(&result.data).expect("default serializer shouldn't fail")
 }
 
@@ -98,7 +97,7 @@ macro_rules! assert_next_pks {
     };
 }
 
-pub fn print_trace(result: &InterpreterOutcome, trace_name: &str) {
+pub fn print_trace(result: &RawAVMOutcome, trace_name: &str) {
     let trace = trace_from_result(result);
 
     println!("trace {} (states_count: {}): [", trace_name, trace.len());
