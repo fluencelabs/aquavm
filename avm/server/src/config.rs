@@ -14,29 +14,19 @@
  * limitations under the License.
  */
 
-use crate::CallServiceClosure;
-
+use super::AVMDataStore;
 use std::path::PathBuf;
 
 /// Describes behaviour of the AVM.
-pub struct AVMConfig {
+pub struct AVMConfig<E> {
     /// Path to a AIR interpreter Wasm file.
     pub air_wasm_path: PathBuf,
-
-    /// Descriptor of a closure that will be invoked on call_service call from the AIR interpreter.
-    pub call_service: CallServiceClosure,
 
     /// Current peer id.
     pub current_peer_id: String,
 
-    /// Path to a folder contains prev data.
-    /// AVM uses it to store data obtained after interpreter execution_step, and load it as a prev_data by particle_id.
-    pub particle_data_store: PathBuf,
-
-    /// Path to a directory to store shared directories called Particle File Vault.
-    /// These directories are shared between services called in the span of a same particle execution.
-    pub vault_dir: PathBuf,
-
     /// Mask used to filter logs, for details see `log_utf8_string` in fluence-faas.
     pub logging_mask: i32,
+
+    pub data_store: AVMDataStore<E>,
 }

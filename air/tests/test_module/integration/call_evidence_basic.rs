@@ -14,18 +14,7 @@
  * limitations under the License.
  */
 
-use air_test_utils::checked_call_vm;
-use air_test_utils::create_avm;
-use air_test_utils::echo_number_call_service;
-use air_test_utils::executed_state::*;
-use air_test_utils::raw_data_from_trace;
-use air_test_utils::trace_from_result;
-use air_test_utils::unit_call_service;
-use air_test_utils::CallServiceClosure;
-use air_test_utils::IValue;
-use air_test_utils::NEVec;
-
-use serde_json::json;
+use air_test_utils::prelude::*;
 
 #[test]
 fn executed_trace_seq_par_call() {
@@ -178,26 +167,18 @@ fn executed_trace_create_service() {
     let module_bytes = json!([1, 2]);
     let blueprint = json!({ "name": "blueprint", "dependencies": [module]});
 
-    let add_module_response = String::from("add_module response");
-    let add_blueprint_response = String::from("add_blueprint response");
-    let create_response = String::from("create response");
+    let add_module_response = "add_module response";
+    let add_blueprint_response = "add_blueprint response";
+    let create_response = "create response";
 
-    let call_service: CallServiceClosure = Box::new(move |args| -> Option<IValue> {
-        let builtin_service = match &args.function_args[0] {
-            IValue::String(str) => str,
-            _ => unreachable!(),
+    let call_service: CallServiceClosure = Box::new(move |params| -> CallServiceResult {
+        let response = match params.service_id.as_str() {
+            "add_module" => add_module_response,
+            "add_blueprint" => add_blueprint_response,
+            "create" => create_response,
+            _ => "unknown response",
         };
-
-        let response = match builtin_service.as_str() {
-            "add_module" => add_module_response.clone(),
-            "add_blueprint" => add_blueprint_response.clone(),
-            "create" => create_response.clone(),
-            _ => String::from("unknown response"),
-        };
-
-        Some(IValue::Record(
-            NEVec::new(vec![IValue::S32(0), IValue::String(format!("\"{}\"", response))]).unwrap(),
-        ))
+        CallServiceResult::ok(json!(response))
     });
 
     let mut vm = create_avm(call_service, "A");
@@ -228,20 +209,12 @@ fn executed_trace_create_service() {
 
 #[test]
 fn executed_trace_par_seq_fold_call() {
-    let return_numbers_call_service: CallServiceClosure = Box::new(|_| -> Option<IValue> {
-        Some(IValue::Record(
-            NEVec::new(vec![
-                IValue::S32(0),
-                IValue::String(String::from(
-                    "[\"1\", \"2\", \"3\", \"4\", \"5\", \"6\", \"7\", \"8\", \"9\", \"10\"]",
-                )),
-            ])
-            .unwrap(),
-        ))
+    let return_numbers_call_service: CallServiceClosure = Box::new(|_| -> CallServiceResult {
+        CallServiceResult::ok(json!(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]))
     });
 
     let mut vm1 = create_avm(return_numbers_call_service, "some_peer_id_1");
-    let mut vm2 = create_avm(echo_number_call_service(), "some_peer_id_2");
+    let mut vm2 = create_avm(echo_call_service(), "some_peer_id_2");
     let mut vm3 = create_avm(unit_call_service(), "some_peer_id_3");
 
     let script = String::from(
@@ -277,25 +250,25 @@ fn executed_trace_par_seq_fold_call() {
         par(21, 1),
         scalar_string_array(vec!["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]),
         par(1, 18),
-        stream_number(1, generation),
+        stream_string(1.to_string(), generation),
         par(1, 16),
-        stream_number(2, generation),
+        stream_string(2.to_string(), generation),
         par(1, 14),
-        stream_number(3, generation),
+        stream_string(3.to_string(), generation),
         par(1, 12),
-        stream_number(4, generation),
+        stream_string(4.to_string(), generation),
         par(1, 10),
-        stream_number(5, generation),
+        stream_string(5.to_string(), generation),
         par(1, 8),
-        stream_number(6, generation),
+        stream_string(6.to_string(), generation),
         par(1, 6),
-        stream_number(7, generation),
+        stream_string(7.to_string(), generation),
         par(1, 4),
-        stream_number(8, generation),
+        stream_string(8.to_string(), generation),
         par(1, 2),
-        stream_number(9, generation),
+        stream_string(9.to_string(), generation),
         par(1, 0),
-        stream_number(10, generation),
+        stream_string(10.to_string(), generation),
         scalar_string("test"),
     ];
 
@@ -305,20 +278,12 @@ fn executed_trace_par_seq_fold_call() {
 
 #[test]
 fn executed_trace_par_seq_fold_in_cycle_call() {
-    let return_numbers_call_service: CallServiceClosure = Box::new(|_| -> Option<IValue> {
-        Some(IValue::Record(
-            NEVec::new(vec![
-                IValue::S32(0),
-                IValue::String(String::from(
-                    "[\"1\", \"2\", \"3\", \"4\", \"5\", \"6\", \"7\", \"8\", \"9\", \"10\"]",
-                )),
-            ])
-            .unwrap(),
-        ))
+    let return_numbers_call_service: CallServiceClosure = Box::new(|_| -> CallServiceResult {
+        CallServiceResult::ok(json!(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]))
     });
 
     let mut vm1 = create_avm(return_numbers_call_service, "some_peer_id_1");
-    let mut vm2 = create_avm(echo_number_call_service(), "some_peer_id_2");
+    let mut vm2 = create_avm(echo_call_service(), "some_peer_id_2");
     let mut vm3 = create_avm(unit_call_service(), "some_peer_id_3");
 
     let script = r#"
@@ -349,25 +314,25 @@ fn executed_trace_par_seq_fold_in_cycle_call() {
             par(21, 1),
             scalar_string_array(vec!["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]),
             par(1, 18),
-            stream_number(1, generation),
+            stream_string(1.to_string(), generation),
             par(1, 16),
-            stream_number(2, generation),
+            stream_string(2.to_string(), generation),
             par(1, 14),
-            stream_number(3, generation),
+            stream_string(3.to_string(), generation),
             par(1, 12),
-            stream_number(4, generation),
+            stream_string(4.to_string(), generation),
             par(1, 10),
-            stream_number(5, generation),
+            stream_string(5.to_string(), generation),
             par(1, 8),
-            stream_number(6, generation),
+            stream_string(6.to_string(), generation),
             par(1, 6),
-            stream_number(7, generation),
+            stream_string(7.to_string(), generation),
             par(1, 4),
-            stream_number(8, generation),
+            stream_string(8.to_string(), generation),
             par(1, 2),
-            stream_number(9, generation),
+            stream_string(9.to_string(), generation),
             par(1, 0),
-            stream_number(10, generation),
+            stream_string(10.to_string(), generation),
             scalar_string("test"),
         ];
 
@@ -379,10 +344,10 @@ fn executed_trace_par_seq_fold_in_cycle_call() {
 
 #[test]
 fn executed_trace_seq_par_seq_seq() {
-    let peer_id_1 = String::from("12D3KooWHk9BjDQBUqnavciRPhAYFvqKBe4ZiPPvde7vDaqgn5er");
-    let peer_id_2 = String::from("12D3KooWAzJcYitiZrerycVB4Wryrx22CFKdDGx7c4u31PFdfTbR");
-    let mut vm1 = create_avm(unit_call_service(), peer_id_1.clone());
-    let mut vm2 = create_avm(unit_call_service(), peer_id_2.clone());
+    let peer_id_1 = "12D3KooWHk9BjDQBUqnavciRPhAYFvqKBe4ZiPPvde7vDaqgn5er";
+    let peer_id_2 = "12D3KooWAzJcYitiZrerycVB4Wryrx22CFKdDGx7c4u31PFdfTbR";
+    let mut vm1 = create_avm(unit_call_service(), peer_id_1);
+    let mut vm2 = create_avm(unit_call_service(), peer_id_2);
     let script = format!(
         r#"
         (seq 
@@ -402,11 +367,11 @@ fn executed_trace_seq_par_seq_seq() {
         peer_id_1, peer_id_2, peer_id_2, peer_id_1, peer_id_2
     );
 
-    let result = checked_call_vm!(vm2, "asd", script.clone(), "", "");
-    assert_eq!(result.next_peer_pks, vec![peer_id_1.clone()]);
+    let result = checked_call_vm!(vm2, "asd", &script, "", "");
+    assert_eq!(result.next_peer_pks, vec![peer_id_1.to_string()]);
 
-    let result = checked_call_vm!(vm1, "asd", script.clone(), "", result.data);
-    assert_eq!(result.next_peer_pks, vec![peer_id_2.clone()]);
+    let result = checked_call_vm!(vm1, "asd", &script, "", result.data);
+    assert_eq!(result.next_peer_pks, vec![peer_id_2.to_string()]);
 
     let result = checked_call_vm!(vm2, "asd", script, "", result.data);
 

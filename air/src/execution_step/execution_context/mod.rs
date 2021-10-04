@@ -18,7 +18,7 @@ mod context;
 mod error_descriptor;
 mod instructions_tracker;
 
-pub(crate) use context::ExecutionCtx;
+pub(crate) use context::*;
 pub use error_descriptor::LastError;
 pub(crate) use error_descriptor::LastErrorDescriptor;
 pub(crate) use error_descriptor::LastErrorWithTetraplet;

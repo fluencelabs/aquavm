@@ -39,6 +39,11 @@ pub struct InterpreterData {
 
     /// Version of this data format.
     pub version: semver::Version,
+
+    /// Last exposed to a peer call request id. All next call request ids will be bigger than this.
+    #[serde(default)]
+    #[serde(rename = "lcid")]
+    pub last_call_request_id: u32,
 }
 
 impl InterpreterData {
@@ -47,14 +52,20 @@ impl InterpreterData {
             trace: <_>::default(),
             streams: <_>::default(),
             version: DATA_FORMAT_VERSION.deref().clone(),
+            last_call_request_id: 0,
         }
     }
 
-    pub fn from_execution_result(trace: ExecutionTrace, streams: StreamGenerations) -> Self {
+    pub fn from_execution_result(
+        trace: ExecutionTrace,
+        streams: StreamGenerations,
+        last_call_request_id: u32,
+    ) -> Self {
         Self {
             trace,
             streams,
             version: DATA_FORMAT_VERSION.deref().clone(),
+            last_call_request_id,
         }
     }
 
@@ -73,5 +84,39 @@ impl InterpreterData {
 impl Default for InterpreterData {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde::Deserialize;
+    use serde::Serialize;
+
+    #[test]
+    fn compatible_with_0_2_0_version() {
+        #[derive(Serialize, Deserialize)]
+        struct InterpreterData0_2_0 {
+            pub trace: ExecutionTrace,
+            pub streams: StreamGenerations,
+            pub version: semver::Version,
+        }
+
+        // test 0.2.0 to 0.2.1 conversion
+        let data_0_2_0 = InterpreterData0_2_0 {
+            trace: ExecutionTrace::default(),
+            streams: StreamGenerations::default(),
+            version: semver::Version::new(0, 2, 0),
+        };
+
+        let data_0_2_0_se = serde_json::to_vec(&data_0_2_0).unwrap();
+        let data_0_2_1 = serde_json::from_slice::<InterpreterData>(&data_0_2_0_se);
+        assert!(data_0_2_1.is_ok());
+
+        // test 0.2.1 to 0.2.1 conversion
+        let data_0_2_1 = InterpreterData::default();
+        let data_0_2_1_se = serde_json::to_vec(&data_0_2_1).unwrap();
+        let data_0_2_0 = serde_json::from_slice::<InterpreterData0_2_0>(&data_0_2_1_se);
+        assert!(data_0_2_0.is_ok());
     }
 }

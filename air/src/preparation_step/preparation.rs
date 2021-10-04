@@ -15,13 +15,12 @@
  */
 
 use super::PreparationError;
-use crate::build_targets::get_current_peer_id;
 use crate::execution_step::ExecutionCtx;
 use crate::execution_step::Stream;
 use crate::execution_step::TraceHandler;
-use crate::log_targets::RUN_PARAMS;
 
 use air_interpreter_data::InterpreterData;
+use air_interpreter_interface::RunParameters;
 use air_parser::ast::Instruction;
 
 type PreparationResult<T> = Result<T, PreparationError>;
@@ -38,22 +37,15 @@ pub(crate) fn prepare<'i>(
     prev_data: &[u8],
     current_data: &[u8],
     raw_air: &'i str,
-    init_peer_id: String,
+    call_results: &[u8],
+    run_parameters: RunParameters,
 ) -> PreparationResult<PreparationDescriptor<'static, 'i>> {
     let prev_data = try_to_data(prev_data)?;
     let current_data = try_to_data(current_data)?;
 
     let air: Instruction<'i> = *air_parser::parse(raw_air).map_err(PreparationError::AIRParseError)?;
 
-    log::trace!(
-        target: RUN_PARAMS,
-        "air: {:?}\nprev_trace: {:?}\ncurrent_trace: {:?}",
-        air,
-        prev_data,
-        current_data
-    );
-
-    let exec_ctx = make_exec_ctx(init_peer_id, &prev_data)?;
+    let exec_ctx = make_exec_ctx(&prev_data, call_results, run_parameters)?;
     let trace_handler = TraceHandler::from_data(prev_data, current_data);
 
     let result = PreparationDescriptor {
@@ -71,11 +63,25 @@ fn try_to_data(raw_data: &[u8]) -> PreparationResult<InterpreterData> {
     InterpreterData::try_from_slice(raw_data).map_err(|err| DataDeFailed(err, raw_data.to_vec()))
 }
 
-fn make_exec_ctx(init_peer_id: String, prev_data: &InterpreterData) -> PreparationResult<ExecutionCtx<'static>> {
-    let current_peer_id = get_current_peer_id().map_err(PreparationError::CurrentPeerIdEnvError)?;
-    log::trace!(target: RUN_PARAMS, "current peer id {}", current_peer_id);
+fn make_exec_ctx(
+    prev_data: &InterpreterData,
+    call_results: &[u8],
+    run_parameters: RunParameters,
+) -> PreparationResult<ExecutionCtx<'static>> {
+    let RunParameters {
+        init_peer_id,
+        current_peer_id,
+    } = run_parameters;
 
-    let mut ctx = ExecutionCtx::new(current_peer_id, init_peer_id);
+    let call_results = serde_json::from_slice(call_results)
+        .map_err(|e| PreparationError::CallResultsDeFailed(e, call_results.to_vec()))?;
+
+    let mut ctx = ExecutionCtx::new(
+        current_peer_id,
+        init_peer_id,
+        call_results,
+        prev_data.last_call_request_id,
+    );
     create_streams(&mut ctx, prev_data);
 
     Ok(ctx)

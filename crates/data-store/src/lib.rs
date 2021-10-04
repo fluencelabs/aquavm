@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Fluence Labs Limited
+ * Copyright 2021 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,13 @@
  * limitations under the License.
  */
 
-use super::CallServiceResult;
+/// This trait should be used to persist prev_data between successive calls of an interpreter o.
+pub trait DataStore<E> {
+    fn initialize(&mut self) -> Result<(), E>;
 
-use marine_rs_sdk::marine;
-use marine_rs_sdk::module_manifest;
+    fn store_data(&mut self, data: &[u8], key: &str) -> Result<(), E>;
 
-use std::env::VarError;
+    fn read_data(&mut self, key: &str) -> Result<Vec<u8>, E>;
 
-const CURRENT_PEER_ID_ENV_NAME: &str = "CURRENT_PEER_ID";
-
-module_manifest!();
-
-pub(crate) fn get_current_peer_id() -> std::result::Result<String, VarError> {
-    std::env::var(CURRENT_PEER_ID_ENV_NAME)
-}
-
-#[marine]
-#[link(wasm_import_module = "host")]
-extern "C" {
-    pub(crate) fn call_service(service_id: &str, fn_name: &str, args: &str, tetraplets: &str) -> CallServiceResult;
+    fn cleanup_data(&mut self, key: &str) -> Result<(), E>;
 }

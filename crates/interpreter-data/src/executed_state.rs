@@ -18,6 +18,7 @@ mod impls;
 mod se_de;
 
 use se_de::par_serializer;
+use se_de::sender_serializer;
 use serde::Deserialize;
 use serde::Serialize;
 use serde_json::Value as JValue;
@@ -30,12 +31,19 @@ pub struct ParResult {
     pub right_size: u32,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Sender {
+    PeerId(Rc<String>),
+    PeerIdWithCallId { peer_id: Rc<String>, call_id: u32 },
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum CallResult {
     /// Request was sent to a target node by node with such public key and it shouldn't be called again.
+    #[serde(with = "sender_serializer")]
     #[serde(rename = "sent_by")]
-    RequestSentBy(Rc<String>),
+    RequestSentBy(Sender),
 
     /// A corresponding call's been already executed with such value as a result.
     Executed(Value),

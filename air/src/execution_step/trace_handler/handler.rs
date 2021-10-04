@@ -116,7 +116,7 @@ impl TraceHandler {
 }
 
 impl TraceHandler {
-    pub(crate) fn meet_fold_start(&mut self, fold_id: usize) -> TraceHandlerResult<()> {
+    pub(crate) fn meet_fold_start(&mut self, fold_id: u32) -> TraceHandlerResult<()> {
         let ingredients = try_merge_next_state_as_fold(&mut self.data_keeper)?;
         let fold_fsm = FoldFSM::from_fold_start(ingredients, &mut self.data_keeper)?;
         self.fsm_keeper.add_fold(fold_id, fold_fsm);
@@ -124,42 +124,42 @@ impl TraceHandler {
         Ok(())
     }
 
-    pub(crate) fn meet_iteration_start(&mut self, fold_id: usize, value_pos: usize) -> TraceHandlerResult<()> {
+    pub(crate) fn meet_iteration_start(&mut self, fold_id: u32, value_pos: usize) -> TraceHandlerResult<()> {
         let fold_fsm = self.fsm_keeper.fold_mut(fold_id)?;
         fold_fsm.meet_iteration_start(value_pos, &mut self.data_keeper)?;
 
         Ok(())
     }
 
-    pub(crate) fn meet_iteration_end(&mut self, fold_id: usize) -> TraceHandlerResult<()> {
+    pub(crate) fn meet_iteration_end(&mut self, fold_id: u32) -> TraceHandlerResult<()> {
         let fold_fsm = self.fsm_keeper.fold_mut(fold_id)?;
         fold_fsm.meet_iteration_end(&mut self.data_keeper);
 
         Ok(())
     }
 
-    pub(crate) fn meet_back_iterator(&mut self, fold_id: usize) -> TraceHandlerResult<()> {
+    pub(crate) fn meet_back_iterator(&mut self, fold_id: u32) -> TraceHandlerResult<()> {
         let fold_fsm = self.fsm_keeper.fold_mut(fold_id)?;
         fold_fsm.meet_back_iterator(&mut self.data_keeper)?;
 
         Ok(())
     }
 
-    pub(crate) fn meet_generation_end(&mut self, fold_id: usize) -> TraceHandlerResult<()> {
+    pub(crate) fn meet_generation_end(&mut self, fold_id: u32) -> TraceHandlerResult<()> {
         let fold_fsm = self.fsm_keeper.fold_mut(fold_id)?;
         fold_fsm.meet_generation_end(&mut self.data_keeper);
 
         Ok(())
     }
 
-    pub(crate) fn meet_fold_end(&mut self, fold_id: usize) -> TraceHandlerResult<()> {
+    pub(crate) fn meet_fold_end(&mut self, fold_id: u32) -> TraceHandlerResult<()> {
         let fold_fsm = self.fsm_keeper.extract_fold(fold_id)?;
         fold_fsm.meet_fold_end(&mut self.data_keeper);
 
         Ok(())
     }
 
-    pub(crate) fn fold_end_with_error(&mut self, fold_id: usize) {
+    pub(crate) fn fold_end_with_error(&mut self, fold_id: u32) {
         let fold_fsm = match self.fsm_keeper.extract_fold(fold_id) {
             Ok(fold_fsm) => fold_fsm,
             // just passing here is ok, because error could be produced while fold initialization

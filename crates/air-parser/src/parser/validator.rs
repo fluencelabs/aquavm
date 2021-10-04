@@ -80,7 +80,7 @@ impl<'i> VariableValidator<'i> {
         self.met_iterator_definition(fold.iterator, span);
     }
 
-    pub(super) fn met_fold_stream(&mut self, fold: &FoldStream<'i>, span: Span) {
+    pub(super) fn meet_fold_stream(&mut self, fold: &FoldStream<'i>, span: Span) {
         self.met_variable(&AstVariable::Stream(fold.stream_name), span);
         self.met_iterator_definition(fold.iterator, span);
     }

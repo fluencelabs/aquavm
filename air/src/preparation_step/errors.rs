@@ -22,8 +22,6 @@ use strum_macros::EnumDiscriminants;
 use strum_macros::EnumIter;
 use thiserror::Error as ThisError;
 
-use std::env::VarError;
-
 /// Errors happened during the interpreter preparation_step step.
 #[derive(Debug, EnumDiscriminants, ThisError)]
 #[strum_discriminants(derive(EnumIter))]
@@ -37,9 +35,9 @@ pub enum PreparationError {
     Probably it's a data of an old version that couldn't be converted to '{}'", *DATA_FORMAT_VERSION)]
     DataDeFailed(SerdeJsonError, Vec<u8>),
 
-    /// Error occurred while getting current peer id.
-    #[error("current peer id can't be obtained: {0:?}")]
-    CurrentPeerIdEnvError(VarError),
+    /// Error occurred on call results deserialization.
+    #[error("error occurred while deserialize call results: {1:?}:\n{0:?}")]
+    CallResultsDeFailed(SerdeJsonError, Vec<u8>),
 }
 
 impl PreparationError {

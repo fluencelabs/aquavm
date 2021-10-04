@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-use air_test_utils::checked_call_vm;
-use air_test_utils::create_avm;
-use air_test_utils::unit_call_service;
+use air_test_utils::prelude::*;
 
 #[test]
 fn par_remote_remote() {

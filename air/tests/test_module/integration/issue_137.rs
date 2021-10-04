@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use air_test_utils::*;
+use air_test_utils::prelude::*;
 
 #[test]
 // test for github.com/fluencelabs/aquavm/issues/137

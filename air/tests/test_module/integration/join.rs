@@ -14,30 +14,14 @@
  * limitations under the License.
  */
 
-use air_test_utils::checked_call_vm;
-use air_test_utils::create_avm;
-use air_test_utils::executed_state;
-use air_test_utils::trace_from_result;
-use air_test_utils::unit_call_service;
-use air_test_utils::CallServiceClosure;
-use air_test_utils::IValue;
-use air_test_utils::NEVec;
-
-use serde_json::json;
+use air_test_utils::prelude::*;
 
 #[test]
 fn join_chat() {
     use std::collections::HashSet;
 
-    let members_call_service1: CallServiceClosure = Box::new(|_| -> Option<IValue> {
-        Some(IValue::Record(
-            NEVec::new(vec![
-                IValue::S32(0),
-                IValue::String(String::from(r#"[["A", "Relay1"], ["B", "Relay2"]]"#)),
-            ])
-            .unwrap(),
-        ))
-    });
+    let members_call_service1: CallServiceClosure =
+        Box::new(|_| -> CallServiceResult { CallServiceResult::ok(json!([["A", "Relay1"], ["B", "Relay2"]])) });
 
     let mut relay_1 = create_avm(unit_call_service(), "Relay1");
     let mut relay_2 = create_avm(unit_call_service(), "Relay2");
@@ -182,11 +166,8 @@ fn join_chat() {
 
 #[test]
 fn join() {
-    let members_call_service1: CallServiceClosure = Box::new(|_| -> Option<IValue> {
-        Some(IValue::Record(
-            NEVec::new(vec![IValue::S32(0), IValue::String(String::from(r#"[["A"], ["B"]]"#))]).unwrap(),
-        ))
-    });
+    let members_call_service1: CallServiceClosure =
+        Box::new(|_| -> CallServiceResult { CallServiceResult::ok(json!([["A"], ["B"]])) });
 
     let mut relay_1 = create_avm(unit_call_service(), "Relay1");
     let mut remote = create_avm(members_call_service1, "Remote");
@@ -235,11 +216,8 @@ fn join() {
 
 #[test]
 fn init_peer_id() {
-    let members_call_service1: CallServiceClosure = Box::new(|_| -> Option<IValue> {
-        Some(IValue::Record(
-            NEVec::new(vec![IValue::S32(0), IValue::String(String::from(r#"[["A"], ["B"]]"#))]).unwrap(),
-        ))
-    });
+    let members_call_service1: CallServiceClosure =
+        Box::new(|_| -> CallServiceResult { CallServiceResult::ok(json!([["A"], ["B"]])) });
 
     let initiator_peer_id = String::from("initiator");
 

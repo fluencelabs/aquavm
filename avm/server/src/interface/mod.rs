@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-use crate::{AVMError, IValue, ParticleParameters};
+mod call_request_parameters;
+mod call_service_result;
+mod outcome;
+pub mod raw_outcome;
 
-use std::path::PathBuf;
+type JValue = serde_json::Value;
 
-pub type Effect<T> = Box<dyn Fn() -> Result<T, AVMError> + 'static>;
-pub struct CallServiceArgs {
-    pub particle_parameters: ParticleParameters,
-    pub function_args: Vec<IValue>,
-    pub create_vault: Effect<PathBuf>,
-}
-
-pub type CallServiceClosure = Box<dyn Fn(CallServiceArgs) -> Option<IValue> + 'static>;
+pub use call_request_parameters::*;
+pub use call_service_result::*;
+pub use outcome::*;

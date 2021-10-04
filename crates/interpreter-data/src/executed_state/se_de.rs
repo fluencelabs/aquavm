@@ -39,8 +39,8 @@ pub mod par_serializer {
     where
         D: Deserializer<'de>,
     {
-        struct VecVisitor;
-        impl<'de> Visitor<'de> for VecVisitor {
+        struct ParVisitor;
+        impl<'de> Visitor<'de> for ParVisitor {
             type Value = ParResult;
 
             fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -63,6 +63,61 @@ pub mod par_serializer {
             }
         }
 
-        deserializer.deserialize_seq(VecVisitor {})
+        deserializer.deserialize_seq(ParVisitor {})
+    }
+}
+
+pub mod sender_serializer {
+    use super::*;
+
+    pub fn serialize<S>(value: &Sender, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match value {
+            Sender::PeerId(peer_id) => serializer.serialize_str(peer_id.as_str()),
+            Sender::PeerIdWithCallId { peer_id, call_id } => {
+                let result = format!("{}: {}", peer_id, call_id);
+                serializer.serialize_str(&result)
+            }
+        }
+    }
+
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<Sender, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct SenderVisitor;
+        impl<'de> Visitor<'de> for SenderVisitor {
+            type Value = Sender;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+                formatter.write_str("call sender")
+            }
+
+            fn visit_str<E: serde::de::Error>(self, raw_sender: &str) -> Result<Self::Value, E> {
+                let sender = match raw_sender.find(": ") {
+                    None => Sender::PeerId(Rc::new(raw_sender.to_string())),
+                    Some(pos) => {
+                        let peer_id = raw_sender[..pos].to_string();
+                        let call_id = &raw_sender[pos + 2..];
+                        let call_id = call_id.parse::<u32>().map_err(|e| {
+                            serde::de::Error::custom(format!(
+                                "failed to parse call_id of a sender {}: {}",
+                                call_id, e
+                            ))
+                        })?;
+                        Sender::PeerIdWithCallId {
+                            peer_id: Rc::new(peer_id),
+                            call_id,
+                        }
+                    }
+                };
+
+                Ok(sender)
+            }
+        }
+
+        deserializer.deserialize_str(SenderVisitor {})
     }
 }

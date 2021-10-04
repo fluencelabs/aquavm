@@ -19,6 +19,7 @@ use super::CallResult;
 use super::ExecutedState;
 use super::JValue;
 use super::ParResult;
+use super::Sender;
 use super::Value;
 use crate::FoldLore;
 use crate::FoldResult;
@@ -78,7 +79,9 @@ pub fn stream_string_array(result: Vec<impl Into<String>>, generation: u32) -> E
 }
 
 pub fn request_sent_by(sender: impl Into<String>) -> ExecutedState {
-    ExecutedState::Call(CallResult::RequestSentBy(Rc::new(sender.into())))
+    ExecutedState::Call(CallResult::RequestSentBy(Sender::PeerId(Rc::new(
+        sender.into(),
+    ))))
 }
 
 pub fn par(left: usize, right: usize) -> ExecutedState {

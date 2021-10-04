@@ -26,7 +26,6 @@
     unreachable_patterns
 )]
 
-mod build_targets;
 mod execution_step;
 mod preparation_step;
 
@@ -34,6 +33,7 @@ pub mod log_targets;
 mod runner;
 
 pub use air_interpreter_interface::InterpreterOutcome;
+pub use air_interpreter_interface::RunParameters;
 pub use air_interpreter_interface::INTERPRETER_SUCCESS;
 pub use execution_step::execution_context::LastError;
 pub use polyplets::ResolvedTriplet;

@@ -17,10 +17,9 @@
 #![allow(unused_unsafe)] // for wasm_bindgen target where calling FFI is safe
 
 use super::call_result_setter::*;
+use super::prev_result_handler::*;
 use super::triplet::Triplet;
-use super::utils::*;
 use super::*;
-use crate::execution_step::air::ResolvedCallResult;
 use crate::execution_step::trace_handler::MergerCallResult;
 use crate::execution_step::trace_handler::TraceHandler;
 use crate::execution_step::RSecurityTetraplet;
@@ -29,7 +28,9 @@ use crate::JValue;
 use crate::SecurityTetraplet;
 
 use air_interpreter_data::CallResult;
-use air_parser::ast::{CallInstrArgValue, CallOutputValue};
+use air_interpreter_interface::CallRequestParams;
+use air_parser::ast::{AstVariable, CallInstrArgValue, CallOutputValue};
+use polyplets::ResolvedTriplet;
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -56,6 +57,8 @@ impl<'i> ResolvedCall<'i> {
         let tetraplet = SecurityTetraplet::from_triplet(triplet);
         let tetraplet = Rc::new(RefCell::new(tetraplet));
 
+        check_output_name(&raw_call.output, exec_ctx)?;
+
         Ok(Self {
             tetraplet,
             function_arg_paths: raw_call.args.clone(),
@@ -71,12 +74,34 @@ impl<'i> ResolvedCall<'i> {
         }
 
         // call can be executed only on peers with such peer_id
-        let triplet = &self.tetraplet.borrow().triplet;
-        if triplet.peer_pk.as_str() != exec_ctx.current_peer_id.as_str() {
-            set_remote_call_result(triplet.peer_pk.clone(), exec_ctx, trace_ctx);
+        let tetraplet = &self.tetraplet.borrow().triplet;
+        if tetraplet.peer_pk.as_str() != exec_ctx.current_peer_id.as_str() {
+            set_remote_call_result(tetraplet.peer_pk.clone(), exec_ctx, trace_ctx);
             return Ok(());
         }
 
+        let request_params = self.prepare_request_params(exec_ctx, tetraplet)?;
+        let call_id = exec_ctx.next_call_request_id();
+        exec_ctx.call_requests.insert(call_id, request_params);
+
+        exec_ctx.subtree_complete = false;
+        trace_ctx.meet_call_end(CallResult::sent_peer_id_with_call_id(
+            exec_ctx.current_peer_id.clone(),
+            call_id,
+        ));
+
+        Ok(())
+    }
+
+    pub(super) fn as_tetraplet(&self) -> RSecurityTetraplet {
+        self.tetraplet.clone()
+    }
+
+    fn prepare_request_params(
+        &self,
+        exec_ctx: &ExecutionCtx<'i>,
+        triplet: &ResolvedTriplet,
+    ) -> ExecutionResult<CallRequestParams> {
         let ResolvedArguments {
             call_arguments,
             tetraplets,
@@ -84,40 +109,14 @@ impl<'i> ResolvedCall<'i> {
 
         let serialized_tetraplets = serde_json::to_string(&tetraplets).expect("default serializer shouldn't fail");
 
-        let service_result = unsafe {
-            crate::build_targets::call_service(
-                &triplet.service_id,
-                &triplet.function_name,
-                &call_arguments,
-                &serialized_tetraplets,
-            )
-        };
-        exec_ctx.tracker.met_executed_call();
+        let request_params = CallRequestParams::new(
+            triplet.service_id.to_string(),
+            triplet.function_name.to_string(),
+            call_arguments,
+            serialized_tetraplets,
+        );
 
-        self.update_state_with_service_result(service_result, exec_ctx, trace_ctx)
-    }
-
-    fn update_state_with_service_result(
-        &self,
-        service_result: CallServiceResult,
-        exec_ctx: &mut ExecutionCtx<'i>,
-        trace_ctx: &mut TraceHandler,
-    ) -> ExecutionResult<()> {
-        // check that service call succeeded
-        let call_service_result = handle_service_error(service_result, trace_ctx)?;
-        // try to get service result from call service result
-        let result = try_to_service_result(call_service_result, trace_ctx)?;
-
-        let trace_pos = trace_ctx.trace_pos();
-        let executed_result = ResolvedCallResult::new(result, self.tetraplet.clone(), trace_pos);
-        let new_call_result = set_local_result(executed_result, &self.output, exec_ctx)?;
-        trace_ctx.meet_call_end(new_call_result);
-
-        Ok(())
-    }
-
-    pub(super) fn as_tetraplet(&self) -> RSecurityTetraplet {
-        self.tetraplet.clone()
+        Ok(request_params)
     }
 
     /// Determine whether this call should be really called and adjust prev executed trace accordingly.
@@ -166,47 +165,26 @@ impl<'i> ResolvedCall<'i> {
     }
 }
 
-use crate::build_targets::CallServiceResult;
+/// Check output type name for being already in execution context.
+// TODO: this check should be moved on a parsing stage
+fn check_output_name(output: &CallOutputValue<'_>, exec_ctx: &ExecutionCtx<'_>) -> ExecutionResult<()> {
+    use crate::execution_step::boxed_value::Scalar;
 
-fn handle_service_error(
-    service_result: CallServiceResult,
-    trace_ctx: &mut TraceHandler,
-) -> ExecutionResult<CallServiceResult> {
-    use crate::build_targets::CALL_SERVICE_SUCCESS;
-    use CallResult::CallServiceFailed;
+    let scalar_name = match output {
+        CallOutputValue::Variable(AstVariable::Scalar(name)) => *name,
+        _ => return Ok(()),
+    };
 
-    if service_result.ret_code == CALL_SERVICE_SUCCESS {
-        return Ok(service_result);
-    }
-
-    let error_message = Rc::new(service_result.result);
-    let error = ExecutionError::LocalServiceError(service_result.ret_code, error_message.clone());
-    let error = Rc::new(error);
-
-    trace_ctx.meet_call_end(CallServiceFailed(service_result.ret_code, error_message));
-
-    Err(error)
-}
-
-fn try_to_service_result(
-    service_result: CallServiceResult,
-    trace_ctx: &mut TraceHandler,
-) -> ExecutionResult<Rc<JValue>> {
-    use CallResult::CallServiceFailed;
-
-    match serde_json::from_str(&service_result.result) {
-        Ok(result) => Ok(Rc::new(result)),
-        Err(e) => {
-            let error_msg = format!(
-                "call_service result '{0}' can't be serialized or deserialized with an error: {1}",
-                service_result.result, e
-            );
-            let error_msg = Rc::new(error_msg);
-
-            let error = CallServiceFailed(i32::MAX, error_msg.clone());
-            trace_ctx.meet_call_end(error);
-
-            Err(Rc::new(ExecutionError::LocalServiceError(i32::MAX, error_msg)))
+    match exec_ctx.scalars.get(scalar_name) {
+        Some(Scalar::JValueRef(_)) => {
+            if exec_ctx.met_folds.is_empty() {
+                // shadowing is allowed only inside fold blocks
+                crate::exec_err!(ExecutionError::MultipleVariablesFound(scalar_name.to_string()))
+            } else {
+                Ok(())
+            }
         }
+        Some(_) => crate::exec_err!(ExecutionError::IterableShadowing(scalar_name.to_string())),
+        None => Ok(()),
     }
 }

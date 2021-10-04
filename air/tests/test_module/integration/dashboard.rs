@@ -14,18 +14,11 @@
  * limitations under the License.
  */
 
-use air_test_utils::checked_call_vm;
-use air_test_utils::create_avm;
-use air_test_utils::CallServiceClosure;
-use air_test_utils::IValue;
-use air_test_utils::NEVec;
-use air_test_utils::AVM;
+use air_test_utils::prelude::*;
 
 use std::cell::RefCell;
 use std::collections::HashSet;
 use std::rc::Rc;
-
-type JValue = serde_json::Value;
 
 fn parse_peers() -> Vec<String> {
     use csv::ReaderBuilder;
@@ -62,44 +55,31 @@ fn client_host_function(
     let relay_id = JValue::String(relay_id);
 
     let to_ret_value = Box::new(
-        move |service_name: &str, function_name: &str, arguments: Vec<&str>| -> JValue {
-            match (service_name, function_name, arguments.as_slice()) {
-                ("", "load", &["relayId"]) => relay_id.clone(),
-                ("", "load", &["knownPeers"]) => known_peers.clone(),
-                ("", "load", &["clientId"]) => client_id.clone(),
+        move |service_name: &str, function_name: &str, arguments: Vec<String>| -> JValue {
+            if service_name != "" || function_name != "load" || arguments.len() != 1 {
+                return JValue::Null;
+            }
+
+            match arguments[0].as_str() {
+                "relayId" => relay_id.clone(),
+                "knownPeers" => known_peers.clone(),
+                "clientId" => client_id.clone(),
                 _ => JValue::Null,
             }
         },
     );
 
     let all_info_inner = all_info.clone();
-    let host_function: CallServiceClosure = Box::new(move |args| -> Option<IValue> {
-        let service_name = match &args.function_args[0] {
-            IValue::String(str) => str,
-            _ => unreachable!(),
-        };
-
-        let function_name = match &args.function_args[1] {
-            IValue::String(str) => str,
-            _ => unreachable!(),
-        };
-
-        let function_args = match &args.function_args[2] {
-            IValue::String(str) => str,
-            _ => unreachable!(),
-        };
-
-        let ret_value = match serde_json::from_str(function_args) {
-            Ok(args) => to_ret_value(service_name.as_str(), function_name.as_str(), args),
+    let host_function: CallServiceClosure = Box::new(move |params| -> CallServiceResult {
+        let ret_value = match serde_json::from_value(JValue::Array(params.arguments.clone())) {
+            Ok(args) => to_ret_value(params.service_id.as_str(), params.function_name.as_str(), args),
             Err(_) => {
-                *all_info_inner.borrow_mut() = function_args.clone();
+                *all_info_inner.borrow_mut() = JValue::Array(params.arguments).to_string();
                 JValue::Null
             }
         };
 
-        Some(IValue::Record(
-            NEVec::new(vec![IValue::S32(0), IValue::String(ret_value.to_string())]).unwrap(),
-        ))
+        CallServiceResult::ok(ret_value)
     });
 
     (host_function, all_info)
@@ -133,29 +113,12 @@ fn peer_host_function(
         },
     );
 
-    Box::new(move |args| -> Option<IValue> {
-        let service_name = match &args.function_args[0] {
-            IValue::String(str) => str,
-            _ => unreachable!(),
-        };
+    Box::new(move |params| -> CallServiceResult {
+        let args: Vec<String> = serde_json::from_value(JValue::Array(params.arguments)).unwrap();
+        let t_args = args.iter().map(|s| s.as_str()).collect::<Vec<_>>();
+        let ret_value = to_ret_value(params.service_id.as_str(), params.function_name.as_str(), t_args);
 
-        let function_name = match &args.function_args[1] {
-            IValue::String(str) => str,
-            _ => unreachable!(),
-        };
-
-        let function_args = match &args.function_args[2] {
-            IValue::String(str) => str,
-            _ => unreachable!(),
-        };
-
-        let args: Vec<&str> = serde_json::from_str(function_args).unwrap();
-
-        let ret_value = to_ret_value(service_name.as_str(), function_name.as_str(), args);
-
-        Some(IValue::Record(
-            NEVec::new(vec![IValue::S32(0), IValue::String(ret_value.to_string())]).unwrap(),
-        ))
+        CallServiceResult::ok(ret_value)
     })
 }
 
@@ -176,7 +139,7 @@ fn create_peer_host_function(peer_id: String, known_peer_ids: Vec<String>) -> Ca
 }
 
 struct AVMState {
-    vm: AVM,
+    vm: TestRunner,
     peer_id: String,
     prev_result: Vec<u8>,
 }
@@ -186,8 +149,8 @@ fn dashboard() {
     let script = include_str!("./scripts/dashboard.clj");
 
     let known_peer_ids = parse_peers();
-    let client_id = String::from("client_id");
-    let relay_id = String::from("relay_id");
+    let client_id = "client_id".to_string();
+    let relay_id = "relay_id".to_string();
 
     let (host_function, all_info) = client_host_function(known_peer_ids.clone(), client_id.clone(), relay_id.clone());
 
@@ -214,20 +177,14 @@ fn dashboard() {
         .collect::<Vec<_>>();
 
     // -> client 1
-    let client_1_result = checked_call_vm!(client, client_id.clone(), script.clone(), "", "");
+    let client_1_result = checked_call_vm!(client, &client_id, script, "", "");
     let next_peer_pks = into_hashset(client_1_result.next_peer_pks);
     let mut all_peer_pks = into_hashset(known_peer_ids.clone());
     all_peer_pks.insert(relay_id.clone());
     assert_eq!(next_peer_pks, all_peer_pks);
 
     // client 1 -> relay 1
-    let relay_1_result = checked_call_vm!(
-        relay,
-        client_id.clone(),
-        script.clone(),
-        client_1_result.data.clone(),
-        ""
-    );
+    let relay_1_result = checked_call_vm!(relay, &client_id, script, client_1_result.data.clone(), "");
     let next_peer_pks = into_hashset(relay_1_result.next_peer_pks.clone());
     all_peer_pks.remove(&relay_id);
     all_peer_pks.insert(client_id.clone());
@@ -236,8 +193,8 @@ fn dashboard() {
     // relay 1 -> client 2
     let client_2_result = checked_call_vm!(
         client,
-        client_id.clone(),
-        script.clone(),
+        &client_id,
+        script,
         client_1_result.data.clone(),
         relay_1_result.data.clone()
     );
@@ -258,7 +215,7 @@ fn dashboard() {
         let known_peer_result = checked_call_vm!(
             avm.vm,
             client_id.clone(),
-            script.clone(),
+            script,
             prev_result,
             client_1_result.data.clone()
         );
@@ -269,7 +226,7 @@ fn dashboard() {
         relay_2_result = checked_call_vm!(
             relay,
             client_id.clone(),
-            script.clone(),
+            script,
             relay_2_result.data.clone(),
             avm.prev_result.clone()
         );
@@ -278,7 +235,7 @@ fn dashboard() {
         client_3_result = checked_call_vm!(
             client,
             client_id.clone(),
-            script.clone(),
+            script,
             client_3_result.data.clone(),
             relay_2_result.data.clone()
         );
@@ -293,7 +250,7 @@ fn dashboard() {
     }
 
     all_peer_pks.remove(&client_id);
-    all_peer_pks.insert(relay_id.clone());
+    all_peer_pks.insert(relay_id.to_string());
 
     let mut relay_3_result = relay_2_result.clone();
     let mut client_4_result = client_3_result.clone();
@@ -301,13 +258,7 @@ fn dashboard() {
     // peers 2 -> relay 3 -> client 4
     for avm in known_peers.iter_mut() {
         let prev_result = std::mem::replace(&mut avm.prev_result, vec![]);
-        let known_peer_result = checked_call_vm!(
-            avm.vm,
-            client_id.clone(),
-            script.clone(),
-            prev_result,
-            relay_1_result.data.clone()
-        );
+        let known_peer_result = checked_call_vm!(avm.vm, &client_id, script, prev_result, relay_1_result.data.clone());
         all_peer_pks.remove(&avm.peer_id);
         let next_peer_pks = into_hashset(known_peer_result.next_peer_pks.clone());
         assert_eq!(next_peer_pks, all_peer_pks);
@@ -318,8 +269,8 @@ fn dashboard() {
 
         relay_3_result = checked_call_vm!(
             relay,
-            client_id.clone(),
-            script.clone(),
+            &client_id,
+            script,
             relay_3_result.data.clone(),
             avm.prev_result.clone()
         );
@@ -328,8 +279,8 @@ fn dashboard() {
         // client -> peers -> relay -> client
         client_4_result = checked_call_vm!(
             client,
-            client_id.clone(),
-            script.clone(),
+            &client_id,
+            script,
             client_4_result.data.clone(),
             relay_3_result.data.clone()
         );
@@ -355,16 +306,15 @@ fn dashboard() {
 
             let prev_data = known_peers[j].prev_result.clone();
             let data = known_peers[i].prev_result.clone();
-            let known_peer_i_j_result =
-                checked_call_vm!(known_peers[j].vm, client_id.clone(), script.clone(), prev_data, data);
+            let known_peer_i_j_result = checked_call_vm!(known_peers[j].vm, &client_id, script, prev_data, data);
             assert_eq!(known_peer_i_j_result.next_peer_pks, vec![relay_id.clone()]);
 
             known_peers[j].prev_result = known_peer_i_j_result.data;
 
             relay_4_result = checked_call_vm!(
                 relay,
-                client_id.clone(),
-                script.clone(),
+                &client_id,
+                script,
                 relay_4_result.data.clone(),
                 known_peers[j].prev_result.clone()
             );
@@ -373,8 +323,8 @@ fn dashboard() {
             // client -> peers -> relay -> client
             client_5_result = checked_call_vm!(
                 client,
-                client_id.clone(),
-                script.clone(),
+                &client_id,
+                script,
                 client_5_result.data.clone(),
                 relay_4_result.data.clone()
             );

@@ -14,15 +14,7 @@
  * limitations under the License.
  */
 
-use air_test_utils::call_vm;
-use air_test_utils::checked_call_vm;
-use air_test_utils::create_avm;
-use air_test_utils::set_variable_call_service;
-use air_test_utils::CallServiceClosure;
-use air_test_utils::IValue;
-use air_test_utils::NEVec;
-
-use serde_json::json;
+use air_test_utils::prelude::*;
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -38,32 +30,17 @@ struct ClosureCallArgs {
 }
 
 fn create_check_service_closure(closure_call_args: ClosureCallArgs) -> CallServiceClosure {
-    Box::new(move |args| -> Option<IValue> {
+    Box::new(move |params| -> CallServiceResult {
         use std::ops::Deref;
 
-        let service_id = match &args.function_args[0] {
-            IValue::String(str) => str,
-            _ => unreachable!(),
-        };
-        *closure_call_args.service_id_var.deref().borrow_mut() = service_id.clone();
+        *closure_call_args.service_id_var.deref().borrow_mut() = params.service_id.clone();
+        *closure_call_args.function_name_var.deref().borrow_mut() = params.function_name.clone();
 
-        let function_name = match &args.function_args[1] {
-            IValue::String(str) => str,
-            _ => unreachable!(),
-        };
-        *closure_call_args.function_name_var.deref().borrow_mut() = function_name.clone();
-
-        let call_args = match &args.function_args[2] {
-            IValue::String(str) => str,
-            _ => unreachable!(),
-        };
-
-        let call_args: Vec<i32> = serde_json::from_str(call_args).expect("json deserialization shouldn't fail");
+        let call_args: Vec<i32> =
+            serde_json::from_value(JValue::Array(params.arguments)).expect("json deserialization shouldn't fail");
         *closure_call_args.args_var.deref().borrow_mut() = call_args;
 
-        Some(IValue::Record(
-            NEVec::new(vec![IValue::S32(0), IValue::String(r#""""#.to_string())]).unwrap(),
-        ))
+        CallServiceResult::ok(json!(""))
     })
 }
 
@@ -74,7 +51,6 @@ fn flattening_scalar_arrays() {
         {"peer_id" : "local_peer_id", "service_id": "local_service_id", "function_name": "local_function_name", "args": [2, 3]},
     ]});
 
-    let scalar_array = serde_json::to_string(&scalar_array).expect("the default serializer shouldn't fail");
     let set_variable_peer_id = "set_variable";
     let mut set_variable_vm = create_avm(set_variable_call_service(scalar_array), set_variable_peer_id);
 
@@ -119,7 +95,6 @@ fn flattening_streams() {
         {"peer_id" : "local_peer_id", "service_id": "local_service_id", "function_name": "local_function_name", "args": [0, 1]}
     );
 
-    let stream_value = serde_json::to_string(&stream_value).expect("the default serializer shouldn't fail");
     let set_variable_peer_id = "set_variable";
     let mut set_variable_vm = create_avm(set_variable_call_service(stream_value), set_variable_peer_id);
 
@@ -169,7 +144,6 @@ fn flattening_empty_values() {
         {"args": []}
     );
 
-    let stream_value = serde_json::to_string(&stream_value).expect("the default serializer shouldn't fail");
     let set_variable_peer_id = "set_variable";
     let mut set_variable_vm = create_avm(set_variable_call_service(stream_value), set_variable_peer_id);
 
@@ -201,7 +175,6 @@ fn test_handling_non_flattening_values() {
         {"peer_id" : "local_peer_id", "service_id": "local_service_id", "function_name": "local_function_name", "args": [0, 1]}
     );
 
-    let stream_value = serde_json::to_string(&stream_value).expect("the default serializer shouldn't fail");
     let set_variable_peer_id = "set_variable";
     let mut set_variable_vm = create_avm(set_variable_call_service(stream_value), set_variable_peer_id);
 

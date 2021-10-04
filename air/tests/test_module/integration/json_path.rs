@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-use air_test_utils::call_vm;
-use air_test_utils::checked_call_vm;
-use air_test_utils::create_avm;
-use air_test_utils::echo_string_call_service;
+use air_test_utils::prelude::*;
 
 #[test]
 fn json_path_not_allowed_for_non_objects_and_arrays() {
     let set_variable_peer_id = "set_variable";
-    let mut set_variable_vm = create_avm(echo_string_call_service(), set_variable_peer_id);
+    let mut set_variable_vm = create_avm(echo_call_service(), set_variable_peer_id);
 
     let local_peer_id = "local_peer_id";
-    let mut local_vm = create_avm(echo_string_call_service(), local_peer_id);
+    let mut local_vm = create_avm(echo_call_service(), local_peer_id);
 
     let script = format!(
         r#"

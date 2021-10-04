@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-use air_test_utils::*;
-
-use serde_json::json;
+use air_test_utils::prelude::*;
 
 #[test]
 fn network_explore() {
     let relay_id = "relay_id";
     let client_id = "client_id";
     let set_variables_state = maplit::hashmap!(
-        "relay".to_string() => json!(relay_id).to_string(),
-        "client".to_string() => json!(client_id).to_string(),
+        "relay".to_string() => json!(relay_id),
+        "client".to_string() => json!(client_id),
     );
 
     let client_call_service = set_variables_call_service(set_variables_state);
@@ -34,20 +32,16 @@ fn network_explore() {
     let client_2_id = "client_2_id";
     let client_3_id = "client_3_id";
 
-    let relay_call_service =
-        air_test_utils::set_variable_call_service(json!([client_1_id, client_2_id, client_3_id, relay_id]).to_string());
+    let relay_call_service = set_variable_call_service(json!([client_1_id, client_2_id, client_3_id, relay_id]));
     let mut relay = create_avm(relay_call_service, relay_id);
 
-    let client_1_call_service =
-        air_test_utils::set_variable_call_service(json!([client_1_id, client_3_id, relay_id, client_2_id]).to_string());
+    let client_1_call_service = set_variable_call_service(json!([client_1_id, client_3_id, relay_id, client_2_id]));
     let mut client_1 = create_avm(client_1_call_service, client_1_id);
 
-    let client_2_call_service =
-        air_test_utils::set_variable_call_service(json!([relay_id, client_3_id, client_1_id, client_2_id]).to_string());
+    let client_2_call_service = set_variable_call_service(json!([relay_id, client_3_id, client_1_id, client_2_id]));
     let mut client_2 = create_avm(client_2_call_service, client_2_id);
 
-    let client_3_call_service =
-        air_test_utils::set_variable_call_service(json!([relay_id, client_3_id, client_1_id, client_2_id]).to_string());
+    let client_3_call_service = set_variable_call_service(json!([relay_id, client_3_id, client_1_id, client_2_id]));
     let mut client_3 = create_avm(client_3_call_service, client_3_id);
 
     let script = include_str!("./scripts/network_explore.clj");
