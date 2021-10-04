@@ -1,5 +1,6 @@
 [package]
 name = "avm-data-store"
+description = "Definition of the AVM DataStore trait"
 version = "0.1.0"
 authors = ["Fluence Labs"]
 edition = "2018"
