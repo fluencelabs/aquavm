@@ -28,8 +28,6 @@
 
 mod execution_step;
 mod preparation_step;
-
-pub mod log_targets;
 mod runner;
 
 pub use air_interpreter_interface::InterpreterOutcome;

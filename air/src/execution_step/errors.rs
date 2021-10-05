@@ -155,7 +155,7 @@ impl ExecutionError {
 
 macro_rules! log_join {
     ($($args:tt)*) => {
-        log::info!(target: crate::log_targets::JOIN_BEHAVIOUR, $($args)*)
+        log::info!(target: air_log_targets::JOIN_BEHAVIOUR, $($args)*)
     }
 }
 

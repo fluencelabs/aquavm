@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use air::log_targets::TARGET_MAP;
+use air_log_targets::TARGET_MAP;
 
 use log::LevelFilter;
 

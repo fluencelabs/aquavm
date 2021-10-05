@@ -1,6 +1,6 @@
 ## AIR trace handler
 
-This crate contains implementation of the CRDT-based merging data algorithm. It exposes the `TraceHandler` struct that based on the visitor pattern and has public methods that should be called in certain places of AIR instructions execution. Internally `TraceHandler` contains several FSM and each such public methods do state transitioning of one or more these FSMs. Below are state transition sequences for all instructions that caller must follow.
+This crate contains implementation of the CRDT-based merging data algorithm. It exposes the `TraceHandler` struct that based on the visitor pattern and has public methods that should be called in certain places of AIR instructions execution. Internally `TraceHandler` contains several FSM and each of such public methods does state transitioning of one or more these FSMs. Below are state transition sequences for all instructions that caller must follow.
 
 ### Ap instruction
 

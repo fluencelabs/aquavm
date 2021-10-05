@@ -2,15 +2,16 @@
 members = [
     "air",
     "air-interpreter",
-    "crates/air-parser",
-    "crates/data-store",
-    "crates/polyplets",
-    "crates/interpreter-interface",
-    "crates/interpreter-data",
-    "crates/test-module",
-    "crates/test-utils",
-    "crates/trace-handler",
     "avm/server",
+    "crates/air-lib/air-parser",
+    "crates/air-lib/interpreter-data",
+    "crates/air-lib/interpreter-interface",
+    "crates/air-lib/log-targets",
+    "crates/air-lib/polyplets",
+    "crates/air-lib/test-utils",
+    "crates/air-lib/trace-handler",
+    "crates/data-store",
+    "crates/test-module",
 ]
 
 exclude = [
