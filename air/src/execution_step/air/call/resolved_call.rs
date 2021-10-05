@@ -20,16 +20,17 @@ use super::call_result_setter::*;
 use super::prev_result_handler::*;
 use super::triplet::Triplet;
 use super::*;
-use crate::execution_step::trace_handler::MergerCallResult;
-use crate::execution_step::trace_handler::TraceHandler;
 use crate::execution_step::RSecurityTetraplet;
 use crate::execution_step::SecurityTetraplets;
+use crate::trace_to_exec_err;
 use crate::JValue;
 use crate::SecurityTetraplet;
 
 use air_interpreter_data::CallResult;
 use air_interpreter_interface::CallRequestParams;
 use air_parser::ast::{AstVariable, CallInstrArgValue, CallOutputValue};
+use air_trace_handler::MergerCallResult;
+use air_trace_handler::TraceHandler;
 use polyplets::ResolvedTriplet;
 
 use std::cell::RefCell;
@@ -125,7 +126,7 @@ impl<'i> ResolvedCall<'i> {
         exec_ctx: &mut ExecutionCtx<'i>,
         trace_ctx: &mut TraceHandler,
     ) -> ExecutionResult<bool> {
-        let (call_result, trace_pos) = match trace_ctx.meet_call_start(&self.output)? {
+        let (call_result, trace_pos) = match trace_to_exec_err!(trace_ctx.meet_call_start(&self.output))? {
             MergerCallResult::CallResult { value, trace_pos } => (value, trace_pos),
             MergerCallResult::Empty => return Ok(true),
         };

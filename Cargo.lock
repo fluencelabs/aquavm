@@ -19,6 +19,7 @@ dependencies = [
  "air-interpreter-interface",
  "air-parser",
  "air-test-utils",
+ "air-trace-handler",
  "boolinator",
  "criterion",
  "csv",
@@ -105,6 +106,17 @@ dependencies = [
  "avm-server",
  "marine-rs-sdk",
  "serde_json",
+]
+
+[[package]]
+name = "air-trace-handler"
+version = "0.1.0"
+dependencies = [
+ "air-interpreter-data",
+ "air-parser",
+ "log",
+ "serde_json",
+ "thiserror",
 ]
 
 [[package]]

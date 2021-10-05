@@ -9,6 +9,7 @@ members = [
     "crates/interpreter-data",
     "crates/test-module",
     "crates/test-utils",
+    "crates/trace-handler",
     "avm/server",
 ]
 

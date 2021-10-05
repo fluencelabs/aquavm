@@ -23,11 +23,13 @@ use super::ExecutionError;
 use super::ExecutionResult;
 use super::Instruction;
 use super::TraceHandler;
-use crate::execution_step::trace_handler::SubtreeType;
 use crate::log_instruction;
+use crate::trace_to_exec_err;
 use completeness_updater::ParCompletenessUpdater;
 
 use air_parser::ast::Par;
+use air_trace_handler::SubtreeType;
+
 use std::rc::Rc;
 
 #[rustfmt::skip]
@@ -36,7 +38,7 @@ impl<'i> ExecutableInstruction<'i> for Par<'i> {
         log_instruction!(par, exec_ctx, trace_ctx);
 
         let mut completeness_updater = ParCompletenessUpdater::new();
-        trace_ctx.meet_par_start()?;
+        trace_to_exec_err!(trace_ctx.meet_par_start())?;
 
         // execute a left subtree of par
         let left_result = execute_subtree(&self.0, exec_ctx, trace_ctx, &mut completeness_updater, SubtreeType::Left)?;
@@ -62,14 +64,14 @@ fn execute_subtree<'i>(
     // execute a subtree
     let result = match subtree.execute(exec_ctx, trace_ctx) {
         Ok(_) => {
-            trace_ctx.meet_par_subtree_end(subtree_type)?;
+            trace_to_exec_err!(trace_ctx.meet_par_subtree_end(subtree_type))?;
             SubtreeResult::Succeeded
         }
         Err(e) if !e.is_catchable() => {
             return Err(e);
         }
         Err(e) => {
-            trace_ctx.meet_par_subtree_end(subtree_type)?;
+            trace_to_exec_err!(trace_ctx.meet_par_subtree_end(subtree_type))?;
             SubtreeResult::Failed(e)
         }
     };

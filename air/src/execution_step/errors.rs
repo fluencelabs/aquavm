@@ -20,13 +20,13 @@ mod joinable;
 pub(crate) use catchable::Catchable;
 pub(crate) use joinable::Joinable;
 
-use super::trace_handler::MergerApResult;
-use super::trace_handler::TraceHandlerError;
 use super::ResolvedCallResult;
 use super::Stream;
 use crate::JValue;
 
 use air_interpreter_interface::CallResults;
+use air_trace_handler::MergerApResult;
+use air_trace_handler::TraceHandlerError;
 use jsonpath_lib::JsonPathError;
 use strum::IntoEnumIterator;
 use strum_macros::EnumDiscriminants;
@@ -35,7 +35,7 @@ use thiserror::Error as ThisError;
 
 use std::rc::Rc;
 
-/// Errors arised while executing AIR script.
+/// Errors arisen while executing AIR script.
 #[derive(ThisError, EnumDiscriminants, Debug)]
 #[strum_discriminants(derive(EnumIter))]
 pub(crate) enum ExecutionError {
@@ -134,10 +134,13 @@ pub(crate) enum ExecutionError {
     CallResultsNotEmpty(CallResults),
 }
 
-impl From<TraceHandlerError> for Rc<ExecutionError> {
-    fn from(trace_error: TraceHandlerError) -> Self {
-        Rc::new(ExecutionError::TraceError(trace_error))
-    }
+/// This macro is needed because it's impossible to implement
+/// From<TraceHandlerError> for Rc<ExecutionError> due to the orphan rule.
+#[macro_export]
+macro_rules! trace_to_exec_err {
+    ($trace_expr: expr) => {
+        $trace_expr.map_err(|e| std::rc::Rc::new(crate::execution_step::ExecutionError::TraceError(e)))
+    };
 }
 
 impl ExecutionError {

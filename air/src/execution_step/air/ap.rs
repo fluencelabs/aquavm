@@ -24,8 +24,8 @@ use super::ExecutionResult;
 use super::TraceHandler;
 use crate::execution_step::air::ResolvedCallResult;
 use crate::execution_step::boxed_value::Variable;
-use crate::execution_step::trace_handler::MergerApResult;
 use crate::execution_step::utils::apply_json_path;
+use crate::trace_to_exec_err;
 use crate::JValue;
 use crate::SecurityTetraplet;
 use apply_to_arguments::*;
@@ -35,6 +35,7 @@ use air_parser::ast::ApArgument;
 use air_parser::ast::AstVariable;
 use air_parser::ast::JsonPath;
 use air_parser::ast::{Ap, LastErrorPath};
+use air_trace_handler::MergerApResult;
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -44,7 +45,7 @@ impl<'i> super::ExecutableInstruction<'i> for Ap<'i> {
         let should_touch_trace = should_touch_trace(self);
 
         let merger_ap_result = if should_touch_trace {
-            let merger_ap_result = trace_ctx.meet_ap_start()?;
+            let merger_ap_result = trace_to_exec_err!(trace_ctx.meet_ap_start())?;
             try_match_result_to_instr(&merger_ap_result, self)?;
             merger_ap_result
         } else {
