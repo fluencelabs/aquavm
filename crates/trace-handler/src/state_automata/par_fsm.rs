@@ -23,9 +23,8 @@ use state_handler::CtxStateHandler;
 
 /// Manages a par state, its state transitioning functions must be called in the following way:
 ///   from_left_started
-///     -> left_completed(_with_error)
-///     -> right_started
-///     -> right_completed(_with_error)
+///     -> left_completed
+///     -> right_completed
 #[derive(Debug, Default, Clone)]
 pub(crate) struct ParFSM {
     prev_par: ParResult,
