@@ -8,7 +8,7 @@ license = "Apache-2.0"
 repository = "https://github.com/fluencelabs/crates/air-lib/test-utils"
 publish = false
 keywords = ["fluence", "air", "webassembly", "security", "authorization"]
-categories = ["authentication"]
+categories = ["wasm"]
 
 [lib]
 name = "air_test_utils"

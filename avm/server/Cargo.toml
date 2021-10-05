@@ -7,16 +7,18 @@ edition = "2018"
 license = "Apache-2.0"
 documentation = "https://github.com/avm-server"
 repository = "https://github.com/fluencelabs/air/air-interpreter"
-publish = true # this crate is used b
+publish = true # this crate is used by the node
+keywords = ["fluence", "air", "webassembly", "programming-language"]
+categories = ["wasm"]
 
 [lib]
 name = "avm_server"
 path = "src/lib.rs"
 
 [dependencies]
-fluence-faas = "0.9.2"
 air-interpreter-interface = { version = "0.7.0", path = "../../crates/air-lib/interpreter-interface" }
 avm-data-store = { version = "0.1.0", path = "../../crates/data-store" }
+fluence-faas = "0.9.2"
 polyplets = { version = "0.1.2", path = "../../crates/air-lib/polyplets" }
 
 eyre = "0.6.5"
