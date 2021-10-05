@@ -1,10 +1,13 @@
 [package]
 name = "air-parser"
+description = "Parser of the AIR scripts in a form of string to AST"
 version = "0.7.1"
 authors = ["Fluence Labs"]
 edition = "2018"
 license = "Apache-2.0"
 publish = false
+keywords = ["fluence", "air", "parser", "lalrpop"]
+categories = ["wasm"]
 
 [build-dependencies]
 lalrpop = "0.19.6"

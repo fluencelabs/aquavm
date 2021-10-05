@@ -1,10 +1,13 @@
 [package]
 name = "air-test-utils"
 version = "0.2.1"
+description = "Test utils for the AIR interpreter"
 authors = ["Fluence Labs"]
 edition = "2018"
 license = "Apache-2.0"
 publish = false
+keywords = ["fluence", "air", "webassembly", "security", "authorization"]
+categories = ["wasm"]
 
 [lib]
 name = "air_test_utils"
@@ -14,6 +17,6 @@ path = "src/lib.rs"
 air = { path = "../../../air" }
 air-interpreter-interface = { path = "../interpreter-interface" }
 avm-server = { path = "../../../avm/server" }
-marine-rs-sdk = "0.6.11"
+marine-rs-sdk = "0.6.13"
 
 serde_json = "1.0.61"

@@ -67,7 +67,7 @@ jobs:
           PAT="\\\\d+.\\\\d+.\\\\d+"
 
           INTERPRETER_CARGO_TOML="air-interpreter/Cargo.toml"
-          CARGO_TOML="crates/air-interpreter-wasm/Cargo.toml"
+          CARGO_TOML="crates/interpreter-wasm/Cargo.toml"
           PACKAGE_JSON="avm/client/package.json"
 
           # get package name from Cargo.toml
@@ -145,21 +145,21 @@ jobs:
         run: marine build --release -p air-interpreter --features marine
         working-directory: air-interpreter
 
-      - name: Copy air_interpreter_server.wasm to air-interpreter-wasm
-        run: cp target/wasm32-wasi/release/air_interpreter_server.wasm crates/air-interpreter-wasm/air_interpreter_server.wasm
+      - name: Copy air_interpreter_server.wasm to interpreter-wasm
+        run: cp target/wasm32-wasi/release/air_interpreter_server.wasm crates/interpreter-wasm/air_interpreter_server.wasm
 
       - name: Set project version to ${{ env.FINAL_VERSION }}
         run: |
           PATH="~/.cargo/bin:$PATH"
           toml set Cargo.toml package.version "${{ env.FINAL_VERSION }}" | sponge Cargo.toml
-        working-directory: crates/air-interpreter-wasm
+        working-directory: crates/interpreter-wasm
 
       - name: Login to crates.io
         run: cargo login ${{ secrets.CRATES_IO_TOKEN }}
 
       - name: Publish to crates.io
         run: cargo publish --allow-dirty
-        working-directory: crates/air-interpreter-wasm
+        working-directory: crates/interpreter-wasm
 
       ### Create a pre-release
       - name: Create Release

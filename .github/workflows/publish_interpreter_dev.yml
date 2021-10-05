@@ -72,7 +72,7 @@ jobs:
           PATH="$(yarn global bin):$PATH"
 
           INTERPRETER_CARGO_TOML="air-interpreter/Cargo.toml"
-          CARGO_TOML="crates/air-interpreter-wasm/Cargo.toml"
+          CARGO_TOML="crates/interpreter-wasm/Cargo.toml"
           PACKAGE_JSON="avm/client/package.json"
 
           # sanitize branch name so it can be used as a semver suffix (replace [^0-9a-zA-Z-] with hyphen)
@@ -168,8 +168,8 @@ jobs:
         run: marine build -p air-interpreter --release --features marine
         working-directory: air-interpreter
 
-      - name: Copy air_interpreter_server.wasm to air-interpreter-wasm
-        run: cp target/wasm32-wasi/release/air_interpreter_server.wasm crates/air-interpreter-wasm/air_interpreter_server.wasm
+      - name: Copy air_interpreter_server.wasm to interpreter-wasm
+        run: cp target/wasm32-wasi/release/air_interpreter_server.wasm crates/interpreter-wasm/air_interpreter_server.wasm
 
       - name: Set project name@version to ${{ env.PKG_NAME }}@${{ env.FINAL_VERSION }}
         run: |
@@ -178,11 +178,11 @@ jobs:
 
           NAME=$(toml get Cargo.toml package.name | jq -r .)
           toml set Cargo.toml package.name "${{ env.PKG_NAME }}" | sponge Cargo.toml
-        working-directory: crates/air-interpreter-wasm
+        working-directory: crates/interpreter-wasm
 
       - name: Login to crates.io
         run: cargo login ${{ secrets.CRATES_IO_TOKEN }}
 
       - name: Publish to crates.io
         run: cargo publish --allow-dirty
-        working-directory: crates/air-interpreter-wasm
+        working-directory: crates/interpreter-wasm
