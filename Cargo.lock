@@ -19,6 +19,7 @@ dependencies = [
  "air-interpreter-interface",
  "air-parser",
  "air-test-utils",
+ "air-trace-handler",
  "boolinator",
  "criterion",
  "csv",

@@ -17,13 +17,13 @@
 use super::*;
 use crate::exec_err;
 use crate::execution_step::air::call::call_result_setter::set_result_from_value;
-use crate::execution_step::trace_handler::TraceHandler;
 use crate::execution_step::RSecurityTetraplet;
 
 use air_interpreter_data::CallResult;
 use air_interpreter_data::Sender;
 use air_interpreter_interface::CallServiceResult;
 use air_parser::ast::CallOutputValue;
+use air_trace_handler::TraceHandler;
 
 /// This function looks at the existing call state, validates it,
 /// and returns Ok(true) if the call should be executed further.

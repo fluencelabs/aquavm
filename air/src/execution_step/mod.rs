@@ -18,7 +18,6 @@ mod air;
 mod boxed_value;
 mod errors;
 pub(crate) mod execution_context;
-mod trace_handler;
 mod utils;
 
 pub(super) use self::air::ExecutableInstruction;
@@ -31,7 +30,8 @@ pub(crate) use errors::Catchable;
 pub(super) use errors::ExecutionError;
 pub(crate) use errors::Joinable;
 pub(crate) use execution_context::ExecutionCtx;
-pub(crate) use trace_handler::TraceHandler;
+
+pub(crate) use air_trace_handler::TraceHandler;
 
 use std::cell::RefCell;
 use std::rc::Rc;

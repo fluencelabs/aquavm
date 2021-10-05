@@ -16,12 +16,12 @@
 
 use super::ExecutionCtx;
 use super::ExecutionResult;
-use crate::execution_step::trace_handler::MergerApResult;
 use crate::execution_step::Generation;
 
 use air_interpreter_data::ApResult;
 use air_parser::ast::Ap;
 use air_parser::ast::AstVariable;
+use air_trace_handler::MergerApResult;
 
 pub(super) fn ap_result_to_generation(ap_result: &MergerApResult) -> Generation {
     match ap_result {

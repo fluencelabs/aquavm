@@ -21,6 +21,7 @@ use super::ExecutionCtx;
 use super::ExecutionResult;
 use super::TraceHandler;
 use crate::log_instruction;
+use crate::trace_to_exec_err;
 
 use air_parser::ast::FoldStream;
 
@@ -34,7 +35,7 @@ impl<'i> ExecutableInstruction<'i> for FoldStream<'i> {
         };
 
         let fold_id = exec_ctx.tracker.fold.seen_stream_count;
-        trace_ctx.meet_fold_start(fold_id)?;
+        trace_to_exec_err!(trace_ctx.meet_fold_start(fold_id))?;
 
         for iterable in iterables {
             let value = match iterable.peek() {
@@ -45,7 +46,7 @@ impl<'i> ExecutableInstruction<'i> for FoldStream<'i> {
             };
 
             let value_pos = value.pos();
-            trace_ctx.meet_iteration_start(fold_id, value_pos)?;
+            trace_to_exec_err!(trace_ctx.meet_iteration_start(fold_id, value_pos))?;
             fold(
                 iterable,
                 IterableType::Stream(fold_id),
@@ -54,14 +55,14 @@ impl<'i> ExecutableInstruction<'i> for FoldStream<'i> {
                 exec_ctx,
                 trace_ctx,
             )?;
-            trace_ctx.meet_generation_end(fold_id)?;
+            trace_to_exec_err!(trace_ctx.meet_generation_end(fold_id))?;
 
             if !exec_ctx.subtree_complete {
                 break;
             }
         }
 
-        trace_ctx.meet_fold_end(fold_id)?;
+        trace_to_exec_err!(trace_ctx.meet_fold_end(fold_id))?;
 
         Ok(())
     }
