@@ -97,13 +97,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "air-test-module"
-version = "0.1.0"
-dependencies = [
- "marine-rs-sdk",
-]
-
-[[package]]
 name = "air-test-utils"
 version = "0.2.1"
 dependencies = [

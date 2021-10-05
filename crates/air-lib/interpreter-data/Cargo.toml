@@ -5,7 +5,8 @@ version = "0.2.0"
 authors = ["Fluence Labs"]
 edition = "2018"
 license = "Apache-2.0"
-repository = "https://github.com/fluencelabs/air"
+repository = "https://github.com/fluencelabs/air/crates/air-lib/interpreter-data"
+publish = false
 keywords = ["fluence", "air", "webassembly", "programming-language"]
 categories = ["wasm"]
 

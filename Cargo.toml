@@ -11,13 +11,12 @@ members = [
     "crates/air-lib/test-utils",
     "crates/air-lib/trace-handler",
     "crates/data-store",
-    "crates/test-module",
 ]
 
 exclude = [
     "air/tests/test_module/integration/security_tetraplets/auth_module",
     "air/tests/test_module/integration/security_tetraplets/log_storage",
-    "crates/air-interpreter-wasm",
+    "crates/interpreter-wasm",
 ]
 
 [profile.release]

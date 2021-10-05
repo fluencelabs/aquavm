@@ -1,0 +1,15 @@
+[package]
+name = "air-interpreter-values"
+version = "0.1.0"
+description = "Definition of the interpreter values and algebra on them"
+authors = ["Fluence Labs"]
+edition = "2018"
+license = "Apache-2.0"
+repository = "https://github.com/fluencelabs/air/crates/air-lib/interpreter-values"
+publish = false
+keywords = ["fluence", "air", "webassembly", "programming-language"]
+categories = ["wasm"]
+
+[lib]
+name = "air_log_targets"
+path = "src/lib.rs"
