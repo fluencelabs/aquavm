@@ -16,16 +16,17 @@
 
 mod outcome;
 
+use crate::execution_step::Catchable;
 use crate::execution_step::ExecutableInstruction;
 use crate::execution_step::ExecutionCtx;
 use crate::execution_step::ExecutionError;
-use crate::execution_step::{Catchable, TraceHandler};
-use air_log_targets::RUN_PARAMS;
+use crate::execution_step::TraceHandler;
 use crate::preparation_step::prepare;
 use crate::preparation_step::PreparationDescriptor;
 
 use air_interpreter_interface::InterpreterOutcome;
 use air_interpreter_interface::RunParameters;
+use air_log_targets::RUN_PARAMS;
 use std::rc::Rc;
 
 pub fn execute_air(
