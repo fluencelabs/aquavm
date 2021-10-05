@@ -5,7 +5,6 @@ description = "Implementation of AIR trace handler"
 authors = ["Fluence Labs"]
 edition = "2018"
 license = "Apache-2.0"
-repository = "https://github.com/fluencelabs/aquavm/tree/master/crates/air-lib/trace-handler"
 publish = false
 keywords = ["fluence", "air", "webassembly", "programming-language"]
 categories = ["wasm"]

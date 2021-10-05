@@ -5,7 +5,6 @@ version = "0.7.1"
 authors = ["Fluence Labs"]
 edition = "2018"
 license = "Apache-2.0"
-repository = "https://github.com/fluencelabs/aquavm/tree/master/crates/air-lib/air-parser"
 publish = false
 keywords = ["fluence", "air", "parser", "lalrpop"]
 categories = ["wasm"]
