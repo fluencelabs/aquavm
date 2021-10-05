@@ -12,9 +12,9 @@ path = "src/lib.rs"
 
 [dependencies]
 fluence-faas = "0.9.0"
-air-interpreter-interface = { version = "0.7.0", path = "../../crates/interpreter-interface" }
+air-interpreter-interface = { version = "0.7.0", path = "../../crates/air-lib/interpreter-interface" }
 avm-data-store = { version = "0.1.0", path = "../../crates/data-store" }
-polyplets = { version = "0.1.2", path = "../../crates/polyplets" }
+polyplets = { version = "0.1.2", path = "../../crates/air-lib/polyplets" }
 
 eyre = "0.6.5"
 thiserror = "1.0.29"

@@ -33,8 +33,6 @@ pub use state_automata::SubtreeType;
 
 pub type TraceHandlerResult<T> = std::result::Result<T, TraceHandlerError>;
 
-pub const EXECUTED_STATE_CHANGING: &str = "executed_state_changing";
-
 use air_interpreter_data::*;
 use data_keeper::DataKeeper;
 use data_keeper::MergeCtx;

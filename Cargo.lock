@@ -17,6 +17,7 @@ version = "0.15.0"
 dependencies = [
  "air-interpreter-data",
  "air-interpreter-interface",
+ "air-log-targets",
  "air-parser",
  "air-test-utils",
  "air-trace-handler",
@@ -45,6 +46,7 @@ name = "air-interpreter"
 version = "0.15.0"
 dependencies = [
  "air",
+ "air-log-targets",
  "log",
  "marine-rs-sdk",
  "serde",
@@ -71,6 +73,10 @@ dependencies = [
  "serde",
  "serde_json",
 ]
+
+[[package]]
+name = "air-log-targets"
+version = "0.1.0"
 
 [[package]]
 name = "air-parser"
@@ -113,6 +119,7 @@ name = "air-trace-handler"
 version = "0.1.0"
 dependencies = [
  "air-interpreter-data",
+ "air-log-targets",
  "air-parser",
  "log",
  "serde_json",

@@ -20,7 +20,7 @@ use crate::execution_step::ExecutableInstruction;
 use crate::execution_step::ExecutionCtx;
 use crate::execution_step::ExecutionError;
 use crate::execution_step::{Catchable, TraceHandler};
-use crate::log_targets::RUN_PARAMS;
+use air_log_targets::RUN_PARAMS;
 use crate::preparation_step::prepare;
 use crate::preparation_step::PreparationDescriptor;
 

@@ -1,0 +1,15 @@
+[package]
+name = "air-log-targets"
+version = "0.1.0"
+description = "Definition of global consts used for logging"
+authors = ["Fluence Labs"]
+edition = "2018"
+license = "Apache-2.0"
+repository = "https://github.com/fluencelabs/air/crates/log-targets"
+publish = false
+keywords = ["fluence", "air", "webassembly", "programming-language"]
+categories = ["wasm"]
+
+[lib]
+name = "air_log_targets"
+path = "src/lib.rs"

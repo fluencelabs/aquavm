@@ -68,7 +68,7 @@ impl TraceHandler {
     /// state to the result trace.
     pub fn meet_call_end(&mut self, call_result: CallResult) {
         log::trace!(
-            target: crate::EXECUTED_STATE_CHANGING,
+            target: air_log_targets::EXECUTED_STATE_CHANGING,
             "  adding new call executed state {:?}",
             call_result
         );

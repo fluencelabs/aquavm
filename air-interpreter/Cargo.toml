@@ -16,6 +16,7 @@ path = "src/marine.rs"
 
 [dependencies]
 air = { path = "../air" }
+air-log-targets = { path = "../crates/air-lib/log-targets" }
 
 marine-rs-sdk = { version = "0.6.11", features = ["logger"] }
 

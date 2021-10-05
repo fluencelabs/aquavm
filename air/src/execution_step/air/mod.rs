@@ -144,7 +144,7 @@ impl<'i> ExecutableInstruction<'i> for Instruction<'i> {
 #[macro_export]
 macro_rules! log_instruction {
     ($instr_name:expr, $exec_ctx:expr, $trace_ctx:expr) => {
-        log::debug!(target: crate::log_targets::INSTRUCTION, "> {}", stringify!($instr_name));
+        log::debug!(target: air_log_targets::INSTRUCTION, "> {}", stringify!($instr_name));
 
         let mut variables = String::from("  scalars:");
         if $exec_ctx.scalars.is_empty() {
@@ -162,25 +162,25 @@ macro_rules! log_instruction {
             variables.push_str(&format!("\n    {} => {}", key, value.borrow()));
         }
 
-        log::trace!(target: crate::log_targets::DATA_CACHE, "{}", variables);
+        log::trace!(target: air_log_targets::DATA_CACHE, "{}", variables);
         log::trace!(
-            target: crate::log_targets::NEXT_PEER_PKS,
+            target: air_log_targets::NEXT_PEER_PKS,
             "  next peers pk: {:?}",
             $exec_ctx.next_peer_pks
         );
         log::trace!(
-            target: crate::log_targets::SUBTREE_COMPLETE,
+            target: air_log_targets::SUBTREE_COMPLETE,
             "  subtree complete: {}",
             $exec_ctx.subtree_complete
         );
 
         log::trace!(
-            target: crate::log_targets::SUBTREE_ELEMENTS,
+            target: air_log_targets::SUBTREE_ELEMENTS,
             "  subtree elements count: {:?}",
             $trace_ctx.subtree_sizes()
         );
         log::debug!(
-            target: crate::log_targets::NEW_EXECUTED_TRACE,
+            target: air_log_targets::NEW_EXECUTED_TRACE,
             "  new call executed trace: {:?}",
             $trace_ctx.as_result_trace()
         );
