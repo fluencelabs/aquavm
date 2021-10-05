@@ -72,22 +72,14 @@ impl CtxStateHandler {
         data_keeper: &mut DataKeeper,
     ) -> FSMResult<Self> {
         let left_pair = compute_new_states(data_keeper, prev_par, current_par, SubtreeType::Left)?;
-        let right_pair =
-            compute_new_states(data_keeper, prev_par, current_par, SubtreeType::Right)?;
+        let right_pair = compute_new_states(data_keeper, prev_par, current_par, SubtreeType::Right)?;
 
-        let handler = Self {
-            left_pair,
-            right_pair,
-        };
+        let handler = Self { left_pair, right_pair };
 
         Ok(handler)
     }
 
-    pub(super) fn handle_subtree_end(
-        self,
-        data_keeper: &mut DataKeeper,
-        subtree_type: SubtreeType,
-    ) {
+    pub(super) fn handle_subtree_end(self, data_keeper: &mut DataKeeper, subtree_type: SubtreeType) {
         match subtree_type {
             SubtreeType::Left => update_ctx_states(self.left_pair, data_keeper),
             SubtreeType::Right => update_ctx_states(self.right_pair, data_keeper),

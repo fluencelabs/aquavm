@@ -60,10 +60,7 @@ impl TraceHandler {
 
 impl TraceHandler {
     /// Should be called at the beginning of a call execution.
-    pub fn meet_call_start(
-        &mut self,
-        output_value: &CallOutputValue<'_>,
-    ) -> TraceHandlerResult<MergerCallResult> {
+    pub fn meet_call_start(&mut self, output_value: &CallOutputValue<'_>) -> TraceHandlerResult<MergerCallResult> {
         try_merge_next_state_as_call(&mut self.data_keeper, output_value).map_err(Into::into)
     }
 
@@ -75,9 +72,7 @@ impl TraceHandler {
             "  adding new call executed state {:?}",
             call_result
         );
-        self.data_keeper
-            .result_trace
-            .push(ExecutedState::Call(call_result));
+        self.data_keeper.result_trace.push(ExecutedState::Call(call_result));
     }
 }
 
@@ -87,9 +82,7 @@ impl TraceHandler {
     }
 
     pub fn meet_ap_end(&mut self, ap_result: ApResult) {
-        self.data_keeper
-            .result_trace
-            .push(ExecutedState::Ap(ap_result));
+        self.data_keeper.result_trace.push(ExecutedState::Ap(ap_result));
     }
 }
 
@@ -127,11 +120,7 @@ impl TraceHandler {
         Ok(())
     }
 
-    pub fn meet_iteration_start(
-        &mut self,
-        fold_id: u32,
-        value_pos: usize,
-    ) -> TraceHandlerResult<()> {
+    pub fn meet_iteration_start(&mut self, fold_id: u32, value_pos: usize) -> TraceHandlerResult<()> {
         let fold_fsm = self.fsm_keeper.fold_mut(fold_id)?;
         fold_fsm.meet_iteration_start(value_pos, &mut self.data_keeper)?;
 

@@ -59,33 +59,23 @@ pub enum ApResultError {
 #[derive(ThisError, Debug)]
 pub enum CallResultError {
     #[error("values in call results are not equal: {prev_value:?} != {current_value:?}")]
-    ValuesNotEqual {
-        prev_value: Value,
-        current_value: Value,
-    },
+    ValuesNotEqual { prev_value: Value, current_value: Value },
 
     /// Errors occurred when previous and current call results are incompatible.
-    #[error(
-        "previous and current call results are incompatible: '{prev_call:?}' '{current_call:?}'"
-    )]
+    #[error("previous and current call results are incompatible: '{prev_call:?}' '{current_call:?}'")]
     IncompatibleCallResults {
         prev_call: CallResult,
         current_call: CallResult,
     },
 
-    #[error(
-        "air scripts has the following value type '{air_type}' while data other '{data_value:?}'"
-    )]
+    #[error("air scripts has the following value type '{air_type}' while data other '{data_value:?}'")]
     DataNotMatchAIR { air_type: String, data_value: Value },
 }
 
 #[derive(ThisError, Debug)]
 pub enum FoldResultError {
     #[error("the first {count} subtrace descriptors lens of fold {fold_result:?} overflows")]
-    SubtraceLenOverflow {
-        fold_result: FoldResult,
-        count: usize,
-    },
+    SubtraceLenOverflow { fold_result: FoldResult, count: usize },
 
     /// There are several lores with the same value_pos.
     #[error("{0:?} contains several subtraces with the same value_pos {1}")]
@@ -107,16 +97,12 @@ impl MergeError {
             (Some(prev_state), Some(current_state)) => {
                 MergeError::IncompatibleExecutedStates(prev_state, current_state)
             }
-            (None, Some(current_state)) => MergeError::DifferentExecutedStateExpected(
-                current_state,
-                DataType::Current,
-                expected_state,
-            ),
-            (Some(prev_state), None) => MergeError::DifferentExecutedStateExpected(
-                prev_state,
-                DataType::Previous,
-                expected_state,
-            ),
+            (None, Some(current_state)) => {
+                MergeError::DifferentExecutedStateExpected(current_state, DataType::Current, expected_state)
+            }
+            (Some(prev_state), None) => {
+                MergeError::DifferentExecutedStateExpected(prev_state, DataType::Previous, expected_state)
+            }
             (None, None) => unreachable!("shouldn't be called with both None"),
         }
     }
@@ -133,10 +119,7 @@ impl CallResultError {
         MergeError::IncorrectCallResult(call_result_error)
     }
 
-    pub(crate) fn incompatible_calls(
-        prev_call: CallResult,
-        current_call: CallResult,
-    ) -> MergeError {
+    pub(crate) fn incompatible_calls(prev_call: CallResult, current_call: CallResult) -> MergeError {
         let call_result_error = CallResultError::IncompatibleCallResults {
             prev_call,
             current_call,
@@ -148,10 +131,7 @@ impl CallResultError {
     pub(crate) fn data_not_match(data_value: Value, air_type: ValueType<'_>) -> MergeError {
         let air_type = air_type.to_string();
 
-        let call_result_error = CallResultError::DataNotMatchAIR {
-            air_type,
-            data_value,
-        };
+        let call_result_error = CallResultError::DataNotMatchAIR { air_type, data_value };
 
         MergeError::IncorrectCallResult(call_result_error)
     }

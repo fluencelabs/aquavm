@@ -50,20 +50,10 @@ pub(crate) fn try_merge_next_state_as_call(
             let call_result = merge_current_executed(value, value_type, data_keeper)?;
             return Ok(prepare_call_result(call_result, Current, data_keeper));
         }
-        (None, Some(Call(current_call))) => {
-            return Ok(prepare_call_result(current_call, Current, data_keeper))
-        }
-        (Some(Call(prev_call)), None) => {
-            return Ok(prepare_call_result(prev_call, Previous, data_keeper))
-        }
+        (None, Some(Call(current_call))) => return Ok(prepare_call_result(current_call, Current, data_keeper)),
+        (Some(Call(prev_call)), None) => return Ok(prepare_call_result(prev_call, Previous, data_keeper)),
         (None, None) => return Ok(MergerCallResult::Empty),
-        (prev_state, current_state) => {
-            return Err(MergeError::incompatible_states(
-                prev_state,
-                current_state,
-                "call",
-            ))
-        }
+        (prev_state, current_state) => return Err(MergeError::incompatible_states(prev_state, current_state, "call")),
     };
 
     let merged_call = merge_call_result(prev_call, current_call, value_type, data_keeper)?;
@@ -92,16 +82,10 @@ fn merge_call_result(
         // github.com/fluencelabs/aquavm/issues/137
         (prev @ RequestSentBy(_), RequestSentBy(_)) => prev,
         // this special case is needed to merge stream generation in a right way
-        (RequestSentBy(_), Executed(value)) => {
-            merge_current_executed(value, value_type, data_keeper)?
-        }
+        (RequestSentBy(_), Executed(value)) => merge_current_executed(value, value_type, data_keeper)?,
         (prev @ Executed(..), RequestSentBy(_)) => prev,
-        (Executed(prev_value), Executed(current_value)) => {
-            merge_executed(prev_value, current_value)?
-        }
-        (prev_call, current_call) => {
-            return Err(CallResultError::incompatible_calls(prev_call, current_call))
-        }
+        (Executed(prev_value), Executed(current_value)) => merge_executed(prev_value, current_value)?,
+        (prev_call, current_call) => return Err(CallResultError::incompatible_calls(prev_call, current_call)),
     };
 
     Ok(merged_state)
@@ -118,9 +102,7 @@ impl<'i> ValueType<'i> {
         use air_parser::ast::AstVariable;
 
         match output_value {
-            CallOutputValue::Variable(AstVariable::Stream(stream_name)) => {
-                ValueType::Stream(stream_name)
-            }
+            CallOutputValue::Variable(AstVariable::Stream(stream_name)) => ValueType::Stream(stream_name),
             _ => ValueType::Scalar,
         }
     }

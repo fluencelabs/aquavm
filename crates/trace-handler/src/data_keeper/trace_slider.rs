@@ -62,11 +62,7 @@ impl TraceSlider {
         Some(result)
     }
 
-    pub(crate) fn set_position_and_len(
-        &mut self,
-        position: usize,
-        subtrace_len: usize,
-    ) -> KeeperResult<()> {
+    pub(crate) fn set_position_and_len(&mut self, position: usize, subtrace_len: usize) -> KeeperResult<()> {
         // it's possible to set empty subtrace_len and inconsistent position
         if subtrace_len != 0 && position + subtrace_len > self.trace.len() {
             return Err(SetSubtraceLenAndPosFailed {

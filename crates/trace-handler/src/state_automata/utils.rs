@@ -56,10 +56,6 @@ pub(super) fn update_ctx_states(state_pair: CtxStatesPair, data_keeper: &mut Dat
     // they have been already checked in a state updater ctor. It's important
     // to make it in a such way, because this function could be called from
     // error_exit that shouldn't fail.
-    let _ = state_pair
-        .prev_state
-        .update_ctx_state(&mut data_keeper.prev_ctx);
-    let _ = state_pair
-        .current_state
-        .update_ctx_state(&mut data_keeper.current_ctx);
+    let _ = state_pair.prev_state.update_ctx_state(&mut data_keeper.prev_ctx);
+    let _ = state_pair.current_state.update_ctx_state(&mut data_keeper.current_ctx);
 }

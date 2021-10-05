@@ -25,9 +25,7 @@ pub struct MergerFoldResult {
     pub current_fold_lore: ResolvedFold,
 }
 
-pub(crate) fn try_merge_next_state_as_fold(
-    data_keeper: &mut DataKeeper,
-) -> MergeResult<MergerFoldResult> {
+pub(crate) fn try_merge_next_state_as_fold(data_keeper: &mut DataKeeper) -> MergeResult<MergerFoldResult> {
     use ExecutedState::Fold;
 
     let prev_state = data_keeper.prev_slider_mut().next_state();
@@ -44,13 +42,7 @@ pub(crate) fn try_merge_next_state_as_fold(
             MergerFoldResult::from_fold_result(&prev_fold, MergeCtxType::Previous, data_keeper)
         }
         (None, None) => return Ok(MergerFoldResult::default()),
-        (prev_state, current_state) => {
-            return Err(MergeError::incompatible_states(
-                prev_state,
-                current_state,
-                "fold",
-            ))
-        }
+        (prev_state, current_state) => return Err(MergeError::incompatible_states(prev_state, current_state, "fold")),
     }?;
 
     Ok(fold_result)

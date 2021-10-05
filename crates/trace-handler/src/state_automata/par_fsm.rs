@@ -42,10 +42,7 @@ pub enum SubtreeType {
 }
 
 impl ParFSM {
-    pub(crate) fn from_left_started(
-        ingredients: MergerParResult,
-        data_keeper: &mut DataKeeper,
-    ) -> FSMResult<Self> {
+    pub(crate) fn from_left_started(ingredients: MergerParResult, data_keeper: &mut DataKeeper) -> FSMResult<Self> {
         // default is a par with empty left and right subtrees
         let prev_par = ingredients.prev_par.unwrap_or_default();
         let current_par = ingredients.current_par.unwrap_or_default();
@@ -69,8 +66,7 @@ impl ParFSM {
 
     pub(crate) fn left_completed(&mut self, data_keeper: &mut DataKeeper) {
         self.par_builder.track(data_keeper, SubtreeType::Left);
-        self.state_handler
-            .handle_subtree_end(data_keeper, SubtreeType::Left);
+        self.state_handler.handle_subtree_end(data_keeper, SubtreeType::Left);
 
         // all invariants were checked in the ctor
         let _ = self.prepare_sliders(data_keeper, SubtreeType::Right);
@@ -81,26 +77,17 @@ impl ParFSM {
         let state = self.par_builder.build();
         self.state_inserter.insert(data_keeper, state);
 
-        self.state_handler
-            .handle_subtree_end(data_keeper, SubtreeType::Right);
+        self.state_handler.handle_subtree_end(data_keeper, SubtreeType::Right);
     }
 
-    fn prepare_sliders(
-        &self,
-        data_keeper: &mut DataKeeper,
-        subtree_type: SubtreeType,
-    ) -> FSMResult<()> {
+    fn prepare_sliders(&self, data_keeper: &mut DataKeeper, subtree_type: SubtreeType) -> FSMResult<()> {
         let (prev_len, current_len) = match subtree_type {
             SubtreeType::Left => (self.prev_par.left_size, self.current_par.left_size),
             SubtreeType::Right => (self.prev_par.right_size, self.current_par.right_size),
         };
 
-        data_keeper
-            .prev_slider_mut()
-            .set_subtrace_len(prev_len as _)?;
-        data_keeper
-            .current_slider_mut()
-            .set_subtrace_len(current_len as _)?;
+        data_keeper.prev_slider_mut().set_subtrace_len(prev_len as _)?;
+        data_keeper.current_slider_mut().set_subtrace_len(current_len as _)?;
 
         Ok(())
     }

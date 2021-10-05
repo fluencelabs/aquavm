@@ -37,9 +37,7 @@ impl FSMKeeper {
     }
 
     pub(crate) fn last_par(&mut self) -> FSMResult<&mut ParFSM> {
-        self.par_stack
-            .last_mut()
-            .ok_or(StateFSMError::ParQueueIsEmpty)
+        self.par_stack.last_mut().ok_or(StateFSMError::ParQueueIsEmpty)
     }
 
     pub(crate) fn pop_par(&mut self) -> FSMResult<ParFSM> {

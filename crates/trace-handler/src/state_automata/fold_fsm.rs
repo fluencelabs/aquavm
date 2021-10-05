@@ -47,16 +47,10 @@ pub(crate) struct FoldFSM {
 }
 
 impl FoldFSM {
-    pub(crate) fn from_fold_start(
-        fold_result: MergerFoldResult,
-        data_keeper: &mut DataKeeper,
-    ) -> FSMResult<Self> {
+    pub(crate) fn from_fold_start(fold_result: MergerFoldResult, data_keeper: &mut DataKeeper) -> FSMResult<Self> {
         let state_inserter = StateInserter::from_keeper(data_keeper);
-        let state_handler = CtxStateHandler::prepare(
-            &fold_result.prev_fold_lore,
-            &fold_result.current_fold_lore,
-            data_keeper,
-        )?;
+        let state_handler =
+            CtxStateHandler::prepare(&fold_result.prev_fold_lore, &fold_result.current_fold_lore, data_keeper)?;
 
         let fold_fsm = Self {
             prev_fold: fold_result.prev_fold_lore,
@@ -69,25 +63,14 @@ impl FoldFSM {
         Ok(fold_fsm)
     }
 
-    pub(crate) fn meet_iteration_start(
-        &mut self,
-        value_pos: usize,
-        data_keeper: &mut DataKeeper,
-    ) -> FSMResult<()> {
+    pub(crate) fn meet_iteration_start(&mut self, value_pos: usize, data_keeper: &mut DataKeeper) -> FSMResult<()> {
         let (prev_pos, current_pos) = match data_keeper.new_to_old_pos.get(&value_pos) {
-            Some(DataPositions {
-                prev_pos,
-                current_pos,
-            }) => (prev_pos, current_pos),
+            Some(DataPositions { prev_pos, current_pos }) => (prev_pos, current_pos),
             None => return self.prepare(None, None, value_pos, data_keeper),
         };
 
-        let prev_lore = prev_pos
-            .map(|pos| self.prev_fold.lore.remove(&pos))
-            .flatten();
-        let current_lore = current_pos
-            .map(|pos| self.current_fold.lore.remove(&pos))
-            .flatten();
+        let prev_lore = prev_pos.map(|pos| self.prev_fold.lore.remove(&pos)).flatten();
+        let current_lore = current_pos.map(|pos| self.current_fold.lore.remove(&pos)).flatten();
 
         self.prepare(prev_lore, current_lore, value_pos, data_keeper)
     }
@@ -152,9 +135,7 @@ impl FoldFSM {
 
     pub(crate) fn meet_fold_end(self, data_keeper: &mut DataKeeper) {
         // TODO: check for prev and current lore emptiness
-        let fold_result = FoldResult {
-            lore: self.result_lore,
-        };
+        let fold_result = FoldResult { lore: self.result_lore };
         let state = ExecutedState::Fold(fold_result);
         self.state_inserter.insert(data_keeper, state);
         self.state_handler.set_final_states(data_keeper);

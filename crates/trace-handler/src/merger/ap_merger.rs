@@ -26,9 +26,7 @@ pub enum MergerApResult {
     ApResult { res_generation: Option<u32> },
 }
 
-pub(crate) fn try_merge_next_state_as_ap(
-    data_keeper: &mut DataKeeper,
-) -> MergeResult<MergerApResult> {
+pub(crate) fn try_merge_next_state_as_ap(data_keeper: &mut DataKeeper) -> MergeResult<MergerApResult> {
     use ExecutedState::Ap;
 
     let prev_state = data_keeper.prev_slider_mut().next_state();
@@ -40,13 +38,7 @@ pub(crate) fn try_merge_next_state_as_ap(
         // could not have streams with such generations
         (None, Some(Ap(_))) => return Ok(MergerApResult::Empty),
         (None, None) => return Ok(MergerApResult::Empty),
-        (prev_state, current_state) => {
-            return Err(MergeError::incompatible_states(
-                prev_state,
-                current_state,
-                "ap",
-            ))
-        }
+        (prev_state, current_state) => return Err(MergeError::incompatible_states(prev_state, current_state, "ap")),
     };
 
     to_merger_result(ap)
@@ -66,8 +58,7 @@ macro_rules! to_maybe_generation {
 }
 
 fn to_merger_result(ap_result: ApResult) -> MergeResult<MergerApResult> {
-    let res_generation =
-        to_maybe_generation!(ap_result, &ap_result.res_generations, TooManyDstGenerations);
+    let res_generation = to_maybe_generation!(ap_result, &ap_result.res_generations, TooManyDstGenerations);
 
     let ap_result = MergerApResult::ApResult { res_generation };
 

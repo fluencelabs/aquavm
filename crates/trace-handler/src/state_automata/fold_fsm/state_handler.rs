@@ -44,11 +44,7 @@ impl CtxStateHandler {
     }
 }
 
-fn compute_new_state(
-    fold: &ResolvedFold,
-    data_keeper: &DataKeeper,
-    ctx_type: MergeCtxType,
-) -> FSMResult<CtxState> {
+fn compute_new_state(fold: &ResolvedFold, data_keeper: &DataKeeper, ctx_type: MergeCtxType) -> FSMResult<CtxState> {
     let ctx = match ctx_type {
         MergeCtxType::Previous => &data_keeper.prev_ctx,
         MergeCtxType::Current => &data_keeper.current_ctx,

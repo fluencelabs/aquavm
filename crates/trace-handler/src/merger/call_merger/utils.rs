@@ -73,10 +73,7 @@ pub(super) fn merge_current_executed(
     match (value, value_type) {
         (scalar @ Value::Scalar(_), ValueType::Scalar) => Ok(CallResult::Executed(scalar)),
         (Value::Stream { value, .. }, ValueType::Stream(stream_name)) => {
-            let generation = data_keeper
-                .prev_ctx
-                .stream_generation(stream_name)
-                .unwrap_or_default();
+            let generation = data_keeper.prev_ctx.stream_generation(stream_name).unwrap_or_default();
             let stream = Value::Stream { value, generation };
             Ok(CallResult::Executed(stream))
         }
@@ -95,10 +92,7 @@ pub(super) fn check_equal(prev_call: &CallResult, current_call: &CallResult) -> 
     }
 }
 
-pub(super) fn try_match_value_type(
-    merged_call: &MergerCallResult,
-    value_type: ValueType<'_>,
-) -> MergeResult<()> {
+pub(super) fn try_match_value_type(merged_call: &MergerCallResult, value_type: ValueType<'_>) -> MergeResult<()> {
     if let MergerCallResult::CallResult { value, .. } = merged_call {
         return match (value, value_type) {
             (CallResult::Executed(value @ Value::Scalar(_)), ValueType::Stream(_)) => {

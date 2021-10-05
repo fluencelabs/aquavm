@@ -26,46 +26,30 @@ pub(super) fn compute_new_states(
     let (prev_len, current_len) = match subtree_type {
         SubtreeType::Left => (prev_par.left_size, current_par.left_size),
         SubtreeType::Right => {
-            let prev_par_size = prev_par
-                .size()
-                .ok_or(StateFSMError::ParLenOverflow(prev_par))?;
-            let current_par_size = current_par
-                .size()
-                .ok_or(StateFSMError::ParLenOverflow(current_par))?;
+            let prev_par_size = prev_par.size().ok_or(StateFSMError::ParLenOverflow(prev_par))?;
+            let current_par_size = current_par.size().ok_or(StateFSMError::ParLenOverflow(current_par))?;
 
             (prev_par_size as u32, current_par_size as u32)
         }
     };
 
     let prev_state = compute_new_state(prev_len as usize, data_keeper.prev_slider(), prev_par)?;
-    let current_state = compute_new_state(
-        current_len as usize,
-        data_keeper.current_slider(),
-        current_par,
-    )?;
+    let current_state = compute_new_state(current_len as usize, data_keeper.current_slider(), current_par)?;
 
     let pair = CtxStatesPair::new(prev_state, current_state);
     Ok(pair)
 }
 
-fn compute_new_state(
-    par_subtree_len: usize,
-    slider: &TraceSlider,
-    par: ParResult,
-) -> FSMResult<CtxState> {
+fn compute_new_state(par_subtree_len: usize, slider: &TraceSlider, par: ParResult) -> FSMResult<CtxState> {
     let pos = slider
         .position()
         .checked_add(par_subtree_len)
-        .ok_or_else(|| {
-            StateFSMError::ParPosOverflow(par, slider.position(), MergeCtxType::Previous)
-        })?;
+        .ok_or_else(|| StateFSMError::ParPosOverflow(par, slider.position(), MergeCtxType::Previous))?;
 
     let subtrace_len = slider
         .subtrace_len()
         .checked_sub(par_subtree_len)
-        .ok_or_else(|| {
-            StateFSMError::ParLenUnderflow(par, slider.subtrace_len(), MergeCtxType::Current)
-        })?;
+        .ok_or_else(|| StateFSMError::ParLenUnderflow(par, slider.subtrace_len(), MergeCtxType::Current))?;
 
     let new_state = CtxState::new(pos, subtrace_len);
     Ok(new_state)

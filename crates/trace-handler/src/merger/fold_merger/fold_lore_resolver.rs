@@ -34,35 +34,26 @@ pub struct ResolvedSubTraceDescs {
     pub after_subtrace: SubTraceDesc,
 }
 
-pub(super) fn resolve_fold_lore(
-    fold: &FoldResult,
-    merge_ctx: &MergeCtx,
-) -> MergeResult<ResolvedFold> {
+pub(super) fn resolve_fold_lore(fold: &FoldResult, merge_ctx: &MergeCtx) -> MergeResult<ResolvedFold> {
     let (fold_states_count, lens) = compute_lens_convolution(fold, merge_ctx)?;
 
-    let lore = fold
-        .lore
-        .iter()
-        .zip(lens)
-        .try_fold::<_, _, MergeResult<_>>(
-            HashMap::with_capacity(fold.lore.len()),
-            |mut resolved_lore, (lore, lens)| {
-                let before_subtrace =
-                    SubTraceDesc::new(lore.subtraces_desc[0].begin_pos as _, lens.before_len as _);
-                let after_subtrace =
-                    SubTraceDesc::new(lore.subtraces_desc[1].begin_pos as _, lens.after_len as _);
-                let resolved_descs = ResolvedSubTraceDescs::new(before_subtrace, after_subtrace);
+    let lore = fold.lore.iter().zip(lens).try_fold::<_, _, MergeResult<_>>(
+        HashMap::with_capacity(fold.lore.len()),
+        |mut resolved_lore, (lore, lens)| {
+            let before_subtrace = SubTraceDesc::new(lore.subtraces_desc[0].begin_pos as _, lens.before_len as _);
+            let after_subtrace = SubTraceDesc::new(lore.subtraces_desc[1].begin_pos as _, lens.after_len as _);
+            let resolved_descs = ResolvedSubTraceDescs::new(before_subtrace, after_subtrace);
 
-                match resolved_lore.insert(lore.value_pos as usize, resolved_descs) {
-                    Some(_) => Err(FoldResultError::SeveralRecordsWithSamePos(
-                        fold.clone(),
-                        lore.value_pos as usize,
-                    ))
-                    .map_err(Into::into),
-                    None => Ok(resolved_lore),
-                }
-            },
-        )?;
+            match resolved_lore.insert(lore.value_pos as usize, resolved_descs) {
+                Some(_) => Err(FoldResultError::SeveralRecordsWithSamePos(
+                    fold.clone(),
+                    lore.value_pos as usize,
+                ))
+                .map_err(Into::into),
+                None => Ok(resolved_lore),
+            }
+        },
+    )?;
 
     let resolved_fold_lore = ResolvedFold::new(lore, fold_states_count);
     Ok(resolved_fold_lore)
@@ -88,10 +79,7 @@ pub(super) fn resolve_fold_lore(
 
 // TODO: in future it's possible to change a format of a Fold state to one behaves like Par,
 // because this function adds some overhead
-fn compute_lens_convolution(
-    fold: &FoldResult,
-    merge_ctx: &MergeCtx,
-) -> MergeResult<(usize, Vec<LoresLen>)> {
+fn compute_lens_convolution(fold: &FoldResult, merge_ctx: &MergeCtx) -> MergeResult<(usize, Vec<LoresLen>)> {
     let subtraces_count = fold.lore.len();
     let mut lens = Vec::with_capacity(subtraces_count);
     let mut fold_states_count: usize = 0;
@@ -168,10 +156,7 @@ fn check_subtrace_lore(subtrace_lore: &FoldSubTraceLore) -> MergeResult<()> {
 }
 
 impl ResolvedFold {
-    pub(crate) fn new(
-        lore: HashMap<usize, ResolvedSubTraceDescs>,
-        fold_states_count: usize,
-    ) -> Self {
+    pub(crate) fn new(lore: HashMap<usize, ResolvedSubTraceDescs>, fold_states_count: usize) -> Self {
         Self {
             lore,
             fold_states_count,
@@ -196,9 +181,6 @@ struct LoresLen {
 
 impl LoresLen {
     pub(self) fn new(before_len: u32, after_len: u32) -> Self {
-        Self {
-            before_len,
-            after_len,
-        }
+        Self { before_len, after_len }
     }
 }

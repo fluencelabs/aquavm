@@ -28,23 +28,16 @@ pub(super) fn prepare_call_result(
     data_keeper: &mut DataKeeper,
 ) -> MergerCallResult {
     let prev_pos = match scheme {
-        PrepareScheme::Previous | PrepareScheme::Both => {
-            Some(data_keeper.prev_slider().position() - 1)
-        }
+        PrepareScheme::Previous | PrepareScheme::Both => Some(data_keeper.prev_slider().position() - 1),
         PrepareScheme::Current => None,
     };
 
     let current_pos = match scheme {
-        PrepareScheme::Current | PrepareScheme::Both => {
-            Some(data_keeper.current_slider().position() - 1)
-        }
+        PrepareScheme::Current | PrepareScheme::Both => Some(data_keeper.current_slider().position() - 1),
         PrepareScheme::Previous => None,
     };
 
-    let data_positions = DataPositions {
-        prev_pos,
-        current_pos,
-    };
+    let data_positions = DataPositions { prev_pos, current_pos };
 
     let trace_pos = data_keeper.result_states_count();
     data_keeper.new_to_old_pos.insert(trace_pos, data_positions);
