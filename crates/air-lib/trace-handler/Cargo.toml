@@ -15,9 +15,9 @@ name = "air_trace_handler"
 path = "src/lib.rs"
 
 [dependencies]
-air-parser = { path = "../air-parser" }
 air-interpreter-data = { path = "../interpreter-data" }
 air-log-targets = { path = "../log-targets" }
+air-parser = { path = "../air-parser" }
 
 serde_json = "1.0.68"
 log = "0.4.14"
