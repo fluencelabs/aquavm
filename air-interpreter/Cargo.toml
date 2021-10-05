@@ -1,9 +1,13 @@
 [package]
 name = "air-interpreter"
 version = "0.15.0"
+description = "Crate-wrapper for air"
 authors = ["Fluence Labs"]
 edition = "2018"
+repository = "https://github.com/fluencelabs/air/air-interpreter"
 publish = false
+keywords = ["fluence", "air", "webassembly", "programming-language"]
+categories = ["wasm"]
 
 [lib]
 name = "air_interpreter_client"
