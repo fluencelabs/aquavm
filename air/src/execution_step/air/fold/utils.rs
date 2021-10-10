@@ -18,12 +18,11 @@ use super::*;
 use crate::exec_err;
 use crate::execution_step::RSecurityTetraplet;
 use crate::JValue;
+use crate::LambdaAST;
 
 use air_parser::ast;
-use jsonpath_lib::select;
 
 use std::ops::Deref;
-use std::rc::Rc;
 
 // TODO: refactor this file after switching to boxed value
 
@@ -46,11 +45,9 @@ pub(crate) fn construct_scalar_iterable_value<'ctx>(
 ) -> ExecutionResult<FoldIterableScalar> {
     match ast_iterable {
         ast::IterableScalarValue::ScalarVariable(scalar_name) => create_scalar_iterable(exec_ctx, scalar_name),
-        ast::IterableScalarValue::JsonPath {
-            scalar_name,
-            path,
-            should_flatten,
-        } => create_scalar_json_path_iterable(exec_ctx, scalar_name, path, *should_flatten),
+        ast::IterableScalarValue::VariableWithLambda { scalar_name, lambda } => {
+            create_scalar_lambda_iterable(exec_ctx, scalar_name, lambda)
+        }
     }
 }
 
@@ -124,77 +121,41 @@ fn from_call_result(call_result: ResolvedCallResult) -> ExecutionResult<FoldIter
     Ok(iterable)
 }
 
-fn create_scalar_json_path_iterable<'ctx>(
+fn create_scalar_lambda_iterable<'ctx>(
     exec_ctx: &ExecutionCtx<'ctx>,
     scalar_name: &str,
-    json_path: &str,
-    should_flatten: bool,
+    lambda: &LambdaAST<'_>,
 ) -> ExecutionResult<FoldIterableScalar> {
+    use crate::execution_step::lambda_applier::select;
+
     match exec_ctx.scalars.get(scalar_name) {
         Some(Scalar::JValueRef(variable)) => {
-            let jvalues = apply_json_path(&variable.result, json_path)?;
-            from_jvalues(jvalues, variable.tetraplet.clone(), json_path, should_flatten)
+            let jvalues = select(&variable.result, lambda.iter())?;
+            from_jvalues(vec![jvalues], variable.tetraplet.clone(), lambda)
         }
         Some(Scalar::JValueFoldCursor(fold_state)) => {
             let iterable_value = fold_state.iterable.peek().unwrap();
-            let jvalues = iterable_value.apply_json_path(json_path)?;
+            let jvalues = iterable_value.apply_lambda(lambda)?;
             let tetraplet = as_tetraplet(&iterable_value);
 
-            from_jvalues(jvalues, tetraplet, json_path, should_flatten)
+            from_jvalues(jvalues, tetraplet, lambda)
         }
         _ => return exec_err!(ExecutionError::VariableNotFound(scalar_name.to_string())),
     }
 }
 
-fn apply_json_path<'jvalue, 'str>(
-    jvalue: &'jvalue JValue,
-    json_path: &'str str,
-) -> ExecutionResult<Vec<&'jvalue JValue>> {
-    use ExecutionError::JValueJsonPathError;
-
-    select(jvalue, json_path).map_err(|e| Rc::new(JValueJsonPathError(jvalue.clone(), json_path.to_string(), e)))
-}
-
-/// Applies json_path to provided jvalues and construct IterableValue from the result and given triplet.
+/// Construct IterableValue from the result and given triplet.
 fn from_jvalues(
     jvalues: Vec<&JValue>,
     tetraplet: RSecurityTetraplet,
-    json_path: &str,
-    should_flatten: bool,
+    lambda: &LambdaAST<'_>,
 ) -> ExecutionResult<FoldIterableScalar> {
-    let jvalues = construct_iterable_jvalues(jvalues, should_flatten)?;
-
-    if jvalues.is_empty() {
-        return Ok(FoldIterableScalar::Empty);
-    }
-
-    tetraplet.borrow_mut().add_json_path(json_path);
+    tetraplet.borrow_mut().add_lambda(&air_lambda_ast::format_ast(lambda));
+    let jvalues = jvalues.into_iter().cloned().collect();
 
     let foldable = IterableJsonPathResult::init(jvalues, tetraplet);
     let iterable = FoldIterableScalar::Scalar(Box::new(foldable));
     Ok(iterable)
-}
-
-fn construct_iterable_jvalues(jvalues: Vec<&JValue>, should_flatten: bool) -> ExecutionResult<Vec<JValue>> {
-    if !should_flatten {
-        let jvalues = jvalues.into_iter().cloned().collect();
-        return Ok(jvalues);
-    }
-
-    if jvalues.len() != 1 {
-        let jvalues = jvalues.into_iter().cloned().collect();
-        let jvalue = JValue::Array(jvalues);
-        return exec_err!(ExecutionError::FlatteningError(jvalue));
-    }
-
-    match jvalues[0] {
-        JValue::Array(values) => Ok(values.clone()),
-        _ => {
-            let jvalues = jvalues.into_iter().cloned().collect();
-            let jvalue = JValue::Array(jvalues);
-            exec_err!(ExecutionError::FlatteningError(jvalue))
-        }
-    }
 }
 
 fn as_tetraplet(iterable: &IterableItem<'_>) -> RSecurityTetraplet {

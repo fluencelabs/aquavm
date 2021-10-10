@@ -18,6 +18,7 @@ use super::AstVariable;
 use super::LexerError;
 use super::LexerResult;
 use super::Token;
+use crate::LambdaAST;
 
 use std::convert::TryInto;
 use std::iter::Peekable;
@@ -304,28 +305,19 @@ impl<'input> CallVariableParser<'input> {
             }
             (false, true) => {
                 let json_path_start_pos = self.state.first_dot_met_pos.unwrap();
-                let should_flatten = self.state.flattening_met;
-                let (variable, json_path) =
-                    to_variable_and_path(self.string_to_parse, json_path_start_pos, should_flatten);
+                let (variable, lambda) =
+                    to_variable_and_lambda(self.string_to_parse, json_path_start_pos)?;
                 let variable = self.to_variable(variable);
 
-                Ok(Token::VariableWithJsonPath(
-                    variable,
-                    json_path,
-                    should_flatten,
-                ))
+                Ok(Token::VariableWithLambda(variable, lambda))
             }
         }
     }
 }
 
-fn to_variable_and_path(str: &str, pos: usize, should_flatten: bool) -> (&str, &str) {
-    let json_path = if should_flatten {
-        // -1 to not include the flattening symbol ! to the resulted json path
-        &str[pos + 1..str.len() - 1]
-    } else {
-        &str[pos + 1..]
-    };
+fn to_variable_and_lambda(str: &str, pos: usize) -> LexerResult<(&str, LambdaAST<'_>)> {
+    let lambda = crate::parse_lambda(&str[pos + 1..])
+        .map_err(|e| LexerError::LambdaParserError(pos + 1, str.len(), e.to_string()))?;
 
-    (&str[0..pos], json_path)
+    Ok((&str[0..pos], lambda))
 }

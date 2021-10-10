@@ -1,12 +1,12 @@
 // auto-generated: "lalrpop 0.19.6"
-// sha3: bcd19a478f6a51d6d816bf63f4b9bd31c8eb721de974cf77626c92ea437d66
+// sha3: dce2765d82d72fa2e95c6d8a8a3bd84838971ba5ae153715dd724be731cecdba
 use crate::parser::ast::*;
-use crate::parser::air_parser::make_flattened_error;
 use crate::parser::air_parser::make_stream_iterable_error;
 use crate::parser::ParserError;
 use crate::parser::VariableValidator;
 use crate::parser::Span;
 use crate::parser::lexer::Token;
+use air_lambda_parser::LambdaAST;
 use lalrpop_util::ErrorRecovery;
 use std::rc::Rc;
 #[allow(unused_extern_crates)]
@@ -21,12 +21,12 @@ mod __parse__AIR {
     #![allow(non_snake_case, non_camel_case_types, unused_mut, unused_variables, unused_imports, unused_parens)]
 
     use crate::parser::ast::*;
-    use crate::parser::air_parser::make_flattened_error;
     use crate::parser::air_parser::make_stream_iterable_error;
     use crate::parser::ParserError;
     use crate::parser::VariableValidator;
     use crate::parser::Span;
     use crate::parser::lexer::Token;
+    use air_lambda_parser::LambdaAST;
     use lalrpop_util::ErrorRecovery;
     use std::rc::Rc;
     #[allow(unused_extern_crates)]
@@ -42,9 +42,9 @@ mod __parse__AIR {
         Variant0(Token<'input>),
         Variant1(&'input str),
         Variant2(bool),
-        Variant3((AstVariable<'input>, &'input str, bool)),
-        Variant4(LastErrorPath),
-        Variant5(Number),
+        Variant3(LastErrorPath),
+        Variant4(Number),
+        Variant5((AstVariable<'input>, LambdaAST<'input>)),
         Variant6(__lalrpop_util::ErrorRecovery<usize, Token<'input>, ParserError>),
         Variant7(CallInstrArgValue<'input>),
         Variant8(alloc::vec::Vec<CallInstrArgValue<'input>>),
@@ -64,15 +64,15 @@ mod __parse__AIR {
         // State 0
         31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32,
         // State 1
-        0, 0, 0, 0, 35, 36, 37, 0, 38, 39, 40, 41, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 35, 36, 37, 0, 38, 39, 40, 0, 41, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 2
-        12, 0, 0, 0, 44, 0, 0, 45, 46, 0, 47, 0, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        12, 0, 0, 0, 44, 0, 0, 45, 0, 46, 0, 47, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 3
-        0, 0, 0, 0, 50, 0, 0, 0, 51, 0, 0, 0, 52, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 51, 52, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 4
-        0, 0, 0, 0, 53, 54, 55, 56, 57, 0, 58, 59, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 53, 54, 55, 56, 0, 57, 58, 59, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 5
-        0, 0, 0, 0, 53, 54, 55, 56, 57, 0, 58, 59, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 53, 54, 55, 56, 0, 57, 58, 59, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 6
         31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32,
         // State 7
@@ -80,15 +80,15 @@ mod __parse__AIR {
         // State 8
         31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32,
         // State 9
-        0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 65, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 65, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 10
-        19, 0, 0, 0, 44, 0, 0, 45, 46, 0, 47, 0, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        19, 0, 0, 0, 44, 0, 0, 45, 0, 46, 0, 47, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 11
-        0, 0, 0, 0, 44, 0, 0, 45, 46, 0, 47, 0, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 44, 0, 0, 45, 0, 46, 0, 47, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 12
-        0, 0, 0, 0, 53, 54, 55, 56, 57, 0, 58, 59, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 53, 54, 55, 56, 0, 57, 58, 59, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 13
-        0, 0, 0, 0, 53, 54, 55, 56, 57, 0, 58, 59, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 53, 54, 55, 56, 0, 57, 58, 59, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 14
         31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32,
         // State 15
@@ -98,9 +98,9 @@ mod __parse__AIR {
         // State 17
         0, 0, 26, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 18
-        0, 0, 0, 0, 44, 0, 0, 45, 46, 0, 47, 0, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 44, 0, 0, 45, 0, 46, 0, 47, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 19
-        0, 0, 0, 0, 44, 0, 0, 45, 46, 0, 47, 0, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 44, 0, 0, 45, 0, 46, 0, 47, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 20
         31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32,
         // State 21
@@ -110,11 +110,11 @@ mod __parse__AIR {
         // State 23
         31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32,
         // State 24
-        0, 83, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 65, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 83, 0, 0, 64, 0, 0, 0, 0, 0, 0, 65, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 25
         0, 0, 0, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 26
-        0, 0, 0, 0, 44, 0, 0, 45, 46, 0, 47, 0, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 44, 0, 0, 45, 0, 46, 0, 47, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 27
         0, 0, 0, 104, 87, 88, 89, 90, 91, 92, 93, 94, 95, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 28
@@ -130,57 +130,57 @@ mod __parse__AIR {
         // State 33
         0, 62, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 34
-        0, 0, 0, 0, -9, 0, 0, 0, 0, 0, 0, 0, -9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, -9, 0, 0, 0, 0, 0, 0, -9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 35
-        0, 0, 0, 0, -12, 0, 0, 0, 0, 0, 0, 0, -12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, -12, 0, 0, 0, 0, 0, 0, -12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 36
-        0, 0, 0, 0, -13, 0, 0, 0, 0, 0, 0, 0, -13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, -13, 0, 0, 0, 0, 0, 0, -13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 37
-        0, 0, 0, 0, -10, 0, 0, 0, 0, 0, 0, 0, -10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, -15, 0, 0, 0, 0, 0, 0, -15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 38
-        0, 0, 0, 0, -15, 0, 0, 0, 0, 0, 0, 0, -15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, -14, 0, 0, 0, 0, 0, 0, -14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 39
-        0, 0, 0, 0, -14, 0, 0, 0, 0, 0, 0, 0, -14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, -11, 0, 0, 0, 0, 0, 0, -11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 40
-        0, 0, 0, 0, -11, 0, 0, 0, 0, 0, 0, 0, -11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, -10, 0, 0, 0, 0, 0, 0, -10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 41
-        -61, 0, 0, 0, -61, 0, 0, -61, -61, 0, -61, 0, -61, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        -61, 0, 0, 0, -61, 0, 0, -61, 0, -61, 0, -61, -61, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 42
-        -62, 0, 0, 0, -62, 0, 0, -62, -62, 0, -62, 0, -62, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        -62, 0, 0, 0, -62, 0, 0, -62, 0, -62, 0, -62, -62, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 43
-        -29, -29, -29, 0, -29, 0, 0, -29, -29, 0, -29, 0, -29, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        -29, -29, -29, 0, -29, 0, 0, -29, 0, -29, 0, -29, -29, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 44
-        -32, -32, -32, 0, -32, 0, 0, -32, -32, 0, -32, 0, -32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        -32, -32, -32, 0, -32, 0, 0, -32, 0, -32, 0, -32, -32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 45
-        -31, -31, -31, 0, -31, 0, 0, -31, -31, 0, -31, 0, -31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        -28, -28, -28, 0, -28, 0, 0, -28, 0, -28, 0, -28, -28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 46
-        -28, -28, -28, 0, -28, 0, 0, -28, -28, 0, -28, 0, -28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        -30, -30, -30, 0, -30, 0, 0, -30, 0, -30, 0, -30, -30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 47
-        -30, -30, -30, 0, -30, 0, 0, -30, -30, 0, -30, 0, -30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        -31, -31, -31, 0, -31, 0, 0, -31, 0, -31, 0, -31, -31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 48
         0, 0, 0, 0, 21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 49
         0, 0, 0, 0, -64, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 50
-        0, 0, 0, 0, -65, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        // State 51
         0, 0, 0, 0, 22, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        // State 51
+        0, 0, 0, 0, -65, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 52
-        -50, 0, 0, 0, -50, -50, -50, -50, -50, 0, -50, -50, -50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -50,
+        -50, 0, 0, 0, -50, -50, -50, -50, 0, -50, -50, -50, -50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -50,
         // State 53
-        -53, 0, 0, 0, -53, -53, -53, -53, -53, 0, -53, -53, -53, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -53,
+        -53, 0, 0, 0, -53, -53, -53, -53, 0, -53, -53, -53, -53, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -53,
         // State 54
-        -55, 0, 0, 0, -55, -55, -55, -55, -55, 0, -55, -55, -55, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -55,
+        -55, 0, 0, 0, -55, -55, -55, -55, 0, -55, -55, -55, -55, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -55,
         // State 55
-        -49, 0, 0, 0, -49, -49, -49, -49, -49, 0, -49, -49, -49, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -49,
+        -49, 0, 0, 0, -49, -49, -49, -49, 0, -49, -49, -49, -49, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -49,
         // State 56
-        -56, 0, 0, 0, -56, -56, -56, -56, -56, 0, -56, -56, -56, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -56,
+        -52, 0, 0, 0, -52, -52, -52, -52, 0, -52, -52, -52, -52, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -52,
         // State 57
-        -52, 0, 0, 0, -52, -52, -52, -52, -52, 0, -52, -52, -52, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -52,
+        -54, 0, 0, 0, -54, -54, -54, -54, 0, -54, -54, -54, -54, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -54,
         // State 58
-        -54, 0, 0, 0, -54, -54, -54, -54, -54, 0, -54, -54, -54, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -54,
+        -51, 0, 0, 0, -51, -51, -51, -51, 0, -51, -51, -51, -51, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -51,
         // State 59
-        -51, 0, 0, 0, -51, -51, -51, -51, -51, 0, -51, -51, -51, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -51,
+        -56, 0, 0, 0, -56, -56, -56, -56, 0, -56, -56, -56, -56, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -56,
         // State 60
         0, 68, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 61
@@ -206,7 +206,7 @@ mod __parse__AIR {
         // State 71
         -38, -38, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -38,
         // State 72
-        0, -66, 0, 0, -66, 0, 0, -66, -66, 0, -66, 0, -66, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, -66, 0, 0, -66, 0, 0, -66, 0, -66, 0, -66, -66, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 73
         0, 97, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 74
@@ -232,7 +232,7 @@ mod __parse__AIR {
         // State 84
         0, 0, 0, -16, -16, -16, -16, -16, -16, -16, -16, -16, -16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 85
-        0, -17, 0, 0, -17, 0, 0, 0, 0, 0, 0, 0, -17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, -17, 0, 0, -17, 0, 0, 0, 0, 0, 0, -17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 86
         0, 0, 0, -20, -20, -20, -20, -20, -20, -20, -20, -20, -20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 87
@@ -242,19 +242,19 @@ mod __parse__AIR {
         // State 89
         0, 0, 0, -25, -25, -25, -25, -25, -25, -25, -25, -25, -25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 90
-        0, 0, 0, -22, -22, -22, -22, -22, -22, -22, -22, -22, -22, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        // State 91
         0, 0, 0, -27, -27, -27, -27, -27, -27, -27, -27, -27, -27, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        // State 92
+        // State 91
         0, 0, 0, -19, -19, -19, -19, -19, -19, -19, -19, -19, -19, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        // State 93
+        // State 92
         0, 0, 0, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        // State 94
+        // State 93
         0, 0, 0, -21, -21, -21, -21, -21, -21, -21, -21, -21, -21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        // State 94
+        0, 0, 0, -22, -22, -22, -22, -22, -22, -22, -22, -22, -22, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 95
         0, 105, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 96
-        -63, 0, 0, 0, -63, 0, 0, -63, -63, 0, -63, 0, -63, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        -63, 0, 0, 0, -63, 0, 0, -63, 0, -63, 0, -63, -63, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 97
         -42, -42, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -42,
         // State 98
@@ -268,7 +268,7 @@ mod __parse__AIR {
         // State 102
         0, 0, 0, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 103
-        0, -18, 0, 0, -18, 0, 0, 0, 0, 0, 0, 0, -18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, -18, 0, 0, -18, 0, 0, 0, 0, 0, 0, -18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 104
         0, 0, -34, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     ];
@@ -554,11 +554,11 @@ mod __parse__AIR {
             r###"Boolean"###,
             r###"EmptyArray"###,
             r###"InitPeerId"###,
-            r###"JsonPath"###,
             r###"LastError"###,
             r###"Literal"###,
             r###"Number"###,
             r###"Stream"###,
+            r###"VariableWithLambda"###,
             r###"ap"###,
             r###"call"###,
             r###"fold"###,
@@ -698,11 +698,11 @@ mod __parse__AIR {
             Token::Boolean(_) if true => Some(5),
             Token::SquareBrackets if true => Some(6),
             Token::InitPeerId if true => Some(7),
-            Token::VariableWithJsonPath(_, _, _) if true => Some(8),
-            Token::LastError(_) if true => Some(9),
-            Token::StringLiteral(_) if true => Some(10),
-            Token::Number(_) if true => Some(11),
-            Token::Stream(_) if true => Some(12),
+            Token::LastError(_) if true => Some(8),
+            Token::StringLiteral(_) if true => Some(9),
+            Token::Number(_) if true => Some(10),
+            Token::Stream(_) if true => Some(11),
+            Token::VariableWithLambda(_, _) if true => Some(12),
             Token::Ap if true => Some(13),
             Token::Call if true => Some(14),
             Token::Fold if true => Some(15),
@@ -728,7 +728,7 @@ mod __parse__AIR {
     {
         match __token_index {
             0 | 1 | 2 | 3 | 6 | 7 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 => __Symbol::Variant0(__token),
-            4 | 10 | 12 => match __token {
+            4 | 9 | 11 => match __token {
                 Token::Alphanumeric(__tok0) | Token::StringLiteral(__tok0) | Token::Stream(__tok0) if true => __Symbol::Variant1(__tok0),
                 _ => unreachable!(),
             },
@@ -737,15 +737,15 @@ mod __parse__AIR {
                 _ => unreachable!(),
             },
             8 => match __token {
-                Token::VariableWithJsonPath(__tok0, __tok1, __tok2) if true => __Symbol::Variant3((__tok0, __tok1, __tok2)),
+                Token::LastError(__tok0) if true => __Symbol::Variant3(__tok0),
                 _ => unreachable!(),
             },
-            9 => match __token {
-                Token::LastError(__tok0) if true => __Symbol::Variant4(__tok0),
+            10 => match __token {
+                Token::Number(__tok0) if true => __Symbol::Variant4(__tok0),
                 _ => unreachable!(),
             },
-            11 => match __token {
-                Token::Number(__tok0) if true => __Symbol::Variant5(__tok0),
+            12 => match __token {
+                Token::VariableWithLambda(__tok0, __tok1) if true => __Symbol::Variant5((__tok0, __tok1)),
                 _ => unreachable!(),
             },
             _ => unreachable!(),
@@ -1476,14 +1476,14 @@ mod __parse__AIR {
     fn __symbol_type_mismatch() -> ! {
         panic!("symbol type mismatch")
     }
-    fn __pop_Variant3<
+    fn __pop_Variant5<
       'input,
     >(
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, (AstVariable<'input>, &'input str, bool), usize)
+    ) -> (usize, (AstVariable<'input>, LambdaAST<'input>), usize)
      {
         match __symbols.pop() {
-            Some((__l, __Symbol::Variant3(__v), __r)) => (__l, __v, __r),
+            Some((__l, __Symbol::Variant5(__v), __r)) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
@@ -1564,14 +1564,14 @@ mod __parse__AIR {
             _ => __symbol_type_mismatch()
         }
     }
-    fn __pop_Variant4<
+    fn __pop_Variant3<
       'input,
     >(
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
     ) -> (usize, LastErrorPath, usize)
      {
         match __symbols.pop() {
-            Some((__l, __Symbol::Variant4(__v), __r)) => (__l, __v, __r),
+            Some((__l, __Symbol::Variant3(__v), __r)) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
@@ -1586,14 +1586,14 @@ mod __parse__AIR {
             _ => __symbol_type_mismatch()
         }
     }
-    fn __pop_Variant5<
+    fn __pop_Variant4<
       'input,
     >(
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
     ) -> (usize, Number, usize)
      {
         match __symbols.pop() {
-            Some((__l, __Symbol::Variant5(__v), __r)) => (__l, __v, __r),
+            Some((__l, __Symbol::Variant4(__v), __r)) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
@@ -1897,8 +1897,8 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // ApArgument = JsonPath => ActionFn(40);
-        let __sym0 = __pop_Variant3(__symbols);
+        // ApArgument = VariableWithLambda => ActionFn(40);
+        let __sym0 = __pop_Variant5(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action40::<>(input, errors, validator, __sym0);
@@ -1919,7 +1919,7 @@ mod __parse__AIR {
     ) -> (usize, usize)
     {
         // ApArgument = Number => ActionFn(41);
-        let __sym0 = __pop_Variant5(__symbols);
+        let __sym0 = __pop_Variant4(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action41::<>(input, errors, validator, __sym0);
@@ -2003,7 +2003,7 @@ mod __parse__AIR {
     ) -> (usize, usize)
     {
         // ApArgument = LastError => ActionFn(45);
-        let __sym0 = __pop_Variant4(__symbols);
+        let __sym0 = __pop_Variant3(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action45::<>(input, errors, validator, __sym0);
@@ -2154,8 +2154,8 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // CallInstrArgValue = JsonPath => ActionFn(33);
-        let __sym0 = __pop_Variant3(__symbols);
+        // CallInstrArgValue = VariableWithLambda => ActionFn(33);
+        let __sym0 = __pop_Variant5(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action33::<>(input, errors, validator, __sym0);
@@ -2176,7 +2176,7 @@ mod __parse__AIR {
     ) -> (usize, usize)
     {
         // CallInstrArgValue = Number => ActionFn(34);
-        let __sym0 = __pop_Variant5(__symbols);
+        let __sym0 = __pop_Variant4(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action34::<>(input, errors, validator, __sym0);
@@ -2260,7 +2260,7 @@ mod __parse__AIR {
     ) -> (usize, usize)
     {
         // CallInstrArgValue = LastError => ActionFn(38);
-        let __sym0 = __pop_Variant4(__symbols);
+        let __sym0 = __pop_Variant3(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action38::<>(input, errors, validator, __sym0);
@@ -2343,8 +2343,8 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // CallInstrValue = JsonPath => ActionFn(78);
-        let __sym0 = __pop_Variant3(__symbols);
+        // CallInstrValue = VariableWithLambda => ActionFn(78);
+        let __sym0 = __pop_Variant5(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action78::<>(input, errors, validator, __sym0);
@@ -2895,7 +2895,7 @@ mod __parse__AIR {
     ) -> (usize, usize)
     {
         // Matchable = Number => ActionFn(53);
-        let __sym0 = __pop_Variant5(__symbols);
+        let __sym0 = __pop_Variant4(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action53::<>(input, errors, validator, __sym0);
@@ -2936,8 +2936,8 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Matchable = JsonPath => ActionFn(55);
-        let __sym0 = __pop_Variant3(__symbols);
+        // Matchable = VariableWithLambda => ActionFn(55);
+        let __sym0 = __pop_Variant5(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action55::<>(input, errors, validator, __sym0);
@@ -3128,8 +3128,8 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // ScalarIterable = JsonPath => ActionFn(86);
-        let __sym0 = __pop_Variant3(__symbols);
+        // ScalarIterable = VariableWithLambda => ActionFn(86);
+        let __sym0 = __pop_Variant5(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action86::<>(input, errors, validator, __sym0);
@@ -3240,17 +3240,11 @@ fn __action3<
 ) -> Box<Instruction<'input>>
 {
     {
-        if let ApArgument::JsonPath(json_path) = &arg {
-            if let AstVariable::Stream(_) = &json_path.variable {
-                let token = Token::VariableWithJsonPath(json_path.variable.clone(), json_path.path, json_path.should_flatten);
+        if let ApArgument::VariableWithLambda(vl) = &arg {
+            if let AstVariable::Stream(_) = &vl.variable {
+                let token = Token::VariableWithLambda(vl.variable.clone(), vl.lambda.clone());
                 errors.push(make_stream_iterable_error(left, token, right));
             };
-
-            // Due the json path constraints json path should be flattened in a apply arguments.
-            if !json_path.should_flatten {
-                let token = Token::VariableWithJsonPath(json_path.variable.clone(), json_path.path, json_path.should_flatten);
-                errors.push(make_flattened_error(left, token, right));
-            }
         }
 
         let apply = Ap::new(arg, res);
@@ -3703,21 +3697,15 @@ fn __action27<
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
     (_, left, _): (usize, usize, usize),
-    (_, j, _): (usize, (AstVariable<'input>, &'input str, bool), usize),
+    (_, vl, _): (usize, (AstVariable<'input>, LambdaAST<'input>), usize),
     (_, right, _): (usize, usize, usize),
 ) -> CallInstrValue<'input>
 {
     {
-        let variable = j.0;
-        let path = j.1;
-        let should_flatten = j.2;
-        // Due the json path constraints json path should be flattened in a call triplet.
-        if !should_flatten {
-            let token = Token::VariableWithJsonPath(variable.clone(), path, should_flatten);
-            errors.push(make_flattened_error(left, token, right));
-        }
+        let variable = vl.0;
+        let lambda = vl.1;
 
-        CallInstrValue::JsonPath(JsonPath::new(variable, path, should_flatten))
+        CallInstrValue::VariableWithLambda(VariableWithLambda::new(variable, lambda))
     }
 }
 
@@ -3805,10 +3793,10 @@ fn __action33<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, j, _): (usize, (AstVariable<'input>, &'input str, bool), usize),
+    (_, vl, _): (usize, (AstVariable<'input>, LambdaAST<'input>), usize),
 ) -> CallInstrArgValue<'input>
 {
-    CallInstrArgValue::JsonPath(JsonPath::new(j.0, j.1, j.2))
+    CallInstrArgValue::VariableWithLambda(VariableWithLambda::new(vl.0, vl.1))
 }
 
 #[allow(unused_variables)]
@@ -3910,10 +3898,10 @@ fn __action40<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, j, _): (usize, (AstVariable<'input>, &'input str, bool), usize),
+    (_, vl, _): (usize, (AstVariable<'input>, LambdaAST<'input>), usize),
 ) -> ApArgument<'input>
 {
-    ApArgument::JsonPath(JsonPath::new(j.0, j.1, j.2))
+    ApArgument::VariableWithLambda(VariableWithLambda::new(vl.0, vl.1))
 }
 
 #[allow(unused_variables)]
@@ -4016,26 +4004,25 @@ fn __action47<
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
     (_, l, _): (usize, usize, usize),
-    (_, j, _): (usize, (AstVariable<'input>, &'input str, bool), usize),
+    (_, vl, _): (usize, (AstVariable<'input>, LambdaAST<'input>), usize),
     (_, r, _): (usize, usize, usize),
 ) -> IterableScalarValue<'input>
 {
     {
         use crate::parser::air::AstVariable::*;
 
-        let variable = j.0;
-        let path = j.1;
-        let should_flatten = j.2;
+        let variable = vl.0;
+        let lambda = vl.1;
 
         let scalar_name = match variable {
             Stream(name) => {
-                let token = Token::VariableWithJsonPath(variable, path, should_flatten);
+                let token = Token::VariableWithLambda(variable, lambda.clone());
                 errors.push(make_stream_iterable_error(l, token, r));
                 name
             }
             Scalar(name) => name,
         };
-        IterableScalarValue::JsonPath { scalar_name, path, should_flatten }
+        IterableScalarValue::VariableWithLambda { scalar_name, lambda }
     }
 }
 
@@ -4153,10 +4140,10 @@ fn __action55<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, j, _): (usize, (AstVariable<'input>, &'input str, bool), usize),
+    (_, vl, _): (usize, (AstVariable<'input>, LambdaAST<'input>), usize),
 ) -> MatchableValue<'input>
 {
-    MatchableValue::JsonPath(JsonPath::new(j.0, j.1, j.2))
+    MatchableValue::VariableWithLambda(VariableWithLambda::new(vl.0, vl.1))
 }
 
 #[allow(unused_variables)]
@@ -4434,7 +4421,7 @@ fn __action69<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    __0: (usize, (AstVariable<'input>, &'input str, bool), usize),
+    __0: (usize, (AstVariable<'input>, LambdaAST<'input>), usize),
     __1: (usize, usize, usize),
 ) -> CallInstrValue<'input>
 {
@@ -4764,7 +4751,7 @@ fn __action77<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    __0: (usize, (AstVariable<'input>, &'input str, bool), usize),
+    __0: (usize, (AstVariable<'input>, LambdaAST<'input>), usize),
     __1: (usize, usize, usize),
 ) -> IterableScalarValue<'input>
 {
@@ -4797,7 +4784,7 @@ fn __action78<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    __0: (usize, (AstVariable<'input>, &'input str, bool), usize),
+    __0: (usize, (AstVariable<'input>, LambdaAST<'input>), usize),
 ) -> CallInstrValue<'input>
 {
     let __start0 = __0.2.clone();
@@ -5111,7 +5098,7 @@ fn __action86<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    __0: (usize, (AstVariable<'input>, &'input str, bool), usize),
+    __0: (usize, (AstVariable<'input>, LambdaAST<'input>), usize),
 ) -> IterableScalarValue<'input>
 {
     let __start0 = __0.2.clone();

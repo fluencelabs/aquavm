@@ -51,11 +51,11 @@ pub fn parse(air_script: &str) -> Result<Box<Instruction<'_>>, String> {
         match result {
             Ok(r) if errors.is_empty() => Ok(r),
             Ok(_) => Err(report_errors(file_id, files, errors)),
-            Err(err) => Err(report_errors(
+            Err(error) => Err(report_errors(
                 file_id,
                 files,
                 vec![ErrorRecovery {
-                    error: err,
+                    error,
                     dropped_tokens: vec![],
                 }],
             )),
@@ -169,6 +169,9 @@ fn lexical_error_to_label(file_id: usize, error: LexerError) -> Label<usize> {
         ParseFloatError(start, end, _) => {
             Label::primary(file_id, start..end).with_message(error.to_string())
         }
+        LambdaParserError(start, end, _) => {
+            Label::primary(file_id, start..end).with_message(error.to_string())
+        }
         LastErrorPathError(start, end, _) => {
             Label::primary(file_id, start..end).with_message(error.to_string())
         }
@@ -194,14 +197,6 @@ macro_rules! make_user_error(
         }
     }}
 );
-
-pub(super) fn make_flattened_error(
-    start_pos: usize,
-    token: Token<'_>,
-    end_pos: usize,
-) -> ErrorRecovery<usize, Token<'_>, ParserError> {
-    make_user_error!(CallArgsNotFlattened, start_pos, token, end_pos)
-}
 
 pub(super) fn make_stream_iterable_error(
     start_pos: usize,

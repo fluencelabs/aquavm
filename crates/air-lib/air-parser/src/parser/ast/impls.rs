@@ -22,12 +22,8 @@ impl<'i> Ap<'i> {
     }
 }
 
-impl<'i> JsonPath<'i> {
-    pub fn new(variable: AstVariable<'i>, path: &'i str, should_flatten: bool) -> Self {
-        Self {
-            variable,
-            path,
-            should_flatten,
-        }
+impl<'i> VariableWithLambda<'i> {
+    pub fn new(variable: AstVariable<'i>, lambda: LambdaAST<'i>) -> Self {
+        Self { variable, lambda }
     }
 }

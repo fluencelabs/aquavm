@@ -17,6 +17,8 @@ version = "0.15.0"
 dependencies = [
  "air-interpreter-data",
  "air-interpreter-interface",
+ "air-lambda-ast",
+ "air-lambda-parser",
  "air-log-targets",
  "air-parser",
  "air-test-utils",
@@ -26,7 +28,6 @@ dependencies = [
  "csv",
  "env_logger",
  "fluence-app-service",
- "jsonpath_lib-fl",
  "log",
  "maplit",
  "marine-rs-sdk",
@@ -75,6 +76,32 @@ dependencies = [
 ]
 
 [[package]]
+name = "air-lambda-ast"
+version = "0.1.0"
+dependencies = [
+ "non-empty-vec",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "air-lambda-parser"
+version = "0.1.0"
+dependencies = [
+ "air-lambda-ast",
+ "codespan",
+ "codespan-reporting",
+ "itertools 0.10.1",
+ "lalrpop",
+ "lalrpop-util",
+ "multimap",
+ "regex",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
 name = "air-log-targets"
 version = "0.1.0"
 
@@ -82,6 +109,7 @@ version = "0.1.0"
 name = "air-parser"
 version = "0.7.1"
 dependencies = [
+ "air-lambda-parser",
  "codespan",
  "codespan-reporting",
  "criterion",
@@ -133,12 +161,6 @@ name = "anyhow"
 version = "1.0.44"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "61604a8f862e1d5c3229fdd78f8b02c68dcf73a4c4b05fd636d12240aaa242c1"
-
-[[package]]
-name = "array_tool"
-version = "1.0.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8f8cb5d814eb646a863c4f24978cff2880c4be96ad8cde2c0f0678732902e271"
 
 [[package]]
 name = "arrayref"
@@ -989,19 +1011,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "jsonpath_lib-fl"
-version = "0.3.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "33dcf980221b25366e8f0df601cf0df6ffcc97242cbbe4d139a79a7f0de5107f"
-dependencies = [
- "array_tool",
- "env_logger",
- "log",
- "serde",
- "serde_json",
-]
-
-[[package]]
 name = "lalrpop"
 version = "0.19.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1332,6 +1341,15 @@ dependencies = [
  "lexical-core",
  "memchr",
  "version_check",
+]
+
+[[package]]
+name = "non-empty-vec"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e411c9b40f7c0048d9d78283d94954defc6ae6d432184f4b8ef491ea87d9a882"
+dependencies = [
+ "serde",
 ]
 
 [[package]]
@@ -1816,7 +1834,6 @@ version = "1.0.68"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0f690853975602e1bfe1ccbf50504d67174e3bcf340f23b5ea9992e0587a52d8"
 dependencies = [
- "indexmap",
  "itoa",
  "ryu",
  "serde",

@@ -271,7 +271,7 @@ fn json_path() {
         JSON_PATH,
         Single(Ok((
             0,
-            Token::VariableWithJsonPath(variable, r#"$[$@[]():?.*,"]"#, false),
+            Token::VariableWithLambda(variable, r#"$[$@[]():?.*,"]"#, false),
             JSON_PATH.len(),
         ))),
     );

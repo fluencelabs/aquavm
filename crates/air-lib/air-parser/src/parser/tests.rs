@@ -140,11 +140,9 @@ fn parse_json_path() {
         "#;
     let instruction = parse(source_code);
     let expected = Instruction::Call(Call {
-        peer_part: PeerPk(CallInstrValue::JsonPath(ast::JsonPath::new(
-            Scalar("id"),
-            "$.a",
-            true,
-        ))),
+        peer_part: PeerPk(CallInstrValue::VariableWithLambda(
+            ast::VariableWithLambda::new(Scalar("id"), "$.a", true),
+        )),
         function_part: FuncName(CallInstrValue::Literal("f")),
         args: Rc::new(vec![
             CallInstrArgValue::Literal("hello"),
@@ -330,21 +328,21 @@ fn parse_json_path_complex() {
     let instruction = parse(source_code);
     let expected = seq(
         Instruction::Call(Call {
-            peer_part: PeerPk(CallInstrValue::JsonPath(ast::JsonPath::new(
-                Scalar("m"),
-                "$.[1]",
-                true,
-            ))),
+            peer_part: PeerPk(CallInstrValue::VariableWithLambda(
+                ast::VariableWithLambda::new(Scalar("m"), "$.[1]", true),
+            )),
             function_part: FuncName(CallInstrValue::Literal("f")),
             args: Rc::new(vec![]),
             output: Variable(Scalar("void")),
         }),
         Instruction::Call(Call {
-            peer_part: PeerPk(CallInstrValue::JsonPath(ast::JsonPath::new(
-                Scalar("m"),
-                r#"$.abc["c"].cde[a][0].cde["bcd"]"#,
-                true,
-            ))),
+            peer_part: PeerPk(CallInstrValue::VariableWithLambda(
+                ast::VariableWithLambda::new(
+                    Scalar("m"),
+                    r#"$.abc["c"].cde[a][0].cde["bcd"]"#,
+                    true,
+                ),
+            )),
             function_part: FuncName(CallInstrValue::Literal("f")),
             args: Rc::new(vec![]),
             output: Variable(Scalar("void")),
@@ -364,22 +362,24 @@ fn json_path_square_braces() {
         "#;
     let instruction = parse(source_code);
     let expected = Instruction::Call(Call {
-        peer_part: PeerPk(CallInstrValue::JsonPath(ast::JsonPath::new(
-            Scalar("u"),
-            r#"$["peer_id"]"#,
-            true,
-        ))),
+        peer_part: PeerPk(CallInstrValue::VariableWithLambda(
+            ast::VariableWithLambda::new(Scalar("u"), r#"$["peer_id"]"#, true),
+        )),
         function_part: ServiceIdWithFuncName(
             CallInstrValue::Literal("return"),
             CallInstrValue::Literal(""),
         ),
         args: Rc::new(vec![
-            CallInstrArgValue::JsonPath(ast::JsonPath::new(
+            CallInstrArgValue::VariableWithLambda(ast::VariableWithLambda::new(
                 Scalar("u"),
                 r#"$["peer_id"].cde[0]["abc"].abc"#,
                 false,
             )),
-            CallInstrArgValue::JsonPath(ast::JsonPath::new(Scalar("u"), r#"$["name"]"#, false)),
+            CallInstrArgValue::VariableWithLambda(ast::VariableWithLambda::new(
+                Scalar("u"),
+                r#"$["name"]"#,
+                false,
+            )),
         ]),
         output: Variable(Stream("$void")),
     });

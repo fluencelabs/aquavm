@@ -1,0 +1,40 @@
+use crate::ValueAlgebra;
+use crate::parser::lexer::LexerError;
+use crate::parser::lexer::Token;
+
+use lalrpop_util::ErrorRecovery;
+
+// the only thing why input matters here is just introducing lifetime for Token
+grammar<'err, 'input>(input: &'input str, errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>);
+
+pub Lambda: Vec<ValueAlgebra<'input>> = <ValueAlgebra1*> => <>;
+
+ValueAlgebra1: ValueAlgebra<'input> = {
+    "." "[" <idx: array_idx> "]" <maybe_flatten_sign:"!"?> => {
+        ValueAlgebra::ArrayAccess { idx }
+    },
+
+    "." "$" <field_name: field_name> <maybe_flatten_sign:"!"?> => {
+        ValueAlgebra::FieldAccess { field_name }
+    },
+
+    ! => { errors.push(<>); ValueAlgebra::Error },
+}
+
+extern {
+    type Location = usize;
+    type Error = LexerError;
+
+    enum Token<'input> {
+        "." => Token::DotSelector,
+        "$" => Token::JSelector,
+
+        "[" => Token::OpenSquareBracket,
+        "]" => Token::CloseSquareBracket,
+
+        array_idx => Token::ArrayIdx(<u32>),
+        field_name => Token::FieldName(<&'input str>),
+
+        "!" => Token::FlatteningSign,
+    }
+}

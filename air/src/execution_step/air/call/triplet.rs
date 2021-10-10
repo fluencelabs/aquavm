@@ -20,7 +20,7 @@ use super::ExecutionResult;
 use crate::exec_err;
 use crate::JValue;
 
-use air_parser::ast::{CallInstrValue, FunctionPart, PeerPart};
+use air_parser::ast::{AstVariable, CallInstrValue, FunctionPart, PeerPart};
 use polyplets::ResolvedTriplet;
 
 /// Triplet represents a location of the executable code in the network.
@@ -87,13 +87,10 @@ fn resolve_to_string<'i>(value: &CallInstrValue<'i>, ctx: &ExecutionCtx<'i>) -> 
             let jvalue = resolved.into_jvalue();
             jvalue_to_string(jvalue)?
         }
-        CallInstrValue::JsonPath(json_path) => {
-            // this is checked on the parsing stage
-            debug_assert!(json_path.should_flatten);
-
-            let resolved = resolve_ast_variable(&json_path.variable, ctx)?;
-            let resolved = resolved.apply_json_path(json_path.path)?;
-            vec_to_string(resolved, json_path.path)?
+        CallInstrValue::VariableWithLambda(vl) => {
+            let resolved = resolve_ast_variable(&vl.variable, ctx)?;
+            let resolved = resolved.apply_lambda(&vl.lambda)?;
+            vec_to_string(resolved, &vl.variable)?
         }
     };
 
@@ -109,13 +106,13 @@ fn jvalue_to_string(jvalue: JValue) -> ExecutionResult<String> {
     }
 }
 
-fn vec_to_string(values: Vec<&JValue>, json_path: &str) -> ExecutionResult<String> {
+fn vec_to_string(values: Vec<&JValue>, variable: &AstVariable<'_>) -> ExecutionResult<String> {
     if values.is_empty() {
-        return exec_err!(ExecutionError::VariableNotFound(json_path.to_string()));
-    }
-
-    if values.len() != 1 {
-        return exec_err!(ExecutionError::MultipleValuesInJsonPath(json_path.to_string()));
+        let variable_name = match variable {
+            AstVariable::Stream(name) => name,
+            AstVariable::Scalar(name) => name,
+        };
+        return exec_err!(ExecutionError::VariableNotFound(variable_name.to_string()));
     }
 
     jvalue_to_string(values[0].clone())

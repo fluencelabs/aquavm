@@ -30,7 +30,7 @@ impl fmt::Display for CallInstrArgValue<'_> {
             Boolean(bool) => write!(f, "{}", bool),
             EmptyArray => write!(f, "[]"),
             Variable(str) => write!(f, "{}", str),
-            JsonPath(json_path) => write!(f, "{}", json_path),
+            VariableWithLambda(json_path) => write!(f, "{}", json_path),
         }
     }
 }
@@ -43,7 +43,7 @@ impl fmt::Display for CallInstrValue<'_> {
             InitPeerId => write!(f, "%init_peer_id%"),
             Literal(str) => write!(f, r#""{}""#, str),
             Variable(str) => write!(f, "{}", str),
-            JsonPath(json_path) => write!(f, "{}", json_path),
+            VariableWithLambda(json_path) => write!(f, "{}", json_path),
         }
     }
 }
@@ -54,17 +54,10 @@ impl fmt::Display for IterableScalarValue<'_> {
 
         match self {
             ScalarVariable(str) => write!(f, "{}", str),
-            JsonPath {
+            VariableWithLambda {
                 scalar_name,
-                path,
-                should_flatten,
-            } => write!(
-                f,
-                "{}.{}{}",
-                scalar_name,
-                path,
-                maybe_flatten_char(*should_flatten)
-            ),
+                lambda,
+            } => write!(f, "{}.$.{:?}", scalar_name, lambda),
         }
     }
 }
@@ -80,7 +73,7 @@ impl fmt::Display for MatchableValue<'_> {
             Boolean(bool) => write!(f, "{}", bool),
             EmptyArray => write!(f, "[]"),
             Variable(str) => write!(f, "{}", str),
-            JsonPath(json_path) => write!(f, "{}", json_path),
+            VariableWithLambda(json_path) => write!(f, "{}", json_path),
         }
     }
 }
@@ -164,7 +157,7 @@ impl fmt::Display for ApArgument<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             ApArgument::ScalarVariable(name) => write!(f, "{}", name),
-            ApArgument::JsonPath(json_path) => write!(f, "{}", json_path),
+            ApArgument::VariableWithLambda(json_path) => write!(f, "{}", json_path),
             ApArgument::LastError(error_path) => write!(f, "{}", error_path),
             ApArgument::Number(value) => write!(f, "{}", value),
             ApArgument::Boolean(value) => write!(f, "{}", value),
@@ -228,22 +221,8 @@ impl fmt::Display for Next<'_> {
     }
 }
 
-impl fmt::Display for JsonPath<'_> {
+impl fmt::Display for VariableWithLambda<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "{}.{}{}",
-            self.variable,
-            self.path,
-            maybe_flatten_char(self.should_flatten)
-        )
-    }
-}
-
-fn maybe_flatten_char(should_flatten: bool) -> &'static str {
-    if should_flatten {
-        "!"
-    } else {
-        ""
+        write!(f, "{}.$.{:?}", self.variable, self.lambda,)
     }
 }

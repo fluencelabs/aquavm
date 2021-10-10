@@ -14,45 +14,37 @@
  * limitations under the License.
  */
 
-use super::ExecutionError::GenerationStreamJsonPathError;
+use super::select_from_stream;
 use super::ExecutionResult;
 use super::JValuable;
 use super::ResolvedCallResult;
 use crate::execution_step::SecurityTetraplets;
 use crate::JValue;
+use crate::LambdaAST;
 
-use jsonpath_lib::select_with_iter;
+use air_lambda_ast::format_ast;
 
 use std::borrow::Cow;
 use std::ops::Deref;
 
 impl JValuable for std::cell::Ref<'_, Vec<ResolvedCallResult>> {
-    fn apply_json_path(&self, json_path: &str) -> ExecutionResult<Vec<&JValue>> {
-        let acc_iter = self.iter().map(|r| r.result.deref());
-        let (selected_values, _) = select_with_iter(acc_iter, json_path).map_err(|e| {
-            GenerationStreamJsonPathError(self.iter().cloned().collect::<Vec<_>>(), json_path.to_string(), e)
-        })?;
-
-        Ok(selected_values)
+    fn apply_lambda(&self, lambda: &LambdaAST<'_>) -> ExecutionResult<Vec<&JValue>> {
+        let stream_iter = self.iter().map(|r| r.result.deref());
+        let select_result = select_from_stream(stream_iter, lambda)?;
+        Ok(vec![select_result.result])
     }
 
-    fn apply_json_path_with_tetraplets(&self, json_path: &str) -> ExecutionResult<(Vec<&JValue>, SecurityTetraplets)> {
-        let acc_iter = self.iter().map(|r| r.result.deref());
+    fn apply_lambda_with_tetraplets(
+        &self,
+        lambda: &LambdaAST<'_>,
+    ) -> ExecutionResult<(Vec<&JValue>, SecurityTetraplets)> {
+        let stream_iter = self.iter().map(|r| r.result.deref());
+        let select_result = select_from_stream(stream_iter, lambda)?;
 
-        let (selected_values, tetraplet_indices) = select_with_iter(acc_iter, json_path).map_err(|e| {
-            GenerationStreamJsonPathError(self.iter().cloned().collect::<Vec<_>>(), json_path.to_string(), e)
-        })?;
+        let tetraplet = self[select_result.tetraplet_idx].tetraplet.clone();
+        tetraplet.borrow_mut().add_lambda(&format_ast(lambda));
 
-        let tetraplets = tetraplet_indices
-            .into_iter()
-            .map(|id| {
-                let tetraplet = self[id].tetraplet.clone();
-                tetraplet.borrow_mut().add_json_path(json_path);
-                tetraplet
-            })
-            .collect::<Vec<_>>();
-
-        Ok((selected_values, tetraplets))
+        Ok((vec![select_result.result], vec![tetraplet]))
     }
 
     fn as_jvalue(&self) -> Cow<'_, JValue> {

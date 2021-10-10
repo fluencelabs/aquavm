@@ -48,6 +48,10 @@ pub enum LexerError {
     #[error("{2}")]
     ParseFloatError(usize, usize, #[source] ParseFloatError),
 
+    // TODO: use LambdaParserError directly here (it'll require introducing a lifetime)
+    #[error("{2}")]
+    LambdaParserError(usize, usize, String),
+
     #[error("{2} is an incorrect path for %last_error%, only .$.instruction, .$.msg, and .$.peer_id are allowed")]
     LastErrorPathError(usize, usize, String),
 

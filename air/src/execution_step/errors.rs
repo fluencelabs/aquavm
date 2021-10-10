@@ -20,14 +20,13 @@ mod joinable;
 pub(crate) use catchable::Catchable;
 pub(crate) use joinable::Joinable;
 
-use super::ResolvedCallResult;
 use super::Stream;
+use crate::execution_step::lambda_applier::LambdaError;
 use crate::JValue;
 
 use air_interpreter_interface::CallResults;
 use air_trace_handler::MergerApResult;
 use air_trace_handler::TraceHandlerError;
-use jsonpath_lib::JsonPathError;
 use strum::IntoEnumIterator;
 use strum_macros::EnumDiscriminants;
 use strum_macros::EnumIter;
@@ -55,21 +54,13 @@ pub(crate) enum ExecutionError {
     #[error("multiple variables found for name '{0}' in data")]
     MultipleVariablesFound(String),
 
-    /// An error occurred while trying to apply json path to this JValue.
-    #[error("variable with path '{1}' not found in '{0}' with an error: '{2}'")]
-    JValueJsonPathError(JValue, String, JsonPathError),
-
-    /// An error occurred while trying to apply json path to this stream generation with JValue's.
-    #[error("variable with path '{1}' not found in '{0:?}' with error: '{2}'")]
-    GenerationStreamJsonPathError(Vec<ResolvedCallResult>, String, JsonPathError),
-
-    /// An error occurred while trying to apply json path to this stream with JValue's.
-    #[error("variable with path '{1}' not found in '{0:?}' with error: '{2}'")]
-    StreamJsonPathError(Stream, String, JsonPathError),
+    /// An error occurred while trying to apply lambda to a value.
+    #[error(transparent)]
+    LambdaApplierError(#[from] LambdaError),
 
     /// An error occurred while trying to apply json path to an empty stream.
-    #[error("json path {0} is applied to an empty stream")]
-    EmptyStreamJsonPathError(String),
+    #[error("json path is applied to an empty stream")]
+    EmptyStreamLambdaError,
 
     /// Provided JValue has incompatible with target type.
     #[error("expected JValue type '{1}', but got '{0}' JValue")]
@@ -78,10 +69,6 @@ pub(crate) enum ExecutionError {
     /// Provided AValue has incompatible with target type.
     #[error("expected AValue type '{1}', but got '{0}' AValue")]
     IncompatibleAValueType(String, String),
-
-    /// Multiple values found for such json path.
-    #[error("multiple variables found for this json path '{0}'")]
-    MultipleValuesInJsonPath(String),
 
     /// Fold state wasn't found for such iterator name.
     #[error("fold state not found for this iterable '{0}'")]
@@ -103,17 +90,6 @@ pub(crate) enum ExecutionError {
     #[error("mismatch is used without corresponding xor")]
     MismatchWithoutXorError,
 
-    /// This error type is produced by a mismatch to notify xor that compared values aren't equal.
-    #[error("jvalue '{0}' can't be flattened, to be flattened a jvalue should have an array type and consist of zero or one values")]
-    FlatteningError(JValue),
-
-    /// Json path is applied to scalar that have inappropriate type.
-    #[error(
-        "json path can't be applied to scalar '{0}',\
-    it could be applied only to streams and variables of array and object types"
-    )]
-    JsonPathVariableTypeError(JValue),
-
     /// Errors bubbled from a trace handler.
     #[error(transparent)]
     TraceError(#[from] TraceHandlerError),
@@ -132,6 +108,12 @@ pub(crate) enum ExecutionError {
         "after finishing execution of supplied AIR, call results aren't empty: `{0:?}`, probably wrong call_id used"
     )]
     CallResultsNotEmpty(CallResults),
+}
+
+impl From<LambdaError> for Rc<ExecutionError> {
+    fn from(e: LambdaError) -> Self {
+        Rc::new(ExecutionError::LambdaApplierError(e))
+    }
 }
 
 /// This macro is needed because it's impossible to implement
@@ -171,12 +153,12 @@ impl Joinable for ExecutionError {
                 log_join!("  waiting for an argument with name '{}'", var_name);
                 true
             }
-            StreamJsonPathError(stream, json_path, _) => {
-                log_join!("  waiting for an argument with path '{}' on stream '{:?}'", json_path, stream);
+            LambdaApplierError(LambdaError::StreamNotHaveEnoughValues { stream_size, idx }) => {
+                log_join!("  waiting for an argument with idx '{}' on stream with size '{}'", idx, stream_size);
                 true
             }
-            EmptyStreamJsonPathError(json_path) => {
-                log_join!("  waiting on empty stream for path '{}'", json_path);
+            EmptyStreamLambdaError => {
+                log_join!("  waiting on empty stream for path ");
                 true
             }
 

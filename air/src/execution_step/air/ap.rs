@@ -24,7 +24,7 @@ use super::ExecutionResult;
 use super::TraceHandler;
 use crate::execution_step::air::ResolvedCallResult;
 use crate::execution_step::boxed_value::Variable;
-use crate::execution_step::utils::apply_json_path;
+use crate::execution_step::utils::apply_lambda;
 use crate::trace_to_exec_err;
 use crate::JValue;
 use crate::SecurityTetraplet;
@@ -33,7 +33,7 @@ use utils::*;
 
 use air_parser::ast::ApArgument;
 use air_parser::ast::AstVariable;
-use air_parser::ast::JsonPath;
+use air_parser::ast::VariableWithLambda;
 use air_parser::ast::{Ap, LastErrorPath};
 use air_trace_handler::MergerApResult;
 
@@ -84,7 +84,7 @@ fn save_result<'ctx>(
 fn should_touch_trace(ap: &Ap<'_>) -> bool {
     match (&ap.argument, &ap.result) {
         (_, AstVariable::Stream(_)) => true,
-        (ApArgument::JsonPath(json_path), _) => match &json_path.variable {
+        (ApArgument::VariableWithLambda(json_path), _) => match &json_path.variable {
             AstVariable::Scalar(_) => false,
             AstVariable::Stream(_) => true,
         },

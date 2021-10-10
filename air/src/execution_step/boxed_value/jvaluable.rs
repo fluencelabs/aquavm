@@ -24,8 +24,10 @@ use super::iterable::IterableItem;
 use super::ExecutionError;
 use super::ExecutionResult;
 use super::ResolvedCallResult;
+use crate::execution_step::lambda_applier::*;
 use crate::execution_step::SecurityTetraplets;
 use crate::JValue;
+use crate::LambdaAST;
 
 pub(crate) use stream::StreamJvaluableIngredients;
 
@@ -34,10 +36,13 @@ use std::borrow::Cow;
 /// Represent a value that could be transform to a JValue with or without tetraplets.
 pub(crate) trait JValuable {
     /// Applies json path to the internal value, produces JValue.
-    fn apply_json_path(&self, json_path: &str) -> ExecutionResult<Vec<&JValue>>;
+    fn apply_lambda(&self, lambda: &LambdaAST<'_>) -> ExecutionResult<Vec<&JValue>>;
 
     /// Applies json path to the internal value, produces JValue with tetraplet.
-    fn apply_json_path_with_tetraplets(&self, json_path: &str) -> ExecutionResult<(Vec<&JValue>, SecurityTetraplets)>;
+    fn apply_lambda_with_tetraplets(
+        &self,
+        lambda: &LambdaAST<'_>,
+    ) -> ExecutionResult<(Vec<&JValue>, SecurityTetraplets)>;
 
     /// Return internal value as borrowed if it's possible, owned otherwise.
     fn as_jvalue(&self) -> Cow<'_, JValue>;

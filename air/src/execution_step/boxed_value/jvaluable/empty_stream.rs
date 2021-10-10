@@ -17,6 +17,7 @@
 use super::ExecutionError;
 use super::ExecutionResult;
 use super::JValuable;
+use super::LambdaAST;
 use crate::exec_err;
 use crate::execution_step::SecurityTetraplets;
 use crate::JValue;
@@ -24,14 +25,17 @@ use crate::JValue;
 use std::borrow::Cow;
 
 impl JValuable for () {
-    fn apply_json_path(&self, json_path: &str) -> ExecutionResult<Vec<&JValue>> {
+    fn apply_lambda(&self, _lambda: &LambdaAST<'_>) -> ExecutionResult<Vec<&JValue>> {
         // applying json path to an empty stream will produce a join behaviour
-        exec_err!(ExecutionError::EmptyStreamJsonPathError(json_path.to_string()))
+        exec_err!(ExecutionError::EmptyStreamLambdaError)
     }
 
-    fn apply_json_path_with_tetraplets(&self, json_path: &str) -> ExecutionResult<(Vec<&JValue>, SecurityTetraplets)> {
+    fn apply_lambda_with_tetraplets(
+        &self,
+        _lambda: &LambdaAST<'_>,
+    ) -> ExecutionResult<(Vec<&JValue>, SecurityTetraplets)> {
         // applying json path to an empty stream will produce a join behaviour
-        exec_err!(ExecutionError::EmptyStreamJsonPathError(json_path.to_string()))
+        exec_err!(ExecutionError::EmptyStreamLambdaError)
     }
 
     fn as_jvalue(&self) -> Cow<'_, JValue> {

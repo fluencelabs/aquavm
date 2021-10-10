@@ -10,6 +10,8 @@ members = [
     "crates/air-lib/polyplets",
     "crates/air-lib/test-utils",
     "crates/air-lib/trace-handler",
+    "crates/air-lib/value-algebra/ast",
+    "crates/air-lib/value-algebra/parser",
     "crates/data-store",
 ]
 

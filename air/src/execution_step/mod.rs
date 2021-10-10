@@ -18,6 +18,7 @@ mod air;
 mod boxed_value;
 mod errors;
 pub(crate) mod execution_context;
+mod lambda_applier;
 mod utils;
 
 pub(super) use self::air::ExecutableInstruction;
