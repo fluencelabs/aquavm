@@ -24,13 +24,13 @@ impl fmt::Display for CallInstrArgValue<'_> {
 
         match self {
             InitPeerId => write!(f, "%init_peer_id%"),
-            LastError(json_path) => write!(f, "%last_error%{}", json_path),
+            LastError(error_path) => write!(f, "%last_error%{}", error_path),
             Literal(str) => write!(f, r#""{}""#, str),
             Number(number) => write!(f, "{}", number),
             Boolean(bool) => write!(f, "{}", bool),
             EmptyArray => write!(f, "[]"),
             Variable(str) => write!(f, "{}", str),
-            VariableWithLambda(json_path) => write!(f, "{}", json_path),
+            VariableWithLambda(vl) => write!(f, "{}", vl),
         }
     }
 }
@@ -43,7 +43,7 @@ impl fmt::Display for CallInstrValue<'_> {
             InitPeerId => write!(f, "%init_peer_id%"),
             Literal(str) => write!(f, r#""{}""#, str),
             Variable(str) => write!(f, "{}", str),
-            VariableWithLambda(json_path) => write!(f, "{}", json_path),
+            VariableWithLambda(vl) => write!(f, "{}", vl),
         }
     }
 }
@@ -73,7 +73,7 @@ impl fmt::Display for MatchableValue<'_> {
             Boolean(bool) => write!(f, "{}", bool),
             EmptyArray => write!(f, "[]"),
             Variable(str) => write!(f, "{}", str),
-            VariableWithLambda(json_path) => write!(f, "{}", json_path),
+            VariableWithLambda(vl) => write!(f, "{}", vl),
         }
     }
 }
@@ -157,7 +157,7 @@ impl fmt::Display for ApArgument<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             ApArgument::ScalarVariable(name) => write!(f, "{}", name),
-            ApArgument::VariableWithLambda(json_path) => write!(f, "{}", json_path),
+            ApArgument::VariableWithLambda(vl) => write!(f, "{}", vl),
             ApArgument::LastError(error_path) => write!(f, "{}", error_path),
             ApArgument::Number(value) => write!(f, "{}", value),
             ApArgument::Boolean(value) => write!(f, "{}", value),

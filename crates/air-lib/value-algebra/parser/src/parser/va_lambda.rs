@@ -1,5 +1,5 @@
 // auto-generated: "lalrpop 0.19.6"
-// sha3: 3a871e9416e7f358aadc2dd8bf619162c2d6c22344c883f42e6ba2398a372
+// sha3: 2d32122dd5e6d2e7f1d7d81d4fa11fa3aa370887c2a9a205c1474ec4b62a72
 use crate::ValueAlgebra;
 use crate::parser::lexer::LexerError;
 use crate::parser::lexer::Token;
@@ -834,7 +834,7 @@ mod __parse__Lambda {
         _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
-        // Lambda = ValueAlgebra1+ => ActionFn(28);
+        // Lambda = ValueAlgebra+ => ActionFn(28);
         let __sym0 = __pop_Variant7(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
@@ -853,7 +853,7 @@ mod __parse__Lambda {
         _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
-        // ValueAlgebra1 = ".", "[", array_idx, "]", "!" => ActionFn(23);
+        // ValueAlgebra = ".", "[", array_idx, "]", "!" => ActionFn(23);
         assert!(__symbols.len() >= 5);
         let __sym4 = __pop_Variant0(__symbols);
         let __sym3 = __pop_Variant0(__symbols);
@@ -877,7 +877,7 @@ mod __parse__Lambda {
         _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
-        // ValueAlgebra1 = "[", array_idx, "]", "!" => ActionFn(24);
+        // ValueAlgebra = "[", array_idx, "]", "!" => ActionFn(24);
         assert!(__symbols.len() >= 4);
         let __sym3 = __pop_Variant0(__symbols);
         let __sym2 = __pop_Variant0(__symbols);
@@ -900,7 +900,7 @@ mod __parse__Lambda {
         _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
-        // ValueAlgebra1 = ".", "[", array_idx, "]" => ActionFn(25);
+        // ValueAlgebra = ".", "[", array_idx, "]" => ActionFn(25);
         assert!(__symbols.len() >= 4);
         let __sym3 = __pop_Variant0(__symbols);
         let __sym2 = __pop_Variant1(__symbols);
@@ -923,7 +923,7 @@ mod __parse__Lambda {
         _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
-        // ValueAlgebra1 = "[", array_idx, "]" => ActionFn(26);
+        // ValueAlgebra = "[", array_idx, "]" => ActionFn(26);
         assert!(__symbols.len() >= 3);
         let __sym2 = __pop_Variant0(__symbols);
         let __sym1 = __pop_Variant1(__symbols);
@@ -945,7 +945,7 @@ mod __parse__Lambda {
         _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
-        // ValueAlgebra1 = ".", "$", field_name, "!" => ActionFn(19);
+        // ValueAlgebra = ".", "$", field_name, "!" => ActionFn(19);
         assert!(__symbols.len() >= 4);
         let __sym3 = __pop_Variant0(__symbols);
         let __sym2 = __pop_Variant2(__symbols);
@@ -968,7 +968,7 @@ mod __parse__Lambda {
         _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
-        // ValueAlgebra1 = ".", field_name, "!" => ActionFn(20);
+        // ValueAlgebra = ".", field_name, "!" => ActionFn(20);
         assert!(__symbols.len() >= 3);
         let __sym2 = __pop_Variant0(__symbols);
         let __sym1 = __pop_Variant2(__symbols);
@@ -990,7 +990,7 @@ mod __parse__Lambda {
         _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
-        // ValueAlgebra1 = ".", "$", field_name => ActionFn(21);
+        // ValueAlgebra = ".", "$", field_name => ActionFn(21);
         assert!(__symbols.len() >= 3);
         let __sym2 = __pop_Variant2(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
@@ -1012,7 +1012,7 @@ mod __parse__Lambda {
         _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
-        // ValueAlgebra1 = ".", field_name => ActionFn(22);
+        // ValueAlgebra = ".", field_name => ActionFn(22);
         assert!(__symbols.len() >= 2);
         let __sym1 = __pop_Variant2(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
@@ -1033,7 +1033,7 @@ mod __parse__Lambda {
         _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
-        // ValueAlgebra1 = error => ActionFn(4);
+        // ValueAlgebra = error => ActionFn(4);
         let __sym0 = __pop_Variant3(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
@@ -1052,7 +1052,7 @@ mod __parse__Lambda {
         _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
-        // ValueAlgebra1* =  => ActionFn(11);
+        // ValueAlgebra* =  => ActionFn(11);
         let __start = __lookahead_start.cloned().or_else(|| __symbols.last().map(|s| s.2.clone())).unwrap_or_default();
         let __end = __start.clone();
         let __nt = super::__action11::<>(input, errors, &__start, &__end);
@@ -1070,7 +1070,7 @@ mod __parse__Lambda {
         _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
-        // ValueAlgebra1* = ValueAlgebra1+ => ActionFn(12);
+        // ValueAlgebra* = ValueAlgebra+ => ActionFn(12);
         let __sym0 = __pop_Variant7(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
@@ -1089,7 +1089,7 @@ mod __parse__Lambda {
         _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
-        // ValueAlgebra1+ = ValueAlgebra1 => ActionFn(13);
+        // ValueAlgebra+ = ValueAlgebra => ActionFn(13);
         let __sym0 = __pop_Variant6(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
@@ -1108,7 +1108,7 @@ mod __parse__Lambda {
         _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
-        // ValueAlgebra1+ = ValueAlgebra1+, ValueAlgebra1 => ActionFn(14);
+        // ValueAlgebra+ = ValueAlgebra+, ValueAlgebra => ActionFn(14);
         assert!(__symbols.len() >= 2);
         let __sym1 = __pop_Variant6(__symbols);
         let __sym0 = __pop_Variant7(__symbols);

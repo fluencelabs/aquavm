@@ -7,9 +7,9 @@ use lalrpop_util::ErrorRecovery;
 // the only thing why input matters here is just introducing lifetime for Token
 grammar<'err, 'input>(input: &'input str, errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>);
 
-pub Lambda: Vec<ValueAlgebra<'input>> = <ValueAlgebra1*> => <>;
+pub Lambda: Vec<ValueAlgebra<'input>> = <ValueAlgebra*> => <>;
 
-ValueAlgebra1: ValueAlgebra<'input> = {
+ValueAlgebra: ValueAlgebra<'input> = {
     <maybe_dot_selector:"."?> "[" <idx: array_idx> "]" <maybe_flatten_sign:"!"?> => {
         ValueAlgebra::ArrayAccess { idx }
     },

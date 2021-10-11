@@ -22,6 +22,8 @@ use super::LexerError;
 use super::Number;
 use super::Token;
 
+use air_lambda_parser::{LambdaAST, ValueAlgebra};
+
 fn run_lexer(input: &str) -> Vec<Spanned<Token<'_>, usize, LexerError>> {
     let lexer = AIRLexer::new(input);
     lexer.collect()
@@ -262,16 +264,23 @@ fn too_big_float_number() {
 }
 
 #[test]
-fn json_path() {
+fn lambda() {
     // this json path contains all allowed in json path characters
-    const JSON_PATH: &str = r#"value.$[$@[]():?.*,"]"#;
+    const JSON_PATH: &str = r#"value.$.field[1]"#;
     let variable = AstVariable::Scalar("value");
 
     lexer_test(
         JSON_PATH,
         Single(Ok((
             0,
-            Token::VariableWithLambda(variable, r#"$[$@[]():?.*,"]"#, false),
+            Token::VariableWithLambda(variable, unsafe {
+                LambdaAST::new_unchecked(vec![
+                    ValueAlgebra::FieldAccess {
+                        field_name: "field",
+                    },
+                    ValueAlgebra::ArrayAccess { idx: 1 },
+                ])
+            }),
             JSON_PATH.len(),
         ))),
     );

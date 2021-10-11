@@ -84,7 +84,7 @@ fn save_result<'ctx>(
 fn should_touch_trace(ap: &Ap<'_>) -> bool {
     match (&ap.argument, &ap.result) {
         (_, AstVariable::Stream(_)) => true,
-        (ApArgument::VariableWithLambda(json_path), _) => match &json_path.variable {
+        (ApArgument::VariableWithLambda(vl), _) => match &vl.variable {
             AstVariable::Scalar(_) => false,
             AstVariable::Stream(_) => true,
         },
