@@ -131,14 +131,14 @@ fn create_scalar_lambda_iterable<'ctx>(
     match exec_ctx.scalars.get(scalar_name) {
         Some(Scalar::JValueRef(variable)) => {
             let jvalues = select(&variable.result, lambda.iter())?;
-            from_jvalues(vec![jvalues], variable.tetraplet.clone(), lambda)
+            from_jvalues(jvalues, variable.tetraplet.clone(), lambda)
         }
         Some(Scalar::JValueFoldCursor(fold_state)) => {
             let iterable_value = fold_state.iterable.peek().unwrap();
             let jvalues = iterable_value.apply_lambda(lambda)?;
             let tetraplet = as_tetraplet(&iterable_value);
 
-            from_jvalues(jvalues, tetraplet, lambda)
+            from_jvalues(jvalues[0], tetraplet, lambda)
         }
         _ => return exec_err!(ExecutionError::VariableNotFound(scalar_name.to_string())),
     }
@@ -146,14 +146,29 @@ fn create_scalar_lambda_iterable<'ctx>(
 
 /// Construct IterableValue from the result and given triplet.
 fn from_jvalues(
-    jvalues: Vec<&JValue>,
+    jvalue: &JValue,
     tetraplet: RSecurityTetraplet,
     lambda: &LambdaAST<'_>,
 ) -> ExecutionResult<FoldIterableScalar> {
-    tetraplet.borrow_mut().add_lambda(&air_lambda_ast::format_ast(lambda));
-    let jvalues = jvalues.into_iter().cloned().collect();
+    let formatted_lambda_ast = air_lambda_ast::format_ast(lambda);
+    tetraplet.borrow_mut().add_lambda(&formatted_lambda_ast);
 
-    let foldable = IterableJsonPathResult::init(jvalues, tetraplet);
+    let iterable = match jvalue {
+        JValue::Array(array) => array,
+        _ => {
+            return exec_err!(ExecutionError::FoldIteratesOverNonArray(
+                jvalue.clone(),
+                formatted_lambda_ast
+            ))
+        }
+    };
+
+    if iterable.is_empty() {
+        return Ok(FoldIterableScalar::Empty);
+    }
+
+    let iterable = iterable.to_vec();
+    let foldable = IterableJsonPathResult::init(iterable, tetraplet);
     let iterable = FoldIterableScalar::Scalar(Box::new(foldable));
     Ok(iterable)
 }

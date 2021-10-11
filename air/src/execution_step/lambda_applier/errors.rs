@@ -29,12 +29,12 @@ pub(crate) enum LambdaError {
     #[error("value '{value}' is not an array-type to match array algebra with idx = '{idx}'")]
     ArrayAlgebraNotMatchValue { value: JValue, idx: u32 },
 
-    #[error("value '{value}' does not contain value for idx = '{idx}'")]
+    #[error("value '{value}' does not contain element for idx = '{idx}'")]
     ValueNotContainSuchArrayIdx { value: JValue, idx: u32 },
 
     #[error("value '{value}' is not an map-type to match field algebra with field_name = '{field_name}'")]
     FieldAlgebraNotMatchValue { value: JValue, field_name: String },
 
-    #[error("value '{value}' does not contain value for field_name = '{field_name}'")]
+    #[error("value '{value}' does not contain element with field name = '{field_name}'")]
     JValueNotContainSuchField { value: JValue, field_name: String },
 }

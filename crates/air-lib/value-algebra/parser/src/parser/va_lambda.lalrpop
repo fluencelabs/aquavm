@@ -10,11 +10,11 @@ grammar<'err, 'input>(input: &'input str, errors: &'err mut Vec<ErrorRecovery<us
 pub Lambda: Vec<ValueAlgebra<'input>> = <ValueAlgebra1*> => <>;
 
 ValueAlgebra1: ValueAlgebra<'input> = {
-    "." "[" <idx: array_idx> "]" <maybe_flatten_sign:"!"?> => {
+    <maybe_dot_selector:"."?> "[" <idx: array_idx> "]" <maybe_flatten_sign:"!"?> => {
         ValueAlgebra::ArrayAccess { idx }
     },
 
-    "." "$" <field_name: field_name> <maybe_flatten_sign:"!"?> => {
+    "." <maybe_jselector_sign:"$"?> <field_name: field_name> <maybe_flatten_sign:"!"?> => {
         ValueAlgebra::FieldAccess { field_name }
     },
 

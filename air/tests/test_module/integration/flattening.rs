@@ -62,9 +62,9 @@ fn flattening_scalar_arrays() {
         r#"
         (seq
             (call "{0}" ("" "") [] scalar_array)
-            (fold scalar_array.$.iterable! v
+            (fold scalar_array.$.$iterable! v
                 (seq
-                    (call v.$.peer_id! (v.$.service_id! v.$.function_name!) [v.$.args[0]! v.$.args[1]!])
+                    (call v.$.peer_id! (v.$.service_id! v.$.function_name!) [v.$.args.[0]! v.$.args.[1]!])
                     (next v)
                 )
             )
@@ -155,7 +155,7 @@ fn flattening_empty_values() {
         r#"
         (seq
             (call "{0}" ("" "") [] $stream)
-            (call "{1}" ("" "") [$stream.$.args!]) ; here $stream.$.args returns an empty array
+            (call "{1}" ("" "") [$stream.$.[1]!]) ; here $stream.$.[1] returns an empty array
         )
         "#,
         set_variable_peer_id, local_peer_id

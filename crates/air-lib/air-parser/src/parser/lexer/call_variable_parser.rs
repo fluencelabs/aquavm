@@ -282,6 +282,22 @@ impl<'input> CallVariableParser<'input> {
         }
     }
 
+    fn try_to_variable_and_lambda(
+        &self,
+        pos: usize,
+    ) -> LexerResult<(&'input str, LambdaAST<'input>)> {
+        // +2 to ignore ".$" prefix
+        let lambda = crate::parse_lambda(&self.string_to_parse[pos + 2..]).map_err(|e| {
+            LexerError::LambdaParserError(
+                self.start_pos + pos,
+                self.start_pos + self.string_to_parse.len(),
+                e.to_string(),
+            )
+        })?;
+
+        Ok((&self.string_to_parse[0..pos], lambda))
+    }
+
     fn to_token(&self) -> LexerResult<Token<'input>> {
         use super::token::UnparsedNumber;
 
@@ -305,19 +321,11 @@ impl<'input> CallVariableParser<'input> {
             }
             (false, true) => {
                 let json_path_start_pos = self.state.first_dot_met_pos.unwrap();
-                let (variable, lambda) =
-                    to_variable_and_lambda(self.string_to_parse, json_path_start_pos)?;
+                let (variable, lambda) = self.try_to_variable_and_lambda(json_path_start_pos)?;
                 let variable = self.to_variable(variable);
 
                 Ok(Token::VariableWithLambda(variable, lambda))
             }
         }
     }
-}
-
-fn to_variable_and_lambda(str: &str, pos: usize) -> LexerResult<(&str, LambdaAST<'_>)> {
-    let lambda = crate::parse_lambda(&str[pos + 1..])
-        .map_err(|e| LexerError::LambdaParserError(pos + 1, str.len(), e.to_string()))?;
-
-    Ok((&str[0..pos], lambda))
 }

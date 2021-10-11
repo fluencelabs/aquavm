@@ -78,6 +78,10 @@ pub(crate) enum ExecutionError {
     #[error("multiple fold states found for iterable '{0}'")]
     MultipleFoldStates(String),
 
+    /// A fold instruction must iterate over array value.
+    #[error("lambda '{1}' returned non-array value '{0}' for fold instruction")]
+    FoldIteratesOverNonArray(JValue, String),
+
     /// Errors encountered while shadowing non-scalar values.
     #[error("variable with name '{0}' can't be shadowed, shadowing isn't supported for iterables")]
     IterableShadowing(String),

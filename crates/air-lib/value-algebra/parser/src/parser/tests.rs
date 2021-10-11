@@ -15,13 +15,11 @@
  */
 
 use crate::parser::LambdaParser;
-use crate::LambdaAST;
-
-use crate::parser::ast::ValueAlgebra;
+use crate::ValueAlgebra;
 
 thread_local!(static TEST_PARSER: LambdaParser = LambdaParser::new());
 
-fn parse(source_code: &str) -> LambdaAST {
+fn parse(source_code: &str) -> Vec<ValueAlgebra<'_>> {
     TEST_PARSER.with(|parser| {
         let mut errors = Vec::new();
         let lexer = crate::parser::AlgebraLexer::new(source_code);
@@ -76,6 +74,20 @@ fn field_array_access() {
     let field_name = "some_field_name";
     let idx = 1;
     let lambda = format!(".${}.[{}]", field_name, idx);
+
+    let actual = parse(&lambda);
+    let expected = vec![
+        ValueAlgebra::FieldAccess { field_name },
+        ValueAlgebra::ArrayAccess { idx },
+    ];
+    assert_eq!(actual, expected);
+}
+
+#[test]
+fn field_array_access_without_dot() {
+    let field_name = "some_field_name";
+    let idx = 1;
+    let lambda = format!(".${}[{}]", field_name, idx);
 
     let actual = parse(&lambda);
     let expected = vec![
