@@ -1,10 +1,9 @@
 [package]
 name = "air"
 version = "0.15.0"
-description = "Implementation of the AIR interpreter"
+description = "Interpreter of AIR scripts intended to coordinate request flow in the Fluence network"
 authors = ["Fluence Labs"]
 edition = "2018"
-description = "Interpreter of AIR scripts intended to coordinate request flow in the Fluence network"
 repository = "https://github.com/fluencelabs/aquavm"
 publish = false
 keywords = ["fluence", "air", "webassembly", "programming-language"]
