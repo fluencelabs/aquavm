@@ -1,6 +1,6 @@
 [package]
 name = "air"
-version = "0.15.0"
+version = "0.16.0"
 description = "Implementation of the AIR interpreter"
 authors = ["Fluence Labs"]
 edition = "2018"

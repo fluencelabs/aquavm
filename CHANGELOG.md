@@ -1,12 +1,20 @@
-## Version 0.15.0 (2021-09-30)
+## Version 0.16.0 (2021-10-14)
+
+[PR 154](https://github.com/fluencelabs/aquavm/pull/154)  
+The json path crate has been removed and changed to custom lambda scheme that have a subset of functionality of json path used by the Aqua compiler. The flattening sign `!` is still allowed now, but does nothing.
+
+[PR 150](https://github.com/fluencelabs/aquavm/pull/150), [PR 152](https://github.com/fluencelabs/aquavm/pull/152), [PR 153](https://github.com/fluencelabs/aquavm/pull/153)  
+Some parts of the interpreter has been refactored to make it more modular. 
+
+[PR 144](https://github.com/fluencelabs/aquavm/pull/144)  
+The interpreter changed to be built with `unwind` panic handler and some other debug options were turned on.
+
+## Version 0.15.0 (2021-10-04)
 
 [PR 140](https://github.com/fluencelabs/aquavm/pull/130):  
 - the interpreter become async, now it's a pure function without any imports from a peer. Instead of calling import `call_service` from a peer, it now returns call results in the outcome structure, and receives their result in the `invoke` export.
 - data structure now includes a new field to track last call request id to give peer more freedom.
 - AVM server was completely refactored to support the new interpreter model and to expose a new trait storing data for a node.
-
-[PR 144](https://github.com/fluencelabs/aquavm/pull/144)  
-  The interpreter changed to be built with `unwind` panic handler and some other debug options were turned on.
 
 [PR 139](https://github.com/fluencelabs/aquavm/pull/139)  
   Senders in `RequestSentBy` could be different now.

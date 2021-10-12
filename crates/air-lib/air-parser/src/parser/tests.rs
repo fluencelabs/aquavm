@@ -952,7 +952,7 @@ fn comments() {
 
     let source_code = r#"
     ; comment
-    (fold members.$.$field[1] m (null)) ;;; comment ;;?()()
+    (fold members.$.field[1] m (null)) ;;; comment ;;?()()
     ;;; comme;?!.$.  nt[][][][()()()null;$::!
     "#;
     let instruction = parse(source_code);
