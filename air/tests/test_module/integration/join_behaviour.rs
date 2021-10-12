@@ -49,7 +49,7 @@ fn dont_wait_on_json_path() {
             (seq
                 (call "{1}" ("op" "identity") [])
                 (seq
-                    (call "{1}" ("history" "add") [msg status.$.$is_authenticated!] auth_result)
+                    (call "{1}" ("history" "add") [msg status.$.is_authenticated!] auth_result)
                     (call %init_peer_id% ("returnService" "run") [auth_result])
                 )
             )

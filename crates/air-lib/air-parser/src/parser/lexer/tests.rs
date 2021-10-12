@@ -22,7 +22,7 @@ use super::LexerError;
 use super::Number;
 use super::Token;
 
-use air_lambda_parser::{LambdaAST, ValueAlgebra};
+use air_lambda_parser::{LambdaAST, ValueAccessor};
 
 fn run_lexer(input: &str) -> Vec<Spanned<Token<'_>, usize, LexerError>> {
     let lexer = AIRLexer::new(input);
@@ -275,10 +275,10 @@ fn lambda() {
             0,
             Token::VariableWithLambda(variable, unsafe {
                 LambdaAST::new_unchecked(vec![
-                    ValueAlgebra::FieldAccess {
+                    ValueAccessor::FieldAccess {
                         field_name: "field",
                     },
-                    ValueAlgebra::ArrayAccess { idx: 1 },
+                    ValueAccessor::ArrayAccess { idx: 1 },
                 ])
             }),
             JSON_PATH.len(),

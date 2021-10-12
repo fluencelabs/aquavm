@@ -15,11 +15,11 @@
  */
 
 use crate::parser::LambdaParser;
-use crate::ValueAlgebra;
+use crate::ValueAccessor;
 
 thread_local!(static TEST_PARSER: LambdaParser = LambdaParser::new());
 
-fn parse(source_code: &str) -> Vec<ValueAlgebra<'_>> {
+fn parse(source_code: &str) -> Vec<ValueAccessor<'_>> {
     TEST_PARSER.with(|parser| {
         let mut errors = Vec::new();
         let lexer = crate::parser::AlgebraLexer::new(source_code);
@@ -32,20 +32,20 @@ fn parse(source_code: &str) -> Vec<ValueAlgebra<'_>> {
 #[test]
 fn field_access() {
     let field_name = "some_field_name";
-    let lambda = format!(".${}", field_name);
+    let lambda = format!(".{}", field_name);
 
     let actual = parse(&lambda);
-    let expected = vec![ValueAlgebra::FieldAccess { field_name }];
+    let expected = vec![ValueAccessor::FieldAccess { field_name }];
     assert_eq!(actual, expected);
 }
 
 #[test]
 fn field_access_with_flattening() {
     let field_name = "some_field_name";
-    let lambda = format!(".${}!", field_name);
+    let lambda = format!(".{}!", field_name);
 
     let actual = parse(&lambda);
-    let expected = vec![ValueAlgebra::FieldAccess { field_name }];
+    let expected = vec![ValueAccessor::FieldAccess { field_name }];
     assert_eq!(actual, expected);
 }
 
@@ -55,7 +55,7 @@ fn array_access() {
     let lambda = format!(".[{}]", idx);
 
     let actual = parse(&lambda);
-    let expected = vec![ValueAlgebra::ArrayAccess { idx }];
+    let expected = vec![ValueAccessor::ArrayAccess { idx }];
     assert_eq!(actual, expected);
 }
 
@@ -65,7 +65,7 @@ fn array_access_with_flattening() {
     let lambda = format!(".[{}]!", idx);
 
     let actual = parse(&lambda);
-    let expected = vec![ValueAlgebra::ArrayAccess { idx }];
+    let expected = vec![ValueAccessor::ArrayAccess { idx }];
     assert_eq!(actual, expected);
 }
 
@@ -73,12 +73,12 @@ fn array_access_with_flattening() {
 fn field_array_access() {
     let field_name = "some_field_name";
     let idx = 1;
-    let lambda = format!(".${}.[{}]", field_name, idx);
+    let lambda = format!(".{}.[{}]", field_name, idx);
 
     let actual = parse(&lambda);
     let expected = vec![
-        ValueAlgebra::FieldAccess { field_name },
-        ValueAlgebra::ArrayAccess { idx },
+        ValueAccessor::FieldAccess { field_name },
+        ValueAccessor::ArrayAccess { idx },
     ];
     assert_eq!(actual, expected);
 }
@@ -87,12 +87,12 @@ fn field_array_access() {
 fn field_array_access_without_dot() {
     let field_name = "some_field_name";
     let idx = 1;
-    let lambda = format!(".${}[{}]", field_name, idx);
+    let lambda = format!(".{}[{}]", field_name, idx);
 
     let actual = parse(&lambda);
     let expected = vec![
-        ValueAlgebra::FieldAccess { field_name },
-        ValueAlgebra::ArrayAccess { idx },
+        ValueAccessor::FieldAccess { field_name },
+        ValueAccessor::ArrayAccess { idx },
     ];
     assert_eq!(actual, expected);
 }
@@ -101,12 +101,12 @@ fn field_array_access_without_dot() {
 fn array_field_access() {
     let field_name = "some_field_name";
     let idx = 1;
-    let lambda = format!(".[{}].${}", idx, field_name);
+    let lambda = format!(".[{}].{}", idx, field_name);
 
     let actual = parse(&lambda);
     let expected = vec![
-        ValueAlgebra::ArrayAccess { idx },
-        ValueAlgebra::FieldAccess { field_name },
+        ValueAccessor::ArrayAccess { idx },
+        ValueAccessor::FieldAccess { field_name },
     ];
     assert_eq!(actual, expected);
 }
@@ -117,19 +117,16 @@ fn many_array_field_access() {
     let field_name_2 = "some_field_name_2";
     let idx_1 = 1;
     let idx_2 = u32::MAX;
-    let lambda = format!(
-        ".[{}].${}.[{}].${}",
-        idx_1, field_name_1, idx_2, field_name_2
-    );
+    let lambda = format!(".[{}].{}.[{}].{}", idx_1, field_name_1, idx_2, field_name_2);
 
     let actual = parse(&lambda);
     let expected = vec![
-        ValueAlgebra::ArrayAccess { idx: idx_1 },
-        ValueAlgebra::FieldAccess {
+        ValueAccessor::ArrayAccess { idx: idx_1 },
+        ValueAccessor::FieldAccess {
             field_name: field_name_1,
         },
-        ValueAlgebra::ArrayAccess { idx: idx_2 },
-        ValueAlgebra::FieldAccess {
+        ValueAccessor::ArrayAccess { idx: idx_2 },
+        ValueAccessor::FieldAccess {
             field_name: field_name_2,
         },
     ];

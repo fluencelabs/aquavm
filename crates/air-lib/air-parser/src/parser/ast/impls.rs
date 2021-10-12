@@ -15,7 +15,7 @@
  */
 
 use super::*;
-use air_lambda_parser::ValueAlgebra;
+use air_lambda_parser::ValueAccessor;
 
 impl<'i> Ap<'i> {
     pub fn new(argument: ApArgument<'i>, result: AstVariable<'i>) -> Self {
@@ -28,14 +28,14 @@ impl<'i> VariableWithLambda<'i> {
         Self { variable, lambda }
     }
 
-    pub fn from_raw_algebras(variable: AstVariable<'i>, lambda: Vec<ValueAlgebra<'i>>) -> Self {
+    pub fn from_raw_algebras(variable: AstVariable<'i>, lambda: Vec<ValueAccessor<'i>>) -> Self {
         let lambda = unsafe { LambdaAST::new_unchecked(lambda) };
         Self { variable, lambda }
     }
 }
 
 impl<'i> IterableScalarValue<'i> {
-    pub fn new_vl(scalar_name: &'i str, lambda: Vec<ValueAlgebra<'i>>) -> Self {
+    pub fn new_vl(scalar_name: &'i str, lambda: Vec<ValueAccessor<'i>>) -> Self {
         let lambda = unsafe { LambdaAST::new_unchecked(lambda) };
         Self::VariableWithLambda {
             scalar_name,

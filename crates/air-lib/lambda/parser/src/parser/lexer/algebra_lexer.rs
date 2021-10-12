@@ -51,8 +51,7 @@ impl<'input> AlgebraLexer<'input> {
             '[' => Ok((start_pos, Token::OpenSquareBracket, start_pos + 1)),
             ']' => Ok((start_pos, Token::CloseSquareBracket, start_pos + 1)),
 
-            '.' => Ok((start_pos, Token::DotSelector, start_pos + 1)),
-            '$' => Ok((start_pos, Token::JSelector, start_pos + 1)),
+            '.' => Ok((start_pos, Token::Selector, start_pos + 1)),
 
             d if d.is_digit(ARRAY_IDX_BASE) => self.tokenize_arrays_idx(start_pos),
             s if is_air_alphanumeric(s) => self.tokenize_field_name(start_pos),

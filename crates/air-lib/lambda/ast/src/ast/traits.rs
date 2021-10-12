@@ -14,23 +14,18 @@
  * limitations under the License.
  */
 
-#![deny(
-    dead_code,
-    nonstandard_style,
-    unused_imports,
-    unused_mut,
-    unused_variables,
-    unused_unsafe,
-    unreachable_patterns
-)]
+use super::*;
 
-mod parser;
+use std::fmt;
 
-pub use parser::parse;
-pub use parser::AlgebraLexer;
-pub use parser::LambdaParser;
-pub use parser::LambdaParserError;
-pub use parser::LexerError;
+impl fmt::Display for ValueAccessor<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use ValueAccessor::*;
 
-pub use air_lambda_ast::LambdaAST;
-pub use air_lambda_ast::ValueAlgebra;
+        match self {
+            ArrayAccess { idx } => write!(f, ".[{}]", idx),
+            FieldAccess { field_name } => write!(f, ".{}", field_name),
+            Error => write!(f, "a parser error occurred while parsing lambda expression"),
+        }
+    }
+}

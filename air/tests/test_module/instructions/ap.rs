@@ -30,7 +30,7 @@ fn ap_with_scalars() {
         (seq
             (seq
                 (call "{}" ("" "") ["scalar_1_result"] scalar_1)
-                (ap scalar_1.$.$field! scalar_2)
+                (ap scalar_1.$.field! scalar_2)
             )
             (call "{}" ("" "") [scalar_2])
         )

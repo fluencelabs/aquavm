@@ -30,7 +30,7 @@ fn array_access() {
 
     let actual = run_lexer(array_access);
     let expected = vec![
-        Spanned::Ok((0, Token::DotSelector, 1)),
+        Spanned::Ok((0, Token::Selector, 1)),
         Spanned::Ok((1, Token::OpenSquareBracket, 2)),
         Spanned::Ok((2, Token::ArrayIdx(0), 3)),
         Spanned::Ok((3, Token::CloseSquareBracket, 4)),
@@ -41,13 +41,12 @@ fn array_access() {
 #[test]
 fn field_access() {
     let field_name = "some_field_name";
-    let field_access = format!(".${}", field_name);
+    let field_access = format!(".{}", field_name);
 
     let actual = run_lexer(&field_access);
     let expected = vec![
-        Spanned::Ok((0, Token::DotSelector, 1)),
-        Spanned::Ok((1, Token::JSelector, 2)),
-        Spanned::Ok((2, Token::FieldName(field_name), 2 + field_name.len())),
+        Spanned::Ok((0, Token::Selector, 1)),
+        Spanned::Ok((1, Token::FieldName(field_name), 1 + field_name.len())),
     ];
     assert_eq!(actual, expected);
 }

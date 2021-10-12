@@ -14,7 +14,7 @@ ValueAlgebra: ValueAlgebra<'input> = {
         ValueAlgebra::ArrayAccess { idx }
     },
 
-    "." <maybe_jselector_sign:"$"?> <field_name: field_name> <maybe_flatten_sign:"!"?> => {
+    "." <field_name: field_name> <maybe_flatten_sign:"!"?> => {
         ValueAlgebra::FieldAccess { field_name }
     },
 
@@ -26,8 +26,7 @@ extern {
     type Error = LexerError;
 
     enum Token<'input> {
-        "." => Token::DotSelector,
-        "$" => Token::JSelector,
+        "." => Token::Selector,
 
         "[" => Token::OpenSquareBracket,
         "]" => Token::CloseSquareBracket,

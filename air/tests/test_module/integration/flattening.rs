@@ -62,7 +62,7 @@ fn flattening_scalar_arrays() {
         r#"
         (seq
             (call "{0}" ("" "") [] scalar_array)
-            (fold scalar_array.$.$iterable! v
+            (fold scalar_array.$.iterable! v
                 (seq
                     (call v.$.peer_id! (v.$.service_id! v.$.function_name!) [v.$.args.[0]! v.$.args.[1]!])
                     (next v)

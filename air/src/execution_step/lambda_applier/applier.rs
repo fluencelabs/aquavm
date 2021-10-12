@@ -20,7 +20,7 @@ use super::LambdaResult;
 use crate::JValue;
 use crate::LambdaAST;
 
-use air_lambda_parser::ValueAlgebra;
+use air_lambda_parser::ValueAccessor;
 
 pub(crate) struct StreamSelectResult<'value> {
     pub(crate) result: &'value JValue,
@@ -31,7 +31,7 @@ pub(crate) fn select_from_stream<'value>(
     stream: impl ExactSizeIterator<Item = &'value JValue> + 'value,
     lambda: &LambdaAST<'_>,
 ) -> LambdaResult<StreamSelectResult<'value>> {
-    use ValueAlgebra::*;
+    use ValueAccessor::*;
 
     let (prefix, body) = lambda.split_first();
     let idx = match prefix {
@@ -61,17 +61,17 @@ pub(crate) fn select_from_stream<'value>(
 
 pub(crate) fn select<'value, 'algebra>(
     mut value: &'value JValue,
-    lambda: impl Iterator<Item = &'algebra ValueAlgebra<'algebra>>,
+    lambda: impl Iterator<Item = &'algebra ValueAccessor<'algebra>>,
 ) -> LambdaResult<&'value JValue> {
     for value_algebra in lambda {
         match value_algebra {
-            ValueAlgebra::ArrayAccess { idx } => {
+            ValueAccessor::ArrayAccess { idx } => {
                 value = try_jvalue_with_idx(value, *idx)?;
             }
-            ValueAlgebra::FieldAccess { field_name } => {
+            ValueAccessor::FieldAccess { field_name } => {
                 value = try_jvalue_with_field_name(value, *field_name)?;
             }
-            ValueAlgebra::Error => unreachable!("should not execute if parsing succeeded. QED."),
+            ValueAccessor::Error => unreachable!("should not execute if parsing succeeded. QED."),
         }
     }
 

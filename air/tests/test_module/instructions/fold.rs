@@ -224,7 +224,7 @@ fn fold_with_join() {
                     (call "unknown_peer" ("" "") [] lazy_def_variable)
                     (fold iterable i
                         (seq
-                            (call "A" ("" "") [lazy_def_variable.$.$hash!] $acc)
+                            (call "A" ("" "") [lazy_def_variable.$.hash!] $acc)
                             (next i)
                         )
                     )
@@ -249,7 +249,7 @@ fn lambda() {
     let script = r#"
             (seq
                 (call "set_variable" ("" "") [] iterable)
-                (fold iterable.$.$array! i
+                (fold iterable.$.array! i
                     (seq
                         (call "A" ("" "") [i] $acc)
                         (next i)

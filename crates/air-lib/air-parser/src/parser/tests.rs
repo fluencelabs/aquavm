@@ -25,7 +25,7 @@ use ast::CallInstrArgValue;
 use ast::CallInstrValue;
 use ast::Instruction;
 
-use air_lambda_parser::ValueAlgebra;
+use air_lambda_parser::ValueAccessor;
 
 use fstrings::f;
 use lalrpop_util::ParseError;
@@ -145,7 +145,7 @@ fn parse_json_path() {
         peer_part: PeerPk(CallInstrValue::VariableWithLambda(
             ast::VariableWithLambda::from_raw_algebras(
                 Scalar("id"),
-                vec![ValueAlgebra::FieldAccess { field_name: "a" }],
+                vec![ValueAccessor::FieldAccess { field_name: "a" }],
             ),
         )),
         function_part: FuncName(CallInstrValue::Literal("f")),
@@ -336,7 +336,7 @@ fn parse_json_path_complex() {
             peer_part: PeerPk(CallInstrValue::VariableWithLambda(
                 ast::VariableWithLambda::from_raw_algebras(
                     Scalar("m"),
-                    vec![ValueAlgebra::ArrayAccess { idx: 1 }],
+                    vec![ValueAccessor::ArrayAccess { idx: 1 }],
                 ),
             )),
             function_part: FuncName(CallInstrValue::Literal("f")),
@@ -348,13 +348,13 @@ fn parse_json_path_complex() {
                 ast::VariableWithLambda::from_raw_algebras(
                     Scalar("m"),
                     vec![
-                        ValueAlgebra::FieldAccess { field_name: "abc" },
-                        ValueAlgebra::ArrayAccess { idx: 0 },
-                        ValueAlgebra::FieldAccess { field_name: "cde" },
-                        ValueAlgebra::ArrayAccess { idx: 1 },
-                        ValueAlgebra::ArrayAccess { idx: 0 },
-                        ValueAlgebra::FieldAccess { field_name: "cde" },
-                        ValueAlgebra::ArrayAccess { idx: 1 },
+                        ValueAccessor::FieldAccess { field_name: "abc" },
+                        ValueAccessor::ArrayAccess { idx: 0 },
+                        ValueAccessor::FieldAccess { field_name: "cde" },
+                        ValueAccessor::ArrayAccess { idx: 1 },
+                        ValueAccessor::ArrayAccess { idx: 0 },
+                        ValueAccessor::FieldAccess { field_name: "cde" },
+                        ValueAccessor::ArrayAccess { idx: 1 },
                     ],
                 ),
             )),
@@ -380,7 +380,7 @@ fn json_path_square_braces() {
         peer_part: PeerPk(CallInstrValue::VariableWithLambda(
             ast::VariableWithLambda::from_raw_algebras(
                 Scalar("u"),
-                vec![ValueAlgebra::FieldAccess {
+                vec![ValueAccessor::FieldAccess {
                     field_name: "peer_id",
                 }],
             ),
@@ -393,16 +393,16 @@ fn json_path_square_braces() {
             CallInstrArgValue::VariableWithLambda(ast::VariableWithLambda::from_raw_algebras(
                 Scalar("u"),
                 vec![
-                    ValueAlgebra::ArrayAccess { idx: 1 },
-                    ValueAlgebra::FieldAccess { field_name: "cde" },
-                    ValueAlgebra::ArrayAccess { idx: 0 },
-                    ValueAlgebra::ArrayAccess { idx: 0 },
-                    ValueAlgebra::FieldAccess { field_name: "abc" },
+                    ValueAccessor::ArrayAccess { idx: 1 },
+                    ValueAccessor::FieldAccess { field_name: "cde" },
+                    ValueAccessor::ArrayAccess { idx: 0 },
+                    ValueAccessor::ArrayAccess { idx: 0 },
+                    ValueAccessor::FieldAccess { field_name: "abc" },
                 ],
             )),
             CallInstrArgValue::VariableWithLambda(ast::VariableWithLambda::from_raw_algebras(
                 Scalar("u"),
-                vec![ValueAlgebra::FieldAccess { field_name: "name" }],
+                vec![ValueAccessor::FieldAccess { field_name: "name" }],
             )),
         ]),
         output: Variable(Stream("$void")),
@@ -921,7 +921,7 @@ fn fold_json_path() {
     let expected = Instruction::FoldScalar(FoldScalar {
         iterable: IterableScalarValue::new_vl(
             "members",
-            vec![ValueAlgebra::ArrayAccess { idx: 123321 }],
+            vec![ValueAccessor::ArrayAccess { idx: 123321 }],
         ),
         iterator: "m",
         instruction: Rc::new(null()),
@@ -960,10 +960,10 @@ fn comments() {
         iterable: IterableScalarValue::new_vl(
             "members",
             vec![
-                ValueAlgebra::FieldAccess {
+                ValueAccessor::FieldAccess {
                     field_name: "field",
                 },
-                ValueAlgebra::ArrayAccess { idx: 1 },
+                ValueAccessor::ArrayAccess { idx: 1 },
             ],
         ),
         iterator: "m",

@@ -19,7 +19,7 @@ use super::va_lambda;
 use super::LambdaParserError;
 use super::LambdaParserResult;
 use crate::LambdaAST;
-use crate::ValueAlgebra;
+use crate::ValueAccessor;
 
 use va_lambda::LambdaParser;
 
@@ -42,7 +42,7 @@ pub fn parse(lambda: &str) -> LambdaParserResult<'_, LambdaAST> {
     })
 }
 
-fn try_to_lambda(algebras: Vec<ValueAlgebra>) -> LambdaParserResult<'_, LambdaAST> {
+fn try_to_lambda(algebras: Vec<ValueAccessor>) -> LambdaParserResult<'_, LambdaAST> {
     if algebras.is_empty() {
         return Err(LambdaParserError::EmptyLambda);
     }

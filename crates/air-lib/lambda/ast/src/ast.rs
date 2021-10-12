@@ -14,22 +14,23 @@
  * limitations under the License.
  */
 
+mod traits;
+
+use non_empty_vec::NonEmpty;
 use serde::Deserialize;
 use serde::Serialize;
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub enum Token<'input> {
-    // .
-    DotSelector,
-    // $
-    JSelector,
+pub type LambdaAST<'input> = NonEmpty<ValueAccessor<'input>>;
 
-    OpenSquareBracket,
-    CloseSquareBracket,
+#[derive(Debug, PartialEq, Clone, Copy, Serialize, Deserialize)]
+pub enum ValueAccessor<'input> {
+    // (.)?[$idx]
+    ArrayAccess { idx: u32 },
 
-    ArrayIdx(u32),
-    FieldName(&'input str),
+    // .field
+    FieldAccess { field_name: &'input str },
 
-    // !
-    FlatteningSign,
+    // needed to allow parser catch all errors from a lambda expression without stopping
+    // on the very first one. Although, this variant is guaranteed to not presence in lambda.
+    Error,
 }

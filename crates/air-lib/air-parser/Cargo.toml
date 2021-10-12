@@ -13,7 +13,7 @@ categories = ["wasm"]
 lalrpop = "0.19.6"
 
 [dependencies]
-air-lambda-parser = { path = "../value-algebra/parser" }
+air-lambda-parser = { path = "../lambda/parser" }
 
 lalrpop-util = "0.19.6"
 regex = "1.5.4"
