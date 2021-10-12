@@ -294,7 +294,7 @@ fn parse_undefined_stream_without_json_path() {
 #[test]
 fn parse_undefined_stream_with_json_path() {
     let source_code = r#"
-        (call "" "" [$stream.$.$json_path])
+        (call "" "" [$stream.$.json_path])
         "#;
 
     let lexer = crate::AIRLexer::new(source_code);
