@@ -4,6 +4,7 @@ members = [
     "air-interpreter",
     "avm/server",
     "crates/air-lib/air-parser",
+    "crates/air-lib/execution-info-collector",
     "crates/air-lib/interpreter-data",
     "crates/air-lib/interpreter-interface",
     "crates/air-lib/log-targets",

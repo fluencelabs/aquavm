@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-use super::InstrTracker;
 use super::LastErrorDescriptor;
 use super::LastErrorWithTetraplet;
 use crate::execution_step::boxed_value::Scalar;
 use crate::execution_step::boxed_value::Stream;
 
+use air_execution_info_collector::InstructionTracker;
 use air_interpreter_interface::*;
 
 use std::cell::RefCell;
@@ -67,7 +67,7 @@ pub(crate) struct ExecutionCtx<'i> {
     pub met_folds: VecDeque<&'i str>,
 
     /// Tracker of all met instructions.
-    pub tracker: InstrTracker,
+    pub tracker: InstructionTracker,
 
     /// Last call request id that was used as an id for call request in outcome.
     pub last_call_request_id: u32,
