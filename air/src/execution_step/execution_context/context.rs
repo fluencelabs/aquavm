@@ -32,28 +32,28 @@ use std::rc::Rc;
 pub(crate) struct ExecutionCtx<'i> {
     /// Contains all scalars.
     // TODO: use shared string (Rc<String>) to avoid copying.
-    pub scalars: HashMap<String, Scalar<'i>>,
+    pub(crate) scalars: HashMap<String, Scalar<'i>>,
 
     /// Contains all streams.
     // TODO: use shared string (Rc<String>) to avoid copying.
-    pub streams: HashMap<String, RefCell<Stream>>,
+    pub(crate) streams: HashMap<String, RefCell<Stream>>,
 
     /// Set of peer public keys that should receive resulted data.
-    pub next_peer_pks: Vec<String>,
+    pub(crate) next_peer_pks: Vec<String>,
 
     /// PeerId of a peer executing this AIR script at the moment.
-    pub current_peer_id: Rc<String>,
+    pub(crate) current_peer_id: Rc<String>,
 
     /// PeerId of a peer send this AIR script.
-    pub init_peer_id: String,
+    pub(crate) init_peer_id: String,
 
     /// Last error produced by local service.
     /// None means that there weren't any error.
-    pub last_error: Option<LastErrorDescriptor>,
+    pub(crate) last_error: Option<LastErrorDescriptor>,
 
     /// True, if last error could be set. This flag is used to distinguish
     /// whether an error is being bubbled up from the bottom or just encountered.
-    pub last_error_could_be_set: bool,
+    pub(crate) last_error_could_be_set: bool,
 
     /// Indicates that previous executed subtree is complete.
     /// A subtree treats as a complete if all subtree elements satisfy the following rules:
@@ -61,22 +61,81 @@ pub(crate) struct ExecutionCtx<'i> {
     ///   - at least one of xor subtrees is completed without an error
     ///   - all of seq subtrees are completed
     ///   - call executed successfully (executed state is Executed)
-    pub subtree_complete: bool,
-
-    /// List of met folds used to determine whether a variable can be shadowed.
-    pub met_folds: VecDeque<&'i str>,
+    pub(crate) subtree_complete: bool,
 
     /// Tracker of all met instructions.
-    pub tracker: InstructionTracker,
+    pub(crate) tracker: InstructionTracker,
 
     /// Last call request id that was used as an id for call request in outcome.
-    pub last_call_request_id: u32,
+    pub(crate) last_call_request_id: u32,
 
     /// Contains all executed results from a host side.
-    pub call_results: CallResults,
+    pub(crate) call_results: CallResults,
 
     /// Tracks all functions that should be called from services.
-    pub call_requests: CallRequests,
+    pub(crate) call_requests: CallRequests,
+}
+
+/// There are two scopes for scalars in AIR: global and local. A local scope is a scope
+/// inside every fold block, other scope is a global. It means that scalar in an upper
+/// fold block could be shadowed by a scalar with the same name in a lower fold block,
+/// it works "as expected". Let's consider the following example:
+/// (seq
+///   (seq
+///     (call ... local) ;; (1)
+///     (fold iterable_1 iterator_1
+///       (seq
+///         (seq
+///           (seq
+///             (call ... local) ;; (2)
+///             (fold iterable_2 iterator_2
+///               (seq
+///                 (seq
+///                    (call ... local) ;; (3)
+///                    (call ... [local]) ;; local set by (3) will be used
+///                  )
+///                  (next iterator_2)
+///               )
+///             )
+///           )
+///           (call ... [local]) ;; local set by (2) will be used
+///         )
+///         (next iterator_1)
+///       )
+///     )
+///   )
+///   (seq
+///     (call ... [local]) ;; local set by (1) will be used
+///     (call ... local) ;; error will be occurred because, it's impossible to set variable twice
+///                      ;; in a global scope
+///   )
+/// )
+///
+/// This struct is intended to provide abilities to work with scalars as it was described.
+pub struct Scalars<'i> {
+    pub variables: HashMap<String, Vec<Scalar<'i>>>,
+    pub fold_layer: usize,
+}
+
+impl<'i> Scalars<'i> {
+    pub fn set(&mut self, name: impl Into<String>, scalar: Scalar<'i>) -> ExecutionResult<()> {
+        use std::collections::hash_map::Entry::{Vacant, Occupied};
+
+        match self.variables.entry(name.into()) {
+            Vacant(entry) => {
+                entry.
+            }
+        }
+        if !self.shadowing_allowed() {
+            return exec_err!();
+        }
+
+        self.scalars.
+    }
+
+    fn shadowing_allowed(&self) -> bool {
+        self.fold_layer != 0
+    }
 }
 
 impl<'i> ExecutionCtx<'i> {
@@ -114,6 +173,7 @@ impl<'i> ExecutionCtx<'i> {
 
 use std::fmt::Display;
 use std::fmt::Formatter;
+use crate::execution_step::ExecutionResult;
 
 impl<'i> Display for ExecutionCtx<'i> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {

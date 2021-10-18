@@ -18,15 +18,12 @@ use super::Instruction;
 use super::IterableValue;
 use super::ResolvedCallResult;
 
-use std::collections::HashMap;
 use std::rc::Rc;
 
 pub(crate) struct FoldState<'i> {
     pub(crate) iterable: IterableValue,
     pub(crate) iterable_type: IterableType,
     pub(crate) instr_head: Rc<Instruction<'i>>,
-    // map of met variables inside this (not any inner) fold block with their initial values
-    pub(crate) met_variables: HashMap<&'i str, ResolvedCallResult>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -45,7 +42,6 @@ impl<'i> FoldState<'i> {
             iterable,
             iterable_type,
             instr_head,
-            met_variables: HashMap::new(),
         }
     }
 }
