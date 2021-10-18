@@ -15,6 +15,7 @@ dependencies = [
 name = "air"
 version = "0.16.0"
 dependencies = [
+ "air-execution-info-collector",
  "air-interpreter-data",
  "air-interpreter-interface",
  "air-lambda-ast",
@@ -41,6 +42,10 @@ dependencies = [
  "thiserror",
  "wasm-bindgen",
 ]
+
+[[package]]
+name = "air-execution-info-collector"
+version = "0.1.0"
 
 [[package]]
 name = "air-interpreter"
