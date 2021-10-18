@@ -45,9 +45,9 @@ pub(crate) fn select_from_stream<'value>(
     };
 
     let stream_size = stream.len();
-    let mut value = stream
+    let value = stream
         .peekable()
-        .nth(idx)
+        .nth(idx as usize)
         .ok_or(LambdaError::StreamNotHaveEnoughValues { stream_size, idx })?;
 
     let result = select(value, body.iter())?;
