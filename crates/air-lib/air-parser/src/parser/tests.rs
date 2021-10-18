@@ -292,7 +292,7 @@ fn parse_undefined_stream_without_json_path() {
 }
 
 #[test]
-fn parse_undefined_stream_with_json_path() {
+fn parse_undefined_stream_with_lambda() {
     let source_code = r#"
         (call "" "" [$stream.$.json_path])
         "#;

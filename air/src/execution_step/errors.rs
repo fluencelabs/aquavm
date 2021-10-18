@@ -58,8 +58,8 @@ pub(crate) enum ExecutionError {
     #[error(transparent)]
     LambdaApplierError(#[from] LambdaError),
 
-    /// An error occurred while trying to apply json path to an empty stream.
-    #[error("json path is applied to an empty stream")]
+    /// An error occurred while trying to apply lambda to an empty stream.
+    #[error("lambda is applied to an empty stream")]
     EmptyStreamLambdaError,
 
     /// Provided JValue has incompatible with target type.

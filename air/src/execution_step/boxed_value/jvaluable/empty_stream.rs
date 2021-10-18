@@ -26,7 +26,7 @@ use std::borrow::Cow;
 
 impl JValuable for () {
     fn apply_lambda(&self, _lambda: &LambdaAST<'_>) -> ExecutionResult<Vec<&JValue>> {
-        // applying json path to an empty stream will produce a join behaviour
+        // applying lambda to an empty stream will produce a join behaviour
         exec_err!(ExecutionError::EmptyStreamLambdaError)
     }
 
@@ -34,7 +34,7 @@ impl JValuable for () {
         &self,
         _lambda: &LambdaAST<'_>,
     ) -> ExecutionResult<(Vec<&JValue>, SecurityTetraplets)> {
-        // applying json path to an empty stream will produce a join behaviour
+        // applying lambda to an empty stream will produce a join behaviour
         exec_err!(ExecutionError::EmptyStreamLambdaError)
     }
 

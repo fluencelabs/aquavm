@@ -211,7 +211,7 @@ impl<'input> CallVariableParser<'input> {
     fn try_parse_as_json_path(&mut self) -> LexerResult<()> {
         if !self.json_path_allowed_char() && !self.try_parse_as_flattening() {
             let error_pos = self.pos_in_string_to_parse();
-            return Err(LexerError::InvalidJsonPath(error_pos, error_pos));
+            return Err(LexerError::InvalidLambda(error_pos, error_pos));
         }
 
         Ok(())
@@ -320,8 +320,8 @@ impl<'input> CallVariableParser<'input> {
                 }
             }
             (false, true) => {
-                let json_path_start_pos = self.state.first_dot_met_pos.unwrap();
-                let (variable, lambda) = self.try_to_variable_and_lambda(json_path_start_pos)?;
+                let lambda_start_pos = self.state.first_dot_met_pos.unwrap();
+                let (variable, lambda) = self.try_to_variable_and_lambda(lambda_start_pos)?;
                 let variable = self.to_variable(variable);
 
                 Ok(Token::VariableWithLambda(variable, lambda))

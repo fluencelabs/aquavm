@@ -131,21 +131,21 @@ fn create_scalar_lambda_iterable<'ctx>(
     match exec_ctx.scalars.get(scalar_name) {
         Some(Scalar::JValueRef(variable)) => {
             let jvalues = select(&variable.result, lambda.iter())?;
-            from_jvalues(jvalues, variable.tetraplet.clone(), lambda)
+            from_jvalue(jvalues, variable.tetraplet.clone(), lambda)
         }
         Some(Scalar::JValueFoldCursor(fold_state)) => {
             let iterable_value = fold_state.iterable.peek().unwrap();
             let jvalues = iterable_value.apply_lambda(lambda)?;
             let tetraplet = as_tetraplet(&iterable_value);
 
-            from_jvalues(jvalues[0], tetraplet, lambda)
+            from_jvalue(jvalues[0], tetraplet, lambda)
         }
         _ => return exec_err!(ExecutionError::VariableNotFound(scalar_name.to_string())),
     }
 }
 
 /// Construct IterableValue from the result and given triplet.
-fn from_jvalues(
+fn from_jvalue(
     jvalue: &JValue,
     tetraplet: RSecurityTetraplet,
     lambda: &LambdaAST<'_>,
@@ -168,7 +168,7 @@ fn from_jvalues(
     }
 
     let iterable = iterable.to_vec();
-    let foldable = IterableJsonPathResult::init(iterable, tetraplet);
+    let foldable = IterableLambdaResult::init(iterable, tetraplet);
     let iterable = FoldIterableScalar::Scalar(Box::new(foldable));
     Ok(iterable)
 }

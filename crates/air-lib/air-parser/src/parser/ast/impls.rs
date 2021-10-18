@@ -28,6 +28,7 @@ impl<'i> VariableWithLambda<'i> {
         Self { variable, lambda }
     }
 
+    // This function is unsafe and lambda must be non-empty, although it's used only for tests
     pub fn from_raw_algebras(variable: AstVariable<'i>, lambda: Vec<ValueAccessor<'i>>) -> Self {
         let lambda = unsafe { LambdaAST::new_unchecked(lambda) };
         Self { variable, lambda }
@@ -35,6 +36,7 @@ impl<'i> VariableWithLambda<'i> {
 }
 
 impl<'i> IterableScalarValue<'i> {
+    // This function is unsafe and lambda must be non-empty, although it's used only for tests
     pub fn new_vl(scalar_name: &'i str, lambda: Vec<ValueAccessor<'i>>) -> Self {
         let lambda = unsafe { LambdaAST::new_unchecked(lambda) };
         Self::VariableWithLambda {

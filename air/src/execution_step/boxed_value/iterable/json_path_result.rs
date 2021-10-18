@@ -21,16 +21,16 @@ use crate::foldable_next;
 use crate::foldable_prev;
 use crate::JValue;
 
-/// Used for iterating over a result of applied to a JValue json path.
+/// Used for iterating over a result of applied to a JValue lambda.
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub(crate) struct IterableJsonPathResult {
+pub(crate) struct IterableLambdaResult {
     pub(crate) jvalues: Vec<JValue>,
     // consider adding index for each tetraplet
     pub(crate) tetraplet: RSecurityTetraplet,
     pub(crate) cursor: usize,
 }
 
-impl IterableJsonPathResult {
+impl IterableLambdaResult {
     pub(crate) fn init(jvalues: Vec<JValue>, tetraplet: RSecurityTetraplet) -> Self {
         Self {
             jvalues,
@@ -40,7 +40,7 @@ impl IterableJsonPathResult {
     }
 }
 
-impl<'ctx> Iterable<'ctx> for IterableJsonPathResult {
+impl<'ctx> Iterable<'ctx> for IterableLambdaResult {
     type Item = IterableItem<'ctx>;
 
     fn next(&mut self) -> bool {

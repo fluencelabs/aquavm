@@ -215,7 +215,7 @@ fn parse_last_error(input: &str, start_pos: usize) -> LexerResult<Token<'_>> {
     let last_error_size = LAST_ERROR.len();
     let last_error_path = match &input[last_error_size..] {
         "" => LastErrorPath::None,
-        // The second option with ! is needed for compatibility with flattening in "standard" json path used in AIR.
+        // The second option with ! is needed for compatibility with flattening in "standard" lambda used in AIR.
         // However version without ! returns just a error, because the opposite is unsound.
         ".$.instruction" | ".$.instruction!" => LastErrorPath::Instruction,
         ".$.msg" | ".$.msg!" => LastErrorPath::Message,

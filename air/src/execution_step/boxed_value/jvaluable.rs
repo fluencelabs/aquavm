@@ -35,10 +35,10 @@ use std::borrow::Cow;
 
 /// Represent a value that could be transform to a JValue with or without tetraplets.
 pub(crate) trait JValuable {
-    /// Applies json path to the internal value, produces JValue.
+    /// Applies lambda to the internal value, produces JValue.
     fn apply_lambda(&self, lambda: &LambdaAST<'_>) -> ExecutionResult<Vec<&JValue>>;
 
-    /// Applies json path to the internal value, produces JValue with tetraplet.
+    /// Applies lambda to the internal value, produces JValue with tetraplet.
     fn apply_lambda_with_tetraplets(
         &self,
         lambda: &LambdaAST<'_>,

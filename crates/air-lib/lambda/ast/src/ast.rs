@@ -31,6 +31,6 @@ pub enum ValueAccessor<'input> {
     FieldAccess { field_name: &'input str },
 
     // needed to allow parser catch all errors from a lambda expression without stopping
-    // on the very first one. Although, this variant is guaranteed to not presence in lambda.
+    // on the very first one. Although, this variant is guaranteed not to be present in a lambda.
     Error,
 }

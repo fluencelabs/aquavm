@@ -24,7 +24,7 @@ pub(super) fn apply_to_arg(
 ) -> ExecutionResult<ResolvedCallResult> {
     let result = match argument {
         ApArgument::ScalarVariable(scalar_name) => apply_scalar(scalar_name, exec_ctx, trace_ctx, should_touch_trace)?,
-        ApArgument::VariableWithLambda(json_arg) => apply_json_argument(json_arg, exec_ctx, trace_ctx)?,
+        ApArgument::VariableWithLambda(vl) => apply_json_argument(vl, exec_ctx, trace_ctx)?,
         ApArgument::LastError(error_path) => apply_last_error(error_path, exec_ctx, trace_ctx)?,
         ApArgument::Literal(value) => apply_const(value.to_string(), exec_ctx, trace_ctx),
         ApArgument::Number(value) => apply_const(value, exec_ctx, trace_ctx),

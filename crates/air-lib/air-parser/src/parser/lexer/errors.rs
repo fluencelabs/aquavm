@@ -36,8 +36,8 @@ pub enum LexerError {
     #[error("this variable or constant shouldn't have empty name")]
     EmptyVariableOrConst(usize, usize),
 
-    #[error("invalid character in json path")]
-    InvalidJsonPath(usize, usize),
+    #[error("invalid character in lambda")]
+    InvalidLambda(usize, usize),
 
     #[error("a digit could contain only digits or one dot")]
     UnallowedCharInNumber(usize, usize),
@@ -58,7 +58,7 @@ pub enum LexerError {
     #[error("this float is too big, a float could contain less than 12 digits")]
     TooBigFloat(usize, usize),
 
-    #[error("leading dot without any symbols before - please write 0 if it's float or variable name if it's json path")]
+    #[error("leading dot without any symbols before - please write 0 if it's float or variable name if it's a lambda")]
     LeadingDot(usize, usize),
 }
 

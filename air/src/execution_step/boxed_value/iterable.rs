@@ -19,7 +19,7 @@ mod resolved_call;
 mod vec_json_path_result;
 mod vec_resolved_call;
 
-pub(crate) use json_path_result::IterableJsonPathResult;
+pub(crate) use json_path_result::IterableLambdaResult;
 pub(crate) use resolved_call::IterableResolvedCall;
 pub(crate) use vec_resolved_call::IterableVecResolvedCall;
 

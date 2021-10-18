@@ -22,13 +22,8 @@ pub enum ParserError {
     #[error(transparent)]
     LexerError(#[from] LexerError),
 
-    #[error(
-        "while using json path in this position, result should be flattened, add ! at the end"
-    )]
-    CallArgsNotFlattened(usize, usize),
-
-    #[error("json path can't be applied to streams in this position")]
-    JsonPathAppliedToStream(usize, usize),
+    #[error("lambda can't be applied to streams in this position")]
+    LambdaAppliedToStream(usize, usize),
 
     #[error("variable '{2}' wasn't defined")]
     UndefinedVariable(usize, usize, String),
