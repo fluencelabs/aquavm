@@ -1,9 +1,9 @@
-## Version 0.16.0 (2021-10-14)
+## Version 0.16.0 (2021-10-18)
 
 [PR 154](https://github.com/fluencelabs/aquavm/pull/154)  
 The json path crate has been removed and changed to custom lambda scheme that have a subset of functionality of json path used by the Aqua compiler. The flattening sign `!` is still allowed now, but does nothing.
 
-[PR 150](https://github.com/fluencelabs/aquavm/pull/150), [PR 152](https://github.com/fluencelabs/aquavm/pull/152), [PR 153](https://github.com/fluencelabs/aquavm/pull/153)  
+[PR 150](https://github.com/fluencelabs/aquavm/pull/150), [PR 152](https://github.com/fluencelabs/aquavm/pull/152), [PR 153](https://github.com/fluencelabs/aquavm/pull/153) [PR 160](https://github.com/fluencelabs/aquavm/pull/160)  
 Some parts of the interpreter has been refactored to make it more modular. 
 
 [PR 144](https://github.com/fluencelabs/aquavm/pull/144)  
