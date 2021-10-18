@@ -159,10 +159,7 @@ fn scalar_to_jvaluable<'name, 'i, 'ctx>(
 ) -> ExecutionResult<Box<dyn JValuable + 'ctx>> {
     use ExecutionError::VariableNotFound;
 
-    let value = ctx
-        .scalars
-        .get(name)
-        .ok_or_else(|| VariableNotFound(name.to_string()))?;
+    let value = ctx.scalars.get(name)?;
 
     Ok(value.to_jvaluable())
 }

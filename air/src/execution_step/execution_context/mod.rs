@@ -16,8 +16,10 @@
 
 mod context;
 mod error_descriptor;
+mod scalar_variables;
 
 pub(crate) use context::*;
 pub use error_descriptor::LastError;
 pub(crate) use error_descriptor::LastErrorDescriptor;
 pub(crate) use error_descriptor::LastErrorWithTetraplet;
+pub(crate) use scalar_variables::*;

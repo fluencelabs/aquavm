@@ -44,10 +44,7 @@ fn apply_scalar(
     use crate::execution_step::ExecutionError::VariableNotFound;
     use crate::execution_step::Scalar;
 
-    let scalar = exec_ctx
-        .scalars
-        .get(scalar_name)
-        .ok_or_else(|| VariableNotFound(scalar_name.to_string()))?;
+    let scalar = exec_ctx.scalars.get(scalar_name)?;
 
     let mut result = match scalar {
         Scalar::JValueRef(result) => result.clone(),

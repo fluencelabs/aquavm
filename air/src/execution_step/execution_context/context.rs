@@ -16,7 +16,7 @@
 
 use super::LastErrorDescriptor;
 use super::LastErrorWithTetraplet;
-use crate::execution_step::boxed_value::Scalar;
+use super::Scalars;
 use crate::execution_step::boxed_value::Stream;
 
 use air_execution_info_collector::InstructionTracker;
@@ -31,8 +31,7 @@ use std::rc::Rc;
 #[derive(Default)]
 pub(crate) struct ExecutionCtx<'i> {
     /// Contains all scalars.
-    // TODO: use shared string (Rc<String>) to avoid copying.
-    pub(crate) scalars: HashMap<String, Scalar<'i>>,
+    pub(crate) scalars: Scalars<'i>,
 
     /// Contains all streams.
     // TODO: use shared string (Rc<String>) to avoid copying.
@@ -76,68 +75,6 @@ pub(crate) struct ExecutionCtx<'i> {
     pub(crate) call_requests: CallRequests,
 }
 
-/// There are two scopes for scalars in AIR: global and local. A local scope is a scope
-/// inside every fold block, other scope is a global. It means that scalar in an upper
-/// fold block could be shadowed by a scalar with the same name in a lower fold block,
-/// it works "as expected". Let's consider the following example:
-/// (seq
-///   (seq
-///     (call ... local) ;; (1)
-///     (fold iterable_1 iterator_1
-///       (seq
-///         (seq
-///           (seq
-///             (call ... local) ;; (2)
-///             (fold iterable_2 iterator_2
-///               (seq
-///                 (seq
-///                    (call ... local) ;; (3)
-///                    (call ... [local]) ;; local set by (3) will be used
-///                  )
-///                  (next iterator_2)
-///               )
-///             )
-///           )
-///           (call ... [local]) ;; local set by (2) will be used
-///         )
-///         (next iterator_1)
-///       )
-///     )
-///   )
-///   (seq
-///     (call ... [local]) ;; local set by (1) will be used
-///     (call ... local) ;; error will be occurred because, it's impossible to set variable twice
-///                      ;; in a global scope
-///   )
-/// )
-///
-/// This struct is intended to provide abilities to work with scalars as it was described.
-pub struct Scalars<'i> {
-    pub variables: HashMap<String, Vec<Scalar<'i>>>,
-    pub fold_layer: usize,
-}
-
-impl<'i> Scalars<'i> {
-    pub fn set(&mut self, name: impl Into<String>, scalar: Scalar<'i>) -> ExecutionResult<()> {
-        use std::collections::hash_map::Entry::{Vacant, Occupied};
-
-        match self.variables.entry(name.into()) {
-            Vacant(entry) => {
-                entry.
-            }
-        }
-        if !self.shadowing_allowed() {
-            return exec_err!();
-        }
-
-        self.scalars.
-    }
-
-    fn shadowing_allowed(&self) -> bool {
-        self.fold_layer != 0
-    }
-}
-
 impl<'i> ExecutionCtx<'i> {
     pub(crate) fn new(
         current_peer_id: String,
@@ -171,16 +108,20 @@ impl<'i> ExecutionCtx<'i> {
     }
 }
 
+use crate::execution_step::ExecutionResult;
 use std::fmt::Display;
 use std::fmt::Formatter;
-use crate::execution_step::ExecutionResult;
 
 impl<'i> Display for ExecutionCtx<'i> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "data cache:")?;
-        for (key, value) in self.scalars.iter() {
-            writeln!(f, "  {} => {}", key, value)?;
+        writeln!(f, "scalars:")?;
+        writeln!(f, "  {}", self.scalars)?;
+
+        writeln!(f, "streams:")?;
+        for (name, stream) in self.streams.iter() {
+            writeln!(f, "  {} => {}", name, stream.borrow())?;
         }
+
         writeln!(f, "current peer id: {}", self.current_peer_id)?;
         writeln!(f, "subtree complete: {}", self.subtree_complete)?;
         writeln!(f, "next peer public keys: {:?}", self.next_peer_pks)?;

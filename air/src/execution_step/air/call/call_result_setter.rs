@@ -41,7 +41,7 @@ pub(crate) fn set_local_result<'i>(
     let result_value = executed_result.result.clone();
     match output {
         CallOutputValue::Variable(AstVariable::Scalar(name)) => {
-            set_scalar_result(executed_result, name, exec_ctx)?;
+            exec_ctx.scalars.set_jvalue(name, executed_result)?;
             Ok(CallResult::executed_scalar(result_value))
         }
         CallOutputValue::Variable(AstVariable::Stream(name)) => {
@@ -68,7 +68,7 @@ pub(crate) fn set_result_from_value<'i>(
     match (output, value) {
         (CallOutputValue::Variable(AstVariable::Scalar(name)), Value::Scalar(value)) => {
             let result = ResolvedCallResult::new(value, tetraplet, trace_pos);
-            set_scalar_result(result, name, exec_ctx)?;
+            exec_ctx.scalars.set_jvalue(name, result)
         }
         (CallOutputValue::Variable(AstVariable::Stream(name)), Value::Stream { value, generation }) => {
             let result = ResolvedCallResult::new(value, tetraplet, trace_pos);
@@ -79,65 +79,6 @@ pub(crate) fn set_result_from_value<'i>(
         // it's been already checked in trace handler
         _ => {}
     };
-
-    Ok(())
-}
-
-#[macro_export]
-macro_rules! shadowing_allowed(
-    ($exec_ctx:ident, $entry:ident) => { {
-        // check that current execution_step flow is inside a fold block
-        if $exec_ctx.met_folds.is_empty() {
-            // shadowing is allowed only inside fold blocks
-            return exec_err!(ExecutionError::MultipleVariablesFound($entry.key().clone()));
-        }
-
-        match $entry.get() {
-            Scalar::JValueRef(_) => {}
-            // shadowing is allowed only for JValue not iterable
-            _ => return exec_err!(ExecutionError::IterableShadowing($entry.key().clone())),
-        };
-
-        ExecutionResult::Ok(())
-    }}
-);
-
-// TODO: decouple this function to a separate module
-pub(crate) fn set_scalar_result<'i>(
-    executed_result: ResolvedCallResult,
-    scalar_name: &'i str,
-    exec_ctx: &mut ExecutionCtx<'i>,
-) -> ExecutionResult<()> {
-    meet_scalar(scalar_name, executed_result.clone(), exec_ctx)?;
-
-    match exec_ctx.scalars.entry(scalar_name.to_string()) {
-        Vacant(entry) => {
-            entry.insert(Scalar::JValueRef(executed_result));
-        }
-        Occupied(mut entry) => {
-            // the macro instead of a function because of borrowing
-            shadowing_allowed!(exec_ctx, entry)?;
-            entry.insert(Scalar::JValueRef(executed_result));
-        }
-    };
-
-    Ok(())
-}
-
-/// Inserts meet variable name into met calls in fold to allow shadowing.
-fn meet_scalar<'i>(
-    scalar_name: &'i str,
-    executed_result: ResolvedCallResult,
-    exec_ctx: &mut ExecutionCtx<'i>,
-) -> ExecutionResult<()> {
-    if let Some(fold_block_name) = exec_ctx.met_folds.back() {
-        let fold_state = match exec_ctx.scalars.get_mut(*fold_block_name) {
-            Some(Scalar::JValueFoldCursor(fold_state)) => fold_state,
-            _ => unreachable!("fold block data must be represented as fold cursor"),
-        };
-
-        fold_state.met_variables.insert(scalar_name, executed_result);
-    }
 
     Ok(())
 }
