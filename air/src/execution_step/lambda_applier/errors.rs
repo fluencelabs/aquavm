@@ -24,16 +24,16 @@ pub(crate) enum LambdaError {
     StreamNotHaveEnoughValues { stream_size: usize, idx: u32 },
 
     #[error("field algebra (with field name = '{field_name}') can't be applied to a stream")]
-    FieldAlgebraAppliedToStream { field_name: String },
+    FieldAccessorAppliedToStream { field_name: String },
 
     #[error("value '{value}' is not an array-type to match array algebra with idx = '{idx}'")]
-    ArrayAlgebraNotMatchValue { value: JValue, idx: u32 },
+    ArrayAccessorNotMatchValue { value: JValue, idx: u32 },
 
     #[error("value '{value}' does not contain element for idx = '{idx}'")]
     ValueNotContainSuchArrayIdx { value: JValue, idx: u32 },
 
     #[error("value '{value}' is not an map-type to match field algebra with field_name = '{field_name}'")]
-    FieldAlgebraNotMatchValue { value: JValue, field_name: String },
+    FieldAccessorNotMatchValue { value: JValue, field_name: String },
 
     #[error("value '{value}' does not contain element with field name = '{field_name}'")]
     JValueNotContainSuchField { value: JValue, field_name: String },

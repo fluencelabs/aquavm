@@ -37,7 +37,7 @@ pub(crate) fn select_from_stream<'value>(
     let idx = match prefix {
         ArrayAccess { idx } => *idx,
         FieldAccess { field_name } => {
-            return Err(LambdaError::FieldAlgebraAppliedToStream {
+            return Err(LambdaError::FieldAccessorAppliedToStream {
                 field_name: field_name.to_string(),
             })
         }

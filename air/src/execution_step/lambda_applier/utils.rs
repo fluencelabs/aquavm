@@ -26,7 +26,7 @@ pub(super) fn try_jvalue_with_idx(jvalue: &JValue, idx: u32) -> LambdaResult<&JV
                 value: jvalue.clone(),
                 idx,
             }),
-        _ => Err(LambdaError::ArrayAlgebraNotMatchValue {
+        _ => Err(LambdaError::ArrayAccessorNotMatchValue {
             value: jvalue.clone(),
             idx,
         }),
@@ -46,7 +46,7 @@ pub(super) fn try_jvalue_with_field_name<'value>(
                     field_name: field_name.to_string(),
                 })
         }
-        _ => Err(LambdaError::FieldAlgebraNotMatchValue {
+        _ => Err(LambdaError::FieldAccessorNotMatchValue {
             value: jvalue.clone(),
             field_name: field_name.to_string(),
         }),
