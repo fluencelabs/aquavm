@@ -15,6 +15,7 @@
  */
 
 use super::*;
+use air_lambda_parser::ValueAccessor;
 
 impl<'i> Ap<'i> {
     pub fn new(argument: ApArgument<'i>, result: AstVariable<'i>) -> Self {
@@ -22,12 +23,25 @@ impl<'i> Ap<'i> {
     }
 }
 
-impl<'i> JsonPath<'i> {
-    pub fn new(variable: AstVariable<'i>, path: &'i str, should_flatten: bool) -> Self {
-        Self {
-            variable,
-            path,
-            should_flatten,
+impl<'i> VariableWithLambda<'i> {
+    pub fn new(variable: AstVariable<'i>, lambda: LambdaAST<'i>) -> Self {
+        Self { variable, lambda }
+    }
+
+    // This function is unsafe and lambda must be non-empty, although it's used only for tests
+    pub fn from_raw_algebras(variable: AstVariable<'i>, lambda: Vec<ValueAccessor<'i>>) -> Self {
+        let lambda = unsafe { LambdaAST::new_unchecked(lambda) };
+        Self { variable, lambda }
+    }
+}
+
+impl<'i> IterableScalarValue<'i> {
+    // This function is unsafe and lambda must be non-empty, although it's used only for tests
+    pub fn new_vl(scalar_name: &'i str, lambda: Vec<ValueAccessor<'i>>) -> Self {
+        let lambda = unsafe { LambdaAST::new_unchecked(lambda) };
+        Self::VariableWithLambda {
+            scalar_name,
+            lambda,
         }
     }
 }

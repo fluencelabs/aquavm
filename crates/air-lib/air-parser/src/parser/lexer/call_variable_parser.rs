@@ -18,6 +18,7 @@ use super::AstVariable;
 use super::LexerError;
 use super::LexerResult;
 use super::Token;
+use crate::LambdaAST;
 
 use std::convert::TryInto;
 use std::iter::Peekable;
@@ -210,7 +211,7 @@ impl<'input> CallVariableParser<'input> {
     fn try_parse_as_json_path(&mut self) -> LexerResult<()> {
         if !self.json_path_allowed_char() && !self.try_parse_as_flattening() {
             let error_pos = self.pos_in_string_to_parse();
-            return Err(LexerError::InvalidJsonPath(error_pos, error_pos));
+            return Err(LexerError::InvalidLambda(error_pos, error_pos));
         }
 
         Ok(())
@@ -281,6 +282,22 @@ impl<'input> CallVariableParser<'input> {
         }
     }
 
+    fn try_to_variable_and_lambda(
+        &self,
+        pos: usize,
+    ) -> LexerResult<(&'input str, LambdaAST<'input>)> {
+        // +2 to ignore ".$" prefix
+        let lambda = crate::parse_lambda(&self.string_to_parse[pos + 2..]).map_err(|e| {
+            LexerError::LambdaParserError(
+                self.start_pos + pos,
+                self.start_pos + self.string_to_parse.len(),
+                e.to_string(),
+            )
+        })?;
+
+        Ok((&self.string_to_parse[0..pos], lambda))
+    }
+
     fn to_token(&self) -> LexerResult<Token<'input>> {
         use super::token::UnparsedNumber;
 
@@ -303,29 +320,12 @@ impl<'input> CallVariableParser<'input> {
                 }
             }
             (false, true) => {
-                let json_path_start_pos = self.state.first_dot_met_pos.unwrap();
-                let should_flatten = self.state.flattening_met;
-                let (variable, json_path) =
-                    to_variable_and_path(self.string_to_parse, json_path_start_pos, should_flatten);
+                let lambda_start_pos = self.state.first_dot_met_pos.unwrap();
+                let (variable, lambda) = self.try_to_variable_and_lambda(lambda_start_pos)?;
                 let variable = self.to_variable(variable);
 
-                Ok(Token::VariableWithJsonPath(
-                    variable,
-                    json_path,
-                    should_flatten,
-                ))
+                Ok(Token::VariableWithLambda(variable, lambda))
             }
         }
     }
-}
-
-fn to_variable_and_path(str: &str, pos: usize, should_flatten: bool) -> (&str, &str) {
-    let json_path = if should_flatten {
-        // -1 to not include the flattening symbol ! to the resulted json path
-        &str[pos + 1..str.len() - 1]
-    } else {
-        &str[pos + 1..]
-    };
-
-    (&str[0..pos], json_path)
 }

@@ -27,6 +27,7 @@ pub struct SecurityTetraplet {
     pub triplet: ResolvedTriplet,
 
     /// Value was produced by applying this `json_path` to the output from `call_service`.
+    // TODO: since it's not a json path anymore, it's needed to rename it to lambda
     pub json_path: String,
 }
 
@@ -55,7 +56,7 @@ impl SecurityTetraplet {
         }
     }
 
-    pub fn add_json_path(&mut self, json_path: &str) {
+    pub fn add_lambda(&mut self, json_path: &str) {
         self.json_path.push_str(json_path)
     }
 }

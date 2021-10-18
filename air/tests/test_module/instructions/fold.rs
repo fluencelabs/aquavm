@@ -157,7 +157,7 @@ fn inner_fold_with_same_iterator() {
 
     let result = call_vm!(vm, "", script, "", "");
 
-    assert_eq!(result.ret_code, 1012);
+    assert_eq!(result.ret_code, 1009);
 }
 
 #[test]
@@ -239,7 +239,7 @@ fn fold_with_join() {
 }
 
 #[test]
-fn json_path() {
+fn lambda() {
     let mut vm = create_avm(echo_call_service(), "A");
     let mut set_variable_vm = create_avm(
         set_variable_call_service(json!({ "array": ["1","2","3","4","5"] })),

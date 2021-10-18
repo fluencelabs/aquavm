@@ -24,7 +24,7 @@ pub(super) fn apply_to_arg(
 ) -> ExecutionResult<ResolvedCallResult> {
     let result = match argument {
         ApArgument::ScalarVariable(scalar_name) => apply_scalar(scalar_name, exec_ctx, trace_ctx, should_touch_trace)?,
-        ApArgument::JsonPath(json_arg) => apply_json_argument(json_arg, exec_ctx, trace_ctx)?,
+        ApArgument::VariableWithLambda(vl) => apply_json_argument(vl, exec_ctx, trace_ctx)?,
         ApArgument::LastError(error_path) => apply_last_error(error_path, exec_ctx, trace_ctx)?,
         ApArgument::Literal(value) => apply_const(value.to_string(), exec_ctx, trace_ctx),
         ApArgument::Number(value) => apply_const(value, exec_ctx, trace_ctx),
@@ -89,12 +89,12 @@ fn apply_last_error(
 }
 
 fn apply_json_argument(
-    json_arg: &JsonPath<'_>,
+    vl: &VariableWithLambda<'_>,
     exec_ctx: &ExecutionCtx<'_>,
     trace_ctx: &TraceHandler,
 ) -> ExecutionResult<ResolvedCallResult> {
-    let variable = Variable::from_ast(&json_arg.variable);
-    let (jvalue, mut tetraplets) = apply_json_path(variable, json_arg.path, json_arg.should_flatten, exec_ctx)?;
+    let variable = Variable::from_ast(&vl.variable);
+    let (jvalue, mut tetraplets) = apply_lambda(variable, &vl.lambda, exec_ctx)?;
 
     let tetraplet = tetraplets
         .pop()

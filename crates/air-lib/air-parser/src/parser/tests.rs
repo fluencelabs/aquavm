@@ -25,6 +25,8 @@ use ast::CallInstrArgValue;
 use ast::CallInstrValue;
 use ast::Instruction;
 
+use air_lambda_parser::ValueAccessor;
+
 use fstrings::f;
 use lalrpop_util::ParseError;
 use std::rc::Rc;
@@ -140,11 +142,12 @@ fn parse_json_path() {
         "#;
     let instruction = parse(source_code);
     let expected = Instruction::Call(Call {
-        peer_part: PeerPk(CallInstrValue::JsonPath(ast::JsonPath::new(
-            Scalar("id"),
-            "$.a",
-            true,
-        ))),
+        peer_part: PeerPk(CallInstrValue::VariableWithLambda(
+            ast::VariableWithLambda::from_raw_algebras(
+                Scalar("id"),
+                vec![ValueAccessor::FieldAccess { field_name: "a" }],
+            ),
+        )),
         function_part: FuncName(CallInstrValue::Literal("f")),
         args: Rc::new(vec![
             CallInstrArgValue::Literal("hello"),
@@ -289,9 +292,9 @@ fn parse_undefined_stream_without_json_path() {
 }
 
 #[test]
-fn parse_undefined_stream_with_json_path() {
+fn parse_undefined_stream_with_lambda() {
     let source_code = r#"
-        (call "" "" [$stream.$json_path])
+        (call "" "" [$stream.$.json_path])
         "#;
 
     let lexer = crate::AIRLexer::new(source_code);
@@ -324,27 +327,37 @@ fn parse_json_path_complex() {
     let source_code = r#"
         (seq
             (call m.$.[1]! "f" [] void)
-            (call m.$.abc["c"].cde[a][0].cde["bcd"]! "f" [] void)
+            (call m.$.abc[0].cde[1][0].cde[1]! "f" [] void)
         )
         "#;
     let instruction = parse(source_code);
     let expected = seq(
         Instruction::Call(Call {
-            peer_part: PeerPk(CallInstrValue::JsonPath(ast::JsonPath::new(
-                Scalar("m"),
-                "$.[1]",
-                true,
-            ))),
+            peer_part: PeerPk(CallInstrValue::VariableWithLambda(
+                ast::VariableWithLambda::from_raw_algebras(
+                    Scalar("m"),
+                    vec![ValueAccessor::ArrayAccess { idx: 1 }],
+                ),
+            )),
             function_part: FuncName(CallInstrValue::Literal("f")),
             args: Rc::new(vec![]),
             output: Variable(Scalar("void")),
         }),
         Instruction::Call(Call {
-            peer_part: PeerPk(CallInstrValue::JsonPath(ast::JsonPath::new(
-                Scalar("m"),
-                r#"$.abc["c"].cde[a][0].cde["bcd"]"#,
-                true,
-            ))),
+            peer_part: PeerPk(CallInstrValue::VariableWithLambda(
+                ast::VariableWithLambda::from_raw_algebras(
+                    Scalar("m"),
+                    vec![
+                        ValueAccessor::FieldAccess { field_name: "abc" },
+                        ValueAccessor::ArrayAccess { idx: 0 },
+                        ValueAccessor::FieldAccess { field_name: "cde" },
+                        ValueAccessor::ArrayAccess { idx: 1 },
+                        ValueAccessor::ArrayAccess { idx: 0 },
+                        ValueAccessor::FieldAccess { field_name: "cde" },
+                        ValueAccessor::ArrayAccess { idx: 1 },
+                    ],
+                ),
+            )),
             function_part: FuncName(CallInstrValue::Literal("f")),
             args: Rc::new(vec![]),
             output: Variable(Scalar("void")),
@@ -360,26 +373,37 @@ fn json_path_square_braces() {
     use ast::PeerPart::*;
 
     let source_code = r#"
-        (call u.$["peer_id"]! ("return" "") [u.$["peer_id"].cde[0]["abc"].abc u.$["name"]] $void)
+        (call u.$.peer_id! ("return" "") [u.$[1].cde[0][0].abc u.$.name] $void)
         "#;
     let instruction = parse(source_code);
     let expected = Instruction::Call(Call {
-        peer_part: PeerPk(CallInstrValue::JsonPath(ast::JsonPath::new(
-            Scalar("u"),
-            r#"$["peer_id"]"#,
-            true,
-        ))),
+        peer_part: PeerPk(CallInstrValue::VariableWithLambda(
+            ast::VariableWithLambda::from_raw_algebras(
+                Scalar("u"),
+                vec![ValueAccessor::FieldAccess {
+                    field_name: "peer_id",
+                }],
+            ),
+        )),
         function_part: ServiceIdWithFuncName(
             CallInstrValue::Literal("return"),
             CallInstrValue::Literal(""),
         ),
         args: Rc::new(vec![
-            CallInstrArgValue::JsonPath(ast::JsonPath::new(
+            CallInstrArgValue::VariableWithLambda(ast::VariableWithLambda::from_raw_algebras(
                 Scalar("u"),
-                r#"$["peer_id"].cde[0]["abc"].abc"#,
-                false,
+                vec![
+                    ValueAccessor::ArrayAccess { idx: 1 },
+                    ValueAccessor::FieldAccess { field_name: "cde" },
+                    ValueAccessor::ArrayAccess { idx: 0 },
+                    ValueAccessor::ArrayAccess { idx: 0 },
+                    ValueAccessor::FieldAccess { field_name: "abc" },
+                ],
             )),
-            CallInstrArgValue::JsonPath(ast::JsonPath::new(Scalar("u"), r#"$["name"]"#, false)),
+            CallInstrArgValue::VariableWithLambda(ast::VariableWithLambda::from_raw_algebras(
+                Scalar("u"),
+                vec![ValueAccessor::FieldAccess { field_name: "name" }],
+            )),
         ]),
         output: Variable(Stream("$void")),
     });
@@ -886,20 +910,19 @@ fn ap_with_last_error() {
 #[test]
 fn fold_json_path() {
     use ast::FoldScalar;
-    use ast::IterableScalarValue::*;
+    use ast::IterableScalarValue;
 
     let source_code = r#"
     ; comment
-    (fold members.$.["users"] m (null)) ;;; comment
+    (fold members.$.[123321] m (null)) ;;; comment
     ;;; comment
     "#;
     let instruction = parse(source_code);
     let expected = Instruction::FoldScalar(FoldScalar {
-        iterable: JsonPath {
-            scalar_name: "members",
-            path: "$.[\"users\"]",
-            should_flatten: false,
-        },
+        iterable: IterableScalarValue::new_vl(
+            "members",
+            vec![ValueAccessor::ArrayAccess { idx: 123321 }],
+        ),
         iterator: "m",
         instruction: Rc::new(null()),
     });
@@ -925,20 +948,24 @@ fn fold_on_stream() {
 #[test]
 fn comments() {
     use ast::FoldScalar;
-    use ast::IterableScalarValue::*;
+    use ast::IterableScalarValue;
 
     let source_code = r#"
     ; comment
-    (fold members.$.["users"] m (null)) ;;; comment ;;?()()
+    (fold members.$.field[1] m (null)) ;;; comment ;;?()()
     ;;; comme;?!.$.  nt[][][][()()()null;$::!
     "#;
     let instruction = parse(source_code);
     let expected = Instruction::FoldScalar(FoldScalar {
-        iterable: JsonPath {
-            scalar_name: "members",
-            path: "$.[\"users\"]",
-            should_flatten: false,
-        },
+        iterable: IterableScalarValue::new_vl(
+            "members",
+            vec![
+                ValueAccessor::FieldAccess {
+                    field_name: "field",
+                },
+                ValueAccessor::ArrayAccess { idx: 1 },
+            ],
+        ),
         iterator: "m",
         instruction: Rc::new(null()),
     });

@@ -1,11 +1,11 @@
 use crate::parser::ast::*;
-use crate::parser::air_parser::make_flattened_error;
 use crate::parser::air_parser::make_stream_iterable_error;
 use crate::parser::ParserError;
 use crate::parser::VariableValidator;
 use crate::parser::Span;
 use crate::parser::lexer::Token;
 
+use air_lambda_parser::LambdaAST;
 use lalrpop_util::ErrorRecovery;
 use std::rc::Rc;
 
@@ -26,17 +26,11 @@ Instr: Box<Instruction<'input>> = {
     },
 
     <left: @L> "(" ap <arg:ApArgument> <res:Output> ")" <right: @R> => {
-        if let ApArgument::JsonPath(json_path) = &arg {
-            if let AstVariable::Stream(_) = &json_path.variable {
-                let token = Token::VariableWithJsonPath(json_path.variable.clone(), json_path.path, json_path.should_flatten);
+        if let ApArgument::VariableWithLambda(vl) = &arg {
+            if let AstVariable::Stream(_) = &vl.variable {
+                let token = Token::VariableWithLambda(vl.variable.clone(), vl.lambda.clone());
                 errors.push(make_stream_iterable_error(left, token, right));
             };
-
-            // Due the json path constraints json path should be flattened in a apply arguments.
-            if !json_path.should_flatten {
-                let token = Token::VariableWithJsonPath(json_path.variable.clone(), json_path.path, json_path.should_flatten);
-                errors.push(make_flattened_error(left, token, right));
-            }
         }
 
         let apply = Ap::new(arg, res);
@@ -124,17 +118,11 @@ CallInstrValue: CallInstrValue<'input> = {
     <l:Literal> => CallInstrValue::Literal(l),
     <a:Alphanumeric> => CallInstrValue::Variable(AstVariable::Scalar(a)),
     <s:Stream> => CallInstrValue::Variable(AstVariable::Stream(s)),
-    <left: @L> <j:JsonPath> <right: @R> => {
-        let variable = j.0;
-        let path = j.1;
-        let should_flatten = j.2;
-        // Due the json path constraints json path should be flattened in a call triplet.
-        if !should_flatten {
-            let token = Token::VariableWithJsonPath(variable.clone(), path, should_flatten);
-            errors.push(make_flattened_error(left, token, right));
-        }
+    <left: @L> <vl:VariableWithLambda> <right: @R> => {
+        let variable = vl.0;
+        let lambda = vl.1;
 
-        CallInstrValue::JsonPath(JsonPath::new(variable, path, should_flatten))
+        CallInstrValue::VariableWithLambda(VariableWithLambda::new(variable, lambda))
     },
     InitPeerId => CallInstrValue::InitPeerId,
 }
@@ -145,7 +133,7 @@ CallInstrArgValue: CallInstrArgValue<'input> = {
     <s:Literal> => CallInstrArgValue::Literal(s),
     <v:Alphanumeric> => CallInstrArgValue::Variable(AstVariable::Scalar(v)),
     <v:Stream> => CallInstrArgValue::Variable(AstVariable::Stream(v)),
-    <j:JsonPath> => CallInstrArgValue::JsonPath(JsonPath::new(j.0, j.1, j.2)),
+    <vl:VariableWithLambda> => CallInstrArgValue::VariableWithLambda(VariableWithLambda::new(vl.0, vl.1)),
     <n:Number> => CallInstrArgValue::Number(n),
     <b:Boolean> => CallInstrArgValue::Boolean(b),
     InitPeerId => CallInstrArgValue::InitPeerId,
@@ -155,7 +143,7 @@ CallInstrArgValue: CallInstrArgValue<'input> = {
 
 ApArgument: ApArgument<'input> = {
     <a:Alphanumeric> => ApArgument::ScalarVariable(a),
-    <j:JsonPath> => ApArgument::JsonPath(JsonPath::new(j.0, j.1, j.2)),
+    <vl:VariableWithLambda> => ApArgument::VariableWithLambda(VariableWithLambda::new(vl.0, vl.1)),
     <n:Number> => ApArgument::Number(n),
     <b:Boolean> => ApArgument::Boolean(b),
     EmptyArray => ApArgument::EmptyArray,
@@ -165,22 +153,21 @@ ApArgument: ApArgument<'input> = {
 
 ScalarIterable: IterableScalarValue<'input> = {
     <v:Alphanumeric> => IterableScalarValue::ScalarVariable(v),
-    <l:@L> <j:JsonPath> <r:@R> => {
+    <l:@L> <vl:VariableWithLambda> <r:@R> => {
         use crate::parser::air::AstVariable::*;
 
-        let variable = j.0;
-        let path = j.1;
-        let should_flatten = j.2;
+        let variable = vl.0;
+        let lambda = vl.1;
 
         let scalar_name = match variable {
             Stream(name) => {
-                let token = Token::VariableWithJsonPath(variable, path, should_flatten);
+                let token = Token::VariableWithLambda(variable, lambda.clone());
                 errors.push(make_stream_iterable_error(l, token, r));
                 name
             }
             Scalar(name) => name,
         };
-        IterableScalarValue::JsonPath { scalar_name, path, should_flatten }
+        IterableScalarValue::VariableWithLambda { scalar_name, lambda }
     }
 }
 
@@ -192,7 +179,7 @@ Matchable: MatchableValue<'input> = {
     <b:Boolean> => MatchableValue::Boolean(b),
     <n:Number> => MatchableValue::Number(n),
     EmptyArray => MatchableValue::EmptyArray,
-    <j:JsonPath> => MatchableValue::JsonPath(JsonPath::new(j.0, j.1, j.2)),
+    <vl:VariableWithLambda> => MatchableValue::VariableWithLambda(VariableWithLambda::new(vl.0, vl.1)),
 }
 
 extern {
@@ -209,7 +196,7 @@ extern {
         Literal => Token::StringLiteral(<&'input str>),
         Alphanumeric => Token::Alphanumeric(<&'input str>),
         Stream => Token::Stream(<&'input str>),
-        JsonPath => Token::VariableWithJsonPath(<AstVariable<'input>>, <&'input str>, <bool>),
+        VariableWithLambda => Token::VariableWithLambda(<AstVariable<'input>>, <LambdaAST<'input>>),
         Number => Token::Number(<Number>),
         Boolean => Token::Boolean(<bool>),
 

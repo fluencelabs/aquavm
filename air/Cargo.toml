@@ -1,6 +1,6 @@
 [package]
 name = "air"
-version = "0.15.0"
+version = "0.16.0"
 description = "Interpreter of AIR scripts intended to coordinate request flow in the Fluence network"
 authors = ["Fluence Labs"]
 edition = "2018"
@@ -20,14 +20,14 @@ air-execution-info-collector = { path = "../crates/air-lib/execution-info-collec
 air-interpreter-data = { path = "../crates/air-lib/interpreter-data" }
 air-interpreter-interface = { path = "../crates/air-lib/interpreter-interface" }
 air-log-targets = { path = "../crates/air-lib/log-targets" }
+air-lambda-ast = { path = "../crates/air-lib/lambda/ast" }
+air-lambda-parser = { path = "../crates/air-lib/lambda/parser" }
 air-trace-handler = { path = "../crates/air-lib/trace-handler" }
 polyplets = { path = "../crates/air-lib/polyplets" }
 marine-rs-sdk = { version = "0.6.11", features = ["logger"] }
 
 serde = { version = "1.0.118", features = [ "derive", "rc" ] }
 serde_json = "1.0.61"
-
-jsonpath_lib-fl = "=0.3.7"
 
 boolinator = "2.4.0"
 log = "0.4.11"

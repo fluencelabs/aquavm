@@ -22,6 +22,8 @@ use super::LexerError;
 use super::Number;
 use super::Token;
 
+use air_lambda_parser::{LambdaAST, ValueAccessor};
+
 fn run_lexer(input: &str) -> Vec<Spanned<Token<'_>, usize, LexerError>> {
     let lexer = AIRLexer::new(input);
     lexer.collect()
@@ -262,34 +264,38 @@ fn too_big_float_number() {
 }
 
 #[test]
-fn json_path() {
-    // this json path contains all allowed in json path characters
-    const JSON_PATH: &str = r#"value.$[$@[]():?.*,"]"#;
+fn lambda() {
+    // this lambda contains all allowed in lambda characters
+    const LAMBDA: &str = r#"value.$.field[1]"#;
     let variable = AstVariable::Scalar("value");
 
     lexer_test(
-        JSON_PATH,
+        LAMBDA,
         Single(Ok((
             0,
-            Token::VariableWithJsonPath(variable, r#"$[$@[]():?.*,"]"#, false),
-            JSON_PATH.len(),
+            Token::VariableWithLambda(variable, unsafe {
+                LambdaAST::new_unchecked(vec![
+                    ValueAccessor::FieldAccess {
+                        field_name: "field",
+                    },
+                    ValueAccessor::ArrayAccess { idx: 1 },
+                ])
+            }),
+            LAMBDA.len(),
         ))),
     );
 }
 
 #[test]
-fn json_path_numbers() {
-    const JSON_PATH: &str = r#"12345.$[$@[]():?.*,"]"#;
+fn lambda_path_numbers() {
+    const LAMBDA: &str = r#"12345.$[$@[]():?.*,"]"#;
+
+    lexer_test(LAMBDA, Single(Err(LexerError::UnallowedCharInNumber(6, 6))));
+
+    const LAMBDA1: &str = r#"+12345.$[$@[]():?.*,"]"#;
 
     lexer_test(
-        JSON_PATH,
-        Single(Err(LexerError::UnallowedCharInNumber(6, 6))),
-    );
-
-    const JSON_PATH1: &str = r#"+12345.$[$@[]():?.*,"]"#;
-
-    lexer_test(
-        JSON_PATH1,
+        LAMBDA1,
         Single(Err(LexerError::UnallowedCharInNumber(7, 7))),
     );
 }
@@ -320,7 +326,7 @@ fn unclosed_quote() {
 
 #[test]
 fn bad_value() {
-    // value contains ! that only allowed at the end of a json path
+    // value contains ! that only allowed at the end of a lambda expression
     const INVALID_VALUE: &str = r#"val!ue.$[$@[]():?.*,"\]"#;
 
     lexer_test(
@@ -328,31 +334,25 @@ fn bad_value() {
         Single(Err(LexerError::IsNotAlphanumeric(3, 3))),
     );
 
-    // value contains ! that only allowed at the end of a json path
+    // value contains ! that only allowed at the end of a lambda expression
     const INVALID_VALUE2: &str = r#"value.$![$@[]():?.*,"\]"#;
 
-    lexer_test(
-        INVALID_VALUE2,
-        Single(Err(LexerError::InvalidJsonPath(7, 7))),
-    );
+    lexer_test(INVALID_VALUE2, Single(Err(LexerError::InvalidLambda(7, 7))));
 }
 
 #[test]
-fn invalid_json_path() {
-    const INVALID_JSON_PATH: &str = r#"value.$%"#;
+fn invalid_lambda() {
+    const INVALID_LAMBDA: &str = r#"value.$%"#;
 
-    lexer_test(
-        INVALID_JSON_PATH,
-        Single(Err(LexerError::InvalidJsonPath(7, 7))),
-    );
+    lexer_test(INVALID_LAMBDA, Single(Err(LexerError::InvalidLambda(7, 7))));
 }
 
 #[test]
-fn invalid_json_path_numbers() {
-    // this json path contains all allowed in json path charactes
-    const JSON_PATH: &str = r#"+12345$[$@[]():?.*,"!]"#;
+fn invalid_lambda_numbers() {
+    // this lambda contains all allowed in lambda characters
+    const LAMBDA: &str = r#"+12345$[$@[]():?.*,"!]"#;
 
-    lexer_test(JSON_PATH, Single(Err(LexerError::IsNotAlphanumeric(6, 6))));
+    lexer_test(LAMBDA, Single(Err(LexerError::IsNotAlphanumeric(6, 6))));
 }
 
 #[test]

@@ -21,7 +21,7 @@ use crate::foldable_next;
 use crate::foldable_prev;
 use crate::JValue;
 
-/// Used for iterating over a result of applied to an stream json path.
+/// Used for iterating over a result of applied to a stream lambda.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) struct IterableVecJsonPathResult {
     pub(crate) jvalues: Vec<JValue>,

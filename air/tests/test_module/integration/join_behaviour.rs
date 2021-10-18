@@ -172,7 +172,7 @@ fn dont_wait_on_json_path_on_scalars() {
     assert_eq!(array_result.ret_code, 1004);
     assert_eq!(
         array_result.error_message,
-        r#"variable with path '$.[5]' not found in '[1,2,3,4,5]' with an error: 'json value not set'"#
+        r#"value '[1,2,3,4,5]' does not contain element for idx = '5'"#
     );
 
     let script = format!(
@@ -191,6 +191,6 @@ fn dont_wait_on_json_path_on_scalars() {
     assert_eq!(object_result.ret_code, 1004);
     assert_eq!(
         object_result.error_message,
-        r#"variable with path '$.non_exist_path' not found in '{"err_msg":"","is_authenticated":1,"ret_code":0}' with an error: 'json value not set'"#
+        r#"value '{"err_msg":"","is_authenticated":1,"ret_code":0}' does not contain element with field name = 'non_exist_path'"#
     );
 }

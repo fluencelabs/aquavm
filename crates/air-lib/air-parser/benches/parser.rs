@@ -25,6 +25,7 @@ use criterion::Criterion;
 
 use air_parser::AIRLexer;
 use air_parser::AIRParser;
+use air_parser::VariableValidator;
 
 const SOURCE_CODE_BAD: &'static str = r#"(seq
         (seq
@@ -75,22 +76,6 @@ fn create_parser(c: &mut Criterion) {
     c.bench_function("create_parser", move |b| b.iter(move || AIRParser::new()));
 }
 
-fn clone_parser(c: &mut Criterion) {
-    let parser = AIRParser::new();
-    c.bench_function("clone_parser", move |b| {
-        let parser = parser.clone();
-        b.iter(move || parser.clone())
-    });
-}
-
-fn clone_parser_rc(c: &mut Criterion) {
-    let parser = Rc::new(AIRParser::new());
-    c.bench_function("clone_parser_rc", move |b| {
-        let parser = parser.clone();
-        b.iter(move || parser.clone())
-    });
-}
-
 fn parse(c: &mut Criterion) {
     let parser = Rc::new(AIRParser::new());
     c.bench_function(
@@ -98,11 +83,12 @@ fn parse(c: &mut Criterion) {
         move |b| {
             let parser = parser.clone();
             b.iter(move || {
+                let mut validator = VariableValidator::new();
                 let lexer = AIRLexer::new(SOURCE_CODE_GOOD);
 
                 parser
                     .clone()
-                    .parse("", &mut Vec::new(), lexer)
+                    .parse("", &mut Vec::new(), &mut validator, lexer)
                     .expect("success")
             })
         },
@@ -116,8 +102,12 @@ fn parse_to_fail(c: &mut Criterion) {
         move |b| {
             let parser = parser.clone();
             b.iter(move || {
+                let mut validator = VariableValidator::new();
                 let lexer = AIRLexer::new(SOURCE_CODE_BAD);
-                parser.clone().parse("", &mut Vec::new(), lexer)
+
+                parser
+                    .clone()
+                    .parse("", &mut Vec::new(), &mut validator, lexer)
             })
         },
     );
@@ -138,11 +128,12 @@ fn parse_deep(c: &mut Criterion) {
             let parser = parser.clone();
             let code = &source_code[*i];
             b.iter(move || {
+                let mut validator = VariableValidator::new();
                 let lexer = AIRLexer::new(code);
 
                 parser
                     .clone()
-                    .parse("", &mut Vec::new(), lexer)
+                    .parse("", &mut Vec::new(), &mut validator, lexer)
                     .expect("success")
             });
         },
@@ -152,18 +143,20 @@ fn parse_deep(c: &mut Criterion) {
 
 fn parse_dashboard_script(c: &mut Criterion) {
     let parser = Rc::new(AIRParser::new());
-    const DASHBOARD_SCRIPT: &str = include_str!("../../../air/tests/scripts/dashboard.clj");
+    const DASHBOARD_SCRIPT: &str =
+        include_str!("../../../../air/tests/test_module/integration/scripts/dashboard.clj");
 
     c.bench_function(
         format!("parse {} bytes", DASHBOARD_SCRIPT.len()).as_str(),
         move |b| {
             let parser = parser.clone();
             b.iter(move || {
+                let mut validator = VariableValidator::new();
                 let lexer = AIRLexer::new(DASHBOARD_SCRIPT);
 
                 parser
                     .clone()
-                    .parse("", &mut Vec::new(), lexer)
+                    .parse("", &mut Vec::new(), &mut validator, lexer)
                     .expect("success")
             })
         },
