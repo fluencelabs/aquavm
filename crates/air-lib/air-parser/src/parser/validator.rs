@@ -50,7 +50,7 @@ pub struct VariableValidator<'i> {
 }
 
 impl<'i> VariableValidator<'i> {
-    pub(super) fn new() -> Self {
+    pub fn new() -> Self {
         <_>::default()
     }
 

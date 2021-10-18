@@ -32,9 +32,9 @@ pub mod tests;
 pub use self::air_parser::parse;
 pub use air::AIRParser;
 pub use lexer::AIRLexer;
+pub use validator::VariableValidator;
 
 use errors::ParserError;
-use validator::VariableValidator;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Span {

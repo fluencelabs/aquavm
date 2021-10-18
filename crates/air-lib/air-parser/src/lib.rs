@@ -30,6 +30,7 @@ pub use parser::ast;
 pub use parser::parse;
 pub use parser::AIRLexer;
 pub use parser::AIRParser;
+pub use parser::VariableValidator;
 
 #[cfg(test)]
 #[macro_use]
