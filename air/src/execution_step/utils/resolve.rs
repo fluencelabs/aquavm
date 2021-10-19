@@ -22,11 +22,13 @@ use crate::execution_step::execution_context::LastErrorWithTetraplet;
 use crate::execution_step::ExecutionError;
 use crate::execution_step::ExecutionResult;
 use crate::JValue;
+use crate::LambdaAST;
 use crate::SecurityTetraplet;
 
 use air_parser::ast::AstVariable;
 use air_parser::ast::CallInstrArgValue;
 use air_parser::ast::LastErrorPath;
+
 use serde_json::json;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -47,9 +49,9 @@ pub(crate) fn resolve_to_args<'i>(
             let variable = Variable::from_ast(variable);
             prepare_variable(variable, ctx)
         }
-        CallInstrArgValue::JsonPath(json_path) => {
-            let variable = Variable::from_ast(&json_path.variable);
-            apply_json_path(variable, json_path.path, json_path.should_flatten, ctx)
+        CallInstrArgValue::VariableWithLambda(var_with_lambda) => {
+            let variable = Variable::from_ast(&var_with_lambda.variable);
+            apply_lambda(variable, &var_with_lambda.lambda, ctx)
         }
     }
 }
@@ -126,30 +128,16 @@ pub(crate) fn resolve_ast_variable<'ctx, 'i>(
     resolve_variable(variable, ctx)
 }
 
-pub(crate) fn apply_json_path<'i>(
+pub(crate) fn apply_lambda<'i>(
     variable: Variable<'_>,
-    json_path: &str,
-    should_flatten: bool,
+    lambda: &LambdaAST<'i>,
     ctx: &ExecutionCtx<'i>,
 ) -> ExecutionResult<(JValue, SecurityTetraplets)> {
     let resolved = resolve_variable(variable, ctx)?;
-    let (jvalue, tetraplets) = resolved.apply_json_path_with_tetraplets(json_path)?;
+    let (jvalue, tetraplets) = resolved.apply_lambda_with_tetraplets(lambda)?;
 
-    let jvalue = if should_flatten {
-        match jvalue.len() {
-            0 => JValue::Array(vec![]),
-            1 => jvalue[0].clone(),
-            _ => {
-                let jvalue = jvalue.into_iter().cloned().collect::<Vec<_>>();
-                return crate::exec_err!(ExecutionError::FlatteningError(JValue::Array(jvalue)));
-            }
-        }
-    } else {
-        let jvalue = jvalue.into_iter().cloned().collect::<Vec<_>>();
-        JValue::Array(jvalue)
-    };
-
-    Ok((jvalue, tetraplets))
+    // it's known that apply_lambda_with_tetraplets returns vec of one value
+    Ok((jvalue[0].clone(), tetraplets))
 }
 
 /// Constructs jvaluable result from scalars by name.

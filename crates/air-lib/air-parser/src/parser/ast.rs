@@ -21,6 +21,7 @@ pub use crate::parser::lexer::AstVariable;
 pub use crate::parser::lexer::LastErrorPath;
 pub use crate::parser::lexer::Number;
 
+use air_lambda_parser::LambdaAST;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -66,7 +67,7 @@ pub struct Call<'i> {
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum ApArgument<'i> {
     ScalarVariable(&'i str),
-    JsonPath(JsonPath<'i>),
+    VariableWithLambda(VariableWithLambda<'i>),
     Number(Number),
     Boolean(bool),
     Literal(&'i str),
@@ -85,7 +86,7 @@ pub enum CallInstrValue<'i> {
     InitPeerId,
     Literal(&'i str),
     Variable(AstVariable<'i>),
-    JsonPath(JsonPath<'i>),
+    VariableWithLambda(VariableWithLambda<'i>),
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
@@ -97,16 +98,15 @@ pub enum CallInstrArgValue<'i> {
     Boolean(bool),
     EmptyArray, // only empty arrays are allowed now
     Variable(AstVariable<'i>),
-    JsonPath(JsonPath<'i>),
+    VariableWithLambda(VariableWithLambda<'i>),
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum IterableScalarValue<'i> {
     ScalarVariable(&'i str),
-    JsonPath {
+    VariableWithLambda {
         scalar_name: &'i str,
-        path: &'i str,
-        should_flatten: bool,
+        lambda: LambdaAST<'i>,
     },
 }
 
@@ -118,7 +118,7 @@ pub enum MatchableValue<'i> {
     Boolean(bool),
     EmptyArray,
     Variable(AstVariable<'i>),
-    JsonPath(JsonPath<'i>),
+    VariableWithLambda(VariableWithLambda<'i>),
 }
 
 #[derive(Serialize, Debug, PartialEq, Clone)]
@@ -171,8 +171,8 @@ pub struct Next<'i>(pub &'i str);
 pub struct Null;
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
-pub struct JsonPath<'i> {
+pub struct VariableWithLambda<'i> {
     pub variable: AstVariable<'i>,
-    pub path: &'i str,
-    pub should_flatten: bool,
+    #[serde(borrow)]
+    pub lambda: LambdaAST<'i>,
 }

@@ -144,7 +144,7 @@ fn fold_json_path() {
     };
     let first_arg_tetraplet = SecurityTetraplet {
         triplet: first_arg_triplet,
-        json_path: String::from("$.args"),
+        json_path: String::from(".args"),
     };
 
     let second_arg_triplet = ResolvedTriplet {

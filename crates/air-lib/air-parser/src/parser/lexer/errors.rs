@@ -36,8 +36,8 @@ pub enum LexerError {
     #[error("this variable or constant shouldn't have empty name")]
     EmptyVariableOrConst(usize, usize),
 
-    #[error("invalid character in json path")]
-    InvalidJsonPath(usize, usize),
+    #[error("invalid character in lambda")]
+    InvalidLambda(usize, usize),
 
     #[error("a digit could contain only digits or one dot")]
     UnallowedCharInNumber(usize, usize),
@@ -48,13 +48,17 @@ pub enum LexerError {
     #[error("{2}")]
     ParseFloatError(usize, usize, #[source] ParseFloatError),
 
+    // TODO: use LambdaParserError directly here (it'll require introducing a lifetime)
+    #[error("{2}")]
+    LambdaParserError(usize, usize, String),
+
     #[error("{2} is an incorrect path for %last_error%, only .$.instruction, .$.msg, and .$.peer_id are allowed")]
     LastErrorPathError(usize, usize, String),
 
     #[error("this float is too big, a float could contain less than 12 digits")]
     TooBigFloat(usize, usize),
 
-    #[error("leading dot without any symbols before - please write 0 if it's float or variable name if it's json path")]
+    #[error("leading dot without any symbols before - please write 0 if it's float or variable name if it's a lambda")]
     LeadingDot(usize, usize),
 }
 

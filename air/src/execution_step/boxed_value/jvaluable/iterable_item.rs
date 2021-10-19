@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-use super::ExecutionError::JValueJsonPathError as JsonPathError;
+use super::select;
 use super::ExecutionResult;
 use super::IterableItem;
 use super::JValuable;
+use super::LambdaAST;
 use crate::execution_step::SecurityTetraplets;
 use crate::JValue;
-
-use jsonpath_lib::select;
 
 use std::borrow::Cow;
 use std::ops::Deref;
 
 impl<'ctx> JValuable for IterableItem<'ctx> {
-    fn apply_json_path(&self, json_path: &str) -> ExecutionResult<Vec<&JValue>> {
+    fn apply_lambda(&self, lambda: &LambdaAST<'_>) -> ExecutionResult<Vec<&JValue>> {
         use super::IterableItem::*;
 
         let jvalue = match self {
@@ -36,12 +35,14 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
             RcValue((jvalue, ..)) => jvalue.deref(),
         };
 
-        let selected_jvalues =
-            select(jvalue, json_path).map_err(|e| JsonPathError(jvalue.clone(), String::from(json_path), e))?;
-        Ok(selected_jvalues)
+        let selected_value = select(jvalue, lambda.iter())?;
+        Ok(vec![selected_value])
     }
 
-    fn apply_json_path_with_tetraplets(&self, json_path: &str) -> ExecutionResult<(Vec<&JValue>, SecurityTetraplets)> {
+    fn apply_lambda_with_tetraplets(
+        &self,
+        lambda: &LambdaAST<'_>,
+    ) -> ExecutionResult<(Vec<&JValue>, SecurityTetraplets)> {
         use super::IterableItem::*;
 
         let (jvalue, tetraplet) = match self {
@@ -50,9 +51,8 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
             RcValue((jvalue, tetraplet, _)) => (jvalue.deref(), tetraplet),
         };
 
-        let selected_jvalues =
-            select(jvalue, json_path).map_err(|e| JsonPathError(jvalue.clone(), String::from(json_path), e))?;
-        Ok((selected_jvalues, vec![tetraplet.clone()]))
+        let selected_value = select(jvalue, lambda.iter())?;
+        Ok((vec![selected_value], vec![tetraplet.clone()]))
     }
 
     fn as_jvalue(&self) -> Cow<'_, JValue> {

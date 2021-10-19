@@ -30,7 +30,11 @@ pub use parser::ast;
 pub use parser::parse;
 pub use parser::AIRLexer;
 pub use parser::AIRParser;
+pub use parser::VariableValidator;
 
 #[cfg(test)]
 #[macro_use]
 extern crate fstrings;
+
+use air_lambda_parser::parse as parse_lambda;
+use air_lambda_parser::LambdaAST;

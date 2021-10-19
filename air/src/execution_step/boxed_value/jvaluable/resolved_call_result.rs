@@ -14,37 +14,34 @@
  * limitations under the License.
  */
 
+use super::select;
 use super::ExecutionResult;
 use super::JValuable;
+use super::LambdaAST;
 use super::ResolvedCallResult;
 use crate::execution_step::SecurityTetraplets;
 use crate::JValue;
 
-use jsonpath_lib::select;
+use air_lambda_ast::format_ast;
 
 use std::borrow::Cow;
 use std::ops::Deref;
 
 impl JValuable for ResolvedCallResult {
-    fn apply_json_path(&self, json_path: &str) -> ExecutionResult<Vec<&JValue>> {
-        use super::ExecutionError::JValueJsonPathError as JsonPathError;
-
-        let selected_jvalues = select(&self.result, json_path)
-            .map_err(|e| JsonPathError(self.result.deref().clone(), String::from(json_path), e))?;
-        Ok(selected_jvalues)
+    fn apply_lambda(&self, lambda: &LambdaAST<'_>) -> ExecutionResult<Vec<&JValue>> {
+        let selected_value = select(&self.result, lambda.iter())?;
+        Ok(vec![selected_value])
     }
 
-    fn apply_json_path_with_tetraplets(&self, json_path: &str) -> ExecutionResult<(Vec<&JValue>, SecurityTetraplets)> {
-        use super::ExecutionError::JValueJsonPathError as JsonPathError;
-
-        is_json_path_allowed(&self.result)?;
-        let selected_jvalues = select(&self.result, json_path)
-            .map_err(|e| JsonPathError(self.result.deref().clone(), String::from(json_path), e))?;
-
+    fn apply_lambda_with_tetraplets(
+        &self,
+        lambda: &LambdaAST<'_>,
+    ) -> ExecutionResult<(Vec<&JValue>, SecurityTetraplets)> {
+        let selected_value = select(&self.result, lambda.iter())?;
         let tetraplet = self.tetraplet.clone();
-        tetraplet.borrow_mut().add_json_path(json_path);
+        tetraplet.borrow_mut().add_lambda(&format_ast(lambda));
 
-        Ok((selected_jvalues, vec![tetraplet]))
+        Ok((vec![selected_value], vec![tetraplet]))
     }
 
     fn as_jvalue(&self) -> Cow<'_, JValue> {
@@ -57,16 +54,5 @@ impl JValuable for ResolvedCallResult {
 
     fn as_tetraplets(&self) -> SecurityTetraplets {
         vec![self.tetraplet.clone()]
-    }
-}
-
-fn is_json_path_allowed(value: &JValue) -> ExecutionResult<()> {
-    use super::ExecutionError;
-    use crate::exec_err;
-
-    match value {
-        JValue::Array(_) => Ok(()),
-        JValue::Object(_) => Ok(()),
-        value => exec_err!(ExecutionError::JsonPathVariableTypeError(value.clone())),
     }
 }

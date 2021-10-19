@@ -51,11 +51,11 @@ pub fn parse(air_script: &str) -> Result<Box<Instruction<'_>>, String> {
         match result {
             Ok(r) if errors.is_empty() => Ok(r),
             Ok(_) => Err(report_errors(file_id, files, errors)),
-            Err(err) => Err(report_errors(
+            Err(error) => Err(report_errors(
                 file_id,
                 files,
                 vec![ErrorRecovery {
-                    error: err,
+                    error,
                     dropped_tokens: vec![],
                 }],
             )),
@@ -124,10 +124,7 @@ fn parser_error_to_label(file_id: usize, error: ParserError) -> Label<usize> {
 
     match error {
         LexerError(error) => lexical_error_to_label(file_id, error),
-        CallArgsNotFlattened(start, end) => {
-            Label::primary(file_id, start..end).with_message(error.to_string())
-        }
-        JsonPathAppliedToStream(start, end) => {
+        LambdaAppliedToStream(start, end) => {
             Label::primary(file_id, start..end).with_message(error.to_string())
         }
         UndefinedIterable(start, end, _) => {
@@ -157,7 +154,7 @@ fn lexical_error_to_label(file_id: usize, error: LexerError) -> Label<usize> {
         EmptyVariableOrConst(start, end) => {
             Label::primary(file_id, start..end).with_message(error.to_string())
         }
-        InvalidJsonPath(start, end) => {
+        InvalidLambda(start, end) => {
             Label::primary(file_id, start..end).with_message(error.to_string())
         }
         UnallowedCharInNumber(start, end) => {
@@ -167,6 +164,9 @@ fn lexical_error_to_label(file_id: usize, error: LexerError) -> Label<usize> {
             Label::primary(file_id, start..end).with_message(error.to_string())
         }
         ParseFloatError(start, end, _) => {
+            Label::primary(file_id, start..end).with_message(error.to_string())
+        }
+        LambdaParserError(start, end, _) => {
             Label::primary(file_id, start..end).with_message(error.to_string())
         }
         LastErrorPathError(start, end, _) => {
@@ -195,18 +195,10 @@ macro_rules! make_user_error(
     }}
 );
 
-pub(super) fn make_flattened_error(
-    start_pos: usize,
-    token: Token<'_>,
-    end_pos: usize,
-) -> ErrorRecovery<usize, Token<'_>, ParserError> {
-    make_user_error!(CallArgsNotFlattened, start_pos, token, end_pos)
-}
-
 pub(super) fn make_stream_iterable_error(
     start_pos: usize,
     token: Token<'_>,
     end_pos: usize,
 ) -> ErrorRecovery<usize, Token<'_>, ParserError> {
-    make_user_error!(JsonPathAppliedToStream, start_pos, token, end_pos)
+    make_user_error!(LambdaAppliedToStream, start_pos, token, end_pos)
 }

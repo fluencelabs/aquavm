@@ -1,11 +1,4 @@
-use air_test_utils::create_avm;
-use air_test_utils::set_variables_call_service;
-use air_test_utils::AVMError;
-use air_test_utils::CallServiceClosure;
-use air_test_utils::IValue;
-use air_test_utils::InterpreterOutcome;
-use air_test_utils::NEVec;
-use air_test_utils::AVM;
+use air_test_utils::prelude::*;
 
 use serde_json::json;
 
@@ -15,33 +8,26 @@ use criterion::Criterion;
 
 use std::cell::RefCell;
 
-thread_local!(static VM: RefCell<AVM> = RefCell::new({
+thread_local!(static VM: RefCell<TestRunner> = RefCell::new({
     let add_module_response = String::from("add_module response");
     let add_blueprint_response = String::from("add_blueprint response");
     let create_response = String::from("create response");
 
-    let call_service: CallServiceClosure = Box::new(move |_, args| -> Option<IValue> {
-        let builtin_service = match &args[0] {
-            IValue::String(str) => str,
-            _ => unreachable!(),
-        };
-
-        let response = match builtin_service.as_str() {
+    let call_service: CallServiceClosure = Box::new(move |args| -> CallServiceResult {
+        let response = match args.service_id.as_str() {
             "add_module" => add_module_response.clone(),
             "add_blueprint" => add_blueprint_response.clone(),
             "create" => create_response.clone(),
             _ => String::from("unknown response"),
         };
 
-        Some(IValue::Record(
-            NEVec::new(vec![IValue::S32(0), IValue::String(format!("\"{}\"", response))]).unwrap(),
-        ))
+        CallServiceResult::ok(json!(response))
     });
 
     create_avm(call_service, "A")
 }));
 
-thread_local!(static SET_VARIABLES_VM: RefCell<AVM> = RefCell::new({
+thread_local!(static SET_VARIABLES_VM: RefCell<TestRunner> = RefCell::new({
     let module = "greeting";
     let module_config = json!(
         {
@@ -60,17 +46,16 @@ thread_local!(static SET_VARIABLES_VM: RefCell<AVM> = RefCell::new({
     let blueprint = json!({ "name": "blueprint", "dependencies": [module]});
 
     let variables_mapping = maplit::hashmap!(
-        String::from("module_bytes") => module_bytes.to_string(),
-        String::from("module_config") => module_config.to_string(),
-        String::from("blueprint") => blueprint.to_string(),
+        String::from("module_bytes") => json!(module_bytes),
+        String::from("module_config") => json!(module_config),
+        String::from("blueprint") => json!(blueprint),
     );
 
     create_avm(set_variables_call_service(variables_mapping), "set_variables")
 }));
 
-fn create_service_benchmark() -> Result<InterpreterOutcome, AVMError> {
-    let script = String::from(
-        r#"
+fn create_service_benchmark() -> Result<RawAVMOutcome, String> {
+    let script = r#"
         (seq 
             (seq 
                 (seq 
@@ -89,13 +74,12 @@ fn create_service_benchmark() -> Result<InterpreterOutcome, AVMError> {
                     )
                 )
             )
-        )"#,
-    );
+        )"#;
 
     let result = SET_VARIABLES_VM
-        .with(|vm| vm.borrow_mut().call_with_prev_data("", script.clone(), "", ""))
+        .with(|vm| vm.borrow_mut().call(script, "", "", ""))
         .unwrap();
-    VM.with(|vm| vm.borrow_mut().call_with_prev_data("", script, "", result.data))
+    VM.with(|vm| vm.borrow_mut().call(script, "", result.data, ""))
 }
 
 fn criterion_benchmark(c: &mut Criterion) {

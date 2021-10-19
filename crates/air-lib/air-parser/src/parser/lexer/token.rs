@@ -18,6 +18,7 @@ mod traits;
 
 use super::LexerError;
 use super::LexerResult;
+use crate::LambdaAST;
 
 use serde::Deserialize;
 use serde::Serialize;
@@ -33,7 +34,7 @@ pub enum Token<'input> {
     StringLiteral(&'input str),
     Alphanumeric(&'input str),
     Stream(&'input str),
-    VariableWithJsonPath(AstVariable<'input>, &'input str, bool),
+    VariableWithLambda(AstVariable<'input>, LambdaAST<'input>),
     Number(Number),
     Boolean(bool),
 

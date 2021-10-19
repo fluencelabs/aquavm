@@ -61,17 +61,12 @@ pub(crate) fn are_matchable_eq<'ctx>(
 
             Ok(left_value == right_value)
         }
-        (JsonPath(lhs), JsonPath(rhs)) => {
-            // TODO: improve comparison
-            if lhs.should_flatten != rhs.should_flatten {
-                return Ok(false);
-            }
-
+        (VariableWithLambda(lhs), VariableWithLambda(rhs)) => {
             let left_jvaluable = resolve_ast_variable(&lhs.variable, exec_ctx)?;
-            let left_value = left_jvaluable.apply_json_path(lhs.path)?;
+            let left_value = left_jvaluable.apply_lambda(&lhs.lambda)?;
 
             let right_jvaluable = resolve_ast_variable(&rhs.variable, exec_ctx)?;
-            let right_value = right_jvaluable.apply_json_path(rhs.path)?;
+            let right_value = right_jvaluable.apply_lambda(&rhs.lambda)?;
 
             Ok(left_value == right_value)
         }
@@ -116,23 +111,14 @@ fn compare_matchable<'ctx>(
             let jvalue = jvaluable.as_jvalue();
             Ok(comparator(jvalue))
         }
-        JsonPath(json_path) => {
-            let jvaluable = resolve_ast_variable(&json_path.variable, exec_ctx)?;
-            let jvalues = jvaluable.apply_json_path(json_path.path)?;
+        VariableWithLambda(vl) => {
+            let jvaluable = resolve_ast_variable(&vl.variable, exec_ctx)?;
+            let jvalues = jvaluable.apply_lambda(&vl.lambda)?;
 
-            let jvalue = if json_path.should_flatten {
-                if jvalues.len() != 1 {
-                    return Ok(false);
-                }
-                Cow::Borrowed(jvalues[0])
-            } else {
-                let jvalue = jvalues.into_iter().cloned().collect::<Vec<_>>();
-                let jvalue = JValue::Array(jvalue);
+            let jvalue = jvalues.into_iter().cloned().collect::<Vec<_>>();
+            let jvalue = JValue::Array(jvalue);
 
-                Cow::Owned(jvalue)
-            };
-
-            Ok(comparator(jvalue))
+            Ok(comparator(Cow::Owned(jvalue)))
         }
     }
 }

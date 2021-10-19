@@ -1,39 +1,26 @@
-use air_test_utils::create_avm;
-use air_test_utils::unit_call_service;
-use air_test_utils::AVMError;
-use air_test_utils::CallServiceClosure;
-use air_test_utils::IValue;
-use air_test_utils::InterpreterOutcome;
-use air_test_utils::NEVec;
-use air_test_utils::AVM;
+use air_test_utils::prelude::*;
 
 use criterion::criterion_group;
 use criterion::criterion_main;
 use criterion::Criterion;
+use serde_json::json;
 
 use std::cell::RefCell;
 
-thread_local!(static RELAY_1_VM: RefCell<AVM> = RefCell::new(create_avm(unit_call_service(), "Relay1")));
-thread_local!(static RELAY_2_VM: RefCell<AVM> = RefCell::new(create_avm(unit_call_service(), "Relay2")));
-thread_local!(static REMOTE_VM: RefCell<AVM> = RefCell::new({
-    let members_call_service: CallServiceClosure = Box::new(|_, _| -> Option<IValue> {
-        Some(IValue::Record(
-            NEVec::new(vec![
-                IValue::S32(0),
-                IValue::String(String::from(r#"[["A", "Relay1"], ["B", "Relay2"]]"#)),
-            ])
-            .unwrap(),
-        ))
+thread_local!(static RELAY_1_VM: RefCell<TestRunner> = RefCell::new(create_avm(unit_call_service(), "Relay1")));
+thread_local!(static RELAY_2_VM: RefCell<TestRunner> = RefCell::new(create_avm(unit_call_service(), "Relay2")));
+thread_local!(static REMOTE_VM: RefCell<TestRunner> = RefCell::new({
+    let members_call_service: CallServiceClosure = Box::new(|_| -> CallServiceResult {
+        CallServiceResult::ok(json!([["A", "Relay1"], ["B", "Relay2"]]))
     });
 
     create_avm(members_call_service, "Remote")
 }));
-thread_local!(static CLIENT_1_VM: RefCell<AVM> = RefCell::new(create_avm(unit_call_service(), "A")));
-thread_local!(static CLIENT_2_VM: RefCell<AVM> = RefCell::new(create_avm(unit_call_service(), "B")));
+thread_local!(static CLIENT_1_VM: RefCell<TestRunner> = RefCell::new(create_avm(unit_call_service(), "A")));
+thread_local!(static CLIENT_2_VM: RefCell<TestRunner> = RefCell::new(create_avm(unit_call_service(), "B")));
 
-fn chat_sent_message_benchmark() -> Result<InterpreterOutcome, AVMError> {
-    let script = String::from(
-        r#"
+fn chat_sent_message_benchmark() -> Result<RawAVMOutcome, String> {
+    let script = r#"
             (seq 
                 (call "Relay1" ("identity" "") [] $void1)
                 (seq 
@@ -52,29 +39,26 @@ fn chat_sent_message_benchmark() -> Result<InterpreterOutcome, AVMError> {
                     )
                 )
             )
-        "#,
-    );
+        "#;
 
-    let result = CLIENT_1_VM
-        .with(|vm| vm.borrow_mut().call_with_prev_data("", script.clone(), "", ""))
-        .unwrap();
+    let result = CLIENT_1_VM.with(|vm| vm.borrow_mut().call(script, "", "", "")).unwrap();
     let result = RELAY_1_VM
-        .with(|vm| vm.borrow_mut().call_with_prev_data("", script.clone(), "", result.data))
+        .with(|vm| vm.borrow_mut().call(script, "", result.data, ""))
         .unwrap();
     let result = REMOTE_VM
-        .with(|vm| vm.borrow_mut().call_with_prev_data("", script.clone(), "", result.data))
+        .with(|vm| vm.borrow_mut().call(script, "", result.data, ""))
         .unwrap();
     let res_data = result.data.clone();
     let res1 = RELAY_1_VM
-        .with(|vm| vm.borrow_mut().call_with_prev_data("", script.clone(), "", res_data))
+        .with(|vm| vm.borrow_mut().call(script, "", res_data, ""))
         .unwrap();
     CLIENT_1_VM
-        .with(|vm| vm.borrow_mut().call_with_prev_data("", script.clone(), "", res1.data))
+        .with(|vm| vm.borrow_mut().call(script, "", res1.data, ""))
         .unwrap();
     let res2 = RELAY_2_VM
-        .with(|vm| vm.borrow_mut().call_with_prev_data("", script.clone(), "", result.data))
+        .with(|vm| vm.borrow_mut().call(script, "", result.data, ""))
         .unwrap();
-    CLIENT_2_VM.with(|vm| vm.borrow_mut().call_with_prev_data("", script.clone(), "", res2.data))
+    CLIENT_2_VM.with(|vm| vm.borrow_mut().call(script, "", res2.data, ""))
 }
 
 fn criterion_benchmark(c: &mut Criterion) {
