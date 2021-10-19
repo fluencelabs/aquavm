@@ -15,13 +15,11 @@
  */
 
 use super::*;
-use crate::exec_err;
 use crate::execution_step::execution_context::*;
 use crate::execution_step::AstVariable;
 use crate::execution_step::Generation;
-use crate::execution_step::ResolvedCallResult;
-use crate::execution_step::Scalar;
 use crate::execution_step::Stream;
+use crate::execution_step::ValueAggregate;
 
 use air_interpreter_data::CallResult;
 use air_interpreter_data::Value;
@@ -34,14 +32,14 @@ use std::collections::hash_map::Entry::{Occupied, Vacant};
 /// Writes result of a local `Call` instruction to `ExecutionCtx` at `output`.
 /// Returns call result.
 pub(crate) fn set_local_result<'i>(
-    executed_result: ResolvedCallResult,
+    executed_result: ValueAggregate,
     output: &CallOutputValue<'i>,
     exec_ctx: &mut ExecutionCtx<'i>,
 ) -> ExecutionResult<CallResult> {
     let result_value = executed_result.result.clone();
     match output {
         CallOutputValue::Variable(AstVariable::Scalar(name)) => {
-            exec_ctx.scalars.set_jvalue(name, executed_result)?;
+            exec_ctx.scalars.set_value(*name, executed_result)?;
             Ok(CallResult::executed_scalar(result_value))
         }
         CallOutputValue::Variable(AstVariable::Stream(name)) => {
@@ -67,11 +65,11 @@ pub(crate) fn set_result_from_value<'i>(
 ) -> ExecutionResult<()> {
     match (output, value) {
         (CallOutputValue::Variable(AstVariable::Scalar(name)), Value::Scalar(value)) => {
-            let result = ResolvedCallResult::new(value, tetraplet, trace_pos);
-            exec_ctx.scalars.set_jvalue(name, result)
+            let result = ValueAggregate::new(value, tetraplet, trace_pos);
+            exec_ctx.scalars.set_value(*name, result)?;
         }
         (CallOutputValue::Variable(AstVariable::Stream(name)), Value::Stream { value, generation }) => {
-            let result = ResolvedCallResult::new(value, tetraplet, trace_pos);
+            let result = ValueAggregate::new(value, tetraplet, trace_pos);
             let generation = Generation::Nth(generation);
             let _ = set_stream_result(result, generation, name.to_string(), exec_ctx)?;
         }
@@ -85,7 +83,7 @@ pub(crate) fn set_result_from_value<'i>(
 
 // TODO: decouple this function to a separate module
 pub(crate) fn set_stream_result(
-    executed_result: ResolvedCallResult,
+    executed_result: ValueAggregate,
     generation: Generation,
     stream_name: String,
     exec_ctx: &mut ExecutionCtx<'_>,

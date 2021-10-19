@@ -16,12 +16,9 @@
 
 use super::fold::IterableType;
 use super::ExecutionCtx;
-use super::ExecutionError;
 use super::ExecutionResult;
 use super::FoldState;
-use super::Scalar;
 use super::TraceHandler;
-use crate::exec_err;
 use crate::log_instruction;
 use crate::trace_to_exec_err;
 
@@ -32,7 +29,7 @@ impl<'i> super::ExecutableInstruction<'i> for Next<'i> {
         log_instruction!(next, exec_ctx, trace_ctx);
 
         let iterator_name = self.0;
-        let fold_state = try_get_fold_state(exec_ctx, iterator_name)?;
+        let fold_state = exec_ctx.scalars.get_iterable_mut(iterator_name)?;
         maybe_meet_iteration_end(fold_state, trace_ctx)?;
 
         if !fold_state.iterable.next() {
@@ -48,43 +45,11 @@ impl<'i> super::ExecutableInstruction<'i> for Next<'i> {
         next_instr.execute(exec_ctx, trace_ctx)?;
 
         // get the same fold state again because of borrow checker
-        match exec_ctx.scalars.get_mut(iterator_name) {
-            // move iterator back to provide correct value for possible subtree after next
-            // (for example for cases such as right fold)
-            Some(Scalar::JValueFoldCursor(fold_state)) => fold_state.iterable.prev(),
-            _ => unreachable!("iterator value shouldn't changed inside fold"),
-        };
-
-        // get this fold state the second time to bypass borrow checker
-        let fold_state = try_get_fold_state(exec_ctx, iterator_name)?;
+        let fold_state = exec_ctx.scalars.get_iterable_mut(iterator_name)?;
+        fold_state.iterable.prev();
         maybe_meet_back_iterator(fold_state, trace_ctx)?;
 
         Ok(())
-    }
-}
-
-fn try_get_fold_state<'i, 'ctx>(
-    exec_ctx: &'ctx mut ExecutionCtx<'i>,
-    iterator_name: &str,
-) -> ExecutionResult<&'ctx mut FoldState<'i>> {
-    use ExecutionError::FoldStateNotFound;
-    use ExecutionError::IncompatibleAValueType;
-
-    let avalue = exec_ctx
-        .scalars
-        .get_mut(iterator_name)
-        .ok_or_else(|| FoldStateNotFound(iterator_name.to_string()))?;
-
-    match avalue {
-        Scalar::JValueFoldCursor(state) => Ok(state),
-        v => {
-            // it's not possible to use unreachable here
-            // because at now next syntactically could be used without fold
-            exec_err!(IncompatibleAValueType(
-                format!("{}", v),
-                String::from("JValueFoldCursor"),
-            ))
-        }
     }
 }
 

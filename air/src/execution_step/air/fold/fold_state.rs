@@ -16,7 +16,6 @@
 
 use super::Instruction;
 use super::IterableValue;
-use super::ResolvedCallResult;
 
 use std::rc::Rc;
 

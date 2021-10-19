@@ -88,19 +88,18 @@ fn create_scalar_iterable<'ctx>(
     exec_ctx: &ExecutionCtx<'ctx>,
     variable_name: &str,
 ) -> ExecutionResult<FoldIterableScalar> {
-    match exec_ctx.scalars.get(variable_name) {
-        Some(Scalar::JValueRef(call_result)) => from_call_result(call_result.clone()),
-        Some(Scalar::JValueFoldCursor(fold_state)) => {
+    match exec_ctx.scalars.get(variable_name)? {
+        ScalarRef::Value(call_result) => from_call_result(call_result.clone()),
+        ScalarRef::IterableValue(fold_state) => {
             let iterable_value = fold_state.iterable.peek().unwrap();
             let call_result = iterable_value.into_resolved_result();
             from_call_result(call_result)
         }
-        _ => return exec_err!(ExecutionError::VariableNotFound(variable_name.to_string())),
     }
 }
 
 /// Constructs iterable value from resolved call result.
-fn from_call_result(call_result: ResolvedCallResult) -> ExecutionResult<FoldIterableScalar> {
+fn from_call_result(call_result: ValueAggregate) -> ExecutionResult<FoldIterableScalar> {
     use ExecutionError::IncompatibleJValueType;
 
     let len = match &call_result.result.deref() {
@@ -128,19 +127,18 @@ fn create_scalar_lambda_iterable<'ctx>(
 ) -> ExecutionResult<FoldIterableScalar> {
     use crate::execution_step::lambda_applier::select;
 
-    match exec_ctx.scalars.get(scalar_name) {
-        Some(Scalar::JValueRef(variable)) => {
+    match exec_ctx.scalars.get(scalar_name)? {
+        ScalarRef::Value(variable) => {
             let jvalues = select(&variable.result, lambda.iter())?;
             from_jvalue(jvalues, variable.tetraplet.clone(), lambda)
         }
-        Some(Scalar::JValueFoldCursor(fold_state)) => {
+        ScalarRef::IterableValue(fold_state) => {
             let iterable_value = fold_state.iterable.peek().unwrap();
             let jvalues = iterable_value.apply_lambda(lambda)?;
             let tetraplet = as_tetraplet(&iterable_value);
 
             from_jvalue(jvalues[0], tetraplet, lambda)
         }
-        _ => return exec_err!(ExecutionError::VariableNotFound(scalar_name.to_string())),
     }
 }
 

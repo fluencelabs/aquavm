@@ -21,7 +21,7 @@ pub(super) fn apply_to_arg(
     exec_ctx: &ExecutionCtx<'_>,
     trace_ctx: &TraceHandler,
     should_touch_trace: bool,
-) -> ExecutionResult<ResolvedCallResult> {
+) -> ExecutionResult<ValueAggregate> {
     let result = match argument {
         ApArgument::ScalarVariable(scalar_name) => apply_scalar(scalar_name, exec_ctx, trace_ctx, should_touch_trace)?,
         ApArgument::VariableWithLambda(vl) => apply_json_argument(vl, exec_ctx, trace_ctx)?,
@@ -40,15 +40,14 @@ fn apply_scalar(
     exec_ctx: &ExecutionCtx<'_>,
     trace_ctx: &TraceHandler,
     should_touch_trace: bool,
-) -> ExecutionResult<ResolvedCallResult> {
-    use crate::execution_step::ExecutionError::VariableNotFound;
-    use crate::execution_step::Scalar;
+) -> ExecutionResult<ValueAggregate> {
+    use crate::execution_step::ScalarRef;
 
     let scalar = exec_ctx.scalars.get(scalar_name)?;
 
     let mut result = match scalar {
-        Scalar::JValueRef(result) => result.clone(),
-        Scalar::JValueFoldCursor(iterator) => {
+        ScalarRef::Value(result) => result.clone(),
+        ScalarRef::IterableValue(iterator) => {
             let result = iterator.iterable.peek().expect(
                 "peek always return elements inside fold,\
             this guaranteed by implementation of next and avoiding empty folds",
@@ -64,24 +63,24 @@ fn apply_scalar(
     Ok(result)
 }
 
-fn apply_const(value: impl Into<JValue>, exec_ctx: &ExecutionCtx<'_>, trace_ctx: &TraceHandler) -> ResolvedCallResult {
+fn apply_const(value: impl Into<JValue>, exec_ctx: &ExecutionCtx<'_>, trace_ctx: &TraceHandler) -> ValueAggregate {
     let value = Rc::new(value.into());
     let tetraplet = SecurityTetraplet::literal_tetraplet(exec_ctx.init_peer_id.clone());
     let tetraplet = Rc::new(RefCell::new(tetraplet));
 
-    ResolvedCallResult::new(value, tetraplet, trace_ctx.trace_pos())
+    ValueAggregate::new(value, tetraplet, trace_ctx.trace_pos())
 }
 
 fn apply_last_error(
     error_path: &LastErrorPath,
     exec_ctx: &ExecutionCtx<'_>,
     trace_ctx: &TraceHandler,
-) -> ExecutionResult<ResolvedCallResult> {
+) -> ExecutionResult<ValueAggregate> {
     let (value, mut tetraplets) = crate::execution_step::utils::prepare_last_error(error_path, exec_ctx)?;
     let value = Rc::new(value);
     let tetraplet = tetraplets.remove(0);
 
-    let result = ResolvedCallResult::new(value, tetraplet, trace_ctx.trace_pos());
+    let result = ValueAggregate::new(value, tetraplet, trace_ctx.trace_pos());
     Ok(result)
 }
 
@@ -89,14 +88,14 @@ fn apply_json_argument(
     vl: &VariableWithLambda<'_>,
     exec_ctx: &ExecutionCtx<'_>,
     trace_ctx: &TraceHandler,
-) -> ExecutionResult<ResolvedCallResult> {
+) -> ExecutionResult<ValueAggregate> {
     let variable = Variable::from_ast(&vl.variable);
     let (jvalue, mut tetraplets) = apply_lambda(variable, &vl.lambda, exec_ctx)?;
 
     let tetraplet = tetraplets
         .pop()
         .unwrap_or_else(|| Rc::new(RefCell::new(SecurityTetraplet::default())));
-    let result = ResolvedCallResult::new(Rc::new(jvalue), tetraplet, trace_ctx.trace_pos());
+    let result = ValueAggregate::new(Rc::new(jvalue), tetraplet, trace_ctx.trace_pos());
 
     Ok(result)
 }

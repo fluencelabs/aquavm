@@ -169,7 +169,7 @@ impl<'i> ResolvedCall<'i> {
 /// Check output type name for being already in execution context.
 // TODO: this check should be moved on a parsing stage
 fn check_output_name(output: &CallOutputValue<'_>, exec_ctx: &ExecutionCtx<'_>) -> ExecutionResult<()> {
-    use crate::execution_step::boxed_value::Scalar;
+    use crate::execution_step::boxed_value::ScalarRef;
 
     let scalar_name = match output {
         CallOutputValue::Variable(AstVariable::Scalar(name)) => *name,
@@ -177,15 +177,14 @@ fn check_output_name(output: &CallOutputValue<'_>, exec_ctx: &ExecutionCtx<'_>) 
     };
 
     match exec_ctx.scalars.get(scalar_name) {
-        Some(Scalar::JValueRef(_)) => {
-            if exec_ctx.met_folds.is_empty() {
-                // shadowing is allowed only inside fold blocks
-                crate::exec_err!(ExecutionError::MultipleVariablesFound(scalar_name.to_string()))
-            } else {
+        Ok(ScalarRef::Value(_)) => {
+            if exec_ctx.scalars.shadowing_allowed() {
                 Ok(())
+            } else {
+                crate::exec_err!(ExecutionError::MultipleVariablesFound(scalar_name.to_string()))
             }
         }
-        Some(_) => crate::exec_err!(ExecutionError::IterableShadowing(scalar_name.to_string())),
-        None => Ok(()),
+        Ok(_) => crate::exec_err!(ExecutionError::IterableShadowing(scalar_name.to_string())),
+        Err(_) => Ok(()),
     }
 }

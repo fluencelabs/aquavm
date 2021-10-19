@@ -36,6 +36,7 @@ impl<'i> ExecutableInstruction<'i> for FoldStream<'i> {
 
         let fold_id = exec_ctx.tracker.fold.seen_stream_count;
         trace_to_exec_err!(trace_ctx.meet_fold_start(fold_id))?;
+        exec_ctx.scalars.meet_fold_begin();
 
         for iterable in iterables {
             let value = match iterable.peek() {
@@ -63,6 +64,7 @@ impl<'i> ExecutableInstruction<'i> for FoldStream<'i> {
         }
 
         trace_to_exec_err!(trace_ctx.meet_fold_end(fold_id))?;
+        exec_ctx.scalars.meet_fold_end();
 
         Ok(())
     }

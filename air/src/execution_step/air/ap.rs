@@ -17,12 +17,11 @@
 mod apply_to_arguments;
 mod utils;
 
-use super::call::call_result_setter::set_scalar_result;
 use super::call::call_result_setter::set_stream_result;
 use super::ExecutionCtx;
 use super::ExecutionResult;
 use super::TraceHandler;
-use crate::execution_step::air::ResolvedCallResult;
+use crate::execution_step::air::ValueAggregate;
 use crate::execution_step::boxed_value::Variable;
 use crate::execution_step::utils::apply_lambda;
 use crate::trace_to_exec_err;
@@ -69,11 +68,11 @@ impl<'i> super::ExecutableInstruction<'i> for Ap<'i> {
 fn save_result<'ctx>(
     ap_result_type: &AstVariable<'ctx>,
     merger_ap_result: &MergerApResult,
-    result: ResolvedCallResult,
+    result: ValueAggregate,
     exec_ctx: &mut ExecutionCtx<'ctx>,
 ) -> ExecutionResult<()> {
     match ap_result_type {
-        AstVariable::Scalar(name) => set_scalar_result(result, name, exec_ctx),
+        AstVariable::Scalar(name) => exec_ctx.scalars.set_value(*name, result).map(|_| ()),
         AstVariable::Stream(name) => {
             let generation = ap_result_to_generation(merger_ap_result);
             set_stream_result(result, generation, name.to_string(), exec_ctx).map(|_| ())

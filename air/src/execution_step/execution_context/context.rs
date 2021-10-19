@@ -24,7 +24,6 @@ use air_interpreter_interface::*;
 
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::collections::VecDeque;
 use std::rc::Rc;
 
 /// Contains all necessary state needed to execute AIR script.
@@ -108,7 +107,6 @@ impl<'i> ExecutionCtx<'i> {
     }
 }
 
-use crate::execution_step::ExecutionResult;
 use std::fmt::Display;
 use std::fmt::Formatter;
 

@@ -16,17 +16,15 @@
 
 mod fold_state;
 mod utils;
-mod variable_handler;
 
 pub(crate) use fold_state::FoldState;
 pub(crate) use fold_state::IterableType;
 pub(super) use utils::*;
-pub(super) use variable_handler::VariableHandler;
 
 use super::ExecutionCtx;
 use super::ExecutionError;
 use super::ExecutionResult;
 use super::Instruction;
-use super::ResolvedCallResult;
-use super::Scalar;
+use super::ScalarRef;
+use super::ValueAggregate;
 use crate::execution_step::boxed_value::*;

@@ -30,8 +30,8 @@ mod xor;
 
 pub(crate) use fold::FoldState;
 
-use super::boxed_value::ResolvedCallResult;
-use super::boxed_value::Scalar;
+use super::boxed_value::ScalarRef;
+use super::boxed_value::ValueAggregate;
 use super::execution_context::*;
 use super::Catchable;
 use super::ExecutionCtx;

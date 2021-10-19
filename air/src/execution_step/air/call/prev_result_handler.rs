@@ -85,7 +85,7 @@ pub(super) fn handle_prev_state<'i>(
 }
 
 use super::call_result_setter::*;
-use crate::execution_step::ResolvedCallResult;
+use crate::execution_step::ValueAggregate;
 use crate::JValue;
 
 fn update_state_with_service_result<'i>(
@@ -102,7 +102,7 @@ fn update_state_with_service_result<'i>(
 
     let trace_pos = trace_ctx.trace_pos();
 
-    let executed_result = ResolvedCallResult::new(result, tetraplet.clone(), trace_pos);
+    let executed_result = ValueAggregate::new(result, tetraplet.clone(), trace_pos);
     let new_call_result = set_local_result(executed_result, output, exec_ctx)?;
     trace_ctx.meet_call_end(new_call_result);
 

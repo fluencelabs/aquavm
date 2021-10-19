@@ -16,7 +16,7 @@
 
 use super::ExecutionError;
 use super::ExecutionResult;
-use super::ResolvedCallResult;
+use super::ValueAggregate;
 use crate::exec_err;
 use crate::JValue;
 
@@ -31,20 +31,20 @@ use std::fmt::Formatter;
 /// obtained values from a current_data that were not present in prev_data becomes a new generation.
 // TODO: make it non-pub after boxed value refactoring.
 #[derive(Debug, Default, Clone)]
-pub(crate) struct Stream(Vec<Vec<ResolvedCallResult>>);
+pub(crate) struct Stream(Vec<Vec<ValueAggregate>>);
 
 impl Stream {
     pub(crate) fn from_generations_count(count: usize) -> Self {
         Self(vec![vec![]; count + 1])
     }
 
-    pub(crate) fn from_value(value: ResolvedCallResult) -> Self {
+    pub(crate) fn from_value(value: ValueAggregate) -> Self {
         Self(vec![vec![value]])
     }
 
     // if generation is None, value would be added to the last generation, otherwise it would
     // be added to given generation
-    pub(crate) fn add_value(&mut self, value: ResolvedCallResult, generation: Generation) -> ExecutionResult<u32> {
+    pub(crate) fn add_value(&mut self, value: ValueAggregate, generation: Generation) -> ExecutionResult<u32> {
         let generation = match generation {
             Generation::Last => self.0.len() - 1,
             Generation::Nth(id) => id as usize,
@@ -95,7 +95,7 @@ impl Stream {
     }
 
     pub(crate) fn iter(&self, generation: Generation) -> Option<StreamIter<'_>> {
-        let iter: Box<dyn Iterator<Item = &ResolvedCallResult>> = match generation {
+        let iter: Box<dyn Iterator<Item = &ValueAggregate>> = match generation {
             Generation::Nth(generation) if generation as usize >= self.generations_count() => return None,
             Generation::Nth(generation) => Box::new(self.0.iter().take(generation as usize + 1).flat_map(|v| v.iter())),
             Generation::Last => Box::new(self.0.iter().flat_map(|v| v.iter())),
@@ -109,7 +109,7 @@ impl Stream {
     }
 
     pub(crate) fn slice_iter(&self, generation: Generation) -> Option<StreamSliceIter<'_>> {
-        let iter: Box<dyn Iterator<Item = &[ResolvedCallResult]>> = match generation {
+        let iter: Box<dyn Iterator<Item = &[ValueAggregate]>> = match generation {
             Generation::Nth(generation) if generation as usize >= self.generations_count() => return None,
             Generation::Nth(generation) => Box::new(self.0.iter().take(generation as usize + 1).map(|v| v.as_slice())),
             Generation::Last => Box::new(self.0.iter().map(|v| v.as_slice())),
@@ -142,12 +142,12 @@ impl Generation {
 }
 
 pub(crate) struct StreamIter<'result> {
-    iter: Box<dyn Iterator<Item = &'result ResolvedCallResult> + 'result>,
+    iter: Box<dyn Iterator<Item = &'result ValueAggregate> + 'result>,
     len: usize,
 }
 
 impl<'result> Iterator for StreamIter<'result> {
-    type Item = &'result ResolvedCallResult;
+    type Item = &'result ValueAggregate;
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.len > 0 {
@@ -164,12 +164,12 @@ impl<'result> Iterator for StreamIter<'result> {
 impl<'result> ExactSizeIterator for StreamIter<'result> {}
 
 pub(crate) struct StreamSliceIter<'slice> {
-    iter: Box<dyn Iterator<Item = &'slice [ResolvedCallResult]> + 'slice>,
+    iter: Box<dyn Iterator<Item = &'slice [ValueAggregate]> + 'slice>,
     len: usize,
 }
 
 impl<'slice> Iterator for StreamSliceIter<'slice> {
-    type Item = &'slice [ResolvedCallResult];
+    type Item = &'slice [ValueAggregate];
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.len > 0 {

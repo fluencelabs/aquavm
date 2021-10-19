@@ -23,7 +23,7 @@ mod stream;
 use super::iterable::IterableItem;
 use super::ExecutionError;
 use super::ExecutionResult;
-use super::ResolvedCallResult;
+use super::ValueAggregate;
 use crate::execution_step::lambda_applier::*;
 use crate::execution_step::SecurityTetraplets;
 use crate::JValue;

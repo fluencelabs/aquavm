@@ -16,7 +16,7 @@
 
 use super::Iterable;
 use super::IterableItem;
-use super::ResolvedCallResult;
+use super::ValueAggregate;
 use crate::foldable_next;
 use crate::foldable_prev;
 use crate::JValue;
@@ -26,13 +26,13 @@ use std::ops::Deref;
 /// Used for iterating over JValue of array type.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) struct IterableResolvedCall {
-    pub(crate) call_result: ResolvedCallResult,
+    pub(crate) call_result: ValueAggregate,
     pub(crate) cursor: usize,
     pub(crate) len: usize,
 }
 
 impl IterableResolvedCall {
-    pub(crate) fn init(call_result: ResolvedCallResult, len: usize) -> Self {
+    pub(crate) fn init(call_result: ValueAggregate, len: usize) -> Self {
         Self {
             call_result,
             cursor: 0,
@@ -57,7 +57,7 @@ impl<'ctx> Iterable<'ctx> for IterableResolvedCall {
             return None;
         }
 
-        let ResolvedCallResult {
+        let ValueAggregate {
             result,
             tetraplet,
             trace_pos,
