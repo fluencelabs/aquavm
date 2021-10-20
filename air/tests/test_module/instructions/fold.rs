@@ -157,7 +157,7 @@ fn inner_fold_with_same_iterator() {
 
     let result = call_vm!(vm, "", script, "", "");
 
-    assert_eq!(result.ret_code, 1009);
+    assert_eq!(result.ret_code, 1008);
 }
 
 #[test]

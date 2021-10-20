@@ -30,8 +30,8 @@ mod xor;
 
 pub(crate) use fold::FoldState;
 
-use super::boxed_value::ResolvedCallResult;
-use super::boxed_value::Scalar;
+use super::boxed_value::ScalarRef;
+use super::boxed_value::ValueAggregate;
 use super::execution_context::*;
 use super::Catchable;
 use super::ExecutionCtx;
@@ -147,12 +147,8 @@ macro_rules! log_instruction {
         log::debug!(target: air_log_targets::INSTRUCTION, "> {}", stringify!($instr_name));
 
         let mut variables = String::from("  scalars:");
-        if $exec_ctx.scalars.is_empty() {
-            variables.push_str("   empty");
-        }
-        for (key, value) in $exec_ctx.scalars.iter() {
-            variables.push_str(&format!("\n    {} => {}", key, value));
-        }
+
+        variables.push_str(&format!("\n    {}", $exec_ctx.scalars));
 
         variables.push_str("  streams:");
         if $exec_ctx.streams.is_empty() {

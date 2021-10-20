@@ -19,7 +19,6 @@ use crate::execution_step::boxed_value::JValuable;
 use crate::execution_step::boxed_value::Variable;
 use crate::execution_step::execution_context::ExecutionCtx;
 use crate::execution_step::execution_context::LastErrorWithTetraplet;
-use crate::execution_step::ExecutionError;
 use crate::execution_step::ExecutionResult;
 use crate::JValue;
 use crate::LambdaAST;
@@ -105,7 +104,7 @@ pub(crate) fn resolve_variable<'ctx, 'i>(
     use crate::execution_step::boxed_value::StreamJvaluableIngredients;
 
     match variable {
-        Variable::Scalar(name) => scalar_to_jvaluable(name, ctx),
+        Variable::Scalar(name) => Ok(ctx.scalars.get(name)?.into_jvaluable()),
         Variable::Stream { name, generation } => {
             match ctx.streams.get(name) {
                 Some(stream) => {
@@ -138,19 +137,4 @@ pub(crate) fn apply_lambda<'i>(
 
     // it's known that apply_lambda_with_tetraplets returns vec of one value
     Ok((jvalue[0].clone(), tetraplets))
-}
-
-/// Constructs jvaluable result from scalars by name.
-fn scalar_to_jvaluable<'name, 'i, 'ctx>(
-    name: &'name str,
-    ctx: &'ctx ExecutionCtx<'i>,
-) -> ExecutionResult<Box<dyn JValuable + 'ctx>> {
-    use ExecutionError::VariableNotFound;
-
-    let value = ctx
-        .scalars
-        .get(name)
-        .ok_or_else(|| VariableNotFound(name.to_string()))?;
-
-    Ok(value.to_jvaluable())
 }

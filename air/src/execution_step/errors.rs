@@ -62,21 +62,17 @@ pub(crate) enum ExecutionError {
     #[error("lambda is applied to an empty stream")]
     EmptyStreamLambdaError,
 
-    /// Provided JValue has incompatible with target type.
+    /// Provided JValue has incompatible type with a requested one.
     #[error("expected JValue type '{1}', but got '{0}' JValue")]
     IncompatibleJValueType(JValue, &'static str),
-
-    /// Provided AValue has incompatible with target type.
-    #[error("expected AValue type '{1}', but got '{0}' AValue")]
-    IncompatibleAValueType(String, String),
 
     /// Fold state wasn't found for such iterator name.
     #[error("fold state not found for this iterable '{0}'")]
     FoldStateNotFound(String),
 
     /// Multiple fold states found for such iterator name.
-    #[error("multiple fold states found for iterable '{0}'")]
-    MultipleFoldStates(String),
+    #[error("multiple iterable values found for iterable name '{0}'")]
+    MultipleIterableValues(String),
 
     /// A fold instruction must iterate over array value.
     #[error("lambda '{1}' returned non-array value '{0}' for fold instruction")]

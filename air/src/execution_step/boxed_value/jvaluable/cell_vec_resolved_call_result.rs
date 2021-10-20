@@ -17,7 +17,7 @@
 use super::select_from_stream;
 use super::ExecutionResult;
 use super::JValuable;
-use super::ResolvedCallResult;
+use super::ValueAggregate;
 use crate::execution_step::SecurityTetraplets;
 use crate::JValue;
 use crate::LambdaAST;
@@ -27,7 +27,7 @@ use air_lambda_ast::format_ast;
 use std::borrow::Cow;
 use std::ops::Deref;
 
-impl JValuable for std::cell::Ref<'_, Vec<ResolvedCallResult>> {
+impl JValuable for std::cell::Ref<'_, Vec<ValueAggregate>> {
     fn apply_lambda(&self, lambda: &LambdaAST<'_>) -> ExecutionResult<Vec<&JValue>> {
         let stream_iter = self.iter().map(|r| r.result.deref());
         let select_result = select_from_stream(stream_iter, lambda)?;

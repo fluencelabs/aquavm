@@ -23,7 +23,7 @@ pub(crate) use json_path_result::IterableLambdaResult;
 pub(crate) use resolved_call::IterableResolvedCall;
 pub(crate) use vec_resolved_call::IterableVecResolvedCall;
 
-use super::ResolvedCallResult;
+use super::ValueAggregate;
 use crate::execution_step::RSecurityTetraplet;
 use crate::JValue;
 
@@ -74,7 +74,7 @@ impl IterableItem<'_> {
         *pos
     }
 
-    pub(crate) fn into_resolved_result(self) -> ResolvedCallResult {
+    pub(crate) fn into_resolved_result(self) -> ValueAggregate {
         use IterableItem::*;
 
         let (value, tetraplet, pos) = match self {
@@ -83,7 +83,7 @@ impl IterableItem<'_> {
             RcValue(ingredients) => ingredients,
         };
 
-        ResolvedCallResult::new(value, tetraplet, pos)
+        ValueAggregate::new(value, tetraplet, pos)
     }
 }
 

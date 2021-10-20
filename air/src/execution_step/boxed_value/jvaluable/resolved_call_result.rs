@@ -18,7 +18,7 @@ use super::select;
 use super::ExecutionResult;
 use super::JValuable;
 use super::LambdaAST;
-use super::ResolvedCallResult;
+use super::ValueAggregate;
 use crate::execution_step::SecurityTetraplets;
 use crate::JValue;
 
@@ -27,7 +27,7 @@ use air_lambda_ast::format_ast;
 use std::borrow::Cow;
 use std::ops::Deref;
 
-impl JValuable for ResolvedCallResult {
+impl JValuable for ValueAggregate {
     fn apply_lambda(&self, lambda: &LambdaAST<'_>) -> ExecutionResult<Vec<&JValue>> {
         let selected_value = select(&self.result, lambda.iter())?;
         Ok(vec![selected_value])

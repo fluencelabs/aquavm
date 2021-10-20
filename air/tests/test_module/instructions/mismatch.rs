@@ -143,11 +143,11 @@ fn mismatch_without_xor() {
     let result = call_vm!(set_variable_vm, "asd", &script, "", "");
     let result = call_vm!(vm, "asd", &script, "", result.data);
 
-    assert_eq!(result.ret_code, 1013);
+    assert_eq!(result.ret_code, 1012);
 
     let result = call_vm!(vm, "asd", script, "", result.data);
 
-    assert_eq!(result.ret_code, 1013);
+    assert_eq!(result.ret_code, 1012);
 }
 
 #[test]

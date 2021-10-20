@@ -27,22 +27,22 @@ use std::fmt::Formatter;
 use std::rc::Rc;
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
-pub struct ResolvedCallResult {
+pub struct ValueAggregate {
     pub result: Rc<JValue>,
     pub tetraplet: RSecurityTetraplet,
     pub trace_pos: usize,
 }
 
-pub(crate) enum Scalar<'i> {
-    JValueRef(ResolvedCallResult),
-    JValueFoldCursor(FoldState<'i>),
+pub(crate) enum ScalarRef<'i> {
+    Value(&'i ValueAggregate),
+    IterableValue(&'i FoldState<'i>),
 }
 
-impl<'i> Scalar<'i> {
-    pub(crate) fn to_jvaluable<'ctx>(&'ctx self) -> Box<dyn JValuable + 'ctx> {
+impl<'i> ScalarRef<'i> {
+    pub(crate) fn into_jvaluable(self) -> Box<dyn JValuable + 'i> {
         match self {
-            Scalar::JValueRef(value) => Box::new(value.clone()),
-            Scalar::JValueFoldCursor(fold_state) => {
+            ScalarRef::Value(value) => Box::new(value.clone()),
+            ScalarRef::IterableValue(fold_state) => {
                 let peeked_value = fold_state.iterable.peek().unwrap();
                 Box::new(peeked_value)
             }
@@ -50,7 +50,7 @@ impl<'i> Scalar<'i> {
     }
 }
 
-impl ResolvedCallResult {
+impl ValueAggregate {
     pub(crate) fn new(result: Rc<JValue>, tetraplet: RSecurityTetraplet, trace_pos: usize) -> Self {
         Self {
             result,
@@ -60,11 +60,11 @@ impl ResolvedCallResult {
     }
 }
 
-impl<'i> Display for Scalar<'i> {
+impl<'i> Display for ScalarRef<'i> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            Scalar::JValueRef(value) => write!(f, "{:?}", value)?,
-            Scalar::JValueFoldCursor(cursor) => {
+            ScalarRef::Value(value) => write!(f, "{:?}", value)?,
+            ScalarRef::IterableValue(cursor) => {
                 let iterable = &cursor.iterable;
                 write!(f, "cursor, current value: {:?}", iterable.peek())?;
             }

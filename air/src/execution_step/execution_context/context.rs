@@ -16,7 +16,7 @@
 
 use super::LastErrorDescriptor;
 use super::LastErrorWithTetraplet;
-use crate::execution_step::boxed_value::Scalar;
+use super::Scalars;
 use crate::execution_step::boxed_value::Stream;
 
 use air_execution_info_collector::InstructionTracker;
@@ -24,36 +24,34 @@ use air_interpreter_interface::*;
 
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::collections::VecDeque;
 use std::rc::Rc;
 
 /// Contains all necessary state needed to execute AIR script.
 #[derive(Default)]
 pub(crate) struct ExecutionCtx<'i> {
     /// Contains all scalars.
-    // TODO: use shared string (Rc<String>) to avoid copying.
-    pub scalars: HashMap<String, Scalar<'i>>,
+    pub(crate) scalars: Scalars<'i>,
 
     /// Contains all streams.
     // TODO: use shared string (Rc<String>) to avoid copying.
-    pub streams: HashMap<String, RefCell<Stream>>,
+    pub(crate) streams: HashMap<String, RefCell<Stream>>,
 
     /// Set of peer public keys that should receive resulted data.
-    pub next_peer_pks: Vec<String>,
+    pub(crate) next_peer_pks: Vec<String>,
 
     /// PeerId of a peer executing this AIR script at the moment.
-    pub current_peer_id: Rc<String>,
+    pub(crate) current_peer_id: Rc<String>,
 
     /// PeerId of a peer send this AIR script.
-    pub init_peer_id: String,
+    pub(crate) init_peer_id: String,
 
     /// Last error produced by local service.
     /// None means that there weren't any error.
-    pub last_error: Option<LastErrorDescriptor>,
+    pub(crate) last_error: Option<LastErrorDescriptor>,
 
     /// True, if last error could be set. This flag is used to distinguish
     /// whether an error is being bubbled up from the bottom or just encountered.
-    pub last_error_could_be_set: bool,
+    pub(crate) last_error_could_be_set: bool,
 
     /// Indicates that previous executed subtree is complete.
     /// A subtree treats as a complete if all subtree elements satisfy the following rules:
@@ -61,22 +59,19 @@ pub(crate) struct ExecutionCtx<'i> {
     ///   - at least one of xor subtrees is completed without an error
     ///   - all of seq subtrees are completed
     ///   - call executed successfully (executed state is Executed)
-    pub subtree_complete: bool,
-
-    /// List of met folds used to determine whether a variable can be shadowed.
-    pub met_folds: VecDeque<&'i str>,
+    pub(crate) subtree_complete: bool,
 
     /// Tracker of all met instructions.
-    pub tracker: InstructionTracker,
+    pub(crate) tracker: InstructionTracker,
 
     /// Last call request id that was used as an id for call request in outcome.
-    pub last_call_request_id: u32,
+    pub(crate) last_call_request_id: u32,
 
     /// Contains all executed results from a host side.
-    pub call_results: CallResults,
+    pub(crate) call_results: CallResults,
 
     /// Tracks all functions that should be called from services.
-    pub call_requests: CallRequests,
+    pub(crate) call_requests: CallRequests,
 }
 
 impl<'i> ExecutionCtx<'i> {
@@ -117,10 +112,14 @@ use std::fmt::Formatter;
 
 impl<'i> Display for ExecutionCtx<'i> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "data cache:")?;
-        for (key, value) in self.scalars.iter() {
-            writeln!(f, "  {} => {}", key, value)?;
+        writeln!(f, "scalars:")?;
+        writeln!(f, "  {}", self.scalars)?;
+
+        writeln!(f, "streams:")?;
+        for (name, stream) in self.streams.iter() {
+            writeln!(f, "  {} => {}", name, stream.borrow())?;
         }
+
         writeln!(f, "current peer id: {}", self.current_peer_id)?;
         writeln!(f, "subtree complete: {}", self.subtree_complete)?;
         writeln!(f, "next peer public keys: {:?}", self.next_peer_pks)?;

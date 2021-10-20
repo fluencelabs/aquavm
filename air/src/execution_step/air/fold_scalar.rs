@@ -29,7 +29,9 @@ impl<'i> ExecutableInstruction<'i> for FoldScalar<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         log_instruction!(fold, exec_ctx, trace_ctx);
 
-        match construct_scalar_iterable_value(&self.iterable, exec_ctx)? {
+        exec_ctx.scalars.meet_fold_begin();
+
+        let fold_result = match construct_scalar_iterable_value(&self.iterable, exec_ctx)? {
             FoldIterableScalar::Empty => Ok(()),
             FoldIterableScalar::Scalar(iterable) => fold(
                 iterable,
@@ -39,7 +41,11 @@ impl<'i> ExecutableInstruction<'i> for FoldScalar<'i> {
                 exec_ctx,
                 trace_ctx,
             ),
-        }
+        };
+
+        exec_ctx.scalars.meet_fold_end();
+
+        fold_result
     }
 }
 
@@ -52,11 +58,11 @@ pub(super) fn fold<'i>(
     trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<()> {
     let fold_state = FoldState::from_iterable(iterable, iterable_type, instruction.clone());
-    let variable_handler = VariableHandler::init(exec_ctx, iterator, fold_state)?;
+    exec_ctx.scalars.set_iterable_value(iterator, fold_state)?;
 
     instruction.execute(exec_ctx, trace_ctx)?;
 
-    variable_handler.cleanup(exec_ctx);
+    exec_ctx.scalars.remove_iterable_value(iterator);
 
     Ok(())
 }
