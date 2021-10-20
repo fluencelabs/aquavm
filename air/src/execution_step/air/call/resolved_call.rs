@@ -184,7 +184,7 @@ fn check_output_name(output: &CallOutputValue<'_>, exec_ctx: &ExecutionCtx<'_>) 
                 crate::exec_err!(ExecutionError::MultipleVariablesFound(scalar_name.to_string()))
             }
         }
-        Ok(_) => crate::exec_err!(ExecutionError::IterableShadowing(scalar_name.to_string())),
+        Ok(ScalarRef::IterableValue(_)) => crate::exec_err!(ExecutionError::IterableShadowing(scalar_name.to_string())),
         Err(_) => Ok(()),
     }
 }
