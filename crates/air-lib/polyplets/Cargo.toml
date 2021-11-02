@@ -16,7 +16,7 @@ name = "polyplets"
 path = "src/lib.rs"
 
 [dependencies]
-marine-macro = "0.6.14"
-marine-rs-sdk-main = "0.6.14"
+marine-macro = "0.6.15"
+marine-rs-sdk-main = "0.6.15"
 
 serde = { version = "1.0.118", features = ["rc", "derive"] }
