@@ -25,6 +25,16 @@
     unreachable_patterns
 )]
 
+extern crate self as marine_rs_sdk;
+
+mod internal {
+    pub use marine_rs_sdk_main::add_object_to_release;
+    pub use marine_rs_sdk_main::get_result_ptr;
+    pub use marine_rs_sdk_main::get_result_size;
+    pub use marine_rs_sdk_main::set_result_ptr;
+    pub use marine_rs_sdk_main::set_result_size;
+}
+
 mod tetraplet;
 mod triplet;
 
