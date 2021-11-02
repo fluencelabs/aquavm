@@ -1544,7 +1544,7 @@ dependencies = [
 name = "polyplets"
 version = "0.2.0"
 dependencies = [
- "marine-rs-sdk",
+ "marine-macro",
  "serde",
 ]
 

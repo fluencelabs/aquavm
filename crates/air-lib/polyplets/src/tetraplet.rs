@@ -16,10 +16,12 @@
 
 use crate::ResolvedTriplet;
 
+use marine_macro::marine;
 use serde::Deserialize;
 use serde::Serialize;
 
 /// Describes an origin that set corresponding value.
+#[marine]
 #[derive(Clone, Debug, Default, Eq, PartialEq, Hash, Serialize, Deserialize)]
 pub struct SecurityTetraplet {
     /// Id of a peer where corresponding value was set.
