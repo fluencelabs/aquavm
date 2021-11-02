@@ -19,8 +19,8 @@ use serde::Serialize;
 
 /// ResolvedTriplet represents peer network location with all
 /// variables, literals and etc resolved into final string.
-/// This structure contains a subset of value that
-/// SecurityTetraplet consist of
+/// This structure contains a subset of values that
+/// SecurityTetraplet consists of.
 #[derive(Debug, Default, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
 pub struct ResolvedTriplet {
     pub peer_pk: String,
