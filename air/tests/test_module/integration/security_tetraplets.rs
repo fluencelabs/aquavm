@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-use air::ResolvedTriplet;
 use air::SecurityTetraplet;
 use air_test_utils::prelude::*;
 
@@ -74,23 +73,17 @@ fn simple_fold() {
     let result = checked_call_vm!(set_variable_vm, init_peer_id.clone(), script.clone(), "", "");
     let mut data = result.data;
 
-    let first_arg_triplet = ResolvedTriplet {
+    let first_arg_tetraplet = SecurityTetraplet {
         peer_pk: set_variable_vm_peer_id,
         service_id,
         function_name,
-    };
-    let first_arg_tetraplet = SecurityTetraplet {
-        triplet: first_arg_triplet,
         json_path: String::new(),
     };
 
-    let second_arg_triplet = ResolvedTriplet {
+    let second_arg_tetraplet = SecurityTetraplet {
         peer_pk: init_peer_id.clone(),
         service_id: String::new(),
         function_name: String::new(),
-    };
-    let second_arg_tetraplet = SecurityTetraplet {
-        triplet: second_arg_triplet,
         json_path: String::new(),
     };
 
@@ -137,23 +130,17 @@ fn fold_json_path() {
     let init_peer_id = String::from("some_init_peer_id");
     let result = checked_call_vm!(set_variable_vm, init_peer_id.clone(), script.clone(), "", "");
 
-    let first_arg_triplet = ResolvedTriplet {
+    let first_arg_tetraplet = SecurityTetraplet {
         peer_pk: set_variable_vm_peer_id,
         service_id,
         function_name,
-    };
-    let first_arg_tetraplet = SecurityTetraplet {
-        triplet: first_arg_triplet,
         json_path: String::from(".args"),
     };
 
-    let second_arg_triplet = ResolvedTriplet {
+    let second_arg_tetraplet = SecurityTetraplet {
         peer_pk: init_peer_id.clone(),
         service_id: String::new(),
         function_name: String::new(),
-    };
-    let second_arg_tetraplet = SecurityTetraplet {
-        triplet: second_arg_triplet,
         json_path: String::new(),
     };
 

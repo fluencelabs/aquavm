@@ -62,7 +62,7 @@ pub(super) fn handle_prev_state<'i>(
         }
         RequestSentBy(..) => {
             // check whether current node can execute this call
-            let is_current_peer = tetraplet.borrow().triplet.peer_pk.as_str() == exec_ctx.current_peer_id.as_str();
+            let is_current_peer = tetraplet.borrow().peer_pk.as_str() == exec_ctx.current_peer_id.as_str();
             if is_current_peer {
                 // if this peer could execute this call early return and
                 return Ok(true);

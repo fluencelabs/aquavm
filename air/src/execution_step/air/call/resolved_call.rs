@@ -31,7 +31,6 @@ use air_interpreter_interface::CallRequestParams;
 use air_parser::ast::{AstVariable, CallInstrArgValue, CallOutputValue};
 use air_trace_handler::MergerCallResult;
 use air_trace_handler::TraceHandler;
-use polyplets::ResolvedTriplet;
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -75,7 +74,7 @@ impl<'i> ResolvedCall<'i> {
         }
 
         // call can be executed only on peers with such peer_id
-        let tetraplet = &self.tetraplet.borrow().triplet;
+        let tetraplet = &self.tetraplet.borrow();
         if tetraplet.peer_pk.as_str() != exec_ctx.current_peer_id.as_str() {
             set_remote_call_result(tetraplet.peer_pk.clone(), exec_ctx, trace_ctx);
             return Ok(());
@@ -101,7 +100,7 @@ impl<'i> ResolvedCall<'i> {
     fn prepare_request_params(
         &self,
         exec_ctx: &ExecutionCtx<'i>,
-        triplet: &ResolvedTriplet,
+        tetraplet: &SecurityTetraplet,
     ) -> ExecutionResult<CallRequestParams> {
         let ResolvedArguments {
             call_arguments,
@@ -111,8 +110,8 @@ impl<'i> ResolvedCall<'i> {
         let serialized_tetraplets = serde_json::to_string(&tetraplets).expect("default serializer shouldn't fail");
 
         let request_params = CallRequestParams::new(
-            triplet.service_id.to_string(),
-            triplet.function_name.to_string(),
+            tetraplet.service_id.to_string(),
+            tetraplet.function_name.to_string(),
             call_arguments,
             serialized_tetraplets,
         );

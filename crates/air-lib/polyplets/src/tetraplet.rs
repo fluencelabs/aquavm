@@ -19,12 +19,17 @@ use crate::ResolvedTriplet;
 use serde::Deserialize;
 use serde::Serialize;
 
-/// Describes an origin returned corresponding value.
+/// Describes an origin that set corresponding value.
 #[derive(Clone, Debug, Default, Eq, PartialEq, Hash, Serialize, Deserialize)]
 pub struct SecurityTetraplet {
-    /// Describes origin of the value in the network.
-    #[serde(flatten)]
-    pub triplet: ResolvedTriplet,
+    /// Id of a peer where corresponding value was set.
+    pub peer_pk: String,
+
+    /// Id of a service that set corresponding value.
+    pub service_id: String,
+
+    /// Name of a function that returned corresponding value.
+    pub function_name: String,
 
     /// Value was produced by applying this `json_path` to the output from `call_service`.
     // TODO: since it's not a json path anymore, it's needed to rename it to lambda
@@ -35,15 +40,11 @@ impl SecurityTetraplet {
     /// Create a tetraplet for string literals defined in the script
     /// such as variable here `(call ("" "") "" ["variable_1"])`.
     pub fn literal_tetraplet(init_peer_id: String) -> Self {
-        let triplet = ResolvedTriplet {
+        Self {
             // these variables represent the initiator peer
             peer_pk: init_peer_id,
             service_id: String::new(),
             function_name: String::new(),
-        };
-
-        Self {
-            triplet,
             // json path can't be applied to the string literals
             json_path: String::new(),
         }
@@ -51,7 +52,9 @@ impl SecurityTetraplet {
 
     pub fn from_triplet(triplet: ResolvedTriplet) -> Self {
         Self {
-            triplet,
+            peer_pk: triplet.peer_pk,
+            service_id: triplet.service_id,
+            function_name: triplet.function_name,
             json_path: String::new(),
         }
     }

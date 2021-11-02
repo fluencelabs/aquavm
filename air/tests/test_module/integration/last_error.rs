@@ -76,10 +76,10 @@ fn last_error_tetraplets() {
         r#"Local service error, ret_code is 1, error message is '"error"'"#
     );
 
-    let triplet = (*tetraplets.borrow()).as_ref().unwrap()[0][0].triplet.clone();
-    assert_eq!(triplet.peer_pk, fallible_peer_id);
-    assert_eq!(triplet.service_id, "fallible_call_service");
-    assert_eq!(triplet.function_name, "");
+    let tetraplet = (*tetraplets.borrow()).as_ref().unwrap()[0][0].clone();
+    assert_eq!(tetraplet.peer_pk, fallible_peer_id);
+    assert_eq!(tetraplet.service_id, "fallible_call_service");
+    assert_eq!(tetraplet.function_name, "");
     assert_eq!(&(*tetraplets.borrow()).as_ref().unwrap()[0][0].json_path, "");
 }
 
