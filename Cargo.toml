@@ -29,3 +29,6 @@ debug = true
 overflow-checks = true
 debug-assertions = false
 panic = "unwind"
+
+[patch.crates-io]
+polyplets = { path = "crates/air-lib/polyplets" }
