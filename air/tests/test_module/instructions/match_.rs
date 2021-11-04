@@ -235,8 +235,9 @@ fn match_with_two_xors() {
     assert_eq!(actual_trace.pop().unwrap(), expected_executed_call_result);
 }
 
+// https://github.com/fluencelabs/aquavm/issues/165
 #[test]
-fn test_match_with_booleans() {
+fn issue_165() {
     let result_setter_peer_id = "result_setter_peer_id";
     let mut result_setter = create_avm(
         set_variable_call_service(serde_json::json!({"success": true})),
