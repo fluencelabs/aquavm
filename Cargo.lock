@@ -681,9 +681,9 @@ dependencies = [
 
 [[package]]
 name = "errno"
-version = "0.2.7"
+version = "0.2.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fa68f2fb9cae9d37c9b2b3584aba698a2e97f72d7aef7b9f7aa71d8b54ce46fe"
+checksum = "f639046355ee4f37944e44f60642c6f3a7efa3cf6b78c78a0d989a8ce6c396a1"
 dependencies = [
  "errno-dragonfly",
  "libc",
@@ -867,9 +867,9 @@ dependencies = [
 
 [[package]]
 name = "half"
-version = "1.8.0"
+version = "1.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ac5956d4e63858efaec57e0d6c1c2f6a41e1487f830314a324ccd7e2223a7ca0"
+checksum = "eabb4a44450da02c90444cf74558da904edde8fb4e9035a9a6a4e15445af0bd7"
 
 [[package]]
 name = "hashbrown"
@@ -1074,9 +1074,9 @@ dependencies = [
 
 [[package]]
 name = "libc"
-version = "0.2.104"
+version = "0.2.106"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7b2f96d100e1cf1929e7719b7edb3b90ab5298072638fccd77be9ce942ecdfce"
+checksum = "a60553f9a9e039a333b4e9b20573b9e9b9c0bb3a11e201ccc48ef4283456d673"
 
 [[package]]
 name = "lock_api"
@@ -1160,18 +1160,19 @@ dependencies = [
 
 [[package]]
 name = "marine-macro"
-version = "0.6.14"
+version = "0.6.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "94b05da94255c230b7bf139c39c04447677b5d238579bf38ca7b3fcdc3e04993"
+checksum = "dfc907943772cf966ebe2a2d462d09bc79e898ef102ed065ba3d3abcc93fbb71"
 dependencies = [
  "marine-macro-impl",
+ "marine-rs-sdk-main",
 ]
 
 [[package]]
 name = "marine-macro-impl"
-version = "0.6.14"
+version = "0.6.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7846a749f35186f923f71b3132a15add0735376e73978f41f552b92e9d43cbab"
+checksum = "bfdbed3a10ae9b22df06bee8cd0023255358935aae8e8daf9d1a006cfaeeb11e"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1217,24 +1218,24 @@ dependencies = [
 
 [[package]]
 name = "marine-rs-sdk"
-version = "0.6.14"
+version = "0.6.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5b349c8b5a09045a2a509f7ee5106a52c70ef6782febe9be6748044c6f8c477a"
+checksum = "4d17d44016675abdf18caf3ac1bdd4437cc17ec0db019da141bb06a9ea991726"
 dependencies = [
  "marine-macro",
  "marine-rs-sdk-main",
  "marine-timestamp-macro",
+ "polyplets",
  "serde",
 ]
 
 [[package]]
 name = "marine-rs-sdk-main"
-version = "0.6.14"
+version = "0.6.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1e9d9b9ecd87f0dfa8ad9ee594e71f71d8b4f0b819d3b025632a1a6597063088"
+checksum = "8ff262801664ce22f9d274504d6e8088c217034aba0ca431eca8d0258f3699c6"
 dependencies = [
  "log",
- "marine-macro",
  "serde",
 ]
 
@@ -1270,9 +1271,9 @@ dependencies = [
 
 [[package]]
 name = "marine-timestamp-macro"
-version = "0.6.14"
+version = "0.6.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cb6e81c03cc0c2f546680bf21e10f3514f69acfa4d4d84a8f2b17b2fcebe8ce9"
+checksum = "85a9f5b1adeff98ac5a14cfc5fa814185a807ba4a0d3849c9f9e9fd868b27d1f"
 dependencies = [
  "chrono",
  "quote",
@@ -1542,9 +1543,10 @@ dependencies = [
 
 [[package]]
 name = "polyplets"
-version = "0.1.2"
+version = "0.2.0"
 dependencies = [
- "marine-rs-sdk",
+ "marine-macro",
+ "marine-rs-sdk-main",
  "serde",
 ]
 
@@ -1574,9 +1576,9 @@ checksum = "dbf0c48bc1d91375ae5c3cd81e3722dff1abcf81a30960240640d223f59fe0e5"
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.30"
+version = "1.0.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "edc3358ebc67bc8b7fa0c007f945b0b18226f78437d61bec735a9eb96b61ee70"
+checksum = "ba508cc11742c0dc5c1659771673afbab7a0efab23aa17e854cbab0837ed0b43"
 dependencies = [
  "unicode-xid",
 ]
@@ -1901,9 +1903,9 @@ checksum = "6bdef32e8150c2a081110b42772ffe7d7c9032b606bc226c8260fd97e0976601"
 
 [[package]]
 name = "syn"
-version = "1.0.80"
+version = "1.0.81"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d010a1623fbd906d51d650a9916aaefc05ffa0e4053ff7fe601167f3e715d194"
+checksum = "f2afee18b8beb5a596ecb4a2dce128c719b4ba399d34126b9e4396e3f9860966"
 dependencies = [
  "proc-macro2",
  "quote",

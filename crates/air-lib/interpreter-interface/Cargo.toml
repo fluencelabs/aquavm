@@ -16,7 +16,7 @@ name = "air_interpreter_interface"
 path = "src/lib.rs"
 
 [dependencies]
-marine-rs-sdk = "0.6.11"
+marine-rs-sdk = "0.6.15"
 fluence-it-types = "0.3.0"
 
 serde = "1.0.118"
