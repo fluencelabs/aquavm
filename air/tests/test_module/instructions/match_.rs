@@ -234,3 +234,39 @@ fn match_with_two_xors() {
 
     assert_eq!(actual_trace.pop().unwrap(), expected_executed_call_result);
 }
+
+#[test]
+fn test_match_with_booleans() {
+    let result_setter_peer_id = "result_setter_peer_id";
+    let mut result_setter = create_avm(
+        set_variable_call_service(serde_json::json!({"success": true})),
+        result_setter_peer_id,
+    );
+
+    let echo_peer_id = "echo_peer_id";
+    let mut echo_peer = create_avm(echo_call_service(), echo_peer_id);
+
+    let script = format!(
+        r#"
+        (seq
+            (call "{0}" ("" "") ["set_result"] result)
+            (seq
+                (xor
+                    (match result.$.success! true
+                        (ap 1 $results)
+                    )
+                    (ap 2 $results)
+                )
+                (call "{1}" ("callbackSrv" "response") [$results.$.[0]!])
+            )
+        )
+    "#,
+        result_setter_peer_id, echo_peer_id
+    );
+
+    let setter_result = checked_call_vm!(result_setter, "", &script, "", "");
+    let echo_result = checked_call_vm!(echo_peer, "", &script, "", setter_result.data);
+
+    let trace = trace_from_result(&echo_result);
+    assert_eq!(trace.last().unwrap(), &executed_state::scalar(json!(1)));
+}
