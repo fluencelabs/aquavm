@@ -115,10 +115,14 @@ fn compare_matchable<'ctx>(
             let jvaluable = resolve_ast_variable(&vl.variable, exec_ctx)?;
             let jvalues = jvaluable.apply_lambda(&vl.lambda)?;
 
-            let jvalue = jvalues.into_iter().cloned().collect::<Vec<_>>();
-            let jvalue = JValue::Array(jvalue);
+            // TODO: it's known that apply_lambda always returns array with one value that is
+            // intended to support multi-return in the future, this check is needed just in
+            // case and should be refactored after introducing boxed values
+            if jvalues.len() != 1 {
+                return Ok(false);
+            }
 
-            Ok(comparator(Cow::Owned(jvalue)))
+            Ok(comparator(Cow::Borrowed(jvalues[0])))
         }
     }
 }
