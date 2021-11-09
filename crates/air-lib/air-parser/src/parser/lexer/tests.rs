@@ -16,7 +16,6 @@
 
 use super::air_lexer::Spanned;
 use super::AIRLexer;
-use super::AstVariable;
 use super::LastErrorPath;
 use super::LexerError;
 use super::Number;

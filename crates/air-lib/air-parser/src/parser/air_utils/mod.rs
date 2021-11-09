@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Fluence Labs Limited
+ * Copyright 2021 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,27 +14,21 @@
  * limitations under the License.
  */
 
-#![deny(
-    dead_code,
-    nonstandard_style,
-    unused_imports,
-    unused_mut,
-    unused_variables,
-    unused_unsafe,
-    unreachable_patterns
-)]
+mod triplet;
 
-pub mod ast;
-mod parser;
+pub(crate) use triplet::try_to_raw_triplet;
 
-pub use parser::parse;
-pub use parser::AIRLexer;
-pub use parser::AIRParser;
-pub use parser::VariableValidator;
+#[macro_export]
+macro_rules! make_user_error(
+    ($error_type:ident, $start_pos: ident, $token:expr, $end_pos: ident) => { {
+        let error = crate::parser::ParserError::$error_type($start_pos, $end_pos);
+        let error = lalrpop_util::ParseError::User { error };
 
-#[cfg(test)]
-#[macro_use]
-extern crate fstrings;
+        let dropped_tokens = vec![($start_pos, $token, $end_pos)];
 
-use air_lambda_parser::parse as parse_lambda;
-use air_lambda_parser::LambdaAST;
+        ErrorRecovery {
+            error,
+            dropped_tokens,
+        }
+    }}
+);

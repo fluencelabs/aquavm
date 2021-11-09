@@ -1,9 +1,12 @@
-use crate::parser::ast::*;
-use crate::parser::air_parser::make_stream_iterable_error;
+use crate::ast::*;
 use crate::parser::ParserError;
 use crate::parser::VariableValidator;
 use crate::parser::Span;
 use crate::parser::lexer::Token;
+use crate::parser::lexer::LastErrorPath;
+use crate::parser::lexer::Number;
+use crate::parser::air_utils::*;
+use crate::make_user_error;
 
 use air_lambda_parser::LambdaAST;
 use lalrpop_util::ErrorRecovery;
@@ -15,25 +18,27 @@ grammar<'err, 'input, 'v>(input: &'input str, errors: &'err mut Vec<ErrorRecover
 pub AIR = Instr;
 
 Instr: Box<Instruction<'input>> = {
-    <left: @L> "(" call <peer_part:PeerPart> <function_part:FPart> <args:Args> <output:Output?> ")" <right: @R> => {
+    <left: @L> "(" call <peer_part:PeerPart> <function_part:FPart> <args:Args> <output:CallOutput?> ")" <right: @R> => {
+        let triplet = match try_to_raw_triplet(peer_part, function_part) {
+            Some(raw_triplet) => raw_triplet,
+            None => {
+                // none means error
+                errors.push(make_user_error!(InvalidCallTriplet, left, Token::Call, right));
+                return Box::new(Instruction::Error);
+            }
+        };
+
         let output = output.map(CallOutputValue::Variable).unwrap_or(CallOutputValue::None);
         let args = Rc::new(args);
-        let call = Call { peer_part, function_part, args, output };
+        let call = Call { triplet, args, output};
         let span = Span { left, right };
         validator.met_call(&call, span);
 
         Box::new(Instruction::Call(call))
     },
 
-    <left: @L> "(" ap <arg:ApArgument> <res:Output> ")" <right: @R> => {
-        if let ApArgument::VariableWithLambda(vl) = &arg {
-            if let AstVariable::Stream(_) = &vl.variable {
-                let token = Token::VariableWithLambda(vl.variable.clone(), vl.lambda.clone());
-                errors.push(make_stream_iterable_error(left, token, right));
-            };
-        }
-
-        let apply = Ap::new(arg, res);
+    <left: @L> "(" ap <arg:ApArgument> <result:ApResult> ")" <right: @R> => {
+        let apply = Ap::new(arg, result);
         let span = Span { left, right };
         validator.met_ap(&apply, span);
 
@@ -44,7 +49,9 @@ Instr: Box<Instruction<'input>> = {
     "(" par <l:Instr> <r:Instr> ")" => Box::new(Instruction::Par(Par(l, r))),
     "(" null ")" => Box::new(Instruction::Null(Null)),
 
-    <left: @L> "(" fold <iterable:ScalarIterable> <iterator:Alphanumeric> <i:Instr> ")" <right: @R> => {
+    <left: @L> "(" fold <iterable:ScalarWithLambda> <iterator_name:Scalar> <i:Instr> ")" <right: @R> => {
+        let iterable = ScalarWithLambda { name: iterable.0, lambda: Some(iterable.1) };
+        let iterator = Scalar { name: iterator_name };
         let instruction = Rc::new(*i);
         let fold = FoldScalar { iterable, iterator, instruction };
         let span = Span { left, right };
@@ -53,17 +60,21 @@ Instr: Box<Instruction<'input>> = {
         Box::new(Instruction::FoldScalar(fold))
     },
 
-    <left: @L> "(" fold <stream:Stream> <iterator:Alphanumeric> <i:Instr> ")" <right: @R> => {
+    <left: @L> "(" fold <stream_name:Stream> <iterator_name:Scalar> <i:Instr> ")" <right: @R> => {
+        let iterable = Stream { name: stream_name };
+        let iterator = Scalar { name: iterator_name };
         let instruction = Rc::new(*i);
-        let fold = FoldStream { stream_name: stream, iterator, instruction };
+        let fold = FoldStream { iterable, iterator, instruction };
+
         let span = Span { left, right };
         validator.meet_fold_stream(&fold, span);
 
         Box::new(Instruction::FoldStream(fold))
     },
 
-    <left: @L> "(" next <i:Alphanumeric> ")" <right: @R> => {
-        let next = Next(i);
+    <left: @L> "(" next <iterator_name:Scalar> ")" <right: @R> => {
+        let iterator = Scalar { name: iterator_name };
+        let next = Next { iterator };
         let span = Span { left, right };
         validator.met_next(&next, span);
 
@@ -72,7 +83,7 @@ Instr: Box<Instruction<'input>> = {
 
     "(" xor <l:Instr> <r:Instr> ")" => Box::new(Instruction::Xor(Xor(l, r))),
 
-    <left: @L> "(" match_ <l:Matchable> <r:Matchable> <i:Instr> ")" <right: @R> => {
+    <left: @L> "(" match_ <l:AIRValue> <r:AIRValue> <i:Instr> ")" <right: @R> => {
         let match_ = Match { left_value: l, right_value: r, instruction: i};
         let span = Span { left, right };
         validator.met_match(&match_, span);
@@ -80,7 +91,7 @@ Instr: Box<Instruction<'input>> = {
         Box::new(Instruction::Match(match_))
     },
 
-    <left: @L> "(" mismatch <l:Matchable> <r:Matchable> <i:Instr> ")" <right: @R> => {
+    <left: @L> "(" mismatch <l:AIRValue> <r:AIRValue> <i:Instr> ")" <right: @R> => {
         let mismatch = MisMatch { left_value: l, right_value: r, instruction: i};
         let span = Span { left, right };
         validator.met_mismatch(&mismatch, span);
@@ -91,7 +102,7 @@ Instr: Box<Instruction<'input>> = {
     ! => { errors.push(<>); Box::new(Instruction::Error) },
 }
 
-Args: Vec<CallInstrArgValue<'input>> = {
+Args: Vec<AIRValue<'input>> = {
     "[" <args:(<Arg>)*> "]" => args
 }
 
@@ -105,9 +116,16 @@ PeerPart: PeerPart<'input> = {
     "(" <pid:PeerId> <sid:ServiceId> ")" => PeerPart::PeerPkWithServiceId(pid, sid),
 }
 
-Output: AstVariable<'input> = {
-    <a:Alphanumeric> => AstVariable::Scalar(a),
-    <s:Stream> => AstVariable::Stream(s),
+CallOutput: Variable<'input> = {
+    <scalar:Scalar> => Variable::scalar(scalar),
+    <stream:Stream> => Variable::stream(stream),
+};
+
+ApResult: VariableWithLambda<'input> = {
+    <scalar:Scalar> => VariableWithLambda::scalar(scalar),
+    <scalar:ScalarWithLambda> => VariableWithLambda::scalar_wl(scalar.0, scalar.1),
+    <stream:Stream> => VariableWithLambda::stream(stream),
+    <stream:StreamWithLambda> => VariableWithLambda::stream_wl(stream.0, stream.1),
 };
 
 Function = CallInstrValue;
@@ -115,71 +133,38 @@ PeerId = CallInstrValue;
 ServiceId = CallInstrValue;
 
 CallInstrValue: CallInstrValue<'input> = {
-    <l:Literal> => CallInstrValue::Literal(l),
-    <a:Alphanumeric> => CallInstrValue::Variable(AstVariable::Scalar(a)),
-    <s:Stream> => CallInstrValue::Variable(AstVariable::Stream(s)),
-    <left: @L> <vl:VariableWithLambda> <right: @R> => {
-        let variable = vl.0;
-        let lambda = vl.1;
-
-        CallInstrValue::VariableWithLambda(VariableWithLambda::new(variable, lambda))
-    },
     InitPeerId => CallInstrValue::InitPeerId,
+    <l:Literal> => CallInstrValue::Literal(l),
+    <scalar:Scalar> => CallInstrValue::Variable(VariableWithLambda::scalar(scalar)),
+    <scalar:ScalarWithLambda> => CallInstrValue::Variable(VariableWithLambda::scalar_wl(scalar.0, scalar.1)),
+    <stream:Stream> => CallInstrValue::Variable(VariableWithLambda::stream(stream)),
+    <stream:StreamWithLambda> => CallInstrValue::Variable(VariableWithLambda::stream_wl(stream.0, stream.1)),
 }
 
-Arg = CallInstrArgValue;
+Arg = AIRValue;
 
-CallInstrArgValue: CallInstrArgValue<'input> = {
-    <s:Literal> => CallInstrArgValue::Literal(s),
-    <v:Alphanumeric> => CallInstrArgValue::Variable(AstVariable::Scalar(v)),
-    <v:Stream> => CallInstrArgValue::Variable(AstVariable::Stream(v)),
-    <vl:VariableWithLambda> => CallInstrArgValue::VariableWithLambda(VariableWithLambda::new(vl.0, vl.1)),
-    <n:Number> => CallInstrArgValue::Number(n),
-    <b:Boolean> => CallInstrArgValue::Boolean(b),
-    InitPeerId => CallInstrArgValue::InitPeerId,
-    EmptyArray => CallInstrArgValue::EmptyArray,
-    <p:LastError> => CallInstrArgValue::LastError(p),
+AIRValue: AIRValue<'input> = {
+    InitPeerId => AIRValue::InitPeerId,
+    <e:LastError> => AIRValue::LastError(e),
+    <l:Literal> => AIRValue::Literal(l),
+    <n:Number> => AIRValue::Number(n),
+    <b:Boolean> => AIRValue::Boolean(b),
+    EmptyArray => AIRValue::EmptyArray,
+    <scalar_name:Scalar> => AIRValue::Variable(VariableWithLambda::scalar(scalar_name)),
+    <scalar:ScalarWithLambda> => AIRValue::Variable(VariableWithLambda::scalar_wl(scalar.0, scalar.1)),
+    <stream_name:Stream> => AIRValue::Variable(VariableWithLambda::stream(stream_name)),
+    <stream:StreamWithLambda> => AIRValue::Variable(VariableWithLambda::stream_wl(stream.0, stream.1)),
 }
 
 ApArgument: ApArgument<'input> = {
-    <a:Alphanumeric> => ApArgument::ScalarVariable(a),
-    <vl:VariableWithLambda> => ApArgument::VariableWithLambda(VariableWithLambda::new(vl.0, vl.1)),
+    InitPeerId => ApArgument::InitPeerId,
+    <e:LastError> => ApArgument::LastError(e),
+    <l:Literal> => ApArgument::Literal(l),
     <n:Number> => ApArgument::Number(n),
     <b:Boolean> => ApArgument::Boolean(b),
     EmptyArray => ApArgument::EmptyArray,
-    <s:Literal> => ApArgument::Literal(s),
-    <p:LastError> => ApArgument::LastError(p),
-};
-
-ScalarIterable: IterableScalarValue<'input> = {
-    <v:Alphanumeric> => IterableScalarValue::ScalarVariable(v),
-    <l:@L> <vl:VariableWithLambda> <r:@R> => {
-        use crate::parser::air::AstVariable::*;
-
-        let variable = vl.0;
-        let lambda = vl.1;
-
-        let scalar_name = match variable {
-            Stream(name) => {
-                let token = Token::VariableWithLambda(variable, lambda.clone());
-                errors.push(make_stream_iterable_error(l, token, r));
-                name
-            }
-            Scalar(name) => name,
-        };
-        IterableScalarValue::VariableWithLambda { scalar_name, lambda }
-    }
-}
-
-Matchable: MatchableValue<'input> = {
-    InitPeerId => MatchableValue::InitPeerId,
-    <v:Alphanumeric> => MatchableValue::Variable(AstVariable::Scalar(v)),
-    <v:Stream> => MatchableValue::Variable(AstVariable::Stream(v)),
-    <s:Literal> => MatchableValue::Literal(s),
-    <b:Boolean> => MatchableValue::Boolean(b),
-    <n:Number> => MatchableValue::Number(n),
-    EmptyArray => MatchableValue::EmptyArray,
-    <vl:VariableWithLambda> => MatchableValue::VariableWithLambda(VariableWithLambda::new(vl.0, vl.1)),
+    <scalar:Scalar> => ApArgument::Scalar(ScalarWithLambda { name: scalar, lambda: None }),
+    <scalar:ScalarWithLambda> => ApArgument::Scalar(ScalarWithLambda { name: scalar.0, lambda: Some(scalar.1) }),
 }
 
 extern {
@@ -194,9 +179,10 @@ extern {
         EmptyArray => Token::SquareBrackets,
 
         Literal => Token::StringLiteral(<&'input str>),
-        Alphanumeric => Token::Alphanumeric(<&'input str>),
-        Stream => Token::Stream(<&'input str>),
-        VariableWithLambda => Token::VariableWithLambda(<AstVariable<'input>>, <LambdaAST<'input>>),
+        Scalar => Token::Scalar { name:<&'input str> },
+        ScalarWithLambda => Token::ScalarWithLambda { name: <&'input str>, lambda: <LambdaAST<'input>>},
+        Stream => Token::Stream { name: <&'input str> },
+        StreamWithLambda => Token::StreamWithLambda {name: <&'input str>, lambda:<LambdaAST<'input>>},
         Number => Token::Number(<Number>),
         Boolean => Token::Boolean(<bool>),
 

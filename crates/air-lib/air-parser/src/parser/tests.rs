@@ -18,15 +18,11 @@ use crate::ast;
 use crate::parser::lexer::LastErrorPath;
 use crate::parser::AIRParser;
 use crate::parser::ParserError;
-use ast::AstVariable::Scalar;
-use ast::AstVariable::Stream;
-use ast::Call;
-use ast::CallInstrArgValue;
-use ast::CallInstrValue;
-use ast::Instruction;
+use ast::*;
 
 use air_lambda_parser::ValueAccessor;
 
+use crate::ast::VariableWithLambda;
 use fstrings::f;
 use lalrpop_util::ParseError;
 use std::rc::Rc;
@@ -46,36 +42,41 @@ fn parse(source_code: &str) -> Instruction {
 
 #[test]
 fn parse_seq() {
-    use ast::CallOutputValue::*;
-    use ast::FunctionPart::*;
-    use ast::PeerPart::*;
-
     let source_code = r#"
         (seq
-            (call peerid function [[] []] output)
-            (call "id" "f" ["hello" [] name])
+            (call peer_id (service_id function) [[] []] output)
+            (call "peer_id" ("service_id" "function_name") ["hello" [] name])
         )
         "#;
+
     let instruction = parse(source_code);
     let expected = seq(
         Instruction::Call(Call {
-            peer_part: PeerPk(CallInstrValue::Variable(Scalar("peerid"))),
-            function_part: FuncName(CallInstrValue::Variable(Scalar("function"))),
+            triplet: RawTriplet {
+                peer_pk: CallInstrValue::Variable(VariableWithLambda::scalar("peer_id")),
+                service_id: CallInstrValue::Variable(VariableWithLambda::scalar("service_id")),
+                function_name: CallInstrValue::Variable(VariableWithLambda::scalar(
+                    "function_name",
+                )),
+            },
             args: Rc::new(vec![
                 CallInstrArgValue::EmptyArray,
                 CallInstrArgValue::EmptyArray,
             ]),
-            output: Variable(Scalar("output")),
+            output: CallOutputValue::Variable(Variable::scalar("output")),
         }),
         Instruction::Call(Call {
-            peer_part: PeerPk(CallInstrValue::Literal("id")),
-            function_part: FuncName(CallInstrValue::Literal("f")),
+            triplet: RawTriplet {
+                peer_pk: CallInstrValue::Literal("peer_id"),
+                service_id: CallInstrValue::Literal("service_id"),
+                function_name: CallInstrValue::Literal("function_name"),
+            },
             args: Rc::new(vec![
-                CallInstrArgValue::Literal("hello"),
-                CallInstrArgValue::EmptyArray,
-                CallInstrArgValue::Variable(Scalar("name")),
+                AIRValue::Literal("hello"),
+                AIRValue::EmptyArray,
+                AIRValue::Variable(VariableWithLambda::scalar("name")),
             ]),
-            output: None,
+            output: CallOutputValue::None,
         }),
     );
     assert_eq!(instruction, expected);
@@ -83,49 +84,52 @@ fn parse_seq() {
 
 #[test]
 fn parse_seq_seq() {
-    use ast::CallOutputValue::*;
-    use ast::FunctionPart::*;
-    use ast::PeerPart::*;
-
     let source_code = r#"
         (seq
             (seq
-                (call peerid function [])
-                (call (peerid serviceA) ("serviceB" function) [])
+                (call peer_id (service_id function_name) [])
+                (call (peer_id service_A) ("service_B" function_name) [])
             )
-            (call "id" "f" ["hello" name] $output)
+            (call "peer_id" ("service_id" "function_name") ["hello" name] $output)
         )
         "#;
     let instruction = parse(source_code);
     let expected = seq(
         seq(
             Instruction::Call(Call {
-                peer_part: PeerPk(CallInstrValue::Variable(Scalar("peerid"))),
-                function_part: FuncName(CallInstrValue::Variable(Scalar("function"))),
+                triplet: RawTriplet {
+                    peer_pk: CallInstrValue::Variable(VariableWithLambda::scalar("peer_id")),
+                    service_id: CallInstrValue::Variable(VariableWithLambda::scalar("service_id")),
+                    function_name: CallInstrValue::Variable(VariableWithLambda::scalar(
+                        "function_name",
+                    )),
+                },
                 args: Rc::new(vec![]),
-                output: None,
+                output: CallOutputValue::None,
             }),
             Instruction::Call(Call {
-                peer_part: PeerPkWithServiceId(
-                    CallInstrValue::Variable(Scalar("peerid")),
-                    CallInstrValue::Variable(Scalar("serviceA")),
-                ),
-                function_part: ServiceIdWithFuncName(
-                    CallInstrValue::Literal("serviceB"),
-                    CallInstrValue::Variable(Scalar("function")),
-                ),
+                triplet: RawTriplet {
+                    peer_pk: CallInstrValue::Variable(VariableWithLambda::scalar("peer_id")),
+                    service_id: CallInstrValue::Variable(VariableWithLambda::scalar("service_A")),
+                    function_name: CallInstrValue::Variable(VariableWithLambda::scalar(
+                        "function_name",
+                    )),
+                },
                 args: Rc::new(vec![]),
-                output: None,
+                output: CallOutputValue::None,
             }),
         ),
         Instruction::Call(Call {
-            peer_part: PeerPk(CallInstrValue::Literal("id")),
-            function_part: FuncName(CallInstrValue::Literal("f")),
+            triplet: RawTriplet {
+                peer_pk: CallInstrValue::Literal("peer_id"),
+                service_id: CallInstrValue::Literal("service_id"),
+                function_name: CallInstrValue::Literal("function_name"),
+            },
             args: Rc::new(vec![
-                CallInstrArgValue::Literal("hello"),
-                CallInstrArgValue::Variable(Scalar("name")),
+                AIRValue::Literal("hello"),
+                AIRValue::Variable(VariableWithLambda::scalar("name")),
             ]),
-            output: Variable(Stream("$output")),
+            output: CallOutputValue::Variable(Variable::scalar("$output")),
         }),
     );
     assert_eq!(instruction, expected);
@@ -133,40 +137,35 @@ fn parse_seq_seq() {
 
 #[test]
 fn parse_json_path() {
-    use ast::CallOutputValue::*;
-    use ast::FunctionPart::*;
-    use ast::PeerPart::*;
-
     let source_code = r#"
-        (call id.$.a! "f" ["hello" name] $void)
+        (call peer_id.$.a! ("service_id" "function_name") ["hello" name] $void)
         "#;
+
     let instruction = parse(source_code);
     let expected = Instruction::Call(Call {
-        peer_part: PeerPk(CallInstrValue::VariableWithLambda(
-            ast::VariableWithLambda::from_raw_algebras(
-                Scalar("id"),
+        triplet: RawTriplet {
+            peer_pk: CallInstrValue::Variable(VariableWithLambda::from_raw_algebras_scalar(
+                "peer_id",
                 vec![ValueAccessor::FieldAccess { field_name: "a" }],
-            ),
-        )),
-        function_part: FuncName(CallInstrValue::Literal("f")),
+            )),
+            service_id: CallInstrValue::Literal("service_id"),
+            function_name: CallInstrValue::Literal("function_name"),
+        },
         args: Rc::new(vec![
             CallInstrArgValue::Literal("hello"),
             CallInstrArgValue::Variable(Scalar("name")),
         ]),
-        output: Variable(Stream("$void")),
+        output: CallOutputValue::Variable(Variable::stream("$void")),
     });
     assert_eq!(instruction, expected);
 }
 
 #[test]
 fn parse_empty_array() {
-    use ast::CallOutputValue::*;
-    use ast::FunctionPart::*;
-    use ast::PeerPart::*;
-
     let source_code = r#"
-        (call id "f" ["" [] arg])
+        (call peer_id (service_id "function_name") ["" [] arg])
         "#;
+
     let actual = parse(source_code);
     let expected = Instruction::Call(Call {
         peer_part: PeerPk(CallInstrValue::Variable(ast::AstVariable::Scalar("id"))),
@@ -938,7 +937,7 @@ fn fold_on_stream() {
     "#;
     let instruction = parse(source_code);
     let expected = Instruction::FoldStream(FoldStream {
-        stream_name: "$stream",
+        iterable: "$stream",
         iterator: "iterator",
         instruction: Rc::new(null()),
     });

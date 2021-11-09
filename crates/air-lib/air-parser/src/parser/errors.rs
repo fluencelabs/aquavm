@@ -30,6 +30,10 @@ pub enum ParserError {
 
     #[error("iterable '{2}' wasn't defined")]
     UndefinedIterable(usize, usize, String),
+
+    /// Semantic errors in a call instructions.
+    #[error("call should have service id specified by peer part or function part")]
+    InvalidCallTriplet(usize, usize),
 }
 
 impl From<std::convert::Infallible> for ParserError {

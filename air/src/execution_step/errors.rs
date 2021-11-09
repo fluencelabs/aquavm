@@ -38,10 +38,6 @@ use std::rc::Rc;
 #[derive(ThisError, EnumDiscriminants, Debug)]
 #[strum_discriminants(derive(EnumIter))]
 pub(crate) enum ExecutionError {
-    /// Semantic errors in a call instructions.
-    #[error("call should have service id specified by peer part or function part")]
-    IncorrectCallTriplet,
-
     /// An error is occurred while calling local service via call_service.
     #[error("Local service error, ret_code is {0}, error message is '{1}'")]
     LocalServiceError(i32, Rc<String>),

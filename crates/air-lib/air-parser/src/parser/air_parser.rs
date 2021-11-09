@@ -15,12 +15,12 @@
  */
 
 use super::air;
-use super::ast::Instruction;
 use super::lexer::AIRLexer;
 use super::lexer::LexerError;
 use super::lexer::Token;
 use super::ParserError;
 
+use crate::ast::Instruction;
 use crate::parser::VariableValidator;
 use air::AIRParser;
 
@@ -133,6 +133,9 @@ fn parser_error_to_label(file_id: usize, error: ParserError) -> Label<usize> {
         UndefinedVariable(start, end, _) => {
             Label::primary(file_id, start..end).with_message(error.to_string())
         }
+        InvalidCallTriplet(start, end) => {
+            Label::primary(file_id, start..end).with_message(error.to_string())
+        }
     }
 }
 
@@ -179,26 +182,4 @@ fn lexical_error_to_label(file_id: usize, error: LexerError) -> Label<usize> {
             Label::primary(file_id, start..end).with_message(error.to_string())
         }
     }
-}
-
-macro_rules! make_user_error(
-    ($error_type:ident, $start_pos: ident, $token:ident, $end_pos: ident) => { {
-        let error = ParserError::$error_type($start_pos, $end_pos);
-        let error = ParseError::User { error };
-
-        let dropped_tokens = vec![($start_pos, $token, $end_pos)];
-
-        ErrorRecovery {
-            error,
-            dropped_tokens,
-        }
-    }}
-);
-
-pub(super) fn make_stream_iterable_error(
-    start_pos: usize,
-    token: Token<'_>,
-    end_pos: usize,
-) -> ErrorRecovery<usize, Token<'_>, ParserError> {
-    make_user_error!(LambdaAppliedToStream, start_pos, token, end_pos)
 }

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-use super::AstVariable;
 use super::LexerError;
 use super::LexerResult;
 use super::Token;
@@ -273,59 +272,57 @@ impl<'input> CallVariableParser<'input> {
         self.current_pos() == self.string_to_parse.len() - 1
     }
 
-    fn to_variable<'v>(&self, variable_name: &'v str) -> AstVariable<'v> {
+    fn to_variable_token<'v>(&self, name: &'v str) -> Token<'v> {
         if self.state.is_first_stream_tag {
-            // TODO: cut the stream tag after the refactoring.
-            AstVariable::Stream(variable_name)
+            Token::Stream { name }
         } else {
-            AstVariable::Scalar(variable_name)
+            Token::Scalar { name }
         }
     }
 
-    fn try_to_variable_and_lambda(
-        &self,
-        pos: usize,
-    ) -> LexerResult<(&'input str, LambdaAST<'input>)> {
-        // +2 to ignore ".$" prefix
-        let lambda = crate::parse_lambda(&self.string_to_parse[pos + 2..]).map_err(|e| {
-            LexerError::LambdaParserError(
-                self.start_pos + pos,
-                self.start_pos + self.string_to_parse.len(),
-                e.to_string(),
-            )
-        })?;
+    fn to_variable_token_with_lambda<'v>(&self, name: &'v str, lambda: LambdaAST<'v>) -> Token<'v> {
+        if self.state.is_first_stream_tag {
+            Token::StreamWithLambda { name, lambda }
+        } else {
+            Token::ScalarWithLambda { name, lambda }
+        }
+    }
 
-        Ok((&self.string_to_parse[0..pos], lambda))
+    fn try_to_variable_and_lambda(&self, lambda_start_pos: usize) -> LexerResult<Token<'input>> {
+        // +2 to ignore ".$" prefix
+        let lambda =
+            crate::parse_lambda(&self.string_to_parse[lambda_start_pos + 2..]).map_err(|e| {
+                LexerError::LambdaParserError(
+                    self.start_pos + lambda_start_pos,
+                    self.start_pos + self.string_to_parse.len(),
+                    e.to_string(),
+                )
+            })?;
+
+        let token =
+            self.to_variable_token_with_lambda(&self.string_to_parse[0..lambda_start_pos], lambda);
+        Ok(token)
     }
 
     fn to_token(&self) -> LexerResult<Token<'input>> {
         use super::token::UnparsedNumber;
 
-        match (self.is_possible_to_parse_as_number(), self.dot_met()) {
-            (true, false) => {
+        let is_number = self.is_possible_to_parse_as_number();
+        let token = match (is_number, self.state.first_dot_met_pos) {
+            (true, None) => {
                 let number = UnparsedNumber::Int(self.string_to_parse, self.start_pos);
                 let number: super::Number = number.try_into()?;
-                Ok(number.into())
+                number.into()
             }
-            (true, true) => {
+            (true, Some(_)) => {
                 let number = UnparsedNumber::Float(self.string_to_parse, self.start_pos);
                 let number: super::Number = number.try_into()?;
-                Ok(number.into())
+                number.into()
             }
-            (false, false) => {
-                if self.state.is_first_stream_tag {
-                    Ok(Token::Stream(self.string_to_parse))
-                } else {
-                    Ok(Token::Alphanumeric(self.string_to_parse))
-                }
-            }
-            (false, true) => {
-                let lambda_start_pos = self.state.first_dot_met_pos.unwrap();
-                let (variable, lambda) = self.try_to_variable_and_lambda(lambda_start_pos)?;
-                let variable = self.to_variable(variable);
+            (false, None) => self.to_variable_token(self.string_to_parse),
+            (false, Some(lambda_start_pos)) => self.try_to_variable_and_lambda(lambda_start_pos)?,
+        };
 
-                Ok(Token::VariableWithLambda(variable, lambda))
-            }
-        }
+        Ok(token)
     }
 }

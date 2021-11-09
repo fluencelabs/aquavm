@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Fluence Labs Limited
+ * Copyright 2021 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,27 +14,18 @@
  * limitations under the License.
  */
 
-#![deny(
-    dead_code,
-    nonstandard_style,
-    unused_imports,
-    unused_mut,
-    unused_variables,
-    unused_unsafe,
-    unreachable_patterns
-)]
+use super::*;
 
-pub mod ast;
-mod parser;
+use std::fmt;
 
-pub use parser::parse;
-pub use parser::AIRLexer;
-pub use parser::AIRParser;
-pub use parser::VariableValidator;
+impl fmt::Display for ValueAccessor<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use ValueAccessor::*;
 
-#[cfg(test)]
-#[macro_use]
-extern crate fstrings;
-
-use air_lambda_parser::parse as parse_lambda;
-use air_lambda_parser::LambdaAST;
+        match self {
+            ArrayAccess { idx } => write!(f, ".[{}]", idx),
+            FieldAccess { field_name } => write!(f, ".{}", field_name),
+            Error => write!(f, "a parser error occurred while parsing lambda expression"),
+        }
+    }
+}

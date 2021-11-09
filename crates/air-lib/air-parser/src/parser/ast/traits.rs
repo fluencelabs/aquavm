@@ -156,7 +156,7 @@ impl fmt::Display for Ap<'_> {
 impl fmt::Display for ApArgument<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ApArgument::ScalarVariable(name) => write!(f, "{}", name),
+            ApArgument::Scalar(name) => write!(f, "{}", name),
             ApArgument::VariableWithLambda(vl) => write!(f, "{}", vl),
             ApArgument::LastError(error_path) => write!(f, "{}", error_path),
             ApArgument::Number(value) => write!(f, "{}", value),
@@ -175,7 +175,7 @@ impl fmt::Display for FoldScalar<'_> {
 
 impl fmt::Display for FoldStream<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "fold {} {}", self.stream_name, self.iterator)
+        write!(f, "fold {} {}", self.iterable, self.iterator)
     }
 }
 

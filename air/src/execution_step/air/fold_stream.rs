@@ -29,7 +29,7 @@ impl<'i> ExecutableInstruction<'i> for FoldStream<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         log_instruction!(fold, exec_ctx, trace_ctx);
 
-        let iterables = match construct_stream_iterable_value(self.stream_name, exec_ctx)? {
+        let iterables = match construct_stream_iterable_value(self.iterable, exec_ctx)? {
             FoldIterableStream::Empty => return Ok(()),
             FoldIterableStream::Stream(iterables) => iterables,
         };

@@ -43,17 +43,6 @@ impl fmt::Display for Number {
     }
 }
 
-impl fmt::Display for AstVariable<'_> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        use AstVariable::*;
-
-        match self {
-            Scalar(name) => write!(f, "{}", name),
-            Stream(name) => write!(f, "&{}", name),
-        }
-    }
-}
-
 impl From<Number> for Token<'_> {
     fn from(value: Number) -> Self {
         Token::Number(value)
