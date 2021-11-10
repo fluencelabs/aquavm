@@ -158,7 +158,10 @@ fn init_peer_id() {
 fn stream() {
     const STREAM: &str = "$stream____asdasd";
 
-    lexer_test(STREAM, Single(Ok((0, Token::Stream(STREAM), STREAM.len()))));
+    lexer_test(
+        STREAM,
+        Single(Ok((0, Token::Stream { name: STREAM }, STREAM.len()))),
+    );
 }
 
 #[test]
@@ -266,20 +269,22 @@ fn too_big_float_number() {
 fn lambda() {
     // this lambda contains all allowed in lambda characters
     const LAMBDA: &str = r#"value.$.field[1]"#;
-    let variable = AstVariable::Scalar("value");
 
     lexer_test(
         LAMBDA,
         Single(Ok((
             0,
-            Token::VariableWithLambda(variable, unsafe {
-                LambdaAST::new_unchecked(vec![
-                    ValueAccessor::FieldAccess {
-                        field_name: "field",
-                    },
-                    ValueAccessor::ArrayAccess { idx: 1 },
-                ])
-            }),
+            Token::ScalarWithLambda {
+                name: "value",
+                lambda: unsafe {
+                    LambdaAST::new_unchecked(vec![
+                        ValueAccessor::FieldAccess {
+                            field_name: "field",
+                        },
+                        ValueAccessor::ArrayAccess { idx: 1 },
+                    ])
+                },
+            },
             LAMBDA.len(),
         ))),
     );
@@ -446,7 +451,9 @@ fn booleans() {
         NON_BOOL_CONST,
         Single(Ok((
             0,
-            Token::Alphanumeric(NON_BOOL_CONST),
+            Token::Scalar {
+                name: NON_BOOL_CONST,
+            },
             NON_BOOL_CONST.len(),
         ))),
     );

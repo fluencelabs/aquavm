@@ -18,6 +18,47 @@ use super::*;
 use air_lambda_parser::LambdaAST;
 use air_lambda_parser::ValueAccessor;
 
+impl<'i> ScalarWithLambda<'i> {
+    pub fn new(name: &'i str, lambda: Option<LambdaAST<'i>>) -> Self {
+        Self { name, lambda }
+    }
+
+    pub(crate) fn from_raw_lambda(name: &'i str, lambda: Vec<ValueAccessor<'i>>) -> Self {
+        let lambda = unsafe { LambdaAST::new_unchecked(lambda) };
+        Self {
+            name,
+            lambda: Some(lambda),
+        }
+    }
+}
+
+impl<'i> StreamWithLambda<'i> {
+    pub fn new(name: &'i str, lambda: Option<LambdaAST<'i>>) -> Self {
+        Self { name, lambda }
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn from_raw_lambda(name: &'i str, lambda: Vec<ValueAccessor<'i>>) -> Self {
+        let lambda = unsafe { LambdaAST::new_unchecked(lambda) };
+        Self {
+            name,
+            lambda: Some(lambda),
+        }
+    }
+}
+
+impl<'i> Scalar<'i> {
+    pub fn new(name: &'i str) -> Self {
+        Self { name }
+    }
+}
+
+impl<'i> Stream<'i> {
+    pub fn new(name: &'i str) -> Self {
+        Self { name }
+    }
+}
+
 impl<'i> Variable<'i> {
     pub fn scalar(name: &'i str) -> Self {
         Self::Scalar(Scalar { name })
@@ -52,22 +93,16 @@ impl<'i> VariableWithLambda<'i> {
     }
 
     // This function is unsafe and lambda must be non-empty, although it's used only for tests
-    pub(crate) fn from_raw_algebras_scalar(name: &'i str, lambda: Vec<ValueAccessor<'i>>) -> Self {
-        let lambda = unsafe { LambdaAST::new_unchecked(lambda) };
-        let scalar = ScalarWithLambda {
-            name,
-            lambda: Some(lambda),
-        };
+    #[allow(dead_code)]
+    pub(crate) fn from_raw_lambda_scalar(name: &'i str, lambda: Vec<ValueAccessor<'i>>) -> Self {
+        let scalar = ScalarWithLambda::from_raw_lambda(name, lambda);
         Self::Scalar(scalar)
     }
 
     // This function is unsafe and lambda must be non-empty, although it's used only for tests
-    pub(crate) fn from_raw_algebras_stream(name: &'i str, lambda: Vec<ValueAccessor<'i>>) -> Self {
-        let lambda = unsafe { LambdaAST::new_unchecked(lambda) };
-        let stream = StreamWithLambda {
-            name,
-            lambda: Some(lambda),
-        };
+    #[allow(dead_code)]
+    pub(crate) fn from_raw_lambda_stream(name: &'i str, lambda: Vec<ValueAccessor<'i>>) -> Self {
+        let stream = StreamWithLambda::from_raw_lambda(name, lambda);
         Self::Stream(stream)
     }
 }

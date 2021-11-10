@@ -49,8 +49,7 @@ Instr: Box<Instruction<'input>> = {
     "(" par <l:Instr> <r:Instr> ")" => Box::new(Instruction::Par(Par(l, r))),
     "(" null ")" => Box::new(Instruction::Null(Null)),
 
-    <left: @L> "(" fold <iterable:ScalarWithLambda> <iterator_name:Scalar> <i:Instr> ")" <right: @R> => {
-        let iterable = ScalarWithLambda { name: iterable.0, lambda: Some(iterable.1) };
+    <left: @L> "(" fold <iterable:FoldScalarIterable> <iterator_name:Scalar> <i:Instr> ")" <right: @R> => {
         let iterator = Scalar { name: iterator_name };
         let instruction = Rc::new(*i);
         let fold = FoldScalar { iterable, iterator, instruction };
@@ -126,6 +125,11 @@ ApResult: VariableWithLambda<'input> = {
     <scalar:ScalarWithLambda> => VariableWithLambda::scalar_wl(scalar.0, scalar.1),
     <stream:Stream> => VariableWithLambda::stream(stream),
     <stream:StreamWithLambda> => VariableWithLambda::stream_wl(stream.0, stream.1),
+};
+
+FoldScalarIterable: ScalarWithLambda<'input> = {
+    <scalar:Scalar> => ScalarWithLambda::new(scalar, None),
+    <scalar:ScalarWithLambda> => ScalarWithLambda::new(scalar.0, Some(scalar.1)),
 };
 
 Function = CallInstrValue;
