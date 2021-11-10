@@ -31,6 +31,7 @@ use std::collections::HashMap;
 use std::hash::Hash;
 use std::rc::Rc;
 
+const PREPARATION_ERRORS_START_ID: i32 = 1;
 const EXECUTION_ERRORS_START_ID: i32 = 1000;
 
 /// Create InterpreterOutcome from supplied execution context and trace handler,
@@ -59,6 +60,7 @@ pub(crate) fn from_success_result(exec_ctx: ExecutionCtx<'_>, trace_handler: Tra
 /// set ret_code based on the error.
 pub(crate) fn from_preparation_error(data: impl Into<Vec<u8>>, err: PreparationError) -> InterpreterOutcome {
     let ret_code = err.to_error_code() as i32;
+    let ret_code = PREPARATION_ERRORS_START_ID + ret_code;
     let data = data.into();
     let call_requests = serde_json::to_vec(&CallRequests::new()).expect("default serializer shouldn't fail");
 

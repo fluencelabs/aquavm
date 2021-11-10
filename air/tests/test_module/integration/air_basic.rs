@@ -148,3 +148,14 @@ fn create_service() {
     assert_eq!(actual_trace, expected_trace);
     assert_eq!(result.next_peer_pks, vec![String::from("remote_peer_id")]);
 }
+
+#[test]
+fn invalid_air() {
+    let vm_peer_id = "some_peer_id";
+    let mut vm = create_avm(unit_call_service(), vm_peer_id);
+
+    let script = r#"(seq )"#;
+
+    let result = call_vm!(vm, "", script, "", "");
+    assert_eq!(result.ret_code, 1);
+}
