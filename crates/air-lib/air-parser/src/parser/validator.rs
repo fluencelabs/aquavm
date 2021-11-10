@@ -141,14 +141,14 @@ impl<'i> VariableValidator<'i> {
 
     fn met_instr_arg_value(&mut self, instr_arg_value: &AIRValue<'i>, span: Span) {
         if let AIRValue::Variable(variable) = instr_arg_value {
-                // skipping streams without lambdas here allows treating non-defined streams as empty arrays
-                if let VariableWithLambda::Stream(stream) = variable {
-                    if stream.lambda.is_none() {
-                        return;
-                    }
+            // skipping streams without lambdas here allows treating non-defined streams as empty arrays
+            if let VariableWithLambda::Stream(stream) = variable {
+                if stream.lambda.is_none() {
+                    return;
                 }
+            }
 
-                self.met_variable_wl(variable, span);
+            self.met_variable_wl(variable, span);
         }
     }
 

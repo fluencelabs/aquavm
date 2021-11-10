@@ -97,7 +97,11 @@ impl fmt::Display for FunctionPart<'_> {
 }
 
 impl fmt::Display for Triplet<'_> {
-   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-       write!(f, "{} ({} {})", self.peer_pk, self.service_id, self.function_name)
-   }
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{} ({} {})",
+            self.peer_pk, self.service_id, self.function_name
+        )
+    }
 }

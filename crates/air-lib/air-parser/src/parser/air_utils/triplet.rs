@@ -27,10 +27,9 @@ pub(crate) fn try_to_raw_triplet<'i>(
     use PeerPart::*;
 
     let (peer_pk, service_id, function_name) = match (peer, f) {
-        (
-            PeerPkWithServiceId(peer_pk, _peer_service_id),
-            ServiceIdWithFuncName(service_id, func_name),
-        ) => (peer_pk, service_id, func_name),
+        (PeerPkWithServiceId(peer_pk, _), ServiceIdWithFuncName(service_id, func_name)) => {
+            (peer_pk, service_id, func_name)
+        }
         (PeerPkWithServiceId(peer_pk, peer_service_id), FuncName(func_name)) => {
             (peer_pk, peer_service_id, func_name)
         }
