@@ -15,6 +15,7 @@
  */
 
 mod impls;
+mod traits;
 
 use super::*;
 use serde::Serialize;
@@ -40,7 +41,7 @@ pub enum Instruction<'i> {
 /// (call (peer part of a triplet: PeerPart) (function part of a triplet: FunctionPart) [arguments] output)
 #[derive(Serialize, Debug, PartialEq)]
 pub struct Call<'i> {
-    pub triplet: RawTriplet<'i>,
+    pub triplet: Triplet<'i>,
     pub args: Rc<Vec<AIRValue<'i>>>,
     pub output: CallOutputValue<'i>,
 }
@@ -49,7 +50,7 @@ pub struct Call<'i> {
 #[derive(Serialize, Debug, PartialEq)]
 pub struct Ap<'i> {
     pub argument: ApArgument<'i>,
-    pub result: VariableWithLambda<'i>,
+    pub result: Variable<'i>,
 }
 
 /// (seq instruction instruction)

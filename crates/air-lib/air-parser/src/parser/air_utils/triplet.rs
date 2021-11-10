@@ -16,12 +16,13 @@
 
 use crate::ast::FunctionPart;
 use crate::ast::PeerPart;
-use crate::ast::RawTriplet;
+use crate::ast::Triplet;
 
+/// Build a `Triplet` from `Call`'s `PeerPart` and `FunctionPart`
 pub(crate) fn try_to_raw_triplet<'i>(
     peer: PeerPart<'i>,
     f: FunctionPart<'i>,
-) -> Option<RawTriplet<'i>> {
+) -> Option<Triplet<'i>> {
     use FunctionPart::*;
     use PeerPart::*;
 
@@ -39,7 +40,7 @@ pub(crate) fn try_to_raw_triplet<'i>(
         (PeerPk(_), FuncName(_)) => return None,
     };
 
-    let raw_triplet = RawTriplet {
+    let raw_triplet = Triplet {
         peer_pk,
         service_id,
         function_name,

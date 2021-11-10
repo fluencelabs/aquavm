@@ -109,7 +109,7 @@ fn duplicate_variables() {
 
     let result = call_vm!(vm, "asd", script, "", "");
 
-    assert_eq!(result.ret_code, 1003);
+    assert_eq!(result.ret_code, 1002);
     assert!(result.next_peer_pks.is_empty());
 }
 

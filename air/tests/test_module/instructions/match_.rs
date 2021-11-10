@@ -192,11 +192,11 @@ fn match_without_xor() {
     let result = call_vm!(set_variable_vm, "", &script, "", "");
     let result = call_vm!(vm, "", &script, "", result.data);
 
-    assert_eq!(result.ret_code, 1011);
+    assert_eq!(result.ret_code, 1010);
 
     let result = call_vm!(vm, "", script, "", result.data);
 
-    assert_eq!(result.ret_code, 1011);
+    assert_eq!(result.ret_code, 1010);
 }
 
 #[test]
@@ -267,6 +267,7 @@ fn issue_165() {
 
     let setter_result = checked_call_vm!(result_setter, "", &script, "", "");
     let echo_result = checked_call_vm!(echo_peer, "", &script, "", setter_result.data);
+    print_trace(&echo_result, "echo result");
 
     let trace = trace_from_result(&echo_result);
     assert_eq!(trace.last().unwrap(), &executed_state::scalar(json!(1)));

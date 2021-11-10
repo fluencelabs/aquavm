@@ -67,6 +67,13 @@ impl<'i> Variable<'i> {
     pub fn stream(name: &'i str) -> Self {
         Self::Stream(Stream { name })
     }
+
+    pub fn name(&self) -> &str {
+        match self {
+            Variable::Scalar(scalar) => scalar.name,
+            Variable::Stream(stream) => stream.name,
+        }
+    }
 }
 
 impl<'i> VariableWithLambda<'i> {
@@ -90,6 +97,20 @@ impl<'i> VariableWithLambda<'i> {
             name,
             lambda: Some(lambda),
         })
+    }
+
+    pub fn name(&self) -> &str {
+        match self {
+            VariableWithLambda::Scalar(scalar) => scalar.name,
+            VariableWithLambda::Stream(stream) => stream.name,
+        }
+    }
+
+    pub fn lambda(&self) -> &Option<LambdaAST> {
+        match self {
+            VariableWithLambda::Scalar(scalar) => &scalar.lambda,
+            VariableWithLambda::Stream(stream) => &stream.lambda,
+        }
     }
 
     // This function is unsafe and lambda must be non-empty, although it's used only for tests

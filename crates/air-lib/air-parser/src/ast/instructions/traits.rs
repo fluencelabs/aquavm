@@ -18,14 +18,92 @@ use super::*;
 
 use std::fmt;
 
-impl fmt::Display for ValueAccessor<'_> {
+impl fmt::Display for Instruction<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        use ValueAccessor::*;
+        use Instruction::*;
 
         match self {
-            ArrayAccess { idx } => write!(f, ".[{}]", idx),
-            FieldAccess { field_name } => write!(f, ".{}", field_name),
-            Error => write!(f, "a parser error occurred while parsing lambda expression"),
+            Null(null) => write!(f, "{}", null),
+            Call(call) => write!(f, "{}", call),
+            Ap(ap) => write!(f, "{}", ap),
+            Seq(seq) => write!(f, "{}", seq),
+            Par(par) => write!(f, "{}", par),
+            Xor(xor) => write!(f, "{}", xor),
+            Match(match_) => write!(f, "{}", match_),
+            MisMatch(mismatch) => write!(f, "{}", mismatch),
+            FoldScalar(fold) => write!(f, "{}", fold),
+            FoldStream(fold) => write!(f, "{}", fold),
+            Next(next) => write!(f, "{}", next),
+            Error => Ok(()),
         }
+    }
+}
+
+impl fmt::Display for Call<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use itertools::Itertools;
+
+        let args = self.args.iter().map(|arg| format!("{}", arg)).join(" ");
+        write!(f, "call {} [{}] {}", self.triplet, args, self.output)
+    }
+}
+
+impl fmt::Display for Ap<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "ap {} {}", self.argument, self.result)
+    }
+}
+
+impl fmt::Display for FoldScalar<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "fold {} {}", self.iterable, self.iterator)
+    }
+}
+
+impl fmt::Display for FoldStream<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "fold {} {}", self.iterable, self.iterator)
+    }
+}
+
+impl fmt::Display for Seq<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "seq")
+    }
+}
+
+impl fmt::Display for Par<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "par")
+    }
+}
+
+impl fmt::Display for Null {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "null")
+    }
+}
+
+impl fmt::Display for Xor<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "xor")
+    }
+}
+
+impl fmt::Display for Match<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "match {} {}", self.left_value, self.right_value)
+    }
+}
+
+impl fmt::Display for MisMatch<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "mismatch {} {}", self.left_value, self.right_value)
+    }
+}
+
+impl fmt::Display for Next<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "next")
     }
 }

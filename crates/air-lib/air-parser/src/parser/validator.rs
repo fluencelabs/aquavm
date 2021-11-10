@@ -107,7 +107,7 @@ impl<'i> VariableValidator<'i> {
                 self.met_variable_wl(&VariableWithLambda::Scalar(scalar.clone()), span)
             }
         }
-        self.met_variable_wl_definition(&ap.result, span);
+        self.met_variable_definition(&ap.result, span);
     }
 
     pub(super) fn finalize(&self) -> Vec<ErrorRecovery<usize, Token<'i>, ParserError>> {
@@ -134,15 +134,13 @@ impl<'i> VariableValidator<'i> {
     }
 
     fn met_call_instr_value(&mut self, instr_value: &CallInstrValue<'i>, span: Span) {
-        match instr_value {
-            CallInstrValue::Variable(variable) => self.met_variable_wl(variable, span),
-            _ => {}
+        if let CallInstrValue::Variable(variable) = instr_value {
+            self.met_variable_wl(variable, span);
         }
     }
 
     fn met_instr_arg_value(&mut self, instr_arg_value: &AIRValue<'i>, span: Span) {
-        match instr_arg_value {
-            AIRValue::Variable(variable) => {
+        if let AIRValue::Variable(variable) = instr_arg_value {
                 // skipping streams without lambdas here allows treating non-defined streams as empty arrays
                 if let VariableWithLambda::Stream(stream) = variable {
                     if stream.lambda.is_none() {
@@ -150,9 +148,7 @@ impl<'i> VariableValidator<'i> {
                     }
                 }
 
-                self.met_variable_wl(variable, span)
-            }
-            _ => {}
+                self.met_variable_wl(variable, span);
         }
     }
 
@@ -190,11 +186,6 @@ impl<'i> VariableValidator<'i> {
 
     fn met_variable_definition(&mut self, variable: &Variable<'i>, span: Span) {
         let name = variable_name(variable);
-        self.met_variable_name_definition(name, span);
-    }
-
-    fn met_variable_wl_definition(&mut self, variable: &VariableWithLambda<'i>, span: Span) {
-        let name = variable_wl_name(variable);
         self.met_variable_name_definition(name, span);
     }
 

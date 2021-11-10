@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+mod traits;
+
 use super::Variable;
 use super::VariableWithLambda;
 use crate::ast::ScalarWithLambda;
@@ -44,8 +46,10 @@ pub enum FunctionPart<'i> {
     ServiceIdWithFuncName(CallInstrValue<'i>, CallInstrValue<'i>),
 }
 
+/// Triplet represents a location of the executable code in the network.
+/// It is build from `PeerPart` and `FunctionPart` of a `Call` instruction.
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
-pub struct RawTriplet<'i> {
+pub struct Triplet<'i> {
     #[serde(borrow)]
     pub peer_pk: CallInstrValue<'i>,
     #[serde(borrow)]

@@ -15,6 +15,7 @@
  */
 
 mod impls;
+mod traits;
 
 use air_lambda_parser::LambdaAST;
 

@@ -17,7 +17,7 @@
 use super::*;
 
 impl<'i> Ap<'i> {
-    pub fn new(argument: ApArgument<'i>, result: VariableWithLambda<'i>) -> Self {
+    pub fn new(argument: ApArgument<'i>, result: Variable<'i>) -> Self {
         Self { argument, result }
     }
 }

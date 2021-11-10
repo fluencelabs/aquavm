@@ -36,7 +36,7 @@ impl<'i> ExecutableInstruction<'i> for FoldScalar<'i> {
             FoldIterableScalar::Scalar(iterable) => fold(
                 iterable,
                 IterableType::Scalar,
-                self.iterator,
+                self.iterator.name,
                 self.instruction.clone(),
                 exec_ctx,
                 trace_ctx,

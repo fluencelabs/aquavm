@@ -16,7 +16,6 @@
 
 use super::*;
 use crate::execution_step::execution_context::*;
-use crate::execution_step::AstVariable;
 use crate::execution_step::Generation;
 use crate::execution_step::Stream;
 use crate::execution_step::ValueAggregate;
@@ -24,6 +23,7 @@ use crate::execution_step::ValueAggregate;
 use air_interpreter_data::CallResult;
 use air_interpreter_data::Value;
 use air_parser::ast::CallOutputValue;
+use air_parser::ast::Variable;
 use air_trace_handler::TraceHandler;
 
 use std::cell::RefCell;
@@ -38,18 +38,18 @@ pub(crate) fn set_local_result<'i>(
 ) -> ExecutionResult<CallResult> {
     let result_value = executed_result.result.clone();
     match output {
-        CallOutputValue::Variable(AstVariable::Scalar(name)) => {
-            exec_ctx.scalars.set_value(*name, executed_result)?;
+        CallOutputValue::Variable(Variable::Scalar(scalar)) => {
+            exec_ctx.scalars.set_value(scalar.name, executed_result)?;
             Ok(CallResult::executed_scalar(result_value))
         }
-        CallOutputValue::Variable(AstVariable::Stream(name)) => {
+        CallOutputValue::Variable(Variable::Stream(stream)) => {
             // TODO: refactor this generation handling
-            let generation = match exec_ctx.streams.get(*name) {
+            let generation = match exec_ctx.streams.get(stream.name) {
                 Some(stream) => Generation::Nth(stream.borrow().generations_count() as u32 - 1),
                 None => Generation::Last,
             };
 
-            let generation = set_stream_result(executed_result, generation, name.to_string(), exec_ctx)?;
+            let generation = set_stream_result(executed_result, generation, stream.name.to_string(), exec_ctx)?;
             Ok(CallResult::executed_stream(result_value, generation))
         }
         CallOutputValue::None => Ok(CallResult::executed_scalar(result_value)),
@@ -64,14 +64,14 @@ pub(crate) fn set_result_from_value<'i>(
     exec_ctx: &mut ExecutionCtx<'i>,
 ) -> ExecutionResult<()> {
     match (output, value) {
-        (CallOutputValue::Variable(AstVariable::Scalar(name)), Value::Scalar(value)) => {
+        (CallOutputValue::Variable(Variable::Scalar(scalar)), Value::Scalar(value)) => {
             let result = ValueAggregate::new(value, tetraplet, trace_pos);
-            exec_ctx.scalars.set_value(*name, result)?;
+            exec_ctx.scalars.set_value(scalar.name, result)?;
         }
-        (CallOutputValue::Variable(AstVariable::Stream(name)), Value::Stream { value, generation }) => {
+        (CallOutputValue::Variable(Variable::Stream(stream)), Value::Stream { value, generation }) => {
             let result = ValueAggregate::new(value, tetraplet, trace_pos);
             let generation = Generation::Nth(generation);
-            let _ = set_stream_result(result, generation, name.to_string(), exec_ctx)?;
+            let _ = set_stream_result(result, generation, stream.name.to_string(), exec_ctx)?;
         }
         // it isn't needed to check there that output and value matches because
         // it's been already checked in trace handler

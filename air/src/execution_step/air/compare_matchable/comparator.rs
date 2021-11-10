@@ -16,57 +16,50 @@
 
 use crate::execution_step::air::ExecutionResult;
 use crate::execution_step::execution_context::ExecutionCtx;
-use crate::execution_step::utils::resolve_ast_variable;
+use crate::execution_step::utils::resolve_ast_variable_wl;
 use crate::JValue;
 
 use air_parser::ast;
-use air_parser::ast::MatchableValue;
+use air_parser::ast::AIRValue;
 
 pub(crate) fn are_matchable_eq<'ctx>(
-    left: &MatchableValue<'_>,
-    right: &MatchableValue<'_>,
+    left: &AIRValue<'_>,
+    right: &AIRValue<'_>,
     exec_ctx: &'ctx ExecutionCtx<'_>,
 ) -> ExecutionResult<bool> {
-    use MatchableValue::*;
+    use AIRValue::*;
 
     match (left, right) {
         (InitPeerId, InitPeerId) => Ok(true),
-        (InitPeerId, matchable) => compare_matchable(
+        (InitPeerId, matchable) | (matchable, InitPeerId) => compare_matchable(
             matchable,
             exec_ctx,
             make_string_comparator(exec_ctx.init_peer_id.as_str()),
         ),
-        (matchable, InitPeerId) => compare_matchable(
-            matchable,
-            exec_ctx,
-            make_string_comparator(exec_ctx.init_peer_id.as_str()),
-        ),
+
+        (LastError(left_error), LastError(right_error)) => Ok(left_error == right_error),
+        (LastError(error), matchable) | (matchable, LastError(error)) => {
+            compare_matchable(matchable, exec_ctx, make_string_comparator(&error.to_string()))
+        }
 
         (Literal(left_name), Literal(right_name)) => Ok(left_name == right_name),
-        (Literal(value), matchable) => compare_matchable(matchable, exec_ctx, make_string_comparator(value)),
-        (matchable, Literal(value)) => compare_matchable(matchable, exec_ctx, make_string_comparator(value)),
+        (Literal(value), matchable) | (matchable, Literal(value)) => {
+            compare_matchable(matchable, exec_ctx, make_string_comparator(value))
+        }
 
-        (Boolean(value), matchable) => compare_matchable(matchable, exec_ctx, make_bool_comparator(value)),
-        (matchable, Boolean(value)) => compare_matchable(matchable, exec_ctx, make_bool_comparator(value)),
+        (Boolean(left_boolean), Boolean(right_boolean)) => Ok(left_boolean == right_boolean),
+        (Boolean(value), matchable) | (matchable, Boolean(value)) => {
+            compare_matchable(matchable, exec_ctx, make_bool_comparator(value))
+        }
 
-        (Number(value), matchable) => compare_matchable(matchable, exec_ctx, make_number_comparator(value)),
-        (matchable, Number(value)) => compare_matchable(matchable, exec_ctx, make_number_comparator(value)),
+        (Number(left_number), Number(right_number)) => Ok(left_number == right_number),
+        (Number(value), matchable) | (matchable, Number(value)) => {
+            compare_matchable(matchable, exec_ctx, make_number_comparator(value))
+        }
 
         (Variable(left_variable), Variable(right_variable)) => {
-            let left_jvaluable = resolve_ast_variable(left_variable, exec_ctx)?;
-            let left_value = left_jvaluable.as_jvalue();
-
-            let right_jvaluable = resolve_ast_variable(right_variable, exec_ctx)?;
-            let right_value = right_jvaluable.as_jvalue();
-
-            Ok(left_value == right_value)
-        }
-        (VariableWithLambda(lhs), VariableWithLambda(rhs)) => {
-            let left_jvaluable = resolve_ast_variable(&lhs.variable, exec_ctx)?;
-            let left_value = left_jvaluable.apply_lambda(&lhs.lambda)?;
-
-            let right_jvaluable = resolve_ast_variable(&rhs.variable, exec_ctx)?;
-            let right_value = right_jvaluable.apply_lambda(&rhs.lambda)?;
+            let (left_value, _) = resolve_ast_variable_wl(left_variable, exec_ctx)?;
+            let (right_value, _) = resolve_ast_variable_wl(right_variable, exec_ctx)?;
 
             Ok(left_value == right_value)
         }
@@ -78,16 +71,21 @@ use std::borrow::Cow;
 type Comparator<'a> = Box<dyn Fn(Cow<'_, JValue>) -> bool + 'a>;
 
 fn compare_matchable<'ctx>(
-    matchable: &MatchableValue<'_>,
+    matchable: &AIRValue<'_>,
     exec_ctx: &'ctx ExecutionCtx<'_>,
     comparator: Comparator<'ctx>,
 ) -> ExecutionResult<bool> {
-    use MatchableValue::*;
+    use AIRValue::*;
 
     match matchable {
         InitPeerId => {
             let init_peer_id = exec_ctx.init_peer_id.clone();
             let jvalue = init_peer_id.into();
+            Ok(comparator(Cow::Owned(jvalue)))
+        }
+        LastError(error_path) => {
+            let error_path = error_path.to_string();
+            let jvalue = error_path.into();
             Ok(comparator(Cow::Owned(jvalue)))
         }
         Literal(str) => {
@@ -107,22 +105,8 @@ fn compare_matchable<'ctx>(
             Ok(comparator(Cow::Owned(jvalue)))
         }
         Variable(variable) => {
-            let jvaluable = resolve_ast_variable(variable, exec_ctx)?;
-            let jvalue = jvaluable.as_jvalue();
-            Ok(comparator(jvalue))
-        }
-        VariableWithLambda(vl) => {
-            let jvaluable = resolve_ast_variable(&vl.variable, exec_ctx)?;
-            let jvalues = jvaluable.apply_lambda(&vl.lambda)?;
-
-            // TODO: it's known that apply_lambda always returns array with one value that is
-            // intended to support multi-return in the future, this check is needed just in
-            // case and should be refactored after introducing boxed values
-            if jvalues.len() != 1 {
-                return Ok(false);
-            }
-
-            Ok(comparator(Cow::Borrowed(jvalues[0])))
+            let (jvalue, _) = resolve_ast_variable_wl(variable, exec_ctx)?;
+            Ok(comparator(Cow::Owned(jvalue)))
         }
     }
 }

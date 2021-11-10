@@ -660,7 +660,7 @@ fn seq_with_empty_and_dash() {
             ),
             seq(
                 Instruction::Call(Call {
-                    triplet: RawTriplet {
+                    triplet: Triplet {
                         peer_pk: CallInstrValue::Literal("A"),
                         service_id: CallInstrValue::Literal("add_blueprint"),
                         function_name: CallInstrValue::Literal(""),
@@ -875,7 +875,7 @@ fn call<'i>(
     args: Rc<Vec<AIRValue<'i>>>,
     output: CallOutputValue<'i>,
 ) -> Instruction<'i> {
-    let triplet = RawTriplet {
+    let triplet = Triplet {
         peer_pk,
         service_id,
         function_name,

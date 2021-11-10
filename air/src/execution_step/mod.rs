@@ -41,8 +41,6 @@ type ExecutionResult<T> = std::result::Result<T, Rc<ExecutionError>>;
 type RSecurityTetraplet = Rc<RefCell<crate::SecurityTetraplet>>;
 type SecurityTetraplets = Vec<RSecurityTetraplet>;
 
-use air_parser::ast::AstVariable;
-
 #[macro_export]
 macro_rules! exec_err {
     ($err:expr) => {

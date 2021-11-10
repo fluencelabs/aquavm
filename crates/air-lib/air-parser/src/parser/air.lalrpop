@@ -115,16 +115,12 @@ PeerPart: PeerPart<'input> = {
     "(" <pid:PeerId> <sid:ServiceId> ")" => PeerPart::PeerPkWithServiceId(pid, sid),
 }
 
-CallOutput: Variable<'input> = {
+ApResult = ScriptVariable;
+CallOutput = ScriptVariable;
+
+ScriptVariable: Variable<'input> = {
     <scalar:Scalar> => Variable::scalar(scalar),
     <stream:Stream> => Variable::stream(stream),
-};
-
-ApResult: VariableWithLambda<'input> = {
-    <scalar:Scalar> => VariableWithLambda::scalar(scalar),
-    <scalar:ScalarWithLambda> => VariableWithLambda::scalar_wl(scalar.0, scalar.1),
-    <stream:Stream> => VariableWithLambda::stream(stream),
-    <stream:StreamWithLambda> => VariableWithLambda::stream_wl(stream.0, stream.1),
 };
 
 FoldScalarIterable: ScalarWithLambda<'input> = {

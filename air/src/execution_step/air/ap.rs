@@ -30,10 +30,8 @@ use crate::SecurityTetraplet;
 use apply_to_arguments::*;
 use utils::*;
 
-use air_parser::ast::ApArgument;
-use air_parser::ast::AstVariable;
-use air_parser::ast::VariableWithLambda;
-use air_parser::ast::{Ap, LastErrorPath};
+use air_parser::ast;
+use air_parser::ast::Ap;
 use air_trace_handler::MergerApResult;
 
 use std::cell::RefCell;
@@ -45,7 +43,7 @@ impl<'i> super::ExecutableInstruction<'i> for Ap<'i> {
 
         let merger_ap_result = if should_touch_trace {
             let merger_ap_result = trace_to_exec_err!(trace_ctx.meet_ap_start())?;
-            try_match_result_to_instr(&merger_ap_result, self)?;
+            try_match_trace_to_instr(&merger_ap_result, self)?;
             merger_ap_result
         } else {
             MergerApResult::Empty
@@ -66,27 +64,22 @@ impl<'i> super::ExecutableInstruction<'i> for Ap<'i> {
 }
 
 fn save_result<'ctx>(
-    ap_result_type: &AstVariable<'ctx>,
+    ap_result_type: &ast::Variable<'ctx>,
     merger_ap_result: &MergerApResult,
     result: ValueAggregate,
     exec_ctx: &mut ExecutionCtx<'ctx>,
 ) -> ExecutionResult<()> {
+    use ast::Variable::*;
+
     match ap_result_type {
-        AstVariable::Scalar(name) => exec_ctx.scalars.set_value(*name, result).map(|_| ()),
-        AstVariable::Stream(name) => {
+        Scalar(scalar) => exec_ctx.scalars.set_value(scalar.name, result).map(|_| ()),
+        Stream(stream) => {
             let generation = ap_result_to_generation(merger_ap_result);
-            set_stream_result(result, generation, name.to_string(), exec_ctx).map(|_| ())
+            set_stream_result(result, generation, stream.name.to_string(), exec_ctx).map(|_| ())
         }
     }
 }
 
 fn should_touch_trace(ap: &Ap<'_>) -> bool {
-    match (&ap.argument, &ap.result) {
-        (_, AstVariable::Stream(_)) => true,
-        (ApArgument::VariableWithLambda(vl), _) => match &vl.variable {
-            AstVariable::Scalar(_) => false,
-            AstVariable::Stream(_) => true,
-        },
-        _ => false,
-    }
+    matches!(ap.result, ast::Variable::Stream(_))
 }
