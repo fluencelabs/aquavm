@@ -123,11 +123,14 @@ macro_rules! trace_to_exec_err {
 
 impl ExecutionError {
     pub(crate) fn to_error_code(&self) -> u32 {
+        const EXECUTION_ERRORS_START_ID: u32 = 1000;
+
         let mut errors = ExecutionErrorDiscriminants::iter();
         let actual_error_type = ExecutionErrorDiscriminants::from(self);
 
         // unwrap is safe here because errors are guaranteed to contain all errors variants
-        errors.position(|et| et == actual_error_type).unwrap() as _
+        let enum_variant_position = errors.position(|et| et == actual_error_type).unwrap() as u32;
+        EXECUTION_ERRORS_START_ID + enum_variant_position
     }
 }
 
