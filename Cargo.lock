@@ -164,9 +164,9 @@ dependencies = [
 
 [[package]]
 name = "anyhow"
-version = "1.0.44"
+version = "1.0.45"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "61604a8f862e1d5c3229fdd78f8b02c68dcf73a4c4b05fd636d12240aaa242c1"
+checksum = "ee10e43ae4a853c0a3591d4e2ada1719e553be18199d9da9d4a83f5927c2f5c7"
 
 [[package]]
 name = "arrayref"
@@ -212,7 +212,7 @@ version = "0.1.0"
 
 [[package]]
 name = "avm-server"
-version = "0.11.0"
+version = "0.11.1"
 dependencies = [
  "air-interpreter-interface",
  "avm-data-store",
@@ -719,9 +719,9 @@ checksum = "37ab347416e802de484e4d03c7316c48f1ecb56574dfd4a46a80f173ce1de04d"
 
 [[package]]
 name = "fluence-app-service"
-version = "0.10.1"
+version = "0.10.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "056981dd5707a42412774d0b95629898f21dbce129b99835ac3f59d39b4a5760"
+checksum = "01c66660de99826038c5ec4ad0f5dccf10b1c8a15924aeaa5315ab49d718bfc9"
 dependencies = [
  "fluence-faas",
  "log",
@@ -735,9 +735,9 @@ dependencies = [
 
 [[package]]
 name = "fluence-faas"
-version = "0.9.2"
+version = "0.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3fe120218635fd3055bdf3f7e4cf765e2e72866874818bd10f40e2abde882326"
+checksum = "2abf1682505636b8c3436a2787df7bbae426d4f5277f5ae4ad193032b318b7f1"
 dependencies = [
  "cmd_lib",
  "itertools 0.9.0",
