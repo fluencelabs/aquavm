@@ -19,8 +19,8 @@ use super::KeeperError;
 use super::KeeperResult;
 use super::TraceSlider;
 
-use air_interpreter_data::InterpreterData;
 use air_interpreter_data::GlobalStreamGens;
+use air_interpreter_data::InterpreterData;
 
 use std::collections::HashMap;
 

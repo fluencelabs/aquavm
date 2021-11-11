@@ -84,7 +84,7 @@ impl Streams {
             .unwrap_or_default();
 
         let new_stream = RefCell::new(Stream::from_generations_count(generations_count as usize));
-        match self.streams.entry(name.into()) {
+        match self.streams.entry(name) {
             Occupied(mut entry) => {
                 entry.get_mut().push(new_stream);
             }
@@ -136,7 +136,7 @@ impl Streams {
                     .map(|iterations| iterations.get(iteration))
                     .flatten()
             })
-            .map(|generation| *generation)
+            .copied()
     }
 
     fn collect_stream_generation(&mut self, name: String, position: u32, generation: u32) {
@@ -145,7 +145,7 @@ impl Streams {
                 Occupied(mut iterations) => iterations.get_mut().push(generation),
                 Vacant(entry) => {
                     entry.insert(vec![generation]);
-                },
+                }
             },
             Vacant(entry) => {
                 let iterations = maplit::hashmap! {

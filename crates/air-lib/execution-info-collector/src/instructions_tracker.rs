@@ -130,13 +130,16 @@ impl InstructionTracker {
             Occupied(mut entry) => *entry.get_mut() += 1,
             Vacant(entry) => {
                 entry.insert(1);
-            },
+            }
         };
     }
 }
 
 impl NewTracker {
     pub fn get_iteration(&self, position: usize) -> u32 {
-        self.executed_count.get(&position).map(|iteration| *iteration).unwrap_or_default()
+        self.executed_count
+            .get(&position)
+            .copied()
+            .unwrap_or_default()
     }
 }

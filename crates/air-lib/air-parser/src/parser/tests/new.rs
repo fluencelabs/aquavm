@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-use super::parse;
 use super::dsl::*;
+use super::parse;
 use crate::ast::*;
 
 #[test]
@@ -27,10 +27,7 @@ fn parse_new_with_scalar() {
         "#;
 
     let instruction = parse(source_code);
-    let expected = new(
-        Variable::scalar("scalar"),
-        null()
-    );
+    let expected = new(Variable::scalar("scalar"), null());
     assert_eq!(instruction, expected);
 }
 
@@ -43,9 +40,6 @@ fn parse_new_with_stream() {
         "#;
 
     let instruction = parse(source_code);
-    let expected = new(
-        Variable::stream("$stream"),
-        null()
-    );
+    let expected = new(Variable::stream("$stream"), null());
     assert_eq!(instruction, expected);
 }
