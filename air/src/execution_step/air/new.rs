@@ -26,24 +26,33 @@ impl<'i> super::ExecutableInstruction<'i> for New<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         log_instruction!(null, exec_ctx, trace_ctx);
 
-        let position = self.position as u32;
-        match &self.variable {
-            Variable::Stream(stream) => {
-                let iteration = exec_ctx.tracker.new_tracker.get_iteration(self.position);
-                exec_ctx.streams.met_scope_start(stream.name, position, iteration);
-            }
-            Variable::Scalar(_scalar) => exec_ctx.scalars.meet_fold_start(),
-        }
-
+        prolog(self, exec_ctx);
         self.instruction.execute(exec_ctx, trace_ctx)?;
-
-        match &self.variable {
-            Variable::Stream(stream) => exec_ctx.streams.met_scope_end(stream.name.to_string(), position),
-            Variable::Scalar(_scalar) => exec_ctx.scalars.meet_fold_end(),
-        }
-
-        exec_ctx.tracker.meet_new(self.position);
+        epilog(self, exec_ctx);
 
         Ok(())
     }
+}
+
+fn prolog<'i>(new: &New<'i>, exec_ctx: &mut ExecutionCtx<'i>) {
+    let position = new.position;
+    match &new.variable {
+        Variable::Stream(stream) => {
+            let iteration = exec_ctx.tracker.new_tracker.get_iteration(position);
+            exec_ctx
+                .streams
+                .met_scope_start(stream.name, position as u32, iteration);
+        }
+        Variable::Scalar(scalar) => exec_ctx.scalars.met_new_start(scalar.name),
+    }
+}
+
+fn epilog<'i>(new: &New<'i>, exec_ctx: &mut ExecutionCtx<'i>) {
+    let position = new.position;
+    match &new.variable {
+        Variable::Stream(stream) => exec_ctx.streams.met_scope_end(stream.name.to_string(), position as u32),
+        Variable::Scalar(scalar) => exec_ctx.scalars.met_new_end(scalar.name),
+    }
+
+    exec_ctx.tracker.meet_new(position);
 }
