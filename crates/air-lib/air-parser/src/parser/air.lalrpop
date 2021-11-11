@@ -47,8 +47,14 @@ Instr: Box<Instruction<'input>> = {
 
     "(" seq <l:Instr> <r:Instr> ")" => Box::new(Instruction::Seq(Seq(l, r))),
     "(" par <l:Instr> <r:Instr> ")" => Box::new(Instruction::Par(Par(l, r))),
-    <position: @L> "(" new <variable: ScriptVariable> <instruction:Instr> ")" => Box::new(Instruction::New(New { variable, instruction, position })),
     "(" null ")" => Box::new(Instruction::Null(Null)),
+
+    <left: @L> "(" new <variable: ScriptVariable> <instruction:Instr> ")" <right: @R> => {
+        let new = New { variable, instruction, position: left };
+        let span = Span { left, right };
+        validator.met_new(&new, span);
+        Box::new(Instruction::New(new))
+    },
 
     <left: @L> "(" fold <iterable:FoldScalarIterable> <iterator_name:Scalar> <i:Instr> ")" <right: @R> => {
         let iterator = Scalar { name: iterator_name };

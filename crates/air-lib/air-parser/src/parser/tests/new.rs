@@ -17,29 +17,68 @@
 use super::dsl::*;
 use super::parse;
 use crate::ast::*;
+use crate::parser::ParserError;
+
+use lalrpop_util::ParseError;
 
 #[test]
 fn parse_new_with_scalar() {
-    let source_code = r#"
-        (new scalar
+    let source_code = r#"(new scalar
             (null)
         )
         "#;
 
     let instruction = parse(source_code);
-    let expected = new(Variable::scalar("scalar"), null());
+    let expected = new(Variable::scalar("scalar"), null(), 0);
     assert_eq!(instruction, expected);
 }
 
 #[test]
 fn parse_new_with_stream() {
-    let source_code = r#"
-        (new $stream
+    let source_code = r#"(new $stream
             (null)
         )
         "#;
 
     let instruction = parse(source_code);
-    let expected = new(Variable::stream("$stream"), null());
+    let expected = new(Variable::stream("$stream"), null(), 0);
     assert_eq!(instruction, expected);
+}
+
+#[test]
+fn iterators_cant_be_restricted() {
+    let source_code = r#"
+        (seq
+            (call "" ("" "") [] iterable)
+            (fold iterable iterator
+                (new iterator
+                    (call "" ("" "") [iterator])
+                )
+            )
+        )
+        "#;
+
+    let lexer = crate::AIRLexer::new(source_code);
+
+    let parser = crate::AIRParser::new();
+    let mut errors = Vec::new();
+    let mut validator = crate::parser::VariableValidator::new();
+    parser
+        .parse(source_code, &mut errors, &mut validator, lexer)
+        .expect("parser shouldn't fail");
+
+    let errors = validator.finalize();
+
+    assert_eq!(errors.len(), 1);
+    println!("{:?}", errors);
+    let error = &errors[0].error;
+    let parser_error = match error {
+        ParseError::User { error } => error,
+        _ => panic!("unexpected error type"),
+    };
+
+    assert!(matches!(
+        parser_error,
+        ParserError::IterableRestrictionNotAllowed(..)
+    ));
 }

@@ -34,6 +34,9 @@ pub enum ParserError {
     /// Semantic errors in a call instructions.
     #[error("call should have service id specified by peer part or function part")]
     InvalidCallTriplet(usize, usize),
+
+    #[error("new can't be applied to a '{2}' because it's an iterable")]
+    IterableRestrictionNotAllowed(usize, usize, String),
 }
 
 impl From<std::convert::Infallible> for ParserError {

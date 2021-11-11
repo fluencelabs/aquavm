@@ -53,10 +53,15 @@ pub(super) fn seqnn() -> Instruction<'static> {
     seq(null(), null())
 }
 
-pub(super) fn new<'i>(variable: Variable<'i>, instruction: Instruction<'i>) -> Instruction<'i> {
+pub(super) fn new<'i>(
+    variable: Variable<'i>,
+    instruction: Instruction<'i>,
+    position: usize,
+) -> Instruction<'i> {
     Instruction::New(New {
         variable,
         instruction: Box::new(instruction),
+        position,
     })
 }
 

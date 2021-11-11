@@ -136,6 +136,9 @@ fn parser_error_to_label(file_id: usize, error: ParserError) -> Label<usize> {
         InvalidCallTriplet(start, end) => {
             Label::primary(file_id, start..end).with_message(error.to_string())
         }
+        IterableRestrictionNotAllowed(start, end, _) => {
+            Label::primary(file_id, start..end).with_message(error.to_string())
+        }
     }
 }
 

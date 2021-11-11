@@ -47,6 +47,9 @@ pub struct VariableValidator<'i> {
     /// Contains all met iterable in call and next, they will be resolved after the whole parsing
     /// due to the way how lalrpop work.
     unresolved_iterables: MultiMap<&'i str, Span>,
+
+    /// Contains all names that should be checked that they are not iterables.
+    check_for_non_iterators: Vec<(&'i str, Span)>,
 }
 
 impl<'i> VariableValidator<'i> {
@@ -87,6 +90,13 @@ impl<'i> VariableValidator<'i> {
         self.met_iterator_definition(&fold.iterator, span);
     }
 
+    pub(super) fn met_new(&mut self, new: &New<'i>, span: Span) {
+        self.check_for_non_iterators
+            .push((variable_name(&new.variable), span));
+        // new defines a new variable
+        self.met_variable_definition(&new.variable, span);
+    }
+
     pub(super) fn met_next(&mut self, next: &Next<'i>, span: Span) {
         let iterable_name = next.iterator.name;
         // due to the right to left convolution in lalrpop, a next instruction will be met earlier
@@ -121,6 +131,12 @@ impl<'i> VariableValidator<'i> {
         for (name, span) in self.unresolved_iterables.iter() {
             if !self.contains_iterable(name, *span) {
                 add_to_errors(*name, &mut errors, *span, Token::Next);
+            }
+        }
+
+        for (name, span) in self.check_for_non_iterators.iter() {
+            if self.contains_iterable(name, *span) {
+                add_to_errors(*name, &mut errors, *span, Token::New);
             }
         }
 
@@ -260,6 +276,9 @@ fn add_to_errors<'err, 'i>(
     let variable_name = variable_name.into();
     let error = match token {
         Token::Next => ParserError::UndefinedIterable(span.left, span.right, variable_name),
+        Token::New => {
+            ParserError::IterableRestrictionNotAllowed(span.left, span.right, variable_name)
+        }
         _ => ParserError::UndefinedVariable(span.left, span.right, variable_name),
     };
     let error = ParseError::User { error };
