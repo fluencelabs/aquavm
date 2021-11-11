@@ -1,5 +1,10 @@
 ## Version 0.2.1
 
+[PR 169](https://github.com/fluencelabs/aquavm/pull/169):  
+- added a new field for tracking generations of private streams
+
+## Version 0.2.1
+
 [PR 130](https://github.com/fluencelabs/aquavm/pull/130):  
 - added a new field to track the latest exposed to a peer number of a call request
 - `RequestSentBy` enum variant of `CallResult` contains a `Sender` enum to support call request scheme (this `Sender` will se/de into string, so this change won't require a hard fork) 

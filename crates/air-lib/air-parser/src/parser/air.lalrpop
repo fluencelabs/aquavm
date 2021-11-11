@@ -47,6 +47,7 @@ Instr: Box<Instruction<'input>> = {
 
     "(" seq <l:Instr> <r:Instr> ")" => Box::new(Instruction::Seq(Seq(l, r))),
     "(" par <l:Instr> <r:Instr> ")" => Box::new(Instruction::Par(Par(l, r))),
+    <position: @L> "(" new <variable: ScriptVariable> <instruction:Instr> ")" => Box::new(Instruction::New(New { variable, instruction, position })),
     "(" null ")" => Box::new(Instruction::Null(Null)),
 
     <left: @L> "(" fold <iterable:FoldScalarIterable> <iterator_name:Scalar> <i:Instr> ")" <right: @R> => {
@@ -193,10 +194,11 @@ extern {
         ap => Token::Ap,
         seq => Token::Seq,
         par => Token::Par,
-        null => Token::Null,
         fold => Token::Fold,
         xor => Token::Xor,
+        new => Token::New,
         next => Token::Next,
+        null => Token::Null,
         match_ => Token::Match,
         mismatch => Token::MisMatch,
     }

@@ -20,7 +20,7 @@ use super::KeeperResult;
 use super::TraceSlider;
 
 use air_interpreter_data::InterpreterData;
-use air_interpreter_data::StreamGenerations;
+use air_interpreter_data::GlobalStreamGens;
 
 use std::collections::HashMap;
 
@@ -28,7 +28,7 @@ use std::collections::HashMap;
 #[derive(Debug, Default, PartialEq)]
 pub struct MergeCtx {
     pub slider: TraceSlider,
-    pub streams: StreamGenerations,
+    pub streams: GlobalStreamGens,
 }
 
 impl MergeCtx {
@@ -47,7 +47,7 @@ impl MergeCtx {
 
         Self {
             slider,
-            streams: data.streams,
+            streams: data.global_streams,
         }
     }
 

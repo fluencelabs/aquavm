@@ -62,7 +62,7 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter-data"
-version = "0.2.0"
+version = "0.2.2"
 dependencies = [
  "once_cell",
  "semver 1.0.4",

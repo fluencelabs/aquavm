@@ -14,15 +14,28 @@
  * limitations under the License.
  */
 
+#![warn(rust_2018_idioms)]
+#![deny(
+    dead_code,
+    nonstandard_style,
+    unused_imports,
+    unused_mut,
+    unused_variables,
+    unused_unsafe,
+    unreachable_patterns
+)]
+
 mod executed_state;
 mod interpreter_data;
+mod stream_generations;
 
 pub use executed_state::*;
 pub use interpreter_data::*;
+pub use stream_generations::*;
 
 use once_cell::sync::Lazy;
 use std::str::FromStr;
 
 pub static DATA_FORMAT_VERSION: Lazy<semver::Version> = Lazy::new(|| {
-    semver::Version::from_str("0.2.1").expect("invalid data format version specified")
+    semver::Version::from_str("0.2.2").expect("invalid data format version specified")
 });

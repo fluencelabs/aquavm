@@ -22,6 +22,7 @@ mod fold_scalar;
 mod fold_stream;
 mod match_;
 mod mismatch;
+mod new;
 mod next;
 mod null;
 mod par;
@@ -126,6 +127,7 @@ impl<'i> ExecutableInstruction<'i> for Instruction<'i> {
             Instruction::Ap(ap) => execute!(self, ap, exec_ctx, trace_ctx),
             Instruction::FoldScalar(fold) => execute!(self, fold, exec_ctx, trace_ctx),
             Instruction::FoldStream(fold) => execute_fold!(self, fold, exec_ctx, trace_ctx),
+            Instruction::New(new) => execute!(self, new, exec_ctx, trace_ctx),
             Instruction::Next(next) => execute!(self, next, exec_ctx, trace_ctx),
             Instruction::Null(null) => execute!(self, null, exec_ctx, trace_ctx),
             Instruction::Par(par) => execute!(self, par, exec_ctx, trace_ctx),
@@ -147,16 +149,10 @@ macro_rules! log_instruction {
         log::debug!(target: air_log_targets::INSTRUCTION, "> {}", stringify!($instr_name));
 
         let mut variables = String::from("  scalars:");
-
         variables.push_str(&format!("\n    {}", $exec_ctx.scalars));
 
         variables.push_str("  streams:");
-        if $exec_ctx.streams.is_empty() {
-            variables.push_str("   empty");
-        }
-        for (key, value) in $exec_ctx.streams.iter() {
-            variables.push_str(&format!("\n    {} => {}", key, value.borrow()));
-        }
+        variables.push_str(&format!("\n    {}", $exec_ctx.streams));
 
         log::trace!(target: air_log_targets::DATA_CACHE, "{}", variables);
         log::trace!(

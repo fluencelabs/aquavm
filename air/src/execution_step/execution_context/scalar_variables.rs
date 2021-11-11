@@ -70,6 +70,14 @@ pub(crate) struct Scalars<'i> {
     pub fold_block_id: usize,
 }
 
+/*
+struct ScalarDescriptor {
+    pub values: Vec<Option<ValueAggregate>>,
+    pub new_operators_met: usize,
+}
+
+ */
+
 #[allow(dead_code)]
 impl<'i> Scalars<'i> {
     /// Returns true if there was a previous value for the provided key on the same
@@ -181,7 +189,7 @@ impl<'i> Scalars<'i> {
         }
     }
 
-    pub(crate) fn meet_fold_begin(&mut self) {
+    pub(crate) fn meet_fold_start(&mut self) {
         self.fold_block_id += 1;
     }
 

@@ -56,10 +56,11 @@ pub enum Token<'input> {
     Ap,
     Seq,
     Par,
-    Null,
     Fold,
     Xor,
+    New,
     Next,
+    Null,
     Match,
     MisMatch,
 }

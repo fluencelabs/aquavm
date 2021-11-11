@@ -17,7 +17,6 @@
 use super::*;
 use crate::execution_step::execution_context::*;
 use crate::execution_step::Generation;
-use crate::execution_step::Stream;
 use crate::execution_step::ValueAggregate;
 
 use air_interpreter_data::CallResult;
@@ -25,9 +24,6 @@ use air_interpreter_data::Value;
 use air_parser::ast::CallOutputValue;
 use air_parser::ast::Variable;
 use air_trace_handler::TraceHandler;
-
-use std::cell::RefCell;
-use std::collections::hash_map::Entry::{Occupied, Vacant};
 
 /// Writes result of a local `Call` instruction to `ExecutionCtx` at `output`.
 /// Returns call result.
@@ -49,7 +45,9 @@ pub(crate) fn set_local_result<'i>(
                 None => Generation::Last,
             };
 
-            let generation = set_stream_result(executed_result, generation, stream.name.to_string(), exec_ctx)?;
+            let generation = exec_ctx
+                .streams
+                .add_stream_value(executed_result, generation, stream.name.to_string())?;
             Ok(CallResult::executed_stream(result_value, generation))
         }
         CallOutputValue::None => Ok(CallResult::executed_scalar(result_value)),
@@ -71,7 +69,9 @@ pub(crate) fn set_result_from_value<'i>(
         (CallOutputValue::Variable(Variable::Stream(stream)), Value::Stream { value, generation }) => {
             let result = ValueAggregate::new(value, tetraplet, trace_pos);
             let generation = Generation::Nth(generation);
-            let _ = set_stream_result(result, generation, stream.name.to_string(), exec_ctx)?;
+            let _ = exec_ctx
+                .streams
+                .add_stream_value(result, generation, stream.name.to_string())?;
         }
         // it isn't needed to check there that output and value matches because
         // it's been already checked in trace handler
@@ -79,28 +79,6 @@ pub(crate) fn set_result_from_value<'i>(
     };
 
     Ok(())
-}
-
-// TODO: decouple this function to a separate module
-pub(crate) fn set_stream_result(
-    executed_result: ValueAggregate,
-    generation: Generation,
-    stream_name: String,
-    exec_ctx: &mut ExecutionCtx<'_>,
-) -> ExecutionResult<u32> {
-    let generation = match exec_ctx.streams.entry(stream_name) {
-        Occupied(mut entry) => {
-            // if result is an array, insert result to the end of the array
-            entry.get_mut().borrow_mut().add_value(executed_result, generation)?
-        }
-        Vacant(entry) => {
-            let stream = Stream::from_value(executed_result);
-            entry.insert(RefCell::new(stream));
-            0
-        }
-    };
-
-    Ok(generation)
 }
 
 /// Writes an executed state of a particle being sent to remote node.
