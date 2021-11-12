@@ -127,7 +127,7 @@ impl<'i> VariableValidator<'i> {
         errors
     }
 
-    fn met_args(&mut self, args: &[AIRValue<'i>], span: Span) {
+    fn met_args(&mut self, args: &[Value<'i>], span: Span) {
         for arg in args {
             self.met_instr_arg_value(arg, span);
         }
@@ -139,8 +139,8 @@ impl<'i> VariableValidator<'i> {
         }
     }
 
-    fn met_instr_arg_value(&mut self, instr_arg_value: &AIRValue<'i>, span: Span) {
-        if let AIRValue::Variable(variable) = instr_arg_value {
+    fn met_instr_arg_value(&mut self, instr_arg_value: &Value<'i>, span: Span) {
+        if let Value::Variable(variable) = instr_arg_value {
             // skipping streams without lambdas here allows treating non-defined streams as empty arrays
             if let VariableWithLambda::Stream(stream) = variable {
                 if stream.lambda.is_none() {
@@ -198,15 +198,15 @@ impl<'i> VariableValidator<'i> {
         }
     }
 
-    fn met_matchable(&mut self, matchable: &AIRValue<'i>, span: Span) {
+    fn met_matchable(&mut self, matchable: &Value<'i>, span: Span) {
         match matchable {
-            AIRValue::InitPeerId
-            | AIRValue::Number(_)
-            | AIRValue::Boolean(_)
-            | AIRValue::Literal(_)
-            | AIRValue::LastError(_)
-            | AIRValue::EmptyArray => {}
-            AIRValue::Variable(variable) => self.met_variable_wl(variable, span),
+            Value::InitPeerId
+            | Value::Number(_)
+            | Value::Boolean(_)
+            | Value::Literal(_)
+            | Value::LastError(_)
+            | Value::EmptyArray => {}
+            Value::Variable(variable) => self.met_variable_wl(variable, span),
         }
     }
 

@@ -21,7 +21,7 @@ pub(super) fn call<'i>(
     peer_pk: CallInstrValue<'i>,
     service_id: CallInstrValue<'i>,
     function_name: CallInstrValue<'i>,
-    args: Rc<Vec<AIRValue<'i>>>,
+    args: Rc<Vec<Value<'i>>>,
     output: CallOutputValue<'i>,
 ) -> Instruction<'i> {
     let triplet = Triplet {
@@ -82,8 +82,8 @@ pub(super) fn fold_stream<'a>(
 }
 
 pub(super) fn match_<'a>(
-    left_value: AIRValue<'a>,
-    right_value: AIRValue<'a>,
+    left_value: Value<'a>,
+    right_value: Value<'a>,
     instruction: Instruction<'a>,
 ) -> Instruction<'a> {
     Instruction::Match(Match {
@@ -94,8 +94,8 @@ pub(super) fn match_<'a>(
 }
 
 pub(super) fn mismatch<'a>(
-    left_value: AIRValue<'a>,
-    right_value: AIRValue<'a>,
+    left_value: Value<'a>,
+    right_value: Value<'a>,
     instruction: Instruction<'a>,
 ) -> Instruction<'a> {
     Instruction::MisMatch(MisMatch {
