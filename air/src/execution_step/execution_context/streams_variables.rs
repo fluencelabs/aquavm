@@ -31,7 +31,6 @@ pub(crate) struct Streams {
     // this one is optimized for speed (not for memory), because it's unexpected
     // that a script could have a lot of new.
     // TODO: use shared string (Rc<String>) to avoid copying.
-    // TODO: get rid of RefCell in a separate PR
     streams: HashMap<String, Vec<StreamDescriptor>>,
 
     /// Contains stream generation that private stream should have at the scope start.
@@ -45,6 +44,7 @@ pub(crate) struct Streams {
 struct StreamDescriptor {
     pub(self) left_position: usize,
     pub(self) right_position: usize,
+    // TODO: get rid of RefCell in a separate PR
     pub(self) stream: RefCell<Stream>,
 }
 
@@ -200,7 +200,7 @@ fn find_closest<'d>(
     descriptors: impl DoubleEndedIterator<Item = &'d StreamDescriptor>,
     position: usize,
 ) -> Option<&'d RefCell<Stream>> {
-    // descriptors are placed in a order of decreasing scope, so it's enough to get the latest suitable
+    // descriptors are placed in a order of decreasing scopes, so it's enough to get the latest suitable
     for descriptor in descriptors.rev() {
         if descriptor.left_position < position && position < descriptor.right_position {
             return Some(&descriptor.stream);

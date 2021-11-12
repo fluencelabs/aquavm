@@ -42,7 +42,7 @@ fn parse_json_path() {
             Value::Literal("hello"),
             Value::Variable(VariableWithLambda::scalar("name")),
         ]),
-        CallOutputValue::Variable(Variable::stream("$void")),
+        CallOutputValue::Variable(Variable::stream("$void", 74)),
     );
     assert_eq!(instruction, expected);
 }
@@ -265,7 +265,7 @@ fn json_path_square_braces() {
                 vec![ValueAccessor::FieldAccess { field_name: "name" }],
             )),
         ]),
-        CallOutputValue::Variable(Variable::stream("$void")),
+        CallOutputValue::Variable(Variable::stream("$void", 74)),
     );
 
     assert_eq!(instruction, expected);

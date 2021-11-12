@@ -160,7 +160,14 @@ fn stream() {
 
     lexer_test(
         STREAM,
-        Single(Ok((0, Token::Stream { name: STREAM }, STREAM.len()))),
+        Single(Ok((
+            0,
+            Token::Stream {
+                name: STREAM,
+                position: 0,
+            },
+            STREAM.len(),
+        ))),
     );
 }
 

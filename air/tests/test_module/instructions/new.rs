@@ -62,405 +62,228 @@ fn new_with_global_streams_seq() {
 
     let vm_1_result = checked_call_vm!(local_vm_1, "", &script, vm_1_result.data, vm_2_result.data.clone());
     let vm_2_result = checked_call_vm!(local_vm_2, "", script, vm_2_result.data, vm_1_result.data);
-    print_trace(&vm_2_result, "vm 1");
+
+    let actual_trace = trace_from_result(&vm_2_result);
+    let expected_trace = vec![
+        executed_state::stream_number(1, 0),
+        executed_state::stream_number(2, 0),
+        executed_state::fold(vec![
+            executed_state::subtrace_lore(0, SubTraceDesc::new(3, 1), SubTraceDesc::new(7, 2)),
+            executed_state::subtrace_lore(1, SubTraceDesc::new(4, 1), SubTraceDesc::new(5, 2)),
+        ]),
+        executed_state::stream_number(1, 0),
+        executed_state::stream_number(2, 0),
+        executed_state::scalar(json!([2])),
+        executed_state::scalar(json!([1, 2])),
+        executed_state::scalar(json!([1])),
+        executed_state::scalar(json!([1, 2])),
+    ];
+    assert_eq!(actual_trace, expected_trace);
+
+    let data = data_from_result(&vm_2_result);
+    let actual_restricted_streams = data.restricted_streams;
+    let expected_restricted_streams = maplit::hashmap! {
+        "$stream".to_string() => maplit::hashmap! {
+            282 => vec![1,1]
+        }
+    };
+    assert_eq!(actual_restricted_streams, expected_restricted_streams);
 }
 
 #[test]
-fn new_with_global_streams_par() {
+fn several_restrictions() {
+    let vm_peer_id = "vm_peer_id";
+    let mut vm = create_avm(echo_call_service(), vm_peer_id);
+
+    let script = format!(
+        r#"
+            (new $stream
+                (seq
+                    (new $stream
+                        (call "{0}" ("" "") ["test"] $stream)
+                    )
+                    (call "{0}" ("" "") [$stream])
+                )
+            )"#,
+        vm_peer_id
+    );
+
+    let result = checked_call_vm!(vm, "", script, "", "");
+
+    let actual_trace = trace_from_result(&result);
+    let expected_trace = vec![
+        executed_state::stream_string("test", 0),
+        executed_state::scalar(json!([])),
+    ];
+    assert_eq!(actual_trace, expected_trace);
+}
+
+#[test]
+fn check_influence_to_not_restricted() {
+    let vm_peer_id = "vm_peer_id";
+    let mut vm = create_avm(echo_call_service(), vm_peer_id);
+
+    let script = format!(
+        r#"
+    (seq
+        (new $a
+            (seq
+                (seq
+                    (seq
+                        (ap "push more" $a0)
+                        (ap "push more" $a1)
+                    )
+                    (ap "more" $a)
+                )
+                (call "{0}" ("op" "identity") [$a] a-fix)
+            )
+        )
+        (seq
+            (seq
+                (call "{0}" ("callbackSrv" "response") [$a0]) ;; should be non-empty
+                (call "{0}" ("callbackSrv" "response") [$a1]) ;; should be non-empty
+            )
+            (seq
+                (call "{0}" ("callbackSrv" "response") [$a])  ;; should be empty
+                (call "{0}" ("callbackSrv" "response") [a-fix])  ;; should be empty
+            )
+        )
+    )
+    "#,
+        vm_peer_id
+    );
+
+    let result = checked_call_vm!(vm, "", script, "", "");
+    print_trace(&result, "initial");
+
+    let actual_trace = trace_from_result(&result);
+    let expected_trace = vec![
+        executed_state::ap(Some(0)),
+        executed_state::ap(Some(0)),
+        executed_state::ap(Some(0)),
+        executed_state::scalar(json!(["more"])),
+        executed_state::scalar(json!(["push more"])),
+        executed_state::scalar(json!(["push more"])),
+        executed_state::scalar(json!([])),
+        executed_state::scalar(json!(["more"])),
+    ];
+    assert_eq!(actual_trace, expected_trace);
+}
+
+#[test]
+fn new_in_fold_with_ap() {
     let set_variable_peer_id = "set_variable_peer_id";
-    let local_vm_peer_id_1 = "local_vm_peer_id_1";
-    let local_vm_peer_id_2 = "local_vm_peer_id_2";
+    let vm_peer_id = "vm_peer_id";
 
-    let mut local_vm_1 = create_avm(echo_call_service(), local_vm_peer_id_1);
-    let mut local_vm_2 = create_avm(echo_call_service(), local_vm_peer_id_2);
+    let mut set_variable_vm = create_avm(set_variable_call_service(json!([1, 2, 3, 4, 5])), set_variable_peer_id);
+    let mut vm = create_avm(echo_call_service(), vm_peer_id);
 
-    let variables_mapping = maplit::hashmap! {
-        "1".to_string() => json!(1),
-        "2".to_string() => json!(2),
+    let script = format!(
+        r#"
+        (seq
+            (call "{0}" ("" "") [] iterable)
+            (fold iterable x
+                (seq
+                    (new $s1
+                        (seq
+                            (ap "none" $s1)
+                            (call "{1}" ("" "") [$s1] s-fix1) ;; should contains only "none" on each iteration
+                        )
+                    )
+                    (next x)
+                )
+            )
+        )
+
+            "#,
+        set_variable_peer_id, vm_peer_id
+    );
+
+    let result = checked_call_vm!(set_variable_vm, "", &script, "", "");
+    let result = checked_call_vm!(vm, "", script, "", result.data);
+
+    print_trace(&result, "initial");
+
+    let actual_trace = trace_from_result(&result);
+    let expected_trace = vec![
+        executed_state::scalar(json!([1, 2, 3, 4, 5])),
+        executed_state::ap(Some(0)),
+        executed_state::scalar_string_array(vec!["none"]),
+        executed_state::ap(Some(0)),
+        executed_state::scalar_string_array(vec!["none"]),
+        executed_state::ap(Some(0)),
+        executed_state::scalar_string_array(vec!["none"]),
+        executed_state::ap(Some(0)),
+        executed_state::scalar_string_array(vec!["none"]),
+        executed_state::ap(Some(0)),
+        executed_state::scalar_string_array(vec!["none"]),
+    ];
+    assert_eq!(actual_trace, expected_trace);
+
+    let data = data_from_result(&result);
+    let actual_restricted_streams = data.restricted_streams;
+    let expected_restricted_streams = maplit::hashmap! {
+        "s1".to_string() => maplit::hashmap! {
+            146 => vec![1,1,1,1,1]
+        }
     };
-    let mut set_variable_vm = create_avm(set_variables_call_service(variables_mapping), set_variable_peer_id);
+    assert_eq!(actual_restricted_streams, expected_restricted_streams);
+}
+
+#[test]
+fn new_with_errors() {
+    let faillible_peer_id = "failible_peer_id";
+    let mut faillible_vm = create_avm(fallible_call_service("service_id_1"), faillible_peer_id);
+
+    let local_peer_id = "local_peer_id";
+    let mut vm = create_avm(echo_call_service(), local_peer_id);
 
     let script = format!(
         r#"
             (seq
-                (seq
-                    (call "{0}" ("" "") ["1"] $stream)
-                    (call "{0}" ("" "") ["2"] $stream)
-                )
-                (fold $stream i
-                    (par
-                        (new $stream
+                (call "{0}" ("" "") [1] $global_stream) ;; this stream should precense in a data
+                (new $restricted_stream_1
+                    (seq
+                        (new $restricted_stream_2
                             (seq
-                                (seq
-                                    (call "{1}" ("" "") [i] $stream)
-                                    (next i)
-                                )
-                                (call "{1}" ("" "") [$stream])
+                                (call "{0}" ("" "") [2] $restricted_stream_2) ;; should have generation 1 in a data
+                                (call "{1}" ("service_id_1" "local_fn_name") [] result)
                             )
                         )
-                        (call "{2}" ("" "") [$stream])
+                        (call "{0}" ("" "") [2] restricted_stream_1) ;; should have generation 0 in a data
                     )
                 )
             )"#,
-        set_variable_peer_id, local_vm_peer_id_1, local_vm_peer_id_2
+        local_peer_id, faillible_peer_id
     );
 
-    let result = checked_call_vm!(set_variable_vm, "", &script, "", "");
-    let vm_1_result = checked_call_vm!(local_vm_1, "", &script, "", result.data);
-    let vm_2_result = checked_call_vm!(local_vm_2, "", &script, "", vm_1_result.data.clone());
-
-    let vm_1_result = checked_call_vm!(local_vm_1, "", &script, vm_1_result.data, vm_2_result.data.clone());
-    let vm_2_result = checked_call_vm!(local_vm_2, "", script, vm_2_result.data, vm_1_result.data);
-    print_trace(&vm_2_result, "vm 1");
-}
-
-#[test]
-fn rfold() {
-    let mut vm = create_avm(echo_call_service(), "A");
-    let mut set_variable_vm = create_avm(
-        set_variable_call_service(json!(["1", "2", "3", "4", "5"])),
-        "set_variable",
-    );
-
-    let rfold = r#"
-            (seq
-                (call "set_variable" ("" "") [] Iterable)
-                (fold Iterable i
-                    (seq
-                        (next i)
-                        (call "A" ("" "") [i] $acc)
-                    )
-                )
-            )"#;
-
-    let result = checked_call_vm!(set_variable_vm, "", rfold, "", "");
-    let result = checked_call_vm!(vm, "", rfold, "", result.data);
+    let result = checked_call_vm!(vm, "", &script, "", "");
+    let result = call_vm!(faillible_vm, "", script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
-    assert_eq!(actual_trace.len(), 6);
+    let expected_trace = vec![
+        executed_state::stream_number(1, 0),
+        executed_state::stream_number(2, 0),
+        executed_state::service_failed(1, r#""error""#),
+    ];
+    assert_eq!(actual_trace, expected_trace);
 
-    let expected_state = executed_state::scalar_string_array(vec!["1", "2", "3", "4", "5"]);
-    assert_eq!(actual_trace[0], expected_state);
+    let data = data_from_result(&result);
 
-    for i in 1..=5 {
-        let expected_state = executed_state::stream_string(format!("{}", 6 - i), 0);
-        assert_eq!(actual_trace[i], expected_state);
-    }
-}
-
-#[test]
-fn inner_fold() {
-    let mut vm = create_avm(echo_call_service(), "A");
-    let mut set_variable_vm = create_avm(
-        set_variable_call_service(json!(["1", "2", "3", "4", "5"])),
-        "set_variable",
-    );
-
-    let script = r#"
-            (seq
-                (seq
-                    (call "set_variable" ("" "") [] Iterable1)
-                    (call "set_variable" ("" "") [] Iterable2)
-                )
-                (fold Iterable1 i
-                    (seq
-                        (fold Iterable2 j
-                            (seq
-                                (call "A" ("" "") [i] $acc)
-                                (next j)
-                            )
-                        )
-                        (next i)
-                    )
-                )
-            )"#;
-
-    let result = checked_call_vm!(set_variable_vm, "", script, "", "");
-    let result = checked_call_vm!(vm, "", script, "", result.data);
-
-    let actual_trace = trace_from_result(&result);
-    assert_eq!(actual_trace.len(), 27);
-
-    let expected_state = executed_state::scalar_string_array(vec!["1", "2", "3", "4", "5"]);
-    assert_eq!(actual_trace[0], expected_state);
-    assert_eq!(actual_trace[1], expected_state);
-
-    for i in 1..=5 {
-        for j in 1..=5 {
-            let expected_state = executed_state::stream_string(i.to_string(), 0);
-            assert_eq!(actual_trace[1 + 5 * (i - 1) + j], expected_state);
+    let actual_restricted_streams = data.restricted_streams;
+    let expected_restricted_streams = maplit::hashmap! {
+        "$restricted_stream_2".to_string() => maplit::hashmap! {
+            216 => vec![1]
+        },
+        "$restricted_stream_1".to_string() => maplit::hashmap! {
+            141 => vec![0]
         }
-    }
-}
+    };
+    assert_eq!(actual_restricted_streams, expected_restricted_streams);
 
-#[test]
-fn inner_fold_with_same_iterator() {
-    let mut vm = create_avm(
-        set_variable_call_service(json!(["1", "2", "3", "4", "5"])),
-        "set_variable",
-    );
-
-    let script = r#"
-            (seq
-                (seq
-                    (call "set_variable" ("" "") [] Iterable1)
-                    (call "set_variable" ("" "") [] Iterable2)
-                )
-                (fold Iterable1 i
-                    (seq
-                        (fold Iterable2 i
-                            (seq
-                                (call "A" ("" "") [i] $acc)
-                                (next i)
-                            )
-                        )
-                        (next i)
-                    )
-                )
-            )"#;
-
-    let result = call_vm!(vm, "", script, "", "");
-
-    assert_eq!(result.ret_code, 1007);
-}
-
-#[test]
-fn empty_fold() {
-    let mut vm = create_avm(echo_call_service(), "A");
-    let mut set_variable_vm = create_avm(set_variable_call_service(json!([])), "set_variable");
-
-    let empty_fold = r#"
-            (seq
-                (call "set_variable" ("" "") [] Iterable)
-                (fold Iterable i
-                    (seq
-                        (call "A" ("" "") [i] $acc)
-                        (next i)
-                    )
-                )
-            )"#;
-
-    let result = checked_call_vm!(set_variable_vm, "", empty_fold, "", "");
-    let result = checked_call_vm!(vm, "", empty_fold, "", result.data);
-
-    let actual_trace = trace_from_result(&result);
-    let expected_state = executed_state::scalar(json!([]));
-
-    assert_eq!(actual_trace.len(), 1);
-    assert_eq!(actual_trace[0], expected_state);
-}
-
-#[test]
-fn empty_fold_json_path() {
-    let mut vm = create_avm(echo_call_service(), "A");
-    let mut set_variable_vm = create_avm(set_variable_call_service(json!({ "messages": [] })), "set_variable");
-
-    let empty_fold = r#"
-            (seq
-                (call "set_variable" ("" "") [] messages)
-                (fold messages.$.messages! i
-                    (seq
-                        (call "A" ("" "") [i] $acc)
-                        (next i)
-                    )
-                )
-            )"#;
-
-    let result = checked_call_vm!(set_variable_vm, "", empty_fold, "", "");
-    let result = checked_call_vm!(vm, "", empty_fold, "", result.data);
-
-    let actual_trace = trace_from_result(&result);
-    let expected_trace = vec![executed_state::scalar(json!({ "messages": [] }))];
-
-    assert_eq!(actual_trace, expected_trace);
-}
-
-// Check that fold works with the join behaviour without hanging up.
-#[test]
-fn fold_with_join() {
-    let mut vm = create_avm(echo_call_service(), "A");
-    let mut set_variable_vm = create_avm(set_variable_call_service(json!(["1", "2"])), "set_variable");
-
-    let fold_with_join = r#"
-            (seq
-                (call "set_variable" ("" "") [] iterable)
-                (par
-                    (call "unknown_peer" ("" "") [] lazy_def_variable)
-                    (fold iterable i
-                        (seq
-                            (call "A" ("" "") [lazy_def_variable.$.hash!] $acc)
-                            (next i)
-                        )
-                    )
-                )
-            )"#;
-
-    let result = checked_call_vm!(set_variable_vm, "", fold_with_join, "", "");
-    let result = checked_call_vm!(vm, "", fold_with_join, "", result.data);
-
-    let actual_trace = trace_from_result(&result);
-    assert_eq!(actual_trace.len(), 3);
-}
-
-#[test]
-fn lambda() {
-    let mut vm = create_avm(echo_call_service(), "A");
-    let mut set_variable_vm = create_avm(
-        set_variable_call_service(json!({ "array": ["1","2","3","4","5"] })),
-        "set_variable",
-    );
-
-    let script = r#"
-            (seq
-                (call "set_variable" ("" "") [] iterable)
-                (fold iterable.$.array! i
-                    (seq
-                        (call "A" ("" "") [i] $acc)
-                        (next i)
-                    )
-                )
-            )"#;
-
-    let result = checked_call_vm!(set_variable_vm, "", script, "", "");
-    let result = checked_call_vm!(vm, "", script, "", result.data);
-
-    let actual_trace = trace_from_result(&result);
-    let expected_state = executed_state::scalar(json!({ "array": ["1", "2", "3", "4", "5"] }));
-
-    assert_eq!(actual_trace.len(), 6);
-    assert_eq!(actual_trace[0], expected_state);
-
-    for i in 1..=5 {
-        let expected_state = executed_state::stream_string(format!("{}", i), 0);
-        assert_eq!(actual_trace[i], expected_state);
-    }
-}
-
-#[test]
-fn shadowing() {
-    use executed_state::*;
-
-    let mut set_variables_vm = create_avm(set_variable_call_service(json!(["1", "2"])), "set_variable");
-    let mut vm_a = create_avm(echo_call_service(), "A");
-    let mut vm_b = create_avm(echo_call_service(), "B");
-
-    let script = r#"
-            (seq
-                (seq
-                    (call "set_variable" ("" "") [] iterable1)
-                    (call "set_variable" ("" "") [] iterable2)
-                )
-                (fold iterable1 i
-                    (seq
-                        (seq
-                            (fold iterable2 j
-                                (seq
-                                    (seq
-                                        (call "A" ("" "") [i] local_j)
-                                        (call "B" ("" "") [local_j])
-                                    )
-                                    (next j)
-                                )
-                            )
-                            (par
-                                (call "A" ("" "") [i] local_i)
-                                (call "B" ("" "") [i])
-                            )
-                        )
-                        (next i)
-                    )
-                )
-            )"#;
-
-    let result = checked_call_vm!(set_variables_vm, "", script, "", "");
-    let result = checked_call_vm!(vm_a, "", script, "", result.data);
-    let result = checked_call_vm!(vm_b, "", script, "", result.data);
-    let result = checked_call_vm!(vm_a, "", script, "", result.data);
-    let result = checked_call_vm!(vm_b, "", script, "", result.data);
-    let result = checked_call_vm!(vm_a, "", script, "", result.data);
-    let result = checked_call_vm!(vm_b, "", script, "", result.data);
-
-    let actual_trace = trace_from_result(&result);
-    let expected_trace = vec![
-        scalar_string_array(vec!["1", "2"]),
-        scalar_string_array(vec!["1", "2"]),
-        scalar_string("1"),
-        scalar_string("1"),
-        scalar_string("1"),
-        scalar_string("1"),
-        par(1, 1),
-        scalar_string("1"),
-        scalar_string("1"),
-        scalar_string("2"),
-        scalar_string("2"),
-        request_sent_by("B"),
-    ];
-
-    assert_eq!(actual_trace, expected_trace);
-}
-
-#[test]
-fn shadowing_scope() {
-    use executed_state::*;
-
-    fn execute_script(script: String) -> Result<RawAVMOutcome, String> {
-        let mut set_variables_vm = create_avm(set_variable_call_service(json!(["1", "2"])), "set_variable");
-        let mut vm_a = create_avm(echo_call_service(), "A");
-        let mut vm_b = create_avm(echo_call_service(), "B");
-
-        let result = checked_call_vm!(set_variables_vm, "", script.clone(), "", "");
-        let result = checked_call_vm!(vm_a, "", script.clone(), "", result.data);
-        let result = checked_call_vm!(vm_b, "", script.clone(), "", result.data);
-        let result = checked_call_vm!(vm_a, "", script.clone(), "", result.data);
-        let result = checked_call_vm!(vm_b, "", script.clone(), "", result.data);
-
-        vm_a.call(script, "", result.data, "")
-    }
-
-    let variable_shadowing_script = r#"
-            (seq
-                (seq
-                    (call "set_variable" ("" "") [] iterable1)
-                    (call "set_variable" ("" "") [] iterable2)
-                )
-                (fold iterable1 i
-                    (seq
-                        (seq
-                            (call "A" ("" "") ["value"] local_j)
-                            (seq
-                                (fold iterable2 j
-                                    (seq
-                                        (seq
-                                            (call "A" ("" "") [i] local_j)
-                                            (call "B" ("" "") [local_j])
-                                        )
-                                        (next j)
-                                    )
-                                )
-                                (call "A" ("" "") [local_j])
-                            )
-                        )
-                        (next i)
-                    )
-                )
-            )"#;
-
-    let result = execute_script(String::from(variable_shadowing_script)).unwrap();
-
-    let actual_trace = trace_from_result(&result);
-    let expected_trace = vec![
-        scalar_string_array(vec!["1", "2"]),
-        scalar_string_array(vec!["1", "2"]),
-        scalar_string("value"),
-        scalar_string("1"),
-        scalar_string("1"),
-        scalar_string("1"),
-        scalar_string("1"),
-        scalar_string("value"),
-        scalar_string("value"),
-        scalar_string("2"),
-        request_sent_by("A"),
-    ];
-
-    assert_eq!(actual_trace, expected_trace);
+    let actual_global_streams = data.global_streams;
+    let expected_global_streams = maplit::hashmap! {
+        "$global_stream".to_string() => 1,
+    };
+    assert_eq!(actual_global_streams, expected_global_streams);
 }

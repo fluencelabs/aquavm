@@ -90,7 +90,7 @@ fn parse_seq_seq() {
                 Value::Literal("hello"),
                 Value::Variable(VariableWithLambda::scalar("name")),
             ]),
-            CallOutputValue::Variable(Variable::stream("$output")),
+            CallOutputValue::Variable(Variable::stream("$output", 254)),
         ),
     );
     assert_eq!(instruction, expected);

@@ -98,7 +98,7 @@ fn fold_on_stream() {
     "#;
 
     let instruction = parse(source_code);
-    let expected = fold_stream("$stream", "iterator", null());
+    let expected = fold_stream("$stream", 15, "iterator", null());
     assert_eq!(instruction, expected);
 }
 
