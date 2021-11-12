@@ -267,7 +267,6 @@ fn issue_165() {
 
     let setter_result = checked_call_vm!(result_setter, "", &script, "", "");
     let echo_result = checked_call_vm!(echo_peer, "", &script, "", setter_result.data);
-    print_trace(&echo_result, "echo result");
 
     let trace = trace_from_result(&echo_result);
     assert_eq!(trace.last().unwrap(), &executed_state::scalar(json!(1)));

@@ -29,7 +29,7 @@ pub(super) fn apply_to_arg(
     let result = match argument {
         InitPeerId => apply_const(exec_ctx.init_peer_id.clone(), exec_ctx, trace_ctx),
         LastError(error_path) => apply_last_error(error_path, exec_ctx, trace_ctx)?,
-        Literal(value) => apply_const(value.to_string(), exec_ctx, trace_ctx),
+        Literal(value) => apply_const(*value, exec_ctx, trace_ctx),
         Number(value) => apply_const(value, exec_ctx, trace_ctx),
         Boolean(value) => apply_const(*value, exec_ctx, trace_ctx),
         EmptyArray => apply_const(serde_json::json!([]), exec_ctx, trace_ctx),
@@ -54,6 +54,7 @@ fn apply_last_error(
 ) -> ExecutionResult<ValueAggregate> {
     let (value, mut tetraplets) = crate::execution_step::utils::prepare_last_error(error_path, exec_ctx)?;
     let value = Rc::new(value);
+    // removing is safe because prepare_last_error always returns a vec with one element.
     let tetraplet = tetraplets.remove(0);
 
     let result = ValueAggregate::new(value, tetraplet, trace_ctx.trace_pos());

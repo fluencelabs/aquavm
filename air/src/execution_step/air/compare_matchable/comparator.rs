@@ -37,9 +37,9 @@ pub(crate) fn are_matchable_eq<'ctx>(
             make_string_comparator(exec_ctx.init_peer_id.as_str()),
         ),
 
-        (LastError(left_error), LastError(right_error)) => Ok(left_error == right_error),
-        (LastError(error), matchable) | (matchable, LastError(error)) => {
-            compare_matchable(matchable, exec_ctx, make_string_comparator(&error.to_string()))
+        (LastError(path), matchable) | (matchable, LastError(path)) => {
+            let (value, _) = crate::execution_step::utils::prepare_last_error(path, exec_ctx)?;
+            compare_matchable(matchable, exec_ctx, make_object_comparator(value))
         }
 
         (Literal(left_name), Literal(right_name)) => Ok(left_name == right_name),
@@ -139,4 +139,10 @@ fn make_number_comparator(comparable_number: &ast::Number) -> Comparator<'_> {
 
     let comparable_jvalue: JValue = comparable_number.into();
     Box::new(move |jvalue: Cow<'_, JValue>| -> bool { jvalue.deref() == &comparable_jvalue })
+}
+
+fn make_object_comparator(comparable_value: JValue) -> Comparator<'static> {
+    use std::ops::Deref;
+
+    Box::new(move |jvalue: Cow<'_, JValue>| -> bool { jvalue.deref() == &comparable_value })
 }

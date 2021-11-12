@@ -105,7 +105,7 @@ pub(crate) fn resolve_ast_variable_wl<'ctx, 'i>(
     ast_variable: &ast::VariableWithLambda<'_>,
     exec_ctx: &'ctx ExecutionCtx<'i>,
 ) -> ExecutionResult<(JValue, SecurityTetraplets)> {
-    let variable = Variable::from_ast_variable_wl(ast_variable);
+    let variable: Variable<'_> = ast_variable.into();
     match ast_variable.lambda() {
         Some(lambda) => apply_lambda(variable, lambda, exec_ctx),
         None => {

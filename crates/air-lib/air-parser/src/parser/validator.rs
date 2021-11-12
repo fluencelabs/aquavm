@@ -168,12 +168,6 @@ impl<'i> VariableValidator<'i> {
         }
     }
 
-    #[allow(dead_code)]
-    fn met_variable(&mut self, variable: &Variable<'i>, span: Span) {
-        let name = variable_name(variable);
-        self.met_variable_name(name, span);
-    }
-
     fn met_variable_wl(&mut self, variable: &VariableWithLambda<'i>, span: Span) {
         let name = variable_wl_name(variable);
         self.met_variable_name(name, span);
