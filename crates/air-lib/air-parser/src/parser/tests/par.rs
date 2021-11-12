@@ -50,7 +50,7 @@ fn parse_seq() {
 }
 
 #[test]
-fn parse_seq_seq() {
+fn parse_par_par() {
     let source_code = r#"
         (par
             (par

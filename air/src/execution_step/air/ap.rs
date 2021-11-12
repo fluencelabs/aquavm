@@ -80,6 +80,8 @@ fn save_result<'ctx>(
     }
 }
 
+/// This function is intended to check whether a Ap instruction should produce
+/// a new state in data.
 fn should_touch_trace(ap: &Ap<'_>) -> bool {
     matches!(ap.result, ast::Variable::Stream(_))
 }

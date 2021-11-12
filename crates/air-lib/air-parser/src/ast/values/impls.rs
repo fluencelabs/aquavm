@@ -23,6 +23,7 @@ impl<'i> ScalarWithLambda<'i> {
         Self { name, lambda }
     }
 
+    // it's unsafe method that should be used only for tests
     pub(crate) fn from_raw_lambda(name: &'i str, lambda: Vec<ValueAccessor<'i>>) -> Self {
         let lambda = unsafe { LambdaAST::new_unchecked(lambda) };
         Self {
@@ -37,6 +38,7 @@ impl<'i> StreamWithLambda<'i> {
         Self { name, lambda }
     }
 
+    // it's unsafe method that should be used only for tests
     #[allow(dead_code)]
     pub(crate) fn from_raw_lambda(name: &'i str, lambda: Vec<ValueAccessor<'i>>) -> Self {
         let lambda = unsafe { LambdaAST::new_unchecked(lambda) };

@@ -24,31 +24,6 @@ pub(crate) enum Variable<'i> {
 }
 
 impl<'i> Variable<'i> {
-    #[allow(dead_code)]
-    pub(crate) fn from_ast_variable(ast_variable: &ast::Variable<'i>) -> Self {
-        use ast::Variable::*;
-
-        match ast_variable {
-            Scalar(scalar) => Variable::Scalar(scalar.name),
-            Stream(stream) => Variable::Stream {
-                name: stream.name,
-                generation: Generation::Last,
-            },
-        }
-    }
-
-    pub(crate) fn from_ast_variable_wl(ast_variable: &ast::VariableWithLambda<'i>) -> Self {
-        use ast::VariableWithLambda::*;
-
-        match ast_variable {
-            Scalar(scalar) => Variable::Scalar(scalar.name),
-            Stream(stream) => Variable::Stream {
-                name: stream.name,
-                generation: Generation::Last,
-            },
-        }
-    }
-
     pub(crate) fn scalar(name: &'i str) -> Self {
         Self::Scalar(name)
     }
@@ -69,5 +44,33 @@ impl<'i> Variable<'i> {
     #[allow(dead_code)]
     pub(crate) fn from_stream(name: &'i str, generation: Generation) -> Self {
         Self::Stream { name, generation }
+    }
+}
+
+impl<'i> From<&ast::Variable<'i>> for Variable<'i> {
+    fn from(ast_variable: &ast::Variable<'i>) -> Self {
+        use ast::Variable::*;
+
+        match ast_variable {
+            Scalar(scalar) => Self::Scalar(scalar.name),
+            Stream(stream) => Self::Stream {
+                name: stream.name,
+                generation: Generation::Last,
+            },
+        }
+    }
+}
+
+impl<'i> From<&ast::VariableWithLambda<'i>> for Variable<'i> {
+    fn from(ast_variable: &ast::VariableWithLambda<'i>) -> Self {
+        use ast::VariableWithLambda::*;
+
+        match ast_variable {
+            Scalar(scalar) => Self::Scalar(scalar.name),
+            Stream(stream) => Self::Stream {
+                name: stream.name,
+                generation: Generation::Last,
+            },
+        }
     }
 }
