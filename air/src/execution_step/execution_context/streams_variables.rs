@@ -44,7 +44,10 @@ pub(crate) struct Streams {
 
 impl Streams {
     pub(crate) fn get(&self, name: &str) -> Option<&RefCell<Stream>> {
-        println!("-- get stream: {:?}", self.streams.get(name).map(|embodiments| embodiments.len()));
+        println!(
+            "-- get stream: {:?}",
+            self.streams.get(name).map(|embodiments| embodiments.len())
+        );
         self.streams.get(name).map(|embodiments| embodiments.last()).flatten()
     }
 

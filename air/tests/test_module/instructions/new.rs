@@ -66,6 +66,55 @@ fn new_with_global_streams_seq() {
 }
 
 #[test]
+fn new_with_global_streams_par() {
+    let set_variable_peer_id = "set_variable_peer_id";
+    let local_vm_peer_id_1 = "local_vm_peer_id_1";
+    let local_vm_peer_id_2 = "local_vm_peer_id_2";
+
+    let mut local_vm_1 = create_avm(echo_call_service(), local_vm_peer_id_1);
+    let mut local_vm_2 = create_avm(echo_call_service(), local_vm_peer_id_2);
+
+    let variables_mapping = maplit::hashmap! {
+        "1".to_string() => json!(1),
+        "2".to_string() => json!(2),
+    };
+    let mut set_variable_vm = create_avm(set_variables_call_service(variables_mapping), set_variable_peer_id);
+
+    let script = format!(
+        r#"
+            (seq
+                (seq
+                    (call "{0}" ("" "") ["1"] $stream)
+                    (call "{0}" ("" "") ["2"] $stream)
+                )
+                (fold $stream i
+                    (par
+                        (new $stream
+                            (seq
+                                (seq
+                                    (call "{1}" ("" "") [i] $stream)
+                                    (next i)
+                                )
+                                (call "{1}" ("" "") [$stream])
+                            )
+                        )
+                        (call "{2}" ("" "") [$stream])
+                    )
+                )
+            )"#,
+        set_variable_peer_id, local_vm_peer_id_1, local_vm_peer_id_2
+    );
+
+    let result = checked_call_vm!(set_variable_vm, "", &script, "", "");
+    let vm_1_result = checked_call_vm!(local_vm_1, "", &script, "", result.data);
+    let vm_2_result = checked_call_vm!(local_vm_2, "", &script, "", vm_1_result.data.clone());
+
+    let vm_1_result = checked_call_vm!(local_vm_1, "", &script, vm_1_result.data, vm_2_result.data.clone());
+    let vm_2_result = checked_call_vm!(local_vm_2, "", script, vm_2_result.data, vm_1_result.data);
+    print_trace(&vm_2_result, "vm 1");
+}
+
+#[test]
 fn rfold() {
     let mut vm = create_avm(echo_call_service(), "A");
     let mut set_variable_vm = create_avm(
