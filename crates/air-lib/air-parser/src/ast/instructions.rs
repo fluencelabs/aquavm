@@ -43,7 +43,7 @@ pub enum Instruction<'i> {
 #[derive(Serialize, Debug, PartialEq)]
 pub struct Call<'i> {
     pub triplet: Triplet<'i>,
-    pub args: Rc<Vec<AIRValue<'i>>>,
+    pub args: Rc<Vec<Value<'i>>>,
     pub output: CallOutputValue<'i>,
 }
 
@@ -69,16 +69,16 @@ pub struct Xor<'i>(pub Box<Instruction<'i>>, pub Box<Instruction<'i>>);
 /// (match left_value right_value instruction)
 #[derive(Serialize, Debug, PartialEq)]
 pub struct Match<'i> {
-    pub left_value: AIRValue<'i>,
-    pub right_value: AIRValue<'i>,
+    pub left_value: Value<'i>,
+    pub right_value: Value<'i>,
     pub instruction: Box<Instruction<'i>>,
 }
 
 /// (mismatch left_value right_value instruction)
 #[derive(Serialize, Debug, PartialEq)]
 pub struct MisMatch<'i> {
-    pub left_value: AIRValue<'i>,
-    pub right_value: AIRValue<'i>,
+    pub left_value: Value<'i>,
+    pub right_value: Value<'i>,
     pub instruction: Box<Instruction<'i>>,
 }
 

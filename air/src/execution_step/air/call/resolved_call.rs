@@ -39,7 +39,7 @@ use std::rc::Rc;
 #[derive(Debug, Clone, PartialEq)]
 pub(super) struct ResolvedCall<'i> {
     tetraplet: RSecurityTetraplet,
-    function_arg_paths: Rc<Vec<ast::AIRValue<'i>>>,
+    function_arg_paths: Rc<Vec<ast::Value<'i>>>,
     output: ast::CallOutputValue<'i>,
 }
 

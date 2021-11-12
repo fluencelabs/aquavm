@@ -35,7 +35,7 @@ fn parse_seq() {
             CallInstrValue::Variable(VariableWithLambda::scalar("peer_id")),
             CallInstrValue::Variable(VariableWithLambda::scalar("service_id")),
             CallInstrValue::Variable(VariableWithLambda::scalar("function_name")),
-            Rc::new(vec![AIRValue::EmptyArray, AIRValue::EmptyArray]),
+            Rc::new(vec![Value::EmptyArray, Value::EmptyArray]),
             CallOutputValue::Variable(Variable::scalar("output")),
         ),
         call(
@@ -43,9 +43,9 @@ fn parse_seq() {
             CallInstrValue::Literal("service_id"),
             CallInstrValue::Literal("function_name"),
             Rc::new(vec![
-                AIRValue::Literal("hello"),
-                AIRValue::EmptyArray,
-                AIRValue::Variable(VariableWithLambda::scalar("name")),
+                Value::Literal("hello"),
+                Value::EmptyArray,
+                Value::Variable(VariableWithLambda::scalar("name")),
             ]),
             CallOutputValue::None,
         ),
@@ -87,8 +87,8 @@ fn parse_seq_seq() {
             CallInstrValue::Literal("service_id"),
             CallInstrValue::Literal("function_name"),
             Rc::new(vec![
-                AIRValue::Literal("hello"),
-                AIRValue::Variable(VariableWithLambda::scalar("name")),
+                Value::Literal("hello"),
+                Value::Variable(VariableWithLambda::scalar("name")),
             ]),
             CallOutputValue::Variable(Variable::stream("$output")),
         ),

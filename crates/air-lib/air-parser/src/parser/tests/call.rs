@@ -39,8 +39,8 @@ fn parse_json_path() {
         CallInstrValue::Literal("service_id"),
         CallInstrValue::Literal("function_name"),
         Rc::new(vec![
-            AIRValue::Literal("hello"),
-            AIRValue::Variable(VariableWithLambda::scalar("name")),
+            Value::Literal("hello"),
+            Value::Variable(VariableWithLambda::scalar("name")),
         ]),
         CallOutputValue::Variable(Variable::stream("$void")),
     );
@@ -59,9 +59,9 @@ fn parse_empty_array() {
         CallInstrValue::Variable(VariableWithLambda::scalar("service_id")),
         CallInstrValue::Literal("function_name"),
         Rc::new(vec![
-            AIRValue::Literal(""),
-            AIRValue::EmptyArray,
-            AIRValue::Variable(VariableWithLambda::scalar("arg")),
+            Value::Literal(""),
+            Value::EmptyArray,
+            Value::Variable(VariableWithLambda::scalar("arg")),
         ]),
         CallOutputValue::None,
     );
@@ -81,9 +81,9 @@ fn parse_empty_array_2() {
         CallInstrValue::Literal("service_id"),
         CallInstrValue::Literal("function_name"),
         Rc::new(vec![
-            AIRValue::Variable(VariableWithLambda::scalar("k")),
-            AIRValue::EmptyArray,
-            AIRValue::EmptyArray,
+            Value::Variable(VariableWithLambda::scalar("k")),
+            Value::EmptyArray,
+            Value::EmptyArray,
         ]),
         CallOutputValue::None,
     );
@@ -250,7 +250,7 @@ fn json_path_square_braces() {
         CallInstrValue::Literal("return"),
         CallInstrValue::Literal(""),
         Rc::new(vec![
-            AIRValue::Variable(VariableWithLambda::from_raw_lambda_scalar(
+            Value::Variable(VariableWithLambda::from_raw_lambda_scalar(
                 "u",
                 vec![
                     ValueAccessor::ArrayAccess { idx: 1 },
@@ -260,7 +260,7 @@ fn json_path_square_braces() {
                     ValueAccessor::FieldAccess { field_name: "abc" },
                 ],
             )),
-            AIRValue::Variable(VariableWithLambda::from_raw_lambda_scalar(
+            Value::Variable(VariableWithLambda::from_raw_lambda_scalar(
                 "u",
                 vec![ValueAccessor::FieldAccess { field_name: "name" }],
             )),
@@ -320,7 +320,7 @@ fn parse_last_error() {
             CallInstrValue::InitPeerId,
             CallInstrValue::Literal("service_id"),
             CallInstrValue::Literal("fn_name"),
-            Rc::new(vec![AIRValue::LastError(LastErrorPath::None)]),
+            Rc::new(vec![Value::LastError(LastErrorPath::None)]),
             CallOutputValue::None,
         ),
         null(),
@@ -406,14 +406,14 @@ fn seq_with_empty_and_dash() {
                     CallInstrValue::Literal("set_variables"),
                     CallInstrValue::Literal(""),
                     CallInstrValue::Literal(""),
-                    Rc::new(vec![AIRValue::Literal("module-bytes")]),
+                    Rc::new(vec![Value::Literal("module-bytes")]),
                     CallOutputValue::Variable(Variable::scalar("module-bytes")),
                 ),
                 call(
                     CallInstrValue::Literal("set_variables"),
                     CallInstrValue::Literal(""),
                     CallInstrValue::Literal(""),
-                    Rc::new(vec![AIRValue::Literal("module_config")]),
+                    Rc::new(vec![Value::Literal("module_config")]),
                     CallOutputValue::Variable(Variable::scalar("module_config")),
                 ),
             ),
@@ -421,7 +421,7 @@ fn seq_with_empty_and_dash() {
                 CallInstrValue::Literal("set_variables"),
                 CallInstrValue::Literal(""),
                 CallInstrValue::Literal(""),
-                Rc::new(vec![AIRValue::Literal("blueprint")]),
+                Rc::new(vec![Value::Literal("blueprint")]),
                 CallOutputValue::Variable(Variable::scalar("blueprint")),
             ),
         ),
@@ -431,8 +431,8 @@ fn seq_with_empty_and_dash() {
                 CallInstrValue::Literal("add_module"),
                 CallInstrValue::Literal(""),
                 Rc::new(vec![
-                    AIRValue::Variable(VariableWithLambda::scalar("module-bytes")),
-                    AIRValue::Variable(VariableWithLambda::scalar("module_config")),
+                    Value::Variable(VariableWithLambda::scalar("module-bytes")),
+                    Value::Variable(VariableWithLambda::scalar("module_config")),
                 ]),
                 CallOutputValue::Variable(Variable::scalar("module")),
             ),
@@ -443,7 +443,7 @@ fn seq_with_empty_and_dash() {
                         service_id: CallInstrValue::Literal("add_blueprint"),
                         function_name: CallInstrValue::Literal(""),
                     },
-                    args: Rc::new(vec![AIRValue::Variable(VariableWithLambda::scalar(
+                    args: Rc::new(vec![Value::Variable(VariableWithLambda::scalar(
                         "blueprint",
                     ))]),
                     output: CallOutputValue::Variable(Variable::scalar("blueprint_id")),
@@ -453,7 +453,7 @@ fn seq_with_empty_and_dash() {
                         CallInstrValue::Literal("A"),
                         CallInstrValue::Literal("create"),
                         CallInstrValue::Literal(""),
-                        Rc::new(vec![AIRValue::Variable(VariableWithLambda::scalar(
+                        Rc::new(vec![Value::Variable(VariableWithLambda::scalar(
                             "blueprint_id",
                         ))]),
                         CallOutputValue::Variable(Variable::scalar("service_id")),
@@ -462,7 +462,7 @@ fn seq_with_empty_and_dash() {
                         CallInstrValue::Literal("remote_peer_id"),
                         CallInstrValue::Literal(""),
                         CallInstrValue::Literal(""),
-                        Rc::new(vec![AIRValue::Variable(VariableWithLambda::scalar(
+                        Rc::new(vec![Value::Variable(VariableWithLambda::scalar(
                             "service_id",
                         ))]),
                         CallOutputValue::Variable(Variable::scalar("client_result")),

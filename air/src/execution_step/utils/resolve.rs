@@ -25,7 +25,6 @@ use crate::LambdaAST;
 use crate::SecurityTetraplet;
 
 use air_parser::ast;
-use air_parser::ast::AIRValue;
 use air_parser::ast::LastErrorPath;
 
 use serde_json::json;
@@ -34,17 +33,19 @@ use std::rc::Rc;
 
 /// Resolve value to called function arguments.
 pub(crate) fn resolve_to_args<'i>(
-    value: &AIRValue<'i>,
+    value: &ast::Value<'i>,
     ctx: &ExecutionCtx<'i>,
 ) -> ExecutionResult<(JValue, SecurityTetraplets)> {
+    use ast::Value::*;
+
     match value {
-        AIRValue::InitPeerId => prepare_const(ctx.init_peer_id.clone(), ctx),
-        AIRValue::LastError(path) => prepare_last_error(path, ctx),
-        AIRValue::Literal(value) => prepare_const(value.to_string(), ctx),
-        AIRValue::Boolean(value) => prepare_const(*value, ctx),
-        AIRValue::Number(value) => prepare_const(value, ctx),
-        AIRValue::EmptyArray => prepare_const(json!([]), ctx),
-        AIRValue::Variable(variable) => resolve_ast_variable_wl(variable, ctx),
+        InitPeerId => prepare_const(ctx.init_peer_id.clone(), ctx),
+        LastError(path) => prepare_last_error(path, ctx),
+        Literal(value) => prepare_const(value.to_string(), ctx),
+        Boolean(value) => prepare_const(*value, ctx),
+        Number(value) => prepare_const(value, ctx),
+        EmptyArray => prepare_const(json!([]), ctx),
+        Variable(variable) => resolve_ast_variable_wl(variable, ctx),
     }
 }
 

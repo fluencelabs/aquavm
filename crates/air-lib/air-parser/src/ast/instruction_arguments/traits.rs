@@ -17,9 +17,9 @@
 use super::*;
 use std::fmt;
 
-impl fmt::Display for AIRValue<'_> {
+impl fmt::Display for Value<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        use AIRValue::*;
+        use Value::*;
 
         match self {
             InitPeerId => write!(f, "%init_peer_id%"),

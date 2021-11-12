@@ -60,7 +60,7 @@ pub struct Triplet<'i> {
 
 /// Represents all values that is possible to set in AIR scripts.
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
-pub enum AIRValue<'i> {
+pub enum Value<'i> {
     InitPeerId,
     LastError(LastErrorPath),
     Literal(&'i str),

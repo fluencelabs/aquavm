@@ -27,8 +27,8 @@ fn parse_match() {
         "#;
     let instruction = parse(&source_code);
     let expected = match_(
-        AIRValue::Variable(VariableWithLambda::scalar("v1")),
-        AIRValue::Variable(VariableWithLambda::scalar("v2")),
+        Value::Variable(VariableWithLambda::scalar("v1")),
+        Value::Variable(VariableWithLambda::scalar("v2")),
         null(),
     );
     assert_eq!(instruction, expected);
@@ -43,8 +43,8 @@ fn parse_match_with_init_peer_id() {
         "#;
     let instruction = parse(&source_code);
     let expected = match_(
-        AIRValue::Variable(VariableWithLambda::scalar("v1")),
-        AIRValue::InitPeerId,
+        Value::Variable(VariableWithLambda::scalar("v1")),
+        Value::InitPeerId,
         null(),
     );
     assert_eq!(instruction, expected);
@@ -59,8 +59,8 @@ fn parse_mismatch() {
         "#;
     let instruction = parse(&source_code);
     let expected = mismatch(
-        AIRValue::Variable(VariableWithLambda::scalar("v1")),
-        AIRValue::Variable(VariableWithLambda::scalar("v2")),
+        Value::Variable(VariableWithLambda::scalar("v1")),
+        Value::Variable(VariableWithLambda::scalar("v2")),
         null(),
     );
     assert_eq!(instruction, expected);
@@ -74,8 +74,8 @@ fn match_with_bool() {
          )
         "#;
 
-    let left_value = AIRValue::Variable(VariableWithLambda::scalar("isOnline"));
-    let right_value = AIRValue::Boolean(true);
+    let left_value = Value::Variable(VariableWithLambda::scalar("isOnline"));
+    let right_value = Value::Boolean(true);
     let null = null();
     let expected = match_(left_value, right_value, null);
 
@@ -91,8 +91,8 @@ fn mismatch_with_bool() {
          )
         "#;
 
-    let left_value = AIRValue::Boolean(true);
-    let right_value = AIRValue::Variable(VariableWithLambda::scalar("isOnline"));
+    let left_value = Value::Boolean(true);
+    let right_value = Value::Variable(VariableWithLambda::scalar("isOnline"));
     let null = null();
     let expected = mismatch(left_value, right_value, null);
 

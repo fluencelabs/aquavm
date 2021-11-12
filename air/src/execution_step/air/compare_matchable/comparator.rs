@@ -16,18 +16,18 @@
 
 use crate::execution_step::air::ExecutionResult;
 use crate::execution_step::execution_context::ExecutionCtx;
+use crate::execution_step::utils::prepare_last_error;
 use crate::execution_step::utils::resolve_ast_variable_wl;
 use crate::JValue;
 
 use air_parser::ast;
-use air_parser::ast::AIRValue;
 
 pub(crate) fn are_matchable_eq<'ctx>(
-    left: &AIRValue<'_>,
-    right: &AIRValue<'_>,
+    left: &ast::Value<'_>,
+    right: &ast::Value<'_>,
     exec_ctx: &'ctx ExecutionCtx<'_>,
 ) -> ExecutionResult<bool> {
-    use AIRValue::*;
+    use ast::Value::*;
 
     match (left, right) {
         (InitPeerId, InitPeerId) => Ok(true),
@@ -38,7 +38,7 @@ pub(crate) fn are_matchable_eq<'ctx>(
         ),
 
         (LastError(path), matchable) | (matchable, LastError(path)) => {
-            let (value, _) = crate::execution_step::utils::prepare_last_error(path, exec_ctx)?;
+            let (value, _) = prepare_last_error(path, exec_ctx)?;
             compare_matchable(matchable, exec_ctx, make_object_comparator(value))
         }
 
@@ -49,12 +49,12 @@ pub(crate) fn are_matchable_eq<'ctx>(
 
         (Boolean(left_boolean), Boolean(right_boolean)) => Ok(left_boolean == right_boolean),
         (Boolean(value), matchable) | (matchable, Boolean(value)) => {
-            compare_matchable(matchable, exec_ctx, make_bool_comparator(value))
+            compare_matchable(matchable, exec_ctx, make_object_comparator((*value).into()))
         }
 
         (Number(left_number), Number(right_number)) => Ok(left_number == right_number),
         (Number(value), matchable) | (matchable, Number(value)) => {
-            compare_matchable(matchable, exec_ctx, make_number_comparator(value))
+            compare_matchable(matchable, exec_ctx, make_object_comparator(value.into()))
         }
 
         (Variable(left_variable), Variable(right_variable)) => {
@@ -71,11 +71,11 @@ use std::borrow::Cow;
 type Comparator<'a> = Box<dyn Fn(Cow<'_, JValue>) -> bool + 'a>;
 
 fn compare_matchable<'ctx>(
-    matchable: &AIRValue<'_>,
+    matchable: &ast::Value<'_>,
     exec_ctx: &'ctx ExecutionCtx<'_>,
     comparator: Comparator<'ctx>,
 ) -> ExecutionResult<bool> {
-    use AIRValue::*;
+    use ast::Value::*;
 
     match matchable {
         InitPeerId => {
@@ -84,8 +84,7 @@ fn compare_matchable<'ctx>(
             Ok(comparator(Cow::Owned(jvalue)))
         }
         LastError(error_path) => {
-            let error_path = error_path.to_string();
-            let jvalue = error_path.into();
+            let (jvalue, _) = prepare_last_error(error_path, exec_ctx)?;
             Ok(comparator(Cow::Owned(jvalue)))
         }
         Literal(str) => {
@@ -120,25 +119,6 @@ fn make_string_comparator(comparable_string: &str) -> Comparator<'_> {
             _ => false,
         }
     })
-}
-
-fn make_bool_comparator(comparable_bool: &bool) -> Comparator<'_> {
-    use std::ops::Deref;
-
-    let comparable_bool = *comparable_bool;
-    Box::new(move |jvalue: Cow<'_, JValue>| -> bool {
-        match jvalue.deref() {
-            JValue::Bool(jvalue) => jvalue == &comparable_bool,
-            _ => false,
-        }
-    })
-}
-
-fn make_number_comparator(comparable_number: &ast::Number) -> Comparator<'_> {
-    use std::ops::Deref;
-
-    let comparable_jvalue: JValue = comparable_number.into();
-    Box::new(move |jvalue: Cow<'_, JValue>| -> bool { jvalue.deref() == &comparable_jvalue })
 }
 
 fn make_object_comparator(comparable_value: JValue) -> Comparator<'static> {
