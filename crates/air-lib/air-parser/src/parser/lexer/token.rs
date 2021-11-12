@@ -32,9 +32,20 @@ pub enum Token<'input> {
     SquareBrackets, // [] symbolize empty array, it's possible to have it only in an argument position
 
     StringLiteral(&'input str),
-    Alphanumeric(&'input str),
-    Stream(&'input str),
-    VariableWithLambda(AstVariable<'input>, LambdaAST<'input>),
+    Scalar {
+        name: &'input str,
+    },
+    ScalarWithLambda {
+        name: &'input str,
+        lambda: LambdaAST<'input>,
+    },
+    Stream {
+        name: &'input str,
+    },
+    StreamWithLambda {
+        name: &'input str,
+        lambda: LambdaAST<'input>,
+    },
     Number(Number),
     Boolean(bool),
 
@@ -51,12 +62,6 @@ pub enum Token<'input> {
     Next,
     Match,
     MisMatch,
-}
-
-#[derive(Debug, Clone, PartialEq, Hash, Serialize, Deserialize)]
-pub enum AstVariable<'input> {
-    Scalar(&'input str),
-    Stream(&'input str),
 }
 
 #[derive(Debug, Clone, PartialEq, Hash, Serialize, Deserialize)]

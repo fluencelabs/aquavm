@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Fluence Labs Limited
+ * Copyright 2021 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,27 +14,20 @@
  * limitations under the License.
  */
 
-#![deny(
-    dead_code,
-    nonstandard_style,
-    unused_imports,
-    unused_mut,
-    unused_variables,
-    unused_unsafe,
-    unreachable_patterns
-)]
+use super::dsl::*;
+use super::parse;
+use crate::ast::*;
 
-pub mod ast;
-mod parser;
+#[test]
+fn parse_null() {
+    let source_code = r#"
+        (seq
+            (null)
 
-pub use parser::parse;
-pub use parser::AIRLexer;
-pub use parser::AIRParser;
-pub use parser::VariableValidator;
-
-#[cfg(test)]
-#[macro_use]
-extern crate fstrings;
-
-use air_lambda_parser::parse as parse_lambda;
-use air_lambda_parser::LambdaAST;
+            ( null     )
+        )
+        "#;
+    let instruction = parse(source_code);
+    let expected = Instruction::Seq(Seq(Box::new(null()), Box::new(null())));
+    assert_eq!(instruction, expected)
+}

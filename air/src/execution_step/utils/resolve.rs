@@ -24,8 +24,7 @@ use crate::JValue;
 use crate::LambdaAST;
 use crate::SecurityTetraplet;
 
-use air_parser::ast::AstVariable;
-use air_parser::ast::CallInstrArgValue;
+use air_parser::ast;
 use air_parser::ast::LastErrorPath;
 
 use serde_json::json;
@@ -34,24 +33,19 @@ use std::rc::Rc;
 
 /// Resolve value to called function arguments.
 pub(crate) fn resolve_to_args<'i>(
-    value: &CallInstrArgValue<'i>,
+    value: &ast::Value<'i>,
     ctx: &ExecutionCtx<'i>,
 ) -> ExecutionResult<(JValue, SecurityTetraplets)> {
+    use ast::Value::*;
+
     match value {
-        CallInstrArgValue::InitPeerId => prepare_const(ctx.init_peer_id.clone(), ctx),
-        CallInstrArgValue::LastError(path) => prepare_last_error(path, ctx),
-        CallInstrArgValue::Literal(value) => prepare_const(value.to_string(), ctx),
-        CallInstrArgValue::Boolean(value) => prepare_const(*value, ctx),
-        CallInstrArgValue::Number(value) => prepare_const(value, ctx),
-        CallInstrArgValue::EmptyArray => prepare_const(json!([]), ctx),
-        CallInstrArgValue::Variable(variable) => {
-            let variable = Variable::from_ast(variable);
-            prepare_variable(variable, ctx)
-        }
-        CallInstrArgValue::VariableWithLambda(var_with_lambda) => {
-            let variable = Variable::from_ast(&var_with_lambda.variable);
-            apply_lambda(variable, &var_with_lambda.lambda, ctx)
-        }
+        InitPeerId => prepare_const(ctx.init_peer_id.clone(), ctx),
+        LastError(path) => prepare_last_error(path, ctx),
+        Literal(value) => prepare_const(value.to_string(), ctx),
+        Boolean(value) => prepare_const(*value, ctx),
+        Number(value) => prepare_const(value, ctx),
+        EmptyArray => prepare_const(json!([]), ctx),
+        Variable(variable) => resolve_ast_variable_wl(variable, ctx),
     }
 }
 
@@ -86,17 +80,6 @@ pub(crate) fn prepare_last_error(
     Ok((jvalue, vec![tetraplets]))
 }
 
-fn prepare_variable<'i>(
-    variable: Variable<'_>,
-    ctx: &ExecutionCtx<'i>,
-) -> ExecutionResult<(JValue, SecurityTetraplets)> {
-    let resolved = resolve_variable(variable, ctx)?;
-    let tetraplets = resolved.as_tetraplets();
-    let jvalue = resolved.into_jvalue();
-
-    Ok((jvalue, tetraplets))
-}
-
 pub(crate) fn resolve_variable<'ctx, 'i>(
     variable: Variable<'_>,
     ctx: &'ctx ExecutionCtx<'i>,
@@ -119,20 +102,27 @@ pub(crate) fn resolve_variable<'ctx, 'i>(
     }
 }
 
-pub(crate) fn resolve_ast_variable<'ctx, 'i>(
-    variable: &AstVariable<'_>,
-    ctx: &'ctx ExecutionCtx<'i>,
-) -> ExecutionResult<Box<dyn JValuable + 'ctx>> {
-    let variable = Variable::from_ast(variable);
-    resolve_variable(variable, ctx)
+pub(crate) fn resolve_ast_variable_wl<'ctx, 'i>(
+    ast_variable: &ast::VariableWithLambda<'_>,
+    exec_ctx: &'ctx ExecutionCtx<'i>,
+) -> ExecutionResult<(JValue, SecurityTetraplets)> {
+    let variable: Variable<'_> = ast_variable.into();
+    match ast_variable.lambda() {
+        Some(lambda) => apply_lambda(variable, lambda, exec_ctx),
+        None => {
+            let value = resolve_variable(variable, exec_ctx)?;
+            let tetraplets = value.as_tetraplets();
+            Ok((value.into_jvalue(), tetraplets))
+        }
+    }
 }
 
 pub(crate) fn apply_lambda<'i>(
     variable: Variable<'_>,
     lambda: &LambdaAST<'i>,
-    ctx: &ExecutionCtx<'i>,
+    exec_ctx: &ExecutionCtx<'i>,
 ) -> ExecutionResult<(JValue, SecurityTetraplets)> {
-    let resolved = resolve_variable(variable, ctx)?;
+    let resolved = resolve_variable(variable, exec_ctx)?;
     let (jvalue, tetraplets) = resolved.apply_lambda_with_tetraplets(lambda)?;
 
     // it's known that apply_lambda_with_tetraplets returns vec of one value

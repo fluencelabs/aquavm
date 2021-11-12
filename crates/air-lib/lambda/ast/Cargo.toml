@@ -1,6 +1,6 @@
 [package]
 name = "air-lambda-ast"
-description = "Parser of AIR value algebra values"
+description = "Definition of the AIR lambda AST"
 version = "0.1.0"
 authors = ["Fluence Labs"]
 edition = "2018"

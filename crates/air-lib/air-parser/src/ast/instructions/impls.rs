@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Fluence Labs Limited
+ * Copyright 2021 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,27 +14,10 @@
  * limitations under the License.
  */
 
-#![deny(
-    dead_code,
-    nonstandard_style,
-    unused_imports,
-    unused_mut,
-    unused_variables,
-    unused_unsafe,
-    unreachable_patterns
-)]
+use super::*;
 
-pub mod ast;
-mod parser;
-
-pub use parser::parse;
-pub use parser::AIRLexer;
-pub use parser::AIRParser;
-pub use parser::VariableValidator;
-
-#[cfg(test)]
-#[macro_use]
-extern crate fstrings;
-
-use air_lambda_parser::parse as parse_lambda;
-use air_lambda_parser::LambdaAST;
+impl<'i> Ap<'i> {
+    pub fn new(argument: ApArgument<'i>, result: Variable<'i>) -> Self {
+        Self { argument, result }
+    }
+}

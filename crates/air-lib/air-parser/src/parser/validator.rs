@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use super::ast::*;
+use crate::ast::*;
 
 use crate::parser::lexer::Token;
 use crate::parser::ParserError;
@@ -55,9 +55,11 @@ impl<'i> VariableValidator<'i> {
     }
 
     pub(super) fn met_call(&mut self, call: &Call<'i>, span: Span) {
-        self.met_peer_part(&call.peer_part, span);
-        self.met_function_part(&call.function_part, span);
-        self.met_args(&call.args, span);
+        self.met_call_instr_value(&call.triplet.peer_pk, span);
+        self.met_call_instr_value(&call.triplet.service_id, span);
+        self.met_call_instr_value(&call.triplet.function_name, span);
+
+        self.met_args(call.args.deref(), span);
 
         match &call.output {
             CallOutputValue::Variable(variable) => self.met_variable_definition(variable, span),
@@ -76,32 +78,34 @@ impl<'i> VariableValidator<'i> {
     }
 
     pub(super) fn met_fold_scalar(&mut self, fold: &FoldScalar<'i>, span: Span) {
-        self.met_iterable_value(&fold.iterable, span);
-        self.met_iterator_definition(fold.iterator, span);
+        self.met_variable_name(fold.iterable.name, span);
+        self.met_iterator_definition(&fold.iterator, span);
     }
 
     pub(super) fn meet_fold_stream(&mut self, fold: &FoldStream<'i>, span: Span) {
-        self.met_variable(&AstVariable::Stream(fold.stream_name), span);
-        self.met_iterator_definition(fold.iterator, span);
+        self.met_variable_name(fold.iterable.name, span);
+        self.met_iterator_definition(&fold.iterator, span);
     }
 
     pub(super) fn met_next(&mut self, next: &Next<'i>, span: Span) {
-        let iterable_name = next.0;
-        // due to the right to left convolution in lalrpop, next will be met earlier than
-        // a corresponding fold with the definition of this iterable, so they're just put
-        // without a check for being already met
+        let iterable_name = next.iterator.name;
+        // due to the right to left convolution in lalrpop, a next instruction will be met earlier
+        // than a corresponding fold instruction with the definition of this iterable, so they're
+        // just put without a check for being already met
         self.unresolved_iterables.insert(iterable_name, span);
     }
 
     pub(super) fn met_ap(&mut self, ap: &Ap<'i>, span: Span) {
         match &ap.argument {
-            ApArgument::ScalarVariable(name) => self.met_variable(&AstVariable::Scalar(name), span),
-            ApArgument::VariableWithLambda(vl) => self.met_variable(&vl.variable, span),
             ApArgument::Number(_)
+            | ApArgument::InitPeerId
             | ApArgument::Boolean(_)
             | ApArgument::Literal(_)
             | ApArgument::EmptyArray
             | ApArgument::LastError(_) => {}
+            ApArgument::Scalar(scalar) => {
+                self.met_variable_wl(&VariableWithLambda::Scalar(scalar.clone()), span)
+            }
         }
         self.met_variable_definition(&ap.result, span);
     }
@@ -123,59 +127,37 @@ impl<'i> VariableValidator<'i> {
         errors
     }
 
-    fn met_peer_part(&mut self, peer_part: &PeerPart<'i>, span: Span) {
-        match peer_part {
-            PeerPart::PeerPk(peer_pk) => self.met_instr_value(peer_pk, span),
-            PeerPart::PeerPkWithServiceId(peer_pk, service_id) => {
-                self.met_instr_value(peer_pk, span);
-                self.met_instr_value(service_id, span);
-            }
-        }
-    }
-
-    fn met_function_part(&mut self, function_part: &FunctionPart<'i>, span: Span) {
-        match function_part {
-            FunctionPart::FuncName(func_name) => self.met_instr_value(func_name, span),
-            FunctionPart::ServiceIdWithFuncName(service_id, func_name) => {
-                self.met_instr_value(service_id, span);
-                self.met_instr_value(func_name, span);
-            }
-        }
-    }
-
-    fn met_args(&mut self, args: &[CallInstrArgValue<'i>], span: Span) {
+    fn met_args(&mut self, args: &[Value<'i>], span: Span) {
         for arg in args {
             self.met_instr_arg_value(arg, span);
         }
     }
 
-    fn met_instr_value(&mut self, instr_value: &CallInstrValue<'i>, span: Span) {
-        match instr_value {
-            CallInstrValue::VariableWithLambda(vl) => self.met_variable(&vl.variable, span),
-            CallInstrValue::Variable(variable) => self.met_variable(variable, span),
-            _ => {}
+    fn met_call_instr_value(&mut self, instr_value: &CallInstrValue<'i>, span: Span) {
+        if let CallInstrValue::Variable(variable) = instr_value {
+            self.met_variable_wl(variable, span);
         }
     }
 
-    fn met_instr_arg_value(&mut self, instr_arg_value: &CallInstrArgValue<'i>, span: Span) {
-        match instr_arg_value {
-            CallInstrArgValue::VariableWithLambda(vl) => self.met_variable(&vl.variable, span),
-            CallInstrArgValue::Variable(variable) => {
-                // skipping streams here allows treating non-defined streams as empty arrays
-                if let AstVariable::Scalar(_) = variable {
-                    self.met_variable(variable, span)
+    fn met_instr_arg_value(&mut self, instr_arg_value: &Value<'i>, span: Span) {
+        if let Value::Variable(variable) = instr_arg_value {
+            // skipping streams without lambdas here allows treating non-defined streams as empty arrays
+            if let VariableWithLambda::Stream(stream) = variable {
+                if stream.lambda.is_none() {
+                    return;
                 }
             }
-            _ => {}
+
+            self.met_variable_wl(variable, span);
         }
     }
 
-    fn met_variable(&mut self, variable: &AstVariable<'i>, span: Span) {
-        let name = match variable {
-            AstVariable::Scalar(name) => name,
-            AstVariable::Stream(name) => name,
-        };
+    fn met_variable_wl(&mut self, variable: &VariableWithLambda<'i>, span: Span) {
+        let name = variable_wl_name(variable);
+        self.met_variable_name(name, span);
+    }
 
+    fn met_variable_name(&mut self, name: &'i str, span: Span) {
         if !self.contains_variable(name, span) {
             self.unresolved_variables.insert(name, span);
         }
@@ -196,15 +178,15 @@ impl<'i> VariableValidator<'i> {
         found_spans.iter().any(|s| s < &key_span)
     }
 
-    fn met_variable_definition(&mut self, variable: &AstVariable<'i>, span: Span) {
+    fn met_variable_definition(&mut self, variable: &Variable<'i>, span: Span) {
+        let name = variable_name(variable);
+        self.met_variable_name_definition(name, span);
+    }
+
+    fn met_variable_name_definition(&mut self, name: &'i str, span: Span) {
         use std::collections::hash_map::Entry;
 
-        let variable_name = match variable {
-            AstVariable::Scalar(name) => name,
-            AstVariable::Stream(name) => name,
-        };
-
-        match self.met_variables.entry(variable_name) {
+        match self.met_variables.entry(name) {
             Entry::Occupied(occupied) => {
                 if occupied.get() > &span {
                     *occupied.into_mut() = span;
@@ -216,15 +198,15 @@ impl<'i> VariableValidator<'i> {
         }
     }
 
-    fn met_matchable(&mut self, matchable: &MatchableValue<'i>, span: Span) {
+    fn met_matchable(&mut self, matchable: &Value<'i>, span: Span) {
         match matchable {
-            MatchableValue::InitPeerId
-            | MatchableValue::Number(_)
-            | MatchableValue::Boolean(_)
-            | MatchableValue::Literal(_)
-            | MatchableValue::EmptyArray => {}
-            MatchableValue::Variable(variable) => self.met_variable(variable, span),
-            MatchableValue::VariableWithLambda(vl) => self.met_variable(&vl.variable, span),
+            Value::InitPeerId
+            | Value::Number(_)
+            | Value::Boolean(_)
+            | Value::Literal(_)
+            | Value::LastError(_)
+            | Value::EmptyArray => {}
+            Value::Variable(variable) => self.met_variable_wl(variable, span),
         }
     }
 
@@ -240,23 +222,14 @@ impl<'i> VariableValidator<'i> {
             .any(|s| s.left < key_span.left && s.right > key_span.right)
     }
 
-    fn met_iterable_value(&mut self, iterable_value: &IterableScalarValue<'i>, span: Span) {
-        match iterable_value {
-            IterableScalarValue::VariableWithLambda { scalar_name, .. } => {
-                self.met_variable(&AstVariable::Scalar(scalar_name), span)
-            }
-            IterableScalarValue::ScalarVariable(name) => {
-                self.met_variable(&AstVariable::Scalar(name), span)
-            }
-        }
-    }
-
-    fn met_iterator_definition(&mut self, iterator: &'i str, span: Span) {
-        self.met_iterators.insert(iterator, span);
+    fn met_iterator_definition(&mut self, iterator: &Scalar<'i>, span: Span) {
+        self.met_iterators.insert(iterator.name, span);
     }
 }
 
 use std::cmp::Ordering;
+use std::ops::Deref;
+
 impl PartialOrd for Span {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         let self_min = std::cmp::min(self.left, self.right);
@@ -293,4 +266,18 @@ fn add_to_errors<'err, 'i>(
     };
 
     errors.push(error);
+}
+
+fn variable_name<'v>(variable: &Variable<'v>) -> &'v str {
+    match variable {
+        Variable::Scalar(scalar) => scalar.name,
+        Variable::Stream(stream) => stream.name,
+    }
+}
+
+fn variable_wl_name<'v>(variable: &VariableWithLambda<'v>) -> &'v str {
+    match variable {
+        VariableWithLambda::Scalar(scalar) => scalar.name,
+        VariableWithLambda::Stream(stream) => stream.name,
+    }
 }

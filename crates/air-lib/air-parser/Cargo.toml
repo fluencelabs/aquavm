@@ -13,6 +13,7 @@ categories = ["wasm"]
 lalrpop = "0.19.6"
 
 [dependencies]
+air-lambda-ast = { path = "../lambda/ast" }
 air-lambda-parser = { path = "../lambda/parser" }
 
 lalrpop-util = "0.19.6"

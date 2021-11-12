@@ -40,14 +40,12 @@ pub(crate) enum FoldIterableStream {
 
 /// Constructs iterable value for given scalar iterable.
 pub(crate) fn construct_scalar_iterable_value<'ctx>(
-    ast_iterable: &ast::IterableScalarValue<'ctx>,
+    iterable: &ast::ScalarWithLambda<'ctx>,
     exec_ctx: &ExecutionCtx<'ctx>,
 ) -> ExecutionResult<FoldIterableScalar> {
-    match ast_iterable {
-        ast::IterableScalarValue::ScalarVariable(scalar_name) => create_scalar_iterable(exec_ctx, scalar_name),
-        ast::IterableScalarValue::VariableWithLambda { scalar_name, lambda } => {
-            create_scalar_lambda_iterable(exec_ctx, scalar_name, lambda)
-        }
+    match &iterable.lambda {
+        None => create_scalar_iterable(exec_ctx, iterable.name),
+        Some(lambda) => create_scalar_lambda_iterable(exec_ctx, iterable.name, lambda),
     }
 }
 

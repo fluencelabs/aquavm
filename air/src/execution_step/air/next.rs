@@ -28,7 +28,7 @@ impl<'i> super::ExecutableInstruction<'i> for Next<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         log_instruction!(next, exec_ctx, trace_ctx);
 
-        let iterator_name = self.0;
+        let iterator_name = &self.iterator.name;
         let fold_state = exec_ctx.scalars.get_iterable_mut(iterator_name)?;
         maybe_meet_iteration_end(fold_state, trace_ctx)?;
 

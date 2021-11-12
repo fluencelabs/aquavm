@@ -15,14 +15,14 @@
  */
 
 pub mod air_parser;
-mod lexer;
+mod air_utils;
+pub(crate) mod lexer;
 
 // air is auto-generated, so exclude it from `cargo fmt -- --check` and `cargo clippy`
 #[rustfmt::skip]
 #[allow(clippy::all)]
 mod air;
 
-pub mod ast;
 mod errors;
 mod validator;
 

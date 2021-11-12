@@ -114,6 +114,7 @@ version = "0.1.0"
 name = "air-parser"
 version = "0.7.1"
 dependencies = [
+ "air-lambda-ast",
  "air-lambda-parser",
  "codespan",
  "codespan-reporting",

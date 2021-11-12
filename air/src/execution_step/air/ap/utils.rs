@@ -19,8 +19,8 @@ use super::ExecutionResult;
 use crate::execution_step::Generation;
 
 use air_interpreter_data::ApResult;
+use air_parser::ast;
 use air_parser::ast::Ap;
-use air_parser::ast::AstVariable;
 use air_trace_handler::MergerApResult;
 
 pub(super) fn ap_result_to_generation(ap_result: &MergerApResult) -> Generation {
@@ -30,7 +30,7 @@ pub(super) fn ap_result_to_generation(ap_result: &MergerApResult) -> Generation 
     }
 }
 
-pub(super) fn try_match_result_to_instr(merger_ap_result: &MergerApResult, instr: &Ap<'_>) -> ExecutionResult<()> {
+pub(super) fn try_match_trace_to_instr(merger_ap_result: &MergerApResult, instr: &Ap<'_>) -> ExecutionResult<()> {
     let res_generation = match merger_ap_result {
         MergerApResult::ApResult { res_generation } => *res_generation,
         MergerApResult::Empty => return Ok(()),
@@ -40,15 +40,16 @@ pub(super) fn try_match_result_to_instr(merger_ap_result: &MergerApResult, instr
 }
 
 fn match_position_variable(
-    variable: &AstVariable<'_>,
+    variable: &ast::Variable<'_>,
     generation: Option<u32>,
     ap_result: &MergerApResult,
 ) -> ExecutionResult<()> {
     use crate::execution_step::ExecutionError::ApResultNotCorrespondToInstr;
+    use ast::Variable::*;
 
     match (variable, generation) {
-        (AstVariable::Stream(_), Some(_)) => Ok(()),
-        (AstVariable::Scalar(_), None) => Ok(()),
+        (Stream(_), Some(_)) => Ok(()),
+        (Scalar(_), None) => Ok(()),
         _ => return crate::exec_err!(ApResultNotCorrespondToInstr(ap_result.clone())),
     }
 }
@@ -71,13 +72,15 @@ fn option_to_vec(value: Option<u32>) -> Vec<u32> {
     }
 }
 
-fn variable_to_generations(variable: &AstVariable<'_>, exec_ctx: &ExecutionCtx<'_>) -> Vec<u32> {
+fn variable_to_generations(variable: &ast::Variable<'_>, exec_ctx: &ExecutionCtx<'_>) -> Vec<u32> {
+    use ast::Variable::*;
+
     match variable {
-        AstVariable::Scalar(_) => vec![],
-        AstVariable::Stream(name) => {
+        Scalar(_) => vec![],
+        Stream(stream) => {
             // unwrap here is safe because this function will be called only
             // when this stream's been created
-            let stream = exec_ctx.streams.get(*name).unwrap();
+            let stream = exec_ctx.streams.get(stream.name).unwrap();
             let generation = match stream.borrow().generations_count() {
                 0 => 0,
                 n => n - 1,

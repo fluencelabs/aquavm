@@ -192,11 +192,11 @@ fn match_without_xor() {
     let result = call_vm!(set_variable_vm, "", &script, "", "");
     let result = call_vm!(vm, "", &script, "", result.data);
 
-    assert_eq!(result.ret_code, 1011);
+    assert_eq!(result.ret_code, 1010);
 
     let result = call_vm!(vm, "", script, "", result.data);
 
-    assert_eq!(result.ret_code, 1011);
+    assert_eq!(result.ret_code, 1010);
 }
 
 #[test]

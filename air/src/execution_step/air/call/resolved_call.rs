@@ -18,7 +18,7 @@
 
 use super::call_result_setter::*;
 use super::prev_result_handler::*;
-use super::triplet::Triplet;
+use super::triplet::resolve;
 use super::*;
 use crate::execution_step::RSecurityTetraplet;
 use crate::execution_step::SecurityTetraplets;
@@ -28,7 +28,7 @@ use crate::SecurityTetraplet;
 
 use air_interpreter_data::CallResult;
 use air_interpreter_interface::CallRequestParams;
-use air_parser::ast::{AstVariable, CallInstrArgValue, CallOutputValue};
+use air_parser::ast;
 use air_trace_handler::MergerCallResult;
 use air_trace_handler::TraceHandler;
 
@@ -39,8 +39,8 @@ use std::rc::Rc;
 #[derive(Debug, Clone, PartialEq)]
 pub(super) struct ResolvedCall<'i> {
     tetraplet: RSecurityTetraplet,
-    function_arg_paths: Rc<Vec<CallInstrArgValue<'i>>>,
-    output: CallOutputValue<'i>,
+    function_arg_paths: Rc<Vec<ast::Value<'i>>>,
+    output: ast::CallOutputValue<'i>,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -52,8 +52,7 @@ struct ResolvedArguments {
 impl<'i> ResolvedCall<'i> {
     /// Build `ResolvedCall` from `Call` by transforming `PeerPart` & `FunctionPart` into `ResolvedTriplet`.
     pub(super) fn new(raw_call: &Call<'i>, exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<Self> {
-        let triplet = Triplet::try_from(&raw_call.peer_part, &raw_call.function_part)?;
-        let triplet = triplet.resolve(exec_ctx)?;
+        let triplet = resolve(&raw_call.triplet, exec_ctx)?;
         let tetraplet = SecurityTetraplet::from_triplet(triplet);
         let tetraplet = Rc::new(RefCell::new(tetraplet));
 
@@ -167,11 +166,11 @@ impl<'i> ResolvedCall<'i> {
 
 /// Check output type name for being already in execution context.
 // TODO: this check should be moved on a parsing stage
-fn check_output_name(output: &CallOutputValue<'_>, exec_ctx: &ExecutionCtx<'_>) -> ExecutionResult<()> {
+fn check_output_name(output: &ast::CallOutputValue<'_>, exec_ctx: &ExecutionCtx<'_>) -> ExecutionResult<()> {
     use crate::execution_step::boxed_value::ScalarRef;
 
     let scalar_name = match output {
-        CallOutputValue::Variable(AstVariable::Scalar(name)) => *name,
+        ast::CallOutputValue::Variable(ast::Variable::Scalar(scalar)) => scalar.name,
         _ => return Ok(()),
     };
 
