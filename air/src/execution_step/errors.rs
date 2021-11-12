@@ -43,7 +43,7 @@ pub(crate) enum ExecutionError {
     LocalServiceError(i32, Rc<String>),
 
     /// Value for such name isn't presence in data.
-    #[error("variable with name '{0}' isn't present in data")]
+    #[error("variable with name '{0}' wasn't defined during script execution")]
     VariableNotFound(String),
 
     /// Multiple values for such name found.

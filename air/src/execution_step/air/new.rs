@@ -41,18 +41,18 @@ fn prolog<'i>(new: &New<'i>, exec_ctx: &mut ExecutionCtx<'i>) {
             let iteration = exec_ctx.tracker.new_tracker.get_iteration(position);
             exec_ctx
                 .streams
-                .met_scope_start(stream.name, position as u32, iteration);
+                .meet_scope_start(stream.name, position as u32, iteration);
         }
-        Variable::Scalar(scalar) => exec_ctx.scalars.met_new_start(scalar.name),
+        Variable::Scalar(scalar) => exec_ctx.scalars.meet_new_start(scalar.name),
     }
+
+    exec_ctx.tracker.meet_new(position);
 }
 
 fn epilog<'i>(new: &New<'i>, exec_ctx: &mut ExecutionCtx<'i>) {
     let position = new.position;
     match &new.variable {
-        Variable::Stream(stream) => exec_ctx.streams.met_scope_end(stream.name.to_string(), position as u32),
-        Variable::Scalar(scalar) => exec_ctx.scalars.met_new_end(scalar.name),
+        Variable::Stream(stream) => exec_ctx.streams.meet_scope_end(stream.name.to_string(), position as u32),
+        Variable::Scalar(scalar) => exec_ctx.scalars.meet_new_end(scalar.name),
     }
-
-    exec_ctx.tracker.meet_new(position);
 }

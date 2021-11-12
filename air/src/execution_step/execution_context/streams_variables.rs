@@ -39,7 +39,7 @@ pub(crate) struct Streams {
 
     /// Contains stream generations that each private stream had at the scope end.
     /// Then it's placed into data
-    collected_resticted_stream_gens: RestrictedStreamGens,
+    collected_restricted_stream_gens: RestrictedStreamGens,
 }
 
 impl Streams {
@@ -77,8 +77,9 @@ impl Streams {
         self.streams.insert(name, vec![RefCell::new(stream)]);
     }
 
-    pub(crate) fn met_scope_start(&mut self, name: impl Into<String>, position: u32, iteration: u32) {
+    pub(crate) fn meet_scope_start(&mut self, name: impl Into<String>, position: u32, iteration: u32) {
         let name = name.into();
+        println!("met_scope_start: {} {} {}", name, position, iteration);
         let generations_count = self
             .stream_generation_from_data(&name, position, iteration as usize)
             .unwrap_or_default();
@@ -94,7 +95,8 @@ impl Streams {
         }
     }
 
-    pub(crate) fn met_scope_end(&mut self, name: String, position: u32) {
+    pub(crate) fn meet_scope_end(&mut self, name: String, position: u32) {
+        println!("meet_scope_end: {} {}", name, position);
         // unwraps are safe here because met_scope_end must be called after met_scope_start
         let stream_embodiments = self.streams.get_mut(&name).unwrap();
         // delete a stream after exit from a scope
@@ -124,7 +126,7 @@ impl Streams {
             })
             .collect::<GlobalStreamGens>();
 
-        (global_streams, self.collected_resticted_stream_gens)
+        (global_streams, self.collected_restricted_stream_gens)
     }
 
     fn stream_generation_from_data(&self, name: &str, position: u32, iteration: usize) -> Option<u32> {
@@ -140,7 +142,7 @@ impl Streams {
     }
 
     fn collect_stream_generation(&mut self, name: String, position: u32, generation: u32) {
-        match self.collected_resticted_stream_gens.entry(name) {
+        match self.collected_restricted_stream_gens.entry(name) {
             Occupied(mut streams) => match streams.get_mut().entry(position) {
                 Occupied(mut iterations) => iterations.get_mut().push(generation),
                 Vacant(entry) => {

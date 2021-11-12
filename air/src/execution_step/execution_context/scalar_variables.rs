@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+mod traits;
+
 use crate::exec_err;
 use crate::execution_step::boxed_value::ScalarRef;
 use crate::execution_step::ExecutionError;
@@ -62,6 +64,8 @@ use std::rc::Rc;
 ///
 /// Although there could be only one iterable value for a fold block, because of CRDT rules.
 /// This struct is intended to provide abilities to work with scalars as it was described.
+///
+/// Additionally, this structs support restrictions that enforces by a new operator.
 #[derive(Default)]
 pub(crate) struct Scalars<'i> {
     // this one is optimized for speed (not for memory), because it's unexpected
@@ -154,22 +158,6 @@ impl<'i> Scalars<'i> {
             .ok_or_else(|| Rc::new(ExecutionError::VariableNotFound(name.to_string())))
     }
 
-    pub(crate) fn get_value_mut(&'i mut self, name: &str) -> ExecutionResult<&'i mut ValueAggregate> {
-        let fold_block_id = self.fold_block_id;
-        self.values
-            .get_mut(name)
-            .and_then(|descriptor| {
-                let elements_count = descriptor.elements_count(fold_block_id);
-                descriptor
-                    .values
-                    .iter_mut()
-                    .take(elements_count + 1)
-                    .rev()
-                    .find_map(|scalar| scalar.as_mut())
-            })
-            .ok_or_else(|| Rc::new(ExecutionError::VariableNotFound(name.to_string())))
-    }
-
     pub(crate) fn get_iterable(&self, name: &str) -> ExecutionResult<&FoldState<'i>> {
         self.iterable_values
             .get(name)
@@ -212,7 +200,7 @@ impl<'i> Scalars<'i> {
         self.fold_block_id != 0
     }
 
-    pub(crate) fn met_new_start(&mut self, name: impl Into<String>) {
+    pub(crate) fn meet_new_start(&mut self, name: impl Into<String>) {
         match self.values.entry(name.into()) {
             Occupied(mut entry) => {
                 let descriptor = entry.get_mut();
@@ -227,7 +215,7 @@ impl<'i> Scalars<'i> {
         }
     }
 
-    pub(crate) fn met_new_end(&mut self, name: &str) {
+    pub(crate) fn meet_new_end(&mut self, name: &str) {
         // unwrap is safe here because this function is always called after met_new_begin
         // that adds corresponding value
         let descriptor = self.values.get_mut(name).unwrap();
@@ -238,7 +226,7 @@ impl<'i> Scalars<'i> {
     fn cleanup(&mut self) {
         for (_, descriptor) in self.values.iter_mut() {
             let new_size = descriptor.elements_count(self.fold_block_id);
-            descriptor.values.truncate(new_size)
+            descriptor.values.truncate(new_size + 1)
         }
     }
 }
@@ -246,27 +234,5 @@ impl<'i> Scalars<'i> {
 impl ScalarDescriptor {
     pub(self) fn elements_count(&self, fold_block_id: usize) -> usize {
         self.new_operators_met + fold_block_id
-    }
-}
-
-use std::fmt;
-
-impl<'i> fmt::Display for Scalars<'i> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "fold_block_id: {}", self.fold_block_id)?;
-
-        for (name, _) in self.values.iter() {
-            let value = self.get_value(name);
-            if let Ok(last_value) = value {
-                writeln!(f, "{} => {}", name, last_value.result)?;
-            }
-        }
-
-        for (name, _) in self.iterable_values.iter() {
-            // it's impossible to print an iterable value for now
-            writeln!(f, "{} => iterable", name)?;
-        }
-
-        Ok(())
     }
 }
