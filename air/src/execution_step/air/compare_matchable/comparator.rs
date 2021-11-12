@@ -17,6 +17,7 @@
 use crate::execution_step::air::ExecutionResult;
 use crate::execution_step::execution_context::ExecutionCtx;
 use crate::execution_step::utils::resolve_ast_variable_wl;
+use crate::execution_step::utils::prepare_last_error;
 use crate::JValue;
 
 use air_parser::ast;
@@ -37,7 +38,7 @@ pub(crate) fn are_matchable_eq<'ctx>(
         ),
 
         (LastError(path), matchable) | (matchable, LastError(path)) => {
-            let (value, _) = crate::execution_step::utils::prepare_last_error(path, exec_ctx)?;
+            let (value, _) = prepare_last_error(path, exec_ctx)?;
             compare_matchable(matchable, exec_ctx, make_object_comparator(value))
         }
 
@@ -83,7 +84,7 @@ fn compare_matchable<'ctx>(
             Ok(comparator(Cow::Owned(jvalue)))
         }
         LastError(error_path) => {
-            let (jvalue, _) = crate::execution_step::utils::prepare_last_error(error_path, exec_ctx)?;
+            let (jvalue, _) = prepare_last_error(error_path, exec_ctx)?;
             Ok(comparator(Cow::Owned(jvalue)))
         }
         Literal(str) => {
