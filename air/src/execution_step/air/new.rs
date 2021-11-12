@@ -26,11 +26,19 @@ impl<'i> super::ExecutableInstruction<'i> for New<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         log_instruction!(null, exec_ctx, trace_ctx);
 
+        println!("new started\n");
         prolog(self, exec_ctx);
-        self.instruction.execute(exec_ctx, trace_ctx)?;
+        // it should be a lazy error evaluating after execution of epilog block, since it's
+        // necessary to return a restricted variable to it's previous state in case of
+        // any error. It's highly important to distinguish between global and restricted streams
+        // at the end of execution to make a correct data.
+        println!("prolog finished\n");
+        let instruction_result = self.instruction.execute(exec_ctx, trace_ctx);
+        println!("instruction executed\n");
         epilog(self, exec_ctx);
+        println!("epilog finished\n");
 
-        Ok(())
+        instruction_result
     }
 }
 
@@ -43,7 +51,7 @@ fn prolog<'i>(new: &New<'i>, exec_ctx: &mut ExecutionCtx<'i>) {
                 .streams
                 .meet_scope_start(stream.name, position as u32, iteration);
         }
-        Variable::Scalar(scalar) => exec_ctx.scalars.meet_new_start(scalar.name),
+        Variable::Scalar(scalar) => exec_ctx.scalars.meet_scope_start(scalar.name),
     }
 
     exec_ctx.tracker.meet_new(position);
@@ -52,7 +60,9 @@ fn prolog<'i>(new: &New<'i>, exec_ctx: &mut ExecutionCtx<'i>) {
 fn epilog<'i>(new: &New<'i>, exec_ctx: &mut ExecutionCtx<'i>) {
     let position = new.position;
     match &new.variable {
-        Variable::Stream(stream) => exec_ctx.streams.meet_scope_end(stream.name.to_string(), position as u32),
-        Variable::Scalar(scalar) => exec_ctx.scalars.meet_new_end(scalar.name),
+        Variable::Stream(stream) => exec_ctx
+            .streams
+            .meet_scope_end(stream.name.to_string(), position as u32),
+        Variable::Scalar(scalar) => exec_ctx.scalars.meet_scope_end(scalar.name),
     }
 }

@@ -17,7 +17,7 @@
 use air_test_utils::prelude::*;
 
 #[test]
-fn new_with_global_streams() {
+fn new_with_global_streams_seq() {
     let set_variable_peer_id = "set_variable_peer_id";
     let local_vm_peer_id_1 = "local_vm_peer_id_1";
     let local_vm_peer_id_2 = "local_vm_peer_id_2";
@@ -29,12 +29,10 @@ fn new_with_global_streams() {
         "1".to_string() => json!(1),
         "2".to_string() => json!(2),
     };
-    let mut set_variable_vm = create_avm(
-        set_variables_call_service(variables_mapping),
-        set_variable_peer_id,
-    );
+    let mut set_variable_vm = create_avm(set_variables_call_service(variables_mapping), set_variable_peer_id);
 
-    let script = format!(r#"
+    let script = format!(
+        r#"
             (seq
                 (seq
                     (call "{0}" ("" "") ["1"] $stream)
@@ -54,20 +52,17 @@ fn new_with_global_streams() {
                         (call "{2}" ("" "") [$stream])
                     )
                 )
-            )"#, set_variable_peer_id, local_vm_peer_id_1, local_vm_peer_id_2);
+            )"#,
+        set_variable_peer_id, local_vm_peer_id_1, local_vm_peer_id_2
+    );
 
     let result = checked_call_vm!(set_variable_vm, "", &script, "", "");
-    let result = checked_call_vm!(local_vm_1, "", &script, "", result.data);
-    print_trace(&result, "local vm 1");
+    let vm_1_result = checked_call_vm!(local_vm_1, "", &script, "", result.data);
+    let vm_2_result = checked_call_vm!(local_vm_2, "", &script, "", vm_1_result.data.clone());
 
-    let result = checked_call_vm!(local_vm_2, "", &script, "", result.data);
-    print_trace(&result, "local vm 2");
-    let data = data_from_result(&result);
-    println!("{:?}", data.restricted_streams);
-
-    let result = checked_call_vm!(local_vm_1, "", &script, "", result.data);
-    let result = checked_call_vm!(local_vm_2, "", script, "", result.data);
-    print_trace(&result, "local vm 2");
+    let vm_1_result = checked_call_vm!(local_vm_1, "", &script, vm_1_result.data, vm_2_result.data.clone());
+    let vm_2_result = checked_call_vm!(local_vm_2, "", script, vm_2_result.data, vm_1_result.data);
+    print_trace(&vm_2_result, "vm 1");
 }
 
 #[test]

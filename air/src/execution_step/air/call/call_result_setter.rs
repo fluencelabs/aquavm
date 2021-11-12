@@ -41,7 +41,13 @@ pub(crate) fn set_local_result<'i>(
         CallOutputValue::Variable(Variable::Stream(stream)) => {
             // TODO: refactor this generation handling
             let generation = match exec_ctx.streams.get(stream.name) {
-                Some(stream) => Generation::Nth(stream.borrow().generations_count() as u32),
+                Some(stream) => {
+                    let generation = match stream.borrow().generations_count() {
+                        0 => 0,
+                        n => n - 1,
+                    };
+                    Generation::Nth(generation as u32)
+                }
                 None => Generation::Last,
             };
 

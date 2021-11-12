@@ -44,6 +44,7 @@ pub(crate) struct Streams {
 
 impl Streams {
     pub(crate) fn get(&self, name: &str) -> Option<&RefCell<Stream>> {
+        println!("-- get stream: {:?}", self.streams.get(name).map(|embodiments| embodiments.len()));
         self.streams.get(name).map(|embodiments| embodiments.last()).flatten()
     }
 
@@ -79,7 +80,6 @@ impl Streams {
 
     pub(crate) fn meet_scope_start(&mut self, name: impl Into<String>, position: u32, iteration: u32) {
         let name = name.into();
-        println!("met_scope_start: {} {} {}", name, position, iteration);
         let generations_count = self
             .stream_generation_from_data(&name, position, iteration as usize)
             .unwrap_or_default();
@@ -96,15 +96,17 @@ impl Streams {
     }
 
     pub(crate) fn meet_scope_end(&mut self, name: String, position: u32) {
-        println!("meet_scope_end: {} {}", name, position);
         // unwraps are safe here because met_scope_end must be called after met_scope_start
         let stream_embodiments = self.streams.get_mut(&name).unwrap();
+        println!("stream_embodiments before: {:?}\n", stream_embodiments);
         // delete a stream after exit from a scope
         let last_stream = stream_embodiments.pop().unwrap();
         if stream_embodiments.is_empty() {
             // streams should contain only non-empty stream embodiments
             self.streams.remove(&name);
         }
+
+        println!("stream_embodiments after: {:?}", self.streams.get_mut(&name).unwrap());
 
         self.collect_stream_generation(name, position, last_stream.borrow().generations_count() as u32);
     }

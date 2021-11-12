@@ -200,7 +200,7 @@ impl<'i> Scalars<'i> {
         self.fold_block_id != 0
     }
 
-    pub(crate) fn meet_new_start(&mut self, name: impl Into<String>) {
+    pub(crate) fn meet_scope_start(&mut self, name: impl Into<String>) {
         match self.values.entry(name.into()) {
             Occupied(mut entry) => {
                 let descriptor = entry.get_mut();
@@ -215,7 +215,7 @@ impl<'i> Scalars<'i> {
         }
     }
 
-    pub(crate) fn meet_new_end(&mut self, name: &str) {
+    pub(crate) fn meet_scope_end(&mut self, name: &str) {
         // unwrap is safe here because this function is always called after met_new_begin
         // that adds corresponding value
         let descriptor = self.values.get_mut(name).unwrap();
