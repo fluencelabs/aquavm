@@ -20,7 +20,11 @@ use air_parser::ast;
 #[derive(Clone, Copy, Debug)]
 pub(crate) enum Variable<'i> {
     Scalar(&'i str),
-    Stream { name: &'i str, generation: Generation },
+    Stream {
+        name: &'i str,
+        generation: Generation,
+        position: usize,
+    },
 }
 
 impl<'i> Variable<'i> {
@@ -37,13 +41,9 @@ impl<'i> Variable<'i> {
             Stream(stream) => Variable::Stream {
                 name: stream.name,
                 generation,
+                position: stream.position,
             },
         }
-    }
-
-    #[allow(dead_code)]
-    pub(crate) fn from_stream(name: &'i str, generation: Generation) -> Self {
-        Self::Stream { name, generation }
     }
 }
 
@@ -56,6 +56,7 @@ impl<'i> From<&ast::Variable<'i>> for Variable<'i> {
             Stream(stream) => Self::Stream {
                 name: stream.name,
                 generation: Generation::Last,
+                position: stream.position,
             },
         }
     }
@@ -70,6 +71,7 @@ impl<'i> From<&ast::VariableWithLambda<'i>> for Variable<'i> {
             Stream(stream) => Self::Stream {
                 name: stream.name,
                 generation: Generation::Last,
+                position: stream.position,
             },
         }
     }

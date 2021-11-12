@@ -111,7 +111,8 @@ pub struct Next<'i> {
 pub struct New<'i> {
     pub variable: Variable<'i>,
     pub instruction: Box<Instruction<'i>>,
-    pub position: usize,
+    pub left_position: usize,
+    pub right_position: usize,
 }
 
 /// (null)

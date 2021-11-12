@@ -41,10 +41,12 @@ pub enum Token<'input> {
     },
     Stream {
         name: &'input str,
+        position: usize,
     },
     StreamWithLambda {
         name: &'input str,
         lambda: LambdaAST<'input>,
+        position: usize,
     },
     Number(Number),
     Boolean(bool),

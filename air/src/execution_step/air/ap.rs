@@ -76,7 +76,7 @@ fn save_result<'ctx>(
             let generation = ap_result_to_generation(merger_ap_result);
             exec_ctx
                 .streams
-                .add_stream_value(result, generation, stream.name.to_string())
+                .add_stream_value(result, generation, stream.name, stream.position)
                 .map(|_| ())
         }
     }

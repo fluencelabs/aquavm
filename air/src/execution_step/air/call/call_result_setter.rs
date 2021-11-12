@@ -40,7 +40,7 @@ pub(crate) fn set_local_result<'i>(
         }
         CallOutputValue::Variable(Variable::Stream(stream)) => {
             // TODO: refactor this generation handling
-            let generation = match exec_ctx.streams.get(stream.name) {
+            let generation = match exec_ctx.streams.get(stream.name, stream.position) {
                 Some(stream) => {
                     let generation = match stream.borrow().generations_count() {
                         0 => 0,
@@ -51,9 +51,10 @@ pub(crate) fn set_local_result<'i>(
                 None => Generation::Last,
             };
 
-            let generation = exec_ctx
-                .streams
-                .add_stream_value(executed_result, generation, stream.name.to_string())?;
+            let generation =
+                exec_ctx
+                    .streams
+                    .add_stream_value(executed_result, generation, stream.name, stream.position)?;
             Ok(CallResult::executed_stream(result_value, generation))
         }
         CallOutputValue::None => Ok(CallResult::executed_scalar(result_value)),
@@ -77,7 +78,7 @@ pub(crate) fn set_result_from_value<'i>(
             let generation = Generation::Nth(generation);
             let _ = exec_ctx
                 .streams
-                .add_stream_value(result, generation, stream.name.to_string())?;
+                .add_stream_value(result, generation, stream.name, stream.position)?;
         }
         // it isn't needed to check there that output and value matches because
         // it's been already checked in trace handler

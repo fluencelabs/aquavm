@@ -32,7 +32,7 @@ pub(crate) struct Streams {
     // that a script could have a lot of new.
     // TODO: use shared string (Rc<String>) to avoid copying.
     // TODO: get rid of RefCell in a separate PR
-    streams: HashMap<String, Vec<RefCell<Stream>>>,
+    streams: HashMap<String, Vec<StreamDescriptor>>,
 
     /// Contains stream generation that private stream should have at the scope start.
     data_private_stream_generations: RestrictedStreamGens,
@@ -42,76 +42,90 @@ pub(crate) struct Streams {
     collected_restricted_stream_gens: RestrictedStreamGens,
 }
 
+struct StreamDescriptor {
+    pub(self) left_position: usize,
+    pub(self) right_position: usize,
+    pub(self) stream: RefCell<Stream>,
+}
+
 impl Streams {
-    pub(crate) fn get(&self, name: &str) -> Option<&RefCell<Stream>> {
-        println!(
-            "-- get stream: {:?}",
-            self.streams.get(name).map(|embodiments| embodiments.len())
-        );
-        self.streams.get(name).map(|embodiments| embodiments.last()).flatten()
+    pub(crate) fn get(&self, name: &str, position: usize) -> Option<&RefCell<Stream>> {
+        let result = self
+            .streams
+            .get(name)
+            .map(|descriptors| find_closest(descriptors.iter(), position))
+            .flatten();
+        result
     }
 
     pub(crate) fn add_stream_value(
         &mut self,
-        executed_result: ValueAggregate,
+        value: ValueAggregate,
         generation: Generation,
-        stream_name: String,
+        stream_name: &str,
+        position: usize,
     ) -> ExecutionResult<u32> {
-        let generation = match self.streams.entry(stream_name) {
-            Occupied(mut stream) => {
-                // unwrap is safe here because streams contains only non-empty vec
-                stream
-                    .get_mut()
-                    .last()
-                    .unwrap()
-                    .borrow_mut()
-                    .add_value(executed_result, generation)?
+        match self.get(stream_name, position) {
+            Some(stream) => stream.borrow_mut().add_value(value, generation),
+            None => {
+                // streams could be created in three ways:
+                //  - after met new instruction with stream name that isn't present in streams
+                //    (it's the only way to create restricted streams)
+                //  - by calling add_global_stream with generation that come from data
+                //    for global streams
+                //  - and by this function, and if there is no such a streams in streams,
+                //    it means that a new global one should be created.
+                let stream = Stream::from_value(value);
+                self.add_global_stream(stream_name.to_string(), stream);
+                Ok(0)
             }
-            Vacant(entry) => {
-                let stream = RefCell::new(Stream::from_value(executed_result));
-                entry.insert(vec![stream]);
-                0
-            }
-        };
-
-        Ok(generation)
+        }
     }
 
     pub(crate) fn add_global_stream(&mut self, name: String, stream: Stream) {
-        self.streams.insert(name, vec![RefCell::new(stream)]);
+        let descriptor = StreamDescriptor::global(RefCell::new(stream));
+        self.streams.insert(name, vec![descriptor]);
     }
 
-    pub(crate) fn meet_scope_start(&mut self, name: impl Into<String>, position: u32, iteration: u32) {
+    pub(crate) fn meet_scope_start(
+        &mut self,
+        name: impl Into<String>,
+        left_position: usize,
+        right_position: usize,
+        iteration: u32,
+    ) {
         let name = name.into();
         let generations_count = self
-            .stream_generation_from_data(&name, position, iteration as usize)
+            .stream_generation_from_data(&name, left_position as u32, iteration as usize)
             .unwrap_or_default();
 
         let new_stream = RefCell::new(Stream::from_generations_count(generations_count as usize));
+        let new_descriptor = StreamDescriptor::restricted(new_stream, left_position, right_position);
         match self.streams.entry(name) {
             Occupied(mut entry) => {
-                entry.get_mut().push(new_stream);
+                entry.get_mut().push(new_descriptor);
             }
             Vacant(entry) => {
-                entry.insert(vec![new_stream]);
+                entry.insert(vec![new_descriptor]);
             }
         }
     }
 
     pub(crate) fn meet_scope_end(&mut self, name: String, position: u32) {
         // unwraps are safe here because met_scope_end must be called after met_scope_start
-        let stream_embodiments = self.streams.get_mut(&name).unwrap();
-        println!("stream_embodiments before: {:?}\n", stream_embodiments);
+        let stream_descriptors = self.streams.get_mut(&name).unwrap();
         // delete a stream after exit from a scope
-        let last_stream = stream_embodiments.pop().unwrap();
-        if stream_embodiments.is_empty() {
+        let last_descriptor = stream_descriptors.pop().unwrap();
+        if stream_descriptors.is_empty() {
             // streams should contain only non-empty stream embodiments
             self.streams.remove(&name);
         }
 
-        println!("stream_embodiments after: {:?}", self.streams.get_mut(&name).unwrap());
-
-        self.collect_stream_generation(name, position, last_stream.borrow().generations_count() as u32);
+        self.collect_stream_generation(
+            name,
+            position,
+            last_descriptor.stream.borrow().generations_count() as u32,
+        );
     }
 
     /// This method must be called at the end of execution, because it contains logic to collect
@@ -122,11 +136,11 @@ impl Streams {
         let global_streams = self
             .streams
             .into_iter()
-            .map(|(name, mut embodiments)| {
+            .map(|(name, mut descriptors)| {
                 // unwrap is safe here because of invariant that streams contains non-empty vectors,
                 // moreover it must contain only one values, because this method is called at the end
                 // of the execution
-                let generation = embodiments.pop().unwrap().borrow().generations_count();
+                let generation = descriptors.pop().unwrap().stream.borrow().generations_count();
                 (name, generation as u32)
             })
             .collect::<GlobalStreamGens>();
@@ -164,16 +178,60 @@ impl Streams {
     }
 }
 
+impl StreamDescriptor {
+    pub(self) fn global(stream: RefCell<Stream>) -> Self {
+        Self {
+            left_position: 0,
+            right_position: usize::MAX,
+            stream,
+        }
+    }
+
+    pub(self) fn restricted(stream: RefCell<Stream>, left_position: usize, right_position: usize) -> Self {
+        Self {
+            left_position,
+            right_position,
+            stream,
+        }
+    }
+}
+
+fn find_closest<'d>(
+    descriptors: impl DoubleEndedIterator<Item = &'d StreamDescriptor>,
+    position: usize,
+) -> Option<&'d RefCell<Stream>> {
+    // descriptors are placed in a order of decreasing scope, so it's enough to get the latest suitable
+    for descriptor in descriptors.rev() {
+        if descriptor.left_position < position && position < descriptor.right_position {
+            return Some(&descriptor.stream);
+        }
+    }
+
+    None
+}
+
 use std::fmt;
 
 impl fmt::Display for Streams {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        for (name, embodiments) in self.streams.iter() {
-            let value = embodiments.last();
-            if let Some(last_value) = value {
-                writeln!(f, "{} => {}", name, last_value.borrow())?;
+        for (name, descriptors) in self.streams.iter() {
+            let descriptor = descriptors.last();
+            if let Some(last_descriptor) = descriptor {
+                writeln!(f, "{} => {}", name, last_descriptor)?;
             }
         }
         Ok(())
+    }
+}
+
+impl fmt::Display for StreamDescriptor {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            " <{}> - <{}>: {}",
+            self.left_position,
+            self.right_position,
+            self.stream.borrow()
+        )
     }
 }

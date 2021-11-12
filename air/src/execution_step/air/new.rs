@@ -26,30 +26,26 @@ impl<'i> super::ExecutableInstruction<'i> for New<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         log_instruction!(null, exec_ctx, trace_ctx);
 
-        println!("new started\n");
         prolog(self, exec_ctx);
         // it should be a lazy error evaluating after execution of epilog block, since it's
         // necessary to return a restricted variable to it's previous state in case of
         // any error. It's highly important to distinguish between global and restricted streams
         // at the end of execution to make a correct data.
-        println!("prolog finished\n");
         let instruction_result = self.instruction.execute(exec_ctx, trace_ctx);
-        println!("instruction executed\n");
         epilog(self, exec_ctx);
-        println!("epilog finished\n");
 
         instruction_result
     }
 }
 
 fn prolog<'i>(new: &New<'i>, exec_ctx: &mut ExecutionCtx<'i>) {
-    let position = new.position;
+    let position = new.left_position;
     match &new.variable {
         Variable::Stream(stream) => {
             let iteration = exec_ctx.tracker.new_tracker.get_iteration(position);
             exec_ctx
                 .streams
-                .meet_scope_start(stream.name, position as u32, iteration);
+                .meet_scope_start(stream.name, new.left_position, new.right_position, iteration);
         }
         Variable::Scalar(scalar) => exec_ctx.scalars.meet_scope_start(scalar.name),
     }
@@ -58,7 +54,7 @@ fn prolog<'i>(new: &New<'i>, exec_ctx: &mut ExecutionCtx<'i>) {
 }
 
 fn epilog<'i>(new: &New<'i>, exec_ctx: &mut ExecutionCtx<'i>) {
-    let position = new.position;
+    let position = new.left_position;
     match &new.variable {
         Variable::Stream(stream) => exec_ctx
             .streams

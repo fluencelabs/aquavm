@@ -41,3 +41,9 @@ pub struct Span {
     pub left: usize,
     pub right: usize,
 }
+
+impl Span {
+    pub fn new(left: usize, right: usize) -> Self {
+        Self { left, right }
+    }
+}
