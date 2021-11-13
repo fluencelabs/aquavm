@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Fluence Labs Limited
+ * Copyright 2021 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,26 +14,21 @@
  * limitations under the License.
  */
 
-pub mod air_parser;
-mod air_utils;
-pub(crate) mod lexer;
-mod span;
+use serde::Deserialize;
+use serde::Serialize;
 
-// air is auto-generated, so exclude it from `cargo fmt -- --check` and `cargo clippy`
-#[rustfmt::skip]
-#[allow(clippy::all)]
-mod air;
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Span {
+    pub left: usize,
+    pub right: usize,
+}
 
-mod errors;
-mod validator;
+impl Span {
+    pub fn new(left: usize, right: usize) -> Self {
+        Self { left, right }
+    }
 
-#[cfg(test)]
-pub mod tests;
-
-pub use self::air_parser::parse;
-pub use air::AIRParser;
-pub use lexer::AIRLexer;
-pub use span::Span;
-pub use validator::VariableValidator;
-
-use errors::ParserError;
+    pub fn is_inside(&self, position: usize) -> bool {
+        self.left < position && position < self.right
+    }
+}

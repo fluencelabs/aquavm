@@ -19,7 +19,9 @@ use air_parser::ast;
 
 #[derive(Clone, Copy, Debug)]
 pub(crate) enum Variable<'i> {
-    Scalar(&'i str),
+    #[allow(dead_code)]
+    // position will be needed to implement new for operators
+    Scalar { name: &'i str, position: usize },
     Stream {
         name: &'i str,
         generation: Generation,
@@ -28,21 +30,15 @@ pub(crate) enum Variable<'i> {
 }
 
 impl<'i> Variable<'i> {
-    pub(crate) fn scalar(name: &'i str) -> Self {
-        Self::Scalar(name)
+    pub(crate) fn scalar(name: &'i str, position: usize) -> Self {
+        Self::Scalar { name, position }
     }
 
-    #[allow(dead_code)]
-    pub(crate) fn from_ast_with_generation(ast_variable: &ast::Variable<'i>, generation: Generation) -> Self {
-        use ast::Variable::*;
-
-        match ast_variable {
-            Scalar(scalar) => Variable::Scalar(scalar.name),
-            Stream(stream) => Variable::Stream {
-                name: stream.name,
-                generation,
-                position: stream.position,
-            },
+    pub(crate) fn stream(name: &'i str, generation: Generation, position: usize) -> Self {
+        Self::Stream {
+            name,
+            generation,
+            position,
         }
     }
 }
@@ -52,12 +48,8 @@ impl<'i> From<&ast::Variable<'i>> for Variable<'i> {
         use ast::Variable::*;
 
         match ast_variable {
-            Scalar(scalar) => Self::Scalar(scalar.name),
-            Stream(stream) => Self::Stream {
-                name: stream.name,
-                generation: Generation::Last,
-                position: stream.position,
-            },
+            Scalar(scalar) => Self::scalar(scalar.name, scalar.position),
+            Stream(stream) => Self::stream(stream.name, Generation::Last, stream.position),
         }
     }
 }
@@ -67,12 +59,8 @@ impl<'i> From<&ast::VariableWithLambda<'i>> for Variable<'i> {
         use ast::VariableWithLambda::*;
 
         match ast_variable {
-            Scalar(scalar) => Self::Scalar(scalar.name),
-            Stream(stream) => Self::Stream {
-                name: stream.name,
-                generation: Generation::Last,
-                position: stream.position,
-            },
+            Scalar(scalar) => Self::scalar(scalar.name, scalar.position),
+            Stream(stream) => Self::stream(stream.name, Generation::Last, stream.position),
         }
     }
 }

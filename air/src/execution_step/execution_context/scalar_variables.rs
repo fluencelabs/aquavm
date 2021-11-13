@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-mod traits;
-
 use crate::exec_err;
 use crate::execution_step::boxed_value::ScalarRef;
 use crate::execution_step::ExecutionError;
@@ -23,7 +21,6 @@ use crate::execution_step::ExecutionResult;
 use crate::execution_step::FoldState;
 use crate::execution_step::ValueAggregate;
 
-use std::collections::hash_map::Entry::{Occupied, Vacant};
 use std::collections::HashMap;
 use std::rc::Rc;
 
@@ -64,21 +61,13 @@ use std::rc::Rc;
 ///
 /// Although there could be only one iterable value for a fold block, because of CRDT rules.
 /// This struct is intended to provide abilities to work with scalars as it was described.
-///
-/// Additionally, this structs support restrictions that enforces by a new operator.
 #[derive(Default)]
 pub(crate) struct Scalars<'i> {
     // this one is optimized for speed (not for memory), because it's unexpected
     // that a script could have a lot of inner folds.
-    values: HashMap<String, ScalarDescriptor>,
-    iterable_values: HashMap<String, FoldState<'i>>,
-    fold_block_id: usize,
-}
-
-#[derive(Default)]
-pub(crate) struct ScalarDescriptor {
-    pub values: Vec<Option<ValueAggregate>>,
-    pub new_operators_met: usize,
+    pub values: HashMap<String, Vec<Option<ValueAggregate>>>,
+    pub iterable_values: HashMap<String, FoldState<'i>>,
+    pub fold_block_id: usize,
 }
 
 #[allow(dead_code)]
@@ -86,16 +75,14 @@ impl<'i> Scalars<'i> {
     /// Returns true if there was a previous value for the provided key on the same
     /// fold block.
     pub(crate) fn set_value(&mut self, name: impl Into<String>, value: ValueAggregate) -> ExecutionResult<bool> {
+        use std::collections::hash_map::Entry::{Occupied, Vacant};
+
         let shadowing_allowed = self.shadowing_allowed();
         match self.values.entry(name.into()) {
             Vacant(entry) => {
                 let mut values = vec![None; self.fold_block_id];
                 values.push(Some(value));
-                let descriptor = ScalarDescriptor {
-                    values,
-                    new_operators_met: 0,
-                };
-                entry.insert(descriptor);
+                entry.insert(values);
 
                 Ok(false)
             }
@@ -104,16 +91,14 @@ impl<'i> Scalars<'i> {
                     return exec_err!(ExecutionError::MultipleVariablesFound(entry.key().clone()));
                 }
 
-                let descriptor = entry.into_mut();
-                let value_id = descriptor.elements_count(self.fold_block_id);
-                let contains_prev_value = descriptor
-                    .values
-                    .get(value_id)
+                let values = entry.into_mut();
+                let contains_prev_value = values
+                    .get(self.fold_block_id)
                     .map_or_else(|| false, |value| value.is_none());
-
                 // could be considered as lazy erasing
-                descriptor.values.resize(value_id + 1, None);
-                descriptor.values[value_id] = Some(value);
+                values.resize(self.fold_block_id + 1, None);
+
+                values[self.fold_block_id] = Some(value);
                 Ok(contains_prev_value)
             }
         }
@@ -124,6 +109,8 @@ impl<'i> Scalars<'i> {
         name: impl Into<String>,
         fold_state: FoldState<'i>,
     ) -> ExecutionResult<()> {
+        use std::collections::hash_map::Entry::{Occupied, Vacant};
+
         match self.iterable_values.entry(name.into()) {
             Vacant(entry) => {
                 entry.insert(fold_state);
@@ -146,14 +133,26 @@ impl<'i> Scalars<'i> {
     pub(crate) fn get_value(&'i self, name: &str) -> ExecutionResult<&'i ValueAggregate> {
         self.values
             .get(name)
-            .and_then(|descriptor| {
-                let elements_count = descriptor.elements_count(self.fold_block_id);
-                descriptor
-                    .values
+            .and_then(|scalars| {
+                scalars
                     .iter()
-                    .take(elements_count + 1)
+                    .take(self.fold_block_id + 1)
                     .rev()
                     .find_map(|scalar| scalar.as_ref())
+            })
+            .ok_or_else(|| Rc::new(ExecutionError::VariableNotFound(name.to_string())))
+    }
+
+    pub(crate) fn get_value_mut(&'i mut self, name: &str) -> ExecutionResult<&'i mut ValueAggregate> {
+        let fold_block_id = self.fold_block_id;
+        self.values
+            .get_mut(name)
+            .and_then(|scalars| {
+                scalars
+                    .iter_mut()
+                    .take(fold_block_id)
+                    .rev()
+                    .find_map(|scalar| scalar.as_mut())
             })
             .ok_or_else(|| Rc::new(ExecutionError::VariableNotFound(name.to_string())))
     }
@@ -200,39 +199,31 @@ impl<'i> Scalars<'i> {
         self.fold_block_id != 0
     }
 
-    pub(crate) fn meet_scope_start(&mut self, name: impl Into<String>) {
-        match self.values.entry(name.into()) {
-            Occupied(mut entry) => {
-                let descriptor = entry.get_mut();
-                descriptor.values.push(None);
-                descriptor.new_operators_met += 1;
-            }
-            Vacant(entry) => {
-                let mut descriptor = ScalarDescriptor::default();
-                descriptor.new_operators_met += 1;
-                entry.insert(descriptor);
-            }
-        }
-    }
-
-    pub(crate) fn meet_scope_end(&mut self, name: &str) {
-        // unwrap is safe here because this function is always called after met_new_begin
-        // that adds corresponding value
-        let descriptor = self.values.get_mut(name).unwrap();
-        descriptor.values.pop();
-        descriptor.new_operators_met -= 1;
-    }
-
     fn cleanup(&mut self) {
-        for (_, descriptor) in self.values.iter_mut() {
-            let new_size = descriptor.elements_count(self.fold_block_id);
-            descriptor.values.truncate(new_size + 1)
+        for (_, scalars) in self.values.iter_mut() {
+            scalars.truncate(self.fold_block_id + 1)
         }
     }
 }
 
-impl ScalarDescriptor {
-    pub(self) fn elements_count(&self, fold_block_id: usize) -> usize {
-        self.new_operators_met + fold_block_id
+use std::fmt;
+
+impl<'i> fmt::Display for Scalars<'i> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "fold_block_id: {}", self.fold_block_id)?;
+
+        for (name, _) in self.values.iter() {
+            let value = self.get_value(name);
+            if let Ok(last_value) = value {
+                writeln!(f, "{} => {}", name, last_value.result)?;
+            }
+        }
+
+        for (name, _) in self.iterable_values.iter() {
+            // it's impossible to print an iterable value for now
+            writeln!(f, "{} => iterable", name)?;
+        }
+
+        Ok(())
     }
 }

@@ -279,7 +279,10 @@ impl<'input> CallVariableParser<'input> {
                 position: self.start_pos,
             }
         } else {
-            Token::Scalar { name }
+            Token::Scalar {
+                name,
+                position: self.start_pos,
+            }
         }
     }
 
@@ -291,7 +294,11 @@ impl<'input> CallVariableParser<'input> {
                 position: self.start_pos,
             }
         } else {
-            Token::ScalarWithLambda { name, lambda }
+            Token::ScalarWithLambda {
+                name,
+                lambda,
+                position: self.start_pos,
+            }
         }
     }
 

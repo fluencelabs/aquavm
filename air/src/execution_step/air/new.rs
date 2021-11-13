@@ -24,7 +24,7 @@ use air_parser::ast::Variable;
 
 impl<'i> super::ExecutableInstruction<'i> for New<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
-        log_instruction!(null, exec_ctx, trace_ctx);
+        log_instruction!(new, exec_ctx, trace_ctx);
 
         prolog(self, exec_ctx);
         // it should be a lazy error evaluating after execution of epilog block, since it's
@@ -39,26 +39,28 @@ impl<'i> super::ExecutableInstruction<'i> for New<'i> {
 }
 
 fn prolog<'i>(new: &New<'i>, exec_ctx: &mut ExecutionCtx<'i>) {
-    let position = new.left_position;
+    let position = new.span.left;
     match &new.variable {
         Variable::Stream(stream) => {
             let iteration = exec_ctx.tracker.new_tracker.get_iteration(position);
             exec_ctx
                 .streams
-                .meet_scope_start(stream.name, new.left_position, new.right_position, iteration);
+                .meet_scope_start(stream.name, new.span.left, new.span.right, iteration);
         }
-        Variable::Scalar(scalar) => exec_ctx.scalars.meet_scope_start(scalar.name),
+        // noop
+        Variable::Scalar(_) => {}
     }
 
     exec_ctx.tracker.meet_new(position);
 }
 
 fn epilog<'i>(new: &New<'i>, exec_ctx: &mut ExecutionCtx<'i>) {
-    let position = new.left_position;
+    let position = new.span.left;
     match &new.variable {
         Variable::Stream(stream) => exec_ctx
             .streams
             .meet_scope_end(stream.name.to_string(), position as u32),
-        Variable::Scalar(scalar) => exec_ctx.scalars.meet_scope_end(scalar.name),
+        // noop
+        Variable::Scalar(_) => {}
     }
 }

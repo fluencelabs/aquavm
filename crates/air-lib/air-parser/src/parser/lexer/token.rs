@@ -34,10 +34,12 @@ pub enum Token<'input> {
     StringLiteral(&'input str),
     Scalar {
         name: &'input str,
+        position: usize,
     },
     ScalarWithLambda {
         name: &'input str,
         lambda: LambdaAST<'input>,
+        position: usize,
     },
     Stream {
         name: &'input str,

@@ -291,6 +291,7 @@ fn lambda() {
                         ValueAccessor::ArrayAccess { idx: 1 },
                     ])
                 },
+                position: 0,
             },
             LAMBDA.len(),
         ))),
@@ -460,6 +461,7 @@ fn booleans() {
             0,
             Token::Scalar {
                 name: NON_BOOL_CONST,
+                position: 0,
             },
             NON_BOOL_CONST.len(),
         ))),

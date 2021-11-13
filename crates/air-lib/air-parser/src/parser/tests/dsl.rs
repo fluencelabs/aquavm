@@ -56,14 +56,12 @@ pub(super) fn seqnn() -> Instruction<'static> {
 pub(super) fn new<'i>(
     variable: Variable<'i>,
     instruction: Instruction<'i>,
-    left_position: usize,
-    right_position: usize,
+    span: Span,
 ) -> Instruction<'i> {
     Instruction::New(New {
         variable,
         instruction: Box::new(instruction),
-        left_position,
-        right_position,
+        span,
     })
 }
 
@@ -73,26 +71,29 @@ pub(super) fn null() -> Instruction<'static> {
 
 pub(super) fn fold_scalar<'a>(
     iterable: ScalarWithLambda<'a>,
-    iterator: &'a str,
+    iterator: Scalar<'a>,
     instruction: Instruction<'a>,
+    span: Span,
 ) -> Instruction<'a> {
     Instruction::FoldScalar(FoldScalar {
         iterable,
-        iterator: Scalar::new(iterator),
+        iterator,
         instruction: std::rc::Rc::new(instruction),
+        span,
     })
 }
 
 pub(super) fn fold_stream<'a>(
-    stream_name: &'a str,
-    position: usize,
-    iterator: &'a str,
+    iterable: Stream<'a>,
+    iterator: Scalar<'a>,
     instruction: Instruction<'a>,
+    span: Span,
 ) -> Instruction<'a> {
     Instruction::FoldStream(FoldStream {
-        iterable: Stream::new(stream_name, position),
-        iterator: Scalar::new(iterator),
+        iterable,
+        iterator,
         instruction: std::rc::Rc::new(instruction),
+        span,
     })
 }
 

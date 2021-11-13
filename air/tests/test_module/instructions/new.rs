@@ -223,7 +223,7 @@ fn new_in_fold_with_ap() {
     let data = data_from_result(&result);
     let actual_restricted_streams = data.restricted_streams;
     let expected_restricted_streams = maplit::hashmap! {
-        "s1".to_string() => maplit::hashmap! {
+        "$s1".to_string() => maplit::hashmap! {
             146 => vec![1,1,1,1,1]
         }
     };

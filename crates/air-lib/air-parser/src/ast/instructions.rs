@@ -89,6 +89,7 @@ pub struct FoldScalar<'i> {
     #[serde(borrow)]
     pub iterator: Scalar<'i>,
     pub instruction: Rc<Instruction<'i>>,
+    pub span: Span,
 }
 
 /// (fold stream_iterable iterator instruction)
@@ -98,6 +99,7 @@ pub struct FoldStream<'i> {
     #[serde(borrow)]
     pub iterator: Scalar<'i>,
     pub instruction: Rc<Instruction<'i>>,
+    pub span: Span,
 }
 
 /// (fold stream_iterable iterator instruction)
@@ -111,8 +113,7 @@ pub struct Next<'i> {
 pub struct New<'i> {
     pub variable: Variable<'i>,
     pub instruction: Box<Instruction<'i>>,
-    pub left_position: usize,
-    pub right_position: usize,
+    pub span: Span,
 }
 
 /// (null)

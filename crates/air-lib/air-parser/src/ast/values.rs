@@ -26,6 +26,7 @@ use serde::Serialize;
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct Scalar<'i> {
     pub name: &'i str,
+    pub position: usize,
 }
 
 /// A scalar value with possible lambda expression.
@@ -34,6 +35,7 @@ pub struct ScalarWithLambda<'i> {
     pub name: &'i str,
     #[serde(borrow)]
     pub lambda: Option<LambdaAST<'i>>,
+    pub position: usize,
 }
 
 /// A stream without lambda.

@@ -96,21 +96,29 @@ impl<'i> FoldScalar<'i> {
         iterable: ScalarWithLambda<'i>,
         iterator: Scalar<'i>,
         instruction: Instruction<'i>,
+        span: Span,
     ) -> Self {
         Self {
             iterable,
             iterator,
             instruction: Rc::new(instruction),
+            span,
         }
     }
 }
 
 impl<'i> FoldStream<'i> {
-    pub fn new(iterable: Stream<'i>, iterator: Scalar<'i>, instruction: Instruction<'i>) -> Self {
+    pub fn new(
+        iterable: Stream<'i>,
+        iterator: Scalar<'i>,
+        instruction: Instruction<'i>,
+        span: Span,
+    ) -> Self {
         Self {
             iterable,
             iterator,
             instruction: Rc::new(instruction),
+            span,
         }
     }
 }
@@ -122,17 +130,11 @@ impl<'i> Next<'i> {
 }
 
 impl<'i> New<'i> {
-    pub fn new(
-        variable: Variable<'i>,
-        instruction: Box<Instruction<'i>>,
-        left_position: usize,
-        right_position: usize,
-    ) -> Self {
+    pub fn new(variable: Variable<'i>, instruction: Box<Instruction<'i>>, span: Span) -> Self {
         Self {
             variable,
             instruction,
-            left_position,
-            right_position,
+            span,
         }
     }
 }

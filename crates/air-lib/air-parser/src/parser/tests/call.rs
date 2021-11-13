@@ -35,12 +35,13 @@ fn parse_json_path() {
         CallInstrValue::Variable(VariableWithLambda::from_raw_lambda_scalar(
             "peer_id",
             vec![ValueAccessor::FieldAccess { field_name: "a" }],
+            15,
         )),
         CallInstrValue::Literal("service_id"),
         CallInstrValue::Literal("function_name"),
         Rc::new(vec![
             Value::Literal("hello"),
-            Value::Variable(VariableWithLambda::scalar("name")),
+            Value::Variable(VariableWithLambda::scalar("name", 68)),
         ]),
         CallOutputValue::Variable(Variable::stream("$void", 74)),
     );
@@ -55,13 +56,13 @@ fn parse_empty_array() {
 
     let actual = parse(source_code);
     let expected = call(
-        CallInstrValue::Variable(VariableWithLambda::scalar("peer_id")),
-        CallInstrValue::Variable(VariableWithLambda::scalar("service_id")),
+        CallInstrValue::Variable(VariableWithLambda::scalar("peer_id", 15)),
+        CallInstrValue::Variable(VariableWithLambda::scalar("service_id", 24)),
         CallInstrValue::Literal("function_name"),
         Rc::new(vec![
             Value::Literal(""),
             Value::EmptyArray,
-            Value::Variable(VariableWithLambda::scalar("arg")),
+            Value::Variable(VariableWithLambda::scalar("arg", 59)),
         ]),
         CallOutputValue::None,
     );
@@ -77,11 +78,11 @@ fn parse_empty_array_2() {
 
     let actual = parse(source_code);
     let expected = call(
-        CallInstrValue::Variable(VariableWithLambda::scalar("peer_id")),
+        CallInstrValue::Variable(VariableWithLambda::scalar("peer_id", 15)),
         CallInstrValue::Literal("service_id"),
         CallInstrValue::Literal("function_name"),
         Rc::new(vec![
-            Value::Variable(VariableWithLambda::scalar("k")),
+            Value::Variable(VariableWithLambda::scalar("k", 55)),
             Value::EmptyArray,
             Value::EmptyArray,
         ]),
@@ -206,11 +207,12 @@ fn parse_json_path_complex() {
             CallInstrValue::Variable(VariableWithLambda::from_raw_lambda_scalar(
                 "m",
                 vec![ValueAccessor::ArrayAccess { idx: 1 }],
+                32,
             )),
             CallInstrValue::Literal("service_id"),
             CallInstrValue::Literal("function_name"),
             Rc::new(vec![]),
-            CallOutputValue::Variable(Variable::scalar("void")),
+            CallOutputValue::Variable(Variable::scalar("void", 75)),
         ),
         call(
             CallInstrValue::Variable(VariableWithLambda::from_raw_lambda_scalar(
@@ -224,11 +226,12 @@ fn parse_json_path_complex() {
                     ValueAccessor::FieldAccess { field_name: "cde" },
                     ValueAccessor::ArrayAccess { idx: 1 },
                 ],
+                99,
             )),
             CallInstrValue::Literal("service_id"),
             CallInstrValue::Literal("function_name"),
             Rc::new(vec![]),
-            CallOutputValue::Variable(Variable::scalar("void")),
+            CallOutputValue::Variable(Variable::scalar("void", 162)),
         ),
     );
     assert_eq!(instruction, expected);
@@ -246,6 +249,7 @@ fn json_path_square_braces() {
             vec![ValueAccessor::FieldAccess {
                 field_name: "peer_id",
             }],
+            15,
         )),
         CallInstrValue::Literal("return"),
         CallInstrValue::Literal(""),
@@ -259,10 +263,12 @@ fn json_path_square_braces() {
                     ValueAccessor::ArrayAccess { idx: 0 },
                     ValueAccessor::FieldAccess { field_name: "abc" },
                 ],
+                43,
             )),
             Value::Variable(VariableWithLambda::from_raw_lambda_scalar(
                 "u",
                 vec![ValueAccessor::FieldAccess { field_name: "name" }],
+                64,
             )),
         ]),
         CallOutputValue::Variable(Variable::stream("$void", 74)),
@@ -352,14 +358,14 @@ fn seq_par_call() {
                 CallInstrValue::Literal("local_service_id"),
                 CallInstrValue::Literal("local_fn_name"),
                 Rc::new(vec![]),
-                CallOutputValue::Variable(Variable::scalar("result_1")),
+                CallOutputValue::Variable(Variable::scalar("result_1", 108)),
             ),
             call(
                 CallInstrValue::Literal(peer_id),
                 CallInstrValue::Literal("service_id"),
                 CallInstrValue::Literal("fn_name"),
                 Rc::new(vec![]),
-                CallOutputValue::Variable(Variable::scalar("g")),
+                CallOutputValue::Variable(Variable::scalar("g", 183)),
             ),
         ),
         call(
@@ -367,7 +373,7 @@ fn seq_par_call() {
             CallInstrValue::Literal("local_service_id"),
             CallInstrValue::Literal("local_fn_name"),
             Rc::new(vec![]),
-            CallOutputValue::Variable(Variable::scalar("result_2")),
+            CallOutputValue::Variable(Variable::scalar("result_2", 273)),
         ),
     );
 
@@ -407,14 +413,14 @@ fn seq_with_empty_and_dash() {
                     CallInstrValue::Literal(""),
                     CallInstrValue::Literal(""),
                     Rc::new(vec![Value::Literal("module-bytes")]),
-                    CallOutputValue::Variable(Variable::scalar("module-bytes")),
+                    CallOutputValue::Variable(Variable::scalar("module-bytes", 119)),
                 ),
                 call(
                     CallInstrValue::Literal("set_variables"),
                     CallInstrValue::Literal(""),
                     CallInstrValue::Literal(""),
                     Rc::new(vec![Value::Literal("module_config")]),
-                    CallOutputValue::Variable(Variable::scalar("module_config")),
+                    CallOutputValue::Variable(Variable::scalar("module_config", 201)),
                 ),
             ),
             call(
@@ -422,7 +428,7 @@ fn seq_with_empty_and_dash() {
                 CallInstrValue::Literal(""),
                 CallInstrValue::Literal(""),
                 Rc::new(vec![Value::Literal("blueprint")]),
-                CallOutputValue::Variable(Variable::scalar("blueprint")),
+                CallOutputValue::Variable(Variable::scalar("blueprint", 294)),
             ),
         ),
         seq(
@@ -431,10 +437,10 @@ fn seq_with_empty_and_dash() {
                 CallInstrValue::Literal("add_module"),
                 CallInstrValue::Literal(""),
                 Rc::new(vec![
-                    Value::Variable(VariableWithLambda::scalar("module-bytes")),
-                    Value::Variable(VariableWithLambda::scalar("module_config")),
+                    Value::Variable(VariableWithLambda::scalar("module-bytes", 381)),
+                    Value::Variable(VariableWithLambda::scalar("module_config", 394)),
                 ]),
-                CallOutputValue::Variable(Variable::scalar("module")),
+                CallOutputValue::Variable(Variable::scalar("module", 409)),
             ),
             seq(
                 Instruction::Call(Call {
@@ -445,8 +451,9 @@ fn seq_with_empty_and_dash() {
                     },
                     args: Rc::new(vec![Value::Variable(VariableWithLambda::scalar(
                         "blueprint",
+                        490,
                     ))]),
-                    output: CallOutputValue::Variable(Variable::scalar("blueprint_id")),
+                    output: CallOutputValue::Variable(Variable::scalar("blueprint_id", 501)),
                 }),
                 seq(
                     call(
@@ -455,8 +462,9 @@ fn seq_with_empty_and_dash() {
                         CallInstrValue::Literal(""),
                         Rc::new(vec![Value::Variable(VariableWithLambda::scalar(
                             "blueprint_id",
+                            589,
                         ))]),
-                        CallOutputValue::Variable(Variable::scalar("service_id")),
+                        CallOutputValue::Variable(Variable::scalar("service_id", 603)),
                     ),
                     call(
                         CallInstrValue::Literal("remote_peer_id"),
@@ -464,8 +472,9 @@ fn seq_with_empty_and_dash() {
                         CallInstrValue::Literal(""),
                         Rc::new(vec![Value::Variable(VariableWithLambda::scalar(
                             "service_id",
+                            671,
                         ))]),
-                        CallOutputValue::Variable(Variable::scalar("client_result")),
+                        CallOutputValue::Variable(Variable::scalar("client_result", 683)),
                     ),
                 ),
             ),
@@ -484,9 +493,9 @@ fn no_output() {
     let actual = parse(source_code);
 
     let expected = call(
-        CallInstrValue::Variable(VariableWithLambda::scalar("peer")),
-        CallInstrValue::Variable(VariableWithLambda::scalar("service")),
-        CallInstrValue::Variable(VariableWithLambda::scalar("fname")),
+        CallInstrValue::Variable(VariableWithLambda::scalar("peer", 15)),
+        CallInstrValue::Variable(VariableWithLambda::scalar("service", 21)),
+        CallInstrValue::Variable(VariableWithLambda::scalar("fname", 29)),
         Rc::new(vec![]),
         CallOutputValue::None,
     );

@@ -20,12 +20,12 @@ use std::fmt;
 
 impl<'i> fmt::Display for Scalars<'i> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "fold_block_id: {}", self.fold_block_id)?;
+        writeln!(f, "fold_block_id: {}", self.fold_blocks_sequence.len())?;
 
         for (name, _) in self.values.iter() {
-            let value = self.get_value(name);
-            if let Ok(last_value) = value {
-                writeln!(f, "{} => {}", name, last_value.result)?;
+            let descriptor = self.values.get(name);
+            if let Some(descriptor) = descriptor {
+                writeln!(f, "{} => {:?}", name, descriptor.values.last())?;
             }
         }
 

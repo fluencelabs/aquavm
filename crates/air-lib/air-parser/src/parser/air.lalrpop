@@ -32,6 +32,7 @@ Instr: Box<Instruction<'input>> = {
         let output = output.map(CallOutputValue::Variable).unwrap_or(CallOutputValue::None);
         let call = Call::new(triplet, args, output);
         let span = Span::new(left, right);
+
         validator.met_call(&call, span);
 
         Box::new(Instruction::Call(call))
@@ -39,6 +40,7 @@ Instr: Box<Instruction<'input>> = {
 
     <left: @L> "(" ap <arg:ApArgument> <result:ApResult> ")" <right: @R> => {
         let apply = Ap::new(arg, result);
+
         let span = Span::new(left, right);
         validator.met_ap(&apply, span);
 
@@ -50,34 +52,37 @@ Instr: Box<Instruction<'input>> = {
     "(" null ")" => Box::new(Instruction::Null(Null)),
 
     <left: @L> "(" new <variable: ScriptVariable> <instruction:Instr> ")" <right: @R> => {
-        let new = New::new(variable, instruction, left, right);
         let span = Span::new(left, right);
+        let new = New::new(variable, instruction, span);
+
         validator.met_new(&new, span);
+
         Box::new(Instruction::New(new))
     },
 
-    <left: @L> "(" fold <iterable:FoldScalarIterable> <iterator_name:Scalar> <i:Instr> ")" <right: @R> => {
-        let iterator = Scalar::new(iterator_name);
-        let fold = FoldScalar::new(iterable, iterator, *i);
+    <left: @L> "(" fold <iterable:FoldScalarIterable> <iterator:Scalar> <i:Instr> ")" <right: @R> => {
+        let iterator = Scalar::new(iterator.0, iterator.1);
         let span = Span::new(left, right);
+        let fold = FoldScalar::new(iterable, iterator, *i, span);
+
         validator.met_fold_scalar(&fold, span);
 
         Box::new(Instruction::FoldScalar(fold))
     },
 
-    <left: @L> "(" fold <stream:Stream> <iterator_name:Scalar> <i:Instr> ")" <right: @R> => {
+    <left: @L> "(" fold <stream:Stream> <iterator:Scalar> <i:Instr> ")" <right: @R> => {
         let iterable = Stream::new(stream.0, stream.1);
-        let iterator = Scalar::new(iterator_name);
-        let fold = FoldStream::new(iterable, iterator, *i);
-
+        let iterator = Scalar::new(iterator.0, iterator.1);
         let span = Span::new(left, right);
+        let fold = FoldStream::new(iterable, iterator, *i, span);
+
         validator.meet_fold_stream(&fold, span);
 
         Box::new(Instruction::FoldStream(fold))
     },
 
-    <left: @L> "(" next <iterator_name:Scalar> ")" <right: @R> => {
-        let iterator = Scalar::new(iterator_name);
+    <left: @L> "(" next <iterator:Scalar> ")" <right: @R> => {
+        let iterator = Scalar::new(iterator.0, iterator.1);
         let next = Next::new(iterator);
         let span = Span::new(left, right);
         validator.met_next(&next, span);
@@ -124,13 +129,13 @@ ApResult = ScriptVariable;
 CallOutput = ScriptVariable;
 
 ScriptVariable: Variable<'input> = {
-    <scalar:Scalar> => Variable::scalar(scalar),
+    <scalar:Scalar> => Variable::scalar(scalar.0, scalar.1),
     <stream:Stream> => Variable::stream(stream.0, stream.1),
 };
 
 FoldScalarIterable: ScalarWithLambda<'input> = {
-    <scalar:Scalar> => ScalarWithLambda::new(scalar, None),
-    <scalar:ScalarWithLambda> => ScalarWithLambda::new(scalar.0, Some(scalar.1)),
+    <scalar:Scalar> => ScalarWithLambda::new(scalar.0, None, scalar.1),
+    <scalar:ScalarWithLambda> => ScalarWithLambda::new(scalar.0, Some(scalar.1), scalar.2),
 };
 
 Function = CallInstrValue;
@@ -140,8 +145,8 @@ ServiceId = CallInstrValue;
 CallInstrValue: CallInstrValue<'input> = {
     InitPeerId => CallInstrValue::InitPeerId,
     <l:Literal> => CallInstrValue::Literal(l),
-    <scalar:Scalar> => CallInstrValue::Variable(VariableWithLambda::scalar(scalar)),
-    <scalar:ScalarWithLambda> => CallInstrValue::Variable(VariableWithLambda::scalar_wl(scalar.0, scalar.1)),
+    <scalar:Scalar> => CallInstrValue::Variable(VariableWithLambda::scalar(scalar.0, scalar.1)),
+    <scalar:ScalarWithLambda> => CallInstrValue::Variable(VariableWithLambda::scalar_wl(scalar.0, scalar.1, scalar.2)),
     <stream:Stream> => CallInstrValue::Variable(VariableWithLambda::stream(stream.0, stream.1)),
     <stream:StreamWithLambda> => CallInstrValue::Variable(VariableWithLambda::stream_wl(stream.0, stream.1, stream.2)),
 }
@@ -155,8 +160,8 @@ Value: Value<'input> = {
     <n:Number> => Value::Number(n),
     <b:Boolean> => Value::Boolean(b),
     EmptyArray => Value::EmptyArray,
-    <scalar_name:Scalar> => Value::Variable(VariableWithLambda::scalar(scalar_name)),
-    <scalar:ScalarWithLambda> => Value::Variable(VariableWithLambda::scalar_wl(scalar.0, scalar.1)),
+    <scalar:Scalar> => Value::Variable(VariableWithLambda::scalar(scalar.0, scalar.1)),
+    <scalar:ScalarWithLambda> => Value::Variable(VariableWithLambda::scalar_wl(scalar.0, scalar.1, scalar.2)),
     <stream:Stream> => Value::Variable(VariableWithLambda::stream(stream.0, stream.1)),
     <stream:StreamWithLambda> => Value::Variable(VariableWithLambda::stream_wl(stream.0, stream.1, stream.2)),
 }
@@ -168,8 +173,8 @@ ApArgument: ApArgument<'input> = {
     <n:Number> => ApArgument::Number(n),
     <b:Boolean> => ApArgument::Boolean(b),
     EmptyArray => ApArgument::EmptyArray,
-    <scalar:Scalar> => ApArgument::Scalar(ScalarWithLambda::new(scalar, None)),
-    <scalar:ScalarWithLambda> => ApArgument::Scalar(ScalarWithLambda::new(scalar.0, Some(scalar.1))),
+    <scalar:Scalar> => ApArgument::Scalar(ScalarWithLambda::new(scalar.0, None, scalar.1)),
+    <scalar:ScalarWithLambda> => ApArgument::Scalar(ScalarWithLambda::new(scalar.0, Some(scalar.1), scalar.2)),
 }
 
 extern {
@@ -184,8 +189,8 @@ extern {
         EmptyArray => Token::SquareBrackets,
 
         Literal => Token::StringLiteral(<&'input str>),
-        Scalar => Token::Scalar { name:<&'input str> },
-        ScalarWithLambda => Token::ScalarWithLambda { name: <&'input str>, lambda: <LambdaAST<'input>> },
+        Scalar => Token::Scalar { name:<&'input str>, position: <usize> },
+        ScalarWithLambda => Token::ScalarWithLambda { name: <&'input str>, lambda: <LambdaAST<'input>>, position: <usize> },
         Stream => Token::Stream { name: <&'input str>, position: <usize> },
         StreamWithLambda => Token::StreamWithLambda {name: <&'input str>, lambda:<LambdaAST<'input>>, position: <usize>},
         Number => Token::Number(<Number>),
