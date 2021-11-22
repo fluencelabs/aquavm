@@ -130,6 +130,7 @@ impl<'i> Next<'i> {
 }
 
 impl<'i> New<'i> {
+    #[allow(clippy::self_named_constructors)]
     pub fn new(variable: Variable<'i>, instruction: Box<Instruction<'i>>, span: Span) -> Self {
         Self {
             variable,
