@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Fluence Labs Limited
+ * Copyright 2021 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 use air_test_utils::prelude::*;
+
+use std::collections::HashSet;
 
 #[test]
 fn ap_with_scalars() {
@@ -190,12 +192,13 @@ fn ap_with_dst_stream() {
 fn par_ap_behaviour() {
     let vm_1_peer_id = "vm_1_peer_id";
     let vm_2_peer_id = "vm_2_peer_id";
+    let vm_3_peer_id = "vm_3_peer_id";
     let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
 
     let script = format!(
         r#"
         (par
-            (call "{1}" ("peer" "timeout") [] join_it)
+            (call "{2}" ("peer" "timeout") [] join_it)
             (seq
                 (par
                     (call "{0}" ("peer" "timeout") [join_it] $result)
@@ -205,9 +208,11 @@ fn par_ap_behaviour() {
             )
         )
         "#,
-        vm_1_peer_id, vm_2_peer_id
+        vm_1_peer_id, vm_2_peer_id, vm_3_peer_id
     );
 
-    let result = checked_call_vm!(vm_1, "", script, "", "");
-    assert_eq!(result.next_peer_pks, vec![vm_2_peer_id.to_string()]);
+    let mut result = checked_call_vm!(vm_1, "", script, "", "");
+    let actual_next_peers: HashSet<_> = result.next_peer_pks.drain(..).collect();
+    let expected_next_peers: HashSet<_> = maplit::hashset!(vm_2_peer_id.to_string(), vm_3_peer_id.to_string());
+    assert_eq!(actual_next_peers, expected_next_peers);
 }
