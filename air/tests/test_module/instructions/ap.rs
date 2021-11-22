@@ -194,12 +194,15 @@ fn par_ap_behaviour() {
 
     let script = format!(
         r#"
-       (seq
-            (par
-                (call "{0}" ("peer" "timeout") [1 "slow_result"] $result)
-                (ap "fast_result" $result)
+        (par
+            (call "{1}" ("peer" "timeout") [] join_it)
+            (seq
+                (par
+                    (call "{0}" ("peer" "timeout") [join_it] $result)
+                    (ap "fast_result" $result)
+                )
+                (call "{1}" ("op" "return") [$result.$[0]])
             )
-            (call "{1}" ("op" "return") [$result.$[0]])
         )
         "#,
         vm_1_peer_id, vm_2_peer_id
