@@ -23,6 +23,7 @@ use crate::execution_step::ExecutionResult;
 use crate::JValue;
 use crate::LambdaAST;
 use crate::SecurityTetraplet;
+use crate::execution_step::RSecurityTetraplet;
 
 use air_parser::ast;
 use air_parser::ast::LastErrorPath;
@@ -108,7 +109,7 @@ pub(crate) fn resolve_ast_variable_wl<'ctx, 'i>(
 ) -> ExecutionResult<(JValue, SecurityTetraplets)> {
     let variable: Variable<'_> = ast_variable.into();
     match ast_variable.lambda() {
-        Some(lambda) => apply_lambda(variable, lambda, exec_ctx),
+        Some(lambda) => apply_lambda(variable, lambda, exec_ctx).map(|(value, tetraplet)| (value, vec![tetraplet])),
         None => {
             let value = resolve_variable(variable, exec_ctx)?;
             let tetraplets = value.as_tetraplets();
@@ -121,10 +122,10 @@ pub(crate) fn apply_lambda<'i>(
     variable: Variable<'_>,
     lambda: &LambdaAST<'i>,
     exec_ctx: &ExecutionCtx<'i>,
-) -> ExecutionResult<(JValue, SecurityTetraplets)> {
+) -> ExecutionResult<(JValue, RSecurityTetraplet)> {
     let resolved = resolve_variable(variable, exec_ctx)?;
-    let (jvalue, tetraplets) = resolved.apply_lambda_with_tetraplets(lambda)?;
+    let (jvalue, tetraplet) = resolved.apply_lambda_with_tetraplets(lambda)?;
 
     // it's known that apply_lambda_with_tetraplets returns vec of one value
-    Ok((jvalue[0].clone(), tetraplets))
+    Ok((jvalue.clone(), tetraplet))
 }

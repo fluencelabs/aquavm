@@ -20,12 +20,13 @@ use super::JValuable;
 use super::LambdaAST;
 use crate::exec_err;
 use crate::execution_step::SecurityTetraplets;
+use crate::execution_step::RSecurityTetraplet;
 use crate::JValue;
 
 use std::borrow::Cow;
 
 impl JValuable for () {
-    fn apply_lambda(&self, _lambda: &LambdaAST<'_>) -> ExecutionResult<Vec<&JValue>> {
+    fn apply_lambda(&self, _lambda: &LambdaAST<'_>) -> ExecutionResult<&JValue> {
         // applying lambda to an empty stream will produce a join behaviour
         exec_err!(ExecutionError::EmptyStreamLambdaError)
     }
@@ -33,7 +34,7 @@ impl JValuable for () {
     fn apply_lambda_with_tetraplets(
         &self,
         _lambda: &LambdaAST<'_>,
-    ) -> ExecutionResult<(Vec<&JValue>, SecurityTetraplets)> {
+    ) -> ExecutionResult<(&JValue, RSecurityTetraplet)> {
         // applying lambda to an empty stream will produce a join behaviour
         exec_err!(ExecutionError::EmptyStreamLambdaError)
     }
