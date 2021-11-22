@@ -20,8 +20,8 @@ use super::JValuable;
 use crate::exec_err;
 use crate::execution_step::boxed_value::Generation;
 use crate::execution_step::boxed_value::Stream;
-use crate::execution_step::SecurityTetraplets;
 use crate::execution_step::RSecurityTetraplet;
+use crate::execution_step::SecurityTetraplets;
 use crate::JValue;
 use crate::LambdaAST;
 
@@ -46,10 +46,7 @@ impl JValuable for StreamJvaluableIngredients<'_> {
         Ok(select_result.result)
     }
 
-    fn apply_lambda_with_tetraplets(
-        &self,
-        lambda: &LambdaAST<'_>,
-    ) -> ExecutionResult<(&JValue, RSecurityTetraplet)> {
+    fn apply_lambda_with_tetraplets(&self, lambda: &LambdaAST<'_>) -> ExecutionResult<(&JValue, RSecurityTetraplet)> {
         let iter = self.iter()?.map(|v| v.result.deref());
         let select_result = select_from_stream(iter, lambda)?;
 

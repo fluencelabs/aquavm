@@ -25,8 +25,8 @@ use super::ExecutionError;
 use super::ExecutionResult;
 use super::ValueAggregate;
 use crate::execution_step::lambda_applier::*;
-use crate::execution_step::SecurityTetraplets;
 use crate::execution_step::RSecurityTetraplet;
+use crate::execution_step::SecurityTetraplets;
 use crate::JValue;
 use crate::LambdaAST;
 
@@ -40,10 +40,7 @@ pub(crate) trait JValuable {
     fn apply_lambda(&self, lambda: &LambdaAST<'_>) -> ExecutionResult<&JValue>;
 
     /// Applies lambda to the internal value, produces JValue with tetraplet.
-    fn apply_lambda_with_tetraplets(
-        &self,
-        lambda: &LambdaAST<'_>,
-    ) -> ExecutionResult<(&JValue, RSecurityTetraplet)>;
+    fn apply_lambda_with_tetraplets(&self, lambda: &LambdaAST<'_>) -> ExecutionResult<(&JValue, RSecurityTetraplet)>;
 
     /// Return internal value as borrowed if it's possible, owned otherwise.
     fn as_jvalue(&self) -> Cow<'_, JValue>;

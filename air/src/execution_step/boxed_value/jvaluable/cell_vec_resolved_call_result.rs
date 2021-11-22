@@ -18,8 +18,8 @@ use super::select_from_stream;
 use super::ExecutionResult;
 use super::JValuable;
 use super::ValueAggregate;
-use crate::execution_step::SecurityTetraplets;
 use crate::execution_step::RSecurityTetraplet;
+use crate::execution_step::SecurityTetraplets;
 use crate::JValue;
 use crate::LambdaAST;
 
@@ -35,10 +35,7 @@ impl JValuable for std::cell::Ref<'_, Vec<ValueAggregate>> {
         Ok(select_result.result)
     }
 
-    fn apply_lambda_with_tetraplets(
-        &self,
-        lambda: &LambdaAST<'_>,
-    ) -> ExecutionResult<(&JValue, RSecurityTetraplet)> {
+    fn apply_lambda_with_tetraplets(&self, lambda: &LambdaAST<'_>) -> ExecutionResult<(&JValue, RSecurityTetraplet)> {
         let stream_iter = self.iter().map(|r| r.result.deref());
         let select_result = select_from_stream(stream_iter, lambda)?;
 

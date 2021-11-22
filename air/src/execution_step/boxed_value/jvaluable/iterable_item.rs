@@ -19,8 +19,8 @@ use super::ExecutionResult;
 use super::IterableItem;
 use super::JValuable;
 use super::LambdaAST;
-use crate::execution_step::SecurityTetraplets;
 use crate::execution_step::RSecurityTetraplet;
+use crate::execution_step::SecurityTetraplets;
 use crate::JValue;
 
 use std::borrow::Cow;
@@ -40,10 +40,7 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
         Ok(selected_value)
     }
 
-    fn apply_lambda_with_tetraplets(
-        &self,
-        lambda: &LambdaAST<'_>,
-    ) -> ExecutionResult<(&JValue, RSecurityTetraplet)> {
+    fn apply_lambda_with_tetraplets(&self, lambda: &LambdaAST<'_>) -> ExecutionResult<(&JValue, RSecurityTetraplet)> {
         use super::IterableItem::*;
 
         let (jvalue, tetraplet) = match self {
