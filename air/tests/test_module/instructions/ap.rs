@@ -185,3 +185,26 @@ fn ap_with_dst_stream() {
     assert_eq!(actual_trace, expected_state);
     assert!(result.next_peer_pks.is_empty());
 }
+
+#[test]
+fn par_ap_behaviour() {
+    let vm_1_peer_id = "vm_1_peer_id";
+    let vm_2_peer_id = "vm_2_peer_id";
+    let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
+
+    let script = format!(
+        r#"
+       (seq
+            (par
+                (call "{0}" ("peer" "timeout") [1 "slow_result"] $result)
+                (ap "fast_result" $result)
+            )
+            (call "{1}" ("op" "return") [$result.$[0]])
+        )
+        "#,
+        vm_1_peer_id, vm_2_peer_id
+    );
+
+    let result = checked_call_vm!(vm_1, "", script, "", "");
+    assert_eq!(result.next_peer_pks, vec![vm_2_peer_id.to_string()]);
+}
