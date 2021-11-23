@@ -33,19 +33,22 @@ fn executed_trace_seq_par_call() {
         local_peer_id
     );
 
-    let initial_trace = vec![par(1, 1), scalar_string("test"), scalar_string("test")];
+    let unit_call_service_result = "result from unit_call_service";
+    let initial_trace = vec![
+        par(1, 1),
+        scalar_string(unit_call_service_result),
+        scalar_string(unit_call_service_result),
+    ];
     let initial_data = raw_data_from_trace(initial_trace);
 
     let result = checked_call_vm!(vm, "asd", script, "", initial_data);
     let actual_trace = trace_from_result(&result);
 
-    let test_string = "test";
-
     let expected_trace = vec![
         par(1, 1),
-        scalar_string(test_string),
-        scalar_string(test_string),
-        scalar_string(test_string),
+        scalar_string(unit_call_service_result),
+        scalar_string(unit_call_service_result),
+        scalar_string(unit_call_service_result),
     ];
 
     assert_eq!(actual_trace, expected_trace);
@@ -69,11 +72,12 @@ fn executed_trace_par_par_call() {
         local_peer_id,
     );
 
+    let unit_call_service_result = "result from unit_call_service";
     let initial_state = vec![
         par(2, 1),
         par(1, 0),
         request_sent_by("peer_id_1"),
-        scalar_string("test"),
+        scalar_string(unit_call_service_result),
     ];
 
     let initial_data = raw_data_from_trace(initial_state);
@@ -81,13 +85,12 @@ fn executed_trace_par_par_call() {
     let result = checked_call_vm!(vm, "asd", &script, "", initial_data);
     let actual_trace = trace_from_result(&result);
 
-    let test_string = "test";
     let expected_trace = vec![
         par(3, 1),
         par(1, 1),
-        scalar_string(test_string),
+        scalar_string(unit_call_service_result),
         request_sent_by(local_peer_id),
-        scalar_string(test_string),
+        scalar_string(unit_call_service_result),
     ];
 
     assert_eq!(actual_trace, expected_trace);
@@ -138,11 +141,11 @@ fn executed_trace_seq_seq() {
 
     let actual_trace = trace_from_result(&result);
 
-    let test_string = "test";
+    let call_serivce_result = "result from unit_call_service";
     let expected_trace = vec![
-        scalar_string(test_string),
-        scalar_string(test_string),
-        scalar_string(test_string),
+        scalar_string(call_serivce_result),
+        scalar_string(call_serivce_result),
+        scalar_string(call_serivce_result),
     ];
 
     assert_eq!(actual_trace, expected_trace);
@@ -269,7 +272,7 @@ fn executed_trace_par_seq_fold_call() {
         stream_string(9.to_string(), generation),
         par(1, 0),
         stream_string(10.to_string(), generation),
-        scalar_string("test"),
+        scalar_string("result from unit_call_service"),
     ];
 
     assert_eq!(actual_trace, expected_trace);
@@ -333,7 +336,7 @@ fn executed_trace_par_seq_fold_in_cycle_call() {
             stream_string(9.to_string(), generation),
             par(1, 0),
             stream_string(10.to_string(), generation),
-            scalar_string("test"),
+            scalar_string("result from unit_call_service"),
         ];
 
         assert_eq!(actual_trace, expected_trace);
@@ -377,14 +380,14 @@ fn executed_trace_seq_par_seq_seq() {
 
     let actual_trace = trace_from_result(&result);
 
-    let service_result_string = "test";
+    let unit_call_service_result = "result from unit_call_service";
     let executed_trace = vec![
         par(2, 2),
-        scalar_string(service_result_string),
-        scalar_string(service_result_string),
-        scalar_string(service_result_string),
-        scalar_string(service_result_string),
-        scalar_string(service_result_string),
+        scalar_string(unit_call_service_result),
+        scalar_string(unit_call_service_result),
+        scalar_string(unit_call_service_result),
+        scalar_string(unit_call_service_result),
+        scalar_string(unit_call_service_result),
     ];
 
     assert_eq!(actual_trace, executed_trace);

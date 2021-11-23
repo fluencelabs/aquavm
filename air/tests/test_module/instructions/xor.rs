@@ -34,10 +34,13 @@ fn xor() {
     let result = checked_call_vm!(vm, "asd", script, "", "");
 
     let actual_trace = trace_from_result(&result);
-    let expected_call_result = executed_state::scalar_string("test");
+    let expected_call_result = executed_state::scalar_string("success result from fallible_call_service");
 
     assert_eq!(actual_trace.len(), 2);
-    assert_eq!(actual_trace[0], executed_state::service_failed(1, r#""error""#));
+    assert_eq!(
+        actual_trace[0],
+        executed_state::service_failed(1, "failed result from fallible_call_service")
+    );
     assert_eq!(actual_trace[1], expected_call_result);
 
     let script = format!(
@@ -146,18 +149,18 @@ fn xor_par() {
     let result = checked_call_vm!(vm, "asd", &script, "", "");
     let actual_trace = trace_from_result(&result);
 
-    let scalar_result = String::from("test");
-
+    let success_result = "success result from fallible_call_service";
+    let failed_result = "failed result from fallible_call_service";
     let expected_trace = vec![
         par(3, 3),
         par(1, 1),
-        service_failed(1, r#""error""#),
-        service_failed(1, r#""error""#),
+        service_failed(1, failed_result),
+        service_failed(1, failed_result),
         par(1, 1),
-        service_failed(1, r#""error""#),
-        service_failed(1, r#""error""#),
-        scalar_string(&scalar_result),
-        scalar_string(&scalar_result),
+        service_failed(1, failed_result),
+        service_failed(1, failed_result),
+        scalar_string(success_result),
+        scalar_string(success_result),
     ];
 
     assert_eq!(actual_trace, expected_trace);
@@ -188,8 +191,9 @@ fn last_error_with_xor() {
     let result = checked_call_vm!(vm, "asd", script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
-    let expected_state =
-        executed_state::scalar_string(r#"Local service error, ret_code is 1, error message is '"error"'"#);
+    let expected_state = executed_state::scalar_string(
+        r#"Local service error, ret_code is 1, error message is '"failed result from fallible_call_service"'"#,
+    );
 
     assert_eq!(actual_trace[1], expected_state);
 }

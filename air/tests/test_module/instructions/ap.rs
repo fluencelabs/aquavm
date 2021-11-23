@@ -16,6 +16,8 @@
 
 use air_test_utils::prelude::*;
 
+use fstrings::f;
+use fstrings::format_args_f;
 use std::collections::HashSet;
 
 #[test]
@@ -161,18 +163,15 @@ fn ap_with_dst_stream() {
     let vm_2_peer_id = "vm_2_peer_id";
     let mut vm_2 = create_avm(echo_call_service(), vm_2_peer_id);
 
-    let script = format!(
-        r#"
+    let script = f!(r#"
         (seq
             (seq
-                (call "{}" ("" "") ["scalar_1_result"] scalar_1)
+                (call "{vm_1_peer_id}" ("" "") ["scalar_1_result"] scalar_1)
                 (ap scalar_1 $stream)
             )
-            (call "{}" ("" "") [$stream])
+            (call "{vm_2_peer_id}" ("" "") [$stream])
         )
-        "#,
-        vm_1_peer_id, vm_2_peer_id
-    );
+        "#);
 
     let result = checked_call_vm!(vm_1, "", &script, "", "");
     let result = checked_call_vm!(vm_2, "", script, "", result.data);
@@ -190,29 +189,34 @@ fn ap_with_dst_stream() {
 
 #[test]
 fn par_ap_behaviour() {
-    let vm_1_peer_id = "vm_1_peer_id";
-    let vm_2_peer_id = "vm_2_peer_id";
-    let vm_3_peer_id = "vm_3_peer_id";
-    let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
+    let client_id = "client_id";
+    let relay_id = "relay_id";
+    let variable_setter_id = "variable_setter_id";
+    let mut client = create_avm(unit_call_service(), client_id);
+    let mut relay = create_avm(unit_call_service(), relay_id);
+    let mut variable_setter = create_avm(unit_call_service(), variable_setter_id);
 
-    let script = format!(
-        r#"
+    let script = f!(r#"
         (par
-            (call "{2}" ("peer" "timeout") [] join_it)
+            (call "{variable_setter_id}" ("peer" "timeout") [] join_it)
             (seq
                 (par
-                    (call "{0}" ("peer" "timeout") [join_it] $result)
-                    (ap "fast_result" $result)
+                    (call "{relay_id}" ("peer" "timeout") [join_it] $result)
+                    (ap "fast_result" $result) ;; ap doesn't affect the subtree_complete flag
                 )
-                (call "{1}" ("op" "return") [$result.$[0]])
+                (call "{client_id}" ("op" "return") [$result.$[0]])
             )
         )
-        "#,
-        vm_1_peer_id, vm_2_peer_id, vm_3_peer_id
-    );
+        "#);
 
-    let mut result = checked_call_vm!(vm_1, "", script, "", "");
-    let actual_next_peers: HashSet<_> = result.next_peer_pks.drain(..).collect();
-    let expected_next_peers: HashSet<_> = maplit::hashset!(vm_2_peer_id.to_string(), vm_3_peer_id.to_string());
+    let mut client_result_1 = checked_call_vm!(client, "", &script, "", "");
+    let actual_next_peers: HashSet<_> = client_result_1.next_peer_pks.drain(..).collect();
+    let expected_next_peers: HashSet<_> = maplit::hashset!(relay_id.to_string(), variable_setter_id.to_string());
     assert_eq!(actual_next_peers, expected_next_peers);
+
+    let setter_result = checked_call_vm!(variable_setter, "", &script, "", client_result_1.data.clone());
+    assert!(setter_result.next_peer_pks.is_empty());
+
+    let relay_result = checked_call_vm!(relay, "", script, "", client_result_1.data);
+    assert!(relay_result.next_peer_pks.is_empty());
 }

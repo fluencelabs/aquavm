@@ -62,7 +62,7 @@ fn join_chat() {
 
     let relay_1_actual_trace = trace_from_result(&relay_1_result);
     let relay_1_expected_trace = vec![
-        executed_state::stream_string("test", 0),
+        executed_state::stream_string("result from unit_call_service", 0),
         executed_state::request_sent_by("Relay1"),
     ];
 
@@ -73,7 +73,7 @@ fn join_chat() {
 
     let remote_actual_trace = trace_from_result(&remote_result);
     let remote_expected_trace = vec![
-        executed_state::stream_string("test", 0),
+        executed_state::stream_string("result from unit_call_service", 0),
         executed_state::stream_jvalue(json!([["A", "Relay1"], ["B", "Relay2"]]), 0),
         executed_state::scalar(json!([["A", "Relay1"], ["B", "Relay2"]])),
         executed_state::par(1, 2),
@@ -96,11 +96,11 @@ fn join_chat() {
     let relay_1_actual_trace = trace_from_result(&relay_1_result);
 
     let relay_1_expected_trace = vec![
-        executed_state::stream_string("test", 0),
+        executed_state::stream_string("result from unit_call_service", 0),
         executed_state::stream_jvalue(json!([["A", "Relay1"], ["B", "Relay2"]]), 0),
         executed_state::scalar(json!([["A", "Relay1"], ["B", "Relay2"]])),
         executed_state::par(2, 2),
-        executed_state::stream_string("test", 0),
+        executed_state::stream_string("result from unit_call_service", 0),
         executed_state::request_sent_by("Relay1"),
         executed_state::par(1, 0),
         executed_state::request_sent_by("Remote"),
@@ -114,12 +114,12 @@ fn join_chat() {
     let client_1_actual_trace = trace_from_result(&client_1_result);
 
     let client_1_expected_trace = vec![
-        executed_state::stream_string("test", 0),
+        executed_state::stream_string("result from unit_call_service", 0),
         executed_state::stream_jvalue(json!([["A", "Relay1"], ["B", "Relay2"]]), 0),
         executed_state::scalar(json!([["A", "Relay1"], ["B", "Relay2"]])),
         executed_state::par(2, 2),
-        executed_state::stream_string("test", 0),
-        executed_state::stream_string("test", 0),
+        executed_state::stream_string("result from unit_call_service", 0),
+        executed_state::stream_string("result from unit_call_service", 0),
         executed_state::par(1, 0),
         executed_state::request_sent_by("Remote"),
     ];
@@ -132,13 +132,13 @@ fn join_chat() {
     let relay_2_actual_trace = trace_from_result(&relay_2_result);
 
     let relay_2_expected_trace = vec![
-        executed_state::stream_string("test", 0),
+        executed_state::stream_string("result from unit_call_service", 0),
         executed_state::stream_jvalue(json!([["A", "Relay1"], ["B", "Relay2"]]), 0),
         executed_state::scalar(json!([["A", "Relay1"], ["B", "Relay2"]])),
         executed_state::par(1, 3),
         executed_state::request_sent_by("Remote"),
         executed_state::par(2, 0),
-        executed_state::stream_string("test", 0),
+        executed_state::stream_string("result from unit_call_service", 0),
         executed_state::request_sent_by("Relay2"),
     ];
 
@@ -150,14 +150,14 @@ fn join_chat() {
     let client_2_actual_trace = trace_from_result(&client_2_result);
 
     let client_2_expected_trace = vec![
-        executed_state::stream_string("test", 0),
+        executed_state::stream_string("result from unit_call_service", 0),
         executed_state::stream_jvalue(json!([["A", "Relay1"], ["B", "Relay2"]]), 0),
         executed_state::scalar(json!([["A", "Relay1"], ["B", "Relay2"]])),
         executed_state::par(1, 3),
         executed_state::request_sent_by("Remote"),
         executed_state::par(2, 0),
-        executed_state::stream_string("test", 0),
-        executed_state::stream_string("test", 0),
+        executed_state::stream_string("result from unit_call_service", 0),
+        executed_state::stream_string("result from unit_call_service", 0),
     ];
 
     assert_eq!(client_2_actual_trace, client_2_expected_trace);
@@ -200,14 +200,14 @@ fn join() {
     let client_1_actual_trace = trace_from_result(&client_1_result);
 
     let client_1_expected_trace = vec![
-        executed_state::stream_string("test", 0),
+        executed_state::stream_string("result from unit_call_service", 0),
         executed_state::scalar(json!([["A"], ["B"]])),
         executed_state::par(2, 3),
-        executed_state::stream_string("test", 0),
-        executed_state::stream_string("test", 0),
+        executed_state::stream_string("result from unit_call_service", 0),
+        executed_state::stream_string("result from unit_call_service", 0),
         executed_state::par(2, 0),
-        executed_state::stream_string("test", 0),
-        executed_state::stream_string("test", 0),
+        executed_state::stream_string("result from unit_call_service", 0),
+        executed_state::stream_string("result from unit_call_service", 0),
     ];
 
     assert_eq!(client_1_actual_trace, client_1_expected_trace);
@@ -256,14 +256,14 @@ fn init_peer_id() {
     let client_1_actual_trace = trace_from_result(&client_1_result);
 
     let client_1_expected_trace = vec![
-        executed_state::scalar_string("test"),
+        executed_state::scalar_string("result from unit_call_service"),
         executed_state::scalar(json!([["A"], ["B"]])),
         executed_state::par(2, 3),
-        executed_state::scalar_string("test"),
-        executed_state::scalar_string("test"),
+        executed_state::scalar_string("result from unit_call_service"),
+        executed_state::scalar_string("result from unit_call_service"),
         executed_state::par(2, 0),
-        executed_state::scalar_string("test"),
-        executed_state::scalar_string("test"),
+        executed_state::scalar_string("result from unit_call_service"),
+        executed_state::scalar_string("result from unit_call_service"),
         executed_state::request_sent_by("A"),
     ];
 
@@ -275,15 +275,15 @@ fn init_peer_id() {
     let initiator_1_actual_trace = trace_from_result(&initiator_1_result);
 
     let initiator_1_expected_trace = vec![
-        executed_state::scalar_string("test"),
+        executed_state::scalar_string("result from unit_call_service"),
         executed_state::scalar(json!([["A"], ["B"]])),
         executed_state::par(2, 3),
-        executed_state::scalar_string("test"),
-        executed_state::scalar_string("test"),
+        executed_state::scalar_string("result from unit_call_service"),
+        executed_state::scalar_string("result from unit_call_service"),
         executed_state::par(2, 0),
-        executed_state::scalar_string("test"),
-        executed_state::scalar_string("test"),
-        executed_state::scalar_string("test"),
+        executed_state::scalar_string("result from unit_call_service"),
+        executed_state::scalar_string("result from unit_call_service"),
+        executed_state::scalar_string("result from unit_call_service"),
     ];
 
     assert_eq!(initiator_1_actual_trace, initiator_1_expected_trace);

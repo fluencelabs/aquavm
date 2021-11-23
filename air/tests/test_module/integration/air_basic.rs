@@ -36,12 +36,12 @@ fn seq_par_call() {
     let result = checked_call_vm!(vm, "asd", script, "", "");
     let actual_trace = trace_from_result(&result);
 
-    let test_string = "test";
+    let unit_call_service_result = "result from unit_call_service";
     let expected_trace = vec![
         executed_state::par(1, 1),
-        executed_state::scalar_string(test_string),
+        executed_state::scalar_string(unit_call_service_result),
         executed_state::request_sent_by(vm_peer_id),
-        executed_state::scalar_string(test_string),
+        executed_state::scalar_string(unit_call_service_result),
     ];
 
     assert_eq!(actual_trace, expected_trace);
@@ -68,13 +68,13 @@ fn par_par_call() {
     let result = checked_call_vm!(vm, "asd", script, "", "");
     let actual_trace = trace_from_result(&result);
 
-    let test_string = "test";
+    let unit_call_service_result = "result from unit_call_service";
     let expected_trace = vec![
         executed_state::par(3, 1),
         executed_state::par(1, 1),
-        executed_state::scalar_string(test_string),
+        executed_state::scalar_string(unit_call_service_result),
         executed_state::request_sent_by(vm_peer_id),
-        executed_state::scalar_string(test_string),
+        executed_state::scalar_string(unit_call_service_result),
     ];
 
     assert_eq!(actual_trace, expected_trace);
