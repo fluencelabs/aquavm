@@ -17,7 +17,7 @@
 use air_test_utils::prelude::*;
 
 #[test]
-fn par_early_exit__() {
+fn par_early_exit() {
     let init_peer_id = "init_peer_id";
     let setter_1_id = "setter_1";
     let setter_2_id = "setter_2";

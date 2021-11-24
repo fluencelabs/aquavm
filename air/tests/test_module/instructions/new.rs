@@ -264,7 +264,7 @@ fn new_with_errors() {
     let expected_trace = vec![
         executed_state::stream_number(1, 0),
         executed_state::stream_number(2, 0),
-        executed_state::service_failed(1, r#""error""#),
+        executed_state::service_failed(1, "failed result from fallible_call_service"),
     ];
     assert_eq!(actual_trace, expected_trace);
 
