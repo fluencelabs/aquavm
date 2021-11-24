@@ -28,10 +28,11 @@ Instr: Box<Instruction<'input>> = {
             }
         };
 
-        let output = output.map(CallOutputValue::Variable).unwrap_or(CallOutputValue::None);
         let args = Rc::new(args);
-        let call = Call { triplet, args, output};
-        let span = Span { left, right };
+        let output = output.map(CallOutputValue::Variable).unwrap_or(CallOutputValue::None);
+        let call = Call::new(triplet, args, output);
+        let span = Span::new(left, right);
+
         validator.met_call(&call, span);
 
         Box::new(Instruction::Call(call))
@@ -39,42 +40,51 @@ Instr: Box<Instruction<'input>> = {
 
     <left: @L> "(" ap <arg:ApArgument> <result:ApResult> ")" <right: @R> => {
         let apply = Ap::new(arg, result);
-        let span = Span { left, right };
+
+        let span = Span::new(left, right);
         validator.met_ap(&apply, span);
 
         Box::new(Instruction::Ap(apply))
     },
 
-    "(" seq <l:Instr> <r:Instr> ")" => Box::new(Instruction::Seq(Seq(l, r))),
-    "(" par <l:Instr> <r:Instr> ")" => Box::new(Instruction::Par(Par(l, r))),
+    "(" seq <l:Instr> <r:Instr> ")" => Box::new(Instruction::Seq(Seq::new(l, r))),
+    "(" par <l:Instr> <r:Instr> ")" => Box::new(Instruction::Par(Par::new(l, r))),
     "(" null ")" => Box::new(Instruction::Null(Null)),
 
-    <left: @L> "(" fold <iterable:FoldScalarIterable> <iterator_name:Scalar> <i:Instr> ")" <right: @R> => {
-        let iterator = Scalar { name: iterator_name };
-        let instruction = Rc::new(*i);
-        let fold = FoldScalar { iterable, iterator, instruction };
-        let span = Span { left, right };
+    <left: @L> "(" new <variable: ScriptVariable> <instruction:Instr> ")" <right: @R> => {
+        let span = Span::new(left, right);
+        let new = New::new(variable, instruction, span);
+
+        validator.met_new(&new, span);
+
+        Box::new(Instruction::New(new))
+    },
+
+    <left: @L> "(" fold <iterable:FoldScalarIterable> <iterator:Scalar> <i:Instr> ")" <right: @R> => {
+        let iterator = Scalar::new(iterator.0, iterator.1);
+        let span = Span::new(left, right);
+        let fold = FoldScalar::new(iterable, iterator, *i, span);
+
         validator.met_fold_scalar(&fold, span);
 
         Box::new(Instruction::FoldScalar(fold))
     },
 
-    <left: @L> "(" fold <stream_name:Stream> <iterator_name:Scalar> <i:Instr> ")" <right: @R> => {
-        let iterable = Stream { name: stream_name };
-        let iterator = Scalar { name: iterator_name };
-        let instruction = Rc::new(*i);
-        let fold = FoldStream { iterable, iterator, instruction };
+    <left: @L> "(" fold <stream:Stream> <iterator:Scalar> <i:Instr> ")" <right: @R> => {
+        let iterable = Stream::new(stream.0, stream.1);
+        let iterator = Scalar::new(iterator.0, iterator.1);
+        let span = Span::new(left, right);
+        let fold = FoldStream::new(iterable, iterator, *i, span);
 
-        let span = Span { left, right };
         validator.meet_fold_stream(&fold, span);
 
         Box::new(Instruction::FoldStream(fold))
     },
 
-    <left: @L> "(" next <iterator_name:Scalar> ")" <right: @R> => {
-        let iterator = Scalar { name: iterator_name };
-        let next = Next { iterator };
-        let span = Span { left, right };
+    <left: @L> "(" next <iterator:Scalar> ")" <right: @R> => {
+        let iterator = Scalar::new(iterator.0, iterator.1);
+        let next = Next::new(iterator);
+        let span = Span::new(left, right);
         validator.met_next(&next, span);
 
         Box::new(Instruction::Next(next))
@@ -83,16 +93,16 @@ Instr: Box<Instruction<'input>> = {
     "(" xor <l:Instr> <r:Instr> ")" => Box::new(Instruction::Xor(Xor(l, r))),
 
     <left: @L> "(" match_ <l:Value> <r:Value> <i:Instr> ")" <right: @R> => {
-        let match_ = Match { left_value: l, right_value: r, instruction: i};
-        let span = Span { left, right };
+        let match_ = Match::new(l, r, i);
+        let span = Span::new(left, right);
         validator.met_match(&match_, span);
 
         Box::new(Instruction::Match(match_))
     },
 
     <left: @L> "(" mismatch <l:Value> <r:Value> <i:Instr> ")" <right: @R> => {
-        let mismatch = MisMatch { left_value: l, right_value: r, instruction: i};
-        let span = Span { left, right };
+        let mismatch = MisMatch::new(l, r, i);
+        let span = Span::new(left, right);
         validator.met_mismatch(&mismatch, span);
 
         Box::new(Instruction::MisMatch(mismatch))
@@ -119,13 +129,13 @@ ApResult = ScriptVariable;
 CallOutput = ScriptVariable;
 
 ScriptVariable: Variable<'input> = {
-    <scalar:Scalar> => Variable::scalar(scalar),
-    <stream:Stream> => Variable::stream(stream),
+    <scalar:Scalar> => Variable::scalar(scalar.0, scalar.1),
+    <stream:Stream> => Variable::stream(stream.0, stream.1),
 };
 
 FoldScalarIterable: ScalarWithLambda<'input> = {
-    <scalar:Scalar> => ScalarWithLambda::new(scalar, None),
-    <scalar:ScalarWithLambda> => ScalarWithLambda::new(scalar.0, Some(scalar.1)),
+    <scalar:Scalar> => ScalarWithLambda::new(scalar.0, None, scalar.1),
+    <scalar:ScalarWithLambda> => ScalarWithLambda::new(scalar.0, Some(scalar.1), scalar.2),
 };
 
 Function = CallInstrValue;
@@ -135,10 +145,10 @@ ServiceId = CallInstrValue;
 CallInstrValue: CallInstrValue<'input> = {
     InitPeerId => CallInstrValue::InitPeerId,
     <l:Literal> => CallInstrValue::Literal(l),
-    <scalar:Scalar> => CallInstrValue::Variable(VariableWithLambda::scalar(scalar)),
-    <scalar:ScalarWithLambda> => CallInstrValue::Variable(VariableWithLambda::scalar_wl(scalar.0, scalar.1)),
-    <stream:Stream> => CallInstrValue::Variable(VariableWithLambda::stream(stream)),
-    <stream:StreamWithLambda> => CallInstrValue::Variable(VariableWithLambda::stream_wl(stream.0, stream.1)),
+    <scalar:Scalar> => CallInstrValue::Variable(VariableWithLambda::scalar(scalar.0, scalar.1)),
+    <scalar:ScalarWithLambda> => CallInstrValue::Variable(VariableWithLambda::scalar_wl(scalar.0, scalar.1, scalar.2)),
+    <stream:Stream> => CallInstrValue::Variable(VariableWithLambda::stream(stream.0, stream.1)),
+    <stream:StreamWithLambda> => CallInstrValue::Variable(VariableWithLambda::stream_wl(stream.0, stream.1, stream.2)),
 }
 
 Arg = Value;
@@ -150,10 +160,10 @@ Value: Value<'input> = {
     <n:Number> => Value::Number(n),
     <b:Boolean> => Value::Boolean(b),
     EmptyArray => Value::EmptyArray,
-    <scalar_name:Scalar> => Value::Variable(VariableWithLambda::scalar(scalar_name)),
-    <scalar:ScalarWithLambda> => Value::Variable(VariableWithLambda::scalar_wl(scalar.0, scalar.1)),
-    <stream_name:Stream> => Value::Variable(VariableWithLambda::stream(stream_name)),
-    <stream:StreamWithLambda> => Value::Variable(VariableWithLambda::stream_wl(stream.0, stream.1)),
+    <scalar:Scalar> => Value::Variable(VariableWithLambda::scalar(scalar.0, scalar.1)),
+    <scalar:ScalarWithLambda> => Value::Variable(VariableWithLambda::scalar_wl(scalar.0, scalar.1, scalar.2)),
+    <stream:Stream> => Value::Variable(VariableWithLambda::stream(stream.0, stream.1)),
+    <stream:StreamWithLambda> => Value::Variable(VariableWithLambda::stream_wl(stream.0, stream.1, stream.2)),
 }
 
 ApArgument: ApArgument<'input> = {
@@ -163,8 +173,8 @@ ApArgument: ApArgument<'input> = {
     <n:Number> => ApArgument::Number(n),
     <b:Boolean> => ApArgument::Boolean(b),
     EmptyArray => ApArgument::EmptyArray,
-    <scalar:Scalar> => ApArgument::Scalar(ScalarWithLambda { name: scalar, lambda: None }),
-    <scalar:ScalarWithLambda> => ApArgument::Scalar(ScalarWithLambda { name: scalar.0, lambda: Some(scalar.1) }),
+    <scalar:Scalar> => ApArgument::Scalar(ScalarWithLambda::new(scalar.0, None, scalar.1)),
+    <scalar:ScalarWithLambda> => ApArgument::Scalar(ScalarWithLambda::new(scalar.0, Some(scalar.1), scalar.2)),
 }
 
 extern {
@@ -179,10 +189,10 @@ extern {
         EmptyArray => Token::SquareBrackets,
 
         Literal => Token::StringLiteral(<&'input str>),
-        Scalar => Token::Scalar { name:<&'input str> },
-        ScalarWithLambda => Token::ScalarWithLambda { name: <&'input str>, lambda: <LambdaAST<'input>>},
-        Stream => Token::Stream { name: <&'input str> },
-        StreamWithLambda => Token::StreamWithLambda {name: <&'input str>, lambda:<LambdaAST<'input>>},
+        Scalar => Token::Scalar { name:<&'input str>, position: <usize> },
+        ScalarWithLambda => Token::ScalarWithLambda { name: <&'input str>, lambda: <LambdaAST<'input>>, position: <usize> },
+        Stream => Token::Stream { name: <&'input str>, position: <usize> },
+        StreamWithLambda => Token::StreamWithLambda {name: <&'input str>, lambda:<LambdaAST<'input>>, position: <usize>},
         Number => Token::Number(<Number>),
         Boolean => Token::Boolean(<bool>),
 
@@ -193,10 +203,11 @@ extern {
         ap => Token::Ap,
         seq => Token::Seq,
         par => Token::Par,
-        null => Token::Null,
         fold => Token::Fold,
         xor => Token::Xor,
+        new => Token::New,
         next => Token::Next,
+        null => Token::Null,
         match_ => Token::Match,
         mismatch => Token::MisMatch,
     }

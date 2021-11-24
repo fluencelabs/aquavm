@@ -16,28 +16,25 @@
 
 use crate::execution_step::ExecutionCtx;
 use crate::execution_step::ExecutionError;
-use crate::execution_step::Stream;
 use crate::execution_step::TraceHandler;
 use crate::preparation_step::PreparationError;
 use crate::InterpreterOutcome;
 use crate::INTERPRETER_SUCCESS;
 
 use air_interpreter_data::InterpreterData;
-use air_interpreter_data::StreamGenerations;
 use air_interpreter_interface::CallRequests;
 
-use std::cell::RefCell;
-use std::collections::HashMap;
 use std::hash::Hash;
 use std::rc::Rc;
 
 /// Create InterpreterOutcome from supplied execution context and trace handler,
 /// set ret_code to INTERPRETER_SUCCESS.
 pub(crate) fn from_success_result(exec_ctx: ExecutionCtx<'_>, trace_handler: TraceHandler) -> InterpreterOutcome {
-    let streams = extract_stream_generations(exec_ctx.streams);
+    let (global_streams, restricted_streams) = exec_ctx.streams.into_streams_data();
     let data = InterpreterData::from_execution_result(
         trace_handler.into_result_trace(),
-        streams,
+        global_streams,
+        restricted_streams,
         exec_ctx.last_call_request_id,
     );
     let data = serde_json::to_vec(&data).expect("default serializer shouldn't fail");
@@ -94,10 +91,11 @@ pub(crate) fn from_execution_error(
 ) -> InterpreterOutcome {
     let ret_code = err.to_error_code() as i32;
 
-    let streams = extract_stream_generations(exec_ctx.streams);
+    let (global_streams, restricted_streams) = exec_ctx.streams.into_streams_data();
     let data = InterpreterData::from_execution_result(
         trace_handler.into_result_trace(),
-        streams,
+        global_streams,
+        restricted_streams,
         exec_ctx.last_call_request_id,
     );
     let data = serde_json::to_vec(&data).expect("default serializer shouldn't fail");
@@ -119,11 +117,4 @@ fn dedup<T: Eq + Hash>(mut vec: Vec<T>) -> Vec<T> {
 
     let set: HashSet<_> = vec.drain(..).collect();
     set.into_iter().collect()
-}
-
-fn extract_stream_generations(streams: HashMap<String, RefCell<Stream>>) -> StreamGenerations {
-    streams
-        .into_iter()
-        .map(|(name, stream)| (name, stream.borrow().generations_count() as u32))
-        .collect::<_>()
 }

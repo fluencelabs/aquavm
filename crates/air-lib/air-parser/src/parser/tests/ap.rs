@@ -27,7 +27,7 @@ fn ap_with_literal() {
     let actual = parse(source_code);
     let expected = ap(
         ApArgument::Literal("some_string"),
-        Variable::stream("$stream"),
+        Variable::stream("$stream", 27),
     );
 
     assert_eq!(actual, expected);
@@ -42,7 +42,7 @@ fn ap_with_number() {
     let actual = parse(source_code);
     let expected = ap(
         ApArgument::Number(Number::Int(-100)),
-        Variable::stream("$stream"),
+        Variable::stream("$stream", 18),
     );
 
     assert_eq!(actual, expected);
@@ -55,7 +55,7 @@ fn ap_with_bool() {
     "#;
 
     let actual = parse(source_code);
-    let expected = ap(ApArgument::Boolean(true), Variable::stream("$stream"));
+    let expected = ap(ApArgument::Boolean(true), Variable::stream("$stream", 18));
 
     assert_eq!(actual, expected);
 }
@@ -69,7 +69,7 @@ fn ap_with_last_error() {
     let actual = parse(source_code);
     let expected = ap(
         ApArgument::LastError(LastErrorPath::Message),
-        Variable::stream("$stream"),
+        Variable::stream("$stream", 33),
     );
 
     assert_eq!(actual, expected);

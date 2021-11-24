@@ -24,7 +24,6 @@ use std::rc::Rc;
 #[allow(clippy::large_enum_variant)] // for Null and Error variants
 #[derive(Serialize, Debug, PartialEq)]
 pub enum Instruction<'i> {
-    Null(Null),
     Call(Call<'i>),
     Ap(Ap<'i>),
     Seq(Seq<'i>),
@@ -34,7 +33,9 @@ pub enum Instruction<'i> {
     MisMatch(MisMatch<'i>),
     FoldScalar(FoldScalar<'i>),
     FoldStream(FoldStream<'i>),
+    New(New<'i>),
     Next(Next<'i>),
+    Null(Null),
     Error,
 }
 
@@ -88,6 +89,7 @@ pub struct FoldScalar<'i> {
     #[serde(borrow)]
     pub iterator: Scalar<'i>,
     pub instruction: Rc<Instruction<'i>>,
+    pub span: Span,
 }
 
 /// (fold stream_iterable iterator instruction)
@@ -97,12 +99,21 @@ pub struct FoldStream<'i> {
     #[serde(borrow)]
     pub iterator: Scalar<'i>,
     pub instruction: Rc<Instruction<'i>>,
+    pub span: Span,
 }
 
 /// (fold stream_iterable iterator instruction)
 #[derive(Serialize, Debug, PartialEq)]
 pub struct Next<'i> {
     pub iterator: Scalar<'i>,
+}
+
+/// (new variable instruction)
+#[derive(Serialize, Debug, PartialEq)]
+pub struct New<'i> {
+    pub variable: Variable<'i>,
+    pub instruction: Box<Instruction<'i>>,
+    pub span: Span,
 }
 
 /// (null)

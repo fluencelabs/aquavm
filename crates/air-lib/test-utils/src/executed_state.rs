@@ -33,7 +33,14 @@ pub fn scalar(result: JValue) -> ExecutedState {
     ExecutedState::Call(CallResult::Executed(value))
 }
 
-pub fn stream_jvalue(result: JValue, generation: u32) -> ExecutedState {
+pub fn scalar_number(result: impl Into<serde_json::Number>) -> ExecutedState {
+    let result = JValue::Number(result.into());
+    let value = Rc::new(result);
+
+    ExecutedState::Call(CallResult::executed_scalar(value))
+}
+
+pub fn stream(result: JValue, generation: u32) -> ExecutedState {
     let call_result = CallResult::executed_stream(Rc::new(result), generation);
     ExecutedState::Call(call_result)
 }

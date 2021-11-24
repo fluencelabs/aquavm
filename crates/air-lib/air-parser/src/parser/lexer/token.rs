@@ -34,17 +34,21 @@ pub enum Token<'input> {
     StringLiteral(&'input str),
     Scalar {
         name: &'input str,
+        position: usize,
     },
     ScalarWithLambda {
         name: &'input str,
         lambda: LambdaAST<'input>,
+        position: usize,
     },
     Stream {
         name: &'input str,
+        position: usize,
     },
     StreamWithLambda {
         name: &'input str,
         lambda: LambdaAST<'input>,
+        position: usize,
     },
     Number(Number),
     Boolean(bool),
@@ -56,10 +60,11 @@ pub enum Token<'input> {
     Ap,
     Seq,
     Par,
-    Null,
     Fold,
     Xor,
+    New,
     Next,
+    Null,
     Match,
     MisMatch,
 }

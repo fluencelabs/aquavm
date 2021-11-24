@@ -262,13 +262,13 @@ fn fold_merge() {
 
     let data = InterpreterData::try_from_slice(&result_7.data).expect("data should be well-formed");
     let stream_1_generations = data
-        .streams
+        .global_streams
         .get("$stream_1")
-        .expect("$stream_1 should presence in data");
+        .expect("$stream_1 should be present in data");
     let stream_2_generations = data
-        .streams
+        .global_streams
         .get("$stream_2")
-        .expect("$stream_2 should presence in data");
+        .expect("$stream_2 should be present in data");
 
     assert_eq!(*stream_1_generations, 4);
     assert_eq!(*stream_2_generations, 3);
