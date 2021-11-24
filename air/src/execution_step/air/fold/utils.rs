@@ -132,10 +132,10 @@ fn create_scalar_lambda_iterable<'ctx>(
         }
         ScalarRef::IterableValue(fold_state) => {
             let iterable_value = fold_state.iterable.peek().unwrap();
-            let jvalues = iterable_value.apply_lambda(lambda)?;
+            let jvalue = iterable_value.apply_lambda(lambda)?;
             let tetraplet = as_tetraplet(&iterable_value);
 
-            from_jvalue(jvalues[0], tetraplet, lambda)
+            from_jvalue(jvalue, tetraplet, lambda)
         }
     }
 }
