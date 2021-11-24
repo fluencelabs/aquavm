@@ -20,6 +20,7 @@ use super::JValuable;
 use crate::exec_err;
 use crate::execution_step::boxed_value::Generation;
 use crate::execution_step::boxed_value::Stream;
+use crate::execution_step::RSecurityTetraplet;
 use crate::execution_step::SecurityTetraplets;
 use crate::JValue;
 use crate::LambdaAST;
@@ -38,17 +39,14 @@ pub(crate) struct StreamJvaluableIngredients<'stream> {
 // TODO: this will be deleted soon, because it would be impossible to use streams without
 // canonicalization as an arg of a call
 impl JValuable for StreamJvaluableIngredients<'_> {
-    fn apply_lambda(&self, lambda: &LambdaAST<'_>) -> ExecutionResult<Vec<&JValue>> {
+    fn apply_lambda(&self, lambda: &LambdaAST<'_>) -> ExecutionResult<&JValue> {
         let iter = self.iter()?.map(|v| v.result.deref());
         let select_result = select_from_stream(iter, lambda)?;
 
-        Ok(vec![select_result.result])
+        Ok(select_result.result)
     }
 
-    fn apply_lambda_with_tetraplets(
-        &self,
-        lambda: &LambdaAST<'_>,
-    ) -> ExecutionResult<(Vec<&JValue>, SecurityTetraplets)> {
+    fn apply_lambda_with_tetraplets(&self, lambda: &LambdaAST<'_>) -> ExecutionResult<(&JValue, RSecurityTetraplet)> {
         let iter = self.iter()?.map(|v| v.result.deref());
         let select_result = select_from_stream(iter, lambda)?;
 
@@ -57,7 +55,7 @@ impl JValuable for StreamJvaluableIngredients<'_> {
         let tetraplet = resolved_call.tetraplet.clone();
         tetraplet.borrow_mut().add_lambda(&format_ast(lambda));
 
-        Ok((vec![select_result.result], vec![tetraplet]))
+        Ok((select_result.result, tetraplet))
     }
 
     fn as_jvalue(&self) -> Cow<'_, JValue> {

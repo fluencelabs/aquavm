@@ -29,7 +29,7 @@ impl<'i> ExecutableInstruction<'i> for FoldScalar<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         log_instruction!(fold, exec_ctx, trace_ctx);
 
-        exec_ctx.scalars.meet_fold_begin();
+        exec_ctx.scalars.meet_fold_start();
 
         let fold_result = match construct_scalar_iterable_value(&self.iterable, exec_ctx)? {
             FoldIterableScalar::Empty => Ok(()),

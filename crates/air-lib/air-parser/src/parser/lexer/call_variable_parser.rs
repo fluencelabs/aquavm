@@ -274,17 +274,31 @@ impl<'input> CallVariableParser<'input> {
 
     fn to_variable_token<'v>(&self, name: &'v str) -> Token<'v> {
         if self.state.is_first_stream_tag {
-            Token::Stream { name }
+            Token::Stream {
+                name,
+                position: self.start_pos,
+            }
         } else {
-            Token::Scalar { name }
+            Token::Scalar {
+                name,
+                position: self.start_pos,
+            }
         }
     }
 
     fn to_variable_token_with_lambda<'v>(&self, name: &'v str, lambda: LambdaAST<'v>) -> Token<'v> {
         if self.state.is_first_stream_tag {
-            Token::StreamWithLambda { name, lambda }
+            Token::StreamWithLambda {
+                name,
+                lambda,
+                position: self.start_pos,
+            }
         } else {
-            Token::ScalarWithLambda { name, lambda }
+            Token::ScalarWithLambda {
+                name,
+                lambda,
+                position: self.start_pos,
+            }
         }
     }
 

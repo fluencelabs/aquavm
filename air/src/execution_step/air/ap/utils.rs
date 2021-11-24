@@ -80,7 +80,7 @@ fn variable_to_generations(variable: &ast::Variable<'_>, exec_ctx: &ExecutionCtx
         Stream(stream) => {
             // unwrap here is safe because this function will be called only
             // when this stream's been created
-            let stream = exec_ctx.streams.get(stream.name).unwrap();
+            let stream = exec_ctx.streams.get(stream.name, stream.position).unwrap();
             let generation = match stream.borrow().generations_count() {
                 0 => 0,
                 n => n - 1,

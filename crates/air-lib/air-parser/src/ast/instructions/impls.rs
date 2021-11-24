@@ -21,3 +21,121 @@ impl<'i> Ap<'i> {
         Self { argument, result }
     }
 }
+
+impl<'i> Call<'i> {
+    pub fn new(
+        triplet: Triplet<'i>,
+        args: Rc<Vec<Value<'i>>>,
+        output: CallOutputValue<'i>,
+    ) -> Self {
+        Self {
+            triplet,
+            args,
+            output,
+        }
+    }
+}
+
+impl<'i> Seq<'i> {
+    pub fn new(
+        left_instruction: Box<Instruction<'i>>,
+        right_instruction: Box<Instruction<'i>>,
+    ) -> Self {
+        Self(left_instruction, right_instruction)
+    }
+}
+
+impl<'i> Par<'i> {
+    pub fn new(
+        left_instruction: Box<Instruction<'i>>,
+        right_instruction: Box<Instruction<'i>>,
+    ) -> Self {
+        Self(left_instruction, right_instruction)
+    }
+}
+
+impl<'i> Xor<'i> {
+    pub fn new(
+        left_instruction: Box<Instruction<'i>>,
+        right_instruction: Box<Instruction<'i>>,
+    ) -> Self {
+        Self(left_instruction, right_instruction)
+    }
+}
+
+impl<'i> Match<'i> {
+    pub fn new(
+        left_value: Value<'i>,
+        right_value: Value<'i>,
+        instruction: Box<Instruction<'i>>,
+    ) -> Self {
+        Self {
+            left_value,
+            right_value,
+            instruction,
+        }
+    }
+}
+
+impl<'i> MisMatch<'i> {
+    pub fn new(
+        left_value: Value<'i>,
+        right_value: Value<'i>,
+        instruction: Box<Instruction<'i>>,
+    ) -> Self {
+        Self {
+            left_value,
+            right_value,
+            instruction,
+        }
+    }
+}
+
+impl<'i> FoldScalar<'i> {
+    pub fn new(
+        iterable: ScalarWithLambda<'i>,
+        iterator: Scalar<'i>,
+        instruction: Instruction<'i>,
+        span: Span,
+    ) -> Self {
+        Self {
+            iterable,
+            iterator,
+            instruction: Rc::new(instruction),
+            span,
+        }
+    }
+}
+
+impl<'i> FoldStream<'i> {
+    pub fn new(
+        iterable: Stream<'i>,
+        iterator: Scalar<'i>,
+        instruction: Instruction<'i>,
+        span: Span,
+    ) -> Self {
+        Self {
+            iterable,
+            iterator,
+            instruction: Rc::new(instruction),
+            span,
+        }
+    }
+}
+
+impl<'i> Next<'i> {
+    pub fn new(iterator: Scalar<'i>) -> Self {
+        Self { iterator }
+    }
+}
+
+impl<'i> New<'i> {
+    #[allow(clippy::self_named_constructors)]
+    pub fn new(variable: Variable<'i>, instruction: Box<Instruction<'i>>, span: Span) -> Self {
+        Self {
+            variable,
+            instruction,
+            span,
+        }
+    }
+}

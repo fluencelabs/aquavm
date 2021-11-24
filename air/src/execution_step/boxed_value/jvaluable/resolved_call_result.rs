@@ -19,6 +19,7 @@ use super::ExecutionResult;
 use super::JValuable;
 use super::LambdaAST;
 use super::ValueAggregate;
+use crate::execution_step::RSecurityTetraplet;
 use crate::execution_step::SecurityTetraplets;
 use crate::JValue;
 
@@ -28,20 +29,17 @@ use std::borrow::Cow;
 use std::ops::Deref;
 
 impl JValuable for ValueAggregate {
-    fn apply_lambda(&self, lambda: &LambdaAST<'_>) -> ExecutionResult<Vec<&JValue>> {
+    fn apply_lambda(&self, lambda: &LambdaAST<'_>) -> ExecutionResult<&JValue> {
         let selected_value = select(&self.result, lambda.iter())?;
-        Ok(vec![selected_value])
+        Ok(selected_value)
     }
 
-    fn apply_lambda_with_tetraplets(
-        &self,
-        lambda: &LambdaAST<'_>,
-    ) -> ExecutionResult<(Vec<&JValue>, SecurityTetraplets)> {
+    fn apply_lambda_with_tetraplets(&self, lambda: &LambdaAST<'_>) -> ExecutionResult<(&JValue, RSecurityTetraplet)> {
         let selected_value = select(&self.result, lambda.iter())?;
         let tetraplet = self.tetraplet.clone();
         tetraplet.borrow_mut().add_lambda(&format_ast(lambda));
 
-        Ok((vec![selected_value], vec![tetraplet]))
+        Ok((selected_value, tetraplet))
     }
 
     fn as_jvalue(&self) -> Cow<'_, JValue> {

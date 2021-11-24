@@ -51,10 +51,10 @@ pub(crate) fn construct_scalar_iterable_value<'ctx>(
 
 /// Constructs iterable value for given stream iterable.
 pub(crate) fn construct_stream_iterable_value<'ctx>(
-    stream_name: &'ctx str,
+    stream: &ast::Stream<'_>,
     exec_ctx: &ExecutionCtx<'ctx>,
 ) -> ExecutionResult<FoldIterableStream> {
-    match exec_ctx.streams.get(stream_name) {
+    match exec_ctx.streams.get(stream.name, stream.position) {
         Some(stream) => {
             let stream = stream.borrow();
             if stream.is_empty() {
@@ -132,10 +132,10 @@ fn create_scalar_lambda_iterable<'ctx>(
         }
         ScalarRef::IterableValue(fold_state) => {
             let iterable_value = fold_state.iterable.peek().unwrap();
-            let jvalues = iterable_value.apply_lambda(lambda)?;
+            let jvalue = iterable_value.apply_lambda(lambda)?;
             let tetraplet = as_tetraplet(&iterable_value);
 
-            from_jvalue(jvalues[0], tetraplet, lambda)
+            from_jvalue(jvalue, tetraplet, lambda)
         }
     }
 }

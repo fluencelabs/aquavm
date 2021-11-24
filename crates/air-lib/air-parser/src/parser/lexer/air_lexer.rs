@@ -192,10 +192,11 @@ fn string_to_token(input: &str, start_pos: usize) -> LexerResult<Token> {
         AP_INSTR => Ok(Token::Ap),
         SEQ_INSTR => Ok(Token::Seq),
         PAR_INSTR => Ok(Token::Par),
-        NULL_INSTR => Ok(Token::Null),
         FOLD_INSTR => Ok(Token::Fold),
         XOR_INSTR => Ok(Token::Xor),
+        NEW_INSTR => Ok(Token::New),
         NEXT_INSTR => Ok(Token::Next),
+        NULL_INSTR => Ok(Token::Null),
         MATCH_INSTR => Ok(Token::Match),
         MISMATCH_INSTR => Ok(Token::MisMatch),
 
@@ -237,10 +238,11 @@ const CALL_INSTR: &str = "call";
 const AP_INSTR: &str = "ap";
 const SEQ_INSTR: &str = "seq";
 const PAR_INSTR: &str = "par";
-const NULL_INSTR: &str = "null";
 const FOLD_INSTR: &str = "fold";
 const XOR_INSTR: &str = "xor";
+const NEW_INSTR: &str = "new";
 const NEXT_INSTR: &str = "next";
+const NULL_INSTR: &str = "null";
 const MATCH_INSTR: &str = "match";
 const MISMATCH_INSTR: &str = "mismatch";
 

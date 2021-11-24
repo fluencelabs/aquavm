@@ -160,7 +160,14 @@ fn stream() {
 
     lexer_test(
         STREAM,
-        Single(Ok((0, Token::Stream { name: STREAM }, STREAM.len()))),
+        Single(Ok((
+            0,
+            Token::Stream {
+                name: STREAM,
+                position: 0,
+            },
+            STREAM.len(),
+        ))),
     );
 }
 
@@ -284,6 +291,7 @@ fn lambda() {
                         ValueAccessor::ArrayAccess { idx: 1 },
                     ])
                 },
+                position: 0,
             },
             LAMBDA.len(),
         ))),
@@ -453,6 +461,7 @@ fn booleans() {
             0,
             Token::Scalar {
                 name: NON_BOOL_CONST,
+                position: 0,
             },
             NON_BOOL_CONST.len(),
         ))),

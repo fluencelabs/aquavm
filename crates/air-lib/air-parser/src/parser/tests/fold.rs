@@ -67,7 +67,12 @@ fn parse_fold() {
         )
         "#;
     let instruction = parse(&source_code);
-    let expected = fold_scalar(ScalarWithLambda::new("iterable", None), "i", null());
+    let expected = fold_scalar(
+        ScalarWithLambda::new("iterable", None, 15),
+        Scalar::new("i", 24),
+        null(),
+        Span::new(9, 54),
+    );
     assert_eq!(instruction, expected);
 }
 
@@ -84,9 +89,11 @@ fn fold_json_path() {
         ScalarWithLambda::from_raw_lambda(
             "members",
             vec![ValueAccessor::ArrayAccess { idx: 123321 }],
+            33,
         ),
-        "m",
+        Scalar::new("m", 52),
         null(),
+        Span::new(27, 61),
     );
     assert_eq!(instruction, expected);
 }
@@ -98,7 +105,12 @@ fn fold_on_stream() {
     "#;
 
     let instruction = parse(source_code);
-    let expected = fold_stream("$stream", "iterator", null());
+    let expected = fold_stream(
+        Stream::new("$stream", 15),
+        Scalar::new("iterator", 23),
+        null(),
+        Span::new(9, 39),
+    );
     assert_eq!(instruction, expected);
 }
 
@@ -119,9 +131,11 @@ fn comments() {
                 },
                 ValueAccessor::ArrayAccess { idx: 1 },
             ],
+            33,
         ),
-        "m",
+        Scalar::new("m", 52),
         null(),
+        Span::new(27, 61),
     );
     assert_eq!(instruction, expected);
 }
@@ -138,9 +152,10 @@ fn parse_fold_with_xor_par_seq() {
         let instruction = parse(&source_code);
         let instr = binary_instruction(*name);
         let expected = fold_scalar(
-            ScalarWithLambda::new("iterable", None),
-            "i",
+            ScalarWithLambda::new("iterable", None, 6),
+            Scalar::new("i", 15),
             instr(null(), null()),
+            Span::new(0, 58),
         );
         assert_eq!(instruction, expected);
     }

@@ -88,13 +88,10 @@ fn make_exec_ctx(
 }
 
 fn create_streams(ctx: &mut ExecutionCtx<'_>, prev_data: &InterpreterData) {
-    use std::cell::RefCell;
-
-    for (stream_name, generation_count) in prev_data.streams.iter() {
+    for (stream_name, generation_count) in prev_data.global_streams.iter() {
         let new_stream = Stream::from_generations_count(*generation_count as usize);
-        let new_stream = RefCell::new(new_stream);
 
         // it's impossible to have duplicates of streams in data because of HashMap in data
-        ctx.streams.insert(stream_name.to_string(), new_stream);
+        ctx.streams.add_global_stream(stream_name.to_string(), new_stream);
     }
 }

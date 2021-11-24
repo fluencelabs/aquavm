@@ -19,6 +19,7 @@ mod call;
 mod fold;
 mod match_;
 mod mismatch;
+mod new;
 mod par;
 mod seq;
 mod xor;
