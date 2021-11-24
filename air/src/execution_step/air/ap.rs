@@ -17,7 +17,6 @@
 mod apply_to_arguments;
 mod utils;
 
-use super::call::call_result_setter::set_stream_result;
 use super::ExecutionCtx;
 use super::ExecutionResult;
 use super::TraceHandler;
@@ -75,7 +74,10 @@ fn save_result<'ctx>(
         Scalar(scalar) => exec_ctx.scalars.set_value(scalar.name, result).map(|_| ()),
         Stream(stream) => {
             let generation = ap_result_to_generation(merger_ap_result);
-            set_stream_result(result, generation, stream.name.to_string(), exec_ctx).map(|_| ())
+            exec_ctx
+                .streams
+                .add_stream_value(result, generation, stream.name, stream.position)
+                .map(|_| ())
         }
     }
 }

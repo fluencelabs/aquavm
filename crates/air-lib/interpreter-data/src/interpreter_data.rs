@@ -15,13 +15,13 @@
  */
 
 use super::ExecutedState;
+use super::GlobalStreamGens;
+use super::RestrictedStreamGens;
 use super::DATA_FORMAT_VERSION;
 use serde::Deserialize;
 use serde::Serialize;
-use std::collections::HashMap;
 use std::ops::Deref;
 
-pub type StreamGenerations = HashMap<String, u32>;
 pub type ExecutionTrace = Vec<ExecutedState>;
 
 /// The AIR interpreter could be considered as a function
@@ -33,9 +33,11 @@ pub struct InterpreterData {
     /// Trace of AIR execution, which contains executed call, par and fold states.
     pub trace: ExecutionTrace,
 
-    /// Contains maximum generation for each stream. This info will be used while merging
-    /// values in streams.
-    pub streams: StreamGenerations,
+    /// Contains maximum generation for each global stream. This info will be used while merging
+    /// values in streams. This field is also needed for backward compatibility with
+    /// <= 0.2.1 versions.
+    #[serde(rename = "streams")] // for compatibility with versions <= 0.2.1
+    pub global_streams: GlobalStreamGens,
 
     /// Version of this data format.
     pub version: semver::Version,
@@ -44,28 +46,37 @@ pub struct InterpreterData {
     #[serde(default)]
     #[serde(rename = "lcid")]
     pub last_call_request_id: u32,
+
+    /// Contains maximum generation for each private stream. This info will be used while merging
+    /// values in streams.
+    #[serde(default)]
+    #[serde(rename = "r_streams")]
+    pub restricted_streams: RestrictedStreamGens,
 }
 
 impl InterpreterData {
     pub fn new() -> Self {
         Self {
             trace: <_>::default(),
-            streams: <_>::default(),
+            global_streams: <_>::default(),
             version: DATA_FORMAT_VERSION.deref().clone(),
             last_call_request_id: 0,
+            restricted_streams: <_>::default(),
         }
     }
 
     pub fn from_execution_result(
         trace: ExecutionTrace,
-        streams: StreamGenerations,
+        streams: GlobalStreamGens,
+        restricted_streams: RestrictedStreamGens,
         last_call_request_id: u32,
     ) -> Self {
         Self {
             trace,
-            streams,
+            global_streams: streams,
             version: DATA_FORMAT_VERSION.deref().clone(),
             last_call_request_id,
+            restricted_streams,
         }
     }
 
@@ -98,14 +109,14 @@ mod tests {
         #[derive(Serialize, Deserialize)]
         struct InterpreterData0_2_0 {
             pub trace: ExecutionTrace,
-            pub streams: StreamGenerations,
+            pub streams: GlobalStreamGens,
             pub version: semver::Version,
         }
 
-        // test 0.2.0 to 0.2.1 conversion
+        // test 0.2.0 to 0.2.2 conversion
         let data_0_2_0 = InterpreterData0_2_0 {
             trace: ExecutionTrace::default(),
-            streams: StreamGenerations::default(),
+            streams: GlobalStreamGens::default(),
             version: semver::Version::new(0, 2, 0),
         };
 
@@ -113,10 +124,41 @@ mod tests {
         let data_0_2_1 = serde_json::from_slice::<InterpreterData>(&data_0_2_0_se);
         assert!(data_0_2_1.is_ok());
 
-        // test 0.2.1 to 0.2.1 conversion
-        let data_0_2_1 = InterpreterData::default();
+        // test 0.2.2 to 0.2.0 conversion
+        let data_0_2_2 = InterpreterData::default();
+        let data_0_2_2_se = serde_json::to_vec(&data_0_2_2).unwrap();
+        let data_0_2_0 = serde_json::from_slice::<InterpreterData0_2_0>(&data_0_2_2_se);
+        assert!(data_0_2_0.is_ok());
+    }
+
+    #[test]
+    fn compatible_with_0_2_1_version() {
+        #[derive(Serialize, Deserialize)]
+        struct InterpreterData0_2_1 {
+            pub trace: ExecutionTrace,
+            pub streams: GlobalStreamGens,
+            pub version: semver::Version,
+            #[serde(default)]
+            #[serde(rename = "lcid")]
+            pub last_call_request_id: u32,
+        }
+
+        // test 0.2.1 to 0.2.2 conversion
+        let data_0_2_1 = InterpreterData0_2_1 {
+            trace: ExecutionTrace::default(),
+            streams: GlobalStreamGens::default(),
+            version: semver::Version::new(0, 2, 1),
+            last_call_request_id: 1,
+        };
+
         let data_0_2_1_se = serde_json::to_vec(&data_0_2_1).unwrap();
-        let data_0_2_0 = serde_json::from_slice::<InterpreterData0_2_0>(&data_0_2_1_se);
+        let data_0_2_2 = serde_json::from_slice::<InterpreterData>(&data_0_2_1_se);
+        assert!(data_0_2_2.is_ok());
+
+        // test 0.2.2 to 0.2.1 conversion
+        let data_0_2_2 = InterpreterData::default();
+        let data_0_2_2_se = serde_json::to_vec(&data_0_2_2).unwrap();
+        let data_0_2_0 = serde_json::from_slice::<InterpreterData0_2_1>(&data_0_2_2_se);
         assert!(data_0_2_0.is_ok());
     }
 }

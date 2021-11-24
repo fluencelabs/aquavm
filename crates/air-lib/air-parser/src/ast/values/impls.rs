@@ -19,55 +19,73 @@ use air_lambda_parser::LambdaAST;
 use air_lambda_parser::ValueAccessor;
 
 impl<'i> ScalarWithLambda<'i> {
-    pub fn new(name: &'i str, lambda: Option<LambdaAST<'i>>) -> Self {
-        Self { name, lambda }
+    pub fn new(name: &'i str, lambda: Option<LambdaAST<'i>>, position: usize) -> Self {
+        Self {
+            name,
+            lambda,
+            position,
+        }
     }
 
     // it's unsafe method that should be used only for tests
-    pub(crate) fn from_raw_lambda(name: &'i str, lambda: Vec<ValueAccessor<'i>>) -> Self {
+    pub(crate) fn from_raw_lambda(
+        name: &'i str,
+        lambda: Vec<ValueAccessor<'i>>,
+        position: usize,
+    ) -> Self {
         let lambda = unsafe { LambdaAST::new_unchecked(lambda) };
         Self {
             name,
             lambda: Some(lambda),
+            position,
         }
     }
 }
 
 impl<'i> StreamWithLambda<'i> {
-    pub fn new(name: &'i str, lambda: Option<LambdaAST<'i>>) -> Self {
-        Self { name, lambda }
+    pub fn new(name: &'i str, lambda: Option<LambdaAST<'i>>, position: usize) -> Self {
+        Self {
+            name,
+            lambda,
+            position,
+        }
     }
 
     // it's unsafe method that should be used only for tests
     #[allow(dead_code)]
-    pub(crate) fn from_raw_lambda(name: &'i str, lambda: Vec<ValueAccessor<'i>>) -> Self {
+    pub(crate) fn from_raw_lambda(
+        name: &'i str,
+        lambda: Vec<ValueAccessor<'i>>,
+        position: usize,
+    ) -> Self {
         let lambda = unsafe { LambdaAST::new_unchecked(lambda) };
         Self {
             name,
             lambda: Some(lambda),
+            position,
         }
     }
 }
 
 impl<'i> Scalar<'i> {
-    pub fn new(name: &'i str) -> Self {
-        Self { name }
+    pub fn new(name: &'i str, position: usize) -> Self {
+        Self { name, position }
     }
 }
 
 impl<'i> Stream<'i> {
-    pub fn new(name: &'i str) -> Self {
-        Self { name }
+    pub fn new(name: &'i str, position: usize) -> Self {
+        Self { name, position }
     }
 }
 
 impl<'i> Variable<'i> {
-    pub fn scalar(name: &'i str) -> Self {
-        Self::Scalar(Scalar { name })
+    pub fn scalar(name: &'i str, position: usize) -> Self {
+        Self::Scalar(Scalar::new(name, position))
     }
 
-    pub fn stream(name: &'i str) -> Self {
-        Self::Stream(Stream { name })
+    pub fn stream(name: &'i str, position: usize) -> Self {
+        Self::Stream(Stream::new(name, position))
     }
 
     pub fn name(&self) -> &str {
@@ -79,26 +97,20 @@ impl<'i> Variable<'i> {
 }
 
 impl<'i> VariableWithLambda<'i> {
-    pub fn scalar(name: &'i str) -> Self {
-        Self::Scalar(ScalarWithLambda { name, lambda: None })
+    pub fn scalar(name: &'i str, position: usize) -> Self {
+        Self::Scalar(ScalarWithLambda::new(name, None, position))
     }
 
-    pub fn scalar_wl(name: &'i str, lambda: LambdaAST<'i>) -> Self {
-        Self::Scalar(ScalarWithLambda {
-            name,
-            lambda: Some(lambda),
-        })
+    pub fn scalar_wl(name: &'i str, lambda: LambdaAST<'i>, position: usize) -> Self {
+        Self::Scalar(ScalarWithLambda::new(name, Some(lambda), position))
     }
 
-    pub fn stream(name: &'i str) -> Self {
-        Self::Stream(StreamWithLambda { name, lambda: None })
+    pub fn stream(name: &'i str, position: usize) -> Self {
+        Self::Stream(StreamWithLambda::new(name, None, position))
     }
 
-    pub fn stream_wl(name: &'i str, lambda: LambdaAST<'i>) -> Self {
-        Self::Stream(StreamWithLambda {
-            name,
-            lambda: Some(lambda),
-        })
+    pub fn stream_wl(name: &'i str, lambda: LambdaAST<'i>, position: usize) -> Self {
+        Self::Stream(StreamWithLambda::new(name, Some(lambda), position))
     }
 
     pub fn name(&self) -> &str {
@@ -117,15 +129,23 @@ impl<'i> VariableWithLambda<'i> {
 
     // This function is unsafe and lambda must be non-empty, although it's used only for tests
     #[allow(dead_code)]
-    pub(crate) fn from_raw_lambda_scalar(name: &'i str, lambda: Vec<ValueAccessor<'i>>) -> Self {
-        let scalar = ScalarWithLambda::from_raw_lambda(name, lambda);
+    pub(crate) fn from_raw_lambda_scalar(
+        name: &'i str,
+        lambda: Vec<ValueAccessor<'i>>,
+        position: usize,
+    ) -> Self {
+        let scalar = ScalarWithLambda::from_raw_lambda(name, lambda, position);
         Self::Scalar(scalar)
     }
 
     // This function is unsafe and lambda must be non-empty, although it's used only for tests
     #[allow(dead_code)]
-    pub(crate) fn from_raw_lambda_stream(name: &'i str, lambda: Vec<ValueAccessor<'i>>) -> Self {
-        let stream = StreamWithLambda::from_raw_lambda(name, lambda);
+    pub(crate) fn from_raw_lambda_stream(
+        name: &'i str,
+        lambda: Vec<ValueAccessor<'i>>,
+        position: usize,
+    ) -> Self {
+        let stream = StreamWithLambda::from_raw_lambda(name, lambda, position);
         Self::Stream(stream)
     }
 }

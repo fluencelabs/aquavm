@@ -23,7 +23,6 @@ impl fmt::Display for Instruction<'_> {
         use Instruction::*;
 
         match self {
-            Null(null) => write!(f, "{}", null),
             Call(call) => write!(f, "{}", call),
             Ap(ap) => write!(f, "{}", ap),
             Seq(seq) => write!(f, "{}", seq),
@@ -34,6 +33,8 @@ impl fmt::Display for Instruction<'_> {
             FoldScalar(fold) => write!(f, "{}", fold),
             FoldStream(fold) => write!(f, "{}", fold),
             Next(next) => write!(f, "{}", next),
+            New(new) => write!(f, "{}", new),
+            Null(null) => write!(f, "{}", null),
             Error => Ok(()),
         }
     }
@@ -105,5 +106,11 @@ impl fmt::Display for MisMatch<'_> {
 impl fmt::Display for Next<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "next")
+    }
+}
+
+impl fmt::Display for New<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "new {}", self.variable)
     }
 }

@@ -1,3 +1,17 @@
+## Version 0.17.0 (2021-11-24)
+
+[PR 172](https://github.com/fluencelabs/aquavm/pull/172):  
+A new instruction intended to restrict a scope of variables was introduced to AquaVM.
+
+[PR 168](https://github.com/fluencelabs/aquavm/pull/168):  
+AIR parser and AST was highly refactored to be more suitable to the scalar/stream restriction scheme used in AIR instructions.   
+
+[PR 164](https://github.com/fluencelabs/aquavm/pull/164):  
+SecurityTetraplet was decoupled with marine-rs-sdk to have the only one definition in AquaVM that then exported by marine-rs-sdk.
+
+[PR 162](https://github.com/fluencelabs/aquavm/pull/162):  
+The scalar scoping scheme was improved in order to support more than two scope levels. 
+
 ## Version 0.16.0 (2021-10-18)
 
 [PR 154](https://github.com/fluencelabs/aquavm/pull/154)  

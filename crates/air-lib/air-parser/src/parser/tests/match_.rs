@@ -27,8 +27,8 @@ fn parse_match() {
         "#;
     let instruction = parse(&source_code);
     let expected = match_(
-        Value::Variable(VariableWithLambda::scalar("v1")),
-        Value::Variable(VariableWithLambda::scalar("v2")),
+        Value::Variable(VariableWithLambda::scalar("v1", 16)),
+        Value::Variable(VariableWithLambda::scalar("v2", 19)),
         null(),
     );
     assert_eq!(instruction, expected);
@@ -43,7 +43,7 @@ fn parse_match_with_init_peer_id() {
         "#;
     let instruction = parse(&source_code);
     let expected = match_(
-        Value::Variable(VariableWithLambda::scalar("v1")),
+        Value::Variable(VariableWithLambda::scalar("v1", 16)),
         Value::InitPeerId,
         null(),
     );
@@ -59,8 +59,8 @@ fn parse_mismatch() {
         "#;
     let instruction = parse(&source_code);
     let expected = mismatch(
-        Value::Variable(VariableWithLambda::scalar("v1")),
-        Value::Variable(VariableWithLambda::scalar("v2")),
+        Value::Variable(VariableWithLambda::scalar("v1", 19)),
+        Value::Variable(VariableWithLambda::scalar("v2", 22)),
         null(),
     );
     assert_eq!(instruction, expected);
@@ -74,7 +74,7 @@ fn match_with_bool() {
          )
         "#;
 
-    let left_value = Value::Variable(VariableWithLambda::scalar("isOnline"));
+    let left_value = Value::Variable(VariableWithLambda::scalar("isOnline", 17));
     let right_value = Value::Boolean(true);
     let null = null();
     let expected = match_(left_value, right_value, null);
@@ -92,7 +92,7 @@ fn mismatch_with_bool() {
         "#;
 
     let left_value = Value::Boolean(true);
-    let right_value = Value::Variable(VariableWithLambda::scalar("isOnline"));
+    let right_value = Value::Variable(VariableWithLambda::scalar("isOnline", 25));
     let null = null();
     let expected = mismatch(left_value, right_value, null);
 
