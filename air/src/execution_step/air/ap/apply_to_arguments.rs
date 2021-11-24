@@ -109,7 +109,7 @@ fn apply_scalar_wl_impl(
     exec_ctx: &ExecutionCtx<'_>,
     trace_ctx: &TraceHandler,
 ) -> ExecutionResult<ValueAggregate> {
-    let variable = Variable::scalar(scalar_name);
+    let variable = Variable::scalar(scalar_name, position);
     let (jvalue, tetraplet) = apply_lambda(variable, lambda, exec_ctx)?;
     let result = ValueAggregate::new(Rc::new(jvalue), tetraplet, trace_ctx.trace_pos());
 
