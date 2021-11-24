@@ -50,7 +50,7 @@ pub struct InterpreterData {
     /// Contains maximum generation for each private stream. This info will be used while merging
     /// values in streams.
     #[serde(default)]
-    #[serde(rename = "g_streams")]
+    #[serde(rename = "r_streams")]
     pub restricted_streams: RestrictedStreamGens,
 }
 
@@ -68,7 +68,7 @@ impl InterpreterData {
     pub fn from_execution_result(
         trace: ExecutionTrace,
         streams: GlobalStreamGens,
-        private_streams: RestrictedStreamGens,
+        restricted_streams: RestrictedStreamGens,
         last_call_request_id: u32,
     ) -> Self {
         Self {
@@ -76,7 +76,7 @@ impl InterpreterData {
             global_streams: streams,
             version: DATA_FORMAT_VERSION.deref().clone(),
             last_call_request_id,
-            restricted_streams: private_streams,
+            restricted_streams,
         }
     }
 

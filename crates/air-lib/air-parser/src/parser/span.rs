@@ -28,7 +28,7 @@ impl Span {
         Self { left, right }
     }
 
-    pub fn is_inside(&self, position: usize) -> bool {
+    pub fn contains(&self, position: usize) -> bool {
         self.left < position && position < self.right
     }
 }

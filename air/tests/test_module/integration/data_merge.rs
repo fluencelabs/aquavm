@@ -264,11 +264,11 @@ fn fold_merge() {
     let stream_1_generations = data
         .global_streams
         .get("$stream_1")
-        .expect("$stream_1 should present in data");
+        .expect("$stream_1 should be present in data");
     let stream_2_generations = data
         .global_streams
         .get("$stream_2")
-        .expect("$stream_2 should present in data");
+        .expect("$stream_2 should be present in data");
 
     assert_eq!(*stream_1_generations, 4);
     assert_eq!(*stream_2_generations, 3);

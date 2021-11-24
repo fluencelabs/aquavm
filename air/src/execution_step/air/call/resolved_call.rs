@@ -169,21 +169,20 @@ impl<'i> ResolvedCall<'i> {
 fn check_output_name(output: &ast::CallOutputValue<'_>, exec_ctx: &ExecutionCtx<'_>) -> ExecutionResult<()> {
     use crate::execution_step::boxed_value::ScalarRef;
 
-    let scalar = match output {
-        ast::CallOutputValue::Variable(ast::Variable::Scalar(scalar)) => scalar,
+    let scalar_name = match output {
+        ast::CallOutputValue::Variable(ast::Variable::Scalar(scalar)) => scalar.name,
         _ => return Ok(()),
     };
 
-    match exec_ctx.scalars.get(scalar.name) {
+    match exec_ctx.scalars.get(scalar_name) {
         Ok(ScalarRef::Value(_)) => {
             if exec_ctx.scalars.shadowing_allowed() {
                 Ok(())
             } else {
-                println!("check name error");
-                crate::exec_err!(ExecutionError::MultipleVariablesFound(scalar.name.to_string()))
+                crate::exec_err!(ExecutionError::MultipleVariablesFound(scalar_name.to_string()))
             }
         }
-        Ok(ScalarRef::IterableValue(_)) => crate::exec_err!(ExecutionError::IterableShadowing(scalar.name.to_string())),
+        Ok(ScalarRef::IterableValue(_)) => crate::exec_err!(ExecutionError::IterableShadowing(scalar_name.to_string())),
         Err(_) => Ok(()),
     }
 }

@@ -43,9 +43,7 @@ fn prolog<'i>(new: &New<'i>, exec_ctx: &mut ExecutionCtx<'i>) {
     match &new.variable {
         Variable::Stream(stream) => {
             let iteration = exec_ctx.tracker.new_tracker.get_iteration(position);
-            exec_ctx
-                .streams
-                .meet_scope_start(stream.name, new.span.left, new.span.right, iteration);
+            exec_ctx.streams.meet_scope_start(stream.name, new.span, iteration);
         }
         // noop
         Variable::Scalar(_) => {}

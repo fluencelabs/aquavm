@@ -48,7 +48,7 @@ pub struct VariableValidator<'i> {
     /// due to the way how lalrpop work.
     unresolved_iterables: MultiMap<&'i str, Span>,
 
-    /// Contains all names that should be checked that they are not iterables.
+    /// Contains all names that should be checked that they are not iterators.
     check_for_non_iterators: Vec<(&'i str, Span)>,
 }
 
@@ -271,7 +271,7 @@ fn add_to_errors<'err, 'i>(
     let error = match token {
         Token::Next => ParserError::UndefinedIterable(span.left, span.right, variable_name),
         Token::New => {
-            ParserError::IterableRestrictionNotAllowed(span.left, span.right, variable_name)
+            ParserError::IteratorRestrictionNotAllowed(span.left, span.right, variable_name)
         }
         _ => ParserError::UndefinedVariable(span.left, span.right, variable_name),
     };

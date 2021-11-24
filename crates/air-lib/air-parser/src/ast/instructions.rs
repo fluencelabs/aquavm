@@ -33,8 +33,8 @@ pub enum Instruction<'i> {
     MisMatch(MisMatch<'i>),
     FoldScalar(FoldScalar<'i>),
     FoldStream(FoldStream<'i>),
-    Next(Next<'i>),
     New(New<'i>),
+    Next(Next<'i>),
     Null(Null),
     Error,
 }

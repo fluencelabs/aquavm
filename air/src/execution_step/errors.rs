@@ -42,7 +42,7 @@ pub(crate) enum ExecutionError {
     #[error("Local service error, ret_code is {0}, error message is '{1}'")]
     LocalServiceError(i32, Rc<String>),
 
-    /// Value for such name isn't presence in data.
+    /// Variable with such a name wasn't defined during AIR script execution.
     #[error("variable with name '{0}' wasn't defined during script execution")]
     VariableNotFound(String),
 

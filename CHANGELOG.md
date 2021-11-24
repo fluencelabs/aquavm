@@ -1,4 +1,4 @@
-## Version 0.17.0 (2021-11-23)
+## Version 0.17.0 (2021-11-24)
 
 [PR 172](https://github.com/fluencelabs/aquavm/pull/172):  
 A new instruction intended to restrict a scope of variables was introduced to AquaVM.
