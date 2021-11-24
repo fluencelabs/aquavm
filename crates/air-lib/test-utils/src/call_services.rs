@@ -20,7 +20,9 @@ use serde_json::json;
 use std::collections::HashMap;
 
 pub fn unit_call_service() -> CallServiceClosure {
-    Box::new(|_| -> CallServiceResult { CallServiceResult::ok(json!("test")) })
+    Box::new(|_| -> CallServiceResult {
+        CallServiceResult::ok(json!("result from unit_call_service"))
+    })
 }
 
 pub fn echo_call_service() -> CallServiceClosure {
@@ -43,7 +45,7 @@ pub fn set_variables_call_service(
         };
 
         variables_mapping.get(&var_name).map_or_else(
-            || CallServiceResult::ok(json!("test")),
+            || CallServiceResult::ok(json!("default result from set_variables_call_service")),
             |var| CallServiceResult::ok(var.clone()),
         )
     })
@@ -61,10 +63,10 @@ pub fn fallible_call_service(fallible_service_id: impl Into<String>) -> CallServ
     Box::new(move |params| -> CallServiceResult {
         // return a error for service with such id
         if params.service_id == fallible_service_id {
-            CallServiceResult::err(1, json!("error"))
+            CallServiceResult::err(1, json!("failed result from fallible_call_service"))
         } else {
             // return success for services with other service id
-            CallServiceResult::ok(json!("test"))
+            CallServiceResult::ok(json!("success result from fallible_call_service"))
         }
     })
 }

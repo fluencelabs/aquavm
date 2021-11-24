@@ -73,7 +73,7 @@ fn last_error_tetraplets() {
 
     assert_eq!(
         actual_value.msg,
-        r#"Local service error, ret_code is 1, error message is '"error"'"#
+        r#"Local service error, ret_code is 1, error message is '"failed result from fallible_call_service"'"#
     );
 
     let tetraplet = (*tetraplets.borrow()).as_ref().unwrap()[0][0].clone();
@@ -142,7 +142,7 @@ fn not_clear_last_error_in_mismatch() {
         (seq
             (call "{0}" ("" "") [] relayVariableName)
             (xor
-                (mismatch relayVariableName "test"
+                (mismatch relayVariableName "result from unit_call_service"
                     (call "unknown_peer" ("" "") [%last_error%])
                 )
                 (seq

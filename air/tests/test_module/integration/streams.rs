@@ -68,9 +68,9 @@ fn stream_merging_v0() {
     let executor_result_1 = checked_call_vm!(executor, "", &script, "", setter_1_res.data);
     let actual_trace_1 = trace_from_result(&executor_result_1);
 
-    let test_value = "test";
+    let unit_call_service_result = "result from unit_call_service";
     let expected_trace_1 = vec![
-        executed_state::scalar_string(test_value),
+        executed_state::scalar_string(unit_call_service_result),
         executed_state::par(11, 1),
         executed_state::par(9, 1),
         executed_state::par(7, 1),
@@ -89,12 +89,12 @@ fn stream_merging_v0() {
             executed_state::subtrace_lore(9, SubTraceDesc::new(17, 2), SubTraceDesc::new(21, 0)),
             executed_state::subtrace_lore(12, SubTraceDesc::new(19, 2), SubTraceDesc::new(21, 0)),
         ]),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
     ];
     assert_eq!(actual_trace_1, expected_trace_1);
 
@@ -102,7 +102,7 @@ fn stream_merging_v0() {
     let actual_trace_2 = trace_from_result(&executor_result_2);
 
     let expected_trace_2 = vec![
-        executed_state::scalar_string(test_value),
+        executed_state::scalar_string(unit_call_service_result),
         executed_state::par(11, 1),
         executed_state::par(9, 1),
         executed_state::par(7, 1),
@@ -123,16 +123,16 @@ fn stream_merging_v0() {
             executed_state::subtrace_lore(8, SubTraceDesc::new(21, 2), SubTraceDesc::new(25, 0)),
             executed_state::subtrace_lore(13, SubTraceDesc::new(23, 2), SubTraceDesc::new(25, 0)),
         ]),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
     ];
     assert_eq!(actual_trace_2, expected_trace_2);
 
@@ -140,7 +140,7 @@ fn stream_merging_v0() {
     let actual_trace_3 = trace_from_result(&executor_result_3);
 
     let expected_trace_3 = vec![
-        executed_state::scalar_string(test_value),
+        executed_state::scalar_string(unit_call_service_result),
         executed_state::par(11, 1),
         executed_state::par(9, 1),
         executed_state::par(7, 1),
@@ -163,20 +163,20 @@ fn stream_merging_v0() {
             executed_state::subtrace_lore(10, SubTraceDesc::new(25, 2), SubTraceDesc::new(29, 0)),
             executed_state::subtrace_lore(11, SubTraceDesc::new(27, 2), SubTraceDesc::new(29, 0)),
         ]),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
     ];
     assert_eq!(actual_trace_3, expected_trace_3);
 }
@@ -208,9 +208,9 @@ fn stream_merging_v1() {
     let executor_result_1 = checked_call_vm!(executor, "", &script, "", setter_1_res.data);
     let actual_trace_1 = trace_from_result(&executor_result_1);
 
-    let test_value = "test";
+    let unit_call_service_result = "result from unit_call_service";
     let expected_trace_1 = vec![
-        executed_state::scalar_string(test_value),
+        executed_state::scalar_string(unit_call_service_result),
         executed_state::par(11, 1),
         executed_state::par(9, 1),
         executed_state::par(7, 1),
@@ -229,12 +229,12 @@ fn stream_merging_v1() {
             executed_state::subtrace_lore(9, SubTraceDesc::new(16, 1), SubTraceDesc::new(19, 1)),
             executed_state::subtrace_lore(12, SubTraceDesc::new(17, 1), SubTraceDesc::new(18, 1)),
         ]),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
     ];
     assert_eq!(actual_trace_1, expected_trace_1);
 
@@ -242,7 +242,7 @@ fn stream_merging_v1() {
     let actual_trace_2 = trace_from_result(&executor_result_2);
 
     let expected_trace_2 = vec![
-        executed_state::scalar_string(test_value),
+        executed_state::scalar_string(unit_call_service_result),
         executed_state::par(11, 1),
         executed_state::par(9, 1),
         executed_state::par(7, 1),
@@ -263,16 +263,16 @@ fn stream_merging_v1() {
             executed_state::subtrace_lore(8, SubTraceDesc::new(21, 1), SubTraceDesc::new(24, 1)),
             executed_state::subtrace_lore(13, SubTraceDesc::new(22, 1), SubTraceDesc::new(23, 1)),
         ]),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
     ];
     assert_eq!(actual_trace_2, expected_trace_2);
 
@@ -280,7 +280,7 @@ fn stream_merging_v1() {
     let actual_trace_3 = trace_from_result(&executor_result_3);
 
     let expected_trace_3 = vec![
-        executed_state::scalar_string(test_value),
+        executed_state::scalar_string(unit_call_service_result),
         executed_state::par(11, 1),
         executed_state::par(9, 1),
         executed_state::par(7, 1),
@@ -303,20 +303,20 @@ fn stream_merging_v1() {
             executed_state::subtrace_lore(10, SubTraceDesc::new(25, 1), SubTraceDesc::new(28, 1)),
             executed_state::subtrace_lore(11, SubTraceDesc::new(26, 1), SubTraceDesc::new(27, 1)),
         ]),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
     ];
     assert_eq!(actual_trace_3, expected_trace_3);
 }
@@ -348,9 +348,9 @@ fn stream_merging_v2() {
     let executor_result_1 = checked_call_vm!(executor, "", &script, "", setter_1_res.data);
     let actual_trace_1 = trace_from_result(&executor_result_1);
 
-    let test_value = "test";
+    let unit_call_service_result = "result from unit_call_service";
     let expected_trace_1 = vec![
-        executed_state::scalar_string(test_value),
+        executed_state::scalar_string(unit_call_service_result),
         executed_state::par(11, 1),
         executed_state::par(9, 1),
         executed_state::par(7, 1),
@@ -369,12 +369,12 @@ fn stream_merging_v2() {
             executed_state::subtrace_lore(9, SubTraceDesc::new(15, 0), SubTraceDesc::new(17, 2)),
             executed_state::subtrace_lore(12, SubTraceDesc::new(15, 0), SubTraceDesc::new(15, 2)),
         ]),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
     ];
     assert_eq!(actual_trace_1, expected_trace_1);
 
@@ -382,7 +382,7 @@ fn stream_merging_v2() {
     let actual_trace_2 = trace_from_result(&executor_result_2);
 
     let expected_trace_2 = vec![
-        executed_state::scalar_string(test_value),
+        executed_state::scalar_string(unit_call_service_result),
         executed_state::par(11, 1),
         executed_state::par(9, 1),
         executed_state::par(7, 1),
@@ -403,16 +403,16 @@ fn stream_merging_v2() {
             executed_state::subtrace_lore(8, SubTraceDesc::new(21, 0), SubTraceDesc::new(23, 2)),
             executed_state::subtrace_lore(13, SubTraceDesc::new(21, 0), SubTraceDesc::new(21, 2)),
         ]),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
     ];
     assert_eq!(actual_trace_2, expected_trace_2);
 
@@ -420,7 +420,7 @@ fn stream_merging_v2() {
     let actual_trace_3 = trace_from_result(&executor_result_3);
 
     let expected_trace_3 = vec![
-        executed_state::scalar_string(test_value),
+        executed_state::scalar_string(unit_call_service_result),
         executed_state::par(11, 1),
         executed_state::par(9, 1),
         executed_state::par(7, 1),
@@ -443,20 +443,20 @@ fn stream_merging_v2() {
             executed_state::subtrace_lore(10, SubTraceDesc::new(25, 0), SubTraceDesc::new(27, 2)),
             executed_state::subtrace_lore(11, SubTraceDesc::new(25, 0), SubTraceDesc::new(25, 2)),
         ]),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
     ];
     assert_eq!(actual_trace_3, expected_trace_3);
 }

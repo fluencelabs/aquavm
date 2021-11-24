@@ -100,10 +100,10 @@ pub fn par(left: usize, right: usize) -> ExecutedState {
     ExecutedState::Par(par_result)
 }
 
-pub fn service_failed(ret_code: i32, error_message: impl Into<String>) -> ExecutedState {
+pub fn service_failed(ret_code: i32, error_message: &str) -> ExecutedState {
     ExecutedState::Call(CallResult::CallServiceFailed(
         ret_code,
-        Rc::new(error_message.into()),
+        Rc::new(format!(r#""{}""#, error_message)),
     ))
 }
 

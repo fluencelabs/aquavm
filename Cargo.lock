@@ -29,6 +29,7 @@ dependencies = [
  "csv",
  "env_logger",
  "fluence-app-service",
+ "fstrings",
  "log",
  "maplit",
  "marine-rs-sdk",

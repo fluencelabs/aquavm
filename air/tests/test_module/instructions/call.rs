@@ -35,7 +35,7 @@ fn current_peer_id_call() {
     let result = checked_call_vm!(vm, vm_peer_id, script, "", "");
 
     let actual_trace = trace_from_result(&result);
-    let expected_trace = vec![executed_state::scalar_string("test")];
+    let expected_trace = vec![executed_state::scalar_string("result from unit_call_service")];
 
     assert_eq!(actual_trace, expected_trace);
     assert!(result.next_peer_pks.is_empty());

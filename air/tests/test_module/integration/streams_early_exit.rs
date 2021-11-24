@@ -40,7 +40,7 @@ fn par_early_exit() {
     let actual_trace_1 = trace_from_result(&setter_3_res_1);
 
     let expected_trace = vec![
-        executed_state::scalar_string("test"),
+        executed_state::scalar_string("result from unit_call_service"),
         executed_state::par(12, 1),
         executed_state::par(9, 1),
         executed_state::par(7, 1),
@@ -50,11 +50,11 @@ fn par_early_exit() {
         executed_state::request_sent_by(init_peer_id),
         executed_state::request_sent_by(init_peer_id),
         executed_state::request_sent_by(init_peer_id),
-        executed_state::stream_string("test", 0),
-        executed_state::service_failed(1, r#""error""#),
-        executed_state::stream_string("test", 0),
-        executed_state::service_failed(1, r#""error""#),
-        executed_state::service_failed(1, r#""error""#),
+        executed_state::stream_string("success result from fallible_call_service", 0),
+        executed_state::service_failed(1, "failed result from fallible_call_service"),
+        executed_state::stream_string("success result from fallible_call_service", 0),
+        executed_state::service_failed(1, "failed result from fallible_call_service"),
+        executed_state::service_failed(1, "failed result from fallible_call_service"),
         executed_state::request_sent_by(setter_3_id),
     ];
     assert_eq!(actual_trace_1, expected_trace);
@@ -84,7 +84,7 @@ fn par_early_exit() {
     let actual_trace_3 = trace_from_result(&init_result_2);
 
     let expected_trace = vec![
-        executed_state::scalar_string("test"),
+        executed_state::scalar_string("result from unit_call_service"),
         executed_state::par(12, 1),
         executed_state::par(9, 1),
         executed_state::par(7, 1),
@@ -94,17 +94,17 @@ fn par_early_exit() {
         executed_state::stream_string("1", 1),
         executed_state::stream_string("2", 2),
         executed_state::stream_string("1", 1),
-        executed_state::stream_string("test", 0),
-        executed_state::service_failed(1, r#""error""#),
-        executed_state::stream_string("test", 0),
-        executed_state::service_failed(1, r#""error""#),
-        executed_state::service_failed(1, r#""error""#),
+        executed_state::stream_string("success result from fallible_call_service", 0),
+        executed_state::service_failed(1, "failed result from fallible_call_service"),
+        executed_state::stream_string("success result from fallible_call_service", 0),
+        executed_state::service_failed(1, "failed result from fallible_call_service"),
+        executed_state::service_failed(1, "failed result from fallible_call_service"),
         executed_state::request_sent_by("setter_3"),
     ];
     assert_eq!(actual_trace_2, expected_trace);
 
     let expected_trace = vec![
-        executed_state::scalar_string("test"),
+        executed_state::scalar_string("result from unit_call_service"),
         executed_state::par(12, 1),
         executed_state::par(9, 1),
         executed_state::par(7, 1),
@@ -114,17 +114,17 @@ fn par_early_exit() {
         executed_state::stream_string("1", 0),
         executed_state::stream_string("2", 0),
         executed_state::stream_string("1", 0),
-        executed_state::stream_string("test", 0),
-        executed_state::service_failed(1, r#""error""#),
-        executed_state::stream_string("test", 0),
-        executed_state::service_failed(1, r#""error""#),
-        executed_state::service_failed(1, r#""error""#),
-        executed_state::scalar_string("test"),
+        executed_state::stream_string("success result from fallible_call_service", 0),
+        executed_state::service_failed(1, "failed result from fallible_call_service"),
+        executed_state::stream_string("success result from fallible_call_service", 0),
+        executed_state::service_failed(1, "failed result from fallible_call_service"),
+        executed_state::service_failed(1, "failed result from fallible_call_service"),
+        executed_state::scalar_string("result from unit_call_service"),
     ];
     assert_eq!(actual_trace_3, expected_trace);
 
     let setter_3_malicious_trace = vec![
-        executed_state::scalar_string("test"),
+        executed_state::scalar_string("result from unit_call_service"),
         executed_state::par(10, 0),
         executed_state::par(9, 0),
         executed_state::par(7, 1),
@@ -134,8 +134,8 @@ fn par_early_exit() {
         executed_state::request_sent_by(init_peer_id),
         executed_state::request_sent_by(init_peer_id),
         executed_state::stream_string("non_exist_value", 0),
-        executed_state::stream_string("test", 0),
-        executed_state::service_failed(1, r#""error""#),
+        executed_state::stream_string("success result from fallible_call_service", 0),
+        executed_state::service_failed(1, "failed result from fallible_call_service"),
         executed_state::request_sent_by(setter_3_id),
     ];
     let setter_3_malicious_data = raw_data_from_trace(setter_3_malicious_trace);
@@ -189,7 +189,7 @@ fn fold_early_exit() {
         checked_call_vm!(last_peer_checker, "", &script, "", last_error_receiver_result.data);
     let actual_trace = trace_from_result(&last_peer_checker_result);
 
-    let test_value = "test";
+    let unit_call_service_result = "result from unit_call_service";
     let expected_trace = vec![
         executed_state::scalar_string_array(vec!["a1", "a2"]),
         executed_state::scalar_string_array(vec!["b1", "b2"]),
@@ -222,17 +222,17 @@ fn fold_early_exit() {
             executed_state::subtrace_lore(10, SubTraceDesc::new(17, 1), SubTraceDesc::new(19, 0)),
             executed_state::subtrace_lore(11, SubTraceDesc::new(18, 1), SubTraceDesc::new(19, 0)),
         ]),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
         executed_state::fold(vec![
             executed_state::subtrace_lore(10, SubTraceDesc::new(20, 1), SubTraceDesc::new(22, 0)),
             executed_state::subtrace_lore(11, SubTraceDesc::new(21, 1), SubTraceDesc::new(22, 0)),
         ]),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
-        executed_state::service_failed(1, r#""error""#),
-        executed_state::scalar_string(test_value),
-        executed_state::scalar_string(test_value),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::service_failed(1, "failed result from fallible_call_service"),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar_string(unit_call_service_result),
     ];
 
     assert_eq!(actual_trace, expected_trace);
@@ -280,7 +280,7 @@ fn fold_par_early_exit() {
         checked_call_vm!(last_peer_checker, "", &script, "", last_error_receiver_result.data);
     let actual_trace = trace_from_result(&last_peer_checker_result);
 
-    let test_value = "test";
+    let unit_call_service_result = "result from unit_call_service";
     let expected_trace = vec![
         executed_state::scalar_string_array(vec!["a1", "a2"]),
         executed_state::scalar_string_array(vec!["b1", "b2"]),
@@ -316,19 +316,19 @@ fn fold_par_early_exit() {
             executed_state::subtrace_lore(11, SubTraceDesc::new(23, 2), SubTraceDesc::new(25, 0)),
         ]),
         executed_state::par(1, 2),
-        executed_state::scalar_string(test_value),
+        executed_state::scalar_string(unit_call_service_result),
         executed_state::par(1, 0),
-        executed_state::scalar_string(test_value),
+        executed_state::scalar_string(unit_call_service_result),
         executed_state::par(5, 0),
         executed_state::fold(vec![
             executed_state::subtrace_lore(10, SubTraceDesc::new(27, 2), SubTraceDesc::new(31, 0)),
             executed_state::subtrace_lore(11, SubTraceDesc::new(29, 2), SubTraceDesc::new(31, 0)),
         ]),
         executed_state::par(1, 2),
-        executed_state::scalar_string(test_value),
+        executed_state::scalar_string(unit_call_service_result),
         executed_state::par(1, 0),
-        executed_state::scalar_string(test_value),
-        executed_state::service_failed(1, r#""error""#),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::service_failed(1, "failed result from fallible_call_service"),
         executed_state::par(15, 0),
         executed_state::par(13, 1),
         executed_state::fold(vec![
