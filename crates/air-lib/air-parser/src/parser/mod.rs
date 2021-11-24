@@ -17,6 +17,7 @@
 pub mod air_parser;
 mod air_utils;
 pub(crate) mod lexer;
+mod span;
 
 // air is auto-generated, so exclude it from `cargo fmt -- --check` and `cargo clippy`
 #[rustfmt::skip]
@@ -32,12 +33,7 @@ pub mod tests;
 pub use self::air_parser::parse;
 pub use air::AIRParser;
 pub use lexer::AIRLexer;
+pub use span::Span;
 pub use validator::VariableValidator;
 
 use errors::ParserError;
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct Span {
-    pub left: usize,
-    pub right: usize,
-}

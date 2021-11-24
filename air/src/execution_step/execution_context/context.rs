@@ -17,13 +17,11 @@
 use super::LastErrorDescriptor;
 use super::LastErrorWithTetraplet;
 use super::Scalars;
-use crate::execution_step::boxed_value::Stream;
+use super::Streams;
 
 use air_execution_info_collector::InstructionTracker;
 use air_interpreter_interface::*;
 
-use std::cell::RefCell;
-use std::collections::HashMap;
 use std::rc::Rc;
 
 /// Contains all necessary state needed to execute AIR script.
@@ -33,8 +31,7 @@ pub(crate) struct ExecutionCtx<'i> {
     pub(crate) scalars: Scalars<'i>,
 
     /// Contains all streams.
-    // TODO: use shared string (Rc<String>) to avoid copying.
-    pub(crate) streams: HashMap<String, RefCell<Stream>>,
+    pub(crate) streams: Streams,
 
     /// Set of peer public keys that should receive resulted data.
     pub(crate) next_peer_pks: Vec<String>,
@@ -116,9 +113,7 @@ impl<'i> Display for ExecutionCtx<'i> {
         writeln!(f, "  {}", self.scalars)?;
 
         writeln!(f, "streams:")?;
-        for (name, stream) in self.streams.iter() {
-            writeln!(f, "  {} => {}", name, stream.borrow())?;
-        }
+        writeln!(f, "  {}", self.streams)?;
 
         writeln!(f, "current peer id: {}", self.current_peer_id)?;
         writeln!(f, "subtree complete: {}", self.subtree_complete)?;

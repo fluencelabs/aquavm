@@ -1,3 +1,8 @@
+## Version 0.2.2
+
+[PR 169](https://github.com/fluencelabs/aquavm/pull/169):  
+- added a new field for tracking generations of private streams
+
 ## Version 0.2.1
 
 [PR 130](https://github.com/fluencelabs/aquavm/pull/130):  

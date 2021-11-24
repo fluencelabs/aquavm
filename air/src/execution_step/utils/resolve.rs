@@ -88,9 +88,13 @@ pub(crate) fn resolve_variable<'ctx, 'i>(
     use crate::execution_step::boxed_value::StreamJvaluableIngredients;
 
     match variable {
-        Variable::Scalar(name) => Ok(ctx.scalars.get(name)?.into_jvaluable()),
-        Variable::Stream { name, generation } => {
-            match ctx.streams.get(name) {
+        Variable::Scalar { name, .. } => Ok(ctx.scalars.get(name)?.into_jvaluable()),
+        Variable::Stream {
+            name,
+            generation,
+            position,
+        } => {
+            match ctx.streams.get(name, position) {
                 Some(stream) => {
                     let ingredients = StreamJvaluableIngredients::new(stream.borrow(), generation);
                     Ok(Box::new(ingredients))

@@ -14,28 +14,21 @@
  * limitations under the License.
  */
 
-#![warn(rust_2018_idioms)]
-#![deny(
-    dead_code,
-    nonstandard_style,
-    unused_imports,
-    unused_mut,
-    unused_variables,
-    unused_unsafe,
-    unreachable_patterns
-)]
+use serde::Deserialize;
+use serde::Serialize;
 
-mod executed_state;
-mod interpreter_data;
-mod stream_generations;
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Span {
+    pub left: usize,
+    pub right: usize,
+}
 
-pub use executed_state::*;
-pub use interpreter_data::*;
-pub use stream_generations::*;
+impl Span {
+    pub fn new(left: usize, right: usize) -> Self {
+        Self { left, right }
+    }
 
-use once_cell::sync::Lazy;
-use std::str::FromStr;
-
-pub static DATA_FORMAT_VERSION: Lazy<semver::Version> = Lazy::new(|| {
-    semver::Version::from_str("0.2.2").expect("invalid data format version specified")
-});
+    pub fn contains(&self, position: usize) -> bool {
+        self.left < position && position < self.right
+    }
+}

@@ -70,7 +70,6 @@ pub(crate) struct Scalars<'i> {
     pub fold_block_id: usize,
 }
 
-#[allow(dead_code)]
 impl<'i> Scalars<'i> {
     /// Returns true if there was a previous value for the provided key on the same
     /// fold block.
@@ -122,10 +121,6 @@ impl<'i> Scalars<'i> {
         }
     }
 
-    pub(crate) fn remove_value(&mut self, name: &str) {
-        self.values.remove(name);
-    }
-
     pub(crate) fn remove_iterable_value(&mut self, name: &str) {
         self.iterable_values.remove(name);
     }
@@ -141,26 +136,6 @@ impl<'i> Scalars<'i> {
                     .find_map(|scalar| scalar.as_ref())
             })
             .ok_or_else(|| Rc::new(ExecutionError::VariableNotFound(name.to_string())))
-    }
-
-    pub(crate) fn get_value_mut(&'i mut self, name: &str) -> ExecutionResult<&'i mut ValueAggregate> {
-        let fold_block_id = self.fold_block_id;
-        self.values
-            .get_mut(name)
-            .and_then(|scalars| {
-                scalars
-                    .iter_mut()
-                    .take(fold_block_id)
-                    .rev()
-                    .find_map(|scalar| scalar.as_mut())
-            })
-            .ok_or_else(|| Rc::new(ExecutionError::VariableNotFound(name.to_string())))
-    }
-
-    pub(crate) fn get_iterable(&self, name: &str) -> ExecutionResult<&FoldState<'i>> {
-        self.iterable_values
-            .get(name)
-            .ok_or_else(|| Rc::new(ExecutionError::FoldStateNotFound(name.to_string())))
     }
 
     pub(crate) fn get_iterable_mut(&mut self, name: &str) -> ExecutionResult<&mut FoldState<'i>> {
@@ -181,7 +156,7 @@ impl<'i> Scalars<'i> {
         }
     }
 
-    pub(crate) fn meet_fold_begin(&mut self) {
+    pub(crate) fn meet_fold_start(&mut self) {
         self.fold_block_id += 1;
     }
 

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+use std::collections::HashMap;
+
 /// Intended to track a number of executed instruction of each type. For instructions that
 /// have a corresponding state in data, it tracks number of executed instructions on
 /// current peer (executed) and overall number (seen) of met instructions of such type.
@@ -24,6 +26,7 @@ pub struct InstructionTracker {
     pub fold: FoldTracker,
     pub match_count: u32,
     pub mismatch_count: u32,
+    pub new_tracker: NewTracker,
     pub next_count: u32,
     pub null_count: u32,
     pub par: ParTracker,
@@ -53,6 +56,14 @@ pub struct FoldTracker {
 pub struct ParTracker {
     pub seen_count: u32,
     pub executed_count: u32,
+}
+
+#[derive(Default, Debug, PartialEq, Eq)]
+pub struct NewTracker {
+    /// Mapping from a new instruction position in a script
+    /// to a number of their execution. This is needed to
+    /// support private stream generation mappings.
+    pub executed_count: HashMap<usize, u32>,
 }
 
 impl InstructionTracker {
@@ -110,5 +121,25 @@ impl InstructionTracker {
 
     pub fn meet_xor(&mut self) {
         self.xor_count += 1;
+    }
+
+    pub fn meet_new(&mut self, position: usize) {
+        use std::collections::hash_map::Entry::{Occupied, Vacant};
+
+        match self.new_tracker.executed_count.entry(position) {
+            Occupied(mut entry) => *entry.get_mut() += 1,
+            Vacant(entry) => {
+                entry.insert(1);
+            }
+        };
+    }
+}
+
+impl NewTracker {
+    pub fn get_iteration(&self, position: usize) -> u32 {
+        self.executed_count
+            .get(&position)
+            .copied()
+            .unwrap_or_default()
     }
 }
