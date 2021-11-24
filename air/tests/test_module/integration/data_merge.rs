@@ -186,7 +186,10 @@ fn fold_merge() {
         "stream_1".to_string() => json!(["peer_0", "peer_1", "peer_2", "peer_3"]),
         "stream_2".to_string() => json!(["peer_4", "peer_5", "peer_6"]),
     };
-    let mut set_variable_vm = create_avm(set_variables_call_service(variables), set_variable_vm_id);
+    let mut set_variable_vm = create_avm(
+        set_variables_call_service(variables, VariableOptionSource::Argument(0)),
+        set_variable_vm_id,
+    );
 
     let script = format!(
         include_str!("./scripts/inner_folds_v1.clj"),

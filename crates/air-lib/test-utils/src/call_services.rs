@@ -33,13 +33,28 @@ pub fn set_variable_call_service(json: JValue) -> CallServiceClosure {
     Box::new(move |_| -> CallServiceResult { CallServiceResult::ok(json.clone()) })
 }
 
+/// Manages which source will be used to choose a variable.
+pub enum VariableOptionSource {
+    // i-th argument
+    Argument(usize),
+    Function,
+    Service,
+}
+
 pub fn set_variables_call_service(
     variables_mapping: HashMap<String, JValue>,
+    variable_source: VariableOptionSource,
 ) -> CallServiceClosure {
-    Box::new(move |mut params| -> CallServiceResult {
-        let var_name = match params.arguments.pop() {
-            Some(JValue::String(name)) => name,
-            _ => "default".to_string(),
+    use VariableOptionSource::*;
+
+    Box::new(move |params| -> CallServiceResult {
+        let var_name = match variable_source {
+            Argument(id) => match params.arguments.get(id) {
+                Some(JValue::String(name)) => name.to_string(),
+                _ => "default".to_string(),
+            },
+            Function => params.function_name,
+            Service => params.service_id,
         };
 
         variables_mapping.get(&var_name).map_or_else(

@@ -51,7 +51,7 @@ thread_local!(static SET_VARIABLES_VM: RefCell<TestRunner> = RefCell::new({
         String::from("blueprint") => json!(blueprint),
     );
 
-    create_avm(set_variables_call_service(variables_mapping), "set_variables")
+    create_avm(set_variables_call_service(variables_mapping, VariableOptionSource::Argument(0)), "set_variables")
 }));
 
 fn create_service_benchmark() -> Result<RawAVMOutcome, String> {
