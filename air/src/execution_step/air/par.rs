@@ -68,9 +68,11 @@ fn execute_subtree<'i>(
             SubtreeResult::Succeeded
         }
         Err(e) if !e.is_catchable() => {
+            exec_ctx.subtree_complete = false;
             return Err(e);
         }
         Err(e) => {
+            exec_ctx.subtree_complete = false;
             trace_to_exec_err!(trace_ctx.meet_par_subtree_end(subtree_type))?;
             SubtreeResult::Failed(e)
         }
