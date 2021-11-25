@@ -17,7 +17,7 @@
 use air_test_utils::prelude::*;
 
 #[test]
-// test for github.com/fluencelabs/aquavm/issues/137
+// https://github.com/fluencelabs/aquavm/issues/137
 fn issue_137() {
     let initiator_id = "initiator_id";
     let mut initiator = create_avm(unit_call_service(), initiator_id);

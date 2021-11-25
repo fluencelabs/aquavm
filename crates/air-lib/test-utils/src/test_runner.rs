@@ -22,8 +22,8 @@ use std::collections::HashSet;
 use std::path::PathBuf;
 
 pub struct TestRunner {
-    runner: AVMRunner,
-    call_service: CallServiceClosure,
+    pub runner: AVMRunner,
+    pub call_service: CallServiceClosure,
 }
 
 impl TestRunner {

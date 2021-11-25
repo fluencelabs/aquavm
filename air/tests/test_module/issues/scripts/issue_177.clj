@@ -1,19 +1,7 @@
 (xor
  (seq
   (seq
-   (seq
-    (seq
-     (seq
-      (seq
-       (call %init_peer_id% ("getDataSrv" "-relay-") [] -relay-)
-       (call %init_peer_id% ("getDataSrv" "tolerance") [] tolerance)
-       )
-      (call %init_peer_id% ("getDataSrv" "threshold") [] threshold)
-      )
-     (call %init_peer_id% ("getDataSrv" "node") [] node)
-     )
-    (call %init_peer_id% ("getDataSrv" "oracle_service_id") [] oracle_service_id)
-    )
+   (call %init_peer_id% ("getDataSrv" "-relay-") [] -relay-)
    (new $res
     (seq
      (seq
@@ -21,10 +9,10 @@
        (call -relay- ("op" "noop") [])
        (xor
         (seq
-         (call node ("op" "string_to_b58") [node] k)
+         (call "12D3KooWSD5PToNiLQwKDXsu8JSysCwUt8BVUJEqCHcDe7P5h45e" ("op" "string_to_b58") ["12D3KooWSD5PToNiLQwKDXsu8JSysCwUt8BVUJEqCHcDe7P5h45e"] k)
          (par
           (seq
-           (call node ("kad" "neighborhood") [k [] []] nodes)
+           (call "12D3KooWSD5PToNiLQwKDXsu8JSysCwUt8BVUJEqCHcDe7P5h45e" ("kad" "neighborhood") [k [] []] nodes)
            (call %init_peer_id% ("op" "noop") [])
            )
           (seq
@@ -59,10 +47,7 @@
      )
     )
    )
-  (xor
-   (call %init_peer_id% ("callbackSrv" "response") [res-fix nodes])
-   (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 3])
-   )
+  (call %init_peer_id% ("--after-callback-srv-service--" "print-and-stop") [res-fix nodes])
   )
- (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 4])
+ (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 3])
  )

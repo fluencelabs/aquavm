@@ -39,8 +39,8 @@ pub fn set_variable_call_service(json: JValue) -> CallServiceClosure {
 pub enum VariableOptionSource {
     // i-th argument
     Argument(usize),
-    Function,
-    Service,
+    FunctionName,
+    ServiceName,
 }
 
 pub fn set_variables_call_service(
@@ -55,8 +55,8 @@ pub fn set_variables_call_service(
                 Some(JValue::String(name)) => name.to_string(),
                 _ => "default".to_string(),
             },
-            Function => params.function_name,
-            Service => params.service_id,
+            FunctionName => params.function_name,
+            ServiceName => params.service_id,
         };
 
         variables_mapping.get(&var_name).map_or_else(
