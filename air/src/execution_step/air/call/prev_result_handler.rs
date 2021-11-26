@@ -26,8 +26,8 @@ use air_parser::ast::CallOutputValue;
 use air_trace_handler::TraceHandler;
 
 pub(crate) struct StateDescriptor {
-    pub(crate) should_execute: bool,
-    pub(crate) prev_state: Option<CallResult>,
+    should_execute: bool,
+    prev_state: Option<CallResult>,
 }
 
 /// This function looks at the existing call state, validates it,
@@ -39,10 +39,10 @@ pub(super) fn handle_prev_state<'i>(
     trace_pos: usize,
     exec_ctx: &mut ExecutionCtx<'i>,
     trace_ctx: &mut TraceHandler,
-) -> ExecutionResult<bool> {
+) -> ExecutionResult<StateDescriptor> {
     use CallResult::*;
 
-    let result = match &prev_result {
+    match &prev_result {
         // this call was failed on one of the previous executions,
         // here it's needed to bubble this special error up
         CallServiceFailed(ret_code, err_msg) => {
@@ -56,12 +56,12 @@ pub(super) fn handle_prev_state<'i>(
             match exec_ctx.call_results.remove(call_id) {
                 Some(call_result) => {
                     update_state_with_service_result(tetraplet, output, call_result, exec_ctx, trace_ctx)?;
-                    return Ok(false);
+                    return Ok(StateDescriptor::executed());
                 }
                 // result hasn't been prepared yet
                 None => {
                     exec_ctx.subtree_complete = false;
-                    Ok(false)
+                    Ok(StateDescriptor::not_prepared(prev_result))
                 }
             }
         }
@@ -69,24 +69,20 @@ pub(super) fn handle_prev_state<'i>(
             // check whether current node can execute this call
             let is_current_peer = tetraplet.borrow().peer_pk.as_str() == exec_ctx.current_peer_id.as_str();
             if is_current_peer {
-                // if this peer could execute this call early return and
-                return Ok(true);
+                return Ok(StateDescriptor::can_execute_now(prev_result));
             }
 
             exec_ctx.subtree_complete = false;
-            Ok(false)
+            Ok(StateDescriptor::cant_execute_now(prev_result))
         }
         // this instruction's been already executed
         Executed(value) => {
             set_result_from_value(value.clone(), tetraplet.clone(), trace_pos, output, exec_ctx)?;
 
             exec_ctx.subtree_complete = true;
-            Ok(false)
+            Ok(StateDescriptor::executed())
         }
-    };
-
-    trace_ctx.meet_call_end(prev_result);
-    result
+    }
 }
 
 use super::call_result_setter::*;
@@ -153,6 +149,53 @@ fn try_to_service_result(
             trace_ctx.meet_call_end(error);
 
             Err(Rc::new(ExecutionError::LocalServiceError(i32::MAX, error_msg)))
+        }
+    }
+}
+
+impl StateDescriptor {
+    pub(crate) fn executed() -> Self {
+        Self {
+            should_execute: false,
+            prev_state: None,
+        }
+    }
+
+    pub(crate) fn not_prepared(prev_state: CallResult) -> Self {
+        Self {
+            should_execute: false,
+            prev_state: Some(prev_state),
+        }
+    }
+
+    pub(crate) fn can_execute_now(prev_state: CallResult) -> Self {
+        Self {
+            should_execute: true,
+            prev_state: Some(prev_state),
+        }
+    }
+
+    pub(crate) fn cant_execute_now(prev_state: CallResult) -> Self {
+        Self {
+            should_execute: false,
+            prev_state: Some(prev_state),
+        }
+    }
+
+    pub(crate) fn no_previous_state() -> Self {
+        Self {
+            should_execute: true,
+            prev_state: None,
+        }
+    }
+
+    pub(crate) fn should_execute(&self) -> bool {
+        self.should_execute
+    }
+
+    pub(crate) fn maybe_set_prev_state(self, trace_ctx: &mut TraceHandler) {
+        if let Some(call_result) = self.prev_state {
+            trace_ctx.meet_call_end(call_result);
         }
     }
 }
