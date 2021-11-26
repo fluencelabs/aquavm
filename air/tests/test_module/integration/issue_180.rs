@@ -31,8 +31,8 @@ fn issue_180() {
             (call "{peer_2_id}" ("" "") [] join_var)
             (seq
                 (par
-                    (call "{peer_1_id}" ("" "") [join_var]) ;; will trigger VariableNotFound exception
-                    (fold join_var iterator ;; will trigger VariableNotFound exception
+                    (call "{peer_1_id}" ("" "") [join_var]) ;; sets subtree_complete to false
+                    (fold join_var iterator ;; (on < 0.17.3) triggers ValueNotFound exception and doesn't touch subtree_complete flag
                         (null)
                     )
                 )
