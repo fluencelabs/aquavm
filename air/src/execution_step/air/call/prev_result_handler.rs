@@ -25,6 +25,11 @@ use air_interpreter_interface::CallServiceResult;
 use air_parser::ast::CallOutputValue;
 use air_trace_handler::TraceHandler;
 
+pub(crate) struct StateDescriptor {
+    pub(crate) should_execute: bool,
+    pub(crate) prev_state: Option<CallResult>,
+}
+
 /// This function looks at the existing call state, validates it,
 /// and returns Ok(true) if the call should be executed further.
 pub(super) fn handle_prev_state<'i>(
