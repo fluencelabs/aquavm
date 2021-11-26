@@ -20,6 +20,8 @@ use super::ExecutableInstruction;
 use super::ExecutionCtx;
 use super::ExecutionResult;
 use super::TraceHandler;
+use crate::execution_step::Joinable;
+use crate::joinable;
 use crate::log_instruction;
 use crate::trace_to_exec_err;
 
@@ -29,7 +31,8 @@ impl<'i> ExecutableInstruction<'i> for FoldStream<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         log_instruction!(fold, exec_ctx, trace_ctx);
 
-        let iterables = match construct_stream_iterable_value(&self.iterable, exec_ctx)? {
+        let stream_iterable = joinable!(construct_stream_iterable_value(&self.iterable, exec_ctx), exec_ctx)?;
+        let iterables = match stream_iterable {
             FoldIterableStream::Empty => return Ok(()),
             FoldIterableStream::Stream(iterables) => iterables,
         };
