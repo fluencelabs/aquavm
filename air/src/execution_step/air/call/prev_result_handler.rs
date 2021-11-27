@@ -25,6 +25,7 @@ use air_interpreter_interface::CallServiceResult;
 use air_parser::ast::CallOutputValue;
 use air_trace_handler::TraceHandler;
 
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) struct StateDescriptor {
     should_execute: bool,
     prev_state: Option<CallResult>,
@@ -56,7 +57,7 @@ pub(super) fn handle_prev_state<'i>(
             match exec_ctx.call_results.remove(call_id) {
                 Some(call_result) => {
                     update_state_with_service_result(tetraplet, output, call_result, exec_ctx, trace_ctx)?;
-                    return Ok(StateDescriptor::executed());
+                    Ok(StateDescriptor::executed())
                 }
                 // result hasn't been prepared yet
                 None => {
@@ -78,6 +79,7 @@ pub(super) fn handle_prev_state<'i>(
         // this instruction's been already executed
         Executed(value) => {
             set_result_from_value(value.clone(), tetraplet.clone(), trace_pos, output, exec_ctx)?;
+            trace_ctx.meet_call_end(prev_result);
 
             exec_ctx.subtree_complete = true;
             Ok(StateDescriptor::executed())
