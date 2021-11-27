@@ -48,7 +48,10 @@ pub(super) fn handle_prev_state<'i>(
         // here it's needed to bubble this special error up
         CallServiceFailed(ret_code, err_msg) => {
             exec_ctx.subtree_complete = false;
-            exec_err!(ExecutionError::LocalServiceError(*ret_code, err_msg.clone()))
+            let ret_code = *ret_code;
+            let err_msg = err_msg.clone();
+            trace_ctx.meet_call_end(prev_result);
+            exec_err!(ExecutionError::LocalServiceError(ret_code, err_msg))
         }
         RequestSentBy(Sender::PeerIdWithCallId { peer_id, call_id })
             if peer_id.as_str() == exec_ctx.current_peer_id.as_str() =>
@@ -81,7 +84,6 @@ pub(super) fn handle_prev_state<'i>(
             set_result_from_value(value.clone(), tetraplet.clone(), trace_pos, output, exec_ctx)?;
             trace_ctx.meet_call_end(prev_result);
 
-            exec_ctx.subtree_complete = true;
             Ok(StateDescriptor::executed())
         }
     }
