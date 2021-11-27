@@ -181,24 +181,11 @@ macro_rules! log_instruction {
 
 /// This macro converts joinable errors to Ok and sets subtree complete to false.
 #[macro_export]
-macro_rules! joinable_call {
-    ($cmd:expr, $exec_ctx:expr) => {
-        match $cmd {
-            Err(e) if e.is_joinable() => {
-                $exec_ctx.subtree_complete = false;
-                return Ok(());
-            }
-            v => v,
-        }
-    };
-}
-
-/// This macro converts joinable errors to Ok.
-#[macro_export]
 macro_rules! joinable {
     ($cmd:expr, $exec_ctx:expr) => {
         match $cmd {
             Err(e) if e.is_joinable() => {
+                $exec_ctx.subtree_complete = false;
                 return Ok(());
             }
             v => v,

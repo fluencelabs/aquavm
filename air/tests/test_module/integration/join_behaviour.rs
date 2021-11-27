@@ -16,6 +16,9 @@
 
 use air_test_utils::prelude::*;
 
+use fstrings::f;
+use fstrings::format_args_f;
+
 #[test]
 fn dont_wait_on_json_path() {
     let status = json!({
@@ -193,4 +196,76 @@ fn dont_wait_on_json_path_on_scalars() {
         object_result.error_message,
         r#"value '{"err_msg":"","is_authenticated":1,"ret_code":0}' does not contain element with field name = 'non_exist_path'"#
     );
+}
+
+#[test]
+fn match_with_join_behaviour() {
+    let peer_1_id = "peer_1_id";
+    let peer_2_id = "peer_2_id";
+
+    let mut peer_1 = create_avm(unit_call_service(), peer_1_id);
+
+    let script = f!(r#"
+        (par
+            (call "{peer_2_id}" ("" "") [] join_var)
+            (xor
+                (match join_var 1
+                    (null)
+                )
+                (call "{peer_1_id}" ("" "") []) ;; this call shouldn't be called
+            )
+        )
+    "#);
+
+    let result = checked_call_vm!(peer_1, "", script, "", "");
+    let trace = trace_from_result(&result);
+    assert_eq!(trace.len(), 2);
+}
+
+#[test]
+fn mismatch_with_join_behaviour() {
+    let peer_1_id = "peer_1_id";
+    let peer_2_id = "peer_2_id";
+
+    let mut peer_1 = create_avm(unit_call_service(), peer_1_id);
+
+    let script = f!(r#"
+        (par
+            (call "{peer_2_id}" ("" "") [] join_var)
+            (xor
+                (mismatch join_var 1
+                    (null)
+                )
+                (call "{peer_1_id}" ("" "") []) ;; this call shouldn't be called
+            )
+        )
+    "#);
+
+    let result = checked_call_vm!(peer_1, "", script, "", "");
+    let trace = trace_from_result(&result);
+    assert_eq!(trace.len(), 2);
+}
+
+#[test]
+fn fold_with_join_behaviour() {
+    let peer_1_id = "peer_1_id";
+    let peer_2_id = "peer_2_id";
+
+    let mut peer_1 = create_avm(unit_call_service(), peer_1_id);
+
+    let script = f!(r#"
+        (par
+            (call "{peer_2_id}" ("" "") [] join_var)
+            (xor
+                (fold join_var iterator
+                    (null)
+                )
+                (call "{peer_1_id}" ("" "") []) ;; this call shouldn't be called
+            )
+        )
+    "#);
+
+    let result = checked_call_vm!(peer_1, "", script, "", "");
+    let trace = trace_from_result(&result);
+    assert_eq!(trace.len(), 2);
 }

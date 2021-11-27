@@ -19,6 +19,8 @@ use super::ExecutableInstruction;
 use super::ExecutionCtx;
 use super::ExecutionResult;
 use super::TraceHandler;
+use crate::execution_step::Joinable;
+use crate::joinable;
 use crate::log_instruction;
 
 use air_parser::ast::FoldScalar;
@@ -31,7 +33,8 @@ impl<'i> ExecutableInstruction<'i> for FoldScalar<'i> {
 
         exec_ctx.scalars.meet_fold_start();
 
-        let fold_result = match construct_scalar_iterable_value(&self.iterable, exec_ctx)? {
+        let scalar_iterable = joinable!(construct_scalar_iterable_value(&self.iterable, exec_ctx), exec_ctx)?;
+        let fold_result = match scalar_iterable {
             FoldIterableScalar::Empty => Ok(()),
             FoldIterableScalar::Scalar(iterable) => fold(
                 iterable,
