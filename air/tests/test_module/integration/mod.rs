@@ -21,8 +21,6 @@ mod dashboard;
 mod data_merge;
 mod empty_array;
 mod flattening;
-mod issue_137;
-mod issue_180;
 mod join;
 mod join_behaviour;
 mod json_path;

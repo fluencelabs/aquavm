@@ -25,7 +25,7 @@ fn network_explore() {
         "client".to_string() => json!(client_id),
     );
 
-    let client_call_service = set_variables_call_service(set_variables_state);
+    let client_call_service = set_variables_call_service(set_variables_state, VariableOptionSource::Argument(0));
     let mut client = create_avm(client_call_service, client_id);
 
     let client_1_id = "client_1_id";

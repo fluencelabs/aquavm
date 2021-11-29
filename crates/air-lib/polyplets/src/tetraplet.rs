@@ -39,6 +39,20 @@ pub struct SecurityTetraplet {
 }
 
 impl SecurityTetraplet {
+    pub fn new(
+        peer_pk: impl Into<String>,
+        service_id: impl Into<String>,
+        function_name: impl Into<String>,
+        json_path: impl Into<String>,
+    ) -> Self {
+        Self {
+            peer_pk: peer_pk.into(),
+            service_id: service_id.into(),
+            function_name: function_name.into(),
+            json_path: json_path.into(),
+        }
+    }
+
     /// Create a tetraplet for string literals defined in the script
     /// such as variable here `(call ("" "") "" ["variable_1"])`.
     pub fn literal_tetraplet(init_peer_id: String) -> Self {

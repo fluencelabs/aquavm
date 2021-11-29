@@ -45,14 +45,14 @@ pub struct CallRequestParams {
 
 impl CallRequestParams {
     pub fn new(
-        service_id: String,
-        function_name: String,
+        service_id: impl Into<String>,
+        function_name: impl Into<String>,
         arguments: Vec<JValue>,
         tetraplets: Vec<Vec<SecurityTetraplet>>,
     ) -> Self {
         Self {
-            service_id,
-            function_name,
+            service_id: service_id.into(),
+            function_name: function_name.into(),
             arguments,
             tetraplets,
         }

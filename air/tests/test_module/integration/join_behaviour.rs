@@ -34,7 +34,7 @@ fn dont_wait_on_json_path() {
         "status".to_string() => status,
     );
 
-    let set_variables_call_service = set_variables_call_service(variables);
+    let set_variables_call_service = set_variables_call_service(variables, VariableOptionSource::Argument(0));
 
     let set_variable_peer_id = "set_variable";
     let mut set_variable_vm = create_avm(set_variables_call_service, set_variable_peer_id);
@@ -148,7 +148,7 @@ fn dont_wait_on_json_path_on_scalars() {
         "object".to_string() => object,
     );
 
-    let set_variables_call_service = set_variables_call_service(variables);
+    let set_variables_call_service = set_variables_call_service(variables, VariableOptionSource::Argument(0));
 
     let set_variable_peer_id = "set_variable";
     let mut set_variable_vm = create_avm(set_variables_call_service, set_variable_peer_id);

@@ -163,7 +163,10 @@ fn fold_early_exit() {
         "stream_4".to_string() => json!(["d1", "d2"]),
     );
 
-    let mut variables_setter = create_avm(set_variables_call_service(variables), variables_setter_id);
+    let mut variables_setter = create_avm(
+        set_variables_call_service(variables, VariableOptionSource::Argument(0)),
+        variables_setter_id,
+    );
     let mut stream_setter = create_avm(echo_call_service(), stream_setter_id);
     let mut fold_executor = create_avm(unit_call_service(), fold_executor_id);
     let mut error_trigger = create_avm(fallible_call_service("error"), error_trigger_id);
@@ -254,7 +257,10 @@ fn fold_par_early_exit() {
         "stream_4".to_string() => json!(["d1", "d2"]),
     );
 
-    let mut variables_setter = create_avm(set_variables_call_service(variables), variables_setter_id);
+    let mut variables_setter = create_avm(
+        set_variables_call_service(variables, VariableOptionSource::Argument(0)),
+        variables_setter_id,
+    );
     let mut stream_setter = create_avm(echo_call_service(), stream_setter_id);
     let mut fold_executor = create_avm(unit_call_service(), fold_executor_id);
     let mut error_trigger = create_avm(fallible_call_service("error"), error_trigger_id);

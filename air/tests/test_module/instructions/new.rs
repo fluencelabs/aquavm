@@ -29,7 +29,10 @@ fn new_with_global_streams_seq() {
         "1".to_string() => json!(1),
         "2".to_string() => json!(2),
     };
-    let mut set_variable_vm = create_avm(set_variables_call_service(variables_mapping), set_variable_peer_id);
+    let mut set_variable_vm = create_avm(
+        set_variables_call_service(variables_mapping, VariableOptionSource::Argument(0)),
+        set_variable_peer_id,
+    );
 
     let script = format!(
         r#"
