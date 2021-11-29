@@ -65,7 +65,7 @@ pub(super) fn handle_prev_state<'i>(
                 // result hasn't been prepared yet
                 None => {
                     exec_ctx.subtree_complete = false;
-                    Ok(StateDescriptor::not_prepared(prev_result))
+                    Ok(StateDescriptor::not_ready(prev_result))
                 }
             }
         }
@@ -165,7 +165,7 @@ impl StateDescriptor {
         }
     }
 
-    pub(crate) fn not_prepared(prev_state: CallResult) -> Self {
+    pub(crate) fn not_ready(prev_state: CallResult) -> Self {
         Self {
             should_execute: false,
             prev_state: Some(prev_state),

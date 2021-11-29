@@ -154,7 +154,6 @@ fn check_influence_to_not_restricted() {
     );
 
     let result = checked_call_vm!(vm, "", script, "", "");
-    print_trace(&result, "initial");
 
     let actual_trace = trace_from_result(&result);
     let expected_trace = vec![
@@ -201,8 +200,6 @@ fn new_in_fold_with_ap() {
 
     let result = checked_call_vm!(set_variable_vm, "", &script, "", "");
     let result = checked_call_vm!(vm, "", script, "", result.data);
-
-    print_trace(&result, "initial");
 
     let actual_trace = trace_from_result(&result);
     let expected_trace = vec![
