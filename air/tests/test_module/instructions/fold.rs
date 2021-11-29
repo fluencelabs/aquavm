@@ -235,7 +235,7 @@ fn fold_with_join() {
     let result = checked_call_vm!(vm, "", fold_with_join, "", result.data);
 
     let actual_trace = trace_from_result(&result);
-    assert_eq!(actual_trace.len(), 3);
+    assert_eq!(actual_trace.len(), 4);
 }
 
 #[test]
