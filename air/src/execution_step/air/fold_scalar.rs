@@ -63,9 +63,11 @@ pub(super) fn fold<'i>(
     let fold_state = FoldState::from_iterable(iterable, iterable_type, instruction.clone());
     exec_ctx.scalars.set_iterable_value(iterator, fold_state)?;
 
-    instruction.execute(exec_ctx, trace_ctx)?;
+    let fold_result = instruction.execute(exec_ctx, trace_ctx);
 
+    // it's necessary to cleanup iterable value before returning a result,
+    // see https://github.com/fluencelabs/aquavm/issues/176
     exec_ctx.scalars.remove_iterable_value(iterator);
 
-    Ok(())
+    fold_result
 }
