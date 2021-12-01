@@ -41,16 +41,18 @@ impl<'i> ExecutableInstruction<'i> for FoldStream<'i> {
         trace_to_exec_err!(trace_ctx.meet_fold_start(fold_id))?;
         exec_ctx.scalars.meet_fold_start();
 
-        let result = execute_iteration(iterables, self, fold_id, exec_ctx, trace_ctx);
+        // here it's necessary to early exit from a call not calling trace handler,
+        // because error handling is done by macro execute_fold!
+        execute_iterations(iterables, self, fold_id, exec_ctx, trace_ctx)?;
 
         trace_to_exec_err!(trace_ctx.meet_fold_end(fold_id))?;
         exec_ctx.scalars.meet_fold_end();
 
-        result
+        Ok(())
     }
 }
 
-fn execute_iteration<'i>(
+fn execute_iterations<'i>(
     iterables: Vec<IterableValue>,
     fold_stream: &FoldStream<'i>,
     fold_id: u32,
@@ -67,21 +69,19 @@ fn execute_iteration<'i>(
 
         let value_pos = value.pos();
         trace_to_exec_err!(trace_ctx.meet_iteration_start(fold_id, value_pos))?;
-        let result = fold(
+        fold(
             iterable,
             IterableType::Stream(fold_id),
             fold_stream.iterator.name,
             fold_stream.instruction.clone(),
             exec_ctx,
             trace_ctx,
-        );
+        )?;
         trace_to_exec_err!(trace_ctx.meet_generation_end(fold_id))?;
 
         if !exec_ctx.subtree_complete {
             break;
         }
-
-        result?;
     }
 
     Ok(())

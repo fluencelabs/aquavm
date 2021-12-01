@@ -15,6 +15,7 @@
  */
 
 use air_test_utils::prelude::*;
+use pretty_assertions::assert_eq;
 
 #[test]
 fn par_early_exit() {
@@ -170,8 +171,8 @@ fn fold_early_exit() {
     let mut stream_setter = create_avm(echo_call_service(), stream_setter_id);
     let mut fold_executor = create_avm(unit_call_service(), fold_executor_id);
     let mut error_trigger = create_avm(fallible_call_service("error"), error_trigger_id);
-    let mut last_error_receiver = create_avm(unit_call_service(), last_error_receiver_id);
-    let mut last_peer_checker = create_avm(unit_call_service(), last_peer_checker_id);
+    let mut last_error_receiver = create_avm(echo_call_service(), last_error_receiver_id);
+    let mut last_peer_checker = create_avm(echo_call_service(), last_peer_checker_id);
 
     let script = format!(
         include_str!("scripts/fold_early_exit.clj"),
@@ -234,8 +235,10 @@ fn fold_early_exit() {
         executed_state::scalar_string(unit_call_service_result),
         executed_state::scalar_string(unit_call_service_result),
         executed_state::service_failed(1, "failed result from fallible_call_service"),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
+        executed_state::scalar(
+            json!({"instruction" : r#"call "error_trigger_id" ("error" "") [] "#, "msg": r#"Local service error, ret_code is 1, error message is '"failed result from fallible_call_service"'"#, "peer_id": "error_trigger_id"}),
+        ),
+        executed_state::scalar_string("last_peer"),
     ];
 
     assert_eq!(actual_trace, expected_trace);

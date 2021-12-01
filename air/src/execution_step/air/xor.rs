@@ -30,6 +30,7 @@ impl<'i> super::ExecutableInstruction<'i> for Xor<'i> {
         exec_ctx.subtree_complete = true;
         match self.0.execute(exec_ctx, trace_ctx) {
             Err(e) if e.is_catchable() => {
+                println!("xor error: {:?}", e);
                 exec_ctx.subtree_complete = true;
                 exec_ctx.last_error_could_be_set = true;
                 print_xor_log(&e);
