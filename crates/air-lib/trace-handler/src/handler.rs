@@ -154,13 +154,4 @@ impl TraceHandler {
 
         Ok(())
     }
-
-    pub fn fold_end_with_error(&mut self, fold_id: u32) {
-        let fold_fsm = match self.fsm_keeper.extract_fold(fold_id) {
-            Ok(fold_fsm) => fold_fsm,
-            // just passing here is ok, because error could be produced while fold initialization
-            Err(_) => return,
-        };
-        fold_fsm.fold_end_with_error(&mut self.data_keeper);
-    }
 }

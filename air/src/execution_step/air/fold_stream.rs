@@ -30,6 +30,7 @@ use air_parser::ast::FoldStream;
 impl<'i> ExecutableInstruction<'i> for FoldStream<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         log_instruction!(fold, exec_ctx, trace_ctx);
+        exec_ctx.tracker.meet_fold_stream();
 
         let stream_iterable = joinable!(construct_stream_iterable_value(&self.iterable, exec_ctx), exec_ctx)?;
         let iterables = match stream_iterable {
@@ -38,37 +39,49 @@ impl<'i> ExecutableInstruction<'i> for FoldStream<'i> {
         };
 
         let fold_id = exec_ctx.tracker.fold.seen_stream_count;
+
         trace_to_exec_err!(trace_ctx.meet_fold_start(fold_id))?;
-        exec_ctx.scalars.meet_fold_start();
 
-        for iterable in iterables {
-            let value = match iterable.peek() {
-                Some(value) => value,
-                // it's ok, because some generation level of a stream on some point inside execution
-                // flow could contain zero values
-                None => continue,
-            };
-
-            let value_pos = value.pos();
-            trace_to_exec_err!(trace_ctx.meet_iteration_start(fold_id, value_pos))?;
-            fold(
-                iterable,
-                IterableType::Stream(fold_id),
-                self.iterator.name,
-                self.instruction.clone(),
-                exec_ctx,
-                trace_ctx,
-            )?;
-            trace_to_exec_err!(trace_ctx.meet_generation_end(fold_id))?;
-
-            if !exec_ctx.subtree_complete {
-                break;
-            }
-        }
+        let result = execute_iterations(iterables, self, fold_id, exec_ctx, trace_ctx);
 
         trace_to_exec_err!(trace_ctx.meet_fold_end(fold_id))?;
-        exec_ctx.scalars.meet_fold_end();
 
-        Ok(())
+        result
     }
+}
+
+fn execute_iterations<'i>(
+    iterables: Vec<IterableValue>,
+    fold_stream: &FoldStream<'i>,
+    fold_id: u32,
+    exec_ctx: &mut ExecutionCtx<'i>,
+    trace_ctx: &mut TraceHandler,
+) -> ExecutionResult<()> {
+    for iterable in iterables {
+        let value = match iterable.peek() {
+            Some(value) => value,
+            // it's ok, because some generation level of a stream on some point inside execution
+            // flow could contain zero values
+            None => continue,
+        };
+
+        let value_pos = value.pos();
+        trace_to_exec_err!(trace_ctx.meet_iteration_start(fold_id, value_pos))?;
+        let result = fold(
+            iterable,
+            IterableType::Stream(fold_id),
+            fold_stream.iterator.name,
+            fold_stream.instruction.clone(),
+            exec_ctx,
+            trace_ctx,
+        );
+        trace_to_exec_err!(trace_ctx.meet_generation_end(fold_id))?;
+
+        result?;
+        if !exec_ctx.subtree_complete {
+            break;
+        }
+    }
+
+    Ok(())
 }

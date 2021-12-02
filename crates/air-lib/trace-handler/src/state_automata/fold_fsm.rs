@@ -140,11 +140,6 @@ impl FoldFSM {
         self.state_inserter.insert(data_keeper, state);
         self.state_handler.set_final_states(data_keeper);
     }
-
-    pub(crate) fn fold_end_with_error(mut self, data_keeper: &mut DataKeeper) {
-        self.meet_generation_end(data_keeper);
-        self.meet_fold_end(data_keeper);
-    }
 }
 
 #[derive(Clone, Copy)]
