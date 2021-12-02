@@ -34,7 +34,7 @@ impl<'i> ExecutableInstruction<'i> for FoldScalar<'i> {
         exec_ctx.scalars.meet_fold_start();
 
         let scalar_iterable = joinable!(construct_scalar_iterable_value(&self.iterable, exec_ctx), exec_ctx)?;
-        let fold_result = match scalar_iterable {
+        match scalar_iterable {
             FoldIterableScalar::Empty => Ok(()),
             FoldIterableScalar::Scalar(iterable) => fold(
                 iterable,
@@ -44,11 +44,11 @@ impl<'i> ExecutableInstruction<'i> for FoldScalar<'i> {
                 exec_ctx,
                 trace_ctx,
             ),
-        };
+        }?;
 
         exec_ctx.scalars.meet_fold_end();
 
-        fold_result
+        Ok(())
     }
 }
 
@@ -63,11 +63,9 @@ pub(super) fn fold<'i>(
     let fold_state = FoldState::from_iterable(iterable, iterable_type, instruction.clone());
     exec_ctx.scalars.set_iterable_value(iterator, fold_state)?;
 
-    let fold_result = instruction.execute(exec_ctx, trace_ctx);
+    instruction.execute(exec_ctx, trace_ctx)?;
 
-    // it's necessary to cleanup iterable value before returning a result,
-    // see https://github.com/fluencelabs/aquavm/issues/176
     exec_ctx.scalars.remove_iterable_value(iterator);
 
-    fold_result
+    Ok(())
 }

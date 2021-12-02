@@ -42,6 +42,8 @@ use crate::execution_step::TraceHandler;
 
 use air_parser::ast::Instruction;
 
+// TODO: move all error set logic from macros into the execution context
+
 /// Executes instruction and updates last error if needed.
 macro_rules! execute {
     ($self:expr, $instr:expr, $exec_ctx:ident, $trace_ctx:ident) => {
@@ -62,8 +64,8 @@ macro_rules! execute {
     };
 }
 
-/// Executes fold instruction, updates last error if needed, and call error_exit of TraceHandler.
-macro_rules! execute_fold {
+/// Executes fold over a stream instruction, updates last error if needed, and call error_exit of TraceHandler.
+macro_rules! execute_fold_stream {
     ($self:expr, $instr:expr, $exec_ctx:ident, $trace_ctx:ident) => {{
         $exec_ctx.tracker.meet_fold_stream();
         let fold_id = $exec_ctx.tracker.fold.seen_stream_count;
@@ -71,6 +73,29 @@ macro_rules! execute_fold {
         match $instr.execute($exec_ctx, $trace_ctx) {
             Err(e) => {
                 $trace_ctx.fold_end_with_error(fold_id);
+
+                if !$exec_ctx.last_error_could_be_set {
+                    return Err(e);
+                }
+
+                let instruction = format!("{}", $self);
+                let last_error =
+                    LastErrorDescriptor::new(e.clone(), instruction, $exec_ctx.current_peer_id.to_string(), None);
+                $exec_ctx.last_error = Some(last_error);
+                Err(e)
+            }
+            v => v,
+        }
+    }};
+}
+
+/// Executes fold over a scalar instruction, updates last error if needed, and call error_exit of TraceHandler.
+macro_rules! execute_fold_scalar {
+    ($self:expr, $instr:expr, $exec_ctx:ident, $trace_ctx:ident) => {{
+        match $instr.execute($exec_ctx, $trace_ctx) {
+            Err(e) => {
+                $exec_ctx.scalars.remove_iterable_value($instr.iterator.name);
+                $exec_ctx.scalars.meet_fold_end();
 
                 if !$exec_ctx.last_error_could_be_set {
                     return Err(e);
@@ -125,8 +150,8 @@ impl<'i> ExecutableInstruction<'i> for Instruction<'i> {
             Instruction::Call(call) => call.execute(exec_ctx, trace_ctx),
 
             Instruction::Ap(ap) => execute!(self, ap, exec_ctx, trace_ctx),
-            Instruction::FoldScalar(fold) => execute!(self, fold, exec_ctx, trace_ctx),
-            Instruction::FoldStream(fold) => execute_fold!(self, fold, exec_ctx, trace_ctx),
+            Instruction::FoldScalar(fold) => execute_fold_scalar!(self, fold, exec_ctx, trace_ctx),
+            Instruction::FoldStream(fold) => execute_fold_stream!(self, fold, exec_ctx, trace_ctx),
             Instruction::New(new) => execute!(self, new, exec_ctx, trace_ctx),
             Instruction::Next(next) => execute!(self, next, exec_ctx, trace_ctx),
             Instruction::Null(null) => execute!(self, null, exec_ctx, trace_ctx),
