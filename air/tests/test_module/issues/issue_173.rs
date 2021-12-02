@@ -38,8 +38,7 @@ fn issue_173() {
         set_variable_peer_id,
     );
 
-    let script = f!(
-        r#"
+    let script = f!(r#"
             (seq
                 (seq
                     (call "{set_variable_peer_id}" ("" "") ["1"] $stream)
@@ -59,8 +58,7 @@ fn issue_173() {
                         (call "{local_vm_peer_id_2}" ("" "") [$stream])
                     )
                 )
-            )"#
-    );
+            )"#);
 
     let result = checked_call_vm!(set_variable_vm, "", &script, "", "");
     let vm_1_result = checked_call_vm!(local_vm_1, "", &script, "", result.data);
@@ -74,10 +72,12 @@ fn issue_173() {
         executed_state::stream_number(1, 0),
         executed_state::stream_number(2, 0),
         executed_state::fold(vec![
-            executed_state::subtrace_lore(0, SubTraceDesc::new(3, 1), SubTraceDesc::new(7, 2)),
-            executed_state::subtrace_lore(1, SubTraceDesc::new(4, 1), SubTraceDesc::new(5, 2)),
+            executed_state::subtrace_lore(0, SubTraceDesc::new(3, 2), SubTraceDesc::new(9, 2)),
+            executed_state::subtrace_lore(1, SubTraceDesc::new(5, 2), SubTraceDesc::new(7, 2)),
         ]),
+        executed_state::par(6, 1),
         executed_state::stream_number(1, 0),
+        executed_state::par(2, 1),
         executed_state::stream_number(2, 0),
         executed_state::scalar(json!([2])),
         executed_state::scalar(json!([1, 2])),

@@ -38,7 +38,7 @@ pub struct TraceSlider {
 }
 
 impl TraceSlider {
-    pub(super) fn new(trace: ExecutionTrace) -> Self {
+    pub(crate) fn new(trace: ExecutionTrace) -> Self {
         let subtrace_len = trace.len();
 
         Self {
