@@ -31,11 +31,10 @@ impl<'i> ExecutableInstruction<'i> for FoldScalar<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         log_instruction!(fold, exec_ctx, trace_ctx);
 
-        exec_ctx.scalars.meet_fold_start();
-
         let scalar_iterable = joinable!(construct_scalar_iterable_value(&self.iterable, exec_ctx), exec_ctx)?;
 
-        let result = match scalar_iterable {
+        match scalar_iterable {
+            // just exit on empty iterable
             FoldIterableScalar::Empty => Ok(()),
             FoldIterableScalar::Scalar(iterable) => fold(
                 iterable,
@@ -45,11 +44,7 @@ impl<'i> ExecutableInstruction<'i> for FoldScalar<'i> {
                 exec_ctx,
                 trace_ctx,
             ),
-        };
-
-        exec_ctx.scalars.meet_fold_end();
-
-        result
+        }
     }
 }
 
@@ -62,11 +57,13 @@ pub(super) fn fold<'i>(
     trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<()> {
     let fold_state = FoldState::from_iterable(iterable, iterable_type, instruction.clone());
+    exec_ctx.scalars.meet_fold_start();
     exec_ctx.scalars.set_iterable_value(iterator, fold_state)?;
 
     let result = instruction.execute(exec_ctx, trace_ctx);
 
     exec_ctx.scalars.remove_iterable_value(iterator);
+    exec_ctx.scalars.meet_fold_end();
 
     result
 }
