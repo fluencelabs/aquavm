@@ -42,7 +42,7 @@ impl<'i> ExecutableInstruction<'i> for FoldStream<'i> {
         exec_ctx.scalars.meet_fold_start();
 
         // here it's necessary to early exit from a call not calling trace handler,
-        // because error handling is done by macro execute_fold!
+        // because error handling is done by macro execute_fold_stream!
         execute_iterations(iterables, self, fold_id, exec_ctx, trace_ctx)?;
 
         trace_to_exec_err!(trace_ctx.meet_fold_end(fold_id))?;

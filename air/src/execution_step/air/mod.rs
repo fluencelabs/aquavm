@@ -89,29 +89,6 @@ macro_rules! execute_fold_stream {
     }};
 }
 
-/// Executes fold over a scalar instruction, updates last error if needed, and call error_exit of TraceHandler.
-macro_rules! execute_fold_scalar {
-    ($self:expr, $instr:expr, $exec_ctx:ident, $trace_ctx:ident) => {{
-        match $instr.execute($exec_ctx, $trace_ctx) {
-            Err(e) => {
-                $exec_ctx.scalars.remove_iterable_value($instr.iterator.name);
-                $exec_ctx.scalars.meet_fold_end();
-
-                if !$exec_ctx.last_error_could_be_set {
-                    return Err(e);
-                }
-
-                let instruction = format!("{}", $self);
-                let last_error =
-                    LastErrorDescriptor::new(e.clone(), instruction, $exec_ctx.current_peer_id.to_string(), None);
-                $exec_ctx.last_error = Some(last_error);
-                Err(e)
-            }
-            v => v,
-        }
-    }};
-}
-
 /// Executes match/mismatch instructions and updates last error if error type wasn't
 /// MatchWithoutXorError or MismatchWithoutXorError.
 macro_rules! execute_match_mismatch {
@@ -150,7 +127,7 @@ impl<'i> ExecutableInstruction<'i> for Instruction<'i> {
             Instruction::Call(call) => call.execute(exec_ctx, trace_ctx),
 
             Instruction::Ap(ap) => execute!(self, ap, exec_ctx, trace_ctx),
-            Instruction::FoldScalar(fold) => execute_fold_scalar!(self, fold, exec_ctx, trace_ctx),
+            Instruction::FoldScalar(fold) => execute!(self, fold, exec_ctx, trace_ctx),
             Instruction::FoldStream(fold) => execute_fold_stream!(self, fold, exec_ctx, trace_ctx),
             Instruction::New(new) => execute!(self, new, exec_ctx, trace_ctx),
             Instruction::Next(next) => execute!(self, next, exec_ctx, trace_ctx),
