@@ -30,6 +30,7 @@ use air_parser::ast::FoldStream;
 impl<'i> ExecutableInstruction<'i> for FoldStream<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         log_instruction!(fold, exec_ctx, trace_ctx);
+        exec_ctx.tracker.meet_fold_stream();
 
         let stream_iterable = joinable!(construct_stream_iterable_value(&self.iterable, exec_ctx), exec_ctx)?;
         let iterables = match stream_iterable {
@@ -37,7 +38,6 @@ impl<'i> ExecutableInstruction<'i> for FoldStream<'i> {
             FoldIterableStream::Stream(iterables) => iterables,
         };
 
-        exec_ctx.tracker.meet_fold_stream();
         let fold_id = exec_ctx.tracker.fold.seen_stream_count;
 
         trace_to_exec_err!(trace_ctx.meet_fold_start(fold_id))?;
