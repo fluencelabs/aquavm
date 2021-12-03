@@ -64,12 +64,12 @@ pub(super) fn resolve_fold_lore(fold: &FoldResult, merge_ctx: &MergeCtx) -> Merg
 ///
 /// Imagine a fold on stream with 3 elements that have the same generation, in this case the
 /// conversion will look like this:
-/// [1, 1] [2, 2] [3, 3] => [6, 1] [5, 3] [3, 6]
+/// [1, 1] [2, 2] [3, 3] => [12, 1] [11, 3] [9, 6]
 ///   g0     g0     g0
 /// here a number before comma represents count of elements before next, and after the comma - after
 ///
 /// For fold with 5 elements of two generations:
-/// [1, 1] [2, 2] [3, 3] [4, 4] [5, 5] [1, 1] => [6, 1] [5, 3] [3, 6] [9, 4] [5, 9] [1, 1]
+/// [1, 1] [2, 2] [3, 3] [4, 4] [5, 5] [1, 1] => [12, 1] [11, 3] [9, 6] [18, 4] [14, 9] [2, 1]
 ///   g0     g0     g0     g1     g1     g2
 ///
 /// It could be seen that this function does a convolution of lens with respect to generations.
@@ -95,7 +95,7 @@ fn compute_lens_convolution(fold: &FoldResult, merge_ctx: &MergeCtx) -> MergeRes
         // TODO: check sequence for monotone
         if last_seen_generation != current_generation {
             if subtrace_id > 0 {
-                // do a back traversal for
+                // do a back traversal for before lens
                 compute_before_lens(&mut lens, last_seen_generation_pos, subtrace_id - 1);
             }
             last_seen_generation = current_generation;
@@ -130,13 +130,13 @@ fn compute_lens_convolution(fold: &FoldResult, merge_ctx: &MergeCtx) -> MergeRes
 
 fn compute_before_lens(lore_lens: &mut [LoresLen], begin_pos: usize, end_pos: usize) {
     let mut cum_before_len = 0;
+    let after_len = lore_lens[end_pos].after_len;
 
     for subtrace_id in (begin_pos..=end_pos).rev() {
-        let lens = &mut lore_lens[subtrace_id];
+        let before_len = &mut lore_lens[subtrace_id].before_len;
 
-        let current_before_len = lens.before_len;
-        cum_before_len += current_before_len;
-        lens.before_len = cum_before_len;
+        cum_before_len += *before_len;
+        *before_len = cum_before_len + after_len;
     }
 }
 
@@ -182,5 +182,129 @@ struct LoresLen {
 impl LoresLen {
     pub(self) fn new(before_len: u32, after_len: u32) -> Self {
         Self { before_len, after_len }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::compute_lens_convolution;
+    use crate::data_keeper::TraceSlider;
+    use crate::merger::fold_merger::fold_lore_resolver::LoresLen;
+    use crate::MergeCtx;
+    use air_interpreter_data::ApResult;
+    use air_interpreter_data::ExecutedState;
+    use air_interpreter_data::FoldResult;
+    use air_interpreter_data::FoldSubTraceLore;
+    use air_interpreter_data::SubTraceDesc;
+
+    #[test]
+    fn empty_fold_result() {
+        let lore = vec![];
+
+        let fold_result = FoldResult { lore };
+
+        let slider = TraceSlider::new(vec![]);
+        let ctx = MergeCtx {
+            slider,
+            streams: <_>::default(),
+        };
+
+        let (all_states, convoluted_lens) =
+            compute_lens_convolution(&fold_result, &ctx).expect("convolution should be successful");
+        assert_eq!(all_states, 0);
+        assert_eq!(convoluted_lens, vec![]);
+    }
+
+    #[test]
+    fn convolution_test_1() {
+        // [1, 1] [2, 2] [3, 3] => [12, 1] [11, 3] [9, 6]
+        //   g0     g0     g0
+        let lore = vec![
+            FoldSubTraceLore {
+                value_pos: 0,
+                subtraces_desc: vec![SubTraceDesc::new(0, 1), SubTraceDesc::new(0, 1)],
+            },
+            FoldSubTraceLore {
+                value_pos: 0,
+                subtraces_desc: vec![SubTraceDesc::new(0, 2), SubTraceDesc::new(0, 2)],
+            },
+            FoldSubTraceLore {
+                value_pos: 0,
+                subtraces_desc: vec![SubTraceDesc::new(0, 3), SubTraceDesc::new(0, 3)],
+            },
+        ];
+
+        let fold_result = FoldResult { lore };
+
+        let slider = TraceSlider::new(vec![ExecutedState::Ap(ApResult::new(vec![0]))]);
+        let ctx = MergeCtx {
+            slider,
+            streams: <_>::default(),
+        };
+
+        let (all_states, convoluted_lens) =
+            compute_lens_convolution(&fold_result, &ctx).expect("convolution should be successful");
+        assert_eq!(all_states, 12);
+
+        let expected_lens = vec![LoresLen::new(12, 1), LoresLen::new(11, 3), LoresLen::new(9, 6)];
+        assert_eq!(convoluted_lens, expected_lens);
+    }
+
+    #[test]
+    fn convolution_test_2() {
+        // [1, 1] [2, 2] [3, 3] [4, 4] [5, 5] [1, 1] => [12, 1] [11, 3] [9, 6] [18, 4] [14, 9] [2, 1]
+        //   g0     g0     g0     g1     g1     g2
+        let lore = vec![
+            FoldSubTraceLore {
+                value_pos: 0,
+                subtraces_desc: vec![SubTraceDesc::new(0, 1), SubTraceDesc::new(0, 1)],
+            },
+            FoldSubTraceLore {
+                value_pos: 0,
+                subtraces_desc: vec![SubTraceDesc::new(0, 2), SubTraceDesc::new(0, 2)],
+            },
+            FoldSubTraceLore {
+                value_pos: 0,
+                subtraces_desc: vec![SubTraceDesc::new(0, 3), SubTraceDesc::new(0, 3)],
+            },
+            FoldSubTraceLore {
+                value_pos: 1,
+                subtraces_desc: vec![SubTraceDesc::new(0, 4), SubTraceDesc::new(0, 4)],
+            },
+            FoldSubTraceLore {
+                value_pos: 1,
+                subtraces_desc: vec![SubTraceDesc::new(0, 5), SubTraceDesc::new(0, 5)],
+            },
+            FoldSubTraceLore {
+                value_pos: 2,
+                subtraces_desc: vec![SubTraceDesc::new(0, 1), SubTraceDesc::new(0, 1)],
+            },
+        ];
+
+        let fold_result = FoldResult { lore };
+
+        let slider = TraceSlider::new(vec![
+            ExecutedState::Ap(ApResult::new(vec![0])),
+            ExecutedState::Ap(ApResult::new(vec![1])),
+            ExecutedState::Ap(ApResult::new(vec![2])),
+        ]);
+        let ctx = MergeCtx {
+            slider,
+            streams: <_>::default(),
+        };
+
+        let (all_states, convoluted_lens) =
+            compute_lens_convolution(&fold_result, &ctx).expect("convolution should be successful");
+        assert_eq!(all_states, 32);
+
+        let expected_lens = vec![
+            LoresLen::new(12, 1),
+            LoresLen::new(11, 3),
+            LoresLen::new(9, 6),
+            LoresLen::new(18, 4),
+            LoresLen::new(14, 9),
+            LoresLen::new(2, 1),
+        ];
+        assert_eq!(convoluted_lens, expected_lens);
     }
 }
