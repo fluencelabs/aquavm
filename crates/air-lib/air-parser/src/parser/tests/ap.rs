@@ -61,6 +61,21 @@ fn ap_with_bool() {
 }
 
 #[test]
+fn ap_with_last_error() {
+    let source_code = r#"
+        (ap %last_error%.$.msg! $stream)
+    "#;
+
+    let actual = parse(source_code);
+    let expected = ap(
+        ApArgument::LastError(LastErrorPath::Message),
+        Variable::stream("$stream", 33),
+    );
+
+    assert_eq!(actual, expected);
+}
+
+#[test]
 fn ap_with_empty_array() {
     let source_code = r#"
         (ap [] $stream)
