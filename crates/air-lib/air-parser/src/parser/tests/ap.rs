@@ -82,10 +82,7 @@ fn ap_with_empty_array() {
     "#;
 
     let actual = parse(source_code);
-    let expected = ap(
-        ApArgument::EmptyArray,
-        Variable::stream("$stream", 16),
-    );
+    let expected = ap(ApArgument::EmptyArray, Variable::stream("$stream", 16));
 
     assert_eq!(actual, expected);
 }
