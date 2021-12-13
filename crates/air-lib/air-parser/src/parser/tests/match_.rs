@@ -99,3 +99,65 @@ fn mismatch_with_bool() {
     let instruction = parse(source_code);
     assert_eq!(expected, instruction);
 }
+
+#[test]
+fn match_with_empty_array() {
+    let source_code = r#"
+         (match variable []
+            (null)
+         )
+        "#;
+
+    let left_value = Value::Variable(VariableWithLambda::scalar("variable", 17));
+    let right_value = Value::EmptyArray;
+    let instr = null();
+    let expected = match_(left_value, right_value, instr);
+
+    let instruction = parse(source_code);
+    assert_eq!(expected, instruction);
+
+    let source_code = r#"
+         (match [] variable
+            (null)
+         )
+        "#;
+
+    let left_value = Value::EmptyArray;
+    let right_value = Value::Variable(VariableWithLambda::scalar("variable", 20));
+    let instr = null();
+    let expected = match_(left_value, right_value, instr);
+
+    let instruction = parse(source_code);
+    assert_eq!(expected, instruction);
+}
+
+#[test]
+fn mismatch_with_empty_array() {
+    let source_code = r#"
+         (mismatch variable []
+            (null)
+         )
+        "#;
+
+    let left_value = Value::Variable(VariableWithLambda::scalar("variable", 20));
+    let right_value = Value::EmptyArray;
+    let instr = null();
+    let expected = mismatch(left_value, right_value, instr);
+
+    let instruction = parse(source_code);
+    assert_eq!(expected, instruction);
+
+    let source_code = r#"
+         (mismatch [] variable
+            (null)
+         )
+        "#;
+
+    let left_value = Value::EmptyArray;
+    let right_value = Value::Variable(VariableWithLambda::scalar("variable", 23));
+    let instr = null();
+    let expected = mismatch(left_value, right_value, instr);
+
+    let instruction = parse(source_code);
+    assert_eq!(expected, instruction);
+}
