@@ -29,7 +29,6 @@ pub enum Token<'input> {
     CloseRoundBracket,
     OpenSquareBracket,
     CloseSquareBracket,
-    SquareBrackets, // [] symbolize empty array, it's possible to have it only in an argument position
 
     StringLiteral(&'input str),
     Scalar {

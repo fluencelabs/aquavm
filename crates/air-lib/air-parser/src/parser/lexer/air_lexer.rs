@@ -26,7 +26,6 @@ pub type Spanned<Token, Loc, Error> = Result<(Loc, Token, Loc), Error>;
 
 pub struct AIRLexer<'input> {
     input: &'input str,
-    open_square_bracket_met: bool,
     chars: Peekable<CharIndices<'input>>,
 }
 
@@ -42,7 +41,6 @@ impl<'input> AIRLexer<'input> {
     pub fn new(input: &'input str) -> Self {
         Self {
             input,
-            open_square_bracket_met: false,
             chars: input.char_indices().peekable(),
         }
     }
@@ -53,18 +51,8 @@ impl<'input> AIRLexer<'input> {
                 '(' => return Some(Ok((start_pos, Token::OpenRoundBracket, start_pos + 1))),
                 ')' => return Some(Ok((start_pos, Token::CloseRoundBracket, start_pos + 1))),
 
-                '[' => {
-                    return if !self.open_square_bracket_met {
-                        self.open_square_bracket_met = true;
-                        Some(Ok((start_pos, Token::OpenSquareBracket, start_pos + 1)))
-                    } else {
-                        self.tokenize_string(start_pos, true)
-                    }
-                }
-                ']' => {
-                    self.open_square_bracket_met = false;
-                    return Some(Ok((start_pos, Token::CloseSquareBracket, start_pos + 1)));
-                }
+                '[' => return Some(Ok((start_pos, Token::OpenSquareBracket, start_pos + 1))),
+                ']' => return Some(Ok((start_pos, Token::CloseSquareBracket, start_pos + 1))),
 
                 ';' => self.skip_comment(),
 
@@ -200,8 +188,6 @@ fn string_to_token(input: &str, start_pos: usize) -> LexerResult<Token> {
         MATCH_INSTR => Ok(Token::Match),
         MISMATCH_INSTR => Ok(Token::MisMatch),
 
-        SQUARE_BRACKETS => Ok(Token::SquareBrackets),
-
         INIT_PEER_ID => Ok(Token::InitPeerId),
         _ if input.starts_with(LAST_ERROR) => parse_last_error(input, start_pos),
 
@@ -248,8 +234,6 @@ const MISMATCH_INSTR: &str = "mismatch";
 
 const INIT_PEER_ID: &str = "%init_peer_id%";
 const LAST_ERROR: &str = "%last_error%";
-
-const SQUARE_BRACKETS: &str = "[]";
 
 const TRUE_VALUE: &str = "true";
 const FALSE_VALUE: &str = "false";

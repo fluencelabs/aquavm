@@ -159,7 +159,6 @@ Value: Value<'input> = {
     <l:Literal> => Value::Literal(l),
     <n:Number> => Value::Number(n),
     <b:Boolean> => Value::Boolean(b),
-    EmptyArray => Value::EmptyArray,
     "[" "]" => Value::EmptyArray,
     <scalar:Scalar> => Value::Variable(VariableWithLambda::scalar(scalar.0, scalar.1)),
     <scalar:ScalarWithLambda> => Value::Variable(VariableWithLambda::scalar_wl(scalar.0, scalar.1, scalar.2)),
@@ -173,7 +172,7 @@ ApArgument: ApArgument<'input> = {
     <l:Literal> => ApArgument::Literal(l),
     <n:Number> => ApArgument::Number(n),
     <b:Boolean> => ApArgument::Boolean(b),
-    EmptyArray => ApArgument::EmptyArray,
+    "[" "]" => ApArgument::EmptyArray,
     <scalar:Scalar> => ApArgument::Scalar(ScalarWithLambda::new(scalar.0, None, scalar.1)),
     <scalar:ScalarWithLambda> => ApArgument::Scalar(ScalarWithLambda::new(scalar.0, Some(scalar.1), scalar.2)),
 }
@@ -187,7 +186,6 @@ extern {
         ")" => Token::CloseRoundBracket,
         "[" => Token::OpenSquareBracket,
         "]" => Token::CloseSquareBracket,
-        EmptyArray => Token::SquareBrackets,
 
         Literal => Token::StringLiteral(<&'input str>),
         Scalar => Token::Scalar { name:<&'input str>, position: <usize> },
