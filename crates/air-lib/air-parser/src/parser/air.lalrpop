@@ -160,6 +160,7 @@ Value: Value<'input> = {
     <n:Number> => Value::Number(n),
     <b:Boolean> => Value::Boolean(b),
     EmptyArray => Value::EmptyArray,
+    "[" "]" => Value::EmptyArray,
     <scalar:Scalar> => Value::Variable(VariableWithLambda::scalar(scalar.0, scalar.1)),
     <scalar:ScalarWithLambda> => Value::Variable(VariableWithLambda::scalar_wl(scalar.0, scalar.1, scalar.2)),
     <stream:Stream> => Value::Variable(VariableWithLambda::stream(stream.0, stream.1)),
