@@ -55,13 +55,14 @@ impl<E> AVM<E> {
         let AVMConfig {
             air_wasm_path,
             current_peer_id,
+            max_heap_size,
             logging_mask,
             mut data_store,
         } = config;
 
         data_store.initialize()?;
 
-        let runner = AVMRunner::new(air_wasm_path, current_peer_id, logging_mask)
+        let runner = AVMRunner::new(air_wasm_path, current_peer_id, max_heap_size, logging_mask)
             .map_err(AVMError::RunnerError)?;
         let runner = SendSafeRunner(runner);
         let avm = Self { runner, data_store };

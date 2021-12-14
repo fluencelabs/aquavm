@@ -21,6 +21,9 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 use std::path::PathBuf;
 
+// 10 Mb
+const AVM_MAX_HEAP_SIZE: u64 = 10 * 1024 * 1024;
+
 pub struct TestRunner {
     pub runner: AVMRunner,
     pub call_service: CallServiceClosure,
@@ -84,8 +87,13 @@ pub fn create_avm(
     let current_peer_id = current_peer_id.into();
     let logging_mask = i32::MAX;
 
-    let runner =
-        AVMRunner::new(air_wasm_path, current_peer_id, logging_mask).expect("vm should be created");
+    let runner = AVMRunner::new(
+        air_wasm_path,
+        current_peer_id,
+        Some(AVM_MAX_HEAP_SIZE),
+        logging_mask,
+    )
+    .expect("vm should be created");
     TestRunner {
         runner,
         call_service,
