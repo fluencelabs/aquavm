@@ -1,3 +1,11 @@
+## Version 0.18.0 (2021-12-14)
+
+[PR 192](https://github.com/fluencelabs/aquavm/pull/172):  
+Added a possibility to use scalars in lambdas.
+
+[PR 190](https://github.com/fluencelabs/aquavm/pull/190), [PR 186](https://github.com/fluencelabs/aquavm/pull/186), [PR 185](https://github.com/fluencelabs/aquavm/pull/185), [PR 182](https://github.com/fluencelabs/aquavm/pull/182), [PR 181](https://github.com/fluencelabs/aquavm/pull/181):  
+Bug fixing.
+
 ## Version 0.17.0 (2021-11-24)
 
 [PR 172](https://github.com/fluencelabs/aquavm/pull/172):  
