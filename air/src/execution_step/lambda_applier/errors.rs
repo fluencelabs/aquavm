@@ -26,7 +26,7 @@ pub(crate) enum LambdaError {
     #[error("field algebra (with field name = '{field_name}') can't be applied to a stream")]
     FieldAccessorAppliedToStream { field_name: String },
 
-    #[error("value '{value}' is not an array-type to match array algebra with idx = '{idx}'")]
+    #[error("value '{value}' is not an array-type to match array accessor with idx = '{idx}'")]
     ArrayAccessorNotMatchValue { value: JValue, idx: u32 },
 
     #[error("value '{value}' does not contain element for idx = '{idx}'")]
