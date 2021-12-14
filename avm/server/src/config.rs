@@ -25,6 +25,9 @@ pub struct AVMConfig<E> {
     /// Current peer id.
     pub current_peer_id: String,
 
+    /// Maximum heap size in bytes available for the interpreter.
+    pub max_heap_size: Option<u64>,
+
     /// Mask used to filter logs, for details see `log_utf8_string` in fluence-faas.
     pub logging_mask: i32,
 

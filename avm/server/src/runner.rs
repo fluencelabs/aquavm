@@ -39,11 +39,12 @@ impl AVMRunner {
     pub fn new(
         air_wasm_path: PathBuf,
         current_peer_id: impl Into<String>,
+        max_heap_size: Option<u64>,
         logging_mask: i32,
     ) -> RunnerResult<Self> {
         let (wasm_dir, wasm_filename) = split_dirname(air_wasm_path)?;
 
-        let faas_config = make_faas_config(wasm_dir, &wasm_filename, logging_mask);
+        let faas_config = make_faas_config(wasm_dir, &wasm_filename, max_heap_size, logging_mask);
         let faas = FluenceFaaS::with_raw_config(faas_config)?;
         let current_peer_id = current_peer_id.into();
 
@@ -149,9 +150,15 @@ fn split_dirname(path: PathBuf) -> RunnerResult<(PathBuf, String)> {
     Ok((path, file_name))
 }
 
-fn make_faas_config(air_wasm_dir: PathBuf, air_wasm_file: &str, logging_mask: i32) -> FaaSConfig {
+fn make_faas_config(
+    air_wasm_dir: PathBuf,
+    air_wasm_file: &str,
+    max_heap_size: Option<u64>,
+    logging_mask: i32,
+) -> FaaSConfig {
     let air_module_config = fluence_faas::FaaSModuleConfig {
         mem_pages_count: None,
+        max_heap_size,
         logger_enabled: true,
         host_imports: <_>::default(),
         wasi: None,

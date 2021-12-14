@@ -74,3 +74,15 @@ fn ap_with_last_error() {
 
     assert_eq!(actual, expected);
 }
+
+#[test]
+fn ap_with_empty_array() {
+    let source_code = r#"
+        (ap [] $stream)
+    "#;
+
+    let actual = parse(source_code);
+    let expected = ap(ApArgument::EmptyArray, Variable::stream("$stream", 16));
+
+    assert_eq!(actual, expected);
+}

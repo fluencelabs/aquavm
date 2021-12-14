@@ -467,3 +467,21 @@ fn booleans() {
         ))),
     );
 }
+
+#[test]
+fn match_with_empty_array__() {
+    const MATCH_WITH_EMPTY_ARRAY: &str = "(match scalar []
+        (null)
+    )";
+
+    lexer_test(
+        MATCH_WITH_EMPTY_ARRAY,
+        Some(
+            vec![3, 4],
+            vec![
+                Ok((14, Token::OpenSquareBracket, 15)),
+                Ok((15, Token::CloseSquareBracket, 16)),
+            ],
+        ),
+    );
+}
