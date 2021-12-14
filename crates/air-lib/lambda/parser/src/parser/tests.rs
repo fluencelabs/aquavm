@@ -35,7 +35,7 @@ fn field_access() {
     let lambda = format!(".{}", field_name);
 
     let actual = parse(&lambda);
-    let expected = vec![ValueAccessor::FieldAccess { field_name }];
+    let expected = vec![ValueAccessor::FieldAccessByName { field_name }];
     assert_eq!(actual, expected);
 }
 
@@ -45,7 +45,7 @@ fn field_access_with_flattening() {
     let lambda = format!(".{}!", field_name);
 
     let actual = parse(&lambda);
-    let expected = vec![ValueAccessor::FieldAccess { field_name }];
+    let expected = vec![ValueAccessor::FieldAccessByName { field_name }];
     assert_eq!(actual, expected);
 }
 
@@ -77,7 +77,7 @@ fn field_array_access() {
 
     let actual = parse(&lambda);
     let expected = vec![
-        ValueAccessor::FieldAccess { field_name },
+        ValueAccessor::FieldAccessByName { field_name },
         ValueAccessor::ArrayAccess { idx },
     ];
     assert_eq!(actual, expected);
@@ -91,7 +91,7 @@ fn field_array_access_without_dot() {
 
     let actual = parse(&lambda);
     let expected = vec![
-        ValueAccessor::FieldAccess { field_name },
+        ValueAccessor::FieldAccessByName { field_name },
         ValueAccessor::ArrayAccess { idx },
     ];
     assert_eq!(actual, expected);
@@ -106,7 +106,7 @@ fn array_field_access() {
     let actual = parse(&lambda);
     let expected = vec![
         ValueAccessor::ArrayAccess { idx },
-        ValueAccessor::FieldAccess { field_name },
+        ValueAccessor::FieldAccessByName { field_name },
     ];
     assert_eq!(actual, expected);
 }
@@ -122,11 +122,11 @@ fn many_array_field_access() {
     let actual = parse(&lambda);
     let expected = vec![
         ValueAccessor::ArrayAccess { idx: idx_1 },
-        ValueAccessor::FieldAccess {
+        ValueAccessor::FieldAccessByName {
             field_name: field_name_1,
         },
         ValueAccessor::ArrayAccess { idx: idx_2 },
-        ValueAccessor::FieldAccess {
+        ValueAccessor::FieldAccessByName {
             field_name: field_name_2,
         },
     ];

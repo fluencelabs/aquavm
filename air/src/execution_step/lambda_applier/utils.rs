@@ -16,6 +16,7 @@
 
 use super::LambdaError;
 use super::LambdaResult;
+use crate::execution_step::ScalarRef;
 use crate::JValue;
 
 pub(super) fn try_jvalue_with_idx(jvalue: &JValue, idx: u32) -> LambdaResult<&JValue> {
@@ -51,4 +52,43 @@ pub(super) fn try_jvalue_with_field_name<'value>(
             field_name: field_name.to_string(),
         }),
     }
+}
+
+pub(super) fn select_by_scalar<'value, 'i>(
+    value: &'value JValue,
+    scalar_ref: ScalarRef<'i>,
+) -> LambdaResult<&'value JValue> {
+    use ScalarRef::*;
+
+    match scalar_ref {
+        Value(lambda_value) => select_by_jvalue(value, &lambda_value.result),
+        IterableValue(fold_state) => {
+            let accessor = fold_state.iterable.peek().unwrap().into_resolved_result();
+            select_by_jvalue(value, &accessor.result)
+        }
+    }
+}
+
+fn select_by_jvalue<'value>(value: &'value JValue, accessor: &JValue) -> LambdaResult<&'value JValue> {
+    match accessor {
+        JValue::String(string_accessor) => try_jvalue_with_field_name(value, string_accessor),
+        JValue::Number(number_accessor) => {
+            let idx = try_number_to_u32(number_accessor)?;
+            try_jvalue_with_idx(value, idx)
+        }
+        scalar_accessor => Err(LambdaError::ScalarAccessorHasInvalidType {
+            scalar_accessor: scalar_accessor.clone(),
+        }),
+    }
+}
+
+fn try_number_to_u32(accessor: &serde_json::Number) -> LambdaResult<u32> {
+    use std::convert::TryFrom;
+
+    accessor
+        .as_u64()
+        .and_then(|v| u32::try_from(v).ok())
+        .ok_or(LambdaError::IndexAccessNotU32 {
+            accessor: accessor.clone(),
+        })
 }

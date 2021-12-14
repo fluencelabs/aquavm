@@ -1,4 +1,4 @@
-use crate::ValueAlgebra;
+use crate::ValueAccessor;
 use crate::parser::lexer::LexerError;
 use crate::parser::lexer::Token;
 
@@ -7,18 +7,22 @@ use lalrpop_util::ErrorRecovery;
 // the only thing why input matters here is just introducing lifetime for Token
 grammar<'err, 'input>(input: &'input str, errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>);
 
-pub Lambda: Vec<ValueAlgebra<'input>> = <ValueAlgebra*> => <>;
+pub Lambda: Vec<ValueAccessor<'input>> = <ValueAccessor*> => <>;
 
-ValueAlgebra: ValueAlgebra<'input> = {
-    <maybe_dot_selector:"."?> "[" <idx: array_idx> "]" <maybe_flatten_sign:"!"?> => {
-        ValueAlgebra::ArrayAccess { idx }
+ValueAccessor: ValueAccessor<'input> = {
+    <maybe_dot_selector:"."?> "[" <idx: number_accessor> "]" <maybe_flatten_sign:"!"?> => {
+        ValueAccessor::ArrayAccess { idx }
     },
 
-    "." <field_name: field_name> <maybe_flatten_sign:"!"?> => {
-        ValueAlgebra::FieldAccess { field_name }
+    <maybe_dot_selector:"."?> "[" <scalar_name: string_accessor> "]" <maybe_flatten_sign:"!"?> => {
+        ValueAccessor::FieldAccessByScalar { scalar_name }
     },
 
-    ! => { errors.push(<>); ValueAlgebra::Error },
+    "." <field_name: string_accessor> <maybe_flatten_sign:"!"?> => {
+        ValueAccessor::FieldAccessByName { field_name }
+    },
+
+    ! => { errors.push(<>); ValueAccessor::Error },
 }
 
 extern {
@@ -31,8 +35,8 @@ extern {
         "[" => Token::OpenSquareBracket,
         "]" => Token::CloseSquareBracket,
 
-        array_idx => Token::ArrayIdx(<u32>),
-        field_name => Token::FieldName(<&'input str>),
+        number_accessor => Token::NumberAccessor(<u32>),
+        string_accessor => Token::StringAccessor(<&'input str>),
 
         "!" => Token::FlatteningSign,
     }

@@ -71,7 +71,11 @@ impl<'input> AlgebraLexer<'input> {
             .parse::<u32>()
             .map_err(|e| LexerError::ParseIntError(start_pos, start_pos + array_idx.len(), e))
         {
-            Ok(idx) => Ok((start_pos, Token::ArrayIdx(idx), start_pos + array_idx.len())),
+            Ok(idx) => Ok((
+                start_pos,
+                Token::NumberAccessor(idx),
+                start_pos + array_idx.len(),
+            )),
             Err(e) => Err(e),
         }
     }
@@ -84,7 +88,7 @@ impl<'input> AlgebraLexer<'input> {
 
         Ok((
             start_pos,
-            Token::FieldName(field_name),
+            Token::StringAccessor(field_name),
             start_pos + field_name.len(),
         ))
     }

@@ -285,7 +285,7 @@ fn lambda() {
                 name: "value",
                 lambda: unsafe {
                     LambdaAST::new_unchecked(vec![
-                        ValueAccessor::FieldAccess {
+                        ValueAccessor::FieldAccessByName {
                             field_name: "field",
                         },
                         ValueAccessor::ArrayAccess { idx: 1 },

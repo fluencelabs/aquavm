@@ -126,7 +126,7 @@ fn comments() {
         ScalarWithLambda::from_raw_lambda(
             "members",
             vec![
-                ValueAccessor::FieldAccess {
+                ValueAccessor::FieldAccessByName {
                     field_name: "field",
                 },
                 ValueAccessor::ArrayAccess { idx: 1 },

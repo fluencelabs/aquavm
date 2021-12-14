@@ -37,4 +37,10 @@ pub(crate) enum LambdaError {
 
     #[error("value '{value}' does not contain element with field name = '{field_name}'")]
     JValueNotContainSuchField { value: JValue, field_name: String },
+
+    #[error("index accessor `{accessor} can't be converted to u32`")]
+    IndexAccessNotU32 { accessor: serde_json::Number },
+
+    #[error("scalar accessor `{scalar_accessor}` should has number or string type")]
+    ScalarAccessorHasInvalidType { scalar_accessor: JValue },
 }

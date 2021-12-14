@@ -19,6 +19,7 @@ use super::ExecutionResult;
 use super::IterableItem;
 use super::JValuable;
 use super::LambdaAST;
+use crate::execution_step::ExecutionCtx;
 use crate::execution_step::RSecurityTetraplet;
 use crate::execution_step::SecurityTetraplets;
 use crate::JValue;
@@ -27,7 +28,7 @@ use std::borrow::Cow;
 use std::ops::Deref;
 
 impl<'ctx> JValuable for IterableItem<'ctx> {
-    fn apply_lambda(&self, lambda: &LambdaAST<'_>) -> ExecutionResult<&JValue> {
+    fn apply_lambda<'i>(&self, lambda: &LambdaAST<'_>, exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<&JValue> {
         use super::IterableItem::*;
 
         let jvalue = match self {
@@ -36,11 +37,15 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
             RcValue((jvalue, ..)) => jvalue.deref(),
         };
 
-        let selected_value = select(jvalue, lambda.iter())?;
+        let selected_value = select(jvalue, lambda.iter(), exec_ctx)?;
         Ok(selected_value)
     }
 
-    fn apply_lambda_with_tetraplets(&self, lambda: &LambdaAST<'_>) -> ExecutionResult<(&JValue, RSecurityTetraplet)> {
+    fn apply_lambda_with_tetraplets<'i>(
+        &self,
+        lambda: &LambdaAST<'_>,
+        exec_ctx: &ExecutionCtx<'i>,
+    ) -> ExecutionResult<(&JValue, RSecurityTetraplet)> {
         use super::IterableItem::*;
 
         let (jvalue, tetraplet) = match self {
@@ -49,7 +54,7 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
             RcValue((jvalue, tetraplet, _)) => (jvalue.deref(), tetraplet),
         };
 
-        let selected_value = select(jvalue, lambda.iter())?;
+        let selected_value = select(jvalue, lambda.iter(), exec_ctx)?;
         Ok((selected_value, tetraplet.clone()))
     }
 

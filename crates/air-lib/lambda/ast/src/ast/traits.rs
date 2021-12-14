@@ -24,7 +24,8 @@ impl fmt::Display for ValueAccessor<'_> {
 
         match self {
             ArrayAccess { idx } => write!(f, ".[{}]", idx),
-            FieldAccess { field_name } => write!(f, ".{}", field_name),
+            FieldAccessByName { field_name } => write!(f, ".{}", field_name),
+            FieldAccessByScalar { scalar_name } => write!(f, ".[{}]", scalar_name),
             Error => write!(f, "a parser error occurred while parsing lambda expression"),
         }
     }

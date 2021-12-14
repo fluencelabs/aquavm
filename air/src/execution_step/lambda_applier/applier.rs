@@ -16,7 +16,8 @@
 
 use super::utils::*;
 use super::LambdaError;
-use super::LambdaResult;
+use crate::execution_step::ExecutionCtx;
+use crate::execution_step::ExecutionResult;
 use crate::JValue;
 use crate::LambdaAST;
 
@@ -27,19 +28,21 @@ pub(crate) struct StreamSelectResult<'value> {
     pub(crate) tetraplet_idx: usize,
 }
 
-pub(crate) fn select_from_stream<'value>(
+pub(crate) fn select_from_stream<'value, 'i>(
     stream: impl ExactSizeIterator<Item = &'value JValue> + 'value,
     lambda: &LambdaAST<'_>,
-) -> LambdaResult<StreamSelectResult<'value>> {
+    exec_ctx: &ExecutionCtx<'i>,
+) -> ExecutionResult<StreamSelectResult<'value>> {
     use ValueAccessor::*;
 
     let (prefix, body) = lambda.split_first();
     let idx = match prefix {
         ArrayAccess { idx } => *idx,
-        FieldAccess { field_name } => {
+        FieldAccessByName { field_name } => {
             return Err(LambdaError::FieldAccessorAppliedToStream {
                 field_name: field_name.to_string(),
-            })
+            }
+            .into());
         }
         _ => unreachable!("should not execute if parsing succeeded. QED."),
     };
@@ -50,22 +53,27 @@ pub(crate) fn select_from_stream<'value>(
         .nth(idx as usize)
         .ok_or(LambdaError::StreamNotHaveEnoughValues { stream_size, idx })?;
 
-    let result = select(value, body.iter())?;
+    let result = select(value, body.iter(), exec_ctx)?;
     let select_result = StreamSelectResult::new(result, idx);
     Ok(select_result)
 }
 
-pub(crate) fn select<'value, 'algebra>(
+pub(crate) fn select<'value, 'accessor, 'i>(
     mut value: &'value JValue,
-    lambda: impl Iterator<Item = &'algebra ValueAccessor<'algebra>>,
-) -> LambdaResult<&'value JValue> {
+    lambda: impl Iterator<Item = &'accessor ValueAccessor<'accessor>>,
+    exec_ctx: &ExecutionCtx<'i>,
+) -> ExecutionResult<&'value JValue> {
     for value_algebra in lambda {
         match value_algebra {
             ValueAccessor::ArrayAccess { idx } => {
                 value = try_jvalue_with_idx(value, *idx)?;
             }
-            ValueAccessor::FieldAccess { field_name } => {
+            ValueAccessor::FieldAccessByName { field_name } => {
                 value = try_jvalue_with_field_name(value, *field_name)?;
+            }
+            ValueAccessor::FieldAccessByScalar { scalar_name } => {
+                let scalar = exec_ctx.scalars.get(scalar_name)?;
+                value = select_by_scalar(value, scalar)?;
             }
             ValueAccessor::Error => unreachable!("should not execute if parsing succeeded. QED."),
         }

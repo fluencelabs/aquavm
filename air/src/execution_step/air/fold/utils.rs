@@ -127,12 +127,12 @@ fn create_scalar_lambda_iterable<'ctx>(
 
     match exec_ctx.scalars.get(scalar_name)? {
         ScalarRef::Value(variable) => {
-            let jvalues = select(&variable.result, lambda.iter())?;
+            let jvalues = select(&variable.result, lambda.iter(), exec_ctx)?;
             from_jvalue(jvalues, variable.tetraplet.clone(), lambda)
         }
         ScalarRef::IterableValue(fold_state) => {
             let iterable_value = fold_state.iterable.peek().unwrap();
-            let jvalue = iterable_value.apply_lambda(lambda)?;
+            let jvalue = iterable_value.apply_lambda(lambda, exec_ctx)?;
             let tetraplet = as_tetraplet(&iterable_value);
 
             from_jvalue(jvalue, tetraplet, lambda)

@@ -25,8 +25,8 @@ pub enum Token<'input> {
     OpenSquareBracket,
     CloseSquareBracket,
 
-    ArrayIdx(u32),
-    FieldName(&'input str),
+    NumberAccessor(u32),
+    StringAccessor(&'input str),
 
     // !
     FlatteningSign,

@@ -34,7 +34,7 @@ fn parse_json_path() {
     let expected = call(
         CallInstrValue::Variable(VariableWithLambda::from_raw_lambda_scalar(
             "peer_id",
-            vec![ValueAccessor::FieldAccess { field_name: "a" }],
+            vec![ValueAccessor::FieldAccessByName { field_name: "a" }],
             15,
         )),
         CallInstrValue::Literal("service_id"),
@@ -218,12 +218,12 @@ fn parse_json_path_complex() {
             CallInstrValue::Variable(VariableWithLambda::from_raw_lambda_scalar(
                 "m",
                 vec![
-                    ValueAccessor::FieldAccess { field_name: "abc" },
+                    ValueAccessor::FieldAccessByName { field_name: "abc" },
                     ValueAccessor::ArrayAccess { idx: 0 },
-                    ValueAccessor::FieldAccess { field_name: "cde" },
+                    ValueAccessor::FieldAccessByName { field_name: "cde" },
                     ValueAccessor::ArrayAccess { idx: 1 },
                     ValueAccessor::ArrayAccess { idx: 0 },
-                    ValueAccessor::FieldAccess { field_name: "cde" },
+                    ValueAccessor::FieldAccessByName { field_name: "cde" },
                     ValueAccessor::ArrayAccess { idx: 1 },
                 ],
                 99,
@@ -246,7 +246,7 @@ fn json_path_square_braces() {
     let expected = call(
         CallInstrValue::Variable(VariableWithLambda::from_raw_lambda_scalar(
             "u",
-            vec![ValueAccessor::FieldAccess {
+            vec![ValueAccessor::FieldAccessByName {
                 field_name: "peer_id",
             }],
             15,
@@ -258,16 +258,16 @@ fn json_path_square_braces() {
                 "u",
                 vec![
                     ValueAccessor::ArrayAccess { idx: 1 },
-                    ValueAccessor::FieldAccess { field_name: "cde" },
+                    ValueAccessor::FieldAccessByName { field_name: "cde" },
                     ValueAccessor::ArrayAccess { idx: 0 },
                     ValueAccessor::ArrayAccess { idx: 0 },
-                    ValueAccessor::FieldAccess { field_name: "abc" },
+                    ValueAccessor::FieldAccessByName { field_name: "abc" },
                 ],
                 43,
             )),
             Value::Variable(VariableWithLambda::from_raw_lambda_scalar(
                 "u",
-                vec![ValueAccessor::FieldAccess { field_name: "name" }],
+                vec![ValueAccessor::FieldAccessByName { field_name: "name" }],
                 64,
             )),
         ]),

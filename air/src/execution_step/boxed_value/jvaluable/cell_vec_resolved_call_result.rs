@@ -18,6 +18,7 @@ use super::select_from_stream;
 use super::ExecutionResult;
 use super::JValuable;
 use super::ValueAggregate;
+use crate::execution_step::ExecutionCtx;
 use crate::execution_step::RSecurityTetraplet;
 use crate::execution_step::SecurityTetraplets;
 use crate::JValue;
@@ -29,15 +30,19 @@ use std::borrow::Cow;
 use std::ops::Deref;
 
 impl JValuable for std::cell::Ref<'_, Vec<ValueAggregate>> {
-    fn apply_lambda(&self, lambda: &LambdaAST<'_>) -> ExecutionResult<&JValue> {
+    fn apply_lambda<'i>(&self, lambda: &LambdaAST<'_>, exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<&JValue> {
         let stream_iter = self.iter().map(|r| r.result.deref());
-        let select_result = select_from_stream(stream_iter, lambda)?;
+        let select_result = select_from_stream(stream_iter, lambda, exec_ctx)?;
         Ok(select_result.result)
     }
 
-    fn apply_lambda_with_tetraplets(&self, lambda: &LambdaAST<'_>) -> ExecutionResult<(&JValue, RSecurityTetraplet)> {
+    fn apply_lambda_with_tetraplets<'i>(
+        &self,
+        lambda: &LambdaAST<'_>,
+        exec_ctx: &ExecutionCtx<'i>,
+    ) -> ExecutionResult<(&JValue, RSecurityTetraplet)> {
         let stream_iter = self.iter().map(|r| r.result.deref());
-        let select_result = select_from_stream(stream_iter, lambda)?;
+        let select_result = select_from_stream(stream_iter, lambda, exec_ctx)?;
 
         let tetraplet = self[select_result.tetraplet_idx].tetraplet.clone();
         tetraplet.borrow_mut().add_lambda(&format_ast(lambda));
