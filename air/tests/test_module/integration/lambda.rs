@@ -31,7 +31,7 @@ fn lambda_not_allowed_for_non_objects_and_arrays() {
         r#"
         (seq
             (call "{0}" ("" "") ["some_string"] string_variable)
-            (call "{1}" ("" "") [string_variable.$.some_json_path])
+            (call "{1}" ("" "") [string_variable.$.some_lambda])
         )
         "#,
         set_variable_peer_id, local_peer_id
