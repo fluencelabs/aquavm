@@ -16,7 +16,6 @@
 
 use super::dsl::*;
 use super::parse;
-use crate::ast::*;
 
 #[test]
 fn parse_fail_last_error() {
@@ -24,7 +23,7 @@ fn parse_fail_last_error() {
            (fail %last_error%)
         "#;
     let instruction = parse(source_code);
-    let expected = fail_last_error(LastErrorPath::None);
+    let expected = fail_last_error();
     assert_eq!(instruction, expected)
 }
 

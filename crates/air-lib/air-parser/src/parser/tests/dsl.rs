@@ -76,8 +76,8 @@ pub(super) fn fail_literals(ret_code: i64, error_message: &str) -> Instruction<'
     })
 }
 
-pub(super) fn fail_last_error(last_error_path: LastErrorPath) -> Instruction<'static> {
-    Instruction::Fail(Fail::LastError(last_error_path))
+pub(super) fn fail_last_error() -> Instruction<'static> {
+    Instruction::Fail(Fail::LastError)
 }
 
 pub(super) fn fold_scalar<'i>(

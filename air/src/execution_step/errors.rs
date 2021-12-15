@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-mod catchable
+mod catchable;
+mod joinable;
+
 pub(crate) use catchable::Catchable;
 pub(crate) use joinable::Joinable;
 
