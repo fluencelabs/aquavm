@@ -23,7 +23,7 @@ pub(crate) enum LambdaError {
     #[error("lambda is applied to a stream that have only '{stream_size}' elements, but '{idx}' requested")]
     StreamNotHaveEnoughValues { stream_size: usize, idx: u32 },
 
-    #[error("field algebra (with field name = '{field_name}') can't be applied to a stream")]
+    #[error("field accessor (with field name = '{field_name}') can't be applied to a stream")]
     FieldAccessorAppliedToStream { field_name: String },
 
     #[error("value '{value}' is not an array-type to match array accessor with idx = '{idx}'")]
