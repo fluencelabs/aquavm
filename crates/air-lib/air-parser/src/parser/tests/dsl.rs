@@ -37,15 +37,15 @@ pub(super) fn call<'i>(
     })
 }
 
-pub(super) fn seq<'a>(l: Instruction<'a>, r: Instruction<'a>) -> Instruction<'a> {
+pub(super) fn seq<'i>(l: Instruction<'i>, r: Instruction<'i>) -> Instruction<'i> {
     Instruction::Seq(Seq(Box::new(l), Box::new(r)))
 }
 
-pub(super) fn par<'a>(l: Instruction<'a>, r: Instruction<'a>) -> Instruction<'a> {
+pub(super) fn par<'i>(l: Instruction<'i>, r: Instruction<'i>) -> Instruction<'i> {
     Instruction::Par(Par(Box::new(l), Box::new(r)))
 }
 
-pub(super) fn xor<'a>(l: Instruction<'a>, r: Instruction<'a>) -> Instruction<'a> {
+pub(super) fn xor<'i>(l: Instruction<'i>, r: Instruction<'i>) -> Instruction<'i> {
     Instruction::Xor(Xor(Box::new(l), Box::new(r)))
 }
 
@@ -69,12 +69,23 @@ pub(super) fn null() -> Instruction<'static> {
     Instruction::Null(Null)
 }
 
-pub(super) fn fold_scalar<'a>(
-    iterable: ScalarWithLambda<'a>,
-    iterator: Scalar<'a>,
-    instruction: Instruction<'a>,
+pub(super) fn fail_literals(ret_code: i64, error_message: &str) -> Instruction<'_> {
+    Instruction::Fail(Fail::Literal {
+        ret_code,
+        error_message,
+    })
+}
+
+pub(super) fn fail_last_error(last_error_path: LastErrorPath) -> Instruction<'static> {
+    Instruction::Fail(Fail::LastError(last_error_path))
+}
+
+pub(super) fn fold_scalar<'i>(
+    iterable: ScalarWithLambda<'i>,
+    iterator: Scalar<'i>,
+    instruction: Instruction<'i>,
     span: Span,
-) -> Instruction<'a> {
+) -> Instruction<'i> {
     Instruction::FoldScalar(FoldScalar {
         iterable,
         iterator,
@@ -83,12 +94,12 @@ pub(super) fn fold_scalar<'a>(
     })
 }
 
-pub(super) fn fold_stream<'a>(
-    iterable: Stream<'a>,
-    iterator: Scalar<'a>,
-    instruction: Instruction<'a>,
+pub(super) fn fold_stream<'i>(
+    iterable: Stream<'i>,
+    iterator: Scalar<'i>,
+    instruction: Instruction<'i>,
     span: Span,
-) -> Instruction<'a> {
+) -> Instruction<'i> {
     Instruction::FoldStream(FoldStream {
         iterable,
         iterator,
@@ -97,11 +108,11 @@ pub(super) fn fold_stream<'a>(
     })
 }
 
-pub(super) fn match_<'a>(
-    left_value: Value<'a>,
-    right_value: Value<'a>,
-    instruction: Instruction<'a>,
-) -> Instruction<'a> {
+pub(super) fn match_<'i>(
+    left_value: Value<'i>,
+    right_value: Value<'i>,
+    instruction: Instruction<'i>,
+) -> Instruction<'i> {
     Instruction::Match(Match {
         left_value,
         right_value,
@@ -109,11 +120,11 @@ pub(super) fn match_<'a>(
     })
 }
 
-pub(super) fn mismatch<'a>(
-    left_value: Value<'a>,
-    right_value: Value<'a>,
-    instruction: Instruction<'a>,
-) -> Instruction<'a> {
+pub(super) fn mismatch<'i>(
+    left_value: Value<'i>,
+    right_value: Value<'i>,
+    instruction: Instruction<'i>,
+) -> Instruction<'i> {
     Instruction::MisMatch(MisMatch {
         left_value,
         right_value,
@@ -125,8 +136,8 @@ pub(super) fn ap<'i>(argument: ApArgument<'i>, result: Variable<'i>) -> Instruct
     Instruction::Ap(Ap { argument, result })
 }
 
-pub(super) fn binary_instruction<'a, 'b>(
-    name: &'a str,
+pub(super) fn binary_instruction<'i, 'b>(
+    name: &'i str,
 ) -> impl Fn(Instruction<'b>, Instruction<'b>) -> Instruction<'b> {
     match name {
         "xor" => |l, r| xor(l, r),

@@ -16,7 +16,6 @@
 
 use super::dsl::*;
 use super::parse;
-use crate::ast::*;
 
 #[test]
 fn parse_null() {
@@ -28,6 +27,6 @@ fn parse_null() {
         )
         "#;
     let instruction = parse(source_code);
-    let expected = Instruction::Seq(Seq(Box::new(null()), Box::new(null())));
+    let expected = seq(null(), null());
     assert_eq!(instruction, expected)
 }

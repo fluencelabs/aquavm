@@ -15,19 +15,43 @@
  */
 
 use super::ExecutionCtx;
-use super::ExecutionResult;
 use super::ExecutionError;
+use super::ExecutionResult;
 use super::TraceHandler;
+use crate::exec_err;
 use crate::log_instruction;
 
-use air_parser::ast::Null;
+use air_parser::ast::Fail;
 
-impl<'i> super::ExecutableInstruction<'i> for Fail {
+impl<'i> super::ExecutableInstruction<'i> for Fail<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
-        log_instruction!(null, exec_ctx, trace_ctx);
+        log_instruction!(fail, exec_ctx, trace_ctx);
 
-        Err(ExecutionError::FailMet {
-            message: self.message.to_string()
-        })
+        match self {
+            &Fail::Literal {
+                ret_code,
+                error_message,
+            } => fail_with_literals(ret_code, error_message, exec_ctx),
+            Fail::LastError => fail_with_last_error(exec_ctx),
+        }
     }
+}
+
+fn fail_with_literals(ret_code: i64, error_message: &str, exec_ctx: &mut ExecutionCtx<'_>) -> ExecutionResult<()> {
+    exec_ctx.subtree_complete = false;
+
+    exec_err!(ExecutionError::FailWithoutXorError {
+        ret_code,
+        error_message: error_message.to_string(),
+    })
+}
+
+fn fail_with_last_error(exec_ctx: &mut ExecutionCtx<'_>) -> ExecutionResult<()> {
+    let last_error = match &exec_ctx.last_error {
+        Some(last_error) => last_error.error.clone(),
+        None => return Ok(()),
+    };
+
+    exec_ctx.last_error_could_be_set = false;
+    Err(last_error)
 }

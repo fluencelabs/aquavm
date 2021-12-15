@@ -17,6 +17,7 @@
 mod ap;
 mod call;
 mod compare_matchable;
+mod fail;
 mod fold;
 mod fold_scalar;
 mod fold_stream;
@@ -102,6 +103,7 @@ impl<'i> ExecutableInstruction<'i> for Instruction<'i> {
             Instruction::Call(call) => call.execute(exec_ctx, trace_ctx),
 
             Instruction::Ap(ap) => execute!(self, ap, exec_ctx, trace_ctx),
+            Instruction::Fail(fail) => execute!(self, fail, exec_ctx, trace_ctx),
             Instruction::FoldScalar(fold) => execute!(self, fold, exec_ctx, trace_ctx),
             Instruction::FoldStream(fold) => execute!(self, fold, exec_ctx, trace_ctx),
             Instruction::New(new) => execute!(self, new, exec_ctx, trace_ctx),

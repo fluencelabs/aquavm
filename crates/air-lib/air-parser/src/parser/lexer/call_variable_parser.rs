@@ -19,7 +19,6 @@ use super::LexerResult;
 use super::Token;
 use crate::LambdaAST;
 
-use std::convert::TryInto;
 use std::iter::Peekable;
 use std::str::CharIndices;
 
@@ -318,25 +317,42 @@ impl<'input> CallVariableParser<'input> {
         Ok(token)
     }
 
-    fn to_token(&self) -> LexerResult<Token<'input>> {
-        use super::token::UnparsedNumber;
+    fn try_to_i64(&self) -> LexerResult<Token<'input>> {
+        let raw_value = self.string_to_parse;
+        let number = raw_value.parse::<i64>().map_err(|e| {
+            let start_pos = self.start_pos;
+            LexerError::ParseIntError(start_pos, start_pos + raw_value.len(), e)
+        })?;
 
-        let is_number = self.is_possible_to_parse_as_number();
-        let token = match (is_number, self.state.first_dot_met_pos) {
-            (true, None) => {
-                let number = UnparsedNumber::Int(self.string_to_parse, self.start_pos);
-                let number: super::Number = number.try_into()?;
-                number.into()
-            }
-            (true, Some(_)) => {
-                let number = UnparsedNumber::Float(self.string_to_parse, self.start_pos);
-                let number: super::Number = number.try_into()?;
-                number.into()
-            }
-            (false, None) => self.to_variable_token(self.string_to_parse),
-            (false, Some(lambda_start_pos)) => self.try_to_variable_and_lambda(lambda_start_pos)?,
-        };
-
+        let token = Token::I64(number);
         Ok(token)
+    }
+
+    fn try_to_f64(&self) -> LexerResult<Token<'input>> {
+        let raw_value = self.string_to_parse;
+        let start_pos = self.start_pos;
+        if raw_value.len() > 11 {
+            return Err(LexerError::TooBigFloat(
+                start_pos,
+                start_pos + raw_value.len(),
+            ));
+        }
+
+        let number = raw_value
+            .parse::<f64>()
+            .map_err(|e| LexerError::ParseFloatError(start_pos, start_pos + raw_value.len(), e))?;
+
+        let token = Token::F64(number);
+        Ok(token)
+    }
+
+    fn to_token(&self) -> LexerResult<Token<'input>> {
+        let is_number = self.is_possible_to_parse_as_number();
+        match (is_number, self.state.first_dot_met_pos) {
+            (true, None) => self.try_to_i64(),
+            (true, Some(_)) => self.try_to_f64(),
+            (false, None) => Ok(self.to_variable_token(self.string_to_parse)),
+            (false, Some(lambda_start_pos)) => self.try_to_variable_and_lambda(lambda_start_pos),
+        }
     }
 }

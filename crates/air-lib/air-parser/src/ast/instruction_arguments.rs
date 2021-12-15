@@ -20,7 +20,6 @@ use super::Variable;
 use super::VariableWithLambda;
 use crate::ast::ScalarWithLambda;
 use crate::parser::lexer::LastErrorPath;
-use crate::parser::lexer::Number;
 
 use serde::Deserialize;
 use serde::Serialize;
@@ -85,4 +84,10 @@ pub enum ApArgument<'i> {
     Boolean(bool),
     EmptyArray,
     Scalar(ScalarWithLambda<'i>),
+}
+
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+pub enum Number {
+    Int(i64),
+    Float(f64),
 }

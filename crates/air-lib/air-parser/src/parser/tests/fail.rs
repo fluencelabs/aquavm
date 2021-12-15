@@ -14,13 +14,26 @@
  * limitations under the License.
  */
 
-mod instruction_arguments;
-mod instructions;
-mod values;
+use super::dsl::*;
+use super::parse;
+use crate::ast::*;
 
-pub use instruction_arguments::*;
-pub use instructions::*;
-pub use values::*;
+#[test]
+fn parse_fail_last_error() {
+    let source_code = r#"
+           (fail %last_error%)
+        "#;
+    let instruction = parse(source_code);
+    let expected = fail_last_error(LastErrorPath::None);
+    assert_eq!(instruction, expected)
+}
 
-pub use crate::parser::lexer::LastErrorPath;
-pub use crate::parser::Span;
+#[test]
+fn parse_fail_literals() {
+    let source_code = r#"
+           (fail 1 "error message")
+        "#;
+    let instruction = parse(source_code);
+    let expected = fail_literals(1, "error message");
+    assert_eq!(instruction, expected)
+}

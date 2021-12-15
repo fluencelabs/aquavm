@@ -180,6 +180,7 @@ fn string_to_token(input: &str, start_pos: usize) -> LexerResult<Token> {
         AP_INSTR => Ok(Token::Ap),
         SEQ_INSTR => Ok(Token::Seq),
         PAR_INSTR => Ok(Token::Par),
+        FAIL_INSTR => Ok(Token::Fail),
         FOLD_INSTR => Ok(Token::Fold),
         XOR_INSTR => Ok(Token::Xor),
         NEW_INSTR => Ok(Token::New),
@@ -224,6 +225,7 @@ const CALL_INSTR: &str = "call";
 const AP_INSTR: &str = "ap";
 const SEQ_INSTR: &str = "seq";
 const PAR_INSTR: &str = "par";
+const FAIL_INSTR: &str = "fail";
 const FOLD_INSTR: &str = "fold";
 const XOR_INSTR: &str = "xor";
 const NEW_INSTR: &str = "new";
