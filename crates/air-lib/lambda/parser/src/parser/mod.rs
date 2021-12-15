@@ -31,7 +31,7 @@ pub type LambdaParserResult<'input, T> = std::result::Result<T, LambdaParserErro
 
 pub use errors::LambdaParserError;
 pub use lambda_parser::parse;
-pub use lexer::AlgebraLexer;
+pub use lexer::AccessorsLexer;
 pub use lexer::LexerError;
 pub use va_lambda::LambdaParser;
 

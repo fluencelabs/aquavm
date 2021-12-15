@@ -23,18 +23,24 @@ pub(crate) enum LambdaError {
     #[error("lambda is applied to a stream that have only '{stream_size}' elements, but '{idx}' requested")]
     StreamNotHaveEnoughValues { stream_size: usize, idx: u32 },
 
-    #[error("field algebra (with field name = '{field_name}') can't be applied to a stream")]
+    #[error("field accessor (with field name = '{field_name}') can't be applied to a stream")]
     FieldAccessorAppliedToStream { field_name: String },
 
-    #[error("value '{value}' is not an array-type to match array algebra with idx = '{idx}'")]
+    #[error("value '{value}' is not an array-type to match array accessor with idx = '{idx}'")]
     ArrayAccessorNotMatchValue { value: JValue, idx: u32 },
 
     #[error("value '{value}' does not contain element for idx = '{idx}'")]
     ValueNotContainSuchArrayIdx { value: JValue, idx: u32 },
 
-    #[error("value '{value}' is not an map-type to match field algebra with field_name = '{field_name}'")]
+    #[error("value '{value}' is not an map-type to match field accessor with field_name = '{field_name}'")]
     FieldAccessorNotMatchValue { value: JValue, field_name: String },
 
     #[error("value '{value}' does not contain element with field name = '{field_name}'")]
     JValueNotContainSuchField { value: JValue, field_name: String },
+
+    #[error("index accessor `{accessor} can't be converted to u32`")]
+    IndexAccessNotU32 { accessor: serde_json::Number },
+
+    #[error("scalar accessor `{scalar_accessor}` should has number or string type")]
+    ScalarAccessorHasInvalidType { scalar_accessor: JValue },
 }

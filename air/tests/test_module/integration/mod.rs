@@ -23,7 +23,7 @@ mod empty_array;
 mod flattening;
 mod join;
 mod join_behaviour;
-mod json_path;
+mod lambda;
 mod last_error;
 mod network_explore;
 mod security_tetraplets;

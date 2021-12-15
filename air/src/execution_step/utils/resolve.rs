@@ -128,7 +128,7 @@ pub(crate) fn apply_lambda<'i>(
     exec_ctx: &ExecutionCtx<'i>,
 ) -> ExecutionResult<(JValue, RSecurityTetraplet)> {
     let resolved = resolve_variable(variable, exec_ctx)?;
-    let (jvalue, tetraplet) = resolved.apply_lambda_with_tetraplets(lambda)?;
+    let (jvalue, tetraplet) = resolved.apply_lambda_with_tetraplets(lambda, exec_ctx)?;
 
     // it's known that apply_lambda_with_tetraplets returns vec of one value
     Ok((jvalue.clone(), tetraplet))

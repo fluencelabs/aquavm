@@ -1,5 +1,5 @@
 // auto-generated: "lalrpop 0.19.6"
-// sha3: db7b23bede3d6914e4bbadd2b1df6f44d50b164a9c2ed557274f415fc6b1d5
+// sha3: 517c7e1bd341e1434f9ffcbf3c72151e4b928e7befd38c6ee2e3e734565b
 use crate::ValueAccessor;
 use crate::parser::lexer::LexerError;
 use crate::parser::lexer::Token;
@@ -46,33 +46,45 @@ mod __parse__Lambda {
         // State 2
         0, 0, 0, 0, 0, 0, 0,
         // State 3
-        0, -16, -16, 0, 0, 0, -16,
+        0, -20, -20, 0, 0, 0, -20,
         // State 4
         0, 0, 9, 0, 0, 10, 0,
         // State 5
-        0, 0, 0, 0, 11, 0, 0,
+        0, 0, 0, 0, 11, 12, 0,
         // State 6
-        0, -13, -13, 0, 0, 0, -13,
-        // State 7
         0, -17, -17, 0, 0, 0, -17,
+        // State 7
+        0, -21, -21, 0, 0, 0, -21,
         // State 8
-        0, 0, 0, 0, 12, 0, 0,
+        0, 0, 0, 0, 13, 14, 0,
         // State 9
-        13, -12, -12, 0, 0, 0, -12,
+        15, -16, -16, 0, 0, 0, -16,
         // State 10
-        0, 0, 0, 14, 0, 0, 0,
+        0, 0, 0, 16, 0, 0, 0,
         // State 11
-        0, 0, 0, 15, 0, 0, 0,
+        0, 0, 0, 17, 0, 0, 0,
         // State 12
-        0, -11, -11, 0, 0, 0, -11,
+        0, 0, 0, 18, 0, 0, 0,
         // State 13
-        16, -10, -10, 0, 0, 0, -10,
+        0, 0, 0, 19, 0, 0, 0,
         // State 14
-        17, -9, -9, 0, 0, 0, -9,
+        0, -15, -15, 0, 0, 0, -15,
         // State 15
-        0, -8, -8, 0, 0, 0, -8,
+        20, -10, -10, 0, 0, 0, -10,
         // State 16
+        21, -14, -14, 0, 0, 0, -14,
+        // State 17
+        22, -9, -9, 0, 0, 0, -9,
+        // State 18
+        23, -13, -13, 0, 0, 0, -13,
+        // State 19
+        0, -8, -8, 0, 0, 0, -8,
+        // State 20
+        0, -12, -12, 0, 0, 0, -12,
+        // State 21
         0, -7, -7, 0, 0, 0, -7,
+        // State 22
+        0, -11, -11, 0, 0, 0, -11,
     ];
     fn __action(state: i8, integer: usize) -> i8 {
         __ACTION[(state as usize) * 7 + integer]
@@ -83,35 +95,47 @@ mod __parse__Lambda {
         // State 1
         -6,
         // State 2
-        -18,
+        -22,
         // State 3
-        -16,
+        -20,
         // State 4
         0,
         // State 5
         0,
         // State 6
-        -13,
-        // State 7
         -17,
+        // State 7
+        -21,
         // State 8
         0,
         // State 9
-        -12,
+        -16,
         // State 10
         0,
         // State 11
         0,
         // State 12
-        -11,
+        0,
         // State 13
-        -10,
+        0,
         // State 14
-        -9,
+        -15,
         // State 15
-        -8,
+        -10,
         // State 16
+        -14,
+        // State 17
+        -9,
+        // State 18
+        -13,
+        // State 19
+        -8,
+        // State 20
+        -12,
+        // State 21
         -7,
+        // State 22
+        -11,
     ];
     fn __goto(state: i8, nt: usize) -> i8 {
         match nt {
@@ -130,8 +154,8 @@ mod __parse__Lambda {
             r###"".""###,
             r###""[""###,
             r###""]""###,
-            r###"array_idx"###,
-            r###"field_name"###,
+            r###"number_accessor"###,
+            r###"string_accessor"###,
         ];
         __TERMINAL.iter().enumerate().filter_map(|(index, terminal)| {
             let next_state = __action(__state, index);
@@ -254,8 +278,8 @@ mod __parse__Lambda {
             Token::Selector if true => Some(1),
             Token::OpenSquareBracket if true => Some(2),
             Token::CloseSquareBracket if true => Some(3),
-            Token::ArrayIdx(_) if true => Some(4),
-            Token::FieldName(_) if true => Some(5),
+            Token::NumberAccessor(_) if true => Some(4),
+            Token::StringAccessor(_) if true => Some(5),
             _ => None,
         }
     }
@@ -271,11 +295,11 @@ mod __parse__Lambda {
         match __token_index {
             0 | 1 | 2 | 3 => __Symbol::Variant0(__token),
             4 => match __token {
-                Token::ArrayIdx(__tok0) if true => __Symbol::Variant1(__tok0),
+                Token::NumberAccessor(__tok0) if true => __Symbol::Variant1(__tok0),
                 _ => unreachable!(),
             },
             5 => match __token {
-                Token::FieldName(__tok0) if true => __Symbol::Variant2(__tok0),
+                Token::StringAccessor(__tok0) if true => __Symbol::Variant2(__tok0),
                 _ => unreachable!(),
             },
             _ => unreachable!(),
@@ -354,47 +378,71 @@ mod __parse__Lambda {
             }
             10 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 3,
+                    states_to_pop: 5,
                     nonterminal_produced: 3,
                 }
             }
             11 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 2,
+                    states_to_pop: 4,
                     nonterminal_produced: 3,
                 }
             }
             12 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 1,
+                    states_to_pop: 4,
                     nonterminal_produced: 3,
                 }
             }
             13 => {
                 __state_machine::SimulatedReduce::Reduce {
+                    states_to_pop: 3,
+                    nonterminal_produced: 3,
+                }
+            }
+            14 => {
+                __state_machine::SimulatedReduce::Reduce {
+                    states_to_pop: 3,
+                    nonterminal_produced: 3,
+                }
+            }
+            15 => {
+                __state_machine::SimulatedReduce::Reduce {
+                    states_to_pop: 2,
+                    nonterminal_produced: 3,
+                }
+            }
+            16 => {
+                __state_machine::SimulatedReduce::Reduce {
+                    states_to_pop: 1,
+                    nonterminal_produced: 3,
+                }
+            }
+            17 => {
+                __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 0,
                     nonterminal_produced: 4,
                 }
             }
-            14 => {
+            18 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
                     nonterminal_produced: 4,
                 }
             }
-            15 => {
+            19 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
                     nonterminal_produced: 5,
                 }
             }
-            16 => {
+            20 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 2,
                     nonterminal_produced: 5,
                 }
             }
-            17 => __state_machine::SimulatedReduce::Accept,
+            21 => __state_machine::SimulatedReduce::Accept,
             _ => panic!("invalid reduction index {}", __reduce_index)
         }
     }
@@ -536,6 +584,18 @@ mod __parse__Lambda {
                 __reduce16(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             17 => {
+                __reduce17(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+            }
+            18 => {
+                __reduce18(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+            }
+            19 => {
+                __reduce19(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+            }
+            20 => {
+                __reduce20(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+            }
+            21 => {
                 // __Lambda = Lambda => ActionFn(0);
                 let __sym0 = __pop_Variant5(__symbols);
                 let __start = __sym0.0.clone();
@@ -655,11 +715,11 @@ mod __parse__Lambda {
         _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
-        // "!"? = "!" => ActionFn(5);
+        // "!"? = "!" => ActionFn(6);
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action5::<>(input, errors, __sym0);
+        let __nt = super::__action6::<>(input, errors, __sym0);
         __symbols.push((__start, __Symbol::Variant4(__nt), __end));
         (1, 0)
     }
@@ -674,10 +734,10 @@ mod __parse__Lambda {
         _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
-        // "!"? =  => ActionFn(6);
+        // "!"? =  => ActionFn(7);
         let __start = __lookahead_start.cloned().or_else(|| __symbols.last().map(|s| s.2.clone())).unwrap_or_default();
         let __end = __start.clone();
-        let __nt = super::__action6::<>(input, errors, &__start, &__end);
+        let __nt = super::__action7::<>(input, errors, &__start, &__end);
         __symbols.push((__start, __Symbol::Variant4(__nt), __end));
         (0, 0)
     }
@@ -692,11 +752,11 @@ mod __parse__Lambda {
         _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
-        // "."? = "." => ActionFn(7);
+        // "."? = "." => ActionFn(8);
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action7::<>(input, errors, __sym0);
+        let __nt = super::__action8::<>(input, errors, __sym0);
         __symbols.push((__start, __Symbol::Variant4(__nt), __end));
         (1, 1)
     }
@@ -711,10 +771,10 @@ mod __parse__Lambda {
         _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
-        // "."? =  => ActionFn(8);
+        // "."? =  => ActionFn(9);
         let __start = __lookahead_start.cloned().or_else(|| __symbols.last().map(|s| s.2.clone())).unwrap_or_default();
         let __end = __start.clone();
-        let __nt = super::__action8::<>(input, errors, &__start, &__end);
+        let __nt = super::__action9::<>(input, errors, &__start, &__end);
         __symbols.push((__start, __Symbol::Variant4(__nt), __end));
         (0, 1)
     }
@@ -729,10 +789,10 @@ mod __parse__Lambda {
         _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
-        // Lambda =  => ActionFn(21);
+        // Lambda =  => ActionFn(28);
         let __start = __lookahead_start.cloned().or_else(|| __symbols.last().map(|s| s.2.clone())).unwrap_or_default();
         let __end = __start.clone();
-        let __nt = super::__action21::<>(input, errors, &__start, &__end);
+        let __nt = super::__action28::<>(input, errors, &__start, &__end);
         __symbols.push((__start, __Symbol::Variant5(__nt), __end));
         (0, 2)
     }
@@ -747,11 +807,11 @@ mod __parse__Lambda {
         _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
-        // Lambda = ValueAccessor+ => ActionFn(22);
+        // Lambda = ValueAccessor+ => ActionFn(29);
         let __sym0 = __pop_Variant7(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action22::<>(input, errors, __sym0);
+        let __nt = super::__action29::<>(input, errors, __sym0);
         __symbols.push((__start, __Symbol::Variant5(__nt), __end));
         (1, 2)
     }
@@ -766,7 +826,7 @@ mod __parse__Lambda {
         _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
-        // ValueAccessor = ".", "[", array_idx, "]", "!" => ActionFn(17);
+        // ValueAccessor = ".", "[", number_accessor, "]", "!" => ActionFn(20);
         assert!(__symbols.len() >= 5);
         let __sym4 = __pop_Variant0(__symbols);
         let __sym3 = __pop_Variant0(__symbols);
@@ -775,7 +835,7 @@ mod __parse__Lambda {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym4.2.clone();
-        let __nt = super::__action17::<>(input, errors, __sym0, __sym1, __sym2, __sym3, __sym4);
+        let __nt = super::__action20::<>(input, errors, __sym0, __sym1, __sym2, __sym3, __sym4);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (5, 3)
     }
@@ -790,7 +850,7 @@ mod __parse__Lambda {
         _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
-        // ValueAccessor = "[", array_idx, "]", "!" => ActionFn(18);
+        // ValueAccessor = "[", number_accessor, "]", "!" => ActionFn(21);
         assert!(__symbols.len() >= 4);
         let __sym3 = __pop_Variant0(__symbols);
         let __sym2 = __pop_Variant0(__symbols);
@@ -798,7 +858,7 @@ mod __parse__Lambda {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym3.2.clone();
-        let __nt = super::__action18::<>(input, errors, __sym0, __sym1, __sym2, __sym3);
+        let __nt = super::__action21::<>(input, errors, __sym0, __sym1, __sym2, __sym3);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (4, 3)
     }
@@ -813,7 +873,7 @@ mod __parse__Lambda {
         _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
-        // ValueAccessor = ".", "[", array_idx, "]" => ActionFn(19);
+        // ValueAccessor = ".", "[", number_accessor, "]" => ActionFn(22);
         assert!(__symbols.len() >= 4);
         let __sym3 = __pop_Variant0(__symbols);
         let __sym2 = __pop_Variant1(__symbols);
@@ -821,7 +881,7 @@ mod __parse__Lambda {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym3.2.clone();
-        let __nt = super::__action19::<>(input, errors, __sym0, __sym1, __sym2, __sym3);
+        let __nt = super::__action22::<>(input, errors, __sym0, __sym1, __sym2, __sym3);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (4, 3)
     }
@@ -836,14 +896,14 @@ mod __parse__Lambda {
         _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
-        // ValueAccessor = "[", array_idx, "]" => ActionFn(20);
+        // ValueAccessor = "[", number_accessor, "]" => ActionFn(23);
         assert!(__symbols.len() >= 3);
         let __sym2 = __pop_Variant0(__symbols);
         let __sym1 = __pop_Variant1(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym2.2.clone();
-        let __nt = super::__action20::<>(input, errors, __sym0, __sym1, __sym2);
+        let __nt = super::__action23::<>(input, errors, __sym0, __sym1, __sym2);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (3, 3)
     }
@@ -858,16 +918,18 @@ mod __parse__Lambda {
         _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
-        // ValueAccessor = ".", field_name, "!" => ActionFn(15);
-        assert!(__symbols.len() >= 3);
-        let __sym2 = __pop_Variant0(__symbols);
-        let __sym1 = __pop_Variant2(__symbols);
+        // ValueAccessor = ".", "[", string_accessor, "]", "!" => ActionFn(24);
+        assert!(__symbols.len() >= 5);
+        let __sym4 = __pop_Variant0(__symbols);
+        let __sym3 = __pop_Variant0(__symbols);
+        let __sym2 = __pop_Variant2(__symbols);
+        let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
-        let __end = __sym2.2.clone();
-        let __nt = super::__action15::<>(input, errors, __sym0, __sym1, __sym2);
+        let __end = __sym4.2.clone();
+        let __nt = super::__action24::<>(input, errors, __sym0, __sym1, __sym2, __sym3, __sym4);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
-        (3, 3)
+        (5, 3)
     }
     pub(crate) fn __reduce11<
         'err,
@@ -880,15 +942,17 @@ mod __parse__Lambda {
         _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
-        // ValueAccessor = ".", field_name => ActionFn(16);
-        assert!(__symbols.len() >= 2);
+        // ValueAccessor = "[", string_accessor, "]", "!" => ActionFn(25);
+        assert!(__symbols.len() >= 4);
+        let __sym3 = __pop_Variant0(__symbols);
+        let __sym2 = __pop_Variant0(__symbols);
         let __sym1 = __pop_Variant2(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
-        let __end = __sym1.2.clone();
-        let __nt = super::__action16::<>(input, errors, __sym0, __sym1);
+        let __end = __sym3.2.clone();
+        let __nt = super::__action25::<>(input, errors, __sym0, __sym1, __sym2, __sym3);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
-        (2, 3)
+        (4, 3)
     }
     pub(crate) fn __reduce12<
         'err,
@@ -901,13 +965,17 @@ mod __parse__Lambda {
         _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
-        // ValueAccessor = error => ActionFn(4);
-        let __sym0 = __pop_Variant3(__symbols);
+        // ValueAccessor = ".", "[", string_accessor, "]" => ActionFn(26);
+        assert!(__symbols.len() >= 4);
+        let __sym3 = __pop_Variant0(__symbols);
+        let __sym2 = __pop_Variant2(__symbols);
+        let __sym1 = __pop_Variant0(__symbols);
+        let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
-        let __nt = super::__action4::<>(input, errors, __sym0);
+        let __end = __sym3.2.clone();
+        let __nt = super::__action26::<>(input, errors, __sym0, __sym1, __sym2, __sym3);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
-        (1, 3)
+        (4, 3)
     }
     pub(crate) fn __reduce13<
         'err,
@@ -920,12 +988,16 @@ mod __parse__Lambda {
         _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
-        // ValueAccessor* =  => ActionFn(9);
-        let __start = __lookahead_start.cloned().or_else(|| __symbols.last().map(|s| s.2.clone())).unwrap_or_default();
-        let __end = __start.clone();
-        let __nt = super::__action9::<>(input, errors, &__start, &__end);
-        __symbols.push((__start, __Symbol::Variant7(__nt), __end));
-        (0, 4)
+        // ValueAccessor = "[", string_accessor, "]" => ActionFn(27);
+        assert!(__symbols.len() >= 3);
+        let __sym2 = __pop_Variant0(__symbols);
+        let __sym1 = __pop_Variant2(__symbols);
+        let __sym0 = __pop_Variant0(__symbols);
+        let __start = __sym0.0.clone();
+        let __end = __sym2.2.clone();
+        let __nt = super::__action27::<>(input, errors, __sym0, __sym1, __sym2);
+        __symbols.push((__start, __Symbol::Variant6(__nt), __end));
+        (3, 3)
     }
     pub(crate) fn __reduce14<
         'err,
@@ -938,13 +1010,16 @@ mod __parse__Lambda {
         _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
-        // ValueAccessor* = ValueAccessor+ => ActionFn(10);
-        let __sym0 = __pop_Variant7(__symbols);
+        // ValueAccessor = ".", string_accessor, "!" => ActionFn(18);
+        assert!(__symbols.len() >= 3);
+        let __sym2 = __pop_Variant0(__symbols);
+        let __sym1 = __pop_Variant2(__symbols);
+        let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
-        let __nt = super::__action10::<>(input, errors, __sym0);
-        __symbols.push((__start, __Symbol::Variant7(__nt), __end));
-        (1, 4)
+        let __end = __sym2.2.clone();
+        let __nt = super::__action18::<>(input, errors, __sym0, __sym1, __sym2);
+        __symbols.push((__start, __Symbol::Variant6(__nt), __end));
+        (3, 3)
     }
     pub(crate) fn __reduce15<
         'err,
@@ -957,13 +1032,15 @@ mod __parse__Lambda {
         _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
-        // ValueAccessor+ = ValueAccessor => ActionFn(11);
-        let __sym0 = __pop_Variant6(__symbols);
+        // ValueAccessor = ".", string_accessor => ActionFn(19);
+        assert!(__symbols.len() >= 2);
+        let __sym1 = __pop_Variant2(__symbols);
+        let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
-        let __nt = super::__action11::<>(input, errors, __sym0);
-        __symbols.push((__start, __Symbol::Variant7(__nt), __end));
-        (1, 5)
+        let __end = __sym1.2.clone();
+        let __nt = super::__action19::<>(input, errors, __sym0, __sym1);
+        __symbols.push((__start, __Symbol::Variant6(__nt), __end));
+        (2, 3)
     }
     pub(crate) fn __reduce16<
         'err,
@@ -976,13 +1053,88 @@ mod __parse__Lambda {
         _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
-        // ValueAccessor+ = ValueAccessor+, ValueAccessor => ActionFn(12);
+        // ValueAccessor = error => ActionFn(5);
+        let __sym0 = __pop_Variant3(__symbols);
+        let __start = __sym0.0.clone();
+        let __end = __sym0.2.clone();
+        let __nt = super::__action5::<>(input, errors, __sym0);
+        __symbols.push((__start, __Symbol::Variant6(__nt), __end));
+        (1, 3)
+    }
+    pub(crate) fn __reduce17<
+        'err,
+        'input,
+    >(
+        input: &'input str,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        __lookahead_start: Option<&usize>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
+    ) -> (usize, usize)
+    {
+        // ValueAccessor* =  => ActionFn(10);
+        let __start = __lookahead_start.cloned().or_else(|| __symbols.last().map(|s| s.2.clone())).unwrap_or_default();
+        let __end = __start.clone();
+        let __nt = super::__action10::<>(input, errors, &__start, &__end);
+        __symbols.push((__start, __Symbol::Variant7(__nt), __end));
+        (0, 4)
+    }
+    pub(crate) fn __reduce18<
+        'err,
+        'input,
+    >(
+        input: &'input str,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        __lookahead_start: Option<&usize>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
+    ) -> (usize, usize)
+    {
+        // ValueAccessor* = ValueAccessor+ => ActionFn(11);
+        let __sym0 = __pop_Variant7(__symbols);
+        let __start = __sym0.0.clone();
+        let __end = __sym0.2.clone();
+        let __nt = super::__action11::<>(input, errors, __sym0);
+        __symbols.push((__start, __Symbol::Variant7(__nt), __end));
+        (1, 4)
+    }
+    pub(crate) fn __reduce19<
+        'err,
+        'input,
+    >(
+        input: &'input str,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        __lookahead_start: Option<&usize>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
+    ) -> (usize, usize)
+    {
+        // ValueAccessor+ = ValueAccessor => ActionFn(12);
+        let __sym0 = __pop_Variant6(__symbols);
+        let __start = __sym0.0.clone();
+        let __end = __sym0.2.clone();
+        let __nt = super::__action12::<>(input, errors, __sym0);
+        __symbols.push((__start, __Symbol::Variant7(__nt), __end));
+        (1, 5)
+    }
+    pub(crate) fn __reduce20<
+        'err,
+        'input,
+    >(
+        input: &'input str,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        __lookahead_start: Option<&usize>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
+    ) -> (usize, usize)
+    {
+        // ValueAccessor+ = ValueAccessor+, ValueAccessor => ActionFn(13);
         assert!(__symbols.len() >= 2);
         let __sym1 = __pop_Variant6(__symbols);
         let __sym0 = __pop_Variant7(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym1.2.clone();
-        let __nt = super::__action12::<>(input, errors, __sym0, __sym1);
+        let __nt = super::__action13::<>(input, errors, __sym0, __sym1);
         __symbols.push((__start, __Symbol::Variant7(__nt), __end));
         (2, 5)
     }
@@ -1041,18 +1193,37 @@ fn __action3<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    (_, maybe_dot_selector, _): (usize, core::option::Option<Token<'input>>, usize),
+    (_, _, _): (usize, Token<'input>, usize),
+    (_, scalar_name, _): (usize, &'input str, usize),
+    (_, _, _): (usize, Token<'input>, usize),
+    (_, maybe_flatten_sign, _): (usize, core::option::Option<Token<'input>>, usize),
+) -> ValueAccessor<'input>
+{
+    {
+        ValueAccessor::FieldAccessByScalar { scalar_name }
+    }
+}
+
+#[allow(unused_variables)]
+fn __action4<
+    'err,
+    'input,
+>(
+    input: &'input str,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     (_, _, _): (usize, Token<'input>, usize),
     (_, field_name, _): (usize, &'input str, usize),
     (_, maybe_flatten_sign, _): (usize, core::option::Option<Token<'input>>, usize),
 ) -> ValueAccessor<'input>
 {
     {
-        ValueAccessor::FieldAccess { field_name }
+        ValueAccessor::FieldAccessByName { field_name }
     }
 }
 
 #[allow(unused_variables)]
-fn __action4<
+fn __action5<
     'err,
     'input,
 >(
@@ -1065,7 +1236,7 @@ fn __action4<
 }
 
 #[allow(unused_variables)]
-fn __action5<
+fn __action6<
     'err,
     'input,
 >(
@@ -1075,20 +1246,6 @@ fn __action5<
 ) -> core::option::Option<Token<'input>>
 {
     Some(__0)
-}
-
-#[allow(unused_variables)]
-fn __action6<
-    'err,
-    'input,
->(
-    input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
-    __lookbehind: &usize,
-    __lookahead: &usize,
-) -> core::option::Option<Token<'input>>
-{
-    None
 }
 
 #[allow(unused_variables)]
@@ -1098,6 +1255,20 @@ fn __action7<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    __lookbehind: &usize,
+    __lookahead: &usize,
+) -> core::option::Option<Token<'input>>
+{
+    None
+}
+
+#[allow(unused_variables)]
+fn __action8<
+    'err,
+    'input,
+>(
+    input: &'input str,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     (_, __0, _): (usize, Token<'input>, usize),
 ) -> core::option::Option<Token<'input>>
 {
@@ -1105,7 +1276,7 @@ fn __action7<
 }
 
 #[allow(unused_variables)]
-fn __action8<
+fn __action9<
     'err,
     'input,
 >(
@@ -1119,7 +1290,7 @@ fn __action8<
 }
 
 #[allow(unused_variables)]
-fn __action9<
+fn __action10<
     'err,
     'input,
 >(
@@ -1133,7 +1304,7 @@ fn __action9<
 }
 
 #[allow(unused_variables)]
-fn __action10<
+fn __action11<
     'err,
     'input,
 >(
@@ -1146,7 +1317,7 @@ fn __action10<
 }
 
 #[allow(unused_variables)]
-fn __action11<
+fn __action12<
     'err,
     'input,
 >(
@@ -1159,7 +1330,7 @@ fn __action11<
 }
 
 #[allow(unused_variables)]
-fn __action12<
+fn __action13<
     'err,
     'input,
 >(
@@ -1173,7 +1344,7 @@ fn __action12<
 }
 
 #[allow(unused_variables)]
-fn __action13<
+fn __action14<
     'err,
     'input,
 >(
@@ -1188,43 +1359,10 @@ fn __action13<
 {
     let __start0 = __4.0.clone();
     let __end0 = __4.2.clone();
-    let __temp0 = __action5(
-        input,
-        errors,
-        __4,
-    );
-    let __temp0 = (__start0, __temp0, __end0);
-    __action2(
-        input,
-        errors,
-        __0,
-        __1,
-        __2,
-        __3,
-        __temp0,
-    )
-}
-
-#[allow(unused_variables)]
-fn __action14<
-    'err,
-    'input,
->(
-    input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
-    __0: (usize, core::option::Option<Token<'input>>, usize),
-    __1: (usize, Token<'input>, usize),
-    __2: (usize, u32, usize),
-    __3: (usize, Token<'input>, usize),
-) -> ValueAccessor<'input>
-{
-    let __start0 = __3.2.clone();
-    let __end0 = __3.2.clone();
     let __temp0 = __action6(
         input,
         errors,
-        &__start0,
-        &__end0,
+        __4,
     );
     let __temp0 = (__start0, __temp0, __end0);
     __action2(
@@ -1245,24 +1383,28 @@ fn __action15<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
-    __0: (usize, Token<'input>, usize),
-    __1: (usize, &'input str, usize),
-    __2: (usize, Token<'input>, usize),
+    __0: (usize, core::option::Option<Token<'input>>, usize),
+    __1: (usize, Token<'input>, usize),
+    __2: (usize, u32, usize),
+    __3: (usize, Token<'input>, usize),
 ) -> ValueAccessor<'input>
 {
-    let __start0 = __2.0.clone();
-    let __end0 = __2.2.clone();
-    let __temp0 = __action5(
+    let __start0 = __3.2.clone();
+    let __end0 = __3.2.clone();
+    let __temp0 = __action7(
         input,
         errors,
-        __2,
+        &__start0,
+        &__end0,
     );
     let __temp0 = (__start0, __temp0, __end0);
-    __action3(
+    __action2(
         input,
         errors,
         __0,
         __1,
+        __2,
+        __3,
         __temp0,
     )
 }
@@ -1274,13 +1416,48 @@ fn __action16<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
-    __0: (usize, Token<'input>, usize),
-    __1: (usize, &'input str, usize),
+    __0: (usize, core::option::Option<Token<'input>>, usize),
+    __1: (usize, Token<'input>, usize),
+    __2: (usize, &'input str, usize),
+    __3: (usize, Token<'input>, usize),
+    __4: (usize, Token<'input>, usize),
 ) -> ValueAccessor<'input>
 {
-    let __start0 = __1.2.clone();
-    let __end0 = __1.2.clone();
+    let __start0 = __4.0.clone();
+    let __end0 = __4.2.clone();
     let __temp0 = __action6(
+        input,
+        errors,
+        __4,
+    );
+    let __temp0 = (__start0, __temp0, __end0);
+    __action3(
+        input,
+        errors,
+        __0,
+        __1,
+        __2,
+        __3,
+        __temp0,
+    )
+}
+
+#[allow(unused_variables)]
+fn __action17<
+    'err,
+    'input,
+>(
+    input: &'input str,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    __0: (usize, core::option::Option<Token<'input>>, usize),
+    __1: (usize, Token<'input>, usize),
+    __2: (usize, &'input str, usize),
+    __3: (usize, Token<'input>, usize),
+) -> ValueAccessor<'input>
+{
+    let __start0 = __3.2.clone();
+    let __end0 = __3.2.clone();
+    let __temp0 = __action7(
         input,
         errors,
         &__start0,
@@ -1292,12 +1469,72 @@ fn __action16<
         errors,
         __0,
         __1,
+        __2,
+        __3,
         __temp0,
     )
 }
 
 #[allow(unused_variables)]
-fn __action17<
+fn __action18<
+    'err,
+    'input,
+>(
+    input: &'input str,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    __0: (usize, Token<'input>, usize),
+    __1: (usize, &'input str, usize),
+    __2: (usize, Token<'input>, usize),
+) -> ValueAccessor<'input>
+{
+    let __start0 = __2.0.clone();
+    let __end0 = __2.2.clone();
+    let __temp0 = __action6(
+        input,
+        errors,
+        __2,
+    );
+    let __temp0 = (__start0, __temp0, __end0);
+    __action4(
+        input,
+        errors,
+        __0,
+        __1,
+        __temp0,
+    )
+}
+
+#[allow(unused_variables)]
+fn __action19<
+    'err,
+    'input,
+>(
+    input: &'input str,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    __0: (usize, Token<'input>, usize),
+    __1: (usize, &'input str, usize),
+) -> ValueAccessor<'input>
+{
+    let __start0 = __1.2.clone();
+    let __end0 = __1.2.clone();
+    let __temp0 = __action7(
+        input,
+        errors,
+        &__start0,
+        &__end0,
+    );
+    let __temp0 = (__start0, __temp0, __end0);
+    __action4(
+        input,
+        errors,
+        __0,
+        __1,
+        __temp0,
+    )
+}
+
+#[allow(unused_variables)]
+fn __action20<
     'err,
     'input,
 >(
@@ -1312,13 +1549,13 @@ fn __action17<
 {
     let __start0 = __0.0.clone();
     let __end0 = __0.2.clone();
-    let __temp0 = __action7(
+    let __temp0 = __action8(
         input,
         errors,
         __0,
     );
     let __temp0 = (__start0, __temp0, __end0);
-    __action13(
+    __action14(
         input,
         errors,
         __temp0,
@@ -1330,7 +1567,7 @@ fn __action17<
 }
 
 #[allow(unused_variables)]
-fn __action18<
+fn __action21<
     'err,
     'input,
 >(
@@ -1344,14 +1581,14 @@ fn __action18<
 {
     let __start0 = __0.0.clone();
     let __end0 = __0.0.clone();
-    let __temp0 = __action8(
+    let __temp0 = __action9(
         input,
         errors,
         &__start0,
         &__end0,
     );
     let __temp0 = (__start0, __temp0, __end0);
-    __action13(
+    __action14(
         input,
         errors,
         __temp0,
@@ -1363,7 +1600,7 @@ fn __action18<
 }
 
 #[allow(unused_variables)]
-fn __action19<
+fn __action22<
     'err,
     'input,
 >(
@@ -1377,13 +1614,13 @@ fn __action19<
 {
     let __start0 = __0.0.clone();
     let __end0 = __0.2.clone();
-    let __temp0 = __action7(
+    let __temp0 = __action8(
         input,
         errors,
         __0,
     );
     let __temp0 = (__start0, __temp0, __end0);
-    __action14(
+    __action15(
         input,
         errors,
         __temp0,
@@ -1394,7 +1631,7 @@ fn __action19<
 }
 
 #[allow(unused_variables)]
-fn __action20<
+fn __action23<
     'err,
     'input,
 >(
@@ -1407,14 +1644,14 @@ fn __action20<
 {
     let __start0 = __0.0.clone();
     let __end0 = __0.0.clone();
-    let __temp0 = __action8(
+    let __temp0 = __action9(
         input,
         errors,
         &__start0,
         &__end0,
     );
     let __temp0 = (__start0, __temp0, __end0);
-    __action14(
+    __action15(
         input,
         errors,
         __temp0,
@@ -1425,7 +1662,135 @@ fn __action20<
 }
 
 #[allow(unused_variables)]
-fn __action21<
+fn __action24<
+    'err,
+    'input,
+>(
+    input: &'input str,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    __0: (usize, Token<'input>, usize),
+    __1: (usize, Token<'input>, usize),
+    __2: (usize, &'input str, usize),
+    __3: (usize, Token<'input>, usize),
+    __4: (usize, Token<'input>, usize),
+) -> ValueAccessor<'input>
+{
+    let __start0 = __0.0.clone();
+    let __end0 = __0.2.clone();
+    let __temp0 = __action8(
+        input,
+        errors,
+        __0,
+    );
+    let __temp0 = (__start0, __temp0, __end0);
+    __action16(
+        input,
+        errors,
+        __temp0,
+        __1,
+        __2,
+        __3,
+        __4,
+    )
+}
+
+#[allow(unused_variables)]
+fn __action25<
+    'err,
+    'input,
+>(
+    input: &'input str,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    __0: (usize, Token<'input>, usize),
+    __1: (usize, &'input str, usize),
+    __2: (usize, Token<'input>, usize),
+    __3: (usize, Token<'input>, usize),
+) -> ValueAccessor<'input>
+{
+    let __start0 = __0.0.clone();
+    let __end0 = __0.0.clone();
+    let __temp0 = __action9(
+        input,
+        errors,
+        &__start0,
+        &__end0,
+    );
+    let __temp0 = (__start0, __temp0, __end0);
+    __action16(
+        input,
+        errors,
+        __temp0,
+        __0,
+        __1,
+        __2,
+        __3,
+    )
+}
+
+#[allow(unused_variables)]
+fn __action26<
+    'err,
+    'input,
+>(
+    input: &'input str,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    __0: (usize, Token<'input>, usize),
+    __1: (usize, Token<'input>, usize),
+    __2: (usize, &'input str, usize),
+    __3: (usize, Token<'input>, usize),
+) -> ValueAccessor<'input>
+{
+    let __start0 = __0.0.clone();
+    let __end0 = __0.2.clone();
+    let __temp0 = __action8(
+        input,
+        errors,
+        __0,
+    );
+    let __temp0 = (__start0, __temp0, __end0);
+    __action17(
+        input,
+        errors,
+        __temp0,
+        __1,
+        __2,
+        __3,
+    )
+}
+
+#[allow(unused_variables)]
+fn __action27<
+    'err,
+    'input,
+>(
+    input: &'input str,
+    errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    __0: (usize, Token<'input>, usize),
+    __1: (usize, &'input str, usize),
+    __2: (usize, Token<'input>, usize),
+) -> ValueAccessor<'input>
+{
+    let __start0 = __0.0.clone();
+    let __end0 = __0.0.clone();
+    let __temp0 = __action9(
+        input,
+        errors,
+        &__start0,
+        &__end0,
+    );
+    let __temp0 = (__start0, __temp0, __end0);
+    __action17(
+        input,
+        errors,
+        __temp0,
+        __0,
+        __1,
+        __2,
+    )
+}
+
+#[allow(unused_variables)]
+fn __action28<
     'err,
     'input,
 >(
@@ -1437,7 +1802,7 @@ fn __action21<
 {
     let __start0 = __lookbehind.clone();
     let __end0 = __lookahead.clone();
-    let __temp0 = __action9(
+    let __temp0 = __action10(
         input,
         errors,
         &__start0,
@@ -1452,7 +1817,7 @@ fn __action21<
 }
 
 #[allow(unused_variables)]
-fn __action22<
+fn __action29<
     'err,
     'input,
 >(
@@ -1463,7 +1828,7 @@ fn __action22<
 {
     let __start0 = __0.0.clone();
     let __end0 = __0.2.clone();
-    let __temp0 = __action10(
+    let __temp0 = __action11(
         input,
         errors,
         __0,

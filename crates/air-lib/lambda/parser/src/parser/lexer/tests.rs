@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-use super::algebra_lexer::Spanned;
-use super::AlgebraLexer;
+use super::accessors_lexer::Spanned;
+use super::AccessorsLexer;
 use super::LexerError;
 use super::Token;
 
 fn run_lexer(input: &str) -> Vec<Spanned<Token<'_>, usize, LexerError>> {
-    let lexer = AlgebraLexer::new(input);
+    let lexer = AccessorsLexer::new(input);
     lexer.collect()
 }
 
@@ -32,7 +32,7 @@ fn array_access() {
     let expected = vec![
         Spanned::Ok((0, Token::Selector, 1)),
         Spanned::Ok((1, Token::OpenSquareBracket, 2)),
-        Spanned::Ok((2, Token::ArrayIdx(0), 3)),
+        Spanned::Ok((2, Token::NumberAccessor(0), 3)),
         Spanned::Ok((3, Token::CloseSquareBracket, 4)),
     ];
     assert_eq!(actual, expected);
@@ -46,7 +46,7 @@ fn field_access() {
     let actual = run_lexer(&field_access);
     let expected = vec![
         Spanned::Ok((0, Token::Selector, 1)),
-        Spanned::Ok((1, Token::FieldName(field_name), 1 + field_name.len())),
+        Spanned::Ok((1, Token::StringAccessor(field_name), 1 + field_name.len())),
     ];
     assert_eq!(actual, expected);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Fluence Labs Limited
+ * Copyright 2020 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,20 @@
  * limitations under the License.
  */
 
-#![deny(
-    dead_code,
-    nonstandard_style,
-    unused_imports,
-    unused_mut,
-    unused_variables,
-    unused_unsafe,
-    unreachable_patterns
-)]
+use super::ExecutionCtx;
+use super::ExecutionResult;
+use super::ExecutionError;
+use super::TraceHandler;
+use crate::log_instruction;
 
-mod ast;
+use air_parser::ast::Null;
 
-pub use ast::*;
+impl<'i> super::ExecutableInstruction<'i> for Fail {
+    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
+        log_instruction!(null, exec_ctx, trace_ctx);
 
-pub fn format_ast(lambda_ast: &LambdaAST<'_>) -> String {
-    let mut formatted_ast = String::new();
-    for accessor in lambda_ast.iter() {
-        formatted_ast.push_str(&accessor.to_string());
+        Err(ExecutionError::FailMet {
+            message: self.message.to_string()
+        })
     }
-
-    formatted_ast
 }

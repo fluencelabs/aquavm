@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use super::lexer::AlgebraLexer;
+use super::lexer::AccessorsLexer;
 use super::va_lambda;
 use super::LambdaParserError;
 use super::LambdaParserResult;
@@ -31,22 +31,22 @@ thread_local!(static PARSER: LambdaParser = LambdaParser::new());
 pub fn parse(lambda: &str) -> LambdaParserResult<'_, LambdaAST> {
     PARSER.with(|parser| {
         let mut errors = Vec::new();
-        let lexer = AlgebraLexer::new(lambda);
+        let lexer = AccessorsLexer::new(lambda);
         let result = parser.parse(lambda, &mut errors, lexer);
 
         match result {
-            Ok(algebras) if errors.is_empty() => try_to_lambda(algebras),
+            Ok(accessors) if errors.is_empty() => try_to_lambda(accessors),
             Ok(_) => Err(errors.into()),
             Err(e) => Err(e.into()),
         }
     })
 }
 
-fn try_to_lambda(algebras: Vec<ValueAccessor>) -> LambdaParserResult<'_, LambdaAST> {
-    if algebras.is_empty() {
+fn try_to_lambda(accessors: Vec<ValueAccessor>) -> LambdaParserResult<'_, LambdaAST> {
+    if accessors.is_empty() {
         return Err(LambdaParserError::EmptyLambda);
     }
 
-    let ast = unsafe { LambdaAST::new_unchecked(algebras) };
+    let ast = unsafe { LambdaAST::new_unchecked(accessors) };
     Ok(ast)
 }
