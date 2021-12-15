@@ -84,7 +84,8 @@ pub struct MisMatch<'i> {
     pub instruction: Box<Instruction<'i>>,
 }
 
-/// (fold scalar_iterable iterator instruction)
+/// (fail 1337 "error message")
+/// (fail %last_error%)
 #[derive(Serialize, Debug, PartialEq)]
 pub enum Fail<'i> {
     Literal {
