@@ -32,6 +32,7 @@ impl<'i> super::ExecutableInstruction<'i> for Fail<'i> {
                 ret_code,
                 error_message,
             } => fail_with_literals(ret_code, error_message, exec_ctx),
+            // bubble last error up
             Fail::LastError => fail_with_last_error(exec_ctx),
         }
     }
@@ -52,6 +53,7 @@ fn fail_with_last_error(exec_ctx: &mut ExecutionCtx<'_>) -> ExecutionResult<()> 
         None => return Ok(()),
     };
 
+    exec_ctx.subtree_complete = false;
     exec_ctx.last_error_could_be_set = false;
     Err(last_error)
 }
