@@ -59,9 +59,7 @@ pub(crate) enum ExecutionError {
     EmptyStreamLambdaError,
 
     /// Provided JValue has incompatible type with a requested one.
-    #[error(
-        "expected JValue type '{expected_value_type}' for variable `{variable_name}`, but got '{actual_value}' JValue"
-    )]
+    #[error("expected JValue type '{expected_value_type}' for variable `{variable_name}`, but got '{actual_value}'")]
     IncompatibleJValueType {
         variable_name: String,
         actual_value: JValue,

@@ -222,7 +222,7 @@ fn variable_names_shown_in_error() {
     assert_eq!(
         trace[1],
         executed_state::scalar(json!(
-            "expected JValue type 'string' for variable `-relay-`, but got '1' JValue"
+            "expected JValue type 'string' for variable `-relay-`, but got '1'"
         ))
     );
 }
