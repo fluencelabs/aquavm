@@ -27,7 +27,7 @@
 mod parser;
 
 pub use parser::parse;
-pub use parser::AlgebraLexer;
+pub use parser::AccessorsLexer;
 pub use parser::LambdaParser;
 pub use parser::LambdaParserError;
 pub use parser::LexerError;

@@ -25,12 +25,12 @@ const ARRAY_IDX_BASE: u32 = 10;
 
 pub type Spanned<Token, Loc, Error> = Result<(Loc, Token, Loc), Error>;
 
-pub struct AlgebraLexer<'input> {
+pub struct AccessorsLexer<'input> {
     input: &'input str,
     chars: Peekable<CharIndices<'input>>,
 }
 
-impl<'input> Iterator for AlgebraLexer<'input> {
+impl<'input> Iterator for AccessorsLexer<'input> {
     type Item = Spanned<Token<'input>, usize, LexerError>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -38,7 +38,7 @@ impl<'input> Iterator for AlgebraLexer<'input> {
     }
 }
 
-impl<'input> AlgebraLexer<'input> {
+impl<'input> AccessorsLexer<'input> {
     pub fn new(input: &'input str) -> Self {
         Self {
             input,

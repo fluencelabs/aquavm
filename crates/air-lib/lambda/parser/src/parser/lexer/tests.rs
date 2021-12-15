@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-use super::algebra_lexer::Spanned;
-use super::AlgebraLexer;
+use super::accessors_lexer::Spanned;
+use super::AccessorsLexer;
 use super::LexerError;
 use super::Token;
 
 fn run_lexer(input: &str) -> Vec<Spanned<Token<'_>, usize, LexerError>> {
-    let lexer = AlgebraLexer::new(input);
+    let lexer = AccessorsLexer::new(input);
     lexer.collect()
 }
 

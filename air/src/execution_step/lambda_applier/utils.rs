@@ -63,6 +63,7 @@ pub(super) fn select_by_scalar<'value, 'i>(
     match scalar_ref {
         Value(lambda_value) => select_by_jvalue(value, &lambda_value.result),
         IterableValue(fold_state) => {
+            // it's safe because iterable always point to valid value
             let accessor = fold_state.iterable.peek().unwrap().into_resolved_result();
             select_by_jvalue(value, &accessor.result)
         }

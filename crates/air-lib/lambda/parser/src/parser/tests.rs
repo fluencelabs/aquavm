@@ -22,7 +22,7 @@ thread_local!(static TEST_PARSER: LambdaParser = LambdaParser::new());
 fn parse(source_code: &str) -> Vec<ValueAccessor<'_>> {
     TEST_PARSER.with(|parser| {
         let mut errors = Vec::new();
-        let lexer = crate::parser::AlgebraLexer::new(source_code);
+        let lexer = crate::parser::AccessorsLexer::new(source_code);
         parser
             .parse(source_code, &mut errors, lexer)
             .expect("parsing should be successful")

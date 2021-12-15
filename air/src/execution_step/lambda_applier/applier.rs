@@ -63,8 +63,8 @@ pub(crate) fn select<'value, 'accessor, 'i>(
     lambda: impl Iterator<Item = &'accessor ValueAccessor<'accessor>>,
     exec_ctx: &ExecutionCtx<'i>,
 ) -> ExecutionResult<&'value JValue> {
-    for value_algebra in lambda {
-        match value_algebra {
+    for accessor in lambda {
+        match accessor {
             ValueAccessor::ArrayAccess { idx } => {
                 value = try_jvalue_with_idx(value, *idx)?;
             }

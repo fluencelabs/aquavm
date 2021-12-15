@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-mod algebra_lexer;
+mod accessors_lexer;
 mod errors;
 mod token;
 mod utils;
@@ -22,7 +22,7 @@ mod utils;
 #[cfg(test)]
 mod tests;
 
-pub use algebra_lexer::AlgebraLexer;
+pub use accessors_lexer::AccessorsLexer;
 pub use errors::LexerError;
 pub use token::Token;
 

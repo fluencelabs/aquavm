@@ -20,7 +20,7 @@ use std::num::ParseIntError;
 
 #[derive(ThisError, Debug, Clone, PartialEq, Eq)]
 pub enum LexerError {
-    #[error("unexpected symbol for value algebra")]
+    #[error("unexpected symbol for value accessor")]
     UnexpectedSymbol(usize, usize),
 
     #[error("{2}")]
