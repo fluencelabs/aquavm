@@ -329,9 +329,12 @@ impl<'input> CallVariableParser<'input> {
     }
 
     fn try_to_f64(&self) -> LexerResult<Token<'input>> {
+        // safe threshold for floating-point numbers to obtain determinism
+        const SAFE_FLOAT_SIGNIFICAND_SIZE: usize = 11;
+
         let raw_value = self.string_to_parse;
         let start_pos = self.start_pos;
-        if raw_value.len() > 11 {
+        if raw_value.len() > SAFE_FLOAT_SIGNIFICAND_SIZE {
             return Err(LexerError::TooBigFloat(
                 start_pos,
                 start_pos + raw_value.len(),
