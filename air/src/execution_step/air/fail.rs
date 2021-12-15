@@ -38,9 +38,8 @@ impl<'i> super::ExecutableInstruction<'i> for Fail<'i> {
     }
 }
 
-fn fail_with_literals(ret_code: i64, error_message: &str, exec_ctx: &mut ExecutionCtx<'_>) -> ExecutionResult<()> {
-    exec_ctx.subtree_complete = false;
-
+fn fail_with_literals<'i>(ret_code: i64, error_message: &str, exec_ctx: &mut ExecutionCtx<'i>) -> ExecutionResult<()> {
+    update_context_state(exec_ctx);
     exec_err!(ExecutionError::FailWithoutXorError {
         ret_code,
         error_message: error_message.to_string(),
@@ -53,7 +52,11 @@ fn fail_with_last_error(exec_ctx: &mut ExecutionCtx<'_>) -> ExecutionResult<()> 
         None => return Ok(()),
     };
 
+    update_context_state(exec_ctx);
+    Err(last_error)
+}
+
+fn update_context_state(exec_ctx: &mut ExecutionCtx<'_>) {
     exec_ctx.subtree_complete = false;
     exec_ctx.last_error_could_be_set = false;
-    Err(last_error)
 }
