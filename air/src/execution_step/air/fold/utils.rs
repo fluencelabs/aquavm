@@ -87,19 +87,17 @@ fn create_scalar_iterable<'ctx>(
     variable_name: &str,
 ) -> ExecutionResult<FoldIterableScalar> {
     match exec_ctx.scalars.get(variable_name)? {
-        ScalarRef::Value(call_result) => from_call_result(call_result.clone()),
+        ScalarRef::Value(call_result) => from_call_result(call_result.clone(), variable_name),
         ScalarRef::IterableValue(fold_state) => {
             let iterable_value = fold_state.iterable.peek().unwrap();
             let call_result = iterable_value.into_resolved_result();
-            from_call_result(call_result)
+            from_call_result(call_result, variable_name)
         }
     }
 }
 
 /// Constructs iterable value from resolved call result.
-fn from_call_result(call_result: ValueAggregate) -> ExecutionResult<FoldIterableScalar> {
-    use ExecutionError::IncompatibleJValueType;
-
+fn from_call_result(call_result: ValueAggregate, variable_name: &str) -> ExecutionResult<FoldIterableScalar> {
     let len = match &call_result.result.deref() {
         JValue::Array(array) => {
             if array.is_empty() {
@@ -108,7 +106,13 @@ fn from_call_result(call_result: ValueAggregate) -> ExecutionResult<FoldIterable
             }
             array.len()
         }
-        v => return exec_err!(IncompatibleJValueType((*v).clone(), "array")),
+        v => {
+            return exec_err!(ExecutionError::IncompatibleJValueType {
+                variable_name: variable_name.to_string(),
+                actual_value: (*v).clone(),
+                expected_value_type: "array",
+            })
+        }
     };
 
     let foldable = IterableResolvedCall::init(call_result, len);

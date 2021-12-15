@@ -18,6 +18,9 @@ use air::LastError;
 use air::SecurityTetraplet;
 use air_test_utils::prelude::*;
 
+use fstrings::f;
+use fstrings::format_args_f;
+
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -192,4 +195,34 @@ fn track_current_peer_id() {
 
     let actual_value = (*args.borrow()).as_ref().unwrap().clone();
     assert_eq!(actual_value.peer_id, fallible_peer_id);
+}
+
+#[test]
+fn variable_names_shown_in_error() {
+    let set_variable_vm_peer_id = "set_variable_vm_peer_id";
+    let mut set_variable_vm = create_avm(set_variable_call_service(json!(1u32)), set_variable_vm_peer_id);
+
+    let echo_vm_peer_id = "echo_vm_peer_id";
+    let mut echo_vm = create_avm(echo_call_service(), echo_vm_peer_id);
+
+    let script = f!(r#"
+        (xor
+            (seq
+                (call "{set_variable_vm_peer_id}" ("" "") [""] -relay-)
+                (call -relay- ("" "") [])
+            )
+            (call "{echo_vm_peer_id}" ("" "") [%last_error%.$.msg])
+        )
+    "#);
+
+    let result = checked_call_vm!(set_variable_vm, "", &script, "", "");
+    let result = checked_call_vm!(echo_vm, "", script, "", result.data);
+    let trace = trace_from_result(&result);
+
+    assert_eq!(
+        trace[1],
+        executed_state::scalar(json!(
+            "expected JValue type 'string' for variable `-relay-`, but got '1' JValue"
+        ))
+    );
 }
