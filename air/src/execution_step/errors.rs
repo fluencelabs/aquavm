@@ -59,8 +59,14 @@ pub(crate) enum ExecutionError {
     EmptyStreamLambdaError,
 
     /// Provided JValue has incompatible type with a requested one.
-    #[error("expected JValue type '{1}', but got '{0}' JValue")]
-    IncompatibleJValueType(JValue, &'static str),
+    #[error(
+        "expected JValue type '{expected_value_type}' for the variable `{variable_name}`, but got '{actual_value}'"
+    )]
+    IncompatibleJValueType {
+        variable_name: String,
+        actual_value: JValue,
+        expected_value_type: &'static str,
+    },
 
     /// Fold state wasn't found for such iterator name.
     #[error("fold state not found for this iterable '{0}'")]
