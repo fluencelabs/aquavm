@@ -1,5 +1,5 @@
 // auto-generated: "lalrpop 0.19.6"
-// sha3: 883473dd8c207114e9d55feb752c25f5efbc26413b91d3481116a323b9505b
+// sha3: a9fea7309f6267251291bd4f29ca8c58ee262f11f7776aa17baec3f33edac3
 use crate::ast::*;
 use crate::parser::ParserError;
 use crate::parser::VariableValidator;
@@ -3929,7 +3929,7 @@ fn __action26<
 ) -> Fail<'input>
 {
     {
-        // it's possible to write smth like that now (fail %last_error%.msg), that is ambigious
+        // it's possible to write smth like that `(fail %last_error%.msg)`, that would be ambigious
         if !matches!(last_error_path, LastErrorPath::None) {
             errors.push(make_user_error!(AmbiguousFailLastError, left, Token::Fail, right));
         }
