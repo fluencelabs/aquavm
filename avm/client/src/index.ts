@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { toByteArray } from 'base64-js';
 import { getStringFromWasm0, invoke } from './wrapper';
-import wasmBs64 from './wasm';
+import { toUint8Array } from 'js-base64';
 
 export type LogLevel = 'info' | 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'off';
 
@@ -82,15 +81,17 @@ class HostImportsConfig {
     }
 }
 
-const interpreter_wasm = toByteArray(wasmBs64);
-
 /// Instantiates WebAssembly runtime with AIR interpreter module
-async function interpreterInstance(cfg: HostImportsConfig, logFunction: LogFunction): Promise<Instance> {
+async function interpreterInstance(
+    module: WebAssembly.Module,
+    cfg: HostImportsConfig,
+    logFunction: LogFunction,
+): Promise<Instance> {
     /// Create host imports that use module exports internally
     let imports = cfg.newImportObject();
 
     /// Instantiate interpreter
-    let interpreter_module = await WebAssembly.compile(interpreter_wasm);
+    let interpreter_module = module;
     let instance: Instance = await WebAssembly.instantiate(interpreter_module, imports);
 
     /// Set exports, so host imports can use them
@@ -161,12 +162,12 @@ export class AirInterpreter {
         this.wasmWrapper = wasmWrapper;
     }
 
-    static async create(logLevel: LogLevel, logFunction: LogFunction) {
+    static async create(module: WebAssembly.Module, logLevel: LogLevel, logFunction: LogFunction) {
         const cfg = new HostImportsConfig((cfg) => {
             return newImportObject(cfg, logFunction);
         });
 
-        const instance = await interpreterInstance(cfg, logFunction);
+        const instance = await interpreterInstance(module, cfg, logFunction);
         const res = new AirInterpreter(instance);
         res.logLevel = logLevel;
         return res;

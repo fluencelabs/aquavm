@@ -16,7 +16,7 @@
     },
     "private": false,
     "dependencies": {
-        "base64-js": "1.5.1"
+        "js-base64": "^3.7.2"
     },
     "devDependencies": {
         "@types/jest": "^26.0.23",
