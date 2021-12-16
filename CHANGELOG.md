@@ -1,3 +1,11 @@
+## Version 0.19.0 (2021-12-15)
+
+[PR 196](https://github.com/fluencelabs/aquavm/pull/196):  
+Introduced fail instruction.
+
+[PR 194](https://github.com/fluencelabs/aquavm/pull/194):  
+Added variables names in resolve errors.
+
 ## Version 0.18.0 (2021-12-14)
 
 [PR 192](https://github.com/fluencelabs/aquavm/pull/172):  

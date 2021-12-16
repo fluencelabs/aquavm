@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Fluence Labs Limited
+ * Copyright 2021 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,25 @@
  * limitations under the License.
  */
 
-mod air_lexer;
-mod call_variable_parser;
-mod errors;
-mod token;
-mod utils;
+use super::dsl::*;
+use super::parse;
 
-#[cfg(test)]
-mod tests;
+#[test]
+fn parse_fail_last_error() {
+    let source_code = r#"
+           (fail %last_error%)
+        "#;
+    let instruction = parse(source_code);
+    let expected = fail_last_error();
+    assert_eq!(instruction, expected)
+}
 
-pub use air_lexer::AIRLexer;
-pub use errors::LexerError;
-pub use token::LastErrorPath;
-pub use token::Token;
-
-pub(super) type LexerResult<T> = std::result::Result<T, LexerError>;
-
-pub(self) use utils::is_air_alphanumeric;
-pub(self) use utils::is_json_path_allowed_char;
+#[test]
+fn parse_fail_literals() {
+    let source_code = r#"
+           (fail 1 "error message")
+        "#;
+    let instruction = parse(source_code);
+    let expected = fail_literals(1, "error message");
+    assert_eq!(instruction, expected)
+}

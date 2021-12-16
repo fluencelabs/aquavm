@@ -17,6 +17,7 @@
 mod ap;
 mod call;
 mod dsl;
+mod fail;
 mod fold;
 mod match_;
 mod new;

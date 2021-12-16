@@ -31,6 +31,9 @@ pub enum ParserError {
     #[error("iterable '{2}' wasn't defined")]
     UndefinedIterable(usize, usize, String),
 
+    #[error("last error with non-empty path is ambiguous, please use just %last_error%")]
+    AmbiguousFailLastError(usize, usize),
+
     /// Semantic errors in a call instructions.
     #[error("call should have service id specified by peer part or function part")]
     InvalidCallTriplet(usize, usize),

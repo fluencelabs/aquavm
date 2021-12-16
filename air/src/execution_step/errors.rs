@@ -92,6 +92,10 @@ pub(crate) enum ExecutionError {
     #[error("mismatch is used without corresponding xor")]
     MismatchWithoutXorError,
 
+    /// This error type is produced by a fail instruction.
+    #[error("fail with ret_code '{ret_code}' and error_message '{error_message}' is used without corresponding xor")]
+    FailWithoutXorError { ret_code: i64, error_message: String },
+
     /// Errors bubbled from a trace handler.
     #[error(transparent)]
     TraceError(#[from] TraceHandlerError),

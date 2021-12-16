@@ -4,7 +4,6 @@ use crate::parser::VariableValidator;
 use crate::parser::Span;
 use crate::parser::lexer::Token;
 use crate::parser::lexer::LastErrorPath;
-use crate::parser::lexer::Number;
 use crate::parser::air_utils::*;
 use crate::make_user_error;
 
@@ -58,6 +57,10 @@ Instr: Box<Instruction<'input>> = {
         validator.met_new(&new, span);
 
         Box::new(Instruction::New(new))
+    },
+
+    "(" fail <fail_body: FailBody> ")" => {
+        Box::new(Instruction::Fail(fail_body))
     },
 
     <left: @L> "(" fold <iterable:FoldScalarIterable> <iterator:Scalar> <i:Instr> ")" <right: @R> => {
@@ -133,6 +136,20 @@ ScriptVariable: Variable<'input> = {
     <stream:Stream> => Variable::stream(stream.0, stream.1),
 };
 
+FailBody: Fail<'input> = {
+    <ret_code:I64> <error_message:Literal> => Fail::Literal {
+        ret_code,
+        error_message,
+    },
+    <left: @L> <last_error_path:LastError> <right: @R> => {
+        // it's possible to write smth like that `(fail %last_error%.msg)`, that would be ambigious
+        if !matches!(last_error_path, LastErrorPath::None) {
+            errors.push(make_user_error!(AmbiguousFailLastError, left, Token::Fail, right));
+        }
+        Fail::LastError
+    }
+}
+
 FoldScalarIterable: ScalarWithLambda<'input> = {
     <scalar:Scalar> => ScalarWithLambda::new(scalar.0, None, scalar.1),
     <scalar:ScalarWithLambda> => ScalarWithLambda::new(scalar.0, Some(scalar.1), scalar.2),
@@ -149,6 +166,11 @@ CallInstrValue: CallInstrValue<'input> = {
     <scalar:ScalarWithLambda> => CallInstrValue::Variable(VariableWithLambda::scalar_wl(scalar.0, scalar.1, scalar.2)),
     <stream:Stream> => CallInstrValue::Variable(VariableWithLambda::stream(stream.0, stream.1)),
     <stream:StreamWithLambda> => CallInstrValue::Variable(VariableWithLambda::stream_wl(stream.0, stream.1, stream.2)),
+}
+
+Number: Number = {
+    <integer:I64> => Number::Int(integer),
+    <float:F64> => Number::Float(float),
 }
 
 Arg = Value;
@@ -187,12 +209,14 @@ extern {
         "[" => Token::OpenSquareBracket,
         "]" => Token::CloseSquareBracket,
 
-        Literal => Token::StringLiteral(<&'input str>),
         Scalar => Token::Scalar { name:<&'input str>, position: <usize> },
         ScalarWithLambda => Token::ScalarWithLambda { name: <&'input str>, lambda: <LambdaAST<'input>>, position: <usize> },
         Stream => Token::Stream { name: <&'input str>, position: <usize> },
         StreamWithLambda => Token::StreamWithLambda {name: <&'input str>, lambda:<LambdaAST<'input>>, position: <usize>},
-        Number => Token::Number(<Number>),
+
+        Literal => Token::StringLiteral(<&'input str>),
+        I64 => Token::I64(<i64>),
+        F64 => Token::F64(<f64>),
         Boolean => Token::Boolean(<bool>),
 
         InitPeerId => Token::InitPeerId,
@@ -202,6 +226,7 @@ extern {
         ap => Token::Ap,
         seq => Token::Seq,
         par => Token::Par,
+        fail => Token::Fail,
         fold => Token::Fold,
         xor => Token::Xor,
         new => Token::New,

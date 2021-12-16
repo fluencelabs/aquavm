@@ -17,7 +17,10 @@
 use super::*;
 
 use serde_json::json;
+
+use std::cell::RefCell;
 use std::collections::HashMap;
+use std::rc::Rc;
 
 pub fn unit_call_service() -> CallServiceClosure {
     Box::new(|_| -> CallServiceResult {
@@ -84,4 +87,20 @@ pub fn fallible_call_service(fallible_service_id: impl Into<String>) -> CallServ
             CallServiceResult::ok(json!("success result from fallible_call_service"))
         }
     })
+}
+
+pub type ArgTetraplets = Vec<Vec<SecurityTetraplet>>;
+
+pub fn tetraplet_host_function(
+    closure: impl Fn(CallRequestParams) -> CallServiceResult + 'static,
+) -> (CallServiceClosure, Rc<RefCell<ArgTetraplets>>) {
+    let arg_tetraplets = Rc::new(RefCell::new(ArgTetraplets::new()));
+
+    let arg_tetraplets_inner = arg_tetraplets.clone();
+    let host_function: CallServiceClosure = Box::new(move |params| -> CallServiceResult {
+        *arg_tetraplets_inner.borrow_mut() = params.tetraplets.clone();
+        closure(params)
+    });
+
+    (host_function, arg_tetraplets)
 }

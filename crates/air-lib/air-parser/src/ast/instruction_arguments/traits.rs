@@ -105,3 +105,29 @@ impl fmt::Display for Triplet<'_> {
         )
     }
 }
+
+impl fmt::Display for Number {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use Number::*;
+
+        match self {
+            Int(number) => write!(f, "{}", number),
+            Float(number) => write!(f, "{}", number),
+        }
+    }
+}
+
+impl From<Number> for serde_json::Value {
+    fn from(number: Number) -> Self {
+        (&number).into()
+    }
+}
+
+impl From<&Number> for serde_json::Value {
+    fn from(number: &Number) -> Self {
+        match number {
+            Number::Int(value) => (*value).into(),
+            Number::Float(value) => (*value).into(),
+        }
+    }
+}

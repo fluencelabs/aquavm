@@ -18,7 +18,6 @@ use super::air_lexer::Spanned;
 use super::AIRLexer;
 use super::LastErrorPath;
 use super::LexerError;
-use super::Number;
 use super::Token;
 
 use air_lambda_parser::{LambdaAST, ValueAccessor};
@@ -98,6 +97,8 @@ fn air_instructions() {
             Ok((5, Token::CloseRoundBracket, 6)),
         ]),
     );
+
+    lexer_test("fail", Single(Ok((0, Token::Fail, 4))));
 
     lexer_test("fold", Single(Ok((0, Token::Fold, 4))));
 
@@ -187,64 +188,66 @@ fn string_literal() {
 
 #[test]
 fn integer_numbers() {
-    const NUMBER_WITH_PLUS_SIGN: &str = "+123";
-    let number = Number::Int(123);
+    let test_integer = 123;
+    let number_with_plus_sign = format!("+{}", test_integer);
 
     lexer_test(
-        NUMBER_WITH_PLUS_SIGN,
+        &number_with_plus_sign,
         Single(Ok((
             0,
-            Token::Number(number.clone()),
-            NUMBER_WITH_PLUS_SIGN.len(),
+            Token::I64(test_integer),
+            number_with_plus_sign.len(),
         ))),
     );
 
-    const NUMBER: &str = "123";
+    let number = format!("{}", test_integer);
 
     lexer_test(
-        NUMBER,
-        Single(Ok((0, Token::Number(number.clone()), NUMBER.len()))),
+        &number,
+        Single(Ok((0, Token::I64(test_integer), number.len()))),
     );
 
-    const NUMBER_WITH_MINUS_SIGN: &str = "-123";
-    let number = Number::Int(-123);
+    let number_with_minus_sign = format!("-{}", test_integer);
 
     lexer_test(
-        NUMBER_WITH_MINUS_SIGN,
-        Single(Ok((0, Token::Number(number), NUMBER_WITH_MINUS_SIGN.len()))),
+        &number_with_minus_sign,
+        Single(Ok((
+            0,
+            Token::I64(-test_integer),
+            number_with_minus_sign.len(),
+        ))),
     );
 }
 
 #[test]
 fn float_number() {
-    const FNUMBER_WITH_PLUS_SIGN: &str = "+123.123";
-    let number = Number::Float(123.123);
+    let test_float = 123.123;
+    let float_number_with_plus_sign = format!("+{}", test_float);
 
     lexer_test(
-        FNUMBER_WITH_PLUS_SIGN,
+        &float_number_with_plus_sign,
         Single(Ok((
             0,
-            Token::Number(number.clone()),
-            FNUMBER_WITH_PLUS_SIGN.len(),
+            Token::F64(test_float),
+            float_number_with_plus_sign.len(),
         ))),
     );
 
-    const FNUMBER: &str = "123.123";
+    let float_number = format!("{}", test_float);
 
     lexer_test(
-        FNUMBER,
-        Single(Ok((0, Token::Number(number), FNUMBER.len()))),
+        &float_number,
+        Single(Ok((0, Token::F64(test_float), float_number.len()))),
     );
 
-    const FNUMBER_WITH_MINUS_SIGN: &str = "-123.123";
-    let number = Number::Float(-123.123);
+    let float_number_with_minus_sign = format!("-{}", test_float);
 
     lexer_test(
-        FNUMBER_WITH_MINUS_SIGN,
+        &float_number_with_minus_sign,
         Single(Ok((
             0,
-            Token::Number(number),
-            FNUMBER_WITH_MINUS_SIGN.len(),
+            Token::F64(-test_float),
+            float_number_with_minus_sign.len(),
         ))),
     );
 }

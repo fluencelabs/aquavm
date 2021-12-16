@@ -23,5 +23,4 @@ pub use instructions::*;
 pub use values::*;
 
 pub use crate::parser::lexer::LastErrorPath;
-pub use crate::parser::lexer::Number;
 pub use crate::parser::Span;
