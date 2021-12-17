@@ -23,8 +23,8 @@ pub(crate) use joinable::Joinable;
 use super::Stream;
 use crate::execution_step::lambda_applier::LambdaError;
 use crate::JValue;
+use crate::ToErrorCode;
 
-use air_interpreter_interface::CallResults;
 use air_trace_handler::MergerApResult;
 use air_trace_handler::TraceHandlerError;
 use strum::IntoEnumIterator;
@@ -53,10 +53,6 @@ pub(crate) enum ExecutionError {
     /// An error occurred while trying to apply lambda to a value.
     #[error(transparent)]
     LambdaApplierError(#[from] LambdaError),
-
-    /// An error occurred while trying to apply lambda to an empty stream.
-    #[error("lambda is applied to an empty stream")]
-    EmptyStreamLambdaError,
 
     /// Provided JValue has incompatible type with a requested one.
     #[error(
@@ -108,12 +104,6 @@ pub(crate) enum ExecutionError {
     /// could be applied to a stream, but result doesn't contain generation in a source position.
     #[error("ap result {0:?} doesn't match corresponding instruction")]
     ApResultNotCorrespondToInstr(MergerApResult),
-
-    /// Call results should be empty at the end of execution thanks to a execution invariant.
-    #[error(
-        "after finishing execution of supplied AIR, call results aren't empty: `{0:?}`, probably wrong call_id used"
-    )]
-    CallResultsNotEmpty(CallResults),
 }
 
 impl From<LambdaError> for Rc<ExecutionError> {
@@ -131,15 +121,31 @@ macro_rules! trace_to_exec_err {
     };
 }
 
-impl ExecutionError {
-    pub(crate) fn to_error_code(&self) -> u32 {
-        const EXECUTION_ERRORS_START_ID: u32 = 1000;
+/*
+impl ToErrorCode for ExecutionError {
+    fn to_error_code(&self) -> i64 {
+        const EXECUTION_ERRORS_START_ID: i64 = 1000;
 
         let mut errors = ExecutionErrorDiscriminants::iter();
         let actual_error_type = ExecutionErrorDiscriminants::from(self);
 
         // unwrap is safe here because errors are guaranteed to contain all errors variants
-        let enum_variant_position = errors.position(|et| et == actual_error_type).unwrap() as u32;
+        let enum_variant_position = errors.position(|et| et == actual_error_type).unwrap() as i64;
+        EXECUTION_ERRORS_START_ID + enum_variant_position
+    }
+}
+
+ */
+
+impl ToErrorCode for Rc<ExecutionError> {
+    fn to_error_code(&self) -> i64 {
+        const EXECUTION_ERRORS_START_ID: i64 = 1000;
+
+        let mut errors = ExecutionErrorDiscriminants::iter();
+        let actual_error_type = ExecutionErrorDiscriminants::from(self.as_ref());
+
+        // unwrap is safe here because errors are guaranteed to contain all errors variants
+        let enum_variant_position = errors.position(|et| et == actual_error_type).unwrap() as i64;
         EXECUTION_ERRORS_START_ID + enum_variant_position
     }
 }
@@ -166,7 +172,7 @@ impl Joinable for ExecutionError {
                 log_join!("  waiting for an argument with idx '{}' on stream with size '{}'", idx, stream_size);
                 true
             }
-            EmptyStreamLambdaError => {
+            LambdaApplierError(LambdaError::EmptyStream) => {
                 log_join!("  waiting on empty stream for path ");
                 true
             }

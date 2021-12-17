@@ -149,7 +149,7 @@ impl<'i> ResolvedCall<'i> {
 
     /// Prepare arguments of this call instruction by resolving and preparing their security tetraplets.
     fn resolve_args(&self, exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<ResolvedArguments> {
-        use crate::execution_step::utils::resolve_to_args;
+        use crate::execution_step::resolver::resolve_to_args;
 
         let function_args = self.function_arg_paths.iter();
         let mut call_arguments = Vec::new();

@@ -27,8 +27,10 @@
 )]
 
 mod execution_step;
+mod farewell_step;
 mod preparation_step;
 mod runner;
+mod utils;
 
 pub use air_interpreter_interface::InterpreterOutcome;
 pub use air_interpreter_interface::RunParameters;
@@ -53,4 +55,6 @@ pub mod parser {
 }
 
 pub(crate) type JValue = serde_json::Value;
+pub(crate) use utils::ToErrorCode;
+
 use air_lambda_parser::LambdaAST;

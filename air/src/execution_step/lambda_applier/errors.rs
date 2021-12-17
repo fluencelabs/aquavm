@@ -23,6 +23,10 @@ pub(crate) enum LambdaError {
     #[error("lambda is applied to a stream that have only '{stream_size}' elements, but '{idx}' requested")]
     StreamNotHaveEnoughValues { stream_size: usize, idx: u32 },
 
+    /// An error occurred while trying to apply lambda to an empty stream.
+    #[error("lambda is applied to an empty stream")]
+    EmptyStream,
+
     #[error("field accessor (with field name = '{field_name}') can't be applied to a stream")]
     FieldAccessorAppliedToStream { field_name: String },
 

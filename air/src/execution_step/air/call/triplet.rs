@@ -45,7 +45,7 @@ pub(crate) fn resolve<'i>(triplet: &ast::Triplet<'i>, ctx: &ExecutionCtx<'i>) ->
 /// Resolve value to string by either resolving variable from `ExecutionCtx`, taking literal value, or etc.
 // TODO: return Rc<String> to avoid excess cloning
 fn resolve_to_string<'i>(value: &ast::CallInstrValue<'i>, ctx: &ExecutionCtx<'i>) -> ExecutionResult<String> {
-    use crate::execution_step::utils::resolve_ast_variable_wl;
+    use crate::execution_step::resolver::resolve_ast_variable_wl;
     use ast::CallInstrValue::*;
 
     let resolved = match value {

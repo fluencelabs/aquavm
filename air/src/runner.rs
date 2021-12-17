@@ -14,21 +14,15 @@
  * limitations under the License.
  */
 
-mod outcome;
-
 use crate::execution_step::Catchable;
 use crate::execution_step::ExecutableInstruction;
-use crate::execution_step::ExecutionCtx;
-use crate::execution_step::ExecutionError;
-use crate::execution_step::TraceHandler;
+use crate::farewell_step as farewell;
 use crate::preparation_step::prepare;
 use crate::preparation_step::PreparationDescriptor;
 
 use air_interpreter_interface::InterpreterOutcome;
 use air_interpreter_interface::RunParameters;
 use air_log_targets::RUN_PARAMS;
-
-use std::rc::Rc;
 
 pub fn execute_air(
     air: String,
@@ -66,30 +60,16 @@ fn execute_air_impl(
     } = match prepare(&prev_data, &data, air.as_str(), &call_results, params) {
         Ok(desc) => desc,
         // return the initial data in case of errors
-        Err(error) => return Err(outcome::from_preparation_error(prev_data, error)),
+        Err(error) => return Err(farewell::from_uncatchable_error(prev_data, error)),
     };
 
     // match here is used instead of map_err, because the compiler can't determine that
     // they are exclusive and would treat exec_ctx and trace_handler as moved
     match air.execute(&mut exec_ctx, &mut trace_handler) {
-        Ok(_) => try_make_outcome(exec_ctx, trace_handler),
-        // return the old data in case of any trace errors
-        Err(e) if !e.is_catchable() => Err(outcome::from_trace_error(prev_data, e)),
+        Ok(_) => farewell::from_success_result(exec_ctx, trace_handler),
         // return new collected trace in case of errors
-        Err(e) => Err(outcome::from_execution_error(exec_ctx, trace_handler, e)),
+        Err(error) if error.is_catchable() => Err(farewell::from_execution_error(exec_ctx, trace_handler, error)),
+        // return the old data in case of any trace errors
+        Err(error) => Err(farewell::from_uncatchable_error(prev_data, error)),
     }
-}
-
-fn try_make_outcome(
-    exec_ctx: ExecutionCtx<'_>,
-    trace_handler: TraceHandler,
-) -> Result<InterpreterOutcome, InterpreterOutcome> {
-    if exec_ctx.call_results.is_empty() {
-        let outcome = outcome::from_success_result(exec_ctx, trace_handler);
-        return Ok(outcome);
-    }
-
-    let exec_error = Rc::new(ExecutionError::CallResultsNotEmpty(exec_ctx.call_results.clone()));
-    let outcome = outcome::from_execution_error(exec_ctx, trace_handler, exec_error);
-    Err(outcome)
 }

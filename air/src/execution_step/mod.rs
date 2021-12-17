@@ -19,7 +19,7 @@ mod boxed_value;
 mod errors;
 pub(crate) mod execution_context;
 mod lambda_applier;
-mod utils;
+mod resolver;
 
 pub(super) use self::air::ExecutableInstruction;
 pub(super) use self::air::FoldState;
