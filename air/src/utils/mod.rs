@@ -16,4 +16,4 @@
 
 mod to_error_code;
 
-pub(crate) use to_error_code::ToErrorCode;
+pub use to_error_code::ToErrorCode;

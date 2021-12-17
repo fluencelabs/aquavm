@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use air::ExecutionError;
 use air_test_utils::prelude::*;
 
 #[test]
@@ -143,11 +144,13 @@ fn mismatch_without_xor() {
     let result = call_vm!(set_variable_vm, "asd", &script, "", "");
     let result = call_vm!(vm, "asd", &script, "", result.data);
 
-    assert_eq!(result.ret_code, 1011);
+    let expected_error = rc!(ExecutionError::MismatchWithoutXorError);
+    assert!(check_error(&result, expected_error));
 
     let result = call_vm!(vm, "asd", script, "", result.data);
 
-    assert_eq!(result.ret_code, 1011);
+    let expected_error = rc!(ExecutionError::MismatchWithoutXorError);
+    assert!(check_error(&result, expected_error));
 }
 
 #[test]
@@ -183,6 +186,5 @@ fn mismatch_with_two_xors() {
     let mut actual_trace = trace_from_result(&result);
     let expected_executed_call_result = executed_state::request_sent_by(local_peer_id);
 
-    assert_eq!(result.ret_code, 0);
     assert_eq!(actual_trace.pop().unwrap(), expected_executed_call_result);
 }

@@ -106,3 +106,16 @@ pub fn print_trace(result: &RawAVMOutcome, trace_name: &str) {
     }
     println!("]");
 }
+
+#[macro_export]
+macro_rules! rc {
+    ($expr:expr) => {
+        std::rc::Rc::new($expr)
+    };
+}
+
+use air::ToErrorCode;
+
+pub fn check_error(result: &RawAVMOutcome, error: impl ToErrorCode + ToString) -> bool {
+    result.ret_code == error.to_error_code() && result.error_message == error.to_string()
+}

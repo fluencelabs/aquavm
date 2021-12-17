@@ -43,13 +43,6 @@ pub enum PreparationError {
 
 impl ToErrorCode for PreparationError {
     fn to_error_code(&self) -> i64 {
-        const PREPARATION_ERRORS_START_ID: i64 = 1;
-
-        let mut errors = PreparationErrorDiscriminants::iter();
-        let actual_error_type = PreparationErrorDiscriminants::from(self);
-
-        // unwrap is safe here because errors are guaranteed to contain all errors variants
-        let enum_variant_position = errors.position(|et| et == actual_error_type).unwrap() as i64;
-        PREPARATION_ERRORS_START_ID + enum_variant_position
+        crate::generate_to_error_code!(self, Preparation, 1)
     }
 }

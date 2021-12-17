@@ -18,8 +18,9 @@ mod applier;
 mod errors;
 mod utils;
 
+pub use errors::LambdaError;
+
 pub(crate) type LambdaResult<T> = std::result::Result<T, LambdaError>;
 
 pub(crate) use applier::select;
 pub(crate) use applier::select_from_stream;
-pub(crate) use errors::LambdaError;

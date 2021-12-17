@@ -35,9 +35,10 @@ use thiserror::Error as ThisError;
 use std::rc::Rc;
 
 /// Errors arisen while executing AIR script.
+/// This enum is pub since it's used in tests.
 #[derive(ThisError, EnumDiscriminants, Debug)]
 #[strum_discriminants(derive(EnumIter))]
-pub(crate) enum ExecutionError {
+pub enum ExecutionError {
     /// An error is occurred while calling local service via call_service.
     #[error("Local service error, ret_code is {0}, error message is '{1}'")]
     LocalServiceError(i32, Rc<String>),
@@ -121,32 +122,9 @@ macro_rules! trace_to_exec_err {
     };
 }
 
-/*
-impl ToErrorCode for ExecutionError {
-    fn to_error_code(&self) -> i64 {
-        const EXECUTION_ERRORS_START_ID: i64 = 1000;
-
-        let mut errors = ExecutionErrorDiscriminants::iter();
-        let actual_error_type = ExecutionErrorDiscriminants::from(self);
-
-        // unwrap is safe here because errors are guaranteed to contain all errors variants
-        let enum_variant_position = errors.position(|et| et == actual_error_type).unwrap() as i64;
-        EXECUTION_ERRORS_START_ID + enum_variant_position
-    }
-}
-
- */
-
 impl ToErrorCode for Rc<ExecutionError> {
     fn to_error_code(&self) -> i64 {
-        const EXECUTION_ERRORS_START_ID: i64 = 1000;
-
-        let mut errors = ExecutionErrorDiscriminants::iter();
-        let actual_error_type = ExecutionErrorDiscriminants::from(self.as_ref());
-
-        // unwrap is safe here because errors are guaranteed to contain all errors variants
-        let enum_variant_position = errors.position(|et| et == actual_error_type).unwrap() as i64;
-        EXECUTION_ERRORS_START_ID + enum_variant_position
+        crate::generate_to_error_code!(self.as_ref(), Execution, 1)
     }
 }
 

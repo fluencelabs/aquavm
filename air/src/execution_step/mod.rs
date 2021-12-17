@@ -21,6 +21,9 @@ pub(crate) mod execution_context;
 mod lambda_applier;
 mod resolver;
 
+pub use errors::ExecutionError;
+pub use lambda_applier::LambdaError;
+
 pub(super) use self::air::ExecutableInstruction;
 pub(super) use self::air::FoldState;
 pub(super) use boxed_value::Generation;
@@ -28,7 +31,6 @@ pub(super) use boxed_value::ScalarRef;
 pub(super) use boxed_value::Stream;
 pub(super) use boxed_value::ValueAggregate;
 pub(crate) use errors::Catchable;
-pub(super) use errors::ExecutionError;
 pub(crate) use errors::Joinable;
 pub(crate) use execution_context::ExecutionCtx;
 

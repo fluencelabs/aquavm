@@ -85,7 +85,6 @@ fn wait_on_stream_json_path_by_id() {
     let result = checked_call_vm!(local_vm, "", non_join_stream_script, "", "");
     let actual_trace = trace_from_result(&result);
 
-    assert_eq!(result.ret_code, 0);
     assert_eq!(actual_trace.len(), 3);
 
     let join_stream_script = format!(
@@ -100,7 +99,6 @@ fn wait_on_stream_json_path_by_id() {
     let result = checked_call_vm!(local_vm, "", join_stream_script, "", "");
     let actual_trace = trace_from_result(&result);
 
-    assert_eq!(result.ret_code, 0);
     assert_eq!(actual_trace.len(), 2); // par and the first call emit traces, second call doesn't
 }
 

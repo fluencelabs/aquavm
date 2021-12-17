@@ -18,8 +18,9 @@ use crate::JValue;
 
 use thiserror::Error as ThisError;
 
+/// Describes errors related to applying lambdas to values.
 #[derive(Debug, Clone, ThisError)]
-pub(crate) enum LambdaError {
+pub enum LambdaError {
     #[error("lambda is applied to a stream that have only '{stream_size}' elements, but '{idx}' requested")]
     StreamNotHaveEnoughValues { stream_size: usize, idx: u32 },
 

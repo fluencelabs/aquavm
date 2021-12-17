@@ -29,9 +29,8 @@ use std::fmt::Formatter;
 /// of values that interpreter obtained from one particle. It means that number of generation on
 /// a peer is equal to number of the interpreter runs in context of one particle. And each set of
 /// obtained values from a current_data that were not present in prev_data becomes a new generation.
-// TODO: make it non-pub after boxed value refactoring.
 #[derive(Debug, Default, Clone)]
-pub(crate) struct Stream(Vec<Vec<ValueAggregate>>);
+pub struct Stream(Vec<Vec<ValueAggregate>>);
 
 impl Stream {
     pub(crate) fn from_generations_count(count: usize) -> Self {
