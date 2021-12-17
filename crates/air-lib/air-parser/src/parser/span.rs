@@ -17,7 +17,7 @@
 use serde::Deserialize;
 use serde::Serialize;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Ord, Hash, Serialize, Deserialize)]
 pub struct Span {
     pub left: usize,
     pub right: usize,
@@ -28,7 +28,28 @@ impl Span {
         Self { left, right }
     }
 
-    pub fn contains(&self, position: usize) -> bool {
+    pub fn contains_position(&self, position: usize) -> bool {
         self.left < position && position < self.right
+    }
+
+    pub fn contains_span(&self, span: Span) -> bool {
+        self.contains_position(span.left) && self.contains_position(span.right)
+    }
+}
+
+use std::cmp::Ordering;
+
+impl PartialOrd for Span {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        let self_min = std::cmp::min(self.left, self.right);
+        let other_min = std::cmp::min(other.left, other.right);
+
+        if self_min < other_min {
+            Some(Ordering::Less)
+        } else if self == other {
+            Some(Ordering::Equal)
+        } else {
+            Some(Ordering::Greater)
+        }
     }
 }

@@ -40,6 +40,9 @@ pub enum ParserError {
 
     #[error("new can't be applied to a '{2}' because it's an iterator")]
     IteratorRestrictionNotAllowed(usize, usize, String),
+
+    #[error("multiple iterable values found for iterable name '{2}'")]
+    MultipleIterableValues(usize, usize, String),
 }
 
 impl From<std::convert::Infallible> for ParserError {

@@ -142,6 +142,9 @@ fn parser_error_to_label(file_id: usize, error: ParserError) -> Label<usize> {
         IteratorRestrictionNotAllowed(start, end, _) => {
             Label::primary(file_id, start..end).with_message(error.to_string())
         }
+        MultipleIterableValues(start, end, _) => {
+            Label::primary(file_id, start..end).with_message(error.to_string())
+        }
     }
 }
 

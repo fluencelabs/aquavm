@@ -88,7 +88,7 @@ impl<'i> Variable<'i> {
         Self::Stream(Stream::new(name, position))
     }
 
-    pub fn name(&self) -> &str {
+    pub fn name(&self) -> &'i str {
         match self {
             Variable::Scalar(scalar) => scalar.name,
             Variable::Stream(stream) => stream.name,
@@ -113,7 +113,7 @@ impl<'i> VariableWithLambda<'i> {
         Self::Stream(StreamWithLambda::new(name, Some(lambda), position))
     }
 
-    pub fn name(&self) -> &str {
+    pub fn name(&self) -> &'i str {
         match self {
             VariableWithLambda::Scalar(scalar) => scalar.name,
             VariableWithLambda::Stream(stream) => stream.name,
