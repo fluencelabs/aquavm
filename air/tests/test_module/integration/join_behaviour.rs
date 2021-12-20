@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+use air::CatchableError;
+use air::LambdaError;
 use air_test_utils::prelude::*;
 
 use fstrings::f;
@@ -133,17 +135,17 @@ fn wait_on_empty_stream_json_path() {
 
 #[test]
 fn dont_wait_on_json_path_on_scalars() {
-    let array = json!([1, 2, 3, 4, 5]);
+    let array = json!([1u32, 2u32, 3u32, 4u32, 5u32]);
 
     let object = json!({
         "err_msg": "",
-        "is_authenticated": 1,
-        "ret_code": 0,
+        "is_authenticated": 1i32,
+        "ret_code": 0i32,
     });
 
     let variables = maplit::hashmap!(
-        "array".to_string() => array,
-        "object".to_string() => object,
+        "array".to_string() => array.clone(),
+        "object".to_string() => object.clone(),
     );
 
     let set_variables_call_service = set_variables_call_service(variables, VariableOptionSource::Argument(0));
@@ -170,11 +172,10 @@ fn dont_wait_on_json_path_on_scalars() {
     let init_peer_id = "asd";
     let result = call_vm!(set_variable_vm, init_peer_id, &script, "", "");
     let array_result = call_vm!(array_consumer, init_peer_id, &script, "", result.data.clone());
-    assert_eq!(array_result.ret_code, 1003);
-    assert_eq!(
-        array_result.error_message,
-        r#"value '[1,2,3,4,5]' does not contain element for idx = '5'"#
-    );
+
+    let expected_error =
+        CatchableError::LambdaApplierError(LambdaError::ValueNotContainSuchArrayIdx { value: array, idx: 5 });
+    assert!(check_error(&array_result, expected_error));
 
     let script = format!(
         r#"
@@ -189,11 +190,13 @@ fn dont_wait_on_json_path_on_scalars() {
     let init_peer_id = "asd";
     let result = call_vm!(set_variable_vm, init_peer_id, &script, "", "");
     let object_result = call_vm!(object_consumer, init_peer_id, script, "", result.data);
-    assert_eq!(object_result.ret_code, 1003);
-    assert_eq!(
-        object_result.error_message,
-        r#"value '{"err_msg":"","is_authenticated":1,"ret_code":0}' does not contain element with field name = 'non_exist_path'"#
-    );
+
+    let expected_error = CatchableError::LambdaApplierError(LambdaError::ValueNotContainSuchField {
+        value: object,
+        field_name: "non_exist_path".to_string(),
+    });
+
+    assert!(check_error(&object_result, expected_error));
 }
 
 #[test]

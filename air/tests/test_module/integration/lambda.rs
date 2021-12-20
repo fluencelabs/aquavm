@@ -40,11 +40,10 @@ fn lambda_not_allowed_for_non_objects_and_arrays() {
     let result = checked_call_vm!(set_variable_vm, "asd", &script, "", "");
     let result = call_vm!(local_vm, "asd", script, "", result.data);
 
-    let expected_error = rc!(CatchableError::LambdaApplierError(
-        LambdaError::ScalarAccessorHasInvalidType {
-            scalar_accessor: json!(some_string),
-        }
-    ));
+    let expected_error = CatchableError::LambdaApplierError(LambdaError::FieldAccessorNotMatchValue {
+        value: json!(some_string),
+        field_name: "some_lambda".to_string(),
+    });
     assert!(check_error(&result, expected_error));
 }
 

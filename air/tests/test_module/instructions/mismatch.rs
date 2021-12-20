@@ -144,12 +144,12 @@ fn mismatch_without_xor() {
     let result = call_vm!(set_variable_vm, "asd", &script, "", "");
     let result = call_vm!(vm, "asd", &script, "", result.data);
 
-    let expected_error = rc!(CatchableError::MismatchWithoutXorError);
+    let expected_error = CatchableError::MismatchWithoutXorError;
     assert!(check_error(&result, expected_error));
 
     let result = call_vm!(vm, "asd", script, "", result.data);
 
-    let expected_error = rc!(CatchableError::MismatchWithoutXorError);
+    let expected_error = CatchableError::MismatchWithoutXorError;
     assert!(check_error(&result, expected_error));
 }
 

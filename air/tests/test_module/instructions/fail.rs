@@ -36,10 +36,8 @@ fn fail_with_last_error() {
 
     let result = call_vm!(vm, "", script, "", "");
 
-    let expected_error = rc!(CatchableError::LocalServiceError(
-        1,
-        Rc::new("failed result from fallible_call_service".to_string())
-    ));
+    let expected_error =
+        CatchableError::LocalServiceError(1, Rc::new(r#""failed result from fallible_call_service""#.to_string()));
     assert!(check_error(&result, expected_error));
 }
 
@@ -58,10 +56,10 @@ fn fail_with_literals() {
 
     let result = call_vm!(vm, "", script, "", "");
 
-    let expected_error = rc!(CatchableError::FailWithoutXorError {
-        ret_code: 1,
-        error_message: "failed result from fallible_call_service".to_string()
-    });
+    let expected_error = CatchableError::FailWithoutXorError {
+        ret_code: 1337,
+        error_message: "error message".to_string(),
+    };
     assert!(check_error(&result, expected_error));
 }
 

@@ -85,8 +85,14 @@ impl From<LambdaError> for Rc<CatchableError> {
 
 impl ToErrorCode for Rc<CatchableError> {
     fn to_error_code(&self) -> i64 {
+        self.as_ref().to_error_code()
+    }
+}
+
+impl ToErrorCode for CatchableError {
+    fn to_error_code(&self) -> i64 {
         const CATCHABLE_ERRORS_START_ID: i64 = 10000;
-        crate::generate_to_error_code!(self.as_ref(), CatchableError, CATCHABLE_ERRORS_START_ID)
+        crate::generate_to_error_code!(self, CatchableError, CATCHABLE_ERRORS_START_ID)
     }
 }
 

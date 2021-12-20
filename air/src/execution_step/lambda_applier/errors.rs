@@ -37,11 +37,11 @@ pub enum LambdaError {
     #[error("value '{value}' does not contain element for idx = '{idx}'")]
     ValueNotContainSuchArrayIdx { value: JValue, idx: u32 },
 
+    #[error("value '{value}' does not contain element with field name = '{field_name}'")]
+    ValueNotContainSuchField { value: JValue, field_name: String },
+
     #[error("value '{value}' is not an map-type to match field accessor with field_name = '{field_name}'")]
     FieldAccessorNotMatchValue { value: JValue, field_name: String },
-
-    #[error("value '{value}' does not contain element with field name = '{field_name}'")]
-    JValueNotContainSuchField { value: JValue, field_name: String },
 
     #[error("index accessor `{accessor} can't be converted to u32`")]
     IndexAccessNotU32 { accessor: serde_json::Number },
