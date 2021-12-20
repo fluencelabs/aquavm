@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use air::ExecutionError;
+use air::CatchableError;
 use air_test_utils::prelude::*;
 
 use fstrings::f;
@@ -36,7 +36,7 @@ fn fail_with_last_error() {
 
     let result = call_vm!(vm, "", script, "", "");
 
-    let expected_error = rc!(ExecutionError::LocalServiceError(
+    let expected_error = rc!(CatchableError::LocalServiceError(
         1,
         Rc::new("failed result from fallible_call_service".to_string())
     ));
@@ -58,7 +58,7 @@ fn fail_with_literals() {
 
     let result = call_vm!(vm, "", script, "", "");
 
-    let expected_error = rc!(ExecutionError::FailWithoutXorError {
+    let expected_error = rc!(CatchableError::FailWithoutXorError {
         ret_code: 1,
         error_message: "failed result from fallible_call_service".to_string()
     });

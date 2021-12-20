@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use air::ExecutionError;
+use air::CatchableError;
 use air_test_utils::prelude::*;
 
 #[test]
@@ -192,12 +192,12 @@ fn match_without_xor() {
     let result = call_vm!(set_variable_vm, "", &script, "", "");
     let result = call_vm!(vm, "", &script, "", result.data);
 
-    let expected_error = rc!(ExecutionError::MatchWithoutXorError);
+    let expected_error = rc!(CatchableError::MatchWithoutXorError);
     assert!(check_error(&result, expected_error));
 
     let result = call_vm!(vm, "", script, "", result.data);
 
-    let expected_error = rc!(ExecutionError::MatchWithoutXorError);
+    let expected_error = rc!(CatchableError::MatchWithoutXorError);
     assert!(check_error(&result, expected_error));
 }
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use air::ExecutionError;
+use air::CatchableError;
 use air::LambdaError;
 use air_test_utils::prelude::*;
 
@@ -40,9 +40,11 @@ fn lambda_not_allowed_for_non_objects_and_arrays() {
     let result = checked_call_vm!(set_variable_vm, "asd", &script, "", "");
     let result = call_vm!(local_vm, "asd", script, "", result.data);
 
-    let expected_error = ExecutionError::LambdaApplierError(LambdaError::ScalarAccessorHasInvalidType {
-        scalar_accessor: json!(some_string),
-    });
+    let expected_error = rc!(CatchableError::LambdaApplierError(
+        LambdaError::ScalarAccessorHasInvalidType {
+            scalar_accessor: json!(some_string),
+        }
+    ));
     assert!(check_error(&result, expected_error));
 }
 

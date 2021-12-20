@@ -23,8 +23,11 @@ use strum_macros::EnumDiscriminants;
 use strum_macros::EnumIter;
 use thiserror::Error as ThisError;
 
-/// Errors arisen while executing AIR script.
-/// This enum is pub since it's used in tests.
+/// Uncatchable errors arisen during AIR script execution. Uncatchable here means that these errors
+/// couldn't be handled by a xor instruction and their error_code couldn't be used in a match
+/// instruction. They are similar to JVM runtime errors and some of them could be caught only
+/// while execution of AIR script, others (FoldStateNotFound and MultipleVariablesFound) are
+/// checked additionally on the validation step, and presence here for convenience.
 #[derive(ThisError, EnumDiscriminants, Debug)]
 #[strum_discriminants(derive(EnumIter))]
 pub enum UncatchableError {

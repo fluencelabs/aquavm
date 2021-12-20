@@ -25,6 +25,7 @@ use thiserror::Error as ThisError;
 
 use std::rc::Rc;
 
+// TODO: add tests for all execution errors
 /// Errors arisen while executing AIR script.
 /// This enum is pub since it's used in tests.
 #[derive(ThisError, EnumDiscriminants, Debug)]

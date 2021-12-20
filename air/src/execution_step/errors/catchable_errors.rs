@@ -28,8 +28,9 @@ use thiserror::Error as ThisError;
 
 use std::rc::Rc;
 
-/// Errors arisen while executing AIR script.
-/// This enum is pub since it's used in tests.
+/// Catchable errors arisen during AIR script execution. Catchable here means that these errors
+/// could be handled by a xor instruction and their error_code could be used in a match
+/// instruction.
 #[derive(ThisError, EnumDiscriminants, Debug)]
 #[strum_discriminants(derive(EnumIter))]
 pub enum CatchableError {

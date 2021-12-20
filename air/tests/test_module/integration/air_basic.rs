@@ -160,9 +160,9 @@ fn invalid_air() {
 
     let script = r#"(seq )"#;
 
-    let result = call_vm!(vm, "", &script, "", "");
+    let result = call_vm!(vm, "", script, "", "");
 
-    let error_message = air_parser::parse(script).into_err();
+    let error_message = air_parser::parse(script).expect_err("air parser should fail on this script");
     let expected_error = PreparationError::AIRParseError(error_message);
     assert!(check_error(&result, expected_error));
 }
