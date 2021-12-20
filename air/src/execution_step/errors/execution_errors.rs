@@ -60,8 +60,6 @@ impl From<CatchableError> for ExecutionError {
     }
 }
 
-/// This macro is needed because it's impossible to implement
-/// From<TraceHandlerError> for Rc<ExecutionError> due to the orphan rule.
 #[macro_export]
 macro_rules! trace_to_exec_err {
     ($trace_expr: expr) => {
