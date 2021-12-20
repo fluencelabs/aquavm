@@ -14,19 +14,13 @@
  * limitations under the License.
  */
 
-mod catchable;
-mod joinable;
-
-pub(crate) use catchable::Catchable;
-pub(crate) use joinable::Joinable;
+pub(crate) use super::Joinable;
 
 use super::Stream;
 use crate::execution_step::lambda_applier::LambdaError;
 use crate::JValue;
 use crate::ToErrorCode;
 
-use air_trace_handler::MergerApResult;
-use air_trace_handler::TraceHandlerError;
 use strum::IntoEnumIterator;
 use strum_macros::EnumDiscriminants;
 use strum_macros::EnumIter;
@@ -38,7 +32,7 @@ use std::rc::Rc;
 /// This enum is pub since it's used in tests.
 #[derive(ThisError, EnumDiscriminants, Debug)]
 #[strum_discriminants(derive(EnumIter))]
-pub enum ExecutionError {
+pub enum CatchableError {
     /// An error is occurred while calling local service via call_service.
     #[error("Local service error, ret_code is {0}, error message is '{1}'")]
     LocalServiceError(i32, Rc<String>),
@@ -46,14 +40,6 @@ pub enum ExecutionError {
     /// Variable with such a name wasn't defined during AIR script execution.
     #[error("variable with name '{0}' wasn't defined during script execution")]
     VariableNotFound(String),
-
-    /// Multiple values for such name found.
-    #[error("multiple variables found for name '{0}' in data")]
-    MultipleVariablesFound(String),
-
-    /// An error occurred while trying to apply lambda to a value.
-    #[error(transparent)]
-    LambdaApplierError(#[from] LambdaError),
 
     /// Provided JValue has incompatible type with a requested one.
     #[error(
@@ -65,21 +51,9 @@ pub enum ExecutionError {
         expected_value_type: &'static str,
     },
 
-    /// Fold state wasn't found for such iterator name.
-    #[error("fold state not found for this iterable '{0}'")]
-    FoldStateNotFound(String),
-
-    /// Multiple fold states found for such iterator name.
-    #[error("multiple iterable values found for iterable name '{0}'")]
-    MultipleIterableValues(String),
-
     /// A fold instruction must iterate over array value.
     #[error("lambda '{1}' returned non-array value '{0}' for fold instruction")]
     FoldIteratesOverNonArray(JValue, String),
-
-    /// Errors encountered while shadowing non-scalar values.
-    #[error("variable with name '{0}' can't be shadowed, shadowing isn't supported for iterables")]
-    IterableShadowing(String),
 
     /// This error type is produced by a match to notify xor that compared values aren't equal.
     #[error("match is used without corresponding xor")]
@@ -93,38 +67,25 @@ pub enum ExecutionError {
     #[error("fail with ret_code '{ret_code}' and error_message '{error_message}' is used without corresponding xor")]
     FailWithoutXorError { ret_code: i64, error_message: String },
 
-    /// Errors bubbled from a trace handler.
+    /// An error occurred while trying to apply lambda to a value.
     #[error(transparent)]
-    TraceError(#[from] TraceHandlerError),
+    LambdaApplierError(#[from] LambdaError),
 
     /// Errors occurred while insertion of a value inside stream that doesn't have corresponding generation.
     #[error("stream {0:?} doesn't have generation with number {1}, probably a supplied to the interpreter data is corrupted")]
     StreamDontHaveSuchGeneration(Stream, usize),
-
-    /// Errors occurred when result from data doesn't match to a instruction, f.e. an instruction
-    /// could be applied to a stream, but result doesn't contain generation in a source position.
-    #[error("ap result {0:?} doesn't match corresponding instruction")]
-    ApResultNotCorrespondToInstr(MergerApResult),
 }
 
-impl From<LambdaError> for Rc<ExecutionError> {
+impl From<LambdaError> for Rc<CatchableError> {
     fn from(e: LambdaError) -> Self {
-        Rc::new(ExecutionError::LambdaApplierError(e))
+        Rc::new(CatchableError::LambdaApplierError(e))
     }
 }
 
-/// This macro is needed because it's impossible to implement
-/// From<TraceHandlerError> for Rc<ExecutionError> due to the orphan rule.
-#[macro_export]
-macro_rules! trace_to_exec_err {
-    ($trace_expr: expr) => {
-        $trace_expr.map_err(|e| std::rc::Rc::new(crate::execution_step::ExecutionError::TraceError(e)))
-    };
-}
-
-impl ToErrorCode for Rc<ExecutionError> {
+impl ToErrorCode for Rc<CatchableError> {
     fn to_error_code(&self) -> i64 {
-        crate::generate_to_error_code!(self.as_ref(), Execution, 1)
+        const CATCHABLE_ERRORS_START_ID: i64 = 10000;
+        crate::generate_to_error_code!(self.as_ref(), CatchableError, CATCHABLE_ERRORS_START_ID)
     }
 }
 
@@ -135,11 +96,11 @@ macro_rules! log_join {
 }
 
 #[rustfmt::skip::macros(log_join)]
-impl Joinable for ExecutionError {
+impl Joinable for CatchableError {
     /// Returns true, if supplied error is related to variable not found errors type.
     /// Print log if this is joinable error type.
     fn is_joinable(&self) -> bool {
-        use ExecutionError::*;
+        use CatchableError::*;
 
         match self {
             VariableNotFound(var_name) => {
@@ -157,18 +118,5 @@ impl Joinable for ExecutionError {
 
             _ => false,
         }
-    }
-}
-
-impl Catchable for ExecutionError {
-    fn is_catchable(&self) -> bool {
-        // this kind is related to an invalid data and should treat as a non-catchable error
-        !matches!(self, ExecutionError::TraceError(_))
-    }
-}
-
-impl From<std::convert::Infallible> for ExecutionError {
-    fn from(_: std::convert::Infallible) -> Self {
-        unreachable!()
     }
 }

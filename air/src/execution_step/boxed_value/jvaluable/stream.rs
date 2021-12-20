@@ -17,7 +17,6 @@
 use super::select_from_stream;
 use super::ExecutionResult;
 use super::JValuable;
-use crate::exec_err;
 use crate::execution_step::boxed_value::Generation;
 use crate::execution_step::boxed_value::Stream;
 use crate::execution_step::ExecutionCtx;
@@ -89,7 +88,7 @@ impl<'stream> StreamJvaluableIngredients<'stream> {
     }
 
     pub(self) fn iter(&self) -> ExecutionResult<StreamIter<'_>> {
-        use super::ExecutionError::StreamDontHaveSuchGeneration;
+        use crate::execution_step::CatchableError::StreamDontHaveSuchGeneration;
 
         match self.stream.iter(self.generation) {
             Some(iter) => Ok(iter),
@@ -99,10 +98,7 @@ impl<'stream> StreamJvaluableIngredients<'stream> {
                     Generation::Last => unreachable!(),
                 };
 
-                exec_err!(StreamDontHaveSuchGeneration(
-                    self.stream.deref().clone(),
-                    generation as usize
-                ))
+                Err(StreamDontHaveSuchGeneration(self.stream.deref().clone(), generation as usize).into())
             }
         }
     }

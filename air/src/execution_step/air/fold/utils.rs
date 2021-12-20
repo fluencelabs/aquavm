@@ -15,7 +15,7 @@
  */
 
 use super::*;
-use crate::exec_err;
+use crate::execution_step::CatchableError;
 use crate::execution_step::RSecurityTetraplet;
 use crate::JValue;
 use crate::LambdaAST;
@@ -107,11 +107,12 @@ fn from_call_result(call_result: ValueAggregate, variable_name: &str) -> Executi
             array.len()
         }
         v => {
-            return exec_err!(ExecutionError::IncompatibleJValueType {
+            return Err(CatchableError::IncompatibleJValueType {
                 variable_name: variable_name.to_string(),
                 actual_value: (*v).clone(),
                 expected_value_type: "array",
-            })
+            }
+            .into());
         }
     };
 
@@ -156,10 +157,7 @@ fn from_jvalue(
     let iterable = match jvalue {
         JValue::Array(array) => array,
         _ => {
-            return exec_err!(ExecutionError::FoldIteratesOverNonArray(
-                jvalue.clone(),
-                formatted_lambda_ast
-            ))
+            return Err(CatchableError::FoldIteratesOverNonArray(jvalue.clone(), formatted_lambda_ast).into());
         }
     };
 

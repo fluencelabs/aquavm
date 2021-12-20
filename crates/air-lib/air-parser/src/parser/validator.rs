@@ -37,7 +37,7 @@ use std::ops::Deref;
 #[derive(Debug, Default, Clone)]
 pub struct VariableValidator<'i> {
     /// Contains the most left definition of a variables met in call outputs.
-    met_variable_definitions: MultiMap<&'i str, Span>,
+    met_variable_definitions: HashMap<&'i str, Span>,
 
     /// Contains iterables met in fold iterables.
     met_iterator_definitions: MultiMap<&'i str, Span>,

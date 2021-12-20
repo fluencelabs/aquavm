@@ -22,7 +22,7 @@ pub trait ToErrorCode {
 macro_rules! generate_to_error_code {
     ($self: expr, $error_type:ident, $start_id: expr) => {
         concat_idents::concat_idents!(error_start_id = $error_type, _, START_ID {
-            concat_idents::concat_idents!(error_discriminant = $error_type, ErrorDiscriminants { {
+            concat_idents::concat_idents!(error_discriminant = $error_type, Discriminants { {
                 #[allow(non_upper_case_globals)]
                 const error_start_id: i64 = $start_id;
 

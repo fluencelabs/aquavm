@@ -20,7 +20,6 @@ mod scalar;
 mod stream;
 mod variable;
 
-pub(crate) use super::ExecutionError;
 pub(crate) use iterable::*;
 pub(crate) use jvaluable::*;
 pub(crate) use scalar::ScalarRef;

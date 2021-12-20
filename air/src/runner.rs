@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-use crate::execution_step::Catchable;
 use crate::execution_step::ExecutableInstruction;
 use crate::farewell_step as farewell;
 use crate::preparation_step::prepare;

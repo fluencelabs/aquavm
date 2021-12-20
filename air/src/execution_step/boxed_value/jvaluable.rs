@@ -21,7 +21,6 @@ mod resolved_call_result;
 mod stream;
 
 use super::iterable::IterableItem;
-use super::ExecutionError;
 use super::ExecutionResult;
 use super::ValueAggregate;
 use crate::execution_step::lambda_applier::*;

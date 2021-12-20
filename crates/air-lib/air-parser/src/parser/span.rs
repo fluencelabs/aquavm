@@ -17,7 +17,7 @@
 use serde::Deserialize;
 use serde::Serialize;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Ord, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Span {
     pub left: usize,
     pub right: usize,
@@ -51,5 +51,12 @@ impl PartialOrd for Span {
         } else {
             Some(Ordering::Greater)
         }
+    }
+}
+
+impl Ord for Span {
+    fn cmp(&self, other: &Self) -> Ordering {
+        // it's safe since partial_cmp always returns some
+        self.partial_cmp(other).unwrap()
     }
 }

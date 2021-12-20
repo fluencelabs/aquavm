@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-use super::ExecutionError;
 use super::ExecutionResult;
 use super::ValueAggregate;
-use crate::exec_err;
+use crate::execution_step::CatchableError;
 use crate::JValue;
 
 use std::fmt::Formatter;
@@ -50,7 +49,7 @@ impl Stream {
         };
 
         if generation >= self.0.len() {
-            return exec_err!(ExecutionError::StreamDontHaveSuchGeneration(self.clone(), generation));
+            return Err(CatchableError::StreamDontHaveSuchGeneration(self.clone(), generation).into());
         }
 
         self.0[generation].push(value);

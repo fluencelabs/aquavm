@@ -43,6 +43,7 @@ pub enum PreparationError {
 
 impl ToErrorCode for PreparationError {
     fn to_error_code(&self) -> i64 {
-        crate::generate_to_error_code!(self, Preparation, 1)
+        const PREPARATION_ERROR_START_ID: i64 = 1;
+        crate::generate_to_error_code!(self, PreparationError, PREPARATION_ERROR_START_ID)
     }
 }

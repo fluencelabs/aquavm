@@ -40,25 +40,26 @@ impl<'i> super::ExecutableInstruction<'i> for Call<'i> {
         log_instruction!(call, exec_ctx, trace_ctx);
         exec_ctx.tracker.meet_call();
 
-        let resolved_call = joinable!(ResolvedCall::new(self, exec_ctx), exec_ctx).map_err(|e| {
-            set_last_error(self, exec_ctx, e.clone(), None);
-            e
-        })?;
+        let resolved_call = joinable!(ResolvedCall::new(self, exec_ctx), exec_ctx)
+            .map_err(|e| set_last_error(self, exec_ctx, e, None))?;
 
         let tetraplet = resolved_call.as_tetraplet();
-        joinable!(resolved_call.execute(exec_ctx, trace_ctx), exec_ctx).map_err(|e| {
-            set_last_error(self, exec_ctx, e.clone(), Some(tetraplet));
-            e
-        })
+        joinable!(resolved_call.execute(exec_ctx, trace_ctx), exec_ctx)
+            .map_err(|e| set_last_error(self, exec_ctx, e, Some(tetraplet)))
     }
 }
 
 fn set_last_error<'i>(
     call: &Call<'i>,
     exec_ctx: &mut ExecutionCtx<'i>,
-    e: Rc<ExecutionError>,
+    execution_error: ExecutionError,
     tetraplet: Option<RSecurityTetraplet>,
-) {
+) -> ExecutionError {
+    let catchable_error = match execution_error {
+        ExecutionError::Catchable(catchable) => catchable,
+        ExecutionError::Uncatchable(_) => return execution_error,
+    };
+
     let current_peer_id = match &tetraplet {
         // use tetraplet if they set, because an error could be propagated from data
         // (from CallServiceFailed state) and exec_ctx.current_peer_id won't mean
@@ -67,10 +68,16 @@ fn set_last_error<'i>(
         None => exec_ctx.current_peer_id.to_string(),
     };
 
-    log::warn!("call failed with an error `{}`, peerId `{}`", e, current_peer_id);
+    log::warn!(
+        "call failed with an error `{}`, peerId `{}`",
+        catchable_error,
+        current_peer_id
+    );
 
     let instruction = call.to_string();
-    let last_error = LastErrorDescriptor::new(e, instruction, current_peer_id, tetraplet);
+    let last_error = LastErrorDescriptor::new(catchable_error.clone(), instruction, current_peer_id, tetraplet);
     exec_ctx.last_error = Some(last_error);
     exec_ctx.last_error_could_be_set = false;
+
+    ExecutionError::Catchable(catchable_error)
 }

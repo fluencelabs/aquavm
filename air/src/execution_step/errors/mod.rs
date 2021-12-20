@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Fluence Labs Limited
+ * Copyright 2020 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-/// This trait is intended to differentiate between catchable and non-catchable error types.
-/// Errors of the first type could be caught by xor, the second couldn't and should stop
-/// AIR execution. This is needed to prevent some malicious data merging and manage
-/// prev_data always in a valid state.
-pub(crate) trait Catchable {
-    /// Return true, if error is catchable.
-    fn is_catchable(&self) -> bool;
-}
+mod catchable_errors;
+mod execution_errors;
+mod joinable;
+mod uncatchable_errors;
+
+pub use catchable_errors::CatchableError;
+pub use execution_errors::ExecutionError;
+pub use uncatchable_errors::UncatchableError;
+
+pub(crate) use joinable::Joinable;
+
+use super::Stream;
