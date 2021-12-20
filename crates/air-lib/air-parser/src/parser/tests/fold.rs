@@ -143,42 +143,6 @@ fn parse_fold_with_multiple_iterable() {
 }
 
 #[test]
-fn parse_fold_with_iterable_shadowing() {
-    let source_code = r#"
-        (seq
-            (call "" ("" "") [] iterable)
-            (fold iterable i
-                (seq
-                    (call "" ("" "") ["hello" ""] i)
-                    (next i)
-                )
-            )
-        )
-        "#;
-
-    let lexer = crate::AIRLexer::new(source_code);
-
-    let parser = crate::AIRParser::new();
-    let mut errors = Vec::new();
-    let mut validator = crate::parser::VariableValidator::new();
-    parser
-        .parse(source_code, &mut errors, &mut validator, lexer)
-        .expect("parser shouldn't fail");
-
-    let errors = validator.finalize();
-
-    assert_eq!(errors.len(), 1);
-
-    let error = &errors[0].error;
-    let parser_error = match error {
-        ParseError::User { error } => error,
-        _ => panic!("unexpected error type"),
-    };
-
-    assert!(matches!(parser_error, ParserError::UndefinedVariable(..)));
-}
-
-#[test]
 fn parse_fold() {
     let source_code = r#"
         (fold iterable i
