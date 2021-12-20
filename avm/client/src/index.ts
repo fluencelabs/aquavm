@@ -15,7 +15,6 @@
  */
 
 import { getStringFromWasm0, invoke } from './wrapper';
-import { toUint8Array } from 'js-base64';
 
 export type LogLevel = 'info' | 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'off';
 
@@ -81,30 +80,30 @@ class HostImportsConfig {
     }
 }
 
-/// Instantiates WebAssembly runtime with AIR interpreter module
+// Instantiates WebAssembly runtime with AIR interpreter module
 async function interpreterInstance(
     module: WebAssembly.Module,
     cfg: HostImportsConfig,
     logFunction: LogFunction,
 ): Promise<Instance> {
-    /// Create host imports that use module exports internally
+    // Create host imports that use module exports internally
     let imports = cfg.newImportObject();
 
-    /// Instantiate interpreter
+    // Instantiate interpreter
     let interpreter_module = module;
     let instance: Instance = await WebAssembly.instantiate(interpreter_module, imports);
 
-    /// Set exports, so host imports can use them
+    // Set exports, so host imports can use them
     cfg.setExports(instance.exports);
 
-    /// Trigger interpreter initialization (i.e., call main function)
+    // Trigger interpreter initialization (i.e., call main function)
     call_export(instance.exports.main, logFunction);
 
     return instance;
 }
 
-/// If export is a function, call it. Otherwise log a warning.
-/// NOTE: any here is unavoidable, see Function interface definition
+// If export is a function, call it. Otherwise log a warning.
+// NOTE: any here is unavoidable, see Function interface definition
 function call_export(f: ExportValue, logFunction: LogFunction): any {
     if (typeof f === 'function') {
         return f();
@@ -147,12 +146,15 @@ function log_import(cfg: HostImportsConfig, logFunction: LogFunction): LogImport
     };
 }
 
-/// Returns import object that describes host functions called by AIR interpreter
+// Returns import object that describes host functions called by AIR interpreter
 function newImportObject(cfg: HostImportsConfig, logFunction: LogFunction): ImportObject {
     return {
         host: log_import(cfg, logFunction),
     };
 }
+
+const decoder = new TextDecoder();
+const encoder = new TextEncoder();
 
 export class AirInterpreter {
     private wasmWrapper;
@@ -188,7 +190,7 @@ export class AirInterpreter {
             };
         }
 
-        const paramsToPass = Buffer.from(
+        const paramsToPass = encoder.encode(
             JSON.stringify({
                 init_peer_id: params.initPeerId,
                 current_peer_id: params.currentPeerId,
@@ -202,7 +204,7 @@ export class AirInterpreter {
             prevData,
             data,
             paramsToPass,
-            Buffer.from(JSON.stringify(callResultsToPass)),
+            encoder.encode(JSON.stringify(callResultsToPass)),
             this.logLevel,
         );
 
@@ -211,7 +213,7 @@ export class AirInterpreter {
             result = JSON.parse(rawResult);
         } catch (ex) {}
 
-        const callRequestsStr = new TextDecoder().decode(Buffer.from(result.call_requests));
+        const callRequestsStr = decoder.decode(new Uint8Array(result.call_requests));
         let parsedCallRequests;
         try {
             if (callRequestsStr.length === 0) {

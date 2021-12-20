@@ -15,9 +15,7 @@
         "test": "jest"
     },
     "private": false,
-    "dependencies": {
-        "js-base64": "^3.7.2"
-    },
+    "dependencies": {},
     "devDependencies": {
         "@types/jest": "^26.0.23",
         "@types/node": "^14.0.0",
