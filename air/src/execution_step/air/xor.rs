@@ -41,7 +41,7 @@ impl<'i> super::ExecutableInstruction<'i> for Xor<'i> {
 }
 
 fn print_xor_log(e: &ExecutionError) {
-    if e.is_match_mismatch() {
+    if e.is_match_or_mismatch() {
         // These errors actually aren't real errors, but a way to bubble execution_step up from match
         // to a corresponding xor. They'll become errors iff there is no such xor and execution_step is
         // bubble up until the very beginning of current subtree. So the error message shouldn't

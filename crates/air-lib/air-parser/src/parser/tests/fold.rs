@@ -96,7 +96,7 @@ fn parse_fold_with_undefined_iterable() {
 }
 
 #[test]
-fn parse_fold_with_multiple_iterable() {
+fn parse_fold_with_multiple_iterator() {
     let source_code = r#"
         (seq
             (seq

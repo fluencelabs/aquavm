@@ -115,6 +115,11 @@ macro_rules! rc {
 }
 
 use air::ToErrorCode;
+use air_interpreter_interface::INTERPRETER_SUCCESS;
+
+pub fn is_interpreter_succeded(result: &RawAVMOutcome) -> bool {
+    result.ret_code == INTERPRETER_SUCCESS
+}
 
 pub fn check_error(result: &RawAVMOutcome, error: impl ToErrorCode + ToString) -> bool {
     println!(

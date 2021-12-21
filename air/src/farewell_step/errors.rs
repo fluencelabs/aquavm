@@ -35,7 +35,7 @@ pub enum FarewellError {
 
 impl ToErrorCode for FarewellError {
     fn to_error_code(&self) -> i64 {
-        const FAREWELL_ERRORS_START_ID: i64 = 30000;
+        use crate::utils::FAREWELL_ERRORS_START_ID;
         crate::generate_to_error_code!(self, FarewellError, FAREWELL_ERRORS_START_ID)
     }
 }

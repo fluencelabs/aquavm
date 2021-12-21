@@ -164,7 +164,9 @@ fn match_with_equal_numbers() {
                 (null)
             )";
 
-    let _result = checked_call_vm!(vm, "asd", script, "", "");
+    let result = call_vm!(vm, "asd", script, "", "");
+
+    assert!(is_interpreter_succeded(&result));
 }
 
 #[test]

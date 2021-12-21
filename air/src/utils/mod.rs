@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+mod error_codes;
 mod to_error_code;
 
+pub(crate) use error_codes::*;
 pub use to_error_code::ToErrorCode;

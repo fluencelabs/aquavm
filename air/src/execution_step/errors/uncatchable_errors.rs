@@ -59,7 +59,7 @@ pub enum UncatchableError {
 
 impl ToErrorCode for UncatchableError {
     fn to_error_code(&self) -> i64 {
-        const UNCATCHABLE_ERRORS_START_ID: i64 = 20000;
+        use crate::utils::UNCATCHABLE_ERRORS_START_ID;
         crate::generate_to_error_code!(self, UncatchableError, UNCATCHABLE_ERRORS_START_ID)
     }
 }

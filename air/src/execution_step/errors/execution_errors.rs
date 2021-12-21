@@ -43,7 +43,7 @@ impl ExecutionError {
         matches!(self, ExecutionError::Catchable(_))
     }
 
-    pub fn is_match_mismatch(&self) -> bool {
+    pub fn is_match_or_mismatch(&self) -> bool {
         match self {
             ExecutionError::Catchable(catchable) => matches!(
                 catchable.as_ref(),

@@ -54,12 +54,12 @@ macro_rules! execute {
         }
 
         let execution_error = match result {
-            // handle only catchable errors
             Err(e) => e,
             v => return v,
         };
 
         let catchable_error = match execution_error {
+            // handle only catchable errors
             crate::execution_step::ExecutionError::Catchable(e) => e,
             e => return Err(e),
         };
@@ -79,20 +79,20 @@ macro_rules! execute {
 
 /// Executes match/mismatch instructions and updates last error if error type wasn't
 /// MatchWithoutXorError or MismatchWithoutXorError.
-macro_rules! execute_match_mismatch {
+macro_rules! execute_match_or_mismatch {
     ($self:expr, $instr:expr, $exec_ctx:ident, $trace_ctx:ident) => {{
         let result = $instr.execute($exec_ctx, $trace_ctx);
         let execution_error = match result {
-            // handle only catchable errors
             Err(e) => e,
             v => return v,
         };
 
-        if !$exec_ctx.last_error_could_be_set || execution_error.is_match_mismatch() {
+        if !$exec_ctx.last_error_could_be_set || execution_error.is_match_or_mismatch() {
             return Err(execution_error);
         }
 
         let catchable_error = match execution_error {
+            // handle only catchable errors
             crate::execution_step::ExecutionError::Catchable(e) => e,
             e => return Err(e),
         };
@@ -133,8 +133,8 @@ impl<'i> ExecutableInstruction<'i> for Instruction<'i> {
             Instruction::Xor(xor) => execute!(self, xor, exec_ctx, trace_ctx),
 
             // match/mismatch shouldn't rewrite last_error
-            Instruction::Match(match_) => execute_match_mismatch!(self, match_, exec_ctx, trace_ctx),
-            Instruction::MisMatch(mismatch) => execute_match_mismatch!(self, mismatch, exec_ctx, trace_ctx),
+            Instruction::Match(match_) => execute_match_or_mismatch!(self, match_, exec_ctx, trace_ctx),
+            Instruction::MisMatch(mismatch) => execute_match_or_mismatch!(self, mismatch, exec_ctx, trace_ctx),
 
             Instruction::Error => unreachable!("should not execute if parsing succeeded. QED."),
         }

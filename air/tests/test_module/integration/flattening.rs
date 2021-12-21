@@ -74,8 +74,9 @@ fn flattening_scalar_arrays() {
     );
 
     let result = checked_call_vm!(set_variable_vm, "asd", script.clone(), "", "");
-    let _result = checked_call_vm!(local_vm, "asd", script.clone(), "", result.data);
+    let result = call_vm!(local_vm, "asd", script.clone(), "", result.data);
 
+    assert!(is_interpreter_succeded(&result));
     assert_eq!(
         closure_call_args.service_id_var,
         Rc::new(RefCell::new("local_service_id".to_string()))
@@ -123,8 +124,9 @@ fn flattening_streams() {
     );
 
     let result = checked_call_vm!(set_variable_vm, "asd", script.clone(), "", "");
-    let _result = checked_call_vm!(local_vm, "asd", script.clone(), "", result.data);
+    let result = call_vm!(local_vm, "asd", script.clone(), "", result.data);
 
+    assert!(is_interpreter_succeded(&result));
     assert_eq!(
         closure_call_args.service_id_var,
         Rc::new(RefCell::new("local_service_id".to_string()))
@@ -160,8 +162,9 @@ fn flattening_empty_values() {
     );
 
     let result = checked_call_vm!(set_variable_vm, "asd", script.clone(), "", "");
-    let _result = checked_call_vm!(local_vm, "asd", script.clone(), "", result.data);
+    let result = checked_call_vm!(local_vm, "asd", script.clone(), "", result.data);
 
+    assert!(is_interpreter_succeded(&result));
     assert_eq!(closure_call_args.args_var, Rc::new(RefCell::new(vec![])));
 }
 

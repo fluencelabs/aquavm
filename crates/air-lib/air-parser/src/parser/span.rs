@@ -32,7 +32,7 @@ impl Span {
         self.left < position && position < self.right
     }
 
-    pub fn contains_span(&self, span: Span) -> bool {
+    pub fn contains_span(&self, span: Self) -> bool {
         self.contains_position(span.left) && self.contains_position(span.right)
     }
 }
@@ -56,7 +56,7 @@ impl PartialOrd for Span {
 
 impl Ord for Span {
     fn cmp(&self, other: &Self) -> Ordering {
-        // it's safe since partial_cmp always returns some
+        // it's safe since partial_cmp always returns Some
         self.partial_cmp(other).unwrap()
     }
 }

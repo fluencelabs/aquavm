@@ -61,5 +61,7 @@ fn issue_137() {
     let node_1_result = checked_call_vm!(node_1, "", &script, "", initiator_result.data.clone());
     let node_2_result = checked_call_vm!(node_2, "", &script, "", initiator_result.data);
     let node_4_result_1 = checked_call_vm!(node_4, "", &script, "", node_1_result.data);
-    let _result = checked_call_vm!(node_4, "", script, node_4_result_1.data, node_2_result.data);
+    let result = call_vm!(node_4, "", script, node_4_result_1.data, node_2_result.data);
+
+    assert!(is_interpreter_succeded(&result));
 }

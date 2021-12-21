@@ -39,6 +39,8 @@ pub enum CatchableError {
     LocalServiceError(i32, Rc<String>),
 
     /// Variable with such a name wasn't defined during AIR script execution.
+    /// This error type is used in order to support the join behaviour and
+    /// it's ok if some variable hasn't been defined yet, due to the par nature of AIR.
     #[error("variable with name '{0}' wasn't defined during script execution")]
     VariableNotFound(String),
 
@@ -91,7 +93,7 @@ impl ToErrorCode for Rc<CatchableError> {
 
 impl ToErrorCode for CatchableError {
     fn to_error_code(&self) -> i64 {
-        const CATCHABLE_ERRORS_START_ID: i64 = 10000;
+        use crate::utils::CATCHABLE_ERRORS_START_ID;
         crate::generate_to_error_code!(self, CatchableError, CATCHABLE_ERRORS_START_ID)
     }
 }

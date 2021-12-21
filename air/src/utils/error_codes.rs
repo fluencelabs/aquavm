@@ -14,15 +14,8 @@
  * limitations under the License.
  */
 
-mod catchable_errors;
-mod execution_errors;
-mod joinable;
-mod uncatchable_errors;
-
-pub use catchable_errors::CatchableError;
-pub use execution_errors::ExecutionError;
-pub use uncatchable_errors::UncatchableError;
-
-pub(crate) use joinable::Joinable;
-
-use super::Stream;
+/// This consts are used as start ids of corresponding errors.
+pub(crate) const PREPARATION_ERROR_START_ID: i64 = 1;
+pub(crate) const CATCHABLE_ERRORS_START_ID: i64 = 10000;
+pub(crate) const UNCATCHABLE_ERRORS_START_ID: i64 = 20000;
+pub(crate) const FAREWELL_ERRORS_START_ID: i64 = 30000;
