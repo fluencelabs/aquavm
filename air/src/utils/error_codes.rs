@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-mod error_codes;
-mod to_error_code;
-
-pub(crate) use error_codes::*;
-pub use to_error_code::ToErrorCode;
+/// This consts are used as start ids of corresponding errors.
+pub(crate) const PREPARATION_ERROR_START_ID: i64 = 1;
+pub(crate) const CATCHABLE_ERRORS_START_ID: i64 = 10000;
+pub(crate) const UNCATCHABLE_ERRORS_START_ID: i64 = 20000;
+pub(crate) const FAREWELL_ERRORS_START_ID: i64 = 30000;

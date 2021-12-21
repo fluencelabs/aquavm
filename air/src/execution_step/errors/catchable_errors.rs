@@ -14,19 +14,13 @@
  * limitations under the License.
  */
 
-mod catchable;
-mod joinable;
-
-pub(crate) use catchable::Catchable;
-pub(crate) use joinable::Joinable;
+pub(crate) use super::Joinable;
 
 use super::Stream;
 use crate::execution_step::lambda_applier::LambdaError;
 use crate::JValue;
 use crate::ToErrorCode;
 
-use air_trace_handler::MergerApResult;
-use air_trace_handler::TraceHandlerError;
 use strum::IntoEnumIterator;
 use strum_macros::EnumDiscriminants;
 use strum_macros::EnumIter;
@@ -34,25 +28,21 @@ use thiserror::Error as ThisError;
 
 use std::rc::Rc;
 
-/// Errors arisen while executing AIR script.
+/// Catchable errors arisen during AIR script execution. Catchable here means that these errors
+/// could be handled by a xor instruction and their error_code could be used in a match
+/// instruction.
 #[derive(ThisError, EnumDiscriminants, Debug)]
 #[strum_discriminants(derive(EnumIter))]
-pub(crate) enum ExecutionError {
+pub enum CatchableError {
     /// An error is occurred while calling local service via call_service.
     #[error("Local service error, ret_code is {0}, error message is '{1}'")]
     LocalServiceError(i32, Rc<String>),
 
     /// Variable with such a name wasn't defined during AIR script execution.
+    /// This error type is used in order to support the join behaviour and
+    /// it's ok if some variable hasn't been defined yet, due to the par nature of AIR.
     #[error("variable with name '{0}' wasn't defined during script execution")]
     VariableNotFound(String),
-
-    /// Multiple values for such name found.
-    #[error("multiple variables found for name '{0}' in data")]
-    MultipleVariablesFound(String),
-
-    /// An error occurred while trying to apply lambda to a value.
-    #[error(transparent)]
-    LambdaApplierError(#[from] LambdaError),
 
     /// Provided JValue has incompatible type with a requested one.
     #[error(
@@ -64,21 +54,9 @@ pub(crate) enum ExecutionError {
         expected_value_type: &'static str,
     },
 
-    /// Fold state wasn't found for such iterator name.
-    #[error("fold state not found for this iterable '{0}'")]
-    FoldStateNotFound(String),
-
-    /// Multiple fold states found for such iterator name.
-    #[error("multiple iterable values found for iterable name '{0}'")]
-    MultipleIterableValues(String),
-
     /// A fold instruction must iterate over array value.
     #[error("lambda '{1}' returned non-array value '{0}' for fold instruction")]
     FoldIteratesOverNonArray(JValue, String),
-
-    /// Errors encountered while shadowing non-scalar values.
-    #[error("variable with name '{0}' can't be shadowed, shadowing isn't supported for iterables")]
-    IterableShadowing(String),
 
     /// This error type is produced by a match to notify xor that compared values aren't equal.
     #[error("match is used without corresponding xor")]
@@ -92,61 +70,31 @@ pub(crate) enum ExecutionError {
     #[error("fail with ret_code '{ret_code}' and error_message '{error_message}' is used without corresponding xor")]
     FailWithoutXorError { ret_code: i64, error_message: String },
 
-    /// Errors bubbled from a trace handler.
+    /// An error occurred while trying to apply lambda to a value.
     #[error(transparent)]
-    TraceError(#[from] TraceHandlerError),
+    LambdaApplierError(#[from] LambdaError),
 
     /// Errors occurred while insertion of a value inside stream that doesn't have corresponding generation.
     #[error("stream {0:?} doesn't have generation with number {1}, probably a supplied to the interpreter data is corrupted")]
     StreamDontHaveSuchGeneration(Stream, usize),
-
-    /// Errors occurred when result from data doesn't match to a instruction, f.e. an instruction
-    /// could be applied to a stream, but result doesn't contain generation in a source position.
-    #[error("ap result {0:?} doesn't match corresponding instruction")]
-    ApResultNotCorrespondToInstr(MergerApResult),
 }
 
-impl From<LambdaError> for Rc<ExecutionError> {
+impl From<LambdaError> for Rc<CatchableError> {
     fn from(e: LambdaError) -> Self {
-        Rc::new(ExecutionError::LambdaApplierError(e))
+        Rc::new(CatchableError::LambdaApplierError(e))
     }
 }
 
-/// This macro is needed because it's impossible to implement
-/// From<TraceHandlerError> for Rc<ExecutionError> due to the orphan rule.
-#[macro_export]
-macro_rules! trace_to_exec_err {
-    ($trace_expr: expr) => {
-        $trace_expr.map_err(|e| std::rc::Rc::new(crate::execution_step::ExecutionError::TraceError(e)))
-    };
-}
-
-/*
-impl ToErrorCode for ExecutionError {
+impl ToErrorCode for Rc<CatchableError> {
     fn to_error_code(&self) -> i64 {
-        const EXECUTION_ERRORS_START_ID: i64 = 1000;
-
-        let mut errors = ExecutionErrorDiscriminants::iter();
-        let actual_error_type = ExecutionErrorDiscriminants::from(self);
-
-        // unwrap is safe here because errors are guaranteed to contain all errors variants
-        let enum_variant_position = errors.position(|et| et == actual_error_type).unwrap() as i64;
-        EXECUTION_ERRORS_START_ID + enum_variant_position
+        self.as_ref().to_error_code()
     }
 }
 
- */
-
-impl ToErrorCode for Rc<ExecutionError> {
+impl ToErrorCode for CatchableError {
     fn to_error_code(&self) -> i64 {
-        const EXECUTION_ERRORS_START_ID: i64 = 1000;
-
-        let mut errors = ExecutionErrorDiscriminants::iter();
-        let actual_error_type = ExecutionErrorDiscriminants::from(self.as_ref());
-
-        // unwrap is safe here because errors are guaranteed to contain all errors variants
-        let enum_variant_position = errors.position(|et| et == actual_error_type).unwrap() as i64;
-        EXECUTION_ERRORS_START_ID + enum_variant_position
+        use crate::utils::CATCHABLE_ERRORS_START_ID;
+        crate::generate_to_error_code!(self, CatchableError, CATCHABLE_ERRORS_START_ID)
     }
 }
 
@@ -157,11 +105,11 @@ macro_rules! log_join {
 }
 
 #[rustfmt::skip::macros(log_join)]
-impl Joinable for ExecutionError {
+impl Joinable for CatchableError {
     /// Returns true, if supplied error is related to variable not found errors type.
     /// Print log if this is joinable error type.
     fn is_joinable(&self) -> bool {
-        use ExecutionError::*;
+        use CatchableError::*;
 
         match self {
             VariableNotFound(var_name) => {
@@ -179,18 +127,5 @@ impl Joinable for ExecutionError {
 
             _ => false,
         }
-    }
-}
-
-impl Catchable for ExecutionError {
-    fn is_catchable(&self) -> bool {
-        // this kind is related to an invalid data and should treat as a non-catchable error
-        !matches!(self, ExecutionError::TraceError(_))
-    }
-}
-
-impl From<std::convert::Infallible> for ExecutionError {
-    fn from(_: std::convert::Infallible) -> Self {
-        unreachable!()
     }
 }

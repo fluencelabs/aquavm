@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+use air::CatchableError;
+use air::LambdaError;
 use air_test_utils::prelude::*;
 
 use fstrings::f;
@@ -27,20 +29,22 @@ fn lambda_not_allowed_for_non_objects_and_arrays() {
     let local_peer_id = "local_peer_id";
     let mut local_vm = create_avm(echo_call_service(), local_peer_id);
 
-    let script = format!(
-        r#"
+    let some_string = "some_string";
+    let script = f!(r#"
         (seq
-            (call "{0}" ("" "") ["some_string"] string_variable)
-            (call "{1}" ("" "") [string_variable.$.some_lambda])
+            (call "{set_variable_peer_id}" ("" "") ["{some_string}"] string_variable)
+            (call "{local_peer_id}" ("" "") [string_variable.$.some_lambda])
         )
-        "#,
-        set_variable_peer_id, local_peer_id
-    );
+        "#);
 
     let result = checked_call_vm!(set_variable_vm, "asd", &script, "", "");
     let result = call_vm!(local_vm, "asd", script, "", result.data);
 
-    assert_eq!(result.ret_code, 1003);
+    let expected_error = CatchableError::LambdaApplierError(LambdaError::FieldAccessorNotMatchValue {
+        value: json!(some_string),
+        field_name: "some_lambda".to_string(),
+    });
+    assert!(check_error(&result, expected_error));
 }
 
 #[test]

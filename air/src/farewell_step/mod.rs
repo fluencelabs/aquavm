@@ -17,7 +17,8 @@
 mod errors;
 mod outcome;
 
-pub(crate) use errors::FarewellError;
+pub use errors::FarewellError;
+
 pub(crate) use outcome::from_execution_error;
 pub(crate) use outcome::from_success_result;
 pub(crate) use outcome::from_uncatchable_error;

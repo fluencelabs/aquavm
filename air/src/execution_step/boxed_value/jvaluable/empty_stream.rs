@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-use super::ExecutionError::LambdaApplierError;
 use super::ExecutionResult;
 use super::JValuable;
 use super::LambdaAST;
 use super::LambdaError::EmptyStream;
-use crate::exec_err;
+use crate::execution_step::CatchableError::LambdaApplierError;
 use crate::execution_step::ExecutionCtx;
 use crate::execution_step::RSecurityTetraplet;
 use crate::execution_step::SecurityTetraplets;
@@ -30,7 +29,7 @@ use std::borrow::Cow;
 impl JValuable for () {
     fn apply_lambda<'i>(&self, _lambda: &LambdaAST<'_>, _exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<&JValue> {
         // applying lambda to an empty stream will produce a join behaviour
-        exec_err!(LambdaApplierError(EmptyStream))
+        Err(LambdaApplierError(EmptyStream).into())
     }
 
     fn apply_lambda_with_tetraplets<'i>(
@@ -39,7 +38,7 @@ impl JValuable for () {
         _exec_ctx: &ExecutionCtx<'i>,
     ) -> ExecutionResult<(&JValue, RSecurityTetraplet)> {
         // applying lambda to an empty stream will produce a join behaviour
-        exec_err!(LambdaApplierError(EmptyStream))
+        Err(LambdaApplierError(EmptyStream).into())
     }
 
     fn as_jvalue(&self) -> Cow<'_, JValue> {

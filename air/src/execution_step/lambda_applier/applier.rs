@@ -18,6 +18,7 @@ use super::utils::*;
 use super::LambdaError;
 use crate::execution_step::ExecutionCtx;
 use crate::execution_step::ExecutionResult;
+use crate::lambda_to_execution_error;
 use crate::JValue;
 use crate::LambdaAST;
 
@@ -39,19 +40,18 @@ pub(crate) fn select_from_stream<'value, 'i>(
     let idx = match prefix {
         ArrayAccess { idx } => *idx,
         FieldAccessByName { field_name } => {
-            return Err(LambdaError::FieldAccessorAppliedToStream {
+            return lambda_to_execution_error!(Err(LambdaError::FieldAccessorAppliedToStream {
                 field_name: field_name.to_string(),
-            }
-            .into());
+            }));
         }
         _ => unreachable!("should not execute if parsing succeeded. QED."),
     };
 
     let stream_size = stream.len();
-    let value = stream
+    let value = lambda_to_execution_error!(stream
         .peekable()
         .nth(idx as usize)
-        .ok_or(LambdaError::StreamNotHaveEnoughValues { stream_size, idx })?;
+        .ok_or(LambdaError::StreamNotHaveEnoughValues { stream_size, idx }))?;
 
     let result = select(value, body.iter(), exec_ctx)?;
     let select_result = StreamSelectResult::new(result, idx);
@@ -66,14 +66,14 @@ pub(crate) fn select<'value, 'accessor, 'i>(
     for accessor in lambda {
         match accessor {
             ValueAccessor::ArrayAccess { idx } => {
-                value = try_jvalue_with_idx(value, *idx)?;
+                value = lambda_to_execution_error!(try_jvalue_with_idx(value, *idx))?;
             }
             ValueAccessor::FieldAccessByName { field_name } => {
-                value = try_jvalue_with_field_name(value, *field_name)?;
+                value = lambda_to_execution_error!(try_jvalue_with_field_name(value, *field_name))?;
             }
             ValueAccessor::FieldAccessByScalar { scalar_name } => {
                 let scalar = exec_ctx.scalars.get(scalar_name)?;
-                value = select_by_scalar(value, scalar)?;
+                value = lambda_to_execution_error!(select_by_scalar(value, scalar))?;
             }
             ValueAccessor::Error => unreachable!("should not execute if parsing succeeded. QED."),
         }

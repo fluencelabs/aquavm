@@ -39,14 +39,12 @@ pub(super) fn try_jvalue_with_field_name<'value>(
     field_name: &str,
 ) -> LambdaResult<&'value JValue> {
     match jvalue {
-        JValue::Object(values_map) => {
-            values_map
-                .get(field_name)
-                .ok_or_else(|| LambdaError::JValueNotContainSuchField {
-                    value: jvalue.clone(),
-                    field_name: field_name.to_string(),
-                })
-        }
+        JValue::Object(values_map) => values_map
+            .get(field_name)
+            .ok_or_else(|| LambdaError::ValueNotContainSuchField {
+                value: jvalue.clone(),
+                field_name: field_name.to_string(),
+            }),
         _ => Err(LambdaError::FieldAccessorNotMatchValue {
             value: jvalue.clone(),
             field_name: field_name.to_string(),

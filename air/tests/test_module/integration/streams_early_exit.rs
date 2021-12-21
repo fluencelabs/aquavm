@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+use air::UncatchableError;
 use air_test_utils::prelude::*;
-use pretty_assertions::assert_eq;
+use air_trace_handler::TraceHandlerError;
+use air_trace_handler::{CallResultError, MergeError};
 
 #[test]
 fn par_early_exit() {
@@ -141,7 +143,20 @@ fn par_early_exit() {
     ];
     let setter_3_malicious_data = raw_data_from_trace(setter_3_malicious_trace);
     let init_result_3 = call_vm!(init, "", &script, init_result_2.data.clone(), setter_3_malicious_data);
-    assert_eq!(init_result_3.ret_code, 1013);
+
+    let expected_error = UncatchableError::TraceError(TraceHandlerError::MergeError(MergeError::IncorrectCallResult(
+        CallResultError::ValuesNotEqual {
+            prev_value: Value::Stream {
+                value: rc!(json!("1")),
+                generation: 0,
+            },
+            current_value: Value::Stream {
+                value: rc!(json!("non_exist_value")),
+                generation: 0,
+            },
+        },
+    )));
+    assert!(check_error(&init_result_3, expected_error));
 
     let actual_trace = trace_from_result(&init_result_3);
     let expected_trace = trace_from_result(&init_result_2);

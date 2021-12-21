@@ -16,7 +16,6 @@
 
 mod completeness_updater;
 
-use super::Catchable;
 use super::ExecutableInstruction;
 use super::ExecutionCtx;
 use super::ExecutionError;
@@ -29,8 +28,6 @@ use completeness_updater::ParCompletenessUpdater;
 
 use air_parser::ast::Par;
 use air_trace_handler::SubtreeType;
-
-use std::rc::Rc;
 
 #[rustfmt::skip]
 impl<'i> ExecutableInstruction<'i> for Par<'i> {
@@ -84,7 +81,7 @@ fn execute_subtree<'i>(
 
 enum SubtreeResult {
     Succeeded,
-    Failed(Rc<ExecutionError>),
+    Failed(ExecutionError),
 }
 
 fn prepare_par_result(

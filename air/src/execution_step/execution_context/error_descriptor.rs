@@ -15,7 +15,7 @@
  */
 
 use super::ExecutionCtx;
-use crate::execution_step::ExecutionError;
+use crate::execution_step::CatchableError;
 use crate::execution_step::RSecurityTetraplet;
 use crate::SecurityTetraplet;
 
@@ -28,7 +28,7 @@ use std::rc::Rc;
 /// This struct is intended to track the last arisen error.
 #[derive(Debug)]
 pub(crate) struct LastErrorDescriptor {
-    pub(crate) error: Rc<ExecutionError>,
+    pub(crate) error: Rc<CatchableError>,
     pub(crate) instruction: String,
     pub(crate) peer_id: String,
     pub(crate) tetraplet: Option<RSecurityTetraplet>,
@@ -70,7 +70,7 @@ impl<'s> LastErrorWithTetraplet {
 
 impl LastErrorDescriptor {
     pub(crate) fn new(
-        error: Rc<ExecutionError>,
+        error: Rc<CatchableError>,
         instruction: String,
         peer_id: String,
         tetraplet: Option<RSecurityTetraplet>,

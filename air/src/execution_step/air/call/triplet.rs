@@ -15,9 +15,8 @@
  */
 
 use super::ExecutionCtx;
-use super::ExecutionError;
 use super::ExecutionResult;
-use crate::exec_err;
+use crate::execution_step::CatchableError;
 use crate::JValue;
 
 use air_parser::ast;
@@ -63,10 +62,11 @@ fn resolve_to_string<'i>(value: &ast::CallInstrValue<'i>, ctx: &ExecutionCtx<'i>
 fn try_jvalue_to_string(jvalue: JValue, variable: &ast::VariableWithLambda<'_>) -> ExecutionResult<String> {
     match jvalue {
         JValue::String(s) => Ok(s),
-        _ => exec_err!(ExecutionError::IncompatibleJValueType {
+        _ => Err(CatchableError::IncompatibleJValueType {
             variable_name: variable.name().to_string(),
             actual_value: jvalue,
             expected_value_type: "string",
-        }),
+        }
+        .into()),
     }
 }

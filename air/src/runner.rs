@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-use crate::execution_step::Catchable;
 use crate::execution_step::ExecutableInstruction;
 use crate::farewell_step as farewell;
 use crate::preparation_step::prepare;
@@ -58,8 +57,8 @@ fn execute_air_impl(
         mut trace_handler,
         air,
     } = match prepare(&prev_data, &data, air.as_str(), &call_results, params) {
-        Ok(desc) => desc,
-        // return the initial data in case of errors
+        Ok(descriptor) => descriptor,
+        // return the prev data in case of errors
         Err(error) => return Err(farewell::from_uncatchable_error(prev_data, error)),
     };
 
@@ -69,7 +68,7 @@ fn execute_air_impl(
         Ok(_) => farewell::from_success_result(exec_ctx, trace_handler),
         // return new collected trace in case of errors
         Err(error) if error.is_catchable() => Err(farewell::from_execution_error(exec_ctx, trace_handler, error)),
-        // return the old data in case of any trace errors
+        // return the prev data in case of any trace errors
         Err(error) => Err(farewell::from_uncatchable_error(prev_data, error)),
     }
 }

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#![allow(improper_ctypes)]
 #![warn(rust_2018_idioms)]
 #![deny(
     dead_code,
@@ -36,8 +35,14 @@ pub use air_interpreter_interface::InterpreterOutcome;
 pub use air_interpreter_interface::RunParameters;
 pub use air_interpreter_interface::INTERPRETER_SUCCESS;
 pub use execution_step::execution_context::LastError;
+pub use execution_step::CatchableError;
+pub use execution_step::ExecutionError;
+pub use execution_step::LambdaError;
+pub use execution_step::UncatchableError;
 pub use polyplets::ResolvedTriplet;
 pub use polyplets::SecurityTetraplet;
+pub use preparation_step::PreparationError;
+pub use utils::ToErrorCode;
 
 pub use crate::runner::execute_air;
 
@@ -55,6 +60,5 @@ pub mod parser {
 }
 
 pub(crate) type JValue = serde_json::Value;
-pub(crate) use utils::ToErrorCode;
 
 use air_lambda_parser::LambdaAST;

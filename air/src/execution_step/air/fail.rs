@@ -15,10 +15,10 @@
  */
 
 use super::ExecutionCtx;
-use super::ExecutionError;
 use super::ExecutionResult;
 use super::LastErrorDescriptor;
 use super::TraceHandler;
+use crate::execution_step::CatchableError;
 use crate::log_instruction;
 
 use air_parser::ast::Fail;
@@ -48,7 +48,7 @@ fn fail_with_literals<'i>(
     fail: &Fail<'_>,
     exec_ctx: &mut ExecutionCtx<'i>,
 ) -> ExecutionResult<()> {
-    let fail_error = ExecutionError::FailWithoutXorError {
+    let fail_error = CatchableError::FailWithoutXorError {
         ret_code,
         error_message: error_message.to_string(),
     };
@@ -71,7 +71,7 @@ fn fail_with_literals<'i>(
 
     update_context_state(exec_ctx);
 
-    Err(fail_error)
+    Err(fail_error.into())
 }
 
 fn fail_with_last_error(exec_ctx: &mut ExecutionCtx<'_>) -> ExecutionResult<()> {
@@ -81,7 +81,7 @@ fn fail_with_last_error(exec_ctx: &mut ExecutionCtx<'_>) -> ExecutionResult<()> 
     };
 
     update_context_state(exec_ctx);
-    Err(last_error)
+    Err(last_error.into())
 }
 
 fn update_context_state(exec_ctx: &mut ExecutionCtx<'_>) {

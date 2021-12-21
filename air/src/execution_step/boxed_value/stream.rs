@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-use super::ExecutionError;
 use super::ExecutionResult;
 use super::ValueAggregate;
-use crate::exec_err;
+use crate::execution_step::CatchableError;
 use crate::JValue;
 
 use std::fmt::Formatter;
@@ -29,9 +28,8 @@ use std::fmt::Formatter;
 /// of values that interpreter obtained from one particle. It means that number of generation on
 /// a peer is equal to number of the interpreter runs in context of one particle. And each set of
 /// obtained values from a current_data that were not present in prev_data becomes a new generation.
-// TODO: make it non-pub after boxed value refactoring.
 #[derive(Debug, Default, Clone)]
-pub(crate) struct Stream(Vec<Vec<ValueAggregate>>);
+pub struct Stream(Vec<Vec<ValueAggregate>>);
 
 impl Stream {
     pub(crate) fn from_generations_count(count: usize) -> Self {
@@ -51,7 +49,7 @@ impl Stream {
         };
 
         if generation >= self.0.len() {
-            return exec_err!(ExecutionError::StreamDontHaveSuchGeneration(self.clone(), generation));
+            return Err(CatchableError::StreamDontHaveSuchGeneration(self.clone(), generation).into());
         }
 
         self.0[generation].push(value);

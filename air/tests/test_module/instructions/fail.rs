@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
+use air::CatchableError;
 use air_test_utils::prelude::*;
 
 use fstrings::f;
 use fstrings::format_args_f;
+
+use std::rc::Rc;
 
 #[test]
 fn fail_with_last_error() {
@@ -32,11 +35,10 @@ fn fail_with_last_error() {
             )"#);
 
     let result = call_vm!(vm, "", script, "", "");
-    assert_eq!(result.ret_code, 1000);
-    assert_eq!(
-        result.error_message,
-        r#"Local service error, ret_code is 1, error message is '"failed result from fallible_call_service"'"#
-    );
+
+    let expected_error =
+        CatchableError::LocalServiceError(1, Rc::new(r#""failed result from fallible_call_service""#.to_string()));
+    assert!(check_error(&result, expected_error));
 }
 
 #[test]
@@ -53,11 +55,12 @@ fn fail_with_literals() {
     );
 
     let result = call_vm!(vm, "", script, "", "");
-    assert_eq!(result.ret_code, 1012);
-    assert_eq!(
-        result.error_message,
-        "fail with ret_code '1337' and error_message 'error message' is used without corresponding xor"
-    );
+
+    let expected_error = CatchableError::FailWithoutXorError {
+        ret_code: 1337,
+        error_message: "error message".to_string(),
+    };
+    assert!(check_error(&result, expected_error));
 }
 
 #[test]
@@ -78,7 +81,7 @@ fn fail_with_last_error_tetraplets() {
         )
           "#);
 
-    let result = checked_call_vm!(vm, local_peer_id, script, "", "");
+    let _ = checked_call_vm!(vm, local_peer_id, script, "", "");
     assert_eq!(
         tetraplet_anchor.borrow()[0][0],
         SecurityTetraplet::new(local_peer_id, fallible_service_id, local_fn_name, "")

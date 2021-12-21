@@ -14,24 +14,26 @@
  * limitations under the License.
  */
 
-pub(crate) trait ToErrorCode {
+pub trait ToErrorCode {
     fn to_error_code(&self) -> i64;
 }
 
-/*
-use concat_idents::concat_idents;
-
 #[macro_export]
 macro_rules! generate_to_error_code {
-    ($error_type:ident, $start_id: ident) => {
-        const PREPARATION_ERRORS_START_ID: u32 = $start_id;
+    ($self: expr, $error_type:ident, $start_id: expr) => {
+        concat_idents::concat_idents!(error_start_id = $error_type, _, START_ID {
+            concat_idents::concat_idents!(error_discriminant = $error_type, Discriminants { {
+                #[allow(non_upper_case_globals)]
+                const error_start_id: i64 = $start_id;
 
-        let mut errors = PreparationErrorDiscriminants::iter();
-        let actual_error_type = PreparationErrorDiscriminants::from(self);
+                let mut errors = error_discriminant::iter();
+                let actual_error_type = error_discriminant::from($self);
 
-        // unwrap is safe here because errors are guaranteed to contain all errors variants
-        let enum_variant_position = errors.position(|et| et == actual_error_type).unwrap() as i64;
-        PREPARATION_ERRORS_START_ID + enum_variant_position
+                // unwrap is safe here because errors are guaranteed to contain all errors variants
+                let enum_variant_position = errors.position(|et| et == actual_error_type).unwrap() as i64;
+                error_start_id + enum_variant_position
+                }
+            })
+        })
     }
 }
- */
