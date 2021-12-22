@@ -80,30 +80,34 @@ class HostImportsConfig {
     }
 }
 
-// Instantiates WebAssembly runtime with AIR interpreter module
+/**
+ * Instantiates WebAssembly runtime with AIR interpreter module
+ */
 async function interpreterInstance(
     module: WebAssembly.Module,
     cfg: HostImportsConfig,
     logFunction: LogFunction,
 ): Promise<Instance> {
-    // Create host imports that use module exports internally
+    // create host imports that use module exports internally
     let imports = cfg.newImportObject();
 
-    // Instantiate interpreter
+    // instantiate interpreter
     let interpreter_module = module;
     let instance: Instance = await WebAssembly.instantiate(interpreter_module, imports);
 
-    // Set exports, so host imports can use them
+    // set exports, so host imports can use them
     cfg.setExports(instance.exports);
 
-    // Trigger interpreter initialization (i.e., call main function)
+    // trigger interpreter initialization (i.e., call main function)
     call_export(instance.exports.main, logFunction);
 
     return instance;
 }
 
-// If export is a function, call it. Otherwise log a warning.
-// NOTE: any here is unavoidable, see Function interface definition
+/**
+ * If export is a function, call it. Otherwise log a warning.
+ * NOTE: any here is unavoidable, see Function interface definition
+ */
 function call_export(f: ExportValue, logFunction: LogFunction): any {
     if (typeof f === 'function') {
         return f();
@@ -146,7 +150,9 @@ function log_import(cfg: HostImportsConfig, logFunction: LogFunction): LogImport
     };
 }
 
-// Returns import object that describes host functions called by AIR interpreter
+/**
+ * Returns import object that describes host functions called by AIR interpreter
+ */
 function newImportObject(cfg: HostImportsConfig, logFunction: LogFunction): ImportObject {
     return {
         host: log_import(cfg, logFunction),
