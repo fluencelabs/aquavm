@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Fluence Labs Limited
+ * Copyright 2021 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,8 @@
  * limitations under the License.
  */
 
-mod air_lexer;
-mod call_variable_parser;
-mod errors;
-mod token;
-mod utils;
-
-#[cfg(test)]
-mod tests;
-
-pub use air_lexer::AIRLexer;
-pub use errors::LexerError;
-pub use token::LastErrorPath;
-pub use token::Token;
-
-pub(super) type LexerResult<T> = std::result::Result<T, LexerError>;
-
-pub(self) use utils::is_air_alphanumeric;
-pub(self) use utils::is_json_path_allowed_char;
+/// This consts are used as start ids of corresponding errors.
+pub(crate) const PREPARATION_ERROR_START_ID: i64 = 1;
+pub(crate) const CATCHABLE_ERRORS_START_ID: i64 = 10000;
+pub(crate) const UNCATCHABLE_ERRORS_START_ID: i64 = 20000;
+pub(crate) const FAREWELL_ERRORS_START_ID: i64 = 30000;

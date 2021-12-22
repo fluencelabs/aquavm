@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Fluence Labs Limited
+ * Copyright 2021 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,15 @@
  * limitations under the License.
  */
 
-mod air_lexer;
-mod call_variable_parser;
-mod errors;
-mod token;
-mod utils;
+mod catchable_errors;
+mod execution_errors;
+mod joinable;
+mod uncatchable_errors;
 
-#[cfg(test)]
-mod tests;
+pub use catchable_errors::CatchableError;
+pub use execution_errors::ExecutionError;
+pub use uncatchable_errors::UncatchableError;
 
-pub use air_lexer::AIRLexer;
-pub use errors::LexerError;
-pub use token::LastErrorPath;
-pub use token::Token;
+pub(crate) use joinable::Joinable;
 
-pub(super) type LexerResult<T> = std::result::Result<T, LexerError>;
-
-pub(self) use utils::is_air_alphanumeric;
-pub(self) use utils::is_json_path_allowed_char;
+use super::Stream;

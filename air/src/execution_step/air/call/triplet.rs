@@ -15,9 +15,8 @@
  */
 
 use super::ExecutionCtx;
-use super::ExecutionError;
 use super::ExecutionResult;
-use crate::exec_err;
+use crate::execution_step::CatchableError;
 use crate::JValue;
 
 use air_parser::ast;
@@ -45,7 +44,7 @@ pub(crate) fn resolve<'i>(triplet: &ast::Triplet<'i>, ctx: &ExecutionCtx<'i>) ->
 /// Resolve value to string by either resolving variable from `ExecutionCtx`, taking literal value, or etc.
 // TODO: return Rc<String> to avoid excess cloning
 fn resolve_to_string<'i>(value: &ast::CallInstrValue<'i>, ctx: &ExecutionCtx<'i>) -> ExecutionResult<String> {
-    use crate::execution_step::utils::resolve_ast_variable_wl;
+    use crate::execution_step::resolver::resolve_ast_variable_wl;
     use ast::CallInstrValue::*;
 
     let resolved = match value {
@@ -63,10 +62,11 @@ fn resolve_to_string<'i>(value: &ast::CallInstrValue<'i>, ctx: &ExecutionCtx<'i>
 fn try_jvalue_to_string(jvalue: JValue, variable: &ast::VariableWithLambda<'_>) -> ExecutionResult<String> {
     match jvalue {
         JValue::String(s) => Ok(s),
-        _ => exec_err!(ExecutionError::IncompatibleJValueType {
+        _ => Err(CatchableError::IncompatibleJValueType {
             variable_name: variable.name().to_string(),
             actual_value: jvalue,
             expected_value_type: "string",
-        }),
+        }
+        .into()),
     }
 }

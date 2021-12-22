@@ -16,8 +16,6 @@
 
 mod traits;
 
-use super::LexerError;
-use super::LexerResult;
 use crate::LambdaAST;
 
 use serde::Deserialize;
@@ -30,7 +28,6 @@ pub enum Token<'input> {
     OpenSquareBracket,
     CloseSquareBracket,
 
-    StringLiteral(&'input str),
     Scalar {
         name: &'input str,
         position: usize,
@@ -49,7 +46,10 @@ pub enum Token<'input> {
         lambda: LambdaAST<'input>,
         position: usize,
     },
-    Number(Number),
+
+    StringLiteral(&'input str),
+    I64(i64),
+    F64(f64),
     Boolean(bool),
 
     InitPeerId,
@@ -59,6 +59,7 @@ pub enum Token<'input> {
     Ap,
     Seq,
     Par,
+    Fail,
     Fold,
     Xor,
     New,
@@ -78,16 +79,4 @@ pub enum LastErrorPath {
     PeerId,
     // %last_error%
     None,
-}
-
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
-pub enum Number {
-    Int(i64),
-    Float(f64),
-}
-
-pub(crate) enum UnparsedNumber<'input> {
-    // raw value and starting pos
-    Int(&'input str, usize),
-    Float(&'input str, usize),
 }

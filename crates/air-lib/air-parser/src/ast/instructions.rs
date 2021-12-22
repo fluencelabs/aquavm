@@ -21,6 +21,7 @@ use super::*;
 use serde::Serialize;
 use std::rc::Rc;
 
+// TODO: sort instruction in alphanumeric order
 #[allow(clippy::large_enum_variant)] // for Null and Error variants
 #[derive(Serialize, Debug, PartialEq)]
 pub enum Instruction<'i> {
@@ -31,6 +32,7 @@ pub enum Instruction<'i> {
     Xor(Xor<'i>),
     Match(Match<'i>),
     MisMatch(MisMatch<'i>),
+    Fail(Fail<'i>),
     FoldScalar(FoldScalar<'i>),
     FoldStream(FoldStream<'i>),
     New(New<'i>),
@@ -80,6 +82,17 @@ pub struct MisMatch<'i> {
     pub left_value: Value<'i>,
     pub right_value: Value<'i>,
     pub instruction: Box<Instruction<'i>>,
+}
+
+/// (fail 1337 "error message")
+/// (fail %last_error%)
+#[derive(Serialize, Debug, PartialEq)]
+pub enum Fail<'i> {
+    Literal {
+        ret_code: i64,
+        error_message: &'i str,
+    },
+    LastError,
 }
 
 /// (fold scalar_iterable iterator instruction)

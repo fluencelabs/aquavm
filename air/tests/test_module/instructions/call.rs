@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
+use air::UncatchableError;
 use air_test_utils::prelude::*;
+
+use fstrings::f;
+use fstrings::format_args_f;
 
 // Check that %init_peer_id% alias works correctly (by comparing result with it and explicit peer id).
 // Additionally, check that empty string for data does the same as empty call path.
@@ -98,18 +102,21 @@ fn variables() {
 // Check that duplicate variables are impossible.
 #[test]
 fn duplicate_variables() {
-    let mut vm = create_avm(unit_call_service(), "some_peer_id");
+    let peer_id = "peer_id";
+    let mut vm = create_avm(unit_call_service(), peer_id);
 
-    let script = r#"
+    let variable_name = "modules";
+    let script = f!(r#"
             (seq
-                (call "some_peer_id" ("some_service_id" "local_fn_name") [] modules)
-                (call "some_peer_id" ("some_service_id" "local_fn_name") [] modules)
+                (call "{peer_id}" ("some_service_id" "local_fn_name") [] {variable_name})
+                (call "{peer_id}" ("some_service_id" "local_fn_name") [] {variable_name})
             )
-        "#;
+        "#);
 
     let result = call_vm!(vm, "asd", script, "", "");
 
-    assert_eq!(result.ret_code, 1002);
+    let expected_error = UncatchableError::MultipleVariablesFound(variable_name.to_string());
+    assert!(check_error(&result, expected_error));
     assert!(result.next_peer_pks.is_empty());
 }
 

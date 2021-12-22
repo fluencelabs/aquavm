@@ -22,7 +22,6 @@ pub(crate) use fold_state::IterableType;
 pub(super) use utils::*;
 
 use super::ExecutionCtx;
-use super::ExecutionError;
 use super::ExecutionResult;
 use super::Instruction;
 use super::ScalarRef;

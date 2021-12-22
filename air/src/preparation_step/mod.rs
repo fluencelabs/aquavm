@@ -17,6 +17,7 @@
 mod errors;
 mod preparation;
 
-pub(crate) use errors::PreparationError;
+pub use errors::PreparationError;
+
 pub(crate) use preparation::prepare;
 pub(crate) use preparation::PreparationDescriptor;

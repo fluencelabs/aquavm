@@ -16,8 +16,8 @@
 
 use crate::execution_step::air::ExecutionResult;
 use crate::execution_step::execution_context::ExecutionCtx;
-use crate::execution_step::utils::prepare_last_error;
-use crate::execution_step::utils::resolve_ast_variable_wl;
+use crate::execution_step::resolver::prepare_last_error;
+use crate::execution_step::resolver::resolve_ast_variable_wl;
 use crate::JValue;
 
 use air_parser::ast;

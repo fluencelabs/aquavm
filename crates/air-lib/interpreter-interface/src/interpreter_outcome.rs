@@ -20,14 +20,14 @@ use fluence_it_types::IValue;
 use serde::Deserialize;
 use serde::Serialize;
 
-pub const INTERPRETER_SUCCESS: i32 = 0;
+pub const INTERPRETER_SUCCESS: i64 = 0;
 
 /// Describes a result returned at the end of the interpreter execution_step.
 #[marine]
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct InterpreterOutcome {
     /// A return code, where INTERPRETER_SUCCESS means success.
-    pub ret_code: i32,
+    pub ret_code: i64,
 
     /// Contains error message if ret_code != INTERPRETER_SUCCESS.
     pub error_message: String,
@@ -59,7 +59,7 @@ impl InterpreterOutcome {
         let next_peer_pks = try_as_string_vec(record_values.pop().unwrap(), "next_peer_pks")?;
         let data = try_as_byte_vec(record_values.pop().unwrap(), "data")?;
         let error_message = try_as_string(record_values.pop().unwrap(), "error_message")?;
-        let ret_code = try_as_i32(record_values.pop().unwrap(), "ret_code")?;
+        let ret_code = try_as_i64(record_values.pop().unwrap(), "ret_code")?;
 
         let outcome = Self {
             ret_code,
@@ -87,10 +87,10 @@ fn try_as_record(ivalue: IValue) -> Result<NEVec<IValue>, String> {
     }
 }
 
-fn try_as_i32(ivalue: IValue, field_name: &str) -> Result<i32, String> {
+fn try_as_i64(ivalue: IValue, field_name: &str) -> Result<i64, String> {
     match ivalue {
-        IValue::S32(value) => Ok(value),
-        v => return Err(format!("expected an i32 for {}, got {:?}", field_name, v)),
+        IValue::S64(value) => Ok(value),
+        v => return Err(format!("expected an i64 for {}, got {:?}", field_name, v)),
     }
 }
 

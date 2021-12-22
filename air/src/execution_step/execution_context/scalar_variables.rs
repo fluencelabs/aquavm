@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-use crate::exec_err;
 use crate::execution_step::boxed_value::ScalarRef;
-use crate::execution_step::ExecutionError;
+use crate::execution_step::errors_prelude::*;
 use crate::execution_step::ExecutionResult;
 use crate::execution_step::FoldState;
 use crate::execution_step::ValueAggregate;
@@ -87,7 +86,7 @@ impl<'i> Scalars<'i> {
             }
             Occupied(entry) => {
                 if !shadowing_allowed {
-                    return exec_err!(ExecutionError::MultipleVariablesFound(entry.key().clone()));
+                    return Err(UncatchableError::MultipleVariablesFound(entry.key().clone()).into());
                 }
 
                 let values = entry.into_mut();
@@ -115,9 +114,7 @@ impl<'i> Scalars<'i> {
                 entry.insert(fold_state);
                 Ok(())
             }
-            Occupied(entry) => {
-                exec_err!(ExecutionError::MultipleIterableValues(entry.key().clone()))
-            }
+            Occupied(entry) => Err(UncatchableError::MultipleIterableValues(entry.key().clone()).into()),
         }
     }
 
@@ -135,13 +132,13 @@ impl<'i> Scalars<'i> {
                     .rev()
                     .find_map(|scalar| scalar.as_ref())
             })
-            .ok_or_else(|| Rc::new(ExecutionError::VariableNotFound(name.to_string())))
+            .ok_or_else(|| Rc::new(CatchableError::VariableNotFound(name.to_string())).into())
     }
 
     pub(crate) fn get_iterable_mut(&mut self, name: &str) -> ExecutionResult<&mut FoldState<'i>> {
         self.iterable_values
             .get_mut(name)
-            .ok_or_else(|| Rc::new(ExecutionError::FoldStateNotFound(name.to_string())))
+            .ok_or_else(|| UncatchableError::FoldStateNotFound(name.to_string()).into())
     }
 
     pub(crate) fn get(&'i self, name: &str) -> ExecutionResult<ScalarRef<'i>> {
@@ -149,7 +146,7 @@ impl<'i> Scalars<'i> {
         let iterable_value = self.iterable_values.get(name);
 
         match (value, iterable_value) {
-            (Err(_), None) => exec_err!(ExecutionError::VariableNotFound(name.to_string())),
+            (Err(_), None) => Err(CatchableError::VariableNotFound(name.to_string()).into()),
             (Ok(value), None) => Ok(ScalarRef::Value(value)),
             (Err(_), Some(iterable_value)) => Ok(ScalarRef::IterableValue(iterable_value)),
             (Ok(_), Some(_)) => unreachable!("this is checked on the parsing stage"),

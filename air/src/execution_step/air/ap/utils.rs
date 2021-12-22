@@ -44,13 +44,13 @@ fn match_position_variable(
     generation: Option<u32>,
     ap_result: &MergerApResult,
 ) -> ExecutionResult<()> {
-    use crate::execution_step::ExecutionError::ApResultNotCorrespondToInstr;
+    use crate::execution_step::UncatchableError::ApResultNotCorrespondToInstr;
     use ast::Variable::*;
 
     match (variable, generation) {
         (Stream(_), Some(_)) => Ok(()),
         (Scalar(_), None) => Ok(()),
-        _ => return crate::exec_err!(ApResultNotCorrespondToInstr(ap_result.clone())),
+        _ => Err(ApResultNotCorrespondToInstr(ap_result.clone()).into()),
     }
 }
 

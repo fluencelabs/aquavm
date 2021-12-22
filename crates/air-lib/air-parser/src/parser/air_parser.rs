@@ -133,10 +133,16 @@ fn parser_error_to_label(file_id: usize, error: ParserError) -> Label<usize> {
         UndefinedVariable(start, end, _) => {
             Label::primary(file_id, start..end).with_message(error.to_string())
         }
+        AmbiguousFailLastError(start, end) => {
+            Label::primary(file_id, start..end).with_message(error.to_string())
+        }
         InvalidCallTriplet(start, end) => {
             Label::primary(file_id, start..end).with_message(error.to_string())
         }
         IteratorRestrictionNotAllowed(start, end, _) => {
+            Label::primary(file_id, start..end).with_message(error.to_string())
+        }
+        MultipleIterableValues(start, end, _) => {
             Label::primary(file_id, start..end).with_message(error.to_string())
         }
     }

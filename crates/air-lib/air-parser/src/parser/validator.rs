@@ -25,6 +25,7 @@ use lalrpop_util::ParseError;
 
 use multimap::MultiMap;
 use std::collections::HashMap;
+use std::ops::Deref;
 
 /// Intermediate implementation of variable validator.
 ///
@@ -36,10 +37,10 @@ use std::collections::HashMap;
 #[derive(Debug, Default, Clone)]
 pub struct VariableValidator<'i> {
     /// Contains the most left definition of a variables met in call outputs.
-    met_variables: HashMap<&'i str, Span>,
+    met_variable_definitions: HashMap<&'i str, Span>,
 
     /// Contains iterables met in fold iterables.
-    met_iterators: MultiMap<&'i str, Span>,
+    met_iterator_definitions: MultiMap<&'i str, Span>,
 
     /// These variables from calls and folds haven't been resolved at the first meet.
     unresolved_variables: MultiMap<&'i str, Span>,
@@ -92,7 +93,7 @@ impl<'i> VariableValidator<'i> {
 
     pub(super) fn met_new(&mut self, new: &New<'i>, span: Span) {
         self.check_for_non_iterators
-            .push((variable_name(&new.variable), span));
+            .push((new.variable.name(), span));
         // new defines a new variable
         self.met_variable_definition(&new.variable, span);
     }
@@ -120,7 +121,7 @@ impl<'i> VariableValidator<'i> {
         self.met_variable_definition(&ap.result, span);
     }
 
-    pub(super) fn finalize(&self) -> Vec<ErrorRecovery<usize, Token<'i>, ParserError>> {
+    pub(super) fn finalize(self) -> Vec<ErrorRecovery<usize, Token<'i>, ParserError>> {
         let mut errors = Vec::new();
         for (name, span) in self.unresolved_variables.iter() {
             if !self.contains_variable(name, *span) {
@@ -137,6 +138,19 @@ impl<'i> VariableValidator<'i> {
         for (name, span) in self.check_for_non_iterators.iter() {
             if self.contains_iterable(name, *span) {
                 add_to_errors(*name, &mut errors, *span, Token::New);
+            }
+        }
+
+        for (name, mut spans) in self.met_iterator_definitions.into_iter() {
+            spans.sort();
+            let mut prev_span: Option<Span> = None;
+            for span in spans {
+                match prev_span {
+                    Some(prev_span) if prev_span.contains_span(span) => {
+                        add_to_errors(name, &mut errors, span, Token::Fold)
+                    }
+                    Some(_) | None => prev_span = Some(span),
+                }
             }
         }
 
@@ -169,8 +183,7 @@ impl<'i> VariableValidator<'i> {
     }
 
     fn met_variable_wl(&mut self, variable: &VariableWithLambda<'i>, span: Span) {
-        let name = variable_wl_name(variable);
-        self.met_variable_name(name, span);
+        self.met_variable_name(variable.name(), span);
     }
 
     fn met_variable_name(&mut self, name: &'i str, span: Span) {
@@ -180,13 +193,13 @@ impl<'i> VariableValidator<'i> {
     }
 
     fn contains_variable(&self, key: &str, key_span: Span) -> bool {
-        if let Some(found_span) = self.met_variables.get(key) {
+        if let Some(found_span) = self.met_variable_definitions.get(key) {
             if found_span < &key_span {
                 return true;
             }
         }
 
-        let found_spans = match self.met_iterators.get_vec(key) {
+        let found_spans = match self.met_iterator_definitions.get_vec(key) {
             Some(found_spans) => found_spans,
             None => return false,
         };
@@ -195,14 +208,13 @@ impl<'i> VariableValidator<'i> {
     }
 
     fn met_variable_definition(&mut self, variable: &Variable<'i>, span: Span) {
-        let name = variable_name(variable);
-        self.met_variable_name_definition(name, span);
+        self.met_variable_name_definition(variable.name(), span);
     }
 
     fn met_variable_name_definition(&mut self, name: &'i str, span: Span) {
         use std::collections::hash_map::Entry;
 
-        match self.met_variables.entry(name) {
+        match self.met_variable_definitions.entry(name) {
             Entry::Occupied(occupied) => {
                 if occupied.get() > &span {
                     *occupied.into_mut() = span;
@@ -228,7 +240,7 @@ impl<'i> VariableValidator<'i> {
 
     /// Checks that multimap contains a span for given key such that provided span lies inside it.
     fn contains_iterable(&self, key: &str, key_span: Span) -> bool {
-        let found_spans = match self.met_iterators.get_vec(key) {
+        let found_spans = match self.met_iterator_definitions.get_vec(key) {
             Some(found_spans) => found_spans,
             None => return false,
         };
@@ -239,25 +251,7 @@ impl<'i> VariableValidator<'i> {
     }
 
     fn met_iterator_definition(&mut self, iterator: &Scalar<'i>, span: Span) {
-        self.met_iterators.insert(iterator.name, span);
-    }
-}
-
-use std::cmp::Ordering;
-use std::ops::Deref;
-
-impl PartialOrd for Span {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        let self_min = std::cmp::min(self.left, self.right);
-        let other_min = std::cmp::min(other.left, other.right);
-
-        if self_min < other_min {
-            Some(Ordering::Less)
-        } else if self == other {
-            Some(Ordering::Equal)
-        } else {
-            Some(Ordering::Greater)
-        }
+        self.met_iterator_definitions.insert(iterator.name, span);
     }
 }
 
@@ -273,6 +267,7 @@ fn add_to_errors<'err, 'i>(
         Token::New => {
             ParserError::IteratorRestrictionNotAllowed(span.left, span.right, variable_name)
         }
+        Token::Fold => ParserError::MultipleIterableValues(span.left, span.right, variable_name),
         _ => ParserError::UndefinedVariable(span.left, span.right, variable_name),
     };
     let error = ParseError::User { error };
@@ -285,18 +280,4 @@ fn add_to_errors<'err, 'i>(
     };
 
     errors.push(error);
-}
-
-fn variable_name<'v>(variable: &Variable<'v>) -> &'v str {
-    match variable {
-        Variable::Scalar(scalar) => scalar.name,
-        Variable::Stream(stream) => stream.name,
-    }
-}
-
-fn variable_wl_name<'v>(variable: &VariableWithLambda<'v>) -> &'v str {
-    match variable {
-        VariableWithLambda::Scalar(scalar) => scalar.name,
-        VariableWithLambda::Stream(stream) => stream.name,
-    }
 }

@@ -52,7 +52,7 @@ fn apply_last_error(
     exec_ctx: &ExecutionCtx<'_>,
     trace_ctx: &TraceHandler,
 ) -> ExecutionResult<ValueAggregate> {
-    let (value, mut tetraplets) = crate::execution_step::utils::prepare_last_error(error_path, exec_ctx)?;
+    let (value, mut tetraplets) = crate::execution_step::resolver::prepare_last_error(error_path, exec_ctx)?;
     let value = Rc::new(value);
     // removing is safe because prepare_last_error always returns a vec with one element.
     let tetraplet = tetraplets.remove(0);

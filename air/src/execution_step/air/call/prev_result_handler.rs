@@ -15,8 +15,8 @@
  */
 
 use super::*;
-use crate::exec_err;
 use crate::execution_step::air::call::call_result_setter::set_result_from_value;
+use crate::execution_step::CatchableError;
 use crate::execution_step::RSecurityTetraplet;
 
 use air_interpreter_data::CallResult;
@@ -51,7 +51,7 @@ pub(super) fn handle_prev_state<'i>(
             let ret_code = *ret_code;
             let err_msg = err_msg.clone();
             trace_ctx.meet_call_end(prev_result);
-            exec_err!(ExecutionError::LocalServiceError(ret_code, err_msg))
+            Err(CatchableError::LocalServiceError(ret_code, err_msg).into())
         }
         RequestSentBy(Sender::PeerIdWithCallId { peer_id, call_id })
             if peer_id.as_str() == exec_ctx.current_peer_id.as_str() =>
@@ -126,12 +126,11 @@ fn handle_service_error(
     }
 
     let error_message = Rc::new(service_result.result);
-    let error = ExecutionError::LocalServiceError(service_result.ret_code, error_message.clone());
-    let error = Rc::new(error);
+    let error = CatchableError::LocalServiceError(service_result.ret_code, error_message.clone());
 
     trace_ctx.meet_call_end(CallServiceFailed(service_result.ret_code, error_message));
 
-    Err(error)
+    Err(error.into())
 }
 
 fn try_to_service_result(
@@ -152,7 +151,7 @@ fn try_to_service_result(
             let error = CallServiceFailed(i32::MAX, error_msg.clone());
             trace_ctx.meet_call_end(error);
 
-            Err(Rc::new(ExecutionError::LocalServiceError(i32::MAX, error_msg)))
+            Err(CatchableError::LocalServiceError(i32::MAX, error_msg).into())
         }
     }
 }

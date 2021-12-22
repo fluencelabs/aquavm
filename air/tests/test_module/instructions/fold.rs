@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use air::{PreparationError, ToErrorCode};
 use air_test_utils::prelude::*;
 
 #[test]
@@ -157,7 +158,8 @@ fn inner_fold_with_same_iterator() {
 
     let result = call_vm!(vm, "", script, "", "");
 
-    assert_eq!(result.ret_code, 1007);
+    let expected_error = PreparationError::AIRParseError("".to_string());
+    assert_eq!(result.ret_code, expected_error.to_error_code());
 }
 
 #[test]

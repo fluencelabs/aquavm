@@ -22,7 +22,7 @@ use super::ExecutionResult;
 use super::TraceHandler;
 use crate::execution_step::air::ValueAggregate;
 use crate::execution_step::boxed_value::Variable;
-use crate::execution_step::utils::apply_lambda;
+use crate::execution_step::resolver::apply_lambda;
 use crate::trace_to_exec_err;
 use crate::JValue;
 use crate::SecurityTetraplet;

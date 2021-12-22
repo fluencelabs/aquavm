@@ -55,10 +55,10 @@ impl SecurityTetraplet {
 
     /// Create a tetraplet for string literals defined in the script
     /// such as variable here `(call ("" "") "" ["variable_1"])`.
-    pub fn literal_tetraplet(init_peer_id: String) -> Self {
+    pub fn literal_tetraplet(init_peer_id: impl Into<String>) -> Self {
         Self {
             // these variables represent the initiator peer
-            peer_pk: init_peer_id,
+            peer_pk: init_peer_id.into(),
             service_id: String::new(),
             function_name: String::new(),
             // json path can't be applied to the string literals

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use air::PreparationError;
 use air_test_utils::prelude::*;
 
 #[test]
@@ -160,5 +161,8 @@ fn invalid_air() {
     let script = r#"(seq )"#;
 
     let result = call_vm!(vm, "", script, "", "");
-    assert_eq!(result.ret_code, 1);
+
+    let error_message = air_parser::parse(script).expect_err("air parser should fail on this script");
+    let expected_error = PreparationError::AIRParseError(error_message);
+    assert!(check_error(&result, expected_error));
 }

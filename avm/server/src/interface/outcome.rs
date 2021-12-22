@@ -37,7 +37,7 @@ pub struct AVMOutcome {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ErrorAVMOutcome {
-    pub error_code: i32,
+    pub error_code: i64,
     pub error_message: String,
     pub outcome: AVMOutcome,
 }
@@ -78,7 +78,7 @@ impl AVMOutcome {
 }
 
 impl ErrorAVMOutcome {
-    pub(self) fn new(error_code: i32, error_msg: String, outcome: AVMOutcome) -> Self {
+    pub(self) fn new(error_code: i64, error_msg: String, outcome: AVMOutcome) -> Self {
         Self {
             error_code,
             error_message: error_msg,

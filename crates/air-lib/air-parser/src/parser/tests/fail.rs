@@ -14,11 +14,25 @@
  * limitations under the License.
  */
 
-/// This trait is intended to differentiate between catchable and non-catchable error types.
-/// Errors of the first type could be caught by xor, the second couldn't and should stop
-/// AIR execution. This is needed to prevent some malicious data merging and manage
-/// prev_data always in a valid state.
-pub(crate) trait Catchable {
-    /// Return true, if error is catchable.
-    fn is_catchable(&self) -> bool;
+use super::dsl::*;
+use super::parse;
+
+#[test]
+fn parse_fail_last_error() {
+    let source_code = r#"
+           (fail %last_error%)
+        "#;
+    let instruction = parse(source_code);
+    let expected = fail_last_error();
+    assert_eq!(instruction, expected)
+}
+
+#[test]
+fn parse_fail_literals() {
+    let source_code = r#"
+           (fail 1 "error message")
+        "#;
+    let instruction = parse(source_code);
+    let expected = fail_literals(1, "error message");
+    assert_eq!(instruction, expected)
 }

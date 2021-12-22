@@ -22,6 +22,7 @@ use super::triplet::resolve;
 use super::*;
 use crate::execution_step::RSecurityTetraplet;
 use crate::execution_step::SecurityTetraplets;
+use crate::execution_step::UncatchableError;
 use crate::trace_to_exec_err;
 use crate::JValue;
 use crate::SecurityTetraplet;
@@ -149,7 +150,7 @@ impl<'i> ResolvedCall<'i> {
 
     /// Prepare arguments of this call instruction by resolving and preparing their security tetraplets.
     fn resolve_args(&self, exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<ResolvedArguments> {
-        use crate::execution_step::utils::resolve_to_args;
+        use crate::execution_step::resolver::resolve_to_args;
 
         let function_args = self.function_arg_paths.iter();
         let mut call_arguments = Vec::new();
@@ -187,10 +188,10 @@ fn check_output_name(output: &ast::CallOutputValue<'_>, exec_ctx: &ExecutionCtx<
             if exec_ctx.scalars.shadowing_allowed() {
                 Ok(())
             } else {
-                crate::exec_err!(ExecutionError::MultipleVariablesFound(scalar_name.to_string()))
+                Err(UncatchableError::MultipleVariablesFound(scalar_name.to_string()).into())
             }
         }
-        Ok(ScalarRef::IterableValue(_)) => crate::exec_err!(ExecutionError::IterableShadowing(scalar_name.to_string())),
+        Ok(ScalarRef::IterableValue(_)) => Err(UncatchableError::IterableShadowing(scalar_name.to_string()).into()),
         Err(_) => Ok(()),
     }
 }
