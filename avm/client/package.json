@@ -10,7 +10,9 @@
     "files": [
         "dist/*"
     ],
-    "bin": "./dist/copyAvm.js",
+    "bin": {
+        "copyAvm": "./dist/copyAvm.js"
+    },
     "scripts": {
         "build": "tsc",
         "test": "jest"

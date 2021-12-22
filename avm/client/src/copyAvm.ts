@@ -1,14 +1,18 @@
+#! /usr/bin/env node
+
 import fs from 'fs';
 import path from 'path';
 
-if (!process.argv[0]) {
+const firstArgument = process.argv[2];
+
+if (!firstArgument) {
     console.log('Specify destination directory');
     process.exit(1);
 }
 
-let destPath = process.argv[0];
+let destPath = firstArgument;
 if (!path.isAbsolute(destPath)) {
-    destPath = path.join(__dirname, destPath);
+    destPath = path.join(process.cwd(), destPath);
 }
 
 const wasmName = 'avm.wasm';
