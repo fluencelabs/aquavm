@@ -11,7 +11,7 @@
         "dist/*"
     ],
     "bin": {
-        "copyAvm": "./dist/copyAvm.js"
+        "copy-avm": "./dist/copyAvm.js"
     },
     "scripts": {
         "build": "tsc",
