@@ -35,13 +35,13 @@ impl<'i> ExecutableInstruction<'i> for Par<'i> {
         log_instruction!(par, exec_ctx, trace_ctx);
 
         let mut completeness_updater = ParCompletenessUpdater::new();
-        trace_to_exec_err!(trace_ctx.meet_par_start())?;
+        trace_to_exec_err!(trace_ctx.meet_par_start(), self)?;
 
         // execute a left subtree of par
-        let left_result = execute_subtree(&self.0, exec_ctx, trace_ctx, &mut completeness_updater, SubtreeType::Left)?;
+        let left_result = execute_subtree(&self, exec_ctx, trace_ctx, &mut completeness_updater, SubtreeType::Left)?;
 
         // execute a right subtree of par
-        let right_result = execute_subtree(&self.1, exec_ctx, trace_ctx, &mut completeness_updater, SubtreeType::Right)?;
+        let right_result = execute_subtree(&self, exec_ctx, trace_ctx, &mut completeness_updater, SubtreeType::Right)?;
 
         completeness_updater.set_completeness(exec_ctx);
         prepare_par_result(left_result, right_result, exec_ctx)
@@ -50,23 +50,27 @@ impl<'i> ExecutableInstruction<'i> for Par<'i> {
 
 /// Execute provided subtree and update Par state in trace_ctx.new_trace.
 fn execute_subtree<'i>(
-    subtree: &Instruction<'i>,
+    par: &Par<'i>,
     exec_ctx: &mut ExecutionCtx<'i>,
     trace_ctx: &mut TraceHandler,
     completeness_updater: &mut ParCompletenessUpdater,
     subtree_type: SubtreeType,
 ) -> ExecutionResult<SubtreeResult> {
+    let subtree = match subtree_type {
+        SubtreeType::Left => &par.0,
+        SubtreeType::Right => &par.1,
+    };
     exec_ctx.subtree_complete = determine_subtree_complete(subtree);
 
     // execute a subtree
     let result = match subtree.execute(exec_ctx, trace_ctx) {
         Ok(_) => {
-            trace_to_exec_err!(trace_ctx.meet_par_subtree_end(subtree_type))?;
+            trace_to_exec_err!(trace_ctx.meet_par_subtree_end(subtree_type), par)?;
             SubtreeResult::Succeeded
         }
         Err(e) if e.is_catchable() => {
             exec_ctx.subtree_complete = false;
-            trace_to_exec_err!(trace_ctx.meet_par_subtree_end(subtree_type))?;
+            trace_to_exec_err!(trace_ctx.meet_par_subtree_end(subtree_type), par)?;
             SubtreeResult::Failed(e)
         }
         Err(e) => {

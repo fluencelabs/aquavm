@@ -44,7 +44,7 @@ impl<'i> super::ExecutableInstruction<'i> for Call<'i> {
             .map_err(|e| set_last_error(self, exec_ctx, e, None))?;
 
         let tetraplet = resolved_call.as_tetraplet();
-        joinable!(resolved_call.execute(exec_ctx, trace_ctx), exec_ctx)
+        joinable!(resolved_call.execute(self, exec_ctx, trace_ctx), exec_ctx)
             .map_err(|e| set_last_error(self, exec_ctx, e, Some(tetraplet)))
     }
 }

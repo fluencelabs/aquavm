@@ -144,8 +144,8 @@ fn par_early_exit() {
     let setter_3_malicious_data = raw_data_from_trace(setter_3_malicious_trace);
     let init_result_3 = call_vm!(init, "", &script, init_result_2.data.clone(), setter_3_malicious_data);
 
-    let expected_error = UncatchableError::TraceError(TraceHandlerError::MergeError(MergeError::IncorrectCallResult(
-        CallResultError::ValuesNotEqual {
+    let expected_error = UncatchableError::TraceError {
+        trace_error: TraceHandlerError::MergeError(MergeError::IncorrectCallResult(CallResultError::ValuesNotEqual {
             prev_value: Value::Stream {
                 value: rc!(json!("1")),
                 generation: 0,
@@ -154,8 +154,9 @@ fn par_early_exit() {
                 value: rc!(json!("non_exist_value")),
                 generation: 0,
             },
-        },
-    )));
+        })),
+        instruction: r#"call "setter_1" ("" "") [] $stream"#.to_string(),
+    };
     assert!(check_error(&init_result_3, expected_error));
 
     let actual_trace = trace_from_result(&init_result_3);

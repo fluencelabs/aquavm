@@ -32,8 +32,11 @@ use thiserror::Error as ThisError;
 #[strum_discriminants(derive(EnumIter))]
 pub enum UncatchableError {
     /// Errors bubbled from a trace handler.
-    #[error(transparent)]
-    TraceError(#[from] TraceHandlerError),
+    #[error("on instruction '{instruction}' trace handler encountered an error: {trace_error}")]
+    TraceError {
+        trace_error: TraceHandlerError,
+        instruction: String,
+    },
 
     /// Fold state wasn't found for such iterator name.
     #[error("fold state not found for this iterable '{0}'")]
