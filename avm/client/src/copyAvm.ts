@@ -6,7 +6,7 @@ import path from 'path';
 const firstArgument = process.argv[2];
 
 if (!firstArgument) {
-    console.log('Specify destination directory');
+    console.log(`Expected exactly 1 argument, got 0. Usage: ${path.basename(process.argv[1])} <destination directory>`);
     process.exit(1);
 }
 
