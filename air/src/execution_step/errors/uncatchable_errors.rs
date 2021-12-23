@@ -52,7 +52,7 @@ pub enum UncatchableError {
 
     /// Errors occurred when result from data doesn't match to a instruction, f.e. an instruction
     /// could be applied to a stream, but result doesn't contain generation in a source position.
-    #[error("ap result {0:?} doesn't match corresponding instruction")]
+    #[error("ap result {0:?} doesn't match with corresponding instruction")]
     ApResultNotCorrespondToInstr(MergerApResult),
 
     /// Multiple values for such name found.
