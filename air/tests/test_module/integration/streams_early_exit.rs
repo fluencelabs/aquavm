@@ -250,9 +250,11 @@ fn fold_early_exit() {
         executed_state::scalar_string(unit_call_service_result),
         executed_state::scalar_string(unit_call_service_result),
         executed_state::service_failed(1, "failed result from fallible_call_service"),
-        executed_state::scalar(
-            json!({"instruction" : r#"call "error_trigger_id" ("error" "") [] "#, "msg": r#"Local service error, ret_code is 1, error message is '"failed result from fallible_call_service"'"#, "peer_id": "error_trigger_id"}),
-        ),
+        executed_state::scalar(json!({
+                "error_code": 10000i64,
+                "instruction" : r#"call "error_trigger_id" ("error" "") [] "#,
+                "message": r#"Local service error, ret_code is 1, error message is '"failed result from fallible_call_service"'"#,
+                "peer_id": "error_trigger_id"})),
         executed_state::scalar_string("last_peer"),
     ];
 

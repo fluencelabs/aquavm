@@ -15,7 +15,6 @@
  */
 
 use super::errors::LexerError;
-use super::token::LastErrorPath;
 use super::token::Token;
 use super::LexerResult;
 
@@ -201,23 +200,28 @@ fn string_to_token(input: &str, start_pos: usize) -> LexerResult<Token> {
 
 fn parse_last_error(input: &str, start_pos: usize) -> LexerResult<Token<'_>> {
     let last_error_size = LAST_ERROR.len();
-    let last_error_path = match &input[last_error_size..] {
-        "" => LastErrorPath::None,
-        // The second option with ! is needed for compatibility with flattening in "standard" lambda used in AIR.
-        // However version without ! returns just a error, because the opposite is unsound.
-        ".$.instruction" | ".$.instruction!" => LastErrorPath::Instruction,
-        ".$.msg" | ".$.msg!" => LastErrorPath::Message,
-        ".$.peer_id" | ".$.peer_id!" => LastErrorPath::PeerId,
-        path => {
-            return Err(LexerError::LastErrorPathError(
-                start_pos + last_error_size,
-                start_pos + input.len(),
-                path.to_string(),
-            ))
-        }
-    };
+    if input.len() == last_error_size {
+        return Ok(Token::LastError);
+    }
 
-    let last_error_token = Token::LastError(last_error_path);
+    let last_error_size = last_error_size + 2;
+    if input.len() <= last_error_size {
+        return Err(LexerError::LambdaParserError(
+            start_pos + last_error_size,
+            start_pos + input.len(),
+            "lambda AST applied to last error has not enough size".to_string(),
+        ));
+    }
+
+    let last_error_accessor = crate::parse_lambda(&input[last_error_size..]).map_err(|e| {
+        LexerError::LambdaParserError(
+            start_pos + last_error_size,
+            start_pos + input.len(),
+            e.to_string(),
+        )
+    })?;
+    let last_error_token = Token::LastErrorWithLambda(last_error_accessor);
+
     Ok(last_error_token)
 }
 

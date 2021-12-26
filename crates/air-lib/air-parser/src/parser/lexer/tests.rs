@@ -16,11 +16,11 @@
 
 use super::air_lexer::Spanned;
 use super::AIRLexer;
-use super::LastErrorPath;
 use super::LexerError;
 use super::Token;
 
-use air_lambda_parser::{LambdaAST, ValueAccessor};
+use air_lambda_parser::LambdaAST;
+use air_lambda_parser::ValueAccessor;
 
 fn run_lexer(input: &str) -> Vec<Spanned<Token<'_>, usize, LexerError>> {
     let lexer = AIRLexer::new(input);
@@ -376,11 +376,7 @@ fn last_error() {
 
     lexer_test(
         LAST_ERROR,
-        Single(Ok((
-            0,
-            Token::LastError(LastErrorPath::None),
-            LAST_ERROR.len(),
-        ))),
+        Single(Ok((0, Token::LastError, LAST_ERROR.len()))),
     );
 }
 
@@ -388,56 +384,49 @@ fn last_error() {
 fn last_error_instruction() {
     const LAST_ERROR: &str = r#"%last_error%.$.instruction"#;
 
-    lexer_test(
-        LAST_ERROR,
-        Single(Ok((
-            0,
-            Token::LastError(LastErrorPath::Instruction),
-            LAST_ERROR.len(),
-        ))),
-    );
+    let token = Token::LastErrorWithLambda(unsafe {
+        LambdaAST::new_unchecked(vec![ValueAccessor::FieldAccessByName {
+            field_name: "instruction",
+        }])
+    });
+
+    lexer_test(LAST_ERROR, Single(Ok((0, token, LAST_ERROR.len()))));
 }
 
 #[test]
-fn last_error_msg() {
-    const LAST_ERROR: &str = r#"%last_error%.$.msg"#;
+fn last_error_message() {
+    const LAST_ERROR: &str = r#"%last_error%.$.message"#;
 
-    lexer_test(
-        LAST_ERROR,
-        Single(Ok((
-            0,
-            Token::LastError(LastErrorPath::Message),
-            LAST_ERROR.len(),
-        ))),
-    );
+    let token = Token::LastErrorWithLambda(unsafe {
+        LambdaAST::new_unchecked(vec![ValueAccessor::FieldAccessByName {
+            field_name: "message",
+        }])
+    });
+    lexer_test(LAST_ERROR, Single(Ok((0, token, LAST_ERROR.len()))));
 }
 
 #[test]
 fn last_error_peer_id() {
     const LAST_ERROR: &str = r#"%last_error%.$.peer_id"#;
 
-    lexer_test(
-        LAST_ERROR,
-        Single(Ok((
-            0,
-            Token::LastError(LastErrorPath::PeerId),
-            LAST_ERROR.len(),
-        ))),
-    );
+    let token = Token::LastErrorWithLambda(unsafe {
+        LambdaAST::new_unchecked(vec![ValueAccessor::FieldAccessByName {
+            field_name: "peer_id",
+        }])
+    });
+    lexer_test(LAST_ERROR, Single(Ok((0, token, LAST_ERROR.len()))));
 }
 
 #[test]
-fn last_error_incorrect_field() {
+fn last_error_non_standard_field() {
     const LAST_ERROR: &str = r#"%last_error%.$.asdasd"#;
 
-    lexer_test(
-        LAST_ERROR,
-        Single(Err(LexerError::LastErrorPathError(
-            12,
-            LAST_ERROR.len(),
-            ".$.asdasd".to_string(),
-        ))),
-    );
+    let token = Token::LastErrorWithLambda(unsafe {
+        LambdaAST::new_unchecked(vec![ValueAccessor::FieldAccessByName {
+            field_name: "asdasd",
+        }])
+    });
+    lexer_test(LAST_ERROR, Single(Ok((0, token, LAST_ERROR.len()))));
 }
 
 #[test]

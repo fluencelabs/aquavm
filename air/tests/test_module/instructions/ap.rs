@@ -137,7 +137,7 @@ fn ap_with_last_error() {
     let script = format!(
         r#"
         (seq
-            (ap %last_error%.$.msg  $stream)
+            (ap %last_error%  $stream)
             (call "{}" ("" "") [$stream])
         )
         "#,
@@ -147,7 +147,7 @@ fn ap_with_last_error() {
     let result = checked_call_vm!(vm_1, "", script, "", "");
 
     let actual_trace = trace_from_result(&result);
-    let expected_state = vec![executed_state::ap(Some(0)), executed_state::scalar(json!([""]))];
+    let expected_state = vec![executed_state::ap(Some(0)), executed_state::scalar(json!([null]))];
 
     assert_eq!(actual_trace, expected_state);
     assert!(result.next_peer_pks.is_empty());

@@ -44,7 +44,7 @@ impl<'i> ExecutableInstruction<'i> for Par<'i> {
         let right_result = execute_subtree(&self.1, exec_ctx, trace_ctx, &mut completeness_updater, SubtreeType::Right)?;
 
         completeness_updater.set_completeness(exec_ctx);
-        prepare_par_result(left_result, right_result, exec_ctx)
+        prepare_par_result(left_result, right_result)
     }
 }
 
@@ -84,17 +84,9 @@ enum SubtreeResult {
     Failed(ExecutionError),
 }
 
-fn prepare_par_result(
-    left_result: SubtreeResult,
-    right_result: SubtreeResult,
-    exec_ctx: &mut ExecutionCtx<'_>,
-) -> ExecutionResult<()> {
+fn prepare_par_result(left_result: SubtreeResult, right_result: SubtreeResult) -> ExecutionResult<()> {
     match (left_result, right_result) {
-        (SubtreeResult::Succeeded, _) | (_, SubtreeResult::Succeeded) => {
-            // clear the last error in case of par succeeded
-            exec_ctx.last_error = None;
-            Ok(())
-        }
+        (SubtreeResult::Succeeded, _) | (_, SubtreeResult::Succeeded) => Ok(()),
         (SubtreeResult::Failed(_), SubtreeResult::Failed(err)) => Err(err),
     }
 }

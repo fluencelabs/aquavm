@@ -384,7 +384,7 @@ fn parse_last_error() {
             CallInstrValue::InitPeerId,
             CallInstrValue::Literal("service_id"),
             CallInstrValue::Literal("fn_name"),
-            Rc::new(vec![Value::LastError(LastErrorPath::None)]),
+            Rc::new(vec![Value::LastError(None)]),
             CallOutputValue::None,
         ),
         null(),

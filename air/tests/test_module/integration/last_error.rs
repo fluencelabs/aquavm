@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-use air::LastError;
 use air::SecurityTetraplet;
 use air_test_utils::prelude::*;
 
@@ -27,11 +26,11 @@ use std::rc::Rc;
 type ArgToCheck<T> = Rc<RefCell<Option<T>>>;
 
 fn create_check_service_closure(
-    args_to_check: ArgToCheck<LastError>,
+    args_to_check: ArgToCheck<JValue>,
     tetraplets_to_check: ArgToCheck<Vec<Vec<SecurityTetraplet>>>,
 ) -> CallServiceClosure {
     Box::new(move |params| -> CallServiceResult {
-        let mut call_args: Vec<LastError> =
+        let mut call_args: Vec<JValue> =
             serde_json::from_value(JValue::Array(params.arguments)).expect("json deserialization shouldn't fail");
 
         let result = json!(params.tetraplets);
@@ -69,13 +68,14 @@ fn last_error_tetraplets() {
     let _ = checked_call_vm!(local_vm, "asd", script, "", result.data);
 
     let actual_value = (*args.borrow()).as_ref().unwrap().clone();
+    let last_error = actual_value.as_object().unwrap();
     assert_eq!(
-        actual_value.instruction,
+        last_error.get("instruction").unwrap(),
         r#"call "fallible_peer_id" ("fallible_call_service" "") [service_id] client_result"#
     );
 
     assert_eq!(
-        actual_value.msg,
+        last_error.get("message").unwrap(),
         r#"Local service error, ret_code is 1, error message is '"failed result from fallible_call_service"'"#
     );
 
@@ -109,8 +109,8 @@ fn not_clear_last_error_in_match() {
                     (call "unknown_peer" ("" "") [%last_error%])
                 )
                 (seq
-                    (null)
                     (call "{1}" ("" "") [%last_error%])
+                    (null)
                 )
             )
         )
@@ -122,8 +122,7 @@ fn not_clear_last_error_in_match() {
     let _ = checked_call_vm!(local_vm, "asd", &script, "", result.data);
 
     let actual_value = (*args.borrow()).as_ref().unwrap().clone();
-    assert_eq!(actual_value.instruction, "");
-    assert_eq!(actual_value.msg, "");
+    assert_eq!(actual_value, JValue::Null);
 }
 
 #[test]
@@ -162,8 +161,7 @@ fn not_clear_last_error_in_mismatch() {
     let _ = checked_call_vm!(local_vm, "asd", &script, "", result.data);
 
     let actual_value = (*args.borrow()).as_ref().unwrap().clone();
-    assert_eq!(actual_value.instruction, "");
-    assert_eq!(actual_value.msg, "");
+    assert_eq!(actual_value, JValue::Null);
 }
 
 #[test]
@@ -194,7 +192,8 @@ fn track_current_peer_id() {
     let _ = checked_call_vm!(local_vm, "asd", script, "", result.data);
 
     let actual_value = (*args.borrow()).as_ref().unwrap().clone();
-    assert_eq!(actual_value.peer_id, fallible_peer_id);
+    let last_error = actual_value.as_object().unwrap();
+    assert_eq!(last_error.get("peer_id").unwrap(), fallible_peer_id);
 }
 
 #[test]
@@ -211,7 +210,7 @@ fn variable_names_shown_in_error() {
                 (call "{set_variable_vm_peer_id}" ("" "") [""] -relay-)
                 (call -relay- ("" "") [])
             )
-            (call "{echo_vm_peer_id}" ("" "") [%last_error%.$.msg])
+            (call "{echo_vm_peer_id}" ("" "") [%last_error%.$.message])
         )
     "#);
 

@@ -3,7 +3,6 @@ use crate::parser::ParserError;
 use crate::parser::VariableValidator;
 use crate::parser::Span;
 use crate::parser::lexer::Token;
-use crate::parser::lexer::LastErrorPath;
 use crate::parser::air_utils::*;
 use crate::make_user_error;
 
@@ -141,11 +140,7 @@ FailBody: Fail<'input> = {
         ret_code,
         error_message,
     },
-    <left: @L> <last_error_path:LastError> <right: @R> => {
-        // it's possible to write smth like that `(fail %last_error%.msg)`, that would be ambigious
-        if !matches!(last_error_path, LastErrorPath::None) {
-            errors.push(make_user_error!(AmbiguousFailLastError, left, Token::Fail, right));
-        }
+    <left: @L> <l:LastError> <right: @R> => {
         Fail::LastError
     }
 }
@@ -177,7 +172,8 @@ Arg = Value;
 
 Value: Value<'input> = {
     InitPeerId => Value::InitPeerId,
-    <e:LastError> => Value::LastError(e),
+    <LastError> => Value::LastError(None),
+    <le:LastErrorWithLambda> => Value::LastError(Some(le)),
     <l:Literal> => Value::Literal(l),
     <n:Number> => Value::Number(n),
     <b:Boolean> => Value::Boolean(b),
@@ -190,7 +186,8 @@ Value: Value<'input> = {
 
 ApArgument: ApArgument<'input> = {
     InitPeerId => ApArgument::InitPeerId,
-    <e:LastError> => ApArgument::LastError(e),
+    <LastError> => ApArgument::LastError(None),
+    <le:LastErrorWithLambda> => ApArgument::LastError(Some(le)),
     <l:Literal> => ApArgument::Literal(l),
     <n:Number> => ApArgument::Number(n),
     <b:Boolean> => ApArgument::Boolean(b),
@@ -220,7 +217,8 @@ extern {
         Boolean => Token::Boolean(<bool>),
 
         InitPeerId => Token::InitPeerId,
-        LastError => Token::LastError(<LastErrorPath>),
+        LastError => Token::LastError,
+        LastErrorWithLambda => Token::LastErrorWithLambda(<LambdaAST<'input>>),
 
         call => Token::Call,
         ap => Token::Ap,

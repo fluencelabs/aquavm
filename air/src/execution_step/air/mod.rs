@@ -34,7 +34,6 @@ pub(crate) use fold::FoldState;
 
 use super::boxed_value::ScalarRef;
 use super::boxed_value::ValueAggregate;
-use super::execution_context::*;
 use super::ExecutionCtx;
 use super::ExecutionError;
 use super::ExecutionResult;
@@ -47,66 +46,18 @@ use air_parser::ast::Instruction;
 /// Executes instruction and updates last error if needed.
 macro_rules! execute {
     ($self:expr, $instr:expr, $exec_ctx:ident, $trace_ctx:ident) => {{
-        let result = $instr.execute($exec_ctx, $trace_ctx);
-
-        if !$exec_ctx.last_error_could_be_set {
-            return result;
+        match $instr.execute($exec_ctx, $trace_ctx) {
+            Err(e) => {
+                $exec_ctx.last_error_descriptor.try_to_set_from_ingredients(
+                    &e,
+                    $instr.to_string(),
+                    $exec_ctx.current_peer_id.to_string(),
+                    None,
+                );
+                Err(e)
+            }
+            v => v,
         }
-
-        let execution_error = match result {
-            Err(e) => e,
-            v => return v,
-        };
-
-        let catchable_error = match execution_error {
-            // handle only catchable errors
-            crate::execution_step::ExecutionError::Catchable(e) => e,
-            e => return Err(e),
-        };
-
-        let instruction = $self.to_string();
-        let last_error = LastErrorDescriptor::new(
-            catchable_error.clone(),
-            instruction,
-            $exec_ctx.current_peer_id.to_string(),
-            None,
-        );
-        $exec_ctx.last_error = Some(last_error);
-
-        Err(catchable_error.into())
-    }};
-}
-
-/// Executes match/mismatch instructions and updates last error if error type wasn't
-/// MatchWithoutXorError or MismatchWithoutXorError.
-macro_rules! execute_match_or_mismatch {
-    ($self:expr, $instr:expr, $exec_ctx:ident, $trace_ctx:ident) => {{
-        let result = $instr.execute($exec_ctx, $trace_ctx);
-        let execution_error = match result {
-            Err(e) => e,
-            v => return v,
-        };
-
-        if !$exec_ctx.last_error_could_be_set || execution_error.is_match_or_mismatch() {
-            return Err(execution_error);
-        }
-
-        let catchable_error = match execution_error {
-            // handle only catchable errors
-            crate::execution_step::ExecutionError::Catchable(e) => e,
-            e => return Err(e),
-        };
-
-        let instruction = $self.to_string();
-        let last_error = LastErrorDescriptor::new(
-            catchable_error.clone(),
-            instruction,
-            $exec_ctx.current_peer_id.to_string(),
-            None,
-        );
-        $exec_ctx.last_error = Some(last_error);
-
-        Err(catchable_error.into())
     }};
 }
 
@@ -131,10 +82,8 @@ impl<'i> ExecutableInstruction<'i> for Instruction<'i> {
             Instruction::Par(par) => execute!(self, par, exec_ctx, trace_ctx),
             Instruction::Seq(seq) => execute!(self, seq, exec_ctx, trace_ctx),
             Instruction::Xor(xor) => execute!(self, xor, exec_ctx, trace_ctx),
-
-            // match/mismatch shouldn't rewrite last_error
-            Instruction::Match(match_) => execute_match_or_mismatch!(self, match_, exec_ctx, trace_ctx),
-            Instruction::MisMatch(mismatch) => execute_match_or_mismatch!(self, mismatch, exec_ctx, trace_ctx),
+            Instruction::Match(match_) => execute!(self, match_, exec_ctx, trace_ctx),
+            Instruction::MisMatch(mismatch) => execute!(self, mismatch, exec_ctx, trace_ctx),
 
             Instruction::Error => unreachable!("should not execute if parsing succeeded. QED."),
         }

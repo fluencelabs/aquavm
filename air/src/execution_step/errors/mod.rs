@@ -17,6 +17,7 @@
 mod catchable_errors;
 mod execution_errors;
 mod joinable;
+mod last_error_settable;
 mod uncatchable_errors;
 
 pub use catchable_errors::CatchableError;
@@ -24,5 +25,6 @@ pub use execution_errors::ExecutionError;
 pub use uncatchable_errors::UncatchableError;
 
 pub(crate) use joinable::Joinable;
+pub(crate) use last_error_settable::LastErrorSettable;
 
 use super::Stream;

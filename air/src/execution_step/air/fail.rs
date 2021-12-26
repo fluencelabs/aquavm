@@ -16,10 +16,13 @@
 
 use super::ExecutionCtx;
 use super::ExecutionResult;
-use super::LastErrorDescriptor;
 use super::TraceHandler;
 use crate::execution_step::CatchableError;
+use crate::execution_step::LastError;
+use crate::execution_step::RSecurityTetraplet;
 use crate::log_instruction;
+use crate::ExecutionError;
+use crate::JValue;
 
 use air_parser::ast::Fail;
 use polyplets::SecurityTetraplet;
@@ -48,43 +51,40 @@ fn fail_with_literals<'i>(
     fail: &Fail<'_>,
     exec_ctx: &mut ExecutionCtx<'i>,
 ) -> ExecutionResult<()> {
-    let fail_error = CatchableError::FailWithoutXorError {
-        ret_code,
-        error_message: error_message.to_string(),
-    };
-    let fail_error = Rc::new(fail_error);
-    let instruction = fail.to_string();
+    // TODO: decouple error object creation into a separate function
+    let error_object = serde_json::json!({
+        "error_code": ret_code,
+        "message": error_message,
+        "instruction": fail.to_string(),
+    });
+    let error_object = Rc::new(error_object);
 
     // TODO: wrap exec.init_peer_id in Rc
     let literal_tetraplet = SecurityTetraplet::literal_tetraplet(exec_ctx.init_peer_id.clone());
     let literal_tetraplet = Rc::new(RefCell::new(literal_tetraplet));
 
-    let last_error = LastErrorDescriptor::new(
-        fail_error.clone(),
-        instruction,
-        // init_peer_id is used here in order to obtain determinism,
-        // so %last_error%.peer_id will produce the same result on each peer
-        exec_ctx.init_peer_id.clone(),
-        Some(literal_tetraplet),
-    );
-    exec_ctx.last_error = Some(last_error);
-
-    update_context_state(exec_ctx);
-
-    Err(fail_error.into())
+    fail_with_error_object(exec_ctx, error_object, Some(literal_tetraplet))
 }
 
 fn fail_with_last_error(exec_ctx: &mut ExecutionCtx<'_>) -> ExecutionResult<()> {
-    let last_error = match &exec_ctx.last_error {
-        Some(last_error) => last_error.error.clone(),
-        None => return Ok(()),
-    };
+    let LastError { error, tetraplet } = exec_ctx.last_error_descriptor.last_error();
 
-    update_context_state(exec_ctx);
-    Err(last_error.into())
+    // to avoid warnings from https://github.com/rust-lang/rust/issues/59159
+    let error = error.clone();
+    let tetraplet = tetraplet.clone();
+
+    fail_with_error_object(exec_ctx, error, tetraplet)
 }
 
-fn update_context_state(exec_ctx: &mut ExecutionCtx<'_>) {
+fn fail_with_error_object(
+    exec_ctx: &mut ExecutionCtx<'_>,
+    error: Rc<JValue>,
+    tetraplet: Option<RSecurityTetraplet>,
+) -> ExecutionResult<()> {
+    exec_ctx
+        .last_error_descriptor
+        .set_from_error_object(error.clone(), tetraplet);
     exec_ctx.subtree_complete = false;
-    exec_ctx.last_error_could_be_set = false;
+
+    Err(ExecutionError::Catchable(Rc::new(CatchableError::UserError { error })))
 }

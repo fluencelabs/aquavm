@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-pub(crate) use super::Joinable;
-
+use super::Joinable;
+use super::LastErrorSettable;
 use super::Stream;
 use crate::execution_step::lambda_applier::LambdaError;
 use crate::JValue;
@@ -60,15 +60,15 @@ pub enum CatchableError {
 
     /// This error type is produced by a match to notify xor that compared values aren't equal.
     #[error("match is used without corresponding xor")]
-    MatchWithoutXorError,
+    MatchValuesNotEqual,
 
     /// This error type is produced by a mismatch to notify xor that compared values aren't equal.
     #[error("mismatch is used without corresponding xor")]
-    MismatchWithoutXorError,
+    MismatchValuesEqual,
 
     /// This error type is produced by a fail instruction.
-    #[error("fail with ret_code '{ret_code}' and error_message '{error_message}' is used without corresponding xor")]
-    FailWithoutXorError { ret_code: i64, error_message: String },
+    #[error("fail with '{error}' is used without corresponding xor")]
+    UserError { error: Rc<JValue> },
 
     /// An error occurred while trying to apply lambda to a value.
     #[error(transparent)]
@@ -95,6 +95,15 @@ impl ToErrorCode for CatchableError {
     fn to_error_code(&self) -> i64 {
         use crate::utils::CATCHABLE_ERRORS_START_ID;
         crate::generate_to_error_code!(self, CatchableError, CATCHABLE_ERRORS_START_ID)
+    }
+}
+
+impl LastErrorSettable for CatchableError {
+    fn is_settable(&self) -> bool {
+        !matches!(
+            self,
+            CatchableError::MatchValuesNotEqual | CatchableError::MismatchValuesEqual
+        )
     }
 }
 

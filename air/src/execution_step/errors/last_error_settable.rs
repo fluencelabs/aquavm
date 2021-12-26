@@ -14,19 +14,8 @@
  * limitations under the License.
  */
 
-use super::*;
-
-use std::fmt;
-
-impl fmt::Display for LastErrorPath {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        use LastErrorPath::*;
-
-        match self {
-            Instruction => write!(f, ".$.instruction"),
-            Message => write!(f, ".$.msg"),
-            PeerId => write!(f, ".$.peer_id"),
-            None => write!(f, ""),
-        }
-    }
+/// This trait is intended to figuring out whether a last error should be set or not.
+pub(crate) trait LastErrorSettable {
+    /// Return true, if last error should set after occurring such a error.
+    fn is_settable(&self) -> bool;
 }
