@@ -40,11 +40,11 @@ impl<'i> ExecutableInstruction<'i> for FoldStream<'i> {
 
         let fold_id = exec_ctx.tracker.fold.seen_stream_count;
 
-        trace_to_exec_err!(trace_ctx.meet_fold_start(fold_id))?;
+        trace_to_exec_err!(trace_ctx.meet_fold_start(fold_id), self)?;
 
         let result = execute_iterations(iterables, self, fold_id, exec_ctx, trace_ctx);
 
-        trace_to_exec_err!(trace_ctx.meet_fold_end(fold_id))?;
+        trace_to_exec_err!(trace_ctx.meet_fold_end(fold_id), self)?;
 
         result
     }
@@ -66,7 +66,7 @@ fn execute_iterations<'i>(
         };
 
         let value_pos = value.pos();
-        trace_to_exec_err!(trace_ctx.meet_iteration_start(fold_id, value_pos))?;
+        trace_to_exec_err!(trace_ctx.meet_iteration_start(fold_id, value_pos), fold_stream)?;
         let result = fold(
             iterable,
             IterableType::Stream(fold_id),
@@ -75,7 +75,7 @@ fn execute_iterations<'i>(
             exec_ctx,
             trace_ctx,
         );
-        trace_to_exec_err!(trace_ctx.meet_generation_end(fold_id))?;
+        trace_to_exec_err!(trace_ctx.meet_generation_end(fold_id), fold_stream)?;
 
         result?;
         if !exec_ctx.subtree_complete {

@@ -41,7 +41,7 @@ impl<'i> super::ExecutableInstruction<'i> for Ap<'i> {
         let should_touch_trace = should_touch_trace(self);
 
         let merger_ap_result = if should_touch_trace {
-            let merger_ap_result = trace_to_exec_err!(trace_ctx.meet_ap_start())?;
+            let merger_ap_result = trace_to_exec_err!(trace_ctx.meet_ap_start(), self)?;
             try_match_trace_to_instr(&merger_ap_result, self)?;
             merger_ap_result
         } else {

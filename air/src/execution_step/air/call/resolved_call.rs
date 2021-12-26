@@ -67,8 +67,13 @@ impl<'i> ResolvedCall<'i> {
     }
 
     /// Executes resolved instruction, updates contexts based on a execution_step result.
-    pub(super) fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
-        let state = self.prepare_current_executed_state(exec_ctx, trace_ctx)?;
+    pub(super) fn execute(
+        &self,
+        raw_call: &Call<'i>,
+        exec_ctx: &mut ExecutionCtx<'i>,
+        trace_ctx: &mut TraceHandler,
+    ) -> ExecutionResult<()> {
+        let state = self.prepare_current_executed_state(raw_call, exec_ctx, trace_ctx)?;
         if !state.should_execute() {
             state.maybe_set_prev_state(trace_ctx);
             return Ok(());
@@ -130,10 +135,11 @@ impl<'i> ResolvedCall<'i> {
     /// Determine whether this call should be really called and adjust prev executed trace accordingly.
     fn prepare_current_executed_state(
         &self,
+        raw_call: &Call<'i>,
         exec_ctx: &mut ExecutionCtx<'i>,
         trace_ctx: &mut TraceHandler,
     ) -> ExecutionResult<StateDescriptor> {
-        let (call_result, trace_pos) = match trace_to_exec_err!(trace_ctx.meet_call_start(&self.output))? {
+        let (call_result, trace_pos) = match trace_to_exec_err!(trace_ctx.meet_call_start(&self.output), raw_call)? {
             MergerCallResult::CallResult { value, trace_pos } => (value, trace_pos),
             MergerCallResult::Empty => return Ok(StateDescriptor::no_previous_state()),
         };
