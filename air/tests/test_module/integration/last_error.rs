@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use air::SecurityTetraplet;
+use air::{CatchableError, ExecutionError, LambdaError, SecurityTetraplet};
 use air_test_utils::prelude::*;
 
 use fstrings::f;
@@ -224,4 +224,67 @@ fn variable_names_shown_in_error() {
             "expected JValue type 'string' for the variable `-relay-`, but got '1'"
         ))
     );
+}
+
+#[test]
+fn non_initialized_last_error() {
+    let vm_peer_id = "vm_peer_id";
+    let args = Rc::new(RefCell::new(None));
+    let tetraplets = Rc::new(RefCell::new(None));
+    let mut vm = create_avm(
+        create_check_service_closure(args.clone(), tetraplets.clone()),
+        vm_peer_id,
+    );
+
+    let script = f!(r#"
+        (seq
+            (call "{vm_peer_id}" ("" "") [%last_error%])
+            (null)
+        )
+    "#);
+
+    let init_peer_id = "init_peer_id";
+    let _ = checked_call_vm!(vm, init_peer_id, script, "", "");
+
+    let actual_value = (*args.borrow()).as_ref().unwrap().clone();
+    assert_eq!(actual_value, JValue::Null);
+
+    let actual_tetraplets = (*tetraplets.borrow()).as_ref().unwrap().clone();
+    assert_eq!(
+        actual_tetraplets,
+        vec![vec![SecurityTetraplet::new(init_peer_id, "", "", "")]]
+    );
+}
+
+#[test]
+fn access_last_error_by_not_exists_field() {
+    let fallible_peer_id = "fallible_peer_id";
+    let mut fallible_vm = create_avm(fallible_call_service("fallible_call_service"), fallible_peer_id);
+
+    let local_peer_id = "local_peer_id";
+    let mut local_vm = create_avm(echo_call_service(), local_peer_id);
+
+    let non_exists_field_name = "non_exists_field";
+    let script = f!(r#"
+        (xor
+            (call "{fallible_peer_id}" ("fallible_call_service" "") [""])
+            (call "{local_peer_id}" ("" "") [%last_error%.$.{non_exists_field_name}])
+        )
+    "#);
+
+    let result = checked_call_vm!(fallible_vm, "asd", &script, "", "");
+    let result = call_vm!(local_vm, "asd", script, "", result.data);
+
+    let expected_error = ExecutionError::Catchable(rc!(CatchableError::LambdaApplierError(
+        LambdaError::ValueNotContainSuchField {
+            value: json!({
+                "error_code": 10000i64,
+                "instruction": r#"call "fallible_peer_id" ("fallible_call_service" "") [""] "#,
+                "message": r#"Local service error, ret_code is 1, error message is '"failed result from fallible_call_service"'"#,
+                "peer_id": "fallible_peer_id",
+            }),
+            field_name: non_exists_field_name.to_string()
+        }
+    )));
+    assert!(check_error(&result, expected_error));
 }
