@@ -85,8 +85,7 @@ impl<'s> LastErrorDescriptor {
     }
 
     pub(crate) fn set_from_error_object(&mut self, error: Rc<JValue>, tetraplet: Option<RSecurityTetraplet>) {
-        let last_error = LastError { error, tetraplet };
-        self.last_error = last_error;
+        self.last_error = LastError { error, tetraplet };
         self.error_could_be_set = false;
     }
 
