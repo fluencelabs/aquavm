@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import { toByteArray } from 'base64-js';
 import { getStringFromWasm0, invoke } from './wrapper';
-import wasmBs64 from './wasm';
 
 export type LogLevel = 'info' | 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'off';
 
@@ -82,28 +80,34 @@ class HostImportsConfig {
     }
 }
 
-const interpreter_wasm = toByteArray(wasmBs64);
-
-/// Instantiates WebAssembly runtime with AIR interpreter module
-async function interpreterInstance(cfg: HostImportsConfig, logFunction: LogFunction): Promise<Instance> {
-    /// Create host imports that use module exports internally
+/**
+ * Instantiates WebAssembly runtime with AIR interpreter module
+ */
+async function interpreterInstance(
+    module: WebAssembly.Module,
+    cfg: HostImportsConfig,
+    logFunction: LogFunction,
+): Promise<Instance> {
+    // create host imports that use module exports internally
     let imports = cfg.newImportObject();
 
-    /// Instantiate interpreter
-    let interpreter_module = await WebAssembly.compile(interpreter_wasm);
+    // instantiate interpreter
+    let interpreter_module = module;
     let instance: Instance = await WebAssembly.instantiate(interpreter_module, imports);
 
-    /// Set exports, so host imports can use them
+    // set exports, so host imports can use them
     cfg.setExports(instance.exports);
 
-    /// Trigger interpreter initialization (i.e., call main function)
+    // trigger interpreter initialization (i.e., call main function)
     call_export(instance.exports.main, logFunction);
 
     return instance;
 }
 
-/// If export is a function, call it. Otherwise log a warning.
-/// NOTE: any here is unavoidable, see Function interface definition
+/**
+ * If export is a function, call it. Otherwise log a warning.
+ * NOTE: any here is unavoidable, see Function interface definition
+ */
 function call_export(f: ExportValue, logFunction: LogFunction): any {
     if (typeof f === 'function') {
         return f();
@@ -146,12 +150,17 @@ function log_import(cfg: HostImportsConfig, logFunction: LogFunction): LogImport
     };
 }
 
-/// Returns import object that describes host functions called by AIR interpreter
+/**
+ * Returns import object that describes host functions called by AIR interpreter
+ */
 function newImportObject(cfg: HostImportsConfig, logFunction: LogFunction): ImportObject {
     return {
         host: log_import(cfg, logFunction),
     };
 }
+
+const decoder = new TextDecoder();
+const encoder = new TextEncoder();
 
 export class AirInterpreter {
     private wasmWrapper;
@@ -161,12 +170,12 @@ export class AirInterpreter {
         this.wasmWrapper = wasmWrapper;
     }
 
-    static async create(logLevel: LogLevel, logFunction: LogFunction) {
+    static async create(module: WebAssembly.Module, logLevel: LogLevel, logFunction: LogFunction) {
         const cfg = new HostImportsConfig((cfg) => {
             return newImportObject(cfg, logFunction);
         });
 
-        const instance = await interpreterInstance(cfg, logFunction);
+        const instance = await interpreterInstance(module, cfg, logFunction);
         const res = new AirInterpreter(instance);
         res.logLevel = logLevel;
         return res;
@@ -187,7 +196,7 @@ export class AirInterpreter {
             };
         }
 
-        const paramsToPass = Buffer.from(
+        const paramsToPass = encoder.encode(
             JSON.stringify({
                 init_peer_id: params.initPeerId,
                 current_peer_id: params.currentPeerId,
@@ -201,7 +210,7 @@ export class AirInterpreter {
             prevData,
             data,
             paramsToPass,
-            Buffer.from(JSON.stringify(callResultsToPass)),
+            encoder.encode(JSON.stringify(callResultsToPass)),
             this.logLevel,
         );
 
@@ -210,7 +219,7 @@ export class AirInterpreter {
             result = JSON.parse(rawResult);
         } catch (ex) {}
 
-        const callRequestsStr = new TextDecoder().decode(Buffer.from(result.call_requests));
+        const callRequestsStr = decoder.decode(new Uint8Array(result.call_requests));
         let parsedCallRequests;
         try {
             if (callRequestsStr.length === 0) {
