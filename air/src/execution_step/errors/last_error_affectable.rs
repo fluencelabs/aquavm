@@ -15,7 +15,8 @@
  */
 
 /// This trait is intended to figuring out whether a last error should be set or not.
-pub(crate) trait LastErrorSettable {
-    /// Return true, if last error should set after occurring such a error.
-    fn is_settable(&self) -> bool;
+pub(crate) trait LastErrorAffectable {
+    /// Return true, if this error type affects last error
+    /// (meaning that it should be set after occurring such an error).
+    fn affects_last_error(&self) -> bool;
 }

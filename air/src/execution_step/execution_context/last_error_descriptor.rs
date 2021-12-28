@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use crate::execution_step::LastErrorSettable;
+use crate::execution_step::LastErrorAffectable;
 use crate::execution_step::RSecurityTetraplet;
 use crate::JValue;
 use crate::ToErrorCode;
@@ -45,32 +45,20 @@ pub(crate) struct LastErrorDescriptor {
     /// True, if last error could be set. This flag is used to distinguish
     /// whether an error is being bubbled up from the bottom or just encountered.
     /// This allows to write a simple code to handle bubbling error up.
-    error_could_be_set: bool,
+    error_can_be_set: bool,
 }
 
 impl<'s> LastErrorDescriptor {
-    pub(crate) fn new() -> Self {
-        let last_error = LastError {
-            error: Rc::new(JValue::Null),
-            tetraplet: None,
-        };
-
-        Self {
-            last_error,
-            error_could_be_set: true,
-        }
-    }
-
     pub(crate) fn try_to_set_from_ingredients(
         &mut self,
-        error: &(impl ToString + LastErrorSettable + ToErrorCode),
+        error: &(impl ToString + LastErrorAffectable + ToErrorCode),
         instruction: impl Into<String>,
         peer_id: impl Into<String>,
         tetraplet: Option<RSecurityTetraplet>,
     ) -> bool {
         // this check is optimization to prevent creation of an error object in case if error
         // couldn't be set
-        if !self.error_could_be_set || !error.is_settable() {
+        if !self.error_can_be_set || !error.affects_last_error() {
             return false;
         }
         let error_object = serde_json::json!({
@@ -86,20 +74,32 @@ impl<'s> LastErrorDescriptor {
 
     pub(crate) fn set_from_error_object(&mut self, error: Rc<JValue>, tetraplet: Option<RSecurityTetraplet>) {
         self.last_error = LastError { error, tetraplet };
-        self.error_could_be_set = false;
+        self.error_can_be_set = false;
     }
 
     pub(crate) fn last_error(&self) -> &LastError {
         &self.last_error
     }
 
-    pub(crate) fn meet_xor(&mut self) {
-        self.error_could_be_set = true;
+    pub(crate) fn meet_xor_right_branch(&mut self) {
+        self.error_can_be_set = true;
+    }
+
+    pub(crate) fn meet_par_successed_end(&mut self) {
+        self.error_can_be_set = true;
     }
 }
 
 impl Default for LastErrorDescriptor {
     fn default() -> Self {
-        Self::new()
+        let last_error = LastError {
+            error: Rc::new(JValue::Null),
+            tetraplet: None,
+        };
+
+        Self {
+            last_error,
+            error_can_be_set: true,
+        }
     }
 }

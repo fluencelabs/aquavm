@@ -15,7 +15,7 @@
  */
 
 use super::Joinable;
-use super::LastErrorSettable;
+use super::LastErrorAffectable;
 use super::Stream;
 use crate::execution_step::lambda_applier::LambdaError;
 use crate::JValue;
@@ -98,8 +98,8 @@ impl ToErrorCode for CatchableError {
     }
 }
 
-impl LastErrorSettable for CatchableError {
-    fn is_settable(&self) -> bool {
+impl LastErrorAffectable for CatchableError {
+    fn affects_last_error(&self) -> bool {
         !matches!(
             self,
             CatchableError::MatchValuesNotEqual | CatchableError::MismatchValuesEqual

@@ -288,3 +288,39 @@ fn access_last_error_by_not_exists_field() {
     )));
     assert!(check_error(&result, expected_error));
 }
+
+#[test]
+fn last_error_with_par_one_subtree_failed() {
+    let fallible_peer_id = "fallible_peer_id";
+    let fallible_call_service_name = "fallible_call_service";
+    let mut fallible_vm = create_avm(fallible_call_service(fallible_call_service_name), fallible_peer_id);
+
+    let vm_peer_id = "local_peer_id";
+    let args = Rc::new(RefCell::new(None));
+    let tetraplets = Rc::new(RefCell::new(None));
+    let mut vm = create_avm(
+        create_check_service_closure(args.clone(), tetraplets.clone()),
+        vm_peer_id,
+    );
+    let script = f!(r#"
+        (seq
+            (par
+                (call "{fallible_peer_id}" ("{fallible_call_service_name}" "") [""])
+                (call "{fallible_peer_id}" ("non_fallible_call_service" "") [""])
+            )
+            (call "{vm_peer_id}" ("" "") [%last_error%])
+        )
+    "#);
+
+    let result = checked_call_vm!(fallible_vm, "asd", &script, "", "");
+    let _ = checked_call_vm!(vm, "asd", script, "", result.data);
+
+    let actual_value = (*args.borrow()).as_ref().unwrap().clone();
+    let expected_value = json!({
+        "error_code": 10000i64,
+        "instruction": r#"call "fallible_peer_id" ("fallible_call_service" "") [""] "#,
+        "message": r#"Local service error, ret_code is 1, error message is '"failed result from fallible_call_service"'"#,
+        "peer_id": fallible_peer_id
+    });
+    assert_eq!(actual_value, expected_value);
+}
