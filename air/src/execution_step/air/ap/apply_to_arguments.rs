@@ -28,7 +28,7 @@ pub(super) fn apply_to_arg(
 
     let result = match argument {
         InitPeerId => apply_const(exec_ctx.init_peer_id.clone(), exec_ctx, trace_ctx),
-        LastError(error_path) => apply_last_error(error_path, exec_ctx, trace_ctx)?,
+        LastError(error_accessor) => apply_last_error(error_accessor, exec_ctx, trace_ctx)?,
         Literal(value) => apply_const(*value, exec_ctx, trace_ctx),
         Number(value) => apply_const(value, exec_ctx, trace_ctx),
         Boolean(value) => apply_const(*value, exec_ctx, trace_ctx),
@@ -47,12 +47,12 @@ fn apply_const(value: impl Into<JValue>, exec_ctx: &ExecutionCtx<'_>, trace_ctx:
     ValueAggregate::new(value, tetraplet, trace_ctx.trace_pos())
 }
 
-fn apply_last_error(
-    error_path: &ast::LastErrorPath,
-    exec_ctx: &ExecutionCtx<'_>,
+fn apply_last_error<'i>(
+    error_accessor: &Option<LambdaAST<'i>>,
+    exec_ctx: &ExecutionCtx<'i>,
     trace_ctx: &TraceHandler,
 ) -> ExecutionResult<ValueAggregate> {
-    let (value, mut tetraplets) = crate::execution_step::resolver::prepare_last_error(error_path, exec_ctx)?;
+    let (value, mut tetraplets) = crate::execution_step::resolver::prepare_last_error(error_accessor, exec_ctx)?;
     let value = Rc::new(value);
     // removing is safe because prepare_last_error always returns a vec with one element.
     let tetraplet = tetraplets.remove(0);

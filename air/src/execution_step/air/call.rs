@@ -24,7 +24,6 @@ use resolved_call::ResolvedCall;
 use super::ExecutionCtx;
 use super::ExecutionError;
 use super::ExecutionResult;
-use super::LastErrorDescriptor;
 use super::TraceHandler;
 use crate::execution_step::Joinable;
 use crate::execution_step::RSecurityTetraplet;
@@ -74,10 +73,11 @@ fn set_last_error<'i>(
         current_peer_id
     );
 
-    let instruction = call.to_string();
-    let last_error = LastErrorDescriptor::new(catchable_error.clone(), instruction, current_peer_id, tetraplet);
-    exec_ctx.last_error = Some(last_error);
-    exec_ctx.last_error_could_be_set = false;
-
+    let _ = exec_ctx.last_error_descriptor.try_to_set_from_ingredients(
+        catchable_error.as_ref(),
+        call.to_string(),
+        current_peer_id,
+        tetraplet,
+    );
     ExecutionError::Catchable(catchable_error)
 }

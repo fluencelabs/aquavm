@@ -39,7 +39,9 @@ pub(super) use boxed_value::ScalarRef;
 pub(super) use boxed_value::Stream;
 pub(super) use boxed_value::ValueAggregate;
 pub(crate) use errors::Joinable;
+pub(crate) use errors::LastErrorAffectable;
 pub(crate) use execution_context::ExecutionCtx;
+pub(crate) use execution_context::LastError;
 
 pub(crate) use air_trace_handler::TraceHandler;
 

@@ -37,8 +37,8 @@ pub(crate) fn are_matchable_eq<'ctx>(
             make_string_comparator(exec_ctx.init_peer_id.as_str()),
         ),
 
-        (LastError(path), matchable) | (matchable, LastError(path)) => {
-            let (value, _) = prepare_last_error(path, exec_ctx)?;
+        (LastError(error_accessor), matchable) | (matchable, LastError(error_accessor)) => {
+            let (value, _) = prepare_last_error(error_accessor, exec_ctx)?;
             compare_matchable(matchable, exec_ctx, make_object_comparator(value))
         }
 
@@ -83,8 +83,8 @@ fn compare_matchable<'ctx>(
             let jvalue = init_peer_id.into();
             Ok(comparator(Cow::Owned(jvalue)))
         }
-        LastError(error_path) => {
-            let (jvalue, _) = prepare_last_error(error_path, exec_ctx)?;
+        LastError(error_accessor) => {
+            let (jvalue, _) = prepare_last_error(error_accessor, exec_ctx)?;
             Ok(comparator(Cow::Owned(jvalue)))
         }
         Literal(str) => {

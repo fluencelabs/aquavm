@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-mod traits;
-
 use crate::LambdaAST;
 
 use serde::Deserialize;
@@ -53,7 +51,8 @@ pub enum Token<'input> {
     Boolean(bool),
 
     InitPeerId,
-    LastError(LastErrorPath),
+    LastError,
+    LastErrorWithLambda(LambdaAST<'input>),
 
     Call,
     Ap,
@@ -67,16 +66,4 @@ pub enum Token<'input> {
     Null,
     Match,
     MisMatch,
-}
-
-#[derive(Debug, Clone, PartialEq, Hash, Serialize, Deserialize)]
-pub enum LastErrorPath {
-    // %last_error%.instruction
-    Instruction,
-    // %last_error%.msg
-    Message,
-    // %last_error%.peer_id
-    PeerId,
-    // %last_error%
-    None,
 }

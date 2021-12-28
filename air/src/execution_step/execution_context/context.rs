@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+use super::LastError;
 use super::LastErrorDescriptor;
-use super::LastErrorWithTetraplet;
 use super::Scalars;
 use super::Streams;
 
@@ -44,11 +44,7 @@ pub(crate) struct ExecutionCtx<'i> {
 
     /// Last error produced by local service.
     /// None means that there weren't any error.
-    pub(crate) last_error: Option<LastErrorDescriptor>,
-
-    /// True, if last error could be set. This flag is used to distinguish
-    /// whether an error is being bubbled up from the bottom or just encountered.
-    pub(crate) last_error_could_be_set: bool,
+    pub(crate) last_error_descriptor: LastErrorDescriptor,
 
     /// Indicates that previous executed subtree is complete.
     /// A subtree treats as a complete if all subtree elements satisfy the following rules:
@@ -84,18 +80,14 @@ impl<'i> ExecutionCtx<'i> {
             current_peer_id,
             init_peer_id,
             subtree_complete: true,
-            last_error_could_be_set: true,
             last_call_request_id,
             call_results,
             ..<_>::default()
         }
     }
 
-    pub(crate) fn last_error(&self) -> LastErrorWithTetraplet {
-        match &self.last_error {
-            Some(error_descriptor) => LastErrorWithTetraplet::from_error_descriptor(error_descriptor, self),
-            None => <_>::default(),
-        }
+    pub(crate) fn last_error(&self) -> &LastError {
+        self.last_error_descriptor.last_error()
     }
 
     pub(crate) fn next_call_request_id(&mut self) -> u32 {

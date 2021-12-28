@@ -16,6 +16,7 @@
 
 use super::CatchableError;
 use super::Joinable;
+use super::LastErrorAffectable;
 use super::UncatchableError;
 use crate::ToErrorCode;
 
@@ -47,7 +48,7 @@ impl ExecutionError {
         match self {
             ExecutionError::Catchable(catchable) => matches!(
                 catchable.as_ref(),
-                CatchableError::MatchWithoutXorError | CatchableError::MismatchWithoutXorError
+                CatchableError::MatchValuesNotEqual | CatchableError::MismatchValuesEqual
             ),
             _ => false,
         }
@@ -71,6 +72,7 @@ macro_rules! trace_to_exec_err {
         })
     };
 }
+
 impl ToErrorCode for ExecutionError {
     fn to_error_code(&self) -> i64 {
         match self {
@@ -84,7 +86,16 @@ impl Joinable for ExecutionError {
     fn is_joinable(&self) -> bool {
         match self {
             ExecutionError::Catchable(err) => err.is_joinable(),
-            _ => false,
+            ExecutionError::Uncatchable(_) => false,
+        }
+    }
+}
+
+impl LastErrorAffectable for ExecutionError {
+    fn affects_last_error(&self) -> bool {
+        match self {
+            ExecutionError::Catchable(err) => err.affects_last_error(),
+            ExecutionError::Uncatchable(_) => false,
         }
     }
 }

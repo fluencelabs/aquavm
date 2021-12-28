@@ -35,7 +35,7 @@ impl<'i> super::ExecutableInstruction<'i> for Match<'i> {
         )?;
 
         if !are_values_equal {
-            return Err(CatchableError::MatchWithoutXorError.into());
+            return Err(CatchableError::MatchValuesNotEqual.into());
         }
 
         self.instruction.execute(exec_ctx, trace_ctx)

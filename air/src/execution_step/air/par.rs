@@ -95,8 +95,7 @@ fn prepare_par_result(
 ) -> ExecutionResult<()> {
     match (left_result, right_result) {
         (SubtreeResult::Succeeded, _) | (_, SubtreeResult::Succeeded) => {
-            // clear the last error in case of par succeeded
-            exec_ctx.last_error = None;
+            exec_ctx.last_error_descriptor.meet_par_successed_end();
             Ok(())
         }
         (SubtreeResult::Failed(_), SubtreeResult::Failed(err)) => Err(err),

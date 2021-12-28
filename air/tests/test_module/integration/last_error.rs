@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-use air::LastError;
-use air::SecurityTetraplet;
+use air::{CatchableError, ExecutionError, LambdaError, SecurityTetraplet};
 use air_test_utils::prelude::*;
 
 use fstrings::f;
@@ -27,11 +26,11 @@ use std::rc::Rc;
 type ArgToCheck<T> = Rc<RefCell<Option<T>>>;
 
 fn create_check_service_closure(
-    args_to_check: ArgToCheck<LastError>,
+    args_to_check: ArgToCheck<JValue>,
     tetraplets_to_check: ArgToCheck<Vec<Vec<SecurityTetraplet>>>,
 ) -> CallServiceClosure {
     Box::new(move |params| -> CallServiceResult {
-        let mut call_args: Vec<LastError> =
+        let mut call_args: Vec<JValue> =
             serde_json::from_value(JValue::Array(params.arguments)).expect("json deserialization shouldn't fail");
 
         let result = json!(params.tetraplets);
@@ -69,13 +68,14 @@ fn last_error_tetraplets() {
     let _ = checked_call_vm!(local_vm, "asd", script, "", result.data);
 
     let actual_value = (*args.borrow()).as_ref().unwrap().clone();
+    let last_error = actual_value.as_object().unwrap();
     assert_eq!(
-        actual_value.instruction,
+        last_error.get("instruction").unwrap(),
         r#"call "fallible_peer_id" ("fallible_call_service" "") [service_id] client_result"#
     );
 
     assert_eq!(
-        actual_value.msg,
+        last_error.get("message").unwrap(),
         r#"Local service error, ret_code is 1, error message is '"failed result from fallible_call_service"'"#
     );
 
@@ -109,8 +109,8 @@ fn not_clear_last_error_in_match() {
                     (call "unknown_peer" ("" "") [%last_error%])
                 )
                 (seq
-                    (null)
                     (call "{1}" ("" "") [%last_error%])
+                    (null)
                 )
             )
         )
@@ -122,8 +122,7 @@ fn not_clear_last_error_in_match() {
     let _ = checked_call_vm!(local_vm, "asd", &script, "", result.data);
 
     let actual_value = (*args.borrow()).as_ref().unwrap().clone();
-    assert_eq!(actual_value.instruction, "");
-    assert_eq!(actual_value.msg, "");
+    assert_eq!(actual_value, JValue::Null);
 }
 
 #[test]
@@ -162,8 +161,7 @@ fn not_clear_last_error_in_mismatch() {
     let _ = checked_call_vm!(local_vm, "asd", &script, "", result.data);
 
     let actual_value = (*args.borrow()).as_ref().unwrap().clone();
-    assert_eq!(actual_value.instruction, "");
-    assert_eq!(actual_value.msg, "");
+    assert_eq!(actual_value, JValue::Null);
 }
 
 #[test]
@@ -194,7 +192,8 @@ fn track_current_peer_id() {
     let _ = checked_call_vm!(local_vm, "asd", script, "", result.data);
 
     let actual_value = (*args.borrow()).as_ref().unwrap().clone();
-    assert_eq!(actual_value.peer_id, fallible_peer_id);
+    let last_error = actual_value.as_object().unwrap();
+    assert_eq!(last_error.get("peer_id").unwrap(), fallible_peer_id);
 }
 
 #[test]
@@ -211,7 +210,7 @@ fn variable_names_shown_in_error() {
                 (call "{set_variable_vm_peer_id}" ("" "") [""] -relay-)
                 (call -relay- ("" "") [])
             )
-            (call "{echo_vm_peer_id}" ("" "") [%last_error%.$.msg])
+            (call "{echo_vm_peer_id}" ("" "") [%last_error%.$.message])
         )
     "#);
 
@@ -225,4 +224,103 @@ fn variable_names_shown_in_error() {
             "expected JValue type 'string' for the variable `-relay-`, but got '1'"
         ))
     );
+}
+
+#[test]
+fn non_initialized_last_error() {
+    let vm_peer_id = "vm_peer_id";
+    let args = Rc::new(RefCell::new(None));
+    let tetraplets = Rc::new(RefCell::new(None));
+    let mut vm = create_avm(
+        create_check_service_closure(args.clone(), tetraplets.clone()),
+        vm_peer_id,
+    );
+
+    let script = f!(r#"
+        (seq
+            (call "{vm_peer_id}" ("" "") [%last_error%])
+            (null)
+        )
+    "#);
+
+    let init_peer_id = "init_peer_id";
+    let _ = checked_call_vm!(vm, init_peer_id, script, "", "");
+
+    let actual_value = (*args.borrow()).as_ref().unwrap().clone();
+    assert_eq!(actual_value, JValue::Null);
+
+    let actual_tetraplets = (*tetraplets.borrow()).as_ref().unwrap().clone();
+    assert_eq!(
+        actual_tetraplets,
+        vec![vec![SecurityTetraplet::new(init_peer_id, "", "", "")]]
+    );
+}
+
+#[test]
+fn access_last_error_by_not_exists_field() {
+    let fallible_peer_id = "fallible_peer_id";
+    let mut fallible_vm = create_avm(fallible_call_service("fallible_call_service"), fallible_peer_id);
+
+    let local_peer_id = "local_peer_id";
+    let mut local_vm = create_avm(echo_call_service(), local_peer_id);
+
+    let non_exists_field_name = "non_exists_field";
+    let script = f!(r#"
+        (xor
+            (call "{fallible_peer_id}" ("fallible_call_service" "") [""])
+            (call "{local_peer_id}" ("" "") [%last_error%.$.{non_exists_field_name}])
+        )
+    "#);
+
+    let result = checked_call_vm!(fallible_vm, "asd", &script, "", "");
+    let result = call_vm!(local_vm, "asd", script, "", result.data);
+
+    let expected_error = ExecutionError::Catchable(rc!(CatchableError::LambdaApplierError(
+        LambdaError::ValueNotContainSuchField {
+            value: json!({
+                "error_code": 10000i64,
+                "instruction": r#"call "fallible_peer_id" ("fallible_call_service" "") [""] "#,
+                "message": r#"Local service error, ret_code is 1, error message is '"failed result from fallible_call_service"'"#,
+                "peer_id": "fallible_peer_id",
+            }),
+            field_name: non_exists_field_name.to_string()
+        }
+    )));
+    assert!(check_error(&result, expected_error));
+}
+
+#[test]
+fn last_error_with_par_one_subtree_failed() {
+    let fallible_peer_id = "fallible_peer_id";
+    let fallible_call_service_name = "fallible_call_service";
+    let mut fallible_vm = create_avm(fallible_call_service(fallible_call_service_name), fallible_peer_id);
+
+    let vm_peer_id = "local_peer_id";
+    let args = Rc::new(RefCell::new(None));
+    let tetraplets = Rc::new(RefCell::new(None));
+    let mut vm = create_avm(
+        create_check_service_closure(args.clone(), tetraplets.clone()),
+        vm_peer_id,
+    );
+    let script = f!(r#"
+        (seq
+            (par
+                (call "{fallible_peer_id}" ("{fallible_call_service_name}" "") [""])
+                (call "{fallible_peer_id}" ("non_fallible_call_service" "") [""])
+            )
+            (call "{vm_peer_id}" ("" "") [%last_error%])
+        )
+    "#);
+
+    let result = checked_call_vm!(fallible_vm, "asd", &script, "", "");
+    let _ = checked_call_vm!(vm, "asd", script, "", result.data);
+
+    let actual_value = (*args.borrow()).as_ref().unwrap().clone();
+    let expected_value = json!({
+        "error_code": 10000i64,
+        "instruction": r#"call "fallible_peer_id" ("fallible_call_service" "") [""] "#,
+        "message": r#"Local service error, ret_code is 1, error message is '"failed result from fallible_call_service"'"#,
+        "peer_id": fallible_peer_id
+    });
+    assert_eq!(actual_value, expected_value);
 }

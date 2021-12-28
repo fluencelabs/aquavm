@@ -194,12 +194,12 @@ fn match_without_xor() {
     let result = call_vm!(set_variable_vm, "", &script, "", "");
     let result = call_vm!(vm, "", &script, "", result.data);
 
-    let expected_error = CatchableError::MatchWithoutXorError;
+    let expected_error = CatchableError::MatchValuesNotEqual;
     assert!(check_error(&result, expected_error));
 
     let result = call_vm!(vm, "", script, "", result.data);
 
-    let expected_error = CatchableError::MatchWithoutXorError;
+    let expected_error = CatchableError::MatchValuesNotEqual;
     assert!(check_error(&result, expected_error));
 }
 
