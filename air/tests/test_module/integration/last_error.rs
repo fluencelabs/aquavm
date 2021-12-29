@@ -349,9 +349,9 @@ fn fail_with_scalar_rebubble_error() {
     let expected_error = CatchableError::UserError {
         error: rc!(json!({
             "error_code": 10000i64,
-            "instruction": r#"call "local_peer_id" ("service_id_1" "local_fn_name") [] result_1"#,
+            "instruction": r#"call "fallible_peer_id" ("fallible_call_service" "") [""] "#,
             "message": r#"Local service error, ret_code is 1, error message is '"failed result from fallible_call_service"'"#,
-            "peer_id": "local_peer_id",
+            "peer_id": "fallible_peer_id",
         })),
     };
     assert!(check_error(&result, expected_error));
@@ -449,6 +449,29 @@ fn fail_with_scalar_from_call_not_right_type() {
 
     let expected_error =
         CatchableError::InvalidLastErrorObjectError(LastErrorObjectError::ScalarMustBeObject(service_result));
+    assert!(check_error(&result, expected_error));
+}
+
+#[test]
+fn fail_with_scalar_from_call_field_not_right_type() {
+    let vm_peer_id = "vm_peer_id";
+    let service_result = json!({"error_code": "error_code", "message": "error message"});
+    let mut vm = create_avm(set_variable_call_service(service_result.clone()), vm_peer_id);
+
+    let script = f!(r#"
+        (seq
+            (call "{vm_peer_id}" ("" "") [""] scalar)
+            (fail scalar)
+        )
+    "#);
+
+    let result = call_vm!(vm, "", &script, "", "");
+
+    let expected_error = CatchableError::InvalidLastErrorObjectError(LastErrorObjectError::ScalarFieldIsWrongType {
+        scalar: service_result.clone(),
+        field_name: "error_code",
+        expected_type: "integer",
+    });
     assert!(check_error(&result, expected_error));
 }
 
