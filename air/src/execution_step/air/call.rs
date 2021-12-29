@@ -73,10 +73,10 @@ fn set_last_error<'i>(
         current_peer_id
     );
 
-    let _ = exec_ctx.last_error_descriptor.try_to_set_from_ingredients(
+    let _ = exec_ctx.last_error_descriptor.try_to_set_from_error(
         catchable_error.as_ref(),
-        call.to_string(),
-        current_peer_id,
+        &call.to_string(),
+        &current_peer_id,
         tetraplet,
     );
     ExecutionError::Catchable(catchable_error)

@@ -39,7 +39,7 @@ pub(crate) fn resolve_to_args<'i>(
     use ast::Value::*;
 
     match value {
-        InitPeerId => prepare_const(ctx.init_peer_id.clone(), ctx),
+        InitPeerId => prepare_const(ctx.init_peer_id.as_str(), ctx),
         LastError(error_accessor) => prepare_last_error(error_accessor, ctx),
         Literal(value) => prepare_const(value.to_string(), ctx),
         Boolean(value) => prepare_const(*value, ctx),
@@ -55,7 +55,7 @@ pub(crate) fn prepare_const(
     ctx: &ExecutionCtx<'_>,
 ) -> ExecutionResult<(JValue, SecurityTetraplets)> {
     let jvalue = arg.into();
-    let tetraplet = SecurityTetraplet::literal_tetraplet(ctx.init_peer_id.clone());
+    let tetraplet = SecurityTetraplet::literal_tetraplet(ctx.init_peer_id.as_ref());
     let tetraplet = Rc::new(RefCell::new(tetraplet));
 
     Ok((jvalue, vec![tetraplet]))
@@ -78,7 +78,7 @@ pub(crate) fn prepare_last_error<'i>(
     let tetraplets = match tetraplet {
         Some(tetraplet) => vec![tetraplet.clone()],
         None => {
-            let tetraplet = SecurityTetraplet::literal_tetraplet(&ctx.init_peer_id);
+            let tetraplet = SecurityTetraplet::literal_tetraplet(ctx.init_peer_id.as_ref());
             let tetraplet = Rc::new(RefCell::new(tetraplet));
             vec![tetraplet]
         }
@@ -126,6 +126,15 @@ pub(crate) fn resolve_ast_variable_wl<'ctx, 'i>(
             Ok((value.into_jvalue(), tetraplets))
         }
     }
+}
+
+pub(crate) fn resolve_ast_scalar_wl<'ctx, 'i>(
+    ast_scalar: &ast::ScalarWithLambda<'_>,
+    exec_ctx: &'ctx ExecutionCtx<'i>,
+) -> ExecutionResult<(JValue, SecurityTetraplets)> {
+    // TODO: wrap lambda path with Rc to make this clone cheaper
+    let variable = ast::VariableWithLambda::Scalar(ast_scalar.clone());
+    resolve_ast_variable_wl(&variable, exec_ctx)
 }
 
 pub(crate) fn apply_lambda<'i>(

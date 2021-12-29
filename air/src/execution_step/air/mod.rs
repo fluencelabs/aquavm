@@ -48,10 +48,11 @@ macro_rules! execute {
     ($self:expr, $instr:expr, $exec_ctx:ident, $trace_ctx:ident) => {{
         match $instr.execute($exec_ctx, $trace_ctx) {
             Err(e) => {
-                $exec_ctx.last_error_descriptor.try_to_set_from_ingredients(
+                $exec_ctx.last_error_descriptor.try_to_set_from_error(
                     &e,
-                    $instr.to_string(),
-                    $exec_ctx.current_peer_id.to_string(),
+                    // TODO: avoid excess copying here
+                    &$instr.to_string(),
+                    $exec_ctx.current_peer_id.as_ref(),
                     None,
                 );
                 Err(e)

@@ -14,30 +14,14 @@
  * limitations under the License.
  */
 
+use super::last_error_definition::error_from_raw_fields;
+use super::LastError;
 use crate::execution_step::LastErrorAffectable;
 use crate::execution_step::RSecurityTetraplet;
 use crate::JValue;
 use crate::ToErrorCode;
 
-use serde::Deserialize;
-use serde::Serialize;
-
 use std::rc::Rc;
-
-/// This struct is intended to track the last arisen error.
-/// LastError is essentially a scalar value with support of lambda expressions.
-/// The only differences from a scalar are
-///  - it's accessed by %last_error% literal
-///  - if it's unset before the usage, JValue::Null will be used without join behaviour
-///  - it's a global scalar, meaning that fold and new scopes doesn't apply for it
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct LastError {
-    /// Error object that represents the last occurred error.
-    pub error: Rc<JValue>,
-
-    /// Tetraplet that identify host where the error occurred.
-    pub tetraplet: Option<RSecurityTetraplet>,
-}
 
 pub(crate) struct LastErrorDescriptor {
     last_error: LastError,
@@ -49,11 +33,11 @@ pub(crate) struct LastErrorDescriptor {
 }
 
 impl<'s> LastErrorDescriptor {
-    pub(crate) fn try_to_set_from_ingredients(
+    pub(crate) fn try_to_set_from_error(
         &mut self,
-        error: &(impl ToString + LastErrorAffectable + ToErrorCode),
-        instruction: impl Into<String>,
-        peer_id: impl Into<String>,
+        error: &(impl LastErrorAffectable + ToErrorCode + ToString),
+        instruction: &str,
+        peer_id: &str,
         tetraplet: Option<RSecurityTetraplet>,
     ) -> bool {
         // this check is optimization to prevent creation of an error object in case if error
@@ -61,13 +45,25 @@ impl<'s> LastErrorDescriptor {
         if !self.error_can_be_set || !error.affects_last_error() {
             return false;
         }
-        let error_object = serde_json::json!({
-            "error_code": error.to_error_code(),
-            "message": error.to_string(),
-            "instruction": instruction.into(),
-            "peer_id": peer_id.into(),
-        });
 
+        self.set_from_ingredients(
+            error.to_error_code(),
+            &error.to_string(),
+            instruction,
+            peer_id,
+            tetraplet,
+        )
+    }
+
+    pub(crate) fn set_from_ingredients(
+        &mut self,
+        error_code: i64,
+        error_message: &str,
+        instruction: &str,
+        peer_id: &str,
+        tetraplet: Option<RSecurityTetraplet>,
+    ) -> bool {
+        let error_object = error_from_raw_fields(error_code, error_message, instruction, peer_id);
         self.set_from_error_object(Rc::new(error_object), tetraplet);
         true
     }

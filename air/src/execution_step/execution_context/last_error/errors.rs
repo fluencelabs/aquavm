@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Fluence Labs Limited
+ * Copyright 2021 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-mod context;
-mod last_error;
-mod scalar_variables;
-mod streams_variables;
+use crate::JValue;
 
-pub use last_error::*;
+use thiserror::Error as ThisError;
 
-pub(crate) use context::*;
-pub(crate) use scalar_variables::*;
-pub(crate) use streams_variables::*;
+/// Describes errors related to converting a scalar into error object.
+#[derive(Debug, Clone, ThisError)]
+pub enum LastErrorObjectError {
+    #[error("scalar should have an object type to be converted into error object, but '{0}' doesn't have")]
+    ScalarMustBeObject(JValue),
+
+    #[error("scalar '{scalar}' must have field with name '{field_name}'")]
+    ScalarMustContainField { scalar: JValue, field_name: &'static str },
+}

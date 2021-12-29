@@ -40,7 +40,7 @@ pub(crate) struct ExecutionCtx<'i> {
     pub(crate) current_peer_id: Rc<String>,
 
     /// PeerId of a peer send this AIR script.
-    pub(crate) init_peer_id: String,
+    pub(crate) init_peer_id: Rc<String>,
 
     /// Last error produced by local service.
     /// None means that there weren't any error.
@@ -78,7 +78,7 @@ impl<'i> ExecutionCtx<'i> {
 
         Self {
             current_peer_id,
-            init_peer_id,
+            init_peer_id: Rc::new(init_peer_id),
             subtree_complete: true,
             last_call_request_id,
             call_results,

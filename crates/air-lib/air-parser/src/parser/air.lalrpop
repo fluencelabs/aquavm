@@ -136,6 +136,8 @@ ScriptVariable: Variable<'input> = {
 };
 
 FailBody: Fail<'input> = {
+    <scalar:Scalar> => Fail::Scalar(ScalarWithLambda::new(scalar.0, None, scalar.1)),
+    <scalar:ScalarWithLambda> => Fail::Scalar(ScalarWithLambda::new(scalar.0, Some(scalar.1), scalar.2)),
     <ret_code:I64> <error_message:Literal> => Fail::Literal {
         ret_code,
         error_message,

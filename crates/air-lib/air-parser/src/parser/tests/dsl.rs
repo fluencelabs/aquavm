@@ -69,6 +69,10 @@ pub(super) fn null() -> Instruction<'static> {
     Instruction::Null(Null)
 }
 
+pub(super) fn fail_scalar(scalar: ScalarWithLambda) -> Instruction<'_> {
+    Instruction::Fail(Fail::Scalar(scalar))
+}
+
 pub(super) fn fail_literals(ret_code: i64, error_message: &str) -> Instruction<'_> {
     Instruction::Fail(Fail::Literal {
         ret_code,

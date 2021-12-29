@@ -38,6 +38,7 @@ pub use execution_step::execution_context::LastError;
 pub use execution_step::CatchableError;
 pub use execution_step::ExecutionError;
 pub use execution_step::LambdaError;
+pub use execution_step::LastErrorObjectError;
 pub use execution_step::UncatchableError;
 pub use polyplets::ResolvedTriplet;
 pub use polyplets::SecurityTetraplet;

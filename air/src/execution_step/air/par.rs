@@ -38,10 +38,10 @@ impl<'i> ExecutableInstruction<'i> for Par<'i> {
         trace_to_exec_err!(trace_ctx.meet_par_start(), self)?;
 
         // execute a left subtree of par
-        let left_result = execute_subtree(&self, exec_ctx, trace_ctx, &mut completeness_updater, SubtreeType::Left)?;
+        let left_result = execute_subtree(self, exec_ctx, trace_ctx, &mut completeness_updater, SubtreeType::Left)?;
 
         // execute a right subtree of par
-        let right_result = execute_subtree(&self, exec_ctx, trace_ctx, &mut completeness_updater, SubtreeType::Right)?;
+        let right_result = execute_subtree(self, exec_ctx, trace_ctx, &mut completeness_updater, SubtreeType::Right)?;
 
         completeness_updater.set_completeness(exec_ctx);
         prepare_par_result(left_result, right_result, exec_ctx)

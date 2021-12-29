@@ -36,7 +36,7 @@ impl fmt::Display for Instruction<'_> {
             Next(next) => write!(f, "{}", next),
             New(new) => write!(f, "{}", new),
             Null(null) => write!(f, "{}", null),
-            Error => Ok(()),
+            Error => write!(f, "error"),
         }
     }
 }
@@ -59,6 +59,7 @@ impl fmt::Display for Ap<'_> {
 impl fmt::Display for Fail<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
+            Fail::Scalar(scalar) => write!(f, "fail {}", scalar),
             Fail::Literal {
                 ret_code,
                 error_message,
