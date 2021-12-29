@@ -66,7 +66,7 @@ fn fail_with_literals() {
         "error_code": 1337i64,
         "instruction": "fail 1337 error message",
         "message": "error message",
-            "peer_id": init_peer_id,
+        "peer_id": init_peer_id,
         })),
     };
     assert!(check_error(&result, expected_error));
