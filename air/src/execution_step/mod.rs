@@ -24,6 +24,7 @@ mod resolver;
 pub use errors::CatchableError;
 pub use errors::ExecutionError;
 pub use errors::UncatchableError;
+pub use execution_context::LastErrorObjectError;
 pub use lambda_applier::LambdaError;
 
 pub mod errors_prelude {

@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-use air::{CatchableError, ExecutionError, LambdaError, SecurityTetraplet};
+use air::CatchableError;
+use air::ExecutionError;
+use air::LambdaError;
+use air::LastErrorObjectError;
+use air::SecurityTetraplet;
 use air_test_utils::prelude::*;
 
 use fstrings::f;
@@ -323,4 +327,170 @@ fn last_error_with_par_one_subtree_failed() {
         "peer_id": fallible_peer_id
     });
     assert_eq!(actual_value, expected_value);
+}
+
+#[test]
+fn fail_with_scalar_rebubble_error() {
+    let fallible_peer_id = "fallible_peer_id";
+    let mut fallible_vm = create_avm(fallible_call_service("fallible_call_service"), fallible_peer_id);
+
+    let script = f!(r#"
+        (xor
+            (call "{fallible_peer_id}" ("fallible_call_service" "") [""])
+            (seq
+                (ap %last_error% scalar)
+                (fail scalar)
+            )
+        )
+    "#);
+
+    let result = call_vm!(fallible_vm, "", &script, "", "");
+
+    let expected_error = CatchableError::UserError {
+        error: rc!(json!({
+            "error_code": 10000i64,
+            "instruction": r#"call "fallible_peer_id" ("fallible_call_service" "") [""] "#,
+            "message": r#"Local service error, ret_code is 1, error message is '"failed result from fallible_call_service"'"#,
+            "peer_id": "fallible_peer_id",
+        })),
+    };
+    assert!(check_error(&result, expected_error));
+}
+
+#[test]
+fn fail_with_scalar_from_call() {
+    let vm_peer_id = "vm_peer_id";
+    let error_code = 1337;
+    let error_message = "error message";
+    let service_result = json!({"error_code": error_code, "message": error_message});
+    let mut vm = create_avm(set_variable_call_service(service_result), vm_peer_id);
+
+    let script = f!(r#"
+        (seq
+            (call "{vm_peer_id}" ("" "") [""] scalar)
+            (fail scalar)
+        )
+    "#);
+
+    let result = call_vm!(vm, "", &script, "", "");
+
+    let expected_error = CatchableError::UserError {
+        error: rc!(json!({
+            "error_code": error_code,
+            "message": error_message,
+        })),
+    };
+    assert!(check_error(&result, expected_error));
+}
+
+#[test]
+fn fail_with_scalar_with_lambda_from_call() {
+    let vm_peer_id = "vm_peer_id";
+    let error_code = 1337;
+    let error_message = "error message";
+    let service_result = json!({"error": {"error_code": error_code, "message": error_message}});
+    let mut vm = create_avm(set_variable_call_service(service_result), vm_peer_id);
+
+    let script = f!(r#"
+        (seq
+            (call "{vm_peer_id}" ("" "") [""] scalar)
+            (fail scalar.$.error)
+        )
+    "#);
+
+    let result = call_vm!(vm, "", &script, "", "");
+
+    let expected_error = CatchableError::UserError {
+        error: rc!(json!({
+            "error_code": error_code,
+            "message": error_message,
+        })),
+    };
+    assert!(check_error(&result, expected_error));
+}
+
+#[test]
+fn fail_with_scalar_from_call_not_enough_fields() {
+    let vm_peer_id = "vm_peer_id";
+    let error_code = 1337;
+    let service_result = json!({ "error_code": error_code });
+    let mut vm = create_avm(set_variable_call_service(service_result.clone()), vm_peer_id);
+
+    let script = f!(r#"
+        (seq
+            (call "{vm_peer_id}" ("" "") [""] scalar)
+            (fail scalar)
+        )
+    "#);
+
+    let result = call_vm!(vm, "", &script, "", "");
+
+    let expected_error = CatchableError::InvalidLastErrorObjectError(LastErrorObjectError::ScalarMustContainField {
+        scalar: service_result,
+        field_name: "message",
+    });
+    assert!(check_error(&result, expected_error));
+}
+
+#[test]
+fn fail_with_scalar_from_call_not_right_type() {
+    let vm_peer_id = "vm_peer_id";
+    let service_result = json!([]);
+    let mut vm = create_avm(set_variable_call_service(service_result.clone()), vm_peer_id);
+
+    let script = f!(r#"
+        (seq
+            (call "{vm_peer_id}" ("" "") [""] scalar)
+            (fail scalar)
+        )
+    "#);
+
+    let result = call_vm!(vm, "", &script, "", "");
+
+    let expected_error =
+        CatchableError::InvalidLastErrorObjectError(LastErrorObjectError::ScalarMustBeObject(service_result));
+    assert!(check_error(&result, expected_error));
+}
+
+#[test]
+fn fail_with_scalar_from_call_field_not_right_type() {
+    let vm_peer_id = "vm_peer_id";
+    let service_result = json!({"error_code": "error_code", "message": "error message"});
+    let mut vm = create_avm(set_variable_call_service(service_result.clone()), vm_peer_id);
+
+    let script = f!(r#"
+        (seq
+            (call "{vm_peer_id}" ("" "") [""] scalar)
+            (fail scalar)
+        )
+    "#);
+
+    let result = call_vm!(vm, "", &script, "", "");
+
+    let expected_error = CatchableError::InvalidLastErrorObjectError(LastErrorObjectError::ScalarFieldIsWrongType {
+        scalar: service_result.clone(),
+        field_name: "error_code",
+        expected_type: "integer",
+    });
+    assert!(check_error(&result, expected_error));
+}
+
+#[test]
+fn last_error_with_match() {
+    let vm_peer_id = "vm_peer_id";
+    let mut vm = create_avm(fallible_call_service("fallible_call_service"), vm_peer_id);
+
+    let script = f!(r#"
+        (xor
+            (call "{vm_peer_id}" ("fallible_call_service" "") [""])
+            (match %last_error%.$.error_code 10000
+                (call "{vm_peer_id}" ("" "") [%last_error%])
+            )
+        )
+    "#);
+
+    let result = checked_call_vm!(vm, "asd", &script, "", "");
+
+    let trace = trace_from_result(&result);
+    assert_eq!(trace.len(), 2); // if match works there will be 2 calls in a resulted trace
 }

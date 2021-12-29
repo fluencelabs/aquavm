@@ -16,6 +16,10 @@
 
 use super::dsl::*;
 use super::parse;
+use crate::ast::ScalarWithLambda;
+
+use air_lambda_ast::LambdaAST;
+use air_lambda_ast::ValueAccessor;
 
 #[test]
 fn parse_fail_last_error() {
@@ -34,5 +38,33 @@ fn parse_fail_literals() {
         "#;
     let instruction = parse(source_code);
     let expected = fail_literals(1, "error message");
+    assert_eq!(instruction, expected)
+}
+
+#[test]
+fn parse_fail_scalars() {
+    let source_code = r#"
+           (fail scalar)
+        "#;
+    let instruction = parse(source_code);
+    let expected = fail_scalar(ScalarWithLambda::new("scalar", None, 18));
+    assert_eq!(instruction, expected)
+}
+
+#[test]
+fn parse_fail_scalar_with_lambda() {
+    let source_code = r#"
+           (fail scalar.$.field_accessor)
+        "#;
+    let instruction = parse(source_code);
+    let expected = fail_scalar(ScalarWithLambda::new(
+        "scalar",
+        Some(unsafe {
+            LambdaAST::new_unchecked(vec![ValueAccessor::FieldAccessByName {
+                field_name: "field_accessor",
+            }])
+        }),
+        18,
+    ));
     assert_eq!(instruction, expected)
 }

@@ -88,6 +88,7 @@ pub struct MisMatch<'i> {
 /// (fail %last_error%)
 #[derive(Serialize, Debug, PartialEq)]
 pub enum Fail<'i> {
+    Scalar(ScalarWithLambda<'i>),
     Literal {
         ret_code: i64,
         error_message: &'i str,

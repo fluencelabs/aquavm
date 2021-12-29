@@ -80,7 +80,7 @@ fn compare_matchable<'ctx>(
     match matchable {
         InitPeerId => {
             let init_peer_id = exec_ctx.init_peer_id.clone();
-            let jvalue = init_peer_id.into();
+            let jvalue = init_peer_id.as_str().into();
             Ok(comparator(Cow::Owned(jvalue)))
         }
         LastError(error_accessor) => {

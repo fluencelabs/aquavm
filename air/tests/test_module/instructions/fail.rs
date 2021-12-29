@@ -58,13 +58,15 @@ fn fail_with_literals() {
             )"#,
     );
 
-    let result = call_vm!(vm, "", script, "", "");
+    let init_peer_id = "init_peer_id";
+    let result = call_vm!(vm, init_peer_id, script, "", "");
 
     let expected_error = CatchableError::UserError {
         error: rc!(json!( {
         "error_code": 1337i64,
         "instruction": "fail 1337 error message",
         "message": "error message",
+        "peer_id": init_peer_id,
         })),
     };
     assert!(check_error(&result, expected_error));

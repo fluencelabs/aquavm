@@ -17,6 +17,8 @@
 use super::ExecutionCtx;
 use super::ExecutionResult;
 use super::TraceHandler;
+use crate::execution_step::execution_context::check_error_object;
+use crate::execution_step::resolver::resolve_ast_scalar_wl;
 use crate::execution_step::CatchableError;
 use crate::execution_step::LastError;
 use crate::execution_step::RSecurityTetraplet;
@@ -24,6 +26,7 @@ use crate::log_instruction;
 use crate::ExecutionError;
 use crate::JValue;
 
+use air_parser::ast;
 use air_parser::ast::Fail;
 use polyplets::SecurityTetraplet;
 
@@ -35,6 +38,7 @@ impl<'i> super::ExecutableInstruction<'i> for Fail<'i> {
         log_instruction!(fail, exec_ctx, trace_ctx);
 
         match self {
+            Fail::Scalar(scalar) => fail_with_scalar(scalar, exec_ctx),
             &Fail::Literal {
                 ret_code,
                 error_message,
@@ -45,25 +49,32 @@ impl<'i> super::ExecutableInstruction<'i> for Fail<'i> {
     }
 }
 
+fn fail_with_scalar<'i>(scalar: &ast::ScalarWithLambda<'i>, exec_ctx: &mut ExecutionCtx<'i>) -> ExecutionResult<()> {
+    let (value, mut tetraplet) = resolve_ast_scalar_wl(scalar, exec_ctx)?;
+    // tetraplets always have one element here and it'll be refactored after boxed value
+    let tetraplet = tetraplet.remove(0);
+    check_error_object(&value).map_err(CatchableError::InvalidLastErrorObjectError)?;
+
+    fail_with_error_object(exec_ctx, Rc::new(value), Some(tetraplet))
+}
+
 fn fail_with_literals<'i>(
-    ret_code: i64,
+    error_code: i64,
     error_message: &str,
     fail: &Fail<'_>,
     exec_ctx: &mut ExecutionCtx<'i>,
 ) -> ExecutionResult<()> {
-    // TODO: decouple error object creation into a separate function
-    let error_object = serde_json::json!({
-        "error_code": ret_code,
-        "message": error_message,
-        "instruction": fail.to_string(),
-    });
-    let error_object = Rc::new(error_object);
+    let error_object = crate::execution_step::execution_context::error_from_raw_fields(
+        error_code,
+        error_message,
+        &fail.to_string(),
+        exec_ctx.init_peer_id.as_ref(),
+    );
 
-    // TODO: wrap exec.init_peer_id in Rc
-    let literal_tetraplet = SecurityTetraplet::literal_tetraplet(exec_ctx.init_peer_id.clone());
+    let literal_tetraplet = SecurityTetraplet::literal_tetraplet(exec_ctx.init_peer_id.as_ref());
     let literal_tetraplet = Rc::new(RefCell::new(literal_tetraplet));
 
-    fail_with_error_object(exec_ctx, error_object, Some(literal_tetraplet))
+    fail_with_error_object(exec_ctx, Rc::new(error_object), Some(literal_tetraplet))
 }
 
 fn fail_with_last_error(exec_ctx: &mut ExecutionCtx<'_>) -> ExecutionResult<()> {

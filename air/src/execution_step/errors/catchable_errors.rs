@@ -17,6 +17,7 @@
 use super::Joinable;
 use super::LastErrorAffectable;
 use super::Stream;
+use crate::execution_step::execution_context::LastErrorObjectError;
 use crate::execution_step::lambda_applier::LambdaError;
 use crate::JValue;
 use crate::ToErrorCode;
@@ -77,6 +78,10 @@ pub enum CatchableError {
     /// Errors occurred while insertion of a value inside stream that doesn't have corresponding generation.
     #[error("stream {0:?} doesn't have generation with number {1}, probably a supplied to the interpreter data is corrupted")]
     StreamDontHaveSuchGeneration(Stream, usize),
+
+    /// This error type is produced by a fail instruction that tries to throw a scalar that have inappropriate type.
+    #[error(transparent)]
+    InvalidLastErrorObjectError(#[from] LastErrorObjectError),
 }
 
 impl From<LambdaError> for Rc<CatchableError> {
