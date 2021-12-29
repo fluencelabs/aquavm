@@ -1,3 +1,14 @@
+## Version 0.20.0 (2021-12-29)
+
+[PR 205](https://github.com/fluencelabs/aquavm/pull/205):  
+Supported scalars in `fail` instructions.
+
+[PR 202](https://github.com/fluencelabs/aquavm/pull/202) [PR 198](https://github.com/fluencelabs/aquavm/pull/198):  
+AquaVM errors mechanism was completely refactored.
+
+[PR 207](https://github.com/fluencelabs/aquavm/pull/207):  
+Fixed bug with empty array in `match`.
+
 ## Version 0.19.0 (2021-12-15)
 
 [PR 196](https://github.com/fluencelabs/aquavm/pull/196):  
