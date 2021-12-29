@@ -51,7 +51,7 @@ impl<'i> super::ExecutableInstruction<'i> for Fail<'i> {
 
 fn fail_with_scalar<'i>(scalar: &ast::ScalarWithLambda<'i>, exec_ctx: &mut ExecutionCtx<'i>) -> ExecutionResult<()> {
     let (value, mut tetraplet) = resolve_ast_scalar_wl(scalar, exec_ctx)?;
-    // tetraplets always have one elements here and it'll be refactored after boxed value
+    // tetraplets always have one element here and it'll be refactored after boxed value
     let rtetraplet = tetraplet.remove(0);
     check_error(&value).map_err(CatchableError::LastErrorObjectError)?;
 
