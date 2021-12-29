@@ -122,12 +122,5 @@ pub fn is_interpreter_succeded(result: &RawAVMOutcome) -> bool {
 }
 
 pub fn check_error(result: &RawAVMOutcome, error: impl ToErrorCode + ToString) -> bool {
-    println!(
-        "{} == {} && {} == {}",
-        result.ret_code,
-        error.to_error_code(),
-        result.error_message,
-        error.to_string()
-    );
     result.ret_code == error.to_error_code() && result.error_message == error.to_string()
 }
