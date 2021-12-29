@@ -47,6 +47,11 @@ pub(crate) fn are_matchable_eq<'ctx>(
             compare_matchable(matchable, exec_ctx, make_string_comparator(value))
         }
 
+        (EmptyArray, EmptyArray) => Ok(true),
+        (EmptyArray, matchable) | (matchable, EmptyArray) => {
+            compare_matchable(matchable, exec_ctx, make_object_comparator(JValue::Array(vec![])))
+        }
+
         (Boolean(left_boolean), Boolean(right_boolean)) => Ok(left_boolean == right_boolean),
         (Boolean(value), matchable) | (matchable, Boolean(value)) => {
             compare_matchable(matchable, exec_ctx, make_object_comparator((*value).into()))
@@ -63,7 +68,6 @@ pub(crate) fn are_matchable_eq<'ctx>(
 
             Ok(left_value == right_value)
         }
-        _ => Ok(false),
     }
 }
 

@@ -19,3 +19,4 @@ mod issue_173;
 mod issue_177;
 mod issue_178;
 mod issue_180;
+mod issue_206;
