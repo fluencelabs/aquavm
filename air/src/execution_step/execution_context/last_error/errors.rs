@@ -26,4 +26,11 @@ pub enum LastErrorObjectError {
 
     #[error("scalar '{scalar}' must have field with name '{field_name}'")]
     ScalarMustContainField { scalar: JValue, field_name: &'static str },
+
+    #[error("{field_name} of scalar '{scalar}' must have {expected_type} type")]
+    ScalarFieldIsWrongType {
+        scalar: JValue,
+        field_name: &'static str,
+        expected_type: &'static str,
+    },
 }

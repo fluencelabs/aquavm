@@ -425,7 +425,7 @@ fn fail_with_scalar_from_call_not_enough_fields() {
 
     let result = call_vm!(vm, "", &script, "", "");
 
-    let expected_error = CatchableError::LastErrorObjectError(LastErrorObjectError::ScalarMustContainField {
+    let expected_error = CatchableError::InvalidLastErrorObjectError(LastErrorObjectError::ScalarMustContainField {
         scalar: service_result,
         field_name: "message",
     });
@@ -447,7 +447,8 @@ fn fail_with_scalar_from_call_not_right_type() {
 
     let result = call_vm!(vm, "", &script, "", "");
 
-    let expected_error = CatchableError::LastErrorObjectError(LastErrorObjectError::ScalarMustBeObject(service_result));
+    let expected_error =
+        CatchableError::InvalidLastErrorObjectError(LastErrorObjectError::ScalarMustBeObject(service_result));
     assert!(check_error(&result, expected_error));
 }
 

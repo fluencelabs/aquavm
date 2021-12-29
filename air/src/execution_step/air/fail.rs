@@ -17,7 +17,7 @@
 use super::ExecutionCtx;
 use super::ExecutionResult;
 use super::TraceHandler;
-use crate::execution_step::execution_context::check_error;
+use crate::execution_step::execution_context::check_error_object;
 use crate::execution_step::resolver::resolve_ast_scalar_wl;
 use crate::execution_step::CatchableError;
 use crate::execution_step::LastError;
@@ -52,10 +52,10 @@ impl<'i> super::ExecutableInstruction<'i> for Fail<'i> {
 fn fail_with_scalar<'i>(scalar: &ast::ScalarWithLambda<'i>, exec_ctx: &mut ExecutionCtx<'i>) -> ExecutionResult<()> {
     let (value, mut tetraplet) = resolve_ast_scalar_wl(scalar, exec_ctx)?;
     // tetraplets always have one elements here and it'll be refactored after boxed value
-    let rtetraplet = tetraplet.remove(0);
-    check_error(&value).map_err(CatchableError::LastErrorObjectError)?;
+    let tetraplet = tetraplet.remove(0);
+    check_error_object(&value).map_err(CatchableError::InvalidLastErrorObjectError)?;
 
-    fail_with_error_object(exec_ctx, Rc::new(value), Some(rtetraplet))
+    fail_with_error_object(exec_ctx, Rc::new(value), Some(tetraplet))
 }
 
 fn fail_with_literals<'i>(

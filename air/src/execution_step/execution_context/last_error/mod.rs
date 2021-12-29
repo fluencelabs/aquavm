@@ -25,6 +25,6 @@ pub use last_error_definition::INSTRUCTION_FIELD_NAME;
 pub use last_error_definition::MESSAGE_FIELD_NAME;
 pub use last_error_definition::PEER_ID_FIELD_NAME;
 
-pub(crate) use last_error_definition::check_error;
+pub(crate) use last_error_definition::check_error_object;
 pub(crate) use last_error_definition::error_from_raw_fields;
 pub(crate) use last_error_descriptor::LastErrorDescriptor;

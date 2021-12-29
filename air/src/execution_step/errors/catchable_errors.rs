@@ -81,7 +81,7 @@ pub enum CatchableError {
 
     /// This error type is produced by a fail instruction that tries to throw a scalar that have inappropriate type.
     #[error(transparent)]
-    LastErrorObjectError(#[from] LastErrorObjectError),
+    InvalidLastErrorObjectError(#[from] LastErrorObjectError),
 }
 
 impl From<LambdaError> for Rc<CatchableError> {

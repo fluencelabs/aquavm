@@ -55,7 +55,7 @@ pub(crate) fn error_from_raw_fields(error_code: i64, error_message: &str, instru
 /// Checks that a scalar is a value of an object types that contains at least two fields:
 ///  - error_code
 ///  - message
-pub(crate) fn check_error(scalar: &JValue) -> Result<(), LastErrorObjectError> {
+pub(crate) fn check_error_object(scalar: &JValue) -> Result<(), LastErrorObjectError> {
     let fields = match scalar {
         JValue::Object(fields) => fields,
         _ => return Err(LastErrorObjectError::ScalarMustBeObject(scalar.clone())),
@@ -70,8 +70,41 @@ pub(crate) fn check_error(scalar: &JValue) -> Result<(), LastErrorObjectError> {
             })
     };
 
-    check_field(ERROR_CODE_FIELD_NAME)?;
-    check_field(MESSAGE_FIELD_NAME)?;
+    let error_code = check_field(ERROR_CODE_FIELD_NAME)?;
+    ensure_jvalue_is_integer(scalar, error_code, ERROR_CODE_FIELD_NAME)?;
+
+    let message = check_field(MESSAGE_FIELD_NAME)?;
+    ensure_jvalue_is_string(scalar, message, MESSAGE_FIELD_NAME)?;
 
     Ok(())
+}
+
+fn ensure_jvalue_is_integer(
+    scalar: &JValue,
+    value: &JValue,
+    field_name: &'static str,
+) -> Result<(), LastErrorObjectError> {
+    match value {
+        JValue::Number(number) if number.is_i64() || number.is_u64() => Ok(()),
+        _ => Err(LastErrorObjectError::ScalarFieldIsWrongType {
+            scalar: scalar.clone(),
+            field_name,
+            expected_type: "integer",
+        }),
+    }
+}
+
+fn ensure_jvalue_is_string(
+    scalar: &JValue,
+    value: &JValue,
+    field_name: &'static str,
+) -> Result<(), LastErrorObjectError> {
+    match value {
+        JValue::String(_) => Ok(()),
+        _ => Err(LastErrorObjectError::ScalarFieldIsWrongType {
+            scalar: scalar.clone(),
+            field_name,
+            expected_type: "string",
+        }),
+    }
 }
