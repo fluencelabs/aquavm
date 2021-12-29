@@ -450,3 +450,24 @@ fn fail_with_scalar_from_call_not_right_type() {
     let expected_error = CatchableError::LastErrorObjectError(LastErrorObjectError::ScalarMustBeObject(service_result));
     assert!(check_error(&result, expected_error));
 }
+
+#[test]
+fn last_error_with_match() {
+    let vm_peer_id = "vm_peer_id";
+    let mut vm = create_avm(fallible_call_service("fallible_call_service"), vm_peer_id);
+
+    let script = f!(
+        r#"
+        (xor
+            (call "{vm_peer_id}" ("fallible_call_service" "") [""])
+            (match %last_error%.$.error_code 10000
+                (call "{vm_peer_id}" ("" "") [%last_error%])
+            )
+        )
+    "#);
+
+    let result = checked_call_vm!(vm, "asd", &script, "", "");
+
+    let trace = trace_from_result(&result);
+    assert_eq!(trace.len(), 2); // if match works there will be 2 calls in a resulted trace
+}
