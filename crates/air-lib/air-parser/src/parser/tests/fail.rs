@@ -17,12 +17,9 @@
 use super::dsl::*;
 use super::parse;
 use crate::ast::ScalarWithLambda;
-use crate::parser::ParserError;
 
 use air_lambda_ast::LambdaAST;
 use air_lambda_ast::ValueAccessor;
-
-use lalrpop_util::ParseError;
 
 #[test]
 fn parse_fail_last_error() {

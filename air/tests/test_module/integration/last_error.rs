@@ -456,8 +456,7 @@ fn last_error_with_match() {
     let vm_peer_id = "vm_peer_id";
     let mut vm = create_avm(fallible_call_service("fallible_call_service"), vm_peer_id);
 
-    let script = f!(
-        r#"
+    let script = f!(r#"
         (xor
             (call "{vm_peer_id}" ("fallible_call_service" "") [""])
             (match %last_error%.$.error_code 10000
