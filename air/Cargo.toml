@@ -24,7 +24,7 @@ air-lambda-ast = { path = "../crates/air-lib/lambda/ast" }
 air-lambda-parser = { path = "../crates/air-lib/lambda/parser" }
 air-trace-handler = { path = "../crates/air-lib/trace-handler" }
 polyplets = { path = "../crates/air-lib/polyplets" }
-marine-rs-sdk = { version = "0.6.15",features = [] }
+marine-rs-sdk = { version = "0.6.15", features = ["logger"] }
 
 serde = { version = "1.0.118", features = [ "derive", "rc" ] }
 serde_json = "1.0.61"

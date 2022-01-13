@@ -99,7 +99,25 @@ function call_export(f: ExportValue, logFunction: LogFunction): any {
         logFunction('error', `can't call export ${f}: it is not a function, but ${typeof f}`);
     }
 }
-/*
+
+const lTextDecoder = typeof TextDecoder === 'undefined' ? module.require('util').TextDecoder : TextDecoder;
+
+let cachedTextDecoder = new lTextDecoder('utf-8', { ignoreBOM: true, fatal: true });
+
+cachedTextDecoder.decode();
+let cachegetUint8Memory0 = null;
+
+function getUint8Memory0(wasm) {
+    if (cachegetUint8Memory0 === null || cachegetUint8Memory0.buffer !== wasm.memory.buffer) {
+        cachegetUint8Memory0 = new Uint8Array(wasm.memory.buffer);
+    }
+    return cachegetUint8Memory0;
+}
+
+export function getStringFromWasm0(wasm, ptr, len) {
+    return cachedTextDecoder.decode(getUint8Memory0(wasm).subarray(ptr, ptr + len));
+}
+
 function log_import(cfg: HostImportsConfig, logFunction: LogFunction): LogImport {
     return {
         log_utf8_string: (level: any, target: any, offset: any, size: any) => {
@@ -139,7 +157,7 @@ function newImportObject(cfg: HostImportsConfig, logFunction: LogFunction): Impo
     return {
         host: log_import(cfg, logFunction),
     };
-}*/
+}
 
 export class AirInterpreter {
     private _interpreter;
@@ -176,13 +194,19 @@ export class AirInterpreter {
             }
         })
 
+        const cfg = new HostImportsConfig((cfg) => {
+            return newImportObject(cfg, this.logFunction);
+        });
+
         let wasmModule = await WebAssembly.compile(interpreter_wasm);
         //console.log(wasmModule)
 
         let instance = await WebAssembly.instantiate(wasmModule, {
             ...this._wasi.getImports(wasmModule),
+            ...cfg.newImportObject()
         });
         //console.log(instance)
+        cfg.setExports(instance.exports)
 
         this._wasi.start(instance)                       // Start the WASI instance
         let custom_sections = WebAssembly.Module.customSections(wasmModule,"interface-types");
