@@ -28,7 +28,10 @@ pub enum ValueAccessor<'input> {
     ArrayAccess { idx: u32 },
 
     // .field
-    FieldAccess { field_name: &'input str },
+    FieldAccessByName { field_name: &'input str },
+
+    // (.)?[field]
+    FieldAccessByScalar { scalar_name: &'input str },
 
     // needed to allow parser catch all errors from a lambda expression without stopping
     // on the very first one. Although, this variant is guaranteed not to be present in a lambda.

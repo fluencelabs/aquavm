@@ -16,6 +16,7 @@
 
 mod ap;
 mod call;
+mod fail;
 mod fold;
 mod match_;
 mod mismatch;

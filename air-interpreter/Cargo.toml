@@ -1,6 +1,6 @@
 [package]
 name = "air-interpreter"
-version = "0.17.0"
+version = "0.20.0"
 description = "Crate-wrapper for air"
 authors = ["Fluence Labs"]
 edition = "2018"

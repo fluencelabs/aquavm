@@ -9,16 +9,6 @@
     wasm-pack build ./air-interpreter --no-typescript --release -d ../avm/client/wasm
 )
 
-## base64 on MacOS doesn't have -w option
-if echo | base64 -w0 > /dev/null 2>&1;
-then
-  BASE64=$(base64 -w0 wasm/air_interpreter_client_bg.wasm)
-else
-  BASE64=$(base64 wasm/air_interpreter_client_bg.wasm)
-fi
-
-cat << EOF > ./src/wasm.js
-// auto-generated
-
-module.exports = "$BASE64";
-EOF
+mkdir -p ./dist/
+cp wasm/air_interpreter_client_bg.wasm dist/avm.wasm
+cp dist/avm.wasm src/__test__/

@@ -15,7 +15,7 @@
  */
 
 use super::*;
-use crate::exec_err;
+use crate::execution_step::CatchableError;
 use crate::execution_step::RSecurityTetraplet;
 use crate::JValue;
 use crate::LambdaAST;
@@ -87,19 +87,17 @@ fn create_scalar_iterable<'ctx>(
     variable_name: &str,
 ) -> ExecutionResult<FoldIterableScalar> {
     match exec_ctx.scalars.get(variable_name)? {
-        ScalarRef::Value(call_result) => from_call_result(call_result.clone()),
+        ScalarRef::Value(call_result) => from_call_result(call_result.clone(), variable_name),
         ScalarRef::IterableValue(fold_state) => {
             let iterable_value = fold_state.iterable.peek().unwrap();
             let call_result = iterable_value.into_resolved_result();
-            from_call_result(call_result)
+            from_call_result(call_result, variable_name)
         }
     }
 }
 
 /// Constructs iterable value from resolved call result.
-fn from_call_result(call_result: ValueAggregate) -> ExecutionResult<FoldIterableScalar> {
-    use ExecutionError::IncompatibleJValueType;
-
+fn from_call_result(call_result: ValueAggregate, variable_name: &str) -> ExecutionResult<FoldIterableScalar> {
     let len = match &call_result.result.deref() {
         JValue::Array(array) => {
             if array.is_empty() {
@@ -108,7 +106,14 @@ fn from_call_result(call_result: ValueAggregate) -> ExecutionResult<FoldIterable
             }
             array.len()
         }
-        v => return exec_err!(IncompatibleJValueType((*v).clone(), "array")),
+        v => {
+            return Err(CatchableError::IncompatibleJValueType {
+                variable_name: variable_name.to_string(),
+                actual_value: (*v).clone(),
+                expected_value_type: "array",
+            }
+            .into());
+        }
     };
 
     let foldable = IterableResolvedCall::init(call_result, len);
@@ -127,12 +132,12 @@ fn create_scalar_lambda_iterable<'ctx>(
 
     match exec_ctx.scalars.get(scalar_name)? {
         ScalarRef::Value(variable) => {
-            let jvalues = select(&variable.result, lambda.iter())?;
+            let jvalues = select(&variable.result, lambda.iter(), exec_ctx)?;
             from_jvalue(jvalues, variable.tetraplet.clone(), lambda)
         }
         ScalarRef::IterableValue(fold_state) => {
             let iterable_value = fold_state.iterable.peek().unwrap();
-            let jvalue = iterable_value.apply_lambda(lambda)?;
+            let jvalue = iterable_value.apply_lambda(lambda, exec_ctx)?;
             let tetraplet = as_tetraplet(&iterable_value);
 
             from_jvalue(jvalue, tetraplet, lambda)
@@ -152,10 +157,7 @@ fn from_jvalue(
     let iterable = match jvalue {
         JValue::Array(array) => array,
         _ => {
-            return exec_err!(ExecutionError::FoldIteratesOverNonArray(
-                jvalue.clone(),
-                formatted_lambda_ast
-            ))
+            return Err(CatchableError::FoldIteratesOverNonArray(jvalue.clone(), formatted_lambda_ast).into());
         }
     };
 

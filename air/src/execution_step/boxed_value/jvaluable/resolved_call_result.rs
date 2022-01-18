@@ -19,6 +19,7 @@ use super::ExecutionResult;
 use super::JValuable;
 use super::LambdaAST;
 use super::ValueAggregate;
+use crate::execution_step::ExecutionCtx;
 use crate::execution_step::RSecurityTetraplet;
 use crate::execution_step::SecurityTetraplets;
 use crate::JValue;
@@ -29,13 +30,17 @@ use std::borrow::Cow;
 use std::ops::Deref;
 
 impl JValuable for ValueAggregate {
-    fn apply_lambda(&self, lambda: &LambdaAST<'_>) -> ExecutionResult<&JValue> {
-        let selected_value = select(&self.result, lambda.iter())?;
+    fn apply_lambda<'i>(&self, lambda: &LambdaAST<'_>, exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<&JValue> {
+        let selected_value = select(&self.result, lambda.iter(), exec_ctx)?;
         Ok(selected_value)
     }
 
-    fn apply_lambda_with_tetraplets(&self, lambda: &LambdaAST<'_>) -> ExecutionResult<(&JValue, RSecurityTetraplet)> {
-        let selected_value = select(&self.result, lambda.iter())?;
+    fn apply_lambda_with_tetraplets<'i>(
+        &self,
+        lambda: &LambdaAST<'_>,
+        exec_ctx: &ExecutionCtx<'i>,
+    ) -> ExecutionResult<(&JValue, RSecurityTetraplet)> {
+        let selected_value = select(&self.result, lambda.iter(), exec_ctx)?;
         let tetraplet = self.tetraplet.clone();
         tetraplet.borrow_mut().add_lambda(&format_ast(lambda));
 

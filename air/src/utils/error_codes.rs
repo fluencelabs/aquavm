@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-/// This trait is intended to differentiate between catchable and non-catchable error types.
-/// Errors of the first type could be caught by xor, the second couldn't and should stop
-/// AIR execution. This is needed to prevent some malicious data merging and manage
-/// prev_data always in a valid state.
-pub(crate) trait Catchable {
-    /// Return true, if error is catchable.
-    fn is_catchable(&self) -> bool;
-}
+/// This consts are used as start ids of corresponding errors.
+pub(crate) const PREPARATION_ERROR_START_ID: i64 = 1;
+pub(crate) const CATCHABLE_ERRORS_START_ID: i64 = 10000;
+pub(crate) const UNCATCHABLE_ERRORS_START_ID: i64 = 20000;
+pub(crate) const FAREWELL_ERRORS_START_ID: i64 = 30000;

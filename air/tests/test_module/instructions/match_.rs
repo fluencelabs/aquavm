@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use air::CatchableError;
 use air_test_utils::prelude::*;
 
 #[test]
@@ -163,8 +164,9 @@ fn match_with_equal_numbers() {
                 (null)
             )";
 
-    let result = checked_call_vm!(vm, "asd", script, "", "");
-    assert_eq!(result.ret_code, 0);
+    let result = call_vm!(vm, "asd", script, "", "");
+
+    assert!(is_interpreter_succeded(&result));
 }
 
 #[test]
@@ -192,11 +194,13 @@ fn match_without_xor() {
     let result = call_vm!(set_variable_vm, "", &script, "", "");
     let result = call_vm!(vm, "", &script, "", result.data);
 
-    assert_eq!(result.ret_code, 1010);
+    let expected_error = CatchableError::MatchValuesNotEqual;
+    assert!(check_error(&result, expected_error));
 
     let result = call_vm!(vm, "", script, "", result.data);
 
-    assert_eq!(result.ret_code, 1010);
+    let expected_error = CatchableError::MatchValuesNotEqual;
+    assert!(check_error(&result, expected_error));
 }
 
 #[test]

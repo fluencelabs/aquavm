@@ -21,10 +21,10 @@ mod resolved_call_result;
 mod stream;
 
 use super::iterable::IterableItem;
-use super::ExecutionError;
 use super::ExecutionResult;
 use super::ValueAggregate;
 use crate::execution_step::lambda_applier::*;
+use crate::execution_step::ExecutionCtx;
 use crate::execution_step::RSecurityTetraplet;
 use crate::execution_step::SecurityTetraplets;
 use crate::JValue;
@@ -37,10 +37,14 @@ use std::borrow::Cow;
 /// Represent a value that could be transform to a JValue with or without tetraplets.
 pub(crate) trait JValuable {
     /// Applies lambda to the internal value, produces JValue.
-    fn apply_lambda(&self, lambda: &LambdaAST<'_>) -> ExecutionResult<&JValue>;
+    fn apply_lambda<'i>(&self, lambda: &LambdaAST<'_>, exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<&JValue>;
 
     /// Applies lambda to the internal value, produces JValue with tetraplet.
-    fn apply_lambda_with_tetraplets(&self, lambda: &LambdaAST<'_>) -> ExecutionResult<(&JValue, RSecurityTetraplet)>;
+    fn apply_lambda_with_tetraplets<'i>(
+        &self,
+        lambda: &LambdaAST<'_>,
+        exec_ctx: &ExecutionCtx<'i>,
+    ) -> ExecutionResult<(&JValue, RSecurityTetraplet)>;
 
     /// Return internal value as borrowed if it's possible, owned otherwise.
     fn as_jvalue(&self) -> Cow<'_, JValue>;

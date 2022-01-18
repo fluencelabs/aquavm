@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-use super::Catchable;
 use super::ExecutionCtx;
 use super::ExecutionError;
 use super::ExecutionResult;
@@ -31,7 +30,7 @@ impl<'i> super::ExecutableInstruction<'i> for Xor<'i> {
         match self.0.execute(exec_ctx, trace_ctx) {
             Err(e) if e.is_catchable() => {
                 exec_ctx.subtree_complete = true;
-                exec_ctx.last_error_could_be_set = true;
+                exec_ctx.last_error_descriptor.meet_xor_right_branch();
                 print_xor_log(&e);
 
                 self.1.execute(exec_ctx, trace_ctx)
@@ -42,12 +41,13 @@ impl<'i> super::ExecutableInstruction<'i> for Xor<'i> {
 }
 
 fn print_xor_log(e: &ExecutionError) {
-    match e {
+    if e.is_match_or_mismatch() {
         // These errors actually aren't real errors, but a way to bubble execution_step up from match
         // to a corresponding xor. They'll become errors iff there is no such xor and execution_step is
         // bubble up until the very beginning of current subtree. So the error message shouldn't
         // be print out in order not to confuse users.
-        ExecutionError::MatchWithoutXorError | ExecutionError::MismatchWithoutXorError => {}
-        e => log::warn!("xor caught an error: {}", e),
+        return;
     }
+
+    log::warn!("xor caught an error: {}", e);
 }

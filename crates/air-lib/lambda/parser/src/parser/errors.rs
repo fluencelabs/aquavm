@@ -26,7 +26,7 @@ pub enum LambdaParserError<'input> {
     #[error(transparent)]
     LexerError(#[from] LexerError),
 
-    #[error("provided lambda expression doesn't contain any algebras")]
+    #[error("provided lambda expression doesn't contain any accessor")]
     EmptyLambda,
 
     #[error("{0:?}")]

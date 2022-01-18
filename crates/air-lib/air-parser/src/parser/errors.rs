@@ -31,12 +31,18 @@ pub enum ParserError {
     #[error("iterable '{2}' wasn't defined")]
     UndefinedIterable(usize, usize, String),
 
+    #[error("last error with non-empty path is ambiguous, please use just %last_error%")]
+    AmbiguousFailLastError(usize, usize),
+
     /// Semantic errors in a call instructions.
     #[error("call should have service id specified by peer part or function part")]
     InvalidCallTriplet(usize, usize),
 
     #[error("new can't be applied to a '{2}' because it's an iterator")]
     IteratorRestrictionNotAllowed(usize, usize, String),
+
+    #[error("multiple iterable values found for iterable name '{2}'")]
+    MultipleIterableValues(usize, usize, String),
 }
 
 impl From<std::convert::Infallible> for ParserError {

@@ -17,6 +17,7 @@
 mod ap;
 mod call;
 mod compare_matchable;
+mod fail;
 mod fold;
 mod fold_scalar;
 mod fold_stream;
@@ -33,8 +34,6 @@ pub(crate) use fold::FoldState;
 
 use super::boxed_value::ScalarRef;
 use super::boxed_value::ValueAggregate;
-use super::execution_context::*;
-use super::Catchable;
 use super::ExecutionCtx;
 use super::ExecutionError;
 use super::ExecutionResult;
@@ -46,48 +45,21 @@ use air_parser::ast::Instruction;
 
 /// Executes instruction and updates last error if needed.
 macro_rules! execute {
-    ($self:expr, $instr:expr, $exec_ctx:ident, $trace_ctx:ident) => {
+    ($self:expr, $instr:expr, $exec_ctx:ident, $trace_ctx:ident) => {{
         match $instr.execute($exec_ctx, $trace_ctx) {
             Err(e) => {
-                if !$exec_ctx.last_error_could_be_set {
-                    return Err(e);
-                }
-
-                let instruction = format!("{}", $self);
-                let last_error =
-                    LastErrorDescriptor::new(e.clone(), instruction, $exec_ctx.current_peer_id.to_string(), None);
-                $exec_ctx.last_error = Some(last_error);
+                $exec_ctx.last_error_descriptor.try_to_set_from_error(
+                    &e,
+                    // TODO: avoid excess copying here
+                    &$instr.to_string(),
+                    $exec_ctx.current_peer_id.as_ref(),
+                    None,
+                );
                 Err(e)
             }
             v => v,
         }
-    };
-}
-
-/// Executes match/mismatch instructions and updates last error if error type wasn't
-/// MatchWithoutXorError or MismatchWithoutXorError.
-macro_rules! execute_match_mismatch {
-    ($self:expr, $instr:expr, $exec_ctx:ident, $trace_ctx:ident) => {
-        match $instr.execute($exec_ctx, $trace_ctx) {
-            Err(e) => {
-                use std::borrow::Borrow;
-
-                if !$exec_ctx.last_error_could_be_set
-                    || matches!(&*e.borrow(), ExecutionError::MatchWithoutXorError)
-                    || matches!(&*e.borrow(), ExecutionError::MismatchWithoutXorError)
-                {
-                    return Err(e);
-                }
-
-                let instruction = format!("{}", $self);
-                let last_error =
-                    LastErrorDescriptor::new(e.clone(), instruction, $exec_ctx.current_peer_id.to_string(), None);
-                $exec_ctx.last_error = Some(last_error);
-                Err(e)
-            }
-            v => v,
-        }
-    };
+    }};
 }
 
 pub(crate) trait ExecutableInstruction<'i> {
@@ -102,6 +74,7 @@ impl<'i> ExecutableInstruction<'i> for Instruction<'i> {
             Instruction::Call(call) => call.execute(exec_ctx, trace_ctx),
 
             Instruction::Ap(ap) => execute!(self, ap, exec_ctx, trace_ctx),
+            Instruction::Fail(fail) => execute!(self, fail, exec_ctx, trace_ctx),
             Instruction::FoldScalar(fold) => execute!(self, fold, exec_ctx, trace_ctx),
             Instruction::FoldStream(fold) => execute!(self, fold, exec_ctx, trace_ctx),
             Instruction::New(new) => execute!(self, new, exec_ctx, trace_ctx),
@@ -110,10 +83,8 @@ impl<'i> ExecutableInstruction<'i> for Instruction<'i> {
             Instruction::Par(par) => execute!(self, par, exec_ctx, trace_ctx),
             Instruction::Seq(seq) => execute!(self, seq, exec_ctx, trace_ctx),
             Instruction::Xor(xor) => execute!(self, xor, exec_ctx, trace_ctx),
-
-            // match/mismatch shouldn't rewrite last_error
-            Instruction::Match(match_) => execute_match_mismatch!(self, match_, exec_ctx, trace_ctx),
-            Instruction::MisMatch(mismatch) => execute_match_mismatch!(self, mismatch, exec_ctx, trace_ctx),
+            Instruction::Match(match_) => execute!(self, match_, exec_ctx, trace_ctx),
+            Instruction::MisMatch(mismatch) => execute!(self, mismatch, exec_ctx, trace_ctx),
 
             Instruction::Error => unreachable!("should not execute if parsing succeeded. QED."),
         }

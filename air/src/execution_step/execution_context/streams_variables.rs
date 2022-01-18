@@ -189,7 +189,7 @@ fn find_closest<'d>(
 ) -> Option<&'d RefCell<Stream>> {
     // descriptors are placed in a order of decreasing scopes, so it's enough to get the latest suitable
     for descriptor in descriptors.rev() {
-        if descriptor.span.contains(position) {
+        if descriptor.span.contains_position(position) {
             return Some(&descriptor.stream);
         }
     }

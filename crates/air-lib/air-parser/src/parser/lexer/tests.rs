@@ -16,12 +16,11 @@
 
 use super::air_lexer::Spanned;
 use super::AIRLexer;
-use super::LastErrorPath;
 use super::LexerError;
-use super::Number;
 use super::Token;
 
-use air_lambda_parser::{LambdaAST, ValueAccessor};
+use air_lambda_parser::LambdaAST;
+use air_lambda_parser::ValueAccessor;
 
 fn run_lexer(input: &str) -> Vec<Spanned<Token<'_>, usize, LexerError>> {
     let lexer = AIRLexer::new(input);
@@ -98,6 +97,8 @@ fn air_instructions() {
             Ok((5, Token::CloseRoundBracket, 6)),
         ]),
     );
+
+    lexer_test("fail", Single(Ok((0, Token::Fail, 4))));
 
     lexer_test("fold", Single(Ok((0, Token::Fold, 4))));
 
@@ -187,64 +188,66 @@ fn string_literal() {
 
 #[test]
 fn integer_numbers() {
-    const NUMBER_WITH_PLUS_SIGN: &str = "+123";
-    let number = Number::Int(123);
+    let test_integer = 123;
+    let number_with_plus_sign = format!("+{}", test_integer);
 
     lexer_test(
-        NUMBER_WITH_PLUS_SIGN,
+        &number_with_plus_sign,
         Single(Ok((
             0,
-            Token::Number(number.clone()),
-            NUMBER_WITH_PLUS_SIGN.len(),
+            Token::I64(test_integer),
+            number_with_plus_sign.len(),
         ))),
     );
 
-    const NUMBER: &str = "123";
+    let number = format!("{}", test_integer);
 
     lexer_test(
-        NUMBER,
-        Single(Ok((0, Token::Number(number.clone()), NUMBER.len()))),
+        &number,
+        Single(Ok((0, Token::I64(test_integer), number.len()))),
     );
 
-    const NUMBER_WITH_MINUS_SIGN: &str = "-123";
-    let number = Number::Int(-123);
+    let number_with_minus_sign = format!("-{}", test_integer);
 
     lexer_test(
-        NUMBER_WITH_MINUS_SIGN,
-        Single(Ok((0, Token::Number(number), NUMBER_WITH_MINUS_SIGN.len()))),
+        &number_with_minus_sign,
+        Single(Ok((
+            0,
+            Token::I64(-test_integer),
+            number_with_minus_sign.len(),
+        ))),
     );
 }
 
 #[test]
 fn float_number() {
-    const FNUMBER_WITH_PLUS_SIGN: &str = "+123.123";
-    let number = Number::Float(123.123);
+    let test_float = 123.123;
+    let float_number_with_plus_sign = format!("+{}", test_float);
 
     lexer_test(
-        FNUMBER_WITH_PLUS_SIGN,
+        &float_number_with_plus_sign,
         Single(Ok((
             0,
-            Token::Number(number.clone()),
-            FNUMBER_WITH_PLUS_SIGN.len(),
+            Token::F64(test_float),
+            float_number_with_plus_sign.len(),
         ))),
     );
 
-    const FNUMBER: &str = "123.123";
+    let float_number = format!("{}", test_float);
 
     lexer_test(
-        FNUMBER,
-        Single(Ok((0, Token::Number(number), FNUMBER.len()))),
+        &float_number,
+        Single(Ok((0, Token::F64(test_float), float_number.len()))),
     );
 
-    const FNUMBER_WITH_MINUS_SIGN: &str = "-123.123";
-    let number = Number::Float(-123.123);
+    let float_number_with_minus_sign = format!("-{}", test_float);
 
     lexer_test(
-        FNUMBER_WITH_MINUS_SIGN,
+        &float_number_with_minus_sign,
         Single(Ok((
             0,
-            Token::Number(number),
-            FNUMBER_WITH_MINUS_SIGN.len(),
+            Token::F64(-test_float),
+            float_number_with_minus_sign.len(),
         ))),
     );
 }
@@ -285,7 +288,7 @@ fn lambda() {
                 name: "value",
                 lambda: unsafe {
                     LambdaAST::new_unchecked(vec![
-                        ValueAccessor::FieldAccess {
+                        ValueAccessor::FieldAccessByName {
                             field_name: "field",
                         },
                         ValueAccessor::ArrayAccess { idx: 1 },
@@ -373,11 +376,7 @@ fn last_error() {
 
     lexer_test(
         LAST_ERROR,
-        Single(Ok((
-            0,
-            Token::LastError(LastErrorPath::None),
-            LAST_ERROR.len(),
-        ))),
+        Single(Ok((0, Token::LastError, LAST_ERROR.len()))),
     );
 }
 
@@ -385,56 +384,49 @@ fn last_error() {
 fn last_error_instruction() {
     const LAST_ERROR: &str = r#"%last_error%.$.instruction"#;
 
-    lexer_test(
-        LAST_ERROR,
-        Single(Ok((
-            0,
-            Token::LastError(LastErrorPath::Instruction),
-            LAST_ERROR.len(),
-        ))),
-    );
+    let token = Token::LastErrorWithLambda(unsafe {
+        LambdaAST::new_unchecked(vec![ValueAccessor::FieldAccessByName {
+            field_name: "instruction",
+        }])
+    });
+
+    lexer_test(LAST_ERROR, Single(Ok((0, token, LAST_ERROR.len()))));
 }
 
 #[test]
-fn last_error_msg() {
-    const LAST_ERROR: &str = r#"%last_error%.$.msg"#;
+fn last_error_message() {
+    const LAST_ERROR: &str = r#"%last_error%.$.message"#;
 
-    lexer_test(
-        LAST_ERROR,
-        Single(Ok((
-            0,
-            Token::LastError(LastErrorPath::Message),
-            LAST_ERROR.len(),
-        ))),
-    );
+    let token = Token::LastErrorWithLambda(unsafe {
+        LambdaAST::new_unchecked(vec![ValueAccessor::FieldAccessByName {
+            field_name: "message",
+        }])
+    });
+    lexer_test(LAST_ERROR, Single(Ok((0, token, LAST_ERROR.len()))));
 }
 
 #[test]
 fn last_error_peer_id() {
     const LAST_ERROR: &str = r#"%last_error%.$.peer_id"#;
 
-    lexer_test(
-        LAST_ERROR,
-        Single(Ok((
-            0,
-            Token::LastError(LastErrorPath::PeerId),
-            LAST_ERROR.len(),
-        ))),
-    );
+    let token = Token::LastErrorWithLambda(unsafe {
+        LambdaAST::new_unchecked(vec![ValueAccessor::FieldAccessByName {
+            field_name: "peer_id",
+        }])
+    });
+    lexer_test(LAST_ERROR, Single(Ok((0, token, LAST_ERROR.len()))));
 }
 
 #[test]
-fn last_error_incorrect_field() {
+fn last_error_non_standard_field() {
     const LAST_ERROR: &str = r#"%last_error%.$.asdasd"#;
 
-    lexer_test(
-        LAST_ERROR,
-        Single(Err(LexerError::LastErrorPathError(
-            12,
-            LAST_ERROR.len(),
-            ".$.asdasd".to_string(),
-        ))),
-    );
+    let token = Token::LastErrorWithLambda(unsafe {
+        LambdaAST::new_unchecked(vec![ValueAccessor::FieldAccessByName {
+            field_name: "asdasd",
+        }])
+    });
+    lexer_test(LAST_ERROR, Single(Ok((0, token, LAST_ERROR.len()))));
 }
 
 #[test]
@@ -465,5 +457,23 @@ fn booleans() {
             },
             NON_BOOL_CONST.len(),
         ))),
+    );
+}
+
+#[test]
+fn match_with_empty_array__() {
+    const MATCH_WITH_EMPTY_ARRAY: &str = "(match scalar []
+        (null)
+    )";
+
+    lexer_test(
+        MATCH_WITH_EMPTY_ARRAY,
+        Some(
+            vec![3, 4],
+            vec![
+                Ok((14, Token::OpenSquareBracket, 15)),
+                Ok((15, Token::CloseSquareBracket, 16)),
+            ],
+        ),
     );
 }

@@ -16,9 +16,9 @@
 
 use super::compare_matchable::are_matchable_eq;
 use super::ExecutionCtx;
-use super::ExecutionError;
 use super::ExecutionResult;
 use super::TraceHandler;
+use crate::execution_step::CatchableError;
 use crate::execution_step::Joinable;
 use crate::joinable;
 use crate::log_instruction;
@@ -35,7 +35,7 @@ impl<'i> super::ExecutableInstruction<'i> for Match<'i> {
         )?;
 
         if !are_values_equal {
-            return crate::exec_err!(ExecutionError::MatchWithoutXorError);
+            return Err(CatchableError::MatchValuesNotEqual.into());
         }
 
         self.instruction.execute(exec_ctx, trace_ctx)

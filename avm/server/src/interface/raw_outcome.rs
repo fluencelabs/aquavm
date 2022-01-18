@@ -25,7 +25,7 @@ use serde::Serialize;
 /// This struct is very similar to AVMOutcome, but keeps error_code and error_msg for test purposes.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct RawAVMOutcome {
-    pub ret_code: i32,
+    pub ret_code: i64,
     pub error_message: String,
     pub data: Vec<u8>,
     pub call_requests: CallRequests,

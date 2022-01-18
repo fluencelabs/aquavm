@@ -18,7 +18,6 @@ use super::SecurityTetraplets;
 use crate::execution_step::boxed_value::JValuable;
 use crate::execution_step::boxed_value::Variable;
 use crate::execution_step::execution_context::ExecutionCtx;
-use crate::execution_step::execution_context::LastErrorWithTetraplet;
 use crate::execution_step::ExecutionResult;
 use crate::execution_step::RSecurityTetraplet;
 use crate::JValue;
@@ -26,8 +25,8 @@ use crate::LambdaAST;
 use crate::SecurityTetraplet;
 
 use air_parser::ast;
-use air_parser::ast::LastErrorPath;
 
+use crate::execution_step::lambda_applier::select;
 use serde_json::json;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -40,8 +39,8 @@ pub(crate) fn resolve_to_args<'i>(
     use ast::Value::*;
 
     match value {
-        InitPeerId => prepare_const(ctx.init_peer_id.clone(), ctx),
-        LastError(path) => prepare_last_error(path, ctx),
+        InitPeerId => prepare_const(ctx.init_peer_id.as_str(), ctx),
+        LastError(error_accessor) => prepare_last_error(error_accessor, ctx),
         Literal(value) => prepare_const(value.to_string(), ctx),
         Boolean(value) => prepare_const(*value, ctx),
         Number(value) => prepare_const(value, ctx),
@@ -56,29 +55,36 @@ pub(crate) fn prepare_const(
     ctx: &ExecutionCtx<'_>,
 ) -> ExecutionResult<(JValue, SecurityTetraplets)> {
     let jvalue = arg.into();
-    let tetraplet = SecurityTetraplet::literal_tetraplet(ctx.init_peer_id.clone());
+    let tetraplet = SecurityTetraplet::literal_tetraplet(ctx.init_peer_id.as_ref());
     let tetraplet = Rc::new(RefCell::new(tetraplet));
 
     Ok((jvalue, vec![tetraplet]))
 }
 
 #[allow(clippy::unnecessary_wraps)]
-pub(crate) fn prepare_last_error(
-    path: &LastErrorPath,
-    ctx: &ExecutionCtx<'_>,
+pub(crate) fn prepare_last_error<'i>(
+    error_accessor: &Option<LambdaAST<'i>>,
+    ctx: &ExecutionCtx<'i>,
 ) -> ExecutionResult<(JValue, SecurityTetraplets)> {
-    let LastErrorWithTetraplet {
-        last_error,
-        tetraplet: tetraplets,
-    } = ctx.last_error();
-    let jvalue = match path {
-        LastErrorPath::Instruction => JValue::String(last_error.instruction),
-        LastErrorPath::Message => JValue::String(last_error.msg),
-        LastErrorPath::PeerId => JValue::String(last_error.peer_id),
-        LastErrorPath::None => json!(last_error),
+    use crate::LastError;
+
+    let LastError { error, tetraplet } = ctx.last_error();
+
+    let jvalue = match error_accessor {
+        Some(error_accessor) => select(error.as_ref(), error_accessor.iter(), ctx)?,
+        None => error.as_ref(),
     };
 
-    Ok((jvalue, vec![tetraplets]))
+    let tetraplets = match tetraplet {
+        Some(tetraplet) => vec![tetraplet.clone()],
+        None => {
+            let tetraplet = SecurityTetraplet::literal_tetraplet(ctx.init_peer_id.as_ref());
+            let tetraplet = Rc::new(RefCell::new(tetraplet));
+            vec![tetraplet]
+        }
+    };
+
+    Ok((jvalue.clone(), tetraplets))
 }
 
 pub(crate) fn resolve_variable<'ctx, 'i>(
@@ -122,13 +128,22 @@ pub(crate) fn resolve_ast_variable_wl<'ctx, 'i>(
     }
 }
 
+pub(crate) fn resolve_ast_scalar_wl<'ctx, 'i>(
+    ast_scalar: &ast::ScalarWithLambda<'_>,
+    exec_ctx: &'ctx ExecutionCtx<'i>,
+) -> ExecutionResult<(JValue, SecurityTetraplets)> {
+    // TODO: wrap lambda path with Rc to make this clone cheaper
+    let variable = ast::VariableWithLambda::Scalar(ast_scalar.clone());
+    resolve_ast_variable_wl(&variable, exec_ctx)
+}
+
 pub(crate) fn apply_lambda<'i>(
     variable: Variable<'_>,
     lambda: &LambdaAST<'i>,
     exec_ctx: &ExecutionCtx<'i>,
 ) -> ExecutionResult<(JValue, RSecurityTetraplet)> {
     let resolved = resolve_variable(variable, exec_ctx)?;
-    let (jvalue, tetraplet) = resolved.apply_lambda_with_tetraplets(lambda)?;
+    let (jvalue, tetraplet) = resolved.apply_lambda_with_tetraplets(lambda, exec_ctx)?;
 
     // it's known that apply_lambda_with_tetraplets returns vec of one value
     Ok((jvalue.clone(), tetraplet))

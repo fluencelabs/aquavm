@@ -18,6 +18,8 @@ use super::dsl::*;
 use super::parse;
 use crate::ast::*;
 
+use air_lambda_ast::{LambdaAST, ValueAccessor};
+
 #[test]
 fn ap_with_literal() {
     let source_code = r#"
@@ -63,14 +65,30 @@ fn ap_with_bool() {
 #[test]
 fn ap_with_last_error() {
     let source_code = r#"
-        (ap %last_error%.$.msg! $stream)
+        (ap %last_error%.$.message! $stream)
     "#;
 
     let actual = parse(source_code);
     let expected = ap(
-        ApArgument::LastError(LastErrorPath::Message),
-        Variable::stream("$stream", 33),
+        ApArgument::LastError(Some(unsafe {
+            LambdaAST::new_unchecked(vec![ValueAccessor::FieldAccessByName {
+                field_name: "message",
+            }])
+        })),
+        Variable::stream("$stream", 37),
     );
+
+    assert_eq!(actual, expected);
+}
+
+#[test]
+fn ap_with_empty_array() {
+    let source_code = r#"
+        (ap [] $stream)
+    "#;
+
+    let actual = parse(source_code);
+    let expected = ap(ApArgument::EmptyArray, Variable::stream("$stream", 16));
 
     assert_eq!(actual, expected);
 }

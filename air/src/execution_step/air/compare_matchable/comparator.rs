@@ -16,8 +16,8 @@
 
 use crate::execution_step::air::ExecutionResult;
 use crate::execution_step::execution_context::ExecutionCtx;
-use crate::execution_step::utils::prepare_last_error;
-use crate::execution_step::utils::resolve_ast_variable_wl;
+use crate::execution_step::resolver::prepare_last_error;
+use crate::execution_step::resolver::resolve_ast_variable_wl;
 use crate::JValue;
 
 use air_parser::ast;
@@ -37,14 +37,19 @@ pub(crate) fn are_matchable_eq<'ctx>(
             make_string_comparator(exec_ctx.init_peer_id.as_str()),
         ),
 
-        (LastError(path), matchable) | (matchable, LastError(path)) => {
-            let (value, _) = prepare_last_error(path, exec_ctx)?;
+        (LastError(error_accessor), matchable) | (matchable, LastError(error_accessor)) => {
+            let (value, _) = prepare_last_error(error_accessor, exec_ctx)?;
             compare_matchable(matchable, exec_ctx, make_object_comparator(value))
         }
 
         (Literal(left_name), Literal(right_name)) => Ok(left_name == right_name),
         (Literal(value), matchable) | (matchable, Literal(value)) => {
             compare_matchable(matchable, exec_ctx, make_string_comparator(value))
+        }
+
+        (EmptyArray, EmptyArray) => Ok(true),
+        (EmptyArray, matchable) | (matchable, EmptyArray) => {
+            compare_matchable(matchable, exec_ctx, make_object_comparator(JValue::Array(vec![])))
         }
 
         (Boolean(left_boolean), Boolean(right_boolean)) => Ok(left_boolean == right_boolean),
@@ -63,7 +68,6 @@ pub(crate) fn are_matchable_eq<'ctx>(
 
             Ok(left_value == right_value)
         }
-        _ => Ok(false),
     }
 }
 
@@ -80,11 +84,11 @@ fn compare_matchable<'ctx>(
     match matchable {
         InitPeerId => {
             let init_peer_id = exec_ctx.init_peer_id.clone();
-            let jvalue = init_peer_id.into();
+            let jvalue = init_peer_id.as_str().into();
             Ok(comparator(Cow::Owned(jvalue)))
         }
-        LastError(error_path) => {
-            let (jvalue, _) = prepare_last_error(error_path, exec_ctx)?;
+        LastError(error_accessor) => {
+            let (jvalue, _) = prepare_last_error(error_accessor, exec_ctx)?;
             Ok(comparator(Cow::Owned(jvalue)))
         }
         Literal(str) => {

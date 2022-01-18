@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
+use air::UncatchableError;
 use air_test_utils::prelude::*;
+
+use fstrings::f;
+use fstrings::format_args_f;
 
 #[test]
 fn xor() {
@@ -89,32 +93,22 @@ fn xor_multiple_variables_found() {
     let mut set_variables_vm = create_avm(echo_call_service(), set_variables_peer_id);
 
     let local_peer_id = "local_peer_id";
-    let mut vm = create_avm(echo_call_service(), local_peer_id);
-
-    let some_string = String::from("some_string");
-    let expected_string = String::from("expected_string");
-    let script = format!(
-        r#"
+    let some_string = "some_string";
+    let expected_string = "expected_string";
+    let variable_name = "result_1";
+    let script = f!(r#"
             (seq
-                (call "{0}" ("service_id_1" "local_fn_name") ["{2}"] result_1)
+                (call "{set_variables_peer_id}" ("service_id_1" "local_fn_name") ["{some_string}"] {variable_name})
                 (xor
-                    (call "{1}" ("service_id_1" "local_fn_name") [""] result_1)
-                    (call "{1}" ("service_id_2" "local_fn_name") ["{3}"] result_2)
+                    (call "{local_peer_id}" ("service_id_1" "local_fn_name") [""] {variable_name})
+                    (call "{local_peer_id}" ("service_id_2" "local_fn_name") ["{expected_string}"] result_2)
                 )
-            )"#,
-        set_variables_peer_id, local_peer_id, some_string, expected_string
-    );
+            )"#);
 
-    let result = checked_call_vm!(set_variables_vm, "asd", &script, "", "");
-    let result = checked_call_vm!(vm, "asd", script, "", result.data);
+    let result = call_vm!(set_variables_vm, "asd", &script, "", "");
 
-    let actual_trace = trace_from_result(&result);
-    let expected_trace = vec![
-        executed_state::scalar_string(some_string),
-        executed_state::scalar_string(expected_string),
-    ];
-
-    assert_eq!(actual_trace, expected_trace);
+    let expected_error = UncatchableError::MultipleVariablesFound(variable_name.to_string());
+    assert!(check_error(&result, expected_error));
 }
 
 #[test]
@@ -182,7 +176,7 @@ fn last_error_with_xor() {
         r#"
             (xor
                 (call "{0}" ("service_id_1" "local_fn_name") [] result)
-                (call "{1}" ("service_id_2" "local_fn_name") [%last_error%.$.msg] result)
+                (call "{1}" ("service_id_2" "local_fn_name") [%last_error%.$.message] result)
             )"#,
         faillible_peer_id, local_peer_id,
     );

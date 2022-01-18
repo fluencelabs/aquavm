@@ -23,7 +23,7 @@ impl fmt::Display for Value<'_> {
 
         match self {
             InitPeerId => write!(f, "%init_peer_id%"),
-            LastError(error_path) => write!(f, "%last_error%{}", error_path),
+            LastError(error_accessor) => display_last_error(f, error_accessor),
             Literal(literal) => write!(f, r#""{}""#, literal),
             Number(number) => write!(f, "{}", number),
             Boolean(bool) => write!(f, "{}", bool),
@@ -62,7 +62,7 @@ impl fmt::Display for ApArgument<'_> {
 
         match self {
             InitPeerId => write!(f, "%init_peer_id%"),
-            LastError(last_error) => write!(f, "{}", last_error),
+            LastError(error_accessor) => display_last_error(f, error_accessor),
             Literal(str) => write!(f, r#""{}""#, str),
             Number(number) => write!(f, "{}", number),
             Boolean(bool) => write!(f, "{}", bool),
@@ -103,5 +103,41 @@ impl fmt::Display for Triplet<'_> {
             "{} ({} {})",
             self.peer_pk, self.service_id, self.function_name
         )
+    }
+}
+
+impl fmt::Display for Number {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use Number::*;
+
+        match self {
+            Int(number) => write!(f, "{}", number),
+            Float(number) => write!(f, "{}", number),
+        }
+    }
+}
+
+impl From<Number> for serde_json::Value {
+    fn from(number: Number) -> Self {
+        (&number).into()
+    }
+}
+
+impl From<&Number> for serde_json::Value {
+    fn from(number: &Number) -> Self {
+        match number {
+            Number::Int(value) => (*value).into(),
+            Number::Float(value) => (*value).into(),
+        }
+    }
+}
+
+fn display_last_error(
+    f: &mut fmt::Formatter,
+    last_error_accessor: &Option<LambdaAST>,
+) -> fmt::Result {
+    match last_error_accessor {
+        Some(accessor) => write!(f, "%last_error%.$.{}", air_lambda_ast::format_ast(accessor)),
+        None => write!(f, "%last_error%"),
     }
 }

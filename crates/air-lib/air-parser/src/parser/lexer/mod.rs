@@ -25,8 +25,6 @@ mod tests;
 
 pub use air_lexer::AIRLexer;
 pub use errors::LexerError;
-pub use token::LastErrorPath;
-pub use token::Number;
 pub use token::Token;
 
 pub(super) type LexerResult<T> = std::result::Result<T, LexerError>;

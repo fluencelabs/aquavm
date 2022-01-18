@@ -15,7 +15,6 @@
  */
 
 use super::errors::LexerError;
-use super::token::LastErrorPath;
 use super::token::Token;
 use super::LexerResult;
 
@@ -26,7 +25,6 @@ pub type Spanned<Token, Loc, Error> = Result<(Loc, Token, Loc), Error>;
 
 pub struct AIRLexer<'input> {
     input: &'input str,
-    open_square_bracket_met: bool,
     chars: Peekable<CharIndices<'input>>,
 }
 
@@ -42,7 +40,6 @@ impl<'input> AIRLexer<'input> {
     pub fn new(input: &'input str) -> Self {
         Self {
             input,
-            open_square_bracket_met: false,
             chars: input.char_indices().peekable(),
         }
     }
@@ -53,18 +50,8 @@ impl<'input> AIRLexer<'input> {
                 '(' => return Some(Ok((start_pos, Token::OpenRoundBracket, start_pos + 1))),
                 ')' => return Some(Ok((start_pos, Token::CloseRoundBracket, start_pos + 1))),
 
-                '[' => {
-                    return if !self.open_square_bracket_met {
-                        self.open_square_bracket_met = true;
-                        Some(Ok((start_pos, Token::OpenSquareBracket, start_pos + 1)))
-                    } else {
-                        self.tokenize_string(start_pos, true)
-                    }
-                }
-                ']' => {
-                    self.open_square_bracket_met = false;
-                    return Some(Ok((start_pos, Token::CloseSquareBracket, start_pos + 1)));
-                }
+                '[' => return Some(Ok((start_pos, Token::OpenSquareBracket, start_pos + 1))),
+                ']' => return Some(Ok((start_pos, Token::CloseSquareBracket, start_pos + 1))),
 
                 ';' => self.skip_comment(),
 
@@ -192,6 +179,7 @@ fn string_to_token(input: &str, start_pos: usize) -> LexerResult<Token> {
         AP_INSTR => Ok(Token::Ap),
         SEQ_INSTR => Ok(Token::Seq),
         PAR_INSTR => Ok(Token::Par),
+        FAIL_INSTR => Ok(Token::Fail),
         FOLD_INSTR => Ok(Token::Fold),
         XOR_INSTR => Ok(Token::Xor),
         NEW_INSTR => Ok(Token::New),
@@ -199,8 +187,6 @@ fn string_to_token(input: &str, start_pos: usize) -> LexerResult<Token> {
         NULL_INSTR => Ok(Token::Null),
         MATCH_INSTR => Ok(Token::Match),
         MISMATCH_INSTR => Ok(Token::MisMatch),
-
-        SQUARE_BRACKETS => Ok(Token::SquareBrackets),
 
         INIT_PEER_ID => Ok(Token::InitPeerId),
         _ if input.starts_with(LAST_ERROR) => parse_last_error(input, start_pos),
@@ -214,23 +200,28 @@ fn string_to_token(input: &str, start_pos: usize) -> LexerResult<Token> {
 
 fn parse_last_error(input: &str, start_pos: usize) -> LexerResult<Token<'_>> {
     let last_error_size = LAST_ERROR.len();
-    let last_error_path = match &input[last_error_size..] {
-        "" => LastErrorPath::None,
-        // The second option with ! is needed for compatibility with flattening in "standard" lambda used in AIR.
-        // However version without ! returns just a error, because the opposite is unsound.
-        ".$.instruction" | ".$.instruction!" => LastErrorPath::Instruction,
-        ".$.msg" | ".$.msg!" => LastErrorPath::Message,
-        ".$.peer_id" | ".$.peer_id!" => LastErrorPath::PeerId,
-        path => {
-            return Err(LexerError::LastErrorPathError(
-                start_pos + last_error_size,
-                start_pos + input.len(),
-                path.to_string(),
-            ))
-        }
-    };
+    if input.len() == last_error_size {
+        return Ok(Token::LastError);
+    }
 
-    let last_error_token = Token::LastError(last_error_path);
+    let last_error_size = last_error_size + 2;
+    if input.len() <= last_error_size {
+        return Err(LexerError::LambdaParserError(
+            start_pos + last_error_size,
+            start_pos + input.len(),
+            "lambda AST applied to last error has not enough size".to_string(),
+        ));
+    }
+
+    let last_error_accessor = crate::parse_lambda(&input[last_error_size..]).map_err(|e| {
+        LexerError::LambdaParserError(
+            start_pos + last_error_size,
+            start_pos + input.len(),
+            e.to_string(),
+        )
+    })?;
+    let last_error_token = Token::LastErrorWithLambda(last_error_accessor);
+
     Ok(last_error_token)
 }
 
@@ -238,6 +229,7 @@ const CALL_INSTR: &str = "call";
 const AP_INSTR: &str = "ap";
 const SEQ_INSTR: &str = "seq";
 const PAR_INSTR: &str = "par";
+const FAIL_INSTR: &str = "fail";
 const FOLD_INSTR: &str = "fold";
 const XOR_INSTR: &str = "xor";
 const NEW_INSTR: &str = "new";
@@ -248,8 +240,6 @@ const MISMATCH_INSTR: &str = "mismatch";
 
 const INIT_PEER_ID: &str = "%init_peer_id%";
 const LAST_ERROR: &str = "%last_error%";
-
-const SQUARE_BRACKETS: &str = "[]";
 
 const TRUE_VALUE: &str = "true";
 const FALSE_VALUE: &str = "false";

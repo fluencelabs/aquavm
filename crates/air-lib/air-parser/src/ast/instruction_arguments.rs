@@ -19,8 +19,8 @@ mod traits;
 use super::Variable;
 use super::VariableWithLambda;
 use crate::ast::ScalarWithLambda;
-use crate::parser::lexer::LastErrorPath;
-use crate::parser::lexer::Number;
+
+use air_lambda_ast::LambdaAST;
 
 use serde::Deserialize;
 use serde::Serialize;
@@ -62,7 +62,7 @@ pub struct Triplet<'i> {
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum Value<'i> {
     InitPeerId,
-    LastError(LastErrorPath),
+    LastError(Option<LambdaAST<'i>>),
     Literal(&'i str),
     Number(Number),
     Boolean(bool),
@@ -79,10 +79,16 @@ pub enum CallOutputValue<'i> {
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum ApArgument<'i> {
     InitPeerId,
-    LastError(LastErrorPath),
+    LastError(Option<LambdaAST<'i>>),
     Literal(&'i str),
     Number(Number),
     Boolean(bool),
     EmptyArray,
     Scalar(ScalarWithLambda<'i>),
+}
+
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+pub enum Number {
+    Int(i64),
+    Float(f64),
 }

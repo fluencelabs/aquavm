@@ -19,7 +19,19 @@ mod boxed_value;
 mod errors;
 pub(crate) mod execution_context;
 mod lambda_applier;
-mod utils;
+mod resolver;
+
+pub use errors::CatchableError;
+pub use errors::ExecutionError;
+pub use errors::UncatchableError;
+pub use execution_context::LastErrorObjectError;
+pub use lambda_applier::LambdaError;
+
+pub mod errors_prelude {
+    pub use super::CatchableError;
+    pub use super::ExecutionError;
+    pub use super::UncatchableError;
+}
 
 pub(super) use self::air::ExecutableInstruction;
 pub(super) use self::air::FoldState;
@@ -27,23 +39,16 @@ pub(super) use boxed_value::Generation;
 pub(super) use boxed_value::ScalarRef;
 pub(super) use boxed_value::Stream;
 pub(super) use boxed_value::ValueAggregate;
-pub(crate) use errors::Catchable;
-pub(super) use errors::ExecutionError;
 pub(crate) use errors::Joinable;
+pub(crate) use errors::LastErrorAffectable;
 pub(crate) use execution_context::ExecutionCtx;
+pub(crate) use execution_context::LastError;
 
 pub(crate) use air_trace_handler::TraceHandler;
 
 use std::cell::RefCell;
 use std::rc::Rc;
 
-type ExecutionResult<T> = std::result::Result<T, Rc<ExecutionError>>;
+type ExecutionResult<T> = std::result::Result<T, ExecutionError>;
 type RSecurityTetraplet = Rc<RefCell<crate::SecurityTetraplet>>;
 type SecurityTetraplets = Vec<RSecurityTetraplet>;
-
-#[macro_export]
-macro_rules! exec_err {
-    ($err:expr) => {
-        Err(std::rc::Rc::new($err))
-    };
-}

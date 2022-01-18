@@ -30,8 +30,8 @@ pub use ast::*;
 
 pub fn format_ast(lambda_ast: &LambdaAST<'_>) -> String {
     let mut formatted_ast = String::new();
-    for algebra in lambda_ast.iter() {
-        formatted_ast.push_str(&algebra.to_string());
+    for accessor in lambda_ast.iter() {
+        formatted_ast.push_str(&accessor.to_string());
     }
 
     formatted_ast

@@ -10,14 +10,15 @@
     "files": [
         "dist/*"
     ],
+    "bin": {
+        "copy-avm": "./dist/copyAvm.js"
+    },
     "scripts": {
         "build": "tsc",
         "test": "jest"
     },
     "private": false,
-    "dependencies": {
-        "base64-js": "1.5.1"
-    },
+    "dependencies": {},
     "devDependencies": {
         "@types/jest": "^26.0.23",
         "@types/node": "^14.0.0",

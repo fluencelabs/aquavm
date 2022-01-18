@@ -30,12 +30,13 @@ impl fmt::Display for Instruction<'_> {
             Xor(xor) => write!(f, "{}", xor),
             Match(match_) => write!(f, "{}", match_),
             MisMatch(mismatch) => write!(f, "{}", mismatch),
+            Fail(fail) => write!(f, "{}", fail),
             FoldScalar(fold) => write!(f, "{}", fold),
             FoldStream(fold) => write!(f, "{}", fold),
             Next(next) => write!(f, "{}", next),
             New(new) => write!(f, "{}", new),
             Null(null) => write!(f, "{}", null),
-            Error => Ok(()),
+            Error => write!(f, "error"),
         }
     }
 }
@@ -52,6 +53,19 @@ impl fmt::Display for Call<'_> {
 impl fmt::Display for Ap<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "ap {} {}", self.argument, self.result)
+    }
+}
+
+impl fmt::Display for Fail<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Fail::Scalar(scalar) => write!(f, "fail {}", scalar),
+            Fail::Literal {
+                ret_code,
+                error_message,
+            } => write!(f, "fail {} {}", ret_code, error_message),
+            Fail::LastError => write!(f, "fail %last_error%"),
+        }
     }
 }
 

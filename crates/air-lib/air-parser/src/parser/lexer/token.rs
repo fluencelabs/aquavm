@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-mod traits;
-
-use super::LexerError;
-use super::LexerResult;
 use crate::LambdaAST;
 
 use serde::Deserialize;
@@ -29,9 +25,7 @@ pub enum Token<'input> {
     CloseRoundBracket,
     OpenSquareBracket,
     CloseSquareBracket,
-    SquareBrackets, // [] symbolize empty array, it's possible to have it only in an argument position
 
-    StringLiteral(&'input str),
     Scalar {
         name: &'input str,
         position: usize,
@@ -50,16 +44,21 @@ pub enum Token<'input> {
         lambda: LambdaAST<'input>,
         position: usize,
     },
-    Number(Number),
+
+    StringLiteral(&'input str),
+    I64(i64),
+    F64(f64),
     Boolean(bool),
 
     InitPeerId,
-    LastError(LastErrorPath),
+    LastError,
+    LastErrorWithLambda(LambdaAST<'input>),
 
     Call,
     Ap,
     Seq,
     Par,
+    Fail,
     Fold,
     Xor,
     New,
@@ -67,28 +66,4 @@ pub enum Token<'input> {
     Null,
     Match,
     MisMatch,
-}
-
-#[derive(Debug, Clone, PartialEq, Hash, Serialize, Deserialize)]
-pub enum LastErrorPath {
-    // %last_error%.instruction
-    Instruction,
-    // %last_error%.msg
-    Message,
-    // %last_error%.peer_id
-    PeerId,
-    // %last_error%
-    None,
-}
-
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
-pub enum Number {
-    Int(i64),
-    Float(f64),
-}
-
-pub(crate) enum UnparsedNumber<'input> {
-    // raw value and starting pos
-    Int(&'input str, usize),
-    Float(&'input str, usize),
 }

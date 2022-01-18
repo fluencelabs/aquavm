@@ -15,18 +15,16 @@
  */
 
 use super::ExecutionCtx;
-use super::ExecutionError;
 use super::ExecutionResult;
-use crate::exec_err;
+use crate::execution_step::CatchableError;
 use crate::JValue;
 
-use air_parser::ast::CallInstrValue;
-use air_parser::ast::Triplet;
+use air_parser::ast;
 use polyplets::ResolvedTriplet;
 
 /// Resolve variables, literals, etc in the `Triplet`, and build a `ResolvedTriplet`.
-pub(crate) fn resolve<'i>(triplet: &Triplet<'i>, ctx: &ExecutionCtx<'i>) -> ExecutionResult<ResolvedTriplet> {
-    let Triplet {
+pub(crate) fn resolve<'i>(triplet: &ast::Triplet<'i>, ctx: &ExecutionCtx<'i>) -> ExecutionResult<ResolvedTriplet> {
+    let ast::Triplet {
         peer_pk,
         service_id,
         function_name,
@@ -45,26 +43,30 @@ pub(crate) fn resolve<'i>(triplet: &Triplet<'i>, ctx: &ExecutionCtx<'i>) -> Exec
 
 /// Resolve value to string by either resolving variable from `ExecutionCtx`, taking literal value, or etc.
 // TODO: return Rc<String> to avoid excess cloning
-fn resolve_to_string<'i>(value: &CallInstrValue<'i>, ctx: &ExecutionCtx<'i>) -> ExecutionResult<String> {
-    use crate::execution_step::utils::resolve_ast_variable_wl;
+fn resolve_to_string<'i>(value: &ast::CallInstrValue<'i>, ctx: &ExecutionCtx<'i>) -> ExecutionResult<String> {
+    use crate::execution_step::resolver::resolve_ast_variable_wl;
+    use ast::CallInstrValue::*;
 
     let resolved = match value {
-        CallInstrValue::InitPeerId => ctx.init_peer_id.clone(),
-        CallInstrValue::Literal(value) => value.to_string(),
-        CallInstrValue::Variable(variable) => {
+        InitPeerId => ctx.init_peer_id.to_string(),
+        Literal(value) => value.to_string(),
+        Variable(variable) => {
             let (resolved, _) = resolve_ast_variable_wl(variable, ctx)?;
-            jvalue_to_string(resolved)?
+            try_jvalue_to_string(resolved, variable)?
         }
     };
 
     Ok(resolved)
 }
 
-fn jvalue_to_string(jvalue: JValue) -> ExecutionResult<String> {
-    use ExecutionError::IncompatibleJValueType;
-
+fn try_jvalue_to_string(jvalue: JValue, variable: &ast::VariableWithLambda<'_>) -> ExecutionResult<String> {
     match jvalue {
         JValue::String(s) => Ok(s),
-        _ => exec_err!(IncompatibleJValueType(jvalue, "string")),
+        _ => Err(CatchableError::IncompatibleJValueType {
+            variable_name: variable.name().to_string(),
+            actual_value: jvalue,
+            expected_value_type: "string",
+        }
+        .into()),
     }
 }
