@@ -1,9 +1,13 @@
 import { AirInterpreter } from '..';
+import { readFileSync } from 'fs';
+import path from 'path';
 
 const vmPeerId = '12D3KooWNzutuy8WHXDKFqFsATvCR6j9cj2FijYbnd47geRKaQZS';
 
 const createTestInterpreter = async () => {
-    return AirInterpreter.create('off', (level, message) => {
+    const file = readFileSync(path.resolve(__dirname, './avm.wasm'));
+    const module = await WebAssembly.compile(file);
+    return AirInterpreter.create(module, 'off', (level, message) => {
         console.log(`level: ${level}, message=${message}`);
     });
 };

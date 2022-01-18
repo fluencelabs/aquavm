@@ -14,6 +14,9 @@
   "moduleDirectories": [
     "node_modules"
   ],
+  "bin": {
+    "copy-avm": "./dist/copyAvm.js"
+  },
   "private": false,
   "author": "",
   "license": "ISC",
@@ -22,7 +25,6 @@
     "@fluencelabs/avm-worker-common": "^0.0.2",
     "@wasmer/wasi": "^0.12.0",
     "@wasmer/wasmfs": "^0.12.0",
-    "base64-js": "^1.5.1",
     "marine-web2-runtime": "file:../../../marine/web-runtime/marine-node-pkg"
   },
   "devDependencies": {

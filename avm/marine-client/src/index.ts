@@ -1,10 +1,10 @@
 import {register_module, call_module} from 'marine-web2-runtime'
-import { toByteArray } from 'base64-js';
+//import { toByteArray } from 'base64-js';
 import { WASI } from '@wasmer/wasi'
-import { WasmFs } from '@wasmer/wasmfs'
+//import { WasmFs } from '@wasmer/wasmfs'
 //import browserBindings from '@wasmer/wasi/lib/bindings/browser'
 import nodeBindings from '@wasmer/wasi/lib/bindings/node'
-const wasmBs64 = require('./wasm')
+//const wasmBs64 = require('./wasm')
 
 export type LogLevel = 'info' | 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'off';
 
@@ -70,15 +70,15 @@ class HostImportsConfig {
     }
 }
 
-const interpreter_wasm = toByteArray(wasmBs64);
+//const interpreter_wasm = toByteArray(wasmBs64);
 
 /// Instantiates WebAssembly runtime with AIR interpreter module
-async function interpreterInstance(cfg: HostImportsConfig, logFunction: LogFunction): Promise<Instance> {
+async function interpreterInstance(module: WebAssembly.Module, cfg: HostImportsConfig, logFunction: LogFunction): Promise<Instance> {
     /// Create host imports that use module exports internally
     let imports = cfg.newImportObject();
 
     /// Instantiate interpreter
-    let interpreter_module = await WebAssembly.compile(interpreter_wasm);
+    let interpreter_module = module;
     let instance: Instance = await WebAssembly.instantiate(interpreter_module, imports);
 
     /// Set exports, so host imports can use them
@@ -159,6 +159,9 @@ function newImportObject(cfg: HostImportsConfig, logFunction: LogFunction): Impo
     };
 }
 
+const decoder = new TextDecoder();
+const encoder = new TextEncoder();
+
 export class AirInterpreter {
     private _interpreter;
     private _wasmFs;
@@ -171,12 +174,12 @@ export class AirInterpreter {
         this.logFunction = logFunction;
     }
 
-    async init(logLevel: LogLevel): Promise<void> {
+    async init(module: WebAssembly.Module, logLevel: LogLevel): Promise<void> {
         if (this._interpreter !== null) {
             return;
         }
 
-        this._wasmFs = new WasmFs()
+        //this._wasmFs = new WasmFs()
 
         this._wasi = new WASI({
             // Arguments passed to the Wasm Module
@@ -189,8 +192,8 @@ export class AirInterpreter {
 
             // Bindings that are used by the WASI Instance (fs, path, etc...)
             bindings: {
-                ...nodeBindings,
-                fs: this._wasmFs.fs
+                ...nodeBindings//,
+                //fs: this._wasmFs.fs
             }
         })
 
@@ -198,7 +201,7 @@ export class AirInterpreter {
             return newImportObject(cfg, this.logFunction);
         });
 
-        let wasmModule = await WebAssembly.compile(interpreter_wasm);
+        let wasmModule = module;//await WebAssembly.compile(interpreter_wasm);
         //console.log(wasmModule)
 
         let instance = await WebAssembly.instantiate(wasmModule, {
@@ -217,7 +220,7 @@ export class AirInterpreter {
         this._interpreter = instance
     }
 
-    static async create(logLevel: LogLevel, logFunction: LogFunction) {
+    static async create(module: WebAssembly.Module, logLevel: LogLevel, logFunction: LogFunction) {
         /*
         const cfg = new HostImportsConfig((cfg) => {
             return newImportObject(cfg, logFunction);
@@ -225,7 +228,7 @@ export class AirInterpreter {
 */
         //const instance = await interpreterInstance(cfg, logFunction);
         const res = new AirInterpreter(logFunction);
-        await res.init(logLevel);
+        await res.init(module, logLevel);
 
         res.logLevel = logLevel;
         return res;
@@ -270,7 +273,8 @@ export class AirInterpreter {
             result = JSON.parse(rawResult);
         } catch (ex) {}
 
-        const callRequestsStr = new TextDecoder().decode(Buffer.from(result.call_requests));
+        const callRequestsStr = decoder.decode(Buffer.from(result.call_requests));
+
         let parsedCallRequests;
         try {
             if (callRequestsStr.length === 0) {
