@@ -1,7 +1,7 @@
 import {register_module, call_module} from 'marine-web2-runtime'
 //import { toByteArray } from 'base64-js';
 import { WASI } from '@wasmer/wasi'
-//import { WasmFs } from '@wasmer/wasmfs'
+import { WasmFs } from '@wasmer/wasmfs'
 //import browserBindings from '@wasmer/wasi/lib/bindings/browser'
 import nodeBindings from '@wasmer/wasi/lib/bindings/node'
 //const wasmBs64 = require('./wasm')
@@ -179,7 +179,7 @@ export class AirInterpreter {
             return;
         }
 
-        //this._wasmFs = new WasmFs()
+        this._wasmFs = new WasmFs()
 
         this._wasi = new WASI({
             // Arguments passed to the Wasm Module
@@ -192,8 +192,8 @@ export class AirInterpreter {
 
             // Bindings that are used by the WASI Instance (fs, path, etc...)
             bindings: {
-                ...nodeBindings//,
-                //fs: this._wasmFs.fs
+                ...nodeBindings,
+                fs: this._wasmFs.fs
             }
         })
 
