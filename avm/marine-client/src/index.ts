@@ -216,7 +216,11 @@ export class AirInterpreter {
         //console.log(custom_sections)
         let it_custom_section = new Uint8Array(custom_sections[0])
 
-        register_module("avm", it_custom_section, instance)
+        let result = register_module("avm", it_custom_section, instance);
+        if (result.error.length > 0) {
+            throw result.error
+        }
+
         this._interpreter = instance
     }
 
@@ -267,11 +271,17 @@ export class AirInterpreter {
                 Array.from(Buffer.from(JSON.stringify(callResultsToPass)))
             ])
         );
+
+        if (rawResult.error.length > 0) {
+            throw rawResult.error;
+        }
         //console.log("end call_module")
         let result: any;
         try {
-            result = JSON.parse(rawResult);
-        } catch (ex) {}
+            result = JSON.parse(rawResult.result);
+        } catch (e) {
+            throw "Couldn't parse result of invoke call: " + e + '. Original string is: ' + rawResult.result;
+        }
 
         const callRequestsStr = decoder.decode(Buffer.from(result.call_requests));
 
