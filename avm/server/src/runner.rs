@@ -87,12 +87,12 @@ impl AVMRunner {
         Ok(outcome)
     }
 
-    pub fn heap_size(&self) -> usize {
-        let statistic = self.faas.heap_statistic();
+    pub fn memory_size(&self) -> usize {
+        let stats = self.faas.module_memory_stats();
 
         // only the interpreters must be loaded in FaaS
-        debug_assert!(statistic.len() == 1);
-        statistic[0].memory_size
+        debug_assert!(stats.len() == 1);
+        stats[0].memory_size
     }
 }
 

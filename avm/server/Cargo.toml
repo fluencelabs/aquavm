@@ -1,7 +1,7 @@
 [package]
 name = "avm-server"
 description = "Fluence AIR VM"
-version = "0.14.0"
+version = "0.15.0"
 authors = ["Fluence Labs"]
 edition = "2018"
 license = "Apache-2.0"
@@ -18,7 +18,7 @@ path = "src/lib.rs"
 [dependencies]
 air-interpreter-interface = { version = "0.8.0", path = "../../crates/air-lib/interpreter-interface" }
 avm-data-store = { version = "0.1.0", path = "../../crates/data-store" }
-fluence-faas = { git = "https://github.com/fluencelabs/marine", branch = "feature/module-memory-footprint" }
+fluence-faas = "0.11.0"
 polyplets = { version = "0.2.0", path = "../../crates/air-lib/polyplets" }
 
 eyre = "0.6.5"
