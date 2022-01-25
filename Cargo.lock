@@ -214,12 +214,12 @@ version = "0.1.0"
 
 [[package]]
 name = "avm-server"
-version = "0.13.0"
+version = "0.14.0"
 dependencies = [
  "air-interpreter-interface",
  "avm-data-store",
  "eyre",
- "fluence-faas 0.10.1",
+ "fluence-faas 0.11.0",
  "log",
  "maplit",
  "parking_lot 0.11.2",
@@ -798,7 +798,7 @@ dependencies = [
  "cmd_lib",
  "itertools 0.9.0",
  "log",
- "marine-module-interface",
+ "marine-module-interface 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "marine-rs-sdk",
  "marine-rs-sdk-main",
  "marine-runtime 0.7.2",
@@ -817,18 +817,17 @@ dependencies = [
 
 [[package]]
 name = "fluence-faas"
-version = "0.10.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "999490a4665246d0f6904743b3b5c8b4abe6723529d9c9b72c58a3f3e5df65d6"
+version = "0.11.0"
+source = "git+https://github.com/fluencelabs/marine?branch=feature/module-memory-footprint#4598e00a4e8b3a90b74fa4322e41f8154d2f5256"
 dependencies = [
  "bytesize",
  "cmd_lib",
  "itertools 0.9.0",
  "log",
- "marine-module-interface",
+ "marine-module-interface 0.1.6 (git+https://github.com/fluencelabs/marine?branch=feature/module-memory-footprint)",
  "marine-rs-sdk",
  "marine-rs-sdk-main",
- "marine-runtime 0.8.1",
+ "marine-runtime 0.9.0",
  "marine-utils 0.4.0",
  "safe-transmute",
  "serde",
@@ -1210,7 +1209,24 @@ checksum = "890b228b9151e9dff213501986f564445a2f9ca5a706088b5d900f5ecf67f7e7"
 dependencies = [
  "cargo_toml",
  "it-lilo",
- "marine-it-parser",
+ "marine-it-parser 0.6.8 (registry+https://github.com/rust-lang/crates.io-index)",
+ "marine-macro-impl",
+ "once_cell",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "walrus",
+ "wasmer-interface-types-fl",
+]
+
+[[package]]
+name = "marine-it-generator"
+version = "0.5.6"
+source = "git+https://github.com/fluencelabs/marine?branch=feature/module-memory-footprint#4598e00a4e8b3a90b74fa4322e41f8154d2f5256"
+dependencies = [
+ "cargo_toml",
+ "it-lilo",
+ "marine-it-parser 0.6.8 (git+https://github.com/fluencelabs/marine?branch=feature/module-memory-footprint)",
  "marine-macro-impl",
  "once_cell",
  "serde",
@@ -1231,6 +1247,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "marine-it-interfaces"
+version = "0.4.1"
+source = "git+https://github.com/fluencelabs/marine?branch=feature/module-memory-footprint#4598e00a4e8b3a90b74fa4322e41f8154d2f5256"
+dependencies = [
+ "multimap",
+ "wasmer-interface-types-fl",
+]
+
+[[package]]
 name = "marine-it-parser"
 version = "0.6.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1238,8 +1263,26 @@ checksum = "edd97bd85072fc540763769be153a7c8ee83391e668b37ef96d6c48decec2cd5"
 dependencies = [
  "anyhow",
  "itertools 0.10.3",
- "marine-it-interfaces",
- "marine-module-interface",
+ "marine-it-interfaces 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "marine-module-interface 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
+ "nom",
+ "semver 0.11.0",
+ "serde",
+ "thiserror",
+ "walrus",
+ "wasmer-interface-types-fl",
+ "wasmer-runtime-core-fl",
+]
+
+[[package]]
+name = "marine-it-parser"
+version = "0.6.8"
+source = "git+https://github.com/fluencelabs/marine?branch=feature/module-memory-footprint#4598e00a4e8b3a90b74fa4322e41f8154d2f5256"
+dependencies = [
+ "anyhow",
+ "itertools 0.10.3",
+ "marine-it-interfaces 0.4.1 (git+https://github.com/fluencelabs/marine?branch=feature/module-memory-footprint)",
+ "marine-module-interface 0.1.6 (git+https://github.com/fluencelabs/marine?branch=feature/module-memory-footprint)",
  "nom",
  "semver 0.11.0",
  "serde",
@@ -1290,6 +1333,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "marine-module-info-parser"
+version = "0.2.2"
+source = "git+https://github.com/fluencelabs/marine?branch=feature/module-memory-footprint#4598e00a4e8b3a90b74fa4322e41f8154d2f5256"
+dependencies = [
+ "anyhow",
+ "chrono",
+ "marine-rs-sdk-main",
+ "semver 0.11.0",
+ "serde",
+ "thiserror",
+ "walrus",
+ "wasmer-runtime-core-fl",
+]
+
+[[package]]
 name = "marine-module-interface"
 version = "0.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1297,7 +1355,24 @@ checksum = "06bc36ef268bf7436916f1fa9b0c84104692a717ea5eef3c90b9f25c3407f6b7"
 dependencies = [
  "anyhow",
  "itertools 0.10.3",
- "marine-it-interfaces",
+ "marine-it-interfaces 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "nom",
+ "semver 0.11.0",
+ "serde",
+ "thiserror",
+ "walrus",
+ "wasmer-interface-types-fl",
+ "wasmer-runtime-core-fl",
+]
+
+[[package]]
+name = "marine-module-interface"
+version = "0.1.6"
+source = "git+https://github.com/fluencelabs/marine?branch=feature/module-memory-footprint#4598e00a4e8b3a90b74fa4322e41f8154d2f5256"
+dependencies = [
+ "anyhow",
+ "itertools 0.10.3",
+ "marine-it-interfaces 0.4.1 (git+https://github.com/fluencelabs/marine?branch=feature/module-memory-footprint)",
  "nom",
  "semver 0.11.0",
  "serde",
@@ -1340,11 +1415,11 @@ dependencies = [
  "boolinator",
  "it-lilo",
  "log",
- "marine-it-generator",
- "marine-it-interfaces",
- "marine-it-parser",
- "marine-module-info-parser",
- "marine-module-interface",
+ "marine-it-generator 0.5.6 (registry+https://github.com/rust-lang/crates.io-index)",
+ "marine-it-interfaces 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "marine-it-parser 0.6.8 (registry+https://github.com/rust-lang/crates.io-index)",
+ "marine-module-info-parser 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "marine-module-interface 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "marine-utils 0.2.0",
  "multimap",
  "once_cell",
@@ -1362,19 +1437,19 @@ dependencies = [
 
 [[package]]
 name = "marine-runtime"
-version = "0.8.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b06f9bc60de3416381b56783f9060f1fcb75fc9dc99c3debdb6c5fc1dd306f52"
+version = "0.9.0"
+source = "git+https://github.com/fluencelabs/marine?branch=feature/module-memory-footprint#4598e00a4e8b3a90b74fa4322e41f8154d2f5256"
 dependencies = [
  "anyhow",
  "boolinator",
+ "bytesize",
  "it-lilo",
  "log",
- "marine-it-generator",
- "marine-it-interfaces",
- "marine-it-parser",
- "marine-module-info-parser",
- "marine-module-interface",
+ "marine-it-generator 0.5.6 (git+https://github.com/fluencelabs/marine?branch=feature/module-memory-footprint)",
+ "marine-it-interfaces 0.4.1 (git+https://github.com/fluencelabs/marine?branch=feature/module-memory-footprint)",
+ "marine-it-parser 0.6.8 (git+https://github.com/fluencelabs/marine?branch=feature/module-memory-footprint)",
+ "marine-module-info-parser 0.2.2 (git+https://github.com/fluencelabs/marine?branch=feature/module-memory-footprint)",
+ "marine-module-interface 0.1.6 (git+https://github.com/fluencelabs/marine?branch=feature/module-memory-footprint)",
  "marine-utils 0.4.0",
  "multimap",
  "once_cell",
@@ -1409,8 +1484,7 @@ checksum = "8dc5838acba84ce4d802d672afd0814fae0ae7098021ae5b06d975e70d09f812"
 [[package]]
 name = "marine-utils"
 version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1cff7a23a7f3925a712c34dfb9cd87994012d7743f016fd1533e12ab5a8335ca"
+source = "git+https://github.com/fluencelabs/marine?branch=feature/module-memory-footprint#4598e00a4e8b3a90b74fa4322e41f8154d2f5256"
 
 [[package]]
 name = "memchr"
