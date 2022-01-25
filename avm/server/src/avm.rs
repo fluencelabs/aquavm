@@ -99,7 +99,7 @@ impl<E> AVM<E> {
         Ok(())
     }
 
-    /// Return size of interpreter heap.
+    /// Return size of interpreter heap in bytes.
     pub fn heap_size(&self) -> usize {
         self.runner.heap_size()
     }
