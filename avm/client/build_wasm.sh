@@ -6,7 +6,7 @@
 (
     cd ../..;
     mkdir -p ./avm/client/wasm || exit;
-    wasm-pack build ./air-interpreter --no-typescript --release -d ../avm/client/wasm
+    wasm-pack build ./air-interpreter --no-typescript -d ../avm/client/wasm
 )
 
 mkdir -p ./dist/
