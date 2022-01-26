@@ -34,17 +34,19 @@ pub(crate) fn select_from_stream<'value, 'i>(
     lambda: &LambdaAST<'_>,
     exec_ctx: &ExecutionCtx<'i>,
 ) -> ExecutionResult<StreamSelectResult<'value>> {
-    use ValueAccessor::*;
-
     let (prefix, body) = lambda.split_first();
     let idx = match prefix {
-        ArrayAccess { idx } => *idx,
-        FieldAccessByName { field_name } => {
+        ValueAccessor::ArrayAccess { idx } => *idx,
+        ValueAccessor::FieldAccessByName { field_name } => {
             return lambda_to_execution_error!(Err(LambdaError::FieldAccessorAppliedToStream {
                 field_name: field_name.to_string(),
             }));
         }
-        _ => unreachable!("should not execute if parsing succeeded. QED."),
+        ValueAccessor::FieldAccessByScalar { scalar_name } => {
+            let scalar = exec_ctx.scalars.get(scalar_name)?;
+            lambda_to_execution_error!(try_scalar_ref_as_idx(scalar))?
+        }
+        ValueAccessor::Error => unreachable!("should not execute if parsing succeeded. QED."),
     };
 
     let stream_size = stream.len();
@@ -53,12 +55,12 @@ pub(crate) fn select_from_stream<'value, 'i>(
         .nth(idx as usize)
         .ok_or(LambdaError::StreamNotHaveEnoughValues { stream_size, idx }))?;
 
-    let result = select(value, body.iter(), exec_ctx)?;
+    let result = select_from_scalar(value, body.iter(), exec_ctx)?;
     let select_result = StreamSelectResult::new(result, idx);
     Ok(select_result)
 }
 
-pub(crate) fn select<'value, 'accessor, 'i>(
+pub(crate) fn select_from_scalar<'value, 'accessor, 'i>(
     mut value: &'value JValue,
     lambda: impl Iterator<Item = &'accessor ValueAccessor<'accessor>>,
     exec_ctx: &ExecutionCtx<'i>,

@@ -128,11 +128,11 @@ fn create_scalar_lambda_iterable<'ctx>(
     scalar_name: &str,
     lambda: &LambdaAST<'_>,
 ) -> ExecutionResult<FoldIterableScalar> {
-    use crate::execution_step::lambda_applier::select;
+    use crate::execution_step::lambda_applier::select_from_scalar;
 
     match exec_ctx.scalars.get(scalar_name)? {
         ScalarRef::Value(variable) => {
-            let jvalues = select(&variable.result, lambda.iter(), exec_ctx)?;
+            let jvalues = select_from_scalar(&variable.result, lambda.iter(), exec_ctx)?;
             from_jvalue(jvalues, variable.tetraplet.clone(), lambda)
         }
         ScalarRef::IterableValue(fold_state) => {

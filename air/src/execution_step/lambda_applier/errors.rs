@@ -48,4 +48,7 @@ pub enum LambdaError {
 
     #[error("scalar accessor `{scalar_accessor}` should has number or string type")]
     ScalarAccessorHasInvalidType { scalar_accessor: JValue },
+
+    #[error("stream accessor `{scalar_accessor}` should has number (u32) type")]
+    StreamAccessorHasInvalidType { scalar_accessor: JValue },
 }

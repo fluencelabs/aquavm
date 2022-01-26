@@ -214,7 +214,7 @@ version = "0.1.0"
 
 [[package]]
 name = "avm-server"
-version = "0.15.0"
+version = "0.14.0"
 dependencies = [
  "air-interpreter-interface",
  "avm-data-store",

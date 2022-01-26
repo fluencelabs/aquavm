@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use super::select;
+use super::select_from_scalar;
 use super::ExecutionResult;
 use super::JValuable;
 use super::LambdaAST;
@@ -31,7 +31,7 @@ use std::ops::Deref;
 
 impl JValuable for ValueAggregate {
     fn apply_lambda<'i>(&self, lambda: &LambdaAST<'_>, exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<&JValue> {
-        let selected_value = select(&self.result, lambda.iter(), exec_ctx)?;
+        let selected_value = select_from_scalar(&self.result, lambda.iter(), exec_ctx)?;
         Ok(selected_value)
     }
 
@@ -40,7 +40,7 @@ impl JValuable for ValueAggregate {
         lambda: &LambdaAST<'_>,
         exec_ctx: &ExecutionCtx<'i>,
     ) -> ExecutionResult<(&JValue, RSecurityTetraplet)> {
-        let selected_value = select(&self.result, lambda.iter(), exec_ctx)?;
+        let selected_value = select_from_scalar(&self.result, lambda.iter(), exec_ctx)?;
         let tetraplet = self.tetraplet.clone();
         tetraplet.borrow_mut().add_lambda(&format_ast(lambda));
 
