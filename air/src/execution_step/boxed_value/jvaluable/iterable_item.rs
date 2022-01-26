@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use super::select;
+use super::select_from_scalar;
 use super::ExecutionResult;
 use super::IterableItem;
 use super::JValuable;
@@ -37,7 +37,7 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
             RcValue((jvalue, ..)) => jvalue.deref(),
         };
 
-        let selected_value = select(jvalue, lambda.iter(), exec_ctx)?;
+        let selected_value = select_from_scalar(jvalue, lambda.iter(), exec_ctx)?;
         Ok(selected_value)
     }
 
@@ -54,7 +54,7 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
             RcValue((jvalue, tetraplet, _)) => (jvalue.deref(), tetraplet),
         };
 
-        let selected_value = select(jvalue, lambda.iter(), exec_ctx)?;
+        let selected_value = select_from_scalar(jvalue, lambda.iter(), exec_ctx)?;
         Ok((selected_value, tetraplet.clone()))
     }
 

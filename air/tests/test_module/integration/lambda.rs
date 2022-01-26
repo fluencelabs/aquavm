@@ -112,6 +112,91 @@ fn lambda_with_number_scalar() {
 }
 
 #[test]
+fn lambda_with_number_stream() {
+    let set_variable_peer_id = "set_variable";
+    let variables = maplit::hashmap! {
+        "number_accessor".to_string() => json!(1),
+        "iterable".to_string() => json!([1,2,3]),
+    };
+    let mut set_variable_vm = create_avm(
+        set_variables_call_service(variables, VariableOptionSource::FunctionName),
+        set_variable_peer_id,
+    );
+
+    let local_peer_id = "local_peer_id";
+    let mut local_vm = create_avm(echo_call_service(), local_peer_id);
+
+    let script = f!(r#"
+        (seq
+            (seq
+                (call "{set_variable_peer_id}" ("" "number_accessor") [] number_accessor)
+                (seq
+                    (call "{set_variable_peer_id}" ("" "iterable") [] iterable)
+                    (fold iterable iterator
+                        (seq
+                            (call "{local_peer_id}" ("" "") [iterator] $stream)
+                            (next iterator)
+                        )
+                    )
+                )
+            )
+            (call "{local_peer_id}" ("" "") [$stream.$.[number_accessor]])
+        )
+        "#);
+
+    let result = checked_call_vm!(set_variable_vm, "asd", &script, "", "");
+    let result = checked_call_vm!(local_vm, "asd", script, "", result.data);
+    let actual_trace = trace_from_result(&result);
+
+    assert_eq!(&actual_trace[5], &executed_state::scalar_number(2));
+}
+
+#[test]
+fn lambda_with_number_stream_and_followed_scalar() {
+    let set_variable_peer_id = "set_variable";
+    let checkable_value = 1337;
+    let variables = maplit::hashmap! {
+        "number_accessor".to_string() => json!(1),
+        "iterable".to_string() => json!([1,2,3]),
+        "value".to_string() => json!({"field_1": checkable_value, "field_2": 31337}),
+    };
+    let mut set_variable_vm = create_avm(
+        set_variables_call_service(variables, VariableOptionSource::FunctionName),
+        set_variable_peer_id,
+    );
+
+    let local_peer_id = "local_peer_id";
+    let mut local_vm = create_avm(echo_call_service(), local_peer_id);
+
+    let script = f!(r#"
+        (seq
+            (seq
+                (seq
+                    (call "{set_variable_peer_id}" ("" "number_accessor") [] number_accessor)
+                    (call "{set_variable_peer_id}" ("" "value") [] value)
+                )
+                (seq
+                    (call "{set_variable_peer_id}" ("" "iterable") [] iterable)
+                    (fold iterable iterator
+                        (seq
+                            (call "{local_peer_id}" ("" "") [value] $stream) ;; place 3 complex values in a stream
+                            (next iterator)
+                        )
+                    )
+                )
+            )
+            (call "{local_peer_id}" ("" "") [$stream.$.[number_accessor].field_1]) ;; get the 2nd value and then access its field
+        )
+        "#);
+
+    let result = checked_call_vm!(set_variable_vm, "asd", &script, "", "");
+    let result = checked_call_vm!(local_vm, "asd", script, "", result.data);
+    let actual_trace = trace_from_result(&result);
+
+    assert_eq!(&actual_trace[6], &executed_state::scalar_number(checkable_value));
+}
+
+#[test]
 fn lambda_with_scalar_join() {
     let set_variable_peer_id = "set_variable";
     let variables = maplit::hashmap! {

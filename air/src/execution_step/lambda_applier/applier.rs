@@ -55,12 +55,12 @@ pub(crate) fn select_from_stream<'value, 'i>(
         .nth(idx as usize)
         .ok_or(LambdaError::StreamNotHaveEnoughValues { stream_size, idx }))?;
 
-    let result = select(value, body.iter(), exec_ctx)?;
+    let result = select_from_scalar(value, body.iter(), exec_ctx)?;
     let select_result = StreamSelectResult::new(result, idx);
     Ok(select_result)
 }
 
-pub(crate) fn select<'value, 'accessor, 'i>(
+pub(crate) fn select_from_scalar<'value, 'accessor, 'i>(
     mut value: &'value JValue,
     lambda: impl Iterator<Item = &'accessor ValueAccessor<'accessor>>,
     exec_ctx: &ExecutionCtx<'i>,

@@ -26,7 +26,7 @@ use crate::SecurityTetraplet;
 
 use air_parser::ast;
 
-use crate::execution_step::lambda_applier::select;
+use crate::execution_step::lambda_applier::select_from_scalar;
 use serde_json::json;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -71,7 +71,7 @@ pub(crate) fn prepare_last_error<'i>(
     let LastError { error, tetraplet } = ctx.last_error();
 
     let jvalue = match error_accessor {
-        Some(error_accessor) => select(error.as_ref(), error_accessor.iter(), ctx)?,
+        Some(error_accessor) => select_from_scalar(error.as_ref(), error_accessor.iter(), ctx)?,
         None => error.as_ref(),
     };
 
