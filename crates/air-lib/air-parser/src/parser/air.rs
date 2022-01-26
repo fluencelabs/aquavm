@@ -1,4 +1,4 @@
-// auto-generated: "lalrpop 0.19.6"
+// auto-generated: "lalrpop 0.19.7"
 // sha3: c2929fd6be582606809ced9bf24341f11131eef708d60644d19fb79f070
 use crate::ast::*;
 use crate::parser::ParserError;
@@ -19,7 +19,7 @@ extern crate alloc;
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
 mod __parse__AIR {
-    #![allow(non_snake_case, non_camel_case_types, unused_mut, unused_variables, unused_imports, unused_parens)]
+    #![allow(non_snake_case, non_camel_case_types, unused_mut, unused_variables, unused_imports, unused_parens, clippy::all)]
 
     use crate::ast::*;
     use crate::parser::ParserError;
@@ -5683,16 +5683,19 @@ fn __action95<
     )
 }
 
-pub trait __ToTriple<'err, 'input, 'v, > {
+pub trait __ToTriple<'err, 'input, 'v, >
+{
     fn to_triple(value: Self) -> Result<(usize,Token<'input>,usize), __lalrpop_util::ParseError<usize, Token<'input>, ParserError>>;
 }
 
-impl<'err, 'input, 'v, > __ToTriple<'err, 'input, 'v, > for (usize, Token<'input>, usize) {
+impl<'err, 'input, 'v, > __ToTriple<'err, 'input, 'v, > for (usize, Token<'input>, usize)
+{
     fn to_triple(value: Self) -> Result<(usize,Token<'input>,usize), __lalrpop_util::ParseError<usize, Token<'input>, ParserError>> {
         Ok(value)
     }
 }
-impl<'err, 'input, 'v, > __ToTriple<'err, 'input, 'v, > for Result<(usize, Token<'input>, usize), ParserError> {
+impl<'err, 'input, 'v, > __ToTriple<'err, 'input, 'v, > for Result<(usize, Token<'input>, usize), ParserError>
+{
     fn to_triple(value: Self) -> Result<(usize,Token<'input>,usize), __lalrpop_util::ParseError<usize, Token<'input>, ParserError>> {
         match value {
             Ok(v) => Ok(v),
