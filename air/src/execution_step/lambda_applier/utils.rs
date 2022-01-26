@@ -72,6 +72,7 @@ pub(super) fn try_scalar_ref_as_idx(scalar: ScalarRef<'_>) -> LambdaResult<u32> 
     match scalar {
         ScalarRef::Value(accessor) => try_jvalue_as_idx(&accessor.result),
         ScalarRef::IterableValue(accessor) => {
+            // it's safe because iterable always point to valid value
             let accessor = accessor.iterable.peek().unwrap().into_resolved_result();
             try_jvalue_as_idx(&accessor.result)
         }
