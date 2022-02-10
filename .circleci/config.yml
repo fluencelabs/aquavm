@@ -1,4 +1,7 @@
 version: 2
+orbs:
+  node: circleci/node@5.0.0
+
 jobs:
   air:
     docker:
@@ -12,6 +15,9 @@ jobs:
       - restore_cache:
           keys:
             - air01-{{ checksum "Cargo.lock" }}
+      - node/install:
+          install-npm: true
+          node-version: '16.14'
       - run: |
           rustup toolchain install nightly-2021-07-13-x86_64-unknown-linux-gnu
           rustup default nightly-2021-07-13-x86_64-unknown-linux-gnu
