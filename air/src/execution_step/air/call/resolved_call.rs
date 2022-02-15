@@ -73,6 +73,11 @@ impl<'i> ResolvedCall<'i> {
         exec_ctx: &mut ExecutionCtx<'i>,
         trace_ctx: &mut TraceHandler,
     ) -> ExecutionResult<()> {
+        // it's necessary to resolve and check arguments after accessing state,
+        // because it would be undeterministic otherwise, for more details see
+        // https://github.com/fluencelabs/aquavm/issues/214
+        // also note that if there is a error then it doesn't save to data
+        let resolved_args = self.resolve_args(exec_ctx)?;
         let state = self.prepare_current_executed_state(raw_call, exec_ctx, trace_ctx)?;
         if !state.should_execute() {
             state.maybe_set_prev_state(trace_ctx);
@@ -86,7 +91,7 @@ impl<'i> ResolvedCall<'i> {
             return Ok(());
         }
 
-        let request_params = match self.prepare_request_params(exec_ctx, tetraplet) {
+        let request_params = match self.prepare_request_params(resolved_args, tetraplet) {
             Ok(params) => params,
             Err(e) => {
                 // to keep states on join behaviour
@@ -112,13 +117,13 @@ impl<'i> ResolvedCall<'i> {
 
     fn prepare_request_params(
         &self,
-        exec_ctx: &ExecutionCtx<'i>,
+        resolved_args: ResolvedArguments,
         tetraplet: &SecurityTetraplet,
     ) -> ExecutionResult<CallRequestParams> {
         let ResolvedArguments {
             call_arguments,
             tetraplets,
-        } = self.resolve_args(exec_ctx)?;
+        } = resolved_args;
 
         let serialized_tetraplets = serde_json::to_string(&tetraplets).expect("default serializer shouldn't fail");
 
