@@ -73,6 +73,13 @@ impl<'i> ResolvedCall<'i> {
         exec_ctx: &mut ExecutionCtx<'i>,
         trace_ctx: &mut TraceHandler,
     ) -> ExecutionResult<()> {
+        // it's necessary to check arguments before accessing state,
+        // because it would be undeterministic otherwise, for more details see
+        // https://github.com/fluencelabs/aquavm/issues/214
+        // also note that if there is a non-join error then the corresponding state
+        // won't be saved to data
+        self.check_args(exec_ctx)?;
+
         let state = self.prepare_current_executed_state(raw_call, exec_ctx, trace_ctx)?;
         if !state.should_execute() {
             state.maybe_set_prev_state(trace_ctx);
@@ -88,9 +95,12 @@ impl<'i> ResolvedCall<'i> {
 
         let request_params = match self.prepare_request_params(exec_ctx, tetraplet) {
             Ok(params) => params,
-            Err(e) => {
+            Err(e) if e.is_joinable() => {
                 // to keep states on join behaviour
                 state.maybe_set_prev_state(trace_ctx);
+                return Err(e);
+            }
+            Err(e) => {
                 return Err(e);
             }
         };
@@ -112,7 +122,7 @@ impl<'i> ResolvedCall<'i> {
 
     fn prepare_request_params(
         &self,
-        exec_ctx: &ExecutionCtx<'i>,
+        exec_ctx: &ExecutionCtx<'_>,
         tetraplet: &SecurityTetraplet,
     ) -> ExecutionResult<CallRequestParams> {
         let ResolvedArguments {
@@ -159,8 +169,8 @@ impl<'i> ResolvedCall<'i> {
         use crate::execution_step::resolver::resolve_to_args;
 
         let function_args = self.function_arg_paths.iter();
-        let mut call_arguments = Vec::new();
-        let mut tetraplets = Vec::new();
+        let mut call_arguments = Vec::with_capacity(function_args.len());
+        let mut tetraplets = Vec::with_capacity(function_args.len());
         for instruction_value in function_args {
             let (arg, tetraplet) = resolve_to_args(instruction_value, exec_ctx)?;
             call_arguments.push(arg);
@@ -176,6 +186,22 @@ impl<'i> ResolvedCall<'i> {
         };
 
         Ok(resolved_arguments)
+    }
+
+    /// Lightweight version of resolve_args function that intended to check arguments of
+    /// a call instruction. It suppresses joinable errors.
+    fn check_args(&self, exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<()> {
+        // TODO: make this function more lightweight
+        use crate::execution_step::resolver::resolve_to_args;
+
+        self.function_arg_paths
+            .iter()
+            .map(|arg_path| match resolve_to_args(arg_path, exec_ctx) {
+                Ok(_) => Ok(()),
+                Err(e) if e.is_joinable() => Ok(()),
+                Err(e) => Err(e),
+            })
+            .collect::<_>()
     }
 }
 

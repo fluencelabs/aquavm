@@ -266,7 +266,6 @@ fn access_last_error_by_not_exists_field() {
     let mut fallible_vm = create_avm(fallible_call_service("fallible_call_service"), fallible_peer_id);
 
     let local_peer_id = "local_peer_id";
-    let mut local_vm = create_avm(echo_call_service(), local_peer_id);
 
     let non_exists_field_name = "non_exists_field";
     let script = f!(r#"
@@ -276,8 +275,7 @@ fn access_last_error_by_not_exists_field() {
         )
     "#);
 
-    let result = checked_call_vm!(fallible_vm, "asd", &script, "", "");
-    let result = call_vm!(local_vm, "asd", script, "", result.data);
+    let result = call_vm!(fallible_vm, "asd", &script, "", "");
 
     let expected_error = ExecutionError::Catchable(rc!(CatchableError::LambdaApplierError(
         LambdaError::ValueNotContainSuchField {
