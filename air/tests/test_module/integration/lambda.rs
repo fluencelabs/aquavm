@@ -27,7 +27,6 @@ fn lambda_not_allowed_for_non_objects_and_arrays() {
     let mut set_variable_vm = create_avm(echo_call_service(), set_variable_peer_id);
 
     let local_peer_id = "local_peer_id";
-    let mut local_vm = create_avm(echo_call_service(), local_peer_id);
 
     let some_string = "some_string";
     let script = f!(r#"
@@ -37,8 +36,7 @@ fn lambda_not_allowed_for_non_objects_and_arrays() {
         )
         "#);
 
-    let result = checked_call_vm!(set_variable_vm, "asd", &script, "", "");
-    let result = call_vm!(local_vm, "asd", script, "", result.data);
+    let result = call_vm!(set_variable_vm, "asd", &script, "", "");
 
     let expected_error = CatchableError::LambdaApplierError(LambdaError::FieldAccessorNotMatchValue {
         value: json!(some_string),

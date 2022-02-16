@@ -20,9 +20,8 @@ use fstrings::f;
 use fstrings::format_args_f;
 
 #[test]
-// test for github.com/fluencelabs/aquavm/issues/211
-// On the versions < 0.20.1 it just crashes
-fn issue_xor() {
+// test for github.com/fluencelabs/aquavm/issues/214
+fn issue_214() {
     let client_id = "client_peer_id";
     let relay_id = "relay_peer_id";
     let scalar = json!([]);
