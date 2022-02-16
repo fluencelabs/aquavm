@@ -61,10 +61,10 @@ fn issue_xor() {
     "#);
 
     let result = checked_call_vm!(client, client_id, &script, "", "");
-    let expected_trace = vec! [
+    let expected_trace = vec![
         executed_state::scalar_string(relay_id),
         executed_state::scalar(scalar),
-        executed_state::scalar_string(error_handler)
+        executed_state::scalar_string(error_handler),
     ];
     let actual_trace = trace_from_result(&result);
 
