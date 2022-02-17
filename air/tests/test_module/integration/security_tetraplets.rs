@@ -64,8 +64,8 @@ fn simple_fold() {
             (fold IterableResultPeer1 i
                 (par
                     (seq
-                        (call i ("local_service_id" "local_fn_name") [IterableResultPeer1.$.[0] "some_text_literal"] $acc)
-                        (call i ("local_service_id" "local_fn_name") [IterableResultPeer1.$.[0] "some_text_literal"] $acc)
+                        (call i ("local_service_id" "local_fn_name") [i "some_text_literal"] $acc)
+                        (call i ("local_service_id" "local_fn_name") [i "some_text_literal"] $acc)
                     )
                     (next i)
                 )
