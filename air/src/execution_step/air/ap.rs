@@ -39,6 +39,10 @@ use std::rc::Rc;
 impl<'i> super::ExecutableInstruction<'i> for Ap<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         let should_touch_trace = should_touch_trace(self);
+        // this applying should be at the very beginning of this function,
+        // because it's necessary to check argument lambda, for more details see
+        // https://github.com/fluencelabs/aquavm/issues/216
+        let result = apply_to_arg(&self.argument, exec_ctx, trace_ctx, should_touch_trace)?;
 
         let merger_ap_result = if should_touch_trace {
             let merger_ap_result = trace_to_exec_err!(trace_ctx.meet_ap_start(), self)?;
@@ -47,8 +51,6 @@ impl<'i> super::ExecutableInstruction<'i> for Ap<'i> {
         } else {
             MergerApResult::Empty
         };
-
-        let result = apply_to_arg(&self.argument, exec_ctx, trace_ctx, should_touch_trace)?;
         save_result(&self.result, &merger_ap_result, result, exec_ctx)?;
 
         if should_touch_trace {

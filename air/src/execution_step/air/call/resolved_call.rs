@@ -196,12 +196,11 @@ impl<'i> ResolvedCall<'i> {
 
         self.function_arg_paths
             .iter()
-            .map(|arg_path| match resolve_to_args(arg_path, exec_ctx) {
+            .try_for_each(|arg_path| match resolve_to_args(arg_path, exec_ctx) {
                 Ok(_) => Ok(()),
                 Err(e) if e.is_joinable() => Ok(()),
                 Err(e) => Err(e),
             })
-            .collect::<_>()
     }
 }
 
