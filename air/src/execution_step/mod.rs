@@ -51,4 +51,4 @@ use std::rc::Rc;
 
 type ExecutionResult<T> = std::result::Result<T, ExecutionError>;
 type RSecurityTetraplet = Rc<RefCell<crate::SecurityTetraplet>>;
-type SecurityTetraplets = Vec<RSecurityTetraplet>;
+type RSecurityTetraplets = Vec<RSecurityTetraplet>;

@@ -111,6 +111,7 @@ fn apply_scalar_wl_impl(
 ) -> ExecutionResult<ValueAggregate> {
     let variable = Variable::scalar(scalar_name, position);
     let (jvalue, tetraplet) = apply_lambda(variable, lambda, exec_ctx)?;
+    let tetraplet = Rc::new(RefCell::new(tetraplet));
     let result = ValueAggregate::new(Rc::new(jvalue), tetraplet, trace_ctx.trace_pos());
 
     Ok(result)

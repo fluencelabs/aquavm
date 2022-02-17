@@ -21,7 +21,7 @@ use super::prev_result_handler::*;
 use super::triplet::resolve;
 use super::*;
 use crate::execution_step::RSecurityTetraplet;
-use crate::execution_step::SecurityTetraplets;
+use crate::execution_step::RSecurityTetraplets;
 use crate::execution_step::UncatchableError;
 use crate::trace_to_exec_err;
 use crate::JValue;
@@ -47,7 +47,7 @@ pub(super) struct ResolvedCall<'i> {
 #[derive(Debug, Clone, PartialEq)]
 struct ResolvedArguments {
     call_arguments: String,
-    tetraplets: Vec<SecurityTetraplets>,
+    tetraplets: Vec<RSecurityTetraplets>,
 }
 
 impl<'i> ResolvedCall<'i> {

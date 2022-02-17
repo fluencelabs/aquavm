@@ -25,10 +25,10 @@ use super::ExecutionResult;
 use super::ValueAggregate;
 use crate::execution_step::lambda_applier::*;
 use crate::execution_step::ExecutionCtx;
-use crate::execution_step::RSecurityTetraplet;
-use crate::execution_step::SecurityTetraplets;
+use crate::execution_step::RSecurityTetraplets;
 use crate::JValue;
 use crate::LambdaAST;
+use crate::SecurityTetraplet;
 
 pub(crate) use stream::StreamJvaluableIngredients;
 
@@ -44,7 +44,7 @@ pub(crate) trait JValuable {
         &self,
         lambda: &LambdaAST<'_>,
         exec_ctx: &ExecutionCtx<'i>,
-    ) -> ExecutionResult<(&JValue, RSecurityTetraplet)>;
+    ) -> ExecutionResult<(&JValue, SecurityTetraplet)>;
 
     /// Return internal value as borrowed if it's possible, owned otherwise.
     fn as_jvalue(&self) -> Cow<'_, JValue>;
@@ -53,5 +53,5 @@ pub(crate) trait JValuable {
     fn into_jvalue(self: Box<Self>) -> JValue;
 
     /// Return tetraplets associating with internal value.
-    fn as_tetraplets(&self) -> SecurityTetraplets;
+    fn as_tetraplets(&self) -> RSecurityTetraplets;
 }

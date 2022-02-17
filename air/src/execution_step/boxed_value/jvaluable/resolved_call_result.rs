@@ -20,9 +20,9 @@ use super::JValuable;
 use super::LambdaAST;
 use super::ValueAggregate;
 use crate::execution_step::ExecutionCtx;
-use crate::execution_step::RSecurityTetraplet;
-use crate::execution_step::SecurityTetraplets;
+use crate::execution_step::RSecurityTetraplets;
 use crate::JValue;
+use crate::SecurityTetraplet;
 
 use air_lambda_ast::format_ast;
 
@@ -39,10 +39,10 @@ impl JValuable for ValueAggregate {
         &self,
         lambda: &LambdaAST<'_>,
         exec_ctx: &ExecutionCtx<'i>,
-    ) -> ExecutionResult<(&JValue, RSecurityTetraplet)> {
+    ) -> ExecutionResult<(&JValue, SecurityTetraplet)> {
         let selected_value = select_from_scalar(&self.result, lambda.iter(), exec_ctx)?;
-        let tetraplet = self.tetraplet.clone();
-        tetraplet.borrow_mut().add_lambda(&format_ast(lambda));
+        let mut tetraplet = self.tetraplet.as_ref().borrow_mut().deref().clone();
+        tetraplet.add_lambda(&format_ast(lambda));
 
         Ok((selected_value, tetraplet))
     }
@@ -55,7 +55,7 @@ impl JValuable for ValueAggregate {
         self.result.deref().clone()
     }
 
-    fn as_tetraplets(&self) -> SecurityTetraplets {
+    fn as_tetraplets(&self) -> RSecurityTetraplets {
         vec![self.tetraplet.clone()]
     }
 }
