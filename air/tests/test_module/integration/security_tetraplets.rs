@@ -17,6 +17,9 @@
 use air::SecurityTetraplet;
 use air_test_utils::prelude::*;
 
+use fstrings::f;
+use fstrings::format_args_f;
+
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -102,12 +105,13 @@ fn simple_fold() {
 
 #[test]
 fn fold_json_path() {
-    let return_numbers_call_service: CallServiceClosure = Box::new(|_| -> CallServiceResult {
-        CallServiceResult::ok(json!({"args": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]}))
-    });
+    let variable_numbers = json!({"args": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]});
 
     let set_variable_vm_peer_id = String::from("some_peer_id_1");
-    let mut set_variable_vm = create_avm(return_numbers_call_service, set_variable_vm_peer_id.clone());
+    let mut set_variable_vm = create_avm(
+        set_variable_call_service(variable_numbers),
+        set_variable_vm_peer_id.clone(),
+    );
 
     let (arg_host_func, arg_tetraplets) = arg_host_function();
     let client_peer_id = String::from("client_id");
@@ -150,6 +154,52 @@ fn fold_json_path() {
     let expected_tetraplets = vec![vec![first_arg_tetraplet], vec![second_arg_tetraplet]];
     let expected_tetraplets = Rc::new(RefCell::new(expected_tetraplets));
     checked_call_vm!(client_vm, init_peer_id.clone(), script.clone(), "", result.data);
+    assert_eq!(arg_tetraplets, expected_tetraplets);
+}
+
+#[test]
+fn check_tetraplet_works_correctly() {
+    let return_numbers_call_service: CallServiceClosure = Box::new(|_| -> CallServiceResult {
+        CallServiceResult::ok(json!({"args": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]}))
+    });
+
+    let set_variable_vm_peer_id = String::from("some_peer_id_1");
+    let mut set_variable_vm = create_avm(return_numbers_call_service, set_variable_vm_peer_id.clone());
+
+    let (arg_host_func, arg_tetraplets) = arg_host_function();
+    let client_peer_id = String::from("client_id");
+    let mut client_vm = create_avm(arg_host_func, client_peer_id.clone());
+
+    let service_id = String::from("some_service_id");
+    let function_name = String::from("some_function_name");
+    let script = f!(r#"
+        (seq
+            (call "{set_variable_vm_peer_id}" ("{service_id}" "{function_name}") [] value)
+            (seq
+                (call "{client_peer_id}" ("local_service_id" "local_fn_name") [value.$.args value.$.args.[0]])
+                (call "{client_peer_id}" ("local_service_id" "local_fn_name") [value.$.args value.$.args.[0]])
+            )
+        )"#);
+
+    let result = checked_call_vm!(set_variable_vm, "", script.clone(), "", "");
+
+    let first_arg_tetraplet = SecurityTetraplet {
+        peer_pk: set_variable_vm_peer_id.clone(),
+        service_id: service_id.clone(),
+        function_name: function_name.clone(),
+        json_path: String::from(".args"),
+    };
+
+    let second_arg_tetraplet = SecurityTetraplet {
+        peer_pk: set_variable_vm_peer_id.clone(),
+        service_id,
+        function_name,
+        json_path: String::from(".args.[0]"),
+    };
+
+    let expected_tetraplets = vec![vec![first_arg_tetraplet], vec![second_arg_tetraplet]];
+    let expected_tetraplets = Rc::new(RefCell::new(expected_tetraplets));
+    checked_call_vm!(client_vm, "", script.clone(), "", result.data);
     assert_eq!(arg_tetraplets, expected_tetraplets);
 }
 
