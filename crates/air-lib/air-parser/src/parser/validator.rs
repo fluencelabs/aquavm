@@ -20,10 +20,10 @@ use crate::parser::lexer::Token;
 use crate::parser::ParserError;
 use crate::parser::Span;
 
+use air_lambda_ast::ValueAccessor;
 use lalrpop_util::ErrorRecovery;
 use lalrpop_util::ParseError;
 
-use air_lambda_ast::ValueAccessor;
 use multimap::MultiMap;
 use std::collections::HashMap;
 use std::ops::Deref;
