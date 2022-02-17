@@ -20,6 +20,7 @@ use crate::parser::lexer::Token;
 use crate::parser::ParserError;
 use crate::parser::Span;
 
+use air_lambda_ast::ValueAccessor;
 use lalrpop_util::ErrorRecovery;
 use lalrpop_util::ParseError;
 
@@ -184,6 +185,21 @@ impl<'i> VariableValidator<'i> {
 
     fn met_variable_wl(&mut self, variable: &VariableWithLambda<'i>, span: Span) {
         self.met_variable_name(variable.name(), span);
+        let lambda = match variable.lambda() {
+            Some(lambda) => lambda,
+            None => return,
+        };
+
+        for accessor in lambda.iter() {
+            match accessor {
+                &ValueAccessor::FieldAccessByScalar { scalar_name } => {
+                    self.met_variable_name(scalar_name, span)
+                }
+                ValueAccessor::ArrayAccess { .. }
+                | ValueAccessor::FieldAccessByName { .. }
+                | ValueAccessor::Error => {}
+            }
+        }
     }
 
     fn met_variable_name(&mut self, name: &'i str, span: Span) {

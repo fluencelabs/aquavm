@@ -120,7 +120,7 @@ impl<'i> VariableWithLambda<'i> {
         }
     }
 
-    pub fn lambda(&self) -> &Option<LambdaAST> {
+    pub fn lambda(&self) -> &Option<LambdaAST<'i>> {
         match self {
             VariableWithLambda::Scalar(scalar) => &scalar.lambda,
             VariableWithLambda::Stream(stream) => &stream.lambda,
