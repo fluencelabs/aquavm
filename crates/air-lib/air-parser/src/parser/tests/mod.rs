@@ -35,11 +35,8 @@ fn parse(source_code: &str) -> Instruction {
         let mut errors = Vec::new();
         let lexer = crate::parser::AIRLexer::new(source_code);
         let mut validator = crate::parser::VariableValidator::new();
-        let res = parser
+        parser
             .parse(source_code, &mut errors, &mut validator, lexer)
-            .expect("parsing should be successful");
-
-        println!("{:?}", errors);
-        res
+            .expect("parsing should be successful")
     })
 }
