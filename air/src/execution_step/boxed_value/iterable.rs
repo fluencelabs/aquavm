@@ -24,7 +24,7 @@ pub(crate) use resolved_call::IterableResolvedCall;
 pub(crate) use vec_resolved_call::IterableVecResolvedCall;
 
 use super::ValueAggregate;
-use crate::execution_step::RSecurityTetraplet;
+use crate::execution_step::RcSecurityTetraplet;
 use crate::JValue;
 
 use std::rc::Rc;
@@ -56,9 +56,9 @@ pub(crate) trait Iterable<'ctx> {
 /// through, i.e., it is the `iterable` in the `(fold collection iterable instruction)` statement.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) enum IterableItem<'ctx> {
-    RefRef((&'ctx JValue, &'ctx RSecurityTetraplet, usize)),
-    RefValue((&'ctx JValue, RSecurityTetraplet, usize)),
-    RcValue((Rc<JValue>, RSecurityTetraplet, usize)),
+    RefRef((&'ctx JValue, &'ctx RcSecurityTetraplet, usize)),
+    RefValue((&'ctx JValue, RcSecurityTetraplet, usize)),
+    RcValue((Rc<JValue>, RcSecurityTetraplet, usize)),
 }
 
 impl IterableItem<'_> {

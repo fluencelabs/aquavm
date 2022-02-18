@@ -19,10 +19,10 @@ use super::ExecutionResult;
 use super::JValuable;
 use super::ValueAggregate;
 use crate::execution_step::ExecutionCtx;
-use crate::execution_step::RSecurityTetraplet;
-use crate::execution_step::SecurityTetraplets;
+use crate::execution_step::RcSecurityTetraplets;
 use crate::JValue;
 use crate::LambdaAST;
+use crate::SecurityTetraplet;
 
 use air_lambda_ast::format_ast;
 
@@ -40,12 +40,13 @@ impl JValuable for std::cell::Ref<'_, Vec<ValueAggregate>> {
         &self,
         lambda: &LambdaAST<'_>,
         exec_ctx: &ExecutionCtx<'i>,
-    ) -> ExecutionResult<(&JValue, RSecurityTetraplet)> {
+    ) -> ExecutionResult<(&JValue, SecurityTetraplet)> {
         let stream_iter = self.iter().map(|r| r.result.deref());
         let select_result = select_from_stream(stream_iter, lambda, exec_ctx)?;
 
-        let tetraplet = self[select_result.tetraplet_idx].tetraplet.clone();
-        tetraplet.borrow_mut().add_lambda(&format_ast(lambda));
+        let tetraplet = &self[select_result.tetraplet_idx].tetraplet;
+        let mut tetraplet = tetraplet.as_ref().clone();
+        tetraplet.add_lambda(&format_ast(lambda));
 
         Ok((select_result.result, tetraplet))
     }
@@ -60,7 +61,7 @@ impl JValuable for std::cell::Ref<'_, Vec<ValueAggregate>> {
         JValue::Array(jvalue_array)
     }
 
-    fn as_tetraplets(&self) -> SecurityTetraplets {
+    fn as_tetraplets(&self) -> RcSecurityTetraplets {
         self.iter().map(|r| r.tetraplet.clone()).collect::<Vec<_>>()
     }
 }

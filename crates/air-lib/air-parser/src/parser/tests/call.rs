@@ -559,3 +559,33 @@ fn no_output() {
     );
     assert_eq!(actual, expected);
 }
+
+#[test]
+fn not_defined_scalar_in_lambda() {
+    let source_code = r#"
+        (seq
+            (call "" ("" "") [] value)
+            (call "" ("" "") [value.$.[not_defined_scalar]])
+        )
+        "#;
+
+    let lexer = crate::AIRLexer::new(source_code);
+
+    let parser = crate::AIRParser::new();
+    let mut errors = Vec::new();
+    let mut validator = crate::parser::VariableValidator::new();
+    parser
+        .parse(source_code, &mut errors, &mut validator, lexer)
+        .expect("parser shouldn't fail");
+
+    let errors = validator.finalize();
+
+    assert_eq!(errors.len(), 1);
+    let error = &errors[0].error;
+    let parser_error = match error {
+        ParseError::User { error } => error,
+        _ => panic!("unexpected error type"),
+    };
+
+    assert!(matches!(parser_error, ParserError::UndefinedVariable(..)));
+}

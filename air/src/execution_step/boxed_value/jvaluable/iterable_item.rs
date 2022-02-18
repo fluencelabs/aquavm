@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-use super::select;
+use super::select_from_scalar;
 use super::ExecutionResult;
 use super::IterableItem;
 use super::JValuable;
 use super::LambdaAST;
 use crate::execution_step::ExecutionCtx;
-use crate::execution_step::RSecurityTetraplet;
-use crate::execution_step::SecurityTetraplets;
+use crate::execution_step::RcSecurityTetraplets;
 use crate::JValue;
+use crate::SecurityTetraplet;
 
+use air_lambda_ast::format_ast;
 use std::borrow::Cow;
 use std::ops::Deref;
 
@@ -37,7 +38,7 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
             RcValue((jvalue, ..)) => jvalue.deref(),
         };
 
-        let selected_value = select(jvalue, lambda.iter(), exec_ctx)?;
+        let selected_value = select_from_scalar(jvalue, lambda.iter(), exec_ctx)?;
         Ok(selected_value)
     }
 
@@ -45,7 +46,7 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
         &self,
         lambda: &LambdaAST<'_>,
         exec_ctx: &ExecutionCtx<'i>,
-    ) -> ExecutionResult<(&JValue, RSecurityTetraplet)> {
+    ) -> ExecutionResult<(&JValue, SecurityTetraplet)> {
         use super::IterableItem::*;
 
         let (jvalue, tetraplet) = match self {
@@ -54,8 +55,11 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
             RcValue((jvalue, tetraplet, _)) => (jvalue.deref(), tetraplet),
         };
 
-        let selected_value = select(jvalue, lambda.iter(), exec_ctx)?;
-        Ok((selected_value, tetraplet.clone()))
+        let selected_value = select_from_scalar(jvalue, lambda.iter(), exec_ctx)?;
+        let mut tetraplet = tetraplet.as_ref().clone();
+        tetraplet.add_lambda(&format_ast(lambda));
+
+        Ok((selected_value, tetraplet))
     }
 
     fn as_jvalue(&self) -> Cow<'_, JValue> {
@@ -78,7 +82,7 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
         }
     }
 
-    fn as_tetraplets(&self) -> SecurityTetraplets {
+    fn as_tetraplets(&self) -> RcSecurityTetraplets {
         use super::IterableItem::*;
 
         // these clones are needed because rust-sdk allows passing arguments only by value

@@ -20,10 +20,10 @@ use super::JValuable;
 use crate::execution_step::boxed_value::Generation;
 use crate::execution_step::boxed_value::Stream;
 use crate::execution_step::ExecutionCtx;
-use crate::execution_step::RSecurityTetraplet;
-use crate::execution_step::SecurityTetraplets;
+use crate::execution_step::RcSecurityTetraplets;
 use crate::JValue;
 use crate::LambdaAST;
+use crate::SecurityTetraplet;
 
 use air_lambda_ast::format_ast;
 
@@ -50,14 +50,14 @@ impl JValuable for StreamJvaluableIngredients<'_> {
         &self,
         lambda: &LambdaAST<'_>,
         exec_ctx: &ExecutionCtx<'i>,
-    ) -> ExecutionResult<(&JValue, RSecurityTetraplet)> {
+    ) -> ExecutionResult<(&JValue, SecurityTetraplet)> {
         let iter = self.iter()?.map(|v| v.result.deref());
         let select_result = select_from_stream(iter, lambda, exec_ctx)?;
 
         // unwrap is safe here because each value has a tetraplet and a lambda always returns a valid index
         let resolved_call = self.iter()?.nth(select_result.tetraplet_idx).unwrap();
-        let tetraplet = resolved_call.tetraplet.clone();
-        tetraplet.borrow_mut().add_lambda(&format_ast(lambda));
+        let mut tetraplet = resolved_call.tetraplet.as_ref().clone();
+        tetraplet.add_lambda(&format_ast(lambda));
 
         Ok((select_result.result, tetraplet))
     }
@@ -71,7 +71,7 @@ impl JValuable for StreamJvaluableIngredients<'_> {
         self.stream.as_jvalue(self.generation).unwrap()
     }
 
-    fn as_tetraplets(&self) -> SecurityTetraplets {
+    fn as_tetraplets(&self) -> RcSecurityTetraplets {
         self.stream
             .iter(self.generation)
             .unwrap()

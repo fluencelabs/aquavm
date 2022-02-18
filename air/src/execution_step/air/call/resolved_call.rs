@@ -20,8 +20,8 @@ use super::call_result_setter::*;
 use super::prev_result_handler::*;
 use super::triplet::resolve;
 use super::*;
-use crate::execution_step::RSecurityTetraplet;
-use crate::execution_step::SecurityTetraplets;
+use crate::execution_step::RcSecurityTetraplet;
+use crate::execution_step::RcSecurityTetraplets;
 use crate::execution_step::UncatchableError;
 use crate::trace_to_exec_err;
 use crate::JValue;
@@ -33,13 +33,12 @@ use air_parser::ast;
 use air_trace_handler::MergerCallResult;
 use air_trace_handler::TraceHandler;
 
-use std::cell::RefCell;
 use std::rc::Rc;
 
 /// Represents Call instruction with resolved internal parts.
 #[derive(Debug, Clone, PartialEq)]
 pub(super) struct ResolvedCall<'i> {
-    tetraplet: RSecurityTetraplet,
+    tetraplet: RcSecurityTetraplet,
     function_arg_paths: Rc<Vec<ast::Value<'i>>>,
     output: ast::CallOutputValue<'i>,
 }
@@ -47,7 +46,7 @@ pub(super) struct ResolvedCall<'i> {
 #[derive(Debug, Clone, PartialEq)]
 struct ResolvedArguments {
     call_arguments: String,
-    tetraplets: Vec<SecurityTetraplets>,
+    tetraplets: Vec<RcSecurityTetraplets>,
 }
 
 impl<'i> ResolvedCall<'i> {
@@ -55,7 +54,7 @@ impl<'i> ResolvedCall<'i> {
     pub(super) fn new(raw_call: &Call<'i>, exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<Self> {
         let triplet = resolve(&raw_call.triplet, exec_ctx)?;
         let tetraplet = SecurityTetraplet::from_triplet(triplet);
-        let tetraplet = Rc::new(RefCell::new(tetraplet));
+        let tetraplet = Rc::new(tetraplet);
 
         check_output_name(&raw_call.output, exec_ctx)?;
 
@@ -73,6 +72,13 @@ impl<'i> ResolvedCall<'i> {
         exec_ctx: &mut ExecutionCtx<'i>,
         trace_ctx: &mut TraceHandler,
     ) -> ExecutionResult<()> {
+        // it's necessary to check arguments before accessing state,
+        // because it would be undeterministic otherwise, for more details see
+        // https://github.com/fluencelabs/aquavm/issues/214
+        // also note that if there is a non-join error then the corresponding state
+        // won't be saved to data
+        self.check_args(exec_ctx)?;
+
         let state = self.prepare_current_executed_state(raw_call, exec_ctx, trace_ctx)?;
         if !state.should_execute() {
             state.maybe_set_prev_state(trace_ctx);
@@ -80,7 +86,7 @@ impl<'i> ResolvedCall<'i> {
         }
 
         // call can be executed only on peers with such peer_id
-        let tetraplet = &self.tetraplet.borrow();
+        let tetraplet = &self.tetraplet;
         if tetraplet.peer_pk.as_str() != exec_ctx.current_peer_id.as_str() {
             set_remote_call_result(tetraplet.peer_pk.clone(), exec_ctx, trace_ctx);
             return Ok(());
@@ -88,9 +94,12 @@ impl<'i> ResolvedCall<'i> {
 
         let request_params = match self.prepare_request_params(exec_ctx, tetraplet) {
             Ok(params) => params,
-            Err(e) => {
+            Err(e) if e.is_joinable() => {
                 // to keep states on join behaviour
                 state.maybe_set_prev_state(trace_ctx);
+                return Err(e);
+            }
+            Err(e) => {
                 return Err(e);
             }
         };
@@ -106,13 +115,13 @@ impl<'i> ResolvedCall<'i> {
         Ok(())
     }
 
-    pub(super) fn as_tetraplet(&self) -> RSecurityTetraplet {
+    pub(super) fn as_tetraplet(&self) -> RcSecurityTetraplet {
         self.tetraplet.clone()
     }
 
     fn prepare_request_params(
         &self,
-        exec_ctx: &ExecutionCtx<'i>,
+        exec_ctx: &ExecutionCtx<'_>,
         tetraplet: &SecurityTetraplet,
     ) -> ExecutionResult<CallRequestParams> {
         let ResolvedArguments {
@@ -159,8 +168,8 @@ impl<'i> ResolvedCall<'i> {
         use crate::execution_step::resolver::resolve_to_args;
 
         let function_args = self.function_arg_paths.iter();
-        let mut call_arguments = Vec::new();
-        let mut tetraplets = Vec::new();
+        let mut call_arguments = Vec::with_capacity(function_args.len());
+        let mut tetraplets = Vec::with_capacity(function_args.len());
         for instruction_value in function_args {
             let (arg, tetraplet) = resolve_to_args(instruction_value, exec_ctx)?;
             call_arguments.push(arg);
@@ -176,6 +185,21 @@ impl<'i> ResolvedCall<'i> {
         };
 
         Ok(resolved_arguments)
+    }
+
+    /// Lightweight version of resolve_args function that intended to check arguments of
+    /// a call instruction. It suppresses joinable errors.
+    fn check_args(&self, exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<()> {
+        // TODO: make this function more lightweight
+        use crate::execution_step::resolver::resolve_to_args;
+
+        self.function_arg_paths
+            .iter()
+            .try_for_each(|arg_path| match resolve_to_args(arg_path, exec_ctx) {
+                Ok(_) => Ok(()),
+                Err(e) if e.is_joinable() => Ok(()),
+                Err(e) => Err(e),
+            })
     }
 }
 

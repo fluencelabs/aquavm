@@ -98,4 +98,9 @@ impl<E> AVM<E> {
         self.data_store.cleanup_data(particle_id)?;
         Ok(())
     }
+
+    /// Return size of interpreter heap in bytes.
+    pub fn memory_size(&self) -> usize {
+        self.runner.memory_size()
+    }
 }

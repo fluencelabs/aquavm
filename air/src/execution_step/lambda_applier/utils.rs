@@ -68,6 +68,17 @@ pub(super) fn select_by_scalar<'value, 'i>(
     }
 }
 
+pub(super) fn try_scalar_ref_as_idx(scalar: ScalarRef<'_>) -> LambdaResult<u32> {
+    match scalar {
+        ScalarRef::Value(accessor) => try_jvalue_as_idx(&accessor.result),
+        ScalarRef::IterableValue(accessor) => {
+            // it's safe because iterable always point to valid value
+            let accessor = accessor.iterable.peek().unwrap().into_resolved_result();
+            try_jvalue_as_idx(&accessor.result)
+        }
+    }
+}
+
 fn select_by_jvalue<'value>(value: &'value JValue, accessor: &JValue) -> LambdaResult<&'value JValue> {
     match accessor {
         JValue::String(string_accessor) => try_jvalue_with_field_name(value, string_accessor),
@@ -76,6 +87,15 @@ fn select_by_jvalue<'value>(value: &'value JValue, accessor: &JValue) -> LambdaR
             try_jvalue_with_idx(value, idx)
         }
         scalar_accessor => Err(LambdaError::ScalarAccessorHasInvalidType {
+            scalar_accessor: scalar_accessor.clone(),
+        }),
+    }
+}
+
+fn try_jvalue_as_idx(jvalue: &JValue) -> LambdaResult<u32> {
+    match jvalue {
+        JValue::Number(number) => try_number_to_u32(number),
+        scalar_accessor => Err(LambdaError::StreamAccessorHasInvalidType {
             scalar_accessor: scalar_accessor.clone(),
         }),
     }

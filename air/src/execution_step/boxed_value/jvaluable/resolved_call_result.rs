@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-use super::select;
+use super::select_from_scalar;
 use super::ExecutionResult;
 use super::JValuable;
 use super::LambdaAST;
 use super::ValueAggregate;
 use crate::execution_step::ExecutionCtx;
-use crate::execution_step::RSecurityTetraplet;
-use crate::execution_step::SecurityTetraplets;
+use crate::execution_step::RcSecurityTetraplets;
 use crate::JValue;
+use crate::SecurityTetraplet;
 
 use air_lambda_ast::format_ast;
 
@@ -31,7 +31,7 @@ use std::ops::Deref;
 
 impl JValuable for ValueAggregate {
     fn apply_lambda<'i>(&self, lambda: &LambdaAST<'_>, exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<&JValue> {
-        let selected_value = select(&self.result, lambda.iter(), exec_ctx)?;
+        let selected_value = select_from_scalar(&self.result, lambda.iter(), exec_ctx)?;
         Ok(selected_value)
     }
 
@@ -39,10 +39,10 @@ impl JValuable for ValueAggregate {
         &self,
         lambda: &LambdaAST<'_>,
         exec_ctx: &ExecutionCtx<'i>,
-    ) -> ExecutionResult<(&JValue, RSecurityTetraplet)> {
-        let selected_value = select(&self.result, lambda.iter(), exec_ctx)?;
-        let tetraplet = self.tetraplet.clone();
-        tetraplet.borrow_mut().add_lambda(&format_ast(lambda));
+    ) -> ExecutionResult<(&JValue, SecurityTetraplet)> {
+        let selected_value = select_from_scalar(&self.result, lambda.iter(), exec_ctx)?;
+        let mut tetraplet = self.tetraplet.as_ref().clone();
+        tetraplet.add_lambda(&format_ast(lambda));
 
         Ok((selected_value, tetraplet))
     }
@@ -55,7 +55,7 @@ impl JValuable for ValueAggregate {
         self.result.deref().clone()
     }
 
-    fn as_tetraplets(&self) -> SecurityTetraplets {
+    fn as_tetraplets(&self) -> RcSecurityTetraplets {
         vec![self.tetraplet.clone()]
     }
 }

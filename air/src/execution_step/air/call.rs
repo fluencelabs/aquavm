@@ -26,7 +26,7 @@ use super::ExecutionError;
 use super::ExecutionResult;
 use super::TraceHandler;
 use crate::execution_step::Joinable;
-use crate::execution_step::RSecurityTetraplet;
+use crate::execution_step::RcSecurityTetraplet;
 use crate::joinable;
 use crate::log_instruction;
 
@@ -52,7 +52,7 @@ fn set_last_error<'i>(
     call: &Call<'i>,
     exec_ctx: &mut ExecutionCtx<'i>,
     execution_error: ExecutionError,
-    tetraplet: Option<RSecurityTetraplet>,
+    tetraplet: Option<RcSecurityTetraplet>,
 ) -> ExecutionError {
     let catchable_error = match execution_error {
         ExecutionError::Catchable(catchable) => catchable,
@@ -63,7 +63,7 @@ fn set_last_error<'i>(
         // use tetraplet if they set, because an error could be propagated from data
         // (from CallServiceFailed state) and exec_ctx.current_peer_id won't mean
         // a peer where the error was occurred
-        Some(tetraplet) => tetraplet.borrow().peer_pk.clone(),
+        Some(tetraplet) => tetraplet.peer_pk.clone(),
         None => exec_ctx.current_peer_id.to_string(),
     };
 

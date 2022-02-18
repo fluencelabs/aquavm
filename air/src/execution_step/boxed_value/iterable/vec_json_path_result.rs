@@ -16,7 +16,7 @@
 
 use super::Iterable;
 use super::IterableItem;
-use crate::execution_step::SecurityTetraplets;
+use crate::execution_step::RcSecurityTetraplets;
 use crate::foldable_next;
 use crate::foldable_prev;
 use crate::JValue;
@@ -25,13 +25,13 @@ use crate::JValue;
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) struct IterableVecJsonPathResult {
     pub(crate) jvalues: Vec<JValue>,
-    pub(crate) tetraplets: SecurityTetraplets,
+    pub(crate) tetraplets: RcSecurityTetraplets,
     pub(crate) cursor: usize,
 }
 
 impl IterableVecJsonPathResult {
     #[allow(dead_code)]
-    pub(crate) fn init(jvalues: Vec<JValue>, tetraplets: SecurityTetraplets) -> Self {
+    pub(crate) fn init(jvalues: Vec<JValue>, tetraplets: RcSecurityTetraplets) -> Self {
         // TODO: add assert on length
         Self {
             jvalues,

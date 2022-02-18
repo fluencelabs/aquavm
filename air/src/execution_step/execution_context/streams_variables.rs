@@ -51,8 +51,7 @@ impl Streams {
     pub(crate) fn get(&self, name: &str, position: usize) -> Option<&RefCell<Stream>> {
         self.streams
             .get(name)
-            .map(|descriptors| find_closest(descriptors.iter(), position))
-            .flatten()
+            .and_then(|descriptors| find_closest(descriptors.iter(), position))
     }
 
     pub(crate) fn add_stream_value(
@@ -143,12 +142,7 @@ impl Streams {
     fn stream_generation_from_data(&self, name: &str, position: u32, iteration: usize) -> Option<u32> {
         self.data_restr_stream_generations
             .get(name)
-            .and_then(|scopes| {
-                scopes
-                    .get(&position)
-                    .map(|iterations| iterations.get(iteration))
-                    .flatten()
-            })
+            .and_then(|scopes| scopes.get(&position).and_then(|iterations| iterations.get(iteration)))
             .copied()
     }
 
