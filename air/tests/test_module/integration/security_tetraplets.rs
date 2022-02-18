@@ -40,7 +40,7 @@ fn arg_host_function() -> (CallServiceClosure, Rc<RefCell<ArgTetraplets>>) {
 }
 
 #[test]
-fn simple_fold() {
+fn fold_with_inner_call() {
     let return_numbers_call_service: CallServiceClosure = Box::new(|_| -> CallServiceResult {
         CallServiceResult::ok(json!(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]))
     });
@@ -57,10 +57,9 @@ fn simple_fold() {
 
     let service_id = String::from("some_service_id");
     let function_name = String::from("some_function_name");
-    let script = format!(
-        r#"
+    let script = f!(r#"
         (seq
-            (call "{}" ("{}" "{}") [] IterableResultPeer1)
+            (call "{set_variable_vm_peer_id}" ("{service_id}" "{function_name}") [] IterableResultPeer1)
             (fold IterableResultPeer1 i
                 (par
                     (call i ("local_service_id" "local_fn_name") [i "some_text_literal"] $acc)
@@ -68,9 +67,7 @@ fn simple_fold() {
                 )
             )
         )
-        "#,
-        set_variable_vm_peer_id, service_id, function_name
-    );
+        "#);
 
     let init_peer_id = String::from("some_init_peer_id");
     let result = checked_call_vm!(set_variable_vm, init_peer_id.clone(), script.clone(), "", "");
@@ -116,20 +113,22 @@ fn fold_json_path() {
 
     let service_id = String::from("some_service_id");
     let function_name = String::from("some_function_name");
-    let script = format!(
-        r#"
-        (seq
-            (call "{}" ("{}" "{}") [] IterableResultPeer1)
+    let script = f!(r#"
+       (seq
+            (call "{set_variable_vm_peer_id}" ("{service_id}" "{function_name}") [] IterableResultPeer1)
             (fold IterableResultPeer1.$.args i
-                (par
-                    (call "{}" ("local_service_id" "local_fn_name") [i "some_text_literal"] $acc)
+                (seq
+                    (fold IterableResultPeer1.$.args j
+                        (seq
+                            (call "{client_peer_id}" ("local_service_id" "local_fn_name") [i "some_text_literal"] $acc)
+                            (next j)
+                        )
+                    )
                     (next i)
                 )
             )
         )
-        "#,
-        set_variable_vm_peer_id, service_id, function_name, client_peer_id
-    );
+        "#);
 
     let init_peer_id = String::from("some_init_peer_id");
     let result = checked_call_vm!(set_variable_vm, init_peer_id.clone(), script.clone(), "", "");

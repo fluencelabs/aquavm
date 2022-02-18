@@ -18,6 +18,7 @@ use super::RSecurityTetraplets;
 use crate::execution_step::boxed_value::JValuable;
 use crate::execution_step::boxed_value::Variable;
 use crate::execution_step::execution_context::ExecutionCtx;
+use crate::execution_step::lambda_applier::select_from_scalar;
 use crate::execution_step::ExecutionResult;
 use crate::JValue;
 use crate::LambdaAST;
@@ -25,9 +26,7 @@ use crate::SecurityTetraplet;
 
 use air_parser::ast;
 
-use crate::execution_step::lambda_applier::select_from_scalar;
 use serde_json::json;
-use std::cell::RefCell;
 use std::rc::Rc;
 
 /// Resolve value to called function arguments.
@@ -55,7 +54,7 @@ pub(crate) fn prepare_const(
 ) -> ExecutionResult<(JValue, RSecurityTetraplets)> {
     let jvalue = arg.into();
     let tetraplet = SecurityTetraplet::literal_tetraplet(ctx.init_peer_id.as_ref());
-    let tetraplet = Rc::new(RefCell::new(tetraplet));
+    let tetraplet = Rc::new(tetraplet);
 
     Ok((jvalue, vec![tetraplet]))
 }
@@ -78,7 +77,7 @@ pub(crate) fn prepare_last_error<'i>(
         Some(tetraplet) => vec![tetraplet.clone()],
         None => {
             let tetraplet = SecurityTetraplet::literal_tetraplet(ctx.init_peer_id.as_ref());
-            let tetraplet = Rc::new(RefCell::new(tetraplet));
+            let tetraplet = Rc::new(tetraplet);
             vec![tetraplet]
         }
     };
@@ -119,7 +118,7 @@ pub(crate) fn resolve_ast_variable_wl<'ctx, 'i>(
     let variable: Variable<'_> = ast_variable.into();
     match ast_variable.lambda() {
         Some(lambda) => apply_lambda(variable, lambda, exec_ctx).map(|(value, tetraplet)| {
-            let tetraplet = Rc::new(RefCell::new(tetraplet));
+            let tetraplet = Rc::new(tetraplet);
             (value, vec![tetraplet])
         }),
         None => {

@@ -56,7 +56,7 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
         };
 
         let selected_value = select_from_scalar(jvalue, lambda.iter(), exec_ctx)?;
-        let mut tetraplet = tetraplet.as_ref().borrow_mut().deref().clone();
+        let mut tetraplet = tetraplet.as_ref().clone();
         tetraplet.add_lambda(&format_ast(lambda));
 
         Ok((selected_value, tetraplet))

@@ -41,7 +41,7 @@ impl JValuable for ValueAggregate {
         exec_ctx: &ExecutionCtx<'i>,
     ) -> ExecutionResult<(&JValue, SecurityTetraplet)> {
         let selected_value = select_from_scalar(&self.result, lambda.iter(), exec_ctx)?;
-        let mut tetraplet = self.tetraplet.as_ref().borrow_mut().deref().clone();
+        let mut tetraplet = self.tetraplet.as_ref().clone();
         tetraplet.add_lambda(&format_ast(lambda));
 
         Ok((selected_value, tetraplet))

@@ -30,7 +30,6 @@ use air_parser::ast;
 use air_parser::ast::Fail;
 use polyplets::SecurityTetraplet;
 
-use std::cell::RefCell;
 use std::rc::Rc;
 
 impl<'i> super::ExecutableInstruction<'i> for Fail<'i> {
@@ -72,7 +71,7 @@ fn fail_with_literals<'i>(
     );
 
     let literal_tetraplet = SecurityTetraplet::literal_tetraplet(exec_ctx.init_peer_id.as_ref());
-    let literal_tetraplet = Rc::new(RefCell::new(literal_tetraplet));
+    let literal_tetraplet = Rc::new(literal_tetraplet);
 
     fail_with_error_object(exec_ctx, Rc::new(error_object), Some(literal_tetraplet))
 }

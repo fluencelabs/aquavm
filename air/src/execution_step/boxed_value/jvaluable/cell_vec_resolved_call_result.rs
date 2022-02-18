@@ -44,8 +44,8 @@ impl JValuable for std::cell::Ref<'_, Vec<ValueAggregate>> {
         let stream_iter = self.iter().map(|r| r.result.deref());
         let select_result = select_from_stream(stream_iter, lambda, exec_ctx)?;
 
-        let tetraplet = self[select_result.tetraplet_idx].tetraplet.clone();
-        let mut tetraplet = tetraplet.as_ref().borrow_mut().deref().clone();
+        let tetraplet = &self[select_result.tetraplet_idx].tetraplet;
+        let mut tetraplet = tetraplet.as_ref().clone();
         tetraplet.add_lambda(&format_ast(lambda));
 
         Ok((select_result.result, tetraplet))

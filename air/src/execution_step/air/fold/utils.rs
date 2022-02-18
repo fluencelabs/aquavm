@@ -23,6 +23,7 @@ use crate::LambdaAST;
 use air_parser::ast;
 
 use std::ops::Deref;
+use std::rc::Rc;
 
 // TODO: refactor this file after switching to boxed value
 
@@ -133,7 +134,7 @@ fn create_scalar_lambda_iterable<'ctx>(
     match exec_ctx.scalars.get(scalar_name)? {
         ScalarRef::Value(variable) => {
             let jvalues = select_from_scalar(&variable.result, lambda.iter(), exec_ctx)?;
-            from_jvalue(jvalues, variable.tetraplet.clone(), lambda)
+            from_jvalue(jvalues, &variable.tetraplet, lambda)
         }
         ScalarRef::IterableValue(fold_state) => {
             let iterable_value = fold_state.iterable.peek().unwrap();
@@ -148,11 +149,13 @@ fn create_scalar_lambda_iterable<'ctx>(
 /// Construct IterableValue from the result and given triplet.
 fn from_jvalue(
     jvalue: &JValue,
-    tetraplet: RSecurityTetraplet,
+    tetraplet: &RSecurityTetraplet,
     lambda: &LambdaAST<'_>,
 ) -> ExecutionResult<FoldIterableScalar> {
     let formatted_lambda_ast = air_lambda_ast::format_ast(lambda);
-    tetraplet.borrow_mut().add_lambda(&formatted_lambda_ast);
+    let mut tetraplet = tetraplet.deref().clone();
+    tetraplet.add_lambda(&formatted_lambda_ast);
+    let tetraplet = Rc::new(tetraplet);
 
     let iterable = match jvalue {
         JValue::Array(array) => array,
@@ -171,14 +174,12 @@ fn from_jvalue(
     Ok(iterable)
 }
 
-fn as_tetraplet(iterable: &IterableItem<'_>) -> RSecurityTetraplet {
+fn as_tetraplet<'i>(iterable: &'i IterableItem<'_>) -> &'i RSecurityTetraplet {
     use IterableItem::*;
 
-    let tetraplet = match iterable {
+    match iterable {
         RefRef((_, tetraplet, _)) => tetraplet,
         RefValue((_, tetraplet, _)) => tetraplet,
         RcValue((_, tetraplet, _)) => tetraplet,
-    };
-
-    (*tetraplet).clone()
+    }
 }

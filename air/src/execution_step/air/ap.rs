@@ -33,7 +33,6 @@ use air_parser::ast;
 use air_parser::ast::Ap;
 use air_trace_handler::MergerApResult;
 
-use std::cell::RefCell;
 use std::rc::Rc;
 
 impl<'i> super::ExecutableInstruction<'i> for Ap<'i> {

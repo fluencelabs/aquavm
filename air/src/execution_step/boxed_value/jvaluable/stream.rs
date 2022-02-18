@@ -56,7 +56,7 @@ impl JValuable for StreamJvaluableIngredients<'_> {
 
         // unwrap is safe here because each value has a tetraplet and a lambda always returns a valid index
         let resolved_call = self.iter()?.nth(select_result.tetraplet_idx).unwrap();
-        let mut tetraplet = resolved_call.tetraplet.as_ref().borrow_mut().deref().clone();
+        let mut tetraplet = resolved_call.tetraplet.as_ref().clone();
         tetraplet.add_lambda(&format_ast(lambda));
 
         Ok((select_result.result, tetraplet))

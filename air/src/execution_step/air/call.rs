@@ -63,7 +63,7 @@ fn set_last_error<'i>(
         // use tetraplet if they set, because an error could be propagated from data
         // (from CallServiceFailed state) and exec_ctx.current_peer_id won't mean
         // a peer where the error was occurred
-        Some(tetraplet) => tetraplet.borrow().peer_pk.clone(),
+        Some(tetraplet) => tetraplet.peer_pk.clone(),
         None => exec_ctx.current_peer_id.to_string(),
     };
 

@@ -59,7 +59,7 @@ pub(super) fn handle_prev_state<'i>(
             // call results are identified by call_id that is saved in data
             match exec_ctx.call_results.remove(call_id) {
                 Some(call_result) => {
-                    update_state_with_service_result(tetraplet, output, call_result, exec_ctx, trace_ctx)?;
+                    update_state_with_service_result(tetraplet.clone(), output, call_result, exec_ctx, trace_ctx)?;
                     Ok(StateDescriptor::executed())
                 }
                 // result hasn't been prepared yet
@@ -71,7 +71,7 @@ pub(super) fn handle_prev_state<'i>(
         }
         RequestSentBy(..) => {
             // check whether current node can execute this call
-            let is_current_peer = tetraplet.borrow().peer_pk.as_str() == exec_ctx.current_peer_id.as_str();
+            let is_current_peer = tetraplet.peer_pk.as_str() == exec_ctx.current_peer_id.as_str();
             if is_current_peer {
                 return Ok(StateDescriptor::can_execute_now(prev_result));
             }
@@ -94,7 +94,7 @@ use crate::execution_step::ValueAggregate;
 use crate::JValue;
 
 fn update_state_with_service_result<'i>(
-    tetraplet: &RSecurityTetraplet,
+    tetraplet: RSecurityTetraplet,
     output: &CallOutputValue<'i>,
     service_result: CallServiceResult,
     exec_ctx: &mut ExecutionCtx<'i>,
@@ -107,7 +107,7 @@ fn update_state_with_service_result<'i>(
 
     let trace_pos = trace_ctx.trace_pos();
 
-    let executed_result = ValueAggregate::new(result, tetraplet.clone(), trace_pos);
+    let executed_result = ValueAggregate::new(result, tetraplet, trace_pos);
     let new_call_result = set_local_result(executed_result, output, exec_ctx)?;
     trace_ctx.meet_call_end(new_call_result);
 
