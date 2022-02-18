@@ -121,33 +121,6 @@ jobs:
           echo "PKG_NAME=$PKG_NAME" | tee -a $GITHUB_ENV
           echo "JS_PKG_NAME=$JS_PKG_NAME" | tee -a $GITHUB_ENV
 
-      ### === JavaScript package release ===
-      - name: Install wasm-pack
-        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-        continue-on-error: true
-
-      - name: Build npm package
-        working-directory: avm/client
-        run: |
-          ./build_wasm.sh
-          npm i
-          npm run build
-
-      ### Set version to FINAL_VERSION
-      - run: yarn version --new-version ${{ env.FINAL_VERSION }} --no-git-tag-version || true
-        working-directory: avm/client
-
-      ### Publish to NPM registry
-      - uses: actions/setup-node@v1
-        with:
-          node-version: "14"
-          registry-url: "https://registry.npmjs.org"
-
-      - run: npm publish --access public --tag=beta
-        working-directory: avm/client
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
       ### === Rust package release ===
       - name: Install marine
         run: cargo install marine || true
@@ -186,3 +159,30 @@ jobs:
       - name: Publish to crates.io
         run: cargo publish --allow-dirty
         working-directory: crates/interpreter-wasm
+
+      ### === JavaScript package release ===
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+        continue-on-error: true
+
+      - name: Build npm package
+        working-directory: avm/client
+        run: |
+          ./build_wasm.sh
+          npm i
+          npm run build
+
+      ### Set version to FINAL_VERSION
+      - run: yarn version --new-version ${{ env.FINAL_VERSION }} --no-git-tag-version || true
+        working-directory: avm/client
+
+      ### Publish to NPM registry
+      - uses: actions/setup-node@v1
+        with:
+          node-version: "14"
+          registry-url: "https://registry.npmjs.org"
+
+      - run: npm publish --access public --tag=beta
+        working-directory: avm/client
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
