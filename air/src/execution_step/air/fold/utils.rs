@@ -16,9 +16,10 @@
 
 use super::*;
 use crate::execution_step::CatchableError;
-use crate::execution_step::RSecurityTetraplet;
+use crate::execution_step::RcSecurityTetraplet;
 use crate::JValue;
 use crate::LambdaAST;
+use crate::SecurityTetraplet;
 
 use air_parser::ast;
 
@@ -134,12 +135,14 @@ fn create_scalar_lambda_iterable<'ctx>(
     match exec_ctx.scalars.get(scalar_name)? {
         ScalarRef::Value(variable) => {
             let jvalues = select_from_scalar(&variable.result, lambda.iter(), exec_ctx)?;
-            from_jvalue(jvalues, &variable.tetraplet, lambda)
+            let tetraplet = variable.tetraplet.deref().clone();
+            from_jvalue(jvalues, tetraplet, lambda)
         }
         ScalarRef::IterableValue(fold_state) => {
             let iterable_value = fold_state.iterable.peek().unwrap();
             let jvalue = iterable_value.apply_lambda(lambda, exec_ctx)?;
             let tetraplet = as_tetraplet(&iterable_value);
+            let tetraplet = tetraplet.deref().clone();
 
             from_jvalue(jvalue, tetraplet, lambda)
         }
@@ -149,11 +152,10 @@ fn create_scalar_lambda_iterable<'ctx>(
 /// Construct IterableValue from the result and given triplet.
 fn from_jvalue(
     jvalue: &JValue,
-    tetraplet: &RSecurityTetraplet,
+    mut tetraplet: SecurityTetraplet,
     lambda: &LambdaAST<'_>,
 ) -> ExecutionResult<FoldIterableScalar> {
     let formatted_lambda_ast = air_lambda_ast::format_ast(lambda);
-    let mut tetraplet = tetraplet.deref().clone();
     tetraplet.add_lambda(&formatted_lambda_ast);
     let tetraplet = Rc::new(tetraplet);
 
@@ -174,7 +176,7 @@ fn from_jvalue(
     Ok(iterable)
 }
 
-fn as_tetraplet<'i>(iterable: &'i IterableItem<'_>) -> &'i RSecurityTetraplet {
+fn as_tetraplet<'i>(iterable: &'i IterableItem<'_>) -> &'i RcSecurityTetraplet {
     use IterableItem::*;
 
     match iterable {

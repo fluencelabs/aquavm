@@ -20,7 +20,7 @@ use super::LambdaAST;
 use super::LambdaError::EmptyStream;
 use crate::execution_step::CatchableError::LambdaApplierError;
 use crate::execution_step::ExecutionCtx;
-use crate::execution_step::RSecurityTetraplets;
+use crate::execution_step::RcSecurityTetraplets;
 use crate::JValue;
 use crate::SecurityTetraplet;
 
@@ -49,7 +49,7 @@ impl JValuable for () {
         JValue::Array(vec![])
     }
 
-    fn as_tetraplets(&self) -> RSecurityTetraplets {
+    fn as_tetraplets(&self) -> RcSecurityTetraplets {
         vec![]
     }
 }

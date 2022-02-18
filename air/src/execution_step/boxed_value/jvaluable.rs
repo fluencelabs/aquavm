@@ -25,7 +25,7 @@ use super::ExecutionResult;
 use super::ValueAggregate;
 use crate::execution_step::lambda_applier::*;
 use crate::execution_step::ExecutionCtx;
-use crate::execution_step::RSecurityTetraplets;
+use crate::execution_step::RcSecurityTetraplets;
 use crate::JValue;
 use crate::LambdaAST;
 use crate::SecurityTetraplet;
@@ -53,5 +53,5 @@ pub(crate) trait JValuable {
     fn into_jvalue(self: Box<Self>) -> JValue;
 
     /// Return tetraplets associating with internal value.
-    fn as_tetraplets(&self) -> RSecurityTetraplets;
+    fn as_tetraplets(&self) -> RcSecurityTetraplets;
 }

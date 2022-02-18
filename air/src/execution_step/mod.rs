@@ -49,5 +49,5 @@ pub(crate) use air_trace_handler::TraceHandler;
 use std::rc::Rc;
 
 type ExecutionResult<T> = std::result::Result<T, ExecutionError>;
-type RSecurityTetraplet = Rc<crate::SecurityTetraplet>;
-type RSecurityTetraplets = Vec<RSecurityTetraplet>;
+type RcSecurityTetraplet = Rc<crate::SecurityTetraplet>;
+type RcSecurityTetraplets = Vec<RcSecurityTetraplet>;

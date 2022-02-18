@@ -17,7 +17,7 @@
 use super::*;
 use crate::execution_step::air::call::call_result_setter::set_result_from_value;
 use crate::execution_step::CatchableError;
-use crate::execution_step::RSecurityTetraplet;
+use crate::execution_step::RcSecurityTetraplet;
 
 use air_interpreter_data::CallResult;
 use air_interpreter_data::Sender;
@@ -34,7 +34,7 @@ pub(crate) struct StateDescriptor {
 /// This function looks at the existing call state, validates it,
 /// and returns Ok(true) if the call should be executed further.
 pub(super) fn handle_prev_state<'i>(
-    tetraplet: &RSecurityTetraplet,
+    tetraplet: &RcSecurityTetraplet,
     output: &CallOutputValue<'i>,
     prev_result: CallResult,
     trace_pos: usize,
@@ -94,7 +94,7 @@ use crate::execution_step::ValueAggregate;
 use crate::JValue;
 
 fn update_state_with_service_result<'i>(
-    tetraplet: RSecurityTetraplet,
+    tetraplet: RcSecurityTetraplet,
     output: &CallOutputValue<'i>,
     service_result: CallServiceResult,
     exec_ctx: &mut ExecutionCtx<'i>,

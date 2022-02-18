@@ -20,7 +20,7 @@ use super::IterableItem;
 use super::JValuable;
 use super::LambdaAST;
 use crate::execution_step::ExecutionCtx;
-use crate::execution_step::RSecurityTetraplets;
+use crate::execution_step::RcSecurityTetraplets;
 use crate::JValue;
 use crate::SecurityTetraplet;
 
@@ -82,7 +82,7 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
         }
     }
 
-    fn as_tetraplets(&self) -> RSecurityTetraplets {
+    fn as_tetraplets(&self) -> RcSecurityTetraplets {
         use super::IterableItem::*;
 
         // these clones are needed because rust-sdk allows passing arguments only by value

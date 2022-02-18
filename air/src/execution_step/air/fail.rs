@@ -21,7 +21,7 @@ use crate::execution_step::execution_context::check_error_object;
 use crate::execution_step::resolver::resolve_ast_scalar_wl;
 use crate::execution_step::CatchableError;
 use crate::execution_step::LastError;
-use crate::execution_step::RSecurityTetraplet;
+use crate::execution_step::RcSecurityTetraplet;
 use crate::log_instruction;
 use crate::ExecutionError;
 use crate::JValue;
@@ -89,7 +89,7 @@ fn fail_with_last_error(exec_ctx: &mut ExecutionCtx<'_>) -> ExecutionResult<()> 
 fn fail_with_error_object(
     exec_ctx: &mut ExecutionCtx<'_>,
     error: Rc<JValue>,
-    tetraplet: Option<RSecurityTetraplet>,
+    tetraplet: Option<RcSecurityTetraplet>,
 ) -> ExecutionResult<()> {
     exec_ctx
         .last_error_descriptor

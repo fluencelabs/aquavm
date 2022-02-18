@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use super::RSecurityTetraplets;
+use super::RcSecurityTetraplets;
 use crate::execution_step::boxed_value::JValuable;
 use crate::execution_step::boxed_value::Variable;
 use crate::execution_step::execution_context::ExecutionCtx;
@@ -33,7 +33,7 @@ use std::rc::Rc;
 pub(crate) fn resolve_to_args<'i>(
     value: &ast::Value<'i>,
     ctx: &ExecutionCtx<'i>,
-) -> ExecutionResult<(JValue, RSecurityTetraplets)> {
+) -> ExecutionResult<(JValue, RcSecurityTetraplets)> {
     use ast::Value::*;
 
     match value {
@@ -51,7 +51,7 @@ pub(crate) fn resolve_to_args<'i>(
 pub(crate) fn prepare_const(
     arg: impl Into<JValue>,
     ctx: &ExecutionCtx<'_>,
-) -> ExecutionResult<(JValue, RSecurityTetraplets)> {
+) -> ExecutionResult<(JValue, RcSecurityTetraplets)> {
     let jvalue = arg.into();
     let tetraplet = SecurityTetraplet::literal_tetraplet(ctx.init_peer_id.as_ref());
     let tetraplet = Rc::new(tetraplet);
@@ -63,7 +63,7 @@ pub(crate) fn prepare_const(
 pub(crate) fn prepare_last_error<'i>(
     error_accessor: &Option<LambdaAST<'i>>,
     ctx: &ExecutionCtx<'i>,
-) -> ExecutionResult<(JValue, RSecurityTetraplets)> {
+) -> ExecutionResult<(JValue, RcSecurityTetraplets)> {
     use crate::LastError;
 
     let LastError { error, tetraplet } = ctx.last_error();
@@ -114,7 +114,7 @@ pub(crate) fn resolve_variable<'ctx, 'i>(
 pub(crate) fn resolve_ast_variable_wl<'ctx, 'i>(
     ast_variable: &ast::VariableWithLambda<'_>,
     exec_ctx: &'ctx ExecutionCtx<'i>,
-) -> ExecutionResult<(JValue, RSecurityTetraplets)> {
+) -> ExecutionResult<(JValue, RcSecurityTetraplets)> {
     let variable: Variable<'_> = ast_variable.into();
     match ast_variable.lambda() {
         Some(lambda) => apply_lambda(variable, lambda, exec_ctx).map(|(value, tetraplet)| {
@@ -132,7 +132,7 @@ pub(crate) fn resolve_ast_variable_wl<'ctx, 'i>(
 pub(crate) fn resolve_ast_scalar_wl<'ctx, 'i>(
     ast_scalar: &ast::ScalarWithLambda<'_>,
     exec_ctx: &'ctx ExecutionCtx<'i>,
-) -> ExecutionResult<(JValue, RSecurityTetraplets)> {
+) -> ExecutionResult<(JValue, RcSecurityTetraplets)> {
     // TODO: wrap lambda path with Rc to make this clone cheaper
     let variable = ast::VariableWithLambda::Scalar(ast_scalar.clone());
     resolve_ast_variable_wl(&variable, exec_ctx)

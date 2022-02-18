@@ -17,7 +17,7 @@
 use super::last_error_definition::error_from_raw_fields;
 use super::LastError;
 use crate::execution_step::LastErrorAffectable;
-use crate::execution_step::RSecurityTetraplet;
+use crate::execution_step::RcSecurityTetraplet;
 use crate::JValue;
 use crate::ToErrorCode;
 
@@ -38,7 +38,7 @@ impl<'s> LastErrorDescriptor {
         error: &(impl LastErrorAffectable + ToErrorCode + ToString),
         instruction: &str,
         peer_id: &str,
-        tetraplet: Option<RSecurityTetraplet>,
+        tetraplet: Option<RcSecurityTetraplet>,
     ) -> bool {
         // this check is optimization to prevent creation of an error object in case if error
         // couldn't be set
@@ -61,14 +61,14 @@ impl<'s> LastErrorDescriptor {
         error_message: &str,
         instruction: &str,
         peer_id: &str,
-        tetraplet: Option<RSecurityTetraplet>,
+        tetraplet: Option<RcSecurityTetraplet>,
     ) -> bool {
         let error_object = error_from_raw_fields(error_code, error_message, instruction, peer_id);
         self.set_from_error_object(Rc::new(error_object), tetraplet);
         true
     }
 
-    pub(crate) fn set_from_error_object(&mut self, error: Rc<JValue>, tetraplet: Option<RSecurityTetraplet>) {
+    pub(crate) fn set_from_error_object(&mut self, error: Rc<JValue>, tetraplet: Option<RcSecurityTetraplet>) {
         self.last_error = LastError { error, tetraplet };
         self.error_can_be_set = false;
     }

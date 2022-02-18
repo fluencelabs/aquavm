@@ -20,7 +20,7 @@ use super::JValuable;
 use super::LambdaAST;
 use super::ValueAggregate;
 use crate::execution_step::ExecutionCtx;
-use crate::execution_step::RSecurityTetraplets;
+use crate::execution_step::RcSecurityTetraplets;
 use crate::JValue;
 use crate::SecurityTetraplet;
 
@@ -55,7 +55,7 @@ impl JValuable for ValueAggregate {
         self.result.deref().clone()
     }
 
-    fn as_tetraplets(&self) -> RSecurityTetraplets {
+    fn as_tetraplets(&self) -> RcSecurityTetraplets {
         vec![self.tetraplet.clone()]
     }
 }

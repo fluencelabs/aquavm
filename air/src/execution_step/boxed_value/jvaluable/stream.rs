@@ -20,7 +20,7 @@ use super::JValuable;
 use crate::execution_step::boxed_value::Generation;
 use crate::execution_step::boxed_value::Stream;
 use crate::execution_step::ExecutionCtx;
-use crate::execution_step::RSecurityTetraplets;
+use crate::execution_step::RcSecurityTetraplets;
 use crate::JValue;
 use crate::LambdaAST;
 use crate::SecurityTetraplet;
@@ -71,7 +71,7 @@ impl JValuable for StreamJvaluableIngredients<'_> {
         self.stream.as_jvalue(self.generation).unwrap()
     }
 
-    fn as_tetraplets(&self) -> RSecurityTetraplets {
+    fn as_tetraplets(&self) -> RcSecurityTetraplets {
         self.stream
             .iter(self.generation)
             .unwrap()

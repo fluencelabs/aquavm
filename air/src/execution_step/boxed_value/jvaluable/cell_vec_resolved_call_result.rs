@@ -19,7 +19,7 @@ use super::ExecutionResult;
 use super::JValuable;
 use super::ValueAggregate;
 use crate::execution_step::ExecutionCtx;
-use crate::execution_step::RSecurityTetraplets;
+use crate::execution_step::RcSecurityTetraplets;
 use crate::JValue;
 use crate::LambdaAST;
 use crate::SecurityTetraplet;
@@ -61,7 +61,7 @@ impl JValuable for std::cell::Ref<'_, Vec<ValueAggregate>> {
         JValue::Array(jvalue_array)
     }
 
-    fn as_tetraplets(&self) -> RSecurityTetraplets {
+    fn as_tetraplets(&self) -> RcSecurityTetraplets {
         self.iter().map(|r| r.tetraplet.clone()).collect::<Vec<_>>()
     }
 }

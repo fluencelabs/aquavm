@@ -18,4 +18,4 @@ mod resolve;
 
 pub(crate) use resolve::*;
 
-use super::RSecurityTetraplets;
+use super::RcSecurityTetraplets;

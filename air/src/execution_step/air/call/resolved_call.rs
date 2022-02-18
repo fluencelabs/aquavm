@@ -20,8 +20,8 @@ use super::call_result_setter::*;
 use super::prev_result_handler::*;
 use super::triplet::resolve;
 use super::*;
-use crate::execution_step::RSecurityTetraplet;
-use crate::execution_step::RSecurityTetraplets;
+use crate::execution_step::RcSecurityTetraplet;
+use crate::execution_step::RcSecurityTetraplets;
 use crate::execution_step::UncatchableError;
 use crate::trace_to_exec_err;
 use crate::JValue;
@@ -38,7 +38,7 @@ use std::rc::Rc;
 /// Represents Call instruction with resolved internal parts.
 #[derive(Debug, Clone, PartialEq)]
 pub(super) struct ResolvedCall<'i> {
-    tetraplet: RSecurityTetraplet,
+    tetraplet: RcSecurityTetraplet,
     function_arg_paths: Rc<Vec<ast::Value<'i>>>,
     output: ast::CallOutputValue<'i>,
 }
@@ -46,7 +46,7 @@ pub(super) struct ResolvedCall<'i> {
 #[derive(Debug, Clone, PartialEq)]
 struct ResolvedArguments {
     call_arguments: String,
-    tetraplets: Vec<RSecurityTetraplets>,
+    tetraplets: Vec<RcSecurityTetraplets>,
 }
 
 impl<'i> ResolvedCall<'i> {
@@ -115,7 +115,7 @@ impl<'i> ResolvedCall<'i> {
         Ok(())
     }
 
-    pub(super) fn as_tetraplet(&self) -> RSecurityTetraplet {
+    pub(super) fn as_tetraplet(&self) -> RcSecurityTetraplet {
         self.tetraplet.clone()
     }
 
