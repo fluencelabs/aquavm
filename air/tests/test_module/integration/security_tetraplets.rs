@@ -149,7 +149,7 @@ fn fold_json_path() {
 
     let expected_tetraplets = vec![vec![first_arg_tetraplet], vec![second_arg_tetraplet]];
     let expected_tetraplets = Rc::new(RefCell::new(expected_tetraplets));
-    checked_call_vm!(client_vm, init_peer_id.clone(), script.clone(), "", result.data);
+    checked_call_vm!(client_vm, init_peer_id, script, "", result.data);
     assert_eq!(arg_tetraplets, expected_tetraplets);
 }
 
@@ -195,7 +195,7 @@ fn check_tetraplet_works_correctly() {
 
     let expected_tetraplets = vec![vec![first_arg_tetraplet], vec![second_arg_tetraplet]];
     let expected_tetraplets = Rc::new(RefCell::new(expected_tetraplets));
-    checked_call_vm!(client_vm, "", script.clone(), "", result.data);
+    checked_call_vm!(client_vm, "", script, "", result.data);
     assert_eq!(arg_tetraplets, expected_tetraplets);
 }
 
