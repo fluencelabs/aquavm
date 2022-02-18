@@ -20,8 +20,8 @@ use super::call_result_setter::*;
 use super::prev_result_handler::*;
 use super::triplet::resolve;
 use super::*;
-use crate::execution_step::RSecurityTetraplet;
-use crate::execution_step::SecurityTetraplets;
+use crate::execution_step::RcSecurityTetraplet;
+use crate::execution_step::RcSecurityTetraplets;
 use crate::execution_step::UncatchableError;
 use crate::trace_to_exec_err;
 use crate::JValue;
@@ -33,13 +33,12 @@ use air_parser::ast;
 use air_trace_handler::MergerCallResult;
 use air_trace_handler::TraceHandler;
 
-use std::cell::RefCell;
 use std::rc::Rc;
 
 /// Represents Call instruction with resolved internal parts.
 #[derive(Debug, Clone, PartialEq)]
 pub(super) struct ResolvedCall<'i> {
-    tetraplet: RSecurityTetraplet,
+    tetraplet: RcSecurityTetraplet,
     function_arg_paths: Rc<Vec<ast::Value<'i>>>,
     output: ast::CallOutputValue<'i>,
 }
@@ -47,7 +46,7 @@ pub(super) struct ResolvedCall<'i> {
 #[derive(Debug, Clone, PartialEq)]
 struct ResolvedArguments {
     call_arguments: String,
-    tetraplets: Vec<SecurityTetraplets>,
+    tetraplets: Vec<RcSecurityTetraplets>,
 }
 
 impl<'i> ResolvedCall<'i> {
@@ -55,7 +54,7 @@ impl<'i> ResolvedCall<'i> {
     pub(super) fn new(raw_call: &Call<'i>, exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<Self> {
         let triplet = resolve(&raw_call.triplet, exec_ctx)?;
         let tetraplet = SecurityTetraplet::from_triplet(triplet);
-        let tetraplet = Rc::new(RefCell::new(tetraplet));
+        let tetraplet = Rc::new(tetraplet);
 
         check_output_name(&raw_call.output, exec_ctx)?;
 
@@ -87,7 +86,7 @@ impl<'i> ResolvedCall<'i> {
         }
 
         // call can be executed only on peers with such peer_id
-        let tetraplet = &self.tetraplet.borrow();
+        let tetraplet = &self.tetraplet;
         if tetraplet.peer_pk.as_str() != exec_ctx.current_peer_id.as_str() {
             set_remote_call_result(tetraplet.peer_pk.clone(), exec_ctx, trace_ctx);
             return Ok(());
@@ -116,7 +115,7 @@ impl<'i> ResolvedCall<'i> {
         Ok(())
     }
 
-    pub(super) fn as_tetraplet(&self) -> RSecurityTetraplet {
+    pub(super) fn as_tetraplet(&self) -> RcSecurityTetraplet {
         self.tetraplet.clone()
     }
 

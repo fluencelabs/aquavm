@@ -16,13 +16,14 @@
 
 use super::*;
 use crate::execution_step::CatchableError;
-use crate::execution_step::RSecurityTetraplet;
 use crate::JValue;
 use crate::LambdaAST;
+use crate::SecurityTetraplet;
 
 use air_parser::ast;
 
 use std::ops::Deref;
+use std::rc::Rc;
 
 // TODO: refactor this file after switching to boxed value
 
@@ -133,12 +134,13 @@ fn create_scalar_lambda_iterable<'ctx>(
     match exec_ctx.scalars.get(scalar_name)? {
         ScalarRef::Value(variable) => {
             let jvalues = select_from_scalar(&variable.result, lambda.iter(), exec_ctx)?;
-            from_jvalue(jvalues, variable.tetraplet.clone(), lambda)
+            let tetraplet = variable.tetraplet.deref().clone();
+            from_jvalue(jvalues, tetraplet, lambda)
         }
         ScalarRef::IterableValue(fold_state) => {
             let iterable_value = fold_state.iterable.peek().unwrap();
             let jvalue = iterable_value.apply_lambda(lambda, exec_ctx)?;
-            let tetraplet = as_tetraplet(&iterable_value);
+            let tetraplet = to_tetraplet(&iterable_value);
 
             from_jvalue(jvalue, tetraplet, lambda)
         }
@@ -148,11 +150,12 @@ fn create_scalar_lambda_iterable<'ctx>(
 /// Construct IterableValue from the result and given triplet.
 fn from_jvalue(
     jvalue: &JValue,
-    tetraplet: RSecurityTetraplet,
+    mut tetraplet: SecurityTetraplet,
     lambda: &LambdaAST<'_>,
 ) -> ExecutionResult<FoldIterableScalar> {
     let formatted_lambda_ast = air_lambda_ast::format_ast(lambda);
-    tetraplet.borrow_mut().add_lambda(&formatted_lambda_ast);
+    tetraplet.add_lambda(&formatted_lambda_ast);
+    let tetraplet = Rc::new(tetraplet);
 
     let iterable = match jvalue {
         JValue::Array(array) => array,
@@ -171,7 +174,7 @@ fn from_jvalue(
     Ok(iterable)
 }
 
-fn as_tetraplet(iterable: &IterableItem<'_>) -> RSecurityTetraplet {
+fn to_tetraplet(iterable: &IterableItem<'_>) -> SecurityTetraplet {
     use IterableItem::*;
 
     let tetraplet = match iterable {
@@ -180,5 +183,5 @@ fn as_tetraplet(iterable: &IterableItem<'_>) -> RSecurityTetraplet {
         RcValue((_, tetraplet, _)) => tetraplet,
     };
 
-    (*tetraplet).clone()
+    (*tetraplet).deref().clone()
 }

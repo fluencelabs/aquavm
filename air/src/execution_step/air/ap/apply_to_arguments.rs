@@ -42,7 +42,7 @@ pub(super) fn apply_to_arg(
 fn apply_const(value: impl Into<JValue>, exec_ctx: &ExecutionCtx<'_>, trace_ctx: &TraceHandler) -> ValueAggregate {
     let value = Rc::new(value.into());
     let tetraplet = SecurityTetraplet::literal_tetraplet(exec_ctx.init_peer_id.as_ref());
-    let tetraplet = Rc::new(RefCell::new(tetraplet));
+    let tetraplet = Rc::new(tetraplet);
 
     ValueAggregate::new(value, tetraplet, trace_ctx.trace_pos())
 }
@@ -111,6 +111,7 @@ fn apply_scalar_wl_impl(
 ) -> ExecutionResult<ValueAggregate> {
     let variable = Variable::scalar(scalar_name, position);
     let (jvalue, tetraplet) = apply_lambda(variable, lambda, exec_ctx)?;
+    let tetraplet = Rc::new(tetraplet);
     let result = ValueAggregate::new(Rc::new(jvalue), tetraplet, trace_ctx.trace_pos());
 
     Ok(result)
