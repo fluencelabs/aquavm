@@ -16,7 +16,6 @@
 
 use super::*;
 use crate::execution_step::CatchableError;
-use crate::execution_step::RcSecurityTetraplet;
 use crate::JValue;
 use crate::LambdaAST;
 use crate::SecurityTetraplet;
@@ -141,8 +140,7 @@ fn create_scalar_lambda_iterable<'ctx>(
         ScalarRef::IterableValue(fold_state) => {
             let iterable_value = fold_state.iterable.peek().unwrap();
             let jvalue = iterable_value.apply_lambda(lambda, exec_ctx)?;
-            let tetraplet = as_tetraplet(&iterable_value);
-            let tetraplet = tetraplet.deref().clone();
+            let tetraplet = to_tetraplet(&iterable_value);
 
             from_jvalue(jvalue, tetraplet, lambda)
         }
@@ -176,12 +174,14 @@ fn from_jvalue(
     Ok(iterable)
 }
 
-fn as_tetraplet<'i>(iterable: &'i IterableItem<'_>) -> &'i RcSecurityTetraplet {
+fn to_tetraplet(iterable: &IterableItem<'_>) -> SecurityTetraplet {
     use IterableItem::*;
 
-    match iterable {
+    let tetraplet = match iterable {
         RefRef((_, tetraplet, _)) => tetraplet,
         RefValue((_, tetraplet, _)) => tetraplet,
         RcValue((_, tetraplet, _)) => tetraplet,
-    }
+    };
+
+    (*tetraplet).deref().clone()
 }
