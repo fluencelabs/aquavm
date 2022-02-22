@@ -67,6 +67,39 @@ impl Stream {
         }
     }
 
+    pub(crate) fn non_empty_generations_count(&self) -> usize {
+        self.0.iter().filter(|gen| !gen.is_empty()).count()
+    }
+
+    /// Add a new empty generation if the latest isn't empty.
+    pub(crate) fn add_new_generation_if_non_empty(&mut self) -> bool {
+        let should_add_generation = match self.0.last() {
+            Some(last) => !last.is_empty(),
+            None => true,
+        };
+
+        if should_add_generation {
+            self.0.push(vec![]);
+        }
+        //println!("add_new_generation_if_non_empty {}", should_add_generation);
+        should_add_generation
+    }
+
+    /// Remove a last generation if it's empty.
+    pub(crate) fn remove_last_generation_if_empty(&mut self) -> bool {
+        let should_remove_generation = match self.0.last() {
+            Some(last) => last.is_empty(),
+            None => false,
+        };
+
+        if should_remove_generation {
+            self.0.pop();
+        }
+        //println!("should_remove_generation {}", should_remove_generation);
+
+        should_remove_generation
+    }
+
     pub(crate) fn elements_count(&self, generation: Generation) -> Option<usize> {
         match generation {
             Generation::Nth(generation) if generation as usize > self.generations_count() => None,
@@ -106,18 +139,26 @@ impl Stream {
         Some(iter)
     }
 
-    pub(crate) fn slice_iter(&self, generation: Generation) -> Option<StreamSliceIter<'_>> {
-        let iter: Box<dyn Iterator<Item = &[ValueAggregate]>> = match generation {
-            Generation::Nth(generation) if generation as usize >= self.generations_count() => return None,
-            Generation::Nth(generation) => Box::new(self.0.iter().take(generation as usize + 1).map(|v| v.as_slice())),
-            Generation::Last => Box::new(self.0.iter().map(|v| v.as_slice())),
+    pub(crate) fn slice_iter(&self, start: Generation, end: Generation) -> Option<StreamSliceIter<'_>> {
+        if self.is_empty() {
+            return None;
+        }
+
+        let generations_count = self.generations_count() as u32 - 1;
+        let (start, end) = match (start, end) {
+            (Generation::Nth(start), Generation::Nth(end)) => (start, end),
+            (Generation::Nth(start), Generation::Last) => (start, generations_count),
+            (Generation::Last, Generation::Nth(end)) => (generations_count, end),
+            (Generation::Last, Generation::Last) => (generations_count, generations_count),
         };
 
-        let len = match generation {
-            Generation::Nth(generation) => generation as usize,
-            Generation::Last => self.0.len(),
-        };
+        if start > end || end > generations_count {
+            return None;
+        }
 
+        let len = (end - start) as usize + 1;
+        let iter: Box<dyn Iterator<Item = &[ValueAggregate]>> =
+            Box::new(self.0.iter().skip(start as usize).take(len).map(|v| v.as_slice()));
         let iter = StreamSliceIter { iter, len };
 
         Some(iter)
@@ -163,7 +204,7 @@ impl<'result> ExactSizeIterator for StreamIter<'result> {}
 
 pub(crate) struct StreamSliceIter<'slice> {
     iter: Box<dyn Iterator<Item = &'slice [ValueAggregate]> + 'slice>,
-    len: usize,
+    pub len: usize,
 }
 
 impl<'slice> Iterator for StreamSliceIter<'slice> {
@@ -189,7 +230,7 @@ impl fmt::Display for Stream {
             return write!(f, "[]");
         }
 
-        write!(f, "[ ")?;
+        write!(f, "[\n")?;
         for (id, generation) in self.0.iter().enumerate() {
             write!(f, " -- {}: ", id)?;
             for value in generation.iter() {
@@ -199,5 +240,55 @@ impl fmt::Display for Stream {
         }
 
         write!(f, "]")
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::Generation;
+    use super::Stream;
+    use super::ValueAggregate;
+
+    use serde_json::json;
+
+    use std::rc::Rc;
+
+    #[test]
+    fn test_slice_iter() {
+        let value_1 = ValueAggregate::new(Rc::new(json!("value")), <_>::default(), 1);
+        let value_2 = ValueAggregate::new(Rc::new(json!("value")), <_>::default(), 1);
+        let mut stream = Stream::from_generations_count(2);
+
+        stream.add_value(value_1, Generation::Nth(0)).unwrap();
+        stream.add_value(value_2, Generation::Nth(1)).unwrap();
+
+        let slice = stream.slice_iter(Generation::Nth(0), Generation::Nth(1)).unwrap();
+        assert_eq!(slice.len, 2);
+
+        let slice = stream.slice_iter(Generation::Nth(0), Generation::Last).unwrap();
+        assert_eq!(slice.len, 2);
+
+        let slice = stream.slice_iter(Generation::Nth(0), Generation::Nth(0)).unwrap();
+        assert_eq!(slice.len, 1);
+
+        let slice = stream.slice_iter(Generation::Last, Generation::Last).unwrap();
+        assert_eq!(slice.len, 1);
+    }
+
+    #[test]
+    fn test_slice_on_empty_stream() {
+        let stream = Stream::from_generations_count(2);
+
+        let slice = stream.slice_iter(Generation::Nth(0), Generation::Nth(1));
+        assert!(slice.is_none());
+
+        let slice = stream.slice_iter(Generation::Nth(0), Generation::Last);
+        assert!(slice.is_none());
+
+        let slice = stream.slice_iter(Generation::Nth(0), Generation::Nth(0));
+        assert!(slice.is_none());
+
+        let slice = stream.slice_iter(Generation::Last, Generation::Last);
+        assert!(slice.is_none());
     }
 }

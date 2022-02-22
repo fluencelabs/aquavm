@@ -41,6 +41,9 @@ pub(crate) fn try_merge_next_state_as_call(
 
     let prev_state = data_keeper.prev_slider_mut().next_state();
     let current_state = data_keeper.current_slider_mut().next_state();
+    println!("  trace handler prev slider: {:?} {:?}", data_keeper.prev_slider().position(), data_keeper.prev_slider().subtrace_len());
+    println!("  trace handler current slider: {:?} {:?}", data_keeper.current_slider().position(), data_keeper.current_slider().subtrace_len());
+    println!("  trace handler: {:?} {:?}", prev_state, current_state);
     let value_type = ValueType::from_output_value(output_value);
 
     let (prev_call, current_call) = match (prev_state, current_state) {

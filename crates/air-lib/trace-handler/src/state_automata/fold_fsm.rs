@@ -19,6 +19,7 @@ mod lore_ctor;
 mod lore_ctor_queue;
 mod state_handler;
 
+use std::thread::current;
 use super::*;
 use lore_applier::*;
 use lore_ctor::*;
@@ -64,10 +65,13 @@ impl FoldFSM {
     }
 
     pub(crate) fn meet_iteration_start(&mut self, value_pos: usize, data_keeper: &mut DataKeeper) -> FSMResult<()> {
+        println!("  meet_iteration_start {} {:?}", value_pos, data_keeper.new_to_old_pos);
         let (prev_pos, current_pos) = match data_keeper.new_to_old_pos.get(&value_pos) {
             Some(DataPositions { prev_pos, current_pos }) => (prev_pos, current_pos),
             None => return self.prepare(None, None, value_pos, data_keeper),
         };
+
+        println!("  meet_iteration_start: {:?} {:?}", prev_pos, current_pos);
 
         let prev_lore = prev_pos.map(|pos| self.prev_fold.lore.remove(&pos)).flatten();
         let current_lore = current_pos.map(|pos| self.current_fold.lore.remove(&pos)).flatten();

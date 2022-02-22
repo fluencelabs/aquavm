@@ -38,6 +38,7 @@ use std::rc::Rc;
 
 impl<'i> super::ExecutableInstruction<'i> for Ap<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
+        println!("  {}", self);
         let should_touch_trace = should_touch_trace(self);
         // this applying should be at the very beginning of this function,
         // because it's necessary to check argument lambda, for more details see

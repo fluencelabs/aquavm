@@ -41,6 +41,14 @@ pub(crate) fn try_merge_next_state_as_ap(data_keeper: &mut DataKeeper) -> MergeR
         (prev_state, current_state) => return Err(MergeError::incompatible_states(prev_state, current_state, "ap")),
     };
 
+    let new_pos = data_keeper.result_states_count();
+    let prev_pos = data_keeper.prev_slider().position() - 1;
+    let positions = DataPositions {
+        prev_pos: Some(prev_pos),
+        current_pos: None,
+    };
+    data_keeper.new_to_old_pos.insert(new_pos, positions);
+
     to_merger_result(ap)
 }
 
