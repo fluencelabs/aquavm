@@ -81,7 +81,6 @@ impl Stream {
         if should_add_generation {
             self.0.push(vec![]);
         }
-        //println!("add_new_generation_if_non_empty {}", should_add_generation);
         should_add_generation
     }
 
@@ -95,7 +94,6 @@ impl Stream {
         if should_remove_generation {
             self.0.pop();
         }
-        //println!("should_remove_generation {}", should_remove_generation);
 
         should_remove_generation
     }

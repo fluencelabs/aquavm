@@ -40,7 +40,6 @@ pub(super) fn prepare_call_result(
     let data_positions = DataPositions { prev_pos, current_pos };
 
     let trace_pos = data_keeper.result_states_count();
-    println!("  new_to_old_pos add {} {:?}", trace_pos, data_positions);
     data_keeper.new_to_old_pos.insert(trace_pos, data_positions);
 
     MergerCallResult::CallResult { value, trace_pos }

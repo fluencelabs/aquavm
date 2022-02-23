@@ -51,7 +51,6 @@ pub(crate) fn construct_stream_iterable_value(
     start: Generation,
     end: Generation,
 ) -> Vec<IterableValue> {
-    println!("construct_stream_iterable_value: {:?} {:?}", start, end);
     let stream = stream.borrow();
     let stream_iter = match stream.slice_iter(start, end) {
         Some(stream_iter) => stream_iter,

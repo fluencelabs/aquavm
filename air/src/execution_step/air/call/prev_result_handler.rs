@@ -81,7 +81,6 @@ pub(super) fn handle_prev_state<'i>(
         }
         // this instruction's been already executed
         Executed(value) => {
-            println!("  handle executed value from data {}: {}", trace_pos, value);
             set_result_from_value(value.clone(), tetraplet.clone(), trace_pos, output, exec_ctx)?;
             trace_ctx.meet_call_end(prev_result);
 

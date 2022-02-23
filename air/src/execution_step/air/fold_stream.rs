@@ -29,12 +29,10 @@ use air_parser::ast::FoldStream;
 impl<'i> ExecutableInstruction<'i> for FoldStream<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         log_instruction!(fold, exec_ctx, trace_ctx);
-        println!("met fold stream");
         exec_ctx.tracker.meet_fold_stream();
 
         let iterable = &self.iterable;
         let stream = match exec_ctx.streams.get(iterable.name, iterable.position) {
-            Some(stream) if stream.borrow().is_empty() => return Ok(()),
             Some(stream) => stream,
             // it's possible to met streams without variables at the moment in fold, they are treated as empty
             None => return Ok(()),
@@ -48,18 +46,16 @@ impl<'i> ExecutableInstruction<'i> for FoldStream<'i> {
         while !stream_iterable.is_empty() {
             // it's safe because it's already checked that stream with such a name and position presence in context
             let stream = exec_ctx.streams.get(iterable.name, iterable.position).unwrap();
-            println!("stream {} before iteration: {}", iterable.name, stream.borrow());
 
             // add a new generation to made all consequence "new" (meaning that they are just executed on this peer)
             // write operation to this stream to write to this new generation
-            let _generation_added = stream.borrow_mut().add_new_generation_if_non_empty();
+            stream.borrow_mut().add_new_generation_if_non_empty();
             let result = execute_iterations(stream_iterable, self, fold_id, exec_ctx, trace_ctx);
 
             // it's safe because stream can't be deleted after iterating
             // it's needed to get stream again, because RefCell allows only one mutable borrowing at time,
             // and likely that stream could be mutably borrowed in execute_iterations
             let stream = exec_ctx.streams.get(iterable.name, iterable.position).unwrap();
-            println!("stream {} after iteration: {}", iterable.name, stream.borrow());
             stream.borrow_mut().remove_last_generation_if_empty();
             if result.is_err() {
                 break;
@@ -70,7 +66,6 @@ impl<'i> ExecutableInstruction<'i> for FoldStream<'i> {
         };
 
         trace_to_exec_err!(trace_ctx.meet_fold_end(fold_id), self)?;
-        println!("met fold end");
         Ok(())
     }
 }
@@ -82,7 +77,6 @@ fn execute_iterations<'i>(
     exec_ctx: &mut ExecutionCtx<'i>,
     trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<()> {
-    println!("  execute iterations {}", iterables.len());
     for iterable in iterables {
         let value = match iterable.peek() {
             Some(value) => value,
@@ -90,7 +84,6 @@ fn execute_iterations<'i>(
             // flow could contain zero values
             None => continue,
         };
-        println!("  execute iteration with {:?}", value);
 
         let value_pos = value.pos();
         trace_to_exec_err!(trace_ctx.meet_iteration_start(fold_id, value_pos), fold_stream)?;
@@ -106,8 +99,7 @@ fn execute_iterations<'i>(
 
         result?;
         if !exec_ctx.subtree_complete {
-            println!("  subtree incomplete");
-            // break;
+            break;
         }
     }
 

@@ -20,8 +20,6 @@ use avm_server::avm_runner::*;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::path::PathBuf;
-use air::interpreter_data::InterpreterData;
-use crate::print_trace;
 
 // 10 Mb
 const AVM_MAX_HEAP_SIZE: u64 = 10 * 1024 * 1024;
@@ -46,10 +44,7 @@ impl TestRunner {
         let mut call_results = HashMap::new();
 
         let mut next_peer_pks = HashSet::new();
-        let mut result_id = 0;
-
         loop {
-            println!("\n\nnext interpreter run:\n{:?}", call_results);
             let mut outcome = self
                 .runner
                 .call(
@@ -60,9 +55,6 @@ impl TestRunner {
                     call_results,
                 )
                 .map_err(|e| e.to_string())?;
-
-            print_trace(&outcome, &format!("run number is {}", result_id));
-            result_id += 1;
 
             next_peer_pks.extend(outcome.next_peer_pks);
 
@@ -81,8 +73,6 @@ impl TestRunner {
                 .collect::<HashMap<_, _>>();
 
             prev_data = outcome.data;
-            let t: InterpreterData = serde_json::from_slice(&prev_data).unwrap();
-            println!("resulted data: {:?}", t);
             data = vec![];
         }
     }
