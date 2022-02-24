@@ -94,7 +94,6 @@ impl<'i> ExecutableInstruction<'i> for Instruction<'i> {
 #[macro_export]
 macro_rules! log_instruction {
     ($instr_name:expr, $exec_ctx:expr, $trace_ctx:expr) => {
-        //println!("> {}", stringify!($instr_name));
         log::debug!(target: air_log_targets::INSTRUCTION, "> {}", stringify!($instr_name));
 
         let mut variables = String::from("  scalars:");

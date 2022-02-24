@@ -20,23 +20,23 @@ use fstrings::f;
 use fstrings::format_args_f;
 
 #[test]
-// test for github.com/fluencelabs/aquavm/issues/218
-fn issue_218() {
+// test for github.com/fluencelabs/aquavm/issues/221
+fn issue_221() {
     let peer_1_id = "peer_1_id";
     let peer_2_id = "peer_2_id";
-    let peer_3_id = "peer_3_id";
     let join_1_id = "join_1_id";
     let join_2_id = "join_2_id";
-    let resulted_join_id = "resulted_join_id";
     let set_variable_id = "set_variable_id";
 
-    let mut peer_1 = create_avm(set_variable_call_service(json!("peer_1_value")), peer_1_id);
-    let mut peer_2 = create_avm(set_variable_call_service(json!("peer_2_value")), peer_2_id);
-    let mut peer_3 = create_avm(set_variable_call_service(json!("peer_3_value")), peer_3_id);
+    let peer_1_value = "peer_1_value";
+    let peer_2_value = "peer_2_value";
+    let mut peer_1 = create_avm(set_variable_call_service(json!(peer_1_value)), peer_1_id);
+    let mut peer_2 = create_avm(set_variable_call_service(json!(peer_2_value)), peer_2_id);
     let mut join_1 = create_avm(echo_call_service(), join_1_id);
-    let mut join_2 = create_avm(echo_call_service(), join_2_id);
-    let mut resulted_join = create_avm(set_variable_call_service(json!("")), resulted_join_id);
-    let mut set_variable = create_avm(set_variable_call_service(json!([peer_1_id, peer_2_id, peer_3_id])), set_variable_id);
+    let mut set_variable = create_avm(
+        set_variable_call_service(json!([peer_1_id, peer_2_id])),
+        set_variable_id,
+    );
 
     let script = f!(r#"
         (seq
@@ -60,6 +60,8 @@ fn issue_218() {
                 ;; join_1 $stream: [peer_1_value, peer_2_value]
                 ;; join_2 $stream: [peer_2_value, peer_1_value]
                 (fold $stream iterator
+                    ;; here it'll encounter a bug in trace handler, because fold won't shuffle lores in
+                    ;; appropriate way and state for (1) is returned
                     (par
                         (par
                             (call "{join_1_id}" ("" "") [iterator])
@@ -69,11 +71,7 @@ fn issue_218() {
                     )
                 )
             )
-            ;; then we'll obtain incompatible state error from trace handler here,
-            ;; because ap instruction doesn't update internal correspondence between position in
-            ;; a new trace and previous. And because of that fold can't shuffle its lores accoring
-            ;; to what was really executed.
-            (call "{resulted_join_id}" ("" "") [])
+            (call "some_peer_id" ("" "") []) ;; (1)
         )
     "#);
 
@@ -82,27 +80,30 @@ fn issue_218() {
     let peer_2_result = checked_call_vm!(peer_2, "", &script, "", result.data.clone());
 
     let join_1_result = checked_call_vm!(join_1, "", &script, "", peer_1_result.data.clone());
-    let join_1_result = checked_call_vm!(join_1, "", &script, join_1_result.data, peer_2_result.data.clone());
-    let join_2_result = checked_call_vm!(join_2, "", &script, "", peer_2_result.data.clone());
-    print_trace(&join_2_result, "join_2_result");
-    print_trace(&peer_1_result, "peer_1_result");
-    let join_2_result = checked_call_vm!(join_2, "", &script, join_2_result.data, peer_1_result.data.clone());
-
-    let join_1_result = checked_call_vm!(join_1, "", &script, join_1_result.data, join_2_result.data.clone());
-    let join_2_result = checked_call_vm!(join_2, "", &script, join_2_result.data, join_1_result.data.clone());
-
-    let result = checked_call_vm!(resulted_join, "", &script, "", join_1_result.data);
-    let result = checked_call_vm!(resulted_join, "", &script, result.data, join_2_result.data);
-
-    print_trace(&result, "result");
-    /*
-    let result = checked_call_vm!(some_peer, client_id, &script, "", "");
-    let actual_trace = trace_from_result(&result);
-
+    let join_1_result = checked_call_vm!(join_1, "", &script, join_1_result.data, peer_2_result.data.clone()); // before 0.20.9 it fails here
+    let actual_trace = trace_from_result(&join_1_result);
     let expected_trace = vec![
-        executed_state::scalar(json!([])),
-        executed_state::scalar_string(error_message),
+        executed_state::scalar(json!([peer_1_id, peer_2_id])),
+        executed_state::par(2, 3),
+        executed_state::scalar_string(peer_1_value),
+        executed_state::ap(Some(0)),
+        executed_state::par(2, 0),
+        executed_state::scalar_string(peer_2_value),
+        executed_state::ap(Some(1)),
+        executed_state::fold(vec![
+            executed_state::subtrace_lore(3, SubTraceDesc::new(8, 4), SubTraceDesc::new(12, 0)),
+            executed_state::subtrace_lore(6, SubTraceDesc::new(12, 4), SubTraceDesc::new(16, 0)),
+        ]),
+        executed_state::par(3, 0),
+        executed_state::par(1, 1),
+        executed_state::scalar_string(peer_1_value),
+        executed_state::request_sent_by(peer_1_id),
+        executed_state::par(3, 0),
+        executed_state::par(1, 1),
+        executed_state::scalar_string(peer_2_value),
+        executed_state::request_sent_by(peer_2_id),
+        executed_state::request_sent_by(join_1_id),
     ];
+
     assert_eq!(actual_trace, expected_trace);
-     */
 }

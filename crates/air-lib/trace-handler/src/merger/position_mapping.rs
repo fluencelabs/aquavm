@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Fluence Labs Limited
+ * Copyright 2022 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,33 +14,33 @@
  * limitations under the License.
  */
 
-use super::*;
+use super::DataKeeper;
+use super::DataPositions;
 
-pub(super) enum PrepareScheme {
+pub(super) enum PreparingScheme {
     Previous,
     Current,
     Both,
 }
 
-pub(super) fn prepare_call_result(
-    value: CallResult,
-    scheme: PrepareScheme,
+/// Prepares new_to_old_pos mapping in data keeper to keep track of value sources.
+pub(super) fn prepare_positions_mapping(
+    scheme: PreparingScheme,
     data_keeper: &mut DataKeeper,
-) -> MergerCallResult {
+) {
+    // it's safe to sub 1 from positions iff scheme was set correctly
     let prev_pos = match scheme {
-        PrepareScheme::Previous | PrepareScheme::Both => Some(data_keeper.prev_slider().position() - 1),
-        PrepareScheme::Current => None,
+        PreparingScheme::Previous | PreparingScheme::Both => Some(data_keeper.prev_slider().position() - 1),
+        PreparingScheme::Current => None,
     };
 
     let current_pos = match scheme {
-        PrepareScheme::Current | PrepareScheme::Both => Some(data_keeper.current_slider().position() - 1),
-        PrepareScheme::Previous => None,
+        PreparingScheme::Current | PreparingScheme::Both => Some(data_keeper.current_slider().position() - 1),
+        PreparingScheme::Previous => None,
     };
 
     let data_positions = DataPositions { prev_pos, current_pos };
 
     let trace_pos = data_keeper.result_states_count();
     data_keeper.new_to_old_pos.insert(trace_pos, data_positions);
-
-    MergerCallResult::CallResult { value, trace_pos }
 }
