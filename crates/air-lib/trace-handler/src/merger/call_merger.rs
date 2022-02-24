@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-mod call_result_constructor;
 mod utils;
 
 use super::*;
 use air_parser::ast::CallOutputValue;
-use call_result_constructor::*;
 use utils::*;
 
 #[derive(Debug, Clone)]
@@ -37,7 +35,7 @@ pub(crate) fn try_merge_next_state_as_call(
     output_value: &CallOutputValue<'_>,
 ) -> MergeResult<MergerCallResult> {
     use ExecutedState::Call;
-    use PrepareScheme::*;
+    use PreparingScheme::*;
 
     let prev_state = data_keeper.prev_slider_mut().next_state();
     let current_state = data_keeper.current_slider_mut().next_state();
@@ -89,6 +87,17 @@ fn merge_call_result(
     };
 
     Ok(merged_state)
+}
+
+pub(super) fn prepare_call_result(
+    value: CallResult,
+    scheme: PreparingScheme,
+    data_keeper: &mut DataKeeper,
+) -> MergerCallResult {
+    let trace_pos = data_keeper.result_states_count();
+    prepare_positions_mapping(scheme, data_keeper);
+
+    MergerCallResult::CallResult { value, trace_pos }
 }
 
 #[derive(Debug, Copy, Clone)]

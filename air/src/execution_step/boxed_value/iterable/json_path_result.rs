@@ -16,7 +16,7 @@
 
 use super::Iterable;
 use super::IterableItem;
-use crate::execution_step::RSecurityTetraplet;
+use crate::execution_step::RcSecurityTetraplet;
 use crate::foldable_next;
 use crate::foldable_prev;
 use crate::JValue;
@@ -26,12 +26,12 @@ use crate::JValue;
 pub(crate) struct IterableLambdaResult {
     pub(crate) jvalues: Vec<JValue>,
     // consider adding index for each tetraplet
-    pub(crate) tetraplet: RSecurityTetraplet,
+    pub(crate) tetraplet: RcSecurityTetraplet,
     pub(crate) cursor: usize,
 }
 
 impl IterableLambdaResult {
-    pub(crate) fn init(jvalues: Vec<JValue>, tetraplet: RSecurityTetraplet) -> Self {
+    pub(crate) fn init(jvalues: Vec<JValue>, tetraplet: RcSecurityTetraplet) -> Self {
         Self {
             jvalues,
             tetraplet,

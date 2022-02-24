@@ -21,7 +21,7 @@ use crate::execution_step::execution_context::check_error_object;
 use crate::execution_step::resolver::resolve_ast_scalar_wl;
 use crate::execution_step::CatchableError;
 use crate::execution_step::LastError;
-use crate::execution_step::RSecurityTetraplet;
+use crate::execution_step::RcSecurityTetraplet;
 use crate::log_instruction;
 use crate::ExecutionError;
 use crate::JValue;
@@ -30,7 +30,6 @@ use air_parser::ast;
 use air_parser::ast::Fail;
 use polyplets::SecurityTetraplet;
 
-use std::cell::RefCell;
 use std::rc::Rc;
 
 impl<'i> super::ExecutableInstruction<'i> for Fail<'i> {
@@ -72,7 +71,7 @@ fn fail_with_literals<'i>(
     );
 
     let literal_tetraplet = SecurityTetraplet::literal_tetraplet(exec_ctx.init_peer_id.as_ref());
-    let literal_tetraplet = Rc::new(RefCell::new(literal_tetraplet));
+    let literal_tetraplet = Rc::new(literal_tetraplet);
 
     fail_with_error_object(exec_ctx, Rc::new(error_object), Some(literal_tetraplet))
 }
@@ -90,7 +89,7 @@ fn fail_with_last_error(exec_ctx: &mut ExecutionCtx<'_>) -> ExecutionResult<()> 
 fn fail_with_error_object(
     exec_ctx: &mut ExecutionCtx<'_>,
     error: Rc<JValue>,
-    tetraplet: Option<RSecurityTetraplet>,
+    tetraplet: Option<RcSecurityTetraplet>,
 ) -> ExecutionResult<()> {
     exec_ctx
         .last_error_descriptor

@@ -16,7 +16,7 @@
 
 use super::JValuable;
 use crate::execution_step::FoldState;
-use crate::execution_step::RSecurityTetraplet;
+use crate::execution_step::RcSecurityTetraplet;
 use crate::JValue;
 
 use serde::Deserialize;
@@ -29,7 +29,7 @@ use std::rc::Rc;
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct ValueAggregate {
     pub result: Rc<JValue>,
-    pub tetraplet: RSecurityTetraplet,
+    pub tetraplet: RcSecurityTetraplet,
     pub trace_pos: usize,
 }
 
@@ -51,7 +51,7 @@ impl<'i> ScalarRef<'i> {
 }
 
 impl ValueAggregate {
-    pub(crate) fn new(result: Rc<JValue>, tetraplet: RSecurityTetraplet, trace_pos: usize) -> Self {
+    pub(crate) fn new(result: Rc<JValue>, tetraplet: RcSecurityTetraplet, trace_pos: usize) -> Self {
         Self {
             result,
             tetraplet,

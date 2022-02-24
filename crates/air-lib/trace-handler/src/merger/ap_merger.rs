@@ -28,28 +28,33 @@ pub enum MergerApResult {
 
 pub(crate) fn try_merge_next_state_as_ap(data_keeper: &mut DataKeeper) -> MergeResult<MergerApResult> {
     use ExecutedState::Ap;
+    use PreparingScheme::*;
 
     let prev_state = data_keeper.prev_slider_mut().next_state();
     let current_state = data_keeper.current_slider_mut().next_state();
 
-    let ap = match (prev_state, current_state) {
-        (Some(Ap(prev_ap)), _) => prev_ap,
+    match (prev_state, current_state) {
+        (Some(Ap(prev_ap)), Some(_)) => prepare_merge_result(Some(prev_ap), Both, data_keeper),
+        (Some(Ap(prev_ap)), None) => prepare_merge_result(Some(prev_ap), Previous, data_keeper),
         // check that current state is Ap, but it's impossible to use it, because prev_data
         // could not have streams with such generations
-        (None, Some(Ap(_))) => return Ok(MergerApResult::Empty),
-        (None, None) => return Ok(MergerApResult::Empty),
-        (prev_state, current_state) => return Err(MergeError::incompatible_states(prev_state, current_state, "ap")),
-    };
+        (None, Some(Ap(_))) => prepare_merge_result(None, Current, data_keeper),
+        (None, None) => Ok(MergerApResult::Empty),
+        (prev_state, current_state) => Err(MergeError::incompatible_states(prev_state, current_state, "ap")),
+    }
+}
 
-    let new_pos = data_keeper.result_states_count();
-    let prev_pos = data_keeper.prev_slider().position() - 1;
-    let positions = DataPositions {
-        prev_pos: Some(prev_pos),
-        current_pos: None,
-    };
-    data_keeper.new_to_old_pos.insert(new_pos, positions);
+fn prepare_merge_result(
+    ap_result: Option<ApResult>,
+    scheme: PreparingScheme,
+    data_keeper: &mut DataKeeper,
+) -> MergeResult<MergerApResult> {
+    prepare_positions_mapping(scheme, data_keeper);
 
-    to_merger_result(ap)
+    match ap_result {
+        Some(ap_result) => to_merger_result(ap_result),
+        None => Ok(MergerApResult::Empty),
+    }
 }
 
 macro_rules! to_maybe_generation {

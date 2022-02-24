@@ -63,7 +63,7 @@ pub(crate) fn set_local_result<'i>(
 
 pub(crate) fn set_result_from_value<'i>(
     value: Value,
-    tetraplet: RSecurityTetraplet,
+    tetraplet: RcSecurityTetraplet,
     trace_pos: usize,
     output: &CallOutputValue<'i>,
     exec_ctx: &mut ExecutionCtx<'i>,
