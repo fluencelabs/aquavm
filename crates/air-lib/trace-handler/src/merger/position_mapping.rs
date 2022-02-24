@@ -24,10 +24,7 @@ pub(super) enum PreparingScheme {
 }
 
 /// Prepares new_to_old_pos mapping in data keeper to keep track of value sources.
-pub(super) fn prepare_positions_mapping(
-    scheme: PreparingScheme,
-    data_keeper: &mut DataKeeper,
-) {
+pub(super) fn prepare_positions_mapping(scheme: PreparingScheme, data_keeper: &mut DataKeeper) {
     // it's safe to sub 1 from positions iff scheme was set correctly
     let prev_pos = match scheme {
         PreparingScheme::Previous | PreparingScheme::Both => Some(data_keeper.prev_slider().position() - 1),

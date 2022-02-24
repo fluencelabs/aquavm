@@ -44,12 +44,16 @@ pub(crate) fn try_merge_next_state_as_ap(data_keeper: &mut DataKeeper) -> MergeR
     }
 }
 
-fn prepare_merge_result(ap_result: Option<ApResult>, scheme: PreparingScheme, data_keeper: &mut DataKeeper) -> MergeResult<MergerApResult> {
+fn prepare_merge_result(
+    ap_result: Option<ApResult>,
+    scheme: PreparingScheme,
+    data_keeper: &mut DataKeeper,
+) -> MergeResult<MergerApResult> {
     prepare_positions_mapping(scheme, data_keeper);
 
     match ap_result {
         Some(ap_result) => to_merger_result(ap_result),
-        None => Ok(MergerApResult::Empty)
+        None => Ok(MergerApResult::Empty),
     }
 }
 
