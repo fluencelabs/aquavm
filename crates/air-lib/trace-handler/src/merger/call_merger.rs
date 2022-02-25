@@ -20,6 +20,8 @@ use super::*;
 use air_parser::ast::CallOutputValue;
 use utils::*;
 
+const EXPECTED_STATE_NAME: &str = "call";
+
 #[derive(Debug, Clone)]
 pub enum MergerCallResult {
     /// There is no corresponding state in a trace for this call.
@@ -35,7 +37,7 @@ pub(crate) fn try_merge_next_state_as_call(
     output_value: &CallOutputValue<'_>,
 ) -> MergeResult<MergerCallResult> {
     use ExecutedState::Call;
-    use PreparingScheme::*;
+    use PreparationScheme::*;
 
     let prev_state = data_keeper.prev_slider_mut().next_state();
     let current_state = data_keeper.current_slider_mut().next_state();
@@ -51,7 +53,13 @@ pub(crate) fn try_merge_next_state_as_call(
         (None, Some(Call(current_call))) => return Ok(prepare_call_result(current_call, Current, data_keeper)),
         (Some(Call(prev_call)), None) => return Ok(prepare_call_result(prev_call, Previous, data_keeper)),
         (None, None) => return Ok(MergerCallResult::Empty),
-        (prev_state, current_state) => return Err(MergeError::incompatible_states(prev_state, current_state, "call")),
+        (prev_state, current_state) => {
+            return Err(MergeError::incompatible_states(
+                prev_state,
+                current_state,
+                EXPECTED_STATE_NAME,
+            ))
+        }
     };
 
     let merged_call = merge_call_result(prev_call, current_call, value_type, data_keeper)?;
@@ -91,7 +99,7 @@ fn merge_call_result(
 
 pub(super) fn prepare_call_result(
     value: CallResult,
-    scheme: PreparingScheme,
+    scheme: PreparationScheme,
     data_keeper: &mut DataKeeper,
 ) -> MergerCallResult {
     let trace_pos = data_keeper.result_states_count();

@@ -16,6 +16,8 @@
 
 use super::*;
 
+const EXPECTED_STATE_NAME: &str = "ap";
+
 #[derive(Debug, Clone)]
 pub enum MergerApResult {
     /// There is no corresponding state in a trace for this call.
@@ -28,7 +30,7 @@ pub enum MergerApResult {
 
 pub(crate) fn try_merge_next_state_as_ap(data_keeper: &mut DataKeeper) -> MergeResult<MergerApResult> {
     use ExecutedState::Ap;
-    use PreparingScheme::*;
+    use PreparationScheme::*;
 
     let prev_state = data_keeper.prev_slider_mut().next_state();
     let current_state = data_keeper.current_slider_mut().next_state();
@@ -40,13 +42,17 @@ pub(crate) fn try_merge_next_state_as_ap(data_keeper: &mut DataKeeper) -> MergeR
         // could not have streams with such generations
         (None, Some(Ap(_))) => prepare_merge_result(None, Current, data_keeper),
         (None, None) => Ok(MergerApResult::Empty),
-        (prev_state, current_state) => Err(MergeError::incompatible_states(prev_state, current_state, "ap")),
+        (prev_state, current_state) => Err(MergeError::incompatible_states(
+            prev_state,
+            current_state,
+            EXPECTED_STATE_NAME,
+        )),
     }
 }
 
 fn prepare_merge_result(
     ap_result: Option<ApResult>,
-    scheme: PreparingScheme,
+    scheme: PreparationScheme,
     data_keeper: &mut DataKeeper,
 ) -> MergeResult<MergerApResult> {
     prepare_positions_mapping(scheme, data_keeper);
