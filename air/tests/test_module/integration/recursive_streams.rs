@@ -65,13 +65,8 @@ fn recursive_stream_many_iterations() {
         "stop".to_string() => json!("stop1"),
     };
 
-    let set_variables_call_service(
-        variables_mapping: HashMap<String, JValue>,
-        variable_source: VariableOptionSource,
-    ) -> CallServiceClosure {
-        use VariableOptionSource::*;
-
-        Box::new(move |params| -> CallServiceResult {
+    let give_n_results_and_then_stop: CallServiceClosure = Box::new(|params| {
+            use VariableOptionSource::*;
             let var_name = match variable_source {
                 Argument(id) => match params.arguments.get(id) {
                     Some(JValue::String(name)) => name.to_string(),
@@ -85,8 +80,7 @@ fn recursive_stream_many_iterations() {
                 || CallServiceResult::ok(json!("default result from set_variables_call_service")),
                 |var| CallServiceResult::ok(var.clone()),
             )
-        })
-    }
+    });
 
     let mut vm = create_avm(
         set_variables_call_service(variable_mappings, VariableOptionSource::FunctionName),
