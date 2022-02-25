@@ -26,6 +26,7 @@ mod join_behaviour;
 mod lambda;
 mod last_error;
 mod network_explore;
+mod recursive_streams;
 mod security_tetraplets;
 mod streams;
 mod streams_early_exit;
