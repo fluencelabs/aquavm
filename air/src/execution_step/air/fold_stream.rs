@@ -14,17 +14,23 @@
  * limitations under the License.
  */
 
+mod stream_iterator;
+
 use super::fold::*;
 use super::fold_scalar::fold;
 use super::ExecutableInstruction;
 use super::ExecutionCtx;
 use super::ExecutionResult;
 use super::TraceHandler;
-use crate::execution_step::boxed_value::Generation;
+use crate::execution_step::boxed_value::Stream;
 use crate::log_instruction;
 use crate::trace_to_exec_err;
+use air_parser::ast;
+use stream_iterator::StreamIterator;
 
 use air_parser::ast::FoldStream;
+
+use std::cell::RefCell;
 
 impl<'i> ExecutableInstruction<'i> for FoldStream<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
@@ -41,32 +47,28 @@ impl<'i> ExecutableInstruction<'i> for FoldStream<'i> {
         let fold_id = exec_ctx.tracker.fold.seen_stream_count;
         trace_to_exec_err!(trace_ctx.meet_fold_start(fold_id), self)?;
 
-        let mut last_generation = stream.borrow().non_empty_generations_count() as u32;
-        let mut stream_iterable = construct_stream_iterable_value(stream, Generation::Nth(0), Generation::Last);
-        while !stream_iterable.is_empty() {
-            // it's safe because it's already checked that stream with such a name and position presence in context
-            let stream = exec_ctx.streams.get(iterable.name, iterable.position).unwrap();
+        let stream_iterator = StreamIterator::new();
+        let mut stream_iterable = stream_iterator.construct_iterables(stream);
 
+        let mut result = Ok(true);
+        while !stream_iterable.is_empty() {
             // add a new generation to made all consequence "new" (meaning that they are just executed on this peer)
             // write operation to this stream to write to this new generation
-            stream.borrow_mut().add_new_generation_if_non_empty();
-            let result = execute_iterations(stream_iterable, self, fold_id, exec_ctx, trace_ctx);
+            add_new_generation_if_non_empty(&self.iterable, exec_ctx);
+            result = execute_iterations(stream_iterable, self, fold_id, exec_ctx, trace_ctx);
 
-            // it's safe because stream can't be deleted after iterating
             // it's needed to get stream again, because RefCell allows only one mutable borrowing at time,
             // and likely that stream could be mutably borrowed in execute_iterations
-            let stream = exec_ctx.streams.get(iterable.name, iterable.position).unwrap();
-            stream.borrow_mut().remove_last_generation_if_empty();
-            if result.is_err() {
+            let stream = remove_new_generation_if_non_empty(&self.iterable, exec_ctx);
+            if should_stop_iteration(&result) {
                 break;
             }
 
-            stream_iterable = construct_stream_iterable_value(stream, Generation::Nth(last_generation), Generation::Last);
-            last_generation = stream.borrow().non_empty_generations_count() as u32;
-        };
+            stream_iterable = stream_iterator.construct_iterables(stream)
+        }
 
         trace_to_exec_err!(trace_ctx.meet_fold_end(fold_id), self)?;
-        Ok(())
+        result.map(|_| ())
     }
 }
 
@@ -76,7 +78,7 @@ fn execute_iterations<'i>(
     fold_id: u32,
     exec_ctx: &mut ExecutionCtx<'i>,
     trace_ctx: &mut TraceHandler,
-) -> ExecutionResult<()> {
+) -> ExecutionResult<bool> {
     for iterable in iterables {
         let value = match iterable.peek() {
             Some(value) => value,
@@ -103,5 +105,29 @@ fn execute_iterations<'i>(
         }
     }
 
-    Ok(())
+    Ok(exec_ctx.subtree_complete)
+}
+
+fn should_stop_iteration(iteration_result: &ExecutionResult<bool>) -> bool {
+    match &iteration_result {
+        Ok(result) if !result => true,
+        Ok(_) => false,
+        Err(_) => true,
+    }
+}
+
+/// Safety: this function should be called iff stream is presented in context
+fn add_new_generation_if_non_empty(stream: &ast::Stream<'_>, exec_ctx: &mut ExecutionCtx<'_>) {
+    let stream = exec_ctx.streams.get(stream.name, stream.position).unwrap();
+    stream.borrow_mut().add_new_generation_if_non_empty();
+}
+
+/// Safety: this function should be called iff stream is presented in context
+fn remove_new_generation_if_non_empty<'ctx>(
+    stream: &ast::Stream<'_>,
+    exec_ctx: &'ctx mut ExecutionCtx<'_>,
+) -> &'ctx RefCell<Stream> {
+    let stream = exec_ctx.streams.get(stream.name, stream.position).unwrap();
+    stream.borrow_mut().remove_last_generation_if_empty();
+    stream
 }

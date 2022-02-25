@@ -20,7 +20,7 @@ use fstrings::f;
 use fstrings::format_args_f;
 
 #[test]
-fn recursive_stream_basic() {
+fn recursive_stream_with_early_exit() {
     let vm_peer_id = "vm_peer_id";
     let variable_mappings = maplit::hashmap! {
         "stream_value".to_string() => json!(1),
@@ -54,48 +54,56 @@ fn recursive_stream_basic() {
         )"#);
 
     let result = checked_call_vm!(vm, "", script, "", "");
-    print_trace(&result, "first");
+    let actual_trace = trace_from_result(&result);
+    let expected_state = vec![
+        executed_state::stream_number(1, 0),
+        executed_state::stream_number(1, 0),
+        executed_state::fold(vec![executed_state::subtrace_lore(
+            0,
+            SubTraceDesc::new(3, 1),
+            SubTraceDesc::new(4, 0),
+        )]),
+        executed_state::scalar_string("stop"),
+    ];
+
+    assert_eq!(actual_trace, expected_state);
 }
 
 #[test]
 fn recursive_stream_many_iterations() {
-    let vm_peer_id = "vm_peer_id";
-    let variable_mappings = maplit::hashmap! {
-        "stream_value".to_string() => json!(1),
-        "stop".to_string() => json!("stop1"),
-    };
+    let vm_peer_id_1 = "vm_peer_id_1";
 
-    let give_n_results_and_then_stop: CallServiceClosure = Box::new(|params| {
-            use VariableOptionSource::*;
-            let var_name = match variable_source {
-                Argument(id) => match params.arguments.get(id) {
-                    Some(JValue::String(name)) => name.to_string(),
-                    _ => "default".to_string(),
-                },
-                FunctionName => params.function_name,
-                ServiceName => params.service_id,
-            };
+    let request_id = std::cell::Cell::new(0);
+    let stop_request_id = 10;
+    let give_n_results_and_then_stop: CallServiceClosure = Box::new(move |_params| {
+        let uncelled_request_id = request_id.get();
 
-            variables_mapping.get(&var_name).map_or_else(
-                || CallServiceResult::ok(json!("default result from set_variables_call_service")),
-                |var| CallServiceResult::ok(var.clone()),
-            )
+        let result = if uncelled_request_id >= stop_request_id {
+            CallServiceResult::ok(json!("stop"))
+        } else {
+            CallServiceResult::ok(json!("non_stop"))
+        };
+
+        request_id.set(uncelled_request_id + 1);
+        result
     });
 
-    let mut vm = create_avm(
-        set_variables_call_service(variable_mappings, VariableOptionSource::FunctionName),
-        vm_peer_id,
-    );
+    let mut vm_1 = create_avm(give_n_results_and_then_stop, vm_peer_id_1);
 
+    let vm_peer_id_2 = "vm_peer_id_2";
+    let mut vm_2 = create_avm(echo_call_service(), vm_peer_id_2);
+
+    let result_value = "result_value";
     let script = f!(r#"
+    (seq
         (seq
             (seq
-                (call "{vm_peer_id}" ("" "stream_value") [] $stream)
-                (call "{vm_peer_id}" ("" "stream_value") [] $stream)
+                (call "{vm_peer_id_1}" ("" "stream_value") [] $stream)
+                (call "{vm_peer_id_1}" ("" "stream_value") [] $stream)
             )
             (fold $stream iterator
                 (seq
-                    (call "{vm_peer_id}" ("" "stop") [] value)
+                    (call "{vm_peer_id_1}" ("" "stop") [] value)
                     (xor
                         (match value "stop"
                             (null)
@@ -107,8 +115,33 @@ fn recursive_stream_many_iterations() {
                     )
                 )
             )
-        )"#);
+        )
+        (call "{vm_peer_id_2}" ("" "") ["{result_value}"])
+    )"#);
 
-    let result = checked_call_vm!(vm, "", script, "", "");
-    print_trace(&result, "first");
+    let result = checked_call_vm!(vm_1, "", &script, "", "");
+    let actual_trace = trace_from_result(&result);
+    let actual_fold = &actual_trace[2];
+    let expected_fold = executed_state::fold(vec![
+        executed_state::subtrace_lore(0, SubTraceDesc::new(3, 2), SubTraceDesc::new(7, 0)),
+        executed_state::subtrace_lore(1, SubTraceDesc::new(5, 2), SubTraceDesc::new(7, 0)),
+        executed_state::subtrace_lore(4, SubTraceDesc::new(7, 2), SubTraceDesc::new(9, 0)),
+        executed_state::subtrace_lore(6, SubTraceDesc::new(9, 2), SubTraceDesc::new(11, 0)),
+        executed_state::subtrace_lore(8, SubTraceDesc::new(11, 2), SubTraceDesc::new(15, 0)),
+        executed_state::subtrace_lore(10, SubTraceDesc::new(13, 2), SubTraceDesc::new(15, 0)),
+        executed_state::subtrace_lore(12, SubTraceDesc::new(15, 2), SubTraceDesc::new(19, 0)),
+        executed_state::subtrace_lore(14, SubTraceDesc::new(17, 2), SubTraceDesc::new(19, 0)),
+        executed_state::subtrace_lore(16, SubTraceDesc::new(19, 1), SubTraceDesc::new(20, 0)),
+    ]);
+    assert_eq!(actual_fold, &expected_fold);
+
+    let actual_last_state = &actual_trace[20];
+    let expected_last_state = executed_state::request_sent_by(vm_peer_id_1);
+    assert_eq!(actual_last_state, &expected_last_state);
+
+    let result = checked_call_vm!(vm_2, "", script, "", result.data);
+    let actual_trace = trace_from_result(&result);
+    let actual_last_state = &actual_trace[20];
+    let expected_last_state = executed_state::scalar_string(result_value);
+    assert_eq!(actual_last_state, &expected_last_state);
 }

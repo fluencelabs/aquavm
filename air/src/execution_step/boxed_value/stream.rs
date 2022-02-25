@@ -228,7 +228,7 @@ impl fmt::Display for Stream {
             return write!(f, "[]");
         }
 
-        write!(f, "[\n")?;
+        writeln!(f, "[")?;
         for (id, generation) in self.0.iter().enumerate() {
             write!(f, " -- {}: ", id)?;
             for value in generation.iter() {
