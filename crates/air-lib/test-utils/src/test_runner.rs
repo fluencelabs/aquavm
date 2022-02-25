@@ -41,9 +41,10 @@ impl TestRunner {
         let mut prev_data = prev_data.into();
         let mut data = data.into();
         let init_user_id = init_user_id.into();
-        let mut call_results = HashMap::new();
 
+        let mut call_results = HashMap::new();
         let mut next_peer_pks = HashSet::new();
+
         loop {
             let mut outcome = self
                 .runner
