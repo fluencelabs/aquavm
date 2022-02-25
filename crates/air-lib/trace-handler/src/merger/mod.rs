@@ -19,6 +19,7 @@ mod call_merger;
 mod errors;
 mod fold_merger;
 mod par_merger;
+mod position_mapping;
 
 pub use ap_merger::MergerApResult;
 pub use call_merger::MergerCallResult;
@@ -37,6 +38,9 @@ pub(super) use ap_merger::try_merge_next_state_as_ap;
 pub(super) use call_merger::try_merge_next_state_as_call;
 pub(crate) use fold_merger::try_merge_next_state_as_fold;
 pub(crate) use par_merger::try_merge_next_state_as_par;
+
+use position_mapping::prepare_positions_mapping;
+use position_mapping::PreparationScheme;
 
 type MergeResult<T> = std::result::Result<T, MergeError>;
 

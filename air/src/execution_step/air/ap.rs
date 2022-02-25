@@ -23,6 +23,7 @@ use super::TraceHandler;
 use crate::execution_step::air::ValueAggregate;
 use crate::execution_step::boxed_value::Variable;
 use crate::execution_step::resolver::apply_lambda;
+use crate::log_instruction;
 use crate::trace_to_exec_err;
 use crate::JValue;
 use crate::SecurityTetraplet;
@@ -37,6 +38,7 @@ use std::rc::Rc;
 
 impl<'i> super::ExecutableInstruction<'i> for Ap<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
+        log_instruction!(call, exec_ctx, trace_ctx);
         let should_touch_trace = should_touch_trace(self);
         // this applying should be at the very beginning of this function,
         // because it's necessary to check argument lambda, for more details see
