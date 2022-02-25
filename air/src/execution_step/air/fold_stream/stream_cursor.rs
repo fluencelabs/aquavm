@@ -14,34 +14,26 @@
  * limitations under the License.
  */
 
-use super::construct_stream_iterable_value;
+use super::construct_stream_iterable_values;
 use crate::execution_step::air::fold::IterableValue;
 use crate::execution_step::boxed_value::Generation;
 use crate::execution_step::boxed_value::Stream;
 
-use std::cell::Cell;
 use std::cell::RefCell;
 
-pub(super) struct StreamIterator {
-    last_seen_generation: Cell<u32>,
+pub(super) struct StreamCursor {
+    last_seen_generation: u32,
 }
 
-impl StreamIterator {
+impl StreamCursor {
     pub(super) fn new() -> Self {
         Self {
-            last_seen_generation: Cell::new(0),
+            last_seen_generation: 0,
         }
     }
 
-    pub(super) fn construct_iterables(&self, stream: &RefCell<Stream>) -> Vec<IterableValue> {
-        let stream_iterable = construct_stream_iterable_value(
-            stream,
-            Generation::Nth(self.last_seen_generation.get()),
-            Generation::Last,
-        );
-        let last_seen_generation = stream.borrow().non_empty_generations_count() as u32;
-        self.last_seen_generation.set(last_seen_generation);
-
-        stream_iterable
+    pub(super) fn construct_iterables(&mut self, stream: &RefCell<Stream>) -> Vec<IterableValue> {
+        self.last_seen_generation = stream.borrow().non_empty_generations_count() as u32;
+        construct_stream_iterable_values(stream, Generation::Nth(self.last_seen_generation), Generation::Last)
     }
 }

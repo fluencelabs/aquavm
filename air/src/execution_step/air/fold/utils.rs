@@ -47,7 +47,7 @@ pub(crate) fn construct_scalar_iterable_value<'ctx>(
 }
 
 /// Constructs iterable value for given stream iterable.
-pub(crate) fn construct_stream_iterable_value(
+pub(crate) fn construct_stream_iterable_values(
     stream: &RefCell<Stream>,
     start: Generation,
     end: Generation,

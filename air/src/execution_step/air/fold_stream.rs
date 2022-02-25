@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-mod stream_iterator;
+mod stream_cursor;
 
 use super::fold::*;
 use super::fold_scalar::fold;
@@ -26,7 +26,7 @@ use crate::execution_step::boxed_value::Stream;
 use crate::log_instruction;
 use crate::trace_to_exec_err;
 use air_parser::ast;
-use stream_iterator::StreamIterator;
+use stream_cursor::StreamCursor;
 
 use air_parser::ast::FoldStream;
 
@@ -47,8 +47,8 @@ impl<'i> ExecutableInstruction<'i> for FoldStream<'i> {
         let fold_id = exec_ctx.tracker.fold.seen_stream_count;
         trace_to_exec_err!(trace_ctx.meet_fold_start(fold_id), self)?;
 
-        let stream_iterator = StreamIterator::new();
-        let mut stream_iterable = stream_iterator.construct_iterables(stream);
+        let mut stream_cursor = StreamCursor::new();
+        let mut stream_iterable = stream_cursor.construct_iterables(stream);
 
         let mut result = Ok(true);
         while !stream_iterable.is_empty() {
@@ -64,7 +64,7 @@ impl<'i> ExecutableInstruction<'i> for FoldStream<'i> {
                 break;
             }
 
-            stream_iterable = stream_iterator.construct_iterables(stream)
+            stream_iterable = stream_cursor.construct_iterables(stream)
         }
 
         trace_to_exec_err!(trace_ctx.meet_fold_end(fold_id), self)?;
@@ -116,13 +116,13 @@ fn should_stop_iteration(iteration_result: &ExecutionResult<bool>) -> bool {
     }
 }
 
-/// Safety: this function should be called iff stream is presented in context
+/// Safety: this function should be called iff stream is present in context
 fn add_new_generation_if_non_empty(stream: &ast::Stream<'_>, exec_ctx: &mut ExecutionCtx<'_>) {
     let stream = exec_ctx.streams.get(stream.name, stream.position).unwrap();
     stream.borrow_mut().add_new_generation_if_non_empty();
 }
 
-/// Safety: this function should be called iff stream is presented in context
+/// Safety: this function should be called iff stream is present in context
 fn remove_new_generation_if_non_empty<'ctx>(
     stream: &ast::Stream<'_>,
     exec_ctx: &'ctx mut ExecutionCtx<'_>,

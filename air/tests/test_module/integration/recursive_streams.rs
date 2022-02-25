@@ -288,3 +288,89 @@ fn recursive_stream_error_handling() {
 
     assert_eq!(actual_last_state, &expected_last_state);
 }
+
+#[test]
+fn recursive_stream_inner_fold() {
+    let vm_peer_id_1 = "vm_peer_id_1";
+
+    let request_id = std::cell::Cell::new(0);
+    let stop_request_id = 10;
+    let give_n_results_and_then_stop: CallServiceClosure = Box::new(move |_params| {
+        let uncelled_request_id = request_id.get();
+
+        let result = if uncelled_request_id >= stop_request_id {
+            CallServiceResult::ok(json!("stop"))
+        } else {
+            CallServiceResult::ok(json!("non_stop"))
+        };
+
+        request_id.set(uncelled_request_id + 1);
+        result
+    });
+
+    let mut vm_1 = create_avm(give_n_results_and_then_stop, vm_peer_id_1);
+
+    let vm_peer_id_2 = "vm_peer_id_2";
+    let mut vm_2 = create_avm(echo_call_service(), vm_peer_id_2);
+
+    let result_value = "result_value";
+    let script = f!(r#"
+    (seq
+        (seq
+            (seq
+                (call "{vm_peer_id_1}" ("" "stream_value") [] $stream_1)
+                (call "{vm_peer_id_1}" ("" "stream_value") [] $stream_2)
+            )
+            (fold $stream_1 iterator_1
+                (seq
+                    (call "{vm_peer_id_1}" ("" "stop") [] value)
+                    (xor
+                        (match value "stop"
+                            (null)
+                        )
+                        (seq
+                            (seq
+                                (ap value $stream_1)
+                                (fold $stream_2 iterator_2
+                                    (seq
+                                        (call "{vm_peer_id_1}" ("" "stop") [] value)
+                                        (xor
+                                            (match value "stop"
+                                                (null)
+                                            )
+                                            (seq
+                                                (ap value $stream_2)
+                                                (next iterator_2)
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                            (next iterator_1)
+                        )
+                    )
+                )
+            )
+        )
+        (call "{vm_peer_id_2}" ("" "") ["{result_value}"])
+    )"#);
+
+    let result = checked_call_vm!(vm_1, "", &script, "", "");
+    let result = checked_call_vm!(vm_2, "", script, "", result.data);
+    let actual_trace = trace_from_result(&result);
+
+    let actual_last_state = &actual_trace[22];
+    let expected_last_state = executed_state::scalar_string(result_value);
+    assert_eq!(actual_last_state, &expected_last_state);
+
+    let external_fold = &actual_trace[2];
+    let internal_fold = &actual_trace[5];
+    let actual_fold_lores_count = match (external_fold, internal_fold) {
+        (ExecutedState::Fold(external_fold), ExecutedState::Fold(internal_fold)) => {
+            external_fold.lore.len() + internal_fold.lore.len()
+        }
+        _ => panic!("2nd and 5th states should be fold"),
+    };
+
+    assert_eq!(actual_fold_lores_count, stop_request_id);
+}
