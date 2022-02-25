@@ -1,3 +1,14 @@
+## Version 0.21.0 (2021-02-26)
+
+[PR 225](https://github.com/fluencelabs/aquavm/pull/225):  
+Introduce recursive streams
+
+[PR 224](https://github.com/fluencelabs/aquavm/pull/224) [PR 220](https://github.com/fluencelabs/aquavm/pull/224) [PR 217](https://github.com/fluencelabs/aquavm/pull/217) [PR 215](https://github.com/fluencelabs/aquavm/pull/215) [PR 212](https://github.com/fluencelabs/aquavm/pull/212) [PR 207](https://github.com/fluencelabs/aquavm/pull/207):  
+Various bugs fixed
+
+[PR 210](https://github.com/fluencelabs/aquavm/pull/210):  
+Add API for returning AquaVM consumed memory size
+
 ## Version 0.20.0 (2021-12-29)
 
 [PR 205](https://github.com/fluencelabs/aquavm/pull/205):  
