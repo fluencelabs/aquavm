@@ -17,23 +17,25 @@
 use super::DataKeeper;
 use super::DataPositions;
 
-pub(super) enum PreparingScheme {
+pub(super) enum PreparationScheme {
     Previous,
     Current,
     Both,
 }
 
 /// Prepares new_to_old_pos mapping in data keeper to keep track of value sources.
-pub(super) fn prepare_positions_mapping(scheme: PreparingScheme, data_keeper: &mut DataKeeper) {
+pub(super) fn prepare_positions_mapping(scheme: PreparationScheme, data_keeper: &mut DataKeeper) {
+    use PreparationScheme::*;
+
     // it's safe to sub 1 from positions iff scheme was set correctly
     let prev_pos = match scheme {
-        PreparingScheme::Previous | PreparingScheme::Both => Some(data_keeper.prev_slider().position() - 1),
-        PreparingScheme::Current => None,
+        Previous | Both => Some(data_keeper.prev_slider().position() - 1),
+        Current => None,
     };
 
     let current_pos = match scheme {
-        PreparingScheme::Current | PreparingScheme::Both => Some(data_keeper.current_slider().position() - 1),
-        PreparingScheme::Previous => None,
+        Current | Both => Some(data_keeper.current_slider().position() - 1),
+        Previous => None,
     };
 
     let data_positions = DataPositions { prev_pos, current_pos };
