@@ -100,7 +100,7 @@ pub(crate) fn resolve_variable<'ctx, 'i>(
         } => {
             match ctx.streams.get(name, position) {
                 Some(stream) => {
-                    let ingredients = StreamJvaluableIngredients::new(stream.borrow(), generation);
+                    let ingredients = StreamJvaluableIngredients::new(stream, generation);
                     Ok(Box::new(ingredients))
                 }
                 // return an empty stream for not found stream

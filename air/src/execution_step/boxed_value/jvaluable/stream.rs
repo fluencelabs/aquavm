@@ -32,7 +32,7 @@ use std::ops::Deref;
 
 #[derive(Debug)]
 pub(crate) struct StreamJvaluableIngredients<'stream> {
-    pub(crate) stream: std::cell::Ref<'stream, Stream>,
+    pub(crate) stream: &'stream Stream,
     pub(crate) generation: Generation,
 }
 
@@ -63,7 +63,7 @@ impl JValuable for StreamJvaluableIngredients<'_> {
     }
 
     fn as_jvalue(&self) -> Cow<'_, JValue> {
-        let jvalue = self.stream.deref().clone().as_jvalue(self.generation).unwrap();
+        let jvalue = self.stream.as_jvalue(self.generation).unwrap();
         Cow::Owned(jvalue)
     }
 
@@ -83,7 +83,7 @@ impl JValuable for StreamJvaluableIngredients<'_> {
 use crate::execution_step::boxed_value::StreamIter;
 
 impl<'stream> StreamJvaluableIngredients<'stream> {
-    pub(crate) fn new(stream: std::cell::Ref<'stream, Stream>, generation: Generation) -> Self {
+    pub(crate) fn new(stream: &'stream Stream, generation: Generation) -> Self {
         Self { stream, generation }
     }
 
@@ -98,7 +98,7 @@ impl<'stream> StreamJvaluableIngredients<'stream> {
                     Generation::Last => unreachable!(),
                 };
 
-                Err(StreamDontHaveSuchGeneration(self.stream.deref().clone(), generation as usize).into())
+                Err(StreamDontHaveSuchGeneration(self.stream.clone(), generation as usize).into())
             }
         }
     }

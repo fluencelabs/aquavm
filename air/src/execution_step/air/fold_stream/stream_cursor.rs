@@ -19,8 +19,6 @@ use crate::execution_step::air::fold::IterableValue;
 use crate::execution_step::boxed_value::Generation;
 use crate::execution_step::boxed_value::Stream;
 
-use std::cell::RefCell;
-
 pub(super) struct StreamCursor {
     last_seen_generation: u32,
 }
@@ -32,10 +30,10 @@ impl StreamCursor {
         }
     }
 
-    pub(super) fn construct_iterables(&mut self, stream: &RefCell<Stream>) -> Vec<IterableValue> {
+    pub(super) fn construct_iterables(&mut self, stream: &Stream) -> Vec<IterableValue> {
         let iterables =
             construct_stream_iterable_values(stream, Generation::Nth(self.last_seen_generation), Generation::Last);
-        self.last_seen_generation = stream.borrow().non_empty_generations_count() as u32;
+        self.last_seen_generation = stream.non_empty_generations_count() as u32;
 
         iterables
     }
