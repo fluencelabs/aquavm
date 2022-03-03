@@ -42,7 +42,7 @@ pub(crate) fn set_local_result<'i>(
             // TODO: refactor this generation handling
             let generation = match exec_ctx.streams.get(stream.name, stream.position) {
                 Some(stream) => {
-                    let generation = match stream.borrow().generations_count() {
+                    let generation = match stream.generations_count() {
                         0 => 0,
                         n => n - 1,
                     };

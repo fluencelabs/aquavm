@@ -22,7 +22,6 @@ use crate::execution_step::ValueAggregate;
 use air_interpreter_data::GlobalStreamGens;
 use air_interpreter_data::RestrictedStreamGens;
 
-use std::cell::RefCell;
 use std::collections::hash_map::Entry::{Occupied, Vacant};
 use std::collections::HashMap;
 
@@ -44,14 +43,20 @@ pub(crate) struct Streams {
 struct StreamDescriptor {
     pub(self) span: Span,
     // TODO: get rid of RefCell in a separate PR
-    pub(self) stream: RefCell<Stream>,
+    pub(self) stream: Stream,
 }
 
 impl Streams {
-    pub(crate) fn get(&self, name: &str, position: usize) -> Option<&RefCell<Stream>> {
+    pub(crate) fn get(&self, name: &str, position: usize) -> Option<&Stream> {
         self.streams
             .get(name)
             .and_then(|descriptors| find_closest(descriptors.iter(), position))
+    }
+
+    pub(crate) fn get_mut(&mut self, name: &str, position: usize) -> Option<&mut Stream> {
+        self.streams
+            .get_mut(name)
+            .and_then(|descriptors| find_closest_mut(descriptors.iter_mut(), position))
     }
 
     pub(crate) fn add_stream_value(
@@ -61,8 +66,8 @@ impl Streams {
         stream_name: &str,
         position: usize,
     ) -> ExecutionResult<u32> {
-        match self.get(stream_name, position) {
-            Some(stream) => stream.borrow_mut().add_value(value, generation),
+        match self.get_mut(stream_name, position) {
+            Some(stream) => stream.add_value(value, generation),
             None => {
                 // streams could be created in three ways:
                 //  - after met new instruction with stream name that isn't present in streams
@@ -80,7 +85,7 @@ impl Streams {
     }
 
     pub(crate) fn add_global_stream(&mut self, name: String, stream: Stream) {
-        let descriptor = StreamDescriptor::global(RefCell::new(stream));
+        let descriptor = StreamDescriptor::global(stream);
         self.streams.insert(name, vec![descriptor]);
     }
 
@@ -90,7 +95,7 @@ impl Streams {
             .stream_generation_from_data(&name, span.left as u32, iteration as usize)
             .unwrap_or_default();
 
-        let new_stream = RefCell::new(Stream::from_generations_count(generations_count as usize));
+        let new_stream = Stream::from_generations_count(generations_count as usize);
         let new_descriptor = StreamDescriptor::restricted(new_stream, span);
         match self.streams.entry(name) {
             Occupied(mut entry) => {
@@ -112,11 +117,7 @@ impl Streams {
             self.streams.remove(&name);
         }
 
-        self.collect_stream_generation(
-            name,
-            position,
-            last_descriptor.stream.borrow().generations_count() as u32,
-        );
+        self.collect_stream_generation(name, position, last_descriptor.stream.generations_count() as u32);
     }
 
     /// This method must be called at the end of execution, because it contains logic to collect
@@ -131,7 +132,7 @@ impl Streams {
                 // unwrap is safe here because of invariant that streams contains non-empty vectors,
                 // moreover it must contain only one value, because this method is called at the end
                 // of the execution
-                let generation = descriptors.pop().unwrap().stream.borrow().generations_count();
+                let generation = descriptors.pop().unwrap().stream.generations_count();
                 (name, generation as u32)
             })
             .collect::<GlobalStreamGens>();
@@ -165,14 +166,14 @@ impl Streams {
 }
 
 impl StreamDescriptor {
-    pub(self) fn global(stream: RefCell<Stream>) -> Self {
+    pub(self) fn global(stream: Stream) -> Self {
         Self {
             span: Span::new(0, usize::MAX),
             stream,
         }
     }
 
-    pub(self) fn restricted(stream: RefCell<Stream>, span: Span) -> Self {
+    pub(self) fn restricted(stream: Stream, span: Span) -> Self {
         Self { span, stream }
     }
 }
@@ -180,11 +181,25 @@ impl StreamDescriptor {
 fn find_closest<'d>(
     descriptors: impl DoubleEndedIterator<Item = &'d StreamDescriptor>,
     position: usize,
-) -> Option<&'d RefCell<Stream>> {
+) -> Option<&'d Stream> {
     // descriptors are placed in a order of decreasing scopes, so it's enough to get the latest suitable
     for descriptor in descriptors.rev() {
         if descriptor.span.contains_position(position) {
             return Some(&descriptor.stream);
+        }
+    }
+
+    None
+}
+
+fn find_closest_mut<'d>(
+    descriptors: impl DoubleEndedIterator<Item = &'d mut StreamDescriptor>,
+    position: usize,
+) -> Option<&'d mut Stream> {
+    // descriptors are placed in a order of decreasing scopes, so it's enough to get the latest suitable
+    for descriptor in descriptors.rev() {
+        if descriptor.span.contains_position(position) {
+            return Some(&mut descriptor.stream);
         }
     }
 
@@ -207,12 +222,6 @@ impl fmt::Display for Streams {
 
 impl fmt::Display for StreamDescriptor {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            " <{}> - <{}>: {}",
-            self.span.left,
-            self.span.right,
-            self.stream.borrow()
-        )
+        write!(f, " <{}> - <{}>: {}", self.span.left, self.span.right, self.stream)
     }
 }

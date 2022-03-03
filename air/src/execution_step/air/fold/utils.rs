@@ -22,7 +22,6 @@ use crate::SecurityTetraplet;
 
 use air_parser::ast;
 
-use std::cell::RefCell;
 use std::ops::Deref;
 use std::rc::Rc;
 
@@ -48,11 +47,10 @@ pub(crate) fn construct_scalar_iterable_value<'ctx>(
 
 /// Constructs iterable value for given stream iterable.
 pub(crate) fn construct_stream_iterable_values(
-    stream: &RefCell<Stream>,
+    stream: &Stream,
     start: Generation,
     end: Generation,
 ) -> Vec<IterableValue> {
-    let stream = stream.borrow();
     let stream_iter = match stream.slice_iter(start, end) {
         Some(stream_iter) => stream_iter,
         None => return vec![],
