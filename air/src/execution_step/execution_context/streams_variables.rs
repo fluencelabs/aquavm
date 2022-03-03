@@ -42,7 +42,6 @@ pub(crate) struct Streams {
 
 struct StreamDescriptor {
     pub(self) span: Span,
-    // TODO: get rid of RefCell in a separate PR
     pub(self) stream: Stream,
 }
 
