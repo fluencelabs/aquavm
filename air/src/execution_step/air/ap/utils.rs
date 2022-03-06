@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-use super::ExecutionCtx;
 use super::ExecutionResult;
 use crate::execution_step::Generation;
 
@@ -54,14 +53,14 @@ fn match_position_variable(
     }
 }
 
-pub(super) fn to_ap_result(merger_ap_result: &MergerApResult, instr: &Ap<'_>, exec_ctx: &ExecutionCtx<'_>) -> ApResult {
+pub(super) fn to_ap_result(merger_ap_result: &MergerApResult, maybe_generation: Option<u32>) -> ApResult {
     if let MergerApResult::ApResult { res_generation } = merger_ap_result {
         let res_generation = option_to_vec(*res_generation);
 
         return ApResult::new(res_generation);
     }
 
-    let res_generation = variable_to_generations(&instr.result, exec_ctx);
+    let res_generation = option_to_vec(maybe_generation);
     ApResult::new(res_generation)
 }
 
@@ -69,24 +68,5 @@ fn option_to_vec(value: Option<u32>) -> Vec<u32> {
     match value {
         Some(value) => vec![value],
         None => vec![],
-    }
-}
-
-fn variable_to_generations(variable: &ast::Variable<'_>, exec_ctx: &ExecutionCtx<'_>) -> Vec<u32> {
-    use ast::Variable::*;
-
-    match variable {
-        Scalar(_) => vec![],
-        Stream(stream) => {
-            // unwrap here is safe because this function will be called only
-            // when this stream's been created
-            let stream = exec_ctx.streams.get(stream.name, stream.position).unwrap();
-            let generation = match stream.generations_count() {
-                0 => 0,
-                n => n - 1,
-            };
-
-            vec![generation as u32]
-        }
     }
 }

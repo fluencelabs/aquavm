@@ -18,7 +18,7 @@ use air_test_utils::prelude::*;
 use std::collections::HashMap;
 
 #[test]
-fn data_merge() {
+fn data_merge__() {
     use executed_state::*;
 
     let set_variable_id = "set_variable";
@@ -73,7 +73,7 @@ fn data_merge() {
         stream_string(vm_1_id, 0),
         par(1, 0),
         request_sent_by(vm_1_id),
-        stream_string(vm_1_id, 0),
+        stream_string(vm_1_id, 1),
         request_sent_by(vm_1_id),
     ];
 
@@ -105,12 +105,12 @@ fn data_merge() {
         par(1, 2),
         stream_string(vm_1_id, 0),
         par(1, 0),
-        stream_string(vm_2_id, 1),
+        stream_string(vm_2_id, 2),
         par(1, 2),
         stream_string(vm_1_id, 0),
         par(1, 0),
         stream_string(vm_2_id, 1),
-        stream_string(vm_1_id, 0),
+        stream_string(vm_1_id, 1),
         request_sent_by(vm_1_id),
     ];
 
@@ -124,12 +124,12 @@ fn data_merge() {
         par(1, 2),
         stream_string(vm_1_id, 0),
         par(1, 0),
-        stream_string(vm_2_id, 1),
+        stream_string(vm_2_id, 2),
         par(1, 2),
         stream_string(vm_1_id, 0),
         par(1, 0),
         stream_string(vm_2_id, 1),
-        stream_string(vm_1_id, 0),
+        stream_string(vm_1_id, 1),
         scalar_string(vm_2_id),
     ];
 

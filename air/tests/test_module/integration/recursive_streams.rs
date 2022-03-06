@@ -59,12 +59,12 @@ fn recursive_stream_with_early_exit() {
     let actual_trace = trace_from_result(&result);
     let expected_state = vec![
         executed_state::stream_number(1, 0),
-        executed_state::stream_number(1, 0),
-        executed_state::fold(vec![executed_state::subtrace_lore(
-            0,
-            SubTraceDesc::new(3, 1),
-            SubTraceDesc::new(4, 0),
-        )]),
+        executed_state::stream_number(1, 1),
+        executed_state::fold(vec![
+            executed_state::subtrace_lore(0, SubTraceDesc::new(3, 1), SubTraceDesc::new(4, 0)),
+            executed_state::subtrace_lore(1, SubTraceDesc::new(4, 1), SubTraceDesc::new(5, 0)),
+        ]),
+        executed_state::scalar_string("stop"),
         executed_state::scalar_string("stop"),
     ];
 
@@ -125,7 +125,7 @@ fn recursive_stream_many_iterations() {
     let actual_trace = trace_from_result(&result);
     let actual_fold = &actual_trace[2];
     let expected_fold = executed_state::fold(vec![
-        executed_state::subtrace_lore(0, SubTraceDesc::new(3, 2), SubTraceDesc::new(7, 0)),
+        executed_state::subtrace_lore(0, SubTraceDesc::new(3, 2), SubTraceDesc::new(5, 0)),
         executed_state::subtrace_lore(1, SubTraceDesc::new(5, 2), SubTraceDesc::new(7, 0)),
         executed_state::subtrace_lore(4, SubTraceDesc::new(7, 2), SubTraceDesc::new(9, 0)),
         executed_state::subtrace_lore(6, SubTraceDesc::new(9, 2), SubTraceDesc::new(11, 0)),
