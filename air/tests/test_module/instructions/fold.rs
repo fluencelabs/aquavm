@@ -201,7 +201,6 @@ fn empty_literal_array_fold() {
         )"#;
 
     let result = checked_call_vm!(vm, "", empty_fold, "", "");
-
     let actual_trace = trace_from_result(&result);
 
     assert!(actual_trace.is_empty());
