@@ -117,6 +117,17 @@ impl fmt::Display for Number {
     }
 }
 
+impl fmt::Display for FoldScalarIterable<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use FoldScalarIterable::*;
+
+        match self {
+            Scalar(variable) => write!(f, "{}", variable),
+            EmptyArray => write!(f, "[]"),
+        }
+    }
+}
+
 impl From<Number> for serde_json::Value {
     fn from(number: Number) -> Self {
         (&number).into()

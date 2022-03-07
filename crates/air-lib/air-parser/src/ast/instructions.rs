@@ -99,7 +99,8 @@ pub enum Fail<'i> {
 /// (fold scalar_iterable iterator instruction)
 #[derive(Serialize, Debug, PartialEq)]
 pub struct FoldScalar<'i> {
-    pub iterable: ScalarWithLambda<'i>,
+    #[serde(borrow)]
+    pub iterable: FoldScalarIterable<'i>,
     #[serde(borrow)]
     pub iterator: Scalar<'i>,
     pub instruction: Rc<Instruction<'i>>,

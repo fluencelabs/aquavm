@@ -150,7 +150,7 @@ fn parse_fold() {
         )
         "#;
     let instruction = parse(&source_code);
-    let expected = fold_scalar(
+    let expected = fold_scalar_variable(
         ScalarWithLambda::new("iterable", None, 15),
         Scalar::new("i", 24),
         null(),
@@ -168,7 +168,7 @@ fn fold_json_path() {
     "#;
 
     let instruction = parse(source_code);
-    let expected = fold_scalar(
+    let expected = fold_scalar_variable(
         ScalarWithLambda::from_raw_lambda(
             "members",
             vec![ValueAccessor::ArrayAccess { idx: 123321 }],
@@ -178,6 +178,19 @@ fn fold_json_path() {
         null(),
         Span::new(27, 61),
     );
+    assert_eq!(instruction, expected);
+}
+
+#[test]
+fn fold_empty_array_iterable() {
+    let source_code = r#"
+        (fold [] m
+            (null)
+        )
+    "#;
+
+    let instruction = parse(source_code);
+    let expected = fold_scalar_empty_array(Scalar::new("m", 18), null(), Span::new(9, 48));
     assert_eq!(instruction, expected);
 }
 
@@ -205,7 +218,7 @@ fn comments() {
         ;;; comme;?!.$.  nt[][][][()()()null;$::!
     "#;
     let instruction = parse(source_code);
-    let expected = fold_scalar(
+    let expected = fold_scalar_variable(
         ScalarWithLambda::from_raw_lambda(
             "members",
             vec![
@@ -234,7 +247,7 @@ fn parse_fold_with_xor_par_seq() {
         let source_code = source_fold_with(name);
         let instruction = parse(&source_code);
         let instr = binary_instruction(*name);
-        let expected = fold_scalar(
+        let expected = fold_scalar_variable(
             ScalarWithLambda::new("iterable", None, 6),
             Scalar::new("i", 15),
             instr(null(), null()),

@@ -92,3 +92,10 @@ pub enum Number {
     Int(i64),
     Float(f64),
 }
+
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+pub enum FoldScalarIterable<'i> {
+    #[serde(borrow)]
+    Scalar(ScalarWithLambda<'i>),
+    EmptyArray,
+}

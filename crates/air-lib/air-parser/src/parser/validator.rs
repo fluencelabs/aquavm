@@ -83,7 +83,12 @@ impl<'i> VariableValidator<'i> {
     }
 
     pub(super) fn met_fold_scalar(&mut self, fold: &FoldScalar<'i>, span: Span) {
-        self.met_variable_name(fold.iterable.name, span);
+        use FoldScalarIterable::*;
+
+        match &fold.iterable {
+            Scalar(variable) => self.met_variable_name(variable.name, span),
+            EmptyArray => {}
+        };
         self.met_iterator_definition(&fold.iterator, span);
     }
 

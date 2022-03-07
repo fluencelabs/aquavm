@@ -147,9 +147,10 @@ FailBody: Fail<'input> = {
     }
 }
 
-FoldScalarIterable: ScalarWithLambda<'input> = {
-    <scalar:Scalar> => ScalarWithLambda::new(scalar.0, None, scalar.1),
-    <scalar:ScalarWithLambda> => ScalarWithLambda::new(scalar.0, Some(scalar.1), scalar.2),
+FoldScalarIterable: FoldScalarIterable<'input> = {
+    <scalar:Scalar> => FoldScalarIterable::Scalar(ScalarWithLambda::new(scalar.0, None, scalar.1)),
+    <scalar:ScalarWithLambda> => FoldScalarIterable::Scalar(ScalarWithLambda::new(scalar.0, Some(scalar.1), scalar.2)),
+    "[" "]" => FoldScalarIterable::EmptyArray,
 };
 
 Function = CallInstrValue;

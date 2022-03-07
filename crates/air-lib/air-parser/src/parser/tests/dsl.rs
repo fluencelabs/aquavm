@@ -84,16 +84,29 @@ pub(super) fn fail_last_error() -> Instruction<'static> {
     Instruction::Fail(Fail::LastError)
 }
 
-pub(super) fn fold_scalar<'i>(
-    iterable: ScalarWithLambda<'i>,
+pub(super) fn fold_scalar_variable<'i>(
+    scalar: ScalarWithLambda<'i>,
     iterator: Scalar<'i>,
     instruction: Instruction<'i>,
     span: Span,
 ) -> Instruction<'i> {
     Instruction::FoldScalar(FoldScalar {
-        iterable,
+        iterable: FoldScalarIterable::Scalar(scalar),
         iterator,
-        instruction: std::rc::Rc::new(instruction),
+        instruction: Rc::new(instruction),
+        span,
+    })
+}
+
+pub(super) fn fold_scalar_empty_array<'i>(
+    iterator: Scalar<'i>,
+    instruction: Instruction<'i>,
+    span: Span,
+) -> Instruction<'i> {
+    Instruction::FoldScalar(FoldScalar {
+        iterable: FoldScalarIterable::EmptyArray,
+        iterator,
+        instruction: Rc::new(instruction),
         span,
     })
 }
@@ -107,7 +120,7 @@ pub(super) fn fold_stream<'i>(
     Instruction::FoldStream(FoldStream {
         iterable,
         iterator,
-        instruction: std::rc::Rc::new(instruction),
+        instruction: Rc::new(instruction),
         span,
     })
 }
