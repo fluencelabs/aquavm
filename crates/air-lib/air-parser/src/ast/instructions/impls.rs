@@ -93,7 +93,7 @@ impl<'i> MisMatch<'i> {
 
 impl<'i> FoldScalar<'i> {
     pub fn new(
-        iterable: ScalarWithLambda<'i>,
+        iterable: FoldScalarIterable<'i>,
         iterator: Scalar<'i>,
         instruction: Instruction<'i>,
         span: Span,

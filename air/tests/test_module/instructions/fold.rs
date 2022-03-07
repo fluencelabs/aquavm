@@ -163,7 +163,26 @@ fn inner_fold_with_same_iterator() {
 }
 
 #[test]
-fn empty_fold() {
+fn empty_iterable_fold() {
+    let mut vm = create_avm(echo_call_service(), "A");
+
+    let empty_fold = r#"
+        (fold [] i
+            (seq
+                (call "A" ("" "") [i] $acc)
+                (next i)
+            )
+        )"#;
+
+    let result = checked_call_vm!(vm, "", empty_fold, "", "");
+
+    let actual_trace = trace_from_result(&result);
+
+    assert!(actual_trace.is_empty());
+}
+
+#[test]
+fn empty_literal_array_fold() {
     let mut vm = create_avm(echo_call_service(), "A");
     let mut set_variable_vm = create_avm(set_variable_call_service(json!([])), "set_variable");
 
