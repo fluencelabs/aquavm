@@ -163,7 +163,7 @@ fn inner_fold_with_same_iterator() {
 }
 
 #[test]
-fn empty_literal_array_fold() {
+fn empty_iterable_fold() {
     let mut vm = create_avm(echo_call_service(), "A");
     let mut set_variable_vm = create_avm(set_variable_call_service(json!([])), "set_variable");
 
@@ -189,7 +189,7 @@ fn empty_literal_array_fold() {
 }
 
 #[test]
-fn empty_iterable_fold() {
+fn empty_literal_array_fold() {
     let mut vm = create_avm(echo_call_service(), "A");
 
     let empty_fold = r#"
