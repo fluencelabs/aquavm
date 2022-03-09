@@ -16,9 +16,6 @@
 
 use air_test_utils::prelude::*;
 
-use fstrings::f;
-use fstrings::format_args_f;
-
 #[test]
 fn ap_with_scalars() {
     let vm_1_peer_id = "vm_1_peer_id";
@@ -28,18 +25,15 @@ fn ap_with_scalars() {
     let vm_2_peer_id = "vm_2_peer_id";
     let mut vm_2 = create_avm(echo_call_service(), vm_2_peer_id);
 
-    let script = format!(
-        r#"
+    let script = f!(r#"
         (seq
             (seq
-                (call "{}" ("" "") ["scalar_1_result"] scalar_1)
+                (call "{vm_1_peer_id}" ("" "") ["scalar_1_result"] scalar_1)
                 (ap scalar_1.$.field! scalar_2)
             )
-            (call "{}" ("" "") [scalar_2])
+            (call "{vm_2_peer_id}" ("" "") [scalar_2])
         )
-        "#,
-        vm_1_peer_id, vm_2_peer_id
-    );
+        "#);
 
     let result = checked_call_vm!(vm_1, "", &script, "", "");
     let result = checked_call_vm!(vm_2, "", script, "", result.data);
@@ -59,15 +53,12 @@ fn ap_with_string_literal() {
     let vm_1_peer_id = "vm_1_peer_id";
     let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
 
-    let script = format!(
-        r#"
+    let script = f!(r#"
         (seq
             (ap "some_string" $stream)
-            (call "{}" ("" "") [$stream])
+            (call "{vm_1_peer_id}" ("" "") [$stream])
         )
-        "#,
-        vm_1_peer_id
-    );
+        "#);
 
     let result = checked_call_vm!(vm_1, "", script, "", "");
 
@@ -86,15 +77,12 @@ fn ap_with_bool_literal() {
     let vm_1_peer_id = "vm_1_peer_id";
     let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
 
-    let script = format!(
-        r#"
+    let script = f!(r#"
         (seq
             (ap true $stream)
-            (call "{}" ("" "") [$stream])
+            (call "{vm_1_peer_id}" ("" "") [$stream])
         )
-        "#,
-        vm_1_peer_id
-    );
+        "#);
 
     let result = checked_call_vm!(vm_1, "", script, "", "");
 
@@ -110,15 +98,12 @@ fn ap_with_number_literal() {
     let vm_1_peer_id = "vm_1_peer_id";
     let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
 
-    let script = format!(
-        r#"
+    let script = f!(r#"
         (seq
             (ap 100 $stream)
-            (call "{}" ("" "") [$stream])
+            (call "{vm_1_peer_id}" ("" "") [$stream])
         )
-        "#,
-        vm_1_peer_id
-    );
+        "#);
 
     let result = checked_call_vm!(vm_1, "", script, "", "");
 
@@ -134,15 +119,12 @@ fn ap_with_last_error() {
     let vm_1_peer_id = "vm_1_peer_id";
     let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
 
-    let script = format!(
-        r#"
+    let script = f!(r#"
         (seq
             (ap %last_error%  $stream)
-            (call "{}" ("" "") [$stream])
+            (call "{vm_1_peer_id}" ("" "") [$stream])
         )
-        "#,
-        vm_1_peer_id
-    );
+        "#);
 
     let result = checked_call_vm!(vm_1, "", script, "", "");
 

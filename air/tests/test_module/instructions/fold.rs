@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-use air::{PreparationError, ToErrorCode};
+use air::PreparationError;
+use air::ToErrorCode;
 use air_test_utils::prelude::*;
 
 #[test]

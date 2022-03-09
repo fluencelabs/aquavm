@@ -17,9 +17,6 @@
 use air::UncatchableError;
 use air_test_utils::prelude::*;
 
-use fstrings::f;
-use fstrings::format_args_f;
-
 // Check that %init_peer_id% alias works correctly (by comparing result with it and explicit peer id).
 // Additionally, check that empty string for data does the same as empty call path.
 #[test]
@@ -44,12 +41,9 @@ fn current_peer_id_call() {
     assert_eq!(actual_trace, expected_trace);
     assert!(result.next_peer_pks.is_empty());
 
-    let script = format!(
-        r#"
-               (call "{}" ("{}" "{}") [] result_name)
-            "#,
-        vm_peer_id, service_id, function_name
-    );
+    let script = f!(r#"
+               (call "{vm_peer_id}" ("{service_id}" "{function_name}") [] result_name)
+            "#);
 
     let result = checked_call_vm!(vm, "asd", script.clone(), "", "");
 
@@ -65,10 +59,7 @@ fn remote_peer_id_call() {
     let mut vm = create_avm(echo_call_service(), &some_local_peer_id);
 
     let remote_peer_id = String::from("some_remote_peer_id");
-    let script = format!(
-        r#"(call "{}" ("local_service_id" "local_fn_name") ["arg"] result_name)"#,
-        remote_peer_id
-    );
+    let script = f!(r#"(call "{remote_peer_id}" ("local_service_id" "local_fn_name") ["arg"] result_name)"#);
 
     let result = checked_call_vm!(vm, "asd", script, "", "");
 
@@ -134,15 +125,12 @@ fn string_parameters() {
 
     let service_id = "some_service_id";
     let function_name = "local_fn_name";
-    let script = format!(
-        r#"
+    let script = f!(r#"
             (seq
-                (call "{0}" ("{1}" "{2}") [] arg3)
-                (call "{3}" ("{1}" "{2}") ["arg1" "arg2" arg3] result)
+                (call "{set_variable_vm_peer_id}" ("{service_id}" "{function_name}") [] arg3)
+                (call "{vm_peer_id}" ("{service_id}" "{function_name}") ["arg1" "arg2" arg3] result)
             )
-        "#,
-        set_variable_vm_peer_id, service_id, function_name, vm_peer_id
-    );
+        "#);
 
     let result = checked_call_vm!(set_variable_vm, "asd", &script, "", "");
     let result = checked_call_vm!(vm, "asd", script, "", result.data);

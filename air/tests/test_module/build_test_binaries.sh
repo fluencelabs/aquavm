@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-for dir in ./security_tetraplets/*; do
+for dir in ./features/tetraplets/security_tetraplets/*; do
     # skip non-directory entries
     [ -d "$dir" ] || continue
 

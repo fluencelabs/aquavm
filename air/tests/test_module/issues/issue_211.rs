@@ -16,9 +16,6 @@
 
 use air_test_utils::prelude::*;
 
-use fstrings::f;
-use fstrings::format_args_f;
-
 #[test]
 // test for github.com/fluencelabs/aquavm/issues/211
 // On the versions < 0.20.1 it just crashes

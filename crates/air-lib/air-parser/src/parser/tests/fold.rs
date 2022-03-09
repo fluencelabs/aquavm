@@ -20,7 +20,6 @@ use crate::ast::*;
 use crate::parser::ParserError;
 
 use air_lambda_ast::ValueAccessor;
-use fstrings::f;
 use lalrpop_util::ParseError;
 
 #[test]

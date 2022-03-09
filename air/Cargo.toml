@@ -34,7 +34,6 @@ concat-idents = "1.1.3"
 maplit = "1.0.2"
 log = "0.4.11"
 thiserror = "1.0.23"
-fstrings = "0.2.3"
 strum = "0.21"
 strum_macros = "0.21"
 

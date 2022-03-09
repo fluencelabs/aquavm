@@ -30,7 +30,6 @@ dependencies = [
  "csv",
  "env_logger",
  "fluence-app-service",
- "fstrings",
  "log",
  "maplit",
  "marine-rs-sdk",
@@ -139,6 +138,7 @@ dependencies = [
  "air",
  "air-interpreter-interface",
  "avm-server",
+ "fstrings",
  "marine-rs-sdk",
  "serde_json",
 ]

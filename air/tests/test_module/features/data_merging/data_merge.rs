@@ -18,7 +18,7 @@ use air_test_utils::prelude::*;
 use std::collections::HashMap;
 
 #[test]
-fn data_merge() {
+fn merge_streams_in_two_fold() {
     use executed_state::*;
 
     let set_variable_id = "set_variable";
@@ -138,7 +138,7 @@ fn data_merge() {
 }
 
 #[test]
-fn acc_merge() {
+fn stream_merge() {
     let neighborhood_call_service: CallServiceClosure = Box::new(|params| -> CallServiceResult {
         let args_count = (params.function_name.as_bytes()[0] - b'0') as usize;
         let args: Vec<Vec<JValue>> = serde_json::from_value(JValue::Array(params.arguments)).expect("valid json");
@@ -150,8 +150,7 @@ fn acc_merge() {
     let mut vm1 = create_avm(set_variable_call_service(json!("peer_id")), "A");
     let mut vm2 = create_avm(neighborhood_call_service, "B");
 
-    let script = String::from(
-        r#"
+    let script = r#"
         (seq 
             (call "A" ("add_provider" "") [] $void)
             (seq 
@@ -168,10 +167,9 @@ fn acc_merge() {
                 )
             )
         )
-        "#,
-    );
+        "#;
 
-    let result = checked_call_vm!(vm1, "asd", script.clone(), "", "");
+    let result = checked_call_vm!(vm1, "asd", script, "", "");
     checked_call_vm!(vm2, "asd", script, "", result.data);
 }
 

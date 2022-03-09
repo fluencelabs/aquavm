@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Fluence Labs Limited
+ * Copyright 2021 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,10 +33,9 @@ fn ap_with_fold() {
     let local_vm_peer_id = "local_peer_id";
     let mut local_vm = create_avm(unit_call_service(), local_vm_peer_id);
 
-    let script = format!(
-        r#"
+    let script = f!(r#"
         (seq
-            (call "{0}" ("" "") [] permutations)
+            (call "{set_variable_id}" ("" "") [] permutations)
             (seq
                 (seq
                     (fold permutations pair
@@ -55,14 +54,12 @@ fn ap_with_fold() {
                     )
                 )
                 (seq
-                    (call "{1}" ("op" "noop") [])
-                    (call "{1}" ("return" "") [$inner])
+                    (call "{local_vm_peer_id}" ("op" "noop") [])
+                    (call "{local_vm_peer_id}" ("return" "") [$inner])
                 )
             )
         )
-        "#,
-        set_variable_id, local_vm_peer_id,
-    );
+        "#);
 
     let result = checked_call_vm!(set_variable_vm, "", &script, "", "");
     assert_eq!(result.next_peer_pks, vec![local_vm_peer_id.to_string()]);

@@ -34,30 +34,27 @@ fn new_with_global_streams_seq() {
         set_variable_peer_id,
     );
 
-    let script = format!(
-        r#"
+    let script = f!(r#"
             (seq
                 (seq
-                    (call "{0}" ("" "") ["1"] $stream)
-                    (call "{0}" ("" "") ["2"] $stream)
+                    (call "{set_variable_peer_id}" ("" "") ["1"] $stream)
+                    (call "{set_variable_peer_id}" ("" "") ["2"] $stream)
                 )
                 (fold $stream i
                     (seq
                         (new $stream
                             (seq
                                 (seq
-                                    (call "{1}" ("" "") [i] $stream)
+                                    (call "{local_vm_peer_id_1}" ("" "") [i] $stream)
                                     (next i)
                                 )
-                                (call "{1}" ("" "") [$stream])
+                                (call "{local_vm_peer_id_1}" ("" "") [$stream])
                             )
                         )
-                        (call "{2}" ("" "") [$stream])
+                        (call "{local_vm_peer_id_2}" ("" "") [$stream])
                     )
                 )
-            )"#,
-        set_variable_peer_id, local_vm_peer_id_1, local_vm_peer_id_2
-    );
+            )"#);
 
     let result = checked_call_vm!(set_variable_vm, "", &script, "", "");
     let vm_1_result = checked_call_vm!(local_vm_1, "", &script, "", result.data);
@@ -98,18 +95,15 @@ fn several_restrictions() {
     let vm_peer_id = "vm_peer_id";
     let mut vm = create_avm(echo_call_service(), vm_peer_id);
 
-    let script = format!(
-        r#"
+    let script = f!(r#"
             (new $stream
                 (seq
                     (new $stream
-                        (call "{0}" ("" "") ["test"] $stream)
+                        (call "{vm_peer_id}" ("" "") ["test"] $stream)
                     )
-                    (call "{0}" ("" "") [$stream])
+                    (call "{vm_peer_id}" ("" "") [$stream])
                 )
-            )"#,
-        vm_peer_id
-    );
+            )"#);
 
     let result = checked_call_vm!(vm, "", script, "", "");
 
@@ -126,8 +120,7 @@ fn check_influence_to_not_restricted() {
     let vm_peer_id = "vm_peer_id";
     let mut vm = create_avm(echo_call_service(), vm_peer_id);
 
-    let script = format!(
-        r#"
+    let script = f!(r#"
     (seq
         (new $a
             (seq
@@ -138,23 +131,21 @@ fn check_influence_to_not_restricted() {
                     )
                     (ap "more" $a)
                 )
-                (call "{0}" ("op" "identity") [$a] a-fix)
+                (call "{vm_peer_id}" ("op" "identity") [$a] a-fix)
             )
         )
         (seq
             (seq
-                (call "{0}" ("callbackSrv" "response") [$a0]) ;; should be non-empty
-                (call "{0}" ("callbackSrv" "response") [$a1]) ;; should be non-empty
+                (call "{vm_peer_id}" ("callbackSrv" "response") [$a0]) ;; should be non-empty
+                (call "{vm_peer_id}" ("callbackSrv" "response") [$a1]) ;; should be non-empty
             )
             (seq
-                (call "{0}" ("callbackSrv" "response") [$a])  ;; should be empty
-                (call "{0}" ("callbackSrv" "response") [a-fix])  ;; should be empty
+                (call "{vm_peer_id}" ("callbackSrv" "response") [$a])  ;; should be empty
+                (call "{vm_peer_id}" ("callbackSrv" "response") [a-fix])  ;; should be empty
             )
         )
     )
-    "#,
-        vm_peer_id
-    );
+    "#);
 
     let result = checked_call_vm!(vm, "", script, "", "");
 
@@ -180,26 +171,22 @@ fn new_in_fold_with_ap() {
     let mut set_variable_vm = create_avm(set_variable_call_service(json!([1, 2, 3, 4, 5])), set_variable_peer_id);
     let mut vm = create_avm(echo_call_service(), vm_peer_id);
 
-    let script = format!(
-        r#"
+    let script = f!(r#"
         (seq
-            (call "{0}" ("" "") [] iterable)
+            (call "{set_variable_peer_id}" ("" "") [] iterable)
             (fold iterable x
                 (seq
                     (new $s1
                         (seq
                             (ap "none" $s1)
-                            (call "{1}" ("" "") [$s1] s-fix1) ;; should contains only "none" on each iteration
+                            (call "{vm_peer_id}" ("" "") [$s1] s-fix1) ;; should contains only "none" on each iteration
                         )
                     )
                     (next x)
                 )
             )
         )
-
-            "#,
-        set_variable_peer_id, vm_peer_id
-    );
+            "#);
 
     let result = checked_call_vm!(set_variable_vm, "", &script, "", "");
     let result = checked_call_vm!(vm, "", script, "", result.data);
@@ -238,24 +225,21 @@ fn new_with_errors() {
     let local_peer_id = "local_peer_id";
     let mut vm = create_avm(echo_call_service(), local_peer_id);
 
-    let script = format!(
-        r#"
+    let script = f!(r#"
             (seq
-                (call "{0}" ("" "") [1] $global_stream) ;; this stream should precense in a data
+                (call "{local_peer_id}" ("" "") [1] $global_stream) ;; this stream should precense in a data
                 (new $restricted_stream_1
                     (seq
                         (new $restricted_stream_2
                             (seq
-                                (call "{0}" ("" "") [2] $restricted_stream_2) ;; should have generation 1 in a data
-                                (call "{1}" ("service_id_1" "local_fn_name") [] result)
+                                (call "{local_peer_id}" ("" "") [2] $restricted_stream_2) ;; should have generation 1 in a data
+                                (call "{faillible_peer_id}" ("service_id_1" "local_fn_name") [] result)
                             )
                         )
-                        (call "{0}" ("" "") [2] restricted_stream_1) ;; should have generation 0 in a data
+                        (call "{local_peer_id}" ("" "") [2] restricted_stream_1) ;; should have generation 0 in a data
                     )
                 )
-            )"#,
-        local_peer_id, faillible_peer_id
-    );
+            )"#);
 
     let result = checked_call_vm!(vm, "", &script, "", "");
     let result = call_vm!(faillible_vm, "", script, "", result.data);

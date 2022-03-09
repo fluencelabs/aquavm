@@ -21,9 +21,6 @@ use air::LastErrorObjectError;
 use air::SecurityTetraplet;
 use air_test_utils::prelude::*;
 
-use fstrings::f;
-use fstrings::format_args_f;
-
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -67,8 +64,8 @@ fn last_error_tetraplets() {
         set_variable_peer_id, fallible_peer_id, local_peer_id
     );
 
-    let result = checked_call_vm!(set_variable_vm, "asd", script.clone(), "", "");
-    let result = checked_call_vm!(fallible_vm, "asd", script.clone(), "", result.data);
+    let result = checked_call_vm!(set_variable_vm, "asd", &script, "", "");
+    let result = checked_call_vm!(fallible_vm, "asd", &script, "", result.data);
     let _ = checked_call_vm!(local_vm, "asd", script, "", result.data);
 
     let actual_value = (*args.borrow()).as_ref().unwrap().clone();
@@ -104,23 +101,20 @@ fn not_clear_last_error_in_match() {
         local_peer_id,
     );
 
-    let script = format!(
-        r#"
+    let script = f!(r#"
         (seq
-            (call "{0}" ("" "") [] relayVariableName)
+            (call "{set_variable_peer_id}" ("" "") [] relayVariableName)
             (xor
                 (match relayVariableName ""
                     (call "unknown_peer" ("" "") [%last_error%])
                 )
                 (seq
-                    (call "{1}" ("" "") [%last_error%])
+                    (call "{local_peer_id}" ("" "") [%last_error%])
                     (null)
                 )
             )
         )
-    "#,
-        set_variable_peer_id, local_peer_id
-    );
+    "#);
 
     let result = checked_call_vm!(set_variable_vm, "asd", &script, "", "");
     let _ = checked_call_vm!(local_vm, "asd", &script, "", result.data);
@@ -143,23 +137,20 @@ fn not_clear_last_error_in_mismatch() {
         local_peer_id,
     );
 
-    let script = format!(
-        r#"
+    let script = f!(r#"
         (seq
-            (call "{0}" ("" "") [] relayVariableName)
+            (call "{set_variable_peer_id}" ("" "") [] relayVariableName)
             (xor
                 (mismatch relayVariableName "result from unit_call_service"
                     (call "unknown_peer" ("" "") [%last_error%])
                 )
                 (seq
                     (null)
-                    (call "{1}" ("" "") [%last_error%])
+                    (call "{local_peer_id}" ("" "") [%last_error%])
                 )
             )
         )
-    "#,
-        set_variable_peer_id, local_peer_id
-    );
+    "#);
 
     let result = checked_call_vm!(set_variable_vm, "asd", &script, "", "");
     let _ = checked_call_vm!(local_vm, "asd", &script, "", result.data);
@@ -182,15 +173,12 @@ fn track_current_peer_id() {
         local_peer_id,
     );
 
-    let script = format!(
-        r#"
+    let script = f!(r#"
         (xor
-            (call "{0}" ("fallible_call_service" "") [""])
-            (call "{1}" ("" "") [%last_error%])
+            (call "{fallible_peer_id}" ("fallible_call_service" "") [""])
+            (call "{local_peer_id}" ("" "") [%last_error%])
         )
-    "#,
-        fallible_peer_id, local_peer_id
-    );
+    "#);
 
     let result = checked_call_vm!(fallible_vm, "asd", &script, "", "");
     let _ = checked_call_vm!(local_vm, "asd", script, "", result.data);
