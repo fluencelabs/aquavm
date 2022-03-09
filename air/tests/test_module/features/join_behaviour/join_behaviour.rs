@@ -97,8 +97,7 @@ fn wait_on_empty_stream_json_path() {
     let local_peer_id = "local_peer_id";
     let mut local_vm = create_avm(echo_call_service(), local_peer_id);
 
-    let join_stream_script = format!(
-        r#"
+    let join_stream_script = f!(r#"
     (seq
         (seq
             (call "{local_peer_id}" ("" "") [[]] nodes)
@@ -110,8 +109,7 @@ fn wait_on_empty_stream_json_path() {
             )
         )
         (call "{local_peer_id}" ("" "") [$ns.$.[0] $ns.$.[1] $ns])
-     )"#
-    );
+     )"#);
 
     let result = checked_call_vm!(local_vm, "", join_stream_script, "", "");
     let actual_trace = trace_from_result(&result);
