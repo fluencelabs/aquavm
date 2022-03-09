@@ -272,14 +272,12 @@ fn tetraplet_with_wasm_modules() {
     });
 
     let local_peer_id = "local_peer_id";
-    let script = f!(
-        r#"
+    let script = f!(r#"
         (seq
             (call "{local_peer_id}" ("auth" "is_authorized") [] auth_result)
             (call "{local_peer_id}" ("log_storage" "delete") [auth_result.$.is_authorized "1"])
         )
-    "#
-    );
+    "#);
 
     let mut vm = create_avm(host_func, local_peer_id);
 
