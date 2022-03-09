@@ -18,7 +18,7 @@ use air_test_utils::prelude::*;
 use std::collections::HashMap;
 
 #[test]
-fn data_merge__() {
+fn data_merge() {
     use executed_state::*;
 
     let set_variable_id = "set_variable";
