@@ -9,7 +9,7 @@ name = "auth_module"
 path = "src/main.rs"
 
 [dependencies]
-air = { path = "../../../../../../air" }
+air = { path = "../../../../../../../air" }
 marine-rs-sdk = "0.6.15"
 
 [workspace]
