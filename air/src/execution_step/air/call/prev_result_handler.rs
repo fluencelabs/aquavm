@@ -25,6 +25,9 @@ use air_interpreter_interface::CallServiceResult;
 use air_parser::ast::CallOutputValue;
 use air_trace_handler::TraceHandler;
 
+use fstrings::f;
+use fstrings::format_args_f;
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) struct StateDescriptor {
     should_execute: bool,
