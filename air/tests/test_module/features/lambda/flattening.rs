@@ -145,14 +145,13 @@ fn flattening_empty_values() {
     let local_peer_id = "local_peer_id";
     let mut local_vm = create_avm(create_check_service_closure(closure_call_args.clone()), local_peer_id);
 
-    let script = format!(
+    let script = f!(
         r#"
         (seq
-            (call "{0}" ("" "") [] $stream)
-            (call "{1}" ("" "") [$stream.$.[1]!]) ; here $stream.$.[1] returns an empty array
+            (call "{set_variable_peer_id}" ("" "") [] $stream)
+            (call "{local_peer_id}" ("" "") [$stream.$.[1]!]) ; here $stream.$.[1] returns an empty array
         )
-        "#,
-        set_variable_peer_id, local_peer_id
+        "#
     );
 
     let result = checked_call_vm!(set_variable_vm, "asd", script.clone(), "", "");
@@ -176,15 +175,15 @@ fn test_handling_non_flattening_values() {
     let local_peer_id = "local_peer_id";
     let mut local_vm = create_avm(create_check_service_closure(closure_call_args.clone()), local_peer_id);
 
-    let script = format!(
+    let script = f!(
         r#"
         (seq
             (seq
                 (seq
-                    (call "{0}" ("" "") [] $stream)
-                    (call "{0}" ("" "") [] $stream)
+                    (call "{set_variable_peer_id}" ("" "") [] $stream)
+                    (call "{set_variable_peer_id}" ("" "") [] $stream)
                 )
-                (call "{0}" ("" "") [] $stream)
+                (call "{set_variable_peer_id}" ("" "") [] $stream)
             )
             (fold $stream.$.[0,1,2]! v
                 (seq
@@ -193,8 +192,7 @@ fn test_handling_non_flattening_values() {
                 )
             )
         )
-        "#,
-        set_variable_peer_id
+        "#
     );
 
     let result = checked_call_vm!(set_variable_vm, "asd", &script, "", "");

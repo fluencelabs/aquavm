@@ -203,7 +203,7 @@ fn fold_merge() {
     let mut local_vms = Vec::with_capacity(7);
     let mut local_vms_results = Vec::with_capacity(7);
     for vm_id in 0..7 {
-        let peer_id = format!("peer_{}", vm_id);
+        let peer_id = f!("peer_{vm_id}");
         let mut vm = create_avm(echo_call_service(), peer_id);
         let result = checked_call_vm!(
             vm,

@@ -396,16 +396,15 @@ fn parse_last_error() {
 #[test]
 fn seq_par_call() {
     let peer_id = "some_peer_id";
-    let source_code = format!(
+    let source_code = f!(
         r#"
         (seq
             (par
-                (call "{0}" ("local_service_id" "local_fn_name") [] result_1)
-                (call "{0}" ("service_id" "fn_name") [] g)
+                (call "{peer_id}" ("local_service_id" "local_fn_name") [] result_1)
+                (call "{peer_id}" ("service_id" "fn_name") [] g)
             )
-            (call "{0}" ("local_service_id" "local_fn_name") [] result_2)
-        )"#,
-        peer_id,
+            (call "{peer_id}" ("local_service_id" "local_fn_name") [] result_2)
+        )"#
     );
 
     let instruction = parse(&source_code);

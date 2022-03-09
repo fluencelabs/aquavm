@@ -26,11 +26,10 @@ fn current_peer_id_call() {
 
     let service_id = "local_service_id";
     let function_name = "local_fn_name";
-    let script = format!(
+    let script = f!(
         r#"
-               (call %init_peer_id% ("{}" "{}") [] result_name)
-            "#,
-        service_id, function_name
+               (call %init_peer_id% ("{service_id}" "{function_name}") [] result_name)
+            "#
     );
 
     let result = checked_call_vm!(vm, vm_peer_id, script, "", "");
