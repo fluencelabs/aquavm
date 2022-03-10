@@ -17,9 +17,6 @@
 use air::CatchableError;
 use air_test_utils::prelude::*;
 
-use fstrings::f;
-use fstrings::format_args_f;
-
 #[test]
 fn fail_with_last_error() {
     let local_peer_id = "local_peer_id";
@@ -50,13 +47,11 @@ fn fail_with_literals() {
     let local_peer_id = "local_peer_id";
     let mut vm = create_avm(echo_call_service(), local_peer_id);
 
-    let script = format!(
-        r#"
+    let script = r#"
             (xor
                 (fail 1337 "error message")
                 (fail %last_error%)
-            )"#,
-    );
+            )"#;
 
     let init_peer_id = "init_peer_id";
     let result = call_vm!(vm, init_peer_id, script, "", "");

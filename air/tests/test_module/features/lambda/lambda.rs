@@ -18,9 +18,6 @@ use air::CatchableError;
 use air::LambdaError;
 use air_test_utils::prelude::*;
 
-use fstrings::f;
-use fstrings::format_args_f;
-
 #[test]
 fn lambda_not_allowed_for_non_objects_and_arrays() {
     let set_variable_peer_id = "set_variable";

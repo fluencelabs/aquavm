@@ -17,23 +17,17 @@
 use air::UncatchableError;
 use air_test_utils::prelude::*;
 
-use fstrings::f;
-use fstrings::format_args_f;
-
 #[test]
 fn xor() {
     let local_peer_id = "local_peer_id";
     let fallible_service_id = "service_id_1";
     let mut vm = create_avm(fallible_call_service(fallible_service_id), local_peer_id);
 
-    let script = format!(
-        r#"
+    let script = f!(r#"
             (xor
-                (call "{0}" ("service_id_1" "local_fn_name") [] result_1)
-                (call "{0}" ("service_id_2" "local_fn_name") [] result_2)
-            )"#,
-        local_peer_id,
-    );
+                (call "{local_peer_id}" ("service_id_1" "local_fn_name") [] result_1)
+                (call "{local_peer_id}" ("service_id_2" "local_fn_name") [] result_2)
+            )"#);
 
     let result = checked_call_vm!(vm, "asd", script, "", "");
 
@@ -47,14 +41,11 @@ fn xor() {
     );
     assert_eq!(actual_trace[1], expected_call_result);
 
-    let script = format!(
-        r#"
+    let script = f!(r#"
             (xor
-                (call "{0}" ("service_id_2" "local_fn_name") [] result_1)
-                (call "{0}" ("service_id_1" "local_fn_name") [] result_2)
-            )"#,
-        local_peer_id
-    );
+                (call "{local_peer_id}" ("service_id_2" "local_fn_name") [] result_1)
+                (call "{local_peer_id}" ("service_id_1" "local_fn_name") [] result_2)
+            )"#);
 
     let result = checked_call_vm!(vm, "asd", script, "", "");
 
@@ -68,17 +59,14 @@ fn xor_var_not_found() {
     let local_peer_id = "local_peer_id";
     let mut vm = create_avm(echo_call_service(), local_peer_id);
 
-    let script = format!(
-        r#"
+    let script = f!(r#"
             (xor
                 (par
                     (call "unknown_peer" ("service_id_1" "local_fn_name") [] lazy_defined_variable)
-                    (call "{0}" ("service_id_1" "local_fn_name") [lazy_defined_variable] result)
+                    (call "{local_peer_id}" ("service_id_1" "local_fn_name") [lazy_defined_variable] result)
                 )
-                (call "{0}" ("service_id_2" "local_fn_name") ["expected"] result)
-            )"#,
-        local_peer_id,
-    );
+                (call "{local_peer_id}" ("service_id_2" "local_fn_name") ["expected"] result)
+            )"#);
 
     let result = checked_call_vm!(vm, "asd", script, "", "");
 
@@ -119,26 +107,23 @@ fn xor_par() {
     let local_peer_id = "local_peer_id";
     let mut vm = create_avm(fallible_call_service(fallible_service_id.clone()), local_peer_id);
 
-    let script = format!(
-        r#"
+    let script = f!(r#"
             (xor
                 (par
                     (par
-                        (call "{0}" ("service_id_1" "local_fn_name") [] result_1)
-                        (call "{0}" ("service_id_1" "local_fn_name") [] result_2)
+                        (call "{local_peer_id}" ("service_id_1" "local_fn_name") [] result_1)
+                        (call "{local_peer_id}" ("service_id_1" "local_fn_name") [] result_2)
                     )
                     (par
-                        (call "{0}" ("service_id_1" "local_fn_name") [] result_3)
-                        (call "{0}" ("service_id_1" "local_fn_name") [] result_4)
+                        (call "{local_peer_id}" ("service_id_1" "local_fn_name") [] result_3)
+                        (call "{local_peer_id}" ("service_id_1" "local_fn_name") [] result_4)
                     )
                 )
                 (seq
-                    (call "{0}" ("service_id_2" "local_fn_name") [] result_4)
-                    (call "{0}" ("service_id_2" "local_fn_name") [] result_5)
+                    (call "{local_peer_id}" ("service_id_2" "local_fn_name") [] result_4)
+                    (call "{local_peer_id}" ("service_id_2" "local_fn_name") [] result_5)
                 )
-            )"#,
-        local_peer_id
-    );
+            )"#);
 
     let result = checked_call_vm!(vm, "asd", &script, "", "");
     let actual_trace = trace_from_result(&result);
@@ -172,14 +157,11 @@ fn last_error_with_xor() {
     let local_peer_id = "local_peer_id";
     let mut vm = create_avm(echo_call_service(), local_peer_id);
 
-    let script = format!(
-        r#"
+    let script = f!(r#"
             (xor
-                (call "{0}" ("service_id_1" "local_fn_name") [] result)
-                (call "{1}" ("service_id_2" "local_fn_name") [%last_error%.$.message] result)
-            )"#,
-        faillible_peer_id, local_peer_id,
-    );
+                (call "{faillible_peer_id}" ("service_id_1" "local_fn_name") [] result)
+                (call "{local_peer_id}" ("service_id_2" "local_fn_name") [%last_error%.$.message] result)
+            )"#);
 
     let result = checked_call_vm!(faillible_vm, "asd", script.clone(), "", "");
     let result = checked_call_vm!(vm, "asd", script, "", result.data);

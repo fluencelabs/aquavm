@@ -22,6 +22,9 @@ use super::Token;
 use air_lambda_parser::LambdaAST;
 use air_lambda_parser::ValueAccessor;
 
+use fstrings::f;
+use fstrings::format_args_f;
+
 fn run_lexer(input: &str) -> Vec<Spanned<Token<'_>, usize, LexerError>> {
     let lexer = AIRLexer::new(input);
     lexer.collect()
@@ -189,7 +192,7 @@ fn string_literal() {
 #[test]
 fn integer_numbers() {
     let test_integer = 123;
-    let number_with_plus_sign = format!("+{}", test_integer);
+    let number_with_plus_sign = f!("+{test_integer}");
 
     lexer_test(
         &number_with_plus_sign,
@@ -200,14 +203,14 @@ fn integer_numbers() {
         ))),
     );
 
-    let number = format!("{}", test_integer);
+    let number = f!("{test_integer}");
 
     lexer_test(
         &number,
         Single(Ok((0, Token::I64(test_integer), number.len()))),
     );
 
-    let number_with_minus_sign = format!("-{}", test_integer);
+    let number_with_minus_sign = f!("-{test_integer}");
 
     lexer_test(
         &number_with_minus_sign,
@@ -222,7 +225,7 @@ fn integer_numbers() {
 #[test]
 fn float_number() {
     let test_float = 123.123;
-    let float_number_with_plus_sign = format!("+{}", test_float);
+    let float_number_with_plus_sign = f!("+{test_float}");
 
     lexer_test(
         &float_number_with_plus_sign,
@@ -233,14 +236,14 @@ fn float_number() {
         ))),
     );
 
-    let float_number = format!("{}", test_float);
+    let float_number = f!("{test_float}");
 
     lexer_test(
         &float_number,
         Single(Ok((0, Token::F64(test_float), float_number.len()))),
     );
 
-    let float_number_with_minus_sign = format!("-{}", test_float);
+    let float_number_with_minus_sign = f!("-{test_float}");
 
     lexer_test(
         &float_number_with_minus_sign,

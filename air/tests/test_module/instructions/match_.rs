@@ -25,22 +25,19 @@ fn match_equal() {
     let local_peer_id = "local_peer_id";
     let mut vm = create_avm(echo_call_service(), local_peer_id);
 
-    let script = format!(
-        r#"
+    let script = f!(r#"
             (seq
                 (seq
-                    (call "{0}" ("" "") ["value_1"] value_1)
-                    (call "{0}" ("" "") ["value_1"] value_2)
+                    (call "{set_variable_peer_id}" ("" "") ["value_1"] value_1)
+                    (call "{set_variable_peer_id}" ("" "") ["value_1"] value_2)
                 )
                 (xor
                     (match value_1 value_2
-                        (call "{1}" ("service_id_2" "local_fn_name") ["result_1"] result_1)
+                        (call "{local_peer_id}" ("service_id_2" "local_fn_name") ["result_1"] result_1)
                     )
-                    (call "{1}" ("service_id_2" "local_fn_name") ["result_2"] result_2)
+                    (call "{local_peer_id}" ("service_id_2" "local_fn_name") ["result_2"] result_2)
                 )
-            )"#,
-        set_variable_peer_id, local_peer_id
-    );
+            )"#);
 
     let result = checked_call_vm!(set_variable_vm, "asd", &script, "", "");
     let result = checked_call_vm!(vm, "asd", script, "", result.data);
@@ -60,22 +57,19 @@ fn match_not_equal() {
     let local_peer_id = "local_peer_id";
     let mut vm = create_avm(echo_call_service(), local_peer_id);
 
-    let script = format!(
-        r#"
+    let script = f!(r#"
             (seq
                 (seq
-                    (call "{0}" ("" "") ["value_1"] value_1)
-                    (call "{0}" ("" "") ["value_2"] value_2)
+                    (call "{set_variable_peer_id}" ("" "") ["value_1"] value_1)
+                    (call "{set_variable_peer_id}" ("" "") ["value_2"] value_2)
                 )
                 (xor
                     (match value_1 value_2
-                        (call "{1}" ("service_id_2" "local_fn_name") ["result_1"] result_1)
+                        (call "{local_peer_id}" ("service_id_2" "local_fn_name") ["result_1"] result_1)
                     )
-                    (call "{1}" ("service_id_2" "local_fn_name") ["result_2"] result_2)
+                    (call "{local_peer_id}" ("service_id_2" "local_fn_name") ["result_2"] result_2)
                 )
-            )"#,
-        set_variable_peer_id, local_peer_id
-    );
+            )"#);
 
     let result = checked_call_vm!(set_variable_vm, "asd", &script, "", "");
     let result = checked_call_vm!(vm, "asd", script, "", result.data);
@@ -95,19 +89,16 @@ fn match_with_string() {
     let local_peer_id = "local_peer_id";
     let mut vm = create_avm(echo_call_service(), local_peer_id);
 
-    let script = format!(
-        r#"
+    let script = f!(r#"
             (seq
-                (call "{0}" ("" "") ["value_1"] value_1)
+                (call "{set_variable_peer_id}" ("" "") ["value_1"] value_1)
                 (xor
                     (match value_1 "value_1"
-                        (call "{1}" ("service_id_2" "local_fn_name") ["result_1"] result_1)
+                        (call "{local_peer_id}" ("service_id_2" "local_fn_name") ["result_1"] result_1)
                     )
-                    (call "{1}" ("service_id_2" "local_fn_name") ["result_2"] result_2)
+                    (call "{local_peer_id}" ("service_id_2" "local_fn_name") ["result_2"] result_2)
                 )
-            )"#,
-        set_variable_peer_id, local_peer_id
-    );
+            )"#);
 
     let result = checked_call_vm!(set_variable_vm, "asd", &script, "", "");
     let result = checked_call_vm!(vm, "asd", script, "", result.data);
@@ -127,19 +118,16 @@ fn match_with_init_peer_id() {
     let local_peer_id = "local_peer_id";
     let mut vm = create_avm(echo_call_service(), local_peer_id);
 
-    let script = format!(
-        r#"
+    let script = f!(r#"
             (seq
-                (call "{0}" ("" "") ["{1}"] value_1)
+                (call "{set_variable_peer_id}" ("" "") ["{local_peer_id}"] value_1)
                 (xor
                     (match value_1 %init_peer_id%
-                        (call "{1}" ("service_id_2" "local_fn_name") ["result_1"] result_1)
+                        (call "{local_peer_id}" ("service_id_2" "local_fn_name") ["result_1"] result_1)
                     )
-                    (call "{1}" ("service_id_2" "local_fn_name") ["result_2"] result_2)
+                    (call "{local_peer_id}" ("service_id_2" "local_fn_name") ["result_2"] result_2)
                 )
-            )"#,
-        set_variable_peer_id, local_peer_id
-    );
+            )"#);
 
     let result = checked_call_vm!(set_variable_vm, local_peer_id, &script, "", "");
     let result = checked_call_vm!(vm, local_peer_id, script, "", result.data);
@@ -177,19 +165,16 @@ fn match_without_xor() {
     let local_peer_id = "local_peer_id";
     let mut vm = create_avm(echo_call_service(), local_peer_id);
 
-    let script = format!(
-        r#"
+    let script = f!(r#"
             (seq
                 (seq
-                    (call "{0}" ("" "") ["value_1"] value_1)
-                    (call "{0}" ("" "") ["value_2"] value_2)
+                    (call "{set_variable_peer_id}" ("" "") ["value_1"] value_1)
+                    (call "{set_variable_peer_id}" ("" "") ["value_2"] value_2)
                 )
                 (match value_1 value_2
-                    (call "{1}" ("service_id_2" "local_fn_name") ["result_1"] result_1)
+                    (call "{local_peer_id}" ("service_id_2" "local_fn_name") ["result_1"] result_1)
                 )
-            )"#,
-        set_variable_peer_id, local_peer_id
-    );
+            )"#);
 
     let result = call_vm!(set_variable_vm, "", &script, "", "");
     let result = call_vm!(vm, "", &script, "", result.data);
@@ -210,26 +195,23 @@ fn match_with_two_xors() {
 
     let local_peer_id_2 = "local_peer_id_2";
 
-    let script = format!(
-        r#"
+    let script = f!(r#"
             (xor
                 (seq
                     (seq
-                        (call "{0}" ("getDataSrv" "condition") [] condition)
-                        (call "{0}" ("getDataSrv" "relay") [] relay)
+                        (call "{local_peer_id}" ("getDataSrv" "condition") [] condition)
+                        (call "{local_peer_id}" ("getDataSrv" "relay") [] relay)
                     )
                     (xor
                         (match condition true
-                            (call "{0}" ("println" "print") ["it is true"])
+                            (call "{local_peer_id}" ("println" "print") ["it is true"])
                         )
-                        (call "{1}" ("println" "print") ["it is false"])
+                        (call "{local_peer_id_2}" ("println" "print") ["it is false"])
                     )
                 )
-                (call "{0}" ("errorHandlingSrv" "error") [%last_error%])
+                (call "{local_peer_id}" ("errorHandlingSrv" "error") [%last_error%])
             )
-            "#,
-        local_peer_id, local_peer_id_2
-    );
+            "#);
 
     let result = checked_call_vm!(vm, "", script, "", "");
 
@@ -251,10 +233,9 @@ fn issue_165() {
     let echo_peer_id = "echo_peer_id";
     let mut echo_peer = create_avm(echo_call_service(), echo_peer_id);
 
-    let script = format!(
-        r#"
+    let script = f!(r#"
         (seq
-            (call "{0}" ("" "") ["set_result"] result)
+            (call "{result_setter_peer_id}" ("" "") ["set_result"] result)
             (seq
                 (xor
                     (match result.$.success! true
@@ -262,12 +243,10 @@ fn issue_165() {
                     )
                     (ap 2 $results)
                 )
-                (call "{1}" ("callbackSrv" "response") [$results.$.[0]!])
+                (call "{echo_peer_id}" ("callbackSrv" "response") [$results.$.[0]!])
             )
         )
-    "#,
-        result_setter_peer_id, echo_peer_id
-    );
+    "#);
 
     let setter_result = checked_call_vm!(result_setter, "", &script, "", "");
     let echo_result = checked_call_vm!(echo_peer, "", &script, "", setter_result.data);

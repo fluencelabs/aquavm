@@ -139,6 +139,7 @@ dependencies = [
  "air",
  "air-interpreter-interface",
  "avm-server",
+ "fstrings",
  "marine-rs-sdk",
  "serde_json",
 ]

@@ -17,9 +17,6 @@
 use air::SecurityTetraplet;
 use air_test_utils::prelude::*;
 
-use fstrings::f;
-use fstrings::format_args_f;
-
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -275,15 +272,12 @@ fn tetraplet_with_wasm_modules() {
     });
 
     let local_peer_id = "local_peer_id";
-    let script = format!(
-        r#"
+    let script = f!(r#"
         (seq
-            (call "{0}" ("auth" "is_authorized") [] auth_result)
-            (call "{0}" ("log_storage" "delete") [auth_result.$.is_authorized "1"])
+            (call "{local_peer_id}" ("auth" "is_authorized") [] auth_result)
+            (call "{local_peer_id}" ("log_storage" "delete") [auth_result.$.is_authorized "1"])
         )
-    "#,
-        local_peer_id,
-    );
+    "#);
 
     let mut vm = create_avm(host_func, local_peer_id);
 

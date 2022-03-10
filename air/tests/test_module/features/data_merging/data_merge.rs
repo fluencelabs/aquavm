@@ -15,23 +15,27 @@
  */
 
 use air_test_utils::prelude::*;
+
 use std::collections::HashMap;
 
 #[test]
-fn data_merge() {
+fn merge_streams_in_two_fold() {
     use executed_state::*;
 
-    let set_variable_id = "set_variable";
-    let vm_1_id = "A";
-    let vm_2_id = "B";
+    let set_variable_peer_id = "set_variable_peer_id";
+    let vm_1_peer_id = "vm_1_peer_id";
+    let vm_2_peer_id = "vm_2_peer_id";
 
-    let mut set_variable = create_avm(set_variable_call_service(json!([vm_1_id, vm_2_id])), set_variable_id);
-    let mut vm1 = create_avm(return_string_call_service(vm_1_id), vm_1_id);
-    let mut vm2 = create_avm(return_string_call_service(vm_2_id), vm_2_id);
+    let mut set_variable = create_avm(
+        set_variable_call_service(json!([vm_1_peer_id, vm_2_peer_id])),
+        set_variable_peer_id,
+    );
+    let mut vm1 = create_avm(return_string_call_service(vm_1_peer_id), vm_1_peer_id);
+    let mut vm2 = create_avm(return_string_call_service(vm_2_peer_id), vm_2_peer_id);
 
-    let script = r#"
+    let script = f!(r#"
         (seq
-            (call "set_variable" ("neighborhood" "") [] neighborhood)
+            (call "{set_variable_peer_id}" ("neighborhood" "") [] neighborhood)
             (seq
                 (seq
                     (fold neighborhood i
@@ -48,70 +52,70 @@ fn data_merge() {
                     )
                 )
                 (seq
-                    (call "A" ("identity" "") [] $void)
-                    (call "B" ("" "") [] none)
+                    (call "{vm_1_peer_id}" ("identity" "") [] $void)
+                    (call "{vm_2_peer_id}" ("" "") [] none)
                 )
             )
         )
-        "#;
+        "#);
 
-    let result_0 = checked_call_vm!(set_variable, "", script, "", "");
-    let result_1 = checked_call_vm!(vm1, "", script, "", result_0.data.clone());
-    let result_2 = checked_call_vm!(vm2, "", script, "", result_0.data);
-    let result_3 = checked_call_vm!(vm1, "", script, result_1.data.clone(), result_2.data.clone());
+    let result_0 = checked_call_vm!(set_variable, "", &script, "", "");
+    let result_1 = checked_call_vm!(vm1, "", &script, "", result_0.data.clone());
+    let result_2 = checked_call_vm!(vm2, "", &script, "", result_0.data);
+    let result_3 = checked_call_vm!(vm1, "", &script, result_1.data.clone(), result_2.data.clone());
     let result_4 = checked_call_vm!(vm2, "", script, result_1.data.clone(), result_2.data.clone());
 
     let actual_trace_1 = trace_from_result(&result_1);
 
     let expected_trace_1 = vec![
-        scalar_string_array(vec!["A", "B"]),
+        scalar_string_array(vec![vm_1_peer_id, vm_2_peer_id]),
         par(1, 2),
-        stream_string(vm_1_id, 0),
+        stream_string(vm_1_peer_id, 0),
         par(1, 0),
-        request_sent_by(set_variable_id),
+        request_sent_by(set_variable_peer_id),
         par(1, 2),
-        stream_string(vm_1_id, 0),
+        stream_string(vm_1_peer_id, 0),
         par(1, 0),
-        request_sent_by(vm_1_id),
-        stream_string(vm_1_id, 1),
-        request_sent_by(vm_1_id),
+        request_sent_by(vm_1_peer_id),
+        stream_string(vm_1_peer_id, 1),
+        request_sent_by(vm_1_peer_id),
     ];
 
     assert_eq!(actual_trace_1, expected_trace_1);
-    assert_eq!(result_1.next_peer_pks, vec![String::from("B")]);
+    assert_eq!(result_1.next_peer_pks, vec![vm_2_peer_id.to_string()]);
 
     let actual_trace_2 = trace_from_result(&result_2);
 
     let expected_trace_2 = vec![
-        scalar_string_array(vec!["A", "B"]),
+        scalar_string_array(vec![vm_1_peer_id, vm_2_peer_id]),
         par(1, 2),
-        request_sent_by(set_variable_id),
+        request_sent_by(set_variable_peer_id),
         par(1, 0),
-        stream_string(vm_2_id, 0),
+        stream_string(vm_2_peer_id, 0),
         par(1, 2),
-        request_sent_by(vm_2_id),
+        request_sent_by(vm_2_peer_id),
         par(1, 0),
-        stream_string(vm_2_id, 0),
-        request_sent_by(vm_2_id),
+        stream_string(vm_2_peer_id, 0),
+        request_sent_by(vm_2_peer_id),
     ];
 
     assert_eq!(actual_trace_2, expected_trace_2);
-    assert_eq!(result_2.next_peer_pks, vec![String::from("A")]);
+    assert_eq!(result_2.next_peer_pks, vec![vm_1_peer_id.to_string()]);
 
     let actual_trace_3 = trace_from_result(&result_3);
 
     let expected_trace_3 = vec![
-        scalar_string_array(vec!["A", "B"]),
+        scalar_string_array(vec![vm_1_peer_id, vm_2_peer_id]),
         par(1, 2),
-        stream_string(vm_1_id, 0),
+        stream_string(vm_1_peer_id, 0),
         par(1, 0),
-        stream_string(vm_2_id, 2),
+        stream_string(vm_2_peer_id, 2),
         par(1, 2),
-        stream_string(vm_1_id, 0),
+        stream_string(vm_1_peer_id, 0),
         par(1, 0),
-        stream_string(vm_2_id, 1),
-        stream_string(vm_1_id, 1),
-        request_sent_by(vm_1_id),
+        stream_string(vm_2_peer_id, 1),
+        stream_string(vm_1_peer_id, 1),
+        request_sent_by(vm_1_peer_id),
     ];
 
     assert_eq!(actual_trace_3, expected_trace_3);
@@ -120,17 +124,17 @@ fn data_merge() {
     let actual_trace_4 = trace_from_result(&result_4);
 
     let expected_trace_4 = vec![
-        scalar_string_array(vec!["A", "B"]),
+        scalar_string_array(vec![vm_1_peer_id, vm_2_peer_id]),
         par(1, 2),
-        stream_string(vm_1_id, 0),
+        stream_string(vm_1_peer_id, 0),
         par(1, 0),
-        stream_string(vm_2_id, 2),
+        stream_string(vm_2_peer_id, 2),
         par(1, 2),
-        stream_string(vm_1_id, 0),
+        stream_string(vm_1_peer_id, 0),
         par(1, 0),
-        stream_string(vm_2_id, 1),
-        stream_string(vm_1_id, 1),
-        scalar_string(vm_2_id),
+        stream_string(vm_2_peer_id, 1),
+        stream_string(vm_1_peer_id, 1),
+        scalar_string(vm_2_peer_id),
     ];
 
     assert_eq!(actual_trace_4, expected_trace_4);
@@ -138,7 +142,7 @@ fn data_merge() {
 }
 
 #[test]
-fn acc_merge() {
+fn stream_merge() {
     let neighborhood_call_service: CallServiceClosure = Box::new(|params| -> CallServiceResult {
         let args_count = (params.function_name.as_bytes()[0] - b'0') as usize;
         let args: Vec<Vec<JValue>> = serde_json::from_value(JValue::Array(params.arguments)).expect("valid json");
@@ -150,8 +154,7 @@ fn acc_merge() {
     let mut vm1 = create_avm(set_variable_call_service(json!("peer_id")), "A");
     let mut vm2 = create_avm(neighborhood_call_service, "B");
 
-    let script = String::from(
-        r#"
+    let script = r#"
         (seq 
             (call "A" ("add_provider" "") [] $void)
             (seq 
@@ -168,10 +171,9 @@ fn acc_merge() {
                 )
             )
         )
-        "#,
-    );
+        "#;
 
-    let result = checked_call_vm!(vm1, "asd", script.clone(), "", "");
+    let result = checked_call_vm!(vm1, "asd", script, "", "");
     checked_call_vm!(vm2, "asd", script, "", result.data);
 }
 
@@ -201,7 +203,7 @@ fn fold_merge() {
     let mut local_vms = Vec::with_capacity(7);
     let mut local_vms_results = Vec::with_capacity(7);
     for vm_id in 0..7 {
-        let peer_id = format!("peer_{}", vm_id);
+        let peer_id = f!("peer_{vm_id}");
         let mut vm = create_avm(echo_call_service(), peer_id);
         let result = checked_call_vm!(
             vm,

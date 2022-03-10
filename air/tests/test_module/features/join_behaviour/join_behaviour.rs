@@ -18,9 +18,6 @@ use air::CatchableError;
 use air::LambdaError;
 use air_test_utils::prelude::*;
 
-use fstrings::f;
-use fstrings::format_args_f;
-
 #[test]
 fn dont_wait_on_json_path() {
     let status = json!({
@@ -44,24 +41,21 @@ fn dont_wait_on_json_path() {
     let local_peer_id = "local_peer_id";
     let mut local_vm = create_avm(unit_call_service(), local_peer_id);
 
-    let script = format!(
-        r#"
+    let script = f!(r#"
         (seq
             (seq
-                (call "{0}" ("" "") ["msg"] msg)
-                (call "{0}" ("" "") ["status"] status)
+                (call "{set_variable_peer_id}" ("" "") ["msg"] msg)
+                (call "{set_variable_peer_id}" ("" "") ["status"] status)
             )
             (seq
-                (call "{1}" ("op" "identity") [])
+                (call "{local_peer_id}" ("op" "identity") [])
                 (seq
-                    (call "{1}" ("history" "add") [msg status.$.is_authenticated!] auth_result)
+                    (call "{local_peer_id}" ("history" "add") [msg status.$.is_authenticated!] auth_result)
                     (call %init_peer_id% ("returnService" "run") [auth_result])
                 )
             )
         )
-    "#,
-        set_variable_peer_id, local_peer_id
-    );
+    "#);
 
     let init_peer_id = "asd";
     let result = checked_call_vm!(set_variable_vm, init_peer_id, &script, "", "");
@@ -75,28 +69,22 @@ fn wait_on_stream_json_path_by_id() {
     let local_peer_id = "local_peer_id";
     let mut local_vm = create_avm(unit_call_service(), local_peer_id);
 
-    let non_join_stream_script = format!(
-        r#"
+    let non_join_stream_script = f!(r#"
     (par
-        (call "{0}" ("" "") [] $status)
-        (call "{0}" ("history" "add") [$status.$[0]!])
-     )"#,
-        local_peer_id
-    );
+        (call "{local_peer_id}" ("" "") [] $status)
+        (call "{local_peer_id}" ("history" "add") [$status.$[0]!])
+     )"#);
 
     let result = checked_call_vm!(local_vm, "", non_join_stream_script, "", "");
     let actual_trace = trace_from_result(&result);
 
     assert_eq!(actual_trace.len(), 3);
 
-    let join_stream_script = format!(
-        r#"
+    let join_stream_script = f!(r#"
     (par
-        (call "{0}" ("" "") [] $status)
-        (call "{0}" ("history" "add") [$status.$[1]!]) ; $status stream here has only one value
-     )"#,
-        local_peer_id
-    );
+        (call "{local_peer_id}" ("" "") [] $status)
+        (call "{local_peer_id}" ("history" "add") [$status.$[1]!]) ; $status stream here has only one value
+     )"#);
 
     let result = checked_call_vm!(local_vm, "", join_stream_script, "", "");
     let actual_trace = trace_from_result(&result);
@@ -109,12 +97,10 @@ fn wait_on_empty_stream_json_path() {
     let local_peer_id = "local_peer_id";
     let mut local_vm = create_avm(echo_call_service(), local_peer_id);
 
-    let join_stream_script = format!(
-        r#"
-
+    let join_stream_script = f!(r#"
     (seq
         (seq
-            (call "{0}" ("" "") [[]] nodes)
+            (call "{local_peer_id}" ("" "") [[]] nodes)
             (fold nodes n
                 (par
                     (call n ("" "") [n] $ns)
@@ -122,10 +108,8 @@ fn wait_on_empty_stream_json_path() {
                 )
             )
         )
-        (call "{0}" ("" "") [$ns.$.[0] $ns.$.[1] $ns])
-     )"#,
-        local_peer_id
-    );
+        (call "{local_peer_id}" ("" "") [$ns.$.[0] $ns.$.[1] $ns])
+     )"#);
 
     let result = checked_call_vm!(local_vm, "", join_stream_script, "", "");
     let actual_trace = trace_from_result(&result);
@@ -159,15 +143,12 @@ fn dont_wait_on_json_path_on_scalars() {
     let object_consumer_peer_id = "object_consumer_peer_id";
     let mut object_consumer = create_avm(unit_call_service(), object_consumer_peer_id);
 
-    let script = format!(
-        r#"
+    let script = f!(r#"
         (seq
-            (call "{0}" ("" "") ["array"] array)
-            (call "{1}" ("" "") [array.$.[5]!] auth_result)
+            (call "{set_variable_peer_id}" ("" "") ["array"] array)
+            (call "{array_consumer_peer_id}" ("" "") [array.$.[5]!] auth_result)
         )
-    "#,
-        set_variable_peer_id, array_consumer_peer_id,
-    );
+    "#);
 
     let init_peer_id = "asd";
     let result = call_vm!(set_variable_vm, init_peer_id, &script, "", "");
@@ -177,15 +158,12 @@ fn dont_wait_on_json_path_on_scalars() {
         CatchableError::LambdaApplierError(LambdaError::ValueNotContainSuchArrayIdx { value: array, idx: 5 });
     assert!(check_error(&array_result, expected_error));
 
-    let script = format!(
-        r#"
+    let script = f!(r#"
         (seq
-            (call "{0}" ("" "") ["object"] object)
-            (call "{1}" ("" "") [object.$.non_exist_path])
+            (call "{set_variable_peer_id}" ("" "") ["object"] object)
+            (call "{object_consumer_peer_id}" ("" "") [object.$.non_exist_path])
         )
-    "#,
-        set_variable_peer_id, object_consumer_peer_id,
-    );
+    "#);
 
     let init_peer_id = "asd";
     let result = call_vm!(set_variable_vm, init_peer_id, &script, "", "");

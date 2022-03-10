@@ -29,33 +29,30 @@ fn issue_137() {
     let node_4_id = "node_4_id";
     let mut node_4 = create_avm(unit_call_service(), node_4_id);
 
-    let script = format!(
-        r#"
+    let script = f!(r#"
         (seq
-            (call "{0}" ("" "") []) ;; initiator
+            (call "{initiator_id}" ("" "") []) ;; initiator
             (par
                 (seq
                     (par
-                        (call "{1}" ("" "") []) ;; node 1
-                        (call "{2}" ("" "") []) ;; node 2
+                        (call "{node_1_id}" ("" "") []) ;; node 1
+                        (call "{node_2_id}" ("" "") []) ;; node 2
                     )
-                    (call "{3}" ("" "") []) ;; node 3
+                    (call "{node_3_id}" ("" "") []) ;; node 3
                 )
                 (par
                     (seq
-                        (call "{1}" ("" "") []) ;; node 1
-                        (call "{4}" ("" "") []) ;; node 4
+                        (call "{node_1_id}" ("" "") []) ;; node 1
+                        (call "{node_4_id}" ("" "") []) ;; node 4
                     )
                     (seq
-                        (call "{2}" ("" "") []) ;; node 2
-                        (call "{4}" ("" "") []) ;; node 4
+                        (call "{node_2_id}" ("" "") []) ;; node 2
+                        (call "{node_4_id}" ("" "") []) ;; node 4
                     )
                 )
             )
         )
-        "#,
-        initiator_id, node_1_id, node_2_id, node_3_id, node_4_id
-    );
+        "#);
 
     let initiator_result = checked_call_vm!(initiator, "", &script, "", "");
     let node_1_result = checked_call_vm!(node_1, "", &script, "", initiator_result.data.clone());

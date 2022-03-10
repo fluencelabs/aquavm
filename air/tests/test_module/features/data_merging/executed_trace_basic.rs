@@ -21,17 +21,14 @@ fn executed_trace_seq_par_call() {
     let local_peer_id = "local_peer_id";
     let mut vm = create_avm(unit_call_service(), local_peer_id);
 
-    let script = format!(
-        r#"
+    let script = f!(r#"
         (seq
             (par
-                (call "{0}" ("local_service_id" "local_fn_name") [] result_1)
+                (call "{local_peer_id}" ("local_service_id" "local_fn_name") [] result_1)
                 (call "remote_peer_id" ("service_id" "fn_name") [] g)
             )
-            (call "{0}" ("local_service_id" "local_fn_name") [] result_2)
-        )"#,
-        local_peer_id
-    );
+            (call "{local_peer_id}" ("local_service_id" "local_fn_name") [] result_2)
+        )"#);
 
     let unit_call_service_result = "result from unit_call_service";
     let initial_trace = vec![
@@ -60,17 +57,14 @@ fn executed_trace_par_par_call() {
     let local_peer_id = "local_peer_id";
     let mut vm = create_avm(unit_call_service(), local_peer_id);
 
-    let script = format!(
-        r#"
+    let script = f!(r#"
         (par
             (par
-                (call "{0}" ("local_service_id" "local_fn_name") [] result_1)
+                (call "{local_peer_id}" ("local_service_id" "local_fn_name") [] result_1)
                 (call "remote_peer_id" ("service_id" "fn_name") [] g)
             )
-            (call "{0}" ("local_service_id" "local_fn_name") [] result_2)
-        )"#,
-        local_peer_id,
-    );
+            (call "{local_peer_id}" ("local_service_id" "local_fn_name") [] result_2)
+        )"#);
 
     let unit_call_service_result = "result from unit_call_service";
     let initial_state = vec![
@@ -118,34 +112,31 @@ fn executed_trace_seq_seq() {
     let mut vm1 = create_avm(unit_call_service(), peer_id_1.clone());
     let mut vm2 = create_avm(unit_call_service(), peer_id_2.clone());
 
-    let script = format!(
-        r#"
+    let script = f!(r#"
         (seq
-            (call "{}" ("identity" "") [] void0)
+            (call "{peer_id_1}" ("identity" "") [] void0)
             (seq
-                (call "{}" ("add_blueprint" "") [] blueprint_id)
-                (call "{}" ("addBlueprint-14d8488e-d10d-474d-96b2-878f6a7d74c8" "") [] void1)
+                (call "{peer_id_1}" ("add_blueprint" "") [] blueprint_id)
+                (call "{peer_id_2}" ("addBlueprint-14d8488e-d10d-474d-96b2-878f6a7d74c8" "") [] void1)
             )
         )
-        "#,
-        peer_id_1, peer_id_1, peer_id_2
-    );
+        "#);
 
-    let result = checked_call_vm!(vm2, "asd", script.clone(), "", "");
+    let result = checked_call_vm!(vm2, "asd", &script, "", "");
     assert_eq!(result.next_peer_pks, vec![peer_id_1.clone()]);
 
-    let result = checked_call_vm!(vm1, "asd", script.clone(), "", result.data);
+    let result = checked_call_vm!(vm1, "asd", &script, "", result.data);
     assert_eq!(result.next_peer_pks, vec![peer_id_2.clone()]);
 
     let result = checked_call_vm!(vm2, "asd", script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
 
-    let call_serivce_result = "result from unit_call_service";
+    let call_service_result = "result from unit_call_service";
     let expected_trace = vec![
-        scalar_string(call_serivce_result),
-        scalar_string(call_serivce_result),
-        scalar_string(call_serivce_result),
+        scalar_string(call_service_result),
+        scalar_string(call_service_result),
+        scalar_string(call_service_result),
     ];
 
     assert_eq!(actual_trace, expected_trace);
@@ -220,8 +211,7 @@ fn executed_trace_par_seq_fold_call() {
     let mut vm2 = create_avm(echo_call_service(), "some_peer_id_2");
     let mut vm3 = create_avm(unit_call_service(), "some_peer_id_3");
 
-    let script = String::from(
-        r#"
+    let script = r#"
         (par
             (seq
                 (call "some_peer_id_1" ("local_service_id" "local_fn_name") [] IterableResultPeer1)
@@ -233,15 +223,14 @@ fn executed_trace_par_seq_fold_call() {
                 )
             )
             (call "some_peer_id_3" ("local_service_id" "local_fn_name") [] result_2)
-        )"#,
-    );
+        )"#;
 
-    let result = checked_call_vm!(vm2, "asd", script.clone(), "", "");
-    let result = checked_call_vm!(vm1, "asd", script.clone(), "", result.data);
+    let result = checked_call_vm!(vm2, "asd", script, "", "");
+    let result = checked_call_vm!(vm1, "asd", script, "", result.data);
     let mut data = result.data;
 
     for _ in 0..100 {
-        let result = checked_call_vm!(vm2, "asd", script.clone(), "", data);
+        let result = checked_call_vm!(vm2, "asd", script, "", data);
         data = result.data;
     }
 
@@ -351,24 +340,21 @@ fn executed_trace_seq_par_seq_seq() {
     let peer_id_2 = "12D3KooWAzJcYitiZrerycVB4Wryrx22CFKdDGx7c4u31PFdfTbR";
     let mut vm1 = create_avm(unit_call_service(), peer_id_1);
     let mut vm2 = create_avm(unit_call_service(), peer_id_2);
-    let script = format!(
-        r#"
+    let script = f!(r#"
         (seq 
             (par 
                 (seq 
-                    (call "{}" ("" "") [] result_1)
-                    (call "{}" ("" "") [] result_2)
+                    (call "{peer_id_1}" ("" "") [] result_1)
+                    (call "{peer_id_2}" ("" "") [] result_2)
                 )
                 (seq 
-                    (call "{}" ("" "") [] result_3)
-                    (call "{}" ("" "") [] result_4)
+                    (call "{peer_id_2}" ("" "") [] result_3)
+                    (call "{peer_id_1}" ("" "") [] result_4)
                 )
             )
-            (call "{}" ("" "") [] result_5)
+            (call "{peer_id_2}" ("" "") [] result_5)
         )
-        "#,
-        peer_id_1, peer_id_2, peer_id_2, peer_id_1, peer_id_2
-    );
+        "#);
 
     let result = checked_call_vm!(vm2, "asd", &script, "", "");
     assert_eq!(result.next_peer_pks, vec![peer_id_1.to_string()]);

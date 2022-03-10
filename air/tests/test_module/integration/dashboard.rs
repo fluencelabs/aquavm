@@ -124,10 +124,10 @@ fn peer_host_function(
 
 #[rustfmt::skip]
 fn create_peer_host_function(peer_id: String, known_peer_ids: Vec<String>) -> CallServiceClosure {
-    let relay_blueprints = (0..=2).map(|id| format!("{}_blueprint_{}", peer_id, id)).collect::<Vec<_>>();
-    let relay_modules = (0..=2).map(|id| format!("{}_module_{}", peer_id, id)).collect::<Vec<_>>();
-    let relay_interfaces = (0..=2).map(|id| format!("{}_interface_{}", peer_id, id)).collect::<Vec<_>>();
-    let relay_ident = format!("{}_ident", peer_id);
+    let relay_blueprints = (0..=2).map(|id| f!("{peer_id}_blueprint_{id}")).collect::<Vec<_>>();
+    let relay_modules = (0..=2).map(|id| f!("{peer_id}_module_{id}")).collect::<Vec<_>>();
+    let relay_interfaces = (0..=2).map(|id| f!("{peer_id}_interface_{id}")).collect::<Vec<_>>();
+    let relay_ident = f!("{peer_id}_ident");
 
     peer_host_function(
         known_peer_ids,

@@ -16,9 +16,6 @@
 
 use air_test_utils::prelude::*;
 
-use fstrings::f;
-use fstrings::format_args_f;
-
 use pretty_assertions::assert_eq;
 
 #[test]

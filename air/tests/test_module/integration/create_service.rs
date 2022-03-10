@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Fluence Labs Limited
+ * Copyright 2022 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,73 +14,7 @@
  * limitations under the License.
  */
 
-use air::PreparationError;
 use air_test_utils::prelude::*;
-
-#[test]
-fn seq_par_call() {
-    let vm_peer_id = "some_peer_id";
-    let mut vm = create_avm(unit_call_service(), vm_peer_id);
-
-    let script = format!(
-        r#"
-        (seq 
-            (par 
-                (call "{0}" ("local_service_id" "local_fn_name") [] result_1)
-                (call "remote_peer_id" ("service_id" "fn_name") [] g)
-            )
-            (call "{0}" ("local_service_id" "local_fn_name") [] result_2)
-        )"#,
-        vm_peer_id
-    );
-
-    let result = checked_call_vm!(vm, "asd", script, "", "");
-    let actual_trace = trace_from_result(&result);
-
-    let unit_call_service_result = "result from unit_call_service";
-    let expected_trace = vec![
-        executed_state::par(1, 1),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::request_sent_by(vm_peer_id),
-        executed_state::scalar_string(unit_call_service_result),
-    ];
-
-    assert_eq!(actual_trace, expected_trace);
-    assert_eq!(result.next_peer_pks, vec![String::from("remote_peer_id")]);
-}
-
-#[test]
-fn par_par_call() {
-    let vm_peer_id = "some_peer_id";
-    let mut vm = create_avm(unit_call_service(), vm_peer_id);
-
-    let script = format!(
-        r#"
-        (par
-            (par
-                (call "{0}" ("local_service_id" "local_fn_name") [] result_1)
-                (call "remote_peer_id" ("service_id" "fn_name") [] g)
-            )
-            (call "{0}" ("local_service_id" "local_fn_name") [] result_2)
-        )"#,
-        vm_peer_id,
-    );
-
-    let result = checked_call_vm!(vm, "asd", script, "", "");
-    let actual_trace = trace_from_result(&result);
-
-    let unit_call_service_result = "result from unit_call_service";
-    let expected_trace = vec![
-        executed_state::par(3, 1),
-        executed_state::par(1, 1),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::request_sent_by(vm_peer_id),
-        executed_state::scalar_string(unit_call_service_result),
-    ];
-
-    assert_eq!(actual_trace, expected_trace);
-    assert_eq!(result.next_peer_pks, vec![String::from("remote_peer_id")]);
-}
 
 #[test]
 fn create_service() {
@@ -131,7 +65,7 @@ fn create_service() {
 
     let script = include_str!("./scripts/create_service.clj");
 
-    let result = checked_call_vm!(set_variables_vm, "init_peer_id", script.clone(), "", "");
+    let result = checked_call_vm!(set_variables_vm, "init_peer_id", script, "", "");
     let result = checked_call_vm!(vm, "init_peer_id", script, "", result.data);
 
     let add_module_response = "add_module response";
@@ -151,18 +85,4 @@ fn create_service() {
 
     assert_eq!(actual_trace, expected_trace);
     assert_eq!(result.next_peer_pks, vec![String::from("remote_peer_id")]);
-}
-
-#[test]
-fn invalid_air() {
-    let vm_peer_id = "some_peer_id";
-    let mut vm = create_avm(unit_call_service(), vm_peer_id);
-
-    let script = r#"(seq )"#;
-
-    let result = call_vm!(vm, "", script, "", "");
-
-    let error_message = air_parser::parse(script).expect_err("air parser should fail on this script");
-    let expected_error = PreparationError::AIRParseError(error_message);
-    assert!(check_error(&result, expected_error));
 }

@@ -21,14 +21,11 @@ fn empty_array() {
     let vm_peer_id = "some_peer_id";
     let mut vm = create_avm(echo_call_service(), vm_peer_id);
 
-    let script = format!(
-        r#"
+    let script = f!(r#"
         (seq 
-           (call "{0}" ("" "") [[]] result)
-           (call "{0}" ("" "") [result])
-        )"#,
-        vm_peer_id
-    );
+           (call "{vm_peer_id}" ("" "") [[]] result)
+           (call "{vm_peer_id}" ("" "") [result])
+        )"#);
 
     let result = checked_call_vm!(vm, "", script, "", "");
     let actual_trace = trace_from_result(&result);

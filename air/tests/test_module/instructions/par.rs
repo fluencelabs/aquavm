@@ -42,14 +42,11 @@ fn par_local_remote() {
     let local_peer_id = "local_peer_id";
     let mut vm = create_avm(unit_call_service(), local_peer_id);
 
-    let script = format!(
-        r#"
+    let script = f!(r#"
             (par
-                (call "{}" ("local_service_id" "local_fn_name") [] result_name)
+                (call "{local_peer_id}" ("local_service_id" "local_fn_name") [] result_name)
                 (call "remote_peer_id_2" ("service_id" "fn_name") [] g)
-            )"#,
-        local_peer_id
-    );
+            )"#);
 
     let result = checked_call_vm!(vm, "", script, "", "");
 
