@@ -53,9 +53,10 @@ fn ap_with_string_literal() {
     let vm_1_peer_id = "vm_1_peer_id";
     let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
 
+    let some_string = "some_string";
     let script = f!(r#"
         (seq
-            (ap "some_string" $stream)
+            (ap "{some_string}" $stream)
             (call "{vm_1_peer_id}" ("" "") [$stream])
         )
         "#);
@@ -65,7 +66,7 @@ fn ap_with_string_literal() {
     let actual_trace = trace_from_result(&result);
     let expected_state = vec![
         executed_state::ap(Some(0)),
-        executed_state::scalar(json!(["some_string"])),
+        executed_state::scalar(json!([some_string])),
     ];
 
     assert_eq!(actual_trace, expected_state);

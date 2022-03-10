@@ -56,12 +56,12 @@ fn recursive_stream_with_early_exit() {
     let actual_trace = trace_from_result(&result);
     let expected_state = vec![
         executed_state::stream_number(1, 0),
-        executed_state::stream_number(1, 0),
-        executed_state::fold(vec![executed_state::subtrace_lore(
-            0,
-            SubTraceDesc::new(3, 1),
-            SubTraceDesc::new(4, 0),
-        )]),
+        executed_state::stream_number(1, 1),
+        executed_state::fold(vec![
+            executed_state::subtrace_lore(0, SubTraceDesc::new(3, 1), SubTraceDesc::new(4, 0)),
+            executed_state::subtrace_lore(1, SubTraceDesc::new(4, 1), SubTraceDesc::new(5, 0)),
+        ]),
+        executed_state::scalar_string("stop"),
         executed_state::scalar_string("stop"),
     ];
 
@@ -122,7 +122,7 @@ fn recursive_stream_many_iterations() {
     let actual_trace = trace_from_result(&result);
     let actual_fold = &actual_trace[2];
     let expected_fold = executed_state::fold(vec![
-        executed_state::subtrace_lore(0, SubTraceDesc::new(3, 2), SubTraceDesc::new(7, 0)),
+        executed_state::subtrace_lore(0, SubTraceDesc::new(3, 2), SubTraceDesc::new(5, 0)),
         executed_state::subtrace_lore(1, SubTraceDesc::new(5, 2), SubTraceDesc::new(7, 0)),
         executed_state::subtrace_lore(4, SubTraceDesc::new(7, 2), SubTraceDesc::new(9, 0)),
         executed_state::subtrace_lore(6, SubTraceDesc::new(9, 2), SubTraceDesc::new(11, 0)),
@@ -370,4 +370,78 @@ fn recursive_stream_inner_fold() {
     };
 
     assert_eq!(actual_fold_lores_count, stop_request_id);
+}
+
+#[test]
+fn recursive_stream_fold_with_n_service_call() {
+    let vm_peer_id = "vm_peer_id_1";
+
+    let request_id = std::cell::Cell::new(0);
+    let stop_request_id = 10;
+    let give_n_results_and_then_stop: CallServiceClosure = Box::new(move |_params| {
+        let uncelled_request_id = request_id.get();
+
+        let result = if uncelled_request_id >= stop_request_id {
+            CallServiceResult::ok(json!("no"))
+        } else {
+            CallServiceResult::ok(json!("yes"))
+        };
+
+        request_id.set(uncelled_request_id + 1);
+        result
+    });
+
+    let mut vm = create_avm(give_n_results_and_then_stop, vm_peer_id);
+
+    let script = f!(r#"
+    (xor
+     (seq
+      (seq
+       (call %init_peer_id% ("getDataSrv" "-relay-") [] -relay-)
+       (new $loop
+        (new $result
+         (seq
+          (seq
+           (ap "yes" $loop)
+           (fold $loop l
+            (seq
+             (seq
+              (xor
+               (match l "yes"
+                (xor
+                 (call %init_peer_id% ("yesno" "get") [] $loop)
+                 (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 1])
+                )
+               )
+               (null)
+              )
+              (ap "success" $result)
+             )
+             (next l)
+            )
+           )
+          )
+          (call %init_peer_id% ("op" "identity") [$result] result-fix)
+         )
+        )
+       )
+      )
+      (xor
+       (call %init_peer_id% ("callbackSrv" "response") [result-fix])
+       (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2])
+      )
+     )
+     (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 3])
+    )
+    "#);
+
+    let result = checked_call_vm!(vm, vm_peer_id, &script, "", "");
+    let actual_trace = trace_from_result(&result);
+    let actual_fold_state = match &actual_trace[2] {
+        ExecutedState::Fold(fold_result) => fold_result,
+        _ => panic!("2nd state should be fold"),
+    };
+    let expected_fold_lores = stop_request_id + 1;
+
+    assert_eq!(actual_fold_state.lore.len(), expected_fold_lores);
 }

@@ -47,7 +47,7 @@ fn lfold() {
     assert_eq!(actual_trace[0], expected_state);
 
     for i in 1..=5 {
-        let expected_state = executed_state::stream_string(format!("{}", i), 0);
+        let expected_state = executed_state::stream_string(format!("{}", i), i as u32 - 1);
         assert_eq!(actual_trace[i], expected_state);
     }
 }
@@ -81,7 +81,7 @@ fn rfold() {
     assert_eq!(actual_trace[0], expected_state);
 
     for i in 1..=5 {
-        let expected_state = executed_state::stream_string(format!("{}", 6 - i), 0);
+        let expected_state = executed_state::stream_string(format!("{}", 6 - i), i as u32 - 1);
         assert_eq!(actual_trace[i], expected_state);
     }
 }
@@ -125,8 +125,9 @@ fn inner_fold() {
 
     for i in 1..=5 {
         for j in 1..=5 {
-            let expected_state = executed_state::stream_string(i.to_string(), 0);
-            assert_eq!(actual_trace[1 + 5 * (i - 1) + j], expected_state);
+            let state_id = 1 + 5 * (i - 1) + j;
+            let expected_state = executed_state::stream_string(i.to_string(), state_id as u32 - 2);
+            assert_eq!(actual_trace[state_id], expected_state);
         }
     }
 }
@@ -288,7 +289,7 @@ fn lambda() {
     assert_eq!(actual_trace[0], expected_state);
 
     for i in 1..=5 {
-        let expected_state = executed_state::stream_string(format!("{}", i), 0);
+        let expected_state = executed_state::stream_string(format!("{}", i), i as u32 - 1);
         assert_eq!(actual_trace[i], expected_state);
     }
 }

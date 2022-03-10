@@ -45,43 +45,11 @@ impl<'i> super::ExecutableInstruction<'i> for Ap<'i> {
         // https://github.com/fluencelabs/aquavm/issues/216
         let result = apply_to_arg(&self.argument, exec_ctx, trace_ctx, should_touch_trace)?;
 
-        let merger_ap_result = if should_touch_trace {
-            let merger_ap_result = trace_to_exec_err!(trace_ctx.meet_ap_start(), self)?;
-            try_match_trace_to_instr(&merger_ap_result, self)?;
-            merger_ap_result
-        } else {
-            MergerApResult::Empty
-        };
-        save_result(&self.result, &merger_ap_result, result, exec_ctx)?;
-
-        if should_touch_trace {
-            // if generations are empty, then this ap instruction operates only with scalars and data
-            // shouldn't be updated
-            let final_ap_result = to_ap_result(&merger_ap_result, self, exec_ctx);
-            trace_ctx.meet_ap_end(final_ap_result);
-        }
+        let merger_ap_result = to_merger_ap_result(should_touch_trace, self, trace_ctx)?;
+        let maybe_generation = update_context(&self.result, &merger_ap_result, result, exec_ctx)?;
+        maybe_update_trace(should_touch_trace, &merger_ap_result, maybe_generation, trace_ctx);
 
         Ok(())
-    }
-}
-
-fn save_result<'ctx>(
-    ap_result_type: &ast::Variable<'ctx>,
-    merger_ap_result: &MergerApResult,
-    result: ValueAggregate,
-    exec_ctx: &mut ExecutionCtx<'ctx>,
-) -> ExecutionResult<()> {
-    use ast::Variable::*;
-
-    match ap_result_type {
-        Scalar(scalar) => exec_ctx.scalars.set_value(scalar.name, result).map(|_| ()),
-        Stream(stream) => {
-            let generation = ap_result_to_generation(merger_ap_result);
-            exec_ctx
-                .streams
-                .add_stream_value(result, generation, stream.name, stream.position)
-                .map(|_| ())
-        }
     }
 }
 
@@ -89,4 +57,56 @@ fn save_result<'ctx>(
 /// a new state in data.
 fn should_touch_trace(ap: &Ap<'_>) -> bool {
     matches!(ap.result, ast::Variable::Stream(_))
+}
+
+fn to_merger_ap_result(
+    should_touch_trace: bool,
+    instr: &Ap<'_>,
+    trace_ctx: &mut TraceHandler,
+) -> ExecutionResult<MergerApResult> {
+    let merger_ap_result = if should_touch_trace {
+        let merger_ap_result = trace_to_exec_err!(trace_ctx.meet_ap_start(), instr)?;
+        try_match_trace_to_instr(&merger_ap_result, instr)?;
+        merger_ap_result
+    } else {
+        MergerApResult::Empty
+    };
+
+    Ok(merger_ap_result)
+}
+
+fn update_context<'ctx>(
+    ap_result_type: &ast::Variable<'ctx>,
+    merger_ap_result: &MergerApResult,
+    result: ValueAggregate,
+    exec_ctx: &mut ExecutionCtx<'ctx>,
+) -> ExecutionResult<Option<u32>> {
+    use ast::Variable::*;
+
+    match ap_result_type {
+        Scalar(scalar) => exec_ctx.scalars.set_value(scalar.name, result).map(|_| None),
+        Stream(stream) => {
+            let generation = ap_result_to_generation(merger_ap_result);
+            exec_ctx
+                .streams
+                .add_stream_value(result, generation, stream.name, stream.position)
+                .map(|generation| Some(generation))
+        }
+    }
+}
+
+fn maybe_update_trace(
+    should_touch_trace: bool,
+    merger_ap_result: &MergerApResult,
+    maybe_generation: Option<u32>,
+    trace_ctx: &mut TraceHandler,
+) {
+    if !should_touch_trace {
+        // if generations are empty, then this ap instruction operates only with scalars and data
+        // shouldn't be updated
+        return;
+    }
+
+    let final_ap_result = to_ap_result(&merger_ap_result, maybe_generation);
+    trace_ctx.meet_ap_end(final_ap_result);
 }

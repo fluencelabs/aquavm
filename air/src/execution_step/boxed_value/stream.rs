@@ -57,17 +57,7 @@ impl Stream {
     }
 
     pub(crate) fn generations_count(&self) -> usize {
-        let generations_count = self.0.len();
-
         // the last generation could be empty due to the logic of from_generations_count ctor
-        if generations_count > 0 && self.0[generations_count - 1].is_empty() {
-            generations_count - 1
-        } else {
-            generations_count
-        }
-    }
-
-    pub(crate) fn non_empty_generations_count(&self) -> usize {
         self.0.iter().filter(|gen| !gen.is_empty()).count()
     }
 
