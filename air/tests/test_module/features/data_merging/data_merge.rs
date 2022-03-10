@@ -76,9 +76,9 @@ fn merge_streams_in_two_fold() {
         par(1, 2),
         stream_string(vm_1_peer_id, 0),
         par(1, 0),
-        request_sent_by(vm_1_id),
-        stream_string(vm_1_id, 1),
-        request_sent_by(vm_1_id),
+        request_sent_by(vm_1_peer_id),
+        stream_string(vm_1_peer_id, 1),
+        request_sent_by(vm_1_peer_id),
     ];
 
     assert_eq!(actual_trace_1, expected_trace_1);
