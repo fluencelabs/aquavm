@@ -32,19 +32,19 @@ jobs:
       - name: Install Rust toolchain with wasm32-unknown-unknown
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly-2021-07-13
+          toolchain: nightly-2022-02-24
           target: wasm32-unknown-unknown
           profile: minimal
           override: true
       - name: Install wasm32-wasi
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly-2021-07-13
+          toolchain: nightly-2022-02-24
           target: wasm32-wasi
           profile: minimal
       - uses: actions-rs/cargo@v1
         with:
-          toolchain: nightly-2021-07-13
+          toolchain: nightly-2022-02-24
           command: update
           args: --aggressive
 
