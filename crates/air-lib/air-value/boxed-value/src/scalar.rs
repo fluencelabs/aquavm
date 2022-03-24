@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Fluence Labs Limited
+ * Copyright 2022 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 
 use super::JValuable;
+use super::ValueAggregate;
 use crate::execution_step::FoldState;
 use crate::execution_step::RcSecurityTetraplet;
 use crate::JValue;
@@ -27,16 +28,9 @@ use std::fmt::Display;
 use std::fmt::Formatter;
 use std::rc::Rc;
 
-#[derive(Debug, Clone)]
-pub struct ValueAggregate {
-    pub result: Rc<dyn BoxedValue>,
-    pub tetraplet: RcSecurityTetraplet,
-    pub trace_pos: usize,
-}
-
-pub(crate) enum ScalarRef<'i> {
+pub enum ScalarRef<'i> {
     Value(&'i ValueAggregate),
-    IterableValue(&'i FoldState<'i>),
+    IterableValue(&'i FoldIterableState<'i>),
 }
 
 impl<'i> ScalarRef<'i> {
@@ -47,16 +41,6 @@ impl<'i> ScalarRef<'i> {
                 let peeked_value = fold_state.iterable.peek().unwrap();
                 Box::new(peeked_value)
             }
-        }
-    }
-}
-
-impl ValueAggregate {
-    pub(crate) fn new(result: Rc<JValue>, tetraplet: RcSecurityTetraplet, trace_pos: usize) -> Self {
-        Self {
-            result,
-            tetraplet,
-            trace_pos,
         }
     }
 }

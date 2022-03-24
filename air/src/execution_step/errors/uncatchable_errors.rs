@@ -30,7 +30,8 @@ use thiserror::Error as ThisError;
 /// checked additionally on the validation step, and presence here for convenience.
 #[derive(ThisError, EnumDiscriminants, Debug)]
 #[strum_discriminants(derive(EnumIter))]
-pub enum UncatchableError<VT> {
+pub enum UncatchableError<VT>
+{
     /// Errors bubbled from a trace handler.
     #[error("on instruction '{instruction}' trace handler encountered an error: {trace_error}")]
     TraceError {

@@ -15,7 +15,7 @@
  */
 
 use crate::execution_step::ExecutableInstruction;
-use crate::farewell_step as farewell;
+use crate::{farewell_step as farewell, ToErrorCode};
 use crate::preparation_step::prepare;
 use crate::preparation_step::PreparationDescriptor;
 
@@ -59,7 +59,7 @@ fn execute_air_impl(
     } = match prepare(&prev_data, &data, air.as_str(), &call_results, params) {
         Ok(descriptor) => descriptor,
         // return the prev data in case of errors
-        Err(error) => return Err(farewell::from_uncatchable_error(prev_data, error)),
+        Err(error) => return Err(farewell::from_uncatchable_error(prev_data, error.to_error_code(), String::new())),
     };
 
     // match here is used instead of map_err, because the compiler can't determine that
@@ -67,8 +67,8 @@ fn execute_air_impl(
     match air.execute(&mut exec_ctx, &mut trace_handler) {
         Ok(_) => farewell::from_success_result(exec_ctx, trace_handler),
         // return new collected trace in case of errors
-        Err(error) if error.is_catchable() => Err(farewell::from_execution_error(exec_ctx, trace_handler, error)),
+        Err(error) if error.is_catchable() => Err(farewell::from_execution_error(exec_ctx, trace_handler, error.to_error_code(), String::new())),
         // return the prev data in case of any trace errors
-        Err(error) => Err(farewell::from_uncatchable_error(prev_data, error)),
+        Err(error) => Err(farewell::from_uncatchable_error(prev_data, error.to_error_code(), String::new())),
     }
 }

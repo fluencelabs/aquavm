@@ -14,4 +14,8 @@ name = "air_execution_info_collector"
 path = "src/lib.rs"
 
 [dependencies]
+air-parser = { path = "../../air-parser" }
+air-value = { path = "../traits" }
+polyplets = { path = "../../polyplets" }
+
 serde_json = "1.0"

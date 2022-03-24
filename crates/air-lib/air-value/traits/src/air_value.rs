@@ -13,6 +13,8 @@ pub trait Value {
     fn as_f64(&self) -> Option<f64>;
 
     fn as_bool(&self) -> Option<bool>;
+
+    fn to_string(&self) -> String;
 }
 
 impl Value for JValue {
@@ -48,5 +50,9 @@ impl Value for JValue {
 
     fn as_bool(&self) -> Option<bool> {
         self.as_bool()
+    }
+
+    fn to_string(&self) -> String {
+        <&JValue as ToString>::to_string(&self)
     }
 }

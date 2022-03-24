@@ -50,6 +50,9 @@ dependencies = [
 name = "air-boxed-value"
 version = "0.1.0"
 dependencies = [
+ "air-parser",
+ "air-value",
+ "polyplets",
  "serde_json",
 ]
 

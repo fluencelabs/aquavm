@@ -24,6 +24,7 @@ use strum_macros::EnumDiscriminants;
 use strum_macros::EnumIter;
 use thiserror::Error as ThisError;
 
+use std::fmt::{Debug, Formatter};
 use std::rc::Rc;
 
 // TODO: add tests for all execution errors

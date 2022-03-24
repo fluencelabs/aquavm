@@ -18,6 +18,7 @@ mod air_value;
 mod lambda_applier;
 mod to_iterable;
 
+use std::fmt::Formatter;
 use erased_serde::private::serde;
 pub use air_value::Value;
 pub use lambda_applier::LambdaApplier;
@@ -46,5 +47,11 @@ impl<'de> serde::Deserialize<'de> for &(dyn BoxedValue + '_) {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error> where D: Deserializer<'de>
     {
         todo!()
+    }
+}
+
+impl std::fmt::Debug for dyn BoxedValue + '_ {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.to_string())
     }
 }

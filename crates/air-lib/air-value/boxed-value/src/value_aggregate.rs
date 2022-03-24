@@ -14,27 +14,33 @@
  * limitations under the License.
  */
 
-mod fold_iterable_state;
-mod iterable;
-mod jvaluable;
-mod scalar;
-mod stream;
-mod value_aggregate;
-mod variable;
-
-pub use iterable::*;
-pub use jvaluable::*;
-pub use scalar::ScalarRef;
-pub use scalar::ValueAggregate;
-pub use stream::Generation;
-pub use stream::Stream;
-pub use stream::StreamIter;
-pub use value_aggregate::ValueAggregate;
-pub use variable::Variable;
-
-pub(crate) use polyplets::SecurityTetraplet;
+use super::RcSecurityTetraplet;
+use air_value::BoxedValue;
 
 use std::rc::Rc;
 
-type RcSecurityTetraplet = Rc<crate::SecurityTetraplet>;
-type RcSecurityTetraplets = Vec<RcSecurityTetraplet>;
+#[derive(Debug, Clone)]
+pub struct ValueAggregate {
+    pub result: Rc<dyn BoxedValue>,
+    pub tetraplet: RcSecurityTetraplet,
+    pub trace_pos: usize,
+}
+
+impl ValueAggregate {
+    pub(crate) fn new(result: Rc<dyn BoxedValue>, tetraplet: RcSecurityTetraplet, trace_pos: usize) -> Self {
+        Self {
+            result,
+            tetraplet,
+            trace_pos,
+        }
+    }
+}
+
+use std::fmt;
+use std::fmt::Formatter;
+
+impl fmt::Debug for ValueAggregate {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        todo!()
+    }
+}

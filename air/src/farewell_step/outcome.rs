@@ -48,15 +48,15 @@ pub(crate) fn from_success_result<VT>(
 /// set ret_code based on the error.
 pub(crate) fn from_uncatchable_error(
     data: impl Into<Vec<u8>>,
-    error: impl ToErrorCode + ToString,
+    error_code: i64,
+    error_message: String,
 ) -> InterpreterOutcome {
-    let ret_code = error.to_error_code();
     let data = data.into();
     let call_requests = serde_json::to_vec(&CallRequests::new()).expect("default serializer shouldn't fail");
 
     InterpreterOutcome {
-        ret_code,
-        error_message: error.to_string(),
+        ret_code: error_code,
+        error_message,
         data,
         next_peer_pks: vec![],
         call_requests,
@@ -68,9 +68,10 @@ pub(crate) fn from_uncatchable_error(
 pub(crate) fn from_execution_error<VT>(
     exec_ctx: ExecutionCtx<'_>,
     trace_handler: TraceHandler<VT>,
-    error: impl ToErrorCode + ToString,
+    error_code: i64,
+    error_message: String,
 ) -> InterpreterOutcome {
-    populate_outcome_from_contexts(exec_ctx, trace_handler, error.to_error_code(), error.to_string())
+    populate_outcome_from_contexts(exec_ctx, trace_handler, error_code, error_message)
 }
 
 fn populate_outcome_from_contexts<VT>(

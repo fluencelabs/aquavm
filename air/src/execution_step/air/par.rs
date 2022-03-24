@@ -31,7 +31,7 @@ use air_trace_handler::SubtreeType;
 
 #[rustfmt::skip]
 impl<'i> ExecutableInstruction<'i> for Par<'i> {
-    fn execute<VT>(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler<VT>) -> ExecutionResult<()> {
+    fn execute<VT: Clone>(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler<VT>) -> ExecutionResult<()> {
         log_instruction!(par, exec_ctx, trace_ctx);
 
         let mut completeness_updater = ParCompletenessUpdater::new();

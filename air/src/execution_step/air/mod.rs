@@ -48,6 +48,7 @@ macro_rules! execute {
     ($self:expr, $instr:expr, $exec_ctx:ident, $trace_ctx:ident) => {{
         match $instr.execute($exec_ctx, $trace_ctx) {
             Err(e) => {
+                /*
                 $exec_ctx.last_error_descriptor.try_to_set_from_error(
                     &e,
                     // TODO: avoid excess copying here
@@ -55,6 +56,8 @@ macro_rules! execute {
                     $exec_ctx.current_peer_id.as_ref(),
                     None,
                 );
+
+                 */
                 Err(e)
             }
             v => v,
@@ -94,6 +97,7 @@ impl<'i> ExecutableInstruction<'i> for Instruction<'i> {
 #[macro_export]
 macro_rules! log_instruction {
     ($instr_name:expr, $exec_ctx:expr, $trace_ctx:expr) => {
+        /*
         log::debug!(target: air_log_targets::INSTRUCTION, "> {}", stringify!($instr_name));
 
         let mut variables = String::from("  scalars:");
@@ -124,6 +128,8 @@ macro_rules! log_instruction {
             "  new call executed trace: {:?}",
             $trace_ctx.as_result_trace()
         );
+
+         */
     };
 }
 
