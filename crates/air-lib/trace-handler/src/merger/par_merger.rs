@@ -23,7 +23,9 @@ pub struct MergerParResult {
     pub current_par: Option<ParResult>,
 }
 
-pub(crate) fn try_merge_next_state_as_par(data_keeper: &mut DataKeeper) -> MergeResult<MergerParResult> {
+pub(crate) fn try_merge_next_state_as_par<VT: Clone>(
+    data_keeper: &mut DataKeeper<VT>,
+) -> MergeResult<MergerParResult, VT> {
     let prev_state = data_keeper.prev_slider_mut().next_state();
     let current_state = data_keeper.current_slider_mut().next_state();
 

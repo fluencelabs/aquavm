@@ -23,7 +23,7 @@ use crate::log_instruction;
 use air_parser::ast::Xor;
 
 impl<'i> super::ExecutableInstruction<'i> for Xor<'i> {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
+    fn execute<VT>(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler<VT>) -> ExecutionResult<()> {
         log_instruction!(xor, exec_ctx, trace_ctx);
 
         exec_ctx.subtree_complete = true;
@@ -40,7 +40,7 @@ impl<'i> super::ExecutableInstruction<'i> for Xor<'i> {
     }
 }
 
-fn print_xor_log(e: &ExecutionError) {
+fn print_xor_log<VT>(e: &ExecutionError<VT>) {
     if e.is_match_or_mismatch() {
         // These errors actually aren't real errors, but a way to bubble execution_step up from match
         // to a corresponding xor. They'll become errors iff there is no such xor and execution_step is

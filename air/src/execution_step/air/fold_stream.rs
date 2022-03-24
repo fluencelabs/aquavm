@@ -31,7 +31,7 @@ use air_parser::ast;
 use air_parser::ast::FoldStream;
 
 impl<'i> ExecutableInstruction<'i> for FoldStream<'i> {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
+    fn execute<VT>(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler<VT>) -> ExecutionResult<()> {
         log_instruction!(fold, exec_ctx, trace_ctx);
         exec_ctx.tracker.meet_fold_stream();
 
@@ -70,12 +70,12 @@ impl<'i> ExecutableInstruction<'i> for FoldStream<'i> {
     }
 }
 
-fn execute_iterations<'i>(
+fn execute_iterations<'i, VT>(
     iterables: Vec<IterableValue>,
     fold_stream: &FoldStream<'i>,
     fold_id: u32,
     exec_ctx: &mut ExecutionCtx<'i>,
-    trace_ctx: &mut TraceHandler,
+    trace_ctx: &mut TraceHandler<VT>,
 ) -> ExecutionResult<bool> {
     for iterable in iterables {
         let value = match iterable.peek() {

@@ -66,11 +66,11 @@ pub(super) struct CtxStateHandler {
 
 impl CtxStateHandler {
     /// Prepare new states that sliders will have after finishing executing of each subtree.
-    pub(super) fn prepare(
+    pub(super) fn prepare<VT: Clone>(
         prev_par: ParResult,
         current_par: ParResult,
-        data_keeper: &mut DataKeeper,
-    ) -> FSMResult<Self> {
+        data_keeper: &mut DataKeeper<VT>,
+    ) -> FSMResult<Self, VT> {
         let left_pair = compute_new_states(data_keeper, prev_par, current_par, SubtreeType::Left)?;
         let right_pair = compute_new_states(data_keeper, prev_par, current_par, SubtreeType::Right)?;
 
@@ -79,7 +79,7 @@ impl CtxStateHandler {
         Ok(handler)
     }
 
-    pub(super) fn handle_subtree_end(self, data_keeper: &mut DataKeeper, subtree_type: SubtreeType) {
+    pub(super) fn handle_subtree_end<VT: Clone>(self, data_keeper: &mut DataKeeper<VT>, subtree_type: SubtreeType) {
         match subtree_type {
             SubtreeType::Left => update_ctx_states(self.left_pair, data_keeper),
             SubtreeType::Right => update_ctx_states(self.right_pair, data_keeper),

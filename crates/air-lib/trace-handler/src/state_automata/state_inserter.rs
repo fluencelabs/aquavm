@@ -26,7 +26,7 @@ pub(super) struct StateInserter {
 }
 
 impl StateInserter {
-    pub(super) fn from_keeper(data_keeper: &mut DataKeeper) -> Self {
+    pub(super) fn from_keeper<VT>(data_keeper: &mut DataKeeper<VT>) -> Self {
         let position = data_keeper.result_trace.len();
         // this par is a temporary state
         data_keeper.result_trace.push(ExecutedState::par(0, 0));
@@ -34,7 +34,7 @@ impl StateInserter {
         Self { position }
     }
 
-    pub(super) fn insert(self, data_keeper: &mut DataKeeper, state: ExecutedState) {
+    pub(super) fn insert<VT>(self, data_keeper: &mut DataKeeper<VT>, state: ExecutedState<VT>) {
         data_keeper.result_trace[self.position] = state;
     }
 }

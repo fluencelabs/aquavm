@@ -25,7 +25,7 @@ use crate::trace_to_exec_err;
 use air_parser::ast::Next;
 
 impl<'i> super::ExecutableInstruction<'i> for Next<'i> {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
+    fn execute<VT>(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler<VT>) -> ExecutionResult<()> {
         log_instruction!(next, exec_ctx, trace_ctx);
 
         let iterator_name = &self.iterator.name;
@@ -53,10 +53,10 @@ impl<'i> super::ExecutableInstruction<'i> for Next<'i> {
     }
 }
 
-fn maybe_meet_iteration_start<'i>(
+fn maybe_meet_iteration_start<'i, VT>(
     next: &Next<'i>,
     fold_state: &FoldState<'i>,
-    trace_ctx: &mut TraceHandler,
+    trace_ctx: &mut TraceHandler<VT>,
 ) -> ExecutionResult<()> {
     if let IterableType::Stream(fold_id) = &fold_state.iterable_type {
         trace_to_exec_err!(
@@ -68,10 +68,10 @@ fn maybe_meet_iteration_start<'i>(
     Ok(())
 }
 
-fn maybe_meet_iteration_end<'i>(
+fn maybe_meet_iteration_end<'i, VT>(
     next: &Next<'i>,
     fold_state: &FoldState<'i>,
-    trace_ctx: &mut TraceHandler,
+    trace_ctx: &mut TraceHandler<VT>,
 ) -> ExecutionResult<()> {
     if let IterableType::Stream(fold_id) = &fold_state.iterable_type {
         trace_to_exec_err!(trace_ctx.meet_iteration_end(*fold_id), next)?;
@@ -80,10 +80,10 @@ fn maybe_meet_iteration_end<'i>(
     Ok(())
 }
 
-fn maybe_meet_back_iterator<'i>(
+fn maybe_meet_back_iterator<'i, VT>(
     next: &Next<'i>,
     fold_state: &FoldState<'i>,
-    trace_ctx: &mut TraceHandler,
+    trace_ctx: &mut TraceHandler<VT>,
 ) -> ExecutionResult<()> {
     if let IterableType::Stream(fold_id) = &fold_state.iterable_type {
         trace_to_exec_err!(trace_ctx.meet_back_iterator(*fold_id), next)?;

@@ -35,7 +35,7 @@ use air_parser::ast::Call;
 use std::rc::Rc;
 
 impl<'i> super::ExecutableInstruction<'i> for Call<'i> {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
+    fn execute<VT>(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler<VT>) -> ExecutionResult<()> {
         log_instruction!(call, exec_ctx, trace_ctx);
         exec_ctx.tracker.meet_call();
 
@@ -48,12 +48,12 @@ impl<'i> super::ExecutableInstruction<'i> for Call<'i> {
     }
 }
 
-fn set_last_error<'i>(
+fn set_last_error<'i, VT>(
     call: &Call<'i>,
     exec_ctx: &mut ExecutionCtx<'i>,
-    execution_error: ExecutionError,
+    execution_error: ExecutionError<VT>,
     tetraplet: Option<RcSecurityTetraplet>,
-) -> ExecutionError {
+) -> ExecutionError<VT> {
     let catchable_error = match execution_error {
         ExecutionError::Catchable(catchable) => catchable,
         ExecutionError::Uncatchable(_) => return execution_error,

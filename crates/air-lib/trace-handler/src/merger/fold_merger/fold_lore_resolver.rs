@@ -34,10 +34,13 @@ pub struct ResolvedSubTraceDescs {
     pub after_subtrace: SubTraceDesc,
 }
 
-pub(super) fn resolve_fold_lore(fold: &FoldResult, merge_ctx: &MergeCtx) -> MergeResult<ResolvedFold> {
+pub(super) fn resolve_fold_lore<VT: Clone>(
+    fold: &FoldResult,
+    merge_ctx: &MergeCtx<VT>,
+) -> MergeResult<ResolvedFold, VT> {
     let (fold_states_count, lens) = compute_lens_convolution(fold, merge_ctx)?;
 
-    let lore = fold.lore.iter().zip(lens).try_fold::<_, _, MergeResult<_>>(
+    let lore = fold.lore.iter().zip(lens).try_fold::<_, _, MergeResult<_, _>>(
         HashMap::with_capacity(fold.lore.len()),
         |mut resolved_lore, (lore, lens)| {
             let before_subtrace = SubTraceDesc::new(lore.subtraces_desc[0].begin_pos as _, lens.before_len as _);
@@ -79,7 +82,10 @@ pub(super) fn resolve_fold_lore(fold: &FoldResult, merge_ctx: &MergeCtx) -> Merg
 
 // TODO: in future it's possible to change a format of a Fold state to one behaves like Par,
 // because this function adds some overhead
-fn compute_lens_convolution(fold: &FoldResult, merge_ctx: &MergeCtx) -> MergeResult<(usize, Vec<LoresLen>)> {
+fn compute_lens_convolution<VT: Clone>(
+    fold: &FoldResult,
+    merge_ctx: &MergeCtx<VT>,
+) -> MergeResult<(usize, Vec<LoresLen>), VT> {
     let subtraces_count = fold.lore.len();
     let mut lens = Vec::with_capacity(subtraces_count);
     let mut fold_states_count: usize = 0;
@@ -140,7 +146,7 @@ fn compute_before_lens(lore_lens: &mut [LoresLen], begin_pos: usize, end_pos: us
     }
 }
 
-fn check_subtrace_lore(subtrace_lore: &FoldSubTraceLore) -> MergeResult<()> {
+fn check_subtrace_lore<VT>(subtrace_lore: &FoldSubTraceLore) -> MergeResult<(), VT> {
     // this limitation is due to current constraint on count of next inside one fold,
     // for more info please see comments in the interpreter-data crate
     const SUBTRACE_DESC_COUNT: usize = 2;

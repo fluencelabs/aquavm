@@ -26,24 +26,24 @@ use thiserror::Error as ThisError;
 
 /// Errors arose out of merging previous data with a new.
 #[derive(ThisError, Debug)]
-pub enum MergeError {
+pub enum MergeError<VT> {
     /// Errors occurred when previous and current executed states are incompatible.
     #[error("previous and current data have incompatible states: '{0:?}' '{1:?}'")]
-    IncompatibleExecutedStates(ExecutedState, ExecutedState),
+    IncompatibleExecutedStates(ExecutedState<VT>, ExecutedState<VT>),
 
     /// Merger was expected to see other state that was obtained from one of traces
     /// (the other state was absent).
     #[error("state from {1} `{0:?}` is incompatible with expected {2}")]
-    DifferentExecutedStateExpected(ExecutedState, DataType, &'static str),
+    DifferentExecutedStateExpected(ExecutedState<VT>, DataType, &'static str),
 
     #[error(transparent)]
-    KeeperError(#[from] KeeperError),
+    KeeperError(#[from] KeeperError<VT>),
 
     #[error(transparent)]
     IncorrectApResult(#[from] ApResultError),
 
     #[error(transparent)]
-    IncorrectCallResult(#[from] CallResultError),
+    IncorrectCallResult(#[from] CallResultError<VT>),
 
     #[error(transparent)]
     IncorrectFoldResult(#[from] FoldResultError),
@@ -57,19 +57,22 @@ pub enum ApResultError {
 }
 
 #[derive(ThisError, Debug)]
-pub enum CallResultError {
+pub enum CallResultError<VT> {
     #[error("values in call results are not equal: {prev_value:?} != {current_value:?}")]
-    ValuesNotEqual { prev_value: Value, current_value: Value },
+    ValuesNotEqual {
+        prev_value: Value<VT>,
+        current_value: Value<VT>,
+    },
 
     /// Errors occurred when previous and current call results are incompatible.
     #[error("previous and current call results are incompatible: '{prev_call:?}' '{current_call:?}'")]
     IncompatibleCallResults {
-        prev_call: CallResult,
-        current_call: CallResult,
+        prev_call: CallResult<VT>,
+        current_call: CallResult<VT>,
     },
 
     #[error("air scripts has the following value type '{air_type}' while data other '{data_value:?}'")]
-    DataNotMatchAIR { air_type: String, data_value: Value },
+    DataNotMatchAIR { air_type: String, data_value: Value<VT> },
 }
 
 #[derive(ThisError, Debug)]
@@ -86,11 +89,11 @@ pub enum FoldResultError {
     FoldIncorrectSubtracesCount(usize),
 }
 
-impl MergeError {
+impl<VT> MergeError<VT> {
     // shouldn't be called with both Nones
     pub(crate) fn incompatible_states(
-        prev_state: Option<ExecutedState>,
-        current_state: Option<ExecutedState>,
+        prev_state: Option<ExecutedState<VT>>,
+        current_state: Option<ExecutedState<VT>>,
         expected_state: &'static str,
     ) -> Self {
         match (prev_state, current_state) {
@@ -109,8 +112,8 @@ impl MergeError {
 }
 
 // these impl methods allow construction of MergeError and are used to make code more clean
-impl CallResultError {
-    pub(crate) fn not_equal_values(prev_value: Value, current_value: Value) -> MergeError {
+impl<VT> CallResultError<VT> {
+    pub(crate) fn not_equal_values(prev_value: Value<VT>, current_value: Value<VT>) -> MergeError<VT> {
         let call_result_error = CallResultError::ValuesNotEqual {
             prev_value,
             current_value,
@@ -119,7 +122,7 @@ impl CallResultError {
         MergeError::IncorrectCallResult(call_result_error)
     }
 
-    pub(crate) fn incompatible_calls(prev_call: CallResult, current_call: CallResult) -> MergeError {
+    pub(crate) fn incompatible_calls(prev_call: CallResult<VT>, current_call: CallResult<VT>) -> MergeError<VT> {
         let call_result_error = CallResultError::IncompatibleCallResults {
             prev_call,
             current_call,
@@ -128,7 +131,7 @@ impl CallResultError {
         MergeError::IncorrectCallResult(call_result_error)
     }
 
-    pub(crate) fn data_not_match(data_value: Value, air_type: ValueType<'_>) -> MergeError {
+    pub(crate) fn data_not_match(data_value: Value<VT>, air_type: ValueType<'_>) -> MergeError<VT> {
         let air_type = air_type.to_string();
 
         let call_result_error = CallResultError::DataNotMatchAIR { air_type, data_value };

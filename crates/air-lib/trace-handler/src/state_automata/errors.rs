@@ -23,7 +23,7 @@ use thiserror::Error as ThisError;
 
 /// Errors arose out of merging previous data with a new.
 #[derive(ThisError, Debug)]
-pub enum StateFSMError {
+pub enum StateFSMError<VT> {
     /// Error occurred while trying to access or pop elements from an empty par queue.
     #[error("par queue is empty, while par FSM is requested")]
     ParQueueIsEmpty,
@@ -55,5 +55,5 @@ pub enum StateFSMError {
 
     /// Errors bubbled from DataKeeper.
     #[error(transparent)]
-    KeeperError(#[from] KeeperError),
+    KeeperError(#[from] KeeperError<VT>),
 }

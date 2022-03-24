@@ -23,13 +23,13 @@ use thiserror::Error as ThisError;
 /// Errors arose out of merging previous data with a new.
 #[derive(ThisError, Debug)]
 #[allow(clippy::enum_variant_names)]
-pub enum TraceHandlerError {
+pub enum TraceHandlerError<VT> {
     #[error(transparent)]
-    KeeperError(#[from] KeeperError),
+    KeeperError(#[from] KeeperError<VT>),
 
     #[error(transparent)]
-    MergeError(#[from] MergeError),
+    MergeError(#[from] MergeError<VT>),
 
     #[error(transparent)]
-    StateFSMError(#[from] StateFSMError),
+    StateFSMError(#[from] StateFSMError<VT>),
 }

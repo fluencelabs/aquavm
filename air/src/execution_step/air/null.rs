@@ -22,7 +22,7 @@ use crate::log_instruction;
 use air_parser::ast::Null;
 
 impl<'i> super::ExecutableInstruction<'i> for Null {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
+    fn execute<VT>(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler<VT>) -> ExecutionResult<()> {
         log_instruction!(null, exec_ctx, trace_ctx);
 
         Ok(())

@@ -26,14 +26,17 @@ use std::collections::HashMap;
 
 /// Contains all necessary information about data.
 #[derive(Debug, Default, PartialEq)]
-pub struct MergeCtx {
-    pub slider: TraceSlider,
+pub struct MergeCtx<VT> {
+    pub slider: TraceSlider<VT>,
     pub streams: GlobalStreamGens,
 }
 
-impl MergeCtx {
+impl<VT> MergeCtx<VT>
+where
+    VT: Clone,
+{
     #[allow(dead_code)]
-    pub(crate) fn from_trace(trace: ExecutionTrace) -> Self {
+    pub(crate) fn from_trace(trace: ExecutionTrace<VT>) -> Self {
         let slider = TraceSlider::new(trace);
 
         Self {
@@ -42,7 +45,7 @@ impl MergeCtx {
         }
     }
 
-    pub(crate) fn from_data(data: InterpreterData) -> Self {
+    pub(crate) fn from_data(data: InterpreterData<VT>) -> Self {
         let slider = TraceSlider::new(data.trace);
 
         Self {
@@ -51,7 +54,7 @@ impl MergeCtx {
         }
     }
 
-    pub(crate) fn try_get_generation(&self, position: u32) -> KeeperResult<u32> {
+    pub(crate) fn try_get_generation(&self, position: u32) -> KeeperResult<u32, VT> {
         use air_interpreter_data::*;
 
         let position = position as usize;

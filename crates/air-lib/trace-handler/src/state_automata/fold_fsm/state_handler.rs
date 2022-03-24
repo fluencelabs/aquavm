@@ -26,11 +26,11 @@ pub(super) struct CtxStateHandler {
 }
 
 impl CtxStateHandler {
-    pub(super) fn prepare(
+    pub(super) fn prepare<VT: Clone>(
         prev_fold: &ResolvedFold,
         current_fold: &ResolvedFold,
-        data_keeper: &DataKeeper,
-    ) -> FSMResult<Self> {
+        data_keeper: &DataKeeper<VT>,
+    ) -> FSMResult<Self, VT> {
         let prev_state = compute_new_state(prev_fold, data_keeper, MergeCtxType::Previous)?;
         let current_state = compute_new_state(current_fold, data_keeper, MergeCtxType::Current)?;
         let state_pair = CtxStatesPair::new(prev_state, current_state);
@@ -39,12 +39,16 @@ impl CtxStateHandler {
         Ok(updater)
     }
 
-    pub(super) fn set_final_states(self, data_keeper: &mut DataKeeper) {
+    pub(super) fn set_final_states<VT: Clone>(self, data_keeper: &mut DataKeeper<VT>) {
         update_ctx_states(self.state_pair, data_keeper)
     }
 }
 
-fn compute_new_state(fold: &ResolvedFold, data_keeper: &DataKeeper, ctx_type: MergeCtxType) -> FSMResult<CtxState> {
+fn compute_new_state<VT: Clone>(
+    fold: &ResolvedFold,
+    data_keeper: &DataKeeper<VT>,
+    ctx_type: MergeCtxType,
+) -> FSMResult<CtxState, VT> {
     let ctx = match ctx_type {
         MergeCtxType::Previous => &data_keeper.prev_ctx,
         MergeCtxType::Current => &data_keeper.current_ctx,

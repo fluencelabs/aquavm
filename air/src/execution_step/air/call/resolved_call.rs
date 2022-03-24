@@ -66,11 +66,11 @@ impl<'i> ResolvedCall<'i> {
     }
 
     /// Executes resolved instruction, updates contexts based on a execution_step result.
-    pub(super) fn execute(
+    pub(super) fn execute<VT>(
         &self,
         raw_call: &Call<'i>,
         exec_ctx: &mut ExecutionCtx<'i>,
-        trace_ctx: &mut TraceHandler,
+        trace_ctx: &mut TraceHandler<VT>,
     ) -> ExecutionResult<()> {
         // it's necessary to check arguments before accessing state,
         // because it would be undeterministic otherwise, for more details see
@@ -142,12 +142,12 @@ impl<'i> ResolvedCall<'i> {
     }
 
     /// Determine whether this call should be really called and adjust prev executed trace accordingly.
-    fn prepare_current_executed_state(
+    fn prepare_current_executed_state<VT>(
         &self,
         raw_call: &Call<'i>,
         exec_ctx: &mut ExecutionCtx<'i>,
-        trace_ctx: &mut TraceHandler,
-    ) -> ExecutionResult<StateDescriptor> {
+        trace_ctx: &mut TraceHandler<VT>,
+    ) -> ExecutionResult<StateDescriptor<VT>> {
         let (call_result, trace_pos) = match trace_to_exec_err!(trace_ctx.meet_call_start(&self.output), raw_call)? {
             MergerCallResult::CallResult { value, trace_pos } => (value, trace_pos),
             MergerCallResult::Empty => return Ok(StateDescriptor::no_previous_state()),
@@ -189,7 +189,7 @@ impl<'i> ResolvedCall<'i> {
 
     /// Lightweight version of resolve_args function that intended to check arguments of
     /// a call instruction. It suppresses joinable errors.
-    fn check_args(&self, exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<()> {
+    fn check_args<VT>(&self, exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<()> {
         // TODO: make this function more lightweight
         use crate::execution_step::resolver::resolve_to_args;
 
@@ -205,7 +205,7 @@ impl<'i> ResolvedCall<'i> {
 
 /// Check output type name for being already in execution context.
 // TODO: this check should be moved on a parsing stage
-fn check_output_name(output: &ast::CallOutputValue<'_>, exec_ctx: &ExecutionCtx<'_>) -> ExecutionResult<()> {
+fn check_output_name<VT>(output: &ast::CallOutputValue<'_>, exec_ctx: &ExecutionCtx<'_>) -> ExecutionResult<()> {
     use crate::execution_step::boxed_value::ScalarRef;
 
     let scalar_name = match output {

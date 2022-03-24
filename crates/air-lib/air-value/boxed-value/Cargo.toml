@@ -1,0 +1,17 @@
+[package]
+name = "air-boxed-value"
+version = "0.1.0"
+description = "Implementation of AIR execution info collector"
+authors = ["Fluence Labs"]
+edition = "2018"
+license = "Apache-2.0"
+publish = false
+keywords = ["fluence", "air", "webassembly", "programming-language"]
+categories = ["wasm"]
+
+[lib]
+name = "air_execution_info_collector"
+path = "src/lib.rs"
+
+[dependencies]
+serde_json = "1.0"

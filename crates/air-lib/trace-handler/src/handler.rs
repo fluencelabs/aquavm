@@ -20,14 +20,19 @@ use merger::*;
 use air_interpreter_data::InterpreterData;
 use air_parser::ast::CallOutputValue;
 
+use std::fmt::Debug;
+
 #[derive(Debug, Default)]
-pub struct TraceHandler {
-    data_keeper: DataKeeper,
+pub struct TraceHandler<VT> {
+    data_keeper: DataKeeper<VT>,
     fsm_keeper: FSMKeeper,
 }
 
-impl TraceHandler {
-    pub fn from_data(prev_data: InterpreterData, current_data: InterpreterData) -> Self {
+impl<VT> TraceHandler<VT>
+where
+    VT: Clone,
+{
+    pub fn from_data(prev_data: InterpreterData<VT>, current_data: InterpreterData<VT>) -> Self {
         let data_keeper = DataKeeper::from_data(prev_data, current_data);
 
         Self {
@@ -42,11 +47,11 @@ impl TraceHandler {
         self.data_keeper.result_trace.len()
     }
 
-    pub fn into_result_trace(self) -> ExecutionTrace {
+    pub fn into_result_trace(self) -> ExecutionTrace<VT> {
         self.data_keeper.result_trace
     }
 
-    pub fn as_result_trace(&self) -> &ExecutionTrace {
+    pub fn as_result_trace(&self) -> &ExecutionTrace<VT> {
         &self.data_keeper.result_trace
     }
 
@@ -58,15 +63,21 @@ impl TraceHandler {
     }
 }
 
-impl TraceHandler {
+impl<VT> TraceHandler<VT>
+where
+    VT: Debug + Clone + Eq,
+{
     /// Should be called at the beginning of a call execution.
-    pub fn meet_call_start(&mut self, output_value: &CallOutputValue<'_>) -> TraceHandlerResult<MergerCallResult> {
+    pub fn meet_call_start(
+        &mut self,
+        output_value: &CallOutputValue<'_>,
+    ) -> TraceHandlerResult<MergerCallResult<VT>, VT> {
         try_merge_next_state_as_call(&mut self.data_keeper, output_value).map_err(Into::into)
     }
 
     /// Should be called when a call instruction was executed successfully. It adds the supplied
     /// state to the result trace.
-    pub fn meet_call_end(&mut self, call_result: CallResult) {
+    pub fn meet_call_end(&mut self, call_result: CallResult<VT>) {
         log::trace!(
             target: air_log_targets::EXECUTED_STATE_CHANGING,
             "  adding new call executed state {:?}",
@@ -76,8 +87,11 @@ impl TraceHandler {
     }
 }
 
-impl TraceHandler {
-    pub fn meet_ap_start(&mut self) -> TraceHandlerResult<MergerApResult> {
+impl<VT> TraceHandler<VT>
+where
+    VT: Clone,
+{
+    pub fn meet_ap_start(&mut self) -> TraceHandlerResult<MergerApResult, VT> {
         try_merge_next_state_as_ap(&mut self.data_keeper).map_err(Into::into)
     }
 
@@ -86,8 +100,11 @@ impl TraceHandler {
     }
 }
 
-impl TraceHandler {
-    pub fn meet_par_start(&mut self) -> TraceHandlerResult<()> {
+impl<VT> TraceHandler<VT>
+where
+    VT: Clone,
+{
+    pub fn meet_par_start(&mut self) -> TraceHandlerResult<(), VT> {
         let ingredients = merger::try_merge_next_state_as_par(&mut self.data_keeper)?;
         let par_fsm = ParFSM::from_left_started(ingredients, &mut self.data_keeper)?;
         self.fsm_keeper.push_par(par_fsm);
@@ -95,7 +112,7 @@ impl TraceHandler {
         Ok(())
     }
 
-    pub fn meet_par_subtree_end(&mut self, subtree_type: SubtreeType) -> TraceHandlerResult<()> {
+    pub fn meet_par_subtree_end(&mut self, subtree_type: SubtreeType) -> TraceHandlerResult<(), VT> {
         match subtree_type {
             SubtreeType::Left => {
                 let par_fsm = self.fsm_keeper.last_par()?;
@@ -111,8 +128,11 @@ impl TraceHandler {
     }
 }
 
-impl TraceHandler {
-    pub fn meet_fold_start(&mut self, fold_id: u32) -> TraceHandlerResult<()> {
+impl<VT> TraceHandler<VT>
+where
+    VT: Clone,
+{
+    pub fn meet_fold_start(&mut self, fold_id: u32) -> TraceHandlerResult<(), VT> {
         let ingredients = try_merge_next_state_as_fold(&mut self.data_keeper)?;
         let fold_fsm = FoldFSM::from_fold_start(ingredients, &mut self.data_keeper)?;
         self.fsm_keeper.add_fold(fold_id, fold_fsm);
@@ -120,35 +140,35 @@ impl TraceHandler {
         Ok(())
     }
 
-    pub fn meet_iteration_start(&mut self, fold_id: u32, value_pos: usize) -> TraceHandlerResult<()> {
+    pub fn meet_iteration_start(&mut self, fold_id: u32, value_pos: usize) -> TraceHandlerResult<(), VT> {
         let fold_fsm = self.fsm_keeper.fold_mut(fold_id)?;
         fold_fsm.meet_iteration_start(value_pos, &mut self.data_keeper)?;
 
         Ok(())
     }
 
-    pub fn meet_iteration_end(&mut self, fold_id: u32) -> TraceHandlerResult<()> {
+    pub fn meet_iteration_end(&mut self, fold_id: u32) -> TraceHandlerResult<(), VT> {
         let fold_fsm = self.fsm_keeper.fold_mut(fold_id)?;
         fold_fsm.meet_iteration_end(&mut self.data_keeper);
 
         Ok(())
     }
 
-    pub fn meet_back_iterator(&mut self, fold_id: u32) -> TraceHandlerResult<()> {
+    pub fn meet_back_iterator(&mut self, fold_id: u32) -> TraceHandlerResult<(), VT> {
         let fold_fsm = self.fsm_keeper.fold_mut(fold_id)?;
         fold_fsm.meet_back_iterator(&mut self.data_keeper)?;
 
         Ok(())
     }
 
-    pub fn meet_generation_end(&mut self, fold_id: u32) -> TraceHandlerResult<()> {
+    pub fn meet_generation_end(&mut self, fold_id: u32) -> TraceHandlerResult<(), VT> {
         let fold_fsm = self.fsm_keeper.fold_mut(fold_id)?;
         fold_fsm.meet_generation_end(&mut self.data_keeper);
 
         Ok(())
     }
 
-    pub fn meet_fold_end(&mut self, fold_id: u32) -> TraceHandlerResult<()> {
+    pub fn meet_fold_end(&mut self, fold_id: u32) -> TraceHandlerResult<(), VT> {
         let fold_fsm = self.fsm_keeper.extract_fold(fold_id)?;
         fold_fsm.meet_fold_end(&mut self.data_keeper);
 

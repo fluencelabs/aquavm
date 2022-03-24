@@ -21,7 +21,7 @@ use se_de::par_serializer;
 use se_de::sender_serializer;
 use serde::Deserialize;
 use serde::Serialize;
-use serde_json::Value as JValue;
+
 use std::fmt::Formatter;
 use std::rc::Rc;
 
@@ -39,14 +39,14 @@ pub enum Sender {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub enum CallResult {
+pub enum CallResult<T> {
     /// Request was sent to a target node by node with such public key and it shouldn't be called again.
     #[serde(with = "sender_serializer")]
     #[serde(rename = "sent_by")]
     RequestSentBy(Sender),
 
     /// A corresponding call's been already executed with such value as a result.
-    Executed(Value),
+    Executed(Value<T>),
 
     /// call_service ended with a service error.
     #[serde(rename = "failed")]
@@ -55,9 +55,9 @@ pub enum CallResult {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub enum Value {
-    Scalar(Rc<JValue>),
-    Stream { value: Rc<JValue>, generation: u32 },
+pub enum Value<T> {
+    Scalar(T),
+    Stream { value: T, generation: u32 },
 }
 
 /// Let's consider an example of trace that could be produces by the following fold:
@@ -124,10 +124,10 @@ pub struct ApResult {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub enum ExecutedState {
+pub enum ExecutedState<T> {
     #[serde(with = "par_serializer")]
     Par(ParResult),
-    Call(CallResult),
+    Call(CallResult<T>),
     Fold(FoldResult),
     Ap(ApResult),
 }

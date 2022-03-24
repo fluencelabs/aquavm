@@ -14,6 +14,17 @@
  * limitations under the License.
  */
 
+#![warn(rust_2018_idioms)]
+#![deny(
+    dead_code,
+    nonstandard_style,
+    unused_imports,
+    unused_mut,
+    unused_variables,
+    unused_unsafe,
+    unreachable_patterns
+)]
+
 mod data_keeper;
 mod errors;
 mod handler;
@@ -31,7 +42,7 @@ pub use merger::MergerApResult;
 pub use merger::MergerCallResult;
 pub use state_automata::SubtreeType;
 
-pub type TraceHandlerResult<T> = std::result::Result<T, TraceHandlerError>;
+pub type TraceHandlerResult<T, VT> = std::result::Result<T, TraceHandlerError<VT>>;
 
 use air_interpreter_data::*;
 use data_keeper::DataKeeper;

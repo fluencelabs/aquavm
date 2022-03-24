@@ -23,9 +23,9 @@ use super::KeeperResult;
 /// is identified by position and len.
 // TODO: check for overflow
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
-pub struct TraceSlider {
+pub struct TraceSlider<VT> {
     /// Trace that slider slide on.
-    trace: ExecutionTrace,
+    trace: ExecutionTrace<VT>,
 
     /// Position of current subtrace inside trace.
     position: usize,
@@ -37,21 +37,25 @@ pub struct TraceSlider {
     seen_elements: usize,
 }
 
-impl TraceSlider {
-    pub(crate) fn new(trace: ExecutionTrace) -> Self {
+impl<VT> TraceSlider<VT>
+where
+    VT: Clone,
+{
+    pub(crate) fn new(trace: ExecutionTrace<VT>) -> Self {
         let subtrace_len = trace.len();
 
         Self {
             trace,
+            position: 0,
             subtrace_len,
-            ..<_>::default()
+            seen_elements: 0,
         }
     }
 
     /// Returns the next state if current interval length hasn't been reached
     /// and None otherwise.
     #[allow(clippy::suspicious_operation_groupings)]
-    pub(crate) fn next_state(&mut self) -> Option<ExecutedState> {
+    pub(crate) fn next_state(&mut self) -> Option<ExecutedState<VT>> {
         if self.seen_elements >= self.subtrace_len || self.position >= self.trace.len() {
             return None;
         }
@@ -62,7 +66,7 @@ impl TraceSlider {
         Some(result)
     }
 
-    pub(crate) fn set_position_and_len(&mut self, position: usize, subtrace_len: usize) -> KeeperResult<()> {
+    pub(crate) fn set_position_and_len(&mut self, position: usize, subtrace_len: usize) -> KeeperResult<(), VT> {
         // it's possible to set empty subtrace_len and inconsistent position
         if subtrace_len != 0 && position + subtrace_len > self.trace.len() {
             return Err(SetSubtraceLenAndPosFailed {
@@ -79,7 +83,7 @@ impl TraceSlider {
         Ok(())
     }
 
-    pub(crate) fn set_subtrace_len(&mut self, subtrace_len: usize) -> KeeperResult<()> {
+    pub(crate) fn set_subtrace_len(&mut self, subtrace_len: usize) -> KeeperResult<(), VT> {
         let trace_remainder = self.trace.len() - self.position;
         if trace_remainder < subtrace_len {
             return Err(SetSubtraceLenFailed {
@@ -103,7 +107,7 @@ impl TraceSlider {
         self.subtrace_len - self.seen_elements
     }
 
-    pub(super) fn state_at_position(&self, position: usize) -> Option<&ExecutedState> {
+    pub(super) fn state_at_position(&self, position: usize) -> Option<&ExecutedState<VT>> {
         self.trace.get(position)
     }
 

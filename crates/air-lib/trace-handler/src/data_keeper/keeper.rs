@@ -24,15 +24,18 @@ use std::collections::HashMap;
 
 /// Keeps all necessary data for merging.
 #[derive(Debug, Default, PartialEq)]
-pub(crate) struct DataKeeper {
-    pub(crate) prev_ctx: MergeCtx,
-    pub(crate) current_ctx: MergeCtx,
+pub(crate) struct DataKeeper<VT> {
+    pub(crate) prev_ctx: MergeCtx<VT>,
+    pub(crate) current_ctx: MergeCtx<VT>,
     pub(crate) new_to_old_pos: HashMap<usize, DataPositions>,
-    pub(crate) result_trace: ExecutionTrace,
+    pub(crate) result_trace: ExecutionTrace<VT>,
 }
 
-impl DataKeeper {
-    pub(crate) fn from_data(prev_data: InterpreterData, current_data: InterpreterData) -> Self {
+impl<VT> DataKeeper<VT>
+where
+    VT: Clone,
+{
+    pub(crate) fn from_data(prev_data: InterpreterData<VT>, current_data: InterpreterData<VT>) -> Self {
         let prev_ctx = MergeCtx::from_data(prev_data);
         let current_ctx = MergeCtx::from_data(current_data);
 
@@ -48,19 +51,19 @@ impl DataKeeper {
         self.result_trace.len()
     }
 
-    pub(crate) fn prev_slider(&self) -> &TraceSlider {
+    pub(crate) fn prev_slider(&self) -> &TraceSlider<VT> {
         &self.prev_ctx.slider
     }
 
-    pub(crate) fn prev_slider_mut(&mut self) -> &mut TraceSlider {
+    pub(crate) fn prev_slider_mut(&mut self) -> &mut TraceSlider<VT> {
         &mut self.prev_ctx.slider
     }
 
-    pub(crate) fn current_slider(&self) -> &TraceSlider {
+    pub(crate) fn current_slider(&self) -> &TraceSlider<VT> {
         &self.current_ctx.slider
     }
 
-    pub(crate) fn current_slider_mut(&mut self) -> &mut TraceSlider {
+    pub(crate) fn current_slider_mut(&mut self) -> &mut TraceSlider<VT> {
         &mut self.current_ctx.slider
     }
 }

@@ -13,20 +13,3 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-mod errors;
-mod keeper;
-mod merge_ctx;
-mod trace_slider;
-
-pub use errors::KeeperError;
-pub use merge_ctx::MergeCtx;
-pub use trace_slider::TraceSlider;
-
-pub(crate) use keeper::DataKeeper;
-pub(crate) use keeper::DataPositions;
-
-pub(self) type KeeperResult<T, VT> = std::result::Result<T, KeeperError<VT>>;
-
-use super::ExecutedState;
-use super::ExecutionTrace;

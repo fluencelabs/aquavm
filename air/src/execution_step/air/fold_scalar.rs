@@ -30,7 +30,7 @@ use air_parser::ast::Instruction;
 use std::rc::Rc;
 
 impl<'i> ExecutableInstruction<'i> for FoldScalar<'i> {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
+    fn execute<VT>(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler<VT>) -> ExecutionResult<()> {
         log_instruction!(fold, exec_ctx, trace_ctx);
 
         let scalar = match &self.iterable {
@@ -55,13 +55,13 @@ impl<'i> ExecutableInstruction<'i> for FoldScalar<'i> {
     }
 }
 
-pub(super) fn fold<'i>(
+pub(super) fn fold<'i, VT>(
     iterable: IterableValue,
     iterable_type: IterableType,
     iterator: &'i str,
     instruction: Rc<Instruction<'i>>,
     exec_ctx: &mut ExecutionCtx<'i>,
-    trace_ctx: &mut TraceHandler,
+    trace_ctx: &mut TraceHandler<VT>,
 ) -> ExecutionResult<()> {
     let fold_state = FoldState::from_iterable(iterable, iterable_type, instruction.clone());
     exec_ctx.scalars.meet_fold_start();

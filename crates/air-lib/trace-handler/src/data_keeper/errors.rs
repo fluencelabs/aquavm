@@ -19,7 +19,7 @@ use thiserror::Error as ThisError;
 
 /// Errors arose out while accessing various interpreter data.
 #[derive(ThisError, Debug, PartialEq, Eq)]
-pub enum KeeperError {
+pub enum KeeperError<VT> {
     /// Errors occurred when trace_len - trace_position < requested_subtrace_len.
     #[error(
         "executed trace has {trace_len} elements and current position is {trace_position}, \
@@ -51,5 +51,5 @@ pub enum KeeperError {
     /// Errors occurred when Fold FSM tries to obtain stream generation by value_pos from a trace,
     /// but such state doesn't belong to values in streams (it doesn't contain a generation).
     #[error("expected a state of CallResult(Value::Stream) or Ap types but '{state}' obtained")]
-    NoStreamState { state: ExecutedState },
+    NoStreamState { state: ExecutedState<VT> },
 }

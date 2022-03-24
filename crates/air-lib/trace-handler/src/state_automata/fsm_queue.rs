@@ -36,21 +36,21 @@ impl FSMKeeper {
         self.fold_map.insert(fold_id, fold_fsm);
     }
 
-    pub(crate) fn last_par(&mut self) -> FSMResult<&mut ParFSM> {
+    pub(crate) fn last_par<VT>(&mut self) -> FSMResult<&mut ParFSM, VT> {
         self.par_stack.last_mut().ok_or(StateFSMError::ParQueueIsEmpty)
     }
 
-    pub(crate) fn pop_par(&mut self) -> FSMResult<ParFSM> {
+    pub(crate) fn pop_par<VT>(&mut self) -> FSMResult<ParFSM, VT> {
         self.par_stack.pop().ok_or(StateFSMError::ParQueueIsEmpty)
     }
 
-    pub(crate) fn fold_mut(&mut self, fold_id: u32) -> FSMResult<&mut FoldFSM> {
+    pub(crate) fn fold_mut<VT>(&mut self, fold_id: u32) -> FSMResult<&mut FoldFSM, VT> {
         self.fold_map
             .get_mut(&fold_id)
             .ok_or(StateFSMError::FoldFSMNotFound(fold_id))
     }
 
-    pub(crate) fn extract_fold(&mut self, fold_id: u32) -> FSMResult<FoldFSM> {
+    pub(crate) fn extract_fold<VT>(&mut self, fold_id: u32) -> FSMResult<FoldFSM, VT> {
         self.fold_map
             .remove(&fold_id)
             .ok_or(StateFSMError::FoldFSMNotFound(fold_id))

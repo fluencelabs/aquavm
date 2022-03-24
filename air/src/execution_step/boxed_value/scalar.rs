@@ -18,6 +18,7 @@ use super::JValuable;
 use crate::execution_step::FoldState;
 use crate::execution_step::RcSecurityTetraplet;
 use crate::JValue;
+use air_value::{BoxedValue, Value};
 
 use serde::Deserialize;
 use serde::Serialize;
@@ -28,7 +29,7 @@ use std::rc::Rc;
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct ValueAggregate {
-    pub result: Rc<JValue>,
+    pub result: Rc<dyn BoxedValue>,
     pub tetraplet: RcSecurityTetraplet,
     pub trace_pos: usize,
 }

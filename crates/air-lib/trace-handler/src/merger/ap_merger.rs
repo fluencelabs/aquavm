@@ -28,7 +28,9 @@ pub enum MergerApResult {
     ApResult { res_generation: Option<u32> },
 }
 
-pub(crate) fn try_merge_next_state_as_ap(data_keeper: &mut DataKeeper) -> MergeResult<MergerApResult> {
+pub(crate) fn try_merge_next_state_as_ap<VT: Clone>(
+    data_keeper: &mut DataKeeper<VT>,
+) -> MergeResult<MergerApResult, VT> {
     use ExecutedState::Ap;
     use PreparationScheme::*;
 
@@ -50,11 +52,11 @@ pub(crate) fn try_merge_next_state_as_ap(data_keeper: &mut DataKeeper) -> MergeR
     }
 }
 
-fn prepare_merge_result(
+fn prepare_merge_result<VT: Clone>(
     ap_result: Option<ApResult>,
     scheme: PreparationScheme,
-    data_keeper: &mut DataKeeper,
-) -> MergeResult<MergerApResult> {
+    data_keeper: &mut DataKeeper<VT>,
+) -> MergeResult<MergerApResult, VT> {
     prepare_positions_mapping(scheme, data_keeper);
 
     match ap_result {
@@ -76,7 +78,7 @@ macro_rules! to_maybe_generation {
     };
 }
 
-fn to_merger_result(ap_result: ApResult) -> MergeResult<MergerApResult> {
+fn to_merger_result<VT>(ap_result: ApResult) -> MergeResult<MergerApResult, VT> {
     let res_generation = to_maybe_generation!(ap_result, &ap_result.res_generations, TooManyDstGenerations);
 
     let ap_result = MergerApResult::ApResult { res_generation };

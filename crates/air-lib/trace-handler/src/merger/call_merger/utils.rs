@@ -16,11 +16,10 @@
 
 use super::*;
 
-type JValue = serde_json::Value;
-
-use std::rc::Rc;
-
-pub(super) fn merge_executed(prev_value: Value, current_value: Value) -> MergeResult<CallResult> {
+pub(super) fn merge_executed<VT: Clone + Eq>(
+    prev_value: Value<VT>,
+    current_value: Value<VT>,
+) -> MergeResult<CallResult<VT>, VT> {
     match (&prev_value, &current_value) {
         (Value::Scalar(_), Value::Scalar(_)) => {
             are_scalars_equal(&prev_value, &current_value)?;
@@ -34,7 +33,7 @@ pub(super) fn merge_executed(prev_value: Value, current_value: Value) -> MergeRe
     }
 }
 
-fn are_scalars_equal(prev_value: &Value, current_value: &Value) -> MergeResult<()> {
+fn are_scalars_equal<VT: Clone + Eq>(prev_value: &Value<VT>, current_value: &Value<VT>) -> MergeResult<(), VT> {
     if prev_value == current_value {
         return Ok(());
     }
@@ -45,12 +44,12 @@ fn are_scalars_equal(prev_value: &Value, current_value: &Value) -> MergeResult<(
     ))
 }
 
-fn are_streams_equal(
-    prev_result_value: &Rc<JValue>,
-    current_result_value: &Rc<JValue>,
-    prev_value: &Value,
-    current_value: &Value,
-) -> MergeResult<()> {
+fn are_streams_equal<VT: Clone + Eq>(
+    prev_result_value: &VT,
+    current_result_value: &VT,
+    prev_value: &Value<VT>,
+    current_value: &Value<VT>,
+) -> MergeResult<(), VT> {
     // values from streams could have different generations and it's ok
     if prev_result_value == current_result_value {
         return Ok(());
@@ -65,11 +64,11 @@ fn are_streams_equal(
 /// Merging of value from only current data to a stream is a something special, because it's
 /// needed to choose generation not from current data, but a maximum from streams on a current peer.
 /// Maximum versions are tracked in data in a special field called streams.
-pub(super) fn merge_current_executed(
-    value: Value,
+pub(super) fn merge_current_executed<VT: Clone>(
+    value: Value<VT>,
     value_type: ValueType<'_>,
-    data_keeper: &DataKeeper,
-) -> MergeResult<CallResult> {
+    data_keeper: &DataKeeper<VT>,
+) -> MergeResult<CallResult<VT>, VT> {
     match (value, value_type) {
         (scalar @ Value::Scalar(_), ValueType::Scalar) => Ok(CallResult::Executed(scalar)),
         (Value::Stream { value, .. }, ValueType::Stream(stream_name)) => {
@@ -81,7 +80,10 @@ pub(super) fn merge_current_executed(
     }
 }
 
-pub(super) fn check_equal(prev_call: &CallResult, current_call: &CallResult) -> MergeResult<()> {
+pub(super) fn check_equal<VT: Clone + Eq>(
+    prev_call: &CallResult<VT>,
+    current_call: &CallResult<VT>,
+) -> MergeResult<(), VT> {
     if prev_call != current_call {
         Err(CallResultError::incompatible_calls(
             prev_call.clone(),
@@ -92,7 +94,10 @@ pub(super) fn check_equal(prev_call: &CallResult, current_call: &CallResult) -> 
     }
 }
 
-pub(super) fn try_match_value_type(merged_call: &MergerCallResult, value_type: ValueType<'_>) -> MergeResult<()> {
+pub(super) fn try_match_value_type<VT: Clone>(
+    merged_call: &MergerCallResult<VT>,
+    value_type: ValueType<'_>,
+) -> MergeResult<(), VT> {
     if let MergerCallResult::CallResult { value, .. } = merged_call {
         return match (value, value_type) {
             (CallResult::Executed(value @ Value::Scalar(_)), ValueType::Stream(_)) => {

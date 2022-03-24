@@ -22,7 +22,7 @@ use crate::log_instruction;
 use air_parser::ast::Seq;
 
 impl<'i> super::ExecutableInstruction<'i> for Seq<'i> {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
+    fn execute<VT>(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler<VT>) -> ExecutionResult<()> {
         log_instruction!(seq, exec_ctx, trace_ctx);
 
         exec_ctx.subtree_complete = true;

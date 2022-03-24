@@ -18,10 +18,10 @@ use super::*;
 use air_lambda_parser::LambdaAST;
 use air_parser::ast;
 
-pub(super) fn apply_to_arg(
+pub(super) fn apply_to_arg<VT>(
     argument: &ast::ApArgument<'_>,
     exec_ctx: &ExecutionCtx<'_>,
-    trace_ctx: &TraceHandler,
+    trace_ctx: &TraceHandler<VT>,
     should_touch_trace: bool,
 ) -> ExecutionResult<ValueAggregate> {
     use ast::ApArgument::*;
@@ -39,7 +39,11 @@ pub(super) fn apply_to_arg(
     Ok(result)
 }
 
-fn apply_const(value: impl Into<JValue>, exec_ctx: &ExecutionCtx<'_>, trace_ctx: &TraceHandler) -> ValueAggregate {
+fn apply_const<VT>(
+    value: impl Into<JValue>,
+    exec_ctx: &ExecutionCtx<'_>,
+    trace_ctx: &TraceHandler<VT>,
+) -> ValueAggregate {
     let value = Rc::new(value.into());
     let tetraplet = SecurityTetraplet::literal_tetraplet(exec_ctx.init_peer_id.as_ref());
     let tetraplet = Rc::new(tetraplet);
@@ -47,10 +51,10 @@ fn apply_const(value: impl Into<JValue>, exec_ctx: &ExecutionCtx<'_>, trace_ctx:
     ValueAggregate::new(value, tetraplet, trace_ctx.trace_pos())
 }
 
-fn apply_last_error<'i>(
+fn apply_last_error<'i, VT>(
     error_accessor: &Option<LambdaAST<'i>>,
     exec_ctx: &ExecutionCtx<'i>,
-    trace_ctx: &TraceHandler,
+    trace_ctx: &TraceHandler<VT>,
 ) -> ExecutionResult<ValueAggregate> {
     let (value, mut tetraplets) = crate::execution_step::resolver::prepare_last_error(error_accessor, exec_ctx)?;
     let value = Rc::new(value);
@@ -61,10 +65,10 @@ fn apply_last_error<'i>(
     Ok(result)
 }
 
-fn apply_scalar(
+fn apply_scalar<VT>(
     scalar: &ast::ScalarWithLambda<'_>,
     exec_ctx: &ExecutionCtx<'_>,
-    trace_ctx: &TraceHandler,
+    trace_ctx: &TraceHandler<VT>,
     should_touch_trace: bool,
 ) -> ExecutionResult<ValueAggregate> {
     // TODO: refactor this code after boxed value
@@ -74,10 +78,10 @@ fn apply_scalar(
     }
 }
 
-fn apply_scalar_impl(
+fn apply_scalar_impl<VT>(
     scalar_name: &str,
     exec_ctx: &ExecutionCtx<'_>,
-    trace_ctx: &TraceHandler,
+    trace_ctx: &TraceHandler<VT>,
     should_touch_trace: bool,
 ) -> ExecutionResult<ValueAggregate> {
     use crate::execution_step::ScalarRef;
@@ -102,12 +106,12 @@ fn apply_scalar_impl(
     Ok(result)
 }
 
-fn apply_scalar_wl_impl(
+fn apply_scalar_wl_impl<VT>(
     scalar_name: &str,
     position: usize,
     lambda: &LambdaAST<'_>,
     exec_ctx: &ExecutionCtx<'_>,
-    trace_ctx: &TraceHandler,
+    trace_ctx: &TraceHandler<VT>,
 ) -> ExecutionResult<ValueAggregate> {
     let variable = Variable::scalar(scalar_name, position);
     let (jvalue, tetraplet) = apply_lambda(variable, lambda, exec_ctx)?;

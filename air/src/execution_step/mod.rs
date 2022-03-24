@@ -48,6 +48,6 @@ pub(crate) use air_trace_handler::TraceHandler;
 
 use std::rc::Rc;
 
-type ExecutionResult<T> = std::result::Result<T, ExecutionError>;
+type ExecutionResult<T> = std::result::Result<T, ExecutionError<Rc<dyn air_value::BoxedValue>>>;
 type RcSecurityTetraplet = Rc<crate::SecurityTetraplet>;
 type RcSecurityTetraplets = Vec<RcSecurityTetraplet>;

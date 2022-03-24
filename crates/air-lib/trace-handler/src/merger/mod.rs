@@ -42,7 +42,7 @@ pub(crate) use par_merger::try_merge_next_state_as_par;
 use position_mapping::prepare_positions_mapping;
 use position_mapping::PreparationScheme;
 
-type MergeResult<T> = std::result::Result<T, MergeError>;
+type MergeResult<T, VT> = std::result::Result<T, MergeError<VT>>;
 
 use super::data_keeper::DataPositions;
 use super::data_keeper::KeeperError;

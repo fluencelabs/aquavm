@@ -32,28 +32,31 @@ impl ParResult {
     }
 }
 
-impl CallResult {
-    pub fn sent_peer_id(peer_id: Rc<String>) -> CallResult {
+impl<T> CallResult<T>
+where
+    T: Serialize + for<'de> Deserialize<'de>,
+{
+    pub fn sent_peer_id(peer_id: Rc<String>) -> CallResult<T> {
         CallResult::RequestSentBy(Sender::PeerId(peer_id))
     }
 
-    pub fn sent_peer_id_with_call_id(peer_id: Rc<String>, call_id: u32) -> CallResult {
+    pub fn sent_peer_id_with_call_id(peer_id: Rc<String>, call_id: u32) -> CallResult<T> {
         CallResult::RequestSentBy(Sender::PeerIdWithCallId { peer_id, call_id })
     }
 
-    pub fn executed_scalar(value: Rc<JValue>) -> CallResult {
+    pub fn executed_scalar(value: T) -> CallResult<T> {
         let value = Value::Scalar(value);
 
         CallResult::Executed(value)
     }
 
-    pub fn executed_stream(value: Rc<JValue>, generation: u32) -> CallResult {
+    pub fn executed_stream(value: T, generation: u32) -> CallResult<T> {
         let value = Value::Stream { value, generation };
 
         CallResult::Executed(value)
     }
 
-    pub fn failed(ret_code: i32, error_msg: impl Into<String>) -> CallResult {
+    pub fn failed(ret_code: i32, error_msg: impl Into<String>) -> CallResult<T> {
         CallResult::CallServiceFailed(ret_code, Rc::new(error_msg.into()))
     }
 }
@@ -67,7 +70,8 @@ impl SubTraceDesc {
     }
 }
 
-impl ExecutedState {
+impl<T> ExecutedState<T>
+{
     pub fn par(left_subtree_size: usize, right_subtree_size: usize) -> Self {
         let par_result = ParResult {
             left_size: left_subtree_size as _,
@@ -86,7 +90,9 @@ impl ApResult {
     }
 }
 
-impl std::fmt::Display for ExecutedState {
+use std::fmt::Display;
+
+impl<T: Display + Serialize + for<'de> Deserialize<'de>> Display for ExecutedState<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         use CallResult::*;
         use ExecutedState::*;
@@ -125,7 +131,7 @@ impl std::fmt::Display for ExecutedState {
     }
 }
 
-impl std::fmt::Display for Value {
+impl<T: Display + Serialize + for<'de> Deserialize<'de>> Display for Value<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             Value::Scalar(value) => write!(f, "scalar: {}", value),
@@ -136,7 +142,7 @@ impl std::fmt::Display for Value {
     }
 }
 
-impl std::fmt::Display for Sender {
+impl Display for Sender {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Sender::PeerId(peer_id) => write!(f, "request_sent_by({})", peer_id),

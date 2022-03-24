@@ -24,6 +24,7 @@ dependencies = [
  "air-parser",
  "air-test-utils",
  "air-trace-handler",
+ "air-value",
  "boolinator",
  "concat-idents",
  "criterion",
@@ -46,6 +47,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "air-boxed-value"
+version = "0.1.0"
+dependencies = [
+ "serde_json",
+]
+
+[[package]]
 name = "air-execution-info-collector"
 version = "0.1.0"
 
@@ -64,7 +72,7 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter-data"
-version = "0.2.2"
+version = "0.2.3"
 dependencies = [
  "once_cell",
  "semver 1.0.4",
@@ -154,6 +162,16 @@ dependencies = [
  "log",
  "serde_json",
  "thiserror",
+]
+
+[[package]]
+name = "air-value"
+version = "0.1.0"
+dependencies = [
+ "air-lambda-ast",
+ "erased-serde",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

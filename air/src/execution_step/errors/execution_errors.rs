@@ -31,15 +31,15 @@ use std::rc::Rc;
 /// This enum is pub since it's used in tests.
 #[derive(ThisError, EnumDiscriminants, Debug)]
 #[strum_discriminants(derive(EnumIter))]
-pub enum ExecutionError {
+pub enum ExecutionError<VT> {
     #[error(transparent)]
     Catchable(#[from] Rc<CatchableError>),
 
     #[error(transparent)]
-    Uncatchable(#[from] UncatchableError),
+    Uncatchable(#[from] UncatchableError<VT>),
 }
 
-impl ExecutionError {
+impl<VT> ExecutionError<VT> {
     pub fn is_catchable(&self) -> bool {
         matches!(self, ExecutionError::Catchable(_))
     }
@@ -55,7 +55,7 @@ impl ExecutionError {
     }
 }
 
-impl From<CatchableError> for ExecutionError {
+impl<VT> From<CatchableError> for ExecutionError<VT> {
     fn from(catchable: CatchableError) -> Self {
         Self::Catchable(std::rc::Rc::new(catchable))
     }
@@ -73,7 +73,7 @@ macro_rules! trace_to_exec_err {
     };
 }
 
-impl ToErrorCode for ExecutionError {
+impl<VT> ToErrorCode for ExecutionError<VT> {
     fn to_error_code(&self) -> i64 {
         match self {
             ExecutionError::Catchable(err) => err.to_error_code(),
@@ -82,7 +82,7 @@ impl ToErrorCode for ExecutionError {
     }
 }
 
-impl Joinable for ExecutionError {
+impl<VT> Joinable for ExecutionError<VT> {
     fn is_joinable(&self) -> bool {
         match self {
             ExecutionError::Catchable(err) => err.is_joinable(),
@@ -91,7 +91,7 @@ impl Joinable for ExecutionError {
     }
 }
 
-impl LastErrorAffectable for ExecutionError {
+impl<VT> LastErrorAffectable for ExecutionError<VT> {
     fn affects_last_error(&self) -> bool {
         match self {
             ExecutionError::Catchable(err) => err.affects_last_error(),

@@ -29,7 +29,7 @@ pub(super) fn ap_result_to_generation(ap_result: &MergerApResult) -> Generation 
     }
 }
 
-pub(super) fn try_match_trace_to_instr(merger_ap_result: &MergerApResult, instr: &Ap<'_>) -> ExecutionResult<()> {
+pub(super) fn try_match_trace_to_instr<VT>(merger_ap_result: &MergerApResult, instr: &Ap<'_>) -> ExecutionResult<()> {
     let res_generation = match merger_ap_result {
         MergerApResult::ApResult { res_generation } => *res_generation,
         MergerApResult::Empty => return Ok(()),
@@ -38,7 +38,7 @@ pub(super) fn try_match_trace_to_instr(merger_ap_result: &MergerApResult, instr:
     match_position_variable(&instr.result, res_generation, merger_ap_result)
 }
 
-fn match_position_variable(
+fn match_position_variable<VT>(
     variable: &ast::Variable<'_>,
     generation: Option<u32>,
     ap_result: &MergerApResult,

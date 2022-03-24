@@ -31,7 +31,7 @@ use air_trace_handler::SubtreeType;
 
 #[rustfmt::skip]
 impl<'i> ExecutableInstruction<'i> for Par<'i> {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
+    fn execute<VT>(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler<VT>) -> ExecutionResult<()> {
         log_instruction!(par, exec_ctx, trace_ctx);
 
         let mut completeness_updater = ParCompletenessUpdater::new();
@@ -49,13 +49,13 @@ impl<'i> ExecutableInstruction<'i> for Par<'i> {
 }
 
 /// Execute provided subtree and update Par state in trace_ctx.new_trace.
-fn execute_subtree<'i>(
+fn execute_subtree<'i, VT>(
     par: &Par<'i>,
     exec_ctx: &mut ExecutionCtx<'i>,
-    trace_ctx: &mut TraceHandler,
+    trace_ctx: &mut TraceHandler<VT>,
     completeness_updater: &mut ParCompletenessUpdater,
     subtree_type: SubtreeType,
-) -> ExecutionResult<SubtreeResult> {
+) -> ExecutionResult<SubtreeResult<VT>> {
     let subtree = match subtree_type {
         SubtreeType::Left => &par.0,
         SubtreeType::Right => &par.1,
@@ -83,14 +83,14 @@ fn execute_subtree<'i>(
     Ok(result)
 }
 
-enum SubtreeResult {
+enum SubtreeResult<VT> {
     Succeeded,
-    Failed(ExecutionError),
+    Failed(ExecutionError<VT>),
 }
 
-fn prepare_par_result(
-    left_result: SubtreeResult,
-    right_result: SubtreeResult,
+fn prepare_par_result<VT>(
+    left_result: SubtreeResult<VT>,
+    right_result: SubtreeResult<VT>,
     exec_ctx: &mut ExecutionCtx<'_>,
 ) -> ExecutionResult<()> {
     match (left_result, right_result) {

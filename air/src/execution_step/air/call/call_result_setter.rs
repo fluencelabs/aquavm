@@ -27,11 +27,11 @@ use air_trace_handler::TraceHandler;
 
 /// Writes result of a local `Call` instruction to `ExecutionCtx` at `output`.
 /// Returns call result.
-pub(crate) fn set_local_result<'i>(
+pub(crate) fn set_local_result<'i, VT>(
     executed_result: ValueAggregate,
     output: &CallOutputValue<'i>,
     exec_ctx: &mut ExecutionCtx<'i>,
-) -> ExecutionResult<CallResult> {
+) -> ExecutionResult<CallResult<VT>> {
     let result_value = executed_result.result.clone();
     match output {
         CallOutputValue::Variable(Variable::Scalar(scalar)) => {
@@ -49,8 +49,8 @@ pub(crate) fn set_local_result<'i>(
     }
 }
 
-pub(crate) fn set_result_from_value<'i>(
-    value: Value,
+pub(crate) fn set_result_from_value<'i, VT>(
+    value: Value<VT>,
     tetraplet: RcSecurityTetraplet,
     trace_pos: usize,
     output: &CallOutputValue<'i>,
@@ -77,10 +77,10 @@ pub(crate) fn set_result_from_value<'i>(
 }
 
 /// Writes an executed state of a particle being sent to remote node.
-pub(crate) fn set_remote_call_result<'i>(
+pub(crate) fn set_remote_call_result<'i, VT>(
     peer_pk: String,
     exec_ctx: &mut ExecutionCtx<'i>,
-    trace_ctx: &mut TraceHandler,
+    trace_ctx: &mut TraceHandler<VT>,
 ) {
     exec_ctx.next_peer_pks.push(peer_pk);
     exec_ctx.subtree_complete = false;

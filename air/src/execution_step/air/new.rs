@@ -23,7 +23,7 @@ use air_parser::ast::New;
 use air_parser::ast::Variable;
 
 impl<'i> super::ExecutableInstruction<'i> for New<'i> {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
+    fn execute<VT>(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler<VT>) -> ExecutionResult<()> {
         log_instruction!(new, exec_ctx, trace_ctx);
 
         prolog(self, exec_ctx);

@@ -26,7 +26,7 @@ use crate::log_instruction;
 use air_parser::ast::MisMatch;
 
 impl<'i> super::ExecutableInstruction<'i> for MisMatch<'i> {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
+    fn execute<VT>(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler<VT>) -> ExecutionResult<()> {
         log_instruction!(match_, exec_ctx, trace_ctx);
 
         let are_values_equal = joinable!(

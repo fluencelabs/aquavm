@@ -15,11 +15,13 @@
  */
 
 use super::*;
+
 use serde::de::SeqAccess;
 use serde::de::Visitor;
 use serde::ser::SerializeSeq;
 use serde::Deserializer;
 use serde::Serializer;
+
 use std::fmt;
 
 pub mod par_serializer {
@@ -88,6 +90,7 @@ pub mod sender_serializer {
         D: Deserializer<'de>,
     {
         struct SenderVisitor;
+
         impl<'de> Visitor<'de> for SenderVisitor {
             type Value = Sender;
 

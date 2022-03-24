@@ -37,7 +37,7 @@ use air_trace_handler::MergerApResult;
 use std::rc::Rc;
 
 impl<'i> super::ExecutableInstruction<'i> for Ap<'i> {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
+    fn execute<VT>(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler<VT>) -> ExecutionResult<()> {
         log_instruction!(call, exec_ctx, trace_ctx);
         let should_touch_trace = should_touch_trace(self);
         // this applying should be at the very beginning of this function,
@@ -59,10 +59,10 @@ fn should_touch_trace(ap: &Ap<'_>) -> bool {
     matches!(ap.result, ast::Variable::Stream(_))
 }
 
-fn to_merger_ap_result(
+fn to_merger_ap_result<VT>(
     should_touch_trace: bool,
     instr: &Ap<'_>,
-    trace_ctx: &mut TraceHandler,
+    trace_ctx: &mut TraceHandler<VT>,
 ) -> ExecutionResult<MergerApResult> {
     let merger_ap_result = if should_touch_trace {
         let merger_ap_result = trace_to_exec_err!(trace_ctx.meet_ap_start(), instr)?;
@@ -95,11 +95,11 @@ fn update_context<'ctx>(
     }
 }
 
-fn maybe_update_trace(
+fn maybe_update_trace<VT>(
     should_touch_trace: bool,
     merger_ap_result: &MergerApResult,
     maybe_generation: Option<u32>,
-    trace_ctx: &mut TraceHandler,
+    trace_ctx: &mut TraceHandler<VT>,
 ) {
     if !should_touch_trace {
         // if generations are empty, then this ap instruction operates only with scalars and data

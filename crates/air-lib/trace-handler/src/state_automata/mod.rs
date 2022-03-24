@@ -24,7 +24,7 @@ mod utils;
 pub use errors::StateFSMError;
 pub use par_fsm::SubtreeType;
 
-pub(crate) type FSMResult<T> = std::result::Result<T, StateFSMError>;
+pub(crate) type FSMResult<T, VT> = std::result::Result<T, StateFSMError<VT>>;
 
 pub(super) use fold_fsm::FoldFSM;
 pub(super) use fsm_queue::FSMKeeper;

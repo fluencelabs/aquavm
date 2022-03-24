@@ -18,20 +18,23 @@ use super::ExecutedState;
 use super::GlobalStreamGens;
 use super::RestrictedStreamGens;
 use super::DATA_FORMAT_VERSION;
+
+//use serde::de::DeserializeOwned;
 use serde::Deserialize;
 use serde::Serialize;
+
 use std::ops::Deref;
 
-pub type ExecutionTrace = Vec<ExecutedState>;
+pub type ExecutionTrace<T> = Vec<ExecutedState<T>>;
 
 /// The AIR interpreter could be considered as a function
 /// f(prev_data: InterpreterData, current_data: InterpreterData, ... ) -> (result_data: InterpreterData, ...).
 /// This function receives prev and current data and produces a result data. All these data
 /// have the following format.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct InterpreterData {
+pub struct InterpreterData<T> {
     /// Trace of AIR execution, which contains executed call, par and fold states.
-    pub trace: ExecutionTrace,
+    pub trace: ExecutionTrace<T>,
 
     /// Contains maximum generation for each global stream. This info will be used while merging
     /// values in streams. This field is also needed for backward compatibility with
@@ -54,7 +57,10 @@ pub struct InterpreterData {
     pub restricted_streams: RestrictedStreamGens,
 }
 
-impl InterpreterData {
+impl<T> InterpreterData<T>
+where
+    T: Serialize + for<'de> Deserialize<'de>,
+{
     pub fn new() -> Self {
         Self {
             trace: <_>::default(),
@@ -66,7 +72,7 @@ impl InterpreterData {
     }
 
     pub fn from_execution_result(
-        trace: ExecutionTrace,
+        trace: ExecutionTrace<T>,
         streams: GlobalStreamGens,
         restricted_streams: RestrictedStreamGens,
         last_call_request_id: u32,
@@ -92,7 +98,10 @@ impl InterpreterData {
     }
 }
 
-impl Default for InterpreterData {
+impl<T> Default for InterpreterData<T>
+where
+    T: Serialize + for<'de> Deserialize<'de>,
+{
     fn default() -> Self {
         Self::new()
     }

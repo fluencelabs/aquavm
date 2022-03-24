@@ -47,7 +47,10 @@ pub(crate) struct FoldFSM {
 }
 
 impl FoldFSM {
-    pub(crate) fn from_fold_start(fold_result: MergerFoldResult, data_keeper: &mut DataKeeper) -> FSMResult<Self> {
+    pub(crate) fn from_fold_start<VT: Clone>(
+        fold_result: MergerFoldResult,
+        data_keeper: &mut DataKeeper<VT>,
+    ) -> FSMResult<Self, VT> {
         let state_inserter = StateInserter::from_keeper(data_keeper);
         let state_handler =
             CtxStateHandler::prepare(&fold_result.prev_fold_lore, &fold_result.current_fold_lore, data_keeper)?;
@@ -63,7 +66,11 @@ impl FoldFSM {
         Ok(fold_fsm)
     }
 
-    pub(crate) fn meet_iteration_start(&mut self, value_pos: usize, data_keeper: &mut DataKeeper) -> FSMResult<()> {
+    pub(crate) fn meet_iteration_start<VT: Clone>(
+        &mut self,
+        value_pos: usize,
+        data_keeper: &mut DataKeeper<VT>,
+    ) -> FSMResult<(), VT> {
         let (prev_pos, current_pos) = match data_keeper.new_to_old_pos.get(&value_pos) {
             Some(DataPositions { prev_pos, current_pos }) => (prev_pos, current_pos),
             None => return self.prepare(None, None, value_pos, data_keeper),
@@ -75,13 +82,13 @@ impl FoldFSM {
         self.prepare(prev_lore, current_lore, value_pos, data_keeper)
     }
 
-    fn prepare(
+    fn prepare<VT: Clone>(
         &mut self,
         prev_lore: Option<ResolvedSubTraceDescs>,
         current_lore: Option<ResolvedSubTraceDescs>,
         value_pos: usize,
-        data_keeper: &mut DataKeeper,
-    ) -> FSMResult<()> {
+        data_keeper: &mut DataKeeper<VT>,
+    ) -> FSMResult<(), VT> {
         apply_fold_lore_before(data_keeper, &prev_lore, &current_lore)?;
 
         let ctor = SubTraceLoreCtor::from_before_start(value_pos, data_keeper);
@@ -90,11 +97,11 @@ impl FoldFSM {
         Ok(())
     }
 
-    pub(crate) fn meet_iteration_end(&mut self, data_keeper: &mut DataKeeper) {
+    pub(crate) fn meet_iteration_end<VT: Clone>(&mut self, data_keeper: &mut DataKeeper<VT>) {
         self.ctor_queue.current().ctor.before_end(data_keeper);
     }
 
-    pub(crate) fn meet_back_iterator(&mut self, data_keeper: &mut DataKeeper) -> FSMResult<()> {
+    pub(crate) fn meet_back_iterator<VT: Clone>(&mut self, data_keeper: &mut DataKeeper<VT>) -> FSMResult<(), VT> {
         let back_traversal_started = self.ctor_queue.back_traversal_started();
 
         let LoreCtorDesc {
@@ -125,7 +132,7 @@ impl FoldFSM {
         Ok(())
     }
 
-    pub(crate) fn meet_generation_end(&mut self, data_keeper: &mut DataKeeper) {
+    pub(crate) fn meet_generation_end<VT: Clone>(&mut self, data_keeper: &mut DataKeeper<VT>) {
         self.ctor_queue.finish(data_keeper);
         self.ctor_queue.end_back_traverse();
 
@@ -133,7 +140,7 @@ impl FoldFSM {
         self.result_lore.extend(fold_lore);
     }
 
-    pub(crate) fn meet_fold_end(self, data_keeper: &mut DataKeeper) {
+    pub(crate) fn meet_fold_end<VT: Clone>(self, data_keeper: &mut DataKeeper<VT>) {
         // TODO: check for prev and current lore emptiness
         let fold_result = FoldResult { lore: self.result_lore };
         let state = ExecutedState::Fold(fold_result);

@@ -26,20 +26,20 @@ use air_parser::ast::Instruction;
 type PreparationResult<T> = Result<T, PreparationError>;
 
 /// Represents result of the preparation_step step.
-pub(crate) struct PreparationDescriptor<'ctx, 'i> {
+pub(crate) struct PreparationDescriptor<'ctx, 'i, VT> {
     pub(crate) exec_ctx: ExecutionCtx<'ctx>,
-    pub(crate) trace_handler: TraceHandler,
+    pub(crate) trace_handler: TraceHandler<VT>,
     pub(crate) air: Instruction<'i>,
 }
 
 /// Parse and prepare supplied data and AIR script.
-pub(crate) fn prepare<'i>(
+pub(crate) fn prepare<'i, VT>(
     prev_data: &[u8],
     current_data: &[u8],
     raw_air: &'i str,
     call_results: &[u8],
     run_parameters: RunParameters,
-) -> PreparationResult<PreparationDescriptor<'static, 'i>> {
+) -> PreparationResult<PreparationDescriptor<'static, 'i, VT>> {
     let prev_data = try_to_data(prev_data)?;
     let current_data = try_to_data(current_data)?;
 
@@ -57,14 +57,14 @@ pub(crate) fn prepare<'i>(
     Ok(result)
 }
 
-fn try_to_data(raw_data: &[u8]) -> PreparationResult<InterpreterData> {
+fn try_to_data<VT>(raw_data: &[u8]) -> PreparationResult<InterpreterData<VT>> {
     use PreparationError::DataDeFailed;
 
     InterpreterData::try_from_slice(raw_data).map_err(|err| DataDeFailed(err, raw_data.to_vec()))
 }
 
-fn make_exec_ctx(
-    prev_data: &InterpreterData,
+fn make_exec_ctx<VT>(
+    prev_data: &InterpreterData<VT>,
     call_results: &[u8],
     run_parameters: RunParameters,
 ) -> PreparationResult<ExecutionCtx<'static>> {
@@ -87,7 +87,7 @@ fn make_exec_ctx(
     Ok(ctx)
 }
 
-fn create_streams(ctx: &mut ExecutionCtx<'_>, prev_data: &InterpreterData) {
+fn create_streams<VT>(ctx: &mut ExecutionCtx<'_>, prev_data: &InterpreterData<VT>) {
     for (stream_name, generation_count) in prev_data.global_streams.iter() {
         let new_stream = Stream::from_generations_count(*generation_count as usize);
 

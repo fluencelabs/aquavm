@@ -33,7 +33,7 @@ use polyplets::SecurityTetraplet;
 use std::rc::Rc;
 
 impl<'i> super::ExecutableInstruction<'i> for Fail<'i> {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
+    fn execute<VT>(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler<VT>) -> ExecutionResult<()> {
         log_instruction!(fail, exec_ctx, trace_ctx);
 
         match self {
@@ -48,7 +48,10 @@ impl<'i> super::ExecutableInstruction<'i> for Fail<'i> {
     }
 }
 
-fn fail_with_scalar<'i>(scalar: &ast::ScalarWithLambda<'i>, exec_ctx: &mut ExecutionCtx<'i>) -> ExecutionResult<()> {
+fn fail_with_scalar<'i, VT>(
+    scalar: &ast::ScalarWithLambda<'i>,
+    exec_ctx: &mut ExecutionCtx<'i>,
+) -> ExecutionResult<()> {
     let (value, mut tetraplet) = resolve_ast_scalar_wl(scalar, exec_ctx)?;
     // tetraplets always have one element here and it'll be refactored after boxed value
     let tetraplet = tetraplet.remove(0);
@@ -57,7 +60,7 @@ fn fail_with_scalar<'i>(scalar: &ast::ScalarWithLambda<'i>, exec_ctx: &mut Execu
     fail_with_error_object(exec_ctx, Rc::new(value), Some(tetraplet))
 }
 
-fn fail_with_literals<'i>(
+fn fail_with_literals<'i, VT>(
     error_code: i64,
     error_message: &str,
     fail: &Fail<'_>,
@@ -76,7 +79,7 @@ fn fail_with_literals<'i>(
     fail_with_error_object(exec_ctx, Rc::new(error_object), Some(literal_tetraplet))
 }
 
-fn fail_with_last_error(exec_ctx: &mut ExecutionCtx<'_>) -> ExecutionResult<()> {
+fn fail_with_last_error<VT>(exec_ctx: &mut ExecutionCtx<'_>) -> ExecutionResult<()> {
     let LastError { error, tetraplet } = exec_ctx.last_error_descriptor.last_error();
 
     // to avoid warnings from https://github.com/rust-lang/rust/issues/59159
@@ -86,7 +89,7 @@ fn fail_with_last_error(exec_ctx: &mut ExecutionCtx<'_>) -> ExecutionResult<()> 
     fail_with_error_object(exec_ctx, error, tetraplet)
 }
 
-fn fail_with_error_object(
+fn fail_with_error_object<VT>(
     exec_ctx: &mut ExecutionCtx<'_>,
     error: Rc<JValue>,
     tetraplet: Option<RcSecurityTetraplet>,

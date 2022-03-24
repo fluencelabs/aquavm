@@ -29,21 +29,21 @@ use fstrings::f;
 use fstrings::format_args_f;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub(crate) struct StateDescriptor {
+pub(crate) struct StateDescriptor<VT> {
     should_execute: bool,
-    prev_state: Option<CallResult>,
+    prev_state: Option<CallResult<VT>>,
 }
 
 /// This function looks at the existing call state, validates it,
 /// and returns Ok(true) if the call should be executed further.
-pub(super) fn handle_prev_state<'i>(
+pub(super) fn handle_prev_state<'i, VT: Clone>(
     tetraplet: &RcSecurityTetraplet,
     output: &CallOutputValue<'i>,
-    prev_result: CallResult,
+    prev_result: CallResult<VT>,
     trace_pos: usize,
     exec_ctx: &mut ExecutionCtx<'i>,
-    trace_ctx: &mut TraceHandler,
-) -> ExecutionResult<StateDescriptor> {
+    trace_ctx: &mut TraceHandler<VT>,
+) -> ExecutionResult<StateDescriptor<VT>> {
     use CallResult::*;
 
     match &prev_result {
@@ -96,12 +96,12 @@ use super::call_result_setter::*;
 use crate::execution_step::ValueAggregate;
 use crate::JValue;
 
-fn update_state_with_service_result<'i>(
+fn update_state_with_service_result<'i, VT>(
     tetraplet: RcSecurityTetraplet,
     output: &CallOutputValue<'i>,
     service_result: CallServiceResult,
     exec_ctx: &mut ExecutionCtx<'i>,
-    trace_ctx: &mut TraceHandler,
+    trace_ctx: &mut TraceHandler<VT>,
 ) -> ExecutionResult<()> {
     // check that service call succeeded
     let service_result = handle_service_error(service_result, trace_ctx)?;
@@ -117,9 +117,9 @@ fn update_state_with_service_result<'i>(
     Ok(())
 }
 
-fn handle_service_error(
+fn handle_service_error<VT>(
     service_result: CallServiceResult,
-    trace_ctx: &mut TraceHandler,
+    trace_ctx: &mut TraceHandler<VT>,
 ) -> ExecutionResult<CallServiceResult> {
     use air_interpreter_interface::CALL_SERVICE_SUCCESS;
     use CallResult::CallServiceFailed;
@@ -136,9 +136,9 @@ fn handle_service_error(
     Err(error.into())
 }
 
-fn try_to_service_result(
+fn try_to_service_result<VT>(
     service_result: CallServiceResult,
-    trace_ctx: &mut TraceHandler,
+    trace_ctx: &mut TraceHandler<VT>,
 ) -> ExecutionResult<Rc<JValue>> {
     use CallResult::CallServiceFailed;
 
@@ -157,7 +157,7 @@ fn try_to_service_result(
     }
 }
 
-impl StateDescriptor {
+impl<VT> StateDescriptor<VT> {
     pub(crate) fn executed() -> Self {
         Self {
             should_execute: false,
@@ -165,21 +165,21 @@ impl StateDescriptor {
         }
     }
 
-    pub(crate) fn not_ready(prev_state: CallResult) -> Self {
+    pub(crate) fn not_ready(prev_state: CallResult<VT>) -> Self {
         Self {
             should_execute: false,
             prev_state: Some(prev_state),
         }
     }
 
-    pub(crate) fn can_execute_now(prev_state: CallResult) -> Self {
+    pub(crate) fn can_execute_now(prev_state: CallResult<VT>) -> Self {
         Self {
             should_execute: true,
             prev_state: Some(prev_state),
         }
     }
 
-    pub(crate) fn cant_execute_now(prev_state: CallResult) -> Self {
+    pub(crate) fn cant_execute_now(prev_state: CallResult<VT>) -> Self {
         Self {
             should_execute: false,
             prev_state: Some(prev_state),
@@ -197,7 +197,7 @@ impl StateDescriptor {
         self.should_execute
     }
 
-    pub(crate) fn maybe_set_prev_state(self, trace_ctx: &mut TraceHandler) {
+    pub(crate) fn maybe_set_prev_state(self, trace_ctx: &mut TraceHandler<VT>) {
         if let Some(call_result) = self.prev_state {
             trace_ctx.meet_call_end(call_result);
         }

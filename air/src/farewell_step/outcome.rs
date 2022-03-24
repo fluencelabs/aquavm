@@ -29,9 +29,9 @@ use std::rc::Rc;
 
 /// Create InterpreterOutcome from supplied execution context and trace handler,
 /// set ret_code to INTERPRETER_SUCCESS.
-pub(crate) fn from_success_result(
+pub(crate) fn from_success_result<VT>(
     exec_ctx: ExecutionCtx<'_>,
-    trace_handler: TraceHandler,
+    trace_handler: TraceHandler<VT>,
 ) -> Result<InterpreterOutcome, InterpreterOutcome> {
     let (ret_code, error_message) = if exec_ctx.call_results.is_empty() {
         (INTERPRETER_SUCCESS, String::new())
@@ -65,17 +65,17 @@ pub(crate) fn from_uncatchable_error(
 
 /// Create InterpreterOutcome from supplied execution context, trace handler, and error,
 /// set ret_code based on the error.
-pub(crate) fn from_execution_error(
+pub(crate) fn from_execution_error<VT>(
     exec_ctx: ExecutionCtx<'_>,
-    trace_handler: TraceHandler,
+    trace_handler: TraceHandler<VT>,
     error: impl ToErrorCode + ToString,
 ) -> InterpreterOutcome {
     populate_outcome_from_contexts(exec_ctx, trace_handler, error.to_error_code(), error.to_string())
 }
 
-fn populate_outcome_from_contexts(
+fn populate_outcome_from_contexts<VT>(
     exec_ctx: ExecutionCtx<'_>,
-    trace_handler: TraceHandler,
+    trace_handler: TraceHandler<VT>,
     ret_code: i64,
     error_message: String,
 ) -> InterpreterOutcome {

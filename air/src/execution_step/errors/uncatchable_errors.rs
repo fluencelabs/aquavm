@@ -30,11 +30,11 @@ use thiserror::Error as ThisError;
 /// checked additionally on the validation step, and presence here for convenience.
 #[derive(ThisError, EnumDiscriminants, Debug)]
 #[strum_discriminants(derive(EnumIter))]
-pub enum UncatchableError {
+pub enum UncatchableError<VT> {
     /// Errors bubbled from a trace handler.
     #[error("on instruction '{instruction}' trace handler encountered an error: {trace_error}")]
     TraceError {
-        trace_error: TraceHandlerError,
+        trace_error: TraceHandlerError<VT>,
         instruction: String,
     },
 
@@ -60,7 +60,7 @@ pub enum UncatchableError {
     MultipleVariablesFound(String),
 }
 
-impl ToErrorCode for UncatchableError {
+impl<VT> ToErrorCode for UncatchableError<VT> {
     fn to_error_code(&self) -> i64 {
         use crate::utils::UNCATCHABLE_ERRORS_START_ID;
         crate::generate_to_error_code!(self, UncatchableError, UNCATCHABLE_ERRORS_START_ID)

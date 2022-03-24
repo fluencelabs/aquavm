@@ -63,11 +63,11 @@ macro_rules! execute {
 }
 
 pub(crate) trait ExecutableInstruction<'i> {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()>;
+    fn execute<VT>(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler<VT>) -> ExecutionResult<()>;
 }
 
 impl<'i> ExecutableInstruction<'i> for Instruction<'i> {
-    fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
+    fn execute<VT>(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler<VT>) -> ExecutionResult<()> {
         match self {
             // call isn't wrapped by the execute macro because
             // it internally sets last_error with resolved triplet

@@ -23,19 +23,19 @@ use utils::*;
 const EXPECTED_STATE_NAME: &str = "call";
 
 #[derive(Debug, Clone)]
-pub enum MergerCallResult {
+pub enum MergerCallResult<VT> {
     /// There is no corresponding state in a trace for this call.
     Empty,
 
     /// There was a state in at least one of the contexts. If there were two states in
     /// both contexts, they were successfully merged.
-    CallResult { value: CallResult, trace_pos: usize },
+    CallResult { value: CallResult<VT>, trace_pos: usize },
 }
 
-pub(crate) fn try_merge_next_state_as_call(
-    data_keeper: &mut DataKeeper,
+pub(crate) fn try_merge_next_state_as_call<VT: Clone + Eq>(
+    data_keeper: &mut DataKeeper<VT>,
     output_value: &CallOutputValue<'_>,
-) -> MergeResult<MergerCallResult> {
+) -> MergeResult<MergerCallResult<VT>, VT> {
     use ExecutedState::Call;
     use PreparationScheme::*;
 
@@ -69,12 +69,12 @@ pub(crate) fn try_merge_next_state_as_call(
     Ok(call_result)
 }
 
-fn merge_call_result(
-    prev_call: CallResult,
-    current_call: CallResult,
+fn merge_call_result<VT: Clone + Eq>(
+    prev_call: CallResult<VT>,
+    current_call: CallResult<VT>,
     value_type: ValueType<'_>,
-    data_keeper: &DataKeeper,
-) -> MergeResult<CallResult> {
+    data_keeper: &DataKeeper<VT>,
+) -> MergeResult<CallResult<VT>, VT> {
     use CallResult::*;
 
     let merged_state = match (prev_call, current_call) {
@@ -97,11 +97,11 @@ fn merge_call_result(
     Ok(merged_state)
 }
 
-pub(super) fn prepare_call_result(
-    value: CallResult,
+pub(super) fn prepare_call_result<VT: Clone>(
+    value: CallResult<VT>,
     scheme: PreparationScheme,
-    data_keeper: &mut DataKeeper,
-) -> MergerCallResult {
+    data_keeper: &mut DataKeeper<VT>,
+) -> MergerCallResult<VT> {
     let trace_pos = data_keeper.result_states_count();
     prepare_positions_mapping(scheme, data_keeper);
 
