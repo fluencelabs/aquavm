@@ -26,6 +26,9 @@ use crate::log_instruction;
 use air_parser::ast::FoldScalar;
 use air_parser::ast::FoldScalarIterable;
 use air_parser::ast::Instruction;
+use air_values::fold_iterable_state::FoldIterableState;
+use air_values::fold_iterable_state::IterableType;
+use air_values::fold_iterable_state::IterableValue;
 
 use std::rc::Rc;
 
@@ -63,7 +66,7 @@ pub(super) fn fold<'i, VT>(
     exec_ctx: &mut ExecutionCtx<'i>,
     trace_ctx: &mut TraceHandler<VT>,
 ) -> ExecutionResult<()> {
-    let fold_state = FoldState::from_iterable(iterable, iterable_type, instruction.clone());
+    let fold_state = FoldIterableState::from_iterable(iterable, iterable_type, instruction.clone());
     exec_ctx.scalars.meet_fold_start();
     exec_ctx.scalars.set_iterable_value(iterator, fold_state)?;
 

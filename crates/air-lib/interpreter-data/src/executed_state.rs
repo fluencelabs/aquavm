@@ -17,6 +17,7 @@
 mod impls;
 mod se_de;
 
+use derivative::Derivative;
 use se_de::par_serializer;
 use se_de::sender_serializer;
 use serde::Deserialize;
@@ -37,27 +38,31 @@ pub enum Sender {
     PeerIdWithCallId { peer_id: Rc<String>, call_id: u32 },
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Derivative, Serialize, Deserialize)]
+// derivative is used here due to https://github.com/rust-lang/rust/issues/26925
+// otherwise it'd be necessary to have a bound for clone all up to the call stack
+#[derivative(Debug, Clone(bound = ""), PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
-pub enum CallResult<T> {
+pub enum CallResult<VT> {
     /// Request was sent to a target node by node with such public key and it shouldn't be called again.
     #[serde(with = "sender_serializer")]
     #[serde(rename = "sent_by")]
     RequestSentBy(Sender),
 
     /// A corresponding call's been already executed with such value as a result.
-    Executed(Value<T>),
+    Executed(Value<VT>),
 
     /// call_service ended with a service error.
     #[serde(rename = "failed")]
     CallServiceFailed(i32, Rc<String>),
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Derivative, Serialize, Deserialize)]
+#[derivative(Debug, Clone(bound = ""), PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
-pub enum Value<T> {
-    Scalar(T),
-    Stream { value: T, generation: u32 },
+pub enum Value<VT> {
+    Scalar(Rc<VT>),
+    Stream { value: Rc<VT>, generation: u32 },
 }
 
 /// Let's consider an example of trace that could be produces by the following fold:
@@ -122,12 +127,13 @@ pub struct ApResult {
     pub res_generations: Vec<u32>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Derivative, Serialize, Deserialize)]
+#[derivative(Debug, Clone(bound = ""), PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
-pub enum ExecutedState<T> {
+pub enum ExecutedState<VT> {
     #[serde(with = "par_serializer")]
     Par(ParResult),
-    Call(CallResult<T>),
+    Call(CallResult<VT>),
     Fold(FoldResult),
     Ap(ApResult),
 }

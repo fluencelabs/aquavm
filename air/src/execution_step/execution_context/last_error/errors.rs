@@ -14,22 +14,17 @@
  * limitations under the License.
  */
 
-use crate::JValue;
-
 use thiserror::Error as ThisError;
 
 /// Describes errors related to converting a scalar into error object.
 #[derive(Debug, Clone, ThisError)]
 pub enum LastErrorObjectError {
-    #[error("scalar should have an object type to be converted into error object, but '{0}' doesn't have")]
-    ScalarMustBeObject(JValue),
-
     #[error("scalar '{scalar}' must have field with name '{field_name}'")]
-    ScalarMustContainField { scalar: JValue, field_name: &'static str },
+    ScalarMustContainField { scalar: String, field_name: &'static str },
 
     #[error("{field_name} of scalar '{scalar}' must have {expected_type} type")]
     ScalarFieldIsWrongType {
-        scalar: JValue,
+        scalar: String,
         field_name: &'static str,
         expected_type: &'static str,
     },

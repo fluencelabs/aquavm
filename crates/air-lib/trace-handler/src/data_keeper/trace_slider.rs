@@ -37,10 +37,7 @@ pub struct TraceSlider<VT> {
     seen_elements: usize,
 }
 
-impl<VT> TraceSlider<VT>
-where
-    VT: Clone,
-{
+impl<VT> TraceSlider<VT> {
     pub(crate) fn new(trace: ExecutionTrace<VT>) -> Self {
         let subtrace_len = trace.len();
 

@@ -19,7 +19,7 @@ use super::AIRLexer;
 use super::LexerError;
 use super::Token;
 
-use air_lambda_parser::LambdaAST;
+use air_lambda_parser::AIRLambdaAST;
 use air_lambda_parser::ValueAccessor;
 
 use fstrings::f;
@@ -290,7 +290,7 @@ fn lambda() {
             Token::ScalarWithLambda {
                 name: "value",
                 lambda: unsafe {
-                    LambdaAST::new_unchecked(vec![
+                    AIRLambdaAST::new_unchecked(vec![
                         ValueAccessor::FieldAccessByName {
                             field_name: "field",
                         },
@@ -388,7 +388,7 @@ fn last_error_instruction() {
     const LAST_ERROR: &str = r#"%last_error%.$.instruction"#;
 
     let token = Token::LastErrorWithLambda(unsafe {
-        LambdaAST::new_unchecked(vec![ValueAccessor::FieldAccessByName {
+        AIRLambdaAST::new_unchecked(vec![ValueAccessor::FieldAccessByName {
             field_name: "instruction",
         }])
     });
@@ -401,7 +401,7 @@ fn last_error_message() {
     const LAST_ERROR: &str = r#"%last_error%.$.message"#;
 
     let token = Token::LastErrorWithLambda(unsafe {
-        LambdaAST::new_unchecked(vec![ValueAccessor::FieldAccessByName {
+        AIRLambdaAST::new_unchecked(vec![ValueAccessor::FieldAccessByName {
             field_name: "message",
         }])
     });
@@ -413,7 +413,7 @@ fn last_error_peer_id() {
     const LAST_ERROR: &str = r#"%last_error%.$.peer_id"#;
 
     let token = Token::LastErrorWithLambda(unsafe {
-        LambdaAST::new_unchecked(vec![ValueAccessor::FieldAccessByName {
+        AIRLambdaAST::new_unchecked(vec![ValueAccessor::FieldAccessByName {
             field_name: "peer_id",
         }])
     });
@@ -425,7 +425,7 @@ fn last_error_non_standard_field() {
     const LAST_ERROR: &str = r#"%last_error%.$.asdasd"#;
 
     let token = Token::LastErrorWithLambda(unsafe {
-        LambdaAST::new_unchecked(vec![ValueAccessor::FieldAccessByName {
+        AIRLambdaAST::new_unchecked(vec![ValueAccessor::FieldAccessByName {
             field_name: "asdasd",
         }])
     });

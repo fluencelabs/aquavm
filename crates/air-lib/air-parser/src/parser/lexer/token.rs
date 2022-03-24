@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use crate::LambdaAST;
+use crate::AIRLambdaAST;
 
 use serde::Deserialize;
 use serde::Serialize;
@@ -32,7 +32,7 @@ pub enum Token<'input> {
     },
     ScalarWithLambda {
         name: &'input str,
-        lambda: LambdaAST<'input>,
+        lambda: AIRLambdaAST<'input>,
         position: usize,
     },
     Stream {
@@ -41,7 +41,7 @@ pub enum Token<'input> {
     },
     StreamWithLambda {
         name: &'input str,
-        lambda: LambdaAST<'input>,
+        lambda: AIRLambdaAST<'input>,
         position: usize,
     },
 
@@ -52,7 +52,7 @@ pub enum Token<'input> {
 
     InitPeerId,
     LastError,
-    LastErrorWithLambda(LambdaAST<'input>),
+    LastErrorWithLambda(AIRLambdaAST<'input>),
 
     Call,
     Ap,

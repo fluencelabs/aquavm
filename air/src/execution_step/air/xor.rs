@@ -22,6 +22,8 @@ use crate::log_instruction;
 
 use air_parser::ast::Xor;
 
+use std::fmt::Display;
+
 impl<'i> super::ExecutableInstruction<'i> for Xor<'i> {
     fn execute<VT>(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler<VT>) -> ExecutionResult<()> {
         log_instruction!(xor, exec_ctx, trace_ctx);
@@ -40,7 +42,10 @@ impl<'i> super::ExecutableInstruction<'i> for Xor<'i> {
     }
 }
 
-fn print_xor_log<VT>(e: &ExecutionError<VT>) {
+fn print_xor_log<VT>(e: &ExecutionError<VT>)
+where
+    VT: Display,
+{
     if e.is_match_or_mismatch() {
         // These errors actually aren't real errors, but a way to bubble execution_step up from match
         // to a corresponding xor. They'll become errors iff there is no such xor and execution_step is

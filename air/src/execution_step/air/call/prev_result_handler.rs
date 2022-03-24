@@ -17,13 +17,14 @@
 use super::*;
 use crate::execution_step::air::call::call_result_setter::set_result_from_value;
 use crate::execution_step::CatchableError;
-use crate::execution_step::RcSecurityTetraplet;
 
 use air_interpreter_data::CallResult;
 use air_interpreter_data::Sender;
 use air_interpreter_interface::CallServiceResult;
 use air_parser::ast::CallOutputValue;
 use air_trace_handler::TraceHandler;
+use air_values::boxed_value::RcSecurityTetraplet;
+use air_values::boxed_value::ValueAggregate;
 
 use fstrings::f;
 use fstrings::format_args_f;
@@ -36,7 +37,7 @@ pub(crate) struct StateDescriptor<VT> {
 
 /// This function looks at the existing call state, validates it,
 /// and returns Ok(true) if the call should be executed further.
-pub(super) fn handle_prev_state<'i, VT: Clone>(
+pub(super) fn handle_prev_state<'i, VT>(
     tetraplet: &RcSecurityTetraplet,
     output: &CallOutputValue<'i>,
     prev_result: CallResult<VT>,
@@ -93,8 +94,6 @@ pub(super) fn handle_prev_state<'i, VT: Clone>(
 }
 
 use super::call_result_setter::*;
-use crate::execution_step::ValueAggregate;
-use crate::JValue;
 
 fn update_state_with_service_result<'i, VT>(
     tetraplet: RcSecurityTetraplet,
@@ -139,7 +138,7 @@ fn handle_service_error<VT>(
 fn try_to_service_result<VT>(
     service_result: CallServiceResult,
     trace_ctx: &mut TraceHandler<VT>,
-) -> ExecutionResult<Rc<JValue>> {
+) -> ExecutionResult<Rc<VT>> {
     use CallResult::CallServiceFailed;
 
     match serde_json::from_str(&service_result.result) {

@@ -27,7 +27,7 @@ use std::fmt::Display;
 use std::fmt::Formatter;
 use std::rc::Rc;
 
-#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone)]
 pub struct ValueAggregate {
     pub result: Rc<dyn BoxedValue>,
     pub tetraplet: RcSecurityTetraplet,

@@ -32,7 +32,7 @@ pub enum MergerCallResult<VT> {
     CallResult { value: CallResult<VT>, trace_pos: usize },
 }
 
-pub(crate) fn try_merge_next_state_as_call<VT: Clone + Eq>(
+pub(crate) fn try_merge_next_state_as_call<VT: Eq>(
     data_keeper: &mut DataKeeper<VT>,
     output_value: &CallOutputValue<'_>,
 ) -> MergeResult<MergerCallResult<VT>, VT> {
@@ -69,7 +69,7 @@ pub(crate) fn try_merge_next_state_as_call<VT: Clone + Eq>(
     Ok(call_result)
 }
 
-fn merge_call_result<VT: Clone + Eq>(
+fn merge_call_result<VT: Eq>(
     prev_call: CallResult<VT>,
     current_call: CallResult<VT>,
     value_type: ValueType<'_>,
@@ -97,7 +97,7 @@ fn merge_call_result<VT: Clone + Eq>(
     Ok(merged_state)
 }
 
-pub(super) fn prepare_call_result<VT: Clone>(
+pub(super) fn prepare_call_result<VT>(
     value: CallResult<VT>,
     scheme: PreparationScheme,
     data_keeper: &mut DataKeeper<VT>,

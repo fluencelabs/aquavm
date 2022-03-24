@@ -18,7 +18,7 @@ use super::lexer::AccessorsLexer;
 use super::va_lambda;
 use super::LambdaParserError;
 use super::LambdaParserResult;
-use crate::LambdaAST;
+use crate::AIRLambdaAST;
 use crate::ValueAccessor;
 
 use va_lambda::LambdaParser;
@@ -28,7 +28,7 @@ use va_lambda::LambdaParser;
 thread_local!(static PARSER: LambdaParser = LambdaParser::new());
 
 /// Parse AIR `source_code` to `Box<Instruction>`
-pub fn parse(lambda: &str) -> LambdaParserResult<'_, LambdaAST> {
+pub fn parse(lambda: &str) -> LambdaParserResult<'_, AIRLambdaAST> {
     PARSER.with(|parser| {
         let mut errors = Vec::new();
         let lexer = AccessorsLexer::new(lambda);
@@ -42,11 +42,11 @@ pub fn parse(lambda: &str) -> LambdaParserResult<'_, LambdaAST> {
     })
 }
 
-fn try_to_lambda(accessors: Vec<ValueAccessor>) -> LambdaParserResult<'_, LambdaAST> {
+fn try_to_lambda(accessors: Vec<ValueAccessor>) -> LambdaParserResult<'_, AIRLambdaAST> {
     if accessors.is_empty() {
         return Err(LambdaParserError::EmptyLambda);
     }
 
-    let ast = unsafe { LambdaAST::new_unchecked(accessors) };
+    let ast = unsafe { AIRLambdaAST::new_unchecked(accessors) };
     Ok(ast)
 }

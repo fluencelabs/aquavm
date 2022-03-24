@@ -20,8 +20,6 @@ use super::call_result_setter::*;
 use super::prev_result_handler::*;
 use super::triplet::resolve;
 use super::*;
-use crate::execution_step::RcSecurityTetraplet;
-use crate::execution_step::RcSecurityTetraplets;
 use crate::execution_step::UncatchableError;
 use crate::trace_to_exec_err;
 use crate::JValue;
@@ -32,6 +30,8 @@ use air_interpreter_interface::CallRequestParams;
 use air_parser::ast;
 use air_trace_handler::MergerCallResult;
 use air_trace_handler::TraceHandler;
+use air_values::boxed_value::RcSecurityTetraplet;
+use air_values::boxed_value::RcSecurityTetraplets;
 
 use std::rc::Rc;
 
@@ -165,13 +165,13 @@ impl<'i> ResolvedCall<'i> {
 
     /// Prepare arguments of this call instruction by resolving and preparing their security tetraplets.
     fn resolve_args(&self, exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<ResolvedArguments> {
-        use crate::execution_step::resolver::resolve_to_args;
+        use crate::execution_step::resolver::resolve_to_ser_arg;
 
         let function_args = self.function_arg_paths.iter();
         let mut call_arguments = Vec::with_capacity(function_args.len());
         let mut tetraplets = Vec::with_capacity(function_args.len());
         for instruction_value in function_args {
-            let (arg, tetraplet) = resolve_to_args(instruction_value, exec_ctx)?;
+            let (arg, tetraplet) = resolve_to_ser_arg(instruction_value, exec_ctx)?;
             call_arguments.push(arg);
             tetraplets.push(tetraplet);
         }
@@ -191,11 +191,11 @@ impl<'i> ResolvedCall<'i> {
     /// a call instruction. It suppresses joinable errors.
     fn check_args<VT>(&self, exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<()> {
         // TODO: make this function more lightweight
-        use crate::execution_step::resolver::resolve_to_args;
+        use crate::execution_step::resolver::resolve_to_ser_arg;
 
         self.function_arg_paths
             .iter()
-            .try_for_each(|arg_path| match resolve_to_args(arg_path, exec_ctx) {
+            .try_for_each(|arg_path| match resolve_to_ser_arg(arg_path, exec_ctx) {
                 Ok(_) => Ok(()),
                 Err(e) if e.is_joinable() => Ok(()),
                 Err(e) => Err(e),
@@ -206,7 +206,7 @@ impl<'i> ResolvedCall<'i> {
 /// Check output type name for being already in execution context.
 // TODO: this check should be moved on a parsing stage
 fn check_output_name<VT>(output: &ast::CallOutputValue<'_>, exec_ctx: &ExecutionCtx<'_>) -> ExecutionResult<()> {
-    use crate::execution_step::boxed_value::ScalarRef;
+    use air_values::scalar::ScalarRef;
 
     let scalar_name = match output {
         ast::CallOutputValue::Variable(ast::Variable::Scalar(scalar)) => scalar.name,

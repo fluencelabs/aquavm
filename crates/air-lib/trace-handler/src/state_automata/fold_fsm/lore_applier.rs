@@ -19,7 +19,7 @@ use ByNextPosition::*;
 use MergeCtxType::*;
 
 /// Adjusts sliders accordingly to a before fold lore state.
-pub(super) fn apply_fold_lore_before<VT: Clone>(
+pub(super) fn apply_fold_lore_before<VT>(
     data_keeper: &mut DataKeeper<VT>,
     prev_fold_lore: &Option<ResolvedSubTraceDescs>,
     current_fold_lore: &Option<ResolvedSubTraceDescs>,
@@ -29,7 +29,7 @@ pub(super) fn apply_fold_lore_before<VT: Clone>(
 }
 
 /// Adjusts sliders accordingly to an after fold lore state.
-pub(super) fn apply_fold_lore_after<VT: Clone>(
+pub(super) fn apply_fold_lore_after<VT>(
     data_keeper: &mut DataKeeper<VT>,
     prev_fold_lore: &Option<ResolvedSubTraceDescs>,
     current_fold_lore: &Option<ResolvedSubTraceDescs>,
@@ -38,7 +38,7 @@ pub(super) fn apply_fold_lore_after<VT: Clone>(
     apply_fold_lore(data_keeper, current_fold_lore, Current, After)
 }
 
-fn apply_fold_lore<VT: Clone>(
+fn apply_fold_lore<VT>(
     data_keeper: &mut DataKeeper<VT>,
     fold_lore: &Option<ResolvedSubTraceDescs>,
     ctx_type: MergeCtxType,

@@ -15,7 +15,7 @@
  */
 
 mod air;
-mod boxed_value;
+//mod boxed_value;
 mod errors;
 pub(crate) mod execution_context;
 mod lambda_applier;
@@ -34,11 +34,12 @@ pub mod errors_prelude {
 }
 
 pub(super) use self::air::ExecutableInstruction;
-pub(super) use self::air::FoldState;
+/*
 pub(super) use boxed_value::Generation;
 pub(super) use boxed_value::ScalarRef;
 pub(super) use boxed_value::Stream;
 pub(super) use boxed_value::ValueAggregate;
+ */
 pub(crate) use errors::Joinable;
 pub(crate) use errors::LastErrorAffectable;
 pub(crate) use execution_context::ExecutionCtx;
@@ -48,6 +49,6 @@ pub(crate) use air_trace_handler::TraceHandler;
 
 use std::rc::Rc;
 
-type ExecutionResult<T> = std::result::Result<T, ExecutionError<Rc<dyn air_value::BoxedValue>>>;
+type ExecutionResult<T> = std::result::Result<T, ExecutionError<Rc<dyn air_values::boxed_value::BoxedValue>>>;
 type RcSecurityTetraplet = Rc<crate::SecurityTetraplet>;
 type RcSecurityTetraplets = Vec<RcSecurityTetraplet>;

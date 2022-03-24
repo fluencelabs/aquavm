@@ -16,7 +16,8 @@
 
 use super::LastErrorObjectError;
 use crate::execution_step::RcSecurityTetraplet;
-use crate::JValue;
+
+use air_values::boxed_value::BoxedValue;
 
 use serde::Deserialize;
 use serde::Serialize;
@@ -34,77 +35,62 @@ pub const PEER_ID_FIELD_NAME: &str = "peer_id";
 ///  - it's accessed by %last_error% literal
 ///  - if it's unset before the usage, JValue::Null will be used without join behaviour
 ///  - it's a global scalar, meaning that fold and new scopes doesn't apply for it
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone)]
 pub struct LastError {
     /// Error object that represents the last occurred error.
-    pub error: Rc<JValue>,
+    pub error: Rc<dyn BoxedValue>,
 
     /// Tetraplet that identify host where the error occurred.
     pub tetraplet: Option<RcSecurityTetraplet>,
 }
 
-pub(crate) fn error_from_raw_fields(error_code: i64, error_message: &str, instruction: &str, peer_id: &str) -> JValue {
-    serde_json::json!({
+pub(crate) fn error_from_raw_fields(
+    error_code: i64,
+    error_message: &str,
+    instruction: &str,
+    peer_id: &str,
+) -> Rc<dyn BoxedValue> {
+    // TODO: abstract over it
+    let jvalue = serde_json::json!({
         ERROR_CODE_FIELD_NAME: error_code,
         MESSAGE_FIELD_NAME: error_message,
         INSTRUCTION_FIELD_NAME: instruction,
         PEER_ID_FIELD_NAME: peer_id,
-    })
+    });
+
+    Rc::new(jvalue) as Rc<dyn BoxedValue>
 }
 
 /// Checks that a scalar is a value of an object types that contains at least two fields:
 ///  - error_code
 ///  - message
-pub(crate) fn check_error_object(scalar: &JValue) -> Result<(), LastErrorObjectError> {
-    let fields = match scalar {
-        JValue::Object(fields) => fields,
-        _ => return Err(LastErrorObjectError::ScalarMustBeObject(scalar.clone())),
-    };
-
-    let check_field = |field_name| {
-        fields
-            .get(field_name)
-            .ok_or_else(|| LastErrorObjectError::ScalarMustContainField {
-                scalar: scalar.clone(),
-                field_name,
-            })
-    };
-
-    let error_code = check_field(ERROR_CODE_FIELD_NAME)?;
-    ensure_jvalue_is_integer(scalar, error_code, ERROR_CODE_FIELD_NAME)?;
-
-    let message = check_field(MESSAGE_FIELD_NAME)?;
-    ensure_jvalue_is_string(scalar, message, MESSAGE_FIELD_NAME)?;
-
-    Ok(())
+pub(crate) fn check_error_object(value: &dyn BoxedValue) -> Result<(), LastErrorObjectError> {
+    check_error_code(value)?;
+    check_message(value)
 }
 
-fn ensure_jvalue_is_integer(
-    scalar: &JValue,
-    value: &JValue,
-    field_name: &'static str,
-) -> Result<(), LastErrorObjectError> {
-    match value {
-        JValue::Number(number) if number.is_i64() || number.is_u64() => Ok(()),
-        _ => Err(LastErrorObjectError::ScalarFieldIsWrongType {
-            scalar: scalar.clone(),
-            field_name,
+fn check_error_code(value: &dyn BoxedValue) -> Result<(), LastErrorObjectError> {
+    let error_code = value.get_by_field_name(ERROR_CODE_FIELD_NAME).and_then(|v| v.as_i64());
+
+    match error_code {
+        Some(_) => Ok(()),
+        None => Err(LastErrorObjectError::ScalarFieldIsWrongType {
+            scalar: value.to_string(),
+            field_name: ERROR_CODE_FIELD_NAME,
             expected_type: "integer",
         }),
     }
 }
 
-fn ensure_jvalue_is_string(
-    scalar: &JValue,
-    value: &JValue,
-    field_name: &'static str,
-) -> Result<(), LastErrorObjectError> {
-    match value {
-        JValue::String(_) => Ok(()),
-        _ => Err(LastErrorObjectError::ScalarFieldIsWrongType {
-            scalar: scalar.clone(),
-            field_name,
-            expected_type: "string",
+fn check_message(value: &dyn BoxedValue) -> Result<(), LastErrorObjectError> {
+    let error_code = value.get_by_field_name(MESSAGE_FIELD_NAME).and_then(|v| v.as_str());
+
+    match error_code {
+        Some(_) => Ok(()),
+        None => Err(LastErrorObjectError::ScalarFieldIsWrongType {
+            scalar: value.to_string(),
+            field_name: MESSAGE_FIELD_NAME,
+            expected_type: "integer",
         }),
     }
 }

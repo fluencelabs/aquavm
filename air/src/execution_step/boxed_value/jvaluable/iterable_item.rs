@@ -18,7 +18,7 @@ use super::select_from_scalar;
 use super::ExecutionResult;
 use super::IterableItem;
 use super::JValuable;
-use super::LambdaAST;
+use super::AIRLambdaAST;
 use crate::execution_step::ExecutionCtx;
 use crate::execution_step::RcSecurityTetraplets;
 use crate::JValue;
@@ -29,7 +29,7 @@ use std::borrow::Cow;
 use std::ops::Deref;
 
 impl<'ctx> JValuable for IterableItem<'ctx> {
-    fn apply_lambda<'i>(&self, lambda: &LambdaAST<'_>, exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<&JValue> {
+    fn apply_lambda<'i>(&self, lambda: &AIRLambdaAST<'_>, exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<&JValue> {
         use super::IterableItem::*;
 
         let jvalue = match self {
@@ -44,7 +44,7 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
 
     fn apply_lambda_with_tetraplets<'i>(
         &self,
-        lambda: &LambdaAST<'_>,
+        lambda: &AIRLambdaAST<'_>,
         exec_ctx: &ExecutionCtx<'i>,
     ) -> ExecutionResult<(&JValue, SecurityTetraplet)> {
         use super::IterableItem::*;

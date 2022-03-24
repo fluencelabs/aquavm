@@ -25,16 +25,16 @@ use serde::Serialize;
 
 use std::ops::Deref;
 
-pub type ExecutionTrace<T> = Vec<ExecutedState<T>>;
+pub type ExecutionTrace<VT> = Vec<ExecutedState<VT>>;
 
 /// The AIR interpreter could be considered as a function
 /// f(prev_data: InterpreterData, current_data: InterpreterData, ... ) -> (result_data: InterpreterData, ...).
 /// This function receives prev and current data and produces a result data. All these data
 /// have the following format.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct InterpreterData<T> {
+pub struct InterpreterData<VT> {
     /// Trace of AIR execution, which contains executed call, par and fold states.
-    pub trace: ExecutionTrace<T>,
+    pub trace: ExecutionTrace<VT>,
 
     /// Contains maximum generation for each global stream. This info will be used while merging
     /// values in streams. This field is also needed for backward compatibility with
@@ -57,9 +57,9 @@ pub struct InterpreterData<T> {
     pub restricted_streams: RestrictedStreamGens,
 }
 
-impl<T> InterpreterData<T>
+impl<VT> InterpreterData<VT>
 where
-    T: Serialize + for<'de> Deserialize<'de>,
+    VT: Serialize + for<'de> Deserialize<'de>,
 {
     pub fn new() -> Self {
         Self {
@@ -72,14 +72,14 @@ where
     }
 
     pub fn from_execution_result(
-        trace: ExecutionTrace<T>,
-        streams: GlobalStreamGens,
+        trace: ExecutionTrace<VT>,
+        global_streams: GlobalStreamGens,
         restricted_streams: RestrictedStreamGens,
         last_call_request_id: u32,
     ) -> Self {
         Self {
             trace,
-            global_streams: streams,
+            global_streams,
             version: DATA_FORMAT_VERSION.deref().clone(),
             last_call_request_id,
             restricted_streams,
@@ -98,9 +98,9 @@ where
     }
 }
 
-impl<T> Default for InterpreterData<T>
+impl<VT> Default for InterpreterData<VT>
 where
-    T: Serialize + for<'de> Deserialize<'de>,
+    VT: Serialize + for<'de> Deserialize<'de>,
 {
     fn default() -> Self {
         Self::new()

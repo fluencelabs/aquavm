@@ -15,25 +15,25 @@
  */
 
 use super::RcSecurityTetraplets;
-use crate::execution_step::boxed_value::JValuable;
-use crate::execution_step::boxed_value::Variable;
 use crate::execution_step::execution_context::ExecutionCtx;
-use crate::execution_step::lambda_applier::select_from_scalar;
 use crate::execution_step::ExecutionResult;
-use crate::JValue;
-use crate::LambdaAST;
+use crate::AIRLambdaAST;
 use crate::SecurityTetraplet;
 
 use air_parser::ast;
+use air_values::boxed_value::AIRValueAlgebra;
+use air_values::boxed_value::BoxedValue;
+use air_values::boxed_value::ValueWithTetraplet;
+use air_values::stream::Stream;
+use air_values::variable::Variable;
 
-use serde_json::json;
 use std::rc::Rc;
 
 /// Resolve value to called function arguments.
-pub(crate) fn resolve_to_args<'i>(
+pub(crate) fn resolve_to_ser_arg<'i>(
     value: &ast::Value<'i>,
     ctx: &ExecutionCtx<'i>,
-) -> ExecutionResult<(JValue, RcSecurityTetraplets)> {
+) -> ExecutionResult<(String, RcSecurityTetraplets)> {
     use ast::Value::*;
 
     match value {
@@ -42,34 +42,39 @@ pub(crate) fn resolve_to_args<'i>(
         Literal(value) => prepare_const(value.to_string(), ctx),
         Boolean(value) => prepare_const(*value, ctx),
         Number(value) => prepare_const(value, ctx),
-        EmptyArray => prepare_const(json!([]), ctx),
-        Variable(variable) => resolve_ast_variable_wl(variable, ctx),
+        EmptyArray => prepare_const("", ctx),
+        Variable(variable) => {
+            resolve_ast_variable_wl(variable, ctx).map(|(value, tetraplets)| (value.serialize(), tetraplets))
+        }
     }
 }
 
 #[allow(clippy::unnecessary_wraps)]
 pub(crate) fn prepare_const(
-    arg: impl Into<JValue>,
+    arg: impl Into<String>,
     ctx: &ExecutionCtx<'_>,
-) -> ExecutionResult<(JValue, RcSecurityTetraplets)> {
-    let jvalue = arg.into();
+) -> ExecutionResult<(String, RcSecurityTetraplets)> {
+    let serialized_arg = arg.into();
     let tetraplet = SecurityTetraplet::literal_tetraplet(ctx.init_peer_id.as_ref());
     let tetraplet = Rc::new(tetraplet);
 
-    Ok((jvalue, vec![tetraplet]))
+    Ok((serialized_arg, vec![tetraplet]))
 }
 
 #[allow(clippy::unnecessary_wraps)]
 pub(crate) fn prepare_last_error<'i>(
-    error_accessor: &Option<LambdaAST<'i>>,
+    error_accessor: &Option<AIRLambdaAST<'i>>,
     ctx: &ExecutionCtx<'i>,
-) -> ExecutionResult<(JValue, RcSecurityTetraplets)> {
+) -> ExecutionResult<(String, RcSecurityTetraplets)> {
     use crate::LastError;
 
     let LastError { error, tetraplet } = ctx.last_error();
 
-    let jvalue = match error_accessor {
-        Some(error_accessor) => select_from_scalar(error.as_ref(), error_accessor.iter(), ctx)?,
+    let value = match error_accessor {
+        Some(lambda) => {
+            let resolved_lambda = crate::execution_step::lambda_applier::resolve_lambda(lambda, ctx)?;
+            error.apply_lambda(&resolved_lambda)?
+        }
         None => error.as_ref(),
     };
 
@@ -82,17 +87,17 @@ pub(crate) fn prepare_last_error<'i>(
         }
     };
 
-    Ok((jvalue.clone(), tetraplets))
+    Ok((value.serialize(), tetraplets))
 }
 
 pub(crate) fn resolve_variable<'ctx, 'i>(
     variable: Variable<'_>,
     ctx: &'ctx ExecutionCtx<'i>,
-) -> ExecutionResult<Box<dyn JValuable + 'ctx>> {
-    use crate::execution_step::boxed_value::StreamJvaluableIngredients;
+) -> ExecutionResult<Box<dyn AIRValueAlgebra<Error = ()> + 'ctx>> {
+    use super::StreamValueAlgebraIngredients;
 
     match variable {
-        Variable::Scalar { name, .. } => Ok(ctx.scalars.get(name)?.into_jvaluable()),
+        Variable::Scalar { name, .. } => Ok(ctx.scalars.get(name)?.as_air_value()),
         Variable::Stream {
             name,
             generation,
@@ -100,31 +105,16 @@ pub(crate) fn resolve_variable<'ctx, 'i>(
         } => {
             match ctx.streams.get(name, position) {
                 Some(stream) => {
-                    let ingredients = StreamJvaluableIngredients::new(stream, generation);
+                    let ingredients = StreamValueAlgebraIngredients::new(stream, generation);
                     Ok(Box::new(ingredients))
                 }
                 // return an empty stream for not found stream
                 // here it ignores the join behaviour
-                None => Ok(Box::new(())),
+                None => {
+                    let empty_stream = Stream::from_generations_count(0);
+                    Ok(Box::new(empty_stream))
+                }
             }
-        }
-    }
-}
-
-pub(crate) fn resolve_ast_variable_wl<'ctx, 'i>(
-    ast_variable: &ast::VariableWithLambda<'_>,
-    exec_ctx: &'ctx ExecutionCtx<'i>,
-) -> ExecutionResult<(JValue, RcSecurityTetraplets)> {
-    let variable: Variable<'_> = ast_variable.into();
-    match ast_variable.lambda() {
-        Some(lambda) => apply_lambda(variable, lambda, exec_ctx).map(|(value, tetraplet)| {
-            let tetraplet = Rc::new(tetraplet);
-            (value, vec![tetraplet])
-        }),
-        None => {
-            let value = resolve_variable(variable, exec_ctx)?;
-            let tetraplets = value.as_tetraplets();
-            Ok((value.into_jvalue(), tetraplets))
         }
     }
 }
@@ -132,20 +122,34 @@ pub(crate) fn resolve_ast_variable_wl<'ctx, 'i>(
 pub(crate) fn resolve_ast_scalar_wl<'ctx, 'i>(
     ast_scalar: &ast::ScalarWithLambda<'_>,
     exec_ctx: &'ctx ExecutionCtx<'i>,
-) -> ExecutionResult<(JValue, RcSecurityTetraplets)> {
+) -> ExecutionResult<(&'ctx dyn BoxedValue, RcSecurityTetraplets)> {
     // TODO: wrap lambda path with Rc to make this clone cheaper
     let variable = ast::VariableWithLambda::Scalar(ast_scalar.clone());
     resolve_ast_variable_wl(&variable, exec_ctx)
 }
 
-pub(crate) fn apply_lambda<'i>(
-    variable: Variable<'_>,
-    lambda: &LambdaAST<'i>,
-    exec_ctx: &ExecutionCtx<'i>,
-) -> ExecutionResult<(JValue, SecurityTetraplet)> {
-    let resolved = resolve_variable(variable, exec_ctx)?;
-    let (jvalue, tetraplet) = resolved.apply_lambda_with_tetraplets(lambda, exec_ctx)?;
+pub(crate) fn resolve_ast_variable_wl<'ctx, 'i>(
+    ast_variable: &ast::VariableWithLambda<'_>,
+    exec_ctx: &'ctx ExecutionCtx<'i>,
+) -> ExecutionResult<(&'ctx dyn BoxedValue, RcSecurityTetraplets)> {
+    let variable: Variable<'_> = ast_variable.into();
+    match ast_variable.lambda() {
+        Some(lambda) => apply_lambda(variable, lambda, exec_ctx).map(|vt| (vt.value, vec![vt.tetraplet.clone()])),
+        None => {
+            let value = resolve_variable(variable, exec_ctx)?;
+            let tetraplets = value.as_tetraplets();
 
-    // it's known that apply_lambda_with_tetraplets returns vec of one value
-    Ok((jvalue.clone(), tetraplet))
+            Ok((value.as_ref().as_value(), tetraplets))
+        }
+    }
+}
+
+pub(crate) fn apply_lambda<'ctx, 'i>(
+    variable: Variable<'_>,
+    lambda: &AIRLambdaAST<'i>,
+    exec_ctx: &ExecutionCtx<'i>,
+) -> ExecutionResult<ValueWithTetraplet<'ctx, 'ctx>> {
+    let resolved_lambda = crate::execution_step::lambda_applier::resolve_lambda(lambda, exec_ctx)?;
+    let resolved = resolve_variable(variable, exec_ctx)?;
+    resolved.apply_lambda_with_tetraplets(resolved_lambda.iter())
 }

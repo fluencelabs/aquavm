@@ -20,7 +20,7 @@ use super::Variable;
 use super::VariableWithLambda;
 use crate::ast::ScalarWithLambda;
 
-use air_lambda_ast::LambdaAST;
+use air_lambda_ast::AIRLambdaAST;
 
 use serde::Deserialize;
 use serde::Serialize;
@@ -62,7 +62,7 @@ pub struct Triplet<'i> {
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum Value<'i> {
     InitPeerId,
-    LastError(Option<LambdaAST<'i>>),
+    LastError(Option<AIRLambdaAST<'i>>),
     Literal(&'i str),
     Number(Number),
     Boolean(bool),
@@ -79,7 +79,7 @@ pub enum CallOutputValue<'i> {
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum ApArgument<'i> {
     InitPeerId,
-    LastError(Option<LambdaAST<'i>>),
+    LastError(Option<AIRLambdaAST<'i>>),
     Literal(&'i str),
     Number(Number),
     Boolean(bool),

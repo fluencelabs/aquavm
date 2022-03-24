@@ -22,13 +22,15 @@ use super::ExecutableInstruction;
 use super::ExecutionCtx;
 use super::ExecutionResult;
 use super::TraceHandler;
-use crate::execution_step::boxed_value::Stream;
 use crate::log_instruction;
 use crate::trace_to_exec_err;
 use stream_cursor::StreamCursor;
 
 use air_parser::ast;
 use air_parser::ast::FoldStream;
+use air_values::fold_iterable_state::IterableType;
+use air_values::fold_iterable_state::IterableValue;
+use air_values::stream::Stream;
 
 impl<'i> ExecutableInstruction<'i> for FoldStream<'i> {
     fn execute<VT>(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler<VT>) -> ExecutionResult<()> {

@@ -1,0 +1,20 @@
+[package]
+name = "air-lambda-applier"
+description = "Definition of the AIR lambda AST"
+version = "0.1.0"
+authors = ["Fluence Labs"]
+edition = "2018"
+license = "Apache-2.0"
+publish = false
+keywords = ["fluence", "air", "lambda", "ast"]
+categories = ["wasm"]
+
+[lib]
+name = "air_lambda_ast"
+path = "src/lib.rs"
+
+[dependencies]
+non-empty-vec = { version = "0.2.0", features = ["serde"] }
+
+serde = { version = "1.0.118", features = ["rc", "derive"] }
+serde_json = "1.0.61"

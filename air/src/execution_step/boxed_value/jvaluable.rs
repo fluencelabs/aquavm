@@ -27,7 +27,7 @@ use crate::execution_step::lambda_applier::*;
 use crate::execution_step::ExecutionCtx;
 use crate::execution_step::RcSecurityTetraplets;
 use crate::JValue;
-use crate::LambdaAST;
+use crate::AIRLambdaAST;
 use crate::SecurityTetraplet;
 
 pub(crate) use stream::StreamJvaluableIngredients;
@@ -37,12 +37,12 @@ use std::borrow::Cow;
 /// Represent a value that could be transform to a JValue with or without tetraplets.
 pub(crate) trait JValuable {
     /// Applies lambda to the internal value, produces JValue.
-    fn apply_lambda<'i>(&self, lambda: &LambdaAST<'_>, exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<&JValue>;
+    fn apply_lambda<'i>(&self, lambda: &AIRLambdaAST<'_>, exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<&JValue>;
 
     /// Applies lambda to the internal value, produces JValue with tetraplet.
     fn apply_lambda_with_tetraplets<'i>(
         &self,
-        lambda: &LambdaAST<'_>,
+        lambda: &AIRLambdaAST<'_>,
         exec_ctx: &ExecutionCtx<'i>,
     ) -> ExecutionResult<(&JValue, SecurityTetraplet)>;
 

@@ -16,9 +16,9 @@
 
 #![warn(rust_2018_idioms)]
 #![deny(
-    dead_code,
+    //dead_code,
     nonstandard_style,
-    unused_imports,
+    //unused_imports,
     unused_mut,
     unused_variables,
     unused_unsafe,
@@ -62,4 +62,4 @@ pub mod parser {
 
 pub(crate) type JValue = serde_json::Value;
 
-use air_lambda_parser::LambdaAST;
+use air_lambda_parser::AIRLambdaAST;

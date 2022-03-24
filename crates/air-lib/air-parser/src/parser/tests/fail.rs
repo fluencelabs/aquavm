@@ -18,7 +18,7 @@ use super::dsl::*;
 use super::parse;
 use crate::ast::ScalarWithLambda;
 
-use air_lambda_ast::LambdaAST;
+use air_lambda_ast::AIRLambdaAST;
 use air_lambda_ast::ValueAccessor;
 
 #[test]
@@ -60,7 +60,7 @@ fn parse_fail_scalar_with_lambda() {
     let expected = fail_scalar(ScalarWithLambda::new(
         "scalar",
         Some(unsafe {
-            LambdaAST::new_unchecked(vec![ValueAccessor::FieldAccessByName {
+            AIRLambdaAST::new_unchecked(vec![ValueAccessor::FieldAccessByName {
                 field_name: "field_accessor",
             }])
         }),

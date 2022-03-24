@@ -28,10 +28,7 @@ pub struct TraceHandler<VT> {
     fsm_keeper: FSMKeeper,
 }
 
-impl<VT> TraceHandler<VT>
-where
-    VT: Clone,
-{
+impl<VT> TraceHandler<VT> {
     pub fn from_data(prev_data: InterpreterData<VT>, current_data: InterpreterData<VT>) -> Self {
         let data_keeper = DataKeeper::from_data(prev_data, current_data);
 
@@ -63,10 +60,7 @@ where
     }
 }
 
-impl<VT> TraceHandler<VT>
-where
-    VT: Debug + Clone + Eq,
-{
+impl<VT: Eq + Debug> TraceHandler<VT> {
     /// Should be called at the beginning of a call execution.
     pub fn meet_call_start(
         &mut self,
@@ -87,10 +81,7 @@ where
     }
 }
 
-impl<VT> TraceHandler<VT>
-where
-    VT: Clone,
-{
+impl<VT> TraceHandler<VT> {
     pub fn meet_ap_start(&mut self) -> TraceHandlerResult<MergerApResult, VT> {
         try_merge_next_state_as_ap(&mut self.data_keeper).map_err(Into::into)
     }
@@ -100,10 +91,7 @@ where
     }
 }
 
-impl<VT> TraceHandler<VT>
-where
-    VT: Clone,
-{
+impl<VT> TraceHandler<VT> {
     pub fn meet_par_start(&mut self) -> TraceHandlerResult<(), VT> {
         let ingredients = merger::try_merge_next_state_as_par(&mut self.data_keeper)?;
         let par_fsm = ParFSM::from_left_started(ingredients, &mut self.data_keeper)?;
@@ -128,10 +116,7 @@ where
     }
 }
 
-impl<VT> TraceHandler<VT>
-where
-    VT: Clone,
-{
+impl<VT> TraceHandler<VT> {
     pub fn meet_fold_start(&mut self, fold_id: u32) -> TraceHandlerResult<(), VT> {
         let ingredients = try_merge_next_state_as_fold(&mut self.data_keeper)?;
         let fold_fsm = FoldFSM::from_fold_start(ingredients, &mut self.data_keeper)?;

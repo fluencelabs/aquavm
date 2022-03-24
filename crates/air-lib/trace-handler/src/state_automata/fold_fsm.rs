@@ -47,7 +47,7 @@ pub(crate) struct FoldFSM {
 }
 
 impl FoldFSM {
-    pub(crate) fn from_fold_start<VT: Clone>(
+    pub(crate) fn from_fold_start<VT>(
         fold_result: MergerFoldResult,
         data_keeper: &mut DataKeeper<VT>,
     ) -> FSMResult<Self, VT> {
@@ -66,7 +66,7 @@ impl FoldFSM {
         Ok(fold_fsm)
     }
 
-    pub(crate) fn meet_iteration_start<VT: Clone>(
+    pub(crate) fn meet_iteration_start<VT>(
         &mut self,
         value_pos: usize,
         data_keeper: &mut DataKeeper<VT>,
@@ -82,7 +82,7 @@ impl FoldFSM {
         self.prepare(prev_lore, current_lore, value_pos, data_keeper)
     }
 
-    fn prepare<VT: Clone>(
+    fn prepare<VT>(
         &mut self,
         prev_lore: Option<ResolvedSubTraceDescs>,
         current_lore: Option<ResolvedSubTraceDescs>,
@@ -97,11 +97,11 @@ impl FoldFSM {
         Ok(())
     }
 
-    pub(crate) fn meet_iteration_end<VT: Clone>(&mut self, data_keeper: &mut DataKeeper<VT>) {
+    pub(crate) fn meet_iteration_end<VT>(&mut self, data_keeper: &mut DataKeeper<VT>) {
         self.ctor_queue.current().ctor.before_end(data_keeper);
     }
 
-    pub(crate) fn meet_back_iterator<VT: Clone>(&mut self, data_keeper: &mut DataKeeper<VT>) -> FSMResult<(), VT> {
+    pub(crate) fn meet_back_iterator<VT>(&mut self, data_keeper: &mut DataKeeper<VT>) -> FSMResult<(), VT> {
         let back_traversal_started = self.ctor_queue.back_traversal_started();
 
         let LoreCtorDesc {
@@ -132,7 +132,7 @@ impl FoldFSM {
         Ok(())
     }
 
-    pub(crate) fn meet_generation_end<VT: Clone>(&mut self, data_keeper: &mut DataKeeper<VT>) {
+    pub(crate) fn meet_generation_end<VT>(&mut self, data_keeper: &mut DataKeeper<VT>) {
         self.ctor_queue.finish(data_keeper);
         self.ctor_queue.end_back_traverse();
 
@@ -140,7 +140,7 @@ impl FoldFSM {
         self.result_lore.extend(fold_lore);
     }
 
-    pub(crate) fn meet_fold_end<VT: Clone>(self, data_keeper: &mut DataKeeper<VT>) {
+    pub(crate) fn meet_fold_end<VT>(self, data_keeper: &mut DataKeeper<VT>) {
         // TODO: check for prev and current lore emptiness
         let fold_result = FoldResult { lore: self.result_lore };
         let state = ExecutedState::Fold(fold_result);

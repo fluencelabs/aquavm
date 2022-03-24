@@ -21,7 +21,7 @@ use super::ValueAggregate;
 use crate::execution_step::ExecutionCtx;
 use crate::execution_step::RcSecurityTetraplets;
 use crate::JValue;
-use crate::LambdaAST;
+use crate::AIRLambdaAST;
 use crate::SecurityTetraplet;
 
 use air_lambda_ast::format_ast;
@@ -30,7 +30,7 @@ use std::borrow::Cow;
 use std::ops::Deref;
 
 impl JValuable for std::cell::Ref<'_, Vec<ValueAggregate>> {
-    fn apply_lambda<'i>(&self, lambda: &LambdaAST<'_>, exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<&JValue> {
+    fn apply_lambda<'i>(&self, lambda: &AIRLambdaAST<'_>, exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<&JValue> {
         let stream_iter = self.iter().map(|r| r.result.deref());
         let select_result = select_from_stream(stream_iter, lambda, exec_ctx)?;
         Ok(select_result.result)
@@ -38,7 +38,7 @@ impl JValuable for std::cell::Ref<'_, Vec<ValueAggregate>> {
 
     fn apply_lambda_with_tetraplets<'i>(
         &self,
-        lambda: &LambdaAST<'_>,
+        lambda: &AIRLambdaAST<'_>,
         exec_ctx: &ExecutionCtx<'i>,
     ) -> ExecutionResult<(&JValue, SecurityTetraplet)> {
         let stream_iter = self.iter().map(|r| r.result.deref());

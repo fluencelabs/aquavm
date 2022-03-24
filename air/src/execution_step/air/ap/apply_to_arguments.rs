@@ -15,8 +15,11 @@
  */
 
 use super::*;
-use air_lambda_parser::LambdaAST;
+
+use air_interpreter_data::ExecutedState;
+use air_lambda_parser::AIRLambdaAST;
 use air_parser::ast;
+use air_values::boxed_value::ValueAggregate;
 
 pub(super) fn apply_to_arg<VT>(
     argument: &ast::ApArgument<'_>,
@@ -52,7 +55,7 @@ fn apply_const<VT>(
 }
 
 fn apply_last_error<'i, VT>(
-    error_accessor: &Option<LambdaAST<'i>>,
+    error_accessor: &Option<AIRLambdaAST<'i>>,
     exec_ctx: &ExecutionCtx<'i>,
     trace_ctx: &TraceHandler<VT>,
 ) -> ExecutionResult<ValueAggregate> {
@@ -84,21 +87,7 @@ fn apply_scalar_impl<VT>(
     trace_ctx: &TraceHandler<VT>,
     should_touch_trace: bool,
 ) -> ExecutionResult<ValueAggregate> {
-    use crate::execution_step::ScalarRef;
-
-    let scalar = exec_ctx.scalars.get(scalar_name)?;
-
-    let mut result = match scalar {
-        ScalarRef::Value(result) => result.clone(),
-        ScalarRef::IterableValue(iterator) => {
-            let result = iterator.iterable.peek().expect(
-                "peek always return elements inside fold,\
-            this guaranteed by implementation of next and avoiding empty folds",
-            );
-            result.into_resolved_result()
-        }
-    };
-
+    let mut result = exec_ctx.scalars.get(scalar_name)?.as_value_aggregate();
     if should_touch_trace {
         result.trace_pos = trace_ctx.trace_pos();
     }
@@ -109,7 +98,7 @@ fn apply_scalar_impl<VT>(
 fn apply_scalar_wl_impl<VT>(
     scalar_name: &str,
     position: usize,
-    lambda: &LambdaAST<'_>,
+    lambda: &AIRLambdaAST<'_>,
     exec_ctx: &ExecutionCtx<'_>,
     trace_ctx: &TraceHandler<VT>,
 ) -> ExecutionResult<ValueAggregate> {

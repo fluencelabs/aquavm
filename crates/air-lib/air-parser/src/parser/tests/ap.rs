@@ -18,7 +18,7 @@ use super::dsl::*;
 use super::parse;
 use crate::ast::*;
 
-use air_lambda_ast::{LambdaAST, ValueAccessor};
+use air_lambda_ast::{AIRLambdaAST, ValueAccessor};
 
 #[test]
 fn ap_with_literal() {
@@ -71,7 +71,7 @@ fn ap_with_last_error() {
     let actual = parse(source_code);
     let expected = ap(
         ApArgument::LastError(Some(unsafe {
-            LambdaAST::new_unchecked(vec![ValueAccessor::FieldAccessByName {
+            AIRLambdaAST::new_unchecked(vec![ValueAccessor::FieldAccessByName {
                 field_name: "message",
             }])
         })),

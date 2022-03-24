@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-use crate::execution_step::boxed_value::ScalarRef;
 use crate::execution_step::errors_prelude::*;
 use crate::execution_step::ExecutionResult;
-use crate::execution_step::FoldState;
-use crate::execution_step::ValueAggregate;
+
+use air_values::boxed_value::ValueAggregate;
+use air_values::fold_iterable_state::FoldIterableState;
+use air_values::scalar::ScalarRef;
 
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -65,7 +66,7 @@ pub(crate) struct Scalars<'i> {
     // this one is optimized for speed (not for memory), because it's unexpected
     // that a script could have a lot of inner folds.
     pub values: HashMap<String, Vec<Option<ValueAggregate>>>,
-    pub iterable_values: HashMap<String, FoldState<'i>>,
+    pub iterable_values: HashMap<String, FoldIterableState<'i>>,
     pub fold_block_id: usize,
 }
 
@@ -105,7 +106,7 @@ impl<'i> Scalars<'i> {
     pub(crate) fn set_iterable_value(
         &mut self,
         name: impl Into<String>,
-        fold_state: FoldState<'i>,
+        fold_state: FoldIterableState<'i>,
     ) -> ExecutionResult<()> {
         use std::collections::hash_map::Entry::{Occupied, Vacant};
 
@@ -135,7 +136,7 @@ impl<'i> Scalars<'i> {
             .ok_or_else(|| Rc::new(CatchableError::VariableNotFound(name.to_string())).into())
     }
 
-    pub(crate) fn get_iterable_mut(&mut self, name: &str) -> ExecutionResult<&mut FoldState<'i>> {
+    pub(crate) fn get_iterable_mut(&mut self, name: &str) -> ExecutionResult<&mut FoldIterableState<'i>> {
         self.iterable_values
             .get_mut(name)
             .ok_or_else(|| UncatchableError::FoldStateNotFound(name.to_string()).into())

@@ -1,0 +1,24 @@
+[package]
+name = "execution-context"
+version = "0.1.0"
+description = "Security primitives to verify origin of service calls in Fluence network"
+authors = ["Fluence Labs"]
+edition = "2018"
+license = "Apache-2.0"
+documentation = "https://docs.rs/polyplets"
+repository = "https://github.com/fluencelabs/aquavm/tree/master/crates/air-lib/polyplets"
+publish = true # this crate is used by the avm server that in its turn is used by the node
+keywords = ["fluence", "air", "webassembly", "security", "authorization"]
+categories = ["authentication"]
+
+[lib]
+name = "execution_context"
+path = "src/lib.rs"
+
+[dependencies]
+air-execution-info-collector = { path = "../execution-info-collector" }
+air-values = { path = "../values/air-values" }
+air-interpreter-interface = { path = "../interpreter-interface" }
+air-interpreter-data = { path = "../interpreter-data" }
+
+serde = { version = "1.0.118", features = ["rc", "derive"] }

@@ -15,21 +15,27 @@
  */
 
 use crate::execution_step::ExecutableInstruction;
-use crate::farewell_step as farewell;
 use crate::preparation_step::prepare;
 use crate::preparation_step::PreparationDescriptor;
+use crate::{farewell_step as farewell, ToErrorCode};
 
 use air_interpreter_interface::InterpreterOutcome;
 use air_interpreter_interface::RunParameters;
 use air_log_targets::RUN_PARAMS;
 
-pub fn execute_air(
+use serde::Deserialize;
+use serde::Serialize;
+
+pub fn execute_air<VT>(
     air: String,
     prev_data: Vec<u8>,
     data: Vec<u8>,
     params: RunParameters,
     call_results: Vec<u8>,
-) -> InterpreterOutcome {
+) -> InterpreterOutcome
+where
+    VT: Serialize + for<'de> Deserialize<'de>,
+{
     use std::convert::identity;
 
     log::trace!(
@@ -42,24 +48,33 @@ pub fn execute_air(
         params.current_peer_id,
     );
 
-    execute_air_impl(air, prev_data, data, params, call_results).unwrap_or_else(identity)
+    execute_air_impl::<VT>(air, prev_data, data, params, call_results).unwrap_or_else(identity)
 }
 
-fn execute_air_impl(
+fn execute_air_impl<VT>(
     air: String,
     prev_data: Vec<u8>,
     data: Vec<u8>,
     params: RunParameters,
     call_results: Vec<u8>,
-) -> Result<InterpreterOutcome, InterpreterOutcome> {
+) -> Result<InterpreterOutcome, InterpreterOutcome>
+where
+    VT: Serialize + for<'de> Deserialize<'de>,
+{
     let PreparationDescriptor {
         mut exec_ctx,
         mut trace_handler,
         air,
-    } = match prepare(&prev_data, &data, air.as_str(), &call_results, params) {
+    } = match prepare::<VT>(&prev_data, &data, air.as_str(), &call_results, params) {
         Ok(descriptor) => descriptor,
         // return the prev data in case of errors
-        Err(error) => return Err(farewell::from_uncatchable_error(prev_data, error)),
+        Err(error) => {
+            return Err(farewell::from_uncatchable_error(
+                prev_data,
+                error.to_error_code(),
+                String::new(),
+            ))
+        }
     };
 
     // match here is used instead of map_err, because the compiler can't determine that
@@ -67,8 +82,17 @@ fn execute_air_impl(
     match air.execute(&mut exec_ctx, &mut trace_handler) {
         Ok(_) => farewell::from_success_result(exec_ctx, trace_handler),
         // return new collected trace in case of errors
-        Err(error) if error.is_catchable() => Err(farewell::from_execution_error(exec_ctx, trace_handler, error)),
+        Err(error) if error.is_catchable() => Err(farewell::from_execution_error(
+            exec_ctx,
+            trace_handler,
+            error.to_error_code(),
+            String::new(),
+        )),
         // return the prev data in case of any trace errors
-        Err(error) => Err(farewell::from_uncatchable_error(prev_data, error)),
+        Err(error) => Err(farewell::from_uncatchable_error(
+            prev_data,
+            error.to_error_code(),
+            String::new(),
+        )),
     }
 }

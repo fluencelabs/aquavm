@@ -28,9 +28,7 @@ pub enum MergerApResult {
     ApResult { res_generation: Option<u32> },
 }
 
-pub(crate) fn try_merge_next_state_as_ap<VT: Clone>(
-    data_keeper: &mut DataKeeper<VT>,
-) -> MergeResult<MergerApResult, VT> {
+pub(crate) fn try_merge_next_state_as_ap<VT>(data_keeper: &mut DataKeeper<VT>) -> MergeResult<MergerApResult, VT> {
     use ExecutedState::Ap;
     use PreparationScheme::*;
 
@@ -52,7 +50,7 @@ pub(crate) fn try_merge_next_state_as_ap<VT: Clone>(
     }
 }
 
-fn prepare_merge_result<VT: Clone>(
+fn prepare_merge_result<VT>(
     ap_result: Option<ApResult>,
     scheme: PreparationScheme,
     data_keeper: &mut DataKeeper<VT>,

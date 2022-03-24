@@ -24,7 +24,7 @@ use crate::JValue;
 use std::ops::Deref;
 
 /// Used for iterating over JValue of array type.
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug)]
 pub(crate) struct IterableResolvedCall {
     pub(crate) call_result: ValueAggregate,
     pub(crate) cursor: usize,

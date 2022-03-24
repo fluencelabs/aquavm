@@ -24,8 +24,9 @@ dependencies = [
  "air-parser",
  "air-test-utils",
  "air-trace-handler",
- "air-value",
+ "air-values",
  "boolinator",
+ "boxed-value",
  "concat-idents",
  "criterion",
  "csv",
@@ -44,13 +45,6 @@ dependencies = [
  "strum_macros",
  "thiserror",
  "wasm-bindgen",
-]
-
-[[package]]
-name = "air-boxed-value"
-version = "0.1.0"
-dependencies = [
- "serde_json",
 ]
 
 [[package]]
@@ -74,6 +68,7 @@ dependencies = [
 name = "air-interpreter-data"
 version = "0.2.3"
 dependencies = [
+ "derivative",
  "once_cell",
  "semver 1.0.4",
  "serde",
@@ -86,6 +81,15 @@ version = "0.8.0"
 dependencies = [
  "fluence-it-types",
  "marine-rs-sdk",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "air-lambda-applier"
+version = "0.1.0"
+dependencies = [
+ "non-empty-vec",
  "serde",
  "serde_json",
 ]
@@ -165,12 +169,13 @@ dependencies = [
 ]
 
 [[package]]
-name = "air-value"
+name = "air-values"
 version = "0.1.0"
 dependencies = [
  "air-lambda-ast",
- "erased-serde",
- "serde",
+ "air-parser",
+ "boxed-value",
+ "polyplets",
  "serde_json",
 ]
 
@@ -298,6 +303,17 @@ name = "boolinator"
 version = "2.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cfa8873f51c92e232f9bac4065cddef41b714152812bfc5f7672ba16d6ef8cd9"
+
+[[package]]
+name = "boxed-value"
+version = "0.1.0"
+dependencies = [
+ "air-lambda-ast",
+ "polyplets",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
 
 [[package]]
 name = "bstr"
@@ -668,6 +684,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "derivative"
+version = "2.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fcc3dd5e9e9c0b295d6e1e4d811fb6f157d5ffd784b8d202fc62eac8035a770b"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "diff"
 version = "0.1.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -774,6 +801,17 @@ checksum = "aa68f1b12764fab894d2755d2518754e71b4fd80ecfb822714a1206c2aab39bf"
 dependencies = [
  "cc",
  "libc",
+]
+
+[[package]]
+name = "execution-context"
+version = "0.1.0"
+dependencies = [
+ "air-execution-info-collector",
+ "air-interpreter-data",
+ "air-interpreter-interface",
+ "air-values",
+ "serde",
 ]
 
 [[package]]

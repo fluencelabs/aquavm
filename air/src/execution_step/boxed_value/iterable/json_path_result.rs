@@ -22,7 +22,7 @@ use crate::foldable_prev;
 use crate::JValue;
 
 /// Used for iterating over a result of applied to a JValue lambda.
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug)]
 pub(crate) struct IterableLambdaResult {
     pub(crate) jvalues: Vec<JValue>,
     // consider adding index for each tetraplet

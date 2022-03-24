@@ -24,7 +24,7 @@ pub(super) enum PreparationScheme {
 }
 
 /// Prepares new_to_old_pos mapping in data keeper to keep track of value sources.
-pub(super) fn prepare_positions_mapping<VT: Clone>(scheme: PreparationScheme, data_keeper: &mut DataKeeper<VT>) {
+pub(super) fn prepare_positions_mapping<VT>(scheme: PreparationScheme, data_keeper: &mut DataKeeper<VT>) {
     use PreparationScheme::*;
 
     // it's safe to sub 1 from positions iff scheme was set correctly

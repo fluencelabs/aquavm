@@ -41,7 +41,7 @@ pub enum SubtreeType {
 }
 
 impl ParFSM {
-    pub(crate) fn from_left_started<VT: Clone>(
+    pub(crate) fn from_left_started<VT>(
         ingredients: MergerParResult,
         data_keeper: &mut DataKeeper<VT>,
     ) -> FSMResult<Self, VT> {
@@ -66,7 +66,7 @@ impl ParFSM {
         Ok(par_fsm)
     }
 
-    pub(crate) fn left_completed<VT: Clone>(&mut self, data_keeper: &mut DataKeeper<VT>) {
+    pub(crate) fn left_completed<VT>(&mut self, data_keeper: &mut DataKeeper<VT>) {
         self.par_builder.track(data_keeper, SubtreeType::Left);
         self.state_handler.handle_subtree_end(data_keeper, SubtreeType::Left);
 
@@ -74,7 +74,7 @@ impl ParFSM {
         let _ = self.prepare_sliders(data_keeper, SubtreeType::Right);
     }
 
-    pub(crate) fn right_completed<VT: Clone>(mut self, data_keeper: &mut DataKeeper<VT>) {
+    pub(crate) fn right_completed<VT>(mut self, data_keeper: &mut DataKeeper<VT>) {
         self.par_builder.track(data_keeper, SubtreeType::Right);
         let state = self.par_builder.build();
         self.state_inserter.insert(data_keeper, state);
@@ -82,11 +82,7 @@ impl ParFSM {
         self.state_handler.handle_subtree_end(data_keeper, SubtreeType::Right);
     }
 
-    fn prepare_sliders<VT: Clone>(
-        &self,
-        data_keeper: &mut DataKeeper<VT>,
-        subtree_type: SubtreeType,
-    ) -> FSMResult<(), VT> {
+    fn prepare_sliders<VT>(&self, data_keeper: &mut DataKeeper<VT>, subtree_type: SubtreeType) -> FSMResult<(), VT> {
         let (prev_len, current_len) = match subtree_type {
             SubtreeType::Left => (self.prev_par.left_size, self.current_par.left_size),
             SubtreeType::Right => (self.prev_par.right_size, self.current_par.right_size),

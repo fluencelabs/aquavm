@@ -16,14 +16,14 @@
 
 use super::*;
 use crate::execution_step::execution_context::*;
-use crate::execution_step::Generation;
-use crate::execution_step::ValueAggregate;
 
 use air_interpreter_data::CallResult;
 use air_interpreter_data::Value;
 use air_parser::ast::CallOutputValue;
 use air_parser::ast::Variable;
 use air_trace_handler::TraceHandler;
+use air_values::boxed_value::ValueAggregate;
+use air_values::stream::Generation;
 
 /// Writes result of a local `Call` instruction to `ExecutionCtx` at `output`.
 /// Returns call result.

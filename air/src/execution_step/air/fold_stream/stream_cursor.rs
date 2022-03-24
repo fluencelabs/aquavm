@@ -15,9 +15,10 @@
  */
 
 use super::construct_stream_iterable_values;
-use crate::execution_step::air::fold::IterableValue;
-use crate::execution_step::boxed_value::Generation;
-use crate::execution_step::boxed_value::Stream;
+
+use air_values::fold_iterable_state::IterableValue;
+use air_values::stream::Generation;
+use air_values::stream::Stream;
 
 pub(super) struct StreamCursor {
     last_seen_generation: u32,

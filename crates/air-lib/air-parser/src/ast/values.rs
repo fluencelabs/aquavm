@@ -17,7 +17,7 @@
 mod impls;
 mod traits;
 
-use air_lambda_parser::LambdaAST;
+use air_lambda_parser::AIRLambdaAST;
 
 use serde::Deserialize;
 use serde::Serialize;
@@ -34,7 +34,7 @@ pub struct Scalar<'i> {
 pub struct ScalarWithLambda<'i> {
     pub name: &'i str,
     #[serde(borrow)]
-    pub lambda: Option<LambdaAST<'i>>,
+    pub lambda: Option<AIRLambdaAST<'i>>,
     pub position: usize,
 }
 
@@ -50,7 +50,7 @@ pub struct Stream<'i> {
 pub struct StreamWithLambda<'i> {
     pub name: &'i str,
     #[serde(borrow)]
-    pub lambda: Option<LambdaAST<'i>>,
+    pub lambda: Option<AIRLambdaAST<'i>>,
     pub position: usize,
 }
 

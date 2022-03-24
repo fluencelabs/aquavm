@@ -15,11 +15,11 @@
  */
 
 use super::*;
-use air_lambda_parser::LambdaAST;
+use air_lambda_parser::AIRLambdaAST;
 use air_lambda_parser::ValueAccessor;
 
 impl<'i> ScalarWithLambda<'i> {
-    pub fn new(name: &'i str, lambda: Option<LambdaAST<'i>>, position: usize) -> Self {
+    pub fn new(name: &'i str, lambda: Option<AIRLambdaAST<'i>>, position: usize) -> Self {
         Self {
             name,
             lambda,
@@ -33,7 +33,7 @@ impl<'i> ScalarWithLambda<'i> {
         lambda: Vec<ValueAccessor<'i>>,
         position: usize,
     ) -> Self {
-        let lambda = unsafe { LambdaAST::new_unchecked(lambda) };
+        let lambda = unsafe { AIRLambdaAST::new_unchecked(lambda) };
         Self {
             name,
             lambda: Some(lambda),
@@ -43,7 +43,7 @@ impl<'i> ScalarWithLambda<'i> {
 }
 
 impl<'i> StreamWithLambda<'i> {
-    pub fn new(name: &'i str, lambda: Option<LambdaAST<'i>>, position: usize) -> Self {
+    pub fn new(name: &'i str, lambda: Option<AIRLambdaAST<'i>>, position: usize) -> Self {
         Self {
             name,
             lambda,
@@ -58,7 +58,7 @@ impl<'i> StreamWithLambda<'i> {
         lambda: Vec<ValueAccessor<'i>>,
         position: usize,
     ) -> Self {
-        let lambda = unsafe { LambdaAST::new_unchecked(lambda) };
+        let lambda = unsafe { AIRLambdaAST::new_unchecked(lambda) };
         Self {
             name,
             lambda: Some(lambda),
@@ -101,7 +101,7 @@ impl<'i> VariableWithLambda<'i> {
         Self::Scalar(ScalarWithLambda::new(name, None, position))
     }
 
-    pub fn scalar_wl(name: &'i str, lambda: LambdaAST<'i>, position: usize) -> Self {
+    pub fn scalar_wl(name: &'i str, lambda: AIRLambdaAST<'i>, position: usize) -> Self {
         Self::Scalar(ScalarWithLambda::new(name, Some(lambda), position))
     }
 
@@ -109,7 +109,7 @@ impl<'i> VariableWithLambda<'i> {
         Self::Stream(StreamWithLambda::new(name, None, position))
     }
 
-    pub fn stream_wl(name: &'i str, lambda: LambdaAST<'i>, position: usize) -> Self {
+    pub fn stream_wl(name: &'i str, lambda: AIRLambdaAST<'i>, position: usize) -> Self {
         Self::Stream(StreamWithLambda::new(name, Some(lambda), position))
     }
 
@@ -120,7 +120,7 @@ impl<'i> VariableWithLambda<'i> {
         }
     }
 
-    pub fn lambda(&self) -> &Option<LambdaAST<'i>> {
+    pub fn lambda(&self) -> &Option<AIRLambdaAST<'i>> {
         match self {
             VariableWithLambda::Scalar(scalar) => &scalar.lambda,
             VariableWithLambda::Stream(stream) => &stream.lambda,

@@ -34,10 +34,7 @@ pub struct ResolvedSubTraceDescs {
     pub after_subtrace: SubTraceDesc,
 }
 
-pub(super) fn resolve_fold_lore<VT: Clone>(
-    fold: &FoldResult,
-    merge_ctx: &MergeCtx<VT>,
-) -> MergeResult<ResolvedFold, VT> {
+pub(super) fn resolve_fold_lore<VT>(fold: &FoldResult, merge_ctx: &MergeCtx<VT>) -> MergeResult<ResolvedFold, VT> {
     let (fold_states_count, lens) = compute_lens_convolution(fold, merge_ctx)?;
 
     let lore = fold.lore.iter().zip(lens).try_fold::<_, _, MergeResult<_, _>>(
@@ -82,7 +79,7 @@ pub(super) fn resolve_fold_lore<VT: Clone>(
 
 // TODO: in future it's possible to change a format of a Fold state to one behaves like Par,
 // because this function adds some overhead
-fn compute_lens_convolution<VT: Clone>(
+fn compute_lens_convolution<VT>(
     fold: &FoldResult,
     merge_ctx: &MergeCtx<VT>,
 ) -> MergeResult<(usize, Vec<LoresLen>), VT> {

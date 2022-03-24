@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-use crate::JValue;
-
 use thiserror::Error as ThisError;
 
 /// Describes errors related to applying lambdas to values.
@@ -32,23 +30,23 @@ pub enum LambdaError {
     FieldAccessorAppliedToStream { field_name: String },
 
     #[error("value '{value}' is not an array-type to match array accessor with idx = '{idx}'")]
-    ArrayAccessorNotMatchValue { value: JValue, idx: u32 },
+    ArrayAccessorNotMatchValue { value: String, idx: u32 },
 
     #[error("value '{value}' does not contain element for idx = '{idx}'")]
-    ValueNotContainSuchArrayIdx { value: JValue, idx: u32 },
+    ValueNotContainSuchArrayIdx { value: String, idx: u32 },
 
     #[error("value '{value}' does not contain element with field name = '{field_name}'")]
-    ValueNotContainSuchField { value: JValue, field_name: String },
+    ValueNotContainSuchField { value: String, field_name: String },
 
     #[error("value '{value}' is not an map-type to match field accessor with field_name = '{field_name}'")]
-    FieldAccessorNotMatchValue { value: JValue, field_name: String },
+    FieldAccessorNotMatchValue { value: String, field_name: String },
 
     #[error("index accessor `{accessor} can't be converted to u32`")]
     IndexAccessNotU32 { accessor: serde_json::Number },
 
     #[error("scalar accessor `{scalar_accessor}` should has number or string type")]
-    ScalarAccessorHasInvalidType { scalar_accessor: JValue },
+    ScalarAccessorHasInvalidType { scalar_accessor: String },
 
     #[error("stream accessor `{scalar_accessor}` should has number (u32) type")]
-    StreamAccessorHasInvalidType { scalar_accessor: JValue },
+    StreamAccessorHasInvalidType { scalar_accessor: String },
 }

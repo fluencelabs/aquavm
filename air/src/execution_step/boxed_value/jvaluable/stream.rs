@@ -22,7 +22,7 @@ use crate::execution_step::boxed_value::Stream;
 use crate::execution_step::ExecutionCtx;
 use crate::execution_step::RcSecurityTetraplets;
 use crate::JValue;
-use crate::LambdaAST;
+use crate::AIRLambdaAST;
 use crate::SecurityTetraplet;
 
 use air_lambda_ast::format_ast;
@@ -39,7 +39,7 @@ pub(crate) struct StreamJvaluableIngredients<'stream> {
 // TODO: this will be deleted soon, because it would be impossible to use streams without
 // canonicalization as an arg of a call
 impl JValuable for StreamJvaluableIngredients<'_> {
-    fn apply_lambda<'i>(&self, lambda: &LambdaAST<'_>, exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<&JValue> {
+    fn apply_lambda<'i>(&self, lambda: &AIRLambdaAST<'_>, exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<&JValue> {
         let iter = self.iter()?.map(|v| v.result.deref());
         let select_result = select_from_stream(iter, lambda, exec_ctx)?;
 
@@ -48,7 +48,7 @@ impl JValuable for StreamJvaluableIngredients<'_> {
 
     fn apply_lambda_with_tetraplets<'i>(
         &self,
-        lambda: &LambdaAST<'_>,
+        lambda: &AIRLambdaAST<'_>,
         exec_ctx: &ExecutionCtx<'i>,
     ) -> ExecutionResult<(&JValue, SecurityTetraplet)> {
         let iter = self.iter()?.map(|v| v.result.deref());

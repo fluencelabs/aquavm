@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Fluence Labs Limited
+ * Copyright 2022 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,20 +20,16 @@ use non_empty_vec::NonEmpty;
 use serde::Deserialize;
 use serde::Serialize;
 
-pub type LambdaAST<'input> = NonEmpty<ValueAccessor<'input>>;
+pub type ResolvedLambda<'input> = NonEmpty<ResolvedValueAccessor<'input>>;
 
+/// It's a resolved version of ValueAccessor, where FieldAccessByScalar was resolved
+/// either to ArrayAccess or to FieldAccess. Intended to apply to AIR values to find out
+/// an appropriate element inside them.
 #[derive(Debug, PartialEq, Clone, Copy, Serialize, Deserialize)]
-pub enum ValueAccessor<'input> {
-    // (.)?[$idx]
+pub enum ResolvedValueAccessor<'input> {
+    /// Access value as an array by value index.
     ArrayAccess { idx: u32 },
 
-    // .field
-    FieldAccessByName { field_name: &'input str },
-
-    // (.)?[field]
-    FieldAccessByScalar { scalar_name: &'input str },
-
-    // needed to allow parser catch all errors from a lambda expression without stopping
-    // on the very first one. Although, this variant is guaranteed not to be present in a lambda.
-    Error,
+    /// Access value as an object by field name.
+    FieldAccess { field_name: &'input str },
 }

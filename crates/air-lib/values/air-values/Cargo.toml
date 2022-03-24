@@ -1,5 +1,5 @@
 [package]
-name = "air-boxed-value"
+name = "air-values"
 version = "0.1.0"
 description = "Implementation of AIR execution info collector"
 authors = ["Fluence Labs"]
@@ -10,8 +10,13 @@ keywords = ["fluence", "air", "webassembly", "programming-language"]
 categories = ["wasm"]
 
 [lib]
-name = "air_execution_info_collector"
+name = "air_values"
 path = "src/lib.rs"
 
 [dependencies]
+air-lambda-ast = { path = "../../lambda/ast" }
+air-parser = { path = "../../air-parser" }
+boxed-value = { path = "../boxed-value" }
+polyplets = { path = "../../polyplets" }
+
 serde_json = "1.0"

@@ -16,12 +16,14 @@
 
 use super::PreparationError;
 use crate::execution_step::ExecutionCtx;
-use crate::execution_step::Stream;
 use crate::execution_step::TraceHandler;
 
 use air_interpreter_data::InterpreterData;
 use air_interpreter_interface::RunParameters;
 use air_parser::ast::Instruction;
+use air_values::stream::Stream;
+use serde::Deserialize;
+use serde::Serialize;
 
 type PreparationResult<T> = Result<T, PreparationError>;
 
@@ -39,7 +41,10 @@ pub(crate) fn prepare<'i, VT>(
     raw_air: &'i str,
     call_results: &[u8],
     run_parameters: RunParameters,
-) -> PreparationResult<PreparationDescriptor<'static, 'i, VT>> {
+) -> PreparationResult<PreparationDescriptor<'static, 'i, VT>>
+where
+    VT: Serialize + for<'de> Deserialize<'de>,
+{
     let prev_data = try_to_data(prev_data)?;
     let current_data = try_to_data(current_data)?;
 
@@ -57,7 +62,10 @@ pub(crate) fn prepare<'i, VT>(
     Ok(result)
 }
 
-fn try_to_data<VT>(raw_data: &[u8]) -> PreparationResult<InterpreterData<VT>> {
+fn try_to_data<VT>(raw_data: &[u8]) -> PreparationResult<InterpreterData<VT>>
+where
+    VT: Serialize + for<'de> Deserialize<'de>,
+{
     use PreparationError::DataDeFailed;
 
     InterpreterData::try_from_slice(raw_data).map_err(|err| DataDeFailed(err, raw_data.to_vec()))

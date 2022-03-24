@@ -16,7 +16,6 @@ doctest = false
 
 [dependencies]
 air-parser = { path = "../crates/air-lib/air-parser" }
-air-value = { path = "../crates/air-lib/air-value/traits" }
 air-execution-info-collector = { path = "../crates/air-lib/execution-info-collector" }
 air-interpreter-data = { path = "../crates/air-lib/interpreter-data" }
 air-interpreter-interface = { path = "../crates/air-lib/interpreter-interface" }
@@ -24,6 +23,8 @@ air-log-targets = { path = "../crates/air-lib/log-targets" }
 air-lambda-ast = { path = "../crates/air-lib/lambda/ast" }
 air-lambda-parser = { path = "../crates/air-lib/lambda/parser" }
 air-trace-handler = { path = "../crates/air-lib/trace-handler" }
+air-values = { path = "../crates/air-lib/values/air-values" }
+boxed-value = { path = "../crates/air-lib/values/boxed-value" }
 polyplets = { path = "../crates/air-lib/polyplets" }
 marine-rs-sdk = { version = "0.6.15", features = ["logger"] }
 

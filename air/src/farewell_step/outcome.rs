@@ -23,6 +23,8 @@ use crate::INTERPRETER_SUCCESS;
 
 use air_interpreter_data::InterpreterData;
 use air_interpreter_interface::CallRequests;
+use serde::Serialize;
+use serde::Deserialize;
 
 use std::hash::Hash;
 use std::rc::Rc;
@@ -32,7 +34,10 @@ use std::rc::Rc;
 pub(crate) fn from_success_result<VT>(
     exec_ctx: ExecutionCtx<'_>,
     trace_handler: TraceHandler<VT>,
-) -> Result<InterpreterOutcome, InterpreterOutcome> {
+) -> Result<InterpreterOutcome, InterpreterOutcome>
+    where
+        VT: Serialize + for<'de> Deserialize<'de>
+{
     let (ret_code, error_message) = if exec_ctx.call_results.is_empty() {
         (INTERPRETER_SUCCESS, String::new())
     } else {
@@ -48,15 +53,15 @@ pub(crate) fn from_success_result<VT>(
 /// set ret_code based on the error.
 pub(crate) fn from_uncatchable_error(
     data: impl Into<Vec<u8>>,
-    error: impl ToErrorCode + ToString,
+    error_code: i64,
+    error_message: String,
 ) -> InterpreterOutcome {
-    let ret_code = error.to_error_code();
     let data = data.into();
     let call_requests = serde_json::to_vec(&CallRequests::new()).expect("default serializer shouldn't fail");
 
     InterpreterOutcome {
-        ret_code,
-        error_message: error.to_string(),
+        ret_code: error_code,
+        error_message,
         data,
         next_peer_pks: vec![],
         call_requests,
@@ -68,9 +73,13 @@ pub(crate) fn from_uncatchable_error(
 pub(crate) fn from_execution_error<VT>(
     exec_ctx: ExecutionCtx<'_>,
     trace_handler: TraceHandler<VT>,
-    error: impl ToErrorCode + ToString,
-) -> InterpreterOutcome {
-    populate_outcome_from_contexts(exec_ctx, trace_handler, error.to_error_code(), error.to_string())
+    error_code: i64,
+    error_message: String,
+) -> InterpreterOutcome
+    where
+        VT: Serialize + for<'de> Deserialize<'de>
+{
+    populate_outcome_from_contexts(exec_ctx, trace_handler, error_code, error_message)
 }
 
 fn populate_outcome_from_contexts<VT>(
@@ -78,7 +87,10 @@ fn populate_outcome_from_contexts<VT>(
     trace_handler: TraceHandler<VT>,
     ret_code: i64,
     error_message: String,
-) -> InterpreterOutcome {
+) -> InterpreterOutcome
+where
+ VT: Serialize + for<'de> Deserialize<'de>
+{
     let (global_streams, restricted_streams) = exec_ctx.streams.into_streams_data();
     let data = InterpreterData::from_execution_result(
         trace_handler.into_result_trace(),

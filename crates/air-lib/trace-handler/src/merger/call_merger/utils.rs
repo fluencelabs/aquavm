@@ -16,7 +16,7 @@
 
 use super::*;
 
-pub(super) fn merge_executed<VT: Clone + Eq>(
+pub(super) fn merge_executed<VT: Eq>(
     prev_value: Value<VT>,
     current_value: Value<VT>,
 ) -> MergeResult<CallResult<VT>, VT> {
@@ -26,14 +26,14 @@ pub(super) fn merge_executed<VT: Clone + Eq>(
             Ok(CallResult::Executed(prev_value))
         }
         (Value::Stream { value: pr, .. }, Value::Stream { value: cr, .. }) => {
-            are_streams_equal(pr, cr, &prev_value, &current_value)?;
+            are_streams_equal(pr.as_ref(), cr.as_ref(), &prev_value, &current_value)?;
             Ok(CallResult::Executed(prev_value))
         }
         _ => Err(CallResultError::not_equal_values(prev_value, current_value)),
     }
 }
 
-fn are_scalars_equal<VT: Clone + Eq>(prev_value: &Value<VT>, current_value: &Value<VT>) -> MergeResult<(), VT> {
+fn are_scalars_equal<VT: Eq>(prev_value: &Value<VT>, current_value: &Value<VT>) -> MergeResult<(), VT> {
     if prev_value == current_value {
         return Ok(());
     }
@@ -44,12 +44,15 @@ fn are_scalars_equal<VT: Clone + Eq>(prev_value: &Value<VT>, current_value: &Val
     ))
 }
 
-fn are_streams_equal<VT: Clone + Eq>(
+fn are_streams_equal<VT>(
     prev_result_value: &VT,
     current_result_value: &VT,
     prev_value: &Value<VT>,
     current_value: &Value<VT>,
-) -> MergeResult<(), VT> {
+) -> MergeResult<(), VT>
+where
+    VT: Eq,
+{
     // values from streams could have different generations and it's ok
     if prev_result_value == current_result_value {
         return Ok(());
@@ -64,7 +67,7 @@ fn are_streams_equal<VT: Clone + Eq>(
 /// Merging of value from only current data to a stream is a something special, because it's
 /// needed to choose generation not from current data, but a maximum from streams on a current peer.
 /// Maximum versions are tracked in data in a special field called streams.
-pub(super) fn merge_current_executed<VT: Clone>(
+pub(super) fn merge_current_executed<VT>(
     value: Value<VT>,
     value_type: ValueType<'_>,
     data_keeper: &DataKeeper<VT>,
@@ -80,10 +83,7 @@ pub(super) fn merge_current_executed<VT: Clone>(
     }
 }
 
-pub(super) fn check_equal<VT: Clone + Eq>(
-    prev_call: &CallResult<VT>,
-    current_call: &CallResult<VT>,
-) -> MergeResult<(), VT> {
+pub(super) fn check_equal<VT: Eq>(prev_call: &CallResult<VT>, current_call: &CallResult<VT>) -> MergeResult<(), VT> {
     if prev_call != current_call {
         Err(CallResultError::incompatible_calls(
             prev_call.clone(),
@@ -94,7 +94,7 @@ pub(super) fn check_equal<VT: Clone + Eq>(
     }
 }
 
-pub(super) fn try_match_value_type<VT: Clone>(
+pub(super) fn try_match_value_type<VT>(
     merged_call: &MergerCallResult<VT>,
     value_type: ValueType<'_>,
 ) -> MergeResult<(), VT> {

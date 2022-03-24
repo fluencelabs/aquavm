@@ -32,5 +32,5 @@ pub use parser::LambdaParser;
 pub use parser::LambdaParserError;
 pub use parser::LexerError;
 
-pub use air_lambda_ast::LambdaAST;
+pub use air_lambda_ast::AIRLambdaAST;
 pub use air_lambda_ast::ValueAccessor;

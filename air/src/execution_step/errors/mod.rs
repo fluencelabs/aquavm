@@ -27,4 +27,4 @@ pub use uncatchable_errors::UncatchableError;
 pub(crate) use joinable::Joinable;
 pub(crate) use last_error_affectable::LastErrorAffectable;
 
-use super::Stream;
+use air_values::stream::Stream;

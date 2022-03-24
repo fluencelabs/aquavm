@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-mod fold_state;
+mod json_path_result;
+mod resolved_call;
 mod utils;
+mod vec_resolved_call;
 
-pub(crate) use fold_state::FoldState;
-pub(crate) use fold_state::IterableType;
+pub(self) use json_path_result::IterableLambdaResult;
+pub(self) use resolved_call::IterableResolvedCall;
 pub(super) use utils::*;
+pub(self) use vec_resolved_call::IterableVecResolvedCall;
 
 use super::ExecutionCtx;
 use super::ExecutionResult;
-use super::Instruction;
-use super::ScalarRef;
-use super::ValueAggregate;
-use crate::execution_step::boxed_value::*;

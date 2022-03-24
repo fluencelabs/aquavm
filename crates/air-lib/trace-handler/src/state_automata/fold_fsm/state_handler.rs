@@ -26,7 +26,7 @@ pub(super) struct CtxStateHandler {
 }
 
 impl CtxStateHandler {
-    pub(super) fn prepare<VT: Clone>(
+    pub(super) fn prepare<VT>(
         prev_fold: &ResolvedFold,
         current_fold: &ResolvedFold,
         data_keeper: &DataKeeper<VT>,
@@ -39,12 +39,12 @@ impl CtxStateHandler {
         Ok(updater)
     }
 
-    pub(super) fn set_final_states<VT: Clone>(self, data_keeper: &mut DataKeeper<VT>) {
+    pub(super) fn set_final_states<VT>(self, data_keeper: &mut DataKeeper<VT>) {
         update_ctx_states(self.state_pair, data_keeper)
     }
 }
 
-fn compute_new_state<VT: Clone>(
+fn compute_new_state<VT>(
     fold: &ResolvedFold,
     data_keeper: &DataKeeper<VT>,
     ctx_type: MergeCtxType,

@@ -17,7 +17,7 @@
 use super::select_from_scalar;
 use super::ExecutionResult;
 use super::JValuable;
-use super::LambdaAST;
+use super::AIRLambdaAST;
 use super::ValueAggregate;
 use crate::execution_step::ExecutionCtx;
 use crate::execution_step::RcSecurityTetraplets;
@@ -30,14 +30,14 @@ use std::borrow::Cow;
 use std::ops::Deref;
 
 impl JValuable for ValueAggregate {
-    fn apply_lambda<'i>(&self, lambda: &LambdaAST<'_>, exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<&JValue> {
+    fn apply_lambda<'i>(&self, lambda: &AIRLambdaAST<'_>, exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<&JValue> {
         let selected_value = select_from_scalar(&self.result, lambda.iter(), exec_ctx)?;
         Ok(selected_value)
     }
 
     fn apply_lambda_with_tetraplets<'i>(
         &self,
-        lambda: &LambdaAST<'_>,
+        lambda: &AIRLambdaAST<'_>,
         exec_ctx: &ExecutionCtx<'i>,
     ) -> ExecutionResult<(&JValue, SecurityTetraplet)> {
         let selected_value = select_from_scalar(&self.result, lambda.iter(), exec_ctx)?;

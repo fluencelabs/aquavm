@@ -26,6 +26,7 @@ use crate::log_instruction;
 use crate::ExecutionError;
 use crate::JValue;
 
+use air_interpreter_data::ExecutedState;
 use air_parser::ast;
 use air_parser::ast::Fail;
 use polyplets::SecurityTetraplet;

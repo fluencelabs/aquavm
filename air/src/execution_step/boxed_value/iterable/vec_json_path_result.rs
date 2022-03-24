@@ -22,7 +22,7 @@ use crate::foldable_prev;
 use crate::JValue;
 
 /// Used for iterating over a result of applied to a stream lambda.
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug)]
 pub(crate) struct IterableVecJsonPathResult {
     pub(crate) jvalues: Vec<JValue>,
     pub(crate) tetraplets: RcSecurityTetraplets,

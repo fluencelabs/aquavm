@@ -20,8 +20,6 @@ mod utils;
 use super::ExecutionCtx;
 use super::ExecutionResult;
 use super::TraceHandler;
-use crate::execution_step::air::ValueAggregate;
-use crate::execution_step::boxed_value::Variable;
 use crate::execution_step::resolver::apply_lambda;
 use crate::log_instruction;
 use crate::trace_to_exec_err;
@@ -30,9 +28,12 @@ use crate::SecurityTetraplet;
 use apply_to_arguments::*;
 use utils::*;
 
+use air_interpreter_data::ExecutedState;
 use air_parser::ast;
 use air_parser::ast::Ap;
 use air_trace_handler::MergerApResult;
+use air_values::boxed_value::ValueAggregate;
+use air_values::variable::Variable;
 
 use std::rc::Rc;
 

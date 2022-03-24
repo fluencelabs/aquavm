@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-use super::fold::IterableType;
 use super::ExecutionCtx;
 use super::ExecutionResult;
-use super::FoldState;
 use super::TraceHandler;
 use crate::log_instruction;
 use crate::trace_to_exec_err;
 
 use air_parser::ast::Next;
+use air_values::fold_iterable_state::FoldIterableState;
+use air_values::fold_iterable_state::IterableType;
 
 impl<'i> super::ExecutableInstruction<'i> for Next<'i> {
     fn execute<VT>(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler<VT>) -> ExecutionResult<()> {
@@ -55,7 +55,7 @@ impl<'i> super::ExecutableInstruction<'i> for Next<'i> {
 
 fn maybe_meet_iteration_start<'i, VT>(
     next: &Next<'i>,
-    fold_state: &FoldState<'i>,
+    fold_state: &FoldIterableState<'i>,
     trace_ctx: &mut TraceHandler<VT>,
 ) -> ExecutionResult<()> {
     if let IterableType::Stream(fold_id) = &fold_state.iterable_type {
@@ -70,7 +70,7 @@ fn maybe_meet_iteration_start<'i, VT>(
 
 fn maybe_meet_iteration_end<'i, VT>(
     next: &Next<'i>,
-    fold_state: &FoldState<'i>,
+    fold_state: &FoldIterableState<'i>,
     trace_ctx: &mut TraceHandler<VT>,
 ) -> ExecutionResult<()> {
     if let IterableType::Stream(fold_id) = &fold_state.iterable_type {
@@ -82,7 +82,7 @@ fn maybe_meet_iteration_end<'i, VT>(
 
 fn maybe_meet_back_iterator<'i, VT>(
     next: &Next<'i>,
-    fold_state: &FoldState<'i>,
+    fold_state: &FoldIterableState<'i>,
     trace_ctx: &mut TraceHandler<VT>,
 ) -> ExecutionResult<()> {
     if let IterableType::Stream(fold_id) = &fold_state.iterable_type {

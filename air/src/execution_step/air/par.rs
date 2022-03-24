@@ -26,11 +26,13 @@ use crate::log_instruction;
 use crate::trace_to_exec_err;
 use completeness_updater::ParCompletenessUpdater;
 
+use air_interpreter_data::ExecutedState;
 use air_parser::ast::Par;
 use air_trace_handler::SubtreeType;
 
 #[rustfmt::skip]
-impl<'i> ExecutableInstruction<'i> for Par<'i> {
+impl<'i> ExecutableInstruction<'i> for Par<'i>
+{
     fn execute<VT>(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler<VT>) -> ExecutionResult<()> {
         log_instruction!(par, exec_ctx, trace_ctx);
 

@@ -17,7 +17,7 @@
 use super::*;
 use crate::data_keeper::TraceSlider;
 
-pub(super) fn compute_new_states<VT: Clone>(
+pub(super) fn compute_new_states<VT>(
     data_keeper: &DataKeeper<VT>,
     prev_par: ParResult,
     current_par: ParResult,
@@ -40,11 +40,7 @@ pub(super) fn compute_new_states<VT: Clone>(
     Ok(pair)
 }
 
-fn compute_new_state<VT: Clone>(
-    par_subtree_len: usize,
-    slider: &TraceSlider<VT>,
-    par: ParResult,
-) -> FSMResult<CtxState, VT> {
+fn compute_new_state<VT>(par_subtree_len: usize, slider: &TraceSlider<VT>, par: ParResult) -> FSMResult<CtxState, VT> {
     let pos = slider
         .position()
         .checked_add(par_subtree_len)

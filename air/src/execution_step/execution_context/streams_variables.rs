@@ -15,12 +15,12 @@
  */
 
 use crate::execution_step::ExecutionResult;
-use crate::execution_step::Generation;
-use crate::execution_step::Stream;
-use crate::execution_step::ValueAggregate;
 
 use air_interpreter_data::GlobalStreamGens;
 use air_interpreter_data::RestrictedStreamGens;
+use air_values::boxed_value::ValueAggregate;
+use air_values::stream::Generation;
+use air_values::stream::Stream;
 
 use std::collections::hash_map::Entry::{Occupied, Vacant};
 use std::collections::HashMap;

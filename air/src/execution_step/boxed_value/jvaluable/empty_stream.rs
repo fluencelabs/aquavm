@@ -16,7 +16,7 @@
 
 use super::ExecutionResult;
 use super::JValuable;
-use super::LambdaAST;
+use super::AIRLambdaAST;
 use super::LambdaError::EmptyStream;
 use crate::execution_step::CatchableError::LambdaApplierError;
 use crate::execution_step::ExecutionCtx;
@@ -27,14 +27,14 @@ use crate::SecurityTetraplet;
 use std::borrow::Cow;
 
 impl JValuable for () {
-    fn apply_lambda<'i>(&self, _lambda: &LambdaAST<'_>, _exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<&JValue> {
+    fn apply_lambda<'i>(&self, _lambda: &AIRLambdaAST<'_>, _exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<&JValue> {
         // applying lambda to an empty stream will produce a join behaviour
         Err(LambdaApplierError(EmptyStream).into())
     }
 
     fn apply_lambda_with_tetraplets<'i>(
         &self,
-        _lambda: &LambdaAST<'_>,
+        _lambda: &AIRLambdaAST<'_>,
         _exec_ctx: &ExecutionCtx<'i>,
     ) -> ExecutionResult<(&JValue, SecurityTetraplet)> {
         // applying lambda to an empty stream will produce a join behaviour

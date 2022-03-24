@@ -41,7 +41,7 @@ pub enum CtorState {
 }
 
 impl SubTraceLoreCtor {
-    pub(super) fn from_before_start<VT: Clone>(value_pos: usize, data_keeper: &DataKeeper<VT>) -> Self {
+    pub(super) fn from_before_start<VT>(value_pos: usize, data_keeper: &DataKeeper<VT>) -> Self {
         let before_tracker = PositionsTracker {
             start_pos: data_keeper.result_states_count(),
             end_pos: 0,
@@ -54,12 +54,12 @@ impl SubTraceLoreCtor {
         }
     }
 
-    pub(super) fn before_end<VT: Clone>(&mut self, data_keeper: &DataKeeper<VT>) {
+    pub(super) fn before_end<VT>(&mut self, data_keeper: &DataKeeper<VT>) {
         self.before_tracker.end_pos = data_keeper.result_states_count();
         self.state.next();
     }
 
-    pub(super) fn maybe_before_end<VT: Clone>(&mut self, data_keeper: &DataKeeper<VT>) {
+    pub(super) fn maybe_before_end<VT>(&mut self, data_keeper: &DataKeeper<VT>) {
         if !matches!(self.state, CtorState::BeforeStarted) {
             return;
         }
@@ -68,12 +68,12 @@ impl SubTraceLoreCtor {
         self.state.next();
     }
 
-    pub(super) fn after_start<VT: Clone>(&mut self, data_keeper: &DataKeeper<VT>) {
+    pub(super) fn after_start<VT>(&mut self, data_keeper: &DataKeeper<VT>) {
         self.after_tracker.start_pos = data_keeper.result_states_count();
         self.state.next();
     }
 
-    pub(super) fn after_end<VT: Clone>(&mut self, data_keeper: &DataKeeper<VT>) {
+    pub(super) fn after_end<VT>(&mut self, data_keeper: &DataKeeper<VT>) {
         self.after_tracker.end_pos = data_keeper.result_states_count();
         self.state.next();
     }
@@ -97,7 +97,7 @@ impl SubTraceLoreCtor {
 
     // this function should be called in a situation of early exit from fold,
     // for more details see the comment above SubTraceLoreCtorQueue::finish().
-    pub(super) fn finish<VT: Clone>(&mut self, data_keeper: &DataKeeper<VT>) {
+    pub(super) fn finish<VT>(&mut self, data_keeper: &DataKeeper<VT>) {
         use CtorState::*;
 
         match self.state {

@@ -31,10 +31,7 @@ pub struct MergeCtx<VT> {
     pub streams: GlobalStreamGens,
 }
 
-impl<VT> MergeCtx<VT>
-where
-    VT: Clone,
-{
+impl<VT> MergeCtx<VT> {
     #[allow(dead_code)]
     pub(crate) fn from_trace(trace: ExecutionTrace<VT>) -> Self {
         let slider = TraceSlider::new(trace);

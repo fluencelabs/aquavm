@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Fluence Labs Limited
+ * Copyright 2022 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-mod air_value;
 mod lambda_applier;
-mod to_iterable;
+mod value;
 
-use erased_serde::private::serde;
-pub use air_value::Value;
 pub use lambda_applier::LambdaApplier;
-pub use to_iterable::ToIterable;
+pub use lambda_applier::ValueLambdaError;
+pub use value::Value;
 
-use erased_serde::Serialize;
-use crate::serde::{Deserializer, Serializer};
+use serde::Deserializer;
+use serde::Serializer;
 
-pub trait BoxedValue: Value + LambdaApplier + ToIterable {}
+use std::fmt::Formatter;
+
+pub trait BoxedValue: Value + LambdaApplier {}
 
 impl PartialEq<Self> for dyn BoxedValue + '_ {
-    fn eq(&self, other: &Self) -> bool {
+    fn eq(&self, _other: &Self) -> bool {
         todo!()
     }
 }
@@ -37,14 +37,25 @@ impl PartialEq<Self> for dyn BoxedValue + '_ {
 impl Eq for dyn BoxedValue + '_ {}
 
 impl serde::Serialize for &(dyn BoxedValue + '_) {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
+    fn serialize<S>(&self, _serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
         todo!()
     }
 }
 
 impl<'de> serde::Deserialize<'de> for &(dyn BoxedValue + '_) {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error> where D: Deserializer<'de>
+    fn deserialize<D>(_deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
     {
         todo!()
+    }
+}
+
+impl std::fmt::Debug for dyn BoxedValue + '_ {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.to_string())
     }
 }

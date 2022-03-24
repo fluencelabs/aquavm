@@ -51,13 +51,13 @@ pub enum CatchableError {
     )]
     IncompatibleJValueType {
         variable_name: String,
-        actual_value: JValue,
+        actual_value: String,
         expected_value_type: &'static str,
     },
 
     /// A fold instruction must iterate over array value.
-    #[error("lambda '{1}' returned non-array value '{0}' for fold instruction")]
-    FoldIteratesOverNonArray(JValue, String),
+    #[error("lambda '{lambda}' returned non-array value '{value}' for fold instruction")]
+    FoldIteratesOverNonArray { value: String, lambda: String },
 
     /// This error type is produced by a match to notify xor that compared values aren't equal.
     #[error("match is used without corresponding xor")]

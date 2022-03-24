@@ -31,10 +31,7 @@ pub(crate) struct DataKeeper<VT> {
     pub(crate) result_trace: ExecutionTrace<VT>,
 }
 
-impl<VT> DataKeeper<VT>
-where
-    VT: Clone,
-{
+impl<VT> DataKeeper<VT> {
     pub(crate) fn from_data(prev_data: InterpreterData<VT>, current_data: InterpreterData<VT>) -> Self {
         let prev_ctx = MergeCtx::from_data(prev_data);
         let current_ctx = MergeCtx::from_data(current_data);

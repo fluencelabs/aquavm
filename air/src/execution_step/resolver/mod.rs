@@ -15,7 +15,9 @@
  */
 
 mod resolve;
+mod stream_as_air_value;
 
 pub(crate) use resolve::*;
+pub(crate) use stream_as_air_value::StreamValueAlgebraIngredients;
 
 use super::RcSecurityTetraplets;

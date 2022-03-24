@@ -14,33 +14,19 @@
  * limitations under the License.
  */
 
-use super::Instruction;
-use super::IterableValue;
+use super::*;
 
-use std::rc::Rc;
+use std::fmt;
 
-pub(crate) struct FoldState<'i> {
-    pub(crate) iterable: IterableValue,
-    pub(crate) iterable_type: IterableType,
-    pub(crate) instr_head: Rc<Instruction<'i>>,
-}
+impl fmt::Display for ValueAccessor<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use ValueAccessor::*;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub(crate) enum IterableType {
-    Scalar,
-    Stream(u32),
-}
-
-impl<'i> FoldState<'i> {
-    pub(crate) fn from_iterable(
-        iterable: IterableValue,
-        iterable_type: IterableType,
-        instr_head: Rc<Instruction<'i>>,
-    ) -> Self {
-        Self {
-            iterable,
-            iterable_type,
-            instr_head,
+        match self {
+            ArrayAccess { idx } => write!(f, ".[{}]", idx),
+            FieldAccessByName { field_name } => write!(f, ".{}", field_name),
+            FieldAccessByScalar { scalar_name } => write!(f, ".[{}]", scalar_name),
+            Error => write!(f, "a parser error occurred while parsing lambda expression"),
         }
     }
 }

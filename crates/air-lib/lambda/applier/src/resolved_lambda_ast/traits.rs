@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Fluence Labs Limited
+ * Copyright 2022 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,3 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+use super::*;
+
+use std::fmt;
+
+impl fmt::Display for ResolvedValueAccessor<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use ResolvedValueAccessor::*;
+
+        match self {
+            ArrayAccess { idx } => write!(f, ".[{}]", idx),
+            FieldAccess { field_name } => write!(f, ".{}", field_name),
+        }
+    }
+}

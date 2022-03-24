@@ -7,7 +7,7 @@ use crate::parser::Span;
 use crate::parser::lexer::Token;
 use crate::parser::air_utils::*;
 use crate::make_user_error;
-use air_lambda_parser::LambdaAST;
+use air_lambda_parser::AIRLambdaAST;
 use lalrpop_util::ErrorRecovery;
 use std::rc::Rc;
 #[allow(unused_extern_crates)]
@@ -28,7 +28,7 @@ mod __parse__AIR {
     use crate::parser::lexer::Token;
     use crate::parser::air_utils::*;
     use crate::make_user_error;
-    use air_lambda_parser::LambdaAST;
+    use air_lambda_parser::AIRLambdaAST;
     use lalrpop_util::ErrorRecovery;
     use std::rc::Rc;
     #[allow(unused_extern_crates)]
@@ -45,10 +45,10 @@ mod __parse__AIR {
         Variant1(bool),
         Variant2(f64),
         Variant3(i64),
-        Variant4(LambdaAST<'input>),
+        Variant4(AIRLambdaAST<'input>),
         Variant5(&'input str),
         Variant6((&'input str, usize)),
-        Variant7((&'input str, LambdaAST<'input>, usize)),
+        Variant7((&'input str, AIRLambdaAST<'input>, usize)),
         Variant8(__lalrpop_util::ErrorRecovery<usize, Token<'input>, ParserError>),
         Variant9(Value<'input>),
         Variant10(alloc::vec::Vec<Value<'input>>),
@@ -1650,7 +1650,7 @@ mod __parse__AIR {
       'input,
     >(
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, (&'input str, LambdaAST<'input>, usize), usize)
+    ) -> (usize, (&'input str, AIRLambdaAST<'input>, usize), usize)
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant7(__v), __r)) => (__l, __v, __r),
@@ -1738,7 +1738,7 @@ mod __parse__AIR {
       'input,
     >(
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, LambdaAST<'input>, usize)
+    ) -> (usize, AIRLambdaAST<'input>, usize)
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant4(__v), __r)) => (__l, __v, __r),
@@ -4095,7 +4095,7 @@ fn __action26<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, scalar, _): (usize, (&'input str, LambdaAST<'input>, usize), usize),
+    (_, scalar, _): (usize, (&'input str, AIRLambdaAST<'input>, usize), usize),
 ) -> Fail<'input>
 {
     Fail::Scalar(ScalarWithLambda::new(scalar.0, Some(scalar.1), scalar.2))
@@ -4163,7 +4163,7 @@ fn __action30<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, scalar, _): (usize, (&'input str, LambdaAST<'input>, usize), usize),
+    (_, scalar, _): (usize, (&'input str, AIRLambdaAST<'input>, usize), usize),
 ) -> FoldScalarIterable<'input>
 {
     FoldScalarIterable::Scalar(ScalarWithLambda::new(scalar.0, Some(scalar.1), scalar.2))
@@ -4284,7 +4284,7 @@ fn __action38<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, scalar, _): (usize, (&'input str, LambdaAST<'input>, usize), usize),
+    (_, scalar, _): (usize, (&'input str, AIRLambdaAST<'input>, usize), usize),
 ) -> CallInstrValue<'input>
 {
     CallInstrValue::Variable(VariableWithLambda::scalar_wl(scalar.0, scalar.1, scalar.2))
@@ -4314,7 +4314,7 @@ fn __action40<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, stream, _): (usize, (&'input str, LambdaAST<'input>, usize), usize),
+    (_, stream, _): (usize, (&'input str, AIRLambdaAST<'input>, usize), usize),
 ) -> CallInstrValue<'input>
 {
     CallInstrValue::Variable(VariableWithLambda::stream_wl(stream.0, stream.1, stream.2))
@@ -4404,7 +4404,7 @@ fn __action46<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, le, _): (usize, LambdaAST<'input>, usize),
+    (_, le, _): (usize, AIRLambdaAST<'input>, usize),
 ) -> Value<'input>
 {
     Value::LastError(Some(le))
@@ -4495,7 +4495,7 @@ fn __action52<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, scalar, _): (usize, (&'input str, LambdaAST<'input>, usize), usize),
+    (_, scalar, _): (usize, (&'input str, AIRLambdaAST<'input>, usize), usize),
 ) -> Value<'input>
 {
     Value::Variable(VariableWithLambda::scalar_wl(scalar.0, scalar.1, scalar.2))
@@ -4525,7 +4525,7 @@ fn __action54<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, stream, _): (usize, (&'input str, LambdaAST<'input>, usize), usize),
+    (_, stream, _): (usize, (&'input str, AIRLambdaAST<'input>, usize), usize),
 ) -> Value<'input>
 {
     Value::Variable(VariableWithLambda::stream_wl(stream.0, stream.1, stream.2))
@@ -4570,7 +4570,7 @@ fn __action57<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, le, _): (usize, LambdaAST<'input>, usize),
+    (_, le, _): (usize, AIRLambdaAST<'input>, usize),
 ) -> ApArgument<'input>
 {
     ApArgument::LastError(Some(le))
@@ -4661,7 +4661,7 @@ fn __action63<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, scalar, _): (usize, (&'input str, LambdaAST<'input>, usize), usize),
+    (_, scalar, _): (usize, (&'input str, AIRLambdaAST<'input>, usize), usize),
 ) -> ApArgument<'input>
 {
     ApArgument::Scalar(ScalarWithLambda::new(scalar.0, Some(scalar.1), scalar.2))

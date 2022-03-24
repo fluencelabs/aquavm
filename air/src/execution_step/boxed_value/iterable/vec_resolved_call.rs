@@ -21,7 +21,7 @@ use crate::foldable_next;
 use crate::foldable_prev;
 
 /// Used for iterating over stream with JValues.
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug)]
 pub(crate) struct IterableVecResolvedCall {
     pub(crate) call_results: Vec<ValueAggregate>,
     pub(crate) cursor: usize,
