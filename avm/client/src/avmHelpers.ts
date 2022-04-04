@@ -1,6 +1,7 @@
 import { CallResultsArray, InterpreterResult, CallRequest } from './types';
 
 const decoder = new TextDecoder();
+const encoder = new TextEncoder();
 
 export function prepareArgs(
     air: string,
@@ -25,12 +26,15 @@ export function prepareArgs(
         current_peer_id: params.currentPeerId,
     };
 
+    const encoded = encoder.encode(JSON.stringify(callResultsToPass));
+
     const avmArg = JSON.stringify([
+        // force new line
         air,
         Array.from(prevData),
         Array.from(data),
         paramsToPass,
-        Array.from(Buffer.from(JSON.stringify(callResultsToPass))),
+        Array.from(encoded),
     ]);
 
     return avmArg;
