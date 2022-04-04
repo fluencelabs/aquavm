@@ -47,8 +47,8 @@ pub(crate) use execution_context::LastError;
 
 pub(crate) use air_trace_handler::TraceHandler;
 
-use std::rc::Rc;
 use boxed_value::RcBoxedValue;
+use std::rc::Rc;
 
 type ExecutionResult<T> = std::result::Result<T, ExecutionError<Rc<dyn air_values::boxed_value::BoxedValue>>>;
 type RcSecurityTetraplet = Rc<crate::SecurityTetraplet>;

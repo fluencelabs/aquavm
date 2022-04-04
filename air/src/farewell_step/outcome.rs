@@ -23,8 +23,8 @@ use crate::INTERPRETER_SUCCESS;
 
 use air_interpreter_data::InterpreterData;
 use air_interpreter_interface::CallRequests;
-use serde::Serialize;
 use serde::Deserialize;
+use serde::Serialize;
 
 use std::hash::Hash;
 use std::rc::Rc;
@@ -35,8 +35,8 @@ pub(crate) fn from_success_result<VT>(
     exec_ctx: ExecutionCtx<'_>,
     trace_handler: TraceHandler<VT>,
 ) -> Result<InterpreterOutcome, InterpreterOutcome>
-    where
-        VT: Serialize + for<'de> Deserialize<'de>
+where
+    VT: Serialize + for<'de> Deserialize<'de>,
 {
     let (ret_code, error_message) = if exec_ctx.call_results.is_empty() {
         (INTERPRETER_SUCCESS, String::new())
@@ -76,8 +76,8 @@ pub(crate) fn from_execution_error<VT>(
     error_code: i64,
     error_message: String,
 ) -> InterpreterOutcome
-    where
-        VT: Serialize + for<'de> Deserialize<'de>
+where
+    VT: Serialize + for<'de> Deserialize<'de>,
 {
     populate_outcome_from_contexts(exec_ctx, trace_handler, error_code, error_message)
 }
@@ -89,7 +89,7 @@ fn populate_outcome_from_contexts<VT>(
     error_message: String,
 ) -> InterpreterOutcome
 where
- VT: Serialize + for<'de> Deserialize<'de>
+    VT: Serialize + for<'de> Deserialize<'de>,
 {
     let (global_streams, restricted_streams) = exec_ctx.streams.into_streams_data();
     let data = InterpreterData::from_execution_result(

@@ -129,7 +129,9 @@ pub(crate) fn resolve_ast_scalar_wl<'ctx, 'i>(
     resolve_ast_variable_wl(&variable, exec_ctx)
 }
 
-pub(crate) fn resolve_ast_variable_wl<'ctx, 'i>(ast_variable: &ast::VariableWithLambda<'_>, exec_ctx: &'ctx ExecutionCtx<'i>,
+pub(crate) fn resolve_ast_variable_wl<'ctx, 'i>(
+    ast_variable: &ast::VariableWithLambda<'_>,
+    exec_ctx: &'ctx ExecutionCtx<'i>,
 ) -> ExecutionResult<(&'ctx RcBoxedValue, RcSecurityTetraplets)> {
     let variable: Variable<'_> = ast_variable.into();
     match ast_variable.lambda() {
@@ -150,5 +152,7 @@ pub(crate) fn apply_lambda<'ctx, 'i>(
 ) -> ExecutionResult<ValueWithTetraplet<'ctx, 'ctx>> {
     let resolved_lambda = crate::execution_step::lambda_applier::resolve_lambda(lambda, exec_ctx)?;
     let resolved = resolve_variable(variable, exec_ctx)?;
-    resolved.apply_lambda_with_tetraplets(&resolved_lambda).map_err(Into::into)
+    resolved
+        .apply_lambda_with_tetraplets(&resolved_lambda)
+        .map_err(Into::into)
 }

@@ -14,39 +14,32 @@
  * limitations under the License.
  */
 
-use super::fold_iterable_state::FoldIterableState;
-use boxed_value::AIRValueAlgebra;
-use boxed_value::ValueAggregate;
-use boxed_value::ValueLambdaError;
+use super::JValuable;
+use super::ValueAggregate;
+use crate::execution_step::FoldState;
+use crate::execution_step::RcSecurityTetraplet;
+use crate::JValue;
+use air_value::{BoxedValue, Value};
+
+use serde::Deserialize;
+use serde::Serialize;
 
 use std::fmt::Display;
 use std::fmt::Formatter;
+use std::rc::Rc;
 
 pub enum ScalarRef<'i> {
     Value(&'i ValueAggregate),
     IterableValue(&'i FoldIterableState<'i>),
 }
 
-const ITERABLE_PEEK_EXPECTATION: &str = "peek always return elements inside fold,\
-                                         this guaranteed by implementation of next and avoiding empty folds";
-
 impl<'i> ScalarRef<'i> {
-    pub fn as_air_value(&self) -> Box<dyn AIRValueAlgebra<Error = ValueLambdaError> + 'i> {
+    pub(crate) fn into_jvaluable(self) -> Box<dyn JValuable + 'i> {
         match self {
-            &ScalarRef::Value(value) => Box::new(value),
+            ScalarRef::Value(value) => Box::new(value.clone()),
             ScalarRef::IterableValue(fold_state) => {
-                let peeked_value = fold_state.iterable.peek().expect(ITERABLE_PEEK_EXPECTATION);
+                let peeked_value = fold_state.iterable.peek().unwrap();
                 Box::new(peeked_value)
-            }
-        }
-    }
-
-    pub fn as_value_aggregate(&self) -> ValueAggregate {
-        match self {
-            &ScalarRef::Value(value) => value.clone(),
-            ScalarRef::IterableValue(fold_state) => {
-                let peeked_value = fold_state.iterable.peek().expect(ITERABLE_PEEK_EXPECTATION);
-                peeked_value.into_value_aggregate()
             }
         }
     }
@@ -57,9 +50,8 @@ impl<'i> Display for ScalarRef<'i> {
         match self {
             ScalarRef::Value(value) => write!(f, "{:?}", value)?,
             ScalarRef::IterableValue(cursor) => {
-                let _iterable = &cursor.iterable;
-                //write!(f, "cursor, current value: {:?}", iterable.peek())?;
-                write!(f, "cursor")?;
+                let iterable = &cursor.iterable;
+                write!(f, "cursor, current value: {:?}", iterable.peek())?;
             }
         }
 

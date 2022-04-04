@@ -88,6 +88,7 @@ fn resolve_value_to_accessor(value: &RcBoxedValue) -> ExecutionResult<ResolvedVa
         (None, Some(idx)) => Ok(ResolvedValueAccessor::ArrayAccess { idx: idx as u32 }),
         (None, None) => Err(Rc::new(LambdaError::ScalarAccessorHasInvalidType {
             scalar_accessor: value.to_string(),
-        })).into(),
+        }))
+        .into(),
     }
 }

@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-use boxed_value::BoxedValue;
-use boxed_value::ValueAggregate;
+use super::ExecutionResult;
+use super::ValueAggregate;
+use crate::execution_step::CatchableError;
+use crate::JValue;
 
 use std::fmt::Formatter;
 
@@ -30,37 +32,43 @@ use std::fmt::Formatter;
 pub struct Stream(Vec<Vec<ValueAggregate>>);
 
 impl Stream {
-    pub fn from_generations_count(count: usize) -> Self {
+    pub(crate) fn from_generations_count(count: usize) -> Self {
         Self(vec![vec![]; count + 1])
     }
 
-    pub fn from_value(value: ValueAggregate) -> Self {
+    pub(crate) fn from_value(value: ValueAggregate) -> Self {
         Self(vec![vec![value]])
     }
 
     // if generation is None, value would be added to the last generation, otherwise it would
     // be added to given generation
-    pub fn add_value(&mut self, value: ValueAggregate, generation: Generation) -> Option<u32> {
+    pub(crate) fn add_value(
+        &mut self,
+        value: ValueAggregate,
+        generation: Generation,
+    ) -> ExecutionResult<u32> {
         let generation = match generation {
             Generation::Last => self.0.len() - 1,
             Generation::Nth(id) => id as usize,
         };
 
         if generation >= self.0.len() {
-            return None;
+            return Err(
+                CatchableError::StreamDontHaveSuchGeneration(self.clone(), generation).into(),
+            );
         }
 
         self.0[generation].push(value);
-        Some(generation as u32)
+        Ok(generation as u32)
     }
 
-    pub fn generations_count(&self) -> usize {
+    pub(crate) fn generations_count(&self) -> usize {
         // the last generation could be empty due to the logic of from_generations_count ctor
         self.0.iter().filter(|gen| !gen.is_empty()).count()
     }
 
     /// Add a new empty generation if the latest isn't empty.
-    pub fn add_new_generation_if_non_empty(&mut self) -> bool {
+    pub(crate) fn add_new_generation_if_non_empty(&mut self) -> bool {
         let should_add_generation = match self.0.last() {
             Some(last) => !last.is_empty(),
             None => true,
@@ -73,7 +81,7 @@ impl Stream {
     }
 
     /// Remove a last generation if it's empty.
-    pub fn remove_last_generation_if_empty(&mut self) -> bool {
+    pub(crate) fn remove_last_generation_if_empty(&mut self) -> bool {
         let should_remove_generation = match self.0.last() {
             Some(last) => last.is_empty(),
             None => false,
@@ -86,7 +94,7 @@ impl Stream {
         should_remove_generation
     }
 
-    pub fn elements_count(&self, generation: Generation) -> Option<usize> {
+    pub(crate) fn elements_count(&self, generation: Generation) -> Option<usize> {
         match generation {
             Generation::Nth(generation) if generation as usize > self.generations_count() => None,
             Generation::Nth(generation) => Some(
@@ -100,7 +108,7 @@ impl Stream {
         }
     }
 
-    pub fn is_empty(&self) -> bool {
+    pub(crate) fn is_empty(&self) -> bool {
         if self.0.is_empty() {
             return false;
         }
@@ -108,20 +116,16 @@ impl Stream {
         self.0.iter().all(|v| v.is_empty())
     }
 
-    pub fn as_value(&self, generation: Generation) -> Option<&dyn BoxedValue> {
-        /*
+    pub(crate) fn as_jvalue(&self, generation: Generation) -> Option<JValue> {
         use std::ops::Deref;
 
         let iter = self.iter(generation)?;
         let jvalue_array = iter.map(|r| r.result.deref().clone()).collect::<Vec<_>>();
 
         Some(JValue::Array(jvalue_array))
-         */
-
-        todo!()
     }
 
-    pub fn iter(&self, generation: Generation) -> Option<StreamIter<'_>> {
+    pub(crate) fn iter(&self, generation: Generation) -> Option<StreamIter<'_>> {
         let iter: Box<dyn Iterator<Item = &ValueAggregate>> = match generation {
             Generation::Nth(generation) if generation as usize >= self.generations_count() => {
                 return None
@@ -142,7 +146,11 @@ impl Stream {
         Some(iter)
     }
 
-    pub fn slice_iter(&self, start: Generation, end: Generation) -> Option<StreamSliceIter<'_>> {
+    pub(crate) fn slice_iter(
+        &self,
+        start: Generation,
+        end: Generation,
+    ) -> Option<StreamSliceIter<'_>> {
         if self.is_empty() {
             return None;
         }
@@ -180,7 +188,7 @@ pub enum Generation {
 }
 
 impl Generation {
-    pub fn from_option(raw_generation: Option<u32>) -> Self {
+    pub(crate) fn from_option(raw_generation: Option<u32>) -> Self {
         match raw_generation {
             Some(generation) => Generation::Nth(generation),
             None => Generation::Last,
@@ -210,7 +218,7 @@ impl<'result> Iterator for StreamIter<'result> {
 
 impl<'result> ExactSizeIterator for StreamIter<'result> {}
 
-pub struct StreamSliceIter<'slice> {
+pub(crate) struct StreamSliceIter<'slice> {
     iter: Box<dyn Iterator<Item = &'slice [ValueAggregate]> + 'slice>,
     pub len: usize,
 }

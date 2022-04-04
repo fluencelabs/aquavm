@@ -25,8 +25,7 @@ use air_parser::ast::Xor;
 use std::fmt::Display;
 
 impl<'i> super::ExecutableInstruction<'i> for Xor<'i> {
-    fn execute<VT>(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler<VT>) -> ExecutionResult<()>
-    {
+    fn execute<VT>(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler<VT>) -> ExecutionResult<()> {
         log_instruction!(xor, exec_ctx, trace_ctx);
 
         exec_ctx.subtree_complete = true;

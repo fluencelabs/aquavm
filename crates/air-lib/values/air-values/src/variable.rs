@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use crate::stream::Generation;
+use super::Generation;
 use air_parser::ast;
 
 #[derive(Clone, Copy, Debug)]
@@ -30,11 +30,11 @@ pub enum Variable<'i> {
 }
 
 impl<'i> Variable<'i> {
-    pub fn scalar(name: &'i str, position: usize) -> Self {
+    pub(crate) fn scalar(name: &'i str, position: usize) -> Self {
         Self::Scalar { name, position }
     }
 
-    pub fn stream(name: &'i str, generation: Generation, position: usize) -> Self {
+    pub(crate) fn stream(name: &'i str, generation: Generation, position: usize) -> Self {
         Self::Stream {
             name,
             generation,
