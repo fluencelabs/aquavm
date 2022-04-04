@@ -9,9 +9,6 @@
     "files": [
         "dist/*"
     ],
-    "bin": {
-        "copy-avm": "./dist/copyAvm.js"
-    },
     "scripts": {
         "build": "tsc && ./build_wasm.sh"
     },
