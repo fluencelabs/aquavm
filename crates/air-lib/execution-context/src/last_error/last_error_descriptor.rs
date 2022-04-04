@@ -21,6 +21,7 @@ use crate::execution_step::RcSecurityTetraplet;
 use crate::JValue;
 use crate::ToErrorCode;
 
+use air_values::boxed_value::BoxedValue;
 use air_values::boxed_value::RcSecurityTetraplet;
 
 use std::rc::Rc;
@@ -66,13 +67,13 @@ impl<'s> LastErrorDescriptor {
         tetraplet: Option<RcSecurityTetraplet>,
     ) -> bool {
         let error_object = error_from_raw_fields(error_code, error_message, instruction, peer_id);
-        self.set_from_error_object(Rc::new(error_object), tetraplet);
+        self.set_from_error_object(error_object, tetraplet);
         true
     }
 
     pub(crate) fn set_from_error_object(
         &mut self,
-        error: Rc<JValue>,
+        error: Rc<dyn BoxedValue>,
         tetraplet: Option<RcSecurityTetraplet>,
     ) {
         self.last_error = LastError { error, tetraplet };

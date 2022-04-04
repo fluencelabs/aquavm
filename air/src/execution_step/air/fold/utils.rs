@@ -16,9 +16,9 @@
 
 use super::*;
 use crate::execution_step::CatchableError;
-use crate::AIRLambdaAST;
 
 use air_lambda_ast::AIRLambda;
+use air_lambda_ast::AIRLambdaAST;
 use air_parser::ast;
 use air_values::boxed_value::RcSecurityTetraplet;
 use air_values::boxed_value::{AIRValueAlgebra, BoxedValue, ValueAggregate};
@@ -90,7 +90,7 @@ fn from_call_result(call_result: ValueAggregate, variable_name: &str) -> Executi
             expected_value_type: "array",
         })?;
 
-    if iter.is_empty() {
+    if iter.len() == 0 {
         // skip fold if array is empty
         return Ok(FoldIterableScalar::Empty);
     }
@@ -119,10 +119,10 @@ fn create_scalar_lambda_iterable<'ctx>(
         }
         ScalarRef::IterableValue(fold_state) => {
             let iterable_value = fold_state.iterable.peek().unwrap();
-            let jvalue = iterable_value.apply_lambda(&resolved_lambda, exec_ctx)?;
+            let value = iterable_value.apply_lambda(&resolved_lambda)?;
             let tetraplet = iterable_value.tetraplet.clone();
 
-            from_value(jvalue, tetraplet, &resolved_lambda)
+            from_value(value, tetraplet, &resolved_lambda)
         }
     }
 }
@@ -144,11 +144,10 @@ fn from_value(
         .into()
     })?;
 
-    if iterable.is_empty() {
+    if iterable.len() == 0 {
         return Ok(FoldIterableScalar::Empty);
     }
 
-    let iterable = iterable.to_vec();
     let foldable = IterableLambdaResult::init(iterable, tetraplet);
     let iterable = FoldIterableScalar::Scalar(Box::new(foldable));
     Ok(iterable)

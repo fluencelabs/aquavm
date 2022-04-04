@@ -30,6 +30,8 @@ use air_interpreter_data::ExecutedState;
 use air_parser::ast::Par;
 use air_trace_handler::SubtreeType;
 
+use std::rc::Rc;
+
 #[rustfmt::skip]
 impl<'i> ExecutableInstruction<'i> for Par<'i>
 {
@@ -57,7 +59,7 @@ fn execute_subtree<'i, VT>(
     trace_ctx: &mut TraceHandler<VT>,
     completeness_updater: &mut ParCompletenessUpdater,
     subtree_type: SubtreeType,
-) -> ExecutionResult<SubtreeResult<VT>> {
+) -> ExecutionResult<SubtreeResult<Rc<VT>>> {
     let subtree = match subtree_type {
         SubtreeType::Left => &par.0,
         SubtreeType::Right => &par.1,

@@ -20,7 +20,6 @@ use serde::Deserialize;
 use serde::Serialize;
 
 pub type AIRLambda<'input> = Vec<ResolvedValueAccessor<'input>>;
-pub type AIRLambdaIter<'input> = dyn Iterator<Item = ResolvedValueAccessor<'input>>;
 
 /// It's a resolved version of ValueAccessor, where FieldAccessByScalar was resolved
 /// either to ArrayAccess or to FieldAccess. Intended to apply to AIR values to find out

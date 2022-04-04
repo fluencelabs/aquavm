@@ -44,7 +44,7 @@ impl AIRValueAlgebra for StreamValueAlgebraIngredients<'_> {
 
     fn apply_lambda<'value>(&'value self, lambda: &AIRLambda<'_>) -> ExecutionResult<&'value dyn BoxedValue> {
         let iter = self.iter()?.map(|v| v.value.deref());
-        let select_result = select_from_stream(iter, lambda.iter())?;
+        let select_result = select_from_stream(iter, lambda)?;
 
         Ok(select_result.result)
     }

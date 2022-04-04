@@ -61,5 +61,3 @@ pub mod parser {
 }
 
 pub(crate) type JValue = serde_json::Value;
-
-use air_lambda_parser::AIRLambdaAST;

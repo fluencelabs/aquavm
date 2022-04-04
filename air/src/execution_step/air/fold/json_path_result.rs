@@ -21,21 +21,23 @@ use air_values::fold_iterable_state::IterableItem;
 use boxed_value::foldable_next;
 use boxed_value::foldable_prev;
 
+use std::cell::Cell;
+
 /// Used for iterating over a result of applied to a JValue lambda.
 pub(crate) struct IterableLambdaResult<'ctx> {
-    pub(crate) iterator: Box<dyn ExactSizeIterator<Item = &'ctx dyn BoxedValue>>,
+    pub(crate) iterable: Cell<Box<dyn ExactSizeIterator<Item = &'ctx dyn BoxedValue>>>,
     // consider adding index for each tetraplet
     pub(crate) tetraplet: RcSecurityTetraplet,
     pub(crate) cursor: usize,
 }
 
-impl IterableLambdaResult<'_> {
+impl<'ctx> IterableLambdaResult<'ctx> {
     pub(crate) fn init(
-        iterator: Box<dyn ExactSizeIterator<Item = &dyn BoxedValue>>,
+        iterable: Box<dyn ExactSizeIterator<Item = &'ctx dyn BoxedValue>>,
         tetraplet: RcSecurityTetraplet,
     ) -> Self {
         Self {
-            iterator,
+            iterable: Cell::new(iterable),
             tetraplet,
             cursor: 0,
         }
@@ -46,7 +48,7 @@ impl<'ctx> AIRIterableValueAlgebra<'ctx> for IterableLambdaResult<'ctx> {
     type Item = IterableItem<'ctx>;
 
     fn next(&mut self) -> bool {
-        foldable_next!(self, self.iterator.len())
+        foldable_next!(self, self.iterable.len())
     }
 
     fn prev(&mut self) -> bool {
@@ -54,12 +56,14 @@ impl<'ctx> AIRIterableValueAlgebra<'ctx> for IterableLambdaResult<'ctx> {
     }
 
     fn peek(&'ctx self) -> Option<Self::Item> {
-        if self.iterator.len() == 0 {
+        if self.iterable.len() == 0 {
             return None;
         }
 
-        let jvalue = &self.jvalues[self.cursor];
-        let result = IterableItem::RefRef((jvalue, &self.tetraplet, 0));
+        let iterator = self.iterable.get_mut();
+        let value = iterator.nth(self.cursor).expect("");
+        // TODO: proper work with position
+        let result = IterableItem::new(value, &self.tetraplet, 0);
 
         Some(result)
     }

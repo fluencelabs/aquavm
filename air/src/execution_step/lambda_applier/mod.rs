@@ -46,7 +46,7 @@ use air_lambda_ast::AIRLambdaAST;
 use air_values::boxed_value::RcBoxedValue;
 
 pub(crate) fn resolve_lambda<'ctx: 'lambda, 'lambda, 'i>(
-    lambda: &'lambda AIRLambdaAST<'_>,
+    lambda: &'lambda AIRLambdaAST<'ctx>,
     exec_ctx: &'ctx ExecutionCtx<'i>,
 ) -> ExecutionResult<AIRLambda<'ctx>> {
     use air_lambda_ast::ValueAccessor;
@@ -86,8 +86,8 @@ fn resolve_value_to_accessor(value: &RcBoxedValue) -> ExecutionResult<ResolvedVa
         (Some(_), Some(_)) => todo!(),
         (Some(field_name), None) => Ok(ResolvedValueAccessor::FieldAccess { field_name }),
         (None, Some(idx)) => Ok(ResolvedValueAccessor::ArrayAccess { idx: idx as u32 }),
-        (None, None) => Rc::new(Err(LambdaError::ScalarAccessorHasInvalidType {
+        (None, None) => Err(Rc::new(LambdaError::ScalarAccessorHasInvalidType {
             scalar_accessor: value.to_string(),
-        })),
+        })).into(),
     }
 }

@@ -24,7 +24,7 @@ use boxed_value::ValueAggregate;
 use boxed_value::ValueLambdaError;
 use boxed_value::ValueWithTetraplet;
 
-use air_lambda_ast::AIRLambdaIter;
+use air_lambda_ast::AIRLambda;
 use boxed_value::BoxedValue;
 use std::rc::Rc;
 
@@ -86,14 +86,14 @@ impl AIRValueAlgebra for IterableItem<'_> {
 
     fn apply_lambda<'value>(
         &'value self,
-        lambda: &AIRLambdaIter<'_>,
+        lambda: &AIRLambda<'_>,
     ) -> Result<&'value dyn BoxedValue, Self::Error> {
         self.value.apply_lambda(lambda)
     }
 
     fn apply_lambda_with_tetraplets<'value>(
         &'value self,
-        lambda: &AIRLambdaIter<'_>,
+        lambda: &AIRLambda<'_>,
     ) -> Result<ValueWithTetraplet<'value, 'value>, Self::Error> {
         let value = self.value.apply_lambda(lambda)?;
         let result = ValueWithTetraplet {

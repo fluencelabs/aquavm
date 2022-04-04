@@ -22,7 +22,7 @@ use super::ValueLambdaError;
 use crate::algebra::AIRValueAlgebra;
 use crate::algebra::ValueWithTetraplet;
 
-use air_lambda_ast::AIRLambdaIter;
+use air_lambda_ast::AIRLambda;
 
 #[derive(Clone)]
 pub struct ValueAggregate {
@@ -46,14 +46,14 @@ impl AIRValueAlgebra for ValueAggregate {
 
     fn apply_lambda<'value>(
         &'value self,
-        lambda: &AIRLambdaIter<'_>,
+        lambda: &AIRLambda<'_>,
     ) -> Result<&'value dyn BoxedValue, Self::Error> {
         self.value.apply_lambda(lambda)
     }
 
     fn apply_lambda_with_tetraplets<'value>(
         &'value self,
-        lambda: &AIRLambdaIter<'_>,
+        lambda: &AIRLambda<'_>,
     ) -> Result<ValueWithTetraplet<'value, 'value>, Self::Error> {
         let value = self.value.apply_lambda(lambda)?;
         let result = ValueWithTetraplet {
@@ -78,14 +78,14 @@ impl AIRValueAlgebra for &ValueAggregate {
 
     fn apply_lambda<'value>(
         &'value self,
-        lambda: &AIRLambdaIter<'_>,
+        lambda: &AIRLambda<'_>,
     ) -> Result<&'value dyn BoxedValue, Self::Error> {
         self.value.apply_lambda(lambda)
     }
 
     fn apply_lambda_with_tetraplets<'value>(
         &'value self,
-        lambda: &AIRLambdaIter<'_>,
+        lambda: &AIRLambda<'_>,
     ) -> Result<ValueWithTetraplet<'value, 'value>, Self::Error> {
         let value = self.value.apply_lambda(lambda)?;
         let result = ValueWithTetraplet {

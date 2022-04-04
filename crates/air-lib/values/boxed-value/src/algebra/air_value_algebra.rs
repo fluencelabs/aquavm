@@ -19,7 +19,7 @@ use crate::RcBoxedValue;
 use crate::RcSecurityTetraplet;
 use crate::RcSecurityTetraplets;
 
-use air_lambda_ast::AIRLambdaIter;
+use air_lambda_ast::AIRLambda;
 
 /// Represent a value that could be transform to a JValue with or without tetraplets.
 pub trait AIRValueAlgebra {
@@ -28,13 +28,13 @@ pub trait AIRValueAlgebra {
     /// Applies lambda to the internal value, produces JValue.
     fn apply_lambda<'value>(
         &'value self,
-        lambda: &AIRLambdaIter<'_>,
+        lambda: &AIRLambda<'_>,
     ) -> Result<&'value dyn BoxedValue, Self::Error>;
 
     /// Applies lambda to the internal value, produces JValue with tetraplet.
     fn apply_lambda_with_tetraplets<'value>(
         &'value self,
-        lambda: &AIRLambdaIter<'_>,
+        lambda: &AIRLambda<'_>,
     ) -> Result<ValueWithTetraplet<'value, 'value>, Self::Error>;
 
     /// Return internal value as borrowed if it's possible, owned otherwise.

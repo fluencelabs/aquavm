@@ -17,7 +17,7 @@
 use super::LastErrorObjectError;
 use crate::execution_step::RcSecurityTetraplet;
 
-use air_values::boxed_value::BoxedValue;
+use air_values::boxed_value::RcBoxedValue;
 
 use serde::Deserialize;
 use serde::Serialize;
@@ -38,7 +38,7 @@ pub const PEER_ID_FIELD_NAME: &str = "peer_id";
 #[derive(Debug, Clone)]
 pub struct LastError {
     /// Error object that represents the last occurred error.
-    pub error: Rc<dyn BoxedValue>,
+    pub error: RcBoxedValue,
 
     /// Tetraplet that identify host where the error occurred.
     pub tetraplet: Option<RcSecurityTetraplet>,
@@ -49,7 +49,7 @@ pub(crate) fn error_from_raw_fields(
     error_message: &str,
     instruction: &str,
     peer_id: &str,
-) -> Rc<dyn BoxedValue> {
+) -> RcBoxedValue {
     // TODO: abstract over it
     let jvalue = serde_json::json!({
         ERROR_CODE_FIELD_NAME: error_code,
@@ -58,18 +58,18 @@ pub(crate) fn error_from_raw_fields(
         PEER_ID_FIELD_NAME: peer_id,
     });
 
-    Rc::new(jvalue) as Rc<dyn BoxedValue>
+    Rc::new(jvalue) as RcBoxedValue
 }
 
 /// Checks that a scalar is a value of an object types that contains at least two fields:
 ///  - error_code
 ///  - message
-pub(crate) fn check_error_object(value: &dyn BoxedValue) -> Result<(), LastErrorObjectError> {
+pub(crate) fn check_error_object(value: &RcBoxedValue) -> Result<(), LastErrorObjectError> {
     check_error_code(value)?;
     check_message(value)
 }
 
-fn check_error_code(value: &dyn BoxedValue) -> Result<(), LastErrorObjectError> {
+fn check_error_code(value: &RcBoxedValue) -> Result<(), LastErrorObjectError> {
     let error_code = value.get_by_field_name(ERROR_CODE_FIELD_NAME).and_then(|v| v.as_i64());
 
     match error_code {
@@ -82,7 +82,7 @@ fn check_error_code(value: &dyn BoxedValue) -> Result<(), LastErrorObjectError> 
     }
 }
 
-fn check_message(value: &dyn BoxedValue) -> Result<(), LastErrorObjectError> {
+fn check_message(value: &RcBoxedValue) -> Result<(), LastErrorObjectError> {
     let error_code = value.get_by_field_name(MESSAGE_FIELD_NAME).and_then(|v| v.as_str());
 
     match error_code {

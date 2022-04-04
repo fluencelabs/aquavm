@@ -1,10 +1,10 @@
 use crate::BoxedValue;
-use air_lambda_ast::AIRLambdaIter;
+use air_lambda_ast::AIRLambda;
 
 pub trait LambdaApplier {
     fn apply_lambda<'value>(
         &'value self,
-        lambda: &AIRLambdaIter<'_>,
+        lambda: &AIRLambda<'_>,
     ) -> Result<&(dyn BoxedValue + 'value), ValueLambdaError>;
 }
 

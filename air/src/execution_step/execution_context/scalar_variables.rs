@@ -187,8 +187,8 @@ impl<'i> fmt::Display for Scalars<'i> {
 
         for (name, _) in self.values.iter() {
             let value = self.get_value(name);
-            if let Ok(last_value) = value {
-                writeln!(f, "{} => {}", name, last_value.result)?;
+            if let Ok(_last_value) = value {
+                // writeln!(f, "{} => {}", name, last_value.value)?;
             }
         }
 

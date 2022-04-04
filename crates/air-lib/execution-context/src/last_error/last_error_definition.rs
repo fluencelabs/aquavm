@@ -48,13 +48,14 @@ pub(crate) fn error_from_raw_fields(
     error_message: &str,
     instruction: &str,
     peer_id: &str,
-) -> JValue {
-    serde_json::json!({
+) -> Rc<dyn BoxedValue> {
+    let jvalue = serde_json::json!({
         ERROR_CODE_FIELD_NAME: error_code,
         MESSAGE_FIELD_NAME: error_message,
         INSTRUCTION_FIELD_NAME: instruction,
         PEER_ID_FIELD_NAME: peer_id,
-    })
+    });
+    Rc::new(jvalue)
 }
 
 /// Checks that a scalar is a value of an object types that contains at least two fields:

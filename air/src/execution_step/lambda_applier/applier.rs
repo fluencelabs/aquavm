@@ -18,7 +18,7 @@ use super::LambdaError;
 use crate::execution_step::ExecutionResult;
 use crate::lambda_to_execution_error;
 
-use air_lambda_ast::AIRLambdaIter;
+use air_lambda_ast::AIRLambda;
 use air_lambda_ast::ResolvedValueAccessor;
 use air_values::boxed_value::BoxedValue;
 
@@ -29,7 +29,7 @@ pub(crate) struct StreamSelectResult<'value> {
 
 pub(crate) fn select_from_stream<'value, 'i>(
     stream: impl ExactSizeIterator<Item = &'value dyn BoxedValue> + 'value,
-    lambda: &AIRLambdaIter<'_>,
+    lambda: &AIRLambda<'_>,
 ) -> ExecutionResult<StreamSelectResult<'value>> {
     let prefix = lambda.take(1);
     let idx = match prefix {

@@ -87,7 +87,7 @@ fn execute_iterations<'i, VT>(
             None => continue,
         };
 
-        let value_pos = value.pos();
+        let value_pos = value.position;
         trace_to_exec_err!(trace_ctx.meet_iteration_start(fold_id, value_pos), fold_stream)?;
         let result = fold(
             iterable,

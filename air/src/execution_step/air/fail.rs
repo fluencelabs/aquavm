@@ -58,7 +58,7 @@ fn fail_with_scalar<'i, VT>(
     let tetraplet = tetraplet.remove(0);
     check_error_object(&value).map_err(CatchableError::InvalidLastErrorObjectError)?;
 
-    fail_with_error_object(exec_ctx, Rc::new(value), Some(tetraplet))
+    fail_with_error_object(exec_ctx, value, Some(tetraplet))
 }
 
 fn fail_with_literals<'i, VT>(

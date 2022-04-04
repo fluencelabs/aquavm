@@ -17,12 +17,13 @@
 use super::RcSecurityTetraplets;
 use crate::execution_step::execution_context::ExecutionCtx;
 use crate::execution_step::ExecutionResult;
-use crate::AIRLambdaAST;
 use crate::SecurityTetraplet;
 
+use air_lambda_ast::AIRLambdaAST;
 use air_parser::ast;
 use air_values::boxed_value::AIRValueAlgebra;
 use air_values::boxed_value::BoxedValue;
+use air_values::boxed_value::RcBoxedValue;
 use air_values::boxed_value::ValueWithTetraplet;
 use air_values::stream::Stream;
 use air_values::variable::Variable;
@@ -93,7 +94,7 @@ pub(crate) fn prepare_last_error<'i>(
 pub(crate) fn resolve_variable<'ctx, 'i>(
     variable: Variable<'_>,
     ctx: &'ctx ExecutionCtx<'i>,
-) -> ExecutionResult<Box<dyn AIRValueAlgebra<Error = ()> + 'ctx>> {
+) -> ExecutionResult<Box<dyn AIRValueAlgebra<Error = boxed_value::ValueLambdaError> + 'ctx>> {
     use super::StreamValueAlgebraIngredients;
 
     match variable {
@@ -122,16 +123,14 @@ pub(crate) fn resolve_variable<'ctx, 'i>(
 pub(crate) fn resolve_ast_scalar_wl<'ctx, 'i>(
     ast_scalar: &ast::ScalarWithLambda<'_>,
     exec_ctx: &'ctx ExecutionCtx<'i>,
-) -> ExecutionResult<(&'ctx dyn BoxedValue, RcSecurityTetraplets)> {
+) -> ExecutionResult<(&'ctx RcBoxedValue, RcSecurityTetraplets)> {
     // TODO: wrap lambda path with Rc to make this clone cheaper
     let variable = ast::VariableWithLambda::Scalar(ast_scalar.clone());
     resolve_ast_variable_wl(&variable, exec_ctx)
 }
 
-pub(crate) fn resolve_ast_variable_wl<'ctx, 'i>(
-    ast_variable: &ast::VariableWithLambda<'_>,
-    exec_ctx: &'ctx ExecutionCtx<'i>,
-) -> ExecutionResult<(&'ctx dyn BoxedValue, RcSecurityTetraplets)> {
+pub(crate) fn resolve_ast_variable_wl<'ctx, 'i>(ast_variable: &ast::VariableWithLambda<'_>, exec_ctx: &'ctx ExecutionCtx<'i>,
+) -> ExecutionResult<(&'ctx RcBoxedValue, RcSecurityTetraplets)> {
     let variable: Variable<'_> = ast_variable.into();
     match ast_variable.lambda() {
         Some(lambda) => apply_lambda(variable, lambda, exec_ctx).map(|vt| (vt.value, vec![vt.tetraplet.clone()])),
@@ -139,7 +138,7 @@ pub(crate) fn resolve_ast_variable_wl<'ctx, 'i>(
             let value = resolve_variable(variable, exec_ctx)?;
             let tetraplets = value.as_tetraplets();
 
-            Ok((value.as_ref().as_value(), tetraplets))
+            Ok((value.as_value(), tetraplets))
         }
     }
 }
@@ -151,5 +150,5 @@ pub(crate) fn apply_lambda<'ctx, 'i>(
 ) -> ExecutionResult<ValueWithTetraplet<'ctx, 'ctx>> {
     let resolved_lambda = crate::execution_step::lambda_applier::resolve_lambda(lambda, exec_ctx)?;
     let resolved = resolve_variable(variable, exec_ctx)?;
-    resolved.apply_lambda_with_tetraplets(resolved_lambda.iter())
+    resolved.apply_lambda_with_tetraplets(&resolved_lambda).map_err(Into::into)
 }

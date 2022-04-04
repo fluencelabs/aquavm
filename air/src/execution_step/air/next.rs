@@ -60,7 +60,7 @@ fn maybe_meet_iteration_start<'i, VT>(
 ) -> ExecutionResult<()> {
     if let IterableType::Stream(fold_id) = &fold_state.iterable_type {
         trace_to_exec_err!(
-            trace_ctx.meet_iteration_start(*fold_id, fold_state.iterable.peek().unwrap().pos()),
+            trace_ctx.meet_iteration_start(*fold_id, fold_state.iterable.peek().unwrap().position),
             next
         )?;
     }
