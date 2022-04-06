@@ -82,11 +82,20 @@ impl<E> AVM<E> {
         let prev_data = self.data_store.read_data(particle_id)?;
         let data = data.into();
 
-        log::trace!(target: "execution", "particle {}\nprev_data {:?}\ncurrent data {:?}\ncall_results: {:?}", particle_id, prev_data, data, call_results);
         let outcome = self
             .runner
-            .call(air, prev_data, data, init_user_id, call_results)
+            .call(
+                air,
+                prev_data.clone(),
+                data.clone(),
+                init_user_id,
+                call_results.clone(),
+            )
             .map_err(AVMError::RunnerError)?;
+
+        if outcome.ret_code != 0 {
+            log::trace!(target: "execution", "particle {}\nprev_data {:?}\ncurrent data {:?}\ncall_results: {:?}", particle_id, prev_data, data, call_results);
+        }
 
         // persist resulted data
         self.data_store.store_data(&outcome.data, particle_id)?;
