@@ -3,7 +3,7 @@ jobs:
   air:
     docker:
       - image: circleci/rust:latest
-    resource_class: medium+
+    resource_class: xlarge+
     environment:
       RUST_BACKTRACE: 1
       RUST_TEST_THREADS: 1
