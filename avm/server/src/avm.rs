@@ -80,7 +80,9 @@ impl<E> AVM<E> {
     ) -> AVMResult<AVMOutcome, E> {
         let init_user_id = init_user_id.into();
         let prev_data = self.data_store.read_data(particle_id)?;
+        let data = data.into();
 
+        log::trace!(target: "execution", "particle {}\nprev_data {:?}\ncurrent data {:?}\ncall_results: {:?}", particle_id, prev_data, data, call_results);
         let outcome = self
             .runner
             .call(air, prev_data, data, init_user_id, call_results)
