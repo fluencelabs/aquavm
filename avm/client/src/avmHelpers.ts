@@ -67,28 +67,28 @@ export function convertInterpreterResult(rawResult: string): InterpreterResult {
     }
 
     let resultCallRequests: Array<[key: number, callRequest: CallRequest]> = [];
-    for (const k in parsedCallRequests) {
-        const v = parsedCallRequests[k];
+    for (const key in parsedCallRequests) {
+        const callRequest = parsedCallRequests[key];
 
         let arguments_;
         let tetraplets;
         try {
-            arguments_ = JSON.parse(v.arguments);
+            arguments_ = JSON.parse(callRequest.arguments);
         } catch (e) {
             throw "Couldn't parse arguments: " + e + '. Original string is: ' + arguments_;
         }
 
         try {
-            tetraplets = JSON.parse(v.tetraplets);
+            tetraplets = JSON.parse(callRequest.tetraplets);
         } catch (e) {
             throw "Couldn't parse tetraplets: " + e + '. Original string is: ' + tetraplets;
         }
 
         resultCallRequests.push([
-            k as any,
+            key as any,
             {
-                serviceId: v.service_id,
-                functionName: v.function_name,
+                serviceId: callRequest.service_id,
+                functionName: callRequest.function_name,
                 arguments: arguments_,
                 tetraplets: tetraplets,
             },
