@@ -34,6 +34,15 @@ pub struct AVMRunner {
     wasm_filename: String,
 }
 
+/// Return statistic of AVM server Wasm module heap footprint.
+pub struct AVMMemoryStats {
+    /// Size of currently used linear memory in bytes.
+    /// Please note that linear memory contains not only heap, but globals, shadow stack and so on.
+    pub memory_size: usize,
+    /// Possibly set max memory size for AVM server.
+    pub max_memory_size: Option<usize>,
+}
+
 impl AVMRunner {
     /// Create AVM with provided config.
     pub fn new(
@@ -87,12 +96,16 @@ impl AVMRunner {
         Ok(outcome)
     }
 
-    pub fn memory_size(&self) -> usize {
+    pub fn memory_stats(&self) -> AVMMemoryStats {
         let stats = self.faas.module_memory_stats();
 
         // only the interpreters must be loaded in FaaS
         debug_assert!(stats.len() == 1);
-        stats[0].memory_size
+
+        AVMMemoryStats {
+            memory_size: stats[0].memory_size,
+            max_memory_size: stats[0].max_memory_size,
+        }
     }
 }
 
