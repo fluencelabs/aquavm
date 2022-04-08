@@ -35,7 +35,7 @@ jobs:
             (cd air/tests/test_module; ./build_test_binaries.sh)
 
             cargo fmt --all -- --check --color always
-x
+
       - name: Run check and clippy
           run: |
             cargo check
