@@ -13,7 +13,7 @@ jobs:
           keys:
             - air01-{{ checksum "Cargo.lock" }}
       - run:
-          name: Install rutst toolckain and components
+          name: Install rutst toolchain and components
           command: |
             rustup toolchain install nightly-2022-03-20-x86_64-unknown-linux-gnu
             rustup default nightly-2022-03-20-x86_64-unknown-linux-gnu
@@ -51,7 +51,7 @@ jobs:
       - run:
           name: Run tests
           command: |
-            cargo nextest --release
+            cargo nextest run --release
 
       - save_cache:
           paths:
