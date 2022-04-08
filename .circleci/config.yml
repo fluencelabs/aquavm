@@ -21,6 +21,7 @@ jobs:
             rustup target add wasm32-wasi
             rustup component add rustfmt
             rustup component add clippy
+            cargo install cargo-nextest
 
       - run:
           name: Install marine
