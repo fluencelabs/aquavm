@@ -51,7 +51,7 @@ jobs:
       - run:
           name: Run tests
           command: |
-            cicargo nextest --release
+            cargo nextest --release
 
       - save_cache:
           paths:
