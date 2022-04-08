@@ -12,38 +12,45 @@ jobs:
       - restore_cache:
           keys:
             - air01-{{ checksum "Cargo.lock" }}
-      - name: Install rutst toolckain and components
-          run: |
+      - run:
+          name: Install rutst toolckain and components
+          command: |
             rustup toolchain install nightly-2022-03-20-x86_64-unknown-linux-gnu
             rustup default nightly-2022-03-20-x86_64-unknown-linux-gnu
 
             rustup target add wasm32-wasi
             rustup component add rustfmt
             rustup component add clippy
-      - name: Install marine
-          run: |
+
+      - run:
+          name: Install marine
+          command: |
             cargo install --force marine
 
-      - name: Build wasm for interpreter
-          run: |
+      - run:
+          name: Build wasm for interpreter
+          command: |
             # build a Wasm binary for interpreter
             (cd air-interpreter; marine build --features marine)
 
-      - name: Build Wasm for tests
-          run: |
+      - run:
+          name: Build Wasm for tests
+          command: |
             # build Wasm binaries for tests
             (cd air/tests/test_module; ./build_test_binaries.sh)
 
             cargo fmt --all -- --check --color always
 
-      - name: Run check and clippy
-          run: |
+      - run:
+          name: Run check and clippy
+          command: |
             cargo check
             cargo clippy -v
 
-      - name: Run tests
-          run: |
-            cargo nextest --release
+      - run:
+          name: Run tests
+          command: |
+            cicargo nextest --release
 
       - save_cache:
           paths:
