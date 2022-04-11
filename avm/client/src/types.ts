@@ -104,18 +104,3 @@ export interface SecurityTetraplet extends ResolvedTriplet {
      */
     json_path: string;
 }
-
-export type AvmRunner = {
-    init: (logLevel: LogLevel) => Promise<void>;
-    terminate: () => Promise<void>;
-    run: (
-        air: string,
-        prevData: Uint8Array,
-        data: Uint8Array,
-        params: {
-            initPeerId: string;
-            currentPeerId: string;
-        },
-        callResults: CallResultsArray,
-    ) => Promise<InterpreterResult>;
-};

@@ -3,14 +3,22 @@ import { CallResultsArray, InterpreterResult, CallRequest } from './types';
 const decoder = new TextDecoder();
 const encoder = new TextEncoder();
 
-export function prepareArgs(
+/**
+ * Serializes AVM arguments in JSON string which can be passed into marine-js
+ * @param initPeerId - peer ID which initialized particle
+ * @param currentPeerId - peer ID which is currently executing the particle
+ * @param air - particle's air script as string
+ * @param prevData - particle's prev data as raw byte array
+ * @param data - particle's data as raw byte array
+ * @param callResults - call results pro
+ * @returns AVM call arguments as serialized JSON string
+ */
+export function serializeAvmArgs(
+    initPeerId: string,
+    currentPeerId: string,
     air: string,
     prevData: Uint8Array,
     data: Uint8Array,
-    params: {
-        initPeerId: string;
-        currentPeerId: string;
-    },
     callResults: CallResultsArray,
 ): string {
     const callResultsToPass: any = {};
@@ -22,8 +30,8 @@ export function prepareArgs(
     }
 
     const paramsToPass = {
-        init_peer_id: params.initPeerId,
-        current_peer_id: params.currentPeerId,
+        init_peer_id: initPeerId,
+        current_peer_id: currentPeerId,
     };
 
     const encoded = encoder.encode(JSON.stringify(callResultsToPass));
@@ -40,7 +48,12 @@ export function prepareArgs(
     return avmArg;
 }
 
-export function convertInterpreterResult(rawResult: string): InterpreterResult {
+/**
+ * Deserializes raw result of AVM call obtained from marine-js into structured form
+ * @param rawResult - string containing raw result of AVM call
+ * @returns structured InterpreterResult
+ */
+export function deserializeAvmResult(rawResult: string): InterpreterResult {
     let result: any;
     try {
         result = JSON.parse(rawResult);
@@ -103,23 +116,34 @@ export function convertInterpreterResult(rawResult: string): InterpreterResult {
     };
 }
 
-type FaaSCall = ((args: string) => Promise<string>) | ((args: string) => string);
+type CallToAvm = ((args: string) => Promise<string>) | ((args: string) => string);
 
-export async function runAvm(
-    faasCall: FaaSCall,
+/**
+ * Utility function which serializes AVM args and passed them into AVM returning interpreter result.
+ * Call to AVM is delegated to a function which must be provided by user.
+ * It might be either synchronous or asynchronous (returning a promise)
+ * @param fn - delegated call to AVM
+ * @param initPeerId - peer ID which initialized particle
+ * @param currentPeerId - peer ID which is currently executing the particle
+ * @param air - particle's air script as string
+ * @param prevData - particle's prev data as raw byte array
+ * @param data - particle's data as raw byte array
+ * @param callResults - call results pro
+ * @returns structured InterpreterResult
+ */
+export async function callAvm(
+    fn: CallToAvm,
+    initPeerId: string,
+    currentPeerId: string,
     air: string,
     prevData: Uint8Array,
     data: Uint8Array,
-    params: {
-        initPeerId: string;
-        currentPeerId: string;
-    },
     callResults: CallResultsArray,
 ): Promise<InterpreterResult> {
     try {
-        const avmArg = prepareArgs(air, prevData, data, params, callResults);
-        const rawResult = await faasCall(avmArg);
-        return convertInterpreterResult(rawResult);
+        const avmArg = serializeAvmArgs(initPeerId, currentPeerId, air, prevData, data, callResults);
+        const rawResult = await fn(avmArg);
+        return deserializeAvmResult(rawResult);
     } catch (e) {
         return {
             retCode: -1,
