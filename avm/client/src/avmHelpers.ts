@@ -48,24 +48,22 @@ export function serializeAvmArgs(
     return avmArg;
 }
 
+interface MarineJsCallServiceResult {
+    error: string;
+    result: any;
+}
+
 /**
  * Deserializes raw result of AVM call obtained from marine-js into structured form
  * @param rawResult - string containing raw result of AVM call
  * @returns structured InterpreterResult
  */
-export function deserializeAvmResult(rawResult: string): InterpreterResult {
-    let result: any;
-    try {
-        result = JSON.parse(rawResult);
-    } catch (ex) {
-        throw 'call_module result parsing error: ' + ex + ', original text: ' + rawResult;
+export function deserializeAvmResult(rawResult: MarineJsCallServiceResult): InterpreterResult {
+    if (rawResult.error !== '') {
+        throw 'call_module returned error: ' + rawResult.error;
     }
 
-    if (result.error !== '') {
-        throw 'call_module returned error: ' + result.error;
-    }
-
-    result = result.result;
+    const result = rawResult.result;
 
     const callRequestsStr = decoder.decode(new Uint8Array(result.call_requests));
     let parsedCallRequests;
@@ -116,7 +114,7 @@ export function deserializeAvmResult(rawResult: string): InterpreterResult {
     };
 }
 
-type CallToAvm = ((args: string) => Promise<string>) | ((args: string) => string);
+type CallToAvm = ((args: string) => Promise<MarineJsCallServiceResult>) | ((args: string) => MarineJsCallServiceResult);
 
 /**
  * Utility function which serializes AVM args and passed them into AVM returning interpreter result.
