@@ -29,6 +29,7 @@
 mod ast;
 mod logger;
 
+use log::LevelFilter;
 use air::execute_air;
 use air::InterpreterOutcome;
 use air::RunParameters;
@@ -38,7 +39,7 @@ use marine_rs_sdk::module_manifest;
 module_manifest!();
 
 pub fn main() {
-    logger::init_logger(None);
+    logger::init_logger(Some(LevelFilter::Trace));
 }
 
 #[marine]

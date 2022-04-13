@@ -33,9 +33,18 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
         use super::IterableItem::*;
 
         let jvalue = match self {
-            RefRef((jvalue, ..)) => *jvalue,
-            RefValue((jvalue, ..)) => jvalue,
-            RcValue((jvalue, ..)) => jvalue.deref(),
+            RefRef((jvalue, ..)) => {
+                log::trace!("JValuable::apply_labmda: RefRef");
+                *jvalue
+            },
+            RefValue((jvalue, ..)) => {
+                log::trace!("JValuable::apply_labmda: RefValue");
+                jvalue
+            },
+            RcValue((jvalue, ..)) => {
+                log::trace!("JValuable::apply_labmda: RcValue");
+                jvalue.deref()
+            },
         };
 
         let selected_value = select_from_scalar(jvalue, lambda.iter(), exec_ctx)?;
@@ -50,15 +59,25 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
         use super::IterableItem::*;
 
         let (jvalue, tetraplet) = match self {
-            RefRef((jvalue, tetraplet, _)) => (*jvalue, *tetraplet),
-            RefValue((jvalue, tetraplet, _)) => (*jvalue, tetraplet),
-            RcValue((jvalue, tetraplet, _)) => (jvalue.deref(), tetraplet),
+            RefRef((jvalue, tetraplet, _)) => {
+                log::trace!("JValuable::apply_lambda_with_tetraplets: RefRef");
+                (*jvalue, *tetraplet)
+            },
+            RefValue((jvalue, tetraplet, _)) => {
+                log::trace!("JValuable::apply_lambda_with_tetraplets: RefValue");
+                (*jvalue, tetraplet)
+            },
+            RcValue((jvalue, tetraplet, _)) => {
+                log::trace!("JValuable::apply_lambda_with_tetraplets: RcValue");
+                (jvalue.deref(), tetraplet)
+            },
         };
 
         let selected_value = select_from_scalar(jvalue, lambda.iter(), exec_ctx)?;
+        log::trace!("JValuable::apply_lambda_with_tetraplets: after select_valye");
         let mut tetraplet = tetraplet.as_ref().clone();
         tetraplet.add_lambda(&format_ast(lambda));
-
+        log::trace!("JValuable::apply_lambda_with_tetraplets: after tetraplet.add_lambda");
         Ok((selected_value, tetraplet))
     }
 

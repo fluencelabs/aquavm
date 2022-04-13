@@ -77,20 +77,27 @@ impl<'i> ResolvedCall<'i> {
         // https://github.com/fluencelabs/aquavm/issues/214
         // also note that if there is a non-join error then the corresponding state
         // won't be saved to data
+        log::trace!("call: just before check_args");
         self.check_args(exec_ctx)?;
 
+        log::trace!("call: just after check_args");
         let state = self.prepare_current_executed_state(raw_call, exec_ctx, trace_ctx)?;
         if !state.should_execute() {
+            log::trace!("call: just before maybe_set_prev_state");
             state.maybe_set_prev_state(trace_ctx);
+            log::trace!("call: just after maybe_set_prev_state");
             return Ok(());
         }
 
         // call can be executed only on peers with such peer_id
         let tetraplet = &self.tetraplet;
         if tetraplet.peer_pk.as_str() != exec_ctx.current_peer_id.as_str() {
+            log::trace!("call: just before set_remote_call_result");
             set_remote_call_result(tetraplet.peer_pk.clone(), exec_ctx, trace_ctx);
+            log::trace!("call: just after set_remote_call_result");
             return Ok(());
         }
+
 
         let request_params = match self.prepare_request_params(exec_ctx, tetraplet) {
             Ok(params) => params,
@@ -104,8 +111,9 @@ impl<'i> ResolvedCall<'i> {
             }
         };
         let call_id = exec_ctx.next_call_request_id();
+        log::trace!("call: just before call_requests.insert");
         exec_ctx.call_requests.insert(call_id, request_params);
-
+        log::trace!("call: just after call_requests.insert");
         exec_ctx.subtree_complete = false;
         trace_ctx.meet_call_end(CallResult::sent_peer_id_with_call_id(
             exec_ctx.current_peer_id.clone(),

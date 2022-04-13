@@ -43,7 +43,9 @@ impl<'i> ScalarRef<'i> {
         match self {
             ScalarRef::Value(value) => Box::new(value.clone()),
             ScalarRef::IterableValue(fold_state) => {
+                log::trace!("into_jvaluable: before unwrap");
                 let peeked_value = fold_state.iterable.peek().unwrap();
+                log::trace!("into_jvaluable: after unwrap");
                 Box::new(peeked_value)
             }
         }

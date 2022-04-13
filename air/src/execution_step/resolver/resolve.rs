@@ -37,13 +37,34 @@ pub(crate) fn resolve_to_args<'i>(
     use ast::Value::*;
 
     match value {
-        InitPeerId => prepare_const(ctx.init_peer_id.as_str(), ctx),
-        LastError(error_accessor) => prepare_last_error(error_accessor, ctx),
-        Literal(value) => prepare_const(value.to_string(), ctx),
-        Boolean(value) => prepare_const(*value, ctx),
-        Number(value) => prepare_const(value, ctx),
-        EmptyArray => prepare_const(json!([]), ctx),
-        Variable(variable) => resolve_ast_variable_wl(variable, ctx),
+        InitPeerId => {
+            log::trace!("resolve_to_args: InitPeerID");
+            prepare_const(ctx.init_peer_id.as_str(), ctx)
+        },
+        LastError(error_accessor) => {
+            log::trace!("resolve_to_args: LastError: {:?}", error_accessor);
+            prepare_last_error(error_accessor, ctx)
+        },
+        Literal(value) => {
+            log::trace!("resolve_to_args: Literal: {:?}", value);
+            prepare_const(value.to_string(), ctx)
+        },
+        Boolean(value) => {
+            log::trace!("resolve_to_args: Boolean: {:?}", value);
+            prepare_const(*value, ctx)
+        },
+        Number(value) => {
+            log::trace!("resolve_to_args: Number: {:?}", value);
+            prepare_const(value, ctx)
+        },
+        EmptyArray => {
+            log::trace!("resolve_to_args: EmptyArray");
+            prepare_const(json!([]), ctx)
+        },
+        Variable(variable) => {
+            log::trace!("resolve_to_args: Variable: {:?}", variable);
+            resolve_ast_variable_wl(variable, ctx)
+        },
     }
 }
 
@@ -144,6 +165,17 @@ pub(crate) fn apply_lambda<'i>(
     exec_ctx: &ExecutionCtx<'i>,
 ) -> ExecutionResult<(JValue, SecurityTetraplet)> {
     let resolved = resolve_variable(variable, exec_ctx)?;
+    //let x = 1;
+    log::trace!("apply_lambda: resolved variabletttttttttttttttfttfrrtxscfecstsdtrsdrtestrestestewstrestresterstrestersrtesrtestersetsetwasetwasteaw");/*
+    log::trace!("apply_lambda: resolved variable");
+    log::trace!("apply_lambda: resolved variable");
+    log::trace!("apply_lambda: resolved variable");
+    log::trace!("apply_lambda: resolved variable: {:?}", std::ptr::addr_of!(x));
+    log::trace!("apply_lambda: resolved variable: {:?}", std::ptr::addr_of!(variable));
+    log::logger().flush();
+    log::trace!("apply_lambda: resolved variable: {:?}", std::ptr::addr_of!(resolved));
+    log::logger().flush();
+    log::trace!("apply_lambda: resolved variable: {:?}", std::ptr::addr_of!(*resolved));*/
     let (jvalue, tetraplet) = resolved.apply_lambda_with_tetraplets(lambda, exec_ctx)?;
 
     // it's known that apply_lambda_with_tetraplets returns vec of one value

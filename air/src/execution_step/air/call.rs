@@ -42,6 +42,7 @@ impl<'i> super::ExecutableInstruction<'i> for Call<'i> {
         let resolved_call = joinable!(ResolvedCall::new(self, exec_ctx), exec_ctx)
             .map_err(|e| set_last_error(self, exec_ctx, e, None))?;
 
+        log::trace!("call: just before resolved_call.as_tetraplet");
         let tetraplet = resolved_call.as_tetraplet();
         joinable!(resolved_call.execute(self, exec_ctx, trace_ctx), exec_ctx)
             .map_err(|e| set_last_error(self, exec_ctx, e, Some(tetraplet)))

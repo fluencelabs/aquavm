@@ -32,3 +32,12 @@ panic = "unwind"
 
 [patch.crates-io]
 polyplets = { path = "crates/air-lib/polyplets" }
+
+#wasmer-interface-types-fl = {version = "0.23.0", path = "../interface-types/wasmer-it"}
+#it-lilo = {version = "0.4.0", path = "../interface-types/crates/it-lilo"}
+#it-memory-traits = {version = "0.3.0", path = "../interface-types/crates/it-memory-traits"}
+#fluence-it-types = {version = "0.3.1", path = "../interface-types/crates/it-types"}
+
+#fluence-app-service = {version = "0.17.0", path = "../marine/fluence-app-service"}
+#fluence-faas = {version = "0.16.0", path = "../marine/fluence-faas"}
+#marine-runtime = {version = "0.14.0", path = "../marine/runtime"}

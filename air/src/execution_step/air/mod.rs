@@ -95,7 +95,7 @@ impl<'i> ExecutableInstruction<'i> for Instruction<'i> {
 macro_rules! log_instruction {
     ($instr_name:expr, $exec_ctx:expr, $trace_ctx:expr) => {
         log::debug!(target: air_log_targets::INSTRUCTION, "> {}", stringify!($instr_name));
-
+/*
         let mut variables = String::from("  scalars:");
         variables.push_str(&format!("\n    {}", $exec_ctx.scalars));
 
@@ -107,7 +107,7 @@ macro_rules! log_instruction {
             target: air_log_targets::NEXT_PEER_PKS,
             "  next peers pk: {:?}",
             $exec_ctx.next_peer_pks
-        );
+        );*/
         log::trace!(
             target: air_log_targets::SUBTREE_COMPLETE,
             "  subtree complete: {}",
@@ -118,12 +118,12 @@ macro_rules! log_instruction {
             target: air_log_targets::SUBTREE_ELEMENTS,
             "  subtree elements count: {:?}",
             $trace_ctx.subtree_sizes()
-        );
+        );/*
         log::debug!(
             target: air_log_targets::NEW_EXECUTED_TRACE,
             "  new call executed trace: {:?}",
             $trace_ctx.as_result_trace()
-        );
+        );*/
     };
 }
 
