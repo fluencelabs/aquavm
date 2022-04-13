@@ -62,11 +62,22 @@ use std::rc::Rc;
 /// This struct is intended to provide abilities to work with scalars as it was described.
 #[derive(Default)]
 pub(crate) struct Scalars<'i> {
-    // this one is optimized for speed (not for memory), because it's unexpected
-    // that a script could have a lot of inner folds.
-    pub values: HashMap<String, Vec<Option<ValueAggregate>>>,
-    pub iterable_values: HashMap<String, FoldState<'i>>,
-    pub fold_block_id: usize,
+    // TODO: use Rc<String> to avoid copying
+    pub(crate) local_values: HashMap<String, Vec<SparseCell>>,
+    pub(crate) iterable_values: HashMap<String, FoldState<'i>>,
+    pub(crate) fold_block_id: usize,
+}
+
+pub(crate) struct SparseCell {
+    /// Position in a inner fold layer where the value was set.
+    pub(crate) position: usize,
+    pub(crate) value: ValueAggregate,
+}
+
+impl SparseCell {
+    pub(crate) fn new(position: usize, value: ValueAggregate) -> Self {
+        Self { position, value }
+    }
 }
 
 impl<'i> Scalars<'i> {
@@ -76,11 +87,10 @@ impl<'i> Scalars<'i> {
         use std::collections::hash_map::Entry::{Occupied, Vacant};
 
         let shadowing_allowed = self.shadowing_allowed();
-        match self.values.entry(name.into()) {
+        match self.local_values.entry(name.into()) {
             Vacant(entry) => {
-                let mut values = vec![None; self.fold_block_id];
-                values.push(Some(value));
-                entry.insert(values);
+                let cell = SparseCell::new(self.fold_block_id, value);
+                entry.insert(vec![cell]);
 
                 Ok(false)
             }
@@ -90,14 +100,15 @@ impl<'i> Scalars<'i> {
                 }
 
                 let values = entry.into_mut();
-                let contains_prev_value = values
-                    .get(self.fold_block_id)
-                    .map_or_else(|| false, |value| value.is_none());
-                // could be considered as lazy erasing
-                values.resize(self.fold_block_id + 1, None);
-
-                values[self.fold_block_id] = Some(value);
-                Ok(contains_prev_value)
+                let last_cell = values.last_mut().expect("");
+                if last_cell.position == self.fold_block_id {
+                    last_cell.value = value;
+                    Ok(true)
+                } else {
+                    let new_cell = SparseCell::new(self.fold_block_id, value);
+                    values.push(new_cell);
+                    Ok(false)
+                }
             }
         }
     }
@@ -123,15 +134,9 @@ impl<'i> Scalars<'i> {
     }
 
     pub(crate) fn get_value(&'i self, name: &str) -> ExecutionResult<&'i ValueAggregate> {
-        self.values
+        self.local_values
             .get(name)
-            .and_then(|scalars| {
-                scalars
-                    .iter()
-                    .take(self.fold_block_id + 1)
-                    .rev()
-                    .find_map(|scalar| scalar.as_ref())
-            })
+            .map(|values| &values.last().expect("").value)
             .ok_or_else(|| Rc::new(CatchableError::VariableNotFound(name.to_string())).into())
     }
 
@@ -153,15 +158,25 @@ impl<'i> Scalars<'i> {
         }
     }
 
-    pub(crate) fn meet_fold_start(&mut self) {
+    pub(crate) fn meet_scope_start(&mut self) {
         self.fold_block_id += 1;
     }
 
-    pub(crate) fn meet_fold_end(&mut self) {
+    pub(crate) fn meet_scope_end(&mut self) {
         self.fold_block_id -= 1;
-        if self.fold_block_id == 0 {
-            // lazy cleanup after exiting from a top fold block to the global scope
-            self.cleanup()
+        let mut values_to_delete = Vec::new();
+        for (name, values) in self.local_values.iter_mut() {
+            let position = values.last().expect("").position;
+            if position != 0 && position >= self.fold_block_id {
+                values.pop();
+            }
+            if values.is_empty() {
+                values_to_delete.push(name.to_string());
+            }
+        }
+
+        for value_name in values_to_delete {
+            self.local_values.remove(&value_name);
         }
     }
 
@@ -169,12 +184,6 @@ impl<'i> Scalars<'i> {
         // shadowing is allowed only inside a fold block, 0 here means that execution flow
         // is in a global scope
         self.fold_block_id != 0
-    }
-
-    fn cleanup(&mut self) {
-        for (_, scalars) in self.values.iter_mut() {
-            scalars.truncate(self.fold_block_id + 1)
-        }
     }
 }
 
@@ -184,7 +193,7 @@ impl<'i> fmt::Display for Scalars<'i> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "fold_block_id: {}", self.fold_block_id)?;
 
-        for (name, _) in self.values.iter() {
+        for (name, _) in self.local_values.iter() {
             let value = self.get_value(name);
             if let Ok(last_value) = value {
                 writeln!(f, "{} => {}", name, last_value.result)?;
@@ -197,5 +206,46 @@ impl<'i> fmt::Display for Scalars<'i> {
         }
 
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use polyplets::SecurityTetraplet;
+
+    use serde_json::json;
+    use std::rc::Rc;
+
+    #[test]
+    fn test_local_cleanup() {
+        let mut scalars = Scalars::default();
+
+        let tetraplet = SecurityTetraplet::default();
+        let rc_tetraplet = Rc::new(tetraplet);
+        let value = json!(1u64);
+        let rc_value = Rc::new(value);
+        let value_aggregate = ValueAggregate::new(rc_value, rc_tetraplet, 1);
+        let value_1_name = "name_1";
+        scalars.set_value(value_1_name, value_aggregate.clone()).unwrap();
+
+        let value_2_name = "name_2";
+        scalars.meet_scope_start();
+        scalars.set_value(value_2_name, value_aggregate.clone()).unwrap();
+        scalars.meet_scope_start();
+        scalars.set_value(value_2_name, value_aggregate.clone()).unwrap();
+
+        let expected_values_count = scalars.local_values.get(value_2_name).unwrap().len();
+        assert_eq!(expected_values_count, 2);
+
+        scalars.meet_scope_end();
+        let expected_values_count = scalars.local_values.get(value_2_name).unwrap().len();
+        assert_eq!(expected_values_count, 1);
+
+        scalars.meet_scope_end();
+        assert!(scalars.local_values.get(value_2_name).is_none());
+
+        let expected_values_count = scalars.local_values.get(value_1_name).unwrap().len();
+        assert_eq!(expected_values_count, 1);
     }
 }

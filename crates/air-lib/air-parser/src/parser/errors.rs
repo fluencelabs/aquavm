@@ -15,8 +15,11 @@
  */
 
 use crate::parser::lexer::LexerError;
+use crate::parser::Span;
+
 use thiserror::Error as ThisError;
 
+// TODO: replace usize pair with Span
 #[derive(ThisError, Debug, Clone, PartialEq, Eq)]
 pub enum ParserError {
     #[error(transparent)]
@@ -41,8 +44,35 @@ pub enum ParserError {
     #[error("new can't be applied to a '{2}' because it's an iterator")]
     IteratorRestrictionNotAllowed(usize, usize, String),
 
-    #[error("multiple iterable values found for iterable name '{2}'")]
+    #[error("multiple iterable values found for iterator name '{2}'")]
     MultipleIterableValues(usize, usize, String),
+
+    #[error(
+        "multiple next instructions for iterator '{2}' found for one fold, that is prohibited"
+    )]
+    MultipleNextInFold(usize, usize, String),
+}
+
+impl ParserError {
+    pub fn undefined_iterable(span: Span, variable_name: impl Into<String>) -> Self {
+        Self::UndefinedIterable(span.left, span.right, variable_name.into())
+    }
+
+    pub fn invalid_iterator_restriction(span: Span, variable_name: impl Into<String>) -> Self {
+        Self::IteratorRestrictionNotAllowed(span.left, span.right, variable_name.into())
+    }
+
+    pub fn multiple_iterables(span: Span, variable_name: impl Into<String>) -> Self {
+        Self::MultipleIterableValues(span.left, span.right, variable_name.into())
+    }
+
+    pub fn undefined_variable(span: Span, variable_name: impl Into<String>) -> Self {
+        Self::UndefinedVariable(span.left, span.right, variable_name.into())
+    }
+
+    pub fn multiple_next_in_fold(span: Span, variable_name: impl Into<String>) -> Self {
+        Self::MultipleNextInFold(span.left, span.right, variable_name.into())
+    }
 }
 
 impl From<std::convert::Infallible> for ParserError {

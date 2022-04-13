@@ -23,7 +23,7 @@ use air_lambda_ast::ValueAccessor;
 use lalrpop_util::ParseError;
 
 #[test]
-fn parse_undefined_iterable() {
+fn fold_with_undefined_iterable() {
     let source_code = r#"
         (seq
             (call "" ("" "") [] iterable)
@@ -59,7 +59,7 @@ fn parse_undefined_iterable() {
 }
 
 #[test]
-fn parse_fold_with_undefined_iterable() {
+fn fold_with_undefined_variable() {
     let source_code = r#"
         (seq
             (null)
@@ -92,6 +92,114 @@ fn parse_fold_with_undefined_iterable() {
     };
 
     assert!(matches!(parser_error, ParserError::UndefinedVariable(..)));
+}
+
+#[test]
+fn scalar_fold_with_multiple_nexts_inside() {
+    let source_code = r#"
+        (seq
+            (call "" ("" "") [] iterable)
+            (fold iterable i
+                (seq
+                    (next i)
+                    (next i)
+                )
+            )
+        )
+        "#;
+
+    let lexer = crate::AIRLexer::new(source_code);
+
+    let parser = crate::AIRParser::new();
+    let mut errors = Vec::new();
+    let mut validator = crate::parser::VariableValidator::new();
+    parser
+        .parse(source_code, &mut errors, &mut validator, lexer)
+        .expect("parser shouldn't fail");
+
+    let errors = validator.finalize();
+
+    assert_eq!(errors.len(), 1);
+
+    let error = &errors[0].error;
+    let parser_error = match error {
+        ParseError::User { error } => error,
+        _ => panic!("unexpected error type"),
+    };
+
+    assert!(matches!(parser_error, ParserError::MultipleNextInFold(..)));
+}
+
+#[test]
+fn multiple_scalar_folds_with_same_iterator() {
+    let source_code = r#"
+        (seq
+            (call "" ("" "") [] iterable)
+            (seq
+                (fold iterable i
+                    (seq
+                        (null)
+                        (next i)
+                    )
+                )
+                (fold iterable i
+                    (seq
+                        (null)
+                        (next i)
+                    )
+                )
+            )
+        )
+        "#;
+
+    let lexer = crate::AIRLexer::new(source_code);
+
+    let parser = crate::AIRParser::new();
+    let mut errors = Vec::new();
+    let mut validator = crate::parser::VariableValidator::new();
+    parser
+        .parse(source_code, &mut errors, &mut validator, lexer)
+        .expect("parser shouldn't fail");
+
+    let errors = validator.finalize();
+
+    assert!(errors.is_empty());
+}
+
+#[test]
+fn stream_fold_with_multiple_nexts_inside() {
+    let source_code = r#"
+        (seq
+            (call "" ("" "") [] $stream)
+            (fold $stream i
+                (seq
+                    (next i)
+                    (next i)
+                )
+            )
+        )
+        "#;
+
+    let lexer = crate::AIRLexer::new(source_code);
+
+    let parser = crate::AIRParser::new();
+    let mut errors = Vec::new();
+    let mut validator = crate::parser::VariableValidator::new();
+    parser
+        .parse(source_code, &mut errors, &mut validator, lexer)
+        .expect("parser shouldn't fail");
+
+    let errors = validator.finalize();
+
+    assert_eq!(errors.len(), 1);
+
+    let error = &errors[0].error;
+    let parser_error = match error {
+        ParseError::User { error } => error,
+        _ => panic!("unexpected error type"),
+    };
+
+    assert!(matches!(parser_error, ParserError::MultipleNextInFold(..)));
 }
 
 #[test]

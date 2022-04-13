@@ -145,6 +145,9 @@ fn parser_error_to_label(file_id: usize, error: ParserError) -> Label<usize> {
         MultipleIterableValues(start, end, _) => {
             Label::primary(file_id, start..end).with_message(error.to_string())
         }
+        MultipleNextInFold(start, end, _) => {
+            Label::primary(file_id, start..end).with_message(error.to_string())
+        }
     }
 }
 

@@ -30,7 +30,7 @@ pub type ExecutionTrace = Vec<ExecutedState>;
 /// have the following format.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct InterpreterData {
-    /// Trace of AIR execution, which contains executed call, par and fold states.
+    /// Trace of AIR execution, which contains executed call, par, fold, and ap states.
     pub trace: ExecutionTrace,
 
     /// Contains maximum generation for each global stream. This info will be used while merging

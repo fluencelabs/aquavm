@@ -40,7 +40,7 @@ pub struct VariableValidator<'i> {
     /// Contains the most left definition of a variables met in call outputs.
     met_variable_definitions: HashMap<&'i str, Span>,
 
-    /// Contains iterables met in fold iterables.
+    /// Contains iterators defined in a fold block.
     met_iterator_definitions: MultiMap<&'i str, Span>,
 
     /// These variables from calls and folds haven't been resolved at the first meet.
@@ -50,8 +50,12 @@ pub struct VariableValidator<'i> {
     /// due to the way how lalrpop work.
     unresolved_iterables: MultiMap<&'i str, Span>,
 
+    /// Contains all met iterable in call and next, they will be resolved after the whole parsing
+    /// due to the way how lalrpop work.
+    multiple_next_candidates: MultiMap<&'i str, Span>,
+
     /// Contains all names that should be checked that they are not iterators.
-    check_for_non_iterators: Vec<(&'i str, Span)>,
+    not_iterators_candidates: Vec<(&'i str, Span)>,
 }
 
 impl<'i> VariableValidator<'i> {
@@ -98,7 +102,7 @@ impl<'i> VariableValidator<'i> {
     }
 
     pub(super) fn met_new(&mut self, new: &New<'i>, span: Span) {
-        self.check_for_non_iterators
+        self.not_iterators_candidates
             .push((new.variable.name(), span));
         // new defines a new variable
         self.met_variable_definition(&new.variable, span);
@@ -110,6 +114,7 @@ impl<'i> VariableValidator<'i> {
         // than a corresponding fold instruction with the definition of this iterable, so they're
         // just put without a check for being already met
         self.unresolved_iterables.insert(iterable_name, span);
+        self.multiple_next_candidates.insert(iterable_name, span);
     }
 
     pub(super) fn met_ap(&mut self, ap: &Ap<'i>, span: Span) {
@@ -128,39 +133,13 @@ impl<'i> VariableValidator<'i> {
     }
 
     pub(super) fn finalize(self) -> Vec<ErrorRecovery<usize, Token<'i>, ParserError>> {
-        let mut errors = Vec::new();
-        for (name, span) in self.unresolved_variables.iter() {
-            if !self.contains_variable(name, *span) {
-                add_to_errors(*name, &mut errors, *span, Token::Call);
-            }
-        }
-
-        for (name, span) in self.unresolved_iterables.iter() {
-            if !self.contains_iterable(name, *span) {
-                add_to_errors(*name, &mut errors, *span, Token::Next);
-            }
-        }
-
-        for (name, span) in self.check_for_non_iterators.iter() {
-            if self.contains_iterable(name, *span) {
-                add_to_errors(*name, &mut errors, *span, Token::New);
-            }
-        }
-
-        for (name, mut spans) in self.met_iterator_definitions.into_iter() {
-            spans.sort();
-            let mut prev_span: Option<Span> = None;
-            for span in spans {
-                match prev_span {
-                    Some(prev_span) if prev_span.contains_span(span) => {
-                        add_to_errors(name, &mut errors, span, Token::Fold)
-                    }
-                    Some(_) | None => prev_span = Some(span),
-                }
-            }
-        }
-
-        errors
+        ValidatorErrorBuilder::new(self)
+            .check_undefined_iterables()
+            .check_undefined_variables()
+            .check_multiple_next_in_fold()
+            .check_new_on_iterators()
+            .check_iterator_definitions()
+            .build()
     }
 
     fn met_args(&mut self, args: &[Value<'i>], span: Span) {
@@ -259,38 +238,133 @@ impl<'i> VariableValidator<'i> {
         }
     }
 
-    /// Checks that multimap contains a span for given key such that provided span lies inside it.
-    fn contains_iterable(&self, key: &str, key_span: Span) -> bool {
-        let found_spans = match self.met_iterator_definitions.get_vec(key) {
-            Some(found_spans) => found_spans,
-            None => return false,
-        };
-
-        found_spans
-            .iter()
-            .any(|s| s.left < key_span.left && s.right > key_span.right)
-    }
-
     fn met_iterator_definition(&mut self, iterator: &Scalar<'i>, span: Span) {
         self.met_iterator_definitions.insert(iterator.name, span);
     }
 }
 
-fn add_to_errors<'err, 'i>(
-    variable_name: impl Into<String>,
-    errors: &'err mut Vec<ErrorRecovery<usize, Token<'i>, ParserError>>,
+struct ValidatorErrorBuilder<'i> {
+    errors: Vec<ErrorRecovery<usize, Token<'i>, ParserError>>,
+    validator: VariableValidator<'i>,
+}
+
+impl<'i> ValidatorErrorBuilder<'i> {
+    fn new(validator: VariableValidator<'i>) -> Self {
+        let mut builder = Self {
+            errors: Vec::new(),
+            validator,
+        };
+        builder.sort_iterator_definitions();
+
+        builder
+    }
+
+    fn sort_iterator_definitions(&mut self) {
+        for (_, spans) in self.validator.met_iterator_definitions.iter_all_mut() {
+            spans.sort()
+        }
+    }
+
+    fn check_undefined_variables(mut self) -> Self {
+        for (name, span) in self.validator.unresolved_variables.iter() {
+            if !self.validator.contains_variable(name, *span) {
+                let error = ParserError::undefined_variable(*span, *name);
+                add_to_errors(&mut self.errors, *span, Token::Call, error);
+            }
+        }
+
+        self
+    }
+
+    fn check_undefined_iterables(mut self) -> Self {
+        for (name, span) in self.validator.unresolved_iterables.iter() {
+            if self.find_closest_fold_span(name, *span).is_none() {
+                let error = ParserError::undefined_iterable(*span, *name);
+                add_to_errors(&mut self.errors, *span, Token::New, error);
+            }
+        }
+
+        self
+    }
+
+    fn check_multiple_next_in_fold(mut self) -> Self {
+        for (name, spans) in self.validator.multiple_next_candidates.iter_all() {
+            let mut collected_fold_spans = std::collections::HashSet::new();
+            for span in spans {
+                let current_span = match self.find_closest_fold_span(name, *span) {
+                    Some(fold_span) => fold_span,
+                    // this would be checked in check_undefined_iterables
+                    None => {
+                        continue;
+                    }
+                };
+
+                if !collected_fold_spans.insert(current_span) {
+                    let error = ParserError::multiple_next_in_fold(*span, *name);
+                    add_to_errors(&mut self.errors, *span, Token::Next, error);
+                }
+            }
+        }
+
+        self
+    }
+
+    fn check_new_on_iterators(mut self) -> Self {
+        for (name, span) in self.validator.not_iterators_candidates.iter() {
+            if self.find_closest_fold_span(name, *span).is_some() {
+                let error = ParserError::invalid_iterator_restriction(*span, *name);
+                add_to_errors(&mut self.errors, *span, Token::New, error);
+            }
+        }
+
+        self
+    }
+
+    fn check_iterator_definitions(mut self) -> Self {
+        for (name, spans) in self.validator.met_iterator_definitions.iter_all_mut() {
+            spans.sort();
+            let mut prev_span: Option<Span> = None;
+            for &span in spans.iter() {
+                match prev_span {
+                    Some(prev_span) if prev_span.contains_span(span) => {
+                        let error = ParserError::multiple_iterables(span, *name);
+                        add_to_errors(&mut self.errors, span, Token::Fold, error);
+                    }
+                    Some(_) | None => prev_span = Some(span),
+                }
+            }
+        }
+
+        self
+    }
+
+    fn build(self) -> Vec<ErrorRecovery<usize, Token<'i>, ParserError>> {
+        self.errors
+    }
+
+    /// Checks that met_iterator_definitions contains a span for given key such that provided
+    /// span lies inside it. This functions assumes that spans are sorted and returns the
+    /// closest span in the list.
+    fn find_closest_fold_span(&self, key: &str, key_span: Span) -> Option<Span> {
+        let found_spans = match self.validator.met_iterator_definitions.get_vec(key) {
+            Some(found_spans) => found_spans,
+            None => return None,
+        };
+
+        found_spans
+            .iter()
+            .filter(|&s| s.contains_span(key_span))
+            .last()
+            .cloned()
+    }
+}
+
+fn add_to_errors<'i>(
+    errors: &mut Vec<ErrorRecovery<usize, Token<'i>, ParserError>>,
     span: Span,
     token: Token<'i>,
+    error: ParserError,
 ) {
-    let variable_name = variable_name.into();
-    let error = match token {
-        Token::Next => ParserError::UndefinedIterable(span.left, span.right, variable_name),
-        Token::New => {
-            ParserError::IteratorRestrictionNotAllowed(span.left, span.right, variable_name)
-        }
-        Token::Fold => ParserError::MultipleIterableValues(span.left, span.right, variable_name),
-        _ => ParserError::UndefinedVariable(span.left, span.right, variable_name),
-    };
     let error = ParseError::User { error };
 
     let dropped_tokens = vec![(span.left, token, span.right)];
