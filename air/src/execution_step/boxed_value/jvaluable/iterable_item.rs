@@ -57,7 +57,7 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
         exec_ctx: &ExecutionCtx<'i>,
     ) -> ExecutionResult<(&JValue, SecurityTetraplet)> {
         use super::IterableItem::*;
-
+        log::trace!("apply_lambda_with_tetraplets for IterableItem<'ctx>");
         let (jvalue, tetraplet) = match self {
             RefRef((jvalue, tetraplet, _)) => {
                 log::trace!("JValuable::apply_lambda_with_tetraplets: RefRef");

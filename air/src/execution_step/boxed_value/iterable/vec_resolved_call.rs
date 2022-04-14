@@ -48,6 +48,8 @@ impl<'ctx> Iterable<'ctx> for IterableVecResolvedCall {
     }
 
     fn peek(&'ctx self) -> Option<Self::Item> {
+        log::trace!("IterableVecResolvedCall::peek");
+        //log::trace!("IterableVecResolvedCall::peek, jvalues: {}, cursor: {}", self.call_results.len(), self.cursor);
         if self.call_results.is_empty() {
             return None;
         }

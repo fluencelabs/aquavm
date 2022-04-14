@@ -53,6 +53,8 @@ impl<'ctx> Iterable<'ctx> for IterableVecJsonPathResult {
     }
 
     fn peek(&'ctx self) -> Option<Self::Item> {
+        log::trace!("IterableVecJsonPathResult::peek");
+        //log::trace!("IterableVecJsonPathResult::peek, jvalues: {}, cursor: {}", self.jvalues.len(), self.cursor);
         if self.jvalues.is_empty() {
             return None;
         }

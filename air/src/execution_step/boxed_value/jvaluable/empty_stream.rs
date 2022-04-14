@@ -37,6 +37,7 @@ impl JValuable for () {
         _lambda: &LambdaAST<'_>,
         _exec_ctx: &ExecutionCtx<'i>,
     ) -> ExecutionResult<(&JValue, SecurityTetraplet)> {
+        log::trace!("apply_lambda_with_tetraplets for ()");
         // applying lambda to an empty stream will produce a join behaviour
         Err(LambdaApplierError(EmptyStream).into())
     }

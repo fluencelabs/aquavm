@@ -52,6 +52,8 @@ impl<'ctx> Iterable<'ctx> for IterableLambdaResult {
     }
 
     fn peek(&'ctx self) -> Option<Self::Item> {
+        //log::trace!("IterableLambdaResult::peek");
+        //log::trace!("IterableLambdaResult::peek, jvalues: {}, cursor: {}", self.jvalues.len(), self.cursor);
         if self.jvalues.is_empty() {
             return None;
         }

@@ -51,6 +51,7 @@ impl JValuable for StreamJvaluableIngredients<'_> {
         lambda: &LambdaAST<'_>,
         exec_ctx: &ExecutionCtx<'i>,
     ) -> ExecutionResult<(&JValue, SecurityTetraplet)> {
+        log::trace!("apply_lambda_with_tetraplets for StreamJvaluableIngredients<'_>");
         let iter = self.iter()?.map(|v| v.result.deref());
         let select_result = select_from_stream(iter, lambda, exec_ctx)?;
 

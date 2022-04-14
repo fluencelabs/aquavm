@@ -53,6 +53,8 @@ impl<'ctx> Iterable<'ctx> for IterableResolvedCall {
     }
 
     fn peek(&'ctx self) -> Option<Self::Item> {
+        //log::trace!("IterableResolvedCall::peek");
+        //log::trace!("IterableResolvedCall::peek, len: {}, cursor: {}", self.len, self.cursor);
         if self.len == 0 {
             return None;
         }

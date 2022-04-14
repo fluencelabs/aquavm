@@ -41,6 +41,7 @@ impl JValuable for std::cell::Ref<'_, Vec<ValueAggregate>> {
         lambda: &LambdaAST<'_>,
         exec_ctx: &ExecutionCtx<'i>,
     ) -> ExecutionResult<(&JValue, SecurityTetraplet)> {
+        log::trace!("apply_lambda_with_tetraplets for std::cell::Ref<'_, Vec<ValueAggregate>>");
         let stream_iter = self.iter().map(|r| r.result.deref());
         let select_result = select_from_stream(stream_iter, lambda, exec_ctx)?;
 

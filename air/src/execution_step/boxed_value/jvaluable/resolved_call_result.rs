@@ -40,6 +40,7 @@ impl JValuable for ValueAggregate {
         lambda: &LambdaAST<'_>,
         exec_ctx: &ExecutionCtx<'i>,
     ) -> ExecutionResult<(&JValue, SecurityTetraplet)> {
+        log::trace!("apply_lambda_with_tetraplet for ValueAggregate");
         let selected_value = select_from_scalar(&self.result, lambda.iter(), exec_ctx)?;
         let mut tetraplet = self.tetraplet.as_ref().clone();
         tetraplet.add_lambda(&format_ast(lambda));
