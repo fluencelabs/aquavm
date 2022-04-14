@@ -62,6 +62,12 @@ pub(crate) fn resolve_to_args<'i>(
             prepare_const(json!([]), ctx)
         },
         Variable(variable) => {
+            let _data = [0u8; 1000];
+            #[cfg(target_arch = "wasm32")]
+            {
+                let offset = unsafe { std::mem::transmute::<*const u8, u32>(_data.as_ptr()) as u64 };
+                log::trace!("stack offset: {}", offset);
+            }
             log::trace!("resolve_to_args: Variable: {:?}", variable);
             resolve_ast_variable_wl(variable, ctx)
         },
