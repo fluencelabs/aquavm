@@ -1,7 +1,7 @@
 ## Version 0.22.0 (2021-04-14)
 
 [PR 243](https://github.com/fluencelabs/aquavm/pull/243):
-Clean scalars at the end of scope
+Clean scalars at the end of scope, only one next in a fold over scalar is possible now
 
 [PR 231](https://github.com/fluencelabs/aquavm/pull/231):
 Test refactoring
