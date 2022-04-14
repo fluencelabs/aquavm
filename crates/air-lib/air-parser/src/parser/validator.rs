@@ -134,11 +134,11 @@ impl<'i> VariableValidator<'i> {
 
     pub(super) fn finalize(self) -> Vec<ErrorRecovery<usize, Token<'i>, ParserError>> {
         ValidatorErrorBuilder::new(self)
-            .check_undefined_iterables()
             .check_undefined_variables()
+            .check_undefined_iterables()
             .check_multiple_next_in_fold()
             .check_new_on_iterators()
-            .check_iterator_definitions()
+            .check_iterator_for_multiple_definitions()
             .build()
     }
 
@@ -265,6 +265,7 @@ impl<'i> ValidatorErrorBuilder<'i> {
         }
     }
 
+    /// Check that all variables were defined.
     fn check_undefined_variables(mut self) -> Self {
         for (name, span) in self.validator.unresolved_variables.iter() {
             if !self.validator.contains_variable(name, *span) {
@@ -276,6 +277,7 @@ impl<'i> ValidatorErrorBuilder<'i> {
         self
     }
 
+    /// Check that all iterables in fold blocks were defined.
     fn check_undefined_iterables(mut self) -> Self {
         for (name, span) in self.validator.unresolved_iterables.iter() {
             if self.find_closest_fold_span(name, *span).is_none() {
@@ -287,7 +289,12 @@ impl<'i> ValidatorErrorBuilder<'i> {
         self
     }
 
+    /// Check that a fold block contains not more than one next with a corresponding iterator.
     fn check_multiple_next_in_fold(mut self) -> Self {
+        // Approach used here is based on an assumption that each one iterator belongs only to one
+        // fold block at any depth. This is checked by check_iterator_for_multiple_definitions and
+        // allows to consider only one fold block where this variable was defined. Then a error
+        // is produced if there are more than one suck block.
         for (name, spans) in self.validator.multiple_next_candidates.iter_all() {
             let mut collected_fold_spans = std::collections::HashSet::new();
             for span in spans {
@@ -309,6 +316,7 @@ impl<'i> ValidatorErrorBuilder<'i> {
         self
     }
 
+    /// Check that a new operator wasn't applied to iterators.
     fn check_new_on_iterators(mut self) -> Self {
         for (name, span) in self.validator.not_iterators_candidates.iter() {
             if self.find_closest_fold_span(name, *span).is_some() {
@@ -320,7 +328,15 @@ impl<'i> ValidatorErrorBuilder<'i> {
         self
     }
 
-    fn check_iterator_definitions(mut self) -> Self {
+    /// Check that one iterator belongs to only one fold.
+    /// F.e. such cases are prohibited
+    /// (fold iterable_1 iterator
+    ///     ...
+    ///     (fold iterable_2 iterator
+    ///         ...
+    ///     )
+    /// )
+    fn check_iterator_for_multiple_definitions(mut self) -> Self {
         for (name, spans) in self.validator.met_iterator_definitions.iter_all_mut() {
             spans.sort();
             let mut prev_span: Option<Span> = None;
@@ -343,8 +359,8 @@ impl<'i> ValidatorErrorBuilder<'i> {
     }
 
     /// Checks that met_iterator_definitions contains a span for given key such that provided
-    /// span lies inside it. This functions assumes that spans are sorted and returns the
-    /// closest span in the list.
+    /// span lies inside it. This functions assumes that spans are sorted and that why returns
+    /// the closest span in the list.
     fn find_closest_fold_span(&self, key: &str, key_span: Span) -> Option<Span> {
         let found_spans = match self.validator.met_iterator_definitions.get_vec(key) {
             Some(found_spans) => found_spans,

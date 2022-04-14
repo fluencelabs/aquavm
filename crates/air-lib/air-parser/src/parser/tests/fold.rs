@@ -257,7 +257,7 @@ fn parse_fold_with_multiple_iterator() {
 
     assert!(matches!(
         parser_error,
-        ParserError::MultipleIterableValues { .. }
+        ParserError::MultipleIterableValuesForOneIterator { .. }
     ));
 }
 

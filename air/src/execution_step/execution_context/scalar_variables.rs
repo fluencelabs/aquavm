@@ -65,21 +65,30 @@ use std::rc::Rc;
 #[derive(Default)]
 pub(crate) struct Scalars<'i> {
     // TODO: use Rc<String> to avoid copying
+    /// Local values could be considered as a sparse matrix, where a raw corresponds to a value
+    /// name and contains all its variants were set with respect to a depth. This structure
+    /// is ruled by several invariants:
+    ///   - all rows are non empty
+    ///   - global variables have 0 depth
+    ///   - cells in a row are sorted by depth
+    ///   - all depths in cell in one row are unique
     pub(crate) local_values: HashMap<String, NonEmpty<SparseCell>>,
     pub(crate) iterable_values: HashMap<String, FoldState<'i>>,
-    pub(crate) fold_block_id: usize,
+
+    /// Count of met scopes at the particular moment of execution.
+    pub(crate) current_scope_depth: usize,
 }
 
 #[derive(Debug)]
 pub(crate) struct SparseCell {
-    /// Position in a inner fold layer where the value was set.
-    pub(crate) position: usize,
+    /// Scope depth where the value was set.
+    pub(crate) depth: usize,
     pub(crate) value: ValueAggregate,
 }
 
 impl SparseCell {
-    pub(crate) fn new(position: usize, value: ValueAggregate) -> Self {
-        Self { position, value }
+    pub(crate) fn new(depth: usize, value: ValueAggregate) -> Self {
+        Self { depth, value }
     }
 }
 
@@ -92,7 +101,7 @@ impl<'i> Scalars<'i> {
         let shadowing_allowed = self.shadowing_allowed();
         match self.local_values.entry(name.into()) {
             Vacant(entry) => {
-                let cell = SparseCell::new(self.fold_block_id, value);
+                let cell = SparseCell::new(self.current_scope_depth, value);
                 let cells = NonEmpty::new(cell);
                 entry.insert(cells);
 
@@ -105,12 +114,12 @@ impl<'i> Scalars<'i> {
 
                 let values = entry.into_mut();
                 let last_cell = values.last_mut();
-                if last_cell.position == self.fold_block_id {
+                if last_cell.depth == self.current_scope_depth {
                     // just rewrite a value if fold level is the same
                     last_cell.value = value;
                     Ok(true)
                 } else {
-                    let new_cell = SparseCell::new(self.fold_block_id, value);
+                    let new_cell = SparseCell::new(self.current_scope_depth, value);
                     values.push(new_cell);
                     Ok(false)
                 }
@@ -164,17 +173,23 @@ impl<'i> Scalars<'i> {
     }
 
     pub(crate) fn meet_scope_start(&mut self) {
-        self.fold_block_id += 1;
+        self.current_scope_depth += 1;
     }
 
     pub(crate) fn meet_scope_end(&mut self) {
-        self.fold_block_id -= 1;
+        self.current_scope_depth -= 1;
+
+        // TODO: it takes O(N) where N is a count of all scalars, but it could be optimized
+        // by maintaining array of value indices that should be removed on each depth level
         let mut values_to_delete = Vec::new();
         for (name, values) in self.local_values.iter_mut() {
-            let position = values.last().position;
-            if position != 0 && position >= self.fold_block_id {
+            let value_position = values.last().depth;
+            if !is_global_variable(self.current_scope_depth)
+                && is_value_obsolete(value_position, self.current_scope_depth)
+            {
                 // it can't be empty, so it returns None if it contains 1 element
                 if values.pop().is_none() {
+                    // TODO: optimize that in next PR
                     values_to_delete.push(name.to_string());
                 }
             }
@@ -188,15 +203,23 @@ impl<'i> Scalars<'i> {
     pub(crate) fn shadowing_allowed(&self) -> bool {
         // shadowing is allowed only inside a fold block, 0 here means that execution flow
         // is in a global scope
-        self.fold_block_id != 0
+        self.current_scope_depth != 0
     }
+}
+
+fn is_global_variable(current_scope_depth: usize) -> bool {
+    current_scope_depth == 0
+}
+
+fn is_value_obsolete(value_position: usize, current_scope_depth: usize) -> bool {
+    value_position > current_scope_depth
 }
 
 use std::fmt;
 
 impl<'i> fmt::Display for Scalars<'i> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "fold_block_id: {}", self.fold_block_id)?;
+        writeln!(f, "fold_block_id: {}", self.current_scope_depth)?;
 
         for (name, _) in self.local_values.iter() {
             let value = self.get_value(name);

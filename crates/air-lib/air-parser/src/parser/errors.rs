@@ -19,7 +19,6 @@ use crate::parser::Span;
 
 use thiserror::Error as ThisError;
 
-// TODO: replace usize pair with Span
 #[derive(ThisError, Debug, Clone, PartialEq, Eq)]
 pub enum ParserError {
     #[error(transparent)]
@@ -45,7 +44,7 @@ pub enum ParserError {
     IteratorRestrictionNotAllowed { span: Span, iterator_name: String },
 
     #[error("multiple iterable values found for iterator name '{iterator_name}'")]
-    MultipleIterableValues { span: Span, iterator_name: String },
+    MultipleIterableValuesForOneIterator { span: Span, iterator_name: String },
 
     #[error(
         "multiple next instructions for iterator '{iterator_name}' found for one fold, that is prohibited"
@@ -63,7 +62,7 @@ impl ParserError {
             Self::AmbiguousFailLastError(span) => *span,
             Self::InvalidCallTriplet(span) => *span,
             Self::IteratorRestrictionNotAllowed { span, .. } => *span,
-            Self::MultipleIterableValues { span, .. } => *span,
+            Self::MultipleIterableValuesForOneIterator { span, .. } => *span,
             Self::MultipleNextInFold { span, .. } => *span,
         }
     }
@@ -90,7 +89,7 @@ impl ParserError {
     }
 
     pub fn multiple_iterables(span: Span, iterator_name: impl Into<String>) -> Self {
-        Self::MultipleIterableValues {
+        Self::MultipleIterableValuesForOneIterator {
             span,
             iterator_name: iterator_name.into(),
         }
