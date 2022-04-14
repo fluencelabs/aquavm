@@ -184,9 +184,7 @@ impl<'i> Scalars<'i> {
         let mut values_to_delete = Vec::new();
         for (name, values) in self.local_values.iter_mut() {
             let value_position = values.last().depth;
-            if !is_global_variable(value_position)
-                && is_value_obsolete(value_position, self.current_scope_depth)
-            {
+            if !is_global_value(value_position) && is_value_obsolete(value_position, self.current_scope_depth) {
                 // it can't be empty, so it returns None if it contains 1 element
                 if values.pop().is_none() {
                     // TODO: optimize that in next PR
@@ -207,7 +205,7 @@ impl<'i> Scalars<'i> {
     }
 }
 
-fn is_global_variable(current_scope_depth: usize) -> bool {
+fn is_global_value(current_scope_depth: usize) -> bool {
     current_scope_depth == 0
 }
 
