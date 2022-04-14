@@ -34,6 +34,7 @@ dependencies = [
  "log",
  "maplit",
  "marine-rs-sdk",
+ "non-empty-vec",
  "once_cell",
  "polyplets",
  "pretty_assertions",

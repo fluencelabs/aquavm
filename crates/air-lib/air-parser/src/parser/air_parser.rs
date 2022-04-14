@@ -18,7 +18,6 @@ use super::air;
 use super::lexer::AIRLexer;
 use super::lexer::Token;
 use super::ParserError;
-
 use crate::ast::Instruction;
 use crate::parser::VariableValidator;
 use air::AIRParser;

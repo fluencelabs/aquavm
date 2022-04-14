@@ -14,11 +14,4 @@
  * limitations under the License.
  */
 
-mod data_merging;
-mod errors;
-mod join_behaviour;
-mod lambda;
-mod misc;
-mod scopes;
-mod streams;
-mod tetraplets;
+mod scalars_scope;

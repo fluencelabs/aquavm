@@ -20,6 +20,8 @@ use crate::execution_step::ExecutionResult;
 use crate::execution_step::FoldState;
 use crate::execution_step::ValueAggregate;
 
+use non_empty_vec::NonEmpty;
+
 use std::collections::HashMap;
 use std::rc::Rc;
 
@@ -63,11 +65,12 @@ use std::rc::Rc;
 #[derive(Default)]
 pub(crate) struct Scalars<'i> {
     // TODO: use Rc<String> to avoid copying
-    pub(crate) local_values: HashMap<String, Vec<SparseCell>>,
+    pub(crate) local_values: HashMap<String, NonEmpty<SparseCell>>,
     pub(crate) iterable_values: HashMap<String, FoldState<'i>>,
     pub(crate) fold_block_id: usize,
 }
 
+#[derive(Debug)]
 pub(crate) struct SparseCell {
     /// Position in a inner fold layer where the value was set.
     pub(crate) position: usize,
@@ -90,7 +93,8 @@ impl<'i> Scalars<'i> {
         match self.local_values.entry(name.into()) {
             Vacant(entry) => {
                 let cell = SparseCell::new(self.fold_block_id, value);
-                entry.insert(vec![cell]);
+                let cells = NonEmpty::new(cell);
+                entry.insert(cells);
 
                 Ok(false)
             }
@@ -100,8 +104,9 @@ impl<'i> Scalars<'i> {
                 }
 
                 let values = entry.into_mut();
-                let last_cell = values.last_mut().expect("");
+                let last_cell = values.last_mut();
                 if last_cell.position == self.fold_block_id {
+                    // just rewrite a value if fold level is the same
                     last_cell.value = value;
                     Ok(true)
                 } else {
@@ -136,7 +141,7 @@ impl<'i> Scalars<'i> {
     pub(crate) fn get_value(&'i self, name: &str) -> ExecutionResult<&'i ValueAggregate> {
         self.local_values
             .get(name)
-            .map(|values| &values.last().expect("").value)
+            .map(|values| &values.last().value)
             .ok_or_else(|| Rc::new(CatchableError::VariableNotFound(name.to_string())).into())
     }
 
@@ -166,12 +171,12 @@ impl<'i> Scalars<'i> {
         self.fold_block_id -= 1;
         let mut values_to_delete = Vec::new();
         for (name, values) in self.local_values.iter_mut() {
-            let position = values.last().expect("").position;
+            let position = values.last().position;
             if position != 0 && position >= self.fold_block_id {
-                values.pop();
-            }
-            if values.is_empty() {
-                values_to_delete.push(name.to_string());
+                // it can't be empty, so it returns None if it contains 1 element
+                if values.pop().is_none() {
+                    values_to_delete.push(name.to_string());
+                }
             }
         }
 
