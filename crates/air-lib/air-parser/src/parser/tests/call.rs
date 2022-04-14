@@ -117,7 +117,10 @@ fn parse_undefined_variable() {
             _ => panic!("unexpected error type"),
         };
 
-        assert!(matches!(parser_error, ParserError::UndefinedVariable(..)));
+        assert!(matches!(
+            parser_error,
+            ParserError::UndefinedVariable { .. }
+        ));
     }
 }
 
@@ -165,7 +168,10 @@ fn parse_undefined_stream_with_lambda() {
         _ => panic!("unexpected error type"),
     };
 
-    assert!(matches!(parser_error, ParserError::UndefinedVariable(..)));
+    assert!(matches!(
+        parser_error,
+        ParserError::UndefinedVariable { .. }
+    ));
 }
 
 #[test]
@@ -584,5 +590,8 @@ fn not_defined_scalar_in_lambda() {
         _ => panic!("unexpected error type"),
     };
 
-    assert!(matches!(parser_error, ParserError::UndefinedVariable(..)));
+    assert!(matches!(
+        parser_error,
+        ParserError::UndefinedVariable { .. }
+    ));
 }

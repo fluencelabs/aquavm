@@ -79,6 +79,6 @@ fn iterators_cant_be_restricted() {
 
     assert!(matches!(
         parser_error,
-        ParserError::IteratorRestrictionNotAllowed(..)
+        ParserError::IteratorRestrictionNotAllowed { .. }
     ));
 }

@@ -55,7 +55,10 @@ fn fold_with_undefined_iterable() {
         _ => panic!("unexpected error type"),
     };
 
-    assert!(matches!(parser_error, ParserError::UndefinedIterable(..)));
+    assert!(matches!(
+        parser_error,
+        ParserError::UndefinedIterable { .. }
+    ));
 }
 
 #[test]
@@ -91,7 +94,10 @@ fn fold_with_undefined_variable() {
         _ => panic!("unexpected error type"),
     };
 
-    assert!(matches!(parser_error, ParserError::UndefinedVariable(..)));
+    assert!(matches!(
+        parser_error,
+        ParserError::UndefinedVariable { .. }
+    ));
 }
 
 #[test]
@@ -127,7 +133,10 @@ fn scalar_fold_with_multiple_nexts_inside() {
         _ => panic!("unexpected error type"),
     };
 
-    assert!(matches!(parser_error, ParserError::MultipleNextInFold(..)));
+    assert!(matches!(
+        parser_error,
+        ParserError::MultipleNextInFold { .. }
+    ));
 }
 
 #[test]
@@ -199,7 +208,10 @@ fn stream_fold_with_multiple_nexts_inside() {
         _ => panic!("unexpected error type"),
     };
 
-    assert!(matches!(parser_error, ParserError::MultipleNextInFold(..)));
+    assert!(matches!(
+        parser_error,
+        ParserError::MultipleNextInFold { .. }
+    ));
 }
 
 #[test]
@@ -245,7 +257,7 @@ fn parse_fold_with_multiple_iterator() {
 
     assert!(matches!(
         parser_error,
-        ParserError::MultipleIterableValues(..)
+        ParserError::MultipleIterableValues { .. }
     ));
 }
 

@@ -274,7 +274,7 @@ fn too_big_float_number() {
 
     lexer_test(
         FNUMBER,
-        Single(Err(LexerError::TooBigFloat(0, FNUMBER.len()))),
+        Single(Err(LexerError::too_big_float(0..FNUMBER.len()))),
     );
 }
 
@@ -308,13 +308,16 @@ fn lambda() {
 fn lambda_path_numbers() {
     const LAMBDA: &str = r#"12345.$[$@[]():?.*,"]"#;
 
-    lexer_test(LAMBDA, Single(Err(LexerError::UnallowedCharInNumber(6, 6))));
+    lexer_test(
+        LAMBDA,
+        Single(Err(LexerError::unallowed_char_in_number(6..6))),
+    );
 
     const LAMBDA1: &str = r#"+12345.$[$@[]():?.*,"]"#;
 
     lexer_test(
         LAMBDA1,
-        Single(Err(LexerError::UnallowedCharInNumber(7, 7))),
+        Single(Err(LexerError::unallowed_char_in_number(7..7))),
     );
 }
 
@@ -322,13 +325,13 @@ fn lambda_path_numbers() {
 fn leading_dot() {
     const LEADING_DOT: &str = ".111";
 
-    lexer_test(LEADING_DOT, Single(Err(LexerError::LeadingDot(0, 0))));
+    lexer_test(LEADING_DOT, Single(Err(LexerError::leading_dot(0..0))));
 
     const LEADING_DOT_AFTER_SIGN: &str = "+.1111";
 
     lexer_test(
         LEADING_DOT_AFTER_SIGN,
-        Single(Err(LexerError::LeadingDot(1, 1))),
+        Single(Err(LexerError::leading_dot(1..1))),
     );
 }
 
@@ -338,7 +341,7 @@ fn unclosed_quote() {
 
     lexer_test(
         UNCLOSED_QUOTE_AIR,
-        One(4, Err(LexerError::IsNotAlphanumeric(33, 33))),
+        One(4, Err(LexerError::is_not_alphanumeric(33..33))),
     );
 }
 
@@ -349,20 +352,26 @@ fn bad_value() {
 
     lexer_test(
         INVALID_VALUE,
-        Single(Err(LexerError::IsNotAlphanumeric(3, 3))),
+        Single(Err(LexerError::is_not_alphanumeric(3..3))),
     );
 
     // value contains ! that only allowed at the end of a lambda expression
     const INVALID_VALUE2: &str = r#"value.$![$@[]():?.*,"\]"#;
 
-    lexer_test(INVALID_VALUE2, Single(Err(LexerError::InvalidLambda(7, 7))));
+    lexer_test(
+        INVALID_VALUE2,
+        Single(Err(LexerError::invalid_lambda(7..7))),
+    );
 }
 
 #[test]
 fn invalid_lambda() {
     const INVALID_LAMBDA: &str = r#"value.$%"#;
 
-    lexer_test(INVALID_LAMBDA, Single(Err(LexerError::InvalidLambda(7, 7))));
+    lexer_test(
+        INVALID_LAMBDA,
+        Single(Err(LexerError::invalid_lambda(7..7))),
+    );
 }
 
 #[test]
@@ -370,7 +379,7 @@ fn invalid_lambda_numbers() {
     // this lambda contains all allowed in lambda characters
     const LAMBDA: &str = r#"+12345$[$@[]():?.*,"!]"#;
 
-    lexer_test(LAMBDA, Single(Err(LexerError::IsNotAlphanumeric(6, 6))));
+    lexer_test(LAMBDA, Single(Err(LexerError::is_not_alphanumeric(6..6))));
 }
 
 #[test]

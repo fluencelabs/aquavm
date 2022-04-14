@@ -17,6 +17,8 @@
 use serde::Deserialize;
 use serde::Serialize;
 
+use std::ops::Range;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Span {
     pub left: usize,
@@ -34,6 +36,15 @@ impl Span {
 
     pub fn contains_span(&self, span: Self) -> bool {
         self.contains_position(span.left) && self.contains_position(span.right)
+    }
+}
+
+impl From<Range<usize>> for Span {
+    fn from(range: Range<usize>) -> Self {
+        Self {
+            left: range.start,
+            right: range.end,
+        }
     }
 }
 
