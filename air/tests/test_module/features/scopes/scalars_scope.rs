@@ -63,7 +63,7 @@ fn scalars_scope() {
 
     let expected_trace = vec![
         executed_state::scalar(peers),
-        executed_state::par(1, 4),
+        executed_state::par(1, 0),
         executed_state::scalar(array_1_content),
         executed_state::scalar_string("result from unit_call_service"),
         executed_state::scalar_string("result from unit_call_service"),

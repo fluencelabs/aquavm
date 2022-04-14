@@ -220,6 +220,8 @@ mod test {
     use polyplets::SecurityTetraplet;
 
     use serde_json::json;
+
+    use std::num::NonZeroUsize;
     use std::rc::Rc;
 
     #[test]
@@ -241,16 +243,16 @@ mod test {
         scalars.set_value(value_2_name, value_aggregate.clone()).unwrap();
 
         let expected_values_count = scalars.local_values.get(value_2_name).unwrap().len();
-        assert_eq!(expected_values_count, 2);
+        assert_eq!(expected_values_count, NonZeroUsize::new(2).unwrap());
 
         scalars.meet_scope_end();
         let expected_values_count = scalars.local_values.get(value_2_name).unwrap().len();
-        assert_eq!(expected_values_count, 1);
+        assert_eq!(expected_values_count, NonZeroUsize::new(1).unwrap());
 
         scalars.meet_scope_end();
         assert!(scalars.local_values.get(value_2_name).is_none());
 
         let expected_values_count = scalars.local_values.get(value_1_name).unwrap().len();
-        assert_eq!(expected_values_count, 1);
+        assert_eq!(expected_values_count, NonZeroUsize::new(1).unwrap());
     }
 }
