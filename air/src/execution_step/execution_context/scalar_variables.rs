@@ -26,7 +26,7 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 use std::rc::Rc;
 
-// TODO: move this code snippet to docs when they are ready
+// TODO: move this code snippet to documentation when it's ready
 
 /// There are two scopes for variable scalars in AIR: global and local. A local scope
 /// is a scope inside every fold block, other scope is a global. It means that scalar
