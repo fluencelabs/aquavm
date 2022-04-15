@@ -20,7 +20,7 @@ use fstrings::f;
 use fstrings::format_args_f;
 
 #[test]
-fn scalars_scope__() {
+fn scalars_scope() {
     let peer_1_id = "peer_1_id";
     let array_1_content = json!(["1", "2"]);
     let mut peer_1_vm = create_avm(set_variable_call_service(array_1_content.clone()), peer_1_id);

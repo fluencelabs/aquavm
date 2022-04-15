@@ -23,7 +23,10 @@ use crate::execution_step::ValueAggregate;
 use non_empty_vec::NonEmpty;
 
 use std::collections::HashMap;
+use std::collections::HashSet;
 use std::rc::Rc;
+
+// TODO: move this code snippet to docs when they are ready
 
 /// There are two scopes for variable scalars in AIR: global and local. A local scope
 /// is a scope inside every fold block, other scope is a global. It means that scalar
@@ -65,20 +68,35 @@ use std::rc::Rc;
 #[derive(Default)]
 pub(crate) struct Scalars<'i> {
     // TODO: use Rc<String> to avoid copying
-    /// Local values could be considered as a sparse matrix, where a row corresponds to
-    /// a value name and contains all its variants were set with respect to a depth.
-    /// And a column corresponds to a depth and contains all values were set at current depth.
+    /// Terminology used here (mainly to resolve concerns re difference between scalars and values):
+    ///  - scalar is an AIR scalar, iterable and non iterable. A scalar is addressed by a name.
+    ///  - value is concrete value assigned to scalar on certain depth
+    ///  - scope is a variable scope where variable is visible. If we consider fold as a tree where
+    ///     each next produces a new level, then scope is a level in this tree. Please note that it
+    ///     includes variable defined after next instruction.
+    ///  - depth is a count of seen scopes (or a depth in a tree met in the previous definition)
+    ///
+    /// Non iterable variables hash map could be recognized as a sparse matrix, where a row
+    /// corresponds to a variable name and contains all its values were set with respect to a depth.
+    /// A column corresponds to a depth and contains all values were set at current depth.
     ///
     /// This matrix follows these invariants:
     ///   - all rows are non empty
     ///   - global variables have 0 depth
     ///   - cells in a row are sorted by depth
     ///   - all depths in cell in one row are unique
-    pub(crate) local_values: HashMap<String, NonEmpty<SparseCell>>,
-    pub(crate) iterable_values: HashMap<String, FoldState<'i>>,
+    pub(crate) non_iterable_variables: HashMap<String, NonEmpty<SparseCell>>,
+
+    /// This set contains depths were invalidated at the certain moment of script execution.
+    /// They are needed for careful isolation of scopes produced by iterations in fold blocks,
+    /// precisely to limit access of non iterable variables defined on one depths to ones
+    /// defined on another.
+    pub(crate) invalidated_depths: HashSet<usize>,
+
+    pub(crate) iterable_variables: HashMap<String, FoldState<'i>>,
 
     /// Count of met scopes at the particular moment of execution.
-    pub(crate) current_scope_depth: usize,
+    pub(crate) current_depth: usize,
 }
 
 #[derive(Debug)]
@@ -101,9 +119,9 @@ impl<'i> Scalars<'i> {
         use std::collections::hash_map::Entry::{Occupied, Vacant};
 
         let shadowing_allowed = self.shadowing_allowed();
-        match self.local_values.entry(name.into()) {
+        match self.non_iterable_variables.entry(name.into()) {
             Vacant(entry) => {
-                let cell = SparseCell::new(self.current_scope_depth, value);
+                let cell = SparseCell::new(self.current_depth, value);
                 let cells = NonEmpty::new(cell);
                 entry.insert(cells);
 
@@ -116,12 +134,12 @@ impl<'i> Scalars<'i> {
 
                 let values = entry.into_mut();
                 let last_cell = values.last_mut();
-                if last_cell.depth == self.current_scope_depth {
+                if last_cell.depth == self.current_depth {
                     // just rewrite a value if fold level is the same
                     last_cell.value = value;
                     Ok(true)
                 } else {
-                    let new_cell = SparseCell::new(self.current_scope_depth, value);
+                    let new_cell = SparseCell::new(self.current_depth, value);
                     values.push(new_cell);
                     Ok(false)
                 }
@@ -136,7 +154,7 @@ impl<'i> Scalars<'i> {
     ) -> ExecutionResult<()> {
         use std::collections::hash_map::Entry::{Occupied, Vacant};
 
-        match self.iterable_values.entry(name.into()) {
+        match self.iterable_variables.entry(name.into()) {
             Vacant(entry) => {
                 entry.insert(fold_state);
                 Ok(())
@@ -146,17 +164,17 @@ impl<'i> Scalars<'i> {
     }
 
     pub(crate) fn remove_iterable_value(&mut self, name: &str) {
-        self.iterable_values.remove(name);
+        self.iterable_variables.remove(name);
     }
 
     pub(crate) fn get_value(&'i self, name: &str) -> ExecutionResult<&'i ValueAggregate> {
-        self.local_values
+        self.non_iterable_variables
             .get(name)
             .and_then(|values| {
                 let last_cell = values.last();
-                let is_value_appropriate = is_global_value(last_cell.depth)
-                    && is_value_from_current_scope(last_cell.depth, self.current_scope_depth);
-                if is_value_appropriate {
+                let value_not_invalidated = !self.invalidated_depths.contains(&last_cell.depth);
+
+                if is_global_value(last_cell.depth) || value_not_invalidated {
                     Some(&last_cell.value)
                 } else {
                     None
@@ -166,14 +184,14 @@ impl<'i> Scalars<'i> {
     }
 
     pub(crate) fn get_iterable_mut(&mut self, name: &str) -> ExecutionResult<&mut FoldState<'i>> {
-        self.iterable_values
+        self.iterable_variables
             .get_mut(name)
             .ok_or_else(|| UncatchableError::FoldStateNotFound(name.to_string()).into())
     }
 
     pub(crate) fn get(&'i self, name: &str) -> ExecutionResult<ScalarRef<'i>> {
         let value = self.get_value(name);
-        let iterable_value = self.iterable_values.get(name);
+        let iterable_value = self.iterable_variables.get(name);
 
         match (value, iterable_value) {
             (Err(_), None) => Err(CatchableError::VariableNotFound(name.to_string()).into()),
@@ -183,36 +201,48 @@ impl<'i> Scalars<'i> {
         }
     }
 
-    pub(crate) fn meet_scope_start(&mut self) {
-        self.current_scope_depth += 1;
+    pub(crate) fn meet_fold_start(&mut self) {
+        self.current_depth += 1;
     }
 
-    pub(crate) fn meet_scope_end(&mut self) {
-        self.current_scope_depth -= 1;
+    // meet next before recursion
+    pub(crate) fn meet_next_before(&mut self) {
+        self.invalidated_depths.insert(self.current_depth);
+        self.current_depth += 1;
+    }
+
+    // meet next after recursion
+    pub(crate) fn meet_next_after(&mut self) {
+        self.meet_fold_end();
+        self.invalidated_depths.remove(&self.current_depth);
+    }
+
+    pub(crate) fn meet_fold_end(&mut self) {
+        self.current_depth -= 1;
 
         // TODO: it takes O(N) where N is a count of all scalars, but it could be optimized
         // by maintaining array of value indices that should be removed on each depth level
         let mut values_to_delete = Vec::new();
-        for (name, values) in self.local_values.iter_mut() {
+        for (name, values) in self.non_iterable_variables.iter_mut() {
             let value_depth = values.last().depth;
-            if !is_global_value(value_depth) && is_value_obsolete(value_depth, self.current_scope_depth) {
+            if !is_global_value(value_depth) && is_value_obsolete(value_depth, self.current_depth) {
                 // it can't be empty, so it returns None if it contains 1 element
                 if values.pop().is_none() {
-                    // TODO: optimize that in next PR
+                    // TODO: optimize this cloning in next PR
                     values_to_delete.push(name.to_string());
                 }
             }
         }
 
         for value_name in values_to_delete {
-            self.local_values.remove(&value_name);
+            self.non_iterable_variables.remove(&value_name);
         }
     }
 
     pub(crate) fn shadowing_allowed(&self) -> bool {
         // shadowing is allowed only inside a fold block, 0 here means that execution flow
         // is in a global scope
-        self.current_scope_depth != 0
+        self.current_depth != 0
     }
 }
 
@@ -221,27 +251,23 @@ fn is_global_value(current_scope_depth: usize) -> bool {
 }
 
 fn is_value_obsolete(value_depth: usize, current_scope_depth: usize) -> bool {
-    value_depth > current_scope_depth
-}
-
-fn is_value_from_current_scope(value_depth: usize, current_scope_depth: usize) -> bool {
-    value_depth == current_scope_depth
+    value_depth >= current_scope_depth
 }
 
 use std::fmt;
 
 impl<'i> fmt::Display for Scalars<'i> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "fold_block_id: {}", self.current_scope_depth)?;
+        writeln!(f, "fold_block_id: {}", self.current_depth)?;
 
-        for (name, _) in self.local_values.iter() {
+        for (name, _) in self.non_iterable_variables.iter() {
             let value = self.get_value(name);
             if let Ok(last_value) = value {
                 writeln!(f, "{} => {}", name, last_value.result)?;
             }
         }
 
-        for (name, _) in self.iterable_values.iter() {
+        for (name, _) in self.iterable_variables.iter() {
             // it's impossible to print an iterable value for now
             writeln!(f, "{} => iterable", name)?;
         }
@@ -273,22 +299,22 @@ mod test {
         scalars.set_value(value_1_name, value_aggregate.clone()).unwrap();
 
         let value_2_name = "name_2";
-        scalars.meet_scope_start();
+        scalars.meet_fold_start();
         scalars.set_value(value_2_name, value_aggregate.clone()).unwrap();
-        scalars.meet_scope_start();
+        scalars.meet_fold_start();
         scalars.set_value(value_2_name, value_aggregate.clone()).unwrap();
 
-        let expected_values_count = scalars.local_values.get(value_2_name).unwrap().len();
+        let expected_values_count = scalars.non_iterable_variables.get(value_2_name).unwrap().len();
         assert_eq!(expected_values_count, NonZeroUsize::new(2).unwrap());
 
-        scalars.meet_scope_end();
-        let expected_values_count = scalars.local_values.get(value_2_name).unwrap().len();
+        scalars.meet_fold_end();
+        let expected_values_count = scalars.non_iterable_variables.get(value_2_name).unwrap().len();
         assert_eq!(expected_values_count, NonZeroUsize::new(1).unwrap());
 
-        scalars.meet_scope_end();
-        assert!(scalars.local_values.get(value_2_name).is_none());
+        scalars.meet_fold_end();
+        assert!(scalars.non_iterable_variables.get(value_2_name).is_none());
 
-        let expected_values_count = scalars.local_values.get(value_1_name).unwrap().len();
+        let expected_values_count = scalars.non_iterable_variables.get(value_1_name).unwrap().len();
         assert_eq!(expected_values_count, NonZeroUsize::new(1).unwrap());
     }
 }

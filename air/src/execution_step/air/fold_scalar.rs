@@ -64,13 +64,13 @@ pub(super) fn fold<'i>(
     trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<()> {
     let fold_state = FoldState::from_iterable(iterable, iterable_type, instruction.clone());
-    exec_ctx.scalars.meet_scope_start();
+    exec_ctx.scalars.meet_fold_start();
     exec_ctx.scalars.set_iterable_value(iterator, fold_state)?;
 
     let result = instruction.execute(exec_ctx, trace_ctx);
 
     exec_ctx.scalars.remove_iterable_value(iterator);
-    exec_ctx.scalars.meet_scope_end();
+    exec_ctx.scalars.meet_fold_end();
 
     result
 }
