@@ -15,6 +15,8 @@
  */
 
 use crate::parser::lexer::LexerError;
+use crate::parser::Span;
+
 use thiserror::Error as ThisError;
 
 #[derive(ThisError, Debug, Clone, PartialEq, Eq)]
@@ -23,26 +25,82 @@ pub enum ParserError {
     LexerError(#[from] LexerError),
 
     #[error("lambda can't be applied to streams in this position")]
-    LambdaAppliedToStream(usize, usize),
+    LambdaAppliedToStream(Span),
 
-    #[error("variable '{2}' wasn't defined")]
-    UndefinedVariable(usize, usize, String),
+    #[error("variable '{variable_name}' wasn't defined")]
+    UndefinedVariable { span: Span, variable_name: String },
 
-    #[error("iterable '{2}' wasn't defined")]
-    UndefinedIterable(usize, usize, String),
+    #[error("iterable '{variable_name}' wasn't defined")]
+    UndefinedIterable { span: Span, variable_name: String },
 
     #[error("last error with non-empty path is ambiguous, please use just %last_error%")]
-    AmbiguousFailLastError(usize, usize),
+    AmbiguousFailLastError(Span),
 
     /// Semantic errors in a call instructions.
     #[error("call should have service id specified by peer part or function part")]
-    InvalidCallTriplet(usize, usize),
+    InvalidCallTriplet(Span),
 
-    #[error("new can't be applied to a '{2}' because it's an iterator")]
-    IteratorRestrictionNotAllowed(usize, usize, String),
+    #[error("new can't be applied to a '{iterator_name}' because it's an iterator")]
+    IteratorRestrictionNotAllowed { span: Span, iterator_name: String },
 
-    #[error("multiple iterable values found for iterable name '{2}'")]
-    MultipleIterableValues(usize, usize, String),
+    #[error("multiple iterable values found for iterator name '{iterator_name}'")]
+    MultipleIterableValuesForOneIterator { span: Span, iterator_name: String },
+
+    #[error(
+        "multiple next instructions for iterator '{iterator_name}' found for one fold, that is prohibited"
+    )]
+    MultipleNextInFold { span: Span, iterator_name: String },
+}
+
+impl ParserError {
+    pub fn span(&self) -> Span {
+        match self {
+            Self::LexerError(lexer_error) => lexer_error.span(),
+            Self::LambdaAppliedToStream(span) => *span,
+            Self::UndefinedVariable { span, .. } => *span,
+            Self::UndefinedIterable { span, .. } => *span,
+            Self::AmbiguousFailLastError(span) => *span,
+            Self::InvalidCallTriplet(span) => *span,
+            Self::IteratorRestrictionNotAllowed { span, .. } => *span,
+            Self::MultipleIterableValuesForOneIterator { span, .. } => *span,
+            Self::MultipleNextInFold { span, .. } => *span,
+        }
+    }
+
+    pub fn undefined_variable(span: Span, variable_name: impl Into<String>) -> Self {
+        Self::UndefinedVariable {
+            span,
+            variable_name: variable_name.into(),
+        }
+    }
+
+    pub fn undefined_iterable(span: Span, variable_name: impl Into<String>) -> Self {
+        Self::UndefinedIterable {
+            span,
+            variable_name: variable_name.into(),
+        }
+    }
+
+    pub fn invalid_iterator_restriction(span: Span, iterator_name: impl Into<String>) -> Self {
+        Self::IteratorRestrictionNotAllowed {
+            span,
+            iterator_name: iterator_name.into(),
+        }
+    }
+
+    pub fn multiple_iterables(span: Span, iterator_name: impl Into<String>) -> Self {
+        Self::MultipleIterableValuesForOneIterator {
+            span,
+            iterator_name: iterator_name.into(),
+        }
+    }
+
+    pub fn multiple_next_in_fold(span: Span, iterator_name: impl Into<String>) -> Self {
+        Self::MultipleNextInFold {
+            span,
+            iterator_name: iterator_name.into(),
+        }
+    }
 }
 
 impl From<std::convert::Infallible> for ParserError {

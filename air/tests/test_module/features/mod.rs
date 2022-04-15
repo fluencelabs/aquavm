@@ -19,5 +19,6 @@ mod errors;
 mod join_behaviour;
 mod lambda;
 mod misc;
+mod scopes;
 mod streams;
 mod tetraplets;

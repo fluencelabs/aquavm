@@ -94,7 +94,7 @@ impl<'input> AIRLexer<'input> {
             }
         }
 
-        Some(Err(LexerError::UnclosedQuote(start_pos, self.input.len())))
+        Some(Err(LexerError::unclosed_quote(start_pos..self.input.len())))
     }
 
     #[allow(clippy::unnecessary_wraps)]
@@ -173,7 +173,7 @@ fn should_stop(ch: char, round_brackets_balance: i64, open_square_brackets_balan
 
 fn string_to_token(input: &str, start_pos: usize) -> LexerResult<Token> {
     match input {
-        "" => Err(LexerError::EmptyString(start_pos, start_pos)),
+        "" => Err(LexerError::empty_string(start_pos..start_pos)),
 
         CALL_INSTR => Ok(Token::Call),
         AP_INSTR => Ok(Token::Ap),
@@ -206,17 +206,15 @@ fn parse_last_error(input: &str, start_pos: usize) -> LexerResult<Token<'_>> {
 
     let last_error_size = last_error_size + 2;
     if input.len() <= last_error_size {
-        return Err(LexerError::LambdaParserError(
-            start_pos + last_error_size,
-            start_pos + input.len(),
-            "lambda AST applied to last error has not enough size".to_string(),
+        return Err(LexerError::lambda_parser_error(
+            start_pos + last_error_size..start_pos + input.len(),
+            "lambda AST applied to last error has not enough size",
         ));
     }
 
     let last_error_accessor = crate::parse_lambda(&input[last_error_size..]).map_err(|e| {
-        LexerError::LambdaParserError(
-            start_pos + last_error_size,
-            start_pos + input.len(),
+        LexerError::lambda_parser_error(
+            start_pos + last_error_size..start_pos + input.len(),
             e.to_string(),
         )
     })?;

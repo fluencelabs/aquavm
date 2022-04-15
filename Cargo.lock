@@ -13,7 +13,7 @@ dependencies = [
 
 [[package]]
 name = "air"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "air-execution-info-collector",
  "air-interpreter-data",
@@ -34,6 +34,7 @@ dependencies = [
  "log",
  "maplit",
  "marine-rs-sdk",
+ "non-empty-vec",
  "once_cell",
  "polyplets",
  "pretty_assertions",
@@ -51,7 +52,7 @@ version = "0.1.0"
 
 [[package]]
 name = "air-interpreter"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "air",
  "air-log-targets",

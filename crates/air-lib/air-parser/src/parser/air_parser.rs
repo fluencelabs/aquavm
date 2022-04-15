@@ -16,10 +16,8 @@
 
 use super::air;
 use super::lexer::AIRLexer;
-use super::lexer::LexerError;
 use super::lexer::Token;
 use super::ParserError;
-
 use crate::ast::Instruction;
 use crate::parser::VariableValidator;
 use air::AIRParser;
@@ -120,75 +118,6 @@ fn pretty_expected(expected: Vec<String>) -> String {
 }
 
 fn parser_error_to_label(file_id: usize, error: ParserError) -> Label<usize> {
-    use ParserError::*;
-
-    match error {
-        LexerError(error) => lexical_error_to_label(file_id, error),
-        LambdaAppliedToStream(start, end) => {
-            Label::primary(file_id, start..end).with_message(error.to_string())
-        }
-        UndefinedIterable(start, end, _) => {
-            Label::primary(file_id, start..end).with_message(error.to_string())
-        }
-        UndefinedVariable(start, end, _) => {
-            Label::primary(file_id, start..end).with_message(error.to_string())
-        }
-        AmbiguousFailLastError(start, end) => {
-            Label::primary(file_id, start..end).with_message(error.to_string())
-        }
-        InvalidCallTriplet(start, end) => {
-            Label::primary(file_id, start..end).with_message(error.to_string())
-        }
-        IteratorRestrictionNotAllowed(start, end, _) => {
-            Label::primary(file_id, start..end).with_message(error.to_string())
-        }
-        MultipleIterableValues(start, end, _) => {
-            Label::primary(file_id, start..end).with_message(error.to_string())
-        }
-    }
-}
-
-fn lexical_error_to_label(file_id: usize, error: LexerError) -> Label<usize> {
-    use LexerError::*;
-    match error {
-        UnclosedQuote(start, end) => {
-            Label::primary(file_id, start..end).with_message(error.to_string())
-        }
-        EmptyString(start, end) => {
-            Label::primary(file_id, start..end).with_message(error.to_string())
-        }
-        IsNotAlphanumeric(start, end) => {
-            Label::primary(file_id, start..end).with_message(error.to_string())
-        }
-        EmptyStreamName(start, end) => {
-            Label::primary(file_id, start..end).with_message(error.to_string())
-        }
-        EmptyVariableOrConst(start, end) => {
-            Label::primary(file_id, start..end).with_message(error.to_string())
-        }
-        InvalidLambda(start, end) => {
-            Label::primary(file_id, start..end).with_message(error.to_string())
-        }
-        UnallowedCharInNumber(start, end) => {
-            Label::primary(file_id, start..end).with_message(error.to_string())
-        }
-        ParseIntError(start, end, _) => {
-            Label::primary(file_id, start..end).with_message(error.to_string())
-        }
-        ParseFloatError(start, end, _) => {
-            Label::primary(file_id, start..end).with_message(error.to_string())
-        }
-        LambdaParserError(start, end, _) => {
-            Label::primary(file_id, start..end).with_message(error.to_string())
-        }
-        LastErrorPathError(start, end, _) => {
-            Label::primary(file_id, start..end).with_message(error.to_string())
-        }
-        TooBigFloat(start, end) => {
-            Label::primary(file_id, start..end).with_message(error.to_string())
-        }
-        LeadingDot(start, end) => {
-            Label::primary(file_id, start..end).with_message(error.to_string())
-        }
-    }
+    let span = error.span();
+    Label::primary(file_id, span.left..span.right).with_message(error.to_string())
 }

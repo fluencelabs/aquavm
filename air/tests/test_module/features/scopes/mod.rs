@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Fluence Labs Limited
+ * Copyright 2022 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,4 @@
  * limitations under the License.
  */
 
-mod triplet;
-
-pub(crate) use triplet::try_to_raw_triplet;
-
-#[macro_export]
-macro_rules! make_user_error(
-    ($error_type:ident, $start_pos: ident, $token:expr, $end_pos: ident) => { {
-        let error = crate::parser::ParserError::$error_type(crate::parser::Span::new($start_pos, $end_pos));
-        let error = lalrpop_util::ParseError::User { error };
-
-        let dropped_tokens = vec![($start_pos, $token, $end_pos)];
-
-        ErrorRecovery {
-            error,
-            dropped_tokens,
-        }
-    }}
-);
+mod scalars_scope;

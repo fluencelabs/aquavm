@@ -90,7 +90,7 @@ fn update_context<'ctx>(
             exec_ctx
                 .streams
                 .add_stream_value(result, generation, stream.name, stream.position)
-                .map(|generation| Some(generation))
+                .map(Some)
         }
     }
 }
@@ -107,6 +107,6 @@ fn maybe_update_trace(
         return;
     }
 
-    let final_ap_result = to_ap_result(&merger_ap_result, maybe_generation);
+    let final_ap_result = to_ap_result(merger_ap_result, maybe_generation);
     trace_ctx.meet_ap_end(final_ap_result);
 }

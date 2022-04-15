@@ -55,7 +55,7 @@ impl<'input> CallVariableParser<'input> {
         let mut string_to_parse_iter = string_to_parse.char_indices().peekable();
         let (current_pos, current_char) = match string_to_parse_iter.next() {
             Some(pos_and_ch) => pos_and_ch,
-            None => return Err(LexerError::EmptyVariableOrConst(start_pos, start_pos)),
+            None => return Err(LexerError::empty_variable_or_const(start_pos..start_pos)),
         };
 
         let state = ParserState {
@@ -145,7 +145,7 @@ impl<'input> CallVariableParser<'input> {
         // filter out +.12 -.2315 variants
         if is_first_dot && !self.state.digit_met {
             let error_pos = self.pos_in_string_to_parse();
-            return Err(LexerError::LeadingDot(error_pos, error_pos));
+            return Err(LexerError::leading_dot(error_pos..error_pos));
         }
 
         Ok(is_first_dot)
@@ -161,7 +161,7 @@ impl<'input> CallVariableParser<'input> {
     fn check_fallback_to_variable(&self) -> LexerResult<()> {
         if self.dot_met() {
             let error_pos = self.pos_in_string_to_parse();
-            return Err(LexerError::UnallowedCharInNumber(error_pos, error_pos));
+            return Err(LexerError::unallowed_char_in_number(error_pos..error_pos));
         }
 
         Ok(())
@@ -183,7 +183,7 @@ impl<'input> CallVariableParser<'input> {
         if self.current_pos() == 0 && self.current_char() == STREAM_START_TAG {
             if self.string_to_parse.len() == 1 {
                 let error_pos = self.pos_in_string_to_parse();
-                return Err(LexerError::EmptyStreamName(error_pos, error_pos));
+                return Err(LexerError::empty_stream_name(error_pos..error_pos));
             }
 
             self.state.is_first_stream_tag = true;
@@ -200,7 +200,7 @@ impl<'input> CallVariableParser<'input> {
     fn try_parse_as_alphanumeric(&self) -> LexerResult<()> {
         if !self.air_alphanumeric() {
             let error_pos = self.pos_in_string_to_parse();
-            return Err(LexerError::IsNotAlphanumeric(error_pos, error_pos));
+            return Err(LexerError::is_not_alphanumeric(error_pos..error_pos));
         }
 
         Ok(())
@@ -209,7 +209,7 @@ impl<'input> CallVariableParser<'input> {
     fn try_parse_as_json_path(&mut self) -> LexerResult<()> {
         if !self.json_path_allowed_char() && !self.try_parse_as_flattening() {
             let error_pos = self.pos_in_string_to_parse();
-            return Err(LexerError::InvalidLambda(error_pos, error_pos));
+            return Err(LexerError::invalid_lambda(error_pos..error_pos));
         }
 
         Ok(())
@@ -227,9 +227,8 @@ impl<'input> CallVariableParser<'input> {
     fn try_parse_first_met_dot(&mut self) -> LexerResult<bool> {
         if !self.dot_met() && self.current_char() == '.' {
             if self.current_pos() == 0 {
-                return Err(LexerError::LeadingDot(
-                    self.start_pos,
-                    self.pos_in_string_to_parse(),
+                return Err(LexerError::leading_dot(
+                    self.start_pos..self.pos_in_string_to_parse(),
                 ));
             }
             self.state.first_dot_met_pos = Some(self.current_pos());
@@ -305,9 +304,8 @@ impl<'input> CallVariableParser<'input> {
         // +2 to ignore ".$" prefix
         let lambda =
             crate::parse_lambda(&self.string_to_parse[lambda_start_pos + 2..]).map_err(|e| {
-                LexerError::LambdaParserError(
-                    self.start_pos + lambda_start_pos,
-                    self.start_pos + self.string_to_parse.len(),
+                LexerError::lambda_parser_error(
+                    self.start_pos + lambda_start_pos..self.start_pos + self.string_to_parse.len(),
                     e.to_string(),
                 )
             })?;
@@ -321,7 +319,7 @@ impl<'input> CallVariableParser<'input> {
         let raw_value = self.string_to_parse;
         let number = raw_value.parse::<i64>().map_err(|e| {
             let start_pos = self.start_pos;
-            LexerError::ParseIntError(start_pos, start_pos + raw_value.len(), e)
+            LexerError::parse_int_error(start_pos..start_pos + raw_value.len(), e)
         })?;
 
         let token = Token::I64(number);
@@ -335,15 +333,14 @@ impl<'input> CallVariableParser<'input> {
         let raw_value = self.string_to_parse;
         let start_pos = self.start_pos;
         if raw_value.len() > SAFE_FLOAT_SIGNIFICAND_SIZE {
-            return Err(LexerError::TooBigFloat(
-                start_pos,
-                start_pos + raw_value.len(),
+            return Err(LexerError::too_big_float(
+                start_pos..start_pos + raw_value.len(),
             ));
         }
 
-        let number = raw_value
-            .parse::<f64>()
-            .map_err(|e| LexerError::ParseFloatError(start_pos, start_pos + raw_value.len(), e))?;
+        let number = raw_value.parse::<f64>().map_err(|e| {
+            LexerError::parse_float_error(start_pos..start_pos + raw_value.len(), e)
+        })?;
 
         let token = Token::F64(number);
         Ok(token)
