@@ -174,7 +174,7 @@ impl<'i> Scalars<'i> {
                 let last_cell = values.last();
                 let value_not_invalidated = !self.invalidated_depths.contains(&last_cell.depth);
 
-                if is_global_value(last_cell.depth) || value_not_invalidated {
+                if value_not_invalidated {
                     Some(&last_cell.value)
                 } else {
                     None
