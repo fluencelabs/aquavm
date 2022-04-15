@@ -213,13 +213,23 @@ impl<'i> Scalars<'i> {
 
     // meet next after recursion
     pub(crate) fn meet_next_after(&mut self) {
-        self.meet_fold_end();
+        self.current_depth -= 1;
         self.invalidated_depths.remove(&self.current_depth);
+        self.cleanup_obsolete_values();
     }
 
     pub(crate) fn meet_fold_end(&mut self) {
         self.current_depth -= 1;
+        self.cleanup_obsolete_values();
+    }
 
+    pub(crate) fn shadowing_allowed(&self) -> bool {
+        // shadowing is allowed only inside a fold block, 0 here means that execution flow
+        // is in a global scope
+        self.current_depth != 0
+    }
+
+    fn cleanup_obsolete_values(&mut self) {
         // TODO: it takes O(N) where N is a count of all scalars, but it could be optimized
         // by maintaining array of value indices that should be removed on each depth level
         let mut values_to_delete = Vec::new();
@@ -238,12 +248,6 @@ impl<'i> Scalars<'i> {
             self.non_iterable_variables.remove(&value_name);
         }
     }
-
-    pub(crate) fn shadowing_allowed(&self) -> bool {
-        // shadowing is allowed only inside a fold block, 0 here means that execution flow
-        // is in a global scope
-        self.current_depth != 0
-    }
 }
 
 fn is_global_value(current_scope_depth: usize) -> bool {
@@ -251,7 +255,7 @@ fn is_global_value(current_scope_depth: usize) -> bool {
 }
 
 fn is_value_obsolete(value_depth: usize, current_scope_depth: usize) -> bool {
-    value_depth >= current_scope_depth
+    value_depth > current_scope_depth
 }
 
 use std::fmt;
