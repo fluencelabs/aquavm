@@ -4,3 +4,8 @@ multiplexing = false        # HTTP/2 multiplexing
 
 [net]
 retry = 50                  # network retries
+
+[target.wasm32-wasi]
+rustflags = [
+    "-C", "link-args=-zstack-size=52428800",
+]
