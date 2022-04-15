@@ -65,9 +65,11 @@ use std::rc::Rc;
 #[derive(Default)]
 pub(crate) struct Scalars<'i> {
     // TODO: use Rc<String> to avoid copying
-    /// Local values could be considered as a sparse matrix, where a raw corresponds to a value
-    /// name and contains all its variants were set with respect to a depth. This structure
-    /// is ruled by several invariants:
+    /// Local values could be considered as a sparse matrix, where a row corresponds to
+    /// a value name and contains all its variants were set with respect to a depth.
+    /// And a column corresponds to a depth and contains all values were set at current depth.
+    ///
+    /// This matrix follows these invariants:
     ///   - all rows are non empty
     ///   - global variables have 0 depth
     ///   - cells in a row are sorted by depth
@@ -150,7 +152,16 @@ impl<'i> Scalars<'i> {
     pub(crate) fn get_value(&'i self, name: &str) -> ExecutionResult<&'i ValueAggregate> {
         self.local_values
             .get(name)
-            .map(|values| &values.last().value)
+            .and_then(|values| {
+                let last_cell = values.last();
+                let is_value_appropriate = is_global_value(last_cell.depth)
+                    && is_value_from_current_scope(last_cell.depth, self.current_scope_depth);
+                if is_value_appropriate {
+                    Some(&last_cell.value)
+                } else {
+                    None
+                }
+            })
             .ok_or_else(|| Rc::new(CatchableError::VariableNotFound(name.to_string())).into())
     }
 
@@ -183,8 +194,8 @@ impl<'i> Scalars<'i> {
         // by maintaining array of value indices that should be removed on each depth level
         let mut values_to_delete = Vec::new();
         for (name, values) in self.local_values.iter_mut() {
-            let value_position = values.last().depth;
-            if !is_global_value(value_position) && is_value_obsolete(value_position, self.current_scope_depth) {
+            let value_depth = values.last().depth;
+            if !is_global_value(value_depth) && is_value_obsolete(value_depth, self.current_scope_depth) {
                 // it can't be empty, so it returns None if it contains 1 element
                 if values.pop().is_none() {
                     // TODO: optimize that in next PR
@@ -209,8 +220,12 @@ fn is_global_value(current_scope_depth: usize) -> bool {
     current_scope_depth == 0
 }
 
-fn is_value_obsolete(value_position: usize, current_scope_depth: usize) -> bool {
-    value_position > current_scope_depth
+fn is_value_obsolete(value_depth: usize, current_scope_depth: usize) -> bool {
+    value_depth > current_scope_depth
+}
+
+fn is_value_from_current_scope(value_depth: usize, current_scope_depth: usize) -> bool {
+    value_depth == current_scope_depth
 }
 
 use std::fmt;
