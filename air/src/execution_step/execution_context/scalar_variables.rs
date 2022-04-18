@@ -103,12 +103,19 @@ pub(crate) struct Scalars<'i> {
 pub(crate) struct SparseCell {
     /// Scope depth where the value was set.
     pub(crate) depth: usize,
-    pub(crate) value: ValueAggregate,
+    pub(crate) value: Option<ValueAggregate>,
 }
 
 impl SparseCell {
-    pub(crate) fn new(depth: usize, value: ValueAggregate) -> Self {
-        Self { depth, value }
+    pub(crate) fn from_value(depth: usize, value: ValueAggregate) -> Self {
+        Self {
+            depth,
+            value: Some(value),
+        }
+    }
+
+    pub(crate) fn from_met_new(depth: usize) -> Self {
+        Self { depth, value: None }
     }
 }
 
@@ -118,10 +125,11 @@ impl<'i> Scalars<'i> {
     pub(crate) fn set_value(&mut self, name: impl Into<String>, value: ValueAggregate) -> ExecutionResult<bool> {
         use std::collections::hash_map::Entry::{Occupied, Vacant};
 
-        let shadowing_allowed = self.shadowing_allowed();
-        match self.non_iterable_variables.entry(name.into()) {
+        let name = name.into();
+        let shadowing_allowed = self.shadowing_allowed(&name);
+        match self.non_iterable_variables.entry(name) {
             Vacant(entry) => {
-                let cell = SparseCell::new(self.current_depth, value);
+                let cell = SparseCell::from_value(self.current_depth, value);
                 let cells = NonEmpty::new(cell);
                 entry.insert(cells);
 
@@ -129,17 +137,17 @@ impl<'i> Scalars<'i> {
             }
             Occupied(entry) => {
                 if !shadowing_allowed {
-                    return Err(UncatchableError::MultipleVariablesFound(entry.key().clone()).into());
+                    return Err(UncatchableError::ShadowingIsNotAllowed(entry.key().clone()).into());
                 }
 
                 let values = entry.into_mut();
                 let last_cell = values.last_mut();
                 if last_cell.depth == self.current_depth {
                     // just rewrite a value if fold level is the same
-                    last_cell.value = value;
+                    last_cell.value = Some(value);
                     Ok(true)
                 } else {
-                    let new_cell = SparseCell::new(self.current_depth, value);
+                    let new_cell = SparseCell::from_value(self.current_depth, value);
                     values.push(new_cell);
                     Ok(false)
                 }
@@ -167,7 +175,7 @@ impl<'i> Scalars<'i> {
         self.iterable_variables.remove(name);
     }
 
-    pub(crate) fn get_value(&'i self, name: &str) -> ExecutionResult<&'i ValueAggregate> {
+    pub(crate) fn get_non_iterable_value(&'i self, name: &str) -> ExecutionResult<Option<&'i ValueAggregate>> {
         self.non_iterable_variables
             .get(name)
             .and_then(|values| {
@@ -175,12 +183,12 @@ impl<'i> Scalars<'i> {
                 let value_not_invalidated = !self.invalidated_depths.contains(&last_cell.depth);
 
                 if value_not_invalidated {
-                    Some(&last_cell.value)
+                    Some(last_cell.value.as_ref())
                 } else {
                     None
                 }
             })
-            .ok_or_else(|| Rc::new(CatchableError::VariableNotFound(name.to_string())).into())
+            .ok_or_else(|| ExecutionError::Catchable(Rc::new(CatchableError::VariableNotFound(name.to_string()))))
     }
 
     pub(crate) fn get_iterable_mut(&mut self, name: &str) -> ExecutionResult<&mut FoldState<'i>> {
@@ -189,13 +197,14 @@ impl<'i> Scalars<'i> {
             .ok_or_else(|| UncatchableError::FoldStateNotFound(name.to_string()).into())
     }
 
-    pub(crate) fn get(&'i self, name: &str) -> ExecutionResult<ScalarRef<'i>> {
-        let value = self.get_value(name);
+    pub(crate) fn get_value(&'i self, name: &str) -> ExecutionResult<ScalarRef<'i>> {
+        let value = self.get_non_iterable_value(name);
         let iterable_value = self.iterable_variables.get(name);
 
         match (value, iterable_value) {
             (Err(_), None) => Err(CatchableError::VariableNotFound(name.to_string()).into()),
-            (Ok(value), None) => Ok(ScalarRef::Value(value)),
+            (Ok(None), _) => Err(CatchableError::VariableWasNotInitializedAfterNew(name.to_string()).into()),
+            (Ok(Some(value)), None) => Ok(ScalarRef::Value(value)),
             (Err(_), Some(iterable_value)) => Ok(ScalarRef::IterableValue(iterable_value)),
             (Ok(_), Some(_)) => unreachable!("this is checked on the parsing stage"),
         }
@@ -223,10 +232,63 @@ impl<'i> Scalars<'i> {
         self.cleanup_obsolete_values();
     }
 
-    pub(crate) fn shadowing_allowed(&self) -> bool {
+    pub(crate) fn meet_new_start(&mut self, scalar_name: &str) {
+        use std::collections::hash_map::Entry::{Occupied, Vacant};
+
+        let new_cell = SparseCell::from_met_new(self.current_depth);
+        match self.non_iterable_variables.entry(scalar_name.to_string()) {
+            Vacant(entry) => {
+                let ne_vec = NonEmpty::new(new_cell);
+                entry.insert(ne_vec);
+            }
+            Occupied(entry) => {
+                let entry = entry.into_mut();
+                entry.push(new_cell);
+            }
+        }
+    }
+
+    pub(crate) fn meet_new_end(&mut self, scalar_name: &str) -> ExecutionResult<()> {
+        let current_depth = self.current_depth;
+        let should_remove_values = self
+            .non_iterable_variables
+            .get_mut(scalar_name)
+            .and_then(|values| {
+                // carefully check that we're popping up an appropriate value
+                let cell = match values.pop() {
+                    Some(value) => value,
+                    None if values.last().depth == current_depth => return Some(true),
+                    None => return None,
+                };
+                if cell.depth != current_depth {
+                    None
+                } else {
+                    Some(false)
+                }
+            })
+            .ok_or_else(|| UncatchableError::ScalarsStateCorrupted {
+                scalar_name: scalar_name.to_string(),
+                depth: self.current_depth,
+            })
+            .map_err(Into::<ExecutionError>::into)?;
+
+        if should_remove_values {
+            self.non_iterable_variables.remove(scalar_name);
+        }
+        Ok(())
+    }
+
+    pub(crate) fn shadowing_allowed(&self, variable_name: &str) -> bool {
         // shadowing is allowed only inside a fold block, 0 here means that execution flow
         // is in a global scope
-        self.current_depth != 0
+        if self.current_depth != 0 {
+            return true;
+        }
+
+        match self.non_iterable_variables.get(variable_name) {
+            Some(values) => values.last().value.is_none(),
+            None => false,
+        }
     }
 
     fn cleanup_obsolete_values(&mut self) {
@@ -265,8 +327,8 @@ impl<'i> fmt::Display for Scalars<'i> {
         writeln!(f, "fold_block_id: {}", self.current_depth)?;
 
         for (name, _) in self.non_iterable_variables.iter() {
-            let value = self.get_value(name);
-            if let Ok(last_value) = value {
+            let value = self.get_non_iterable_value(name);
+            if let Ok(Some(last_value)) = value {
                 writeln!(f, "{} => {}", name, last_value.result)?;
             }
         }

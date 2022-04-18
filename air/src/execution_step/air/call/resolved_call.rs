@@ -213,12 +213,12 @@ fn check_output_name(output: &ast::CallOutputValue<'_>, exec_ctx: &ExecutionCtx<
         _ => return Ok(()),
     };
 
-    match exec_ctx.scalars.get(scalar_name) {
+    match exec_ctx.scalars.get_value(scalar_name) {
         Ok(ScalarRef::Value(_)) => {
-            if exec_ctx.scalars.shadowing_allowed() {
+            if exec_ctx.scalars.shadowing_allowed(scalar_name) {
                 Ok(())
             } else {
-                Err(UncatchableError::MultipleVariablesFound(scalar_name.to_string()).into())
+                Err(UncatchableError::ShadowingIsNotAllowed(scalar_name.to_string()).into())
             }
         }
         Ok(ScalarRef::IterableValue(_)) => Err(UncatchableError::IterableShadowing(scalar_name.to_string()).into()),

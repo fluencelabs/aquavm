@@ -92,7 +92,7 @@ pub(crate) fn resolve_variable<'ctx, 'i>(
     use crate::execution_step::boxed_value::StreamJvaluableIngredients;
 
     match variable {
-        Variable::Scalar { name, .. } => Ok(ctx.scalars.get(name)?.into_jvaluable()),
+        Variable::Scalar { name, .. } => Ok(ctx.scalars.get_value(name)?.into_jvaluable()),
         Variable::Stream {
             name,
             generation,

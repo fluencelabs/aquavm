@@ -271,3 +271,258 @@ fn new_with_errors() {
     };
     assert_eq!(actual_global_streams, expected_global_streams);
 }
+
+#[test]
+fn new_with_global_scalars() {
+    let set_variable_peer_id = "set_variable_peer_id";
+    let variables_mapping = maplit::hashmap! {
+        "global".to_string() => json!(1),
+        "scoped".to_string() => json!(2),
+    };
+    let mut set_variable_vm = create_avm(
+        set_variables_call_service(variables_mapping, VariableOptionSource::Argument(0)),
+        set_variable_peer_id,
+    );
+
+    let variable_receiver_peer_id = "variable_receiver_peer_id";
+    let mut variable_receiver = create_avm(echo_call_service(), variable_receiver_peer_id);
+
+    let script = f!(r#"
+            (seq
+                (seq
+                    (call "{set_variable_peer_id}" ("" "") ["global"] scalar)
+                    (new scalar
+                        (seq
+                            (call "{set_variable_peer_id}" ("" "") ["scoped"] scalar)
+                            (call "{variable_receiver_peer_id}" ("" "") [scalar])
+                        )
+                    )
+                )
+                (call "{variable_receiver_peer_id}" ("" "") [scalar])
+            )"#);
+
+    let result = checked_call_vm!(set_variable_vm, "", &script, "", "");
+    let result = checked_call_vm!(variable_receiver, "", &script, "", result.data);
+    let actual_trace = trace_from_result(&result);
+
+    let expected_trace = vec![
+        executed_state::scalar_number(1),
+        executed_state::scalar_number(2),
+        executed_state::scalar_number(2),
+        executed_state::scalar_number(1),
+    ];
+    assert_eq!(actual_trace, expected_trace);
+}
+
+const GET_ITERABLE_ACTION_NAME: &'static str = "get_iterable_action_name";
+const OUTSIDE_ACTION_NAME: &'static str = "outside_new";
+const INSIDE_ACTION_NAME: &'static str = "inside_new";
+const OUTPUT_ACTION_NAME: &'static str = "output";
+
+fn prepare_new_test_call_service() -> CallServiceClosure {
+    let outside_new_id = std::cell::Cell::new(0u32);
+    let inside_new_id = std::cell::Cell::new(10u32);
+
+    Box::new(move |mut params| {
+        let action = params.arguments.remove(0);
+        let action = action.as_str().unwrap();
+        match action {
+            GET_ITERABLE_ACTION_NAME => CallServiceResult::ok(json!([1, 2, 3])),
+            OUTSIDE_ACTION_NAME => {
+                let outside_result = outside_new_id.get();
+                outside_new_id.set(outside_result + 1);
+                CallServiceResult::ok(json!(outside_result))
+            }
+            INSIDE_ACTION_NAME => {
+                let inside_result = inside_new_id.get();
+                inside_new_id.set(inside_result + 1);
+                CallServiceResult::ok(json!(inside_result))
+            }
+            OUTPUT_ACTION_NAME => {
+                let second_argument = params.arguments.remove(0);
+                CallServiceResult::ok(second_argument)
+            }
+            action_name => {
+                println!("unknown action: {:?}", action_name);
+                CallServiceResult::err(1, json!("no such action"))
+            }
+        }
+    })
+}
+
+#[test]
+fn new_with_scalars_in_lfold_with_outside_next() {
+    let test_peer_id = "test_peer_id";
+
+    let test_call_service = prepare_new_test_call_service();
+    let mut test_vm = create_avm(test_call_service, test_peer_id);
+
+    let script = f!(r#"
+    (seq
+        (call "{test_peer_id}" ("" "") ["{GET_ITERABLE_ACTION_NAME}"] iterable)
+        (fold iterable iterator
+            (seq
+                (seq
+                    (seq
+                        (call "{test_peer_id}" ("" "") ["{OUTSIDE_ACTION_NAME}"] scalar)
+                        (call "{test_peer_id}" ("" "") ["{OUTPUT_ACTION_NAME}" scalar])
+                    )
+                    (new scalar
+                        (seq
+                            (call "{test_peer_id}" ("" "") ["{INSIDE_ACTION_NAME}"] scalar)
+                            (call "{test_peer_id}" ("" "") ["{OUTPUT_ACTION_NAME}" scalar])
+                        )
+                    )
+                )
+                (seq
+                    (next iterator)
+                    (call "{test_peer_id}" ("" "") ["{OUTPUT_ACTION_NAME}" scalar])
+                )
+            )
+        )
+    )
+    "#);
+
+    let result = checked_call_vm!(test_vm, "", &script, "", "");
+    let actual_trace = trace_from_result(&result);
+
+    let expected_trace = vec![
+        executed_state::scalar(json!([1, 2, 3])),
+        executed_state::scalar_number(0),
+        executed_state::scalar_number(0),
+        executed_state::scalar_number(10),
+        executed_state::scalar_number(10),
+        executed_state::scalar_number(1),
+        executed_state::scalar_number(1),
+        executed_state::scalar_number(11),
+        executed_state::scalar_number(11),
+        executed_state::scalar_number(2),
+        executed_state::scalar_number(2),
+        executed_state::scalar_number(12),
+        executed_state::scalar_number(12),
+        executed_state::scalar_number(2),
+        executed_state::scalar_number(1),
+        executed_state::scalar_number(0),
+    ];
+    assert_eq!(actual_trace, expected_trace);
+}
+
+#[test]
+fn new_with_scalars_in_rfold_with_outside_next() {
+    let test_peer_id = "test_peer_id";
+
+    let test_call_service = prepare_new_test_call_service();
+    let mut test_vm = create_avm(test_call_service, test_peer_id);
+
+    let script = f!(r#"
+    (seq
+        (call "{test_peer_id}" ("" "") ["{GET_ITERABLE_ACTION_NAME}"] iterable)
+        (fold iterable iterator
+            (seq
+                (next iterator)
+                (seq
+                    (seq
+                        (call "{test_peer_id}" ("" "") ["{OUTSIDE_ACTION_NAME}"] scalar)
+                        (call "{test_peer_id}" ("" "") ["{OUTPUT_ACTION_NAME}" scalar])
+                    )
+                    (seq
+                        (new scalar
+                            (seq
+                                (call "{test_peer_id}" ("" "") ["{INSIDE_ACTION_NAME}"] scalar)
+                                (call "{test_peer_id}" ("" "") ["{OUTPUT_ACTION_NAME}" scalar])
+                            )
+                        )
+                        (call "{test_peer_id}" ("" "") ["{OUTPUT_ACTION_NAME}" scalar])
+                    )
+                )
+            )
+        )
+    )
+    "#);
+
+    let result = checked_call_vm!(test_vm, "", &script, "", "");
+    let actual_trace = trace_from_result(&result);
+
+    let expected_trace = vec![
+        executed_state::scalar(json!([1, 2, 3])),
+        executed_state::scalar_number(0),
+        executed_state::scalar_number(0),
+        executed_state::scalar_number(10),
+        executed_state::scalar_number(10),
+        executed_state::scalar_number(0),
+        executed_state::scalar_number(1),
+        executed_state::scalar_number(1),
+        executed_state::scalar_number(11),
+        executed_state::scalar_number(11),
+        executed_state::scalar_number(1),
+        executed_state::scalar_number(2),
+        executed_state::scalar_number(2),
+        executed_state::scalar_number(12),
+        executed_state::scalar_number(12),
+        executed_state::scalar_number(2),
+    ];
+    assert_eq!(actual_trace, expected_trace);
+}
+
+#[test]
+fn new_with_scalars_in_fold_with_inside_next() {
+    let test_peer_id = "test_peer_id";
+
+    let test_call_service = prepare_new_test_call_service();
+    let mut test_vm = create_avm(test_call_service, test_peer_id);
+
+    let script = f!(r#"
+    (seq
+        (call "{test_peer_id}" ("" "") ["{GET_ITERABLE_ACTION_NAME}"] iterable)
+        (fold iterable iterator
+            (seq
+                (seq
+                    (seq
+                        (call "{test_peer_id}" ("" "") ["{OUTSIDE_ACTION_NAME}"] scalar)
+                        (call "{test_peer_id}" ("" "") ["{OUTPUT_ACTION_NAME}" scalar])
+                    )
+                    (new scalar
+                        (seq
+                            (call "{test_peer_id}" ("" "") ["{INSIDE_ACTION_NAME}"] scalar)
+                            (seq
+                                (call "{test_peer_id}" ("" "") ["{OUTPUT_ACTION_NAME}" scalar])
+                                (seq
+                                    (next iterator)
+                                    (call "{test_peer_id}" ("" "") ["{OUTPUT_ACTION_NAME}" scalar])
+                                )
+                            )
+                        )
+                    )
+                )
+                (call "{test_peer_id}" ("" "") ["{OUTPUT_ACTION_NAME}" scalar])
+            )
+        )
+    )
+    "#);
+
+    let result = checked_call_vm!(test_vm, "", &script, "", "");
+    let actual_trace = trace_from_result(&result);
+
+    let expected_trace = vec![
+        executed_state::scalar(json!([1, 2, 3])),
+        executed_state::scalar_number(0),
+        executed_state::scalar_number(0),
+        executed_state::scalar_number(10),
+        executed_state::scalar_number(10),
+        executed_state::scalar_number(1),
+        executed_state::scalar_number(1),
+        executed_state::scalar_number(11),
+        executed_state::scalar_number(11),
+        executed_state::scalar_number(2),
+        executed_state::scalar_number(2),
+        executed_state::scalar_number(12),
+        executed_state::scalar_number(12),
+        executed_state::scalar_number(12),
+        executed_state::scalar_number(2),
+        executed_state::scalar_number(11),
+        executed_state::scalar_number(1),
+        executed_state::scalar_number(10),
+        executed_state::scalar_number(0),
+    ];
+    assert_eq!(actual_trace, expected_trace);
+}
