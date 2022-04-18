@@ -2,23 +2,19 @@
     "name": "@fluencelabs/avm",
     "description": "Aquamarine VM",
     "version": "0.0.0",
-    "main": "./dist/avm.wasm",
+    "main": "./dist/index.js",
     "repository": "https://github.com/fluencelabs/air",
     "author": "Fluence Labs",
     "license": "Apache 2.0",
     "files": [
         "dist/*"
     ],
-    "bin": {
-        "copy-avm": "./dist/copyAvm.js"
-    },
     "scripts": {
         "build": "tsc && ./build_wasm.sh"
     },
     "private": false,
     "dependencies": {},
     "devDependencies": {
-        "typescript": "^4.0.0",
-        "@types/node": "^14.0.0"
+        "typescript": "^4.0.0"
     }
 }
