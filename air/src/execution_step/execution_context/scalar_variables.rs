@@ -254,16 +254,14 @@ impl<'i> Scalars<'i> {
             .non_iterable_variables
             .get_mut(scalar_name)
             .and_then(|values| {
-                // carefully check that we're popping up an appropriate value
-                let cell = match values.pop() {
-                    Some(value) => value,
-                    None if values.last().depth == current_depth => return Some(true),
-                    None => return None,
-                };
-                if cell.depth != current_depth {
-                    None
-                } else {
-                    Some(false)
+                // carefully check that we're popping up an appropriate value,
+                // returning None means an error here
+                match values.pop() {
+                    Some(value) if value.depth == current_depth => Some(false),
+                    Some(_) => None,
+                    // None means that the value was last in a row
+                    None if values.last().depth == current_depth => Some(true),
+                    None => None,
                 }
             })
             .ok_or_else(|| UncatchableError::ScalarsStateCorrupted {
