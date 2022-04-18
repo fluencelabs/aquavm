@@ -26,7 +26,7 @@ const encoder = new TextEncoder();
  * @param air - particle's air script as string
  * @param prevData - particle's prev data as raw byte array
  * @param data - particle's data as raw byte array
- * @param callResults - call results pro
+ * @param callResults - array of tuples [callResultKey, callResult]
  * @returns AVM call arguments as serialized JSON string
  */
 export function serializeAvmArgs(
@@ -38,10 +38,10 @@ export function serializeAvmArgs(
     callResults: CallResultsArray,
 ): string {
     const callResultsToPass: any = {};
-    for (let [k, v] of callResults) {
-        callResultsToPass[k] = {
-            ret_code: v.retCode,
-            result: v.result,
+    for (let [key, callResult] of callResults) {
+        callResultsToPass[key] = {
+            ret_code: callResult.retCode,
+            result: callResult.result,
         };
     }
 
@@ -144,7 +144,7 @@ type CallToAvm = ((args: string) => Promise<string>) | ((args: string) => string
  * @param air - particle's air script as string
  * @param prevData - particle's prev data as raw byte array
  * @param data - particle's data as raw byte array
- * @param callResults - call results pro
+ * @param callResults - array of tuples [callResultKey, callResult]
  * @returns structured InterpreterResult
  */
 export async function callAvm(

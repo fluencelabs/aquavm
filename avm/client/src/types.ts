@@ -26,7 +26,7 @@ export interface CallServiceResult {
     retCode: number;
 
     /**
-     * Serialized return value from the service
+     * Serialized return value from the service.
      */
     result: string;
 }
@@ -46,12 +46,12 @@ export interface CallRequest {
     functionName: string;
 
     /**
-     * Arguments that should be passed to the service
+     * Arguments that should be passed to the service.
      */
     arguments: any[];
 
     /**
-     * Security tetraplets that should be passed to the service
+     * Security tetraplets that should be passed to the service.
      */
     tetraplets: SecurityTetraplet[][];
 }
