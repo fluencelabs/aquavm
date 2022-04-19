@@ -53,6 +53,7 @@ pub enum Token<'input> {
     InitPeerId,
     LastError,
     LastErrorWithLambda(LambdaAST<'input>),
+    Timestamp,
 
     Call,
     Ap,

@@ -52,7 +52,7 @@ macro_rules! execute {
                     &e,
                     // TODO: avoid excess copying here
                     &$instr.to_string(),
-                    $exec_ctx.current_peer_id.as_ref(),
+                    $exec_ctx.run_parameters.current_peer_id.as_ref(),
                     None,
                 );
                 Err(e)

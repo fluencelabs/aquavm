@@ -45,7 +45,7 @@ fn issue_177() {
     // client 1: demand result for (call %init_peer_id% ("getDataSrv" "-relay-") [] -relay-)
     let client_result_1 = client
         .runner
-        .call(script, "", "", client_peer_id, HashMap::new())
+        .call(script, "", "", client_peer_id, 0, HashMap::new())
         .expect("call should be success");
     let expected_call_requests = maplit::hashmap! {
         1 => CallRequestParams::new("getDataSrv", "-relay-", vec![], vec![]),
@@ -59,7 +59,7 @@ fn issue_177() {
     // client 2: send result to the specified relay
     let client_result_2 = client
         .runner
-        .call(script, client_result_1.data, "", client_peer_id, call_results)
+        .call(script, client_result_1.data, "", client_peer_id, 0, call_results)
         .expect("call should be success");
     assert!(client_result_2.call_requests.is_empty());
     assert_eq!(client_result_2.next_peer_pks, vec![relay_peer_id.to_string()]);
@@ -67,7 +67,14 @@ fn issue_177() {
     // relay 1: execute one time (without providing call results) on the relay and them send back to the client
     let relay_result_1 = relay
         .runner
-        .call(script, "", client_result_2.data.clone(), client_peer_id, HashMap::new())
+        .call(
+            script,
+            "",
+            client_result_2.data.clone(),
+            client_peer_id,
+            0,
+            HashMap::new(),
+        )
         .expect("call should be success");
     let expected_call_requests = maplit::hashmap! {
         1 => CallRequestParams::new("op", "noop", vec![], vec![]),
@@ -81,7 +88,7 @@ fn issue_177() {
     };
     let relay_result_2 = relay
         .runner
-        .call(script, relay_result_1.data.clone(), "", client_peer_id, call_results)
+        .call(script, relay_result_1.data.clone(), "", client_peer_id, 0, call_results)
         .expect("call should be success");
     assert!(relay_result_2.next_peer_pks.is_empty());
 
@@ -91,7 +98,7 @@ fn issue_177() {
     };
     let relay_result_3 = relay
         .runner
-        .call(script, relay_result_2.data.clone(), "", client_peer_id, call_results)
+        .call(script, relay_result_2.data.clone(), "", client_peer_id, 0, call_results)
         .expect("call should be success");
     assert!(relay_result_3.next_peer_pks.is_empty());
 
@@ -101,7 +108,7 @@ fn issue_177() {
     };
     let relay_result_4 = relay
         .runner
-        .call(script, relay_result_3.data.clone(), "", client_peer_id, call_results)
+        .call(script, relay_result_3.data.clone(), "", client_peer_id, 0, call_results)
         .expect("call should be success");
 
     // client 4: receive result from the relay
@@ -113,6 +120,7 @@ fn issue_177() {
             client_result_2.data,
             relay_result_4.data.clone(),
             client_peer_id,
+            0,
             HashMap::new(),
         )
         .expect("call should be success");
@@ -129,7 +137,7 @@ fn issue_177() {
     // demand a result for (call %init_peer_id% ("peer" "timeout") [1000 "timeout"])
     let client_result_4 = client
         .runner
-        .call(script, client_result_3.data, "", client_peer_id, call_results)
+        .call(script, client_result_3.data, "", client_peer_id, 0, call_results)
         .expect("call should be success");
     let expected_call_requests = maplit::hashmap! {
         3 => CallRequestParams::new("peer", "timeout", vec![json!(1000u64), json!("timeout")], vec![
@@ -146,7 +154,7 @@ fn issue_177() {
     // timeout requests provided
     let client_result_5 = client
         .runner
-        .call(script, client_result_4.data, "", client_peer_id, call_results);
+        .call(script, client_result_4.data, "", client_peer_id, 0, call_results);
     // before patch the interpreter crashed here
     assert!(client_result_5.is_ok());
 }

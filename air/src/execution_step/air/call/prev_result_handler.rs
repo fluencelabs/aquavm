@@ -57,7 +57,7 @@ pub(super) fn handle_prev_state<'i>(
             Err(CatchableError::LocalServiceError(ret_code, err_msg).into())
         }
         RequestSentBy(Sender::PeerIdWithCallId { peer_id, call_id })
-            if peer_id.as_str() == exec_ctx.current_peer_id.as_str() =>
+            if peer_id.as_str() == exec_ctx.run_parameters.current_peer_id.as_str() =>
         {
             // call results are identified by call_id that is saved in data
             match exec_ctx.call_results.remove(call_id) {
@@ -74,7 +74,7 @@ pub(super) fn handle_prev_state<'i>(
         }
         RequestSentBy(..) => {
             // check whether current node can execute this call
-            let is_current_peer = tetraplet.peer_pk.as_str() == exec_ctx.current_peer_id.as_str();
+            let is_current_peer = tetraplet.peer_pk.as_str() == exec_ctx.run_parameters.current_peer_id.as_str();
             if is_current_peer {
                 return Ok(StateDescriptor::can_execute_now(prev_result));
             }

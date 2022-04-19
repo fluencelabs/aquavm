@@ -75,6 +75,7 @@ impl<E> AVM<E> {
         air: impl Into<String>,
         data: impl Into<Vec<u8>>,
         init_user_id: impl Into<String>,
+        timestamp: u64,
         particle_id: &str,
         call_results: CallResults,
     ) -> AVMResult<AVMOutcome, E> {
@@ -83,7 +84,7 @@ impl<E> AVM<E> {
 
         let outcome = self
             .runner
-            .call(air, prev_data, data, init_user_id, call_results)
+            .call(air, prev_data, data, init_user_id, timestamp, call_results)
             .map_err(AVMError::RunnerError)?;
 
         // persist resulted data

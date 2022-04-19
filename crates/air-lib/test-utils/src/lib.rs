@@ -55,7 +55,7 @@ pub type JValue = serde_json::Value;
 #[macro_export]
 macro_rules! checked_call_vm {
     ($vm:expr, $init_peer_id:expr, $script:expr, $prev_data:expr, $data:expr) => {{
-        match $vm.call($script, $prev_data, $data, $init_peer_id) {
+        match $vm.call($script, $prev_data, $data, $init_peer_id, 0) {
             Ok(v) if v.ret_code != 0 => {
                 panic!("VM returns a error: {} {}", v.ret_code, v.error_message)
             }
@@ -68,7 +68,7 @@ macro_rules! checked_call_vm {
 #[macro_export]
 macro_rules! call_vm {
     ($vm:expr, $init_peer_id:expr, $script:expr, $prev_data:expr, $data:expr) => {
-        match $vm.call($script, $prev_data, $data, $init_peer_id) {
+        match $vm.call($script, $prev_data, $data, $init_peer_id, 0) {
             Ok(v) => v,
             Err(err) => panic!("VM call failed: {}", err),
         }

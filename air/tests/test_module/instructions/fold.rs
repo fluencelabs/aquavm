@@ -372,7 +372,7 @@ fn shadowing_scope() {
         let result = checked_call_vm!(vm_a, "", script.clone(), "", result.data);
         let result = checked_call_vm!(vm_b, "", script.clone(), "", result.data);
 
-        vm_a.call(script, "", result.data, "")
+        vm_a.call(script, "", result.data, "", 0)
     }
 
     let variable_shadowing_script = r#"

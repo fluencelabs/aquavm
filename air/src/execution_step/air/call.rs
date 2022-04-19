@@ -61,10 +61,10 @@ fn set_last_error<'i>(
 
     let current_peer_id = match &tetraplet {
         // use tetraplet if they set, because an error could be propagated from data
-        // (from CallServiceFailed state) and exec_ctx.current_peer_id won't mean
+        // (from CallServiceFailed state) and exec_ctx.run_parameters.current_peer_id won't mean
         // a peer where the error was occurred
         Some(tetraplet) => tetraplet.peer_pk.clone(),
-        None => exec_ctx.current_peer_id.to_string(),
+        None => exec_ctx.run_parameters.current_peer_id.to_string(),
     };
 
     log::warn!(

@@ -37,9 +37,10 @@ pub(crate) fn resolve_to_args<'i>(
     use ast::Value::*;
 
     match value {
-        InitPeerId => prepare_const(ctx.init_peer_id.as_str(), ctx),
+        InitPeerId => prepare_const(ctx.run_parameters.init_peer_id.as_str(), ctx),
         LastError(error_accessor) => prepare_last_error(error_accessor, ctx),
         Literal(value) => prepare_const(value.to_string(), ctx),
+        Timestamp => prepare_const(ctx.run_parameters.timestamp, ctx),
         Boolean(value) => prepare_const(*value, ctx),
         Number(value) => prepare_const(value, ctx),
         EmptyArray => prepare_const(json!([]), ctx),
@@ -53,7 +54,7 @@ pub(crate) fn prepare_const(
     ctx: &ExecutionCtx<'_>,
 ) -> ExecutionResult<(JValue, RcSecurityTetraplets)> {
     let jvalue = arg.into();
-    let tetraplet = SecurityTetraplet::literal_tetraplet(ctx.init_peer_id.as_ref());
+    let tetraplet = SecurityTetraplet::literal_tetraplet(ctx.run_parameters.init_peer_id.as_ref());
     let tetraplet = Rc::new(tetraplet);
 
     Ok((jvalue, vec![tetraplet]))
@@ -76,7 +77,7 @@ pub(crate) fn prepare_last_error<'i>(
     let tetraplets = match tetraplet {
         Some(tetraplet) => vec![tetraplet.clone()],
         None => {
-            let tetraplet = SecurityTetraplet::literal_tetraplet(ctx.init_peer_id.as_ref());
+            let tetraplet = SecurityTetraplet::literal_tetraplet(ctx.run_parameters.init_peer_id.as_ref());
             let tetraplet = Rc::new(tetraplet);
             vec![tetraplet]
         }

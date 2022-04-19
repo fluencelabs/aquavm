@@ -36,6 +36,7 @@ impl TestRunner {
         prev_data: impl Into<Vec<u8>>,
         data: impl Into<Vec<u8>>,
         init_user_id: impl Into<String>,
+        timestamp: u64,
     ) -> Result<RawAVMOutcome, String> {
         let air = air.into();
         let mut prev_data = prev_data.into();
@@ -53,6 +54,7 @@ impl TestRunner {
                     prev_data,
                     data,
                     init_user_id.clone(),
+                    timestamp,
                     call_results,
                 )
                 .map_err(|e| e.to_string())?;

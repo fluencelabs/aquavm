@@ -27,4 +27,8 @@ pub struct RunParameters {
 
     /// Peer id of a current peer.
     pub current_peer_id: String,
+
+    /// Unix timestamp from a particle in milliseconds.
+    /// It represents time when this particle was sent from the init peer id.
+    pub timestamp: u64,
 }

@@ -120,6 +120,7 @@ impl<'i> VariableValidator<'i> {
     pub(super) fn met_ap(&mut self, ap: &Ap<'i>, span: Span) {
         match &ap.argument {
             ApArgument::Number(_)
+            | ApArgument::Timestamp
             | ApArgument::InitPeerId
             | ApArgument::Boolean(_)
             | ApArgument::Literal(_)
@@ -229,6 +230,7 @@ impl<'i> VariableValidator<'i> {
     fn met_matchable(&mut self, matchable: &Value<'i>, span: Span) {
         match matchable {
             Value::InitPeerId
+            | Value::Timestamp
             | Value::Number(_)
             | Value::Boolean(_)
             | Value::Literal(_)

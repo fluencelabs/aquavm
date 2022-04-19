@@ -159,6 +159,16 @@ fn init_peer_id() {
 }
 
 #[test]
+fn timestamp() {
+    const TIMESTAMP: &str = "%timestamp%";
+
+    lexer_test(
+        TIMESTAMP,
+        Single(Ok((0, Token::Timestamp, TIMESTAMP.len()))),
+    );
+}
+
+#[test]
 fn stream() {
     const STREAM: &str = "$stream____asdasd";
 

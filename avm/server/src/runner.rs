@@ -63,6 +63,7 @@ impl AVMRunner {
         prev_data: impl Into<Vec<u8>>,
         data: impl Into<Vec<u8>>,
         init_user_id: impl Into<String>,
+        timestamp: u64,
         call_results: CallResults,
     ) -> RunnerResult<RawAVMOutcome> {
         let init_user_id = init_user_id.into();
@@ -72,6 +73,7 @@ impl AVMRunner {
             data,
             init_user_id,
             self.current_peer_id.clone(),
+            timestamp,
             call_results,
         );
 
@@ -102,6 +104,7 @@ fn prepare_args(
     data: impl Into<Vec<u8>>,
     init_peer_id: impl Into<String>,
     current_peer_id: String,
+    timestamp: u64,
     call_results: CallResults,
 ) -> Vec<IValue> {
     use fluence_faas::ne_vec::NEVec;
@@ -109,6 +112,7 @@ fn prepare_args(
     let run_parameters = vec![
         IValue::String(init_peer_id.into()),
         IValue::String(current_peer_id),
+        IValue::U64(timestamp),
     ];
     let run_parameters = NEVec::new(run_parameters).unwrap();
 
