@@ -38,7 +38,7 @@ impl<'i> super::ExecutableInstruction<'i> for New<'i> {
             (Ok(()), Ok(())) => Ok(()),
             // instruction error has higher priority over epilog result error,
             // because epilog returns "utility" errors that normally (meaning that AquaVM
-            // scalar handling code doesn't contain errors) shouldn't happened,
+            // scalar handling code doesn't contain errors) shouldn't happen,
             // additionally see test new_with_randomly_set_scalars_in_fold_2
             (err @ Err(_), _) => err,
             (_, err @ Err(_)) => err,
