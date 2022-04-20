@@ -83,7 +83,7 @@ fn apply_scalar_impl(
 ) -> ExecutionResult<ValueAggregate> {
     use crate::execution_step::ScalarRef;
 
-    let scalar = exec_ctx.scalars.get(scalar_name)?;
+    let scalar = exec_ctx.scalars.get_value(scalar_name)?;
 
     let mut result = match scalar {
         ScalarRef::Value(result) => result.clone(),

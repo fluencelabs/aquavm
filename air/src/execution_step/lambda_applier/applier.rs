@@ -43,7 +43,7 @@ pub(crate) fn select_from_stream<'value, 'i>(
             }));
         }
         ValueAccessor::FieldAccessByScalar { scalar_name } => {
-            let scalar = exec_ctx.scalars.get(scalar_name)?;
+            let scalar = exec_ctx.scalars.get_value(scalar_name)?;
             lambda_to_execution_error!(try_scalar_ref_as_idx(scalar))?
         }
         ValueAccessor::Error => unreachable!("should not execute if parsing succeeded. QED."),
@@ -74,7 +74,7 @@ pub(crate) fn select_from_scalar<'value, 'accessor, 'i>(
                 value = lambda_to_execution_error!(try_jvalue_with_field_name(value, *field_name))?;
             }
             ValueAccessor::FieldAccessByScalar { scalar_name } => {
-                let scalar = exec_ctx.scalars.get(scalar_name)?;
+                let scalar = exec_ctx.scalars.get_value(scalar_name)?;
                 value = lambda_to_execution_error!(select_by_scalar(value, scalar))?;
             }
             ValueAccessor::Error => unreachable!("should not execute if parsing succeeded. QED."),

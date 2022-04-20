@@ -55,9 +55,16 @@ pub enum UncatchableError {
     #[error("ap result {0:?} doesn't match with corresponding instruction")]
     ApResultNotCorrespondToInstr(MergerApResult),
 
-    /// Multiple values for such name found.
-    #[error("multiple variables found for name '{0}' in data")]
-    MultipleVariablesFound(String),
+    /// Variable shadowing is not allowed, usually it's thrown when a AIR tries to assign value
+    /// for a variable not in a fold block or in a global scope but not right after new.
+    #[error("trying to shadow variable '{0}', but shadowing is allowed only inside fold blocks")]
+    ShadowingIsNotAllowed(String),
+
+    /// This error occurred when new tries to pop up a variable at the end, but scalar state doesn't
+    /// contain an appropriate variable. It should be considered as an internal error and shouldn't
+    /// be caught by a xor instruction.
+    #[error("new end block tries to pop up a variable '{scalar_name}' that wasn't defined at depth {depth}")]
+    ScalarsStateCorrupted { scalar_name: String, depth: usize },
 }
 
 impl ToErrorCode for UncatchableError {

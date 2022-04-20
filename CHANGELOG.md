@@ -1,3 +1,11 @@
+## Version 0.23.0 (2021-04-19)
+
+[PR 248](https://github.com/fluencelabs/aquavm/pull/248):
+Introduced new for scalars
+
+[PR 244](https://github.com/fluencelabs/aquavm/pull/244):
+Stack size was increased to 50 MiB
+
 ## Version 0.22.0 (2021-04-14)
 
 [PR 243](https://github.com/fluencelabs/aquavm/pull/243):
