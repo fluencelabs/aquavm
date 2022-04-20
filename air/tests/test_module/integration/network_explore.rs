@@ -46,72 +46,180 @@ fn network_explore() {
 
     let script = include_str!("./scripts/network_explore.clj");
 
-    let client_result = checked_call_vm!(client, "", script, "", "");
+    let client_result = checked_call_vm!(client, <_>::default(), script, "", "");
     assert_next_pks!(&client_result.next_peer_pks, &[relay_id]);
 
-    let relay_result = checked_call_vm!(relay, "", script, "", client_result.data.clone());
+    let relay_result = checked_call_vm!(relay, <_>::default(), script, "", client_result.data.clone());
     assert_next_pks!(&relay_result.next_peer_pks, &[client_1_id]);
 
-    let client_1_result = checked_call_vm!(client_1, "", script, "", relay_result.data.clone());
+    let client_1_result = checked_call_vm!(client_1, <_>::default(), script, "", relay_result.data.clone());
     assert_next_pks!(&client_1_result.next_peer_pks, &[client_2_id]);
 
-    let client_2_result = checked_call_vm!(client_2, "", script, "", client_1_result.data.clone());
+    let client_2_result = checked_call_vm!(client_2, <_>::default(), script, "", client_1_result.data.clone());
     assert_next_pks!(&client_2_result.next_peer_pks, &[client_3_id]);
 
-    let client_3_result = checked_call_vm!(client_3, "", script, "", client_2_result.data.clone());
+    let client_3_result = checked_call_vm!(client_3, <_>::default(), script, "", client_2_result.data.clone());
     assert_next_pks!(&client_3_result.next_peer_pks, &[relay_id]);
 
-    let relay_result = checked_call_vm!(relay, "", script, relay_result.data, client_3_result.data.clone());
+    let relay_result = checked_call_vm!(
+        relay,
+        <_>::default(),
+        script,
+        relay_result.data,
+        client_3_result.data.clone()
+    );
     assert_next_pks!(&relay_result.next_peer_pks, &[client_1_id]);
 
-    let client_1_result = checked_call_vm!(client_1, "", script, client_1_result.data, relay_result.data.clone());
+    let client_1_result = checked_call_vm!(
+        client_1,
+        <_>::default(),
+        script,
+        client_1_result.data,
+        relay_result.data.clone()
+    );
     assert_next_pks!(&client_1_result.next_peer_pks, &[client_3_id]);
 
-    let client_3_result = checked_call_vm!(client_3, "", script, client_3_result.data, client_1_result.data.clone());
+    let client_3_result = checked_call_vm!(
+        client_3,
+        <_>::default(),
+        script,
+        client_3_result.data,
+        client_1_result.data.clone()
+    );
     assert_next_pks!(&client_3_result.next_peer_pks, &[relay_id]);
 
-    let relay_result = checked_call_vm!(relay, "", script, relay_result.data, client_3_result.data.clone());
+    let relay_result = checked_call_vm!(
+        relay,
+        <_>::default(),
+        script,
+        relay_result.data,
+        client_3_result.data.clone()
+    );
     assert_next_pks!(&relay_result.next_peer_pks, &[client_2_id]);
 
-    let client_2_result = checked_call_vm!(client_2, "", script, client_2_result.data, relay_result.data.clone());
+    let client_2_result = checked_call_vm!(
+        client_2,
+        <_>::default(),
+        script,
+        client_2_result.data,
+        relay_result.data.clone()
+    );
     assert_next_pks!(&client_2_result.next_peer_pks, &[relay_id]);
 
-    let relay_result = checked_call_vm!(relay, "", script, relay_result.data, client_2_result.data.clone());
+    let relay_result = checked_call_vm!(
+        relay,
+        <_>::default(),
+        script,
+        relay_result.data,
+        client_2_result.data.clone()
+    );
     assert_next_pks!(&relay_result.next_peer_pks, &[client_3_id]);
 
-    let client_3_result = checked_call_vm!(client_3, "", script, client_3_result.data, relay_result.data.clone());
+    let client_3_result = checked_call_vm!(
+        client_3,
+        <_>::default(),
+        script,
+        client_3_result.data,
+        relay_result.data.clone()
+    );
     assert_next_pks!(&client_3_result.next_peer_pks, &[client_1_id]);
 
-    let client_1_result = checked_call_vm!(client_1, "", script, client_1_result.data, client_3_result.data.clone());
+    let client_1_result = checked_call_vm!(
+        client_1,
+        <_>::default(),
+        script,
+        client_1_result.data,
+        client_3_result.data.clone()
+    );
     assert_next_pks!(&client_1_result.next_peer_pks, &[client_2_id]);
 
-    let client_2_result = checked_call_vm!(client_2, "", script, client_2_result.data, client_1_result.data.clone());
+    let client_2_result = checked_call_vm!(
+        client_2,
+        <_>::default(),
+        script,
+        client_2_result.data,
+        client_1_result.data.clone()
+    );
     assert_next_pks!(&client_2_result.next_peer_pks, &[relay_id]);
 
-    let relay_result = checked_call_vm!(relay, "", script, relay_result.data, client_2_result.data.clone());
+    let relay_result = checked_call_vm!(
+        relay,
+        <_>::default(),
+        script,
+        relay_result.data,
+        client_2_result.data.clone()
+    );
     assert_next_pks!(&relay_result.next_peer_pks, &[client_3_id]);
 
-    let client_3_result = checked_call_vm!(client_3, "", script, client_3_result.data, relay_result.data.clone());
+    let client_3_result = checked_call_vm!(
+        client_3,
+        <_>::default(),
+        script,
+        client_3_result.data,
+        relay_result.data.clone()
+    );
     assert_next_pks!(&client_3_result.next_peer_pks, &[client_1_id]);
 
-    let client_1_result = checked_call_vm!(client_1, "", script, client_1_result.data, client_3_result.data.clone());
+    let client_1_result = checked_call_vm!(
+        client_1,
+        <_>::default(),
+        script,
+        client_1_result.data,
+        client_3_result.data.clone()
+    );
     assert_next_pks!(&client_1_result.next_peer_pks, &[client_2_id]);
 
-    let client_2_result = checked_call_vm!(client_2, "", script, client_2_result.data, client_1_result.data.clone());
+    let client_2_result = checked_call_vm!(
+        client_2,
+        <_>::default(),
+        script,
+        client_2_result.data,
+        client_1_result.data.clone()
+    );
     assert_next_pks!(&client_2_result.next_peer_pks, &[client_1_id]);
 
-    let client_1_result = checked_call_vm!(client_1, "", script, client_1_result.data, client_2_result.data.clone());
+    let client_1_result = checked_call_vm!(
+        client_1,
+        <_>::default(),
+        script,
+        client_1_result.data,
+        client_2_result.data.clone()
+    );
     assert_next_pks!(&client_1_result.next_peer_pks, &[client_2_id]);
 
-    let client_2_result = checked_call_vm!(client_2, "", script, client_2_result.data, client_1_result.data.clone());
+    let client_2_result = checked_call_vm!(
+        client_2,
+        <_>::default(),
+        script,
+        client_2_result.data,
+        client_1_result.data.clone()
+    );
     assert_next_pks!(&client_2_result.next_peer_pks, &[client_3_id]);
 
-    let client_3_result = checked_call_vm!(client_3, "", script, client_3_result.data, client_2_result.data.clone());
+    let client_3_result = checked_call_vm!(
+        client_3,
+        <_>::default(),
+        script,
+        client_3_result.data,
+        client_2_result.data.clone()
+    );
     assert_next_pks!(&client_3_result.next_peer_pks, &[relay_id]);
 
-    let relay_result = checked_call_vm!(relay, "", script, relay_result.data, client_3_result.data.clone());
+    let relay_result = checked_call_vm!(
+        relay,
+        <_>::default(),
+        script,
+        relay_result.data,
+        client_3_result.data.clone()
+    );
     assert_next_pks!(&relay_result.next_peer_pks, &[client_id]);
 
-    let client_result = checked_call_vm!(client, "", script, client_result.data, relay_result.data.clone());
+    let client_result = checked_call_vm!(
+        client,
+        <_>::default(),
+        script,
+        client_result.data,
+        relay_result.data.clone()
+    );
     assert_next_pks!(&client_result.next_peer_pks, &[]);
 }

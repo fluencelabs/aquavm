@@ -57,10 +57,9 @@ fn scalars_scope() {
             )
         )"#);
 
-    let init_peer_id = "";
-    let result = checked_call_vm!(set_array_0_vm, init_peer_id, &script, "", "");
-    let result = checked_call_vm!(peer_1_vm, init_peer_id, &script, "", result.data);
-    let result = checked_call_vm!(some_peer_vm, init_peer_id, &script, "", result.data);
+    let result = checked_call_vm!(set_array_0_vm, <_>::default(), &script, "", "");
+    let result = checked_call_vm!(peer_1_vm, <_>::default(), &script, "", result.data);
+    let result = checked_call_vm!(some_peer_vm, <_>::default(), &script, "", result.data);
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
@@ -107,10 +106,9 @@ fn before_after_of_next() {
             )
         )"#);
 
-    let init_peer_id = "";
-    let result = checked_call_vm!(set_array_0_vm, init_peer_id, &script, "", "");
-    let result = checked_call_vm!(peer_0_vm, init_peer_id, &script, "", result.data);
-    let result = checked_call_vm!(peer_1_vm, init_peer_id, &script, "", result.data);
+    let result = checked_call_vm!(set_array_0_vm, <_>::default(), &script, "", "");
+    let result = checked_call_vm!(peer_0_vm, <_>::default(), &script, "", result.data);
+    let result = checked_call_vm!(peer_1_vm, <_>::default(), &script, "", result.data);
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
@@ -180,16 +178,15 @@ fn local_and_global_scalars() {
             (call "{local_consumer_peer_id}" ("" "") [local]) ;; local set by (1) will be used
         )"#);
 
-    let init_peer_id = "";
-    let result = checked_call_vm!(set_variable_vm, init_peer_id, &script, "", "");
-    let result = checked_call_vm!(local_setter_vm, init_peer_id, &script, "", result.data);
-    let result = checked_call_vm!(local_consumer_vm, init_peer_id, &script, "", result.data);
-    let result = checked_call_vm!(local_setter_vm, init_peer_id, &script, "", result.data);
-    let result = checked_call_vm!(local_consumer_vm, init_peer_id, &script, "", result.data);
-    let result = checked_call_vm!(local_setter_vm, init_peer_id, &script, "", result.data);
-    let result = checked_call_vm!(local_consumer_vm, init_peer_id, &script, "", result.data);
-    let result = checked_call_vm!(local_setter_vm, init_peer_id, &script, "", result.data);
-    let result = checked_call_vm!(local_consumer_vm, init_peer_id, &script, "", result.data);
+    let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
+    let result = checked_call_vm!(local_setter_vm, <_>::default(), &script, "", result.data);
+    let result = checked_call_vm!(local_consumer_vm, <_>::default(), &script, "", result.data);
+    let result = checked_call_vm!(local_setter_vm, <_>::default(), &script, "", result.data);
+    let result = checked_call_vm!(local_consumer_vm, <_>::default(), &script, "", result.data);
+    let result = checked_call_vm!(local_setter_vm, <_>::default(), &script, "", result.data);
+    let result = checked_call_vm!(local_consumer_vm, <_>::default(), &script, "", result.data);
+    let result = checked_call_vm!(local_setter_vm, <_>::default(), &script, "", result.data);
+    let result = checked_call_vm!(local_consumer_vm, <_>::default(), &script, "", result.data);
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
@@ -247,7 +244,7 @@ fn new_with_randomly_set_scalars_in_fold_1() {
         )
     )"#);
 
-    let result = call_vm!(test_vm_1, "", &script, "", "");
+    let result = call_vm!(test_vm_1, <_>::default(), &script, "", "");
     assert_eq!(result.ret_code, 0)
 }
 
@@ -283,7 +280,7 @@ fn new_with_randomly_set_scalars_in_fold_2() {
         )
     )"#);
 
-    let result = call_vm!(test_vm_1, "", &script, "", "");
+    let result = call_vm!(test_vm_1, <_>::default(), &script, "", "");
     let expected_error = ExecutionError::Catchable(rc!(CatchableError::VariableWasNotInitializedAfterNew(
         variable_name.to_string()
     )));

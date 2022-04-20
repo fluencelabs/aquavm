@@ -26,13 +26,13 @@ fn seq_remote_remote() {
                 (call "remote_peer_id_2" ("service_id" "fn_name") [] g)
             )"#;
 
-    let result = checked_call_vm!(vm, "asd", script, "", "");
+    let result = checked_call_vm!(vm, <_>::default(), script, "", "");
     assert_eq!(result.next_peer_pks, vec![String::from("remote_peer_id_1")]);
 
     let initial_trace = vec![executed_state::scalar_string("")];
     let initial_data = raw_data_from_trace(initial_trace);
 
-    let result = checked_call_vm!(vm, "asd", script, "", initial_data);
+    let result = checked_call_vm!(vm, <_>::default(), script, "", initial_data);
 
     assert_eq!(result.next_peer_pks, vec![String::from("remote_peer_id_2")]);
 }
@@ -49,6 +49,6 @@ fn seq_local_remote() {
                 (call "{remote_peer_id}" ("service_id" "fn_name") [] g)
             )"#);
 
-    let result = checked_call_vm!(vm, "asd", script, "", "");
+    let result = checked_call_vm!(vm, <_>::default(), script, "", "");
     assert_eq!(result.next_peer_pks, vec![remote_peer_id]);
 }

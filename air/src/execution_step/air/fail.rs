@@ -67,10 +67,10 @@ fn fail_with_literals<'i>(
         error_code,
         error_message,
         &fail.to_string(),
-        exec_ctx.init_peer_id.as_ref(),
+        exec_ctx.run_parameters.init_peer_id.as_ref(),
     );
 
-    let literal_tetraplet = SecurityTetraplet::literal_tetraplet(exec_ctx.init_peer_id.as_ref());
+    let literal_tetraplet = SecurityTetraplet::literal_tetraplet(exec_ctx.run_parameters.init_peer_id.as_ref());
     let literal_tetraplet = Rc::new(literal_tetraplet);
 
     fail_with_error_object(exec_ctx, Rc::new(error_object), Some(literal_tetraplet))

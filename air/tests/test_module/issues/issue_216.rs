@@ -43,8 +43,9 @@ fn issue_216() {
         )
     "#);
 
-    let result = checked_call_vm!(some_peer, client_id, &script, "", "");
-    let result = checked_call_vm!(client, client_id, &script, "", result.data); // before 0.20.4 it's just failed
+    let test_params = TestRunParameters::from_init_peer_id(client_id);
+    let result = checked_call_vm!(some_peer, test_params.clone(), &script, "", "");
+    let result = checked_call_vm!(client, test_params, &script, "", result.data); // before 0.20.4 it's just failed
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![

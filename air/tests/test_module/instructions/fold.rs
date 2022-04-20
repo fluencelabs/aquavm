@@ -37,8 +37,8 @@ fn lfold() {
                 )
             )"#;
 
-    let result = checked_call_vm!(set_variable_vm, "", lfold, "", "");
-    let result = checked_call_vm!(vm, "", lfold, "", result.data);
+    let result = checked_call_vm!(set_variable_vm, <_>::default(), lfold, "", "");
+    let result = checked_call_vm!(vm, <_>::default(), lfold, "", result.data);
 
     let actual_trace = trace_from_result(&result);
     let expected_state = executed_state::scalar_string_array(vec!["1", "2", "3", "4", "5"]);
@@ -71,8 +71,8 @@ fn rfold() {
                 )
             )"#;
 
-    let result = checked_call_vm!(set_variable_vm, "", rfold, "", "");
-    let result = checked_call_vm!(vm, "", rfold, "", result.data);
+    let result = checked_call_vm!(set_variable_vm, <_>::default(), rfold, "", "");
+    let result = checked_call_vm!(vm, <_>::default(), rfold, "", result.data);
 
     let actual_trace = trace_from_result(&result);
     assert_eq!(actual_trace.len(), 6);
@@ -113,8 +113,8 @@ fn inner_fold() {
                 )
             )"#;
 
-    let result = checked_call_vm!(set_variable_vm, "", script, "", "");
-    let result = checked_call_vm!(vm, "", script, "", result.data);
+    let result = checked_call_vm!(set_variable_vm, <_>::default(), script, "", "");
+    let result = checked_call_vm!(vm, <_>::default(), script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
     assert_eq!(actual_trace.len(), 27);
@@ -158,7 +158,7 @@ fn inner_fold_with_same_iterator() {
                 )
             )"#;
 
-    let result = call_vm!(vm, "", script, "", "");
+    let result = call_vm!(vm, <_>::default(), script, "", "");
 
     let expected_error = PreparationError::AIRParseError("".to_string());
     assert_eq!(result.ret_code, expected_error.to_error_code());
@@ -180,8 +180,8 @@ fn empty_iterable_fold() {
                 )
             )"#;
 
-    let result = checked_call_vm!(set_variable_vm, "", empty_fold, "", "");
-    let result = checked_call_vm!(vm, "", empty_fold, "", result.data);
+    let result = checked_call_vm!(set_variable_vm, <_>::default(), empty_fold, "", "");
+    let result = checked_call_vm!(vm, <_>::default(), empty_fold, "", result.data);
 
     let actual_trace = trace_from_result(&result);
     let expected_state = executed_state::scalar(json!([]));
@@ -202,7 +202,7 @@ fn empty_literal_array_fold() {
             )
         )"#;
 
-    let result = checked_call_vm!(vm, "", empty_fold, "", "");
+    let result = checked_call_vm!(vm, <_>::default(), empty_fold, "", "");
     let actual_trace = trace_from_result(&result);
 
     assert!(actual_trace.is_empty());
@@ -224,8 +224,8 @@ fn empty_fold_json_path() {
                 )
             )"#;
 
-    let result = checked_call_vm!(set_variable_vm, "", empty_fold, "", "");
-    let result = checked_call_vm!(vm, "", empty_fold, "", result.data);
+    let result = checked_call_vm!(set_variable_vm, <_>::default(), empty_fold, "", "");
+    let result = checked_call_vm!(vm, <_>::default(), empty_fold, "", result.data);
 
     let actual_trace = trace_from_result(&result);
     let expected_trace = vec![executed_state::scalar(json!({ "messages": [] }))];
@@ -253,8 +253,8 @@ fn fold_with_join() {
                 )
             )"#;
 
-    let result = checked_call_vm!(set_variable_vm, "", fold_with_join, "", "");
-    let result = checked_call_vm!(vm, "", fold_with_join, "", result.data);
+    let result = checked_call_vm!(set_variable_vm, <_>::default(), fold_with_join, "", "");
+    let result = checked_call_vm!(vm, <_>::default(), fold_with_join, "", result.data);
 
     let actual_trace = trace_from_result(&result);
     assert_eq!(actual_trace.len(), 4);
@@ -279,8 +279,8 @@ fn lambda() {
                 )
             )"#;
 
-    let result = checked_call_vm!(set_variable_vm, "", script, "", "");
-    let result = checked_call_vm!(vm, "", script, "", result.data);
+    let result = checked_call_vm!(set_variable_vm, <_>::default(), script, "", "");
+    let result = checked_call_vm!(vm, <_>::default(), script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
     let expected_state = executed_state::scalar(json!({ "array": ["1", "2", "3", "4", "5"] }));
@@ -330,13 +330,13 @@ fn shadowing() {
                 )
             )"#;
 
-    let result = checked_call_vm!(set_variables_vm, "", script, "", "");
-    let result = checked_call_vm!(vm_a, "", script, "", result.data);
-    let result = checked_call_vm!(vm_b, "", script, "", result.data);
-    let result = checked_call_vm!(vm_a, "", script, "", result.data);
-    let result = checked_call_vm!(vm_b, "", script, "", result.data);
-    let result = checked_call_vm!(vm_a, "", script, "", result.data);
-    let result = checked_call_vm!(vm_b, "", script, "", result.data);
+    let result = checked_call_vm!(set_variables_vm, <_>::default(), script, "", "");
+    let result = checked_call_vm!(vm_a, <_>::default(), script, "", result.data);
+    let result = checked_call_vm!(vm_b, <_>::default(), script, "", result.data);
+    let result = checked_call_vm!(vm_a, <_>::default(), script, "", result.data);
+    let result = checked_call_vm!(vm_b, <_>::default(), script, "", result.data);
+    let result = checked_call_vm!(vm_a, <_>::default(), script, "", result.data);
+    let result = checked_call_vm!(vm_b, <_>::default(), script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
     let expected_trace = vec![
@@ -366,13 +366,13 @@ fn shadowing_scope() {
         let mut vm_a = create_avm(echo_call_service(), "A");
         let mut vm_b = create_avm(echo_call_service(), "B");
 
-        let result = checked_call_vm!(set_variables_vm, "", script.clone(), "", "");
-        let result = checked_call_vm!(vm_a, "", script.clone(), "", result.data);
-        let result = checked_call_vm!(vm_b, "", script.clone(), "", result.data);
-        let result = checked_call_vm!(vm_a, "", script.clone(), "", result.data);
-        let result = checked_call_vm!(vm_b, "", script.clone(), "", result.data);
+        let result = checked_call_vm!(set_variables_vm, <_>::default(), script.clone(), "", "");
+        let result = checked_call_vm!(vm_a, <_>::default(), script.clone(), "", result.data);
+        let result = checked_call_vm!(vm_b, <_>::default(), script.clone(), "", result.data);
+        let result = checked_call_vm!(vm_a, <_>::default(), script.clone(), "", result.data);
+        let result = checked_call_vm!(vm_b, <_>::default(), script.clone(), "", result.data);
 
-        vm_a.call(script, "", result.data, "")
+        vm_a.call(script, "", result.data, <_>::default())
     }
 
     let variable_shadowing_script = r#"

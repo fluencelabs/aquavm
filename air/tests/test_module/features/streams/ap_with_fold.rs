@@ -61,9 +61,9 @@ fn ap_with_fold() {
         )
         "#);
 
-    let result = checked_call_vm!(set_variable_vm, "", &script, "", "");
+    let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
     assert_eq!(result.next_peer_pks, vec![local_vm_peer_id.to_string()]);
 
-    let result = checked_call_vm!(local_vm, "", &script, "", result.data);
+    let result = checked_call_vm!(local_vm, <_>::default(), &script, "", result.data);
     assert!(result.next_peer_pks.is_empty());
 }

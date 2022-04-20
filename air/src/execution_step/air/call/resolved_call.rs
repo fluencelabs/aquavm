@@ -87,7 +87,7 @@ impl<'i> ResolvedCall<'i> {
 
         // call can be executed only on peers with such peer_id
         let tetraplet = &self.tetraplet;
-        if tetraplet.peer_pk.as_str() != exec_ctx.current_peer_id.as_str() {
+        if tetraplet.peer_pk.as_str() != exec_ctx.run_parameters.current_peer_id.as_str() {
             set_remote_call_result(tetraplet.peer_pk.clone(), exec_ctx, trace_ctx);
             return Ok(());
         }
@@ -108,7 +108,7 @@ impl<'i> ResolvedCall<'i> {
 
         exec_ctx.subtree_complete = false;
         trace_ctx.meet_call_end(CallResult::sent_peer_id_with_call_id(
-            exec_ctx.current_peer_id.clone(),
+            exec_ctx.run_parameters.current_peer_id.clone(),
             call_id,
         ));
 

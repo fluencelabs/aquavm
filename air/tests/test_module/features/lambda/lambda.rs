@@ -33,7 +33,7 @@ fn lambda_not_allowed_for_non_objects_and_arrays() {
         )
         "#);
 
-    let result = call_vm!(set_variable_vm, "asd", &script, "", "");
+    let result = call_vm!(set_variable_vm, <_>::default(), &script, "", "");
 
     let expected_error = CatchableError::LambdaApplierError(LambdaError::FieldAccessorNotMatchValue {
         value: json!(some_string),
@@ -67,8 +67,8 @@ fn lambda_with_string_scalar() {
         )
         "#);
 
-    let result = checked_call_vm!(set_variable_vm, "asd", &script, "", "");
-    let result = checked_call_vm!(local_vm, "asd", script, "", result.data);
+    let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
+    let result = checked_call_vm!(local_vm, <_>::default(), script, "", result.data);
     let trace = trace_from_result(&result);
 
     assert_eq!(&trace[2], &executed_state::scalar_number(1u32));
@@ -99,8 +99,8 @@ fn lambda_with_number_scalar() {
         )
         "#);
 
-    let result = checked_call_vm!(set_variable_vm, "asd", &script, "", "");
-    let result = checked_call_vm!(local_vm, "asd", script, "", result.data);
+    let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
+    let result = checked_call_vm!(local_vm, <_>::default(), script, "", result.data);
     let trace = trace_from_result(&result);
 
     assert_eq!(&trace[2], &executed_state::scalar_number(1u32));
@@ -139,8 +139,8 @@ fn lambda_with_number_stream() {
         )
         "#);
 
-    let result = checked_call_vm!(set_variable_vm, "asd", &script, "", "");
-    let result = checked_call_vm!(local_vm, "asd", script, "", result.data);
+    let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
+    let result = checked_call_vm!(local_vm, <_>::default(), script, "", result.data);
     let actual_trace = trace_from_result(&result);
 
     assert_eq!(&actual_trace[5], &executed_state::scalar_number(2));
@@ -184,8 +184,8 @@ fn lambda_with_number_stream_and_followed_scalar() {
         )
         "#);
 
-    let result = checked_call_vm!(set_variable_vm, "asd", &script, "", "");
-    let result = checked_call_vm!(local_vm, "asd", script, "", result.data);
+    let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
+    let result = checked_call_vm!(local_vm, <_>::default(), script, "", result.data);
     let actual_trace = trace_from_result(&result);
 
     assert_eq!(&actual_trace[6], &executed_state::scalar_number(checkable_value));
@@ -216,8 +216,8 @@ fn lambda_with_scalar_join() {
         )
         "#);
 
-    let result = checked_call_vm!(set_variable_vm, "asd", &script, "", "");
-    let result = checked_call_vm!(local_vm, "asd", script, "", result.data);
+    let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
+    let result = checked_call_vm!(local_vm, <_>::default(), script, "", result.data);
     let trace = trace_from_result(&result);
 
     assert_eq!(&trace[3], &executed_state::request_sent_by("set_variable"));
@@ -256,8 +256,8 @@ fn lambda_with_stream_join() {
         )
         "#);
 
-    let result = checked_call_vm!(set_variable_vm, "asd", &script, "", "");
-    let result = checked_call_vm!(local_vm, "asd", script, "", result.data);
+    let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
+    let result = checked_call_vm!(local_vm, <_>::default(), script, "", result.data);
     let actual_trace = trace_from_result(&result);
 
     assert_eq!(&actual_trace[6], &executed_state::request_sent_by("set_variable"));

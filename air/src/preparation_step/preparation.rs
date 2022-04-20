@@ -68,20 +68,10 @@ fn make_exec_ctx(
     call_results: &[u8],
     run_parameters: RunParameters,
 ) -> PreparationResult<ExecutionCtx<'static>> {
-    let RunParameters {
-        init_peer_id,
-        current_peer_id,
-    } = run_parameters;
-
     let call_results = serde_json::from_slice(call_results)
         .map_err(|e| PreparationError::CallResultsDeFailed(e, call_results.to_vec()))?;
 
-    let mut ctx = ExecutionCtx::new(
-        current_peer_id,
-        init_peer_id,
-        call_results,
-        prev_data.last_call_request_id,
-    );
+    let mut ctx = ExecutionCtx::new(run_parameters, call_results, prev_data.last_call_request_id);
     create_streams(&mut ctx, prev_data);
 
     Ok(ctx)

@@ -29,7 +29,7 @@ fn fail_with_last_error() {
                 (fail %last_error%)
             )"#);
 
-    let result = call_vm!(vm, "", script, "", "");
+    let result = call_vm!(vm, <_>::default(), script, "", "");
 
     let expected_error = CatchableError::UserError {
         error: rc!(json!({
@@ -53,15 +53,15 @@ fn fail_with_literals() {
                 (fail %last_error%)
             )"#;
 
-    let init_peer_id = "init_peer_id";
-    let result = call_vm!(vm, init_peer_id, script, "", "");
+    let test_params = TestRunParameters::from_init_peer_id("init_peer_id");
+    let result = call_vm!(vm, test_params.clone(), script, "", "");
 
     let expected_error = CatchableError::UserError {
         error: rc!(json!( {
         "error_code": 1337i64,
         "instruction": "fail 1337 error message",
         "message": "error message",
-        "peer_id": init_peer_id,
+        "peer_id": test_params.init_peer_id,
         })),
     };
     assert!(check_error(&result, expected_error));
@@ -85,7 +85,8 @@ fn fail_with_last_error_tetraplets() {
         )
           "#);
 
-    let _ = checked_call_vm!(vm, local_peer_id, script, "", "");
+    let test_params = TestRunParameters::from_init_peer_id(local_peer_id);
+    let _ = checked_call_vm!(vm, test_params, script, "", "");
     assert_eq!(
         tetraplet_anchor.borrow()[0][0],
         SecurityTetraplet::new(local_peer_id, fallible_service_id, local_fn_name, "")
@@ -107,7 +108,8 @@ fn fail_with_literals_tetraplets() {
                 (call "{local_peer_id}" ("" "") [%last_error%])
             )"#);
 
-    let _ = checked_call_vm!(vm, local_peer_id, script, "", "");
+    let test_params = TestRunParameters::from_init_peer_id(local_peer_id);
+    let _ = checked_call_vm!(vm, test_params, script, "", "");
     assert_eq!(
         tetraplet_anchor.borrow()[0][0],
         SecurityTetraplet::literal_tetraplet(local_peer_id)

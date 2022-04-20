@@ -34,7 +34,7 @@ pub(crate) fn are_matchable_eq<'ctx>(
         (InitPeerId, matchable) | (matchable, InitPeerId) => compare_matchable(
             matchable,
             exec_ctx,
-            make_string_comparator(exec_ctx.init_peer_id.as_str()),
+            make_string_comparator(exec_ctx.run_parameters.init_peer_id.as_str()),
         ),
 
         (LastError(error_accessor), matchable) | (matchable, LastError(error_accessor)) => {
@@ -46,6 +46,13 @@ pub(crate) fn are_matchable_eq<'ctx>(
         (Literal(value), matchable) | (matchable, Literal(value)) => {
             compare_matchable(matchable, exec_ctx, make_string_comparator(value))
         }
+
+        (Timestamp, Timestamp) => Ok(true),
+        (Timestamp, matchable) | (matchable, Timestamp) => compare_matchable(
+            matchable,
+            exec_ctx,
+            make_object_comparator(JValue::Number(exec_ctx.run_parameters.timestamp.into())),
+        ),
 
         (EmptyArray, EmptyArray) => Ok(true),
         (EmptyArray, matchable) | (matchable, EmptyArray) => {
@@ -83,7 +90,7 @@ fn compare_matchable<'ctx>(
 
     match matchable {
         InitPeerId => {
-            let init_peer_id = exec_ctx.init_peer_id.clone();
+            let init_peer_id = exec_ctx.run_parameters.init_peer_id.clone();
             let jvalue = init_peer_id.as_str().into();
             Ok(comparator(Cow::Owned(jvalue)))
         }
@@ -93,6 +100,10 @@ fn compare_matchable<'ctx>(
         }
         Literal(str) => {
             let jvalue = str.to_string().into();
+            Ok(comparator(Cow::Owned(jvalue)))
+        }
+        Timestamp => {
+            let jvalue = exec_ctx.run_parameters.timestamp.into();
             Ok(comparator(Cow::Owned(jvalue)))
         }
         Number(number) => {

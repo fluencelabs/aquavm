@@ -63,6 +63,7 @@ pub struct Triplet<'i> {
 pub enum Value<'i> {
     InitPeerId,
     LastError(Option<LambdaAST<'i>>),
+    Timestamp,
     Literal(&'i str),
     Number(Number),
     Boolean(bool),
@@ -79,6 +80,7 @@ pub enum CallOutputValue<'i> {
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum ApArgument<'i> {
     InitPeerId,
+    Timestamp,
     LastError(Option<LambdaAST<'i>>),
     Literal(&'i str),
     Number(Number),

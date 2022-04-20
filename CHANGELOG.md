@@ -1,4 +1,9 @@
-## Version 0.23.0 (2021-04-19)
+## Version 0.24.0 (2021-04-21)
+
+[PR 250](https://github.com/fluencelabs/aquavm/pull/250):
+Introduced %timestamp% keyword
+
+## Version 0.23.0 (2021-04-20)
 
 [PR 248](https://github.com/fluencelabs/aquavm/pull/248):
 Introduced new for scalars

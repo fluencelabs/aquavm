@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+use fluence_it_types::ne_vec::NEVec;
+use fluence_it_types::IValue;
 use marine_rs_sdk::marine;
 use serde::Deserialize;
 use serde::Serialize;
@@ -27,4 +29,29 @@ pub struct RunParameters {
 
     /// Peer id of a current peer.
     pub current_peer_id: String,
+
+    /// Unix timestamp from a particle in milliseconds.
+    /// It represents time when this particle was sent from the init peer id.
+    pub timestamp: u64,
+}
+
+impl RunParameters {
+    pub fn new(init_peer_id: String, current_peer_id: String, timestamp: u64) -> Self {
+        Self {
+            init_peer_id,
+            current_peer_id,
+            timestamp,
+        }
+    }
+
+    pub fn into_ivalue(self) -> IValue {
+        let run_parameters = vec![
+            IValue::String(self.init_peer_id),
+            IValue::String(self.current_peer_id),
+            IValue::U64(self.timestamp),
+        ];
+        // unwrap is safe here because run_parameters is non-empty array
+        let run_parameters = NEVec::new(run_parameters).unwrap();
+        IValue::Record(run_parameters)
+    }
 }

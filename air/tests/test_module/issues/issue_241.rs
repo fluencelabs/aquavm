@@ -51,10 +51,9 @@ fn issue_241() {
         )
     "#);
 
-    let init_peer_id = "";
-    let result = checked_call_vm!(set_array_0_vm, init_peer_id, &script, "", "");
-    let result = checked_call_vm!(peer_1_vm, init_peer_id, &script, "", result.data);
-    let result = checked_call_vm!(some_peer_vm, init_peer_id, &script, "", result.data);
+    let result = checked_call_vm!(set_array_0_vm, <_>::default(), &script, "", "");
+    let result = checked_call_vm!(peer_1_vm, <_>::default(), &script, "", result.data);
+    let result = checked_call_vm!(some_peer_vm, <_>::default(), &script, "", result.data);
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![

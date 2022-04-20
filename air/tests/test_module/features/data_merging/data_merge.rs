@@ -59,11 +59,23 @@ fn merge_streams_in_two_fold() {
         )
         "#);
 
-    let result_0 = checked_call_vm!(set_variable, "", &script, "", "");
-    let result_1 = checked_call_vm!(vm1, "", &script, "", result_0.data.clone());
-    let result_2 = checked_call_vm!(vm2, "", &script, "", result_0.data);
-    let result_3 = checked_call_vm!(vm1, "", &script, result_1.data.clone(), result_2.data.clone());
-    let result_4 = checked_call_vm!(vm2, "", script, result_1.data.clone(), result_2.data.clone());
+    let result_0 = checked_call_vm!(set_variable, <_>::default(), &script, "", "");
+    let result_1 = checked_call_vm!(vm1, <_>::default(), &script, "", result_0.data.clone());
+    let result_2 = checked_call_vm!(vm2, <_>::default(), &script, "", result_0.data);
+    let result_3 = checked_call_vm!(
+        vm1,
+        <_>::default(),
+        &script,
+        result_1.data.clone(),
+        result_2.data.clone()
+    );
+    let result_4 = checked_call_vm!(
+        vm2,
+        <_>::default(),
+        script,
+        result_1.data.clone(),
+        result_2.data.clone()
+    );
 
     let actual_trace_1 = trace_from_result(&result_1);
 
@@ -173,8 +185,8 @@ fn stream_merge() {
         )
         "#;
 
-    let result = checked_call_vm!(vm1, "asd", script, "", "");
-    checked_call_vm!(vm2, "asd", script, "", result.data);
+    let result = checked_call_vm!(vm1, <_>::default(), script, "", "");
+    checked_call_vm!(vm2, <_>::default(), script, "", result.data);
 }
 
 #[test]
@@ -198,7 +210,7 @@ fn fold_merge() {
         set_variable_vm_id, local_vm_id
     );
 
-    let set_variable_result = checked_call_vm!(set_variable_vm, "", &script, "", "");
+    let set_variable_result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
 
     let mut local_vms = Vec::with_capacity(7);
     let mut local_vms_results = Vec::with_capacity(7);
@@ -207,7 +219,7 @@ fn fold_merge() {
         let mut vm = create_avm(echo_call_service(), peer_id);
         let result = checked_call_vm!(
             vm,
-            "",
+            <_>::default(),
             &script,
             set_variable_result.data.clone(),
             set_variable_result.data.clone()
@@ -218,24 +230,24 @@ fn fold_merge() {
     }
 
     let mut local_vm = create_avm(echo_call_service(), local_vm_id);
-    let result_1 = checked_call_vm!(local_vm, "", &script, "", local_vms_results[0].data.clone());
+    let result_1 = checked_call_vm!(local_vm, <_>::default(), &script, "", local_vms_results[0].data.clone());
     let result_2 = checked_call_vm!(
         local_vm,
-        "",
+        <_>::default(),
         &script,
         result_1.data.clone(),
         local_vms_results[3].data.clone()
     );
     let result_3 = checked_call_vm!(
         local_vm,
-        "",
+        <_>::default(),
         &script,
         result_2.data.clone(),
         local_vms_results[4].data.clone()
     );
     let result_4 = checked_call_vm!(
         local_vm,
-        "",
+        <_>::default(),
         &script,
         result_3.data.clone(),
         local_vms_results[5].data.clone()
@@ -243,7 +255,7 @@ fn fold_merge() {
 
     let result_5 = checked_call_vm!(
         local_vm,
-        "",
+        <_>::default(),
         &script,
         result_4.data.clone(),
         local_vms_results[1].data.clone()
@@ -251,7 +263,7 @@ fn fold_merge() {
 
     let result_6 = checked_call_vm!(
         local_vm,
-        "",
+        <_>::default(),
         &script,
         result_5.data.clone(),
         local_vms_results[2].data.clone()
@@ -259,7 +271,7 @@ fn fold_merge() {
 
     let result_7 = checked_call_vm!(
         local_vm,
-        "",
+        <_>::default(),
         &script,
         result_6.data.clone(),
         local_vms_results[6].data.clone()

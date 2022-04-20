@@ -36,10 +36,10 @@ fn par_early_exit() {
         init_peer_id, setter_1_id, setter_2_id, setter_3_id
     );
 
-    let init_result_1 = checked_call_vm!(init, "", &script, "", "");
-    let setter_1_res = checked_call_vm!(setter_1, "", &script, "", init_result_1.data.clone());
-    let setter_2_res = checked_call_vm!(setter_2, "", &script, "", init_result_1.data.clone());
-    let setter_3_res_1 = checked_call_vm!(setter_3, "", &script, "", init_result_1.data.clone());
+    let init_result_1 = checked_call_vm!(init, <_>::default(), &script, "", "");
+    let setter_1_res = checked_call_vm!(setter_1, <_>::default(), &script, "", init_result_1.data.clone());
+    let setter_2_res = checked_call_vm!(setter_2, <_>::default(), &script, "", init_result_1.data.clone());
+    let setter_3_res_1 = checked_call_vm!(setter_3, <_>::default(), &script, "", init_result_1.data.clone());
     let actual_trace_1 = trace_from_result(&setter_3_res_1);
 
     let expected_trace = vec![
@@ -64,21 +64,21 @@ fn par_early_exit() {
 
     let setter_3_res_2 = checked_call_vm!(
         setter_3,
-        "",
+        <_>::default(),
         &script,
         setter_3_res_1.data.clone(),
         setter_1_res.data.clone()
     );
     let setter_3_res_3 = checked_call_vm!(
         setter_3,
-        "",
+        <_>::default(),
         &script,
         setter_3_res_2.data.clone(),
         setter_2_res.data.clone()
     );
     let init_result_2 = checked_call_vm!(
         init,
-        "",
+        <_>::default(),
         &script,
         init_result_1.data.clone(),
         setter_3_res_3.data.clone()
@@ -142,7 +142,13 @@ fn par_early_exit() {
         executed_state::request_sent_by(setter_3_id),
     ];
     let setter_3_malicious_data = raw_data_from_trace(setter_3_malicious_trace);
-    let init_result_3 = call_vm!(init, "", &script, init_result_2.data.clone(), setter_3_malicious_data);
+    let init_result_3 = call_vm!(
+        init,
+        <_>::default(),
+        &script,
+        init_result_2.data.clone(),
+        setter_3_malicious_data
+    );
 
     let expected_error = UncatchableError::TraceError {
         trace_error: TraceHandlerError::MergeError(MergeError::IncorrectCallResult(CallResultError::ValuesNotEqual {
@@ -200,13 +206,25 @@ fn fold_early_exit() {
         last_peer_checker_id
     );
 
-    let variables_setter_result = checked_call_vm!(variables_setter, "", &script, "", "");
-    let stream_setter_result = checked_call_vm!(stream_setter, "", &script, "", variables_setter_result.data);
-    let fold_executor_result = checked_call_vm!(fold_executor, "", &script, "", stream_setter_result.data);
-    let error_trigger_result = checked_call_vm!(error_trigger, "", &script, "", fold_executor_result.data);
-    let last_error_receiver_result = checked_call_vm!(last_error_receiver, "", &script, "", error_trigger_result.data);
-    let last_peer_checker_result =
-        checked_call_vm!(last_peer_checker, "", &script, "", last_error_receiver_result.data);
+    let variables_setter_result = checked_call_vm!(variables_setter, <_>::default(), &script, "", "");
+    let stream_setter_result =
+        checked_call_vm!(stream_setter, <_>::default(), &script, "", variables_setter_result.data);
+    let fold_executor_result = checked_call_vm!(fold_executor, <_>::default(), &script, "", stream_setter_result.data);
+    let error_trigger_result = checked_call_vm!(error_trigger, <_>::default(), &script, "", fold_executor_result.data);
+    let last_error_receiver_result = checked_call_vm!(
+        last_error_receiver,
+        <_>::default(),
+        &script,
+        "",
+        error_trigger_result.data
+    );
+    let last_peer_checker_result = checked_call_vm!(
+        last_peer_checker,
+        <_>::default(),
+        &script,
+        "",
+        last_error_receiver_result.data
+    );
     let actual_trace = trace_from_result(&last_peer_checker_result);
 
     let unit_call_service_result = "result from unit_call_service";
@@ -298,13 +316,25 @@ fn fold_par_early_exit() {
         last_peer_checker_id
     );
 
-    let variables_setter_result = checked_call_vm!(variables_setter, "", &script, "", "");
-    let stream_setter_result = checked_call_vm!(stream_setter, "", &script, "", variables_setter_result.data);
-    let fold_executor_result = checked_call_vm!(fold_executor, "", &script, "", stream_setter_result.data);
-    let error_trigger_result = checked_call_vm!(error_trigger, "", &script, "", fold_executor_result.data);
-    let last_error_receiver_result = checked_call_vm!(last_error_receiver, "", &script, "", error_trigger_result.data);
-    let last_peer_checker_result =
-        checked_call_vm!(last_peer_checker, "", &script, "", last_error_receiver_result.data);
+    let variables_setter_result = checked_call_vm!(variables_setter, <_>::default(), &script, "", "");
+    let stream_setter_result =
+        checked_call_vm!(stream_setter, <_>::default(), &script, "", variables_setter_result.data);
+    let fold_executor_result = checked_call_vm!(fold_executor, <_>::default(), &script, "", stream_setter_result.data);
+    let error_trigger_result = checked_call_vm!(error_trigger, <_>::default(), &script, "", fold_executor_result.data);
+    let last_error_receiver_result = checked_call_vm!(
+        last_error_receiver,
+        <_>::default(),
+        &script,
+        "",
+        error_trigger_result.data
+    );
+    let last_peer_checker_result = checked_call_vm!(
+        last_peer_checker,
+        <_>::default(),
+        &script,
+        "",
+        last_error_receiver_result.data
+    );
     let actual_trace = trace_from_result(&last_peer_checker_result);
 
     let unit_call_service_result = "result from unit_call_service";
