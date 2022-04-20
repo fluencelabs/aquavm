@@ -19,14 +19,14 @@ use std::borrow::Cow;
 /// Represents parameters obtained from a particle.
 pub struct ParticleParameters<'init_peer_id, 'particle_id> {
     pub init_peer_id: Cow<'init_peer_id, String>,
-    pub particle_id: &'particle_id str,
+    pub particle_id: Cow<'particle_id, String>,
     pub timestamp: u64,
 }
 
 impl<'init_peer_id, 'particle_id> ParticleParameters<'init_peer_id, 'particle_id> {
     pub fn new(
         init_peer_id: Cow<'init_peer_id, String>,
-        particle_id: &'particle_id str,
+        particle_id: Cow<'particle_id, String>,
         timestamp: u64,
     ) -> Self {
         Self {

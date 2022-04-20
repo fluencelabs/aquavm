@@ -79,7 +79,7 @@ impl<E> AVM<E> {
         particle_parameters: ParticleParameters<'_, '_>,
         call_results: CallResults,
     ) -> AVMResult<AVMOutcome, E> {
-        let particle_id = particle_parameters.particle_id;
+        let particle_id = particle_parameters.particle_id.as_str();
         let prev_data = self.data_store.read_data(particle_id)?;
 
         let outcome = self
