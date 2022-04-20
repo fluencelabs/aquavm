@@ -50,6 +50,7 @@ impl RunParameters {
             IValue::String(self.current_peer_id),
             IValue::U64(self.timestamp),
         ];
+        // unwrap is safe here because run_parameters is non-empty array
         let run_parameters = NEVec::new(run_parameters).unwrap();
         IValue::Record(run_parameters)
     }

@@ -44,7 +44,7 @@ pub struct AVMMemoryStats {
 }
 
 impl AVMRunner {
-    /// Create AVM with a provided config.
+    /// Create AVM with the provided config.
     pub fn new(
         air_wasm_path: PathBuf,
         current_peer_id: impl Into<String>,
