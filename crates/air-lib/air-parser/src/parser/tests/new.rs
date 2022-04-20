@@ -70,7 +70,6 @@ fn iterators_cant_be_restricted() {
     let errors = validator.finalize();
 
     assert_eq!(errors.len(), 1);
-    println!("{:?}", errors);
     let error = &errors[0].error;
     let parser_error = match error {
         ParseError::User { error } => error,

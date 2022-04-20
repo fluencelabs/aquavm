@@ -82,6 +82,11 @@ pub enum CatchableError {
     /// This error type is produced by a fail instruction that tries to throw a scalar that have inappropriate type.
     #[error(transparent)]
     InvalidLastErrorObjectError(#[from] LastErrorObjectError),
+
+    /// A new with this variable name was met and right after that it was accessed
+    /// that is prohibited.
+    #[error("variable with name '{0}' was cleared by new and then wasn't set")]
+    VariableWasNotInitializedAfterNew(String),
 }
 
 impl From<LambdaError> for Rc<CatchableError> {

@@ -71,7 +71,7 @@ fn create_scalar_iterable<'ctx>(
     exec_ctx: &ExecutionCtx<'ctx>,
     variable_name: &str,
 ) -> ExecutionResult<FoldIterableScalar> {
-    match exec_ctx.scalars.get(variable_name)? {
+    match exec_ctx.scalars.get_value(variable_name)? {
         ScalarRef::Value(call_result) => from_call_result(call_result.clone(), variable_name),
         ScalarRef::IterableValue(fold_state) => {
             let iterable_value = fold_state.iterable.peek().unwrap();
@@ -115,7 +115,7 @@ fn create_scalar_lambda_iterable<'ctx>(
 ) -> ExecutionResult<FoldIterableScalar> {
     use crate::execution_step::lambda_applier::select_from_scalar;
 
-    match exec_ctx.scalars.get(scalar_name)? {
+    match exec_ctx.scalars.get_value(scalar_name)? {
         ScalarRef::Value(variable) => {
             let jvalues = select_from_scalar(&variable.result, lambda.iter(), exec_ctx)?;
             let tetraplet = variable.tetraplet.deref().clone();

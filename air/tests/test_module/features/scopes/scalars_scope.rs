@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+use air::CatchableError;
+use air::ExecutionError;
 use air_test_utils::prelude::*;
 
 use fstrings::f;
@@ -209,4 +211,81 @@ fn local_and_global_scalars() {
         executed_state::scalar_number(0),
     ];
     assert_eq!(actual_trace, expected_trace);
+}
+
+#[test]
+fn new_with_randomly_set_scalars_in_fold_1() {
+    let test_peer_id_1 = "test_peer_id_1";
+    let mut test_vm_1 = create_avm(set_variable_call_service(json!([1, 2, 3])), test_peer_id_1);
+
+    let test_peer_id_2 = "test_peer_id_2";
+    let script = f!(r#"
+    (seq
+        (call "{test_peer_id_1}" ("" "") [] iterable)
+        (fold iterable iterator
+            (seq
+                (seq
+                    (call "{test_peer_id_1}" ("" "") [] scalar)
+                    (new scalar
+                        (seq
+                            (seq
+                                (par
+                                    (call "{test_peer_id_2}" ("" "") [] scalar)
+                                    (null)
+                                )
+                                (next iterator)
+                            )
+                            (par
+                                (call "{test_peer_id_2}" ("" "") [scalar])
+                                (null)
+                            )
+                        )
+                    )
+                )
+                (call "{test_peer_id_1}" ("" "") [scalar])
+            )
+        )
+    )"#);
+
+    let result = call_vm!(test_vm_1, "", &script, "", "");
+    assert_eq!(result.ret_code, 0)
+}
+
+#[test]
+fn new_with_randomly_set_scalars_in_fold_2() {
+    let test_peer_id_1 = "test_peer_id_1";
+    let mut test_vm_1 = create_avm(set_variable_call_service(json!([1, 2, 3])), test_peer_id_1);
+
+    let test_peer_id_2 = "test_peer_id_2";
+    let variable_name = "scalar";
+    let script = f!(r#"
+    (seq
+        (call "{test_peer_id_1}" ("" "") [] iterable)
+        (fold iterable iterator
+            (seq
+                (seq
+                    (call "{test_peer_id_1}" ("" "") [] {variable_name})
+                    (new {variable_name}
+                        (seq
+                            (seq
+                                (par
+                                    (call "{test_peer_id_2}" ("" "") [] {variable_name})
+                                    (null)
+                                )
+                                (next iterator)
+                            )
+                            (call "{test_peer_id_1}" ("" "") [{variable_name}])
+                        )
+                    )
+                )
+                (call "{test_peer_id_1}" ("" "") [{variable_name}])
+            )
+        )
+    )"#);
+
+    let result = call_vm!(test_vm_1, "", &script, "", "");
+    let expected_error = ExecutionError::Catchable(rc!(CatchableError::VariableWasNotInitializedAfterNew(
+        variable_name.to_string()
+    )));
+    assert!(check_error(&result, expected_error));
 }

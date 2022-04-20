@@ -95,7 +95,7 @@ fn xor_multiple_variables_found() {
 
     let result = call_vm!(set_variables_vm, "asd", &script, "", "");
 
-    let expected_error = UncatchableError::MultipleVariablesFound(variable_name.to_string());
+    let expected_error = UncatchableError::ShadowingIsNotAllowed(variable_name.to_string());
     assert!(check_error(&result, expected_error));
 }
 

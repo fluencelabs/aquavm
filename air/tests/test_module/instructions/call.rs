@@ -103,7 +103,7 @@ fn duplicate_variables() {
 
     let result = call_vm!(vm, "asd", script, "", "");
 
-    let expected_error = UncatchableError::MultipleVariablesFound(variable_name.to_string());
+    let expected_error = UncatchableError::ShadowingIsNotAllowed(variable_name.to_string());
     assert!(check_error(&result, expected_error));
     assert!(result.next_peer_pks.is_empty());
 }

@@ -32,9 +32,17 @@ impl<'i> super::ExecutableInstruction<'i> for New<'i> {
         // any error. It's highly important to distinguish between global and restricted streams
         // at the end of execution to make a correct data.
         let instruction_result = self.instruction.execute(exec_ctx, trace_ctx);
-        epilog(self, exec_ctx);
+        let epilog_result = epilog(self, exec_ctx);
 
-        instruction_result
+        match (instruction_result, epilog_result) {
+            (Ok(()), Ok(())) => Ok(()),
+            // instruction error has higher priority over epilog result error,
+            // because epilog returns "utility" errors that normally (meaning that AquaVM
+            // scalar handling code doesn't contain errors) shouldn't happen,
+            // additionally see test new_with_randomly_set_scalars_in_fold_2
+            (err @ Err(_), _) => err,
+            (_, err @ Err(_)) => err,
+        }
     }
 }
 
@@ -45,20 +53,21 @@ fn prolog<'i>(new: &New<'i>, exec_ctx: &mut ExecutionCtx<'i>) {
             let iteration = exec_ctx.tracker.new_tracker.get_iteration(position);
             exec_ctx.streams.meet_scope_start(stream.name, new.span, iteration);
         }
-        // noop
-        Variable::Scalar(_) => {}
+        Variable::Scalar(scalar) => exec_ctx.scalars.meet_new_start(scalar.name),
     }
 
     exec_ctx.tracker.meet_new(position);
 }
 
-fn epilog<'i>(new: &New<'i>, exec_ctx: &mut ExecutionCtx<'i>) {
+fn epilog<'i>(new: &New<'i>, exec_ctx: &mut ExecutionCtx<'i>) -> ExecutionResult<()> {
     let position = new.span.left;
     match &new.variable {
-        Variable::Stream(stream) => exec_ctx
-            .streams
-            .meet_scope_end(stream.name.to_string(), position as u32),
-        // noop
-        Variable::Scalar(_) => {}
+        Variable::Stream(stream) => {
+            exec_ctx
+                .streams
+                .meet_scope_end(stream.name.to_string(), position as u32);
+            Ok(())
+        }
+        Variable::Scalar(scalar) => exec_ctx.scalars.meet_new_end(scalar.name),
     }
 }
