@@ -51,6 +51,22 @@ fn parse_match_with_init_peer_id() {
 }
 
 #[test]
+fn parse_match_with_timestamp() {
+    let source_code = r#"
+        (match %timestamp% v1
+            (null)
+        )
+        "#;
+    let instruction = parse(source_code);
+    let expected = match_(
+        Value::Timestamp,
+        Value::Variable(VariableWithLambda::scalar("v1", 28)),
+        null(),
+    );
+    assert_eq!(instruction, expected);
+}
+
+#[test]
 fn parse_mismatch() {
     let source_code = r#"
         (mismatch v1 v2

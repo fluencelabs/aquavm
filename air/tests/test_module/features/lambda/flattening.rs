@@ -70,8 +70,8 @@ fn flattening_scalar_arrays() {
         )
         "#);
 
-    let result = checked_call_vm!(set_variable_vm, "asd", script.clone(), "", "");
-    let result = call_vm!(local_vm, "asd", script.clone(), "", result.data);
+    let result = checked_call_vm!(set_variable_vm, <_>::default(), script.clone(), "", "");
+    let result = call_vm!(local_vm, <_>::default(), script.clone(), "", result.data);
 
     assert!(is_interpreter_succeded(&result));
     assert_eq!(
@@ -117,8 +117,8 @@ fn flattening_streams() {
         )
         "#);
 
-    let result = checked_call_vm!(set_variable_vm, "asd", script.clone(), "", "");
-    let result = call_vm!(local_vm, "asd", script.clone(), "", result.data);
+    let result = checked_call_vm!(set_variable_vm, <_>::default(), script.clone(), "", "");
+    let result = call_vm!(local_vm, <_>::default(), script.clone(), "", result.data);
 
     assert!(is_interpreter_succeded(&result));
     assert_eq!(
@@ -152,8 +152,8 @@ fn flattening_empty_values() {
         )
         "#);
 
-    let result = checked_call_vm!(set_variable_vm, "asd", script.clone(), "", "");
-    let result = checked_call_vm!(local_vm, "asd", script.clone(), "", result.data);
+    let result = checked_call_vm!(set_variable_vm, <_>::default(), script.clone(), "", "");
+    let result = checked_call_vm!(local_vm, <_>::default(), script.clone(), "", result.data);
 
     assert!(is_interpreter_succeded(&result));
     assert_eq!(closure_call_args.args_var, Rc::new(RefCell::new(vec![])));
@@ -191,8 +191,8 @@ fn test_handling_non_flattening_values() {
         )
         "#);
 
-    let result = checked_call_vm!(set_variable_vm, "asd", &script, "", "");
-    let result = call_vm!(local_vm, "asd", &script, "", result.data);
+    let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
+    let result = call_vm!(local_vm, <_>::default(), &script, "", result.data);
 
     assert_eq!(result.ret_code, 1017);
     assert_eq!(

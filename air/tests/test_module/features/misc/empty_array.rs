@@ -27,7 +27,7 @@ fn empty_array() {
            (call "{vm_peer_id}" ("" "") [result])
         )"#);
 
-    let result = checked_call_vm!(vm, "", script, "", "");
+    let result = checked_call_vm!(vm, <_>::default(), script, "", "");
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![executed_state::scalar(json!([])), executed_state::scalar(json!([]))];

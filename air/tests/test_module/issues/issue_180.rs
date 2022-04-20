@@ -38,7 +38,7 @@ fn issue_180() {
         )
         "#);
 
-    let peer_1_result = checked_call_vm!(peer_1, "", &script, "", "");
+    let peer_1_result = checked_call_vm!(peer_1, <_>::default(), &script, "", "");
     let trace = trace_from_result(&peer_1_result);
     assert_eq!(trace.len(), 3);
 }

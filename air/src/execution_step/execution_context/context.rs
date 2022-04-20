@@ -36,11 +36,8 @@ pub(crate) struct ExecutionCtx<'i> {
     /// Set of peer public keys that should receive resulted data.
     pub(crate) next_peer_pks: Vec<String>,
 
-    /// PeerId of a peer executing this AIR script at the moment.
-    pub(crate) current_peer_id: Rc<String>,
-
-    /// PeerId of a peer send this AIR script.
-    pub(crate) init_peer_id: Rc<String>,
+    /// Parameters passed from a host that describes host and contains info from a particle.
+    pub(crate) run_parameters: RcRunParameters,
 
     /// Last error produced by local service.
     /// None means that there weren't any error.
@@ -68,17 +65,11 @@ pub(crate) struct ExecutionCtx<'i> {
 }
 
 impl<'i> ExecutionCtx<'i> {
-    pub(crate) fn new(
-        current_peer_id: String,
-        init_peer_id: String,
-        call_results: CallResults,
-        last_call_request_id: u32,
-    ) -> Self {
-        let current_peer_id = Rc::new(current_peer_id);
+    pub(crate) fn new(run_parameters: RunParameters, call_results: CallResults, last_call_request_id: u32) -> Self {
+        let run_parameters = RcRunParameters::from_run_parameters(run_parameters);
 
         Self {
-            current_peer_id,
-            init_peer_id: Rc::new(init_peer_id),
+            run_parameters,
             subtree_complete: true,
             last_call_request_id,
             call_results,
@@ -96,8 +87,28 @@ impl<'i> ExecutionCtx<'i> {
     }
 }
 
+use serde::Deserialize;
+use serde::Serialize;
 use std::fmt::Display;
 use std::fmt::Formatter;
+
+/// It reflects RunParameters structure due to limitation of the marine macro to support Rc.
+#[derive(Debug, Default, Clone, Eq, PartialEq, Serialize, Deserialize)]
+pub(crate) struct RcRunParameters {
+    pub(crate) init_peer_id: Rc<String>,
+    pub(crate) current_peer_id: Rc<String>,
+    pub(crate) timestamp: u64,
+}
+
+impl RcRunParameters {
+    pub(crate) fn from_run_parameters(run_parameters: RunParameters) -> Self {
+        Self {
+            init_peer_id: Rc::new(run_parameters.init_peer_id),
+            current_peer_id: Rc::new(run_parameters.current_peer_id),
+            timestamp: run_parameters.timestamp,
+        }
+    }
+}
 
 impl<'i> Display for ExecutionCtx<'i> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -107,7 +118,9 @@ impl<'i> Display for ExecutionCtx<'i> {
         writeln!(f, "streams:")?;
         writeln!(f, "  {}", self.streams)?;
 
-        writeln!(f, "current peer id: {}", self.current_peer_id)?;
+        writeln!(f, "current peer id: {}", self.run_parameters.current_peer_id)?;
+        writeln!(f, "init peer id: {}", self.run_parameters.init_peer_id)?;
+        writeln!(f, "timestamp: {}", self.run_parameters.timestamp)?;
         writeln!(f, "subtree complete: {}", self.subtree_complete)?;
         writeln!(f, "next peer public keys: {:?}", self.next_peer_pks)?;
 

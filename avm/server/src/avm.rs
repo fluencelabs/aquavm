@@ -17,9 +17,11 @@
 use super::avm_runner::AVMRunner;
 use super::AVMDataStore;
 use super::AVMError;
+use super::AVMMemoryStats;
 use super::AVMOutcome;
 use super::CallResults;
 use crate::config::AVMConfig;
+use crate::interface::ParticleParameters;
 use crate::AVMResult;
 
 use std::ops::Deref;
@@ -74,16 +76,22 @@ impl<E> AVM<E> {
         &mut self,
         air: impl Into<String>,
         data: impl Into<Vec<u8>>,
-        init_user_id: impl Into<String>,
-        particle_id: &str,
+        particle_parameters: ParticleParameters<'_, '_>,
         call_results: CallResults,
     ) -> AVMResult<AVMOutcome, E> {
-        let init_user_id = init_user_id.into();
+        let particle_id = particle_parameters.particle_id.as_str();
         let prev_data = self.data_store.read_data(particle_id)?;
 
         let outcome = self
             .runner
-            .call(air, prev_data, data, init_user_id, call_results)
+            .call(
+                air,
+                prev_data,
+                data,
+                particle_parameters.init_peer_id.into_owned(),
+                particle_parameters.timestamp,
+                call_results,
+            )
             .map_err(AVMError::RunnerError)?;
 
         // persist resulted data
@@ -99,8 +107,8 @@ impl<E> AVM<E> {
         Ok(())
     }
 
-    /// Return size of interpreter heap in bytes.
-    pub fn memory_size(&self) -> usize {
-        self.runner.memory_size()
+    /// Return memory stat of an interpreter heap.
+    pub fn memory_stats(&self) -> AVMMemoryStats {
+        self.runner.memory_stats()
     }
 }

@@ -38,7 +38,7 @@ fn empty_stream() {
             (null)
         )"#;
 
-    let _ = checked_call_vm!(vm, "", script, "", "");
+    let _ = checked_call_vm!(vm, <_>::default(), script, "", "");
 }
 
 #[test]
@@ -60,12 +60,12 @@ fn stream_merging_v0() {
         initiator_id, setter_1_id, setter_2_id, setter_3_id, executor_id
     );
 
-    let initiator_result = checked_call_vm!(initiator, "", &script, "", "");
-    let setter_1_res = checked_call_vm!(setter_1, "", &script, "", initiator_result.data.clone());
-    let setter_2_res = checked_call_vm!(setter_2, "", &script, "", initiator_result.data.clone());
-    let setter_3_res = checked_call_vm!(setter_3, "", &script, "", initiator_result.data);
+    let initiator_result = checked_call_vm!(initiator, <_>::default(), &script, "", "");
+    let setter_1_res = checked_call_vm!(setter_1, <_>::default(), &script, "", initiator_result.data.clone());
+    let setter_2_res = checked_call_vm!(setter_2, <_>::default(), &script, "", initiator_result.data.clone());
+    let setter_3_res = checked_call_vm!(setter_3, <_>::default(), &script, "", initiator_result.data);
 
-    let executor_result_1 = checked_call_vm!(executor, "", &script, "", setter_1_res.data);
+    let executor_result_1 = checked_call_vm!(executor, <_>::default(), &script, "", setter_1_res.data);
     let actual_trace_1 = trace_from_result(&executor_result_1);
 
     let unit_call_service_result = "result from unit_call_service";
@@ -98,7 +98,13 @@ fn stream_merging_v0() {
     ];
     assert_eq!(actual_trace_1, expected_trace_1);
 
-    let executor_result_2 = checked_call_vm!(executor, "", &script, executor_result_1.data.clone(), setter_2_res.data);
+    let executor_result_2 = checked_call_vm!(
+        executor,
+        <_>::default(),
+        &script,
+        executor_result_1.data.clone(),
+        setter_2_res.data
+    );
     let actual_trace_2 = trace_from_result(&executor_result_2);
 
     let expected_trace_2 = vec![
@@ -136,7 +142,13 @@ fn stream_merging_v0() {
     ];
     assert_eq!(actual_trace_2, expected_trace_2);
 
-    let executor_result_3 = checked_call_vm!(executor, "", &script, executor_result_2.data.clone(), setter_3_res.data);
+    let executor_result_3 = checked_call_vm!(
+        executor,
+        <_>::default(),
+        &script,
+        executor_result_2.data.clone(),
+        setter_3_res.data
+    );
     let actual_trace_3 = trace_from_result(&executor_result_3);
 
     let expected_trace_3 = vec![
@@ -200,12 +212,12 @@ fn stream_merging_v1() {
         initiator_id, setter_1_id, setter_2_id, setter_3_id, executor_id
     );
 
-    let initiator_result = checked_call_vm!(initiator, "", &script, "", "");
-    let setter_1_res = checked_call_vm!(setter_1, "", &script, "", initiator_result.data.clone());
-    let setter_2_res = checked_call_vm!(setter_2, "", &script, "", initiator_result.data.clone());
-    let setter_3_res = checked_call_vm!(setter_3, "", &script, "", initiator_result.data);
+    let initiator_result = checked_call_vm!(initiator, <_>::default(), &script, "", "");
+    let setter_1_res = checked_call_vm!(setter_1, <_>::default(), &script, "", initiator_result.data.clone());
+    let setter_2_res = checked_call_vm!(setter_2, <_>::default(), &script, "", initiator_result.data.clone());
+    let setter_3_res = checked_call_vm!(setter_3, <_>::default(), &script, "", initiator_result.data);
 
-    let executor_result_1 = checked_call_vm!(executor, "", &script, "", setter_1_res.data);
+    let executor_result_1 = checked_call_vm!(executor, <_>::default(), &script, "", setter_1_res.data);
     let actual_trace_1 = trace_from_result(&executor_result_1);
 
     let unit_call_service_result = "result from unit_call_service";
@@ -238,7 +250,13 @@ fn stream_merging_v1() {
     ];
     assert_eq!(actual_trace_1, expected_trace_1);
 
-    let executor_result_2 = checked_call_vm!(executor, "", &script, executor_result_1.data.clone(), setter_2_res.data);
+    let executor_result_2 = checked_call_vm!(
+        executor,
+        <_>::default(),
+        &script,
+        executor_result_1.data.clone(),
+        setter_2_res.data
+    );
     let actual_trace_2 = trace_from_result(&executor_result_2);
 
     let expected_trace_2 = vec![
@@ -276,7 +294,13 @@ fn stream_merging_v1() {
     ];
     assert_eq!(actual_trace_2, expected_trace_2);
 
-    let executor_result_3 = checked_call_vm!(executor, "", &script, executor_result_2.data.clone(), setter_3_res.data);
+    let executor_result_3 = checked_call_vm!(
+        executor,
+        <_>::default(),
+        &script,
+        executor_result_2.data.clone(),
+        setter_3_res.data
+    );
     let actual_trace_3 = trace_from_result(&executor_result_3);
 
     let expected_trace_3 = vec![
@@ -340,12 +364,12 @@ fn stream_merging_v2() {
         initiator_id, setter_1_id, setter_2_id, setter_3_id, executor_id
     );
 
-    let initiator_result = checked_call_vm!(initiator, "", &script, "", "");
-    let setter_1_res = checked_call_vm!(setter_1, "", &script, "", initiator_result.data.clone());
-    let setter_2_res = checked_call_vm!(setter_2, "", &script, "", initiator_result.data.clone());
-    let setter_3_res = checked_call_vm!(setter_3, "", &script, "", initiator_result.data);
+    let initiator_result = checked_call_vm!(initiator, <_>::default(), &script, "", "");
+    let setter_1_res = checked_call_vm!(setter_1, <_>::default(), &script, "", initiator_result.data.clone());
+    let setter_2_res = checked_call_vm!(setter_2, <_>::default(), &script, "", initiator_result.data.clone());
+    let setter_3_res = checked_call_vm!(setter_3, <_>::default(), &script, "", initiator_result.data);
 
-    let executor_result_1 = checked_call_vm!(executor, "", &script, "", setter_1_res.data);
+    let executor_result_1 = checked_call_vm!(executor, <_>::default(), &script, "", setter_1_res.data);
     let actual_trace_1 = trace_from_result(&executor_result_1);
 
     let unit_call_service_result = "result from unit_call_service";
@@ -378,7 +402,13 @@ fn stream_merging_v2() {
     ];
     assert_eq!(actual_trace_1, expected_trace_1);
 
-    let executor_result_2 = checked_call_vm!(executor, "", &script, executor_result_1.data.clone(), setter_2_res.data);
+    let executor_result_2 = checked_call_vm!(
+        executor,
+        <_>::default(),
+        &script,
+        executor_result_1.data.clone(),
+        setter_2_res.data
+    );
     let actual_trace_2 = trace_from_result(&executor_result_2);
 
     let expected_trace_2 = vec![
@@ -416,7 +446,13 @@ fn stream_merging_v2() {
     ];
     assert_eq!(actual_trace_2, expected_trace_2);
 
-    let executor_result_3 = checked_call_vm!(executor, "", &script, executor_result_2.data.clone(), setter_3_res.data);
+    let executor_result_3 = checked_call_vm!(
+        executor,
+        <_>::default(),
+        &script,
+        executor_result_2.data.clone(),
+        setter_3_res.data
+    );
     let actual_trace_3 = trace_from_result(&executor_result_3);
 
     let expected_trace_3 = vec![

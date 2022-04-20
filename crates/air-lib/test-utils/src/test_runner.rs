@@ -29,18 +29,28 @@ pub struct TestRunner {
     pub call_service: CallServiceClosure,
 }
 
+#[derive(Debug, Default, Clone)]
+pub struct TestRunParameters {
+    pub init_peer_id: String,
+    pub timestamp: u64,
+}
+
 impl TestRunner {
     pub fn call(
         &mut self,
         air: impl Into<String>,
         prev_data: impl Into<Vec<u8>>,
         data: impl Into<Vec<u8>>,
-        init_user_id: impl Into<String>,
+        test_run_params: TestRunParameters,
     ) -> Result<RawAVMOutcome, String> {
         let air = air.into();
         let mut prev_data = prev_data.into();
         let mut data = data.into();
-        let init_user_id = init_user_id.into();
+
+        let TestRunParameters {
+            init_peer_id,
+            timestamp,
+        } = test_run_params;
 
         let mut call_results = HashMap::new();
         let mut next_peer_pks = HashSet::new();
@@ -52,7 +62,8 @@ impl TestRunner {
                     air.clone(),
                     prev_data,
                     data,
-                    init_user_id.clone(),
+                    init_peer_id.clone(),
+                    timestamp,
                     call_results,
                 )
                 .map_err(|e| e.to_string())?;
@@ -97,5 +108,28 @@ pub fn create_avm(
     TestRunner {
         runner,
         call_service,
+    }
+}
+
+impl TestRunParameters {
+    pub fn new(init_peer_id: impl Into<String>, timestamp: u64) -> Self {
+        Self {
+            init_peer_id: init_peer_id.into(),
+            timestamp,
+        }
+    }
+
+    pub fn from_init_peer_id(init_peer_id: impl Into<String>) -> Self {
+        Self {
+            init_peer_id: init_peer_id.into(),
+            timestamp: 0,
+        }
+    }
+
+    pub fn from_timestamp(timestamp: u64) -> Self {
+        Self {
+            init_peer_id: String::new(),
+            timestamp,
+        }
     }
 }

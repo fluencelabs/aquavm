@@ -56,7 +56,8 @@ fn issue_214() {
         )
     "#);
 
-    let result = checked_call_vm!(client, client_id, &script, "", "");
+    let test_params = TestRunParameters::from_init_peer_id(client_id);
+    let result = checked_call_vm!(client, test_params, &script, "", "");
     let expected_trace = vec![
         executed_state::scalar_string(relay_id),
         executed_state::scalar(scalar),

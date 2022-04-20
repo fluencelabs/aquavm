@@ -34,8 +34,17 @@ pub struct AVMRunner {
     wasm_filename: String,
 }
 
+/// Return statistic of AVM server Wasm module heap footprint.
+pub struct AVMMemoryStats {
+    /// Size of currently used linear memory in bytes.
+    /// Please note that linear memory contains not only heap, but globals, shadow stack and so on.
+    pub memory_size: usize,
+    /// Possibly set max memory size for AVM server.
+    pub max_memory_size: Option<usize>,
+}
+
 impl AVMRunner {
-    /// Create AVM with provided config.
+    /// Create AVM with the provided config.
     pub fn new(
         air_wasm_path: PathBuf,
         current_peer_id: impl Into<String>,
@@ -62,16 +71,17 @@ impl AVMRunner {
         air: impl Into<String>,
         prev_data: impl Into<Vec<u8>>,
         data: impl Into<Vec<u8>>,
-        init_user_id: impl Into<String>,
+        init_peer_id: impl Into<String>,
+        timestamp: u64,
         call_results: CallResults,
     ) -> RunnerResult<RawAVMOutcome> {
-        let init_user_id = init_user_id.into();
         let args = prepare_args(
             air,
             prev_data,
             data,
-            init_user_id,
             self.current_peer_id.clone(),
+            init_peer_id.into(),
+            timestamp,
             call_results,
         );
 
@@ -87,12 +97,16 @@ impl AVMRunner {
         Ok(outcome)
     }
 
-    pub fn memory_size(&self) -> usize {
+    pub fn memory_stats(&self) -> AVMMemoryStats {
         let stats = self.faas.module_memory_stats();
 
         // only the interpreters must be loaded in FaaS
         debug_assert!(stats.len() == 1);
-        stats[0].memory_size
+
+        AVMMemoryStats {
+            memory_size: stats[0].memory_size,
+            max_memory_size: stats[0].max_memory_size,
+        }
     }
 }
 
@@ -100,17 +114,14 @@ fn prepare_args(
     air: impl Into<String>,
     prev_data: impl Into<Vec<u8>>,
     data: impl Into<Vec<u8>>,
-    init_peer_id: impl Into<String>,
     current_peer_id: String,
+    init_peer_id: String,
+    timestamp: u64,
     call_results: CallResults,
 ) -> Vec<IValue> {
-    use fluence_faas::ne_vec::NEVec;
-
-    let run_parameters = vec![
-        IValue::String(init_peer_id.into()),
-        IValue::String(current_peer_id),
-    ];
-    let run_parameters = NEVec::new(run_parameters).unwrap();
+    let run_parameters =
+        air_interpreter_interface::RunParameters::new(init_peer_id, current_peer_id, timestamp)
+            .into_ivalue();
 
     let call_results = crate::interface::into_raw_result(call_results);
     let call_results =
@@ -120,7 +131,7 @@ fn prepare_args(
         IValue::String(air.into()),
         IValue::ByteArray(prev_data.into()),
         IValue::ByteArray(data.into()),
-        IValue::Record(run_parameters),
+        run_parameters,
         IValue::ByteArray(call_results),
     ]
 }

@@ -35,8 +35,8 @@ fn ap_with_scalars() {
         )
         "#);
 
-    let result = checked_call_vm!(vm_1, "", &script, "", "");
-    let result = checked_call_vm!(vm_2, "", script, "", result.data);
+    let result = checked_call_vm!(vm_1, <_>::default(), &script, "", "");
+    let result = checked_call_vm!(vm_2, <_>::default(), script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
     let expected_state = vec![
@@ -61,7 +61,7 @@ fn ap_with_string_literal() {
         )
         "#);
 
-    let result = checked_call_vm!(vm_1, "", script, "", "");
+    let result = checked_call_vm!(vm_1, <_>::default(), script, "", "");
 
     let actual_trace = trace_from_result(&result);
     let expected_state = vec![
@@ -85,7 +85,7 @@ fn ap_with_bool_literal() {
         )
         "#);
 
-    let result = checked_call_vm!(vm_1, "", script, "", "");
+    let result = checked_call_vm!(vm_1, <_>::default(), script, "", "");
 
     let actual_trace = trace_from_result(&result);
     let expected_state = vec![executed_state::ap(Some(0)), executed_state::scalar(json!([true]))];
@@ -106,7 +106,7 @@ fn ap_with_number_literal() {
         )
         "#);
 
-    let result = checked_call_vm!(vm_1, "", script, "", "");
+    let result = checked_call_vm!(vm_1, <_>::default(), script, "", "");
 
     let actual_trace = trace_from_result(&result);
     let expected_state = vec![executed_state::ap(Some(0)), executed_state::scalar(json!([100]))];
@@ -122,18 +122,39 @@ fn ap_with_last_error() {
 
     let script = f!(r#"
         (seq
-            (ap %last_error%  $stream)
+            (ap %last_error% $stream)
             (call "{vm_1_peer_id}" ("" "") [$stream])
         )
         "#);
 
-    let result = checked_call_vm!(vm_1, "", script, "", "");
+    let result = checked_call_vm!(vm_1, <_>::default(), script, "", "");
 
     let actual_trace = trace_from_result(&result);
     let expected_state = vec![executed_state::ap(Some(0)), executed_state::scalar(json!([null]))];
 
     assert_eq!(actual_trace, expected_state);
     assert!(result.next_peer_pks.is_empty());
+}
+
+#[test]
+fn ap_with_timestamp() {
+    let vm_1_peer_id = "vm_1_peer_id";
+    let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
+
+    let script = f!(r#"
+        (seq
+            (ap %timestamp% scalar)
+            (call "{vm_1_peer_id}" ("" "") [scalar])
+        )
+        "#);
+
+    let test_params = TestRunParameters::from_timestamp(1337);
+    let result = checked_call_vm!(vm_1, test_params.clone(), script, "", "");
+
+    let actual_trace = trace_from_result(&result);
+    let expected_state = vec![executed_state::scalar_number(test_params.timestamp)];
+
+    assert_eq!(actual_trace, expected_state);
 }
 
 #[test]
@@ -155,8 +176,8 @@ fn ap_with_dst_stream() {
         )
         "#);
 
-    let result = checked_call_vm!(vm_1, "", &script, "", "");
-    let result = checked_call_vm!(vm_2, "", script, "", result.data);
+    let result = checked_call_vm!(vm_1, <_>::default(), &script, "", "");
+    let result = checked_call_vm!(vm_2, <_>::default(), script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
     let expected_state = vec![

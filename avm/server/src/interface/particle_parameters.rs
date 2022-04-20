@@ -14,19 +14,25 @@
  * limitations under the License.
  */
 
-use air::PreparationError;
-use air_test_utils::prelude::*;
+use std::borrow::Cow;
 
-#[test]
-fn invalid_air() {
-    let vm_peer_id = "some_peer_id";
-    let mut vm = create_avm(unit_call_service(), vm_peer_id);
+/// Represents parameters obtained from a particle.
+pub struct ParticleParameters<'init_peer_id, 'particle_id> {
+    pub init_peer_id: Cow<'init_peer_id, String>,
+    pub particle_id: Cow<'particle_id, String>,
+    pub timestamp: u64,
+}
 
-    let script = r#"(seq )"#;
-
-    let result = call_vm!(vm, <_>::default(), script, "", "");
-
-    let error_message = air_parser::parse(script).expect_err("air parser should fail on this script");
-    let expected_error = PreparationError::AIRParseError(error_message);
-    assert!(check_error(&result, expected_error));
+impl<'init_peer_id, 'particle_id> ParticleParameters<'init_peer_id, 'particle_id> {
+    pub fn new(
+        init_peer_id: Cow<'init_peer_id, String>,
+        particle_id: Cow<'particle_id, String>,
+        timestamp: u64,
+    ) -> Self {
+        Self {
+            init_peer_id,
+            particle_id,
+            timestamp,
+        }
+    }
 }

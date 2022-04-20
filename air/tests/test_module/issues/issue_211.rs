@@ -66,7 +66,8 @@ fn issue_211() {
     )
     "#);
 
-    let result = checked_call_vm!(peer_1, peer_1_id, &script, "", "");
+    let run_params = TestRunParameters::from_init_peer_id(peer_1_id);
+    let result = checked_call_vm!(peer_1, run_params, &script, "", "");
 
     let expected_trace = vec![
         executed_state::scalar_number(2),

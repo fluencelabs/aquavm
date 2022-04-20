@@ -57,12 +57,18 @@ fn issue_173() {
                 )
             )"#);
 
-    let result = checked_call_vm!(set_variable_vm, "", &script, "", "");
-    let vm_1_result = checked_call_vm!(local_vm_1, "", &script, "", result.data);
-    let vm_2_result = checked_call_vm!(local_vm_2, "", &script, "", vm_1_result.data.clone());
+    let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
+    let vm_1_result = checked_call_vm!(local_vm_1, <_>::default(), &script, "", result.data);
+    let vm_2_result = checked_call_vm!(local_vm_2, <_>::default(), &script, "", vm_1_result.data.clone());
 
-    let vm_1_result = checked_call_vm!(local_vm_1, "", &script, vm_1_result.data, vm_2_result.data.clone());
-    let vm_2_result = checked_call_vm!(local_vm_2, "", script, vm_2_result.data, vm_1_result.data);
+    let vm_1_result = checked_call_vm!(
+        local_vm_1,
+        <_>::default(),
+        &script,
+        vm_1_result.data,
+        vm_2_result.data.clone()
+    );
+    let vm_2_result = checked_call_vm!(local_vm_2, <_>::default(), script, vm_2_result.data, vm_1_result.data);
 
     let actual_trace = trace_from_result(&vm_2_result);
     let expected_trace = vec![

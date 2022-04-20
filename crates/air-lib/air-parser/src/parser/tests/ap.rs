@@ -92,3 +92,27 @@ fn ap_with_empty_array() {
 
     assert_eq!(actual, expected);
 }
+
+#[test]
+fn ap_with_init_peer_id() {
+    let source_code = r#"
+        (ap %init_peer_id% $stream)
+    "#;
+
+    let actual = parse(source_code);
+    let expected = ap(ApArgument::InitPeerId, Variable::stream("$stream", 28));
+
+    assert_eq!(actual, expected);
+}
+
+#[test]
+fn ap_with_timestamp() {
+    let source_code = r#"
+        (ap %timestamp% $stream)
+    "#;
+
+    let actual = parse(source_code);
+    let expected = ap(ApArgument::Timestamp, Variable::stream("$stream", 25));
+
+    assert_eq!(actual, expected);
+}

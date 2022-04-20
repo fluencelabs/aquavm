@@ -48,7 +48,7 @@ fn resolve_to_string<'i>(value: &ast::CallInstrValue<'i>, ctx: &ExecutionCtx<'i>
     use ast::CallInstrValue::*;
 
     let resolved = match value {
-        InitPeerId => ctx.init_peer_id.to_string(),
+        InitPeerId => ctx.run_parameters.init_peer_id.to_string(),
         Literal(value) => value.to_string(),
         Variable(variable) => {
             let (resolved, _) = resolve_ast_variable_wl(variable, ctx)?;

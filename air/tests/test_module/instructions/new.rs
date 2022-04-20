@@ -56,12 +56,18 @@ fn new_with_global_streams_seq() {
                 )
             )"#);
 
-    let result = checked_call_vm!(set_variable_vm, "", &script, "", "");
-    let vm_1_result = checked_call_vm!(local_vm_1, "", &script, "", result.data);
-    let vm_2_result = checked_call_vm!(local_vm_2, "", &script, "", vm_1_result.data.clone());
+    let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
+    let vm_1_result = checked_call_vm!(local_vm_1, <_>::default(), &script, "", result.data);
+    let vm_2_result = checked_call_vm!(local_vm_2, <_>::default(), &script, "", vm_1_result.data.clone());
 
-    let vm_1_result = checked_call_vm!(local_vm_1, "", &script, vm_1_result.data, vm_2_result.data.clone());
-    let vm_2_result = checked_call_vm!(local_vm_2, "", script, vm_2_result.data, vm_1_result.data);
+    let vm_1_result = checked_call_vm!(
+        local_vm_1,
+        <_>::default(),
+        &script,
+        vm_1_result.data,
+        vm_2_result.data.clone()
+    );
+    let vm_2_result = checked_call_vm!(local_vm_2, <_>::default(), script, vm_2_result.data, vm_1_result.data);
 
     let actual_trace = trace_from_result(&vm_2_result);
     let expected_trace = vec![
@@ -105,7 +111,7 @@ fn several_restrictions() {
                 )
             )"#);
 
-    let result = checked_call_vm!(vm, "", script, "", "");
+    let result = checked_call_vm!(vm, <_>::default(), script, "", "");
 
     let actual_trace = trace_from_result(&result);
     let expected_trace = vec![
@@ -147,7 +153,7 @@ fn check_influence_to_not_restricted() {
     )
     "#);
 
-    let result = checked_call_vm!(vm, "", script, "", "");
+    let result = checked_call_vm!(vm, <_>::default(), script, "", "");
 
     let actual_trace = trace_from_result(&result);
     let expected_trace = vec![
@@ -188,8 +194,8 @@ fn new_in_fold_with_ap() {
         )
             "#);
 
-    let result = checked_call_vm!(set_variable_vm, "", &script, "", "");
-    let result = checked_call_vm!(vm, "", script, "", result.data);
+    let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
+    let result = checked_call_vm!(vm, <_>::default(), script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
     let expected_trace = vec![
@@ -241,8 +247,8 @@ fn new_with_errors() {
                 )
             )"#);
 
-    let result = checked_call_vm!(vm, "", &script, "", "");
-    let result = call_vm!(faillible_vm, "", script, "", result.data);
+    let result = checked_call_vm!(vm, <_>::default(), &script, "", "");
+    let result = call_vm!(faillible_vm, <_>::default(), script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
     let expected_trace = vec![
@@ -301,8 +307,8 @@ fn new_with_global_scalars() {
                 (call "{variable_receiver_peer_id}" ("" "") [scalar])
             )"#);
 
-    let result = checked_call_vm!(set_variable_vm, "", &script, "", "");
-    let result = checked_call_vm!(variable_receiver, "", &script, "", result.data);
+    let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
+    let result = checked_call_vm!(variable_receiver, <_>::default(), &script, "", result.data);
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
@@ -383,7 +389,7 @@ fn new_with_scalars_in_lfold_with_outside_next() {
     )
     "#);
 
-    let result = checked_call_vm!(test_vm, "", &script, "", "");
+    let result = checked_call_vm!(test_vm, <_>::default(), &script, "", "");
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
@@ -440,7 +446,7 @@ fn new_with_scalars_in_rfold_with_outside_next() {
     )
     "#);
 
-    let result = checked_call_vm!(test_vm, "", &script, "", "");
+    let result = checked_call_vm!(test_vm, <_>::default(), &script, "", "");
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
@@ -500,7 +506,7 @@ fn new_with_scalars_in_fold_with_inside_next() {
     )
     "#);
 
-    let result = checked_call_vm!(test_vm, "", &script, "", "");
+    let result = checked_call_vm!(test_vm, <_>::default(), &script, "", "");
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![

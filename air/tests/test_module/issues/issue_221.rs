@@ -72,12 +72,18 @@ fn issue_221() {
         )
     "#);
 
-    let result = checked_call_vm!(set_variable, "", &script, "", "");
-    let peer_1_result = checked_call_vm!(peer_1, "", &script, "", result.data.clone());
-    let peer_2_result = checked_call_vm!(peer_2, "", &script, "", result.data.clone());
+    let result = checked_call_vm!(set_variable, <_>::default(), &script, "", "");
+    let peer_1_result = checked_call_vm!(peer_1, <_>::default(), &script, "", result.data.clone());
+    let peer_2_result = checked_call_vm!(peer_2, <_>::default(), &script, "", result.data.clone());
 
-    let join_1_result = checked_call_vm!(join_1, "", &script, "", peer_1_result.data.clone());
-    let join_1_result = checked_call_vm!(join_1, "", &script, join_1_result.data, peer_2_result.data.clone()); // before 0.20.9 it fails here
+    let join_1_result = checked_call_vm!(join_1, <_>::default(), &script, "", peer_1_result.data.clone());
+    let join_1_result = checked_call_vm!(
+        join_1,
+        <_>::default(),
+        &script,
+        join_1_result.data,
+        peer_2_result.data.clone()
+    ); // before 0.20.9 it fails here
     let actual_trace = trace_from_result(&join_1_result);
     let expected_trace = vec![
         executed_state::scalar(json!([peer_1_id, peer_2_id])),
