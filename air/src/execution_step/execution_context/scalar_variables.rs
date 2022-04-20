@@ -126,7 +126,7 @@ impl<'i> Scalars<'i> {
         use std::collections::hash_map::Entry::{Occupied, Vacant};
 
         let name = name.into();
-        let shadowing_allowed = self.shadowing_allowed(&name);
+        let variable_could_be_set = self.variable_could_be_set(&name);
         match self.non_iterable_variables.entry(name) {
             Vacant(entry) => {
                 let cell = SparseCell::from_value(self.current_depth, value);
@@ -136,7 +136,7 @@ impl<'i> Scalars<'i> {
                 Ok(false)
             }
             Occupied(entry) => {
-                if !shadowing_allowed {
+                if !variable_could_be_set {
                     return Err(UncatchableError::ShadowingIsNotAllowed(entry.key().clone()).into());
                 }
 
@@ -276,10 +276,8 @@ impl<'i> Scalars<'i> {
         Ok(())
     }
 
-    pub(crate) fn shadowing_allowed(&self, variable_name: &str) -> bool {
-        // shadowing is allowed only inside a fold block, 0 here means that execution flow
-        // is in a global scope
-        if self.current_depth != 0 {
+    pub(crate) fn variable_could_be_set(&self, variable_name: &str) -> bool {
+        if self.shadowing_allowed() {
             return true;
         }
 
@@ -287,6 +285,12 @@ impl<'i> Scalars<'i> {
             Some(values) => values.last().value.is_none(),
             None => false,
         }
+    }
+
+    pub(crate) fn shadowing_allowed(&self) -> bool {
+        // shadowing is allowed only inside a fold block, 0 here means that execution flow
+        // is in a global scope
+        self.current_depth != 0
     }
 
     fn cleanup_obsolete_values(&mut self) {

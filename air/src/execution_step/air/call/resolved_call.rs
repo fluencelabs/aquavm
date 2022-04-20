@@ -215,7 +215,7 @@ fn check_output_name(output: &ast::CallOutputValue<'_>, exec_ctx: &ExecutionCtx<
 
     match exec_ctx.scalars.get_value(scalar_name) {
         Ok(ScalarRef::Value(_)) => {
-            if exec_ctx.scalars.shadowing_allowed(scalar_name) {
+            if exec_ctx.scalars.variable_could_be_set(scalar_name) {
                 Ok(())
             } else {
                 Err(UncatchableError::ShadowingIsNotAllowed(scalar_name.to_string()).into())
