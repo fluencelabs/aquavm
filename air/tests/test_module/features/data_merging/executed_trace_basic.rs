@@ -38,7 +38,7 @@ fn executed_trace_seq_par_call() {
     ];
     let initial_data = raw_data_from_trace(initial_trace);
 
-    let result = checked_call_vm!(vm, "asd", script, "", initial_data);
+    let result = checked_call_vm!(vm, <_>::default(), script, "", initial_data);
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
@@ -76,7 +76,7 @@ fn executed_trace_par_par_call() {
 
     let initial_data = raw_data_from_trace(initial_state);
 
-    let result = checked_call_vm!(vm, "asd", &script, "", initial_data);
+    let result = checked_call_vm!(vm, <_>::default(), &script, "", initial_data);
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
@@ -99,7 +99,7 @@ fn executed_trace_par_par_call() {
 
     let initial_data = raw_data_from_trace(initial_state);
 
-    let result = checked_call_vm!(vm, "asd", script, "", initial_data);
+    let result = checked_call_vm!(vm, <_>::default(), script, "", initial_data);
     let actual_trace = trace_from_result(&result);
 
     assert_eq!(actual_trace, expected_trace);
@@ -122,13 +122,13 @@ fn executed_trace_seq_seq() {
         )
         "#);
 
-    let result = checked_call_vm!(vm2, "asd", &script, "", "");
+    let result = checked_call_vm!(vm2, <_>::default(), &script, "", "");
     assert_eq!(result.next_peer_pks, vec![peer_id_1.clone()]);
 
-    let result = checked_call_vm!(vm1, "asd", &script, "", result.data);
+    let result = checked_call_vm!(vm1, <_>::default(), &script, "", result.data);
     assert_eq!(result.next_peer_pks, vec![peer_id_2.clone()]);
 
-    let result = checked_call_vm!(vm2, "asd", script, "", result.data);
+    let result = checked_call_vm!(vm2, <_>::default(), script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
 
@@ -193,7 +193,7 @@ fn executed_trace_create_service() {
     ];
     let initial_data = raw_data_from_trace(expected_trace.clone());
 
-    let result = checked_call_vm!(vm, "init_peer_id", script, "", initial_data);
+    let result = checked_call_vm!(vm, <_>::default(), script, "", initial_data);
 
     let actual_trace = trace_from_result(&result);
 
@@ -225,16 +225,16 @@ fn executed_trace_par_seq_fold_call() {
             (call "some_peer_id_3" ("local_service_id" "local_fn_name") [] result_2)
         )"#;
 
-    let result = checked_call_vm!(vm2, "asd", script, "", "");
-    let result = checked_call_vm!(vm1, "asd", script, "", result.data);
+    let result = checked_call_vm!(vm2, <_>::default(), script, "", "");
+    let result = checked_call_vm!(vm1, <_>::default(), script, "", result.data);
     let mut data = result.data;
 
     for _ in 0..100 {
-        let result = checked_call_vm!(vm2, "asd", script, "", data);
+        let result = checked_call_vm!(vm2, <_>::default(), script, "", data);
         data = result.data;
     }
 
-    let result = checked_call_vm!(vm3, "asd", script, "", data);
+    let result = checked_call_vm!(vm3, <_>::default(), script, "", data);
     let actual_trace = trace_from_result(&result);
 
     let generation = 0;
@@ -295,9 +295,9 @@ fn executed_trace_par_seq_fold_in_cycle_call() {
     let mut data = vec![];
 
     for _ in 0..100 {
-        let result = checked_call_vm!(vm1, "asd", script, "", data);
-        let result = checked_call_vm!(vm2, "asd", script, "", result.data);
-        let result = checked_call_vm!(vm3, "asd", script, "", result.data);
+        let result = checked_call_vm!(vm1, <_>::default(), script, "", data);
+        let result = checked_call_vm!(vm2, <_>::default(), script, "", result.data);
+        let result = checked_call_vm!(vm3, <_>::default(), script, "", result.data);
 
         let actual_trace = trace_from_result(&result);
 
@@ -356,13 +356,13 @@ fn executed_trace_seq_par_seq_seq() {
         )
         "#);
 
-    let result = checked_call_vm!(vm2, "asd", &script, "", "");
+    let result = checked_call_vm!(vm2, <_>::default(), &script, "", "");
     assert_eq!(result.next_peer_pks, vec![peer_id_1.to_string()]);
 
-    let result = checked_call_vm!(vm1, "asd", &script, "", result.data);
+    let result = checked_call_vm!(vm1, <_>::default(), &script, "", result.data);
     assert_eq!(result.next_peer_pks, vec![peer_id_2.to_string()]);
 
-    let result = checked_call_vm!(vm2, "asd", script, "", result.data);
+    let result = checked_call_vm!(vm2, <_>::default(), script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
 

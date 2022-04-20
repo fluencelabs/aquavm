@@ -28,7 +28,7 @@ fn par_remote_remote() {
                 (call "remote_peer_id_2" ("service_id" "fn_name") [] g)
             )"#;
 
-    let mut result = checked_call_vm!(vm, "", script, "", "");
+    let mut result = checked_call_vm!(vm, <_>::default(), script, "", "");
 
     let actual_peers: HashSet<_> = result.next_peer_pks.drain(..).collect();
     let expected_peers: HashSet<_> =
@@ -48,7 +48,7 @@ fn par_local_remote() {
                 (call "remote_peer_id_2" ("service_id" "fn_name") [] g)
             )"#);
 
-    let result = checked_call_vm!(vm, "", script, "", "");
+    let result = checked_call_vm!(vm, <_>::default(), script, "", "");
 
     assert_eq!(result.next_peer_pks, vec![String::from("remote_peer_id_2")]);
 }

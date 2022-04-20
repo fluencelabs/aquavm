@@ -17,6 +17,7 @@
 mod call_request_parameters;
 mod call_service_result;
 mod outcome;
+mod particle_parameters;
 pub mod raw_outcome;
 
 type JValue = serde_json::Value;
@@ -24,3 +25,4 @@ type JValue = serde_json::Value;
 pub use call_request_parameters::*;
 pub use call_service_result::*;
 pub use outcome::*;
+pub use particle_parameters::*;

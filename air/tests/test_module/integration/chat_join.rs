@@ -59,7 +59,7 @@ fn join_chat_1() {
             )
         "#);
 
-    let client_1_result = checked_call_vm!(client_1, "asd", &script, "", "");
+    let client_1_result = checked_call_vm!(client_1, <_>::default(), &script, "", "");
 
     let client_1_actual_trace = trace_from_result(&client_1_result);
     let client_1_expected_trace = vec![executed_state::request_sent_by(client_1_peer_id)];
@@ -67,7 +67,7 @@ fn join_chat_1() {
     assert_eq!(client_1_actual_trace, client_1_expected_trace);
     assert_eq!(client_1_result.next_peer_pks, vec![String::from(relay_1_peer_id)]);
 
-    let relay_1_result = checked_call_vm!(relay_1, "asd", &script, client_1_result.data, "");
+    let relay_1_result = checked_call_vm!(relay_1, <_>::default(), &script, client_1_result.data, "");
 
     let relay_1_actual_trace = trace_from_result(&relay_1_result);
     let relay_1_expected_trace = vec![
@@ -78,7 +78,7 @@ fn join_chat_1() {
     assert_eq!(relay_1_actual_trace, relay_1_expected_trace);
     assert_eq!(relay_1_result.next_peer_pks, vec![String::from(remote_peer_id)]);
 
-    let remote_result = checked_call_vm!(remote, "asd", &script, relay_1_result.data, "");
+    let remote_result = checked_call_vm!(remote, <_>::default(), &script, relay_1_result.data, "");
 
     let remote_actual_trace = trace_from_result(&remote_result);
     let remote_expected_trace = vec![
@@ -106,7 +106,7 @@ fn join_chat_1() {
     assert_eq!(remote_actual_trace, remote_expected_trace);
     assert_eq!(actual_remote_next_peer_pks, expected_next_peer_pks);
 
-    let relay_1_result = checked_call_vm!(relay_1, "asd", &script, remote_result.data.clone(), "");
+    let relay_1_result = checked_call_vm!(relay_1, <_>::default(), &script, remote_result.data.clone(), "");
 
     let relay_1_actual_trace = trace_from_result(&relay_1_result);
 
@@ -130,7 +130,7 @@ fn join_chat_1() {
     assert_eq!(relay_1_actual_trace, relay_1_expected_trace);
     assert_eq!(relay_1_result.next_peer_pks, vec![String::from(client_1_peer_id)]);
 
-    let client_1_result = checked_call_vm!(client_1, "asd", &script, relay_1_result.data, "");
+    let client_1_result = checked_call_vm!(client_1, <_>::default(), &script, relay_1_result.data, "");
 
     let client_1_actual_trace = trace_from_result(&client_1_result);
 
@@ -154,7 +154,7 @@ fn join_chat_1() {
     assert_eq!(client_1_actual_trace, client_1_expected_trace);
     assert!(client_1_result.next_peer_pks.is_empty());
 
-    let relay_2_result = checked_call_vm!(relay_2, "asd", &script, remote_result.data, "");
+    let relay_2_result = checked_call_vm!(relay_2, <_>::default(), &script, remote_result.data, "");
 
     let relay_2_actual_trace = trace_from_result(&relay_2_result);
 
@@ -178,7 +178,7 @@ fn join_chat_1() {
     assert_eq!(relay_2_actual_trace, relay_2_expected_trace);
     assert_eq!(relay_2_result.next_peer_pks, vec![String::from(client_2_peer_id)]);
 
-    let client_2_result = checked_call_vm!(client_2, "asd", script, relay_2_result.data, "");
+    let client_2_result = checked_call_vm!(client_2, <_>::default(), script, relay_2_result.data, "");
 
     let client_2_actual_trace = trace_from_result(&client_2_result);
 
@@ -235,11 +235,11 @@ fn join_chat_2() {
             )
         "#);
 
-    let client_1_result = checked_call_vm!(client_1, "asd", &script, "", "");
-    let relay_1_result = checked_call_vm!(relay_1, "asd", &script, client_1_result.data, "");
-    let remote_result = checked_call_vm!(remote, "asd", &script, relay_1_result.data, "");
-    let relay_1_result = checked_call_vm!(relay_1, "asd", &script, remote_result.data, "");
-    let client_1_result = checked_call_vm!(client_1, "asd", script, relay_1_result.data, "");
+    let client_1_result = checked_call_vm!(client_1, <_>::default(), &script, "", "");
+    let relay_1_result = checked_call_vm!(relay_1, <_>::default(), &script, client_1_result.data, "");
+    let remote_result = checked_call_vm!(remote, <_>::default(), &script, relay_1_result.data, "");
+    let relay_1_result = checked_call_vm!(relay_1, <_>::default(), &script, remote_result.data, "");
+    let client_1_result = checked_call_vm!(client_1, <_>::default(), script, relay_1_result.data, "");
 
     let client_1_actual_trace = trace_from_result(&client_1_result);
 
@@ -295,12 +295,13 @@ fn init_peer_id() {
             )
         "#);
 
-    let initiator_1_result = checked_call_vm!(initiator, initiator_peer_id, &script, "", "");
-    let client_1_result = checked_call_vm!(client_1, initiator_peer_id, &script, initiator_1_result.data, "");
-    let relay_1_result = checked_call_vm!(relay_1, initiator_peer_id, &script, client_1_result.data, "");
-    let remote_result = checked_call_vm!(remote, initiator_peer_id, &script, relay_1_result.data, "");
-    let relay_1_result = checked_call_vm!(relay_1, initiator_peer_id, &script, remote_result.data, "");
-    let client_1_result = checked_call_vm!(client_1, initiator_peer_id, &script, relay_1_result.data, "");
+    let test_params = TestRunParameters::from_init_peer_id(initiator_peer_id);
+    let initiator_1_result = checked_call_vm!(initiator, test_params.clone(), &script, "", "");
+    let client_1_result = checked_call_vm!(client_1, test_params.clone(), &script, initiator_1_result.data, "");
+    let relay_1_result = checked_call_vm!(relay_1, test_params.clone(), &script, client_1_result.data, "");
+    let remote_result = checked_call_vm!(remote, test_params.clone(), &script, relay_1_result.data, "");
+    let relay_1_result = checked_call_vm!(relay_1, test_params.clone(), &script, remote_result.data, "");
+    let client_1_result = checked_call_vm!(client_1, test_params.clone(), &script, relay_1_result.data, "");
 
     let client_1_actual_trace = trace_from_result(&client_1_result);
 
@@ -319,7 +320,7 @@ fn init_peer_id() {
     assert_eq!(client_1_actual_trace, client_1_expected_trace);
     assert_eq!(client_1_result.next_peer_pks, vec![initiator_peer_id.to_string()]);
 
-    let initiator_1_result = checked_call_vm!(initiator, initiator_peer_id, script, client_1_result.data, "");
+    let initiator_1_result = checked_call_vm!(initiator, test_params.clone(), script, client_1_result.data, "");
 
     let initiator_1_actual_trace = trace_from_result(&initiator_1_result);
 

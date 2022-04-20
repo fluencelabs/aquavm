@@ -41,14 +41,20 @@ fn par_ap_behaviour() {
         )
         "#);
 
-    let mut client_result_1 = checked_call_vm!(client, "", &script, "", "");
+    let mut client_result_1 = checked_call_vm!(client, <_>::default(), &script, "", "");
     let actual_next_peers: HashSet<_> = client_result_1.next_peer_pks.drain(..).collect();
     let expected_next_peers: HashSet<_> = maplit::hashset!(relay_id.to_string(), variable_setter_id.to_string());
     assert_eq!(actual_next_peers, expected_next_peers);
 
-    let setter_result = checked_call_vm!(variable_setter, "", &script, "", client_result_1.data.clone());
+    let setter_result = checked_call_vm!(
+        variable_setter,
+        <_>::default(),
+        &script,
+        "",
+        client_result_1.data.clone()
+    );
     assert!(setter_result.next_peer_pks.is_empty());
 
-    let relay_result = checked_call_vm!(relay, "", script, "", client_result_1.data);
+    let relay_result = checked_call_vm!(relay, <_>::default(), script, "", client_result_1.data);
     assert!(relay_result.next_peer_pks.is_empty());
 }

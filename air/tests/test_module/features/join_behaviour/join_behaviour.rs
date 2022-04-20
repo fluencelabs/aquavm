@@ -57,11 +57,11 @@ fn dont_wait_on_json_path() {
         )
     "#);
 
-    let init_peer_id = "asd";
-    let result = checked_call_vm!(set_variable_vm, init_peer_id, &script, "", "");
-    let result = checked_call_vm!(local_vm, init_peer_id, script, "", result.data);
+    let test_params = TestRunParameters::default();
+    let result = checked_call_vm!(set_variable_vm, test_params.clone(), &script, "", "");
+    let result = checked_call_vm!(local_vm, test_params.clone(), script, "", result.data);
 
-    assert_eq!(result.next_peer_pks, vec![init_peer_id.to_string()]);
+    assert_eq!(result.next_peer_pks, vec![test_params.init_peer_id.to_string()]);
 }
 
 #[test]
@@ -75,7 +75,7 @@ fn wait_on_stream_json_path_by_id() {
         (call "{local_peer_id}" ("history" "add") [$status.$[0]!])
      )"#);
 
-    let result = checked_call_vm!(local_vm, "", non_join_stream_script, "", "");
+    let result = checked_call_vm!(local_vm, <_>::default(), non_join_stream_script, "", "");
     let actual_trace = trace_from_result(&result);
 
     assert_eq!(actual_trace.len(), 3);
@@ -86,7 +86,7 @@ fn wait_on_stream_json_path_by_id() {
         (call "{local_peer_id}" ("history" "add") [$status.$[1]!]) ; $status stream here has only one value
      )"#);
 
-    let result = checked_call_vm!(local_vm, "", join_stream_script, "", "");
+    let result = checked_call_vm!(local_vm, <_>::default(), join_stream_script, "", "");
     let actual_trace = trace_from_result(&result);
 
     assert_eq!(actual_trace.len(), 2); // par and the first call emit traces, second call doesn't
@@ -111,7 +111,7 @@ fn wait_on_empty_stream_json_path() {
         (call "{local_peer_id}" ("" "") [$ns.$.[0] $ns.$.[1] $ns])
      )"#);
 
-    let result = checked_call_vm!(local_vm, "", join_stream_script, "", "");
+    let result = checked_call_vm!(local_vm, <_>::default(), join_stream_script, "", "");
     let actual_trace = trace_from_result(&result);
 
     assert_eq!(actual_trace.len(), 1); // only the first call should produce a trace
@@ -150,9 +150,8 @@ fn dont_wait_on_json_path_on_scalars() {
         )
     "#);
 
-    let init_peer_id = "asd";
-    let result = call_vm!(set_variable_vm, init_peer_id, &script, "", "");
-    let array_result = call_vm!(array_consumer, init_peer_id, &script, "", result.data.clone());
+    let result = call_vm!(set_variable_vm, <_>::default(), &script, "", "");
+    let array_result = call_vm!(array_consumer, <_>::default(), &script, "", result.data.clone());
 
     let expected_error =
         CatchableError::LambdaApplierError(LambdaError::ValueNotContainSuchArrayIdx { value: array, idx: 5 });
@@ -165,9 +164,8 @@ fn dont_wait_on_json_path_on_scalars() {
         )
     "#);
 
-    let init_peer_id = "asd";
-    let result = call_vm!(set_variable_vm, init_peer_id, &script, "", "");
-    let object_result = call_vm!(object_consumer, init_peer_id, script, "", result.data);
+    let result = call_vm!(set_variable_vm, <_>::default(), &script, "", "");
+    let object_result = call_vm!(object_consumer, <_>::default(), script, "", result.data);
 
     let expected_error = CatchableError::LambdaApplierError(LambdaError::ValueNotContainSuchField {
         value: object,
@@ -196,7 +194,7 @@ fn match_with_join_behaviour() {
         )
     "#);
 
-    let result = checked_call_vm!(peer_1, "", script, "", "");
+    let result = checked_call_vm!(peer_1, <_>::default(), script, "", "");
     let trace = trace_from_result(&result);
     assert_eq!(trace.len(), 2);
 }
@@ -220,7 +218,7 @@ fn mismatch_with_join_behaviour() {
         )
     "#);
 
-    let result = checked_call_vm!(peer_1, "", script, "", "");
+    let result = checked_call_vm!(peer_1, <_>::default(), script, "", "");
     let trace = trace_from_result(&result);
     assert_eq!(trace.len(), 2);
 }
@@ -244,7 +242,7 @@ fn fold_with_join_behaviour() {
         )
     "#);
 
-    let result = checked_call_vm!(peer_1, "", script, "", "");
+    let result = checked_call_vm!(peer_1, <_>::default(), script, "", "");
     let trace = trace_from_result(&result);
     assert_eq!(trace.len(), 2);
 }

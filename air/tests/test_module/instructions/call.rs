@@ -30,7 +30,8 @@ fn current_peer_id_call() {
                (call %init_peer_id% ("{service_id}" "{function_name}") [] result_name)
             "#);
 
-    let result = checked_call_vm!(vm, vm_peer_id, script, "", "");
+    let test_params = TestRunParameters::from_init_peer_id(vm_peer_id);
+    let result = checked_call_vm!(vm, test_params, script, "", "");
 
     let actual_trace = trace_from_result(&result);
     let expected_trace = vec![executed_state::scalar_string("result from unit_call_service")];
@@ -42,11 +43,27 @@ fn current_peer_id_call() {
                (call "{vm_peer_id}" ("{service_id}" "{function_name}") [] result_name)
             "#);
 
-    let result = checked_call_vm!(vm, "asd", script.clone(), "", "");
+    let result = checked_call_vm!(vm, <_>::default(), script.clone(), "", "");
 
     // test that empty string for data works
-    let result_with_empty_string = checked_call_vm!(vm, "asd", script, "", "");
+    let result_with_empty_string = checked_call_vm!(vm, <_>::default(), script, "", "");
     assert_eq!(result_with_empty_string, result);
+}
+
+#[test]
+fn call_with_timestamp() {
+    let vm_peer_id = "test_peer_id";
+    let mut vm = create_avm(echo_call_service(), vm_peer_id);
+
+    let script = r#"(call %init_peer_id% ("" "") [%timestamp%] result_name)"#;
+
+    let test_params = TestRunParameters::new(vm_peer_id, 1337);
+    let result = checked_call_vm!(vm, test_params.clone(), script, "", "");
+
+    let actual_trace = trace_from_result(&result);
+    let expected_trace = vec![executed_state::scalar_number(test_params.timestamp)];
+
+    assert_eq!(actual_trace, expected_trace);
 }
 
 // Check that specifying remote peer id in call will result its appearing in next_peer_pks.
@@ -58,7 +75,7 @@ fn remote_peer_id_call() {
     let remote_peer_id = String::from("some_remote_peer_id");
     let script = f!(r#"(call "{remote_peer_id}" ("local_service_id" "local_fn_name") ["arg"] result_name)"#);
 
-    let result = checked_call_vm!(vm, "asd", script, "", "");
+    let result = checked_call_vm!(vm, <_>::default(), script, "", "");
 
     let actual_trace = trace_from_result(&result);
     let expected_state = executed_state::request_sent_by(some_local_peer_id);
@@ -81,8 +98,8 @@ fn variables() {
             )
         "#;
 
-    let result = checked_call_vm!(set_variable_vm, "asd", script, "", "");
-    let result = checked_call_vm!(vm, "asd", script, "", result.data);
+    let result = checked_call_vm!(set_variable_vm, <_>::default(), script, "", "");
+    let result = checked_call_vm!(vm, <_>::default(), script, "", result.data);
 
     assert!(result.next_peer_pks.is_empty());
 }
@@ -101,7 +118,7 @@ fn duplicate_variables() {
             )
         "#);
 
-    let result = call_vm!(vm, "asd", script, "", "");
+    let result = call_vm!(vm, <_>::default(), script, "", "");
 
     let expected_error = UncatchableError::ShadowingIsNotAllowed(variable_name.to_string());
     assert!(check_error(&result, expected_error));
@@ -129,8 +146,8 @@ fn string_parameters() {
             )
         "#);
 
-    let result = checked_call_vm!(set_variable_vm, "asd", &script, "", "");
-    let result = checked_call_vm!(vm, "asd", script, "", result.data);
+    let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
+    let result = checked_call_vm!(vm, <_>::default(), script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
     let expected_state = executed_state::scalar_string("arg1");

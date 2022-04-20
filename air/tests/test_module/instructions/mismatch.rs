@@ -39,8 +39,8 @@ fn mismatch_equal() {
                 )
             )"#);
 
-    let result = checked_call_vm!(set_variable_vm, "asd", &script, "", "");
-    let result = checked_call_vm!(vm, "asd", script, "", result.data);
+    let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
+    let result = checked_call_vm!(vm, <_>::default(), script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
     let expected_state = executed_state::scalar_string("result_2");
@@ -71,8 +71,8 @@ fn mismatch_not_equal() {
                 )
             )"#);
 
-    let result = checked_call_vm!(set_variable_vm, "asd", &script, "", "");
-    let result = checked_call_vm!(vm, "asd", script, "", result.data);
+    let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
+    let result = checked_call_vm!(vm, <_>::default(), script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
     let expected_state = executed_state::scalar_string("result_1");
@@ -100,8 +100,8 @@ fn mismatch_with_string() {
                 )
             )"#);
 
-    let result = checked_call_vm!(set_variable_vm, "asd", &script, "", "");
-    let result = checked_call_vm!(vm, "asd", script, "", result.data);
+    let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
+    let result = checked_call_vm!(vm, <_>::default(), script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
     let expected_state = executed_state::scalar_string("result_2");
@@ -129,13 +129,13 @@ fn mismatch_without_xor() {
                 )
             )"#);
 
-    let result = call_vm!(set_variable_vm, "asd", &script, "", "");
-    let result = call_vm!(vm, "asd", &script, "", result.data);
+    let result = call_vm!(set_variable_vm, <_>::default(), &script, "", "");
+    let result = call_vm!(vm, <_>::default(), &script, "", result.data);
 
     let expected_error = CatchableError::MismatchValuesEqual;
     assert!(check_error(&result, expected_error));
 
-    let result = call_vm!(vm, "asd", script, "", result.data);
+    let result = call_vm!(vm, <_>::default(), script, "", result.data);
 
     let expected_error = CatchableError::MismatchValuesEqual;
     assert!(check_error(&result, expected_error));
@@ -166,7 +166,7 @@ fn mismatch_with_two_xors() {
             )
             "#);
 
-    let result = checked_call_vm!(vm, "", script, "", "");
+    let result = checked_call_vm!(vm, <_>::default(), script, "", "");
 
     let mut actual_trace = trace_from_result(&result);
     let expected_executed_call_result = executed_state::request_sent_by(local_peer_id);

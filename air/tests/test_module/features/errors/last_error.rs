@@ -64,9 +64,9 @@ fn last_error_tetraplets() {
         set_variable_peer_id, fallible_peer_id, local_peer_id
     );
 
-    let result = checked_call_vm!(set_variable_vm, "asd", &script, "", "");
-    let result = checked_call_vm!(fallible_vm, "asd", &script, "", result.data);
-    let _ = checked_call_vm!(local_vm, "asd", script, "", result.data);
+    let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
+    let result = checked_call_vm!(fallible_vm, <_>::default(), &script, "", result.data);
+    let _ = checked_call_vm!(local_vm, <_>::default(), script, "", result.data);
 
     let actual_value = (*args.borrow()).as_ref().unwrap().clone();
     let last_error = actual_value.as_object().unwrap();
@@ -116,8 +116,8 @@ fn not_clear_last_error_in_match() {
         )
     "#);
 
-    let result = checked_call_vm!(set_variable_vm, "asd", &script, "", "");
-    let _ = checked_call_vm!(local_vm, "asd", &script, "", result.data);
+    let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
+    let _ = checked_call_vm!(local_vm, <_>::default(), &script, "", result.data);
 
     let actual_value = (*args.borrow()).as_ref().unwrap().clone();
     assert_eq!(actual_value, JValue::Null);
@@ -152,8 +152,8 @@ fn not_clear_last_error_in_mismatch() {
         )
     "#);
 
-    let result = checked_call_vm!(set_variable_vm, "asd", &script, "", "");
-    let _ = checked_call_vm!(local_vm, "asd", &script, "", result.data);
+    let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
+    let _ = checked_call_vm!(local_vm, <_>::default(), &script, "", result.data);
 
     let actual_value = (*args.borrow()).as_ref().unwrap().clone();
     assert_eq!(actual_value, JValue::Null);
@@ -180,8 +180,8 @@ fn track_current_peer_id() {
         )
     "#);
 
-    let result = checked_call_vm!(fallible_vm, "asd", &script, "", "");
-    let _ = checked_call_vm!(local_vm, "asd", script, "", result.data);
+    let result = checked_call_vm!(fallible_vm, <_>::default(), &script, "", "");
+    let _ = checked_call_vm!(local_vm, <_>::default(), script, "", result.data);
 
     let actual_value = (*args.borrow()).as_ref().unwrap().clone();
     let last_error = actual_value.as_object().unwrap();
@@ -206,8 +206,8 @@ fn variable_names_shown_in_error() {
         )
     "#);
 
-    let result = checked_call_vm!(set_variable_vm, "", &script, "", "");
-    let result = checked_call_vm!(echo_vm, "", script, "", result.data);
+    let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
+    let result = checked_call_vm!(echo_vm, <_>::default(), script, "", result.data);
     let trace = trace_from_result(&result);
 
     assert_eq!(
@@ -235,8 +235,8 @@ fn non_initialized_last_error() {
         )
     "#);
 
-    let init_peer_id = "init_peer_id";
-    let _ = checked_call_vm!(vm, init_peer_id, script, "", "");
+    let test_params = TestRunParameters::from_init_peer_id("init_peer_id");
+    let _ = checked_call_vm!(vm, test_params.clone(), script, "", "");
 
     let actual_value = (*args.borrow()).as_ref().unwrap().clone();
     assert_eq!(actual_value, JValue::Null);
@@ -244,7 +244,7 @@ fn non_initialized_last_error() {
     let actual_tetraplets = (*tetraplets.borrow()).as_ref().unwrap().clone();
     assert_eq!(
         actual_tetraplets,
-        vec![vec![SecurityTetraplet::new(init_peer_id, "", "", "")]]
+        vec![vec![SecurityTetraplet::new(test_params.init_peer_id, "", "", "")]]
     );
 }
 
@@ -263,7 +263,7 @@ fn access_last_error_by_not_exists_field() {
         )
     "#);
 
-    let result = call_vm!(fallible_vm, "asd", &script, "", "");
+    let result = call_vm!(fallible_vm, <_>::default(), &script, "", "");
 
     let expected_error = ExecutionError::Catchable(rc!(CatchableError::LambdaApplierError(
         LambdaError::ValueNotContainSuchField {
@@ -302,8 +302,8 @@ fn last_error_with_par_one_subtree_failed() {
         )
     "#);
 
-    let result = checked_call_vm!(fallible_vm, "asd", &script, "", "");
-    let _ = checked_call_vm!(vm, "asd", script, "", result.data);
+    let result = checked_call_vm!(fallible_vm, <_>::default(), &script, "", "");
+    let _ = checked_call_vm!(vm, <_>::default(), script, "", result.data);
 
     let actual_value = (*args.borrow()).as_ref().unwrap().clone();
     let expected_value = json!({
@@ -330,7 +330,7 @@ fn fail_with_scalar_rebubble_error() {
         )
     "#);
 
-    let result = call_vm!(fallible_vm, "", &script, "", "");
+    let result = call_vm!(fallible_vm, <_>::default(), &script, "", "");
 
     let expected_error = CatchableError::UserError {
         error: rc!(json!({
@@ -358,7 +358,7 @@ fn fail_with_scalar_from_call() {
         )
     "#);
 
-    let result = call_vm!(vm, "", &script, "", "");
+    let result = call_vm!(vm, <_>::default(), &script, "", "");
 
     let expected_error = CatchableError::UserError {
         error: rc!(json!({
@@ -384,7 +384,7 @@ fn fail_with_scalar_with_lambda_from_call() {
         )
     "#);
 
-    let result = call_vm!(vm, "", &script, "", "");
+    let result = call_vm!(vm, <_>::default(), &script, "", "");
 
     let expected_error = CatchableError::UserError {
         error: rc!(json!({
@@ -409,7 +409,7 @@ fn fail_with_scalar_from_call_not_enough_fields() {
         )
     "#);
 
-    let result = call_vm!(vm, "", &script, "", "");
+    let result = call_vm!(vm, <_>::default(), &script, "", "");
 
     let expected_error = CatchableError::InvalidLastErrorObjectError(LastErrorObjectError::ScalarMustContainField {
         scalar: service_result,
@@ -431,7 +431,7 @@ fn fail_with_scalar_from_call_not_right_type() {
         )
     "#);
 
-    let result = call_vm!(vm, "", &script, "", "");
+    let result = call_vm!(vm, <_>::default(), &script, "", "");
 
     let expected_error =
         CatchableError::InvalidLastErrorObjectError(LastErrorObjectError::ScalarMustBeObject(service_result));
@@ -451,7 +451,7 @@ fn fail_with_scalar_from_call_field_not_right_type() {
         )
     "#);
 
-    let result = call_vm!(vm, "", &script, "", "");
+    let result = call_vm!(vm, <_>::default(), &script, "", "");
 
     let expected_error = CatchableError::InvalidLastErrorObjectError(LastErrorObjectError::ScalarFieldIsWrongType {
         scalar: service_result.clone(),
@@ -475,7 +475,7 @@ fn last_error_with_match() {
         )
     "#);
 
-    let result = checked_call_vm!(vm, "asd", &script, "", "");
+    let result = checked_call_vm!(vm, <_>::default(), &script, "", "");
 
     let trace = trace_from_result(&result);
     assert_eq!(trace.len(), 2); // if match works there will be 2 calls in a resulted trace
