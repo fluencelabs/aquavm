@@ -91,7 +91,7 @@ pub(crate) struct Scalars<'i> {
     /// They are needed for careful isolation of scopes produced by iterations in fold blocks,
     /// precisely to limit access of non iterable variables defined on one depths to ones
     /// defined on another.
-    pub(crate) invalidated_depths: HashSet<usize>,
+    pub(crate) allowed_depths: HashSet<usize>,
 
     pub(crate) iterable_variables: HashMap<String, FoldState<'i>>,
 
@@ -180,9 +180,9 @@ impl<'i> Scalars<'i> {
             .get(name)
             .and_then(|values| {
                 let last_cell = values.last();
-                let value_not_invalidated = !self.invalidated_depths.contains(&last_cell.depth);
+                let depth_allowed = self.allowed_depths.contains(&last_cell.depth);
 
-                if value_not_invalidated {
+                if depth_allowed {
                     Some(last_cell.value.as_ref())
                 } else {
                     None
@@ -212,22 +212,27 @@ impl<'i> Scalars<'i> {
 
     pub(crate) fn meet_fold_start(&mut self) {
         self.current_depth += 1;
+        self.allowed_depths.insert(self.current_depth);
     }
 
     // meet next before recursion
     pub(crate) fn meet_next_before(&mut self) {
-        self.invalidated_depths.insert(self.current_depth);
+        self.allowed_depths.remove(&self.current_depth);
         self.current_depth += 1;
+        self.allowed_depths.insert(self.current_depth);
     }
 
     // meet next after recursion
     pub(crate) fn meet_next_after(&mut self) {
+        self.allowed_depths.remove(&self.current_depth);
         self.current_depth -= 1;
-        self.invalidated_depths.remove(&self.current_depth);
+        self.allowed_depths.insert(self.current_depth);
+
         self.cleanup_obsolete_values();
     }
 
     pub(crate) fn meet_fold_end(&mut self) {
+        self.allowed_depths.remove(&self.current_depth);
         self.current_depth -= 1;
         self.cleanup_obsolete_values();
     }
