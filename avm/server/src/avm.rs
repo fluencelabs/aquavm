@@ -17,6 +17,7 @@
 use super::avm_runner::AVMRunner;
 use super::AVMDataStore;
 use super::AVMError;
+use super::AVMMemoryStats;
 use super::AVMOutcome;
 use super::CallResults;
 use crate::config::AVMConfig;
@@ -99,8 +100,8 @@ impl<E> AVM<E> {
         Ok(())
     }
 
-    /// Return size of interpreter heap in bytes.
-    pub fn memory_size(&self) -> usize {
-        self.runner.memory_size()
+    /// Return memory stat of an interpreter heap.
+    pub fn memory_stats(&self) -> AVMMemoryStats {
+        self.runner.memory_stats()
     }
 }

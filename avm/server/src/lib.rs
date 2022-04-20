@@ -34,6 +34,7 @@ pub use avm::AVM;
 pub use config::AVMConfig;
 pub use errors::AVMError;
 pub use interface::*;
+pub use runner::AVMMemoryStats;
 
 pub mod avm_runner {
     pub use crate::interface::raw_outcome::RawAVMOutcome;
