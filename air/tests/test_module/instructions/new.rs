@@ -224,9 +224,9 @@ fn new_in_fold_with_ap() {
 }
 
 #[test]
-fn new_with_errors() {
-    let faillible_peer_id = "failible_peer_id";
-    let mut faillible_vm = create_avm(fallible_call_service("service_id_1"), faillible_peer_id);
+fn new_with_streams_with_errors() {
+    let fallible_peer_id = "fallible_peer_id";
+    let mut fallible_vm = create_avm(fallible_call_service("service_id_1"), fallible_peer_id);
 
     let local_peer_id = "local_peer_id";
     let mut vm = create_avm(echo_call_service(), local_peer_id);
@@ -239,7 +239,7 @@ fn new_with_errors() {
                         (new $restricted_stream_2
                             (seq
                                 (call "{local_peer_id}" ("" "") [2] $restricted_stream_2) ;; should have generation 1 in a data
-                                (call "{faillible_peer_id}" ("service_id_1" "local_fn_name") [] result)
+                                (call "{fallible_peer_id}" ("service_id_1" "local_fn_name") [] result)
                             )
                         )
                         (call "{local_peer_id}" ("" "") [2] restricted_stream_1) ;; should have generation 0 in a data
@@ -248,7 +248,7 @@ fn new_with_errors() {
             )"#);
 
     let result = checked_call_vm!(vm, <_>::default(), &script, "", "");
-    let result = call_vm!(faillible_vm, <_>::default(), script, "", result.data);
+    let result = call_vm!(fallible_vm, <_>::default(), script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
     let expected_trace = vec![
@@ -276,6 +276,62 @@ fn new_with_errors() {
         "$global_stream".to_string() => 1,
     };
     assert_eq!(actual_global_streams, expected_global_streams);
+}
+
+#[test]
+fn new_with_scalars_with_errors() {
+    let set_variable_peer_id = "set_variable_peer_id";
+    let variables_mapping = maplit::hashmap! {
+        "global".to_string() => json!(1),
+        "scoped".to_string() => json!(2),
+    };
+    let mut set_variable_vm = create_avm(
+        set_variables_call_service(variables_mapping, VariableOptionSource::Argument(0)),
+        set_variable_peer_id,
+    );
+
+    let variable_receiver_peer_id = "variable_receiver_peer_id";
+    let mut variable_receiver_vm = create_avm(echo_call_service(), variable_receiver_peer_id);
+
+    let fallible_peer_id = "fallible_peer_id";
+    let fallible_service_id = "fallible_service_id";
+    let mut fallible_peer_vm = create_avm(fallible_call_service(fallible_service_id), fallible_peer_id);
+
+    let script = f!(r#"
+            (seq
+                (seq
+                    (call "{set_variable_peer_id}" ("" "") ["global"] scalar)
+                    (xor
+                        (new scalar
+                            (seq
+                                (call "{set_variable_peer_id}" ("" "") ["scoped"] scalar)
+                                (seq
+                                    (call "{variable_receiver_peer_id}" ("" "") [scalar])
+                                    (call "{fallible_peer_id}" ("{fallible_service_id}" "") [])
+                                )
+                            )
+                        )
+                        (call "{variable_receiver_peer_id}" ("" "") [scalar])
+                    )
+                )
+                (call "{variable_receiver_peer_id}" ("" "") [scalar])
+            )"#);
+
+    let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
+    let result = checked_call_vm!(variable_receiver_vm, <_>::default(), &script, "", result.data);
+    let result = checked_call_vm!(fallible_peer_vm, <_>::default(), &script, "", result.data);
+    let result = checked_call_vm!(variable_receiver_vm, <_>::default(), &script, "", result.data);
+    let actual_trace = trace_from_result(&result);
+
+    let expected_trace = vec![
+        executed_state::scalar_number(1),
+        executed_state::scalar_number(2),
+        executed_state::scalar_number(2),
+        executed_state::service_failed(1, r#"failed result from fallible_call_service"#),
+        executed_state::scalar_number(1),
+        executed_state::scalar_number(1),
+    ];
+    assert_eq!(actual_trace, expected_trace);
 }
 
 #[test]

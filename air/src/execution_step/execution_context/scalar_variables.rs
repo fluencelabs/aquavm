@@ -26,6 +26,9 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 use std::rc::Rc;
 
+/// Depth of a global scope.
+const GLOBAL_DEPTH: usize = 0;
+
 // TODO: move this code snippet to documentation when it's ready
 
 /// There are two scopes for variable scalars in AIR: global and local. A local scope
@@ -65,7 +68,6 @@ use std::rc::Rc;
 ///
 /// Although there could be only one iterable value for a fold block, because of CRDT rules.
 /// This struct is intended to provide abilities to work with scalars as it was described.
-#[derive(Default)]
 pub(crate) struct Scalars<'i> {
     // TODO: use Rc<String> to avoid copying
     /// Terminology used here (mainly to resolve concerns re difference between scalars and values):
@@ -120,6 +122,17 @@ impl SparseCell {
 }
 
 impl<'i> Scalars<'i> {
+    pub fn new() -> Self {
+        let allowed_depths = maplit::hashset! { GLOBAL_DEPTH };
+
+        Self {
+            non_iterable_variables: HashMap::new(),
+            allowed_depths,
+            iterable_variables: HashMap::new(),
+            current_depth: GLOBAL_DEPTH,
+        }
+    }
+
     /// Returns true if there was a previous value for the provided key on the same
     /// fold block.
     pub(crate) fn set_value(&mut self, name: impl Into<String>, value: ValueAggregate) -> ExecutionResult<bool> {
@@ -319,8 +332,8 @@ impl<'i> Scalars<'i> {
     }
 }
 
-fn is_global_value(current_scope_depth: usize) -> bool {
-    current_scope_depth == 0
+fn is_global_value(value_depth: usize) -> bool {
+    value_depth == GLOBAL_DEPTH
 }
 
 fn is_value_obsolete(value_depth: usize, current_scope_depth: usize) -> bool {
@@ -328,6 +341,12 @@ fn is_value_obsolete(value_depth: usize, current_scope_depth: usize) -> bool {
 }
 
 use std::fmt;
+
+impl Default for Scalars<'_> {
+    fn default() -> Self {
+        Scalars::new()
+    }
+}
 
 impl<'i> fmt::Display for Scalars<'i> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

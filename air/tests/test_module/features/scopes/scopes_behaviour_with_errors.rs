@@ -14,5 +14,12 @@
  * limitations under the License.
  */
 
-mod scalars_scope;
-mod scopes_behaviour_with_errors;
+use air::CatchableError;
+use air::ExecutionError;
+use air_test_utils::prelude::*;
+
+use fstrings::f;
+use fstrings::format_args_f;
+
+#[test]
+fn scopes_with_error() {}
