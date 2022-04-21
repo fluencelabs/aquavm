@@ -15,3 +15,4 @@
  */
 
 mod scalars_scope;
+mod scopes_behaviour_with_errors;

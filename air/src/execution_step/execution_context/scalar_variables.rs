@@ -26,6 +26,9 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 use std::rc::Rc;
 
+/// Depth of a global scope.
+const GLOBAL_DEPTH: usize = 0;
+
 // TODO: move this code snippet to documentation when it's ready
 
 /// There are two scopes for variable scalars in AIR: global and local. A local scope
@@ -65,7 +68,6 @@ use std::rc::Rc;
 ///
 /// Although there could be only one iterable value for a fold block, because of CRDT rules.
 /// This struct is intended to provide abilities to work with scalars as it was described.
-#[derive(Default)]
 pub(crate) struct Scalars<'i> {
     // TODO: use Rc<String> to avoid copying
     /// Terminology used here (mainly to resolve concerns re difference between scalars and values):
@@ -91,7 +93,7 @@ pub(crate) struct Scalars<'i> {
     /// They are needed for careful isolation of scopes produced by iterations in fold blocks,
     /// precisely to limit access of non iterable variables defined on one depths to ones
     /// defined on another.
-    pub(crate) invalidated_depths: HashSet<usize>,
+    pub(crate) allowed_depths: HashSet<usize>,
 
     pub(crate) iterable_variables: HashMap<String, FoldState<'i>>,
 
@@ -120,6 +122,17 @@ impl SparseCell {
 }
 
 impl<'i> Scalars<'i> {
+    pub fn new() -> Self {
+        let allowed_depths = maplit::hashset! { GLOBAL_DEPTH };
+
+        Self {
+            non_iterable_variables: HashMap::new(),
+            allowed_depths,
+            iterable_variables: HashMap::new(),
+            current_depth: GLOBAL_DEPTH,
+        }
+    }
+
     /// Returns true if there was a previous value for the provided key on the same
     /// fold block.
     pub(crate) fn set_value(&mut self, name: impl Into<String>, value: ValueAggregate) -> ExecutionResult<bool> {
@@ -180,9 +193,9 @@ impl<'i> Scalars<'i> {
             .get(name)
             .and_then(|values| {
                 let last_cell = values.last();
-                let value_not_invalidated = !self.invalidated_depths.contains(&last_cell.depth);
+                let depth_allowed = self.allowed_depths.contains(&last_cell.depth);
 
-                if value_not_invalidated {
+                if depth_allowed {
                     Some(last_cell.value.as_ref())
                 } else {
                     None
@@ -212,22 +225,27 @@ impl<'i> Scalars<'i> {
 
     pub(crate) fn meet_fold_start(&mut self) {
         self.current_depth += 1;
+        self.allowed_depths.insert(self.current_depth);
     }
 
     // meet next before recursion
     pub(crate) fn meet_next_before(&mut self) {
-        self.invalidated_depths.insert(self.current_depth);
+        self.allowed_depths.remove(&self.current_depth);
         self.current_depth += 1;
+        self.allowed_depths.insert(self.current_depth);
     }
 
     // meet next after recursion
     pub(crate) fn meet_next_after(&mut self) {
+        self.allowed_depths.remove(&self.current_depth);
         self.current_depth -= 1;
-        self.invalidated_depths.remove(&self.current_depth);
+        self.allowed_depths.insert(self.current_depth);
+
         self.cleanup_obsolete_values();
     }
 
     pub(crate) fn meet_fold_end(&mut self) {
+        self.allowed_depths.remove(&self.current_depth);
         self.current_depth -= 1;
         self.cleanup_obsolete_values();
     }
@@ -314,8 +332,8 @@ impl<'i> Scalars<'i> {
     }
 }
 
-fn is_global_value(current_scope_depth: usize) -> bool {
-    current_scope_depth == 0
+fn is_global_value(value_depth: usize) -> bool {
+    value_depth == GLOBAL_DEPTH
 }
 
 fn is_value_obsolete(value_depth: usize, current_scope_depth: usize) -> bool {
@@ -323,6 +341,12 @@ fn is_value_obsolete(value_depth: usize, current_scope_depth: usize) -> bool {
 }
 
 use std::fmt;
+
+impl Default for Scalars<'_> {
+    fn default() -> Self {
+        Scalars::new()
+    }
+}
 
 impl<'i> fmt::Display for Scalars<'i> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

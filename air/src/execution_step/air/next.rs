@@ -43,8 +43,9 @@ impl<'i> super::ExecutableInstruction<'i> for Next<'i> {
         maybe_meet_iteration_start(self, fold_state, trace_ctx)?;
         exec_ctx.scalars.meet_next_before();
 
-        next_instr.execute(exec_ctx, trace_ctx)?;
+        let result = next_instr.execute(exec_ctx, trace_ctx);
         exec_ctx.scalars.meet_next_after();
+        result?;
 
         // get the same fold state again because of borrow checker
         let fold_state = exec_ctx.scalars.get_iterable_mut(iterator_name)?;
