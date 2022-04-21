@@ -172,6 +172,37 @@ fn match_with_timestamp() {
 }
 
 #[test]
+fn match_with_ttl() {
+    let set_variable_peer_id = "set_variable_peer_id";
+    let mut set_variable_vm = create_avm(echo_call_service(), set_variable_peer_id);
+
+    let local_peer_id = "local_peer_id";
+    let mut vm = create_avm(echo_call_service(), local_peer_id);
+
+    let ttl = 1337;
+    let script = f!(r#"
+            (seq
+                (call "{set_variable_peer_id}" ("" "") [{ttl}] value_1)
+                (xor
+                    (match value_1 %ttl%
+                        (call "{local_peer_id}" ("service_id_2" "local_fn_name") ["result_1"] result_1)
+                    )
+                    (call "{local_peer_id}" ("service_id_2" "local_fn_name") ["result_2"] result_2)
+                )
+            )"#);
+
+    let test_params = TestRunParameters::from_ttl(ttl);
+    let result = checked_call_vm!(set_variable_vm, test_params.clone(), &script, "", "");
+    let result = checked_call_vm!(vm, test_params.clone(), script, "", result.data);
+
+    let actual_trace = trace_from_result(&result);
+    let expected_executed_call_result = executed_state::scalar_string("result_1");
+
+    assert_eq!(actual_trace.len(), 2);
+    assert_eq!(actual_trace[1], expected_executed_call_result);
+}
+
+#[test]
 fn match_with_equal_numbers() {
     let local_peer_id = "local_peer_id";
     let mut vm = create_avm(echo_call_service(), local_peer_id);

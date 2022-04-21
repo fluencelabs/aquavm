@@ -191,6 +191,7 @@ fn string_to_token(input: &str, start_pos: usize) -> LexerResult<Token> {
         INIT_PEER_ID => Ok(Token::InitPeerId),
         _ if input.starts_with(LAST_ERROR) => parse_last_error(input, start_pos),
         TIMESTAMP => Ok(Token::Timestamp),
+        TTL => Ok(Token::TTL),
 
         TRUE_VALUE => Ok(Token::Boolean(true)),
         FALSE_VALUE => Ok(Token::Boolean(false)),
@@ -240,6 +241,7 @@ const MISMATCH_INSTR: &str = "mismatch";
 const INIT_PEER_ID: &str = "%init_peer_id%";
 const LAST_ERROR: &str = "%last_error%";
 const TIMESTAMP: &str = "%timestamp%";
+const TTL: &str = "%ttl%";
 
 const TRUE_VALUE: &str = "true";
 const FALSE_VALUE: &str = "false";

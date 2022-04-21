@@ -21,6 +21,7 @@ pub struct ParticleParameters<'init_peer_id, 'particle_id> {
     pub init_peer_id: Cow<'init_peer_id, String>,
     pub particle_id: Cow<'particle_id, String>,
     pub timestamp: u64,
+    pub ttl: u32,
 }
 
 impl<'init_peer_id, 'particle_id> ParticleParameters<'init_peer_id, 'particle_id> {
@@ -28,11 +29,13 @@ impl<'init_peer_id, 'particle_id> ParticleParameters<'init_peer_id, 'particle_id
         init_peer_id: Cow<'init_peer_id, String>,
         particle_id: Cow<'particle_id, String>,
         timestamp: u64,
+        ttl: u32,
     ) -> Self {
         Self {
             init_peer_id,
             particle_id,
             timestamp,
+            ttl,
         }
     }
 }

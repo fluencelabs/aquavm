@@ -116,3 +116,15 @@ fn ap_with_timestamp() {
 
     assert_eq!(actual, expected);
 }
+
+#[test]
+fn ap_with_ttl() {
+    let source_code = r#"
+        (ap %ttl% $stream)
+    "#;
+
+    let actual = parse(source_code);
+    let expected = ap(ApArgument::TTL, Variable::stream("$stream", 19));
+
+    assert_eq!(actual, expected);
+}

@@ -121,6 +121,7 @@ impl<'i> VariableValidator<'i> {
         match &ap.argument {
             ApArgument::Number(_)
             | ApArgument::Timestamp
+            | ApArgument::TTL
             | ApArgument::InitPeerId
             | ApArgument::Boolean(_)
             | ApArgument::Literal(_)
@@ -231,6 +232,7 @@ impl<'i> VariableValidator<'i> {
         match matchable {
             Value::InitPeerId
             | Value::Timestamp
+            | Value::TTL
             | Value::Number(_)
             | Value::Boolean(_)
             | Value::Literal(_)

@@ -57,11 +57,27 @@ fn call_with_timestamp() {
 
     let script = r#"(call %init_peer_id% ("" "") [%timestamp%] result_name)"#;
 
-    let test_params = TestRunParameters::new(vm_peer_id, 1337);
+    let test_params = TestRunParameters::new(vm_peer_id, 1337, 0);
     let result = checked_call_vm!(vm, test_params.clone(), script, "", "");
 
     let actual_trace = trace_from_result(&result);
     let expected_trace = vec![executed_state::scalar_number(test_params.timestamp)];
+
+    assert_eq!(actual_trace, expected_trace);
+}
+
+#[test]
+fn call_with_ttl() {
+    let vm_peer_id = "test_peer_id";
+    let mut vm = create_avm(echo_call_service(), vm_peer_id);
+
+    let script = r#"(call %init_peer_id% ("" "") [%ttl%] result_name)"#;
+
+    let test_params = TestRunParameters::from_ttl(1337);
+    let result = checked_call_vm!(vm, test_params.clone(), script, "", "");
+
+    let actual_trace = trace_from_result(&result);
+    let expected_trace = vec![executed_state::scalar_number(test_params.ttl)];
 
     assert_eq!(actual_trace, expected_trace);
 }

@@ -67,6 +67,22 @@ fn parse_match_with_timestamp() {
 }
 
 #[test]
+fn parse_match_with_ttl() {
+    let source_code = r#"
+        (match %ttl% v1
+            (null)
+        )
+        "#;
+    let instruction = parse(source_code);
+    let expected = match_(
+        Value::TTL,
+        Value::Variable(VariableWithLambda::scalar("v1", 22)),
+        null(),
+    );
+    assert_eq!(instruction, expected);
+}
+
+#[test]
 fn parse_mismatch() {
     let source_code = r#"
         (mismatch v1 v2
