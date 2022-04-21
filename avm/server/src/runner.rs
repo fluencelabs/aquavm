@@ -73,6 +73,7 @@ impl AVMRunner {
         data: impl Into<Vec<u8>>,
         init_peer_id: impl Into<String>,
         timestamp: u64,
+        ttl: u32,
         call_results: CallResults,
     ) -> RunnerResult<RawAVMOutcome> {
         let args = prepare_args(
@@ -82,6 +83,7 @@ impl AVMRunner {
             self.current_peer_id.clone(),
             init_peer_id.into(),
             timestamp,
+            ttl,
             call_results,
         );
 
@@ -117,11 +119,16 @@ fn prepare_args(
     current_peer_id: String,
     init_peer_id: String,
     timestamp: u64,
+    ttl: u32,
     call_results: CallResults,
 ) -> Vec<IValue> {
-    let run_parameters =
-        air_interpreter_interface::RunParameters::new(init_peer_id, current_peer_id, timestamp)
-            .into_ivalue();
+    let run_parameters = air_interpreter_interface::RunParameters::new(
+        init_peer_id,
+        current_peer_id,
+        timestamp,
+        ttl,
+    )
+    .into_ivalue();
 
     let call_results = crate::interface::into_raw_result(call_results);
     let call_results =

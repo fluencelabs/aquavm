@@ -90,6 +90,7 @@ impl<E> AVM<E> {
                 data,
                 particle_parameters.init_peer_id.into_owned(),
                 particle_parameters.timestamp,
+                particle_parameters.ttl,
                 call_results,
             )
             .map_err(AVMError::RunnerError)?;

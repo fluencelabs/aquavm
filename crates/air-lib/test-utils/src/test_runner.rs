@@ -33,6 +33,7 @@ pub struct TestRunner {
 pub struct TestRunParameters {
     pub init_peer_id: String,
     pub timestamp: u64,
+    pub ttl: u32,
 }
 
 impl TestRunner {
@@ -50,6 +51,7 @@ impl TestRunner {
         let TestRunParameters {
             init_peer_id,
             timestamp,
+            ttl,
         } = test_run_params;
 
         let mut call_results = HashMap::new();
@@ -64,6 +66,7 @@ impl TestRunner {
                     data,
                     init_peer_id.clone(),
                     timestamp,
+                    ttl,
                     call_results,
                 )
                 .map_err(|e| e.to_string())?;
@@ -112,10 +115,11 @@ pub fn create_avm(
 }
 
 impl TestRunParameters {
-    pub fn new(init_peer_id: impl Into<String>, timestamp: u64) -> Self {
+    pub fn new(init_peer_id: impl Into<String>, timestamp: u64, ttl: u32) -> Self {
         Self {
             init_peer_id: init_peer_id.into(),
             timestamp,
+            ttl,
         }
     }
 
@@ -123,6 +127,7 @@ impl TestRunParameters {
         Self {
             init_peer_id: init_peer_id.into(),
             timestamp: 0,
+            ttl: 0,
         }
     }
 
@@ -130,6 +135,15 @@ impl TestRunParameters {
         Self {
             init_peer_id: String::new(),
             timestamp,
+            ttl: 0,
+        }
+    }
+
+    pub fn from_ttl(ttl: u32) -> Self {
+        Self {
+            init_peer_id: String::new(),
+            timestamp: 0,
+            ttl,
         }
     }
 }

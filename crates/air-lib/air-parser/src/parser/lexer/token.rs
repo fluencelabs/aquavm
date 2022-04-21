@@ -19,6 +19,7 @@ use crate::LambdaAST;
 use serde::Deserialize;
 use serde::Serialize;
 
+#[allow(clippy::upper_case_acronyms)]
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum Token<'input> {
     OpenRoundBracket,
@@ -54,6 +55,7 @@ pub enum Token<'input> {
     LastError,
     LastErrorWithLambda(LambdaAST<'input>),
     Timestamp,
+    TTL,
 
     Call,
     Ap,

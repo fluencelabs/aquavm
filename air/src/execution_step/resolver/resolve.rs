@@ -41,6 +41,7 @@ pub(crate) fn resolve_to_args<'i>(
         LastError(error_accessor) => prepare_last_error(error_accessor, ctx),
         Literal(value) => prepare_const(value.to_string(), ctx),
         Timestamp => prepare_const(ctx.run_parameters.timestamp, ctx),
+        TTL => prepare_const(ctx.run_parameters.ttl, ctx),
         Boolean(value) => prepare_const(*value, ctx),
         Number(value) => prepare_const(value, ctx),
         EmptyArray => prepare_const(json!([]), ctx),
