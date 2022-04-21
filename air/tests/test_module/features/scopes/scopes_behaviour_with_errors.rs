@@ -14,12 +14,103 @@
  * limitations under the License.
  */
 
-use air::CatchableError;
-use air::ExecutionError;
 use air_test_utils::prelude::*;
 
 use fstrings::f;
 use fstrings::format_args_f;
 
 #[test]
-fn scopes_with_error() {}
+fn check_that_scalar_is_visible_only_inside_fold_block() {
+    let variable_setter_peer_id = "variable_setter_peer_id";
+    let mut variable_setter_vm = create_avm(set_variable_call_service(json!([1, 2, 3])), variable_setter_peer_id);
+
+    let fallible_peer_id = "fallible_peer_id";
+    let mut fallible_peer_vm = create_avm(fallible_call_service("fail"), fallible_peer_id);
+
+    let variable_receiver_peer_id = "variable_receiver_peer_id";
+    let mut variable_receiver_peer_vm = create_avm(echo_call_service(), variable_receiver_peer_id);
+
+    let script = f!(r#"
+        (seq
+            (call "{variable_setter_peer_id}" ("" "") ["iterable_1"] iterable_1)
+            (xor
+                (fold iterable_1 iterator_1
+                     (seq
+                         (call "{variable_setter_peer_id}" ("" "") [] scalar)
+                         (seq
+                             (next iterator_1)
+                             (call "{fallible_peer_id}" ("fail" "") [] scalar)
+                         )
+                     )
+                )
+                (call "{variable_receiver_peer_id}" ("" "") [scalar])
+            )
+        )
+    "#);
+
+    let result = checked_call_vm!(variable_setter_vm, <_>::default(), &script, "", "");
+    let result = checked_call_vm!(fallible_peer_vm, <_>::default(), &script, "", result.data);
+    let result = checked_call_vm!(variable_receiver_peer_vm, <_>::default(), &script, "", result.data);
+    let actual_trace = trace_from_result(&result);
+
+    let expected_trace = vec![
+        executed_state::scalar(json!([1, 2, 3])),
+        executed_state::scalar(json!([1, 2, 3])),
+        executed_state::scalar(json!([1, 2, 3])),
+        executed_state::scalar(json!([1, 2, 3])),
+        executed_state::service_failed(1, "failed result from fallible_call_service"),
+        executed_state::request_sent_by(fallible_peer_id),
+    ];
+
+    assert_eq!(actual_trace, expected_trace);
+}
+
+#[test]
+fn scopes_check_that_scalar_not_overwritten_by_fold_end() {
+    let variable_setter_peer_id = "variable_setter_peer_id";
+    let mut variable_setter_vm = create_avm(set_variable_call_service(json!([1, 2, 3])), variable_setter_peer_id);
+
+    let fallible_peer_id = "fallible_peer_id";
+    let mut fallible_peer_vm = create_avm(fallible_call_service("fail"), fallible_peer_id);
+
+    let variable_receiver_peer_id = "variable_receiver_peer_id";
+    let mut variable_receiver_peer_vm = create_avm(echo_call_service(), variable_receiver_peer_id);
+
+    let script = f!(r#"
+        (seq
+            (seq
+                (call "{variable_setter_peer_id}" ("" "") ["iterable_1"] iterable_1)
+                (call "{variable_setter_peer_id}" ("" "") ["scalar"] scalar)
+            )
+            (xor
+                (fold iterable_1 iterator_1
+                     (seq
+                         (call "{variable_setter_peer_id}" ("" "") [] scalar)
+                         (seq
+                             (next iterator_1)
+                             (call "{fallible_peer_id}" ("fail" "") [] scalar)
+                         )
+                     )
+                )
+                (call "{variable_receiver_peer_id}" ("" "") [scalar])
+            )
+        )
+    "#);
+
+    let result = checked_call_vm!(variable_setter_vm, <_>::default(), &script, "", "");
+    let result = checked_call_vm!(fallible_peer_vm, <_>::default(), &script, "", result.data);
+    let result = checked_call_vm!(variable_receiver_peer_vm, <_>::default(), &script, "", result.data);
+    let actual_trace = trace_from_result(&result);
+
+    let expected_trace = vec![
+        executed_state::scalar(json!([1, 2, 3])),
+        executed_state::scalar(json!([1, 2, 3])),
+        executed_state::scalar(json!([1, 2, 3])),
+        executed_state::scalar(json!([1, 2, 3])),
+        executed_state::scalar(json!([1, 2, 3])),
+        executed_state::service_failed(1, "failed result from fallible_call_service"),
+        executed_state::scalar(json!([1, 2, 3])),
+    ];
+
+    assert_eq!(actual_trace, expected_trace);
+}
