@@ -1,5 +1,10 @@
 ## Version 0.24.0 (2021-04-21)
 
+[PR 253](https://github.com/fluencelabs/aquavm/pull/253):
+Introduced %ttl% keyword
+
+## Version 0.24.0 (2021-04-20)
+
 [PR 250](https://github.com/fluencelabs/aquavm/pull/250):
 Introduced %timestamp% keyword
 
