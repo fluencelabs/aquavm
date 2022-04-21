@@ -158,6 +158,27 @@ fn ap_with_timestamp() {
 }
 
 #[test]
+fn ap_with_ttl() {
+    let vm_1_peer_id = "vm_1_peer_id";
+    let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
+
+    let script = f!(r#"
+        (seq
+            (ap %ttl% scalar)
+            (call "{vm_1_peer_id}" ("" "") [scalar])
+        )
+        "#);
+
+    let test_params = TestRunParameters::from_ttl(1337);
+    let result = checked_call_vm!(vm_1, test_params.clone(), script, "", "");
+
+    let actual_trace = trace_from_result(&result);
+    let expected_state = vec![executed_state::scalar_number(test_params.ttl)];
+
+    assert_eq!(actual_trace, expected_state);
+}
+
+#[test]
 fn ap_with_dst_stream() {
     let vm_1_peer_id = "vm_1_peer_id";
     let test_value = "scalar_2";

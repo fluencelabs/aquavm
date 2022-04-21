@@ -64,6 +64,7 @@ pub enum Value<'i> {
     InitPeerId,
     LastError(Option<LambdaAST<'i>>),
     Timestamp,
+    TTL,
     Literal(&'i str),
     Number(Number),
     Boolean(bool),
@@ -81,6 +82,7 @@ pub enum CallOutputValue<'i> {
 pub enum ApArgument<'i> {
     InitPeerId,
     Timestamp,
+    TTL,
     LastError(Option<LambdaAST<'i>>),
     Literal(&'i str),
     Number(Number),

@@ -179,6 +179,7 @@ Value: Value<'input> = {
     <le:LastErrorWithLambda> => Value::LastError(Some(le)),
     <l:Literal> => Value::Literal(l),
     Timestamp => Value::Timestamp,
+    TTL => Value::TTL,
     <n:Number> => Value::Number(n),
     <b:Boolean> => Value::Boolean(b),
     "[" "]" => Value::EmptyArray,
@@ -193,6 +194,7 @@ ApArgument: ApArgument<'input> = {
     <LastError> => ApArgument::LastError(None),
     <le:LastErrorWithLambda> => ApArgument::LastError(Some(le)),
     Timestamp => ApArgument::Timestamp,
+    TTL => ApArgument::TTL,
     <l:Literal> => ApArgument::Literal(l),
     <n:Number> => ApArgument::Number(n),
     <b:Boolean> => ApArgument::Boolean(b),
@@ -225,6 +227,7 @@ extern {
         LastError => Token::LastError,
         LastErrorWithLambda => Token::LastErrorWithLambda(<LambdaAST<'input>>),
         Timestamp => Token::Timestamp,
+        TTL => Token::TTL,
 
         call => Token::Call,
         ap => Token::Ap,

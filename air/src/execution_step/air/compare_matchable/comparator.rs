@@ -54,6 +54,13 @@ pub(crate) fn are_matchable_eq<'ctx>(
             make_object_comparator(JValue::Number(exec_ctx.run_parameters.timestamp.into())),
         ),
 
+        (TTL, TTL) => Ok(true),
+        (TTL, matchable) | (matchable, TTL) => compare_matchable(
+            matchable,
+            exec_ctx,
+            make_object_comparator(JValue::Number(exec_ctx.run_parameters.ttl.into())),
+        ),
+
         (EmptyArray, EmptyArray) => Ok(true),
         (EmptyArray, matchable) | (matchable, EmptyArray) => {
             compare_matchable(matchable, exec_ctx, make_object_comparator(JValue::Array(vec![])))
@@ -104,6 +111,10 @@ fn compare_matchable<'ctx>(
         }
         Timestamp => {
             let jvalue = exec_ctx.run_parameters.timestamp.into();
+            Ok(comparator(Cow::Owned(jvalue)))
+        }
+        TTL => {
+            let jvalue = exec_ctx.run_parameters.ttl.into();
             Ok(comparator(Cow::Owned(jvalue)))
         }
         Number(number) => {

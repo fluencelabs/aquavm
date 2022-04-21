@@ -98,6 +98,7 @@ pub(crate) struct RcRunParameters {
     pub(crate) init_peer_id: Rc<String>,
     pub(crate) current_peer_id: Rc<String>,
     pub(crate) timestamp: u64,
+    pub(crate) ttl: u32,
 }
 
 impl RcRunParameters {
@@ -106,6 +107,7 @@ impl RcRunParameters {
             init_peer_id: Rc::new(run_parameters.init_peer_id),
             current_peer_id: Rc::new(run_parameters.current_peer_id),
             timestamp: run_parameters.timestamp,
+            ttl: run_parameters.ttl,
         }
     }
 }

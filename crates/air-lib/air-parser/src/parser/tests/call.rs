@@ -393,6 +393,24 @@ fn parse_timestamp() {
 }
 
 #[test]
+fn parse_ttl() {
+    let source_code = r#"
+        (call "peer_id" ("service_id" "fn_name") [%ttl%])
+        "#;
+
+    let instruction = parse(source_code);
+    let expected = call(
+        CallInstrValue::Literal("peer_id"),
+        CallInstrValue::Literal("service_id"),
+        CallInstrValue::Literal("fn_name"),
+        Rc::new(vec![Value::TTL]),
+        CallOutputValue::None,
+    );
+
+    assert_eq!(instruction, expected);
+}
+
+#[test]
 fn parse_last_error() {
     let source_code = format!(
         r#"

@@ -169,6 +169,13 @@ fn timestamp() {
 }
 
 #[test]
+fn ttl() {
+    const TTL: &str = "%ttl%";
+
+    lexer_test(TTL, Single(Ok((0, Token::TTL, TTL.len()))));
+}
+
+#[test]
 fn stream() {
     const STREAM: &str = "$stream____asdasd";
 
