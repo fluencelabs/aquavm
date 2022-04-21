@@ -71,7 +71,7 @@ fn call_with_ttl() {
     let vm_peer_id = "test_peer_id";
     let mut vm = create_avm(echo_call_service(), vm_peer_id);
 
-    let script = r#"(call %init_peer_id% ("" "") [%ttl%] result_name)"#;
+    let script = f!(r#"(call "{vm_peer_id}" ("" "") [%ttl%] result_name)"#);
 
     let test_params = TestRunParameters::from_ttl(1337);
     let result = checked_call_vm!(vm, test_params.clone(), script, "", "");
