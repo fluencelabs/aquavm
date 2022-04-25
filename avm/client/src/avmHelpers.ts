@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { CallResultsArray, InterpreterResult, CallRequest } from './types';
+import { CallResultsArray, InterpreterResult, CallRequest, RunParameters } from './types';
 
 const decoder = new TextDecoder();
 const encoder = new TextEncoder();
@@ -30,8 +30,7 @@ const encoder = new TextEncoder();
  * @returns AVM call arguments as serialized JSON string
  */
 export function serializeAvmArgs(
-    initPeerId: string,
-    currentPeerId: string,
+    runParams: RunParameters,
     air: string,
     prevData: Uint8Array,
     data: Uint8Array,
@@ -45,11 +44,6 @@ export function serializeAvmArgs(
         };
     }
 
-    const paramsToPass = {
-        init_peer_id: initPeerId,
-        current_peer_id: currentPeerId,
-    };
-
     const encoded = encoder.encode(JSON.stringify(callResultsToPass));
 
     const avmArg = JSON.stringify([
@@ -57,7 +51,12 @@ export function serializeAvmArgs(
         air,
         Array.from(prevData),
         Array.from(data),
-        paramsToPass,
+        {
+            init_peer_id: runParams.initPeerId,
+            current_peer_id: runParams.currentPeerId,
+            timestamp: runParams.timestamp,
+            ttl: runParams.ttl,
+        },
         Array.from(encoded),
     ]);
 
@@ -149,15 +148,14 @@ type CallToAvm = ((args: string) => Promise<string>) | ((args: string) => string
  */
 export async function callAvm(
     fn: CallToAvm,
-    initPeerId: string,
-    currentPeerId: string,
+    runParams: RunParameters,
     air: string,
     prevData: Uint8Array,
     data: Uint8Array,
     callResults: CallResultsArray,
 ): Promise<InterpreterResult> {
     try {
-        const avmArg = serializeAvmArgs(initPeerId, currentPeerId, air, prevData, data, callResults);
+        const avmArg = serializeAvmArgs(runParams, air, prevData, data, callResults);
         const rawResult = await fn(avmArg);
         return deserializeAvmResult(rawResult);
     } catch (e) {

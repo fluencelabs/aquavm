@@ -17,6 +17,32 @@
 export type LogLevel = 'info' | 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'off';
 
 /**
+ * Parameters that a host side should pass to an interpreter and that necessary for execution.
+ */
+export interface RunParameters {
+    /**
+     * Peer id of a peer that start this particle.
+     */
+    initPeerId: String;
+
+    /**
+     * Peer id of a current peer.
+     */
+    currentPeerId: String;
+
+    /**
+     * Unix timestamp from a particle in milliseconds.
+     * It represents time when this particle was sent from the init peer id.
+     */
+    timestamp: number;
+
+    /**
+     * TTL set by init peer id in milliseconds.
+     */
+    ttl: number;
+}
+
+/**
  * Represents an executed host function result.
  */
 export interface CallServiceResult {
