@@ -18,7 +18,7 @@ path = "src/lib.rs"
 [dependencies]
 air-interpreter-interface = { version = "0.10.0", path = "../../crates/air-lib/interpreter-interface" }
 avm-data-store = { version = "0.1.0", path = "../../crates/data-store" }
-fluence-faas = "0.16.0"
+fluence-faas = "0.16.1"
 polyplets = { version = "0.2.0", path = "../../crates/air-lib/polyplets" }
 
 eyre = "0.6.5"
