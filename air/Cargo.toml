@@ -44,7 +44,7 @@ wasm-bindgen = "=0.2.65"
 
 [dev_dependencies]
 air-test-utils = { path = "../crates/air-lib/test-utils" }
-fluence-app-service = "0.17.1"
+fluence-app-service = "0.17.2"
 
 criterion = "0.3.3"
 csv = "1.1.5"

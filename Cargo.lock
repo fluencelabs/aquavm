@@ -216,7 +216,7 @@ version = "0.1.0"
 
 [[package]]
 name = "avm-server"
-version = "0.20.1"
+version = "0.20.2"
 dependencies = [
  "air-interpreter-interface",
  "avm-data-store",
@@ -778,9 +778,9 @@ checksum = "37ab347416e802de484e4d03c7316c48f1ecb56574dfd4a46a80f173ce1de04d"
 
 [[package]]
 name = "fluence-app-service"
-version = "0.17.1"
+version = "0.17.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d3494434324b613a7a1d82c7963e06ee7c33c44e4c470d06964da1d0697afd11"
+checksum = "8057f761b34a5bfb840e9062c9228306c8c8dd72f7bccf1c311d03f0ece13966"
 dependencies = [
  "fluence-faas",
  "log",
@@ -795,9 +795,9 @@ dependencies = [
 
 [[package]]
 name = "fluence-faas"
-version = "0.16.1"
+version = "0.16.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "182fcdeaabfef54838f8ecefbf861ede8ed47bbe8353b05849c0a5faaf49838d"
+checksum = "bc936ee9f17ecd8f0cf10f9364c17fe76cbf6a07299f1d35c649e9415bc8821c"
 dependencies = [
  "bytesize",
  "cmd_lib",
@@ -1345,9 +1345,9 @@ dependencies = [
 
 [[package]]
 name = "marine-runtime"
-version = "0.14.1"
+version = "0.14.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fbec0f1550ea0e09ef0e8553131bb6e75f61e31c7cebe61fa9bc3d01fc9eb917"
+checksum = "d36a361cb7ce770c78c979d784d877982042a16fef97043cb3bec1a4eaff5935"
 dependencies = [
  "anyhow",
  "boolinator",
