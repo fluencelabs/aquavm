@@ -32,3 +32,13 @@ panic = "unwind"
 
 [patch.crates-io]
 polyplets = { path = "crates/air-lib/polyplets" }
+
+it-lilo = {version = "0.4.0", git = "https://github.com/fluencelabs/interface-types", branch = "bug/allocating-more-than-2gb"}
+fluence-it-types = {version = "0.3.1", git = "https://github.com/fluencelabs/interface-types", branch = "bug/allocating-more-than-2gb"}
+it-memory-traits = {version = "0.3.0", git = "https://github.com/fluencelabs/interface-types", branch = "bug/allocating-more-than-2gb"}
+wasmer-interface-types-fl = {version = "0.23.1", git = "https://github.com/fluencelabs/interface-types", branch = "bug/allocating-more-than-2gb"}
+marine-runtime = {version = "0.14.1", git = "https://github.com/fluencelabs/marine", branch = "update-it"}
+fluence-faas = {version = "0.16.1", git = "https://github.com/fluencelabs/marine", branch = "update-it"}
+fluence-app-service = {version = "0.17.1", git = "https://github.com/fluencelabs/marine", branch = "update-it"}
+
+
