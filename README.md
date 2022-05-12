@@ -4,9 +4,7 @@
 # AquaVM
 
 <img style="float: right;" alt="AquaVM & AIR model" src="images/air_model.png" height="250"/>
-<div style="clear: right">
 AquaVM is the interpreter of AIR scripts intended to be an integral pillar of the Fluence network. It allows expressing network choreography in scripts and compose distributed, peer-to-peer hosted services. AquaVM compiles to Wasm and run both client- and server-side.
-</div>
 
 ## AquaVM: interpreter execution model
 
