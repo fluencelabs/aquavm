@@ -9,7 +9,9 @@ AquaVM is the interpreter of AIR scripts intended to be an integral pillar of th
 
 From a high level AquaVM could be considered as a pure state transition function that takes previous and current (usually came from a network) state and produces a new one with a list of peer where it should be sent. Additionally, the function returns requests to call services that should be called locally on a peer and then expects from a host to pass results back to it somewhere in the future.
 
-<img alt="call structure" src="images/interpreter_ee.png" width="970"/>
+<div style="text-align: center;">
+    <img alt="interpreter execution model" src="images/interpreter_ee.png" width="670"/>
+</div>
 
 This execution model aims to provide async/parallel service execution ability on a peer.
 
