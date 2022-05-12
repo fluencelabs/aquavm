@@ -5,17 +5,17 @@
 
 AquaVM is the interpreter of AIR scripts intended to be an integral pillar of the Fluence network. It allows expressing network choreography in scripts and compose distributed, peer-to-peer hosted services. AquaVM compiles to Wasm and run both client- and server-side.
 
+<img alt="interpreter execution model" src="images/air_model.png" width="670"/>
+
 ## AquaVM: interpreter execution model
 
 From a high level AquaVM could be considered as a pure state transition function that takes previous and current (usually came from a network) state and produces a new one with a list of peer where it should be sent. Additionally, the function returns requests to call services that should be called locally on a peer and then expects from a host to pass results back to it somewhere in the future.
 
-<div style="text-align: center;">
-    <img alt="interpreter execution model" src="images/interpreter_ee.png" width="670"/>
-</div>
+<img alt="interpreter execution model" src="images/interpreter_em.png" width="670"/>
 
-This execution model aims to provide async/parallel service execution ability on a peer.
+This execution model aims to allow async/parallel service execution on a peer.
 
-## Aquamarine Intermediate Representation (AIR)
+## Aquamarine Intermediate Representation: IR for p2p systems
 
 ### AIR: What is it?
 
