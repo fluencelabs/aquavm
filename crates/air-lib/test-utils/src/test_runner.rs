@@ -17,16 +17,31 @@
 use super::CallServiceClosure;
 use avm_server::avm_runner::*;
 
+use once_cell::sync::OnceCell;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::path::PathBuf;
 
 // 10 Mb
 const AVM_MAX_HEAP_SIZE: u64 = 10 * 1024 * 1024;
+const AIR_WASM_PATH: &str = "../target/wasm32-wasi/debug/air_interpreter_server.wasm";
 
 pub struct TestRunner {
-    pub runner: AVMRunner,
+    pub runner: object_pool::Reusable<'static, AVMRunner>,
     pub call_service: CallServiceClosure,
+}
+
+fn make_pooled_avm_runner() -> AVMRunner {
+    let fake_current_peer_id = "";
+    let logging_mask = i32::MAX;
+
+    AVMRunner::new(
+        PathBuf::from(AIR_WASM_PATH),
+        fake_current_peer_id,
+        Some(AVM_MAX_HEAP_SIZE),
+        logging_mask,
+    )
+    .expect("vm should be created")
 }
 
 #[derive(Debug, Default, Clone)]
@@ -97,17 +112,19 @@ pub fn create_avm(
     call_service: CallServiceClosure,
     current_peer_id: impl Into<String>,
 ) -> TestRunner {
-    let air_wasm_path = PathBuf::from("../target/wasm32-wasi/debug/air_interpreter_server.wasm");
-    let current_peer_id = current_peer_id.into();
-    let logging_mask = i32::MAX;
+    static POOL_CELL: OnceCell<object_pool::Pool<AVMRunner>> = OnceCell::new();
 
-    let runner = AVMRunner::new(
-        air_wasm_path,
-        current_peer_id,
-        Some(AVM_MAX_HEAP_SIZE),
-        logging_mask,
-    )
-    .expect("vm should be created");
+    let pool = POOL_CELL.get_or_init(|| {
+        object_pool::Pool::new(
+            // we create an empty pool and let it fill on demand
+            0,
+            || unreachable!(),
+        )
+    });
+
+    let mut runner = pool.pull(make_pooled_avm_runner);
+    runner.set_peer_id(current_peer_id);
+
     TestRunner {
         runner,
         call_service,

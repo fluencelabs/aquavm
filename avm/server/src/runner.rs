@@ -110,6 +110,11 @@ impl AVMRunner {
             max_memory_size: stats[0].max_memory_size,
         }
     }
+
+    #[inline]
+    pub fn set_peer_id(&mut self, current_peer_id: impl Into<String>) {
+        self.current_peer_id = current_peer_id.into();
+    }
 }
 
 fn prepare_args(

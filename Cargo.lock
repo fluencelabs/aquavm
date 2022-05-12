@@ -142,6 +142,8 @@ dependencies = [
  "avm-server",
  "fstrings",
  "marine-rs-sdk",
+ "object-pool",
+ "once_cell",
  "serde_json",
 ]
 
@@ -1492,6 +1494,15 @@ checksum = "19e64526ebdee182341572e50e9ad03965aa510cd94427a4549448f285e957a1"
 dependencies = [
  "hermit-abi",
  "libc",
+]
+
+[[package]]
+name = "object-pool"
+version = "0.5.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ee9a3e7196d09ec86002b939f1576e8e446d58def8fd48fe578e2c72d5328d68"
+dependencies = [
+ "parking_lot 0.11.2",
 ]
 
 [[package]]
