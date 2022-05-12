@@ -1,90 +1,138 @@
 [![crates.io version](https://img.shields.io/crates/v/air-interpreter-wasm?style=flat-square)](https://crates.io/crates/air-interpreter-wasm)
 [![npm version](https://img.shields.io/npm/v/@fluencelabs/avm)](https://www.npmjs.com/package/@fluencelabs/avm)
 
-# Aquamarine
+# AquaVM
 
- - composability medium
- - allows developers to express network choreography in a script
- - moves script & data from peer to peer in a single-use logical network with checking merkle proofs and signatures.
+AquaVM is the interpreter of AIR scripts intended to be an integral pillar of the Fluence network. It allows expressing network choreography in scripts and compose distributed, peer-to-peer hosted services. AquaVM compiles to Wasm and run both client- and server-side.
 
-<br/>
-<p align="center" width="100%">
-    <img alt="aquamarine scheme" src="images/interpreter.png" width="621"/>
-</p>
-<br/>
+## AquaVM: interpreter execution model
 
-## Fluence stack
+From a high level AquaVM could be considered as a pure state transition function that takes previous and current (usually came from a network) state and produces a new one with a list of peer where it should be sent. Additionally, the function returns requests to call services that should be called locally on a peer and then expects from a host to pass results back to it somewhere in the future.
 
-Fluence [nodes](https://github.com/fluencelabs/fluence) uses AIR to coordinate requests between different services run by [Marine](https://github.com/fluencelabs/marine):
+<img alt="call structure" src="images/interpreter_ee.png" width="670"/>
 
-<br/>
-<p align="center" width="100%">
-    <img alt="aquamarine scheme" align="center" src="images/stack.png" width="663"/>
-</p>
-<br/>
-
-## Aquamarine Intermediate Representation
+## Aquamarine Intermediate Representation (AIR)
 
 ### AIR: What is it?
 
 - S-expression-based low-level language
 - Controls Fluence network and its peers
-- Inspired by WAT (WebAssembly Text Format)
-- Meant to be a compile target
-- Development meant to happen in a higher-level language
-- Syntax is in flux, will change
-
-Scripts written in AIR look like this:
-
-<img alt="fold example" src="images/fold_example.png" width="100%"/>
-
-1. Gather chat members by calling chat.members
-2. Iterate through elements in members array, m = element
-3. Each m is an object, represented as array; [0] is the first field
-4. `(next m)` triggers next iteration
+- Consists of 12 instructions (more instructions to come)
+- Semantic inspired by pi-calculus, lambda-calculus and theory of category
+- Syntax inspired by WAT (Wasm Text Format) and Lisp
 
 ### AIR: Instructions
-#### call: execution
-<img alt="call structure" src="images/call_data.png" width="670"/>
+#### call
 
-- `call` commands the execution
-- moves execution to a peer, specified by `location`
-- peer is expected to have specified WASM `service`
-- the `service` must have specified `function` available to be called
-- `argument list` is given to the `function`
-- result of the `function` is saved and available under `output name`
-- example call could be thought of as `data.result = dht.put(key, value)`
+```wasm
+(call "12D1Node" ("dht" "put") [key value] result)
+```
 
-#### seq: sequential
-<img alt="seq structure" src="images/seq.png" width="586"/>
+- moves execution to a peer, specified by location (`"12D1Node"` in the example)
+- peer is expected to have the specified Wasm service (`"dht"`)
+- the `service` must have specified function (`"put"`) available to be called
+- argument list (`[key value]`) will be given to the function
+- result of the function execution is saved and available under output name (`result`)
+
+#### seq
+
+```wasm
+(seq
+    (call "12D1Node" ("dht" "get") [key] value)
+    (call "12D1Storage" ("SQLite" "put") [key value] store_result)
+)
+```
 
 - `seq` takes two instructions
-- executes them sequentially
+- executes them sequentially: second instruction will be executed iff first one finished successfully
 
-#### par: parallel
-<img alt="par structure" src="images/par.png" width="536"/>
+#### par
+
+```wasm
+(par
+    (call "ClientA" ("chat" "display") [msg])
+    (call "ClientB" ("chat" "display") [msg])
+)
+```
 
 - `par` takes two instructions
-- executes them in parallel
+- executes them in parallel: the second instruction will be executed independently of the completion of the first one
 
-#### fold: iteration
-<img alt="fold structure" src="images/fold.png" width="536"/>
+#### ap
 
-- `fold` takes an array, a variable and an instruction
-- iterates through the array, assigning each element to the variable
-- on each iteration instruction is executed
-- instruction can read the variable
+```wasm
+(seq
+    (call "peer_id" ("user-list" "get_users") [] users)
+    (ap users.$.[0].peer_id user_0)
+)
+```
+
+- `ap` takes two values
+- applies lambda to first and saves the result in second
+
+#### match/mismath
+
+```wasm
+(seq
+    (call "peer_id" ("user-list" "get_users") [] users)
+    (mismatch users.$.length 0
+        (ap users.$.[0].peer_id user_0)
+    )
+)
+```
+
+- `match`/`mismatch` takes two variables and an instruction
+- executes the instruction iff variables are equal/notequal
+
+#### fold
+
+```wasm
+(fold users user
+    (seq
+        (call user.$.peer_id ("chat" "display") [msg])
+        (next user)
+    )
+)
+```
+
+- `fold` is a form of a fixed-point combinator
+- takes an array or an iterable variable and an instruction
+- iterates through the iterable (`users`), assigning each element to the iterator (`user`) 
+- on each iteration instruction (`(seq ...)`) is executed
+- instruction can read the iterator
 - `next` triggers next iteration
 
-#### xor: branching & error handling
-<img alt="xor structure" src="images/xor.png" width="577"/>
+#### xor
+
+```wasm
+(xor
+    (call "ClientA" ("chat" "display") [msg])
+    (call "ClientB" ("chat" "display") [msg])
+)
+```
 
 - `xor` takes two instructions
-- iff first instruction fails, second one is executed
+- second one is executed iff the first one failed
 
 #### null
-<img alt="null structure" src="images/null.png" width="577"/>
 
+```wasm
+(null)
+```
 
 - `null` takes no arguments
 - does nothing, useful for code generation
+
+### AIR: values
+#### Scalars
+
+- scalars are fully consistent - have the same value on each peer during a script execution
+- could be an argument of any instruction
+- JSON-based (fold could iterate only over array-based value)
+
+#### Streams
+
+- streams are CRDT-like (locally-consistent) - have deterministic execution wrt one peer
+- versioned
+- could be used only by call and fold instructions (more instructions for streams to come)
+- could be turned to scalar (canonicalized)
