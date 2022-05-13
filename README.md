@@ -57,7 +57,7 @@ Example:
 (seq <left_instruction> <right_instruction>)
 ```
 
-- executes instructions sequentially: `right_instruction` will be executed iff `left_instruction` finished successfully
+- executes instructions sequentially: `right_instruction` will be executed iff  `left_instruction` finished successfully
 
 #### par
 
@@ -71,11 +71,11 @@ Example:
 
 ```wasm
 (ap <literal> <dst_variable>)
-(ap <src_variable>.$.<lamda> <dst_variable>)
+(ap <src_variable>.$.<lambda> <dst_variable>)
 ```
 
-- `ap` puts literal into `dst_variable`
-- or applies lambda to `src_variable` and saves the result in `dst_variable`
+- puts `literal` into `dst_variable`
+- or applies `lambda` to `src_variable` and saves the result in `dst_variable`
 
 Example:
 ```wasm
@@ -110,7 +110,7 @@ Example:
 (fold <iterable> <iterator> <instruction>)
 ```
 
-- `fold` is a form of a fixed-point combinator
+- is a form of a fixed-point combinator
 - iterates through the `iterable`, assigning each element to the `iterator` 
 - on each iteration `instruction` is executed
 - `next` triggers next iteration
@@ -139,7 +139,7 @@ Example:
 (new <variable>)
 ```
 
-- `new` creates a new scoped variable with the provided name (it's similar to \mu operator from pi-calculus that creates an anonymous channel)
+- creates a new scoped variable with the provided name (it's similar to \mu operator from pi-calculus that creates an anonymous channel)
 
 #### fail
 
@@ -148,7 +148,7 @@ Example:
 (fail <error code> <error message>)
 ```
 
-- `fail` throws an exception with provided `error code` and `error message` or construct it from a provided `variable`]
+- throws an exception with provided `error code` and `error message` or construct it from a provided `variable`]
 
 Example
 ```wasm
@@ -161,7 +161,6 @@ Example
 (null)
 ```
 
-- `null` takes no arguments
 - does nothing, useful for code generation
 
 ### AIR: values
