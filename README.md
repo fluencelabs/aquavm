@@ -29,10 +29,10 @@ This execution model aims to allow async/parallel service execution on a peer.
 #### call
 
 ```wasm
-(call "12D1Node" ("dht" "put") [key value] result)
+(call "peer_id" ("dht" "put") [key value] result)
 ```
 
-- moves execution to a peer, specified by location (`"12D1Node"` in the example)
+- moves execution to a peer, specified by location (`"peer_id"` in the example)
 - peer is expected to have the specified Wasm service (`"dht"`)
 - the `service` must have specified function (`"put"`) available to be called
 - argument list (`[key value]`) will be given to the function
@@ -42,8 +42,8 @@ This execution model aims to allow async/parallel service execution on a peer.
 
 ```wasm
 (seq
-    (call "12D1Node" ("dht" "get") [key] value)
-    (call "12D1Storage" ("SQLite" "put") [key value] store_result)
+    (call "node_id" ("dht" "get") [key] value)
+    (call "storage_id" ("SQLite" "put") [key value] store_result)
 )
 ```
 
@@ -54,8 +54,8 @@ This execution model aims to allow async/parallel service execution on a peer.
 
 ```wasm
 (par
-    (call "ClientA" ("chat" "display") [msg])
-    (call "ClientB" ("chat" "display") [msg])
+    (call "client_a_id" ("chat" "display") [msg])
+    (call "client_b_id" ("chat" "display") [msg])
 )
 ```
 
@@ -110,8 +110,8 @@ This execution model aims to allow async/parallel service execution on a peer.
 
 ```wasm
 (xor
-    (call "ClientA" ("chat" "display") [msg])
-    (call "ClientB" ("chat" "display") [msg])
+    (call "client_a_id" ("chat" "display") [msg])
+    (call "client_b_id" ("chat" "display") [msg])
 )
 ```
 
