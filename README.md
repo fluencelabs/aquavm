@@ -23,29 +23,22 @@ In summary, the AquaVM execution model allows (async) parallel service execution
 
 ## Aquamarine Intermediate Representation (AIR): IR For P2P Systems
 
-AIR scripts control the Fluence peer-to-peer network, its peers and, through [Marine adapter services]() even resources on other (p2p) betworks, such as IPFS and Filecoin.
-
-Mike: would be good to maybe briefly explain the design choices for Air, e.., S-epr as opposed to byte code, etc.
+AIR scripts control the Fluence peer-to-peer network, its peers and, through Marine adapter services even resources on other (p2p) betworks, such as IPFS and Filecoin.
 
 ### What is AIR?
 
-- S-expression-based low-level language
+- S-expression-based low-level language with binary form to come
 - Consists of twelve (12) instructions with more instructions to come
 - Semantics are inspired by [π-calculus](https://en.wikipedia.org/wiki/%CE%A0-calculus), [λ-calculus](https://en.wikipedia.org/wiki/Lambda_calculus) and [category theory](https://en.wikipedia.org/wiki/Category_theory)
 - Syntax is inspired by [Wasm Text Format](https://developer.mozilla.org/en-US/docs/WebAssembly/Understanding_the_text_format) (WAT) and [Lisp](https://en.wikipedia.org/wiki/Lisp_(programming_language))
 
 ### AIR: Instructions
 
-Mike: could use some of the calculus references and explainers we had a year ago or so in readme
-
 #### call
 
-Mike: wouldn't it be better to have a generic function specification before the example?
-
 ```wasm
-(call <peer_id> (<service namespace> <service function>) [key value] <output>)
+(call <peer_id> (<service name> <service function>) [<argument list>] <output>)
 ```
-
 
 ```wasm
 (call "peer_id" ("dht" "put") [key value] result)
@@ -53,11 +46,15 @@ Mike: wouldn't it be better to have a generic function specification before the 
 
 - moves execution to the peer specified, e.g., `"peer_id"`
 - the peer is expected to host the specified Wasm service, e.g., `"dht"`
-- the `service` is expected to contain the specified function, e.g.,  `"put"`
-- the argument list `[key value]` is given to the function and may be empty 
+- the `service function` is expected to contain the specified function, e.g.,  `"put"`
+- the `argument list`, e.g., `[key value]`, is given to the function and may be empty 
 - the result of the function execution is saved and returned by it's output name, e.g., `result`
 
 #### seq
+
+```wasm
+(seq left_instruction right_instruction)
+```
 
 ```wasm
 (seq
@@ -66,10 +63,13 @@ Mike: wouldn't it be better to have a generic function specification before the 
 )
 ```
 
-- `seq` takes two instructions
-- executes them sequentially: second instruction will be executed iff first one finished successfully
+- executes instructions sequentially: `right_instruction` will be executed iff `left_instruction` finished successfully
 
 #### par
+
+```wasm
+(par left_instruction right_instruction)
+```
 
 ```wasm
 (par
@@ -78,10 +78,14 @@ Mike: wouldn't it be better to have a generic function specification before the 
 )
 ```
 
-- `par` takes two instructions
-- executes them in parallel: the second instruction will be executed independently of the completion of the first one
+- executes instructions in parallel: `right_instruction` will be executed independently of the completion of `left_instruction`
 
 #### ap
+
+```wasm
+(ap literal dst_variable)
+(ap src_variable.$.lamda dst_variable)
+```
 
 ```wasm
 (seq
@@ -90,10 +94,14 @@ Mike: wouldn't it be better to have a generic function specification before the 
 )
 ```
 
-- `ap` takes two values
-- applies lambda to first and saves the result in second
+- `ap` puts literal into `dst_variable`
+- or applies lambda to `src_variable` and saves the result in `dst_variable`
 
 #### match/mismath
+
+```wasm
+(match variable variable instruction)
+```
 
 ```wasm
 (seq
@@ -104,10 +112,13 @@ Mike: wouldn't it be better to have a generic function specification before the 
 )
 ```
 
-- `match`/`mismatch` takes two variables and an instruction
 - executes the instruction iff variables are equal/notequal
 
 #### fold
+
+```wasm
+(fold iterable iterator instruction)
+```
 
 ```wasm
 (fold users user
@@ -128,14 +139,34 @@ Mike: wouldn't it be better to have a generic function specification before the 
 #### xor
 
 ```wasm
+(xor left_instruction right_instruction)
+```
+
+```wasm
 (xor
     (call "client_a_id" ("chat" "display") [msg])
     (call "client_b_id" ("chat" "display") [msg])
 )
 ```
 
-- `xor` takes two instructions
-- second one is executed iff the first one failed
+- `right_instruction` is executed iff `left_instruction` failed
+
+#### new
+
+```wasm
+(new variable)
+```
+
+- `new` creates a new scoped variable with the provided name (it's similar to \mu operator from pi-calculus that creates an anonymous channel)
+
+#### fail
+
+```wasm
+(fail variable)
+(fail 1337 "error message")
+```
+
+- `fail` throws an exception with provided error code and message or construct it from a provided variable
 
 #### null
 
