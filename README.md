@@ -37,30 +37,24 @@ AIR scripts control the Fluence peer-to-peer network, its peers and, through Mar
 #### call
 
 ```wasm
-(call <peer_id> (<service name> <service function>) [<argument list>] <output>)
+(call <peer_id> (<service name> <service function>) [<arguments list>] <output name>)
 ```
 
+- moves execution to the `peer_id` specified
+- the peer is expected to host Wasm service with the specified `service name`
+- the `service function` is expected to contain the specified function
+- the `arguments list` is given to the function and may be empty 
+- the result of the function execution is saved and returned by it's `output name`
+
+Example:
 ```wasm
 (call "peer_id" ("dht" "put") [key value] result)
 ```
 
-- moves execution to the peer specified, e.g., `"peer_id"`
-- the peer is expected to host the specified Wasm service, e.g., `"dht"`
-- the `service function` is expected to contain the specified function, e.g.,  `"put"`
-- the `argument list`, e.g., `[key value]`, is given to the function and may be empty 
-- the result of the function execution is saved and returned by it's output name, e.g., `result`
-
 #### seq
 
 ```wasm
-(seq left_instruction right_instruction)
-```
-
-```wasm
-(seq
-    (call "node_id" ("dht" "get") [key] value)
-    (call "storage_id" ("SQLite" "put") [key value] store_result)
-)
+(seq <left_instruction> <right_instruction>)
 ```
 
 - executes instructions sequentially: `right_instruction` will be executed iff `left_instruction` finished successfully
@@ -68,14 +62,7 @@ AIR scripts control the Fluence peer-to-peer network, its peers and, through Mar
 #### par
 
 ```wasm
-(par left_instruction right_instruction)
-```
-
-```wasm
-(par
-    (call "client_a_id" ("chat" "display") [msg])
-    (call "client_b_id" ("chat" "display") [msg])
-)
+(par <left_instruction> <right_instruction>)
 ```
 
 - executes instructions in parallel: `right_instruction` will be executed independently of the completion of `left_instruction`
@@ -83,10 +70,14 @@ AIR scripts control the Fluence peer-to-peer network, its peers and, through Mar
 #### ap
 
 ```wasm
-(ap literal dst_variable)
-(ap src_variable.$.lamda dst_variable)
+(ap <literal> <dst_variable>)
+(ap <src_variable>.$.<lamda> <dst_variable>)
 ```
 
+- `ap` puts literal into `dst_variable`
+- or applies lambda to `src_variable` and saves the result in `dst_variable`
+
+Example:
 ```wasm
 (seq
     (call "peer_id" ("user-list" "get_users") [] users)
@@ -94,15 +85,16 @@ AIR scripts control the Fluence peer-to-peer network, its peers and, through Mar
 )
 ```
 
-- `ap` puts literal into `dst_variable`
-- or applies lambda to `src_variable` and saves the result in `dst_variable`
-
 #### match/mismath
 
 ```wasm
-(match variable variable instruction)
+(match <variable> <variable> <instruction>)
+(mismatch <variable> <variable> <instruction>)
 ```
 
+- executes the instruction iff variables are equal/notequal
+
+Example:
 ```wasm
 (seq
     (call "peer_id" ("user-list" "get_users") [] users)
@@ -112,14 +104,18 @@ AIR scripts control the Fluence peer-to-peer network, its peers and, through Mar
 )
 ```
 
-- executes the instruction iff variables are equal/notequal
-
-#### fold
+#### fold/next
 
 ```wasm
-(fold iterable iterator instruction)
+(fold <iterable> <iterator> <instruction>)
 ```
 
+- `fold` is a form of a fixed-point combinator
+- iterates through the `iterable`, assigning each element to the `iterator` 
+- on each iteration `instruction` is executed
+- `next` triggers next iteration
+  
+Example:
 ```wasm
 (fold users user
     (seq
@@ -129,24 +125,10 @@ AIR scripts control the Fluence peer-to-peer network, its peers and, through Mar
 )
 ```
 
-- `fold` is a form of a fixed-point combinator
-- takes an array or an iterable variable and an instruction
-- iterates through the iterable (`users`), assigning each element to the iterator (`user`) 
-- on each iteration instruction (`(seq ...)`) is executed
-- instruction can read the iterator
-- `next` triggers next iteration
-
 #### xor
 
 ```wasm
-(xor left_instruction right_instruction)
-```
-
-```wasm
-(xor
-    (call "client_a_id" ("chat" "display") [msg])
-    (call "client_b_id" ("chat" "display") [msg])
-)
+(xor <left_instruction> <right_instruction>)
 ```
 
 - `right_instruction` is executed iff `left_instruction` failed
@@ -154,7 +136,7 @@ AIR scripts control the Fluence peer-to-peer network, its peers and, through Mar
 #### new
 
 ```wasm
-(new variable)
+(new <variable>)
 ```
 
 - `new` creates a new scoped variable with the provided name (it's similar to \mu operator from pi-calculus that creates an anonymous channel)
@@ -162,11 +144,16 @@ AIR scripts control the Fluence peer-to-peer network, its peers and, through Mar
 #### fail
 
 ```wasm
-(fail variable)
-(fail 1337 "error message")
+(fail <variable>)
+(fail <error code> <error message>)
 ```
 
-- `fail` throws an exception with provided error code and message or construct it from a provided variable
+- `fail` throws an exception with provided `error code` and `error message` or construct it from a provided `variable`]
+
+Example
+```wasm
+(fail 1337 "error message")
+```
 
 #### null
 
