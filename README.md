@@ -21,28 +21,41 @@ AquaVM's execution model facilitates Fluence protocol's data push model implemen
 
 In summary, the AquaVM execution model allows (async) parallel service execution on one or multiple peers.
 
-## Aquamarine Intermediate Representation: IR for p2p systems
+## Aquamarine Intermediate Representation (AIR): IR For P2P Systems
 
-### AIR: What is it?
+AIR scripts control the Fluence peer-to-peer network, its peers and, through [Marine adapter services]() even resources on other (p2p) betworks, such as IPFS and Filecoin.
+
+Mike: would be good to maybe briefly explain the design choices for Air, e.., S-epr as opposed to byte code, etc.
+
+### What is AIR?
 
 - S-expression-based low-level language
-- Controls Fluence network and its peers
-- Consists of 12 instructions (more instructions to come)
-- Semantic inspired by pi-calculus, lambda-calculus and theory of category
-- Syntax inspired by WAT (Wasm Text Format) and Lisp
+- Consists of twelve (12) instructions with more instructions to come
+- Semantics are inspired by [π-calculus](https://en.wikipedia.org/wiki/%CE%A0-calculus), [λ-calculus](https://en.wikipedia.org/wiki/Lambda_calculus) and [category theory](https://en.wikipedia.org/wiki/Category_theory)
+- Syntax is inspired by [Wasm Text Format](https://developer.mozilla.org/en-US/docs/WebAssembly/Understanding_the_text_format) (WAT) and [Lisp](https://en.wikipedia.org/wiki/Lisp_(programming_language))
 
 ### AIR: Instructions
+
+Mike: could use some of the calculus references and explainers we had a year ago or so in readme
+
 #### call
+
+Mike: wouldn't it be better to have a generic function specification before the example?
+
+```wasm
+(call <peer_id> (<service namespace> <service function>) [key value] <output>)
+```
+
 
 ```wasm
 (call "peer_id" ("dht" "put") [key value] result)
 ```
 
-- moves execution to a peer, specified by location (`"peer_id"` in the example)
-- peer is expected to have the specified Wasm service (`"dht"`)
-- the `service` must have specified function (`"put"`) available to be called
-- argument list (`[key value]`) will be given to the function
-- result of the function execution is saved and available under output name (`result`)
+- moves execution to the peer specified, e.g., `"peer_id"`
+- the peer is expected to host the specified Wasm service, e.g., `"dht"`
+- the `service` is expected to contain the specified function, e.g.,  `"put"`
+- the argument list `[key value]` is given to the function and may be empty 
+- the result of the function execution is saved and returned by it's output name, e.g., `result`
 
 #### seq
 
