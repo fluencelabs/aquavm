@@ -7,7 +7,7 @@ AquaVM executes compiled [Aqua](https://github.com/fluencelabs/aqua), i.e., Aqua
 
 Since AquaVM compiles to Wasm, it can run both clients, such as browsers and nodejs apps, and servers. See Figure 1.
 
-**Figure 1: Stylized AquaVM And Air Model**
+**Figure 1: Stylized AquaVM And AIR Model**
 
 <img alt="AquaVM & AIR model" src="images/aquavm_air_model.png" />
 
