@@ -3,17 +3,23 @@
 
 # AquaVM
 
-AquaVM is the interpreter of AIR scripts intended to be an integral pillar of the Fluence network. It allows expressing network choreography in scripts and compose distributed, peer-to-peer hosted services. AquaVM compiles to Wasm and run both client- and server-side:
+AquaVM executes compiled [Aqua](https://github.com/fluencelabs/aqua), i.e., Aqua Intermediate Representation (AIR) scripts, and plays an integral part in the implementation of the Fluence peer-to-peer compute protocol. In this capacity, AquaVM allows expressing network choreography in scripts and composing distributed, peer-to-peer hosted services. Moreover, AquaVM plays a significant role in facilitating *function addressability* in the Fluence network.
+
+Since AquaVM compiles to Wasm, it can run both clients, such as browsers and nodejs apps, and servers. See Figure 1.
+
+**Figure 1: Stylized AquaVM And Air Model**
 
 <img alt="AquaVM & AIR model" src="images/aquavm_air_model.png" />
 
-## AquaVM: interpreter execution model
+## AquaVM: Interpreter Execution Model
 
-From a high level AquaVM could be considered as a pure state transition function that takes previous and current (usually came from a network) state and produces a new one with a list of peer where it should be sent. Additionally, the function returns requests to call services that should be called locally on a peer and then expects from a peer to pass results back to it somewhere in the future.
+AquaVM's execution model facilitates Fluence protocol's data push model implemented as a *particle*, i.e., a smart packet comprised of data, AIR, and some metadata. In this context, AquaVM can be viewed as a pure state transition function that facilitates particle updates, which includes state management of particle data by taking previous and current state to produce a new state and an updated list of peers and call requests, in the remaining AIR workflow. In addition to local service call execution, AquaVM handles requests from remote peers, e.g. as part of a parallel execution block, to call local services and the future response. See Figure 2.
+
+**Figure 2: AquaVM Interpreter Execution Model**
 
 <img alt="interpreter execution model" src="images/interpreter_execution_model.png"/>
 
-This execution model aims to allow async/parallel service execution on a peer.
+In summary, the AquaVM execution model allows (async) parallel service execution on one or multiple peers.
 
 ## Aquamarine Intermediate Representation: IR for p2p systems
 
