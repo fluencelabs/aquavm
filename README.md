@@ -1,90 +1,180 @@
 [![crates.io version](https://img.shields.io/crates/v/air-interpreter-wasm?style=flat-square)](https://crates.io/crates/air-interpreter-wasm)
 [![npm version](https://img.shields.io/npm/v/@fluencelabs/avm)](https://www.npmjs.com/package/@fluencelabs/avm)
 
-# Aquamarine
+# AquaVM
 
- - composability medium
- - allows developers to express network choreography in a script
- - moves script & data from peer to peer in a single-use logical network with checking merkle proofs and signatures.
+AquaVM executes compiled [Aqua](https://github.com/fluencelabs/aqua), i.e., Aqua Intermediate Representation (AIR) scripts, and plays an integral part in the implementation of the Fluence peer-to-peer compute protocol. Specifically, AquaVM allows expressing network choreography in scripts and composing distributed, peer-to-peer hosted services. Moreover, AquaVM plays a significant role in facilitating *function addressability* in the Fluence network. Figure 1.
 
-<br/>
-<p align="center" width="100%">
-    <img alt="aquamarine scheme" src="images/interpreter.png" width="621"/>
-</p>
-<br/>
+**Figure 1: Stylized AquaVM And AIR Model**
 
-## Fluence stack
+<img alt="AquaVM & AIR model" src="images/aquavm_air_model.png" />  
 
-Fluence [nodes](https://github.com/fluencelabs/fluence) uses AIR to coordinate requests between different services run by [Marine](https://github.com/fluencelabs/marine):
+Since AquaVM compiles to Wasm, it can run in both client, such as browsers and nodejs apps, and server environments.
 
-<br/>
-<p align="center" width="100%">
-    <img alt="aquamarine scheme" align="center" src="images/stack.png" width="663"/>
-</p>
-<br/>
+## AquaVM: Interpreter Execution Model
 
-## Aquamarine Intermediate Representation
+AquaVM's execution model facilitates Fluence protocol's data push model implemented as a *particle*, i.e., a smart packet comprised of data, AIR, and some metadata. In this context, AquaVM can be viewed as a pure state transition function that facilitates particle updates, which includes state management of particle data by taking previous and current state to produce a new state and an updated list of peers and call requests in the remaining AIR workflow. In addition to local service call execution, AquaVM handles requests from remote peers, e.g. as part of a parallel execution block, to call local services and handle the future response. See Figure 2.
 
-### AIR: What is it?
+**Figure 2: AquaVM Interpreter Execution Model**
 
-- S-expression-based low-level language
-- Controls Fluence network and its peers
-- Inspired by WAT (WebAssembly Text Format)
-- Meant to be a compile target
-- Development meant to happen in a higher-level language
-- Syntax is in flux, will change
+<img alt="interpreter execution model" src="images/interpreter_execution_model.png"/>
 
-Scripts written in AIR look like this:
+In summary, the AquaVM execution model handles the topological hops for simple and advanced composition patters, such as (async) parallel service execution on one or multiple peers.
 
-<img alt="fold example" src="images/fold_example.png" width="100%"/>
+## Aquamarine Intermediate Representation (AIR): IR For P2P Systems
 
-1. Gather chat members by calling chat.members
-2. Iterate through elements in members array, m = element
-3. Each m is an object, represented as array; [0] is the first field
-4. `(next m)` triggers next iteration
+AIR scripts control the Fluence peer-to-peer network, its peers and, through Marine adapter services, even resources on other (p2p) networks, such as IPFS and Filecoin, e.g., [Fluence IPFS library](https://doc.fluence.dev/aqua-book/libraries/aqua-ipfs).
+
+### What is AIR?
+
+- S-expression-based low-level language with binary form to come
+- Consists of twelve (12) instructions with more instructions to come
+- Semantics are inspired by [π-calculus](https://en.wikipedia.org/wiki/%CE%A0-calculus), [λ-calculus](https://en.wikipedia.org/wiki/Lambda_calculus) and [category theory](https://en.wikipedia.org/wiki/Category_theory)
+- Syntax is inspired by [Wasm Text Format](https://developer.mozilla.org/en-US/docs/WebAssembly/Understanding_the_text_format) (WAT) and [Lisp](https://en.wikipedia.org/wiki/Lisp_(programming_language))
 
 ### AIR: Instructions
-#### call: execution
-<img alt="call structure" src="images/call_data.png" width="670"/>
 
-- `call` commands the execution
-- moves execution to a peer, specified by `location`
-- peer is expected to have specified WASM `service`
-- the `service` must have specified `function` available to be called
-- `argument list` is given to the `function`
-- result of the `function` is saved and available under `output name`
-- example call could be thought of as `data.result = dht.put(key, value)`
+#### call
 
-#### seq: sequential
-<img alt="seq structure" src="images/seq.png" width="586"/>
+```wasm
+(call <peer_id> (<service name> <service function>) [<arguments list>] <output name>)
+```
 
-- `seq` takes two instructions
-- executes them sequentially
+- moves execution to the `peer_id` specified
+- the peer is expected to host Wasm service with the specified `service name`
+- the `service function` is expected to contain the specified function
+- the `arguments list` is given to the function and may be empty 
+- the result of the function execution is saved and returned by it's `output name`
 
-#### par: parallel
-<img alt="par structure" src="images/par.png" width="536"/>
+Example:
+```wasm
+(call "peer_id" ("dht" "put") [key value] result)
+```
 
-- `par` takes two instructions
-- executes them in parallel
+#### seq
 
-#### fold: iteration
-<img alt="fold structure" src="images/fold.png" width="536"/>
+```wasm
+(seq <left_instruction> <right_instruction>)
+```
 
-- `fold` takes an array, a variable and an instruction
-- iterates through the array, assigning each element to the variable
-- on each iteration instruction is executed
-- instruction can read the variable
+- executes instructions sequentially: `right_instruction` will be executed iff  `left_instruction` finished successfully
+
+#### par
+
+```wasm
+(par <left_instruction> <right_instruction>)
+```
+
+- executes instructions in parallel: `right_instruction` will be executed independently of the completion of `left_instruction`
+
+#### ap
+
+```wasm
+(ap <literal> <dst_variable>)
+(ap <src_variable>.$.<lambda> <dst_variable>)
+```
+
+- puts `literal` into `dst_variable`
+- or applies `lambda` to `src_variable` and saves the result in `dst_variable`
+
+Example:
+
+```wasm
+(seq
+    (call "peer_id" ("user-list" "get_users") [] users)
+    (ap users.$.[0].peer_id user_0)
+)
+```
+
+#### match/mismath
+
+```wasm
+(match <variable> <variable> <instruction>)
+(mismatch <variable> <variable> <instruction>)
+```
+
+- executes the instruction iff variables are equal/notequal
+
+Example:
+```wasm
+(seq
+    (call "peer_id" ("user-list" "get_users") [] users)
+    (mismatch users.$.length 0
+        (ap users.$.[0].peer_id user_0)
+    )
+)
+```
+
+#### fold/next
+
+```wasm
+(fold <iterable> <iterator> <instruction>)
+```
+
+- is a form of a fixed-point combinator
+- iterates through the `iterable`, assigning each element to the `iterator` 
+- on each iteration `instruction` is executed
 - `next` triggers next iteration
+  
+Example:
 
-#### xor: branching & error handling
-<img alt="xor structure" src="images/xor.png" width="577"/>
+```wasm
+(fold users user
+    (seq
+        (call user.$.peer_id ("chat" "display") [msg])
+        (next user)
+    )
+)
+```
 
-- `xor` takes two instructions
-- iff first instruction fails, second one is executed
+#### xor
+
+```wasm
+(xor <left_instruction> <right_instruction>)
+```
+
+- `right_instruction` is executed iff `left_instruction` failed
+
+#### new
+
+```wasm
+(new <variable>)
+```
+
+- creates a new scoped variable with the provided name (it's similar to \mu operator from pi-calculus that creates an anonymous channel)
+
+#### fail
+
+```wasm
+(fail <variable>)
+(fail <error code> <error message>)
+```
+
+- throws an exception with provided `error code` and `error message` or construct it from a provided `variable`]
+
+Example
+```wasm
+(fail 1337 "error message")
+```
 
 #### null
-<img alt="null structure" src="images/null.png" width="577"/>
 
+```wasm
+(null)
+```
 
-- `null` takes no arguments
 - does nothing, useful for code generation
+
+### AIR: values
+#### Scalars
+
+- scalars are fully consistent - have the same value on each peer during a script execution
+- could be an argument of any instruction
+- JSON-based (fold could iterate only over array-based value)
+
+#### Streams
+
+- streams are CRDT-like (locally-consistent) - have deterministic execution wrt one peer
+- versioned
+- could be used only by call and fold instructions (more instructions for streams to come)
+- could be turned to scalar (canonicalized)
