@@ -3,27 +3,27 @@
 
 # AquaVM
 
-AquaVM executes compiled [Aqua](https://github.com/fluencelabs/aqua), i.e., Aqua Intermediate Representation (AIR) scripts, and plays an integral part in the implementation of the Fluence peer-to-peer compute protocol. In this capacity, AquaVM allows expressing network choreography in scripts and composing distributed, peer-to-peer hosted services. Moreover, AquaVM plays a significant role in facilitating *function addressability* in the Fluence network.
-
-Since AquaVM compiles to Wasm, it can run both clients, such as browsers and nodejs apps, and servers. See Figure 1.
+AquaVM executes compiled [Aqua](https://github.com/fluencelabs/aqua), i.e., Aqua Intermediate Representation (AIR) scripts, and plays an integral part in the implementation of the Fluence peer-to-peer compute protocol. Specifically, AquaVM allows expressing network choreography in scripts and composing distributed, peer-to-peer hosted services. Moreover, AquaVM plays a significant role in facilitating *function addressability* in the Fluence network. Figure 1.
 
 **Figure 1: Stylized AquaVM And AIR Model**
 
-<img alt="AquaVM & AIR model" src="images/aquavm_air_model.png" />
+<img alt="AquaVM & AIR model" src="images/aquavm_air_model.png" />  
+
+Since AquaVM compiles to Wasm, it can run in both client, such as browsers and nodejs apps, and server environments.
 
 ## AquaVM: Interpreter Execution Model
 
-AquaVM's execution model facilitates Fluence protocol's data push model implemented as a *particle*, i.e., a smart packet comprised of data, AIR, and some metadata. In this context, AquaVM can be viewed as a pure state transition function that facilitates particle updates, which includes state management of particle data by taking previous and current state to produce a new state and an updated list of peers and call requests, in the remaining AIR workflow. In addition to local service call execution, AquaVM handles requests from remote peers, e.g. as part of a parallel execution block, to call local services and the future response. See Figure 2.
+AquaVM's execution model facilitates Fluence protocol's data push model implemented as a *particle*, i.e., a smart packet comprised of data, AIR, and some metadata. In this context, AquaVM can be viewed as a pure state transition function that facilitates particle updates, which includes state management of particle data by taking previous and current state to produce a new state and an updated list of peers and call requests in the remaining AIR workflow. In addition to local service call execution, AquaVM handles requests from remote peers, e.g. as part of a parallel execution block, to call local services and handle the future response. See Figure 2.
 
 **Figure 2: AquaVM Interpreter Execution Model**
 
 <img alt="interpreter execution model" src="images/interpreter_execution_model.png"/>
 
-In summary, the AquaVM execution model allows (async) parallel service execution on one or multiple peers.
+In summary, the AquaVM execution model handles the topological hops for simple and advanced composition patters, such as (async) parallel service execution on one or multiple peers.
 
 ## Aquamarine Intermediate Representation (AIR): IR For P2P Systems
 
-AIR scripts control the Fluence peer-to-peer network, its peers and, through Marine adapter services even resources on other (p2p) betworks, such as IPFS and Filecoin.
+AIR scripts control the Fluence peer-to-peer network, its peers and, through Marine adapter services, even resources on other (p2p) networks, such as IPFS and Filecoin, e.g., [Fluence IPFS library](https://doc.fluence.dev/aqua-book/libraries/aqua-ipfs).
 
 ### What is AIR?
 
@@ -53,7 +53,7 @@ Example:
 
 #### seq
 
-```wasm
+````wasm
 (seq <left_instruction> <right_instruction>)
 ```
 
@@ -78,6 +78,7 @@ Example:
 - or applies `lambda` to `src_variable` and saves the result in `dst_variable`
 
 Example:
+
 ```wasm
 (seq
     (call "peer_id" ("user-list" "get_users") [] users)
@@ -116,6 +117,7 @@ Example:
 - `next` triggers next iteration
   
 Example:
+
 ```wasm
 (fold users user
     (seq
