@@ -53,7 +53,7 @@ Example:
 
 #### seq
 
-````wasm
+```wasm
 (seq <left_instruction> <right_instruction>)
 ```
 
