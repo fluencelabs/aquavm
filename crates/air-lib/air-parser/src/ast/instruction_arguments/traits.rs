@@ -152,7 +152,7 @@ fn display_last_error(
     last_error_accessor: &Option<LambdaAST>,
 ) -> fmt::Result {
     match last_error_accessor {
-        Some(accessor) => write!(f, "%last_error%.$.{}", air_lambda_ast::format_ast(accessor)),
+        Some(accessor) => write!(f, "%last_error%.${}", air_lambda_ast::format_ast(accessor)),
         None => write!(f, "%last_error%"),
     }
 }

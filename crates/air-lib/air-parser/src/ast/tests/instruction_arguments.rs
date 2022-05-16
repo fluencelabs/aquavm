@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Fluence Labs Limited
+ * Copyright 2022 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-mod instruction_arguments;
-mod instructions;
-mod values;
+use crate::ast::Value;
+use air_lambda_ast::ValueAccessor;
+use non_empty_vec::NonEmpty;
 
-#[cfg(test)]
-pub mod tests;
-
-pub use instruction_arguments::*;
-pub use instructions::*;
-pub use values::*;
-
-pub use crate::parser::Span;
+#[test]
+// https://github.com/fluencelabs/aquavm/issues/263
+fn issue_263() {
+    let val = Value::LastError(Some(NonEmpty::new(ValueAccessor::FieldAccessByName {
+        field_name: "message",
+    })));
+    assert_eq!(val.to_string(), "%last_error%.$.message");
+}

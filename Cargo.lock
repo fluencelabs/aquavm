@@ -127,6 +127,7 @@ dependencies = [
  "lalrpop",
  "lalrpop-util",
  "multimap",
+ "non-empty-vec",
  "regex",
  "serde",
  "serde_json",
