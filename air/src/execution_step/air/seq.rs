@@ -25,10 +25,10 @@ impl<'i> super::ExecutableInstruction<'i> for Seq<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         log_instruction!(seq, exec_ctx, trace_ctx);
 
-        exec_ctx.subtree_complete = true;
+        exec_ctx.subgraph_complete = true;
         self.0.execute(exec_ctx, trace_ctx)?;
 
-        if exec_ctx.subtree_complete {
+        if exec_ctx.subgraph_complete {
             self.1.execute(exec_ctx, trace_ctx)?;
         }
 

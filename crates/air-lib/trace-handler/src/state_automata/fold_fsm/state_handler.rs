@@ -18,7 +18,7 @@ use super::*;
 use crate::MergeCtxType;
 use crate::ResolvedFold;
 
-/// This state updater manage to do the same thing as SubTreeStateUpdater in ParFSM,
+/// This state updater manage to do the same thing as CtxStateHandler in ParFSM,
 /// for details please see its detailed comment.
 #[derive(Debug, Default, Clone)]
 pub(super) struct CtxStateHandler {

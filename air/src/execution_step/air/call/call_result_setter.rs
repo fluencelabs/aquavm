@@ -83,7 +83,7 @@ pub(crate) fn set_remote_call_result<'i>(
     trace_ctx: &mut TraceHandler,
 ) {
     exec_ctx.next_peer_pks.push(peer_pk);
-    exec_ctx.subtree_complete = false;
+    exec_ctx.subgraph_complete = false;
 
     let new_call_result = CallResult::sent_peer_id(exec_ctx.run_parameters.current_peer_id.clone());
     trace_ctx.meet_call_end(new_call_result);

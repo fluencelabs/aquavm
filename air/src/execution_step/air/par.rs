@@ -27,7 +27,7 @@ use crate::trace_to_exec_err;
 use completeness_updater::ParCompletenessUpdater;
 
 use air_parser::ast::Par;
-use air_trace_handler::SubtreeType;
+use air_trace_handler::SubgraphType;
 
 #[rustfmt::skip]
 impl<'i> ExecutableInstruction<'i> for Par<'i> {
@@ -37,72 +37,72 @@ impl<'i> ExecutableInstruction<'i> for Par<'i> {
         let mut completeness_updater = ParCompletenessUpdater::new();
         trace_to_exec_err!(trace_ctx.meet_par_start(), self)?;
 
-        // execute a left subtree of par
-        let left_result = execute_subtree(self, exec_ctx, trace_ctx, &mut completeness_updater, SubtreeType::Left)?;
+        // execute a left subgraph of par
+        let left_result = execute_subgraph(self, exec_ctx, trace_ctx, &mut completeness_updater, SubgraphType::Left)?;
 
-        // execute a right subtree of par
-        let right_result = execute_subtree(self, exec_ctx, trace_ctx, &mut completeness_updater, SubtreeType::Right)?;
+        // execute a right subgraph of par
+        let right_result = execute_subgraph(self, exec_ctx, trace_ctx, &mut completeness_updater, SubgraphType::Right)?;
 
         completeness_updater.set_completeness(exec_ctx);
         prepare_par_result(left_result, right_result, exec_ctx)
     }
 }
 
-/// Execute provided subtree and update Par state in trace_ctx.new_trace.
-fn execute_subtree<'i>(
+/// Execute provided subgraph and update Par state in trace_ctx.new_trace.
+fn execute_subgraph<'i>(
     par: &Par<'i>,
     exec_ctx: &mut ExecutionCtx<'i>,
     trace_ctx: &mut TraceHandler,
     completeness_updater: &mut ParCompletenessUpdater,
-    subtree_type: SubtreeType,
-) -> ExecutionResult<SubtreeResult> {
-    let subtree = match subtree_type {
-        SubtreeType::Left => &par.0,
-        SubtreeType::Right => &par.1,
+    subgraph_type: SubgraphType,
+) -> ExecutionResult<SubgraphResult> {
+    let subgraph = match subgraph_type {
+        SubgraphType::Left => &par.0,
+        SubgraphType::Right => &par.1,
     };
-    exec_ctx.subtree_complete = determine_subtree_complete(subtree);
+    exec_ctx.subgraph_complete = determine_subgraph_complete(subgraph);
 
-    // execute a subtree
-    let result = match subtree.execute(exec_ctx, trace_ctx) {
+    // execute a subgraph
+    let result = match subgraph.execute(exec_ctx, trace_ctx) {
         Ok(_) => {
-            trace_to_exec_err!(trace_ctx.meet_par_subtree_end(subtree_type), par)?;
-            SubtreeResult::Succeeded
+            trace_to_exec_err!(trace_ctx.meet_par_subgraph_end(subgraph_type), par)?;
+            SubgraphResult::Succeeded
         }
         Err(e) if e.is_catchable() => {
-            exec_ctx.subtree_complete = false;
-            trace_to_exec_err!(trace_ctx.meet_par_subtree_end(subtree_type), par)?;
-            SubtreeResult::Failed(e)
+            exec_ctx.subgraph_complete = false;
+            trace_to_exec_err!(trace_ctx.meet_par_subgraph_end(subgraph_type), par)?;
+            SubgraphResult::Failed(e)
         }
         Err(e) => {
-            exec_ctx.subtree_complete = false;
+            exec_ctx.subgraph_complete = false;
             return Err(e);
         }
     };
 
-    completeness_updater.update_completeness(exec_ctx, subtree_type);
+    completeness_updater.update_completeness(exec_ctx, subgraph_type);
     Ok(result)
 }
 
-enum SubtreeResult {
+enum SubgraphResult {
     Succeeded,
     Failed(ExecutionError),
 }
 
 fn prepare_par_result(
-    left_result: SubtreeResult,
-    right_result: SubtreeResult,
+    left_result: SubgraphResult,
+    right_result: SubgraphResult,
     exec_ctx: &mut ExecutionCtx<'_>,
 ) -> ExecutionResult<()> {
     match (left_result, right_result) {
-        (SubtreeResult::Succeeded, _) | (_, SubtreeResult::Succeeded) => {
+        (SubgraphResult::Succeeded, _) | (_, SubgraphResult::Succeeded) => {
             exec_ctx.last_error_descriptor.meet_par_successed_end();
             Ok(())
         }
-        (SubtreeResult::Failed(_), SubtreeResult::Failed(err)) => Err(err),
+        (SubgraphResult::Failed(_), SubgraphResult::Failed(err)) => Err(err),
     }
 }
 
-fn determine_subtree_complete(next_instruction: &Instruction<'_>) -> bool {
+fn determine_subgraph_complete(next_instruction: &Instruction<'_>) -> bool {
     // this is needed to prevent situation when on such pattern
     // (fold (Iterable i
     //    (par
@@ -110,6 +110,6 @@ fn determine_subtree_complete(next_instruction: &Instruction<'_>) -> bool {
     //       (next i)
     //    )
     // )
-    // par will be completed after the last next that wouldn't change subtree_complete
+    // par will be completed after the last next that wouldn't change subgraph_complete
     !matches!(next_instruction, Instruction::Next(_))
 }

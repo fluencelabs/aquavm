@@ -109,15 +109,15 @@ macro_rules! log_instruction {
             $exec_ctx.next_peer_pks
         );
         log::trace!(
-            target: air_log_targets::SUBTREE_COMPLETE,
-            "  subtree complete: {}",
-            $exec_ctx.subtree_complete
+            target: air_log_targets::SUBGRAPH_COMPLETE,
+            "  subgraph complete: {}",
+            $exec_ctx.subgraph_complete
         );
 
         log::trace!(
-            target: air_log_targets::SUBTREE_ELEMENTS,
-            "  subtree elements count: {:?}",
-            $trace_ctx.subtree_sizes()
+            target: air_log_targets::SUBGRAPH_ELEMENTS,
+            "  subgraph elements count: {:?}",
+            $trace_ctx.subgraph_sizes()
         );
         log::debug!(
             target: air_log_targets::NEW_EXECUTED_TRACE,
@@ -127,13 +127,13 @@ macro_rules! log_instruction {
     };
 }
 
-/// This macro converts joinable errors to Ok and sets subtree complete to false.
+/// This macro converts joinable errors to Ok and sets subgraph complete to false.
 #[macro_export]
 macro_rules! joinable {
     ($cmd:expr, $exec_ctx:expr) => {
         match $cmd {
             Err(e) if e.is_joinable() => {
-                $exec_ctx.subtree_complete = false;
+                $exec_ctx.subgraph_complete = false;
                 return Ok(());
             }
             v => v,

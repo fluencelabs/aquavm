@@ -22,7 +22,7 @@ mod state_inserter;
 mod utils;
 
 pub use errors::StateFSMError;
-pub use par_fsm::SubtreeType;
+pub use par_fsm::SubgraphType;
 
 pub(crate) type FSMResult<T> = std::result::Result<T, StateFSMError>;
 

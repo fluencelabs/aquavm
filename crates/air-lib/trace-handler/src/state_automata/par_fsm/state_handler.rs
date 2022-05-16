@@ -23,12 +23,12 @@ use new_states_calculation::compute_new_states;
 ///
 /// To see why it's really needed, imagine the following trace:
 /// [par 9, 3]
-///     [par 3, 5]                                                       <- left subtree of [par 9, 3]
-///         [call rs 1] [call rs 2] [call rs 3]                          <- left subtree of [par 3, 5]
-///         [call rs 4] [call rs 5] [call rs 6] [call rs 7] [call rs 8]  <- right subtree of [par 3, 5]
-///     [par 1, 1]                                                       <- right subtree of [par 9, 3]
-///         [call e 9]                                                   <- left subtree of [par 1, 1]
-///         [call e 10]                                                  <- right subtree of [par 1, 1]
+///     [par 3, 5]                                                       <- left subgraph of [par 9, 3]
+///         [call rs 1] [call rs 2] [call rs 3]                          <- left subgraph of [par 3, 5]
+///         [call rs 4] [call rs 5] [call rs 6] [call rs 7] [call rs 8]  <- right subgraph of [par 3, 5]
+///     [par 1, 1]                                                       <- right subgraph of [par 9, 3]
+///         [call e 9]                                                   <- left subgraph of [par 1, 1]
+///         [call e 10]                                                  <- right subgraph of [par 1, 1]
 ///
 /// where
 ///     call rs N - request sent state of Nth call
@@ -50,7 +50,7 @@ use new_states_calculation::compute_new_states;
 /// )
 ///
 /// Suppose that call 5 (corresponds to [call rs 5]) will fail (f.e. call_service returns a service
-/// error). Since it's wrapped with xor, then right subtree of xor (null) will be executed.
+/// error). Since it's wrapped with xor, then right subgraph of xor (null) will be executed.
 /// After that next par will be executed. This par has corresponding state [par 1, 1] in a trace,
 /// and to allow slider to pop it it's needed to set updated position in a proper way, because
 /// otherwise [call rs 6] will be returned.
@@ -65,24 +65,24 @@ pub(super) struct CtxStateHandler {
 }
 
 impl CtxStateHandler {
-    /// Prepare new states that sliders will have after finishing executing of each subtree.
+    /// Prepare new states that sliders will have after finishing executing of each subgraph.
     pub(super) fn prepare(
         prev_par: ParResult,
         current_par: ParResult,
         data_keeper: &mut DataKeeper,
     ) -> FSMResult<Self> {
-        let left_pair = compute_new_states(data_keeper, prev_par, current_par, SubtreeType::Left)?;
-        let right_pair = compute_new_states(data_keeper, prev_par, current_par, SubtreeType::Right)?;
+        let left_pair = compute_new_states(data_keeper, prev_par, current_par, SubgraphType::Left)?;
+        let right_pair = compute_new_states(data_keeper, prev_par, current_par, SubgraphType::Right)?;
 
         let handler = Self { left_pair, right_pair };
 
         Ok(handler)
     }
 
-    pub(super) fn handle_subtree_end(self, data_keeper: &mut DataKeeper, subtree_type: SubtreeType) {
-        match subtree_type {
-            SubtreeType::Left => update_ctx_states(self.left_pair, data_keeper),
-            SubtreeType::Right => update_ctx_states(self.right_pair, data_keeper),
+    pub(super) fn handle_subgraph_end(self, data_keeper: &mut DataKeeper, subgraph_type: SubgraphType) {
+        match subgraph_type {
+            SubgraphType::Left => update_ctx_states(self.left_pair, data_keeper),
+            SubgraphType::Right => update_ctx_states(self.right_pair, data_keeper),
         }
     }
 }

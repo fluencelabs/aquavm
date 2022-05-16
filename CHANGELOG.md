@@ -182,4 +182,4 @@ and it's possible to address its fields separately: `%last_error%.$.instruction`
 
 - Added join behaviour ([PR 11](https://github.com/fluencelabs/aquavm/pull/11)):
     - if `call` uses non existing variable, it is just being passed and isn't executed without any error
-    - `par` becomes completed when at least one of its subtree is completed    
+    - `par` becomes completed when at least one of its subgraph is completed    

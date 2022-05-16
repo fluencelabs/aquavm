@@ -50,7 +50,7 @@ impl TraceHandler {
         &self.data_keeper.result_trace
     }
 
-    pub fn subtree_sizes(&self) -> (usize, usize) {
+    pub fn subgraph_sizes(&self) -> (usize, usize) {
         let prev_len = self.data_keeper.prev_slider().subtrace_len();
         let current_len = self.data_keeper.current_slider().subtrace_len();
 
@@ -95,13 +95,13 @@ impl TraceHandler {
         Ok(())
     }
 
-    pub fn meet_par_subtree_end(&mut self, subtree_type: SubtreeType) -> TraceHandlerResult<()> {
-        match subtree_type {
-            SubtreeType::Left => {
+    pub fn meet_par_subgraph_end(&mut self, subgraph_type: SubgraphType) -> TraceHandlerResult<()> {
+        match subgraph_type {
+            SubgraphType::Left => {
                 let par_fsm = self.fsm_keeper.last_par()?;
                 par_fsm.left_completed(&mut self.data_keeper);
             }
-            SubtreeType::Right => {
+            SubgraphType::Right => {
                 let par_fsm = self.fsm_keeper.pop_par()?;
                 par_fsm.right_completed(&mut self.data_keeper);
             }

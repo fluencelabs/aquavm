@@ -26,10 +26,10 @@ impl<'i> super::ExecutableInstruction<'i> for Xor<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         log_instruction!(xor, exec_ctx, trace_ctx);
 
-        exec_ctx.subtree_complete = true;
+        exec_ctx.subgraph_complete = true;
         match self.0.execute(exec_ctx, trace_ctx) {
             Err(e) if e.is_catchable() => {
-                exec_ctx.subtree_complete = true;
+                exec_ctx.subgraph_complete = true;
                 exec_ctx.last_error_descriptor.meet_xor_right_branch();
                 print_xor_log(&e);
 
@@ -44,7 +44,7 @@ fn print_xor_log(e: &ExecutionError) {
     if e.is_match_or_mismatch() {
         // These errors actually aren't real errors, but a way to bubble execution_step up from match
         // to a corresponding xor. They'll become errors iff there is no such xor and execution_step is
-        // bubble up until the very beginning of current subtree. So the error message shouldn't
+        // bubble up until the very beginning of current subgraph. So the error message shouldn't
         // be print out in order not to confuse users.
         return;
     }

@@ -75,7 +75,7 @@ pub(super) fn resolve_fold_lore(fold: &FoldResult, merge_ctx: &MergeCtx) -> Merg
 /// It could be seen that this function does a convolution of lens with respect to generations.
 /// This is needed to handle (fold (par (next ... cases, because of subtrace_len of a Fold state
 /// describes only states inside this iteration without states that next brings, however a Par
-/// lens describe the whole subtree, where "next" states are included.
+/// lens describe the whole subgraph, where "next" states are included.
 
 // TODO: in future it's possible to change a format of a Fold state to one behaves like Par,
 // because this function adds some overhead

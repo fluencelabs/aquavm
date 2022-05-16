@@ -34,7 +34,7 @@ fn par_ap_behaviour() {
             (seq
                 (par
                     (call "{relay_id}" ("peer" "timeout") [join_it] $result)
-                    (ap "fast_result" $result) ;; ap doesn't affect the subtree_complete flag
+                    (ap "fast_result" $result) ;; ap doesn't affect the subgraph_complete flag
                 )
                 (call "{client_id}" ("op" "return") [$result.$[0]])
             )

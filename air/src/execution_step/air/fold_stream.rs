@@ -98,12 +98,12 @@ fn execute_iterations<'i>(
         trace_to_exec_err!(trace_ctx.meet_generation_end(fold_id), fold_stream)?;
 
         result?;
-        if !exec_ctx.subtree_complete {
+        if !exec_ctx.subgraph_complete {
             break;
         }
     }
 
-    Ok(exec_ctx.subtree_complete)
+    Ok(exec_ctx.subgraph_complete)
 }
 
 fn should_stop_iteration(iteration_result: &ExecutionResult<bool>) -> bool {
