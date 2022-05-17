@@ -280,7 +280,7 @@ fn access_last_error_by_not_exists_field() {
 }
 
 #[test]
-fn last_error_with_par_one_subtree_failed() {
+fn last_error_with_par_one_subgraph_failed() {
     let fallible_peer_id = "fallible_peer_id";
     let fallible_call_service_name = "fallible_call_service";
     let mut fallible_vm = create_avm(fallible_call_service(fallible_call_service_name), fallible_peer_id);

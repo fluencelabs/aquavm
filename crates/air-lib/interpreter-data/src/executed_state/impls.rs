@@ -68,10 +68,10 @@ impl SubTraceDesc {
 }
 
 impl ExecutedState {
-    pub fn par(left_subtree_size: usize, right_subtree_size: usize) -> Self {
+    pub fn par(left_subgraph_size: usize, right_subgraph_size: usize) -> Self {
         let par_result = ParResult {
-            left_size: left_subtree_size as _,
-            right_size: right_subtree_size as _,
+            left_size: left_subgraph_size as _,
+            right_size: right_subgraph_size as _,
         };
 
         Self::Par(par_result)
@@ -93,9 +93,9 @@ impl std::fmt::Display for ExecutedState {
 
         match self {
             Par(ParResult {
-                left_size: left_subtree_size,
-                right_size: right_subtree_size,
-            }) => write!(f, "par({}, {})", left_subtree_size, right_subtree_size),
+                left_size: left_subgraph_size,
+                right_size: right_subgraph_size,
+            }) => write!(f, "par({}, {})", left_subgraph_size, right_subgraph_size),
             Call(RequestSentBy(sender)) => write!(f, r"{}", sender),
             Call(Executed(value)) => {
                 write!(f, "executed({})", value)

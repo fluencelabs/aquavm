@@ -29,7 +29,7 @@ pub use merger::MergeCtxType;
 pub use merger::MergeError;
 pub use merger::MergerApResult;
 pub use merger::MergerCallResult;
-pub use state_automata::SubtreeType;
+pub use state_automata::SubgraphType;
 
 pub type TraceHandlerResult<T> = std::result::Result<T, TraceHandlerError>;
 

@@ -23,8 +23,8 @@ meet_call_start
 Expected sequence of `TraceHandler` calls for the `par` instruction: 
 ```
 meet_par_start
-    -> meet_par_subtree_end(..., SubtreeType::Left)
-    -> meet_par_subtree_end(..., SubtreeType::Right)
+    -> meet_par_subgraph_end(..., SubgraphType::Left)
+    -> meet_par_subgraph_end(..., SubgraphType::Right)
 ```
 
 ### Fold instruction

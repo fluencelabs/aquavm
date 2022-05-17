@@ -41,7 +41,7 @@ pub enum StateFSMError {
     #[error("overflow is occurred while calculating the new position of a {2} slider for resolved par {0:?} and current position {1}'")]
     ParPosOverflow(ParResult, usize, MergeCtxType),
 
-    /// Errors occurred when ParResult.0 + ParResult.1 value is bigger than current subtree size.
+    /// Errors occurred when ParResult.0 + ParResult.1 value is bigger than current subgraph size.
     #[error("underflow is occurred while calculating the new position of a {2} slider for resolved par {0:?} and current subtrace len {1}'")]
     ParLenUnderflow(ParResult, usize, MergeCtxType),
 

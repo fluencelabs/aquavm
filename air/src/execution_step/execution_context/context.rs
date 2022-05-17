@@ -43,13 +43,13 @@ pub(crate) struct ExecutionCtx<'i> {
     /// None means that there weren't any error.
     pub(crate) last_error_descriptor: LastErrorDescriptor,
 
-    /// Indicates that previous executed subtree is complete.
-    /// A subtree treats as a complete if all subtree elements satisfy the following rules:
-    ///   - at least one of par subtrees is completed
-    ///   - at least one of xor subtrees is completed without an error
-    ///   - all of seq subtrees are completed
+    /// Indicates that previous executed subgraph is complete.
+    /// A subgraph treats as a complete if all subgraph elements satisfy the following rules:
+    ///   - at least one of par subgraphs is completed
+    ///   - at least one of xor subgraphs is completed without an error
+    ///   - all of seq subgraphs are completed
     ///   - call executed successfully (executed state is Executed)
-    pub(crate) subtree_complete: bool,
+    pub(crate) subgraph_complete: bool,
 
     /// Tracker of all met instructions.
     pub(crate) tracker: InstructionTracker,
@@ -70,7 +70,7 @@ impl<'i> ExecutionCtx<'i> {
 
         Self {
             run_parameters,
-            subtree_complete: true,
+            subgraph_complete: true,
             last_call_request_id,
             call_results,
             ..<_>::default()
@@ -123,7 +123,7 @@ impl<'i> Display for ExecutionCtx<'i> {
         writeln!(f, "current peer id: {}", self.run_parameters.current_peer_id)?;
         writeln!(f, "init peer id: {}", self.run_parameters.init_peer_id)?;
         writeln!(f, "timestamp: {}", self.run_parameters.timestamp)?;
-        writeln!(f, "subtree complete: {}", self.subtree_complete)?;
+        writeln!(f, "subgraph complete: {}", self.subgraph_complete)?;
         writeln!(f, "next peer public keys: {:?}", self.next_peer_pks)?;
 
         Ok(())

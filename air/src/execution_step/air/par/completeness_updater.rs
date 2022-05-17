@@ -15,32 +15,32 @@
  */
 
 use super::ExecutionCtx;
-use super::SubtreeType;
+use super::SubgraphType;
 
 #[derive(Debug, Default, Clone)]
 pub(super) struct ParCompletenessUpdater {
-    left_subtree_complete: bool,
-    right_subtree_complete: bool,
+    left_subgraph_complete: bool,
+    right_subgraph_complete: bool,
 }
 
 impl ParCompletenessUpdater {
     pub(super) fn new() -> Self {
         Self {
-            left_subtree_complete: false,
-            right_subtree_complete: false,
+            left_subgraph_complete: false,
+            right_subgraph_complete: false,
         }
     }
 
-    pub(super) fn update_completeness(&mut self, exec_ctx: &ExecutionCtx<'_>, subtree_type: SubtreeType) {
-        match subtree_type {
-            SubtreeType::Left => self.left_subtree_complete = exec_ctx.subtree_complete,
-            SubtreeType::Right => self.right_subtree_complete = exec_ctx.subtree_complete,
+    pub(super) fn update_completeness(&mut self, exec_ctx: &ExecutionCtx<'_>, subgraph_type: SubgraphType) {
+        match subgraph_type {
+            SubgraphType::Left => self.left_subgraph_complete = exec_ctx.subgraph_complete,
+            SubgraphType::Right => self.right_subgraph_complete = exec_ctx.subgraph_complete,
         }
     }
 
     pub(super) fn set_completeness(self, exec_ctx: &mut ExecutionCtx<'_>) {
-        // par is completed if at least one of its subtrees is completed
-        let subtree_complete = self.left_subtree_complete || self.right_subtree_complete;
-        exec_ctx.subtree_complete = subtree_complete;
+        // par is completed if at least one of its subgraphs is completed
+        let subgraph_complete = self.left_subgraph_complete || self.right_subgraph_complete;
+        exec_ctx.subgraph_complete = subgraph_complete;
     }
 }

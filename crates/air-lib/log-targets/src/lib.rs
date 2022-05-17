@@ -23,11 +23,11 @@ pub const DATA_CACHE: &str = "data_cache";
 /// Print out next_peer_pks at the beginning of each instruction execution_step.
 pub const NEXT_PEER_PKS: &str = "next_peer_pks";
 
-/// Print out subtree_complete value at the beginning of each instruction execution_step.
-pub const SUBTREE_COMPLETE: &str = "subtree_complete";
+/// Print out subgraph_complete value at the beginning of each instruction execution_step.
+pub const SUBGRAPH_COMPLETE: &str = "subgraph_complete";
 
-/// Print out count of element in the current subtree at the beginning of each instruction execution_step.
-pub const SUBTREE_ELEMENTS: &str = "subtree_elements_count";
+/// Print out count of element in the current subgraph at the beginning of each instruction execution_step.
+pub const SUBGRAPH_ELEMENTS: &str = "subgraph_elements_count";
 
 /// Print out state of data cache at the beginning of each instruction execution_step.
 pub const NEW_EXECUTED_TRACE: &str = "new_executed_trace";
@@ -49,8 +49,8 @@ pub const TARGET_MAP: [(&str, i32); 10] = [
     (INSTRUCTION, 1 << 1),
     (DATA_CACHE, 1 << 2),
     (NEXT_PEER_PKS, 1 << 3),
-    (SUBTREE_COMPLETE, 1 << 4),
-    (SUBTREE_ELEMENTS, 1 << 5),
+    (SUBGRAPH_COMPLETE, 1 << 4),
+    (SUBGRAPH_ELEMENTS, 1 << 5),
     (NEW_EXECUTED_TRACE, 1 << 6),
     (EXECUTED_TRACE_MERGE, 1 << 7),
     (RUN_PARAMS, 1 << 8),

@@ -73,7 +73,7 @@ pub(crate) struct Scalars<'i> {
     /// Terminology used here (mainly to resolve concerns re difference between scalars and values):
     ///  - scalar is an AIR scalar, iterable and non iterable. A scalar is addressed by a name.
     ///  - value is concrete value assigned to scalar on certain depth
-    ///  - scope is a variable scope where variable is visible. If we consider fold as a tree where
+    ///  - scope is a variable scope where variable is visible. If we consider fold as a graph where
     ///     each next produces a new level, then scope is a level in this tree. Please note that it
     ///     includes variable defined after next instruction.
     ///  - depth is a count of seen scopes (or a depth in a tree met in the previous definition)

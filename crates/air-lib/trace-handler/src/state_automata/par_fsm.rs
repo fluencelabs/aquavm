@@ -35,14 +35,14 @@ pub(crate) struct ParFSM {
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
-pub enum SubtreeType {
+pub enum SubgraphType {
     Left,
     Right,
 }
 
 impl ParFSM {
     pub(crate) fn from_left_started(ingredients: MergerParResult, data_keeper: &mut DataKeeper) -> FSMResult<Self> {
-        // default is a par with empty left and right subtrees
+        // default is a par with empty left and right subgraphs
         let prev_par = ingredients.prev_par.unwrap_or_default();
         let current_par = ingredients.current_par.unwrap_or_default();
 
@@ -58,31 +58,31 @@ impl ParFSM {
             par_builder,
         };
 
-        par_fsm.prepare_sliders(data_keeper, SubtreeType::Left)?;
+        par_fsm.prepare_sliders(data_keeper, SubgraphType::Left)?;
 
         Ok(par_fsm)
     }
 
     pub(crate) fn left_completed(&mut self, data_keeper: &mut DataKeeper) {
-        self.par_builder.track(data_keeper, SubtreeType::Left);
-        self.state_handler.handle_subtree_end(data_keeper, SubtreeType::Left);
+        self.par_builder.track(data_keeper, SubgraphType::Left);
+        self.state_handler.handle_subgraph_end(data_keeper, SubgraphType::Left);
 
         // all invariants were checked in the ctor
-        let _ = self.prepare_sliders(data_keeper, SubtreeType::Right);
+        let _ = self.prepare_sliders(data_keeper, SubgraphType::Right);
     }
 
     pub(crate) fn right_completed(mut self, data_keeper: &mut DataKeeper) {
-        self.par_builder.track(data_keeper, SubtreeType::Right);
+        self.par_builder.track(data_keeper, SubgraphType::Right);
         let state = self.par_builder.build();
         self.state_inserter.insert(data_keeper, state);
 
-        self.state_handler.handle_subtree_end(data_keeper, SubtreeType::Right);
+        self.state_handler.handle_subgraph_end(data_keeper, SubgraphType::Right);
     }
 
-    fn prepare_sliders(&self, data_keeper: &mut DataKeeper, subtree_type: SubtreeType) -> FSMResult<()> {
-        let (prev_len, current_len) = match subtree_type {
-            SubtreeType::Left => (self.prev_par.left_size, self.current_par.left_size),
-            SubtreeType::Right => (self.prev_par.right_size, self.current_par.right_size),
+    fn prepare_sliders(&self, data_keeper: &mut DataKeeper, subgraph_type: SubgraphType) -> FSMResult<()> {
+        let (prev_len, current_len) = match subgraph_type {
+            SubgraphType::Left => (self.prev_par.left_size, self.current_par.left_size),
+            SubgraphType::Right => (self.prev_par.right_size, self.current_par.right_size),
         };
 
         data_keeper.prev_slider_mut().set_subtrace_len(prev_len as _)?;
@@ -94,11 +94,11 @@ impl ParFSM {
 
 use std::fmt;
 
-impl fmt::Display for SubtreeType {
+impl fmt::Display for SubgraphType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            SubtreeType::Left => write!(f, "left"),
-            SubtreeType::Right => write!(f, "right"),
+            SubgraphType::Left => write!(f, "left"),
+            SubgraphType::Right => write!(f, "right"),
         }
     }
 }

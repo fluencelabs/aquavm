@@ -94,7 +94,7 @@ fn fail_with_error_object(
     exec_ctx
         .last_error_descriptor
         .set_from_error_object(error.clone(), tetraplet);
-    exec_ctx.subtree_complete = false;
+    exec_ctx.subgraph_complete = false;
 
     Err(ExecutionError::Catchable(Rc::new(CatchableError::UserError { error })))
 }
