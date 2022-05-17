@@ -14,5 +14,20 @@
  * limitations under the License.
  */
 
-pub mod instruction_arguments;
-pub mod instructions;
+#[test]
+fn display_fail_scalar() {
+    let ast = crate::parse("(fail x)").unwrap();
+    assert_eq!(ast.to_string(), "fail x");
+}
+
+#[test]
+fn display_fail_literal() {
+    let ast = crate::parse(r#"(fail 123 "string")"#).unwrap();
+    assert_eq!(ast.to_string(), r#"fail 123 "string""#);
+}
+
+#[test]
+fn display_fail_last_error() {
+    let ast = crate::parse("(fail %last_error%)").unwrap();
+    assert_eq!(ast.to_string(), "fail %last_error%");
+}

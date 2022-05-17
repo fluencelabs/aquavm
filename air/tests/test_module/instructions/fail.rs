@@ -59,7 +59,7 @@ fn fail_with_literals() {
     let expected_error = CatchableError::UserError {
         error: rc!(json!( {
         "error_code": 1337i64,
-        "instruction": "fail 1337 error message",
+        "instruction": r#"fail 1337 "error message""#,
         "message": "error message",
         "peer_id": test_params.init_peer_id,
         })),

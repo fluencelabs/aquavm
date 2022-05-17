@@ -63,7 +63,7 @@ impl fmt::Display for Fail<'_> {
             Fail::Literal {
                 ret_code,
                 error_message,
-            } => write!(f, "fail {} {}", ret_code, error_message),
+            } => write!(f, r#"fail {} "{}""#, ret_code, error_message),
             Fail::LastError => write!(f, "fail %last_error%"),
         }
     }
