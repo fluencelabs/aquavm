@@ -24,13 +24,10 @@
     unreachable_patterns
 )]
 
+use air_parser::ast;
+
 use std::fmt::Display;
 use std::io::{Error as IoError, Result as IoResult, Write};
-
-use air_parser::ast::{
-    Ap, Call, Fail, FoldScalar, FoldStream, Instruction, Match, MisMatch, New, Next, Null, Par,
-    Seq, Triplet, Value, Xor,
-};
 
 pub const DEFAULT_INDENT_SIZE: usize = 4;
 
@@ -66,7 +63,7 @@ fn fmt_indent(output: &mut impl Write, indent: usize) -> IoResult<()> {
     Ok(())
 }
 
-struct BArgs<'a, 'b>(&'a [Value<'b>]);
+struct BArgs<'a, 'b>(&'a [ast::Value<'b>]);
 
 impl<'a, 'b> Display for BArgs<'a, 'b> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -83,7 +80,7 @@ impl<'a, 'b> Display for BArgs<'a, 'b> {
     }
 }
 
-struct BTriplet<'a, 'b>(&'a Triplet<'b>);
+struct BTriplet<'a, 'b>(&'a ast::Triplet<'b>);
 
 impl<'a, 'b> Display for BTriplet<'a, 'b> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -153,39 +150,39 @@ impl<W: Write> Beautifier<W> {
      */
     pub fn beautify_ast<'a>(
         &mut self,
-        ast: impl AsRef<Instruction<'a>>,
+        ast: impl AsRef<ast::Instruction<'a>>,
     ) -> Result<(), BeautifyError> {
         Ok(self.beautify_walker(ast.as_ref(), 0)?)
     }
 
-    fn beautify_walker(
-        &mut self,
-        node: &air_parser::ast::Instruction,
-        indent: usize,
-    ) -> IoResult<()> {
+    fn beautify_walker(&mut self, node: &ast::Instruction, indent: usize) -> IoResult<()> {
         match node {
-            Instruction::Call(call) => self.beautify_call(call, indent),
-            Instruction::Ap(ap) => self.beautify_ap(ap, indent),
-            Instruction::Seq(seq) => self.beautify_seq(seq, indent),
-            Instruction::Par(par) => self.beautify_par(par, indent),
-            Instruction::Xor(xor) => self.beautify_xor(xor, indent),
-            Instruction::Match(match_) => self.beautify_match(match_, indent),
-            Instruction::MisMatch(mismatch) => self.beautify_mismatch(mismatch, indent),
-            Instruction::Fail(fail) => self.beautify_fail(fail, indent),
-            Instruction::FoldScalar(fold_scalar) => self.beautify_fold_scalar(fold_scalar, indent),
-            Instruction::FoldStream(fold_stream) => self.beautify_fold_stream(fold_stream, indent),
-            Instruction::New(new) => self.beautify_new(new, indent),
-            Instruction::Next(next) => self.beautify_next(next, indent),
-            Instruction::Null(null) => self.beautify_null(null, indent),
-            Instruction::Error => self.beautify_error(indent),
+            ast::Instruction::Call(call) => self.beautify_call(call, indent),
+            ast::Instruction::Ap(ap) => self.beautify_ap(ap, indent),
+            ast::Instruction::Seq(seq) => self.beautify_seq(seq, indent),
+            ast::Instruction::Par(par) => self.beautify_par(par, indent),
+            ast::Instruction::Xor(xor) => self.beautify_xor(xor, indent),
+            ast::Instruction::Match(match_) => self.beautify_match(match_, indent),
+            ast::Instruction::MisMatch(mismatch) => self.beautify_mismatch(mismatch, indent),
+            ast::Instruction::Fail(fail) => self.beautify_fail(fail, indent),
+            ast::Instruction::FoldScalar(fold_scalar) => {
+                self.beautify_fold_scalar(fold_scalar, indent)
+            }
+            ast::Instruction::FoldStream(fold_stream) => {
+                self.beautify_fold_stream(fold_stream, indent)
+            }
+            ast::Instruction::New(new) => self.beautify_new(new, indent),
+            ast::Instruction::Next(next) => self.beautify_next(next, indent),
+            ast::Instruction::Null(null) => self.beautify_null(null, indent),
+            ast::Instruction::Error => self.beautify_error(indent),
         }
     }
 
-    fn beautify_call(&mut self, call: &Call, indent: usize) -> IoResult<()> {
+    fn beautify_call(&mut self, call: &ast::Call, indent: usize) -> IoResult<()> {
         fmt_indent(&mut self.output, indent)?;
         match &call.output {
-            air_parser::ast::CallOutputValue::Variable(v) => write!(&mut self.output, "{} <- ", v)?,
-            air_parser::ast::CallOutputValue::None => {}
+            ast::CallOutputValue::Variable(v) => write!(&mut self.output, "{} <- ", v)?,
+            ast::CallOutputValue::None => {}
         }
         writeln!(
             &mut self.output,
@@ -195,18 +192,18 @@ impl<W: Write> Beautifier<W> {
         )
     }
 
-    fn beautify_ap(&mut self, ap: &Ap, indent: usize) -> IoResult<()> {
+    fn beautify_ap(&mut self, ap: &ast::Ap, indent: usize) -> IoResult<()> {
         fmt_indent(&mut self.output, indent)?;
         writeln!(&mut self.output, "{}", ap)
     }
 
-    fn beautify_seq(&mut self, seq: &Seq, indent: usize) -> IoResult<()> {
+    fn beautify_seq(&mut self, seq: &ast::Seq, indent: usize) -> IoResult<()> {
         // please note that seq uses same indendation intentionally
         self.beautify_walker(&seq.0, indent)?;
         self.beautify_walker(&seq.1, indent)
     }
 
-    fn beautify_par(&mut self, par: &Par, indent: usize) -> IoResult<()> {
+    fn beautify_par(&mut self, par: &ast::Par, indent: usize) -> IoResult<()> {
         multiline!(
             self, indent,
             "par:";
@@ -216,7 +213,7 @@ impl<W: Write> Beautifier<W> {
         )
     }
 
-    fn beautify_xor(&mut self, xor: &Xor, indent: usize) -> IoResult<()> {
+    fn beautify_xor(&mut self, xor: &ast::Xor, indent: usize) -> IoResult<()> {
         multiline!(
             self, indent,
             "try:";
@@ -226,7 +223,7 @@ impl<W: Write> Beautifier<W> {
         )
     }
 
-    fn beautify_match(&mut self, match_: &Match, indent: usize) -> IoResult<()> {
+    fn beautify_match(&mut self, match_: &ast::Match, indent: usize) -> IoResult<()> {
         multiline!(
             self, indent,
             "{}:", match_;
@@ -234,7 +231,7 @@ impl<W: Write> Beautifier<W> {
         )
     }
 
-    fn beautify_mismatch(&mut self, mismatch: &MisMatch, indent: usize) -> IoResult<()> {
+    fn beautify_mismatch(&mut self, mismatch: &ast::MisMatch, indent: usize) -> IoResult<()> {
         multiline!(
             self, indent,
             "{}:", mismatch;
@@ -242,12 +239,12 @@ impl<W: Write> Beautifier<W> {
         )
     }
 
-    fn beautify_fail(&mut self, fail: &Fail, indent: usize) -> IoResult<()> {
+    fn beautify_fail(&mut self, fail: &ast::Fail, indent: usize) -> IoResult<()> {
         fmt_indent(&mut self.output, indent)?;
         writeln!(&mut self.output, "{}", fail)
     }
 
-    fn beautify_fold_scalar(&mut self, fold: &FoldScalar, indent: usize) -> IoResult<()> {
+    fn beautify_fold_scalar(&mut self, fold: &ast::FoldScalar, indent: usize) -> IoResult<()> {
         multiline!(
             self, indent,
             "fold {} {}:", fold.iterable, fold.iterator;
@@ -255,7 +252,7 @@ impl<W: Write> Beautifier<W> {
         )
     }
 
-    fn beautify_fold_stream(&mut self, fold: &FoldStream, indent: usize) -> IoResult<()> {
+    fn beautify_fold_stream(&mut self, fold: &ast::FoldStream, indent: usize) -> IoResult<()> {
         multiline!(
             self, indent,
             "fold {} {}:", fold.iterable, fold.iterator;
@@ -263,7 +260,7 @@ impl<W: Write> Beautifier<W> {
         )
     }
 
-    fn beautify_new(&mut self, new: &New, indent: usize) -> IoResult<()> {
+    fn beautify_new(&mut self, new: &ast::New, indent: usize) -> IoResult<()> {
         multiline!(
             self, indent,
             "{}:", new;
@@ -271,12 +268,12 @@ impl<W: Write> Beautifier<W> {
         )
     }
 
-    fn beautify_next(&mut self, next: &Next, indent: usize) -> IoResult<()> {
+    fn beautify_next(&mut self, next: &ast::Next, indent: usize) -> IoResult<()> {
         fmt_indent(&mut self.output, indent)?;
         writeln!(&mut self.output, "next {}", next.iterator.name)
     }
 
-    fn beautify_null(&mut self, null: &Null, indent: usize) -> IoResult<()> {
+    fn beautify_null(&mut self, null: &ast::Null, indent: usize) -> IoResult<()> {
         fmt_indent(&mut self.output, indent)?;
         // emits correct text
         writeln!(&mut self.output, "{}", null)

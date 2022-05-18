@@ -27,9 +27,10 @@
 use air_beautifier::Beautifier;
 use anyhow::{Context, Result};
 use clap::Parser;
+
 use std::{
     fs::File,
-    io::{self, Read},
+    io,
     path::PathBuf,
 };
 
@@ -43,6 +44,8 @@ struct Args {
 }
 
 fn read_script(args: &Args) -> Result<String> {
+    use std::io::Read;
+
     let mut air_script = String::new();
 
     match &args.input {
