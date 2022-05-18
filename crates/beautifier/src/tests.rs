@@ -26,15 +26,21 @@
 
 use crate::Beautifier;
 
+fn beautify_to_string(air_script: &str) -> String {
+    let mut output = vec![];
+    let mut beautifier = Beautifier::new(&mut output);
+    beautifier.beautify(air_script).unwrap();
+    String::from_utf8(output).unwrap()
+}
+
 #[test]
 fn ap_with_literal() {
     let script = r#"(ap "some_string" $stream)"#;
-    let mut output = vec![];
-    let mut beautifier = Beautifier::new(&mut output);
-    beautifier.beautify(script).unwrap();
+    let output = beautify_to_string(script);
+
     assert_eq!(
         output,
-        br#"ap "some_string" $stream
+        r#"ap "some_string" $stream
 "#
     );
 }
@@ -42,85 +48,77 @@ fn ap_with_literal() {
 #[test]
 fn ap_with_number() {
     let script = "(ap -100 $stream)";
-    let mut output = vec![];
-    let mut beautifier = Beautifier::new(&mut output);
-    beautifier.beautify(script).unwrap();
+    let output = beautify_to_string(script);
+
     assert_eq!(
         output,
-        br#"ap -100 $stream
+        r#"ap -100 $stream
 "#
     );
 }
 
 #[test]
 fn ap_with_bool() {
-    let source_code = "(ap true $stream)";
-    let mut output = vec![];
-    let mut beautifier = Beautifier::new(&mut output);
-    beautifier.beautify(source_code).unwrap();
+    let script = "(ap true $stream)";
+    let output = beautify_to_string(script);
+
     assert_eq!(
         output,
-        br#"ap true $stream
+        r#"ap true $stream
 "#
     );
 }
 
 #[test]
 fn ap_with_last_error() {
-    let source_code = "(ap %last_error%.$.message! $stream)";
-    let mut output = vec![];
-    let mut beautifier = Beautifier::new(&mut output);
-    beautifier.beautify(source_code).unwrap();
-    assert_eq!(output, b"ap %last_error%.$.message $stream\n");
+    let script = "(ap %last_error%.$.message! $stream)";
+    let output = beautify_to_string(script);
+
+    assert_eq!(output, "ap %last_error%.$.message $stream\n");
 }
 
 #[test]
 fn ap_with_empty_array() {
-    let source_code = "(ap [] $stream)";
-    let mut output = vec![];
-    let mut beautifier = Beautifier::new(&mut output);
-    beautifier.beautify(source_code).unwrap();
-    assert_eq!(output, b"ap [] $stream\n");
+    let script = "(ap [] $stream)";
+    let output = beautify_to_string(script);
+
+    assert_eq!(output, "ap [] $stream\n");
 }
 
 #[test]
 fn ap_with_init_peer_id() {
-    let source_code = "(ap %init_peer_id% $stream)";
-    let mut output = vec![];
-    let mut beautifier = Beautifier::new(&mut output);
-    beautifier.beautify(source_code).unwrap();
-    assert_eq!(output, b"ap %init_peer_id% $stream\n");
+    let script = "(ap %init_peer_id% $stream)";
+    let output = beautify_to_string(script);
+
+    assert_eq!(output, "ap %init_peer_id% $stream\n");
 }
 
 #[test]
 fn ap_with_timestamp() {
-    let source_code = "(ap %timestamp% $stream)";
-    let mut output = vec![];
-    let mut beautifier = Beautifier::new(&mut output);
-    beautifier.beautify(source_code).unwrap();
-    assert_eq!(output, b"ap %timestamp% $stream\n");
+    let script = "(ap %timestamp% $stream)";
+    let output = beautify_to_string(script);
+
+    assert_eq!(output, "ap %timestamp% $stream\n");
 }
 
 #[test]
 fn ap_with_ttl() {
-    let source_code = r#"
+    let script = r#"
         (ap %ttl% $stream)
     "#;
-    let mut output = vec![];
-    let mut beautifier = Beautifier::new(&mut output);
-    beautifier.beautify(source_code).unwrap();
-    assert_eq!(output, b"ap %ttl% $stream\n");
+    let output = beautify_to_string(script);
+
+    assert_eq!(output, "ap %ttl% $stream\n");
 }
 
 #[test]
 fn seq() {
     let script = "(seq (null) (null))";
-    let mut output = vec![];
-    let mut beautifier = Beautifier::new(&mut output);
-    beautifier.beautify(script).unwrap();
+    let output = beautify_to_string(script);
+
     assert_eq!(
         output,
-        b"null
+        "null
 null
 "
     )
@@ -129,12 +127,11 @@ null
 #[test]
 fn seq_nested_pre() {
     let script = "(seq (seq (null) (null)) (null))";
-    let mut output = vec![];
-    let mut beautifier = Beautifier::new(&mut output);
-    beautifier.beautify(script).unwrap();
+    let output = beautify_to_string(script);
+
     assert_eq!(
         output,
-        b"null
+        "null
 null
 null
 "
@@ -144,12 +141,11 @@ null
 #[test]
 fn seq_nested_post() {
     let script = "(seq (null) (seq (null) (null)))";
-    let mut output = vec![];
-    let mut beautifier = Beautifier::new(&mut output);
-    beautifier.beautify(script).unwrap();
+    let output = beautify_to_string(script);
+
     assert_eq!(
         output,
-        b"null
+        "null
 null
 null
 "
@@ -159,12 +155,11 @@ null
 #[test]
 fn par() {
     let script = "(par (null) (null))";
-    let mut output = vec![];
-    let mut beautifier = Beautifier::new(&mut output);
-    beautifier.beautify(script).unwrap();
+    let output = beautify_to_string(script);
+
     assert_eq!(
         output,
-        b"par:
+        "par:
     null
 |
     null
@@ -179,12 +174,11 @@ fn match_() {
       (call "a" ("" "") [] a)
       (call "b" ("" "") [] b))
   (match a b (null)))"#;
-    let mut output = vec![];
-    let mut beautifier = Beautifier::new(&mut output);
-    beautifier.beautify(script).unwrap();
+    let output = beautify_to_string(script);
+
     assert_eq!(
         output,
-        br#"a <- call "a" ("", "") []
+        r#"a <- call "a" ("", "") []
 b <- call "b" ("", "") []
 match a b:
     null
@@ -199,12 +193,11 @@ fn mismatch() {
       (call "a" ("" "") [] a)
       (call "b" ("" "") [] b))
   (mismatch a b (null)))"#;
-    let mut output = vec![];
-    let mut beautifier = Beautifier::new(&mut output);
-    beautifier.beautify(script).unwrap();
+    let output = beautify_to_string(script);
+
     assert_eq!(
         output,
-        br#"a <- call "a" ("", "") []
+        r#"a <- call "a" ("", "") []
 b <- call "b" ("", "") []
 mismatch a b:
     null
@@ -215,30 +208,27 @@ mismatch a b:
 #[test]
 fn fail_last_error() {
     let script = "(fail %last_error%)";
-    let mut output = vec![];
-    let mut beautifier = Beautifier::new(&mut output);
-    beautifier.beautify(script).unwrap();
-    assert_eq!(output, b"fail %last_error%\n");
+    let output = beautify_to_string(script);
+
+    assert_eq!(output, "fail %last_error%\n");
 }
 
 #[test]
 fn fail_expr() {
     let script = "(fail var)";
-    let mut output = vec![];
-    let mut beautifier = Beautifier::new(&mut output);
-    beautifier.beautify(script).unwrap();
-    assert_eq!(output, b"fail var\n");
+    let output = beautify_to_string(script);
+
+    assert_eq!(output, "fail var\n");
 }
 
 #[test]
 fn fail_common() {
     let script = r#"(fail 123 "Message")"#;
-    let mut output = vec![];
-    let mut beautifier = Beautifier::new(&mut output);
-    beautifier.beautify(script).unwrap();
+    let output = beautify_to_string(script);
+
     assert_eq!(
         output,
-        br#"fail 123 "Message"
+        r#"fail 123 "Message"
 "#
     );
 }
@@ -246,12 +236,11 @@ fn fail_common() {
 #[test]
 fn fold_scalar() {
     let script = r#"(seq (call "it" ("" "") [] var) (fold var i (null)))"#;
-    let mut output = vec![];
-    let mut beautifier = Beautifier::new(&mut output);
-    beautifier.beautify(script).unwrap();
+    let output = beautify_to_string(script);
+
     assert_eq!(
         output,
-        br#"var <- call "it" ("", "") []
+        r#"var <- call "it" ("", "") []
 fold var i:
     null
 "#
@@ -261,12 +250,11 @@ fold var i:
 #[test]
 fn fold_stream() {
     let script = r#"(seq (call "it" ("" "") [] $var) (fold $var i (null)))"#;
-    let mut output = vec![];
-    let mut beautifier = Beautifier::new(&mut output);
-    beautifier.beautify(script).unwrap();
+    let output = beautify_to_string(script);
+
     assert_eq!(
         output,
-        br#"$var <- call "it" ("", "") []
+        r#"$var <- call "it" ("", "") []
 fold $var i:
     null
 "#
@@ -276,24 +264,22 @@ fold $var i:
 #[test]
 fn call_var() {
     let script = "(call \"{0}\" (\"a\" \"b\") [\"stream_1\" \"stream_2\"] streamvar)";
-    let mut output = vec![];
-    let mut beautifier = Beautifier::new(&mut output);
-    beautifier.beautify(script).unwrap();
+    let output = beautify_to_string(script);
+
     assert_eq!(
         output,
-        b"streamvar <- call \"{0}\" (\"a\", \"b\") [\"stream_1\", \"stream_2\"]\n"
+        "streamvar <- call \"{0}\" (\"a\", \"b\") [\"stream_1\", \"stream_2\"]\n"
     );
 }
 
 #[test]
 fn call_novar() {
     let script = r#"(call "{0}" ("a" "b") ["stream_1" "stream_2"])"#;
-    let mut output = vec![];
-    let mut beautifier = Beautifier::new(&mut output);
-    beautifier.beautify(script).unwrap();
+    let output = beautify_to_string(script);
+
     assert_eq!(
         output,
-        br#"call "{0}" ("a", "b") ["stream_1", "stream_2"]
+        r#"call "{0}" ("a", "b") ["stream_1", "stream_2"]
 "#
     );
 }
@@ -301,12 +287,11 @@ fn call_novar() {
 #[test]
 fn call_noargs() {
     let script = r#"(call "{0}" ("a" "b") [])"#;
-    let mut output = vec![];
-    let mut beautifier = Beautifier::new(&mut output);
-    beautifier.beautify(script).unwrap();
+    let output = beautify_to_string(script);
+
     assert_eq!(
         output,
-        br#"call "{0}" ("a", "b") []
+        r#"call "{0}" ("a", "b") []
 "#
     );
 }
@@ -314,12 +299,11 @@ fn call_noargs() {
 #[test]
 fn next() {
     let script = r#"(seq (call "{0}" ("a" "b") ["stream_1"] j) (fold j i (next i)))"#;
-    let mut output = vec![];
-    let mut beautifier = Beautifier::new(&mut output);
-    beautifier.beautify(script).unwrap();
+    let output = beautify_to_string(script);
+
     assert_eq!(
         output,
-        br#"j <- call "{0}" ("a", "b") ["stream_1"]
+        r#"j <- call "{0}" ("a", "b") ["stream_1"]
 fold j i:
     next i
 "#
@@ -329,12 +313,11 @@ fold j i:
 #[test]
 fn new() {
     let script = "(new var (seq (null) (null)))";
-    let mut output = vec![];
-    let mut beautifier = Beautifier::new(&mut output);
-    beautifier.beautify(script).unwrap();
+    let output = beautify_to_string(script);
+
     assert_eq!(
         output,
-        b"new var:
+        "new var:
     null
     null
 "
@@ -344,10 +327,9 @@ fn new() {
 #[test]
 fn null() {
     let script = "(null)";
-    let mut output = vec![];
-    let mut beautifier = Beautifier::new(&mut output);
-    beautifier.beautify(script).unwrap();
-    assert_eq!(output, b"null\n");
+    let output = beautify_to_string(script);
+
+    assert_eq!(output, "null\n");
 }
 
 #[test]
@@ -356,9 +338,10 @@ fn custom_indentation() {
     let mut beautifier = Beautifier::new_with_indent(&mut output, 2);
     let script = "(new var1 (new var (seq (null) (null))))";
     beautifier.beautify(script).unwrap();
+
     assert_eq!(
-        output,
-        b"new var1:
+        String::from_utf8(output).unwrap(),
+        "new var1:
   new var:
     null
     null
