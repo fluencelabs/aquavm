@@ -2,7 +2,6 @@
 members = [
     "air",
     "air-interpreter",
-    "air-beautify",
     "avm/server",
     "crates/air-lib/air-parser",
     "crates/air-lib/execution-info-collector",
@@ -16,6 +15,7 @@ members = [
     "crates/air-lib/trace-handler",
     "crates/beautifier",
     "crates/data-store",
+    "tools/cli/air-beautify",
 ]
 
 exclude = [

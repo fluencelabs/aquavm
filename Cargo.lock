@@ -47,11 +47,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "air-beautifier"
+version = "0.1.0"
+dependencies = [
+ "air-parser",
+ "thiserror",
+]
+
+[[package]]
 name = "air-beautify"
 version = "0.1.0"
 dependencies = [
+ "air-beautifier",
  "anyhow",
- "beautifier",
  "clap 3.1.18",
 ]
 
@@ -240,14 +248,6 @@ dependencies = [
  "polyplets",
  "serde",
  "serde_json",
- "thiserror",
-]
-
-[[package]]
-name = "beautifier"
-version = "0.1.0"
-dependencies = [
- "air-parser",
  "thiserror",
 ]
 
