@@ -92,7 +92,7 @@ impl<'a, 'b> Display for BTriplet<'a, 'b> {
     }
 }
 
-/** Error produced by the Beautifier. */
+/// Error produced by the Beautifier.
 #[derive(Debug, thiserror::Error)]
 pub enum BeautifyError {
     #[error("{0}")]
@@ -101,18 +101,14 @@ pub enum BeautifyError {
     Io(#[from] IoError),
 }
 
-/**
- * AIR beautifier.
-*/
+/// AIR beautifier.
 pub struct Beautifier<W: Write> {
     output: W,
     indent_size: usize,
 }
 
 impl<W: Write> Beautifier<W> {
-    /**
-     * Beautifier for the output with default indent size.
-     */
+    /// Beautifier for the output with default indent size.
     pub fn new(output: W) -> Self {
         Self {
             output,
@@ -120,9 +116,7 @@ impl<W: Write> Beautifier<W> {
         }
     }
 
-    /**
-     * Beautifier for the output with custom indent size.
-     */
+    /// Beautifier for the output with custom indent size.
     pub fn new_with_indent(output: W, indent_step: usize) -> Self {
         Self {
             output,
@@ -130,24 +124,18 @@ impl<W: Write> Beautifier<W> {
         }
     }
 
-    /**
-     * Unwrap the Beautifier, returning the underlying writer.
-     */
+    /// Unwrap the Beautifier, returning the underlying writer.
     pub fn into_inner(self) -> W {
         self.output
     }
 
-    /**
-     * Emit beautified code for the `air_script`.
-     */
+    /// Emit beautified code for the `air_script`.
     pub fn beautify(&mut self, air_script: &str) -> Result<(), BeautifyError> {
         let tree = air_parser::parse(air_script).map_err(BeautifyError::Parse)?;
         self.beautify_ast(tree)
     }
 
-    /**
-     * Emit beautified code for the `ast`.
-     */
+    /// Emit beautified code for the `ast`.
     pub fn beautify_ast<'a>(
         &mut self,
         ast: impl AsRef<ast::Instruction<'a>>,
