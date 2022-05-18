@@ -15,4 +15,5 @@ path = "src/lib.rs"
 
 [dependencies]
 air-parser = { path = "../air-lib/air-parser" }
+itertools = "0.10.3"
 thiserror = "1.0.30"

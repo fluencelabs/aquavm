@@ -28,11 +28,7 @@ use air_beautifier::Beautifier;
 use anyhow::{Context, Result};
 use clap::Parser;
 
-use std::{
-    fs::File,
-    io,
-    path::PathBuf,
-};
+use std::{io, path::PathBuf};
 
 #[derive(Parser)]
 struct Args {
@@ -46,16 +42,14 @@ struct Args {
 fn read_script(args: &Args) -> Result<String> {
     use std::io::Read;
 
-    let mut air_script = String::new();
-
-    match &args.input {
-        Some(in_path) => {
-            let mut file = File::open(in_path)?;
-            file.read_to_string(&mut air_script)?;
-        }
+    let air_script = match &args.input {
+        Some(in_path) => std::fs::read_to_string(in_path)?,
         None => {
+            let mut buffer = String::new();
             let mut stdin = io::stdin().lock();
-            stdin.read_to_string(&mut air_script)?;
+
+            stdin.read_to_string(&mut buffer)?;
+            buffer
         }
     };
 
@@ -63,16 +57,17 @@ fn read_script(args: &Args) -> Result<String> {
 }
 
 fn build_output(args: &Args) -> Result<Box<dyn io::Write>> {
-    Ok(match &args.output {
+    let output: Box<dyn io::Write> = match &args.output {
         Some(out_path) => {
-            let file = File::create(out_path)?;
-            Box::new(file) as _
+            let file = std::fs::File::create(out_path)?;
+            Box::new(file)
         }
         None => {
             let stdout = io::stdout().lock();
             Box::new(stdout)
         }
-    })
+    };
+    Ok(output)
 }
 
 fn main() -> Result<()> {

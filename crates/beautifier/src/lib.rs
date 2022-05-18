@@ -25,6 +25,7 @@
 )]
 
 use air_parser::ast;
+use itertools::Itertools as _;
 
 use std::fmt::Display;
 use std::io::{Error as IoError, Result as IoResult, Write};
@@ -42,7 +43,7 @@ macro_rules! multiline {
         let step = $beautifier.indent_size;
         {
             let out = &mut $beautifier.output;
-            $crate::fmt_indent(&mut *out, $indent)?;
+            $crate::fmt_indent(out, $indent)?;
             writeln!(out, $fmt1 $(, $arg1)*)?;
         }
         crate::Beautifier::beautify_walker(&mut *$beautifier, $nest1, $indent + step)?;
@@ -56,27 +57,14 @@ macro_rules! multiline {
 }
 
 fn fmt_indent(output: &mut impl Write, indent: usize) -> IoResult<()> {
-    // basic implementation that can be speeded up
-    for _ in 0..indent {
-        write!(output, " ")?;
-    }
-    Ok(())
+    write!(output, "{:indent$}", "", indent = indent)
 }
 
 struct BArgs<'a, 'b>(&'a [ast::Value<'b>]);
 
 impl<'a, 'b> Display for BArgs<'a, 'b> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut first = true;
-        for item in self.0 {
-            if !first {
-                write!(f, ", ")?;
-            } else {
-                first = false;
-            }
-            write!(f, "{}", item)?;
-        }
-        Ok(())
+        f.write_fmt(format_args!("{}", self.0.iter().format(", ")))
     }
 }
 
@@ -84,11 +72,10 @@ struct BTriplet<'a, 'b>(&'a ast::Triplet<'b>);
 
 impl<'a, 'b> Display for BTriplet<'a, 'b> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
+        f.write_fmt(format_args!(
             "{} ({}, {})",
             self.0.peer_pk, self.0.service_id, self.0.function_name
-        )
+        ))
     }
 }
 
