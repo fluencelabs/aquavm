@@ -60,17 +60,17 @@ fn fmt_indent(output: &mut impl Write, indent: usize) -> IoResult<()> {
     write!(output, "{:indent$}", "", indent = indent)
 }
 
-struct BArgs<'ctx, 'i>(&'ctx [ast::Value<'i>]);
+struct CallArgs<'ctx, 'i>(&'ctx [ast::Value<'i>]);
 
-impl<'ctx, 'i> Display for BArgs<'ctx, 'i> {
+impl<'ctx, 'i> Display for CallArgs<'ctx, 'i> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_fmt(format_args!("{}", self.0.iter().format(", ")))
     }
 }
 
-struct BTriplet<'ctx, 'i>(&'ctx ast::Triplet<'i>);
+struct CallTriplet<'ctx, 'i>(&'ctx ast::Triplet<'i>);
 
-impl<'ctx, 'i> Display for BTriplet<'ctx, 'i> {
+impl<'ctx, 'i> Display for CallTriplet<'ctx, 'i> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_fmt(format_args!(
             "{} ({}, {})",
@@ -162,8 +162,8 @@ impl<W: Write> Beautifier<W> {
         writeln!(
             &mut self.output,
             "call {} [{}]",
-            BTriplet(&call.triplet),
-            BArgs(call.args.as_slice())
+            CallTriplet(&call.triplet),
+            CallArgs(call.args.as_slice())
         )
     }
 
