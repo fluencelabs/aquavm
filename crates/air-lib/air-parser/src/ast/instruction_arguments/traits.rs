@@ -76,30 +76,6 @@ impl fmt::Display for ApArgument<'_> {
     }
 }
 
-impl fmt::Display for PeerPart<'_> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        use PeerPart::*;
-
-        match self {
-            PeerPk(peer_pk) => write!(f, "{}", peer_pk),
-            PeerPkWithServiceId(peer_pk, service_id) => write!(f, "({} {})", peer_pk, service_id),
-        }
-    }
-}
-
-impl fmt::Display for FunctionPart<'_> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        use FunctionPart::*;
-
-        match self {
-            FuncName(func_name) => write!(f, "{}", func_name),
-            ServiceIdWithFuncName(service_id, func_name) => {
-                write!(f, "({} {})", service_id, func_name)
-            }
-        }
-    }
-}
-
 impl fmt::Display for Triplet<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
