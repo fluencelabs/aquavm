@@ -32,27 +32,30 @@ use std::io::{Error as IoError, Result as IoResult, Write};
 
 pub const DEFAULT_INDENT_SIZE: usize = 4;
 
-macro_rules! multiline {
-    ($beautifier:expr, $indent:expr, $fmt1:literal $(, $arg1:expr)*; $nest1:expr) => ({
+macro_rules! compound {
+    ($beautifier:expr, $indent:expr, $body:expr) => {{
         let out = &mut $beautifier.output;
         $crate::fmt_indent(out, $indent)?;
-        writeln!(out, $fmt1 $(, $arg1)*)?;
-        $crate::Beautifier::beautify_walker($beautifier, $nest1, $indent + $beautifier.indent_size)
-    });
-    ($beautifier:expr, $indent:expr, $fmt1:literal $(, $arg1:expr)*; $nest1:expr; $fmt2:literal $(, $arg2:expr)*; $nest2:expr) => ({
+        writeln!(out, "{}:", $body)?;
+        $crate::Beautifier::beautify_walker(
+            $beautifier,
+            &$body.instruction,
+            $indent + $beautifier.indent_size,
+        )
+    }};
+}
+
+macro_rules! multiline {
+    ($beautifier:expr, $indent:expr $(; $fmt1:literal $(, $arg1:expr)*; $nest:expr)+) => ({
         let step = $beautifier.indent_size;
-        {
-            let out = &mut $beautifier.output;
-            $crate::fmt_indent(out, $indent)?;
-            writeln!(out, $fmt1 $(, $arg1)*)?;
-        }
-        crate::Beautifier::beautify_walker(&mut *$beautifier, $nest1, $indent + step)?;
-        {
-            let out = &mut $beautifier.output;
-            $crate::fmt_indent(out, $indent)?;
-            writeln!(out, $fmt2 $(, $arg2)*)?;
-        }
-        crate::Beautifier::beautify_walker(&mut *$beautifier, $nest2, $indent + step)
+        $({
+              let out = &mut $beautifier.output;
+              $crate::fmt_indent(out, $indent)?;
+              writeln!(out, $fmt1 $(, $arg1)*)?;
+          }
+          $crate::Beautifier::beautify_walker($beautifier, $nest, $indent + step)?;
+        )+
+        Ok(())
     });
 }
 
@@ -133,13 +136,13 @@ impl<W: Write> Beautifier<W> {
     fn beautify_walker(&mut self, node: &ast::Instruction, indent: usize) -> IoResult<()> {
         match node {
             ast::Instruction::Call(call) => self.beautify_call(call, indent),
-            ast::Instruction::Ap(ap) => self.beautify_ap(ap, indent),
+            ast::Instruction::Ap(ap) => self.beautify_simple(ap, indent),
             ast::Instruction::Seq(seq) => self.beautify_seq(seq, indent),
             ast::Instruction::Par(par) => self.beautify_par(par, indent),
             ast::Instruction::Xor(xor) => self.beautify_xor(xor, indent),
             ast::Instruction::Match(match_) => self.beautify_match(match_, indent),
             ast::Instruction::MisMatch(mismatch) => self.beautify_mismatch(mismatch, indent),
-            ast::Instruction::Fail(fail) => self.beautify_fail(fail, indent),
+            ast::Instruction::Fail(fail) => self.beautify_simple(fail, indent),
             ast::Instruction::FoldScalar(fold_scalar) => {
                 self.beautify_fold_scalar(fold_scalar, indent)
             }
@@ -147,8 +150,8 @@ impl<W: Write> Beautifier<W> {
                 self.beautify_fold_stream(fold_stream, indent)
             }
             ast::Instruction::New(new) => self.beautify_new(new, indent),
-            ast::Instruction::Next(next) => self.beautify_next(next, indent),
-            ast::Instruction::Null(null) => self.beautify_null(null, indent),
+            ast::Instruction::Next(next) => self.beautify_simple(next, indent),
+            ast::Instruction::Null(null) => self.beautify_simple(null, indent),
             ast::Instruction::Error => self.beautify_error(indent),
         }
     }
@@ -167,20 +170,19 @@ impl<W: Write> Beautifier<W> {
         )
     }
 
-    fn beautify_ap(&mut self, ap: &ast::Ap, indent: usize) -> IoResult<()> {
+    fn beautify_simple(&mut self, cmd: impl Display, indent: usize) -> IoResult<()> {
         fmt_indent(&mut self.output, indent)?;
-        writeln!(&mut self.output, "{}", ap)
+        writeln!(&mut self.output, "{}", cmd)
     }
 
     fn beautify_seq(&mut self, seq: &ast::Seq, indent: usize) -> IoResult<()> {
-        // please note that seq uses same indendation intentionally
         self.beautify_walker(&seq.0, indent)?;
         self.beautify_walker(&seq.1, indent)
     }
 
     fn beautify_par(&mut self, par: &ast::Par, indent: usize) -> IoResult<()> {
         multiline!(
-            self, indent,
+            self, indent;
             "par:";
             &par.0;
             "|";  // TODO: SHOULD BE UNINDENTED AS PER SPEC; OR WE MAY CHANGE THE SPEC
@@ -190,7 +192,7 @@ impl<W: Write> Beautifier<W> {
 
     fn beautify_xor(&mut self, xor: &ast::Xor, indent: usize) -> IoResult<()> {
         multiline!(
-            self, indent,
+            self, indent;
             "try:";
             &xor.0;
             "catch:";
@@ -199,59 +201,23 @@ impl<W: Write> Beautifier<W> {
     }
 
     fn beautify_match(&mut self, match_: &ast::Match, indent: usize) -> IoResult<()> {
-        multiline!(
-            self, indent,
-            "{}:", match_;
-            &match_.instruction
-        )
+        compound!(self, indent, match_)
     }
 
     fn beautify_mismatch(&mut self, mismatch: &ast::MisMatch, indent: usize) -> IoResult<()> {
-        multiline!(
-            self, indent,
-            "{}:", mismatch;
-            &mismatch.instruction
-        )
-    }
-
-    fn beautify_fail(&mut self, fail: &ast::Fail, indent: usize) -> IoResult<()> {
-        fmt_indent(&mut self.output, indent)?;
-        writeln!(&mut self.output, "{}", fail)
+        compound!(self, indent, mismatch)
     }
 
     fn beautify_fold_scalar(&mut self, fold: &ast::FoldScalar, indent: usize) -> IoResult<()> {
-        multiline!(
-            self, indent,
-            "fold {} {}:", fold.iterable, fold.iterator;
-            &fold.instruction
-        )
+        compound!(self, indent, fold)
     }
 
     fn beautify_fold_stream(&mut self, fold: &ast::FoldStream, indent: usize) -> IoResult<()> {
-        multiline!(
-            self, indent,
-            "fold {} {}:", fold.iterable, fold.iterator;
-            &fold.instruction
-        )
+        compound!(self, indent, fold)
     }
 
     fn beautify_new(&mut self, new: &ast::New, indent: usize) -> IoResult<()> {
-        multiline!(
-            self, indent,
-            "{}:", new;
-            &new.instruction
-        )
-    }
-
-    fn beautify_next(&mut self, next: &ast::Next, indent: usize) -> IoResult<()> {
-        fmt_indent(&mut self.output, indent)?;
-        writeln!(&mut self.output, "next {}", next.iterator.name)
-    }
-
-    fn beautify_null(&mut self, null: &ast::Null, indent: usize) -> IoResult<()> {
-        fmt_indent(&mut self.output, indent)?;
-        // emits correct text
-        writeln!(&mut self.output, "{}", null)
+        compound!(self, indent, new)
     }
 
     fn beautify_error(&mut self, indent: usize) -> IoResult<()> {
