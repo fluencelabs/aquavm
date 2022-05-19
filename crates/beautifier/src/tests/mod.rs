@@ -351,61 +351,8 @@ fn custom_indentation() {
 
 #[test]
 fn deeply_nested() {
-    let script = r#"
-(xor
-  (seq
-    (seq
-       (call "me" ("" "") [] var)
-       (ap var.$.value data))
-    (par
-      (par
-        (call "other1" ("set" "") [data])
-        (call "other2" ("insert" "") [data]))
-      (seq
-        (ap "key" key)
-        (seq
-          (call "other3" ("" "") [key data] $values)
-          (fold $values i
-            (seq
-              (xor
-                (seq
-                  (call "other2" ("insert" "") [i] j)
-                  (call "other3" ("report" "") [j]))
-                (fail 3 "fail to fold"))
-              (next i)))))))
-  (par
-    (seq
-      (call "other1" ("report" "error") [%last_error%] rep)
-      (call "other2" ("report" "error") [%last_error% rep]))
-    (call "other3" ("report" "error") [%last_error%])))
-"#;
+    let script = include_str!("deeply_nested.air");
     let output = beautify_to_string(script);
-    assert_eq!(
-        output,
-        r#"try:
-    var <- call "me" ("", "") []
-    ap var.$.value data
-    par:
-        par:
-            call "other1" ("set", "") [data]
-        |
-            call "other2" ("insert", "") [data]
-    |
-        ap "key" key
-        $values <- call "other3" ("", "") [key, data]
-        fold $values i:
-            try:
-                j <- call "other2" ("insert", "") [i]
-                call "other3" ("report", "") [j]
-            catch:
-                fail 3 "fail to fold"
-            next i
-catch:
-    par:
-        rep <- call "other1" ("report", "error") [%last_error%]
-        call "other2" ("report", "error") [%last_error%, rep]
-    |
-        call "other3" ("report", "error") [%last_error%]
-"#
-    )
+    let expected = include_str!("deeply_nested_expected.txt");
+    assert_eq!(output, expected);
 }
