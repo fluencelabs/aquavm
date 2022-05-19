@@ -119,7 +119,7 @@ impl fmt::Display for MisMatch<'_> {
 
 impl fmt::Display for Next<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "next")
+        write!(f, "next {}", self.iterator)
     }
 }
 
