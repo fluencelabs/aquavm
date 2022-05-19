@@ -60,17 +60,17 @@ fn fmt_indent(output: &mut impl Write, indent: usize) -> IoResult<()> {
     write!(output, "{:indent$}", "", indent = indent)
 }
 
-struct BArgs<'a, 'b>(&'a [ast::Value<'b>]);
+struct BArgs<'ctx, 'i>(&'ctx [ast::Value<'i>]);
 
-impl<'a, 'b> Display for BArgs<'a, 'b> {
+impl<'ctx, 'i> Display for BArgs<'ctx, 'i> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_fmt(format_args!("{}", self.0.iter().format(", ")))
     }
 }
 
-struct BTriplet<'a, 'b>(&'a ast::Triplet<'b>);
+struct BTriplet<'ctx, 'i>(&'ctx ast::Triplet<'i>);
 
-impl<'a, 'b> Display for BTriplet<'a, 'b> {
+impl<'ctx, 'i> Display for BTriplet<'ctx, 'i> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_fmt(format_args!(
             "{} ({}, {})",
@@ -123,9 +123,9 @@ impl<W: Write> Beautifier<W> {
     }
 
     /// Emit beautified code for the `ast`.
-    pub fn beautify_ast<'a>(
+    pub fn beautify_ast<'i>(
         &mut self,
-        ast: impl AsRef<ast::Instruction<'a>>,
+        ast: impl AsRef<ast::Instruction<'i>>,
     ) -> Result<(), BeautifyError> {
         Ok(self.beautify_walker(ast.as_ref(), 0)?)
     }
