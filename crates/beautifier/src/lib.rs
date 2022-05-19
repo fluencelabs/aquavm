@@ -26,7 +26,27 @@
 
 mod beautifier;
 
-pub use crate::beautifier::Beautifier;
+pub use crate::beautifier::{Beautifier, BeautifyError};
+
+use std::io;
+
+/// Beautify the `air_script` with default settings to the `output`.
+pub fn beautify(air_script: &str, output: &mut impl io::Write) -> Result<(), BeautifyError> {
+    let mut beautifier = Beautifier::new(output);
+    beautifier.beautify(air_script)
+}
+
+/// Beautify the `air_script` to a string with default settings.
+/// Return error on parsing error.
+pub fn beautify_to_string(air_script: &str) -> Result<String, String> {
+    let ast = air_parser::parse(air_script)?;
+    let mut buffer = vec![];
+    let mut beautifier = Beautifier::new(&mut buffer);
+
+    beautifier.beautify_ast(&ast).unwrap();
+    // Safety: safe because Beautifier produces valid utf8 strings
+    Ok(unsafe { String::from_utf8_unchecked(buffer) })
+}
 
 #[cfg(test)]
 mod tests;
