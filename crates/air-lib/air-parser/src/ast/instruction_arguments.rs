@@ -32,20 +32,6 @@ pub enum CallInstrValue<'i> {
     Variable(VariableWithLambda<'i>),
 }
 
-/// The peer part of a call instruction triplet
-#[derive(Serialize, Debug, PartialEq)]
-pub enum PeerPart<'i> {
-    PeerPk(CallInstrValue<'i>),
-    PeerPkWithServiceId(CallInstrValue<'i>, CallInstrValue<'i>),
-}
-
-/// The function part of a call instruction triplet
-#[derive(Serialize, Debug, PartialEq)]
-pub enum FunctionPart<'i> {
-    FuncName(CallInstrValue<'i>),
-    ServiceIdWithFuncName(CallInstrValue<'i>, CallInstrValue<'i>),
-}
-
 /// Triplet represents a location of the executable code in the network.
 /// It is build from `PeerPart` and `FunctionPart` of a `Call` instruction.
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]

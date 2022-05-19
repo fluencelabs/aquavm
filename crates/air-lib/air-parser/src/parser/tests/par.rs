@@ -55,7 +55,7 @@ fn parse_par_par() {
         (par
             (par
                 (call "" ("" "") [])
-                (call ("" "") ("" "") [])
+                (call "" ("" "") [])
             )
             (call "" ("" "") [])
         )

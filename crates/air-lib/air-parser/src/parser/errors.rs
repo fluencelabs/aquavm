@@ -36,10 +36,6 @@ pub enum ParserError {
     #[error("last error with non-empty path is ambiguous, please use just %last_error%")]
     AmbiguousFailLastError(Span),
 
-    /// Semantic errors in a call instructions.
-    #[error("call should have service id specified by peer part or function part")]
-    InvalidCallTriplet(Span),
-
     #[error("new can't be applied to a '{iterator_name}' because it's an iterator")]
     IteratorRestrictionNotAllowed { span: Span, iterator_name: String },
 
@@ -60,7 +56,6 @@ impl ParserError {
             Self::UndefinedVariable { span, .. } => *span,
             Self::UndefinedIterable { span, .. } => *span,
             Self::AmbiguousFailLastError(span) => *span,
-            Self::InvalidCallTriplet(span) => *span,
             Self::IteratorRestrictionNotAllowed { span, .. } => *span,
             Self::MultipleIterableValuesForOneIterator { span, .. } => *span,
             Self::MultipleNextInFold { span, .. } => *span,

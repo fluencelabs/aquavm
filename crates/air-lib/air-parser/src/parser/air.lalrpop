@@ -3,8 +3,6 @@ use crate::parser::ParserError;
 use crate::parser::VariableValidator;
 use crate::parser::Span;
 use crate::parser::lexer::Token;
-use crate::parser::air_utils::*;
-use crate::make_user_error;
 
 use air_lambda_parser::LambdaAST;
 use lalrpop_util::ErrorRecovery;
@@ -16,16 +14,7 @@ grammar<'err, 'input, 'v>(input: &'input str, errors: &'err mut Vec<ErrorRecover
 pub AIR = Instr;
 
 Instr: Box<Instruction<'input>> = {
-    <left: @L> "(" call <peer_part:PeerPart> <function_part:FPart> <args:Args> <output:CallOutput?> ")" <right: @R> => {
-        let triplet = match try_to_raw_triplet(peer_part, function_part) {
-            Some(raw_triplet) => raw_triplet,
-            None => {
-                // none means error
-                errors.push(make_user_error!(InvalidCallTriplet, left, Token::Call, right));
-                return Box::new(Instruction::Error);
-            }
-        };
-
+    <left: @L> "(" call <triplet:Triplet> <args:Args> <output:CallOutput?> ")" <right: @R> => {
         let args = Rc::new(args);
         let output = output.map(CallOutputValue::Variable).unwrap_or(CallOutputValue::None);
         let call = Call::new(triplet, args, output);
@@ -117,14 +106,12 @@ Args: Vec<Value<'input>> = {
     "[" <args:(<Arg>)*> "]" => args
 }
 
-FPart: FunctionPart<'input> = {
-    <f:Function> => FunctionPart::FuncName(f),
-    "(" <sid:ServiceId> <f:Function> ")" => FunctionPart::ServiceIdWithFuncName(sid, f),
-}
-
-PeerPart: PeerPart<'input> = {
-    <pid:PeerId> => PeerPart::PeerPk(pid),
-    "(" <pid:PeerId> <sid:ServiceId> ")" => PeerPart::PeerPkWithServiceId(pid, sid),
+Triplet: Triplet<'input> = {
+    <peer_pk:PeerId> "(" <service_id:ServiceId> <function_name:Function> ")" => Triplet {
+        peer_pk,
+        service_id,
+        function_name
+    }
 }
 
 ApResult = ScriptVariable;

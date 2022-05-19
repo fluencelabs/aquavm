@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-mod triplet;
-
-pub(crate) use triplet::try_to_raw_triplet;
-
 #[macro_export]
 macro_rules! make_user_error(
     ($error_type:ident, $start_pos: ident, $token:expr, $end_pos: ident) => { {

@@ -59,7 +59,7 @@ fn parse_seq_seq() {
         (seq
             (seq
                 (call peer_id (service_id function_name) [])
-                (call (peer_id service_A) ("service_B" function_name) [])
+                (call peer_id ("service_B" function_name) [])
             )
             (call "peer_id" ("service_id" "function_name") ["hello" name] $output)
         )
@@ -70,14 +70,14 @@ fn parse_seq_seq() {
             call(
                 CallInstrValue::Variable(VariableWithLambda::scalar("peer_id", 53)),
                 CallInstrValue::Variable(VariableWithLambda::scalar("service_id", 62)),
-                CallInstrValue::Variable(VariableWithLambda::scalar("function_name", 073)),
+                CallInstrValue::Variable(VariableWithLambda::scalar("function_name", 73)),
                 Rc::new(vec![]),
                 CallOutputValue::None,
             ),
             call(
-                CallInstrValue::Variable(VariableWithLambda::scalar("peer_id", 115)),
+                CallInstrValue::Variable(VariableWithLambda::scalar("peer_id", 114)),
                 CallInstrValue::Literal("service_B"),
-                CallInstrValue::Variable(VariableWithLambda::scalar("function_name", 147)),
+                CallInstrValue::Variable(VariableWithLambda::scalar("function_name", 135)),
                 Rc::new(vec![]),
                 CallOutputValue::None,
             ),
@@ -88,9 +88,9 @@ fn parse_seq_seq() {
             CallInstrValue::Literal("function_name"),
             Rc::new(vec![
                 Value::Literal("hello"),
-                Value::Variable(VariableWithLambda::scalar("name", 248)),
+                Value::Variable(VariableWithLambda::scalar("name", 236)),
             ]),
-            CallOutputValue::Variable(Variable::stream("$output", 254)),
+            CallOutputValue::Variable(Variable::stream("$output", 242)),
         ),
     );
     assert_eq!(instruction, expected);

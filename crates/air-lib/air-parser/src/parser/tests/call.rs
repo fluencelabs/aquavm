@@ -175,31 +175,6 @@ fn parse_undefined_stream_with_lambda() {
 }
 
 #[test]
-fn parse_call_with_invalid_triplet() {
-    let source_code = r#"
-        (call "" "" [$stream.$.json_path])
-        "#;
-
-    let lexer = crate::AIRLexer::new(source_code);
-
-    let parser = crate::AIRParser::new();
-    let mut errors = Vec::new();
-    let mut validator = crate::parser::VariableValidator::new();
-    parser
-        .parse(source_code, &mut errors, &mut validator, lexer)
-        .expect("parser shouldn't fail");
-
-    assert_eq!(errors.len(), 1);
-    let error = &errors[0].error;
-    let parser_error = match error {
-        ParseError::User { error } => error,
-        _ => panic!("unexpected error type"),
-    };
-
-    assert!(matches!(parser_error, ParserError::InvalidCallTriplet(..)));
-}
-
-#[test]
 fn parse_lambda_complex() {
     let source_code = r#"
         (seq
