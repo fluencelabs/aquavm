@@ -326,7 +326,7 @@ fn null() {
 }
 
 #[test]
-fn custom_indentation() {
+fn custom_indent_step() {
     let mut output = vec![];
     let mut beautifier = Beautifier::new_with_indent(&mut output, 2);
     let script = "(new var1 (new var (seq (null) (null))))";

@@ -26,7 +26,7 @@
 
 mod beautifier;
 
-pub use crate::beautifier::{Beautifier, BeautifyError, DEFAULT_INDENT_SIZE};
+pub use crate::beautifier::{Beautifier, BeautifyError, DEFAULT_INDENT_STEP};
 
 use std::io;
 

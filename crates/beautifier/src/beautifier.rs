@@ -29,7 +29,7 @@ use air_parser::ast;
 use std::fmt::Display;
 use std::io;
 
-pub const DEFAULT_INDENT_SIZE: usize = 4;
+pub const DEFAULT_INDENT_STEP: usize = 4;
 
 macro_rules! compound {
     ($beautifier:expr, $indent:expr, $body:expr) => {{
@@ -39,20 +39,20 @@ macro_rules! compound {
         $crate::beautifier::Beautifier::beautify_walker(
             $beautifier,
             &$body.instruction,
-            $indent + $beautifier.indent_size,
+            $indent + $beautifier.indent_step,
         )
     }};
 }
 
 macro_rules! multiline {
     ($beautifier:expr, $indent:expr $(; $fmt1:literal $(, $arg1:expr)*; $nest:expr)+) => ({
-        let step = $beautifier.indent_size;
+        let indent_step = $beautifier.indent_step;
         $({
               let out = &mut $beautifier.output;
               $crate::beautifier::fmt_indent(out, $indent)?;
               writeln!(out, $fmt1 $(, $arg1)*)?;
           }
-          $crate::beautifier::Beautifier::beautify_walker($beautifier, $nest, $indent + step)?;
+          $crate::beautifier::Beautifier::beautify_walker($beautifier, $nest, $indent + indent_step)?;
         )+
         Ok(())
     });
@@ -95,23 +95,23 @@ pub enum BeautifyError {
 /// AIR beautifier.
 pub struct Beautifier<W: io::Write> {
     output: W,
-    indent_size: usize,
+    indent_step: usize,
 }
 
 impl<W: io::Write> Beautifier<W> {
-    /// Beautifier for the output with default indent size.
+    /// Beautifier for the output with default indentation step.
     pub fn new(output: W) -> Self {
         Self {
             output,
-            indent_size: DEFAULT_INDENT_SIZE,
+            indent_step: DEFAULT_INDENT_STEP,
         }
     }
 
-    /// Beautifier for the output with custom indent size.
+    /// Beautifier for the output with custom indentation step.
     pub fn new_with_indent(output: W, indent_step: usize) -> Self {
         Self {
             output,
-            indent_size: indent_step,
+            indent_step,
         }
     }
 
@@ -171,9 +171,9 @@ impl<W: io::Write> Beautifier<W> {
         )
     }
 
-    fn beautify_simple(&mut self, cmd: impl Display, indent: usize) -> io::Result<()> {
+    fn beautify_simple(&mut self, instruction: impl Display, indent: usize) -> io::Result<()> {
         fmt_indent(&mut self.output, indent)?;
-        writeln!(&mut self.output, "{}", cmd)
+        writeln!(&mut self.output, "{}", instruction)
     }
 
     fn beautify_seq(&mut self, seq: &ast::Seq, indent: usize) -> io::Result<()> {

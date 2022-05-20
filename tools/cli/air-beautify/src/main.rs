@@ -32,8 +32,8 @@ use std::{io, path::PathBuf};
 
 #[derive(Parser)]
 struct Args {
-    #[clap(short, long, default_value_t = air_beautifier::DEFAULT_INDENT_SIZE)]
-    indent_size: usize,
+    #[clap(short, long, default_value_t = air_beautifier::DEFAULT_INDENT_STEP)]
+    indent_step: usize,
     #[clap(short, long)]
     output: Option<PathBuf>,
     input: Option<PathBuf>,
@@ -75,6 +75,6 @@ fn main() -> Result<()> {
     let air_script = read_script(&args).context("failed to read the input")?;
     let output = build_output(&args).context("failed to open the output")?;
 
-    Beautifier::new_with_indent(output, args.indent_size).beautify(&air_script)?;
+    Beautifier::new_with_indent(output, args.indent_step).beautify(&air_script)?;
     Ok(())
 }
