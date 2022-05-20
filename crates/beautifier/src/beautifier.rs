@@ -31,19 +31,6 @@ use std::io;
 
 pub const DEFAULT_INDENT_STEP: usize = 4;
 
-macro_rules! compound {
-    ($beautifier:expr, $indent:expr, $body:expr) => {{
-        let out = &mut $beautifier.output;
-        $crate::beautifier::fmt_indent(out, $indent)?;
-        writeln!(out, "{}:", $body)?;
-        $crate::beautifier::Beautifier::beautify_walker(
-            $beautifier,
-            &$body.instruction,
-            $indent + $beautifier.indent_step,
-        )
-    }};
-}
-
 macro_rules! multiline {
     ($beautifier:expr, $indent:expr $(; $fmt1:literal $(, $arg1:expr)*; $nest:expr)+) => ({
         let indent_step = $beautifier.indent_step;
@@ -55,6 +42,16 @@ macro_rules! multiline {
           $crate::beautifier::Beautifier::beautify_walker($beautifier, $nest, $indent + indent_step)?;
         )+
         Ok(())
+    });
+}
+
+macro_rules! compound {
+    ($beautifier:expr, $indent:expr, $instruction:expr) => ({
+        multiline!(
+            $beautifier, $indent;
+            "{}:", $instruction;
+            &$instruction.instruction
+        )
     });
 }
 
@@ -153,7 +150,7 @@ impl<W: io::Write> Beautifier<W> {
             ast::Instruction::New(new) => self.beautify_new(new, indent),
             ast::Instruction::Next(next) => self.beautify_simple(next, indent),
             ast::Instruction::Null(null) => self.beautify_simple(null, indent),
-            ast::Instruction::Error => self.beautify_error(indent),
+            ast::Instruction::Error => self.beautify_simple("error", indent),
         }
     }
 
@@ -219,10 +216,5 @@ impl<W: io::Write> Beautifier<W> {
 
     fn beautify_new(&mut self, new: &ast::New, indent: usize) -> io::Result<()> {
         compound!(self, indent, new)
-    }
-
-    fn beautify_error(&mut self, indent: usize) -> io::Result<()> {
-        fmt_indent(&mut self.output, indent)?;
-        writeln!(&mut self.output, "error")
     }
 }
