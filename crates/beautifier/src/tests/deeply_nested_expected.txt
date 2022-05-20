@@ -1,0 +1,24 @@
+try:
+    var <- call "me" ("", "") []
+    ap var.$.value data
+    par:
+        par:
+            call "other1" ("set", "") [data]
+        |
+            call "other2" ("insert", "") [data]
+    |
+        ap "key" key
+        $values <- call "other3" ("", "") [key, data]
+        fold $values i:
+            try:
+                j <- call "other2" ("insert", "") [i]
+                call "other3" ("report", "") [j]
+            catch:
+                fail 3 "fail to fold"
+            next i
+catch:
+    par:
+        rep <- call "other1" ("report", "error") [%last_error%]
+        call "other2" ("report", "error") [%last_error%, rep]
+    |
+        call "other3" ("report", "error") [%last_error%]

@@ -1,0 +1,26 @@
+(xor
+  (seq
+    (seq
+       (call "me" ("" "") [] var)
+       (ap var.$.value data))
+    (par
+      (par
+        (call "other1" ("set" "") [data])
+        (call "other2" ("insert" "") [data]))
+      (seq
+        (ap "key" key)
+        (seq
+          (call "other3" ("" "") [key data] $values)
+          (fold $values i
+            (seq
+              (xor
+                (seq
+                  (call "other2" ("insert" "") [i] j)
+                  (call "other3" ("report" "") [j]))
+                (fail 3 "fail to fold"))
+              (next i)))))))
+  (par
+    (seq
+      (call "other1" ("report" "error") [%last_error%] rep)
+      (call "other2" ("report" "error") [%last_error% rep]))
+    (call "other3" ("report" "error") [%last_error%])))

@@ -1,0 +1,19 @@
+[package]
+name = "air-beautifier"
+version = "0.1.0"
+description = "AIR human-readable format transformer library"
+authors = ["Fluence Labs"]
+edition = "2018"
+license = "Apache-2.0"
+repository = "https://github.com/fluencelabs/aquavm/tree/master/crates/beautifier"
+publish = false
+keywords = ["fluence", "air", "beautifier"]
+
+[lib]
+name = "air_beautifier"
+path = "src/lib.rs"
+
+[dependencies]
+air-parser = { path = "../air-lib/air-parser" }
+itertools = "0.10.3"
+thiserror = "1.0.30"

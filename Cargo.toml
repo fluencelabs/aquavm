@@ -13,7 +13,9 @@ members = [
     "crates/air-lib/polyplets",
     "crates/air-lib/test-utils",
     "crates/air-lib/trace-handler",
+    "crates/beautifier",
     "crates/data-store",
+    "tools/cli/air-beautify",
 ]
 
 exclude = [
