@@ -112,7 +112,7 @@ impl<W: io::Write> Beautifier<W> {
         }
     }
 
-    /// Unwrap the Beautifier, returning the underlying writer.
+    /// Unwrap the Beautifier into the underlying writer.
     pub fn into_inner(self) -> W {
         self.output
     }
