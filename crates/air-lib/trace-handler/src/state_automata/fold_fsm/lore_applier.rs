@@ -44,14 +44,18 @@ fn apply_fold_lore(
     ctx_type: MergeCtxType,
     next_position: ByNextPosition,
 ) -> FSMResult<()> {
-    let fold_lore = match fold_lore {
-        Some(fold_lore) => fold_lore,
-        None => return Ok(()),
-    };
-
     let slider = match ctx_type {
         Previous => data_keeper.prev_slider_mut(),
         Current => data_keeper.current_slider_mut(),
+    };
+
+    let fold_lore = match fold_lore {
+        Some(fold_lore) => fold_lore,
+        None => {
+            // create an empty subtrace
+            slider.set_position_and_len(slider.subtrace_len(), 0)?;
+            return Ok(());
+        }
     };
 
     match next_position {
