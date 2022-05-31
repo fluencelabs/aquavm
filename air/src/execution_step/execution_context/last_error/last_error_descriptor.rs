@@ -32,7 +32,7 @@ pub(crate) struct LastErrorDescriptor {
     error_can_be_set: bool,
 }
 
-impl<'s> LastErrorDescriptor {
+impl LastErrorDescriptor {
     pub(crate) fn try_to_set_from_error(
         &mut self,
         error: &(impl LastErrorAffectable + ToErrorCode + ToString),
