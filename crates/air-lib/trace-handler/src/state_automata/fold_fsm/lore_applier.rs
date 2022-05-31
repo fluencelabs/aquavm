@@ -49,28 +49,26 @@ fn apply_fold_lore(
         Current => data_keeper.current_slider_mut(),
     };
 
-    let fold_lore = match fold_lore {
-        Some(fold_lore) => fold_lore,
+    match fold_lore {
+        Some(fold_lore) => match next_position {
+            Before => {
+                slider.set_position_and_len(
+                    fold_lore.before_subtrace.begin_pos as _,
+                    fold_lore.before_subtrace.subtrace_len as _,
+                )?;
+            }
+            After => {
+                slider.set_position_and_len(
+                    fold_lore.after_subtrace.begin_pos as _,
+                    fold_lore.after_subtrace.subtrace_len as _,
+                )?;
+            }
+        },
         None => {
-            // create an empty subtrace
-            slider.set_position_and_len(slider.subtrace_len(), 0)?;
-            return Ok(());
-        }
-    };
-
-    match next_position {
-        Before => {
-            slider.set_position_and_len(
-                fold_lore.before_subtrace.begin_pos as _,
-                fold_lore.before_subtrace.subtrace_len as _,
-            )?;
-        }
-        After => {
-            slider.set_position_and_len(
-                fold_lore.after_subtrace.begin_pos as _,
-                fold_lore.after_subtrace.subtrace_len as _,
-            )?;
+            // substrace is empty
+            slider.set_subtrace_len(0)?;
         }
     }
+
     Ok(())
 }
