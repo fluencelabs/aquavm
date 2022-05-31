@@ -65,7 +65,7 @@ impl From<CatchableError> for ExecutionError {
 macro_rules! trace_to_exec_err {
     ($trace_expr: expr, $instruction: ident) => {
         $trace_expr.map_err(|trace_error| {
-            crate::execution_step::ExecutionError::Uncatchable(crate::execution_step::UncatchableError::TraceError {
+            $crate::execution_step::ExecutionError::Uncatchable($crate::execution_step::UncatchableError::TraceError {
                 trace_error,
                 instruction: $instruction.to_string(),
             })
