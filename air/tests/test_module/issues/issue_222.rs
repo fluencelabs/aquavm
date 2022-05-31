@@ -27,14 +27,15 @@ fn issue_222_weak() {
 
     let air_script = f!(r#"
         (new $stream
-          (par
-           (par
-              (call "{other_1_id}" ("" "") [] $stream)
-              (call "{other_2_id}" ("" "") [] $stream))
-           (fold $stream j
-               (seq (call "{other_id}" ("" "") [j])
-                    (next j)))))
-"#);
+            (par
+                (par
+                    (call "{other_1_id}" ("" "") [] $stream)
+                    (call "{other_2_id}" ("" "") [] $stream))
+                (fold $stream j
+                    (seq
+                        (call "{other_id}" ("" "") [j])
+                        (next j)))))
+    "#);
 
     let mut other_id_vm = create_avm(echo_call_service(), "other_id");
     let mut other_1_vm = create_avm(set_variable_call_service(json!([1])), "other_1");
