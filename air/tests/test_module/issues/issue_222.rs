@@ -20,65 +20,60 @@ use pretty_assertions::assert_eq;
 
 #[test]
 // test for github.com/fluencelabs/aquavm/issues/222
-fn issue_222_possibly() {
-    let air_script = r#"
-(new $stream
-  (par
-   (par
-      (call "other_1" ("" "") [] $stream)
-      (call "other_2" ("" "") [] $stream))
-   (fold $stream j
-       (seq (call "other_id" ("" "") [j])
-            (next j)))))
-"#;
+fn issue_222_weak() {
+    let other_id = "other_id";
+    let other_1_id = "other_1";
+    let other_2_id = "other_2";
 
-    let mut other_id = create_avm(echo_call_service(), "other_id");
+    let air_script = f!(r#"
+        (new $stream
+          (par
+           (par
+              (call "{other_1_id}" ("" "") [] $stream)
+              (call "{other_2_id}" ("" "") [] $stream))
+           (fold $stream j
+               (seq (call "{other_id}" ("" "") [j])
+                    (next j)))))
+"#);
 
-    // The bug is triggered when (call "other_2" ...) result arrives to "other_id"
+    let mut other_id_vm = create_avm(echo_call_service(), "other_id");
+    let mut other_1_vm = create_avm(set_variable_call_service(json!([1])), "other_1");
+    let mut other_2_vm = create_avm(set_variable_call_service(json!([2])), "other_2");
+
+    let result = checked_call_vm!(other_id_vm, <_>::default(), &air_script, "", "");
+    let other_1_result = checked_call_vm!(other_1_vm, <_>::default(), &air_script, "", result.data.clone());
+    let other_2_result = checked_call_vm!(other_2_vm, <_>::default(), &air_script, "", result.data.clone());
+
+    // the bug is triggered when (call "other_2" ...) result arrives to "other_id"
     // before the "other_1" result.
-    let cur_data = br#"
-{"trace":[
-  {"par":[3,2]},
-  {"par":[1,1]},
-  {"call":{"executed":{"stream":{"value":[3],"generation":0}}}},
-  {"call":{"sent_by":"init_id"}},
-  {"fold":{"lore":[{"pos":2,"desc":[{"pos":5,"len":1},{"pos":6,"len":0}]}]}},
-  {"call":{"sent_by":"other_1"}}
-  ],
-  "streams":{},"version":"0.2.2","lcid":1,"r_streams":{"$stream":{"0":[1]}}}
-"#;
-
-    let prev_data = br#"
-{"trace":[
-  {"par":[3,2]},
-  {"par":[1,1]},
-  {"call":{"sent_by":"init_id"}},
-  {"call":{"executed":{"stream":{"value":[1],"generation":0}}}},
-  {"fold":{"lore":[{"pos":3,"desc":[{"pos":5,"len":1},{"pos":6,"len":0}]}]}},
-  {"call":{"executed":{"scalar":[1]}}}
-],"streams":{},"version":"0.2.2","lcid":1,"r_streams":{"$stream":{"0":[1]}}}
-"#;
-
-    let other_result = checked_call_vm!(
-        other_id,
+    let result_from_2 = checked_call_vm!(
+        other_id_vm,
         <_>::default(),
-        air_script,
-        prev_data.to_vec(),
-        cur_data.to_vec()
+        &air_script,
+        result.data,
+        other_2_result.data
+    );
+    let final_result = checked_call_vm!(
+        other_id_vm,
+        <_>::default(),
+        &air_script,
+        result_from_2.data,
+        other_1_result.data
     );
 
-    let actual_trace = trace_from_result(&other_result);
+    let actual_trace = trace_from_result(&final_result);
+
     let expected_trace = vec![
         executed_state::par(3, 3),
         executed_state::par(1, 1),
-        executed_state::stream(json!([3]), 0),
         executed_state::stream(json!([1]), 0),
+        executed_state::stream(json!([2]), 0),
         executed_state::fold(vec![
             executed_state::subtrace_lore(2, SubTraceDesc::new(5, 1), SubTraceDesc::new(7, 0)),
             executed_state::subtrace_lore(3, SubTraceDesc::new(6, 1), SubTraceDesc::new(7, 0)),
         ]),
-        executed_state::scalar(json!([3])),
         executed_state::scalar(json!([1])),
+        executed_state::scalar(json!([2])),
     ];
 
     assert_eq!(actual_trace, expected_trace);
