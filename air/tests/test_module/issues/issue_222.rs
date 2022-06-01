@@ -20,7 +20,7 @@ use pretty_assertions::assert_eq;
 
 #[test]
 // test for github.com/fluencelabs/aquavm/issues/222
-fn issue_222_weak() {
+fn issue_222() {
     let other_id = "other_id";
     let other_1_id = "other_1";
     let other_2_id = "other_2";
