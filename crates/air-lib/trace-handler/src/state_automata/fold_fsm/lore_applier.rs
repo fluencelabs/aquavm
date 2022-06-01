@@ -44,29 +44,31 @@ fn apply_fold_lore(
     ctx_type: MergeCtxType,
     next_position: ByNextPosition,
 ) -> FSMResult<()> {
-    let fold_lore = match fold_lore {
-        Some(fold_lore) => fold_lore,
-        None => return Ok(()),
-    };
-
     let slider = match ctx_type {
         Previous => data_keeper.prev_slider_mut(),
         Current => data_keeper.current_slider_mut(),
     };
 
-    match next_position {
-        Before => {
-            slider.set_position_and_len(
-                fold_lore.before_subtrace.begin_pos as _,
-                fold_lore.before_subtrace.subtrace_len as _,
-            )?;
-        }
-        After => {
-            slider.set_position_and_len(
-                fold_lore.after_subtrace.begin_pos as _,
-                fold_lore.after_subtrace.subtrace_len as _,
-            )?;
+    match fold_lore {
+        Some(fold_lore) => match next_position {
+            Before => {
+                slider.set_position_and_len(
+                    fold_lore.before_subtrace.begin_pos as _,
+                    fold_lore.before_subtrace.subtrace_len as _,
+                )?;
+            }
+            After => {
+                slider.set_position_and_len(
+                    fold_lore.after_subtrace.begin_pos as _,
+                    fold_lore.after_subtrace.subtrace_len as _,
+                )?;
+            }
+        },
+        None => {
+            // substrace is empty
+            slider.set_subtrace_len(0)?;
         }
     }
+
     Ok(())
 }
