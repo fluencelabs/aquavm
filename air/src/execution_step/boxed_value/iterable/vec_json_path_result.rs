@@ -59,7 +59,7 @@ impl<'ctx> Iterable<'ctx> for IterableVecJsonPathResult {
 
         let jvalue = &self.jvalues[self.cursor];
         let tetraplet = &self.tetraplets[self.cursor];
-        let result = IterableItem::RefRef((jvalue, tetraplet, 0));
+        let result = IterableItem::RefRef((jvalue, tetraplet, 0.into()));
 
         Some(result)
     }

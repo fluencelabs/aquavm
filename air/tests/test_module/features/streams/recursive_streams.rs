@@ -18,6 +18,13 @@ use air_test_utils::prelude::*;
 
 use pretty_assertions::assert_eq;
 
+fn subtrace_desc(begin_pos: impl Into<TracePos>, subtrace_len: u32) -> SubTraceDesc {
+    SubTraceDesc {
+        begin_pos: begin_pos.into(),
+        subtrace_len,
+    }
+}
+
 #[test]
 fn recursive_stream_with_early_exit() {
     let vm_peer_id = "vm_peer_id";
@@ -58,8 +65,8 @@ fn recursive_stream_with_early_exit() {
         executed_state::stream_number(1, 0),
         executed_state::stream_number(1, 1),
         executed_state::fold(vec![
-            executed_state::subtrace_lore(0, SubTraceDesc::new(3, 1), SubTraceDesc::new(4, 0)),
-            executed_state::subtrace_lore(1, SubTraceDesc::new(4, 1), SubTraceDesc::new(5, 0)),
+            executed_state::subtrace_lore(0, subtrace_desc(3, 1), subtrace_desc(4, 0)),
+            executed_state::subtrace_lore(1, subtrace_desc(4, 1), subtrace_desc(5, 0)),
         ]),
         executed_state::scalar_string("stop"),
         executed_state::scalar_string("stop"),
@@ -122,15 +129,15 @@ fn recursive_stream_many_iterations() {
     let actual_trace = trace_from_result(&result);
     let actual_fold = &actual_trace[2];
     let expected_fold = executed_state::fold(vec![
-        executed_state::subtrace_lore(0, SubTraceDesc::new(3, 2), SubTraceDesc::new(5, 0)),
-        executed_state::subtrace_lore(1, SubTraceDesc::new(5, 2), SubTraceDesc::new(7, 0)),
-        executed_state::subtrace_lore(4, SubTraceDesc::new(7, 2), SubTraceDesc::new(9, 0)),
-        executed_state::subtrace_lore(6, SubTraceDesc::new(9, 2), SubTraceDesc::new(11, 0)),
-        executed_state::subtrace_lore(8, SubTraceDesc::new(11, 2), SubTraceDesc::new(15, 0)),
-        executed_state::subtrace_lore(10, SubTraceDesc::new(13, 2), SubTraceDesc::new(15, 0)),
-        executed_state::subtrace_lore(12, SubTraceDesc::new(15, 2), SubTraceDesc::new(19, 0)),
-        executed_state::subtrace_lore(14, SubTraceDesc::new(17, 2), SubTraceDesc::new(19, 0)),
-        executed_state::subtrace_lore(16, SubTraceDesc::new(19, 1), SubTraceDesc::new(20, 0)),
+        executed_state::subtrace_lore(0, subtrace_desc(3, 2), subtrace_desc(5, 0)),
+        executed_state::subtrace_lore(1, subtrace_desc(5, 2), subtrace_desc(7, 0)),
+        executed_state::subtrace_lore(4, subtrace_desc(7, 2), subtrace_desc(9, 0)),
+        executed_state::subtrace_lore(6, subtrace_desc(9, 2), subtrace_desc(11, 0)),
+        executed_state::subtrace_lore(8, subtrace_desc(11, 2), subtrace_desc(15, 0)),
+        executed_state::subtrace_lore(10, subtrace_desc(13, 2), subtrace_desc(15, 0)),
+        executed_state::subtrace_lore(12, subtrace_desc(15, 2), subtrace_desc(19, 0)),
+        executed_state::subtrace_lore(14, subtrace_desc(17, 2), subtrace_desc(19, 0)),
+        executed_state::subtrace_lore(16, subtrace_desc(19, 1), subtrace_desc(20, 0)),
     ]);
     assert_eq!(actual_fold, &expected_fold);
 
@@ -206,11 +213,11 @@ fn recursive_stream_join() {
         executed_state::stream_string("non_join", 0),
         executed_state::scalar_string(""),
         executed_state::fold(vec![
-            executed_state::subtrace_lore(1, SubTraceDesc::new(4, 2), SubTraceDesc::new(6, 0)),
-            executed_state::subtrace_lore(5, SubTraceDesc::new(6, 2), SubTraceDesc::new(8, 0)),
-            executed_state::subtrace_lore(7, SubTraceDesc::new(8, 2), SubTraceDesc::new(10, 0)),
-            executed_state::subtrace_lore(9, SubTraceDesc::new(10, 2), SubTraceDesc::new(12, 0)),
-            executed_state::subtrace_lore(11, SubTraceDesc::new(12, 2), SubTraceDesc::new(14, 0)),
+            executed_state::subtrace_lore(1, subtrace_desc(4, 2), subtrace_desc(6, 0)),
+            executed_state::subtrace_lore(5, subtrace_desc(6, 2), subtrace_desc(8, 0)),
+            executed_state::subtrace_lore(7, subtrace_desc(8, 2), subtrace_desc(10, 0)),
+            executed_state::subtrace_lore(9, subtrace_desc(10, 2), subtrace_desc(12, 0)),
+            executed_state::subtrace_lore(11, subtrace_desc(12, 2), subtrace_desc(14, 0)),
         ]),
         executed_state::scalar_string("non_join"),
         executed_state::ap(Some(1)),

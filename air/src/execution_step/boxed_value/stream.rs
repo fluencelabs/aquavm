@@ -243,8 +243,8 @@ mod test {
 
     #[test]
     fn test_slice_iter() {
-        let value_1 = ValueAggregate::new(Rc::new(json!("value")), <_>::default(), 1);
-        let value_2 = ValueAggregate::new(Rc::new(json!("value")), <_>::default(), 1);
+        let value_1 = ValueAggregate::new(Rc::new(json!("value")), <_>::default(), 1.into());
+        let value_2 = ValueAggregate::new(Rc::new(json!("value")), <_>::default(), 1.into());
         let mut stream = Stream::from_generations_count(2);
 
         stream.add_value(value_1, Generation::Nth(0)).unwrap();

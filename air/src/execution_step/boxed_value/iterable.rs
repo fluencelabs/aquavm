@@ -27,6 +27,7 @@ use super::ValueAggregate;
 use crate::execution_step::RcSecurityTetraplet;
 use crate::JValue;
 
+use air_interpreter_data::TracePos;
 use std::rc::Rc;
 
 /// This trait represent bidirectional iterator and
@@ -56,13 +57,13 @@ pub(crate) trait Iterable<'ctx> {
 /// through, i.e., it is the `iterable` in the `(fold collection iterable instruction)` statement.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) enum IterableItem<'ctx> {
-    RefRef((&'ctx JValue, &'ctx RcSecurityTetraplet, usize)),
-    RefValue((&'ctx JValue, RcSecurityTetraplet, usize)),
-    RcValue((Rc<JValue>, RcSecurityTetraplet, usize)),
+    RefRef((&'ctx JValue, &'ctx RcSecurityTetraplet, TracePos)),
+    RefValue((&'ctx JValue, RcSecurityTetraplet, TracePos)),
+    RcValue((Rc<JValue>, RcSecurityTetraplet, TracePos)),
 }
 
 impl IterableItem<'_> {
-    pub(crate) fn pos(&self) -> usize {
+    pub(crate) fn pos(&self) -> TracePos {
         use IterableItem::*;
 
         let pos = match self {

@@ -118,7 +118,7 @@ pub fn subtrace_lore(
     after: SubTraceDesc,
 ) -> FoldSubTraceLore {
     FoldSubTraceLore {
-        value_pos,
+        value_pos: (value_pos as usize).into(),
         subtraces_desc: vec![before, after],
     }
 }

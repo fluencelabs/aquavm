@@ -17,6 +17,7 @@
 use super::ExecutionTrace;
 use super::MergeCtx;
 use super::TraceSlider;
+use crate::TracePos;
 
 use air_interpreter_data::InterpreterData;
 
@@ -27,7 +28,7 @@ use std::collections::HashMap;
 pub(crate) struct DataKeeper {
     pub(crate) prev_ctx: MergeCtx,
     pub(crate) current_ctx: MergeCtx,
-    pub(crate) new_to_old_pos: HashMap<usize, DataPositions>,
+    pub(crate) new_to_old_pos: HashMap<TracePos, DataPositions>,
     pub(crate) result_trace: ExecutionTrace,
 }
 
@@ -46,6 +47,10 @@ impl DataKeeper {
 
     pub(crate) fn result_states_count(&self) -> usize {
         self.result_trace.len()
+    }
+
+    pub(crate) fn result_trace_next_pos(&self) -> TracePos {
+        self.result_trace.len().into()
     }
 
     pub(crate) fn prev_slider(&self) -> &TraceSlider {
@@ -67,6 +72,6 @@ impl DataKeeper {
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
 pub(crate) struct DataPositions {
-    pub(crate) prev_pos: Option<usize>,
-    pub(crate) current_pos: Option<usize>,
+    pub(crate) prev_pos: Option<TracePos>,
+    pub(crate) current_pos: Option<TracePos>,
 }

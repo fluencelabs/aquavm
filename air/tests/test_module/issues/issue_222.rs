@@ -70,8 +70,8 @@ fn issue_222() {
         executed_state::stream(json!([1]), 0),
         executed_state::stream(json!([2]), 0),
         executed_state::fold(vec![
-            executed_state::subtrace_lore(2, SubTraceDesc::new(5, 1), SubTraceDesc::new(7, 0)),
-            executed_state::subtrace_lore(3, SubTraceDesc::new(6, 1), SubTraceDesc::new(7, 0)),
+            executed_state::subtrace_lore(2, SubTraceDesc::new(5.into(), 1), SubTraceDesc::new(7.into(), 0)),
+            executed_state::subtrace_lore(3, SubTraceDesc::new(6.into(), 1), SubTraceDesc::new(7.into(), 0)),
         ]),
         executed_state::scalar(json!([1])),
         executed_state::scalar(json!([2])),

@@ -19,6 +19,8 @@ mod lore_ctor;
 mod lore_ctor_queue;
 mod state_handler;
 
+use crate::TracePos;
+
 use super::*;
 use lore_applier::*;
 use lore_ctor::*;
@@ -63,7 +65,7 @@ impl FoldFSM {
         Ok(fold_fsm)
     }
 
-    pub(crate) fn meet_iteration_start(&mut self, value_pos: usize, data_keeper: &mut DataKeeper) -> FSMResult<()> {
+    pub(crate) fn meet_iteration_start(&mut self, value_pos: TracePos, data_keeper: &mut DataKeeper) -> FSMResult<()> {
         let (prev_pos, current_pos) = match data_keeper.new_to_old_pos.get(&value_pos) {
             Some(DataPositions { prev_pos, current_pos }) => (prev_pos, current_pos),
             None => return self.prepare(None, None, value_pos, data_keeper),
@@ -79,7 +81,7 @@ impl FoldFSM {
         &mut self,
         prev_lore: Option<ResolvedSubTraceDescs>,
         current_lore: Option<ResolvedSubTraceDescs>,
-        value_pos: usize,
+        value_pos: TracePos,
         data_keeper: &mut DataKeeper,
     ) -> FSMResult<()> {
         apply_fold_lore_before(data_keeper, &prev_lore, &current_lore)?;

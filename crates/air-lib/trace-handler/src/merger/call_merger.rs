@@ -17,6 +17,7 @@
 mod utils;
 
 use super::*;
+use crate::TracePos;
 use air_parser::ast::CallOutputValue;
 use utils::*;
 
@@ -29,7 +30,7 @@ pub enum MergerCallResult {
 
     /// There was a state in at least one of the contexts. If there were two states in
     /// both contexts, they were successfully merged.
-    CallResult { value: CallResult, trace_pos: usize },
+    CallResult { value: CallResult, trace_pos: TracePos },
 }
 
 pub(crate) fn try_merge_next_state_as_call(
@@ -102,7 +103,7 @@ pub(super) fn prepare_call_result(
     scheme: PreparationScheme,
     data_keeper: &mut DataKeeper,
 ) -> MergerCallResult {
-    let trace_pos = data_keeper.result_states_count();
+    let trace_pos = data_keeper.result_trace_next_pos();
     prepare_positions_mapping(scheme, data_keeper);
 
     MergerCallResult::CallResult { value, trace_pos }

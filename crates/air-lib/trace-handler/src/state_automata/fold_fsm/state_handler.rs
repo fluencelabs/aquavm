@@ -58,6 +58,7 @@ fn compute_new_state(fold: &ResolvedFold, data_keeper: &DataKeeper, ctx_type: Me
     let current_len = ctx.slider.subtrace_len();
     let subtrace_len = current_len
         .checked_sub(fold.fold_states_count)
+        // TODO judging by the error message, one should pass current_len instead.
         .ok_or_else(|| StateFSMError::FoldLenUnderflow(fold.clone(), current_position, ctx_type))?;
 
     let state = CtxState::new(pos, subtrace_len);

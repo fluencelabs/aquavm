@@ -18,6 +18,7 @@ use super::ExecutionTrace;
 use super::KeeperError;
 use super::KeeperResult;
 use super::TraceSlider;
+use crate::TracePos;
 
 use air_interpreter_data::GlobalStreamGens;
 use air_interpreter_data::InterpreterData;
@@ -51,10 +52,9 @@ impl MergeCtx {
         }
     }
 
-    pub(crate) fn try_get_generation(&self, position: u32) -> KeeperResult<u32> {
+    pub(crate) fn try_get_generation(&self, position: TracePos) -> KeeperResult<u32> {
         use air_interpreter_data::*;
 
-        let position = position as usize;
         let state = self
             .slider
             .state_at_position(position)

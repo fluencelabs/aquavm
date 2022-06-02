@@ -22,6 +22,7 @@ use super::FoldResult;
 use super::KeeperError;
 use super::Value;
 
+use air_interpreter_data::TracePos;
 use thiserror::Error as ThisError;
 
 /// Errors arose out of merging previous data with a new.
@@ -79,7 +80,7 @@ pub enum FoldResultError {
 
     /// There are several lores with the same value_pos.
     #[error("{0:?} contains several subtraces with the same value_pos {1}")]
-    SeveralRecordsWithSamePos(FoldResult, usize),
+    SeveralRecordsWithSamePos(FoldResult, TracePos),
 
     /// Errors occurred when one of the fold subtrace lore doesn't contain 2 descriptors.
     #[error("fold contains {0} sublore descriptors, but 2 is expected")]

@@ -20,7 +20,7 @@ use air_interpreter_data::SubTraceDesc;
 /// This struct is a form of FSM and is intended to construct a fold subtrace lore element.
 #[derive(Debug, Default, PartialEq, Eq, Clone, Copy)]
 pub(super) struct SubTraceLoreCtor {
-    value_pos: usize,
+    value_pos: TracePos,
     before_tracker: PositionsTracker,
     after_tracker: PositionsTracker,
     state: CtorState,
@@ -28,8 +28,8 @@ pub(super) struct SubTraceLoreCtor {
 
 #[derive(Debug, Default, PartialEq, Eq, Clone, Copy)]
 struct PositionsTracker {
-    pub(self) start_pos: usize,
-    pub(self) end_pos: usize,
+    pub(self) start_pos: TracePos,
+    pub(self) end_pos: TracePos,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
@@ -41,10 +41,10 @@ pub enum CtorState {
 }
 
 impl SubTraceLoreCtor {
-    pub(super) fn from_before_start(value_pos: usize, data_keeper: &DataKeeper) -> Self {
+    pub(super) fn from_before_start(value_pos: TracePos, data_keeper: &DataKeeper) -> Self {
         let before_tracker = PositionsTracker {
-            start_pos: data_keeper.result_states_count(),
-            end_pos: 0,
+            start_pos: data_keeper.result_trace_next_pos(),
+            end_pos: 0.into(),
         };
 
         Self {
@@ -55,7 +55,7 @@ impl SubTraceLoreCtor {
     }
 
     pub(super) fn before_end(&mut self, data_keeper: &DataKeeper) {
-        self.before_tracker.end_pos = data_keeper.result_states_count();
+        self.before_tracker.end_pos = data_keeper.result_trace_next_pos();
         self.state.next();
     }
 
@@ -64,33 +64,33 @@ impl SubTraceLoreCtor {
             return;
         }
 
-        self.before_tracker.end_pos = data_keeper.result_states_count();
+        self.before_tracker.end_pos = data_keeper.result_trace_next_pos();
         self.state.next();
     }
 
     pub(super) fn after_start(&mut self, data_keeper: &DataKeeper) {
-        self.after_tracker.start_pos = data_keeper.result_states_count();
+        self.after_tracker.start_pos = data_keeper.result_trace_next_pos();
         self.state.next();
     }
 
     pub(super) fn after_end(&mut self, data_keeper: &DataKeeper) {
-        self.after_tracker.end_pos = data_keeper.result_states_count();
+        self.after_tracker.end_pos = data_keeper.result_trace_next_pos();
         self.state.next();
     }
 
     pub(super) fn into_subtrace_lore(self) -> FoldSubTraceLore {
         let before = SubTraceDesc {
-            begin_pos: self.before_tracker.start_pos as _,
+            begin_pos: self.before_tracker.start_pos,
             subtrace_len: self.before_tracker.len() as _,
         };
 
         let after = SubTraceDesc {
-            begin_pos: self.after_tracker.start_pos as _,
+            begin_pos: self.after_tracker.start_pos,
             subtrace_len: self.after_tracker.len() as _,
         };
 
         FoldSubTraceLore {
-            value_pos: self.value_pos as _,
+            value_pos: self.value_pos,
             subtraces_desc: vec![before, after],
         }
     }

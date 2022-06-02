@@ -17,10 +17,11 @@
 use super::DataKeeper;
 use super::FSMResult;
 use super::MergeCtx;
+use crate::TracePos;
 
 #[derive(Debug, Default, Clone, Copy)]
 pub(super) struct CtxState {
-    pub(super) pos: usize,
+    pub(super) pos: TracePos,
     pub(super) subtrace_len: usize,
 }
 
@@ -31,7 +32,7 @@ pub(super) struct CtxStatesPair {
 }
 
 impl CtxState {
-    pub(super) fn new(pos: usize, subtrace_len: usize) -> Self {
+    pub(super) fn new(pos: TracePos, subtrace_len: usize) -> Self {
         Self { pos, subtrace_len }
     }
 

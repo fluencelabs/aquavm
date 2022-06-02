@@ -17,6 +17,8 @@
 mod impls;
 mod se_de;
 
+use crate::TracePos;
+
 use se_de::par_serializer;
 use se_de::sender_serializer;
 use serde::Deserialize;
@@ -82,7 +84,7 @@ pub enum Value {
 pub struct FoldSubTraceLore {
     /// Position of current value in a trace.
     #[serde(rename = "pos")]
-    pub value_pos: u32,
+    pub value_pos: TracePos,
 
     /// Descriptors of a subtrace that are corresponded to the current value. Technically, now
     /// it always contains two values, and Vec here is used to have a possibility to handle more
@@ -97,7 +99,7 @@ pub struct FoldSubTraceLore {
 pub struct SubTraceDesc {
     /// Start position in a trace of this subtrace.
     #[serde(rename = "pos")]
-    pub begin_pos: u32,
+    pub begin_pos: TracePos,
 
     /// Length of the subtrace.
     #[serde(rename = "len")]

@@ -59,9 +59,9 @@ impl CallResult {
 }
 
 impl SubTraceDesc {
-    pub fn new(begin_pos: usize, subtrace_len: usize) -> Self {
+    pub fn new(begin_pos: TracePos, subtrace_len: usize) -> Self {
         Self {
-            begin_pos: begin_pos as _,
+            begin_pos,
             subtrace_len: subtrace_len as _,
         }
     }

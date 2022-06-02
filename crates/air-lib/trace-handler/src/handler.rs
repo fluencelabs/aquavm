@@ -38,8 +38,8 @@ impl TraceHandler {
 
     /// Returns size of elements inside result trace and intended to provide
     /// a position of next inserted elements.
-    pub fn trace_pos(&self) -> usize {
-        self.data_keeper.result_trace.len()
+    pub fn trace_pos(&self) -> TracePos {
+        self.data_keeper.result_trace.len().into()
     }
 
     pub fn into_result_trace(self) -> ExecutionTrace {
@@ -120,7 +120,7 @@ impl TraceHandler {
         Ok(())
     }
 
-    pub fn meet_iteration_start(&mut self, fold_id: u32, value_pos: usize) -> TraceHandlerResult<()> {
+    pub fn meet_iteration_start(&mut self, fold_id: u32, value_pos: TracePos) -> TraceHandlerResult<()> {
         let fold_fsm = self.fsm_keeper.fold_mut(fold_id)?;
         fold_fsm.meet_iteration_start(value_pos, &mut self.data_keeper)?;
 
