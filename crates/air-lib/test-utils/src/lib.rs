@@ -84,8 +84,9 @@ pub fn data_from_result(result: &RawAVMOutcome) -> InterpreterData {
     serde_json::from_slice(&result.data).expect("default serializer shouldn't fail")
 }
 
-pub fn raw_data_from_trace(trace: ExecutionTrace) -> Vec<u8> {
-    let data = InterpreterData::from_execution_result(trace, <_>::default(), <_>::default(), 0);
+pub fn raw_data_from_trace(trace: impl Into<ExecutionTrace>) -> Vec<u8> {
+    let data =
+        InterpreterData::from_execution_result(trace.into(), <_>::default(), <_>::default(), 0);
     serde_json::to_vec(&data).expect("default serializer shouldn't fail")
 }
 

@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-use super::ExecutedState;
 use super::GlobalStreamGens;
 use super::RestrictedStreamGens;
 use super::DATA_FORMAT_VERSION;
+use crate::ExecutionTrace;
 use serde::Deserialize;
 use serde::Serialize;
 use std::ops::Deref;
-
-pub type ExecutionTrace = Vec<ExecutedState>;
 
 /// The AIR interpreter could be considered as a function
 /// f(prev_data: InterpreterData, current_data: InterpreterData, ... ) -> (result_data: InterpreterData, ...).

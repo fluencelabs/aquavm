@@ -402,5 +402,5 @@ fn fold_par_early_exit() {
     ];
     let trace_len = expected_trace.len();
 
-    assert_eq!(&actual_trace[0..trace_len], expected_trace);
+    assert_eq!(&actual_trace.as_ref()[0..trace_len], expected_trace);
 }

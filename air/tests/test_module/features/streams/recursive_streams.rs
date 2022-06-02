@@ -127,7 +127,7 @@ fn recursive_stream_many_iterations() {
 
     let result = checked_call_vm!(vm_1, <_>::default(), &script, "", "");
     let actual_trace = trace_from_result(&result);
-    let actual_fold = &actual_trace[2];
+    let actual_fold = &actual_trace.as_ref()[2];
     let expected_fold = executed_state::fold(vec![
         executed_state::subtrace_lore(0, subtrace_desc(3, 2), subtrace_desc(5, 0)),
         executed_state::subtrace_lore(1, subtrace_desc(5, 2), subtrace_desc(7, 0)),
@@ -141,13 +141,13 @@ fn recursive_stream_many_iterations() {
     ]);
     assert_eq!(actual_fold, &expected_fold);
 
-    let actual_last_state = &actual_trace[20];
+    let actual_last_state = &actual_trace.as_ref()[20];
     let expected_last_state = executed_state::request_sent_by(vm_peer_id_1);
     assert_eq!(actual_last_state, &expected_last_state);
 
     let result = checked_call_vm!(vm_2, <_>::default(), script, "", result.data);
     let actual_trace = trace_from_result(&result);
-    let actual_last_state = &actual_trace[20];
+    let actual_last_state = &actual_trace.as_ref()[20];
     let expected_last_state = executed_state::scalar_string(result_value);
     assert_eq!(actual_last_state, &expected_last_state);
 }
@@ -287,7 +287,7 @@ fn recursive_stream_error_handling() {
     let result = checked_call_vm!(vm_1, <_>::default(), &script, "", "");
     let result = checked_call_vm!(vm_2, <_>::default(), &script, "", result.data);
     let actual_trace = trace_from_result(&result);
-    let actual_last_state = &actual_trace[10];
+    let actual_last_state = &actual_trace.as_ref()[10];
     let expected_last_state = executed_state::scalar_string(result_value);
 
     assert_eq!(actual_last_state, &expected_last_state);
@@ -363,12 +363,12 @@ fn recursive_stream_inner_fold() {
     let result = checked_call_vm!(vm_2, <_>::default(), script, "", result.data);
     let actual_trace = trace_from_result(&result);
 
-    let actual_last_state = &actual_trace[22];
+    let actual_last_state = &actual_trace.as_ref()[22];
     let expected_last_state = executed_state::scalar_string(result_value);
     assert_eq!(actual_last_state, &expected_last_state);
 
-    let external_fold = &actual_trace[2];
-    let internal_fold = &actual_trace[5];
+    let external_fold = &actual_trace.as_ref()[2];
+    let internal_fold = &actual_trace.as_ref()[5];
     let actual_fold_lores_count = match (external_fold, internal_fold) {
         (ExecutedState::Fold(external_fold), ExecutedState::Fold(internal_fold)) => {
             external_fold.lore.len() + internal_fold.lore.len()
@@ -445,7 +445,7 @@ fn recursive_stream_fold_with_n_service_call() {
     let test_params = TestRunParameters::from_init_peer_id(vm_peer_id);
     let result = checked_call_vm!(vm, test_params, &script, "", "");
     let actual_trace = trace_from_result(&result);
-    let actual_fold_state = match &actual_trace[2] {
+    let actual_fold_state = match &actual_trace.as_ref()[2] {
         ExecutedState::Fold(fold_result) => fold_result,
         _ => panic!("2nd state should be fold"),
     };

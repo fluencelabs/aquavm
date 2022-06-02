@@ -39,7 +39,8 @@ pub struct TraceSlider {
 }
 
 impl TraceSlider {
-    pub(crate) fn new(trace: ExecutionTrace) -> Self {
+    pub(crate) fn new(trace: impl Into<ExecutionTrace>) -> Self {
+        let trace = trace.into();
         let subtrace_len = trace.len();
 
         Self {
@@ -53,7 +54,7 @@ impl TraceSlider {
     /// and None otherwise.
     #[allow(clippy::suspicious_operation_groupings)]
     pub(crate) fn next_state(&mut self) -> Option<ExecutedState> {
-        if self.seen_elements >= self.subtrace_len || Into::<usize>::into(self.position) >= self.trace.len() {
+        if self.seen_elements >= self.subtrace_len || usize::from(self.position) >= self.trace.len() {
             return None;
         }
 
@@ -107,7 +108,7 @@ impl TraceSlider {
 
     pub(super) fn state_at_position(&self, position: TracePos) -> Option<&ExecutedState> {
         // it would be nice to have the `impl SliceIndex for TracePos`, but it is unstable
-        self.trace.get::<usize>(position.into())
+        self.trace.get(position)
     }
 
     pub(super) fn trace_len(&self) -> usize {

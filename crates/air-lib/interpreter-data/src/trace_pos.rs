@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-use crate::{ExecutedState, ExecutionTrace};
-
 use serde::{Deserialize, Serialize};
 use std::{
     fmt::{Debug, Display},
-    ops::{Add, AddAssign, Index, Sub},
+    ops::{Add, AddAssign, Sub},
 };
 
 #[derive(Copy, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
@@ -84,13 +82,5 @@ impl Sub<TracePos> for TracePos {
 
     fn sub(self, rhs: TracePos) -> Self::Output {
         self.0 - rhs.0
-    }
-}
-
-impl Index<TracePos> for ExecutionTrace {
-    type Output = ExecutedState;
-
-    fn index(&self, index: TracePos) -> &Self::Output {
-        &self[index.0]
     }
 }

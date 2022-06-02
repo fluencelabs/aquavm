@@ -16,18 +16,19 @@
 
 use super::DataKeeper;
 use super::ExecutedState;
+use air_interpreter_data::TracePos;
 
 /// This one is intended to optimize insertion in data to avoid insertion in a middle of it.
 /// This is achieved by inserting a temporary state, track insert position and insert there
 /// the final state.
 #[derive(Debug, Default, Clone)]
 pub(super) struct StateInserter {
-    position: usize,
+    position: TracePos,
 }
 
 impl StateInserter {
     pub(super) fn from_keeper(data_keeper: &mut DataKeeper) -> Self {
-        let position = data_keeper.result_trace.len();
+        let position = data_keeper.result_trace_next_pos();
         // this par is a temporary state
         data_keeper.result_trace.push(ExecutedState::par(0, 0));
 
