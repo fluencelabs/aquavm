@@ -89,8 +89,8 @@ impl NativeAirRunner {
             },
             raw_call_results,
         );
-        let outcome = RawAVMOutcome::from_interpreter_outcome(outcome)
-            .map_err(|e| e.to_string())?;
+        let outcome =
+            RawAVMOutcome::from_interpreter_outcome(outcome).map_err(|e| e.to_string())?;
 
         Ok(outcome)
     }
