@@ -33,7 +33,7 @@ pub struct RawAVMOutcome {
 }
 
 impl RawAVMOutcome {
-    pub(crate) fn from_interpreter_outcome(outcome: InterpreterOutcome) -> RunnerResult<Self> {
+    pub fn from_interpreter_outcome(outcome: InterpreterOutcome) -> RunnerResult<Self> {
         let InterpreterOutcome {
             ret_code,
             error_message,
