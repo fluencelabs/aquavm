@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-use super::CallServiceClosure;
 use avm_server::avm_runner::*;
 
 use once_cell::sync::OnceCell;
@@ -24,10 +23,7 @@ use std::path::PathBuf;
 const AVM_MAX_HEAP_SIZE: u64 = 10 * 1024 * 1024;
 const AIR_WASM_PATH: &str = "../target/wasm32-wasi/debug/air_interpreter_server.wasm";
 
-pub struct TestRunner {
-    pub runner: object_pool::Reusable<'static, AVMRunner>,
-    pub call_service: CallServiceClosure,
-}
+pub struct WasmAirRunner(object_pool::Reusable<'static, AVMRunner>);
 
 fn make_pooled_avm_runner() -> AVMRunner {
     let fake_current_peer_id = "";
@@ -42,25 +38,46 @@ fn make_pooled_avm_runner() -> AVMRunner {
     .expect("vm should be created")
 }
 
-pub fn create_avm(
-    call_service: CallServiceClosure,
-    current_peer_id: impl Into<String>,
-) -> TestRunner {
-    static POOL_CELL: OnceCell<object_pool::Pool<AVMRunner>> = OnceCell::new();
+impl WasmAirRunner {
+    pub fn new(current_peer_id: impl Into<String>) -> Self {
+        static POOL_CELL: OnceCell<object_pool::Pool<AVMRunner>> = OnceCell::new();
 
-    let pool = POOL_CELL.get_or_init(|| {
-        object_pool::Pool::new(
-            // we create an empty pool and let it fill on demand
-            0,
-            || unreachable!(),
-        )
-    });
+        let pool = POOL_CELL.get_or_init(|| {
+            object_pool::Pool::new(
+                // we create an empty pool and let it fill on demand
+                0,
+                || unreachable!(),
+            )
+        });
 
-    let mut runner = pool.pull(make_pooled_avm_runner);
-    runner.set_peer_id(current_peer_id);
+        let mut runner = pool.pull(make_pooled_avm_runner);
+        runner.set_peer_id(current_peer_id);
 
-    TestRunner {
-        runner,
-        call_service,
+        Self(runner)
+    }
+
+    pub fn call(
+        &mut self,
+        air: impl Into<String>,
+        prev_data: impl Into<Vec<u8>>,
+        data: impl Into<Vec<u8>>,
+        init_peer_id: impl Into<String>,
+        timestamp: u64,
+        ttl: u32,
+        call_results: avm_server::CallResults,
+    ) -> Result<RawAVMOutcome, Box<dyn std::error::Error>> {
+        Ok(self.0.call(
+            air,
+            prev_data,
+            data,
+            init_peer_id,
+            timestamp,
+            ttl,
+            call_results,
+        )?)
+    }
+
+    pub fn set_peer_id(&mut self, peer_id: impl Into<String>) {
+        self.0.set_peer_id(peer_id)
     }
 }

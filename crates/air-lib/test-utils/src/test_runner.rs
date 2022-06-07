@@ -15,14 +15,20 @@
  */
 
 #[cfg(feature = "test_with_native_code")]
-pub use crate::native_test_runner::{create_avm, TestRunner};
+use crate::native_test_runner::NativeAirRunner as Runner;
 #[cfg(not(feature = "test_with_native_code"))]
-pub use crate::wasm_test_runner::{create_avm, TestRunner};
+use crate::wasm_test_runner::WasmAirRunner as Runner;
 
+use super::CallServiceClosure;
 use avm_server::avm_runner::*;
 
 use std::collections::HashMap;
 use std::collections::HashSet;
+
+pub struct TestRunner {
+    pub runner: Runner,
+    pub call_service: CallServiceClosure,
+}
 
 #[derive(Debug, Default, Clone)]
 pub struct TestRunParameters {
@@ -85,6 +91,18 @@ impl TestRunner {
             prev_data = outcome.data;
             data = vec![];
         }
+    }
+}
+
+pub fn create_avm(
+    call_service: CallServiceClosure,
+    current_peer_id: impl Into<String>,
+) -> TestRunner {
+    let runner = Runner::new(current_peer_id);
+
+    TestRunner {
+        runner,
+        call_service,
     }
 }
 

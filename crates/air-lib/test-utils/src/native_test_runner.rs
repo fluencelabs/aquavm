@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-use super::CallServiceClosure;
 use air_interpreter_interface::RunParameters;
 use avm_server::avm_runner::*;
 
@@ -28,6 +27,7 @@ pub(crate) fn into_raw_result(
         .collect::<_>()
 }
 
+#[derive(Default)]
 pub struct NativeAirRunner {
     current_peer_id: String,
 }
@@ -68,20 +68,5 @@ impl NativeAirRunner {
         let outcome = RawAVMOutcome::from_interpreter_outcome(outcome)?;
 
         Ok(outcome)
-    }
-}
-
-pub struct TestRunner {
-    pub runner: NativeAirRunner,
-    pub call_service: CallServiceClosure,
-}
-
-pub fn create_avm(
-    call_service: CallServiceClosure,
-    current_peer_id: impl Into<String>,
-) -> TestRunner {
-    TestRunner {
-        runner: NativeAirRunner::new(current_peer_id),
-        call_service,
     }
 }
