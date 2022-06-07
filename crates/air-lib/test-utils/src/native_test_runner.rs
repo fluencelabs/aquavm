@@ -16,18 +16,8 @@
 
 use air_interpreter_interface::RunParameters;
 use avm_server::avm_runner::*;
+use avm_server::into_raw_result;
 
-// Borrowed from private module in the avm/server/src/interface/call_service_result.rs
-pub(crate) fn into_raw_result(
-    call_results: avm_server::CallResults,
-) -> air_interpreter_interface::CallResults {
-    call_results
-        .into_iter()
-        .map(|(call_id, call_result)| (call_id, call_result.into_raw()))
-        .collect::<_>()
-}
-
-#[derive(Default)]
 pub struct NativeAirRunner {
     current_peer_id: String,
 }
