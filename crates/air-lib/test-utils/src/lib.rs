@@ -29,6 +29,11 @@ pub mod call_services;
 pub mod executed_state;
 pub mod test_runner;
 
+#[cfg(feature = "test_with_native_code")]
+mod native_test_runner;
+#[cfg(not(feature = "test_with_native_code"))]
+mod wasm_test_runner;
+
 pub use air::interpreter_data::*;
 pub use avm_server::raw_outcome::*;
 pub use avm_server::*;

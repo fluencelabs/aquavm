@@ -14,107 +14,15 @@
  * limitations under the License.
  */
 
-use super::CallServiceClosure;
 #[cfg(feature = "test_with_native_code")]
-use air_interpreter_interface::{CallServiceResult, RunParameters};
+pub use crate::native_test_runner::{create_avm, TestRunner};
+#[cfg(not(feature = "test_with_native_code"))]
+pub use crate::wasm_test_runner::{create_avm, TestRunner};
+
 use avm_server::avm_runner::*;
 
-#[cfg(not(feature = "test_with_native_code"))]
-use once_cell::sync::OnceCell;
 use std::collections::HashMap;
 use std::collections::HashSet;
-#[cfg(not(feature = "test_with_native_code"))]
-use std::path::PathBuf;
-
-// 10 Mb
-#[cfg(not(feature = "test_with_native_code"))]
-const AVM_MAX_HEAP_SIZE: u64 = 10 * 1024 * 1024;
-#[cfg(not(feature = "test_with_native_code"))]
-const AIR_WASM_PATH: &str = "../target/wasm32-wasi/debug/air_interpreter_server.wasm";
-
-#[cfg(not(feature = "test_with_native_code"))]
-pub struct TestRunner {
-    pub runner: object_pool::Reusable<'static, AVMRunner>,
-    pub call_service: CallServiceClosure,
-}
-
-#[cfg(feature = "test_with_native_code")]
-#[derive(Default)]
-pub struct NativeAirRunner {
-    current_peer_id: String,
-}
-
-#[cfg(feature = "test_with_native_code")]
-impl NativeAirRunner {
-    pub fn new(current_peer_id: impl Into<String>) -> Self {
-        Self {
-            current_peer_id: current_peer_id.into(),
-        }
-    }
-
-    pub fn call(
-        &mut self,
-        air: impl Into<String>,
-        prev_data: impl Into<Vec<u8>>,
-        data: impl Into<Vec<u8>>,
-        init_peer_id: impl Into<String>,
-        timestamp: u64,
-        ttl: u32,
-        call_results: avm_server::CallResults,
-    ) -> Result<RawAVMOutcome, String> {
-        // some inner parts transformations
-        let raw_call_results: air_interpreter_interface::CallResults = call_results
-            .into_iter()
-            .map(|(call_id, call_result)| {
-                (
-                    call_id,
-                    CallServiceResult {
-                        ret_code: call_result.ret_code,
-                        result: call_result.result.to_string(),
-                    },
-                )
-            })
-            .collect::<_>();
-        let raw_call_results = serde_json::to_vec(&raw_call_results).unwrap();
-
-        let outcome = air::execute_air(
-            air.into(),
-            prev_data.into(),
-            data.into(),
-            RunParameters {
-                init_peer_id: init_peer_id.into(),
-                current_peer_id: self.current_peer_id.clone(),
-                timestamp,
-                ttl,
-            },
-            raw_call_results,
-        );
-        let outcome =
-            RawAVMOutcome::from_interpreter_outcome(outcome).map_err(|e| e.to_string())?;
-
-        Ok(outcome)
-    }
-}
-
-#[cfg(feature = "test_with_native_code")]
-pub struct TestRunner {
-    pub runner: NativeAirRunner,
-    pub call_service: CallServiceClosure,
-}
-
-#[cfg(not(feature = "test_with_native_code"))]
-fn make_pooled_avm_runner() -> AVMRunner {
-    let fake_current_peer_id = "";
-    let logging_mask = i32::MAX;
-
-    AVMRunner::new(
-        PathBuf::from(AIR_WASM_PATH),
-        fake_current_peer_id,
-        Some(AVM_MAX_HEAP_SIZE),
-        logging_mask,
-    )
-    .expect("vm should be created")
-}
 
 #[derive(Debug, Default, Clone)]
 pub struct TestRunParameters {
@@ -177,41 +85,6 @@ impl TestRunner {
             prev_data = outcome.data;
             data = vec![];
         }
-    }
-}
-
-#[cfg(not(feature = "test_with_native_code"))]
-pub fn create_avm(
-    call_service: CallServiceClosure,
-    current_peer_id: impl Into<String>,
-) -> TestRunner {
-    static POOL_CELL: OnceCell<object_pool::Pool<AVMRunner>> = OnceCell::new();
-
-    let pool = POOL_CELL.get_or_init(|| {
-        object_pool::Pool::new(
-            // we create an empty pool and let it fill on demand
-            0,
-            || unreachable!(),
-        )
-    });
-
-    let mut runner = pool.pull(make_pooled_avm_runner);
-    runner.set_peer_id(current_peer_id);
-
-    TestRunner {
-        runner,
-        call_service,
-    }
-}
-
-#[cfg(feature = "test_with_native_code")]
-pub fn create_avm(
-    call_service: CallServiceClosure,
-    current_peer_id: impl Into<String>,
-) -> TestRunner {
-    TestRunner {
-        runner: NativeAirRunner::new(current_peer_id),
-        call_service,
     }
 }
 
