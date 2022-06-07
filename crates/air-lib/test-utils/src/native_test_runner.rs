@@ -15,10 +15,19 @@
  */
 
 use super::CallServiceClosure;
-use air_interpreter_interface::{CallServiceResult, RunParameters};
+use air_interpreter_interface::RunParameters;
 use avm_server::avm_runner::*;
 
-#[derive(Default)]
+// Borrowed from private module in the avm/server/src/interface/call_service_result.rs
+pub(crate) fn into_raw_result(
+    call_results: avm_server::CallResults,
+) -> air_interpreter_interface::CallResults {
+    call_results
+        .into_iter()
+        .map(|(call_id, call_result)| (call_id, call_result.into_raw()))
+        .collect::<_>()
+}
+
 pub struct NativeAirRunner {
     current_peer_id: String,
 }
@@ -41,18 +50,7 @@ impl NativeAirRunner {
         call_results: avm_server::CallResults,
     ) -> Result<RawAVMOutcome, Box<dyn std::error::Error>> {
         // some inner parts transformations
-        let raw_call_results: air_interpreter_interface::CallResults = call_results
-            .into_iter()
-            .map(|(call_id, call_result)| {
-                (
-                    call_id,
-                    CallServiceResult {
-                        ret_code: call_result.ret_code,
-                        result: call_result.result.to_string(),
-                    },
-                )
-            })
-            .collect::<_>();
+        let raw_call_results = into_raw_result(call_results);
         let raw_call_results = serde_json::to_vec(&raw_call_results).unwrap();
 
         let outcome = air::execute_air(

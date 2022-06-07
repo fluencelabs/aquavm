@@ -48,7 +48,7 @@ impl CallServiceResult {
         }
     }
 
-    pub(crate) fn into_raw(self) -> air_interpreter_interface::CallServiceResult {
+    pub fn into_raw(self) -> air_interpreter_interface::CallServiceResult {
         let CallServiceResult { ret_code, result } = self;
 
         air_interpreter_interface::CallServiceResult {
