@@ -83,7 +83,7 @@ impl TraceSlider {
     }
 
     pub(crate) fn set_subtrace_len(&mut self, subtrace_len: usize) -> KeeperResult<()> {
-        let trace_remainder = Into::<TracePos>::into(self.trace.len()) - self.position;
+        let trace_remainder = self.trace.len() - usize::from(self.position);
         if trace_remainder < subtrace_len {
             return Err(SetSubtraceLenFailed {
                 requested_subtrace_len: subtrace_len,

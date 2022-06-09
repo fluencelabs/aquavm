@@ -19,13 +19,6 @@ use air_test_utils::prelude::*;
 use air_trace_handler::TraceHandlerError;
 use air_trace_handler::{CallResultError, MergeError};
 
-fn subtrace_desc(begin_pos: impl Into<TracePos>, subtrace_len: u32) -> SubTraceDesc {
-    SubTraceDesc {
-        begin_pos: begin_pos.into(),
-        subtrace_len,
-    }
-}
-
 #[test]
 fn par_early_exit() {
     let init_peer_id = "init_peer_id";

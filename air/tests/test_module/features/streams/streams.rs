@@ -16,13 +16,6 @@
 
 use air_test_utils::prelude::*;
 
-fn subtrace_desc(begin_pos: impl Into<TracePos>, subtrace_len: u32) -> SubTraceDesc {
-    SubTraceDesc {
-        begin_pos: begin_pos.into(),
-        subtrace_len,
-    }
-}
-
 #[test]
 fn empty_stream() {
     fn arg_type_check_closure() -> CallServiceClosure {

@@ -18,13 +18,6 @@ use air_test_utils::prelude::*;
 
 use pretty_assertions::assert_eq;
 
-fn subtrace_desc(begin_pos: impl Into<TracePos>, subtrace_len: u32) -> SubTraceDesc {
-    SubTraceDesc {
-        begin_pos: begin_pos.into(),
-        subtrace_len,
-    }
-}
-
 #[test]
 fn recursive_stream_with_early_exit() {
     let vm_peer_id = "vm_peer_id";
