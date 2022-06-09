@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use crate::test_runner::AirRunner;
 use avm_server::avm_runner::*;
 
 use once_cell::sync::OnceCell;
@@ -38,8 +39,8 @@ fn make_pooled_avm_runner() -> AVMRunner {
     .expect("vm should be created")
 }
 
-impl WasmAirRunner {
-    pub fn new(current_peer_id: impl Into<String>) -> Self {
+impl AirRunner for WasmAirRunner {
+    fn new(current_peer_id: impl Into<String>) -> Self {
         static POOL_CELL: OnceCell<object_pool::Pool<AVMRunner>> = OnceCell::new();
 
         let pool = POOL_CELL.get_or_init(|| {
@@ -56,7 +57,7 @@ impl WasmAirRunner {
         Self(runner)
     }
 
-    pub fn call(
+    fn call(
         &mut self,
         air: impl Into<String>,
         prev_data: impl Into<Vec<u8>>,
@@ -75,9 +76,5 @@ impl WasmAirRunner {
             ttl,
             call_results,
         )?)
-    }
-
-    pub fn set_peer_id(&mut self, peer_id: impl Into<String>) {
-        self.0.set_peer_id(peer_id)
     }
 }

@@ -15,9 +15,9 @@
  */
 
 #[cfg(feature = "test_with_native_code")]
-use crate::native_test_runner::NativeAirRunner as Runner;
+use crate::native_test_runner::NativeAirRunner as AirRunnerImpl;
 #[cfg(not(feature = "test_with_native_code"))]
-use crate::wasm_test_runner::WasmAirRunner as Runner;
+use crate::wasm_test_runner::WasmAirRunner as AirRunnerImpl;
 
 use super::CallServiceClosure;
 use avm_server::avm_runner::*;
@@ -25,8 +25,23 @@ use avm_server::avm_runner::*;
 use std::collections::HashMap;
 use std::collections::HashSet;
 
-pub struct TestRunner {
-    pub runner: Runner,
+pub trait AirRunner {
+    fn new(current_call_id: impl Into<String>) -> Self;
+
+    fn call(
+        &mut self,
+        air: impl Into<String>,
+        prev_data: impl Into<Vec<u8>>,
+        data: impl Into<Vec<u8>>,
+        init_peer_id: impl Into<String>,
+        timestamp: u64,
+        ttl: u32,
+        call_results: avm_server::CallResults,
+    ) -> Result<RawAVMOutcome, Box<dyn std::error::Error>>;
+}
+
+pub struct TestRunner<R = AirRunnerImpl> {
+    pub runner: R,
     pub call_service: CallServiceClosure,
 }
 
@@ -37,7 +52,7 @@ pub struct TestRunParameters {
     pub ttl: u32,
 }
 
-impl TestRunner {
+impl<R: AirRunner> TestRunner<R> {
     pub fn call(
         &mut self,
         air: impl Into<String>,
@@ -98,7 +113,7 @@ pub fn create_avm(
     call_service: CallServiceClosure,
     current_peer_id: impl Into<String>,
 ) -> TestRunner {
-    let runner = Runner::new(current_peer_id);
+    let runner = AirRunnerImpl::new(current_peer_id);
 
     TestRunner {
         runner,

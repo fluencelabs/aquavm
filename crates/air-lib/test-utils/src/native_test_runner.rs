@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use crate::test_runner::AirRunner;
 use air_interpreter_interface::RunParameters;
 use avm_server::avm_runner::*;
 use avm_server::into_raw_result;
@@ -22,14 +23,14 @@ pub struct NativeAirRunner {
     current_peer_id: String,
 }
 
-impl NativeAirRunner {
-    pub fn new(current_peer_id: impl Into<String>) -> Self {
+impl AirRunner for NativeAirRunner {
+    fn new(current_peer_id: impl Into<String>) -> Self {
         Self {
             current_peer_id: current_peer_id.into(),
         }
     }
 
-    pub fn call(
+    fn call(
         &mut self,
         air: impl Into<String>,
         prev_data: impl Into<Vec<u8>>,
