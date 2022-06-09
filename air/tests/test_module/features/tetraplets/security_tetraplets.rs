@@ -286,5 +286,5 @@ fn tetraplet_with_wasm_modules() {
     let actual_trace = trace_from_result(&result);
     let expected_state = executed_state::scalar_string("Ok");
 
-    assert_eq!(actual_trace.as_ref()[1], expected_state)
+    assert_eq!(actual_trace[1.into()], expected_state)
 }

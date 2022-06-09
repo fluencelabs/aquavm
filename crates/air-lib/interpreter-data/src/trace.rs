@@ -18,6 +18,7 @@ use super::ExecutedState;
 use crate::TracePos;
 use serde::Deserialize;
 use serde::Serialize;
+use std::ops::Deref;
 use std::ops::Index;
 use std::ops::IndexMut;
 
@@ -30,22 +31,6 @@ impl ExecutionTrace {
         self.0.get(usize::from(index))
     }
 
-    pub fn iter(&self) -> std::slice::Iter<'_, ExecutedState> {
-        self.0.iter()
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.0.is_empty()
-    }
-
-    pub fn last(&self) -> Option<&ExecutedState> {
-        self.0.last()
-    }
-
-    pub fn len(&self) -> usize {
-        self.0.len()
-    }
-
     pub fn pop(&mut self) -> Option<ExecutedState> {
         self.0.pop()
     }
@@ -55,8 +40,10 @@ impl ExecutionTrace {
     }
 }
 
-impl AsRef<[ExecutedState]> for ExecutionTrace {
-    fn as_ref(&self) -> &[ExecutedState] {
+impl Deref for ExecutionTrace {
+    type Target = [ExecutedState];
+
+    fn deref(&self) -> &[ExecutedState] {
         &self.0
     }
 }
@@ -71,7 +58,7 @@ impl Index<TracePos> for ExecutionTrace {
     type Output = ExecutedState;
 
     fn index(&self, index: TracePos) -> &Self::Output {
-        &self.0[usize::from(index)]
+        &self.deref()[usize::from(index)]
     }
 }
 
