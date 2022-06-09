@@ -113,12 +113,12 @@ pub fn fold(lore: FoldLore) -> ExecutedState {
 }
 
 pub fn subtrace_lore(
-    value_pos: u32,
+    value_pos: usize,
     before: SubTraceDesc,
     after: SubTraceDesc,
 ) -> FoldSubTraceLore {
     FoldSubTraceLore {
-        value_pos: (value_pos as usize).into(),
+        value_pos: value_pos.into(),
         subtraces_desc: vec![before, after],
     }
 }
