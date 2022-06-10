@@ -36,10 +36,10 @@ fn xor() {
 
     assert_eq!(actual_trace.len(), 2);
     assert_eq!(
-        actual_trace[0],
+        actual_trace[0.into()],
         executed_state::service_failed(1, "failed result from fallible_call_service")
     );
-    assert_eq!(actual_trace[1], expected_call_result);
+    assert_eq!(actual_trace[1.into()], expected_call_result);
 
     let script = f!(r#"
             (xor
@@ -51,7 +51,7 @@ fn xor() {
 
     let actual_trace = trace_from_result(&result);
     assert_eq!(actual_trace.len(), 1);
-    assert_eq!(actual_trace[0], expected_call_result);
+    assert_eq!(actual_trace[0.into()], expected_call_result);
 }
 
 #[test]
@@ -71,8 +71,8 @@ fn xor_var_not_found() {
     let result = checked_call_vm!(vm, <_>::default(), script, "", "");
 
     let actual_trace = trace_from_result(&result);
-    assert_eq!(actual_trace[0], executed_state::par(1, 0));
-    assert_eq!(actual_trace[1], executed_state::request_sent_by(local_peer_id));
+    assert_eq!(actual_trace[0.into()], executed_state::par(1, 0));
+    assert_eq!(actual_trace[1.into()], executed_state::request_sent_by(local_peer_id));
 }
 
 #[test]
@@ -171,5 +171,5 @@ fn last_error_with_xor() {
         r#"Local service error, ret_code is 1, error message is '"failed result from fallible_call_service"'"#,
     );
 
-    assert_eq!(actual_trace[1], expected_state);
+    assert_eq!(actual_trace[1.into()], expected_state);
 }

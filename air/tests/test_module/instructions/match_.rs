@@ -46,7 +46,7 @@ fn match_equal() {
     let expected_state = executed_state::scalar_string("result_1");
 
     assert_eq!(actual_trace.len(), 3);
-    assert_eq!(actual_trace[2], expected_state);
+    assert_eq!(actual_trace[2.into()], expected_state);
 }
 
 #[test]
@@ -78,7 +78,7 @@ fn match_not_equal() {
     let expected_state = executed_state::scalar_string("result_2");
 
     assert_eq!(actual_trace.len(), 3);
-    assert_eq!(actual_trace[2], expected_state);
+    assert_eq!(actual_trace[2.into()], expected_state);
 }
 
 #[test]
@@ -107,7 +107,7 @@ fn match_with_string() {
     let expected_state = executed_state::scalar_string("result_1");
 
     assert_eq!(actual_trace.len(), 2);
-    assert_eq!(actual_trace[1], expected_state);
+    assert_eq!(actual_trace[1.into()], expected_state);
 }
 
 #[test]
@@ -137,7 +137,7 @@ fn match_with_init_peer_id() {
     let expected_executed_call_result = executed_state::scalar_string("result_1");
 
     assert_eq!(actual_trace.len(), 2);
-    assert_eq!(actual_trace[1], expected_executed_call_result);
+    assert_eq!(actual_trace[1.into()], expected_executed_call_result);
 }
 
 #[test]
@@ -168,7 +168,7 @@ fn match_with_timestamp() {
     let expected_executed_call_result = executed_state::scalar_string("result_1");
 
     assert_eq!(actual_trace.len(), 2);
-    assert_eq!(actual_trace[1], expected_executed_call_result);
+    assert_eq!(actual_trace[1.into()], expected_executed_call_result);
 }
 
 #[test]
@@ -199,7 +199,7 @@ fn match_with_ttl() {
     let expected_executed_call_result = executed_state::scalar_string("result_1");
 
     assert_eq!(actual_trace.len(), 2);
-    assert_eq!(actual_trace[1], expected_executed_call_result);
+    assert_eq!(actual_trace[1.into()], expected_executed_call_result);
 }
 
 #[test]

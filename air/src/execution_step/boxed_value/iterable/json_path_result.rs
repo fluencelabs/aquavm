@@ -57,7 +57,7 @@ impl<'ctx> Iterable<'ctx> for IterableLambdaResult {
         }
 
         let jvalue = &self.jvalues[self.cursor];
-        let result = IterableItem::RefRef((jvalue, &self.tetraplet, 0));
+        let result = IterableItem::RefRef((jvalue, &self.tetraplet, 0.into()));
 
         Some(result)
     }

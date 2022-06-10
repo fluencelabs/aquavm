@@ -211,7 +211,7 @@ fn variable_names_shown_in_error() {
     let trace = trace_from_result(&result);
 
     assert_eq!(
-        trace[1],
+        trace[1.into()],
         executed_state::scalar(json!(
             "expected JValue type 'string' for the variable `-relay-`, but got '1'"
         ))

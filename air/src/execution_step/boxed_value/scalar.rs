@@ -19,6 +19,7 @@ use crate::execution_step::FoldState;
 use crate::execution_step::RcSecurityTetraplet;
 use crate::JValue;
 
+use air_interpreter_data::TracePos;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -30,7 +31,7 @@ use std::rc::Rc;
 pub struct ValueAggregate {
     pub result: Rc<JValue>,
     pub tetraplet: RcSecurityTetraplet,
-    pub trace_pos: usize,
+    pub trace_pos: TracePos,
 }
 
 pub(crate) enum ScalarRef<'i> {
@@ -51,7 +52,7 @@ impl<'i> ScalarRef<'i> {
 }
 
 impl ValueAggregate {
-    pub(crate) fn new(result: Rc<JValue>, tetraplet: RcSecurityTetraplet, trace_pos: usize) -> Self {
+    pub(crate) fn new(result: Rc<JValue>, tetraplet: RcSecurityTetraplet, trace_pos: TracePos) -> Self {
         Self {
             result,
             tetraplet,

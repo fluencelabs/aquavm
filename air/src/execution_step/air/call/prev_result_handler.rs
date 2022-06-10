@@ -21,6 +21,7 @@ use crate::execution_step::RcSecurityTetraplet;
 
 use air_interpreter_data::CallResult;
 use air_interpreter_data::Sender;
+use air_interpreter_data::TracePos;
 use air_interpreter_interface::CallServiceResult;
 use air_parser::ast::CallOutputValue;
 use air_trace_handler::TraceHandler;
@@ -40,7 +41,7 @@ pub(super) fn handle_prev_state<'i>(
     tetraplet: &RcSecurityTetraplet,
     output: &CallOutputValue<'i>,
     prev_result: CallResult,
-    trace_pos: usize,
+    trace_pos: TracePos,
     exec_ctx: &mut ExecutionCtx<'i>,
     trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<StateDescriptor> {

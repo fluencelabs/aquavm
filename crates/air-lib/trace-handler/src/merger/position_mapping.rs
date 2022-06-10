@@ -40,6 +40,6 @@ pub(super) fn prepare_positions_mapping(scheme: PreparationScheme, data_keeper: 
 
     let data_positions = DataPositions { prev_pos, current_pos };
 
-    let trace_pos = data_keeper.result_states_count();
+    let trace_pos = data_keeper.result_trace_next_pos();
     data_keeper.new_to_old_pos.insert(trace_pos, data_positions);
 }

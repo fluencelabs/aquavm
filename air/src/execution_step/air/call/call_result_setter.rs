@@ -20,6 +20,7 @@ use crate::execution_step::Generation;
 use crate::execution_step::ValueAggregate;
 
 use air_interpreter_data::CallResult;
+use air_interpreter_data::TracePos;
 use air_interpreter_data::Value;
 use air_parser::ast::CallOutputValue;
 use air_parser::ast::Variable;
@@ -52,7 +53,7 @@ pub(crate) fn set_local_result<'i>(
 pub(crate) fn set_result_from_value<'i>(
     value: Value,
     tetraplet: RcSecurityTetraplet,
-    trace_pos: usize,
+    trace_pos: TracePos,
     output: &CallOutputValue<'i>,
     exec_ctx: &mut ExecutionCtx<'i>,
 ) -> ExecutionResult<()> {

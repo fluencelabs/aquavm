@@ -28,10 +28,14 @@
 mod executed_state;
 mod interpreter_data;
 mod stream_generations;
+mod trace;
+mod trace_pos;
 
 pub use executed_state::*;
 pub use interpreter_data::*;
 pub use stream_generations::*;
+pub use trace::*;
+pub use trace_pos::*;
 
 use once_cell::sync::Lazy;
 use std::str::FromStr;

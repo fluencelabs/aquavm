@@ -244,27 +244,27 @@ fn fold_early_exit() {
         executed_state::par(11, 1),
         executed_state::fold(vec![executed_state::subtrace_lore(
             4,
-            SubTraceDesc::new(14, 9),
-            SubTraceDesc::new(23, 0),
+            subtrace_desc(14, 9),
+            subtrace_desc(23, 0),
         )]),
         executed_state::fold(vec![executed_state::subtrace_lore(
             6,
-            SubTraceDesc::new(15, 8),
-            SubTraceDesc::new(23, 0),
+            subtrace_desc(15, 8),
+            subtrace_desc(23, 0),
         )]),
         executed_state::fold(vec![
-            executed_state::subtrace_lore(8, SubTraceDesc::new(16, 3), SubTraceDesc::new(22, 0)),
-            executed_state::subtrace_lore(9, SubTraceDesc::new(19, 3), SubTraceDesc::new(22, 0)),
+            executed_state::subtrace_lore(8, subtrace_desc(16, 3), subtrace_desc(22, 0)),
+            executed_state::subtrace_lore(9, subtrace_desc(19, 3), subtrace_desc(22, 0)),
         ]),
         executed_state::fold(vec![
-            executed_state::subtrace_lore(10, SubTraceDesc::new(17, 1), SubTraceDesc::new(19, 0)),
-            executed_state::subtrace_lore(11, SubTraceDesc::new(18, 1), SubTraceDesc::new(19, 0)),
+            executed_state::subtrace_lore(10, subtrace_desc(17, 1), subtrace_desc(19, 0)),
+            executed_state::subtrace_lore(11, subtrace_desc(18, 1), subtrace_desc(19, 0)),
         ]),
         executed_state::scalar_string(unit_call_service_result),
         executed_state::scalar_string(unit_call_service_result),
         executed_state::fold(vec![
-            executed_state::subtrace_lore(10, SubTraceDesc::new(20, 1), SubTraceDesc::new(22, 0)),
-            executed_state::subtrace_lore(11, SubTraceDesc::new(21, 1), SubTraceDesc::new(22, 0)),
+            executed_state::subtrace_lore(10, subtrace_desc(20, 1), subtrace_desc(22, 0)),
+            executed_state::subtrace_lore(11, subtrace_desc(21, 1), subtrace_desc(22, 0)),
         ]),
         executed_state::scalar_string(unit_call_service_result),
         executed_state::scalar_string(unit_call_service_result),
@@ -353,24 +353,24 @@ fn fold_par_early_exit() {
         executed_state::stream_string("d2", 0),
         executed_state::par(69, 1),
         executed_state::fold(vec![
-            executed_state::subtrace_lore(4, SubTraceDesc::new(14, 34), SubTraceDesc::new(82, 0)),
-            executed_state::subtrace_lore(5, SubTraceDesc::new(48, 34), SubTraceDesc::new(82, 0)),
+            executed_state::subtrace_lore(4, subtrace_desc(14, 34), subtrace_desc(82, 0)),
+            executed_state::subtrace_lore(5, subtrace_desc(48, 34), subtrace_desc(82, 0)),
         ]),
         executed_state::par(33, 34),
         executed_state::fold(vec![
-            executed_state::subtrace_lore(6, SubTraceDesc::new(16, 16), SubTraceDesc::new(48, 0)),
-            executed_state::subtrace_lore(7, SubTraceDesc::new(32, 16), SubTraceDesc::new(48, 0)),
+            executed_state::subtrace_lore(6, subtrace_desc(16, 16), subtrace_desc(48, 0)),
+            executed_state::subtrace_lore(7, subtrace_desc(32, 16), subtrace_desc(48, 0)),
         ]),
         executed_state::par(15, 16),
         executed_state::par(13, 1),
         executed_state::fold(vec![
-            executed_state::subtrace_lore(8, SubTraceDesc::new(19, 6), SubTraceDesc::new(31, 0)),
-            executed_state::subtrace_lore(9, SubTraceDesc::new(25, 6), SubTraceDesc::new(31, 0)),
+            executed_state::subtrace_lore(8, subtrace_desc(19, 6), subtrace_desc(31, 0)),
+            executed_state::subtrace_lore(9, subtrace_desc(25, 6), subtrace_desc(31, 0)),
         ]),
         executed_state::par(5, 6),
         executed_state::fold(vec![
-            executed_state::subtrace_lore(10, SubTraceDesc::new(21, 2), SubTraceDesc::new(25, 0)),
-            executed_state::subtrace_lore(11, SubTraceDesc::new(23, 2), SubTraceDesc::new(25, 0)),
+            executed_state::subtrace_lore(10, subtrace_desc(21, 2), subtrace_desc(25, 0)),
+            executed_state::subtrace_lore(11, subtrace_desc(23, 2), subtrace_desc(25, 0)),
         ]),
         executed_state::par(1, 2),
         executed_state::scalar_string(unit_call_service_result),
@@ -378,8 +378,8 @@ fn fold_par_early_exit() {
         executed_state::scalar_string(unit_call_service_result),
         executed_state::par(5, 0),
         executed_state::fold(vec![
-            executed_state::subtrace_lore(10, SubTraceDesc::new(27, 2), SubTraceDesc::new(31, 0)),
-            executed_state::subtrace_lore(11, SubTraceDesc::new(29, 2), SubTraceDesc::new(31, 0)),
+            executed_state::subtrace_lore(10, subtrace_desc(27, 2), subtrace_desc(31, 0)),
+            executed_state::subtrace_lore(11, subtrace_desc(29, 2), subtrace_desc(31, 0)),
         ]),
         executed_state::par(1, 2),
         executed_state::scalar_string(unit_call_service_result),
@@ -389,11 +389,11 @@ fn fold_par_early_exit() {
         executed_state::par(15, 0),
         executed_state::par(13, 1),
         executed_state::fold(vec![
-            executed_state::subtrace_lore(8, SubTraceDesc::new(35, 6), SubTraceDesc::new(47, 0)),
-            executed_state::subtrace_lore(9, SubTraceDesc::new(41, 6), SubTraceDesc::new(47, 0)),
+            executed_state::subtrace_lore(8, subtrace_desc(35, 6), subtrace_desc(47, 0)),
+            executed_state::subtrace_lore(9, subtrace_desc(41, 6), subtrace_desc(47, 0)),
         ]),
     ];
     let trace_len = expected_trace.len();
 
-    assert_eq!(&actual_trace[0..trace_len], expected_trace);
+    assert_eq!((*actual_trace)[0..trace_len], expected_trace);
 }

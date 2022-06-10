@@ -20,6 +20,7 @@ use super::ExecutedState;
 use super::JValue;
 use super::ParResult;
 use super::Sender;
+use super::TracePos;
 use super::Value;
 use crate::FoldLore;
 use crate::FoldResult;
@@ -113,13 +114,20 @@ pub fn fold(lore: FoldLore) -> ExecutedState {
 }
 
 pub fn subtrace_lore(
-    value_pos: u32,
+    value_pos: usize,
     before: SubTraceDesc,
     after: SubTraceDesc,
 ) -> FoldSubTraceLore {
     FoldSubTraceLore {
-        value_pos,
+        value_pos: value_pos.into(),
         subtraces_desc: vec![before, after],
+    }
+}
+
+pub fn subtrace_desc(begin_pos: impl Into<TracePos>, subtrace_len: u32) -> SubTraceDesc {
+    SubTraceDesc {
+        begin_pos: begin_pos.into(),
+        subtrace_len,
     }
 }
 

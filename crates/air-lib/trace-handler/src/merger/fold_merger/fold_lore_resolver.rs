@@ -19,12 +19,13 @@ use crate::data_keeper::MergeCtx;
 
 use air_interpreter_data::FoldSubTraceLore;
 use air_interpreter_data::SubTraceDesc;
+use air_interpreter_data::TracePos;
 
 use std::collections::HashMap;
 
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct ResolvedFold {
-    pub lore: HashMap<usize, ResolvedSubTraceDescs>,
+    pub lore: HashMap<TracePos, ResolvedSubTraceDescs>,
     pub fold_states_count: usize,
 }
 
@@ -40,16 +41,14 @@ pub(super) fn resolve_fold_lore(fold: &FoldResult, merge_ctx: &MergeCtx) -> Merg
     let lore = fold.lore.iter().zip(lens).try_fold::<_, _, MergeResult<_>>(
         HashMap::with_capacity(fold.lore.len()),
         |mut resolved_lore, (lore, lens)| {
-            let before_subtrace = SubTraceDesc::new(lore.subtraces_desc[0].begin_pos as _, lens.before_len as _);
-            let after_subtrace = SubTraceDesc::new(lore.subtraces_desc[1].begin_pos as _, lens.after_len as _);
+            let before_subtrace = SubTraceDesc::new(lore.subtraces_desc[0].begin_pos, lens.before_len as _);
+            let after_subtrace = SubTraceDesc::new(lore.subtraces_desc[1].begin_pos, lens.after_len as _);
             let resolved_descs = ResolvedSubTraceDescs::new(before_subtrace, after_subtrace);
 
-            match resolved_lore.insert(lore.value_pos as usize, resolved_descs) {
-                Some(_) => Err(FoldResultError::SeveralRecordsWithSamePos(
-                    fold.clone(),
-                    lore.value_pos as usize,
-                ))
-                .map_err(Into::into),
+            match resolved_lore.insert(lore.value_pos, resolved_descs) {
+                Some(_) => {
+                    Err(FoldResultError::SeveralRecordsWithSamePos(fold.clone(), lore.value_pos)).map_err(Into::into)
+                }
                 None => Ok(resolved_lore),
             }
         },
@@ -156,7 +155,7 @@ fn check_subtrace_lore(subtrace_lore: &FoldSubTraceLore) -> MergeResult<()> {
 }
 
 impl ResolvedFold {
-    pub(crate) fn new(lore: HashMap<usize, ResolvedSubTraceDescs>, fold_states_count: usize) -> Self {
+    pub(crate) fn new(lore: HashMap<TracePos, ResolvedSubTraceDescs>, fold_states_count: usize) -> Self {
         Self {
             lore,
             fold_states_count,
@@ -196,6 +195,14 @@ mod tests {
     use air_interpreter_data::FoldResult;
     use air_interpreter_data::FoldSubTraceLore;
     use air_interpreter_data::SubTraceDesc;
+    use air_interpreter_data::TracePos;
+
+    fn subtrace_desc(begin_pos: impl Into<TracePos>, subtrace_len: u32) -> SubTraceDesc {
+        SubTraceDesc {
+            begin_pos: begin_pos.into(),
+            subtrace_len,
+        }
+    }
 
     #[test]
     fn empty_fold_result() {
@@ -221,16 +228,16 @@ mod tests {
         //   g0     g0     g0
         let lore = vec![
             FoldSubTraceLore {
-                value_pos: 0,
-                subtraces_desc: vec![SubTraceDesc::new(0, 1), SubTraceDesc::new(0, 1)],
+                value_pos: 0.into(),
+                subtraces_desc: vec![subtrace_desc(0, 1), subtrace_desc(0, 1)],
             },
             FoldSubTraceLore {
-                value_pos: 0,
-                subtraces_desc: vec![SubTraceDesc::new(0, 2), SubTraceDesc::new(0, 2)],
+                value_pos: 0.into(),
+                subtraces_desc: vec![subtrace_desc(0, 2), subtrace_desc(0, 2)],
             },
             FoldSubTraceLore {
-                value_pos: 0,
-                subtraces_desc: vec![SubTraceDesc::new(0, 3), SubTraceDesc::new(0, 3)],
+                value_pos: 0.into(),
+                subtraces_desc: vec![subtrace_desc(0, 3), subtrace_desc(0, 3)],
             },
         ];
 
@@ -256,28 +263,28 @@ mod tests {
         //   g0     g0     g0     g1     g1     g2
         let lore = vec![
             FoldSubTraceLore {
-                value_pos: 0,
-                subtraces_desc: vec![SubTraceDesc::new(0, 1), SubTraceDesc::new(0, 1)],
+                value_pos: 0.into(),
+                subtraces_desc: vec![subtrace_desc(0, 1), subtrace_desc(0, 1)],
             },
             FoldSubTraceLore {
-                value_pos: 0,
-                subtraces_desc: vec![SubTraceDesc::new(0, 2), SubTraceDesc::new(0, 2)],
+                value_pos: 0.into(),
+                subtraces_desc: vec![subtrace_desc(0, 2), subtrace_desc(0, 2)],
             },
             FoldSubTraceLore {
-                value_pos: 0,
-                subtraces_desc: vec![SubTraceDesc::new(0, 3), SubTraceDesc::new(0, 3)],
+                value_pos: 0.into(),
+                subtraces_desc: vec![subtrace_desc(0, 3), subtrace_desc(0, 3)],
             },
             FoldSubTraceLore {
-                value_pos: 1,
-                subtraces_desc: vec![SubTraceDesc::new(0, 4), SubTraceDesc::new(0, 4)],
+                value_pos: 1.into(),
+                subtraces_desc: vec![subtrace_desc(0, 4), subtrace_desc(0, 4)],
             },
             FoldSubTraceLore {
-                value_pos: 1,
-                subtraces_desc: vec![SubTraceDesc::new(0, 5), SubTraceDesc::new(0, 5)],
+                value_pos: 1.into(),
+                subtraces_desc: vec![subtrace_desc(0, 5), subtrace_desc(0, 5)],
             },
             FoldSubTraceLore {
-                value_pos: 2,
-                subtraces_desc: vec![SubTraceDesc::new(0, 1), SubTraceDesc::new(0, 1)],
+                value_pos: 2.into(),
+                subtraces_desc: vec![subtrace_desc(0, 1), subtrace_desc(0, 1)],
             },
         ];
 

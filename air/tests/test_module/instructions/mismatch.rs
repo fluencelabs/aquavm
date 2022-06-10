@@ -46,7 +46,7 @@ fn mismatch_equal() {
     let expected_state = executed_state::scalar_string("result_2");
 
     assert_eq!(actual_trace.len(), 3);
-    assert_eq!(actual_trace[2], expected_state);
+    assert_eq!(actual_trace[2.into()], expected_state);
 }
 
 #[test]
@@ -78,7 +78,7 @@ fn mismatch_not_equal() {
     let expected_state = executed_state::scalar_string("result_1");
 
     assert_eq!(actual_trace.len(), 3);
-    assert_eq!(actual_trace[2], expected_state);
+    assert_eq!(actual_trace[2.into()], expected_state);
 }
 
 #[test]
@@ -107,7 +107,7 @@ fn mismatch_with_string() {
     let expected_state = executed_state::scalar_string("result_2");
 
     assert_eq!(actual_trace.len(), 2);
-    assert_eq!(actual_trace[1], expected_state);
+    assert_eq!(actual_trace[1.into()], expected_state);
 }
 
 #[test]

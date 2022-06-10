@@ -44,11 +44,11 @@ fn lfold() {
     let expected_state = executed_state::scalar_string_array(vec!["1", "2", "3", "4", "5"]);
 
     assert_eq!(actual_trace.len(), 6);
-    assert_eq!(actual_trace[0], expected_state);
+    assert_eq!(actual_trace[0.into()], expected_state);
 
     for i in 1..=5 {
         let expected_state = executed_state::stream_string(format!("{}", i), i as u32 - 1);
-        assert_eq!(actual_trace[i], expected_state);
+        assert_eq!(actual_trace[i.into()], expected_state);
     }
 }
 
@@ -78,11 +78,11 @@ fn rfold() {
     assert_eq!(actual_trace.len(), 6);
 
     let expected_state = executed_state::scalar_string_array(vec!["1", "2", "3", "4", "5"]);
-    assert_eq!(actual_trace[0], expected_state);
+    assert_eq!(actual_trace[0.into()], expected_state);
 
     for i in 1..=5 {
         let expected_state = executed_state::stream_string(format!("{}", 6 - i), i as u32 - 1);
-        assert_eq!(actual_trace[i], expected_state);
+        assert_eq!(actual_trace[i.into()], expected_state);
     }
 }
 
@@ -120,14 +120,14 @@ fn inner_fold() {
     assert_eq!(actual_trace.len(), 27);
 
     let expected_state = executed_state::scalar_string_array(vec!["1", "2", "3", "4", "5"]);
-    assert_eq!(actual_trace[0], expected_state);
-    assert_eq!(actual_trace[1], expected_state);
+    assert_eq!(actual_trace[0.into()], expected_state);
+    assert_eq!(actual_trace[1.into()], expected_state);
 
     for i in 1..=5 {
         for j in 1..=5 {
             let state_id = 1 + 5 * (i - 1) + j;
             let expected_state = executed_state::stream_string(i.to_string(), state_id as u32 - 2);
-            assert_eq!(actual_trace[state_id], expected_state);
+            assert_eq!(actual_trace[state_id.into()], expected_state);
         }
     }
 }
@@ -187,7 +187,7 @@ fn empty_iterable_fold() {
     let expected_state = executed_state::scalar(json!([]));
 
     assert_eq!(actual_trace.len(), 1);
-    assert_eq!(actual_trace[0], expected_state);
+    assert_eq!(actual_trace[0.into()], expected_state);
 }
 
 #[test]
@@ -286,11 +286,11 @@ fn lambda() {
     let expected_state = executed_state::scalar(json!({ "array": ["1", "2", "3", "4", "5"] }));
 
     assert_eq!(actual_trace.len(), 6);
-    assert_eq!(actual_trace[0], expected_state);
+    assert_eq!(actual_trace[0.into()], expected_state);
 
     for i in 1..=5 {
         let expected_state = executed_state::stream_string(format!("{}", i), i as u32 - 1);
-        assert_eq!(actual_trace[i], expected_state);
+        assert_eq!(actual_trace[i.into()], expected_state);
     }
 }
 

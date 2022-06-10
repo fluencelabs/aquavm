@@ -300,7 +300,7 @@ fn fold_merge() {
 
         if let ExecutedState::Fold(fold) = state {
             for subtrace_lore in fold.lore.iter() {
-                let value_pos = subtrace_lore.value_pos as usize;
+                let value_pos = subtrace_lore.value_pos;
                 if let ExecutedState::Call(CallResult::Executed(value)) = &data.trace[value_pos] {
                     let value = match value {
                         Value::Scalar(value) => value,

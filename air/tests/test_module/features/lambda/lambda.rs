@@ -71,7 +71,7 @@ fn lambda_with_string_scalar() {
     let result = checked_call_vm!(local_vm, <_>::default(), script, "", result.data);
     let trace = trace_from_result(&result);
 
-    assert_eq!(&trace[2], &executed_state::scalar_number(1u32));
+    assert_eq!(&trace[2.into()], &executed_state::scalar_number(1u32));
 }
 
 #[test]
@@ -103,7 +103,7 @@ fn lambda_with_number_scalar() {
     let result = checked_call_vm!(local_vm, <_>::default(), script, "", result.data);
     let trace = trace_from_result(&result);
 
-    assert_eq!(&trace[2], &executed_state::scalar_number(1u32));
+    assert_eq!(&trace[2.into()], &executed_state::scalar_number(1u32));
 }
 
 #[test]
@@ -143,7 +143,7 @@ fn lambda_with_number_stream() {
     let result = checked_call_vm!(local_vm, <_>::default(), script, "", result.data);
     let actual_trace = trace_from_result(&result);
 
-    assert_eq!(&actual_trace[5], &executed_state::scalar_number(2));
+    assert_eq!(&actual_trace[5.into()], &executed_state::scalar_number(2));
 }
 
 #[test]
@@ -188,7 +188,7 @@ fn lambda_with_number_stream_and_followed_scalar() {
     let result = checked_call_vm!(local_vm, <_>::default(), script, "", result.data);
     let actual_trace = trace_from_result(&result);
 
-    assert_eq!(&actual_trace[6], &executed_state::scalar_number(checkable_value));
+    assert_eq!(&actual_trace[6.into()], &executed_state::scalar_number(checkable_value));
 }
 
 #[test]
@@ -220,7 +220,7 @@ fn lambda_with_scalar_join() {
     let result = checked_call_vm!(local_vm, <_>::default(), script, "", result.data);
     let trace = trace_from_result(&result);
 
-    assert_eq!(&trace[3], &executed_state::request_sent_by("set_variable"));
+    assert_eq!(&trace[3.into()], &executed_state::request_sent_by("set_variable"));
 }
 
 #[test]
@@ -260,5 +260,8 @@ fn lambda_with_stream_join() {
     let result = checked_call_vm!(local_vm, <_>::default(), script, "", result.data);
     let actual_trace = trace_from_result(&result);
 
-    assert_eq!(&actual_trace[6], &executed_state::request_sent_by("set_variable"));
+    assert_eq!(
+        &actual_trace[6.into()],
+        &executed_state::request_sent_by("set_variable")
+    );
 }
