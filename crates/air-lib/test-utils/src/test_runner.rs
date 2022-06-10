@@ -14,34 +14,35 @@
  * limitations under the License.
  */
 
+#[cfg(feature = "test_with_native_code")]
+use crate::native_test_runner::NativeAirRunner as AirRunnerImpl;
+#[cfg(not(feature = "test_with_native_code"))]
+use crate::wasm_test_runner::WasmAirRunner as AirRunnerImpl;
+
 use super::CallServiceClosure;
 use avm_server::avm_runner::*;
 
-use once_cell::sync::OnceCell;
 use std::collections::HashMap;
 use std::collections::HashSet;
-use std::path::PathBuf;
 
-// 10 Mb
-const AVM_MAX_HEAP_SIZE: u64 = 10 * 1024 * 1024;
-const AIR_WASM_PATH: &str = "../target/wasm32-wasi/debug/air_interpreter_server.wasm";
+pub trait AirRunner {
+    fn new(current_call_id: impl Into<String>) -> Self;
 
-pub struct TestRunner {
-    pub runner: object_pool::Reusable<'static, AVMRunner>,
-    pub call_service: CallServiceClosure,
+    fn call(
+        &mut self,
+        air: impl Into<String>,
+        prev_data: impl Into<Vec<u8>>,
+        data: impl Into<Vec<u8>>,
+        init_peer_id: impl Into<String>,
+        timestamp: u64,
+        ttl: u32,
+        call_results: avm_server::CallResults,
+    ) -> Result<RawAVMOutcome, Box<dyn std::error::Error>>;
 }
 
-fn make_pooled_avm_runner() -> AVMRunner {
-    let fake_current_peer_id = "";
-    let logging_mask = i32::MAX;
-
-    AVMRunner::new(
-        PathBuf::from(AIR_WASM_PATH),
-        fake_current_peer_id,
-        Some(AVM_MAX_HEAP_SIZE),
-        logging_mask,
-    )
-    .expect("vm should be created")
+pub struct TestRunner<R = AirRunnerImpl> {
+    pub runner: R,
+    pub call_service: CallServiceClosure,
 }
 
 #[derive(Debug, Default, Clone)]
@@ -51,7 +52,7 @@ pub struct TestRunParameters {
     pub ttl: u32,
 }
 
-impl TestRunner {
+impl<R: AirRunner> TestRunner<R> {
     pub fn call(
         &mut self,
         air: impl Into<String>,
@@ -73,7 +74,7 @@ impl TestRunner {
         let mut next_peer_pks = HashSet::new();
 
         loop {
-            let mut outcome = self
+            let mut outcome: RawAVMOutcome = self
                 .runner
                 .call(
                     air.clone(),
@@ -112,18 +113,7 @@ pub fn create_avm(
     call_service: CallServiceClosure,
     current_peer_id: impl Into<String>,
 ) -> TestRunner {
-    static POOL_CELL: OnceCell<object_pool::Pool<AVMRunner>> = OnceCell::new();
-
-    let pool = POOL_CELL.get_or_init(|| {
-        object_pool::Pool::new(
-            // we create an empty pool and let it fill on demand
-            0,
-            || unreachable!(),
-        )
-    });
-
-    let mut runner = pool.pull(make_pooled_avm_runner);
-    runner.set_peer_id(current_peer_id);
+    let runner = AirRunnerImpl::new(current_peer_id);
 
     TestRunner {
         runner,
