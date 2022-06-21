@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+/*
 use air_log_targets::TARGET_MAP;
-
 use log::LevelFilter;
 
 pub fn init_logger(default_level: Option<LevelFilter>) {
@@ -32,3 +32,4 @@ pub fn init_logger(default_level: Option<LevelFilter>) {
 
     builder.build().unwrap();
 }
+*/

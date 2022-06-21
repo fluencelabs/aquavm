@@ -33,6 +33,7 @@ pub(crate) struct PreparationDescriptor<'ctx, 'i> {
 }
 
 /// Parse and prepare supplied data and AIR script.
+#[tracing::instrument(skip_all)]
 pub(crate) fn prepare<'i>(
     prev_data: &[u8],
     current_data: &[u8],
@@ -63,6 +64,7 @@ fn try_to_data(raw_data: &[u8]) -> PreparationResult<InterpreterData> {
     InterpreterData::try_from_slice(raw_data).map_err(|err| DataDeFailed(err, raw_data.to_vec()))
 }
 
+#[tracing::instrument(skip_all)]
 fn make_exec_ctx(
     prev_data: &InterpreterData,
     call_results: &[u8],

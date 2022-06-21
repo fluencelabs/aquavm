@@ -62,6 +62,10 @@ fn execute_air_impl(
         Err(error) => return Err(farewell::from_uncatchable_error(prev_data, error)),
     };
 
+    // create a span for tracing the whole air.execute and its handling
+    let execute_span = tracing::span!(tracing::Level::INFO, "execute");
+    let _enter = execute_span.enter();
+
     // match here is used instead of map_err, because the compiler can't determine that
     // they are exclusive and would treat exec_ctx and trace_handler as moved
     match air.execute(&mut exec_ctx, &mut trace_handler) {

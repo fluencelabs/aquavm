@@ -37,8 +37,17 @@ use marine_rs_sdk::module_manifest;
 
 module_manifest!();
 
+
 pub fn main() {
-    logger::init_logger(None);
+    use tracing_subscriber::fmt::format::FmtSpan;
+
+    tracing_subscriber::fmt()
+        .with_env_filter("info")
+        .with_ansi(true)
+        .with_span_events(FmtSpan::CLOSE)
+        .init();
+
+    // tracing_log::LogTracer::init().unwrap();
 }
 
 #[marine]

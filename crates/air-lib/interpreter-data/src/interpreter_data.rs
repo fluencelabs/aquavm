@@ -63,6 +63,7 @@ impl InterpreterData {
         }
     }
 
+    #[tracing::instrument(skip_all)]
     pub fn from_execution_result(
         trace: ExecutionTrace,
         streams: GlobalStreamGens,
@@ -86,6 +87,8 @@ impl InterpreterData {
             return Ok(Self::default());
         }
 
+        let serde_span = tracing::span!(tracing::Level::INFO, "serde_json::from_slice");
+        let _enter = serde_span.enter();
         serde_json::from_slice(slice)
     }
 }
