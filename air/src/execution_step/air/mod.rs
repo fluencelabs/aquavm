@@ -94,16 +94,21 @@ impl<'i> ExecutableInstruction<'i> for Instruction<'i> {
 #[macro_export]
 macro_rules! log_instruction {
     ($instr_name:expr, $exec_ctx:expr, $trace_ctx:expr) => {
-        use std::fmt::Write as _;
-        log::debug!(target: air_log_targets::INSTRUCTION, "> {}", stringify!($instr_name));
+        log::debug!(
+            target: air_log_targets::INSTRUCTION,
+            "> {}",
+            stringify!($instr_name)
+        );
 
-        let mut variables = String::from("  scalars:");
-        write!(variables, "\n    {}", $exec_ctx.scalars).unwrap();
-
-        write!(variables, "  streams:").unwrap();
-        write!(variables, "\n    {}", $exec_ctx.streams).unwrap();
-
-        log::trace!(target: air_log_targets::DATA_CACHE, "{}", variables);
+        log::trace!(
+            target: air_log_targets::DATA_CACHE,
+            "  scalars:
+    {}
+  streams:
+    {}",
+            $exec_ctx.scalars,
+            $exec_ctx.streams
+        );
         log::trace!(
             target: air_log_targets::NEXT_PEER_PKS,
             "  next peers pk: {:?}",
