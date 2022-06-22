@@ -21,6 +21,7 @@ use super::AVMMemoryStats;
 use super::AVMOutcome;
 use super::CallResults;
 use crate::config::AVMConfig;
+use crate::interface::raw_outcome::RawAVMOutcome;
 use crate::interface::ParticleParameters;
 use crate::AVMResult;
 
@@ -102,18 +103,7 @@ impl<E> AVM<E> {
         let execution_time = execution_start_time.elapsed();
         let memory_delta = self.runner.memory_stats().memory_size - memory_size_before;
         if self.data_store.detect_anomaly(execution_time, memory_delta) {
-            let prev_data = self.data_store.read_data(particle_id)?;
-
-            let ser_particle =
-                serde_json::to_vec(&particle_parameters).map_err(AVMError::AnomalyDataSeError)?;
-            let ser_avm_outcome =
-                serde_json::to_vec(&outcome).map_err(AVMError::AnomalyDataSeError)?;
-            self.data_store.collect_anomaly_data(
-                &ser_particle,
-                &prev_data,
-                &current_data,
-                &ser_avm_outcome,
-            )?;
+            self.save_anomaly_data(&current_data, &particle_parameters, &outcome)?;
         }
 
         // persist resulted data
@@ -132,5 +122,24 @@ impl<E> AVM<E> {
     /// Return memory stat of an interpreter heap.
     pub fn memory_stats(&self) -> AVMMemoryStats {
         self.runner.memory_stats()
+    }
+
+    fn save_anomaly_data(
+        &mut self,
+        current_data: &[u8],
+        particle_parameters: &ParticleParameters<'_, '_>,
+        avm_outcome: &RawAVMOutcome,
+    ) -> AVMResult<(), E> {
+        let prev_data = self
+            .data_store
+            .read_data(particle_parameters.particle_id.as_str())?;
+        let ser_particle =
+            serde_json::to_vec(particle_parameters).map_err(AVMError::AnomalyDataSeError)?;
+        let ser_avm_outcome =
+            serde_json::to_vec(avm_outcome).map_err(AVMError::AnomalyDataSeError)?;
+
+        self.data_store
+            .collect_anomaly_data(&ser_particle, &prev_data, &current_data, &ser_avm_outcome)
+            .map_err(Into::into)
     }
 }
