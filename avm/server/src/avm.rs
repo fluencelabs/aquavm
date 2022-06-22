@@ -26,6 +26,7 @@ use crate::AVMResult;
 
 use std::ops::Deref;
 use std::ops::DerefMut;
+use std::time::Instant;
 
 /// A newtype needed to mark it as `unsafe impl Send`
 struct SendSafeRunner(AVMRunner);
@@ -81,19 +82,28 @@ impl<E> AVM<E> {
     ) -> AVMResult<AVMOutcome, E> {
         let particle_id = particle_parameters.particle_id.as_str();
         let prev_data = self.data_store.read_data(particle_id)?;
+        let current_data = data.into();
 
+        let execution_start_time = Instant::now();
         let outcome = self
             .runner
             .call(
                 air,
                 prev_data,
-                data,
+                current_data.clone(),
                 particle_parameters.init_peer_id.into_owned(),
                 particle_parameters.timestamp,
                 particle_parameters.ttl,
                 call_results,
             )
             .map_err(AVMError::RunnerError)?;
+
+        let execution_duration = execution_start_time.elapsed();
+        if self.data_store.should_collect_data(execution_duration) {
+            let prev_data = self.data_store.read_data(particle_id)?;
+            self.data_store
+                .collect_data(particle_id, &prev_data, &current_data, &outcome.data)?;
+        }
 
         // persist resulted data
         self.data_store.store_data(&outcome.data, particle_id)?;

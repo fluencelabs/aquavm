@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Fluence Labs Limited
+ * Copyright 2022 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,30 @@
  * limitations under the License.
  */
 
-/// This trait should be used to persist prev_data between successive calls of an interpreter o.
-pub trait DataStore<E> {
-    fn initialize(&mut self) -> Result<(), E>;
+use std::time::Duration;
 
-    fn store_data(&mut self, data: &[u8], key: &str) -> Result<(), E>;
+/// This trait is used for
+///   - persisting prev_data between successive calls of an interpreter
+///   - logging previous, current, and new data in case of spikes
+pub trait DataStore {
+    type Error;
 
-    fn read_data(&mut self, key: &str) -> Result<Vec<u8>, E>;
+    fn initialize(&mut self) -> Result<(), Self::Error>;
 
-    fn cleanup_data(&mut self, key: &str) -> Result<(), E>;
+    fn store_data(&mut self, data: &[u8], key: &str) -> Result<(), Self::Error>;
+
+    fn read_data(&mut self, key: &str) -> Result<Vec<u8>, Self::Error>;
+
+    fn cleanup_data(&mut self, key: &str) -> Result<(), Self::Error>;
+
+    fn should_collect_data(&self, execution_time: Duration) -> bool;
+
+    // TODO: consider collecting not only new data, but an entire RawAVMOutcome
+    fn collect_data(
+        &mut self,
+        particle_id: &str,
+        prev_data: &[u8],
+        current_data: &[u8],
+        new_data: &[u8],
+    ) -> Result<(), Self::Error>;
 }
