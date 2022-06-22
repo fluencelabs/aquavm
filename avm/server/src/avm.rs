@@ -85,24 +85,35 @@ impl<E> AVM<E> {
         let current_data = data.into();
 
         let execution_start_time = Instant::now();
+        let memory_size_before = self.runner.memory_stats().memory_size;
         let outcome = self
             .runner
             .call(
                 air,
                 prev_data,
                 current_data.clone(),
-                particle_parameters.init_peer_id.into_owned(),
+                particle_parameters.init_peer_id.clone().into_owned(),
                 particle_parameters.timestamp,
                 particle_parameters.ttl,
                 call_results,
             )
             .map_err(AVMError::RunnerError)?;
 
-        let execution_duration = execution_start_time.elapsed();
-        if self.data_store.should_collect_data(execution_duration) {
+        let execution_time = execution_start_time.elapsed();
+        let memory_delta = self.runner.memory_stats().memory_size - memory_size_before;
+        if self.data_store.detect_anomaly(execution_time, memory_delta) {
             let prev_data = self.data_store.read_data(particle_id)?;
-            self.data_store
-                .collect_data(particle_id, &prev_data, &current_data, &outcome.data)?;
+
+            let ser_particle =
+                serde_json::to_vec(&particle_parameters).map_err(AVMError::AnomalyDataSeError)?;
+            let ser_avm_outcome =
+                serde_json::to_vec(&outcome).map_err(AVMError::AnomalyDataSeError)?;
+            self.data_store.collect_anomaly_data(
+                &ser_particle,
+                &prev_data,
+                &current_data,
+                &ser_avm_outcome,
+            )?;
         }
 
         // persist resulted data

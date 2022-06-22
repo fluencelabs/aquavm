@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
+use serde::Deserialize;
+use serde::Serialize;
 use std::borrow::Cow;
 
 /// Represents parameters obtained from a particle.
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ParticleParameters<'init_peer_id, 'particle_id> {
     pub init_peer_id: Cow<'init_peer_id, String>,
     pub particle_id: Cow<'particle_id, String>,

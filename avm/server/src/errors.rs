@@ -38,6 +38,10 @@ pub enum AVMError<E> {
     /// This errors are encountered from a data store object.
     #[error(transparent)]
     DataStoreError(#[from] E),
+
+    /// This errors are encountered from a data store object.
+    #[error(transparent)]
+    AnomalyDataSeError(SerdeError),
 }
 
 #[derive(Debug, ThisError)]

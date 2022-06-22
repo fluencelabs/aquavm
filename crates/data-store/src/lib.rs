@@ -28,16 +28,21 @@ pub trait DataStore {
 
     fn read_data(&mut self, key: &str) -> Result<Vec<u8>, Self::Error>;
 
+    /// Cleanup data that become obsolete.
     fn cleanup_data(&mut self, key: &str) -> Result<(), Self::Error>;
 
-    fn should_collect_data(&self, execution_time: Duration) -> bool;
+    /// Returns true if an anomaly happened and it's necessary to save execution data
+    /// for debugging purposes.
+    ///  execution_time - is a time taken by the interpreter to execute provided script
+    ///  memory_delta - is a count of bytes on which an interpreter heap has been extended
+    ///                 during execution of a particle
+    fn detect_anomaly(&self, execution_time: Duration, memory_delta: usize) -> bool;
 
-    // TODO: consider collecting not only new data, but an entire RawAVMOutcome
-    fn collect_data(
+    fn collect_anomaly_data(
         &mut self,
-        particle_id: &str,
+        particle: &[u8], // it's byte because of the restriction on trait objects methods
         prev_data: &[u8],
         current_data: &[u8],
-        new_data: &[u8],
+        avm_outcome: &[u8], // it's byte because of the restriction on trait objects methods
     ) -> Result<(), Self::Error>;
 }
