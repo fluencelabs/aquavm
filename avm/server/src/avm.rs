@@ -108,7 +108,7 @@ impl<E> AVM<E> {
 
         // persist resulted data
         self.data_store.store_data(&outcome.data, particle_id)?;
-        let outcome = AVMOutcome::from_raw_outcome(outcome)?;
+        let outcome = AVMOutcome::from_raw_outcome(outcome, memory_delta, execution_time)?;
 
         Ok(outcome)
     }

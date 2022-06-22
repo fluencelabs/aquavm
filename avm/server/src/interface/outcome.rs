@@ -22,6 +22,8 @@ use crate::AVMResult;
 use serde::Deserialize;
 use serde::Serialize;
 
+use std::time::Duration;
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct AVMOutcome {
     /// Contains script data that should be preserved in an executor of this interpreter
@@ -33,6 +35,13 @@ pub struct AVMOutcome {
 
     /// Public keys of peers that should receive data.
     pub next_peer_pks: Vec<String>,
+
+    /// Memory in bytes AVM linear heap was extended during execution by.
+    pub memory_delta: usize,
+
+    /// Time of particle execution
+    /// (it count only execution time without operations with DataStore and so on)
+    pub execution_time: Duration,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -47,15 +56,23 @@ impl AVMOutcome {
         data: Vec<u8>,
         call_requests: CallRequests,
         next_peer_pks: Vec<String>,
+        memory_delta: usize,
+        execution_time: Duration,
     ) -> Self {
         Self {
             data,
             call_requests,
             next_peer_pks,
+            memory_delta,
+            execution_time,
         }
     }
 
-    pub(crate) fn from_raw_outcome<E>(raw_outcome: RawAVMOutcome) -> AVMResult<Self, E> {
+    pub(crate) fn from_raw_outcome<E>(
+        raw_outcome: RawAVMOutcome,
+        memory_delta: usize,
+        execution_time: Duration,
+    ) -> AVMResult<Self, E> {
         use air_interpreter_interface::INTERPRETER_SUCCESS;
 
         let RawAVMOutcome {
@@ -66,7 +83,13 @@ impl AVMOutcome {
             next_peer_pks,
         } = raw_outcome;
 
-        let avm_outcome = AVMOutcome::new(data, call_requests, next_peer_pks);
+        let avm_outcome = AVMOutcome::new(
+            data,
+            call_requests,
+            next_peer_pks,
+            memory_delta,
+            execution_time,
+        );
 
         if ret_code == INTERPRETER_SUCCESS {
             return Ok(avm_outcome);
