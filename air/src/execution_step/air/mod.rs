@@ -94,7 +94,11 @@ impl<'i> ExecutableInstruction<'i> for Instruction<'i> {
 #[macro_export]
 macro_rules! log_instruction {
     ($instr_name:expr, $exec_ctx:expr, $trace_ctx:expr) => {
-        log::debug!(target: air_log_targets::INSTRUCTION, "> {}", stringify!($instr_name));
+        log::debug!(
+            target: air_log_targets::INSTRUCTION,
+            "> {}",
+            stringify!($instr_name)
+        );
 
         log::trace!(
             target: air_log_targets::DATA_CACHE,
