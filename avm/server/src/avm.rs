@@ -86,7 +86,7 @@ impl<E> AVM<E> {
         let current_data = data.into();
 
         let execution_start_time = Instant::now();
-        let memory_size_before = self.runner.memory_stats().memory_size;
+        let memory_size_before = self.memory_stats().memory_size;
         let outcome = self
             .runner
             .call(
@@ -101,7 +101,7 @@ impl<E> AVM<E> {
             .map_err(AVMError::RunnerError)?;
 
         let execution_time = execution_start_time.elapsed();
-        let memory_delta = self.runner.memory_stats().memory_size - memory_size_before;
+        let memory_delta = self.memory_stats().memory_size - memory_size_before;
         if self.data_store.detect_anomaly(execution_time, memory_delta) {
             self.save_anomaly_data(&current_data, &particle_parameters, &outcome)?;
         }
