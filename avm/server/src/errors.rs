@@ -39,7 +39,7 @@ pub enum AVMError<E> {
     #[error(transparent)]
     DataStoreError(#[from] E),
 
-    /// This errors are encountered from a data store object.
+    /// This errors are encountered from serialization of data tracked during an anomaly.
     #[error(transparent)]
     AnomalyDataSeError(SerdeError),
 }
