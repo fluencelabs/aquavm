@@ -16,4 +16,4 @@ name = "avm_data_store"
 path = "src/lib.rs"
 
 [dependencies]
-serde = "1.0"
+serde = { version = "1.0.118", features = ["derive"] }
