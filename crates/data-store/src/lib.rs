@@ -33,13 +33,14 @@ pub trait DataStore {
 
     /// Returns true if an anomaly happened and it's necessary to save execution data
     /// for debugging purposes.
-    ///  execution_time - is a time taken by the interpreter to execute provided script
+    ///  execution_time - is time taken by the interpreter to execute provided script
     ///  memory_delta - is a count of bytes on which an interpreter heap has been extended
     ///                 during execution of a particle
     fn detect_anomaly(&self, execution_time: Duration, memory_delta: usize) -> bool;
 
     fn collect_anomaly_data(
         &mut self,
+        particle_id: &str,
         particle: &[u8], // it's byte because of the restriction on trait objects methods
         prev_data: &[u8],
         current_data: &[u8],

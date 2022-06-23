@@ -139,7 +139,13 @@ impl<E> AVM<E> {
             serde_json::to_vec(avm_outcome).map_err(AVMError::AnomalyDataSeError)?;
 
         self.data_store
-            .collect_anomaly_data(&ser_particle, &prev_data, &current_data, &ser_avm_outcome)
+            .collect_anomaly_data(
+                &particle_parameters.particle_id,
+                &ser_particle,
+                &prev_data,
+                &current_data,
+                &ser_avm_outcome,
+            )
             .map_err(Into::into)
     }
 }
