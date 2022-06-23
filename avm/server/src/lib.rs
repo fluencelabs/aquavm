@@ -52,9 +52,10 @@ pub use fluence_faas::IValue;
 
 pub use polyplets::SecurityTetraplet;
 
+pub use avm_data_store::AnomalyData;
 pub use avm_data_store::DataStore;
 
-pub type AVMDataStore<E> = Box<dyn DataStore<E> + Send + Sync + 'static>;
+pub type AVMDataStore<E> = Box<dyn DataStore<Error = E> + Send + Sync + 'static>;
 
 pub type AVMResult<T, E> = std::result::Result<T, AVMError<E>>;
 

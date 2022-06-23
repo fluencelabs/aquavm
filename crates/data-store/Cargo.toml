@@ -1,6 +1,6 @@
 [package]
 name = "avm-data-store"
-version = "0.1.0"
+version = "0.2.0"
 description = "Definition of the AVM DataStore trait"
 authors = ["Fluence Labs"]
 edition = "2018"
@@ -14,3 +14,6 @@ categories = ["wasm"]
 [lib]
 name = "avm_data_store"
 path = "src/lib.rs"
+
+[dependencies]
+serde = "1.0"

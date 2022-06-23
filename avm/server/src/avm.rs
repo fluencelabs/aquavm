@@ -21,11 +21,15 @@ use super::AVMMemoryStats;
 use super::AVMOutcome;
 use super::CallResults;
 use crate::config::AVMConfig;
+use crate::interface::raw_outcome::RawAVMOutcome;
 use crate::interface::ParticleParameters;
 use crate::AVMResult;
 
+use avm_data_store::AnomalyData;
 use std::ops::Deref;
 use std::ops::DerefMut;
+use std::time::Duration;
+use std::time::Instant;
 
 /// A newtype needed to mark it as `unsafe impl Send`
 struct SendSafeRunner(AVMRunner);
@@ -81,23 +85,38 @@ impl<E> AVM<E> {
     ) -> AVMResult<AVMOutcome, E> {
         let particle_id = particle_parameters.particle_id.as_str();
         let prev_data = self.data_store.read_data(particle_id)?;
+        let current_data = data.into();
 
+        let execution_start_time = Instant::now();
+        let memory_size_before = self.memory_stats().memory_size;
         let outcome = self
             .runner
             .call(
                 air,
                 prev_data,
-                data,
-                particle_parameters.init_peer_id.into_owned(),
+                current_data.clone(),
+                particle_parameters.init_peer_id.clone().into_owned(),
                 particle_parameters.timestamp,
                 particle_parameters.ttl,
                 call_results,
             )
             .map_err(AVMError::RunnerError)?;
 
+        let execution_time = execution_start_time.elapsed();
+        let memory_delta = self.memory_stats().memory_size - memory_size_before;
+        if self.data_store.detect_anomaly(execution_time, memory_delta) {
+            self.save_anomaly_data(
+                &current_data,
+                &particle_parameters,
+                &outcome,
+                execution_time,
+                memory_delta,
+            )?;
+        }
+
         // persist resulted data
         self.data_store.store_data(&outcome.data, particle_id)?;
-        let outcome = AVMOutcome::from_raw_outcome(outcome)?;
+        let outcome = AVMOutcome::from_raw_outcome(outcome, memory_delta, execution_time)?;
 
         Ok(outcome)
     }
@@ -111,5 +130,35 @@ impl<E> AVM<E> {
     /// Return memory stat of an interpreter heap.
     pub fn memory_stats(&self) -> AVMMemoryStats {
         self.runner.memory_stats()
+    }
+
+    fn save_anomaly_data(
+        &mut self,
+        current_data: &[u8],
+        particle_parameters: &ParticleParameters<'_, '_>,
+        avm_outcome: &RawAVMOutcome,
+        execution_time: Duration,
+        memory_delta: usize,
+    ) -> AVMResult<(), E> {
+        let prev_data = self
+            .data_store
+            .read_data(particle_parameters.particle_id.as_str())?;
+        let ser_particle =
+            serde_json::to_vec(particle_parameters).map_err(AVMError::AnomalyDataSeError)?;
+        let ser_avm_outcome =
+            serde_json::to_vec(avm_outcome).map_err(AVMError::AnomalyDataSeError)?;
+
+        let anomaly_data = AnomalyData::new(
+            &ser_particle,
+            &prev_data,
+            &current_data,
+            &ser_avm_outcome,
+            execution_time,
+            memory_delta,
+        );
+
+        self.data_store
+            .collect_anomaly_data(&particle_parameters.particle_id, anomaly_data)
+            .map_err(Into::into)
     }
 }
