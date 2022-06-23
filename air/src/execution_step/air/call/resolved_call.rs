@@ -119,6 +119,7 @@ impl<'i> ResolvedCall<'i> {
         self.tetraplet.clone()
     }
 
+    #[tracing::instrument(skip_all)]
     fn prepare_request_params(
         &self,
         exec_ctx: &ExecutionCtx<'_>,
@@ -129,7 +130,11 @@ impl<'i> ResolvedCall<'i> {
             tetraplets,
         } = self.resolve_args(exec_ctx)?;
 
-        let serialized_tetraplets = serde_json::to_string(&tetraplets).expect("default serializer shouldn't fail");
+        let serialized_tetraplets = {
+            let span = tracing::span!(tracing::Level::INFO, "serde_json::to_string(tetraplets)");
+            let _enter = span.enter();
+            serde_json::to_string(&tetraplets).expect("default serializer shouldn't fail")
+        };
 
         let request_params = CallRequestParams::new(
             tetraplet.service_id.to_string(),

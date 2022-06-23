@@ -44,7 +44,7 @@ pub fn main() {
     tracing_subscriber::fmt()
         .with_env_filter("info")
         .with_ansi(true)
-        .with_span_events(FmtSpan::CLOSE)
+        .with_span_events(FmtSpan::ENTER | FmtSpan::CLOSE)
         .init();
 
     // tracing_log::LogTracer::init().unwrap();

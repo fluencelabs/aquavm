@@ -44,6 +44,7 @@ dependencies = [
  "strum_macros",
  "thiserror",
  "tracing",
+ "tracing-subscriber",
  "wasm-bindgen",
 ]
 
@@ -269,6 +270,7 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror",
+ "tracing",
 ]
 
 [[package]]

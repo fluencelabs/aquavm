@@ -66,6 +66,7 @@ impl AVMRunner {
         Ok(avm)
     }
 
+    #[tracing::instrument(skip_all)]
     pub fn call(
         &mut self,
         air: impl Into<String>,
@@ -87,9 +88,12 @@ impl AVMRunner {
             call_results,
         );
 
-        let result =
+        let result = {
+            let span = tracing::span!(tracing::Level::INFO, "faas.call_with_ivalues", method="invoke");
+            let _enter = span.enter();
             self.faas
-                .call_with_ivalues(&self.wasm_filename, "invoke", &args, <_>::default())?;
+                .call_with_ivalues(&self.wasm_filename, "invoke", &args, <_>::default())?
+        };
 
         let result = try_as_one_value_vec(result)?;
         let outcome = InterpreterOutcome::from_ivalue(result)
@@ -117,6 +121,7 @@ impl AVMRunner {
     }
 }
 
+#[tracing::instrument(skip(air, prev_data, data, call_results))]
 fn prepare_args(
     air: impl Into<String>,
     prev_data: impl Into<Vec<u8>>,
@@ -136,8 +141,11 @@ fn prepare_args(
     .into_ivalue();
 
     let call_results = crate::interface::into_raw_result(call_results);
-    let call_results =
-        serde_json::to_vec(&call_results).expect("the default serializer shouldn't fail");
+    let call_results = {
+        let span = tracing::span!(tracing::Level::INFO, "serde_json::to_vec call_results");
+        let _enter = span.enter();
+        serde_json::to_vec(&call_results).expect("the default serializer shouldn't fail")
+    };
 
     vec![
         IValue::String(air.into()),
