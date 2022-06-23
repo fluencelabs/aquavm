@@ -39,8 +39,8 @@ pub struct AVMOutcome {
     /// Memory in bytes AVM linear heap was extended during execution by.
     pub memory_delta: usize,
 
-    /// Time of particle execution
-    /// (it count only execution time without operations with DataStore and so on)
+    /// Time of a particle execution
+    /// (it counts only execution time without operations with DataStore and so on)
     pub execution_time: Duration,
 }
 
