@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+use serde::Deserialize;
+use serde::Serialize;
 use std::time::Duration;
 
 /// This trait is used for
@@ -40,10 +42,37 @@ pub trait DataStore {
 
     fn collect_anomaly_data(
         &mut self,
-        particle_id: &str,
-        particle: &[u8], // it's byte because of the restriction on trait objects methods
-        prev_data: &[u8],
-        current_data: &[u8],
-        avm_outcome: &[u8], // it's byte because of the restriction on trait objects methods
+        key: &str,
+        anomaly_data: AnomalyData<'_>,
     ) -> Result<(), Self::Error>;
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+pub struct AnomalyData<'data> {
+    pub particle: &'data [u8], // it's byte because of the restriction on trait objects methods
+    pub prev_data: &'data [u8],
+    pub current_data: &'data [u8],
+    pub avm_outcome: &'data [u8], // it's byte because of the restriction on trait objects methods
+    pub execution_time: Duration,
+    pub memory_delta: usize,
+}
+
+impl<'data> AnomalyData<'data> {
+    pub fn new(
+        particle: &'data [u8],
+        prev_data: &'data [u8],
+        current_data: &'data [u8],
+        avm_outcome: &'data [u8],
+        execution_time: Duration,
+        memory_delta: usize,
+    ) -> Self {
+        Self {
+            particle,
+            prev_data,
+            current_data,
+            avm_outcome,
+            execution_time,
+            memory_delta,
+        }
+    }
 }

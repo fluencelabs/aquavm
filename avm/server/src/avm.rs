@@ -25,8 +25,10 @@ use crate::interface::raw_outcome::RawAVMOutcome;
 use crate::interface::ParticleParameters;
 use crate::AVMResult;
 
+use avm_data_store::AnomalyData;
 use std::ops::Deref;
 use std::ops::DerefMut;
+use std::time::Duration;
 use std::time::Instant;
 
 /// A newtype needed to mark it as `unsafe impl Send`
@@ -103,7 +105,13 @@ impl<E> AVM<E> {
         let execution_time = execution_start_time.elapsed();
         let memory_delta = self.memory_stats().memory_size - memory_size_before;
         if self.data_store.detect_anomaly(execution_time, memory_delta) {
-            self.save_anomaly_data(&current_data, &particle_parameters, &outcome)?;
+            self.save_anomaly_data(
+                &current_data,
+                &particle_parameters,
+                &outcome,
+                execution_time,
+                memory_delta,
+            )?;
         }
 
         // persist resulted data
@@ -129,6 +137,8 @@ impl<E> AVM<E> {
         current_data: &[u8],
         particle_parameters: &ParticleParameters<'_, '_>,
         avm_outcome: &RawAVMOutcome,
+        execution_time: Duration,
+        memory_delta: usize,
     ) -> AVMResult<(), E> {
         let prev_data = self
             .data_store
@@ -138,14 +148,17 @@ impl<E> AVM<E> {
         let ser_avm_outcome =
             serde_json::to_vec(avm_outcome).map_err(AVMError::AnomalyDataSeError)?;
 
+        let anomaly_data = AnomalyData::new(
+            &ser_particle,
+            &prev_data,
+            &current_data,
+            &ser_avm_outcome,
+            execution_time,
+            memory_delta,
+        );
+
         self.data_store
-            .collect_anomaly_data(
-                &particle_parameters.particle_id,
-                &ser_particle,
-                &prev_data,
-                &current_data,
-                &ser_avm_outcome,
-            )
+            .collect_anomaly_data(&particle_parameters.particle_id, anomaly_data)
             .map_err(Into::into)
     }
 }
