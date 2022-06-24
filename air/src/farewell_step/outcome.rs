@@ -24,8 +24,8 @@ use crate::INTERPRETER_SUCCESS;
 use air_interpreter_data::InterpreterData;
 use air_interpreter_interface::CallRequests;
 
-use std::hash::Hash;
 use std::fmt::Debug;
+use std::hash::Hash;
 use std::rc::Rc;
 
 /// Create InterpreterOutcome from supplied execution context and trace handler,

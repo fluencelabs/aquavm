@@ -62,7 +62,6 @@ fn execute_air_impl(
         Err(error) => return Err(farewell::from_uncatchable_error(prev_data, error)),
     };
 
-
     // match here is used instead of map_err, because the compiler can't determine that
     // they are exclusive and would treat exec_ctx and trace_handler as moved
     match {

@@ -89,7 +89,11 @@ impl AVMRunner {
         );
 
         let result = {
-            let span = tracing::span!(tracing::Level::INFO, "faas.call_with_ivalues", method="invoke");
+            let span = tracing::span!(
+                tracing::Level::INFO,
+                "faas.call_with_ivalues",
+                method = "invoke"
+            );
             let _enter = span.enter();
             self.faas
                 .call_with_ivalues(&self.wasm_filename, "invoke", &args, <_>::default())?

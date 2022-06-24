@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-/*
 use air_log_targets::TARGET_MAP;
 use log::LevelFilter;
 
@@ -32,4 +31,19 @@ pub fn init_logger(default_level: Option<LevelFilter>) {
 
     builder.build().unwrap();
 }
-*/
+
+// this the only variable allowed to access by Marine WASI configuration,
+// and it can be used in log-compatible fashion
+pub const AQUAVM_TRACING_ENV: &str = "WASM_LOG";
+
+// it worth moving it to marine_rs_sdk
+pub fn init_tracing() {
+    use tracing_subscriber::fmt::format::FmtSpan;
+    use tracing_subscriber::EnvFilter;
+
+    tracing_subscriber::fmt()
+        .with_env_filter(EnvFilter::from_env(AQUAVM_TRACING_ENV))
+        .json() // remove this line for nice human-readable output
+        .with_span_events(FmtSpan::ENTER | FmtSpan::CLOSE)
+        .init();
+}
