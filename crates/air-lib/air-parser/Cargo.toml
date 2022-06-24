@@ -28,7 +28,7 @@ serde_json = "1.0.61"
 
 itertools = "0.10.0"
 thiserror = "1.0.23"
-tracing = { version = "0.1.35" }
+tracing = "0.1.35"
 
 [dev-dependencies]
 fstrings = "0.2.3"
