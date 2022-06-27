@@ -19,13 +19,11 @@ use avm_server::CallResults;
 
 use anyhow::Context as _;
 use clap::Parser;
-use std::{
-    fs::File,
-    path::{Path, PathBuf},
-};
+use std::path::{Path, PathBuf};
 use tracing_subscriber::EnvFilter;
 
 pub const AQUAVM_TRACING_ENV: &str = "WASM_LOG";
+const DEFAULT_DATA: &str = r#"{"trace":[],"streams":{},"version":"0.2.2","lcid":0,"r_streams":{"$nodes":{}}}"#;
 
 #[derive(Parser, Debug)]
 struct Args {
@@ -70,8 +68,7 @@ fn main() -> anyhow::Result<()> {
     let air_script =
         read_air_script(args.air_script_path.as_deref()).context("failed to read AIR script")?;
     let prev_data = match &args.prev_data_path {
-        None => r#"{"trace":[],"streams":{},"version":"0.2.2","lcid":0,"r_streams":{"$nodes":{}}}"#
-            .to_owned(),
+        None => DEFAULT_DATA.to_owned(),
         Some(prev_data_path) => load_data(prev_data_path).context("failed to read prev_data")?,
     };
     let current_data = load_data(&args.data_path).context("failed to read data")?;
@@ -113,12 +110,7 @@ fn init_tracing() {
 }
 
 fn load_data(data_path: &Path) -> anyhow::Result<String> {
-    use std::io::Read;
-
-    let mut inp = File::open(data_path)?;
-    let mut data = String::new();
-    inp.read_to_string(&mut data)?;
-    Ok(data)
+    Ok(std::fs::read_to_string(data_path)?)
 }
 
 fn read_air_script(air_input: Option<&Path>) -> anyhow::Result<String> {
