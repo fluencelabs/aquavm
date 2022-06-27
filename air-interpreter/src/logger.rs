@@ -15,6 +15,7 @@
  */
 
 use air_log_targets::TARGET_MAP;
+
 use log::LevelFilter;
 
 pub fn init_logger(default_level: Option<LevelFilter>) {
@@ -36,7 +37,7 @@ pub fn init_logger(default_level: Option<LevelFilter>) {
 // and it can be used in log-compatible fashion
 pub const AQUAVM_TRACING_ENV: &str = "WASM_LOG";
 
-// it worth moving it to marine_rs_sdk
+// TODO it worth moving it to marine_rs_sdk
 pub fn init_tracing() {
     use tracing_subscriber::fmt::format::FmtSpan;
     use tracing_subscriber::EnvFilter;
