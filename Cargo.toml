@@ -16,6 +16,7 @@ members = [
     "crates/beautifier",
     "crates/data-store",
     "tools/cli/air-beautify",
+    "tools/cli/air-trace",
 ]
 
 exclude = [

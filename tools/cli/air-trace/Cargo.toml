@@ -1,0 +1,20 @@
+[package]
+name = "air-trace"
+version = "0.1.0"
+edition = "2021"
+description = "AIR performance tracing tool"
+authors = ["Fluence Labs"]
+license = "Apache-2.0"
+publish = false
+keywords = ["fluence", "air", "tracing"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+air-test-utils = { path = "../../../crates/air-lib/test-utils" }
+avm-server = { path = "../../../avm/server" }
+
+anyhow = "1.0.56"
+clap = { version = "3.1.18", features = ["derive", "env"] }
+serde_json = "1.0.61"
+tracing-subscriber = { version = "0.3.11", default-features = false, features = [ "env-filter", "json", "smallvec", "time", "fmt" ] }

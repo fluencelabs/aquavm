@@ -172,6 +172,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "air-trace"
+version = "0.1.0"
+dependencies = [
+ "air-test-utils",
+ "anyhow",
+ "avm-server",
+ "clap 3.1.18",
+ "serde_json",
+ "tracing-subscriber",
+]
+
+[[package]]
 name = "air-trace-handler"
 version = "0.1.0"
 dependencies = [
