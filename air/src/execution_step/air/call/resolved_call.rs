@@ -51,6 +51,7 @@ struct ResolvedArguments {
 
 impl<'i> ResolvedCall<'i> {
     /// Build `ResolvedCall` from `Call` by transforming `PeerPart` & `FunctionPart` into `ResolvedTriplet`.
+    #[tracing::instrument(skip_all)]
     pub(super) fn new(raw_call: &Call<'i>, exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<Self> {
         let triplet = resolve(&raw_call.triplet, exec_ctx)?;
         let tetraplet = SecurityTetraplet::from_triplet(triplet);
@@ -66,6 +67,7 @@ impl<'i> ResolvedCall<'i> {
     }
 
     /// Executes resolved instruction, updates contexts based on a execution_step result.
+    #[tracing::instrument(skip_all)]
     pub(super) fn execute(
         &self,
         raw_call: &Call<'i>,

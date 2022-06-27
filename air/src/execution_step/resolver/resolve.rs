@@ -87,6 +87,7 @@ pub(crate) fn prepare_last_error<'i>(
     Ok((jvalue.clone(), tetraplets))
 }
 
+#[tracing::instrument(skip(ctx))]
 pub(crate) fn resolve_variable<'ctx, 'i>(
     variable: Variable<'_>,
     ctx: &'ctx ExecutionCtx<'i>,
@@ -113,6 +114,7 @@ pub(crate) fn resolve_variable<'ctx, 'i>(
     }
 }
 
+#[tracing::instrument(skip(exec_ctx))]
 pub(crate) fn resolve_ast_variable_wl<'ctx, 'i>(
     ast_variable: &ast::VariableWithLambda<'_>,
     exec_ctx: &'ctx ExecutionCtx<'i>,
@@ -131,6 +133,7 @@ pub(crate) fn resolve_ast_variable_wl<'ctx, 'i>(
     }
 }
 
+#[tracing::instrument(skip(exec_ctx))]
 pub(crate) fn resolve_ast_scalar_wl<'ctx, 'i>(
     ast_scalar: &ast::ScalarWithLambda<'_>,
     exec_ctx: &'ctx ExecutionCtx<'i>,
@@ -140,6 +143,7 @@ pub(crate) fn resolve_ast_scalar_wl<'ctx, 'i>(
     resolve_ast_variable_wl(&variable, exec_ctx)
 }
 
+#[tracing::instrument(skip(exec_ctx))]
 pub(crate) fn apply_lambda<'i>(
     variable: Variable<'_>,
     lambda: &LambdaAST<'i>,

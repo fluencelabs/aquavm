@@ -22,6 +22,7 @@ use crate::JValue;
 
 use air_parser::ast;
 
+#[tracing::instrument(skip_all)]
 pub(crate) fn are_matchable_eq<'ctx>(
     left: &ast::Value<'_>,
     right: &ast::Value<'_>,

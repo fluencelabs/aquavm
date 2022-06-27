@@ -37,6 +37,7 @@ use air_trace_handler::MergerApResult;
 use std::rc::Rc;
 
 impl<'i> super::ExecutableInstruction<'i> for Ap<'i> {
+    #[tracing::instrument(skip(exec_ctx, trace_ctx))]
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         log_instruction!(call, exec_ctx, trace_ctx);
         let should_touch_trace = should_touch_trace(self);
