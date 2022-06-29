@@ -32,6 +32,12 @@ use std::rc::Rc;
 ```
 
 __Doc comment style__  
+
 ```rust
 /// This is a doc comment with a dot at the end.
+```
+
+```rust
+/// Comments could also be multi-line and
+/// should also end with a dot.
 ```
