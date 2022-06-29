@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-use std::collections::HashMap;
 use serde::Deserialize;
+use std::collections::HashMap;
 
 #[derive(Deserialize)]
 pub(crate) struct LogRecord {
@@ -102,7 +102,14 @@ impl std::fmt::Display for Span {
         self.name.fmt(f)?;
         if !self.args.is_empty() {
             "{".fmt(f)?;
-            write!(f, "{}", self.args.iter().map(|(k, v)| format!("{}={}", k, format_argument(v))).format(", "))?;
+            write!(
+                f,
+                "{}",
+                self.args
+                    .iter()
+                    .map(|(k, v)| format!("{}={}", k, format_argument(v)))
+                    .format(", ")
+            )?;
             "}".fmt(f)?;
         }
         Ok(())
