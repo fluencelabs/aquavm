@@ -14,25 +14,29 @@
  * limitations under the License.
  */
 
+use std::collections::HashMap;
 use serde::Deserialize;
 
 #[derive(Deserialize)]
 pub(crate) struct LogRecord {
-    #[serde(flatten)]
-    pub(crate) key: LogKey,
+    pub(crate) target: String,
+    pub(crate) span: Span,
+
     #[serde(flatten)]
     pub(crate) value: LogValue,
 }
 
-#[derive(Deserialize, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub(crate) struct LogKey {
-    pub(crate) target: String,
-    pub(crate) span: Span,
-}
-
-#[derive(Debug, Deserialize, Hash, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Deserialize)]
 pub(crate) struct Span {
     pub(crate) name: String,
+    #[serde(flatten)]
+    pub(crate) args: HashMap<String, serde_json::Value>,
+}
+
+#[derive(Hash, PartialEq, Eq, PartialOrd, Ord)]
+pub(crate) struct LogKey {
+    pub(crate) target: String,
+    pub(crate) span_name: String,
 }
 
 #[derive(Deserialize)]
@@ -59,6 +63,15 @@ pub(crate) struct CloseMessage {
     pub(crate) time_idle: String,
 }
 
+impl LogRecord {
+    pub(crate) fn get_key(&self) -> LogKey {
+        LogKey {
+            target: self.target.clone(),
+            span_name: self.span.name.clone(),
+        }
+    }
+}
+
 impl std::fmt::Display for Message {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
@@ -75,8 +88,23 @@ impl std::fmt::Display for CloseMessage {
     }
 }
 
+fn format_argument(val: &serde_json::Value) -> String {
+    match val {
+        serde_json::Value::String(s) => s.to_owned(),
+        _ => val.to_string(),
+    }
+}
+
 impl std::fmt::Display for Span {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        self.name.fmt(f)
+        use itertools::Itertools as _;
+
+        self.name.fmt(f)?;
+        if !self.args.is_empty() {
+            "{".fmt(f)?;
+            write!(f, "{}", self.args.iter().map(|(k, v)| format!("{}={}", k, format_argument(v))).format(", "))?;
+            "}".fmt(f)?;
+        }
+        Ok(())
     }
 }

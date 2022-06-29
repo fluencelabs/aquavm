@@ -27,6 +27,7 @@ pub(crate) struct Args {
     pretty: bool,
     #[clap(long)]
     stats: bool,
+
     #[clap(long)]
     sort_stats_by_duration: bool,
 }
@@ -76,7 +77,6 @@ fn read_logs<R: std::io::BufRead>(input: R) -> impl Iterator<Item = anyhow::Resu
 fn print_log_record<W: std::io::Write>(mut out: W, log_record: &LogRecord) -> std::io::Result<()> {
     use itertools::Itertools as _;
 
-    let key = &log_record.key;
     let val = &log_record.value;
 
     write!(
@@ -92,12 +92,12 @@ fn print_log_record<W: std::io::Write>(mut out: W, log_record: &LogRecord) -> st
         if !val.spans.is_empty() {
             write!(out, ":")?;
         }
-        write!(out, "{span}", span = key.span)?;
+        write!(out, "{span}", span = log_record.span)?;
     }
     writeln!(
         out,
         ": {target}: {fields}",
-        target = key.target,
+        target = log_record.target,
         fields = val.fields,
     )
 }
