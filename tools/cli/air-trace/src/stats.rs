@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+mod log_data;
 mod report;
 
-use crate::logs::{LogRecord, Message};
+use self::log_data::{LogRecord, Message};
 
 use clap::Parser;
 
@@ -45,7 +46,7 @@ pub(crate) fn stats(mut args: Args) -> anyhow::Result<()> {
     let stdin = std::io::stdin();
     let stdin = stdin.lock();
 
-    let mut stats = crate::stats::report::StatsReport::new();
+    let mut stats = self::report::StatsReport::new();
 
     for rec in read_logs(stdin) {
         let rec = rec?;

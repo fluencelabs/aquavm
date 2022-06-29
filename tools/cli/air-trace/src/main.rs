@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-mod logs;
 mod run;
 mod stats;
 mod utils;
