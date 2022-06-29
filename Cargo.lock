@@ -179,6 +179,8 @@ dependencies = [
  "anyhow",
  "avm-server",
  "clap 3.1.18",
+ "itertools 0.10.3",
+ "serde",
  "serde_json",
  "tracing-subscriber",
 ]

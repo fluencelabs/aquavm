@@ -27,14 +27,15 @@ const DEFAULT_DATA: &str =
     r#"{"trace":[],"streams":{},"version":"0.2.2","lcid":0,"r_streams":{"$nodes":{}}}"#;
 
 #[derive(Parser, Debug)]
+#[clap(about = "Run AIR script with AquaVM")]
 pub(crate) struct Args {
     #[clap(long)]
     init_peer_id: Option<String>,
     #[clap(long)]
     current_peer_id: Option<String>,
-    #[clap(long)]
+    #[clap(long, help = "default: current time")]
     timestamp: Option<u64>,
-    #[clap(long)]
+    #[clap(long, help = "default: max possible ttl")]
     ttl: Option<u32>,
     #[clap(long = "call_results")]
     call_results_path: Option<PathBuf>,
@@ -54,7 +55,7 @@ pub(crate) struct Args {
     prev_data_path: Option<PathBuf>,
     #[clap(long = "data")]
     data_path: PathBuf,
-    #[clap(long = "script")]
+    #[clap(long = "script", help = "read from stdin by default")]
     air_script_path: Option<PathBuf>,
 }
 
@@ -73,7 +74,9 @@ pub(crate) fn run(args: Args) -> anyhow::Result<()> {
     let current_data = load_data(&args.data_path).context("failed to read data")?;
 
     let init_peer_id = args.init_peer_id.unwrap_or_else(|| "some_id".to_owned());
-    let timestamp = args.timestamp.unwrap_or_default();
+    let timestamp = args
+        .timestamp
+        .unwrap_or_else(crate::utils::unix_timestamp_now);
     let ttl = args.ttl.unwrap_or(u32::MAX);
     let call_results = read_call_results(args.call_results_path.as_deref())?;
 

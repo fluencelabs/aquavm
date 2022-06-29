@@ -14,24 +14,30 @@
  * limitations under the License.
  */
 
+mod logs;
 mod run;
+mod stats;
+mod utils;
 
 use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
-struct Command {
+struct Cli {
     #[clap(subcommand)]
     command: Subcomm,
 }
 
 #[derive(Subcommand)]
+#[allow(clippy::large_enum_variant)]
 enum Subcomm {
     Run(crate::run::Args),
+    Stats(crate::stats::Args),
 }
 
 fn main() -> anyhow::Result<()> {
-    let command = Command::parse();
+    let command = Cli::parse();
     match command.command {
         Subcomm::Run(args) => crate::run::run(args),
+        Subcomm::Stats(args) => crate::stats::stats(args),
     }
 }
