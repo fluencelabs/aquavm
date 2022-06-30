@@ -9,12 +9,13 @@ concurrency:
 
 jobs:
   air:
-    name: "air"
+    name: "Run air tests"
     runs-on: builder
 
     env:
       RUST_BACKTRACE: 1
       RUST_TEST_THREADS: 1
+      CARGO_TERM_COLOR: always
 
     steps:
       - uses: actions/checkout@v3
@@ -35,12 +36,12 @@ jobs:
         run: marine build --features marine
         working-directory: air-interpreter
 
-      - name: "Build Wasm binary for interpreter"
+      - name: "Build Wasm binary for tests"
         run: ./build_test_binaries.sh
         working-directory: air/tests/test_module
 
       - name: "cargo fmt"
-        run: cargo fmt --all -- --check --color always
+        run: cargo fmt --all -- --check
 
       - name: "cargo check"
         run: cargo check
