@@ -49,6 +49,7 @@ pub trait DataStore {
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct AnomalyData<'data> {
+    pub air_script: &'data str,
     pub particle: &'data [u8], // it's byte because of the restriction on trait objects methods
     pub prev_data: &'data [u8],
     pub current_data: &'data [u8],
@@ -59,6 +60,7 @@ pub struct AnomalyData<'data> {
 
 impl<'data> AnomalyData<'data> {
     pub fn new(
+        air_script: &'data str,
         particle: &'data [u8],
         prev_data: &'data [u8],
         current_data: &'data [u8],
@@ -67,6 +69,7 @@ impl<'data> AnomalyData<'data> {
         memory_delta: usize,
     ) -> Self {
         Self {
+            air_script,
             particle,
             prev_data,
             current_data,

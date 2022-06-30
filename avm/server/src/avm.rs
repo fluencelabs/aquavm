@@ -83,6 +83,7 @@ impl<E> AVM<E> {
         particle_parameters: ParticleParameters<'_, '_>,
         call_results: CallResults,
     ) -> AVMResult<AVMOutcome, E> {
+        let air = air.into();
         let particle_id = particle_parameters.particle_id.as_str();
         let prev_data = self.data_store.read_data(particle_id)?;
         let current_data = data.into();
@@ -92,7 +93,7 @@ impl<E> AVM<E> {
         let outcome = self
             .runner
             .call(
-                air,
+                air.clone(),
                 prev_data,
                 current_data.clone(),
                 particle_parameters.init_peer_id.clone().into_owned(),
@@ -106,6 +107,7 @@ impl<E> AVM<E> {
         let memory_delta = self.memory_stats().memory_size - memory_size_before;
         if self.data_store.detect_anomaly(execution_time, memory_delta) {
             self.save_anomaly_data(
+                &air,
                 &current_data,
                 &particle_parameters,
                 &outcome,
@@ -134,6 +136,7 @@ impl<E> AVM<E> {
 
     fn save_anomaly_data(
         &mut self,
+        air_script: &str,
         current_data: &[u8],
         particle_parameters: &ParticleParameters<'_, '_>,
         avm_outcome: &RawAVMOutcome,
@@ -149,9 +152,10 @@ impl<E> AVM<E> {
             serde_json::to_vec(avm_outcome).map_err(AVMError::AnomalyDataSeError)?;
 
         let anomaly_data = AnomalyData::new(
+            air_script,
             &ser_particle,
             &prev_data,
-            &current_data,
+            current_data,
             &ser_avm_outcome,
             execution_time,
             memory_delta,
