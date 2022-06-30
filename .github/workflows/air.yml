@@ -29,8 +29,8 @@ jobs:
       - name: "Cache rust"
         uses: Swatinem/rust-cache@v1
 
-      - name: "Install marine"
-        run: cargo install marine
+      - name: "Download marine"
+        run: .github/download_marine.sh
 
       - name: "Build Wasm binary for interpreter"
         run: marine build --features marine
