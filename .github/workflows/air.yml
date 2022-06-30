@@ -12,7 +12,7 @@ jobs:
     name: "air"
     runs-on: builder
 
-    environment:
+    env:
       RUST_BACKTRACE: 1
       RUST_TEST_THREADS: 1
 
@@ -21,15 +21,17 @@ jobs:
 
       - uses: actions-rs/toolchain@v1
         with:
-          toolchain: nighlty-2022-06-30
+          toolchain: nightly-2022-06-29
           target: wasm32-wasi
           components: rustfmt, clippy
 
-      - uses: Swatinem/rust-cache@v1
+      - name: "Cache rust"
+        uses: Swatinem/rust-cache@v1
+
+      - name: "Install marine"
+        run: cargo install --force marine
 
       - run: |
-          cargo install --force marine
-
           # build a Wasm binary for interpreter
           (cd air-interpreter; marine build --features marine)
 
