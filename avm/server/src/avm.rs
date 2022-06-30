@@ -147,7 +147,7 @@ impl<E> AVM<E> {
             .data_store
             .read_data(particle_parameters.particle_id.as_str())?;
         let ser_particle =
-            serde_json::to_vec(&particle_parameters).map_err(AVMError::AnomalyDataSeError)?;
+            serde_json::to_vec(particle_parameters).map_err(AVMError::AnomalyDataSeError)?;
         let ser_avm_outcome =
             serde_json::to_vec(avm_outcome).map_err(AVMError::AnomalyDataSeError)?;
 
