@@ -1,25 +1,33 @@
-version: 2
+name: "air"
+
+on:
+  pull_request:
+
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
 jobs:
   air:
-    docker:
-      - image: circleci/rust:latest
-    resource_class: medium+
+    name: "air"
+    runs-on: builder
+
     environment:
       RUST_BACKTRACE: 1
       RUST_TEST_THREADS: 1
+
     steps:
-      - checkout
-      - restore_cache:
-          keys:
-            - air01-{{ checksum "Cargo.lock" }}
+      - uses: actions/checkout@v3
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nighlty-2022-06-30
+          target: wasm32-wasi
+          components: rustfmt, clippy
+
+      - uses: Swatinem/rust-cache@v1
+
       - run: |
-          rustup toolchain install nightly-2022-03-20-x86_64-unknown-linux-gnu
-          rustup default nightly-2022-03-20-x86_64-unknown-linux-gnu
-
-          rustup target add wasm32-wasi
-          rustup component add rustfmt
-          rustup component add clippy
-
           cargo install --force marine
 
           # build a Wasm binary for interpreter
@@ -36,14 +44,3 @@ jobs:
               RUSTFLAGS="-Z sanitizer=$san" cargo test --features test_with_native_code --target x86_64-unknown-linux-gnu
           done
           cargo clippy -v
-
-      - save_cache:
-          paths:
-            - ~/.cargo
-            - ~/.rustup
-          key: air01-{{ checksum "Cargo.lock" }}
-workflows:
-  version: 2
-  air:
-    jobs:
-      - air
