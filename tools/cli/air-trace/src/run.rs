@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-use air_test_utils::avm_runner::AVMRunner;
-use avm_server::CallResults;
+mod native;
+mod runner;
+#[cfg(feature = "wasm")]
+mod wasm;
+
+use air_test_utils::CallResults;
 
 use anyhow::Context as _;
 use clap::Parser;
 use std::path::{Path, PathBuf};
-use tracing_subscriber::EnvFilter;
 
 pub const AQUAVM_TRACING_ENV: &str = "WASM_LOG";
 const DEFAULT_DATA: &str =
@@ -44,6 +47,8 @@ pub(crate) struct Args {
     max_heap_size: Option<u64>,
     #[clap(long, default_value = "info")]
     tracing_params: String,
+    #[clap(long)]
+    native: bool,
 
     #[clap(
         long = "runtime",
@@ -63,7 +68,24 @@ pub(crate) fn run(args: Args) -> anyhow::Result<()> {
     update_tracing_env(&args.tracing_params);
     init_tracing();
 
-    let mut runner = create_avm_runner(&args).context("Failed to instantiate AIR runner")?;
+    let current_peer_id = args.current_peer_id.as_deref().unwrap_or("some_id");
+    let mut runner = if cfg!(not(feature = "wasm")) || args.native {
+        self::native::create_native_avm_runner(current_peer_id)
+            .context("Failed to instantiate a native AVM")?
+    } else {
+        #[cfg(feature = "wasm")]
+        let _res = self::wasm::create_wasm_avm_runner(
+            current_peer_id,
+            &args.air_wasm_runtime_path,
+            args.max_heap_size,
+        )
+        .context("Failed to instantiate WASM AVM")?;
+        #[cfg(not(feature = "wasm"))]
+        let _res = unreachable!();
+
+        #[allow(unreachable_code)]
+        _res
+    };
 
     let air_script =
         read_air_script(args.air_script_path.as_deref()).context("failed to read AIR script")?;
@@ -83,8 +105,8 @@ pub(crate) fn run(args: Args) -> anyhow::Result<()> {
     let results = runner
         .call(
             air_script,
-            prev_data,
-            current_data,
+            prev_data.into(),
+            current_data.into(),
             init_peer_id,
             timestamp,
             ttl,
@@ -103,6 +125,7 @@ fn update_tracing_env(tracing_params: &str) {
 
 fn init_tracing() {
     use tracing_subscriber::fmt::format::FmtSpan;
+    use tracing_subscriber::EnvFilter;
 
     tracing_subscriber::fmt()
         .with_env_filter(EnvFilter::from_env(AQUAVM_TRACING_ENV))
@@ -142,18 +165,4 @@ fn read_call_results(call_results_path: Option<&Path>) -> anyhow::Result<CallRes
                 .context("failed to parse call_results data")?)
         }
     }
-}
-
-fn create_avm_runner(args: &Args) -> anyhow::Result<AVMRunner> {
-    let current_peer_id = args
-        .current_peer_id
-        .clone()
-        .unwrap_or_else(|| "some_id".to_owned());
-
-    Ok(AVMRunner::new(
-        args.air_wasm_runtime_path.clone(),
-        current_peer_id,
-        args.max_heap_size,
-        0,
-    )?)
 }
