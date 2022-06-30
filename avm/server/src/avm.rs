@@ -26,6 +26,7 @@ use crate::interface::ParticleParameters;
 use crate::AVMResult;
 
 use avm_data_store::AnomalyData;
+use serde::Serialize;
 use std::ops::Deref;
 use std::ops::DerefMut;
 use std::time::Duration;
@@ -53,6 +54,13 @@ impl DerefMut for SendSafeRunner {
 pub struct AVM<E> {
     runner: SendSafeRunner,
     data_store: AVMDataStore<E>,
+}
+
+#[derive(Serialize)]
+struct AnomalyParticleParameters<'ctx, 'init_peer_id, 'particle_id> {
+    air_script: &'ctx str,
+    #[serde(flatten)]
+    particle_parameters: &'ctx ParticleParameters<'init_peer_id, 'particle_id>,
 }
 
 impl<E> AVM<E> {
@@ -83,6 +91,7 @@ impl<E> AVM<E> {
         particle_parameters: ParticleParameters<'_, '_>,
         call_results: CallResults,
     ) -> AVMResult<AVMOutcome, E> {
+        let air = air.into();
         let particle_id = particle_parameters.particle_id.as_str();
         let prev_data = self.data_store.read_data(particle_id)?;
         let current_data = data.into();
@@ -92,7 +101,7 @@ impl<E> AVM<E> {
         let outcome = self
             .runner
             .call(
-                air,
+                air.clone(),
                 prev_data,
                 current_data.clone(),
                 particle_parameters.init_peer_id.clone().into_owned(),
@@ -106,6 +115,7 @@ impl<E> AVM<E> {
         let memory_delta = self.memory_stats().memory_size - memory_size_before;
         if self.data_store.detect_anomaly(execution_time, memory_delta) {
             self.save_anomaly_data(
+                &air,
                 &current_data,
                 &particle_parameters,
                 &outcome,
@@ -134,17 +144,22 @@ impl<E> AVM<E> {
 
     fn save_anomaly_data(
         &mut self,
+        air_script: &str,
         current_data: &[u8],
         particle_parameters: &ParticleParameters<'_, '_>,
         avm_outcome: &RawAVMOutcome,
         execution_time: Duration,
         memory_delta: usize,
     ) -> AVMResult<(), E> {
+        let anomaly_particle_parameters = AnomalyParticleParameters {
+            air_script,
+            particle_parameters,
+        };
         let prev_data = self
             .data_store
             .read_data(particle_parameters.particle_id.as_str())?;
-        let ser_particle =
-            serde_json::to_vec(particle_parameters).map_err(AVMError::AnomalyDataSeError)?;
+        let ser_particle = serde_json::to_vec(&anomaly_particle_parameters)
+            .map_err(AVMError::AnomalyDataSeError)?;
         let ser_avm_outcome =
             serde_json::to_vec(avm_outcome).map_err(AVMError::AnomalyDataSeError)?;
 
