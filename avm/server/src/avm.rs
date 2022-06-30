@@ -26,7 +26,6 @@ use crate::interface::ParticleParameters;
 use crate::AVMResult;
 
 use avm_data_store::AnomalyData;
-use serde::Serialize;
 use std::ops::Deref;
 use std::ops::DerefMut;
 use std::time::Duration;
@@ -54,13 +53,6 @@ impl DerefMut for SendSafeRunner {
 pub struct AVM<E> {
     runner: SendSafeRunner,
     data_store: AVMDataStore<E>,
-}
-
-#[derive(Serialize)]
-struct AnomalyParticleParameters<'ctx, 'init_peer_id, 'particle_id> {
-    air_script: &'ctx str,
-    #[serde(flatten)]
-    particle_parameters: &'ctx ParticleParameters<'init_peer_id, 'particle_id>,
 }
 
 impl<E> AVM<E> {
@@ -151,22 +143,19 @@ impl<E> AVM<E> {
         execution_time: Duration,
         memory_delta: usize,
     ) -> AVMResult<(), E> {
-        let anomaly_particle_parameters = AnomalyParticleParameters {
-            air_script,
-            particle_parameters,
-        };
         let prev_data = self
             .data_store
             .read_data(particle_parameters.particle_id.as_str())?;
-        let ser_particle = serde_json::to_vec(&anomaly_particle_parameters)
-            .map_err(AVMError::AnomalyDataSeError)?;
+        let ser_particle =
+            serde_json::to_vec(&particle_parameters).map_err(AVMError::AnomalyDataSeError)?;
         let ser_avm_outcome =
             serde_json::to_vec(avm_outcome).map_err(AVMError::AnomalyDataSeError)?;
 
         let anomaly_data = AnomalyData::new(
+            air_script,
             &ser_particle,
             &prev_data,
-            &current_data,
+            current_data,
             &ser_avm_outcome,
             execution_time,
             memory_delta,
