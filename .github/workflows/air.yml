@@ -29,20 +29,29 @@ jobs:
         uses: Swatinem/rust-cache@v1
 
       - name: "Install marine"
-        run: cargo install --force marine
+        run: cargo install marine
 
-      - run: |
-          # build a Wasm binary for interpreter
-          (cd air-interpreter; marine build --features marine)
+      - name: "Build Wasm binary for interpreter"
+        run: marine build --features marine
+        working-directory: air-interpreter
 
-          # build Wasm binaries for tests
-          (cd air/tests/test_module; ./build_test_binaries.sh)
+      - name: "Build Wasm binary for interpreter"
+        run: ./build_test_binaries.sh
+        working-directory: air/tests/test_module
 
-          cargo fmt --all -- --check --color always
-          cargo check
+      - name: "cargo fmt"
+        run: cargo fmt --all -- --check --color always
+
+      - name: "cargo check"
+        run: cargo check
+
+      - name: "cargo test"
+        run: |
           cargo test --release
           # The memory sanitizer on cargo test has false positive even on empty project.
           for san in address leak; do
               RUSTFLAGS="-Z sanitizer=$san" cargo test --features test_with_native_code --target x86_64-unknown-linux-gnu
           done
-          cargo clippy -v
+
+      - name: "cargo clippy"
+        run: cargo clippy -v
