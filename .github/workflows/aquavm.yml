@@ -1,4 +1,4 @@
-name: "air"
+name: "aquavm"
 
 on:
   pull_request:
@@ -9,7 +9,7 @@ concurrency:
 
 jobs:
   air:
-    name: "Run air tests"
+    name: "Run aquavm tests"
     runs-on: builder
 
     env:
