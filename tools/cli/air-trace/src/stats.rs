@@ -69,9 +69,17 @@ pub(crate) fn stats(mut args: Args) -> anyhow::Result<()> {
 }
 
 fn read_logs<R: std::io::BufRead>(input: R) -> impl Iterator<Item = anyhow::Result<LogRecord>> {
-    input.lines().map(|r| match r {
-        Ok(line) => serde_json::from_str(&line).map_err(anyhow::Error::from),
-        Err(err) => Err(err.into()),
+    input.lines().filter_map(|r| match r {
+        Ok(line) => {
+            let line = line.trim();
+            eprintln!("{}", line);
+            if line.is_empty() {
+                None
+            } else {
+                Some(serde_json::from_str(&line).map_err(anyhow::Error::from))
+            }
+        }
+        Err(err) => Some(Err(err.into())),
     })
 }
 
