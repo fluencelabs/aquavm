@@ -16,6 +16,7 @@
 
 use serde::Deserialize;
 use serde::Serialize;
+use std::borrow::Cow;
 use std::time::Duration;
 
 /// This trait is used for
@@ -47,13 +48,18 @@ pub trait DataStore {
     ) -> Result<(), Self::Error>;
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AnomalyData<'data> {
-    pub air_script: &'data str,
-    pub particle: &'data [u8], // it's byte because of the restriction on trait objects methods
-    pub prev_data: &'data [u8],
-    pub current_data: &'data [u8],
-    pub avm_outcome: &'data [u8], // it's byte because of the restriction on trait objects methods
+    #[serde(borrow)]
+    pub air_script: Cow<'data, str>,
+    #[serde(borrow, with = "serde_bytes")]
+    pub particle: Cow<'data, [u8]>, // it's byte because of the restriction on trait objects methods
+    #[serde(borrow, with = "serde_bytes")]
+    pub prev_data: Cow<'data, [u8]>,
+    #[serde(borrow, with = "serde_bytes")]
+    pub current_data: Cow<'data, [u8]>,
+    #[serde(borrow, with = "serde_bytes")]
+    pub avm_outcome: Cow<'data, [u8]>, // it's byte because of the restriction on trait objects methods
     pub execution_time: Duration,
     pub memory_delta: usize,
 }
@@ -69,11 +75,11 @@ impl<'data> AnomalyData<'data> {
         memory_delta: usize,
     ) -> Self {
         Self {
-            air_script,
-            particle,
-            prev_data,
-            current_data,
-            avm_outcome,
+            air_script: air_script.into(),
+            particle: particle.into(),
+            prev_data: prev_data.into(),
+            current_data: current_data.into(),
+            avm_outcome: avm_outcome.into(),
             execution_time,
             memory_delta,
         }

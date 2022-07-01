@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+mod data;
 mod native;
 mod runner;
 #[cfg(feature = "wasm")]
@@ -22,24 +23,17 @@ mod wasm;
 use air_test_utils::CallResults;
 
 use anyhow::Context as _;
-use clap::Parser;
+use clap::{Parser, Subcommand};
 use std::path::{Path, PathBuf};
 
 pub const AQUAVM_TRACING_ENV: &str = "WASM_LOG";
-const DEFAULT_DATA: &str =
-    r#"{"trace":[],"streams":{},"version":"0.2.2","lcid":0,"r_streams":{"$nodes":{}}}"#;
 
 #[derive(Parser, Debug)]
 #[clap(about = "Run AIR script with AquaVM")]
 pub(crate) struct Args {
     #[clap(long)]
-    init_peer_id: Option<String>,
-    #[clap(long)]
     current_peer_id: Option<String>,
-    #[clap(long, help = "default: current time")]
-    timestamp: Option<u64>,
-    #[clap(long, help = "default: max possible ttl")]
-    ttl: Option<u32>,
+
     #[clap(long = "call_results")]
     call_results_path: Option<PathBuf>,
 
@@ -49,19 +43,24 @@ pub(crate) struct Args {
     tracing_params: String,
     #[clap(long)]
     native: bool,
-
     #[clap(
         long = "runtime",
         env = "AIR_WASM_RUNTIME_PATH",
         default_value = "target/wasm32-wasi/release/air_interpreter_server.wasm"
     )]
     air_wasm_runtime_path: PathBuf,
-    #[clap(long = "prev_data")]
-    prev_data_path: Option<PathBuf>,
-    #[clap(long = "data")]
-    data_path: PathBuf,
-    #[clap(long = "script", help = "read from stdin by default")]
-    air_script_path: Option<PathBuf>,
+
+    #[clap(subcommand)]
+    source: Source,
+}
+
+#[derive(Subcommand, Debug)]
+#[allow(clippy::large_enum_variant)]
+enum Source {
+    #[clap(name = "--anomaly")]
+    Anomaly(self::data::anomaly::AnomalyDataArgs),
+    #[clap(name = "--plain")]
+    PlainData(self::data::plain::PlainDataArgs),
 }
 
 pub(crate) fn run(args: Args) -> anyhow::Result<()> {
@@ -87,29 +86,22 @@ pub(crate) fn run(args: Args) -> anyhow::Result<()> {
         _res
     };
 
-    let air_script =
-        read_air_script(args.air_script_path.as_deref()).context("failed to read AIR script")?;
-    let prev_data = match &args.prev_data_path {
-        None => DEFAULT_DATA.to_owned(),
-        Some(prev_data_path) => load_data(prev_data_path).context("failed to read prev_data")?,
+    let execution_data = match &args.source {
+        Source::Anomaly(anomaly) => data::anomaly::load(anomaly)?,
+        Source::PlainData(raw) => data::plain::load(raw)?,
     };
-    let current_data = load_data(&args.data_path).context("failed to read data")?;
+    let particle = execution_data.particle;
 
-    let init_peer_id = args.init_peer_id.unwrap_or_else(|| "some_id".to_owned());
-    let timestamp = args
-        .timestamp
-        .unwrap_or_else(crate::utils::unix_timestamp_now);
-    let ttl = args.ttl.unwrap_or(u32::MAX);
     let call_results = read_call_results(args.call_results_path.as_deref())?;
 
     let results = runner
         .call(
-            air_script,
-            prev_data.into(),
-            current_data.into(),
-            init_peer_id,
-            timestamp,
-            ttl,
+            execution_data.air_script,
+            execution_data.prev_data.into(),
+            execution_data.current_data.into(),
+            particle.init_peer_id.into_owned(),
+            particle.timestamp,
+            particle.ttl,
             call_results,
         )
         .context("Failed to execute the script")?;
@@ -134,27 +126,6 @@ fn init_tracing() {
         .init();
 }
 
-fn load_data(data_path: &Path) -> anyhow::Result<String> {
-    Ok(std::fs::read_to_string(data_path)?)
-}
-
-fn read_air_script(air_input: Option<&Path>) -> anyhow::Result<String> {
-    use std::io::Read;
-
-    let air_script = match air_input {
-        Some(in_path) => std::fs::read_to_string(in_path)?,
-        None => {
-            let mut buffer = String::new();
-            let mut stdin = std::io::stdin().lock();
-
-            stdin.read_to_string(&mut buffer)?;
-            buffer
-        }
-    };
-
-    Ok(air_script)
-}
-
 fn read_call_results(call_results_path: Option<&Path>) -> anyhow::Result<CallResults> {
     match call_results_path {
         None => Ok(CallResults::default()),
@@ -165,4 +136,8 @@ fn read_call_results(call_results_path: Option<&Path>) -> anyhow::Result<CallRes
                 .context("failed to parse call_results data")?)
         }
     }
+}
+
+fn load_data(data_path: &Path) -> anyhow::Result<String> {
+    Ok(std::fs::read_to_string(data_path)?)
 }

@@ -84,7 +84,7 @@ impl<E> AVM<E> {
         call_results: CallResults,
     ) -> AVMResult<AVMOutcome, E> {
         let air = air.into();
-        let particle_id = particle_parameters.particle_id.as_str();
+        let particle_id = particle_parameters.particle_id.as_ref();
         let prev_data = self.data_store.read_data(particle_id)?;
         let current_data = data.into();
 
@@ -145,7 +145,7 @@ impl<E> AVM<E> {
     ) -> AVMResult<(), E> {
         let prev_data = self
             .data_store
-            .read_data(particle_parameters.particle_id.as_str())?;
+            .read_data(&particle_parameters.particle_id)?;
         let ser_particle =
             serde_json::to_vec(particle_parameters).map_err(AVMError::AnomalyDataSeError)?;
         let ser_avm_outcome =
