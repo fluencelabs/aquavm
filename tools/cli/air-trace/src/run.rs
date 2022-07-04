@@ -49,6 +49,8 @@ pub(crate) struct Args {
         default_value = "target/wasm32-wasi/release/air_interpreter_server.wasm"
     )]
     air_wasm_runtime_path: PathBuf,
+    #[clap(long, help = "Execute several times; great for native profilng")]
+    repeat: Option<u32>,
 
     #[clap(subcommand)]
     source: Source,
@@ -94,19 +96,34 @@ pub(crate) fn run(args: Args) -> anyhow::Result<()> {
 
     let call_results = read_call_results(args.call_results_path.as_deref())?;
 
-    let results = runner
-        .call(
-            execution_data.air_script,
-            execution_data.prev_data.into(),
-            execution_data.current_data.into(),
-            particle.init_peer_id.into_owned(),
-            particle.timestamp,
-            particle.ttl,
-            call_results,
-        )
-        .context("Failed to execute the script")?;
-
-    println!("{:?}", results);
+    if let Some(repeat) = args.repeat {
+        for _ in 0..repeat {
+            runner
+                .call(
+                    execution_data.air_script.clone(),
+                    execution_data.prev_data.clone().into(),
+                    execution_data.current_data.clone().into(),
+                    particle.init_peer_id.clone().into_owned(),
+                    particle.timestamp,
+                    particle.ttl,
+                    call_results.clone(),
+                )
+                .context("Failed to execute the script")?;
+        }
+    } else {
+        let results = runner
+            .call(
+                execution_data.air_script,
+                execution_data.prev_data.into(),
+                execution_data.current_data.into(),
+                particle.init_peer_id.into_owned(),
+                particle.timestamp,
+                particle.ttl,
+                call_results,
+            )
+            .context("Failed to execute the script")?;
+        println!("{:?}", results);
+    }
 
     Ok(())
 }
