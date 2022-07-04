@@ -22,7 +22,7 @@ struct NativeAvmRunner {
 }
 
 impl AirRunner for NativeAvmRunner {
-    fn call(
+    fn call_tracing(
         &mut self,
         air: String,
         prev_data: Vec<u8>,
@@ -31,6 +31,9 @@ impl AirRunner for NativeAvmRunner {
         timestamp: u64,
         ttl: u32,
         call_results: air_test_utils::CallResults,
+        // We use externally configured logger.
+        _tracing_params: String,
+        _tracing_output_mode: u8,
     ) -> anyhow::Result<air_test_utils::RawAVMOutcome> {
         use air_test_utils::into_raw_result;
 

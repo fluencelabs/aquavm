@@ -18,7 +18,7 @@ use avm_server::avm_runner::*;
 use avm_server::CallResults;
 
 pub(crate) trait AirRunner {
-    fn call(
+    fn call_tracing(
         &mut self,
         air: String,
         prev_data: Vec<u8>,
@@ -27,5 +27,7 @@ pub(crate) trait AirRunner {
         timestamp: u64,
         ttl: u32,
         call_results: CallResults,
+        tracing_params: String,
+        tracing_output_mode: u8,
     ) -> anyhow::Result<RawAVMOutcome>;
 }

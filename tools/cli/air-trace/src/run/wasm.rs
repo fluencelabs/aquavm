@@ -20,7 +20,7 @@ use std::path::Path;
 pub(crate) struct WasmAvmRunner(AVMRunner);
 
 impl AirRunner for WasmAvmRunner {
-    fn call(
+    fn call_tracing(
         &mut self,
         air: String,
         prev_data: Vec<u8>,
@@ -29,8 +29,10 @@ impl AirRunner for WasmAvmRunner {
         timestamp: u64,
         ttl: u32,
         call_results: avm_server::CallResults,
+        tracing_params: String,
+        tracing_output_mode: u8,
     ) -> anyhow::Result<air_test_utils::RawAVMOutcome> {
-        Ok(self.0.call(
+        Ok(self.0.call_tracing(
             air,
             prev_data,
             data,
@@ -38,6 +40,8 @@ impl AirRunner for WasmAvmRunner {
             timestamp,
             ttl,
             call_results,
+            tracing_params,
+            tracing_output_mode,
         )?)
     }
 }

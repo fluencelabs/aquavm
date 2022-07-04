@@ -107,6 +107,55 @@ impl AVMRunner {
         Ok(outcome)
     }
 
+    #[tracing::instrument(skip_all)]
+    pub fn call_tracing(
+        &mut self,
+        air: impl Into<String>,
+        prev_data: impl Into<Vec<u8>>,
+        data: impl Into<Vec<u8>>,
+        init_peer_id: impl Into<String>,
+        timestamp: u64,
+        ttl: u32,
+        call_results: CallResults,
+        tracing_params: String,
+        tracing_output_mode: u8,
+    ) -> RunnerResult<RawAVMOutcome> {
+        let mut args = prepare_args(
+            air,
+            prev_data,
+            data,
+            self.current_peer_id.clone(),
+            init_peer_id.into(),
+            timestamp,
+            ttl,
+            call_results,
+        );
+        args.push(IValue::String(tracing_params));
+        args.push(IValue::U8(tracing_output_mode));
+
+        let result = {
+            let span = tracing::span!(
+                tracing::Level::INFO,
+                "faas.call_with_ivalues",
+                method = "invoke_tracing"
+            );
+            let _enter = span.enter();
+            self.faas.call_with_ivalues(
+                &self.wasm_filename,
+                "invoke_tracing",
+                &args,
+                <_>::default(),
+            )?
+        };
+
+        let result = try_as_one_value_vec(result)?;
+        let outcome = InterpreterOutcome::from_ivalue(result)
+            .map_err(RunnerError::InterpreterResultDeError)?;
+        let outcome = RawAVMOutcome::from_interpreter_outcome(outcome)?;
+
+        Ok(outcome)
+    }
+
     pub fn memory_stats(&self) -> AVMMemoryStats {
         let stats = self.faas.module_memory_stats();
 

@@ -44,7 +44,6 @@ pub fn main() {
 
     const MINIMAL_LOG_LEVEL: LevelFilter = LevelFilter::Trace;
     logger::init_logger(Some(MINIMAL_LOG_LEVEL));
-    logger::init_tracing();
 
     // this one is just a guard for possible changes of the invoke function where some log-prone
     // code could added before the setting max log level from a function parameter.

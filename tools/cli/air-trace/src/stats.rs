@@ -22,7 +22,7 @@ use self::log_data::{LogRecord, Message};
 use clap::Parser;
 
 #[derive(Parser)]
-#[clap(about = "Pretty-print AquaVM trace or provide execution stats")]
+#[clap(about = "Pretty-print AquaVM JSON trace or provide execution stats")]
 pub(crate) struct Args {
     #[clap(long)]
     pretty: bool,
@@ -75,7 +75,7 @@ fn read_logs<R: std::io::BufRead>(input: R) -> impl Iterator<Item = anyhow::Resu
             if line.is_empty() {
                 None
             } else {
-                Some(serde_json::from_str(&line).map_err(anyhow::Error::from))
+                Some(serde_json::from_str(line).map_err(anyhow::Error::from))
             }
         }
         Err(err) => Some(Err(err.into())),

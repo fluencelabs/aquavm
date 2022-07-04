@@ -26,8 +26,6 @@ use anyhow::Context as _;
 use clap::{Parser, Subcommand};
 use std::path::{Path, PathBuf};
 
-pub const AQUAVM_TRACING_ENV: &str = "WASM_LOG";
-
 #[derive(Parser, Debug)]
 #[clap(about = "Run AIR script with AquaVM")]
 pub(crate) struct Args {
@@ -51,6 +49,8 @@ pub(crate) struct Args {
     air_wasm_runtime_path: PathBuf,
     #[clap(long, help = "Execute several times; great for native profilng")]
     repeat: Option<u32>,
+    #[clap(long, help = "Output JSON tracing info")]
+    json: bool,
 
     #[clap(subcommand)]
     source: Source,
@@ -66,8 +66,8 @@ enum Source {
 }
 
 pub(crate) fn run(args: Args) -> anyhow::Result<()> {
-    update_tracing_env(&args.tracing_params);
-    init_tracing();
+    let tracing_json = (!args.json) as u8;
+    init_tracing(args.tracing_params.clone(), tracing_json);
 
     let current_peer_id = args.current_peer_id.as_deref().unwrap_or("some_id");
     let mut runner = if cfg!(not(feature = "wasm")) || args.native {
@@ -99,7 +99,7 @@ pub(crate) fn run(args: Args) -> anyhow::Result<()> {
     if let Some(repeat) = args.repeat {
         for _ in 0..repeat {
             runner
-                .call(
+                .call_tracing(
                     execution_data.air_script.clone(),
                     execution_data.prev_data.clone().into(),
                     execution_data.current_data.clone().into(),
@@ -107,12 +107,14 @@ pub(crate) fn run(args: Args) -> anyhow::Result<()> {
                     particle.timestamp,
                     particle.ttl,
                     call_results.clone(),
+                    args.tracing_params.clone(),
+                    tracing_json,
                 )
                 .context("Failed to execute the script")?;
         }
     } else {
         let results = runner
-            .call(
+            .call_tracing(
                 execution_data.air_script,
                 execution_data.prev_data.into(),
                 execution_data.current_data.into(),
@@ -120,6 +122,8 @@ pub(crate) fn run(args: Args) -> anyhow::Result<()> {
                 particle.timestamp,
                 particle.ttl,
                 call_results,
+                args.tracing_params,
+                tracing_json,
             )
             .context("Failed to execute the script")?;
         println!("{:?}", results);
@@ -128,21 +132,20 @@ pub(crate) fn run(args: Args) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn update_tracing_env(tracing_params: &str) {
-    std::env::set_var("WASM_LOG", tracing_params);
-}
-
-fn init_tracing() {
+// TODO This is a copy of function from air_interpreter/marine.rs.  It should be moved to the marine_rs_sdk.
+pub fn init_tracing(tracing_params: String, trace_mode: u8) {
     use tracing_subscriber::fmt::format::FmtSpan;
-    use tracing_subscriber::EnvFilter;
 
-    tracing_subscriber::fmt()
-        .with_env_filter(EnvFilter::from_env(AQUAVM_TRACING_ENV))
-        .json()
-        .with_span_events(FmtSpan::NEW | FmtSpan::CLOSE)
-        .init();
+    let builder = tracing_subscriber::fmt()
+        .with_env_filter(tracing_params)
+        .with_span_events(FmtSpan::ENTER | FmtSpan::CLOSE);
+    if trace_mode == 0 {
+        builder.json().init();
+    } else {
+        // Human-readable output.
+        builder.init();
+    }
 }
-
 fn read_call_results(call_results_path: Option<&Path>) -> anyhow::Result<CallResults> {
     match call_results_path {
         None => Ok(CallResults::default()),
