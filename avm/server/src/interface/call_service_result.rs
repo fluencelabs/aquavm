@@ -58,7 +58,7 @@ impl CallServiceResult {
     }
 }
 
-#[tracing::instrument(skip(call_results))]
+#[tracing::instrument(level = "debug", skip(call_results))]
 pub fn into_raw_result(call_results: CallResults) -> air_interpreter_interface::CallResults {
     call_results
         .into_iter()

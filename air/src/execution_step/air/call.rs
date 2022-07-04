@@ -35,7 +35,7 @@ use air_parser::ast::Call;
 use std::rc::Rc;
 
 impl<'i> super::ExecutableInstruction<'i> for Call<'i> {
-    #[tracing::instrument(skip(exec_ctx, trace_ctx))]
+    #[tracing::instrument(level = "debug", skip(exec_ctx, trace_ctx))]
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         log_instruction!(call, exec_ctx, trace_ctx);
         exec_ctx.tracker.meet_call();

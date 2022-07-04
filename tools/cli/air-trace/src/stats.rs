@@ -72,7 +72,6 @@ fn read_logs<R: std::io::BufRead>(input: R) -> impl Iterator<Item = anyhow::Resu
     input.lines().filter_map(|r| match r {
         Ok(line) => {
             let line = line.trim();
-            eprintln!("{}", line);
             if line.is_empty() {
                 None
             } else {
