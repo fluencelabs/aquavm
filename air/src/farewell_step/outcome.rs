@@ -114,7 +114,6 @@ fn populate_outcome_from_contexts(
 }
 
 /// Deduplicate values in a supplied vector.
-#[tracing::instrument]
 fn dedup<T: Eq + Hash + Debug>(mut vec: Vec<T>) -> Vec<T> {
     use std::collections::HashSet;
 
