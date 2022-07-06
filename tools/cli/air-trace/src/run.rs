@@ -20,10 +20,12 @@ mod runner;
 #[cfg(feature = "wasm")]
 mod wasm;
 
+use self::runner::AirRunner;
 use air_test_utils::CallResults;
 
 use anyhow::Context as _;
 use clap::{Parser, Subcommand};
+
 use std::path::{Path, PathBuf};
 
 #[derive(Parser, Debug)]
@@ -47,7 +49,7 @@ pub(crate) struct Args {
         default_value = "target/wasm32-wasi/release/air_interpreter_server.wasm"
     )]
     air_wasm_runtime_path: PathBuf,
-    #[clap(long, help = "Execute several times; great for native profilng")]
+    #[clap(long, help = "Execute several times; great for native profiling")]
     repeat: Option<u32>,
     #[clap(long, help = "Output JSON tracing info")]
     json: bool,
@@ -70,23 +72,12 @@ pub(crate) fn run(args: Args) -> anyhow::Result<()> {
     init_tracing(args.tracing_params.clone(), tracing_json);
 
     let current_peer_id = args.current_peer_id.as_deref().unwrap_or("some_id");
-    let mut runner = if cfg!(not(feature = "wasm")) || args.native {
-        self::native::create_native_avm_runner(current_peer_id)
-            .context("Failed to instantiate a native AVM")?
-    } else {
-        #[cfg(feature = "wasm")]
-        let _res = self::wasm::create_wasm_avm_runner(
-            current_peer_id,
-            &args.air_wasm_runtime_path,
-            args.max_heap_size,
-        )
-        .context("Failed to instantiate WASM AVM")?;
-        #[cfg(not(feature = "wasm"))]
-        let _res = unreachable!();
-
-        #[allow(unreachable_code)]
-        _res
-    };
+    let mut runner = get_runner(
+        args.native,
+        current_peer_id,
+        &args.air_wasm_runtime_path,
+        args.max_heap_size,
+    )?;
 
     let execution_data = match &args.source {
         Source::Anomaly(anomaly) => data::anomaly::load(anomaly)?,
@@ -96,40 +87,54 @@ pub(crate) fn run(args: Args) -> anyhow::Result<()> {
 
     let call_results = read_call_results(args.call_results_path.as_deref())?;
 
-    if let Some(repeat) = args.repeat {
-        for _ in 0..repeat {
-            runner
-                .call_tracing(
-                    execution_data.air_script.clone(),
-                    execution_data.prev_data.clone().into(),
-                    execution_data.current_data.clone().into(),
-                    particle.init_peer_id.clone().into_owned(),
-                    particle.timestamp,
-                    particle.ttl,
-                    call_results.clone(),
-                    args.tracing_params.clone(),
-                    tracing_json,
-                )
-                .context("Failed to execute the script")?;
-        }
-    } else {
-        let results = runner
+    let repeat = args.repeat.unwrap_or(1);
+    for _ in 0..repeat {
+        let result = runner
             .call_tracing(
-                execution_data.air_script,
-                execution_data.prev_data.into(),
-                execution_data.current_data.into(),
-                particle.init_peer_id.into_owned(),
+                execution_data.air_script.clone(),
+                execution_data.prev_data.clone().into(),
+                execution_data.current_data.clone().into(),
+                particle.init_peer_id.clone().into_owned(),
                 particle.timestamp,
                 particle.ttl,
-                call_results,
-                args.tracing_params,
+                call_results.clone(),
+                args.tracing_params.clone(),
                 tracing_json,
             )
             .context("Failed to execute the script")?;
-        println!("{:?}", results);
+        if args.repeat.is_none() {
+            println!("{:?}", result);
+        }
     }
 
     Ok(())
+}
+
+#[cfg(feature = "wasm")]
+fn get_runner(
+    native: bool,
+    current_peer_id: impl Into<String>,
+    air_wasm_runtime_path: &Path,
+    max_heap_size: Option<u64>,
+) -> anyhow::Result<Box<dyn AirRunner>> {
+    if native {
+        self::native::create_native_avm_runner(current_peer_id)
+            .context("Failed to instantiate a native AVM")
+    } else {
+        self::wasm::create_wasm_avm_runner(current_peer_id, air_wasm_runtime_path, max_heap_size)
+            .context("Failed to instantiate WASM AVM")
+    }
+}
+
+#[cfg(not(feature = "wasm"))]
+fn get_runner(
+    native: bool,
+    current_peer_id: impl Into<String>,
+    air_wasm_runtime_path: &Path,
+    max_heap_size: Option<u64>,
+) -> anyhow::Result<Box<dyn AirRunner>> {
+    self::native::create_native_avm_runner(current_peer_id)
+        .context("Failed to instantiate a native AVM")
 }
 
 // TODO This is a copy of function from air_interpreter/marine.rs.  It should be moved to the marine_rs_sdk.

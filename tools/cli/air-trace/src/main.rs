@@ -18,25 +18,25 @@ mod run;
 mod stats;
 mod utils;
 
-use clap::{Parser, Subcommand};
+use clap::Parser;
 
 #[derive(Parser)]
 struct Cli {
     #[clap(subcommand)]
-    command: Subcomm,
+    subcommand: Subcommand,
 }
 
-#[derive(Subcommand)]
+#[derive(clap::Subcommand)]
 #[allow(clippy::large_enum_variant)]
-enum Subcomm {
+enum Subcommand {
     Run(crate::run::Args),
     Stats(crate::stats::Args),
 }
 
 fn main() -> anyhow::Result<()> {
-    let command = Cli::parse();
-    match command.command {
-        Subcomm::Run(args) => crate::run::run(args),
-        Subcomm::Stats(args) => crate::stats::stats(args),
+    let args = Cli::parse();
+    match args.subcommand {
+        Subcommand::Run(args) => crate::run::run(args),
+        Subcommand::Stats(args) => crate::stats::stats(args),
     }
 }
