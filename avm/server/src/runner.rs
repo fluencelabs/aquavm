@@ -20,6 +20,7 @@ use crate::RunnerError;
 use crate::RunnerResult;
 
 use air_interpreter_interface::InterpreterOutcome;
+use air_utils::measure;
 use fluence_faas::FaaSConfig;
 use fluence_faas::FluenceFaaS;
 use fluence_faas::IValue;
@@ -88,16 +89,13 @@ impl AVMRunner {
             call_results,
         );
 
-        let result = {
-            let span = tracing::span!(
-                tracing::Level::INFO,
-                "faas.call_with_ivalues",
-                method = "invoke"
-            );
-            let _enter = span.enter();
+        let result = measure!(
             self.faas
-                .call_with_ivalues(&self.wasm_filename, "invoke", &args, <_>::default())?
-        };
+                .call_with_ivalues(&self.wasm_filename, "invoke", &args, <_>::default())?,
+            tracing::Level::INFO,
+            "faas.call_with_ivalues",
+            method = "invoke",
+        );
 
         let result = try_as_one_value_vec(result)?;
         let outcome = InterpreterOutcome::from_ivalue(result)
@@ -133,20 +131,17 @@ impl AVMRunner {
         args.push(IValue::String(tracing_params));
         args.push(IValue::U8(tracing_output_mode));
 
-        let result = {
-            let span = tracing::span!(
-                tracing::Level::INFO,
-                "faas.call_with_ivalues",
-                method = "invoke_tracing"
-            );
-            let _enter = span.enter();
+        let result = measure!(
             self.faas.call_with_ivalues(
                 &self.wasm_filename,
                 "invoke_tracing",
                 &args,
                 <_>::default(),
-            )?
-        };
+            )?,
+            tracing::Level::INFO,
+            "faas.call_with_ivalues",
+            method = "invoke_tracing",
+        );
 
         let result = try_as_one_value_vec(result)?;
         let outcome = InterpreterOutcome::from_ivalue(result)
@@ -194,11 +189,11 @@ fn prepare_args(
     .into_ivalue();
 
     let call_results = crate::interface::into_raw_result(call_results);
-    let call_results = {
-        let span = tracing::span!(tracing::Level::INFO, "serde_json::to_vec call_results");
-        let _enter = span.enter();
-        serde_json::to_vec(&call_results).expect("the default serializer shouldn't fail")
-    };
+    let call_results = measure!(
+        serde_json::to_vec(&call_results).expect("the default serializer shouldn't fail"),
+        tracing::Level::INFO,
+        "serde_json::to_vec call_results"
+    );
 
     vec![
         IValue::String(air.into()),

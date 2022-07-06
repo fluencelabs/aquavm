@@ -23,6 +23,7 @@ use crate::INTERPRETER_SUCCESS;
 
 use air_interpreter_data::InterpreterData;
 use air_interpreter_interface::CallRequests;
+use air_utils::measure;
 
 use std::fmt::Debug;
 use std::hash::Hash;
@@ -91,17 +92,17 @@ fn populate_outcome_from_contexts(
         restricted_streams,
         exec_ctx.last_call_request_id,
     );
-    let data = {
-        let span = tracing::span!(tracing::Level::INFO, "serde_json::to_vec(data)");
-        let _enter = span.enter();
-        serde_json::to_vec(&data).expect("default serializer shouldn't fail")
-    };
+    let data = measure!(
+        serde_json::to_vec(&data).expect("default serializer shouldn't fail"),
+        tracing::Level::INFO,
+        "serde_json::to_vec(data)"
+    );
     let next_peer_pks = dedup(exec_ctx.next_peer_pks);
-    let call_requests = {
-        let span = tracing::span!(tracing::Level::INFO, "serde_json::to_vec(call_results)");
-        let _enter = span.enter();
-        serde_json::to_vec(&exec_ctx.call_requests).expect("default serializer shouldn't fail")
-    };
+    let call_requests = measure!(
+        serde_json::to_vec(&exec_ctx.call_requests).expect("default serializer shouldn't fail"),
+        tracing::Level::INFO,
+        "serde_json::to_vec(call_results)",
+    );
 
     InterpreterOutcome {
         ret_code,

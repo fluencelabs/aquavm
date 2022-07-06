@@ -24,6 +24,7 @@ dependencies = [
  "air-parser",
  "air-test-utils",
  "air-trace-handler",
+ "air-utils",
  "boolinator",
  "concat-idents",
  "criterion",
@@ -88,6 +89,7 @@ dependencies = [
 name = "air-interpreter-data"
 version = "0.2.2"
 dependencies = [
+ "air-utils",
  "once_cell",
  "semver 1.0.7",
  "serde",
@@ -201,6 +203,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "air-utils"
+version = "0.1.0"
+
+[[package]]
 name = "ansi_term"
 version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -266,6 +272,7 @@ name = "avm-server"
 version = "0.23.0"
 dependencies = [
  "air-interpreter-interface",
+ "air-utils",
  "avm-data-store",
  "eyre",
  "fluence-faas",
