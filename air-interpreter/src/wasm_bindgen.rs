@@ -41,6 +41,7 @@ pub const DEFAULT_LOG_LEVEL: LevelFilter = LevelFilter::Trace;
 pub fn main() {
     // it's necessary to initialize it with the minimal allowed log level,
     // because otherwise it's impossible to set less level than used during initialization.
+
     const MINIMAL_LOG_LEVEL: LevelFilter = LevelFilter::Trace;
     logger::init_logger(Some(MINIMAL_LOG_LEVEL));
 

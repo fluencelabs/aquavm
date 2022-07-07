@@ -48,7 +48,7 @@ impl CallServiceResult {
         }
     }
 
-    pub(crate) fn into_raw(self) -> air_interpreter_interface::CallServiceResult {
+    pub fn into_raw(self) -> air_interpreter_interface::CallServiceResult {
         let CallServiceResult { ret_code, result } = self;
 
         air_interpreter_interface::CallServiceResult {
@@ -58,6 +58,7 @@ impl CallServiceResult {
     }
 }
 
+#[tracing::instrument(level = "debug", skip(call_results))]
 pub fn into_raw_result(call_results: CallResults) -> air_interpreter_interface::CallResults {
     call_results
         .into_iter()

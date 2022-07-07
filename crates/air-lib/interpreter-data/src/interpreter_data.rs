@@ -18,6 +18,8 @@ use super::GlobalStreamGens;
 use super::RestrictedStreamGens;
 use super::DATA_FORMAT_VERSION;
 use crate::ExecutionTrace;
+use air_utils::measure;
+
 use serde::Deserialize;
 use serde::Serialize;
 use std::ops::Deref;
@@ -63,6 +65,7 @@ impl InterpreterData {
         }
     }
 
+    #[tracing::instrument(skip_all)]
     pub fn from_execution_result(
         trace: ExecutionTrace,
         streams: GlobalStreamGens,
@@ -86,7 +89,11 @@ impl InterpreterData {
             return Ok(Self::default());
         }
 
-        serde_json::from_slice(slice)
+        measure!(
+            serde_json::from_slice(slice),
+            tracing::Level::INFO,
+            "serde_json::from_slice"
+        )
     }
 }
 

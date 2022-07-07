@@ -22,6 +22,7 @@ use crate::preparation_step::PreparationDescriptor;
 use air_interpreter_interface::InterpreterOutcome;
 use air_interpreter_interface::RunParameters;
 use air_log_targets::RUN_PARAMS;
+use air_utils::measure;
 
 pub fn execute_air(
     air: String,
@@ -64,7 +65,12 @@ fn execute_air_impl(
 
     // match here is used instead of map_err, because the compiler can't determine that
     // they are exclusive and would treat exec_ctx and trace_handler as moved
-    match air.execute(&mut exec_ctx, &mut trace_handler) {
+    let exec_result = measure!(
+        air.execute(&mut exec_ctx, &mut trace_handler),
+        tracing::Level::INFO,
+        "execute",
+    );
+    match exec_result {
         Ok(_) => farewell::from_success_result(exec_ctx, trace_handler),
         // return new collected trace in case of errors
         Err(error) if error.is_catchable() => Err(farewell::from_execution_error(exec_ctx, trace_handler, error)),

@@ -32,6 +32,7 @@ use air_interpreter_interface::CallRequestParams;
 use air_parser::ast;
 use air_trace_handler::MergerCallResult;
 use air_trace_handler::TraceHandler;
+use air_utils::measure;
 
 use std::rc::Rc;
 
@@ -51,6 +52,7 @@ struct ResolvedArguments {
 
 impl<'i> ResolvedCall<'i> {
     /// Build `ResolvedCall` from `Call` by transforming `PeerPart` & `FunctionPart` into `ResolvedTriplet`.
+    #[tracing::instrument(level = "trace", skip_all)]
     pub(super) fn new(raw_call: &Call<'i>, exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<Self> {
         let triplet = resolve(&raw_call.triplet, exec_ctx)?;
         let tetraplet = SecurityTetraplet::from_triplet(triplet);
@@ -66,6 +68,7 @@ impl<'i> ResolvedCall<'i> {
     }
 
     /// Executes resolved instruction, updates contexts based on a execution_step result.
+    #[tracing::instrument(level = "trace", skip_all)]
     pub(super) fn execute(
         &self,
         raw_call: &Call<'i>,
@@ -119,6 +122,7 @@ impl<'i> ResolvedCall<'i> {
         self.tetraplet.clone()
     }
 
+    #[tracing::instrument(level = "trace", skip_all)]
     fn prepare_request_params(
         &self,
         exec_ctx: &ExecutionCtx<'_>,
@@ -129,7 +133,11 @@ impl<'i> ResolvedCall<'i> {
             tetraplets,
         } = self.resolve_args(exec_ctx)?;
 
-        let serialized_tetraplets = serde_json::to_string(&tetraplets).expect("default serializer shouldn't fail");
+        let serialized_tetraplets = measure!(
+            serde_json::to_string(&tetraplets).expect("default serializer shouldn't fail"),
+            tracing::Level::INFO,
+            "serde_json::to_string(tetraplets)",
+        );
 
         let request_params = CallRequestParams::new(
             tetraplet.service_id.to_string(),

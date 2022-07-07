@@ -16,6 +16,7 @@
 
 use serde::Deserialize;
 use serde::Serialize;
+use std::borrow::Cow;
 use std::time::Duration;
 
 /// This trait is used for
@@ -47,13 +48,18 @@ pub trait DataStore {
     ) -> Result<(), Self::Error>;
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct AnomalyData<'data> {
-    pub air_script: &'data str,
-    pub particle: &'data [u8], // it's byte because of the restriction on trait objects methods
-    pub prev_data: &'data [u8],
-    pub current_data: &'data [u8],
-    pub avm_outcome: &'data [u8], // it's byte because of the restriction on trait objects methods
+    #[serde(borrow)]
+    pub air_script: Cow<'data, str>,
+    #[serde(borrow, with = "serde_bytes")]
+    pub particle: Cow<'data, [u8]>, // it's byte because of the restriction on trait objects methods
+    #[serde(borrow, with = "serde_bytes")]
+    pub prev_data: Cow<'data, [u8]>,
+    #[serde(borrow, with = "serde_bytes")]
+    pub current_data: Cow<'data, [u8]>,
+    #[serde(borrow, with = "serde_bytes")]
+    pub avm_outcome: Cow<'data, [u8]>, // it's byte because of the restriction on trait objects methods
     pub execution_time: Duration,
     pub memory_delta: usize,
 }
@@ -69,13 +75,97 @@ impl<'data> AnomalyData<'data> {
         memory_delta: usize,
     ) -> Self {
         Self {
-            air_script,
-            particle,
-            prev_data,
-            current_data,
-            avm_outcome,
+            air_script: air_script.into(),
+            particle: particle.into(),
+            prev_data: prev_data.into(),
+            current_data: current_data.into(),
+            avm_outcome: avm_outcome.into(),
             execution_time,
             memory_delta,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn anomaly_json(
+        air_script: &str,
+        particle: &[u8],
+        prev_data: &[u8],
+        current_data: &[u8],
+        avm_outcome: &[u8],
+    ) -> String {
+        format!(
+            concat!(
+                r#"{{"air_script":{air_script},"#,
+                r#""particle":{particle},"#,
+                r#""prev_data":{prev_data},"#,
+                r#""current_data":{current_data},"#,
+                r#""avm_outcome":{avm_outcome},"#,
+                r#""execution_time":{{"secs":42,"nanos":0}},"#,
+                r#""memory_delta":123"#,
+                r#"}}"#
+            ),
+            air_script = serde_json::to_string(air_script).unwrap(),
+            particle = serde_json::to_string(particle).unwrap(),
+            prev_data = serde_json::to_string(prev_data).unwrap(),
+            current_data = serde_json::to_string(current_data).unwrap(),
+            avm_outcome = serde_json::to_string(avm_outcome).unwrap(),
+        )
+    }
+    #[test]
+    fn anomaly_data_se() {
+        let anomaly = AnomalyData::new(
+            "(null)",
+            br#"{"data":"value"}"#,  // not real data
+            br#"{"trace":[]}"#,      // not real data
+            br#"{"trace":[1,2,3]}"#, // not real data
+            b"{}",                   // not real data
+            Duration::from_secs(42),
+            123,
+        );
+
+        let json_data = serde_json::to_string(&anomaly).expect("JSON serialize anomaly data");
+        let expected = anomaly_json(
+            &anomaly.air_script,
+            &anomaly.particle,
+            &anomaly.prev_data,
+            &anomaly.current_data,
+            &anomaly.avm_outcome,
+        );
+        assert_eq!(json_data, expected);
+    }
+
+    #[test]
+    fn anomaly_data_de() {
+        let particle = br#"{"particle":"data"}"#;
+        let current_data = br#"{"data":"current"}"#;
+        let prev_data = br#"{"data":"prev"}"#;
+        let avm_outcome = br#"{"avm":[1,2,3]}"#;
+        let json_data = anomaly_json(
+            "(null)",
+            &particle[..],
+            &prev_data[..],
+            &current_data[..],
+            &avm_outcome[..],
+        );
+
+        let anomaly: AnomalyData =
+            serde_json::from_str(&json_data).expect("deserialize JSON anomaly data");
+
+        assert_eq!(
+            anomaly,
+            AnomalyData::new(
+                "(null)",
+                &particle[..],
+                &prev_data[..],
+                &current_data[..],
+                &avm_outcome[..],
+                Duration::from_secs(42),
+                123,
+            )
+        )
     }
 }

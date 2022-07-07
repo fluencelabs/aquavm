@@ -23,12 +23,15 @@ use crate::INTERPRETER_SUCCESS;
 
 use air_interpreter_data::InterpreterData;
 use air_interpreter_interface::CallRequests;
+use air_utils::measure;
 
+use std::fmt::Debug;
 use std::hash::Hash;
 use std::rc::Rc;
 
 /// Create InterpreterOutcome from supplied execution context and trace handler,
 /// set ret_code to INTERPRETER_SUCCESS.
+#[tracing::instrument(skip_all)]
 pub(crate) fn from_success_result(
     exec_ctx: ExecutionCtx<'_>,
     trace_handler: TraceHandler,
@@ -46,9 +49,10 @@ pub(crate) fn from_success_result(
 
 /// Create InterpreterOutcome from supplied data and error,
 /// set ret_code based on the error.
+#[tracing::instrument]
 pub(crate) fn from_uncatchable_error(
-    data: impl Into<Vec<u8>>,
-    error: impl ToErrorCode + ToString,
+    data: impl Into<Vec<u8>> + Debug,
+    error: impl ToErrorCode + ToString + Debug,
 ) -> InterpreterOutcome {
     let ret_code = error.to_error_code();
     let data = data.into();
@@ -65,14 +69,16 @@ pub(crate) fn from_uncatchable_error(
 
 /// Create InterpreterOutcome from supplied execution context, trace handler, and error,
 /// set ret_code based on the error.
+#[tracing::instrument(skip(exec_ctx, trace_handler))]
 pub(crate) fn from_execution_error(
     exec_ctx: ExecutionCtx<'_>,
     trace_handler: TraceHandler,
-    error: impl ToErrorCode + ToString,
+    error: impl ToErrorCode + ToString + Debug,
 ) -> InterpreterOutcome {
     populate_outcome_from_contexts(exec_ctx, trace_handler, error.to_error_code(), error.to_string())
 }
 
+#[tracing::instrument(skip(exec_ctx, trace_handler))]
 fn populate_outcome_from_contexts(
     exec_ctx: ExecutionCtx<'_>,
     trace_handler: TraceHandler,
@@ -86,9 +92,17 @@ fn populate_outcome_from_contexts(
         restricted_streams,
         exec_ctx.last_call_request_id,
     );
-    let data = serde_json::to_vec(&data).expect("default serializer shouldn't fail");
+    let data = measure!(
+        serde_json::to_vec(&data).expect("default serializer shouldn't fail"),
+        tracing::Level::INFO,
+        "serde_json::to_vec(data)"
+    );
     let next_peer_pks = dedup(exec_ctx.next_peer_pks);
-    let call_requests = serde_json::to_vec(&exec_ctx.call_requests).expect("default serializer shouldn't fail");
+    let call_requests = measure!(
+        serde_json::to_vec(&exec_ctx.call_requests).expect("default serializer shouldn't fail"),
+        tracing::Level::INFO,
+        "serde_json::to_vec(call_results)",
+    );
 
     InterpreterOutcome {
         ret_code,
@@ -100,7 +114,7 @@ fn populate_outcome_from_contexts(
 }
 
 /// Deduplicate values in a supplied vector.
-fn dedup<T: Eq + Hash>(mut vec: Vec<T>) -> Vec<T> {
+fn dedup<T: Eq + Hash + Debug>(mut vec: Vec<T>) -> Vec<T> {
     use std::collections::HashSet;
 
     let set: HashSet<_> = vec.drain(..).collect();

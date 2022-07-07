@@ -20,6 +20,7 @@ use crate::RunnerError;
 use crate::RunnerResult;
 
 use air_interpreter_interface::InterpreterOutcome;
+use air_utils::measure;
 use fluence_faas::FaaSConfig;
 use fluence_faas::FluenceFaaS;
 use fluence_faas::IValue;
@@ -66,6 +67,7 @@ impl AVMRunner {
         Ok(avm)
     }
 
+    #[tracing::instrument(skip_all)]
     pub fn call(
         &mut self,
         air: impl Into<String>,
@@ -87,9 +89,59 @@ impl AVMRunner {
             call_results,
         );
 
-        let result =
+        let result = measure!(
             self.faas
-                .call_with_ivalues(&self.wasm_filename, "invoke", &args, <_>::default())?;
+                .call_with_ivalues(&self.wasm_filename, "invoke", &args, <_>::default())?,
+            tracing::Level::INFO,
+            "faas.call_with_ivalues",
+            method = "invoke",
+        );
+
+        let result = try_as_one_value_vec(result)?;
+        let outcome = InterpreterOutcome::from_ivalue(result)
+            .map_err(RunnerError::InterpreterResultDeError)?;
+        let outcome = RawAVMOutcome::from_interpreter_outcome(outcome)?;
+
+        Ok(outcome)
+    }
+
+    #[tracing::instrument(skip_all)]
+    pub fn call_tracing(
+        &mut self,
+        air: impl Into<String>,
+        prev_data: impl Into<Vec<u8>>,
+        data: impl Into<Vec<u8>>,
+        init_peer_id: impl Into<String>,
+        timestamp: u64,
+        ttl: u32,
+        call_results: CallResults,
+        tracing_params: String,
+        tracing_output_mode: u8,
+    ) -> RunnerResult<RawAVMOutcome> {
+        let mut args = prepare_args(
+            air,
+            prev_data,
+            data,
+            self.current_peer_id.clone(),
+            init_peer_id.into(),
+            timestamp,
+            ttl,
+            call_results,
+        );
+        args.push(IValue::String(tracing_params));
+        args.push(IValue::U8(tracing_output_mode));
+
+        let result = measure!(
+            self.faas.call_with_ivalues(
+                &self.wasm_filename,
+                "invoke_tracing",
+                &args,
+                <_>::default(),
+            )?,
+            tracing::Level::INFO,
+            "faas.call_with_ivalues",
+            method = "invoke_tracing",
+        );
 
         let result = try_as_one_value_vec(result)?;
         let outcome = InterpreterOutcome::from_ivalue(result)
@@ -117,6 +169,7 @@ impl AVMRunner {
     }
 }
 
+#[tracing::instrument(skip(air, prev_data, data, call_results))]
 fn prepare_args(
     air: impl Into<String>,
     prev_data: impl Into<Vec<u8>>,
@@ -136,8 +189,11 @@ fn prepare_args(
     .into_ivalue();
 
     let call_results = crate::interface::into_raw_result(call_results);
-    let call_results =
-        serde_json::to_vec(&call_results).expect("the default serializer shouldn't fail");
+    let call_results = measure!(
+        serde_json::to_vec(&call_results).expect("the default serializer shouldn't fail"),
+        tracing::Level::INFO,
+        "serde_json::to_vec call_results"
+    );
 
     vec![
         IValue::String(air.into()),
