@@ -15,7 +15,8 @@ thread_local!(static SCRIPT: String = String::from(
 );
 
 fn current_peer_id_call() -> Result<RawAVMOutcome, String> {
-    VM.with(|vm| SCRIPT.with(|script| vm.borrow_mut().call(script, "", "", "")))
+    let run_parameters = TestRunParameters::new("test_peer_id", 0, 1);
+    VM.with(|vm| SCRIPT.with(|script| vm.borrow_mut().call(script, "", "", run_parameters)))
 }
 
 fn criterion_benchmark(c: &mut Criterion) {

@@ -76,10 +76,12 @@ fn create_service_benchmark() -> Result<RawAVMOutcome, String> {
             )
         )"#;
 
+    let run_parameters1 = TestRunParameters::new("set_variables", 0, 1);
+    let run_parameters2 = run_parameters1.clone();
     let result = SET_VARIABLES_VM
-        .with(|vm| vm.borrow_mut().call(script, "", "", ""))
+        .with(|vm| vm.borrow_mut().call(script, "", "", run_parameters1))
         .unwrap();
-    VM.with(|vm| vm.borrow_mut().call(script, "", result.data, ""))
+    VM.with(|vm| vm.borrow_mut().call(script, "", result.data, run_parameters2))
 }
 
 fn criterion_benchmark(c: &mut Criterion) {

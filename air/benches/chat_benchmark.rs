@@ -41,24 +41,25 @@ fn chat_sent_message_benchmark() -> Result<RawAVMOutcome, String> {
             )
         "#;
 
-    let result = CLIENT_1_VM.with(|vm| vm.borrow_mut().call(script, "", "", "")).unwrap();
+    let run_parameters = TestRunParameters::new("A", 0, 1);
+    let result = CLIENT_1_VM.with(|vm| vm.borrow_mut().call(script, "", "", run_parameters.clone())).unwrap();
     let result = RELAY_1_VM
-        .with(|vm| vm.borrow_mut().call(script, "", result.data, ""))
+        .with(|vm| vm.borrow_mut().call(script, "", result.data, run_parameters.clone()))
         .unwrap();
     let result = REMOTE_VM
-        .with(|vm| vm.borrow_mut().call(script, "", result.data, ""))
+        .with(|vm| vm.borrow_mut().call(script, "", result.data, run_parameters.clone()))
         .unwrap();
     let res_data = result.data.clone();
     let res1 = RELAY_1_VM
-        .with(|vm| vm.borrow_mut().call(script, "", res_data, ""))
+        .with(|vm| vm.borrow_mut().call(script, "", res_data, run_parameters.clone()))
         .unwrap();
     CLIENT_1_VM
-        .with(|vm| vm.borrow_mut().call(script, "", res1.data, ""))
+        .with(|vm| vm.borrow_mut().call(script, "", res1.data, run_parameters.clone()))
         .unwrap();
     let res2 = RELAY_2_VM
-        .with(|vm| vm.borrow_mut().call(script, "", result.data, ""))
+        .with(|vm| vm.borrow_mut().call(script, "", result.data, run_parameters.clone()))
         .unwrap();
-    CLIENT_2_VM.with(|vm| vm.borrow_mut().call(script, "", res2.data, ""))
+    CLIENT_2_VM.with(|vm| vm.borrow_mut().call(script, "", res2.data, run_parameters.clone()))
 }
 
 fn criterion_benchmark(c: &mut Criterion) {

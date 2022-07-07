@@ -122,11 +122,11 @@ fn parse_deep(c: &mut Criterion) {
         .map(|(i, code)| (i, code.len()))
         .collect();
 
-    c.bench_function_over_inputs(
-        "parse generated script",
-        move |b, (i, _)| {
+    let mut group = c.benchmark_group("parse generated script");
+    for (i, _) in index {
+        group.bench_function(i.to_string(), |b| {
             let parser = parser.clone();
-            let code = &source_code[*i];
+            let code = &source_code[i];
             b.iter(move || {
                 let mut validator = VariableValidator::new();
                 let lexer = AIRLexer::new(code);
@@ -136,9 +136,8 @@ fn parse_deep(c: &mut Criterion) {
                     .parse("", &mut Vec::new(), &mut validator, lexer)
                     .expect("success")
             });
-        },
-        index,
-    );
+        });
+    }
 }
 
 fn parse_dashboard_script(c: &mut Criterion) {
@@ -170,7 +169,5 @@ criterion_group!(
     parse_to_fail,
     parse_dashboard_script,
     parse_deep,
-    clone_parser,
-    clone_parser_rc,
 );
 criterion_main!(parser);
