@@ -38,8 +38,8 @@ use marine_rs_sdk::module_manifest;
 module_manifest!();
 
 /*
-   _initialize function that calls __wasm_call_ctors is required to mitigade memory leak
-   that is described in https://github.com/WebAssembly/wasi-libc/issues/298
+   _initialize function that calls __wasm_call_ctors is required to mitigate memory leak
+   that is described in https://github.com/WebAssembly/wasi-libc/issues/298.
 
    In short, without this code rust wraps every export function
    with __wasm_call_ctors/__wasm_call_dtors calls. This causes memory leaks. When compiler sees
@@ -58,9 +58,8 @@ pub fn _initialize() {
     }
 }
 
-
 pub fn main() {
-    _initialize(); // As __wasm_call_ctors still does necessary work, we call it at the start of the module
+    _initialize(); // As __wasm_call_ctors still does necessary work, we call it at the start of the module.
     logger::init_logger(None);
 }
 
