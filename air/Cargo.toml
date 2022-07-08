@@ -48,7 +48,8 @@ wasm-bindgen = "=0.2.65"
 air-test-utils = { path = "../crates/air-lib/test-utils" }
 fluence-app-service = "0.17.2"
 
-criterion = "0.3.3"
+# the feature just silence a warning in the criterion 0.3.x.
+criterion = { version = "0.3.3", features = ["html_reports"] }
 csv = "1.1.5"
 once_cell = "1.4.1"
 env_logger = "0.7.1"
@@ -65,4 +66,12 @@ harness = false
 
 [[bench]]
 name = "create_service_benchmark"
+harness = false
+
+[[bench]]
+name = "data_big_benchmark"
+harness = false
+
+[[bench]]
+name = "data_long_benchmark"
 harness = false
