@@ -121,8 +121,12 @@ fn get_runner(
         self::native::create_native_avm_runner(current_peer_id)
             .context("Failed to instantiate a native AVM")
     } else {
-        self::wasm::create_wasm_avm_runner(current_peer_id, air_interpreter_wasm_path, max_heap_size)
-            .context("Failed to instantiate WASM AVM")
+        self::wasm::create_wasm_avm_runner(
+            current_peer_id,
+            air_interpreter_wasm_path,
+            max_heap_size,
+        )
+        .context("Failed to instantiate WASM AVM")
     }
 }
 
