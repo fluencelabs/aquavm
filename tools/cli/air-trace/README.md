@@ -12,7 +12,7 @@ All common parameters are optional.  Their position is before the mode selector 
 + `--call-results PATH` parameter allows you to provide call results for current execution.
 + `--current-peer-id STR` by default is "some_id".
 + `--max-heap-size N` defines maximum heap size for WASM runtime.
-+ `--runtime PATH` option defines the AquaVM WASM binary to be executed.  By default, it is "target/wasm32-wasi/release/air_interpreter_server.wasm", but you can define a global value with the `AIR_WASM_RUNTIME_PATH` environment variable.
++ `--interpreter PATH` option defines the AquaVM WASM binary to be executed.  By default, it is "target/wasm32-wasi/release/air_interpreter_server.wasm", but you can define a global value with the `AIR_INTERPRETER_WASM_PATH` environment variable.
 + with the `--json` option, tracing info is output in machine-readable JSON format.  The output can be later processed with `air-trace stats` subcommand.
 + `--tracing-params` defines tracing crate logging levels.  By default, it is equal to `info` and does trace the most high-level AquaVM constructions (data parsing, AIR script parsing, execution, result construction).  With `debug` level it traces some individual commands, and with `trace` level it traces even more fine grained functionality.
 

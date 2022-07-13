@@ -44,11 +44,11 @@ pub(crate) struct Args {
     #[clap(long)]
     native: bool,
     #[clap(
-        long = "runtime",
-        env = "AIR_WASM_RUNTIME_PATH",
+        long = "interpreter",
+        env = "AIR_INTERPRETER_WASM_PATH",
         default_value = "target/wasm32-wasi/release/air_interpreter_server.wasm"
     )]
-    air_wasm_runtime_path: PathBuf,
+    air_interpreter_path: PathBuf,
     #[clap(long, help = "Execute several times; great for native profiling")]
     repeat: Option<u32>,
     #[clap(long, help = "Output JSON tracing info")]
@@ -75,7 +75,7 @@ pub(crate) fn run(args: Args) -> anyhow::Result<()> {
     let mut runner = get_runner(
         args.native,
         current_peer_id,
-        &args.air_wasm_runtime_path,
+        &args.air_interpreter_path,
         args.max_heap_size,
     )?;
 
@@ -114,24 +114,24 @@ pub(crate) fn run(args: Args) -> anyhow::Result<()> {
 fn get_runner(
     native: bool,
     current_peer_id: impl Into<String>,
-    air_wasm_runtime_path: &Path,
+    air_interpreter_wasm_path: &Path,
     max_heap_size: Option<u64>,
 ) -> anyhow::Result<Box<dyn AirRunner>> {
     if native {
         self::native::create_native_avm_runner(current_peer_id)
             .context("Failed to instantiate a native AVM")
     } else {
-        self::wasm::create_wasm_avm_runner(current_peer_id, air_wasm_runtime_path, max_heap_size)
+        self::wasm::create_wasm_avm_runner(current_peer_id, air_interpreter_wasm_path, max_heap_size)
             .context("Failed to instantiate WASM AVM")
     }
 }
 
 #[cfg(not(feature = "wasm"))]
 fn get_runner(
-    native: bool,
+    _native: bool,
     current_peer_id: impl Into<String>,
-    air_wasm_runtime_path: &Path,
-    max_heap_size: Option<u64>,
+    _air_interpreter_wasm_path: &Path,
+    _max_heap_size: Option<u64>,
 ) -> anyhow::Result<Box<dyn AirRunner>> {
     self::native::create_native_avm_runner(current_peer_id)
         .context("Failed to instantiate a native AVM")
