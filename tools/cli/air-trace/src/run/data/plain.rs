@@ -36,7 +36,7 @@ pub(crate) struct PlainDataArgs {
 
     #[clap(long = "script", help = "read from stdin by default")]
     air_script_path: Option<PathBuf>,
-    #[clap(long = "prev_data")]
+    #[clap(long = "prev-data")]
     prev_data_path: Option<PathBuf>,
     #[clap(long = "data")]
     data_path: PathBuf,

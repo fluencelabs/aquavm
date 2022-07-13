@@ -9,7 +9,7 @@ Executes an AIR script with data in WASM AquaVM.  It has two modes of parameter 
 ### Common parameters
 All common parameters are optional.  Their position is before the mode selector (`--plain` or `--anomaly`).
 
-+ `--call_results PATH` parameter allows you to provide call results for current execution.
++ `--call-results PATH` parameter allows you to provide call results for current execution.
 + `--current-peer-id STR` by default is "some_id".
 + `--max-heap-size N` defines maximum heap size for WASM runtime.
 + `--runtime PATH` option defines the AquaVM WASM binary to be executed.  By default, it is "target/wasm32-wasi/release/air_interpreter_server.wasm", but you can define a global value with the `AIR_WASM_RUNTIME_PATH` environment variable.

@@ -34,7 +34,7 @@ pub(crate) struct Args {
     #[clap(long)]
     current_peer_id: Option<String>,
 
-    #[clap(long = "call_results")]
+    #[clap(long = "call-results")]
     call_results_path: Option<PathBuf>,
 
     #[clap(long)]
