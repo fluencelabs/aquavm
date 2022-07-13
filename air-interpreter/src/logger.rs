@@ -40,7 +40,8 @@ pub fn init_tracing(tracing_params: String, trace_mode: u8) {
 
     let builder = tracing_subscriber::fmt()
         .with_env_filter(tracing_params)
-        .with_span_events(FmtSpan::ENTER | FmtSpan::CLOSE);
+        .with_span_events(FmtSpan::ENTER | FmtSpan::CLOSE)
+        .with_writer(std::io::stderr);
     if trace_mode == 0 {
         builder.json().init();
     } else {
