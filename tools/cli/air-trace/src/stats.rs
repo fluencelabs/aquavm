@@ -22,7 +22,7 @@ use self::log_data::{LogRecord, Message};
 use clap::Parser;
 
 #[derive(Parser)]
-#[clap(about = "Pretty-print AquaVM JSON trace or provide execution stats")]
+#[clap(about = "Print human-readable AquaVM JSON trace or provide execution stats")]
 pub(crate) struct Args {
     #[clap(long)]
     pretty: bool,
