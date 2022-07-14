@@ -48,13 +48,13 @@ impl AirRunner for WasmAvmRunner {
 
 pub(crate) fn create_wasm_avm_runner(
     current_peer_id: impl Into<String>,
-    air_wasm_runtime_path: &Path,
+    air_interpreter_wasm_path: &Path,
     max_heap_size: Option<u64>,
 ) -> anyhow::Result<Box<dyn AirRunner>> {
     let current_peer_id = current_peer_id.into();
 
     Ok(Box::new(WasmAvmRunner(AVMRunner::new(
-        air_wasm_runtime_path.to_owned(),
+        air_interpreter_wasm_path.to_owned(),
         current_peer_id,
         max_heap_size,
         0,
