@@ -8,23 +8,8 @@ use serde_json::Value;
 use std::cell::RefCell;
 
 thread_local!(static VM: RefCell<TestRunner> = RefCell::new(create_avm(unit_call_service(), "test_peer_id")));
-const SCRIPT: &str = r#"
-(par
-   (seq
-      (seq
-         (call "one_peer_id" ("service1" "call1") [] res1)
-         (call "two_peer_id" ("service2" "call2") [] res2))
-      (seq
-         (call "three_peer_id" ("service3" "call3") [] res3)
-         (call "test_peer_id" ("service" "call") [res1 res2 res3])))
-   (seq
-      (seq
-         (call "one_peer_id" ("service1" "call1") [] res1)
-         (call "two_peer_id" ("service2" "call2") [] res2))
-      (seq
-         (call "three_peer_id" ("service3" "call3") [] res3)
-         (call "test_peer_id" ("service" "call") [res1 res2 res3]))))"#;
 
+const SCRIPT: &str = include_str!("data/big.air");
 // this is the data with smaller number of huge values; it contains only calls and
 // is to be modified in different ways.
 const VALUES_DATA: &str = include_str!("data/anomaly_big.json");

@@ -1,0 +1,15 @@
+(par
+   (seq
+      (seq
+         (call "one_peer_id" ("service1" "call1") [] res1)
+         (call "two_peer_id" ("service2" "call2") [] res2))
+      (seq
+         (call "three_peer_id" ("service3" "call3") [] res3)
+         (call "test_peer_id" ("service" "call") [res1 res2 res3])))
+   (seq
+      (seq
+         (call "one_peer_id" ("service1" "call1") [] res4)
+         (call "two_peer_id" ("service2" "call2") [] res5))
+      (seq
+         (call "three_peer_id" ("service3" "call3") [] res6)
+         (call "test_peer_id" ("service" "call") [res4 res5 res6]))))
