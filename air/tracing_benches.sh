@@ -68,9 +68,9 @@ function main {
     esac
     shift 2
 
-    : "${AIR_WASM_RUNTIME_PATH:=../target/wasm32-wasi/release/air_interpreter_server.wasm}"
-    if [ ! -e "${AIR_WASM_RUNTIME_PATH}" ]; then
-        error "No AIR interpreter at ${AIR_WASM_RUNTIME_PATH}."
+    : "${AIR_INTERPRETER_WASM_PATH:=../target/wasm32-wasi/release/air_interpreter_server.wasm}"
+    if [ ! -e "${AIR_INTERPRETER_WASM_PATH}" ]; then
+        error "No AIR interpreter at ${AIR_INTERPRETER_WASM_PATH}."
     fi
 
     : "${INPUT_DATA_DIR:=./benches/data}"
@@ -78,7 +78,7 @@ function main {
         error "No input data at ${INPUT_DATA_DIR}.  Set INPUT_DATA_DIR to proper value."
     fi
 
-    export AIR_WASM_RUNTIME_PATH
+    export AIR_INTERPRETER_WASM_PATH
 
     prev_data_path=$(mktemp -t "tracing_benches_prev_data_XXXXXXX")
     current_data_path=$(mktemp -t "tracing_benches_current_data_XXXXXXX")
@@ -114,7 +114,7 @@ function main {
             echo "*** Running test ${tst}-${subt}..." >&1
             eval "${script_cmd}" | \
                 air-trace run "$@" --repeat 1 --plain \
-                    --prev_data "$prev_data_path" \
+                    --prev-data "$prev_data_path" \
                     --data "$current_data_path"
         done
     done
