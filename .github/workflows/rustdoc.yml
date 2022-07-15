@@ -22,7 +22,8 @@ jobs:
       - name: Install Rust toolchain
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly
+          # fix version until https://github.com/rust-lang/rust/issues/99261 is resolved
+          toolchain: nightly-2022-07-13
           profile: minimal
           override: true
           components: rustfmt, rust-src
