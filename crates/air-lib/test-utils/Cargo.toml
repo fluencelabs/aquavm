@@ -17,7 +17,7 @@ path = "src/lib.rs"
 air = { path = "../../../air" }
 air-interpreter-interface = { path = "../interpreter-interface" }
 avm-server = { path = "../../../avm/server" }
-marine-rs-sdk = "0.6.15"
+marine-rs-sdk = "0.7.0"
 
 fstrings = "0.2.3"
 object-pool = "0.5.4"
