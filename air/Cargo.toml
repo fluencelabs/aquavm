@@ -46,7 +46,7 @@ wasm-bindgen = "=0.2.65"
 
 [dev_dependencies]
 air-test-utils = { path = "../crates/air-lib/test-utils" }
-fluence-app-service = "0.17.2"
+fluence-app-service = "0.18.0"
 
 # the feature just silence a warning in the criterion 0.3.x.
 criterion = { version = "0.3.3", features = ["html_reports"] }

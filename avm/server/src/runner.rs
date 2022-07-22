@@ -21,15 +21,15 @@ use crate::RunnerResult;
 
 use air_interpreter_interface::InterpreterOutcome;
 use air_utils::measure;
-use fluence_faas::FaaSConfig;
-use fluence_faas::FluenceFaaS;
-use fluence_faas::IValue;
-use fluence_faas::ModuleDescriptor;
+use marine::MarineConfig;
+use marine::Marine;
+use marine::IValue;
+use marine::ModuleDescriptor;
 
 use std::path::PathBuf;
 
 pub struct AVMRunner {
-    faas: FluenceFaaS,
+    marine: Marine,
     current_peer_id: String,
     /// file name of the AIR interpreter .wasm
     wasm_filename: String,
@@ -54,12 +54,12 @@ impl AVMRunner {
     ) -> RunnerResult<Self> {
         let (wasm_dir, wasm_filename) = split_dirname(air_wasm_path)?;
 
-        let faas_config = make_faas_config(wasm_dir, &wasm_filename, max_heap_size, logging_mask);
-        let faas = FluenceFaaS::with_raw_config(faas_config)?;
+        let marine_config = make_marine_config(wasm_dir, &wasm_filename, max_heap_size, logging_mask);
+        let marine = Marine::with_raw_config(marine_config)?;
         let current_peer_id = current_peer_id.into();
 
         let avm = Self {
-            faas,
+            marine,
             current_peer_id,
             wasm_filename,
         };
@@ -90,10 +90,10 @@ impl AVMRunner {
         );
 
         let result = measure!(
-            self.faas
+            self.marine
                 .call_with_ivalues(&self.wasm_filename, "invoke", &args, <_>::default())?,
             tracing::Level::INFO,
-            "faas.call_with_ivalues",
+            "marine.call_with_ivalues",
             method = "invoke",
         );
 
@@ -132,14 +132,14 @@ impl AVMRunner {
         args.push(IValue::U8(tracing_output_mode));
 
         let result = measure!(
-            self.faas.call_with_ivalues(
+            self.marine.call_with_ivalues(
                 &self.wasm_filename,
                 "invoke_tracing",
                 &args,
                 <_>::default(),
             )?,
             tracing::Level::INFO,
-            "faas.call_with_ivalues",
+            "marine.call_with_ivalues",
             method = "invoke_tracing",
         );
 
@@ -152,9 +152,9 @@ impl AVMRunner {
     }
 
     pub fn memory_stats(&self) -> AVMMemoryStats {
-        let stats = self.faas.module_memory_stats();
+        let stats = self.marine.module_memory_stats();
 
-        // only the interpreters must be loaded in FaaS
+        // only the interpreters must be loaded in Marine
         debug_assert!(stats.len() == 1);
 
         AVMMemoryStats {
@@ -237,13 +237,13 @@ fn split_dirname(path: PathBuf) -> RunnerResult<(PathBuf, String)> {
     Ok((path, file_name))
 }
 
-fn make_faas_config(
+fn make_marine_config(
     air_wasm_dir: PathBuf,
     air_wasm_file: &str,
     max_heap_size: Option<u64>,
     logging_mask: i32,
-) -> FaaSConfig {
-    let air_module_config = fluence_faas::FaaSModuleConfig {
+) -> MarineConfig {
+    let air_module_config = marine::MarineModuleConfig {
         mem_pages_count: None,
         max_heap_size,
         logger_enabled: true,
@@ -252,7 +252,7 @@ fn make_faas_config(
         logging_mask,
     };
 
-    FaaSConfig {
+    MarineConfig {
         modules_dir: Some(air_wasm_dir),
         modules_config: vec![ModuleDescriptor {
             file_name: String::from(air_wasm_file),
