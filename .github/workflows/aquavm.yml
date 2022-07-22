@@ -62,3 +62,7 @@ jobs:
 
       - name: "cargo clippy"
         run: cargo clippy -v
+
+      - name: setup tmate session on failure
+        if: failure()
+        uses: mxschmitt/action-tmate@v3
