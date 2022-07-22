@@ -33,7 +33,11 @@ jobs:
         run: .github/download_marine.sh
 
       - name: "Build Wasm binary for interpreter"
-        run: marine build --features marine
+        run: |
+          # just to make sure caches do not interefe
+          cargo clean
+          
+          marine build --features marine
         working-directory: air-interpreter
 
       - name: "Build Wasm binary for tests"
