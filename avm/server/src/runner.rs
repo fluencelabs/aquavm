@@ -21,9 +21,9 @@ use crate::RunnerResult;
 
 use air_interpreter_interface::InterpreterOutcome;
 use air_utils::measure;
-use marine::MarineConfig;
-use marine::Marine;
 use marine::IValue;
+use marine::Marine;
+use marine::MarineConfig;
 use marine::ModuleDescriptor;
 
 use std::path::PathBuf;
@@ -54,7 +54,8 @@ impl AVMRunner {
     ) -> RunnerResult<Self> {
         let (wasm_dir, wasm_filename) = split_dirname(air_wasm_path)?;
 
-        let marine_config = make_marine_config(wasm_dir, &wasm_filename, max_heap_size, logging_mask);
+        let marine_config =
+            make_marine_config(wasm_dir, &wasm_filename, max_heap_size, logging_mask);
         let marine = Marine::with_raw_config(marine_config)?;
         let current_peer_id = current_peer_id.into();
 

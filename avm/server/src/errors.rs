@@ -15,8 +15,8 @@
  */
 
 use crate::interface::ErrorAVMOutcome;
-use marine::MarineError;
 use marine::IValue;
+use marine::MarineError;
 
 use serde_json::Error as SerdeError;
 use thiserror::Error as ThisError;

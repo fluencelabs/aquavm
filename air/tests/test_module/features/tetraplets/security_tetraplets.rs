@@ -196,10 +196,10 @@ fn check_tetraplet_works_correctly() {
     assert_eq!(arg_tetraplets, expected_tetraplets);
 }
 
+use fluence_app_service::AppService;
 use fluence_app_service::AppServiceConfig;
 use fluence_app_service::MarineConfig;
 use fluence_app_service::ModuleDescriptor;
-use fluence_app_service::AppService;
 
 use air_test_utils::trace_from_result;
 use std::path::PathBuf;
