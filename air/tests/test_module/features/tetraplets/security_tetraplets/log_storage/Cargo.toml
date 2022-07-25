@@ -12,4 +12,11 @@ path = "src/main.rs"
 air = { path = "../../../../../../../air" }
 marine-rs-sdk = "0.7.0"
 
+[patch.crates-io]
+polyplets = { path = "../../../../../../../crates/air-lib/polyplets" }
+marine-rs-sdk = {version = "0.7.0", git = "https://github.com/fluencelabs/marine-rs-sdk", branch = "feat/VM-115-wasm_ctors_workaround"}
+marine-rs-sdk-main = {version = "0.7.0", git = "https://github.com/fluencelabs/marine-rs-sdk", branch = "feat/VM-115-wasm_ctors_workaround"}
+marine-macro = {version = "0.7.0", git = "https://github.com/fluencelabs/marine-rs-sdk", branch = "feat/VM-115-wasm_ctors_workaround"}
+marine-macro-impl = {version = "0.7.0", git = "https://github.com/fluencelabs/marine-rs-sdk", branch = "feat/VM-115-wasm_ctors_workaround"}
+
 [workspace]
