@@ -33,14 +33,7 @@ jobs:
         run: .github/download_marine.sh
 
       - name: "Build Wasm binary for interpreter"
-        run: |
-          # here is temporary things to ensure that github dependencies are updated  to latest
-          cargo update -p marine-macro
-          cargo update -p marine-rs-sdk-main
-          cargo update -p marine-rs-sdk
-          cargo update -p marine-runtime
-          # here is the actual command
-          marine build --features marine
+        run: marine build --features marine
         working-directory: air-interpreter
 
       - name: "Build Wasm binary for tests"
