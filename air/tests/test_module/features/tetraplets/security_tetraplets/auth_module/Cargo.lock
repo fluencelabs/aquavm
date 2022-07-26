@@ -23,6 +23,7 @@ dependencies = [
  "air-log-targets",
  "air-parser",
  "air-trace-handler",
+ "air-utils",
  "boolinator",
  "concat-idents",
  "fstrings",
@@ -30,12 +31,13 @@ dependencies = [
  "maplit",
  "marine-rs-sdk",
  "non-empty-vec",
- "polyplets 0.2.0",
+ "polyplets",
  "serde",
  "serde_json",
  "strum",
  "strum_macros",
  "thiserror",
+ "tracing",
  "wasm-bindgen",
 ]
 
@@ -47,10 +49,12 @@ version = "0.1.0"
 name = "air-interpreter-data"
 version = "0.2.2"
 dependencies = [
+ "air-utils",
  "once_cell",
  "semver",
  "serde",
  "serde_json",
+ "tracing",
 ]
 
 [[package]]
@@ -109,6 +113,7 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror",
+ "tracing",
 ]
 
 [[package]]
@@ -121,7 +126,12 @@ dependencies = [
  "log",
  "serde_json",
  "thiserror",
+ "tracing",
 ]
+
+[[package]]
+name = "air-utils"
+version = "0.1.0"
 
 [[package]]
 name = "ascii-canvas"
@@ -457,9 +467,8 @@ checksum = "3e2e65a1a2e43cfcb47a895c4c8b10d1f4a61097f9f254f183aee60cad9c651d"
 
 [[package]]
 name = "marine-macro"
-version = "0.6.15"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dfc907943772cf966ebe2a2d462d09bc79e898ef102ed065ba3d3abcc93fbb71"
+version = "0.7.0"
+source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/VM-115-wasm_ctors_workaround#dafe2cf65b8e994d39ba0cfd953cfbdc57105089"
 dependencies = [
  "marine-macro-impl",
  "marine-rs-sdk-main",
@@ -467,9 +476,8 @@ dependencies = [
 
 [[package]]
 name = "marine-macro-impl"
-version = "0.6.15"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bfdbed3a10ae9b22df06bee8cd0023255358935aae8e8daf9d1a006cfaeeb11e"
+version = "0.7.0"
+source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/VM-115-wasm_ctors_workaround#dafe2cf65b8e994d39ba0cfd953cfbdc57105089"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -481,22 +489,20 @@ dependencies = [
 
 [[package]]
 name = "marine-rs-sdk"
-version = "0.6.15"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4d17d44016675abdf18caf3ac1bdd4437cc17ec0db019da141bb06a9ea991726"
+version = "0.7.0"
+source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/VM-115-wasm_ctors_workaround#dafe2cf65b8e994d39ba0cfd953cfbdc57105089"
 dependencies = [
  "marine-macro",
  "marine-rs-sdk-main",
  "marine-timestamp-macro",
- "polyplets 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "polyplets",
  "serde",
 ]
 
 [[package]]
 name = "marine-rs-sdk-main"
-version = "0.6.15"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8ff262801664ce22f9d274504d6e8088c217034aba0ca431eca8d0258f3699c6"
+version = "0.7.0"
+source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/VM-115-wasm_ctors_workaround#dafe2cf65b8e994d39ba0cfd953cfbdc57105089"
 dependencies = [
  "log",
  "serde",
@@ -504,9 +510,8 @@ dependencies = [
 
 [[package]]
 name = "marine-timestamp-macro"
-version = "0.6.15"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "85a9f5b1adeff98ac5a14cfc5fa814185a807ba4a0d3849c9f9e9fd868b27d1f"
+version = "0.7.0"
+source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/VM-115-wasm_ctors_workaround#dafe2cf65b8e994d39ba0cfd953cfbdc57105089"
 dependencies = [
  "chrono",
  "quote",
@@ -563,9 +568,9 @@ dependencies = [
 
 [[package]]
 name = "once_cell"
-version = "1.8.0"
+version = "1.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "692fcb63b64b1758029e0a96ee63e049ce8c5948587f2f7208df04625e5f6b56"
+checksum = "18a6dbe30758c9f83eb00cbea4ac95966305f5a7772f3f42ebfc7fc7eddbd8e1"
 
 [[package]]
 name = "petgraph"
@@ -593,19 +598,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7d7afeb98c5a10e0bffcc7fc16e105b04d06729fac5fd6384aebf7ff5cb5a67d"
 
 [[package]]
-name = "polyplets"
-version = "0.2.0"
-dependencies = [
- "marine-macro",
- "marine-rs-sdk-main",
- "serde",
-]
+name = "pin-project-lite"
+version = "0.2.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e0a7ae3ac2f1173085d398531c705756c94a4c56843785df85a60c1a0afac116"
 
 [[package]]
 name = "polyplets"
 version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8cc56e7803860fa903c27675a17215e1cfb39fb26e111c0b93f6c049f9cf8d8e"
 dependencies = [
  "marine-macro",
  "marine-rs-sdk-main",
@@ -835,6 +835,38 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2c9d3793400a45f954c52e73d068316d76b6f4e36977e3fcebb13a2721e80237"
 dependencies = [
  "crunchy",
+]
+
+[[package]]
+name = "tracing"
+version = "0.1.35"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a400e31aa60b9d44a52a8ee0343b5b18566b03a8321e0d321f695cf56e940160"
+dependencies = [
+ "cfg-if 1.0.0",
+ "pin-project-lite",
+ "tracing-attributes",
+ "tracing-core",
+]
+
+[[package]]
+name = "tracing-attributes"
+version = "0.1.22"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "11c75893af559bc8e10716548bdef5cb2b983f8e637db9d0e15126b61b484ee2"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "tracing-core"
+version = "0.1.28"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7b7358be39f2f274f322d2aaed611acc57f382e8eb1e5b48cb9ae30933495ce7"
+dependencies = [
+ "once_cell",
 ]
 
 [[package]]

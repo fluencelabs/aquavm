@@ -13,7 +13,7 @@ dependencies = [
 
 [[package]]
 name = "air"
-version = "0.24.0"
+version = "0.25.0"
 dependencies = [
  "air-execution-info-collector",
  "air-interpreter-data",
@@ -72,7 +72,7 @@ version = "0.1.0"
 
 [[package]]
 name = "air-interpreter"
-version = "0.24.0"
+version = "0.25.0"
 dependencies = [
  "air",
  "air-log-targets",
@@ -99,7 +99,7 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter-interface"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "fluence-it-types",
  "marine-rs-sdk",
@@ -161,7 +161,7 @@ dependencies = [
 
 [[package]]
 name = "air-test-utils"
-version = "0.2.1"
+version = "0.3.0"
 dependencies = [
  "air",
  "air-interpreter-interface",
@@ -270,7 +270,7 @@ dependencies = [
 
 [[package]]
 name = "avm-server"
-version = "0.23.0"
+version = "0.24.0"
 dependencies = [
  "air-interpreter-interface",
  "air-utils",
@@ -1355,7 +1355,7 @@ dependencies = [
 [[package]]
 name = "marine-macro"
 version = "0.7.0"
-source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/VM-115-wasm_ctors_workaround#dafe2cf65b8e994d39ba0cfd953cfbdc57105089"
+source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/VM-115-wasm_ctors_workaround#cb08224a3ed89926383af771fee9541322711eb5"
 dependencies = [
  "marine-macro-impl",
  "marine-rs-sdk-main",
@@ -1364,7 +1364,7 @@ dependencies = [
 [[package]]
 name = "marine-macro-impl"
 version = "0.7.0"
-source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/VM-115-wasm_ctors_workaround#dafe2cf65b8e994d39ba0cfd953cfbdc57105089"
+source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/VM-115-wasm_ctors_workaround#cb08224a3ed89926383af771fee9541322711eb5"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1417,7 +1417,7 @@ dependencies = [
 [[package]]
 name = "marine-rs-sdk"
 version = "0.7.0"
-source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/VM-115-wasm_ctors_workaround#dafe2cf65b8e994d39ba0cfd953cfbdc57105089"
+source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/VM-115-wasm_ctors_workaround#cb08224a3ed89926383af771fee9541322711eb5"
 dependencies = [
  "marine-macro",
  "marine-rs-sdk-main",
@@ -1429,7 +1429,7 @@ dependencies = [
 [[package]]
 name = "marine-rs-sdk-main"
 version = "0.7.0"
-source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/VM-115-wasm_ctors_workaround#dafe2cf65b8e994d39ba0cfd953cfbdc57105089"
+source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/VM-115-wasm_ctors_workaround#cb08224a3ed89926383af771fee9541322711eb5"
 dependencies = [
  "log",
  "serde",
@@ -1466,7 +1466,7 @@ dependencies = [
 [[package]]
 name = "marine-timestamp-macro"
 version = "0.7.0"
-source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/VM-115-wasm_ctors_workaround#dafe2cf65b8e994d39ba0cfd953cfbdc57105089"
+source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/VM-115-wasm_ctors_workaround#cb08224a3ed89926383af771fee9541322711eb5"
 dependencies = [
  "chrono",
  "quote",
@@ -1797,7 +1797,7 @@ dependencies = [
 
 [[package]]
 name = "polyplets"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "marine-macro",
  "marine-rs-sdk-main",
