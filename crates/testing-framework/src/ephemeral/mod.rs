@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
+pub mod neiborhood;
 
-use std::{collections::{HashMap, HashSet}, ops::Deref};
-
+use self::neiborhood::{PeerSet, PeerWithNeighborhood};
 use crate::{clock::Clock, queue::Queue, services::FunctionOutcome};
+
+use std::{
+    borrow::Borrow,
+    collections::{HashMap, HashSet},
+};
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct PeerId(String);
@@ -36,6 +41,12 @@ impl From<String> for PeerId {
 impl From<&str> for PeerId {
     fn from(source: &str) -> Self {
         Self(source.to_owned())
+    }
+}
+
+impl Borrow<str> for PeerId {
+    fn borrow(&self) -> &str {
+        &self.0
     }
 }
 
@@ -67,105 +78,39 @@ impl Peer {
     }
 }
 
-type PeerSet = HashSet<PeerId>;
-
-#[derive(Debug, Default)]
-pub struct Neighborghood {
-    neighbors: PeerSet,
-    // A neighbor can be unreachable for some time.
-    failing: PeerSet,
-}
-
-#[derive(Debug)]
-pub struct PeerWithNeighborhood {
-    peer: Peer,
-    neighborhood: Neighborghood,
-}
-
-impl PeerWithNeighborhood {
-    pub fn new(peer: Peer) -> Self {
-        Self {
-            peer,
-            neighborhood: Default::default(),
-        }
-    }
-
-    pub fn is_reachable(&self, target: impl Deref<Target = PeerId>) -> bool {
-        let t = target.deref();
-        (&self.peer.peer_id == t) || self.neighborhood.is_reachable(target)
-    }
-
-    pub fn get_neighborhood(&self) -> &Neighborghood {
-        &self.neighborhood
-    }
-
-    pub fn get_neighborhood_mut(&mut self) -> &mut Neighborghood {
-        &mut self.neighborhood
-    }
-
-    pub fn iter_neighbors(&mut self) -> impl Iterator<Item=&PeerId> {
-        self.neighborhood.iter_neighbors()
-    }
-
-}
-
-impl Neighborghood {
-    pub fn new() -> Self {
-        Default::default()
-    }
-
-    pub fn set_neighbors(&mut self, neighbors: PeerSet) {
-        self.neighbors = neighbors;
-    }
-
-    pub fn iter_neighbors(&mut self) -> impl Iterator<Item=&PeerId> {
-        self.neighbors.iter()
-    }
-
-    pub fn insert(&mut self, other_peer_id: impl Into<PeerId>) {
-        let other_peer_id = other_peer_id.into();
-        self.unfail(&other_peer_id);
-        self.neighbors.insert(other_peer_id);
-    }
-
-    pub fn remove(&mut self, other_peer_id: impl Into<PeerId>) {
-        let other_peer_id = other_peer_id.into();
-        self.unfail(&other_peer_id);
-        self.neighbors.remove(&other_peer_id);
-    }
-
-    pub fn fail(&mut self, target: impl Into<PeerId>) {
-        self.failing.insert(target.into());
-    }
-
-    pub fn unfail(&mut self, target: impl Deref<Target = PeerId>) {
-        self.failing.remove(&target);
-    }
-
-    pub fn is_reachable(&self, target: impl Deref<Target = PeerId>) -> bool {
-        let t = target.deref();
-        self.neighbors.contains(t) && !self.failing.contains(t)
-    }
-}
-
 #[derive(Debug)]
 pub struct Network {
     clock: Clock,
     peers: HashMap<PeerId, PeerWithNeighborhood>,
     task_queue: Queue,
+    default_neiborhood: HashSet<PeerId>,
 }
 
 impl Network {
-    pub fn new() -> Self {
+    pub fn empty() -> Self {
+        Self::new(std::iter::empty::<&str>())
+    }
+
+    pub fn new(default_neiborhoud: impl Iterator<Item = impl Into<PeerId>>) -> Self {
         Self {
             clock: Clock::new(),
             peers: Default::default(),
             task_queue: Default::default(),
+            default_neiborhood: default_neiborhoud.map(Into::into).collect(),
         }
     }
 
+    /// Add a peer with default neighborhood.
+    pub fn add_peer(&mut self, peer: Peer) -> &mut PeerWithNeighborhood {
+        let peer_id = peer.peer_id.clone();
+        let mut peer_with_neigh = PeerWithNeighborhood::new(peer);
+        peer_with_neigh.extend_neighborhood(self.default_neiborhood.iter().cloned());
+        self.peers.insert(peer_id.clone(), peer_with_neigh);
+        self.peers.get_mut(&peer_id).unwrap()
+    }
+
     pub fn from_vec(nodes: Vec<Peer>) -> Self {
-        let mut network = Self::new();
+        let mut network = Self::empty();
         let neighborhood: PeerSet = nodes.iter().map(|peer| peer.peer_id.clone()).collect();
         for peer in nodes {
             // TODO can peer have itself as a neighbor?
@@ -174,160 +119,15 @@ impl Network {
         network
     }
 
-    pub fn add_peer_with_neighborhood(&mut self, peer: Peer, neighborhood: impl IntoIterator<Item = impl Into<PeerId>>) -> &mut PeerWithNeighborhood {
+    pub fn add_peer_with_neighborhood(
+        &mut self,
+        peer: Peer,
+        neighborhood: impl IntoIterator<Item = impl Into<PeerId>>,
+    ) -> &mut PeerWithNeighborhood {
         let peer_id = peer.peer_id.clone();
         let mut peer_with_neigh = PeerWithNeighborhood::new(peer);
-        peer_with_neigh.neighborhood.neighbors.extend(neighborhood.into_iter().map(Into::into));
+        peer_with_neigh.extend_neighborhood(neighborhood.into_iter().map(Into::into));
         self.peers.insert(peer_id.clone(), peer_with_neigh);
         self.peers.get_mut(&peer_id).unwrap()
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_empty_neighborhood() {
-        let peer_id: PeerId = "someone".into();
-        let other_id: PeerId = "other".into();
-        let pwn = PeerWithNeighborhood::new(Peer::new(peer_id.clone()));
-        assert!(pwn.is_reachable(&peer_id));
-        assert!(!pwn.is_reachable(&other_id));
-    }
-
-    #[test]
-    fn test_no_self_disconnect() {
-        let peer_id: PeerId = "someone".into();
-        let other_id: PeerId = "other".into();
-        let mut pwn = PeerWithNeighborhood::new(Peer::new(peer_id.clone()));
-        let nei = pwn.get_neighborhood_mut();
-        nei.insert(peer_id.clone());
-        nei.remove(peer_id.clone());
-        assert!(pwn.is_reachable(&peer_id));
-        assert!(!pwn.is_reachable(&other_id));
-    }
-
-    #[test]
-    fn test_no_self_fail() {
-        let peer_id: PeerId = "someone".into();
-        let other_id: PeerId = "other".into();
-        let mut pwn = PeerWithNeighborhood::new(Peer::new(peer_id.clone()));
-        pwn.get_neighborhood_mut().fail(peer_id.clone());
-        assert!(pwn.is_reachable(&peer_id));
-        assert!(!pwn.is_reachable(&other_id));
-    }
-
-    #[test]
-    fn test_set_neighborhood() {
-        let peer_id: PeerId = "someone".into();
-        let other_id1: PeerId = "other1".into();
-        let other_id2: PeerId = "other2".into();
-        let mut pwn = PeerWithNeighborhood::new(Peer::new(peer_id.clone()));
-
-        // iter is empty
-        assert!(pwn.iter_neighbors().next().is_none());
-
-        let expected_neighborhood = vec![other_id1.clone(), other_id2.clone()].into_iter().collect::<PeerSet>();
-        pwn.get_neighborhood_mut().set_neighbors(expected_neighborhood.clone());
-        assert_eq!(pwn.iter_neighbors().cloned().collect::<PeerSet>(), expected_neighborhood);
-    }
-
-    #[test]
-    fn test_insert() {
-        let peer_id: PeerId = "someone".into();
-        let other_id1: PeerId = "other1".into();
-        let other_id2: PeerId = "other2".into();
-        let mut pwn = PeerWithNeighborhood::new(Peer::new(peer_id.clone()));
-
-        // iter is empty
-        assert!(pwn.iter_neighbors().next().is_none());
-        let nei = pwn.get_neighborhood_mut();
-
-        nei.insert(other_id1.clone());
-        nei.insert(other_id2.clone());
-        let expected_neighborhood = vec![other_id1.clone(), other_id2.clone()].into_iter().collect::<PeerSet>();
-        assert_eq!(pwn.iter_neighbors().cloned().collect::<PeerSet>(), expected_neighborhood);
-    }
-
-    #[test]
-    fn test_insert_insert() {
-        let peer_id: PeerId = "someone".into();
-        let other_id1: PeerId = "other1".into();
-        let mut pwn = PeerWithNeighborhood::new(Peer::new(peer_id.clone()));
-
-        // iter is empty
-        assert!(pwn.iter_neighbors().next().is_none());
-
-        let nei = pwn.get_neighborhood_mut();
-        nei.insert(other_id1.clone());
-        nei.insert(other_id1.clone());
-        let expected_neighborhood = vec![other_id1];
-        assert_eq!(pwn.iter_neighbors().cloned().collect::<Vec<_>>(), expected_neighborhood);
-    }
-
-    #[test]
-    fn test_fail() {
-        let peer_id: PeerId = "someone".into();
-        let other_id: PeerId = "other".into();
-        let mut pwn = PeerWithNeighborhood::new(Peer::new(peer_id.clone()));
-        let nei = pwn.get_neighborhood_mut();
-        nei.insert(other_id.clone());
-        nei.fail(other_id.clone());
-
-        let expected_neighborhood = vec![other_id.clone()].into_iter().collect::<PeerSet>();
-        assert_eq!(pwn.iter_neighbors().cloned().collect::<PeerSet>(), expected_neighborhood);
-        assert!(!pwn.is_reachable(&other_id));
-    }
-
-    #[test]
-    fn test_fail_remove() {
-        let peer_id: PeerId = "someone".into();
-        let other_id: PeerId = "other".into();
-        let mut pwn = PeerWithNeighborhood::new(Peer::new(peer_id.clone()));
-
-        let nei = pwn.get_neighborhood_mut();
-        nei.insert(other_id.clone());
-        nei.fail(other_id.clone());
-        assert!(!pwn.is_reachable(&other_id));
-
-        let nei = pwn.get_neighborhood_mut();
-        nei.remove(other_id.clone());
-        assert!(!pwn.is_reachable(&other_id));
-
-        let nei = pwn.get_neighborhood_mut();
-        nei.insert(other_id.clone());
-        assert!(pwn.is_reachable(&other_id));
-    }
-
-    #[test]
-    fn test_fail_unfail() {
-        let peer_id: PeerId = "someone".into();
-        let other_id: PeerId = "other".into();
-        let mut pwn = PeerWithNeighborhood::new(Peer::new(peer_id.clone()));
-
-        let nei = pwn.get_neighborhood_mut();
-        nei.insert(other_id.clone());
-        nei.fail(other_id.clone());
-        assert!(!pwn.is_reachable(&other_id));
-
-        let nei = pwn.get_neighborhood_mut();
-        nei.unfail(&other_id);
-        assert!(pwn.is_reachable(&other_id));
-    }
-
-    #[test]
-    fn test_uninserted_fail_unfail() {
-        let peer_id: PeerId = "someone".into();
-        let other_id: PeerId = "other".into();
-        let mut pwn = PeerWithNeighborhood::new(Peer::new(peer_id.clone()));
-
-        let nei = pwn.get_neighborhood_mut();
-        nei.fail(other_id.clone());
-        assert!(!pwn.is_reachable(&other_id));
-
-        let nei = pwn.get_neighborhood_mut();
-        nei.unfail(&other_id);
-        assert!(!pwn.is_reachable(&other_id));
     }
 }

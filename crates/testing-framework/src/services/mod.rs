@@ -33,10 +33,5 @@ pub enum FunctionOutcome {
 
 /// A mocked Marine service.  It is stateful, and each peer has own instances.
 pub trait Service {
-    fn call(
-        &self,
-        service_id: &str,
-        function_name: &str,
-        args: &[JValue],
-    ) -> FunctionOutcome;
+    fn call(&self, service_id: &str, function_name: &str, args: &[JValue]) -> FunctionOutcome;
 }
