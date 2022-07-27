@@ -15,8 +15,8 @@
  */
 
 use crate::interface::ErrorAVMOutcome;
-use fluence_faas::FaaSError;
-use fluence_faas::IValue;
+use marine::IValue;
+use marine::MarineError;
 
 use serde_json::Error as SerdeError;
 use thiserror::Error as ThisError;
@@ -48,7 +48,7 @@ pub enum AVMError<E> {
 pub enum RunnerError {
     /// This errors are encountered from FaaS.
     #[error(transparent)]
-    FaaSError(#[from] FaaSError),
+    MarineError(#[from] MarineError),
 
     /// Specified path to AIR interpreter .wasm file was invalid
     #[error("path to AIR interpreter .wasm ({invalid_path:?}) is invalid: {reason}; IO Error: {io_error:?}")]
@@ -62,10 +62,10 @@ pub enum RunnerError {
     #[error("{0}")]
     InterpreterResultDeError(String),
 
-    /// FaaS call returns Vec<IValue> to support multi-value in a future,
+    /// Marine call returns Vec<IValue> to support multi-value in a future,
     /// but actually now it could return empty vec or a vec with one value.
     /// This error is encountered when it returns vec with not a one value.
-    #[error("result `{0:?}` returned from FaaS should contain only one element")]
+    #[error("result `{0:?}` returned from Marine should contain only one element")]
     IncorrectInterpreterResult(Vec<IValue>),
 
     /// This errors are encountered from an call results/params se/de.

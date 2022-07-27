@@ -198,7 +198,7 @@ fn check_tetraplet_works_correctly() {
 
 use fluence_app_service::AppService;
 use fluence_app_service::AppServiceConfig;
-use fluence_app_service::FaaSConfig;
+use fluence_app_service::MarineConfig;
 use fluence_app_service::ModuleDescriptor;
 
 use air_test_utils::trace_from_result;
@@ -214,7 +214,7 @@ fn construct_service_config(module_name: impl Into<String>) -> AppServiceConfig 
         ..<_>::default()
     };
 
-    let faas_config = FaaSConfig {
+    let marine_config = MarineConfig {
         modules_dir: Some(PathBuf::from(module_path)),
         modules_config: vec![module_descriptor],
         default_modules_config: None,
@@ -224,7 +224,7 @@ fn construct_service_config(module_name: impl Into<String>) -> AppServiceConfig 
 
     let config = AppServiceConfig {
         service_base_dir,
-        faas_config,
+        marine_config,
     };
 
     config

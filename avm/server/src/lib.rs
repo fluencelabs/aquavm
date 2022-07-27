@@ -42,13 +42,13 @@ pub mod avm_runner {
 }
 
 // Re-exports
-pub use fluence_faas::ne_vec;
-pub use fluence_faas::Ctx;
-pub use fluence_faas::HostExportedFunc;
-pub use fluence_faas::HostImportDescriptor;
-pub use fluence_faas::HostImportError;
-pub use fluence_faas::IType;
-pub use fluence_faas::IValue;
+pub use marine::ne_vec;
+pub use marine::Ctx;
+pub use marine::HostExportedFunc;
+pub use marine::HostImportDescriptor;
+pub use marine::HostImportError;
+pub use marine::IType;
+pub use marine::IValue;
 
 pub use polyplets::SecurityTetraplet;
 
