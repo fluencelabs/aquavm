@@ -22,6 +22,8 @@ use crate::{clock::Clock, queue::Queue, services::FunctionOutcome};
 use std::{
     borrow::Borrow,
     collections::{HashMap, HashSet},
+    hash::Hash,
+    time::Instant,
 };
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
@@ -100,15 +102,6 @@ impl Network {
         }
     }
 
-    /// Add a peer with default neighborhood.
-    pub fn add_peer(&mut self, peer: Peer) -> &mut PeerWithNeighborhood {
-        let peer_id = peer.peer_id.clone();
-        let mut peer_with_neigh = PeerWithNeighborhood::new(peer);
-        peer_with_neigh.extend_neighborhood(self.default_neiborhood.iter().cloned());
-        self.peers.insert(peer_id.clone(), peer_with_neigh);
-        self.peers.get_mut(&peer_id).unwrap()
-    }
-
     pub fn from_vec(nodes: Vec<Peer>) -> Self {
         let mut network = Self::empty();
         let neighborhood: PeerSet = nodes.iter().map(|peer| peer.peer_id.clone()).collect();
@@ -129,5 +122,73 @@ impl Network {
         peer_with_neigh.extend_neighborhood(neighborhood.into_iter().map(Into::into));
         self.peers.insert(peer_id.clone(), peer_with_neigh);
         self.peers.get_mut(&peer_id).unwrap()
+    }
+
+    pub fn set_clock(&mut self, now: Instant) {
+        self.clock.set(now);
+    }
+
+    /// Add a peer with default neighborhood.
+    pub fn add_peer(&mut self, peer: Peer) -> &mut PeerWithNeighborhood {
+        let peer_id = peer.peer_id.clone();
+        let mut peer_with_neigh = PeerWithNeighborhood::new(peer);
+        peer_with_neigh.extend_neighborhood(self.default_neiborhood.iter().cloned());
+        self.peers.insert(peer_id.clone(), peer_with_neigh);
+        self.peers.get_mut(&peer_id).unwrap()
+    }
+
+    pub fn set_peer_failed<Id>(&mut self, peer_id: &Id, failed: bool)
+    where
+        PeerId: Borrow<Id>,
+        Id: Hash + Eq + ?Sized,
+    {
+        self.peers
+            .get_mut(peer_id)
+            .expect("unknown peer")
+            .set_failed(failed);
+    }
+
+    pub fn fail_peer_for<Id>(&mut self, source_peer_id: &Id, target_peer_id: impl Into<PeerId>)
+    where
+        PeerId: Borrow<Id>,
+        Id: Hash + Eq + ?Sized,
+    {
+        self.peers
+            .get_mut(source_peer_id)
+            .expect("unknown peer")
+            .get_neighborhood_mut()
+            .fail(target_peer_id);
+    }
+
+    pub fn unfail_peer_for<Id1, Id2>(&mut self, source_peer_id: &Id1, target_peer_id: &Id2)
+    where
+        PeerId: Borrow<Id1>,
+        Id1: Hash + Eq + ?Sized,
+        PeerId: Borrow<Id2>,
+        Id2: Hash + Eq + ?Sized,
+    {
+        self.peers
+            .get_mut(source_peer_id)
+            .expect("unknown peer")
+            .get_neighborhood_mut()
+            .unfail(target_peer_id);
+    }
+
+    // TODO there is some kind of unsymmetry between these methods and the fail/unfail:
+    // the latters panic on unknown peer.
+    pub fn get_peer<Id>(&self, peer_id: &Id) -> Option<&PeerWithNeighborhood>
+    where
+        PeerId: Borrow<Id>,
+        Id: Hash + Eq + ?Sized,
+    {
+        self.peers.get(peer_id)
+    }
+
+    pub fn get_peer_mut<Id>(&mut self, peer_id: &Id) -> Option<&mut PeerWithNeighborhood>
+    where
+        PeerId: Borrow<Id>,
+        Id: Hash + Eq + ?Sized,
+    {
+        self.peers.get_mut(peer_id)
     }
 }
