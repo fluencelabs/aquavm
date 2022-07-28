@@ -17,13 +17,12 @@
 pub mod neiborhood;
 
 use self::neiborhood::{PeerSet, PeerWithNeighborhood};
-use crate::{clock::Clock, queue::Queue, services::FunctionOutcome};
+use crate::services::FunctionOutcome;
 
 use std::{
     borrow::Borrow,
     collections::{HashMap, HashSet},
     hash::Hash,
-    time::Instant,
 };
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
@@ -82,9 +81,7 @@ impl Peer {
 
 #[derive(Debug)]
 pub struct Network {
-    clock: Clock,
     peers: HashMap<PeerId, PeerWithNeighborhood>,
-    task_queue: Queue,
     default_neiborhood: HashSet<PeerId>,
 }
 
@@ -95,9 +92,7 @@ impl Network {
 
     pub fn new(default_neiborhoud: impl Iterator<Item = impl Into<PeerId>>) -> Self {
         Self {
-            clock: Clock::new(),
             peers: Default::default(),
-            task_queue: Default::default(),
             default_neiborhood: default_neiborhoud.map(Into::into).collect(),
         }
     }
@@ -122,10 +117,6 @@ impl Network {
         peer_with_neigh.extend_neighborhood(neighborhood.into_iter().map(Into::into));
         self.peers.insert(peer_id.clone(), peer_with_neigh);
         self.peers.get_mut(&peer_id).unwrap()
-    }
-
-    pub fn set_clock(&mut self, now: Instant) {
-        self.clock.set(now);
     }
 
     /// Add a peer with default neighborhood.
