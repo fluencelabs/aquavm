@@ -15,3 +15,4 @@ path = "src/lib.rs"
 
 [dependencies]
 serde_json = "1.0.61"
+nom = "7.1.1"

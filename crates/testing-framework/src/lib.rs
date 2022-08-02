@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+pub mod asserts;
 pub mod clock;
 pub mod ephemeral;
 pub mod queue;
