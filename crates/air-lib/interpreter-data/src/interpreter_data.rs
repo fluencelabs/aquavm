@@ -65,7 +65,6 @@ impl InterpreterData {
         }
     }
 
-    #[tracing::instrument(skip_all)]
     pub fn from_execution_result(
         trace: ExecutionTrace,
         streams: GlobalStreamGens,

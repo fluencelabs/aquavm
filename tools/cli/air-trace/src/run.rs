@@ -41,6 +41,8 @@ pub(crate) struct Args {
     max_heap_size: Option<u64>,
     #[clap(long, default_value = "info")]
     tracing_params: String,
+    #[clap(long, default_value = "warn")]
+    runner_tracing_params: String,
     #[clap(long)]
     native: bool,
     #[clap(
@@ -69,7 +71,13 @@ enum Source {
 
 pub(crate) fn run(args: Args) -> anyhow::Result<()> {
     let tracing_json = (!args.json) as u8;
-    init_tracing(args.tracing_params.clone(), tracing_json);
+    let global_tracing_params = if args.native {
+        // for native, there is single tracing configuration, and no runner
+        args.tracing_params.clone()
+    } else {
+        args.runner_tracing_params
+    };
+    init_tracing(global_tracing_params, tracing_json);
 
     let current_peer_id = args.current_peer_id.as_deref().unwrap_or("some_id");
     let mut runner = get_runner(

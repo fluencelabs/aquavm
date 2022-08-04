@@ -22,8 +22,7 @@ use anyhow::Context;
 
 use std::path::{Path, PathBuf};
 
-const DEFAULT_DATA: &str =
-    r#"{"trace":[],"streams":{},"version":"0.2.2","lcid":0,"r_streams":{"$nodes":{}}}"#;
+const DEFAULT_DATA: &str = "";
 
 #[derive(clap::Args, Debug)]
 pub(crate) struct PlainDataArgs {
