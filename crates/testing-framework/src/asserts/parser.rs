@@ -136,7 +136,7 @@ fn parse_kw(s: &str) -> IResult<&str, Pair, ParseError> {
     )))(s)
 }
 
-fn delim_ws<I, O, E, F>(f: F) -> impl FnMut(I) -> IResult<I, O, E>
+pub(crate) fn delim_ws<I, O, E, F>(f: F) -> impl FnMut(I) -> IResult<I, O, E>
 where
     F: Parser<I, O, E>,
     E: nom::error::ParseError<I>,

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-mod parser;
+pub(crate) mod parser;
 
 /// Assert language structure: Assert.
 #[derive(Debug, PartialEq, Eq)]
