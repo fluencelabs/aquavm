@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+/*
+ * Plan:
+ * 1. [x] line numbers and pos
+ * 2. [ ] contexts for error reporting
+ * 3. [ ] error report
+ * 4. [ ] annotation parsing
+*/
+
 use nom::branch::alt;
 use nom::bytes::complete::{is_not, tag};
 use nom::character::complete::multispace0;
@@ -22,11 +30,13 @@ use nom::combinator::{cut, map, opt, recognize, value};
 use nom::multi::{many1_count, separated_list0};
 use nom::sequence::{delimited, pair, preceded, separated_pair, terminated};
 use nom::{error::VerboseError, IResult};
+use nom_locate::LocatedSpan;
 use std::str::FromStr;
 
 use crate::asserts::parser::delim_ws;
 
-type ParseError<'inp> = VerboseError<&'inp str>;
+type Input<'inp> = LocatedSpan<&'inp str>;
+type ParseError<'inp> = VerboseError<Input<'inp>>;
 type Triplet = (Sexp, Sexp, Sexp);
 
 #[derive(Debug, PartialEq)]
@@ -47,21 +57,23 @@ impl FromStr for Sexp {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         use nom::combinator::all_consuming;
-        all_consuming(delim_ws(parse_sexp))(s)
+
+        let span = LocatedSpan::new(s);
+        all_consuming(delim_ws(parse_sexp))(span)
             .map(|(_, v)| v)
             .map_err(|e| e.to_string())
     }
 }
 
-fn parse_sexp(inp: &str) -> IResult<&str, Sexp, ParseError> {
+fn parse_sexp<'inp>(inp: Input<'inp>) -> IResult<Input<'inp>, Sexp, ParseError<'inp>> {
     alt((parse_sexp_list_like, parse_sexp_string, parse_sexp_symbol))(inp)
 }
 
-fn parse_sexp_list_like(inp: &str) -> IResult<&str, Sexp, ParseError> {
+fn parse_sexp_list_like<'inp>(inp: Input<'inp>) -> IResult<Input<'inp>, Sexp, ParseError<'inp>> {
     alt((parse_sexp_call, parse_sexp_list))(inp)
 }
 
-fn parse_sexp_list(inp: &str) -> IResult<&str, Sexp, ParseError> {
+fn parse_sexp_list<'inp>(inp: Input<'inp>) -> IResult<Input<'inp>, Sexp, ParseError<'inp>> {
     delimited(
         terminated(tag("("), multispace0),
         cut(map(separated_list0(multispace1, parse_sexp), Sexp::List)),
@@ -69,26 +81,26 @@ fn parse_sexp_list(inp: &str) -> IResult<&str, Sexp, ParseError> {
     )(inp)
 }
 
-fn parse_sexp_string(inp: &str) -> IResult<&str, Sexp, ParseError> {
+fn parse_sexp_string<'inp>(inp: Input<'inp>) -> IResult<Input<'inp>, Sexp, ParseError<'inp>> {
     // N.B. escape are rejected by AIR parser, but we simply treat backslash
     // as any other character
     map(
         delimited(tag("\""), cut(is_not("\"")), tag("\"")),
-        |s: &str| Sexp::String(s.to_owned()),
+        |s: Input<'_>| Sexp::String(s.to_string()),
     )(inp)
 }
 
-fn parse_sexp_symbol(inp: &str) -> IResult<&str, Sexp, ParseError> {
+fn parse_sexp_symbol<'inp>(inp: Input<'inp>) -> IResult<Input<'inp>, Sexp, ParseError<'inp>> {
     map(
         recognize(many1_count(alt((
             value((), alphanumeric1),
             value((), one_of("_.$")),
         )))),
-        |s: &str| Sexp::Symbol(s.to_owned()),
+        |s: Input<'_>| Sexp::Symbol(s.to_string()),
     )(inp)
 }
 
-fn parse_sexp_call(inp: &str) -> IResult<&str, Sexp, ParseError> {
+fn parse_sexp_call<'inp>(inp: Input<'inp>) -> IResult<Input<'inp>, Sexp, ParseError<'inp>> {
     preceded(
         delim_ws(tag("(")),
         preceded(tag("call "), cut(parse_sexp_call_content)),
@@ -96,7 +108,7 @@ fn parse_sexp_call(inp: &str) -> IResult<&str, Sexp, ParseError> {
     )(inp)
 }
 
-fn parse_sexp_call_content(inp: &str) -> IResult<&str, Sexp, ParseError> {
+fn parse_sexp_call_content<'inp>(inp: Input<'inp>) -> IResult<Input<'inp>, Sexp, ParseError<'inp>> {
     map(
         pair(
             // triplet and arguments
@@ -119,7 +131,9 @@ fn parse_sexp_call_content(inp: &str) -> IResult<&str, Sexp, ParseError> {
     )(inp)
 }
 
-fn parse_sexp_call_triplet(inp: &str) -> IResult<&str, Box<Triplet>, ParseError> {
+fn parse_sexp_call_triplet<'inp>(
+    inp: Input<'inp>,
+) -> IResult<Input<'inp>, Box<Triplet>, ParseError<'inp>> {
     map(
         separated_pair(
             parse_sexp,
@@ -134,7 +148,9 @@ fn parse_sexp_call_triplet(inp: &str) -> IResult<&str, Box<Triplet>, ParseError>
     )(inp)
 }
 
-fn parse_sexp_call_arguments(inp: &str) -> IResult<&str, Vec<Sexp>, ParseError> {
+fn parse_sexp_call_arguments<'inp>(
+    inp: Input<'inp>,
+) -> IResult<Input<'inp>, Vec<Sexp>, ParseError<'inp>> {
     delimited(tag("["), separated_list0(multispace1, parse_sexp), tag("]"))(inp)
 }
 
@@ -298,6 +314,6 @@ mod tests {
     #[test]
     fn test_trailing_error() {
         let res = Sexp::from_str("(null))");
-        assert!(res.is_err());
+        assert!(res.is_err(), "{:?}", res);
     }
 }
