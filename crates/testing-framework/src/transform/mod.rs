@@ -53,6 +53,20 @@ enum Sexp {
     String(String),
 }
 
+impl Sexp {
+    fn list(list: Vec<Self>) -> Self {
+        Self::List(list)
+    }
+
+    fn symbol(name: impl ToString) -> Self {
+        Self::Symbol(name.to_string())
+    }
+
+    fn string(value: impl ToString) -> Self {
+        Self::String(value.to_string())
+    }
+}
+
 impl FromStr for Sexp {
     type Err = String;
 
@@ -79,21 +93,22 @@ fn parse_sexp_list<'inp>(inp: Input<'inp>) -> IResult<Input<'inp>, Sexp, ParseEr
         "within generic list",
         delimited(
             terminated(tag("("), multispace0),
-            cut(map(separated_list0(multispace1, parse_sexp), Sexp::List)),
+            cut(map(separated_list0(multispace1, parse_sexp), Sexp::list)),
             preceded(multispace0, tag(")")),
-    ))(inp)
+        ),
+    )(inp)
 }
 
 fn parse_sexp_string<'inp>(inp: Input<'inp>) -> IResult<Input<'inp>, Sexp, ParseError<'inp>> {
     // N.B. escape are rejected by AIR parser, but we simply treat backslash
     // as any other character
     map(
-        delimited(tag("\""), cut(
-            context(
-                "within string",
-                is_not("\"")
-            )), tag("\"")),
-        |s: Input<'_>| Sexp::String(s.to_string()),
+        delimited(
+            tag("\""),
+            cut(context("within string", is_not("\""))),
+            tag("\""),
+        ),
+        |s: Input<'_>| Sexp::string(s),
     )(inp)
 }
 
@@ -103,7 +118,7 @@ fn parse_sexp_symbol<'inp>(inp: Input<'inp>) -> IResult<Input<'inp>, Sexp, Parse
             value((), alphanumeric1),
             value((), one_of("_.$")),
         )))),
-        |s: Input<'_>| Sexp::Symbol(s.to_string()),
+        |s: Input<'_>| Sexp::symbol(s),
     )(inp)
 }
 
@@ -112,12 +127,9 @@ fn parse_sexp_call<'inp>(inp: Input<'inp>) -> IResult<Input<'inp>, Sexp, ParseEr
         delim_ws(tag("(")),
         preceded(
             tag("call "),
-            context(
-                "within call list",
-                cut(parse_sexp_call_content),
-            ),
+            context("within call list", cut(parse_sexp_call_content)),
         ),
-        // call_content includes ")" and possible comment
+        // call_content includes ")" and possible comment ^
     )(inp)
 }
 
@@ -154,15 +166,9 @@ fn parse_sexp_call_triplet<'inp>(
             delimited(
                 delim_ws(tag("(")),
                 separated_pair(
-                    context(
-                        "triplet service name",
-                        parse_sexp_string,
-                    ),
+                    context("triplet service name", parse_sexp_string),
                     multispace0,
-                    context(
-                        "triplet function name",
-                        parse_sexp,
-                    ),
+                    context("triplet function name", parse_sexp),
                 ),
                 delim_ws(tag(")")),
             ),
@@ -184,19 +190,19 @@ mod tests {
     #[test]
     fn test_symbol() {
         let res = Sexp::from_str("symbol");
-        assert_eq!(res, Ok(Sexp::Symbol("symbol".to_owned())));
+        assert_eq!(res, Ok(Sexp::symbol("symbol")));
     }
 
     #[test]
     fn test_symbol_lambda() {
         let res = Sexp::from_str("sym_bol.$.blabla");
-        assert_eq!(res, Ok(Sexp::Symbol("sym_bol.$.blabla".to_owned())));
+        assert_eq!(res, Ok(Sexp::symbol("sym_bol.$.blabla")));
     }
 
     #[test]
     fn test_string() {
         let res = Sexp::from_str(r#""str ing""#);
-        assert_eq!(res, Ok(Sexp::String("str ing".to_owned())));
+        assert_eq!(res, Ok(Sexp::string("str ing")));
     }
 
     #[test]
@@ -208,7 +214,7 @@ mod tests {
     #[test]
     fn test_small_list() {
         let res = Sexp::from_str("(null)");
-        assert_eq!(res, Ok(Sexp::List(vec![Sexp::Symbol("null".to_owned())])));
+        assert_eq!(res, Ok(Sexp::list(vec![Sexp::symbol("null")])));
     }
 
     #[test]
@@ -218,9 +224,9 @@ mod tests {
             res,
             Ok(Sexp::Call {
                 triplet: Box::new((
-                    Sexp::Symbol("peer_id".to_owned()),
-                    Sexp::String("serv".to_owned()),
-                    Sexp::String("func".to_owned()),
+                    Sexp::symbol("peer_id"),
+                    Sexp::string("serv"),
+                    Sexp::string("func"),
                 )),
                 args: vec![],
                 var: None,
@@ -236,11 +242,11 @@ mod tests {
             res,
             Ok(Sexp::Call {
                 triplet: Box::new((
-                    Sexp::Symbol("peer_id".to_owned()),
-                    Sexp::String("serv".to_owned()),
-                    Sexp::String("func".to_owned()),
+                    Sexp::symbol("peer_id"),
+                    Sexp::string("serv"),
+                    Sexp::string("func"),
                 )),
-                args: vec![Sexp::Symbol("a".to_owned())],
+                args: vec![Sexp::symbol("a")],
                 var: None,
                 annotation: None,
             })
@@ -254,11 +260,11 @@ mod tests {
             res,
             Ok(Sexp::Call {
                 triplet: Box::new((
-                    Sexp::Symbol("peer_id".to_owned()),
-                    Sexp::String("serv".to_owned()),
-                    Sexp::String("func".to_owned()),
+                    Sexp::symbol("peer_id"),
+                    Sexp::string("serv"),
+                    Sexp::string("func"),
                 )),
-                args: vec![Sexp::Symbol("a".to_owned()), Sexp::Symbol("b".to_owned())],
+                args: vec![Sexp::symbol("a"), Sexp::symbol("b")],
                 var: None,
                 annotation: None,
             })
@@ -290,12 +296,12 @@ mod tests {
             res,
             Ok(Sexp::Call {
                 triplet: Box::new((
-                    Sexp::Symbol("peer_id".to_owned()),
-                    Sexp::String("serv".to_owned()),
-                    Sexp::String("func".to_owned()),
+                    Sexp::symbol("peer_id"),
+                    Sexp::string("serv"),
+                    Sexp::string("func"),
                 )),
-                args: vec![Sexp::Symbol("a".to_owned()), Sexp::Symbol("b".to_owned())],
-                var: Some(Box::new(Sexp::Symbol("var".to_owned()))),
+                args: vec![Sexp::symbol("a"), Sexp::symbol("b")],
+                var: Some(Box::new(Sexp::symbol("var"))),
                 annotation: Some("result=42".to_owned()),
             })
         );
@@ -316,18 +322,18 @@ mod tests {
         let res = Sexp::from_str(" (fold i n ( par (null) (match y \"asdf\" (fail ))) )");
         assert_eq!(
             res,
-            Ok(Sexp::List(vec![
-                Sexp::Symbol("fold".to_owned()),
-                Sexp::Symbol("i".to_owned()),
-                Sexp::Symbol("n".to_owned()),
-                Sexp::List(vec![
-                    Sexp::Symbol("par".to_owned()),
-                    Sexp::List(vec![Sexp::Symbol("null".to_owned())]),
-                    Sexp::List(vec![
-                        Sexp::Symbol("match".to_owned()),
-                        Sexp::Symbol("y".to_owned()),
-                        Sexp::String("asdf".to_owned()),
-                        Sexp::List(vec![Sexp::Symbol("fail".to_owned()),])
+            Ok(Sexp::list(vec![
+                Sexp::symbol("fold"),
+                Sexp::symbol("i"),
+                Sexp::symbol("n"),
+                Sexp::list(vec![
+                    Sexp::symbol("par"),
+                    Sexp::list(vec![Sexp::symbol("null")]),
+                    Sexp::list(vec![
+                        Sexp::symbol("match"),
+                        Sexp::symbol("y"),
+                        Sexp::string("asdf"),
+                        Sexp::list(vec![Sexp::symbol("fail"),])
                     ])
                 ])
             ]))
