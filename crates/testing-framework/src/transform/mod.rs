@@ -27,6 +27,7 @@ use nom::bytes::complete::{is_not, tag};
 use nom::character::complete::multispace0;
 use nom::character::complete::{alphanumeric1, multispace1, one_of};
 use nom::combinator::{cut, map, opt, recognize, value};
+use nom::error::context;
 use nom::multi::{many1_count, separated_list0};
 use nom::sequence::{delimited, pair, preceded, separated_pair, terminated};
 use nom::{error::VerboseError, IResult};
@@ -74,18 +75,24 @@ fn parse_sexp_list_like<'inp>(inp: Input<'inp>) -> IResult<Input<'inp>, Sexp, Pa
 }
 
 fn parse_sexp_list<'inp>(inp: Input<'inp>) -> IResult<Input<'inp>, Sexp, ParseError<'inp>> {
-    delimited(
-        terminated(tag("("), multispace0),
-        cut(map(separated_list0(multispace1, parse_sexp), Sexp::List)),
-        preceded(multispace0, tag(")")),
-    )(inp)
+    context(
+        "within generic list",
+        delimited(
+            terminated(tag("("), multispace0),
+            cut(map(separated_list0(multispace1, parse_sexp), Sexp::List)),
+            preceded(multispace0, tag(")")),
+    ))(inp)
 }
 
 fn parse_sexp_string<'inp>(inp: Input<'inp>) -> IResult<Input<'inp>, Sexp, ParseError<'inp>> {
     // N.B. escape are rejected by AIR parser, but we simply treat backslash
     // as any other character
     map(
-        delimited(tag("\""), cut(is_not("\"")), tag("\"")),
+        delimited(tag("\""), cut(
+            context(
+                "within string",
+                is_not("\"")
+            )), tag("\"")),
         |s: Input<'_>| Sexp::String(s.to_string()),
     )(inp)
 }
@@ -103,8 +110,14 @@ fn parse_sexp_symbol<'inp>(inp: Input<'inp>) -> IResult<Input<'inp>, Sexp, Parse
 fn parse_sexp_call<'inp>(inp: Input<'inp>) -> IResult<Input<'inp>, Sexp, ParseError<'inp>> {
     preceded(
         delim_ws(tag("(")),
-        preceded(tag("call "), cut(parse_sexp_call_content)),
-        // call content includes ")" and possible comment
+        preceded(
+            tag("call "),
+            context(
+                "within call list",
+                cut(parse_sexp_call_content),
+            ),
+        ),
+        // call_content includes ")" and possible comment
     )(inp)
 }
 
@@ -136,11 +149,21 @@ fn parse_sexp_call_triplet<'inp>(
 ) -> IResult<Input<'inp>, Box<Triplet>, ParseError<'inp>> {
     map(
         separated_pair(
-            parse_sexp,
+            context("triplet peer_id", parse_sexp),
             multispace0,
             delimited(
                 delim_ws(tag("(")),
-                separated_pair(parse_sexp_string, multispace0, parse_sexp),
+                separated_pair(
+                    context(
+                        "triplet service name",
+                        parse_sexp_string,
+                    ),
+                    multispace0,
+                    context(
+                        "triplet function name",
+                        parse_sexp,
+                    ),
+                ),
                 delim_ws(tag(")")),
             ),
         ),
