@@ -19,14 +19,14 @@
  * 1. [x] line numbers and pos
  * 2. [x] contexts for error reporting
  * 3. [x] error report
- * 4. [ ] annotation parsing
+ * 4. [x] annotation parsing
 */
 
 use nom::branch::alt;
 use nom::bytes::complete::{is_not, tag};
 use nom::character::complete::multispace0;
 use nom::character::complete::{alphanumeric1, multispace1, one_of};
-use nom::combinator::{cut, map, opt, recognize, value};
+use nom::combinator::{cut, map, map_parser, map_res, opt, recognize, value};
 use nom::error::{context, ErrorKind, VerboseError, VerboseErrorKind};
 use nom::multi::{many1_count, separated_list0};
 use nom::sequence::{delimited, pair, preceded, separated_pair, terminated};
@@ -35,6 +35,7 @@ use nom_locate::LocatedSpan;
 use std::str::FromStr;
 
 use crate::asserts::parser::delim_ws;
+use crate::asserts::AssertionChain;
 
 type Input<'inp> = LocatedSpan<&'inp str>;
 type ParseError<'inp> = VerboseError<Input<'inp>>;
@@ -46,7 +47,7 @@ enum Sexp {
         triplet: Box<Triplet>,
         args: Vec<Sexp>,
         var: Option<Box<Sexp>>,
-        annotation: Option<String>,
+        annotation: Option<AssertionChain>,
     },
     List(Vec<Sexp>),
     Symbol(String),
@@ -184,14 +185,25 @@ fn parse_sexp_call_content<'inp>(inp: Input<'inp>) -> IResult<Input<'inp>, Sexp,
                     opt(preceded(multispace1, map(parse_sexp_symbol, Box::new))),
                     delim_ws(tag(")")),
                 ),
-                opt(preceded(tag("# "), is_not("\r\n"))),
+                opt(preceded(tag("# "), parse_annotation)),
             ),
         ),
         |((triplet, args), (var, annotation))| Sexp::Call {
             triplet,
             args,
             var,
-            annotation: annotation.map(|x| x.trim().to_owned()),
+            annotation,
+        },
+    )(inp)
+}
+
+fn parse_annotation<'inp>(
+    inp: Input<'inp>,
+) -> IResult<Input<'inp>, AssertionChain, ParseError<'inp>> {
+    map_res(
+        is_not("\r\n"),
+        |span: Input<'_>| -> Result<AssertionChain, ParseError<'inp>> {
+            Ok(AssertionChain::from_str(&span).unwrap())
         },
     )(inp)
 }
@@ -225,7 +237,11 @@ fn parse_sexp_call_arguments<'inp>(
 
 #[cfg(test)]
 mod tests {
+    use serde_json::json;
+
     use super::*;
+
+    use crate::asserts::{AssertionBranch, Meta};
 
     #[test]
     fn test_symbol() {
@@ -332,6 +348,10 @@ mod tests {
     #[test]
     fn test_call_with_annotation() {
         let res = Sexp::from_str(r#"(call peer_id ("serv" "func") [a b] var) # result=42 "#);
+        let expected_annotation =
+            AssertionChain::new(vec![AssertionBranch::from_metas(vec![Meta::Result(
+                json!(42),
+            )])]);
         assert_eq!(
             res,
             Ok(Sexp::Call {
@@ -342,7 +362,7 @@ mod tests {
                 )),
                 args: vec![Sexp::symbol("a"), Sexp::symbol("b")],
                 var: Some(Box::new(Sexp::symbol("var"))),
-                annotation: Some("result=42".to_owned()),
+                annotation: Some(expected_annotation),
             })
         );
     }
