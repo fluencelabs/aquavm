@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-use nom::{error::VerboseError, IResult, InputTakeAtPosition, Parser};
-use std::str::FromStr;
-
 use super::{Assertion, AssertionBranch, AssertionChain, Condition, Meta};
+use crate::services::JValue;
+
+use nom::{error::VerboseError, IResult, InputTakeAtPosition, Parser};
+
+use std::str::FromStr;
 
 type ParseError<'inp> = VerboseError<&'inp str>;
 
@@ -27,7 +29,7 @@ enum Pair {
     Assertion(Assertion),
 }
 
-// This implementation uses nom as quick and dirty solution.  One might consider using
+// this implementation uses nom as quick and dirty solution.  One might consider using
 // lalrpop for codebase consistency.
 impl FromStr for AssertionChain {
     type Err = String;
@@ -91,7 +93,7 @@ fn parse_kw(s: &str) -> IResult<&str, Pair, ParseError> {
     use nom::branch::alt;
     use nom::bytes::complete::tag;
     use nom::character::complete::{alphanumeric1, u32 as parse_u32};
-    use nom::combinator::{cut, map, map_res};
+    use nom::combinator::{cut, map, map_res, rest};
     use nom::error::context;
     use nom::sequence::{pair, preceded, separated_pair};
 
@@ -119,6 +121,21 @@ fn parse_kw(s: &str) -> IResult<&str, Pair, ParseError> {
             ),
             |flag| Pair::Assertion(Assertion::IsCalled(flag)),
         ),
+        preceded(
+            pair(tag("result"), equal()),
+            cut(context(
+                "result value is consumed to end and has to be a valid JSON",
+                map_res(
+                    // TODO taking rest of input means we cannot provide values for
+                    // each branch; one might use some json parser, including nom's one
+                    rest,
+                    |result: &str| {
+                        serde_json::from_str::<JValue>(result.trim())
+                            .map_or(Err(()), |value| Ok(Pair::Meta(Meta::Result(value))))
+                    },
+                ),
+            )),
+        ),
         map_res(
             separated_pair(alphanumeric1, delim_ws(tag("=")), alphanumeric1),
             |(key, val)| match key {
@@ -127,7 +144,6 @@ fn parse_kw(s: &str) -> IResult<&str, Pair, ParseError> {
                 "before" => Ok(Pair::Assertion(Assertion::Before(val.to_owned()))),
                 "after" => Ok(Pair::Assertion(Assertion::After(val.to_owned()))),
                 "filter" => Ok(Pair::Condition(Condition::Filter(val.to_owned()))),
-                "result" => Ok(Pair::Meta(Meta::Result(val.to_owned()))),
                 "callback" => Ok(Pair::Assertion(Assertion::Callback(val.to_owned()))),
                 "next_peer_pk" => Ok(Pair::Assertion(Assertion::NextPeerPk(val.to_owned()))),
                 _ => Err(()),
@@ -155,9 +171,9 @@ where
 {
     use nom::branch::alt;
     use nom::bytes::complete::tag;
-    use nom::combinator::map;
+    use nom::combinator::value;
 
-    alt((map(tag("true"), |_| true), map(tag("false"), |_| false)))(inp)
+    alt((value(true, tag("true")), value(false, tag("false"))))(inp)
 }
 
 #[cfg(test)]
@@ -305,6 +321,28 @@ mod tests {
                 inp,
             );
         }
+    }
+
+    #[test]
+    fn test_result() {
+        use serde_json::json;
+
+        let res = AssertionChain::from_str(r#"id=myid,result={"this":["is","value"]}"#);
+        assert_eq!(
+            res,
+            Ok(AssertionChain::new(vec![AssertionBranch::from_metas(
+                vec![
+                    Meta::Id("myid".to_owned()),
+                    Meta::Result(json!({"this": ["is", "value"]}))
+                ]
+            )]))
+        );
+    }
+
+    #[test]
+    fn test_result_malformed() {
+        let res = AssertionChain::from_str(r#"id=myid,result={"this":["is","value"]"#);
+        assert!(res.is_err());
     }
 
     // TODO sample test for each pair

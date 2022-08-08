@@ -16,6 +16,8 @@
 
 pub(crate) mod parser;
 
+use crate::services::JValue;
+
 /// Assert language structure: Assert.
 #[derive(Debug, PartialEq, Eq)]
 pub struct AssertionChain {
@@ -24,9 +26,7 @@ pub struct AssertionChain {
 
 impl AssertionChain {
     pub fn new(assertions: Vec<AssertionBranch>) -> Self {
-        Self {
-            assertions
-        }
+        Self { assertions }
     }
 }
 
@@ -38,17 +38,15 @@ pub struct AssertionBranch {
 }
 
 impl AssertionBranch {
-    pub fn new(
-        conditions: Vec<Condition>,
-    assertions: Vec<Assertion>,
-    metas: Vec<Meta>,
-    ) -> Self {
-        Self { conditions, assertions, metas }
+    pub fn new(conditions: Vec<Condition>, assertions: Vec<Assertion>, metas: Vec<Meta>) -> Self {
+        Self {
+            conditions,
+            assertions,
+            metas,
+        }
     }
 
-    pub fn from_conditions(
-        conditions: Vec<Condition>,
-    ) -> Self {
+    pub fn from_conditions(conditions: Vec<Condition>) -> Self {
         Self {
             conditions,
             assertions: vec![],
@@ -56,9 +54,7 @@ impl AssertionBranch {
         }
     }
 
-    pub fn from_assertions(
-        assertions: Vec<Assertion>,
-    ) -> Self {
+    pub fn from_assertions(assertions: Vec<Assertion>) -> Self {
         Self {
             conditions: vec![],
             assertions,
@@ -66,9 +62,7 @@ impl AssertionBranch {
         }
     }
 
-    pub fn from_metas(
-        metas: Vec<Meta>,
-    ) -> Self {
+    pub fn from_metas(metas: Vec<Meta>) -> Self {
         Self {
             conditions: vec![],
             assertions: vec![],
@@ -81,7 +75,7 @@ impl AssertionBranch {
 pub enum Condition {
     Iter(u32),
     On(Equation),
-    Filter(FuncName)
+    Filter(FuncName),
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -99,15 +93,14 @@ pub enum Assertion {
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Equation {
-    Equal(String, String),  // TODO
+    Equal(String, String), // TODO
 }
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Meta {
     Id(CallPlaceId),
-    Result(ResultId)
+    Result(JValue),
 }
 
 pub type CallPlaceId = String;
 pub type FuncName = String;
-pub type ResultId = String;
