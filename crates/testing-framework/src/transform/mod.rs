@@ -26,8 +26,8 @@ use nom::branch::alt;
 use nom::bytes::complete::{is_not, tag};
 use nom::character::complete::multispace0;
 use nom::character::complete::{alphanumeric1, multispace1, one_of};
-use nom::combinator::{cut, map, map_parser, map_res, opt, recognize, value};
-use nom::error::{context, ErrorKind, VerboseError, VerboseErrorKind};
+use nom::combinator::{cut, map, map_res, opt, recognize, value};
+use nom::error::{context, VerboseError, VerboseErrorKind};
 use nom::multi::{many1_count, separated_list0};
 use nom::sequence::{delimited, pair, preceded, separated_pair, terminated};
 use nom::IResult;
@@ -110,7 +110,7 @@ fn parse_error_to_message(e: nom::Err<ParseError>) -> String {
     }
 }
 
-fn parse_sexp<'inp>(inp: Input<'inp>) -> IResult<Input<'inp>, Sexp, ParseError<'inp>> {
+fn parse_sexp(inp: Input<'_>) -> IResult<Input<'_>, Sexp, ParseError<'_>> {
     alt((
         parse_sexp_call,
         parse_sexp_list,
@@ -119,7 +119,7 @@ fn parse_sexp<'inp>(inp: Input<'inp>) -> IResult<Input<'inp>, Sexp, ParseError<'
     ))(inp)
 }
 
-fn parse_sexp_list<'inp>(inp: Input<'inp>) -> IResult<Input<'inp>, Sexp, ParseError<'inp>> {
+fn parse_sexp_list(inp: Input<'_>) -> IResult<Input<'_>, Sexp, ParseError<'_>> {
     context(
         "within generic list",
         preceded(
@@ -135,7 +135,7 @@ fn parse_sexp_list<'inp>(inp: Input<'inp>) -> IResult<Input<'inp>, Sexp, ParseEr
     )(inp)
 }
 
-fn parse_sexp_string<'inp>(inp: Input<'inp>) -> IResult<Input<'inp>, Sexp, ParseError<'inp>> {
+fn parse_sexp_string(inp: Input<'_>) -> IResult<Input<'_>, Sexp, ParseError<'_>> {
     // N.B. escape are rejected by AIR parser, but we simply treat backslash
     // as any other character
     map(
@@ -149,21 +149,21 @@ fn parse_sexp_string<'inp>(inp: Input<'inp>) -> IResult<Input<'inp>, Sexp, Parse
                 )),
             ),
         ),
-        |s: Input<'_>| Sexp::string(s),
+        Sexp::string,
     )(inp)
 }
 
-fn parse_sexp_symbol<'inp>(inp: Input<'inp>) -> IResult<Input<'inp>, Sexp, ParseError<'inp>> {
+fn parse_sexp_symbol(inp: Input<'_>) -> IResult<Input<'_>, Sexp, ParseError<'_>> {
     map(
         recognize(many1_count(alt((
             value((), alphanumeric1),
             value((), one_of("_.$")),
         )))),
-        |s: Input<'_>| Sexp::symbol(s),
+        Sexp::symbol,
     )(inp)
 }
 
-fn parse_sexp_call<'inp>(inp: Input<'inp>) -> IResult<Input<'inp>, Sexp, ParseError<'inp>> {
+fn parse_sexp_call(inp: Input<'_>) -> IResult<Input<'_>, Sexp, ParseError<'_>> {
     preceded(
         delim_ws(tag("(")),
         preceded(
@@ -174,7 +174,7 @@ fn parse_sexp_call<'inp>(inp: Input<'inp>) -> IResult<Input<'inp>, Sexp, ParseEr
     )(inp)
 }
 
-fn parse_sexp_call_content<'inp>(inp: Input<'inp>) -> IResult<Input<'inp>, Sexp, ParseError<'inp>> {
+fn parse_sexp_call_content(inp: Input<'_>) -> IResult<Input<'_>, Sexp, ParseError<'_>> {
     map(
         pair(
             // triplet and arguments
@@ -197,20 +197,16 @@ fn parse_sexp_call_content<'inp>(inp: Input<'inp>) -> IResult<Input<'inp>, Sexp,
     )(inp)
 }
 
-fn parse_annotation<'inp>(
-    inp: Input<'inp>,
-) -> IResult<Input<'inp>, AssertionChain, ParseError<'inp>> {
+fn parse_annotation(inp: Input<'_>) -> IResult<Input<'_>, AssertionChain, ParseError<'_>> {
     map_res(
         is_not("\r\n"),
-        |span: Input<'_>| -> Result<AssertionChain, ParseError<'inp>> {
+        |span: Input<'_>| -> Result<AssertionChain, ParseError<'_>> {
             Ok(AssertionChain::from_str(&span).unwrap())
         },
     )(inp)
 }
 
-fn parse_sexp_call_triplet<'inp>(
-    inp: Input<'inp>,
-) -> IResult<Input<'inp>, Box<Triplet>, ParseError<'inp>> {
+fn parse_sexp_call_triplet(inp: Input<'_>) -> IResult<Input<'_>, Box<Triplet>, ParseError<'_>> {
     map(
         separated_pair(
             context("triplet peer_id", parse_sexp),
@@ -229,9 +225,7 @@ fn parse_sexp_call_triplet<'inp>(
     )(inp)
 }
 
-fn parse_sexp_call_arguments<'inp>(
-    inp: Input<'inp>,
-) -> IResult<Input<'inp>, Vec<Sexp>, ParseError<'inp>> {
+fn parse_sexp_call_arguments(inp: Input<'_>) -> IResult<Input<'_>, Vec<Sexp>, ParseError<'_>> {
     delimited(tag("["), separated_list0(multispace1, parse_sexp), tag("]"))(inp)
 }
 
