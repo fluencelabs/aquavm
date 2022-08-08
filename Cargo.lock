@@ -2305,6 +2305,7 @@ dependencies = [
 name = "testing-framework"
 version = "0.1.0"
 dependencies = [
+ "itertools 0.10.3",
  "nom 7.1.1",
  "nom_locate",
  "serde_json",
