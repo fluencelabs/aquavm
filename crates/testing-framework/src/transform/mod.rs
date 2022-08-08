@@ -42,13 +42,16 @@ type ParseError<'inp> = VerboseError<Input<'inp>>;
 type Triplet = (Sexp, Sexp, Sexp);
 
 #[derive(Debug, PartialEq)]
+struct Call {
+    triplet: Box<Triplet>,
+    args: Vec<Sexp>,
+    var: Option<Box<Sexp>>,
+    annotation: Option<AssertionChain>,
+}
+
+#[derive(Debug, PartialEq)]
 enum Sexp {
-    Call {
-        triplet: Box<Triplet>,
-        args: Vec<Sexp>,
-        var: Option<Box<Sexp>>,
-        annotation: Option<AssertionChain>,
-    },
+    Call(Call),
     List(Vec<Sexp>),
     Symbol(String),
     String(String),
@@ -86,20 +89,15 @@ impl std::fmt::Display for Sexp {
         use itertools::Itertools;
 
         match self {
-            Sexp::Call {
-                triplet,
-                args,
-                var,
-                annotation,
-            } => {
+            Sexp::Call(call) => {
                 write!(
                     f,
                     "(call {peer_id} ({service} {func}) [{args}]{var})",
-                    peer_id = triplet.0,
-                    service = triplet.1,
-                    func = triplet.2,
-                    args = args.iter().format(" "),
-                    var = match var {
+                    peer_id = call.triplet.0,
+                    service = call.triplet.1,
+                    func = call.triplet.2,
+                    args = call.args.iter().format(" "),
+                    var = match &call.var {
                         Some(var) => format!(" {}", var),
                         None => "".to_owned(),
                     }
@@ -219,11 +217,13 @@ fn parse_sexp_call_content(inp: Input<'_>) -> IResult<Input<'_>, Sexp, ParseErro
                 opt(preceded(tag("# "), parse_annotation)),
             ),
         ),
-        |((triplet, args), (var, annotation))| Sexp::Call {
-            triplet,
-            args,
-            var,
-            annotation,
+        |((triplet, args), (var, annotation))| {
+            Sexp::Call(Call {
+                triplet,
+                args,
+                var,
+                annotation,
+            })
         },
     )(inp)
 }
@@ -303,7 +303,7 @@ mod tests {
         let res = Sexp::from_str(r#"(call peer_id ("serv" "func") [])"#);
         assert_eq!(
             res,
-            Ok(Sexp::Call {
+            Ok(Sexp::Call(Call {
                 triplet: Box::new((
                     Sexp::symbol("peer_id"),
                     Sexp::string("serv"),
@@ -312,7 +312,7 @@ mod tests {
                 args: vec![],
                 var: None,
                 annotation: None,
-            })
+            }))
         );
     }
 
@@ -321,7 +321,7 @@ mod tests {
         let res = Sexp::from_str(r#"(call peer_id ("serv" "func") [a])"#);
         assert_eq!(
             res,
-            Ok(Sexp::Call {
+            Ok(Sexp::Call(Call {
                 triplet: Box::new((
                     Sexp::symbol("peer_id"),
                     Sexp::string("serv"),
@@ -330,7 +330,7 @@ mod tests {
                 args: vec![Sexp::symbol("a")],
                 var: None,
                 annotation: None,
-            })
+            }))
         );
     }
 
@@ -339,7 +339,7 @@ mod tests {
         let res = Sexp::from_str(r#"(call peer_id ("serv" "func") [a b])"#);
         assert_eq!(
             res,
-            Ok(Sexp::Call {
+            Ok(Sexp::Call(Call {
                 triplet: Box::new((
                     Sexp::symbol("peer_id"),
                     Sexp::string("serv"),
@@ -348,7 +348,7 @@ mod tests {
                 args: vec![Sexp::symbol("a"), Sexp::symbol("b")],
                 var: None,
                 annotation: None,
-            })
+            }))
         );
     }
 
@@ -357,7 +357,7 @@ mod tests {
         let res = Sexp::from_str(r#"(call peer_id ("serv" "func") [a b] var)"#);
         assert_eq!(
             res,
-            Ok(Sexp::Call {
+            Ok(Sexp::Call(Call {
                 triplet: Box::new((
                     Sexp::Symbol("peer_id".to_owned()),
                     Sexp::String("serv".to_owned()),
@@ -366,7 +366,7 @@ mod tests {
                 args: vec![Sexp::Symbol("a".to_owned()), Sexp::Symbol("b".to_owned())],
                 var: Some(Box::new(Sexp::Symbol("var".to_owned()))),
                 annotation: None,
-            })
+            }))
         );
     }
 
@@ -379,7 +379,7 @@ mod tests {
             )])]);
         assert_eq!(
             res,
-            Ok(Sexp::Call {
+            Ok(Sexp::Call(Call {
                 triplet: Box::new((
                     Sexp::symbol("peer_id"),
                     Sexp::string("serv"),
@@ -388,7 +388,7 @@ mod tests {
                 args: vec![Sexp::symbol("a"), Sexp::symbol("b")],
                 var: Some(Box::new(Sexp::symbol("var"))),
                 annotation: Some(expected_annotation),
-            })
+            }))
         );
     }
 
