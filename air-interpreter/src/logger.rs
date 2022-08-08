@@ -20,9 +20,7 @@ use log::LevelFilter;
 
 pub fn init_logger(default_level: Option<LevelFilter>) {
     let target_map = TARGET_MAP.iter().cloned().collect();
-    let builder = marine_rs_sdk::WasmLoggerBuilder::new()
-        .with_target_map(target_map)
-        .filter("jsonpath_lib", log::LevelFilter::Info);
+    let builder = marine_rs_sdk::WasmLoggerBuilder::new().with_target_map(target_map);
 
     let builder = if let Some(default_level) = default_level {
         builder.with_log_level(default_level)
