@@ -19,7 +19,9 @@ use super::parse;
 use crate::ast::*;
 use crate::parser::ParserError;
 
-use air_lambda_ast::ValueAccessor;
+use air_lambda_ast::{LambdaAST, ValueAccessor};
+use fstrings::f;
+use fstrings::format_args_f;
 use lalrpop_util::ParseError;
 
 use std::rc::Rc;
@@ -405,6 +407,82 @@ fn parse_last_error() {
             CallOutputValue::None,
         ),
         null(),
+    );
+
+    assert_eq!(instruction, expected);
+}
+
+#[test]
+fn canon_stream_in_args() {
+    let service_id = "service_id";
+    let function_name = "function_name";
+    let canon_stream = "#canon_stream";
+    let source_code = f!(r#"
+            (call %init_peer_id% ("{service_id}" "{function_name}") [{canon_stream}])
+        "#);
+
+    let instruction = parse(&source_code);
+    let expected = call(
+        CallInstrValue::InitPeerId,
+        CallInstrValue::Literal(service_id),
+        CallInstrValue::Literal(function_name),
+        Rc::new(vec![Value::Variable(VariableWithLambda::canon_stream(
+            canon_stream,
+            66,
+        ))]),
+        CallOutputValue::None,
+    );
+
+    assert_eq!(instruction, expected);
+}
+
+#[test]
+fn canon_stream_in_triplet() {
+    let service_id = "service_id";
+    let function_name = "function_name";
+    let canon_stream = "#canon_stream";
+    let source_code = f!(r#"
+            (call {canon_stream} ("{service_id}" "{function_name}") [])
+        "#);
+
+    let instruction = parse(&source_code);
+    let expected = call(
+        CallInstrValue::Variable(VariableWithLambda::canon_stream(canon_stream, 19)),
+        CallInstrValue::Literal(service_id),
+        CallInstrValue::Literal(function_name),
+        Rc::new(vec![]),
+        CallOutputValue::None,
+    );
+
+    assert_eq!(instruction, expected);
+}
+
+#[test]
+fn canon_stream_with_lambda_in_triplet() {
+    let service_id = "service_id";
+    let function_name = "function_name";
+    let canon_stream = "#canon_stream";
+    let canon_stream_lambda = ".$.[0].path!";
+    let source_code = f!(r#"
+            (call {canon_stream}{canon_stream_lambda} ("{service_id}" "{function_name}") [])
+        "#);
+
+    let instruction = parse(&source_code);
+    let expected = call(
+        CallInstrValue::Variable(VariableWithLambda::canon_stream_wl(
+            canon_stream,
+            unsafe {
+                LambdaAST::new_unchecked(vec![
+                    ValueAccessor::ArrayAccess { idx: 0 },
+                    ValueAccessor::FieldAccessByName { field_name: "path" },
+                ])
+            },
+            19,
+        )),
+        CallInstrValue::Literal(service_id),
+        CallInstrValue::Literal(function_name),
+        Rc::new(vec![]),
+        CallOutputValue::None,
     );
 
     assert_eq!(instruction, expected);

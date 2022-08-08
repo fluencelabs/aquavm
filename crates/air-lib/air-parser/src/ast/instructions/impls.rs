@@ -36,6 +36,20 @@ impl<'i> Call<'i> {
     }
 }
 
+impl<'i> Canon<'i> {
+    pub fn new(
+        peer_pk: CallInstrValue<'i>,
+        stream: Stream<'i>,
+        canon_stream: CanonStream<'i>,
+    ) -> Self {
+        Self {
+            peer_pk,
+            stream,
+            canon_stream,
+        }
+    }
+}
+
 impl<'i> Seq<'i> {
     pub fn new(
         left_instruction: Box<Instruction<'i>>,
@@ -131,9 +145,9 @@ impl<'i> Next<'i> {
 
 impl<'i> New<'i> {
     #[allow(clippy::self_named_constructors)]
-    pub fn new(variable: Variable<'i>, instruction: Box<Instruction<'i>>, span: Span) -> Self {
+    pub fn new(argument: NewArgument<'i>, instruction: Box<Instruction<'i>>, span: Span) -> Self {
         Self {
-            variable,
+            argument,
             instruction,
             span,
         }

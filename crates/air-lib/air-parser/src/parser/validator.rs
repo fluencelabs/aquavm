@@ -20,7 +20,7 @@ use crate::parser::lexer::Token;
 use crate::parser::ParserError;
 use crate::parser::Span;
 
-use air_lambda_ast::ValueAccessor;
+use air_lambda_ast::{LambdaAST, ValueAccessor};
 use lalrpop_util::ErrorRecovery;
 use lalrpop_util::ParseError;
 
@@ -76,6 +76,11 @@ impl<'i> VariableValidator<'i> {
         };
     }
 
+    pub(super) fn met_canon(&mut self, canon: &Canon<'i>, span: Span) {
+        self.met_variable_name(canon.stream.name, span);
+        self.met_variable_name_definition(canon.canon_stream.name, span);
+    }
+
     pub(super) fn met_match(&mut self, match_: &Match<'i>, span: Span) {
         self.met_matchable(&match_.left_value, span);
         self.met_matchable(&match_.right_value, span);
@@ -90,7 +95,14 @@ impl<'i> VariableValidator<'i> {
         use FoldScalarIterable::*;
 
         match &fold.iterable {
-            Scalar(variable) => self.met_variable_name(variable.name, span),
+            Scalar(variable) => {
+                self.met_variable_name(variable.name, span);
+                self.met_lambda(&variable.lambda, span);
+            }
+            CanonStream(canon_stream) => {
+                self.met_variable_name(canon_stream.name, span);
+                self.met_lambda(&canon_stream.lambda, span);
+            }
             EmptyArray => {}
         };
         self.met_iterator_definition(&fold.iterator, span);
@@ -103,9 +115,9 @@ impl<'i> VariableValidator<'i> {
 
     pub(super) fn met_new(&mut self, new: &New<'i>, span: Span) {
         self.not_iterators_candidates
-            .push((new.variable.name(), span));
+            .push((new.argument.name(), span));
         // new defines a new variable
-        self.met_variable_definition(&new.variable, span);
+        self.met_variable_name_definition(new.argument.name(), span);
     }
 
     pub(super) fn met_next(&mut self, next: &Next<'i>, span: Span) {
@@ -128,7 +140,12 @@ impl<'i> VariableValidator<'i> {
             | ApArgument::EmptyArray
             | ApArgument::LastError(_) => {}
             ApArgument::Scalar(scalar) => {
-                self.met_variable_wl(&VariableWithLambda::Scalar(scalar.clone()), span)
+                self.met_variable_name(scalar.name, span);
+                self.met_lambda(&scalar.lambda, span);
+            }
+            ApArgument::CanonStream(canon_stream) => {
+                self.met_variable_name(canon_stream.name, span);
+                self.met_lambda(&canon_stream.lambda, span);
             }
         }
         self.met_variable_definition(&ap.result, span);
@@ -171,7 +188,17 @@ impl<'i> VariableValidator<'i> {
 
     fn met_variable_wl(&mut self, variable: &VariableWithLambda<'i>, span: Span) {
         self.met_variable_name(variable.name(), span);
-        let lambda = match variable.lambda() {
+        self.met_lambda(variable.lambda(), span);
+    }
+
+    fn met_variable_name(&mut self, name: &'i str, span: Span) {
+        if !self.contains_variable(name, span) {
+            self.unresolved_variables.insert(name, span);
+        }
+    }
+
+    fn met_lambda(&mut self, lambda: &Option<LambdaAST<'i>>, span: Span) {
+        let lambda = match lambda {
             Some(lambda) => lambda,
             None => return,
         };
@@ -185,12 +212,6 @@ impl<'i> VariableValidator<'i> {
                 | ValueAccessor::FieldAccessByName { .. }
                 | ValueAccessor::Error => {}
             }
-        }
-    }
-
-    fn met_variable_name(&mut self, name: &'i str, span: Span) {
-        if !self.contains_variable(name, span) {
-            self.unresolved_variables.insert(name, span);
         }
     }
 

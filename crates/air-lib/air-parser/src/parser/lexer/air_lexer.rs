@@ -176,6 +176,7 @@ fn string_to_token(input: &str, start_pos: usize) -> LexerResult<Token> {
         "" => Err(LexerError::empty_string(start_pos..start_pos)),
 
         CALL_INSTR => Ok(Token::Call),
+        CANON_INSTR => Ok(Token::Canon),
         AP_INSTR => Ok(Token::Ap),
         SEQ_INSTR => Ok(Token::Seq),
         PAR_INSTR => Ok(Token::Par),
@@ -226,6 +227,7 @@ fn parse_last_error(input: &str, start_pos: usize) -> LexerResult<Token<'_>> {
 }
 
 const CALL_INSTR: &str = "call";
+const CANON_INSTR: &str = "canon";
 const AP_INSTR: &str = "ap";
 const SEQ_INSTR: &str = "seq";
 const PAR_INSTR: &str = "par";

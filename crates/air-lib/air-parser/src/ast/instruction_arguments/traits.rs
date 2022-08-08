@@ -72,6 +72,7 @@ impl fmt::Display for ApArgument<'_> {
             Boolean(bool) => write!(f, "{}", bool),
             EmptyArray => write!(f, "[]"),
             Scalar(scalar) => write!(f, "{}", scalar),
+            CanonStream(canon_stream) => write!(f, "{}", canon_stream),
         }
     }
 }
@@ -83,6 +84,15 @@ impl fmt::Display for Triplet<'_> {
             "{} ({} {})",
             self.peer_pk, self.service_id, self.function_name
         )
+    }
+}
+
+impl fmt::Display for NewArgument<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Scalar(scalar) => write!(f, "{}", scalar),
+            Self::Stream(stream) => write!(f, "{}", stream),
+        }
     }
 }
 
@@ -103,6 +113,7 @@ impl fmt::Display for FoldScalarIterable<'_> {
 
         match self {
             Scalar(variable) => write!(f, "{}", variable),
+            CanonStream(canon_stream) => write!(f, "{}", canon_stream),
             EmptyArray => write!(f, "[]"),
         }
     }

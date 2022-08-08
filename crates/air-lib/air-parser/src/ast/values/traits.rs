@@ -39,7 +39,22 @@ impl fmt::Display for Stream<'_> {
     }
 }
 
+impl fmt::Display for CanonStream<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.name)
+    }
+}
+
 impl fmt::Display for StreamWithLambda<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match &self.lambda {
+            Some(lambda) => write!(f, "{}.${}", self.name, format_ast(lambda)),
+            None => write!(f, "{}", self.name),
+        }
+    }
+}
+
+impl fmt::Display for CanonStreamWithLambda<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match &self.lambda {
             Some(lambda) => write!(f, "{}.${}", self.name, format_ast(lambda)),
@@ -55,6 +70,7 @@ impl fmt::Display for Variable<'_> {
         match self {
             Scalar(scalar) => write!(f, "{}", scalar),
             Stream(stream) => write!(f, "{}", stream),
+            CanonStream(canon_stream) => write!(f, "{}", canon_stream),
         }
     }
 }
@@ -66,6 +82,7 @@ impl fmt::Display for VariableWithLambda<'_> {
         match self {
             Scalar(scalar) => write!(f, "{}", scalar),
             Stream(stream) => write!(f, "{}", stream),
+            CanonStream(canon_stream) => write!(f, "{}", canon_stream),
         }
     }
 }

@@ -24,6 +24,7 @@ impl fmt::Display for Instruction<'_> {
 
         match self {
             Call(call) => write!(f, "{}", call),
+            Canon(canon) => write!(f, "{}", canon),
             Ap(ap) => write!(f, "{}", ap),
             Seq(seq) => write!(f, "{}", seq),
             Par(par) => write!(f, "{}", par),
@@ -47,6 +48,16 @@ impl fmt::Display for Call<'_> {
 
         let args = self.args.iter().map(|arg| format!("{}", arg)).join(" ");
         write!(f, "call {} [{}] {}", self.triplet, args, self.output)
+    }
+}
+
+impl fmt::Display for Canon<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "canon {} {} {}",
+            self.peer_pk, self.stream, self.canon_stream
+        )
     }
 }
 
@@ -125,6 +136,6 @@ impl fmt::Display for Next<'_> {
 
 impl fmt::Display for New<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "new {}", self.variable)
+        write!(f, "new {}", self.argument)
     }
 }

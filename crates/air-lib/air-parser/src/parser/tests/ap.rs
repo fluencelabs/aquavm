@@ -19,6 +19,8 @@ use super::parse;
 use crate::ast::*;
 
 use air_lambda_ast::{LambdaAST, ValueAccessor};
+use fstrings::f;
+use fstrings::format_args_f;
 
 #[test]
 fn ap_with_literal() {
@@ -125,6 +127,23 @@ fn ap_with_ttl() {
 
     let actual = parse(source_code);
     let expected = ap(ApArgument::TTL, Variable::stream("$stream", 19));
+
+    assert_eq!(actual, expected);
+}
+
+#[test]
+fn ap_with_canon_stream() {
+    let canon_stream = "#canon_stream";
+    let scalar = "scalar";
+    let source_code = f!(r#"
+        (ap {canon_stream} {scalar})
+    "#);
+
+    let actual = parse(&source_code);
+    let expected = ap(
+        ApArgument::CanonStream(CanonStreamWithLambda::new(canon_stream, None, 13)),
+        Variable::scalar(scalar, 27),
+    );
 
     assert_eq!(actual, expected);
 }

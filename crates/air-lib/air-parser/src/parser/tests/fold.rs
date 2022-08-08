@@ -19,7 +19,9 @@ use super::parse;
 use crate::ast::*;
 use crate::parser::ParserError;
 
-use air_lambda_ast::ValueAccessor;
+use air_lambda_ast::{LambdaAST, ValueAccessor};
+use fstrings::f;
+use fstrings::format_args_f;
 use lalrpop_util::ParseError;
 
 #[test]
@@ -325,6 +327,46 @@ fn fold_on_stream() {
         Scalar::new("iterator", 23),
         null(),
         Span::new(9, 39),
+    );
+    assert_eq!(instruction, expected);
+}
+
+#[test]
+fn fold_on_canon_stream() {
+    let canon_stream = "#canon_stream";
+    let iterator = "iterator";
+    let source_code = f!(r#"
+        (fold {canon_stream} {iterator} (null))
+    "#);
+
+    let instruction = parse(&source_code);
+    let expected = fold_scalar_canon_stream(
+        CanonStreamWithLambda::new(canon_stream, None, 15),
+        Scalar::new(iterator, 29),
+        null(),
+        Span::new(9, 45),
+    );
+    assert_eq!(instruction, expected);
+}
+
+#[test]
+fn fold_on_canon_stream_with_lambda() {
+    let canon_stream = "#canon_stream";
+    let iterator = "iterator";
+    let source_code = f!(r#"
+        (fold {canon_stream}.$.[0]! {iterator} (null))
+    "#);
+
+    let instruction = parse(&source_code);
+    let expected = fold_scalar_canon_stream(
+        CanonStreamWithLambda::new(
+            canon_stream,
+            Some(unsafe { LambdaAST::new_unchecked(vec![ValueAccessor::ArrayAccess { idx: 0 }]) }),
+            15,
+        ),
+        Scalar::new(iterator, 36),
+        null(),
+        Span::new(9, 52),
     );
     assert_eq!(instruction, expected);
 }

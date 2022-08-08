@@ -27,6 +27,7 @@ use std::rc::Rc;
 pub enum Instruction<'i> {
     Call(Call<'i>),
     Ap(Ap<'i>),
+    Canon(Canon<'i>),
     Seq(Seq<'i>),
     Par(Par<'i>),
     Xor(Xor<'i>),
@@ -54,6 +55,14 @@ pub struct Call<'i> {
 pub struct Ap<'i> {
     pub argument: ApArgument<'i>,
     pub result: Variable<'i>,
+}
+
+/// (canon peer_id $stream #canon_stream)
+#[derive(Serialize, Debug, PartialEq)]
+pub struct Canon<'i> {
+    pub peer_pk: CallInstrValue<'i>,
+    pub stream: Stream<'i>,
+    pub canon_stream: CanonStream<'i>,
 }
 
 /// (seq instruction instruction)
@@ -126,7 +135,7 @@ pub struct Next<'i> {
 /// (new variable instruction)
 #[derive(Serialize, Debug, PartialEq)]
 pub struct New<'i> {
-    pub variable: Variable<'i>,
+    pub argument: NewArgument<'i>,
     pub instruction: Box<Instruction<'i>>,
     pub span: Span,
 }

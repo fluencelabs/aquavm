@@ -29,7 +29,11 @@ fn parse_new_with_scalar() {
         "#;
 
     let instruction = parse(source_code);
-    let expected = new(Variable::scalar("scalar", 5), null(), Span::new(0, 40));
+    let expected = new(
+        NewArgument::Scalar(Scalar::new("scalar", 5)),
+        null(),
+        Span::new(0, 40),
+    );
     assert_eq!(instruction, expected);
 }
 
@@ -41,7 +45,11 @@ fn parse_new_with_stream() {
         "#;
 
     let instruction = parse(source_code);
-    let expected = new(Variable::stream("$stream", 5), null(), Span::new(0, 41));
+    let expected = new(
+        NewArgument::Stream(Stream::new("$stream", 5)),
+        null(),
+        Span::new(0, 41),
+    );
     assert_eq!(instruction, expected);
 }
 
@@ -80,4 +88,30 @@ fn iterators_cant_be_restricted() {
         parser_error,
         ParserError::IteratorRestrictionNotAllowed { .. }
     ));
+}
+
+#[test]
+fn canon_streams_cant_be_restricted() {
+    let source_code = r#"
+        (seq
+            (seq
+                (call "" ("" "") [] $stream)
+                (canon "" $stream #canon_stream)
+            )
+            (new #canon_stream
+                (null)
+            )
+        )
+        "#;
+
+    let lexer = crate::AIRLexer::new(source_code);
+
+    let parser = crate::AIRParser::new();
+    let mut errors = Vec::new();
+    let mut validator = crate::parser::VariableValidator::new();
+    parser
+        .parse(source_code, &mut errors, &mut validator, lexer)
+        .expect("parser shouldn't fail");
+
+    assert!(!errors.is_empty());
 }

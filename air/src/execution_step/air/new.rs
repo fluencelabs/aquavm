@@ -48,7 +48,7 @@ impl<'i> super::ExecutableInstruction<'i> for New<'i> {
 
 fn prolog<'i>(new: &New<'i>, exec_ctx: &mut ExecutionCtx<'i>) {
     let position = new.span.left;
-    match &new.variable {
+    match &new.argument {
         Variable::Stream(stream) => {
             let iteration = exec_ctx.tracker.new_tracker.get_iteration(position);
             exec_ctx.streams.meet_scope_start(stream.name, new.span, iteration);
@@ -61,7 +61,7 @@ fn prolog<'i>(new: &New<'i>, exec_ctx: &mut ExecutionCtx<'i>) {
 
 fn epilog<'i>(new: &New<'i>, exec_ctx: &mut ExecutionCtx<'i>) -> ExecutionResult<()> {
     let position = new.span.left;
-    match &new.variable {
+    match &new.argument {
         Variable::Stream(stream) => {
             exec_ctx
                 .streams
