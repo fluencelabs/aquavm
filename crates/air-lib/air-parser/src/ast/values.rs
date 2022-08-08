@@ -23,14 +23,14 @@ use serde::Deserialize;
 use serde::Serialize;
 
 /// A scalar value without lambda.
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct Scalar<'i> {
     pub name: &'i str,
     pub position: usize,
 }
 
 /// A scalar value with possible lambda expression.
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct ScalarWithLambda<'i> {
     pub name: &'i str,
     #[serde(borrow)]
@@ -39,14 +39,14 @@ pub struct ScalarWithLambda<'i> {
 }
 
 /// A stream without lambda.
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct Stream<'i> {
     pub name: &'i str,
     pub position: usize,
 }
 
 /// A stream with possible lambda expression.
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct StreamWithLambda<'i> {
     pub name: &'i str,
     #[serde(borrow)]
@@ -55,7 +55,7 @@ pub struct StreamWithLambda<'i> {
 }
 
 /// A variable that could be either scalar or stream without lambda.
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub enum Variable<'i> {
     #[serde(borrow)]
     Scalar(Scalar<'i>),
@@ -64,7 +64,7 @@ pub enum Variable<'i> {
 }
 
 /// A variable that could be either scalar or stream with possible lambda expression.
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub enum VariableWithLambda<'i> {
     #[serde(borrow)]
     Scalar(ScalarWithLambda<'i>),

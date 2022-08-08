@@ -48,7 +48,7 @@ pub trait DataStore {
     ) -> Result<(), Self::Error>;
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct AnomalyData<'data> {
     #[serde(borrow)]
     pub air_script: Cow<'data, str>,

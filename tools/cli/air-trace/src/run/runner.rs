@@ -18,6 +18,7 @@ use avm_server::avm_runner::*;
 use avm_server::CallResults;
 
 pub(crate) trait AirRunner {
+    #[allow(clippy::too_many_arguments)]
     fn call_tracing(
         &mut self,
         air: String,

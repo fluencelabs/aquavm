@@ -372,17 +372,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "cargo_toml"
-version = "0.8.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "513d17226888c7b8283ac02a1c1b0d8a9d4cbf6db65dfadb79f598f5d7966fe9"
-dependencies = [
- "serde",
- "serde_derive",
- "toml",
-]
-
-[[package]]
 name = "cast"
 version = "0.2.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -873,8 +862,9 @@ checksum = "37ab347416e802de484e4d03c7316c48f1ecb56574dfd4a46a80f173ce1de04d"
 
 [[package]]
 name = "fluence-app-service"
-version = "0.18.0"
-source = "git+https://github.com/fluencelabs/marine?branch=feat/support-handmade-reactors#9e0812d02341e52ad0c810cc542827a732bbf2c4"
+version = "0.18.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1519a1ece5d14a54046ed5e88155bfea47d209f73a05b32a18cf82e2d8ac5c43"
 dependencies = [
  "log",
  "maplit",
@@ -1102,7 +1092,8 @@ dependencies = [
 [[package]]
 name = "it-json-serde"
 version = "0.3.1"
-source = "git+https://github.com/fluencelabs/marine?branch=feat/support-handmade-reactors#9e0812d02341e52ad0c810cc542827a732bbf2c4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9e3b7efb8eeb6892a947928c10ac963e5d5101c173924453466314bf004306b4"
 dependencies = [
  "serde",
  "serde_derive",
@@ -1278,8 +1269,9 @@ checksum = "3e2e65a1a2e43cfcb47a895c4c8b10d1f4a61097f9f254f183aee60cad9c651d"
 
 [[package]]
 name = "marine-core"
-version = "0.16.0"
-source = "git+https://github.com/fluencelabs/marine?branch=feat/support-handmade-reactors#9e0812d02341e52ad0c810cc542827a732bbf2c4"
+version = "0.16.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c18b924984c79fb11a0f989e293c9ba5ba8b1061bc99f2bd45e63d139c2a01b0"
 dependencies = [
  "anyhow",
  "boolinator",
@@ -1310,10 +1302,10 @@ dependencies = [
 
 [[package]]
 name = "marine-it-generator"
-version = "0.8.1"
-source = "git+https://github.com/fluencelabs/marine?branch=feat/support-handmade-reactors#9e0812d02341e52ad0c810cc542827a732bbf2c4"
+version = "0.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5f68db04cab6cd0afa567251d80b4ef8223b317beffb99323c117bcc4a9773a4"
 dependencies = [
- "cargo_toml",
  "it-lilo",
  "marine-it-parser",
  "marine-macro-impl",
@@ -1328,7 +1320,8 @@ dependencies = [
 [[package]]
 name = "marine-it-interfaces"
 version = "0.7.1"
-source = "git+https://github.com/fluencelabs/marine?branch=feat/support-handmade-reactors#9e0812d02341e52ad0c810cc542827a732bbf2c4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b3236d1068eaa0f1a07ab74b098b777c150c0c354a16d8869cd69ae3ff847014"
 dependencies = [
  "multimap",
  "wasmer-interface-types-fl",
@@ -1337,7 +1330,8 @@ dependencies = [
 [[package]]
 name = "marine-it-parser"
 version = "0.9.1"
-source = "git+https://github.com/fluencelabs/marine?branch=feat/support-handmade-reactors#9e0812d02341e52ad0c810cc542827a732bbf2c4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "edea8966aa56f373e3b2db95432b023e20137c7d58798f74a67ee5749370d289"
 dependencies = [
  "anyhow",
  "itertools 0.10.3",
@@ -1379,7 +1373,8 @@ dependencies = [
 [[package]]
 name = "marine-min-it-version"
 version = "0.1.0"
-source = "git+https://github.com/fluencelabs/marine?branch=feat/support-handmade-reactors#9e0812d02341e52ad0c810cc542827a732bbf2c4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "890269754a531810b8c16cf00e6161e01c1183ef7ff4ff20117656316e9fdbd1"
 dependencies = [
  "once_cell",
  "semver 0.11.0",
@@ -1387,8 +1382,9 @@ dependencies = [
 
 [[package]]
 name = "marine-module-info-parser"
-version = "0.2.2"
-source = "git+https://github.com/fluencelabs/marine?branch=feat/support-handmade-reactors#9e0812d02341e52ad0c810cc542827a732bbf2c4"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5d85c5353236fdb9a94dc09531d3cef40866df88c27903a432ef32263d5111e4"
 dependencies = [
  "anyhow",
  "chrono",
@@ -1403,7 +1399,8 @@ dependencies = [
 [[package]]
 name = "marine-module-interface"
 version = "0.4.1"
-source = "git+https://github.com/fluencelabs/marine?branch=feat/support-handmade-reactors#9e0812d02341e52ad0c810cc542827a732bbf2c4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "eb284ad998636d64bfad9fef2849d8a02127ce9c094b4a3e53b2eb62c14e5e5f"
 dependencies = [
  "anyhow",
  "itertools 0.10.3",
@@ -1441,8 +1438,9 @@ dependencies = [
 
 [[package]]
 name = "marine-runtime"
-version = "0.18.0"
-source = "git+https://github.com/fluencelabs/marine?branch=feat/support-handmade-reactors#9e0812d02341e52ad0c810cc542827a732bbf2c4"
+version = "0.18.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d7ed0ecac893ecc26c925cbe00c6a1eb8ac9f8d9e60ebc9c0bd390fba08617f2"
 dependencies = [
  "bytesize",
  "cmd_lib",
@@ -1480,7 +1478,8 @@ dependencies = [
 [[package]]
 name = "marine-utils"
 version = "0.4.0"
-source = "git+https://github.com/fluencelabs/marine?branch=feat/support-handmade-reactors#9e0812d02341e52ad0c810cc542827a732bbf2c4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1cff7a23a7f3925a712c34dfb9cd87994012d7743f016fd1533e12ab5a8335ca"
 
 [[package]]
 name = "matchers"

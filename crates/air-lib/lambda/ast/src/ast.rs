@@ -22,7 +22,7 @@ use serde::Serialize;
 
 pub type LambdaAST<'input> = NonEmpty<ValueAccessor<'input>>;
 
-#[derive(Debug, PartialEq, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Serialize, Deserialize)]
 pub enum ValueAccessor<'input> {
     // (.)?[$idx]
     ArrayAccess { idx: u32 },
