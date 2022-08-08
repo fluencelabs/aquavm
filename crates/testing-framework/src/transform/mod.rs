@@ -17,8 +17,8 @@
 /*
  * Plan:
  * 1. [x] line numbers and pos
- * 2. [ ] contexts for error reporting
- * 3. [ ] error report
+ * 2. [x] contexts for error reporting
+ * 3. [x] error report
  * 4. [ ] annotation parsing
 */
 
@@ -27,10 +27,10 @@ use nom::bytes::complete::{is_not, tag};
 use nom::character::complete::multispace0;
 use nom::character::complete::{alphanumeric1, multispace1, one_of};
 use nom::combinator::{cut, map, opt, recognize, value};
-use nom::error::context;
+use nom::error::{context, ErrorKind, VerboseError, VerboseErrorKind};
 use nom::multi::{many1_count, separated_list0};
 use nom::sequence::{delimited, pair, preceded, separated_pair, terminated};
-use nom::{error::VerboseError, IResult};
+use nom::IResult;
 use nom_locate::LocatedSpan;
 use std::str::FromStr;
 
@@ -74,27 +74,62 @@ impl FromStr for Sexp {
         use nom::combinator::all_consuming;
 
         let span = LocatedSpan::new(s);
-        all_consuming(delim_ws(parse_sexp))(span)
+        cut(all_consuming(delim_ws(parse_sexp)))(span)
             .map(|(_, v)| v)
-            .map_err(|e| e.to_string())
+            .map_err(parse_error_to_message)
+    }
+}
+
+fn parse_error_to_message(e: nom::Err<ParseError>) -> String {
+    let e = match e {
+        nom::Err::Failure(e) => e,
+        _ => panic!("shouldn't happen because of top-level cut"),
+    };
+    let contexts = e
+        .errors
+        .iter()
+        .rev()
+        .filter_map(|(span, kind)| {
+            if let VerboseErrorKind::Context(c) = kind {
+                Some(format!(
+                    "  {}:{}: {}",
+                    span.location_line(),
+                    span.location_offset(),
+                    c
+                ))
+            } else {
+                None
+            }
+        })
+        .collect::<Vec<_>>();
+    if contexts.is_empty() {
+        e.to_string()
+    } else {
+        format!("Failed to parse the script:\n{}", contexts.join("\n"))
     }
 }
 
 fn parse_sexp<'inp>(inp: Input<'inp>) -> IResult<Input<'inp>, Sexp, ParseError<'inp>> {
-    alt((parse_sexp_list_like, parse_sexp_string, parse_sexp_symbol))(inp)
-}
-
-fn parse_sexp_list_like<'inp>(inp: Input<'inp>) -> IResult<Input<'inp>, Sexp, ParseError<'inp>> {
-    alt((parse_sexp_call, parse_sexp_list))(inp)
+    alt((
+        parse_sexp_call,
+        parse_sexp_list,
+        parse_sexp_string,
+        parse_sexp_symbol,
+    ))(inp)
 }
 
 fn parse_sexp_list<'inp>(inp: Input<'inp>) -> IResult<Input<'inp>, Sexp, ParseError<'inp>> {
     context(
         "within generic list",
-        delimited(
+        preceded(
             terminated(tag("("), multispace0),
-            cut(map(separated_list0(multispace1, parse_sexp), Sexp::list)),
-            preceded(multispace0, tag(")")),
+            cut(terminated(
+                map(separated_list0(multispace1, parse_sexp), Sexp::list),
+                preceded(
+                    multispace0,
+                    context("closing parentheses not found", tag(")")),
+                ),
+            )),
         ),
     )(inp)
 }
@@ -103,10 +138,15 @@ fn parse_sexp_string<'inp>(inp: Input<'inp>) -> IResult<Input<'inp>, Sexp, Parse
     // N.B. escape are rejected by AIR parser, but we simply treat backslash
     // as any other character
     map(
-        delimited(
-            tag("\""),
-            cut(context("within string", is_not("\""))),
-            tag("\""),
+        context(
+            "within string",
+            preceded(
+                tag("\""),
+                cut(terminated(
+                    is_not("\""),
+                    context("closing quotes not found", tag("\"")),
+                )),
+            ),
         ),
         |s: Input<'_>| Sexp::string(s),
     )(inp)
@@ -344,5 +384,28 @@ mod tests {
     fn test_trailing_error() {
         let res = Sexp::from_str("(null))");
         assert!(res.is_err(), "{:?}", res);
+    }
+
+    #[test]
+    fn test_incomplete_string() {
+        let err = Sexp::from_str(r#"(seq "string"#).unwrap_err();
+        assert_eq!(
+            err,
+            "Failed to parse the script:
+  1:0: within generic list
+  1:5: within string
+  1:12: closing quotes not found"
+        );
+    }
+
+    #[test]
+    fn test_incomplete_list() {
+        let err = Sexp::from_str(r#"(seq "string" "#).unwrap_err();
+        assert_eq!(
+            err,
+            "Failed to parse the script:
+  1:0: within generic list
+  1:14: closing parentheses not found"
+        );
     }
 }
