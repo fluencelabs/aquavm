@@ -65,7 +65,7 @@ pub(crate) fn parse_error_to_message(e: nom::Err<ParseError>) -> String {
                 Some(format!(
                     "  {}:{}: {}",
                     span.location_line(),
-                    span.location_offset(),
+                    span.get_utf8_column(),
                     c
                 ))
             } else {
@@ -374,24 +374,33 @@ mod tests {
 
     #[test]
     fn test_incomplete_string() {
-        let err = Sexp::from_str(r#"(seq "string"#).unwrap_err();
+        let err = Sexp::from_str(
+            r#"(seq
+   "string"#,
+        )
+        .unwrap_err();
         assert_eq!(
             err,
             "Failed to parse the script:
-  1:0: within generic list
-  1:5: within string
-  1:12: closing quotes not found"
+  1:1: within generic list
+  2:4: within string
+  2:11: closing quotes not found"
         );
     }
 
     #[test]
     fn test_incomplete_list() {
-        let err = Sexp::from_str(r#"(seq "string" "#).unwrap_err();
+        let err = Sexp::from_str(
+            r#"(seq
+   "string"
+"#,
+        )
+        .unwrap_err();
         assert_eq!(
             err,
             "Failed to parse the script:
-  1:0: within generic list
-  1:14: closing parentheses not found"
+  1:1: within generic list
+  3:1: closing parentheses not found"
         );
     }
 
