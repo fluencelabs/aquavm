@@ -21,7 +21,7 @@ use crate::services::JValue;
 /// Assert language structure: Assert.
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct AssertionChain {
-    assertions: Vec<AssertionBranch>,
+    pub(crate) assertions: Vec<AssertionBranch>,
 }
 
 impl AssertionChain {
@@ -32,9 +32,9 @@ impl AssertionChain {
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct AssertionBranch {
-    conditions: Vec<Condition>,
-    assertions: Vec<Assertion>,
-    metas: Vec<Meta>,
+    pub(crate) conditions: Vec<Condition>,
+    pub(crate) assertions: Vec<Assertion>,
+    pub(crate) metas: Vec<Meta>,
 }
 
 impl AssertionBranch {

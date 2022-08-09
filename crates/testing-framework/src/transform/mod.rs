@@ -23,6 +23,7 @@
 */
 
 mod parser;
+mod walker;
 
 use crate::asserts::AssertionChain;
 use std::str::FromStr;
