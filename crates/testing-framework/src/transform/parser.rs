@@ -20,8 +20,7 @@ use crate::asserts::AssertionChain;
 
 use nom::branch::alt;
 use nom::bytes::complete::{is_not, tag};
-use nom::character::complete::multispace0;
-use nom::character::complete::{alphanumeric1, multispace1, one_of};
+use nom::character::complete::{alphanumeric1, multispace0, multispace1, one_of, space1};
 use nom::combinator::{cut, map, map_res, opt, recognize, value};
 use nom::error::{context, VerboseError, VerboseErrorKind};
 use nom::multi::{many1_count, separated_list0};
@@ -153,9 +152,12 @@ fn parse_sexp_call_content(inp: Input<'_>) -> IResult<Input<'_>, Sexp, ParseErro
             pair(
                 terminated(
                     opt(preceded(multispace1, map(parse_sexp_symbol, Box::new))),
-                    delim_ws(tag(")")),
+                    preceded(multispace0, tag(")")),
                 ),
-                opt(preceded(tag("# "), parse_annotation)),
+                alt((
+                    opt(preceded(pair(space1, tag("# ")), parse_annotation)),
+                    value(None, multispace0),
+                )),
             ),
         ),
         |((triplet, args), (var, annotation))| {
@@ -254,6 +256,55 @@ mod tests {
                 var: None,
                 annotation: None,
             }))
+        );
+    }
+
+    #[test]
+    fn test_call_after_call() {
+        let res = Sexp::from_str(
+            r#"(seq
+    (call peer_id ("serv" "func") [])
+    (call peer_id ("serv" "func") [])
+)"#,
+        );
+        assert_eq!(
+            res,
+            Ok(Sexp::list(vec![
+                Sexp::symbol("seq"),
+                Sexp::Call(Call {
+                    triplet: Box::new((
+                        Sexp::symbol("peer_id"),
+                        Sexp::string("serv"),
+                        Sexp::string("func"),
+                    )),
+                    args: vec![],
+                    var: None,
+                    annotation: None,
+                }),
+                Sexp::Call(Call {
+                    triplet: Box::new((
+                        Sexp::symbol("peer_id"),
+                        Sexp::string("serv"),
+                        Sexp::string("func"),
+                    )),
+                    args: vec![],
+                    var: None,
+                    annotation: None,
+                }),
+            ]))
+        );
+    }
+
+    #[test]
+    fn test_call_annotation_newline() {
+        let res = Sexp::from_str(
+            r#"(seq (call peer_id ("serv" "func") [])
+# result=42
+)"#,
+        );
+        assert_eq!(
+            res,
+            Err("Failed to parse the script:\n  1:1: within generic list\n  2:1: closing parentheses not found".to_owned())
         );
     }
 

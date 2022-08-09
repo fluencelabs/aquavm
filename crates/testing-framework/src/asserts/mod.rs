@@ -19,7 +19,7 @@ pub(crate) mod parser;
 use crate::services::JValue;
 
 /// Assert language structure: Assert.
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct AssertionChain {
     assertions: Vec<AssertionBranch>,
 }
@@ -30,7 +30,7 @@ impl AssertionChain {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct AssertionBranch {
     conditions: Vec<Condition>,
     assertions: Vec<Assertion>,
@@ -71,14 +71,14 @@ impl AssertionBranch {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Condition {
     Iter(u32),
     On(Equation),
     Filter(FuncName),
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Assertion {
     Before(CallPlaceId),
     After(CallPlaceId),
@@ -91,12 +91,12 @@ pub enum Assertion {
     NextPeerPk(String),
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Equation {
     Equal(String, String), // TODO
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Meta {
     Id(CallPlaceId),
     Result(JValue),
