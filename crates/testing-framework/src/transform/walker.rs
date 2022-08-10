@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
+use super::{Call, Sexp};
 use crate::{asserts::Meta, services::JValue};
 
-use std::collections::HashMap;
-
-use super::{Call, Sexp};
+use std::collections::{HashMap, HashSet};
 
 #[derive(Debug, Default)]
 pub(crate) struct Transformer {
     cnt: u32,
-    results: HashMap<u32, JValue>,
+    pub(crate) results: HashMap<u32, JValue>,
+    pub(crate) peers: HashSet<String>,
 }
 
 impl Transformer {
@@ -44,6 +44,11 @@ impl Transformer {
     }
 
     fn handle_call(&mut self, call: &mut Call) {
+        // collect peers...
+        if let Sexp::String(peer_id) = &call.triplet.0 {
+            self.peers.insert(peer_id.clone());
+        }
+
         // find first value...
         for branch in call
             .annotation
@@ -70,16 +75,12 @@ impl Transformer {
             }
         }
     }
-
-    pub(crate) fn to_result_map(self) -> HashMap<u32, JValue> {
-        self.results
-    }
 }
 
 #[cfg(test)]
 mod tests {
-    use std::str::FromStr;
     use super::*;
+    use std::{iter::FromIterator, str::FromStr};
 
     #[test]
     fn test_translate_null() {
@@ -111,20 +112,25 @@ mod tests {
 
     #[test]
     fn test_translate_call_result() {
-        let script = r#"(call peer_id ("service_id" func) []) # result = 42"#;
+        let script = r#"(call "peer_id" ("service_id" func) []) # result = 42"#;
         let mut tree = Sexp::from_str(script).unwrap();
         let mut transformer = Transformer::new();
         transformer.transform(&mut tree);
         assert_eq!(
             tree.to_string(),
-            r#"(call peer_id ("service_id..0" func) [])"#
+            r#"(call "peer_id" ("service_id..0" func) [])"#
         );
 
         assert_eq!(
-            transformer.to_result_map(),
+            transformer.results,
             maplit::hashmap! {
                 0u32 => serde_json::json!(42),
             }
+        );
+
+        assert_eq!(
+            transformer.peers.into_iter().collect::<Vec<_>>(),
+            vec!["peer_id".to_owned()],
         );
     }
 
@@ -154,11 +160,37 @@ mod tests {
         );
 
         assert_eq!(
-            transformer.to_result_map(),
+            transformer.results,
             maplit::hashmap! {
                 0u32 => serde_json::json!({"test": "me"}),
                 1 => serde_json::json!(true),
             }
         );
+
+        assert!(transformer.peers.is_empty());
+    }
+
+    #[test]
+    fn test_peers() {
+        // this script is not correct AIR, but our parser handles it
+        let script = r#"(seq
+   (call "peer_id1" ("service_id" func) [a 11]) # result={"test":"me"}
+   (seq
+      (call "peer_id2" ("service_id" func) [b])
+      (call "peer_id1" ("service_id" func) [1]) # result=true
+      (call peer_id3 ("service_id" func) [b])
+))"#;
+
+        let mut tree = Sexp::from_str(script).unwrap();
+        let mut transformer = Transformer::new();
+        transformer.transform(&mut tree);
+
+        assert_eq!(
+            transformer.peers,
+            HashSet::from_iter(vec![
+                "peer_id1".to_owned(),
+                "peer_id2".to_owned(),
+            ]),
+        )
     }
 }
