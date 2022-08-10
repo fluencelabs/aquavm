@@ -78,26 +78,24 @@ use fluence_it_types::ne_vec::NEVec;
 fn try_as_record(ivalue: IValue) -> Result<NEVec<IValue>, String> {
     match ivalue {
         IValue::Record(record_values) => Ok(record_values),
-        v => {
-            return Err(format!(
-                "expected record for InterpreterOutcome, got {:?}",
-                v
-            ))
-        }
+        v => Err(format!(
+            "expected record for InterpreterOutcome, got {:?}",
+            v
+        )),
     }
 }
 
 fn try_as_i64(ivalue: IValue, field_name: &str) -> Result<i64, String> {
     match ivalue {
         IValue::S64(value) => Ok(value),
-        v => return Err(format!("expected an i64 for {}, got {:?}", field_name, v)),
+        v => Err(format!("expected an i64 for {}, got {:?}", field_name, v)),
     }
 }
 
 fn try_as_string(ivalue: IValue, field_name: &str) -> Result<String, String> {
     match ivalue {
         IValue::String(value) => Ok(value),
-        v => return Err(format!("expected a string for {}, got {:?}", field_name, v)),
+        v => Err(format!("expected a string for {}, got {:?}", field_name, v)),
     }
 }
 

@@ -17,7 +17,7 @@
 #[macro_export]
 macro_rules! make_user_error(
     ($error_type:ident, $start_pos: ident, $token:expr, $end_pos: ident) => { {
-        let error = crate::parser::ParserError::$error_type(crate::parser::Span::new($start_pos, $end_pos));
+        let error = $crate::parser::ParserError::$error_type($crate::parser::Span::new($start_pos, $end_pos));
         let error = lalrpop_util::ParseError::User { error };
 
         let dropped_tokens = vec![($start_pos, $token, $end_pos)];

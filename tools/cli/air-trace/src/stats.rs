@@ -48,6 +48,7 @@ pub(crate) fn stats(mut args: Args) -> anyhow::Result<()> {
 
     let mut stats = self::report::StatsReport::new();
 
+    #[allow(clippy::significant_drop_in_scrutinee)]
     for rec in read_logs(stdin) {
         let rec = rec?;
 
