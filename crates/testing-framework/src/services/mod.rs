@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-pub mod builtins;
 pub(crate) mod results;
 
 use air_test_utils::{CallRequestParams, CallServiceClosure, CallServiceResult};

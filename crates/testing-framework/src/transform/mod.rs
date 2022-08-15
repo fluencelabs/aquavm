@@ -87,11 +87,9 @@ impl std::fmt::Display for Sexp {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
-
     use super::*;
 
-    use crate::asserts::{AssertionBranch, Meta};
+    use std::str::FromStr;
 
     #[test]
     fn test_parse_fmt_call() {
