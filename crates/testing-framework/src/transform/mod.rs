@@ -23,10 +23,9 @@
 */
 
 mod parser;
-mod walker;
+pub(crate) mod walker;
 
 use crate::asserts::AssertionChain;
-use std::str::FromStr;
 
 type Triplet = (Sexp, Sexp, Sexp);
 

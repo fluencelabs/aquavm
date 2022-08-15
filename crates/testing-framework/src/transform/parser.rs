@@ -37,10 +37,6 @@ impl FromStr for Sexp {
     type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        use crate::{
-            asserts::parser::delim_ws,
-            transform::parser::{parse_error_to_message, parse_sexp},
-        };
         use nom::combinator::all_consuming;
 
         let span = nom_locate::LocatedSpan::new(s);

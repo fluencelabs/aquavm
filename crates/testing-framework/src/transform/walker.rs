@@ -15,7 +15,7 @@
  */
 
 use super::{Call, Sexp};
-use crate::{asserts::Meta, services::JValue};
+use crate::{asserts::Meta, ephemeral::PeerId, services::JValue};
 
 use std::collections::{HashMap, HashSet};
 
@@ -23,7 +23,7 @@ use std::collections::{HashMap, HashSet};
 pub(crate) struct Transformer {
     cnt: u32,
     pub(crate) results: HashMap<u32, JValue>,
-    pub(crate) peers: HashSet<String>,
+    pub(crate) peers: HashSet<PeerId>,
 }
 
 impl Transformer {
@@ -46,7 +46,7 @@ impl Transformer {
     fn handle_call(&mut self, call: &mut Call) {
         // collect peers...
         if let Sexp::String(peer_id) = &call.triplet.0 {
-            self.peers.insert(peer_id.clone());
+            self.peers.insert(peer_id.clone().into());
         }
 
         // find first value...
@@ -130,7 +130,7 @@ mod tests {
 
         assert_eq!(
             transformer.peers.into_iter().collect::<Vec<_>>(),
-            vec!["peer_id".to_owned()],
+            vec![PeerId::new("peer_id")],
         );
     }
 
@@ -187,10 +187,7 @@ mod tests {
 
         assert_eq!(
             transformer.peers,
-            HashSet::from_iter(vec![
-                "peer_id1".to_owned(),
-                "peer_id2".to_owned(),
-            ]),
+            HashSet::from_iter(vec![PeerId::new("peer_id1"), PeerId::new("peer_id2")]),
         )
     }
 }

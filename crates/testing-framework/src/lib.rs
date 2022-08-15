@@ -17,6 +17,7 @@
 pub mod asserts;
 pub mod clock;
 pub mod ephemeral;
+pub mod execution;
 pub mod queue;
 pub mod services;
 pub mod transform;

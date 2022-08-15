@@ -15,23 +15,44 @@
  */
 
 pub mod builtins;
+pub(crate) mod results;
 
-use std::time::Duration;
+use air_test_utils::{CallRequestParams, CallServiceClosure, CallServiceResult};
+
+use std::{rc::Rc, time::Duration};
 
 pub type JValue = serde_json::Value;
 
-// TODO: consider using Result instead.
 /// Somewhat modified type from fluence.  The Duration defines when the caller receives it, imitating
 /// real execution time.
 #[derive(Debug)]
 pub enum FunctionOutcome {
     Ok(JValue, Duration),
-    Err(JValue, Duration),
+    Err(i32, JValue, Duration),
     NotDefined,
     Empty,
 }
 
-/// A mocked Marine service.  It is stateful, and each peer has own instances.
+/// A mocked Marine service.
 pub trait Service {
-    fn call(&self, service_id: &str, function_name: &str, args: &[JValue]) -> FunctionOutcome;
+    fn call(&self, params: &CallRequestParams) -> FunctionOutcome;
+}
+
+pub(crate) fn services_to_call_service_closure(
+    services: Rc<[Rc<dyn Service>]>,
+) -> CallServiceClosure {
+    Box::new(move |params: CallRequestParams| -> CallServiceResult {
+        for service in services.as_ref() {
+            let outcome = service.call(&params);
+            match outcome {
+                FunctionOutcome::Ok(value, _) => return CallServiceResult::ok(value),
+                FunctionOutcome::Err(err_code, value, _) => {
+                    return CallServiceResult::err(err_code, value)
+                }
+                FunctionOutcome::NotDefined => continue,
+                FunctionOutcome::Empty => todo!("It's not clear yet what to return"),
+            }
+        }
+        todo!("Do not know yet what to return here")
+    })
 }

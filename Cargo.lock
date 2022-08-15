@@ -2305,6 +2305,7 @@ dependencies = [
 name = "testing-framework"
 version = "0.1.0"
 dependencies = [
+ "air-test-utils",
  "itertools 0.10.3",
  "maplit",
  "nom 7.1.1",
