@@ -121,6 +121,9 @@ impl std::fmt::Display for ExecutedState {
             Ap(ap) => {
                 write!(f, "ap: _ -> {:?}", ap.res_generations)
             }
+            Canon(canon) => {
+                write!(f, "canon {:?}", canon.stream_element_ids)
+            }
         }
     }
 }

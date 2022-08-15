@@ -124,6 +124,14 @@ pub struct ApResult {
     pub res_generations: Vec<u32>,
 }
 
+/// Contains ids of element that were on a stream at the moment of an appropriate canon call.
+#[derive(Debug, Default, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub struct CanonResult {
+    #[serde(rename = "ids")]
+    pub stream_element_ids: Vec<TracePos>,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum ExecutedState {
@@ -132,4 +140,5 @@ pub enum ExecutedState {
     Call(CallResult),
     Fold(FoldResult),
     Ap(ApResult),
+    Canon(CanonResult),
 }

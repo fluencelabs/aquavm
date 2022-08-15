@@ -54,7 +54,7 @@ pub struct Call<'i> {
 #[derive(Serialize, Debug, PartialEq)]
 pub struct Ap<'i> {
     pub argument: ApArgument<'i>,
-    pub result: Variable<'i>,
+    pub result: ApResult<'i>,
 }
 
 /// (canon peer_id $stream #canon_stream)

@@ -17,6 +17,17 @@
 use super::*;
 use std::fmt;
 
+impl fmt::Display for ApResult<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use ApResult::*;
+
+        match self {
+            Scalar(scalar) => write!(f, "{}", scalar),
+            Stream(stream) => write!(f, "{}", stream),
+        }
+    }
+}
+
 impl fmt::Display for Value<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use Value::*;
@@ -52,7 +63,8 @@ impl fmt::Display for CallOutputValue<'_> {
         use CallOutputValue::*;
 
         match self {
-            Variable(variable) => write!(f, "{}", variable),
+            Scalar(scalar) => write!(f, "{}", scalar),
+            Stream(stream) => write!(f, "{}", stream),
             None => Ok(()),
         }
     }

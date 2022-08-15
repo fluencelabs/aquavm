@@ -71,7 +71,8 @@ impl<'i> VariableValidator<'i> {
         self.met_args(call.args.deref(), span);
 
         match &call.output {
-            CallOutputValue::Variable(variable) => self.met_variable_definition(variable, span),
+            CallOutputValue::Scalar(scalar) => self.met_variable_name_definition(scalar.name, span),
+            CallOutputValue::Stream(stream) => self.met_variable_name_definition(stream.name, span),
             CallOutputValue::None => {}
         };
     }
@@ -148,7 +149,7 @@ impl<'i> VariableValidator<'i> {
                 self.met_lambda(&canon_stream.lambda, span);
             }
         }
-        self.met_variable_definition(&ap.result, span);
+        self.met_variable_name_definition(ap.result.name(), span);
     }
 
     pub(super) fn finalize(self) -> Vec<ErrorRecovery<usize, Token<'i>, ParserError>> {
@@ -228,10 +229,6 @@ impl<'i> VariableValidator<'i> {
         };
 
         found_spans.iter().any(|s| s < &key_span)
-    }
-
-    fn met_variable_definition(&mut self, variable: &Variable<'i>, span: Span) {
-        self.met_variable_name_definition(variable.name(), span);
     }
 
     fn met_variable_name_definition(&mut self, name: &'i str, span: Span) {

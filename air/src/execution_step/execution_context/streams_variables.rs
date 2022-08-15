@@ -32,6 +32,8 @@ pub(crate) struct Streams {
     // TODO: use shared string (Rc<String>) to avoid copying.
     streams: HashMap<String, Vec<StreamDescriptor>>,
 
+    canon_streams: HashMap<String, CanonStream>,
+
     /// Contains stream generation that private stream should have at the scope start.
     data_restr_stream_generations: RestrictedStreamGens,
 
@@ -56,6 +58,14 @@ impl Streams {
         self.streams
             .get_mut(name)
             .and_then(|descriptors| find_closest_mut(descriptors.iter_mut(), position))
+    }
+
+    pub(crate) fn get_canon(&self, name: &str) -> Option<&CanonStream> {
+        self.canon_streams.get(name)
+    }
+
+    pub(crate) fn add_canon(&mut self, name: String, canon_stream: CanonStream) {
+        self.canon_streams.insert(name, canon_stream);
     }
 
     pub(crate) fn add_stream_value(
@@ -205,6 +215,7 @@ fn find_closest_mut<'d>(
     None
 }
 
+use crate::execution_step::boxed_value::CanonStream;
 use air_parser::ast::Span;
 use std::fmt;
 

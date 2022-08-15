@@ -1,5 +1,5 @@
 // auto-generated: "lalrpop 0.19.7"
-// sha3: 8139a36a8b1c16b9f1cbb147821c7c7b7ff659e55e708ad7fb985be79445e
+// sha3: 57d1efe7fbbe214b18a6302105bbb8e12751e4f711ba7d43a7aa89df52168a
 use crate::ast::*;
 use crate::parser::ParserError;
 use crate::parser::VariableValidator;
@@ -51,17 +51,18 @@ mod __parse__AIR {
         Variant11(usize),
         Variant12(Box<Instruction<'input>>),
         Variant13(ApArgument<'input>),
-        Variant14(Variable<'input>),
+        Variant14(ApResult<'input>),
         Variant15(Vec<Value<'input>>),
         Variant16(CallInstrValue<'input>),
-        Variant17(core::option::Option<Variable<'input>>),
-        Variant18(CanonStream<'input>),
-        Variant19(Fail<'input>),
-        Variant20(FoldScalarIterable<'input>),
-        Variant21(NewArgument<'input>),
-        Variant22(Number),
-        Variant23(Stream<'input>),
-        Variant24(Triplet<'input>),
+        Variant17(CallOutputValue<'input>),
+        Variant18(core::option::Option<CallOutputValue<'input>>),
+        Variant19(CanonStream<'input>),
+        Variant20(Fail<'input>),
+        Variant21(FoldScalarIterable<'input>),
+        Variant22(NewArgument<'input>),
+        Variant23(Number),
+        Variant24(Stream<'input>),
+        Variant25(Triplet<'input>),
     }
     const __ACTION: &[i16] = &[
         // State 0
@@ -89,11 +90,11 @@ mod __parse__AIR {
         // State 11
         34, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 35,
         // State 12
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 96, 0, 97, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 95, 0, 96, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 13
         0, 0, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 14
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 99, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 98, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 15
         0, 0, 76, 0, 77, 78, 79, 43, 44, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 16
@@ -109,7 +110,7 @@ mod __parse__AIR {
         // State 21
         0, 0, 0, 0, 0, 55, 56, 0, 0, 57, 0, 0, 58, 59, 60, 61, 62, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 22
-        0, 113, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 96, 0, 97, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 111, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 112, 0, 113, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 23
         0, 0, 76, 116, 77, 78, 79, 43, 44, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 24
@@ -133,7 +134,7 @@ mod __parse__AIR {
         // State 33
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 4, 5, 6, 7, 8, 9, 36, 37, 10, 11, 12, 0,
         // State 34
-        -63, -63, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -63,
+        -65, -65, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -65,
         // State 35
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 92, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 36
@@ -141,7 +142,7 @@ mod __parse__AIR {
         // State 37
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -15, 0, -15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 38
-        0, 0, 0, 98, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 97, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 39
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -16, 0, -16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 40
@@ -149,9 +150,9 @@ mod __parse__AIR {
         // State 41
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -21, 0, -21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 42
-        -67, 0, -67, -67, -67, -67, -67, -67, -67, -67, -67, -67, -67, -67, -67, -67, -67, -67, -67, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -67,
+        -69, 0, -69, -69, -69, -69, -69, -69, -69, -69, -69, -69, -69, -69, -69, -69, -69, -69, -69, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -69,
         // State 43
-        -66, 0, -66, -66, -66, -66, -66, -66, -66, -66, -66, -66, -66, -66, -66, -66, -66, -66, -66, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -66,
+        -68, 0, -68, -68, -68, -68, -68, -68, -68, -68, -68, -68, -68, -68, -68, -68, -68, -68, -68, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -68,
         // State 44
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -9, 0, -9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 45
@@ -169,53 +170,53 @@ mod __parse__AIR {
         // State 51
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -12, 0, -12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 52
-        -68, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        -70, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 53
         22, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 54
-        -32, -32, 0, 0, 0, -32, -32, 0, 0, -32, 0, 0, -32, -32, -32, -32, -32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        // State 55
         -33, -33, 0, 0, 0, -33, -33, 0, 0, -33, 0, 0, -33, -33, -33, -33, -33, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        // State 55
+        -34, -34, 0, 0, 0, -34, -34, 0, 0, -34, 0, 0, -34, -34, -34, -34, -34, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 56
-        -26, -26, 0, 0, 0, -26, -26, 0, 0, -26, 0, 0, -26, -26, -26, -26, -26, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        // State 57
         -27, -27, 0, 0, 0, -27, -27, 0, 0, -27, 0, 0, -27, -27, -27, -27, -27, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        // State 58
+        // State 57
         -28, -28, 0, 0, 0, -28, -28, 0, 0, -28, 0, 0, -28, -28, -28, -28, -28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        // State 59
+        // State 58
         -29, -29, 0, 0, 0, -29, -29, 0, 0, -29, 0, 0, -29, -29, -29, -29, -29, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        // State 60
+        // State 59
         -30, -30, 0, 0, 0, -30, -30, 0, 0, -30, 0, 0, -30, -30, -30, -30, -30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        // State 61
+        // State 60
         -31, -31, 0, 0, 0, -31, -31, 0, 0, -31, 0, 0, -31, -31, -31, -31, -31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        // State 61
+        -32, -32, 0, 0, 0, -32, -32, 0, 0, -32, 0, 0, -32, -32, -32, -32, -32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 62
-        0, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 99, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 63
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 101, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 64
-        0, -41, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, -43, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 65
-        0, -38, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, -40, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 66
-        0, -39, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, -41, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 67
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 26, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 68
-        0, 0, 0, 102, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 101, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 69
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -44, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -46, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 70
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -45, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -47, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 71
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -42, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -44, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 72
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -43, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -45, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 73
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 27, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 74
         -80, 0, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -80,
         // State 75
-        0, 0, 0, 103, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 102, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 76
         -81, 0, -81, -81, -81, -81, -81, -81, -81, -81, -81, -81, -81, -81, -81, -81, -81, -81, -81, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -81,
         // State 77
@@ -243,63 +244,63 @@ mod __parse__AIR {
         // State 88
         -78, 0, -78, -78, -78, -78, -78, -78, -78, -78, -78, -78, -78, -78, -78, -78, -78, -78, -78, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -78,
         // State 89
-        -64, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -64,
+        -66, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -66,
         // State 90
-        -65, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -65,
+        -67, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -67,
         // State 91
-        0, 105, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 104, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 92
-        -54, -54, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -54,
+        -56, -56, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -56,
         // State 93
-        0, 109, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 108, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 94
         0, -22, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 95
-        0, -69, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, -23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 96
-        0, -70, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        // State 97
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -17, 0, -17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        // State 98
+        // State 97
         0, 0, 0, 0, 0, -72, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        // State 98
+        -58, -58, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -58,
         // State 99
-        -56, -56, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -56,
+        0, -42, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 100
-        0, -40, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 101
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -46, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        // State 102
         -82, 0, -82, -82, -82, -82, -82, -82, -82, -82, -82, -82, -82, -82, -82, -82, -82, -82, -82, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -82,
-        // State 103
+        // State 102
         0, 123, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        // State 103
+        -61, -61, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -61,
         // State 104
-        -59, -59, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -59,
-        // State 105
         0, 124, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        // State 106
+        // State 105
         0, 125, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        // State 107
+        // State 106
         0, 126, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        // State 107
+        -53, -53, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -53,
         // State 108
-        -51, -51, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -51,
-        // State 109
         0, 0, 0, 0, 0, -71, -71, 0, 0, -71, 0, 0, -71, -71, -71, -71, -71, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        // State 110
+        // State 109
         0, 129, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        // State 110
+        -51, -51, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -51,
         // State 111
-        0, -34, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, -35, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 112
-        -49, -49, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -49,
+        0, -36, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 113
         0, 0, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 114
-        0, 0, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 115
-        0, -24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -24, 0, -24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, -25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -25, 0, -25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 116
         0, 132, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 117
-        0, -37, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, -39, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 118
         0, 133, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 119
@@ -309,33 +310,33 @@ mod __parse__AIR {
         // State 121
         0, 136, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 122
-        -55, -55, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -55,
+        -57, -57, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -57,
         // State 123
-        -53, -53, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -53,
+        -55, -55, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -55,
         // State 124
-        -52, -52, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -52,
+        -54, -54, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -54,
         // State 125
-        -60, -60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -60,
+        -62, -62, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -62,
         // State 126
-        0, -47, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, -49, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 127
         0, 137, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 128
-        -48, -48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -48,
+        -50, -50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -50,
         // State 129
         0, 0, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 130
-        0, -25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -25, 0, -25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, -26, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -26, 0, -26, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 131
-        -50, -50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -50,
+        -52, -52, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -52,
         // State 132
-        -57, -57, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -57,
+        -59, -59, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -59,
         // State 133
-        -58, -58, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -58,
+        -60, -60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -60,
         // State 134
-        -61, -61, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -61,
+        -63, -63, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -63,
         // State 135
-        -62, -62, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -62,
+        -64, -64, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -64,
         // State 136
         0, 0, -73, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     ];
@@ -412,7 +413,7 @@ mod __parse__AIR {
         // State 33
         0,
         // State 34
-        -63,
+        -65,
         // State 35
         0,
         // State 36
@@ -528,7 +529,7 @@ mod __parse__AIR {
         // State 91
         0,
         // State 92
-        -54,
+        -56,
         // State 93
         0,
         // State 94
@@ -540,9 +541,9 @@ mod __parse__AIR {
         // State 97
         0,
         // State 98
-        0,
+        -58,
         // State 99
-        -56,
+        0,
         // State 100
         0,
         // State 101
@@ -550,25 +551,25 @@ mod __parse__AIR {
         // State 102
         0,
         // State 103
-        0,
+        -61,
         // State 104
-        -59,
+        0,
         // State 105
         0,
         // State 106
         0,
         // State 107
-        0,
+        -53,
         // State 108
-        -51,
+        0,
         // State 109
         0,
         // State 110
-        0,
+        -51,
         // State 111
         0,
         // State 112
-        -49,
+        0,
         // State 113
         0,
         // State 114
@@ -588,33 +589,33 @@ mod __parse__AIR {
         // State 121
         0,
         // State 122
-        -55,
+        -57,
         // State 123
-        -53,
+        -55,
         // State 124
-        -52,
+        -54,
         // State 125
-        -60,
+        -62,
         // State 126
         0,
         // State 127
         0,
         // State 128
-        -48,
+        -50,
         // State 129
         0,
         // State 130
         0,
         // State 131
-        -50,
+        -52,
         // State 132
-        -57,
+        -59,
         // State 133
-        -58,
+        -60,
         // State 134
-        -61,
+        -63,
         // State 135
-        -62,
+        -64,
         // State 136
         0,
     ];
@@ -631,11 +632,11 @@ mod __parse__AIR {
             9 => 22,
             10 => match state {
                 2 => 52,
-                21 => 109,
+                21 => 108,
                 29 => 126,
                 _ => 14,
             },
-            11 => 110,
+            11 => 109,
             13 => 116,
             14 => 62,
             15 => 67,
@@ -644,10 +645,10 @@ mod __parse__AIR {
                 10 => 19,
                 11 => 20,
                 0 => 32,
-                17 => 103,
-                18 => 105,
-                19 => 106,
-                20 => 107,
+                17 => 102,
+                18 => 104,
+                19 => 105,
+                20 => 106,
                 25 => 118,
                 26 => 119,
                 27 => 120,
@@ -660,14 +661,10 @@ mod __parse__AIR {
                 _ => 74,
             },
             20 => 53,
-            21 => match state {
-                22 => 111,
-                _ => 94,
-            },
-            22 => 29,
-            23 => 24,
-            24 => 13,
-            25 => match state {
+            21 => 29,
+            22 => 24,
+            23 => 13,
+            24 => match state {
                 6 => 15,
                 7 => 16,
                 15 => 27,
@@ -1058,25 +1055,25 @@ mod __parse__AIR {
             22 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 8,
+                    nonterminal_produced: 7,
                 }
             }
             23 => {
+                __state_machine::SimulatedReduce::Reduce {
+                    states_to_pop: 1,
+                    nonterminal_produced: 8,
+                }
+            }
+            24 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 2,
                     nonterminal_produced: 9,
                 }
             }
-            24 => {
+            25 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 3,
                     nonterminal_produced: 9,
-                }
-            }
-            25 => {
-                __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 1,
-                    nonterminal_produced: 10,
                 }
             }
             26 => {
@@ -1124,42 +1121,42 @@ mod __parse__AIR {
             33 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 11,
+                    nonterminal_produced: 10,
                 }
             }
             34 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 12,
+                    nonterminal_produced: 11,
                 }
             }
             35 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 0,
-                    nonterminal_produced: 12,
+                    states_to_pop: 1,
+                    nonterminal_produced: 11,
                 }
             }
             36 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 13,
+                    nonterminal_produced: 12,
                 }
             }
             37 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 1,
-                    nonterminal_produced: 14,
+                    states_to_pop: 0,
+                    nonterminal_produced: 12,
                 }
             }
             38 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 14,
+                    nonterminal_produced: 13,
                 }
             }
             39 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 2,
+                    states_to_pop: 1,
                     nonterminal_produced: 14,
                 }
             }
@@ -1171,14 +1168,14 @@ mod __parse__AIR {
             }
             41 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 1,
-                    nonterminal_produced: 15,
+                    states_to_pop: 2,
+                    nonterminal_produced: 14,
                 }
             }
             42 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 15,
+                    nonterminal_produced: 14,
                 }
             }
             43 => {
@@ -1195,26 +1192,26 @@ mod __parse__AIR {
             }
             45 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 2,
+                    states_to_pop: 1,
                     nonterminal_produced: 15,
                 }
             }
             46 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 16,
+                    nonterminal_produced: 15,
                 }
             }
             47 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 6,
-                    nonterminal_produced: 17,
+                    states_to_pop: 2,
+                    nonterminal_produced: 15,
                 }
             }
             48 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 5,
-                    nonterminal_produced: 17,
+                    states_to_pop: 1,
+                    nonterminal_produced: 16,
                 }
             }
             49 => {
@@ -1231,7 +1228,7 @@ mod __parse__AIR {
             }
             51 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 5,
+                    states_to_pop: 6,
                     nonterminal_produced: 17,
                 }
             }
@@ -1243,7 +1240,7 @@ mod __parse__AIR {
             }
             53 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 3,
+                    states_to_pop: 5,
                     nonterminal_produced: 17,
                 }
             }
@@ -1255,200 +1252,200 @@ mod __parse__AIR {
             }
             55 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 4,
+                    states_to_pop: 3,
                     nonterminal_produced: 17,
                 }
             }
             56 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 6,
+                    states_to_pop: 5,
                     nonterminal_produced: 17,
                 }
             }
             57 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 6,
+                    states_to_pop: 4,
                     nonterminal_produced: 17,
                 }
             }
             58 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 4,
+                    states_to_pop: 6,
                     nonterminal_produced: 17,
                 }
             }
             59 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 5,
+                    states_to_pop: 6,
                     nonterminal_produced: 17,
                 }
             }
             60 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 6,
+                    states_to_pop: 4,
                     nonterminal_produced: 17,
                 }
             }
             61 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 6,
+                    states_to_pop: 5,
                     nonterminal_produced: 17,
                 }
             }
             62 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 1,
+                    states_to_pop: 6,
                     nonterminal_produced: 17,
                 }
             }
             63 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 1,
-                    nonterminal_produced: 18,
+                    states_to_pop: 6,
+                    nonterminal_produced: 17,
                 }
             }
             64 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 18,
+                    nonterminal_produced: 17,
                 }
             }
             65 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 19,
+                    nonterminal_produced: 18,
                 }
             }
             66 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 19,
+                    nonterminal_produced: 18,
                 }
             }
             67 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 20,
+                    nonterminal_produced: 19,
                 }
             }
             68 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 21,
+                    nonterminal_produced: 19,
                 }
             }
             69 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 21,
+                    nonterminal_produced: 20,
                 }
             }
             70 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 22,
+                    nonterminal_produced: 21,
                 }
             }
             71 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 23,
+                    nonterminal_produced: 22,
                 }
             }
             72 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 5,
-                    nonterminal_produced: 24,
+                    nonterminal_produced: 23,
                 }
             }
             73 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 25,
+                    nonterminal_produced: 24,
                 }
             }
             74 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 25,
+                    nonterminal_produced: 24,
                 }
             }
             75 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 25,
+                    nonterminal_produced: 24,
                 }
             }
             76 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 25,
+                    nonterminal_produced: 24,
                 }
             }
             77 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 25,
+                    nonterminal_produced: 24,
                 }
             }
             78 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 25,
+                    nonterminal_produced: 24,
                 }
             }
             79 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 25,
+                    nonterminal_produced: 24,
                 }
             }
             80 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 25,
+                    nonterminal_produced: 24,
                 }
             }
             81 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 2,
-                    nonterminal_produced: 25,
+                    nonterminal_produced: 24,
                 }
             }
             82 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 25,
+                    nonterminal_produced: 24,
                 }
             }
             83 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 25,
+                    nonterminal_produced: 24,
                 }
             }
             84 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 25,
+                    nonterminal_produced: 24,
                 }
             }
             85 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 25,
+                    nonterminal_produced: 24,
                 }
             }
             86 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 25,
+                    nonterminal_produced: 24,
                 }
             }
             87 => {
                 __state_machine::SimulatedReduce::Reduce {
                     states_to_pop: 1,
-                    nonterminal_produced: 25,
+                    nonterminal_produced: 24,
                 }
             }
             88 => __state_machine::SimulatedReduce::Accept,
@@ -1866,6 +1863,17 @@ mod __parse__AIR {
             _ => __symbol_type_mismatch()
         }
     }
+    fn __pop_Variant14<
+      'input,
+    >(
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
+    ) -> (usize, ApResult<'input>, usize)
+     {
+        match __symbols.pop() {
+            Some((__l, __Symbol::Variant14(__v), __r)) => (__l, __v, __r),
+            _ => __symbol_type_mismatch()
+        }
+    }
     fn __pop_Variant12<
       'input,
     >(
@@ -1888,14 +1896,14 @@ mod __parse__AIR {
             _ => __symbol_type_mismatch()
         }
     }
-    fn __pop_Variant18<
+    fn __pop_Variant17<
       'input,
     >(
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, CanonStream<'input>, usize)
+    ) -> (usize, CallOutputValue<'input>, usize)
      {
         match __symbols.pop() {
-            Some((__l, __Symbol::Variant18(__v), __r)) => (__l, __v, __r),
+            Some((__l, __Symbol::Variant17(__v), __r)) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
@@ -1903,7 +1911,7 @@ mod __parse__AIR {
       'input,
     >(
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, Fail<'input>, usize)
+    ) -> (usize, CanonStream<'input>, usize)
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant19(__v), __r)) => (__l, __v, __r),
@@ -1914,10 +1922,21 @@ mod __parse__AIR {
       'input,
     >(
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, FoldScalarIterable<'input>, usize)
+    ) -> (usize, Fail<'input>, usize)
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant20(__v), __r)) => (__l, __v, __r),
+            _ => __symbol_type_mismatch()
+        }
+    }
+    fn __pop_Variant21<
+      'input,
+    >(
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
+    ) -> (usize, FoldScalarIterable<'input>, usize)
+     {
+        match __symbols.pop() {
+            Some((__l, __Symbol::Variant21(__v), __r)) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
@@ -1932,22 +1951,11 @@ mod __parse__AIR {
             _ => __symbol_type_mismatch()
         }
     }
-    fn __pop_Variant21<
-      'input,
-    >(
-        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, NewArgument<'input>, usize)
-     {
-        match __symbols.pop() {
-            Some((__l, __Symbol::Variant21(__v), __r)) => (__l, __v, __r),
-            _ => __symbol_type_mismatch()
-        }
-    }
     fn __pop_Variant22<
       'input,
     >(
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, Number, usize)
+    ) -> (usize, NewArgument<'input>, usize)
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant22(__v), __r)) => (__l, __v, __r),
@@ -1958,10 +1966,21 @@ mod __parse__AIR {
       'input,
     >(
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, Stream<'input>, usize)
+    ) -> (usize, Number, usize)
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant23(__v), __r)) => (__l, __v, __r),
+            _ => __symbol_type_mismatch()
+        }
+    }
+    fn __pop_Variant24<
+      'input,
+    >(
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
+    ) -> (usize, Stream<'input>, usize)
+     {
+        match __symbols.pop() {
+            Some((__l, __Symbol::Variant24(__v), __r)) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
@@ -1976,14 +1995,14 @@ mod __parse__AIR {
             _ => __symbol_type_mismatch()
         }
     }
-    fn __pop_Variant24<
+    fn __pop_Variant25<
       'input,
     >(
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
     ) -> (usize, Triplet<'input>, usize)
      {
         match __symbols.pop() {
-            Some((__l, __Symbol::Variant24(__v), __r)) => (__l, __v, __r),
+            Some((__l, __Symbol::Variant25(__v), __r)) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
@@ -1995,17 +2014,6 @@ mod __parse__AIR {
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant9(__v), __r)) => (__l, __v, __r),
-            _ => __symbol_type_mismatch()
-        }
-    }
-    fn __pop_Variant14<
-      'input,
-    >(
-        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, Variable<'input>, usize)
-     {
-        match __symbols.pop() {
-            Some((__l, __Symbol::Variant14(__v), __r)) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
@@ -2053,14 +2061,14 @@ mod __parse__AIR {
             _ => __symbol_type_mismatch()
         }
     }
-    fn __pop_Variant17<
+    fn __pop_Variant18<
       'input,
     >(
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, core::option::Option<Variable<'input>>, usize)
+    ) -> (usize, core::option::Option<CallOutputValue<'input>>, usize)
      {
         match __symbols.pop() {
-            Some((__l, __Symbol::Variant17(__v), __r)) => (__l, __v, __r),
+            Some((__l, __Symbol::Variant18(__v), __r)) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
@@ -2415,7 +2423,7 @@ mod __parse__AIR {
     ) -> (usize, usize)
     {
         // ApArgument = Number => ActionFn(69);
-        let __sym0 = __pop_Variant22(__symbols);
+        let __sym0 = __pop_Variant23(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action69::<>(input, errors, validator, __sym0);
@@ -2563,8 +2571,8 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // ApResult = ScriptVariable => ActionFn(19);
-        let __sym0 = __pop_Variant14(__symbols);
+        // ApResult = Scalar => ActionFn(19);
+        let __sym0 = __pop_Variant2(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action19::<>(input, errors, validator, __sym0);
@@ -2572,6 +2580,27 @@ mod __parse__AIR {
         (1, 7)
     }
     pub(crate) fn __reduce22<
+        'err,
+        'input,
+        'v,
+    >(
+        input: &'input str,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
+        __lookahead_start: Option<&usize>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
+    ) -> (usize, usize)
+    {
+        // ApResult = Stream => ActionFn(20);
+        let __sym0 = __pop_Variant2(__symbols);
+        let __start = __sym0.0.clone();
+        let __end = __sym0.2.clone();
+        let __nt = super::__action20::<>(input, errors, validator, __sym0);
+        __symbols.push((__start, __Symbol::Variant14(__nt), __end));
+        (1, 7)
+    }
+    pub(crate) fn __reduce23<
         'err,
         'input,
         'v,
@@ -2592,7 +2621,7 @@ mod __parse__AIR {
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (1, 8)
     }
-    pub(crate) fn __reduce23<
+    pub(crate) fn __reduce24<
         'err,
         'input,
         'v,
@@ -2615,7 +2644,7 @@ mod __parse__AIR {
         __symbols.push((__start, __Symbol::Variant15(__nt), __end));
         (2, 9)
     }
-    pub(crate) fn __reduce24<
+    pub(crate) fn __reduce25<
         'err,
         'input,
         'v,
@@ -2639,7 +2668,7 @@ mod __parse__AIR {
         __symbols.push((__start, __Symbol::Variant15(__nt), __end));
         (3, 9)
     }
-    pub(crate) fn __reduce25<
+    pub(crate) fn __reduce26<
         'err,
         'input,
         'v,
@@ -2660,7 +2689,7 @@ mod __parse__AIR {
         __symbols.push((__start, __Symbol::Variant16(__nt), __end));
         (1, 10)
     }
-    pub(crate) fn __reduce26<
+    pub(crate) fn __reduce27<
         'err,
         'input,
         'v,
@@ -2681,7 +2710,7 @@ mod __parse__AIR {
         __symbols.push((__start, __Symbol::Variant16(__nt), __end));
         (1, 10)
     }
-    pub(crate) fn __reduce27<
+    pub(crate) fn __reduce28<
         'err,
         'input,
         'v,
@@ -2702,7 +2731,7 @@ mod __parse__AIR {
         __symbols.push((__start, __Symbol::Variant16(__nt), __end));
         (1, 10)
     }
-    pub(crate) fn __reduce28<
+    pub(crate) fn __reduce29<
         'err,
         'input,
         'v,
@@ -2723,7 +2752,7 @@ mod __parse__AIR {
         __symbols.push((__start, __Symbol::Variant16(__nt), __end));
         (1, 10)
     }
-    pub(crate) fn __reduce29<
+    pub(crate) fn __reduce30<
         'err,
         'input,
         'v,
@@ -2744,7 +2773,7 @@ mod __parse__AIR {
         __symbols.push((__start, __Symbol::Variant16(__nt), __end));
         (1, 10)
     }
-    pub(crate) fn __reduce30<
+    pub(crate) fn __reduce31<
         'err,
         'input,
         'v,
@@ -2765,7 +2794,7 @@ mod __parse__AIR {
         __symbols.push((__start, __Symbol::Variant16(__nt), __end));
         (1, 10)
     }
-    pub(crate) fn __reduce31<
+    pub(crate) fn __reduce32<
         'err,
         'input,
         'v,
@@ -2786,7 +2815,7 @@ mod __parse__AIR {
         __symbols.push((__start, __Symbol::Variant16(__nt), __end));
         (1, 10)
     }
-    pub(crate) fn __reduce32<
+    pub(crate) fn __reduce33<
         'err,
         'input,
         'v,
@@ -2807,27 +2836,6 @@ mod __parse__AIR {
         __symbols.push((__start, __Symbol::Variant16(__nt), __end));
         (1, 10)
     }
-    pub(crate) fn __reduce33<
-        'err,
-        'input,
-        'v,
-    >(
-        input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
-        validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&usize>,
-        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
-    ) -> (usize, usize)
-    {
-        // CallOutput = ScriptVariable => ActionFn(20);
-        let __sym0 = __pop_Variant14(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
-        let __nt = super::__action20::<>(input, errors, validator, __sym0);
-        __symbols.push((__start, __Symbol::Variant14(__nt), __end));
-        (1, 11)
-    }
     pub(crate) fn __reduce34<
         'err,
         'input,
@@ -2841,15 +2849,57 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
+        // CallOutput = Scalar => ActionFn(21);
+        let __sym0 = __pop_Variant2(__symbols);
+        let __start = __sym0.0.clone();
+        let __end = __sym0.2.clone();
+        let __nt = super::__action21::<>(input, errors, validator, __sym0);
+        __symbols.push((__start, __Symbol::Variant17(__nt), __end));
+        (1, 11)
+    }
+    pub(crate) fn __reduce35<
+        'err,
+        'input,
+        'v,
+    >(
+        input: &'input str,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
+        __lookahead_start: Option<&usize>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
+    ) -> (usize, usize)
+    {
+        // CallOutput = Stream => ActionFn(22);
+        let __sym0 = __pop_Variant2(__symbols);
+        let __start = __sym0.0.clone();
+        let __end = __sym0.2.clone();
+        let __nt = super::__action22::<>(input, errors, validator, __sym0);
+        __symbols.push((__start, __Symbol::Variant17(__nt), __end));
+        (1, 11)
+    }
+    pub(crate) fn __reduce36<
+        'err,
+        'input,
+        'v,
+    >(
+        input: &'input str,
+        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
+        validator: &'v mut VariableValidator<'input>,
+        __lookahead_start: Option<&usize>,
+        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
+    ) -> (usize, usize)
+    {
         // CallOutput? = CallOutput => ActionFn(82);
-        let __sym0 = __pop_Variant14(__symbols);
+        let __sym0 = __pop_Variant17(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action82::<>(input, errors, validator, __sym0);
-        __symbols.push((__start, __Symbol::Variant17(__nt), __end));
+        __symbols.push((__start, __Symbol::Variant18(__nt), __end));
         (1, 12)
     }
-    pub(crate) fn __reduce35<
+    pub(crate) fn __reduce37<
         'err,
         'input,
         'v,
@@ -2866,10 +2916,10 @@ mod __parse__AIR {
         let __start = __lookahead_start.cloned().or_else(|| __symbols.last().map(|s| s.2.clone())).unwrap_or_default();
         let __end = __start.clone();
         let __nt = super::__action83::<>(input, errors, validator, &__start, &__end);
-        __symbols.push((__start, __Symbol::Variant17(__nt), __end));
+        __symbols.push((__start, __Symbol::Variant18(__nt), __end));
         (0, 12)
     }
-    pub(crate) fn __reduce36<
+    pub(crate) fn __reduce38<
         'err,
         'input,
         'v,
@@ -2887,10 +2937,10 @@ mod __parse__AIR {
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action77::<>(input, errors, validator, __sym0);
-        __symbols.push((__start, __Symbol::Variant18(__nt), __end));
+        __symbols.push((__start, __Symbol::Variant19(__nt), __end));
         (1, 13)
     }
-    pub(crate) fn __reduce37<
+    pub(crate) fn __reduce39<
         'err,
         'input,
         'v,
@@ -2908,10 +2958,10 @@ mod __parse__AIR {
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action23::<>(input, errors, validator, __sym0);
-        __symbols.push((__start, __Symbol::Variant19(__nt), __end));
+        __symbols.push((__start, __Symbol::Variant20(__nt), __end));
         (1, 14)
     }
-    pub(crate) fn __reduce38<
+    pub(crate) fn __reduce40<
         'err,
         'input,
         'v,
@@ -2929,10 +2979,10 @@ mod __parse__AIR {
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action24::<>(input, errors, validator, __sym0);
-        __symbols.push((__start, __Symbol::Variant19(__nt), __end));
+        __symbols.push((__start, __Symbol::Variant20(__nt), __end));
         (1, 14)
     }
-    pub(crate) fn __reduce39<
+    pub(crate) fn __reduce41<
         'err,
         'input,
         'v,
@@ -2952,10 +3002,10 @@ mod __parse__AIR {
         let __start = __sym0.0.clone();
         let __end = __sym1.2.clone();
         let __nt = super::__action25::<>(input, errors, validator, __sym0, __sym1);
-        __symbols.push((__start, __Symbol::Variant19(__nt), __end));
+        __symbols.push((__start, __Symbol::Variant20(__nt), __end));
         (2, 14)
     }
-    pub(crate) fn __reduce40<
+    pub(crate) fn __reduce42<
         'err,
         'input,
         'v,
@@ -2973,10 +3023,10 @@ mod __parse__AIR {
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action101::<>(input, errors, validator, __sym0);
-        __symbols.push((__start, __Symbol::Variant19(__nt), __end));
+        __symbols.push((__start, __Symbol::Variant20(__nt), __end));
         (1, 14)
     }
-    pub(crate) fn __reduce41<
+    pub(crate) fn __reduce43<
         'err,
         'input,
         'v,
@@ -2994,10 +3044,10 @@ mod __parse__AIR {
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action27::<>(input, errors, validator, __sym0);
-        __symbols.push((__start, __Symbol::Variant20(__nt), __end));
+        __symbols.push((__start, __Symbol::Variant21(__nt), __end));
         (1, 15)
     }
-    pub(crate) fn __reduce42<
+    pub(crate) fn __reduce44<
         'err,
         'input,
         'v,
@@ -3015,10 +3065,10 @@ mod __parse__AIR {
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action28::<>(input, errors, validator, __sym0);
-        __symbols.push((__start, __Symbol::Variant20(__nt), __end));
+        __symbols.push((__start, __Symbol::Variant21(__nt), __end));
         (1, 15)
     }
-    pub(crate) fn __reduce43<
+    pub(crate) fn __reduce45<
         'err,
         'input,
         'v,
@@ -3036,10 +3086,10 @@ mod __parse__AIR {
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action29::<>(input, errors, validator, __sym0);
-        __symbols.push((__start, __Symbol::Variant20(__nt), __end));
+        __symbols.push((__start, __Symbol::Variant21(__nt), __end));
         (1, 15)
     }
-    pub(crate) fn __reduce44<
+    pub(crate) fn __reduce46<
         'err,
         'input,
         'v,
@@ -3057,10 +3107,10 @@ mod __parse__AIR {
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action30::<>(input, errors, validator, __sym0);
-        __symbols.push((__start, __Symbol::Variant20(__nt), __end));
+        __symbols.push((__start, __Symbol::Variant21(__nt), __end));
         (1, 15)
     }
-    pub(crate) fn __reduce45<
+    pub(crate) fn __reduce47<
         'err,
         'input,
         'v,
@@ -3080,10 +3130,10 @@ mod __parse__AIR {
         let __start = __sym0.0.clone();
         let __end = __sym1.2.clone();
         let __nt = super::__action31::<>(input, errors, validator, __sym0, __sym1);
-        __symbols.push((__start, __Symbol::Variant20(__nt), __end));
+        __symbols.push((__start, __Symbol::Variant21(__nt), __end));
         (2, 15)
     }
-    pub(crate) fn __reduce46<
+    pub(crate) fn __reduce48<
         'err,
         'input,
         'v,
@@ -3104,7 +3154,7 @@ mod __parse__AIR {
         __symbols.push((__start, __Symbol::Variant16(__nt), __end));
         (1, 16)
     }
-    pub(crate) fn __reduce47<
+    pub(crate) fn __reduce49<
         'err,
         'input,
         'v,
@@ -3120,9 +3170,9 @@ mod __parse__AIR {
         // Instr = "(", call, Triplet, Args, CallOutput, ")" => ActionFn(111);
         assert!(__symbols.len() >= 6);
         let __sym5 = __pop_Variant0(__symbols);
-        let __sym4 = __pop_Variant14(__symbols);
+        let __sym4 = __pop_Variant17(__symbols);
         let __sym3 = __pop_Variant15(__symbols);
-        let __sym2 = __pop_Variant24(__symbols);
+        let __sym2 = __pop_Variant25(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
@@ -3131,7 +3181,7 @@ mod __parse__AIR {
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (6, 17)
     }
-    pub(crate) fn __reduce48<
+    pub(crate) fn __reduce50<
         'err,
         'input,
         'v,
@@ -3148,7 +3198,7 @@ mod __parse__AIR {
         assert!(__symbols.len() >= 5);
         let __sym4 = __pop_Variant0(__symbols);
         let __sym3 = __pop_Variant15(__symbols);
-        let __sym2 = __pop_Variant24(__symbols);
+        let __sym2 = __pop_Variant25(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
@@ -3157,7 +3207,7 @@ mod __parse__AIR {
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (5, 17)
     }
-    pub(crate) fn __reduce49<
+    pub(crate) fn __reduce51<
         'err,
         'input,
         'v,
@@ -3173,8 +3223,8 @@ mod __parse__AIR {
         // Instr = "(", canon, CallInstrValue, StreamArgument, CanonStreamArgument, ")" => ActionFn(103);
         assert!(__symbols.len() >= 6);
         let __sym5 = __pop_Variant0(__symbols);
-        let __sym4 = __pop_Variant18(__symbols);
-        let __sym3 = __pop_Variant23(__symbols);
+        let __sym4 = __pop_Variant19(__symbols);
+        let __sym3 = __pop_Variant24(__symbols);
         let __sym2 = __pop_Variant16(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
@@ -3184,7 +3234,7 @@ mod __parse__AIR {
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (6, 17)
     }
-    pub(crate) fn __reduce50<
+    pub(crate) fn __reduce52<
         'err,
         'input,
         'v,
@@ -3210,7 +3260,7 @@ mod __parse__AIR {
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (5, 17)
     }
-    pub(crate) fn __reduce51<
+    pub(crate) fn __reduce53<
         'err,
         'input,
         'v,
@@ -3236,7 +3286,7 @@ mod __parse__AIR {
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (5, 17)
     }
-    pub(crate) fn __reduce52<
+    pub(crate) fn __reduce54<
         'err,
         'input,
         'v,
@@ -3262,7 +3312,7 @@ mod __parse__AIR {
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (5, 17)
     }
-    pub(crate) fn __reduce53<
+    pub(crate) fn __reduce55<
         'err,
         'input,
         'v,
@@ -3286,7 +3336,7 @@ mod __parse__AIR {
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (3, 17)
     }
-    pub(crate) fn __reduce54<
+    pub(crate) fn __reduce56<
         'err,
         'input,
         'v,
@@ -3303,7 +3353,7 @@ mod __parse__AIR {
         assert!(__symbols.len() >= 5);
         let __sym4 = __pop_Variant0(__symbols);
         let __sym3 = __pop_Variant12(__symbols);
-        let __sym2 = __pop_Variant21(__symbols);
+        let __sym2 = __pop_Variant22(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
@@ -3312,7 +3362,7 @@ mod __parse__AIR {
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (5, 17)
     }
-    pub(crate) fn __reduce55<
+    pub(crate) fn __reduce57<
         'err,
         'input,
         'v,
@@ -3328,7 +3378,7 @@ mod __parse__AIR {
         // Instr = "(", fail, FailBody, ")" => ActionFn(9);
         assert!(__symbols.len() >= 4);
         let __sym3 = __pop_Variant0(__symbols);
-        let __sym2 = __pop_Variant19(__symbols);
+        let __sym2 = __pop_Variant20(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
@@ -3337,7 +3387,7 @@ mod __parse__AIR {
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (4, 17)
     }
-    pub(crate) fn __reduce56<
+    pub(crate) fn __reduce58<
         'err,
         'input,
         'v,
@@ -3355,7 +3405,7 @@ mod __parse__AIR {
         let __sym5 = __pop_Variant0(__symbols);
         let __sym4 = __pop_Variant12(__symbols);
         let __sym3 = __pop_Variant2(__symbols);
-        let __sym2 = __pop_Variant20(__symbols);
+        let __sym2 = __pop_Variant21(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
@@ -3364,7 +3414,7 @@ mod __parse__AIR {
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (6, 17)
     }
-    pub(crate) fn __reduce57<
+    pub(crate) fn __reduce59<
         'err,
         'input,
         'v,
@@ -3391,7 +3441,7 @@ mod __parse__AIR {
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (6, 17)
     }
-    pub(crate) fn __reduce58<
+    pub(crate) fn __reduce60<
         'err,
         'input,
         'v,
@@ -3416,7 +3466,7 @@ mod __parse__AIR {
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (4, 17)
     }
-    pub(crate) fn __reduce59<
+    pub(crate) fn __reduce61<
         'err,
         'input,
         'v,
@@ -3442,7 +3492,7 @@ mod __parse__AIR {
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (5, 17)
     }
-    pub(crate) fn __reduce60<
+    pub(crate) fn __reduce62<
         'err,
         'input,
         'v,
@@ -3469,7 +3519,7 @@ mod __parse__AIR {
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (6, 17)
     }
-    pub(crate) fn __reduce61<
+    pub(crate) fn __reduce63<
         'err,
         'input,
         'v,
@@ -3496,7 +3546,7 @@ mod __parse__AIR {
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (6, 17)
     }
-    pub(crate) fn __reduce62<
+    pub(crate) fn __reduce64<
         'err,
         'input,
         'v,
@@ -3517,7 +3567,7 @@ mod __parse__AIR {
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (1, 17)
     }
-    pub(crate) fn __reduce63<
+    pub(crate) fn __reduce65<
         'err,
         'input,
         'v,
@@ -3535,10 +3585,10 @@ mod __parse__AIR {
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action43::<>(input, errors, validator, __sym0);
-        __symbols.push((__start, __Symbol::Variant21(__nt), __end));
+        __symbols.push((__start, __Symbol::Variant22(__nt), __end));
         (1, 18)
     }
-    pub(crate) fn __reduce64<
+    pub(crate) fn __reduce66<
         'err,
         'input,
         'v,
@@ -3556,10 +3606,10 @@ mod __parse__AIR {
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action44::<>(input, errors, validator, __sym0);
-        __symbols.push((__start, __Symbol::Variant21(__nt), __end));
+        __symbols.push((__start, __Symbol::Variant22(__nt), __end));
         (1, 18)
     }
-    pub(crate) fn __reduce65<
+    pub(crate) fn __reduce67<
         'err,
         'input,
         'v,
@@ -3577,10 +3627,10 @@ mod __parse__AIR {
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action45::<>(input, errors, validator, __sym0);
-        __symbols.push((__start, __Symbol::Variant22(__nt), __end));
+        __symbols.push((__start, __Symbol::Variant23(__nt), __end));
         (1, 19)
     }
-    pub(crate) fn __reduce66<
+    pub(crate) fn __reduce68<
         'err,
         'input,
         'v,
@@ -3598,10 +3648,10 @@ mod __parse__AIR {
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action46::<>(input, errors, validator, __sym0);
-        __symbols.push((__start, __Symbol::Variant22(__nt), __end));
+        __symbols.push((__start, __Symbol::Variant23(__nt), __end));
         (1, 19)
     }
-    pub(crate) fn __reduce67<
+    pub(crate) fn __reduce69<
         'err,
         'input,
         'v,
@@ -3622,48 +3672,6 @@ mod __parse__AIR {
         __symbols.push((__start, __Symbol::Variant16(__nt), __end));
         (1, 20)
     }
-    pub(crate) fn __reduce68<
-        'err,
-        'input,
-        'v,
-    >(
-        input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
-        validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&usize>,
-        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
-    ) -> (usize, usize)
-    {
-        // ScriptVariable = Scalar => ActionFn(21);
-        let __sym0 = __pop_Variant2(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
-        let __nt = super::__action21::<>(input, errors, validator, __sym0);
-        __symbols.push((__start, __Symbol::Variant14(__nt), __end));
-        (1, 21)
-    }
-    pub(crate) fn __reduce69<
-        'err,
-        'input,
-        'v,
-    >(
-        input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
-        validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&usize>,
-        __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
-    ) -> (usize, usize)
-    {
-        // ScriptVariable = Stream => ActionFn(22);
-        let __sym0 = __pop_Variant2(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
-        let __nt = super::__action22::<>(input, errors, validator, __sym0);
-        __symbols.push((__start, __Symbol::Variant14(__nt), __end));
-        (1, 21)
-    }
     pub(crate) fn __reduce70<
         'err,
         'input,
@@ -3683,7 +3691,7 @@ mod __parse__AIR {
         let __end = __sym0.2.clone();
         let __nt = super::__action34::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant16(__nt), __end));
-        (1, 22)
+        (1, 21)
     }
     pub(crate) fn __reduce71<
         'err,
@@ -3703,8 +3711,8 @@ mod __parse__AIR {
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action76::<>(input, errors, validator, __sym0);
-        __symbols.push((__start, __Symbol::Variant23(__nt), __end));
-        (1, 23)
+        __symbols.push((__start, __Symbol::Variant24(__nt), __end));
+        (1, 22)
     }
     pub(crate) fn __reduce72<
         'err,
@@ -3729,8 +3737,8 @@ mod __parse__AIR {
         let __start = __sym0.0.clone();
         let __end = __sym4.2.clone();
         let __nt = super::__action18::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4);
-        __symbols.push((__start, __Symbol::Variant24(__nt), __end));
-        (5, 24)
+        __symbols.push((__start, __Symbol::Variant25(__nt), __end));
+        (5, 23)
     }
     pub(crate) fn __reduce73<
         'err,
@@ -3751,7 +3759,7 @@ mod __parse__AIR {
         let __end = __sym0.2.clone();
         let __nt = super::__action48::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
-        (1, 25)
+        (1, 24)
     }
     pub(crate) fn __reduce74<
         'err,
@@ -3772,7 +3780,7 @@ mod __parse__AIR {
         let __end = __sym0.2.clone();
         let __nt = super::__action49::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
-        (1, 25)
+        (1, 24)
     }
     pub(crate) fn __reduce75<
         'err,
@@ -3793,7 +3801,7 @@ mod __parse__AIR {
         let __end = __sym0.2.clone();
         let __nt = super::__action50::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
-        (1, 25)
+        (1, 24)
     }
     pub(crate) fn __reduce76<
         'err,
@@ -3814,7 +3822,7 @@ mod __parse__AIR {
         let __end = __sym0.2.clone();
         let __nt = super::__action51::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
-        (1, 25)
+        (1, 24)
     }
     pub(crate) fn __reduce77<
         'err,
@@ -3835,7 +3843,7 @@ mod __parse__AIR {
         let __end = __sym0.2.clone();
         let __nt = super::__action52::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
-        (1, 25)
+        (1, 24)
     }
     pub(crate) fn __reduce78<
         'err,
@@ -3856,7 +3864,7 @@ mod __parse__AIR {
         let __end = __sym0.2.clone();
         let __nt = super::__action53::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
-        (1, 25)
+        (1, 24)
     }
     pub(crate) fn __reduce79<
         'err,
@@ -3872,12 +3880,12 @@ mod __parse__AIR {
     ) -> (usize, usize)
     {
         // Value = Number => ActionFn(54);
-        let __sym0 = __pop_Variant22(__symbols);
+        let __sym0 = __pop_Variant23(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
         let __nt = super::__action54::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
-        (1, 25)
+        (1, 24)
     }
     pub(crate) fn __reduce80<
         'err,
@@ -3898,7 +3906,7 @@ mod __parse__AIR {
         let __end = __sym0.2.clone();
         let __nt = super::__action55::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
-        (1, 25)
+        (1, 24)
     }
     pub(crate) fn __reduce81<
         'err,
@@ -3921,7 +3929,7 @@ mod __parse__AIR {
         let __end = __sym1.2.clone();
         let __nt = super::__action56::<>(input, errors, validator, __sym0, __sym1);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
-        (2, 25)
+        (2, 24)
     }
     pub(crate) fn __reduce82<
         'err,
@@ -3942,7 +3950,7 @@ mod __parse__AIR {
         let __end = __sym0.2.clone();
         let __nt = super::__action57::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
-        (1, 25)
+        (1, 24)
     }
     pub(crate) fn __reduce83<
         'err,
@@ -3963,7 +3971,7 @@ mod __parse__AIR {
         let __end = __sym0.2.clone();
         let __nt = super::__action58::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
-        (1, 25)
+        (1, 24)
     }
     pub(crate) fn __reduce84<
         'err,
@@ -3984,7 +3992,7 @@ mod __parse__AIR {
         let __end = __sym0.2.clone();
         let __nt = super::__action59::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
-        (1, 25)
+        (1, 24)
     }
     pub(crate) fn __reduce85<
         'err,
@@ -4005,7 +4013,7 @@ mod __parse__AIR {
         let __end = __sym0.2.clone();
         let __nt = super::__action60::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
-        (1, 25)
+        (1, 24)
     }
     pub(crate) fn __reduce86<
         'err,
@@ -4026,7 +4034,7 @@ mod __parse__AIR {
         let __end = __sym0.2.clone();
         let __nt = super::__action61::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
-        (1, 25)
+        (1, 24)
     }
     pub(crate) fn __reduce87<
         'err,
@@ -4047,7 +4055,7 @@ mod __parse__AIR {
         let __end = __sym0.2.clone();
         let __nt = super::__action62::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
-        (1, 25)
+        (1, 24)
     }
 }
 pub use self::__parse__AIR::AIRParser;
@@ -4096,14 +4104,14 @@ fn __action2<
     (_, _, _): (usize, Token<'input>, usize),
     (_, triplet, _): (usize, Triplet<'input>, usize),
     (_, args, _): (usize, Vec<Value<'input>>, usize),
-    (_, output, _): (usize, core::option::Option<Variable<'input>>, usize),
+    (_, output, _): (usize, core::option::Option<CallOutputValue<'input>>, usize),
     (_, _, _): (usize, Token<'input>, usize),
     (_, right, _): (usize, usize, usize),
 ) -> Box<Instruction<'input>>
 {
     {
         let args = Rc::new(args);
-        let output = output.map(CallOutputValue::Variable).unwrap_or(CallOutputValue::None);
+        let output = output.unwrap_or(CallOutputValue::None);
         let call = Call::new(triplet, args, output);
         let span = Span::new(left, right);
 
@@ -4155,7 +4163,7 @@ fn __action4<
     (_, _, _): (usize, Token<'input>, usize),
     (_, _, _): (usize, Token<'input>, usize),
     (_, arg, _): (usize, ApArgument<'input>, usize),
-    (_, result, _): (usize, Variable<'input>, usize),
+    (_, result, _): (usize, ApResult<'input>, usize),
     (_, _, _): (usize, Token<'input>, usize),
     (_, right, _): (usize, usize, usize),
 ) -> Box<Instruction<'input>>
@@ -4500,10 +4508,10 @@ fn __action19<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, __0, _): (usize, Variable<'input>, usize),
-) -> Variable<'input>
+    (_, scalar, _): (usize, (&'input str, usize), usize),
+) -> ApResult<'input>
 {
-    __0
+    ApResult::scalar(scalar.0, scalar.1)
 }
 
 #[allow(unused_variables)]
@@ -4515,10 +4523,10 @@ fn __action20<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, __0, _): (usize, Variable<'input>, usize),
-) -> Variable<'input>
+    (_, stream, _): (usize, (&'input str, usize), usize),
+) -> ApResult<'input>
 {
-    __0
+    ApResult::stream(stream.0, stream.1)
 }
 
 #[allow(unused_variables)]
@@ -4531,9 +4539,9 @@ fn __action21<
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
     (_, scalar, _): (usize, (&'input str, usize), usize),
-) -> Variable<'input>
+) -> CallOutputValue<'input>
 {
-    Variable::scalar(scalar.0, scalar.1)
+    CallOutputValue::scalar(scalar.0, scalar.1)
 }
 
 #[allow(unused_variables)]
@@ -4546,9 +4554,9 @@ fn __action22<
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
     (_, stream, _): (usize, (&'input str, usize), usize),
-) -> Variable<'input>
+) -> CallOutputValue<'input>
 {
-    Variable::stream(stream.0, stream.1)
+    CallOutputValue::stream(stream.0, stream.1)
 }
 
 #[allow(unused_variables)]
@@ -5458,8 +5466,8 @@ fn __action82<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, __0, _): (usize, Variable<'input>, usize),
-) -> core::option::Option<Variable<'input>>
+    (_, __0, _): (usize, CallOutputValue<'input>, usize),
+) -> core::option::Option<CallOutputValue<'input>>
 {
     Some(__0)
 }
@@ -5475,7 +5483,7 @@ fn __action83<
     validator: &'v mut VariableValidator<'input>,
     __lookbehind: &usize,
     __lookahead: &usize,
-) -> core::option::Option<Variable<'input>>
+) -> core::option::Option<CallOutputValue<'input>>
 {
     None
 }
@@ -5699,7 +5707,7 @@ fn __action92<
     __1: (usize, Token<'input>, usize),
     __2: (usize, Triplet<'input>, usize),
     __3: (usize, Vec<Value<'input>>, usize),
-    __4: (usize, core::option::Option<Variable<'input>>, usize),
+    __4: (usize, core::option::Option<CallOutputValue<'input>>, usize),
     __5: (usize, Token<'input>, usize),
     __6: (usize, usize, usize),
 ) -> Box<Instruction<'input>>
@@ -5784,7 +5792,7 @@ fn __action94<
     __0: (usize, Token<'input>, usize),
     __1: (usize, Token<'input>, usize),
     __2: (usize, ApArgument<'input>, usize),
-    __3: (usize, Variable<'input>, usize),
+    __3: (usize, ApResult<'input>, usize),
     __4: (usize, Token<'input>, usize),
     __5: (usize, usize, usize),
 ) -> Box<Instruction<'input>>
@@ -6109,7 +6117,7 @@ fn __action102<
     __1: (usize, Token<'input>, usize),
     __2: (usize, Triplet<'input>, usize),
     __3: (usize, Vec<Value<'input>>, usize),
-    __4: (usize, core::option::Option<Variable<'input>>, usize),
+    __4: (usize, core::option::Option<CallOutputValue<'input>>, usize),
     __5: (usize, Token<'input>, usize),
 ) -> Box<Instruction<'input>>
 {
@@ -6190,7 +6198,7 @@ fn __action104<
     __0: (usize, Token<'input>, usize),
     __1: (usize, Token<'input>, usize),
     __2: (usize, ApArgument<'input>, usize),
-    __3: (usize, Variable<'input>, usize),
+    __3: (usize, ApResult<'input>, usize),
     __4: (usize, Token<'input>, usize),
 ) -> Box<Instruction<'input>>
 {
@@ -6470,7 +6478,7 @@ fn __action111<
     __1: (usize, Token<'input>, usize),
     __2: (usize, Triplet<'input>, usize),
     __3: (usize, Vec<Value<'input>>, usize),
-    __4: (usize, Variable<'input>, usize),
+    __4: (usize, CallOutputValue<'input>, usize),
     __5: (usize, Token<'input>, usize),
 ) -> Box<Instruction<'input>>
 {

@@ -21,7 +21,6 @@ use super::CanonStreamWithLambda;
 use super::Scalar;
 use super::ScalarWithLambda;
 use super::Stream;
-use super::Variable;
 use super::VariableWithLambda;
 
 use air_lambda_ast::LambdaAST;
@@ -65,7 +64,10 @@ pub enum Value<'i> {
 
 #[derive(Serialize, Debug, PartialEq, Clone)]
 pub enum CallOutputValue<'i> {
-    Variable(Variable<'i>),
+    #[serde(borrow)]
+    Scalar(Scalar<'i>),
+    #[serde(borrow)]
+    Stream(Stream<'i>),
     None,
 }
 
@@ -81,6 +83,14 @@ pub enum ApArgument<'i> {
     EmptyArray,
     Scalar(ScalarWithLambda<'i>),
     CanonStream(CanonStreamWithLambda<'i>),
+}
+
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+pub enum ApResult<'i> {
+    #[serde(borrow)]
+    Scalar(Scalar<'i>),
+    #[serde(borrow)]
+    Stream(Stream<'i>),
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]

@@ -20,7 +20,7 @@ use super::TraceHandler;
 use crate::log_instruction;
 
 use air_parser::ast::New;
-use air_parser::ast::Variable;
+use air_parser::ast::NewArgument;
 
 impl<'i> super::ExecutableInstruction<'i> for New<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
@@ -49,11 +49,11 @@ impl<'i> super::ExecutableInstruction<'i> for New<'i> {
 fn prolog<'i>(new: &New<'i>, exec_ctx: &mut ExecutionCtx<'i>) {
     let position = new.span.left;
     match &new.argument {
-        Variable::Stream(stream) => {
+        NewArgument::Stream(stream) => {
             let iteration = exec_ctx.tracker.new_tracker.get_iteration(position);
             exec_ctx.streams.meet_scope_start(stream.name, new.span, iteration);
         }
-        Variable::Scalar(scalar) => exec_ctx.scalars.meet_new_start(scalar.name),
+        NewArgument::Scalar(scalar) => exec_ctx.scalars.meet_new_start(scalar.name),
     }
 
     exec_ctx.tracker.meet_new(position);
@@ -62,12 +62,12 @@ fn prolog<'i>(new: &New<'i>, exec_ctx: &mut ExecutionCtx<'i>) {
 fn epilog<'i>(new: &New<'i>, exec_ctx: &mut ExecutionCtx<'i>) -> ExecutionResult<()> {
     let position = new.span.left;
     match &new.argument {
-        Variable::Stream(stream) => {
+        NewArgument::Stream(stream) => {
             exec_ctx
                 .streams
                 .meet_scope_end(stream.name.to_string(), position as u32);
             Ok(())
         }
-        Variable::Scalar(scalar) => exec_ctx.scalars.meet_new_end(scalar.name),
+        NewArgument::Scalar(scalar) => exec_ctx.scalars.meet_new_end(scalar.name),
     }
 }

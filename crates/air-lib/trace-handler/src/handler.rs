@@ -87,6 +87,16 @@ impl TraceHandler {
 }
 
 impl TraceHandler {
+    pub fn meet_canon_start(&mut self) -> TraceHandlerResult<MergerCanonResult> {
+        try_merge_next_state_as_canon(&mut self.data_keeper).map_err(Into::into)
+    }
+
+    pub fn meet_canon_end(&mut self, canon_result: CanonResult) {
+        self.data_keeper.result_trace.push(ExecutedState::Canon(canon_result));
+    }
+}
+
+impl TraceHandler {
     pub fn meet_par_start(&mut self) -> TraceHandlerResult<()> {
         let ingredients = merger::try_merge_next_state_as_par(&mut self.data_keeper)?;
         let par_fsm = ParFSM::from_left_started(ingredients, &mut self.data_keeper)?;

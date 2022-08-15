@@ -16,7 +16,7 @@ pub AIR = Instr;
 Instr: Box<Instruction<'input>> = {
     <left: @L> "(" call <triplet:Triplet> <args:Args> <output:CallOutput?> ")" <right: @R> => {
         let args = Rc::new(args);
-        let output = output.map(CallOutputValue::Variable).unwrap_or(CallOutputValue::None);
+        let output = output.unwrap_or(CallOutputValue::None);
         let call = Call::new(triplet, args, output);
         let span = Span::new(left, right);
 
@@ -124,12 +124,14 @@ Triplet: Triplet<'input> = {
     }
 }
 
-ApResult = ScriptVariable;
-CallOutput = ScriptVariable;
+ApResult: ApResult<'input> = {
+    <scalar:Scalar> => ApResult::scalar(scalar.0, scalar.1),
+    <stream:Stream> => ApResult::stream(stream.0, stream.1),
+};
 
-ScriptVariable: Variable<'input> = {
-    <scalar:Scalar> => Variable::scalar(scalar.0, scalar.1),
-    <stream:Stream> => Variable::stream(stream.0, stream.1),
+CallOutput: CallOutputValue<'input> = {
+    <scalar:Scalar> => CallOutputValue::scalar(scalar.0, scalar.1),
+    <stream:Stream> => CallOutputValue::stream(stream.0, stream.1),
 };
 
 FailBody: Fail<'input> = {

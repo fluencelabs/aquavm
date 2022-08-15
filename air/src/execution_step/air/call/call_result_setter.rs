@@ -35,11 +35,11 @@ pub(crate) fn set_local_result<'i>(
 ) -> ExecutionResult<CallResult> {
     let result_value = executed_result.result.clone();
     match output {
-        CallOutputValue::Variable(Variable::Scalar(scalar)) => {
+        CallOutputValue::Scalar(scalar) => {
             exec_ctx.scalars.set_value(scalar.name, executed_result)?;
             Ok(CallResult::executed_scalar(result_value))
         }
-        CallOutputValue::Variable(Variable::Stream(stream)) => {
+        CallOutputValue::Stream(stream) => {
             let generation =
                 exec_ctx
                     .streams
@@ -58,11 +58,11 @@ pub(crate) fn set_result_from_value<'i>(
     exec_ctx: &mut ExecutionCtx<'i>,
 ) -> ExecutionResult<()> {
     match (output, value) {
-        (CallOutputValue::Variable(Variable::Scalar(scalar)), Value::Scalar(value)) => {
+        (CallOutputValue::Scalar(scalar), Value::Scalar(value)) => {
             let result = ValueAggregate::new(value, tetraplet, trace_pos);
             exec_ctx.scalars.set_value(scalar.name, result)?;
         }
-        (CallOutputValue::Variable(Variable::Stream(stream)), Value::Stream { value, generation }) => {
+        (CallOutputValue::Stream(stream), Value::Stream { value, generation }) => {
             let result = ValueAggregate::new(value, tetraplet, trace_pos);
             let generation = Generation::Nth(generation);
             let _ = exec_ctx

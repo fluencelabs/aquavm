@@ -22,6 +22,7 @@ use super::FoldResult;
 use super::KeeperError;
 use super::Value;
 
+use air_interpreter_data::CanonResult;
 use air_interpreter_data::TracePos;
 use thiserror::Error as ThisError;
 
@@ -45,6 +46,9 @@ pub enum MergeError {
 
     #[error(transparent)]
     IncorrectCallResult(#[from] CallResultError),
+
+    #[error(transparent)]
+    IncorrectCanonResult(#[from] CanonResultError),
 
     #[error(transparent)]
     IncorrectFoldResult(#[from] FoldResultError),
@@ -71,6 +75,16 @@ pub enum CallResultError {
 
     #[error("air scripts has the following value type '{air_type}' while data other '{data_value:?}'")]
     DataNotMatchAIR { air_type: String, data_value: Value },
+}
+
+#[derive(ThisError, Debug)]
+pub enum CanonResultError {
+    /// Error occurred when Ap results contains more then 1 generation in destination.
+    #[error("canon results are incompatible: {prev_canon_result:?} != {current_canon_result:?}")]
+    CanonResultsIncompatible {
+        prev_canon_result: CanonResult,
+        current_canon_result: CanonResult,
+    },
 }
 
 #[derive(ThisError, Debug)]

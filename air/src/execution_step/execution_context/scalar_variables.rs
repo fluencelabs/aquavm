@@ -20,6 +20,7 @@ use crate::execution_step::ExecutionResult;
 use crate::execution_step::FoldState;
 use crate::execution_step::ValueAggregate;
 
+use multi_map::MultiMap;
 use non_empty_vec::NonEmpty;
 
 use std::collections::HashMap;
@@ -87,7 +88,7 @@ pub(crate) struct Scalars<'i> {
     ///   - global variables have 0 depth
     ///   - cells in a row are sorted by depth
     ///   - all depths in cell in one row are unique
-    pub(crate) non_iterable_variables: HashMap<String, NonEmpty<SparseCell>>,
+    pub(crate) non_iterable_variables: MultiMap<String, TracePos, NonEmpty<SparseCell>>,
 
     /// This set contains depths were invalidated at the certain moment of script execution.
     /// They are needed for careful isolation of scopes produced by iterations in fold blocks,
@@ -126,7 +127,7 @@ impl<'i> Scalars<'i> {
         let allowed_depths = maplit::hashset! { GLOBAL_DEPTH };
 
         Self {
-            non_iterable_variables: HashMap::new(),
+            non_iterable_variables: MultiMap::new(),
             allowed_depths,
             iterable_variables: HashMap::new(),
             current_depth: GLOBAL_DEPTH,
@@ -188,20 +189,30 @@ impl<'i> Scalars<'i> {
         self.iterable_variables.remove(name);
     }
 
-    pub(crate) fn get_non_iterable_value(&'i self, name: &str) -> ExecutionResult<Option<&'i ValueAggregate>> {
+    pub(crate) fn get_non_iterable_value(&'i self, name: &String) -> ExecutionResult<Option<&'i ValueAggregate>> {
         self.non_iterable_variables
             .get(name)
-            .and_then(|values| {
-                let last_cell = values.last();
-                let depth_allowed = self.allowed_depths.contains(&last_cell.depth);
-
-                if depth_allowed {
-                    Some(last_cell.value.as_ref())
-                } else {
-                    None
-                }
-            })
+            .and_then(|values| self.prepare_non_iterable_result(values))
             .ok_or_else(|| ExecutionError::Catchable(Rc::new(CatchableError::VariableNotFound(name.to_string()))))
+    }
+
+    pub(crate) fn get_non_iterable_value_by_pos(&'i self, position: TracePos) -> ExecutionResult<&'i ValueAggregate> {
+        self.non_iterable_variables
+            .get_alt(&position)
+            .and_then(|values| self.prepare_non_iterable_result(values))
+            .flatten()
+            .ok_or_else(|| ExecutionError::Uncatchable(UncatchableError::VariableNotFoundByPos(position)))
+    }
+
+    fn prepare_non_iterable_result(&'i self, values: &NonEmpty<SparseCell>) -> Option<Option<&'i ValueAggregate>> {
+        let last_cell = values.last();
+        let depth_allowed = self.allowed_depths.contains(&last_cell.depth);
+
+        if depth_allowed {
+            Some(last_cell.value.as_ref())
+        } else {
+            None
+        }
     }
 
     pub(crate) fn get_iterable_mut(&mut self, name: &str) -> ExecutionResult<&mut FoldState<'i>> {
@@ -210,7 +221,7 @@ impl<'i> Scalars<'i> {
             .ok_or_else(|| UncatchableError::FoldStateNotFound(name.to_string()).into())
     }
 
-    pub(crate) fn get_value(&'i self, name: &str) -> ExecutionResult<ScalarRef<'i>> {
+    pub(crate) fn get_value(&'i self, name: &String) -> ExecutionResult<ScalarRef<'i>> {
         let value = self.get_non_iterable_value(name);
         let iterable_value = self.iterable_variables.get(name);
 
@@ -266,7 +277,7 @@ impl<'i> Scalars<'i> {
         }
     }
 
-    pub(crate) fn meet_new_end(&mut self, scalar_name: &str) -> ExecutionResult<()> {
+    pub(crate) fn meet_new_end(&mut self, scalar_name: &String) -> ExecutionResult<()> {
         let current_depth = self.current_depth;
         let should_remove_values = self
             .non_iterable_variables
@@ -294,7 +305,7 @@ impl<'i> Scalars<'i> {
         Ok(())
     }
 
-    pub(crate) fn variable_could_be_set(&self, variable_name: &str) -> bool {
+    pub(crate) fn variable_could_be_set(&self, variable_name: &String) -> bool {
         if self.shadowing_allowed() {
             return true;
         }
@@ -340,6 +351,7 @@ fn is_value_obsolete(value_depth: usize, current_scope_depth: usize) -> bool {
     value_depth > current_scope_depth
 }
 
+use air_interpreter_data::TracePos;
 use std::fmt;
 
 impl Default for Scalars<'_> {

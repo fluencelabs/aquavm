@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+use super::Scalar;
+use super::Stream;
+use super::ApResult;
+use super::CallOutputValue;
 use super::NewArgument;
 
 impl<'i> NewArgument<'i> {
@@ -22,5 +26,44 @@ impl<'i> NewArgument<'i> {
             Self::Scalar(scalar) => scalar.name,
             Self::Stream(stream) => stream.name,
         }
+    }
+}
+
+impl<'i> ApResult<'i> {
+    pub fn scalar(name: &'i str, position: usize) -> Self {
+        Self::Scalar(Scalar {
+            name,
+            position
+        })
+    }
+
+    pub fn stream(name: &'i str, position: usize) -> Self {
+        Self::Stream(Stream {
+            name,
+            position
+        })
+    }
+
+    pub fn name(&self) -> &'i str {
+        match self {
+            Self::Scalar(scalar) => scalar.name,
+            Self::Stream(stream) => stream.name,
+        }
+    }
+}
+
+impl<'i> CallOutputValue<'i> {
+    pub fn scalar(name: &'i str, position: usize) -> Self {
+        Self::Scalar(Scalar {
+            name,
+            position
+        })
+    }
+
+    pub fn stream(name: &'i str, position: usize) -> Self {
+        Self::Stream(Stream {
+            name,
+            position
+        })
     }
 }

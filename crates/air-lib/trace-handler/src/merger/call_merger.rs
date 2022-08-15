@@ -117,10 +117,8 @@ pub(crate) enum ValueType<'i> {
 
 impl<'i> ValueType<'i> {
     pub(self) fn from_output_value(output_value: &'i CallOutputValue<'_>) -> Self {
-        use air_parser::ast::Variable;
-
         match output_value {
-            CallOutputValue::Variable(Variable::Stream(stream)) => ValueType::Stream(stream.name),
+            CallOutputValue::Stream(stream) => ValueType::Stream(stream.name),
             _ => ValueType::Scalar,
         }
     }

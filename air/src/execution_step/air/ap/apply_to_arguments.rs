@@ -36,6 +36,7 @@ pub(super) fn apply_to_arg(
         Boolean(value) => apply_const(*value, exec_ctx, trace_ctx),
         EmptyArray => apply_const(serde_json::json!([]), exec_ctx, trace_ctx),
         Scalar(scalar) => apply_scalar(scalar, exec_ctx, trace_ctx, should_touch_trace)?,
+        CanonStream(canon_stream) => todo!(),
     };
 
     Ok(result)

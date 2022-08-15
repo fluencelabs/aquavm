@@ -16,6 +16,7 @@
 
 mod ap_merger;
 mod call_merger;
+mod canon_merger;
 mod errors;
 mod fold_merger;
 mod par_merger;
@@ -23,6 +24,7 @@ mod position_mapping;
 
 pub use ap_merger::MergerApResult;
 pub use call_merger::MergerCallResult;
+pub use canon_merger::MergerCanonResult;
 pub use fold_merger::MergerFoldResult;
 pub use par_merger::MergerParResult;
 
@@ -36,6 +38,7 @@ pub use fold_merger::ResolvedSubTraceDescs;
 
 pub(super) use ap_merger::try_merge_next_state_as_ap;
 pub(super) use call_merger::try_merge_next_state_as_call;
+pub(super) use canon_merger::try_merge_next_state_as_canon;
 pub(crate) use fold_merger::try_merge_next_state_as_fold;
 pub(crate) use par_merger::try_merge_next_state_as_par;
 

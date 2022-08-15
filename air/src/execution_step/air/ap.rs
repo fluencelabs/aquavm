@@ -31,7 +31,7 @@ use apply_to_arguments::*;
 use utils::*;
 
 use air_parser::ast;
-use air_parser::ast::Ap;
+use air_parser::ast::{Ap, ApResult};
 use air_trace_handler::MergerApResult;
 
 use std::rc::Rc;
@@ -77,16 +77,14 @@ fn to_merger_ap_result(
 }
 
 fn update_context<'ctx>(
-    ap_result_type: &ast::Variable<'ctx>,
+    ap_result_type: &ApResult<'ctx>,
     merger_ap_result: &MergerApResult,
     result: ValueAggregate,
     exec_ctx: &mut ExecutionCtx<'ctx>,
 ) -> ExecutionResult<Option<u32>> {
-    use ast::Variable::*;
-
     match ap_result_type {
-        Scalar(scalar) => exec_ctx.scalars.set_value(scalar.name, result).map(|_| None),
-        Stream(stream) => {
+        ApResult::Scalar(scalar) => exec_ctx.scalars.set_value(scalar.name, result).map(|_| None),
+        ApResult::Stream(stream) => {
             let generation = ap_result_to_generation(merger_ap_result);
             exec_ctx
                 .streams

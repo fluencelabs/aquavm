@@ -16,6 +16,7 @@
 
 mod ap;
 mod call;
+mod canon;
 mod compare_matchable;
 mod fail;
 mod fold;
