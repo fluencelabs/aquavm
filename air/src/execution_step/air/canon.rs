@@ -18,24 +18,21 @@ use super::ExecutionCtx;
 use super::ExecutionResult;
 use super::TraceHandler;
 use crate::execution_step::boxed_value::CanonStream;
+use crate::execution_step::Generation;
 use crate::trace_to_exec_err;
 use crate::log_instruction;
 use crate::CatchableError;
-use apply_to_arguments::*;
-use utils::*;
 
 use air_parser::ast::Canon;
 use air_trace_handler::MergerCanonResult;
 
-use crate::execution_step::Generation;
 use air_interpreter_data::{CanonResult, TracePos};
-use std::rc::Rc;
 
 impl<'i> super::ExecutableInstruction<'i> for Canon<'i> {
     #[tracing::instrument(level = "debug", skip(exec_ctx, trace_ctx))]
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         log_instruction!(call, exec_ctx, trace_ctx);
-        let canon_result = trace_to_exec_err!(trace_ctx.meet_canon_start())?;
+        let canon_result = trace_to_exec_err!(trace_ctx.meet_canon_start(), self)?;
 
         let stream_with_positions = match canon_result {
             MergerCanonResult::CanonResult { stream_element_pos } => {

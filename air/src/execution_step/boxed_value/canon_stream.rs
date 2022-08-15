@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-use super::ExecutionResult;
 use super::Stream;
 use super::ValueAggregate;
-use crate::execution_step::{CatchableError, Generation};
+use crate::execution_step::Generation;
 use crate::JValue;
 
 use std::fmt::Formatter;

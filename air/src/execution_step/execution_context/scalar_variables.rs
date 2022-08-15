@@ -189,9 +189,10 @@ impl<'i> Scalars<'i> {
         self.iterable_variables.remove(name);
     }
 
-    pub(crate) fn get_non_iterable_value(&'i self, name: &String) -> ExecutionResult<Option<&'i ValueAggregate>> {
+    pub(crate) fn get_non_iterable_value(&'i self, name: &str) -> ExecutionResult<Option<&'i ValueAggregate>> {
         self.non_iterable_variables
-            .get(name)
+            // TODO: get rid of copying here
+            .get(&name.to_string())
             .and_then(|values| self.prepare_non_iterable_result(values))
             .ok_or_else(|| ExecutionError::Catchable(Rc::new(CatchableError::VariableNotFound(name.to_string()))))
     }
@@ -221,7 +222,7 @@ impl<'i> Scalars<'i> {
             .ok_or_else(|| UncatchableError::FoldStateNotFound(name.to_string()).into())
     }
 
-    pub(crate) fn get_value(&'i self, name: &String) -> ExecutionResult<ScalarRef<'i>> {
+    pub(crate) fn get_value(&'i self, name: &str) -> ExecutionResult<ScalarRef<'i>> {
         let value = self.get_non_iterable_value(name);
         let iterable_value = self.iterable_variables.get(name);
 
@@ -277,11 +278,12 @@ impl<'i> Scalars<'i> {
         }
     }
 
-    pub(crate) fn meet_new_end(&mut self, scalar_name: &String) -> ExecutionResult<()> {
+    pub(crate) fn meet_new_end(&mut self, scalar_name: &str) -> ExecutionResult<()> {
         let current_depth = self.current_depth;
         let should_remove_values = self
             .non_iterable_variables
-            .get_mut(scalar_name)
+            // TODO: get rid of copying here
+            .get_mut(&scalar_name.to_string())
             .and_then(|values| {
                 // carefully check that we're popping up an appropriate value,
                 // returning None means an error here
@@ -305,12 +307,13 @@ impl<'i> Scalars<'i> {
         Ok(())
     }
 
-    pub(crate) fn variable_could_be_set(&self, variable_name: &String) -> bool {
+    pub(crate) fn variable_could_be_set(&self, variable_name: &str) -> bool {
         if self.shadowing_allowed() {
             return true;
         }
 
-        match self.non_iterable_variables.get(variable_name) {
+        // TODO: get rid of copying here
+        match self.non_iterable_variables.get(&variable_name.to_string()) {
             Some(values) => values.last().value.is_none(),
             None => false,
         }

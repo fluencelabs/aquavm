@@ -23,7 +23,6 @@ use air_interpreter_data::CallResult;
 use air_interpreter_data::TracePos;
 use air_interpreter_data::Value;
 use air_parser::ast::CallOutputValue;
-use air_parser::ast::Variable;
 use air_trace_handler::TraceHandler;
 
 /// Writes result of a local `Call` instruction to `ExecutionCtx` at `output`.

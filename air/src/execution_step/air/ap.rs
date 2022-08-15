@@ -30,8 +30,8 @@ use crate::SecurityTetraplet;
 use apply_to_arguments::*;
 use utils::*;
 
-use air_parser::ast;
-use air_parser::ast::{Ap, ApResult};
+use air_parser::ast::Ap;
+use air_parser::ast::ApResult;
 use air_trace_handler::MergerApResult;
 
 use std::rc::Rc;
@@ -57,7 +57,7 @@ impl<'i> super::ExecutableInstruction<'i> for Ap<'i> {
 /// This function is intended to check whether a Ap instruction should produce
 /// a new state in data.
 fn should_touch_trace(ap: &Ap<'_>) -> bool {
-    matches!(ap.result, ast::Variable::Stream(_))
+    matches!(ap.result, ApResult::Stream(_))
 }
 
 fn to_merger_ap_result(

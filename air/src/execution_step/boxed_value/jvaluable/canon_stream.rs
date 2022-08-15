@@ -16,6 +16,7 @@
 
 use super::select_from_stream;
 use super::JValuable;
+use super::ExecutionResult;
 use crate::execution_step::boxed_value::CanonStream;
 use crate::execution_step::ExecutionCtx;
 use crate::execution_step::RcSecurityTetraplets;
@@ -53,17 +54,15 @@ impl JValuable for &CanonStream {
     }
 
     fn as_jvalue(&self) -> Cow<'_, JValue> {
-        let jvalue = self.as_jvalue().unwrap();
-        Cow::Owned(jvalue)
+        self.as_jvalue()
     }
 
     fn into_jvalue(self: Box<Self>) -> JValue {
-        self.as_jvalue().unwrap()
+        self.as_jvalue()
     }
 
     fn as_tetraplets(&self) -> RcSecurityTetraplets {
-        self.stream
-            .iter(self.generation)
+        self.iter()
             .map(|r| r.tetraplet.clone())
             .collect::<Vec<_>>()
     }

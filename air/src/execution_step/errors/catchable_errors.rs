@@ -89,7 +89,7 @@ pub enum CatchableError {
     VariableWasNotInitializedAfterNew(String),
 
     /// Canon instruction can't canonicalize a stream since it's
-    #[error("stream with name {stream_name} wasn't defined, so canon instruction can't canonicalize it")]
+    #[error("stream with name {0} wasn't defined, so canon instruction can't canonicalize it")]
     StreamsForCanonNotFound(String),
 }
 

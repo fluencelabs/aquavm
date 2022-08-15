@@ -39,12 +39,12 @@ pub(super) fn try_match_trace_to_instr(merger_ap_result: &MergerApResult, instr:
 }
 
 fn match_position_variable(
-    variable: &ast::Variable<'_>,
+    variable: &ast::ApResult<'_>,
     generation: Option<u32>,
     ap_result: &MergerApResult,
 ) -> ExecutionResult<()> {
     use crate::execution_step::UncatchableError::ApResultNotCorrespondToInstr;
-    use ast::Variable::*;
+    use ast::ApResult::*;
 
     match (variable, generation) {
         (Stream(_), Some(_)) => Ok(()),
