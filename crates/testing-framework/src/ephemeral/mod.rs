@@ -109,7 +109,7 @@ impl std::fmt::Debug for Peer {
 #[derive(Debug)]
 pub struct Network {
     test_parameters: TestRunParameters,
-    peers: HashMap<PeerId, RefCell<PeerWithNeighborhood>>,
+    peers: HashMap<PeerId, Rc<RefCell<PeerWithNeighborhood>>>,
     default_neiborhood: HashSet<PeerId>,
 }
 
@@ -147,8 +147,11 @@ impl Network {
         let peer_id = peer.peer_id.clone();
         let mut peer_with_neigh = PeerWithNeighborhood::new(peer);
         peer_with_neigh.extend_neighborhood(neighborhood.into_iter().map(Into::into));
-        self.peers.insert(peer_id.clone(), peer_with_neigh.into());
-        self.peers.get_mut(&peer_id).unwrap().get_mut()
+        self.peers
+            .insert(peer_id.clone(), Rc::new(peer_with_neigh.into()));
+        Rc::get_mut(self.peers.get_mut(&peer_id).unwrap())
+            .unwrap()
+            .get_mut()
     }
 
     /// Add a peer with default neighborhood.
@@ -156,8 +159,11 @@ impl Network {
         let peer_id = peer.peer_id.clone();
         let mut peer_with_neigh = PeerWithNeighborhood::new(peer);
         peer_with_neigh.extend_neighborhood(self.default_neiborhood.iter().cloned());
-        self.peers.insert(peer_id.clone(), peer_with_neigh.into());
-        self.peers.get_mut(&peer_id).unwrap().get_mut()
+        self.peers
+            .insert(peer_id.clone(), Rc::new(peer_with_neigh.into()));
+        Rc::get_mut(self.peers.get_mut(&peer_id).unwrap())
+            .unwrap()
+            .get_mut()
     }
 
     pub fn set_peer_failed<Id>(&mut self, peer_id: &Id, failed: bool)
@@ -168,7 +174,8 @@ impl Network {
         self.peers
             .get_mut(peer_id)
             .expect("unknown peer")
-            .get_mut()
+            .as_ref()
+            .borrow_mut()
             .set_failed(failed);
     }
 
@@ -180,7 +187,8 @@ impl Network {
         self.peers
             .get_mut(source_peer_id)
             .expect("unknown peer")
-            .get_mut()
+            .as_ref()
+            .borrow_mut()
             .get_neighborhood_mut()
             .fail(target_peer_id);
     }
@@ -195,19 +203,20 @@ impl Network {
         self.peers
             .get_mut(source_peer_id)
             .expect("unknown peer")
-            .get_mut()
+            .as_ref()
+            .borrow_mut()
             .get_neighborhood_mut()
             .unfail(target_peer_id);
     }
 
     // TODO there is some kind of unsymmetry between these methods and the fail/unfail:
     // the latters panic on unknown peer; perhaps, it's OK
-    pub fn get_peer<'s, Id>(&'s self, peer_id: &Id) -> Option<&'s RefCell<PeerWithNeighborhood>>
+    pub fn get_peer_env<Id>(&self, peer_id: &Id) -> Option<Rc<RefCell<PeerWithNeighborhood>>>
     where
         PeerId: Borrow<Id>,
         Id: Hash + Eq + ?Sized,
     {
-        self.peers.get(peer_id)
+        self.peers.get(peer_id).cloned()
     }
 
     pub fn iter_execution<'s, Id>(
@@ -219,7 +228,7 @@ impl Network {
         PeerId: Borrow<Id>,
         Id: Eq + Hash + ?Sized,
     {
-        let peer = self.get_peer(peer_id);
+        let peer = self.get_peer_env(peer_id);
 
         peer.map(|peer_cell| {
             std::iter::from_fn(move || {
@@ -231,7 +240,7 @@ impl Network {
 
     pub fn distribute_to_peers(&self, peers: &[String], data: &Data) {
         for peer_id in peers {
-            if let Some(peer_cell) = self.get_peer(peer_id.as_str()) {
+            if let Some(peer_cell) = self.get_peer_env(peer_id.as_str()) {
                 peer_cell.borrow_mut().data_queue.push_back(data.clone());
             }
         }
