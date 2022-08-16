@@ -25,12 +25,12 @@ use crate::{
 
 use std::{borrow::Borrow, collections::HashMap, hash::Hash, rc::Rc, str::FromStr};
 
-pub struct Execution {
-    air_script: String,
-    network: Network,
+pub struct TestExecutor {
+    pub air_script: String,
+    pub network: Network,
 }
 
-impl Execution {
+impl TestExecutor {
     /// Create execution from the annotated air script
     pub fn new(
         test_parameters: TestRunParameters,
@@ -57,7 +57,7 @@ impl Execution {
         // Seed execution
         network.distribute_to_peers(&[init_peer_id], &vec![]);
 
-        Ok(Execution {
+        Ok(TestExecutor {
             air_script: transformed_air_script,
             network,
         })
@@ -125,7 +125,7 @@ mod tests {
 
     #[test]
     fn test_execution() {
-        let exec = Execution::new(
+        let exec = TestExecutor::new(
             TestRunParameters::from_init_peer_id("init_peer_id"),
             vec![],
             std::iter::empty(),
@@ -158,7 +158,7 @@ mod tests {
 
     #[test]
     fn test_error() {
-        let exec = Execution::new(
+        let exec = TestExecutor::new(
             TestRunParameters::from_init_peer_id("init_peer_id"),
             vec![],
             std::iter::empty(),

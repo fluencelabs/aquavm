@@ -19,3 +19,5 @@ pub mod ephemeral;
 pub mod execution;
 pub mod services;
 pub mod transform;
+
+pub use execution::TestExecutor;
