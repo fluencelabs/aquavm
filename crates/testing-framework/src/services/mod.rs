@@ -26,8 +26,7 @@ pub type JValue = serde_json::Value;
 /// real execution time.
 #[derive(Debug)]
 pub enum FunctionOutcome {
-    Ok(JValue, Duration),
-    Err(i32, JValue, Duration),
+    ServiceResult(CallServiceResult, Duration),
     NotDefined,
     Empty,
 }
@@ -44,10 +43,7 @@ pub(crate) fn services_to_call_service_closure(
         for service in services.as_ref() {
             let outcome = service.call(&params);
             match outcome {
-                FunctionOutcome::Ok(value, _) => return CallServiceResult::ok(value),
-                FunctionOutcome::Err(err_code, value, _) => {
-                    return CallServiceResult::err(err_code, value)
-                }
+                FunctionOutcome::ServiceResult(result, _) => return result,
                 FunctionOutcome::NotDefined => continue,
                 FunctionOutcome::Empty => todo!("It's not clear yet what to return"),
             }

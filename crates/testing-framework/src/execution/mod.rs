@@ -138,14 +138,59 @@ mod tests {
         .unwrap();
 
         let result_init: Vec<_> = exec.iter_execution("init_peer_id").unwrap().collect();
+
         assert_eq!(result_init.len(), 1);
+        let outcome = result_init[0].as_ref().unwrap();
+        assert_eq!(outcome.next_peer_pks, vec!["peer1".to_owned()]);
 
         assert!(exec.iter_execution("peer2").unwrap().next().is_none());
         let results1: Vec<_> = exec.iter_execution("peer1").unwrap().collect();
         assert_eq!(results1.len(), 1);
+        let outcome1 = results1[0].as_ref().unwrap();
+        assert_eq!(outcome1.ret_code, 0);
         assert!(exec.iter_execution("peer1").unwrap().next().is_none());
 
         let results2: Vec<_> = exec.iter_execution("peer2").unwrap().collect();
         assert_eq!(results2.len(), 1);
+        let outcome2 = results2[0].as_ref().unwrap();
+        assert_eq!(outcome2.ret_code, 0);
+    }
+
+    #[test]
+    fn test_error() {
+        let exec = Execution::new(
+            TestRunParameters::from_init_peer_id("init_peer_id"),
+            vec![],
+            std::iter::empty(),
+            r#"(seq
+(call "peer1" ("service" "func") [] arg) # result = {"ret_code":12,"result":"ERROR MESSAGE"}
+(call "peer2" ("service" "func") [arg]) # result = 43
+)
+"#,
+        )
+        .unwrap();
+
+        let result_init: Vec<_> = exec.iter_execution("init_peer_id").unwrap().collect();
+
+        assert_eq!(result_init.len(), 1);
+        let outcome1 = result_init[0].as_ref().unwrap();
+        assert_eq!(outcome1.ret_code, 0);
+        assert_eq!(outcome1.error_message, "");
+
+        assert!(exec.iter_execution("peer2").unwrap().next().is_none());
+        let results1: Vec<_> = exec.iter_execution("peer1").unwrap().collect();
+        assert_eq!(results1.len(), 1);
+        let outcome1 = results1[0].as_ref().unwrap();
+        assert_eq!(outcome1.ret_code, 10000, "{:?}", outcome1);
+        assert_eq!(
+            outcome1.error_message,
+            "Local service error, ret_code is 12, error message is '\"ERROR MESSAGE\"'",
+            "{:?}",
+            outcome1
+        );
+        assert!(exec.iter_execution("peer1").unwrap().next().is_none());
+
+        let results2: Vec<_> = exec.iter_execution("peer2").unwrap().collect();
+        assert_eq!(results2.len(), 0);
     }
 }
