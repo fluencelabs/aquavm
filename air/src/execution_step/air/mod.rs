@@ -31,6 +31,7 @@ mod par;
 mod seq;
 mod xor;
 
+pub(crate) use call::triplet::resolve_to_string;
 pub(crate) use fold::FoldState;
 
 use super::boxed_value::ScalarRef;
@@ -75,6 +76,7 @@ impl<'i> ExecutableInstruction<'i> for Instruction<'i> {
             Instruction::Call(call) => call.execute(exec_ctx, trace_ctx),
 
             Instruction::Ap(ap) => execute!(self, ap, exec_ctx, trace_ctx),
+            Instruction::Canon(canon) => execute!(self, canon, exec_ctx, trace_ctx),
             Instruction::Fail(fail) => execute!(self, fail, exec_ctx, trace_ctx),
             Instruction::FoldScalar(fold) => execute!(self, fold, exec_ctx, trace_ctx),
             Instruction::FoldStream(fold) => execute!(self, fold, exec_ctx, trace_ctx),

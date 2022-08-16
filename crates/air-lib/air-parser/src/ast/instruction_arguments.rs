@@ -17,7 +17,7 @@
 mod impls;
 mod traits;
 
-use super::CanonStreamWithLambda;
+use super::CanonStream;
 use super::Scalar;
 use super::ScalarWithLambda;
 use super::Stream;
@@ -82,7 +82,12 @@ pub enum ApArgument<'i> {
     Boolean(bool),
     EmptyArray,
     Scalar(ScalarWithLambda<'i>),
-    CanonStream(CanonStreamWithLambda<'i>),
+    // it's impossible to turn canon stream into a scalar because of tetraplets
+    CanonStream {
+        stream_name: &'i str,
+        lambda: LambdaAST<'i>,
+        position: usize,
+    },
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
@@ -103,8 +108,9 @@ pub enum Number {
 pub enum FoldScalarIterable<'i> {
     #[serde(borrow)]
     Scalar(ScalarWithLambda<'i>),
+    // it's important not to have lambda here
     #[serde(borrow)]
-    CanonStream(CanonStreamWithLambda<'i>),
+    CanonStream(CanonStream<'i>),
     EmptyArray,
 }
 

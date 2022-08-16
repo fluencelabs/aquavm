@@ -31,7 +31,7 @@ fn ap_with_literal() {
     let actual = parse(source_code);
     let expected = ap(
         ApArgument::Literal("some_string"),
-        Variable::stream("$stream", 27),
+        ApResult::Stream(Stream::new("$stream", 27)),
     );
 
     assert_eq!(actual, expected);
@@ -46,7 +46,7 @@ fn ap_with_number() {
     let actual = parse(source_code);
     let expected = ap(
         ApArgument::Number(Number::Int(-100)),
-        Variable::stream("$stream", 18),
+        ApResult::Stream(Stream::new("$stream", 18)),
     );
 
     assert_eq!(actual, expected);
@@ -59,7 +59,10 @@ fn ap_with_bool() {
     "#;
 
     let actual = parse(source_code);
-    let expected = ap(ApArgument::Boolean(true), Variable::stream("$stream", 18));
+    let expected = ap(
+        ApArgument::Boolean(true),
+        ApResult::Stream(Stream::new("$stream", 18)),
+    );
 
     assert_eq!(actual, expected);
 }
@@ -77,7 +80,7 @@ fn ap_with_last_error() {
                 field_name: "message",
             }])
         })),
-        Variable::stream("$stream", 37),
+        ApResult::Stream(Stream::new("$stream", 37)),
     );
 
     assert_eq!(actual, expected);
@@ -90,7 +93,10 @@ fn ap_with_empty_array() {
     "#;
 
     let actual = parse(source_code);
-    let expected = ap(ApArgument::EmptyArray, Variable::stream("$stream", 16));
+    let expected = ap(
+        ApArgument::EmptyArray,
+        ApResult::Stream(Stream::new("$stream", 16)),
+    );
 
     assert_eq!(actual, expected);
 }
@@ -102,7 +108,10 @@ fn ap_with_init_peer_id() {
     "#;
 
     let actual = parse(source_code);
-    let expected = ap(ApArgument::InitPeerId, Variable::stream("$stream", 28));
+    let expected = ap(
+        ApArgument::InitPeerId,
+        ApResult::Stream(Stream::new("$stream", 28)),
+    );
 
     assert_eq!(actual, expected);
 }
@@ -114,7 +123,10 @@ fn ap_with_timestamp() {
     "#;
 
     let actual = parse(source_code);
-    let expected = ap(ApArgument::Timestamp, Variable::stream("$stream", 25));
+    let expected = ap(
+        ApArgument::Timestamp,
+        ApResult::Stream(Stream::new("$stream", 25)),
+    );
 
     assert_eq!(actual, expected);
 }
@@ -126,7 +138,10 @@ fn ap_with_ttl() {
     "#;
 
     let actual = parse(source_code);
-    let expected = ap(ApArgument::TTL, Variable::stream("$stream", 19));
+    let expected = ap(
+        ApArgument::TTL,
+        ApResult::Stream(Stream::new("$stream", 19)),
+    );
 
     assert_eq!(actual, expected);
 }
@@ -136,13 +151,19 @@ fn ap_with_canon_stream() {
     let canon_stream = "#canon_stream";
     let scalar = "scalar";
     let source_code = f!(r#"
-        (ap {canon_stream} {scalar})
+        (ap {canon_stream}.$.[0] {scalar})
     "#);
 
     let actual = parse(&source_code);
     let expected = ap(
-        ApArgument::CanonStream(CanonStreamWithLambda::new(canon_stream, None, 13)),
-        Variable::scalar(scalar, 27),
+        ApArgument::CanonStream {
+            stream_name: canon_stream,
+            lambda: unsafe {
+                LambdaAST::new_unchecked(vec![ValueAccessor::ArrayAccess { idx: 0 }])
+            },
+            position: 13,
+        },
+        ApResult::Scalar(Scalar::new(scalar, 33)),
     );
 
     assert_eq!(actual, expected);

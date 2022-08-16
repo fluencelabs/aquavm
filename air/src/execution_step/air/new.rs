@@ -53,7 +53,7 @@ fn prolog<'i>(new: &New<'i>, exec_ctx: &mut ExecutionCtx<'i>) {
             let iteration = exec_ctx.tracker.new_tracker.get_iteration(position);
             exec_ctx.streams.meet_scope_start(stream.name, new.span, iteration);
         }
-        NewArgument::Scalar(scalar) => exec_ctx.scalars.meet_new_start(scalar.name),
+        NewArgument::Scalar(scalar) => exec_ctx.scalars.meet_new_start(scalar.name.to_string()),
     }
 
     exec_ctx.tracker.meet_new(position);

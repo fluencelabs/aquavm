@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-use super::Scalar;
-use super::Stream;
 use super::ApResult;
 use super::CallOutputValue;
 use super::NewArgument;
+use super::Scalar;
+use super::Stream;
 
 impl<'i> NewArgument<'i> {
     pub fn name(&self) -> &'i str {
@@ -31,17 +31,11 @@ impl<'i> NewArgument<'i> {
 
 impl<'i> ApResult<'i> {
     pub fn scalar(name: &'i str, position: usize) -> Self {
-        Self::Scalar(Scalar {
-            name,
-            position
-        })
+        Self::Scalar(Scalar { name, position })
     }
 
     pub fn stream(name: &'i str, position: usize) -> Self {
-        Self::Stream(Stream {
-            name,
-            position
-        })
+        Self::Stream(Stream { name, position })
     }
 
     pub fn name(&self) -> &'i str {
@@ -54,16 +48,10 @@ impl<'i> ApResult<'i> {
 
 impl<'i> CallOutputValue<'i> {
     pub fn scalar(name: &'i str, position: usize) -> Self {
-        Self::Scalar(Scalar {
-            name,
-            position
-        })
+        Self::Scalar(Scalar { name, position })
     }
 
     pub fn stream(name: &'i str, position: usize) -> Self {
-        Self::Stream(Stream {
-            name,
-            position
-        })
+        Self::Stream(Stream { name, position })
     }
 }

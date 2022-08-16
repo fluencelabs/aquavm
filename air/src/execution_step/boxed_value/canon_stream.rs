@@ -38,6 +38,10 @@ impl CanonStream {
         self.0.len()
     }
 
+    pub(crate) fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
+
     pub(crate) fn as_jvalue(&self) -> JValue {
         use std::ops::Deref;
 
@@ -49,12 +53,17 @@ impl CanonStream {
     pub(crate) fn iter(&self) -> impl ExactSizeIterator<Item = &ValueAggregate> {
         self.0.iter()
     }
+
+    pub(crate) fn nth(&self, idx: usize) -> Option<&ValueAggregate> {
+        self.0.get(idx)
+    }
 }
 
 use std::fmt;
 
 impl fmt::Display for CanonStream {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "#[{}]", self.0.join(", "))
+    fn fmt(&self, _f: &mut Formatter<'_>) -> fmt::Result {
+        Ok(())
+        //write!(f, "#[{}]", self.0.join(", "))
     }
 }

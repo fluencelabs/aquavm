@@ -20,7 +20,6 @@ use crate::execution_step::ExecutionResult;
 use crate::execution_step::FoldState;
 use crate::execution_step::ValueAggregate;
 
-use double_map::DHashMap;
 use non_empty_vec::NonEmpty;
 
 use std::collections::HashMap;
@@ -89,7 +88,6 @@ pub(crate) struct Scalars<'i> {
     ///   - cells in a row are sorted by depth
     ///   - all depths in cell in one row are unique
     pub(crate) non_iterable_variables: HashMap<String, NonEmpty<SparseCell>>,
-    pub(crate) non_iterable_variables_by_pos: HashMap<TracePos, >
 
     /// This set contains depths were invalidated at the certain moment of script execution.
     /// They are needed for careful isolation of scopes produced by iterations in fold blocks,
@@ -128,7 +126,7 @@ impl<'i> Scalars<'i> {
         let allowed_depths = maplit::hashset! { GLOBAL_DEPTH };
 
         Self {
-            non_iterable_variables: MultiMap::new(),
+            non_iterable_variables: HashMap::new(),
             allowed_depths,
             iterable_variables: HashMap::new(),
             current_depth: GLOBAL_DEPTH,
@@ -142,7 +140,7 @@ impl<'i> Scalars<'i> {
 
         let name = name.into();
         let variable_could_be_set = self.variable_could_be_set(&name);
-        match self.non_iterable_variables.entry(name, value.trace_pos) {
+        match self.non_iterable_variables.entry(name) {
             Vacant(entry) => {
                 let cell = SparseCell::from_value(self.current_depth, value);
                 let cells = NonEmpty::new(cell);
@@ -152,7 +150,7 @@ impl<'i> Scalars<'i> {
             }
             Occupied(entry) => {
                 if !variable_could_be_set {
-                    return Err(UncatchableError::ShadowingIsNotAllowed(entry.key().0.clone()).into());
+                    return Err(UncatchableError::ShadowingIsNotAllowed(entry.key().clone()).into());
                 }
 
                 let values = entry.into_mut();
@@ -193,27 +191,17 @@ impl<'i> Scalars<'i> {
     pub(crate) fn get_non_iterable_value(&'i self, name: &str) -> ExecutionResult<Option<&'i ValueAggregate>> {
         self.non_iterable_variables
             .get(name)
-            .and_then(|values| self.prepare_non_iterable_result(values))
+            .and_then(|values| {
+                let last_cell = values.last();
+                let depth_allowed = self.allowed_depths.contains(&last_cell.depth);
+
+                if depth_allowed {
+                    Some(last_cell.value.as_ref())
+                } else {
+                    None
+                }
+            })
             .ok_or_else(|| ExecutionError::Catchable(Rc::new(CatchableError::VariableNotFound(name.to_string()))))
-    }
-
-    pub(crate) fn get_non_iterable_value_by_pos(&'i self, position: TracePos) -> ExecutionResult<&'i ValueAggregate> {
-        self.non_iterable_variables
-            .get_alt(&position)
-            .and_then(|values| self.prepare_non_iterable_result(values))
-            .flatten()
-            .ok_or_else(|| ExecutionError::Uncatchable(UncatchableError::VariableNotFoundByPos(position)))
-    }
-
-    fn prepare_non_iterable_result(&'i self, values: &NonEmpty<SparseCell>) -> Option<Option<&'i ValueAggregate>> {
-        let last_cell = values.last();
-        let depth_allowed = self.allowed_depths.contains(&last_cell.depth);
-
-        if depth_allowed {
-            Some(last_cell.value.as_ref())
-        } else {
-            None
-        }
     }
 
     pub(crate) fn get_iterable_mut(&mut self, name: &str) -> ExecutionResult<&mut FoldState<'i>> {
@@ -262,7 +250,7 @@ impl<'i> Scalars<'i> {
         self.cleanup_obsolete_values();
     }
 
-    pub(crate) fn meet_new_start(&mut self, scalar_name: &str) {
+    pub(crate) fn meet_new_start(&mut self, scalar_name: String) {
         use std::collections::hash_map::Entry::{Occupied, Vacant};
 
         let new_cell = SparseCell::from_met_new(self.current_depth);
@@ -354,7 +342,6 @@ fn is_value_obsolete(value_depth: usize, current_scope_depth: usize) -> bool {
     value_depth > current_scope_depth
 }
 
-use air_interpreter_data::TracePos;
 use std::fmt;
 
 impl Default for Scalars<'_> {

@@ -33,6 +33,7 @@ dependencies = [
  "env_logger",
  "fluence-app-service",
  "fstrings",
+ "itertools 0.10.3",
  "log",
  "maplit",
  "marine-rs-sdk",

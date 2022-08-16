@@ -99,7 +99,7 @@ pub(super) fn fold_scalar_variable<'i>(
 }
 
 pub(super) fn fold_scalar_canon_stream<'i>(
-    canon_stream: CanonStreamWithLambda<'i>,
+    canon_stream: CanonStream<'i>,
     iterator: Scalar<'i>,
     instruction: Instruction<'i>,
     span: Span,
@@ -163,7 +163,7 @@ pub(super) fn mismatch<'i>(
     })
 }
 
-pub(super) fn ap<'i>(argument: ApArgument<'i>, result: Variable<'i>) -> Instruction<'i> {
+pub(super) fn ap<'i>(argument: ApArgument<'i>, result: ApResult<'i>) -> Instruction<'i> {
     Instruction::Ap(Ap { argument, result })
 }
 

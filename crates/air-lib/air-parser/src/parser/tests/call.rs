@@ -45,7 +45,7 @@ fn parse_json_path() {
             Value::Literal("hello"),
             Value::Variable(VariableWithLambda::scalar("name", 68)),
         ]),
-        CallOutputValue::Variable(Variable::stream("$void", 74)),
+        CallOutputValue::Stream(Stream::new("$void", 74)),
     );
     assert_eq!(instruction, expected);
 }
@@ -195,7 +195,7 @@ fn parse_lambda_complex() {
             CallInstrValue::Literal("service_id"),
             CallInstrValue::Literal("function_name"),
             Rc::new(vec![]),
-            CallOutputValue::Variable(Variable::scalar("void", 75)),
+            CallOutputValue::Scalar(Scalar::new("void", 75)),
         ),
         call(
             CallInstrValue::Variable(VariableWithLambda::from_raw_lambda_scalar(
@@ -214,7 +214,7 @@ fn parse_lambda_complex() {
             CallInstrValue::Literal("service_id"),
             CallInstrValue::Literal("function_name"),
             Rc::new(vec![]),
-            CallOutputValue::Variable(Variable::scalar("void", 162)),
+            CallOutputValue::Scalar(Scalar::new("void", 162)),
         ),
     );
     assert_eq!(instruction, expected);
@@ -247,7 +247,7 @@ fn parse_lambda_with_scalars_complex() {
             CallInstrValue::Literal("service_id"),
             CallInstrValue::Literal("function_name"),
             Rc::new(vec![]),
-            CallOutputValue::Variable(Variable::scalar("void", 97)),
+            CallOutputValue::Scalar(Scalar::new("void", 97)),
         ),
         call(
             CallInstrValue::Variable(VariableWithLambda::from_raw_lambda_scalar(
@@ -272,7 +272,7 @@ fn parse_lambda_with_scalars_complex() {
             CallInstrValue::Literal("service_id"),
             CallInstrValue::Literal("function_name"),
             Rc::new(vec![]),
-            CallOutputValue::Variable(Variable::scalar("void", 205)),
+            CallOutputValue::Scalar(Scalar::new("void", 205)),
         ),
     );
     assert_eq!(instruction, expected);
@@ -312,7 +312,7 @@ fn json_path_square_braces() {
                 64,
             )),
         ]),
-        CallOutputValue::Variable(Variable::stream("$void", 74)),
+        CallOutputValue::Stream(Stream::new("$void", 74)),
     );
 
     assert_eq!(instruction, expected);
@@ -508,14 +508,14 @@ fn seq_par_call() {
                 CallInstrValue::Literal("local_service_id"),
                 CallInstrValue::Literal("local_fn_name"),
                 Rc::new(vec![]),
-                CallOutputValue::Variable(Variable::scalar("result_1", 108)),
+                CallOutputValue::Scalar(Scalar::new("result_1", 108)),
             ),
             call(
                 CallInstrValue::Literal(peer_id),
                 CallInstrValue::Literal("service_id"),
                 CallInstrValue::Literal("fn_name"),
                 Rc::new(vec![]),
-                CallOutputValue::Variable(Variable::scalar("g", 183)),
+                CallOutputValue::Scalar(Scalar::new("g", 183)),
             ),
         ),
         call(
@@ -523,7 +523,7 @@ fn seq_par_call() {
             CallInstrValue::Literal("local_service_id"),
             CallInstrValue::Literal("local_fn_name"),
             Rc::new(vec![]),
-            CallOutputValue::Variable(Variable::scalar("result_2", 273)),
+            CallOutputValue::Scalar(Scalar::new("result_2", 273)),
         ),
     );
 
@@ -563,14 +563,14 @@ fn seq_with_empty_and_dash() {
                     CallInstrValue::Literal(""),
                     CallInstrValue::Literal(""),
                     Rc::new(vec![Value::Literal("module-bytes")]),
-                    CallOutputValue::Variable(Variable::scalar("module-bytes", 119)),
+                    CallOutputValue::Scalar(Scalar::new("module-bytes", 119)),
                 ),
                 call(
                     CallInstrValue::Literal("set_variables"),
                     CallInstrValue::Literal(""),
                     CallInstrValue::Literal(""),
                     Rc::new(vec![Value::Literal("module_config")]),
-                    CallOutputValue::Variable(Variable::scalar("module_config", 201)),
+                    CallOutputValue::Scalar(Scalar::new("module_config", 201)),
                 ),
             ),
             call(
@@ -578,7 +578,7 @@ fn seq_with_empty_and_dash() {
                 CallInstrValue::Literal(""),
                 CallInstrValue::Literal(""),
                 Rc::new(vec![Value::Literal("blueprint")]),
-                CallOutputValue::Variable(Variable::scalar("blueprint", 294)),
+                CallOutputValue::Scalar(Scalar::new("blueprint", 294)),
             ),
         ),
         seq(
@@ -590,7 +590,7 @@ fn seq_with_empty_and_dash() {
                     Value::Variable(VariableWithLambda::scalar("module-bytes", 381)),
                     Value::Variable(VariableWithLambda::scalar("module_config", 394)),
                 ]),
-                CallOutputValue::Variable(Variable::scalar("module", 409)),
+                CallOutputValue::Scalar(Scalar::new("module", 409)),
             ),
             seq(
                 Instruction::Call(Call {
@@ -603,7 +603,7 @@ fn seq_with_empty_and_dash() {
                         "blueprint",
                         490,
                     ))]),
-                    output: CallOutputValue::Variable(Variable::scalar("blueprint_id", 501)),
+                    output: CallOutputValue::Scalar(Scalar::new("blueprint_id", 501)),
                 }),
                 seq(
                     call(
@@ -614,7 +614,7 @@ fn seq_with_empty_and_dash() {
                             "blueprint_id",
                             589,
                         ))]),
-                        CallOutputValue::Variable(Variable::scalar("service_id", 603)),
+                        CallOutputValue::Scalar(Scalar::new("service_id", 603)),
                     ),
                     call(
                         CallInstrValue::Literal("remote_peer_id"),
@@ -624,7 +624,7 @@ fn seq_with_empty_and_dash() {
                             "service_id",
                             671,
                         ))]),
-                        CallOutputValue::Variable(Variable::scalar("client_result", 683)),
+                        CallOutputValue::Scalar(Scalar::new("client_result", 683)),
                     ),
                 ),
             ),

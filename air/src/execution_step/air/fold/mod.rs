@@ -25,5 +25,4 @@ use super::ExecutionCtx;
 use super::ExecutionResult;
 use super::Instruction;
 use super::ScalarRef;
-use super::ValueAggregate;
 use crate::execution_step::boxed_value::*;

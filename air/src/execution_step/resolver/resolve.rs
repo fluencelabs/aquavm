@@ -20,9 +20,9 @@ use crate::execution_step::boxed_value::Variable;
 use crate::execution_step::execution_context::ExecutionCtx;
 use crate::execution_step::lambda_applier::select_from_scalar;
 use crate::execution_step::ExecutionResult;
-use crate::LambdaAST;
 use crate::SecurityTetraplet;
 use crate::{CatchableError, JValue};
+use crate::{ExecutionError, LambdaAST};
 
 use air_parser::ast;
 
@@ -96,7 +96,7 @@ pub(crate) fn resolve_variable<'ctx, 'i>(
 
     match variable {
         // TODO: get rid of to_string
-        Variable::Scalar { name, .. } => Ok(ctx.scalars.get_value(&name.to_string())?.into_jvaluable()),
+        Variable::Scalar { name, .. } => Ok(ctx.scalars.get_value(name)?.into_jvaluable()),
         Variable::Stream {
             name,
             generation,
@@ -113,10 +113,9 @@ pub(crate) fn resolve_variable<'ctx, 'i>(
             }
         }
         Variable::CanonStream { name, .. } => {
-            let canon_stream = ctx
-                .streams
-                .get_canon(name)
-                .ok_or_else(|| CatchableError::VariableNotFound(name.to_string()).into())?;
+            let canon_stream = ctx.streams.get_canon(name).ok_or_else(|| {
+                ExecutionError::Catchable(Rc::new(CatchableError::VariableNotFound(name.to_string())))
+            })?;
             Ok(Box::new(canon_stream))
         }
     }

@@ -15,6 +15,7 @@
  */
 
 use super::*;
+use air_lambda_ast::format_ast;
 use std::fmt;
 
 impl fmt::Display for ApResult<'_> {
@@ -84,7 +85,11 @@ impl fmt::Display for ApArgument<'_> {
             Boolean(bool) => write!(f, "{}", bool),
             EmptyArray => write!(f, "[]"),
             Scalar(scalar) => write!(f, "{}", scalar),
-            CanonStream(canon_stream) => write!(f, "{}", canon_stream),
+            CanonStream {
+                stream_name,
+                lambda,
+                ..
+            } => write!(f, "{}.$.{}", stream_name, format_ast(lambda)),
         }
     }
 }

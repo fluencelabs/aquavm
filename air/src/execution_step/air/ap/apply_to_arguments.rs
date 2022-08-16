@@ -36,7 +36,7 @@ pub(super) fn apply_to_arg(
         Boolean(value) => apply_const(*value, exec_ctx, trace_ctx),
         EmptyArray => apply_const(serde_json::json!([]), exec_ctx, trace_ctx),
         Scalar(scalar) => apply_scalar(scalar, exec_ctx, trace_ctx, should_touch_trace)?,
-        CanonStream(canon_stream) => todo!(),
+        CanonStream{ stream_name, lambda, ..} => apply_canon_stream(stream_name, lambda, exec_ctx, trace_ctx)?,
     };
 
     Ok(result)
@@ -118,4 +118,21 @@ fn apply_scalar_wl_impl(
     let result = ValueAggregate::new(Rc::new(jvalue), tetraplet, trace_ctx.trace_pos());
 
     Ok(result)
+}
+
+fn apply_canon_stream(
+    stream_name: &str,
+    lambda: &LambdaAST<'_>,
+    exec_ctx: &ExecutionCtx<'_>,
+    trace_ctx: &TraceHandler,
+) -> ExecutionResult<ValueAggregate> {
+    use crate::execution_step::boxed_value::JValuable;
+
+    let canon_stream = exec_ctx.streams.get_canon(stream_name).unwrap();
+    let jvaluable = &canon_stream as &dyn JValuable;
+    let (result, tetraplet) = jvaluable.apply_lambda_with_tetraplets(lambda, exec_ctx)?;
+    let position = trace_ctx.trace_pos();
+    // TODO: refactor this code after boxed value
+    let value = ValueAggregate::new(Rc::new(result.clone()), Rc::new(tetraplet), position);
+    Ok(value)
 }

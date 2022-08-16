@@ -20,7 +20,8 @@ use crate::parser::lexer::Token;
 use crate::parser::ParserError;
 use crate::parser::Span;
 
-use air_lambda_ast::{LambdaAST, ValueAccessor};
+use air_lambda_ast::LambdaAST;
+use air_lambda_ast::ValueAccessor;
 use lalrpop_util::ErrorRecovery;
 use lalrpop_util::ParseError;
 
@@ -98,11 +99,10 @@ impl<'i> VariableValidator<'i> {
         match &fold.iterable {
             Scalar(variable) => {
                 self.met_variable_name(variable.name, span);
-                self.met_lambda(&variable.lambda, span);
+                self.met_maybe_lambda(&variable.lambda, span);
             }
             CanonStream(canon_stream) => {
                 self.met_variable_name(canon_stream.name, span);
-                self.met_lambda(&canon_stream.lambda, span);
             }
             EmptyArray => {}
         };
@@ -142,11 +142,15 @@ impl<'i> VariableValidator<'i> {
             | ApArgument::LastError(_) => {}
             ApArgument::Scalar(scalar) => {
                 self.met_variable_name(scalar.name, span);
-                self.met_lambda(&scalar.lambda, span);
+                self.met_maybe_lambda(&scalar.lambda, span);
             }
-            ApArgument::CanonStream(canon_stream) => {
-                self.met_variable_name(canon_stream.name, span);
-                self.met_lambda(&canon_stream.lambda, span);
+            ApArgument::CanonStream {
+                stream_name,
+                lambda,
+                ..
+            } => {
+                self.met_variable_name(stream_name, span);
+                self.met_lambda(lambda, span);
             }
         }
         self.met_variable_name_definition(ap.result.name(), span);
@@ -189,7 +193,7 @@ impl<'i> VariableValidator<'i> {
 
     fn met_variable_wl(&mut self, variable: &VariableWithLambda<'i>, span: Span) {
         self.met_variable_name(variable.name(), span);
-        self.met_lambda(variable.lambda(), span);
+        self.met_maybe_lambda(variable.lambda(), span);
     }
 
     fn met_variable_name(&mut self, name: &'i str, span: Span) {
@@ -198,12 +202,15 @@ impl<'i> VariableValidator<'i> {
         }
     }
 
-    fn met_lambda(&mut self, lambda: &Option<LambdaAST<'i>>, span: Span) {
+    fn met_maybe_lambda(&mut self, lambda: &Option<LambdaAST<'i>>, span: Span) {
         let lambda = match lambda {
             Some(lambda) => lambda,
             None => return,
         };
+        self.met_lambda(lambda, span)
+    }
 
+    fn met_lambda(&mut self, lambda: &LambdaAST<'i>, span: Span) {
         for accessor in lambda.iter() {
             match accessor {
                 &ValueAccessor::FieldAccessByScalar { scalar_name } => {

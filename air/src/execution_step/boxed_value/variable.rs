@@ -21,6 +21,7 @@ use air_parser::ast;
 pub(crate) enum Variable<'i> {
     Scalar {
         name: &'i str,
+        #[allow(dead_code)]
         position: usize,
     },
     Stream {
@@ -30,6 +31,7 @@ pub(crate) enum Variable<'i> {
     },
     CanonStream {
         name: &'i str,
+        #[allow(dead_code)]
         position: usize,
     },
 }
