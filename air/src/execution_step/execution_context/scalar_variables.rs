@@ -20,7 +20,7 @@ use crate::execution_step::ExecutionResult;
 use crate::execution_step::FoldState;
 use crate::execution_step::ValueAggregate;
 
-use multi_map::MultiMap;
+use double_map::DHashMap;
 use non_empty_vec::NonEmpty;
 
 use std::collections::HashMap;
@@ -88,7 +88,8 @@ pub(crate) struct Scalars<'i> {
     ///   - global variables have 0 depth
     ///   - cells in a row are sorted by depth
     ///   - all depths in cell in one row are unique
-    pub(crate) non_iterable_variables: MultiMap<String, TracePos, NonEmpty<SparseCell>>,
+    pub(crate) non_iterable_variables: HashMap<String, NonEmpty<SparseCell>>,
+    pub(crate) non_iterable_variables_by_pos: HashMap<TracePos, >
 
     /// This set contains depths were invalidated at the certain moment of script execution.
     /// They are needed for careful isolation of scopes produced by iterations in fold blocks,
@@ -141,7 +142,7 @@ impl<'i> Scalars<'i> {
 
         let name = name.into();
         let variable_could_be_set = self.variable_could_be_set(&name);
-        match self.non_iterable_variables.entry(name) {
+        match self.non_iterable_variables.entry(name, value.trace_pos) {
             Vacant(entry) => {
                 let cell = SparseCell::from_value(self.current_depth, value);
                 let cells = NonEmpty::new(cell);
@@ -151,7 +152,7 @@ impl<'i> Scalars<'i> {
             }
             Occupied(entry) => {
                 if !variable_could_be_set {
-                    return Err(UncatchableError::ShadowingIsNotAllowed(entry.key().clone()).into());
+                    return Err(UncatchableError::ShadowingIsNotAllowed(entry.key().0.clone()).into());
                 }
 
                 let values = entry.into_mut();
@@ -191,8 +192,7 @@ impl<'i> Scalars<'i> {
 
     pub(crate) fn get_non_iterable_value(&'i self, name: &str) -> ExecutionResult<Option<&'i ValueAggregate>> {
         self.non_iterable_variables
-            // TODO: get rid of copying here
-            .get(&name.to_string())
+            .get(name)
             .and_then(|values| self.prepare_non_iterable_result(values))
             .ok_or_else(|| ExecutionError::Catchable(Rc::new(CatchableError::VariableNotFound(name.to_string()))))
     }
@@ -266,7 +266,7 @@ impl<'i> Scalars<'i> {
         use std::collections::hash_map::Entry::{Occupied, Vacant};
 
         let new_cell = SparseCell::from_met_new(self.current_depth);
-        match self.non_iterable_variables.entry(scalar_name.to_string()) {
+        match self.non_iterable_variables.entry(scalar_name) {
             Vacant(entry) => {
                 let ne_vec = NonEmpty::new(new_cell);
                 entry.insert(ne_vec);
@@ -283,7 +283,7 @@ impl<'i> Scalars<'i> {
         let should_remove_values = self
             .non_iterable_variables
             // TODO: get rid of copying here
-            .get_mut(&scalar_name.to_string())
+            .get_mut(scalar_name)
             .and_then(|values| {
                 // carefully check that we're popping up an appropriate value,
                 // returning None means an error here
