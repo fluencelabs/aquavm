@@ -223,7 +223,7 @@ impl Network {
         &'s self,
         air: &'s str,
         peer_id: &Id,
-    ) -> Option<impl Iterator<Item = Result<RawAVMOutcome, String>> + 's>
+    ) -> Option<impl Iterator<Item = RawAVMOutcome> + 's>
     where
         PeerId: Borrow<Id>,
         Id: Eq + Hash + ?Sized,
@@ -233,7 +233,7 @@ impl Network {
         peer.map(|peer_cell| {
             std::iter::from_fn(move || {
                 let mut peer_env = peer_cell.borrow_mut();
-                peer_env.execute_once(air, self)
+                peer_env.execute_once(air, self).map(Result::unwrap)
             })
         })
     }
