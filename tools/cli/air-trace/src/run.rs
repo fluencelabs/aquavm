@@ -71,12 +71,15 @@ enum Source {
 
 pub(crate) fn run(args: Args) -> anyhow::Result<()> {
     let tracing_json = (!args.json) as u8;
+    #[cfg(feature = "wasm")]
     let global_tracing_params = if args.native {
         // for native, there is single tracing configuration, and no runner
         args.tracing_params.clone()
     } else {
         args.runner_tracing_params
     };
+    #[cfg(not(feature = "wasm"))]
+    let global_tracing_params = args.tracing_params.clone();
     init_tracing(global_tracing_params, tracing_json);
 
     let current_peer_id = args.current_peer_id.as_deref().unwrap_or("some_id");
