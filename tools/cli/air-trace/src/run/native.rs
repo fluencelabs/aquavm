@@ -16,6 +16,7 @@
 
 use super::runner::AirRunner;
 use air_interpreter_interface::RunParameters;
+use avm_interface::raw_outcome::RawAVMOutcome;
 
 struct NativeAvmRunner {
     current_peer_id: String,
@@ -30,12 +31,12 @@ impl AirRunner for NativeAvmRunner {
         init_peer_id: String,
         timestamp: u64,
         ttl: u32,
-        call_results: air_test_utils::CallResults,
+        call_results: avm_interface::CallResults,
         // We use externally configured logger.
         _tracing_params: String,
         _tracing_output_mode: u8,
-    ) -> anyhow::Result<air_test_utils::RawAVMOutcome> {
-        use air_test_utils::into_raw_result;
+    ) -> anyhow::Result<RawAVMOutcome> {
+        use avm_interface::into_raw_result;
 
         // some inner parts transformations
         let raw_call_results = into_raw_result(call_results);
@@ -53,7 +54,7 @@ impl AirRunner for NativeAvmRunner {
             },
             raw_call_results,
         );
-        let outcome = air_test_utils::RawAVMOutcome::from_interpreter_outcome(outcome)?;
+        let outcome = RawAVMOutcome::from_interpreter_outcome(outcome)?;
 
         Ok(outcome)
     }

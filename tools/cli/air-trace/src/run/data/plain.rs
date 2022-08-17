@@ -16,7 +16,7 @@
 
 use super::ExecutionData;
 use crate::utils::unix_timestamp_now;
-use air_test_utils::ParticleParameters;
+use avm_interface::ParticleParameters;
 
 use anyhow::Context;
 

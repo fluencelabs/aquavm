@@ -177,13 +177,14 @@ dependencies = [
 
 [[package]]
 name = "air-trace"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "air",
  "air-interpreter-interface",
  "air-test-utils",
  "anyhow",
- "avm-server",
+ "avm-data-store",
+ "avm-interface",
  "clap 3.2.16",
  "itertools 0.10.3",
  "serde",

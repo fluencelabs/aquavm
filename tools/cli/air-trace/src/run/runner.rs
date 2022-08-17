@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-use avm_server::avm_runner::*;
-use avm_server::CallResults;
+use avm_interface::raw_outcome::RawAVMOutcome;
+use avm_interface::CallResults;
 
 pub(crate) trait AirRunner {
     #[allow(clippy::too_many_arguments)]

@@ -47,7 +47,6 @@ Please, note that currently tracing outputs to stdout, and execution result is a
 ## Known limitations
 
 1. At detailed tracing levels (debug etc), trace formatting time is comparable to traced code execution time and can give incorrect results.
-2. Native builds of the utility still depend on Marine, and cannot be built for architectures unsupported by Marine, like Apple Silicon or WASM.  It is yet to be resolved with some refactoring.
 
 ## Installation
 
@@ -68,3 +67,14 @@ You need to have Rust toolchain and its `cargo` utility installed.  Run this com
 ``` sh
 cargo install --path tools/cli/air-trace
 ```
+
+## `air-trace` native build
+
+You can have fully native or WASM `air-trace` build with the following commands:
+
+``` sh
+cargo build --no-default-features --release -p air-trace
+cargo build --no-default-features --release -p air-trace --target wasm32-wasi
+```
+
+This build doesn't need the AIR interpreter server binary.

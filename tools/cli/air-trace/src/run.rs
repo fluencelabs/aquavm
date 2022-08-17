@@ -21,7 +21,7 @@ mod runner;
 mod wasm;
 
 use self::runner::AirRunner;
-use air_test_utils::CallResults;
+use avm_interface::CallResults;
 
 use anyhow::Context as _;
 use clap::{Parser, Subcommand};
