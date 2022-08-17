@@ -55,14 +55,14 @@ pub struct StreamWithLambda<'i> {
 }
 
 /// A canonicalized stream without lambda.
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct CanonStream<'i> {
     pub name: &'i str,
     pub position: usize,
 }
 
 /// A canonicalized stream with lambda.
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct CanonStreamWithLambda<'i> {
     pub name: &'i str,
     #[serde(borrow)]
