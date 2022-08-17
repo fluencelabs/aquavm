@@ -78,7 +78,7 @@ pub(crate) fn from_execution_error(
     populate_outcome_from_contexts(exec_ctx, trace_handler, error.to_error_code(), error.to_string())
 }
 
-#[tracing::instrument(skip(exec_ctx, trace_handler))]
+#[tracing::instrument(skip(exec_ctx, trace_handler), level = "info")]
 fn populate_outcome_from_contexts(
     exec_ctx: ExecutionCtx<'_>,
     trace_handler: TraceHandler,
@@ -94,13 +94,13 @@ fn populate_outcome_from_contexts(
     );
     let data = measure!(
         serde_json::to_vec(&data).expect("default serializer shouldn't fail"),
-        tracing::Level::INFO,
+        tracing::Level::TRACE,
         "serde_json::to_vec(data)"
     );
     let next_peer_pks = dedup(exec_ctx.next_peer_pks);
     let call_requests = measure!(
         serde_json::to_vec(&exec_ctx.call_requests).expect("default serializer shouldn't fail"),
-        tracing::Level::INFO,
+        tracing::Level::TRACE,
         "serde_json::to_vec(call_results)",
     );
 
