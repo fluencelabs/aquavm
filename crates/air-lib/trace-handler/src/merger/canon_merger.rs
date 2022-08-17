@@ -25,7 +25,7 @@ pub enum MergerCanonResult {
 
     /// There was a state in at least one of the contexts. If there were two states in
     /// both contexts, they were successfully merged.
-    CanonResult { stream_element_pos: Vec<TracePos> },
+    CanonResult { stream_elements_pos: Vec<TracePos> },
 }
 
 pub(crate) fn try_merge_next_state_as_canon(data_keeper: &mut DataKeeper) -> MergeResult<MergerCanonResult> {
@@ -37,7 +37,7 @@ pub(crate) fn try_merge_next_state_as_canon(data_keeper: &mut DataKeeper) -> Mer
     match (prev_state, current_state) {
         (Some(Canon(prev_canon)), Some(Canon(current_canon))) => prepare_canon_result(&prev_canon, &current_canon),
         (Some(Canon(canon)), None) | (None, Some(Canon(canon))) => Ok(MergerCanonResult::CanonResult {
-            stream_element_pos: canon.stream_element_ids.clone(),
+            stream_elements_pos: canon.stream_elements_pos.clone(),
         }),
         (None, None) => Ok(MergerCanonResult::Empty),
         (prev_state, current_state) => Err(MergeError::incompatible_states(
@@ -64,6 +64,6 @@ fn prepare_canon_result(
     }
 
     Ok(MergerCanonResult::CanonResult {
-        stream_element_pos: prev_canon_result.stream_element_ids.clone(),
+        stream_elements_pos: prev_canon_result.stream_elements_pos.clone(),
     })
 }

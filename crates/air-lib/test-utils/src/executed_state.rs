@@ -16,6 +16,7 @@
 
 use super::ApResult;
 use super::CallResult;
+use super::CanonResult;
 use super::ExecutedState;
 use super::JValue;
 use super::ParResult;
@@ -136,6 +137,11 @@ pub fn ap(dst: Option<u32>) -> ExecutedState {
     let ap_result = ApResult::new(res_generations);
 
     ExecutedState::Ap(ap_result)
+}
+
+pub fn canon(stream_elements_pos: Vec<TracePos>) -> ExecutedState {
+    let canon_result = CanonResult::new(stream_elements_pos);
+    ExecutedState::Canon(canon_result)
 }
 
 fn option_to_vec(maybe_value: Option<u32>) -> Vec<u32> {

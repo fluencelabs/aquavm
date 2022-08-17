@@ -86,6 +86,14 @@ impl ApResult {
     }
 }
 
+impl CanonResult {
+    pub fn new(stream_elements_pos: Vec<TracePos>) -> Self {
+        Self {
+            stream_elements_pos,
+        }
+    }
+}
+
 impl std::fmt::Display for ExecutedState {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         use CallResult::*;
@@ -122,7 +130,7 @@ impl std::fmt::Display for ExecutedState {
                 write!(f, "ap: _ -> {:?}", ap.res_generations)
             }
             Canon(canon) => {
-                write!(f, "canon {:?}", canon.stream_element_ids)
+                write!(f, "canon {:?}", canon.stream_elements_pos)
             }
         }
     }

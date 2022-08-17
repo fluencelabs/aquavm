@@ -19,54 +19,67 @@ use super::ExecutionResult;
 use super::TraceHandler;
 use crate::execution_step::boxed_value::CanonStream;
 use crate::execution_step::Generation;
+use crate::log_instruction;
+use crate::trace_to_exec_err;
 use crate::CatchableError;
-use crate::{log_instruction, ExecutionError};
-use crate::{trace_to_exec_err, UncatchableError};
+use crate::ExecutionError;
+use crate::UncatchableError;
 
 use air_interpreter_data::{CanonResult, TracePos};
 use air_parser::ast;
-use air_parser::ast::Canon;
 use air_trace_handler::MergerCanonResult;
 use std::rc::Rc;
 
-impl<'i> super::ExecutableInstruction<'i> for Canon<'i> {
+impl<'i> super::ExecutableInstruction<'i> for ast::Canon<'i> {
     #[tracing::instrument(level = "debug", skip(exec_ctx, trace_ctx))]
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         log_instruction!(call, exec_ctx, trace_ctx);
         let canon_result = trace_to_exec_err!(trace_ctx.meet_canon_start(), self)?;
 
-        let stream_with_positions = match canon_result {
-            MergerCanonResult::CanonResult { stream_element_pos } => {
-                let canon_stream = create_canon_stream_from_ids(&stream_element_pos, &self.stream, exec_ctx)?;
-                StreamWithPositions {
-                    canon_stream,
-                    positions: stream_element_pos,
-                }
+        match canon_result {
+            MergerCanonResult::CanonResult { stream_elements_pos } => {
+                handle_seen_canon(self, stream_elements_pos, exec_ctx, trace_ctx)
             }
-            MergerCanonResult::Empty => {
-                let peer_id = crate::execution_step::air::resolve_to_string(&self.peer_pk, exec_ctx)?;
-
-                if exec_ctx.run_parameters.current_peer_id.as_str() != peer_id {
-                    exec_ctx.subgraph_complete = false;
-                    exec_ctx.next_peer_pks.push(peer_id);
-                    return Ok(());
-                }
-                create_canon_stream_from_name(&self.stream, exec_ctx)?
-            }
-        };
-
-        exec_ctx
-            .streams
-            .add_canon(self.canon_stream.name.to_string(), stream_with_positions.canon_stream);
-        trace_ctx.meet_canon_end(CanonResult {
-            stream_element_ids: stream_with_positions.positions,
-        });
-
-        Ok(())
+            MergerCanonResult::Empty => handle_unseen_canon(self, exec_ctx, trace_ctx),
+        }
     }
 }
 
-fn create_canon_stream_from_ids(
+fn handle_seen_canon(
+    ast_canon: &ast::Canon<'_>,
+    stream_elements_pos: Vec<TracePos>,
+    exec_ctx: &mut ExecutionCtx<'_>,
+    trace_ctx: &mut TraceHandler,
+) -> ExecutionResult<()> {
+    let canon_stream = create_canon_stream_from_pos(&stream_elements_pos, &ast_canon.stream, exec_ctx)?;
+    let stream_with_positions = StreamWithPositions {
+        canon_stream,
+        stream_elements_pos,
+    };
+
+    epilog(&ast_canon.canon_stream.name, stream_with_positions, exec_ctx, trace_ctx);
+    Ok(())
+}
+
+fn handle_unseen_canon(
+    ast_canon: &ast::Canon<'_>,
+    exec_ctx: &mut ExecutionCtx<'_>,
+    trace_ctx: &mut TraceHandler,
+) -> ExecutionResult<()> {
+    let peer_id = crate::execution_step::air::resolve_to_string(&ast_canon.peer_pk, exec_ctx)?;
+
+    if exec_ctx.run_parameters.current_peer_id.as_str() != peer_id {
+        exec_ctx.subgraph_complete = false;
+        exec_ctx.next_peer_pks.push(peer_id);
+        return Ok(());
+    }
+
+    let stream_with_positions = create_canon_stream_from_name(&ast_canon.stream, exec_ctx)?;
+    epilog(&ast_canon.canon_stream.name, stream_with_positions, exec_ctx, trace_ctx);
+    Ok(())
+}
+
+fn create_canon_stream_from_pos(
     stream_elements_pos: &[TracePos],
     stream: &ast::Stream<'_>,
     exec_ctx: &ExecutionCtx<'_>,
@@ -91,9 +104,24 @@ fn create_canon_stream_from_ids(
     Ok(canon_stream)
 }
 
+fn epilog(
+    canon_stream_name: &str,
+    stream_with_positions: StreamWithPositions,
+    exec_ctx: &mut ExecutionCtx<'_>,
+    trace_ctx: &mut TraceHandler,
+) {
+    let StreamWithPositions {
+        canon_stream,
+        stream_elements_pos,
+    } = stream_with_positions;
+
+    exec_ctx.streams.add_canon(canon_stream_name, canon_stream);
+    trace_ctx.meet_canon_end(CanonResult::new(stream_elements_pos));
+}
+
 struct StreamWithPositions {
     canon_stream: CanonStream,
-    positions: Vec<TracePos>,
+    stream_elements_pos: Vec<TracePos>,
 }
 
 fn create_canon_stream_from_name(
@@ -106,7 +134,7 @@ fn create_canon_stream_from_name(
         )))
     })?;
     let canon_stream = CanonStream::from_stream(stream);
-    let positions = stream
+    let stream_elements_pos = stream
         .iter(Generation::Last)
         .unwrap()
         .map(|value| value.trace_pos)
@@ -114,7 +142,7 @@ fn create_canon_stream_from_name(
 
     let result = StreamWithPositions {
         canon_stream,
-        positions,
+        stream_elements_pos,
     };
 
     Ok(result)

@@ -64,8 +64,8 @@ impl Streams {
         self.canon_streams.get(name)
     }
 
-    pub(crate) fn add_canon(&mut self, name: String, canon_stream: CanonStream) {
-        self.canon_streams.insert(name, canon_stream);
+    pub(crate) fn add_canon(&mut self, name: impl Into<String>, canon_stream: CanonStream) {
+        self.canon_streams.insert(name.into(), canon_stream);
     }
 
     pub(crate) fn add_stream_value(

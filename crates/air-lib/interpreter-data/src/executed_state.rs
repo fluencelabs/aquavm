@@ -129,7 +129,7 @@ pub struct ApResult {
 #[serde(rename_all = "snake_case")]
 pub struct CanonResult {
     #[serde(rename = "ids")]
-    pub stream_element_ids: Vec<TracePos>,
+    pub stream_elements_pos: Vec<TracePos>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
