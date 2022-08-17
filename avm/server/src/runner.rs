@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-use super::CallResults;
-use crate::raw_outcome::RawAVMOutcome;
 use crate::RunnerError;
 use crate::RunnerResult;
 
 use air_interpreter_interface::InterpreterOutcome;
 use air_utils::measure;
+use avm_interface::raw_outcome::RawAVMOutcome;
+use avm_interface::CallResults;
 use marine::IValue;
 use marine::Marine;
 use marine::MarineConfig;
