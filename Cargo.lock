@@ -165,6 +165,7 @@ version = "0.3.0"
 dependencies = [
  "air",
  "air-interpreter-interface",
+ "avm-interface",
  "avm-server",
  "fstrings",
  "marine-rs-sdk",
@@ -269,12 +270,29 @@ dependencies = [
 ]
 
 [[package]]
-name = "avm-server"
-version = "0.24.0"
+name = "avm-interface"
+version = "0.25.0"
 dependencies = [
  "air-interpreter-interface",
  "air-utils",
  "avm-data-store",
+ "log",
+ "maplit",
+ "polyplets",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "tracing",
+]
+
+[[package]]
+name = "avm-server"
+version = "0.25.0"
+dependencies = [
+ "air-interpreter-interface",
+ "air-utils",
+ "avm-data-store",
+ "avm-interface",
  "eyre",
  "log",
  "maplit",

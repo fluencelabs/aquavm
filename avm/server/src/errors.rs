@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use crate::interface::ErrorAVMOutcome;
+use avm_interface::{AVMInterfaceError, ErrorAVMOutcome};
 use marine::IValue;
 use marine::MarineError;
 
@@ -73,38 +73,16 @@ pub enum RunnerError {
     CallSeDeErrors(#[from] CallSeDeErrors),
 }
 
-#[derive(Debug, ThisError)]
-#[allow(clippy::enum_variant_names)]
-pub enum CallSeDeErrors {
-    /// Errors encountered while trying to serialize call results.
-    #[error("error occurred while call results `{call_results:?}` deserialization: {se_error}")]
-    CallResultsSeFailed {
-        call_results: air_interpreter_interface::CallResults,
-        se_error: SerdeError,
-    },
-
-    /// This error is encountered when deserialization pof call requests failed for some reason.
-    #[error("'{raw_call_request:?}' can't been serialized with error '{error}'")]
-    CallRequestsDeError {
-        raw_call_request: Vec<u8>,
-        error: SerdeError,
-    },
-
-    /// Errors encountered while trying to deserialize arguments from call parameters returned
-    /// by the interpreter. In the corresponding struct such arguments are Vec<JValue> serialized
-    /// to a string.
-    #[error("error occurred while deserialization of arguments from call params `{call_params:?}`: {de_error}")]
-    CallParamsArgsDeFailed {
-        call_params: air_interpreter_interface::CallRequestParams,
-        de_error: SerdeError,
-    },
-
-    /// Errors encountered while trying to deserialize tetraplets from call parameters returned
-    /// by the interpreter. In the corresponding struct such tetraplets are
-    /// Vec<Vec<SecurityTetraplet>> serialized to a string.
-    #[error("error occurred while deserialization of tetraplets from call params `{call_params:?}`: {de_error}")]
-    CallParamsTetrapletsDeFailed {
-        call_params: air_interpreter_interface::CallRequestParams,
-        de_error: SerdeError,
-    },
+// TODO same variant? it will make the RunnerError type little larger; but it is yet to be measured
+impl From<AVMInterfaceError> for RunnerError {
+    fn from(value: AVMInterfaceError) -> Self {
+        match value {
+            AVMInterfaceError::InterpreterResultDeError(e) => {
+                RunnerError::InterpreterResultDeError(e)
+            }
+            AVMInterfaceError::CallSeDeErrors(e) => RunnerError::CallSeDeErrors(e),
+        }
+    }
 }
+
+pub use avm_interface::CallSeDeErrors;

@@ -192,7 +192,7 @@ fn prepare_args(
     )
     .into_ivalue();
 
-    let call_results = crate::interface::into_raw_result(call_results);
+    let call_results = avm_interface::into_raw_result(call_results);
     let call_results = measure!(
         serde_json::to_vec(&call_results).expect("the default serializer shouldn't fail"),
         tracing::Level::INFO,
