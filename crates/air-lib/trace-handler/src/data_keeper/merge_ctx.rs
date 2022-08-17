@@ -26,7 +26,7 @@ use air_interpreter_data::InterpreterData;
 use std::collections::HashMap;
 
 /// Contains all necessary information about data.
-#[derive(Debug, Default, PartialEq)]
+#[derive(Debug, Default, PartialEq, Eq)]
 pub struct MergeCtx {
     pub slider: TraceSlider,
     pub streams: GlobalStreamGens,

@@ -29,7 +29,7 @@ use serde::Deserialize;
 use serde::Serialize;
 
 // TODO: rename CallInstrValue, since it'd used by the canon instruction
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub enum CallInstrValue<'i> {
     InitPeerId,
     Literal(&'i str),
@@ -38,7 +38,7 @@ pub enum CallInstrValue<'i> {
 
 /// Triplet represents a location of the executable code in the network.
 /// It is build from `PeerPart` and `FunctionPart` of a `Call` instruction.
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct Triplet<'i> {
     #[serde(borrow)]
     pub peer_pk: CallInstrValue<'i>,
@@ -62,7 +62,7 @@ pub enum Value<'i> {
     Variable(VariableWithLambda<'i>),
 }
 
-#[derive(Serialize, Debug, PartialEq, Clone)]
+#[derive(Serialize, Debug, PartialEq, Eq, Clone)]
 pub enum CallOutputValue<'i> {
     #[serde(borrow)]
     Scalar(Scalar<'i>),
@@ -104,7 +104,7 @@ pub enum Number {
     Float(f64),
 }
 
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub enum FoldScalarIterable<'i> {
     #[serde(borrow)]
     Scalar(ScalarWithLambda<'i>),

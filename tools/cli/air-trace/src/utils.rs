@@ -27,7 +27,8 @@ pub(crate) fn parse_tracing_duration(input: &str) -> Result<Duration, anyhow::Er
             }
         }
     }
-    return Err(anyhow::anyhow!("malformed duration {:?}", input));
+
+    Err(anyhow::anyhow!("malformed duration {:?}", input))
 }
 
 pub(crate) fn unix_timestamp_now() -> u64 {

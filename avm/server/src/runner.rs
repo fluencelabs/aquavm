@@ -68,6 +68,7 @@ impl AVMRunner {
         Ok(avm)
     }
 
+    #[allow(clippy::too_many_arguments)]
     #[tracing::instrument(skip_all)]
     pub fn call(
         &mut self,
@@ -106,6 +107,7 @@ impl AVMRunner {
         Ok(outcome)
     }
 
+    #[allow(clippy::too_many_arguments)]
     #[tracing::instrument(skip_all)]
     pub fn call_tracing(
         &mut self,
@@ -170,6 +172,7 @@ impl AVMRunner {
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 #[tracing::instrument(skip(air, prev_data, data, call_results))]
 fn prepare_args(
     air: impl Into<String>,

@@ -28,6 +28,7 @@ use std::collections::HashSet;
 pub trait AirRunner {
     fn new(current_call_id: impl Into<String>) -> Self;
 
+    #[allow(clippy::too_many_arguments)]
     fn call(
         &mut self,
         air: impl Into<String>,

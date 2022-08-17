@@ -95,7 +95,7 @@ pub struct MisMatch<'i> {
 
 /// (fail 1337 "error message")
 /// (fail %last_error%)
-#[derive(Serialize, Debug, PartialEq)]
+#[derive(Serialize, Debug, PartialEq, Eq)]
 pub enum Fail<'i> {
     Scalar(ScalarWithLambda<'i>),
     Literal {
@@ -127,7 +127,7 @@ pub struct FoldStream<'i> {
 }
 
 /// (fold stream_iterable iterator instruction)
-#[derive(Serialize, Debug, PartialEq)]
+#[derive(Serialize, Debug, PartialEq, Eq)]
 pub struct Next<'i> {
     pub iterator: Scalar<'i>,
 }
@@ -141,5 +141,5 @@ pub struct New<'i> {
 }
 
 /// (null)
-#[derive(Serialize, Debug, PartialEq)]
+#[derive(Serialize, Debug, PartialEq, Eq)]
 pub struct Null;
