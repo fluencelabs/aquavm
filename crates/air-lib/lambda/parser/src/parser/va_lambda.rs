@@ -1,5 +1,5 @@
-// auto-generated: "lalrpop 0.19.7"
-// sha3: 517c7e1bd341e1434f9ffcbf3c72151e4b928e7befd38c6ee2e3e734565b
+// auto-generated: "lalrpop 0.19.8"
+// sha3: 517c7e1bd341e104034f9ffcbf3c072151e4b9028e7befd38c6ee2e3e734565b
 use crate::ValueAccessor;
 use crate::parser::lexer::LexerError;
 use crate::parser::lexer::Token;
