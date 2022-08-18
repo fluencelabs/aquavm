@@ -37,7 +37,7 @@ pub(crate) fn try_merge_next_state_as_canon(data_keeper: &mut DataKeeper) -> Mer
     match (prev_state, current_state) {
         (Some(Canon(prev_canon)), Some(Canon(current_canon))) => prepare_canon_result(&prev_canon, &current_canon),
         (Some(Canon(canon)), None) | (None, Some(Canon(canon))) => Ok(MergerCanonResult::CanonResult {
-            stream_elements_pos: canon.stream_elements_pos.clone(),
+            stream_elements_pos: canon.stream_elements_pos,
         }),
         (None, None) => Ok(MergerCanonResult::Empty),
         (prev_state, current_state) => Err(MergeError::incompatible_states(
@@ -54,7 +54,7 @@ fn prepare_canon_result(
 ) -> MergeResult<MergerCanonResult> {
     use crate::merger::errors::CanonResultError;
 
-    if prev_canon_result != current_canon_result {
+    if prev_canon_result.len() != current_canon_result.len() {
         return Err(MergeError::IncorrectCanonResult(
             CanonResultError::CanonResultsIncompatible {
                 prev_canon_result: prev_canon_result.clone(),

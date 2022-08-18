@@ -58,7 +58,7 @@ pub struct Ap<'i> {
 }
 
 /// (canon peer_id $stream #canon_stream)
-#[derive(Serialize, Debug, PartialEq)]
+#[derive(Serialize, Debug, PartialEq, Eq)]
 pub struct Canon<'i> {
     pub peer_pk: CallInstrValue<'i>,
     pub stream: Stream<'i>,

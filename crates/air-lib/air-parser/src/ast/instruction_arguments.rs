@@ -90,7 +90,7 @@ pub enum ApArgument<'i> {
     },
 }
 
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub enum ApResult<'i> {
     #[serde(borrow)]
     Scalar(Scalar<'i>),
@@ -114,7 +114,7 @@ pub enum FoldScalarIterable<'i> {
     EmptyArray,
 }
 
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub enum NewArgument<'i> {
     #[serde(borrow)]
     Scalar(Scalar<'i>),

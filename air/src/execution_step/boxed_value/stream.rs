@@ -24,14 +24,16 @@ use std::fmt::Formatter;
 
 /// Streams are CRDT-like append only data structures. They are guaranteed to have the same order
 /// of values on each peer.
-///
-/// The first Vec represents generations, the second values in a generation. Generation is a set
-/// of values that interpreter obtained from one particle. It means that number of generation on
-/// a peer is equal to number of the interpreter runs in context of one particle. And each set of
-/// obtained values from a current_data that were not present in prev_data becomes a new generation.
 #[derive(Debug, Default, Clone)]
 pub struct Stream {
+    /// The first Vec represents generations, the second values in a generation. Generation is a set
+    /// of values that interpreter obtained from one particle. It means that number of generation on
+    /// a peer is equal to number of the interpreter runs in context of one particle. And each set of
+    /// obtained values from a current_data that were not present in prev_data becomes a new generation.
     values: Vec<Vec<ValueAggregate>>,
+
+    /// This map is intended to support canonicalized stream creation, such streams has
+    /// corresponding value positions in a data and this field is used to create such streams.
     values_by_pos: HashMap<TracePos, (usize, usize)>,
 }
 

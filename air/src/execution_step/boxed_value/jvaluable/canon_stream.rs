@@ -46,7 +46,7 @@ impl JValuable for &CanonStream {
         let select_result = select_from_stream(iter, lambda, exec_ctx)?;
 
         // unwrap is safe here because each value has a tetraplet and a lambda always returns a valid index
-        let resolved_call = self.iter().nth(select_result.tetraplet_idx).unwrap();
+        let resolved_call = self.nth(select_result.tetraplet_idx).unwrap();
         let mut tetraplet = resolved_call.tetraplet.as_ref().clone();
         tetraplet.add_lambda(&format_ast(lambda));
 
@@ -59,7 +59,7 @@ impl JValuable for &CanonStream {
     }
 
     fn into_jvalue(self: Box<Self>) -> JValue {
-        self.as_jvalue()
+        CanonStream::as_jvalue(&self)
     }
 
     fn as_tetraplets(&self) -> RcSecurityTetraplets {

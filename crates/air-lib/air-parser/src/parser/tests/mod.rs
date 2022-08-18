@@ -37,10 +37,8 @@ fn parse(source_code: &str) -> Instruction {
         let lexer = crate::parser::AIRLexer::new(source_code);
         let mut validator = crate::parser::VariableValidator::new();
 
-        let result = parser
+        parser
             .parse(source_code, &mut errors, &mut validator, lexer)
-            .expect("parsing should be successful");
-        println!("parser errors: {:?}", errors);
-        result
+            .expect("parsing should be successful")
     })
 }

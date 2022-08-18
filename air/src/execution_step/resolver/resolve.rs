@@ -95,7 +95,6 @@ pub(crate) fn resolve_variable<'ctx, 'i>(
     use crate::execution_step::boxed_value::StreamJvaluableIngredients;
 
     match variable {
-        // TODO: get rid of to_string
         Variable::Scalar { name, .. } => Ok(ctx.scalars.get_value(name)?.into_jvaluable()),
         Variable::Stream {
             name,

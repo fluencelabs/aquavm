@@ -57,7 +57,7 @@ fn handle_seen_canon(
         stream_elements_pos,
     };
 
-    epilog(&ast_canon.canon_stream.name, stream_with_positions, exec_ctx, trace_ctx);
+    epilog(ast_canon.canon_stream.name, stream_with_positions, exec_ctx, trace_ctx);
     Ok(())
 }
 
@@ -75,7 +75,7 @@ fn handle_unseen_canon(
     }
 
     let stream_with_positions = create_canon_stream_from_name(&ast_canon.stream, exec_ctx)?;
-    epilog(&ast_canon.canon_stream.name, stream_with_positions, exec_ctx, trace_ctx);
+    epilog(ast_canon.canon_stream.name, stream_with_positions, exec_ctx, trace_ctx);
     Ok(())
 }
 
@@ -95,7 +95,9 @@ fn create_canon_stream_from_pos(
         .map(|&position| {
             stream
                 .get_value_by_pos(position)
-                .ok_or_else(|| ExecutionError::Uncatchable(UncatchableError::VariableNotFoundByPos(position)))
+                .ok_or(ExecutionError::Uncatchable(UncatchableError::VariableNotFoundByPos(
+                    position,
+                )))
                 .cloned()
         })
         .collect::<Result<Vec<_>, _>>()?;
