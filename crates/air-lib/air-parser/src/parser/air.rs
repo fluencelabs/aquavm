@@ -1,5 +1,5 @@
-// auto-generated: "lalrpop 0.19.7"
-// sha3: bd63e614fda5f25993172a583a29b4959c0d2cdba69f5e5343f48f72b98ee
+// auto-generated: "lalrpop 0.19.8"
+// sha3: bd630e614fda5f25993172a583a29b4959c0d20cdba69f5e05343f48f72b98ee
 use crate::ast::*;
 use crate::parser::ParserError;
 use crate::parser::VariableValidator;
