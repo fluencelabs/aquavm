@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-use avm_interface::{AVMInterfaceError, ErrorAVMOutcome};
+pub use avm_interface::CallSeDeErrors;
+use avm_interface::ErrorAVMOutcome;
 use marine::IValue;
 use marine::MarineError;
 
@@ -72,17 +73,3 @@ pub enum RunnerError {
     #[error(transparent)]
     CallSeDeErrors(#[from] CallSeDeErrors),
 }
-
-// TODO same variant? it will make the RunnerError type little larger; but it is yet to be measured
-impl From<AVMInterfaceError> for RunnerError {
-    fn from(value: AVMInterfaceError) -> Self {
-        match value {
-            AVMInterfaceError::InterpreterResultDeError(e) => {
-                RunnerError::InterpreterResultDeError(e)
-            }
-            AVMInterfaceError::CallSeDeErrors(e) => RunnerError::CallSeDeErrors(e),
-        }
-    }
-}
-
-pub use avm_interface::CallSeDeErrors;

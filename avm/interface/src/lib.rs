@@ -24,17 +24,6 @@ use serde_json::Error as SerdeError;
 use thiserror::Error as ThisError;
 
 #[derive(Debug, ThisError)]
-pub enum AVMInterfaceError {
-    /// AIR interpreter result deserialization errors.
-    #[error("{0}")]
-    InterpreterResultDeError(String),
-
-    /// This errors are encountered from an call results/params se/de.
-    #[error(transparent)]
-    CallSeDeErrors(#[from] CallSeDeErrors),
-}
-
-#[derive(Debug, ThisError)]
 #[allow(clippy::enum_variant_names)]
 pub enum CallSeDeErrors {
     /// Errors encountered while trying to serialize call results.
