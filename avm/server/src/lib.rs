@@ -27,18 +27,18 @@
 mod avm;
 mod config;
 mod errors;
-mod interface;
 mod runner;
 
 pub use avm::AVM;
 pub use config::AVMConfig;
 pub use errors::AVMError;
-pub use interface::*;
 pub use runner::AVMMemoryStats;
 
+pub use avm_interface::*;
+
 pub mod avm_runner {
-    pub use crate::interface::raw_outcome::RawAVMOutcome;
     pub use crate::runner::AVMRunner;
+    pub use avm_interface::raw_outcome::RawAVMOutcome;
 }
 
 // Re-exports

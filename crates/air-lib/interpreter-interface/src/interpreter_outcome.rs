@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+#[cfg(feature = "marine")]
 use marine_rs_sdk::marine;
 
+#[cfg(feature = "marine")]
 use fluence_it_types::IValue;
 use serde::Deserialize;
 use serde::Serialize;
@@ -23,7 +25,7 @@ use serde::Serialize;
 pub const INTERPRETER_SUCCESS: i64 = 0;
 
 /// Describes a result returned at the end of the interpreter execution_step.
-#[marine]
+#[cfg_attr(feature = "marine", marine)]
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct InterpreterOutcome {
     /// A return code, where INTERPRETER_SUCCESS means success.
@@ -43,6 +45,7 @@ pub struct InterpreterOutcome {
     pub call_requests: Vec<u8>,
 }
 
+#[cfg(feature = "marine")]
 impl InterpreterOutcome {
     pub fn from_ivalue(ivalue: IValue) -> Result<Self, String> {
         const OUTCOME_FIELDS_COUNT: usize = 5;
@@ -73,8 +76,10 @@ impl InterpreterOutcome {
     }
 }
 
+#[cfg(feature = "marine")]
 use fluence_it_types::ne_vec::NEVec;
 
+#[cfg(feature = "marine")]
 fn try_as_record(ivalue: IValue) -> Result<NEVec<IValue>, String> {
     match ivalue {
         IValue::Record(record_values) => Ok(record_values),
@@ -85,6 +90,7 @@ fn try_as_record(ivalue: IValue) -> Result<NEVec<IValue>, String> {
     }
 }
 
+#[cfg(feature = "marine")]
 fn try_as_i64(ivalue: IValue, field_name: &str) -> Result<i64, String> {
     match ivalue {
         IValue::S64(value) => Ok(value),
@@ -92,6 +98,7 @@ fn try_as_i64(ivalue: IValue, field_name: &str) -> Result<i64, String> {
     }
 }
 
+#[cfg(feature = "marine")]
 fn try_as_string(ivalue: IValue, field_name: &str) -> Result<String, String> {
     match ivalue {
         IValue::String(value) => Ok(value),
@@ -99,6 +106,7 @@ fn try_as_string(ivalue: IValue, field_name: &str) -> Result<String, String> {
     }
 }
 
+#[cfg(feature = "marine")]
 fn try_as_byte_vec(ivalue: IValue, field_name: &str) -> Result<Vec<u8>, String> {
     let byte_vec = match ivalue {
         IValue::Array(array) => {
@@ -123,6 +131,7 @@ fn try_as_byte_vec(ivalue: IValue, field_name: &str) -> Result<Vec<u8>, String> 
     Ok(byte_vec)
 }
 
+#[cfg(feature = "marine")]
 fn try_as_string_vec(ivalue: IValue, field_name: &str) -> Result<Vec<String>, String> {
     match ivalue {
         IValue::Array(ar_values) => {

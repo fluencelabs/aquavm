@@ -16,8 +16,8 @@
 
 use super::ExecutionData;
 use crate::run::load_data;
-use air_test_utils::ParticleParameters;
-use avm_server::AnomalyData;
+use avm_data_store::AnomalyData;
+use avm_interface::ParticleParameters;
 
 use anyhow::Context;
 use clap::Parser;

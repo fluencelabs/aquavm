@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#[cfg(feature = "marine")]
 use marine_rs_sdk::marine;
 use serde::Deserialize;
 use serde::Serialize;
@@ -23,7 +24,7 @@ pub type CallRequests = HashMap<u32, CallRequestParams>;
 
 /// Contains arguments of a call instruction and all other necessary information
 /// required for calling a service.
-#[marine]
+#[cfg_attr(feature = "marine", marine)]
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct CallRequestParams {
     /// Id of a service that should be called.
