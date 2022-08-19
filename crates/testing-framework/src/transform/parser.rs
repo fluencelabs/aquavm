@@ -122,7 +122,7 @@ fn parse_sexp_symbol(inp: Input<'_>) -> IResult<Input<'_>, Sexp, ParseError<'_>>
     map(
         recognize(many1_count(alt((
             value((), alphanumeric1),
-            value((), one_of("_.$")),
+            value((), one_of("_.$#")),
         )))),
         Sexp::symbol,
     )(inp)
@@ -151,7 +151,7 @@ fn parse_sexp_call_content(inp: Input<'_>) -> IResult<Input<'_>, Sexp, ParseErro
                     preceded(multispace0, tag(")")),
                 ),
                 alt((
-                    opt(preceded(pair(space1, tag("# ")), parse_annotation)),
+                    opt(preceded(pair(space1, tag("; ")), parse_annotation)),
                     value(None, multispace0),
                 )),
             ),
@@ -217,6 +217,18 @@ mod tests {
     fn test_symbol_lambda() {
         let res = Sexp::from_str("sym_bol.$.blabla");
         assert_eq!(res, Ok(Sexp::symbol("sym_bol.$.blabla")));
+    }
+
+    #[test]
+    fn test_symbol_stream() {
+        let res = Sexp::from_str("$stream");
+        assert_eq!(res, Ok(Sexp::symbol("$stream")));
+    }
+
+    #[test]
+    fn test_symbol_canon() {
+        let res = Sexp::from_str("#canon");
+        assert_eq!(res, Ok(Sexp::symbol("#canon")));
     }
 
     #[test]
@@ -295,7 +307,7 @@ mod tests {
     fn test_call_annotation_newline() {
         let res = Sexp::from_str(
             r#"(seq (call peer_id ("serv" "func") [])
-# result=42
+; result=42
 )"#,
         );
         assert_eq!(
@@ -360,7 +372,7 @@ mod tests {
 
     #[test]
     fn test_call_with_annotation() {
-        let res = Sexp::from_str(r#"(call peer_id ("serv" "func") [a b] var) # result=42 "#);
+        let res = Sexp::from_str(r#"(call peer_id ("serv" "func") [a b] var) ; result=42 "#);
         let expected_annotation =
             AssertionChain::new(vec![AssertionBranch::from_metas(vec![Meta::Result(
                 json!(42),
@@ -384,7 +396,7 @@ mod tests {
     fn test_call_with_annotation2() {
         let res = Sexp::from_str(
             r#"(par
-  (call peerid ("serv" "func") [a b] var) # result=42
+  (call peerid ("serv" "func") [a b] var) ; result=42
   (call peerid2 ("serv" "func") []))"#,
         );
         assert!(res.is_ok(), "{:?}", res);
@@ -484,5 +496,12 @@ mod tests {
         let sexp_str = r#"(par (ap x y) (fold x y (next)))"#;
         let sexp = Sexp::from_str(sexp_str).unwrap();
         assert_eq!(format!("{}", sexp), sexp_str);
+    }
+
+    #[test]
+    fn test_canon_syntax() {
+        let sexp_str = r#"(seq (canon peer_id $stream #canon) (fold #canon i (next)))"#;
+        let res = Sexp::from_str(sexp_str);
+        assert!(res.is_ok(), "{:?}", res);
     }
 }

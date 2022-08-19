@@ -136,8 +136,8 @@ mod tests {
             vec![],
             std::iter::empty(),
             r#"(seq
-(call "peer1" ("service" "func") [] arg) # result=42
-(call "peer2" ("service" "func") [arg]) # result=43
+(call "peer1" ("service" "func") [] arg) ; result=42
+(call "peer2" ("service" "func") [arg]) ; result=43
 )
 "#,
         )
@@ -167,8 +167,8 @@ mod tests {
             vec![],
             std::iter::empty(),
             r#"(seq
-(call "peer1" ("service" "func") [] arg) # result = {"ret_code":12,"result":"ERROR MESSAGE"}
-(call "peer2" ("service" "func") [arg]) # result = 43
+(call "peer1" ("service" "func") [] arg) ; result = {"ret_code":12,"result":"ERROR MESSAGE"}
+(call "peer2" ("service" "func") [arg]) ; result = 43
 )
 "#,
         )

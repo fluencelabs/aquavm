@@ -112,7 +112,7 @@ mod tests {
 
     #[test]
     fn test_translate_call_result() {
-        let script = r#"(call "peer_id" ("service_id" func) []) # result = 42"#;
+        let script = r#"(call "peer_id" ("service_id" func) []) ; result = 42"#;
         let mut tree = Sexp::from_str(script).unwrap();
         let mut transformer = Transformer::new();
         transformer.transform(&mut tree);
@@ -137,10 +137,10 @@ mod tests {
     #[test]
     fn test_translate_multiple_calls() {
         let script = r#"(seq
-   (call peer_id ("service_id" func) [a 11]) # result={"test":"me"}
+   (call peer_id ("service_id" func) [a 11]) ; result={"test":"me"}
    (seq
       (call peer_id ("service_id" func) [b])
-      (call peer_id ("service_id" func) [1]) # result=true
+      (call peer_id ("service_id" func) [1]) ; result=true
 ))"#;
 
         let mut tree = Sexp::from_str(script).unwrap();
@@ -174,10 +174,10 @@ mod tests {
     fn test_peers() {
         // this script is not correct AIR, but our parser handles it
         let script = r#"(seq
-   (call "peer_id1" ("service_id" func) [a 11]) # result={"test":"me"}
+   (call "peer_id1" ("service_id" func) [a 11]) ; result={"test":"me"}
    (seq
       (call "peer_id2" ("service_id" func) [b])
-      (call "peer_id1" ("service_id" func) [1]) # result=true
+      (call "peer_id1" ("service_id" func) [1]) ; result=true
       (call peer_id3 ("service_id" func) [b])
 ))"#;
 
