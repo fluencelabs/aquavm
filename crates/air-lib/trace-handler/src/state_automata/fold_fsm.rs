@@ -69,8 +69,8 @@ impl FoldFSM {
         let prev_pos = data_keeper.new_to_prev_pos.get_by_left(&value_pos);
         let current_pos = data_keeper.new_to_current_pos.get_by_left(&value_pos);
 
-        let prev_lore = prev_pos.map(|pos| self.prev_fold.lore.remove(&pos)).flatten();
-        let current_lore = current_pos.map(|pos| self.current_fold.lore.remove(&pos)).flatten();
+        let prev_lore = prev_pos.and_then(|pos| self.prev_fold.lore.remove(pos));
+        let current_lore = current_pos.and_then(|pos| self.current_fold.lore.remove(pos));
 
         self.prepare(prev_lore, current_lore, value_pos, data_keeper)
     }
