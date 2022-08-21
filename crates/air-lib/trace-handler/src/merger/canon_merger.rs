@@ -15,6 +15,8 @@
  */
 
 use super::*;
+use crate::merger::errors::CanonResultError;
+use bimap::BiHashMap;
 
 const EXPECTED_STATE_NAME: &str = "canon";
 
@@ -25,6 +27,7 @@ pub enum MergerCanonResult {
 
     /// There was a state in at least one of the contexts. If there were two states in
     /// both contexts, they were successfully merged.
+    /// Positions correspond to a new data trace.
     CanonResult { stream_elements_pos: Vec<TracePos> },
 }
 
@@ -35,10 +38,13 @@ pub(crate) fn try_merge_next_state_as_canon(data_keeper: &mut DataKeeper) -> Mer
     let current_state = data_keeper.current_slider_mut().next_state();
 
     match (prev_state, current_state) {
-        (Some(Canon(prev_canon)), Some(Canon(current_canon))) => prepare_canon_result(&prev_canon, &current_canon),
-        (Some(Canon(canon)), None) | (None, Some(Canon(canon))) => Ok(MergerCanonResult::CanonResult {
-            stream_elements_pos: canon.stream_elements_pos,
-        }),
+        (Some(Canon(prev_canon)), Some(Canon(current_canon))) => {
+            prepare_both_canon_result(&prev_canon, &current_canon, data_keeper)
+        }
+        (Some(Canon(prev_canon)), None) => prepare_single_canon_result(&prev_canon, &data_keeper.new_to_prev_pos),
+        (None, Some(Canon(current_canon))) => {
+            prepare_single_canon_result(&current_canon, &data_keeper.new_to_current_pos)
+        }
         (None, None) => Ok(MergerCanonResult::Empty),
         (prev_state, current_state) => Err(MergeError::incompatible_states(
             prev_state,
@@ -48,22 +54,76 @@ pub(crate) fn try_merge_next_state_as_canon(data_keeper: &mut DataKeeper) -> Mer
     }
 }
 
-fn prepare_canon_result(
+fn prepare_both_canon_result(
     prev_canon_result: &CanonResult,
     current_canon_result: &CanonResult,
+    data_keeper: &DataKeeper,
 ) -> MergeResult<MergerCanonResult> {
-    use crate::merger::errors::CanonResultError;
+    check_canon_results(prev_canon_result, current_canon_result, data_keeper)
+        .map_err(MergeError::IncorrectCanonResult)?;
+    prepare_single_canon_result(prev_canon_result, &data_keeper.new_to_prev_pos)
+}
 
-    if prev_canon_result.len() != current_canon_result.len() {
-        return Err(MergeError::IncorrectCanonResult(
-            CanonResultError::CanonResultsIncompatible {
-                prev_canon_result: prev_canon_result.clone(),
-                current_canon_result: current_canon_result.clone(),
-            },
+fn prepare_single_canon_result(
+    canon_result: &CanonResult,
+    new_to_other_pos: &BiHashMap<TracePos, TracePos>,
+) -> MergeResult<MergerCanonResult> {
+    let new_positions = canon_result
+        .stream_elements_pos
+        .iter()
+        .map(|pos| {
+            new_to_other_pos
+                .get_by_right(pos)
+                .cloned()
+                .ok_or_else(|| CanonResultError::not_met_position(canon_result.clone(), *pos))
+        })
+        .collect::<Result<Vec<_>, _>>()?;
+
+    Ok(MergerCanonResult::CanonResult {
+        stream_elements_pos: new_positions,
+    })
+}
+
+fn check_canon_results(
+    prev_canon_result: &CanonResult,
+    current_canon_result: &CanonResult,
+    data_keeper: &DataKeeper,
+) -> Result<(), CanonResultError> {
+    if prev_canon_result.stream_elements_pos.len() != current_canon_result.stream_elements_pos.len() {
+        return Err(CanonResultError::different_lens(
+            prev_canon_result.clone(),
+            current_canon_result.clone(),
         ));
     }
 
-    Ok(MergerCanonResult::CanonResult {
-        stream_elements_pos: prev_canon_result.stream_elements_pos.clone(),
-    })
+    let prev_slider = data_keeper.prev_slider();
+    let current_slider = data_keeper.current_slider();
+    for (position, (prev_idx, current_idx)) in prev_canon_result
+        .stream_elements_pos
+        .iter()
+        .zip(current_canon_result.stream_elements_pos.iter())
+        .enumerate()
+    {
+        let prev_state = prev_slider.state_at_position(*prev_idx);
+        let current_state = current_slider.state_at_position(*current_idx);
+
+        match (prev_state, current_state) {
+            (Some(ExecutedState::Call(prev_call_result)), Some(ExecutedState::Call(current_call_result)))
+                if prev_call_result == current_call_result =>
+            {
+                continue;
+            }
+            _ => {
+                return Err(CanonResultError::incompatible_state(
+                    prev_canon_result.clone(),
+                    current_canon_result.clone(),
+                    prev_state.cloned(),
+                    current_state.cloned(),
+                    position,
+                ))
+            }
+        }
+    }
+
+    Ok(())
 }

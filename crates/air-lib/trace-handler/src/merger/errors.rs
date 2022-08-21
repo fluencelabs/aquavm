@@ -79,11 +79,25 @@ pub enum CallResultError {
 
 #[derive(ThisError, Debug)]
 pub enum CanonResultError {
-    /// Error occurred when Ap results contains more then 1 generation in destination.
-    #[error("canon results are incompatible: {prev_canon_result:?} != {current_canon_result:?}")]
-    CanonResultsIncompatible {
+    #[error("canon results have different lens: {prev_canon_result:?} != {current_canon_result:?}")]
+    LensNotEqual {
         prev_canon_result: CanonResult,
         current_canon_result: CanonResult,
+    },
+
+    #[error("canon results {prev_canon_result:?} {current_canon_result:?} at position {position} points to incompatible execution states: {prev_state:?} {current_state:?}")]
+    IncompatibleState {
+        prev_canon_result: CanonResult,
+        current_canon_result: CanonResult,
+        prev_state: Option<ExecutedState>,
+        current_state: Option<ExecutedState>,
+        position: usize,
+    },
+
+    #[error("position {position} from canon result {canon_result:?} hasn't been met yet")]
+    NotMetPosition {
+        canon_result: CanonResult,
+        position: TracePos,
     },
 }
 
@@ -149,6 +163,35 @@ impl CallResultError {
         let call_result_error = CallResultError::DataNotMatchAIR { air_type, data_value };
 
         MergeError::IncorrectCallResult(call_result_error)
+    }
+}
+
+impl CanonResultError {
+    pub(crate) fn different_lens(prev_canon_result: CanonResult, current_canon_result: CanonResult) -> Self {
+        Self::LensNotEqual {
+            prev_canon_result,
+            current_canon_result,
+        }
+    }
+
+    pub(crate) fn incompatible_state(
+        prev_canon_result: CanonResult,
+        current_canon_result: CanonResult,
+        prev_state: Option<ExecutedState>,
+        current_state: Option<ExecutedState>,
+        position: usize,
+    ) -> Self {
+        Self::IncompatibleState {
+            prev_canon_result,
+            current_canon_result,
+            prev_state,
+            current_state,
+            position,
+        }
+    }
+
+    pub(crate) fn not_met_position(canon_result: CanonResult, position: TracePos) -> Self {
+        Self::NotMetPosition { canon_result, position }
     }
 }
 

@@ -47,7 +47,6 @@ use position_mapping::PreparationScheme;
 
 type MergeResult<T> = std::result::Result<T, MergeError>;
 
-use super::data_keeper::DataPositions;
 use super::data_keeper::KeeperError;
 use super::DataKeeper;
 

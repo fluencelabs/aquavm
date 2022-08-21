@@ -30,7 +30,6 @@ pub(super) use fold_fsm::FoldFSM;
 pub(super) use fsm_queue::FSMKeeper;
 pub(super) use par_fsm::ParFSM;
 
-use super::data_keeper::DataPositions;
 use super::data_keeper::KeeperError;
 use super::merger::MergerParResult;
 use super::DataKeeper;

@@ -15,7 +15,6 @@
  */
 
 use super::DataKeeper;
-use super::DataPositions;
 
 pub(super) enum PreparationScheme {
     Previous,
@@ -27,19 +26,21 @@ pub(super) enum PreparationScheme {
 pub(super) fn prepare_positions_mapping(scheme: PreparationScheme, data_keeper: &mut DataKeeper) {
     use PreparationScheme::*;
 
+    let new_pos = data_keeper.result_trace_next_pos();
     // it's safe to sub 1 from positions iff scheme was set correctly
-    let prev_pos = match scheme {
-        Previous | Both => Some(data_keeper.prev_slider().position() - 1),
-        Current => None,
+    let prev_pos = data_keeper.prev_slider().position() - 1;
+    let current_pos = data_keeper.current_slider().position() - 1;
+
+    match scheme {
+        Previous => {
+            data_keeper.new_to_prev_pos.insert(new_pos, prev_pos);
+        }
+        Current => {
+            data_keeper.new_to_current_pos.insert(new_pos, current_pos);
+        }
+        Both => {
+            data_keeper.new_to_prev_pos.insert(new_pos, prev_pos);
+            data_keeper.new_to_current_pos.insert(new_pos, current_pos);
+        }
     };
-
-    let current_pos = match scheme {
-        Current | Both => Some(data_keeper.current_slider().position() - 1),
-        Previous => None,
-    };
-
-    let data_positions = DataPositions { prev_pos, current_pos };
-
-    let trace_pos = data_keeper.result_trace_next_pos();
-    data_keeper.new_to_old_pos.insert(trace_pos, data_positions);
 }
