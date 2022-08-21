@@ -27,18 +27,20 @@ pub(super) fn prepare_positions_mapping(scheme: PreparationScheme, data_keeper: 
     use PreparationScheme::*;
 
     let new_pos = data_keeper.result_trace_next_pos();
-    // it's safe to sub 1 from positions iff scheme was set correctly
-    let prev_pos = data_keeper.prev_slider().position() - 1;
-    let current_pos = data_keeper.current_slider().position() - 1;
 
+    // it's safe to sub 1 from positions here iff scheme was set correctly
     match scheme {
         Previous => {
+            let prev_pos = data_keeper.prev_slider().position() - 1;
             data_keeper.new_to_prev_pos.insert(new_pos, prev_pos);
         }
         Current => {
+            let current_pos = data_keeper.current_slider().position() - 1;
             data_keeper.new_to_current_pos.insert(new_pos, current_pos);
         }
         Both => {
+            let prev_pos = data_keeper.prev_slider().position() - 1;
+            let current_pos = data_keeper.current_slider().position() - 1;
             data_keeper.new_to_prev_pos.insert(new_pos, prev_pos);
             data_keeper.new_to_current_pos.insert(new_pos, current_pos);
         }

@@ -67,9 +67,9 @@ impl Stream {
             return Err(CatchableError::StreamDontHaveSuchGeneration(self.clone(), generation).into());
         }
 
-        self.values_by_pos
-            .insert(value.trace_pos, (generation, self.values.len()));
-        self.values[generation].push(value);
+        let values = &mut self.values[generation];
+        self.values_by_pos.insert(value.trace_pos, (generation, values.len()));
+        values.push(value);
         Ok(generation as u32)
     }
 

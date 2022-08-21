@@ -16,6 +16,9 @@
 
 use air_test_utils::prelude::*;
 
+use fstrings::f;
+use fstrings::format_args_f;
+
 #[test]
 fn canon_moves_execution_flow() {
     let mut vm = create_avm(echo_call_service(), "A");
@@ -48,12 +51,9 @@ fn basic_canon() {
                     (fold Iterable i
                         (seq
                             (call "A" ("" "") [i] $stream)
-                            (next i)
-                        )
-                    )
-                    (canon "A" $stream #canon_stream)
-                )
-            )"#;
+                            (next i)))
+                    (canon "A" $stream #canon_stream)))
+                    "#;
 
     let result = checked_call_vm!(set_variable_vm, <_>::default(), script, "", "");
     let result = checked_call_vm!(vm, <_>::default(), script, "", result.data);
@@ -61,4 +61,124 @@ fn basic_canon() {
 
     let expected_state = executed_state::canon(vec![1.into(), 2.into(), 3.into(), 4.into(), 5.into()]);
     assert_eq!(actual_state, &expected_state);
+}
+
+#[test]
+fn canon_fixes_stream_correct() {
+    let peer_id_1 = "peer_id_1";
+    let mut vm_1 = create_avm(echo_call_service(), peer_id_1);
+    let peer_id_2 = "peer_id_2";
+    let mut vm_2 = create_avm(echo_call_service(), peer_id_2);
+    let peer_id_3 = "peer_id_3";
+    let mut vm_3 = create_avm(echo_call_service(), peer_id_3);
+    let peer_id_4 = "peer_id_4";
+    let mut vm_4 = create_avm(echo_call_service(), peer_id_4);
+
+    let script = f!(r#"
+        (seq
+            (par
+                (call "{peer_id_1}" ("" "") [1] $stream)
+                (par
+                     (call "{peer_id_2}" ("" "") [2] $stream)
+                     (call "{peer_id_3}" ("" "") [3] $stream)))
+            (seq
+                (call "{peer_id_4}" ("" "") [4])
+                (seq
+                     (canon "{peer_id_3}" $stream #canon_stream)
+                     (par
+                         (call "{peer_id_3}" ("" "") [#canon_stream])
+                         (call "{peer_id_1}" ("" "") [#canon_stream])))))
+            "#);
+
+    let vm_1_result_1 = checked_call_vm!(vm_1, <_>::default(), &script, "", "");
+    let vm_2_result = checked_call_vm!(vm_2, <_>::default(), &script, "", "");
+    let vm_3_result_1 = checked_call_vm!(vm_3, <_>::default(), &script, "", vm_2_result.data);
+    let vm_4_result = checked_call_vm!(vm_4, <_>::default(), &script, "", vm_3_result_1.data.clone());
+    let vm_3_result_2 = checked_call_vm!(vm_3, <_>::default(), &script, vm_3_result_1.data, vm_4_result.data);
+    let actual_vm_3_result_2_trace = trace_from_result(&vm_3_result_2);
+    let expected_vm_3_result_2_trace = vec![
+        executed_state::par(1, 3),
+        executed_state::request_sent_by(peer_id_2),
+        executed_state::par(1, 1),
+        executed_state::stream_number(2, 0),
+        executed_state::stream_number(3, 1),
+        executed_state::scalar_number(4),
+        executed_state::canon(vec![3.into(), 4.into()]),
+        executed_state::par(1, 1),
+        executed_state::scalar(json!([2, 3])),
+        executed_state::request_sent_by(peer_id_3),
+    ];
+    assert_eq!(actual_vm_3_result_2_trace, expected_vm_3_result_2_trace);
+
+    let vm_1_result_2 = checked_call_vm!(vm_1, <_>::default(), script, vm_1_result_1.data, vm_3_result_2.data);
+    let vm_1_result_2_trace = trace_from_result(&vm_1_result_2);
+    let expected_vm_1_result_2_trace = vec![
+        executed_state::par(1, 3),
+        executed_state::stream_number(1, 0),
+        executed_state::par(1, 1),
+        executed_state::stream_number(2, 1),
+        executed_state::stream_number(3, 1),
+        executed_state::scalar_number(4),
+        executed_state::canon(vec![3.into(), 4.into()]),
+        executed_state::par(1, 1),
+        executed_state::scalar(json!([2, 3])),
+        executed_state::scalar(json!([2, 3])),
+    ];
+    assert_eq!(vm_1_result_2_trace, expected_vm_1_result_2_trace);
+}
+
+#[test]
+fn canon_gates() {
+    let peer_id_1 = "peer_id_1";
+    let mut vm_1 = create_avm(set_variable_call_service(json!([1, 2, 3, 4, 5])), peer_id_1);
+
+    let peer_id_2 = "peer_id_2";
+    let mut vm_2 = create_avm(echo_call_service(), peer_id_2);
+
+    let peer_id_3 = "peer_id_3";
+    let stop_len_count = 2;
+    let vm_3_call_service: CallServiceClosure = Box::new(move |params: CallRequestParams| -> CallServiceResult {
+        let value = params.arguments[0].as_array().unwrap().len();
+        if value >= stop_len_count {
+            CallServiceResult::ok(json!(true))
+        } else {
+            CallServiceResult::ok(json!(false))
+        }
+    });
+    let mut vm_3 = create_avm(vm_3_call_service, peer_id_3);
+
+    let script = f!(r#"
+        (seq
+          (seq
+            (call "{peer_id_1}" ("" "") [] iterable)
+            (fold iterable iterator
+              (par
+                (call "{peer_id_2}" ("" "") [iterator] $stream)
+                (next iterator))))
+          (new $tmp
+            (fold $stream s
+              (xor
+                (seq
+                  (ap s $tmp)
+                  (seq
+                    (seq
+                      (canon "{peer_id_3}" $tmp #t)
+                      (call "{peer_id_3}" ("" "") [#t] x))
+                    (match x true
+                      (call "{peer_id_3}" ("" "") [#t]))))
+                (next s)))))
+            "#);
+
+    let vm_1_result = checked_call_vm!(vm_1, <_>::default(), &script, "", "");
+    let vm_2_result = checked_call_vm!(vm_2, <_>::default(), &script, "", vm_1_result.data);
+    let vm_3_result = checked_call_vm!(vm_3, <_>::default(), &script, "", vm_2_result.data);
+
+    let actual_trace = trace_from_result(&vm_3_result);
+    let fold = match &actual_trace[11.into()] {
+        ExecutedState::Fold(fold_result) => fold_result,
+        _ => unreachable!(),
+    };
+
+    // fold should stop at the correspond len
+    assert_eq!(fold.lore.len(), stop_len_count);
 }
