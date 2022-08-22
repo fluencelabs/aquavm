@@ -35,7 +35,7 @@ pub(crate) fn set_local_result<'i>(
     let result_value = executed_result.result.clone();
     match output {
         CallOutputValue::Scalar(scalar) => {
-            exec_ctx.scalars.set_value(scalar.name, executed_result)?;
+            exec_ctx.scalars.set_scalar_value(scalar.name, executed_result)?;
             Ok(CallResult::executed_scalar(result_value))
         }
         CallOutputValue::Stream(stream) => {
@@ -59,7 +59,7 @@ pub(crate) fn set_result_from_value<'i>(
     match (output, value) {
         (CallOutputValue::Scalar(scalar), Value::Scalar(value)) => {
             let result = ValueAggregate::new(value, tetraplet, trace_pos);
-            exec_ctx.scalars.set_value(scalar.name, result)?;
+            exec_ctx.scalars.set_scalar_value(scalar.name, result)?;
         }
         (CallOutputValue::Stream(stream), Value::Stream { value, generation }) => {
             let result = ValueAggregate::new(value, tetraplet, trace_pos);

@@ -27,6 +27,7 @@ use air_lambda_ast::LambdaAST;
 
 use serde::Deserialize;
 use serde::Serialize;
+use crate::ast::CanonStreamWithLambda;
 
 // TODO: rename CallInstrValue, since it'd used by the canon instruction
 #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
@@ -82,12 +83,7 @@ pub enum ApArgument<'i> {
     Boolean(bool),
     EmptyArray,
     Scalar(ScalarWithLambda<'i>),
-    // it's impossible to turn canon stream into a scalar because of tetraplets
-    CanonStream {
-        stream_name: &'i str,
-        lambda: LambdaAST<'i>,
-        position: usize,
-    },
+    CanonStream(CanonStreamWithLambda<'i>),
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
@@ -120,4 +116,6 @@ pub enum NewArgument<'i> {
     Scalar(Scalar<'i>),
     #[serde(borrow)]
     Stream(Stream<'i>),
+    #[serde(borrow)]
+    CanonStream(CanonStream<'i>),
 }

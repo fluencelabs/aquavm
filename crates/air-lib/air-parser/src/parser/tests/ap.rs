@@ -151,18 +151,39 @@ fn ap_with_canon_stream() {
     let canon_stream = "#canon_stream";
     let scalar = "scalar";
     let source_code = f!(r#"
+        (ap {canon_stream} {scalar})
+    "#);
+
+    let actual = parse(&source_code);
+    let expected = ap(
+        ApArgument::CanonStream(CanonStreamWithLambda::new(
+            canon_stream,
+            None,
+            13,
+        )),
+        ApResult::Scalar(Scalar::new(scalar, 27)),
+    );
+
+    assert_eq!(actual, expected);
+}
+
+#[test]
+fn ap_with_canon_stream_with_lambda() {
+    let canon_stream = "#canon_stream";
+    let scalar = "scalar";
+    let source_code = f!(r#"
         (ap {canon_stream}.$.[0] {scalar})
     "#);
 
     let actual = parse(&source_code);
     let expected = ap(
-        ApArgument::CanonStream {
-            stream_name: canon_stream,
-            lambda: unsafe {
+        ApArgument::CanonStream(CanonStreamWithLambda::new(
+            canon_stream,
+            Some(unsafe {
                 LambdaAST::new_unchecked(vec![ValueAccessor::ArrayAccess { idx: 0 }])
-            },
-            position: 13,
-        },
+            }),
+            13,
+        )),
         ApResult::Scalar(Scalar::new(scalar, 33)),
     );
 

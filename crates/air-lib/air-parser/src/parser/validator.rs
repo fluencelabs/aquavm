@@ -144,13 +144,9 @@ impl<'i> VariableValidator<'i> {
                 self.met_variable_name(scalar.name, span);
                 self.met_maybe_lambda(&scalar.lambda, span);
             }
-            ApArgument::CanonStream {
-                stream_name,
-                lambda,
-                ..
-            } => {
-                self.met_variable_name(stream_name, span);
-                self.met_lambda(lambda, span);
+            ApArgument::CanonStream(canon_stream) => {
+                self.met_variable_name(canon_stream.name, span);
+                self.met_maybe_lambda(&canon_stream.lambda, span);
             }
         }
         self.met_variable_name_definition(ap.result.name(), span);

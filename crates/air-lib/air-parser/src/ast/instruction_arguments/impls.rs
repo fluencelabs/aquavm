@@ -25,6 +25,7 @@ impl<'i> NewArgument<'i> {
         match self {
             Self::Scalar(scalar) => scalar.name,
             Self::Stream(stream) => stream.name,
+            Self::CanonStream(canon_stream) => canon_stream.name,
         }
     }
 }

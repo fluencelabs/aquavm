@@ -50,10 +50,7 @@ pub(crate) fn construct_canon_stream_iterable_value<'ctx>(
     ast_canon_stream: &ast::CanonStream<'ctx>,
     exec_ctx: &ExecutionCtx<'ctx>,
 ) -> ExecutionResult<FoldIterableScalar> {
-    let canon_stream = exec_ctx
-        .streams
-        .get_canon(ast_canon_stream.name)
-        .ok_or_else(|| CatchableError::VariableNotFound(ast_canon_stream.name.to_string()))?;
+    let canon_stream = exec_ctx.scalars.get_canon_stream(ast_canon_stream.name)?;
     // TODO: this one is a relatively long operation and will be refactored in Boxed Value
     let iterable_ingredients = CanonStreamIterableIngredients::init(canon_stream.clone());
     let iterable = Box::new(iterable_ingredients);

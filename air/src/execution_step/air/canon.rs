@@ -51,14 +51,13 @@ fn handle_seen_canon(
     exec_ctx: &mut ExecutionCtx<'_>,
     trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<()> {
-    let canon_stream = create_canon_stream_from_pos(&stream_elements_pos, &ast_canon.stream, exec_ctx)?;
+    let canon_stream = create_canon_stream_from_pos(&stream_elements_pos, ast_canon, exec_ctx)?;
     let stream_with_positions = StreamWithPositions {
         canon_stream,
         stream_elements_pos,
     };
 
-    epilog(ast_canon.canon_stream.name, stream_with_positions, exec_ctx, trace_ctx);
-    Ok(())
+    epilog(ast_canon.canon_stream.name, stream_with_positions, exec_ctx, trace_ctx)
 }
 
 fn handle_unseen_canon(
@@ -74,21 +73,23 @@ fn handle_unseen_canon(
         return Ok(());
     }
 
-    let stream_with_positions = create_canon_stream_from_name(&ast_canon.stream, exec_ctx)?;
-    epilog(ast_canon.canon_stream.name, stream_with_positions, exec_ctx, trace_ctx);
-    Ok(())
+    let stream_with_positions = create_canon_stream_from_name(ast_canon, exec_ctx)?;
+    epilog(ast_canon.canon_stream.name, stream_with_positions, exec_ctx, trace_ctx)
 }
 
 fn create_canon_stream_from_pos(
     stream_elements_pos: &[TracePos],
-    stream: &ast::Stream<'_>,
+    ast_canon: &ast::Canon<'_>,
     exec_ctx: &ExecutionCtx<'_>,
 ) -> ExecutionResult<CanonStream> {
-    let stream = exec_ctx.streams.get(stream.name, stream.position).ok_or_else(|| {
-        ExecutionError::Catchable(Rc::new(CatchableError::StreamsForCanonNotFound(
-            stream.name.to_string(),
-        )))
-    })?;
+    let stream = exec_ctx
+        .streams
+        .get(ast_canon.stream.name, ast_canon.stream.position)
+        .ok_or_else(|| {
+            ExecutionError::Catchable(Rc::new(CatchableError::StreamsForCanonNotFound(
+                ast_canon.stream.name.to_string(),
+            )))
+        })?;
 
     let values = stream_elements_pos
         .iter()
@@ -102,7 +103,7 @@ fn create_canon_stream_from_pos(
         })
         .collect::<Result<Vec<_>, _>>()?;
 
-    let canon_stream = CanonStream::new(values);
+    let canon_stream = CanonStream::new(values, ast_canon.peer_pk.to_string(), ast_canon.stream.position.into());
     Ok(canon_stream)
 }
 
@@ -111,14 +112,18 @@ fn epilog(
     stream_with_positions: StreamWithPositions,
     exec_ctx: &mut ExecutionCtx<'_>,
     trace_ctx: &mut TraceHandler,
-) {
+) -> ExecutionResult<()> {
     let StreamWithPositions {
         canon_stream,
         stream_elements_pos,
     } = stream_with_positions;
 
-    exec_ctx.streams.add_canon(canon_stream_name, canon_stream);
+    exec_ctx
+        .scalars
+        .set_canon_value(canon_stream_name, canon_stream)
+        .map(|_| ())?;
     trace_ctx.meet_canon_end(CanonResult::new(stream_elements_pos));
+    Ok(())
 }
 
 struct StreamWithPositions {
@@ -127,15 +132,22 @@ struct StreamWithPositions {
 }
 
 fn create_canon_stream_from_name(
-    stream: &ast::Stream<'_>,
+    ast_canon: &ast::Canon<'_>,
     exec_ctx: &ExecutionCtx<'_>,
 ) -> ExecutionResult<StreamWithPositions> {
-    let stream = exec_ctx.streams.get(stream.name, stream.position).ok_or_else(|| {
-        ExecutionError::Catchable(Rc::new(CatchableError::StreamsForCanonNotFound(
-            stream.name.to_string(),
-        )))
-    })?;
-    let canon_stream = CanonStream::from_stream(stream);
+    let stream = exec_ctx
+        .streams
+        .get(ast_canon.stream.name, ast_canon.stream.position)
+        .ok_or_else(|| {
+            ExecutionError::Catchable(Rc::new(CatchableError::StreamsForCanonNotFound(
+                ast_canon.stream.name.to_string(),
+            )))
+        })?;
+    let canon_stream = CanonStream::from_stream(
+        stream,
+        ast_canon.peer_pk.to_string(),
+        ast_canon.canon_stream.position.into(),
+    );
     let stream_elements_pos = stream
         .iter(Generation::Last)
         .unwrap()

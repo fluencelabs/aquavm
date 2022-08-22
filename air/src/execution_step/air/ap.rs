@@ -83,7 +83,7 @@ fn update_context<'ctx>(
     exec_ctx: &mut ExecutionCtx<'ctx>,
 ) -> ExecutionResult<Option<u32>> {
     match ap_result_type {
-        ApResult::Scalar(scalar) => exec_ctx.scalars.set_value(scalar.name, result).map(|_| None),
+        ApResult::Scalar(scalar) => exec_ctx.scalars.set_scalar_value(scalar.name, result).map(|_| None),
         ApResult::Stream(stream) => {
             let generation = ap_result_to_generation(merger_ap_result);
             exec_ctx

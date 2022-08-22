@@ -54,6 +54,22 @@ fn parse_new_with_stream() {
 }
 
 #[test]
+fn parse_new_with_canon_stream() {
+    let source_code = r#"(new #canon_stream
+            (null)
+        )
+        "#;
+
+    let instruction = parse(source_code);
+    let expected = new(
+        NewArgument::CanonStream(CanonStream::new("#canon_stream", 5)),
+        null(),
+        Span::new(0, 47),
+    );
+    assert_eq!(instruction, expected);
+}
+
+#[test]
 fn iterators_cant_be_restricted() {
     let source_code = r#"
         (seq
@@ -88,30 +104,4 @@ fn iterators_cant_be_restricted() {
         parser_error,
         ParserError::IteratorRestrictionNotAllowed { .. }
     ));
-}
-
-#[test]
-fn canon_streams_cant_be_restricted() {
-    let source_code = r#"
-        (seq
-            (seq
-                (call "" ("" "") [] $stream)
-                (canon "" $stream #canon_stream)
-            )
-            (new #canon_stream
-                (null)
-            )
-        )
-        "#;
-
-    let lexer = crate::AIRLexer::new(source_code);
-
-    let parser = crate::AIRParser::new();
-    let mut errors = Vec::new();
-    let mut validator = crate::parser::VariableValidator::new();
-    parser
-        .parse(source_code, &mut errors, &mut validator, lexer)
-        .expect("parser shouldn't fail");
-
-    assert!(!errors.is_empty());
 }

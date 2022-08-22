@@ -16,6 +16,7 @@
 
 use super::*;
 use crate::merger::errors::CanonResultError;
+
 use bimap::BiHashMap;
 
 const EXPECTED_STATE_NAME: &str = "canon";

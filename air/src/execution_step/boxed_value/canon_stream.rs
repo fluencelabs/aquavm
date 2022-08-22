@@ -20,45 +20,71 @@ use crate::execution_step::Generation;
 use crate::JValue;
 
 use std::fmt::Formatter;
+use std::rc::Rc;
 
+/// Canon stream is a value type lies between a scalar and a stream, it has the same algebra as
+/// scalars, and represent a stream fixed at some execution point.
 #[derive(Debug, Default, Clone)]
-pub struct CanonStream(Vec<ValueAggregate>);
+pub struct CanonStream {
+    values: Vec<ValueAggregate>,
+    // tetraplet is needed to handle adding canon streams as a whole to a stream.
+    tetraplet: Rc<SecurityTetraplet>,
+    #[allow(dead_code)]
+    position: TracePos,
+}
 
 impl CanonStream {
-    pub(crate) fn new(values: Vec<ValueAggregate>) -> Self {
-        Self(values)
+    pub(crate) fn new(values: Vec<ValueAggregate>, peer_pk: String, position: TracePos) -> Self {
+        // tetraplet is comprised only from peer_pk here
+        let tetraplet = SecurityTetraplet::new(peer_pk, "", "", "");
+        Self {
+            values,
+            tetraplet: Rc::new(tetraplet),
+            position,
+        }
     }
 
-    pub(crate) fn from_stream(stream: &Stream) -> Self {
+    pub(crate) fn from_stream(stream: &Stream, peer_pk: String, position: TracePos) -> Self {
         let values = stream.iter(Generation::Last).unwrap().cloned().collect::<Vec<_>>();
-        CanonStream(values)
+        let tetraplet = SecurityTetraplet::new(peer_pk, "", "", "");
+        Self {
+            values,
+            tetraplet: Rc::new(tetraplet),
+            position,
+        }
     }
 
     pub(crate) fn len(&self) -> usize {
-        self.0.len()
+        self.values.len()
     }
 
     pub(crate) fn is_empty(&self) -> bool {
-        self.0.is_empty()
+        self.values.is_empty()
     }
 
     pub(crate) fn as_jvalue(&self) -> JValue {
         use std::ops::Deref;
 
         // TODO: this clone will be removed after boxed values
-        let jvalue_array = self.0.iter().map(|r| r.result.deref().clone()).collect::<Vec<_>>();
+        let jvalue_array = self.values.iter().map(|r| r.result.deref().clone()).collect::<Vec<_>>();
         JValue::Array(jvalue_array)
     }
 
     pub(crate) fn iter(&self) -> impl ExactSizeIterator<Item = &ValueAggregate> {
-        self.0.iter()
+        self.values.iter()
     }
 
     pub(crate) fn nth(&self, idx: usize) -> Option<&ValueAggregate> {
-        self.0.get(idx)
+        self.values.get(idx)
+    }
+
+    pub(crate) fn tetraplet(&self) -> &Rc<SecurityTetraplet> {
+        &self.tetraplet
     }
 }
 
+use air_interpreter_data::TracePos;
+use polyplets::SecurityTetraplet;
 use std::fmt;
 
 impl fmt::Display for CanonStream {

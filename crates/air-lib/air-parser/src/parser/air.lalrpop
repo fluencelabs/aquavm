@@ -172,6 +172,7 @@ CallInstrValue: CallInstrValue<'input> = {
 NewArgument: NewArgument<'input> = {
     <scalar:Scalar> => NewArgument::Scalar(Scalar::new(scalar.0, scalar.1)),
     <stream:Stream> => NewArgument::Stream(Stream::new(stream.0, stream.1)),
+    <canon_stream:CanonStream> => NewArgument::CanonStream(CanonStream::new(canon_stream.0, canon_stream.1)),
 }
 
 Number: Number = {
@@ -211,11 +212,8 @@ ApArgument: ApArgument<'input> = {
     "[" "]" => ApArgument::EmptyArray,
     <scalar:Scalar> => ApArgument::Scalar(ScalarWithLambda::new(scalar.0, None, scalar.1)),
     <scalar:ScalarWithLambda> => ApArgument::Scalar(ScalarWithLambda::new(scalar.0, Some(scalar.1), scalar.2)),
-    <canon_stream:CanonStreamWithLambda> => ApArgument::CanonStream {
-        stream_name: canon_stream.0,
-        lambda: canon_stream.1,
-        position: canon_stream.2
-    },
+    <canon_stream:CanonStream> => ApArgument::CanonStream(CanonStreamWithLambda::new(canon_stream.0, None, canon_stream.1)),
+    <canon_stream:CanonStreamWithLambda> => ApArgument::CanonStream(CanonStreamWithLambda::new(canon_stream.0, Some(canon_stream.1), canon_stream.2)),
 }
 
 StreamArgument: Stream<'input> = {

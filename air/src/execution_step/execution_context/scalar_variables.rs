@@ -14,20 +14,17 @@
  * limitations under the License.
  */
 
+mod values_sparse_matrix;
+
+use crate::execution_step::boxed_value::CanonStream;
 use crate::execution_step::boxed_value::ScalarRef;
 use crate::execution_step::errors_prelude::*;
 use crate::execution_step::ExecutionResult;
 use crate::execution_step::FoldState;
 use crate::execution_step::ValueAggregate;
-
-use non_empty_vec::NonEmpty;
+use values_sparse_matrix::ValuesSparseMatrix;
 
 use std::collections::HashMap;
-use std::collections::HashSet;
-use std::rc::Rc;
-
-/// Depth of a global scope.
-const GLOBAL_DEPTH: usize = 0;
 
 // TODO: move this code snippet to documentation when it's ready
 
@@ -87,85 +84,32 @@ pub(crate) struct Scalars<'i> {
     ///   - global variables have 0 depth
     ///   - cells in a row are sorted by depth
     ///   - all depths in cell in one row are unique
-    pub(crate) non_iterable_variables: HashMap<String, NonEmpty<SparseCell>>,
+    pub(crate) non_iterable_variables: ValuesSparseMatrix<ValueAggregate>,
 
-    /// This set contains depths were invalidated at the certain moment of script execution.
-    /// They are needed for careful isolation of scopes produced by iterations in fold blocks,
-    /// precisely to limit access of non iterable variables defined on one depths to ones
-    /// defined on another.
-    pub(crate) allowed_depths: HashSet<usize>,
+    pub(crate) canon_streams: ValuesSparseMatrix<CanonStream>,
 
     pub(crate) iterable_variables: HashMap<String, FoldState<'i>>,
-
-    /// Count of met scopes at the particular moment of execution.
-    pub(crate) current_depth: usize,
-}
-
-#[derive(Debug)]
-pub(crate) struct SparseCell {
-    /// Scope depth where the value was set.
-    pub(crate) depth: usize,
-    pub(crate) value: Option<ValueAggregate>,
-}
-
-impl SparseCell {
-    pub(crate) fn from_value(depth: usize, value: ValueAggregate) -> Self {
-        Self {
-            depth,
-            value: Some(value),
-        }
-    }
-
-    pub(crate) fn from_met_new(depth: usize) -> Self {
-        Self { depth, value: None }
-    }
 }
 
 impl<'i> Scalars<'i> {
     pub fn new() -> Self {
-        let allowed_depths = maplit::hashset! { GLOBAL_DEPTH };
-
         Self {
-            non_iterable_variables: HashMap::new(),
-            allowed_depths,
+            non_iterable_variables: ValuesSparseMatrix::new(),
+            canon_streams: ValuesSparseMatrix::new(),
             iterable_variables: HashMap::new(),
-            current_depth: GLOBAL_DEPTH,
         }
     }
 
     /// Returns true if there was a previous value for the provided key on the same
     /// fold block.
-    pub(crate) fn set_value(&mut self, name: impl Into<String>, value: ValueAggregate) -> ExecutionResult<bool> {
-        use std::collections::hash_map::Entry::{Occupied, Vacant};
+    pub(crate) fn set_scalar_value(&mut self, name: impl Into<String>, value: ValueAggregate) -> ExecutionResult<bool> {
+        self.non_iterable_variables.set_value(name, value)
+    }
 
-        let name = name.into();
-        let variable_could_be_set = self.variable_could_be_set(&name);
-        match self.non_iterable_variables.entry(name) {
-            Vacant(entry) => {
-                let cell = SparseCell::from_value(self.current_depth, value);
-                let cells = NonEmpty::new(cell);
-                entry.insert(cells);
-
-                Ok(false)
-            }
-            Occupied(entry) => {
-                if !variable_could_be_set {
-                    return Err(UncatchableError::ShadowingIsNotAllowed(entry.key().clone()).into());
-                }
-
-                let values = entry.into_mut();
-                let last_cell = values.last_mut();
-                if last_cell.depth == self.current_depth {
-                    // just rewrite a value if fold level is the same
-                    last_cell.value = Some(value);
-                    Ok(true)
-                } else {
-                    let new_cell = SparseCell::from_value(self.current_depth, value);
-                    values.push(new_cell);
-                    Ok(false)
-                }
-            }
-        }
+    /// Returns true if there was a previous value for the provided key on the same
+    /// fold block.
+    pub(crate) fn set_canon_value(&mut self, name: impl Into<String>, value: CanonStream) -> ExecutionResult<bool> {
+        self.canon_streams.set_value(name, value)
     }
 
     pub(crate) fn set_iterable_value(
@@ -188,20 +132,8 @@ impl<'i> Scalars<'i> {
         self.iterable_variables.remove(name);
     }
 
-    pub(crate) fn get_non_iterable_value(&'i self, name: &str) -> ExecutionResult<Option<&'i ValueAggregate>> {
-        self.non_iterable_variables
-            .get(name)
-            .and_then(|values| {
-                let last_cell = values.last();
-                let depth_allowed = self.allowed_depths.contains(&last_cell.depth);
-
-                if depth_allowed {
-                    Some(last_cell.value.as_ref())
-                } else {
-                    None
-                }
-            })
-            .ok_or_else(|| ExecutionError::Catchable(Rc::new(CatchableError::VariableNotFound(name.to_string()))))
+    pub(crate) fn get_non_iterable_scalar(&'i self, name: &str) -> ExecutionResult<Option<&'i ValueAggregate>> {
+        self.non_iterable_variables.get_value(name)
     }
 
     pub(crate) fn get_iterable_mut(&mut self, name: &str) -> ExecutionResult<&mut FoldState<'i>> {
@@ -210,8 +142,14 @@ impl<'i> Scalars<'i> {
             .ok_or_else(|| UncatchableError::FoldStateNotFound(name.to_string()).into())
     }
 
+    pub(crate) fn get_canon_stream(&'i self, name: &str) -> ExecutionResult<&'i CanonStream> {
+        self.canon_streams
+            .get_value(name)?
+            .ok_or_else(|| CatchableError::VariableWasNotInitializedAfterNew(name.to_string()).into())
+    }
+
     pub(crate) fn get_value(&'i self, name: &str) -> ExecutionResult<ScalarRef<'i>> {
-        let value = self.get_non_iterable_value(name);
+        let value = self.get_non_iterable_scalar(name);
         let iterable_value = self.iterable_variables.get(name);
 
         match (value, iterable_value) {
@@ -223,126 +161,49 @@ impl<'i> Scalars<'i> {
         }
     }
 
+    pub(crate) fn variable_could_be_set(&self, variable_name: &str) -> bool {
+        self.non_iterable_variables.variable_could_be_set(variable_name)
+            || self.canon_streams.variable_could_be_set(variable_name)
+    }
+
     pub(crate) fn meet_fold_start(&mut self) {
-        self.current_depth += 1;
-        self.allowed_depths.insert(self.current_depth);
+        self.non_iterable_variables.meet_fold_start();
+        self.canon_streams.meet_fold_start();
     }
 
     // meet next before recursion
     pub(crate) fn meet_next_before(&mut self) {
-        self.allowed_depths.remove(&self.current_depth);
-        self.current_depth += 1;
-        self.allowed_depths.insert(self.current_depth);
+        self.non_iterable_variables.meet_next_before();
+        self.canon_streams.meet_next_before();
     }
 
     // meet next after recursion
     pub(crate) fn meet_next_after(&mut self) {
-        self.allowed_depths.remove(&self.current_depth);
-        self.current_depth -= 1;
-        self.allowed_depths.insert(self.current_depth);
-
-        self.cleanup_obsolete_values();
+        self.non_iterable_variables.meet_next_after();
+        self.canon_streams.meet_next_after();
     }
 
     pub(crate) fn meet_fold_end(&mut self) {
-        self.allowed_depths.remove(&self.current_depth);
-        self.current_depth -= 1;
-        self.cleanup_obsolete_values();
+        self.non_iterable_variables.meet_fold_end();
+        self.canon_streams.meet_fold_end();
     }
 
-    pub(crate) fn meet_new_start(&mut self, scalar_name: String) {
-        use std::collections::hash_map::Entry::{Occupied, Vacant};
-
-        let new_cell = SparseCell::from_met_new(self.current_depth);
-        match self.non_iterable_variables.entry(scalar_name) {
-            Vacant(entry) => {
-                let ne_vec = NonEmpty::new(new_cell);
-                entry.insert(ne_vec);
-            }
-            Occupied(entry) => {
-                let entry = entry.into_mut();
-                entry.push(new_cell);
-            }
-        }
+    pub(crate) fn meet_new_start_scalar(&mut self, scalar_name: String) {
+        self.non_iterable_variables.meet_new_start(scalar_name);
     }
 
-    pub(crate) fn meet_new_end(&mut self, scalar_name: &str) -> ExecutionResult<()> {
-        let current_depth = self.current_depth;
-        let should_remove_values = self
-            .non_iterable_variables
-            // TODO: get rid of copying here
-            .get_mut(scalar_name)
-            .and_then(|values| {
-                // carefully check that we're popping up an appropriate value,
-                // returning None means an error here
-                match values.pop() {
-                    Some(value) if value.depth == current_depth => Some(false),
-                    Some(_) => None,
-                    // None means that the value was last in a row
-                    None if values.last().depth == current_depth => Some(true),
-                    None => None,
-                }
-            })
-            .ok_or_else(|| UncatchableError::ScalarsStateCorrupted {
-                scalar_name: scalar_name.to_string(),
-                depth: self.current_depth,
-            })
-            .map_err(Into::<ExecutionError>::into)?;
-
-        if should_remove_values {
-            self.non_iterable_variables.remove(scalar_name);
-        }
-        Ok(())
+    pub(crate) fn meet_new_start_canon_stream(&mut self, canon_stream_name: String) {
+        self.canon_streams.meet_new_start(canon_stream_name);
     }
 
-    pub(crate) fn variable_could_be_set(&self, variable_name: &str) -> bool {
-        if self.shadowing_allowed() {
-            return true;
-        }
-
-        // TODO: get rid of copying here
-        match self.non_iterable_variables.get(&variable_name.to_string()) {
-            Some(values) => values.last().value.is_none(),
-            None => false,
-        }
+    pub(crate) fn meet_new_end_scalar(&mut self, scalar_name: &str) -> ExecutionResult<()> {
+        self.non_iterable_variables.meet_new_end(scalar_name)
     }
 
-    pub(crate) fn shadowing_allowed(&self) -> bool {
-        // shadowing is allowed only inside a fold block, 0 here means that execution flow
-        // is in a global scope
-        self.current_depth != 0
-    }
-
-    fn cleanup_obsolete_values(&mut self) {
-        // TODO: it takes O(N) where N is a count of all scalars, but it could be optimized
-        // by maintaining array of value indices that should be removed on each depth level
-        let mut values_to_delete = Vec::new();
-        for (name, values) in self.non_iterable_variables.iter_mut() {
-            let value_depth = values.last().depth;
-            if !is_global_value(value_depth) && is_value_obsolete(value_depth, self.current_depth) {
-                // it can't be empty, so it returns None if it contains 1 element
-                if values.pop().is_none() {
-                    // TODO: optimize this cloning in next PR
-                    values_to_delete.push(name.to_string());
-                }
-            }
-        }
-
-        for value_name in values_to_delete {
-            self.non_iterable_variables.remove(&value_name);
-        }
+    pub(crate) fn meet_new_end_canon_stream(&mut self, canon_name: &str) -> ExecutionResult<()> {
+        self.canon_streams.meet_new_end(canon_name)
     }
 }
-
-fn is_global_value(value_depth: usize) -> bool {
-    value_depth == GLOBAL_DEPTH
-}
-
-fn is_value_obsolete(value_depth: usize, current_scope_depth: usize) -> bool {
-    value_depth > current_scope_depth
-}
-
-use std::fmt;
 
 impl Default for Scalars<'_> {
     fn default() -> Self {
@@ -350,16 +211,12 @@ impl Default for Scalars<'_> {
     }
 }
 
+use std::fmt;
+
 impl<'i> fmt::Display for Scalars<'i> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "fold_block_id: {}", self.current_depth)?;
-
-        for (name, _) in self.non_iterable_variables.iter() {
-            let value = self.get_non_iterable_value(name);
-            if let Ok(Some(last_value)) = value {
-                writeln!(f, "{} => {}", name, last_value.result)?;
-            }
-        }
+        writeln!(f, "scalars:\n{}", self.non_iterable_variables)?;
+        writeln!(f, "canon_streams:\n{}", self.canon_streams)?;
 
         for (name, _) in self.iterable_variables.iter() {
             // it's impossible to print an iterable value for now
@@ -390,13 +247,13 @@ mod test {
         let rc_value = Rc::new(value);
         let value_aggregate = ValueAggregate::new(rc_value, rc_tetraplet, 1.into());
         let value_1_name = "name_1";
-        scalars.set_value(value_1_name, value_aggregate.clone()).unwrap();
+        scalars.set_scalar_value(value_1_name, value_aggregate.clone()).unwrap();
 
         let value_2_name = "name_2";
         scalars.meet_fold_start();
-        scalars.set_value(value_2_name, value_aggregate.clone()).unwrap();
+        scalars.set_scalar_value(value_2_name, value_aggregate.clone()).unwrap();
         scalars.meet_fold_start();
-        scalars.set_value(value_2_name, value_aggregate.clone()).unwrap();
+        scalars.set_scalar_value(value_2_name, value_aggregate.clone()).unwrap();
 
         let expected_values_count = scalars.non_iterable_variables.get(value_2_name).unwrap().len();
         assert_eq!(expected_values_count, NonZeroUsize::new(2).unwrap());
