@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+use crate::CallSeDeErrors;
+
 use super::CallRequests;
-use crate::RunnerResult;
 
 use air_interpreter_interface::InterpreterOutcome;
 
@@ -33,7 +34,7 @@ pub struct RawAVMOutcome {
 }
 
 impl RawAVMOutcome {
-    pub fn from_interpreter_outcome(outcome: InterpreterOutcome) -> RunnerResult<Self> {
+    pub fn from_interpreter_outcome(outcome: InterpreterOutcome) -> Result<Self, CallSeDeErrors> {
         let InterpreterOutcome {
             ret_code,
             error_message,
@@ -42,7 +43,7 @@ impl RawAVMOutcome {
             next_peer_pks,
         } = outcome;
 
-        let call_requests = crate::interface::from_raw_call_requests(call_requests)?;
+        let call_requests = crate::from_raw_call_requests(call_requests)?;
 
         let raw_avm_outcome = Self {
             ret_code,

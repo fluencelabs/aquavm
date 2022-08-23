@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 use super::runner::AirRunner;
-use avm_server::avm_runner::AVMRunner;
+use air_test_utils::avm_runner::AVMRunner;
 use std::path::Path;
 
 pub(crate) struct WasmAvmRunner(AVMRunner);
@@ -28,10 +28,10 @@ impl AirRunner for WasmAvmRunner {
         init_peer_id: String,
         timestamp: u64,
         ttl: u32,
-        call_results: avm_server::CallResults,
+        call_results: avm_interface::CallResults,
         tracing_params: String,
         tracing_output_mode: u8,
-    ) -> anyhow::Result<air_test_utils::RawAVMOutcome> {
+    ) -> anyhow::Result<avm_interface::raw_outcome::RawAVMOutcome> {
         Ok(self.0.call_tracing(
             air,
             prev_data,

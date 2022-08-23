@@ -18,14 +18,15 @@ use super::avm_runner::AVMRunner;
 use super::AVMDataStore;
 use super::AVMError;
 use super::AVMMemoryStats;
-use super::AVMOutcome;
-use super::CallResults;
 use crate::config::AVMConfig;
-use crate::interface::raw_outcome::RawAVMOutcome;
-use crate::interface::ParticleParameters;
 use crate::AVMResult;
 
 use avm_data_store::AnomalyData;
+use avm_interface::raw_outcome::RawAVMOutcome;
+use avm_interface::AVMOutcome;
+use avm_interface::CallResults;
+use avm_interface::ParticleParameters;
+
 use std::ops::Deref;
 use std::ops::DerefMut;
 use std::time::Duration;
@@ -118,7 +119,8 @@ impl<E> AVM<E> {
 
         // persist resulted data
         self.data_store.store_data(&outcome.data, particle_id)?;
-        let outcome = AVMOutcome::from_raw_outcome(outcome, memory_delta, execution_time)?;
+        let outcome = AVMOutcome::from_raw_outcome(outcome, memory_delta, execution_time)
+            .map_err(AVMError::InterpreterFailed)?;
 
         Ok(outcome)
     }

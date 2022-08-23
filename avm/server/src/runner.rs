@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-use super::CallResults;
-use crate::raw_outcome::RawAVMOutcome;
 use crate::RunnerError;
 use crate::RunnerResult;
 
 use air_interpreter_interface::InterpreterOutcome;
 use air_utils::measure;
+use avm_interface::raw_outcome::RawAVMOutcome;
+use avm_interface::CallResults;
 use marine::IValue;
 use marine::Marine;
 use marine::MarineConfig;
@@ -192,7 +192,7 @@ fn prepare_args(
     )
     .into_ivalue();
 
-    let call_results = crate::interface::into_raw_result(call_results);
+    let call_results = avm_interface::into_raw_result(call_results);
     let call_results = measure!(
         serde_json::to_vec(&call_results).expect("the default serializer shouldn't fail"),
         tracing::Level::INFO,

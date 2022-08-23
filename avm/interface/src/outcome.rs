@@ -15,9 +15,7 @@
  */
 
 use super::CallRequests;
-use crate::avm_runner::RawAVMOutcome;
-use crate::AVMError;
-use crate::AVMResult;
+use crate::raw_outcome::RawAVMOutcome;
 
 use serde::Deserialize;
 use serde::Serialize;
@@ -68,11 +66,11 @@ impl AVMOutcome {
         }
     }
 
-    pub(crate) fn from_raw_outcome<E>(
+    pub fn from_raw_outcome(
         raw_outcome: RawAVMOutcome,
         memory_delta: usize,
         execution_time: Duration,
-    ) -> AVMResult<Self, E> {
+    ) -> Result<Self, ErrorAVMOutcome> {
         use air_interpreter_interface::INTERPRETER_SUCCESS;
 
         let RawAVMOutcome {
@@ -92,11 +90,10 @@ impl AVMOutcome {
         );
 
         if ret_code == INTERPRETER_SUCCESS {
-            return Ok(avm_outcome);
+            Ok(avm_outcome)
+        } else {
+            Err(ErrorAVMOutcome::new(ret_code, error_message, avm_outcome))
         }
-
-        let error_outcome = ErrorAVMOutcome::new(ret_code, error_message, avm_outcome);
-        Err(AVMError::InterpreterFailed(error_outcome))
     }
 }
 

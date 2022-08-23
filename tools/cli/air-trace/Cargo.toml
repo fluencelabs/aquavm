@@ -1,6 +1,6 @@
 [package]
 name = "air-trace"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 description = "AIR performance tracing tool"
 authors = ["Fluence Labs"]
@@ -10,9 +10,10 @@ keywords = ["fluence", "air", "tracing"]
 
 [dependencies]
 air = { path = "../../../air" }
-air-test-utils = { path = "../../../crates/air-lib/test-utils" }
-air-interpreter-interface = { path = "../../../crates/air-lib/interpreter-interface" }
-avm-server = { path = "../../../avm/server" }
+air-test-utils = { path = "../../../crates/air-lib/test-utils", optional = true }
+air-interpreter-interface = { path = "../../../crates/air-lib/interpreter-interface", default-features = false }
+avm-data-store = { path = "../../../crates/data-store" }
+avm-interface = { path = "../../../avm/interface" }
 
 anyhow = "1.0.56"
 clap = { version = "3.1.18", features = ["derive", "env"] }
@@ -23,4 +24,4 @@ tracing-subscriber = { version = "0.3.11", default-features = false, features = 
 
 [features]
 default = ["wasm"]
-wasm = []
+wasm = ["air-test-utils"]
