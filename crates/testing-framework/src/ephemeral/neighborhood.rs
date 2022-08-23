@@ -26,13 +26,13 @@ use std::{
 pub(crate) type PeerSet = HashSet<PeerId>;
 
 #[derive(Debug, Default)]
-pub struct Neighborghood {
+pub struct Neighborhood {
     neighbors: PeerSet,
     // A neighbor can be unreachable for some time.
     failing: PeerSet,
 }
 
-impl Neighborghood {
+impl Neighborhood {
     pub fn new() -> Self {
         Default::default()
     }
@@ -82,7 +82,7 @@ impl Neighborghood {
 pub struct PeerWithNeighborhood {
     pub(crate) peer: Peer,
     failed: bool,
-    neighborhood: Neighborghood,
+    neighborhood: Neighborhood,
     pub(crate) data_queue: VecDeque<Data>,
 }
 
@@ -133,11 +133,11 @@ impl PeerWithNeighborhood {
         }
     }
 
-    pub fn get_neighborhood(&self) -> &Neighborghood {
+    pub fn get_neighborhood(&self) -> &Neighborhood {
         &self.neighborhood
     }
 
-    pub fn get_neighborhood_mut(&mut self) -> &mut Neighborghood {
+    pub fn get_neighborhood_mut(&mut self) -> &mut Neighborhood {
         &mut self.neighborhood
     }
 

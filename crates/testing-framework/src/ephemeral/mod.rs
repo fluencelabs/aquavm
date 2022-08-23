@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-pub mod neiborhood;
+pub mod neighborhood;
 
-use self::neiborhood::{PeerSet, PeerWithNeighborhood};
+use self::neighborhood::{PeerSet, PeerWithNeighborhood};
 use crate::services::{services_to_call_service_closure, Service};
 
 use air_test_utils::{
@@ -110,7 +110,7 @@ impl std::fmt::Debug for Peer {
 pub struct Network {
     test_parameters: TestRunParameters,
     peers: HashMap<PeerId, Rc<RefCell<PeerWithNeighborhood>>>,
-    default_neiborhood: HashSet<PeerId>,
+    default_neighborhood: HashSet<PeerId>,
 }
 
 impl Network {
@@ -125,7 +125,7 @@ impl Network {
         Self {
             test_parameters,
             peers: Default::default(),
-            default_neiborhood: default_neiborhoud.map(Into::into).collect(),
+            default_neighborhood: default_neiborhoud.map(Into::into).collect(),
         }
     }
 
@@ -158,7 +158,7 @@ impl Network {
     pub fn add_peer(&mut self, peer: Peer) -> &mut PeerWithNeighborhood {
         let peer_id = peer.peer_id.clone();
         let mut peer_with_neigh = PeerWithNeighborhood::new(peer);
-        peer_with_neigh.extend_neighborhood(self.default_neiborhood.iter().cloned());
+        peer_with_neigh.extend_neighborhood(self.default_neighborhood.iter().cloned());
         self.peers
             .insert(peer_id.clone(), Rc::new(peer_with_neigh.into()));
         Rc::get_mut(self.peers.get_mut(&peer_id).unwrap())
