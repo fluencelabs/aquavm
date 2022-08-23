@@ -25,9 +25,9 @@ use super::VariableWithLambda;
 
 use air_lambda_ast::LambdaAST;
 
+use crate::ast::CanonStreamWithLambda;
 use serde::Deserialize;
 use serde::Serialize;
-use crate::ast::CanonStreamWithLambda;
 
 // TODO: rename CallInstrValue, since it'd used by the canon instruction
 #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]

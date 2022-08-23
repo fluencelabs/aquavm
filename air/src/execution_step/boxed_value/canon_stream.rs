@@ -19,7 +19,9 @@ use super::ValueAggregate;
 use crate::execution_step::Generation;
 use crate::JValue;
 
-use std::fmt::Formatter;
+use air_interpreter_data::TracePos;
+use polyplets::SecurityTetraplet;
+
 use std::rc::Rc;
 
 /// Canon stream is a value type lies between a scalar and a stream, it has the same algebra as
@@ -83,13 +85,14 @@ impl CanonStream {
     }
 }
 
-use air_interpreter_data::TracePos;
-use polyplets::SecurityTetraplet;
 use std::fmt;
 
 impl fmt::Display for CanonStream {
-    fn fmt(&self, _f: &mut Formatter<'_>) -> fmt::Result {
-        Ok(())
-        //write!(f, "#[{}]", self.0.join(", "))
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "[")?;
+        for value in self.values.iter() {
+            write!(f, "{}", value)?;
+        }
+        write!(f, "]")
     }
 }

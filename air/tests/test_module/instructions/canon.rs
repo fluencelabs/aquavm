@@ -128,6 +128,32 @@ fn canon_fixes_stream_correct() {
 }
 
 #[test]
+fn canon_stream_can_be_created_from_aps() {
+    let vm_1_peer_id = "vm_1_peer_id";
+    let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
+
+    let vm_2_peer_id = "vm_2_peer_id";
+    let mut vm_2 = create_avm(echo_call_service(), vm_2_peer_id);
+
+    let script = f!(r#"
+        (seq
+            (seq
+                (ap 0 $stream)
+                (ap 1 $stream))
+            (seq
+                (canon "{vm_1_peer_id}" $stream #canon_stream)
+                (seq
+                    (ap #canon_stream $stream_2)
+                    (call "{vm_2_peer_id}" ("" "") [$stream_2]))))
+        "#);
+
+    let result_1 = checked_call_vm!(vm_1, <_>::default(), &script, "", "");
+    let result_2 = checked_call_vm!(vm_2, <_>::default(), &script, "", result_1.data.clone());
+    // it fails on this call if canon merger can't handle ap results
+    let result = checked_call_vm!(vm_2, <_>::default(), &script, result_1.data, result_2.data);
+}
+
+#[test]
 fn canon_gates() {
     let peer_id_1 = "peer_id_1";
     let mut vm_1 = create_avm(set_variable_call_service(json!([1, 2, 3, 4, 5])), peer_id_1);
@@ -181,4 +207,29 @@ fn canon_gates() {
 
     // fold should stop at the correspond len
     assert_eq!(fold.lore.len(), stop_len_count);
+}
+
+#[test]
+fn canon_empty_stream() {
+    let peer_id_1 = "peer_id_1";
+    let mut vm_1 = create_avm(echo_call_service(), peer_id_1);
+    let peer_id_2 = "peer_id_2";
+    let mut vm_2 = create_avm(echo_call_service(), peer_id_2);
+
+    let script = f!(r#"
+            (new $stream
+                (seq
+                    (canon "{peer_id_1}" $stream #canon_stream)
+                    (call "{peer_id_1}" ("" "") [#canon_stream])))
+                    "#);
+
+    let result = checked_call_vm!(vm_1, <_>::default(), &script, "", "");
+    let actual_trace = trace_from_result(&result);
+    let expected_trace = vec![executed_state::canon(vec![]), executed_state::scalar(json!([]))];
+    assert_eq!(actual_trace, expected_trace);
+
+    let result = checked_call_vm!(vm_2, <_>::default(), script, "", result.data);
+    let actual_trace = trace_from_result(&result);
+    let expected_trace = vec![executed_state::canon(vec![]), executed_state::scalar(json!([]))];
+    assert_eq!(actual_trace, expected_trace);
 }

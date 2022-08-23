@@ -73,7 +73,7 @@ fn handle_unseen_canon(
         return Ok(());
     }
 
-    let stream_with_positions = create_canon_stream_from_name(ast_canon, exec_ctx)?;
+    let stream_with_positions = create_canon_stream_from_name(ast_canon, peer_id, exec_ctx)?;
     epilog(ast_canon.canon_stream.name, stream_with_positions, exec_ctx, trace_ctx)
 }
 
@@ -103,7 +103,8 @@ fn create_canon_stream_from_pos(
         })
         .collect::<Result<Vec<_>, _>>()?;
 
-    let canon_stream = CanonStream::new(values, ast_canon.peer_pk.to_string(), ast_canon.stream.position.into());
+    let peer_id = crate::execution_step::air::resolve_to_string(&ast_canon.peer_pk, exec_ctx)?;
+    let canon_stream = CanonStream::new(values, peer_id, ast_canon.stream.position.into());
     Ok(canon_stream)
 }
 
@@ -133,6 +134,7 @@ struct StreamWithPositions {
 
 fn create_canon_stream_from_name(
     ast_canon: &ast::Canon<'_>,
+    peer_id: String,
     exec_ctx: &ExecutionCtx<'_>,
 ) -> ExecutionResult<StreamWithPositions> {
     let stream = exec_ctx
@@ -143,11 +145,7 @@ fn create_canon_stream_from_name(
                 ast_canon.stream.name.to_string(),
             )))
         })?;
-    let canon_stream = CanonStream::from_stream(
-        stream,
-        ast_canon.peer_pk.to_string(),
-        ast_canon.canon_stream.position.into(),
-    );
+    let canon_stream = CanonStream::from_stream(stream, peer_id, ast_canon.canon_stream.position.into());
     let stream_elements_pos = stream
         .iter(Generation::Last)
         .unwrap()

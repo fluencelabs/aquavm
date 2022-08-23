@@ -210,6 +210,12 @@ impl<T> ValuesSparseMatrix<T> {
     }
 }
 
+impl<T> Default for ValuesSparseMatrix<T> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 fn is_global_value(value_depth: usize) -> bool {
     value_depth == GLOBAL_DEPTH
 }
@@ -269,5 +275,49 @@ where
         }
 
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::execution_step::ValueAggregate;
+    use polyplets::SecurityTetraplet;
+
+    use serde_json::json;
+
+    use std::num::NonZeroUsize;
+    use std::rc::Rc;
+
+    #[test]
+    fn test_local_cleanup() {
+        let mut scalars = ValuesSparseMatrix::new();
+
+        let tetraplet = SecurityTetraplet::default();
+        let rc_tetraplet = Rc::new(tetraplet);
+        let value = json!(1u64);
+        let rc_value = Rc::new(value);
+        let value_aggregate = ValueAggregate::new(rc_value, rc_tetraplet, 1.into());
+        let value_1_name = "name_1";
+        scalars.set_value(value_1_name, value_aggregate.clone()).unwrap();
+
+        let value_2_name = "name_2";
+        scalars.meet_fold_start();
+        scalars.set_value(value_2_name, value_aggregate.clone()).unwrap();
+        scalars.meet_fold_start();
+        scalars.set_value(value_2_name, value_aggregate.clone()).unwrap();
+
+        let expected_values_count = scalars.cells.get(value_2_name).unwrap().len();
+        assert_eq!(expected_values_count, NonZeroUsize::new(2).unwrap());
+
+        scalars.meet_fold_end();
+        let expected_values_count = scalars.cells.get(value_2_name).unwrap().len();
+        assert_eq!(expected_values_count, NonZeroUsize::new(1).unwrap());
+
+        scalars.meet_fold_end();
+        assert!(scalars.cells.get(value_2_name).is_none());
+
+        let expected_values_count = scalars.cells.get(value_1_name).unwrap().len();
+        assert_eq!(expected_values_count, NonZeroUsize::new(1).unwrap());
     }
 }
