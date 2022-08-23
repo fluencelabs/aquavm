@@ -4,12 +4,12 @@
 Introduced a new `canon` instruction
 
 [PR 296](https://github.com/fluencelabs/aquavm/pull/296):  
-A bug with inappropriate checking of states in the `Ap` merger was fixed
+A bug with an inappropriate check of states in the `Ap` merger was fixed
 
 ## Version 0.26.0 (2022-08-19)
 
 [PR 294](https://github.com/fluencelabs/aquavm/pull/294):  
-Accompanying to air-interpreter update makes interface more handy for `air-trace`
+Accompanying to air-interpreter update that makes interface more handy for `air-trace`
 
 ## Version 0.25.0 (2022-07-27)
 
@@ -17,7 +17,7 @@ Accompanying to air-interpreter update makes interface more handy for `air-trace
 Memory leak introduced by switching to reactor/command model in WASI fixed
 
 [PR 276](https://github.com/fluencelabs/aquavm/pull/276):  
-AquaVM performance was improved by deleting excess logging
+AquaVM performance was improved by removing excess logging
 
 [PR 273](https://github.com/fluencelabs/aquavm/pull/273):  
 Introduced `TracePos` for `TraceHandler` positions
