@@ -65,7 +65,7 @@ impl TestExecutor {
 
     /// Return Iterator for handling all the queued datas
     /// for particular peer_id.
-    pub fn iter_execution<'s, Id>(
+    pub fn execution_iter<'s, Id>(
         &'s self,
         peer_id: &Id,
     ) -> Option<impl Iterator<Item = RawAVMOutcome> + 's>
@@ -74,7 +74,7 @@ impl TestExecutor {
         // TODO it's not clear why compiler requies + 's here, but not at Network::iter_execution
         Id: Eq + Hash + ?Sized + 's,
     {
-        self.network.iter_execution(&self.air_script, peer_id)
+        self.network.execution_iter(&self.air_script, peer_id)
     }
 
     /// Process all queued datas, panicing on error.
@@ -83,7 +83,7 @@ impl TestExecutor {
         PeerId: Borrow<Id>,
         Id: Eq + Hash + ?Sized,
     {
-        self.iter_execution(peer_id).map(|it| it.collect())
+        self.execution_iter(peer_id).map(|it| it.collect())
     }
 
     /// Process one queued data, panicing if it is unavalable or on error.
@@ -92,7 +92,7 @@ impl TestExecutor {
         PeerId: Borrow<Id>,
         Id: Eq + Hash + ?Sized,
     {
-        self.iter_execution(peer_id)
+        self.execution_iter(peer_id)
             .map(|mut it| it.next().unwrap())
     }
 }
@@ -143,18 +143,18 @@ mod tests {
         )
         .unwrap();
 
-        let result_init: Vec<_> = exec.iter_execution("init_peer_id").unwrap().collect();
+        let result_init: Vec<_> = exec.execution_iter("init_peer_id").unwrap().collect();
 
         assert_eq!(result_init.len(), 1);
         let outcome = &result_init[0];
         assert_eq!(outcome.next_peer_pks, vec!["peer1".to_owned()]);
 
-        assert!(exec.iter_execution("peer2").unwrap().next().is_none());
-        let results1: Vec<_> = exec.iter_execution("peer1").unwrap().collect();
+        assert!(exec.execution_iter("peer2").unwrap().next().is_none());
+        let results1: Vec<_> = exec.execution_iter("peer1").unwrap().collect();
         assert_eq!(results1.len(), 1);
         let outcome1 = &results1[0];
         assert_eq!(outcome1.ret_code, 0);
-        assert!(exec.iter_execution("peer1").unwrap().next().is_none());
+        assert!(exec.execution_iter("peer1").unwrap().next().is_none());
 
         let outcome2 = exec.execute_one("peer2").unwrap();
         assert_eq!(outcome2.ret_code, 0);
@@ -174,15 +174,15 @@ mod tests {
         )
         .unwrap();
 
-        let result_init: Vec<_> = exec.iter_execution("init_peer_id").unwrap().collect();
+        let result_init: Vec<_> = exec.execution_iter("init_peer_id").unwrap().collect();
 
         assert_eq!(result_init.len(), 1);
         let outcome1 = &result_init[0];
         assert_eq!(outcome1.ret_code, 0);
         assert_eq!(outcome1.error_message, "");
 
-        assert!(exec.iter_execution("peer2").unwrap().next().is_none());
-        let results1: Vec<_> = exec.iter_execution("peer1").unwrap().collect();
+        assert!(exec.execution_iter("peer2").unwrap().next().is_none());
+        let results1: Vec<_> = exec.execution_iter("peer1").unwrap().collect();
         assert_eq!(results1.len(), 1);
         let outcome1 = &results1[0];
         assert_eq!(outcome1.ret_code, 10000, "{:?}", outcome1);
@@ -192,9 +192,9 @@ mod tests {
             "{:?}",
             outcome1
         );
-        assert!(exec.iter_execution("peer1").unwrap().next().is_none());
+        assert!(exec.execution_iter("peer1").unwrap().next().is_none());
 
-        let results2: Vec<_> = exec.iter_execution("peer2").unwrap().collect();
+        let results2: Vec<_> = exec.execution_iter("peer2").unwrap().collect();
         assert_eq!(results2.len(), 0);
     }
 }

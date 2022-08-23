@@ -25,6 +25,8 @@ use std::{
 
 pub(crate) type PeerSet = HashSet<PeerId>;
 
+/// Neighbors of particular node, including set of nodes unreachable from this one (but they might be
+/// reachable from others).
 #[derive(Debug, Default)]
 pub struct Neighborhood {
     neighbors: PeerSet,
@@ -47,24 +49,24 @@ impl Neighborhood {
 
     pub fn insert(&mut self, other_peer_id: impl Into<PeerId>) {
         let other_peer_id = other_peer_id.into();
-        self.unfail(&other_peer_id);
         self.neighbors.insert(other_peer_id);
     }
 
+    /// Removes the other_peer_id from neigborhood, also removes unreachable status.
     pub fn remove<Id>(&mut self, other_peer_id: &Id)
     where
         PeerId: Borrow<Id>,
         Id: Eq + Hash + ?Sized,
     {
-        self.unfail(other_peer_id);
+        self.unset_target_unreachable(other_peer_id);
         self.neighbors.remove(other_peer_id);
     }
 
-    pub fn fail(&mut self, target: impl Into<PeerId>) {
+    pub fn set_target_unreachable(&mut self, target: impl Into<PeerId>) {
         self.failing.insert(target.into());
     }
 
-    pub fn unfail<Id>(&mut self, target: &Id)
+    pub fn unset_target_unreachable<Id>(&mut self, target: &Id)
     where
         PeerId: Borrow<Id>,
         Id: Eq + Hash + ?Sized,
@@ -88,16 +90,16 @@ impl<'a> std::iter::IntoIterator for &'a Neighborhood {
     }
 }
 
-
 #[derive(Debug)]
-pub struct PeerWithNeighborhood {
+pub struct PeerEnv {
     pub(crate) peer: Peer,
+    // failed for everyone
     failed: bool,
     neighborhood: Neighborhood,
     pub(crate) data_queue: VecDeque<Data>,
 }
 
-impl PeerWithNeighborhood {
+impl PeerEnv {
     pub fn new(peer: Peer) -> Self {
         Self {
             peer,
@@ -179,7 +181,7 @@ impl PeerWithNeighborhood {
     }
 }
 
-impl<'a> IntoIterator for &'a PeerWithNeighborhood {
+impl<'a> IntoIterator for &'a PeerEnv {
     type Item = <&'a Neighborhood as IntoIterator>::Item;
     type IntoIter = <&'a Neighborhood as IntoIterator>::IntoIter;
 
@@ -198,7 +200,7 @@ mod tests {
     fn test_empty_neighborhood() {
         let peer_id: PeerId = "someone".into();
         let other_id: PeerId = "other".into();
-        let pwn = PeerWithNeighborhood::new(Peer::new(peer_id.clone(), Rc::from(vec![])));
+        let pwn = PeerEnv::new(Peer::new(peer_id.clone(), Rc::from(vec![])));
         assert!(pwn.is_reachable(&peer_id));
         assert!(!pwn.is_reachable(&other_id));
     }
@@ -207,7 +209,7 @@ mod tests {
     fn test_no_self_disconnect() {
         let peer_id: PeerId = "someone".into();
         let other_id: PeerId = "other".into();
-        let mut pwn = PeerWithNeighborhood::new(Peer::new(peer_id.clone(), Rc::from(vec![])));
+        let mut pwn = PeerEnv::new(Peer::new(peer_id.clone(), Rc::from(vec![])));
         let nei = pwn.get_neighborhood_mut();
         nei.insert(peer_id.clone());
         nei.remove(&peer_id);
@@ -219,8 +221,9 @@ mod tests {
     fn test_no_self_fail() {
         let peer_id: PeerId = "someone".into();
         let other_id: PeerId = "other".into();
-        let mut pwn = PeerWithNeighborhood::new(Peer::new(peer_id.clone(), Rc::from(vec![])));
-        pwn.get_neighborhood_mut().fail(peer_id.clone());
+        let mut pwn = PeerEnv::new(Peer::new(peer_id.clone(), Rc::from(vec![])));
+        pwn.get_neighborhood_mut()
+            .set_target_unreachable(peer_id.clone());
         assert!(pwn.is_reachable(&peer_id));
         assert!(!pwn.is_reachable(&other_id));
     }
@@ -230,7 +233,7 @@ mod tests {
         let peer_id: PeerId = "someone".into();
         let other_id1: PeerId = "other1".into();
         let other_id2: PeerId = "other2".into();
-        let mut pwn = PeerWithNeighborhood::new(Peer::new(peer_id.clone(), Rc::from(vec![])));
+        let mut pwn = PeerEnv::new(Peer::new(peer_id.clone(), Rc::from(vec![])));
 
         // iter is empty
         assert!(pwn.iter().next().is_none());
@@ -249,7 +252,7 @@ mod tests {
         let peer_id: PeerId = "someone".into();
         let other_id1: PeerId = "other1".into();
         let other_id2: PeerId = "other2".into();
-        let mut pwn = PeerWithNeighborhood::new(Peer::new(peer_id.clone(), Rc::from(vec![])));
+        let mut pwn = PeerEnv::new(Peer::new(peer_id.clone(), Rc::from(vec![])));
 
         // iter is empty
         assert!(pwn.iter().next().is_none());
@@ -268,7 +271,7 @@ mod tests {
     fn test_insert_insert() {
         let peer_id: PeerId = "someone".into();
         let other_id1: PeerId = "other1".into();
-        let mut pwn = PeerWithNeighborhood::new(Peer::new(peer_id.clone(), Rc::from(vec![])));
+        let mut pwn = PeerEnv::new(Peer::new(peer_id.clone(), Rc::from(vec![])));
 
         // iter is empty
         assert!(pwn.iter().next().is_none());
@@ -286,7 +289,7 @@ mod tests {
     #[test]
     fn test_extend_neighborhood() {
         let peer_id: PeerId = "someone".into();
-        let mut pwn = PeerWithNeighborhood::new(Peer::new(peer_id.clone(), Rc::from(vec![])));
+        let mut pwn = PeerEnv::new(Peer::new(peer_id.clone(), Rc::from(vec![])));
         pwn.get_neighborhood_mut().insert("zero");
         pwn.extend_neighborhood(IntoIterator::into_iter(["one", "two"]));
 
@@ -299,7 +302,7 @@ mod tests {
     #[test]
     fn test_remove_from_neiborhood() {
         let peer_id: PeerId = "someone".into();
-        let mut pwn = PeerWithNeighborhood::new(Peer::new(peer_id.clone(), Rc::from(vec![])));
+        let mut pwn = PeerEnv::new(Peer::new(peer_id.clone(), Rc::from(vec![])));
         pwn.get_neighborhood_mut().insert("zero");
         pwn.extend_neighborhood(IntoIterator::into_iter(["one", "two"]));
         pwn.remove_from_neighborhood(IntoIterator::into_iter(["zero", "two"]));
@@ -315,10 +318,10 @@ mod tests {
     fn test_fail() {
         let peer_id: PeerId = "someone".into();
         let other_id: PeerId = "other".into();
-        let mut pwn = PeerWithNeighborhood::new(Peer::new(peer_id.clone(), Rc::from(vec![])));
+        let mut pwn = PeerEnv::new(Peer::new(peer_id.clone(), Rc::from(vec![])));
         let nei = pwn.get_neighborhood_mut();
         nei.insert(other_id.clone());
-        nei.fail(other_id.clone());
+        nei.set_target_unreachable(other_id.clone());
 
         let expected_neighborhood = PeerSet::from([other_id.clone()]);
         assert_eq!(
@@ -332,11 +335,11 @@ mod tests {
     fn test_fail_remove() {
         let peer_id: PeerId = "someone".into();
         let other_id: PeerId = "other".into();
-        let mut pwn = PeerWithNeighborhood::new(Peer::new(peer_id.clone(), Rc::from(vec![])));
+        let mut pwn = PeerEnv::new(Peer::new(peer_id.clone(), Rc::from(vec![])));
 
         let nei = pwn.get_neighborhood_mut();
         nei.insert(other_id.clone());
-        nei.fail(other_id.clone());
+        nei.set_target_unreachable(other_id.clone());
         assert!(!pwn.is_reachable(&other_id));
 
         let nei = pwn.get_neighborhood_mut();
@@ -352,15 +355,15 @@ mod tests {
     fn test_fail_unfail() {
         let peer_id: PeerId = "someone".into();
         let other_id: PeerId = "other".into();
-        let mut pwn = PeerWithNeighborhood::new(Peer::new(peer_id.clone(), Rc::from(vec![])));
+        let mut pwn = PeerEnv::new(Peer::new(peer_id.clone(), Rc::from(vec![])));
 
         let nei = pwn.get_neighborhood_mut();
         nei.insert(other_id.clone());
-        nei.fail(other_id.clone());
+        nei.set_target_unreachable(other_id.clone());
         assert!(!pwn.is_reachable(&other_id));
 
         let nei = pwn.get_neighborhood_mut();
-        nei.unfail(&other_id);
+        nei.unset_target_unreachable(&other_id);
         assert!(pwn.is_reachable(&other_id));
     }
 
@@ -368,14 +371,14 @@ mod tests {
     fn test_uninserted_fail_unfail() {
         let peer_id: PeerId = "someone".into();
         let other_id: PeerId = "other".into();
-        let mut pwn = PeerWithNeighborhood::new(Peer::new(peer_id.clone(), Rc::from(vec![])));
+        let mut pwn = PeerEnv::new(Peer::new(peer_id.clone(), Rc::from(vec![])));
 
         let nei = pwn.get_neighborhood_mut();
-        nei.fail(other_id.clone());
+        nei.set_target_unreachable(other_id.clone());
         assert!(!pwn.is_reachable(&other_id));
 
         let nei = pwn.get_neighborhood_mut();
-        nei.unfail(&other_id);
+        nei.unset_target_unreachable(&other_id);
         assert!(!pwn.is_reachable(&other_id));
     }
 
@@ -384,7 +387,7 @@ mod tests {
         let peer_id: PeerId = "someone".into();
         let other_id: PeerId = "other".into();
         let remote_id: PeerId = "remote".into();
-        let mut pwn = PeerWithNeighborhood::new(Peer::new(peer_id.clone(), Rc::from(vec![])));
+        let mut pwn = PeerEnv::new(Peer::new(peer_id.clone(), Rc::from(vec![])));
         pwn.get_neighborhood_mut().insert(other_id.clone());
 
         assert!(pwn.is_reachable(&peer_id));

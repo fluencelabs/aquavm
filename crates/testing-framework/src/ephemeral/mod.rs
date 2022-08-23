@@ -16,7 +16,7 @@
 
 pub mod neighborhood;
 
-use self::neighborhood::{PeerSet, PeerWithNeighborhood};
+use self::neighborhood::{PeerEnv, PeerSet};
 use crate::services::{services_to_call_service_closure, Service};
 
 use air_test_utils::{
@@ -109,7 +109,7 @@ impl std::fmt::Debug for Peer {
 #[derive(Debug)]
 pub struct Network {
     test_parameters: TestRunParameters,
-    peers: HashMap<PeerId, Rc<RefCell<PeerWithNeighborhood>>>,
+    peers: HashMap<PeerId, Rc<RefCell<PeerEnv>>>,
     default_neighborhood: HashSet<PeerId>,
 }
 
@@ -134,33 +134,31 @@ impl Network {
         let neighborhood: PeerSet = nodes.iter().map(|peer| peer.peer_id.clone()).collect();
         for peer in nodes {
             // TODO can peer have itself as a neighbor?
-            network.add_peer_with_neighborhood(peer, neighborhood.iter().cloned());
+            network.add_peer_env(peer, neighborhood.iter().cloned());
         }
         network
     }
 
-    pub fn add_peer_with_neighborhood(
+    pub fn add_peer_env(
         &mut self,
         peer: Peer,
         neighborhood: impl IntoIterator<Item = impl Into<PeerId>>,
-    ) -> &mut PeerWithNeighborhood {
+    ) -> &mut PeerEnv {
         let peer_id = peer.peer_id.clone();
-        let mut peer_with_neigh = PeerWithNeighborhood::new(peer);
-        peer_with_neigh.extend_neighborhood(neighborhood.into_iter().map(Into::into));
-        self.peers
-            .insert(peer_id.clone(), Rc::new(peer_with_neigh.into()));
+        let mut peer_env = PeerEnv::new(peer);
+        peer_env.extend_neighborhood(neighborhood.into_iter().map(Into::into));
+        self.peers.insert(peer_id.clone(), Rc::new(peer_env.into()));
         Rc::get_mut(self.peers.get_mut(&peer_id).unwrap())
             .unwrap()
             .get_mut()
     }
 
     /// Add a peer with default neighborhood.
-    pub fn add_peer(&mut self, peer: Peer) -> &mut PeerWithNeighborhood {
+    pub fn add_peer(&mut self, peer: Peer) -> &mut PeerEnv {
         let peer_id = peer.peer_id.clone();
-        let mut peer_with_neigh = PeerWithNeighborhood::new(peer);
-        peer_with_neigh.extend_neighborhood(self.default_neighborhood.iter().cloned());
-        self.peers
-            .insert(peer_id.clone(), Rc::new(peer_with_neigh.into()));
+        let mut peer_env = PeerEnv::new(peer);
+        peer_env.extend_neighborhood(self.default_neighborhood.iter().cloned());
+        self.peers.insert(peer_id.clone(), Rc::new(peer_env.into()));
         Rc::get_mut(self.peers.get_mut(&peer_id).unwrap())
             .unwrap()
             .get_mut()
@@ -190,7 +188,7 @@ impl Network {
             .as_ref()
             .borrow_mut()
             .get_neighborhood_mut()
-            .fail(target_peer_id);
+            .set_target_unreachable(target_peer_id);
     }
 
     pub fn unfail_peer_for<Id1, Id2>(&mut self, source_peer_id: &Id1, target_peer_id: &Id2)
@@ -206,12 +204,12 @@ impl Network {
             .as_ref()
             .borrow_mut()
             .get_neighborhood_mut()
-            .unfail(target_peer_id);
+            .unset_target_unreachable(target_peer_id);
     }
 
     // TODO there is some kind of unsymmetry between these methods and the fail/unfail:
     // the latters panic on unknown peer; perhaps, it's OK
-    pub fn get_peer_env<Id>(&self, peer_id: &Id) -> Option<Rc<RefCell<PeerWithNeighborhood>>>
+    pub fn get_peer_env<Id>(&self, peer_id: &Id) -> Option<Rc<RefCell<PeerEnv>>>
     where
         PeerId: Borrow<Id>,
         Id: Hash + Eq + ?Sized,
@@ -219,7 +217,8 @@ impl Network {
         self.peers.get(peer_id).cloned()
     }
 
-    pub fn iter_execution<'s, Id>(
+    /// Iterator for handling al the queued data.  It borrows peer env's `RefCell` only temporarily.
+    pub fn execution_iter<'s, Id>(
         &'s self,
         air: &'s str,
         peer_id: &Id,
@@ -228,11 +227,11 @@ impl Network {
         PeerId: Borrow<Id>,
         Id: Eq + Hash + ?Sized,
     {
-        let peer = self.get_peer_env(peer_id);
+        let peer_env = self.get_peer_env(peer_id);
 
-        peer.map(|peer_cell| {
+        peer_env.map(|peer_env_cell| {
             std::iter::from_fn(move || {
-                let mut peer_env = peer_cell.borrow_mut();
+                let mut peer_env = peer_env_cell.borrow_mut();
                 peer_env.execute_once(air, self).map(Result::unwrap)
             })
         })
@@ -240,8 +239,11 @@ impl Network {
 
     pub fn distribute_to_peers(&self, peers: &[String], data: &Data) {
         for peer_id in peers {
-            if let Some(peer_cell) = self.get_peer_env(peer_id.as_str()) {
-                peer_cell.borrow_mut().data_queue.push_back(data.clone());
+            if let Some(peer_env_cell) = self.get_peer_env(peer_id.as_str()) {
+                peer_env_cell
+                    .borrow_mut()
+                    .data_queue
+                    .push_back(data.clone());
             }
         }
     }
