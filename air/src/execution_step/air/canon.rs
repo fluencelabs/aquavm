@@ -148,6 +148,7 @@ fn create_canon_stream_from_name(
     let canon_stream = CanonStream::from_stream(stream, peer_id, ast_canon.canon_stream.position.into());
     let stream_elements_pos = stream
         .iter(Generation::Last)
+        // it's always safe to iter over all generations
         .unwrap()
         .map(|value| value.trace_pos)
         .collect::<Vec<_>>();

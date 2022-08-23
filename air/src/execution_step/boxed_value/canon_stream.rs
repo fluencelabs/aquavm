@@ -47,6 +47,7 @@ impl CanonStream {
     }
 
     pub(crate) fn from_stream(stream: &Stream, peer_pk: String, position: TracePos) -> Self {
+        // it's always safe to iter over all generations of a stream
         let values = stream.iter(Generation::Last).unwrap().cloned().collect::<Vec<_>>();
         let tetraplet = SecurityTetraplet::new(peer_pk, "", "", "");
         Self {
