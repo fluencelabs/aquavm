@@ -53,7 +53,7 @@ impl TestExecutor {
             extra_peers,
         );
 
-        let network = Network::from_vec(test_parameters, peers);
+        let network = Network::from_peers(test_parameters, peers);
         // Seed execution
         network.distribute_to_peers(&[init_peer_id], &vec![]);
 

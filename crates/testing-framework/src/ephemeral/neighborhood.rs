@@ -41,8 +41,8 @@ impl Neighborhood {
         self.neighbors = neighbors;
     }
 
-    pub fn iter_neighbors(&mut self) -> impl Iterator<Item = &PeerId> {
-        self.neighbors.iter()
+    pub fn iter(&self) -> impl Iterator<Item = &PeerId> {
+        self.into_iter()
     }
 
     pub fn insert(&mut self, other_peer_id: impl Into<PeerId>) {
@@ -77,6 +77,17 @@ impl Neighborhood {
         self.neighbors.contains(t) && !self.failing.contains(t)
     }
 }
+
+impl<'a> std::iter::IntoIterator for &'a Neighborhood {
+    type Item = &'a PeerId;
+
+    type IntoIter = std::collections::hash_set::Iter<'a, PeerId>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.neighbors.iter()
+    }
+}
+
 
 #[derive(Debug)]
 pub struct PeerWithNeighborhood {
@@ -141,8 +152,8 @@ impl PeerWithNeighborhood {
         &mut self.neighborhood
     }
 
-    pub fn iter_neighbors(&mut self) -> impl Iterator<Item = &PeerId> {
-        self.neighborhood.iter_neighbors()
+    pub fn iter(&self) -> impl Iterator<Item = &PeerId> {
+        self.neighborhood.iter()
     }
 
     pub fn send_data(&mut self, data: Data) {
@@ -165,6 +176,15 @@ impl PeerWithNeighborhood {
 
             res
         })
+    }
+}
+
+impl<'a> IntoIterator for &'a PeerWithNeighborhood {
+    type Item = <&'a Neighborhood as IntoIterator>::Item;
+    type IntoIter = <&'a Neighborhood as IntoIterator>::IntoIter;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.neighborhood.into_iter()
     }
 }
 
@@ -213,13 +233,13 @@ mod tests {
         let mut pwn = PeerWithNeighborhood::new(Peer::new(peer_id.clone(), Rc::from(vec![])));
 
         // iter is empty
-        assert!(pwn.iter_neighbors().next().is_none());
+        assert!(pwn.iter().next().is_none());
 
         let expected_neighborhood = PeerSet::from([other_id1.clone(), other_id2.clone()]);
         pwn.get_neighborhood_mut()
             .set_neighbors(expected_neighborhood.clone());
         assert_eq!(
-            pwn.iter_neighbors().cloned().collect::<PeerSet>(),
+            pwn.iter().cloned().collect::<PeerSet>(),
             expected_neighborhood
         );
     }
@@ -232,14 +252,14 @@ mod tests {
         let mut pwn = PeerWithNeighborhood::new(Peer::new(peer_id.clone(), Rc::from(vec![])));
 
         // iter is empty
-        assert!(pwn.iter_neighbors().next().is_none());
+        assert!(pwn.iter().next().is_none());
         let nei = pwn.get_neighborhood_mut();
 
         nei.insert(other_id1.clone());
         nei.insert(other_id2.clone());
         let expected_neighborhood = PeerSet::from([other_id1.clone(), other_id2.clone()]);
         assert_eq!(
-            PeerSet::from_iter(pwn.iter_neighbors().cloned()),
+            PeerSet::from_iter(pwn.iter().cloned()),
             expected_neighborhood
         );
     }
@@ -251,14 +271,14 @@ mod tests {
         let mut pwn = PeerWithNeighborhood::new(Peer::new(peer_id.clone(), Rc::from(vec![])));
 
         // iter is empty
-        assert!(pwn.iter_neighbors().next().is_none());
+        assert!(pwn.iter().next().is_none());
 
         let nei = pwn.get_neighborhood_mut();
         nei.insert(other_id1.clone());
         nei.insert(other_id1.clone());
         let expected_neighborhood = vec![other_id1];
         assert_eq!(
-            pwn.iter_neighbors().cloned().collect::<Vec<_>>(),
+            pwn.iter().cloned().collect::<Vec<_>>(),
             expected_neighborhood
         );
     }
@@ -271,7 +291,7 @@ mod tests {
         pwn.extend_neighborhood(IntoIterator::into_iter(["one", "two"]));
 
         assert_eq!(
-            PeerSet::from_iter(pwn.iter_neighbors().cloned()),
+            PeerSet::from_iter(pwn.iter().cloned()),
             PeerSet::from_iter(IntoIterator::into_iter(["zero", "one", "two"]).map(PeerId::from)),
         );
     }
@@ -285,7 +305,7 @@ mod tests {
         pwn.remove_from_neighborhood(IntoIterator::into_iter(["zero", "two"]));
 
         assert_eq!(
-            pwn.iter_neighbors().cloned().collect::<HashSet<_>>(),
+            pwn.iter().cloned().collect::<HashSet<_>>(),
             IntoIterator::into_iter(["one"])
                 .map(PeerId::from)
                 .collect::<HashSet<_>>()
@@ -302,7 +322,7 @@ mod tests {
 
         let expected_neighborhood = PeerSet::from([other_id.clone()]);
         assert_eq!(
-            PeerSet::from_iter(pwn.iter_neighbors().cloned()),
+            PeerSet::from_iter(pwn.iter().cloned()),
             expected_neighborhood
         );
         assert!(!pwn.is_reachable(&other_id));

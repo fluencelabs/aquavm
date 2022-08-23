@@ -129,7 +129,7 @@ impl Network {
         }
     }
 
-    pub fn from_vec(test_parameters: TestRunParameters, nodes: Vec<Peer>) -> Self {
+    pub fn from_peers(test_parameters: TestRunParameters, nodes: Vec<Peer>) -> Self {
         let mut network = Self::empty(test_parameters);
         let neighborhood: PeerSet = nodes.iter().map(|peer| peer.peer_id.clone()).collect();
         for peer in nodes {

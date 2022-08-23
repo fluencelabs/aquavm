@@ -14,14 +14,6 @@
  * limitations under the License.
  */
 
-/*
- * Plan:
- * 1. [x] line numbers and pos
- * 2. [x] contexts for error reporting
- * 3. [x] error report
- * 4. [x] annotation parsing
-*/
-
 mod parser;
 pub(crate) mod walker;
 
