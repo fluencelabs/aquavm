@@ -1,14 +1,41 @@
-## Version 0.24.0 (2021-04-21)
+## Version 0.27.0 (2022-08-23)
+
+[PR 292](https://github.com/fluencelabs/aquavm/pull/292):
+Introduced a new `canon` instruction
+
+[PR 296](https://github.com/fluencelabs/aquavm/pull/296):  
+A bug with inappropriate checking of states in the `Ap` merger was fixed
+
+## Version 0.26.0 (2022-08-19)
+
+[PR 294](https://github.com/fluencelabs/aquavm/pull/294):  
+Accompanying to air-interpreter update makes interface more handy for `air-trace`
+
+## Version 0.25.0 (2022-07-27)
+
+[PR 287](https://github.com/fluencelabs/aquavm/pull/287):
+Memory leak introduced by switching to reactor/command model in WASI fixed
+
+[PR 276](https://github.com/fluencelabs/aquavm/pull/276):  
+AquaVM performance was improved by deleting excess logging
+
+[PR 273](https://github.com/fluencelabs/aquavm/pull/273):  
+Introduced `TracePos` for `TraceHandler` positions
+
+[PR 270](https://github.com/fluencelabs/aquavm/pull/270):
+A bug with empty subtrace lore in TraceHandler was fixed 
+
+## Version 0.24.0 (2022-04-21)
 
 [PR 253](https://github.com/fluencelabs/aquavm/pull/253):
 Introduced %ttl% keyword
 
-## Version 0.24.0 (2021-04-20)
+## Version 0.24.0 (2022-04-20)
 
 [PR 250](https://github.com/fluencelabs/aquavm/pull/250):
 Introduced %timestamp% keyword
 
-## Version 0.23.0 (2021-04-20)
+## Version 0.23.0 (2022-04-20)
 
 [PR 248](https://github.com/fluencelabs/aquavm/pull/248):
 Introduced new for scalars
@@ -16,7 +43,7 @@ Introduced new for scalars
 [PR 244](https://github.com/fluencelabs/aquavm/pull/244):
 Stack size was increased to 50 MiB
 
-## Version 0.22.0 (2021-04-14)
+## Version 0.22.0 (2022-04-14)
 
 [PR 243](https://github.com/fluencelabs/aquavm/pull/243):
 Clean scalars at the end of scope, only one next in a fold over scalar is possible now
@@ -27,13 +54,13 @@ Test refactoring
 [PR 228](https://github.com/fluencelabs/aquavm/pull/228):
 Improve stream determinism
 
-## Version 0.21.0 (2021-02-26)
+## Version 0.21.0 (2022-02-26)
 
 [PR 225](https://github.com/fluencelabs/aquavm/pull/225):  
 Introduce recursive streams
 
 [PR 224](https://github.com/fluencelabs/aquavm/pull/224) [PR 220](https://github.com/fluencelabs/aquavm/pull/224) [PR 217](https://github.com/fluencelabs/aquavm/pull/217) [PR 215](https://github.com/fluencelabs/aquavm/pull/215) [PR 212](https://github.com/fluencelabs/aquavm/pull/212) [PR 207](https://github.com/fluencelabs/aquavm/pull/207):  
-Various bugs fixed
+Various bugs were fixed
 
 [PR 210](https://github.com/fluencelabs/aquavm/pull/210):  
 Add API for returning AquaVM consumed memory size
