@@ -18,6 +18,7 @@ mod impls;
 mod traits;
 
 use super::*;
+use air_lambda_ast::LambdaAST;
 use serde::Serialize;
 use std::rc::Rc;
 
@@ -101,6 +102,10 @@ pub enum Fail<'i> {
     Literal {
         ret_code: i64,
         error_message: &'i str,
+    },
+    CanonStream {
+        name: &'i str,
+        lambda: LambdaAST<'i>,
     },
     LastError,
 }

@@ -141,6 +141,10 @@ FailBody: Fail<'input> = {
         ret_code,
         error_message,
     },
+    <canon_stream:CanonStreamWithLambda> => Fail::CanonStream {
+        name: canon_stream.0,
+        lambda: canon_stream.1,
+    },
     <left: @L> <l:LastError> <right: @R> => {
         Fail::LastError
     }

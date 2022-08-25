@@ -72,7 +72,7 @@ fn apply_scalar(
 ) -> ExecutionResult<ValueAggregate> {
     // TODO: refactor this code after boxed value
     match &scalar.lambda {
-        Some(lambda) => apply_scalar_wl_impl(scalar.name, scalar.position, lambda, exec_ctx, trace_ctx),
+        Some(lambda) => apply_scalar_wl_impl(scalar.name, lambda, exec_ctx, trace_ctx),
         None => apply_scalar_impl(scalar.name, exec_ctx, trace_ctx, should_touch_trace),
     }
 }
@@ -107,12 +107,11 @@ fn apply_scalar_impl(
 
 fn apply_scalar_wl_impl(
     scalar_name: &str,
-    position: usize,
     lambda: &LambdaAST<'_>,
     exec_ctx: &ExecutionCtx<'_>,
     trace_ctx: &TraceHandler,
 ) -> ExecutionResult<ValueAggregate> {
-    let variable = Variable::scalar(scalar_name, position);
+    let variable = Variable::scalar(scalar_name);
     let (jvalue, tetraplet) = apply_lambda(variable, lambda, exec_ctx)?;
     let tetraplet = Rc::new(tetraplet);
     let result = ValueAggregate::new(Rc::new(jvalue), tetraplet, trace_ctx.trace_pos());

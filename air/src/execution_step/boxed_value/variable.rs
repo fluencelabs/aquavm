@@ -21,8 +21,6 @@ use air_parser::ast;
 pub(crate) enum Variable<'i> {
     Scalar {
         name: &'i str,
-        #[allow(dead_code)] // it's needed for the further refactoring
-        position: usize,
     },
     Stream {
         name: &'i str,
@@ -31,14 +29,12 @@ pub(crate) enum Variable<'i> {
     },
     CanonStream {
         name: &'i str,
-        #[allow(dead_code)] // it's needed for the further refactoring
-        position: usize,
     },
 }
 
 impl<'i> Variable<'i> {
-    pub(crate) fn scalar(name: &'i str, position: usize) -> Self {
-        Self::Scalar { name, position }
+    pub(crate) fn scalar(name: &'i str) -> Self {
+        Self::Scalar { name }
     }
 
     pub(crate) fn stream(name: &'i str, generation: Generation, position: usize) -> Self {
@@ -49,8 +45,8 @@ impl<'i> Variable<'i> {
         }
     }
 
-    pub(crate) fn canon_stream(name: &'i str, position: usize) -> Self {
-        Self::CanonStream { name, position }
+    pub(crate) fn canon_stream(name: &'i str) -> Self {
+        Self::CanonStream { name }
     }
 }
 
@@ -59,9 +55,9 @@ impl<'i> From<&ast::Variable<'i>> for Variable<'i> {
         use ast::Variable::*;
 
         match ast_variable {
-            Scalar(scalar) => Self::scalar(scalar.name, scalar.position),
+            Scalar(scalar) => Self::scalar(scalar.name),
             Stream(stream) => Self::stream(stream.name, Generation::Last, stream.position),
-            CanonStream(canon_stream) => Self::canon_stream(canon_stream.name, canon_stream.position),
+            CanonStream(canon_stream) => Self::canon_stream(canon_stream.name),
         }
     }
 }
@@ -71,9 +67,9 @@ impl<'i> From<&ast::VariableWithLambda<'i>> for Variable<'i> {
         use ast::VariableWithLambda::*;
 
         match ast_variable {
-            Scalar(scalar) => Self::scalar(scalar.name, scalar.position),
+            Scalar(scalar) => Self::scalar(scalar.name),
             Stream(stream) => Self::stream(stream.name, Generation::Last, stream.position),
-            CanonStream(canon_stream) => Self::canon_stream(canon_stream.name, canon_stream.position),
+            CanonStream(canon_stream) => Self::canon_stream(canon_stream.name),
         }
     }
 }

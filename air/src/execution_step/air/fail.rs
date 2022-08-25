@@ -18,7 +18,7 @@ use super::ExecutionCtx;
 use super::ExecutionResult;
 use super::TraceHandler;
 use crate::execution_step::execution_context::check_error_object;
-use crate::execution_step::resolver::resolve_ast_scalar_wl;
+use crate::execution_step::resolver::{apply_lambda, resolve_ast_scalar_wl};
 use crate::execution_step::CatchableError;
 use crate::execution_step::LastError;
 use crate::execution_step::RcSecurityTetraplet;
@@ -30,6 +30,8 @@ use air_parser::ast;
 use air_parser::ast::Fail;
 use polyplets::SecurityTetraplet;
 
+use crate::execution_step::boxed_value::Variable;
+use air_lambda_ast::LambdaAST;
 use std::rc::Rc;
 
 impl<'i> super::ExecutableInstruction<'i> for Fail<'i> {
@@ -42,6 +44,7 @@ impl<'i> super::ExecutableInstruction<'i> for Fail<'i> {
                 ret_code,
                 error_message,
             } => fail_with_literals(ret_code, error_message, self, exec_ctx),
+            Fail::CanonStream { name, lambda } => fail_with_canon_stream(name, lambda, exec_ctx),
             // bubble last error up
             Fail::LastError => fail_with_last_error(exec_ctx),
         }
@@ -74,6 +77,20 @@ fn fail_with_literals<'i>(
     let literal_tetraplet = Rc::new(literal_tetraplet);
 
     fail_with_error_object(exec_ctx, Rc::new(error_object), Some(literal_tetraplet))
+}
+
+fn fail_with_canon_stream<'i>(
+    name: &'i str,
+    lambda: &LambdaAST<'i>,
+    exec_ctx: &mut ExecutionCtx<'i>,
+) -> ExecutionResult<()> {
+    let variable = Variable::CanonStream { name };
+
+    let (value, tetraplet) = apply_lambda(variable, lambda, exec_ctx)?;
+    // tetraplets always have one element here and it'll be refactored after boxed value
+    check_error_object(&value).map_err(CatchableError::InvalidLastErrorObjectError)?;
+
+    fail_with_error_object(exec_ctx, Rc::new(value), Some(Rc::new(tetraplet)))
 }
 
 fn fail_with_last_error(exec_ctx: &mut ExecutionCtx<'_>) -> ExecutionResult<()> {

@@ -150,7 +150,7 @@ fn canon_stream_can_be_created_from_aps() {
     let result_1 = checked_call_vm!(vm_1, <_>::default(), &script, "", "");
     let result_2 = checked_call_vm!(vm_2, <_>::default(), &script, "", result_1.data.clone());
     // it fails on this call if canon merger can't handle ap results
-    let result = checked_call_vm!(vm_2, <_>::default(), &script, result_1.data, result_2.data);
+    let _ = checked_call_vm!(vm_2, <_>::default(), &script, result_1.data, result_2.data);
 }
 
 #[test]
