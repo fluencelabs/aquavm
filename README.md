@@ -86,6 +86,24 @@ Example:
 )
 ```
 
+#### canon
+
+```wasm
+(canon "peer_id" <$stream> <#canon_stream>)
+```
+
+- executes on peer_id, takes $stream as it is on the moment of first canonicalization
+- every next execution #canon_stream will be the same — as first seen by peer_id
+
+Example:
+
+```wasm
+(seq
+    (ap user $users)
+    (canon "peer_id" $stream #canon_stream)
+)
+```
+
 #### match/mismath
 
 ```wasm
