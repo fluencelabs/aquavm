@@ -29,9 +29,8 @@ use std::rc::Rc;
 #[derive(Debug, Default, Clone)]
 pub struct CanonStream {
     values: Vec<ValueAggregate>,
-    // tetraplet is needed to handle adding canon streams as a whole to a stream.
+    // tetraplet is needed to handle adding canon streams as a whole to a stream
     tetraplet: Rc<SecurityTetraplet>,
-    #[allow(dead_code)]
     position: TracePos,
 }
 
@@ -47,7 +46,7 @@ impl CanonStream {
     }
 
     pub(crate) fn from_stream(stream: &Stream, peer_pk: String, position: TracePos) -> Self {
-        // it's always safe to iter over all generations of a stream
+        // it's always possible to iter over all generations of a stream
         let values = stream.iter(Generation::Last).unwrap().cloned().collect::<Vec<_>>();
         let tetraplet = SecurityTetraplet::new(peer_pk, "", "", "");
         Self {
@@ -84,6 +83,10 @@ impl CanonStream {
     pub(crate) fn tetraplet(&self) -> &Rc<SecurityTetraplet> {
         &self.tetraplet
     }
+
+    pub(crate) fn position(&self) -> TracePos {
+        self.position
+    }
 }
 
 use std::fmt;
@@ -92,7 +95,7 @@ impl fmt::Display for CanonStream {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "[")?;
         for value in self.values.iter() {
-            write!(f, "{}", value)?;
+            write!(f, "{}, ", value)?;
         }
         write!(f, "]")
     }

@@ -25,9 +25,11 @@ use crate::CatchableError;
 use crate::ExecutionError;
 use crate::UncatchableError;
 
-use air_interpreter_data::{CanonResult, TracePos};
+use air_interpreter_data::CanonResult;
+use air_interpreter_data::TracePos;
 use air_parser::ast;
 use air_trace_handler::MergerCanonResult;
+
 use std::rc::Rc;
 
 impl<'i> super::ExecutableInstruction<'i> for ast::Canon<'i> {
@@ -70,6 +72,12 @@ fn handle_unseen_canon(
     if exec_ctx.run_parameters.current_peer_id.as_str() != peer_id {
         exec_ctx.subgraph_complete = false;
         exec_ctx.next_peer_pks.push(peer_id);
+        //this branch is executed only when
+        //  this canon instruction executes for the first time
+        //  a peer is different from one set in peer_id of a this canon instruction
+        //
+        // the former means that there wasn't canon associated state in data, the latter that it
+        // can't be obtained on this peer, so it's intended not to call meet_canon_end here.
         return Ok(());
     }
 

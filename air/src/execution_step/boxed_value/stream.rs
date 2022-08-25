@@ -18,8 +18,10 @@ use super::ExecutionResult;
 use super::ValueAggregate;
 use crate::execution_step::CatchableError;
 use crate::JValue;
-use std::collections::HashMap;
 
+use air_interpreter_data::TracePos;
+
+use std::collections::HashMap;
 use std::fmt::Formatter;
 
 /// Streams are CRDT-like append only data structures. They are guaranteed to have the same order
@@ -33,8 +35,8 @@ pub struct Stream {
     values: Vec<Vec<ValueAggregate>>,
 
     /// This map is intended to support canonicalized stream creation, such streams has
-    /// corresponding value positions in a data and this field is used to create such streams.
-    values_by_pos: HashMap<TracePos, (usize, usize)>,
+    /// corresponding value positions in a data and this field are used to create such streams.
+    values_by_pos: HashMap<TracePos, StreamValueLocation>,
 }
 
 impl Stream {
@@ -47,7 +49,7 @@ impl Stream {
 
     pub(crate) fn from_value(value: ValueAggregate) -> Self {
         let values_by_pos = maplit::hashmap! {
-            value.trace_pos => (0,0),
+            value.trace_pos => StreamValueLocation::new(0, 0),
         };
         Self {
             values: vec![vec![value]],
@@ -68,7 +70,8 @@ impl Stream {
         }
 
         let values = &mut self.values[generation];
-        self.values_by_pos.insert(value.trace_pos, (generation, values.len()));
+        self.values_by_pos
+            .insert(value.trace_pos, StreamValueLocation::new(generation, values.len()));
         values.push(value);
         Ok(generation as u32)
     }
@@ -131,7 +134,10 @@ impl Stream {
     }
 
     pub(crate) fn get_value_by_pos(&self, position: TracePos) -> Option<&ValueAggregate> {
-        let (generation, position_in_generation) = self.values_by_pos.get(&position)?;
+        let StreamValueLocation {
+            generation,
+            position_in_generation,
+        } = self.values_by_pos.get(&position)?;
         let value = &self.values[*generation][*position_in_generation];
         Some(value)
     }
@@ -235,7 +241,21 @@ impl<'slice> Iterator for StreamSliceIter<'slice> {
     }
 }
 
-use air_interpreter_data::TracePos;
+#[derive(Clone, Copy, Debug, Default)]
+struct StreamValueLocation {
+    pub generation: usize,
+    pub position_in_generation: usize,
+}
+
+impl StreamValueLocation {
+    pub(super) fn new(generation: usize, position_in_generation: usize) -> Self {
+        Self {
+            generation,
+            position_in_generation,
+        }
+    }
+}
+
 use std::fmt;
 
 impl fmt::Display for Stream {

@@ -20,7 +20,7 @@ use crate::execution_step::boxed_value::CanonStream;
 use crate::foldable_next;
 use crate::foldable_prev;
 
-const EXPECT_VALUE_IN_STREAM: &str = "value must exists, because length checked before creation and canonicalized stream can't be modified during iteration";
+const EXPECT_VALUE_IN_STREAM: &str = "value must exist, because length checked before creation and canonicalized stream can't be modified during iteration";
 
 pub(crate) struct CanonStreamIterableIngredients {
     canon_stream: CanonStream,

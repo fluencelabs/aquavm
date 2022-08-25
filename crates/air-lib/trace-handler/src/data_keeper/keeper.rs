@@ -20,6 +20,7 @@ use super::TraceSlider;
 use crate::TracePos;
 
 use air_interpreter_data::InterpreterData;
+
 use bimap::BiHashMap;
 
 /// Keeps all necessary data for merging.

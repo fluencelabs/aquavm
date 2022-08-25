@@ -79,7 +79,7 @@ pub enum CallResultError {
 
 #[derive(ThisError, Debug)]
 pub enum CanonResultError {
-    #[error("canon results have different lens: {prev_canon_result:?} != {current_canon_result:?}")]
+    #[error("canon results have different length: {prev_canon_result:?} != {current_canon_result:?}")]
     LensNotEqual {
         prev_canon_result: CanonResult,
         current_canon_result: CanonResult,

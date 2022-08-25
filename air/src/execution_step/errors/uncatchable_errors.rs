@@ -68,7 +68,7 @@ pub enum UncatchableError {
     ScalarsStateCorrupted { scalar_name: String, depth: usize },
 
     /// Variable with such a position wasn't defined during AIR script execution.
-    /// Canon instruction requires this value to presence in data, otherwise it's considered
+    /// Canon instruction requires this value to be present in data, otherwise it's considered
     /// as a hard error.
     #[error("variable with position '{0}' wasn't defined during script execution")]
     VariableNotFoundByPos(TracePos),
