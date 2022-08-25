@@ -196,3 +196,11 @@ Example
 - versioned
 - could be used only by call and fold instructions (more instructions for streams to come)
 - could be turned to scalar (canonicalized)
+
+#### Canonicalized streams
+
+- contains an array of elements that was in a stream at the moment of canonicalization
+- canonicalized streams are imutable and fully consistent as scalars
+- has the same algebra as a stream for `match`/`mismatch` and `call` argument
+- has the same algebra as a scalar for `new`
+- has mixed behaviour for with other instructions
