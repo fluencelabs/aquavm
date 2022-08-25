@@ -21,14 +21,15 @@ use crate::TracePos;
 
 use air_interpreter_data::InterpreterData;
 
-use std::collections::HashMap;
+use bimap::BiHashMap;
 
 /// Keeps all necessary data for merging.
 #[derive(Debug, Default, PartialEq)]
 pub(crate) struct DataKeeper {
     pub(crate) prev_ctx: MergeCtx,
     pub(crate) current_ctx: MergeCtx,
-    pub(crate) new_to_old_pos: HashMap<TracePos, DataPositions>,
+    pub(crate) new_to_prev_pos: BiHashMap<TracePos, TracePos>,
+    pub(crate) new_to_current_pos: BiHashMap<TracePos, TracePos>,
     pub(crate) result_trace: ExecutionTrace,
 }
 
@@ -40,7 +41,8 @@ impl DataKeeper {
         Self {
             prev_ctx,
             current_ctx,
-            new_to_old_pos: <_>::default(),
+            new_to_prev_pos: <_>::default(),
+            new_to_current_pos: <_>::default(),
             result_trace: <_>::default(),
         }
     }
@@ -68,10 +70,4 @@ impl DataKeeper {
     pub(crate) fn current_slider_mut(&mut self) -> &mut TraceSlider {
         &mut self.current_ctx.slider
     }
-}
-
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
-pub(crate) struct DataPositions {
-    pub(crate) prev_pos: Option<TracePos>,
-    pub(crate) current_pos: Option<TracePos>,
 }

@@ -22,8 +22,6 @@ use crate::LambdaAST;
 use std::iter::Peekable;
 use std::str::CharIndices;
 
-const STREAM_START_TAG: char = '$';
-
 pub(super) fn try_parse_call_variable(
     string_to_parse: &str,
     start_pos: usize,
@@ -32,13 +30,20 @@ pub(super) fn try_parse_call_variable(
 }
 
 #[derive(Debug)]
+enum MetTag {
+    None,
+    Stream,
+    CanonStream,
+}
+
+#[derive(Debug)]
 struct ParserState {
     pub(self) first_dot_met_pos: Option<usize>,
     pub(self) non_numeric_met: bool,
     pub(self) digit_met: bool,
     pub(self) flattening_met: bool,
+    pub(self) met_tag: MetTag,
     pub(self) is_first_char: bool,
-    pub(self) is_first_stream_tag: bool,
     pub(self) current_char: char,
     pub(self) current_pos: usize,
 }
@@ -64,7 +69,7 @@ impl<'input> CallVariableParser<'input> {
             digit_met: false,
             flattening_met: false,
             is_first_char: true,
-            is_first_stream_tag: false,
+            met_tag: MetTag::None,
             current_char,
             current_pos,
         };
@@ -180,13 +185,14 @@ impl<'input> CallVariableParser<'input> {
     }
 
     fn try_parse_as_stream_start(&mut self) -> LexerResult<bool> {
-        if self.current_pos() == 0 && self.current_char() == STREAM_START_TAG {
+        let stream_tag = MetTag::from_tag(self.current_char());
+        if self.current_pos() == 0 && stream_tag.is_tag() {
             if self.string_to_parse.len() == 1 {
                 let error_pos = self.pos_in_string_to_parse();
                 return Err(LexerError::empty_stream_name(error_pos..error_pos));
             }
 
-            self.state.is_first_stream_tag = true;
+            self.state.met_tag = stream_tag;
             return Ok(true);
         }
 
@@ -271,32 +277,39 @@ impl<'input> CallVariableParser<'input> {
     }
 
     fn to_variable_token<'v>(&self, name: &'v str) -> Token<'v> {
-        if self.state.is_first_stream_tag {
-            Token::Stream {
+        match self.state.met_tag {
+            MetTag::None => Token::Scalar {
                 name,
                 position: self.start_pos,
-            }
-        } else {
-            Token::Scalar {
+            },
+            MetTag::Stream => Token::Stream {
                 name,
                 position: self.start_pos,
-            }
+            },
+            MetTag::CanonStream => Token::CanonStream {
+                name,
+                position: self.start_pos,
+            },
         }
     }
 
     fn to_variable_token_with_lambda<'v>(&self, name: &'v str, lambda: LambdaAST<'v>) -> Token<'v> {
-        if self.state.is_first_stream_tag {
-            Token::StreamWithLambda {
+        match self.state.met_tag {
+            MetTag::None => Token::ScalarWithLambda {
                 name,
                 lambda,
                 position: self.start_pos,
-            }
-        } else {
-            Token::ScalarWithLambda {
+            },
+            MetTag::Stream => Token::StreamWithLambda {
                 name,
                 lambda,
                 position: self.start_pos,
-            }
+            },
+            MetTag::CanonStream => Token::CanonStreamWithLambda {
+                name,
+                lambda,
+                position: self.start_pos,
+            },
         }
     }
 
@@ -354,5 +367,19 @@ impl<'input> CallVariableParser<'input> {
             (false, None) => Ok(self.to_variable_token(self.string_to_parse)),
             (false, Some(lambda_start_pos)) => self.try_to_variable_and_lambda(lambda_start_pos),
         }
+    }
+}
+
+impl MetTag {
+    fn from_tag(tag: char) -> Self {
+        match tag {
+            '$' => Self::Stream,
+            '#' => Self::CanonStream,
+            _ => Self::None,
+        }
+    }
+
+    fn is_tag(&self) -> bool {
+        !matches!(self, Self::None)
     }
 }

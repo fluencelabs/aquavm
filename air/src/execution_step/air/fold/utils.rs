@@ -31,7 +31,7 @@ pub(crate) type IterableValue = Box<dyn for<'ctx> Iterable<'ctx, Item = Iterable
 
 pub(crate) enum FoldIterableScalar {
     Empty,
-    Scalar(IterableValue),
+    ScalarBased(IterableValue),
 }
 
 /// Constructs iterable value for given scalar iterable.
@@ -43,6 +43,18 @@ pub(crate) fn construct_scalar_iterable_value<'ctx>(
         None => create_scalar_iterable(exec_ctx, iterable.name),
         Some(lambda) => create_scalar_lambda_iterable(exec_ctx, iterable.name, lambda),
     }
+}
+
+/// Constructs iterable value for given canon stream.
+pub(crate) fn construct_canon_stream_iterable_value<'ctx>(
+    ast_canon_stream: &ast::CanonStream<'ctx>,
+    exec_ctx: &ExecutionCtx<'ctx>,
+) -> ExecutionResult<FoldIterableScalar> {
+    let canon_stream = exec_ctx.scalars.get_canon_stream(ast_canon_stream.name)?;
+    // TODO: this one is a relatively long operation and will be refactored in Boxed Value
+    let iterable_ingredients = CanonStreamIterableIngredients::init(canon_stream.clone());
+    let iterable = Box::new(iterable_ingredients);
+    Ok(FoldIterableScalar::ScalarBased(iterable))
 }
 
 /// Constructs iterable value for given stream iterable.
@@ -72,17 +84,17 @@ fn create_scalar_iterable<'ctx>(
     variable_name: &str,
 ) -> ExecutionResult<FoldIterableScalar> {
     match exec_ctx.scalars.get_value(variable_name)? {
-        ScalarRef::Value(call_result) => from_call_result(call_result.clone(), variable_name),
+        ScalarRef::Value(call_result) => from_value(call_result.clone(), variable_name),
         ScalarRef::IterableValue(fold_state) => {
             let iterable_value = fold_state.iterable.peek().unwrap();
             let call_result = iterable_value.into_resolved_result();
-            from_call_result(call_result, variable_name)
+            from_value(call_result, variable_name)
         }
     }
 }
 
 /// Constructs iterable value from resolved call result.
-fn from_call_result(call_result: ValueAggregate, variable_name: &str) -> ExecutionResult<FoldIterableScalar> {
+fn from_value(call_result: ValueAggregate, variable_name: &str) -> ExecutionResult<FoldIterableScalar> {
     let len = match &call_result.result.deref() {
         JValue::Array(array) => {
             if array.is_empty() {
@@ -103,7 +115,7 @@ fn from_call_result(call_result: ValueAggregate, variable_name: &str) -> Executi
 
     let foldable = IterableResolvedCall::init(call_result, len);
     let foldable = Box::new(foldable);
-    let iterable = FoldIterableScalar::Scalar(foldable);
+    let iterable = FoldIterableScalar::ScalarBased(foldable);
 
     Ok(iterable)
 }
@@ -154,7 +166,7 @@ fn from_jvalue(
 
     let iterable = iterable.to_vec();
     let foldable = IterableLambdaResult::init(iterable, tetraplet);
-    let iterable = FoldIterableScalar::Scalar(Box::new(foldable));
+    let iterable = FoldIterableScalar::ScalarBased(Box::new(foldable));
     Ok(iterable)
 }
 

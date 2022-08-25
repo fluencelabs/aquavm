@@ -19,19 +19,22 @@ use air_parser::ast;
 
 #[derive(Clone, Copy, Debug)]
 pub(crate) enum Variable<'i> {
-    #[allow(dead_code)]
-    // position will be needed to implement new for operators
-    Scalar { name: &'i str, position: usize },
+    Scalar {
+        name: &'i str,
+    },
     Stream {
         name: &'i str,
         generation: Generation,
         position: usize,
     },
+    CanonStream {
+        name: &'i str,
+    },
 }
 
 impl<'i> Variable<'i> {
-    pub(crate) fn scalar(name: &'i str, position: usize) -> Self {
-        Self::Scalar { name, position }
+    pub(crate) fn scalar(name: &'i str) -> Self {
+        Self::Scalar { name }
     }
 
     pub(crate) fn stream(name: &'i str, generation: Generation, position: usize) -> Self {
@@ -41,6 +44,10 @@ impl<'i> Variable<'i> {
             position,
         }
     }
+
+    pub(crate) fn canon_stream(name: &'i str) -> Self {
+        Self::CanonStream { name }
+    }
 }
 
 impl<'i> From<&ast::Variable<'i>> for Variable<'i> {
@@ -48,8 +55,9 @@ impl<'i> From<&ast::Variable<'i>> for Variable<'i> {
         use ast::Variable::*;
 
         match ast_variable {
-            Scalar(scalar) => Self::scalar(scalar.name, scalar.position),
+            Scalar(scalar) => Self::scalar(scalar.name),
             Stream(stream) => Self::stream(stream.name, Generation::Last, stream.position),
+            CanonStream(canon_stream) => Self::canon_stream(canon_stream.name),
         }
     }
 }
@@ -59,8 +67,9 @@ impl<'i> From<&ast::VariableWithLambda<'i>> for Variable<'i> {
         use ast::VariableWithLambda::*;
 
         match ast_variable {
-            Scalar(scalar) => Self::scalar(scalar.name, scalar.position),
+            Scalar(scalar) => Self::scalar(scalar.name),
             Stream(stream) => Self::stream(stream.name, Generation::Last, stream.position),
+            CanonStream(canon_stream) => Self::canon_stream(canon_stream.name),
         }
     }
 }

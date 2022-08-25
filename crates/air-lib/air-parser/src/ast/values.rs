@@ -54,6 +54,22 @@ pub struct StreamWithLambda<'i> {
     pub position: usize,
 }
 
+/// A canonicalized stream without lambda.
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
+pub struct CanonStream<'i> {
+    pub name: &'i str,
+    pub position: usize,
+}
+
+/// A canonicalized stream with lambda.
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
+pub struct CanonStreamWithLambda<'i> {
+    pub name: &'i str,
+    #[serde(borrow)]
+    pub lambda: Option<LambdaAST<'i>>,
+    pub position: usize,
+}
+
 /// A variable that could be either scalar or stream without lambda.
 #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub enum Variable<'i> {
@@ -61,6 +77,8 @@ pub enum Variable<'i> {
     Scalar(Scalar<'i>),
     #[serde(borrow)]
     Stream(Stream<'i>),
+    #[serde(borrow)]
+    CanonStream(CanonStream<'i>),
 }
 
 /// A variable that could be either scalar or stream with possible lambda expression.
@@ -70,4 +88,6 @@ pub enum VariableWithLambda<'i> {
     Scalar(ScalarWithLambda<'i>),
     #[serde(borrow)]
     Stream(StreamWithLambda<'i>),
+    #[serde(borrow)]
+    CanonStream(CanonStreamWithLambda<'i>),
 }

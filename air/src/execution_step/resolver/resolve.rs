@@ -111,6 +111,10 @@ pub(crate) fn resolve_variable<'ctx, 'i>(
                 None => Ok(Box::new(())),
             }
         }
+        Variable::CanonStream { name, .. } => {
+            let canon_stream = ctx.scalars.get_canon_stream(name)?;
+            Ok(Box::new(canon_stream))
+        }
     }
 }
 

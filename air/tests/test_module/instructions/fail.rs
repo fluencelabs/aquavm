@@ -115,3 +115,34 @@ fn fail_with_literals_tetraplets() {
         SecurityTetraplet::literal_tetraplet(local_peer_id)
     );
 }
+
+#[test]
+fn fail_with_canon_stream() {
+    let vm_peer_id = "local_peer_id";
+    let error_code = 1337i64;
+    let error_message = "error message";
+    let mut vm = create_avm(
+        set_variable_call_service(json!({"error_code": error_code, "message": error_message})),
+        vm_peer_id,
+    );
+
+    let script = f!(r#"
+            (seq
+                (seq
+                    (call "{vm_peer_id}" ("" "") [] $stream)
+                    (canon "{vm_peer_id}" $stream #canon_stream)
+                )
+                (fail #canon_stream.$.[0])
+            )"#);
+
+    let test_params = TestRunParameters::from_init_peer_id("init_peer_id");
+    let result = call_vm!(vm, test_params.clone(), script, "", "");
+
+    let expected_error = CatchableError::UserError {
+        error: rc!(json!( {
+        "error_code": error_code,
+        "message": error_message,
+        })),
+    };
+    assert!(check_error(&result, expected_error));
+}

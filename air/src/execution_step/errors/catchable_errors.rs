@@ -87,6 +87,10 @@ pub enum CatchableError {
     /// that is prohibited.
     #[error("variable with name '{0}' was cleared by new and then wasn't set")]
     VariableWasNotInitializedAfterNew(String),
+
+    /// Canon instruction can't canonicalize a stream since it's been found.
+    #[error("stream with name {0} wasn't defined, so canon instruction can't canonicalize it")]
+    StreamsForCanonNotFound(String),
 }
 
 impl From<LambdaError> for Rc<CatchableError> {

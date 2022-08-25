@@ -135,6 +135,7 @@ impl<W: io::Write> Beautifier<W> {
         match node {
             ast::Instruction::Call(call) => self.beautify_call(call, indent),
             ast::Instruction::Ap(ap) => self.beautify_simple(ap, indent),
+            ast::Instruction::Canon(canon) => self.beautify_simple(canon, indent),
             ast::Instruction::Seq(seq) => self.beautify_seq(seq, indent),
             ast::Instruction::Par(par) => self.beautify_par(par, indent),
             ast::Instruction::Xor(xor) => self.beautify_xor(xor, indent),
@@ -157,7 +158,8 @@ impl<W: io::Write> Beautifier<W> {
     fn beautify_call(&mut self, call: &ast::Call, indent: usize) -> io::Result<()> {
         fmt_indent(&mut self.output, indent)?;
         match &call.output {
-            ast::CallOutputValue::Variable(v) => write!(&mut self.output, "{} <- ", v)?,
+            ast::CallOutputValue::Scalar(v) => write!(&mut self.output, "{} <- ", v)?,
+            ast::CallOutputValue::Stream(v) => write!(&mut self.output, "{} <- ", v)?,
             ast::CallOutputValue::None => {}
         }
         writeln!(

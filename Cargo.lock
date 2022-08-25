@@ -13,7 +13,7 @@ dependencies = [
 
 [[package]]
 name = "air"
-version = "0.26.0"
+version = "0.27.0"
 dependencies = [
  "air-execution-info-collector",
  "air-interpreter-data",
@@ -72,7 +72,7 @@ version = "0.1.0"
 
 [[package]]
 name = "air-interpreter"
-version = "0.26.0"
+version = "0.27.0"
 dependencies = [
  "air",
  "air-interpreter-interface",
@@ -88,7 +88,7 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter-data"
-version = "0.2.2"
+version = "0.3.0"
 dependencies = [
  "air-utils",
  "once_cell",
@@ -199,6 +199,7 @@ dependencies = [
  "air-interpreter-data",
  "air-log-targets",
  "air-parser",
+ "bimap",
  "log",
  "serde_json",
  "thiserror",
@@ -306,6 +307,12 @@ dependencies = [
  "thiserror",
  "tracing",
 ]
+
+[[package]]
+name = "bimap"
+version = "0.6.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bc0455254eb5c6964c4545d8bac815e1a1be4f3afe0ae695ea539c12d728d44b"
 
 [[package]]
 name = "bincode"
@@ -1829,7 +1836,7 @@ dependencies = [
 
 [[package]]
 name = "polyplets"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "marine-macro",
  "marine-rs-sdk-main",

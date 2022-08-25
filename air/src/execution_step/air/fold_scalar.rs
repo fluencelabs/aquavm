@@ -33,17 +33,21 @@ impl<'i> ExecutableInstruction<'i> for FoldScalar<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         log_instruction!(fold, exec_ctx, trace_ctx);
 
-        let scalar = match &self.iterable {
-            FoldScalarIterable::Scalar(scalar) => scalar,
+        let iterable = match &self.iterable {
+            FoldScalarIterable::Scalar(scalar) => {
+                joinable!(construct_scalar_iterable_value(scalar, exec_ctx), exec_ctx)?
+            }
+            FoldScalarIterable::CanonStream(canon_stream) => {
+                construct_canon_stream_iterable_value(canon_stream, exec_ctx)?
+            }
             // just do nothing on an empty array
             FoldScalarIterable::EmptyArray => return Ok(()),
         };
-        let scalar_iterable = joinable!(construct_scalar_iterable_value(scalar, exec_ctx), exec_ctx)?;
 
-        match scalar_iterable {
+        match iterable {
             // just exit on empty iterable
             FoldIterableScalar::Empty => Ok(()),
-            FoldIterableScalar::Scalar(iterable) => fold(
+            FoldIterableScalar::ScalarBased(iterable) => fold(
                 iterable,
                 IterableType::Scalar,
                 self.iterator.name,

@@ -16,6 +16,7 @@
 
 mod ap;
 mod call;
+mod canon;
 mod dsl;
 mod fail;
 mod fold;
@@ -35,6 +36,7 @@ fn parse(source_code: &str) -> Instruction {
         let mut errors = Vec::new();
         let lexer = crate::parser::AIRLexer::new(source_code);
         let mut validator = crate::parser::VariableValidator::new();
+
         parser
             .parse(source_code, &mut errors, &mut validator, lexer)
             .expect("parsing should be successful")

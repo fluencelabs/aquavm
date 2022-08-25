@@ -217,7 +217,7 @@ fn check_output_name(output: &ast::CallOutputValue<'_>, exec_ctx: &ExecutionCtx<
     use crate::execution_step::boxed_value::ScalarRef;
 
     let scalar_name = match output {
-        ast::CallOutputValue::Variable(ast::Variable::Scalar(scalar)) => scalar.name,
+        ast::CallOutputValue::Scalar(scalar) => scalar.name,
         _ => return Ok(()),
     };
 

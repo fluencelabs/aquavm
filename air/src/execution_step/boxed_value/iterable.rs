@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+mod canon_stream;
 mod json_path_result;
 mod resolved_call;
-mod vec_json_path_result;
 mod vec_resolved_call;
 
+pub(crate) use canon_stream::CanonStreamIterableIngredients;
 pub(crate) use json_path_result::IterableLambdaResult;
 pub(crate) use resolved_call::IterableResolvedCall;
 pub(crate) use vec_resolved_call::IterableVecResolvedCall;

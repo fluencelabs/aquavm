@@ -22,6 +22,7 @@ use super::FoldResult;
 use super::KeeperError;
 use super::Value;
 
+use air_interpreter_data::CanonResult;
 use air_interpreter_data::TracePos;
 use thiserror::Error as ThisError;
 
@@ -45,6 +46,9 @@ pub enum MergeError {
 
     #[error(transparent)]
     IncorrectCallResult(#[from] CallResultError),
+
+    #[error(transparent)]
+    IncorrectCanonResult(#[from] CanonResultError),
 
     #[error(transparent)]
     IncorrectFoldResult(#[from] FoldResultError),
@@ -71,6 +75,30 @@ pub enum CallResultError {
 
     #[error("air scripts has the following value type '{air_type}' while data other '{data_value:?}'")]
     DataNotMatchAIR { air_type: String, data_value: Value },
+}
+
+#[derive(ThisError, Debug)]
+pub enum CanonResultError {
+    #[error("canon results have different length: {prev_canon_result:?} != {current_canon_result:?}")]
+    LensNotEqual {
+        prev_canon_result: CanonResult,
+        current_canon_result: CanonResult,
+    },
+
+    #[error("canon results {prev_canon_result:?} {current_canon_result:?} at position {position} points to incompatible execution states: {prev_state:?} {current_state:?}")]
+    IncompatibleState {
+        prev_canon_result: CanonResult,
+        current_canon_result: CanonResult,
+        prev_state: Option<ExecutedState>,
+        current_state: Option<ExecutedState>,
+        position: usize,
+    },
+
+    #[error("position {position} from canon result {canon_result:?} hasn't been met yet")]
+    NotMetPosition {
+        canon_result: CanonResult,
+        position: TracePos,
+    },
 }
 
 #[derive(ThisError, Debug)]
@@ -135,6 +163,35 @@ impl CallResultError {
         let call_result_error = CallResultError::DataNotMatchAIR { air_type, data_value };
 
         MergeError::IncorrectCallResult(call_result_error)
+    }
+}
+
+impl CanonResultError {
+    pub(crate) fn different_lens(prev_canon_result: CanonResult, current_canon_result: CanonResult) -> Self {
+        Self::LensNotEqual {
+            prev_canon_result,
+            current_canon_result,
+        }
+    }
+
+    pub(crate) fn incompatible_state(
+        prev_canon_result: CanonResult,
+        current_canon_result: CanonResult,
+        prev_state: Option<ExecutedState>,
+        current_state: Option<ExecutedState>,
+        position: usize,
+    ) -> Self {
+        Self::IncompatibleState {
+            prev_canon_result,
+            current_canon_result,
+            prev_state,
+            current_state,
+            position,
+        }
+    }
+
+    pub(crate) fn not_met_position(canon_result: CanonResult, position: TracePos) -> Self {
+        Self::NotMetPosition { canon_result, position }
     }
 }
 

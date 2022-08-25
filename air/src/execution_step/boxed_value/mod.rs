@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
+mod canon_stream;
 mod iterable;
 mod jvaluable;
 mod scalar;
 mod stream;
 mod variable;
 
+pub(crate) use canon_stream::*;
 pub(crate) use iterable::*;
 pub(crate) use jvaluable::*;
 pub(crate) use scalar::ScalarRef;

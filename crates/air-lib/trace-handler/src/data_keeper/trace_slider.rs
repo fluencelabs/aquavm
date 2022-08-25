@@ -106,7 +106,7 @@ impl TraceSlider {
         self.subtrace_len - self.seen_elements
     }
 
-    pub(super) fn state_at_position(&self, position: TracePos) -> Option<&ExecutedState> {
+    pub(crate) fn state_at_position(&self, position: TracePos) -> Option<&ExecutedState> {
         // it would be nice to have the `impl SliceIndex for TracePos`, but it is unstable
         self.trace.get(position)
     }
