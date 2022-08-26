@@ -40,7 +40,7 @@ fn issue_177() {
         relay_peer_id,
     );
 
-    let script = include_str!("scripts/issue_177.clj");
+    let script = include_str!("scripts/issue_177.air");
 
     // client 1: demand result for (call %init_peer_id% ("getDataSrv" "-relay-") [] -relay-)
     let client_result_1 = client
