@@ -14,17 +14,22 @@
  * limitations under the License.
  */
 
+mod impls;
 mod traits;
 
-use super::Variable;
+use super::CanonStream;
+use super::Scalar;
+use super::ScalarWithLambda;
+use super::Stream;
 use super::VariableWithLambda;
-use crate::ast::ScalarWithLambda;
 
 use air_lambda_ast::LambdaAST;
 
+use crate::ast::CanonStreamWithLambda;
 use serde::Deserialize;
 use serde::Serialize;
 
+// TODO: rename CallInstrValue, since it'd used by the canon instruction
 #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub enum CallInstrValue<'i> {
     InitPeerId,
@@ -60,7 +65,10 @@ pub enum Value<'i> {
 
 #[derive(Serialize, Debug, PartialEq, Eq, Clone)]
 pub enum CallOutputValue<'i> {
-    Variable(Variable<'i>),
+    #[serde(borrow)]
+    Scalar(Scalar<'i>),
+    #[serde(borrow)]
+    Stream(Stream<'i>),
     None,
 }
 
@@ -75,6 +83,15 @@ pub enum ApArgument<'i> {
     Boolean(bool),
     EmptyArray,
     Scalar(ScalarWithLambda<'i>),
+    CanonStream(CanonStreamWithLambda<'i>),
+}
+
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
+pub enum ApResult<'i> {
+    #[serde(borrow)]
+    Scalar(Scalar<'i>),
+    #[serde(borrow)]
+    Stream(Stream<'i>),
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
@@ -87,5 +104,18 @@ pub enum Number {
 pub enum FoldScalarIterable<'i> {
     #[serde(borrow)]
     Scalar(ScalarWithLambda<'i>),
+    // it's important not to have lambda here
+    #[serde(borrow)]
+    CanonStream(CanonStream<'i>),
     EmptyArray,
+}
+
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
+pub enum NewArgument<'i> {
+    #[serde(borrow)]
+    Scalar(Scalar<'i>),
+    #[serde(borrow)]
+    Stream(Stream<'i>),
+    #[serde(borrow)]
+    CanonStream(CanonStream<'i>),
 }

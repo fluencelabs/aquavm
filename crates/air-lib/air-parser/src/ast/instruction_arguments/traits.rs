@@ -17,6 +17,17 @@
 use super::*;
 use std::fmt;
 
+impl fmt::Display for ApResult<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use ApResult::*;
+
+        match self {
+            Scalar(scalar) => write!(f, "{}", scalar),
+            Stream(stream) => write!(f, "{}", stream),
+        }
+    }
+}
+
 impl fmt::Display for Value<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use Value::*;
@@ -52,7 +63,8 @@ impl fmt::Display for CallOutputValue<'_> {
         use CallOutputValue::*;
 
         match self {
-            Variable(variable) => write!(f, "{}", variable),
+            Scalar(scalar) => write!(f, "{}", scalar),
+            Stream(stream) => write!(f, "{}", stream),
             None => Ok(()),
         }
     }
@@ -72,6 +84,7 @@ impl fmt::Display for ApArgument<'_> {
             Boolean(bool) => write!(f, "{}", bool),
             EmptyArray => write!(f, "[]"),
             Scalar(scalar) => write!(f, "{}", scalar),
+            CanonStream(canon_stream) => write!(f, "{}", canon_stream),
         }
     }
 }
@@ -83,6 +96,16 @@ impl fmt::Display for Triplet<'_> {
             "{} ({} {})",
             self.peer_pk, self.service_id, self.function_name
         )
+    }
+}
+
+impl fmt::Display for NewArgument<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Scalar(scalar) => write!(f, "{}", scalar),
+            Self::Stream(stream) => write!(f, "{}", stream),
+            Self::CanonStream(canon_stream) => write!(f, "{}", canon_stream),
+        }
     }
 }
 
@@ -103,6 +126,7 @@ impl fmt::Display for FoldScalarIterable<'_> {
 
         match self {
             Scalar(variable) => write!(f, "{}", variable),
+            CanonStream(canon_stream) => write!(f, "{}", canon_stream),
             EmptyArray => write!(f, "[]"),
         }
     }

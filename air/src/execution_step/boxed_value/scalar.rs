@@ -23,8 +23,6 @@ use air_interpreter_data::TracePos;
 use serde::Deserialize;
 use serde::Serialize;
 
-use std::fmt::Display;
-use std::fmt::Formatter;
 use std::rc::Rc;
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
@@ -61,8 +59,20 @@ impl ValueAggregate {
     }
 }
 
-impl<'i> Display for ScalarRef<'i> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+use std::fmt;
+
+impl fmt::Display for ValueAggregate {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "value: {}, tetraplet: {}, position: {} ",
+            self.result, self.tetraplet, self.trace_pos
+        )
+    }
+}
+
+impl<'i> fmt::Display for ScalarRef<'i> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             ScalarRef::Value(value) => write!(f, "{:?}", value)?,
             ScalarRef::IterableValue(cursor) => {

@@ -16,36 +16,31 @@
 
 use super::Iterable;
 use super::IterableItem;
-use crate::execution_step::RcSecurityTetraplets;
+use crate::execution_step::boxed_value::CanonStream;
 use crate::foldable_next;
 use crate::foldable_prev;
-use crate::JValue;
 
-/// Used for iterating over a result of applied to a stream lambda.
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub(crate) struct IterableVecJsonPathResult {
-    pub(crate) jvalues: Vec<JValue>,
-    pub(crate) tetraplets: RcSecurityTetraplets,
-    pub(crate) cursor: usize,
+const EXPECT_VALUE_IN_STREAM: &str = "value must exist, because length checked before creation and canonicalized stream can't be modified during iteration";
+
+pub(crate) struct CanonStreamIterableIngredients {
+    canon_stream: CanonStream,
+    cursor: usize,
 }
 
-impl IterableVecJsonPathResult {
-    #[allow(dead_code)]
-    pub(crate) fn init(jvalues: Vec<JValue>, tetraplets: RcSecurityTetraplets) -> Self {
-        // TODO: add assert on length
+impl CanonStreamIterableIngredients {
+    pub(crate) fn init(canon_stream: CanonStream) -> Self {
         Self {
-            jvalues,
-            tetraplets,
+            canon_stream,
             cursor: 0,
         }
     }
 }
 
-impl<'ctx> Iterable<'ctx> for IterableVecJsonPathResult {
+impl<'ctx> Iterable<'ctx> for CanonStreamIterableIngredients {
     type Item = IterableItem<'ctx>;
 
     fn next(&mut self) -> bool {
-        foldable_next!(self, self.jvalues.len())
+        foldable_next!(self, self.len())
     }
 
     fn prev(&mut self) -> bool {
@@ -53,18 +48,16 @@ impl<'ctx> Iterable<'ctx> for IterableVecJsonPathResult {
     }
 
     fn peek(&'ctx self) -> Option<Self::Item> {
-        if self.jvalues.is_empty() {
+        if self.canon_stream.is_empty() {
             return None;
         }
 
-        let jvalue = &self.jvalues[self.cursor];
-        let tetraplet = &self.tetraplets[self.cursor];
-        let result = IterableItem::RefRef((jvalue, tetraplet, 0.into()));
-
+        let value = self.canon_stream.nth(self.cursor).expect(EXPECT_VALUE_IN_STREAM);
+        let result = IterableItem::RefRef((&value.result, &value.tetraplet, value.trace_pos));
         Some(result)
     }
 
     fn len(&self) -> usize {
-        self.jvalues.len()
+        self.canon_stream.len()
     }
 }

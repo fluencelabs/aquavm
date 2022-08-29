@@ -86,6 +86,24 @@ Example:
 )
 ```
 
+#### canon
+
+```wasm
+(canon "peer_id" <$stream> <#canon_stream>)
+```
+
+- executes on peer_id, takes $stream as it is on the moment of first canonicalization
+- every next execution #canon_stream will be the same — as first seen by peer_id
+
+Example:
+
+```wasm
+(seq
+    (ap user $users)
+    (canon "peer_id" $stream #canon_stream)
+)
+```
+
 #### match/mismath
 
 ```wasm
@@ -178,3 +196,11 @@ Example
 - versioned
 - could be used only by call and fold instructions (more instructions for streams to come)
 - could be turned to scalar (canonicalized)
+
+#### Canonicalized streams
+
+- contains an array of elements that was in a stream at the moment of canonicalization
+- canonicalized streams are imutable and fully consistent as scalars
+- has the same algebra as a stream for `match`/`mismatch` and `call` argument
+- has the same algebra as a scalar for `new`
+- has mixed behaviour for with other instructions

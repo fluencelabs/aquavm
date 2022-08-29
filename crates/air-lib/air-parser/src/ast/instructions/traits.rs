@@ -16,6 +16,7 @@
 
 use super::*;
 
+use air_lambda_ast::format_ast;
 use std::fmt;
 
 impl fmt::Display for Instruction<'_> {
@@ -24,6 +25,7 @@ impl fmt::Display for Instruction<'_> {
 
         match self {
             Call(call) => write!(f, "{}", call),
+            Canon(canon) => write!(f, "{}", canon),
             Ap(ap) => write!(f, "{}", ap),
             Seq(seq) => write!(f, "{}", seq),
             Par(par) => write!(f, "{}", par),
@@ -50,6 +52,16 @@ impl fmt::Display for Call<'_> {
     }
 }
 
+impl fmt::Display for Canon<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "canon {} {} {}",
+            self.peer_pk, self.stream, self.canon_stream
+        )
+    }
+}
+
 impl fmt::Display for Ap<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "ap {} {}", self.argument, self.result)
@@ -64,6 +76,9 @@ impl fmt::Display for Fail<'_> {
                 ret_code,
                 error_message,
             } => write!(f, r#"fail {} "{}""#, ret_code, error_message),
+            Fail::CanonStream { name, lambda, .. } => {
+                write!(f, "fail {}.$.{}", name, format_ast(lambda))
+            }
             Fail::LastError => write!(f, "fail %last_error%"),
         }
     }
@@ -125,6 +140,6 @@ impl fmt::Display for Next<'_> {
 
 impl fmt::Display for New<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "new {}", self.variable)
+        write!(f, "new {}", self.argument)
     }
 }

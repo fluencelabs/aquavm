@@ -54,12 +54,12 @@ pub(super) fn seqnn() -> Instruction<'static> {
 }
 
 pub(super) fn new<'i>(
-    variable: Variable<'i>,
+    argument: NewArgument<'i>,
     instruction: Instruction<'i>,
     span: Span,
 ) -> Instruction<'i> {
     Instruction::New(New {
-        variable,
+        argument,
         instruction: Box::new(instruction),
         span,
     })
@@ -92,6 +92,20 @@ pub(super) fn fold_scalar_variable<'i>(
 ) -> Instruction<'i> {
     Instruction::FoldScalar(FoldScalar {
         iterable: FoldScalarIterable::Scalar(scalar),
+        iterator,
+        instruction: Rc::new(instruction),
+        span,
+    })
+}
+
+pub(super) fn fold_scalar_canon_stream<'i>(
+    canon_stream: CanonStream<'i>,
+    iterator: Scalar<'i>,
+    instruction: Instruction<'i>,
+    span: Span,
+) -> Instruction<'i> {
+    Instruction::FoldScalar(FoldScalar {
+        iterable: FoldScalarIterable::CanonStream(canon_stream),
         iterator,
         instruction: Rc::new(instruction),
         span,
@@ -149,8 +163,20 @@ pub(super) fn mismatch<'i>(
     })
 }
 
-pub(super) fn ap<'i>(argument: ApArgument<'i>, result: Variable<'i>) -> Instruction<'i> {
+pub(super) fn ap<'i>(argument: ApArgument<'i>, result: ApResult<'i>) -> Instruction<'i> {
     Instruction::Ap(Ap { argument, result })
+}
+
+pub(super) fn canon<'i>(
+    peer_pk: CallInstrValue<'i>,
+    stream: Stream<'i>,
+    canon_stream: CanonStream<'i>,
+) -> Instruction<'i> {
+    Instruction::Canon(Canon {
+        peer_pk,
+        stream,
+        canon_stream,
+    })
 }
 
 pub(super) fn binary_instruction<'i, 'b>(

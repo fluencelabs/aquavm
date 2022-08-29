@@ -20,6 +20,8 @@ use crate::ast::*;
 use crate::parser::ParserError;
 
 use air_lambda_ast::ValueAccessor;
+use fstrings::f;
+use fstrings::format_args_f;
 use lalrpop_util::ParseError;
 
 #[test]
@@ -325,6 +327,24 @@ fn fold_on_stream() {
         Scalar::new("iterator", 23),
         null(),
         Span::new(9, 39),
+    );
+    assert_eq!(instruction, expected);
+}
+
+#[test]
+fn fold_on_canon_stream() {
+    let canon_stream = "#canon_stream";
+    let iterator = "iterator";
+    let source_code = f!(r#"
+        (fold {canon_stream} {iterator} (null))
+    "#);
+
+    let instruction = parse(&source_code);
+    let expected = fold_scalar_canon_stream(
+        CanonStream::new(canon_stream, 15),
+        Scalar::new(iterator, 29),
+        null(),
+        Span::new(9, 45),
     );
     assert_eq!(instruction, expected);
 }

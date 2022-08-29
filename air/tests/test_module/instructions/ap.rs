@@ -16,6 +16,8 @@
 
 use air_test_utils::prelude::*;
 
+use std::cell::RefCell;
+
 #[test]
 fn ap_with_scalars() {
     let vm_1_peer_id = "vm_1_peer_id";
@@ -209,4 +211,81 @@ fn ap_with_dst_stream() {
 
     assert_eq!(actual_trace, expected_state);
     assert!(result.next_peer_pks.is_empty());
+}
+
+#[test]
+fn ap_canon_stream_with_lambda() {
+    let vm_1_peer_id = "vm_1_peer_id";
+    let (echo_call_service, tetraplet_checker) = tetraplet_host_function(echo_call_service());
+    let mut vm_1 = create_avm(echo_call_service, vm_1_peer_id);
+
+    let service_name = "some_service_name";
+    let function_name = "some_function_name";
+    let script = f!(r#"
+        (seq
+            (seq
+                (call "{vm_1_peer_id}" ("" "") [0] $stream)
+                (call "{vm_1_peer_id}" ("{service_name}" "{function_name}") [1] $stream))
+            (seq
+                (canon "{vm_1_peer_id}" $stream #canon_stream)
+                (seq
+                    (ap #canon_stream.$.[1] $stream_2)
+                    (call "{vm_1_peer_id}" ("" "") [$stream_2]))))
+        "#);
+
+    let result = checked_call_vm!(vm_1, <_>::default(), &script, "", "");
+
+    let actual_trace = trace_from_result(&result);
+    let expected_state = vec![
+        executed_state::stream_number(0, 0),
+        executed_state::stream_number(1, 1),
+        executed_state::canon(vec![0.into(), 1.into()]),
+        executed_state::ap(Some(0)),
+        executed_state::scalar(json!([1])),
+    ];
+    assert_eq!(actual_trace, expected_state);
+
+    let expected_tetraplet = RefCell::new(vec![vec![SecurityTetraplet::new(
+        vm_1_peer_id,
+        service_name,
+        function_name,
+        ".[1]",
+    )]]);
+    assert_eq!(tetraplet_checker.as_ref(), &expected_tetraplet);
+}
+
+#[test]
+fn ap_canon_stream() {
+    let vm_1_peer_id = "vm_1_peer_id";
+    let (echo_call_service, tetraplet_checker) = tetraplet_host_function(echo_call_service());
+    let mut vm_1 = create_avm(echo_call_service, vm_1_peer_id);
+
+    let service_name = "some_service_name";
+    let function_name = "some_function_name";
+    let script = f!(r#"
+        (seq
+            (seq
+                (call "{vm_1_peer_id}" ("" "") [0] $stream)
+                (call "{vm_1_peer_id}" ("{service_name}" "{function_name}") [1] $stream))
+            (seq
+                (canon "{vm_1_peer_id}" $stream #canon_stream)
+                (seq
+                    (ap #canon_stream $stream_2)
+                    (call "{vm_1_peer_id}" ("" "") [$stream_2]))))
+        "#);
+
+    let result = checked_call_vm!(vm_1, <_>::default(), &script, "", "");
+
+    let actual_trace = trace_from_result(&result);
+    let expected_state = vec![
+        executed_state::stream_number(0, 0),
+        executed_state::stream_number(1, 1),
+        executed_state::canon(vec![0.into(), 1.into()]),
+        executed_state::ap(Some(0)),
+        executed_state::scalar(json!([[0, 1]])),
+    ];
+    assert_eq!(actual_trace, expected_state);
+
+    let expected_tetraplet = RefCell::new(vec![vec![SecurityTetraplet::new(vm_1_peer_id, "", "", "")]]);
+    assert_eq!(tetraplet_checker.as_ref(), &expected_tetraplet);
 }

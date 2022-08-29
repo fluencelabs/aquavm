@@ -17,7 +17,7 @@
 pub(crate) mod call_result_setter;
 mod prev_result_handler;
 mod resolved_call;
-mod triplet;
+pub(crate) mod triplet;
 
 use resolved_call::ResolvedCall;
 

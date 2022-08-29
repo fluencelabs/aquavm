@@ -29,7 +29,11 @@ fn parse_new_with_scalar() {
         "#;
 
     let instruction = parse(source_code);
-    let expected = new(Variable::scalar("scalar", 5), null(), Span::new(0, 40));
+    let expected = new(
+        NewArgument::Scalar(Scalar::new("scalar", 5)),
+        null(),
+        Span::new(0, 40),
+    );
     assert_eq!(instruction, expected);
 }
 
@@ -41,7 +45,27 @@ fn parse_new_with_stream() {
         "#;
 
     let instruction = parse(source_code);
-    let expected = new(Variable::stream("$stream", 5), null(), Span::new(0, 41));
+    let expected = new(
+        NewArgument::Stream(Stream::new("$stream", 5)),
+        null(),
+        Span::new(0, 41),
+    );
+    assert_eq!(instruction, expected);
+}
+
+#[test]
+fn parse_new_with_canon_stream() {
+    let source_code = r#"(new #canon_stream
+            (null)
+        )
+        "#;
+
+    let instruction = parse(source_code);
+    let expected = new(
+        NewArgument::CanonStream(CanonStream::new("#canon_stream", 5)),
+        null(),
+        Span::new(0, 47),
+    );
     assert_eq!(instruction, expected);
 }
 

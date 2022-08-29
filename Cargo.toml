@@ -2,6 +2,7 @@
 members = [
     "air",
     "air-interpreter",
+    "avm/interface",
     "avm/server",
     "crates/air-lib/air-parser",
     "crates/air-lib/execution-info-collector",

@@ -19,70 +19,90 @@ use super::ValueAggregate;
 use crate::execution_step::CatchableError;
 use crate::JValue;
 
+use air_interpreter_data::TracePos;
+
+use std::collections::HashMap;
 use std::fmt::Formatter;
 
 /// Streams are CRDT-like append only data structures. They are guaranteed to have the same order
 /// of values on each peer.
-///
-/// The first Vec represents generations, the second values in a generation. Generation is a set
-/// of values that interpreter obtained from one particle. It means that number of generation on
-/// a peer is equal to number of the interpreter runs in context of one particle. And each set of
-/// obtained values from a current_data that were not present in prev_data becomes a new generation.
 #[derive(Debug, Default, Clone)]
-pub struct Stream(Vec<Vec<ValueAggregate>>);
+pub struct Stream {
+    /// The first Vec represents generations, the second values in a generation. Generation is a set
+    /// of values that interpreter obtained from one particle. It means that number of generation on
+    /// a peer is equal to number of the interpreter runs in context of one particle. And each set of
+    /// obtained values from a current_data that were not present in prev_data becomes a new generation.
+    values: Vec<Vec<ValueAggregate>>,
+
+    /// This map is intended to support canonicalized stream creation, such streams has
+    /// corresponding value positions in a data and this field are used to create such streams.
+    values_by_pos: HashMap<TracePos, StreamValueLocation>,
+}
 
 impl Stream {
     pub(crate) fn from_generations_count(count: usize) -> Self {
-        Self(vec![vec![]; count + 1])
+        Self {
+            values: vec![vec![]; count + 1],
+            values_by_pos: HashMap::new(),
+        }
     }
 
     pub(crate) fn from_value(value: ValueAggregate) -> Self {
-        Self(vec![vec![value]])
+        let values_by_pos = maplit::hashmap! {
+            value.trace_pos => StreamValueLocation::new(0, 0),
+        };
+        Self {
+            values: vec![vec![value]],
+            values_by_pos,
+        }
     }
 
     // if generation is None, value would be added to the last generation, otherwise it would
     // be added to given generation
     pub(crate) fn add_value(&mut self, value: ValueAggregate, generation: Generation) -> ExecutionResult<u32> {
         let generation = match generation {
-            Generation::Last => self.0.len() - 1,
+            Generation::Last => self.values.len() - 1,
             Generation::Nth(id) => id as usize,
         };
 
-        if generation >= self.0.len() {
+        if generation >= self.values.len() {
             return Err(CatchableError::StreamDontHaveSuchGeneration(self.clone(), generation).into());
         }
 
-        self.0[generation].push(value);
+        let values = &mut self.values[generation];
+        self.values_by_pos
+            .insert(value.trace_pos, StreamValueLocation::new(generation, values.len()));
+        values.push(value);
         Ok(generation as u32)
     }
 
     pub(crate) fn generations_count(&self) -> usize {
         // the last generation could be empty due to the logic of from_generations_count ctor
-        self.0.iter().filter(|gen| !gen.is_empty()).count()
+        self.values.iter().filter(|gen| !gen.is_empty()).count()
     }
 
     /// Add a new empty generation if the latest isn't empty.
     pub(crate) fn add_new_generation_if_non_empty(&mut self) -> bool {
-        let should_add_generation = match self.0.last() {
+        let should_add_generation = match self.values.last() {
             Some(last) => !last.is_empty(),
             None => true,
         };
 
         if should_add_generation {
-            self.0.push(vec![]);
+            self.values.push(vec![]);
         }
         should_add_generation
     }
 
     /// Remove a last generation if it's empty.
     pub(crate) fn remove_last_generation_if_empty(&mut self) -> bool {
-        let should_remove_generation = match self.0.last() {
+        let should_remove_generation = match self.values.last() {
             Some(last) => last.is_empty(),
             None => false,
         };
 
         if should_remove_generation {
-            self.0.pop();
+            self.values.pop();
         }
 
         should_remove_generation
@@ -91,17 +111,17 @@ impl Stream {
     pub(crate) fn elements_count(&self, generation: Generation) -> Option<usize> {
         match generation {
             Generation::Nth(generation) if generation as usize > self.generations_count() => None,
-            Generation::Nth(generation) => Some(self.0.iter().take(generation as usize).map(|v| v.len()).sum()),
-            Generation::Last => Some(self.0.iter().map(|v| v.len()).sum()),
+            Generation::Nth(generation) => Some(self.values.iter().take(generation as usize).map(|v| v.len()).sum()),
+            Generation::Last => Some(self.values.iter().map(|v| v.len()).sum()),
         }
     }
 
     pub(crate) fn is_empty(&self) -> bool {
-        if self.0.is_empty() {
+        if self.values.is_empty() {
             return false;
         }
 
-        self.0.iter().all(|v| v.is_empty())
+        self.values.iter().all(|v| v.is_empty())
     }
 
     pub(crate) fn as_jvalue(&self, generation: Generation) -> Option<JValue> {
@@ -113,11 +133,22 @@ impl Stream {
         Some(JValue::Array(jvalue_array))
     }
 
+    pub(crate) fn get_value_by_pos(&self, position: TracePos) -> Option<&ValueAggregate> {
+        let StreamValueLocation {
+            generation,
+            position_in_generation,
+        } = self.values_by_pos.get(&position)?;
+        let value = &self.values[*generation][*position_in_generation];
+        Some(value)
+    }
+
     pub(crate) fn iter(&self, generation: Generation) -> Option<StreamIter<'_>> {
         let iter: Box<dyn Iterator<Item = &ValueAggregate>> = match generation {
             Generation::Nth(generation) if generation as usize >= self.generations_count() => return None,
-            Generation::Nth(generation) => Box::new(self.0.iter().take(generation as usize + 1).flat_map(|v| v.iter())),
-            Generation::Last => Box::new(self.0.iter().flat_map(|v| v.iter())),
+            Generation::Nth(generation) => {
+                Box::new(self.values.iter().take(generation as usize + 1).flat_map(|v| v.iter()))
+            }
+            Generation::Last => Box::new(self.values.iter().flat_map(|v| v.iter())),
         };
         // unwrap is safe here, because generation's been already checked
         let len = self.elements_count(generation).unwrap();
@@ -146,7 +177,7 @@ impl Stream {
 
         let len = (end - start) as usize + 1;
         let iter: Box<dyn Iterator<Item = &[ValueAggregate]>> =
-            Box::new(self.0.iter().skip(start as usize).take(len).map(|v| v.as_slice()));
+            Box::new(self.values.iter().skip(start as usize).take(len).map(|v| v.as_slice()));
         let iter = StreamSliceIter { iter, len };
 
         Some(iter)
@@ -210,16 +241,31 @@ impl<'slice> Iterator for StreamSliceIter<'slice> {
     }
 }
 
+#[derive(Clone, Copy, Debug, Default)]
+struct StreamValueLocation {
+    pub generation: usize,
+    pub position_in_generation: usize,
+}
+
+impl StreamValueLocation {
+    pub(super) fn new(generation: usize, position_in_generation: usize) -> Self {
+        Self {
+            generation,
+            position_in_generation,
+        }
+    }
+}
+
 use std::fmt;
 
 impl fmt::Display for Stream {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        if self.0.is_empty() {
+        if self.values.is_empty() {
             return write!(f, "[]");
         }
 
         writeln!(f, "[")?;
-        for (id, generation) in self.0.iter().enumerate() {
+        for (id, generation) in self.values.iter().enumerate() {
             write!(f, " -- {}: ", id)?;
             for value in generation.iter() {
                 write!(f, "{:?}, ", value)?;

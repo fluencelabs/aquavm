@@ -17,7 +17,7 @@
 use super::*;
 
 impl<'i> Ap<'i> {
-    pub fn new(argument: ApArgument<'i>, result: Variable<'i>) -> Self {
+    pub fn new(argument: ApArgument<'i>, result: ApResult<'i>) -> Self {
         Self { argument, result }
     }
 }
@@ -32,6 +32,20 @@ impl<'i> Call<'i> {
             triplet,
             args,
             output,
+        }
+    }
+}
+
+impl<'i> Canon<'i> {
+    pub fn new(
+        peer_pk: CallInstrValue<'i>,
+        stream: Stream<'i>,
+        canon_stream: CanonStream<'i>,
+    ) -> Self {
+        Self {
+            peer_pk,
+            stream,
+            canon_stream,
         }
     }
 }
@@ -131,9 +145,9 @@ impl<'i> Next<'i> {
 
 impl<'i> New<'i> {
     #[allow(clippy::self_named_constructors)]
-    pub fn new(variable: Variable<'i>, instruction: Box<Instruction<'i>>, span: Span) -> Self {
+    pub fn new(argument: NewArgument<'i>, instruction: Box<Instruction<'i>>, span: Span) -> Self {
         Self {
-            variable,
+            argument,
             instruction,
             span,
         }

@@ -36,7 +36,7 @@ pub(crate) fn try_merge_next_state_as_ap(data_keeper: &mut DataKeeper) -> MergeR
     let current_state = data_keeper.current_slider_mut().next_state();
 
     match (prev_state, current_state) {
-        (Some(Ap(prev_ap)), Some(_)) => prepare_merge_result(Some(prev_ap), Both, data_keeper),
+        (Some(Ap(prev_ap)), Some(Ap(_))) => prepare_merge_result(Some(prev_ap), Both, data_keeper),
         (Some(Ap(prev_ap)), None) => prepare_merge_result(Some(prev_ap), Previous, data_keeper),
         // check that current state is Ap, but it's impossible to use it, because prev_data
         // could not have streams with such generations

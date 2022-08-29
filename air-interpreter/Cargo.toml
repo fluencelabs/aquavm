@@ -1,6 +1,6 @@
 [package]
 name = "air-interpreter"
-version = "0.25.0"
+version = "0.27.0"
 description = "Crate-wrapper for air"
 authors = ["Fluence Labs"]
 edition = "2018"
@@ -19,6 +19,7 @@ path = "src/marine.rs"
 
 [dependencies]
 air = { path = "../air" }
+air-interpreter-interface = { path = "../crates/air-lib/interpreter-interface" }
 air-log-targets = { path = "../crates/air-lib/log-targets" }
 
 marine-rs-sdk = { version = "0.7.0", features = ["logger"] }

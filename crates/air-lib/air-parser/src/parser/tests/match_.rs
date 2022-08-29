@@ -18,6 +18,10 @@ use super::dsl::*;
 use super::parse;
 use crate::ast::*;
 
+use air_lambda_ast::{LambdaAST, ValueAccessor};
+use fstrings::f;
+use fstrings::format_args_f;
+
 #[test]
 fn parse_match() {
     let source_code = r#"
@@ -29,6 +33,29 @@ fn parse_match() {
     let expected = match_(
         Value::Variable(VariableWithLambda::scalar("v1", 16)),
         Value::Variable(VariableWithLambda::scalar("v2", 19)),
+        null(),
+    );
+    assert_eq!(instruction, expected);
+}
+
+#[test]
+fn parse_match_with_canon_stream() {
+    let canon_stream = "#canon_stream";
+    let canon_stream_lambda = ".$.[0]";
+    let source_code = f!(r#"
+        (match {canon_stream}{canon_stream_lambda} v2
+            (null)
+        )
+        "#);
+
+    let instruction = parse(&source_code);
+    let expected = match_(
+        Value::Variable(VariableWithLambda::canon_stream_wl(
+            canon_stream,
+            unsafe { LambdaAST::new_unchecked(vec![ValueAccessor::ArrayAccess { idx: 0 }]) },
+            16,
+        )),
+        Value::Variable(VariableWithLambda::scalar("v2", 36)),
         null(),
     );
     assert_eq!(instruction, expected);

@@ -79,3 +79,15 @@ impl SecurityTetraplet {
         self.json_path.push_str(json_path)
     }
 }
+
+use std::fmt;
+
+impl fmt::Display for SecurityTetraplet {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "peer_pk: {}, service_id: {}, function_name: {}, json_path: {}",
+            self.peer_pk, self.service_id, self.function_name, self.json_path
+        )
+    }
+}

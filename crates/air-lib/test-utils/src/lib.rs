@@ -35,7 +35,7 @@ mod native_test_runner;
 mod wasm_test_runner;
 
 pub use air::interpreter_data::*;
-pub use avm_server::raw_outcome::*;
+pub use avm_interface::raw_outcome::*;
 pub use avm_server::*;
 
 pub mod prelude {

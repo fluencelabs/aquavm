@@ -17,7 +17,7 @@
 pub(crate) mod anomaly;
 pub(crate) mod plain;
 
-use avm_server::ParticleParameters;
+use avm_interface::ParticleParameters;
 
 pub(crate) struct ExecutionData<'ctx> {
     pub(crate) air_script: String,

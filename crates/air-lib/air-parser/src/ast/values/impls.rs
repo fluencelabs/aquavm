@@ -67,6 +67,22 @@ impl<'i> StreamWithLambda<'i> {
     }
 }
 
+impl<'i> CanonStream<'i> {
+    pub fn new(name: &'i str, position: usize) -> Self {
+        Self { name, position }
+    }
+}
+
+impl<'i> CanonStreamWithLambda<'i> {
+    pub fn new(name: &'i str, lambda: Option<LambdaAST<'i>>, position: usize) -> Self {
+        Self {
+            name,
+            lambda,
+            position,
+        }
+    }
+}
+
 impl<'i> Scalar<'i> {
     pub fn new(name: &'i str, position: usize) -> Self {
         Self { name, position }
@@ -92,6 +108,7 @@ impl<'i> Variable<'i> {
         match self {
             Variable::Scalar(scalar) => scalar.name,
             Variable::Stream(stream) => stream.name,
+            Variable::CanonStream(stream) => stream.name,
         }
     }
 }
@@ -113,10 +130,19 @@ impl<'i> VariableWithLambda<'i> {
         Self::Stream(StreamWithLambda::new(name, Some(lambda), position))
     }
 
+    pub fn canon_stream(name: &'i str, position: usize) -> Self {
+        Self::CanonStream(CanonStreamWithLambda::new(name, None, position))
+    }
+
+    pub fn canon_stream_wl(name: &'i str, lambda: LambdaAST<'i>, position: usize) -> Self {
+        Self::CanonStream(CanonStreamWithLambda::new(name, Some(lambda), position))
+    }
+
     pub fn name(&self) -> &'i str {
         match self {
             VariableWithLambda::Scalar(scalar) => scalar.name,
             VariableWithLambda::Stream(stream) => stream.name,
+            VariableWithLambda::CanonStream(canon_stream) => canon_stream.name,
         }
     }
 
@@ -124,6 +150,7 @@ impl<'i> VariableWithLambda<'i> {
         match self {
             VariableWithLambda::Scalar(scalar) => &scalar.lambda,
             VariableWithLambda::Stream(stream) => &stream.lambda,
+            VariableWithLambda::CanonStream(canon_stream) => &canon_stream.lambda,
         }
     }
 

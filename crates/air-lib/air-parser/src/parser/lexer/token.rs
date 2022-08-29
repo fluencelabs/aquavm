@@ -45,6 +45,15 @@ pub enum Token<'input> {
         lambda: LambdaAST<'input>,
         position: usize,
     },
+    CanonStream {
+        name: &'input str,
+        position: usize,
+    },
+    CanonStreamWithLambda {
+        name: &'input str,
+        lambda: LambdaAST<'input>,
+        position: usize,
+    },
 
     StringLiteral(&'input str),
     I64(i64),
@@ -58,6 +67,7 @@ pub enum Token<'input> {
     TTL,
 
     Call,
+    Canon,
     Ap,
     Seq,
     Par,

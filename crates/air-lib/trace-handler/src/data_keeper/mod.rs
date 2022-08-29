@@ -24,7 +24,6 @@ pub use merge_ctx::MergeCtx;
 pub use trace_slider::TraceSlider;
 
 pub(crate) use keeper::DataKeeper;
-pub(crate) use keeper::DataPositions;
 
 pub(self) type KeeperResult<T> = std::result::Result<T, KeeperError>;
 

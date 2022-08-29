@@ -18,6 +18,7 @@ mod impls;
 mod traits;
 
 use super::*;
+use air_lambda_ast::LambdaAST;
 use serde::Serialize;
 use std::rc::Rc;
 
@@ -27,6 +28,7 @@ use std::rc::Rc;
 pub enum Instruction<'i> {
     Call(Call<'i>),
     Ap(Ap<'i>),
+    Canon(Canon<'i>),
     Seq(Seq<'i>),
     Par(Par<'i>),
     Xor(Xor<'i>),
@@ -53,7 +55,15 @@ pub struct Call<'i> {
 #[derive(Serialize, Debug, PartialEq)]
 pub struct Ap<'i> {
     pub argument: ApArgument<'i>,
-    pub result: Variable<'i>,
+    pub result: ApResult<'i>,
+}
+
+/// (canon peer_id $stream #canon_stream)
+#[derive(Serialize, Debug, PartialEq, Eq)]
+pub struct Canon<'i> {
+    pub peer_pk: CallInstrValue<'i>,
+    pub stream: Stream<'i>,
+    pub canon_stream: CanonStream<'i>,
 }
 
 /// (seq instruction instruction)
@@ -93,6 +103,10 @@ pub enum Fail<'i> {
         ret_code: i64,
         error_message: &'i str,
     },
+    CanonStream {
+        name: &'i str,
+        lambda: LambdaAST<'i>,
+    },
     LastError,
 }
 
@@ -126,7 +140,7 @@ pub struct Next<'i> {
 /// (new variable instruction)
 #[derive(Serialize, Debug, PartialEq)]
 pub struct New<'i> {
-    pub variable: Variable<'i>,
+    pub argument: NewArgument<'i>,
     pub instruction: Box<Instruction<'i>>,
     pub span: Span,
 }

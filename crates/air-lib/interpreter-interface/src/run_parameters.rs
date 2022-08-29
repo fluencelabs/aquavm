@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
+#[cfg(feature = "marine")]
 use fluence_it_types::ne_vec::NEVec;
+#[cfg(feature = "marine")]
 use fluence_it_types::IValue;
+#[cfg(feature = "marine")]
 use marine_rs_sdk::marine;
 use serde::Deserialize;
 use serde::Serialize;
 
 /// Parameters that a host side should pass to an interpreter and that necessary for execution.
-#[marine]
+#[cfg_attr(feature = "marine", marine)]
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct RunParameters {
     /// Peer id of a peer that start this particle.
@@ -48,6 +51,7 @@ impl RunParameters {
         }
     }
 
+    #[cfg(feature = "marine")]
     pub fn into_ivalue(self) -> IValue {
         let run_parameters = vec![
             IValue::String(self.init_peer_id),

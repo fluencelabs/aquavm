@@ -16,6 +16,7 @@ path = "src/lib.rs"
 [dependencies]
 air = { path = "../../../air" }
 air-interpreter-interface = { path = "../interpreter-interface" }
+avm-interface = { path = "../../../avm/interface" }
 avm-server = { path = "../../../avm/server" }
 marine-rs-sdk = "0.7.0"
 

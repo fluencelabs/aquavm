@@ -1,3 +1,8 @@
+## Version 0.3.0
+
+[PR 292](https://github.com/fluencelabs/aquavm/pull/292):  
+- added a new state in data for a canon instruction result
+
 ## Version 0.2.2
 
 [PR 169](https://github.com/fluencelabs/aquavm/pull/169):  

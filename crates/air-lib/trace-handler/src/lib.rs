@@ -14,6 +14,17 @@
  * limitations under the License.
  */
 
+#![warn(rust_2018_idioms)]
+#![deny(
+    dead_code,
+    nonstandard_style,
+    unused_imports,
+    unused_mut,
+    unused_variables,
+    unused_unsafe,
+    unreachable_patterns
+)]
+
 mod data_keeper;
 mod errors;
 mod handler;
@@ -29,6 +40,7 @@ pub use merger::MergeCtxType;
 pub use merger::MergeError;
 pub use merger::MergerApResult;
 pub use merger::MergerCallResult;
+pub use merger::MergerCanonResult;
 pub use state_automata::SubgraphType;
 
 pub type TraceHandlerResult<T> = std::result::Result<T, TraceHandlerError>;

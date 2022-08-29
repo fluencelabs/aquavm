@@ -15,10 +15,9 @@
  */
 
 use super::JValue;
-use crate::errors::CallSeDeErrors;
-use crate::RunnerResult;
-use crate::SecurityTetraplet;
+use crate::CallSeDeErrors;
 
+use polyplets::SecurityTetraplet;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -60,7 +59,7 @@ impl CallRequestParams {
 
     pub(crate) fn from_raw(
         call_params: air_interpreter_interface::CallRequestParams,
-    ) -> RunnerResult<Self> {
+    ) -> Result<Self, CallSeDeErrors> {
         let arguments: Vec<JValue> =
             serde_json::from_str(&call_params.arguments).map_err(|de_error| {
                 CallSeDeErrors::CallParamsArgsDeFailed {
@@ -86,7 +85,9 @@ impl CallRequestParams {
     }
 }
 
-pub(crate) fn from_raw_call_requests(raw_call_params: Vec<u8>) -> RunnerResult<CallRequests> {
+pub(crate) fn from_raw_call_requests(
+    raw_call_params: Vec<u8>,
+) -> Result<CallRequests, CallSeDeErrors> {
     let call_requests: air_interpreter_interface::CallRequests =
         match serde_json::from_slice(&raw_call_params) {
             Ok(requests) => requests,
@@ -101,7 +102,7 @@ pub(crate) fn from_raw_call_requests(raw_call_params: Vec<u8>) -> RunnerResult<C
 
     call_requests
         .into_iter()
-        .map(|(call_id, call_params)| -> RunnerResult<_> {
+        .map(|(call_id, call_params)| -> Result<_, _> {
             let call_params = CallRequestParams::from_raw(call_params)?;
             Ok((call_id, call_params))
         })
