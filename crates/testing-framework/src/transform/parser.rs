@@ -108,7 +108,11 @@ fn parse_sexp_string(inp: Input<'_>) -> IResult<Input<'_>, Sexp, ParseError<'_>>
             preceded(
                 tag("\""),
                 cut(terminated(
-                    is_not("\""),
+                    alt((
+                        is_not("\""),
+                        //
+                        tag(""),
+                    )),
                     context("closing quotes not found", tag("\"")),
                 )),
             ),
@@ -228,6 +232,12 @@ mod tests {
     fn test_symbol_canon() {
         let res = Sexp::from_str("#canon");
         assert_eq!(res, Ok(Sexp::symbol("#canon")));
+    }
+
+    #[test]
+    fn test_string_empty() {
+        let res = Sexp::from_str(r#""""#);
+        assert_eq!(res, Ok(Sexp::string("")));
     }
 
     #[test]
