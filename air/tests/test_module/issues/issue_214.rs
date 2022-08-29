@@ -47,8 +47,8 @@ fn issue_214() {
     "#);
 
     let test_params = TestRunParameters::from_init_peer_id(client_id);
-    let engine = air_test_framework::TestExecutor::new(test_params, vec![], std::iter::empty(), &script)
-        .expect("Invalid test executor configuration");
+    let engine =
+        air_test_framework::TestExecutor::simple(test_params, &script).expect("Invalid test executor configuration");
 
     let result = engine.execute_one(client_id).unwrap();
     let expected_trace = vec![

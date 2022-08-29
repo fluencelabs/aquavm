@@ -37,13 +37,8 @@ fn par_ap_behaviour() {
         )
         "#);
 
-    let engine = air_test_framework::TestExecutor::new(
-        TestRunParameters::new("client_id", 0, 1),
-        vec![],
-        std::iter::empty(),
-        &script,
-    )
-    .expect("invalid test executor config");
+    let engine = air_test_framework::TestExecutor::simple(TestRunParameters::new("client_id", 0, 1), &script)
+        .expect("invalid test executor config");
 
     let client_result_1 = engine.execute_one(client_id).unwrap();
     assert_next_pks!(&client_result_1.next_peer_pks, [relay_id, variable_setter_id]);

@@ -31,7 +31,7 @@ pub struct TestExecutor {
 }
 
 impl TestExecutor {
-    /// Create execution from the annotated air script
+    /// Create execution from the annotated air script.
     pub fn new(
         test_parameters: TestRunParameters,
         common_services: Vec<ServiceHandle>,
@@ -61,6 +61,19 @@ impl TestExecutor {
             air_script: transformed_air_script,
             network,
         })
+    }
+
+    /// Simple constructor where everything is generated from the annotated_air_script.
+    pub fn simple(
+        test_parameters: TestRunParameters,
+        annotated_air_script: &str,
+    ) -> Result<Self, String> {
+        Self::new(
+            test_parameters,
+            <_>::default(),
+            std::iter::empty(),
+            annotated_air_script,
+        )
     }
 
     /// Return Iterator for handling all the queued datas
