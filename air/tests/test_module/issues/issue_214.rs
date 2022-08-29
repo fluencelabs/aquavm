@@ -23,41 +23,34 @@ fn issue_214() {
     let relay_id = "relay_peer_id";
     let scalar = json!([]);
     let error_handler = "error handler is called";
-    let variables_mapping = maplit::hashmap! {
-        "-relay-".to_string() => json!(relay_id),
-        "s".to_string() => scalar.clone(),
-        "error".to_string() => json!(error_handler), // this result should be returned by (2) call
-    };
-
-    let mut client = create_avm(
-        set_variables_call_service(variables_mapping, VariableOptionSource::FunctionName),
-        client_id,
-    );
 
     let script = f!(r#"
         (xor
          (seq
           (seq
            (seq
-            (call %init_peer_id% ("getDataSrv" "-relay-") [] -relay-)
-            (call %init_peer_id% ("getDataSrv" "s") [] s)
+            (call %init_peer_id% ("getDataSrv" "-relay-") [] -relay-) ; result="relay_peer_id"
+            (call %init_peer_id% ("getDataSrv" "s") [] s) ; result=[]
            )
            (xor
-            (call -relay- ("op" "identity") [s.$.field!] res) ;; (1) should not produce data after calling on relay
-            (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 1]) ;; (2) should be called
+            (call -relay- ("op" "identity") [s.$.field] res)
+            (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 1]) ; result="error handler is called"
            )
           )
           (xor
-           (call %init_peer_id% ("callbackSrv" "response") [res]) ;; join behaviour
-           (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2])
+           (call %init_peer_id% ("callbackSrv" "response") [res]) ; result = "default"
+           (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2]) ; result="error handler is not called"
           )
          )
-         (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 3])
+         (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 3]) ; result="error handler is called"
         )
     "#);
 
     let test_params = TestRunParameters::from_init_peer_id(client_id);
-    let result = checked_call_vm!(client, test_params, &script, "", "");
+    let engine = air_test_framework::TestExecutor::new(test_params, vec![], std::iter::empty(), &script)
+        .expect("Invalid test executor configuration");
+
+    let result = engine.execute_one(client_id).unwrap();
     let expected_trace = vec![
         executed_state::scalar_string(relay_id),
         executed_state::scalar(scalar),
