@@ -17,7 +17,7 @@
 mod parser;
 pub(crate) mod walker;
 
-use crate::asserts::AssertionChain;
+use crate::asserts::ServiceDesc;
 
 type Triplet = (Sexp, Sexp, Sexp);
 
@@ -26,7 +26,7 @@ pub(crate) struct Call {
     triplet: Box<Triplet>,
     args: Vec<Sexp>,
     var: Option<Box<Sexp>>,
-    annotation: Option<AssertionChain>,
+    service_desc: Option<ServiceDesc>,
 }
 
 #[derive(Debug, PartialEq)]

@@ -15,7 +15,7 @@
  */
 
 use super::{Call, Sexp, Triplet};
-use crate::asserts::{parser::delim_ws, AssertionChain};
+use crate::asserts::{parser::delim_ws, ServiceDesc};
 
 use nom::branch::alt;
 use nom::bytes::complete::{is_not, tag};
@@ -160,17 +160,17 @@ fn parse_sexp_call_content(inp: Input<'_>) -> IResult<Input<'_>, Sexp, ParseErro
                 triplet,
                 args,
                 var,
-                annotation,
+                service_desc: annotation,
             })
         },
     )(inp)
 }
 
-fn parse_annotation(inp: Input<'_>) -> IResult<Input<'_>, AssertionChain, ParseError<'_>> {
+fn parse_annotation(inp: Input<'_>) -> IResult<Input<'_>, ServiceDesc, ParseError<'_>> {
     map_res(
         is_not("\r\n"),
-        |span: Input<'_>| -> Result<AssertionChain, ParseError<'_>> {
-            Ok(AssertionChain::from_str(&span).unwrap())
+        |span: Input<'_>| -> Result<ServiceDesc, ParseError<'_>> {
+            Ok(ServiceDesc::from_str(&span).unwrap())
         },
     )(inp)
 }
@@ -204,7 +204,7 @@ mod tests {
 
     use super::*;
 
-    use crate::asserts::{AssertionBranch, ServiceDesc};
+    use crate::asserts::ServiceDesc;
 
     #[test]
     fn test_symbol() {
@@ -261,7 +261,7 @@ mod tests {
                 )),
                 args: vec![],
                 var: None,
-                annotation: None,
+                service_desc: None,
             }))
         );
     }
@@ -286,7 +286,7 @@ mod tests {
                     )),
                     args: vec![],
                     var: None,
-                    annotation: None,
+                    service_desc: None,
                 }),
                 Sexp::Call(Call {
                     triplet: Box::new((
@@ -296,7 +296,7 @@ mod tests {
                     )),
                     args: vec![],
                     var: None,
-                    annotation: None,
+                    service_desc: None,
                 }),
             ]))
         );
@@ -328,7 +328,7 @@ mod tests {
                 )),
                 args: vec![Sexp::symbol("a")],
                 var: None,
-                annotation: None,
+                service_desc: None,
             }))
         );
     }
@@ -346,7 +346,7 @@ mod tests {
                 )),
                 args: vec![Sexp::symbol("a"), Sexp::symbol("b")],
                 var: None,
-                annotation: None,
+                service_desc: None,
             }))
         );
     }
@@ -364,7 +364,7 @@ mod tests {
                 )),
                 args: vec![Sexp::Symbol("a".to_owned()), Sexp::Symbol("b".to_owned())],
                 var: Some(Box::new(Sexp::Symbol("var".to_owned()))),
-                annotation: None,
+                service_desc: None,
             }))
         );
     }
@@ -372,9 +372,7 @@ mod tests {
     #[test]
     fn test_call_with_annotation() {
         let res = Sexp::from_str(r#"(call peer_id ("serv" "func") [a b] var) ; result=42 "#);
-        let expected_annotation = AssertionChain::new(vec![AssertionBranch::from_service_desc(
-            ServiceDesc::Result(json!(42)),
-        )]);
+        let expected_annotation = ServiceDesc::Result(json!(42));
         assert_eq!(
             res,
             Ok(Sexp::Call(Call {
@@ -385,7 +383,7 @@ mod tests {
                 )),
                 args: vec![Sexp::symbol("a"), Sexp::symbol("b")],
                 var: Some(Box::new(Sexp::symbol("var"))),
-                annotation: Some(expected_annotation),
+                service_desc: Some(expected_annotation),
             }))
         );
     }

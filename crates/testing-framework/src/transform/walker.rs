@@ -49,27 +49,16 @@ impl Transformer {
             self.peers.insert(peer_id.clone().into());
         }
 
-        // find first value...
-        for branch in call
-            .annotation
-            .as_ref()
-            .map(|chain| chain.assertions.iter())
-            .into_iter()
-            .flatten()
-        {
-            if let Some(service) = &branch.service_desc {
-                // install a value
-                let call_id = self.cnt;
-                self.cnt += 1;
+        if let Some(service) = &call.service_desc {
+            // install a value
+            let call_id = self.cnt;
+            self.cnt += 1;
 
-                self.results.insert(call_id, service.clone());
+            self.results.insert(call_id, service.clone());
 
-                match &mut call.triplet.1 {
-                    Sexp::String(ref mut value) => value.push_str(&format!("..{}", call_id)),
-                    _ => panic!("Incorrect script: non-string service string not supported"),
-                }
-
-                return;
+            match &mut call.triplet.1 {
+                Sexp::String(ref mut value) => value.push_str(&format!("..{}", call_id)),
+                _ => panic!("Incorrect script: non-string service string not supported"),
             }
         }
     }
