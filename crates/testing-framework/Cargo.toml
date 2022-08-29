@@ -1,5 +1,5 @@
 [package]
-name = "testing-framework"
+name = "air-testing-framework"
 version = "0.1.0"
 description = "AquaVM testing framework"
 authors = ["Fluence Labs"]

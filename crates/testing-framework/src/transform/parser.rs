@@ -123,10 +123,10 @@ fn parse_sexp_string(inp: Input<'_>) -> IResult<Input<'_>, Sexp, ParseError<'_>>
 
 fn parse_sexp_symbol(inp: Input<'_>) -> IResult<Input<'_>, Sexp, ParseError<'_>> {
     map(
-        recognize(many1_count(alt((
-            value((), alphanumeric1),
-            value((), one_of("_.$#")),
-        )))),
+        recognize(pair(
+            many1_count(alt((value((), alphanumeric1), value((), one_of("_-.$#%"))))),
+            opt(delimited(tag("["), parse_sexp_symbol, tag("]"))),
+        )),
         Sexp::symbol,
     )(inp)
 }
@@ -232,6 +232,12 @@ mod tests {
     fn test_symbol_canon() {
         let res = Sexp::from_str("#canon");
         assert_eq!(res, Ok(Sexp::symbol("#canon")));
+    }
+
+    #[test]
+    fn test_symbol_lambda2() {
+        let res = Sexp::from_str(r#"$result.$[0]"#);
+        assert_eq!(res, Ok(Sexp::symbol(r#"$result.$[0]"#)));
     }
 
     #[test]
