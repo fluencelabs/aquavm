@@ -21,15 +21,6 @@ use air_test_utils::prelude::*;
 // On the versions < 0.20.1 it just crashes
 fn issue_211() {
     let peer_1_id = "peer_1_id";
-    let variables_mapping = maplit::hashmap! {
-        "idx".to_string() => json!(2),
-        "nodes".to_string() => json!([1,2,3]),
-    };
-
-    let mut peer_1 = create_avm(
-        set_variables_call_service(variables_mapping, VariableOptionSource::FunctionName),
-        peer_1_id,
-    );
 
     let script = f!(r#"
     (xor
@@ -38,9 +29,9 @@ fn issue_211() {
        (seq
         (seq
          (null)
-         (call %init_peer_id% ("getDataSrv" "idx") [] idx)
+         (call %init_peer_id% ("getDataSrv" "idx") [] idx) ; result=2
         )
-        (call %init_peer_id% ("getDataSrv" "nodes") [] nodes)
+        (call %init_peer_id% ("getDataSrv" "nodes") [] nodes) ; result = [1,2,3]
        )
        (new $nodes2
         (seq
@@ -54,20 +45,24 @@ fn issue_211() {
            )
            (null)
           )
-          (call %init_peer_id% ("op" "noop") [$nodes2.$.[idx]! nodes])
+          (call %init_peer_id% ("op" "noop") [$nodes2.$.[idx] nodes]) ; result="expected result"
          )
-         (call %init_peer_id% ("op" "identity") [$nodes2] nodes2-fix)
+         (call %init_peer_id% ("op" "identity") [$nodes2] nodes2-fix) ; result="expected result"
         )
        )
       )
       (null)
      )
-     (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2])
+     (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2]) ; result="error"
     )
     "#);
 
     let run_params = TestRunParameters::from_init_peer_id(peer_1_id);
-    let result = checked_call_vm!(peer_1, run_params, &script, "", "");
+
+    let engine = air_test_framework::TestExecutor::new(run_params, vec![], std::iter::empty(), &script)
+        .expect("invalid test executor config");
+
+    let result = engine.execute_one(peer_1_id).unwrap();
 
     let expected_trace = vec![
         executed_state::scalar_number(2),
@@ -79,8 +74,8 @@ fn issue_211() {
         executed_state::ap(Some(0)),
         executed_state::par(1, 0),
         executed_state::ap(Some(0)),
-        executed_state::scalar_string("default result from set_variables_call_service"),
-        executed_state::scalar_string("default result from set_variables_call_service"),
+        executed_state::scalar_string("expected result"),
+        executed_state::scalar_string("expected result"),
     ];
 
     let actual_trace = trace_from_result(&result);
