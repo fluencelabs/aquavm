@@ -17,7 +17,7 @@
 pub mod neighborhood;
 
 use self::neighborhood::{PeerEnv, PeerSet};
-use crate::services::{services_to_call_service_closure, Service};
+use crate::services::{services_to_call_service_closure, ServiceHandle};
 
 use air_test_utils::{
     test_runner::{create_avm, TestRunParameters, TestRunner},
@@ -68,7 +68,7 @@ pub struct Peer {
 }
 
 impl Peer {
-    pub fn new(peer_id: impl Into<PeerId>, services: Rc<[Rc<dyn Service>]>) -> Self {
+    pub fn new(peer_id: impl Into<PeerId>, services: Rc<[ServiceHandle]>) -> Self {
         let peer_id = Into::into(peer_id);
         let call_service = services_to_call_service_closure(services);
         let runner = create_avm(call_service, &peer_id.0);

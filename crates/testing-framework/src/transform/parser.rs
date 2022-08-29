@@ -15,8 +15,7 @@
  */
 
 use super::{Call, Sexp, Triplet};
-use crate::asserts::parser::delim_ws;
-use crate::asserts::AssertionChain;
+use crate::asserts::{parser::delim_ws, AssertionChain};
 
 use nom::branch::alt;
 use nom::bytes::complete::{is_not, tag};
@@ -205,7 +204,7 @@ mod tests {
 
     use super::*;
 
-    use crate::asserts::{AssertionBranch, Meta};
+    use crate::asserts::{AssertionBranch, ServiceDesc};
 
     #[test]
     fn test_symbol() {
@@ -373,10 +372,9 @@ mod tests {
     #[test]
     fn test_call_with_annotation() {
         let res = Sexp::from_str(r#"(call peer_id ("serv" "func") [a b] var) ; result=42 "#);
-        let expected_annotation =
-            AssertionChain::new(vec![AssertionBranch::from_metas(vec![Meta::Result(
-                json!(42),
-            )])]);
+        let expected_annotation = AssertionChain::new(vec![AssertionBranch::from_service_desc(
+            ServiceDesc::Result(json!(42)),
+        )]);
         assert_eq!(
             res,
             Ok(Sexp::Call(Call {

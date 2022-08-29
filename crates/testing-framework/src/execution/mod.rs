@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-use air_test_utils::{test_runner::TestRunParameters, RawAVMOutcome};
-use itertools::Itertools;
-
 use crate::{
+    asserts::ServiceDesc,
     ephemeral::{Network, Peer, PeerId},
-    services::{results::ResultService, Service},
+    services::{results::ResultService, Service, ServiceHandle},
     transform::{walker::Transformer, Sexp},
 };
+
+use air_test_utils::{test_runner::TestRunParameters, RawAVMOutcome};
 
 use std::{borrow::Borrow, collections::HashMap, hash::Hash, rc::Rc, str::FromStr};
 
@@ -34,7 +34,7 @@ impl TestExecutor {
     /// Create execution from the annotated air script
     pub fn new(
         test_parameters: TestRunParameters,
-        common_services: Vec<Rc<dyn Service>>,
+        common_services: Vec<ServiceHandle>,
         extra_peers: impl IntoIterator<Item = PeerId>,
         annotated_air_script: &str,
     ) -> Result<Self, String> {
@@ -51,7 +51,7 @@ impl TestExecutor {
             walker.peers,
             PeerId::new(init_peer_id.clone()),
             extra_peers,
-        );
+        )?;
 
         let network = Network::from_peers(test_parameters, peers);
         // Seed execution
@@ -98,23 +98,21 @@ impl TestExecutor {
 }
 
 fn build_peers(
-    common_services: Vec<Rc<dyn Service>>,
-    results: std::collections::HashMap<u32, serde_json::Value>,
+    common_services: Vec<ServiceHandle>,
+    results: std::collections::HashMap<u32, ServiceDesc>,
     known_peers: std::collections::HashSet<PeerId>,
     init_peer_id: PeerId,
     extra_peers: impl IntoIterator<Item = PeerId>,
-) -> Vec<Peer> {
-    let mut result_services: Vec<Rc<dyn Service>> = Vec::with_capacity(1 + common_services.len());
-    result_services.push(Rc::new(ResultService::new(results)));
-    result_services.extend_from_slice(&common_services);
+) -> Result<Vec<Peer>, String> {
+    let mut result_services: Vec<ServiceHandle> = Vec::with_capacity(1 + common_services.len());
+    result_services.push(ResultService::new(results)?.to_handle());
+    result_services.extend(common_services);
     let result_services = Rc::<[_]>::from(result_services);
-
-    let common_services = Rc::<[_]>::from(common_services);
 
     let extra_peers_pairs = extra_peers
         .into_iter()
         .chain(std::iter::once(init_peer_id))
-        .map(|peer_id| (peer_id.clone(), Peer::new(peer_id, common_services.clone())));
+        .map(|peer_id| (peer_id.clone(), Peer::new(peer_id, result_services.clone())));
     let mut peers = extra_peers_pairs.collect::<HashMap<_, _>>();
 
     let known_peers_pairs = known_peers
@@ -122,11 +120,13 @@ fn build_peers(
         .map(|peer_id| (peer_id.clone(), Peer::new(peer_id, result_services.clone())));
     peers.extend(known_peers_pairs);
 
-    peers.into_values().collect_vec()
+    Ok(peers.into_values().collect())
 }
 
 #[cfg(test)]
 mod tests {
+    use air_test_utils::prelude::*;
+
     use super::*;
 
     #[test]
@@ -161,13 +161,42 @@ mod tests {
     }
 
     #[test]
-    fn test_error() {
+    fn test_call_result_success() {
         let exec = TestExecutor::new(
             TestRunParameters::from_init_peer_id("init_peer_id"),
             vec![],
             std::iter::empty(),
             r#"(seq
-(call "peer1" ("service" "func") [] arg) ; result = {"ret_code":12,"result":"ERROR MESSAGE"}
+(call "peer1" ("service" "func") [] arg) ; call_result = {"ret_code":0,"result":42}
+(call "peer2" ("service" "func") [arg]) ; result = 43
+)
+"#,
+        )
+        .unwrap();
+
+        let result_init: Vec<_> = exec.execution_iter("init_peer_id").unwrap().collect();
+
+        assert_eq!(result_init.len(), 1);
+        let outcome1 = &result_init[0];
+        assert_eq!(outcome1.ret_code, 0);
+        assert_eq!(outcome1.error_message, "");
+
+        assert!(exec.execution_iter("peer2").unwrap().next().is_none());
+        let results1: Vec<_> = exec.execution_iter("peer1").unwrap().collect();
+        assert_eq!(results1.len(), 1);
+        let outcome1 = &results1[0];
+        assert_eq!(outcome1.ret_code, 0, "{:?}", outcome1);
+        assert!(exec.execution_iter("peer1").unwrap().next().is_none());
+    }
+
+    #[test]
+    fn test_call_result_error() {
+        let exec = TestExecutor::new(
+            TestRunParameters::from_init_peer_id("init_peer_id"),
+            vec![],
+            std::iter::empty(),
+            r#"(seq
+(call "peer1" ("service" "func") [] arg) ; call_result = {"ret_code":12,"result":"ERROR MESSAGE"}
 (call "peer2" ("service" "func") [arg]) ; result = 43
 )
 "#,
@@ -196,5 +225,114 @@ mod tests {
 
         let results2: Vec<_> = exec.execution_iter("peer2").unwrap().collect();
         assert_eq!(results2.len(), 0);
+    }
+
+    #[test]
+    fn test_seq_result() {
+        let exec = TestExecutor::new(
+            TestRunParameters::from_init_peer_id("init_peer_id"),
+            vec![],
+            IntoIterator::into_iter(["peer2", "peer3"]).map(Into::into),
+            r#"(seq
+  (seq
+    (call "peer1" ("service" "func") [] var)  ; result = [{"p":"peer2","v":2},{"p":"peer3","v":3}]
+    (seq
+      (ap 1 k)
+      (fold var i
+        (seq
+          (call i.$.p ("service" "func") [i k] k)  ; seq_result = {"0":12,"default":42}
+          (next i)))))
+  (call "init_peer_id" ("a" "b") []) ; result = 0
+)"#,
+        )
+        .unwrap();
+
+        let result_init: Vec<_> = exec.execution_iter("init_peer_id").unwrap().collect();
+
+        assert_eq!(result_init.len(), 1);
+        let outcome1 = &result_init[0];
+        assert_eq!(outcome1.ret_code, 0);
+        assert_eq!(outcome1.error_message, "");
+
+        assert!(exec.execution_iter("peer2").unwrap().next().is_none());
+        {
+            let results1 = exec.execute_all("peer1").unwrap();
+            assert_eq!(results1.len(), 1);
+            let outcome1 = &results1[0];
+            assert_eq!(outcome1.ret_code, 0, "{:?}", outcome1);
+            assert!(exec.execution_iter("peer1").unwrap().next().is_none());
+            assert_next_pks!(&outcome1.next_peer_pks, ["peer2"]);
+        }
+
+        {
+            let results2: Vec<_> = exec.execute_all("peer2").unwrap();
+            assert_eq!(results2.len(), 1);
+            let outcome2 = &results2[0];
+            assert_eq!(outcome2.ret_code, 0, "{:?}", outcome2);
+            assert!(exec.execution_iter("peer2").unwrap().next().is_none());
+            assert_next_pks!(&outcome2.next_peer_pks, ["peer3"]);
+
+            let trace = trace_from_result(outcome2);
+            assert_eq!(
+                trace,
+                ExecutionTrace::from(vec![
+                    scalar(json!([{"p":"peer2","v":2},{"p":"peer3","v":3},])),
+                    scalar_number(12),
+                    request_sent_by("peer2"),
+                ])
+            );
+        }
+
+        {
+            let results3: Vec<_> = exec.execute_all("peer3").unwrap();
+            assert_eq!(results3.len(), 1);
+            let outcome3 = &results3[0];
+            assert_eq!(outcome3.ret_code, 0, "{:?}", outcome3);
+            assert!(exec.execution_iter("peer3").unwrap().next().is_none());
+
+            let trace = trace_from_result(outcome3);
+            assert_eq!(
+                trace,
+                ExecutionTrace::from(vec![
+                    scalar(json!([{"p":"peer2","v":2},{"p":"peer3","v":3},])),
+                    scalar_number(12),
+                    request_sent_by("peer2"),
+                ])
+            );
+        }
+    }
+
+    #[test]
+    fn test_echo() {
+        let exec = TestExecutor::new(
+            TestRunParameters::from_init_peer_id("init_peer_id"),
+            vec![],
+            std::iter::empty(),
+            r#"(seq
+(call "peer1" ("service" "func") [1 22] arg) ; service=echo
+(call "peer2" ("service" "func") [arg]) ; result = 43
+)
+"#,
+        )
+        .unwrap();
+
+        let result_init: Vec<_> = exec.execution_iter("init_peer_id").unwrap().collect();
+
+        assert_eq!(result_init.len(), 1);
+        let outcome0 = &result_init[0];
+        assert_eq!(outcome0.ret_code, 0);
+        assert_eq!(outcome0.error_message, "");
+
+        assert!(exec.execution_iter("peer2").unwrap().next().is_none());
+        let results1: Vec<_> = exec.execution_iter("peer1").unwrap().collect();
+        assert_eq!(results1.len(), 1);
+        let outcome1 = &results1[0];
+        assert_eq!(outcome1.ret_code, 0, "{:?}", outcome1);
+        assert!(exec.execution_iter("peer1").unwrap().next().is_none());
+
+        assert_eq!(
+            trace_from_result(outcome1),
+            ExecutionTrace::from(vec![scalar_number(1), request_sent_by("peer1"),]),
+        )
     }
 }

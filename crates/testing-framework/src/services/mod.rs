@@ -18,7 +18,7 @@ pub(crate) mod results;
 
 use air_test_utils::{CallRequestParams, CallServiceClosure, CallServiceResult};
 
-use std::{rc::Rc, time::Duration};
+use std::{cell::RefCell, rc::Rc, time::Duration};
 
 pub type JValue = serde_json::Value;
 
@@ -33,21 +33,38 @@ pub enum FunctionOutcome {
 
 /// A mocked Marine service.
 pub trait Service {
-    fn call(&self, params: &CallRequestParams) -> FunctionOutcome;
+    fn call(&self, params: CallRequestParams) -> FunctionOutcome;
+
+    fn to_handle(self) -> ServiceHandle
+    where
+        Self: Sized + 'static,
+    {
+        ServiceHandle(Rc::new(RefCell::new(Box::new(self))))
+    }
+}
+
+#[derive(Clone)]
+pub struct ServiceHandle(Rc<RefCell<Box<dyn Service>>>);
+
+impl Service for ServiceHandle {
+    fn call(&self, params: CallRequestParams) -> FunctionOutcome {
+        let mut guard = self.0.borrow_mut();
+        Service::call(guard.as_mut(), params)
+    }
 }
 
 pub(crate) fn services_to_call_service_closure(
-    services: Rc<[Rc<dyn Service>]>,
+    services: Rc<[ServiceHandle]>,
 ) -> CallServiceClosure {
     Box::new(move |params: CallRequestParams| -> CallServiceResult {
-        for service in services.as_ref() {
-            let outcome = service.call(&params);
+        for service_handler in services.as_ref() {
+            let outcome = service_handler.call(params.clone());
             match outcome {
                 FunctionOutcome::ServiceResult(result, _) => return result,
                 FunctionOutcome::NotDefined => continue,
-                FunctionOutcome::Empty => todo!("It's not clear yet what to return"),
+                FunctionOutcome::Empty => return CallServiceResult::ok(serde_json::Value::Null),
             }
         }
-        todo!("Do not know yet what to return here")
+        panic!("No function found for params {:?}", params)
     })
 }

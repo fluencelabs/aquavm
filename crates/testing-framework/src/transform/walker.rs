@@ -15,14 +15,14 @@
  */
 
 use super::{Call, Sexp};
-use crate::{asserts::Meta, ephemeral::PeerId, services::JValue};
+use crate::{asserts::ServiceDesc, ephemeral::PeerId};
 
 use std::collections::{HashMap, HashSet};
 
 #[derive(Debug, Default)]
 pub(crate) struct Transformer {
     cnt: u32,
-    pub(crate) results: HashMap<u32, JValue>,
+    pub(crate) results: HashMap<u32, ServiceDesc>,
     pub(crate) peers: HashSet<PeerId>,
 }
 
@@ -57,21 +57,19 @@ impl Transformer {
             .into_iter()
             .flatten()
         {
-            for meta in &branch.metas {
-                if let Meta::Result(res) = meta {
-                    // install a value
-                    let call_id = self.cnt;
-                    self.cnt += 1;
+            if let Some(service) = &branch.service_desc {
+                // install a value
+                let call_id = self.cnt;
+                self.cnt += 1;
 
-                    self.results.insert(call_id, res.clone());
+                self.results.insert(call_id, service.clone());
 
-                    match &mut call.triplet.1 {
-                        Sexp::String(ref mut value) => value.push_str(&format!("..{}", call_id)),
-                        _ => panic!("Incorrect script: non-string service string not supported"),
-                    }
-
-                    return;
+                match &mut call.triplet.1 {
+                    Sexp::String(ref mut value) => value.push_str(&format!("..{}", call_id)),
+                    _ => panic!("Incorrect script: non-string service string not supported"),
                 }
+
+                return;
             }
         }
     }
@@ -124,7 +122,7 @@ mod tests {
         assert_eq!(
             transformer.results,
             maplit::hashmap! {
-                0u32 => serde_json::json!(42),
+                0u32 => ServiceDesc::Result(serde_json::json!(42)),
             }
         );
 
@@ -162,8 +160,8 @@ mod tests {
         assert_eq!(
             transformer.results,
             maplit::hashmap! {
-                0u32 => serde_json::json!({"test": "me"}),
-                1 => serde_json::json!(true),
+                0u32 => ServiceDesc::Result(serde_json::json!({"test":"me"})),
+                1 => ServiceDesc::Result(serde_json::json!(true)),
             }
         );
 

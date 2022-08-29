@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-use super::{Assertion, AssertionBranch, AssertionChain, Condition, Meta};
+use super::{Assertion, AssertionBranch, AssertionChain, Condition, Meta, ServiceDesc};
 use crate::services::JValue;
 
+use air_test_utils::CallServiceResult;
 use nom::{error::VerboseError, IResult, InputTakeAtPosition, Parser};
 
-use std::str::FromStr;
+use std::{collections::HashMap, str::FromStr};
 
 type ParseError<'inp> = VerboseError<&'inp str>;
 
@@ -27,6 +28,7 @@ enum Pair {
     Meta(Meta),
     Condition(Condition),
     Assertion(Assertion),
+    ServiceDesc(ServiceDesc),
 }
 
 // this implementation uses nom as quick and dirty solution.  One might consider using
@@ -64,32 +66,40 @@ fn parse_assertion_chain(s: &str) -> IResult<&str, AssertionChain, ParseError> {
 // "id = firstcall, callback = check_values"
 fn parse_assertion_branch(s: &str) -> IResult<&str, AssertionBranch, ParseError> {
     use nom::bytes::complete::tag;
-    use nom::combinator::map;
+    use nom::combinator::map_res;
     use nom::multi::separated_list1;
 
-    map(delim_ws(separated_list1(tag(","), parse_kw)), |pairs| {
+    map_res(delim_ws(separated_list1(tag(","), parse_kw)), |pairs| {
         let mut assertions = vec![];
         let mut conditions = vec![];
         let mut metas = vec![];
+        let mut services = vec![];
 
         for pair in pairs {
             match pair {
                 Pair::Meta(m) => metas.push(m),
                 Pair::Condition(c) => conditions.push(c),
                 Pair::Assertion(a) => assertions.push(a),
+                Pair::ServiceDesc(s) => services.push(s),
             }
         }
-        AssertionBranch {
-            assertions,
-            conditions,
-            metas,
+        if services.len() > 1 {
+            Err("Multiple service descriptors found")
+        } else {
+            let service_desc = services.into_iter().next();
+            Ok(AssertionBranch {
+                assertions,
+                conditions,
+                metas,
+                service_desc,
+            })
         }
     })(s)
 }
 
 // kw "=" val
 // example: "id=firstcall"
-fn parse_kw(s: &str) -> IResult<&str, Pair, ParseError> {
+fn parse_kw(inp: &str) -> IResult<&str, Pair, ParseError> {
     use nom::branch::alt;
     use nom::bytes::complete::tag;
     use nom::character::complete::{alphanumeric1, u32 as parse_u32};
@@ -121,20 +131,35 @@ fn parse_kw(s: &str) -> IResult<&str, Pair, ParseError> {
             ),
             |flag| Pair::Assertion(Assertion::IsCalled(flag)),
         ),
-        preceded(
-            pair(tag("result"), equal()),
-            cut(context(
-                "result value is consumed to end and has to be a valid JSON",
-                map_res(
+        map_res(
+            separated_pair(
+                alt((
+                    tag("result"),
+                    tag("call_result"),
+                    tag("seq_result"),
+                    tag("service"),
+                )),
+                equal(),
+                cut(context(
+                    "result value is consumed to end and has to be a valid JSON",
                     // TODO taking rest of input means we cannot provide values for
                     // each branch; one might use some json parser, including nom's one
                     rest,
-                    |result: &str| {
-                        serde_json::from_str::<JValue>(result.trim())
-                            .map_or(Err(()), |value| Ok(Pair::Meta(Meta::Result(value))))
-                    },
-                ),
-            )),
+                )),
+            ),
+            |(tag, value): (&str, &str)| {
+                let value = value.trim();
+                match tag {
+                    "result" => serde_json::from_str::<JValue>(value).map(ServiceDesc::Result),
+                    "call_result" => serde_json::from_str::<CallServiceResult>(value)
+                        .map(ServiceDesc::CallResult),
+                    "seq_result" => serde_json::from_str::<HashMap<String, JValue>>(value)
+                        .map(ServiceDesc::SeqResult),
+                    "service" => Ok(ServiceDesc::Service(value.to_owned())),
+                    _ => unreachable!("unknown tag {:?}", tag),
+                }
+                .map(Pair::ServiceDesc)
+            },
         ),
         map_res(
             separated_pair(alphanumeric1, delim_ws(tag("=")), alphanumeric1),
@@ -149,7 +174,7 @@ fn parse_kw(s: &str) -> IResult<&str, Pair, ParseError> {
                 _ => Err(()),
             },
         ),
-    )))(s)
+    )))(inp)
 }
 
 pub(crate) fn delim_ws<I, O, E, F>(f: F) -> impl FnMut(I) -> IResult<I, O, E>
@@ -209,6 +234,7 @@ mod tests {
                     assertions: vec![Assertion::Before("other".to_owned())],
                     metas: vec![Meta::Id("myid".to_owned())],
                     conditions: vec![],
+                    service_desc: None,
                 }]
             })
         );
@@ -226,11 +252,13 @@ mod tests {
                         assertions: vec![Assertion::Before("other".to_owned())],
                         conditions: vec![Condition::Iter(0)],
                         metas: vec![Meta::Id("myid".to_owned())],
+                        service_desc: None,
                     },
                     AssertionBranch {
                         assertions: vec![Assertion::After("another".to_owned())],
                         conditions: vec![Condition::Iter(1)],
                         metas: vec![],
+                        service_desc: None,
                     },
                 ]
             })
@@ -250,11 +278,13 @@ mod tests {
                     vec![Condition::Iter(0)],
                     vec![Assertion::Before("other".to_owned())],
                     vec![Meta::Id("myid".to_owned())],
+                    None,
                 ),
                 AssertionBranch::new(
                     vec![Condition::Iter(1)],
                     vec![Assertion::After("another".to_owned())],
                     vec![],
+                    None,
                 ),
             ]))
         );
@@ -324,26 +354,103 @@ mod tests {
     }
 
     #[test]
-    fn test_result() {
+    fn test_result_service() {
         use serde_json::json;
 
         let res = AssertionChain::from_str(r#"id=myid,result={"this":["is","value"]}"#);
         assert_eq!(
             res,
-            Ok(AssertionChain::new(vec![AssertionBranch::from_metas(
-                vec![
-                    Meta::Id("myid".to_owned()),
-                    Meta::Result(json!({"this": ["is", "value"]}))
-                ]
+            Ok(AssertionChain::new(vec![AssertionBranch::new(
+                vec![],
+                vec![],
+                vec![Meta::Id("myid".to_owned()),],
+                Some(ServiceDesc::Result(json!({"this": ["is", "value"]})))
             )]))
         );
     }
 
     #[test]
-    fn test_result_malformed() {
+    fn test_result_service_malformed() {
         let res = AssertionChain::from_str(r#"id=myid,result={"this":["is","value"]"#);
         assert!(res.is_err());
     }
 
-    // TODO sample test for each pair
+    #[test]
+    fn test_call_result() {
+        use serde_json::json;
+
+        let res =
+            AssertionChain::from_str(r#"id=myid,call_result={"ret_code": 0, "result": [1, 2, 3]}"#);
+        assert_eq!(
+            res,
+            Ok(AssertionChain::new(vec![AssertionBranch::new(
+                vec![],
+                vec![],
+                vec![Meta::Id("myid".to_owned()),],
+                Some(ServiceDesc::CallResult(CallServiceResult::ok(json!([
+                    1, 2, 3
+                ])))),
+            )]))
+        );
+    }
+
+    #[test]
+    fn test_call_result_malformed() {
+        let res =
+            AssertionChain::from_str(r#"id=myid,call_result={"retcode": 0, "result": [1, 2, 3]}"#);
+        assert!(res.is_err());
+    }
+
+    #[test]
+    fn test_call_result_invalid() {
+        let res =
+            AssertionChain::from_str(r#"id=myid,call_result={"ret_code": 0, "result": 1, 2, 3]}"#);
+        assert!(res.is_err());
+    }
+
+    #[test]
+    fn test_seq_result() {
+        use serde_json::json;
+
+        let res =
+            AssertionChain::from_str(r#"id=myid,seq_result={"default": 42, "1": true, "3": []}"#);
+        assert_eq!(
+            res,
+            Ok(AssertionChain::new(vec![AssertionBranch::new(
+                vec![],
+                vec![],
+                vec![Meta::Id("myid".to_owned()),],
+                Some(ServiceDesc::SeqResult(maplit::hashmap! {
+                    "default".to_owned() => json!(42),
+                    "1".to_owned() => json!(true),
+                    "3".to_owned() => json!([]),
+                }))
+            )]))
+        );
+    }
+
+    #[test]
+    fn test_seq_result_malformed() {
+        let res =
+            AssertionChain::from_str(r#"id=myid,seq_result={"default": 42, "1": true, "3": ]}"#);
+        assert!(res.is_err());
+    }
+
+    #[test]
+    fn test_seq_result_invalid() {
+        // TODO perhaps, we should support both arrays and maps
+        let res = AssertionChain::from_str(r#"id=myid,seq_result=[42, 43]"#);
+        assert!(res.is_err());
+    }
+
+    #[test]
+    fn test_service() {
+        let res = AssertionChain::from_str(r#"service=echo"#);
+        assert_eq!(
+            res,
+            Ok(AssertionChain::new(vec![
+                AssertionBranch::from_service_desc(ServiceDesc::Service("echo".to_owned()))
+            ]))
+        );
+    }
 }

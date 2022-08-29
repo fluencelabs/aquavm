@@ -18,6 +18,10 @@ pub(crate) mod parser;
 
 use crate::services::JValue;
 
+use air_test_utils::CallServiceResult;
+
+use std::collections::HashMap;
+
 /// Assert language structure: Assert.
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct AssertionChain {
@@ -35,14 +39,21 @@ pub struct AssertionBranch {
     pub(crate) conditions: Vec<Condition>,
     pub(crate) assertions: Vec<Assertion>,
     pub(crate) metas: Vec<Meta>,
+    pub(crate) service_desc: Option<ServiceDesc>,
 }
 
 impl AssertionBranch {
-    pub fn new(conditions: Vec<Condition>, assertions: Vec<Assertion>, metas: Vec<Meta>) -> Self {
+    pub fn new(
+        conditions: Vec<Condition>,
+        assertions: Vec<Assertion>,
+        metas: Vec<Meta>,
+        service_desc: Option<ServiceDesc>,
+    ) -> Self {
         Self {
             conditions,
             assertions,
             metas,
+            service_desc,
         }
     }
 
@@ -51,6 +62,7 @@ impl AssertionBranch {
             conditions,
             assertions: vec![],
             metas: vec![],
+            service_desc: None,
         }
     }
 
@@ -59,6 +71,7 @@ impl AssertionBranch {
             conditions: vec![],
             assertions,
             metas: vec![],
+            service_desc: None,
         }
     }
 
@@ -67,6 +80,16 @@ impl AssertionBranch {
             conditions: vec![],
             assertions: vec![],
             metas,
+            service_desc: None,
+        }
+    }
+
+    pub fn from_service_desc(service_desc: ServiceDesc) -> Self {
+        Self {
+            conditions: vec![],
+            assertions: vec![],
+            metas: vec![],
+            service_desc: Some(service_desc),
         }
     }
 }
@@ -99,7 +122,15 @@ pub enum Equation {
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Meta {
     Id(CallPlaceId),
+}
+
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub enum ServiceDesc {
     Result(JValue),
+    CallResult(CallServiceResult),
+    SeqResult(HashMap<String, JValue>),
+    // For example: echo, service, function, argument.N, fail
+    Service(String),
 }
 
 pub type CallPlaceId = String;

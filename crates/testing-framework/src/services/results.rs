@@ -14,31 +14,83 @@
  * limitations under the License.
  */
 
-use super::{FunctionOutcome, JValue, Service};
+use super::{FunctionOutcome, Service};
+use crate::asserts::ServiceDesc;
 
-use air_test_utils::{CallRequestParams, CallServiceResult};
+use air_test_utils::{
+    prelude::{echo_call_service, unit_call_service},
+    CallRequestParams, CallServiceClosure, CallServiceResult,
+};
 
-use std::{collections::HashMap, time::Duration};
+use std::{cell::Cell, collections::HashMap, convert::TryInto, time::Duration};
 
 pub struct ResultService {
-    results: HashMap<u32, JValue>,
+    results: HashMap<u32, CallServiceClosure>,
+}
+
+impl TryInto<CallServiceClosure> for ServiceDesc {
+    type Error = String;
+
+    fn try_into(self) -> Result<CallServiceClosure, Self::Error> {
+        match self {
+            ServiceDesc::Result(jvalue) => {
+                Ok(Box::new(move |_| CallServiceResult::ok(jvalue.clone())))
+            }
+            ServiceDesc::CallResult(call_result) => Ok(Box::new(move |_| call_result.clone())),
+            ServiceDesc::SeqResult(call_map) => Ok(seq_result_closure(call_map)),
+            ServiceDesc::Service(name) => named_service_closure(name),
+        }
+    }
+}
+
+fn named_service_closure(name: String) -> Result<CallServiceClosure, String> {
+    match name.as_str() {
+        "echo" => Ok(echo_call_service()),
+        "unit" => Ok(unit_call_service()),
+        _ => Err(format!("unknown service name: {:?}", name)),
+    }
+}
+
+fn seq_result_closure(call_map: HashMap<String, serde_json::Value>) -> CallServiceClosure {
+    let call_number_seq = Cell::new(0);
+
+    Box::new(move |_| {
+        let call_number = call_number_seq.get();
+        let call_num_str = call_number.to_string();
+        call_number_seq.set(call_number + 1);
+
+        CallServiceResult::ok(
+            call_map
+                .get(&call_num_str)
+                .or_else(|| call_map.get("default"))
+                .unwrap_or_else(|| {
+                    panic!(
+                        "neither value {} nor default value not found in the {:?}",
+                        call_num_str, call_map
+                    )
+                })
+                .clone(),
+        )
+    })
 }
 
 impl ResultService {
-    pub(crate) fn new(results: HashMap<u32, JValue>) -> Self {
-        Self { results }
+    pub(crate) fn new(results: HashMap<u32, ServiceDesc>) -> Result<Self, String> {
+        Ok(Self {
+            results: results
+                .into_iter()
+                .map(|(k, v)| v.try_into().map(move |s: CallServiceClosure| (k, s)))
+                .collect::<Result<_, String>>()?,
+        })
     }
 }
 
 impl Service for ResultService {
-    fn call(&self, params: &CallRequestParams) -> FunctionOutcome {
+    fn call(&self, params: CallRequestParams) -> FunctionOutcome {
         if let Some((_, suffix)) = params.service_id.split_once("..") {
             if let Ok(key) = suffix.parse() {
-                let value = self.results.get(&key).expect("Unknown result id");
-                // It is rather CallServiceResult or plain value.
-                let result = serde_json::from_value::<CallServiceResult>(value.clone())
-                    .unwrap_or_else(|_| CallServiceResult::ok(value.clone()));
-                FunctionOutcome::ServiceResult(result, Duration::ZERO)
+                let service_desc = self.results.get(&key).expect("Unknown result id");
+                FunctionOutcome::ServiceResult(service_desc(params), Duration::ZERO)
             } else {
                 // Pass malformed service names further in a chain
                 FunctionOutcome::NotDefined
