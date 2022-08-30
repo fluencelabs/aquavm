@@ -19,7 +19,6 @@ mod traits;
 
 use super::*;
 
-use air_lambda_ast::LambdaAST;
 use serde::Serialize;
 
 use std::rc::Rc;
@@ -98,6 +97,7 @@ pub struct MisMatch<'i> {
 
 /// (fail 1337 "error message")
 /// (fail %last_error%)
+/// (fail value)
 #[derive(Serialize, Debug, PartialEq, Eq)]
 pub enum Fail<'i> {
     Scalar(Scalar<'i>),
@@ -106,10 +106,7 @@ pub enum Fail<'i> {
         ret_code: i64,
         error_message: &'i str,
     },
-    CanonStream {
-        name: &'i str,
-        lambda: LambdaAST<'i>,
-    },
+    CanonStreamWithLambda(CanonStreamWithLambda<'i>),
     LastError,
 }
 

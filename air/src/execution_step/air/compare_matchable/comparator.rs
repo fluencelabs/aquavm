@@ -34,6 +34,7 @@ pub(crate) fn are_matchable_eq<'ctx>(
     use ast::ImmutableValue::*;
 
     match (left, right) {
+        // TODO: introduce traits to refactor this in boxed values
         (InitPeerId, InitPeerId) => Ok(true),
         (InitPeerId, matchable) | (matchable, InitPeerId) => compare_matchable(
             matchable,
@@ -82,6 +83,20 @@ pub(crate) fn are_matchable_eq<'ctx>(
 
         (Variable(left_variable), Variable(right_variable)) => {
             let (left_value, _) = resolve_ast_variable(left_variable, exec_ctx)?;
+            let (right_value, _) = resolve_ast_variable(right_variable, exec_ctx)?;
+
+            Ok(left_value == right_value)
+        }
+
+        (Variable(left_variable), VariableWithLambda(right_variable)) => {
+            let (left_value, _) = resolve_ast_variable(left_variable, exec_ctx)?;
+            let (right_value, _) = resolve_ast_variable_wl(right_variable, exec_ctx)?;
+
+            Ok(left_value == right_value)
+        }
+
+        (VariableWithLambda(left_variable), Variable(right_variable)) => {
+            let (left_value, _) = resolve_ast_variable_wl(left_variable, exec_ctx)?;
             let (right_value, _) = resolve_ast_variable(right_variable, exec_ctx)?;
 
             Ok(left_value == right_value)

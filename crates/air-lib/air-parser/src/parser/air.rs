@@ -1,5 +1,5 @@
 // auto-generated: "lalrpop 0.19.8"
-// sha3: 75300e49eaef4f4bd2ca00a1d064041bd0e73af3b4c3d5aee6c0679d01dea9a8
+// sha3: 8fdccff36fa8438dd9829e0b0ec59f87c94b0bae89bfe0503aa370f11847aef8
 use crate::ast::*;
 use crate::parser::ParserError;
 use crate::parser::VariableValidator;
@@ -4484,10 +4484,7 @@ fn __action26<
     (_, canon_stream, _): (usize, (&'input str, LambdaAST<'input>, usize), usize),
 ) -> Fail<'input>
 {
-    Fail::CanonStream {
-        name: canon_stream.0,
-        lambda: canon_stream.1,
-    }
+    Fail::CanonStreamWithLambda(CanonStreamWithLambda::new(canon_stream.0, canon_stream.1, canon_stream.2))
 }
 
 #[allow(unused_variables)]

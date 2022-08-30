@@ -34,14 +34,13 @@ impl<'i> ExecutableInstruction<'i> for FoldScalar<'i> {
         log_instruction!(fold, exec_ctx, trace_ctx);
 
         let iterable = match &self.iterable {
-            FoldScalarIterable::Scalar(scalar) => {
-                joinable!(create_scalar_iterable(scalar, exec_ctx), exec_ctx)?
-            }
+            FoldScalarIterable::Scalar(scalar) => joinable!(create_scalar_iterable(scalar, exec_ctx), exec_ctx, ())?,
             FoldScalarIterable::ScalarWithLambda(scalar) => {
-                joinable!(create_scalar_wl_iterable(scalar, exec_ctx), exec_ctx)?
+                joinable!(create_scalar_wl_iterable(scalar, exec_ctx), exec_ctx, ())?
             }
             FoldScalarIterable::CanonStream(canon_stream) => {
-                joinable!(create_canon_stream_iterable_value(canon_stream, exec_ctx), exec_ctx)?
+                // TODO: use joinable in a separate PR
+                create_canon_stream_iterable_value(canon_stream, exec_ctx)?
             }
             // just do nothing on an empty array
             FoldScalarIterable::EmptyArray => return Ok(()),

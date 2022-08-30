@@ -22,6 +22,7 @@ pub(crate) enum Variable<'i> {
     Scalar {
         name: &'i str,
     },
+    #[allow(dead_code)] // it will be used in BoxedValues
     Stream {
         name: &'i str,
         generation: Generation,
@@ -37,6 +38,7 @@ impl<'i> Variable<'i> {
         Self::Scalar { name }
     }
 
+    #[allow(dead_code)] // it'll be used in BoxedValues
     pub(crate) fn stream(name: &'i str, generation: Generation, position: usize) -> Self {
         Self::Stream {
             name,
@@ -56,7 +58,6 @@ impl<'i> From<&ast::ImmutableVariable<'i>> for Variable<'i> {
 
         match ast_variable {
             Scalar(scalar) => Self::scalar(scalar.name),
-            Stream(stream) => Self::stream(stream.name, Generation::Last, stream.position),
             CanonStream(canon_stream) => Self::canon_stream(canon_stream.name),
         }
     }
@@ -68,7 +69,6 @@ impl<'i> From<&ast::ImmutableVariableWithLambda<'i>> for Variable<'i> {
 
         match ast_variable {
             Scalar(scalar) => Self::scalar(scalar.name),
-            Stream(stream) => Self::stream(stream.name, Generation::Last, stream.position),
             CanonStream(canon_stream) => Self::canon_stream(canon_stream.name),
         }
     }

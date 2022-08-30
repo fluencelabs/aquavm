@@ -17,7 +17,8 @@
 use air_test_utils::prelude::*;
 
 #[test]
-// test for github.com/fluencelabs/aquavm/issues/206
+#[ignore] // this test is not actual because streams are prohibited to be used as match operands
+          // test for github.com/fluencelabs/aquavm/issues/206
 fn issue_206() {
     let peer_1_id = "peer_1_id";
     let mut peer_1 = create_avm(echo_call_service(), peer_1_id);

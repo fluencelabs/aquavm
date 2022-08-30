@@ -46,28 +46,30 @@ pub(crate) fn resolve<'i>(triplet: &ast::Triplet<'i>, ctx: &ExecutionCtx<'i>) ->
 // TODO: move this function into resolve in boxed value PR
 pub(crate) fn resolve_to_string<'i>(
     value: &ast::ResolvableToStringVariable<'i>,
-    ctx: &ExecutionCtx<'i>,
+    exec_ctx: &ExecutionCtx<'i>,
 ) -> ExecutionResult<String> {
-    use crate::execution_step::resolver::resolve_ast_variable_wl;
+    use crate::execution_step::resolver;
     use ast::ResolvableToStringVariable::*;
 
-    let resolved = match value {
-        InitPeerId => ctx.run_parameters.init_peer_id.to_string(),
-        Literal(value) => value.to_string(),
-        Variable(variable) => {
-            let (resolved, _) = resolve_ast_variable_wl(variable, ctx)?;
-            try_jvalue_to_string(resolved, variable)?
-        }
+    let ((jvalue, _), name) = match value {
+        InitPeerId => return Ok(exec_ctx.run_parameters.init_peer_id.to_string()),
+        Literal(value) => return Ok(value.to_string()),
+        Scalar(scalar) => (resolver::resolve_ast_scalar(scalar, exec_ctx)?, scalar.name),
+        ScalarWithLambda(scalar) => (resolver::resolve_ast_scalar_wl(scalar, exec_ctx)?, scalar.name),
+        CanonStreamWithLambda(canon_stream) => (
+            resolver::resolve_ast_canon_wl(canon_stream, exec_ctx)?,
+            canon_stream.name,
+        ),
     };
 
-    Ok(resolved)
+    try_jvalue_to_string(jvalue, name)
 }
 
-fn try_jvalue_to_string(jvalue: JValue, variable: &ast::ImmutableVariableWithLambda<'_>) -> ExecutionResult<String> {
+fn try_jvalue_to_string(jvalue: JValue, variable_name: impl Into<String>) -> ExecutionResult<String> {
     match jvalue {
         JValue::String(s) => Ok(s),
         _ => Err(CatchableError::IncompatibleJValueType {
-            variable_name: variable.name().to_string(),
+            variable_name: variable_name.into(),
             actual_value: jvalue,
             expected_value_type: "string",
         }

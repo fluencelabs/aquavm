@@ -38,10 +38,8 @@ fn issue_211() {
        (seq
         (seq
          (null)
-         (call %init_peer_id% ("getDataSrv" "idx") [] idx)
-        )
-        (call %init_peer_id% ("getDataSrv" "nodes") [] nodes)
-       )
+         (call %init_peer_id% ("getDataSrv" "idx") [] idx))
+        (call %init_peer_id% ("getDataSrv" "nodes") [] nodes))
        (new $nodes2
         (seq
          (seq
@@ -49,21 +47,16 @@ fn issue_211() {
            (fold nodes node
             (par
              (ap node $nodes2)
-             (next node)
-            )
-           )
-           (null)
-          )
-          (call %init_peer_id% ("op" "noop") [$nodes2.$.[idx]! nodes])
-         )
-         (call %init_peer_id% ("op" "identity") [$nodes2] nodes2-fix)
-        )
-       )
-      )
-      (null)
-     )
-     (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2])
-    )
+             (next node)))
+           (null))
+           (seq
+            (canon %init_peer_id% $nodes2 #nodes2_0)
+            (call %init_peer_id% ("op" "noop") [#nodes2_0.$.[idx]! nodes])))
+         (seq
+            (canon %init_peer_id% $nodes2 #nodes2_1)
+            (call %init_peer_id% ("op" "identity") [#nodes2_1] nodes2-fix)))))
+      (null))
+     (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2]))
     "#);
 
     let run_params = TestRunParameters::from_init_peer_id(peer_1_id);
@@ -79,7 +72,9 @@ fn issue_211() {
         executed_state::ap(Some(0)),
         executed_state::par(1, 0),
         executed_state::ap(Some(0)),
+        executed_state::canon(vec![4.into(), 6.into(), 8.into()]),
         executed_state::scalar_string("default result from set_variables_call_service"),
+        executed_state::canon(vec![4.into(), 6.into(), 8.into()]),
         executed_state::scalar_string("default result from set_variables_call_service"),
     ];
 

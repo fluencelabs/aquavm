@@ -137,10 +137,20 @@ pub(crate) fn resolve_ast_variable_wl<'ctx, 'i>(
 ) -> ExecutionResult<(JValue, RcSecurityTetraplets)> {
     let variable: Variable<'_> = ast_variable.into();
 
-    apply_lambda(variable, lambda, exec_ctx).map(|(value, tetraplet)| {
+    apply_lambda(variable, ast_variable.lambda(), exec_ctx).map(|(value, tetraplet)| {
         let tetraplet = Rc::new(tetraplet);
         (value, vec![tetraplet])
     })
+}
+
+#[tracing::instrument(level = "trace", skip(exec_ctx))]
+pub(crate) fn resolve_ast_scalar<'ctx, 'i>(
+    ast_scalar: &ast::Scalar<'_>,
+    exec_ctx: &'ctx ExecutionCtx<'i>,
+) -> ExecutionResult<(JValue, RcSecurityTetraplets)> {
+    // TODO: wrap lambda path with Rc to make this clone cheaper
+    let variable = ast::ImmutableVariable::Scalar(ast_scalar.clone());
+    resolve_ast_variable(&variable, exec_ctx)
 }
 
 #[tracing::instrument(level = "trace", skip(exec_ctx))]
@@ -150,6 +160,16 @@ pub(crate) fn resolve_ast_scalar_wl<'ctx, 'i>(
 ) -> ExecutionResult<(JValue, RcSecurityTetraplets)> {
     // TODO: wrap lambda path with Rc to make this clone cheaper
     let variable = ast::ImmutableVariableWithLambda::Scalar(ast_scalar.clone());
+    resolve_ast_variable_wl(&variable, exec_ctx)
+}
+
+#[tracing::instrument(level = "trace", skip(exec_ctx))]
+pub(crate) fn resolve_ast_canon_wl<'ctx, 'i>(
+    ast_canon: &ast::CanonStreamWithLambda<'_>,
+    exec_ctx: &'ctx ExecutionCtx<'i>,
+) -> ExecutionResult<(JValue, RcSecurityTetraplets)> {
+    // TODO: wrap lambda path with Rc to make this clone cheaper
+    let variable = ast::ImmutableVariableWithLambda::CanonStream(ast_canon.clone());
     resolve_ast_variable_wl(&variable, exec_ctx)
 }
 

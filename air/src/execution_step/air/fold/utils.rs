@@ -39,13 +39,13 @@ pub(crate) fn create_scalar_iterable<'ctx>(
     scalar_iterable: &ast::Scalar<'ctx>,
     exec_ctx: &ExecutionCtx<'ctx>,
 ) -> ExecutionResult<FoldIterableScalar> {
-    let scalar_name = scalar_iterable.name();
+    let scalar_name = scalar_iterable.name;
     match exec_ctx.scalars.get_value(scalar_name)? {
-        ScalarRef::Value(call_result) => from_value(call_result.clone(), variable_name),
+        ScalarRef::Value(call_result) => from_value(call_result.clone(), scalar_name),
         ScalarRef::IterableValue(fold_state) => {
             let iterable_value = fold_state.iterable.peek().unwrap();
             let call_result = iterable_value.into_resolved_result();
-            from_value(call_result, variable_name)
+            from_value(call_result, scalar_name)
         }
     }
 }

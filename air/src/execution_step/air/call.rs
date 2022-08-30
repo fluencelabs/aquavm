@@ -40,11 +40,11 @@ impl<'i> super::ExecutableInstruction<'i> for Call<'i> {
         log_instruction!(call, exec_ctx, trace_ctx);
         exec_ctx.tracker.meet_call();
 
-        let resolved_call = joinable!(ResolvedCall::new(self, exec_ctx), exec_ctx)
+        let resolved_call = joinable!(ResolvedCall::new(self, exec_ctx), exec_ctx, ())
             .map_err(|e| set_last_error(self, exec_ctx, e, None))?;
 
         let tetraplet = resolved_call.as_tetraplet();
-        joinable!(resolved_call.execute(self, exec_ctx, trace_ctx), exec_ctx)
+        joinable!(resolved_call.execute(self, exec_ctx, trace_ctx), exec_ctx, ())
             .map_err(|e| set_last_error(self, exec_ctx, e, Some(tetraplet)))
     }
 }

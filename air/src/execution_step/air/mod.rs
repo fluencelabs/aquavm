@@ -139,11 +139,11 @@ macro_rules! log_instruction {
 /// This macro converts joinable errors to Ok and sets subgraph complete to false.
 #[macro_export]
 macro_rules! joinable {
-    ($cmd:expr, $exec_ctx:expr) => {
+    ($cmd:expr, $exec_ctx:expr, $ok_result:expr) => {
         match $cmd {
             Err(e) if e.is_joinable() => {
                 $exec_ctx.subgraph_complete = false;
-                return Ok(());
+                return Ok($ok_result);
             }
             v => v,
         }

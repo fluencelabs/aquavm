@@ -65,34 +65,6 @@ fn dont_wait_on_json_path() {
 }
 
 #[test]
-fn wait_on_stream_json_path_by_id() {
-    let local_peer_id = "local_peer_id";
-    let mut local_vm = create_avm(unit_call_service(), local_peer_id);
-
-    let non_join_stream_script = f!(r#"
-    (par
-        (call "{local_peer_id}" ("" "") [] $status)
-        (call "{local_peer_id}" ("history" "add") [$status.$[0]!])
-     )"#);
-
-    let result = checked_call_vm!(local_vm, <_>::default(), non_join_stream_script, "", "");
-    let actual_trace = trace_from_result(&result);
-
-    assert_eq!(actual_trace.len(), 3);
-
-    let join_stream_script = f!(r#"
-    (par
-        (call "{local_peer_id}" ("" "") [] $status)
-        (call "{local_peer_id}" ("history" "add") [$status.$[1]!]) ; $status stream here has only one value
-     )"#);
-
-    let result = checked_call_vm!(local_vm, <_>::default(), join_stream_script, "", "");
-    let actual_trace = trace_from_result(&result);
-
-    assert_eq!(actual_trace.len(), 2); // par and the first call emit traces, second call doesn't
-}
-
-#[test]
 fn wait_on_empty_stream_json_path() {
     let local_peer_id = "local_peer_id";
     let mut local_vm = create_avm(echo_call_service(), local_peer_id);
