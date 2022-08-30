@@ -15,6 +15,7 @@
  */
 
 use super::*;
+
 use std::fmt;
 
 impl fmt::Display for ApResult<'_> {
@@ -28,9 +29,9 @@ impl fmt::Display for ApResult<'_> {
     }
 }
 
-impl fmt::Display for Value<'_> {
+impl fmt::Display for ImmutableValue<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        use Value::*;
+        use ImmutableValue::*;
 
         match self {
             InitPeerId => write!(f, "%init_peer_id%"),
@@ -42,18 +43,21 @@ impl fmt::Display for Value<'_> {
             Boolean(bool) => write!(f, "{}", bool),
             EmptyArray => write!(f, "[]"),
             Variable(variable) => write!(f, "{}", variable),
+            VariableWithLambda(variable) => write!(f, "{}", variable),
         }
     }
 }
 
-impl fmt::Display for CallInstrValue<'_> {
+impl fmt::Display for ResolvableToStringVariable<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        use CallInstrValue::*;
+        use ResolvableToStringVariable::*;
 
         match self {
             InitPeerId => write!(f, "%init_peer_id%"),
             Literal(literal) => write!(f, r#""{}""#, literal),
-            Variable(variable) => write!(f, "{}", variable),
+            Scalar(scalar) => write!(f, "{}", scalar),
+            ScalarWithLambda(scalar) => write!(f, "{}", scalar),
+            CanonStreamWithLambda(canon_stream) => write!(f, "{}", canon_stream),
         }
     }
 }
@@ -84,7 +88,9 @@ impl fmt::Display for ApArgument<'_> {
             Boolean(bool) => write!(f, "{}", bool),
             EmptyArray => write!(f, "[]"),
             Scalar(scalar) => write!(f, "{}", scalar),
+            ScalarWithLambda(scalar) => write!(f, "{}", scalar),
             CanonStream(canon_stream) => write!(f, "{}", canon_stream),
+            CanonStreamWithLambda(canon_stream) => write!(f, "{}", canon_stream),
         }
     }
 }
@@ -125,7 +131,8 @@ impl fmt::Display for FoldScalarIterable<'_> {
         use FoldScalarIterable::*;
 
         match self {
-            Scalar(variable) => write!(f, "{}", variable),
+            Scalar(scalar) => write!(f, "{}", scalar),
+            ScalarWithLambda(scalar) => write!(f, "{}", scalar),
             CanonStream(canon_stream) => write!(f, "{}", canon_stream),
             EmptyArray => write!(f, "[]"),
         }

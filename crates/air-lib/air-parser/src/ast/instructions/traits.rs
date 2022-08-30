@@ -72,6 +72,7 @@ impl fmt::Display for Fail<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Fail::Scalar(scalar) => write!(f, "fail {}", scalar),
+            Fail::ScalarWithLambda(scalar) => write!(f, "fail {}", scalar),
             Fail::Literal {
                 ret_code,
                 error_message,

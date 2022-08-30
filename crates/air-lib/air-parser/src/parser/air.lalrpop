@@ -25,7 +25,7 @@ Instr: Box<Instruction<'input>> = {
         Box::new(Instruction::Call(call))
     },
 
-    <left: @L> "(" canon <peer_pk:CallInstrValue> <stream:StreamArgument> <canon_stream:CanonStreamArgument> ")" <right: @R> => {
+    <left: @L> "(" canon <peer_pk:ResolvableToStringVariable> <stream:StreamArgument> <canon_stream:CanonStreamArgument> ")" <right: @R> => {
         let canon = Canon::new(peer_pk, stream, canon_stream);
 
         let span = Span::new(left, right);
@@ -112,7 +112,7 @@ Instr: Box<Instruction<'input>> = {
     ! => { errors.push(<>); Box::new(Instruction::Error) },
 }
 
-Args: Vec<Value<'input>> = {
+Args: Vec<ImmutableValue<'input>> = {
     "[" <args:(<Arg>)*> "]" => args
 }
 
@@ -135,8 +135,8 @@ CallOutput: CallOutputValue<'input> = {
 };
 
 FailBody: Fail<'input> = {
-    <scalar:Scalar> => Fail::Scalar(ScalarWithLambda::new(scalar.0, None, scalar.1)),
-    <scalar:ScalarWithLambda> => Fail::Scalar(ScalarWithLambda::new(scalar.0, Some(scalar.1), scalar.2)),
+    <scalar:Scalar> => Fail::Scalar(Scalar::new(scalar.0, scalar.1)),
+    <scalar:ScalarWithLambda> => Fail::ScalarWithLambda(ScalarWithLambda::new(scalar.0, scalar.1, scalar.2)),
     <ret_code:I64> <error_message:Literal> => Fail::Literal {
         ret_code,
         error_message,
@@ -151,26 +151,22 @@ FailBody: Fail<'input> = {
 }
 
 FoldScalarIterable: FoldScalarIterable<'input> = {
-    <scalar:Scalar> => FoldScalarIterable::Scalar(ScalarWithLambda::new(scalar.0, None, scalar.1)),
-    <scalar:ScalarWithLambda> => FoldScalarIterable::Scalar(ScalarWithLambda::new(scalar.0, Some(scalar.1), scalar.2)),
+    <scalar:Scalar> => FoldScalarIterable::Scalar(Scalar::new(scalar.0, scalar.1)),
+    <scalar:ScalarWithLambda> => FoldScalarIterable::ScalarWithLambda(ScalarWithLambda::new(scalar.0, scalar.1, scalar.2)),
     <canon_stream:CanonStream> => FoldScalarIterable::CanonStream(CanonStream::new(canon_stream.0, canon_stream.1)),
     "[" "]" => FoldScalarIterable::EmptyArray,
 };
 
-Function = CallInstrValue;
-PeerId = CallInstrValue;
-ServiceId = CallInstrValue;
+Function = ResolvableToStringVariable;
+PeerId = ResolvableToStringVariable;
+ServiceId = ResolvableToStringVariable;
 
-// TODO: call triplet should receive only streams with lambdas
-CallInstrValue: CallInstrValue<'input> = {
-    InitPeerId => CallInstrValue::InitPeerId,
-    <l:Literal> => CallInstrValue::Literal(l),
-    <scalar:Scalar> => CallInstrValue::Variable(VariableWithLambda::scalar(scalar.0, scalar.1)),
-    <scalar:ScalarWithLambda> => CallInstrValue::Variable(VariableWithLambda::scalar_wl(scalar.0, scalar.1, scalar.2)),
-    <stream:Stream> => CallInstrValue::Variable(VariableWithLambda::stream(stream.0, stream.1)),
-    <stream:StreamWithLambda> => CallInstrValue::Variable(VariableWithLambda::stream_wl(stream.0, stream.1, stream.2)),
-    <canon_stream:CanonStream> => CallInstrValue::Variable(VariableWithLambda::canon_stream(canon_stream.0, canon_stream.1)),
-    <canon_stream:CanonStreamWithLambda> => CallInstrValue::Variable(VariableWithLambda::canon_stream_wl(canon_stream.0, canon_stream.1, canon_stream.2)),
+ResolvableToStringVariable: ResolvableToStringVariable<'input> = {
+    InitPeerId => ResolvableToStringVariable::InitPeerId,
+    <literal:Literal> => ResolvableToStringVariable::Literal(literal),
+    <scalar:Scalar> => ResolvableToStringVariable::Scalar(Scalar::new(scalar.0, scalar.1)),
+    <scalar:ScalarWithLambda> => ResolvableToStringVariable::ScalarWithLambda(ScalarWithLambda::new(scalar.0, scalar.1, scalar.2)),
+    <canon_stream:CanonStreamWithLambda> => ResolvableToStringVariable::CanonStreamWithLambda(CanonStreamWithLambda::new(canon_stream.0, canon_stream.1, canon_stream.2)),
 }
 
 NewArgument: NewArgument<'input> = {
@@ -186,22 +182,20 @@ Number: Number = {
 
 Arg = Value;
 
-Value: Value<'input> = {
-    InitPeerId => Value::InitPeerId,
-    <LastError> => Value::LastError(None),
-    <le:LastErrorWithLambda> => Value::LastError(Some(le)),
-    <l:Literal> => Value::Literal(l),
-    Timestamp => Value::Timestamp,
-    TTL => Value::TTL,
-    <n:Number> => Value::Number(n),
-    <b:Boolean> => Value::Boolean(b),
-    "[" "]" => Value::EmptyArray,
-    <scalar:Scalar> => Value::Variable(VariableWithLambda::scalar(scalar.0, scalar.1)),
-    <scalar:ScalarWithLambda> => Value::Variable(VariableWithLambda::scalar_wl(scalar.0, scalar.1, scalar.2)),
-    <stream:Stream> => Value::Variable(VariableWithLambda::stream(stream.0, stream.1)),
-    <stream:StreamWithLambda> => Value::Variable(VariableWithLambda::stream_wl(stream.0, stream.1, stream.2)),
-    <canon_stream:CanonStream> => Value::Variable(VariableWithLambda::canon_stream(canon_stream.0, canon_stream.1)),
-    <canon_stream:CanonStreamWithLambda> => Value::Variable(VariableWithLambda::canon_stream_wl(canon_stream.0, canon_stream.1, canon_stream.2)),
+Value: ImmutableValue<'input> = {
+    InitPeerId => ImmutableValue::InitPeerId,
+    <LastError> => ImmutableValue::LastError(None),
+    <le:LastErrorWithLambda> => ImmutableValue::LastError(Some(le)),
+    <l:Literal> => ImmutableValue::Literal(l),
+    Timestamp => ImmutableValue::Timestamp,
+    TTL => ImmutableValue::TTL,
+    <n:Number> => ImmutableValue::Number(n),
+    <b:Boolean> => ImmutableValue::Boolean(b),
+    "[" "]" => ImmutableValue::EmptyArray,
+    <scalar:Scalar> => ImmutableValue::Variable(ImmutableVariable::scalar(scalar.0, scalar.1)),
+    <scalar:ScalarWithLambda> => ImmutableValue::VariableWithLambda(ImmutableVariableWithLambda::scalar(scalar.0, scalar.1, scalar.2)),
+    <canon_stream:CanonStream> => ImmutableValue::Variable(ImmutableVariable::canon_stream(canon_stream.0, canon_stream.1)),
+    <canon_stream:CanonStreamWithLambda> => ImmutableValue::VariableWithLambda(ImmutableVariableWithLambda::canon_stream(canon_stream.0, canon_stream.1, canon_stream.2)),
 }
 
 ApArgument: ApArgument<'input> = {
@@ -214,10 +208,10 @@ ApArgument: ApArgument<'input> = {
     <n:Number> => ApArgument::Number(n),
     <b:Boolean> => ApArgument::Boolean(b),
     "[" "]" => ApArgument::EmptyArray,
-    <scalar:Scalar> => ApArgument::Scalar(ScalarWithLambda::new(scalar.0, None, scalar.1)),
-    <scalar:ScalarWithLambda> => ApArgument::Scalar(ScalarWithLambda::new(scalar.0, Some(scalar.1), scalar.2)),
-    <canon_stream:CanonStream> => ApArgument::CanonStream(CanonStreamWithLambda::new(canon_stream.0, None, canon_stream.1)),
-    <canon_stream:CanonStreamWithLambda> => ApArgument::CanonStream(CanonStreamWithLambda::new(canon_stream.0, Some(canon_stream.1), canon_stream.2)),
+    <scalar:Scalar> => ApArgument::Scalar(Scalar::new(scalar.0, scalar.1)),
+    <scalar:ScalarWithLambda> => ApArgument::ScalarWithLambda(ScalarWithLambda::new(scalar.0, scalar.1, scalar.2)),
+    <canon_stream:CanonStream> => ApArgument::CanonStream(CanonStream::new(canon_stream.0, canon_stream.1)),
+    <canon_stream:CanonStreamWithLambda> => ApArgument::CanonStreamWithLambda(CanonStreamWithLambda::new(canon_stream.0, canon_stream.1, canon_stream.2)),
 }
 
 StreamArgument: Stream<'input> = {

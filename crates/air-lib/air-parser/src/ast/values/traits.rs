@@ -26,10 +26,7 @@ impl fmt::Display for Scalar<'_> {
 
 impl fmt::Display for ScalarWithLambda<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match &self.lambda {
-            Some(lambda) => write!(f, "{}.${}", self.name, format_ast(lambda)),
-            None => write!(f, "{}", self.name),
-        }
+        write!(f, "{}.${}", self.name, format_ast(&self.lambda))
     }
 }
 
@@ -47,41 +44,33 @@ impl fmt::Display for CanonStream<'_> {
 
 impl fmt::Display for StreamWithLambda<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match &self.lambda {
-            Some(lambda) => write!(f, "{}.${}", self.name, format_ast(lambda)),
-            None => write!(f, "{}", self.name),
-        }
+        write!(f, "{}.${}", self.name, format_ast(&self.lambda))
     }
 }
 
 impl fmt::Display for CanonStreamWithLambda<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match &self.lambda {
-            Some(lambda) => write!(f, "{}.${}", self.name, format_ast(lambda)),
-            None => write!(f, "{}", self.name),
-        }
+        write!(f, "{}.${}", self.name, format_ast(&self.lambda))
     }
 }
 
-impl fmt::Display for Variable<'_> {
+impl fmt::Display for ImmutableVariable<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        use Variable::*;
+        use ImmutableVariable::*;
 
         match self {
             Scalar(scalar) => write!(f, "{}", scalar),
-            Stream(stream) => write!(f, "{}", stream),
             CanonStream(canon_stream) => write!(f, "{}", canon_stream),
         }
     }
 }
 
-impl fmt::Display for VariableWithLambda<'_> {
+impl fmt::Display for ImmutableVariableWithLambda<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        use VariableWithLambda::*;
+        use ImmutableVariableWithLambda::*;
 
         match self {
             Scalar(scalar) => write!(f, "{}", scalar),
-            Stream(stream) => write!(f, "{}", stream),
             CanonStream(canon_stream) => write!(f, "{}", canon_stream),
         }
     }

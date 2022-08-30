@@ -45,11 +45,11 @@ pub(crate) fn resolve<'i>(triplet: &ast::Triplet<'i>, ctx: &ExecutionCtx<'i>) ->
 // TODO: return Rc<String> to avoid excess cloning
 // TODO: move this function into resolve in boxed value PR
 pub(crate) fn resolve_to_string<'i>(
-    value: &ast::CallInstrValue<'i>,
+    value: &ast::ResolvableToStringVariable<'i>,
     ctx: &ExecutionCtx<'i>,
 ) -> ExecutionResult<String> {
     use crate::execution_step::resolver::resolve_ast_variable_wl;
-    use ast::CallInstrValue::*;
+    use ast::ResolvableToStringVariable::*;
 
     let resolved = match value {
         InitPeerId => ctx.run_parameters.init_peer_id.to_string(),
@@ -63,7 +63,7 @@ pub(crate) fn resolve_to_string<'i>(
     Ok(resolved)
 }
 
-fn try_jvalue_to_string(jvalue: JValue, variable: &ast::VariableWithLambda<'_>) -> ExecutionResult<String> {
+fn try_jvalue_to_string(jvalue: JValue, variable: &ast::ImmutableVariableWithLambda<'_>) -> ExecutionResult<String> {
     match jvalue {
         JValue::String(s) => Ok(s),
         _ => Err(CatchableError::IncompatibleJValueType {

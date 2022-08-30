@@ -16,10 +16,9 @@
 
 use super::*;
 use air_lambda_parser::LambdaAST;
-use air_lambda_parser::ValueAccessor;
 
 impl<'i> ScalarWithLambda<'i> {
-    pub fn new(name: &'i str, lambda: Option<LambdaAST<'i>>, position: usize) -> Self {
+    pub fn new(name: &'i str, lambda: LambdaAST<'i>, position: usize) -> Self {
         Self {
             name,
             lambda,
@@ -27,41 +26,26 @@ impl<'i> ScalarWithLambda<'i> {
         }
     }
 
-    // it's unsafe method that should be used only for tests
+    #[cfg(test)]
     pub(crate) fn from_raw_lambda(
         name: &'i str,
-        lambda: Vec<ValueAccessor<'i>>,
+        lambda: Vec<air_lambda_parser::ValueAccessor<'i>>,
         position: usize,
     ) -> Self {
         let lambda = unsafe { LambdaAST::new_unchecked(lambda) };
         Self {
             name,
-            lambda: Some(lambda),
+            lambda,
             position,
         }
     }
 }
 
 impl<'i> StreamWithLambda<'i> {
-    pub fn new(name: &'i str, lambda: Option<LambdaAST<'i>>, position: usize) -> Self {
+    pub fn new(name: &'i str, lambda: LambdaAST<'i>, position: usize) -> Self {
         Self {
             name,
             lambda,
-            position,
-        }
-    }
-
-    // it's unsafe method that should be used only for tests
-    #[allow(dead_code)]
-    pub(crate) fn from_raw_lambda(
-        name: &'i str,
-        lambda: Vec<ValueAccessor<'i>>,
-        position: usize,
-    ) -> Self {
-        let lambda = unsafe { LambdaAST::new_unchecked(lambda) };
-        Self {
-            name,
-            lambda: Some(lambda),
             position,
         }
     }
@@ -74,7 +58,7 @@ impl<'i> CanonStream<'i> {
 }
 
 impl<'i> CanonStreamWithLambda<'i> {
-    pub fn new(name: &'i str, lambda: Option<LambdaAST<'i>>, position: usize) -> Self {
+    pub fn new(name: &'i str, lambda: LambdaAST<'i>, position: usize) -> Self {
         Self {
             name,
             lambda,
@@ -95,84 +79,53 @@ impl<'i> Stream<'i> {
     }
 }
 
-impl<'i> Variable<'i> {
+impl<'i> ImmutableVariable<'i> {
     pub fn scalar(name: &'i str, position: usize) -> Self {
         Self::Scalar(Scalar::new(name, position))
     }
 
-    pub fn stream(name: &'i str, position: usize) -> Self {
-        Self::Stream(Stream::new(name, position))
+    pub fn canon_stream(name: &'i str, position: usize) -> Self {
+        Self::CanonStream(CanonStream::new(name, position))
     }
 
     pub fn name(&self) -> &'i str {
         match self {
-            Variable::Scalar(scalar) => scalar.name,
-            Variable::Stream(stream) => stream.name,
-            Variable::CanonStream(stream) => stream.name,
+            ImmutableVariable::Scalar(scalar) => scalar.name,
+            ImmutableVariable::CanonStream(stream) => stream.name,
         }
     }
 }
 
-impl<'i> VariableWithLambda<'i> {
-    pub fn scalar(name: &'i str, position: usize) -> Self {
-        Self::Scalar(ScalarWithLambda::new(name, None, position))
+impl<'i> ImmutableVariableWithLambda<'i> {
+    pub fn scalar(name: &'i str, lambda: LambdaAST<'i>, position: usize) -> Self {
+        Self::Scalar(ScalarWithLambda::new(name, lambda, position))
     }
 
-    pub fn scalar_wl(name: &'i str, lambda: LambdaAST<'i>, position: usize) -> Self {
-        Self::Scalar(ScalarWithLambda::new(name, Some(lambda), position))
-    }
-
-    pub fn stream(name: &'i str, position: usize) -> Self {
-        Self::Stream(StreamWithLambda::new(name, None, position))
-    }
-
-    pub fn stream_wl(name: &'i str, lambda: LambdaAST<'i>, position: usize) -> Self {
-        Self::Stream(StreamWithLambda::new(name, Some(lambda), position))
-    }
-
-    pub fn canon_stream(name: &'i str, position: usize) -> Self {
-        Self::CanonStream(CanonStreamWithLambda::new(name, None, position))
-    }
-
-    pub fn canon_stream_wl(name: &'i str, lambda: LambdaAST<'i>, position: usize) -> Self {
-        Self::CanonStream(CanonStreamWithLambda::new(name, Some(lambda), position))
+    pub fn canon_stream(name: &'i str, lambda: LambdaAST<'i>, position: usize) -> Self {
+        Self::CanonStream(CanonStreamWithLambda::new(name, lambda, position))
     }
 
     pub fn name(&self) -> &'i str {
         match self {
-            VariableWithLambda::Scalar(scalar) => scalar.name,
-            VariableWithLambda::Stream(stream) => stream.name,
-            VariableWithLambda::CanonStream(canon_stream) => canon_stream.name,
+            ImmutableVariableWithLambda::Scalar(scalar) => scalar.name,
+            ImmutableVariableWithLambda::CanonStream(canon_stream) => canon_stream.name,
         }
     }
 
-    pub fn lambda(&self) -> &Option<LambdaAST<'i>> {
+    pub fn lambda(&self) -> &LambdaAST<'i> {
         match self {
-            VariableWithLambda::Scalar(scalar) => &scalar.lambda,
-            VariableWithLambda::Stream(stream) => &stream.lambda,
-            VariableWithLambda::CanonStream(canon_stream) => &canon_stream.lambda,
+            ImmutableVariableWithLambda::Scalar(scalar) => &scalar.lambda,
+            ImmutableVariableWithLambda::CanonStream(canon_stream) => &canon_stream.lambda,
         }
     }
 
-    // This function is unsafe and lambda must be non-empty, although it's used only for tests
-    #[allow(dead_code)]
+    #[cfg(test)]
     pub(crate) fn from_raw_lambda_scalar(
         name: &'i str,
-        lambda: Vec<ValueAccessor<'i>>,
+        lambda: Vec<air_lambda_parser::ValueAccessor<'i>>,
         position: usize,
     ) -> Self {
         let scalar = ScalarWithLambda::from_raw_lambda(name, lambda, position);
         Self::Scalar(scalar)
-    }
-
-    // This function is unsafe and lambda must be non-empty, although it's used only for tests
-    #[allow(dead_code)]
-    pub(crate) fn from_raw_lambda_stream(
-        name: &'i str,
-        lambda: Vec<ValueAccessor<'i>>,
-        position: usize,
-    ) -> Self {
-        let stream = StreamWithLambda::from_raw_lambda(name, lambda, position);
-        Self::Stream(stream)
     }
 }

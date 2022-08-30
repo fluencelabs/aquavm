@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-use crate::ast::Value;
+use crate::ast::ImmutableValue;
 use air_lambda_ast::ValueAccessor;
 use non_empty_vec::NonEmpty;
 
 #[test]
 // https://github.com/fluencelabs/aquavm/issues/263
 fn issue_263() {
-    let val = Value::LastError(Some(NonEmpty::new(ValueAccessor::FieldAccessByName {
+    let val = ImmutableValue::LastError(Some(NonEmpty::new(ValueAccessor::FieldAccessByName {
         field_name: "message",
     })));
     assert_eq!(val.to_string(), "%last_error%.$.message");

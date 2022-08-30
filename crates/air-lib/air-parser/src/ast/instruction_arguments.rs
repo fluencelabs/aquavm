@@ -18,23 +18,27 @@ mod impls;
 mod traits;
 
 use super::CanonStream;
+use super::CanonStreamWithLambda;
+use super::ImmutableVariable;
+use super::ImmutableVariableWithLambda;
 use super::Scalar;
 use super::ScalarWithLambda;
 use super::Stream;
-use super::VariableWithLambda;
 
 use air_lambda_ast::LambdaAST;
 
-use crate::ast::CanonStreamWithLambda;
 use serde::Deserialize;
 use serde::Serialize;
 
-// TODO: rename CallInstrValue, since it'd used by the canon instruction
+/// Contains all variable variants that could be resolved to a string type.
 #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
-pub enum CallInstrValue<'i> {
+pub enum ResolvableToStringVariable<'i> {
     InitPeerId,
     Literal(&'i str),
-    Variable(VariableWithLambda<'i>),
+    Scalar(Scalar<'i>),
+    ScalarWithLambda(ScalarWithLambda<'i>),
+    // canon without lambda can't be resolved to a string, since it represents an array of values
+    CanonStreamWithLambda(CanonStreamWithLambda<'i>),
 }
 
 /// Triplet represents a location of the executable code in the network.
@@ -42,16 +46,16 @@ pub enum CallInstrValue<'i> {
 #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct Triplet<'i> {
     #[serde(borrow)]
-    pub peer_pk: CallInstrValue<'i>,
+    pub peer_pk: ResolvableToStringVariable<'i>,
     #[serde(borrow)]
-    pub service_id: CallInstrValue<'i>,
+    pub service_id: ResolvableToStringVariable<'i>,
     #[serde(borrow)]
-    pub function_name: CallInstrValue<'i>,
+    pub function_name: ResolvableToStringVariable<'i>,
 }
 
-/// Represents all values that is possible to set in AIR scripts.
+/// Represents all immutable values that is possible to set in AIR scripts.
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
-pub enum Value<'i> {
+pub enum ImmutableValue<'i> {
     InitPeerId,
     LastError(Option<LambdaAST<'i>>),
     Timestamp,
@@ -60,7 +64,8 @@ pub enum Value<'i> {
     Number(Number),
     Boolean(bool),
     EmptyArray, // only empty arrays are allowed now
-    Variable(VariableWithLambda<'i>),
+    Variable(ImmutableVariable<'i>),
+    VariableWithLambda(ImmutableVariableWithLambda<'i>),
 }
 
 #[derive(Serialize, Debug, PartialEq, Eq, Clone)]
@@ -82,8 +87,10 @@ pub enum ApArgument<'i> {
     Number(Number),
     Boolean(bool),
     EmptyArray,
-    Scalar(ScalarWithLambda<'i>),
-    CanonStream(CanonStreamWithLambda<'i>),
+    Scalar(Scalar<'i>),
+    ScalarWithLambda(ScalarWithLambda<'i>),
+    CanonStream(CanonStream<'i>),
+    CanonStreamWithLambda(CanonStreamWithLambda<'i>),
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
@@ -103,7 +110,9 @@ pub enum Number {
 #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub enum FoldScalarIterable<'i> {
     #[serde(borrow)]
-    Scalar(ScalarWithLambda<'i>),
+    Scalar(Scalar<'i>),
+    #[serde(borrow)]
+    ScalarWithLambda(ScalarWithLambda<'i>),
     // it's important not to have lambda here
     #[serde(borrow)]
     CanonStream(CanonStream<'i>),

@@ -24,8 +24,8 @@ use air_lambda_ast::LambdaAST;
 use air_lambda_ast::ValueAccessor;
 use lalrpop_util::ErrorRecovery;
 use lalrpop_util::ParseError;
-
 use multimap::MultiMap;
+
 use std::collections::HashMap;
 use std::ops::Deref;
 
@@ -79,7 +79,7 @@ impl<'i> VariableValidator<'i> {
     }
 
     pub(super) fn met_canon(&mut self, canon: &Canon<'i>, span: Span) {
-        self.met_variable_name(canon.stream.name, span);
+        self.met_stream(&canon.stream, span);
         self.met_variable_name_definition(canon.canon_stream.name, span);
     }
 
@@ -97,13 +97,9 @@ impl<'i> VariableValidator<'i> {
         use FoldScalarIterable::*;
 
         match &fold.iterable {
-            Scalar(variable) => {
-                self.met_variable_name(variable.name, span);
-                self.met_maybe_lambda(&variable.lambda, span);
-            }
-            CanonStream(canon_stream) => {
-                self.met_variable_name(canon_stream.name, span);
-            }
+            Scalar(scalar) => self.met_scalar(scalar, span),
+            ScalarWithLambda(scalar) => self.met_scalar_wl(scalar, span),
+            CanonStream(canon_stream) => self.met_canon_stream(canon_stream, span),
             EmptyArray => {}
         };
         self.met_iterator_definition(&fold.iterator, span);
@@ -140,13 +136,11 @@ impl<'i> VariableValidator<'i> {
             | ApArgument::Literal(_)
             | ApArgument::EmptyArray
             | ApArgument::LastError(_) => {}
-            ApArgument::Scalar(scalar) => {
-                self.met_variable_name(scalar.name, span);
-                self.met_maybe_lambda(&scalar.lambda, span);
-            }
-            ApArgument::CanonStream(canon_stream) => {
-                self.met_variable_name(canon_stream.name, span);
-                self.met_maybe_lambda(&canon_stream.lambda, span);
+            ApArgument::Scalar(scalar) => self.met_scalar(scalar, span),
+            ApArgument::ScalarWithLambda(scalar) => self.met_scalar_wl(scalar, span),
+            ApArgument::CanonStream(canon_stream) => self.met_canon_stream(canon_stream, span),
+            ApArgument::CanonStreamWithLambda(canon_stream) => {
+                self.met_canon_stream_wl(canon_stream, span)
             }
         }
         self.met_variable_name_definition(ap.result.name(), span);
@@ -162,48 +156,69 @@ impl<'i> VariableValidator<'i> {
             .build()
     }
 
-    fn met_args(&mut self, args: &[Value<'i>], span: Span) {
+    fn met_args(&mut self, args: &[ImmutableValue<'i>], span: Span) {
         for arg in args {
             self.met_instr_arg_value(arg, span);
         }
     }
 
-    fn met_call_instr_value(&mut self, instr_value: &CallInstrValue<'i>, span: Span) {
-        if let CallInstrValue::Variable(variable) = instr_value {
-            self.met_variable_wl(variable, span);
+    fn met_call_instr_value(&mut self, instr_value: &ResolvableToStringVariable<'i>, span: Span) {
+        use ResolvableToStringVariable::*;
+
+        match instr_value {
+            InitPeerId | Literal(_) => {}
+            Scalar(scalar) => self.met_scalar(scalar, span),
+            ScalarWithLambda(scalar) => self.met_scalar_wl(scalar, span),
+            CanonStreamWithLambda(stream) => self.met_canon_stream_wl(stream, span),
         }
     }
 
-    fn met_instr_arg_value(&mut self, instr_arg_value: &Value<'i>, span: Span) {
-        if let Value::Variable(variable) = instr_arg_value {
-            // skipping streams without lambdas here allows treating non-defined streams as empty arrays
-            if let VariableWithLambda::Stream(stream) = variable {
-                if stream.lambda.is_none() {
-                    return;
-                }
-            }
+    fn met_instr_arg_value(&mut self, instr_arg_value: &ImmutableValue<'i>, span: Span) {
+        use ImmutableValue::*;
 
-            self.met_variable_wl(variable, span);
+        match instr_arg_value {
+            InitPeerId | LastError(_) | Timestamp | TTL | Literal(_) | Number(_) | Boolean(_)
+            | EmptyArray => {}
+            Variable(variable) => self.met_variable(variable, span),
+            VariableWithLambda(variable) => self.met_variable_wl(variable, span),
         }
     }
 
-    fn met_variable_wl(&mut self, variable: &VariableWithLambda<'i>, span: Span) {
+    fn met_variable(&mut self, variable: &ImmutableVariable<'i>, span: Span) {
         self.met_variable_name(variable.name(), span);
-        self.met_maybe_lambda(variable.lambda(), span);
+    }
+
+    fn met_variable_wl(&mut self, variable: &ImmutableVariableWithLambda<'i>, span: Span) {
+        self.met_variable_name(variable.name(), span);
+        self.met_lambda(variable.lambda(), span);
+    }
+
+    fn met_scalar(&mut self, scalar: &Scalar<'i>, span: Span) {
+        self.met_variable_name(scalar.name, span);
+    }
+
+    fn met_scalar_wl(&mut self, scalar: &ScalarWithLambda<'i>, span: Span) {
+        self.met_variable_name(scalar.name, span);
+        self.met_lambda(&scalar.lambda, span);
+    }
+
+    fn met_stream(&mut self, stream: &Stream<'i>, span: Span) {
+        self.met_variable_name(stream.name, span);
+    }
+
+    fn met_canon_stream(&mut self, stream: &CanonStream<'i>, span: Span) {
+        self.met_variable_name(stream.name, span);
+    }
+
+    fn met_canon_stream_wl(&mut self, stream: &CanonStreamWithLambda<'i>, span: Span) {
+        self.met_variable_name(stream.name, span);
+        self.met_lambda(&stream.lambda, span);
     }
 
     fn met_variable_name(&mut self, name: &'i str, span: Span) {
         if !self.contains_variable(name, span) {
             self.unresolved_variables.insert(name, span);
         }
-    }
-
-    fn met_maybe_lambda(&mut self, lambda: &Option<LambdaAST<'i>>, span: Span) {
-        let lambda = match lambda {
-            Some(lambda) => lambda,
-            None => return,
-        };
-        self.met_lambda(lambda, span)
     }
 
     fn met_lambda(&mut self, lambda: &LambdaAST<'i>, span: Span) {
@@ -249,17 +264,18 @@ impl<'i> VariableValidator<'i> {
         }
     }
 
-    fn met_matchable(&mut self, matchable: &Value<'i>, span: Span) {
+    fn met_matchable(&mut self, matchable: &ImmutableValue<'i>, span: Span) {
         match matchable {
-            Value::InitPeerId
-            | Value::Timestamp
-            | Value::TTL
-            | Value::Number(_)
-            | Value::Boolean(_)
-            | Value::Literal(_)
-            | Value::LastError(_)
-            | Value::EmptyArray => {}
-            Value::Variable(variable) => self.met_variable_wl(variable, span),
+            ImmutableValue::InitPeerId
+            | ImmutableValue::Timestamp
+            | ImmutableValue::TTL
+            | ImmutableValue::Number(_)
+            | ImmutableValue::Boolean(_)
+            | ImmutableValue::Literal(_)
+            | ImmutableValue::LastError(_)
+            | ImmutableValue::EmptyArray => {}
+            ImmutableValue::Variable(variable) => self.met_variable(variable, span),
+            ImmutableValue::VariableWithLambda(variable) => self.met_variable_wl(variable, span),
         }
     }
 

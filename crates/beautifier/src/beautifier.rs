@@ -59,7 +59,7 @@ fn fmt_indent(output: &mut impl io::Write, indent: usize) -> io::Result<()> {
     write!(output, "{:indent$}", "", indent = indent)
 }
 
-struct CallArgs<'ctx, 'i>(&'ctx [ast::Value<'i>]);
+struct CallArgs<'ctx, 'i>(&'ctx [ast::ImmutableValue<'i>]);
 
 impl<'ctx, 'i> Display for CallArgs<'ctx, 'i> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

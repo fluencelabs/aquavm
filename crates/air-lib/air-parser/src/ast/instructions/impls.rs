@@ -25,7 +25,7 @@ impl<'i> Ap<'i> {
 impl<'i> Call<'i> {
     pub fn new(
         triplet: Triplet<'i>,
-        args: Rc<Vec<Value<'i>>>,
+        args: Rc<Vec<ImmutableValue<'i>>>,
         output: CallOutputValue<'i>,
     ) -> Self {
         Self {
@@ -38,7 +38,7 @@ impl<'i> Call<'i> {
 
 impl<'i> Canon<'i> {
     pub fn new(
-        peer_pk: CallInstrValue<'i>,
+        peer_pk: ResolvableToStringVariable<'i>,
         stream: Stream<'i>,
         canon_stream: CanonStream<'i>,
     ) -> Self {
@@ -79,8 +79,8 @@ impl<'i> Xor<'i> {
 
 impl<'i> Match<'i> {
     pub fn new(
-        left_value: Value<'i>,
-        right_value: Value<'i>,
+        left_value: ImmutableValue<'i>,
+        right_value: ImmutableValue<'i>,
         instruction: Box<Instruction<'i>>,
     ) -> Self {
         Self {
@@ -93,8 +93,8 @@ impl<'i> Match<'i> {
 
 impl<'i> MisMatch<'i> {
     pub fn new(
-        left_value: Value<'i>,
-        right_value: Value<'i>,
+        left_value: ImmutableValue<'i>,
+        right_value: ImmutableValue<'i>,
         instruction: Box<Instruction<'i>>,
     ) -> Self {
         Self {

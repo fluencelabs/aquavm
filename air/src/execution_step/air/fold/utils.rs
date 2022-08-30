@@ -34,19 +34,49 @@ pub(crate) enum FoldIterableScalar {
     ScalarBased(IterableValue),
 }
 
-/// Constructs iterable value for given scalar iterable.
-pub(crate) fn construct_scalar_iterable_value<'ctx>(
-    iterable: &ast::ScalarWithLambda<'ctx>,
+/// Creates iterable value for given scalar iterable.
+pub(crate) fn create_scalar_iterable<'ctx>(
+    scalar_iterable: &ast::Scalar<'ctx>,
     exec_ctx: &ExecutionCtx<'ctx>,
 ) -> ExecutionResult<FoldIterableScalar> {
-    match &iterable.lambda {
-        None => create_scalar_iterable(exec_ctx, iterable.name),
-        Some(lambda) => create_scalar_lambda_iterable(exec_ctx, iterable.name, lambda),
+    let scalar_name = scalar_iterable.name();
+    match exec_ctx.scalars.get_value(scalar_name)? {
+        ScalarRef::Value(call_result) => from_value(call_result.clone(), variable_name),
+        ScalarRef::IterableValue(fold_state) => {
+            let iterable_value = fold_state.iterable.peek().unwrap();
+            let call_result = iterable_value.into_resolved_result();
+            from_value(call_result, variable_name)
+        }
     }
 }
 
-/// Constructs iterable value for given canon stream.
-pub(crate) fn construct_canon_stream_iterable_value<'ctx>(
+/// Creates iterable value for given scalar with lambda iterable.
+pub(crate) fn create_scalar_wl_iterable<'ctx>(
+    scalar_iterable: &ast::ScalarWithLambda<'ctx>,
+    exec_ctx: &ExecutionCtx<'ctx>,
+) -> ExecutionResult<FoldIterableScalar> {
+    use crate::execution_step::lambda_applier::select_from_scalar;
+    let scalar_name = scalar_iterable.name;
+    let lambda = &scalar_iterable.lambda;
+
+    match exec_ctx.scalars.get_value(scalar_name)? {
+        ScalarRef::Value(variable) => {
+            let jvalues = select_from_scalar(&variable.result, lambda.iter(), exec_ctx)?;
+            let tetraplet = variable.tetraplet.deref().clone();
+            from_jvalue(jvalues, tetraplet, lambda)
+        }
+        ScalarRef::IterableValue(fold_state) => {
+            let iterable_value = fold_state.iterable.peek().unwrap();
+            let jvalue = iterable_value.apply_lambda(lambda, exec_ctx)?;
+            let tetraplet = to_tetraplet(&iterable_value);
+
+            from_jvalue(jvalue, tetraplet, lambda)
+        }
+    }
+}
+
+/// Creates iterable value for given canon stream.
+pub(crate) fn create_canon_stream_iterable_value<'ctx>(
     ast_canon_stream: &ast::CanonStream<'ctx>,
     exec_ctx: &ExecutionCtx<'ctx>,
 ) -> ExecutionResult<FoldIterableScalar> {
@@ -79,20 +109,6 @@ pub(crate) fn construct_stream_iterable_values(
         .collect::<Vec<_>>()
 }
 
-fn create_scalar_iterable<'ctx>(
-    exec_ctx: &ExecutionCtx<'ctx>,
-    variable_name: &str,
-) -> ExecutionResult<FoldIterableScalar> {
-    match exec_ctx.scalars.get_value(variable_name)? {
-        ScalarRef::Value(call_result) => from_value(call_result.clone(), variable_name),
-        ScalarRef::IterableValue(fold_state) => {
-            let iterable_value = fold_state.iterable.peek().unwrap();
-            let call_result = iterable_value.into_resolved_result();
-            from_value(call_result, variable_name)
-        }
-    }
-}
-
 /// Constructs iterable value from resolved call result.
 fn from_value(call_result: ValueAggregate, variable_name: &str) -> ExecutionResult<FoldIterableScalar> {
     let len = match &call_result.result.deref() {
@@ -118,29 +134,6 @@ fn from_value(call_result: ValueAggregate, variable_name: &str) -> ExecutionResu
     let iterable = FoldIterableScalar::ScalarBased(foldable);
 
     Ok(iterable)
-}
-
-fn create_scalar_lambda_iterable<'ctx>(
-    exec_ctx: &ExecutionCtx<'ctx>,
-    scalar_name: &str,
-    lambda: &LambdaAST<'_>,
-) -> ExecutionResult<FoldIterableScalar> {
-    use crate::execution_step::lambda_applier::select_from_scalar;
-
-    match exec_ctx.scalars.get_value(scalar_name)? {
-        ScalarRef::Value(variable) => {
-            let jvalues = select_from_scalar(&variable.result, lambda.iter(), exec_ctx)?;
-            let tetraplet = variable.tetraplet.deref().clone();
-            from_jvalue(jvalues, tetraplet, lambda)
-        }
-        ScalarRef::IterableValue(fold_state) => {
-            let iterable_value = fold_state.iterable.peek().unwrap();
-            let jvalue = iterable_value.apply_lambda(lambda, exec_ctx)?;
-            let tetraplet = to_tetraplet(&iterable_value);
-
-            from_jvalue(jvalue, tetraplet, lambda)
-        }
-    }
 }
 
 /// Construct IterableValue from the result and given triplet.

@@ -17,18 +17,21 @@
 use crate::execution_step::air::ExecutionResult;
 use crate::execution_step::execution_context::ExecutionCtx;
 use crate::execution_step::resolver::prepare_last_error;
+use crate::execution_step::resolver::resolve_ast_variable;
 use crate::execution_step::resolver::resolve_ast_variable_wl;
 use crate::JValue;
 
 use air_parser::ast;
 
+use std::borrow::Cow;
+
 #[tracing::instrument(skip_all)]
 pub(crate) fn are_matchable_eq<'ctx>(
-    left: &ast::Value<'_>,
-    right: &ast::Value<'_>,
+    left: &ast::ImmutableValue<'_>,
+    right: &ast::ImmutableValue<'_>,
     exec_ctx: &'ctx ExecutionCtx<'_>,
 ) -> ExecutionResult<bool> {
-    use ast::Value::*;
+    use ast::ImmutableValue::*;
 
     match (left, right) {
         (InitPeerId, InitPeerId) => Ok(true),
@@ -78,6 +81,13 @@ pub(crate) fn are_matchable_eq<'ctx>(
         }
 
         (Variable(left_variable), Variable(right_variable)) => {
+            let (left_value, _) = resolve_ast_variable(left_variable, exec_ctx)?;
+            let (right_value, _) = resolve_ast_variable(right_variable, exec_ctx)?;
+
+            Ok(left_value == right_value)
+        }
+
+        (VariableWithLambda(left_variable), VariableWithLambda(right_variable)) => {
             let (left_value, _) = resolve_ast_variable_wl(left_variable, exec_ctx)?;
             let (right_value, _) = resolve_ast_variable_wl(right_variable, exec_ctx)?;
 
@@ -86,15 +96,14 @@ pub(crate) fn are_matchable_eq<'ctx>(
     }
 }
 
-use std::borrow::Cow;
 type Comparator<'a> = Box<dyn Fn(Cow<'_, JValue>) -> bool + 'a>;
 
 fn compare_matchable<'ctx>(
-    matchable: &ast::Value<'_>,
+    matchable: &ast::ImmutableValue<'_>,
     exec_ctx: &'ctx ExecutionCtx<'_>,
     comparator: Comparator<'ctx>,
 ) -> ExecutionResult<bool> {
-    use ast::Value::*;
+    use ast::ImmutableValue::*;
 
     match matchable {
         InitPeerId => {
@@ -131,6 +140,10 @@ fn compare_matchable<'ctx>(
             Ok(comparator(Cow::Owned(jvalue)))
         }
         Variable(variable) => {
+            let (jvalue, _) = resolve_ast_variable(variable, exec_ctx)?;
+            Ok(comparator(Cow::Owned(jvalue)))
+        }
+        VariableWithLambda(variable) => {
             let (jvalue, _) = resolve_ast_variable_wl(variable, exec_ctx)?;
             Ok(comparator(Cow::Owned(jvalue)))
         }

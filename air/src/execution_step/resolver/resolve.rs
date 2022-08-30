@@ -31,10 +31,10 @@ use std::rc::Rc;
 
 /// Resolve value to called function arguments.
 pub(crate) fn resolve_to_args<'i>(
-    value: &ast::Value<'i>,
+    value: &ast::ImmutableValue<'i>,
     ctx: &ExecutionCtx<'i>,
 ) -> ExecutionResult<(JValue, RcSecurityTetraplets)> {
-    use ast::Value::*;
+    use ast::ImmutableValue::*;
 
     match value {
         InitPeerId => prepare_const(ctx.run_parameters.init_peer_id.as_str(), ctx),
@@ -45,7 +45,8 @@ pub(crate) fn resolve_to_args<'i>(
         Boolean(value) => prepare_const(*value, ctx),
         Number(value) => prepare_const(value, ctx),
         EmptyArray => prepare_const(json!([]), ctx),
-        Variable(variable) => resolve_ast_variable_wl(variable, ctx),
+        Variable(variable) => resolve_ast_variable(variable, ctx),
+        VariableWithLambda(variable) => resolve_ast_variable_wl(variable, ctx),
     }
 }
 
@@ -119,22 +120,27 @@ pub(crate) fn resolve_variable<'ctx, 'i>(
 }
 
 #[tracing::instrument(level = "trace", skip(exec_ctx))]
-pub(crate) fn resolve_ast_variable_wl<'ctx, 'i>(
-    ast_variable: &ast::VariableWithLambda<'_>,
+pub(crate) fn resolve_ast_variable<'ctx, 'i>(
+    ast_variable: &ast::ImmutableVariable<'_>,
     exec_ctx: &'ctx ExecutionCtx<'i>,
 ) -> ExecutionResult<(JValue, RcSecurityTetraplets)> {
     let variable: Variable<'_> = ast_variable.into();
-    match ast_variable.lambda() {
-        Some(lambda) => apply_lambda(variable, lambda, exec_ctx).map(|(value, tetraplet)| {
-            let tetraplet = Rc::new(tetraplet);
-            (value, vec![tetraplet])
-        }),
-        None => {
-            let value = resolve_variable(variable, exec_ctx)?;
-            let tetraplets = value.as_tetraplets();
-            Ok((value.into_jvalue(), tetraplets))
-        }
-    }
+    let value = resolve_variable(variable, exec_ctx)?;
+    let tetraplets = value.as_tetraplets();
+    Ok((value.into_jvalue(), tetraplets))
+}
+
+#[tracing::instrument(level = "trace", skip(exec_ctx))]
+pub(crate) fn resolve_ast_variable_wl<'ctx, 'i>(
+    ast_variable: &ast::ImmutableVariableWithLambda<'_>,
+    exec_ctx: &'ctx ExecutionCtx<'i>,
+) -> ExecutionResult<(JValue, RcSecurityTetraplets)> {
+    let variable: Variable<'_> = ast_variable.into();
+
+    apply_lambda(variable, lambda, exec_ctx).map(|(value, tetraplet)| {
+        let tetraplet = Rc::new(tetraplet);
+        (value, vec![tetraplet])
+    })
 }
 
 #[tracing::instrument(level = "trace", skip(exec_ctx))]
@@ -143,7 +149,7 @@ pub(crate) fn resolve_ast_scalar_wl<'ctx, 'i>(
     exec_ctx: &'ctx ExecutionCtx<'i>,
 ) -> ExecutionResult<(JValue, RcSecurityTetraplets)> {
     // TODO: wrap lambda path with Rc to make this clone cheaper
-    let variable = ast::VariableWithLambda::Scalar(ast_scalar.clone());
+    let variable = ast::ImmutableVariableWithLambda::Scalar(ast_scalar.clone());
     resolve_ast_variable_wl(&variable, exec_ctx)
 }
 

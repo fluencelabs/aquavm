@@ -50,9 +50,9 @@ impl<'i> Variable<'i> {
     }
 }
 
-impl<'i> From<&ast::Variable<'i>> for Variable<'i> {
-    fn from(ast_variable: &ast::Variable<'i>) -> Self {
-        use ast::Variable::*;
+impl<'i> From<&ast::ImmutableVariable<'i>> for Variable<'i> {
+    fn from(ast_variable: &ast::ImmutableVariable<'i>) -> Self {
+        use ast::ImmutableVariable::*;
 
         match ast_variable {
             Scalar(scalar) => Self::scalar(scalar.name),
@@ -62,9 +62,9 @@ impl<'i> From<&ast::Variable<'i>> for Variable<'i> {
     }
 }
 
-impl<'i> From<&ast::VariableWithLambda<'i>> for Variable<'i> {
-    fn from(ast_variable: &ast::VariableWithLambda<'i>) -> Self {
-        use ast::VariableWithLambda::*;
+impl<'i> From<&ast::ImmutableVariableWithLambda<'i>> for Variable<'i> {
+    fn from(ast_variable: &ast::ImmutableVariableWithLambda<'i>) -> Self {
+        use ast::ImmutableVariableWithLambda::*;
 
         match ast_variable {
             Scalar(scalar) => Self::scalar(scalar.name),
