@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use super::ServiceDefinition;
+use super::{ServiceDefinition, ServiceTagName};
 use crate::services::JValue;
 
 use air_test_utils::CallServiceResult;
@@ -48,10 +48,10 @@ pub fn parse_kw(inp: &str) -> IResult<&str, ServiceDefinition, ParseError> {
     delim_ws(map_res(
         separated_pair(
             alt((
-                tag("result"),
-                tag("call_result"),
-                tag("seq_result"),
-                tag("behaviour"),
+                tag(ServiceTagName::Result.as_ref()),
+                tag(ServiceTagName::CallResult.as_ref()),
+                tag(ServiceTagName::SeqResult.as_ref()),
+                tag(ServiceTagName::Behaviour.as_ref()),
             )),
             equal(),
             cut(context(
@@ -61,14 +61,18 @@ pub fn parse_kw(inp: &str) -> IResult<&str, ServiceDefinition, ParseError> {
         ),
         |(tag, value): (&str, &str)| {
             let value = value.trim();
-            match tag {
-                "result" => serde_json::from_str::<JValue>(value).map(ServiceDefinition::Result),
-                "call_result" => serde_json::from_str::<CallServiceResult>(value)
+            match ServiceTagName::from_str(tag) {
+                Ok(ServiceTagName::Result) => {
+                    serde_json::from_str::<JValue>(value).map(ServiceDefinition::Result)
+                }
+                Ok(ServiceTagName::CallResult) => serde_json::from_str::<CallServiceResult>(value)
                     .map(ServiceDefinition::CallResult),
-                "seq_result" => serde_json::from_str::<HashMap<String, JValue>>(value)
-                    .map(ServiceDefinition::SeqResult),
-                "behaviour" => Ok(ServiceDefinition::Behaviour(value.to_owned())),
-                _ => unreachable!("unknown tag {:?}", tag),
+                Ok(ServiceTagName::SeqResult) => {
+                    serde_json::from_str::<HashMap<String, JValue>>(value)
+                        .map(ServiceDefinition::SeqResult)
+                }
+                Ok(ServiceTagName::Behaviour) => Ok(ServiceDefinition::Behaviour(value.to_owned())),
+                Err(_) => unreachable!("unknown tag {:?}", tag),
             }
         },
     ))(inp)

@@ -14,11 +14,13 @@ name = "air_test_framework"
 path = "src/lib.rs"
 
 [dependencies]
+air-test-utils = { path = "../air-lib/test-utils" }
+
 itertools = "0.10.3"
+strum = { version="0.21.0", features=["derive"] }
 nom = "7.1.1"
 nom_locate = "4.0.0"
 serde_json = "1.0.61"
-air-test-utils = { path = "../air-lib/test-utils" }
 
 [dev-dependencies]
 maplit = "1.0.2"

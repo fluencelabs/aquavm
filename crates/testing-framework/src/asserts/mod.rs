@@ -19,19 +19,26 @@ pub(crate) mod parser;
 use crate::services::JValue;
 
 use air_test_utils::CallServiceResult;
+use strum::{AsRefStr, EnumDiscriminants, EnumString};
 
 use std::collections::HashMap;
 
 /// Service definition in the testing framework comment DSL.
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone, EnumDiscriminants)]
+#[strum_discriminants(derive(AsRefStr, EnumString))]
+#[strum_discriminants(name(ServiceTagName))]
 pub enum ServiceDefinition {
     /// Simple service that returns same value
+    #[strum_discriminants(strum(serialize = "result"))]
     Result(JValue),
     /// Simple service that returns same call result (i.e. may return a error)
+    #[strum_discriminants(strum(serialize = "call_result"))]
     CallResult(CallServiceResult),
     /// Service that may return a new value on subsequent call.  Its keys are either
     /// call number string starting from "0", or "default".
+    #[strum_discriminants(strum(serialize = "seq_result"))]
     SeqResult(HashMap<String, JValue>),
     /// Some known service by name: "echo", "unit" (more to follow).
+    #[strum_discriminants(strum(serialize = "behaviour"))]
     Behaviour(String),
 }
