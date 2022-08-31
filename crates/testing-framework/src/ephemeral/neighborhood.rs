@@ -20,21 +20,25 @@ use air_test_utils::test_runner::TestRunParameters;
 
 use std::{
     borrow::Borrow,
-    collections::{HashSet, VecDeque},
+    collections::{HashMap, HashSet, VecDeque},
     hash::Hash,
     ops::Deref,
 };
 
 pub(crate) type PeerSet = HashSet<PeerId>;
 
+#[derive(Debug, PartialEq, Eq, Copy, Clone)]
+pub enum LinkState {
+    Reachable,
+    Unreachable,
+}
+
 /// Neighbors of particular node, including set of nodes unreachable from this one (but they might be
 /// reachable from others).
 #[derive(Debug, Default)]
 pub struct Neighborhood {
-    neighbors: PeerSet,
-    // A neighbor can be unreachable for some time.  Unlike PeerEnv's `failed`, this field defines
-    // failed link from one peer to another.
-    failing: PeerSet,
+    // the value is true is link from this peer to neighbor is failng
+    neighbors: HashMap<PeerId, LinkState>,
 }
 
 impl Neighborhood {
@@ -43,7 +47,10 @@ impl Neighborhood {
     }
 
     pub fn set_neighbors(&mut self, neighbors: PeerSet) {
-        self.neighbors = neighbors;
+        self.neighbors = neighbors
+            .into_iter()
+            .map(|peer_id| (peer_id, LinkState::Reachable))
+            .collect();
     }
 
     pub fn iter(&self) -> impl Iterator<Item = &PeerId> {
@@ -52,7 +59,7 @@ impl Neighborhood {
 
     pub fn insert(&mut self, other_peer_id: impl Into<PeerId>) {
         let other_peer_id = other_peer_id.into();
-        self.neighbors.insert(other_peer_id);
+        self.neighbors.insert(other_peer_id, LinkState::Reachable);
     }
 
     /// Removes the other_peer_id from neighborhood, also removes unreachable status.
@@ -61,12 +68,11 @@ impl Neighborhood {
         PeerId: Borrow<Id>,
         Id: Eq + Hash + ?Sized,
     {
-        self.unset_target_unreachable(other_peer_id);
         self.neighbors.remove(other_peer_id);
     }
 
     pub fn set_target_unreachable(&mut self, target: impl Into<PeerId>) {
-        self.failing.insert(target.into());
+        *self.neighbors.get_mut(&target.into()).unwrap() = LinkState::Unreachable;
     }
 
     pub fn unset_target_unreachable<Id>(&mut self, target: &Id)
@@ -74,22 +80,22 @@ impl Neighborhood {
         PeerId: Borrow<Id>,
         Id: Eq + Hash + ?Sized,
     {
-        self.failing.remove(target);
+        *self.neighbors.get_mut(target).unwrap() = LinkState::Reachable;
     }
 
     pub fn is_reachable(&self, target: impl Deref<Target = PeerId>) -> bool {
         let target_peer_id = target.deref();
-        self.neighbors.contains(target_peer_id) && !self.failing.contains(target_peer_id)
+        self.neighbors.get(target_peer_id) == Some(&LinkState::Reachable)
     }
 }
 
 impl<'a> std::iter::IntoIterator for &'a Neighborhood {
     type Item = &'a PeerId;
 
-    type IntoIter = std::collections::hash_set::Iter<'a, PeerId>;
+    type IntoIter = std::collections::hash_map::Keys<'a, PeerId, LinkState>;
 
     fn into_iter(self) -> Self::IntoIter {
-        self.neighbors.iter()
+        self.neighbors.keys()
     }
 }
 
@@ -217,17 +223,6 @@ mod tests {
         let nei = pwn.get_neighborhood_mut();
         nei.insert(peer_id.clone());
         nei.remove(&peer_id);
-        assert!(pwn.is_reachable(&peer_id));
-        assert!(!pwn.is_reachable(&other_id));
-    }
-
-    #[test]
-    fn test_no_self_fail() {
-        let peer_id: PeerId = "someone".into();
-        let other_id: PeerId = "other".into();
-        let mut pwn = PeerEnv::new(Peer::new(peer_id.clone(), Rc::from(vec![])));
-        pwn.get_neighborhood_mut()
-            .set_target_unreachable(peer_id.clone());
         assert!(pwn.is_reachable(&peer_id));
         assert!(!pwn.is_reachable(&other_id));
     }
@@ -369,21 +364,6 @@ mod tests {
         let nei = pwn.get_neighborhood_mut();
         nei.unset_target_unreachable(&other_id);
         assert!(pwn.is_reachable(&other_id));
-    }
-
-    #[test]
-    fn test_uninserted_fail_unfail() {
-        let peer_id: PeerId = "someone".into();
-        let other_id: PeerId = "other".into();
-        let mut pwn = PeerEnv::new(Peer::new(peer_id.clone(), Rc::from(vec![])));
-
-        let nei = pwn.get_neighborhood_mut();
-        nei.set_target_unreachable(other_id.clone());
-        assert!(!pwn.is_reachable(&other_id));
-
-        let nei = pwn.get_neighborhood_mut();
-        nei.unset_target_unreachable(&other_id);
-        assert!(!pwn.is_reachable(&other_id));
     }
 
     #[test]
