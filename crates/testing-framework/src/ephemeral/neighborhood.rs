@@ -52,7 +52,7 @@ impl Neighborhood {
         self.neighbors.insert(other_peer_id);
     }
 
-    /// Removes the other_peer_id from neigborhood, also removes unreachable status.
+    /// Removes the other_peer_id from neighborhood, also removes unreachable status.
     pub fn remove<Id>(&mut self, other_peer_id: &Id)
     where
         PeerId: Borrow<Id>,
@@ -75,8 +75,8 @@ impl Neighborhood {
     }
 
     pub fn is_reachable(&self, target: impl Deref<Target = PeerId>) -> bool {
-        let t = target.deref();
-        self.neighbors.contains(t) && !self.failing.contains(t)
+        let target_peer_id = target.deref();
+        self.neighbors.contains(target_peer_id) && !self.failing.contains(target_peer_id)
     }
 }
 
@@ -122,8 +122,8 @@ impl PeerEnv {
             return false;
         }
 
-        let t = target.deref();
-        if &self.peer.peer_id == t {
+        let target_peer_id = target.deref();
+        if &self.peer.peer_id == target_peer_id {
             return true;
         }
 

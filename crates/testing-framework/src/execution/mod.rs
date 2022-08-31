@@ -32,6 +32,9 @@ pub struct TestExecutor {
 
 impl TestExecutor {
     /// Create execution from the annotated air script.
+    ///
+    /// `extra_peers` allows you to define peers that are not mentioned in the annotated script
+    /// explicitly, but are used, e.g. if their names are returned from a call.
     pub fn new(
         test_parameters: TestRunParameters,
         common_services: Vec<MarineServiceHandle>,
@@ -112,7 +115,7 @@ impl TestExecutor {
 
 fn build_peers(
     common_services: Vec<MarineServiceHandle>,
-    results: std::collections::HashMap<u32, ServiceDefinition>,
+    results: HashMap<u32, ServiceDefinition>,
     known_peers: std::collections::HashSet<PeerId>,
     init_peer_id: PeerId,
     extra_peers: impl IntoIterator<Item = PeerId>,

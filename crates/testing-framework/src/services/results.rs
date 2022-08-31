@@ -81,7 +81,7 @@ impl ResultService {
         Ok(Self {
             results: results
                 .into_iter()
-                .map(|(k, v)| v.try_into().map(move |s: CallServiceClosure| (k, s)))
+                .map(|(id, service_def)| service_def.try_into().map(move |s: CallServiceClosure| (id, s)))
                 .collect::<Result<_, String>>()?,
         })
     }

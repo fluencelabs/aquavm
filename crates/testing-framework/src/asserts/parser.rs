@@ -29,7 +29,7 @@ impl FromStr for ServiceDefinition {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         nom::combinator::all_consuming(parse_kw)(s)
-            .map(|(_, val)| val)
+            .map(|(_, service_definition)| service_definition)
             .map_err(|e| e.to_string())
     }
 }
