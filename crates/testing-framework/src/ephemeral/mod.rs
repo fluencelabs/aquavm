@@ -142,10 +142,7 @@ impl Network {
         let peer_id = peer.peer_id.clone();
         let mut peer_env = PeerEnv::new(peer);
         peer_env.extend_neighborhood(neighborhood.into_iter().map(Into::into));
-        self.peers.insert(peer_id.clone(), Rc::new(peer_env.into()));
-        Rc::get_mut(self.peers.get_mut(&peer_id).unwrap())
-            .unwrap()
-            .get_mut()
+        self.insert_peer_env_entry(peer_id, peer_env)
     }
 
     /// Add a peer with default neighborhood.
@@ -153,10 +150,22 @@ impl Network {
         let peer_id = peer.peer_id.clone();
         let mut peer_env = PeerEnv::new(peer);
         peer_env.extend_neighborhood(self.default_neighborhood.iter().cloned());
-        self.peers.insert(peer_id.clone(), Rc::new(peer_env.into()));
-        Rc::get_mut(self.peers.get_mut(&peer_id).unwrap())
-            .unwrap()
-            .get_mut()
+        self.insert_peer_env_entry(peer_id, peer_env)
+    }
+
+    fn insert_peer_env_entry(&mut self, peer_id: PeerId, peer_env: PeerEnv) -> &mut PeerEnv {
+        let peer_env = Rc::new(peer_env.into());
+        // It will be simplified with entry_insert stabilization
+        // https://github.com/rust-lang/rust/issues/65225
+        let cell = match self.peers.entry(peer_id) {
+            std::collections::hash_map::Entry::Occupied(ent) => {
+                let cell = ent.into_mut();
+                *cell = peer_env;
+                cell
+            }
+            std::collections::hash_map::Entry::Vacant(ent) => ent.insert(peer_env),
+        };
+        Rc::get_mut(cell).unwrap().get_mut()
     }
 
     pub fn set_peer_failed<Id>(&mut self, peer_id: &Id, failed: bool)
