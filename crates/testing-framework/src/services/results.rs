@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use super::{FunctionOutcome, Service};
+use super::{FunctionOutcome, MarineService};
 use crate::asserts::ServiceDefinition;
 
 use air_test_utils::{
@@ -87,7 +87,7 @@ impl ResultService {
     }
 }
 
-impl Service for ResultService {
+impl MarineService for ResultService {
     fn call(&self, params: CallRequestParams) -> FunctionOutcome {
         if let Some((_, suffix)) = params.service_id.split_once("..") {
             if let Ok(key) = suffix.parse() {

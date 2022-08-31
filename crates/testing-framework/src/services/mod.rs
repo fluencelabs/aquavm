@@ -32,29 +32,29 @@ pub enum FunctionOutcome {
 }
 
 /// A mocked Marine service.
-pub trait Service {
+pub trait MarineService {
     fn call(&self, params: CallRequestParams) -> FunctionOutcome;
 
-    fn to_handle(self) -> ServiceHandle
+    fn to_handle(self) -> MarineServiceHandle
     where
         Self: Sized + 'static,
     {
-        ServiceHandle(Rc::new(RefCell::new(Box::new(self))))
+        MarineServiceHandle(Rc::new(RefCell::new(Box::new(self))))
     }
 }
 
 #[derive(Clone)]
-pub struct ServiceHandle(Rc<RefCell<Box<dyn Service>>>);
+pub struct MarineServiceHandle(Rc<RefCell<Box<dyn MarineService>>>);
 
-impl Service for ServiceHandle {
+impl MarineService for MarineServiceHandle {
     fn call(&self, params: CallRequestParams) -> FunctionOutcome {
         let mut guard = self.0.borrow_mut();
-        Service::call(guard.as_mut(), params)
+        MarineService::call(guard.as_mut(), params)
     }
 }
 
 pub(crate) fn services_to_call_service_closure(
-    services: Rc<[ServiceHandle]>,
+    services: Rc<[MarineServiceHandle]>,
 ) -> CallServiceClosure {
     Box::new(move |params: CallRequestParams| -> CallServiceResult {
         for service_handler in services.as_ref() {

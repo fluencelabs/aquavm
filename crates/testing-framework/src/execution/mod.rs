@@ -17,7 +17,7 @@
 use crate::{
     asserts::ServiceDefinition,
     ephemeral::{Network, Peer, PeerId},
-    services::{results::ResultService, Service, ServiceHandle},
+    services::{results::ResultService, MarineService, MarineServiceHandle},
     transform::{walker::Transformer, Sexp},
 };
 
@@ -34,7 +34,7 @@ impl TestExecutor {
     /// Create execution from the annotated air script.
     pub fn new(
         test_parameters: TestRunParameters,
-        common_services: Vec<ServiceHandle>,
+        common_services: Vec<MarineServiceHandle>,
         extra_peers: impl IntoIterator<Item = PeerId>,
         annotated_air_script: &str,
     ) -> Result<Self, String> {
@@ -111,13 +111,14 @@ impl TestExecutor {
 }
 
 fn build_peers(
-    common_services: Vec<ServiceHandle>,
+    common_services: Vec<MarineServiceHandle>,
     results: std::collections::HashMap<u32, ServiceDefinition>,
     known_peers: std::collections::HashSet<PeerId>,
     init_peer_id: PeerId,
     extra_peers: impl IntoIterator<Item = PeerId>,
 ) -> Result<Vec<Peer>, String> {
-    let mut result_services: Vec<ServiceHandle> = Vec::with_capacity(1 + common_services.len());
+    let mut result_services: Vec<MarineServiceHandle> =
+        Vec::with_capacity(1 + common_services.len());
     result_services.push(ResultService::new(results)?.to_handle());
     result_services.extend(common_services);
     let result_services = Rc::<[_]>::from(result_services);
