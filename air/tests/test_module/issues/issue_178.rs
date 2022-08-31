@@ -26,13 +26,13 @@ fn par_ap_behaviour() {
     // ap doesn't affect the subgraph_complete flag
     let script = f!(r#"
         (par
-            (call "{variable_setter_id}" ("peer" "timeout") [] join_it) ; service=unit
+            (call "{variable_setter_id}" ("peer" "timeout") [] join_it) ; behaviour=unit
             (seq
                 (par
-                    (call "{relay_id}" ("peer" "timeout") [join_it] $result) ; service=unit
+                    (call "{relay_id}" ("peer" "timeout") [join_it] $result) ; behaviour=unit
                     (ap "fast_result" $result)
                 )
-                (call "{client_id}" ("op" "return") [$result.$[0]]) ; service=unit
+                (call "{client_id}" ("op" "return") [$result.$[0]]) ; behaviour=unit
             )
         )
         "#);

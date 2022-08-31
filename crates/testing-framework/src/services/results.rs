@@ -81,7 +81,11 @@ impl ResultService {
         Ok(Self {
             results: results
                 .into_iter()
-                .map(|(id, service_def)| service_def.try_into().map(move |s: CallServiceClosure| (id, s)))
+                .map(|(id, service_def)| {
+                    service_def
+                        .try_into()
+                        .map(move |s: CallServiceClosure| (id, s))
+                })
                 .collect::<Result<_, String>>()?,
         })
     }
