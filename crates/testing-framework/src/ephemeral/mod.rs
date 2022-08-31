@@ -174,6 +174,7 @@ impl Network {
             }
             std::collections::hash_map::Entry::Vacant(ent) => ent.insert(peer_env),
         };
+        // never panics because Rc have been just created and there's just single reference
         Rc::get_mut(cell).unwrap().get_mut()
     }
 
@@ -231,6 +232,7 @@ impl Network {
     }
 
     /// Iterator for handling al the queued data.  It borrows peer env's `RefCell` only temporarily.
+    /// Following test-utils' call_vm macro, it panics on failed VM.
     pub fn execution_iter<'s, Id>(
         &'s self,
         air: &'s str,
@@ -248,7 +250,7 @@ impl Network {
                 let mut peer_env = peer_env_cell.borrow_mut();
                 peer_env
                     .execute_once(air, self, test_parameters)
-                    .map(Result::unwrap)
+                    .map(|r| r.unwrap_or_else(|err| panic!("VM call failed: {}", err)))
             })
         })
     }
