@@ -33,5 +33,5 @@ pub enum ServiceDefinition {
     /// call number string starting from "0", or "default".
     SeqResult(HashMap<String, JValue>),
     /// Some known service by name: "echo", "unit" (more to follow).
-    Service(String),
+    Behaviour(String),
 }

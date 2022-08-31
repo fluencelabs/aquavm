@@ -40,7 +40,7 @@ impl TryInto<CallServiceClosure> for ServiceDefinition {
                 Ok(Box::new(move |_| call_result.clone()))
             }
             ServiceDefinition::SeqResult(call_map) => Ok(seq_result_closure(call_map)),
-            ServiceDefinition::Service(name) => named_service_closure(name),
+            ServiceDefinition::Behaviour(name) => named_service_closure(name),
         }
     }
 }

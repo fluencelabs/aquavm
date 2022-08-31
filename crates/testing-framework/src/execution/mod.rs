@@ -323,7 +323,7 @@ mod tests {
             vec![],
             std::iter::empty(),
             r#"(seq
-(call "peer1" ("service" "func") [1 22] arg) ; service=echo
+(call "peer1" ("service" "func") [1 22] arg) ; behaviour=echo
 (call "peer2" ("service" "func") [arg]) ; result = 43
 )
 "#,

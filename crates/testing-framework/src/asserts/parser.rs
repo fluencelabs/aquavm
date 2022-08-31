@@ -51,7 +51,7 @@ pub fn parse_kw(inp: &str) -> IResult<&str, ServiceDefinition, ParseError> {
                 tag("result"),
                 tag("call_result"),
                 tag("seq_result"),
-                tag("service"),
+                tag("behaviour"),
             )),
             equal(),
             cut(context(
@@ -67,7 +67,7 @@ pub fn parse_kw(inp: &str) -> IResult<&str, ServiceDefinition, ParseError> {
                     .map(ServiceDefinition::CallResult),
                 "seq_result" => serde_json::from_str::<HashMap<String, JValue>>(value)
                     .map(ServiceDefinition::SeqResult),
-                "service" => Ok(ServiceDefinition::Service(value.to_owned())),
+                "behaviour" => Ok(ServiceDefinition::Behaviour(value.to_owned())),
                 _ => unreachable!("unknown tag {:?}", tag),
             }
         },
@@ -176,8 +176,8 @@ mod tests {
     }
 
     #[test]
-    fn test_service() {
-        let res = ServiceDefinition::from_str(r#"service=echo"#);
-        assert_eq!(res, Ok(ServiceDefinition::Service("echo".to_owned())),);
+    fn test_behaviour() {
+        let res = ServiceDefinition::from_str(r#"behaviour=echo"#);
+        assert_eq!(res, Ok(ServiceDefinition::Behaviour("echo".to_owned())),);
     }
 }
