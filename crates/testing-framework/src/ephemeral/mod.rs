@@ -108,29 +108,24 @@ impl std::fmt::Debug for Peer {
 
 #[derive(Debug)]
 pub struct Network {
-    test_parameters: TestRunParameters,
     peers: HashMap<PeerId, Rc<RefCell<PeerEnv>>>,
     default_neighborhood: HashSet<PeerId>,
 }
 
 impl Network {
-    pub fn empty(test_parameters: TestRunParameters) -> Self {
-        Self::new(test_parameters, std::iter::empty::<&str>())
+    pub fn empty() -> Self {
+        Self::new(std::iter::empty::<&str>())
     }
 
-    pub fn new(
-        test_parameters: TestRunParameters,
-        default_neiborhoud: impl Iterator<Item = impl Into<PeerId>>,
-    ) -> Self {
+    pub fn new(default_neiborhoud: impl Iterator<Item = impl Into<PeerId>>) -> Self {
         Self {
-            test_parameters,
             peers: Default::default(),
             default_neighborhood: default_neiborhoud.map(Into::into).collect(),
         }
     }
 
-    pub fn from_peers(test_parameters: TestRunParameters, nodes: Vec<Peer>) -> Self {
-        let mut network = Self::empty(test_parameters);
+    pub fn from_peers(nodes: Vec<Peer>) -> Self {
+        let mut network = Self::empty();
         let neighborhood: PeerSet = nodes.iter().map(|peer| peer.peer_id.clone()).collect();
         for peer in nodes {
             // TODO can peer have itself as a neighbor?
@@ -221,6 +216,7 @@ impl Network {
     pub fn execution_iter<'s, Id>(
         &'s self,
         air: &'s str,
+        test_parameters: &'s TestRunParameters,
         peer_id: &Id,
     ) -> Option<impl Iterator<Item = RawAVMOutcome> + 's>
     where
@@ -232,7 +228,9 @@ impl Network {
         peer_env.map(|peer_env_cell| {
             std::iter::from_fn(move || {
                 let mut peer_env = peer_env_cell.borrow_mut();
-                peer_env.execute_once(air, self).map(Result::unwrap)
+                peer_env
+                    .execute_once(air, self, test_parameters)
+                    .map(Result::unwrap)
             })
         })
     }

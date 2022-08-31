@@ -28,6 +28,7 @@ use std::{borrow::Borrow, collections::HashMap, hash::Hash, rc::Rc, str::FromStr
 pub struct TestExecutor {
     pub air_script: String,
     pub network: Network,
+    pub test_parameters: TestRunParameters,
 }
 
 impl TestExecutor {
@@ -56,13 +57,14 @@ impl TestExecutor {
             extra_peers,
         )?;
 
-        let network = Network::from_peers(test_parameters, peers);
+        let network = Network::from_peers(peers);
         // Seed execution
         network.distribute_to_peers(&[init_peer_id], &vec![]);
 
         Ok(TestExecutor {
             air_script: transformed_air_script,
             network,
+            test_parameters,
         })
     }
 
@@ -90,7 +92,8 @@ impl TestExecutor {
         // TODO it's not clear why compiler requies + 's here, but not at Network::iter_execution
         Id: Eq + Hash + ?Sized + 's,
     {
-        self.network.execution_iter(&self.air_script, peer_id)
+        self.network
+            .execution_iter(&self.air_script, &self.test_parameters, peer_id)
     }
 
     /// Process all queued datas, panicing on error.

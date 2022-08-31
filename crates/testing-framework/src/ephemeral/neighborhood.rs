@@ -16,6 +16,8 @@
 
 use super::{Data, Network, Peer, PeerId};
 
+use air_test_utils::test_runner::TestRunParameters;
+
 use std::{
     borrow::Borrow,
     collections::{HashSet, VecDeque},
@@ -30,7 +32,8 @@ pub(crate) type PeerSet = HashSet<PeerId>;
 #[derive(Debug, Default)]
 pub struct Neighborhood {
     neighbors: PeerSet,
-    // A neighbor can be unreachable for some time.
+    // A neighbor can be unreachable for some time.  Unlike PeerEnv's `failed`, this field defines
+    // failed link from one peer to another.
     failing: PeerSet,
 }
 
@@ -166,11 +169,12 @@ impl PeerEnv {
         &mut self,
         air: impl Into<String>,
         network: &Network,
+        test_parameters: &TestRunParameters,
     ) -> Option<Result<air_test_utils::RawAVMOutcome, String>> {
         let maybe_data = self.data_queue.pop_front();
 
         maybe_data.map(|data| {
-            let res = self.peer.invoke(air, data, network.test_parameters.clone());
+            let res = self.peer.invoke(air, data, test_parameters.clone());
 
             if let Ok(outcome) = &res {
                 network.distribute_to_peers(&outcome.next_peer_pks, &outcome.data)
