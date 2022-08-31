@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use super::ServiceDesc;
+use super::ServiceDefinition;
 use crate::services::JValue;
 
 use air_test_utils::CallServiceResult;
@@ -24,7 +24,7 @@ use std::{collections::HashMap, str::FromStr};
 
 type ParseError<'inp> = VerboseError<&'inp str>;
 
-impl FromStr for ServiceDesc {
+impl FromStr for ServiceDefinition {
     type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -36,7 +36,7 @@ impl FromStr for ServiceDesc {
 
 // kw "=" val
 // example: "id=firstcall"
-pub fn parse_kw(inp: &str) -> IResult<&str, ServiceDesc, ParseError> {
+pub fn parse_kw(inp: &str) -> IResult<&str, ServiceDefinition, ParseError> {
     use nom::branch::alt;
     use nom::bytes::complete::tag;
     use nom::combinator::{cut, map_res, rest};
@@ -62,13 +62,12 @@ pub fn parse_kw(inp: &str) -> IResult<&str, ServiceDesc, ParseError> {
         |(tag, value): (&str, &str)| {
             let value = value.trim();
             match tag {
-                "result" => serde_json::from_str::<JValue>(value).map(ServiceDesc::Result),
-                "call_result" => {
-                    serde_json::from_str::<CallServiceResult>(value).map(ServiceDesc::CallResult)
-                }
+                "result" => serde_json::from_str::<JValue>(value).map(ServiceDefinition::Result),
+                "call_result" => serde_json::from_str::<CallServiceResult>(value)
+                    .map(ServiceDefinition::CallResult),
                 "seq_result" => serde_json::from_str::<HashMap<String, JValue>>(value)
-                    .map(ServiceDesc::SeqResult),
-                "service" => Ok(ServiceDesc::Service(value.to_owned())),
+                    .map(ServiceDefinition::SeqResult),
+                "service" => Ok(ServiceDefinition::Service(value.to_owned())),
                 _ => unreachable!("unknown tag {:?}", tag),
             }
         },
@@ -94,13 +93,13 @@ mod tests {
 
     #[test]
     fn test_parse_empty() {
-        let res = ServiceDesc::from_str("");
+        let res = ServiceDefinition::from_str("");
         assert!(res.is_err());
     }
 
     #[test]
     fn test_parse_garbage0() {
-        let res = ServiceDesc::from_str("garbage");
+        let res = ServiceDefinition::from_str("garbage");
         assert!(res.is_err(), "{:?}", res);
     }
 
@@ -108,16 +107,16 @@ mod tests {
     fn test_result_service() {
         use serde_json::json;
 
-        let res = ServiceDesc::from_str(r#"result={"this":["is","value"]}"#);
+        let res = ServiceDefinition::from_str(r#"result={"this":["is","value"]}"#);
         assert_eq!(
             res,
-            Ok(ServiceDesc::Result(json!({"this": ["is", "value"]}))),
+            Ok(ServiceDefinition::Result(json!({"this": ["is", "value"]}))),
         );
     }
 
     #[test]
     fn test_result_service_malformed() {
-        let res = ServiceDesc::from_str(r#"result={"this":["is","value"]"#);
+        let res = ServiceDefinition::from_str(r#"result={"this":["is","value"]"#);
         assert!(res.is_err());
     }
 
@@ -125,24 +124,25 @@ mod tests {
     fn test_call_result() {
         use serde_json::json;
 
-        let res = ServiceDesc::from_str(r#"call_result={"ret_code": 0, "result": [1, 2, 3]}"#);
+        let res =
+            ServiceDefinition::from_str(r#"call_result={"ret_code": 0, "result": [1, 2, 3]}"#);
         assert_eq!(
             res,
-            Ok(ServiceDesc::CallResult(CallServiceResult::ok(json!([
-                1, 2, 3
-            ])))),
+            Ok(ServiceDefinition::CallResult(CallServiceResult::ok(json!(
+                [1, 2, 3]
+            )))),
         );
     }
 
     #[test]
     fn test_call_result_malformed() {
-        let res = ServiceDesc::from_str(r#"call_result={"retcode": 0, "result": [1, 2, 3]}"#);
+        let res = ServiceDefinition::from_str(r#"call_result={"retcode": 0, "result": [1, 2, 3]}"#);
         assert!(res.is_err());
     }
 
     #[test]
     fn test_call_result_invalid() {
-        let res = ServiceDesc::from_str(r#"call_result={"ret_code": 0, "result": 1, 2, 3]}"#);
+        let res = ServiceDefinition::from_str(r#"call_result={"ret_code": 0, "result": 1, 2, 3]}"#);
         assert!(res.is_err());
     }
 
@@ -150,10 +150,10 @@ mod tests {
     fn test_seq_result() {
         use serde_json::json;
 
-        let res = ServiceDesc::from_str(r#"seq_result={"default": 42, "1": true, "3": []}"#);
+        let res = ServiceDefinition::from_str(r#"seq_result={"default": 42, "1": true, "3": []}"#);
         assert_eq!(
             res,
-            Ok(ServiceDesc::SeqResult(maplit::hashmap! {
+            Ok(ServiceDefinition::SeqResult(maplit::hashmap! {
                 "default".to_owned() => json!(42),
                 "1".to_owned() => json!(true),
                 "3".to_owned() => json!([]),
@@ -163,20 +163,21 @@ mod tests {
 
     #[test]
     fn test_seq_result_malformed() {
-        let res = ServiceDesc::from_str(r#"id=myid,seq_result={"default": 42, "1": true, "3": ]}"#);
+        let res =
+            ServiceDefinition::from_str(r#"id=myid,seq_result={"default": 42, "1": true, "3": ]}"#);
         assert!(res.is_err());
     }
 
     #[test]
     fn test_seq_result_invalid() {
         // TODO perhaps, we should support both arrays and maps
-        let res = ServiceDesc::from_str(r#"id=myid,seq_result=[42, 43]"#);
+        let res = ServiceDefinition::from_str(r#"id=myid,seq_result=[42, 43]"#);
         assert!(res.is_err());
     }
 
     #[test]
     fn test_service() {
-        let res = ServiceDesc::from_str(r#"service=echo"#);
-        assert_eq!(res, Ok(ServiceDesc::Service("echo".to_owned())),);
+        let res = ServiceDefinition::from_str(r#"service=echo"#);
+        assert_eq!(res, Ok(ServiceDefinition::Service("echo".to_owned())),);
     }
 }

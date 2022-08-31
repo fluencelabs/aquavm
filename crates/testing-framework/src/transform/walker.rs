@@ -15,14 +15,14 @@
  */
 
 use super::{Call, Sexp};
-use crate::{asserts::ServiceDesc, ephemeral::PeerId};
+use crate::{asserts::ServiceDefinition, ephemeral::PeerId};
 
 use std::collections::{HashMap, HashSet};
 
 #[derive(Debug, Default)]
 pub(crate) struct Transformer {
     cnt: u32,
-    pub(crate) results: HashMap<u32, ServiceDesc>,
+    pub(crate) results: HashMap<u32, ServiceDefinition>,
     pub(crate) peers: HashSet<PeerId>,
 }
 
@@ -111,7 +111,7 @@ mod tests {
         assert_eq!(
             transformer.results,
             maplit::hashmap! {
-                0u32 => ServiceDesc::Result(serde_json::json!(42)),
+                0u32 => ServiceDefinition::Result(serde_json::json!(42)),
             }
         );
 
@@ -149,8 +149,8 @@ mod tests {
         assert_eq!(
             transformer.results,
             maplit::hashmap! {
-                0u32 => ServiceDesc::Result(serde_json::json!({"test":"me"})),
-                1 => ServiceDesc::Result(serde_json::json!(true)),
+                0u32 => ServiceDefinition::Result(serde_json::json!({"test":"me"})),
+                1 => ServiceDefinition::Result(serde_json::json!(true)),
             }
         );
 

@@ -15,7 +15,7 @@
  */
 
 use super::{FunctionOutcome, Service};
-use crate::asserts::ServiceDesc;
+use crate::asserts::ServiceDefinition;
 
 use air_test_utils::{
     prelude::{echo_call_service, unit_call_service},
@@ -28,17 +28,19 @@ pub struct ResultService {
     results: HashMap<u32, CallServiceClosure>,
 }
 
-impl TryInto<CallServiceClosure> for ServiceDesc {
+impl TryInto<CallServiceClosure> for ServiceDefinition {
     type Error = String;
 
     fn try_into(self) -> Result<CallServiceClosure, Self::Error> {
         match self {
-            ServiceDesc::Result(jvalue) => {
+            ServiceDefinition::Result(jvalue) => {
                 Ok(Box::new(move |_| CallServiceResult::ok(jvalue.clone())))
             }
-            ServiceDesc::CallResult(call_result) => Ok(Box::new(move |_| call_result.clone())),
-            ServiceDesc::SeqResult(call_map) => Ok(seq_result_closure(call_map)),
-            ServiceDesc::Service(name) => named_service_closure(name),
+            ServiceDefinition::CallResult(call_result) => {
+                Ok(Box::new(move |_| call_result.clone()))
+            }
+            ServiceDefinition::SeqResult(call_map) => Ok(seq_result_closure(call_map)),
+            ServiceDefinition::Service(name) => named_service_closure(name),
         }
     }
 }
@@ -75,7 +77,7 @@ fn seq_result_closure(call_map: HashMap<String, serde_json::Value>) -> CallServi
 }
 
 impl ResultService {
-    pub(crate) fn new(results: HashMap<u32, ServiceDesc>) -> Result<Self, String> {
+    pub(crate) fn new(results: HashMap<u32, ServiceDefinition>) -> Result<Self, String> {
         Ok(Self {
             results: results
                 .into_iter()

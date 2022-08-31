@@ -15,7 +15,7 @@
  */
 
 use crate::{
-    asserts::ServiceDesc,
+    asserts::ServiceDefinition,
     ephemeral::{Network, Peer, PeerId},
     services::{results::ResultService, Service, ServiceHandle},
     transform::{walker::Transformer, Sexp},
@@ -112,7 +112,7 @@ impl TestExecutor {
 
 fn build_peers(
     common_services: Vec<ServiceHandle>,
-    results: std::collections::HashMap<u32, ServiceDesc>,
+    results: std::collections::HashMap<u32, ServiceDefinition>,
     known_peers: std::collections::HashSet<PeerId>,
     init_peer_id: PeerId,
     extra_peers: impl IntoIterator<Item = PeerId>,

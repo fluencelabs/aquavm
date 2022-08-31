@@ -22,11 +22,16 @@ use air_test_utils::CallServiceResult;
 
 use std::collections::HashMap;
 
+/// Service definition in the testing framework comment DSL.
 #[derive(Debug, PartialEq, Eq, Clone)]
-pub enum ServiceDesc {
+pub enum ServiceDefinition {
+    /// Simple service that returns same value
     Result(JValue),
+    /// Simple service that returns same call result (i.e. may return a error)
     CallResult(CallServiceResult),
+    /// Service that may return a new value on subsequent call.  Its keys are either
+    /// call number string starting from "0", or "default".
     SeqResult(HashMap<String, JValue>),
-    // For example: echo, service, function, argument.N, fail
+    /// Some known service by name: "echo", "unit" (more to follow).
     Service(String),
 }
