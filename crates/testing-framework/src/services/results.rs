@@ -31,14 +31,12 @@ pub struct ResultService {
 impl TryInto<CallServiceClosure> for ServiceDefinition {
     type Error = String;
 
-    fn try_into(self) -> Result<CallServiceClosure, Self::Error> {
+    fn try_into(self) -> Result<CallServiceClosure, String> {
         match self {
-            ServiceDefinition::Result(jvalue) => {
+            ServiceDefinition::Ok(jvalue) => {
                 Ok(Box::new(move |_| CallServiceResult::ok(jvalue.clone())))
             }
-            ServiceDefinition::CallResult(call_result) => {
-                Ok(Box::new(move |_| call_result.clone()))
-            }
+            ServiceDefinition::Error(call_result) => Ok(Box::new(move |_| call_result.clone())),
             ServiceDefinition::SeqResult(call_map) => Ok(seq_result_closure(call_map)),
             ServiceDefinition::Behaviour(name) => named_service_closure(name),
         }

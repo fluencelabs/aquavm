@@ -48,8 +48,8 @@ pub fn parse_kw(inp: &str) -> IResult<&str, ServiceDefinition, ParseError> {
     delim_ws(map_res(
         separated_pair(
             alt((
-                tag(ServiceTagName::Result.as_ref()),
-                tag(ServiceTagName::CallResult.as_ref()),
+                tag(ServiceTagName::Ok.as_ref()),
+                tag(ServiceTagName::Error.as_ref()),
                 tag(ServiceTagName::SeqResult.as_ref()),
                 tag(ServiceTagName::Behaviour.as_ref()),
             )),
@@ -62,11 +62,12 @@ pub fn parse_kw(inp: &str) -> IResult<&str, ServiceDefinition, ParseError> {
         |(tag, value): (&str, &str)| {
             let value = value.trim();
             match ServiceTagName::from_str(tag) {
-                Ok(ServiceTagName::Result) => {
-                    serde_json::from_str::<JValue>(value).map(ServiceDefinition::Result)
+                Ok(ServiceTagName::Ok) => {
+                    serde_json::from_str::<JValue>(value).map(ServiceDefinition::Ok)
                 }
-                Ok(ServiceTagName::CallResult) => serde_json::from_str::<CallServiceResult>(value)
-                    .map(ServiceDefinition::CallResult),
+                Ok(ServiceTagName::Error) => {
+                    serde_json::from_str::<CallServiceResult>(value).map(ServiceDefinition::Error)
+                }
                 Ok(ServiceTagName::SeqResult) => {
                     serde_json::from_str::<HashMap<String, JValue>>(value)
                         .map(ServiceDefinition::SeqResult)
@@ -111,16 +112,16 @@ mod tests {
     fn test_result_service() {
         use serde_json::json;
 
-        let res = ServiceDefinition::from_str(r#"result={"this":["is","value"]}"#);
+        let res = ServiceDefinition::from_str(r#"ok={"this":["is","value"]}"#);
         assert_eq!(
             res,
-            Ok(ServiceDefinition::Result(json!({"this": ["is", "value"]}))),
+            Ok(ServiceDefinition::Ok(json!({"this": ["is", "value"]}))),
         );
     }
 
     #[test]
     fn test_result_service_malformed() {
-        let res = ServiceDefinition::from_str(r#"result={"this":["is","value"]"#);
+        let res = ServiceDefinition::from_str(r#"ok={"this":["is","value"]"#);
         assert!(res.is_err());
     }
 
@@ -128,25 +129,24 @@ mod tests {
     fn test_call_result() {
         use serde_json::json;
 
-        let res =
-            ServiceDefinition::from_str(r#"call_result={"ret_code": 0, "result": [1, 2, 3]}"#);
+        let res = ServiceDefinition::from_str(r#"err={"ret_code": 0, "result": [1, 2, 3]}"#);
         assert_eq!(
             res,
-            Ok(ServiceDefinition::CallResult(CallServiceResult::ok(json!(
-                [1, 2, 3]
-            )))),
+            Ok(ServiceDefinition::Error(CallServiceResult::ok(json!([
+                1, 2, 3
+            ])))),
         );
     }
 
     #[test]
     fn test_call_result_malformed() {
-        let res = ServiceDefinition::from_str(r#"call_result={"retcode": 0, "result": [1, 2, 3]}"#);
+        let res = ServiceDefinition::from_str(r#"err={"retcode": 0, "result": [1, 2, 3]}"#);
         assert!(res.is_err());
     }
 
     #[test]
     fn test_call_result_invalid() {
-        let res = ServiceDefinition::from_str(r#"call_result={"ret_code": 0, "result": 1, 2, 3]}"#);
+        let res = ServiceDefinition::from_str(r#"err={"ret_code": 0, "result": 1, 2, 3]}"#);
         assert!(res.is_err());
     }
 
@@ -167,15 +167,14 @@ mod tests {
 
     #[test]
     fn test_seq_result_malformed() {
-        let res =
-            ServiceDefinition::from_str(r#"id=myid,seq_result={"default": 42, "1": true, "3": ]}"#);
+        let res = ServiceDefinition::from_str(r#"seq_result={"default": 42, "1": true, "3": ]}"#);
         assert!(res.is_err());
     }
 
     #[test]
     fn test_seq_result_invalid() {
         // TODO perhaps, we should support both arrays and maps
-        let res = ServiceDefinition::from_str(r#"id=myid,seq_result=[42, 43]"#);
+        let res = ServiceDefinition::from_str(r#"seq_result=[42, 43]"#);
         assert!(res.is_err());
     }
 

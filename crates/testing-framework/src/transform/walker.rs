@@ -99,7 +99,7 @@ mod tests {
 
     #[test]
     fn test_translate_call_result() {
-        let script = r#"(call "peer_id" ("service_id" func) []) ; result = 42"#;
+        let script = r#"(call "peer_id" ("service_id" func) []) ; ok = 42"#;
         let mut tree = Sexp::from_str(script).unwrap();
         let mut transformer = Transformer::new();
         transformer.transform(&mut tree);
@@ -111,7 +111,7 @@ mod tests {
         assert_eq!(
             transformer.results,
             maplit::hashmap! {
-                0u32 => ServiceDefinition::Result(serde_json::json!(42)),
+                0u32 => ServiceDefinition::Ok(serde_json::json!(42)),
             }
         );
 
@@ -124,10 +124,10 @@ mod tests {
     #[test]
     fn test_translate_multiple_calls() {
         let script = r#"(seq
-   (call peer_id ("service_id" func) [a 11]) ; result={"test":"me"}
+   (call peer_id ("service_id" func) [a 11]) ; ok={"test":"me"}
    (seq
       (call peer_id ("service_id" func) [b])
-      (call peer_id ("service_id" func) [1]) ; result=true
+      (call peer_id ("service_id" func) [1]) ; ok=true
 ))"#;
 
         let mut tree = Sexp::from_str(script).unwrap();
@@ -149,8 +149,8 @@ mod tests {
         assert_eq!(
             transformer.results,
             maplit::hashmap! {
-                0u32 => ServiceDefinition::Result(serde_json::json!({"test":"me"})),
-                1 => ServiceDefinition::Result(serde_json::json!(true)),
+                0u32 => ServiceDefinition::Ok(serde_json::json!({"test":"me"})),
+                1 => ServiceDefinition::Ok(serde_json::json!(true)),
             }
         );
 
@@ -161,10 +161,10 @@ mod tests {
     fn test_peers() {
         // this script is not correct AIR, but our parser handles it
         let script = r#"(seq
-   (call "peer_id1" ("service_id" func) [a 11]) ; result={"test":"me"}
+   (call "peer_id1" ("service_id" func) [a 11]) ; ok={"test":"me"}
    (seq
       (call "peer_id2" ("service_id" func) [b])
-      (call "peer_id1" ("service_id" func) [1]) ; result=true
+      (call "peer_id1" ("service_id" func) [1]) ; ok=true
       (call peer_id3 ("service_id" func) [b])
 ))"#;
 

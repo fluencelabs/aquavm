@@ -387,8 +387,8 @@ mod tests {
 
     #[test]
     fn test_call_with_annotation() {
-        let res = Sexp::from_str(r#"(call peer_id ("serv" "func") [a b] var) ; result=42 "#);
-        let expected_annotation = ServiceDefinition::Result(json!(42));
+        let res = Sexp::from_str(r#"(call peer_id ("serv" "func") [a b] var) ; ok=42 "#);
+        let expected_annotation = ServiceDefinition::Ok(json!(42));
         assert_eq!(
             res,
             Ok(Sexp::Call(Call {
@@ -408,7 +408,7 @@ mod tests {
     fn test_call_with_annotation2() {
         let res = Sexp::from_str(
             r#"(par
-  (call peerid ("serv" "func") [a b] var) ; result=42
+  (call peerid ("serv" "func") [a b] var) ; ok=42
   (call peerid2 ("serv" "func") []))"#,
         );
         assert!(res.is_ok(), "{:?}", res);

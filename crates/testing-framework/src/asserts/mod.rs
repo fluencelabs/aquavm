@@ -29,11 +29,11 @@ use std::collections::HashMap;
 #[strum_discriminants(name(ServiceTagName))]
 pub enum ServiceDefinition {
     /// Simple service that returns same value
-    #[strum_discriminants(strum(serialize = "result"))]
-    Result(JValue),
+    #[strum_discriminants(strum(serialize = "ok"))]
+    Ok(JValue),
     /// Simple service that returns same call result (i.e. may return a error)
-    #[strum_discriminants(strum(serialize = "call_result"))]
-    CallResult(CallServiceResult),
+    #[strum_discriminants(strum(serialize = "err"))]
+    Error(CallServiceResult),
     /// Service that may return a new value on subsequent call.  Its keys are either
     /// call number string starting from "0", or "default".
     #[strum_discriminants(strum(serialize = "seq_result"))]

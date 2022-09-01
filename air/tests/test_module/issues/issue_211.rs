@@ -29,9 +29,9 @@ fn issue_211() {
        (seq
         (seq
          (null)
-         (call %init_peer_id% ("getDataSrv" "idx") [] idx) ; result=2
+         (call %init_peer_id% ("getDataSrv" "idx") [] idx) ; ok=2
         )
-        (call %init_peer_id% ("getDataSrv" "nodes") [] nodes) ; result = [1,2,3]
+        (call %init_peer_id% ("getDataSrv" "nodes") [] nodes) ; ok = [1,2,3]
        )
        (new $nodes2
         (seq
@@ -45,15 +45,15 @@ fn issue_211() {
            )
            (null)
           )
-          (call %init_peer_id% ("op" "noop") [$nodes2.$.[idx] nodes]) ; result="expected result"
+          (call %init_peer_id% ("op" "noop") [$nodes2.$.[idx] nodes]) ; ok="expected result"
          )
-         (call %init_peer_id% ("op" "identity") [$nodes2] nodes2-fix) ; result="expected result"
+         (call %init_peer_id% ("op" "identity") [$nodes2] nodes2-fix) ; ok="expected result"
         )
        )
       )
       (null)
      )
-     (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2]) ; result="error"
+     (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2]) ; ok="error"
     )
     "#);
 

@@ -156,8 +156,8 @@ mod tests {
             vec![],
             std::iter::empty(),
             r#"(seq
-(call "peer1" ("service" "func") [] arg) ; result=42
-(call "peer2" ("service" "func") [arg]) ; result=43
+(call "peer1" ("service" "func") [] arg) ; ok=42
+(call "peer2" ("service" "func") [arg]) ; ok=43
 )
 "#,
         )
@@ -187,8 +187,8 @@ mod tests {
             vec![],
             std::iter::empty(),
             r#"(seq
-(call "peer1" ("service" "func") [] arg) ; call_result = {"ret_code":0,"result":42}
-(call "peer2" ("service" "func") [arg]) ; result = 43
+(call "peer1" ("service" "func") [] arg) ; err = {"ret_code":0,"result":42}
+(call "peer2" ("service" "func") [arg]) ; ok = 43
 )
 "#,
         )
@@ -216,8 +216,8 @@ mod tests {
             vec![],
             std::iter::empty(),
             r#"(seq
-(call "peer1" ("service" "func") [] arg) ; call_result = {"ret_code":12,"result":"ERROR MESSAGE"}
-(call "peer2" ("service" "func") [arg]) ; result = 43
+(call "peer1" ("service" "func") [] arg) ; err = {"ret_code":12,"result":"ERROR MESSAGE"}
+(call "peer2" ("service" "func") [arg]) ; ok = 43
 )
 "#,
         )
@@ -255,14 +255,14 @@ mod tests {
             IntoIterator::into_iter(["peer2", "peer3"]).map(Into::into),
             r#"(seq
   (seq
-    (call "peer1" ("service" "func") [] var)  ; result = [{"p":"peer2","v":2},{"p":"peer3","v":3}]
+    (call "peer1" ("service" "func") [] var)  ; ok = [{"p":"peer2","v":2},{"p":"peer3","v":3}]
     (seq
       (ap 1 k)
       (fold var i
         (seq
           (call i.$.p ("service" "func") [i k] k)  ; seq_result = {"0":12,"default":42}
           (next i)))))
-  (call "init_peer_id" ("a" "b") []) ; result = 0
+  (call "init_peer_id" ("a" "b") []) ; ok = 0
 )"#,
         )
         .unwrap();
@@ -330,7 +330,7 @@ mod tests {
             std::iter::empty(),
             r#"(seq
 (call "peer1" ("service" "func") [1 22] arg) ; behaviour=echo
-(call "peer2" ("service" "func") [arg]) ; result = 43
+(call "peer2" ("service" "func") [arg]) ; ok = 43
 )
 "#,
         )
