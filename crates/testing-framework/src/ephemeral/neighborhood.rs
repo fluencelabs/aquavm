@@ -140,8 +140,12 @@ impl PeerEnv {
     }
 
     pub fn extend_neighborhood(&mut self, peers: impl Iterator<Item = impl Into<PeerId>>) {
-        for peer_id in peers {
-            self.neighborhood.insert(peer_id.into());
+        let peer_id = self.peer.peer_id.clone();
+        for other_peer_id in peers
+            .map(Into::into)
+            .filter(|other_id| other_id != &peer_id)
+        {
+            self.neighborhood.insert(other_peer_id);
         }
     }
 

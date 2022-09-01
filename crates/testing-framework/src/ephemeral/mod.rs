@@ -140,12 +140,7 @@ impl Network {
     ) -> &mut PeerEnv {
         let peer_id = peer.peer_id.clone();
         let mut peer_env = PeerEnv::new(peer);
-        peer_env.extend_neighborhood(
-            neighborhood
-                .into_iter()
-                .map(Into::into)
-                .filter(|other_peer_id| other_peer_id != &peer_id),
-        );
+        peer_env.extend_neighborhood(neighborhood.into_iter());
         self.insert_peer_env_entry(peer_id, peer_env)
     }
 
@@ -153,12 +148,7 @@ impl Network {
     pub fn add_peer(&mut self, peer: Peer) -> &mut PeerEnv {
         let peer_id = peer.peer_id.clone();
         let mut peer_env = PeerEnv::new(peer);
-        peer_env.extend_neighborhood(
-            self.default_neighborhood
-                .iter()
-                .cloned()
-                .filter(|other_peer_id| other_peer_id != &peer_id),
-        );
+        peer_env.extend_neighborhood(self.default_neighborhood.iter().cloned());
         self.insert_peer_env_entry(peer_id, peer_env)
     }
 
