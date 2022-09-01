@@ -16,45 +16,36 @@
 
 use air_test_utils::prelude::*;
 
-use std::collections::HashSet;
-
 #[test]
 // https://github.com/fluencelabs/aquavm/issues/178
 fn par_ap_behaviour() {
     let client_id = "client_id";
     let relay_id = "relay_id";
     let variable_setter_id = "variable_setter_id";
-    let mut client = create_avm(unit_call_service(), client_id);
-    let mut relay = create_avm(unit_call_service(), relay_id);
-    let mut variable_setter = create_avm(unit_call_service(), variable_setter_id);
 
+    // ap doesn't affect the subgraph_complete flag
     let script = f!(r#"
         (par
-            (call "{variable_setter_id}" ("peer" "timeout") [] join_it)
+            (call "{variable_setter_id}" ("peer" "timeout") [] join_it) ; behaviour=unit
             (seq
                 (par
-                    (call "{relay_id}" ("peer" "timeout") [join_it] $result)
-                    (ap "fast_result" $result) ;; ap doesn't affect the subgraph_complete flag
+                    (call "{relay_id}" ("peer" "timeout") [join_it] $result) ; behaviour=unit
+                    (ap "fast_result" $result)
                 )
-                (call "{client_id}" ("op" "return") [$result.$[0]])
+                (call "{client_id}" ("op" "return") [$result.$[0]]) ; behaviour=unit
             )
         )
         "#);
 
-    let mut client_result_1 = checked_call_vm!(client, <_>::default(), &script, "", "");
-    let actual_next_peers: HashSet<_> = client_result_1.next_peer_pks.drain(..).collect();
-    let expected_next_peers: HashSet<_> = maplit::hashset!(relay_id.to_string(), variable_setter_id.to_string());
-    assert_eq!(actual_next_peers, expected_next_peers);
+    let engine = air_test_framework::TestExecutor::simple(TestRunParameters::new("client_id", 0, 1), &script)
+        .expect("invalid test executor config");
 
-    let setter_result = checked_call_vm!(
-        variable_setter,
-        <_>::default(),
-        &script,
-        "",
-        client_result_1.data.clone()
-    );
+    let client_result_1 = engine.execute_one(client_id).unwrap();
+    assert_next_pks!(&client_result_1.next_peer_pks, [relay_id, variable_setter_id]);
+
+    let setter_result = engine.execute_one(variable_setter_id).unwrap();
     assert!(setter_result.next_peer_pks.is_empty());
 
-    let relay_result = checked_call_vm!(relay, <_>::default(), script, "", client_result_1.data);
+    let relay_result = engine.execute_one(relay_id).unwrap();
     assert!(relay_result.next_peer_pks.is_empty());
 }

@@ -24,7 +24,7 @@ pub type CallResults = HashMap<u32, CallServiceResult>;
 pub const CALL_SERVICE_SUCCESS: i32 = 0;
 
 /// Represents an executed host function result.
-#[derive(Debug, Default, Clone, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct CallServiceResult {
     /// A error code service or builtin returned, where CALL_SERVICE_SUCCESS represents success.
     pub ret_code: i32,

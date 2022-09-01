@@ -23,6 +23,7 @@ dependencies = [
  "air-log-targets",
  "air-parser",
  "air-test-utils",
+ "air-testing-framework",
  "air-trace-handler",
  "air-utils",
  "boolinator",
@@ -173,6 +174,19 @@ dependencies = [
  "object-pool",
  "once_cell",
  "serde_json",
+]
+
+[[package]]
+name = "air-testing-framework"
+version = "0.1.0"
+dependencies = [
+ "air-test-utils",
+ "itertools 0.10.3",
+ "maplit",
+ "nom 7.1.1",
+ "nom_locate",
+ "serde_json",
+ "strum",
 ]
 
 [[package]]
@@ -382,6 +396,12 @@ name = "bumpalo"
 version = "3.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "37ccbd214614c6783386c1af30caf03192f17891059cecc394b4fb119e363de3"
+
+[[package]]
+name = "bytecount"
+version = "0.6.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2c676a478f63e9fa2dd5368a42f28bba0d6c560b775f38583c8bbaa7fcd67c9c"
 
 [[package]]
 name = "byteorder"
@@ -918,7 +938,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "047f670b4807cab8872550a607b1515daff08b3e3bb7576ce8f45971fd811a4e"
 dependencies = [
  "it-to-bytes",
- "nom",
+ "nom 5.1.2",
  "serde",
  "variant_count",
  "wast",
@@ -1371,7 +1391,7 @@ dependencies = [
  "itertools 0.10.3",
  "marine-it-interfaces",
  "marine-module-interface",
- "nom",
+ "nom 5.1.2",
  "semver 0.11.0",
  "serde",
  "thiserror",
@@ -1439,7 +1459,7 @@ dependencies = [
  "anyhow",
  "itertools 0.10.3",
  "marine-it-interfaces",
- "nom",
+ "nom 5.1.2",
  "semver 0.11.0",
  "serde",
  "thiserror",
@@ -1550,6 +1570,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "minimal-lexical"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "68354c5c6bd36d73ff3feceb05efa59b6acb7626617f4962be322a825e61f79a"
+
+[[package]]
 name = "multimap"
 version = "0.8.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1586,6 +1612,27 @@ dependencies = [
  "lexical-core",
  "memchr",
  "version_check",
+]
+
+[[package]]
+name = "nom"
+version = "7.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a8903e5a29a317527874d0402f867152a3d21c908bb0b933e416c65e301d4c36"
+dependencies = [
+ "memchr",
+ "minimal-lexical",
+]
+
+[[package]]
+name = "nom_locate"
+version = "4.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "37794436ca3029a3089e0b95d42da1f0b565ad271e4d3bb4bad0c7bb70b10605"
+dependencies = [
+ "bytecount",
+ "memchr",
+ "nom 7.1.1",
 ]
 
 [[package]]
@@ -2239,6 +2286,9 @@ name = "strum"
 version = "0.21.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "aaf86bbcfd1fa9670b7a129f64fc0c9fcbbfe4f1bc4210e9e98fe71ffc12cde2"
+dependencies = [
+ "strum_macros",
+]
 
 [[package]]
 name = "strum_macros"
@@ -2722,7 +2772,7 @@ dependencies = [
  "it-to-bytes",
  "itertools 0.10.3",
  "log",
- "nom",
+ "nom 5.1.2",
  "safe-transmute",
  "semver 0.11.0",
  "serde",

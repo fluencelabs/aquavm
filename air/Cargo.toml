@@ -45,6 +45,7 @@ wasm-bindgen = "=0.2.65"
 
 [dev_dependencies]
 air-test-utils = { path = "../crates/air-lib/test-utils" }
+air-testing-framework = { path = "../crates/testing-framework" }
 fluence-app-service = "0.18.0"
 marine-rs-sdk = { version = "0.7.0", features = ["logger"] }
 
