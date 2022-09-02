@@ -88,6 +88,10 @@ impl Streams {
         self.streams.insert(name, vec![descriptor]);
     }
 
+    pub(crate) fn add_restricted_stream(&mut self, name: String, generations: HashMap<u32, Vec<u32>>) {
+        self.data_restr_stream_generations.insert(name, generations);
+    }
+
     pub(crate) fn meet_scope_start(&mut self, name: impl Into<String>, span: Span, iteration: u32) {
         let name = name.into();
         let generations_count = self

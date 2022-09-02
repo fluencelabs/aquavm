@@ -84,6 +84,11 @@ fn create_streams(ctx: &mut ExecutionCtx<'_>, prev_data: &InterpreterData) {
         let new_stream = Stream::from_generations_count(*generation_count as usize);
 
         // it's impossible to have duplicates of streams in data because of HashMap in data
-        ctx.streams.add_global_stream(stream_name.to_string(), new_stream);
+        ctx.streams.add_global_stream(stream_name.clone(), new_stream);
+    }
+
+    for (stream_name, generations) in prev_data.restricted_streams.iter() {
+        ctx.streams
+            .add_restricted_stream(stream_name.clone(), generations.clone())
     }
 }
