@@ -288,7 +288,7 @@ dependencies = [
 
 [[package]]
 name = "avm-interface"
-version = "0.25.0"
+version = "0.26.0"
 dependencies = [
  "air-interpreter-interface",
  "air-utils",
