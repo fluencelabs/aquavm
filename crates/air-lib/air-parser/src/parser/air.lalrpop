@@ -5,6 +5,7 @@ use crate::parser::Span;
 use crate::parser::lexer::Token;
 
 use air_lambda_parser::LambdaAST;
+use air_parser_utils::Identifier;
 use lalrpop_util::ErrorRecovery;
 use std::rc::Rc;
 
@@ -238,12 +239,12 @@ extern {
         "[" => Token::OpenSquareBracket,
         "]" => Token::CloseSquareBracket,
 
-        Scalar => Token::Scalar { name:<&'input str>, position: <usize> },
-        ScalarWithLambda => Token::ScalarWithLambda { name: <&'input str>, lambda: <LambdaAST<'input>>, position: <usize> },
-        Stream => Token::Stream { name: <&'input str>, position: <usize> },
-        StreamWithLambda => Token::StreamWithLambda {name: <&'input str>, lambda:<LambdaAST<'input>>, position: <usize>},
-        CanonStream => Token::CanonStream { name: <&'input str>, position: <usize> },
-        CanonStreamWithLambda => Token::CanonStreamWithLambda {name: <&'input str>, lambda:<LambdaAST<'input>>, position: <usize>},
+        Scalar => Token::Scalar { name:<Identifier<'input>>, position: <usize> },
+        ScalarWithLambda => Token::ScalarWithLambda { name: <Identifier<'input>>, lambda: <LambdaAST<'input>>, position: <usize> },
+        Stream => Token::Stream { name: <Identifier<'input>>, position: <usize> },
+        StreamWithLambda => Token::StreamWithLambda {name: <Identifier<'input>>, lambda:<LambdaAST<'input>>, position: <usize>},
+        CanonStream => Token::CanonStream { name: <Identifier<'input>>, position: <usize> },
+        CanonStreamWithLambda => Token::CanonStreamWithLambda {name: <Identifier<'input>>, lambda:<LambdaAST<'input>>, position: <usize>},
 
         Literal => Token::StringLiteral(<&'input str>),
         I64 => Token::I64(<i64>),

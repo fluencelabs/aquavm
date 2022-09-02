@@ -21,6 +21,7 @@ use super::LambdaParserResult;
 use crate::LambdaAST;
 use crate::ValueAccessor;
 
+use air_parser_utils::Interner;
 use va_lambda::LambdaParser;
 
 use std::convert::TryFrom;
@@ -30,11 +31,14 @@ use std::convert::TryFrom;
 thread_local!(static PARSER: LambdaParser = LambdaParser::new());
 
 /// Parse AIR `source_code` to `Box<Instruction>`
-pub fn parse(lambda: &str) -> LambdaParserResult<'_, LambdaAST> {
+pub fn parse<'input>(
+    lambda: &'input str,
+    interner: &mut Interner<'input>,
+) -> LambdaParserResult<'input, LambdaAST<'input>> {
     PARSER.with(|parser| {
         let mut errors = Vec::new();
         let lexer = AccessorsLexer::new(lambda);
-        let result = parser.parse(lambda, &mut errors, lexer);
+        let result = parser.parse(lambda, &mut errors, interner, lexer);
 
         match result {
             Ok(accessors) if errors.is_empty() => try_to_lambda(accessors),

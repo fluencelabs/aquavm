@@ -17,6 +17,7 @@ path = "src/lib.rs"
 air-interpreter-data = { path = "../interpreter-data" }
 air-log-targets = { path = "../log-targets" }
 air-parser = { path = "../air-parser" }
+air-parser-utils = { path = "../parser-utils" }
 
 bimap = "0.6.2"
 serde_json = "1.0.68"

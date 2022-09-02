@@ -1,11 +1,12 @@
 // auto-generated: "lalrpop 0.19.8"
-// sha3: c1d6038a914f4d058915d1d80f6943a98fd99e21c303f874a4393a619d95eb9b
+// sha3: f047f7566b297368d3326bd190171d8504627d4ec515a315b38b179f7de9c7ca
 use crate::ast::*;
 use crate::parser::ParserError;
 use crate::parser::VariableValidator;
 use crate::parser::Span;
 use crate::parser::lexer::Token;
 use air_lambda_parser::LambdaAST;
+use air_parser_utils::Identifier;
 use lalrpop_util::ErrorRecovery;
 use std::rc::Rc;
 #[allow(unused_extern_crates)]
@@ -25,6 +26,7 @@ mod __parse__AIR {
     use crate::parser::Span;
     use crate::parser::lexer::Token;
     use air_lambda_parser::LambdaAST;
+    use air_parser_utils::Identifier;
     use lalrpop_util::ErrorRecovery;
     use std::rc::Rc;
     #[allow(unused_extern_crates)]
@@ -39,8 +41,8 @@ mod __parse__AIR {
      {
         Variant0(Token<'input>),
         Variant1(bool),
-        Variant2((&'input str, usize)),
-        Variant3((&'input str, LambdaAST<'input>, usize)),
+        Variant2((Identifier<'input>, usize)),
+        Variant3((Identifier<'input>, LambdaAST<'input>, usize)),
         Variant4(f64),
         Variant5(i64),
         Variant6(LambdaAST<'input>),
@@ -1847,7 +1849,7 @@ mod __parse__AIR {
       'input,
     >(
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, (&'input str, LambdaAST<'input>, usize), usize)
+    ) -> (usize, (Identifier<'input>, LambdaAST<'input>, usize), usize)
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant3(__v), __r)) => (__l, __v, __r),
@@ -1858,7 +1860,7 @@ mod __parse__AIR {
       'input,
     >(
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, (&'input str, usize), usize)
+    ) -> (usize, (Identifier<'input>, usize), usize)
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant2(__v), __r)) => (__l, __v, __r),
@@ -4328,7 +4330,7 @@ fn __action10<
     (_, _, _): (usize, Token<'input>, usize),
     (_, _, _): (usize, Token<'input>, usize),
     (_, iterable, _): (usize, FoldScalarIterable<'input>, usize),
-    (_, iterator, _): (usize, (&'input str, usize), usize),
+    (_, iterator, _): (usize, (Identifier<'input>, usize), usize),
     (_, i, _): (usize, Box<Instruction<'input>>, usize),
     (_, _, _): (usize, Token<'input>, usize),
     (_, right, _): (usize, usize, usize),
@@ -4357,8 +4359,8 @@ fn __action11<
     (_, left, _): (usize, usize, usize),
     (_, _, _): (usize, Token<'input>, usize),
     (_, _, _): (usize, Token<'input>, usize),
-    (_, stream, _): (usize, (&'input str, usize), usize),
-    (_, iterator, _): (usize, (&'input str, usize), usize),
+    (_, stream, _): (usize, (Identifier<'input>, usize), usize),
+    (_, iterator, _): (usize, (Identifier<'input>, usize), usize),
     (_, i, _): (usize, Box<Instruction<'input>>, usize),
     (_, _, _): (usize, Token<'input>, usize),
     (_, right, _): (usize, usize, usize),
@@ -4388,7 +4390,7 @@ fn __action12<
     (_, left, _): (usize, usize, usize),
     (_, _, _): (usize, Token<'input>, usize),
     (_, _, _): (usize, Token<'input>, usize),
-    (_, iterator, _): (usize, (&'input str, usize), usize),
+    (_, iterator, _): (usize, (Identifier<'input>, usize), usize),
     (_, _, _): (usize, Token<'input>, usize),
     (_, right, _): (usize, usize, usize),
 ) -> Box<Instruction<'input>>
@@ -4542,7 +4544,7 @@ fn __action19<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, scalar, _): (usize, (&'input str, usize), usize),
+    (_, scalar, _): (usize, (Identifier<'input>, usize), usize),
 ) -> ApResult<'input>
 {
     ApResult::scalar(scalar.0, scalar.1)
@@ -4557,7 +4559,7 @@ fn __action20<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, stream, _): (usize, (&'input str, usize), usize),
+    (_, stream, _): (usize, (Identifier<'input>, usize), usize),
 ) -> ApResult<'input>
 {
     ApResult::stream(stream.0, stream.1)
@@ -4572,7 +4574,7 @@ fn __action21<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, scalar, _): (usize, (&'input str, usize), usize),
+    (_, scalar, _): (usize, (Identifier<'input>, usize), usize),
 ) -> CallOutputValue<'input>
 {
     CallOutputValue::scalar(scalar.0, scalar.1)
@@ -4587,7 +4589,7 @@ fn __action22<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, stream, _): (usize, (&'input str, usize), usize),
+    (_, stream, _): (usize, (Identifier<'input>, usize), usize),
 ) -> CallOutputValue<'input>
 {
     CallOutputValue::stream(stream.0, stream.1)
@@ -4602,7 +4604,7 @@ fn __action23<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, scalar, _): (usize, (&'input str, usize), usize),
+    (_, scalar, _): (usize, (Identifier<'input>, usize), usize),
 ) -> Fail<'input>
 {
     Fail::Scalar(ScalarWithLambda::new(scalar.0, None, scalar.1))
@@ -4617,7 +4619,7 @@ fn __action24<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, scalar, _): (usize, (&'input str, LambdaAST<'input>, usize), usize),
+    (_, scalar, _): (usize, (Identifier<'input>, LambdaAST<'input>, usize), usize),
 ) -> Fail<'input>
 {
     Fail::Scalar(ScalarWithLambda::new(scalar.0, Some(scalar.1), scalar.2))
@@ -4651,7 +4653,7 @@ fn __action26<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, canon_stream, _): (usize, (&'input str, LambdaAST<'input>, usize), usize),
+    (_, canon_stream, _): (usize, (Identifier<'input>, LambdaAST<'input>, usize), usize),
 ) -> Fail<'input>
 {
     Fail::CanonStream {
@@ -4688,7 +4690,7 @@ fn __action28<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, scalar, _): (usize, (&'input str, usize), usize),
+    (_, scalar, _): (usize, (Identifier<'input>, usize), usize),
 ) -> FoldScalarIterable<'input>
 {
     FoldScalarIterable::Scalar(ScalarWithLambda::new(scalar.0, None, scalar.1))
@@ -4703,7 +4705,7 @@ fn __action29<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, scalar, _): (usize, (&'input str, LambdaAST<'input>, usize), usize),
+    (_, scalar, _): (usize, (Identifier<'input>, LambdaAST<'input>, usize), usize),
 ) -> FoldScalarIterable<'input>
 {
     FoldScalarIterable::Scalar(ScalarWithLambda::new(scalar.0, Some(scalar.1), scalar.2))
@@ -4718,7 +4720,7 @@ fn __action30<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, canon_stream, _): (usize, (&'input str, usize), usize),
+    (_, canon_stream, _): (usize, (Identifier<'input>, usize), usize),
 ) -> FoldScalarIterable<'input>
 {
     FoldScalarIterable::CanonStream(CanonStream::new(canon_stream.0, canon_stream.1))
@@ -4824,7 +4826,7 @@ fn __action37<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, scalar, _): (usize, (&'input str, usize), usize),
+    (_, scalar, _): (usize, (Identifier<'input>, usize), usize),
 ) -> CallInstrValue<'input>
 {
     CallInstrValue::Variable(VariableWithLambda::scalar(scalar.0, scalar.1))
@@ -4839,7 +4841,7 @@ fn __action38<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, scalar, _): (usize, (&'input str, LambdaAST<'input>, usize), usize),
+    (_, scalar, _): (usize, (Identifier<'input>, LambdaAST<'input>, usize), usize),
 ) -> CallInstrValue<'input>
 {
     CallInstrValue::Variable(VariableWithLambda::scalar_wl(scalar.0, scalar.1, scalar.2))
@@ -4854,7 +4856,7 @@ fn __action39<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, stream, _): (usize, (&'input str, usize), usize),
+    (_, stream, _): (usize, (Identifier<'input>, usize), usize),
 ) -> CallInstrValue<'input>
 {
     CallInstrValue::Variable(VariableWithLambda::stream(stream.0, stream.1))
@@ -4869,7 +4871,7 @@ fn __action40<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, stream, _): (usize, (&'input str, LambdaAST<'input>, usize), usize),
+    (_, stream, _): (usize, (Identifier<'input>, LambdaAST<'input>, usize), usize),
 ) -> CallInstrValue<'input>
 {
     CallInstrValue::Variable(VariableWithLambda::stream_wl(stream.0, stream.1, stream.2))
@@ -4884,7 +4886,7 @@ fn __action41<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, canon_stream, _): (usize, (&'input str, usize), usize),
+    (_, canon_stream, _): (usize, (Identifier<'input>, usize), usize),
 ) -> CallInstrValue<'input>
 {
     CallInstrValue::Variable(VariableWithLambda::canon_stream(canon_stream.0, canon_stream.1))
@@ -4899,7 +4901,7 @@ fn __action42<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, canon_stream, _): (usize, (&'input str, LambdaAST<'input>, usize), usize),
+    (_, canon_stream, _): (usize, (Identifier<'input>, LambdaAST<'input>, usize), usize),
 ) -> CallInstrValue<'input>
 {
     CallInstrValue::Variable(VariableWithLambda::canon_stream_wl(canon_stream.0, canon_stream.1, canon_stream.2))
@@ -4914,7 +4916,7 @@ fn __action43<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, scalar, _): (usize, (&'input str, usize), usize),
+    (_, scalar, _): (usize, (Identifier<'input>, usize), usize),
 ) -> NewArgument<'input>
 {
     NewArgument::Scalar(Scalar::new(scalar.0, scalar.1))
@@ -4929,7 +4931,7 @@ fn __action44<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, stream, _): (usize, (&'input str, usize), usize),
+    (_, stream, _): (usize, (Identifier<'input>, usize), usize),
 ) -> NewArgument<'input>
 {
     NewArgument::Stream(Stream::new(stream.0, stream.1))
@@ -4944,7 +4946,7 @@ fn __action45<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, canon_stream, _): (usize, (&'input str, usize), usize),
+    (_, canon_stream, _): (usize, (Identifier<'input>, usize), usize),
 ) -> NewArgument<'input>
 {
     NewArgument::CanonStream(CanonStream::new(canon_stream.0, canon_stream.1))
@@ -5140,7 +5142,7 @@ fn __action58<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, scalar, _): (usize, (&'input str, usize), usize),
+    (_, scalar, _): (usize, (Identifier<'input>, usize), usize),
 ) -> Value<'input>
 {
     Value::Variable(VariableWithLambda::scalar(scalar.0, scalar.1))
@@ -5155,7 +5157,7 @@ fn __action59<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, scalar, _): (usize, (&'input str, LambdaAST<'input>, usize), usize),
+    (_, scalar, _): (usize, (Identifier<'input>, LambdaAST<'input>, usize), usize),
 ) -> Value<'input>
 {
     Value::Variable(VariableWithLambda::scalar_wl(scalar.0, scalar.1, scalar.2))
@@ -5170,7 +5172,7 @@ fn __action60<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, stream, _): (usize, (&'input str, usize), usize),
+    (_, stream, _): (usize, (Identifier<'input>, usize), usize),
 ) -> Value<'input>
 {
     Value::Variable(VariableWithLambda::stream(stream.0, stream.1))
@@ -5185,7 +5187,7 @@ fn __action61<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, stream, _): (usize, (&'input str, LambdaAST<'input>, usize), usize),
+    (_, stream, _): (usize, (Identifier<'input>, LambdaAST<'input>, usize), usize),
 ) -> Value<'input>
 {
     Value::Variable(VariableWithLambda::stream_wl(stream.0, stream.1, stream.2))
@@ -5200,7 +5202,7 @@ fn __action62<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, canon_stream, _): (usize, (&'input str, usize), usize),
+    (_, canon_stream, _): (usize, (Identifier<'input>, usize), usize),
 ) -> Value<'input>
 {
     Value::Variable(VariableWithLambda::canon_stream(canon_stream.0, canon_stream.1))
@@ -5215,7 +5217,7 @@ fn __action63<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, canon_stream, _): (usize, (&'input str, LambdaAST<'input>, usize), usize),
+    (_, canon_stream, _): (usize, (Identifier<'input>, LambdaAST<'input>, usize), usize),
 ) -> Value<'input>
 {
     Value::Variable(VariableWithLambda::canon_stream_wl(canon_stream.0, canon_stream.1, canon_stream.2))
@@ -5366,7 +5368,7 @@ fn __action73<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, scalar, _): (usize, (&'input str, usize), usize),
+    (_, scalar, _): (usize, (Identifier<'input>, usize), usize),
 ) -> ApArgument<'input>
 {
     ApArgument::Scalar(ScalarWithLambda::new(scalar.0, None, scalar.1))
@@ -5381,7 +5383,7 @@ fn __action74<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, scalar, _): (usize, (&'input str, LambdaAST<'input>, usize), usize),
+    (_, scalar, _): (usize, (Identifier<'input>, LambdaAST<'input>, usize), usize),
 ) -> ApArgument<'input>
 {
     ApArgument::Scalar(ScalarWithLambda::new(scalar.0, Some(scalar.1), scalar.2))
@@ -5396,7 +5398,7 @@ fn __action75<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, canon_stream, _): (usize, (&'input str, usize), usize),
+    (_, canon_stream, _): (usize, (Identifier<'input>, usize), usize),
 ) -> ApArgument<'input>
 {
     ApArgument::CanonStream(CanonStreamWithLambda::new(canon_stream.0, None, canon_stream.1))
@@ -5411,7 +5413,7 @@ fn __action76<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, canon_stream, _): (usize, (&'input str, LambdaAST<'input>, usize), usize),
+    (_, canon_stream, _): (usize, (Identifier<'input>, LambdaAST<'input>, usize), usize),
 ) -> ApArgument<'input>
 {
     ApArgument::CanonStream(CanonStreamWithLambda::new(canon_stream.0, Some(canon_stream.1), canon_stream.2))
@@ -5426,7 +5428,7 @@ fn __action77<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, stream, _): (usize, (&'input str, usize), usize),
+    (_, stream, _): (usize, (Identifier<'input>, usize), usize),
 ) -> Stream<'input>
 {
     Stream::new(stream.0, stream.1)
@@ -5441,7 +5443,7 @@ fn __action78<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, canon_stream, _): (usize, (&'input str, usize), usize),
+    (_, canon_stream, _): (usize, (Identifier<'input>, usize), usize),
 ) -> CanonStream<'input>
 {
     CanonStream::new(canon_stream.0, canon_stream.1)
@@ -5926,7 +5928,7 @@ fn __action97<
     __0: (usize, Token<'input>, usize),
     __1: (usize, Token<'input>, usize),
     __2: (usize, FoldScalarIterable<'input>, usize),
-    __3: (usize, (&'input str, usize), usize),
+    __3: (usize, (Identifier<'input>, usize), usize),
     __4: (usize, Box<Instruction<'input>>, usize),
     __5: (usize, Token<'input>, usize),
     __6: (usize, usize, usize),
@@ -5968,8 +5970,8 @@ fn __action98<
     validator: &'v mut VariableValidator<'input>,
     __0: (usize, Token<'input>, usize),
     __1: (usize, Token<'input>, usize),
-    __2: (usize, (&'input str, usize), usize),
-    __3: (usize, (&'input str, usize), usize),
+    __2: (usize, (Identifier<'input>, usize), usize),
+    __3: (usize, (Identifier<'input>, usize), usize),
     __4: (usize, Box<Instruction<'input>>, usize),
     __5: (usize, Token<'input>, usize),
     __6: (usize, usize, usize),
@@ -6011,7 +6013,7 @@ fn __action99<
     validator: &'v mut VariableValidator<'input>,
     __0: (usize, Token<'input>, usize),
     __1: (usize, Token<'input>, usize),
-    __2: (usize, (&'input str, usize), usize),
+    __2: (usize, (Identifier<'input>, usize), usize),
     __3: (usize, Token<'input>, usize),
     __4: (usize, usize, usize),
 ) -> Box<Instruction<'input>>
@@ -6328,7 +6330,7 @@ fn __action107<
     __0: (usize, Token<'input>, usize),
     __1: (usize, Token<'input>, usize),
     __2: (usize, FoldScalarIterable<'input>, usize),
-    __3: (usize, (&'input str, usize), usize),
+    __3: (usize, (Identifier<'input>, usize), usize),
     __4: (usize, Box<Instruction<'input>>, usize),
     __5: (usize, Token<'input>, usize),
 ) -> Box<Instruction<'input>>
@@ -6368,8 +6370,8 @@ fn __action108<
     validator: &'v mut VariableValidator<'input>,
     __0: (usize, Token<'input>, usize),
     __1: (usize, Token<'input>, usize),
-    __2: (usize, (&'input str, usize), usize),
-    __3: (usize, (&'input str, usize), usize),
+    __2: (usize, (Identifier<'input>, usize), usize),
+    __3: (usize, (Identifier<'input>, usize), usize),
     __4: (usize, Box<Instruction<'input>>, usize),
     __5: (usize, Token<'input>, usize),
 ) -> Box<Instruction<'input>>
@@ -6409,7 +6411,7 @@ fn __action109<
     validator: &'v mut VariableValidator<'input>,
     __0: (usize, Token<'input>, usize),
     __1: (usize, Token<'input>, usize),
-    __2: (usize, (&'input str, usize), usize),
+    __2: (usize, (Identifier<'input>, usize), usize),
     __3: (usize, Token<'input>, usize),
 ) -> Box<Instruction<'input>>
 {

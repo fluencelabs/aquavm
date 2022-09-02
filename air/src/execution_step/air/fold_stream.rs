@@ -36,7 +36,8 @@ impl<'i> ExecutableInstruction<'i> for FoldStream<'i> {
         exec_ctx.tracker.meet_fold_stream();
 
         let iterable = &self.iterable;
-        let stream = match exec_ctx.streams.get(iterable.name, iterable.position) {
+        // TODO allocates
+        let stream = match exec_ctx.streams.get(&iterable.name.to_string(), iterable.position) {
             Some(stream) => stream,
             // it's possible to met streams without variables at the moment in fold, they are treated as empty
             None => return Ok(()),
@@ -116,7 +117,8 @@ fn should_stop_iteration(iteration_result: &ExecutionResult<bool>) -> bool {
 
 /// Safety: this function should be called iff stream is present in context
 fn add_new_generation_if_non_empty(stream: &ast::Stream<'_>, exec_ctx: &mut ExecutionCtx<'_>) {
-    let stream = exec_ctx.streams.get_mut(stream.name, stream.position).unwrap();
+    // TODO allocates
+    let stream = exec_ctx.streams.get_mut(&stream.name.to_string(), stream.position).unwrap();
     stream.add_new_generation_if_non_empty();
 }
 
@@ -125,7 +127,8 @@ fn remove_new_generation_if_non_empty<'ctx>(
     stream: &ast::Stream<'_>,
     exec_ctx: &'ctx mut ExecutionCtx<'_>,
 ) -> &'ctx Stream {
-    let stream = exec_ctx.streams.get_mut(stream.name, stream.position).unwrap();
+    // TODO allocates
+    let stream = exec_ctx.streams.get_mut(&stream.name.to_string(), stream.position).unwrap();
     stream.remove_last_generation_if_empty();
     stream
 }

@@ -18,6 +18,7 @@ lalrpop = "0.19.6"
 
 [dependencies]
 air-lambda-ast = { path = "../ast" }
+air-parser-utils = { path = "../../parser-utils" }
 
 lalrpop-util = "0.19.6"
 regex = "1.5.4"

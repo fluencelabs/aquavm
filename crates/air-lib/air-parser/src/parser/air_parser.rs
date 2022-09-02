@@ -22,6 +22,7 @@ use crate::ast::Instruction;
 use crate::parser::VariableValidator;
 use air::AIRParser;
 
+use air_parser_utils::Interner;
 use codespan_reporting::diagnostic::{Diagnostic, Label};
 use codespan_reporting::files::SimpleFiles;
 use codespan_reporting::term;
@@ -34,13 +35,13 @@ thread_local!(static PARSER: AIRParser = AIRParser::new());
 
 /// Parse AIR `source_code` to `Box<Instruction>`
 #[tracing::instrument(skip_all)]
-pub fn parse(air_script: &str) -> Result<Box<Instruction<'_>>, String> {
+pub fn parse<'i>(air_script: &'i str, interner: &mut Interner<'i>) -> Result<Box<Instruction<'i>>, String> {
     let mut files = SimpleFiles::new();
     let file_id = files.add("script.air", air_script);
 
     PARSER.with(|parser| {
         let mut errors = Vec::new();
-        let lexer = AIRLexer::new(air_script);
+        let lexer = AIRLexer::new(air_script, interner);
         let mut validator = VariableValidator::new();
         let result = parser.parse(air_script, &mut errors, &mut validator, lexer);
 

@@ -21,6 +21,7 @@ use crate::LambdaAST;
 use crate::SecurityTetraplet;
 
 use air_parser::ast;
+use air_parser_utils::Identifier;
 
 use std::ops::Deref;
 use std::rc::Rc;
@@ -81,7 +82,7 @@ pub(crate) fn construct_stream_iterable_values(
 
 fn create_scalar_iterable<'ctx>(
     exec_ctx: &ExecutionCtx<'ctx>,
-    variable_name: &str,
+    variable_name: Identifier<'_>,
 ) -> ExecutionResult<FoldIterableScalar> {
     match exec_ctx.scalars.get_value(variable_name)? {
         ScalarRef::Value(call_result) => from_value(call_result.clone(), variable_name),
@@ -94,7 +95,7 @@ fn create_scalar_iterable<'ctx>(
 }
 
 /// Constructs iterable value from resolved call result.
-fn from_value(call_result: ValueAggregate, variable_name: &str) -> ExecutionResult<FoldIterableScalar> {
+fn from_value(call_result: ValueAggregate, variable_name: Identifier<'_>) -> ExecutionResult<FoldIterableScalar> {
     let len = match &call_result.result.deref() {
         JValue::Array(array) => {
             if array.is_empty() {
@@ -122,7 +123,7 @@ fn from_value(call_result: ValueAggregate, variable_name: &str) -> ExecutionResu
 
 fn create_scalar_lambda_iterable<'ctx>(
     exec_ctx: &ExecutionCtx<'ctx>,
-    scalar_name: &str,
+    scalar_name: Identifier<'_>,
     lambda: &LambdaAST<'_>,
 ) -> ExecutionResult<FoldIterableScalar> {
     use crate::execution_step::lambda_applier::select_from_scalar;

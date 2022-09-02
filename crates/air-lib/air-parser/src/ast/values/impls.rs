@@ -17,9 +17,10 @@
 use super::*;
 use air_lambda_parser::LambdaAST;
 use air_lambda_parser::ValueAccessor;
+use air_parser_utils::Identifier;
 
 impl<'i> ScalarWithLambda<'i> {
-    pub fn new(name: &'i str, lambda: Option<LambdaAST<'i>>, position: usize) -> Self {
+    pub fn new(name: Identifier<'i>, lambda: Option<LambdaAST<'i>>, position: usize) -> Self {
         Self {
             name,
             lambda,
@@ -29,7 +30,7 @@ impl<'i> ScalarWithLambda<'i> {
 
     // it's unsafe method that should be used only for tests
     pub(crate) fn from_raw_lambda(
-        name: &'i str,
+        name: Identifier<'i>,
         lambda: Vec<ValueAccessor<'i>>,
         position: usize,
     ) -> Self {
@@ -43,7 +44,7 @@ impl<'i> ScalarWithLambda<'i> {
 }
 
 impl<'i> StreamWithLambda<'i> {
-    pub fn new(name: &'i str, lambda: Option<LambdaAST<'i>>, position: usize) -> Self {
+    pub fn new(name: Identifier<'i>, lambda: Option<LambdaAST<'i>>, position: usize) -> Self {
         Self {
             name,
             lambda,
@@ -54,7 +55,7 @@ impl<'i> StreamWithLambda<'i> {
     // it's unsafe method that should be used only for tests
     #[allow(dead_code)]
     pub(crate) fn from_raw_lambda(
-        name: &'i str,
+        name: Identifier<'i>,
         lambda: Vec<ValueAccessor<'i>>,
         position: usize,
     ) -> Self {
@@ -68,13 +69,13 @@ impl<'i> StreamWithLambda<'i> {
 }
 
 impl<'i> CanonStream<'i> {
-    pub fn new(name: &'i str, position: usize) -> Self {
+    pub fn new(name: Identifier<'i>, position: usize) -> Self {
         Self { name, position }
     }
 }
 
 impl<'i> CanonStreamWithLambda<'i> {
-    pub fn new(name: &'i str, lambda: Option<LambdaAST<'i>>, position: usize) -> Self {
+    pub fn new(name: Identifier<'i>, lambda: Option<LambdaAST<'i>>, position: usize) -> Self {
         Self {
             name,
             lambda,
@@ -84,27 +85,27 @@ impl<'i> CanonStreamWithLambda<'i> {
 }
 
 impl<'i> Scalar<'i> {
-    pub fn new(name: &'i str, position: usize) -> Self {
+    pub fn new(name: Identifier<'i>, position: usize) -> Self {
         Self { name, position }
     }
 }
 
 impl<'i> Stream<'i> {
-    pub fn new(name: &'i str, position: usize) -> Self {
+    pub fn new(name: Identifier<'i>, position: usize) -> Self {
         Self { name, position }
     }
 }
 
 impl<'i> Variable<'i> {
-    pub fn scalar(name: &'i str, position: usize) -> Self {
+    pub fn scalar(name: Identifier<'i>, position: usize) -> Self {
         Self::Scalar(Scalar::new(name, position))
     }
 
-    pub fn stream(name: &'i str, position: usize) -> Self {
+    pub fn stream(name: Identifier<'i>, position: usize) -> Self {
         Self::Stream(Stream::new(name, position))
     }
 
-    pub fn name(&self) -> &'i str {
+    pub fn name(&self) -> Identifier<'i> {
         match self {
             Variable::Scalar(scalar) => scalar.name,
             Variable::Stream(stream) => stream.name,
@@ -114,31 +115,31 @@ impl<'i> Variable<'i> {
 }
 
 impl<'i> VariableWithLambda<'i> {
-    pub fn scalar(name: &'i str, position: usize) -> Self {
+    pub fn scalar(name: Identifier<'i>, position: usize) -> Self {
         Self::Scalar(ScalarWithLambda::new(name, None, position))
     }
 
-    pub fn scalar_wl(name: &'i str, lambda: LambdaAST<'i>, position: usize) -> Self {
+    pub fn scalar_wl(name: Identifier<'i>, lambda: LambdaAST<'i>, position: usize) -> Self {
         Self::Scalar(ScalarWithLambda::new(name, Some(lambda), position))
     }
 
-    pub fn stream(name: &'i str, position: usize) -> Self {
+    pub fn stream(name: Identifier<'i>, position: usize) -> Self {
         Self::Stream(StreamWithLambda::new(name, None, position))
     }
 
-    pub fn stream_wl(name: &'i str, lambda: LambdaAST<'i>, position: usize) -> Self {
+    pub fn stream_wl(name: Identifier<'i>, lambda: LambdaAST<'i>, position: usize) -> Self {
         Self::Stream(StreamWithLambda::new(name, Some(lambda), position))
     }
 
-    pub fn canon_stream(name: &'i str, position: usize) -> Self {
+    pub fn canon_stream(name: Identifier<'i>, position: usize) -> Self {
         Self::CanonStream(CanonStreamWithLambda::new(name, None, position))
     }
 
-    pub fn canon_stream_wl(name: &'i str, lambda: LambdaAST<'i>, position: usize) -> Self {
+    pub fn canon_stream_wl(name: Identifier<'i>, lambda: LambdaAST<'i>, position: usize) -> Self {
         Self::CanonStream(CanonStreamWithLambda::new(name, Some(lambda), position))
     }
 
-    pub fn name(&self) -> &'i str {
+    pub fn name(&self) -> Identifier<'i> {
         match self {
             VariableWithLambda::Scalar(scalar) => scalar.name,
             VariableWithLambda::Stream(stream) => stream.name,
@@ -157,7 +158,7 @@ impl<'i> VariableWithLambda<'i> {
     // This function is unsafe and lambda must be non-empty, although it's used only for tests
     #[allow(dead_code)]
     pub(crate) fn from_raw_lambda_scalar(
-        name: &'i str,
+        name: Identifier<'i>,
         lambda: Vec<ValueAccessor<'i>>,
         position: usize,
     ) -> Self {
@@ -168,7 +169,7 @@ impl<'i> VariableWithLambda<'i> {
     // This function is unsafe and lambda must be non-empty, although it's used only for tests
     #[allow(dead_code)]
     pub(crate) fn from_raw_lambda_stream(
-        name: &'i str,
+        name: Identifier<'i>,
         lambda: Vec<ValueAccessor<'i>>,
         position: usize,
     ) -> Self {

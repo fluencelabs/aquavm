@@ -18,7 +18,9 @@ mod utils;
 
 use super::*;
 use crate::TracePos;
+
 use air_parser::ast::CallOutputValue;
+use air_parser_utils::Identifier;
 use utils::*;
 
 const EXPECTED_STATE_NAME: &str = "call";
@@ -112,7 +114,7 @@ pub(super) fn prepare_call_result(
 #[derive(Debug, Copy, Clone)]
 pub(crate) enum ValueType<'i> {
     Scalar,
-    Stream(&'i str),
+    Stream(Identifier<'i>),
 }
 
 impl<'i> ValueType<'i> {

@@ -22,6 +22,7 @@ use crate::execution_step::TraceHandler;
 use air_interpreter_data::InterpreterData;
 use air_interpreter_interface::RunParameters;
 use air_parser::ast::Instruction;
+use air_parser_utils::Interner;
 
 type PreparationResult<T> = Result<T, PreparationError>;
 
@@ -40,11 +41,12 @@ pub(crate) fn prepare<'i>(
     raw_air: &'i str,
     call_results: &[u8],
     run_parameters: RunParameters,
+    interner: &mut Interner<'i>,
 ) -> PreparationResult<PreparationDescriptor<'static, 'i>> {
     let prev_data = try_to_data(prev_data)?;
     let current_data = try_to_data(current_data)?;
 
-    let air: Instruction<'i> = *air_parser::parse(raw_air).map_err(PreparationError::AIRParseError)?;
+    let air: Instruction<'i> = *air_parser::parse(raw_air, interner).map_err(PreparationError::AIRParseError)?;
 
     let exec_ctx = make_exec_ctx(&prev_data, call_results, run_parameters)?;
     let trace_handler = TraceHandler::from_data(prev_data, current_data);
@@ -84,6 +86,6 @@ fn create_streams(ctx: &mut ExecutionCtx<'_>, prev_data: &InterpreterData) {
         let new_stream = Stream::from_generations_count(*generation_count as usize);
 
         // it's impossible to have duplicates of streams in data because of HashMap in data
-        ctx.streams.add_global_stream(stream_name.to_string(), new_stream);
+        ctx.streams.add_global_stream(stream_name, new_stream);
     }
 }

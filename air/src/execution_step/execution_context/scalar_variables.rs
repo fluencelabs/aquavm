@@ -22,6 +22,8 @@ use crate::execution_step::errors_prelude::*;
 use crate::execution_step::ExecutionResult;
 use crate::execution_step::FoldState;
 use crate::execution_step::ValueAggregate;
+
+use air_parser_utils::Identifier;
 use values_sparse_matrix::ValuesSparseMatrix;
 
 use std::collections::HashMap;
@@ -88,7 +90,8 @@ pub(crate) struct Scalars<'i> {
 
     pub(crate) canon_streams: ValuesSparseMatrix<CanonStream>,
 
-    pub(crate) iterable_variables: HashMap<String, FoldState<'i>>,
+    // TODO one may use some associated type for Identifier, and some kind of Deref.
+    pub(crate) iterable_variables: HashMap<Identifier<'i>, FoldState<'i>>,
 }
 
 impl<'i> Scalars<'i> {
@@ -102,55 +105,55 @@ impl<'i> Scalars<'i> {
 
     /// Returns true if there was a previous value for the provided key on the same
     /// fold block.
-    pub(crate) fn set_scalar_value(&mut self, name: impl Into<String>, value: ValueAggregate) -> ExecutionResult<bool> {
+    pub(crate) fn set_scalar_value(&mut self, name: Identifier<'_>, value: ValueAggregate) -> ExecutionResult<bool> {
         self.non_iterable_variables.set_value(name, value)
     }
 
     /// Returns true if there was a previous value for the provided key on the same
     /// fold block.
-    pub(crate) fn set_canon_value(&mut self, name: impl Into<String>, value: CanonStream) -> ExecutionResult<bool> {
+    pub(crate) fn set_canon_value(&mut self, name: Identifier<'_>, value: CanonStream) -> ExecutionResult<bool> {
         self.canon_streams.set_value(name, value)
     }
 
     pub(crate) fn set_iterable_value(
         &mut self,
-        name: impl Into<String>,
+        name: Identifier<'i>,
         fold_state: FoldState<'i>,
     ) -> ExecutionResult<()> {
         use std::collections::hash_map::Entry::{Occupied, Vacant};
 
-        match self.iterable_variables.entry(name.into()) {
+        match self.iterable_variables.entry(name) {
             Vacant(entry) => {
                 entry.insert(fold_state);
                 Ok(())
             }
-            Occupied(entry) => Err(UncatchableError::MultipleIterableValues(entry.key().clone()).into()),
+            Occupied(entry) => Err(UncatchableError::MultipleIterableValues(entry.key().to_string()).into()),
         }
     }
 
-    pub(crate) fn remove_iterable_value(&mut self, name: &str) {
-        self.iterable_variables.remove(name);
+    pub(crate) fn remove_iterable_value(&mut self, name: Identifier<'_>) {
+        self.iterable_variables.remove(&name);
     }
 
-    pub(crate) fn get_non_iterable_scalar(&'i self, name: &str) -> ExecutionResult<Option<&'i ValueAggregate>> {
-        self.non_iterable_variables.get_value(name)
+    pub(crate) fn get_non_iterable_scalar(&'i self, name: Identifier<'_>) -> ExecutionResult<Option<&'i ValueAggregate>> {
+        self.non_iterable_variables.get_value(&name)
     }
 
-    pub(crate) fn get_iterable_mut(&mut self, name: &str) -> ExecutionResult<&mut FoldState<'i>> {
+    pub(crate) fn get_iterable_mut(&mut self, name: Identifier<'_>) -> ExecutionResult<&mut FoldState<'i>> {
         self.iterable_variables
-            .get_mut(name)
+            .get_mut(&name)
             .ok_or_else(|| UncatchableError::FoldStateNotFound(name.to_string()).into())
     }
 
-    pub(crate) fn get_canon_stream(&'i self, name: &str) -> ExecutionResult<&'i CanonStream> {
+    pub(crate) fn get_canon_stream(&'i self, name: Identifier<'_>) -> ExecutionResult<&'i CanonStream> {
         self.canon_streams
             .get_value(name)?
             .ok_or_else(|| CatchableError::VariableWasNotInitializedAfterNew(name.to_string()).into())
     }
 
-    pub(crate) fn get_value(&'i self, name: &str) -> ExecutionResult<ScalarRef<'i>> {
+    pub(crate) fn get_value(&'i self, name: Identifier<'i>) -> ExecutionResult<ScalarRef<'i>> {
         let value = self.get_non_iterable_scalar(name);
-        let iterable_value = self.iterable_variables.get(name);
+        let iterable_value = self.iterable_variables.get(&name);
 
         match (value, iterable_value) {
             (Err(_), None) => Err(CatchableError::VariableNotFound(name.to_string()).into()),
@@ -161,7 +164,7 @@ impl<'i> Scalars<'i> {
         }
     }
 
-    pub(crate) fn variable_could_be_set(&self, variable_name: &str) -> bool {
+    pub(crate) fn variable_could_be_set(&self, variable_name: Identifier<'_>) -> bool {
         self.non_iterable_variables.variable_could_be_set(variable_name)
             || self.canon_streams.variable_could_be_set(variable_name)
     }
@@ -196,11 +199,11 @@ impl<'i> Scalars<'i> {
         self.canon_streams.meet_new_start(canon_stream_name);
     }
 
-    pub(crate) fn meet_new_end_scalar(&mut self, scalar_name: &str) -> ExecutionResult<()> {
+    pub(crate) fn meet_new_end_scalar(&mut self, scalar_name: Identifier<'_>) -> ExecutionResult<()> {
         self.non_iterable_variables.meet_new_end(scalar_name)
     }
 
-    pub(crate) fn meet_new_end_canon_stream(&mut self, canon_name: &str) -> ExecutionResult<()> {
+    pub(crate) fn meet_new_end_canon_stream(&mut self, canon_name: Identifier<'_>) -> ExecutionResult<()> {
         self.canon_streams.meet_new_end(canon_name)
     }
 }

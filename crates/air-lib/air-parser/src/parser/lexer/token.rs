@@ -16,6 +16,7 @@
 
 use crate::LambdaAST;
 
+use air_parser_utils::Identifier;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -28,29 +29,29 @@ pub enum Token<'input> {
     CloseSquareBracket,
 
     Scalar {
-        name: &'input str,
+        name: Identifier<'input>,
         position: usize,
     },
     ScalarWithLambda {
-        name: &'input str,
+        name: Identifier<'input>,
         lambda: LambdaAST<'input>,
         position: usize,
     },
     Stream {
-        name: &'input str,
+        name: Identifier<'input>,
         position: usize,
     },
     StreamWithLambda {
-        name: &'input str,
+        name: Identifier<'input>,
         lambda: LambdaAST<'input>,
         position: usize,
     },
     CanonStream {
-        name: &'input str,
+        name: Identifier<'input>,
         position: usize,
     },
     CanonStreamWithLambda {
-        name: &'input str,
+        name: Identifier<'input>,
         lambda: LambdaAST<'input>,
         position: usize,
     },

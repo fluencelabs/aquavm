@@ -2,10 +2,11 @@ use crate::ValueAccessor;
 use crate::parser::lexer::LexerError;
 use crate::parser::lexer::Token;
 
+use air_parser_utils::Interner;
 use lalrpop_util::ErrorRecovery;
 
 // the only thing why input matters here is just introducing lifetime for Token
-grammar<'err, 'input>(input: &'input str, errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>);
+grammar<'err, 'input>(input: &'input str, errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>, interner: &mut Interner<'input>);
 
 pub Lambda: Vec<ValueAccessor<'input>> = <ValueAccessor*> => <>;
 
@@ -15,7 +16,7 @@ ValueAccessor: ValueAccessor<'input> = {
     },
 
     <maybe_dot_selector:"."?> "[" <scalar_name: string_accessor> "]" <maybe_flatten_sign:"!"?> => {
-        ValueAccessor::FieldAccessByScalar { scalar_name }
+        ValueAccessor::FieldAccessByScalar { scalar_name: interner.intern(scalar_name) }
     },
 
     "." <field_name: string_accessor> <maybe_flatten_sign:"!"?> => {

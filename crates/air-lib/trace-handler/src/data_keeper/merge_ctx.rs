@@ -22,6 +22,7 @@ use crate::TracePos;
 
 use air_interpreter_data::GlobalStreamGens;
 use air_interpreter_data::InterpreterData;
+use air_parser_utils::Identifier;
 
 use std::collections::HashMap;
 
@@ -73,7 +74,8 @@ impl MergeCtx {
         }
     }
 
-    pub(crate) fn stream_generation(&self, stream_name: &str) -> Option<u32> {
-        self.streams.get(stream_name).copied()
+    pub(crate) fn stream_generation(&self, stream_name: Identifier<'_>) -> Option<u32> {
+        // TODO: it allocates
+        self.streams.get(&stream_name.to_string()).copied()
     }
 }

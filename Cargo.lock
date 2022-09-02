@@ -22,6 +22,7 @@ dependencies = [
  "air-lambda-parser",
  "air-log-targets",
  "air-parser",
+ "air-parser-utils",
  "air-test-utils",
  "air-testing-framework",
  "air-trace-handler",
@@ -78,6 +79,7 @@ dependencies = [
  "air",
  "air-interpreter-interface",
  "air-log-targets",
+ "air-parser-utils",
  "log",
  "marine-rs-sdk",
  "serde",
@@ -91,6 +93,7 @@ dependencies = [
 name = "air-interpreter-data"
 version = "0.3.0"
 dependencies = [
+ "air-parser-utils",
  "air-utils",
  "once_cell",
  "semver 1.0.13",
@@ -113,6 +116,7 @@ dependencies = [
 name = "air-lambda-ast"
 version = "0.1.0"
 dependencies = [
+ "air-parser-utils",
  "non-empty-vec",
  "serde",
  "serde_json",
@@ -123,6 +127,7 @@ name = "air-lambda-parser"
 version = "0.1.0"
 dependencies = [
  "air-lambda-ast",
+ "air-parser-utils",
  "codespan",
  "codespan-reporting",
  "itertools 0.10.3",
@@ -145,6 +150,7 @@ version = "0.7.1"
 dependencies = [
  "air-lambda-ast",
  "air-lambda-parser",
+ "air-parser-utils",
  "codespan",
  "codespan-reporting",
  "criterion",
@@ -159,6 +165,14 @@ dependencies = [
  "serde_json",
  "thiserror",
  "tracing",
+]
+
+[[package]]
+name = "air-parser-utils"
+version = "0.1.0"
+dependencies = [
+ "bimap",
+ "serde",
 ]
 
 [[package]]
@@ -213,6 +227,7 @@ dependencies = [
  "air-interpreter-data",
  "air-log-targets",
  "air-parser",
+ "air-parser-utils",
  "bimap",
  "log",
  "serde_json",

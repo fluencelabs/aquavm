@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+use air_parser_utils::Interner;
+
 use super::errors::LexerError;
 use super::token::Token;
 use super::LexerResult;
@@ -23,12 +25,13 @@ use std::str::CharIndices;
 
 pub type Spanned<Token, Loc, Error> = Result<(Loc, Token, Loc), Error>;
 
-pub struct AIRLexer<'input> {
+pub struct AIRLexer<'ctx, 'input: 'ctx> {
     input: &'input str,
     chars: Peekable<CharIndices<'input>>,
+    interner: &'ctx mut Interner<'input>
 }
 
-impl<'input> Iterator for AIRLexer<'input> {
+impl<'ctx, 'input: 'ctx> Iterator for AIRLexer<'ctx, 'input> {
     type Item = Spanned<Token<'input>, usize, LexerError>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -36,11 +39,12 @@ impl<'input> Iterator for AIRLexer<'input> {
     }
 }
 
-impl<'input> AIRLexer<'input> {
-    pub fn new(input: &'input str) -> Self {
+impl<'ctx, 'input: 'ctx> AIRLexer<'ctx, 'input> {
+    pub fn new(input: &'input str, interner: &'ctx mut Interner<'input>) -> Self {
         Self {
             input,
             chars: input.char_indices().peekable(),
+            interner,
         }
     }
 
@@ -108,7 +112,7 @@ impl<'input> AIRLexer<'input> {
         // this slicing is safe here because borders come from the chars iterator
         let token_str = &self.input[start_pos..end_pos];
 
-        let token = match string_to_token(token_str, start_pos) {
+        let token = match string_to_token(token_str, start_pos, &mut *self.interner) {
             Ok(token) => token,
             Err(e) => return Some(Err(e)),
         };
@@ -171,7 +175,7 @@ fn should_stop(ch: char, round_brackets_balance: i64, open_square_brackets_balan
     ch.is_whitespace() || round_brackets_balance < 0 || open_square_brackets_balance < 0
 }
 
-fn string_to_token(input: &str, start_pos: usize) -> LexerResult<Token> {
+fn string_to_token<'i>(input: &'i str, start_pos: usize, interner: &mut Interner<'i>) -> LexerResult<Token<'i>> {
     match input {
         "" => Err(LexerError::empty_string(start_pos..start_pos)),
 
@@ -190,18 +194,18 @@ fn string_to_token(input: &str, start_pos: usize) -> LexerResult<Token> {
         MISMATCH_INSTR => Ok(Token::MisMatch),
 
         INIT_PEER_ID => Ok(Token::InitPeerId),
-        _ if input.starts_with(LAST_ERROR) => parse_last_error(input, start_pos),
+        _ if input.starts_with(LAST_ERROR) => parse_last_error(input, start_pos, interner),
         TIMESTAMP => Ok(Token::Timestamp),
         TTL => Ok(Token::TTL),
 
         TRUE_VALUE => Ok(Token::Boolean(true)),
         FALSE_VALUE => Ok(Token::Boolean(false)),
 
-        str => super::call_variable_parser::try_parse_call_variable(str, start_pos),
+        str => super::call_variable_parser::try_parse_call_variable(str, start_pos, interner),
     }
 }
 
-fn parse_last_error(input: &str, start_pos: usize) -> LexerResult<Token<'_>> {
+fn parse_last_error<'i>(input: &'i str, start_pos: usize, interner: &mut Interner<'i>) -> LexerResult<Token<'i>> {
     let last_error_size = LAST_ERROR.len();
     if input.len() == last_error_size {
         return Ok(Token::LastError);
@@ -215,7 +219,7 @@ fn parse_last_error(input: &str, start_pos: usize) -> LexerResult<Token<'_>> {
         ));
     }
 
-    let last_error_accessor = crate::parse_lambda(&input[last_error_size..]).map_err(|e| {
+    let last_error_accessor = crate::parse_lambda(&input[last_error_size..], interner).map_err(|e| {
         LexerError::lambda_parser_error(
             start_pos + last_error_size..start_pos + input.len(),
             e.to_string(),

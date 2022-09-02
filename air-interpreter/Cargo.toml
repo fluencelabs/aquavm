@@ -21,6 +21,7 @@ path = "src/marine.rs"
 air = { path = "../air" }
 air-interpreter-interface = { path = "../crates/air-lib/interpreter-interface" }
 air-log-targets = { path = "../crates/air-lib/log-targets" }
+air-parser-utils = { path = "../crates/air-lib/parser-utils" }
 
 marine-rs-sdk = { version = "0.7.0", features = ["logger"] }
 

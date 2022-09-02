@@ -19,6 +19,7 @@ use crate::execution_step::ExecutionError;
 use crate::execution_step::ExecutionResult;
 use crate::execution_step::UncatchableError;
 
+use air_parser::ast;
 use non_empty_vec::NonEmpty;
 
 use std::collections::HashMap;
@@ -29,7 +30,7 @@ use std::rc::Rc;
 const GLOBAL_DEPTH: usize = 0;
 
 pub(crate) struct ValuesSparseMatrix<T> {
-    cells: HashMap<String, NonEmpty<SparseCell<T>>>,
+    cells: HashMap<ast::Identifier, NonEmpty<SparseCell<T>>>,
 
     /// This set contains depths were invalidated at the certain moment of script execution.
     /// They are needed for careful isolation of scopes produced by iterations in fold blocks,
@@ -52,7 +53,7 @@ impl<T> ValuesSparseMatrix<T> {
         }
     }
 
-    pub(super) fn set_value(&mut self, name: impl Into<String>, value: T) -> ExecutionResult<bool> {
+    pub(super) fn set_value(&mut self, name: ast::Identifier, value: T) -> ExecutionResult<bool> {
         use std::collections::hash_map::Entry::{Occupied, Vacant};
 
         let name = name.into();
@@ -85,7 +86,7 @@ impl<T> ValuesSparseMatrix<T> {
         }
     }
 
-    pub(super) fn get_value(&self, name: &str) -> ExecutionResult<Option<&T>> {
+    pub(super) fn get_value(&self, name: ast::Identifier) -> ExecutionResult<Option<&T>> {
         self.cells
             .get(name)
             .and_then(|values| {
@@ -144,7 +145,7 @@ impl<T> ValuesSparseMatrix<T> {
         }
     }
 
-    pub(super) fn meet_new_end(&mut self, scalar_name: &str) -> ExecutionResult<()> {
+    pub(super) fn meet_new_end(&mut self, scalar_name: ast::Identifier) -> ExecutionResult<()> {
         let current_depth = self.current_depth;
         let should_remove_values = self
             .cells
@@ -172,7 +173,7 @@ impl<T> ValuesSparseMatrix<T> {
         Ok(())
     }
 
-    pub(super) fn variable_could_be_set(&self, variable_name: &str) -> bool {
+    pub(super) fn variable_could_be_set(&self, variable_name: ast::Identifier) -> bool {
         if self.shadowing_allowed() {
             return true;
         }
@@ -298,26 +299,26 @@ mod test {
         let value = json!(1u64);
         let rc_value = Rc::new(value);
         let value_aggregate = ValueAggregate::new(rc_value, rc_tetraplet, 1.into());
-        let value_1_name = "name_1";
+        let value_1_name = 1usize;
         scalars.set_value(value_1_name, value_aggregate.clone()).unwrap();
 
-        let value_2_name = "name_2";
+        let value_2_name = 2usize;
         scalars.meet_fold_start();
         scalars.set_value(value_2_name, value_aggregate.clone()).unwrap();
         scalars.meet_fold_start();
         scalars.set_value(value_2_name, value_aggregate.clone()).unwrap();
 
-        let expected_values_count = scalars.cells.get(value_2_name).unwrap().len();
+        let expected_values_count = scalars.cells.get(&value_2_name).unwrap().len();
         assert_eq!(expected_values_count, NonZeroUsize::new(2).unwrap());
 
         scalars.meet_fold_end();
-        let expected_values_count = scalars.cells.get(value_2_name).unwrap().len();
+        let expected_values_count = scalars.cells.get(&value_2_name).unwrap().len();
         assert_eq!(expected_values_count, NonZeroUsize::new(1).unwrap());
 
         scalars.meet_fold_end();
-        assert!(scalars.cells.get(value_2_name).is_none());
+        assert!(scalars.cells.get(&value_2_name).is_none());
 
-        let expected_values_count = scalars.cells.get(value_1_name).unwrap().len();
+        let expected_values_count = scalars.cells.get(&value_1_name).unwrap().len();
         assert_eq!(expected_values_count, NonZeroUsize::new(1).unwrap());
     }
 }

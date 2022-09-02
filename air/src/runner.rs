@@ -22,6 +22,7 @@ use crate::preparation_step::PreparationDescriptor;
 use air_interpreter_interface::InterpreterOutcome;
 use air_interpreter_interface::RunParameters;
 use air_log_targets::RUN_PARAMS;
+use air_parser_utils::Interner;
 use air_utils::measure;
 
 pub fn execute_air(
@@ -53,11 +54,12 @@ fn execute_air_impl(
     params: RunParameters,
     call_results: Vec<u8>,
 ) -> Result<InterpreterOutcome, InterpreterOutcome> {
+    let mut interner = Interner::new();
     let PreparationDescriptor {
         mut exec_ctx,
         mut trace_handler,
         air,
-    } = match prepare(&prev_data, &data, air.as_str(), &call_results, params) {
+    } = match prepare(&prev_data, &data, air.as_str(), &call_results, params, &mut interner) {
         Ok(descriptor) => descriptor,
         // return the prev data in case of errors
         Err(error) => return Err(farewell::from_uncatchable_error(prev_data, error)),

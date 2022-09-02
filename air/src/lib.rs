@@ -53,10 +53,11 @@ pub mod interpreter_data {
 
 pub mod parser {
     pub use air_parser::ast::Instruction;
+    use air_parser_utils::Interner;
 
     /// Parse an AIR script to AST.
-    pub fn parse(script: &str) -> Result<Box<Instruction<'_>>, String> {
-        air_parser::parse(script)
+    pub fn parse<'i>(script: &'i str, interner: &mut Interner<'i>) -> Result<Box<Instruction<'i>>, String> {
+        air_parser::parse(script, interner)
     }
 }
 

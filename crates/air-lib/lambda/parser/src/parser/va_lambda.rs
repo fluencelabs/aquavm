@@ -1,8 +1,9 @@
 // auto-generated: "lalrpop 0.19.8"
-// sha3: 517c7e1bd341e104034f9ffcbf3c072151e4b9028e7befd38c6ee2e3e734565b
+// sha3: b24bedf88e4cdc8be343a61576666824356bdb0a18e3af5318484212f3cae9b7
 use crate::ValueAccessor;
 use crate::parser::lexer::LexerError;
 use crate::parser::lexer::Token;
+use air_parser_utils::Interner;
 use lalrpop_util::ErrorRecovery;
 #[allow(unused_extern_crates)]
 extern crate lalrpop_util as __lalrpop_util;
@@ -18,6 +19,7 @@ mod __parse__Lambda {
     use crate::ValueAccessor;
     use crate::parser::lexer::LexerError;
     use crate::parser::lexer::Token;
+    use air_parser_utils::Interner;
     use lalrpop_util::ErrorRecovery;
     #[allow(unused_extern_crates)]
     extern crate lalrpop_util as __lalrpop_util;
@@ -166,15 +168,16 @@ mod __parse__Lambda {
             }
         }).collect()
     }
-    pub(crate) struct __StateMachine<'err, 'input>
-    where 'input: 'err
+    pub(crate) struct __StateMachine<'err, 'input, '__2>
+    where 'input: 'err, 'input: '__2
     {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        interner: &'__2 mut Interner<'input>,
         __phantom: core::marker::PhantomData<(&'err (), &'input ())>,
     }
-    impl<'err, 'input> __state_machine::ParserDefinition for __StateMachine<'err, 'input>
-    where 'input: 'err
+    impl<'err, 'input, '__2> __state_machine::ParserDefinition for __StateMachine<'err, 'input, '__2>
+    where 'input: 'err, 'input: '__2
     {
         type Location = usize;
         type Error = LexerError;
@@ -253,6 +256,7 @@ mod __parse__Lambda {
             __reduce(
                 self.input,
                 self.errors,
+                self.interner,
                 action,
                 start_location,
                 states,
@@ -308,12 +312,14 @@ mod __parse__Lambda {
     fn __simulate_reduce<
         'err,
         'input,
+        '__2,
     >(
         __reduce_index: i8,
         _: core::marker::PhantomData<(&'err (), &'input ())>,
-    ) -> __state_machine::SimulatedReduce<__StateMachine<'err, 'input>>
+    ) -> __state_machine::SimulatedReduce<__StateMachine<'err, 'input, '__2>>
     where
         'input: 'err,
+        'input: '__2,
     {
         match __reduce_index {
             0 => {
@@ -467,6 +473,7 @@ mod __parse__Lambda {
             &self,
             input: &'input str,
             errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+            interner: &mut Interner<'input>,
             __tokens0: __TOKENS,
         ) -> Result<Vec<ValueAccessor<'input>>, __lalrpop_util::ParseError<usize, Token<'input>, LexerError>>
         {
@@ -476,6 +483,7 @@ mod __parse__Lambda {
                 __StateMachine {
                     input,
                     errors,
+                    interner,
                     __phantom: core::marker::PhantomData::<(&(), &())>,
                 },
                 __tokens,
@@ -488,6 +496,7 @@ mod __parse__Lambda {
     >(
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        interner: &mut Interner<'input>,
         __error_state: i8,
         __states: & [i8],
         __opt_integer: Option<usize>,
@@ -524,6 +533,7 @@ mod __parse__Lambda {
     >(
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        interner: &mut Interner<'input>,
         __action: i8,
         __lookahead_start: Option<&usize>,
         __states: &mut alloc::vec::Vec<i8>,
@@ -533,74 +543,74 @@ mod __parse__Lambda {
     {
         let (__pop_states, __nonterminal) = match __action {
             0 => {
-                __reduce0(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce0(input, errors, interner, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             1 => {
-                __reduce1(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce1(input, errors, interner, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             2 => {
-                __reduce2(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce2(input, errors, interner, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             3 => {
-                __reduce3(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce3(input, errors, interner, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             4 => {
-                __reduce4(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce4(input, errors, interner, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             5 => {
-                __reduce5(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce5(input, errors, interner, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             6 => {
-                __reduce6(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce6(input, errors, interner, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             7 => {
-                __reduce7(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce7(input, errors, interner, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             8 => {
-                __reduce8(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce8(input, errors, interner, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             9 => {
-                __reduce9(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce9(input, errors, interner, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             10 => {
-                __reduce10(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce10(input, errors, interner, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             11 => {
-                __reduce11(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce11(input, errors, interner, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             12 => {
-                __reduce12(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce12(input, errors, interner, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             13 => {
-                __reduce13(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce13(input, errors, interner, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             14 => {
-                __reduce14(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce14(input, errors, interner, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             15 => {
-                __reduce15(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce15(input, errors, interner, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             16 => {
-                __reduce16(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce16(input, errors, interner, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             17 => {
-                __reduce17(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce17(input, errors, interner, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             18 => {
-                __reduce18(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce18(input, errors, interner, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             19 => {
-                __reduce19(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce19(input, errors, interner, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             20 => {
-                __reduce20(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
+                __reduce20(input, errors, interner, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             21 => {
                 // __Lambda = Lambda => ActionFn(0);
                 let __sym0 = __pop_Variant5(__symbols);
                 let __start = __sym0.0.clone();
                 let __end = __sym0.2.clone();
-                let __nt = super::__action0::<>(input, errors, __sym0);
+                let __nt = super::__action0::<>(input, errors, interner, __sym0);
                 return Some(Ok(__nt));
             }
             _ => panic!("invalid action code {}", __action)
@@ -710,6 +720,7 @@ mod __parse__Lambda {
     >(
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        interner: &mut Interner<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: core::marker::PhantomData<(&'err (), &'input ())>,
@@ -719,7 +730,7 @@ mod __parse__Lambda {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action6::<>(input, errors, __sym0);
+        let __nt = super::__action6::<>(input, errors, interner, __sym0);
         __symbols.push((__start, __Symbol::Variant4(__nt), __end));
         (1, 0)
     }
@@ -729,6 +740,7 @@ mod __parse__Lambda {
     >(
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        interner: &mut Interner<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: core::marker::PhantomData<(&'err (), &'input ())>,
@@ -737,7 +749,7 @@ mod __parse__Lambda {
         // "!"? =  => ActionFn(7);
         let __start = __lookahead_start.cloned().or_else(|| __symbols.last().map(|s| s.2.clone())).unwrap_or_default();
         let __end = __start.clone();
-        let __nt = super::__action7::<>(input, errors, &__start, &__end);
+        let __nt = super::__action7::<>(input, errors, interner, &__start, &__end);
         __symbols.push((__start, __Symbol::Variant4(__nt), __end));
         (0, 0)
     }
@@ -747,6 +759,7 @@ mod __parse__Lambda {
     >(
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        interner: &mut Interner<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: core::marker::PhantomData<(&'err (), &'input ())>,
@@ -756,7 +769,7 @@ mod __parse__Lambda {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action8::<>(input, errors, __sym0);
+        let __nt = super::__action8::<>(input, errors, interner, __sym0);
         __symbols.push((__start, __Symbol::Variant4(__nt), __end));
         (1, 1)
     }
@@ -766,6 +779,7 @@ mod __parse__Lambda {
     >(
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        interner: &mut Interner<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: core::marker::PhantomData<(&'err (), &'input ())>,
@@ -774,7 +788,7 @@ mod __parse__Lambda {
         // "."? =  => ActionFn(9);
         let __start = __lookahead_start.cloned().or_else(|| __symbols.last().map(|s| s.2.clone())).unwrap_or_default();
         let __end = __start.clone();
-        let __nt = super::__action9::<>(input, errors, &__start, &__end);
+        let __nt = super::__action9::<>(input, errors, interner, &__start, &__end);
         __symbols.push((__start, __Symbol::Variant4(__nt), __end));
         (0, 1)
     }
@@ -784,6 +798,7 @@ mod __parse__Lambda {
     >(
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        interner: &mut Interner<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: core::marker::PhantomData<(&'err (), &'input ())>,
@@ -792,7 +807,7 @@ mod __parse__Lambda {
         // Lambda =  => ActionFn(28);
         let __start = __lookahead_start.cloned().or_else(|| __symbols.last().map(|s| s.2.clone())).unwrap_or_default();
         let __end = __start.clone();
-        let __nt = super::__action28::<>(input, errors, &__start, &__end);
+        let __nt = super::__action28::<>(input, errors, interner, &__start, &__end);
         __symbols.push((__start, __Symbol::Variant5(__nt), __end));
         (0, 2)
     }
@@ -802,6 +817,7 @@ mod __parse__Lambda {
     >(
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        interner: &mut Interner<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: core::marker::PhantomData<(&'err (), &'input ())>,
@@ -811,7 +827,7 @@ mod __parse__Lambda {
         let __sym0 = __pop_Variant7(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action29::<>(input, errors, __sym0);
+        let __nt = super::__action29::<>(input, errors, interner, __sym0);
         __symbols.push((__start, __Symbol::Variant5(__nt), __end));
         (1, 2)
     }
@@ -821,6 +837,7 @@ mod __parse__Lambda {
     >(
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        interner: &mut Interner<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: core::marker::PhantomData<(&'err (), &'input ())>,
@@ -835,7 +852,7 @@ mod __parse__Lambda {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym4.2.clone();
-        let __nt = super::__action20::<>(input, errors, __sym0, __sym1, __sym2, __sym3, __sym4);
+        let __nt = super::__action20::<>(input, errors, interner, __sym0, __sym1, __sym2, __sym3, __sym4);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (5, 3)
     }
@@ -845,6 +862,7 @@ mod __parse__Lambda {
     >(
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        interner: &mut Interner<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: core::marker::PhantomData<(&'err (), &'input ())>,
@@ -858,7 +876,7 @@ mod __parse__Lambda {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym3.2.clone();
-        let __nt = super::__action21::<>(input, errors, __sym0, __sym1, __sym2, __sym3);
+        let __nt = super::__action21::<>(input, errors, interner, __sym0, __sym1, __sym2, __sym3);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (4, 3)
     }
@@ -868,6 +886,7 @@ mod __parse__Lambda {
     >(
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        interner: &mut Interner<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: core::marker::PhantomData<(&'err (), &'input ())>,
@@ -881,7 +900,7 @@ mod __parse__Lambda {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym3.2.clone();
-        let __nt = super::__action22::<>(input, errors, __sym0, __sym1, __sym2, __sym3);
+        let __nt = super::__action22::<>(input, errors, interner, __sym0, __sym1, __sym2, __sym3);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (4, 3)
     }
@@ -891,6 +910,7 @@ mod __parse__Lambda {
     >(
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        interner: &mut Interner<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: core::marker::PhantomData<(&'err (), &'input ())>,
@@ -903,7 +923,7 @@ mod __parse__Lambda {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym2.2.clone();
-        let __nt = super::__action23::<>(input, errors, __sym0, __sym1, __sym2);
+        let __nt = super::__action23::<>(input, errors, interner, __sym0, __sym1, __sym2);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (3, 3)
     }
@@ -913,6 +933,7 @@ mod __parse__Lambda {
     >(
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        interner: &mut Interner<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: core::marker::PhantomData<(&'err (), &'input ())>,
@@ -927,7 +948,7 @@ mod __parse__Lambda {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym4.2.clone();
-        let __nt = super::__action24::<>(input, errors, __sym0, __sym1, __sym2, __sym3, __sym4);
+        let __nt = super::__action24::<>(input, errors, interner, __sym0, __sym1, __sym2, __sym3, __sym4);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (5, 3)
     }
@@ -937,6 +958,7 @@ mod __parse__Lambda {
     >(
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        interner: &mut Interner<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: core::marker::PhantomData<(&'err (), &'input ())>,
@@ -950,7 +972,7 @@ mod __parse__Lambda {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym3.2.clone();
-        let __nt = super::__action25::<>(input, errors, __sym0, __sym1, __sym2, __sym3);
+        let __nt = super::__action25::<>(input, errors, interner, __sym0, __sym1, __sym2, __sym3);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (4, 3)
     }
@@ -960,6 +982,7 @@ mod __parse__Lambda {
     >(
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        interner: &mut Interner<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: core::marker::PhantomData<(&'err (), &'input ())>,
@@ -973,7 +996,7 @@ mod __parse__Lambda {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym3.2.clone();
-        let __nt = super::__action26::<>(input, errors, __sym0, __sym1, __sym2, __sym3);
+        let __nt = super::__action26::<>(input, errors, interner, __sym0, __sym1, __sym2, __sym3);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (4, 3)
     }
@@ -983,6 +1006,7 @@ mod __parse__Lambda {
     >(
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        interner: &mut Interner<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: core::marker::PhantomData<(&'err (), &'input ())>,
@@ -995,7 +1019,7 @@ mod __parse__Lambda {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym2.2.clone();
-        let __nt = super::__action27::<>(input, errors, __sym0, __sym1, __sym2);
+        let __nt = super::__action27::<>(input, errors, interner, __sym0, __sym1, __sym2);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (3, 3)
     }
@@ -1005,6 +1029,7 @@ mod __parse__Lambda {
     >(
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        interner: &mut Interner<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: core::marker::PhantomData<(&'err (), &'input ())>,
@@ -1017,7 +1042,7 @@ mod __parse__Lambda {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym2.2.clone();
-        let __nt = super::__action18::<>(input, errors, __sym0, __sym1, __sym2);
+        let __nt = super::__action18::<>(input, errors, interner, __sym0, __sym1, __sym2);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (3, 3)
     }
@@ -1027,6 +1052,7 @@ mod __parse__Lambda {
     >(
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        interner: &mut Interner<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: core::marker::PhantomData<(&'err (), &'input ())>,
@@ -1038,7 +1064,7 @@ mod __parse__Lambda {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym1.2.clone();
-        let __nt = super::__action19::<>(input, errors, __sym0, __sym1);
+        let __nt = super::__action19::<>(input, errors, interner, __sym0, __sym1);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (2, 3)
     }
@@ -1048,6 +1074,7 @@ mod __parse__Lambda {
     >(
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        interner: &mut Interner<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: core::marker::PhantomData<(&'err (), &'input ())>,
@@ -1057,7 +1084,7 @@ mod __parse__Lambda {
         let __sym0 = __pop_Variant3(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action5::<>(input, errors, __sym0);
+        let __nt = super::__action5::<>(input, errors, interner, __sym0);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (1, 3)
     }
@@ -1067,6 +1094,7 @@ mod __parse__Lambda {
     >(
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        interner: &mut Interner<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: core::marker::PhantomData<(&'err (), &'input ())>,
@@ -1075,7 +1103,7 @@ mod __parse__Lambda {
         // ValueAccessor* =  => ActionFn(10);
         let __start = __lookahead_start.cloned().or_else(|| __symbols.last().map(|s| s.2.clone())).unwrap_or_default();
         let __end = __start.clone();
-        let __nt = super::__action10::<>(input, errors, &__start, &__end);
+        let __nt = super::__action10::<>(input, errors, interner, &__start, &__end);
         __symbols.push((__start, __Symbol::Variant7(__nt), __end));
         (0, 4)
     }
@@ -1085,6 +1113,7 @@ mod __parse__Lambda {
     >(
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        interner: &mut Interner<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: core::marker::PhantomData<(&'err (), &'input ())>,
@@ -1094,7 +1123,7 @@ mod __parse__Lambda {
         let __sym0 = __pop_Variant7(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action11::<>(input, errors, __sym0);
+        let __nt = super::__action11::<>(input, errors, interner, __sym0);
         __symbols.push((__start, __Symbol::Variant7(__nt), __end));
         (1, 4)
     }
@@ -1104,6 +1133,7 @@ mod __parse__Lambda {
     >(
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        interner: &mut Interner<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: core::marker::PhantomData<(&'err (), &'input ())>,
@@ -1113,7 +1143,7 @@ mod __parse__Lambda {
         let __sym0 = __pop_Variant6(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
-        let __nt = super::__action12::<>(input, errors, __sym0);
+        let __nt = super::__action12::<>(input, errors, interner, __sym0);
         __symbols.push((__start, __Symbol::Variant7(__nt), __end));
         (1, 5)
     }
@@ -1123,6 +1153,7 @@ mod __parse__Lambda {
     >(
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+        interner: &mut Interner<'input>,
         __lookahead_start: Option<&usize>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: core::marker::PhantomData<(&'err (), &'input ())>,
@@ -1134,7 +1165,7 @@ mod __parse__Lambda {
         let __sym0 = __pop_Variant7(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym1.2.clone();
-        let __nt = super::__action13::<>(input, errors, __sym0, __sym1);
+        let __nt = super::__action13::<>(input, errors, interner, __sym0, __sym1);
         __symbols.push((__start, __Symbol::Variant7(__nt), __end));
         (2, 5)
     }
@@ -1148,6 +1179,7 @@ fn __action0<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    interner: &mut Interner<'input>,
     (_, __0, _): (usize, Vec<ValueAccessor<'input>>, usize),
 ) -> Vec<ValueAccessor<'input>>
 {
@@ -1161,6 +1193,7 @@ fn __action1<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    interner: &mut Interner<'input>,
     (_, __0, _): (usize, alloc::vec::Vec<ValueAccessor<'input>>, usize),
 ) -> Vec<ValueAccessor<'input>>
 {
@@ -1174,6 +1207,7 @@ fn __action2<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    interner: &mut Interner<'input>,
     (_, maybe_dot_selector, _): (usize, core::option::Option<Token<'input>>, usize),
     (_, _, _): (usize, Token<'input>, usize),
     (_, idx, _): (usize, u32, usize),
@@ -1193,6 +1227,7 @@ fn __action3<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    interner: &mut Interner<'input>,
     (_, maybe_dot_selector, _): (usize, core::option::Option<Token<'input>>, usize),
     (_, _, _): (usize, Token<'input>, usize),
     (_, scalar_name, _): (usize, &'input str, usize),
@@ -1201,7 +1236,7 @@ fn __action3<
 ) -> ValueAccessor<'input>
 {
     {
-        ValueAccessor::FieldAccessByScalar { scalar_name }
+        ValueAccessor::FieldAccessByScalar { scalar_name: interner.intern(scalar_name) }
     }
 }
 
@@ -1212,6 +1247,7 @@ fn __action4<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    interner: &mut Interner<'input>,
     (_, _, _): (usize, Token<'input>, usize),
     (_, field_name, _): (usize, &'input str, usize),
     (_, maybe_flatten_sign, _): (usize, core::option::Option<Token<'input>>, usize),
@@ -1229,6 +1265,7 @@ fn __action5<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    interner: &mut Interner<'input>,
     (_, __0, _): (usize, __lalrpop_util::ErrorRecovery<usize, Token<'input>, LexerError>, usize),
 ) -> ValueAccessor<'input>
 {
@@ -1242,6 +1279,7 @@ fn __action6<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    interner: &mut Interner<'input>,
     (_, __0, _): (usize, Token<'input>, usize),
 ) -> core::option::Option<Token<'input>>
 {
@@ -1255,6 +1293,7 @@ fn __action7<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    interner: &mut Interner<'input>,
     __lookbehind: &usize,
     __lookahead: &usize,
 ) -> core::option::Option<Token<'input>>
@@ -1269,6 +1308,7 @@ fn __action8<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    interner: &mut Interner<'input>,
     (_, __0, _): (usize, Token<'input>, usize),
 ) -> core::option::Option<Token<'input>>
 {
@@ -1282,6 +1322,7 @@ fn __action9<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    interner: &mut Interner<'input>,
     __lookbehind: &usize,
     __lookahead: &usize,
 ) -> core::option::Option<Token<'input>>
@@ -1296,6 +1337,7 @@ fn __action10<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    interner: &mut Interner<'input>,
     __lookbehind: &usize,
     __lookahead: &usize,
 ) -> alloc::vec::Vec<ValueAccessor<'input>>
@@ -1310,6 +1352,7 @@ fn __action11<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    interner: &mut Interner<'input>,
     (_, v, _): (usize, alloc::vec::Vec<ValueAccessor<'input>>, usize),
 ) -> alloc::vec::Vec<ValueAccessor<'input>>
 {
@@ -1323,6 +1366,7 @@ fn __action12<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    interner: &mut Interner<'input>,
     (_, __0, _): (usize, ValueAccessor<'input>, usize),
 ) -> alloc::vec::Vec<ValueAccessor<'input>>
 {
@@ -1336,6 +1380,7 @@ fn __action13<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    interner: &mut Interner<'input>,
     (_, v, _): (usize, alloc::vec::Vec<ValueAccessor<'input>>, usize),
     (_, e, _): (usize, ValueAccessor<'input>, usize),
 ) -> alloc::vec::Vec<ValueAccessor<'input>>
@@ -1350,6 +1395,7 @@ fn __action14<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    interner: &mut Interner<'input>,
     __0: (usize, core::option::Option<Token<'input>>, usize),
     __1: (usize, Token<'input>, usize),
     __2: (usize, u32, usize),
@@ -1362,12 +1408,14 @@ fn __action14<
     let __temp0 = __action6(
         input,
         errors,
+        interner,
         __4,
     );
     let __temp0 = (__start0, __temp0, __end0);
     __action2(
         input,
         errors,
+        interner,
         __0,
         __1,
         __2,
@@ -1383,6 +1431,7 @@ fn __action15<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    interner: &mut Interner<'input>,
     __0: (usize, core::option::Option<Token<'input>>, usize),
     __1: (usize, Token<'input>, usize),
     __2: (usize, u32, usize),
@@ -1394,6 +1443,7 @@ fn __action15<
     let __temp0 = __action7(
         input,
         errors,
+        interner,
         &__start0,
         &__end0,
     );
@@ -1401,6 +1451,7 @@ fn __action15<
     __action2(
         input,
         errors,
+        interner,
         __0,
         __1,
         __2,
@@ -1416,6 +1467,7 @@ fn __action16<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    interner: &mut Interner<'input>,
     __0: (usize, core::option::Option<Token<'input>>, usize),
     __1: (usize, Token<'input>, usize),
     __2: (usize, &'input str, usize),
@@ -1428,12 +1480,14 @@ fn __action16<
     let __temp0 = __action6(
         input,
         errors,
+        interner,
         __4,
     );
     let __temp0 = (__start0, __temp0, __end0);
     __action3(
         input,
         errors,
+        interner,
         __0,
         __1,
         __2,
@@ -1449,6 +1503,7 @@ fn __action17<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    interner: &mut Interner<'input>,
     __0: (usize, core::option::Option<Token<'input>>, usize),
     __1: (usize, Token<'input>, usize),
     __2: (usize, &'input str, usize),
@@ -1460,6 +1515,7 @@ fn __action17<
     let __temp0 = __action7(
         input,
         errors,
+        interner,
         &__start0,
         &__end0,
     );
@@ -1467,6 +1523,7 @@ fn __action17<
     __action3(
         input,
         errors,
+        interner,
         __0,
         __1,
         __2,
@@ -1482,6 +1539,7 @@ fn __action18<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    interner: &mut Interner<'input>,
     __0: (usize, Token<'input>, usize),
     __1: (usize, &'input str, usize),
     __2: (usize, Token<'input>, usize),
@@ -1492,12 +1550,14 @@ fn __action18<
     let __temp0 = __action6(
         input,
         errors,
+        interner,
         __2,
     );
     let __temp0 = (__start0, __temp0, __end0);
     __action4(
         input,
         errors,
+        interner,
         __0,
         __1,
         __temp0,
@@ -1511,6 +1571,7 @@ fn __action19<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    interner: &mut Interner<'input>,
     __0: (usize, Token<'input>, usize),
     __1: (usize, &'input str, usize),
 ) -> ValueAccessor<'input>
@@ -1520,6 +1581,7 @@ fn __action19<
     let __temp0 = __action7(
         input,
         errors,
+        interner,
         &__start0,
         &__end0,
     );
@@ -1527,6 +1589,7 @@ fn __action19<
     __action4(
         input,
         errors,
+        interner,
         __0,
         __1,
         __temp0,
@@ -1540,6 +1603,7 @@ fn __action20<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    interner: &mut Interner<'input>,
     __0: (usize, Token<'input>, usize),
     __1: (usize, Token<'input>, usize),
     __2: (usize, u32, usize),
@@ -1552,12 +1616,14 @@ fn __action20<
     let __temp0 = __action8(
         input,
         errors,
+        interner,
         __0,
     );
     let __temp0 = (__start0, __temp0, __end0);
     __action14(
         input,
         errors,
+        interner,
         __temp0,
         __1,
         __2,
@@ -1573,6 +1639,7 @@ fn __action21<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    interner: &mut Interner<'input>,
     __0: (usize, Token<'input>, usize),
     __1: (usize, u32, usize),
     __2: (usize, Token<'input>, usize),
@@ -1584,6 +1651,7 @@ fn __action21<
     let __temp0 = __action9(
         input,
         errors,
+        interner,
         &__start0,
         &__end0,
     );
@@ -1591,6 +1659,7 @@ fn __action21<
     __action14(
         input,
         errors,
+        interner,
         __temp0,
         __0,
         __1,
@@ -1606,6 +1675,7 @@ fn __action22<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    interner: &mut Interner<'input>,
     __0: (usize, Token<'input>, usize),
     __1: (usize, Token<'input>, usize),
     __2: (usize, u32, usize),
@@ -1617,12 +1687,14 @@ fn __action22<
     let __temp0 = __action8(
         input,
         errors,
+        interner,
         __0,
     );
     let __temp0 = (__start0, __temp0, __end0);
     __action15(
         input,
         errors,
+        interner,
         __temp0,
         __1,
         __2,
@@ -1637,6 +1709,7 @@ fn __action23<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    interner: &mut Interner<'input>,
     __0: (usize, Token<'input>, usize),
     __1: (usize, u32, usize),
     __2: (usize, Token<'input>, usize),
@@ -1647,6 +1720,7 @@ fn __action23<
     let __temp0 = __action9(
         input,
         errors,
+        interner,
         &__start0,
         &__end0,
     );
@@ -1654,6 +1728,7 @@ fn __action23<
     __action15(
         input,
         errors,
+        interner,
         __temp0,
         __0,
         __1,
@@ -1668,6 +1743,7 @@ fn __action24<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    interner: &mut Interner<'input>,
     __0: (usize, Token<'input>, usize),
     __1: (usize, Token<'input>, usize),
     __2: (usize, &'input str, usize),
@@ -1680,12 +1756,14 @@ fn __action24<
     let __temp0 = __action8(
         input,
         errors,
+        interner,
         __0,
     );
     let __temp0 = (__start0, __temp0, __end0);
     __action16(
         input,
         errors,
+        interner,
         __temp0,
         __1,
         __2,
@@ -1701,6 +1779,7 @@ fn __action25<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    interner: &mut Interner<'input>,
     __0: (usize, Token<'input>, usize),
     __1: (usize, &'input str, usize),
     __2: (usize, Token<'input>, usize),
@@ -1712,6 +1791,7 @@ fn __action25<
     let __temp0 = __action9(
         input,
         errors,
+        interner,
         &__start0,
         &__end0,
     );
@@ -1719,6 +1799,7 @@ fn __action25<
     __action16(
         input,
         errors,
+        interner,
         __temp0,
         __0,
         __1,
@@ -1734,6 +1815,7 @@ fn __action26<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    interner: &mut Interner<'input>,
     __0: (usize, Token<'input>, usize),
     __1: (usize, Token<'input>, usize),
     __2: (usize, &'input str, usize),
@@ -1745,12 +1827,14 @@ fn __action26<
     let __temp0 = __action8(
         input,
         errors,
+        interner,
         __0,
     );
     let __temp0 = (__start0, __temp0, __end0);
     __action17(
         input,
         errors,
+        interner,
         __temp0,
         __1,
         __2,
@@ -1765,6 +1849,7 @@ fn __action27<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    interner: &mut Interner<'input>,
     __0: (usize, Token<'input>, usize),
     __1: (usize, &'input str, usize),
     __2: (usize, Token<'input>, usize),
@@ -1775,6 +1860,7 @@ fn __action27<
     let __temp0 = __action9(
         input,
         errors,
+        interner,
         &__start0,
         &__end0,
     );
@@ -1782,6 +1868,7 @@ fn __action27<
     __action17(
         input,
         errors,
+        interner,
         __temp0,
         __0,
         __1,
@@ -1796,6 +1883,7 @@ fn __action28<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    interner: &mut Interner<'input>,
     __lookbehind: &usize,
     __lookahead: &usize,
 ) -> Vec<ValueAccessor<'input>>
@@ -1805,6 +1893,7 @@ fn __action28<
     let __temp0 = __action10(
         input,
         errors,
+        interner,
         &__start0,
         &__end0,
     );
@@ -1812,6 +1901,7 @@ fn __action28<
     __action1(
         input,
         errors,
+        interner,
         __temp0,
     )
 }
@@ -1823,6 +1913,7 @@ fn __action29<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
+    interner: &mut Interner<'input>,
     __0: (usize, alloc::vec::Vec<ValueAccessor<'input>>, usize),
 ) -> Vec<ValueAccessor<'input>>
 {
@@ -1831,12 +1922,14 @@ fn __action29<
     let __temp0 = __action11(
         input,
         errors,
+        interner,
         __0,
     );
     let __temp0 = (__start0, __temp0, __end0);
     __action1(
         input,
         errors,
+        interner,
         __temp0,
     )
 }

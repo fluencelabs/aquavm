@@ -21,6 +21,7 @@ use super::Streams;
 
 use air_execution_info_collector::InstructionTracker;
 use air_interpreter_interface::*;
+use air_parser_utils::Interner;
 
 use std::rc::Rc;
 
@@ -31,7 +32,7 @@ pub(crate) struct ExecutionCtx<'i> {
     pub(crate) scalars: Scalars<'i>,
 
     /// Contains all streams.
-    pub(crate) streams: Streams,
+    pub(crate) streams: Streams<'i>,
 
     /// Set of peer public keys that should receive resulted data.
     pub(crate) next_peer_pks: Vec<String>,
@@ -62,6 +63,9 @@ pub(crate) struct ExecutionCtx<'i> {
 
     /// Tracks all functions that should be called from services.
     pub(crate) call_requests: CallRequests,
+
+    /// Tracks bidirectional relationship between variable names and their IDs.
+    pub(crate) interner: Interner<'i>,
 }
 
 impl<'i> ExecutionCtx<'i> {
@@ -125,6 +129,7 @@ impl<'i> Display for ExecutionCtx<'i> {
         writeln!(f, "timestamp: {}", self.run_parameters.timestamp)?;
         writeln!(f, "subgraph complete: {}", self.subgraph_complete)?;
         writeln!(f, "next peer public keys: {:?}", self.next_peer_pks)?;
+        writeln!(f, "interner: {:?}", self.interner)?;
 
         Ok(())
     }

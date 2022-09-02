@@ -19,6 +19,7 @@ mod traits;
 
 use super::*;
 use air_lambda_ast::LambdaAST;
+use air_parser_utils::Identifier;
 use serde::Serialize;
 use std::rc::Rc;
 
@@ -104,7 +105,7 @@ pub enum Fail<'i> {
         error_message: &'i str,
     },
     CanonStream {
-        name: &'i str,
+        name: Identifier<'i>,
         lambda: LambdaAST<'i>,
     },
     LastError,

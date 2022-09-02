@@ -15,11 +15,13 @@
  */
 
 use air::parser::parse;
+use air_parser_utils::Interner;
 
 /// Parse AIR script and return it as minified JSON
 pub fn ast(script: String) -> String {
     let do_parse = || -> std::result::Result<_, Box<dyn std::error::Error>> {
-        let ast = parse(&script)?;
+        let mut interner = Interner::new();
+        let ast = parse(&script, &mut interner)?;
         serde_json::to_string(&ast).map_err(Into::into)
     };
 

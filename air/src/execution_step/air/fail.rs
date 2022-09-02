@@ -26,6 +26,7 @@ use crate::log_instruction;
 use crate::ExecutionError;
 use crate::JValue;
 
+use air_lambda_ast::Identifier;
 use air_parser::ast;
 use air_parser::ast::Fail;
 use polyplets::SecurityTetraplet;
@@ -80,7 +81,7 @@ fn fail_with_literals<'i>(
 }
 
 fn fail_with_canon_stream<'i>(
-    name: &'i str,
+    name: Identifier<'i>,
     lambda: &LambdaAST<'i>,
     exec_ctx: &mut ExecutionCtx<'i>,
 ) -> ExecutionResult<()> {

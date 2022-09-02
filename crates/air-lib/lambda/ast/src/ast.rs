@@ -16,6 +16,8 @@
 
 mod traits;
 
+use air_parser_utils::Identifier;
+
 use non_empty_vec::NonEmpty;
 use serde::Deserialize;
 use serde::Serialize;
@@ -31,7 +33,7 @@ pub enum ValueAccessor<'input> {
     FieldAccessByName { field_name: &'input str },
 
     // (.)?[field]
-    FieldAccessByScalar { scalar_name: &'input str },
+    FieldAccessByScalar { scalar_name: Identifier<'input> },
 
     // needed to allow parser catch all errors from a lambda expression without stopping
     // on the very first one. Although, this variant is guaranteed not to be present in a lambda.

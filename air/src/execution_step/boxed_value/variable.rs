@@ -20,24 +20,24 @@ use air_parser::ast;
 #[derive(Clone, Copy, Debug)]
 pub(crate) enum Variable<'i> {
     Scalar {
-        name: &'i str,
+        name: ast::Identifier,
     },
     Stream {
-        name: &'i str,
+        name: ast::Identifier,
         generation: Generation,
         position: usize,
     },
     CanonStream {
-        name: &'i str,
+        name: ast::Identifier,
     },
 }
 
 impl<'i> Variable<'i> {
-    pub(crate) fn scalar(name: &'i str) -> Self {
+    pub(crate) fn scalar(name: ast::Identifier) -> Self {
         Self::Scalar { name }
     }
 
-    pub(crate) fn stream(name: &'i str, generation: Generation, position: usize) -> Self {
+    pub(crate) fn stream(name: ast::Identifier, generation: Generation, position: usize) -> Self {
         Self::Stream {
             name,
             generation,
@@ -45,13 +45,13 @@ impl<'i> Variable<'i> {
         }
     }
 
-    pub(crate) fn canon_stream(name: &'i str) -> Self {
+    pub(crate) fn canon_stream(name: ast::Identifier) -> Self {
         Self::CanonStream { name }
     }
 }
 
-impl<'i> From<&ast::Variable<'i>> for Variable<'i> {
-    fn from(ast_variable: &ast::Variable<'i>) -> Self {
+impl<'i> From<&ast::Variable> for Variable {
+    fn from(ast_variable: &ast::Variable) -> Self {
         use ast::Variable::*;
 
         match ast_variable {

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+use air_parser::ast;
+
 use super::LambdaError;
 use super::LambdaResult;
 use crate::execution_step::ScalarRef;
@@ -36,7 +38,7 @@ pub(super) fn try_jvalue_with_idx(jvalue: &JValue, idx: u32) -> LambdaResult<&JV
 
 pub(super) fn try_jvalue_with_field_name<'value>(
     jvalue: &'value JValue,
-    field_name: &str,
+    field_name: ast::Identifier,
 ) -> LambdaResult<&'value JValue> {
     match jvalue {
         JValue::Object(values_map) => values_map

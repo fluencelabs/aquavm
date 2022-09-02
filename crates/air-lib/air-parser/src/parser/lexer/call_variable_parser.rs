@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+use air_parser_utils::Interner;
+
 use super::LexerError;
 use super::LexerResult;
 use super::Token;
@@ -22,11 +24,12 @@ use crate::LambdaAST;
 use std::iter::Peekable;
 use std::str::CharIndices;
 
-pub(super) fn try_parse_call_variable(
-    string_to_parse: &str,
+pub(super) fn try_parse_call_variable<'input>(
+    string_to_parse: &'input str,
     start_pos: usize,
-) -> LexerResult<Token<'_>> {
-    CallVariableParser::try_parse(string_to_parse, start_pos)
+    interner: &mut Interner<'input>,
+) -> LexerResult<Token<'input>> {
+    CallVariableParser::try_parse(string_to_parse, start_pos, interner)
 }
 
 #[derive(Debug)]
@@ -48,15 +51,16 @@ struct ParserState {
     pub(self) current_pos: usize,
 }
 
-struct CallVariableParser<'input> {
+struct CallVariableParser<'ctx, 'input: 'ctx> {
     string_to_parse_iter: Peekable<CharIndices<'input>>,
     string_to_parse: &'input str,
     start_pos: usize,
     state: ParserState,
+    interner: &'ctx mut Interner<'input>,
 }
 
-impl<'input> CallVariableParser<'input> {
-    fn new(string_to_parse: &'input str, start_pos: usize) -> LexerResult<Self> {
+impl<'ctx, 'input: 'ctx> CallVariableParser<'ctx, 'input> {
+    fn new(string_to_parse: &'input str, start_pos: usize, interner: &'ctx mut Interner<'input>) -> LexerResult<Self> {
         let mut string_to_parse_iter = string_to_parse.char_indices().peekable();
         let (current_pos, current_char) = match string_to_parse_iter.next() {
             Some(pos_and_ch) => pos_and_ch,
@@ -79,6 +83,7 @@ impl<'input> CallVariableParser<'input> {
             string_to_parse,
             start_pos,
             state,
+            interner,
         };
 
         Ok(parser)
@@ -87,8 +92,9 @@ impl<'input> CallVariableParser<'input> {
     pub(self) fn try_parse(
         string_to_parse: &'input str,
         start_pos: usize,
+        interner: &'ctx mut Interner<'input>
     ) -> LexerResult<Token<'input>> {
-        let mut parser = Self::new(string_to_parse, start_pos)?;
+        let mut parser = Self::new(string_to_parse, start_pos, interner)?;
 
         loop {
             if parser.is_possible_to_parse_as_number() {
@@ -276,47 +282,47 @@ impl<'input> CallVariableParser<'input> {
         self.current_pos() == self.string_to_parse.len() - 1
     }
 
-    fn to_variable_token<'v>(&self, name: &'v str) -> Token<'v> {
+    fn to_variable_token(&mut self, name: &'input str) -> Token<'input> {
         match self.state.met_tag {
             MetTag::None => Token::Scalar {
-                name,
+                name: self.interner.intern(name),
                 position: self.start_pos,
             },
             MetTag::Stream => Token::Stream {
-                name,
+                name: self.interner.intern(name),
                 position: self.start_pos,
             },
             MetTag::CanonStream => Token::CanonStream {
-                name,
+                name: self.interner.intern(name),
                 position: self.start_pos,
             },
         }
     }
 
-    fn to_variable_token_with_lambda<'v>(&self, name: &'v str, lambda: LambdaAST<'v>) -> Token<'v> {
+    fn to_variable_token_with_lambda(&mut self, name: &'input str, lambda: LambdaAST<'input>) -> Token<'input> {
         match self.state.met_tag {
             MetTag::None => Token::ScalarWithLambda {
-                name,
+                name: self.interner.intern(name),
                 lambda,
                 position: self.start_pos,
             },
             MetTag::Stream => Token::StreamWithLambda {
-                name,
+                name: self.interner.intern(name),
                 lambda,
                 position: self.start_pos,
             },
             MetTag::CanonStream => Token::CanonStreamWithLambda {
-                name,
+                name: self.interner.intern(name),
                 lambda,
                 position: self.start_pos,
             },
         }
     }
 
-    fn try_to_variable_and_lambda(&self, lambda_start_pos: usize) -> LexerResult<Token<'input>> {
+    fn try_to_variable_and_lambda(&mut self, lambda_start_pos: usize) -> LexerResult<Token<'input>> {
         // +2 to ignore ".$" prefix
         let lambda =
-            crate::parse_lambda(&self.string_to_parse[lambda_start_pos + 2..]).map_err(|e| {
+            crate::parse_lambda(&self.string_to_parse[lambda_start_pos + 2..], self.interner).map_err(|e| {
                 LexerError::lambda_parser_error(
                     self.start_pos + lambda_start_pos..self.start_pos + self.string_to_parse.len(),
                     e.to_string(),
@@ -359,7 +365,7 @@ impl<'input> CallVariableParser<'input> {
         Ok(token)
     }
 
-    fn to_token(&self) -> LexerResult<Token<'input>> {
+    fn to_token(&mut self) -> LexerResult<Token<'input>> {
         let is_number = self.is_possible_to_parse_as_number();
         match (is_number, self.state.first_dot_met_pos) {
             (true, None) => self.try_to_i64(),

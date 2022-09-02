@@ -21,16 +21,17 @@ use crate::execution_step::ValueAggregate;
 
 use air_interpreter_data::GlobalStreamGens;
 use air_interpreter_data::RestrictedStreamGens;
+use air_parser_utils::Identifier;
 
 use std::collections::hash_map::Entry::{Occupied, Vacant};
 use std::collections::HashMap;
 
 #[derive(Default)]
-pub(crate) struct Streams {
+pub(crate) struct Streams<'i> {
     // this one is optimized for speed (not for memory), because it's unexpected
     // that a script could have a lot of new.
     // TODO: use shared string (Rc<String>) to avoid copying.
-    streams: HashMap<String, Vec<StreamDescriptor>>,
+    streams: HashMap<Identifier<'i>, Vec<StreamDescriptor>>,
 
     /// Contains stream generation that private stream should have at the scope start.
     data_restr_stream_generations: RestrictedStreamGens,
@@ -45,16 +46,16 @@ struct StreamDescriptor {
     pub(self) stream: Stream,
 }
 
-impl Streams {
-    pub(crate) fn get(&self, name: &str, position: usize) -> Option<&Stream> {
+impl<'i> Streams<'i> {
+    pub(crate) fn get(&self, name: Identifier<'i>, position: usize) -> Option<&Stream> {
         self.streams
-            .get(name)
+            .get(&name)
             .and_then(|descriptors| find_closest(descriptors.iter(), position))
     }
 
-    pub(crate) fn get_mut(&mut self, name: &str, position: usize) -> Option<&mut Stream> {
+    pub(crate) fn get_mut(&mut self, name: Identifier<'i>, position: usize) -> Option<&mut Stream> {
         self.streams
-            .get_mut(name)
+            .get_mut(&name)
             .and_then(|descriptors| find_closest_mut(descriptors.iter_mut(), position))
     }
 
@@ -62,7 +63,7 @@ impl Streams {
         &mut self,
         value: ValueAggregate,
         generation: Generation,
-        stream_name: &str,
+        stream_name: Identifier<'i>,
         position: usize,
     ) -> ExecutionResult<u32> {
         match self.get_mut(stream_name, position) {
@@ -76,22 +77,22 @@ impl Streams {
                 //  - and by this function, and if there is no such a streams in streams,
                 //    it means that a new global one should be created.
                 let stream = Stream::from_value(value);
-                self.add_global_stream(stream_name.to_string(), stream);
+                self.add_global_stream(stream_name, stream);
                 let generation = 0;
                 Ok(generation)
             }
         }
     }
 
-    pub(crate) fn add_global_stream(&mut self, name: String, stream: Stream) {
+    pub(crate) fn add_global_stream(&mut self, name: Identifier<'i>, stream: Stream) {
         let descriptor = StreamDescriptor::global(stream);
         self.streams.insert(name, vec![descriptor]);
     }
 
-    pub(crate) fn meet_scope_start(&mut self, name: impl Into<String>, span: Span, iteration: u32) {
-        let name = name.into();
+    pub(crate) fn meet_scope_start(&mut self, name: Identifier<'i>, span: Span, iteration: u32) {
+        let name_str = name.to_string();
         let generations_count = self
-            .stream_generation_from_data(&name, span.left as u32, iteration as usize)
+            .stream_generation_from_data(&name_str, span.left as u32, iteration as usize)
             .unwrap_or_default();
 
         let new_stream = Stream::from_generations_count(generations_count as usize);

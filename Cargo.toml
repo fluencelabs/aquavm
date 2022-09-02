@@ -11,6 +11,7 @@ members = [
     "crates/air-lib/lambda/ast",
     "crates/air-lib/lambda/parser",
     "crates/air-lib/log-targets",
+    "crates/air-lib/parser-utils",
     "crates/air-lib/polyplets",
     "crates/air-lib/test-utils",
     "crates/air-lib/trace-handler",

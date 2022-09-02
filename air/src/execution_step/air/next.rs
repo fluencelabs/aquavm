@@ -29,7 +29,7 @@ impl<'i> super::ExecutableInstruction<'i> for Next<'i> {
         log_instruction!(next, exec_ctx, trace_ctx);
 
         let iterator_name = &self.iterator.name;
-        let fold_state = exec_ctx.scalars.get_iterable_mut(iterator_name)?;
+        let fold_state = exec_ctx.scalars.get_iterable_mut(*iterator_name)?;
         maybe_meet_iteration_end(self, fold_state, trace_ctx)?;
 
         if !fold_state.iterable.next() {
@@ -48,7 +48,7 @@ impl<'i> super::ExecutableInstruction<'i> for Next<'i> {
         result?;
 
         // get the same fold state again because of borrow checker
-        let fold_state = exec_ctx.scalars.get_iterable_mut(iterator_name)?;
+        let fold_state = exec_ctx.scalars.get_iterable_mut(*iterator_name)?;
         fold_state.iterable.prev();
         maybe_meet_back_iterator(self, fold_state, trace_ctx)?;
 

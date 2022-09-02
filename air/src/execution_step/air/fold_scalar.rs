@@ -26,6 +26,7 @@ use crate::log_instruction;
 use air_parser::ast::FoldScalar;
 use air_parser::ast::FoldScalarIterable;
 use air_parser::ast::Instruction;
+use air_parser_utils::Identifier;
 
 use std::rc::Rc;
 
@@ -62,7 +63,7 @@ impl<'i> ExecutableInstruction<'i> for FoldScalar<'i> {
 pub(super) fn fold<'i>(
     iterable: IterableValue,
     iterable_type: IterableType,
-    iterator: &'i str,
+    iterator: Identifier<'i>,
     instruction: Rc<Instruction<'i>>,
     exec_ctx: &mut ExecutionCtx<'i>,
     trace_ctx: &mut TraceHandler,
