@@ -259,6 +259,7 @@ fn make_marine_config(
     MarineConfig {
         modules_dir: Some(air_wasm_dir),
         modules_config: vec![ModuleDescriptor {
+            load_from: None,
             file_name: String::from(air_wasm_file),
             import_name: String::from(air_wasm_file),
             config: air_module_config,
