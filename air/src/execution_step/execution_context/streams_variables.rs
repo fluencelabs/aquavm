@@ -30,7 +30,7 @@ pub(crate) struct Streams {
     // this one is optimized for speed (not for memory), because it's unexpected
     // that a script could have a lot of new.
     // TODO: use shared string (Rc<String>) to avoid copying.
-    streams: HashMap<String, Vec<StreamDescriptor>>,
+    global_streams: HashMap<String, Vec<StreamDescriptor>>,
 
     /// Contains stream generation that private stream should have at the scope start.
     data_restr_stream_generations: RestrictedStreamGens,
@@ -46,14 +46,34 @@ struct StreamDescriptor {
 }
 
 impl Streams {
+    pub(crate) fn from_data(
+        global_streams: &GlobalStreamGens,
+        data_restr_stream_generations: RestrictedStreamGens,
+    ) -> Self {
+        let global_streams = global_streams
+            .iter()
+            .map(|(stream_name, &generations_count)| {
+                let global_stream = Stream::from_generations_count(generations_count as usize);
+                let descriptor = StreamDescriptor::global(global_stream);
+                (stream_name.to_string(), vec![descriptor])
+            })
+            .collect::<HashMap<_, _>>();
+
+        Self {
+            global_streams,
+            data_restr_stream_generations,
+            collected_restricted_stream_gens: <_>::default(),
+        }
+    }
+
     pub(crate) fn get(&self, name: &str, position: usize) -> Option<&Stream> {
-        self.streams
+        self.global_streams
             .get(name)
             .and_then(|descriptors| find_closest(descriptors.iter(), position))
     }
 
     pub(crate) fn get_mut(&mut self, name: &str, position: usize) -> Option<&mut Stream> {
-        self.streams
+        self.global_streams
             .get_mut(name)
             .and_then(|descriptors| find_closest_mut(descriptors.iter_mut(), position))
     }
@@ -76,20 +96,12 @@ impl Streams {
                 //  - and by this function, and if there is no such a streams in streams,
                 //    it means that a new global one should be created.
                 let stream = Stream::from_value(value);
-                self.add_global_stream(stream_name.to_string(), stream);
+                let descriptor = StreamDescriptor::global(stream);
+                self.global_streams.insert(stream_name.to_string(), vec![descriptor]);
                 let generation = 0;
                 Ok(generation)
             }
         }
-    }
-
-    pub(crate) fn add_global_stream(&mut self, name: String, stream: Stream) {
-        let descriptor = StreamDescriptor::global(stream);
-        self.streams.insert(name, vec![descriptor]);
-    }
-
-    pub(crate) fn add_restricted_stream(&mut self, name: String, generations: HashMap<u32, Vec<u32>>) {
-        self.data_restr_stream_generations.insert(name, generations);
     }
 
     pub(crate) fn meet_scope_start(&mut self, name: impl Into<String>, span: Span, iteration: u32) {
@@ -100,7 +112,7 @@ impl Streams {
 
         let new_stream = Stream::from_generations_count(generations_count as usize);
         let new_descriptor = StreamDescriptor::restricted(new_stream, span);
-        match self.streams.entry(name) {
+        match self.global_streams.entry(name) {
             Occupied(mut entry) => {
                 entry.get_mut().push(new_descriptor);
             }
@@ -112,12 +124,12 @@ impl Streams {
 
     pub(crate) fn meet_scope_end(&mut self, name: String, position: u32) {
         // unwraps are safe here because met_scope_end must be called after met_scope_start
-        let stream_descriptors = self.streams.get_mut(&name).unwrap();
+        let stream_descriptors = self.global_streams.get_mut(&name).unwrap();
         // delete a stream after exit from a scope
         let last_descriptor = stream_descriptors.pop().unwrap();
         if stream_descriptors.is_empty() {
             // streams should contain only non-empty stream embodiments
-            self.streams.remove(&name);
+            self.global_streams.remove(&name);
         }
 
         self.collect_stream_generation(name, position, last_descriptor.stream.generations_count() as u32);
@@ -129,7 +141,7 @@ impl Streams {
         // since it's called at the end of execution, streams contains only global ones,
         // because all private's been deleted after exiting a scope
         let global_streams = self
-            .streams
+            .global_streams
             .into_iter()
             .map(|(name, mut descriptors)| {
                 // unwrap is safe here because of invariant that streams contains non-empty vectors,
@@ -214,7 +226,7 @@ use std::fmt;
 
 impl fmt::Display for Streams {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        for (name, descriptors) in self.streams.iter() {
+        for (name, descriptors) in self.global_streams.iter() {
             if let Some(last_descriptor) = descriptors.last() {
                 writeln!(f, "{} => {}", name, last_descriptor)?;
             }

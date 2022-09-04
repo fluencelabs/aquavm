@@ -23,37 +23,24 @@ fn issue_300() {
     let mut peer_vm_1 = create_avm(echo_call_service(), peer_id_1);
     let peer_id_2 = "peer_id_2";
     let mut peer_vm_2 = create_avm(echo_call_service(), peer_id_2);
-    let peer_id_3 = "peer_id_3";
-    let mut peer_vm_3 = create_avm(echo_call_service(), peer_id_3);
 
     let script = f!(r#"
-        ;(new $stream
+        (new $stream
             (par
                 (call "{peer_id_1}" ("" "") [2] $stream)
-                (seq
-                    (call "{peer_id_2}" ("" "") [1] $stream)
-                    (seq
-                        (call "{peer_id_3}" ("" "") [0] $stream)
-                        (call "{peer_id_2}" ("" "") [$stream])
-                    )
-                )
+                (call "{peer_id_2}" ("" "") [1] $stream)
             )
-        ;)
+        )
     "#);
 
     let result_1 = checked_call_vm!(peer_vm_2, <_>::default(), &script, "", "");
-
     let result_2 = checked_call_vm!(peer_vm_1, <_>::default(), &script, "", result_1.data.clone());
-
-    let result_3 = checked_call_vm!(peer_vm_3, <_>::default(), &script, "", result_2.data);
-    print_trace(&result_1, "result 1");
-    print_trace(&result_3, "result 3");
-    let result_4 = checked_call_vm!(peer_vm_2, <_>::default(), &script, result_1.data, result_3.data);
-    print_trace(&result_4, "result 3");
+    let actual_trace = trace_from_result(&result_2);
 
     let expected_trace = vec![
-        executed_state::par(1, 3),
+        executed_state::par(1, 1),
         executed_state::stream_number(2, 1),
         executed_state::stream_number(1, 0),
     ];
+    assert_eq!(actual_trace, expected_trace);
 }

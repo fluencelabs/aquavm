@@ -16,7 +16,6 @@
 
 use super::PreparationError;
 use crate::execution_step::ExecutionCtx;
-use crate::execution_step::Stream;
 use crate::execution_step::TraceHandler;
 
 use air_interpreter_data::InterpreterData;
@@ -73,22 +72,6 @@ fn make_exec_ctx(
     let call_results = serde_json::from_slice(call_results)
         .map_err(|e| PreparationError::CallResultsDeFailed(e, call_results.to_vec()))?;
 
-    let mut ctx = ExecutionCtx::new(run_parameters, call_results, prev_data.last_call_request_id);
-    create_streams(&mut ctx, prev_data);
-
+    let ctx = ExecutionCtx::new(prev_data, call_results, run_parameters);
     Ok(ctx)
-}
-
-fn create_streams(ctx: &mut ExecutionCtx<'_>, prev_data: &InterpreterData) {
-    for (stream_name, generation_count) in prev_data.global_streams.iter() {
-        let new_stream = Stream::from_generations_count(*generation_count as usize);
-
-        // it's impossible to have duplicates of streams in data because of HashMap in data
-        ctx.streams.add_global_stream(stream_name.clone(), new_stream);
-    }
-
-    for (stream_name, generations) in prev_data.restricted_streams.iter() {
-        ctx.streams
-            .add_restricted_stream(stream_name.clone(), generations.clone())
-    }
 }
