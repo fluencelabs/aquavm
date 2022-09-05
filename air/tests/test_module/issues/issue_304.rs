@@ -34,7 +34,8 @@ fn issue_304() {
 )
     "#);
 
-    let executor = TestExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), &script).expect("invalid test AIR script");
+    let executor = TestExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), &script)
+        .expect("invalid test AIR script");
     let res = executor.execute_one(init_peer_id).unwrap();
     assert_eq!(res.ret_code, 0);
 }
