@@ -113,6 +113,7 @@ dependencies = [
 name = "air-lambda-ast"
 version = "0.1.0"
 dependencies = [
+ "itertools 0.10.3",
  "non-empty-vec",
  "serde",
  "serde_json",

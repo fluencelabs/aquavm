@@ -16,12 +16,14 @@
 
 use super::errors::LexerError;
 use super::token::Token;
-
 use crate::parser::lexer::is_air_alphanumeric;
+
 use std::iter::Peekable;
 use std::str::CharIndices;
 
 const ARRAY_IDX_BASE: u32 = 10;
+const LENGTH_FUNCTOR: &str = "length";
+const VALUE_PATH_STARTER: &str = ".$";
 
 pub type Spanned<Token, Loc, Error> = Result<(Loc, Token, Loc), Error>;
 
@@ -51,7 +53,10 @@ impl<'input> AccessorsLexer<'input> {
             '[' => Ok((start_pos, Token::OpenSquareBracket, start_pos + 1)),
             ']' => Ok((start_pos, Token::CloseSquareBracket, start_pos + 1)),
 
-            '.' => Ok((start_pos, Token::Selector, start_pos + 1)),
+            '.' => Ok((start_pos, Token::ValuePathSelector, start_pos + 1)),
+
+            LENGTH_FUNCTOR => Ok((start_pos, Token::LengthFunctor, start_pos + LENGTH_FUNCTOR.len())),
+            VALUE_PATH_STARTER => Ok((start_pos, Token::ValuePathStarter, start_pos + VALUE_PATH_STARTER.len())),
 
             d if d.is_digit(ARRAY_IDX_BASE) => self.tokenize_arrays_idx(start_pos),
             s if is_air_alphanumeric(s) => self.tokenize_field_name(start_pos),
@@ -108,5 +113,15 @@ impl<'input> AccessorsLexer<'input> {
         }
 
         &self.input[start_pos..end_pos + 1]
+    }
+
+    fn tokenize_string(string_to_parse: &str, start_pos: usize) -> Spanned<Token<'input>, usize, LexerError> {
+        if string_to_parse == LENGTH_FUNCTOR {
+            return Ok((start_pos, Token::LengthFunctor, start_pos + LENGTH_FUNCTOR.len()));
+        } else if string_to_parse.starts_with(VALUE_PATH_STARTER) {
+            return Ok((start_pos, Token::ValuePathStarter, start_pos + VALUE_PATH_STARTER.len()))
+        }
+
+        Err(LexerError::UnexpectedSymbol(start_pos, start_pos + 1))
     }
 }
