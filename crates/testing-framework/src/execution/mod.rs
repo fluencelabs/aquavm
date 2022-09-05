@@ -146,6 +146,7 @@ fn build_peers(
 #[cfg(test)]
 mod tests {
     use air_test_utils::prelude::*;
+    use pretty_assertions::assert_eq;
 
     use super::*;
 
@@ -248,7 +249,7 @@ mod tests {
     }
 
     #[test]
-    fn test_seq_result() {
+    fn test_seq_ok() {
         let exec = TestExecutor::new(
             TestRunParameters::from_init_peer_id("init_peer_id"),
             vec![],
@@ -260,7 +261,7 @@ mod tests {
       (ap 1 k)
       (fold var i
         (seq
-          (call i.$.p ("service" "func") [i k] k)  ; seq_result = {"0":12,"default":42}
+          (call i.$.p ("service" "func") [i k] k)  ; seq_ok = {"0":12,"default":42}
           (next i)))))
   (call "init_peer_id" ("a" "b") []) ; ok = 0
 )"#,
@@ -315,6 +316,82 @@ mod tests {
                 trace,
                 ExecutionTrace::from(vec![
                     scalar(json!([{"p":"peer2","v":2},{"p":"peer3","v":3},])),
+                    scalar_number(12),
+                    request_sent_by("peer2"),
+                ])
+            );
+        }
+    }
+
+    #[test]
+    fn test_seq_error() {
+        let exec = TestExecutor::new(
+            TestRunParameters::from_init_peer_id("init_peer_id"),
+            vec![],
+            IntoIterator::into_iter(["peer2", "peer3"]).map(Into::into),
+            r#"(seq
+  (seq
+    (call "peer1" ("service" "func") [] var)  ; ok = [{"p":"peer2","v":2},{"p":"peer3","v":3}, {"p":"peer4"}]
+    (seq
+      (ap 1 k)
+      (fold var i
+        (seq
+          (call i.$.p ("service" "func") [i.$.v k] k)  ; seq_error = {"0":{"ret_code":0,"result":12},"default":{"ret_code":1,"result":42}}
+          (next i)))))
+  (call "init_peer_id" ("a" "b") []) ; ok = 0
+)"#,
+        )
+        .unwrap();
+
+        let result_init: Vec<_> = exec.execution_iter("init_peer_id").unwrap().collect();
+
+        assert_eq!(result_init.len(), 1);
+        let outcome1 = &result_init[0];
+        assert_eq!(outcome1.ret_code, 0);
+        assert_eq!(outcome1.error_message, "");
+
+        assert!(exec.execution_iter("peer2").unwrap().next().is_none());
+        {
+            let results1 = exec.execute_all("peer1").unwrap();
+            assert_eq!(results1.len(), 1);
+            let outcome1 = &results1[0];
+            assert_eq!(outcome1.ret_code, 0, "{:?}", outcome1);
+            assert!(exec.execution_iter("peer1").unwrap().next().is_none());
+            assert_next_pks!(&outcome1.next_peer_pks, ["peer2"]);
+        }
+
+        {
+            let results2: Vec<_> = exec.execute_all("peer2").unwrap();
+            assert_eq!(results2.len(), 1);
+            let outcome2 = &results2[0];
+            assert_eq!(outcome2.ret_code, 0, "{:?}", outcome2);
+            assert!(exec.execution_iter("peer2").unwrap().next().is_none());
+            assert_next_pks!(&outcome2.next_peer_pks, ["peer3"]);
+
+            let trace = trace_from_result(outcome2);
+            assert_eq!(
+                trace,
+                ExecutionTrace::from(vec![
+                    scalar(json!([{"p":"peer2","v":2},{"p":"peer3","v":3},{"p":"peer4"}])),
+                    scalar_number(12),
+                    request_sent_by("peer2"),
+                ])
+            );
+        }
+
+        {
+            let results3: Vec<_> = exec.execute_all("peer3").unwrap();
+            assert_eq!(results3.len(), 1);
+            // TODO why doesn't it fail?
+            let outcome3 = &results3[0];
+            assert_eq!(outcome3.ret_code, 0, "{:?}", outcome3);
+            assert!(exec.execution_iter("peer3").unwrap().next().is_none());
+
+            let trace = trace_from_result(outcome3);
+            assert_eq!(
+                trace,
+                ExecutionTrace::from(vec![
+                    scalar(json!([{"p":"peer2","v":2},{"p":"peer3","v":3},{"p":"peer4"}])),
                     scalar_number(12),
                     request_sent_by("peer2"),
                 ])

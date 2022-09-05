@@ -50,7 +50,8 @@ pub fn parse_kw(inp: &str) -> IResult<&str, ServiceDefinition, ParseError> {
             alt((
                 tag(ServiceTagName::Ok.as_ref()),
                 tag(ServiceTagName::Error.as_ref()),
-                tag(ServiceTagName::SeqResult.as_ref()),
+                tag(ServiceTagName::SeqOk.as_ref()),
+                tag(ServiceTagName::SeqError.as_ref()),
                 tag(ServiceTagName::Behaviour.as_ref()),
             )),
             equal(),
@@ -68,9 +69,11 @@ pub fn parse_kw(inp: &str) -> IResult<&str, ServiceDefinition, ParseError> {
                 Ok(ServiceTagName::Error) => {
                     serde_json::from_str::<CallServiceResult>(value).map(ServiceDefinition::Error)
                 }
-                Ok(ServiceTagName::SeqResult) => {
-                    serde_json::from_str::<HashMap<String, JValue>>(value)
-                        .map(ServiceDefinition::SeqResult)
+                Ok(ServiceTagName::SeqOk) => serde_json::from_str::<HashMap<String, JValue>>(value)
+                    .map(ServiceDefinition::SeqOk),
+                Ok(ServiceTagName::SeqError) => {
+                    serde_json::from_str::<HashMap<String, CallServiceResult>>(value)
+                        .map(ServiceDefinition::SeqError)
                 }
                 Ok(ServiceTagName::Behaviour) => Ok(ServiceDefinition::Behaviour(value.to_owned())),
                 Err(_) => unreachable!("unknown tag {:?}", tag),
@@ -151,13 +154,13 @@ mod tests {
     }
 
     #[test]
-    fn test_seq_result() {
+    fn test_seq_ok() {
         use serde_json::json;
 
-        let res = ServiceDefinition::from_str(r#"seq_result={"default": 42, "1": true, "3": []}"#);
+        let res = ServiceDefinition::from_str(r#"seq_ok={"default": 42, "1": true, "3": []}"#);
         assert_eq!(
             res,
-            Ok(ServiceDefinition::SeqResult(maplit::hashmap! {
+            Ok(ServiceDefinition::SeqOk(maplit::hashmap! {
                 "default".to_owned() => json!(42),
                 "1".to_owned() => json!(true),
                 "3".to_owned() => json!([]),
@@ -166,15 +169,45 @@ mod tests {
     }
 
     #[test]
-    fn test_seq_result_malformed() {
-        let res = ServiceDefinition::from_str(r#"seq_result={"default": 42, "1": true, "3": ]}"#);
+    fn test_seq_ok_malformed() {
+        let res = ServiceDefinition::from_str(r#"seq_ok={"default": 42, "1": true, "3": ]}"#);
         assert!(res.is_err());
     }
 
     #[test]
-    fn test_seq_result_invalid() {
+    fn test_seq_ok_invalid() {
         // TODO perhaps, we should support both arrays and maps
-        let res = ServiceDefinition::from_str(r#"seq_result=[42, 43]"#);
+        let res = ServiceDefinition::from_str(r#"seq_ok=[42, 43]"#);
+        assert!(res.is_err());
+    }
+
+    #[test]
+    fn test_seq_error() {
+        use serde_json::json;
+
+        let res = ServiceDefinition::from_str(
+            r#"seq_error={"default": {"ret_code": 0, "result": 42}, "1": {"ret_code": 0, "result": true}, "3": {"ret_code": 1, "result": "error"}}"#,
+        );
+        assert_eq!(
+            res,
+            Ok(ServiceDefinition::SeqError(maplit::hashmap! {
+                "default".to_owned() => CallServiceResult::ok(json!(42)),
+                "1".to_owned() => CallServiceResult::ok(json!(true)),
+                "3".to_owned() => CallServiceResult::err(1, json!("error")),
+            })),
+        );
+    }
+
+    #[test]
+    fn test_seq_error_malformed() {
+        let res = ServiceDefinition::from_str(r#"seq_error={"default": 42, "1": true]}"#);
+        assert!(res.is_err());
+    }
+
+    #[test]
+    fn test_seq_error_invalid() {
+        // TODO perhaps, we should support both arrays and maps
+        let res = ServiceDefinition::from_str(r#"seq_error=[42, 43]"#);
         assert!(res.is_err());
     }
 

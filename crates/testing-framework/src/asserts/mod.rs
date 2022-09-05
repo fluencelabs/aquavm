@@ -36,10 +36,10 @@ pub enum ServiceDefinition {
     Error(CallServiceResult),
     /// Service that may return a new value on subsequent call.  Its keys are either
     /// call number string starting from "0", or "default".
-    // TODO We need to return error results too, so we need to define a call result
-    // for default and individual errors.
-    #[strum_discriminants(strum(serialize = "seq_result"))]
-    SeqResult(HashMap<String, JValue>),
+    #[strum_discriminants(strum(serialize = "seq_ok"))]
+    SeqOk(HashMap<String, JValue>),
+    #[strum_discriminants(strum(serialize = "seq_error"))]
+    SeqError(HashMap<String, CallServiceResult>),
     /// Some known service by name: "echo", "unit" (more to follow).
     #[strum_discriminants(strum(serialize = "behaviour"))]
     Behaviour(String),

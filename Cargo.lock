@@ -185,6 +185,7 @@ dependencies = [
  "maplit",
  "nom 7.1.1",
  "nom_locate",
+ "pretty_assertions",
  "serde_json",
  "strum",
 ]

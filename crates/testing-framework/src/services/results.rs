@@ -37,7 +37,8 @@ impl TryInto<CallServiceClosure> for ServiceDefinition {
                 Ok(Box::new(move |_| CallServiceResult::ok(jvalue.clone())))
             }
             ServiceDefinition::Error(call_result) => Ok(Box::new(move |_| call_result.clone())),
-            ServiceDefinition::SeqResult(call_map) => Ok(seq_result_closure(call_map)),
+            ServiceDefinition::SeqOk(call_map) => Ok(seq_ok_closure(call_map)),
+            ServiceDefinition::SeqError(call_map) => Ok(seq_error_closure(call_map)),
             ServiceDefinition::Behaviour(name) => named_service_closure(name),
         }
     }
@@ -51,7 +52,7 @@ fn named_service_closure(name: String) -> Result<CallServiceClosure, String> {
     }
 }
 
-fn seq_result_closure(call_map: HashMap<String, serde_json::Value>) -> CallServiceClosure {
+fn seq_ok_closure(call_map: HashMap<String, serde_json::Value>) -> CallServiceClosure {
     let call_number_seq = Cell::new(0);
 
     Box::new(move |_| {
@@ -71,6 +72,27 @@ fn seq_result_closure(call_map: HashMap<String, serde_json::Value>) -> CallServi
                 })
                 .clone(),
         )
+    })
+}
+
+fn seq_error_closure(call_map: HashMap<String, CallServiceResult>) -> CallServiceClosure {
+    let call_number_seq = Cell::new(0);
+
+    Box::new(move |_| {
+        let call_number = call_number_seq.get();
+        let call_num_str = call_number.to_string();
+        call_number_seq.set(call_number + 1);
+
+        call_map
+            .get(&call_num_str)
+            .or_else(|| call_map.get("default"))
+            .unwrap_or_else(|| {
+                panic!(
+                    "neither value {} nor default value not found in the {:?}",
+                    call_num_str, call_map
+                )
+            })
+            .clone()
     })
 }
 
