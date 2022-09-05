@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#![forbid(unsafe_code)]
 #![deny(
     dead_code,
     nonstandard_style,

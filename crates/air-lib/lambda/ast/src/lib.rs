@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#![forbid(unsafe_code)]
+#![warn(rust_2018_idioms)]
 #![deny(
     dead_code,
     nonstandard_style,
