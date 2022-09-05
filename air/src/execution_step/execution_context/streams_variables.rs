@@ -48,7 +48,7 @@ struct StreamDescriptor {
 impl Streams {
     pub(crate) fn from_data(
         global_streams: &GlobalStreamGens,
-        data_restr_stream_generations: RestrictedStreamGens,
+        data_restricted_stream_gens: RestrictedStreamGens,
     ) -> Self {
         let global_streams = global_streams
             .iter()
@@ -61,7 +61,7 @@ impl Streams {
 
         Self {
             streams: global_streams,
-            data_restricted_stream_gens: data_restr_stream_generations,
+            data_restricted_stream_gens,
             collected_restricted_stream_gens: <_>::default(),
         }
     }
