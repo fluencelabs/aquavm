@@ -18,6 +18,7 @@ use air_test_utils::prelude::*;
 
 use fstrings::f;
 use fstrings::format_args_f;
+use maplit::hashmap;
 
 #[test]
 fn canon_moves_execution_flow() {
@@ -232,4 +233,53 @@ fn canon_empty_stream() {
     let actual_trace = trace_from_result(&result);
     let expected_trace = vec![executed_state::canon(vec![]), executed_state::scalar(json!([]))];
     assert_eq!(actual_trace, expected_trace);
+}
+
+#[test]
+fn issue_smth() {
+    env_logger::init();
+    let mut vm = create_avm(echo_call_service(), "12D3KooWQ6S6pzRCupyqoK5G4mfPojs4ob47u4aconRJUf61eChG");
+    // {"trace":[{"call":{"executed":{"scalar":"12D3KooWHCJbJKGDfCgHSoCuK9q4STyRnVveqLoXAPBbXHTZx9Cv"}}},{"call":{"sent_by":"12D3KooWQ6S6pzRCupyqoK5G4mfPojs4ob47u4aconRJUf61eChG: 2"}}],"streams":{},"version":"0.2.2","lcid":2,"r_streams":{}}
+    let prev_data: Vec<u8> = vec![123,34,116,114,97,99,101,34,58,91,123,34,99,97,108,108,34,58,123,34,101,120,101,99,117,116,101,100,34,58,123,34,115,99,97,108,97,114,34,58,34,49,50,68,51,75,111,111,87,72,67,74,98,74,75,71,68,102,67,103,72,83,111,67,117,75,57,113,52,83,84,121,82,110,86,118,101,113,76,111,88,65,80,66,98,88,72,84,90,120,57,67,118,34,125,125,125,44,123,34,99,97,108,108,34,58,123,34,115,101,110,116,95,98,121,34,58,34,49,50,68,51,75,111,111,87,81,54,83,54,112,122,82,67,117,112,121,113,111,75,53,71,52,109,102,80,111,106,115,52,111,98,52,55,117,52,97,99,111,110,82,74,85,102,54,49,101,67,104,71,58,32,50,34,125,125,93,44,34,115,116,114,101,97,109,115,34,58,123,125,44,34,118,101,114,115,105,111,110,34,58,34,48,46,50,46,50,34,44,34,108,99,105,100,34,58,50,44,34,114,95,115,116,114,101,97,109,115,34,58,123,125,125];
+    let script = r#"
+                    (seq
+                     (seq
+                      (seq
+                       (call %init_peer_id% ("getDataSrv" "-relay-") [] -relay-)
+                       (call %init_peer_id% ("getDataSrv" "strNone") [] strNone)
+                      )
+                      (new $str
+                       (seq
+                        (seq
+                         (new $option-inline
+                          (seq
+                           (xor
+                            (ap strNone.$.[0]! $option-inline)
+                            (null)
+                           )
+                           (canon %init_peer_id% $option-inline  #option-inline-0)
+                          )
+                         )
+                         (fold #option-inline-0 i-0
+                          (seq
+                           (ap i-0 $str)
+                           (next i-0)
+                          )
+                         )
+                        )
+                        (canon %init_peer_id% $str  #str-fix)
+                       )
+                      )
+                     )
+                     (call %init_peer_id% ("callbackSrv" "response") [[] #str-fix []])
+                    )"#;
+
+    //{"2":{"ret_code":0,"result":"[]"}}
+    let call_results = hashmap! {
+        2u32 => CallServiceResult {
+            ret_code: 0,
+            result: JValue::Array(vec![]),
+        }
+    };
+    vm.runner.call(script.clone(), prev_data.clone(), "", "12D3KooWQ6S6pzRCupyqoK5G4mfPojs4ob47u4aconRJUf61eChG", 0, 700, call_results).unwrap();
 }
