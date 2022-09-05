@@ -23,6 +23,8 @@ use crate::ValueAccessor;
 
 use va_lambda::LambdaParser;
 
+use std::convert::TryFrom;
+
 // Caching parser to cache internal regexes, which are expensive to instantiate
 // See also https://github.com/lalrpop/lalrpop/issues/269
 thread_local!(static PARSER: LambdaParser = LambdaParser::new());
@@ -43,10 +45,5 @@ pub fn parse(lambda: &str) -> LambdaParserResult<'_, LambdaAST> {
 }
 
 fn try_to_lambda(accessors: Vec<ValueAccessor>) -> LambdaParserResult<'_, LambdaAST> {
-    if accessors.is_empty() {
-        return Err(LambdaParserError::EmptyLambda);
-    }
-
-    let ast = unsafe { LambdaAST::new_unchecked(accessors) };
-    Ok(ast)
+    LambdaAST::try_from(accessors).or(Err(LambdaParserError::EmptyLambda))
 }

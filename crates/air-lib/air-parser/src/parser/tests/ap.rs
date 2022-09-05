@@ -22,6 +22,8 @@ use air_lambda_ast::{LambdaAST, ValueAccessor};
 use fstrings::f;
 use fstrings::format_args_f;
 
+use std::convert::TryFrom;
+
 #[test]
 fn ap_with_literal() {
     let source_code = r#"
@@ -75,11 +77,12 @@ fn ap_with_last_error() {
 
     let actual = parse(source_code);
     let expected = ap(
-        ApArgument::LastError(Some(unsafe {
-            LambdaAST::new_unchecked(vec![ValueAccessor::FieldAccessByName {
+        ApArgument::LastError(Some(
+            LambdaAST::try_from(vec![ValueAccessor::FieldAccessByName {
                 field_name: "message",
             }])
-        })),
+            .unwrap(),
+        )),
         ApResult::Stream(Stream::new("$stream", 37)),
     );
 
@@ -175,7 +178,7 @@ fn ap_with_canon_stream_with_lambda() {
     let expected = ap(
         ApArgument::CanonStream(CanonStreamWithLambda::new(
             canon_stream,
-            Some(unsafe { LambdaAST::new_unchecked(vec![ValueAccessor::ArrayAccess { idx: 0 }]) }),
+            Some(LambdaAST::try_from(vec![ValueAccessor::ArrayAccess { idx: 0 }]).unwrap()),
             13,
         )),
         ApResult::Scalar(Scalar::new(scalar, 33)),

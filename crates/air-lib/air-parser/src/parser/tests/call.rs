@@ -24,6 +24,7 @@ use fstrings::f;
 use fstrings::format_args_f;
 use lalrpop_util::ParseError;
 
+use std::convert::TryFrom;
 use std::rc::Rc;
 
 #[test]
@@ -471,12 +472,11 @@ fn canon_stream_with_lambda_in_triplet() {
     let expected = call(
         CallInstrValue::Variable(VariableWithLambda::canon_stream_wl(
             canon_stream,
-            unsafe {
-                LambdaAST::new_unchecked(vec![
-                    ValueAccessor::ArrayAccess { idx: 0 },
-                    ValueAccessor::FieldAccessByName { field_name: "path" },
-                ])
-            },
+            LambdaAST::try_from(vec![
+                ValueAccessor::ArrayAccess { idx: 0 },
+                ValueAccessor::FieldAccessByName { field_name: "path" },
+            ])
+            .unwrap(),
             19,
         )),
         CallInstrValue::Literal(service_id),
