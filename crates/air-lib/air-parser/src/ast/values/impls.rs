@@ -18,6 +18,8 @@ use super::*;
 use air_lambda_parser::LambdaAST;
 use air_lambda_parser::ValueAccessor;
 
+use std::convert::TryFrom;
+
 impl<'i> ScalarWithLambda<'i> {
     pub fn new(name: &'i str, lambda: Option<LambdaAST<'i>>, position: usize) -> Self {
         Self {
@@ -27,16 +29,15 @@ impl<'i> ScalarWithLambda<'i> {
         }
     }
 
-    // it's unsafe method that should be used only for tests
     pub(crate) fn from_raw_lambda(
         name: &'i str,
         lambda: Vec<ValueAccessor<'i>>,
         position: usize,
     ) -> Self {
-        let lambda = unsafe { LambdaAST::new_unchecked(lambda) };
+        let lambda = LambdaAST::try_from(lambda).ok();
         Self {
             name,
-            lambda: Some(lambda),
+            lambda,
             position,
         }
     }
@@ -51,17 +52,16 @@ impl<'i> StreamWithLambda<'i> {
         }
     }
 
-    // it's unsafe method that should be used only for tests
     #[allow(dead_code)]
     pub(crate) fn from_raw_lambda(
         name: &'i str,
         lambda: Vec<ValueAccessor<'i>>,
         position: usize,
     ) -> Self {
-        let lambda = unsafe { LambdaAST::new_unchecked(lambda) };
+        let lambda = LambdaAST::try_from(lambda).ok();
         Self {
             name,
-            lambda: Some(lambda),
+            lambda,
             position,
         }
     }
@@ -154,7 +154,6 @@ impl<'i> VariableWithLambda<'i> {
         }
     }
 
-    // This function is unsafe and lambda must be non-empty, although it's used only for tests
     #[allow(dead_code)]
     pub(crate) fn from_raw_lambda_scalar(
         name: &'i str,
@@ -165,7 +164,6 @@ impl<'i> VariableWithLambda<'i> {
         Self::Scalar(scalar)
     }
 
-    // This function is unsafe and lambda must be non-empty, although it's used only for tests
     #[allow(dead_code)]
     pub(crate) fn from_raw_lambda_stream(
         name: &'i str,
