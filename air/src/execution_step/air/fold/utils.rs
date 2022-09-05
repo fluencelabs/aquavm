@@ -51,6 +51,10 @@ pub(crate) fn construct_canon_stream_iterable_value<'ctx>(
     exec_ctx: &ExecutionCtx<'ctx>,
 ) -> ExecutionResult<FoldIterableScalar> {
     let canon_stream = exec_ctx.scalars.get_canon_stream(ast_canon_stream.name)?;
+    if canon_stream.is_empty() {
+        return Ok(FoldIterableScalar::Empty);
+    }
+
     // TODO: this one is a relatively long operation and will be refactored in Boxed Value
     let iterable_ingredients = CanonStreamIterableIngredients::init(canon_stream.clone());
     let iterable = Box::new(iterable_ingredients);
