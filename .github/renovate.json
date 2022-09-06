@@ -22,7 +22,7 @@
       "groupName": "all non-major JS dependencies"
     },
     {
-      "matchPackagePatterns": ["^@wasmer", "^wasmer"],
+      "matchPackagePatterns": ["^@wasmer", "^wasmer", "^wasm-bindgen"],
       "enabled": false
     }
   ]
