@@ -58,7 +58,7 @@ pub(crate) fn select_by_lambda_from_scalar<'value, 'i>(
     }
 }
 
-pub(crate) fn select_by_path_from_stream<'value, 'i>(
+fn select_by_path_from_stream<'value, 'i>(
     stream: impl ExactSizeIterator<Item = &'value JValue> + 'value,
     lambda: &NonEmpty<ValueAccessor<'_>>,
     exec_ctx: &ExecutionCtx<'i>,
@@ -89,7 +89,7 @@ pub(crate) fn select_by_path_from_stream<'value, 'i>(
     Ok(select_result)
 }
 
-pub(crate) fn select_by_functor_from_stream<'value, 'i>(
+fn select_by_functor_from_stream<'value, 'i>(
     stream: impl ExactSizeIterator<Item = &'value JValue> + 'value,
     functor: &Functor,
 ) -> StreamSelectResult<'value> {
@@ -101,7 +101,7 @@ pub(crate) fn select_by_functor_from_stream<'value, 'i>(
     }
 }
 
-pub(crate) fn select_by_path_from_scalar<'value, 'accessor, 'i>(
+fn select_by_path_from_scalar<'value, 'accessor, 'i>(
     mut value: &'value JValue,
     lambda: impl Iterator<Item = &'accessor ValueAccessor<'accessor>>,
     exec_ctx: &ExecutionCtx<'i>,
@@ -125,7 +125,7 @@ pub(crate) fn select_by_path_from_scalar<'value, 'accessor, 'i>(
     Ok(Cow::Borrowed(value))
 }
 
-pub(crate) fn select_by_functor_from_scalar(value: &JValue, functor: &Functor) -> ExecutionResult<JValue> {
+fn select_by_functor_from_scalar(value: &JValue, functor: &Functor) -> ExecutionResult<JValue> {
     match functor {
         Functor::Length => {
             let length = value
