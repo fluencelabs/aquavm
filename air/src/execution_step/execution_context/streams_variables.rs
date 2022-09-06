@@ -33,7 +33,7 @@ pub(crate) struct Streams {
     streams: HashMap<String, Vec<StreamDescriptor>>,
 
     /// Contains stream generation that private stream should have at the scope start.
-    data_restr_stream_generations: RestrictedStreamGens,
+    data_restricted_stream_gens: RestrictedStreamGens,
 
     /// Contains stream generations that each private stream had at the scope end.
     /// Then it's placed into data
@@ -46,6 +46,26 @@ struct StreamDescriptor {
 }
 
 impl Streams {
+    pub(crate) fn from_data(
+        global_streams: &GlobalStreamGens,
+        data_restricted_stream_gens: RestrictedStreamGens,
+    ) -> Self {
+        let global_streams = global_streams
+            .iter()
+            .map(|(stream_name, &generations_count)| {
+                let global_stream = Stream::from_generations_count(generations_count as usize);
+                let descriptor = StreamDescriptor::global(global_stream);
+                (stream_name.to_string(), vec![descriptor])
+            })
+            .collect::<HashMap<_, _>>();
+
+        Self {
+            streams: global_streams,
+            data_restricted_stream_gens,
+            collected_restricted_stream_gens: <_>::default(),
+        }
+    }
+
     pub(crate) fn get(&self, name: &str, position: usize) -> Option<&Stream> {
         self.streams
             .get(name)
@@ -76,16 +96,12 @@ impl Streams {
                 //  - and by this function, and if there is no such a streams in streams,
                 //    it means that a new global one should be created.
                 let stream = Stream::from_value(value);
-                self.add_global_stream(stream_name.to_string(), stream);
+                let descriptor = StreamDescriptor::global(stream);
+                self.streams.insert(stream_name.to_string(), vec![descriptor]);
                 let generation = 0;
                 Ok(generation)
             }
         }
-    }
-
-    pub(crate) fn add_global_stream(&mut self, name: String, stream: Stream) {
-        let descriptor = StreamDescriptor::global(stream);
-        self.streams.insert(name, vec![descriptor]);
     }
 
     pub(crate) fn meet_scope_start(&mut self, name: impl Into<String>, span: Span, iteration: u32) {
@@ -140,7 +156,7 @@ impl Streams {
     }
 
     fn stream_generation_from_data(&self, name: &str, position: u32, iteration: usize) -> Option<u32> {
-        self.data_restr_stream_generations
+        self.data_restricted_stream_gens
             .get(name)
             .and_then(|scopes| scopes.get(&position).and_then(|iterations| iterations.get(iteration)))
             .copied()

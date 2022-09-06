@@ -15,6 +15,8 @@
  */
 
 use super::*;
+use crate::execution_step::PEEK_ALLOWED_ON_NON_EMPTY;
+
 use air_lambda_parser::LambdaAST;
 use air_parser::ast;
 
@@ -90,10 +92,7 @@ fn apply_scalar_impl(
     let mut result = match scalar {
         ScalarRef::Value(result) => result.clone(),
         ScalarRef::IterableValue(iterator) => {
-            let result = iterator.iterable.peek().expect(
-                "peek always return elements inside fold,\
-            this guaranteed by implementation of next and avoiding empty folds",
-            );
+            let result = iterator.iterable.peek().expect(PEEK_ALLOWED_ON_NON_EMPTY);
             result.into_resolved_result()
         }
     };
