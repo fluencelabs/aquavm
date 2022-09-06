@@ -20,22 +20,22 @@ use air_test_utils::prelude::*;
 #[test]
 // test for github.com/fluencelabs/aquavm/issues/304
 fn issue_304() {
+    let script = r#"
+        (par
+           (seq
+              (fail 1 "error")
+              (seq
+                 (call "peer_id1" ("" "") [] $stream)
+                 (canon "peer_id1" $stream #can)))
+           (fold #can i
+              (null))
+        )
+    "#;
+
     let init_peer_id = "init_peer_id";
-
-    let script = f!(r#"
-(par
-   (seq
-      (fail 1 "error")
-      (seq
-         (call "peer_id1" ("" "") [] $stream)
-         (canon "peer_id1" $stream #can)))
-   (fold #can i
-      (null))
-)
-    "#);
-
     let executor = TestExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), &script)
         .expect("invalid test AIR script");
+
     let res = executor.execute_one(init_peer_id).unwrap();
-    assert_eq!(res.ret_code, 0);
+    assert_eq!(res.ret_code, air_interpreter_interface::INTERPRETER_SUCCESS);
 }
