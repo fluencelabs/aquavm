@@ -154,17 +154,7 @@ export async function callAvm(
     data: Uint8Array,
     callResults: CallResultsArray,
 ): Promise<InterpreterResult> {
-    try {
-        const avmArg = serializeAvmArgs(runParams, air, prevData, data, callResults);
-        const rawResult = await fn(avmArg);
-        return deserializeAvmResult(rawResult);
-    } catch (e) {
-        return {
-            retCode: -1,
-            errorMessage: 'marine-js call failed, ' + e,
-            data: new Uint8Array(),
-            nextPeerPks: [],
-            callRequests: [],
-        };
-    }
+    const avmArg = serializeAvmArgs(runParams, air, prevData, data, callResults);
+    const rawResult = await fn(avmArg);
+    return deserializeAvmResult(rawResult);
 }
