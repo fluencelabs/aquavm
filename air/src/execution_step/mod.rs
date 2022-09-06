@@ -21,6 +21,9 @@ pub(crate) mod execution_context;
 mod lambda_applier;
 mod resolver;
 
+const PEEK_ALLOWED_ON_NON_EMPTY: &str = "peek always return elements inside fold,\
+            this guaranteed by implementation of next and avoiding empty folds";
+
 pub use errors::CatchableError;
 pub use errors::ExecutionError;
 pub use errors::UncatchableError;

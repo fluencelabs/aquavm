@@ -16,6 +16,7 @@
 
 use super::*;
 use crate::execution_step::CatchableError;
+use crate::execution_step::PEEK_ALLOWED_ON_NON_EMPTY;
 use crate::JValue;
 use crate::LambdaAST;
 use crate::SecurityTetraplet;
@@ -90,7 +91,7 @@ fn create_scalar_iterable<'ctx>(
     match exec_ctx.scalars.get_value(variable_name)? {
         ScalarRef::Value(call_result) => from_value(call_result.clone(), variable_name),
         ScalarRef::IterableValue(fold_state) => {
-            let iterable_value = fold_state.iterable.peek().unwrap();
+            let iterable_value = fold_state.iterable.peek().expect(PEEK_ALLOWED_ON_NON_EMPTY);
             let call_result = iterable_value.into_resolved_result();
             from_value(call_result, variable_name)
         }
@@ -138,7 +139,7 @@ fn create_scalar_lambda_iterable<'ctx>(
             from_jvalue(jvalues, tetraplet, lambda)
         }
         ScalarRef::IterableValue(fold_state) => {
-            let iterable_value = fold_state.iterable.peek().unwrap();
+            let iterable_value = fold_state.iterable.peek().expect(PEEK_ALLOWED_ON_NON_EMPTY);
             let jvalue = iterable_value.apply_lambda(lambda, exec_ctx)?;
             let tetraplet = to_tetraplet(&iterable_value);
 
