@@ -162,6 +162,9 @@ export async function callAvm(
         return {
             retCode: -1,
             errorMessage: 'marine-js call failed, ' + e,
-        } as any;
+            data: new Uint8Array(),
+            nextPeerPks: [],
+            callRequests: [],
+        };
     }
 }
