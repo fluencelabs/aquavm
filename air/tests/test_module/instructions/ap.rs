@@ -249,7 +249,7 @@ fn ap_canon_stream_with_lambda() {
         vm_1_peer_id,
         service_name,
         function_name,
-        ".[1]",
+        ".$.[1]",
     )]]);
     assert_eq!(tetraplet_checker.as_ref(), &expected_tetraplet);
 }
