@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+mod impls;
 mod traits;
 
 use non_empty_vec::NonEmpty;
@@ -21,16 +22,14 @@ use serde::Deserialize;
 use serde::Serialize;
 
 // TODO: rename lambda to smth more appropriate
-#[derive(Debug, PartialEq, Eq, Clone, Serialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub enum LambdaAST<'input> {
     /// Various functors that could applied to a value.
     Functor(Functor),
     /// Each value in AIR could be represented as a tree and
     /// this variant acts as a path in such trees.
+    #[serde(borrow)]
     ValuePath(NonEmpty<ValueAccessor<'input>>),
-    // needed to allow parser catch all errors from a lambda expression without stopping
-    // on the very first one. Although, this variant is guaranteed not to be present in a lambda.
-    Error,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Serialize, Deserialize)]
@@ -51,5 +50,7 @@ pub enum ValueAccessor<'input> {
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Serialize, Deserialize)]
 pub enum Functor {
+    /// Returns a length of a value if this value has array type (json array or canon stream)
+    /// or a error if not.
     Length,
 }

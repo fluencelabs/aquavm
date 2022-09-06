@@ -14,18 +14,24 @@
  * limitations under the License.
  */
 
-use crate::ast::Value;
-use air_lambda_ast::LambdaAST;
-use air_lambda_ast::ValueAccessor;
+use crate::Functor;
+use crate::LambdaAST;
+use crate::ValueAccessor;
 
-#[test]
-// https://github.com/fluencelabs/aquavm/issues/263
-fn issue_263() {
-    let val = Value::LastError(Some(
-        LambdaAST::try_from_accessors(vec![ValueAccessor::FieldAccessByName {
-            field_name: "message",
-        }])
-        .unwrap(),
-    ));
-    assert_eq!(val.to_string(), "%last_error%.$.message");
+pub use non_empty_vec::EmptyError;
+use non_empty_vec::NonEmpty;
+
+use std::convert::TryFrom;
+
+impl<'input> LambdaAST<'input> {
+    pub fn try_from_accessors(accessors: Vec<ValueAccessor<'input>>) -> Result<Self, EmptyError> {
+        let value_path = NonEmpty::try_from(accessors)?;
+        let lambda_ast = Self::ValuePath(value_path);
+
+        Ok(lambda_ast)
+    }
+
+    pub fn from_functor(functor: Functor) -> Self {
+        Self::Functor(functor)
+    }
 }

@@ -207,7 +207,6 @@ fn parse_last_error(input: &str, start_pos: usize) -> LexerResult<Token<'_>> {
         return Ok(Token::LastError);
     }
 
-    let last_error_size = last_error_size + 2;
     if input.len() <= last_error_size {
         return Err(LexerError::lambda_parser_error(
             start_pos + last_error_size..start_pos + input.len(),

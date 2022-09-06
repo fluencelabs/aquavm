@@ -290,7 +290,7 @@ fn fold_json_path() {
 
     let instruction = parse(source_code);
     let expected = fold_scalar_variable(
-        ScalarWithLambda::from_raw_lambda(
+        ScalarWithLambda::from_value_path(
             "members",
             vec![ValueAccessor::ArrayAccess { idx: 123321 }],
             33,
@@ -358,7 +358,7 @@ fn comments() {
     "#;
     let instruction = parse(source_code);
     let expected = fold_scalar_variable(
-        ScalarWithLambda::from_raw_lambda(
+        ScalarWithLambda::from_value_path(
             "members",
             vec![
                 ValueAccessor::FieldAccessByName {

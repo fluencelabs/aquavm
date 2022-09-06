@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-mod accessors_lexer;
 mod errors;
+mod lambda_ast_lexer;
 mod token;
 mod utils;
 
 #[cfg(test)]
 mod tests;
 
-pub use accessors_lexer::AccessorsLexer;
 pub use errors::LexerError;
+pub use lambda_ast_lexer::LambdaASTLexer;
 pub use token::Token;
 
 pub(self) use utils::is_air_alphanumeric;

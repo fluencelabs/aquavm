@@ -22,10 +22,9 @@ use super::Token;
 use air_lambda_parser::LambdaAST;
 use air_lambda_parser::ValueAccessor;
 
+use air_lambda_ast::Functor;
 use fstrings::f;
 use fstrings::format_args_f;
-
-use std::convert::TryFrom;
 
 fn run_lexer(input: &str) -> Vec<Spanned<Token<'_>, usize, LexerError>> {
     let lexer = AIRLexer::new(input);
@@ -195,6 +194,80 @@ fn stream() {
 }
 
 #[test]
+fn canon_stream() {
+    const CANON_STREAM: &str = "#stream____asdasd";
+
+    lexer_test(
+        CANON_STREAM,
+        Single(Ok((
+            0,
+            Token::CanonStream {
+                name: CANON_STREAM,
+                position: 0,
+            },
+            CANON_STREAM.len(),
+        ))),
+    );
+}
+
+#[test]
+fn stream_with_functor() {
+    let stream_name = "$stream";
+    let stream_with_functor: String = f!("{stream_name}.length");
+
+    lexer_test(
+        &stream_with_functor,
+        Single(Ok((
+            0,
+            Token::StreamWithLambda {
+                name: stream_name,
+                lambda: LambdaAST::Functor(Functor::Length),
+                position: 0,
+            },
+            stream_with_functor.len(),
+        ))),
+    );
+}
+
+#[test]
+fn canon_stream_with_functor() {
+    let canon_stream_name = "#canon_stream";
+    let canon_stream_with_functor: String = f!("{canon_stream_name}.length");
+
+    lexer_test(
+        &canon_stream_with_functor,
+        Single(Ok((
+            0,
+            Token::CanonStreamWithLambda {
+                name: canon_stream_name,
+                lambda: LambdaAST::Functor(Functor::Length),
+                position: 0,
+            },
+            canon_stream_with_functor.len(),
+        ))),
+    );
+}
+
+#[test]
+fn scalar_with_functor() {
+    let scalar_name = "scalar";
+    let scalar_with_functor: String = f!("{scalar_name}.length");
+
+    lexer_test(
+        &scalar_with_functor,
+        Single(Ok((
+            0,
+            Token::ScalarWithLambda {
+                name: scalar_name,
+                lambda: LambdaAST::Functor(Functor::Length),
+                position: 0,
+            },
+            scalar_with_functor.len(),
+        ))),
+    );
+}
+
+#[test]
 fn string_literal() {
     const STRING_LITERAL: &str = r#""some_string""#;
 
@@ -308,7 +381,7 @@ fn lambda() {
             0,
             Token::ScalarWithLambda {
                 name: "value",
-                lambda: LambdaAST::try_from(vec![
+                lambda: LambdaAST::try_from_accessors(vec![
                     ValueAccessor::FieldAccessByName {
                         field_name: "field",
                     },
@@ -415,7 +488,7 @@ fn last_error_instruction() {
     const LAST_ERROR: &str = r#"%last_error%.$.instruction"#;
 
     let token = Token::LastErrorWithLambda(
-        LambdaAST::try_from(vec![ValueAccessor::FieldAccessByName {
+        LambdaAST::try_from_accessors(vec![ValueAccessor::FieldAccessByName {
             field_name: "instruction",
         }])
         .unwrap(),
@@ -429,7 +502,7 @@ fn last_error_message() {
     const LAST_ERROR: &str = r#"%last_error%.$.message"#;
 
     let token = Token::LastErrorWithLambda(
-        LambdaAST::try_from(vec![ValueAccessor::FieldAccessByName {
+        LambdaAST::try_from_accessors(vec![ValueAccessor::FieldAccessByName {
             field_name: "message",
         }])
         .unwrap(),
@@ -442,7 +515,7 @@ fn last_error_peer_id() {
     const LAST_ERROR: &str = r#"%last_error%.$.peer_id"#;
 
     let token = Token::LastErrorWithLambda(
-        LambdaAST::try_from(vec![ValueAccessor::FieldAccessByName {
+        LambdaAST::try_from_accessors(vec![ValueAccessor::FieldAccessByName {
             field_name: "peer_id",
         }])
         .unwrap(),
@@ -455,7 +528,7 @@ fn last_error_non_standard_field() {
     const LAST_ERROR: &str = r#"%last_error%.$.asdasd"#;
 
     let token = Token::LastErrorWithLambda(
-        LambdaAST::try_from(vec![ValueAccessor::FieldAccessByName {
+        LambdaAST::try_from_accessors(vec![ValueAccessor::FieldAccessByName {
             field_name: "asdasd",
         }])
         .unwrap(),

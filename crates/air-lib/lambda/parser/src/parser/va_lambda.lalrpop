@@ -1,27 +1,20 @@
 use crate::ValueAccessor;
-use crate::LambdaAST;
+use crate::parser::lambda_parser::RawLambdaAST;
 use crate::Functor;
 use crate::parser::lexer::LexerError;
 use crate::parser::lexer::Token;
 
-use non_empty_vec::NonEmpty;
 use lalrpop_util::ErrorRecovery;
 
 // the only thing why input matters here is just introducing lifetime for Token
 grammar<'err, 'input>(input: &'input str, errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>);
 
-pub Lambda: LambdaAST<'input> = {
-    <value_path_starter: ".$"> <accessors: ValueAccessor*> => {
-        if accessors.is_empty() {
-            return LambdaAST::Error;
-        }
+pub(crate) RawLambdaAST: RawLambdaAST<'input> = {
+    <value_path_starter: ".$"> <accessors: ValueAccessor*> => RawLambdaAST::ValuePath(accessors),
 
-        unsafe { LambdaAST::ValuePath(NonEmpty::new_unchecked(accessors)) }
-    },
+    length_functor => RawLambdaAST::Functor(Functor::Length),
 
-    <value_path_selector: "."> length_functor => LambdaAST::Functor(Functor::Length),
-
-    ! => { errors.push(<>); LambdaAST::Error },
+    ! => { errors.push(<>); RawLambdaAST::Error },
 }
 
 ValueAccessor: ValueAccessor<'input> = {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use super::select_from_stream;
+use super::select_by_lambda_from_stream;
 use super::ExecutionResult;
 use super::JValuable;
 use crate::execution_step::boxed_value::CanonStream;
@@ -24,15 +24,17 @@ use crate::JValue;
 use crate::LambdaAST;
 use crate::SecurityTetraplet;
 
-use air_lambda_ast::format_ast;
-
 use std::borrow::Cow;
 use std::ops::Deref;
 
 impl JValuable for &CanonStream {
-    fn apply_lambda<'i>(&self, lambda: &LambdaAST<'_>, exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<&JValue> {
+    fn apply_lambda<'i>(
+        &self,
+        lambda: &LambdaAST<'_>,
+        exec_ctx: &ExecutionCtx<'i>,
+    ) -> ExecutionResult<Cow<'_, JValue>> {
         let iter = self.iter().map(|v| v.result.deref());
-        let select_result = select_from_stream(iter, lambda, exec_ctx)?;
+        let select_result = select_by_lambda_from_stream(iter, lambda, exec_ctx)?;
 
         Ok(select_result.result)
     }
@@ -41,14 +43,19 @@ impl JValuable for &CanonStream {
         &self,
         lambda: &LambdaAST<'_>,
         exec_ctx: &ExecutionCtx<'i>,
-    ) -> ExecutionResult<(&JValue, SecurityTetraplet)> {
+    ) -> ExecutionResult<(Cow<'_, JValue>, SecurityTetraplet)> {
         let iter = self.iter().map(|v| v.result.deref());
-        let select_result = select_from_stream(iter, lambda, exec_ctx)?;
+        let select_result = select_by_lambda_from_stream(iter, lambda, exec_ctx)?;
 
-        // unwrap is safe here because each value has a tetraplet and a lambda always returns a valid index
-        let resolved_call = self.nth(select_result.tetraplet_idx).unwrap();
-        let mut tetraplet = resolved_call.tetraplet.as_ref().clone();
-        tetraplet.add_lambda(&format_ast(lambda));
+        let tetraplet = match select_result.tetraplet_idx {
+            Some(idx) => {
+                let resolved_call = self.nth(idx).expect(crate::execution_step::TETRAPLET_IDX_CORRECT);
+                let mut tetraplet = resolved_call.tetraplet.as_ref().clone();
+                tetraplet.add_lambda(&lambda.to_string());
+                tetraplet
+            }
+            None => SecurityTetraplet::new(exec_ctx.run_parameters.current_peer_id.to_string(), "", "", ""),
+        };
 
         Ok((select_result.result, tetraplet))
     }

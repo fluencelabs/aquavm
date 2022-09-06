@@ -25,8 +25,7 @@ impl fmt::Display for LambdaAST<'_> {
 
         match self {
             Functor(functor) => write!(f, ".{}", functor),
-            ValuePath(value_path) => write!(f, ".{}", value_path.iter().join(".")),
-            Error => write!(f, "a parser error occurred while parsing lambda expression"),
+            ValuePath(value_path) => write!(f, ".$.{}", value_path.iter().join(".")),
         }
     }
 }

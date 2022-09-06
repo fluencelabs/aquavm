@@ -22,17 +22,18 @@ use std::iter::Peekable;
 use std::str::CharIndices;
 
 const ARRAY_IDX_BASE: u32 = 10;
-const LENGTH_FUNCTOR: &str = "length";
+const LENGTH_FUNCTOR: &str = ".length";
 const VALUE_PATH_STARTER: &str = ".$";
 
 pub type Spanned<Token, Loc, Error> = Result<(Loc, Token, Loc), Error>;
 
-pub struct AccessorsLexer<'input> {
+pub struct LambdaASTLexer<'input> {
     input: &'input str,
     chars: Peekable<CharIndices<'input>>,
+    is_first_token: bool,
 }
 
-impl<'input> Iterator for AccessorsLexer<'input> {
+impl<'input> Iterator for LambdaASTLexer<'input> {
     type Item = Spanned<Token<'input>, usize, LexerError>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -40,23 +41,30 @@ impl<'input> Iterator for AccessorsLexer<'input> {
     }
 }
 
-impl<'input> AccessorsLexer<'input> {
+impl<'input> LambdaASTLexer<'input> {
     pub fn new(input: &'input str) -> Self {
         Self {
             input,
             chars: input.char_indices().peekable(),
+            is_first_token: true,
         }
     }
 
     pub fn next_token(&mut self) -> Option<Spanned<Token<'input>, usize, LexerError>> {
+        if self.input.is_empty() {
+            return None;
+        }
+
+        if self.is_first_token {
+            self.is_first_token = false;
+            return Some(self.try_parse_first_token());
+        }
+
         self.chars.next().map(|(start_pos, ch)| match ch {
             '[' => Ok((start_pos, Token::OpenSquareBracket, start_pos + 1)),
             ']' => Ok((start_pos, Token::CloseSquareBracket, start_pos + 1)),
 
             '.' => Ok((start_pos, Token::ValuePathSelector, start_pos + 1)),
-
-            LENGTH_FUNCTOR => Ok((start_pos, Token::LengthFunctor, start_pos + LENGTH_FUNCTOR.len())),
-            VALUE_PATH_STARTER => Ok((start_pos, Token::ValuePathStarter, start_pos + VALUE_PATH_STARTER.len())),
 
             d if d.is_digit(ARRAY_IDX_BASE) => self.tokenize_arrays_idx(start_pos),
             s if is_air_alphanumeric(s) => self.tokenize_field_name(start_pos),
@@ -115,13 +123,23 @@ impl<'input> AccessorsLexer<'input> {
         &self.input[start_pos..end_pos + 1]
     }
 
-    fn tokenize_string(string_to_parse: &str, start_pos: usize) -> Spanned<Token<'input>, usize, LexerError> {
-        if string_to_parse == LENGTH_FUNCTOR {
-            return Ok((start_pos, Token::LengthFunctor, start_pos + LENGTH_FUNCTOR.len()));
-        } else if string_to_parse.starts_with(VALUE_PATH_STARTER) {
-            return Ok((start_pos, Token::ValuePathStarter, start_pos + VALUE_PATH_STARTER.len()))
-        }
+    fn try_parse_first_token(&mut self) -> Spanned<Token<'input>, usize, LexerError> {
+        let (token, token_size) = if self.input == LENGTH_FUNCTOR {
+            (Token::LengthFunctor, LENGTH_FUNCTOR.len())
+        } else if self.input.starts_with(VALUE_PATH_STARTER) {
+            (Token::ValuePathStarter, VALUE_PATH_STARTER.len())
+        } else {
+            return Err(LexerError::UnexpectedSymbol(0, self.input.len()));
+        };
 
-        Err(LexerError::UnexpectedSymbol(start_pos, start_pos + 1))
+        self.advance_by(token_size);
+        Ok((0, token, token_size))
+    }
+
+    fn advance_by(&mut self, advance_size: usize) {
+        // advance_by is unstable
+        for _ in 0..advance_size {
+            self.chars.next();
+        }
     }
 }

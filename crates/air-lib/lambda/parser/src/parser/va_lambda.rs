@@ -1,11 +1,10 @@
 // auto-generated: "lalrpop 0.19.8"
-// sha3: 2a9c63e294d7e8e34c0f1bc40f80102e6ee2ae2711142ad2be935a36bc39b713
+// sha3: 592663f5597c21f4cc9cb3ad5cb93fa0a7db3635fc4d677c2b6130d33b6e22fd
 use crate::ValueAccessor;
-use crate::LambdaAST;
+use crate::parser::lambda_parser::RawLambdaAST;
 use crate::Functor;
 use crate::parser::lexer::LexerError;
 use crate::parser::lexer::Token;
-use non_empty_vec::NonEmpty;
 use lalrpop_util::ErrorRecovery;
 #[allow(unused_extern_crates)]
 extern crate lalrpop_util as __lalrpop_util;
@@ -15,15 +14,14 @@ extern crate core;
 extern crate alloc;
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
-mod __parse__Lambda {
+mod __parse__RawLambdaAST {
     #![allow(non_snake_case, non_camel_case_types, unused_mut, unused_variables, unused_imports, unused_parens, clippy::all)]
 
     use crate::ValueAccessor;
-    use crate::LambdaAST;
+    use crate::parser::lambda_parser::RawLambdaAST;
     use crate::Functor;
     use crate::parser::lexer::LexerError;
     use crate::parser::lexer::Token;
-    use non_empty_vec::NonEmpty;
     use lalrpop_util::ErrorRecovery;
     #[allow(unused_extern_crates)]
     extern crate lalrpop_util as __lalrpop_util;
@@ -40,39 +38,39 @@ mod __parse__Lambda {
         Variant2(&'input str),
         Variant3(__lalrpop_util::ErrorRecovery<usize, Token<'input>, LexerError>),
         Variant4(core::option::Option<Token<'input>>),
-        Variant5(LambdaAST<'input>),
+        Variant5(RawLambdaAST<'input>),
         Variant6(ValueAccessor<'input>),
         Variant7(alloc::vec::Vec<ValueAccessor<'input>>),
     }
     const __ACTION: &[i8] = &[
         // State 0
-        0, 5, 2, 0, 0, 0, 0, 0, 6,
+        0, 0, 2, 0, 0, 5, 0, 0, 6,
         // State 1
-        0, 9, 0, 10, 0, 0, 0, 0, 11,
+        0, 8, 0, 9, 0, 0, 0, 0, 10,
         // State 2
-        0, 9, 0, 10, 0, 0, 0, 0, 11,
+        0, 8, 0, 9, 0, 0, 0, 0, 10,
         // State 3
         0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 4
-        0, 0, 0, 0, 0, 7, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 5
         0, 0, 0, 0, 0, 0, 0, 0, 0,
         // State 6
-        0, 0, 0, 0, 0, 0, 0, 0, 0,
-        // State 7
         0, -22, 0, -22, 0, 0, 0, 0, -22,
+        // State 7
+        0, 0, 0, 12, 0, 0, 0, 13, 0,
         // State 8
-        0, 0, 0, 13, 0, 0, 0, 14, 0,
+        0, 0, 0, 0, 0, 0, 14, 15, 0,
         // State 9
-        0, 0, 0, 0, 0, 0, 15, 16, 0,
-        // State 10
         0, -19, 0, -19, 0, 0, 0, 0, -19,
-        // State 11
+        // State 10
         0, -23, 0, -23, 0, 0, 0, 0, -23,
+        // State 11
+        0, 0, 0, 0, 0, 0, 16, 17, 0,
         // State 12
-        0, 0, 0, 0, 0, 0, 17, 18, 0,
+        18, -18, 0, -18, 0, 0, 0, 0, -18,
         // State 13
-        19, -18, 0, -18, 0, 0, 0, 0, -18,
+        0, 0, 0, 0, 19, 0, 0, 0, 0,
         // State 14
         0, 0, 0, 0, 20, 0, 0, 0, 0,
         // State 15
@@ -80,24 +78,22 @@ mod __parse__Lambda {
         // State 16
         0, 0, 0, 0, 22, 0, 0, 0, 0,
         // State 17
-        0, 0, 0, 0, 23, 0, 0, 0, 0,
-        // State 18
         0, -17, 0, -17, 0, 0, 0, 0, -17,
+        // State 18
+        23, -12, 0, -12, 0, 0, 0, 0, -12,
         // State 19
-        24, -12, 0, -12, 0, 0, 0, 0, -12,
+        24, -16, 0, -16, 0, 0, 0, 0, -16,
         // State 20
-        25, -16, 0, -16, 0, 0, 0, 0, -16,
+        25, -11, 0, -11, 0, 0, 0, 0, -11,
         // State 21
-        26, -11, 0, -11, 0, 0, 0, 0, -11,
+        26, -15, 0, -15, 0, 0, 0, 0, -15,
         // State 22
-        27, -15, 0, -15, 0, 0, 0, 0, -15,
-        // State 23
         0, -10, 0, -10, 0, 0, 0, 0, -10,
-        // State 24
+        // State 23
         0, -14, 0, -14, 0, 0, 0, 0, -14,
-        // State 25
+        // State 24
         0, -9, 0, -9, 0, 0, 0, 0, -9,
-        // State 26
+        // State 25
         0, -13, 0, -13, 0, 0, 0, 0, -13,
     ];
     fn __action(state: i8, integer: usize) -> i8 {
@@ -113,25 +109,25 @@ mod __parse__Lambda {
         // State 3
         -24,
         // State 4
-        0,
+        -7,
         // State 5
         -8,
         // State 6
-        -7,
-        // State 7
         -22,
+        // State 7
+        0,
         // State 8
         0,
         // State 9
-        0,
-        // State 10
         -19,
-        // State 11
+        // State 10
         -23,
-        // State 12
+        // State 11
         0,
-        // State 13
+        // State 12
         -18,
+        // State 13
+        0,
         // State 14
         0,
         // State 15
@@ -139,32 +135,30 @@ mod __parse__Lambda {
         // State 16
         0,
         // State 17
-        0,
-        // State 18
         -17,
-        // State 19
+        // State 18
         -12,
-        // State 20
+        // State 19
         -16,
-        // State 21
+        // State 20
         -11,
-        // State 22
+        // State 21
         -15,
-        // State 23
+        // State 22
         -10,
-        // State 24
+        // State 23
         -14,
-        // State 25
+        // State 24
         -9,
-        // State 26
+        // State 25
         -13,
     ];
     fn __goto(state: i8, nt: usize) -> i8 {
         match nt {
             2 => 3,
             3 => match state {
-                2 => 11,
-                _ => 7,
+                2 => 10,
+                _ => 6,
             },
             5 => 2,
             _ => 0,
@@ -205,7 +199,7 @@ mod __parse__Lambda {
         type Token = Token<'input>;
         type TokenIndex = usize;
         type Symbol = __Symbol<'input>;
-        type Success = LambdaAST<'input>;
+        type Success = RawLambdaAST<'input>;
         type StateIndex = i8;
         type Action = i8;
         type ReduceIndex = i8;
@@ -380,7 +374,7 @@ mod __parse__Lambda {
             }
             6 => {
                 __state_machine::SimulatedReduce::Reduce {
-                    states_to_pop: 2,
+                    states_to_pop: 1,
                     nonterminal_produced: 2,
                 }
             }
@@ -484,19 +478,19 @@ mod __parse__Lambda {
             _ => panic!("invalid reduction index {}", __reduce_index)
         }
     }
-    pub struct LambdaParser {
+    pub(crate) struct RawLambdaASTParser {
         _priv: (),
     }
 
-    impl LambdaParser {
-        pub fn new() -> LambdaParser {
-            LambdaParser {
+    impl RawLambdaASTParser {
+        pub(crate) fn new() -> RawLambdaASTParser {
+            RawLambdaASTParser {
                 _priv: (),
             }
         }
 
         #[allow(dead_code)]
-        pub fn parse<
+        pub(crate) fn parse<
             'err,
             'input,
             __TOKEN: __ToTriple<'err, 'input, >,
@@ -506,7 +500,7 @@ mod __parse__Lambda {
             input: &'input str,
             errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
             __tokens0: __TOKENS,
-        ) -> Result<LambdaAST<'input>, __lalrpop_util::ParseError<usize, Token<'input>, LexerError>>
+        ) -> Result<RawLambdaAST<'input>, __lalrpop_util::ParseError<usize, Token<'input>, LexerError>>
         {
             let __tokens = __tokens0.into_iter();
             let mut __tokens = __tokens.map(|t| __ToTriple::to_triple(t));
@@ -567,7 +561,7 @@ mod __parse__Lambda {
         __states: &mut alloc::vec::Vec<i8>,
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>,
         _: core::marker::PhantomData<(&'err (), &'input ())>,
-    ) -> Option<Result<LambdaAST<'input>,__lalrpop_util::ParseError<usize, Token<'input>, LexerError>>>
+    ) -> Option<Result<RawLambdaAST<'input>,__lalrpop_util::ParseError<usize, Token<'input>, LexerError>>>
     {
         let (__pop_states, __nonterminal) = match __action {
             0 => {
@@ -640,7 +634,7 @@ mod __parse__Lambda {
                 __reduce22(input, errors, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &())>)
             }
             23 => {
-                // __Lambda = Lambda => ActionFn(0);
+                // __RawLambdaAST = RawLambdaAST => ActionFn(0);
                 let __sym0 = __pop_Variant5(__symbols);
                 let __start = __sym0.0.clone();
                 let __end = __sym0.2.clone();
@@ -664,7 +658,7 @@ mod __parse__Lambda {
       'input,
     >(
         __symbols: &mut alloc::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, LambdaAST<'input>, usize)
+    ) -> (usize, RawLambdaAST<'input>, usize)
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant5(__v), __r)) => (__l, __v, __r),
@@ -833,7 +827,7 @@ mod __parse__Lambda {
         _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
-        // Lambda = ".$" => ActionFn(30);
+        // RawLambdaAST = ".$" => ActionFn(30);
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
@@ -852,7 +846,7 @@ mod __parse__Lambda {
         _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
-        // Lambda = ".$", ValueAccessor+ => ActionFn(31);
+        // RawLambdaAST = ".$", ValueAccessor+ => ActionFn(31);
         assert!(__symbols.len() >= 2);
         let __sym1 = __pop_Variant7(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
@@ -873,15 +867,13 @@ mod __parse__Lambda {
         _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
-        // Lambda = ".", length_functor => ActionFn(2);
-        assert!(__symbols.len() >= 2);
-        let __sym1 = __pop_Variant0(__symbols);
+        // RawLambdaAST = length_functor => ActionFn(2);
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0.clone();
-        let __end = __sym1.2.clone();
-        let __nt = super::__action2::<>(input, errors, __sym0, __sym1);
+        let __end = __sym0.2.clone();
+        let __nt = super::__action2::<>(input, errors, __sym0);
         __symbols.push((__start, __Symbol::Variant5(__nt), __end));
-        (2, 2)
+        (1, 2)
     }
     pub(crate) fn __reduce7<
         'err,
@@ -894,7 +886,7 @@ mod __parse__Lambda {
         _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> (usize, usize)
     {
-        // Lambda = error => ActionFn(3);
+        // RawLambdaAST = error => ActionFn(3);
         let __sym0 = __pop_Variant3(__symbols);
         let __start = __sym0.0.clone();
         let __end = __sym0.2.clone();
@@ -1226,7 +1218,7 @@ mod __parse__Lambda {
         (2, 5)
     }
 }
-pub use self::__parse__Lambda::LambdaParser;
+pub(crate) use self::__parse__RawLambdaAST::RawLambdaASTParser;
 
 #[allow(unused_variables)]
 fn __action0<
@@ -1235,8 +1227,8 @@ fn __action0<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
-    (_, __0, _): (usize, LambdaAST<'input>, usize),
-) -> LambdaAST<'input>
+    (_, __0, _): (usize, RawLambdaAST<'input>, usize),
+) -> RawLambdaAST<'input>
 {
     __0
 }
@@ -1250,15 +1242,9 @@ fn __action1<
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     (_, value_path_starter, _): (usize, Token<'input>, usize),
     (_, accessors, _): (usize, alloc::vec::Vec<ValueAccessor<'input>>, usize),
-) -> LambdaAST<'input>
+) -> RawLambdaAST<'input>
 {
-    {
-        if accessors.is_empty() {
-            return LambdaAST::Error;
-        }
-
-        unsafe { LambdaAST::ValuePath(NonEmpty::new_unchecked(accessors)) }
-    }
+    RawLambdaAST::ValuePath(accessors)
 }
 
 #[allow(unused_variables)]
@@ -1268,11 +1254,10 @@ fn __action2<
 >(
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
-    (_, value_path_selector, _): (usize, Token<'input>, usize),
-    (_, _, _): (usize, Token<'input>, usize),
-) -> LambdaAST<'input>
+    (_, __0, _): (usize, Token<'input>, usize),
+) -> RawLambdaAST<'input>
 {
-    LambdaAST::Functor(Functor::Length)
+    RawLambdaAST::Functor(Functor::Length)
 }
 
 #[allow(unused_variables)]
@@ -1283,9 +1268,9 @@ fn __action3<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     (_, __0, _): (usize, __lalrpop_util::ErrorRecovery<usize, Token<'input>, LexerError>, usize),
-) -> LambdaAST<'input>
+) -> RawLambdaAST<'input>
 {
-    { errors.push(__0); LambdaAST::Error }
+    { errors.push(__0); RawLambdaAST::Error }
 }
 
 #[allow(unused_variables)]
@@ -1918,7 +1903,7 @@ fn __action30<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     __0: (usize, Token<'input>, usize),
-) -> LambdaAST<'input>
+) -> RawLambdaAST<'input>
 {
     let __start0 = __0.2.clone();
     let __end0 = __0.2.clone();
@@ -1946,7 +1931,7 @@ fn __action31<
     errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
     __0: (usize, Token<'input>, usize),
     __1: (usize, alloc::vec::Vec<ValueAccessor<'input>>, usize),
-) -> LambdaAST<'input>
+) -> RawLambdaAST<'input>
 {
     let __start0 = __1.0.clone();
     let __end0 = __1.2.clone();

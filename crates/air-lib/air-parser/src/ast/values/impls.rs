@@ -18,8 +18,6 @@ use super::*;
 use air_lambda_parser::LambdaAST;
 use air_lambda_parser::ValueAccessor;
 
-use std::convert::TryFrom;
-
 impl<'i> ScalarWithLambda<'i> {
     pub fn new(name: &'i str, lambda: Option<LambdaAST<'i>>, position: usize) -> Self {
         Self {
@@ -29,12 +27,12 @@ impl<'i> ScalarWithLambda<'i> {
         }
     }
 
-    pub(crate) fn from_raw_lambda(
+    pub(crate) fn from_value_path(
         name: &'i str,
-        lambda: Vec<ValueAccessor<'i>>,
+        accessors: Vec<ValueAccessor<'i>>,
         position: usize,
     ) -> Self {
-        let lambda = LambdaAST::try_from(lambda).ok();
+        let lambda = LambdaAST::try_from_accessors(accessors).ok();
         Self {
             name,
             lambda,
@@ -53,12 +51,12 @@ impl<'i> StreamWithLambda<'i> {
     }
 
     #[allow(dead_code)]
-    pub(crate) fn from_raw_lambda(
+    pub(crate) fn from_value_path(
         name: &'i str,
-        lambda: Vec<ValueAccessor<'i>>,
+        accessors: Vec<ValueAccessor<'i>>,
         position: usize,
     ) -> Self {
-        let lambda = LambdaAST::try_from(lambda).ok();
+        let lambda = LambdaAST::try_from_accessors(accessors).ok();
         Self {
             name,
             lambda,
@@ -155,12 +153,12 @@ impl<'i> VariableWithLambda<'i> {
     }
 
     #[allow(dead_code)]
-    pub(crate) fn from_raw_lambda_scalar(
+    pub(crate) fn from_raw_value_path(
         name: &'i str,
         lambda: Vec<ValueAccessor<'i>>,
         position: usize,
     ) -> Self {
-        let scalar = ScalarWithLambda::from_raw_lambda(name, lambda, position);
+        let scalar = ScalarWithLambda::from_value_path(name, lambda, position);
         Self::Scalar(scalar)
     }
 
@@ -170,7 +168,7 @@ impl<'i> VariableWithLambda<'i> {
         lambda: Vec<ValueAccessor<'i>>,
         position: usize,
     ) -> Self {
-        let stream = StreamWithLambda::from_raw_lambda(name, lambda, position);
+        let stream = StreamWithLambda::from_value_path(name, lambda, position);
         Self::Stream(stream)
     }
 }

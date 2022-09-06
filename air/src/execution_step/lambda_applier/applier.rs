@@ -16,22 +16,51 @@
 
 use super::utils::*;
 use super::LambdaError;
+use crate::execution_step::CatchableError;
 use crate::execution_step::ExecutionCtx;
 use crate::execution_step::ExecutionResult;
 use crate::lambda_to_execution_error;
+use crate::ExecutionError;
 use crate::JValue;
 use crate::LambdaAST;
 
+use air_lambda_ast::Functor;
 use air_lambda_parser::ValueAccessor;
+use non_empty_vec::NonEmpty;
+
+use std::borrow::Cow;
+use std::rc::Rc;
 
 pub(crate) struct StreamSelectResult<'value> {
-    pub(crate) result: &'value JValue,
-    pub(crate) tetraplet_idx: usize,
+    pub(crate) result: Cow<'value, JValue>,
+    pub(crate) tetraplet_idx: Option<usize>,
 }
 
-pub(crate) fn select_from_stream<'value, 'i>(
+pub(crate) fn select_by_lambda_from_stream<'value, 'i>(
     stream: impl ExactSizeIterator<Item = &'value JValue> + 'value,
     lambda: &LambdaAST<'_>,
+    exec_ctx: &ExecutionCtx<'i>,
+) -> ExecutionResult<StreamSelectResult<'value>> {
+    match lambda {
+        LambdaAST::ValuePath(value_path) => select_by_path_from_stream(stream, value_path, exec_ctx),
+        LambdaAST::Functor(functor) => Ok(select_by_functor_from_stream(stream, functor)),
+    }
+}
+
+pub(crate) fn select_by_lambda_from_scalar<'value, 'i>(
+    value: &'value JValue,
+    lambda: &LambdaAST<'_>,
+    exec_ctx: &ExecutionCtx<'i>,
+) -> ExecutionResult<Cow<'value, JValue>> {
+    match lambda {
+        LambdaAST::ValuePath(value_path) => select_by_path_from_scalar(value, value_path.iter(), exec_ctx),
+        LambdaAST::Functor(functor) => select_by_functor_from_scalar(value, functor).map(Cow::Owned),
+    }
+}
+
+pub(crate) fn select_by_path_from_stream<'value, 'i>(
+    stream: impl ExactSizeIterator<Item = &'value JValue> + 'value,
+    lambda: &NonEmpty<ValueAccessor<'_>>,
     exec_ctx: &ExecutionCtx<'i>,
 ) -> ExecutionResult<StreamSelectResult<'value>> {
     let (prefix, body) = lambda.split_first();
@@ -55,16 +84,28 @@ pub(crate) fn select_from_stream<'value, 'i>(
         .nth(idx as usize)
         .ok_or(LambdaError::StreamNotHaveEnoughValues { stream_size, idx }))?;
 
-    let result = select_from_scalar(value, body.iter(), exec_ctx)?;
-    let select_result = StreamSelectResult::new(result, idx);
+    let result = select_by_path_from_scalar(value, body.iter(), exec_ctx)?;
+    let select_result = StreamSelectResult::from_cow(result, idx);
     Ok(select_result)
 }
 
-pub(crate) fn select_from_scalar<'value, 'accessor, 'i>(
+pub(crate) fn select_by_functor_from_stream<'value, 'i>(
+    stream: impl ExactSizeIterator<Item = &'value JValue> + 'value,
+    functor: &Functor,
+) -> StreamSelectResult<'value> {
+    match functor {
+        Functor::Length => {
+            let result = serde_json::json!(stream.len());
+            StreamSelectResult::from_owned(result)
+        }
+    }
+}
+
+pub(crate) fn select_by_path_from_scalar<'value, 'accessor, 'i>(
     mut value: &'value JValue,
     lambda: impl Iterator<Item = &'accessor ValueAccessor<'accessor>>,
     exec_ctx: &ExecutionCtx<'i>,
-) -> ExecutionResult<&'value JValue> {
+) -> ExecutionResult<Cow<'value, JValue>> {
     for accessor in lambda {
         match accessor {
             ValueAccessor::ArrayAccess { idx } => {
@@ -81,14 +122,35 @@ pub(crate) fn select_from_scalar<'value, 'accessor, 'i>(
         }
     }
 
-    Ok(value)
+    Ok(Cow::Borrowed(value))
+}
+
+pub(crate) fn select_by_functor_from_scalar(value: &JValue, functor: &Functor) -> ExecutionResult<JValue> {
+    match functor {
+        Functor::Length => {
+            let length = value
+                .as_array()
+                .ok_or_else(|| {
+                    ExecutionError::Catchable(Rc::new(CatchableError::LengthFunctorAppliedToNotArray(value.clone())))
+                })?
+                .len();
+            Ok(serde_json::json!(length))
+        }
+    }
 }
 
 impl<'value> StreamSelectResult<'value> {
-    pub(self) fn new(result: &'value JValue, tetraplet_idx: u32) -> Self {
+    pub(self) fn from_cow(result: Cow<'value, JValue>, tetraplet_idx: u32) -> Self {
         Self {
             result,
-            tetraplet_idx: tetraplet_idx as usize,
+            tetraplet_idx: Some(tetraplet_idx as usize),
+        }
+    }
+
+    pub(self) fn from_owned(result: JValue) -> Self {
+        Self {
+            result: Cow::Owned(result),
+            tetraplet_idx: None,
         }
     }
 }
