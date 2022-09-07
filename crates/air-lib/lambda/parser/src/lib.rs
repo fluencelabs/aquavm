@@ -29,7 +29,6 @@ mod parser;
 
 pub use parser::parse;
 pub use parser::LambdaASTLexer;
-//pub use parser::LambdaParser;
 pub use parser::LambdaParserError;
 pub use parser::LexerError;
 

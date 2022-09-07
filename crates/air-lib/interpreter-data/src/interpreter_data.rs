@@ -54,18 +54,6 @@ pub struct InterpreterData {
     pub restricted_streams: RestrictedStreamGens,
 }
 
-/*
-par:
-  call "1" $stream
-  call "1" $stream
-  |
-  call ..
-  ap "hello" $stream
-  ..
-  call "1"
-
- */
-
 impl InterpreterData {
     pub fn new() -> Self {
         Self {
