@@ -23,12 +23,12 @@ export interface RunParameters {
     /**
      * Peer id of a peer that start this particle.
      */
-    initPeerId: String;
+    initPeerId: string;
 
     /**
      * Peer id of a current peer.
      */
-    currentPeerId: String;
+    currentPeerId: string;
 
     /**
      * Unix timestamp from a particle in milliseconds.
@@ -146,3 +146,7 @@ export interface SecurityTetraplet extends ResolvedTriplet {
      */
     json_path: string;
 }
+
+export type JSONValue = string | number | boolean | { [x: string]: JSONValue } | Array<JSONValue>;
+export type JSONArray = Array<JSONValue>;
+export type JSONObject = { [x: string]: JSONValue };
