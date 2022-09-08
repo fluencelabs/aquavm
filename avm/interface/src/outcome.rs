@@ -66,6 +66,7 @@ impl AVMOutcome {
         }
     }
 
+    #[allow(clippy::result_large_err)]
     pub fn from_raw_outcome(
         raw_outcome: RawAVMOutcome,
         memory_delta: usize,
