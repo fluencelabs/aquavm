@@ -9,7 +9,7 @@ concurrency:
 
 env:
   RUST_TEST_THREADS: 1
-  CARGO_HOME: "./cargo"
+  CARGO_HOME: "${{ github.workspace }}/cargo"
 
 jobs:
   aquavm:
