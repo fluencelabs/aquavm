@@ -17,6 +17,7 @@
 use super::select_by_lambda_from_stream;
 use super::ExecutionResult;
 use super::JValuable;
+use crate::execution_step::boxed_value::populate_tetraplet_with_lambda;
 use crate::execution_step::boxed_value::Generation;
 use crate::execution_step::boxed_value::Stream;
 use crate::execution_step::ExecutionCtx;
@@ -89,7 +90,6 @@ impl JValuable for StreamJvaluableIngredients<'_> {
     }
 }
 
-use crate::execution_step::boxed_value::populate_tetraplet_with_lambda;
 use crate::execution_step::boxed_value::StreamIter;
 
 impl<'stream> StreamJvaluableIngredients<'stream> {
