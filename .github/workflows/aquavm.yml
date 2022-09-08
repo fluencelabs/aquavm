@@ -9,7 +9,7 @@ concurrency:
 
 env:
   RUST_TEST_THREADS: 1
-  CARGO_HOME: "/usr/local/cargo"
+  CARGO_HOME: "./cargo"
 
 jobs:
   aquavm:

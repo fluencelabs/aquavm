@@ -6,7 +6,7 @@ on:
       - "v*"
 
 env:
-  CARGO_HOME: "/usr/local/cargo"
+  CARGO_HOME: "./cargo"
 
 jobs:
   pre-release:

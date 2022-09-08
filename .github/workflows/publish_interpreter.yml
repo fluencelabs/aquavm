@@ -9,7 +9,7 @@ on:
       - "master"
 
 env:
-  CARGO_HOME: "/usr/local/cargo"
+  CARGO_HOME: "./cargo"
 
 jobs:
   npm-publish:
