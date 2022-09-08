@@ -8,6 +8,9 @@ on:
     branches:
       - "master"
 
+env:
+  CARGO_HOME: "/usr/local/cargo"
+
 jobs:
   npm-publish:
     name: "Publish AIR to NPM & crates.io"

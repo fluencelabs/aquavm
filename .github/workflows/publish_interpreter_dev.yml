@@ -9,7 +9,6 @@ on:
       - "master"
 
 env:
-  RUST_TEST_THREADS: 1
   CARGO_HOME: "/usr/local/cargo"
 
 jobs:

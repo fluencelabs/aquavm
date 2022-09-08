@@ -10,6 +10,7 @@ env:
   CARGO_INCREMENTAL: 0
   CARGO_NET_RETRY: 10
   RUSTUP_MAX_RETRIES: 10
+  CARGO_HOME: "/usr/local/cargo"
 
 jobs:
   rustdoc:
