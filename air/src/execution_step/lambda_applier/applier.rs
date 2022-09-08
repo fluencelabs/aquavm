@@ -96,7 +96,7 @@ fn select_by_functor_from_stream<'value, 'i>(
     match functor {
         Functor::Length => {
             let result = serde_json::json!(stream.len());
-            StreamSelectResult::from_owned(result)
+            StreamSelectResult::from_value(result)
         }
     }
 }
@@ -147,7 +147,7 @@ impl<'value> StreamSelectResult<'value> {
         }
     }
 
-    pub(self) fn from_owned(result: JValue) -> Self {
+    pub(self) fn from_value(result: JValue) -> Self {
         Self {
             result: Cow::Owned(result),
             tetraplet_idx: None,

@@ -59,7 +59,7 @@ impl Transformer {
 
             match &mut call.triplet.1 {
                 Sexp::String(ref mut value) => {
-                    let _ = write!(value, "..{}", call_id);
+                    write!(value, "..{}", call_id).unwrap();
                 }
                 _ => panic!("Incorrect script: non-string service string not supported"),
             }
