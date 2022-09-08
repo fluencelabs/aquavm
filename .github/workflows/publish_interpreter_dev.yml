@@ -8,9 +8,6 @@ on:
     branches-ignore:
       - "master"
 
-env:
-  CARGO_HOME: "./cargo"
-
 jobs:
   npm-publish-dev:
     name: "Publish AIR interpreter .wasm to NPM & crates.io"
