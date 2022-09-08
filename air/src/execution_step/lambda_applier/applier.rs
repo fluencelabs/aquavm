@@ -71,7 +71,7 @@ pub(crate) fn select_from_scalar<'value, 'accessor, 'i>(
                 value = lambda_to_execution_error!(try_jvalue_with_idx(value, *idx))?;
             }
             ValueAccessor::FieldAccessByName { field_name } => {
-                value = lambda_to_execution_error!(try_jvalue_with_field_name(value, *field_name))?;
+                value = lambda_to_execution_error!(try_jvalue_with_field_name(value, field_name))?;
             }
             ValueAccessor::FieldAccessByScalar { scalar_name } => {
                 let scalar = exec_ctx.scalars.get_value(scalar_name)?;
