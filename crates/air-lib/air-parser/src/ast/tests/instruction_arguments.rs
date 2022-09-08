@@ -15,14 +15,17 @@
  */
 
 use crate::ast::Value;
+use air_lambda_ast::LambdaAST;
 use air_lambda_ast::ValueAccessor;
-use non_empty_vec::NonEmpty;
 
 #[test]
 // https://github.com/fluencelabs/aquavm/issues/263
 fn issue_263() {
-    let val = Value::LastError(Some(NonEmpty::new(ValueAccessor::FieldAccessByName {
-        field_name: "message",
-    })));
+    let val = Value::LastError(Some(
+        LambdaAST::try_from_accessors(vec![ValueAccessor::FieldAccessByName {
+            field_name: "message",
+        }])
+        .unwrap(),
+    ));
     assert_eq!(val.to_string(), "%last_error%.$.message");
 }

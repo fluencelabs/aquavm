@@ -18,6 +18,7 @@ use super::{Call, Sexp};
 use crate::{asserts::ServiceDefinition, ephemeral::PeerId};
 
 use std::collections::{HashMap, HashSet};
+use std::fmt::Write;
 
 #[derive(Debug, Default)]
 pub(crate) struct Transformer {
@@ -57,7 +58,9 @@ impl Transformer {
             self.results.insert(call_id, service.clone());
 
             match &mut call.triplet.1 {
-                Sexp::String(ref mut value) => value.push_str(&format!("..{}", call_id)),
+                Sexp::String(ref mut value) => {
+                    write!(value, "..{}", call_id).unwrap();
+                }
                 _ => panic!("Incorrect script: non-string service string not supported"),
             }
         }

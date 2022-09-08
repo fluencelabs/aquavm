@@ -13,7 +13,7 @@ dependencies = [
 
 [[package]]
 name = "air"
-version = "0.27.0"
+version = "0.28.0"
 dependencies = [
  "air-execution-info-collector",
  "air-interpreter-data",
@@ -72,7 +72,7 @@ version = "0.1.0"
 
 [[package]]
 name = "air-interpreter"
-version = "0.27.0"
+version = "0.28.0"
 dependencies = [
  "air",
  "air-interpreter-interface",
@@ -112,6 +112,7 @@ dependencies = [
 name = "air-lambda-ast"
 version = "0.1.0"
 dependencies = [
+ "itertools 0.10.3",
  "non-empty-vec",
  "serde",
  "serde_json",

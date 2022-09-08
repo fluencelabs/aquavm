@@ -24,6 +24,8 @@ mod resolver;
 const PEEK_ALLOWED_ON_NON_EMPTY: &str = "peek always return elements inside fold,\
             this guaranteed by implementation of next and avoiding empty folds";
 
+const TETRAPLET_IDX_CORRECT: &str = "selects always return a correct index inside stream";
+
 pub use errors::CatchableError;
 pub use errors::ExecutionError;
 pub use errors::UncatchableError;

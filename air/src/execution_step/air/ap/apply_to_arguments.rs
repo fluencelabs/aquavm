@@ -138,7 +138,11 @@ fn apply_canon_stream_with_lambda(
     let canon_stream = exec_ctx.scalars.get_canon_stream(stream_name)?;
     let (result, tetraplet) = JValuable::apply_lambda_with_tetraplets(&canon_stream, lambda, exec_ctx)?;
     // TODO: refactor this code after boxed value
-    let value = ValueAggregate::new(Rc::new(result.clone()), Rc::new(tetraplet), canon_stream.position());
+    let value = ValueAggregate::new(
+        Rc::new(result.into_owned()),
+        Rc::new(tetraplet),
+        canon_stream.position(),
+    );
     Ok(value)
 }
 

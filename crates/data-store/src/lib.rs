@@ -164,7 +164,7 @@ mod tests {
             &avm_outcome[..],
         );
 
-        let anomaly: AnomalyData =
+        let anomaly: AnomalyData<'_> =
             serde_json::from_str(&json_data).expect("deserialize JSON anomaly data");
 
         assert_eq!(

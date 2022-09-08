@@ -14,27 +14,45 @@
  * limitations under the License.
  */
 
-use crate::parser::LambdaParser;
+use crate::parser::lambda_parser::RawLambdaAST;
+use crate::parser::va_lambda::RawLambdaASTParser;
 use crate::ValueAccessor;
+use air_lambda_ast::Functor;
 
-thread_local!(static TEST_PARSER: LambdaParser = LambdaParser::new());
+thread_local!(static TEST_PARSER: RawLambdaASTParser = RawLambdaASTParser::new());
 
-fn parse(source_code: &str) -> Vec<ValueAccessor<'_>> {
+fn parse(source_code: &str) -> RawLambdaAST<'_> {
     TEST_PARSER.with(|parser| {
         let mut errors = Vec::new();
-        let lexer = crate::parser::AccessorsLexer::new(source_code);
+        let lexer = crate::parser::LambdaASTLexer::new(source_code);
         parser
             .parse(source_code, &mut errors, lexer)
             .expect("parsing should be successful")
     })
 }
 
+fn parse_to_accessors(source_code: &str) -> Vec<ValueAccessor<'_>> {
+    let lambda_ast = parse(source_code);
+    match lambda_ast {
+        RawLambdaAST::ValuePath(accessors) => accessors,
+        _ => panic!("it should be a value path"),
+    }
+}
+
+fn parse_to_functor(source_code: &str) -> Functor {
+    let lambda_ast = parse(source_code);
+    match lambda_ast {
+        RawLambdaAST::Functor(functor) => functor,
+        _ => panic!("it should be a functor"),
+    }
+}
+
 #[test]
 fn field_access() {
     let field_name = "some_field_name";
-    let lambda = format!(".{}", field_name);
+    let lambda = format!(".$.{}", field_name);
 
-    let actual = parse(&lambda);
+    let actual = parse_to_accessors(&lambda);
     let expected = vec![ValueAccessor::FieldAccessByName { field_name }];
     assert_eq!(actual, expected);
 }
@@ -42,9 +60,9 @@ fn field_access() {
 #[test]
 fn field_access_with_flattening() {
     let field_name = "some_field_name";
-    let lambda = format!(".{}!", field_name);
+    let lambda = format!(".$.{}!", field_name);
 
-    let actual = parse(&lambda);
+    let actual = parse_to_accessors(&lambda);
     let expected = vec![ValueAccessor::FieldAccessByName { field_name }];
     assert_eq!(actual, expected);
 }
@@ -52,9 +70,9 @@ fn field_access_with_flattening() {
 #[test]
 fn array_access() {
     let idx = 0;
-    let lambda = format!(".[{}]", idx);
+    let lambda = format!(".$.[{}]", idx);
 
-    let actual = parse(&lambda);
+    let actual = parse_to_accessors(&lambda);
     let expected = vec![ValueAccessor::ArrayAccess { idx }];
     assert_eq!(actual, expected);
 }
@@ -62,9 +80,9 @@ fn array_access() {
 #[test]
 fn array_access_with_flattening() {
     let idx = 0;
-    let lambda = format!(".[{}]!", idx);
+    let lambda = format!(".$.[{}]!", idx);
 
-    let actual = parse(&lambda);
+    let actual = parse_to_accessors(&lambda);
     let expected = vec![ValueAccessor::ArrayAccess { idx }];
     assert_eq!(actual, expected);
 }
@@ -72,9 +90,9 @@ fn array_access_with_flattening() {
 #[test]
 fn scalar_access() {
     let scalar_name = "some_field_name";
-    let lambda = format!(".[{}]", scalar_name);
+    let lambda = format!(".$.[{}]", scalar_name);
 
-    let actual = parse(&lambda);
+    let actual = parse_to_accessors(&lambda);
     let expected = vec![ValueAccessor::FieldAccessByScalar { scalar_name }];
     assert_eq!(actual, expected);
 }
@@ -82,9 +100,9 @@ fn scalar_access() {
 #[test]
 fn scalar_access_with_flattening() {
     let scalar_name = "some_scalar_name";
-    let lambda = format!(".[{}]!", scalar_name);
+    let lambda = format!(".$.[{}]!", scalar_name);
 
-    let actual = parse(&lambda);
+    let actual = parse_to_accessors(&lambda);
     let expected = vec![ValueAccessor::FieldAccessByScalar { scalar_name }];
     assert_eq!(actual, expected);
 }
@@ -93,9 +111,9 @@ fn scalar_access_with_flattening() {
 fn field_array_access() {
     let field_name = "some_field_name";
     let idx = 1;
-    let lambda = format!(".{}.[{}]", field_name, idx);
+    let lambda = format!(".$.{}.[{}]", field_name, idx);
 
-    let actual = parse(&lambda);
+    let actual = parse_to_accessors(&lambda);
     let expected = vec![
         ValueAccessor::FieldAccessByName { field_name },
         ValueAccessor::ArrayAccess { idx },
@@ -107,9 +125,9 @@ fn field_array_access() {
 fn field_scalar_access() {
     let field_name = "some_field_name";
     let scalar_name = "some_scalar_name";
-    let lambda = format!(".{}.[{}]", field_name, scalar_name);
+    let lambda = format!(".$.{}.[{}]", field_name, scalar_name);
 
-    let actual = parse(&lambda);
+    let actual = parse_to_accessors(&lambda);
     let expected = vec![
         ValueAccessor::FieldAccessByName { field_name },
         ValueAccessor::FieldAccessByScalar { scalar_name },
@@ -121,9 +139,9 @@ fn field_scalar_access() {
 fn scalar_array_access() {
     let scalar_name = "some_scalar_name";
     let idx = 1;
-    let lambda = format!(".[{}].[{}]", scalar_name, idx);
+    let lambda = format!(".$.[{}].[{}]", scalar_name, idx);
 
-    let actual = parse(&lambda);
+    let actual = parse_to_accessors(&lambda);
     let expected = vec![
         ValueAccessor::FieldAccessByScalar { scalar_name },
         ValueAccessor::ArrayAccess { idx },
@@ -135,9 +153,9 @@ fn scalar_array_access() {
 fn field_array_access_without_dot() {
     let field_name = "some_field_name";
     let idx = 1;
-    let lambda = format!(".{}[{}]", field_name, idx);
+    let lambda = format!(".$.{}[{}]", field_name, idx);
 
-    let actual = parse(&lambda);
+    let actual = parse_to_accessors(&lambda);
     let expected = vec![
         ValueAccessor::FieldAccessByName { field_name },
         ValueAccessor::ArrayAccess { idx },
@@ -149,9 +167,9 @@ fn field_array_access_without_dot() {
 fn array_field_access() {
     let field_name = "some_field_name";
     let idx = 1;
-    let lambda = format!(".[{}].{}", idx, field_name);
+    let lambda = format!(".$.[{}].{}", idx, field_name);
 
-    let actual = parse(&lambda);
+    let actual = parse_to_accessors(&lambda);
     let expected = vec![
         ValueAccessor::ArrayAccess { idx },
         ValueAccessor::FieldAccessByName { field_name },
@@ -163,9 +181,9 @@ fn array_field_access() {
 fn array_scalar_access() {
     let scalar_name = "some_scalar_name";
     let idx = 1;
-    let lambda = format!(".[{}].[{}]", idx, scalar_name);
+    let lambda = format!(".$.[{}].[{}]", idx, scalar_name);
 
-    let actual = parse(&lambda);
+    let actual = parse_to_accessors(&lambda);
     let expected = vec![
         ValueAccessor::ArrayAccess { idx },
         ValueAccessor::FieldAccessByScalar { scalar_name },
@@ -179,9 +197,12 @@ fn many_array_field_access() {
     let field_name_2 = "some_field_name_2";
     let idx_1 = 1;
     let idx_2 = u32::MAX;
-    let lambda = format!(".[{}].{}.[{}].{}", idx_1, field_name_1, idx_2, field_name_2);
+    let lambda = format!(
+        ".$.[{}].{}.[{}].{}",
+        idx_1, field_name_1, idx_2, field_name_2
+    );
 
-    let actual = parse(&lambda);
+    let actual = parse_to_accessors(&lambda);
     let expected = vec![
         ValueAccessor::ArrayAccess { idx: idx_1 },
         ValueAccessor::FieldAccessByName {
@@ -204,11 +225,11 @@ fn many_array_field_scalar_access() {
     let scalar_name_1 = "some_scalar_name_1";
     let scalar_name_2 = "some_scalar_name_2";
     let lambda = format!(
-        ".[{}].[{}].{}.[{}].[{}].{}",
+        ".$.[{}].[{}].{}.[{}].[{}].{}",
         idx_1, scalar_name_1, field_name_1, idx_2, scalar_name_2, field_name_2
     );
 
-    let actual = parse(&lambda);
+    let actual = parse_to_accessors(&lambda);
     let expected = vec![
         ValueAccessor::ArrayAccess { idx: idx_1 },
         ValueAccessor::FieldAccessByScalar {
@@ -226,4 +247,26 @@ fn many_array_field_scalar_access() {
         },
     ];
     assert_eq!(actual, expected);
+}
+
+#[test]
+fn parse_length_functor() {
+    let lambda = ".length";
+
+    let actual = parse_to_functor(&lambda);
+    let expected = Functor::Length;
+    assert_eq!(actual, expected);
+}
+
+#[test]
+fn parse_length_functor_with_following_accessors() {
+    let lambda = ".length.[0]";
+
+    let actual = TEST_PARSER.with(|parser| {
+        let mut errors = Vec::new();
+        let lexer = crate::parser::LambdaASTLexer::new(lambda);
+        parser.parse(lambda, &mut errors, lexer)
+    });
+
+    assert!(matches!(actual, Err(lalrpop_util::ParseError::User { .. })))
 }
