@@ -7,27 +7,20 @@ concurrency:
   group: "${{ github.workflow }}-${{ github.ref }}"
   cancel-in-progress: true
 
-jobs:
-  air:
-    name: "Run aquavm tests"
-    runs-on: builder
+env:
+  RUST_TEST_THREADS: 1
+  CARGO_HOME: "/usr/local/cargo"
 
-    env:
-      RUST_BACKTRACE: 1
-      RUST_TEST_THREADS: 1
-      CARGO_TERM_COLOR: always
+jobs:
+  aquavm:
+    name: "Run tests"
+    runs-on: builder
 
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: nightly-2022-06-29
-          target: wasm32-wasi
-          components: rustfmt, clippy
-
-      - name: "Cache rust"
-        uses: Swatinem/rust-cache@v1
+      - name: Setup rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
 
       - name: "Download marine"
         run: .github/download_marine.sh
