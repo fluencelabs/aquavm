@@ -19,4 +19,4 @@ path = "src/lib.rs"
 marine-macro = "0.7.0"
 marine-rs-sdk-main = "0.7.0"
 
-serde = { version = "1.0.118", features = ["rc", "derive"] }
+serde = { version = "1.0.144", features = ["rc", "derive"] }

@@ -14,8 +14,8 @@ name = "air_lambda_ast"
 path = "src/lib.rs"
 
 [dependencies]
-non-empty-vec = { version = "0.2.0", features = ["serde"] }
+non-empty-vec = { version = "0.2.3", features = ["serde"] }
 itertools = "0.10.0"
 
-serde = { version = "1.0.118", features = ["rc", "derive"] }
-serde_json = "1.0.61"
+serde = { version = "1.0.144", features = ["rc", "derive"] }
+serde_json = "1.0.85"
