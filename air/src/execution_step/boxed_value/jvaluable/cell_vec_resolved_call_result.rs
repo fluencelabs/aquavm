@@ -18,6 +18,7 @@ use super::select_by_lambda_from_stream;
 use super::ExecutionResult;
 use super::JValuable;
 use super::ValueAggregate;
+use crate::execution_step::boxed_value::populate_tetraplet_with_lambda;
 use crate::execution_step::ExecutionCtx;
 use crate::execution_step::RcSecurityTetraplets;
 use crate::JValue;
@@ -49,9 +50,7 @@ impl JValuable for std::cell::Ref<'_, Vec<ValueAggregate>> {
         let tetraplet = match select_result.tetraplet_idx {
             Some(idx) => {
                 let tetraplet = &self[idx].tetraplet;
-                let mut tetraplet = tetraplet.as_ref().clone();
-                tetraplet.add_lambda(&lambda.to_string());
-                tetraplet
+                populate_tetraplet_with_lambda(tetraplet.as_ref().clone(), lambda)
             }
             None => SecurityTetraplet::new(exec_ctx.run_parameters.current_peer_id.to_string(), "", "", ""),
         };

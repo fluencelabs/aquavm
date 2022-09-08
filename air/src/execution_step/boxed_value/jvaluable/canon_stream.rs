@@ -17,6 +17,7 @@
 use super::select_by_lambda_from_stream;
 use super::ExecutionResult;
 use super::JValuable;
+use crate::execution_step::boxed_value::populate_tetraplet_with_lambda;
 use crate::execution_step::boxed_value::CanonStream;
 use crate::execution_step::ExecutionCtx;
 use crate::execution_step::RcSecurityTetraplets;
@@ -50,12 +51,11 @@ impl JValuable for &CanonStream {
         let tetraplet = match select_result.tetraplet_idx {
             Some(idx) => {
                 let resolved_call = self.nth(idx).expect(crate::execution_step::TETRAPLET_IDX_CORRECT);
-                let mut tetraplet = resolved_call.tetraplet.as_ref().clone();
-                tetraplet.add_lambda(&lambda.to_string());
-                tetraplet
+                resolved_call.tetraplet.as_ref().clone()
             }
             None => SecurityTetraplet::new(exec_ctx.run_parameters.current_peer_id.to_string(), "", "", ""),
         };
+        let tetraplet = populate_tetraplet_with_lambda(tetraplet, lambda);
 
         Ok((select_result.result, tetraplet))
     }

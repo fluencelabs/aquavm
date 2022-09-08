@@ -15,6 +15,7 @@
  */
 
 use super::*;
+use crate::execution_step::boxed_value::populate_tetraplet_with_lambda;
 use crate::execution_step::CatchableError;
 use crate::execution_step::PEEK_ALLOWED_ON_NON_EMPTY;
 use crate::JValue;
@@ -152,17 +153,16 @@ fn create_scalar_lambda_iterable<'ctx>(
 /// Construct IterableValue from the result and given triplet.
 fn from_jvalue(
     jvalue: Cow<'_, JValue>,
-    mut tetraplet: SecurityTetraplet,
+    tetraplet: SecurityTetraplet,
     lambda: &LambdaAST<'_>,
 ) -> ExecutionResult<FoldIterableScalar> {
-    let formatted_lambda_ast = lambda.to_string();
-    tetraplet.add_lambda(&formatted_lambda_ast);
+    let tetraplet = populate_tetraplet_with_lambda(tetraplet, lambda);
     let tetraplet = Rc::new(tetraplet);
 
     let iterable = match jvalue.as_ref() {
         JValue::Array(array) => array,
         _ => {
-            return Err(CatchableError::FoldIteratesOverNonArray(jvalue.into_owned(), formatted_lambda_ast).into());
+            return Err(CatchableError::FoldIteratesOverNonArray(jvalue.into_owned(), lambda.to_string()).into());
         }
     };
 

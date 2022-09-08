@@ -19,6 +19,7 @@ use super::ExecutionResult;
 use super::JValuable;
 use super::LambdaAST;
 use super::ValueAggregate;
+use crate::execution_step::boxed_value::populate_tetraplet_with_lambda;
 use crate::execution_step::ExecutionCtx;
 use crate::execution_step::RcSecurityTetraplets;
 use crate::JValue;
@@ -43,8 +44,7 @@ impl JValuable for ValueAggregate {
         exec_ctx: &ExecutionCtx<'i>,
     ) -> ExecutionResult<(Cow<'_, JValue>, SecurityTetraplet)> {
         let selected_value = select_by_lambda_from_scalar(&self.result, lambda, exec_ctx)?;
-        let mut tetraplet = self.tetraplet.as_ref().clone();
-        tetraplet.add_lambda(&lambda.to_string());
+        let tetraplet = populate_tetraplet_with_lambda(self.tetraplet.as_ref().clone(), lambda);
 
         Ok((selected_value, tetraplet))
     }

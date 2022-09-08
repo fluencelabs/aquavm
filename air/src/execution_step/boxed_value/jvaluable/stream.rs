@@ -62,12 +62,11 @@ impl JValuable for StreamJvaluableIngredients<'_> {
                     .iter()?
                     .nth(idx)
                     .expect(crate::execution_step::TETRAPLET_IDX_CORRECT);
-                let mut tetraplet = resolved_call.tetraplet.as_ref().clone();
-                tetraplet.add_lambda(&lambda.to_string());
-                tetraplet
+                resolved_call.tetraplet.as_ref().clone()
             }
             None => SecurityTetraplet::new(exec_ctx.run_parameters.current_peer_id.to_string(), "", "", ""),
         };
+        let tetraplet = populate_tetraplet_with_lambda(tetraplet, lambda);
 
         Ok((select_result.result, tetraplet))
     }
@@ -90,6 +89,7 @@ impl JValuable for StreamJvaluableIngredients<'_> {
     }
 }
 
+use crate::execution_step::boxed_value::populate_tetraplet_with_lambda;
 use crate::execution_step::boxed_value::StreamIter;
 
 impl<'stream> StreamJvaluableIngredients<'stream> {

@@ -18,6 +18,8 @@ use air::CatchableError;
 use air_test_framework::TestExecutor;
 use air_test_utils::prelude::*;
 
+use std::cell::RefCell;
+
 #[test]
 fn length_functor_for_array_scalar() {
     let script = r#"
@@ -156,5 +158,45 @@ fn length_functor_for_empty_canon_stream() {
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![executed_state::canon(vec![]), executed_state::scalar_number(0)];
+    assert_eq!(actual_trace, expected_trace);
+}
+
+#[test]
+fn functor_dont_influence_tetraplet() {
+    let set_variable_peer_id = "set_variable_peer_id";
+    let set_variable_peer_result = json!({"field": [1,2,3]});
+    let mut set_variable_vm = create_avm(
+        set_variable_call_service(set_variable_peer_result.clone()),
+        set_variable_peer_id,
+    );
+
+    let tetraplet_catcher_peer_id = "tetraplet_catcher_peer_id";
+    let (call_service, actual_tetraplet) = tetraplet_host_function(echo_call_service());
+    let mut tetraplet_catcher_vm = create_avm(call_service, tetraplet_catcher_peer_id);
+
+    let script = f!(r#"
+        (seq
+            (call "{set_variable_peer_id}" ("" "") [] scalar)
+            (seq
+                (ap scalar.$.field field)
+                (seq
+                    (ap field.length length)
+                    (call "{tetraplet_catcher_peer_id}" ("" "") [length])
+                )
+            )
+        )
+        "#);
+
+    let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
+    let result = checked_call_vm!(tetraplet_catcher_vm, <_>::default(), &script, "", result.data);
+    let actual_trace = trace_from_result(&result);
+
+    let expected_tetraplet = RefCell::new(vec![vec![SecurityTetraplet::new("", "", "", ".length")]]);
+    assert_eq!(actual_tetraplet.as_ref(), &expected_tetraplet);
+
+    let expected_trace = vec![
+        executed_state::scalar(set_variable_peer_result),
+        executed_state::scalar_number(3),
+    ];
     assert_eq!(actual_trace, expected_trace);
 }

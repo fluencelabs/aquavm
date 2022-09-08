@@ -24,6 +24,7 @@ use crate::execution_step::RcSecurityTetraplets;
 use crate::JValue;
 use crate::SecurityTetraplet;
 
+use crate::execution_step::boxed_value::populate_tetraplet_with_lambda;
 use std::borrow::Cow;
 use std::ops::Deref;
 
@@ -59,8 +60,7 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
         };
 
         let selected_value = select_by_lambda_from_scalar(jvalue, lambda, exec_ctx)?;
-        let mut tetraplet = tetraplet.as_ref().clone();
-        tetraplet.add_lambda(&lambda.to_string());
+        let tetraplet = populate_tetraplet_with_lambda(tetraplet.as_ref().clone(), lambda);
 
         Ok((selected_value, tetraplet))
     }
