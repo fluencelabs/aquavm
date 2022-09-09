@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import { CallResultsArray, InterpreterResult, CallRequest, RunParameters } from './types';
+import { CallResultsArray, InterpreterResult, CallRequest, RunParameters, JSONArray, JSONObject } from './types';
 
 const decoder = new TextDecoder();
 const encoder = new TextEncoder();
 
 /**
- * Serializes AVM arguments in JSON string which can be passed into marine-js
+ * Encodes arguments into JSON array suitable for marine-js
  * @param initPeerId - peer ID which initialized particle
  * @param currentPeerId - peer ID which is currently executing the particle
  * @param air - particle's air script as string
  * @param prevData - particle's prev data as raw byte array
  * @param data - particle's data as raw byte array
  * @param callResults - array of tuples [callResultKey, callResult]
- * @returns AVM call arguments as serialized JSON string
+ * @returns AVM call arguments suitable for marine-js
  */
 export function serializeAvmArgs(
     runParams: RunParameters,
@@ -35,7 +35,7 @@ export function serializeAvmArgs(
     prevData: Uint8Array,
     data: Uint8Array,
     callResults: CallResultsArray,
-): string {
+): JSONArray {
     const callResultsToPass: any = {};
     for (let [key, callResult] of callResults) {
         callResultsToPass[key] = {
@@ -46,7 +46,7 @@ export function serializeAvmArgs(
 
     const encoded = encoder.encode(JSON.stringify(callResultsToPass));
 
-    const avmArg = JSON.stringify([
+    return [
         // force new line
         air,
         Array.from(prevData),
@@ -58,9 +58,7 @@ export function serializeAvmArgs(
             ttl: runParams.ttl,
         },
         Array.from(encoded),
-    ]);
-
-    return avmArg;
+    ];
 }
 
 /**
@@ -68,20 +66,7 @@ export function serializeAvmArgs(
  * @param rawResult - string containing raw result of AVM call
  * @returns structured InterpreterResult
  */
-export function deserializeAvmResult(rawResult: string): InterpreterResult {
-    let result: any;
-    try {
-        result = JSON.parse(rawResult);
-    } catch (ex) {
-        throw 'call_module result parsing error: ' + ex + ', original text: ' + rawResult;
-    }
-
-    if (result.error !== '') {
-        throw 'call_module returned error: ' + result.error;
-    }
-
-    result = result.result;
-
+export function deserializeAvmResult(result: any): InterpreterResult {
     const callRequestsStr = decoder.decode(new Uint8Array(result.call_requests));
     let parsedCallRequests;
     try {
@@ -131,7 +116,7 @@ export function deserializeAvmResult(rawResult: string): InterpreterResult {
     };
 }
 
-type CallToAvm = ((args: string) => Promise<string>) | ((args: string) => string);
+type CallToAvm = ((args: JSONArray | JSONObject) => Promise<unknown>) | ((args: JSONArray | JSONObject) => unknown);
 
 /**
  * Utility function which serializes AVM args and passed them into AVM returning interpreter result.
