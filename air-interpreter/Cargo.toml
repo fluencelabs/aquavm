@@ -22,7 +22,7 @@ air = { path = "../air" }
 air-interpreter-interface = { path = "../crates/air-lib/interpreter-interface" }
 air-log-targets = { path = "../crates/air-lib/log-targets" }
 
-marine-rs-sdk = { version = "0.7.0", features = ["logger"] }
+marine-rs-sdk = { version = "0.7.1", features = ["logger"] }
 
 wasm-bindgen = "=0.2.82"
 

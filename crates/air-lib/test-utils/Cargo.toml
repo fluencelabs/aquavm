@@ -18,7 +18,7 @@ air = { path = "../../../air" }
 air-interpreter-interface = { path = "../interpreter-interface" }
 avm-interface = { path = "../../../avm/interface" }
 avm-server = { path = "../../../avm/server" }
-marine-rs-sdk = "0.7.0"
+marine-rs-sdk = "0.7.1"
 
 fstrings = "0.2.3"
 object-pool = "0.5.4"
