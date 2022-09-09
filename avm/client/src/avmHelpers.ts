@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { CallResultsArray, InterpreterResult, CallRequest, RunParameters, JSONArray, JSONValue } from './types';
+import { CallResultsArray, InterpreterResult, CallRequest, RunParameters, JSONArray, JSONObject } from './types';
 
 const decoder = new TextDecoder();
 const encoder = new TextEncoder();
@@ -116,7 +116,7 @@ export function deserializeAvmResult(result: any): InterpreterResult {
     };
 }
 
-type CallToAvm = ((args: JSONArray) => Promise<JSONValue>) | ((args: JSONArray) => JSONValue);
+type CallToAvm = ((args: JSONArray | JSONObject) => Promise<unknown>) | ((args: JSONArray | JSONObject) => unknown);
 
 /**
  * Utility function which serializes AVM args and passed them into AVM returning interpreter result.
