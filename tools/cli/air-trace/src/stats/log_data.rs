@@ -73,7 +73,7 @@ impl LogRecord {
 }
 
 impl std::fmt::Display for Message {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Message::New => write!(f, "new"),
             Message::Enter => write!(f, "enter"),
@@ -83,7 +83,7 @@ impl std::fmt::Display for Message {
 }
 
 impl std::fmt::Display for CloseMessage {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "idle={}, busy={}", self.time_idle, self.time_busy)
     }
 }
@@ -96,7 +96,7 @@ fn format_argument(val: &serde_json::Value) -> String {
 }
 
 impl std::fmt::Display for Span {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         use itertools::Itertools as _;
 
         self.name.fmt(f)?;
