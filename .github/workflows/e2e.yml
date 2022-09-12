@@ -30,14 +30,10 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: fluencelabs/rust-peer
+          ref: aquavm-e2e
 
       - name: Setup rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
-
-      - name: Download artifacts
-        uses: actions/download-artifact@v3
-        with:
-          path: external
 
       - name: Use local dependencies
         run: |
