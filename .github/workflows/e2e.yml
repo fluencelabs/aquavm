@@ -41,7 +41,7 @@ jobs:
 
       - name: Use local dependencies
         run: |
-          sed -i 's#\(avm-server =\) .*#\1 { git = "https://github.com/fluencelabs/aquavm", branch = "${{ github.head_ref }} }#g' Cargo.toml
+          sed -i 's#\(avm-server =\) .*#\1 { git = "https://github.com/fluencelabs/aquavm", branch = "${{ github.head_ref }}" }#g' Cargo.toml
 
       - name: Run cargo build
         run: cargo build --release -p particle-node
