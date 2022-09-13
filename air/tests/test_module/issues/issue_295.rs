@@ -34,7 +34,7 @@ fn issue_295() {
         )
     "#);
 
-    let prev_trace = vec![executed_state::scalar_string(""), executed_state::ap(Some(1))];
+    let prev_trace = vec![executed_state::scalar_string(""), executed_state::ap_stream(1)];
     let current_trace = vec![executed_state::scalar_string(""), executed_state::scalar_string("")];
     let prev_data = raw_data_from_trace(prev_trace);
     let current_data = raw_data_from_trace(current_trace);

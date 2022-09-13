@@ -139,6 +139,7 @@ pub enum ExecutedState {
     Par(ParResult),
     Call(CallResult),
     Fold(FoldResult),
+    // TODO: separate result for scalar and streams in next breaking change
     Ap(ApResult),
     Canon(CanonResult),
 }

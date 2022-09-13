@@ -53,7 +53,7 @@ fn handle_seen_canon(
     exec_ctx: &mut ExecutionCtx<'_>,
     trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<()> {
-    let canon_stream = create_canon_stream_from_pos(&stream_elements_pos, ast_canon, exec_ctx)?;
+    let canon_stream = create_canon_stream_from_pos(&stream_elements_pos, ast_canon, exec_ctx, trace_ctx)?;
     let stream_with_positions = StreamWithPositions {
         canon_stream,
         stream_elements_pos,
@@ -81,7 +81,7 @@ fn handle_unseen_canon(
         return Ok(());
     }
 
-    let stream_with_positions = create_canon_stream_from_name(ast_canon, peer_id, exec_ctx)?;
+    let stream_with_positions = create_canon_stream_from_name(ast_canon, peer_id, exec_ctx, trace_ctx)?;
     epilog(ast_canon.canon_stream.name, stream_with_positions, exec_ctx, trace_ctx)
 }
 
@@ -89,6 +89,7 @@ fn create_canon_stream_from_pos(
     stream_elements_pos: &[TracePos],
     ast_canon: &ast::Canon<'_>,
     exec_ctx: &ExecutionCtx<'_>,
+    trace_ctx: &TraceHandler,
 ) -> ExecutionResult<CanonStream> {
     let stream = exec_ctx
         .streams
@@ -112,7 +113,8 @@ fn create_canon_stream_from_pos(
         .collect::<Result<Vec<_>, _>>()?;
 
     let peer_id = crate::execution_step::air::resolve_to_string(&ast_canon.peer_pk, exec_ctx)?;
-    let canon_stream = CanonStream::new(values, peer_id, ast_canon.stream.position.into());
+    let position = trace_ctx.trace_pos();
+    let canon_stream = CanonStream::new(values, peer_id, position);
     Ok(canon_stream)
 }
 
@@ -144,6 +146,7 @@ fn create_canon_stream_from_name(
     ast_canon: &ast::Canon<'_>,
     peer_id: String,
     exec_ctx: &ExecutionCtx<'_>,
+    trace_ctx: &TraceHandler,
 ) -> ExecutionResult<StreamWithPositions> {
     let stream = exec_ctx
         .streams
@@ -153,7 +156,9 @@ fn create_canon_stream_from_name(
                 ast_canon.stream.name.to_string(),
             )))
         })?;
-    let canon_stream = CanonStream::from_stream(stream, peer_id, ast_canon.canon_stream.position.into());
+
+    let position = trace_ctx.trace_pos();
+    let canon_stream = CanonStream::from_stream(stream, peer_id, position);
     let stream_elements_pos = stream
         .iter(Generation::Last)
         // it's always safe to iter over all generations

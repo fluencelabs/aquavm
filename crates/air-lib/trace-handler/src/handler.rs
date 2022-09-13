@@ -81,7 +81,7 @@ impl TraceHandler {
         try_merge_next_state_as_ap(&mut self.data_keeper).map_err(Into::into)
     }
 
-    pub fn meet_ap_end(&mut self, ap_result: ApResult) {
+    pub fn meet_ap_stream_end(&mut self, ap_result: ApResult) {
         self.data_keeper.result_trace.push(ExecutedState::Ap(ap_result));
     }
 }

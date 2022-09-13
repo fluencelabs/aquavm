@@ -83,8 +83,8 @@ fn length_functor_for_stream() {
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
-        executed_state::ap(Some(0)),
-        executed_state::ap(Some(0)),
+        executed_state::ap_stream(0),
+        executed_state::ap_stream(0),
         executed_state::scalar_number(2),
     ];
     assert_eq!(actual_trace, expected_trace);
@@ -131,8 +131,8 @@ fn length_functor_for_canon_stream() {
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
-        executed_state::ap(Some(0)),
-        executed_state::ap(Some(0)),
+        executed_state::ap_stream(0),
+        executed_state::ap_stream(0),
         executed_state::canon(vec![0.into(), 1.into()]),
         executed_state::scalar_number(2),
     ];
@@ -196,6 +196,8 @@ fn functor_dont_influence_tetraplet() {
 
     let expected_trace = vec![
         executed_state::scalar(set_variable_peer_result),
+        executed_state::ap_scalar(),
+        executed_state::ap_scalar(),
         executed_state::scalar_number(3),
     ];
     assert_eq!(actual_trace, expected_trace);

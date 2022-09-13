@@ -30,8 +30,9 @@ use crate::SecurityTetraplet;
 use apply_to_arguments::*;
 use utils::*;
 
+use air_interpreter_data as trace;
+use air_parser::ast;
 use air_parser::ast::Ap;
-use air_parser::ast::ApResult;
 use air_trace_handler::MergerApResult;
 
 use std::rc::Rc;
@@ -40,72 +41,48 @@ impl<'i> super::ExecutableInstruction<'i> for Ap<'i> {
     #[tracing::instrument(level = "debug", skip(exec_ctx, trace_ctx))]
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         log_instruction!(call, exec_ctx, trace_ctx);
-        let should_touch_trace = should_touch_trace(self);
         // this applying should be at the very beginning of this function,
         // because it's necessary to check argument lambda, for more details see
         // https://github.com/fluencelabs/aquavm/issues/216
-        let result = apply_to_arg(&self.argument, exec_ctx, trace_ctx, should_touch_trace)?;
+        let result = apply_to_arg(&self.argument, exec_ctx, trace_ctx)?;
 
-        let merger_ap_result = to_merger_ap_result(should_touch_trace, self, trace_ctx)?;
-        let maybe_generation = update_context(&self.result, &merger_ap_result, result, exec_ctx)?;
-        maybe_update_trace(should_touch_trace, &merger_ap_result, maybe_generation, trace_ctx);
+        let merger_ap_result = try_meet_ap_start(self, trace_ctx)?;
+        let final_ap_result = handle_ap(&self.result, &merger_ap_result, result, exec_ctx)?;
+        trace_ctx.meet_ap_stream_end(final_ap_result);
 
         Ok(())
     }
 }
 
-/// This function is intended to check whether a Ap instruction should produce
-/// a new state in data.
-fn should_touch_trace(ap: &Ap<'_>) -> bool {
-    matches!(ap.result, ApResult::Stream(_))
+fn try_meet_ap_start(instr: &Ap<'_>, trace_ctx: &mut TraceHandler) -> ExecutionResult<MergerApResult> {
+    use crate::UncatchableError::ApResultNotCorrespondToInstr;
+
+    let merger_ap_result = trace_to_exec_err!(trace_ctx.meet_ap_start(), instr)?;
+    match (&merger_ap_result, &instr.result) {
+        (MergerApResult::Scalar, ast::ApResult::Scalar(_)) => Ok(merger_ap_result),
+        (MergerApResult::Stream(_), ast::ApResult::Stream(_)) => Ok(merger_ap_result),
+        (MergerApResult::Empty, _) => Ok(merger_ap_result),
+        _ => Err(ApResultNotCorrespondToInstr(merger_ap_result.clone()).into()),
+    }
 }
 
-fn to_merger_ap_result(
-    should_touch_trace: bool,
-    instr: &Ap<'_>,
-    trace_ctx: &mut TraceHandler,
-) -> ExecutionResult<MergerApResult> {
-    let merger_ap_result = if should_touch_trace {
-        let merger_ap_result = trace_to_exec_err!(trace_ctx.meet_ap_start(), instr)?;
-        try_match_trace_to_instr(&merger_ap_result, instr)?;
-        merger_ap_result
-    } else {
-        MergerApResult::Empty
-    };
-
-    Ok(merger_ap_result)
-}
-
-fn update_context<'ctx>(
-    ap_result_type: &ApResult<'ctx>,
+fn handle_ap<'ctx>(
+    ap_result_type: &ast::ApResult<'ctx>,
     merger_ap_result: &MergerApResult,
     result: ValueAggregate,
     exec_ctx: &mut ExecutionCtx<'ctx>,
-) -> ExecutionResult<Option<u32>> {
+) -> ExecutionResult<trace::ApResult> {
     match ap_result_type {
-        ApResult::Scalar(scalar) => exec_ctx.scalars.set_scalar_value(scalar.name, result).map(|_| None),
-        ApResult::Stream(stream) => {
-            let generation = ap_result_to_generation(merger_ap_result);
-            exec_ctx
+        ast::ApResult::Scalar(scalar) => {
+            exec_ctx.scalars.set_scalar_value(scalar.name, result)?;
+            Ok(trace::ApResult::scalar())
+        }
+        ast::ApResult::Stream(stream) => {
+            let generation = ap_result_to_generation(merger_ap_result)?;
+            let generation = exec_ctx
                 .streams
-                .add_stream_value(result, generation, stream.name, stream.position)
-                .map(Some)
+                .add_stream_value(result, generation, stream.name, stream.position)?;
+            Ok(trace::ApResult::stream(generation))
         }
     }
-}
-
-fn maybe_update_trace(
-    should_touch_trace: bool,
-    merger_ap_result: &MergerApResult,
-    maybe_generation: Option<u32>,
-    trace_ctx: &mut TraceHandler,
-) {
-    if !should_touch_trace {
-        // if generations are empty, then this ap instruction operates only with scalars and data
-        // shouldn't be updated
-        return;
-    }
-
-    let final_ap_result = to_ap_result(merger_ap_result, maybe_generation);
-    trace_ctx.meet_ap_end(final_ap_result);
 }

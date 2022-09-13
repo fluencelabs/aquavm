@@ -157,9 +157,9 @@ fn check_influence_to_not_restricted() {
 
     let actual_trace = trace_from_result(&result);
     let expected_trace = vec![
-        executed_state::ap(Some(0)),
-        executed_state::ap(Some(0)),
-        executed_state::ap(Some(0)),
+        executed_state::ap_stream(0),
+        executed_state::ap_stream(0),
+        executed_state::ap_stream(0),
         executed_state::scalar(json!(["more"])),
         executed_state::scalar(json!(["push more"])),
         executed_state::scalar(json!(["push more"])),
@@ -200,15 +200,15 @@ fn new_in_fold_with_ap() {
     let actual_trace = trace_from_result(&result);
     let expected_trace = vec![
         executed_state::scalar(json!([1, 2, 3, 4, 5])),
-        executed_state::ap(Some(0)),
+        executed_state::ap_stream(0),
         executed_state::scalar_string_array(vec!["none"]),
-        executed_state::ap(Some(0)),
+        executed_state::ap_stream(0),
         executed_state::scalar_string_array(vec!["none"]),
-        executed_state::ap(Some(0)),
+        executed_state::ap_stream(0),
         executed_state::scalar_string_array(vec!["none"]),
-        executed_state::ap(Some(0)),
+        executed_state::ap_stream(0),
         executed_state::scalar_string_array(vec!["none"]),
-        executed_state::ap(Some(0)),
+        executed_state::ap_stream(0),
         executed_state::scalar_string_array(vec!["none"]),
     ];
     assert_eq!(actual_trace, expected_trace);

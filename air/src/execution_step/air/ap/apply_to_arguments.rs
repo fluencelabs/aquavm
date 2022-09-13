@@ -24,7 +24,6 @@ pub(super) fn apply_to_arg(
     argument: &ast::ApArgument<'_>,
     exec_ctx: &ExecutionCtx<'_>,
     trace_ctx: &TraceHandler,
-    should_touch_trace: bool,
 ) -> ExecutionResult<ValueAggregate> {
     use ast::ApArgument::*;
 
@@ -37,7 +36,7 @@ pub(super) fn apply_to_arg(
         Number(value) => apply_const(value, exec_ctx, trace_ctx),
         Boolean(value) => apply_const(*value, exec_ctx, trace_ctx),
         EmptyArray => apply_const(serde_json::json!([]), exec_ctx, trace_ctx),
-        Scalar(scalar) => apply_scalar(scalar, exec_ctx, trace_ctx, should_touch_trace)?,
+        Scalar(scalar) => apply_scalar(scalar, exec_ctx, trace_ctx)?,
         CanonStream(canon_stream) => apply_canon_stream(canon_stream, exec_ctx)?,
     };
 
@@ -70,12 +69,11 @@ fn apply_scalar(
     scalar: &ast::ScalarWithLambda<'_>,
     exec_ctx: &ExecutionCtx<'_>,
     trace_ctx: &TraceHandler,
-    should_touch_trace: bool,
 ) -> ExecutionResult<ValueAggregate> {
     // TODO: refactor this code after boxed value
     match &scalar.lambda {
         Some(lambda) => apply_scalar_wl_impl(scalar.name, lambda, exec_ctx, trace_ctx),
-        None => apply_scalar_impl(scalar.name, exec_ctx, trace_ctx, should_touch_trace),
+        None => apply_scalar_impl(scalar.name, exec_ctx, trace_ctx),
     }
 }
 
@@ -83,7 +81,6 @@ fn apply_scalar_impl(
     scalar_name: &str,
     exec_ctx: &ExecutionCtx<'_>,
     trace_ctx: &TraceHandler,
-    should_touch_trace: bool,
 ) -> ExecutionResult<ValueAggregate> {
     use crate::execution_step::ScalarRef;
 
@@ -97,9 +94,7 @@ fn apply_scalar_impl(
         }
     };
 
-    if should_touch_trace {
-        result.trace_pos = trace_ctx.trace_pos();
-    }
+    result.trace_pos = trace_ctx.trace_pos();
 
     Ok(result)
 }
@@ -136,6 +131,7 @@ fn apply_canon_stream_with_lambda(
     use crate::execution_step::boxed_value::JValuable;
 
     let canon_stream = exec_ctx.scalars.get_canon_stream(stream_name)?;
+    println!("canon {} position: {}", stream_name, canon_stream.position());
     let (result, tetraplet) = JValuable::apply_lambda_with_tetraplets(&canon_stream, lambda, exec_ctx)?;
     // TODO: refactor this code after boxed value
     let value = ValueAggregate::new(
@@ -153,6 +149,7 @@ fn apply_canon_stream_without_lambda(
     use crate::execution_step::boxed_value::JValuable;
 
     let canon_stream = exec_ctx.scalars.get_canon_stream(stream_name)?;
+    println!("canon {} position: {}", stream_name, canon_stream.position());
     // TODO: refactor this code after boxed value
     let value = JValuable::as_jvalue(&canon_stream).into_owned();
 

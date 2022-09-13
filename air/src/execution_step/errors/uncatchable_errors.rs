@@ -67,6 +67,12 @@ pub enum UncatchableError {
     #[error("new end block tries to pop up a variable '{scalar_name}' that wasn't defined at depth {depth}")]
     ScalarsStateCorrupted { scalar_name: String, depth: usize },
 
+    /// It's an internal error in AquaVM, correspondence of Ap state in trace should be checked before
+    #[error(
+        "it's an internal error in AquaVM ap merger: {0:?} doesn't match to instruction, but must be checked before"
+    )]
+    ApInternalError(MergerApResult),
+
     /// Variable with such a position wasn't defined during AIR script execution.
     /// Canon instruction requires this value to be present in data, otherwise it's considered
     /// as a hard error.

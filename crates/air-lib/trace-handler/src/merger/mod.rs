@@ -23,6 +23,7 @@ mod par_merger;
 mod position_mapping;
 
 pub use ap_merger::MergerApResult;
+pub use ap_merger::StreamApResult;
 pub use call_merger::MergerCallResult;
 pub use canon_merger::MergerCanonResult;
 pub use fold_merger::MergerFoldResult;

@@ -84,6 +84,26 @@ impl ApResult {
             res_generations: res_gens,
         }
     }
+
+    pub fn scalar() -> Self {
+        Self {
+            res_generations: vec![],
+        }
+    }
+
+    pub fn stream(generation: u32) -> Self {
+        Self {
+            res_generations: vec![generation],
+        }
+    }
+
+    pub fn is_stream(&self) -> bool {
+        self.res_generations.len() == 1
+    }
+
+    pub fn is_scalar(&self) -> bool {
+        self.res_generations.is_empty()
+    }
 }
 
 impl CanonResult {

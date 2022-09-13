@@ -1,6 +1,6 @@
 [package]
 name = "air-trace-handler"
-version = "0.1.0"
+version = "0.2.0"
 description = "Implementation of AIR trace handler"
 authors = ["Fluence Labs"]
 edition = "2018"

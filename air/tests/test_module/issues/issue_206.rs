@@ -43,6 +43,6 @@ fn issue_206() {
     let result = checked_call_vm!(peer_1, test_params, &script, "", "");
 
     let actual_trace = trace_from_result(&result);
-    let expected_trace = vec![executed_state::ap(Some(0)), executed_state::scalar(json!(["is nil"]))];
+    let expected_trace = vec![executed_state::ap_stream(0), executed_state::scalar(json!(["is nil"]))];
     assert_eq!(actual_trace, expected_trace);
 }
