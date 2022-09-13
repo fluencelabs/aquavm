@@ -41,8 +41,8 @@ jobs:
           name: avm-wasm-binary
           path: target/wasm32-wasi/release/air_interpreter_server.wasm
 
-  avm:
-    name: "Publish avm"
+  publish-snapshot:
+    name: "Publish avm snapshot"
     runs-on: ubuntu-latest
 
     needs: air-interpreter
