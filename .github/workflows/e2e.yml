@@ -17,6 +17,12 @@ env:
   CARGO_HOME: "${{ github.workspace }}/cargo"
 
 jobs:
+  air-client:
+    name: "Build air-client"
+    runs-on: builder
+
+    uses: ./.github/workflows/snapshot.yml
+
   rust-peer:
     name: "Build rust-peer snapshot"
     runs-on: builder
