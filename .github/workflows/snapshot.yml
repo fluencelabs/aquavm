@@ -38,10 +38,10 @@ jobs:
         run: marine build --release --features marine
         working-directory: air-interpreter
 
-      - name: Upload air-interpreter-server wasm binary
+      - name: Upload avm wasm binary
         uses: actions/upload-artifact@v3
         with:
-          name: avm.wasm
+          name: avm-wasm-binary
           path: target/wasm32-wasi/release/air_interpreter_server.wasm
 
   air-client:
@@ -61,13 +61,14 @@ jobs:
       - name: Checkout Aquavm
         uses: actions/checkout@v3
 
-      - name: Download air-interpreter-server wasm binary
+      - name: Download avm wasm binary
         uses: actions/download-artifact@v3
         with:
-          name: avm.wasm
+          name: avm-wasm-binary
           path: avm/client/dist/
 
-      - run: ls -alh avm/client/dist
+      - run: mv air_interpreter_server.wasm avm.wasm
+        working-directory: avm/client/dist
 
       - name: Setup node with self-hosted npm registry
         uses: actions/setup-node@v3
