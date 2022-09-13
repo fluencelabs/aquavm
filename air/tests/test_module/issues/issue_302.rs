@@ -52,7 +52,7 @@ fn issue_302() {
         executed_state::stream_number(2, 1),
         executed_state::stream_number(1, 0),
         executed_state::stream_number(0, 1),
-        executed_state::scalar(json!([1,2,0])),
+        executed_state::scalar(json!([1, 2, 0])),
     ];
     assert_eq!(actual_trace, expected_trace);
 }

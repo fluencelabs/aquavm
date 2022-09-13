@@ -30,7 +30,12 @@ pub enum MergerCallResult {
     /// There is no corresponding state in a trace for this call.
     Empty,
 
-    NewStreamValue{ value: Rc<JValue>, name: String, pos: usize, trace_pos: TracePos },
+    NewStreamValue {
+        value: Rc<JValue>,
+        stream_name: String,
+        stream_pos: usize,
+        trace_pos: TracePos,
+    },
     /// There was a state in at least one of the contexts. If there were two states in
     /// both contexts, they were successfully merged.
     CallResult { value: CallResult, trace_pos: TracePos },
@@ -51,8 +56,7 @@ pub(crate) fn try_merge_next_state_as_call(
         (Some(Call(prev_call)), Some(Call(current_call))) => (prev_call, current_call),
         // this special case is needed to merge stream generation in a right way
         (None, Some(Call(CallResult::Executed(value)))) => {
-            let call_result = merge_current_executed(value, value_type, data_keeper)?;
-            return Ok(prepare_call_result(call_result, Current, data_keeper));
+            return merge_current_executed(value, value_type, Current, data_keeper);
         }
         (None, Some(Call(current_call))) => return Ok(prepare_call_result(current_call, Current, data_keeper)),
         (Some(Call(prev_call)), None) => return Ok(prepare_call_result(prev_call, Previous, data_keeper)),
@@ -66,8 +70,7 @@ pub(crate) fn try_merge_next_state_as_call(
         }
     };
 
-    let merged_call = merge_call_result(prev_call, current_call, value_type, data_keeper)?;
-    let call_result = prepare_call_result(merged_call, Both, data_keeper);
+    let call_result = merge_call_result(prev_call, current_call, value_type, Both, data_keeper)?;
     try_match_value_type(&call_result, value_type)?;
 
     Ok(call_result)
@@ -77,8 +80,9 @@ fn merge_call_result(
     prev_call: CallResult,
     current_call: CallResult,
     value_type: ValueType<'_>,
-    data_keeper: &DataKeeper,
-) -> MergeResult<CallResult> {
+    scheme: PreparationScheme,
+    data_keeper: &mut DataKeeper,
+) -> MergeResult<MergerCallResult> {
     use CallResult::*;
 
     let merged_state = match (prev_call, current_call) {
@@ -92,13 +96,13 @@ fn merge_call_result(
         // github.com/fluencelabs/aquavm/issues/137
         (prev @ RequestSentBy(_), RequestSentBy(_)) => prev,
         // this special case is needed to merge stream generation in a right way
-        (RequestSentBy(_), Executed(value)) => merge_current_executed(value, value_type, data_keeper)?,
+        (RequestSentBy(_), Executed(value)) => return merge_current_executed(value, value_type, scheme, data_keeper),
         (prev @ Executed(..), RequestSentBy(_)) => prev,
         (Executed(prev_value), Executed(current_value)) => merge_executed(prev_value, current_value)?,
         (prev_call, current_call) => return Err(CallResultError::incompatible_calls(prev_call, current_call)),
     };
 
-    Ok(merged_state)
+    Ok(prepare_call_result(merged_state, scheme, data_keeper))
 }
 
 pub(super) fn prepare_call_result(
@@ -112,16 +116,34 @@ pub(super) fn prepare_call_result(
     MergerCallResult::CallResult { value, trace_pos }
 }
 
+pub(super) fn prepare_new_stream_result(
+    value: Rc<JValue>,
+    stream_name: impl Into<String>,
+    stream_pos: usize,
+    scheme: PreparationScheme,
+    data_keeper: &mut DataKeeper,
+) -> MergerCallResult {
+    let trace_pos = data_keeper.result_trace_next_pos();
+    prepare_positions_mapping(scheme, data_keeper);
+
+    MergerCallResult::NewStreamValue {
+        value,
+        stream_name: stream_name.into(),
+        stream_pos,
+        trace_pos,
+    }
+}
+
 #[derive(Debug, Copy, Clone)]
 pub(crate) enum ValueType<'i> {
     Scalar,
-    Stream(&'i str),
+    Stream(&'i str, usize),
 }
 
 impl<'i> ValueType<'i> {
     pub(self) fn from_output_value(output_value: &'i CallOutputValue<'_>) -> Self {
         match output_value {
-            CallOutputValue::Stream(stream) => ValueType::Stream(stream.name),
+            CallOutputValue::Stream(stream) => ValueType::Stream(stream.name, stream.position),
             _ => ValueType::Scalar,
         }
     }
@@ -132,7 +154,7 @@ impl fmt::Display for ValueType<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             ValueType::Scalar => write!(f, "scalar"),
-            ValueType::Stream(stream_name) => write!(f, "${}", stream_name),
+            ValueType::Stream(stream_name, _) => write!(f, "${}", stream_name),
         }
     }
 }

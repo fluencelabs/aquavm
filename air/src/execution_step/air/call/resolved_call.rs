@@ -162,13 +162,14 @@ impl<'i> ResolvedCall<'i> {
             // TODO It might be resolved elsewhere instead.
             MergerCallResult::NewStreamValue {
                 value,
-                name,
-                pos,
+                stream_name,
+                stream_pos,
                 trace_pos,
             } => {
-                let stream = exec_ctx.streams.get(&name, pos.into()).expect("TODO");
-                // TODO check it is correct
-                let generation = stream.generations_count() as u32;
+                let stream = exec_ctx.streams.get(&stream_name, stream_pos);
+                let generation = stream
+                    .map(|stream| stream.generations_count() as u32)
+                    .unwrap_or_default();
                 let call_result = CallResult::Executed(Value::Stream { value, generation });
                 (call_result, trace_pos)
             }
