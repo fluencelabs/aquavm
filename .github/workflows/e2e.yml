@@ -17,7 +17,7 @@ jobs:
   snapshot:
     uses: ./.github/workflows/snapshot.yml
 
-  fluence-js:
+  fluence-js-tests:
     needs:
       - snapshot
 
@@ -32,6 +32,14 @@ jobs:
     uses: fluencelabs/fluence-js/.github/workflows/snapshot.yml@aquavm-e2e
     with:
       avm-version: ${{ needs.snapshot.outputs.avm-version }}
+
+  aqua-snapshot:
+    needs:
+      - fluence-js-snapshot
+
+    uses: fluencelabs/aqua/.github/workflows/snapshot.yml@aquavm-e2e
+    with:
+      fluence-js-version: ${{ needs.fluence-js-snapshot.outputs.fluence-js-version }}
 
   rust-peer:
     name: "Build rust-peer snapshot"
@@ -103,9 +111,11 @@ jobs:
   aqua-playground:
     needs:
       - fluence-js-snapshot
+      - aqua-snapshot
       - rust-peer
 
-    uses: fluencelabs/aqua-playground/.github/workflows/tests.yml@master
+    uses: fluencelabs/aqua-playground/.github/workflows/tests.yml@aquavm-e2e
     with:
       fluence-js-version: ${{ needs.fluence-js-snapshot.outputs.fluence-js-version }}
-      rust-peer-image: docker.fluence.dev/marine:${{ github.head_ref }}
+      aqua-version: ${{ needs.aqua-snapshot.outputs.aqua-snapshot }}
+      rust-peer-image: docker.fluence.dev/aquavm:${{ github.head_ref }}
