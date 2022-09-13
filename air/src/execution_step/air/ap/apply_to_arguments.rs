@@ -131,7 +131,6 @@ fn apply_canon_stream_with_lambda(
     use crate::execution_step::boxed_value::JValuable;
 
     let canon_stream = exec_ctx.scalars.get_canon_stream(stream_name)?;
-    println!("canon {} position: {}", stream_name, canon_stream.position());
     let (result, tetraplet) = JValuable::apply_lambda_with_tetraplets(&canon_stream, lambda, exec_ctx)?;
     // TODO: refactor this code after boxed value
     let value = ValueAggregate::new(
@@ -149,7 +148,6 @@ fn apply_canon_stream_without_lambda(
     use crate::execution_step::boxed_value::JValuable;
 
     let canon_stream = exec_ctx.scalars.get_canon_stream(stream_name)?;
-    println!("canon {} position: {}", stream_name, canon_stream.position());
     // TODO: refactor this code after boxed value
     let value = JValuable::as_jvalue(&canon_stream).into_owned();
 
