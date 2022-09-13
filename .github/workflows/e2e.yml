@@ -45,6 +45,9 @@ jobs:
     name: "Build rust-peer snapshot"
     runs-on: builder
 
+    outputs:
+      image: "${{ steps.build.outputs.digest }}"
+
     permissions:
       contents: read
       id-token: write
@@ -96,6 +99,7 @@ jobs:
           password: ${{ env.DOCKER_PASSWORD }}
 
       - name: Build and push snapshot
+        id: build
         uses: docker/build-push-action@v3
         with:
           context: .
@@ -118,4 +122,4 @@ jobs:
     with:
       fluence-js-version: ${{ needs.fluence-js-snapshot.outputs.fluence-js-version }}
       aqua-version: ${{ needs.aqua-snapshot.outputs.aqua-snapshot }}
-      rust-peer-image: docker.fluence.dev/aquavm:${{ github.head_ref }}
+      rust-peer-image: ${{ needs.rust-peer.outputs.image }}
