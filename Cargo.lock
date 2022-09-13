@@ -100,7 +100,7 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter-interface"
-version = "0.11.0"
+version = "0.11.1"
 dependencies = [
  "fluence-it-types",
  "marine-rs-sdk",
@@ -294,7 +294,7 @@ checksum = "d468802bab17cbc0cc575e9b053f41e72aa36bfa6b7f55e3529ffa43161b97fa"
 
 [[package]]
 name = "avm-data-store"
-version = "0.4.0"
+version = "0.4.1"
 dependencies = [
  "serde",
  "serde_bytes",
@@ -303,7 +303,7 @@ dependencies = [
 
 [[package]]
 name = "avm-interface"
-version = "0.26.0"
+version = "0.26.1"
 dependencies = [
  "air-interpreter-interface",
  "air-utils",
@@ -319,7 +319,7 @@ dependencies = [
 
 [[package]]
 name = "avm-server"
-version = "0.26.0"
+version = "0.26.1"
 dependencies = [
  "air-interpreter-interface",
  "air-utils",
@@ -1958,7 +1958,7 @@ dependencies = [
 
 [[package]]
 name = "polyplets"
-version = "0.3.1"
+version = "0.3.2"
 dependencies = [
  "marine-macro",
  "marine-rs-sdk-main",
