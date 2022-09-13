@@ -70,7 +70,10 @@ jobs:
         run: cargo build --release -p particle-node
 
       - name: Install cargo-nextest
-        run: cargo install --locked cargo-nextest@0.9.22
+        uses: baptiste0928/cargo-install@v1
+        with:
+          crate: cargo-nextest
+          version: "0.9"
 
       - name: Run cargo nextest
         run: cargo nextest run --release --all-features --no-fail-fast --retries 10 --test-threads 10
