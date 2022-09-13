@@ -21,7 +21,7 @@ jobs:
     name: "Build air-client"
     runs-on: builder
 
-    uses: ./.github/workflows/snapshot.yml
+    uses: ./.github/workflows/air-client-snapshot.yml
 
   rust-peer:
     name: "Build rust-peer snapshot"
