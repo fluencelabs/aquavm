@@ -21,7 +21,7 @@ jobs:
     needs:
       - snapshot
 
-    uses: fluencelabs/fluence-js/.github/workflows/tests.yml@aquavm-e2e
+    uses: fluencelabs/fluence-js/.github/workflows/tests.yml@master
     with:
       avm-version: ${{ needs.snapshot.outputs.avm-version }}
 
@@ -29,7 +29,7 @@ jobs:
     needs:
       - snapshot
 
-    uses: fluencelabs/fluence-js/.github/workflows/snapshot.yml@aquavm-e2e
+    uses: fluencelabs/fluence-js/.github/workflows/snapshot.yml@master
     with:
       avm-version: ${{ needs.snapshot.outputs.avm-version }}
 
@@ -57,7 +57,6 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: fluencelabs/rust-peer
-          ref: aquavm-e2e
 
       - name: Setup rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
@@ -121,7 +120,7 @@ jobs:
       - aqua-snapshot
       - rust-peer
 
-    uses: fluencelabs/aqua-playground/.github/workflows/tests.yml@aquavm-e2e
+    uses: fluencelabs/aqua-playground/.github/workflows/tests.yml@master
     with:
       fluence-js-version: ${{ needs.fluence-js-snapshot.outputs.fluence-js-version }}
       aqua-version: ${{ needs.aqua-snapshot.outputs.aqua-snapshot }}
