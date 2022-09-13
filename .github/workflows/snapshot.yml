@@ -3,20 +3,17 @@ name: Publish snapshots
 on:
   workflow_call:
     outputs:
-      air-client-version:
-        description: "air-client snapshot version"
-        value: ${{ jobs.publish-snapshot.outputs.air-client-version }}
+      avm-version:
+        description: "avm snapshot version"
+        value: ${{ jobs.publish-snapshot.outputs.avm-version }}
 
 env:
   FORCE_COLOR: true
 
 jobs:
   air-interpreter:
-    name: "Publish air-interpreter"
+    name: "Build air-interpreter wasm"
     runs-on: ubuntu-latest
-
-    # outputs:
-    #   air-interpreter-version: "${{ steps.build.outputs.version }}"
 
     permissions:
       contents: read
@@ -44,14 +41,14 @@ jobs:
           name: avm-wasm-binary
           path: target/wasm32-wasi/release/air_interpreter_server.wasm
 
-  air-client:
-    name: "Publish air-client"
+  avm:
+    name: "Publish avm"
     runs-on: ubuntu-latest
 
     needs: air-interpreter
 
     outputs:
-      air-client-version: "${{ steps.build.outputs.version }}"
+      avm-version: "${{ steps.build.outputs.version }}"
 
     permissions:
       contents: read
