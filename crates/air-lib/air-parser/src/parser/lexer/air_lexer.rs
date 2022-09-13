@@ -120,7 +120,7 @@ impl<'input> AIRLexer<'input> {
     fn advance_to_token_end(&mut self, start_pos: usize, square_met: bool) -> usize {
         let mut end_pos = start_pos;
         let mut round_brackets_balance: i64 = 0;
-        let mut square_brackets_balance: i64 = if square_met { 1 } else { 0 };
+        let mut square_brackets_balance = i64::from(square_met);
 
         while let Some((pos, ch)) = self.chars.peek() {
             end_pos = *pos;
