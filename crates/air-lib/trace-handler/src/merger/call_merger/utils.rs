@@ -16,7 +16,7 @@
 
 use super::*;
 
-type JValue = serde_json::Value;
+pub(crate) type JValue = serde_json::Value;
 
 use std::rc::Rc;
 

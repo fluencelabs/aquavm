@@ -21,6 +21,8 @@ use crate::TracePos;
 use air_parser::ast::CallOutputValue;
 use utils::*;
 
+use std::rc::Rc;
+
 const EXPECTED_STATE_NAME: &str = "call";
 
 #[derive(Debug, Clone)]
@@ -28,6 +30,7 @@ pub enum MergerCallResult {
     /// There is no corresponding state in a trace for this call.
     Empty,
 
+    NewStreamValue{ value: Rc<JValue>, name: String, pos: usize, trace_pos: TracePos },
     /// There was a state in at least one of the contexts. If there were two states in
     /// both contexts, they were successfully merged.
     CallResult { value: CallResult, trace_pos: TracePos },

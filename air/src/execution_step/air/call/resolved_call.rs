@@ -28,6 +28,7 @@ use crate::JValue;
 use crate::SecurityTetraplet;
 
 use air_interpreter_data::CallResult;
+use air_interpreter_data::Value;
 use air_interpreter_interface::CallRequestParams;
 use air_parser::ast;
 use air_trace_handler::MergerCallResult;
@@ -158,6 +159,19 @@ impl<'i> ResolvedCall<'i> {
     ) -> ExecutionResult<StateDescriptor> {
         let (call_result, trace_pos) = match trace_to_exec_err!(trace_ctx.meet_call_start(&self.output), raw_call)? {
             MergerCallResult::CallResult { value, trace_pos } => (value, trace_pos),
+            // TODO It might be resolved elsewhere instead.
+            MergerCallResult::NewStreamValue {
+                value,
+                name,
+                pos,
+                trace_pos,
+            } => {
+                let stream = exec_ctx.streams.get(&name, pos.into()).expect("TODO");
+                // TODO check it is correct
+                let generation = stream.generations_count() as u32;
+                let call_result = CallResult::Executed(Value::Stream { value, generation });
+                (call_result, trace_pos)
+            }
             MergerCallResult::Empty => return Ok(StateDescriptor::no_previous_state()),
         };
 
