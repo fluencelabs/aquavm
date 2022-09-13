@@ -41,7 +41,7 @@ pub(crate) struct PlainDataArgs {
     data_path: PathBuf,
 }
 
-pub(crate) fn load(args: &PlainDataArgs) -> anyhow::Result<ExecutionData> {
+pub(crate) fn load(args: &PlainDataArgs) -> anyhow::Result<ExecutionData<'_>> {
     use crate::run::load_data;
 
     let air_script =

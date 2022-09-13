@@ -50,7 +50,7 @@ dependencies = [
 
 [[package]]
 name = "air-beautifier"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "air-parser",
  "itertools 0.10.3",
@@ -59,7 +59,7 @@ dependencies = [
 
 [[package]]
 name = "air-beautify"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "air-beautifier",
  "anyhow",
@@ -141,7 +141,7 @@ version = "0.1.0"
 
 [[package]]
 name = "air-parser"
-version = "0.7.1"
+version = "0.7.2"
 dependencies = [
  "air-lambda-ast",
  "air-lambda-parser",
@@ -191,7 +191,7 @@ dependencies = [
 
 [[package]]
 name = "air-trace"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "air",
  "air-interpreter-interface",
