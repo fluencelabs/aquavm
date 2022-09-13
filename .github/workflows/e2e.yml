@@ -25,6 +25,14 @@ jobs:
     with:
       avm-version: ${{ needs.snapshot.outputs.avm-version }}
 
+  fluence-js-snapshot:
+    needs:
+      - snapshot
+
+    uses: fluencelabs/fluence-js/.github/workflows/snapshot.yml@aquavm-e2e
+    with:
+      avm-version: ${{ needs.snapshot.outputs.avm-version }}
+
   rust-peer:
     name: "Build rust-peer snapshot"
     runs-on: builder
@@ -94,10 +102,10 @@ jobs:
 
   aqua-playground:
     needs:
-      - fluence-js
+      - fluence-js-snapshot
       - rust-peer
 
     uses: fluencelabs/aqua-playground/.github/workflows/tests.yml@master
     with:
-      fluence-js-version: ${{ needs.fluence-js.outputs.fluence-js-version }}
+      fluence-js-version: ${{ needs.fluence-js-snapshot.outputs.fluence-js-version }}
       rust-peer-image: docker.fluence.dev/marine:${{ github.head_ref }}
