@@ -15,7 +15,6 @@
  */
 
 use super::*;
-use air_lambda_ast::format_ast;
 use std::fmt;
 
 impl fmt::Display for Scalar<'_> {
@@ -27,7 +26,7 @@ impl fmt::Display for Scalar<'_> {
 impl fmt::Display for ScalarWithLambda<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match &self.lambda {
-            Some(lambda) => write!(f, "{}.${}", self.name, format_ast(lambda)),
+            Some(lambda) => write!(f, "{}{}", self.name, lambda),
             None => write!(f, "{}", self.name),
         }
     }
@@ -48,7 +47,7 @@ impl fmt::Display for CanonStream<'_> {
 impl fmt::Display for StreamWithLambda<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match &self.lambda {
-            Some(lambda) => write!(f, "{}.${}", self.name, format_ast(lambda)),
+            Some(lambda) => write!(f, "{}{}", self.name, lambda),
             None => write!(f, "{}", self.name),
         }
     }
@@ -57,7 +56,7 @@ impl fmt::Display for StreamWithLambda<'_> {
 impl fmt::Display for CanonStreamWithLambda<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match &self.lambda {
-            Some(lambda) => write!(f, "{}.${}", self.name, format_ast(lambda)),
+            Some(lambda) => write!(f, "{}{}", self.name, lambda),
             None => write!(f, "{}", self.name),
         }
     }

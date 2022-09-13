@@ -17,6 +17,7 @@
 use super::LambdaError;
 use super::LambdaResult;
 use crate::execution_step::ScalarRef;
+use crate::execution_step::PEEK_ALLOWED_ON_NON_EMPTY;
 use crate::JValue;
 
 pub(super) fn try_jvalue_with_idx(jvalue: &JValue, idx: u32) -> LambdaResult<&JValue> {
@@ -61,8 +62,11 @@ pub(super) fn select_by_scalar<'value, 'i>(
     match scalar_ref {
         Value(lambda_value) => select_by_jvalue(value, &lambda_value.result),
         IterableValue(fold_state) => {
-            // it's safe because iterable always point to valid value
-            let accessor = fold_state.iterable.peek().unwrap().into_resolved_result();
+            let accessor = fold_state
+                .iterable
+                .peek()
+                .expect(PEEK_ALLOWED_ON_NON_EMPTY)
+                .into_resolved_result();
             select_by_jvalue(value, &accessor.result)
         }
     }
@@ -72,8 +76,11 @@ pub(super) fn try_scalar_ref_as_idx(scalar: ScalarRef<'_>) -> LambdaResult<u32> 
     match scalar {
         ScalarRef::Value(accessor) => try_jvalue_as_idx(&accessor.result),
         ScalarRef::IterableValue(accessor) => {
-            // it's safe because iterable always point to valid value
-            let accessor = accessor.iterable.peek().unwrap().into_resolved_result();
+            let accessor = accessor
+                .iterable
+                .peek()
+                .expect(PEEK_ALLOWED_ON_NON_EMPTY)
+                .into_resolved_result();
             try_jvalue_as_idx(&accessor.result)
         }
     }

@@ -314,9 +314,8 @@ impl<'input> CallVariableParser<'input> {
     }
 
     fn try_to_variable_and_lambda(&self, lambda_start_pos: usize) -> LexerResult<Token<'input>> {
-        // +2 to ignore ".$" prefix
         let lambda =
-            crate::parse_lambda(&self.string_to_parse[lambda_start_pos + 2..]).map_err(|e| {
+            crate::parse_lambda(&self.string_to_parse[lambda_start_pos..]).map_err(|e| {
                 LexerError::lambda_parser_error(
                     self.start_pos + lambda_start_pos..self.start_pos + self.string_to_parse.len(),
                     e.to_string(),

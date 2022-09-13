@@ -1,4 +1,6 @@
 use crate::ValueAccessor;
+use crate::parser::lambda_parser::RawLambdaAST;
+use crate::Functor;
 use crate::parser::lexer::LexerError;
 use crate::parser::lexer::Token;
 
@@ -7,7 +9,13 @@ use lalrpop_util::ErrorRecovery;
 // the only thing why input matters here is just introducing lifetime for Token
 grammar<'err, 'input>(input: &'input str, errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>);
 
-pub Lambda: Vec<ValueAccessor<'input>> = <ValueAccessor*> => <>;
+pub(crate) RawLambdaAST: RawLambdaAST<'input> = {
+    <value_path_starter: ".$"> <accessors: ValueAccessor*> => RawLambdaAST::ValuePath(accessors),
+
+    length_functor => RawLambdaAST::Functor(Functor::Length),
+
+    ! => { errors.push(<>); RawLambdaAST::Error },
+}
 
 ValueAccessor: ValueAccessor<'input> = {
     <maybe_dot_selector:"."?> "[" <idx: number_accessor> "]" <maybe_flatten_sign:"!"?> => {
@@ -30,7 +38,8 @@ extern {
     type Error = LexerError;
 
     enum Token<'input> {
-        "." => Token::Selector,
+        ".$" => Token::ValuePathStarter,
+        "." => Token::ValuePathSelector,
 
         "[" => Token::OpenSquareBracket,
         "]" => Token::CloseSquareBracket,
@@ -39,5 +48,7 @@ extern {
         string_accessor => Token::StringAccessor(<&'input str>),
 
         "!" => Token::FlatteningSign,
+
+        length_functor => Token::LengthFunctor,
     }
 }

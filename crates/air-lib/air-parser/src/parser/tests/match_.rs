@@ -22,8 +22,6 @@ use air_lambda_ast::{LambdaAST, ValueAccessor};
 use fstrings::f;
 use fstrings::format_args_f;
 
-use std::convert::TryFrom;
-
 #[test]
 fn parse_match() {
     let source_code = r#"
@@ -54,7 +52,7 @@ fn parse_match_with_canon_stream() {
     let expected = match_(
         Value::Variable(VariableWithLambda::canon_stream_wl(
             canon_stream,
-            LambdaAST::try_from(vec![ValueAccessor::ArrayAccess { idx: 0 }]).unwrap(),
+            LambdaAST::try_from_accessors(vec![ValueAccessor::ArrayAccess { idx: 0 }]).unwrap(),
             16,
         )),
         Value::Variable(VariableWithLambda::scalar("v2", 36)),

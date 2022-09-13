@@ -16,7 +16,6 @@
 
 use super::*;
 
-use air_lambda_ast::format_ast;
 use std::fmt;
 
 impl fmt::Display for Instruction<'_> {
@@ -77,7 +76,7 @@ impl fmt::Display for Fail<'_> {
                 error_message,
             } => write!(f, r#"fail {} "{}""#, ret_code, error_message),
             Fail::CanonStream { name, lambda, .. } => {
-                write!(f, "fail {}.$.{}", name, format_ast(lambda))
+                write!(f, "fail {}.$.{}", name, lambda)
             }
             Fail::LastError => write!(f, "fail %last_error%"),
         }

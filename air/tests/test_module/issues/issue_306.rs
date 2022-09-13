@@ -14,18 +14,23 @@
  * limitations under the License.
  */
 
-use crate::ast::Value;
-use air_lambda_ast::LambdaAST;
-use air_lambda_ast::ValueAccessor;
+use air_interpreter_interface::INTERPRETER_SUCCESS;
+use air_test_utils::prelude::*;
 
 #[test]
-// https://github.com/fluencelabs/aquavm/issues/263
-fn issue_263() {
-    let val = Value::LastError(Some(
-        LambdaAST::try_from_accessors(vec![ValueAccessor::FieldAccessByName {
-            field_name: "message",
-        }])
-        .unwrap(),
-    ));
-    assert_eq!(val.to_string(), "%last_error%.$.message");
+// test for github.com/fluencelabs/aquavm/issues/306
+fn issue_306() {
+    let peer_id_1 = "peer_id_1";
+    let mut peer_vm_1 = create_avm(echo_call_service(), peer_id_1);
+
+    let script = f!(r#"
+        (new $stream
+            (seq
+                (canon "{peer_id_1}" $stream #canon_stream)
+                (fold #canon_stream iterator
+                    (ap iterator $stream))))
+    "#);
+
+    let result = call_vm!(peer_vm_1, <_>::default(), &script, "", "");
+    assert_eq!(result.ret_code, INTERPRETER_SUCCESS)
 }

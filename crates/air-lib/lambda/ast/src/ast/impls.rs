@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Fluence Labs Limited
+ * Copyright 2022 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,24 @@
  * limitations under the License.
  */
 
-mod canon_stream;
-mod iterable;
-mod jvaluable;
-mod scalar;
-mod stream;
-mod utils;
-mod variable;
+use crate::Functor;
+use crate::LambdaAST;
+use crate::ValueAccessor;
 
-pub(crate) use canon_stream::*;
-pub(crate) use iterable::*;
-pub(crate) use jvaluable::*;
-pub(crate) use scalar::ScalarRef;
-pub(crate) use scalar::ValueAggregate;
-pub(crate) use stream::Generation;
-pub(crate) use stream::Stream;
-pub(crate) use stream::StreamIter;
-pub(crate) use utils::populate_tetraplet_with_lambda;
-pub(crate) use variable::Variable;
+pub use non_empty_vec::EmptyError;
+use non_empty_vec::NonEmpty;
 
-use super::ExecutionResult;
+use std::convert::TryFrom;
+
+impl<'input> LambdaAST<'input> {
+    pub fn try_from_accessors(accessors: Vec<ValueAccessor<'input>>) -> Result<Self, EmptyError> {
+        let value_path = NonEmpty::try_from(accessors)?;
+        let lambda_ast = Self::ValuePath(value_path);
+
+        Ok(lambda_ast)
+    }
+
+    pub fn from_functor(functor: Functor) -> Self {
+        Self::Functor(functor)
+    }
+}

@@ -1,6 +1,23 @@
+## Version 0.28.0 (2022-09-07)
+
+[PR 314](https://github.com/fluencelabs/aquavm/pull/314):  
+The length functor was introduced
+
+[PR 307](https://github.com/fluencelabs/aquavm/pull/307):  
+bug with iteration over empty canonicalized stream was fixed
+
+[PR 305](https://github.com/fluencelabs/aquavm/pull/305):  
+bug with absence of join behaviour for canonicalized streams in fold instructions was fixed
+
+[PR 303](https://github.com/fluencelabs/aquavm/pull/303):  
+unsafe code for `LambdaAST` creation was removed
+
+[PR 301](https://github.com/fluencelabs/aquavm/pull/301):  
+bug with adding just executed values to a restricted stream was fixed
+
 ## Version 0.27.0 (2022-08-23)
 
-[PR 292](https://github.com/fluencelabs/aquavm/pull/292):
+[PR 292](https://github.com/fluencelabs/aquavm/pull/292):  
 Introduced a new `canon` instruction
 
 [PR 296](https://github.com/fluencelabs/aquavm/pull/296):  
@@ -13,7 +30,7 @@ Accompanying to air-interpreter update that makes interface more handy for `air-
 
 ## Version 0.25.0 (2022-07-27)
 
-[PR 287](https://github.com/fluencelabs/aquavm/pull/287):
+[PR 287](https://github.com/fluencelabs/aquavm/pull/287):  
 Memory leak introduced by switching to reactor/command model in WASI fixed
 
 [PR 276](https://github.com/fluencelabs/aquavm/pull/276):  
@@ -22,36 +39,36 @@ AquaVM performance was improved by removing excess logging
 [PR 273](https://github.com/fluencelabs/aquavm/pull/273):  
 Introduced `TracePos` for `TraceHandler` positions
 
-[PR 270](https://github.com/fluencelabs/aquavm/pull/270):
+[PR 270](https://github.com/fluencelabs/aquavm/pull/270):  
 A bug with empty subtrace lore in TraceHandler was fixed 
 
 ## Version 0.24.0 (2022-04-21)
 
-[PR 253](https://github.com/fluencelabs/aquavm/pull/253):
+[PR 253](https://github.com/fluencelabs/aquavm/pull/253):  
 Introduced %ttl% keyword
 
 ## Version 0.24.0 (2022-04-20)
 
-[PR 250](https://github.com/fluencelabs/aquavm/pull/250):
+[PR 250](https://github.com/fluencelabs/aquavm/pull/250):  
 Introduced %timestamp% keyword
 
 ## Version 0.23.0 (2022-04-20)
 
-[PR 248](https://github.com/fluencelabs/aquavm/pull/248):
+[PR 248](https://github.com/fluencelabs/aquavm/pull/248):  
 Introduced new for scalars
 
-[PR 244](https://github.com/fluencelabs/aquavm/pull/244):
+[PR 244](https://github.com/fluencelabs/aquavm/pull/244):  
 Stack size was increased to 50 MiB
 
 ## Version 0.22.0 (2022-04-14)
 
-[PR 243](https://github.com/fluencelabs/aquavm/pull/243):
+[PR 243](https://github.com/fluencelabs/aquavm/pull/243):  
 Clean scalars at the end of scope, only one next in a fold over scalar is possible now
 
-[PR 231](https://github.com/fluencelabs/aquavm/pull/231):
+[PR 231](https://github.com/fluencelabs/aquavm/pull/231):  
 Test refactoring
 
-[PR 228](https://github.com/fluencelabs/aquavm/pull/228):
+[PR 228](https://github.com/fluencelabs/aquavm/pull/228):  
 Improve stream determinism
 
 ## Version 0.21.0 (2022-02-26)

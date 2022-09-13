@@ -15,18 +15,40 @@
  */
 
 use super::*;
+use itertools::Itertools;
 
 use std::fmt;
+
+impl fmt::Display for LambdaAST<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use LambdaAST::*;
+
+        match self {
+            Functor(functor) => write!(f, ".{}", functor),
+            ValuePath(value_path) => write!(f, ".$.{}", value_path.iter().join(".")),
+        }
+    }
+}
 
 impl fmt::Display for ValueAccessor<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use ValueAccessor::*;
 
         match self {
-            ArrayAccess { idx } => write!(f, ".[{}]", idx),
-            FieldAccessByName { field_name } => write!(f, ".{}", field_name),
-            FieldAccessByScalar { scalar_name } => write!(f, ".[{}]", scalar_name),
+            ArrayAccess { idx } => write!(f, "[{}]", idx),
+            FieldAccessByName { field_name } => write!(f, "{}", field_name),
+            FieldAccessByScalar { scalar_name } => write!(f, "[{}]", scalar_name),
             Error => write!(f, "a parser error occurred while parsing lambda expression"),
+        }
+    }
+}
+
+impl fmt::Display for Functor {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use Functor::*;
+
+        match self {
+            Length => write!(f, "length"),
         }
     }
 }

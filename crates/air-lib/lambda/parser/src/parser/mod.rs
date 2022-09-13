@@ -31,9 +31,8 @@ pub type LambdaParserResult<'input, T> = std::result::Result<T, LambdaParserErro
 
 pub use errors::LambdaParserError;
 pub use lambda_parser::parse;
-pub use lexer::AccessorsLexer;
+pub use lexer::LambdaASTLexer;
 pub use lexer::LexerError;
-pub use va_lambda::LambdaParser;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Span {

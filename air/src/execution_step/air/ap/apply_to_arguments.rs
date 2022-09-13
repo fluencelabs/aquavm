@@ -15,6 +15,8 @@
  */
 
 use super::*;
+use crate::execution_step::PEEK_ALLOWED_ON_NON_EMPTY;
+
 use air_lambda_parser::LambdaAST;
 use air_parser::ast;
 
@@ -90,10 +92,7 @@ fn apply_scalar_impl(
     let mut result = match scalar {
         ScalarRef::Value(result) => result.clone(),
         ScalarRef::IterableValue(iterator) => {
-            let result = iterator.iterable.peek().expect(
-                "peek always return elements inside fold,\
-            this guaranteed by implementation of next and avoiding empty folds",
-            );
+            let result = iterator.iterable.peek().expect(PEEK_ALLOWED_ON_NON_EMPTY);
             result.into_resolved_result()
         }
     };
@@ -139,7 +138,11 @@ fn apply_canon_stream_with_lambda(
     let canon_stream = exec_ctx.scalars.get_canon_stream(stream_name)?;
     let (result, tetraplet) = JValuable::apply_lambda_with_tetraplets(&canon_stream, lambda, exec_ctx)?;
     // TODO: refactor this code after boxed value
-    let value = ValueAggregate::new(Rc::new(result.clone()), Rc::new(tetraplet), canon_stream.position());
+    let value = ValueAggregate::new(
+        Rc::new(result.into_owned()),
+        Rc::new(tetraplet),
+        canon_stream.position(),
+    );
     Ok(value)
 }
 
