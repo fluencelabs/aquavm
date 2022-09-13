@@ -70,6 +70,19 @@ jobs:
       - run: mv air_interpreter_server.wasm avm.wasm
         working-directory: avm/client/dist
 
+      - name: Import secrets
+        uses: hashicorp/vault-action@v2.4.2
+        with:
+          url: https://vault.fluence.dev
+          path: jwt/github
+          role: ci
+          method: jwt
+          jwtGithubAudience: "https://github.com/fluencelabs"
+          jwtTtl: 300
+          exportToken: false
+          secrets: |
+            kv/npm-registry/basicauth/ci token | NODE_AUTH_TOKEN
+
       - name: Setup node with self-hosted npm registry
         uses: actions/setup-node@v3
         with:
@@ -83,19 +96,6 @@ jobs:
 
       - run: npm run build
         working-directory: avm/client
-
-      - name: Import secrets
-        uses: hashicorp/vault-action@v2.4.2
-        with:
-          url: https://vault.fluence.dev
-          path: jwt/github
-          role: ci
-          method: jwt
-          jwtGithubAudience: "https://github.com/fluencelabs"
-          jwtTtl: 300
-          exportToken: false
-          secrets: |
-            kv/npm-registry/basicauth/ci token | NODE_AUTH_TOKEN
 
       - name: Generate package version
         id: version
@@ -111,6 +111,7 @@ jobs:
           SHA: ${{ steps.version.outputs.sha }}
           RUN: ${{ github.run_number }}
           ATTEMPT: ${{ github.run_attempt }}
+        working-directory: avm/client
         run: |
           echo "::set-output name=version::$(\
                 npm version prerelease \
@@ -118,4 +119,5 @@ jobs:
                 --preid ${{ env.BRANCH }}-${{ env.SHA }}-${{ env.RUN }}-${{ env.ATTEMPT }})"
 
       - name: Publish to self-hosted npm repo
+        working-directory: avm/client
         run: npm publish --tag snapshot --registry https://npm.fluence.dev
