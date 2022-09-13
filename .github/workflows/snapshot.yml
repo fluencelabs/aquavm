@@ -1,4 +1,4 @@
-name: Publish air-client snapshot
+name: Publish snapshots
 
 on:
   workflow_call:
@@ -11,41 +11,70 @@ env:
   FORCE_COLOR: true
 
 jobs:
-  publish-snapshot:
-    name: "Publish snapshot"
+  air-interpreter:
+    name: "Publish air-interpreter"
     runs-on: ubuntu-latest
 
-    outputs:
-      air-cluent-version: "${{ steps.build.outputs.version }}"
+    # outputs:
+    #   air-interpreter-version: "${{ steps.build.outputs.version }}"
 
     permissions:
       contents: read
       id-token: write
 
     steps:
-      - name: Checkout aquavm
+      - name: Checkout Aquavm
         uses: actions/checkout@v3
 
-      - name: Setup rust toolchain
+      - name: Setup Rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
 
-      - name: Download marine
-        run: .github/download_marine.sh
+      - name: Install marine
+        uses: baptiste0928/cargo-install@v1
+        with:
+          crate: marine
 
-      - name: Build Wasm binary for interpreter
+      - name: Build air-interpreter-server wasm binary
         run: marine build --release --features marine
         working-directory: air-interpreter
 
-      - name: Copy Wasm binary to avm/client
-        run: |
-          mkdir -p avm/client/dist/
-          cp target/wasm32-wasi/release/air_interpreter_server.wasm avm/client/dist/avm.wasm
+      - name: Upload air-interpreter-server wasm binary
+        uses: actions/upload-artifact@v3
+        with:
+          name: avm.wasm
+          path: target/wasm32-wasi/release/air_interpreter_server.wasm
+
+  air-client:
+    name: "Publish air-client"
+    runs-on: ubuntu-latest
+
+    needs: air-interpreter
+
+    outputs:
+      air-client-version: "${{ steps.build.outputs.version }}"
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout Aquavm
+        uses: actions/checkout@v3
+
+      - name: Download air-interpreter-server wasm binary
+        uses: actions/download-artifact@v3
+        with:
+          name: avm.wasm
+          path: avm/client/dist/
+
+      - run: ls -alh avm/client/dist
 
       - name: Setup node with self-hosted npm registry
         uses: actions/setup-node@v3
         with:
           node-version: "16"
           registry-url: "https://npm.fluence.dev"
+          cache-dependency-path: avm/client/package-lock.json
           cache: "npm"
 
       - run: npm i
@@ -71,7 +100,6 @@ jobs:
         id: version
         run: |
           SHA=$(git rev-parse --short HEAD)
-
           echo "::set-output name=sha::$SHA"
           echo "::set-output name=branch::${GITHUB_HEAD_REF//[^a-zA-Z0-9-]/-}"
 
