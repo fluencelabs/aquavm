@@ -37,7 +37,7 @@ jobs:
     needs:
       - fluence-js-snapshot
 
-    uses: fluencelabs/aqua/.github/workflows/snapshot.yml@aquavm-e2e
+    uses: fluencelabs/aqua/.github/workflows/snapshot.yml@e2e
     with:
       fluence-js-version: ${{ needs.fluence-js-snapshot.outputs.fluence-js-version }}
 
