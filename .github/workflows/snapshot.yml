@@ -81,7 +81,7 @@ jobs:
       - run: npm i
         working-directory: avm/client
 
-      - run: npm build
+      - run: npm run build
         working-directory: avm/client
 
       - name: Import secrets
