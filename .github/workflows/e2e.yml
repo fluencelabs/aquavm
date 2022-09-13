@@ -4,9 +4,6 @@ on:
   pull_request:
     paths-ignore:
       - "!**.md"
-  push:
-    branches:
-      - "master"
 
 concurrency:
   group: "${{ github.workflow }}-${{ github.ref }}"
@@ -18,9 +15,6 @@ env:
 
 jobs:
   air-client:
-    name: "Build air-client"
-    runs-on: builder
-
     uses: ./.github/workflows/air-client-snapshot.yml
 
   rust-peer:
