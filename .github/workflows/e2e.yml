@@ -15,9 +15,11 @@ env:
 
 jobs:
   snapshot:
+    name: "aquavm"
     uses: ./.github/workflows/snapshot.yml
 
   fluence-js-tests:
+    name: "fluence-js"
     needs:
       - snapshot
 
@@ -26,6 +28,7 @@ jobs:
       avm-version: ${{ needs.snapshot.outputs.avm-version }}
 
   fluence-js-snapshot:
+    name: "fluence-js"
     needs:
       - snapshot
 
@@ -34,6 +37,7 @@ jobs:
       avm-version: ${{ needs.snapshot.outputs.avm-version }}
 
   aqua-snapshot:
+    name: "aqua"
     needs:
       - fluence-js-snapshot
 
