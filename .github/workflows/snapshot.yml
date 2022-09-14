@@ -52,7 +52,7 @@ jobs:
 
     permissions:
       contents: read
-      pull-request: write
+      pull-requests: write
       id-token: write
 
     steps:
