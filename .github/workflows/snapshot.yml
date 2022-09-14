@@ -234,5 +234,5 @@ jobs:
             ## air-interpreter-wasm version is [${{ env.VERSION }}](https://crates.fluence.dev/#/crate?name=air-interpreter-wasm&version=${{ env.VERSION }})
             To install it run:
             ```shell
-            cargo add air-interpreter-wasm --version ${{ env.VERSION }} --registry fluence
+            cargo add air-interpreter-wasm@${{ env.VERSION }} --registry fluence
             ```
