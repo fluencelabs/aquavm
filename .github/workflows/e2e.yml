@@ -47,6 +47,8 @@ jobs:
 
   rust-peer:
     name: "rust-peer"
+    needs:
+      - snapshot
 
     uses: fluencelabs/rust-peer/.github/workflows/snapshot.yml@rust-peer-snapshot-workflow
     with:
