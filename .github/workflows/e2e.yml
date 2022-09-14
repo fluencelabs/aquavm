@@ -1,4 +1,4 @@
-name: "e2e"
+nam: "e2e"
 
 on:
   pull_request:
@@ -110,7 +110,7 @@ jobs:
           tags: |
             docker.fluence.dev/aquavm:${{ github.head_ref }}
           labels: |
-            sha=${{ github.sha }}
+            sha=${{ github.event.pull_request.head.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
