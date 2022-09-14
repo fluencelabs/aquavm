@@ -1,4 +1,4 @@
-nam: "e2e"
+name: "e2e"
 
 on:
   pull_request:
