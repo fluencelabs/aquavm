@@ -18,6 +18,16 @@ jobs:
     name: "aquavm"
     uses: ./.github/workflows/snapshot.yml
 
+  rust-peer:
+    name: "rust-peer"
+    needs:
+      - snapshot
+
+    uses: fluencelabs/rust-peer/.github/workflows/snapshot.yml@rust-peer-snapshot-workflow
+    with:
+      image-name: "docker.fluence.dev/aquavm"
+      avm-server-version: '{ git = "https://github.com/fluencelabs/aquavm", branch = "${{ github.head_ref }}" }'
+
   fluence-js-tests:
     name: "fluence-js"
     needs:
@@ -44,16 +54,6 @@ jobs:
     uses: fluencelabs/aqua/.github/workflows/snapshot.yml@main
     with:
       fluence-js-version: ${{ needs.fluence-js-snapshot.outputs.fluence-js-version }}
-
-  rust-peer:
-    name: "rust-peer"
-    needs:
-      - snapshot
-
-    uses: fluencelabs/rust-peer/.github/workflows/snapshot.yml@rust-peer-snapshot-workflow
-    with:
-      image-name: "docker.fluence.dev/aquavm"
-      avm-server-version: '{ git = "https://github.com/fluencelabs/aquavm", branch = "${{ github.head_ref }}" }'
 
   aqua-playground:
     needs:
