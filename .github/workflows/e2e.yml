@@ -46,77 +46,12 @@ jobs:
       fluence-js-version: ${{ needs.fluence-js-snapshot.outputs.fluence-js-version }}
 
   rust-peer:
-    name: "Build rust-peer snapshot"
-    runs-on: builder
+    name: "rust-peer"
 
-    outputs:
-      digest: "${{ steps.build.outputs.digest }}"
-
-    permissions:
-      contents: read
-      id-token: write
-
-    steps:
-      - name: Checkout rust-peer
-        uses: actions/checkout@v3
-        with:
-          repository: fluencelabs/rust-peer
-
-      - name: Setup rust toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-
-      - name: Use local dependencies
-        run: |
-          sed -i 's#\(avm-server =\) .*#\1 { git = "https://github.com/fluencelabs/aquavm", branch = "${{ github.head_ref }}" }#g' Cargo.toml
-
-      - name: Run cargo build
-        run: cargo build --release -p particle-node
-
-      - name: Install cargo-nextest
-        uses: baptiste0928/cargo-install@v1
-        with:
-          crate: cargo-nextest
-          version: "0.9"
-
-      - name: Run cargo nextest
-        run: cargo nextest run --release --all-features --no-fail-fast --retries 10 --test-threads 10
-
-      - name: Import secrets
-        uses: hashicorp/vault-action@v2.4.1
-        with:
-          url: https://vault.fluence.dev
-          path: jwt/github
-          role: ci
-          method: jwt
-          jwtGithubAudience: "https://github.com/fluencelabs"
-          jwtTtl: 300
-          secrets: |
-            kv/docker-registry/basicauth/ci username | DOCKER_USERNAME ;
-            kv/docker-registry/basicauth/ci password | DOCKER_PASSWORD
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Login to DockerHub
-        uses: docker/login-action@v2
-        with:
-          registry: docker.fluence.dev
-          username: ${{ env.DOCKER_USERNAME }}
-          password: ${{ env.DOCKER_PASSWORD }}
-
-      - name: Build and push snapshot
-        id: build
-        uses: docker/build-push-action@v3
-        with:
-          context: .
-          push: true
-          file: .github/snapshot/Dockerfile
-          tags: |
-            docker.fluence.dev/aquavm:${{ github.head_ref }}
-          labels: |
-            sha=${{ github.event.pull_request.head.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+    uses: fluencelabs/rust-peer/.github/workflows/snapshot.yml@rust-peer-snapshot-workflow
+    with:
+      image-name: "docker.fluence.dev/aquavm"
+      avm-server-version: '{ git = "https://github.com/fluencelabs/aquavm", branch = "${{ github.head_ref }}" }'
 
   aqua-playground:
     needs:
@@ -128,4 +63,4 @@ jobs:
     with:
       fluence-js-version: ${{ needs.fluence-js-snapshot.outputs.fluence-js-version }}
       aqua-version: ${{ needs.aqua-snapshot.outputs.aqua-version }}
-      rust-peer-image: docker.fluence.dev/aquavm@${{ needs.rust-peer.outputs.digest }}
+      rust-peer-image: ${{ needs.rust-peer.outputs.rust-peer-image }}
