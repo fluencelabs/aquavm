@@ -112,7 +112,7 @@ fn create_canon_stream_from_pos(
         .collect::<Result<Vec<_>, _>>()?;
 
     let peer_id = crate::execution_step::air::resolve_to_string(&ast_canon.peer_pk, exec_ctx)?;
-    let canon_stream = CanonStream::new(values, peer_id, ast_canon.stream.position.into());
+    let canon_stream = CanonStream::new(values, peer_id);
     Ok(canon_stream)
 }
 
@@ -153,7 +153,8 @@ fn create_canon_stream_from_name(
                 ast_canon.stream.name.to_string(),
             )))
         })?;
-    let canon_stream = CanonStream::from_stream(stream, peer_id, ast_canon.canon_stream.position.into());
+
+    let canon_stream = CanonStream::from_stream(stream, peer_id);
     let stream_elements_pos = stream
         .iter(Generation::Last)
         // it's always safe to iter over all generations
