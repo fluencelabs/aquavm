@@ -6,7 +6,7 @@ on:
       avm-version:
         description: "@fluencelabs/avm version"
         value: ${{ jobs.publish-avm.outputs.version }}
-      avm-interpreter-wasm-version:
+      air-interpreter-wasm-version:
         description: "air-interpreter-wasm version"
         value: ${{ jobs.publish-interpreter.outputs.version }}
 
