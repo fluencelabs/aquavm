@@ -24,6 +24,7 @@ jobs:
       image-name: "docker.fluence.dev/aquavm"
       avm-server-version: '{ git = "https://github.com/fluencelabs/aquavm", branch = "${{ github.head_ref }}" }'
       air-interpreter-wasm-version: '{ version = "${{ needs.snapshot.outputs.avm-interpreter-wasm-version }}", registry = "fluence" }'
+      ref: rust-peer-snapshot-workflow
 
   fluence-js-tests:
     name: "fluence-js"
