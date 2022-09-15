@@ -9,10 +9,6 @@ concurrency:
   group: "${{ github.workflow }}-${{ github.ref }}"
   cancel-in-progress: true
 
-env:
-  FORCE_COLOR: true
-  CARGO_HOME: "${{ github.workspace }}/cargo"
-
 jobs:
   snapshot:
     name: "aquavm"
