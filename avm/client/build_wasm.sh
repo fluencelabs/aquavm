@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 
 # if running in CI avm.wasm has been built already
-if [[ -z $GITHUB_SHA ]] && [[ -f dist/avm.wasm ]]; then
+if [[ ! -z $GITHUB_SHA ]] && [[ -f dist/avm.wasm ]]; then
   echo "air-interpreter wasm binary already present"
   exit 0
 else
