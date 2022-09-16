@@ -21,7 +21,7 @@ air-utils = { version = "0.1.0", path = "../../crates/air-lib/utils" }
 avm-data-store = { version = "0.4.1", path = "../../crates/data-store" }
 polyplets = { version = "0.3.2", path = "../../crates/air-lib/polyplets" }
 
-thiserror = "1.0.34"
+thiserror = "1.0.35"
 maplit = "1.0.2"
 serde_json = "1.0.85"
 serde = "1.0.144"
