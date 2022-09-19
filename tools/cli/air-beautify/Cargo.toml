@@ -10,5 +10,5 @@ keywords = ["fluence", "air", "beautifier"]
 
 [dependencies]
 air-beautifier = { path = "../../../crates/beautifier" }
-clap = { version = "3.2.20", features = ["derive"] }
-anyhow = "1.0.64"
+clap = { version = "3.2.22", features = ["derive"] }
+anyhow = "1.0.65"
