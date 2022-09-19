@@ -138,6 +138,7 @@ impl<W: io::Write> Beautifier<W> {
             ast::Instruction::FoldStream(fold_stream) => {
                 self.beautify_fold_stream(fold_stream, indent)
             }
+            ast::Instruction::Never(never) => self.beautify_simple(never, indent),
             ast::Instruction::New(new) => self.beautify_new(new, indent),
             ast::Instruction::Next(next) => self.beautify_simple(next, indent),
             ast::Instruction::Null(null) => self.beautify_simple(null, indent),

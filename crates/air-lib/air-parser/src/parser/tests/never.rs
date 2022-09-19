@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Fluence Labs Limited
+ * Copyright 2022 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,19 @@
  * limitations under the License.
  */
 
-mod ap;
-mod call;
-mod canon;
-mod fail;
-mod fold;
-mod match_;
-mod mismatch;
-mod never;
-mod new;
-mod par;
-mod seq;
-mod xor;
+use super::dsl::*;
+use super::parse;
+
+#[test]
+fn parse_null() {
+    let source_code = r#"
+        (seq
+            (never)
+
+            ( never     )
+        )
+        "#;
+    let instruction = parse(source_code);
+    let expected = seq(never(), never());
+    assert_eq!(instruction, expected)
+}
