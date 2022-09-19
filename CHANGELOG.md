@@ -1,3 +1,11 @@
+## Version 0.29.0 (2022-09-19)
+
+[PR 335](https://github.com/fluencelabs/aquavm/pull/335):  
+Introduce `never` instruction
+
+[PR 332](https://github.com/fluencelabs/aquavm/pull/332):  
+Fix bug with incorrect positions in `canon` instruction
+
 ## Version 0.28.0 (2022-09-07)
 
 [PR 314](https://github.com/fluencelabs/aquavm/pull/314):  

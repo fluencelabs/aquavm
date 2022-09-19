@@ -14,15 +14,21 @@
  * limitations under the License.
  */
 
-mod ap;
-mod call;
-mod canon;
-mod fail;
-mod fold;
-mod match_;
-mod mismatch;
-mod never;
-mod new;
-mod par;
-mod seq;
-mod xor;
+use air_test_utils::prelude::*;
+
+#[test]
+fn never_not_complete_subgraph() {
+    let vm_peer_id = "test_peer_id";
+    let mut vm = create_avm(unit_call_service(), vm_peer_id);
+
+    let script = f!(r#"
+        (seq
+            (never)
+            (call "{vm_peer_id}" ("" "") [])
+        )
+    "#);
+
+    let result = checked_call_vm!(vm, <_>::default(), script, "", "");
+    let actual_trace = trace_from_result(&result);
+    assert!(actual_trace.is_empty());
+}
