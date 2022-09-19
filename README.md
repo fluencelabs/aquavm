@@ -28,7 +28,7 @@ AIR scripts control the Fluence peer-to-peer network, its peers and, through Mar
 ### What is AIR?
 
 - S-expression-based low-level language with binary form to come
-- Consists of twelve (12) instructions with more instructions to come
+- Consists of fourteen (14) instructions with more instructions to come
 - Semantics are inspired by [π-calculus](https://en.wikipedia.org/wiki/%CE%A0-calculus), [λ-calculus](https://en.wikipedia.org/wiki/Lambda_calculus) and [category theory](https://en.wikipedia.org/wiki/Category_theory)
 - Syntax is inspired by [Wasm Text Format](https://developer.mozilla.org/en-US/docs/WebAssembly/Understanding_the_text_format) (WAT) and [Lisp](https://en.wikipedia.org/wiki/Lisp_(programming_language))
 
@@ -174,6 +174,14 @@ Example
 ```wasm
 (fail 1337 "error message")
 ```
+
+#### never
+
+```wasm
+(never)
+```
+
+- marks subgraph as incomplete, useful for code generation
 
 #### null
 
