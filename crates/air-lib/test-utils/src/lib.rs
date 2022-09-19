@@ -60,8 +60,13 @@ pub type JValue = serde_json::Value;
 #[macro_export]
 macro_rules! checked_call_vm {
     ($vm:expr, $test_run_parameters:expr, $script:expr, $prev_data:expr, $data:expr) => {{
-        match $vm.call($script, $prev_data, $data, $test_run_parameters) {
+        let data = $data;
+        match $vm.call($script, $prev_data, data.clone(), $test_run_parameters) {
             Ok(v) if v.ret_code != 0 => {
+                let dat = data_from_data(data);
+                print_trace1(&dat.trace, "cur_data");
+                eprintln!("global streams: {:?}", dat.global_streams);
+                eprintln!("restricted streams: {:?}", dat.restricted_streams);
                 panic!("VM returns a error: {} {}", v.ret_code, v.error_message)
             }
             Ok(v) => v,
@@ -85,8 +90,12 @@ pub fn trace_from_result(result: &RawAVMOutcome) -> ExecutionTrace {
     data.trace
 }
 
+pub fn data_from_data(data: impl Into<Vec<u8>>) -> InterpreterData {
+    serde_json::from_slice(&data.into()).expect("default serializer shouldn't fail")
+}
+
 pub fn data_from_result(result: &RawAVMOutcome) -> InterpreterData {
-    serde_json::from_slice(&result.data).expect("default serializer shouldn't fail")
+    data_from_data(result.data.clone())
 }
 
 pub fn raw_data_from_trace(trace: impl Into<ExecutionTrace>) -> Vec<u8> {
@@ -104,6 +113,14 @@ macro_rules! assert_next_pks {
 
         assert_eq!(expected, actual)
     };
+}
+
+pub fn print_trace1(trace: &ExecutionTrace, trace_name: &str) {
+    println!("trace {} (states_count: {}): [", trace_name, trace.len());
+    for (id, state) in trace.iter().enumerate() {
+        println!("  {}: {}", id, state);
+    }
+    println!("]");
 }
 
 pub fn print_trace(result: &RawAVMOutcome, trace_name: &str) {

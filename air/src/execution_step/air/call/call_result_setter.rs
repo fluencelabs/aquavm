@@ -49,6 +49,7 @@ pub(crate) fn set_local_result<'i>(
     }
 }
 
+// TODO New stream should be handled here
 pub(crate) fn set_result_from_value<'i>(
     value: Value,
     tetraplet: RcSecurityTetraplet,
