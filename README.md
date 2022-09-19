@@ -181,7 +181,7 @@ Example
 (never)
 ```
 
-- marks subgraph as incomplete, useful for code generation
+- marks a subgraph as incomplete, useful for code generation
 
 #### null
 
