@@ -35,6 +35,7 @@ pub(crate) struct StateDescriptor {
     prev_state: Option<CallResult>,
 }
 
+// TODO update as per 12:00
 /// This function looks at the existing call state, validates it,
 /// and returns Ok(true) if the call should be executed further.
 pub(super) fn handle_prev_state<'i>(
