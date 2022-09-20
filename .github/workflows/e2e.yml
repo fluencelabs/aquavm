@@ -19,8 +19,7 @@ jobs:
     needs:
       - snapshot
 
-    # uses: fluencelabs/rust-peer/.github/workflows/snapshot.yml@master
-    uses: fluencelabs/rust-peer/.github/workflows/snapshot.yml@try-setting-dependency-with-action
+    uses: fluencelabs/rust-peer/.github/workflows/snapshot.yml@master
     with:
       image-name: "docker.fluence.dev/aquavm"
       avm-server-version: '{ git = "https://github.com/fluencelabs/aquavm", branch = "${{ github.head_ref }}" }'
