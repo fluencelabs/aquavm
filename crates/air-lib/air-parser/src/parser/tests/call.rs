@@ -34,7 +34,7 @@ fn parse_json_path() {
 
     let instruction = parse(source_code);
     let expected = call(
-        CallInstrValue::Variable(VariableWithLambda::from_raw_lambda_scalar(
+        CallInstrValue::Variable(VariableWithLambda::from_raw_value_path(
             "peer_id",
             vec![ValueAccessor::FieldAccessByName { field_name: "a" }],
             15,
@@ -187,7 +187,7 @@ fn parse_lambda_complex() {
     let instruction = parse(source_code);
     let expected = seq(
         call(
-            CallInstrValue::Variable(VariableWithLambda::from_raw_lambda_scalar(
+            CallInstrValue::Variable(VariableWithLambda::from_raw_value_path(
                 "m",
                 vec![ValueAccessor::ArrayAccess { idx: 1 }],
                 32,
@@ -198,7 +198,7 @@ fn parse_lambda_complex() {
             CallOutputValue::Scalar(Scalar::new("void", 75)),
         ),
         call(
-            CallInstrValue::Variable(VariableWithLambda::from_raw_lambda_scalar(
+            CallInstrValue::Variable(VariableWithLambda::from_raw_value_path(
                 "m",
                 vec![
                     ValueAccessor::FieldAccessByName { field_name: "abc" },
@@ -231,7 +231,7 @@ fn parse_lambda_with_scalars_complex() {
     let instruction = parse(source_code);
     let expected = seq(
         call(
-            CallInstrValue::Variable(VariableWithLambda::from_raw_lambda_scalar(
+            CallInstrValue::Variable(VariableWithLambda::from_raw_value_path(
                 "m",
                 vec![
                     ValueAccessor::ArrayAccess { idx: 1 },
@@ -250,7 +250,7 @@ fn parse_lambda_with_scalars_complex() {
             CallOutputValue::Scalar(Scalar::new("void", 97)),
         ),
         call(
-            CallInstrValue::Variable(VariableWithLambda::from_raw_lambda_scalar(
+            CallInstrValue::Variable(VariableWithLambda::from_raw_value_path(
                 "m",
                 vec![
                     ValueAccessor::FieldAccessByName { field_name: "abc" },
@@ -285,7 +285,7 @@ fn json_path_square_braces() {
         "#;
     let instruction = parse(source_code);
     let expected = call(
-        CallInstrValue::Variable(VariableWithLambda::from_raw_lambda_scalar(
+        CallInstrValue::Variable(VariableWithLambda::from_raw_value_path(
             "u",
             vec![ValueAccessor::FieldAccessByName {
                 field_name: "peer_id",
@@ -295,7 +295,7 @@ fn json_path_square_braces() {
         CallInstrValue::Literal("return"),
         CallInstrValue::Literal(""),
         Rc::new(vec![
-            Value::Variable(VariableWithLambda::from_raw_lambda_scalar(
+            Value::Variable(VariableWithLambda::from_raw_value_path(
                 "u",
                 vec![
                     ValueAccessor::ArrayAccess { idx: 1 },
@@ -306,7 +306,7 @@ fn json_path_square_braces() {
                 ],
                 43,
             )),
-            Value::Variable(VariableWithLambda::from_raw_lambda_scalar(
+            Value::Variable(VariableWithLambda::from_raw_value_path(
                 "u",
                 vec![ValueAccessor::FieldAccessByName { field_name: "name" }],
                 64,
@@ -471,12 +471,11 @@ fn canon_stream_with_lambda_in_triplet() {
     let expected = call(
         CallInstrValue::Variable(VariableWithLambda::canon_stream_wl(
             canon_stream,
-            unsafe {
-                LambdaAST::new_unchecked(vec![
-                    ValueAccessor::ArrayAccess { idx: 0 },
-                    ValueAccessor::FieldAccessByName { field_name: "path" },
-                ])
-            },
+            LambdaAST::try_from_accessors(vec![
+                ValueAccessor::ArrayAccess { idx: 0 },
+                ValueAccessor::FieldAccessByName { field_name: "path" },
+            ])
+            .unwrap(),
             19,
         )),
         CallInstrValue::Literal(service_id),

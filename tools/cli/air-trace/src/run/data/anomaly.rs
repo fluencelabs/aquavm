@@ -29,9 +29,9 @@ pub(crate) struct AnomalyDataArgs {
     anomaly_data_path: PathBuf,
 }
 
-pub(crate) fn load(args: &AnomalyDataArgs) -> anyhow::Result<super::ExecutionData> {
+pub(crate) fn load(args: &AnomalyDataArgs) -> anyhow::Result<super::ExecutionData<'_>> {
     let anomaly_json = load_data(&args.anomaly_data_path).context("Failed to read anomaly data")?;
-    let anomaly_data: AnomalyData =
+    let anomaly_data: AnomalyData<'_> =
         serde_json::from_str(&anomaly_json).context("Failed to parse anomaly data")?;
 
     let air_script = anomaly_data.air_script.to_string();

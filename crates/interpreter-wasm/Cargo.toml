@@ -17,4 +17,4 @@ keywords = ["fluence", "air", "webassembly", "programming-language"]
 categories = ["wasm"]
 
 [build-dependencies]
-built = "0.4.4"
+built = "0.5.1"

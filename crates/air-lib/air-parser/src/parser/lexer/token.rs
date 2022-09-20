@@ -74,6 +74,7 @@ pub enum Token<'input> {
     Fail,
     Fold,
     Xor,
+    Never,
     New,
     Next,
     Null,

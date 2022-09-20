@@ -19,6 +19,7 @@ mod iterable;
 mod jvaluable;
 mod scalar;
 mod stream;
+mod utils;
 mod variable;
 
 pub(crate) use canon_stream::*;
@@ -29,6 +30,7 @@ pub(crate) use scalar::ValueAggregate;
 pub(crate) use stream::Generation;
 pub(crate) use stream::Stream;
 pub(crate) use stream::StreamIter;
+pub(crate) use utils::populate_tetraplet_with_lambda;
 pub(crate) use variable::Variable;
 
 use super::ExecutionResult;

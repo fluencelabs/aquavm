@@ -65,6 +65,10 @@ pub(super) fn new<'i>(
     })
 }
 
+pub(super) fn never() -> Instruction<'static> {
+    Instruction::Never(Never)
+}
+
 pub(super) fn null() -> Instruction<'static> {
     Instruction::Null(Null)
 }

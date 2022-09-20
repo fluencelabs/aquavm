@@ -14,6 +14,18 @@
  * limitations under the License.
  */
 
+#![forbid(unsafe_code)]
+#![warn(rust_2018_idioms)]
+#![deny(
+    dead_code,
+    nonstandard_style,
+    unused_imports,
+    unused_mut,
+    unused_variables,
+    unused_unsafe,
+    unreachable_patterns
+)]
+
 use serde::Deserialize;
 use serde::Serialize;
 use std::borrow::Cow;
@@ -152,7 +164,7 @@ mod tests {
             &avm_outcome[..],
         );
 
-        let anomaly: AnomalyData =
+        let anomaly: AnomalyData<'_> =
             serde_json::from_str(&json_data).expect("deserialize JSON anomaly data");
 
         assert_eq!(

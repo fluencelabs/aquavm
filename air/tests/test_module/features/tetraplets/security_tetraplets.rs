@@ -134,7 +134,7 @@ fn fold_json_path() {
         peer_pk: set_variable_vm_peer_id,
         service_id,
         function_name,
-        json_path: String::from(".args"),
+        json_path: String::from(".$.args"),
     };
 
     let second_arg_tetraplet = SecurityTetraplet {
@@ -180,14 +180,14 @@ fn check_tetraplet_works_correctly() {
         peer_pk: set_variable_vm_peer_id.clone(),
         service_id: service_id.clone(),
         function_name: function_name.clone(),
-        json_path: String::from(".args"),
+        json_path: String::from(".$.args"),
     };
 
     let second_arg_tetraplet = SecurityTetraplet {
         peer_pk: set_variable_vm_peer_id.clone(),
         service_id,
         function_name,
-        json_path: String::from(".args.[0]"),
+        json_path: String::from(".$.args.[0]"),
     };
 
     let expected_tetraplets = vec![vec![first_arg_tetraplet], vec![second_arg_tetraplet]];

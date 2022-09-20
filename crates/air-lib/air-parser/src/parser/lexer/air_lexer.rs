@@ -120,7 +120,7 @@ impl<'input> AIRLexer<'input> {
     fn advance_to_token_end(&mut self, start_pos: usize, square_met: bool) -> usize {
         let mut end_pos = start_pos;
         let mut round_brackets_balance: i64 = 0;
-        let mut square_brackets_balance: i64 = if square_met { 1 } else { 0 };
+        let mut square_brackets_balance = i64::from(square_met);
 
         while let Some((pos, ch)) = self.chars.peek() {
             end_pos = *pos;
@@ -183,6 +183,7 @@ fn string_to_token(input: &str, start_pos: usize) -> LexerResult<Token> {
         FAIL_INSTR => Ok(Token::Fail),
         FOLD_INSTR => Ok(Token::Fold),
         XOR_INSTR => Ok(Token::Xor),
+        NEVER_INSTR => Ok(Token::Never),
         NEW_INSTR => Ok(Token::New),
         NEXT_INSTR => Ok(Token::Next),
         NULL_INSTR => Ok(Token::Null),
@@ -207,7 +208,6 @@ fn parse_last_error(input: &str, start_pos: usize) -> LexerResult<Token<'_>> {
         return Ok(Token::LastError);
     }
 
-    let last_error_size = last_error_size + 2;
     if input.len() <= last_error_size {
         return Err(LexerError::lambda_parser_error(
             start_pos + last_error_size..start_pos + input.len(),
@@ -234,6 +234,7 @@ const PAR_INSTR: &str = "par";
 const FAIL_INSTR: &str = "fail";
 const FOLD_INSTR: &str = "fold";
 const XOR_INSTR: &str = "xor";
+const NEVER_INSTR: &str = "never";
 const NEW_INSTR: &str = "new";
 const NEXT_INSTR: &str = "next";
 const NULL_INSTR: &str = "null";

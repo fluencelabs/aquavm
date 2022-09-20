@@ -19,6 +19,7 @@ use super::ExecutionCtx;
 use super::ExecutionResult;
 use super::FoldState;
 use super::TraceHandler;
+use crate::execution_step::PEEK_ALLOWED_ON_NON_EMPTY;
 use crate::log_instruction;
 use crate::trace_to_exec_err;
 
@@ -63,7 +64,10 @@ fn maybe_meet_iteration_start<'i>(
 ) -> ExecutionResult<()> {
     if let IterableType::Stream(fold_id) = &fold_state.iterable_type {
         trace_to_exec_err!(
-            trace_ctx.meet_iteration_start(*fold_id, fold_state.iterable.peek().unwrap().pos()),
+            trace_ctx.meet_iteration_start(
+                *fold_id,
+                fold_state.iterable.peek().expect(PEEK_ALLOWED_ON_NON_EMPTY).pos()
+            ),
             next
         )?;
     }

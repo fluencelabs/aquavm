@@ -17,6 +17,7 @@
 use super::JValuable;
 use crate::execution_step::FoldState;
 use crate::execution_step::RcSecurityTetraplet;
+use crate::execution_step::PEEK_ALLOWED_ON_NON_EMPTY;
 use crate::JValue;
 
 use air_interpreter_data::TracePos;
@@ -42,7 +43,7 @@ impl<'i> ScalarRef<'i> {
         match self {
             ScalarRef::Value(value) => Box::new(value.clone()),
             ScalarRef::IterableValue(fold_state) => {
-                let peeked_value = fold_state.iterable.peek().unwrap();
+                let peeked_value = fold_state.iterable.peek().expect(PEEK_ALLOWED_ON_NON_EMPTY);
                 Box::new(peeked_value)
             }
         }

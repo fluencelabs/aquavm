@@ -38,14 +38,15 @@ use std::borrow::Cow;
 /// Represent a value that could be transform to a JValue with or without tetraplets.
 pub(crate) trait JValuable {
     /// Applies lambda to the internal value, produces JValue.
-    fn apply_lambda<'i>(&self, lambda: &LambdaAST<'_>, exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<&JValue>;
+    fn apply_lambda<'i>(&self, lambda: &LambdaAST<'_>, exec_ctx: &ExecutionCtx<'i>)
+        -> ExecutionResult<Cow<'_, JValue>>;
 
     /// Applies lambda to the internal value, produces JValue with tetraplet.
     fn apply_lambda_with_tetraplets<'i>(
         &self,
         lambda: &LambdaAST<'_>,
         exec_ctx: &ExecutionCtx<'i>,
-    ) -> ExecutionResult<(&JValue, SecurityTetraplet)>;
+    ) -> ExecutionResult<(Cow<'_, JValue>, SecurityTetraplet)>;
 
     /// Return internal value as borrowed if it's possible, owned otherwise.
     fn as_jvalue(&self) -> Cow<'_, JValue>;
