@@ -22,6 +22,7 @@ use crate::wasm_test_runner::WasmAirRunner as AirRunnerImpl;
 use super::CallServiceClosure;
 use avm_server::avm_runner::*;
 
+use crate::print_trace;
 use std::collections::HashMap;
 use std::collections::HashSet;
 
@@ -75,6 +76,7 @@ impl<R: AirRunner> TestRunner<R> {
         let mut next_peer_pks = HashSet::new();
 
         loop {
+            println!("call_results: {:?}", call_results);
             let mut outcome: RawAVMOutcome = self
                 .runner
                 .call(
@@ -87,6 +89,7 @@ impl<R: AirRunner> TestRunner<R> {
                     call_results,
                 )
                 .map_err(|e| e.to_string())?;
+            print_trace(&outcome, "");
 
             next_peer_pks.extend(outcome.next_peer_pks);
 

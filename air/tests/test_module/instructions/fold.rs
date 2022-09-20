@@ -422,3 +422,153 @@ fn shadowing_scope() {
 
     assert_eq!(actual_trace, expected_trace);
 }
+
+#[test]
+fn fold_waits_on_empty_stream() {
+    let vm_peer_id = "vm_peer_id";
+    let mut vm = create_avm(echo_call_service(), vm_peer_id);
+
+    let script = f!(r#"
+            (par
+                (call "" ("" "") [] $stream)
+                (fold $stream iterator
+                    (seq
+                        (call "{vm_peer_id}" ("" "") [iterator] $new_stream)
+                        (next iterator))))
+            "#);
+
+    let result = checked_call_vm!(vm, <_>::default(), &script, "", "");
+    let actual_trace = trace_from_result(&result);
+
+    let expected_trace = vec![executed_state::par(1, 0), executed_state::request_sent_by(vm_peer_id)];
+    assert_eq!(actual_trace, expected_trace);
+}
+
+#[test]
+fn fold_seq_next_never_completes() {
+    let vm_peer_id = "vm_peer_id";
+    let mut vm = create_avm(set_variable_call_service(json!(1)), vm_peer_id);
+
+    let script = f!(r#"
+            (seq
+                (call "{vm_peer_id}" ("" "") [] $stream)
+                (seq
+                    (fold $stream iterator
+                        (seq
+                            (call "{vm_peer_id}" ("" "") [iterator] $new_stream)
+                            (next iterator)))
+                    (call "{vm_peer_id}" ("" "") [])))
+            "#);
+
+    let result = checked_call_vm!(vm, <_>::default(), &script, "", "");
+    let actual_trace = trace_from_result(&result);
+
+    let expected_trace = vec![
+        executed_state::stream_number(1, 0),
+        executed_state::fold(vec![subtrace_lore(
+            0,
+            SubTraceDesc::new(2.into(), 1),
+            SubTraceDesc::new(3.into(), 0),
+        )]),
+        executed_state::stream_number(1, 0),
+    ];
+    assert_eq!(actual_trace, expected_trace);
+}
+
+#[test]
+fn fold_par_next_completes() {
+    let vm_1_peer_id = "vm_1_peer_id";
+    let mut vm_1 = create_avm(set_variable_call_service(json!(1)), vm_1_peer_id);
+
+    let vm_2_peer_id = "vm_2_peer_id";
+    let mut vm_2 = create_avm(set_variable_call_service(json!(1)), vm_2_peer_id);
+
+    let vm_3_peer_id = "vm_3_peer_id";
+    let mut vm_3 = create_avm(set_variable_call_service(json!(1)), vm_3_peer_id);
+
+    let vm_4_peer_id = "vm_4_peer_id";
+    let mut vm_4 = create_avm(set_variable_call_service(json!(1)), vm_4_peer_id);
+
+    let script = f!(r#"
+            (seq
+                (seq
+                    (seq
+                        (ap "{vm_2_peer_id}" $stream)
+                        (ap "{vm_3_peer_id}" $stream))
+                    (ap "{vm_4_peer_id}" $stream))
+                (seq
+                    (fold $stream peer_id
+                        (par
+                            (call peer_id ("" "") [] $new_stream)
+                            (next peer_id)))
+                    (call "{vm_1_peer_id}" ("" "") []) ; this call should be executed if any of these three peers is reached
+                )
+            )
+            "#);
+
+    let result_1 = checked_call_vm!(vm_1, <_>::default(), &script, "", "");
+    print_trace(&result_1, "");
+
+    let result_2 = checked_call_vm!(vm_2, <_>::default(), &script, "", result_1.data.clone());
+    let actual_trace = trace_from_result(&result_2);
+    let expected_trace = vec![
+        executed_state::ap(Some(0)),
+        executed_state::ap(Some(0)),
+        executed_state::ap(Some(0)),
+        executed_state::fold(vec![
+            subtrace_lore(0, SubTraceDesc::new(4.into(), 2), SubTraceDesc::new(10.into(), 0)),
+            subtrace_lore(1, SubTraceDesc::new(6.into(), 2), SubTraceDesc::new(10.into(), 0)),
+            subtrace_lore(2, SubTraceDesc::new(8.into(), 2), SubTraceDesc::new(10.into(), 0)),
+        ]),
+        executed_state::par(1, 4),
+        executed_state::stream_number(1, 0),
+        executed_state::par(1, 2),
+        executed_state::request_sent_by(vm_1_peer_id),
+        executed_state::par(1, 0),
+        executed_state::request_sent_by(vm_1_peer_id),
+        executed_state::request_sent_by(vm_2_peer_id),
+    ];
+    assert_eq!(actual_trace, expected_trace);
+
+    let result_3 = checked_call_vm!(vm_3, <_>::default(), &script, "", result_1.data.clone());
+    let actual_trace = trace_from_result(&result_3);
+    let expected_trace = vec![
+        executed_state::ap(Some(0)),
+        executed_state::ap(Some(0)),
+        executed_state::ap(Some(0)),
+        executed_state::fold(vec![
+            subtrace_lore(0, SubTraceDesc::new(4.into(), 2), SubTraceDesc::new(10.into(), 0)),
+            subtrace_lore(1, SubTraceDesc::new(6.into(), 2), SubTraceDesc::new(10.into(), 0)),
+            subtrace_lore(2, SubTraceDesc::new(8.into(), 2), SubTraceDesc::new(10.into(), 0)),
+        ]),
+        executed_state::par(1, 4),
+        executed_state::request_sent_by(vm_1_peer_id),
+        executed_state::par(1, 2),
+        executed_state::stream_number(1, 0),
+        executed_state::par(1, 0),
+        executed_state::request_sent_by(vm_1_peer_id),
+        executed_state::request_sent_by(vm_3_peer_id),
+    ];
+    assert_eq!(actual_trace, expected_trace);
+
+    let result_4 = checked_call_vm!(vm_4, <_>::default(), &script, "", result_1.data);
+    let actual_trace = trace_from_result(&result_4);
+    let expected_trace = vec![
+        executed_state::ap(Some(0)),
+        executed_state::ap(Some(0)),
+        executed_state::ap(Some(0)),
+        executed_state::fold(vec![
+            subtrace_lore(0, SubTraceDesc::new(4.into(), 2), SubTraceDesc::new(10.into(), 0)),
+            subtrace_lore(1, SubTraceDesc::new(6.into(), 2), SubTraceDesc::new(10.into(), 0)),
+            subtrace_lore(2, SubTraceDesc::new(8.into(), 2), SubTraceDesc::new(10.into(), 0)),
+        ]),
+        executed_state::par(1, 4),
+        executed_state::request_sent_by(vm_1_peer_id),
+        executed_state::par(1, 2),
+        executed_state::request_sent_by(vm_1_peer_id),
+        executed_state::par(1, 0),
+        executed_state::stream_number(1, 0),
+        executed_state::request_sent_by(vm_4_peer_id),
+    ];
+    assert_eq!(actual_trace, expected_trace);
+}

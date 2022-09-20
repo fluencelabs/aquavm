@@ -39,26 +39,19 @@ fn ap_with_fold() {
             (seq
                 (seq
                     (fold permutations pair
-                        (seq
+                        (par
                             (fold pair.$.[1]! peer_ids
-                                (seq
+                                (par
                                     (ap peer_ids $inner)
-                                    (next peer_ids)
-                                )
-                            )
-                            (next pair)
-                        )
-                    )
+                                    (next peer_ids)))
+                            (next pair)))
                     (fold $inner ns
-                        (next ns)
-                    )
-                )
+                        (par
+                            (next ns)
+                            (null))))
                 (seq
                     (call "{local_vm_peer_id}" ("op" "noop") [])
-                    (call "{local_vm_peer_id}" ("return" "") [$inner])
-                )
-            )
-        )
+                    (call "{local_vm_peer_id}" ("return" "") [$inner]))))
         "#);
 
     let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");

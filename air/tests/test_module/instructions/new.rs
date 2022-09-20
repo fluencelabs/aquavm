@@ -44,7 +44,7 @@ fn new_with_global_streams_seq() {
                     (seq
                         (new $stream
                             (seq
-                                (seq
+                                (par
                                     (call "{local_vm_peer_id_1}" ("" "") [i] $stream)
                                     (next i)
                                 )

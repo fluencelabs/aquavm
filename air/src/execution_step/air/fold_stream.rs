@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+mod completeness_updater;
 mod stream_cursor;
 
 use super::fold::*;
@@ -25,6 +26,7 @@ use super::TraceHandler;
 use crate::execution_step::boxed_value::Stream;
 use crate::log_instruction;
 use crate::trace_to_exec_err;
+use completeness_updater::FoldCompletenessUpdater;
 use stream_cursor::StreamCursor;
 
 use air_parser::ast;
@@ -38,8 +40,11 @@ impl<'i> ExecutableInstruction<'i> for FoldStream<'i> {
         let iterable = &self.iterable;
         let stream = match exec_ctx.streams.get(iterable.name, iterable.position) {
             Some(stream) => stream,
-            // it's possible to met streams without variables at the moment in fold, they are treated as empty
-            None => return Ok(()),
+            None => {
+                // having empty streams means that it haven't been met yet, and it's needed to wait
+                exec_ctx.subgraph_complete = false;
+                return Ok(());
+            }
         };
 
         let fold_id = exec_ctx.tracker.fold.seen_stream_count;
@@ -47,26 +52,37 @@ impl<'i> ExecutableInstruction<'i> for FoldStream<'i> {
 
         let mut stream_cursor = StreamCursor::new();
         let mut stream_iterable = stream_cursor.construct_iterables(stream);
+        let mut completeness_updater = FoldCompletenessUpdater::new();
 
-        let mut result = Ok(true);
+        let mut result = Ok(());
+        // this cycle manages recursive streams
         while !stream_iterable.is_empty() {
             // add a new generation to made all consequence "new" (meaning that they are just executed on this peer)
             // write operation to this stream to write to this new generation
             add_new_generation_if_non_empty(&self.iterable, exec_ctx);
-            result = execute_iterations(stream_iterable, self, fold_id, exec_ctx, trace_ctx);
+            result = execute_iterations(
+                stream_iterable,
+                self,
+                fold_id,
+                &mut completeness_updater,
+                exec_ctx,
+                trace_ctx,
+            );
 
             // it's needed to get stream again, because RefCell allows only one mutable borrowing at time,
             // and likely that stream could be mutably borrowed in execute_iterations
             let stream = remove_new_generation_if_non_empty(&self.iterable, exec_ctx);
-            if should_stop_iteration(&result) {
+            if result.is_err() {
+                println!("result is error {:?}", result);
                 break;
             }
 
             stream_iterable = stream_cursor.construct_iterables(stream)
         }
 
+        completeness_updater.set_completeness(exec_ctx);
         trace_to_exec_err!(trace_ctx.meet_fold_end(fold_id), self)?;
-        result.map(|_| ())
+        result
     }
 }
 
@@ -74,10 +90,11 @@ fn execute_iterations<'i>(
     iterables: Vec<IterableValue>,
     fold_stream: &FoldStream<'i>,
     fold_id: u32,
+    completeness_updater: &mut FoldCompletenessUpdater,
     exec_ctx: &mut ExecutionCtx<'i>,
     trace_ctx: &mut TraceHandler,
-) -> ExecutionResult<bool> {
-    for iterable in iterables {
+) -> ExecutionResult<()> {
+    for iterable in iterables.into_iter() {
         let value = match iterable.peek() {
             Some(value) => value,
             // it's ok, because some generation level of a stream on some point inside execution
@@ -96,22 +113,12 @@ fn execute_iterations<'i>(
             trace_ctx,
         );
         trace_to_exec_err!(trace_ctx.meet_generation_end(fold_id), fold_stream)?;
+        completeness_updater.observe_completeness(exec_ctx.subgraph_complete);
 
         result?;
-        if !exec_ctx.subgraph_complete {
-            break;
-        }
     }
 
-    Ok(exec_ctx.subgraph_complete)
-}
-
-fn should_stop_iteration(iteration_result: &ExecutionResult<bool>) -> bool {
-    match &iteration_result {
-        Ok(result) if !result => true,
-        Ok(_) => false,
-        Err(_) => true,
-    }
+    Ok(())
 }
 
 /// Safety: this function should be called iff stream is present in context
