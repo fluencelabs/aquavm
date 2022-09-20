@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use crate::execution_step::air::NewStreamValue;
 use crate::execution_step::ExecutionResult;
 use crate::execution_step::Generation;
 use crate::execution_step::Stream;
@@ -77,6 +78,32 @@ impl Streams {
                 //    it means that a new global one should be created.
                 let stream = Stream::from_value(value);
                 self.add_global_stream(stream_name.to_string(), stream);
+                let generation = 0;
+                Ok(generation)
+            }
+        }
+    }
+
+    pub(crate) fn add_stream_new_value(
+        &mut self,
+        value_aggregate: ValueAggregate,
+        value: &NewStreamValue,
+    ) -> ExecutionResult<u32> {
+        match self.get_mut(&value.stream_name, value.stream_pos) {
+            Some(stream) => {
+                let generation = stream.generations_count() as u32;
+                stream.add_value(value_aggregate, Generation::Nth(generation))
+            }
+            None => {
+                // streams could be created in three ways:
+                //  - after met new instruction with stream name that isn't present in streams
+                //    (it's the only way to create restricted streams)
+                //  - by calling add_global_stream with generation that come from data
+                //    for global streams
+                //  - and by this function, and if there is no such a streams in streams,
+                //    it means that a new global one should be created.
+                let stream = Stream::from_value(value_aggregate);
+                self.add_global_stream(value.stream_name.clone(), stream);
                 let generation = 0;
                 Ok(generation)
             }

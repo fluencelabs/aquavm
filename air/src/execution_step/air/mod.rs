@@ -32,6 +32,7 @@ mod seq;
 mod xor;
 
 pub(crate) use call::triplet::resolve_to_string;
+pub(crate) use call::NewStreamValue;
 pub(crate) use fold::FoldState;
 
 use super::boxed_value::ScalarRef;

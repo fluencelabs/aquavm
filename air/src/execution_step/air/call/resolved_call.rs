@@ -28,7 +28,7 @@ use crate::JValue;
 use crate::SecurityTetraplet;
 
 use air_interpreter_data::CallResult;
-use air_interpreter_data::Value;
+use air_interpreter_data::TracePos;
 use air_interpreter_interface::CallRequestParams;
 use air_parser::ast;
 use air_trace_handler::MergerCallResult;
@@ -49,6 +49,17 @@ pub(super) struct ResolvedCall<'i> {
 struct ResolvedArguments {
     call_arguments: String,
     tetraplets: Vec<RcSecurityTetraplets>,
+}
+
+#[derive(Debug, Clone)]
+pub(crate) enum NewOrOldValue {
+    NewStreamValue(NewStreamValue),
+    /// There was a state in at least one of the contexts. If there were two states in
+    /// both contexts, they were successfully merged.
+    CallResult {
+        value: CallResult,
+        trace_pos: TracePos,
+    },
 }
 
 impl<'i> ResolvedCall<'i> {
@@ -157,33 +168,25 @@ impl<'i> ResolvedCall<'i> {
         exec_ctx: &mut ExecutionCtx<'i>,
         trace_ctx: &mut TraceHandler,
     ) -> ExecutionResult<StateDescriptor> {
-        let (call_result, trace_pos) = match trace_to_exec_err!(trace_ctx.meet_call_start(&self.output), raw_call)? {
-            MergerCallResult::CallResult { value, trace_pos } => (value, trace_pos),
+        // TODO it seems we are to move this block into handle_prev_state and beyond
+        let new_or_old_value = match trace_to_exec_err!(trace_ctx.meet_call_start(&self.output), raw_call)? {
+            MergerCallResult::CallResult { value, trace_pos } => NewOrOldValue::CallResult { value, trace_pos },
             // TODO It might be resolved elsewhere instead.
             MergerCallResult::NewStreamValue {
                 value,
                 stream_name,
                 stream_pos,
                 trace_pos,
-            } => {
-                let stream = exec_ctx.streams.get(&stream_name, stream_pos);
-                let generation = stream
-                    .map(|stream| stream.generations_count() as u32)
-                    .unwrap_or_default();
-                let call_result = CallResult::Executed(Value::Stream { value, generation });
-                (call_result, trace_pos)
-            }
+            } => NewOrOldValue::NewStreamValue(NewStreamValue {
+                value,
+                stream_name,
+                stream_pos,
+                trace_pos,
+            }),
             MergerCallResult::Empty => return Ok(StateDescriptor::no_previous_state()),
         };
 
-        handle_prev_state(
-            &self.tetraplet,
-            &self.output,
-            call_result,
-            trace_pos,
-            exec_ctx,
-            trace_ctx,
-        )
+        handle_prev_state(&self.tetraplet, &self.output, new_or_old_value, exec_ctx, trace_ctx)
     }
 
     /// Prepare arguments of this call instruction by resolving and preparing their security tetraplets.

@@ -29,10 +29,20 @@ use crate::execution_step::Joinable;
 use crate::execution_step::RcSecurityTetraplet;
 use crate::joinable;
 use crate::log_instruction;
+use crate::JValue;
 
+use air_interpreter_data::TracePos;
 use air_parser::ast::Call;
 
 use std::rc::Rc;
+
+#[derive(Debug, Clone)]
+pub(crate) struct NewStreamValue {
+    pub(crate) value: Rc<JValue>,
+    pub(crate) stream_name: String,
+    pub(crate) stream_pos: usize,
+    pub(crate) trace_pos: TracePos,
+}
 
 impl<'i> super::ExecutableInstruction<'i> for Call<'i> {
     #[tracing::instrument(level = "debug", skip(exec_ctx, trace_ctx))]
