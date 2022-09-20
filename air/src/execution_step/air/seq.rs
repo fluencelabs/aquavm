@@ -27,7 +27,7 @@ impl<'i> super::ExecutableInstruction<'i> for Seq<'i> {
 
         exec_ctx.subgraph_complete = true;
         self.0.execute(exec_ctx, trace_ctx)?;
-        println!("> seq {}", exec_ctx.subgraph_complete);
+        // println!("> seq {}", exec_ctx.subgraph_complete);
 
         if exec_ctx.subgraph_complete {
             self.1.execute(exec_ctx, trace_ctx)?;

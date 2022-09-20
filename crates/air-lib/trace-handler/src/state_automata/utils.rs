@@ -37,6 +37,7 @@ impl CtxState {
     }
 
     pub(super) fn update_ctx_state(self, ctx: &mut MergeCtx) -> FSMResult<()> {
+        println!("  update_ctx_state {} {}", self.pos, self.subtrace_len);
         ctx.slider
             .set_position_and_len(self.pos, self.subtrace_len)
             .map_err(Into::into)

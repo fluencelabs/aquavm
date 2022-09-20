@@ -38,6 +38,7 @@ fn new_with_global_streams_seq() {
             (seq
                 (seq
                     (call "{set_variable_peer_id}" ("" "") ["1"] $stream)
+                    ;(null)
                     (call "{set_variable_peer_id}" ("" "") ["2"] $stream)
                 )
                 (fold $stream i
@@ -57,8 +58,13 @@ fn new_with_global_streams_seq() {
             )"#);
 
     let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
+    println!("next peer pks: {:?}\n\n\n", result.next_peer_pks);
     let vm_1_result = checked_call_vm!(local_vm_1, <_>::default(), &script, "", result.data);
+    print_trace(&vm_1_result, "");
+    println!("next peer pks: {:?}\n\n\n", vm_1_result.next_peer_pks);
     let vm_2_result = checked_call_vm!(local_vm_2, <_>::default(), &script, "", vm_1_result.data.clone());
+    print_trace(&vm_2_result, "");
+    println!("next peer pks: {:?}\n\n\n", vm_2_result.next_peer_pks);
 
     let vm_1_result = checked_call_vm!(
         local_vm_1,

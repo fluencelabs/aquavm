@@ -420,6 +420,28 @@ fn stream_merging_v2() {
     assert_eq!(actual_trace_1, expected_trace_1);
 
     /*
+      (par (4, 1) (6 ,1)
+        (seq
+           (par (2, 1) (3, 1)
+               (seq
+                  (par (0, 1) (0, 1)
+                     (seq
+                       (never)
+                       (call v1) ; never will be called
+                     )
+                     (call v) ; 18 (> executed)
+                  )
+                  (call v 1) ;
+               )
+               (call v) ; 19 (> executed)
+           )
+           (call v 1)
+         )
+         (call v) ; 20 (> executed)
+       )
+     */
+
+    /*
     let executor_result_2 = checked_call_vm!(
         executor,
         <_>::default(),

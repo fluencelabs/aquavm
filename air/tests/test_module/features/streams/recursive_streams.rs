@@ -274,7 +274,7 @@ fn recursive_stream_error_handling() {
     println!("\n\n\n----\n");
     let result = checked_call_vm!(vm_2, <_>::default(), &script, "", result.data);
     let actual_trace = trace_from_result(&result);
-    let actual_last_state = &actual_trace[10.into()];
+    let actual_last_state = &actual_trace[11.into()];
     let expected_last_state = executed_state::scalar_string(result_value);
 
     assert_eq!(actual_last_state, &expected_last_state);
