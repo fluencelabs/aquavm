@@ -9,3 +9,6 @@ retry = 50                  # network retries
 rustflags = [
     "-C", "link-args=-zstack-size=52428800",
 ]
+
+[registries]
+fluence = { index = "git://crates.fluence.dev/index" }
