@@ -111,9 +111,7 @@ impl Streams {
         value: &NewStreamValue,
     ) -> ExecutionResult<u32> {
         match self.get_mut(&value.stream_name, value.stream_pos) {
-            Some(stream) => {
-                stream.add_value(value_aggregate, Generation::Last)
-            }
+            Some(stream) => stream.add_value(value_aggregate, Generation::Last),
             None => {
                 // streams could be created in three ways:
                 //  - after met new instruction with stream name that isn't present in streams
