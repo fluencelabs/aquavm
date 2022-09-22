@@ -427,7 +427,7 @@ fn stream_merging_v2() {
                   (par (0, 1) (0, 1)
                      (seq
                        (never)
-                       (call v1) ; never will be called
+                       (call v 1) ; never will be called
                      )
                      (call v) ; 18 (> executed)
                   )

@@ -36,6 +36,8 @@ pub(super) fn compute_new_states(
     let prev_state = compute_new_state(prev_len as usize, data_keeper.prev_slider(), prev_par)?;
     let current_state = compute_new_state(current_len as usize, data_keeper.current_slider(), current_par)?;
 
+    println!("prev state {:?}, current state {:?}", prev_state, current_state);
+
     let pair = CtxStatesPair::new(prev_state, current_state);
     Ok(pair)
 }
