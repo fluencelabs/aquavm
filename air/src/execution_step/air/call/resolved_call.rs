@@ -160,7 +160,6 @@ impl<'i> ResolvedCall<'i> {
             MergerCallResult::CallResult { value, trace_pos } => (value, trace_pos),
             MergerCallResult::Empty => return Ok(StateDescriptor::no_previous_state()),
         };
-        println!("  call result {:?}", call_result);
 
         handle_prev_state(
             &self.tetraplet,

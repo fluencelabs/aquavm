@@ -37,7 +37,6 @@ impl CtxState {
     }
 
     pub(super) fn update_ctx_state(self, ctx: &mut MergeCtx) -> FSMResult<()> {
-        println!("  update_ctx_state {} {}", self.pos, self.subtrace_len);
         ctx.slider
             .set_position_and_len(self.pos, self.subtrace_len)
             .map_err(Into::into)
@@ -54,6 +53,7 @@ impl CtxStatesPair {
 }
 
 pub(super) fn update_ctx_states(state_pair: CtxStatesPair, data_keeper: &mut DataKeeper) {
+    println!("  update_ctx_state {:?}, {:?}", state_pair.prev_state, state_pair.current_state);
     // these calls shouldn't produce a error, because sizes become less and
     // they have been already checked in a state updater ctor. It's important
     // to make it in a such way, because this function could be called from

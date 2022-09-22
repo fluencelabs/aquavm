@@ -36,13 +36,14 @@ pub(super) fn compute_new_states(
     let prev_state = compute_new_state(prev_len as usize, data_keeper.prev_slider(), prev_par)?;
     let current_state = compute_new_state(current_len as usize, data_keeper.current_slider(), current_par)?;
 
-    println!("prev state {:?}, current state {:?}", prev_state, current_state);
+    println!("  prev state {:?}, current state {:?}", prev_state, current_state);
 
     let pair = CtxStatesPair::new(prev_state, current_state);
     Ok(pair)
 }
 
 fn compute_new_state(par_subgraph_len: usize, slider: &TraceSlider, par: ParResult) -> FSMResult<CtxState> {
+    println!("  compute_new_state {} {}", slider.position(), slider.subtrace_len());
     let pos = slider
         .position()
         .checked_add(par_subgraph_len)
