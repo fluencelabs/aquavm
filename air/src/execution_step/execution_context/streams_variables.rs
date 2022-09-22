@@ -108,9 +108,9 @@ impl Streams {
     pub(crate) fn add_stream_new_value(
         &mut self,
         value_aggregate: ValueAggregate,
-        value: &NewStreamValue,
+        value: &NewStreamValue<'_>,
     ) -> ExecutionResult<u32> {
-        match self.get_mut(&value.stream_name, value.stream_pos) {
+        match self.get_mut(value.stream_name, value.stream_pos) {
             Some(stream) => stream.add_value(value_aggregate, Generation::Last),
             None => {
                 // streams could be created in three ways:
@@ -121,7 +121,7 @@ impl Streams {
                 //  - and by this function, and if there is no such a streams in streams,
                 //    it means that a new global one should be created.
                 let stream = Stream::from_value(value_aggregate);
-                self.add_global_stream(value.stream_name.clone(), stream);
+                self.add_global_stream(value.stream_name.to_owned(), stream);
                 let generation = 0;
                 Ok(generation)
             }

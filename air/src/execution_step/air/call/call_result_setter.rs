@@ -51,10 +51,8 @@ pub(crate) fn set_local_result<'i>(
 
 // TODO New stream should be handled here 12:30, 16:40
 pub(crate) fn set_result_from_new_value<'i>(
-    value: &NewStreamValue,
+    value: &NewStreamValue<'i>,
     tetraplet: RcSecurityTetraplet,
-    // TODO should we get stream info from here instead?
-    _output: &CallOutputValue<'i>,
     exec_ctx: &mut ExecutionCtx<'i>,
 ) -> ExecutionResult<u32> {
     let result = ValueAggregate::new(value.value.clone(), tetraplet, value.trace_pos);

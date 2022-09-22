@@ -43,14 +43,14 @@ pub(crate) struct StateDescriptor {
 pub(super) fn handle_prev_state<'i>(
     tetraplet: &RcSecurityTetraplet,
     output: &CallOutputValue<'i>,
-    new_or_old_value: NewOrOldValue,
+    new_or_old_value: NewOrOldValue<'i>,
     exec_ctx: &mut ExecutionCtx<'i>,
     trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<StateDescriptor> {
     match new_or_old_value {
         NewOrOldValue::NewStreamValue(new_stream_value) => {
             let jvalue = new_stream_value.value.clone();
-            let generation = set_result_from_new_value(&new_stream_value, tetraplet.clone(), output, exec_ctx)?;
+            let generation = set_result_from_new_value(&new_stream_value, tetraplet.clone(), exec_ctx)?;
             let prev_result = CallResult::Executed(Value::Stream {
                 value: jvalue,
                 generation,

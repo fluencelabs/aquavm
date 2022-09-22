@@ -26,13 +26,13 @@ use std::rc::Rc;
 const EXPECTED_STATE_NAME: &str = "call";
 
 #[derive(Debug, Clone)]
-pub enum MergerCallResult {
+pub enum MergerCallResult<'i> {
     /// There is no corresponding state in a trace for this call.
     Empty,
 
     NewStreamValue {
         value: Rc<JValue>,
-        stream_name: String,
+        stream_name: &'i str,
         stream_pos: usize,
         trace_pos: TracePos,
     },
@@ -41,10 +41,10 @@ pub enum MergerCallResult {
     CallResult { value: CallResult, trace_pos: TracePos },
 }
 
-pub(crate) fn try_merge_next_state_as_call(
+pub(crate) fn try_merge_next_state_as_call<'i>(
     data_keeper: &mut DataKeeper,
-    output_value: &CallOutputValue<'_>,
-) -> MergeResult<MergerCallResult> {
+    output_value: &CallOutputValue<'i>,
+) -> MergeResult<MergerCallResult<'i>> {
     use ExecutedState::Call;
     use PreparationScheme::*;
 
@@ -76,13 +76,13 @@ pub(crate) fn try_merge_next_state_as_call(
     Ok(call_result)
 }
 
-fn merge_call_result(
+fn merge_call_result<'i>(
     prev_call: CallResult,
     current_call: CallResult,
-    value_type: ValueType<'_>,
+    value_type: ValueType<'i>,
     scheme: PreparationScheme,
     data_keeper: &mut DataKeeper,
-) -> MergeResult<MergerCallResult> {
+) -> MergeResult<MergerCallResult<'i>> {
     use CallResult::*;
 
     let merged_state = match (prev_call, current_call) {
@@ -109,26 +109,26 @@ pub(super) fn prepare_call_result(
     value: CallResult,
     scheme: PreparationScheme,
     data_keeper: &mut DataKeeper,
-) -> MergerCallResult {
+) -> MergerCallResult<'static> {
     let trace_pos = data_keeper.result_trace_next_pos();
     prepare_positions_mapping(scheme, data_keeper);
 
     MergerCallResult::CallResult { value, trace_pos }
 }
 
-pub(super) fn prepare_new_stream_result(
+pub(super) fn prepare_new_stream_result<'i>(
     value: Rc<JValue>,
-    stream_name: impl Into<String>,
+    stream_name: &'i str,
     stream_pos: usize,
     scheme: PreparationScheme,
     data_keeper: &mut DataKeeper,
-) -> MergerCallResult {
+) -> MergerCallResult<'i> {
     let trace_pos = data_keeper.result_trace_next_pos();
     prepare_positions_mapping(scheme, data_keeper);
 
     MergerCallResult::NewStreamValue {
         value,
-        stream_name: stream_name.into(),
+        stream_name,
         stream_pos,
         trace_pos,
     }
@@ -141,7 +141,7 @@ pub(crate) enum ValueType<'i> {
 }
 
 impl<'i> ValueType<'i> {
-    pub(self) fn from_output_value(output_value: &'i CallOutputValue<'_>) -> Self {
+    pub(self) fn from_output_value(output_value: &CallOutputValue<'i>) -> Self {
         match output_value {
             CallOutputValue::Stream(stream) => ValueType::Stream(stream.name, stream.position),
             _ => ValueType::Scalar,

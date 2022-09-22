@@ -52,8 +52,8 @@ struct ResolvedArguments {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) enum NewOrOldValue {
-    NewStreamValue(NewStreamValue),
+pub(crate) enum NewOrOldValue<'i> {
+    NewStreamValue(NewStreamValue<'i>),
     /// There was a state in at least one of the contexts. If there were two states in
     /// both contexts, they were successfully merged.
     CallResult {

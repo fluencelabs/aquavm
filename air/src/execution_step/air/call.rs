@@ -37,9 +37,9 @@ use air_parser::ast::Call;
 use std::rc::Rc;
 
 #[derive(Debug, Clone)]
-pub(crate) struct NewStreamValue {
+pub(crate) struct NewStreamValue<'i> {
     pub(crate) value: Rc<JValue>,
-    pub(crate) stream_name: String,
+    pub(crate) stream_name: &'i str,
     pub(crate) stream_pos: usize,
     pub(crate) trace_pos: TracePos,
 }
