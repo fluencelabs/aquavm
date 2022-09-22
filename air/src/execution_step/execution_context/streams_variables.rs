@@ -112,8 +112,7 @@ impl Streams {
     ) -> ExecutionResult<u32> {
         match self.get_mut(&value.stream_name, value.stream_pos) {
             Some(stream) => {
-                let generation = stream.generations_count() as u32;
-                stream.add_value(value_aggregate, Generation::Nth(generation))
+                stream.add_value(value_aggregate, Generation::Last)
             }
             None => {
                 // streams could be created in three ways:

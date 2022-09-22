@@ -16,6 +16,8 @@
 
 use air_test_utils::prelude::*;
 
+use pretty_assertions::assert_eq;
+
 #[test]
 // test for github.com/fluencelabs/aquavm/issues/302
 fn issue_302() {
