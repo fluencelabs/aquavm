@@ -16,9 +16,10 @@
 
 use super::{ServiceDefinition, ServiceTagName};
 use crate::services::JValue;
+use crate::transform::parser::delim_ws;
 
 use air_test_utils::CallServiceResult;
-use nom::{error::VerboseError, IResult, InputTakeAtPosition, Parser};
+use nom::{error::VerboseError, IResult};
 
 use std::{collections::HashMap, str::FromStr};
 
@@ -82,22 +83,10 @@ pub fn parse_kw(inp: &str) -> IResult<&str, ServiceDefinition, ParseError> {
     ))(inp)
 }
 
-pub(crate) fn delim_ws<I, O, E, F>(f: F) -> impl FnMut(I) -> IResult<I, O, E>
-where
-    F: Parser<I, O, E>,
-    E: nom::error::ParseError<I>,
-    I: InputTakeAtPosition,
-    <I as InputTakeAtPosition>::Item: nom::AsChar + Clone,
-{
-    use nom::character::complete::multispace0;
-    use nom::sequence::delimited;
-
-    delimited(multispace0, f, multispace0)
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
+    use pretty_assertions::assert_eq;
 
     #[test]
     fn test_parse_empty() {

@@ -15,7 +15,7 @@
  */
 
 use super::{Call, Sexp, Triplet};
-use crate::asserts::{parser::delim_ws, ServiceDefinition};
+use crate::asserts::ServiceDefinition;
 
 use nom::branch::alt;
 use nom::bytes::complete::{is_not, tag};
@@ -24,7 +24,7 @@ use nom::combinator::{cut, map, map_res, opt, recognize, value};
 use nom::error::{context, VerboseError, VerboseErrorKind};
 use nom::multi::{many0, many1, many1_count, separated_list0};
 use nom::sequence::{delimited, pair, preceded, separated_pair, terminated};
-use nom::IResult;
+use nom::{IResult, InputTakeAtPosition};
 use nom_locate::LocatedSpan;
 
 use std::str::FromStr;
@@ -89,7 +89,7 @@ fn parse_sexp_list(inp: Input<'_>) -> IResult<Input<'_>, Sexp, ParseError<'_>> {
         preceded(
             terminated(tag("("), sexp_multispace0),
             cut(terminated(
-                map(separated_list0(multispace1, parse_sexp), Sexp::list),
+                map(separated_list0(sexp_multispace1, parse_sexp), Sexp::list),
                 preceded(
                     sexp_multispace0,
                     context("closing parentheses not found", tag(")")),
@@ -202,7 +202,32 @@ fn parse_sexp_call_arguments(inp: Input<'_>) -> IResult<Input<'_>, Vec<Sexp>, Pa
     delimited(tag("["), separated_list0(multispace1, parse_sexp), tag("]"))(inp)
 }
 
-pub(crate) fn sexp_multispace0(inp: Input<'_>) -> IResult<Input<'_>, (), ParseError<'_>> {
+pub(crate) fn delim_ws<I, O, E, F>(f: F) -> impl FnMut(I) -> IResult<I, O, E>
+where
+    F: nom::Parser<I, O, E>,
+    E: nom::error::ParseError<I>,
+    I: nom::InputTakeAtPosition
+        + nom::InputLength
+        + for<'a> nom::Compare<&'a str>
+        + nom::InputTake
+        + Clone,
+    <I as InputTakeAtPosition>::Item: nom::AsChar + Clone,
+    for<'a> &'a str: nom::FindToken<<I as InputTakeAtPosition>::Item>,
+{
+    delimited(sexp_multispace0, f, sexp_multispace0)
+}
+
+pub(crate) fn sexp_multispace0<I, E>(inp: I) -> IResult<I, (), E>
+where
+    E: nom::error::ParseError<I>,
+    I: InputTakeAtPosition
+        + nom::InputLength
+        + for<'a> nom::Compare<&'a str>
+        + nom::InputTake
+        + Clone,
+    <I as InputTakeAtPosition>::Item: nom::AsChar + Clone,
+    for<'a> &'a str: nom::FindToken<<I as InputTakeAtPosition>::Item>,
+{
     map(
         opt(many0(pair(
             // white space
@@ -236,39 +261,63 @@ pub(crate) fn sexp_multispace1(inp: Input<'_>) -> IResult<Input<'_>, (), ParseEr
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
-
     use super::*;
-
     use crate::asserts::ServiceDefinition;
+
+    use pretty_assertions::assert_eq;
+    use serde_json::json;
 
     #[test]
     fn test_multispace0_empty() {
-        let res = sexp_multispace0("".into());
+        let res = sexp_multispace0::<_, ()>("");
         assert!(res.is_ok(), "{}", res.unwrap_err());
     }
 
     #[test]
     fn test_multispace0_spaces() {
-        let res = sexp_multispace0("  ".into());
+        let res = sexp_multispace0::<_, ()>("  ");
         assert!(res.is_ok(), "{}", res.unwrap_err());
     }
 
     #[test]
     fn test_multispace0_comment() {
-        let res = sexp_multispace0(";; this is comment".into());
+        let res = sexp_multispace0::<_, ()>(";; this is comment");
         assert!(res.is_ok(), "{}", res.unwrap_err());
     }
 
     #[test]
     fn test_multispace0_comment_with_space() {
-        let res = sexp_multispace0(" ;; ".into());
+        let res = sexp_multispace0::<_, ()>(" ;; ");
         assert!(res.is_ok(), "{}", res.unwrap_err());
+    }
+
+    #[test]
+    fn test_multispace0_multiline() {
+        let res = sexp_multispace0::<_, ()>(" ;; \n ;;;; \n ");
+        assert!(res.is_ok(), "{}", res.unwrap_err());
+    }
+
+    #[test]
+    fn test_multispace1_empty() {
+        let res = sexp_multispace1("".into());
+        assert!(res.is_err());
     }
 
     #[test]
     fn test_multispace1_space() {
         let res = sexp_multispace1(" ".into());
+        assert!(res.is_ok(), "{}", res.unwrap_err());
+    }
+
+    #[test]
+    fn test_multispace1_comment() {
+        let res = sexp_multispace1(" ;; ".into());
+        assert!(res.is_ok(), "{}", res.unwrap_err());
+    }
+
+    #[test]
+    fn test_multispace1_multiline() {
+        let res = sexp_multispace1(" ;; \n ;;;; \n ".into());
         assert!(res.is_ok(), "{}", res.unwrap_err());
     }
 
@@ -577,5 +626,38 @@ mod tests {
         let sexp_str = r#"(seq (canon peer_id $stream #canon) (fold #canon i (next)))"#;
         let res = Sexp::from_str(sexp_str);
         assert!(res.is_ok(), "{:?}", res);
+    }
+
+    #[test]
+    fn test_comments() {
+        let sexp_str = r#" ;; One comment
+( ;;; Second comment
+  ;; The third one
+  (par ;;;; Comment comment comment
+    ;;;; Comment comment comment
+    (null)  ;;;;; Comment
+    (fail  ;; Fails
+        1    ;; Retcode
+        "test"  ;; Message
+        ;; Nothing more
+    )
+  )   ;;;;; Comment
+  ;;;;; Comment
+ )  ;;;;; Comment
+;;; Comment
+"#;
+        let res = Sexp::from_str(sexp_str);
+        assert_eq!(
+            res,
+            Ok(Sexp::list(vec![Sexp::list(vec![
+                Sexp::symbol("par"),
+                Sexp::list(vec![Sexp::symbol("null"),]),
+                Sexp::list(vec![
+                    Sexp::symbol("fail"),
+                    Sexp::symbol("1"),
+                    Sexp::string("test"),
+                ]),
+            ])]))
+        );
     }
 }
