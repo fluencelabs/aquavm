@@ -61,15 +61,12 @@ impl TraceHandler {
 impl TraceHandler {
     /// Should be called at the beginning of a call execution.
     pub fn meet_call_start(&mut self, output_value: &CallOutputValue<'_>) -> TraceHandlerResult<MergerCallResult> {
-        let result = try_merge_next_state_as_call(&mut self.data_keeper, output_value).map_err(Into::into);
-        println!("  meet_call_start: {:?}", result);
-        result
+        try_merge_next_state_as_call(&mut self.data_keeper, output_value).map_err(Into::into)
     }
 
     /// Should be called when a call instruction was executed successfully. It adds the supplied
     /// state to the result trace.
     pub fn meet_call_end(&mut self, call_result: CallResult) {
-        println!("  meet_call_end: {:?}", call_result);
         log::trace!(
             target: air_log_targets::EXECUTED_STATE_CHANGING,
             "  adding new call executed state {:?}",

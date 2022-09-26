@@ -59,14 +59,7 @@ impl<'i> ExecutableInstruction<'i> for FoldStream<'i> {
             // add a new generation to made all consequence "new" (meaning that they are just executed on this peer)
             // write operation to this stream to write to this new generation
             add_new_generation_if_non_empty(&self.iterable, exec_ctx);
-            execute_iterations(
-                stream_iterable,
-                self,
-                fold_id,
-                &mut observer,
-                exec_ctx,
-                trace_ctx,
-            )?;
+            execute_iterations(stream_iterable, self, fold_id, &mut observer, exec_ctx, trace_ctx)?;
 
             // it's needed to get stream again, because RefCell allows only one mutable borrowing at time,
             // and likely that stream could be mutably borrowed in execute_iterations

@@ -32,7 +32,6 @@ use std::rc::Rc;
 impl<'i> ExecutableInstruction<'i> for FoldScalar<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         log_instruction!(fold, exec_ctx, trace_ctx);
-        //println!("> {}", self);
 
         let iterable = match &self.iterable {
             FoldScalarIterable::Scalar(scalar) => {

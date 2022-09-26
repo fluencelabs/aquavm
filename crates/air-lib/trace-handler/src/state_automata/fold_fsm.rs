@@ -126,7 +126,6 @@ impl FoldFSM {
     }
 
     pub(crate) fn meet_generation_end(&mut self, data_keeper: &mut DataKeeper) {
-        println!("  meet_generation_end");
         self.ctor_queue.finish(data_keeper);
         self.ctor_queue.end_back_traverse();
 
@@ -135,7 +134,6 @@ impl FoldFSM {
     }
 
     pub(crate) fn meet_fold_end(self, data_keeper: &mut DataKeeper) {
-        println!("  meet_fold_end");
         // TODO: check for prev and current lore emptiness
         let fold_result = FoldResult { lore: self.result_lore };
         let state = ExecutedState::Fold(fold_result);

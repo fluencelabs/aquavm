@@ -76,7 +76,6 @@ impl<R: AirRunner> TestRunner<R> {
         let mut next_peer_pks = HashSet::new();
 
         loop {
-            println!("call_results: {:?}", call_results);
             let mut outcome: RawAVMOutcome = self
                 .runner
                 .call(

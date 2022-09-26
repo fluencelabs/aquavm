@@ -33,17 +33,19 @@ pub(super) fn compute_new_states(
         }
     };
 
-    let prev_state = compute_new_state(prev_len as usize, data_keeper.prev_slider(), prev_par)?;
-    let current_state = compute_new_state(current_len as usize, data_keeper.current_slider(), current_par)?;
+    let mut prev_state = compute_new_state(prev_len as usize, data_keeper.prev_slider(), prev_par)?;
+    let mut current_state = compute_new_state(current_len as usize, data_keeper.current_slider(), current_par)?;
 
-    println!("  prev state {:?}, current state {:?}", prev_state, current_state);
+    if matches!(subgraph_type, SubgraphType::Left) {
+        prev_state.subtrace_len = (prev_par.right_size as usize).into();
+        current_state.subtrace_len = (current_par.right_size as usize).into();
+    }
 
     let pair = CtxStatesPair::new(prev_state, current_state);
     Ok(pair)
 }
 
 fn compute_new_state(par_subgraph_len: usize, slider: &TraceSlider, par: ParResult) -> FSMResult<CtxState> {
-    println!("  compute_new_state {} {}", slider.position(), slider.subtrace_len());
     let pos = slider
         .position()
         .checked_add(par_subgraph_len)

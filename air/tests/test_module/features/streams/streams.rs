@@ -420,16 +420,57 @@ fn stream_merging_v2() {
     assert_eq!(actual_trace_1, expected_trace_1);
 
     /*
+     (par (4, 1) (6 ,1)
+       (seq
+          (par (2, 1) (3, 1)
+              (seq
+                 (par (0, 1) (0, 1)
+                    (seq
+                      (never)
+                      (call v 1) ; never will be called
+                    )
+                    (call v) ; 18 (> executed)
+                 )
+                 (call v 1) ;
+              )
+              (call v) ; 19 (> executed)
+          )
+          (call v 1)
+        )
+        (call v) ; 20 (> executed)
+      )
+    */
+    /*
+    (fold
+     (next)
+     (par)
+    )
+     */
+
+    /*
+    meet_iteration_start
+    par slider handler
       (par (4, 1) (6 ,1)
         (seq
+        meet_iteration_end
+        meet_iteration_start
+        par slider handler
            (par (2, 1) (3, 1)
                (seq
+                meet_iteration_end
+                meet_iteration_start
+                par slider handler
                   (par (0, 1) (0, 1)
                      (seq
+                       maybe_meet_back_iterator
+                       next never met
                        (never)
                        (call v 1) ; never will be called
                      )
+                     left_completed
                      (call v) ; 18 (> executed)
+                     right_completed
+                  next after, maybe_meet_back_iterator
                   )
                   (call v 1) ;
                )

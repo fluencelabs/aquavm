@@ -64,7 +64,6 @@ impl ParFSM {
     }
 
     pub(crate) fn left_completed(&mut self, data_keeper: &mut DataKeeper) {
-        println!("  left_completed");
         self.par_builder.track(data_keeper, SubgraphType::Left);
         self.state_handler.handle_subgraph_end(data_keeper, SubgraphType::Left);
 
@@ -73,7 +72,6 @@ impl ParFSM {
     }
 
     pub(crate) fn right_completed(mut self, data_keeper: &mut DataKeeper) {
-        println!("  right_completed");
         self.par_builder.track(data_keeper, SubgraphType::Right);
         let state = self.par_builder.build();
         self.state_inserter.insert(data_keeper, state);
@@ -86,7 +84,6 @@ impl ParFSM {
             SubgraphType::Left => (self.prev_par.left_size, self.current_par.left_size),
             SubgraphType::Right => (self.prev_par.right_size, self.current_par.right_size),
         };
-        println!("  prepare sliders {} {}", prev_len, current_len);
 
         data_keeper.prev_slider_mut().set_subtrace_len(prev_len as _)?;
         data_keeper.current_slider_mut().set_subtrace_len(current_len as _)?;
