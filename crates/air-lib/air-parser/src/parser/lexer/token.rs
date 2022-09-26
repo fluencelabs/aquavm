@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use super::TextPos;
 use crate::LambdaAST;
 
 use serde::Deserialize;
@@ -29,30 +30,30 @@ pub enum Token<'input> {
 
     Scalar {
         name: &'input str,
-        position: usize,
+        position: TextPos,
     },
     ScalarWithLambda {
         name: &'input str,
         lambda: LambdaAST<'input>,
-        position: usize,
+        position: TextPos,
     },
     Stream {
         name: &'input str,
-        position: usize,
+        position: TextPos,
     },
     StreamWithLambda {
         name: &'input str,
         lambda: LambdaAST<'input>,
-        position: usize,
+        position: TextPos,
     },
     CanonStream {
         name: &'input str,
-        position: usize,
+        position: TextPos,
     },
     CanonStreamWithLambda {
         name: &'input str,
         lambda: LambdaAST<'input>,
-        position: usize,
+        position: TextPos,
     },
 
     StringLiteral(&'input str),

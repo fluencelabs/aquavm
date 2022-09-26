@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+use super::lexer::TextPos;
+
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -21,16 +23,16 @@ use std::ops::Range;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Span {
-    pub left: usize,
-    pub right: usize,
+    pub left: TextPos,
+    pub right: TextPos,
 }
 
 impl Span {
-    pub fn new(left: usize, right: usize) -> Self {
+    pub fn new(left: TextPos, right: TextPos) -> Self {
         Self { left, right }
     }
 
-    pub fn contains_position(&self, position: usize) -> bool {
+    pub fn contains_position(&self, position: TextPos) -> bool {
         self.left < position && position < self.right
     }
 
@@ -39,8 +41,8 @@ impl Span {
     }
 }
 
-impl From<Range<usize>> for Span {
-    fn from(range: Range<usize>) -> Self {
+impl From<Range<TextPos>> for Span {
+    fn from(range: Range<TextPos>) -> Self {
         Self {
             left: range.start,
             right: range.end,

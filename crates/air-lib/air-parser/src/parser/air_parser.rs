@@ -16,6 +16,7 @@
 
 use super::air;
 use super::lexer::AIRLexer;
+use super::lexer::TextPos;
 use super::lexer::Token;
 use super::ParserError;
 use crate::ast::Instruction;
@@ -39,7 +40,7 @@ pub fn parse(air_script: &str) -> Result<Box<Instruction<'_>>, String> {
     let file_id = files.add("script.air", air_script);
 
     PARSER.with(|parser| {
-        let mut errors = Vec::new();
+        let mut errors: Vec<ErrorRecovery<TextPos, Token<'_>, ParserError>> = Vec::new();
         let lexer = AIRLexer::new(air_script);
         let mut validator = VariableValidator::new();
         let result = parser.parse(air_script, &mut errors, &mut validator, lexer);
@@ -65,7 +66,7 @@ pub fn parse(air_script: &str) -> Result<Box<Instruction<'_>>, String> {
 fn report_errors(
     file_id: usize,
     files: SimpleFiles<&str, &str>,
-    errors: Vec<ErrorRecovery<usize, Token<'_>, ParserError>>,
+    errors: Vec<ErrorRecovery<TextPos, Token<'_>, ParserError>>,
 ) -> String {
     let labels = errors_to_labels(file_id, errors);
     let diagnostic = Diagnostic::error().with_labels(labels);
@@ -85,7 +86,7 @@ fn report_errors(
 
 fn errors_to_labels(
     file_id: usize,
-    errors: Vec<ErrorRecovery<usize, Token<'_>, ParserError>>,
+    errors: Vec<ErrorRecovery<TextPos, Token<'_>, ParserError>>,
 ) -> Vec<Label<usize>> {
     errors
         .into_iter()
@@ -93,16 +94,17 @@ fn errors_to_labels(
             ParseError::UnrecognizedToken {
                 token: (start, _, end),
                 expected,
-            } => Label::primary(file_id, start..end)
+            } => Label::primary(file_id, start.into()..end.into())
                 .with_message(format!("expected {}", pretty_expected(expected))),
             ParseError::InvalidToken { location } => {
-                Label::primary(file_id, location..(location + 1)).with_message("unexpected token")
+                Label::primary(file_id, location.into()..(location + 1).into())
+                    .with_message("unexpected token")
             }
             ParseError::ExtraToken {
                 token: (start, _, end),
-            } => Label::primary(file_id, start..end).with_message("extra token"),
+            } => Label::primary(file_id, start.into()..end.into()).with_message("extra token"),
             ParseError::UnrecognizedEOF { location, expected } => {
-                Label::primary(file_id, location..(location + 1))
+                Label::primary(file_id, location.into()..(location + 1).into())
                     .with_message(format!("expected {}", pretty_expected(expected)))
             }
             ParseError::User { error } => parser_error_to_label(file_id, error),
@@ -120,5 +122,5 @@ fn pretty_expected(expected: Vec<String>) -> String {
 
 fn parser_error_to_label(file_id: usize, error: ParserError) -> Label<usize> {
     let span = error.span();
-    Label::primary(file_id, span.left..span.right).with_message(error.to_string())
+    Label::primary(file_id, span.left.into()..span.right.into()).with_message(error.to_string())
 }

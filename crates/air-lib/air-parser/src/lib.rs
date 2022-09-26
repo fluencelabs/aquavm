@@ -28,6 +28,7 @@
 pub mod ast;
 mod parser;
 
+pub use parser::lexer::TextPos;
 pub use parser::parse;
 pub use parser::AIRLexer;
 pub use parser::AIRParser;

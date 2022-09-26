@@ -12,3 +12,6 @@ categories = ["wasm"]
 [lib]
 name = "air_execution_info_collector"
 path = "src/lib.rs"
+
+[dependencies]
+air-parser = { path = "../air-parser" }

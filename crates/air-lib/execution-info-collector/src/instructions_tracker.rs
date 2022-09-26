@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+use air_parser::TextPos;
+
 use std::collections::HashMap;
 
 /// Intended to track a number of executed instruction of each type. For instructions that
@@ -63,7 +65,7 @@ pub struct NewTracker {
     /// Mapping from a new instruction position in a script
     /// to a number of their execution. This is needed to
     /// support private stream generation mappings.
-    pub executed_count: HashMap<usize, u32>,
+    pub executed_count: HashMap<TextPos, u32>,
 }
 
 impl InstructionTracker {
@@ -123,7 +125,7 @@ impl InstructionTracker {
         self.xor_count += 1;
     }
 
-    pub fn meet_new(&mut self, position: usize) {
+    pub fn meet_new(&mut self, position: TextPos) {
         use std::collections::hash_map::Entry::{Occupied, Vacant};
 
         match self.new_tracker.executed_count.entry(position) {
@@ -136,7 +138,7 @@ impl InstructionTracker {
 }
 
 impl NewTracker {
-    pub fn get_iteration(&self, position: usize) -> u32 {
+    pub fn get_iteration(&self, position: TextPos) -> u32 {
         self.executed_count
             .get(&position)
             .copied()
