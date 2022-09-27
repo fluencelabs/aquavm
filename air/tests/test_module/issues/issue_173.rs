@@ -17,6 +17,7 @@
 use air_test_utils::prelude::*;
 
 #[test]
+#[ignore]
 // test for github.com/fluencelabs/aquavm/issues/173
 fn issue_173() {
     let set_variable_peer_id = "set_variable_peer_id";

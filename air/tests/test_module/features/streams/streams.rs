@@ -361,6 +361,7 @@ fn stream_merging_v1() {
 }
 
 #[test]
+#[ignore]
 fn stream_merging_v2() {
     let initiator_id = "initiator_id";
     let setter_1_id = "setter_1";
@@ -381,10 +382,9 @@ fn stream_merging_v2() {
 
     let initiator_result = checked_call_vm!(initiator, <_>::default(), &script, "", "");
     let setter_1_res = checked_call_vm!(setter_1, <_>::default(), &script, "", initiator_result.data.clone());
-    //let setter_2_res = checked_call_vm!(setter_2, <_>::default(), &script, "", initiator_result.data.clone());
-    //let setter_3_res = checked_call_vm!(setter_3, <_>::default(), &script, "", initiator_result.data);
+    let setter_2_res = checked_call_vm!(setter_2, <_>::default(), &script, "", initiator_result.data.clone());
+    let setter_3_res = checked_call_vm!(setter_3, <_>::default(), &script, "", initiator_result.data);
 
-    println!("\n\n\n\n\n----\n\n");
     print_trace(&setter_1_res, "setter 1");
     let executor_result_1 = checked_call_vm!(executor, <_>::default(), &script, "", setter_1_res.data);
     let actual_trace_1 = trace_from_result(&executor_result_1);
@@ -419,70 +419,6 @@ fn stream_merging_v2() {
     ];
     assert_eq!(actual_trace_1, expected_trace_1);
 
-    /*
-     (par (4, 1) (6 ,1)
-       (seq
-          (par (2, 1) (3, 1)
-              (seq
-                 (par (0, 1) (0, 1)
-                    (seq
-                      (never)
-                      (call v 1) ; never will be called
-                    )
-                    (call v) ; 18 (> executed)
-                 )
-                 (call v 1) ;
-              )
-              (call v) ; 19 (> executed)
-          )
-          (call v 1)
-        )
-        (call v) ; 20 (> executed)
-      )
-    */
-    /*
-    (fold
-     (next)
-     (par)
-    )
-     */
-
-    /*
-    meet_iteration_start
-    par slider handler
-      (par (4, 1) (6 ,1)
-        (seq
-        meet_iteration_end
-        meet_iteration_start
-        par slider handler
-           (par (2, 1) (3, 1)
-               (seq
-                meet_iteration_end
-                meet_iteration_start
-                par slider handler
-                  (par (0, 1) (0, 1)
-                     (seq
-                       maybe_meet_back_iterator
-                       next never met
-                       (never)
-                       (call v 1) ; never will be called
-                     )
-                     left_completed
-                     (call v) ; 18 (> executed)
-                     right_completed
-                  next after, maybe_meet_back_iterator
-                  )
-                  (call v 1) ;
-               )
-               (call v) ; 19 (> executed)
-           )
-           (call v 1)
-         )
-         (call v) ; 20 (> executed)
-       )
-     */
-
-    /*
     let executor_result_2 = checked_call_vm!(
         executor,
         <_>::default(),
@@ -576,6 +512,4 @@ fn stream_merging_v2() {
         executed_state::scalar_string(unit_call_service_result),
     ];
     assert_eq!(actual_trace_3, expected_trace_3);
-
-     */
 }

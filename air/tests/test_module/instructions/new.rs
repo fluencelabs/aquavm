@@ -17,6 +17,7 @@
 use air_test_utils::prelude::*;
 
 #[test]
+#[ignore]
 fn new_with_global_streams_seq() {
     let set_variable_peer_id = "set_variable_peer_id";
     let local_vm_peer_id_1 = "local_vm_peer_id_1";

@@ -37,8 +37,8 @@ pub(super) fn compute_new_states(
     let mut current_state = compute_new_state(current_len as usize, data_keeper.current_slider(), current_par)?;
 
     if matches!(subgraph_type, SubgraphType::Left) {
-        prev_state.subtrace_len = (prev_par.right_size as usize).into();
-        current_state.subtrace_len = (current_par.right_size as usize).into();
+        prev_state.subtrace_len = prev_par.right_size as usize;
+        current_state.subtrace_len = current_par.right_size as usize;
     }
 
     let pair = CtxStatesPair::new(prev_state, current_state);
