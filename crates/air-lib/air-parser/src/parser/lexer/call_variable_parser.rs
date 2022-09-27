@@ -59,7 +59,7 @@ struct CallVariableParser<'input> {
 impl<'input> CallVariableParser<'input> {
     fn new(string_to_parse: &'input str, start_pos: TextPos) -> LexerResult<Self> {
         let mut string_to_parse_iter = string_to_parse.char_indices().peekable();
-        let (current_pos, current_char) = match string_to_parse_iter.next() {
+        let (current_offset, current_char) = match string_to_parse_iter.next() {
             Some(pos_and_ch) => pos_and_ch,
             None => return Err(LexerError::empty_variable_or_const(start_pos..start_pos)),
         };
@@ -72,7 +72,7 @@ impl<'input> CallVariableParser<'input> {
             is_first_char: true,
             met_tag: MetTag::None,
             current_char,
-            current_offset: current_pos,
+            current_offset,
         };
 
         let parser = Self {
@@ -314,17 +314,18 @@ impl<'input> CallVariableParser<'input> {
         }
     }
 
-    fn try_to_variable_and_lambda(&self, lambda_start_pos: usize) -> LexerResult<Token<'input>> {
+    fn try_to_variable_and_lambda(&self, lambda_start_offset: usize) -> LexerResult<Token<'input>> {
         let lambda =
-            crate::parse_lambda(&self.string_to_parse[lambda_start_pos..]).map_err(|e| {
+            crate::parse_lambda(&self.string_to_parse[lambda_start_offset..]).map_err(|e| {
                 LexerError::lambda_parser_error(
-                    self.start_pos + lambda_start_pos..self.start_pos + self.string_to_parse.len(),
+                    self.start_pos + lambda_start_offset
+                        ..self.start_pos + self.string_to_parse.len(),
                     e.to_string(),
                 )
             })?;
 
-        let token =
-            self.to_variable_token_with_lambda(&self.string_to_parse[0..lambda_start_pos], lambda);
+        let token = self
+            .to_variable_token_with_lambda(&self.string_to_parse[0..lambda_start_offset], lambda);
         Ok(token)
     }
 
@@ -365,7 +366,9 @@ impl<'input> CallVariableParser<'input> {
             (true, None) => self.try_to_i64(),
             (true, Some(_)) => self.try_to_f64(),
             (false, None) => Ok(self.to_variable_token(self.string_to_parse)),
-            (false, Some(lambda_start_pos)) => self.try_to_variable_and_lambda(lambda_start_pos),
+            (false, Some(lambda_start_offset)) => {
+                self.try_to_variable_and_lambda(lambda_start_offset)
+            }
         }
     }
 }
