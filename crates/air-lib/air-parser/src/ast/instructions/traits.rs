@@ -16,7 +16,6 @@
 
 use super::*;
 
-use air_lambda_ast::format_ast;
 use std::fmt;
 
 impl fmt::Display for Instruction<'_> {
@@ -35,6 +34,7 @@ impl fmt::Display for Instruction<'_> {
             Fail(fail) => write!(f, "{}", fail),
             FoldScalar(fold) => write!(f, "{}", fold),
             FoldStream(fold) => write!(f, "{}", fold),
+            Never(never) => write!(f, "{}", never),
             Next(next) => write!(f, "{}", next),
             New(new) => write!(f, "{}", new),
             Null(null) => write!(f, "{}", null),
@@ -77,7 +77,7 @@ impl fmt::Display for Fail<'_> {
                 error_message,
             } => write!(f, r#"fail {} "{}""#, ret_code, error_message),
             Fail::CanonStream { name, lambda, .. } => {
-                write!(f, "fail {}.$.{}", name, format_ast(lambda))
+                write!(f, "fail {}.$.{}", name, lambda)
             }
             Fail::LastError => write!(f, "fail %last_error%"),
         }
@@ -129,6 +129,12 @@ impl fmt::Display for Match<'_> {
 impl fmt::Display for MisMatch<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "mismatch {} {}", self.left_value, self.right_value)
+    }
+}
+
+impl fmt::Display for Never {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "never")
     }
 }
 

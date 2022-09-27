@@ -52,7 +52,7 @@ fn parse_match_with_canon_stream() {
     let expected = match_(
         Value::Variable(VariableWithLambda::canon_stream_wl(
             canon_stream,
-            unsafe { LambdaAST::new_unchecked(vec![ValueAccessor::ArrayAccess { idx: 0 }]) },
+            LambdaAST::try_from_accessors(vec![ValueAccessor::ArrayAccess { idx: 0 }]).unwrap(),
             16,
         )),
         Value::Variable(VariableWithLambda::scalar("v2", 36)),

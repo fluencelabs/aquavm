@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#![forbid(unsafe_code)]
+#![warn(rust_2018_idioms)]
 #![deny(
     dead_code,
     nonstandard_style,
@@ -27,12 +29,3 @@
 mod ast;
 
 pub use ast::*;
-
-pub fn format_ast(lambda_ast: &LambdaAST<'_>) -> String {
-    let mut formatted_ast = String::new();
-    for accessor in lambda_ast.iter() {
-        formatted_ast.push_str(&accessor.to_string());
-    }
-
-    formatted_ast
-}

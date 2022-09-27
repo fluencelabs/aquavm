@@ -19,7 +19,6 @@ use super::ValueAggregate;
 use crate::execution_step::Generation;
 use crate::JValue;
 
-use air_interpreter_data::TracePos;
 use polyplets::SecurityTetraplet;
 
 use std::rc::Rc;
@@ -31,28 +30,25 @@ pub struct CanonStream {
     values: Vec<ValueAggregate>,
     // tetraplet is needed to handle adding canon streams as a whole to a stream
     tetraplet: Rc<SecurityTetraplet>,
-    position: TracePos,
 }
 
 impl CanonStream {
-    pub(crate) fn new(values: Vec<ValueAggregate>, peer_pk: String, position: TracePos) -> Self {
+    pub(crate) fn new(values: Vec<ValueAggregate>, peer_pk: String) -> Self {
         // tetraplet is comprised only from peer_pk here
         let tetraplet = SecurityTetraplet::new(peer_pk, "", "", "");
         Self {
             values,
             tetraplet: Rc::new(tetraplet),
-            position,
         }
     }
 
-    pub(crate) fn from_stream(stream: &Stream, peer_pk: String, position: TracePos) -> Self {
+    pub(crate) fn from_stream(stream: &Stream, peer_pk: String) -> Self {
         // it's always possible to iter over all generations of a stream
         let values = stream.iter(Generation::Last).unwrap().cloned().collect::<Vec<_>>();
         let tetraplet = SecurityTetraplet::new(peer_pk, "", "", "");
         Self {
             values,
             tetraplet: Rc::new(tetraplet),
-            position,
         }
     }
 
@@ -82,10 +78,6 @@ impl CanonStream {
 
     pub(crate) fn tetraplet(&self) -> &Rc<SecurityTetraplet> {
         &self.tetraplet
-    }
-
-    pub(crate) fn position(&self) -> TracePos {
-        self.position
     }
 }
 

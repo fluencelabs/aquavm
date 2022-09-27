@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#![forbid(unsafe_code)]
 #![deny(
     dead_code,
     nonstandard_style,
@@ -27,10 +28,10 @@
 mod parser;
 
 pub use parser::parse;
-pub use parser::AccessorsLexer;
-pub use parser::LambdaParser;
+pub use parser::LambdaASTLexer;
 pub use parser::LambdaParserError;
 pub use parser::LexerError;
 
+pub use air_lambda_ast::Functor;
 pub use air_lambda_ast::LambdaAST;
 pub use air_lambda_ast::ValueAccessor;

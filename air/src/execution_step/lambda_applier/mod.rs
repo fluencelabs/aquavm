@@ -22,8 +22,8 @@ pub use errors::LambdaError;
 
 pub(crate) type LambdaResult<T> = std::result::Result<T, LambdaError>;
 
-pub(crate) use applier::select_from_scalar;
-pub(crate) use applier::select_from_stream;
+pub(crate) use applier::select_by_lambda_from_scalar;
+pub(crate) use applier::select_by_lambda_from_stream;
 
 #[macro_export]
 macro_rules! lambda_to_execution_error {

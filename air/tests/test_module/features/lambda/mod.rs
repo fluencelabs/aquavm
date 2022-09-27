@@ -15,4 +15,5 @@
  */
 
 mod flattening;
+mod functors;
 mod lambda;

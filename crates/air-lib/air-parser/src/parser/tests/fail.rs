@@ -59,11 +59,12 @@ fn parse_fail_scalar_with_lambda() {
     let instruction = parse(source_code);
     let expected = fail_scalar(ScalarWithLambda::new(
         "scalar",
-        Some(unsafe {
-            LambdaAST::new_unchecked(vec![ValueAccessor::FieldAccessByName {
+        Some(
+            LambdaAST::try_from_accessors(vec![ValueAccessor::FieldAccessByName {
                 field_name: "field_accessor",
             }])
-        }),
+            .unwrap(),
+        ),
         18,
     ));
     assert_eq!(instruction, expected)

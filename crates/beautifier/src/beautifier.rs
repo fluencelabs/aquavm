@@ -14,16 +14,6 @@
  * limitations under the License.
  */
 
-#![deny(
-    dead_code,
-    nonstandard_style,
-    unused_imports,
-    unused_mut,
-    unused_variables,
-    unused_unsafe,
-    unreachable_patterns
-)]
-
 use air_parser::ast;
 
 use std::fmt::Display;
@@ -131,7 +121,7 @@ impl<W: io::Write> Beautifier<W> {
         Ok(self.beautify_walker(ast.as_ref(), 0)?)
     }
 
-    fn beautify_walker(&mut self, node: &ast::Instruction, indent: usize) -> io::Result<()> {
+    fn beautify_walker(&mut self, node: &ast::Instruction<'_>, indent: usize) -> io::Result<()> {
         match node {
             ast::Instruction::Call(call) => self.beautify_call(call, indent),
             ast::Instruction::Ap(ap) => self.beautify_simple(ap, indent),
@@ -148,6 +138,7 @@ impl<W: io::Write> Beautifier<W> {
             ast::Instruction::FoldStream(fold_stream) => {
                 self.beautify_fold_stream(fold_stream, indent)
             }
+            ast::Instruction::Never(never) => self.beautify_simple(never, indent),
             ast::Instruction::New(new) => self.beautify_new(new, indent),
             ast::Instruction::Next(next) => self.beautify_simple(next, indent),
             ast::Instruction::Null(null) => self.beautify_simple(null, indent),
@@ -155,7 +146,7 @@ impl<W: io::Write> Beautifier<W> {
         }
     }
 
-    fn beautify_call(&mut self, call: &ast::Call, indent: usize) -> io::Result<()> {
+    fn beautify_call(&mut self, call: &ast::Call<'_>, indent: usize) -> io::Result<()> {
         fmt_indent(&mut self.output, indent)?;
         match &call.output {
             ast::CallOutputValue::Scalar(v) => write!(&mut self.output, "{} <- ", v)?,
@@ -175,12 +166,12 @@ impl<W: io::Write> Beautifier<W> {
         writeln!(&mut self.output, "{}", instruction)
     }
 
-    fn beautify_seq(&mut self, seq: &ast::Seq, indent: usize) -> io::Result<()> {
+    fn beautify_seq(&mut self, seq: &ast::Seq<'_>, indent: usize) -> io::Result<()> {
         self.beautify_walker(&seq.0, indent)?;
         self.beautify_walker(&seq.1, indent)
     }
 
-    fn beautify_par(&mut self, par: &ast::Par, indent: usize) -> io::Result<()> {
+    fn beautify_par(&mut self, par: &ast::Par<'_>, indent: usize) -> io::Result<()> {
         multiline!(
             self, indent;
             "par:";
@@ -190,7 +181,7 @@ impl<W: io::Write> Beautifier<W> {
         )
     }
 
-    fn beautify_xor(&mut self, xor: &ast::Xor, indent: usize) -> io::Result<()> {
+    fn beautify_xor(&mut self, xor: &ast::Xor<'_>, indent: usize) -> io::Result<()> {
         multiline!(
             self, indent;
             "try:";
@@ -200,23 +191,31 @@ impl<W: io::Write> Beautifier<W> {
         )
     }
 
-    fn beautify_match(&mut self, match_: &ast::Match, indent: usize) -> io::Result<()> {
+    fn beautify_match(&mut self, match_: &ast::Match<'_>, indent: usize) -> io::Result<()> {
         compound!(self, indent, match_)
     }
 
-    fn beautify_mismatch(&mut self, mismatch: &ast::MisMatch, indent: usize) -> io::Result<()> {
+    fn beautify_mismatch(&mut self, mismatch: &ast::MisMatch<'_>, indent: usize) -> io::Result<()> {
         compound!(self, indent, mismatch)
     }
 
-    fn beautify_fold_scalar(&mut self, fold: &ast::FoldScalar, indent: usize) -> io::Result<()> {
+    fn beautify_fold_scalar(
+        &mut self,
+        fold: &ast::FoldScalar<'_>,
+        indent: usize,
+    ) -> io::Result<()> {
         compound!(self, indent, fold)
     }
 
-    fn beautify_fold_stream(&mut self, fold: &ast::FoldStream, indent: usize) -> io::Result<()> {
+    fn beautify_fold_stream(
+        &mut self,
+        fold: &ast::FoldStream<'_>,
+        indent: usize,
+    ) -> io::Result<()> {
         compound!(self, indent, fold)
     }
 
-    fn beautify_new(&mut self, new: &ast::New, indent: usize) -> io::Result<()> {
+    fn beautify_new(&mut self, new: &ast::New<'_>, indent: usize) -> io::Result<()> {
         compound!(self, indent, new)
     }
 }

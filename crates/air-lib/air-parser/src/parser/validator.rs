@@ -207,7 +207,12 @@ impl<'i> VariableValidator<'i> {
     }
 
     fn met_lambda(&mut self, lambda: &LambdaAST<'i>, span: Span) {
-        for accessor in lambda.iter() {
+        let accessors = match lambda {
+            LambdaAST::ValuePath(accessors) => accessors,
+            LambdaAST::Functor(_) => return,
+        };
+
+        for accessor in accessors.iter() {
             match accessor {
                 &ValueAccessor::FieldAccessByScalar { scalar_name } => {
                     self.met_variable_name(scalar_name, span)

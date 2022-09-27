@@ -12,48 +12,21 @@ jobs:
   npm-publish:
     name: "Publish AIR to NPM & crates.io"
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      ### Prepare cargo & toolchains
-      - uses: actions/cache@v2
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            ~/.cargo/bin
-            target
-          key: ${{ runner.os }}-cargo-v2-${{ hashFiles('**/Cargo.lock') }}
-      - name: Install Rust toolchain with wasm32-unknown-unknown
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: nightly-2022-03-20
-          target: wasm32-unknown-unknown
-          profile: minimal
-          override: true
-      - name: Install wasm32-wasi
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: nightly-2022-03-20
-          target: wasm32-wasi
-          profile: minimal
-      - uses: actions-rs/cargo@v1
-        with:
-          toolchain: nightly-2022-03-20
-          command: update
-          args: --aggressive
+      - name: Setup rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
 
-      ### Calculate FINAL_VERSION
+      - run: cargo update --aggressive
+
       - name: Install jq & sponge
         run: sudo apt-get update && sudo apt-get --yes --force-yes install jq moreutils
 
       - name: Install cargo-show toml-cli
-        run: cargo install cargo-show toml-cli || true
+        run: cargo install cargo-show toml-cli
 
       - name: Get versions from npm & crates.io, and take the highest one
         run: |
@@ -97,13 +70,11 @@ jobs:
           echo "FINAL_VERSION=$MAX_VERSION" | tee -a $GITHUB_ENV
           echo "JS_PKG_NAME=$JS_PKG_NAME" | tee -a $GITHUB_ENV
 
-      ### === Rust package release ===
       - name: Install marine
-        run: cargo install marine || true
+        run: cargo install marine
 
       - name: Set interpreter version to ${{ env.FINAL_VERSION }} before the build
         run: |
-          PATH="~/.cargo/bin:$PATH"
           (
             cd air-interpreter
             toml set Cargo.toml package.version "${{ env.FINAL_VERSION }}" | sponge Cargo.toml
@@ -121,9 +92,7 @@ jobs:
         run: cp target/wasm32-wasi/release/air_interpreter_server.wasm crates/interpreter-wasm/air_interpreter_server.wasm
 
       - name: Set project version to ${{ env.FINAL_VERSION }}
-        run: |
-          PATH="~/.cargo/bin:$PATH"
-          toml set Cargo.toml package.version "${{ env.FINAL_VERSION }}" | sponge Cargo.toml
+        run: toml set Cargo.toml package.version "${{ env.FINAL_VERSION }}" | sponge Cargo.toml
         working-directory: crates/interpreter-wasm
 
       - name: Login to crates.io
@@ -133,7 +102,6 @@ jobs:
         run: cargo publish --allow-dirty
         working-directory: crates/interpreter-wasm
 
-      ### Create a pre-release
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -148,7 +116,6 @@ jobs:
           draft: false
           prerelease: false
 
-      ### === JavaScript package release ===
       - name: Install wasm-pack
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
         continue-on-error: true
@@ -160,18 +127,18 @@ jobs:
           npm i
           npm run build
 
-      ### Set version
       - name: Set version to ${{ env.FINAL_VERSION }}
         run: yarn version --new-version ${{ env.FINAL_VERSION }} --no-git-tag-version
         working-directory: avm/client
 
-      ### Publish to NPM registry
-      - uses: actions/setup-node@v1
+      - name: Setup node
+        uses: actions/setup-node@v1
         with:
           node-version: "14"
           registry-url: "https://registry.npmjs.org"
 
-      - run: npm publish --access public
-        working-directory: avm/client
+      - name: Publish to npm registry
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public
+        working-directory: avm/client

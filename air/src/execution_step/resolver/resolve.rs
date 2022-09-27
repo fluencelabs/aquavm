@@ -18,7 +18,7 @@ use super::RcSecurityTetraplets;
 use crate::execution_step::boxed_value::JValuable;
 use crate::execution_step::boxed_value::Variable;
 use crate::execution_step::execution_context::ExecutionCtx;
-use crate::execution_step::lambda_applier::select_from_scalar;
+use crate::execution_step::lambda_applier::select_by_lambda_from_scalar;
 use crate::execution_step::ExecutionResult;
 use crate::JValue;
 use crate::LambdaAST;
@@ -71,8 +71,8 @@ pub(crate) fn prepare_last_error<'i>(
     let LastError { error, tetraplet } = ctx.last_error();
 
     let jvalue = match error_accessor {
-        Some(error_accessor) => select_from_scalar(error.as_ref(), error_accessor.iter(), ctx)?,
-        None => error.as_ref(),
+        Some(error_accessor) => select_by_lambda_from_scalar(error.as_ref(), error_accessor, ctx)?.into_owned(),
+        None => error.as_ref().clone(),
     };
 
     let tetraplets = match tetraplet {
@@ -84,7 +84,7 @@ pub(crate) fn prepare_last_error<'i>(
         }
     };
 
-    Ok((jvalue.clone(), tetraplets))
+    Ok((jvalue, tetraplets))
 }
 
 #[tracing::instrument(level = "trace", skip(ctx))]
@@ -157,5 +157,5 @@ pub(crate) fn apply_lambda<'i>(
     let (jvalue, tetraplet) = resolved.apply_lambda_with_tetraplets(lambda, exec_ctx)?;
 
     // it's known that apply_lambda_with_tetraplets returns vec of one value
-    Ok((jvalue.clone(), tetraplet))
+    Ok((jvalue.into_owned(), tetraplet))
 }

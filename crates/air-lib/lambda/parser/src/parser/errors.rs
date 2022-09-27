@@ -26,14 +26,25 @@ pub enum LambdaParserError<'input> {
     #[error(transparent)]
     LexerError(#[from] LexerError),
 
-    #[error("provided lambda expression doesn't contain any accessor")]
-    EmptyLambda,
+    #[error(transparent)]
+    LambdaError(#[from] IncorrectLambdaError),
 
     #[error("{0:?}")]
     ParseError(ParseError<usize, Token<'input>, LexerError>),
 
     #[error("{0:?}")]
     RecoveryErrors(Vec<ErrorRecovery<usize, Token<'input>, LexerError>>),
+}
+
+#[derive(ThisError, Debug, Clone, PartialEq, Eq)]
+pub enum IncorrectLambdaError {
+    #[error("provided lambda expression doesn't contain any accessor")]
+    EmptyLambda,
+
+    #[error(
+        "normally, this error shouldn't occur, it's an internal error of a parser implementation"
+    )]
+    InternalError,
 }
 
 impl<'input> From<ParseError<usize, Token<'input>, LexerError>> for LambdaParserError<'input> {

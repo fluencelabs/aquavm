@@ -19,8 +19,12 @@ use serde::Serialize;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Token<'input> {
+    LengthFunctor,
+
+    //.$
+    ValuePathStarter,
     // .
-    Selector,
+    ValuePathSelector,
 
     OpenSquareBracket,
     CloseSquareBracket,
