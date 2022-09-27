@@ -349,7 +349,6 @@ fn recursive_stream_inner_fold() {
 
     let result = checked_call_vm!(vm_1, <_>::default(), &script, "", "");
     let result = checked_call_vm!(vm_2, <_>::default(), script, "", result.data);
-    print_trace(&result, "");
     let actual_trace = trace_from_result(&result);
 
     let actual_last_state = &actual_trace[(actual_trace.len() - 1).into()];

@@ -385,7 +385,6 @@ fn stream_merging_v2() {
     let setter_2_res = checked_call_vm!(setter_2, <_>::default(), &script, "", initiator_result.data.clone());
     let setter_3_res = checked_call_vm!(setter_3, <_>::default(), &script, "", initiator_result.data);
 
-    print_trace(&setter_1_res, "setter 1");
     let executor_result_1 = checked_call_vm!(executor, <_>::default(), &script, "", setter_1_res.data);
     let actual_trace_1 = trace_from_result(&executor_result_1);
 

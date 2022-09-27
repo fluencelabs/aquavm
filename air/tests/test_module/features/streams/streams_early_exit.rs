@@ -225,7 +225,6 @@ fn fold_early_exit() {
         "",
         last_error_receiver_result.data
     );
-    print_trace(&last_peer_checker_result, "");
     let actual_trace = trace_from_result(&last_peer_checker_result);
 
     let unit_call_service_result = "result from unit_call_service";

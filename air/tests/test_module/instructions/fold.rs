@@ -507,7 +507,6 @@ fn fold_par_next_completes() {
             "#);
 
     let result_1 = checked_call_vm!(vm_1, <_>::default(), &script, "", "");
-    print_trace(&result_1, "");
 
     let result_2 = checked_call_vm!(vm_2, <_>::default(), &script, "", result_1.data.clone());
     let actual_trace = trace_from_result(&result_2);

@@ -22,13 +22,10 @@ use new_states_calculation::compute_new_states;
 /// At the end of a Par execution it's needed to update subtrace_len and positions of both sliders.
 ///
 /// To see why it's really needed, imagine the following trace:
-/// [par 12, 3] subtrace_len = 9
-///     (seq
-///     [par 3, 5] subtrace_len = 3                                                      <- left subgraph of [par 9, 3]
-///         [call rs 1] [call f 2] [call rs 3]                          <- left subgraph of [par 3, 5]
-///         [call rs 4] [call f 5] [call rs 6] [call rs 7] [call rs 8]  <- right subgraph of [par 3, 5]
-///        ...
-///      )
+/// [par 12, 3]
+///     [par 3, 5]                                                       <- left subgraph of [par 9, 3]
+///         [call rs 1] [call rs 2] [call rs 3]                          <- left subgraph of [par 3, 5]
+///         [call rs 4] [call rs 5] [call rs 6] [call rs 7] [call rs 8]  <- right subgraph of [par 3, 5]
 ///     [par 1, 1]                                                       <- right subgraph of [par 9, 3]
 ///         [call e 9]                                                   <- left subgraph of [par 1, 1]
 ///         [call e 10]                                                  <- right subgraph of [par 1, 1]
