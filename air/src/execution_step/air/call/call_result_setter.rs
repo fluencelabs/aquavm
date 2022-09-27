@@ -23,6 +23,7 @@ use air_interpreter_data::CallResult;
 use air_interpreter_data::TracePos;
 use air_interpreter_data::Value;
 use air_parser::ast::CallOutputValue;
+use air_trace_handler::CurrentStreamValue;
 use air_trace_handler::TraceHandler;
 
 /// Writes result of a local `Call` instruction to `ExecutionCtx` at `output`.
@@ -51,7 +52,7 @@ pub(crate) fn set_local_result<'i>(
 
 // TODO New stream should be handled here 12:30, 16:40
 pub(crate) fn set_result_from_new_value<'i>(
-    value: &NewStreamValue<'i>,
+    value: &CurrentStreamValue<'i>,
     tetraplet: RcSecurityTetraplet,
     exec_ctx: &mut ExecutionCtx<'i>,
 ) -> ExecutionResult<u32> {

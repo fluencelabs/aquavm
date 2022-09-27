@@ -36,6 +36,7 @@ pub use errors::TraceHandlerError;
 pub use handler::TraceHandler;
 pub use merger::ApResultError;
 pub use merger::CallResultError;
+pub use merger::CurrentStreamValue;
 pub use merger::FoldResultError;
 pub use merger::MergeCtxType;
 pub use merger::MergeError;

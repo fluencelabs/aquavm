@@ -30,15 +30,23 @@ pub enum MergerCallResult<'i> {
     /// There is no corresponding state in a trace for this call.
     Empty,
 
-    NewStreamValue {
-        value: Rc<JValue>,
-        stream_name: &'i str,
-        stream_pos: usize,
-        trace_pos: TracePos,
-    },
+    CurrentStreamValue(CurrentStreamValue<'i>),
     /// There was a state in at least one of the contexts. If there were two states in
     /// both contexts, they were successfully merged.
-    CallResult { value: CallResult, trace_pos: TracePos },
+    CallResult {
+        value: CallResult,
+        trace_pos: TracePos,
+    },
+}
+
+// invariant:
+// An instance of this type is a proof that we have ValueType::Stream variant.
+#[derive(Debug, Clone)]
+pub struct CurrentStreamValue<'i> {
+    pub value: Rc<JValue>,
+    pub stream_name: &'i str,
+    pub stream_pos: usize,
+    pub trace_pos: TracePos,
 }
 
 pub(crate) fn try_merge_next_state_as_call<'i>(
@@ -126,12 +134,12 @@ pub(super) fn prepare_new_stream_result<'i>(
     let trace_pos = data_keeper.result_trace_next_pos();
     prepare_positions_mapping(scheme, data_keeper);
 
-    MergerCallResult::NewStreamValue {
+    MergerCallResult::CurrentStreamValue(CurrentStreamValue {
         value,
         stream_name,
         stream_pos,
         trace_pos,
-    }
+    })
 }
 
 #[derive(Debug, Copy, Clone)]
