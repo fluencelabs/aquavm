@@ -90,6 +90,7 @@ dependencies = [
 name = "air-interpreter-data"
 version = "0.3.0"
 dependencies = [
+ "air-parser",
  "air-utils",
  "once_cell",
  "semver 1.0.14",

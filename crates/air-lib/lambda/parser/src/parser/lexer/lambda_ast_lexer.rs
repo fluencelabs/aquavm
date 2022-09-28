@@ -60,34 +60,34 @@ impl<'input> LambdaASTLexer<'input> {
             return Some(self.try_parse_first_token());
         }
 
-        self.chars.next().map(|(start_pos, ch)| match ch {
-            '[' => Ok((start_pos, Token::OpenSquareBracket, start_pos + 1)),
-            ']' => Ok((start_pos, Token::CloseSquareBracket, start_pos + 1)),
+        self.chars.next().map(|(start_offset, ch)| match ch {
+            '[' => Ok((start_offset, Token::OpenSquareBracket, start_offset + 1)),
+            ']' => Ok((start_offset, Token::CloseSquareBracket, start_offset + 1)),
 
-            '.' => Ok((start_pos, Token::ValuePathSelector, start_pos + 1)),
+            '.' => Ok((start_offset, Token::ValuePathSelector, start_offset + 1)),
 
-            d if d.is_digit(ARRAY_IDX_BASE) => self.tokenize_arrays_idx(start_pos),
-            s if is_air_alphanumeric(s) => self.tokenize_field_name(start_pos),
+            d if d.is_digit(ARRAY_IDX_BASE) => self.tokenize_arrays_idx(start_offset),
+            s if is_air_alphanumeric(s) => self.tokenize_field_name(start_offset),
 
-            '!' => Ok((start_pos, Token::FlatteningSign, start_pos + 1)),
+            '!' => Ok((start_offset, Token::FlatteningSign, start_offset + 1)),
 
-            _ => Err(LexerError::UnexpectedSymbol(start_pos, start_pos + 1)),
+            _ => Err(LexerError::UnexpectedSymbol(start_offset, start_offset + 1)),
         })
     }
 
     fn tokenize_arrays_idx(
         &mut self,
-        start_pos: usize,
+        start_offset: usize,
     ) -> Spanned<Token<'input>, usize, LexerError> {
-        let array_idx = self.tokenize_until(start_pos, |ch| ch.is_digit(ARRAY_IDX_BASE));
+        let array_idx = self.tokenize_until(start_offset, |ch| ch.is_digit(ARRAY_IDX_BASE));
         match array_idx
             .parse::<u32>()
-            .map_err(|e| LexerError::ParseIntError(start_pos, start_pos + array_idx.len(), e))
+            .map_err(|e| LexerError::ParseIntError(start_offset, start_offset + array_idx.len(), e))
         {
             Ok(idx) => Ok((
-                start_pos,
+                start_offset,
                 Token::NumberAccessor(idx),
-                start_pos + array_idx.len(),
+                start_offset + array_idx.len(),
             )),
             Err(e) => Err(e),
         }
@@ -95,23 +95,23 @@ impl<'input> LambdaASTLexer<'input> {
 
     fn tokenize_field_name(
         &mut self,
-        start_pos: usize,
+        start_offset: usize,
     ) -> Spanned<Token<'input>, usize, LexerError> {
-        let field_name = self.tokenize_until(start_pos, is_air_alphanumeric);
+        let field_name = self.tokenize_until(start_offset, is_air_alphanumeric);
 
         Ok((
-            start_pos,
+            start_offset,
             Token::StringAccessor(field_name),
-            start_pos + field_name.len(),
+            start_offset + field_name.len(),
         ))
     }
 
     fn tokenize_until(
         &mut self,
-        start_pos: usize,
+        start_offset: usize,
         condition: impl Fn(char) -> bool,
     ) -> &'input str {
-        let mut end_pos = start_pos;
+        let mut end_pos = start_offset;
         while let Some((pos, ch)) = self.chars.peek() {
             if !condition(*ch) {
                 break;
@@ -120,7 +120,7 @@ impl<'input> LambdaASTLexer<'input> {
             self.chars.next();
         }
 
-        &self.input[start_pos..end_pos + 1]
+        &self.input[start_offset..end_pos + 1]
     }
 
     fn try_parse_first_token(&mut self) -> Spanned<Token<'input>, usize, LexerError> {
