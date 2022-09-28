@@ -26,7 +26,7 @@ pub mod text_pos;
 
 pub use air_lexer::AIRLexer;
 pub use errors::LexerError;
-pub use text_pos::TextPos;
+pub use text_pos::AirPos;
 pub use token::Token;
 
 pub(super) type LexerResult<T> = std::result::Result<T, LexerError>;

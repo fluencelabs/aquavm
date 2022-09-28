@@ -1,10 +1,10 @@
 // auto-generated: "lalrpop 0.19.8"
-// sha3: 6015184229228a3f428f95fb29c56509f070f983a1754f1cde84c27a9f0a417d
+// sha3: b654ab99b5c3594daec351b78297ab71ffa5ab7ec34a2288c0cf1be8efb20660
 use crate::ast::*;
 use crate::parser::ParserError;
 use crate::parser::VariableValidator;
 use crate::parser::Span;
-use crate::parser::lexer::{TextPos, Token};
+use crate::parser::lexer::{AirPos, Token};
 use air_lambda_parser::LambdaAST;
 use lalrpop_util::ErrorRecovery;
 use std::rc::Rc;
@@ -23,7 +23,7 @@ mod __parse__AIR {
     use crate::parser::ParserError;
     use crate::parser::VariableValidator;
     use crate::parser::Span;
-    use crate::parser::lexer::{TextPos, Token};
+    use crate::parser::lexer::{AirPos, Token};
     use air_lambda_parser::LambdaAST;
     use lalrpop_util::ErrorRecovery;
     use std::rc::Rc;
@@ -39,16 +39,16 @@ mod __parse__AIR {
      {
         Variant0(Token<'input>),
         Variant1(bool),
-        Variant2((&'input str, TextPos)),
-        Variant3((&'input str, LambdaAST<'input>, TextPos)),
+        Variant2((&'input str, AirPos)),
+        Variant3((&'input str, LambdaAST<'input>, AirPos)),
         Variant4(f64),
         Variant5(i64),
         Variant6(LambdaAST<'input>),
         Variant7(&'input str),
-        Variant8(__lalrpop_util::ErrorRecovery<TextPos, Token<'input>, ParserError>),
+        Variant8(__lalrpop_util::ErrorRecovery<AirPos, Token<'input>, ParserError>),
         Variant9(Value<'input>),
         Variant10(alloc::vec::Vec<Value<'input>>),
-        Variant11(TextPos),
+        Variant11(AirPos),
         Variant12(Box<Instruction<'input>>),
         Variant13(ApArgument<'input>),
         Variant14(ApResult<'input>),
@@ -735,14 +735,14 @@ mod __parse__AIR {
     where 'input: 'err, 'input: 'v
     {
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
         __phantom: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     }
     impl<'err, 'input, 'v> __state_machine::ParserDefinition for __StateMachine<'err, 'input, 'v>
     where 'input: 'err, 'input: 'v
     {
-        type Location = TextPos;
+        type Location = AirPos;
         type Error = ParserError;
         type Token = Token<'input>;
         type TokenIndex = usize;
@@ -1499,10 +1499,10 @@ mod __parse__AIR {
         >(
             &self,
             input: &'input str,
-            errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+            errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
             validator: &'v mut VariableValidator<'input>,
             __tokens0: __TOKENS,
-        ) -> Result<Box<Instruction<'input>>, __lalrpop_util::ParseError<TextPos, Token<'input>, ParserError>>
+        ) -> Result<Box<Instruction<'input>>, __lalrpop_util::ParseError<AirPos, Token<'input>, ParserError>>
         {
             let __tokens = __tokens0.into_iter();
             let mut __tokens = __tokens.map(|t| __ToTriple::to_triple(t));
@@ -1523,7 +1523,7 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
         __error_state: i16,
         __states: & [i16],
@@ -1561,14 +1561,14 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
         __action: i16,
-        __lookahead_start: Option<&TextPos>,
+        __lookahead_start: Option<&AirPos>,
         __states: &mut alloc::vec::Vec<i16>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
-    ) -> Option<Result<Box<Instruction<'input>>,__lalrpop_util::ParseError<TextPos, Token<'input>, ParserError>>>
+    ) -> Option<Result<Box<Instruction<'input>>,__lalrpop_util::ParseError<AirPos, Token<'input>, ParserError>>>
     {
         let (__pop_states, __nonterminal) = match __action {
             0 => {
@@ -1862,33 +1862,44 @@ mod __parse__AIR {
     fn __symbol_type_mismatch() -> ! {
         panic!("symbol type mismatch")
     }
-    fn __pop_Variant3<
-      'input,
-    >(
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>
-    ) -> (TextPos, (&'input str, LambdaAST<'input>, TextPos), TextPos)
-     {
-        match __symbols.pop() {
-            Some((__l, __Symbol::Variant3(__v), __r)) => (__l, __v, __r),
-            _ => __symbol_type_mismatch()
-        }
-    }
     fn __pop_Variant2<
       'input,
     >(
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>
-    ) -> (TextPos, (&'input str, TextPos), TextPos)
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>
+    ) -> (AirPos, (&'input str, AirPos), AirPos)
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant2(__v), __r)) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+    fn __pop_Variant3<
+      'input,
+    >(
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>
+    ) -> (AirPos, (&'input str, LambdaAST<'input>, AirPos), AirPos)
+     {
+        match __symbols.pop() {
+            Some((__l, __Symbol::Variant3(__v), __r)) => (__l, __v, __r),
+            _ => __symbol_type_mismatch()
+        }
+    }
+    fn __pop_Variant11<
+      'input,
+    >(
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>
+    ) -> (AirPos, AirPos, AirPos)
+     {
+        match __symbols.pop() {
+            Some((__l, __Symbol::Variant11(__v), __r)) => (__l, __v, __r),
+            _ => __symbol_type_mismatch()
+        }
+    }
     fn __pop_Variant13<
       'input,
     >(
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>
-    ) -> (TextPos, ApArgument<'input>, TextPos)
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>
+    ) -> (AirPos, ApArgument<'input>, AirPos)
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant13(__v), __r)) => (__l, __v, __r),
@@ -1898,8 +1909,8 @@ mod __parse__AIR {
     fn __pop_Variant14<
       'input,
     >(
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>
-    ) -> (TextPos, ApResult<'input>, TextPos)
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>
+    ) -> (AirPos, ApResult<'input>, AirPos)
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant14(__v), __r)) => (__l, __v, __r),
@@ -1909,8 +1920,8 @@ mod __parse__AIR {
     fn __pop_Variant12<
       'input,
     >(
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>
-    ) -> (TextPos, Box<Instruction<'input>>, TextPos)
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>
+    ) -> (AirPos, Box<Instruction<'input>>, AirPos)
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant12(__v), __r)) => (__l, __v, __r),
@@ -1920,8 +1931,8 @@ mod __parse__AIR {
     fn __pop_Variant16<
       'input,
     >(
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>
-    ) -> (TextPos, CallInstrValue<'input>, TextPos)
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>
+    ) -> (AirPos, CallInstrValue<'input>, AirPos)
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant16(__v), __r)) => (__l, __v, __r),
@@ -1931,8 +1942,8 @@ mod __parse__AIR {
     fn __pop_Variant17<
       'input,
     >(
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>
-    ) -> (TextPos, CallOutputValue<'input>, TextPos)
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>
+    ) -> (AirPos, CallOutputValue<'input>, AirPos)
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant17(__v), __r)) => (__l, __v, __r),
@@ -1942,8 +1953,8 @@ mod __parse__AIR {
     fn __pop_Variant19<
       'input,
     >(
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>
-    ) -> (TextPos, CanonStream<'input>, TextPos)
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>
+    ) -> (AirPos, CanonStream<'input>, AirPos)
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant19(__v), __r)) => (__l, __v, __r),
@@ -1953,8 +1964,8 @@ mod __parse__AIR {
     fn __pop_Variant20<
       'input,
     >(
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>
-    ) -> (TextPos, Fail<'input>, TextPos)
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>
+    ) -> (AirPos, Fail<'input>, AirPos)
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant20(__v), __r)) => (__l, __v, __r),
@@ -1964,8 +1975,8 @@ mod __parse__AIR {
     fn __pop_Variant21<
       'input,
     >(
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>
-    ) -> (TextPos, FoldScalarIterable<'input>, TextPos)
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>
+    ) -> (AirPos, FoldScalarIterable<'input>, AirPos)
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant21(__v), __r)) => (__l, __v, __r),
@@ -1975,8 +1986,8 @@ mod __parse__AIR {
     fn __pop_Variant6<
       'input,
     >(
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>
-    ) -> (TextPos, LambdaAST<'input>, TextPos)
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>
+    ) -> (AirPos, LambdaAST<'input>, AirPos)
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant6(__v), __r)) => (__l, __v, __r),
@@ -1986,8 +1997,8 @@ mod __parse__AIR {
     fn __pop_Variant22<
       'input,
     >(
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>
-    ) -> (TextPos, NewArgument<'input>, TextPos)
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>
+    ) -> (AirPos, NewArgument<'input>, AirPos)
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant22(__v), __r)) => (__l, __v, __r),
@@ -1997,8 +2008,8 @@ mod __parse__AIR {
     fn __pop_Variant23<
       'input,
     >(
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>
-    ) -> (TextPos, Number, TextPos)
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>
+    ) -> (AirPos, Number, AirPos)
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant23(__v), __r)) => (__l, __v, __r),
@@ -2008,30 +2019,19 @@ mod __parse__AIR {
     fn __pop_Variant24<
       'input,
     >(
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>
-    ) -> (TextPos, Stream<'input>, TextPos)
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>
+    ) -> (AirPos, Stream<'input>, AirPos)
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant24(__v), __r)) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
-    fn __pop_Variant11<
-      'input,
-    >(
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>
-    ) -> (TextPos, TextPos, TextPos)
-     {
-        match __symbols.pop() {
-            Some((__l, __Symbol::Variant11(__v), __r)) => (__l, __v, __r),
-            _ => __symbol_type_mismatch()
-        }
-    }
     fn __pop_Variant0<
       'input,
     >(
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>
-    ) -> (TextPos, Token<'input>, TextPos)
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>
+    ) -> (AirPos, Token<'input>, AirPos)
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant0(__v), __r)) => (__l, __v, __r),
@@ -2041,8 +2041,8 @@ mod __parse__AIR {
     fn __pop_Variant25<
       'input,
     >(
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>
-    ) -> (TextPos, Triplet<'input>, TextPos)
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>
+    ) -> (AirPos, Triplet<'input>, AirPos)
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant25(__v), __r)) => (__l, __v, __r),
@@ -2052,8 +2052,8 @@ mod __parse__AIR {
     fn __pop_Variant9<
       'input,
     >(
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>
-    ) -> (TextPos, Value<'input>, TextPos)
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>
+    ) -> (AirPos, Value<'input>, AirPos)
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant9(__v), __r)) => (__l, __v, __r),
@@ -2063,8 +2063,8 @@ mod __parse__AIR {
     fn __pop_Variant15<
       'input,
     >(
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>
-    ) -> (TextPos, Vec<Value<'input>>, TextPos)
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>
+    ) -> (AirPos, Vec<Value<'input>>, AirPos)
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant15(__v), __r)) => (__l, __v, __r),
@@ -2074,8 +2074,8 @@ mod __parse__AIR {
     fn __pop_Variant8<
       'input,
     >(
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>
-    ) -> (TextPos, __lalrpop_util::ErrorRecovery<TextPos, Token<'input>, ParserError>, TextPos)
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>
+    ) -> (AirPos, __lalrpop_util::ErrorRecovery<AirPos, Token<'input>, ParserError>, AirPos)
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant8(__v), __r)) => (__l, __v, __r),
@@ -2085,8 +2085,8 @@ mod __parse__AIR {
     fn __pop_Variant10<
       'input,
     >(
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>
-    ) -> (TextPos, alloc::vec::Vec<Value<'input>>, TextPos)
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>
+    ) -> (AirPos, alloc::vec::Vec<Value<'input>>, AirPos)
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant10(__v), __r)) => (__l, __v, __r),
@@ -2096,8 +2096,8 @@ mod __parse__AIR {
     fn __pop_Variant1<
       'input,
     >(
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>
-    ) -> (TextPos, bool, TextPos)
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>
+    ) -> (AirPos, bool, AirPos)
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant1(__v), __r)) => (__l, __v, __r),
@@ -2107,8 +2107,8 @@ mod __parse__AIR {
     fn __pop_Variant18<
       'input,
     >(
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>
-    ) -> (TextPos, core::option::Option<CallOutputValue<'input>>, TextPos)
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>
+    ) -> (AirPos, core::option::Option<CallOutputValue<'input>>, AirPos)
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant18(__v), __r)) => (__l, __v, __r),
@@ -2118,8 +2118,8 @@ mod __parse__AIR {
     fn __pop_Variant4<
       'input,
     >(
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>
-    ) -> (TextPos, f64, TextPos)
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>
+    ) -> (AirPos, f64, AirPos)
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant4(__v), __r)) => (__l, __v, __r),
@@ -2129,8 +2129,8 @@ mod __parse__AIR {
     fn __pop_Variant5<
       'input,
     >(
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>
-    ) -> (TextPos, i64, TextPos)
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>
+    ) -> (AirPos, i64, AirPos)
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant5(__v), __r)) => (__l, __v, __r),
@@ -2140,8 +2140,8 @@ mod __parse__AIR {
     fn __pop_Variant7<
       'input,
     >(
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>
-    ) -> (TextPos, &'input str, TextPos)
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>
+    ) -> (AirPos, &'input str, AirPos)
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant7(__v), __r)) => (__l, __v, __r),
@@ -2154,10 +2154,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -2175,10 +2175,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -2195,10 +2195,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -2216,10 +2216,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -2237,10 +2237,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -2260,10 +2260,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -2280,10 +2280,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -2300,10 +2300,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -2321,10 +2321,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -2342,10 +2342,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -2363,10 +2363,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -2384,10 +2384,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -2405,10 +2405,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -2426,10 +2426,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -2447,10 +2447,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -2468,10 +2468,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -2489,10 +2489,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -2512,10 +2512,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -2533,10 +2533,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -2554,10 +2554,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -2575,10 +2575,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -2596,10 +2596,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -2617,10 +2617,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -2638,10 +2638,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -2659,10 +2659,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -2682,10 +2682,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -2706,10 +2706,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -2727,10 +2727,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -2748,10 +2748,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -2769,10 +2769,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -2790,10 +2790,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -2811,10 +2811,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -2832,10 +2832,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -2853,10 +2853,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -2874,10 +2874,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -2895,10 +2895,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -2916,10 +2916,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -2937,10 +2937,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -2957,10 +2957,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -2978,10 +2978,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -2999,10 +2999,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -3020,10 +3020,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -3043,10 +3043,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -3064,10 +3064,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -3085,10 +3085,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -3106,10 +3106,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -3127,10 +3127,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -3148,10 +3148,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -3171,10 +3171,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -3192,10 +3192,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -3219,10 +3219,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -3245,10 +3245,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -3272,10 +3272,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -3298,10 +3298,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -3324,10 +3324,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -3350,10 +3350,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -3374,10 +3374,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -3398,10 +3398,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -3424,10 +3424,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -3449,10 +3449,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -3476,10 +3476,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -3503,10 +3503,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -3528,10 +3528,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -3554,10 +3554,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -3581,10 +3581,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -3608,10 +3608,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -3629,10 +3629,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -3650,10 +3650,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -3671,10 +3671,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -3692,10 +3692,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -3713,10 +3713,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -3734,10 +3734,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -3755,10 +3755,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -3776,10 +3776,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -3797,10 +3797,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -3823,10 +3823,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -3844,10 +3844,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -3865,10 +3865,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -3886,10 +3886,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -3907,10 +3907,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -3928,10 +3928,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -3949,10 +3949,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -3970,10 +3970,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -3991,10 +3991,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -4014,10 +4014,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -4035,10 +4035,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -4056,10 +4056,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -4077,10 +4077,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -4098,10 +4098,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -4119,10 +4119,10 @@ mod __parse__AIR {
         'v,
     >(
         input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
-        __lookahead_start: Option<&TextPos>,
-        __symbols: &mut alloc::vec::Vec<(TextPos,__Symbol<'input>,TextPos)>,
+        __lookahead_start: Option<&AirPos>,
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
@@ -4144,9 +4144,9 @@ fn __action0<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, __0, _): (TextPos, Box<Instruction<'input>>, TextPos),
+    (_, __0, _): (AirPos, Box<Instruction<'input>>, AirPos),
 ) -> Box<Instruction<'input>>
 {
     __0
@@ -4159,9 +4159,9 @@ fn __action1<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, __0, _): (TextPos, Box<Instruction<'input>>, TextPos),
+    (_, __0, _): (AirPos, Box<Instruction<'input>>, AirPos),
 ) -> Box<Instruction<'input>>
 {
     __0
@@ -4174,16 +4174,16 @@ fn __action2<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, left, _): (TextPos, TextPos, TextPos),
-    (_, _, _): (TextPos, Token<'input>, TextPos),
-    (_, _, _): (TextPos, Token<'input>, TextPos),
-    (_, triplet, _): (TextPos, Triplet<'input>, TextPos),
-    (_, args, _): (TextPos, Vec<Value<'input>>, TextPos),
-    (_, output, _): (TextPos, core::option::Option<CallOutputValue<'input>>, TextPos),
-    (_, _, _): (TextPos, Token<'input>, TextPos),
-    (_, right, _): (TextPos, TextPos, TextPos),
+    (_, left, _): (AirPos, AirPos, AirPos),
+    (_, _, _): (AirPos, Token<'input>, AirPos),
+    (_, _, _): (AirPos, Token<'input>, AirPos),
+    (_, triplet, _): (AirPos, Triplet<'input>, AirPos),
+    (_, args, _): (AirPos, Vec<Value<'input>>, AirPos),
+    (_, output, _): (AirPos, core::option::Option<CallOutputValue<'input>>, AirPos),
+    (_, _, _): (AirPos, Token<'input>, AirPos),
+    (_, right, _): (AirPos, AirPos, AirPos),
 ) -> Box<Instruction<'input>>
 {
     {
@@ -4205,16 +4205,16 @@ fn __action3<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, left, _): (TextPos, TextPos, TextPos),
-    (_, _, _): (TextPos, Token<'input>, TextPos),
-    (_, _, _): (TextPos, Token<'input>, TextPos),
-    (_, peer_pk, _): (TextPos, CallInstrValue<'input>, TextPos),
-    (_, stream, _): (TextPos, Stream<'input>, TextPos),
-    (_, canon_stream, _): (TextPos, CanonStream<'input>, TextPos),
-    (_, _, _): (TextPos, Token<'input>, TextPos),
-    (_, right, _): (TextPos, TextPos, TextPos),
+    (_, left, _): (AirPos, AirPos, AirPos),
+    (_, _, _): (AirPos, Token<'input>, AirPos),
+    (_, _, _): (AirPos, Token<'input>, AirPos),
+    (_, peer_pk, _): (AirPos, CallInstrValue<'input>, AirPos),
+    (_, stream, _): (AirPos, Stream<'input>, AirPos),
+    (_, canon_stream, _): (AirPos, CanonStream<'input>, AirPos),
+    (_, _, _): (AirPos, Token<'input>, AirPos),
+    (_, right, _): (AirPos, AirPos, AirPos),
 ) -> Box<Instruction<'input>>
 {
     {
@@ -4234,15 +4234,15 @@ fn __action4<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, left, _): (TextPos, TextPos, TextPos),
-    (_, _, _): (TextPos, Token<'input>, TextPos),
-    (_, _, _): (TextPos, Token<'input>, TextPos),
-    (_, arg, _): (TextPos, ApArgument<'input>, TextPos),
-    (_, result, _): (TextPos, ApResult<'input>, TextPos),
-    (_, _, _): (TextPos, Token<'input>, TextPos),
-    (_, right, _): (TextPos, TextPos, TextPos),
+    (_, left, _): (AirPos, AirPos, AirPos),
+    (_, _, _): (AirPos, Token<'input>, AirPos),
+    (_, _, _): (AirPos, Token<'input>, AirPos),
+    (_, arg, _): (AirPos, ApArgument<'input>, AirPos),
+    (_, result, _): (AirPos, ApResult<'input>, AirPos),
+    (_, _, _): (AirPos, Token<'input>, AirPos),
+    (_, right, _): (AirPos, AirPos, AirPos),
 ) -> Box<Instruction<'input>>
 {
     {
@@ -4262,13 +4262,13 @@ fn __action5<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, _, _): (TextPos, Token<'input>, TextPos),
-    (_, _, _): (TextPos, Token<'input>, TextPos),
-    (_, l, _): (TextPos, Box<Instruction<'input>>, TextPos),
-    (_, r, _): (TextPos, Box<Instruction<'input>>, TextPos),
-    (_, _, _): (TextPos, Token<'input>, TextPos),
+    (_, _, _): (AirPos, Token<'input>, AirPos),
+    (_, _, _): (AirPos, Token<'input>, AirPos),
+    (_, l, _): (AirPos, Box<Instruction<'input>>, AirPos),
+    (_, r, _): (AirPos, Box<Instruction<'input>>, AirPos),
+    (_, _, _): (AirPos, Token<'input>, AirPos),
 ) -> Box<Instruction<'input>>
 {
     Box::new(Instruction::Seq(Seq::new(l, r)))
@@ -4281,13 +4281,13 @@ fn __action6<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, _, _): (TextPos, Token<'input>, TextPos),
-    (_, _, _): (TextPos, Token<'input>, TextPos),
-    (_, l, _): (TextPos, Box<Instruction<'input>>, TextPos),
-    (_, r, _): (TextPos, Box<Instruction<'input>>, TextPos),
-    (_, _, _): (TextPos, Token<'input>, TextPos),
+    (_, _, _): (AirPos, Token<'input>, AirPos),
+    (_, _, _): (AirPos, Token<'input>, AirPos),
+    (_, l, _): (AirPos, Box<Instruction<'input>>, AirPos),
+    (_, r, _): (AirPos, Box<Instruction<'input>>, AirPos),
+    (_, _, _): (AirPos, Token<'input>, AirPos),
 ) -> Box<Instruction<'input>>
 {
     Box::new(Instruction::Par(Par::new(l, r)))
@@ -4300,11 +4300,11 @@ fn __action7<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, __0, _): (TextPos, Token<'input>, TextPos),
-    (_, __1, _): (TextPos, Token<'input>, TextPos),
-    (_, __2, _): (TextPos, Token<'input>, TextPos),
+    (_, __0, _): (AirPos, Token<'input>, AirPos),
+    (_, __1, _): (AirPos, Token<'input>, AirPos),
+    (_, __2, _): (AirPos, Token<'input>, AirPos),
 ) -> Box<Instruction<'input>>
 {
     Box::new(Instruction::Never(Never))
@@ -4317,11 +4317,11 @@ fn __action8<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, __0, _): (TextPos, Token<'input>, TextPos),
-    (_, __1, _): (TextPos, Token<'input>, TextPos),
-    (_, __2, _): (TextPos, Token<'input>, TextPos),
+    (_, __0, _): (AirPos, Token<'input>, AirPos),
+    (_, __1, _): (AirPos, Token<'input>, AirPos),
+    (_, __2, _): (AirPos, Token<'input>, AirPos),
 ) -> Box<Instruction<'input>>
 {
     Box::new(Instruction::Null(Null))
@@ -4334,15 +4334,15 @@ fn __action9<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, left, _): (TextPos, TextPos, TextPos),
-    (_, _, _): (TextPos, Token<'input>, TextPos),
-    (_, _, _): (TextPos, Token<'input>, TextPos),
-    (_, argument, _): (TextPos, NewArgument<'input>, TextPos),
-    (_, instruction, _): (TextPos, Box<Instruction<'input>>, TextPos),
-    (_, _, _): (TextPos, Token<'input>, TextPos),
-    (_, right, _): (TextPos, TextPos, TextPos),
+    (_, left, _): (AirPos, AirPos, AirPos),
+    (_, _, _): (AirPos, Token<'input>, AirPos),
+    (_, _, _): (AirPos, Token<'input>, AirPos),
+    (_, argument, _): (AirPos, NewArgument<'input>, AirPos),
+    (_, instruction, _): (AirPos, Box<Instruction<'input>>, AirPos),
+    (_, _, _): (AirPos, Token<'input>, AirPos),
+    (_, right, _): (AirPos, AirPos, AirPos),
 ) -> Box<Instruction<'input>>
 {
     {
@@ -4362,12 +4362,12 @@ fn __action10<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, _, _): (TextPos, Token<'input>, TextPos),
-    (_, _, _): (TextPos, Token<'input>, TextPos),
-    (_, fail_body, _): (TextPos, Fail<'input>, TextPos),
-    (_, _, _): (TextPos, Token<'input>, TextPos),
+    (_, _, _): (AirPos, Token<'input>, AirPos),
+    (_, _, _): (AirPos, Token<'input>, AirPos),
+    (_, fail_body, _): (AirPos, Fail<'input>, AirPos),
+    (_, _, _): (AirPos, Token<'input>, AirPos),
 ) -> Box<Instruction<'input>>
 {
     {
@@ -4382,16 +4382,16 @@ fn __action11<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, left, _): (TextPos, TextPos, TextPos),
-    (_, _, _): (TextPos, Token<'input>, TextPos),
-    (_, _, _): (TextPos, Token<'input>, TextPos),
-    (_, iterable, _): (TextPos, FoldScalarIterable<'input>, TextPos),
-    (_, iterator, _): (TextPos, (&'input str, TextPos), TextPos),
-    (_, i, _): (TextPos, Box<Instruction<'input>>, TextPos),
-    (_, _, _): (TextPos, Token<'input>, TextPos),
-    (_, right, _): (TextPos, TextPos, TextPos),
+    (_, left, _): (AirPos, AirPos, AirPos),
+    (_, _, _): (AirPos, Token<'input>, AirPos),
+    (_, _, _): (AirPos, Token<'input>, AirPos),
+    (_, iterable, _): (AirPos, FoldScalarIterable<'input>, AirPos),
+    (_, iterator, _): (AirPos, (&'input str, AirPos), AirPos),
+    (_, i, _): (AirPos, Box<Instruction<'input>>, AirPos),
+    (_, _, _): (AirPos, Token<'input>, AirPos),
+    (_, right, _): (AirPos, AirPos, AirPos),
 ) -> Box<Instruction<'input>>
 {
     {
@@ -4412,16 +4412,16 @@ fn __action12<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, left, _): (TextPos, TextPos, TextPos),
-    (_, _, _): (TextPos, Token<'input>, TextPos),
-    (_, _, _): (TextPos, Token<'input>, TextPos),
-    (_, stream, _): (TextPos, (&'input str, TextPos), TextPos),
-    (_, iterator, _): (TextPos, (&'input str, TextPos), TextPos),
-    (_, i, _): (TextPos, Box<Instruction<'input>>, TextPos),
-    (_, _, _): (TextPos, Token<'input>, TextPos),
-    (_, right, _): (TextPos, TextPos, TextPos),
+    (_, left, _): (AirPos, AirPos, AirPos),
+    (_, _, _): (AirPos, Token<'input>, AirPos),
+    (_, _, _): (AirPos, Token<'input>, AirPos),
+    (_, stream, _): (AirPos, (&'input str, AirPos), AirPos),
+    (_, iterator, _): (AirPos, (&'input str, AirPos), AirPos),
+    (_, i, _): (AirPos, Box<Instruction<'input>>, AirPos),
+    (_, _, _): (AirPos, Token<'input>, AirPos),
+    (_, right, _): (AirPos, AirPos, AirPos),
 ) -> Box<Instruction<'input>>
 {
     {
@@ -4443,14 +4443,14 @@ fn __action13<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, left, _): (TextPos, TextPos, TextPos),
-    (_, _, _): (TextPos, Token<'input>, TextPos),
-    (_, _, _): (TextPos, Token<'input>, TextPos),
-    (_, iterator, _): (TextPos, (&'input str, TextPos), TextPos),
-    (_, _, _): (TextPos, Token<'input>, TextPos),
-    (_, right, _): (TextPos, TextPos, TextPos),
+    (_, left, _): (AirPos, AirPos, AirPos),
+    (_, _, _): (AirPos, Token<'input>, AirPos),
+    (_, _, _): (AirPos, Token<'input>, AirPos),
+    (_, iterator, _): (AirPos, (&'input str, AirPos), AirPos),
+    (_, _, _): (AirPos, Token<'input>, AirPos),
+    (_, right, _): (AirPos, AirPos, AirPos),
 ) -> Box<Instruction<'input>>
 {
     {
@@ -4470,13 +4470,13 @@ fn __action14<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, _, _): (TextPos, Token<'input>, TextPos),
-    (_, _, _): (TextPos, Token<'input>, TextPos),
-    (_, l, _): (TextPos, Box<Instruction<'input>>, TextPos),
-    (_, r, _): (TextPos, Box<Instruction<'input>>, TextPos),
-    (_, _, _): (TextPos, Token<'input>, TextPos),
+    (_, _, _): (AirPos, Token<'input>, AirPos),
+    (_, _, _): (AirPos, Token<'input>, AirPos),
+    (_, l, _): (AirPos, Box<Instruction<'input>>, AirPos),
+    (_, r, _): (AirPos, Box<Instruction<'input>>, AirPos),
+    (_, _, _): (AirPos, Token<'input>, AirPos),
 ) -> Box<Instruction<'input>>
 {
     Box::new(Instruction::Xor(Xor(l, r)))
@@ -4489,16 +4489,16 @@ fn __action15<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, left, _): (TextPos, TextPos, TextPos),
-    (_, _, _): (TextPos, Token<'input>, TextPos),
-    (_, _, _): (TextPos, Token<'input>, TextPos),
-    (_, l, _): (TextPos, Value<'input>, TextPos),
-    (_, r, _): (TextPos, Value<'input>, TextPos),
-    (_, i, _): (TextPos, Box<Instruction<'input>>, TextPos),
-    (_, _, _): (TextPos, Token<'input>, TextPos),
-    (_, right, _): (TextPos, TextPos, TextPos),
+    (_, left, _): (AirPos, AirPos, AirPos),
+    (_, _, _): (AirPos, Token<'input>, AirPos),
+    (_, _, _): (AirPos, Token<'input>, AirPos),
+    (_, l, _): (AirPos, Value<'input>, AirPos),
+    (_, r, _): (AirPos, Value<'input>, AirPos),
+    (_, i, _): (AirPos, Box<Instruction<'input>>, AirPos),
+    (_, _, _): (AirPos, Token<'input>, AirPos),
+    (_, right, _): (AirPos, AirPos, AirPos),
 ) -> Box<Instruction<'input>>
 {
     {
@@ -4517,16 +4517,16 @@ fn __action16<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, left, _): (TextPos, TextPos, TextPos),
-    (_, _, _): (TextPos, Token<'input>, TextPos),
-    (_, _, _): (TextPos, Token<'input>, TextPos),
-    (_, l, _): (TextPos, Value<'input>, TextPos),
-    (_, r, _): (TextPos, Value<'input>, TextPos),
-    (_, i, _): (TextPos, Box<Instruction<'input>>, TextPos),
-    (_, _, _): (TextPos, Token<'input>, TextPos),
-    (_, right, _): (TextPos, TextPos, TextPos),
+    (_, left, _): (AirPos, AirPos, AirPos),
+    (_, _, _): (AirPos, Token<'input>, AirPos),
+    (_, _, _): (AirPos, Token<'input>, AirPos),
+    (_, l, _): (AirPos, Value<'input>, AirPos),
+    (_, r, _): (AirPos, Value<'input>, AirPos),
+    (_, i, _): (AirPos, Box<Instruction<'input>>, AirPos),
+    (_, _, _): (AirPos, Token<'input>, AirPos),
+    (_, right, _): (AirPos, AirPos, AirPos),
 ) -> Box<Instruction<'input>>
 {
     {
@@ -4545,9 +4545,9 @@ fn __action17<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, __0, _): (TextPos, __lalrpop_util::ErrorRecovery<TextPos, Token<'input>, ParserError>, TextPos),
+    (_, __0, _): (AirPos, __lalrpop_util::ErrorRecovery<AirPos, Token<'input>, ParserError>, AirPos),
 ) -> Box<Instruction<'input>>
 {
     { errors.push(__0); Box::new(Instruction::Error) }
@@ -4560,11 +4560,11 @@ fn __action18<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, _, _): (TextPos, Token<'input>, TextPos),
-    (_, args, _): (TextPos, alloc::vec::Vec<Value<'input>>, TextPos),
-    (_, _, _): (TextPos, Token<'input>, TextPos),
+    (_, _, _): (AirPos, Token<'input>, AirPos),
+    (_, args, _): (AirPos, alloc::vec::Vec<Value<'input>>, AirPos),
+    (_, _, _): (AirPos, Token<'input>, AirPos),
 ) -> Vec<Value<'input>>
 {
     args
@@ -4577,13 +4577,13 @@ fn __action19<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, peer_pk, _): (TextPos, CallInstrValue<'input>, TextPos),
-    (_, _, _): (TextPos, Token<'input>, TextPos),
-    (_, service_id, _): (TextPos, CallInstrValue<'input>, TextPos),
-    (_, function_name, _): (TextPos, CallInstrValue<'input>, TextPos),
-    (_, _, _): (TextPos, Token<'input>, TextPos),
+    (_, peer_pk, _): (AirPos, CallInstrValue<'input>, AirPos),
+    (_, _, _): (AirPos, Token<'input>, AirPos),
+    (_, service_id, _): (AirPos, CallInstrValue<'input>, AirPos),
+    (_, function_name, _): (AirPos, CallInstrValue<'input>, AirPos),
+    (_, _, _): (AirPos, Token<'input>, AirPos),
 ) -> Triplet<'input>
 {
     Triplet {
@@ -4600,9 +4600,9 @@ fn __action20<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, scalar, _): (TextPos, (&'input str, TextPos), TextPos),
+    (_, scalar, _): (AirPos, (&'input str, AirPos), AirPos),
 ) -> ApResult<'input>
 {
     ApResult::scalar(scalar.0, scalar.1)
@@ -4615,9 +4615,9 @@ fn __action21<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, stream, _): (TextPos, (&'input str, TextPos), TextPos),
+    (_, stream, _): (AirPos, (&'input str, AirPos), AirPos),
 ) -> ApResult<'input>
 {
     ApResult::stream(stream.0, stream.1)
@@ -4630,9 +4630,9 @@ fn __action22<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, scalar, _): (TextPos, (&'input str, TextPos), TextPos),
+    (_, scalar, _): (AirPos, (&'input str, AirPos), AirPos),
 ) -> CallOutputValue<'input>
 {
     CallOutputValue::scalar(scalar.0, scalar.1)
@@ -4645,9 +4645,9 @@ fn __action23<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, stream, _): (TextPos, (&'input str, TextPos), TextPos),
+    (_, stream, _): (AirPos, (&'input str, AirPos), AirPos),
 ) -> CallOutputValue<'input>
 {
     CallOutputValue::stream(stream.0, stream.1)
@@ -4660,9 +4660,9 @@ fn __action24<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, scalar, _): (TextPos, (&'input str, TextPos), TextPos),
+    (_, scalar, _): (AirPos, (&'input str, AirPos), AirPos),
 ) -> Fail<'input>
 {
     Fail::Scalar(ScalarWithLambda::new(scalar.0, None, scalar.1))
@@ -4675,9 +4675,9 @@ fn __action25<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, scalar, _): (TextPos, (&'input str, LambdaAST<'input>, TextPos), TextPos),
+    (_, scalar, _): (AirPos, (&'input str, LambdaAST<'input>, AirPos), AirPos),
 ) -> Fail<'input>
 {
     Fail::Scalar(ScalarWithLambda::new(scalar.0, Some(scalar.1), scalar.2))
@@ -4690,10 +4690,10 @@ fn __action26<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, ret_code, _): (TextPos, i64, TextPos),
-    (_, error_message, _): (TextPos, &'input str, TextPos),
+    (_, ret_code, _): (AirPos, i64, AirPos),
+    (_, error_message, _): (AirPos, &'input str, AirPos),
 ) -> Fail<'input>
 {
     Fail::Literal {
@@ -4709,9 +4709,9 @@ fn __action27<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, canon_stream, _): (TextPos, (&'input str, LambdaAST<'input>, TextPos), TextPos),
+    (_, canon_stream, _): (AirPos, (&'input str, LambdaAST<'input>, AirPos), AirPos),
 ) -> Fail<'input>
 {
     Fail::CanonStream {
@@ -4727,11 +4727,11 @@ fn __action28<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, left, _): (TextPos, TextPos, TextPos),
-    (_, l, _): (TextPos, Token<'input>, TextPos),
-    (_, right, _): (TextPos, TextPos, TextPos),
+    (_, left, _): (AirPos, AirPos, AirPos),
+    (_, l, _): (AirPos, Token<'input>, AirPos),
+    (_, right, _): (AirPos, AirPos, AirPos),
 ) -> Fail<'input>
 {
     {
@@ -4746,9 +4746,9 @@ fn __action29<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, scalar, _): (TextPos, (&'input str, TextPos), TextPos),
+    (_, scalar, _): (AirPos, (&'input str, AirPos), AirPos),
 ) -> FoldScalarIterable<'input>
 {
     FoldScalarIterable::Scalar(ScalarWithLambda::new(scalar.0, None, scalar.1))
@@ -4761,9 +4761,9 @@ fn __action30<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, scalar, _): (TextPos, (&'input str, LambdaAST<'input>, TextPos), TextPos),
+    (_, scalar, _): (AirPos, (&'input str, LambdaAST<'input>, AirPos), AirPos),
 ) -> FoldScalarIterable<'input>
 {
     FoldScalarIterable::Scalar(ScalarWithLambda::new(scalar.0, Some(scalar.1), scalar.2))
@@ -4776,9 +4776,9 @@ fn __action31<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, canon_stream, _): (TextPos, (&'input str, TextPos), TextPos),
+    (_, canon_stream, _): (AirPos, (&'input str, AirPos), AirPos),
 ) -> FoldScalarIterable<'input>
 {
     FoldScalarIterable::CanonStream(CanonStream::new(canon_stream.0, canon_stream.1))
@@ -4791,10 +4791,10 @@ fn __action32<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, __0, _): (TextPos, Token<'input>, TextPos),
-    (_, __1, _): (TextPos, Token<'input>, TextPos),
+    (_, __0, _): (AirPos, Token<'input>, AirPos),
+    (_, __1, _): (AirPos, Token<'input>, AirPos),
 ) -> FoldScalarIterable<'input>
 {
     FoldScalarIterable::EmptyArray
@@ -4807,9 +4807,9 @@ fn __action33<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, __0, _): (TextPos, CallInstrValue<'input>, TextPos),
+    (_, __0, _): (AirPos, CallInstrValue<'input>, AirPos),
 ) -> CallInstrValue<'input>
 {
     __0
@@ -4822,9 +4822,9 @@ fn __action34<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, __0, _): (TextPos, CallInstrValue<'input>, TextPos),
+    (_, __0, _): (AirPos, CallInstrValue<'input>, AirPos),
 ) -> CallInstrValue<'input>
 {
     __0
@@ -4837,9 +4837,9 @@ fn __action35<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, __0, _): (TextPos, CallInstrValue<'input>, TextPos),
+    (_, __0, _): (AirPos, CallInstrValue<'input>, AirPos),
 ) -> CallInstrValue<'input>
 {
     __0
@@ -4852,9 +4852,9 @@ fn __action36<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, __0, _): (TextPos, Token<'input>, TextPos),
+    (_, __0, _): (AirPos, Token<'input>, AirPos),
 ) -> CallInstrValue<'input>
 {
     CallInstrValue::InitPeerId
@@ -4867,9 +4867,9 @@ fn __action37<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, l, _): (TextPos, &'input str, TextPos),
+    (_, l, _): (AirPos, &'input str, AirPos),
 ) -> CallInstrValue<'input>
 {
     CallInstrValue::Literal(l)
@@ -4882,9 +4882,9 @@ fn __action38<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, scalar, _): (TextPos, (&'input str, TextPos), TextPos),
+    (_, scalar, _): (AirPos, (&'input str, AirPos), AirPos),
 ) -> CallInstrValue<'input>
 {
     CallInstrValue::Variable(VariableWithLambda::scalar(scalar.0, scalar.1))
@@ -4897,9 +4897,9 @@ fn __action39<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, scalar, _): (TextPos, (&'input str, LambdaAST<'input>, TextPos), TextPos),
+    (_, scalar, _): (AirPos, (&'input str, LambdaAST<'input>, AirPos), AirPos),
 ) -> CallInstrValue<'input>
 {
     CallInstrValue::Variable(VariableWithLambda::scalar_wl(scalar.0, scalar.1, scalar.2))
@@ -4912,9 +4912,9 @@ fn __action40<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, stream, _): (TextPos, (&'input str, TextPos), TextPos),
+    (_, stream, _): (AirPos, (&'input str, AirPos), AirPos),
 ) -> CallInstrValue<'input>
 {
     CallInstrValue::Variable(VariableWithLambda::stream(stream.0, stream.1))
@@ -4927,9 +4927,9 @@ fn __action41<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, stream, _): (TextPos, (&'input str, LambdaAST<'input>, TextPos), TextPos),
+    (_, stream, _): (AirPos, (&'input str, LambdaAST<'input>, AirPos), AirPos),
 ) -> CallInstrValue<'input>
 {
     CallInstrValue::Variable(VariableWithLambda::stream_wl(stream.0, stream.1, stream.2))
@@ -4942,9 +4942,9 @@ fn __action42<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, canon_stream, _): (TextPos, (&'input str, TextPos), TextPos),
+    (_, canon_stream, _): (AirPos, (&'input str, AirPos), AirPos),
 ) -> CallInstrValue<'input>
 {
     CallInstrValue::Variable(VariableWithLambda::canon_stream(canon_stream.0, canon_stream.1))
@@ -4957,9 +4957,9 @@ fn __action43<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, canon_stream, _): (TextPos, (&'input str, LambdaAST<'input>, TextPos), TextPos),
+    (_, canon_stream, _): (AirPos, (&'input str, LambdaAST<'input>, AirPos), AirPos),
 ) -> CallInstrValue<'input>
 {
     CallInstrValue::Variable(VariableWithLambda::canon_stream_wl(canon_stream.0, canon_stream.1, canon_stream.2))
@@ -4972,9 +4972,9 @@ fn __action44<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, scalar, _): (TextPos, (&'input str, TextPos), TextPos),
+    (_, scalar, _): (AirPos, (&'input str, AirPos), AirPos),
 ) -> NewArgument<'input>
 {
     NewArgument::Scalar(Scalar::new(scalar.0, scalar.1))
@@ -4987,9 +4987,9 @@ fn __action45<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, stream, _): (TextPos, (&'input str, TextPos), TextPos),
+    (_, stream, _): (AirPos, (&'input str, AirPos), AirPos),
 ) -> NewArgument<'input>
 {
     NewArgument::Stream(Stream::new(stream.0, stream.1))
@@ -5002,9 +5002,9 @@ fn __action46<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, canon_stream, _): (TextPos, (&'input str, TextPos), TextPos),
+    (_, canon_stream, _): (AirPos, (&'input str, AirPos), AirPos),
 ) -> NewArgument<'input>
 {
     NewArgument::CanonStream(CanonStream::new(canon_stream.0, canon_stream.1))
@@ -5017,9 +5017,9 @@ fn __action47<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, integer, _): (TextPos, i64, TextPos),
+    (_, integer, _): (AirPos, i64, AirPos),
 ) -> Number
 {
     Number::Int(integer)
@@ -5032,9 +5032,9 @@ fn __action48<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, float, _): (TextPos, f64, TextPos),
+    (_, float, _): (AirPos, f64, AirPos),
 ) -> Number
 {
     Number::Float(float)
@@ -5047,9 +5047,9 @@ fn __action49<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, __0, _): (TextPos, Value<'input>, TextPos),
+    (_, __0, _): (AirPos, Value<'input>, AirPos),
 ) -> Value<'input>
 {
     __0
@@ -5062,9 +5062,9 @@ fn __action50<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, __0, _): (TextPos, Token<'input>, TextPos),
+    (_, __0, _): (AirPos, Token<'input>, AirPos),
 ) -> Value<'input>
 {
     Value::InitPeerId
@@ -5077,9 +5077,9 @@ fn __action51<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, __0, _): (TextPos, Token<'input>, TextPos),
+    (_, __0, _): (AirPos, Token<'input>, AirPos),
 ) -> Value<'input>
 {
     Value::LastError(None)
@@ -5092,9 +5092,9 @@ fn __action52<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, le, _): (TextPos, LambdaAST<'input>, TextPos),
+    (_, le, _): (AirPos, LambdaAST<'input>, AirPos),
 ) -> Value<'input>
 {
     Value::LastError(Some(le))
@@ -5107,9 +5107,9 @@ fn __action53<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, l, _): (TextPos, &'input str, TextPos),
+    (_, l, _): (AirPos, &'input str, AirPos),
 ) -> Value<'input>
 {
     Value::Literal(l)
@@ -5122,9 +5122,9 @@ fn __action54<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, __0, _): (TextPos, Token<'input>, TextPos),
+    (_, __0, _): (AirPos, Token<'input>, AirPos),
 ) -> Value<'input>
 {
     Value::Timestamp
@@ -5137,9 +5137,9 @@ fn __action55<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, __0, _): (TextPos, Token<'input>, TextPos),
+    (_, __0, _): (AirPos, Token<'input>, AirPos),
 ) -> Value<'input>
 {
     Value::TTL
@@ -5152,9 +5152,9 @@ fn __action56<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, n, _): (TextPos, Number, TextPos),
+    (_, n, _): (AirPos, Number, AirPos),
 ) -> Value<'input>
 {
     Value::Number(n)
@@ -5167,9 +5167,9 @@ fn __action57<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, b, _): (TextPos, bool, TextPos),
+    (_, b, _): (AirPos, bool, AirPos),
 ) -> Value<'input>
 {
     Value::Boolean(b)
@@ -5182,10 +5182,10 @@ fn __action58<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, __0, _): (TextPos, Token<'input>, TextPos),
-    (_, __1, _): (TextPos, Token<'input>, TextPos),
+    (_, __0, _): (AirPos, Token<'input>, AirPos),
+    (_, __1, _): (AirPos, Token<'input>, AirPos),
 ) -> Value<'input>
 {
     Value::EmptyArray
@@ -5198,9 +5198,9 @@ fn __action59<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, scalar, _): (TextPos, (&'input str, TextPos), TextPos),
+    (_, scalar, _): (AirPos, (&'input str, AirPos), AirPos),
 ) -> Value<'input>
 {
     Value::Variable(VariableWithLambda::scalar(scalar.0, scalar.1))
@@ -5213,9 +5213,9 @@ fn __action60<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, scalar, _): (TextPos, (&'input str, LambdaAST<'input>, TextPos), TextPos),
+    (_, scalar, _): (AirPos, (&'input str, LambdaAST<'input>, AirPos), AirPos),
 ) -> Value<'input>
 {
     Value::Variable(VariableWithLambda::scalar_wl(scalar.0, scalar.1, scalar.2))
@@ -5228,9 +5228,9 @@ fn __action61<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, stream, _): (TextPos, (&'input str, TextPos), TextPos),
+    (_, stream, _): (AirPos, (&'input str, AirPos), AirPos),
 ) -> Value<'input>
 {
     Value::Variable(VariableWithLambda::stream(stream.0, stream.1))
@@ -5243,9 +5243,9 @@ fn __action62<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, stream, _): (TextPos, (&'input str, LambdaAST<'input>, TextPos), TextPos),
+    (_, stream, _): (AirPos, (&'input str, LambdaAST<'input>, AirPos), AirPos),
 ) -> Value<'input>
 {
     Value::Variable(VariableWithLambda::stream_wl(stream.0, stream.1, stream.2))
@@ -5258,9 +5258,9 @@ fn __action63<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, canon_stream, _): (TextPos, (&'input str, TextPos), TextPos),
+    (_, canon_stream, _): (AirPos, (&'input str, AirPos), AirPos),
 ) -> Value<'input>
 {
     Value::Variable(VariableWithLambda::canon_stream(canon_stream.0, canon_stream.1))
@@ -5273,9 +5273,9 @@ fn __action64<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, canon_stream, _): (TextPos, (&'input str, LambdaAST<'input>, TextPos), TextPos),
+    (_, canon_stream, _): (AirPos, (&'input str, LambdaAST<'input>, AirPos), AirPos),
 ) -> Value<'input>
 {
     Value::Variable(VariableWithLambda::canon_stream_wl(canon_stream.0, canon_stream.1, canon_stream.2))
@@ -5288,9 +5288,9 @@ fn __action65<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, __0, _): (TextPos, Token<'input>, TextPos),
+    (_, __0, _): (AirPos, Token<'input>, AirPos),
 ) -> ApArgument<'input>
 {
     ApArgument::InitPeerId
@@ -5303,9 +5303,9 @@ fn __action66<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, __0, _): (TextPos, Token<'input>, TextPos),
+    (_, __0, _): (AirPos, Token<'input>, AirPos),
 ) -> ApArgument<'input>
 {
     ApArgument::LastError(None)
@@ -5318,9 +5318,9 @@ fn __action67<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, le, _): (TextPos, LambdaAST<'input>, TextPos),
+    (_, le, _): (AirPos, LambdaAST<'input>, AirPos),
 ) -> ApArgument<'input>
 {
     ApArgument::LastError(Some(le))
@@ -5333,9 +5333,9 @@ fn __action68<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, __0, _): (TextPos, Token<'input>, TextPos),
+    (_, __0, _): (AirPos, Token<'input>, AirPos),
 ) -> ApArgument<'input>
 {
     ApArgument::Timestamp
@@ -5348,9 +5348,9 @@ fn __action69<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, __0, _): (TextPos, Token<'input>, TextPos),
+    (_, __0, _): (AirPos, Token<'input>, AirPos),
 ) -> ApArgument<'input>
 {
     ApArgument::TTL
@@ -5363,9 +5363,9 @@ fn __action70<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, l, _): (TextPos, &'input str, TextPos),
+    (_, l, _): (AirPos, &'input str, AirPos),
 ) -> ApArgument<'input>
 {
     ApArgument::Literal(l)
@@ -5378,9 +5378,9 @@ fn __action71<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, n, _): (TextPos, Number, TextPos),
+    (_, n, _): (AirPos, Number, AirPos),
 ) -> ApArgument<'input>
 {
     ApArgument::Number(n)
@@ -5393,9 +5393,9 @@ fn __action72<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, b, _): (TextPos, bool, TextPos),
+    (_, b, _): (AirPos, bool, AirPos),
 ) -> ApArgument<'input>
 {
     ApArgument::Boolean(b)
@@ -5408,10 +5408,10 @@ fn __action73<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, __0, _): (TextPos, Token<'input>, TextPos),
-    (_, __1, _): (TextPos, Token<'input>, TextPos),
+    (_, __0, _): (AirPos, Token<'input>, AirPos),
+    (_, __1, _): (AirPos, Token<'input>, AirPos),
 ) -> ApArgument<'input>
 {
     ApArgument::EmptyArray
@@ -5424,9 +5424,9 @@ fn __action74<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, scalar, _): (TextPos, (&'input str, TextPos), TextPos),
+    (_, scalar, _): (AirPos, (&'input str, AirPos), AirPos),
 ) -> ApArgument<'input>
 {
     ApArgument::Scalar(ScalarWithLambda::new(scalar.0, None, scalar.1))
@@ -5439,9 +5439,9 @@ fn __action75<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, scalar, _): (TextPos, (&'input str, LambdaAST<'input>, TextPos), TextPos),
+    (_, scalar, _): (AirPos, (&'input str, LambdaAST<'input>, AirPos), AirPos),
 ) -> ApArgument<'input>
 {
     ApArgument::Scalar(ScalarWithLambda::new(scalar.0, Some(scalar.1), scalar.2))
@@ -5454,9 +5454,9 @@ fn __action76<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, canon_stream, _): (TextPos, (&'input str, TextPos), TextPos),
+    (_, canon_stream, _): (AirPos, (&'input str, AirPos), AirPos),
 ) -> ApArgument<'input>
 {
     ApArgument::CanonStream(CanonStreamWithLambda::new(canon_stream.0, None, canon_stream.1))
@@ -5469,9 +5469,9 @@ fn __action77<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, canon_stream, _): (TextPos, (&'input str, LambdaAST<'input>, TextPos), TextPos),
+    (_, canon_stream, _): (AirPos, (&'input str, LambdaAST<'input>, AirPos), AirPos),
 ) -> ApArgument<'input>
 {
     ApArgument::CanonStream(CanonStreamWithLambda::new(canon_stream.0, Some(canon_stream.1), canon_stream.2))
@@ -5484,9 +5484,9 @@ fn __action78<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, stream, _): (TextPos, (&'input str, TextPos), TextPos),
+    (_, stream, _): (AirPos, (&'input str, AirPos), AirPos),
 ) -> Stream<'input>
 {
     Stream::new(stream.0, stream.1)
@@ -5499,9 +5499,9 @@ fn __action79<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, canon_stream, _): (TextPos, (&'input str, TextPos), TextPos),
+    (_, canon_stream, _): (AirPos, (&'input str, AirPos), AirPos),
 ) -> CanonStream<'input>
 {
     CanonStream::new(canon_stream.0, canon_stream.1)
@@ -5514,10 +5514,10 @@ fn __action80<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    __lookbehind: &TextPos,
-    __lookahead: &TextPos,
+    __lookbehind: &AirPos,
+    __lookahead: &AirPos,
 ) -> alloc::vec::Vec<Value<'input>>
 {
     alloc::vec![]
@@ -5530,9 +5530,9 @@ fn __action81<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, v, _): (TextPos, alloc::vec::Vec<Value<'input>>, TextPos),
+    (_, v, _): (AirPos, alloc::vec::Vec<Value<'input>>, AirPos),
 ) -> alloc::vec::Vec<Value<'input>>
 {
     v
@@ -5545,9 +5545,9 @@ fn __action82<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, __0, _): (TextPos, Value<'input>, TextPos),
+    (_, __0, _): (AirPos, Value<'input>, AirPos),
 ) -> Value<'input>
 {
     __0
@@ -5560,11 +5560,11 @@ fn __action83<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    __lookbehind: &TextPos,
-    __lookahead: &TextPos,
-) -> TextPos
+    __lookbehind: &AirPos,
+    __lookahead: &AirPos,
+) -> AirPos
 {
     __lookbehind.clone()
 }
@@ -5576,9 +5576,9 @@ fn __action84<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, __0, _): (TextPos, CallOutputValue<'input>, TextPos),
+    (_, __0, _): (AirPos, CallOutputValue<'input>, AirPos),
 ) -> core::option::Option<CallOutputValue<'input>>
 {
     Some(__0)
@@ -5591,10 +5591,10 @@ fn __action85<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    __lookbehind: &TextPos,
-    __lookahead: &TextPos,
+    __lookbehind: &AirPos,
+    __lookahead: &AirPos,
 ) -> core::option::Option<CallOutputValue<'input>>
 {
     None
@@ -5607,11 +5607,11 @@ fn __action86<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    __lookbehind: &TextPos,
-    __lookahead: &TextPos,
-) -> TextPos
+    __lookbehind: &AirPos,
+    __lookahead: &AirPos,
+) -> AirPos
 {
     __lookahead.clone()
 }
@@ -5623,9 +5623,9 @@ fn __action87<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, __0, _): (TextPos, Value<'input>, TextPos),
+    (_, __0, _): (AirPos, Value<'input>, AirPos),
 ) -> alloc::vec::Vec<Value<'input>>
 {
     alloc::vec![__0]
@@ -5638,10 +5638,10 @@ fn __action88<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, v, _): (TextPos, alloc::vec::Vec<Value<'input>>, TextPos),
-    (_, e, _): (TextPos, Value<'input>, TextPos),
+    (_, v, _): (AirPos, alloc::vec::Vec<Value<'input>>, AirPos),
+    (_, e, _): (AirPos, Value<'input>, AirPos),
 ) -> alloc::vec::Vec<Value<'input>>
 {
     { let mut v = v; v.push(e); v }
@@ -5654,9 +5654,9 @@ fn __action89<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    __0: (TextPos, Value<'input>, TextPos),
+    __0: (AirPos, Value<'input>, AirPos),
 ) -> alloc::vec::Vec<Value<'input>>
 {
     let __start0 = __0.0.clone();
@@ -5683,10 +5683,10 @@ fn __action90<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    __0: (TextPos, alloc::vec::Vec<Value<'input>>, TextPos),
-    __1: (TextPos, Value<'input>, TextPos),
+    __0: (AirPos, alloc::vec::Vec<Value<'input>>, AirPos),
+    __1: (AirPos, Value<'input>, AirPos),
 ) -> alloc::vec::Vec<Value<'input>>
 {
     let __start0 = __1.0.clone();
@@ -5714,10 +5714,10 @@ fn __action91<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    __0: (TextPos, Token<'input>, TextPos),
-    __1: (TextPos, Token<'input>, TextPos),
+    __0: (AirPos, Token<'input>, AirPos),
+    __1: (AirPos, Token<'input>, AirPos),
 ) -> Vec<Value<'input>>
 {
     let __start0 = __0.2.clone();
@@ -5747,11 +5747,11 @@ fn __action92<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    __0: (TextPos, Token<'input>, TextPos),
-    __1: (TextPos, alloc::vec::Vec<Value<'input>>, TextPos),
-    __2: (TextPos, Token<'input>, TextPos),
+    __0: (AirPos, Token<'input>, AirPos),
+    __1: (AirPos, alloc::vec::Vec<Value<'input>>, AirPos),
+    __2: (AirPos, Token<'input>, AirPos),
 ) -> Vec<Value<'input>>
 {
     let __start0 = __1.0.clone();
@@ -5780,10 +5780,10 @@ fn __action93<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    __0: (TextPos, Token<'input>, TextPos),
-    __1: (TextPos, TextPos, TextPos),
+    __0: (AirPos, Token<'input>, AirPos),
+    __1: (AirPos, AirPos, AirPos),
 ) -> Fail<'input>
 {
     let __start0 = __0.0.clone();
@@ -5813,15 +5813,15 @@ fn __action94<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    __0: (TextPos, Token<'input>, TextPos),
-    __1: (TextPos, Token<'input>, TextPos),
-    __2: (TextPos, Triplet<'input>, TextPos),
-    __3: (TextPos, Vec<Value<'input>>, TextPos),
-    __4: (TextPos, core::option::Option<CallOutputValue<'input>>, TextPos),
-    __5: (TextPos, Token<'input>, TextPos),
-    __6: (TextPos, TextPos, TextPos),
+    __0: (AirPos, Token<'input>, AirPos),
+    __1: (AirPos, Token<'input>, AirPos),
+    __2: (AirPos, Triplet<'input>, AirPos),
+    __3: (AirPos, Vec<Value<'input>>, AirPos),
+    __4: (AirPos, core::option::Option<CallOutputValue<'input>>, AirPos),
+    __5: (AirPos, Token<'input>, AirPos),
+    __6: (AirPos, AirPos, AirPos),
 ) -> Box<Instruction<'input>>
 {
     let __start0 = __0.0.clone();
@@ -5856,15 +5856,15 @@ fn __action95<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    __0: (TextPos, Token<'input>, TextPos),
-    __1: (TextPos, Token<'input>, TextPos),
-    __2: (TextPos, CallInstrValue<'input>, TextPos),
-    __3: (TextPos, Stream<'input>, TextPos),
-    __4: (TextPos, CanonStream<'input>, TextPos),
-    __5: (TextPos, Token<'input>, TextPos),
-    __6: (TextPos, TextPos, TextPos),
+    __0: (AirPos, Token<'input>, AirPos),
+    __1: (AirPos, Token<'input>, AirPos),
+    __2: (AirPos, CallInstrValue<'input>, AirPos),
+    __3: (AirPos, Stream<'input>, AirPos),
+    __4: (AirPos, CanonStream<'input>, AirPos),
+    __5: (AirPos, Token<'input>, AirPos),
+    __6: (AirPos, AirPos, AirPos),
 ) -> Box<Instruction<'input>>
 {
     let __start0 = __0.0.clone();
@@ -5899,14 +5899,14 @@ fn __action96<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    __0: (TextPos, Token<'input>, TextPos),
-    __1: (TextPos, Token<'input>, TextPos),
-    __2: (TextPos, ApArgument<'input>, TextPos),
-    __3: (TextPos, ApResult<'input>, TextPos),
-    __4: (TextPos, Token<'input>, TextPos),
-    __5: (TextPos, TextPos, TextPos),
+    __0: (AirPos, Token<'input>, AirPos),
+    __1: (AirPos, Token<'input>, AirPos),
+    __2: (AirPos, ApArgument<'input>, AirPos),
+    __3: (AirPos, ApResult<'input>, AirPos),
+    __4: (AirPos, Token<'input>, AirPos),
+    __5: (AirPos, AirPos, AirPos),
 ) -> Box<Instruction<'input>>
 {
     let __start0 = __0.0.clone();
@@ -5940,14 +5940,14 @@ fn __action97<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    __0: (TextPos, Token<'input>, TextPos),
-    __1: (TextPos, Token<'input>, TextPos),
-    __2: (TextPos, NewArgument<'input>, TextPos),
-    __3: (TextPos, Box<Instruction<'input>>, TextPos),
-    __4: (TextPos, Token<'input>, TextPos),
-    __5: (TextPos, TextPos, TextPos),
+    __0: (AirPos, Token<'input>, AirPos),
+    __1: (AirPos, Token<'input>, AirPos),
+    __2: (AirPos, NewArgument<'input>, AirPos),
+    __3: (AirPos, Box<Instruction<'input>>, AirPos),
+    __4: (AirPos, Token<'input>, AirPos),
+    __5: (AirPos, AirPos, AirPos),
 ) -> Box<Instruction<'input>>
 {
     let __start0 = __0.0.clone();
@@ -5981,15 +5981,15 @@ fn __action98<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    __0: (TextPos, Token<'input>, TextPos),
-    __1: (TextPos, Token<'input>, TextPos),
-    __2: (TextPos, FoldScalarIterable<'input>, TextPos),
-    __3: (TextPos, (&'input str, TextPos), TextPos),
-    __4: (TextPos, Box<Instruction<'input>>, TextPos),
-    __5: (TextPos, Token<'input>, TextPos),
-    __6: (TextPos, TextPos, TextPos),
+    __0: (AirPos, Token<'input>, AirPos),
+    __1: (AirPos, Token<'input>, AirPos),
+    __2: (AirPos, FoldScalarIterable<'input>, AirPos),
+    __3: (AirPos, (&'input str, AirPos), AirPos),
+    __4: (AirPos, Box<Instruction<'input>>, AirPos),
+    __5: (AirPos, Token<'input>, AirPos),
+    __6: (AirPos, AirPos, AirPos),
 ) -> Box<Instruction<'input>>
 {
     let __start0 = __0.0.clone();
@@ -6024,15 +6024,15 @@ fn __action99<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    __0: (TextPos, Token<'input>, TextPos),
-    __1: (TextPos, Token<'input>, TextPos),
-    __2: (TextPos, (&'input str, TextPos), TextPos),
-    __3: (TextPos, (&'input str, TextPos), TextPos),
-    __4: (TextPos, Box<Instruction<'input>>, TextPos),
-    __5: (TextPos, Token<'input>, TextPos),
-    __6: (TextPos, TextPos, TextPos),
+    __0: (AirPos, Token<'input>, AirPos),
+    __1: (AirPos, Token<'input>, AirPos),
+    __2: (AirPos, (&'input str, AirPos), AirPos),
+    __3: (AirPos, (&'input str, AirPos), AirPos),
+    __4: (AirPos, Box<Instruction<'input>>, AirPos),
+    __5: (AirPos, Token<'input>, AirPos),
+    __6: (AirPos, AirPos, AirPos),
 ) -> Box<Instruction<'input>>
 {
     let __start0 = __0.0.clone();
@@ -6067,13 +6067,13 @@ fn __action100<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    __0: (TextPos, Token<'input>, TextPos),
-    __1: (TextPos, Token<'input>, TextPos),
-    __2: (TextPos, (&'input str, TextPos), TextPos),
-    __3: (TextPos, Token<'input>, TextPos),
-    __4: (TextPos, TextPos, TextPos),
+    __0: (AirPos, Token<'input>, AirPos),
+    __1: (AirPos, Token<'input>, AirPos),
+    __2: (AirPos, (&'input str, AirPos), AirPos),
+    __3: (AirPos, Token<'input>, AirPos),
+    __4: (AirPos, AirPos, AirPos),
 ) -> Box<Instruction<'input>>
 {
     let __start0 = __0.0.clone();
@@ -6106,15 +6106,15 @@ fn __action101<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    __0: (TextPos, Token<'input>, TextPos),
-    __1: (TextPos, Token<'input>, TextPos),
-    __2: (TextPos, Value<'input>, TextPos),
-    __3: (TextPos, Value<'input>, TextPos),
-    __4: (TextPos, Box<Instruction<'input>>, TextPos),
-    __5: (TextPos, Token<'input>, TextPos),
-    __6: (TextPos, TextPos, TextPos),
+    __0: (AirPos, Token<'input>, AirPos),
+    __1: (AirPos, Token<'input>, AirPos),
+    __2: (AirPos, Value<'input>, AirPos),
+    __3: (AirPos, Value<'input>, AirPos),
+    __4: (AirPos, Box<Instruction<'input>>, AirPos),
+    __5: (AirPos, Token<'input>, AirPos),
+    __6: (AirPos, AirPos, AirPos),
 ) -> Box<Instruction<'input>>
 {
     let __start0 = __0.0.clone();
@@ -6149,15 +6149,15 @@ fn __action102<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    __0: (TextPos, Token<'input>, TextPos),
-    __1: (TextPos, Token<'input>, TextPos),
-    __2: (TextPos, Value<'input>, TextPos),
-    __3: (TextPos, Value<'input>, TextPos),
-    __4: (TextPos, Box<Instruction<'input>>, TextPos),
-    __5: (TextPos, Token<'input>, TextPos),
-    __6: (TextPos, TextPos, TextPos),
+    __0: (AirPos, Token<'input>, AirPos),
+    __1: (AirPos, Token<'input>, AirPos),
+    __2: (AirPos, Value<'input>, AirPos),
+    __3: (AirPos, Value<'input>, AirPos),
+    __4: (AirPos, Box<Instruction<'input>>, AirPos),
+    __5: (AirPos, Token<'input>, AirPos),
+    __6: (AirPos, AirPos, AirPos),
 ) -> Box<Instruction<'input>>
 {
     let __start0 = __0.0.clone();
@@ -6192,9 +6192,9 @@ fn __action103<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    __0: (TextPos, Token<'input>, TextPos),
+    __0: (AirPos, Token<'input>, AirPos),
 ) -> Fail<'input>
 {
     let __start0 = __0.2.clone();
@@ -6223,14 +6223,14 @@ fn __action104<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    __0: (TextPos, Token<'input>, TextPos),
-    __1: (TextPos, Token<'input>, TextPos),
-    __2: (TextPos, Triplet<'input>, TextPos),
-    __3: (TextPos, Vec<Value<'input>>, TextPos),
-    __4: (TextPos, core::option::Option<CallOutputValue<'input>>, TextPos),
-    __5: (TextPos, Token<'input>, TextPos),
+    __0: (AirPos, Token<'input>, AirPos),
+    __1: (AirPos, Token<'input>, AirPos),
+    __2: (AirPos, Triplet<'input>, AirPos),
+    __3: (AirPos, Vec<Value<'input>>, AirPos),
+    __4: (AirPos, core::option::Option<CallOutputValue<'input>>, AirPos),
+    __5: (AirPos, Token<'input>, AirPos),
 ) -> Box<Instruction<'input>>
 {
     let __start0 = __5.2.clone();
@@ -6264,14 +6264,14 @@ fn __action105<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    __0: (TextPos, Token<'input>, TextPos),
-    __1: (TextPos, Token<'input>, TextPos),
-    __2: (TextPos, CallInstrValue<'input>, TextPos),
-    __3: (TextPos, Stream<'input>, TextPos),
-    __4: (TextPos, CanonStream<'input>, TextPos),
-    __5: (TextPos, Token<'input>, TextPos),
+    __0: (AirPos, Token<'input>, AirPos),
+    __1: (AirPos, Token<'input>, AirPos),
+    __2: (AirPos, CallInstrValue<'input>, AirPos),
+    __3: (AirPos, Stream<'input>, AirPos),
+    __4: (AirPos, CanonStream<'input>, AirPos),
+    __5: (AirPos, Token<'input>, AirPos),
 ) -> Box<Instruction<'input>>
 {
     let __start0 = __5.2.clone();
@@ -6305,13 +6305,13 @@ fn __action106<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    __0: (TextPos, Token<'input>, TextPos),
-    __1: (TextPos, Token<'input>, TextPos),
-    __2: (TextPos, ApArgument<'input>, TextPos),
-    __3: (TextPos, ApResult<'input>, TextPos),
-    __4: (TextPos, Token<'input>, TextPos),
+    __0: (AirPos, Token<'input>, AirPos),
+    __1: (AirPos, Token<'input>, AirPos),
+    __2: (AirPos, ApArgument<'input>, AirPos),
+    __3: (AirPos, ApResult<'input>, AirPos),
+    __4: (AirPos, Token<'input>, AirPos),
 ) -> Box<Instruction<'input>>
 {
     let __start0 = __4.2.clone();
@@ -6344,13 +6344,13 @@ fn __action107<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    __0: (TextPos, Token<'input>, TextPos),
-    __1: (TextPos, Token<'input>, TextPos),
-    __2: (TextPos, NewArgument<'input>, TextPos),
-    __3: (TextPos, Box<Instruction<'input>>, TextPos),
-    __4: (TextPos, Token<'input>, TextPos),
+    __0: (AirPos, Token<'input>, AirPos),
+    __1: (AirPos, Token<'input>, AirPos),
+    __2: (AirPos, NewArgument<'input>, AirPos),
+    __3: (AirPos, Box<Instruction<'input>>, AirPos),
+    __4: (AirPos, Token<'input>, AirPos),
 ) -> Box<Instruction<'input>>
 {
     let __start0 = __4.2.clone();
@@ -6383,14 +6383,14 @@ fn __action108<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    __0: (TextPos, Token<'input>, TextPos),
-    __1: (TextPos, Token<'input>, TextPos),
-    __2: (TextPos, FoldScalarIterable<'input>, TextPos),
-    __3: (TextPos, (&'input str, TextPos), TextPos),
-    __4: (TextPos, Box<Instruction<'input>>, TextPos),
-    __5: (TextPos, Token<'input>, TextPos),
+    __0: (AirPos, Token<'input>, AirPos),
+    __1: (AirPos, Token<'input>, AirPos),
+    __2: (AirPos, FoldScalarIterable<'input>, AirPos),
+    __3: (AirPos, (&'input str, AirPos), AirPos),
+    __4: (AirPos, Box<Instruction<'input>>, AirPos),
+    __5: (AirPos, Token<'input>, AirPos),
 ) -> Box<Instruction<'input>>
 {
     let __start0 = __5.2.clone();
@@ -6424,14 +6424,14 @@ fn __action109<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    __0: (TextPos, Token<'input>, TextPos),
-    __1: (TextPos, Token<'input>, TextPos),
-    __2: (TextPos, (&'input str, TextPos), TextPos),
-    __3: (TextPos, (&'input str, TextPos), TextPos),
-    __4: (TextPos, Box<Instruction<'input>>, TextPos),
-    __5: (TextPos, Token<'input>, TextPos),
+    __0: (AirPos, Token<'input>, AirPos),
+    __1: (AirPos, Token<'input>, AirPos),
+    __2: (AirPos, (&'input str, AirPos), AirPos),
+    __3: (AirPos, (&'input str, AirPos), AirPos),
+    __4: (AirPos, Box<Instruction<'input>>, AirPos),
+    __5: (AirPos, Token<'input>, AirPos),
 ) -> Box<Instruction<'input>>
 {
     let __start0 = __5.2.clone();
@@ -6465,12 +6465,12 @@ fn __action110<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    __0: (TextPos, Token<'input>, TextPos),
-    __1: (TextPos, Token<'input>, TextPos),
-    __2: (TextPos, (&'input str, TextPos), TextPos),
-    __3: (TextPos, Token<'input>, TextPos),
+    __0: (AirPos, Token<'input>, AirPos),
+    __1: (AirPos, Token<'input>, AirPos),
+    __2: (AirPos, (&'input str, AirPos), AirPos),
+    __3: (AirPos, Token<'input>, AirPos),
 ) -> Box<Instruction<'input>>
 {
     let __start0 = __3.2.clone();
@@ -6502,14 +6502,14 @@ fn __action111<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    __0: (TextPos, Token<'input>, TextPos),
-    __1: (TextPos, Token<'input>, TextPos),
-    __2: (TextPos, Value<'input>, TextPos),
-    __3: (TextPos, Value<'input>, TextPos),
-    __4: (TextPos, Box<Instruction<'input>>, TextPos),
-    __5: (TextPos, Token<'input>, TextPos),
+    __0: (AirPos, Token<'input>, AirPos),
+    __1: (AirPos, Token<'input>, AirPos),
+    __2: (AirPos, Value<'input>, AirPos),
+    __3: (AirPos, Value<'input>, AirPos),
+    __4: (AirPos, Box<Instruction<'input>>, AirPos),
+    __5: (AirPos, Token<'input>, AirPos),
 ) -> Box<Instruction<'input>>
 {
     let __start0 = __5.2.clone();
@@ -6543,14 +6543,14 @@ fn __action112<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    __0: (TextPos, Token<'input>, TextPos),
-    __1: (TextPos, Token<'input>, TextPos),
-    __2: (TextPos, Value<'input>, TextPos),
-    __3: (TextPos, Value<'input>, TextPos),
-    __4: (TextPos, Box<Instruction<'input>>, TextPos),
-    __5: (TextPos, Token<'input>, TextPos),
+    __0: (AirPos, Token<'input>, AirPos),
+    __1: (AirPos, Token<'input>, AirPos),
+    __2: (AirPos, Value<'input>, AirPos),
+    __3: (AirPos, Value<'input>, AirPos),
+    __4: (AirPos, Box<Instruction<'input>>, AirPos),
+    __5: (AirPos, Token<'input>, AirPos),
 ) -> Box<Instruction<'input>>
 {
     let __start0 = __5.2.clone();
@@ -6584,14 +6584,14 @@ fn __action113<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    __0: (TextPos, Token<'input>, TextPos),
-    __1: (TextPos, Token<'input>, TextPos),
-    __2: (TextPos, Triplet<'input>, TextPos),
-    __3: (TextPos, Vec<Value<'input>>, TextPos),
-    __4: (TextPos, CallOutputValue<'input>, TextPos),
-    __5: (TextPos, Token<'input>, TextPos),
+    __0: (AirPos, Token<'input>, AirPos),
+    __1: (AirPos, Token<'input>, AirPos),
+    __2: (AirPos, Triplet<'input>, AirPos),
+    __3: (AirPos, Vec<Value<'input>>, AirPos),
+    __4: (AirPos, CallOutputValue<'input>, AirPos),
+    __5: (AirPos, Token<'input>, AirPos),
 ) -> Box<Instruction<'input>>
 {
     let __start0 = __4.0.clone();
@@ -6623,13 +6623,13 @@ fn __action114<
     'v,
 >(
     input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<TextPos, Token<'input>, ParserError>>,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    __0: (TextPos, Token<'input>, TextPos),
-    __1: (TextPos, Token<'input>, TextPos),
-    __2: (TextPos, Triplet<'input>, TextPos),
-    __3: (TextPos, Vec<Value<'input>>, TextPos),
-    __4: (TextPos, Token<'input>, TextPos),
+    __0: (AirPos, Token<'input>, AirPos),
+    __1: (AirPos, Token<'input>, AirPos),
+    __2: (AirPos, Triplet<'input>, AirPos),
+    __3: (AirPos, Vec<Value<'input>>, AirPos),
+    __4: (AirPos, Token<'input>, AirPos),
 ) -> Box<Instruction<'input>>
 {
     let __start0 = __3.2.clone();
@@ -6657,18 +6657,18 @@ fn __action114<
 
 pub trait __ToTriple<'err, 'input, 'v, >
 {
-    fn to_triple(value: Self) -> Result<(TextPos,Token<'input>,TextPos), __lalrpop_util::ParseError<TextPos, Token<'input>, ParserError>>;
+    fn to_triple(value: Self) -> Result<(AirPos,Token<'input>,AirPos), __lalrpop_util::ParseError<AirPos, Token<'input>, ParserError>>;
 }
 
-impl<'err, 'input, 'v, > __ToTriple<'err, 'input, 'v, > for (TextPos, Token<'input>, TextPos)
+impl<'err, 'input, 'v, > __ToTriple<'err, 'input, 'v, > for (AirPos, Token<'input>, AirPos)
 {
-    fn to_triple(value: Self) -> Result<(TextPos,Token<'input>,TextPos), __lalrpop_util::ParseError<TextPos, Token<'input>, ParserError>> {
+    fn to_triple(value: Self) -> Result<(AirPos,Token<'input>,AirPos), __lalrpop_util::ParseError<AirPos, Token<'input>, ParserError>> {
         Ok(value)
     }
 }
-impl<'err, 'input, 'v, > __ToTriple<'err, 'input, 'v, > for Result<(TextPos, Token<'input>, TextPos), ParserError>
+impl<'err, 'input, 'v, > __ToTriple<'err, 'input, 'v, > for Result<(AirPos, Token<'input>, AirPos), ParserError>
 {
-    fn to_triple(value: Self) -> Result<(TextPos,Token<'input>,TextPos), __lalrpop_util::ParseError<TextPos, Token<'input>, ParserError>> {
+    fn to_triple(value: Self) -> Result<(AirPos,Token<'input>,AirPos), __lalrpop_util::ParseError<AirPos, Token<'input>, ParserError>> {
         match value {
             Ok(v) => Ok(v),
             Err(error) => Err(__lalrpop_util::ParseError::User { error }),

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use air_parser::TextPos;
+use air_parser::AirPos;
 
 use std::collections::HashMap;
 
@@ -30,4 +30,4 @@ pub type GlobalStreamGens = HashMap<String, u32>;
 /// so it could be met several times during script execution. This field anchors iteration
 /// where it was met.
 /// Similar to pi-calculus restricted names/channels.
-pub type RestrictedStreamGens = HashMap<String, HashMap<TextPos, Vec<u32>>>;
+pub type RestrictedStreamGens = HashMap<String, HashMap<AirPos, Vec<u32>>>;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use crate::TextPos;
+use crate::AirPos;
 
 use super::air_lexer::Spanned;
 use super::AIRLexer;
@@ -28,17 +28,17 @@ use air_lambda_ast::Functor;
 use fstrings::f;
 use fstrings::format_args_f;
 
-fn run_lexer(input: &str) -> Vec<Spanned<Token<'_>, TextPos, LexerError>> {
+fn run_lexer(input: &str) -> Vec<Spanned<Token<'_>, AirPos, LexerError>> {
     let lexer = AIRLexer::new(input);
     lexer.collect()
 }
 
 #[allow(dead_code)]
 enum TokenCompareStrategy<'token> {
-    All(Vec<Spanned<Token<'token>, TextPos, LexerError>>),
-    Some(Vec<usize>, Vec<Spanned<Token<'token>, TextPos, LexerError>>),
-    One(usize, Spanned<Token<'token>, TextPos, LexerError>),
-    Single(Spanned<Token<'token>, TextPos, LexerError>),
+    All(Vec<Spanned<Token<'token>, AirPos, LexerError>>),
+    Some(Vec<usize>, Vec<Spanned<Token<'token>, AirPos, LexerError>>),
+    One(usize, Spanned<Token<'token>, AirPos, LexerError>),
+    Single(Spanned<Token<'token>, AirPos, LexerError>),
 }
 
 use TokenCompareStrategy::*;

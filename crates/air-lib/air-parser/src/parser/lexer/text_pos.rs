@@ -24,21 +24,21 @@ use serde::{Deserialize, Serialize};
 )]
 #[serde(transparent)]
 #[repr(transparent)]
-pub struct TextPos(usize);
+pub struct AirPos(usize);
 
-impl From<usize> for TextPos {
+impl From<usize> for AirPos {
     fn from(value: usize) -> Self {
         Self(value)
     }
 }
 
-impl From<TextPos> for usize {
-    fn from(p: TextPos) -> Self {
+impl From<AirPos> for usize {
+    fn from(p: AirPos) -> Self {
         p.0
     }
 }
 
-impl Add<usize> for TextPos {
+impl Add<usize> for AirPos {
     type Output = Self;
 
     fn add(self, rhs: usize) -> Self::Output {
@@ -46,29 +46,29 @@ impl Add<usize> for TextPos {
     }
 }
 
-impl Sub<usize> for TextPos {
-    type Output = TextPos;
+impl Sub<usize> for AirPos {
+    type Output = AirPos;
 
     fn sub(self, rhs: usize) -> Self::Output {
         Self(self.0 - rhs)
     }
 }
 
-impl Sub<TextPos> for TextPos {
+impl Sub<AirPos> for AirPos {
     type Output = usize;
 
-    fn sub(self, rhs: TextPos) -> Self::Output {
+    fn sub(self, rhs: AirPos) -> Self::Output {
         self.0 - rhs.0
     }
 }
 
-impl PartialEq<usize> for TextPos {
+impl PartialEq<usize> for AirPos {
     fn eq(&self, other: &usize) -> bool {
         self.0 == *other
     }
 }
 
-impl std::fmt::Display for TextPos {
+impl std::fmt::Display for AirPos {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(&self.0, f)
     }

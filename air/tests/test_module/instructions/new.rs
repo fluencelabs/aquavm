@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use air_parser::TextPos;
+use air_parser::AirPos;
 use air_test_utils::prelude::*;
 
 #[test]
@@ -91,7 +91,7 @@ fn new_with_global_streams_seq() {
     let actual_restricted_streams = data.restricted_streams;
     let expected_restricted_streams = maplit::hashmap! {
         "$stream".to_string() => maplit::hashmap! {
-            TextPos::from(282) => vec![1,1]
+            AirPos::from(282) => vec![1,1]
         }
     };
     assert_eq!(actual_restricted_streams, expected_restricted_streams);
@@ -218,7 +218,7 @@ fn new_in_fold_with_ap() {
     let actual_restricted_streams = data.restricted_streams;
     let expected_restricted_streams = maplit::hashmap! {
         "$s1".to_string() => maplit::hashmap! {
-            TextPos::from(146) => vec![1,1,1,1,1]
+            AirPos::from(146) => vec![1,1,1,1,1]
         }
     };
     assert_eq!(actual_restricted_streams, expected_restricted_streams);
@@ -264,10 +264,10 @@ fn new_with_streams_with_errors() {
     let actual_restricted_streams = data.restricted_streams;
     let expected_restricted_streams = maplit::hashmap! {
         "$restricted_stream_2".to_string() => maplit::hashmap! {
-            TextPos::from(216) => vec![1]
+            AirPos::from(216) => vec![1]
         },
         "$restricted_stream_1".to_string() => maplit::hashmap! {
-            TextPos::from(141) => vec![0]
+            AirPos::from(141) => vec![0]
         }
     };
     assert_eq!(actual_restricted_streams, expected_restricted_streams);

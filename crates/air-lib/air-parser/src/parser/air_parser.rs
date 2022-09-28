@@ -16,7 +16,7 @@
 
 use super::air;
 use super::lexer::AIRLexer;
-use super::lexer::TextPos;
+use super::lexer::AirPos;
 use super::lexer::Token;
 use super::ParserError;
 use crate::ast::Instruction;
@@ -40,7 +40,7 @@ pub fn parse(air_script: &str) -> Result<Box<Instruction<'_>>, String> {
     let file_id = files.add("script.air", air_script);
 
     PARSER.with(|parser| {
-        let mut errors: Vec<ErrorRecovery<TextPos, Token<'_>, ParserError>> = Vec::new();
+        let mut errors: Vec<ErrorRecovery<AirPos, Token<'_>, ParserError>> = Vec::new();
         let lexer = AIRLexer::new(air_script);
         let mut validator = VariableValidator::new();
         let result = parser.parse(air_script, &mut errors, &mut validator, lexer);
@@ -66,7 +66,7 @@ pub fn parse(air_script: &str) -> Result<Box<Instruction<'_>>, String> {
 fn report_errors(
     file_id: usize,
     files: SimpleFiles<&str, &str>,
-    errors: Vec<ErrorRecovery<TextPos, Token<'_>, ParserError>>,
+    errors: Vec<ErrorRecovery<AirPos, Token<'_>, ParserError>>,
 ) -> String {
     let labels = errors_to_labels(file_id, errors);
     let diagnostic = Diagnostic::error().with_labels(labels);
@@ -86,7 +86,7 @@ fn report_errors(
 
 fn errors_to_labels(
     file_id: usize,
-    errors: Vec<ErrorRecovery<TextPos, Token<'_>, ParserError>>,
+    errors: Vec<ErrorRecovery<AirPos, Token<'_>, ParserError>>,
 ) -> Vec<Label<usize>> {
     errors
         .into_iter()

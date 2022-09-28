@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use super::TextPos;
+use super::AirPos;
 use crate::parser::Span;
 
 use thiserror::Error as ThisError;
@@ -90,44 +90,44 @@ impl LexerError {
         *span
     }
 
-    pub fn unclosed_quote(range: Range<TextPos>) -> Self {
+    pub fn unclosed_quote(range: Range<AirPos>) -> Self {
         Self::UnclosedQuote(range.into())
     }
 
-    pub fn empty_string(range: Range<TextPos>) -> Self {
+    pub fn empty_string(range: Range<AirPos>) -> Self {
         Self::EmptyString(range.into())
     }
 
-    pub fn is_not_alphanumeric(range: Range<TextPos>) -> Self {
+    pub fn is_not_alphanumeric(range: Range<AirPos>) -> Self {
         Self::IsNotAlphanumeric(range.into())
     }
 
-    pub fn empty_stream_name(range: Range<TextPos>) -> Self {
+    pub fn empty_stream_name(range: Range<AirPos>) -> Self {
         Self::EmptyStreamName(range.into())
     }
 
-    pub fn empty_variable_or_const(range: Range<TextPos>) -> Self {
+    pub fn empty_variable_or_const(range: Range<AirPos>) -> Self {
         Self::EmptyVariableOrConst(range.into())
     }
 
-    pub fn invalid_lambda(range: Range<TextPos>) -> Self {
+    pub fn invalid_lambda(range: Range<AirPos>) -> Self {
         Self::InvalidLambda(range.into())
     }
 
-    pub fn unallowed_char_in_number(range: Range<TextPos>) -> Self {
+    pub fn unallowed_char_in_number(range: Range<AirPos>) -> Self {
         Self::UnallowedCharInNumber(range.into())
     }
 
-    pub fn parse_int_error(range: Range<TextPos>, parse_int_error: ParseIntError) -> Self {
+    pub fn parse_int_error(range: Range<AirPos>, parse_int_error: ParseIntError) -> Self {
         Self::ParseIntError(range.into(), parse_int_error)
     }
 
-    pub fn parse_float_error(range: Range<TextPos>, parse_float_error: ParseFloatError) -> Self {
+    pub fn parse_float_error(range: Range<AirPos>, parse_float_error: ParseFloatError) -> Self {
         Self::ParseFloatError(range.into(), parse_float_error)
     }
 
     pub fn lambda_parser_error(
-        range: Range<TextPos>,
+        range: Range<AirPos>,
         se_lambda_parser_error: impl Into<String>,
     ) -> Self {
         Self::LambdaParserError {
@@ -136,18 +136,18 @@ impl LexerError {
         }
     }
 
-    pub fn last_error_path_error(range: Range<TextPos>, error_path: String) -> Self {
+    pub fn last_error_path_error(range: Range<AirPos>, error_path: String) -> Self {
         Self::LastErrorPathError {
             span: range.into(),
             error_path,
         }
     }
 
-    pub fn too_big_float(range: Range<TextPos>) -> Self {
+    pub fn too_big_float(range: Range<AirPos>) -> Self {
         Self::TooBigFloat(range.into())
     }
 
-    pub fn leading_dot(range: Range<TextPos>) -> Self {
+    pub fn leading_dot(range: Range<AirPos>) -> Self {
         Self::LeadingDot(range.into())
     }
 }
@@ -157,14 +157,14 @@ use crate::parser::air::__ToTriple;
 use crate::parser::ParserError;
 
 impl<'err, 'input, 'i> __ToTriple<'err, 'input, 'i>
-    for Result<(TextPos, Token<'input>, TextPos), LexerError>
+    for Result<(AirPos, Token<'input>, AirPos), LexerError>
 {
     #[allow(clippy::wrong_self_convention)]
     fn to_triple(
         value: Self,
     ) -> Result<
-        (TextPos, Token<'input>, TextPos),
-        lalrpop_util::ParseError<TextPos, Token<'input>, ParserError>,
+        (AirPos, Token<'input>, AirPos),
+        lalrpop_util::ParseError<AirPos, Token<'input>, ParserError>,
     > {
         match value {
             Ok(v) => Ok(v),

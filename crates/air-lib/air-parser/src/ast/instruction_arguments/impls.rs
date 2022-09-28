@@ -19,7 +19,7 @@ use super::CallOutputValue;
 use super::NewArgument;
 use super::Scalar;
 use super::Stream;
-use crate::parser::lexer::TextPos;
+use crate::parser::lexer::AirPos;
 
 impl<'i> NewArgument<'i> {
     pub fn name(&self) -> &'i str {
@@ -32,11 +32,11 @@ impl<'i> NewArgument<'i> {
 }
 
 impl<'i> ApResult<'i> {
-    pub fn scalar(name: &'i str, position: TextPos) -> Self {
+    pub fn scalar(name: &'i str, position: AirPos) -> Self {
         Self::Scalar(Scalar { name, position })
     }
 
-    pub fn stream(name: &'i str, position: TextPos) -> Self {
+    pub fn stream(name: &'i str, position: AirPos) -> Self {
         Self::Stream(Stream { name, position })
     }
 
@@ -49,11 +49,11 @@ impl<'i> ApResult<'i> {
 }
 
 impl<'i> CallOutputValue<'i> {
-    pub fn scalar(name: &'i str, position: TextPos) -> Self {
+    pub fn scalar(name: &'i str, position: AirPos) -> Self {
         Self::Scalar(Scalar { name, position })
     }
 
-    pub fn stream(name: &'i str, position: TextPos) -> Self {
+    pub fn stream(name: &'i str, position: AirPos) -> Self {
         Self::Stream(Stream { name, position })
     }
 }

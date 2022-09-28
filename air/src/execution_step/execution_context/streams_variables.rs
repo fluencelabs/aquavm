@@ -21,7 +21,7 @@ use crate::execution_step::ValueAggregate;
 
 use air_interpreter_data::GlobalStreamGens;
 use air_interpreter_data::RestrictedStreamGens;
-use air_parser::TextPos;
+use air_parser::AirPos;
 
 use std::collections::hash_map::Entry::{Occupied, Vacant};
 use std::collections::HashMap;
@@ -67,13 +67,13 @@ impl Streams {
         }
     }
 
-    pub(crate) fn get(&self, name: &str, position: TextPos) -> Option<&Stream> {
+    pub(crate) fn get(&self, name: &str, position: AirPos) -> Option<&Stream> {
         self.streams
             .get(name)
             .and_then(|descriptors| find_closest(descriptors.iter(), position))
     }
 
-    pub(crate) fn get_mut(&mut self, name: &str, position: TextPos) -> Option<&mut Stream> {
+    pub(crate) fn get_mut(&mut self, name: &str, position: AirPos) -> Option<&mut Stream> {
         self.streams
             .get_mut(name)
             .and_then(|descriptors| find_closest_mut(descriptors.iter_mut(), position))
@@ -84,7 +84,7 @@ impl Streams {
         value: ValueAggregate,
         generation: Generation,
         stream_name: &str,
-        position: TextPos,
+        position: AirPos,
     ) -> ExecutionResult<u32> {
         match self.get_mut(stream_name, position) {
             Some(stream) => stream.add_value(value, generation),
@@ -123,7 +123,7 @@ impl Streams {
         }
     }
 
-    pub(crate) fn meet_scope_end(&mut self, name: String, position: TextPos) {
+    pub(crate) fn meet_scope_end(&mut self, name: String, position: AirPos) {
         // unwraps are safe here because met_scope_end must be called after met_scope_start
         let stream_descriptors = self.streams.get_mut(&name).unwrap();
         // delete a stream after exit from a scope
@@ -156,14 +156,14 @@ impl Streams {
         (global_streams, self.collected_restricted_stream_gens)
     }
 
-    fn stream_generation_from_data(&self, name: &str, position: TextPos, iteration: usize) -> Option<u32> {
+    fn stream_generation_from_data(&self, name: &str, position: AirPos, iteration: usize) -> Option<u32> {
         self.data_restricted_stream_gens
             .get(name)
             .and_then(|scopes| scopes.get(&position).and_then(|iterations| iterations.get(iteration)))
             .copied()
     }
 
-    fn collect_stream_generation(&mut self, name: String, position: TextPos, generation: u32) {
+    fn collect_stream_generation(&mut self, name: String, position: AirPos, generation: u32) {
         match self.collected_restricted_stream_gens.entry(name) {
             Occupied(mut streams) => match streams.get_mut().entry(position) {
                 Occupied(mut iterations) => iterations.get_mut().push(generation),
@@ -196,7 +196,7 @@ impl StreamDescriptor {
 
 fn find_closest<'d>(
     descriptors: impl DoubleEndedIterator<Item = &'d StreamDescriptor>,
-    position: TextPos,
+    position: AirPos,
 ) -> Option<&'d Stream> {
     // descriptors are placed in a order of decreasing scopes, so it's enough to get the latest suitable
     for descriptor in descriptors.rev() {
@@ -210,7 +210,7 @@ fn find_closest<'d>(
 
 fn find_closest_mut<'d>(
     descriptors: impl DoubleEndedIterator<Item = &'d mut StreamDescriptor>,
-    position: TextPos,
+    position: AirPos,
 ) -> Option<&'d mut Stream> {
     // descriptors are placed in a order of decreasing scopes, so it's enough to get the latest suitable
     for descriptor in descriptors.rev() {

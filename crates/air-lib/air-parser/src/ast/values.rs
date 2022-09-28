@@ -17,7 +17,7 @@
 mod impls;
 mod traits;
 
-use crate::parser::lexer::TextPos;
+use crate::parser::lexer::AirPos;
 
 use air_lambda_parser::LambdaAST;
 use serde::Deserialize;
@@ -27,7 +27,7 @@ use serde::Serialize;
 #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct Scalar<'i> {
     pub name: &'i str,
-    pub position: TextPos,
+    pub position: AirPos,
 }
 
 /// A scalar value with possible lambda expression.
@@ -36,14 +36,14 @@ pub struct ScalarWithLambda<'i> {
     pub name: &'i str,
     #[serde(borrow)]
     pub lambda: Option<LambdaAST<'i>>,
-    pub position: TextPos,
+    pub position: AirPos,
 }
 
 /// A stream without lambda.
 #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct Stream<'i> {
     pub name: &'i str,
-    pub position: TextPos,
+    pub position: AirPos,
 }
 
 /// A stream with possible lambda expression.
@@ -52,14 +52,14 @@ pub struct StreamWithLambda<'i> {
     pub name: &'i str,
     #[serde(borrow)]
     pub lambda: Option<LambdaAST<'i>>,
-    pub position: TextPos,
+    pub position: AirPos,
 }
 
 /// A canonicalized stream without lambda.
 #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct CanonStream<'i> {
     pub name: &'i str,
-    pub position: TextPos,
+    pub position: AirPos,
 }
 
 /// A canonicalized stream with lambda.
@@ -68,7 +68,7 @@ pub struct CanonStreamWithLambda<'i> {
     pub name: &'i str,
     #[serde(borrow)]
     pub lambda: Option<LambdaAST<'i>>,
-    pub position: TextPos,
+    pub position: AirPos,
 }
 
 /// A variable that could be either scalar or stream without lambda.

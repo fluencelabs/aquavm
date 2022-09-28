@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+use super::AirPos;
 use super::LexerError;
 use super::LexerResult;
-use super::TextPos;
 use super::Token;
 use crate::LambdaAST;
 
@@ -25,7 +25,7 @@ use std::str::CharIndices;
 
 pub(super) fn try_parse_call_variable(
     string_to_parse: &str,
-    start_pos: TextPos,
+    start_pos: AirPos,
 ) -> LexerResult<Token<'_>> {
     CallVariableParser::try_parse(string_to_parse, start_pos)
 }
@@ -52,12 +52,12 @@ struct ParserState {
 struct CallVariableParser<'input> {
     string_to_parse_iter: Peekable<CharIndices<'input>>,
     string_to_parse: &'input str,
-    start_pos: TextPos,
+    start_pos: AirPos,
     state: ParserState,
 }
 
 impl<'input> CallVariableParser<'input> {
-    fn new(string_to_parse: &'input str, start_pos: TextPos) -> LexerResult<Self> {
+    fn new(string_to_parse: &'input str, start_pos: AirPos) -> LexerResult<Self> {
         let mut string_to_parse_iter = string_to_parse.char_indices().peekable();
         let (current_offset, current_char) = match string_to_parse_iter.next() {
             Some(pos_and_ch) => pos_and_ch,
@@ -87,7 +87,7 @@ impl<'input> CallVariableParser<'input> {
 
     pub(self) fn try_parse(
         string_to_parse: &'input str,
-        start_pos: TextPos,
+        start_pos: AirPos,
     ) -> LexerResult<Token<'input>> {
         let mut parser = Self::new(string_to_parse, start_pos)?;
 
@@ -261,7 +261,7 @@ impl<'input> CallVariableParser<'input> {
         super::is_json_path_allowed_char(self.current_char())
     }
 
-    fn pos_in_string_to_parse(&self) -> TextPos {
+    fn pos_in_string_to_parse(&self) -> AirPos {
         self.start_pos + self.current_offset()
     }
 

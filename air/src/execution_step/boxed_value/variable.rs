@@ -15,7 +15,7 @@
  */
 
 use super::Generation;
-use air_parser::{ast, TextPos};
+use air_parser::{ast, AirPos};
 
 #[derive(Clone, Copy, Debug)]
 pub(crate) enum Variable<'i> {
@@ -25,7 +25,7 @@ pub(crate) enum Variable<'i> {
     Stream {
         name: &'i str,
         generation: Generation,
-        position: TextPos,
+        position: AirPos,
     },
     CanonStream {
         name: &'i str,
@@ -37,7 +37,7 @@ impl<'i> Variable<'i> {
         Self::Scalar { name }
     }
 
-    pub(crate) fn stream(name: &'i str, generation: Generation, position: TextPos) -> Self {
+    pub(crate) fn stream(name: &'i str, generation: Generation, position: AirPos) -> Self {
         Self::Stream {
             name,
             generation,
