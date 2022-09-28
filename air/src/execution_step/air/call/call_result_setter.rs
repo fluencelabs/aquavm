@@ -23,7 +23,7 @@ use air_interpreter_data::CallResult;
 use air_interpreter_data::TracePos;
 use air_interpreter_data::Value;
 use air_parser::ast::CallOutputValue;
-use air_trace_handler::CurrentStreamValue;
+use air_trace_handler::PreparationScheme;
 use air_trace_handler::TraceHandler;
 
 /// Writes result of a local `Call` instruction to `ExecutionCtx` at `output`.
@@ -50,34 +50,36 @@ pub(crate) fn set_local_result<'i>(
     }
 }
 
-// TODO New stream should be handled here 12:30, 16:40
-pub(crate) fn set_result_from_new_value<'i>(
-    value: &CurrentStreamValue<'i>,
-    tetraplet: RcSecurityTetraplet,
-    exec_ctx: &mut ExecutionCtx<'i>,
-) -> ExecutionResult<u32> {
-    let result = ValueAggregate::new(value.value.clone(), tetraplet, value.trace_pos);
-    exec_ctx.streams.add_stream_new_value(result, value)
-}
-
 pub(crate) fn set_result_from_value<'i>(
-    value: Value,
+    value: &mut Value,
     tetraplet: RcSecurityTetraplet,
     trace_pos: TracePos,
+    scheme: PreparationScheme,
     output: &CallOutputValue<'i>,
     exec_ctx: &mut ExecutionCtx<'i>,
 ) -> ExecutionResult<()> {
     match (output, value) {
         (CallOutputValue::Scalar(scalar), Value::Scalar(value)) => {
-            let result = ValueAggregate::new(value, tetraplet, trace_pos);
+            let result = ValueAggregate::new(value.clone(), tetraplet, trace_pos);
             exec_ctx.scalars.set_scalar_value(scalar.name, result)?;
         }
-        (CallOutputValue::Stream(stream), Value::Stream { value, generation }) => {
-            let result = ValueAggregate::new(value, tetraplet, trace_pos);
-            let generation = Generation::Nth(generation);
-            let _ = exec_ctx
+        (CallOutputValue::Stream(stream), Value::Stream { value, generation: value_generation }) => {
+            let result = ValueAggregate::new(value.clone(), tetraplet, trace_pos);
+            let generation = match scheme {
+                PreparationScheme::Both | PreparationScheme::Previous => {
+                    assert_ne!(*value_generation, u32::MAX, "Should be valid");
+                    Generation::Nth(*value_generation)
+                }
+                PreparationScheme::Current => {
+                    assert_eq!(*value_generation, u32::MAX, "Shouldn't be valid");
+                    Generation::Last
+                }
+            };
+            let generation = exec_ctx
                 .streams
                 .add_stream_value(result, generation, stream.name, stream.position)?;
+            // Update value's generation
+            *value_generation = generation;
         }
         // it isn't needed to check there that output and value matches because
         // it's been already checked in trace handler

@@ -22,7 +22,6 @@ use crate::execution_step::ValueAggregate;
 use air_interpreter_data::GlobalStreamGens;
 use air_interpreter_data::RestrictedStreamGens;
 use air_parser::AirPos;
-use air_trace_handler::CurrentStreamValue;
 
 use std::collections::hash_map::Entry::{Occupied, Vacant};
 use std::collections::HashMap;
@@ -104,34 +103,6 @@ impl Streams {
                 Ok(generation)
             }
         }
-    }
-
-    pub(crate) fn add_stream_new_value(
-        &mut self,
-        value_aggregate: ValueAggregate,
-        value: &CurrentStreamValue<'_>,
-    ) -> ExecutionResult<u32> {
-        match self.get_mut(value.stream_name, value.stream_pos) {
-            Some(stream) => stream.add_value(value_aggregate, Generation::Last),
-            None => {
-                // streams could be created in three ways:
-                //  - after met new instruction with stream name that isn't present in streams
-                //    (it's the only way to create restricted streams)
-                //  - by calling add_global_stream with generation that come from data
-                //    for global streams
-                //  - and by this function, and if there is no such a streams in streams,
-                //    it means that a new global one should be created.
-                let stream = Stream::from_value(value_aggregate);
-                self.add_global_stream(value.stream_name.to_owned(), stream);
-                let generation = 0;
-                Ok(generation)
-            }
-        }
-    }
-
-    pub(crate) fn add_global_stream(&mut self, name: String, stream: Stream) {
-        let descriptor = StreamDescriptor::global(stream);
-        self.streams.insert(name, vec![descriptor]);
     }
 
     pub(crate) fn meet_scope_start(&mut self, name: impl Into<String>, span: Span, iteration: u32) {

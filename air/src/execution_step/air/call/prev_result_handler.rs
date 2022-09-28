@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-use super::resolved_call::CurrentOrPrevValue;
 use super::*;
 use crate::execution_step::air::call::call_result_setter::set_result_from_value;
 use crate::execution_step::CatchableError;
@@ -23,9 +22,9 @@ use crate::execution_step::RcSecurityTetraplet;
 use air_interpreter_data::CallResult;
 use air_interpreter_data::Sender;
 use air_interpreter_data::TracePos;
-use air_interpreter_data::Value;
 use air_interpreter_interface::CallServiceResult;
 use air_parser::ast::CallOutputValue;
+use air_trace_handler::PreparationScheme;
 use air_trace_handler::TraceHandler;
 
 use fstrings::f;
@@ -37,45 +36,20 @@ pub(crate) struct StateDescriptor {
     prev_state: Option<CallResult>,
 }
 
-// TODO update as per 12:00
 /// This function looks at the existing call state, validates it,
 /// and returns Ok(true) if the call should be executed further.
 pub(super) fn handle_prev_state<'i>(
     tetraplet: &RcSecurityTetraplet,
     output: &CallOutputValue<'i>,
-    new_or_old_value: CurrentOrPrevValue<'i>,
-    exec_ctx: &mut ExecutionCtx<'i>,
-    trace_ctx: &mut TraceHandler,
-) -> ExecutionResult<StateDescriptor> {
-    match new_or_old_value {
-        CurrentOrPrevValue::CurrentStreamValue(new_stream_value) => {
-            let jvalue = new_stream_value.value.clone();
-            let generation = set_result_from_new_value(&new_stream_value, tetraplet.clone(), exec_ctx)?;
-            let prev_result = CallResult::Executed(Value::Stream {
-                value: jvalue,
-                generation,
-            });
-            trace_ctx.meet_call_end(prev_result);
-
-            Ok(StateDescriptor::executed())
-        }
-        CurrentOrPrevValue::CallResult { value, trace_pos } => {
-            handle_prev_known_state(tetraplet, output, value, trace_pos, exec_ctx, trace_ctx)
-        }
-    }
-}
-
-fn handle_prev_known_state<'i>(
-    tetraplet: &RcSecurityTetraplet,
-    output: &CallOutputValue<'i>,
-    prev_result: CallResult,
+    mut prev_result: CallResult,
     trace_pos: TracePos,
+    scheme: PreparationScheme,
     exec_ctx: &mut ExecutionCtx<'i>,
     trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<StateDescriptor> {
     use CallResult::*;
 
-    match &prev_result {
+    match &mut prev_result {
         // this call was failed on one of the previous executions,
         // here it's needed to bubble this special error up
         CallServiceFailed(ret_code, err_msg) => {
@@ -112,8 +86,9 @@ fn handle_prev_known_state<'i>(
             Ok(StateDescriptor::cant_execute_now(prev_result))
         }
         // this instruction's been already executed
-        Executed(value) => {
-            set_result_from_value(value.clone(), tetraplet.clone(), trace_pos, output, exec_ctx)?;
+        Executed(ref mut value) => {
+            eprintln!("Scheme: {:?}, {:?}", scheme, value);
+            set_result_from_value(&mut *value, tetraplet.clone(), trace_pos, scheme, output, exec_ctx)?;
             trace_ctx.meet_call_end(prev_result);
 
             Ok(StateDescriptor::executed())

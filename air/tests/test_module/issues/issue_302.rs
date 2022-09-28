@@ -18,6 +18,8 @@ use air_test_utils::prelude::*;
 
 use pretty_assertions::assert_eq;
 
+use std::ops::Deref;
+
 #[test]
 // test for github.com/fluencelabs/aquavm/issues/302
 fn issue_302() {
@@ -56,5 +58,5 @@ fn issue_302() {
         executed_state::stream_number(0, 1),
         executed_state::scalar(json!([1, 2, 0])),
     ];
-    assert_eq!(actual_trace, expected_trace);
+    assert_eq!(actual_trace.deref(), expected_trace);
 }

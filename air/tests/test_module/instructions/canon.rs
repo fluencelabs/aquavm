@@ -18,6 +18,9 @@ use air_test_utils::prelude::*;
 
 use fstrings::f;
 use fstrings::format_args_f;
+use pretty_assertions::assert_eq;
+
+use std::ops::Deref;
 
 #[test]
 fn canon_moves_execution_flow() {
@@ -124,7 +127,7 @@ fn canon_fixes_stream_correct() {
         executed_state::scalar(json!([2, 3])),
         executed_state::scalar(json!([2, 3])),
     ];
-    assert_eq!(vm_1_result_2_trace, expected_vm_1_result_2_trace);
+    assert_eq!(vm_1_result_2_trace.deref(), expected_vm_1_result_2_trace);
 }
 
 #[test]

@@ -16,7 +16,7 @@
 
 use super::*;
 
-pub(crate) type JValue = serde_json::Value;
+type JValue = serde_json::Value;
 
 use std::rc::Rc;
 
@@ -65,23 +65,15 @@ fn are_streams_equal(
 /// Merging of value from only current data to a stream is a something special, because it's
 /// needed to choose generation not from current data, but a maximum from streams on a current peer.
 /// Maximum versions are tracked in data in a special field called streams.
-pub(super) fn merge_current_executed<'i>(
-    value: Value,
-    value_type: ValueType<'i>,
-    scheme: PreparationScheme,
-    data_keeper: &mut DataKeeper,
-) -> MergeResult<MergerCallResult<'i>> {
+pub(super) fn merge_current_executed(value: Value, value_type: ValueType<'_>) -> MergeResult<CallResult> {
     match (value, value_type) {
-        (scalar @ Value::Scalar(_), ValueType::Scalar) => {
-            Ok(prepare_call_result(CallResult::Executed(scalar), scheme, data_keeper))
+        (scalar @ Value::Scalar(_), ValueType::Scalar) => Ok(CallResult::Executed(scalar)),
+        (Value::Stream { value, .. }, ValueType::Stream(_)) => {
+            // it is checked by an assertion
+            let canary_generation = u32::MAX;
+            let stream = Value::Stream { value, generation: canary_generation };
+            Ok(CallResult::Executed(stream))
         }
-        (Value::Stream { value, .. }, ValueType::Stream(stream_name, stream_pos)) => Ok(prepare_new_stream_result(
-            value,
-            stream_name,
-            stream_pos,
-            scheme,
-            data_keeper,
-        )),
         (value, value_type) => Err(CallResultError::data_not_match(value, value_type)),
     }
 }
@@ -97,10 +89,10 @@ pub(super) fn check_equal(prev_call: &CallResult, current_call: &CallResult) -> 
     }
 }
 
-pub(super) fn try_match_value_type(merged_call: &MergerCallResult<'_>, value_type: ValueType<'_>) -> MergeResult<()> {
+pub(super) fn try_match_value_type(merged_call: &MergerCallResult, value_type: ValueType<'_>) -> MergeResult<()> {
     if let MergerCallResult::CallResult { value, .. } = merged_call {
         return match (value, value_type) {
-            (CallResult::Executed(value @ Value::Scalar(_)), ValueType::Stream(_, _)) => {
+            (CallResult::Executed(value @ Value::Scalar(_)), ValueType::Stream(_)) => {
                 Err(CallResultError::data_not_match(value.clone(), value_type))
             }
             (CallResult::Executed(value @ Value::Stream { .. }), ValueType::Scalar) => {

@@ -28,10 +28,8 @@ use crate::JValue;
 use crate::SecurityTetraplet;
 
 use air_interpreter_data::CallResult;
-use air_interpreter_data::TracePos;
 use air_interpreter_interface::CallRequestParams;
 use air_parser::ast;
-use air_trace_handler::CurrentStreamValue;
 use air_trace_handler::MergerCallResult;
 use air_trace_handler::TraceHandler;
 use air_utils::measure;
@@ -50,17 +48,6 @@ pub(super) struct ResolvedCall<'i> {
 struct ResolvedArguments {
     call_arguments: String,
     tetraplets: Vec<RcSecurityTetraplets>,
-}
-
-#[derive(Debug, Clone)]
-pub(crate) enum CurrentOrPrevValue<'i> {
-    CurrentStreamValue(CurrentStreamValue<'i>),
-    /// There was a state in at least one of the contexts. If there were two states in
-    /// both contexts, they were successfully merged.
-    CallResult {
-        value: CallResult,
-        trace_pos: TracePos,
-    },
 }
 
 impl<'i> ResolvedCall<'i> {
@@ -169,17 +156,25 @@ impl<'i> ResolvedCall<'i> {
         exec_ctx: &mut ExecutionCtx<'i>,
         trace_ctx: &mut TraceHandler,
     ) -> ExecutionResult<StateDescriptor> {
-        // TODO it seems we are to move this block into handle_prev_state and beyond
-        let new_or_old_value = match trace_to_exec_err!(trace_ctx.meet_call_start(&self.output), raw_call)? {
-            MergerCallResult::CallResult { value, trace_pos } => CurrentOrPrevValue::CallResult { value, trace_pos },
-            // TODO It might be resolved elsewhere instead.
-            MergerCallResult::CurrentStreamValue(current_stream_value) => {
-                CurrentOrPrevValue::CurrentStreamValue(current_stream_value)
-            }
-            MergerCallResult::Empty => return Ok(StateDescriptor::no_previous_state()),
-        };
+        let (call_result, trace_pos, scheme) =
+            match trace_to_exec_err!(trace_ctx.meet_call_start(&self.output), raw_call)? {
+                MergerCallResult::CallResult {
+                    value,
+                    trace_pos,
+                    scheme,
+                } => (value, trace_pos, scheme),
+                MergerCallResult::Empty => return Ok(StateDescriptor::no_previous_state()),
+            };
 
-        handle_prev_state(&self.tetraplet, &self.output, new_or_old_value, exec_ctx, trace_ctx)
+        handle_prev_state(
+            &self.tetraplet,
+            &self.output,
+            call_result,
+            trace_pos,
+            scheme,
+            exec_ctx,
+            trace_ctx,
+        )
     }
 
     /// Prepare arguments of this call instruction by resolving and preparing their security tetraplets.

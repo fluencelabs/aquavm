@@ -60,10 +60,7 @@ impl TraceHandler {
 
 impl TraceHandler {
     /// Should be called at the beginning of a call execution.
-    pub fn meet_call_start<'i>(
-        &mut self,
-        output_value: &CallOutputValue<'i>,
-    ) -> TraceHandlerResult<MergerCallResult<'i>> {
+    pub fn meet_call_start(&mut self, output_value: &CallOutputValue<'_>) -> TraceHandlerResult<MergerCallResult> {
         try_merge_next_state_as_call(&mut self.data_keeper, output_value).map_err(Into::into)
     }
 
