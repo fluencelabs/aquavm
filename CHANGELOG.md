@@ -1,3 +1,8 @@
+## Version 0.30.0 (2022-09-28)
+
+[PR 340](https://github.com/fluencelabs/aquavm/pull/340):  
+Change behaviour of folds over streams
+
 ## Version 0.29.0 (2022-09-19)
 
 [PR 335](https://github.com/fluencelabs/aquavm/pull/335):  

@@ -1,34 +1,22 @@
 (seq
-(seq
- (seq
-  (call "client_id" ("" "") ["relay"] relay)
-  (call "client_id" ("" "") ["client"] client)
-  )
- (seq
-  (call relay ("dht" "neighborhood") [relay] neighs_top)
-  (seq
-   (fold neighs_top n
-         (seq
-          (call n ("dht" "neighborhood") [n] $neighs_inner)
-          (next n)
-          )
-         )
-   (fold $neighs_inner ns
-         (seq
-          (fold ns n
-                (seq
-                 (call n ("op" "identify") [] $services)
-                 (next n)
-                 )
-                )
-          (next ns)
-          )
-         )
-   )
-  )
- )
- (seq
-  (call relay ("op" "identity") [])
-  (call client ("return" "") [$services $neighs_inner neighs_top])
-  )
- )
+    (seq
+        (seq
+            (call "client_id" ("" "") ["relay"] relay)
+            (call "client_id" ("" "") ["client"] client))
+        (seq
+            (call relay ("dht" "neighborhood") [relay] neighs_top) ;
+            (seq
+                (fold neighs_top n
+                    (seq
+                        (call n ("dht" "neighborhood") [n] $neighs_inner)
+                        (next n)))
+                (fold $neighs_inner ns
+                    (seq
+                        (fold ns n
+                            (seq
+                                (call n ("op" "identify") [] $services)
+                                (next n)))
+                        (next ns))))))
+        (seq
+            (call relay ("op" "identity") [])
+            (call client ("return" "") [$services $neighs_inner neighs_top])))
