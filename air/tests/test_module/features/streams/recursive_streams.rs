@@ -149,13 +149,13 @@ fn recursive_stream_many_iterations() {
     let test_passed = (actual_fold == &expected_fold_v1) || (actual_fold == &expected_fold_v2);
     assert!(test_passed);
 
-    let actual_last_state = &actual_trace[(actual_trace.len() - 1).into()];
+    let actual_last_state = actual_trace.last().unwrap();
     let expected_last_state = executed_state::request_sent_by(vm_peer_id_1);
     assert_eq!(actual_last_state, &expected_last_state);
 
     let result = checked_call_vm!(vm_2, <_>::default(), script, "", result.data);
     let actual_trace = trace_from_result(&result);
-    let actual_last_state = &actual_trace[(actual_trace.len() - 1).into()];
+    let actual_last_state = actual_trace.last().unwrap();
     let expected_last_state = executed_state::scalar_string(result_value);
     assert_eq!(actual_last_state, &expected_last_state);
 }
@@ -351,7 +351,7 @@ fn recursive_stream_inner_fold() {
     let result = checked_call_vm!(vm_2, <_>::default(), script, "", result.data);
     let actual_trace = trace_from_result(&result);
 
-    let actual_last_state = &actual_trace[(actual_trace.len() - 1).into()];
+    let actual_last_state = actual_trace.last().unwrap();
     let expected_last_state = executed_state::scalar_string(result_value);
     assert_eq!(actual_last_state, &expected_last_state);
 }

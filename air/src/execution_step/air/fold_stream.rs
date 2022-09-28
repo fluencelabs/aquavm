@@ -74,7 +74,11 @@ impl<'i> ExecutableInstruction<'i> for FoldStream<'i> {
     }
 }
 
-// it must return only uncatchable errors (such as ones from TraceHandler)
+/// Executes fold iteration over all generation that stream had at the moment of call.
+/// It must return only uncatchable errors (such as ones from TraceHandler), though
+/// catchable errors are suppressed and not propagated from this function, because of determinism.
+/// The issue with determinism here lies in invariant that all previous executed states
+/// must be met.
 fn execute_iterations<'i>(
     iterables: Vec<IterableValue>,
     fold_stream: &FoldStream<'i>,
