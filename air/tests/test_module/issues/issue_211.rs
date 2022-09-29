@@ -46,12 +46,13 @@ fn issue_211() {
            (null))
            (seq
             (canon %init_peer_id% $nodes2 #nodes2_0)
-            (call %init_peer_id% ("op" "noop") [#nodes2_0.$.[idx]! nodes]) ; ok="expected result"
+            (call %init_peer_id% ("op" "noop") [#nodes2_0.$.[idx] nodes]) ; ok="expected result"
             )
             )
          (seq
             (canon %init_peer_id% $nodes2 #nodes2_1)
-            (call %init_peer_id% ("op" "identity") [#nodes2_1] nodes2-fix))))) ; ok="expected result"
+            (call %init_peer_id% ("op" "identity") [#nodes2_1] nodes2-fix)  ; ok="expected result"
+            ))))
       (null)
       )
      (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2]) ; ok="error"
@@ -75,9 +76,9 @@ fn issue_211() {
         executed_state::par(1, 0),
         executed_state::ap(Some(0)),
         executed_state::canon(vec![4.into(), 6.into(), 8.into()]),
-        executed_state::scalar_string("default result from set_variables_call_service"),
+        executed_state::scalar_string("expected result"),
         executed_state::canon(vec![4.into(), 6.into(), 8.into()]),
-        executed_state::scalar_string("default result from set_variables_call_service"),
+        executed_state::scalar_string("expected result"),
     ];
 
     let actual_trace = trace_from_result(&result);
