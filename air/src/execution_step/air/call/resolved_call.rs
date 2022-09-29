@@ -156,8 +156,13 @@ impl<'i> ResolvedCall<'i> {
         exec_ctx: &mut ExecutionCtx<'i>,
         trace_ctx: &mut TraceHandler,
     ) -> ExecutionResult<StateDescriptor> {
-        let (call_result, trace_pos) = match trace_to_exec_err!(trace_ctx.meet_call_start(&self.output), raw_call)? {
-            MergerCallResult::CallResult { value, trace_pos } => (value, trace_pos),
+        let prev_result = trace_ctx.meet_call_start(&self.output);
+        let (call_result, trace_pos, scheme) = match trace_to_exec_err!(prev_result, raw_call)? {
+            MergerCallResult::CallResult {
+                value,
+                trace_pos,
+                scheme,
+            } => (value, trace_pos, scheme),
             MergerCallResult::Empty => return Ok(StateDescriptor::no_previous_state()),
         };
 
@@ -166,6 +171,7 @@ impl<'i> ResolvedCall<'i> {
             &self.output,
             call_result,
             trace_pos,
+            scheme,
             exec_ctx,
             trace_ctx,
         )

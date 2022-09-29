@@ -211,10 +211,7 @@ mod tests {
         let fold_result = FoldResult { lore };
 
         let slider = TraceSlider::new(vec![]);
-        let ctx = MergeCtx {
-            slider,
-            streams: <_>::default(),
-        };
+        let ctx = MergeCtx { slider };
 
         let (all_states, convoluted_lens) =
             compute_lens_convolution(&fold_result, &ctx).expect("convolution should be successful");
@@ -244,10 +241,7 @@ mod tests {
         let fold_result = FoldResult { lore };
 
         let slider = TraceSlider::new(vec![ExecutedState::Ap(ApResult::new(vec![0]))]);
-        let ctx = MergeCtx {
-            slider,
-            streams: <_>::default(),
-        };
+        let ctx = MergeCtx { slider };
 
         let (all_states, convoluted_lens) =
             compute_lens_convolution(&fold_result, &ctx).expect("convolution should be successful");
@@ -295,10 +289,7 @@ mod tests {
             ExecutedState::Ap(ApResult::new(vec![1])),
             ExecutedState::Ap(ApResult::new(vec![2])),
         ]);
-        let ctx = MergeCtx {
-            slider,
-            streams: <_>::default(),
-        };
+        let ctx = MergeCtx { slider };
 
         let (all_states, convoluted_lens) =
             compute_lens_convolution(&fold_result, &ctx).expect("convolution should be successful");

@@ -20,16 +20,12 @@ use super::KeeperResult;
 use super::TraceSlider;
 use crate::TracePos;
 
-use air_interpreter_data::GlobalStreamGens;
 use air_interpreter_data::InterpreterData;
-
-use std::collections::HashMap;
 
 /// Contains all necessary information about data.
 #[derive(Debug, Default, PartialEq, Eq)]
 pub struct MergeCtx {
     pub slider: TraceSlider,
-    pub streams: GlobalStreamGens,
 }
 
 impl MergeCtx {
@@ -37,19 +33,13 @@ impl MergeCtx {
     pub(crate) fn from_trace(trace: ExecutionTrace) -> Self {
         let slider = TraceSlider::new(trace);
 
-        Self {
-            slider,
-            streams: HashMap::new(),
-        }
+        Self { slider }
     }
 
     pub(crate) fn from_data(data: InterpreterData) -> Self {
         let slider = TraceSlider::new(data.trace);
 
-        Self {
-            slider,
-            streams: data.global_streams,
-        }
+        Self { slider }
     }
 
     pub(crate) fn try_get_generation(&self, position: TracePos) -> KeeperResult<u32> {
@@ -71,9 +61,5 @@ impl MergeCtx {
             ExecutedState::Ap(ap_result) => Ok(ap_result.res_generations[0]),
             state => Err(KeeperError::NoStreamState { state: state.clone() }),
         }
-    }
-
-    pub(crate) fn stream_generation(&self, stream_name: &str) -> Option<u32> {
-        self.streams.get(stream_name).copied()
     }
 }
