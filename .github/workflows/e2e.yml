@@ -19,7 +19,7 @@ jobs:
     needs:
       - snapshot
 
-    uses: fluencelabs/rust-peer/.github/workflows/snapshot.yml@master
+    uses: fluencelabs/rust-peer/.github/workflows/snapshot.yml@fix-e2e-version-action
     with:
       image-name: "docker.fluence.dev/aquavm"
       avm-server-version: |
