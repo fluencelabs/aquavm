@@ -19,9 +19,9 @@ use super::ExecutionResult;
 use super::TraceHandler;
 use crate::execution_step::boxed_value::CanonStream;
 use crate::execution_step::Generation;
+use crate::execution_step::Stream;
 use crate::log_instruction;
 use crate::trace_to_exec_err;
-use crate::CatchableError;
 use crate::ExecutionError;
 use crate::UncatchableError;
 
@@ -30,7 +30,7 @@ use air_interpreter_data::TracePos;
 use air_parser::ast;
 use air_trace_handler::MergerCanonResult;
 
-use std::rc::Rc;
+use std::borrow::Cow;
 
 impl<'i> super::ExecutableInstruction<'i> for ast::Canon<'i> {
     #[tracing::instrument(level = "debug", skip(exec_ctx, trace_ctx))]
@@ -90,14 +90,7 @@ fn create_canon_stream_from_pos(
     ast_canon: &ast::Canon<'_>,
     exec_ctx: &ExecutionCtx<'_>,
 ) -> ExecutionResult<CanonStream> {
-    let stream = exec_ctx
-        .streams
-        .get(ast_canon.stream.name, ast_canon.stream.position)
-        .ok_or_else(|| {
-            ExecutionError::Catchable(Rc::new(CatchableError::StreamsForCanonNotFound(
-                ast_canon.stream.name.to_string(),
-            )))
-        })?;
+    let stream = get_stream_or_default(ast_canon, exec_ctx);
 
     let values = stream_elements_pos
         .iter()
@@ -145,16 +138,9 @@ fn create_canon_stream_from_name(
     peer_id: String,
     exec_ctx: &ExecutionCtx<'_>,
 ) -> ExecutionResult<StreamWithPositions> {
-    let stream = exec_ctx
-        .streams
-        .get(ast_canon.stream.name, ast_canon.stream.position)
-        .ok_or_else(|| {
-            ExecutionError::Catchable(Rc::new(CatchableError::StreamsForCanonNotFound(
-                ast_canon.stream.name.to_string(),
-            )))
-        })?;
+    let stream = get_stream_or_default(ast_canon, exec_ctx);
 
-    let canon_stream = CanonStream::from_stream(stream, peer_id);
+    let canon_stream = CanonStream::from_stream(stream.as_ref(), peer_id);
     let stream_elements_pos = stream
         .iter(Generation::Last)
         // it's always safe to iter over all generations
@@ -168,4 +154,15 @@ fn create_canon_stream_from_name(
     };
 
     Ok(result)
+}
+
+/// This function gets a stream from context or return a default empty stream,
+/// it's crucial for deterministic behaviour, for more info see
+/// github.com/fluencelabs/aquavm/issues/346
+fn get_stream_or_default<'ctx, 'value>(
+    ast_canon: &ast::Canon<'_>,
+    exec_ctx: &'ctx ExecutionCtx<'value>,
+) -> Cow<'ctx, Stream> {
+    let maybe_stream = exec_ctx.streams.get(ast_canon.stream.name, ast_canon.stream.position);
+    maybe_stream.map(Cow::Borrowed).unwrap_or_default()
 }
