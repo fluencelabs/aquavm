@@ -63,15 +63,21 @@ pub(crate) fn set_result_from_value<'i>(
             let result = ValueAggregate::new(value.clone(), tetraplet, trace_pos);
             exec_ctx.scalars.set_scalar_value(scalar.name, result)?;
         }
-        (CallOutputValue::Stream(stream), Value::Stream { value, generation: value_generation }) => {
+        (
+            CallOutputValue::Stream(stream),
+            Value::Stream {
+                value,
+                generation: stream_generation,
+            },
+        ) => {
             let result = ValueAggregate::new(value.clone(), tetraplet, trace_pos);
             let generation = match scheme {
                 PreparationScheme::Both | PreparationScheme::Previous => {
-                    assert_ne!(*value_generation, u32::MAX, "Should be valid");
-                    Generation::Nth(*value_generation)
+                    assert_ne!(*stream_generation, u32::MAX, "Should be valid");
+                    Generation::Nth(*stream_generation)
                 }
                 PreparationScheme::Current => {
-                    assert_eq!(*value_generation, u32::MAX, "Shouldn't be valid");
+                    assert_eq!(*stream_generation, u32::MAX, "Shouldn't be valid");
                     Generation::Last
                 }
             };
@@ -79,7 +85,7 @@ pub(crate) fn set_result_from_value<'i>(
                 .streams
                 .add_stream_value(result, generation, stream.name, stream.position)?;
             // Update value's generation
-            *value_generation = generation;
+            *stream_generation = generation;
         }
         // it isn't needed to check there that output and value matches because
         // it's been already checked in trace handler

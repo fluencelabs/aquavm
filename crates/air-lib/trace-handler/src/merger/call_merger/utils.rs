@@ -71,7 +71,10 @@ pub(super) fn merge_current_executed(value: Value, value_type: ValueType<'_>) ->
         (Value::Stream { value, .. }, ValueType::Stream(_)) => {
             // it is checked by an assertion
             let canary_generation = u32::MAX;
-            let stream = Value::Stream { value, generation: canary_generation };
+            let stream = Value::Stream {
+                value,
+                generation: canary_generation,
+            };
             Ok(CallResult::Executed(stream))
         }
         (value, value_type) => Err(CallResultError::data_not_match(value, value_type)),

@@ -94,9 +94,7 @@ fn merge_call_result(
         // this special case is needed to merge stream generation in a right way
         (RequestSentBy(_), Executed(value)) => (merge_current_executed(value, value_type)?, Current),
         (prev @ Executed(..), RequestSentBy(_)) => (prev, Previous),
-        (Executed(prev_value), Executed(current_value)) => {
-            (merge_executed(prev_value, current_value)?, Both)
-        }
+        (Executed(prev_value), Executed(current_value)) => (merge_executed(prev_value, current_value)?, Both),
         (prev_call, current_call) => return Err(CallResultError::incompatible_calls(prev_call, current_call)),
     };
 
