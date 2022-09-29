@@ -164,8 +164,5 @@ fn get_stream_or_default<'ctx, 'value>(
     exec_ctx: &'ctx ExecutionCtx<'value>,
 ) -> Cow<'ctx, Stream> {
     let maybe_stream = exec_ctx.streams.get(ast_canon.stream.name, ast_canon.stream.position);
-    match maybe_stream {
-        Some(stream) => Cow::Borrowed(stream),
-        None => Cow::Owned(Stream::default()),
-    }
+    maybe_stream.map(Cow::Borrowed).unwrap_or_default()
 }
