@@ -121,7 +121,7 @@ fn several_restrictions() {
     let actual_trace = trace_from_result(&result);
     let expected_trace = vec![
         executed_state::stream_string("test", 0),
-        executed_state::canon(vec![0.into()]),
+        executed_state::canon(vec![]),
         executed_state::scalar(json!([])),
     ];
     assert_eq!(actual_trace, expected_trace);
@@ -143,16 +143,31 @@ fn check_influence_to_not_restricted() {
                     )
                     (ap "more" $a)
                 )
-                (call "{vm_peer_id}" ("op" "identity") [$a] a-fix)
+                (seq
+                    (canon "{vm_peer_id}" $a #a)
+                    (call "{vm_peer_id}" ("op" "identity") [#a] a-fix)
+                )
             )
         )
         (seq
             (seq
-                (call "{vm_peer_id}" ("callbackSrv" "response") [$a0]) ;; should be non-empty
-                (call "{vm_peer_id}" ("callbackSrv" "response") [$a1]) ;; should be non-empty
+                (seq
+                    (canon "{vm_peer_id}" $a0 #a0)
+                    (call "{vm_peer_id}" ("callbackSrv" "response") [#a0]) ;; should be non-empty
+                )
+                (seq
+                    (canon "{vm_peer_id}" $a1 #a1)
+                    (call "{vm_peer_id}" ("callbackSrv" "response") [#a1]) ;; should be non-empty
+                )
             )
             (seq
-                (call "{vm_peer_id}" ("callbackSrv" "response") [$a])  ;; should be empty
+                (xor
+                    (seq
+                        (canon "{vm_peer_id}" $a #a)
+                        (call "{vm_peer_id}" ("callbackSrv" "response") [#a])  ;; shouldn't execute
+                    )
+                    (call "{vm_peer_id}" ("callbackSrv" "response") [#a])  ;; should be empty
+                )
                 (call "{vm_peer_id}" ("callbackSrv" "response") [a-fix])  ;; should be empty
             )
         )
@@ -160,6 +175,7 @@ fn check_influence_to_not_restricted() {
     "#);
 
     let result = checked_call_vm!(vm, <_>::default(), script, "", "");
+    print_trace(&result, "");
 
     let actual_trace = trace_from_result(&result);
     let expected_trace = vec![

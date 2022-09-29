@@ -80,7 +80,10 @@ fn wait_on_empty_stream_json_path() {
                 )
             )
         )
-        (call "{local_peer_id}" ("" "") [$ns.$.[0] $ns.$.[1] $ns])
+        (seq
+            (canon "{local_peer_id}" $ns #ns)
+            (call "{local_peer_id}" ("" "") [#ns.$.[0] #ns.$.[1] #ns])
+        )
      )"#);
 
     let result = checked_call_vm!(local_vm, <_>::default(), join_stream_script, "", "");

@@ -405,7 +405,10 @@ fn recursive_stream_fold_with_n_service_call() {
             )
            )
           )
-          (call %init_peer_id% ("op" "identity") [$result] result-fix)
+          (seq
+            (canon %init_peer_id% $result #canon_stream)
+            (call %init_peer_id% ("op" "identity") [#canon_stream] result-fix)
+          )
          )
         )
        )
