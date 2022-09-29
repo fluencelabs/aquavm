@@ -29,7 +29,12 @@ fn issue_331() {
                 (seq
                     (seq
                         (seq
-                            (call %init_peer_id% ("op" "array_length") [$status] array_length)
+                            (seq
+                                (new $status
+                                    (canon %init_peer_id% $status #status)
+                                )
+                                (call %init_peer_id% ("op" "array_length") [#status] array_length)
+                            )
                             (ap array_length $array-inline)
                         )
                         (seq
