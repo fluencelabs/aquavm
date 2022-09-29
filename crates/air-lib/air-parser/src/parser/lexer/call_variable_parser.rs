@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use super::AirPos;
 use super::LexerError;
 use super::LexerResult;
 use super::Token;
@@ -24,7 +25,7 @@ use std::str::CharIndices;
 
 pub(super) fn try_parse_call_variable(
     string_to_parse: &str,
-    start_pos: usize,
+    start_pos: AirPos,
 ) -> LexerResult<Token<'_>> {
     CallVariableParser::try_parse(string_to_parse, start_pos)
 }
@@ -45,20 +46,20 @@ struct ParserState {
     pub(self) met_tag: MetTag,
     pub(self) is_first_char: bool,
     pub(self) current_char: char,
-    pub(self) current_pos: usize,
+    pub(self) current_offset: usize,
 }
 
 struct CallVariableParser<'input> {
     string_to_parse_iter: Peekable<CharIndices<'input>>,
     string_to_parse: &'input str,
-    start_pos: usize,
+    start_pos: AirPos,
     state: ParserState,
 }
 
 impl<'input> CallVariableParser<'input> {
-    fn new(string_to_parse: &'input str, start_pos: usize) -> LexerResult<Self> {
+    fn new(string_to_parse: &'input str, start_pos: AirPos) -> LexerResult<Self> {
         let mut string_to_parse_iter = string_to_parse.char_indices().peekable();
-        let (current_pos, current_char) = match string_to_parse_iter.next() {
+        let (current_offset, current_char) = match string_to_parse_iter.next() {
             Some(pos_and_ch) => pos_and_ch,
             None => return Err(LexerError::empty_variable_or_const(start_pos..start_pos)),
         };
@@ -71,7 +72,7 @@ impl<'input> CallVariableParser<'input> {
             is_first_char: true,
             met_tag: MetTag::None,
             current_char,
-            current_pos,
+            current_offset,
         };
 
         let parser = Self {
@@ -86,7 +87,7 @@ impl<'input> CallVariableParser<'input> {
 
     pub(self) fn try_parse(
         string_to_parse: &'input str,
-        start_pos: usize,
+        start_pos: AirPos,
     ) -> LexerResult<Token<'input>> {
         let mut parser = Self::new(string_to_parse, start_pos)?;
 
@@ -112,7 +113,7 @@ impl<'input> CallVariableParser<'input> {
         };
 
         self.state.current_char = ch;
-        self.state.current_pos = pos;
+        self.state.current_offset = pos;
         self.state.is_first_char = false;
 
         true
@@ -186,7 +187,7 @@ impl<'input> CallVariableParser<'input> {
 
     fn try_parse_as_stream_start(&mut self) -> LexerResult<bool> {
         let stream_tag = MetTag::from_tag(self.current_char());
-        if self.current_pos() == 0 && stream_tag.is_tag() {
+        if self.current_offset() == 0 && stream_tag.is_tag() {
             if self.string_to_parse.len() == 1 {
                 let error_pos = self.pos_in_string_to_parse();
                 return Err(LexerError::empty_stream_name(error_pos..error_pos));
@@ -232,12 +233,12 @@ impl<'input> CallVariableParser<'input> {
 
     fn try_parse_first_met_dot(&mut self) -> LexerResult<bool> {
         if !self.dot_met() && self.current_char() == '.' {
-            if self.current_pos() == 0 {
+            if self.current_offset() == 0 {
                 return Err(LexerError::leading_dot(
                     self.start_pos..self.pos_in_string_to_parse(),
                 ));
             }
-            self.state.first_dot_met_pos = Some(self.current_pos());
+            self.state.first_dot_met_pos = Some(self.current_offset());
             return Ok(true);
         }
 
@@ -260,12 +261,12 @@ impl<'input> CallVariableParser<'input> {
         super::is_json_path_allowed_char(self.current_char())
     }
 
-    fn pos_in_string_to_parse(&self) -> usize {
-        self.start_pos + self.current_pos()
+    fn pos_in_string_to_parse(&self) -> AirPos {
+        self.start_pos + self.current_offset()
     }
 
-    fn current_pos(&self) -> usize {
-        self.state.current_pos
+    fn current_offset(&self) -> usize {
+        self.state.current_offset
     }
 
     fn current_char(&self) -> char {
@@ -273,7 +274,7 @@ impl<'input> CallVariableParser<'input> {
     }
 
     fn is_last_char(&self) -> bool {
-        self.current_pos() == self.string_to_parse.len() - 1
+        self.current_offset() == self.string_to_parse.len() - 1
     }
 
     fn to_variable_token<'v>(&self, name: &'v str) -> Token<'v> {
@@ -313,17 +314,18 @@ impl<'input> CallVariableParser<'input> {
         }
     }
 
-    fn try_to_variable_and_lambda(&self, lambda_start_pos: usize) -> LexerResult<Token<'input>> {
+    fn try_to_variable_and_lambda(&self, lambda_start_offset: usize) -> LexerResult<Token<'input>> {
         let lambda =
-            crate::parse_lambda(&self.string_to_parse[lambda_start_pos..]).map_err(|e| {
+            crate::parse_lambda(&self.string_to_parse[lambda_start_offset..]).map_err(|e| {
                 LexerError::lambda_parser_error(
-                    self.start_pos + lambda_start_pos..self.start_pos + self.string_to_parse.len(),
+                    self.start_pos + lambda_start_offset
+                        ..self.start_pos + self.string_to_parse.len(),
                     e.to_string(),
                 )
             })?;
 
-        let token =
-            self.to_variable_token_with_lambda(&self.string_to_parse[0..lambda_start_pos], lambda);
+        let token = self
+            .to_variable_token_with_lambda(&self.string_to_parse[0..lambda_start_offset], lambda);
         Ok(token)
     }
 
@@ -364,7 +366,9 @@ impl<'input> CallVariableParser<'input> {
             (true, None) => self.try_to_i64(),
             (true, Some(_)) => self.try_to_f64(),
             (false, None) => Ok(self.to_variable_token(self.string_to_parse)),
-            (false, Some(lambda_start_pos)) => self.try_to_variable_and_lambda(lambda_start_pos),
+            (false, Some(lambda_start_offset)) => {
+                self.try_to_variable_and_lambda(lambda_start_offset)
+            }
         }
     }
 }

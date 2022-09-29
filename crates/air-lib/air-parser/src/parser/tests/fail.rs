@@ -47,7 +47,7 @@ fn parse_fail_scalars() {
            (fail scalar)
         "#;
     let instruction = parse(source_code);
-    let expected = fail_scalar(ScalarWithLambda::new("scalar", None, 18));
+    let expected = fail_scalar(ScalarWithLambda::new("scalar", None, 18.into()));
     assert_eq!(instruction, expected)
 }
 
@@ -65,7 +65,7 @@ fn parse_fail_scalar_with_lambda() {
             }])
             .unwrap(),
         ),
-        18,
+        18.into(),
     ));
     assert_eq!(instruction, expected)
 }

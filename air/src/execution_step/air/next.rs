@@ -35,6 +35,12 @@ impl<'i> super::ExecutableInstruction<'i> for Next<'i> {
 
         if !fold_state.iterable.next() {
             maybe_meet_back_iterator(self, fold_state, trace_ctx)?;
+            if !fold_state.back_iteration_started && matches!(fold_state.iterable_type, IterableType::Stream(_)) {
+                // this set the last iteration of a next to not executed for fold over streams
+                // for more info see https://github.com/fluencelabs/aquavm/issues/333
+                exec_ctx.subgraph_complete = false;
+                fold_state.back_iteration_started = true;
+            }
 
             // just do nothing to exit
             return Ok(());

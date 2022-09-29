@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+use crate::AirPos;
+
 use super::air_lexer::Spanned;
 use super::AIRLexer;
 use super::LexerError;
@@ -26,17 +28,17 @@ use air_lambda_ast::Functor;
 use fstrings::f;
 use fstrings::format_args_f;
 
-fn run_lexer(input: &str) -> Vec<Spanned<Token<'_>, usize, LexerError>> {
+fn run_lexer(input: &str) -> Vec<Spanned<Token<'_>, AirPos, LexerError>> {
     let lexer = AIRLexer::new(input);
     lexer.collect()
 }
 
 #[allow(dead_code)]
 enum TokenCompareStrategy<'token> {
-    All(Vec<Spanned<Token<'token>, usize, LexerError>>),
-    Some(Vec<usize>, Vec<Spanned<Token<'token>, usize, LexerError>>),
-    One(usize, Spanned<Token<'token>, usize, LexerError>),
-    Single(Spanned<Token<'token>, usize, LexerError>),
+    All(Vec<Spanned<Token<'token>, AirPos, LexerError>>),
+    Some(Vec<usize>, Vec<Spanned<Token<'token>, AirPos, LexerError>>),
+    One(usize, Spanned<Token<'token>, AirPos, LexerError>),
+    Single(Spanned<Token<'token>, AirPos, LexerError>),
 }
 
 use TokenCompareStrategy::*;
@@ -58,93 +60,96 @@ fn lexer_test(input: &str, expected_tokens: TokenCompareStrategy) {
 
 #[test]
 fn air_instructions() {
-    lexer_test("call", Single(Ok((0, Token::Call, 4))));
+    lexer_test("call", Single(Ok((0.into(), Token::Call, 4.into()))));
 
     lexer_test(
         "(call)",
         All(vec![
-            Ok((0, Token::OpenRoundBracket, 1)),
-            Ok((1, Token::Call, 5)),
-            Ok((5, Token::CloseRoundBracket, 6)),
+            Ok((0.into(), Token::OpenRoundBracket, 1.into())),
+            Ok((1.into(), Token::Call, 5.into())),
+            Ok((5.into(), Token::CloseRoundBracket, 6.into())),
         ]),
     );
 
-    lexer_test("par", Single(Ok((0, Token::Par, 3))));
+    lexer_test("par", Single(Ok((0.into(), Token::Par, 3.into()))));
 
     lexer_test(
         "(par)",
         All(vec![
-            Ok((0, Token::OpenRoundBracket, 1)),
-            Ok((1, Token::Par, 4)),
-            Ok((4, Token::CloseRoundBracket, 5)),
+            Ok((0.into(), Token::OpenRoundBracket, 1.into())),
+            Ok((1.into(), Token::Par, 4.into())),
+            Ok((4.into(), Token::CloseRoundBracket, 5.into())),
         ]),
     );
 
-    lexer_test("seq", Single(Ok((0, Token::Seq, 3))));
+    lexer_test("seq", Single(Ok((0.into(), Token::Seq, 3.into()))));
 
     lexer_test(
         "(seq)",
         All(vec![
-            Ok((0, Token::OpenRoundBracket, 1)),
-            Ok((1, Token::Seq, 4)),
-            Ok((4, Token::CloseRoundBracket, 5)),
+            Ok((0.into(), Token::OpenRoundBracket, 1.into())),
+            Ok((1.into(), Token::Seq, 4.into())),
+            Ok((4.into(), Token::CloseRoundBracket, 5.into())),
         ]),
     );
 
-    lexer_test("null", Single(Ok((0, Token::Null, 4))));
+    lexer_test("null", Single(Ok((0.into(), Token::Null, 4.into()))));
 
     lexer_test(
         "(null)",
         All(vec![
-            Ok((0, Token::OpenRoundBracket, 1)),
-            Ok((1, Token::Null, 5)),
-            Ok((5, Token::CloseRoundBracket, 6)),
+            Ok((0.into(), Token::OpenRoundBracket, 1.into())),
+            Ok((1.into(), Token::Null, 5.into())),
+            Ok((5.into(), Token::CloseRoundBracket, 6.into())),
         ]),
     );
 
-    lexer_test("fail", Single(Ok((0, Token::Fail, 4))));
+    lexer_test("fail", Single(Ok((0.into(), Token::Fail, 4.into()))));
 
-    lexer_test("fold", Single(Ok((0, Token::Fold, 4))));
+    lexer_test("fold", Single(Ok((0.into(), Token::Fold, 4.into()))));
 
     lexer_test(
         "(fold)",
         All(vec![
-            Ok((0, Token::OpenRoundBracket, 1)),
-            Ok((1, Token::Fold, 5)),
-            Ok((5, Token::CloseRoundBracket, 6)),
+            Ok((0.into(), Token::OpenRoundBracket, 1.into())),
+            Ok((1.into(), Token::Fold, 5.into())),
+            Ok((5.into(), Token::CloseRoundBracket, 6.into())),
         ]),
     );
 
-    lexer_test("next", Single(Ok((0, Token::Next, 4))));
+    lexer_test("next", Single(Ok((0.into(), Token::Next, 4.into()))));
 
     lexer_test(
         "(next)",
         All(vec![
-            Ok((0, Token::OpenRoundBracket, 1)),
-            Ok((1, Token::Next, 5)),
-            Ok((5, Token::CloseRoundBracket, 6)),
+            Ok((0.into(), Token::OpenRoundBracket, 1.into())),
+            Ok((1.into(), Token::Next, 5.into())),
+            Ok((5.into(), Token::CloseRoundBracket, 6.into())),
         ]),
     );
 
-    lexer_test("match", Single(Ok((0, Token::Match, 5))));
+    lexer_test("match", Single(Ok((0.into(), Token::Match, 5.into()))));
 
     lexer_test(
         "(match)",
         All(vec![
-            Ok((0, Token::OpenRoundBracket, 1)),
-            Ok((1, Token::Match, 6)),
-            Ok((6, Token::CloseRoundBracket, 7)),
+            Ok((0.into(), Token::OpenRoundBracket, 1.into())),
+            Ok((1.into(), Token::Match, 6.into())),
+            Ok((6.into(), Token::CloseRoundBracket, 7.into())),
         ]),
     );
 
-    lexer_test("mismatch", Single(Ok((0, Token::MisMatch, 8))));
+    lexer_test(
+        "mismatch",
+        Single(Ok((0.into(), Token::MisMatch, 8.into()))),
+    );
 
     lexer_test(
         "(mismatch)",
         All(vec![
-            Ok((0, Token::OpenRoundBracket, 1)),
-            Ok((1, Token::MisMatch, 9)),
-            Ok((9, Token::CloseRoundBracket, 10)),
+            Ok((0.into(), Token::OpenRoundBracket, 1.into())),
+            Ok((1.into(), Token::MisMatch, 9.into())),
+            Ok((9.into(), Token::CloseRoundBracket, 10.into())),
         ]),
     );
 }
@@ -155,7 +160,7 @@ fn init_peer_id() {
 
     lexer_test(
         INIT_PEER_ID,
-        Single(Ok((0, Token::InitPeerId, INIT_PEER_ID.len()))),
+        Single(Ok((0.into(), Token::InitPeerId, INIT_PEER_ID.len().into()))),
     );
 }
 
@@ -165,7 +170,7 @@ fn timestamp() {
 
     lexer_test(
         TIMESTAMP,
-        Single(Ok((0, Token::Timestamp, TIMESTAMP.len()))),
+        Single(Ok((0.into(), Token::Timestamp, TIMESTAMP.len().into()))),
     );
 }
 
@@ -173,7 +178,7 @@ fn timestamp() {
 fn ttl() {
     const TTL: &str = "%ttl%";
 
-    lexer_test(TTL, Single(Ok((0, Token::TTL, TTL.len()))));
+    lexer_test(TTL, Single(Ok((0.into(), Token::TTL, TTL.len().into()))));
 }
 
 #[test]
@@ -183,12 +188,12 @@ fn stream() {
     lexer_test(
         STREAM,
         Single(Ok((
-            0,
+            0.into(),
             Token::Stream {
                 name: STREAM,
-                position: 0,
+                position: 0.into(),
             },
-            STREAM.len(),
+            STREAM.len().into(),
         ))),
     );
 }
@@ -200,12 +205,12 @@ fn canon_stream() {
     lexer_test(
         CANON_STREAM,
         Single(Ok((
-            0,
+            0.into(),
             Token::CanonStream {
                 name: CANON_STREAM,
-                position: 0,
+                position: 0.into(),
             },
-            CANON_STREAM.len(),
+            CANON_STREAM.len().into(),
         ))),
     );
 }
@@ -218,13 +223,13 @@ fn stream_with_functor() {
     lexer_test(
         &stream_with_functor,
         Single(Ok((
-            0,
+            0.into(),
             Token::StreamWithLambda {
                 name: stream_name,
                 lambda: LambdaAST::Functor(Functor::Length),
-                position: 0,
+                position: 0.into(),
             },
-            stream_with_functor.len(),
+            stream_with_functor.len().into(),
         ))),
     );
 }
@@ -237,13 +242,13 @@ fn canon_stream_with_functor() {
     lexer_test(
         &canon_stream_with_functor,
         Single(Ok((
-            0,
+            0.into(),
             Token::CanonStreamWithLambda {
                 name: canon_stream_name,
                 lambda: LambdaAST::Functor(Functor::Length),
-                position: 0,
+                position: 0.into(),
             },
-            canon_stream_with_functor.len(),
+            canon_stream_with_functor.len().into(),
         ))),
     );
 }
@@ -256,13 +261,13 @@ fn scalar_with_functor() {
     lexer_test(
         &scalar_with_functor,
         Single(Ok((
-            0,
+            0.into(),
             Token::ScalarWithLambda {
                 name: scalar_name,
                 lambda: LambdaAST::Functor(Functor::Length),
-                position: 0,
+                position: 0.into(),
             },
-            scalar_with_functor.len(),
+            scalar_with_functor.len().into(),
         ))),
     );
 }
@@ -274,9 +279,9 @@ fn string_literal() {
     lexer_test(
         STRING_LITERAL,
         Single(Ok((
-            0,
+            0.into(),
             Token::StringLiteral(&STRING_LITERAL[1..STRING_LITERAL.len() - 1]),
-            STRING_LITERAL.len(),
+            STRING_LITERAL.len().into(),
         ))),
     );
 }
@@ -289,9 +294,9 @@ fn integer_numbers() {
     lexer_test(
         &number_with_plus_sign,
         Single(Ok((
-            0,
+            0.into(),
             Token::I64(test_integer),
-            number_with_plus_sign.len(),
+            number_with_plus_sign.len().into(),
         ))),
     );
 
@@ -299,7 +304,11 @@ fn integer_numbers() {
 
     lexer_test(
         &number,
-        Single(Ok((0, Token::I64(test_integer), number.len()))),
+        Single(Ok((
+            0.into(),
+            Token::I64(test_integer),
+            number.len().into(),
+        ))),
     );
 
     let number_with_minus_sign = f!("-{test_integer}");
@@ -307,9 +316,9 @@ fn integer_numbers() {
     lexer_test(
         &number_with_minus_sign,
         Single(Ok((
-            0,
+            0.into(),
             Token::I64(-test_integer),
-            number_with_minus_sign.len(),
+            number_with_minus_sign.len().into(),
         ))),
     );
 }
@@ -322,9 +331,9 @@ fn float_number() {
     lexer_test(
         &float_number_with_plus_sign,
         Single(Ok((
-            0,
+            0.into(),
             Token::F64(test_float),
-            float_number_with_plus_sign.len(),
+            float_number_with_plus_sign.len().into(),
         ))),
     );
 
@@ -332,7 +341,11 @@ fn float_number() {
 
     lexer_test(
         &float_number,
-        Single(Ok((0, Token::F64(test_float), float_number.len()))),
+        Single(Ok((
+            0.into(),
+            Token::F64(test_float),
+            float_number.len().into(),
+        ))),
     );
 
     let float_number_with_minus_sign = f!("-{test_float}");
@@ -340,9 +353,9 @@ fn float_number() {
     lexer_test(
         &float_number_with_minus_sign,
         Single(Ok((
-            0,
+            0.into(),
             Token::F64(-test_float),
-            float_number_with_minus_sign.len(),
+            float_number_with_minus_sign.len().into(),
         ))),
     );
 }
@@ -366,7 +379,9 @@ fn too_big_float_number() {
 
     lexer_test(
         FNUMBER,
-        Single(Err(LexerError::too_big_float(0..FNUMBER.len()))),
+        Single(Err(LexerError::too_big_float(
+            0.into()..FNUMBER.len().into(),
+        ))),
     );
 }
 
@@ -378,7 +393,7 @@ fn lambda() {
     lexer_test(
         LAMBDA,
         Single(Ok((
-            0,
+            0.into(),
             Token::ScalarWithLambda {
                 name: "value",
                 lambda: LambdaAST::try_from_accessors(vec![
@@ -388,9 +403,9 @@ fn lambda() {
                     ValueAccessor::ArrayAccess { idx: 1 },
                 ])
                 .unwrap(),
-                position: 0,
+                position: 0.into(),
             },
-            LAMBDA.len(),
+            LAMBDA.len().into(),
         ))),
     );
 }
@@ -401,14 +416,18 @@ fn lambda_path_numbers() {
 
     lexer_test(
         LAMBDA,
-        Single(Err(LexerError::unallowed_char_in_number(6..6))),
+        Single(Err(LexerError::unallowed_char_in_number(
+            6.into()..6.into(),
+        ))),
     );
 
     const LAMBDA1: &str = r#"+12345.$[$@[]():?.*,"]"#;
 
     lexer_test(
         LAMBDA1,
-        Single(Err(LexerError::unallowed_char_in_number(7..7))),
+        Single(Err(LexerError::unallowed_char_in_number(
+            7.into()..7.into(),
+        ))),
     );
 }
 
@@ -416,13 +435,16 @@ fn lambda_path_numbers() {
 fn leading_dot() {
     const LEADING_DOT: &str = ".111";
 
-    lexer_test(LEADING_DOT, Single(Err(LexerError::leading_dot(0..0))));
+    lexer_test(
+        LEADING_DOT,
+        Single(Err(LexerError::leading_dot(0.into()..0.into()))),
+    );
 
     const LEADING_DOT_AFTER_SIGN: &str = "+.1111";
 
     lexer_test(
         LEADING_DOT_AFTER_SIGN,
-        Single(Err(LexerError::leading_dot(1..1))),
+        Single(Err(LexerError::leading_dot(1.into()..1.into()))),
     );
 }
 
@@ -432,7 +454,10 @@ fn unclosed_quote() {
 
     lexer_test(
         UNCLOSED_QUOTE_AIR,
-        One(4, Err(LexerError::is_not_alphanumeric(33..33))),
+        One(
+            4,
+            Err(LexerError::is_not_alphanumeric(33.into()..33.into())),
+        ),
     );
 }
 
@@ -443,7 +468,7 @@ fn bad_value() {
 
     lexer_test(
         INVALID_VALUE,
-        Single(Err(LexerError::is_not_alphanumeric(3..3))),
+        Single(Err(LexerError::is_not_alphanumeric(3.into()..3.into()))),
     );
 
     // value contains ! that only allowed at the end of a lambda expression
@@ -451,7 +476,7 @@ fn bad_value() {
 
     lexer_test(
         INVALID_VALUE2,
-        Single(Err(LexerError::invalid_lambda(7..7))),
+        Single(Err(LexerError::invalid_lambda(7.into()..7.into()))),
     );
 }
 
@@ -461,7 +486,7 @@ fn invalid_lambda() {
 
     lexer_test(
         INVALID_LAMBDA,
-        Single(Err(LexerError::invalid_lambda(7..7))),
+        Single(Err(LexerError::invalid_lambda(7.into()..7.into()))),
     );
 }
 
@@ -470,7 +495,10 @@ fn invalid_lambda_numbers() {
     // this lambda contains all allowed in lambda characters
     const LAMBDA: &str = r#"+12345$[$@[]():?.*,"!]"#;
 
-    lexer_test(LAMBDA, Single(Err(LexerError::is_not_alphanumeric(6..6))));
+    lexer_test(
+        LAMBDA,
+        Single(Err(LexerError::is_not_alphanumeric(6.into()..6.into()))),
+    );
 }
 
 #[test]
@@ -479,7 +507,7 @@ fn last_error() {
 
     lexer_test(
         LAST_ERROR,
-        Single(Ok((0, Token::LastError, LAST_ERROR.len()))),
+        Single(Ok((0.into(), Token::LastError, LAST_ERROR.len().into()))),
     );
 }
 
@@ -494,7 +522,10 @@ fn last_error_instruction() {
         .unwrap(),
     );
 
-    lexer_test(LAST_ERROR, Single(Ok((0, token, LAST_ERROR.len()))));
+    lexer_test(
+        LAST_ERROR,
+        Single(Ok((0.into(), token, LAST_ERROR.len().into()))),
+    );
 }
 
 #[test]
@@ -507,7 +538,10 @@ fn last_error_message() {
         }])
         .unwrap(),
     );
-    lexer_test(LAST_ERROR, Single(Ok((0, token, LAST_ERROR.len()))));
+    lexer_test(
+        LAST_ERROR,
+        Single(Ok((0.into(), token, LAST_ERROR.len().into()))),
+    );
 }
 
 #[test]
@@ -520,7 +554,10 @@ fn last_error_peer_id() {
         }])
         .unwrap(),
     );
-    lexer_test(LAST_ERROR, Single(Ok((0, token, LAST_ERROR.len()))));
+    lexer_test(
+        LAST_ERROR,
+        Single(Ok((0.into(), token, LAST_ERROR.len().into()))),
+    );
 }
 
 #[test]
@@ -533,7 +570,10 @@ fn last_error_non_standard_field() {
         }])
         .unwrap(),
     );
-    lexer_test(LAST_ERROR, Single(Ok((0, token, LAST_ERROR.len()))));
+    lexer_test(
+        LAST_ERROR,
+        Single(Ok((0.into(), token, LAST_ERROR.len().into()))),
+    );
 }
 
 #[test]
@@ -542,14 +582,22 @@ fn booleans() {
 
     lexer_test(
         TRUE_BOOL_CONST,
-        Single(Ok((0, Token::Boolean(true), TRUE_BOOL_CONST.len()))),
+        Single(Ok((
+            0.into(),
+            Token::Boolean(true),
+            TRUE_BOOL_CONST.len().into(),
+        ))),
     );
 
     const FALSE_BOOL_CONST: &str = "false";
 
     lexer_test(
         FALSE_BOOL_CONST,
-        Single(Ok((0, Token::Boolean(false), FALSE_BOOL_CONST.len()))),
+        Single(Ok((
+            0.into(),
+            Token::Boolean(false),
+            FALSE_BOOL_CONST.len().into(),
+        ))),
     );
 
     const NON_BOOL_CONST: &str = "true1";
@@ -557,12 +605,12 @@ fn booleans() {
     lexer_test(
         NON_BOOL_CONST,
         Single(Ok((
-            0,
+            0.into(),
             Token::Scalar {
                 name: NON_BOOL_CONST,
-                position: 0,
+                position: 0.into(),
             },
-            NON_BOOL_CONST.len(),
+            NON_BOOL_CONST.len().into(),
         ))),
     );
 }
@@ -578,8 +626,8 @@ fn match_with_empty_array__() {
         Some(
             vec![3, 4],
             vec![
-                Ok((14, Token::OpenSquareBracket, 15)),
-                Ok((15, Token::CloseSquareBracket, 16)),
+                Ok((14.into(), Token::OpenSquareBracket, 15.into())),
+                Ok((15.into(), Token::CloseSquareBracket, 16.into())),
             ],
         ),
     );
