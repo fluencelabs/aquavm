@@ -87,9 +87,10 @@ fn wait_on_empty_stream_json_path() {
      )"#);
 
     let result = checked_call_vm!(local_vm, <_>::default(), join_stream_script, "", "");
+    print_trace(&result, "");
     let actual_trace = trace_from_result(&result);
 
-    assert_eq!(actual_trace.len(), 1); // only the first call should produce a trace
+    assert_eq!(actual_trace.len(), 2); // only the first call and canon should produce a trace
 }
 
 #[test]

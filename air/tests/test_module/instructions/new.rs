@@ -161,12 +161,9 @@ fn check_influence_to_not_restricted() {
                 )
             )
             (seq
-                (xor
-                    (seq
-                        (canon "{vm_peer_id}" $a #a)
-                        (call "{vm_peer_id}" ("callbackSrv" "response") [#a])  ;; shouldn't execute
-                    )
-                    (call "{vm_peer_id}" ("callbackSrv" "response") [#a])  ;; should be empty
+                (seq
+                    (canon "{vm_peer_id}" $a #aa)
+                    (call "{vm_peer_id}" ("callbackSrv" "response") [#aa])  ;; should be empty
                 )
                 (call "{vm_peer_id}" ("callbackSrv" "response") [a-fix])  ;; should be empty
             )
@@ -182,9 +179,13 @@ fn check_influence_to_not_restricted() {
         executed_state::ap(Some(0)),
         executed_state::ap(Some(0)),
         executed_state::ap(Some(0)),
+        executed_state::canon(vec![2.into()]),
         executed_state::scalar(json!(["more"])),
+        executed_state::canon(vec![0.into()]),
         executed_state::scalar(json!(["push more"])),
+        executed_state::canon(vec![1.into()]),
         executed_state::scalar(json!(["push more"])),
+        executed_state::canon(vec![]),
         executed_state::scalar(json!([])),
         executed_state::scalar(json!(["more"])),
     ];

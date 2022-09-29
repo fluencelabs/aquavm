@@ -94,7 +94,10 @@ fn length_functor_for_stream() {
 fn length_functor_for_empty_stream() {
     let script = r#"
         (new $stream
-            (call %init_peer_id% ("" "") [$stream.length]) ; behaviour = echo
+            (seq
+                (canon %init_peer_id% $stream #canon_stream)
+                (call %init_peer_id% ("" "") [#canon_stream.length]) ; behaviour = echo
+            )
         )
         "#;
 
@@ -105,7 +108,7 @@ fn length_functor_for_empty_stream() {
     let result = executor.execute_one(init_peer_id).unwrap();
     let actual_trace = trace_from_result(&result);
 
-    let expected_trace = vec![executed_state::scalar_number(0)];
+    let expected_trace = vec![executed_state::canon(vec![]), executed_state::scalar_number(0)];
     assert_eq!(actual_trace, expected_trace);
 }
 
