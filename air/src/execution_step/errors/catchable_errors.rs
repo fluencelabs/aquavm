@@ -88,10 +88,6 @@ pub enum CatchableError {
     #[error("variable with name '{0}' was cleared by new and then wasn't set")]
     VariableWasNotInitializedAfterNew(String),
 
-    /// Canon instruction can't canonicalize a stream since it's been found.
-    #[error("stream with name {0} wasn't defined, so canon instruction can't canonicalize it")]
-    StreamsForCanonNotFound(String),
-
     /// This error type is occurred when the length functor applied to a value of non-array type.
     #[error("the length functor could applied only to an array-like value, but it's applied to '{0}'")]
     LengthFunctorAppliedToNotArray(JValue),
