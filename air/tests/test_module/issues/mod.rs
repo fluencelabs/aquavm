@@ -27,3 +27,7 @@ mod issue_221;
 mod issue_222;
 mod issue_241;
 mod issue_295;
+mod issue_300;
+mod issue_304;
+mod issue_306;
+mod issue_331;

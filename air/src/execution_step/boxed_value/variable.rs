@@ -15,7 +15,7 @@
  */
 
 use super::Generation;
-use air_parser::ast;
+use air_parser::{ast, AirPos};
 
 #[derive(Clone, Copy, Debug)]
 pub(crate) enum Variable<'i> {
@@ -26,7 +26,7 @@ pub(crate) enum Variable<'i> {
     Stream {
         name: &'i str,
         generation: Generation,
-        position: usize,
+        position: AirPos,
     },
     CanonStream {
         name: &'i str,
@@ -36,15 +36,6 @@ pub(crate) enum Variable<'i> {
 impl<'i> Variable<'i> {
     pub(crate) fn scalar(name: &'i str) -> Self {
         Self::Scalar { name }
-    }
-
-    #[allow(dead_code)] // it'll be used in BoxedValues
-    pub(crate) fn stream(name: &'i str, generation: Generation, position: usize) -> Self {
-        Self::Stream {
-            name,
-            generation,
-            position,
-        }
     }
 
     pub(crate) fn canon_stream(name: &'i str) -> Self {

@@ -24,6 +24,7 @@ mod fold_scalar;
 mod fold_stream;
 mod match_;
 mod mismatch;
+mod never;
 mod new;
 mod next;
 mod null;
@@ -80,6 +81,7 @@ impl<'i> ExecutableInstruction<'i> for Instruction<'i> {
             Instruction::Fail(fail) => execute!(self, fail, exec_ctx, trace_ctx),
             Instruction::FoldScalar(fold) => execute!(self, fold, exec_ctx, trace_ctx),
             Instruction::FoldStream(fold) => execute!(self, fold, exec_ctx, trace_ctx),
+            Instruction::Never(never) => execute!(self, never, exec_ctx, trace_ctx),
             Instruction::New(new) => execute!(self, new, exec_ctx, trace_ctx),
             Instruction::Next(next) => execute!(self, next, exec_ctx, trace_ctx),
             Instruction::Null(null) => execute!(self, null, exec_ctx, trace_ctx),

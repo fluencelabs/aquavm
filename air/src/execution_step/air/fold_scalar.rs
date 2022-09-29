@@ -39,8 +39,7 @@ impl<'i> ExecutableInstruction<'i> for FoldScalar<'i> {
                 joinable!(create_scalar_wl_iterable(scalar, exec_ctx), exec_ctx, ())?
             }
             FoldScalarIterable::CanonStream(canon_stream) => {
-                // TODO: use joinable in a separate PR
-                create_canon_stream_iterable_value(canon_stream, exec_ctx)?
+                joinable!(create_canon_stream_iterable_value(canon_stream, exec_ctx), exec_ctx, ())?
             }
             // just do nothing on an empty array
             FoldScalarIterable::EmptyArray => return Ok(()),

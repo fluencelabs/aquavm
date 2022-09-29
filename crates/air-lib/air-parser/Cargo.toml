@@ -1,7 +1,7 @@
 [package]
 name = "air-parser"
 description = "Parser of the AIR scripts in a form of string to AST"
-version = "0.7.1"
+version = "0.7.2"
 authors = ["Fluence Labs"]
 edition = "2018"
 license = "Apache-2.0"
@@ -10,30 +10,30 @@ keywords = ["fluence", "air", "parser", "lalrpop"]
 categories = ["wasm"]
 
 [build-dependencies]
-lalrpop = "0.19.6"
+lalrpop = "0.19.8"
 
 [dependencies]
 air-lambda-ast = { path = "../lambda/ast" }
 air-lambda-parser = { path = "../lambda/parser" }
 
-lalrpop-util = "0.19.6"
-regex = "1.5.4"
+lalrpop-util = "0.19.8"
+regex = "1.6.0"
 codespan = "0.11.1"
 codespan-reporting = "0.11.1"
 multimap = "0.8.3"
 
 # TODO: hide serde behind a feature
-serde = { version = "1.0.118", features = ["rc", "derive"] }
-serde_json = "1.0.61"
+serde = { version = "1.0.144", features = ["rc", "derive"] }
+serde_json = "1.0.85"
 
-itertools = "0.10.0"
-thiserror = "1.0.23"
-tracing = "0.1.35"
+itertools = "0.10.4"
+thiserror = "1.0.35"
+tracing = "0.1.36"
 
 [dev-dependencies]
 fstrings = "0.2.3"
-criterion = "0.3.3"
-non-empty-vec = { version = "0.2.0" }
+criterion = "0.4.0"
+non-empty-vec = { version = "0.2.3" }
 
 [[bench]]
 name = "parser"

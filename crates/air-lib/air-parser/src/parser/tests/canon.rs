@@ -33,8 +33,8 @@ fn canon_with_literal_peer_id() {
     let actual = parse(&source_code);
     let expected = canon(
         ResolvableToStringVariable::Literal(peer_id),
-        Stream::new(stream, 26),
-        CanonStream::new(canon_stream, 34),
+        Stream::new(stream, 26.into()),
+        CanonStream::new(canon_stream, 34.into()),
     );
 
     assert_eq!(actual, expected);
@@ -51,9 +51,9 @@ fn canon_with_variable_peer_id() {
 
     let actual = parse(&source_code);
     let expected = canon(
-        ResolvableToStringVariable::Scalar(Scalar::new(peer_id, 16)),
-        Stream::new(stream, 24),
-        CanonStream::new(canon_stream, 32),
+        ResolvableToStringVariable::Scalar(Scalar::new(peer_id, 16.into())),
+        Stream::new(stream, 24.into()),
+        CanonStream::new(canon_stream, 32.into()),
     );
 
     assert_eq!(actual, expected);

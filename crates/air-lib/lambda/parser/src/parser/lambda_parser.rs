@@ -14,39 +14,54 @@
  * limitations under the License.
  */
 
-use super::lexer::AccessorsLexer;
-use super::va_lambda;
-use super::LambdaParserError;
+use super::lexer::LambdaASTLexer;
 use super::LambdaParserResult;
+use crate::parser::errors::IncorrectLambdaError;
+use crate::parser::va_lambda::RawLambdaASTParser;
+use crate::Functor;
 use crate::LambdaAST;
 use crate::ValueAccessor;
 
-use va_lambda::LambdaParser;
+use std::convert::TryFrom;
+use std::convert::TryInto;
 
 // Caching parser to cache internal regexes, which are expensive to instantiate
 // See also https://github.com/lalrpop/lalrpop/issues/269
-thread_local!(static PARSER: LambdaParser = LambdaParser::new());
+thread_local!(static PARSER: RawLambdaASTParser = RawLambdaASTParser::new());
 
-/// Parse AIR `source_code` to `Box<Instruction>`
+/// Parse AIR lambda ast to `LambdaAST`
 pub fn parse(lambda: &str) -> LambdaParserResult<'_, LambdaAST> {
     PARSER.with(|parser| {
         let mut errors = Vec::new();
-        let lexer = AccessorsLexer::new(lambda);
+        let lexer = LambdaASTLexer::new(lambda);
         let result = parser.parse(lambda, &mut errors, lexer);
 
         match result {
-            Ok(accessors) if errors.is_empty() => try_to_lambda(accessors),
+            Ok(lambda_ast) if errors.is_empty() => lambda_ast.try_into().map_err(Into::into),
             Ok(_) => Err(errors.into()),
             Err(e) => Err(e.into()),
         }
     })
 }
 
-fn try_to_lambda(accessors: Vec<ValueAccessor>) -> LambdaParserResult<'_, LambdaAST> {
-    if accessors.is_empty() {
-        return Err(LambdaParserError::EmptyLambda);
-    }
+impl<'input> TryFrom<RawLambdaAST<'input>> for LambdaAST<'input> {
+    type Error = IncorrectLambdaError;
 
-    let ast = unsafe { LambdaAST::new_unchecked(accessors) };
-    Ok(ast)
+    fn try_from(raw_lambda_ast: RawLambdaAST<'input>) -> Result<Self, Self::Error> {
+        match raw_lambda_ast {
+            RawLambdaAST::ValuePath(accessors) => {
+                LambdaAST::try_from_accessors(accessors).or(Err(IncorrectLambdaError::EmptyLambda))
+            }
+            RawLambdaAST::Functor(functor) => Ok(LambdaAST::from_functor(functor)),
+            RawLambdaAST::Error => Err(IncorrectLambdaError::InternalError),
+        }
+    }
+}
+
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub(crate) enum RawLambdaAST<'input> {
+    Functor(Functor),
+    ValuePath(Vec<ValueAccessor<'input>>),
+    // needed to allow parser catch all errors from a lambda expression without stopping on the very first one.
+    Error,
 }

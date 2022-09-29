@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use super::AirPos;
 use crate::LambdaAST;
 
 use serde::Deserialize;
@@ -29,30 +30,30 @@ pub enum Token<'input> {
 
     Scalar {
         name: &'input str,
-        position: usize,
+        position: AirPos,
     },
     ScalarWithLambda {
         name: &'input str,
         lambda: LambdaAST<'input>,
-        position: usize,
+        position: AirPos,
     },
     Stream {
         name: &'input str,
-        position: usize,
+        position: AirPos,
     },
     StreamWithLambda {
         name: &'input str,
         lambda: LambdaAST<'input>,
-        position: usize,
+        position: AirPos,
     },
     CanonStream {
         name: &'input str,
-        position: usize,
+        position: AirPos,
     },
     CanonStreamWithLambda {
         name: &'input str,
         lambda: LambdaAST<'input>,
-        position: usize,
+        position: AirPos,
     },
 
     StringLiteral(&'input str),
@@ -74,6 +75,7 @@ pub enum Token<'input> {
     Fail,
     Fold,
     Xor,
+    Never,
     New,
     Next,
     Null,

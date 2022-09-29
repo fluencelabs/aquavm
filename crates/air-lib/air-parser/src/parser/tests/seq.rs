@@ -32,11 +32,11 @@ fn parse_seq() {
     let instruction = parse(source_code);
     let expected = seq(
         call(
-            ResolvableToStringVariable::Scalar(Scalar::new("peer_id", 32)),
-            ResolvableToStringVariable::Scalar(Scalar::new("service_id", 41)),
-            ResolvableToStringVariable::Scalar(Scalar::new("function_name", 52)),
+            ResolvableToStringVariable::Scalar(Scalar::new("peer_id", 32.into())),
+            ResolvableToStringVariable::Scalar(Scalar::new("service_id", 41.into())),
+            ResolvableToStringVariable::Scalar(Scalar::new("function_name", 52.into())),
             Rc::new(vec![ImmutableValue::EmptyArray, ImmutableValue::EmptyArray]),
-            CallOutputValue::Scalar(Scalar::new("output", 75)),
+            CallOutputValue::Scalar(Scalar::new("output", 75.into())),
         ),
         call(
             ResolvableToStringVariable::Literal("peer_id"),
@@ -45,7 +45,7 @@ fn parse_seq() {
             Rc::new(vec![
                 ImmutableValue::Literal("hello"),
                 ImmutableValue::EmptyArray,
-                ImmutableValue::Variable(ImmutableVariable::scalar("name", 154)),
+                ImmutableValue::Variable(ImmutableVariable::scalar("name", 154.into())),
             ]),
             CallOutputValue::None,
         ),
@@ -68,16 +68,16 @@ fn parse_seq_seq() {
     let expected = seq(
         seq(
             call(
-                ResolvableToStringVariable::Scalar(Scalar::new("peer_id", 53)),
-                ResolvableToStringVariable::Scalar(Scalar::new("service_id", 62)),
-                ResolvableToStringVariable::Scalar(Scalar::new("function_name", 73)),
+                ResolvableToStringVariable::Scalar(Scalar::new("peer_id", 53.into())),
+                ResolvableToStringVariable::Scalar(Scalar::new("service_id", 62.into())),
+                ResolvableToStringVariable::Scalar(Scalar::new("function_name", 73.into())),
                 Rc::new(vec![]),
                 CallOutputValue::None,
             ),
             call(
-                ResolvableToStringVariable::Scalar(Scalar::new("peer_id", 114)),
+                ResolvableToStringVariable::Scalar(Scalar::new("peer_id", 114.into())),
                 ResolvableToStringVariable::Literal("service_B"),
-                ResolvableToStringVariable::Scalar(Scalar::new("function_name", 135)),
+                ResolvableToStringVariable::Scalar(Scalar::new("function_name", 135.into())),
                 Rc::new(vec![]),
                 CallOutputValue::None,
             ),
@@ -88,9 +88,9 @@ fn parse_seq_seq() {
             ResolvableToStringVariable::Literal("function_name"),
             Rc::new(vec![
                 ImmutableValue::Literal("hello"),
-                ImmutableValue::Variable(ImmutableVariable::scalar("name", 236)),
+                ImmutableValue::Variable(ImmutableVariable::scalar("name", 236.into())),
             ]),
-            CallOutputValue::Stream(Stream::new("$output", 242)),
+            CallOutputValue::Stream(Stream::new("$output", 242.into())),
         ),
     );
     assert_eq!(instruction, expected);

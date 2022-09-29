@@ -2,14 +2,14 @@ use crate::ast::*;
 use crate::parser::ParserError;
 use crate::parser::VariableValidator;
 use crate::parser::Span;
-use crate::parser::lexer::Token;
+use crate::parser::lexer::{AirPos, Token};
 
 use air_lambda_parser::LambdaAST;
 use lalrpop_util::ErrorRecovery;
 use std::rc::Rc;
 
 // the only thing why input matters here is just introducing lifetime for Token
-grammar<'err, 'input, 'v>(input: &'input str, errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>, validator: &'v mut VariableValidator<'input>);
+grammar<'err, 'input, 'v>(input: &'input str, errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>, validator: &'v mut VariableValidator<'input>);
 
 pub AIR = Instr;
 
@@ -46,6 +46,7 @@ Instr: Box<Instruction<'input>> = {
 
     "(" seq <l:Instr> <r:Instr> ")" => Box::new(Instruction::Seq(Seq::new(l, r))),
     "(" par <l:Instr> <r:Instr> ")" => Box::new(Instruction::Par(Par::new(l, r))),
+    "(" never ")" => Box::new(Instruction::Never(Never)),
     "(" null ")" => Box::new(Instruction::Null(Null)),
 
     <left: @L> "(" new <argument: NewArgument> <instruction:Instr> ")" <right: @R> => {
@@ -220,7 +221,7 @@ CanonStreamArgument: CanonStream<'input> = {
 }
 
 extern {
-    type Location = usize;
+    type Location = AirPos;
     type Error = ParserError;
 
     enum Token<'input> {
@@ -229,12 +230,12 @@ extern {
         "[" => Token::OpenSquareBracket,
         "]" => Token::CloseSquareBracket,
 
-        Scalar => Token::Scalar { name:<&'input str>, position: <usize> },
-        ScalarWithLambda => Token::ScalarWithLambda { name: <&'input str>, lambda: <LambdaAST<'input>>, position: <usize> },
-        Stream => Token::Stream { name: <&'input str>, position: <usize> },
-        StreamWithLambda => Token::StreamWithLambda {name: <&'input str>, lambda:<LambdaAST<'input>>, position: <usize>},
-        CanonStream => Token::CanonStream { name: <&'input str>, position: <usize> },
-        CanonStreamWithLambda => Token::CanonStreamWithLambda {name: <&'input str>, lambda:<LambdaAST<'input>>, position: <usize>},
+        Scalar => Token::Scalar { name:<&'input str>, position: <AirPos> },
+        ScalarWithLambda => Token::ScalarWithLambda { name: <&'input str>, lambda: <LambdaAST<'input>>, position: <AirPos> },
+        Stream => Token::Stream { name: <&'input str>, position: <AirPos> },
+        StreamWithLambda => Token::StreamWithLambda {name: <&'input str>, lambda:<LambdaAST<'input>>, position: <AirPos>},
+        CanonStream => Token::CanonStream { name: <&'input str>, position: <AirPos> },
+        CanonStreamWithLambda => Token::CanonStreamWithLambda {name: <&'input str>, lambda:<LambdaAST<'input>>, position: <AirPos>},
 
         Literal => Token::StringLiteral(<&'input str>),
         I64 => Token::I64(<i64>),
@@ -255,6 +256,7 @@ extern {
         fail => Token::Fail,
         fold => Token::Fold,
         xor => Token::Xor,
+        never => Token::Never,
         new => Token::New,
         next => Token::Next,
         null => Token::Null,

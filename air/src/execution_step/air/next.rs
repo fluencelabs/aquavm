@@ -19,6 +19,7 @@ use super::ExecutionCtx;
 use super::ExecutionResult;
 use super::FoldState;
 use super::TraceHandler;
+use crate::execution_step::PEEK_ALLOWED_ON_NON_EMPTY;
 use crate::log_instruction;
 use crate::trace_to_exec_err;
 
@@ -34,6 +35,12 @@ impl<'i> super::ExecutableInstruction<'i> for Next<'i> {
 
         if !fold_state.iterable.next() {
             maybe_meet_back_iterator(self, fold_state, trace_ctx)?;
+            if !fold_state.back_iteration_started && matches!(fold_state.iterable_type, IterableType::Stream(_)) {
+                // this set the last iteration of a next to not executed for fold over streams
+                // for more info see https://github.com/fluencelabs/aquavm/issues/333
+                exec_ctx.subgraph_complete = false;
+                fold_state.back_iteration_started = true;
+            }
 
             // just do nothing to exit
             return Ok(());
@@ -63,7 +70,10 @@ fn maybe_meet_iteration_start<'i>(
 ) -> ExecutionResult<()> {
     if let IterableType::Stream(fold_id) = &fold_state.iterable_type {
         trace_to_exec_err!(
-            trace_ctx.meet_iteration_start(*fold_id, fold_state.iterable.peek().unwrap().pos()),
+            trace_ctx.meet_iteration_start(
+                *fold_id,
+                fold_state.iterable.peek().expect(PEEK_ALLOWED_ON_NON_EMPTY).pos()
+            ),
             next
         )?;
     }

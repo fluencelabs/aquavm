@@ -59,8 +59,9 @@ fn ap_with_string_literal() {
     let script = f!(r#"
         (seq
             (ap "{some_string}" $stream)
-            (call "{vm_1_peer_id}" ("" "") [$stream])
-        )
+            (seq
+                (canon "{vm_1_peer_id}" $stream #canon_stream)
+                (call "{vm_1_peer_id}" ("" "") [#canon_stream])))
         "#);
 
     let result = checked_call_vm!(vm_1, <_>::default(), script, "", "");
@@ -68,6 +69,7 @@ fn ap_with_string_literal() {
     let actual_trace = trace_from_result(&result);
     let expected_state = vec![
         executed_state::ap(Some(0)),
+        executed_state::canon(vec![0.into()]),
         executed_state::scalar(json!([some_string])),
     ];
 
@@ -83,14 +85,19 @@ fn ap_with_bool_literal() {
     let script = f!(r#"
         (seq
             (ap true $stream)
-            (call "{vm_1_peer_id}" ("" "") [$stream])
-        )
+            (seq
+                (canon "{vm_1_peer_id}" $stream #canon_stream)
+                (call "{vm_1_peer_id}" ("" "") [#canon_stream])))
         "#);
 
     let result = checked_call_vm!(vm_1, <_>::default(), script, "", "");
 
     let actual_trace = trace_from_result(&result);
-    let expected_state = vec![executed_state::ap(Some(0)), executed_state::scalar(json!([true]))];
+    let expected_state = vec![
+        executed_state::ap(Some(0)),
+        executed_state::canon(vec![0.into()]),
+        executed_state::scalar(json!([true])),
+    ];
 
     assert_eq!(actual_trace, expected_state);
     assert!(result.next_peer_pks.is_empty());
@@ -104,14 +111,19 @@ fn ap_with_number_literal() {
     let script = f!(r#"
         (seq
             (ap 100 $stream)
-            (call "{vm_1_peer_id}" ("" "") [$stream])
-        )
+            (seq
+                (canon "{vm_1_peer_id}" $stream #canon_stream)
+                (call "{vm_1_peer_id}" ("" "") [#canon_stream])))
         "#);
 
     let result = checked_call_vm!(vm_1, <_>::default(), script, "", "");
 
     let actual_trace = trace_from_result(&result);
-    let expected_state = vec![executed_state::ap(Some(0)), executed_state::scalar(json!([100]))];
+    let expected_state = vec![
+        executed_state::ap(Some(0)),
+        executed_state::canon(vec![0.into()]),
+        executed_state::scalar(json!([100])),
+    ];
 
     assert_eq!(actual_trace, expected_state);
     assert!(result.next_peer_pks.is_empty());
@@ -125,14 +137,19 @@ fn ap_with_last_error() {
     let script = f!(r#"
         (seq
             (ap %last_error% $stream)
-            (call "{vm_1_peer_id}" ("" "") [$stream])
-        )
+            (seq
+                (canon "{vm_1_peer_id}" $stream #canon_stream)
+                (call "{vm_1_peer_id}" ("" "") [#canon_stream])))
         "#);
 
     let result = checked_call_vm!(vm_1, <_>::default(), script, "", "");
 
     let actual_trace = trace_from_result(&result);
-    let expected_state = vec![executed_state::ap(Some(0)), executed_state::scalar(json!([null]))];
+    let expected_state = vec![
+        executed_state::ap(Some(0)),
+        executed_state::canon(vec![0.into()]),
+        executed_state::scalar(json!([null])),
+    ];
 
     assert_eq!(actual_trace, expected_state);
     assert!(result.next_peer_pks.is_empty());
@@ -193,10 +210,10 @@ fn ap_with_dst_stream() {
         (seq
             (seq
                 (call "{vm_1_peer_id}" ("" "") ["scalar_1_result"] scalar_1)
-                (ap scalar_1 $stream)
-            )
-            (call "{vm_2_peer_id}" ("" "") [$stream])
-        )
+                (ap scalar_1 $stream))
+            (seq
+                (canon "{vm_2_peer_id}" $stream #canon_stream)
+                (call "{vm_2_peer_id}" ("" "") [#canon_stream])))
         "#);
 
     let result = checked_call_vm!(vm_1, <_>::default(), &script, "", "");
@@ -206,6 +223,7 @@ fn ap_with_dst_stream() {
     let expected_state = vec![
         executed_state::scalar(json!({ "field": test_value })),
         executed_state::ap(Some(0)),
+        executed_state::canon(vec![1.into()]),
         executed_state::scalar(json!([{ "field": test_value }])),
     ];
 
@@ -230,7 +248,9 @@ fn ap_canon_stream_with_lambda() {
                 (canon "{vm_1_peer_id}" $stream #canon_stream)
                 (seq
                     (ap #canon_stream.$.[1] $stream_2)
-                    (call "{vm_1_peer_id}" ("" "") [$stream_2]))))
+                    (seq
+                        (canon "{vm_1_peer_id}" $stream_2 #canon_stream_2)
+                        (call "{vm_1_peer_id}" ("" "") [#canon_stream_2])))))
         "#);
 
     let result = checked_call_vm!(vm_1, <_>::default(), &script, "", "");
@@ -241,6 +261,7 @@ fn ap_canon_stream_with_lambda() {
         executed_state::stream_number(1, 1),
         executed_state::canon(vec![0.into(), 1.into()]),
         executed_state::ap(Some(0)),
+        executed_state::canon(vec![3.into()]),
         executed_state::scalar(json!([1])),
     ];
     assert_eq!(actual_trace, expected_state);
@@ -249,7 +270,7 @@ fn ap_canon_stream_with_lambda() {
         vm_1_peer_id,
         service_name,
         function_name,
-        ".[1]",
+        ".$.[1]",
     )]]);
     assert_eq!(tetraplet_checker.as_ref(), &expected_tetraplet);
 }
@@ -271,7 +292,9 @@ fn ap_canon_stream() {
                 (canon "{vm_1_peer_id}" $stream #canon_stream)
                 (seq
                     (ap #canon_stream $stream_2)
-                    (call "{vm_1_peer_id}" ("" "") [$stream_2]))))
+                    (seq
+                        (canon "{vm_1_peer_id}" $stream_2 #canon_stream_2)
+                        (call "{vm_1_peer_id}" ("" "") [#canon_stream_2])))))
         "#);
 
     let result = checked_call_vm!(vm_1, <_>::default(), &script, "", "");
@@ -282,6 +305,7 @@ fn ap_canon_stream() {
         executed_state::stream_number(1, 1),
         executed_state::canon(vec![0.into(), 1.into()]),
         executed_state::ap(Some(0)),
+        executed_state::canon(vec![3.into()]),
         executed_state::scalar(json!([[0, 1]])),
     ];
     assert_eq!(actual_trace, expected_state);

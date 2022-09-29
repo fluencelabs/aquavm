@@ -154,12 +154,9 @@ impl From<&Number> for serde_json::Value {
     }
 }
 
-fn display_last_error(
-    f: &mut fmt::Formatter,
-    last_error_accessor: &Option<LambdaAST>,
-) -> fmt::Result {
-    match last_error_accessor {
-        Some(accessor) => write!(f, "%last_error%.${}", air_lambda_ast::format_ast(accessor)),
+fn display_last_error(f: &mut fmt::Formatter, lambda_ast: &Option<LambdaAST>) -> fmt::Result {
+    match lambda_ast {
+        Some(lambda_ast) => write!(f, "%last_error%{}", lambda_ast),
         None => write!(f, "%last_error%"),
     }
 }

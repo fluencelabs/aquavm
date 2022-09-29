@@ -16,6 +16,7 @@
 
 use crate::ast::*;
 
+use super::lexer::AirPos;
 use crate::parser::lexer::Token;
 use crate::parser::ParserError;
 use crate::parser::Span;
@@ -146,7 +147,7 @@ impl<'i> VariableValidator<'i> {
         self.met_variable_name_definition(ap.result.name(), span);
     }
 
-    pub(super) fn finalize(self) -> Vec<ErrorRecovery<usize, Token<'i>, ParserError>> {
+    pub(super) fn finalize(self) -> Vec<ErrorRecovery<AirPos, Token<'i>, ParserError>> {
         ValidatorErrorBuilder::new(self)
             .check_undefined_variables()
             .check_undefined_iterables()
@@ -222,7 +223,12 @@ impl<'i> VariableValidator<'i> {
     }
 
     fn met_lambda(&mut self, lambda: &LambdaAST<'i>, span: Span) {
-        for accessor in lambda.iter() {
+        let accessors = match lambda {
+            LambdaAST::ValuePath(accessors) => accessors,
+            LambdaAST::Functor(_) => return,
+        };
+
+        for accessor in accessors.iter() {
             match accessor {
                 &ValueAccessor::FieldAccessByScalar { scalar_name } => {
                     self.met_variable_name(scalar_name, span)
@@ -285,7 +291,7 @@ impl<'i> VariableValidator<'i> {
 }
 
 struct ValidatorErrorBuilder<'i> {
-    errors: Vec<ErrorRecovery<usize, Token<'i>, ParserError>>,
+    errors: Vec<ErrorRecovery<AirPos, Token<'i>, ParserError>>,
     validator: VariableValidator<'i>,
 }
 
@@ -395,7 +401,7 @@ impl<'i> ValidatorErrorBuilder<'i> {
         self
     }
 
-    fn build(self) -> Vec<ErrorRecovery<usize, Token<'i>, ParserError>> {
+    fn build(self) -> Vec<ErrorRecovery<AirPos, Token<'i>, ParserError>> {
         self.errors
     }
 
@@ -417,7 +423,7 @@ impl<'i> ValidatorErrorBuilder<'i> {
 }
 
 fn add_to_errors<'i>(
-    errors: &mut Vec<ErrorRecovery<usize, Token<'i>, ParserError>>,
+    errors: &mut Vec<ErrorRecovery<AirPos, Token<'i>, ParserError>>,
     span: Span,
     token: Token<'i>,
     error: ParserError,

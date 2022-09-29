@@ -21,6 +21,7 @@ use crate::execution_step::ValueAggregate;
 
 use air_interpreter_data::GlobalStreamGens;
 use air_interpreter_data::RestrictedStreamGens;
+use air_parser::AirPos;
 
 use std::collections::hash_map::Entry::{Occupied, Vacant};
 use std::collections::HashMap;
@@ -33,7 +34,7 @@ pub(crate) struct Streams {
     streams: HashMap<String, Vec<StreamDescriptor>>,
 
     /// Contains stream generation that private stream should have at the scope start.
-    data_restr_stream_generations: RestrictedStreamGens,
+    data_restricted_stream_gens: RestrictedStreamGens,
 
     /// Contains stream generations that each private stream had at the scope end.
     /// Then it's placed into data
@@ -46,13 +47,33 @@ struct StreamDescriptor {
 }
 
 impl Streams {
-    pub(crate) fn get(&self, name: &str, position: usize) -> Option<&Stream> {
+    pub(crate) fn from_data(
+        global_streams: &GlobalStreamGens,
+        data_restricted_stream_gens: RestrictedStreamGens,
+    ) -> Self {
+        let global_streams = global_streams
+            .iter()
+            .map(|(stream_name, &generations_count)| {
+                let global_stream = Stream::from_generations_count(generations_count as usize);
+                let descriptor = StreamDescriptor::global(global_stream);
+                (stream_name.to_string(), vec![descriptor])
+            })
+            .collect::<HashMap<_, _>>();
+
+        Self {
+            streams: global_streams,
+            data_restricted_stream_gens,
+            collected_restricted_stream_gens: <_>::default(),
+        }
+    }
+
+    pub(crate) fn get(&self, name: &str, position: AirPos) -> Option<&Stream> {
         self.streams
             .get(name)
             .and_then(|descriptors| find_closest(descriptors.iter(), position))
     }
 
-    pub(crate) fn get_mut(&mut self, name: &str, position: usize) -> Option<&mut Stream> {
+    pub(crate) fn get_mut(&mut self, name: &str, position: AirPos) -> Option<&mut Stream> {
         self.streams
             .get_mut(name)
             .and_then(|descriptors| find_closest_mut(descriptors.iter_mut(), position))
@@ -63,7 +84,7 @@ impl Streams {
         value: ValueAggregate,
         generation: Generation,
         stream_name: &str,
-        position: usize,
+        position: AirPos,
     ) -> ExecutionResult<u32> {
         match self.get_mut(stream_name, position) {
             Some(stream) => stream.add_value(value, generation),
@@ -76,22 +97,18 @@ impl Streams {
                 //  - and by this function, and if there is no such a streams in streams,
                 //    it means that a new global one should be created.
                 let stream = Stream::from_value(value);
-                self.add_global_stream(stream_name.to_string(), stream);
+                let descriptor = StreamDescriptor::global(stream);
+                self.streams.insert(stream_name.to_string(), vec![descriptor]);
                 let generation = 0;
                 Ok(generation)
             }
         }
     }
 
-    pub(crate) fn add_global_stream(&mut self, name: String, stream: Stream) {
-        let descriptor = StreamDescriptor::global(stream);
-        self.streams.insert(name, vec![descriptor]);
-    }
-
     pub(crate) fn meet_scope_start(&mut self, name: impl Into<String>, span: Span, iteration: u32) {
         let name = name.into();
         let generations_count = self
-            .stream_generation_from_data(&name, span.left as u32, iteration as usize)
+            .stream_generation_from_data(&name, span.left, iteration as usize)
             .unwrap_or_default();
 
         let new_stream = Stream::from_generations_count(generations_count as usize);
@@ -106,7 +123,7 @@ impl Streams {
         }
     }
 
-    pub(crate) fn meet_scope_end(&mut self, name: String, position: u32) {
+    pub(crate) fn meet_scope_end(&mut self, name: String, position: AirPos) {
         // unwraps are safe here because met_scope_end must be called after met_scope_start
         let stream_descriptors = self.streams.get_mut(&name).unwrap();
         // delete a stream after exit from a scope
@@ -139,14 +156,14 @@ impl Streams {
         (global_streams, self.collected_restricted_stream_gens)
     }
 
-    fn stream_generation_from_data(&self, name: &str, position: u32, iteration: usize) -> Option<u32> {
-        self.data_restr_stream_generations
+    fn stream_generation_from_data(&self, name: &str, position: AirPos, iteration: usize) -> Option<u32> {
+        self.data_restricted_stream_gens
             .get(name)
             .and_then(|scopes| scopes.get(&position).and_then(|iterations| iterations.get(iteration)))
             .copied()
     }
 
-    fn collect_stream_generation(&mut self, name: String, position: u32, generation: u32) {
+    fn collect_stream_generation(&mut self, name: String, position: AirPos, generation: u32) {
         match self.collected_restricted_stream_gens.entry(name) {
             Occupied(mut streams) => match streams.get_mut().entry(position) {
                 Occupied(mut iterations) => iterations.get_mut().push(generation),
@@ -167,7 +184,7 @@ impl Streams {
 impl StreamDescriptor {
     pub(self) fn global(stream: Stream) -> Self {
         Self {
-            span: Span::new(0, usize::MAX),
+            span: Span::new(0.into(), usize::MAX.into()),
             stream,
         }
     }
@@ -179,7 +196,7 @@ impl StreamDescriptor {
 
 fn find_closest<'d>(
     descriptors: impl DoubleEndedIterator<Item = &'d StreamDescriptor>,
-    position: usize,
+    position: AirPos,
 ) -> Option<&'d Stream> {
     // descriptors are placed in a order of decreasing scopes, so it's enough to get the latest suitable
     for descriptor in descriptors.rev() {
@@ -193,7 +210,7 @@ fn find_closest<'d>(
 
 fn find_closest_mut<'d>(
     descriptors: impl DoubleEndedIterator<Item = &'d mut StreamDescriptor>,
-    position: usize,
+    position: AirPos,
 ) -> Option<&'d mut Stream> {
     // descriptors are placed in a order of decreasing scopes, so it's enough to get the latest suitable
     for descriptor in descriptors.rev() {

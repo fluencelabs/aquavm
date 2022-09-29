@@ -20,6 +20,7 @@ use super::Scalars;
 use super::Streams;
 
 use air_execution_info_collector::InstructionTracker;
+use air_interpreter_data::InterpreterData;
 use air_interpreter_interface::*;
 
 use std::rc::Rc;
@@ -65,14 +66,16 @@ pub(crate) struct ExecutionCtx<'i> {
 }
 
 impl<'i> ExecutionCtx<'i> {
-    pub(crate) fn new(run_parameters: RunParameters, call_results: CallResults, last_call_request_id: u32) -> Self {
+    pub(crate) fn new(prev_data: &InterpreterData, call_results: CallResults, run_parameters: RunParameters) -> Self {
         let run_parameters = RcRunParameters::from_run_parameters(run_parameters);
+        let streams = Streams::from_data(&prev_data.global_streams, prev_data.restricted_streams.clone());
 
         Self {
             run_parameters,
             subgraph_complete: true,
-            last_call_request_id,
+            last_call_request_id: prev_data.last_call_request_id,
             call_results,
+            streams,
             ..<_>::default()
         }
     }

@@ -15,6 +15,7 @@
  */
 
 use super::*;
+use crate::execution_step::boxed_value::populate_tetraplet_with_lambda;
 use crate::execution_step::CatchableError;
 use crate::JValue;
 use crate::LambdaAST;
@@ -22,6 +23,7 @@ use crate::SecurityTetraplet;
 
 use air_parser::ast;
 
+use std::borrow::Cow;
 use std::ops::Deref;
 use std::rc::Rc;
 
@@ -55,13 +57,13 @@ pub(crate) fn create_scalar_wl_iterable<'ctx>(
     scalar_iterable: &ast::ScalarWithLambda<'ctx>,
     exec_ctx: &ExecutionCtx<'ctx>,
 ) -> ExecutionResult<FoldIterableScalar> {
-    use crate::execution_step::lambda_applier::select_from_scalar;
+    use crate::execution_step::lambda_applier::select_by_lambda_from_scalar;
     let scalar_name = scalar_iterable.name;
     let lambda = &scalar_iterable.lambda;
 
     match exec_ctx.scalars.get_value(scalar_name)? {
         ScalarRef::Value(variable) => {
-            let jvalues = select_from_scalar(&variable.result, lambda.iter(), exec_ctx)?;
+            let jvalues = select_by_lambda_from_scalar(&variable.result, lambda, exec_ctx)?;
             let tetraplet = variable.tetraplet.deref().clone();
             from_jvalue(jvalues, tetraplet, lambda)
         }
@@ -81,6 +83,10 @@ pub(crate) fn create_canon_stream_iterable_value<'ctx>(
     exec_ctx: &ExecutionCtx<'ctx>,
 ) -> ExecutionResult<FoldIterableScalar> {
     let canon_stream = exec_ctx.scalars.get_canon_stream(ast_canon_stream.name)?;
+    if canon_stream.is_empty() {
+        return Ok(FoldIterableScalar::Empty);
+    }
+
     // TODO: this one is a relatively long operation and will be refactored in Boxed Value
     let iterable_ingredients = CanonStreamIterableIngredients::init(canon_stream.clone());
     let iterable = Box::new(iterable_ingredients);
@@ -138,18 +144,17 @@ fn from_value(call_result: ValueAggregate, variable_name: &str) -> ExecutionResu
 
 /// Construct IterableValue from the result and given triplet.
 fn from_jvalue(
-    jvalue: &JValue,
-    mut tetraplet: SecurityTetraplet,
+    jvalue: Cow<'_, JValue>,
+    tetraplet: SecurityTetraplet,
     lambda: &LambdaAST<'_>,
 ) -> ExecutionResult<FoldIterableScalar> {
-    let formatted_lambda_ast = air_lambda_ast::format_ast(lambda);
-    tetraplet.add_lambda(&formatted_lambda_ast);
+    let tetraplet = populate_tetraplet_with_lambda(tetraplet, lambda);
     let tetraplet = Rc::new(tetraplet);
 
-    let iterable = match jvalue {
+    let iterable = match jvalue.as_ref() {
         JValue::Array(array) => array,
         _ => {
-            return Err(CatchableError::FoldIteratesOverNonArray(jvalue.clone(), formatted_lambda_ast).into());
+            return Err(CatchableError::FoldIteratesOverNonArray(jvalue.into_owned(), lambda.to_string()).into());
         }
     };
 

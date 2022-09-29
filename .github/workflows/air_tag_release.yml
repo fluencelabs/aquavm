@@ -8,40 +8,25 @@ on:
 jobs:
   pre-release:
     name: "Tagged Release"
-    runs-on: "ubuntu-latest"
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Install Rust toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: nightly
-          target: wasm32-wasi
-          profile: minimal
-          override: true
+      - name: Setup rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
 
-      - name: Install marine
-        uses: actions-rs/cargo@v1
-        with:
-          toolchain: nightly
-          command: install
-          args: marine
+      - run: cargo install marine
 
-    ### Update & build
-      - uses: actions-rs/cargo@v1
-        with:
-          toolchain: nightly
-          command: update
+      - run: cargo update
 
       - name: marine build --release
         working-directory: ./air-interpreter
-        shell: bash
         run: marine build --release --features marine
 
-    ### Create release
-      - uses: marvinpinto/action-automatic-releases@latest
+      - name: Release
+        uses: marvinpinto/action-automatic-releases@latest
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           automatic_release_tag: "latest"

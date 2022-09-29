@@ -31,7 +31,7 @@ impl ParCompletenessUpdater {
         }
     }
 
-    pub(super) fn update_completeness(&mut self, exec_ctx: &ExecutionCtx<'_>, subgraph_type: SubgraphType) {
+    pub(super) fn observe_completeness(&mut self, exec_ctx: &ExecutionCtx<'_>, subgraph_type: SubgraphType) {
         match subgraph_type {
             SubgraphType::Left => self.left_subgraph_complete = exec_ctx.subgraph_complete,
             SubgraphType::Right => self.right_subgraph_complete = exec_ctx.subgraph_complete,

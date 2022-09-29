@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use super::select_from_scalar;
+use super::select_by_lambda_from_scalar;
 use super::ExecutionResult;
 use super::IterableItem;
 use super::JValuable;
@@ -24,12 +24,16 @@ use crate::execution_step::RcSecurityTetraplets;
 use crate::JValue;
 use crate::SecurityTetraplet;
 
-use air_lambda_ast::format_ast;
+use crate::execution_step::boxed_value::populate_tetraplet_with_lambda;
 use std::borrow::Cow;
 use std::ops::Deref;
 
 impl<'ctx> JValuable for IterableItem<'ctx> {
-    fn apply_lambda<'i>(&self, lambda: &LambdaAST<'_>, exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<&JValue> {
+    fn apply_lambda<'i>(
+        &self,
+        lambda: &LambdaAST<'_>,
+        exec_ctx: &ExecutionCtx<'i>,
+    ) -> ExecutionResult<Cow<'_, JValue>> {
         use super::IterableItem::*;
 
         let jvalue = match self {
@@ -38,7 +42,7 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
             RcValue((jvalue, ..)) => jvalue.deref(),
         };
 
-        let selected_value = select_from_scalar(jvalue, lambda.iter(), exec_ctx)?;
+        let selected_value = select_by_lambda_from_scalar(jvalue, lambda, exec_ctx)?;
         Ok(selected_value)
     }
 
@@ -46,7 +50,7 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
         &self,
         lambda: &LambdaAST<'_>,
         exec_ctx: &ExecutionCtx<'i>,
-    ) -> ExecutionResult<(&JValue, SecurityTetraplet)> {
+    ) -> ExecutionResult<(Cow<'_, JValue>, SecurityTetraplet)> {
         use super::IterableItem::*;
 
         let (jvalue, tetraplet) = match self {
@@ -55,9 +59,8 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
             RcValue((jvalue, tetraplet, _)) => (jvalue.deref(), tetraplet),
         };
 
-        let selected_value = select_from_scalar(jvalue, lambda.iter(), exec_ctx)?;
-        let mut tetraplet = tetraplet.as_ref().clone();
-        tetraplet.add_lambda(&format_ast(lambda));
+        let selected_value = select_by_lambda_from_scalar(jvalue, lambda, exec_ctx)?;
+        let tetraplet = populate_tetraplet_with_lambda(tetraplet.as_ref().clone(), lambda);
 
         Ok((selected_value, tetraplet))
     }

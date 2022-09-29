@@ -17,6 +17,7 @@ members = [
     "crates/air-lib/utils",
     "crates/beautifier",
     "crates/data-store",
+    "crates/testing-framework",
     "tools/cli/air-beautify",
     "tools/cli/air-trace",
 ]
@@ -25,6 +26,7 @@ exclude = [
     "air/tests/test_module/integration/security_tetraplets/auth_module",
     "air/tests/test_module/integration/security_tetraplets/log_storage",
     "crates/interpreter-wasm",
+    "tools/wasm/wasm-air-beautify",
 ]
 
 [profile.release]

@@ -38,6 +38,7 @@ pub enum Instruction<'i> {
     Fail(Fail<'i>),
     FoldScalar(FoldScalar<'i>),
     FoldStream(FoldStream<'i>),
+    Never(Never),
     New(New<'i>),
     Next(Next<'i>),
     Null(Null),
@@ -136,6 +137,10 @@ pub struct FoldStream<'i> {
 pub struct Next<'i> {
     pub iterator: Scalar<'i>,
 }
+
+/// (never)
+#[derive(Serialize, Debug, PartialEq, Eq)]
+pub struct Never;
 
 /// (new variable instruction)
 #[derive(Serialize, Debug, PartialEq)]

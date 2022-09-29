@@ -14,25 +14,28 @@
  * limitations under the License.
  */
 
-use super::select_from_stream;
+use super::select_by_lambda_from_stream;
 use super::ExecutionResult;
 use super::JValuable;
 use super::ValueAggregate;
+use crate::execution_step::boxed_value::populate_tetraplet_with_lambda;
 use crate::execution_step::ExecutionCtx;
 use crate::execution_step::RcSecurityTetraplets;
 use crate::JValue;
 use crate::LambdaAST;
 use crate::SecurityTetraplet;
 
-use air_lambda_ast::format_ast;
-
 use std::borrow::Cow;
 use std::ops::Deref;
 
 impl JValuable for std::cell::Ref<'_, Vec<ValueAggregate>> {
-    fn apply_lambda<'i>(&self, lambda: &LambdaAST<'_>, exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<&JValue> {
+    fn apply_lambda<'i>(
+        &self,
+        lambda: &LambdaAST<'_>,
+        exec_ctx: &ExecutionCtx<'i>,
+    ) -> ExecutionResult<Cow<'_, JValue>> {
         let stream_iter = self.iter().map(|r| r.result.deref());
-        let select_result = select_from_stream(stream_iter, lambda, exec_ctx)?;
+        let select_result = select_by_lambda_from_stream(stream_iter, lambda, exec_ctx)?;
         Ok(select_result.result)
     }
 
@@ -40,13 +43,17 @@ impl JValuable for std::cell::Ref<'_, Vec<ValueAggregate>> {
         &self,
         lambda: &LambdaAST<'_>,
         exec_ctx: &ExecutionCtx<'i>,
-    ) -> ExecutionResult<(&JValue, SecurityTetraplet)> {
+    ) -> ExecutionResult<(Cow<'_, JValue>, SecurityTetraplet)> {
         let stream_iter = self.iter().map(|r| r.result.deref());
-        let select_result = select_from_stream(stream_iter, lambda, exec_ctx)?;
+        let select_result = select_by_lambda_from_stream(stream_iter, lambda, exec_ctx)?;
 
-        let tetraplet = &self[select_result.tetraplet_idx].tetraplet;
-        let mut tetraplet = tetraplet.as_ref().clone();
-        tetraplet.add_lambda(&format_ast(lambda));
+        let tetraplet = match select_result.tetraplet_idx {
+            Some(idx) => {
+                let tetraplet = &self[idx].tetraplet;
+                populate_tetraplet_with_lambda(tetraplet.as_ref().clone(), lambda)
+            }
+            None => SecurityTetraplet::new(exec_ctx.run_parameters.current_peer_id.to_string(), "", "", ""),
+        };
 
         Ok((select_result.result, tetraplet))
     }

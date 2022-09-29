@@ -15,7 +15,6 @@
  */
 
 use super::*;
-use air_lambda_ast::format_ast;
 use std::fmt;
 
 impl fmt::Display for Scalar<'_> {
@@ -26,7 +25,7 @@ impl fmt::Display for Scalar<'_> {
 
 impl fmt::Display for ScalarWithLambda<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}.${}", self.name, format_ast(&self.lambda))
+        write!(f, "{}{}", self.name, self.lambda)
     }
 }
 
@@ -44,13 +43,13 @@ impl fmt::Display for CanonStream<'_> {
 
 impl fmt::Display for StreamWithLambda<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}.${}", self.name, format_ast(&self.lambda))
+        write!(f, "{}{}", self.name, self.lambda)
     }
 }
 
 impl fmt::Display for CanonStreamWithLambda<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}.${}", self.name, format_ast(&self.lambda))
+        write!(f, "{}{}", self.name, self.lambda)
     }
 }
 

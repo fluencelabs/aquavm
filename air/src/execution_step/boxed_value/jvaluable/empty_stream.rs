@@ -27,7 +27,11 @@ use crate::SecurityTetraplet;
 use std::borrow::Cow;
 
 impl JValuable for () {
-    fn apply_lambda<'i>(&self, _lambda: &LambdaAST<'_>, _exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<&JValue> {
+    fn apply_lambda<'i>(
+        &self,
+        _lambda: &LambdaAST<'_>,
+        _exec_ctx: &ExecutionCtx<'i>,
+    ) -> ExecutionResult<Cow<'_, JValue>> {
         // applying lambda to an empty stream will produce a join behaviour
         Err(LambdaApplierError(EmptyStream).into())
     }
@@ -36,7 +40,7 @@ impl JValuable for () {
         &self,
         _lambda: &LambdaAST<'_>,
         _exec_ctx: &ExecutionCtx<'i>,
-    ) -> ExecutionResult<(&JValue, SecurityTetraplet)> {
+    ) -> ExecutionResult<(Cow<'_, JValue>, SecurityTetraplet)> {
         // applying lambda to an empty stream will produce a join behaviour
         Err(LambdaApplierError(EmptyStream).into())
     }

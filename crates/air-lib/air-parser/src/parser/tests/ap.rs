@@ -31,7 +31,7 @@ fn ap_with_literal() {
     let actual = parse(source_code);
     let expected = ap(
         ApArgument::Literal("some_string"),
-        ApResult::Stream(Stream::new("$stream", 27)),
+        ApResult::Stream(Stream::new("$stream", 27.into())),
     );
 
     assert_eq!(actual, expected);
@@ -46,7 +46,7 @@ fn ap_with_number() {
     let actual = parse(source_code);
     let expected = ap(
         ApArgument::Number(Number::Int(-100)),
-        ApResult::Stream(Stream::new("$stream", 18)),
+        ApResult::Stream(Stream::new("$stream", 18.into())),
     );
 
     assert_eq!(actual, expected);
@@ -61,7 +61,7 @@ fn ap_with_bool() {
     let actual = parse(source_code);
     let expected = ap(
         ApArgument::Boolean(true),
-        ApResult::Stream(Stream::new("$stream", 18)),
+        ApResult::Stream(Stream::new("$stream", 18.into())),
     );
 
     assert_eq!(actual, expected);
@@ -75,12 +75,13 @@ fn ap_with_last_error() {
 
     let actual = parse(source_code);
     let expected = ap(
-        ApArgument::LastError(Some(unsafe {
-            LambdaAST::new_unchecked(vec![ValueAccessor::FieldAccessByName {
+        ApArgument::LastError(Some(
+            LambdaAST::try_from_accessors(vec![ValueAccessor::FieldAccessByName {
                 field_name: "message",
             }])
-        })),
-        ApResult::Stream(Stream::new("$stream", 37)),
+            .unwrap(),
+        )),
+        ApResult::Stream(Stream::new("$stream", 37.into())),
     );
 
     assert_eq!(actual, expected);
@@ -95,7 +96,7 @@ fn ap_with_empty_array() {
     let actual = parse(source_code);
     let expected = ap(
         ApArgument::EmptyArray,
-        ApResult::Stream(Stream::new("$stream", 16)),
+        ApResult::Stream(Stream::new("$stream", 16.into())),
     );
 
     assert_eq!(actual, expected);
@@ -110,7 +111,7 @@ fn ap_with_init_peer_id() {
     let actual = parse(source_code);
     let expected = ap(
         ApArgument::InitPeerId,
-        ApResult::Stream(Stream::new("$stream", 28)),
+        ApResult::Stream(Stream::new("$stream", 28.into())),
     );
 
     assert_eq!(actual, expected);
@@ -125,7 +126,7 @@ fn ap_with_timestamp() {
     let actual = parse(source_code);
     let expected = ap(
         ApArgument::Timestamp,
-        ApResult::Stream(Stream::new("$stream", 25)),
+        ApResult::Stream(Stream::new("$stream", 25.into())),
     );
 
     assert_eq!(actual, expected);
@@ -140,7 +141,7 @@ fn ap_with_ttl() {
     let actual = parse(source_code);
     let expected = ap(
         ApArgument::TTL,
-        ApResult::Stream(Stream::new("$stream", 19)),
+        ApResult::Stream(Stream::new("$stream", 19.into())),
     );
 
     assert_eq!(actual, expected);
@@ -156,8 +157,8 @@ fn ap_with_canon_stream() {
 
     let actual = parse(&source_code);
     let expected = ap(
-        ApArgument::CanonStream(CanonStream::new(canon_stream, 13)),
-        ApResult::Scalar(Scalar::new(scalar, 27)),
+        ApArgument::CanonStream(CanonStream::new(canon_stream, 13.into())),
+        ApResult::Scalar(Scalar::new(scalar, 27.into())),
     );
 
     assert_eq!(actual, expected);
@@ -175,10 +176,10 @@ fn ap_with_canon_stream_with_lambda() {
     let expected = ap(
         ApArgument::CanonStreamWithLambda(CanonStreamWithLambda::new(
             canon_stream,
-            unsafe { LambdaAST::new_unchecked(vec![ValueAccessor::ArrayAccess { idx: 0 }]) },
-            13,
+            LambdaAST::try_from_accessors(vec![ValueAccessor::ArrayAccess { idx: 0 }]).unwrap(),
+            13.into(),
         )),
-        ApResult::Scalar(Scalar::new(scalar, 33)),
+        ApResult::Scalar(Scalar::new(scalar, 33.into())),
     );
 
     assert_eq!(actual, expected);

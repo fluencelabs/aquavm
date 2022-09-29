@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+use air_parser::AirPos;
 use air_test_utils::prelude::*;
 
 #[test]
+#[ignore]
 fn new_with_global_streams_seq() {
     let set_variable_peer_id = "set_variable_peer_id";
     let local_vm_peer_id_1 = "local_vm_peer_id_1";
@@ -44,7 +46,7 @@ fn new_with_global_streams_seq() {
                     (seq
                         (new $stream
                             (seq
-                                (seq
+                                (par
                                     (call "{local_vm_peer_id_1}" ("" "") [i] $stream)
                                     (next i)
                                 )
@@ -90,7 +92,7 @@ fn new_with_global_streams_seq() {
     let actual_restricted_streams = data.restricted_streams;
     let expected_restricted_streams = maplit::hashmap! {
         "$stream".to_string() => maplit::hashmap! {
-            282 => vec![1,1]
+            AirPos::from(282) => vec![1,1]
         }
     };
     assert_eq!(actual_restricted_streams, expected_restricted_streams);
@@ -107,7 +109,10 @@ fn several_restrictions() {
                     (new $stream
                         (call "{vm_peer_id}" ("" "") ["test"] $stream)
                     )
-                    (call "{vm_peer_id}" ("" "") [$stream])
+                    (seq
+                        (canon "{vm_peer_id}" $stream #canon_stream)
+                        (call "{vm_peer_id}" ("" "") [#canon_stream])
+                    )
                 )
             )"#);
 
@@ -116,6 +121,7 @@ fn several_restrictions() {
     let actual_trace = trace_from_result(&result);
     let expected_trace = vec![
         executed_state::stream_string("test", 0),
+        executed_state::canon(vec![0.into()]),
         executed_state::scalar(json!([])),
     ];
     assert_eq!(actual_trace, expected_trace);
@@ -185,7 +191,10 @@ fn new_in_fold_with_ap() {
                     (new $s1
                         (seq
                             (ap "none" $s1)
-                            (call "{vm_peer_id}" ("" "") [$s1] s-fix1) ;; should contains only "none" on each iteration
+                            (seq
+                                (canon "{vm_peer_id}" $s1 #canon_s1)
+                                (call "{vm_peer_id}" ("" "") [#canon_s1] s-fix1) ;; should contains only "none" on each iteration
+                            )
                         )
                     )
                     (next x)
@@ -201,14 +210,19 @@ fn new_in_fold_with_ap() {
     let expected_trace = vec![
         executed_state::scalar(json!([1, 2, 3, 4, 5])),
         executed_state::ap(Some(0)),
+        executed_state::canon(vec![1.into()]),
         executed_state::scalar_string_array(vec!["none"]),
         executed_state::ap(Some(0)),
+        executed_state::canon(vec![4.into()]),
         executed_state::scalar_string_array(vec!["none"]),
         executed_state::ap(Some(0)),
+        executed_state::canon(vec![7.into()]),
         executed_state::scalar_string_array(vec!["none"]),
         executed_state::ap(Some(0)),
+        executed_state::canon(vec![10.into()]),
         executed_state::scalar_string_array(vec!["none"]),
         executed_state::ap(Some(0)),
+        executed_state::canon(vec![13.into()]),
         executed_state::scalar_string_array(vec!["none"]),
     ];
     assert_eq!(actual_trace, expected_trace);
@@ -217,7 +231,7 @@ fn new_in_fold_with_ap() {
     let actual_restricted_streams = data.restricted_streams;
     let expected_restricted_streams = maplit::hashmap! {
         "$s1".to_string() => maplit::hashmap! {
-            146 => vec![1,1,1,1,1]
+            AirPos::from(146) => vec![1,1,1,1,1]
         }
     };
     assert_eq!(actual_restricted_streams, expected_restricted_streams);
@@ -263,10 +277,10 @@ fn new_with_streams_with_errors() {
     let actual_restricted_streams = data.restricted_streams;
     let expected_restricted_streams = maplit::hashmap! {
         "$restricted_stream_2".to_string() => maplit::hashmap! {
-            216 => vec![1]
+            AirPos::from(216) => vec![1]
         },
         "$restricted_stream_1".to_string() => maplit::hashmap! {
-            141 => vec![0]
+            AirPos::from(141) => vec![0]
         }
     };
     assert_eq!(actual_restricted_streams, expected_restricted_streams);

@@ -21,15 +21,6 @@ use air_test_utils::prelude::*;
 // On the versions < 0.20.1 it just crashes
 fn issue_211() {
     let peer_1_id = "peer_1_id";
-    let variables_mapping = maplit::hashmap! {
-        "idx".to_string() => json!(2),
-        "nodes".to_string() => json!([1,2,3]),
-    };
-
-    let mut peer_1 = create_avm(
-        set_variables_call_service(variables_mapping, VariableOptionSource::FunctionName),
-        peer_1_id,
-    );
 
     let script = f!(r#"
     (xor
@@ -38,8 +29,10 @@ fn issue_211() {
        (seq
         (seq
          (null)
-         (call %init_peer_id% ("getDataSrv" "idx") [] idx))
-        (call %init_peer_id% ("getDataSrv" "nodes") [] nodes))
+         (call %init_peer_id% ("getDataSrv" "idx") [] idx) ; ok=2
+        )
+        (call %init_peer_id% ("getDataSrv" "nodes") [] nodes) ; ok = [1,2,3]
+       )
        (new $nodes2
         (seq
          (seq
@@ -47,20 +40,29 @@ fn issue_211() {
            (fold nodes node
             (par
              (ap node $nodes2)
-             (next node)))
+             (next node)
+             )
+             )
            (null))
            (seq
             (canon %init_peer_id% $nodes2 #nodes2_0)
-            (call %init_peer_id% ("op" "noop") [#nodes2_0.$.[idx]! nodes])))
+            (call %init_peer_id% ("op" "noop") [#nodes2_0.$.[idx]! nodes]) ; ok="expected result"
+            )
+            )
          (seq
             (canon %init_peer_id% $nodes2 #nodes2_1)
-            (call %init_peer_id% ("op" "identity") [#nodes2_1] nodes2-fix)))))
-      (null))
-     (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2]))
+            (call %init_peer_id% ("op" "identity") [#nodes2_1] nodes2-fix))))) ; ok="expected result"
+      (null)
+      )
+     (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2]) ; ok="error"
+     )
     "#);
 
     let run_params = TestRunParameters::from_init_peer_id(peer_1_id);
-    let result = checked_call_vm!(peer_1, run_params, &script, "", "");
+
+    let engine = air_test_framework::TestExecutor::simple(run_params, &script).expect("invalid test executor config");
+
+    let result = engine.execute_one(peer_1_id).unwrap();
 
     let expected_trace = vec![
         executed_state::scalar_number(2),

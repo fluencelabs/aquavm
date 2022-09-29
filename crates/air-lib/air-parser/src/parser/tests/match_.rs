@@ -31,8 +31,8 @@ fn parse_match() {
         "#;
     let instruction = parse(&source_code);
     let expected = match_(
-        ImmutableValue::Variable(ImmutableVariable::scalar("v1", 16)),
-        ImmutableValue::Variable(ImmutableVariable::scalar("v2", 19)),
+        ImmutableValue::Variable(ImmutableVariable::scalar("v1", 16.into())),
+        ImmutableValue::Variable(ImmutableVariable::scalar("v2", 19.into())),
         null(),
     );
     assert_eq!(instruction, expected);
@@ -52,10 +52,10 @@ fn parse_match_with_canon_stream() {
     let expected = match_(
         ImmutableValue::VariableWithLambda(ImmutableVariableWithLambda::canon_stream(
             canon_stream,
-            unsafe { LambdaAST::new_unchecked(vec![ValueAccessor::ArrayAccess { idx: 0 }]) },
-            16,
+            LambdaAST::try_from_accessors(vec![ValueAccessor::ArrayAccess { idx: 0 }]).unwrap(),
+            16.into(),
         )),
-        ImmutableValue::Variable(ImmutableVariable::scalar("v2", 36)),
+        ImmutableValue::Variable(ImmutableVariable::scalar("v2", 36.into())),
         null(),
     );
     assert_eq!(instruction, expected);
@@ -70,7 +70,7 @@ fn parse_match_with_init_peer_id() {
         "#;
     let instruction = parse(&source_code);
     let expected = match_(
-        ImmutableValue::Variable(ImmutableVariable::scalar("v1", 16)),
+        ImmutableValue::Variable(ImmutableVariable::scalar("v1", 16.into())),
         ImmutableValue::InitPeerId,
         null(),
     );
@@ -87,7 +87,7 @@ fn parse_match_with_timestamp() {
     let instruction = parse(source_code);
     let expected = match_(
         ImmutableValue::Timestamp,
-        ImmutableValue::Variable(ImmutableVariable::scalar("v1", 28)),
+        ImmutableValue::Variable(ImmutableVariable::scalar("v1", 28.into())),
         null(),
     );
     assert_eq!(instruction, expected);
@@ -103,7 +103,7 @@ fn parse_match_with_ttl() {
     let instruction = parse(source_code);
     let expected = match_(
         ImmutableValue::TTL,
-        ImmutableValue::Variable(ImmutableVariable::scalar("v1", 22)),
+        ImmutableValue::Variable(ImmutableVariable::scalar("v1", 22.into())),
         null(),
     );
     assert_eq!(instruction, expected);
@@ -118,8 +118,8 @@ fn parse_mismatch() {
         "#;
     let instruction = parse(&source_code);
     let expected = mismatch(
-        ImmutableValue::Variable(ImmutableVariable::scalar("v1", 19)),
-        ImmutableValue::Variable(ImmutableVariable::scalar("v2", 22)),
+        ImmutableValue::Variable(ImmutableVariable::scalar("v1", 19.into())),
+        ImmutableValue::Variable(ImmutableVariable::scalar("v2", 22.into())),
         null(),
     );
     assert_eq!(instruction, expected);
@@ -133,7 +133,7 @@ fn match_with_bool() {
          )
         "#;
 
-    let left_value = ImmutableValue::Variable(ImmutableVariable::scalar("isOnline", 17));
+    let left_value = ImmutableValue::Variable(ImmutableVariable::scalar("isOnline", 17.into()));
     let right_value = ImmutableValue::Boolean(true);
     let null = null();
     let expected = match_(left_value, right_value, null);
@@ -151,7 +151,7 @@ fn mismatch_with_bool() {
         "#;
 
     let left_value = ImmutableValue::Boolean(true);
-    let right_value = ImmutableValue::Variable(ImmutableVariable::scalar("isOnline", 25));
+    let right_value = ImmutableValue::Variable(ImmutableVariable::scalar("isOnline", 25.into()));
     let null = null();
     let expected = mismatch(left_value, right_value, null);
 
@@ -167,7 +167,7 @@ fn match_with_empty_array() {
          )
         "#;
 
-    let left_value = ImmutableValue::Variable(ImmutableVariable::scalar("variable", 17));
+    let left_value = ImmutableValue::Variable(ImmutableVariable::scalar("variable", 17.into()));
     let right_value = ImmutableValue::EmptyArray;
     let instr = null();
     let expected = match_(left_value, right_value, instr);
@@ -182,7 +182,7 @@ fn match_with_empty_array() {
         "#;
 
     let left_value = ImmutableValue::EmptyArray;
-    let right_value = ImmutableValue::Variable(ImmutableVariable::scalar("variable", 20));
+    let right_value = ImmutableValue::Variable(ImmutableVariable::scalar("variable", 20.into()));
     let instr = null();
     let expected = match_(left_value, right_value, instr);
 
@@ -198,7 +198,7 @@ fn mismatch_with_empty_array() {
          )
         "#;
 
-    let left_value = ImmutableValue::Variable(ImmutableVariable::scalar("variable", 20));
+    let left_value = ImmutableValue::Variable(ImmutableVariable::scalar("variable", 20.into()));
     let right_value = ImmutableValue::EmptyArray;
     let instr = null();
     let expected = mismatch(left_value, right_value, instr);
@@ -213,7 +213,7 @@ fn mismatch_with_empty_array() {
         "#;
 
     let left_value = ImmutableValue::EmptyArray;
-    let right_value = ImmutableValue::Variable(ImmutableVariable::scalar("variable", 23));
+    let right_value = ImmutableValue::Variable(ImmutableVariable::scalar("variable", 23.into()));
     let instr = null();
     let expected = mismatch(left_value, right_value, instr);
 

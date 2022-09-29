@@ -21,6 +21,7 @@ mod fail;
 mod fold;
 mod match_;
 mod mismatch;
+mod never;
 mod new;
 mod par;
 mod seq;
