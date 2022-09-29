@@ -27,10 +27,13 @@ const EXPECTED_STATE_NAME: &str = "call";
 pub enum MergerCallResult {
     /// There is no corresponding state in a trace for this call.
     Empty,
-
     /// There was a state in at least one of the contexts. If there were two states in
     /// both contexts, they were successfully merged.
-    CallResult { value: CallResult, trace_pos: TracePos },
+    CallResult {
+        value: CallResult,
+        trace_pos: TracePos,
+        scheme: PreparationScheme,
+    },
 }
 
 pub(crate) fn try_merge_next_state_as_call(
@@ -48,7 +51,7 @@ pub(crate) fn try_merge_next_state_as_call(
         (Some(Call(prev_call)), Some(Call(current_call))) => (prev_call, current_call),
         // this special case is needed to merge stream generation in a right way
         (None, Some(Call(CallResult::Executed(value)))) => {
-            let call_result = merge_current_executed(value, value_type, data_keeper)?;
+            let call_result = merge_current_executed(value, value_type)?;
             return Ok(prepare_call_result(call_result, Current, data_keeper));
         }
         (None, Some(Call(current_call))) => return Ok(prepare_call_result(current_call, Current, data_keeper)),
@@ -63,8 +66,8 @@ pub(crate) fn try_merge_next_state_as_call(
         }
     };
 
-    let merged_call = merge_call_result(prev_call, current_call, value_type, data_keeper)?;
-    let call_result = prepare_call_result(merged_call, Both, data_keeper);
+    let (merged_call, scheme) = merge_call_result(prev_call, current_call, value_type)?;
+    let call_result = prepare_call_result(merged_call, scheme, data_keeper);
     try_match_value_type(&call_result, value_type)?;
 
     Ok(call_result)
@@ -74,28 +77,28 @@ fn merge_call_result(
     prev_call: CallResult,
     current_call: CallResult,
     value_type: ValueType<'_>,
-    data_keeper: &DataKeeper,
-) -> MergeResult<CallResult> {
+) -> MergeResult<(CallResult, PreparationScheme)> {
     use CallResult::*;
+    use PreparationScheme::*;
 
-    let merged_state = match (prev_call, current_call) {
+    let (merged_state, scheme) = match (prev_call, current_call) {
         (prev @ CallServiceFailed(..), current @ CallServiceFailed(..)) => {
             check_equal(&prev, &current)?;
-            prev
+            (prev, Previous)
         }
-        (RequestSentBy(_), current @ CallServiceFailed(..)) => current,
-        (prev @ CallServiceFailed(..), RequestSentBy(_)) => prev,
+        (RequestSentBy(_), current @ CallServiceFailed(..)) => (current, Current),
+        (prev @ CallServiceFailed(..), RequestSentBy(_)) => (prev, Previous),
         // senders shouldn't be checked for equality, for more info please look at
         // github.com/fluencelabs/aquavm/issues/137
-        (prev @ RequestSentBy(_), RequestSentBy(_)) => prev,
+        (prev @ RequestSentBy(_), RequestSentBy(_)) => (prev, Previous),
         // this special case is needed to merge stream generation in a right way
-        (RequestSentBy(_), Executed(value)) => merge_current_executed(value, value_type, data_keeper)?,
-        (prev @ Executed(..), RequestSentBy(_)) => prev,
-        (Executed(prev_value), Executed(current_value)) => merge_executed(prev_value, current_value)?,
+        (RequestSentBy(_), Executed(value)) => (merge_current_executed(value, value_type)?, Current),
+        (prev @ Executed(..), RequestSentBy(_)) => (prev, Previous),
+        (Executed(prev_value), Executed(current_value)) => (merge_executed(prev_value, current_value)?, Both),
         (prev_call, current_call) => return Err(CallResultError::incompatible_calls(prev_call, current_call)),
     };
 
-    Ok(merged_state)
+    Ok((merged_state, scheme))
 }
 
 pub(super) fn prepare_call_result(
@@ -106,7 +109,11 @@ pub(super) fn prepare_call_result(
     let trace_pos = data_keeper.result_trace_next_pos();
     prepare_positions_mapping(scheme, data_keeper);
 
-    MergerCallResult::CallResult { value, trace_pos }
+    MergerCallResult::CallResult {
+        value,
+        trace_pos,
+        scheme,
+    }
 }
 
 #[derive(Debug, Copy, Clone)]

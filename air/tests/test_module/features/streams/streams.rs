@@ -16,6 +16,10 @@
 
 use air_test_utils::prelude::*;
 
+use pretty_assertions::assert_eq;
+
+use std::ops::Deref;
+
 #[test]
 fn empty_stream() {
     fn arg_type_check_closure() -> CallServiceClosure {
@@ -147,7 +151,7 @@ fn stream_merging_v0() {
         executed_state::scalar_string(unit_call_service_result),
         executed_state::scalar_string(unit_call_service_result),
     ];
-    assert_eq!(actual_trace_2, expected_trace_2);
+    assert_eq!(actual_trace_2.deref(), expected_trace_2);
 
     let executor_result_3 = checked_call_vm!(
         executor,

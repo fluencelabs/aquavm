@@ -42,6 +42,7 @@ pub use merger::MergeError;
 pub use merger::MergerApResult;
 pub use merger::MergerCallResult;
 pub use merger::MergerCanonResult;
+pub use merger::PreparationScheme;
 pub use state_automata::SubgraphType;
 
 pub type TraceHandlerResult<T> = std::result::Result<T, TraceHandlerError>;

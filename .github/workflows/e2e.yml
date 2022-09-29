@@ -22,8 +22,16 @@ jobs:
     uses: fluencelabs/rust-peer/.github/workflows/snapshot.yml@master
     with:
       image-name: "docker.fluence.dev/aquavm"
-      avm-server-version: '{ git = "https://github.com/fluencelabs/aquavm", branch = "${{ github.head_ref }}" }'
-      air-interpreter-wasm-version: '{ version = "${{ needs.snapshot.outputs.air-interpreter-wasm-version }}", registry = "fluence" }'
+      avm-server-version: |
+        {
+          "git": "https://github.com/fluencelabs/aquavm",
+          "branch": "${{ github.head_ref }}"
+        }
+      air-interpreter-wasm-version: |
+        {
+          "version": "=${{ needs.snapshot.outputs.air-interpreter-wasm-version }}",
+          "registry": "fluence"
+        }
 
   fluence-js-tests:
     name: "fluence-js"

@@ -27,6 +27,7 @@ pub use call_merger::MergerCallResult;
 pub use canon_merger::MergerCanonResult;
 pub use fold_merger::MergerFoldResult;
 pub use par_merger::MergerParResult;
+pub use position_mapping::PreparationScheme;
 
 pub use errors::ApResultError;
 pub use errors::CallResultError;
@@ -43,7 +44,6 @@ pub(crate) use fold_merger::try_merge_next_state_as_fold;
 pub(crate) use par_merger::try_merge_next_state_as_par;
 
 use position_mapping::prepare_positions_mapping;
-use position_mapping::PreparationScheme;
 
 type MergeResult<T> = std::result::Result<T, MergeError>;
 
