@@ -43,4 +43,7 @@ pub enum ServiceDefinition {
     /// Some known service by name: "echo", "unit" (more to follow).
     #[strum_discriminants(strum(serialize = "behaviour"))]
     Behaviour(String),
+    /// Maps first argument to a value
+    #[strum_discriminants(strum(serialize = "map"))]
+    Map(HashMap<String, JValue>),
 }

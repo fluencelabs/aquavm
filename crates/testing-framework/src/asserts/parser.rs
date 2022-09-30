@@ -54,6 +54,7 @@ pub fn parse_kw(inp: &str) -> IResult<&str, ServiceDefinition, ParseError> {
                 tag(ServiceTagName::SeqOk.as_ref()),
                 tag(ServiceTagName::SeqError.as_ref()),
                 tag(ServiceTagName::Behaviour.as_ref()),
+                tag(ServiceTagName::Map.as_ref()),
             )),
             equal(),
             cut(context(
@@ -70,13 +71,15 @@ pub fn parse_kw(inp: &str) -> IResult<&str, ServiceDefinition, ParseError> {
                 Ok(ServiceTagName::Error) => {
                     serde_json::from_str::<CallServiceResult>(value).map(ServiceDefinition::Error)
                 }
-                Ok(ServiceTagName::SeqOk) => serde_json::from_str::<HashMap<String, JValue>>(value)
-                    .map(ServiceDefinition::SeqOk),
+                Ok(ServiceTagName::SeqOk) => {
+                    serde_json::from_str(value).map(ServiceDefinition::SeqOk)
+                }
                 Ok(ServiceTagName::SeqError) => {
                     serde_json::from_str::<HashMap<String, CallServiceResult>>(value)
                         .map(ServiceDefinition::SeqError)
                 }
                 Ok(ServiceTagName::Behaviour) => Ok(ServiceDefinition::Behaviour(value.to_owned())),
+                Ok(ServiceTagName::Map) => serde_json::from_str(value).map(ServiceDefinition::Map),
                 Err(_) => unreachable!("unknown tag {:?}", tag),
             }
         },
@@ -87,6 +90,7 @@ pub fn parse_kw(inp: &str) -> IResult<&str, ServiceDefinition, ParseError> {
 mod tests {
     use super::*;
     use pretty_assertions::assert_eq;
+    use serde_json::json;
 
     #[test]
     fn test_parse_empty() {
@@ -204,5 +208,17 @@ mod tests {
     fn test_behaviour() {
         let res = ServiceDefinition::from_str(r#"behaviour=echo"#);
         assert_eq!(res, Ok(ServiceDefinition::Behaviour("echo".to_owned())),);
+    }
+
+    #[test]
+    fn test_map() {
+        let res = ServiceDefinition::from_str(r#"map = {"42": [], "a": 2}"#);
+        assert_eq!(
+            res,
+            Ok(ServiceDefinition::Map(maplit::hashmap! {
+                "42".to_owned() => json!([]),
+                "a".to_owned() => json!(2)
+            }))
+        );
     }
 }

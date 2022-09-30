@@ -145,10 +145,12 @@ fn build_peers(
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+
     use air_test_utils::prelude::*;
     use pretty_assertions::assert_eq;
 
-    use super::*;
+    use std::ops::Deref;
 
     #[test]
     fn test_execution() {
@@ -319,6 +321,61 @@ mod tests {
                     scalar_number(12),
                     request_sent_by("peer2"),
                 ])
+            );
+        }
+    }
+
+    #[test]
+    fn test_map() {
+        let exec = TestExecutor::new(
+            TestRunParameters::from_init_peer_id("peer1"),
+            vec![],
+            IntoIterator::into_iter(["peer2", "peer3"]).map(Into::into),
+            r#"
+(seq
+  (call "peer1" ("" "") [] peers) ; ok = ["peer2", "peer3"]
+  (fold peers p
+    (seq
+      (call p ("" "") [p]) ; map = {"peer2": 42, "peer3": 43}
+      (next p)
+)))
+"#,
+        )
+        .unwrap();
+
+        let result_init: Vec<_> = exec.execution_iter("peer1").unwrap().collect();
+
+        assert_eq!(result_init.len(), 1);
+        let outcome1 = &result_init[0];
+        assert_eq!(outcome1.ret_code, 0);
+        assert_eq!(outcome1.error_message, "");
+        assert_next_pks!(&outcome1.next_peer_pks, ["peer2"]);
+
+        {
+            let results2 = exec.execute_all("peer2").unwrap();
+            assert_eq!(results2.len(), 1);
+            let outcome2 = &results2[0];
+            assert_eq!(outcome2.ret_code, 0, "{:?}", outcome2);
+            assert!(exec.execution_iter("peer2").unwrap().next().is_none());
+            assert_next_pks!(&outcome2.next_peer_pks, ["peer3"]);
+        }
+
+        {
+            let results3 = exec.execute_all("peer3").unwrap();
+            assert_eq!(results3.len(), 1);
+            let outcome3 = &results3[0];
+            assert_eq!(outcome3.ret_code, 0, "{:?}", outcome3);
+            assert_next_pks!(&outcome3.next_peer_pks, []);
+
+            let trace = trace_from_result(outcome3);
+
+            assert_eq!(
+                trace.deref(),
+                vec![
+                    executed_state::scalar(json!(["peer2", "peer3"])),
+                    executed_state::scalar(json!(42)),
+                    executed_state::scalar(json!(43)),
+                ]
             );
         }
     }

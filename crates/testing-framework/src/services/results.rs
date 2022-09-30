@@ -21,8 +21,9 @@ use air_test_utils::{
     prelude::{echo_call_service, unit_call_service},
     CallRequestParams, CallServiceClosure, CallServiceResult,
 };
+use serde_json::json;
 
-use std::{cell::Cell, collections::HashMap, convert::TryInto, time::Duration};
+use std::{borrow::Cow, cell::Cell, collections::HashMap, convert::TryInto, time::Duration};
 
 pub struct ResultService {
     results: HashMap<u32, CallServiceClosure>,
@@ -40,6 +41,7 @@ impl TryInto<CallServiceClosure> for ServiceDefinition {
             ServiceDefinition::SeqOk(call_map) => Ok(seq_ok_closure(call_map)),
             ServiceDefinition::SeqError(call_map) => Ok(seq_error_closure(call_map)),
             ServiceDefinition::Behaviour(name) => named_service_closure(name),
+            ServiceDefinition::Map(map) => Ok(map_service_closure(map)),
         }
     }
 }
@@ -93,6 +95,16 @@ fn seq_error_closure(call_map: HashMap<String, CallServiceResult>) -> CallServic
                 )
             })
             .clone()
+    })
+}
+
+fn map_service_closure(map: HashMap<String, serde_json::Value>) -> CallServiceClosure {
+    Box::new(move |args| {
+        let repr = match &args.arguments[0] {
+            serde_json::Value::String(s) => Cow::Borrowed(s.as_str()),
+            val => Cow::Owned(val.to_string()),
+        };
+        CallServiceResult::ok(json!(map.get(repr.as_ref()).cloned()))
     })
 }
 
