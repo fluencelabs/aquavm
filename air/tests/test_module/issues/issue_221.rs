@@ -15,6 +15,7 @@
  */
 
 use air_test_utils::prelude::*;
+use air_test_framework::TestExecutor;
 
 #[test]
 // test for github.com/fluencelabs/aquavm/issues/221
@@ -40,11 +41,11 @@ fn issue_221() {
             (seq
                 (seq
                     ;; let's peers be an array of two values [peer_1_id, peer_2_id]
-                    (call "{set_variable_id}" ("" "") [] peers)
+                    (call "{set_variable_id}" ("" "") [] peers) ; ok = ["{peer_1_id}", "{peer_2_id}"]
                     (fold peers peer
                         (par
                             (seq
-                                (call peer ("" "") [] value)
+                                (call peer ("" "") [peer] value) ; map = {{"{peer_1_id}": "{peer_1_value}", "{peer_2_id}": "{peer_2_value}"}}
                                 ;; it's crucial to reproduce this bug to add value to stream
                                 ;; with help of ap instruction
                                 (ap value $stream)
@@ -61,8 +62,8 @@ fn issue_221() {
                     ;; appropriate way and state for (1) is returned
                     (par
                         (par
-                            (call "{join_1_id}" ("" "") [iterator])
-                            (call "{join_2_id}" ("" "") [iterator])
+                            (call "{join_1_id}" ("" "") [iterator]) ; behaviour = echo
+                            (call "{join_2_id}" ("" "") [iterator]) ; behaviour = echo
                         )
                         (next iterator)
                     )
@@ -71,6 +72,13 @@ fn issue_221() {
             (call "some_peer_id" ("" "") []) ;; (1)
         )
     "#);
+
+    let executor = TestExecutor::new(
+        TestRunParameters::from_init_peer_id("set_variable_id"),
+        vec![],
+        vec![peer_1_id, peer_2_id].into_iter().map(Into::into),
+        &script,
+    );
 
     let result = checked_call_vm!(set_variable, <_>::default(), &script, "", "");
     let peer_1_result = checked_call_vm!(peer_1, <_>::default(), &script, "", result.data.clone());
