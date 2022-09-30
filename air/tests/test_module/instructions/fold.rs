@@ -582,6 +582,7 @@ fn fold_scalar_seq_next_completes_with_null() {
         executed_state::stream(service_result.clone(), 0),
         executed_state::par(1, 0),
         executed_state::stream(service_result.clone(), 0),
+        executed_state::canon(vec![]),
         executed_state::scalar(service_result),
     ];
     assert_eq!(actual_trace, expected_trace);
