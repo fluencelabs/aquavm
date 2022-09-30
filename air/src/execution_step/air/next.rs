@@ -41,6 +41,7 @@ impl<'i> super::ExecutableInstruction<'i> for Next<'i> {
             // execute last instruction if any
             if let Some(last_instr) = &fold_state.last_instr_head {
                 let last_instr = last_instr.clone();
+                exec_ctx.subgraph_complete = true; // it's needed because of determine_subgraph_complete in par
                 last_instr.execute(exec_ctx, trace_ctx)?;
             } else {
                 // if no last instruction, execute never as a fallback for fold over stream (it'll be removed in future)
