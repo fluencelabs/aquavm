@@ -38,7 +38,10 @@ fn issue_302() {
                     (call "{peer_id_2}" ("" "") [1] $stream)
                     (seq
                         (call "{peer_id_3}" ("" "") [0] $stream)
-                        (call "{peer_id_2}" ("" "") [$stream])
+                        (seq
+                            (canon "{peer_id_2}" $stream #canon_stream)
+                            (call "{peer_id_2}" ("" "") [#canon_stream])
+                        )
                     )
                 )
             )
@@ -52,10 +55,11 @@ fn issue_302() {
     let actual_trace = trace_from_result(&result_4);
 
     let expected_trace = vec![
-        executed_state::par(1, 3),
+        executed_state::par(1, 4),
         executed_state::stream_number(2, 1),
         executed_state::stream_number(1, 0),
         executed_state::stream_number(0, 1),
+        executed_state::canon(vec![2.into(), 1.into(), 3.into()]),
         executed_state::scalar(json!([1, 2, 0])),
     ];
     assert_eq!(actual_trace.deref(), expected_trace);
