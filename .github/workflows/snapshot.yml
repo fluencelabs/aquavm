@@ -6,6 +6,9 @@ on:
       avm-version:
         description: "@fluencelabs/avm version"
         value: ${{ jobs.publish-avm.outputs.version }}
+      avm-server-version:
+        description: "avm-server version"
+        value: ${{ jobs.publish-avm-server.outputs.version }}
       air-interpreter-wasm-version:
         description: "air-interpreter-wasm version"
         value: ${{ jobs.publish-interpreter.outputs.version }}
@@ -235,4 +238,98 @@ jobs:
             To install it run:
             ```shell
             cargo add air-interpreter-wasm@${{ env.VERSION }} --registry fluence
+            ```
+
+  publish-avm-server:
+    name: "Publish avm-server snapshot"
+    runs-on: ubuntu-latest
+
+    needs: wasm
+
+    outputs:
+      version: "${{ steps.build.outputs.version }}"
+
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+
+    steps:
+      - name: Checkout AquaVM
+        uses: actions/checkout@v3
+
+      - name: Download air-interpreter-wasm binary
+        uses: actions/download-artifact@v3
+        with:
+          name: air-interpreter-wasm
+
+      - run: mv air_interpreter_server.wasm crates/interpreter-wasm/
+
+      - name: Import secrets
+        uses: hashicorp/vault-action@v2.4.2
+        with:
+          url: https://vault.fluence.dev
+          path: jwt/github
+          role: ci
+          method: jwt
+          jwtGithubAudience: "https://github.com/fluencelabs"
+          jwtTtl: 300
+          exportToken: false
+          secrets: |
+            kv/cargo-registry/users/ci token | CARGO_REGISTRIES_FLUENCE_TOKEN
+
+      - name: Setup Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Install cargo-edit
+        uses: baptiste0928/cargo-install@v1
+        with:
+          crate: cargo-edit
+
+      - name: Generate package version
+        id: version
+        run: |
+          SHA=${{ github.event.pull_request.head.sha }}
+          echo "::set-output name=sha::${SHA::7}"
+          echo "::set-output name=branch::${GITHUB_HEAD_REF//[^a-zA-Z0-9-]/-}"
+
+      - name: Set package version
+        id: build
+        env:
+          BRANCH: ${{ steps.version.outputs.branch }}
+          SHA: ${{ steps.version.outputs.sha }}
+          RUN: ${{ github.run_number }}
+          ATTEMPT: ${{ github.run_attempt }}
+        working-directory: avm/server
+        run: |
+          cargo set-version --bump alpha
+          cargo set-version "$(cargo read-manifest | jq -r .version)-${{ env.BRANCH }}-${{ env.SHA }}-${{ env.RUN }}-${{ env.ATTEMPT }}"
+
+          echo "::set-output name=version::$(cargo read-manifest | jq -r .version)"
+
+      - name: Publish to self-hosted cargo registry
+        working-directory: avm/server
+        run: cargo publish --registry fluence --allow-dirty
+
+      - name: Find comment in PR
+        uses: peter-evans/find-comment@v1
+        id: comment
+        with:
+          issue-number: "${{ github.event.pull_request.number }}"
+          comment-author: github-actions[bot]
+          body-includes: "## avm-server version is"
+
+      - name: Update comment in PR
+        uses: peter-evans/create-or-update-comment@v1
+        env:
+          VERSION: ${{ steps.build.outputs.version }}
+        with:
+          comment-id: "${{ steps.comment.outputs.comment-id }}"
+          issue-number: "${{ github.event.pull_request.number }}"
+          edit-mode: replace
+          body: |
+            ## avm-server version is [${{ env.VERSION }}](https://crates.fluence.dev/#/crate?name=avm-server&version=${{ env.VERSION }})
+            To install it run:
+            ```shell
+            cargo add avm-server@${{ env.VERSION }} --registry fluence
             ```
