@@ -272,6 +272,5 @@ fn lambda_with_canon_stream_join() {
     assert_eq!(
         &actual_trace[7.into()],
         &executed_state::request_sent_by("set_variable"),
-        "{:?}", actual_trace,
     );
 }
