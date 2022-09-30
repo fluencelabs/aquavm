@@ -178,9 +178,15 @@ fn stream_merge() {
                     (call "A" ("get_providers" "") [] $providers)
                     (seq 
                         (call "A" ("get_providers" "") [] $providers)
-                        (seq 
-                            (call "B" ("" "2") [$providers] $void)
-                            (call "B" ("" "3") [$void] $void)
+                        (seq
+                            (seq
+                                (canon "B" $providers #canon_providers)
+                                (call "B" ("" "2") [#canon_providers] $void)
+                            )
+                            (seq
+                                (canon "B" $void #canon_void)
+                                (call "B" ("" "3") [#canon_void] $void)
+                            )
                         )
                     )
                 )
