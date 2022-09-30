@@ -35,6 +35,7 @@ impl<'i> super::ExecutableInstruction<'i> for Next<'i> {
 
         // TODO: refactor a body of this if to reduce LOCs count
         if !fold_state.iterable.next() {
+            maybe_meet_back_iterator(self, fold_state, trace_ctx)?;
 
             let fold_state = exec_ctx.scalars.get_iterable(iterator_name)?;
             // execute last instruction if any
@@ -51,7 +52,6 @@ impl<'i> super::ExecutableInstruction<'i> for Next<'i> {
                     fold_state.back_iteration_started = true;
                 }
             }
-            maybe_meet_back_iterator(self, fold_state, trace_ctx)?;
 
             // just do nothing to exit
             return Ok(());
