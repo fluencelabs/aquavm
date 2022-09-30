@@ -65,32 +65,6 @@ fn length_functor_for_non_array_scalar() {
 }
 
 #[test]
-fn length_functor_for_stream() {
-    let script = r#"
-        (seq
-            (seq
-                (ap 1 $stream)
-                (ap 1 $stream))
-            (call %init_peer_id% ("" "") [$stream.length]) ; behaviour = echo
-        )
-        "#;
-
-    let init_peer_id = "init_peer_id";
-    let executor = TestExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), &script)
-        .expect("invalid test AIR script");
-
-    let result = executor.execute_one(init_peer_id).unwrap();
-    let actual_trace = trace_from_result(&result);
-
-    let expected_trace = vec![
-        executed_state::ap(Some(0)),
-        executed_state::ap(Some(0)),
-        executed_state::scalar_number(2),
-    ];
-    assert_eq!(actual_trace, expected_trace);
-}
-
-#[test]
 fn length_functor_for_empty_stream() {
     let script = r#"
         (new $stream
