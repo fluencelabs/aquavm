@@ -281,7 +281,12 @@ fn recursive_stream_error_handling() {
                             (null))
                         (seq
                             (ap value $stream)
-                            (next iterator))))))
+                            (next iterator)
+                        )
+                    )
+                )
+            )
+         )
         (call "{vm_peer_id_2}" ("" "") ["{result_value}"]))
     "#);
 
