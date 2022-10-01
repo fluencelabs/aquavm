@@ -263,10 +263,8 @@ fn recursive_stream_error_handling() {
 
     let mut vm_1 = create_avm(give_n_results_and_then_stop, vm_peer_id_1);
 
-    let vm_peer_id_2 = "vm_peer_id_2";
-    let mut vm_2 = create_avm(echo_call_service(), vm_peer_id_2);
-
     let result_value = "result_value";
+    let vm_peer_id_2 = "vm_peer_id_2";
     let script = f!(r#"
     (xor
         (seq
@@ -291,12 +289,28 @@ fn recursive_stream_error_handling() {
     "#);
 
     let result = checked_call_vm!(vm_1, <_>::default(), &script, "", "");
-    let result = checked_call_vm!(vm_2, <_>::default(), &script, "", result.data);
     let actual_trace = trace_from_result(&result);
-    let actual_last_state = &actual_trace[11.into()];
-    let expected_last_state = executed_state::scalar_string(result_value);
+    let expected_trace = vec![
+        executed_state::stream_string("non_stop", 0),
+        executed_state::stream_string("non_stop", 1),
+        executed_state::fold(vec![
+            subtrace_lore(0, SubTraceDesc::new(3.into(), 2), SubTraceDesc::new(5.into(), 0)),
+            subtrace_lore(1, SubTraceDesc::new(5.into(), 2), SubTraceDesc::new(7.into(), 0)),
+            subtrace_lore(4, SubTraceDesc::new(7.into(), 2), SubTraceDesc::new(10.into(), 0)),
+            subtrace_lore(6, SubTraceDesc::new(9.into(), 1), SubTraceDesc::new(10.into(), 0)),
+            subtrace_lore(8, SubTraceDesc::new(10.into(), 1), SubTraceDesc::new(11.into(), 0)),
+        ]),
+        executed_state::scalar_string("non_stop"),
+        executed_state::ap(Some(2)),
+        executed_state::scalar_string("non_stop"),
+        executed_state::ap(Some(2)),
+        executed_state::scalar_string("non_stop"),
+        executed_state::ap(Some(3)),
+        executed_state::service_failed(1, "error"),
+        executed_state::service_failed(1, "error"),
+    ];
 
-    assert_eq!(actual_last_state, &expected_last_state);
+    assert_eq!(actual_trace, expected_trace);
 }
 
 #[test]
