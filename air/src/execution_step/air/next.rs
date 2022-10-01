@@ -33,7 +33,7 @@ impl<'i> super::ExecutableInstruction<'i> for Next<'i> {
         let fold_state = exec_ctx.scalars.get_iterable_mut(iterator_name)?;
         maybe_meet_iteration_end(self, fold_state, trace_ctx)?;
 
-        // TODO: refactor a body of this if to reduce LOCs count
+        // TODO: refactor a body of this if to reduce LOCs count and improve readability
         if !fold_state.iterable.next() {
             maybe_meet_back_iterator(self, fold_state, trace_ctx)?;
 
