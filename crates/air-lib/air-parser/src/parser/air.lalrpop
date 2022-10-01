@@ -62,21 +62,21 @@ Instr: Box<Instruction<'input>> = {
         Box::new(Instruction::Fail(fail_body))
     },
 
-    <left: @L> "(" fold <iterable:FoldScalarIterable> <iterator:Scalar> <i:Instr> ")" <right: @R> => {
+    <left: @L> "(" fold <iterable:FoldScalarIterable> <iterator:Scalar> <instruction:Instr> <last_instruction:Instr?>")" <right: @R> => {
         let iterator = Scalar::new(iterator.0, iterator.1);
         let span = Span::new(left, right);
-        let fold = FoldScalar::new(iterable, iterator, *i, span);
+        let fold = FoldScalar::new(iterable, iterator, *instruction, last_instruction.map(|v| *v), span);
 
         validator.met_fold_scalar(&fold, span);
 
         Box::new(Instruction::FoldScalar(fold))
     },
 
-    <left: @L> "(" fold <stream:Stream> <iterator:Scalar> <i:Instr> ")" <right: @R> => {
+    <left: @L> "(" fold <stream:Stream> <iterator:Scalar> <instruction:Instr> <last_instruction:Instr?> ")" <right: @R> => {
         let iterable = Stream::new(stream.0, stream.1);
         let iterator = Scalar::new(iterator.0, iterator.1);
         let span = Span::new(left, right);
-        let fold = FoldStream::new(iterable, iterator, *i, span);
+        let fold = FoldStream::new(iterable, iterator, *instruction, last_instruction.map(|v| *v), span);
 
         validator.meet_fold_stream(&fold, span);
 

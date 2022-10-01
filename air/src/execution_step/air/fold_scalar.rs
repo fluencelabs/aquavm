@@ -52,6 +52,7 @@ impl<'i> ExecutableInstruction<'i> for FoldScalar<'i> {
                 IterableType::Scalar,
                 self.iterator.name,
                 self.instruction.clone(),
+                self.last_instruction.clone(),
                 exec_ctx,
                 trace_ctx,
             ),
@@ -64,10 +65,11 @@ pub(super) fn fold<'i>(
     iterable_type: IterableType,
     iterator: &'i str,
     instruction: Rc<Instruction<'i>>,
+    last_instruction: Option<Rc<Instruction<'i>>>,
     exec_ctx: &mut ExecutionCtx<'i>,
     trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<()> {
-    let fold_state = FoldState::from_iterable(iterable, iterable_type, instruction.clone());
+    let fold_state = FoldState::from_iterable(iterable, iterable_type, instruction.clone(), last_instruction);
     exec_ctx.scalars.meet_fold_start();
     exec_ctx.scalars.set_iterable_value(iterator, fold_state)?;
 

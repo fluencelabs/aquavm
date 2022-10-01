@@ -445,7 +445,7 @@ fn fold_waits_on_empty_stream() {
 }
 
 #[test]
-fn fold_seq_next_never_completes() {
+fn fold_stream_seq_next_never_completes() {
     let vm_peer_id = "vm_peer_id";
     let mut vm = create_avm(set_variable_call_service(json!(1)), vm_peer_id);
 
@@ -471,6 +471,199 @@ fn fold_seq_next_never_completes() {
             SubTraceDesc::new(3.into(), 0),
         )]),
         executed_state::stream_number(1, 0),
+    ];
+    assert_eq!(actual_trace, expected_trace);
+}
+
+#[test]
+fn fold_stream_seq_next_never_completes_with_never() {
+    let vm_peer_id = "vm_peer_id";
+    let mut vm = create_avm(set_variable_call_service(json!(1)), vm_peer_id);
+
+    let script = f!(r#"
+            (seq
+                (call "{vm_peer_id}" ("" "") [] $stream)
+                (seq
+                    (fold $stream iterator
+                        (seq
+                            (call "{vm_peer_id}" ("" "") [iterator] $new_stream)
+                            (next iterator)
+                        )
+                        (never)
+                    )
+                    (call "{vm_peer_id}" ("" "") [])
+                )
+            )
+            "#);
+
+    let result = checked_call_vm!(vm, <_>::default(), &script, "", "");
+    let actual_trace = trace_from_result(&result);
+
+    let expected_trace = vec![
+        executed_state::stream_number(1, 0),
+        executed_state::fold(vec![subtrace_lore(
+            0,
+            SubTraceDesc::new(2.into(), 1),
+            SubTraceDesc::new(3.into(), 0),
+        )]),
+        executed_state::stream_number(1, 0),
+    ];
+    assert_eq!(actual_trace, expected_trace);
+}
+
+#[test]
+fn fold_stream_seq_next_completes_with_null() {
+    let vm_peer_id = "vm_peer_id";
+    let mut vm = create_avm(set_variable_call_service(json!(1)), vm_peer_id);
+
+    let script = f!(r#"
+            (seq
+                (call "{vm_peer_id}" ("" "") [] $stream)
+                (seq
+                    (fold $stream iterator
+                        (seq
+                            (call "{vm_peer_id}" ("" "") [iterator] $new_stream)
+                            (next iterator)
+                        )
+                        (null)
+                    )
+                    (call "{vm_peer_id}" ("" "") [])
+                )
+            )
+            "#);
+
+    let result = checked_call_vm!(vm, <_>::default(), &script, "", "");
+    let actual_trace = trace_from_result(&result);
+
+    let expected_trace = vec![
+        executed_state::stream_number(1, 0),
+        executed_state::fold(vec![subtrace_lore(
+            0,
+            SubTraceDesc::new(2.into(), 1),
+            SubTraceDesc::new(3.into(), 0),
+        )]),
+        executed_state::stream_number(1, 0),
+        executed_state::scalar_number(1),
+    ];
+    assert_eq!(actual_trace, expected_trace);
+}
+
+#[test]
+fn fold_scalar_seq_next_completes_with_null() {
+    let vm_peer_id = "vm_peer_id";
+    let service_result = json!([1, 2]);
+    let mut vm = create_avm(set_variable_call_service(service_result.clone()), vm_peer_id);
+
+    let script = f!(r#"
+            (seq
+                (call "{vm_peer_id}" ("" "") [] iterable)
+                (seq
+                    (fold iterable iterator
+                        (par
+                            (call "{vm_peer_id}" ("" "") [iterator] $new_stream)
+                            (next iterator)
+                        )
+                        (null)
+                    )
+                    (seq
+                        (canon "{vm_peer_id}" $new_stream #canon_stream)
+                        (call "{vm_peer_id}" ("" "") [#canon_stream])
+                    )
+                )
+            )
+            "#);
+
+    let result = checked_call_vm!(vm, <_>::default(), &script, "", "");
+    let actual_trace = trace_from_result(&result);
+
+    let expected_trace = vec![
+        executed_state::scalar(service_result.clone()),
+        executed_state::par(1, 2),
+        executed_state::stream(service_result.clone(), 0),
+        executed_state::par(1, 0),
+        executed_state::stream(service_result.clone(), 0),
+        executed_state::canon(vec![]),
+        executed_state::scalar(service_result),
+    ];
+    assert_eq!(actual_trace, expected_trace);
+}
+
+#[test]
+fn fold_scalar_seq_next_not_completes_with_never() {
+    let vm_peer_id = "vm_peer_id";
+    let service_result = json!([1, 2]);
+    let mut vm = create_avm(set_variable_call_service(service_result.clone()), vm_peer_id);
+
+    let script = f!(r#"
+            (seq
+                (call "{vm_peer_id}" ("" "") [] iterable)
+                (seq
+                    (fold iterable iterator
+                        (par
+                            (call "unknwon_peer_id" ("" "") [iterator] $new_stream)
+                            (next iterator)
+                        )
+                        (never)
+                    )
+                    (seq
+                        (canon "{vm_peer_id}" $new_stream #canon_stream)
+                        (call "{vm_peer_id}" ("" "") [#canon_stream])
+                    )
+                )
+            )
+            "#);
+
+    let result = checked_call_vm!(vm, <_>::default(), &script, "", "");
+    let actual_trace = trace_from_result(&result);
+
+    let expected_trace = vec![
+        executed_state::scalar(service_result.clone()),
+        executed_state::par(1, 2),
+        executed_state::request_sent_by(vm_peer_id),
+        executed_state::par(1, 0),
+        executed_state::request_sent_by(vm_peer_id),
+    ];
+    assert_eq!(actual_trace, expected_trace);
+}
+
+#[test]
+fn fold_stream_seq_next_saves_call_result() {
+    let vm_peer_id = "vm_peer_id";
+    let mut vm = create_avm(echo_call_service(), vm_peer_id);
+
+    let script = f!(r#"
+            (seq
+                (seq
+                    (ap 1 $stream)
+                    (ap 2 $stream)
+                )
+                (seq
+                    (fold $stream iterator
+                        (seq
+                            (call "{vm_peer_id}" ("" "") [iterator] $new_stream)
+                            (next iterator)
+                        )
+                        (call "{vm_peer_id}" ("" "") [iterator] $new_stream)
+                    )
+                    (call "{vm_peer_id}" ("" "") [0])
+                )
+            )
+            "#);
+
+    let result = checked_call_vm!(vm, <_>::default(), &script, "", "");
+    let actual_trace = trace_from_result(&result);
+
+    let expected_trace = vec![
+        executed_state::ap(Some(0)),
+        executed_state::ap(Some(0)),
+        executed_state::fold(vec![
+            subtrace_lore(0, SubTraceDesc::new(3.into(), 1), SubTraceDesc::new(6.into(), 0)),
+            subtrace_lore(1, SubTraceDesc::new(4.into(), 1), SubTraceDesc::new(5.into(), 1)),
+        ]),
+        executed_state::stream_number(1, 0),
+        executed_state::stream_number(2, 1),
+        executed_state::stream_number(2, 2),
+        executed_state::scalar_number(0),
     ];
     assert_eq!(actual_trace, expected_trace);
 }
