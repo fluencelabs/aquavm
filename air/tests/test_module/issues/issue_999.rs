@@ -43,49 +43,48 @@ pub fn join_stream(stream: &str, relay: &str, length: &str, result: &str) -> Str
 
 #[test]
 fn folex_bug_999() {
+    env_logger::init();
     let script = format!(
         r#"
         (seq
             (seq
-                (call "relay" ("kad" "neighborhood") ["relay"] neighs_top) ; ok = ["p1","p2","p3","p4","p5"]
+                (call "relay" ("kad" "neighborhood") ["relay"] neighs_top) ; ok = ["p1"]
                 (seq
-                    (fold neighs_top n
-                        (seq
-                            (call n ("kad" "neighborhood") [n] $neighs_inner) ; ok =["relay","client","p1","p2","p3","p4","p5"]
-                            (next n)
-                        )
-                    )
-                    (fold $neighs_inner ns
-                        (par
-                            (fold ns n
-                                (par
-                                    (call n ("peer" "identify") [n] $external_addresses) ; behaviour = echo
-                                    (next n)
-                                )
-                            )
-                            (next ns)
-                        )
+                    (call "p1" ("kad" "neighborhood") ["p1"] neighs_inner) ; ok =["p1"]
+                    (par
+                        (call "relay" ("peer" "identify") ["relay"] $external_addresses) ; behaviour = echo
+                        (call "p1" ("peer" "identify") ["p1"] $external_addresses) ; behaviour = echo
                     )
                 )
             )
             (seq
-                {}
-                (call "client" ("return" "") [#joined_addresses neighs_top] x) ; ok = null
+                (new $monotonic_stream
+                    (fold $external_addresses elem
+                        (seq
+                            (ap "asd" $monotonic_stream)
+                            (seq
+                                (canon "relay" $monotonic_stream #result)
+                                (null)
+                            )
+                        )
+                    )
+                )
+                (call "client" ("return" "") [$external_addresses neighs_inner] x) ; ok = null
             )
         )
         "#,
-        join_stream("external_addresses", "\"relay\"", "5", "joined_addresses"),
+       // join_stream("external_addresses", "\"relay\"", "2", "joined_addresses"),
     );
 
     let engine = TestExecutor::new(
         TestRunParameters::from_init_peer_id("client"),
         vec![],
-        vec!["p1","p2","p3","p4","p5"].into_iter().map(Into::into),
+        vec!["p1","p2","p3"].into_iter().map(Into::into),
         &script,
     ).unwrap();
 
     for _ in 0..7 {
-        for peer in ["client", "relay", "p1", "p2", "p3", "p4", "p5"] {
+        for peer in ["client", "relay", "p1", "p2"] {
             let it = engine.execution_iter(peer).unwrap();
             for v in it {
                 assert_eq!(v.ret_code, 0, "{:?}", v);
