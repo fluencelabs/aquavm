@@ -32,11 +32,11 @@ fn parse_seq() {
     let instruction = parse(source_code);
     let expected = seq(
         call(
-            CallInstrValue::Variable(VariableWithLambda::scalar("peer_id", 32)),
-            CallInstrValue::Variable(VariableWithLambda::scalar("service_id", 41)),
-            CallInstrValue::Variable(VariableWithLambda::scalar("function_name", 52)),
+            CallInstrValue::Variable(VariableWithLambda::scalar("peer_id", 32.into())),
+            CallInstrValue::Variable(VariableWithLambda::scalar("service_id", 41.into())),
+            CallInstrValue::Variable(VariableWithLambda::scalar("function_name", 52.into())),
             Rc::new(vec![Value::EmptyArray, Value::EmptyArray]),
-            CallOutputValue::Scalar(Scalar::new("output", 75)),
+            CallOutputValue::Scalar(Scalar::new("output", 75.into())),
         ),
         call(
             CallInstrValue::Literal("peer_id"),
@@ -45,7 +45,7 @@ fn parse_seq() {
             Rc::new(vec![
                 Value::Literal("hello"),
                 Value::EmptyArray,
-                Value::Variable(VariableWithLambda::scalar("name", 154)),
+                Value::Variable(VariableWithLambda::scalar("name", 154.into())),
             ]),
             CallOutputValue::None,
         ),
@@ -68,16 +68,16 @@ fn parse_seq_seq() {
     let expected = seq(
         seq(
             call(
-                CallInstrValue::Variable(VariableWithLambda::scalar("peer_id", 53)),
-                CallInstrValue::Variable(VariableWithLambda::scalar("service_id", 62)),
-                CallInstrValue::Variable(VariableWithLambda::scalar("function_name", 73)),
+                CallInstrValue::Variable(VariableWithLambda::scalar("peer_id", 53.into())),
+                CallInstrValue::Variable(VariableWithLambda::scalar("service_id", 62.into())),
+                CallInstrValue::Variable(VariableWithLambda::scalar("function_name", 73.into())),
                 Rc::new(vec![]),
                 CallOutputValue::None,
             ),
             call(
-                CallInstrValue::Variable(VariableWithLambda::scalar("peer_id", 114)),
+                CallInstrValue::Variable(VariableWithLambda::scalar("peer_id", 114.into())),
                 CallInstrValue::Literal("service_B"),
-                CallInstrValue::Variable(VariableWithLambda::scalar("function_name", 135)),
+                CallInstrValue::Variable(VariableWithLambda::scalar("function_name", 135.into())),
                 Rc::new(vec![]),
                 CallOutputValue::None,
             ),
@@ -88,9 +88,9 @@ fn parse_seq_seq() {
             CallInstrValue::Literal("function_name"),
             Rc::new(vec![
                 Value::Literal("hello"),
-                Value::Variable(VariableWithLambda::scalar("name", 236)),
+                Value::Variable(VariableWithLambda::scalar("name", 236.into())),
             ]),
-            CallOutputValue::Stream(Stream::new("$output", 242)),
+            CallOutputValue::Stream(Stream::new("$output", 242.into())),
         ),
     );
     assert_eq!(instruction, expected);

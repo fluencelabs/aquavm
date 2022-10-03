@@ -79,7 +79,7 @@ fn execute_subgraph<'i>(
         }
     };
 
-    completeness_updater.update_completeness(exec_ctx, subgraph_type);
+    completeness_updater.observe_completeness(exec_ctx, subgraph_type);
     Ok(result)
 }
 

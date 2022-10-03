@@ -66,9 +66,7 @@ fn epilog<'i>(new: &New<'i>, exec_ctx: &mut ExecutionCtx<'i>) -> ExecutionResult
     let position = new.span.left;
     match &new.argument {
         NewArgument::Stream(stream) => {
-            exec_ctx
-                .streams
-                .meet_scope_end(stream.name.to_string(), position as u32);
+            exec_ctx.streams.meet_scope_end(stream.name.to_string(), position);
             Ok(())
         }
         NewArgument::Scalar(scalar) => exec_ctx.scalars.meet_new_end_scalar(scalar.name),

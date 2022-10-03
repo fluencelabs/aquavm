@@ -18,6 +18,9 @@ use air_test_utils::prelude::*;
 
 use fstrings::f;
 use fstrings::format_args_f;
+use pretty_assertions::assert_eq;
+
+use std::ops::Deref;
 
 #[test]
 fn canon_moves_execution_flow() {
@@ -124,7 +127,7 @@ fn canon_fixes_stream_correct() {
         executed_state::scalar(json!([2, 3])),
         executed_state::scalar(json!([2, 3])),
     ];
-    assert_eq!(vm_1_result_2_trace, expected_vm_1_result_2_trace);
+    assert_eq!(vm_1_result_2_trace.deref(), expected_vm_1_result_2_trace);
 }
 
 #[test]
@@ -231,5 +234,40 @@ fn canon_empty_stream() {
     let result = checked_call_vm!(vm_2, <_>::default(), script, "", result.data);
     let actual_trace = trace_from_result(&result);
     let expected_trace = vec![executed_state::canon(vec![]), executed_state::scalar(json!([]))];
+    assert_eq!(actual_trace, expected_trace);
+}
+
+#[test]
+fn canon_over_later_defined_stream() {
+    let vm_peer_id_1 = "vm_peer_id_1";
+    let mut peer_vm_1 = create_avm(echo_call_service(), vm_peer_id_1);
+
+    let vm_peer_id_2 = "vm_peer_id_2";
+    let mut peer_vm_2 = create_avm(echo_call_service(), vm_peer_id_2);
+
+    let vm_peer_id_3 = "vm_peer_id_3";
+    let mut peer_vm_3 = create_avm(echo_call_service(), vm_peer_id_3);
+
+    let script = f!(r#"
+        (par
+            (call "{vm_peer_id_2}" ("" "") [1] $stream)
+            (seq
+                (canon "{vm_peer_id_1}" $stream #canon_stream) ; it returns a catchable error
+                (call "{vm_peer_id_3}" ("" "") [#canon_stream])
+            )
+        )
+    "#);
+
+    let result = checked_call_vm!(peer_vm_1, <_>::default(), &script, "", "");
+    let result = checked_call_vm!(peer_vm_2, <_>::default(), &script, "", result.data);
+    let result = checked_call_vm!(peer_vm_3, <_>::default(), &script, "", result.data);
+    let actual_trace = trace_from_result(&result);
+
+    let expected_trace = vec![
+        executed_state::par(1, 2),
+        executed_state::stream_number(1, 0),
+        executed_state::canon(vec![]),
+        executed_state::scalar(json!([])),
+    ];
     assert_eq!(actual_trace, expected_trace);
 }

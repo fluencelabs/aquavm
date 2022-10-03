@@ -24,6 +24,7 @@ use air_interpreter_data::Sender;
 use air_interpreter_data::TracePos;
 use air_interpreter_interface::CallServiceResult;
 use air_parser::ast::CallOutputValue;
+use air_trace_handler::PreparationScheme;
 use air_trace_handler::TraceHandler;
 
 use fstrings::f;
@@ -40,14 +41,15 @@ pub(crate) struct StateDescriptor {
 pub(super) fn handle_prev_state<'i>(
     tetraplet: &RcSecurityTetraplet,
     output: &CallOutputValue<'i>,
-    prev_result: CallResult,
+    mut prev_result: CallResult,
     trace_pos: TracePos,
+    scheme: PreparationScheme,
     exec_ctx: &mut ExecutionCtx<'i>,
     trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<StateDescriptor> {
     use CallResult::*;
 
-    match &prev_result {
+    match &mut prev_result {
         // this call was failed on one of the previous executions,
         // here it's needed to bubble this special error up
         CallServiceFailed(ret_code, err_msg) => {
@@ -84,8 +86,8 @@ pub(super) fn handle_prev_state<'i>(
             Ok(StateDescriptor::cant_execute_now(prev_result))
         }
         // this instruction's been already executed
-        Executed(value) => {
-            set_result_from_value(value.clone(), tetraplet.clone(), trace_pos, output, exec_ctx)?;
+        Executed(ref mut value) => {
+            set_result_from_value(&mut *value, tetraplet.clone(), trace_pos, scheme, output, exec_ctx)?;
             trace_ctx.meet_call_end(prev_result);
 
             Ok(StateDescriptor::executed())

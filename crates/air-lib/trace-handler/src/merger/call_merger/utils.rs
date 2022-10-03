@@ -65,16 +65,16 @@ fn are_streams_equal(
 /// Merging of value from only current data to a stream is a something special, because it's
 /// needed to choose generation not from current data, but a maximum from streams on a current peer.
 /// Maximum versions are tracked in data in a special field called streams.
-pub(super) fn merge_current_executed(
-    value: Value,
-    value_type: ValueType<'_>,
-    data_keeper: &DataKeeper,
-) -> MergeResult<CallResult> {
+pub(super) fn merge_current_executed(value: Value, value_type: ValueType<'_>) -> MergeResult<CallResult> {
     match (value, value_type) {
         (scalar @ Value::Scalar(_), ValueType::Scalar) => Ok(CallResult::Executed(scalar)),
-        (Value::Stream { value, .. }, ValueType::Stream(stream_name)) => {
-            let generation = data_keeper.prev_ctx.stream_generation(stream_name).unwrap_or_default();
-            let stream = Value::Stream { value, generation };
+        (Value::Stream { value, .. }, ValueType::Stream(_)) => {
+            // it is checked by an assertion
+            let canary_generation = u32::MAX;
+            let stream = Value::Stream {
+                value,
+                generation: canary_generation,
+            };
             Ok(CallResult::Executed(stream))
         }
         (value, value_type) => Err(CallResultError::data_not_match(value, value_type)),

@@ -114,9 +114,7 @@ fn check_canon_results(
             {
                 continue;
             }
-            (Some(ExecutedState::Ap(prev_ap_result)), Some(ExecutedState::Ap(current_ap_result)))
-                if prev_ap_result == current_ap_result =>
-            {
+            (Some(ExecutedState::Ap(_)), Some(ExecutedState::Ap(_))) => {
                 continue;
             }
             _ => {

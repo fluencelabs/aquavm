@@ -16,7 +16,7 @@
 
 use super::errors::LexerError;
 use super::token::Token;
-use super::LexerResult;
+use super::{AirPos, LexerResult};
 
 use std::iter::Peekable;
 use std::str::CharIndices;
@@ -29,7 +29,7 @@ pub struct AIRLexer<'input> {
 }
 
 impl<'input> Iterator for AIRLexer<'input> {
-    type Item = Spanned<Token<'input>, usize, LexerError>;
+    type Item = Spanned<Token<'input>, AirPos, LexerError>;
 
     fn next(&mut self) -> Option<Self::Item> {
         self.next_token()
@@ -44,8 +44,9 @@ impl<'input> AIRLexer<'input> {
         }
     }
 
-    pub fn next_token(&mut self) -> Option<Spanned<Token<'input>, usize, LexerError>> {
+    pub fn next_token(&mut self) -> Option<Spanned<Token<'input>, AirPos, LexerError>> {
         while let Some((start_pos, ch)) = self.chars.next() {
+            let start_pos = AirPos::from(start_pos);
             match ch {
                 '(' => return Some(Ok((start_pos, Token::OpenRoundBracket, start_pos + 1))),
                 ')' => return Some(Ok((start_pos, Token::CloseRoundBracket, start_pos + 1))),
@@ -79,34 +80,37 @@ impl<'input> AIRLexer<'input> {
     #[allow(clippy::unnecessary_wraps)]
     fn tokenize_string_literal(
         &mut self,
-        start_pos: usize,
-    ) -> Option<Spanned<Token<'input>, usize, LexerError>> {
+        start_pos: AirPos,
+    ) -> Option<Spanned<Token<'input>, AirPos, LexerError>> {
         for (pos, ch) in &mut self.chars {
+            let pos = AirPos::from(pos);
             if ch == '"' {
                 // + 1 to count an open double quote
                 let string_size = pos - start_pos + 1;
 
                 return Some(Ok((
                     start_pos,
-                    Token::StringLiteral(&self.input[start_pos + 1..pos]),
+                    Token::StringLiteral(&self.input[(start_pos + 1).into()..pos.into()]),
                     start_pos + string_size,
                 )));
             }
         }
 
-        Some(Err(LexerError::unclosed_quote(start_pos..self.input.len())))
+        Some(Err(LexerError::unclosed_quote(
+            start_pos..self.input.len().into(),
+        )))
     }
 
     #[allow(clippy::unnecessary_wraps)]
     fn tokenize_string(
         &mut self,
-        start_pos: usize,
+        start_pos: AirPos,
         open_square_bracket_met: bool,
-    ) -> Option<Spanned<Token<'input>, usize, LexerError>> {
+    ) -> Option<Spanned<Token<'input>, AirPos, LexerError>> {
         let end_pos = self.advance_to_token_end(start_pos, open_square_bracket_met);
 
         // this slicing is safe here because borders come from the chars iterator
-        let token_str = &self.input[start_pos..end_pos];
+        let token_str = &self.input[start_pos.into()..end_pos.into()];
 
         let token = match string_to_token(token_str, start_pos) {
             Ok(token) => token,
@@ -117,13 +121,13 @@ impl<'input> AIRLexer<'input> {
         Some(Ok((start_pos, token, start_pos + token_str_len)))
     }
 
-    fn advance_to_token_end(&mut self, start_pos: usize, square_met: bool) -> usize {
+    fn advance_to_token_end(&mut self, start_pos: AirPos, square_met: bool) -> AirPos {
         let mut end_pos = start_pos;
         let mut round_brackets_balance: i64 = 0;
         let mut square_brackets_balance = i64::from(square_met);
 
         while let Some((pos, ch)) = self.chars.peek() {
-            end_pos = *pos;
+            end_pos = (*pos).into();
             let ch = *ch;
 
             update_brackets_count(
@@ -144,9 +148,9 @@ impl<'input> AIRLexer<'input> {
     }
 
     // if it was the last char, advance the end position.
-    fn advance_end_pos(&mut self, end_pos: &mut usize) {
+    fn advance_end_pos(&mut self, end_pos: &mut AirPos) {
         if self.chars.peek().is_none() {
-            *end_pos = self.input.len();
+            *end_pos = self.input.len().into();
         }
     }
 }
@@ -171,7 +175,7 @@ fn should_stop(ch: char, round_brackets_balance: i64, open_square_brackets_balan
     ch.is_whitespace() || round_brackets_balance < 0 || open_square_brackets_balance < 0
 }
 
-fn string_to_token(input: &str, start_pos: usize) -> LexerResult<Token> {
+fn string_to_token(input: &str, start_pos: AirPos) -> LexerResult<Token> {
     match input {
         "" => Err(LexerError::empty_string(start_pos..start_pos)),
 
@@ -202,7 +206,7 @@ fn string_to_token(input: &str, start_pos: usize) -> LexerResult<Token> {
     }
 }
 
-fn parse_last_error(input: &str, start_pos: usize) -> LexerResult<Token<'_>> {
+fn parse_last_error(input: &str, start_pos: AirPos) -> LexerResult<Token<'_>> {
     let last_error_size = LAST_ERROR.len();
     if input.len() == last_error_size {
         return Ok(Token::LastError);

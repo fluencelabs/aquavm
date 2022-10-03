@@ -16,6 +16,10 @@
 
 use air_test_utils::prelude::*;
 
+use pretty_assertions::assert_eq;
+
+use std::ops::Deref;
+
 #[test]
 fn empty_stream() {
     fn arg_type_check_closure() -> CallServiceClosure {
@@ -140,7 +144,7 @@ fn stream_merging_v0() {
         executed_state::scalar_string(unit_call_service_result),
         executed_state::scalar_string(unit_call_service_result),
     ];
-    assert_eq!(actual_trace_2, expected_trace_2);
+    assert_eq!(actual_trace_2.deref(), expected_trace_2);
 
     let executor_result_3 = checked_call_vm!(
         executor,
@@ -237,12 +241,15 @@ fn stream_merging_v1() {
         executed_state::stream_string("1", 0),
         executed_state::request_sent_by(initiator_id),
         executed_state::fold(vec![
-            executed_state::subtrace_lore(7, subtrace_desc(15, 1), subtrace_desc(20, 1)),
-            executed_state::subtrace_lore(9, subtrace_desc(16, 1), subtrace_desc(19, 1)),
-            executed_state::subtrace_lore(12, subtrace_desc(17, 1), subtrace_desc(18, 1)),
+            executed_state::subtrace_lore(7, subtrace_desc(15, 2), subtrace_desc(23, 1)),
+            executed_state::subtrace_lore(9, subtrace_desc(17, 2), subtrace_desc(22, 1)),
+            executed_state::subtrace_lore(12, subtrace_desc(19, 2), subtrace_desc(21, 1)),
         ]),
+        executed_state::par(7, 1),
         executed_state::scalar_string(unit_call_service_result),
+        executed_state::par(4, 1),
         executed_state::scalar_string(unit_call_service_result),
+        executed_state::par(1, 1),
         executed_state::scalar_string(unit_call_service_result),
         executed_state::scalar_string(unit_call_service_result),
         executed_state::scalar_string(unit_call_service_result),
@@ -275,19 +282,24 @@ fn stream_merging_v1() {
         executed_state::stream_string("1", 0),
         executed_state::stream_string("2", 1),
         executed_state::fold(vec![
-            executed_state::subtrace_lore(7, subtrace_desc(15, 1), subtrace_desc(20, 1)),
-            executed_state::subtrace_lore(9, subtrace_desc(16, 1), subtrace_desc(19, 1)),
-            executed_state::subtrace_lore(12, subtrace_desc(17, 1), subtrace_desc(18, 1)),
-            executed_state::subtrace_lore(8, subtrace_desc(21, 1), subtrace_desc(24, 1)),
-            executed_state::subtrace_lore(13, subtrace_desc(22, 1), subtrace_desc(23, 1)),
+            executed_state::subtrace_lore(7, subtrace_desc(15, 2), subtrace_desc(23, 1)),
+            executed_state::subtrace_lore(9, subtrace_desc(17, 2), subtrace_desc(22, 1)),
+            executed_state::subtrace_lore(12, subtrace_desc(19, 2), subtrace_desc(21, 1)),
+            executed_state::subtrace_lore(8, subtrace_desc(24, 2), subtrace_desc(29, 1)),
+            executed_state::subtrace_lore(13, subtrace_desc(26, 2), subtrace_desc(28, 1)),
         ]),
+        executed_state::par(7, 1),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::par(4, 1),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::par(1, 1),
         executed_state::scalar_string(unit_call_service_result),
         executed_state::scalar_string(unit_call_service_result),
         executed_state::scalar_string(unit_call_service_result),
         executed_state::scalar_string(unit_call_service_result),
+        executed_state::par(4, 1),
         executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
+        executed_state::par(1, 1),
         executed_state::scalar_string(unit_call_service_result),
         executed_state::scalar_string(unit_call_service_result),
         executed_state::scalar_string(unit_call_service_result),
@@ -319,25 +331,32 @@ fn stream_merging_v1() {
         executed_state::stream_string("1", 0),
         executed_state::stream_string("2", 1),
         executed_state::fold(vec![
-            executed_state::subtrace_lore(7, subtrace_desc(15, 1), subtrace_desc(20, 1)),
-            executed_state::subtrace_lore(9, subtrace_desc(16, 1), subtrace_desc(19, 1)),
-            executed_state::subtrace_lore(12, subtrace_desc(17, 1), subtrace_desc(18, 1)),
-            executed_state::subtrace_lore(8, subtrace_desc(21, 1), subtrace_desc(24, 1)),
-            executed_state::subtrace_lore(13, subtrace_desc(22, 1), subtrace_desc(23, 1)),
-            executed_state::subtrace_lore(10, subtrace_desc(25, 1), subtrace_desc(28, 1)),
-            executed_state::subtrace_lore(11, subtrace_desc(26, 1), subtrace_desc(27, 1)),
+            executed_state::subtrace_lore(7, subtrace_desc(15, 2), subtrace_desc(23, 1)),
+            executed_state::subtrace_lore(9, subtrace_desc(17, 2), subtrace_desc(22, 1)),
+            executed_state::subtrace_lore(12, subtrace_desc(19, 2), subtrace_desc(21, 1)),
+            executed_state::subtrace_lore(8, subtrace_desc(24, 2), subtrace_desc(29, 1)),
+            executed_state::subtrace_lore(13, subtrace_desc(26, 2), subtrace_desc(28, 1)),
+            executed_state::subtrace_lore(10, subtrace_desc(30, 2), subtrace_desc(35, 1)),
+            executed_state::subtrace_lore(11, subtrace_desc(32, 2), subtrace_desc(34, 1)),
         ]),
+        executed_state::par(7, 1),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::par(4, 1),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::par(1, 1),
         executed_state::scalar_string(unit_call_service_result),
         executed_state::scalar_string(unit_call_service_result),
         executed_state::scalar_string(unit_call_service_result),
         executed_state::scalar_string(unit_call_service_result),
+        executed_state::par(4, 1),
+        executed_state::scalar_string(unit_call_service_result),
+        executed_state::par(1, 1),
         executed_state::scalar_string(unit_call_service_result),
         executed_state::scalar_string(unit_call_service_result),
         executed_state::scalar_string(unit_call_service_result),
+        executed_state::par(4, 1),
         executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
+        executed_state::par(1, 1),
         executed_state::scalar_string(unit_call_service_result),
         executed_state::scalar_string(unit_call_service_result),
         executed_state::scalar_string(unit_call_service_result),
@@ -346,6 +365,7 @@ fn stream_merging_v1() {
 }
 
 #[test]
+#[ignore]
 fn stream_merging_v2() {
     let initiator_id = "initiator_id";
     let setter_1_id = "setter_1";
@@ -389,9 +409,9 @@ fn stream_merging_v2() {
         executed_state::stream_string("1", 0),
         executed_state::request_sent_by(initiator_id),
         executed_state::fold(vec![
-            executed_state::subtrace_lore(7, subtrace_desc(15, 0), subtrace_desc(19, 2)),
-            executed_state::subtrace_lore(9, subtrace_desc(15, 0), subtrace_desc(17, 2)),
-            executed_state::subtrace_lore(12, subtrace_desc(15, 0), subtrace_desc(15, 2)),
+            executed_state::subtrace_lore(7, subtrace_desc(15, 1), subtrace_desc(21, 2)),
+            executed_state::subtrace_lore(9, subtrace_desc(16, 1), subtrace_desc(19, 2)),
+            executed_state::subtrace_lore(12, subtrace_desc(17, 1), subtrace_desc(18, 2)),
         ]),
         executed_state::scalar_string(unit_call_service_result),
         executed_state::scalar_string(unit_call_service_result),
