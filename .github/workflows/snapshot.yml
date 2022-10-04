@@ -241,7 +241,7 @@ jobs:
             ```
 
   publish-air-beautify:
-    name: "Publish air-beautify snapshot"
+    name: "Publish wasm-air-beautify snapshot"
     runs-on: ubuntu-latest
 
     outputs:
@@ -314,7 +314,7 @@ jobs:
         with:
           issue-number: "${{ github.event.pull_request.number }}"
           comment-author: github-actions[bot]
-          body-includes: "## WASM_AIR_BEAUTIFY version is"
+          body-includes: "## wasm-air-beautify version is"
 
       - name: Update comment in PR
         uses: peter-evans/create-or-update-comment@v1
@@ -325,7 +325,7 @@ jobs:
           issue-number: "${{ github.event.pull_request.number }}"
           edit-mode: replace
           body: |
-            ## AIR_BEAUTIFY version is [${{ env.AIR_BEAUTIFY_VERSION }}](https://npm.fluence.dev/-/web/detail/@fluencelabs/air_beautify/v/${{ env.AIR_BEAUTIFY_VERSION }})
+            ## wasm-air-beautify version is [${{ env.AIR_BEAUTIFY_VERSION }}](https://npm.fluence.dev/-/web/detail/@fluencelabs/air_beautify/v/${{ env.AIR_BEAUTIFY_VERSION }})
             To install it run:
             ```shell
             npm login --registry https://npm.fluence.dev
