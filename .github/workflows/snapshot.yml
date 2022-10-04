@@ -9,6 +9,9 @@ on:
       air-interpreter-wasm-version:
         description: "air-interpreter-wasm version"
         value: ${{ jobs.publish-interpreter.outputs.version }}
+      air-beautify-wasm-version:
+        description: "air-beautify-wasm version"
+        value: ${{ jobs.publish-beautify.outputs.version }}
 
 env:
   FORCE_COLOR: true
@@ -235,4 +238,96 @@ jobs:
             To install it run:
             ```shell
             cargo add air-interpreter-wasm@${{ env.VERSION }} --registry fluence
+            ```
+
+  publish-air-beautify:
+    name: "Publish air-beautify snapshot"
+    runs-on: ubuntu-latest
+
+    outputs:
+      version: "${{ steps.build.outputs.version }}"
+
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+
+    steps:
+      - name: Checkout aquavm
+        uses: actions/checkout@v3
+
+      - name: Import secrets
+        uses: hashicorp/vault-action@v2.4.2
+        with:
+          url: https://vault.fluence.dev
+          path: jwt/github
+          role: ci
+          method: jwt
+          jwtGithubAudience: "https://github.com/fluencelabs"
+          jwtTtl: 300
+          exportToken: false
+          secrets: |
+            kv/npm-registry/basicauth/ci token | NODE_AUTH_TOKEN
+
+      - name: Setup wasm-pack
+        uses: jetli/wasm-pack-action@v0.3.0
+        with:
+          version: 'latest'
+
+      - name: Setup node with self-hosted npm registry
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16"
+          registry-url: "https://npm.fluence.dev"
+
+      - run: wasm-pack build --release
+        working-directory: tools/wasm/wasm-air-beautify
+
+      - name: Generate package version
+        id: version
+        run: |
+          SHA=${{ github.event.pull_request.head.sha }}
+          echo "::set-output name=sha::${SHA::7}"
+          echo "::set-output name=branch::${GITHUB_HEAD_REF//[^a-zA-Z0-9-]/-}"
+
+      - name: Set package version
+        id: build
+        env:
+          BRANCH: ${{ steps.version.outputs.branch }}
+          SHA: ${{ steps.version.outputs.sha }}
+          RUN: ${{ github.run_number }}
+          ATTEMPT: ${{ github.run_attempt }}
+        working-directory: tools/wasm/wasm-air-beautify/pkg
+        run: |
+          echo "::set-output name=version::$(\
+                npm version prerelease \
+                --no-git-tag-version \
+                --preid ${{ env.BRANCH }}-${{ env.SHA }}-${{ env.RUN }}-${{ env.ATTEMPT }})"
+
+      - name: Publish to self-hosted npm repo
+        working-directory: tools/wasm/wasm-air-beautify/pkg
+        run: npm publish --tag snapshot --registry https://npm.fluence.dev
+
+      - name: Find comment in PR
+        uses: peter-evans/find-comment@v1
+        id: comment
+        with:
+          issue-number: "${{ github.event.pull_request.number }}"
+          comment-author: github-actions[bot]
+          body-includes: "## WASM_AIR_BEAUTIFY version is"
+
+      - name: Update comment in PR
+        uses: peter-evans/create-or-update-comment@v1
+        env:
+          AIR_BEAUTIFY_VERSION: ${{ steps.build.outputs.version }}
+        with:
+          comment-id: "${{ steps.comment.outputs.comment-id }}"
+          issue-number: "${{ github.event.pull_request.number }}"
+          edit-mode: replace
+          body: |
+            ## AIR_BEAUTIFY version is [${{ env.AIR_BEAUTIFY_VERSION }}](https://npm.fluence.dev/-/web/detail/@fluencelabs/air_beautify/v/${{ env.AIR_BEAUTIFY_VERSION }})
+            To install it run:
+            ```shell
+            npm login --registry https://npm.fluence.dev
+            npm i @fluencelabs/wasm-air-beautify@${{ env.AIR_BEAUTIFY_VERSION }} --registry=https://npm.fluence.dev
             ```
