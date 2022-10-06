@@ -24,15 +24,15 @@ use air_trace_handler::merger::MergerApResult;
 
 pub(super) fn ap_result_to_generation(ap_result: &MergerApResult) -> Generation {
     match ap_result {
-        MergerApResult::Empty => Generation::Last,
-        MergerApResult::ApResult { res_generation, .. } => Generation::from_option(*res_generation),
+        MergerApResult::NotMet => Generation::Last,
+        MergerApResult::Met { res_generation, .. } => Generation::from_option(*res_generation),
     }
 }
 
 pub(super) fn try_match_trace_to_instr(merger_ap_result: &MergerApResult, instr: &Ap<'_>) -> ExecutionResult<()> {
     let res_generation = match merger_ap_result {
-        MergerApResult::ApResult { res_generation } => *res_generation,
-        MergerApResult::Empty => return Ok(()),
+        MergerApResult::Met { res_generation } => *res_generation,
+        MergerApResult::NotMet => return Ok(()),
     };
 
     match_position_variable(&instr.result, res_generation, merger_ap_result)
@@ -54,7 +54,7 @@ fn match_position_variable(
 }
 
 pub(super) fn to_ap_result(merger_ap_result: &MergerApResult, maybe_generation: Option<u32>) -> ApResult {
-    if let MergerApResult::ApResult { res_generation } = merger_ap_result {
+    if let MergerApResult::Met { res_generation } = merger_ap_result {
         let res_generation = option_to_vec(*res_generation);
 
         return ApResult::new(res_generation);

@@ -60,6 +60,12 @@ pub enum MergeCtxType {
     Previous,
 }
 
+#[derive(Debug, Clone, Copy)]
+pub enum ValueSource {
+    PreviousData,
+    CurrentData,
+}
+
 use std::fmt;
 
 impl fmt::Display for MergeCtxType {

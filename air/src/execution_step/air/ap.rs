@@ -47,7 +47,7 @@ impl<'i> super::ExecutableInstruction<'i> for Ap<'i> {
         let result = apply_to_arg(&self.argument, exec_ctx, trace_ctx, should_touch_trace)?;
 
         let merger_ap_result = to_merger_ap_result(should_touch_trace, self, trace_ctx)?;
-        let maybe_generation = update_context(&self.result, &merger_ap_result, result, exec_ctx)?;
+        let maybe_generation = populate_context(&self.result, &merger_ap_result, result, exec_ctx)?;
         maybe_update_trace(should_touch_trace, &merger_ap_result, maybe_generation, trace_ctx);
 
         Ok(())
@@ -70,13 +70,13 @@ fn to_merger_ap_result(
         try_match_trace_to_instr(&merger_ap_result, instr)?;
         merger_ap_result
     } else {
-        MergerApResult::Empty
+        MergerApResult::NotMet
     };
 
     Ok(merger_ap_result)
 }
 
-fn update_context<'ctx>(
+fn populate_context<'ctx>(
     ap_result_type: &ApResult<'ctx>,
     merger_ap_result: &MergerApResult,
     result: ValueAggregate,

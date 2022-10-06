@@ -39,12 +39,6 @@ pub struct MetResult {
     pub source: ValueSource,
 }
 
-#[derive(Debug, Clone, Copy)]
-pub enum ValueSource {
-    PreviousData,
-    CurrentData,
-}
-
 pub(crate) fn try_merge_next_state_as_call(data_keeper: &mut DataKeeper) -> MergeResult<MergerCallResult> {
     use ExecutedState::Call;
     use PreparationScheme::*;

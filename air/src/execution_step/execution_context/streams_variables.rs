@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+mod stream_value_descriptor;
+
+use stream_value_descriptor::StreamValueDescriptor;
 use crate::execution_step::ExecutionResult;
 use crate::execution_step::Generation;
 use crate::execution_step::Stream;
@@ -81,10 +84,7 @@ impl Streams {
 
     pub(crate) fn add_stream_value(
         &mut self,
-        value: ValueAggregate,
-        generation: Generation,
-        stream_name: &str,
-        position: AirPos,
+        value_descriptor: StreamValueDescriptor,
     ) -> ExecutionResult<u32> {
         match self.get_mut(stream_name, position) {
             Some(stream) => stream.add_value(value, generation),
