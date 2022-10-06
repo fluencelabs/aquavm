@@ -32,7 +32,7 @@ use utils::*;
 
 use air_parser::ast::Ap;
 use air_parser::ast::ApResult;
-use air_trace_handler::MergerApResult;
+use air_trace_handler::merger::MergerApResult;
 
 use std::rc::Rc;
 

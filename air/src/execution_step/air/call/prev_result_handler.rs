@@ -21,10 +21,9 @@ use crate::execution_step::RcSecurityTetraplet;
 
 use air_interpreter_data::CallResult;
 use air_interpreter_data::Sender;
-use air_interpreter_data::TracePos;
 use air_interpreter_interface::CallServiceResult;
 use air_parser::ast::CallOutputValue;
-use air_trace_handler::PreparationScheme;
+use air_trace_handler::merger::MetResult;
 use air_trace_handler::TraceHandler;
 
 use fstrings::f;
@@ -39,24 +38,22 @@ pub(crate) struct StateDescriptor {
 /// This function looks at the existing call state, validates it,
 /// and returns Ok(true) if the call should be executed further.
 pub(super) fn handle_prev_state<'i>(
+    met_result: MetResult,
     tetraplet: &RcSecurityTetraplet,
     output: &CallOutputValue<'i>,
-    mut prev_result: CallResult,
-    trace_pos: TracePos,
-    scheme: PreparationScheme,
     exec_ctx: &mut ExecutionCtx<'i>,
     trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<StateDescriptor> {
     use CallResult::*;
 
-    match &mut prev_result {
+    match &met_result.result {
         // this call was failed on one of the previous executions,
         // here it's needed to bubble this special error up
         CallServiceFailed(ret_code, err_msg) => {
             exec_ctx.subgraph_complete = false;
             let ret_code = *ret_code;
             let err_msg = err_msg.clone();
-            trace_ctx.meet_call_end(prev_result);
+            trace_ctx.meet_call_end(met_result.result);
             Err(CatchableError::LocalServiceError(ret_code, err_msg).into())
         }
         RequestSentBy(Sender::PeerIdWithCallId { peer_id, call_id })
@@ -71,7 +68,7 @@ pub(super) fn handle_prev_state<'i>(
                 // result hasn't been prepared yet
                 None => {
                     exec_ctx.subgraph_complete = false;
-                    Ok(StateDescriptor::not_ready(prev_result))
+                    Ok(StateDescriptor::not_ready(met_result.result))
                 }
             }
         }
@@ -79,16 +76,24 @@ pub(super) fn handle_prev_state<'i>(
             // check whether current node can execute this call
             let is_current_peer = tetraplet.peer_pk.as_str() == exec_ctx.run_parameters.current_peer_id.as_str();
             if is_current_peer {
-                return Ok(StateDescriptor::can_execute_now(prev_result));
+                return Ok(StateDescriptor::can_execute_now(met_result.result));
             }
 
             exec_ctx.subgraph_complete = false;
-            Ok(StateDescriptor::cant_execute_now(prev_result))
+            Ok(StateDescriptor::cant_execute_now(met_result.result))
         }
         // this instruction's been already executed
-        Executed(ref mut value) => {
-            set_result_from_value(&mut *value, tetraplet.clone(), trace_pos, scheme, output, exec_ctx)?;
-            trace_ctx.meet_call_end(prev_result);
+        Executed(value) => {
+            let resulted_value = set_result_from_value(
+                value.clone(),
+                tetraplet.clone(),
+                met_result.trace_pos,
+                met_result.source,
+                output,
+                exec_ctx,
+            )?;
+            let call_result = CallResult::Executed(resulted_value);
+            trace_ctx.meet_call_end(call_result);
 
             Ok(StateDescriptor::executed())
         }

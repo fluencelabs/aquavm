@@ -30,7 +30,7 @@ use crate::SecurityTetraplet;
 use air_interpreter_data::CallResult;
 use air_interpreter_interface::CallRequestParams;
 use air_parser::ast;
-use air_trace_handler::MergerCallResult;
+use air_trace_handler::merger::MergerCallResult;
 use air_trace_handler::TraceHandler;
 use air_utils::measure;
 
@@ -156,25 +156,13 @@ impl<'i> ResolvedCall<'i> {
         exec_ctx: &mut ExecutionCtx<'i>,
         trace_ctx: &mut TraceHandler,
     ) -> ExecutionResult<StateDescriptor> {
-        let prev_result = trace_ctx.meet_call_start(&self.output);
-        let (call_result, trace_pos, scheme) = match trace_to_exec_err!(prev_result, raw_call)? {
-            MergerCallResult::CallResult {
-                value,
-                trace_pos,
-                scheme,
-            } => (value, trace_pos, scheme),
-            MergerCallResult::Empty => return Ok(StateDescriptor::no_previous_state()),
-        };
-
-        handle_prev_state(
-            &self.tetraplet,
-            &self.output,
-            call_result,
-            trace_pos,
-            scheme,
-            exec_ctx,
-            trace_ctx,
-        )
+        let prev_result = trace_ctx.meet_call_start();
+        match trace_to_exec_err!(prev_result, raw_call)? {
+            MergerCallResult::Met(call_result) => {
+                handle_prev_state(call_result, &self.tetraplet, &self.output, exec_ctx, trace_ctx)
+            }
+            MergerCallResult::NotMet => Ok(StateDescriptor::no_previous_state()),
+        }
     }
 
     /// Prepare arguments of this call instruction by resolving and preparing their security tetraplets.

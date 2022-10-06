@@ -20,7 +20,7 @@ use crate::execution_step::Generation;
 use air_interpreter_data::ApResult;
 use air_parser::ast;
 use air_parser::ast::Ap;
-use air_trace_handler::MergerApResult;
+use air_trace_handler::merger::MergerApResult;
 
 pub(super) fn ap_result_to_generation(ap_result: &MergerApResult) -> Generation {
     match ap_result {

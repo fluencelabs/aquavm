@@ -24,6 +24,8 @@ mod position_mapping;
 
 pub use ap_merger::MergerApResult;
 pub use call_merger::MergerCallResult;
+pub use call_merger::MetResult;
+pub use call_merger::ValueSource;
 pub use canon_merger::MergerCanonResult;
 pub use fold_merger::MergerFoldResult;
 pub use par_merger::MergerParResult;
