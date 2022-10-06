@@ -16,9 +16,9 @@
 
 use air::UncatchableError;
 use air_test_utils::prelude::*;
-use air_trace_handler::TraceHandlerError;
 use air_trace_handler::merger::CallResultError;
 use air_trace_handler::merger::MergeError;
+use air_trace_handler::TraceHandlerError;
 
 #[test]
 fn par_early_exit() {

@@ -82,20 +82,14 @@ pub(crate) fn populate_context_from_data<'i>(
         // by the internal conventions if call has no output value,
         // corresponding data should have scalar type
         (CallOutputValue::None, value @ Value::Scalar(_)) => Ok(value),
-        (_, value) => {
-            Err(ExecutionError::Uncatchable(
-                UncatchableError::CallResultNotCorrespondToInstr(value),
-            ))
-        },
+        (_, value) => Err(ExecutionError::Uncatchable(
+            UncatchableError::CallResultNotCorrespondToInstr(value),
+        )),
     }
 }
 
 /// Writes an executed state of a particle being sent to remote node.
-pub(crate) fn handle_remote_call<'i>(
-    peer_pk: String,
-    exec_ctx: &mut ExecutionCtx<'i>,
-    trace_ctx: &mut TraceHandler,
-) {
+pub(crate) fn handle_remote_call<'i>(peer_pk: String, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) {
     exec_ctx.next_peer_pks.push(peer_pk);
     exec_ctx.subgraph_complete = false;
 
