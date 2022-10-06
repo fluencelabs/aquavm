@@ -1,5 +1,5 @@
 [package]
-name = "wasm-air-beautify"
+name = "air-beautify-wasm"
 version = "0.1.0"
 authors = ["Fluence Labs"]
 edition = "2021"

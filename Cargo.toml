@@ -20,7 +20,7 @@ members = [
     "crates/testing-framework",
     "tools/cli/air-beautify",
     "tools/cli/air-trace",
-    "tools/wasm/wasm-air-beautify",
+    "tools/wasm/air-beautify-wasm",
 ]
 
 exclude = [

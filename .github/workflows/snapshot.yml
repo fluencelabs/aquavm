@@ -241,7 +241,7 @@ jobs:
             ```
 
   publish-air-beautify:
-    name: "Publish wasm-air-beautify snapshot"
+    name: "Publish air-beautify-wasm snapshot"
     runs-on: ubuntu-latest
 
     outputs:
@@ -280,8 +280,11 @@ jobs:
           node-version: "16"
           registry-url: "https://npm.fluence.dev"
 
-      - run: wasm-pack build --release
-        working-directory: tools/wasm/wasm-air-beautify
+      - name: Build air-beautify-wasm
+        run: |
+          rm -rf pack
+          wasm-pack build --release
+        working-directory: tools/wasm/air-beautify-wasm
 
       - name: Generate package version
         id: version
@@ -297,7 +300,7 @@ jobs:
           SHA: ${{ steps.version.outputs.sha }}
           RUN: ${{ github.run_number }}
           ATTEMPT: ${{ github.run_attempt }}
-        working-directory: tools/wasm/wasm-air-beautify/pkg
+        working-directory: tools/wasm/air-beautify-wasm/pkg
         run: |
           echo "::set-output name=version::$(\
                 npm version prerelease \
@@ -305,7 +308,7 @@ jobs:
                 --preid ${{ env.BRANCH }}-${{ env.SHA }}-${{ env.RUN }}-${{ env.ATTEMPT }})"
 
       - name: Publish to self-hosted npm repo
-        working-directory: tools/wasm/wasm-air-beautify/pkg
+        working-directory: tools/wasm/air-beautify-wasm/pkg
         run: npm publish --tag snapshot --registry https://npm.fluence.dev
 
       - name: Find comment in PR
@@ -314,7 +317,7 @@ jobs:
         with:
           issue-number: "${{ github.event.pull_request.number }}"
           comment-author: github-actions[bot]
-          body-includes: "## wasm-air-beautify version is"
+          body-includes: "## air-beautify-wasm version is"
 
       - name: Update comment in PR
         uses: peter-evans/create-or-update-comment@v1
@@ -325,9 +328,9 @@ jobs:
           issue-number: "${{ github.event.pull_request.number }}"
           edit-mode: replace
           body: |
-            ## wasm-air-beautify version is [${{ env.AIR_BEAUTIFY_VERSION }}](https://npm.fluence.dev/-/web/detail/@fluencelabs/air_beautify/v/${{ env.AIR_BEAUTIFY_VERSION }})
+            ## air-beautify-wasm version is [${{ env.AIR_BEAUTIFY_VERSION }}](https://npm.fluence.dev/-/web/detail/@fluencelabs/air_beautify/v/${{ env.AIR_BEAUTIFY_VERSION }})
             To install it run:
             ```shell
             npm login --registry https://npm.fluence.dev
-            npm i @fluencelabs/wasm-air-beautify@${{ env.AIR_BEAUTIFY_VERSION }} --registry=https://npm.fluence.dev
+            npm i @fluencelabs/air-beautify-wasm@${{ env.AIR_BEAUTIFY_VERSION }} --registry=https://npm.fluence.dev
             ```
