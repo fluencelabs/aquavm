@@ -18,8 +18,8 @@ use super::*;
 use crate::execution_step::execution_context::*;
 use crate::execution_step::Generation;
 use crate::execution_step::ValueAggregate;
-
 use crate::UncatchableError;
+
 use air_interpreter_data::CallResult;
 use air_interpreter_data::TracePos;
 use air_interpreter_data::Value;
