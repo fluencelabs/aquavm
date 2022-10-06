@@ -27,9 +27,7 @@ use air_parser::ast::CallOutputValue;
 use air_trace_handler::merger::ValueSource;
 use air_trace_handler::TraceHandler;
 
-/// Writes result of a local `Call` instruction to `ExecutionCtx` at `output`.
-/// Returns call result.
-pub(crate) fn set_local_result<'i>(
+pub(crate) fn populate_context_from_peer_service_result<'i>(
     executed_result: ValueAggregate,
     output: &CallOutputValue<'i>,
     exec_ctx: &mut ExecutionCtx<'i>,
@@ -47,11 +45,13 @@ pub(crate) fn set_local_result<'i>(
                     .add_stream_value(executed_result, Generation::Last, stream.name, stream.position)?;
             Ok(CallResult::executed_stream(result_value, generation))
         }
+        // by the internal conventions if call has no output value,
+        // corresponding data should have scalar type
         CallOutputValue::None => Ok(CallResult::executed_scalar(result_value)),
     }
 }
 
-pub(crate) fn set_result_from_value<'i>(
+pub(crate) fn populate_context_from_data<'i>(
     value: Value,
     tetraplet: RcSecurityTetraplet,
     trace_pos: TracePos,
@@ -79,14 +79,19 @@ pub(crate) fn set_result_from_value<'i>(
             };
             Ok(result)
         }
-        (_, value) => Err(ExecutionError::Uncatchable(
-            UncatchableError::CallResultNotCorrespondToInstr(value),
-        )),
+        // by the internal conventions if call has no output value,
+        // corresponding data should have scalar type
+        (CallOutputValue::None, value @ Value::Scalar(_)) => Ok(value),
+        (_, value) => {
+            Err(ExecutionError::Uncatchable(
+                UncatchableError::CallResultNotCorrespondToInstr(value),
+            ))
+        },
     }
 }
 
 /// Writes an executed state of a particle being sent to remote node.
-pub(crate) fn set_remote_call_result<'i>(
+pub(crate) fn handle_remote_call<'i>(
     peer_pk: String,
     exec_ctx: &mut ExecutionCtx<'i>,
     trace_ctx: &mut TraceHandler,

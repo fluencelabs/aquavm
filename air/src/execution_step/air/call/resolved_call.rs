@@ -91,7 +91,7 @@ impl<'i> ResolvedCall<'i> {
         // call can be executed only on peers with such peer_id
         let tetraplet = &self.tetraplet;
         if tetraplet.peer_pk.as_str() != exec_ctx.run_parameters.current_peer_id.as_str() {
-            set_remote_call_result(tetraplet.peer_pk.clone(), exec_ctx, trace_ctx);
+            handle_remote_call(tetraplet.peer_pk.clone(), exec_ctx, trace_ctx);
             return Ok(());
         }
 

@@ -15,7 +15,7 @@
  */
 
 use super::*;
-use crate::execution_step::air::call::call_result_setter::set_result_from_value;
+use crate::execution_step::air::call::call_result_setter::populate_context_from_data;
 use crate::execution_step::CatchableError;
 use crate::execution_step::RcSecurityTetraplet;
 
@@ -84,7 +84,7 @@ pub(super) fn handle_prev_state<'i>(
         }
         // this instruction's been already executed
         Executed(value) => {
-            let resulted_value = set_result_from_value(
+            let resulted_value = populate_context_from_data(
                 value.clone(),
                 tetraplet.clone(),
                 met_result.trace_pos,
@@ -119,7 +119,7 @@ fn update_state_with_service_result<'i>(
     let trace_pos = trace_ctx.trace_pos();
 
     let executed_result = ValueAggregate::new(result, tetraplet, trace_pos);
-    let new_call_result = set_local_result(executed_result, output, exec_ctx)?;
+    let new_call_result = populate_context_from_peer_service_result(executed_result, output, exec_ctx)?;
     trace_ctx.meet_call_end(new_call_result);
 
     Ok(())
