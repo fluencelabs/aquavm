@@ -177,7 +177,7 @@ fn executed_trace_create_service() {
 
     let mut vm = create_avm(call_service, "A");
 
-    let script = include_str!("./scripts/create_service.clj");
+    let script = include_str!("./scripts/create_service.air");
 
     let add_module_response = String::from("add_module response");
     let add_blueprint_response = String::from("add_blueprint response");

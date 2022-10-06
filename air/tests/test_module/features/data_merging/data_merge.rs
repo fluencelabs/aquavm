@@ -209,7 +209,7 @@ fn fold_merge() {
     );
 
     let script = format!(
-        include_str!("./scripts/inner_folds_v1.clj"),
+        include_str!("./scripts/inner_folds_v1.air"),
         set_variable_vm_id, local_vm_id
     );
 

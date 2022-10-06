@@ -32,7 +32,7 @@ fn par_early_exit() {
     let mut setter_3 = create_avm(fallible_call_service("error"), setter_3_id);
 
     let script = format!(
-        include_str!("scripts/par_early_exit.clj"),
+        include_str!("scripts/par_early_exit.air"),
         init_peer_id, setter_1_id, setter_2_id, setter_3_id
     );
 
@@ -197,7 +197,7 @@ fn fold_early_exit() {
     let mut last_peer_checker = create_avm(echo_call_service(), last_peer_checker_id);
 
     let script = format!(
-        include_str!("scripts/fold_early_exit.clj"),
+        include_str!("scripts/fold_early_exit.air"),
         variables_setter_id,
         stream_setter_id,
         fold_executor_id,
@@ -313,7 +313,7 @@ fn fold_par_early_exit() {
     let mut last_peer_checker = create_avm(unit_call_service(), last_peer_checker_id);
 
     let script = format!(
-        include_str!("scripts/fold_par_early_exit.clj"),
+        include_str!("scripts/fold_par_early_exit.air"),
         variables_setter_id,
         stream_setter_id,
         fold_executor_id,

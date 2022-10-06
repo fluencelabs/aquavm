@@ -143,7 +143,7 @@ fn parse_deep(c: &mut Criterion) {
 fn parse_dashboard_script(c: &mut Criterion) {
     let parser = Rc::new(AIRParser::new());
     const DASHBOARD_SCRIPT: &str =
-        include_str!("../../../../air/tests/test_module/integration/scripts/dashboard.clj");
+        include_str!("../../../../air/tests/test_module/integration/scripts/dashboard.air");
 
     c.bench_function(
         format!("parse {} bytes", DASHBOARD_SCRIPT.len()).as_str(),
