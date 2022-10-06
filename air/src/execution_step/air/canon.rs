@@ -28,7 +28,7 @@ use crate::UncatchableError;
 use air_interpreter_data::CanonResult;
 use air_interpreter_data::TracePos;
 use air_parser::ast;
-use air_trace_handler::MergerCanonResult;
+use air_trace_handler::merger::MergerCanonResult;
 
 use std::borrow::Cow;
 

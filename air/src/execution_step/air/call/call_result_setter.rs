@@ -18,17 +18,16 @@ use super::*;
 use crate::execution_step::execution_context::*;
 use crate::execution_step::Generation;
 use crate::execution_step::ValueAggregate;
+use crate::UncatchableError;
 
 use air_interpreter_data::CallResult;
 use air_interpreter_data::TracePos;
 use air_interpreter_data::Value;
 use air_parser::ast::CallOutputValue;
-use air_trace_handler::PreparationScheme;
+use air_trace_handler::merger::ValueSource;
 use air_trace_handler::TraceHandler;
 
-/// Writes result of a local `Call` instruction to `ExecutionCtx` at `output`.
-/// Returns call result.
-pub(crate) fn set_local_result<'i>(
+pub(crate) fn populate_context_from_peer_service_result<'i>(
     executed_result: ValueAggregate,
     output: &CallOutputValue<'i>,
     exec_ctx: &mut ExecutionCtx<'i>,
@@ -46,64 +45,61 @@ pub(crate) fn set_local_result<'i>(
                     .add_stream_value(executed_result, Generation::Last, stream.name, stream.position)?;
             Ok(CallResult::executed_stream(result_value, generation))
         }
+        // by the internal conventions if call has no output value,
+        // corresponding data should have scalar type
         CallOutputValue::None => Ok(CallResult::executed_scalar(result_value)),
     }
 }
 
-pub(crate) fn set_result_from_value<'i>(
-    value: &mut Value,
+pub(crate) fn populate_context_from_data<'i>(
+    value: Value,
     tetraplet: RcSecurityTetraplet,
     trace_pos: TracePos,
-    scheme: PreparationScheme,
+    value_source: ValueSource,
     output: &CallOutputValue<'i>,
     exec_ctx: &mut ExecutionCtx<'i>,
-) -> ExecutionResult<()> {
+) -> ExecutionResult<Value> {
     match (output, value) {
         (CallOutputValue::Scalar(scalar), Value::Scalar(value)) => {
             let result = ValueAggregate::new(value.clone(), tetraplet, trace_pos);
             exec_ctx.scalars.set_scalar_value(scalar.name, result)?;
+            Ok(Value::Scalar(value))
         }
-        (
-            CallOutputValue::Stream(stream),
-            Value::Stream {
-                value,
-                generation: stream_generation,
-            },
-        ) => {
+        (CallOutputValue::Stream(stream), Value::Stream { value, generation }) => {
             let result = ValueAggregate::new(value.clone(), tetraplet, trace_pos);
-            let generation = match scheme {
-                PreparationScheme::Both | PreparationScheme::Previous => {
-                    assert_ne!(*stream_generation, u32::MAX, "Should be valid");
-                    Generation::Nth(*stream_generation)
-                }
-                PreparationScheme::Current => {
-                    assert_eq!(*stream_generation, u32::MAX, "Shouldn't be valid");
-                    Generation::Last
-                }
-            };
-            let generation = exec_ctx
-                .streams
-                .add_stream_value(result, generation, stream.name, stream.position)?;
-            // Update value's generation
-            *stream_generation = generation;
-        }
-        // it isn't needed to check there that output and value matches because
-        // it's been already checked in trace handler
-        _ => {}
-    };
+            let adjusted_generation = maybe_adjust_generation(generation, value_source);
+            let resulted_generation =
+                exec_ctx
+                    .streams
+                    .add_stream_value(result, adjusted_generation, stream.name, stream.position)?;
 
-    Ok(())
+            let result = Value::Stream {
+                value,
+                generation: resulted_generation,
+            };
+            Ok(result)
+        }
+        // by the internal conventions if call has no output value,
+        // corresponding data should have scalar type
+        (CallOutputValue::None, value @ Value::Scalar(_)) => Ok(value),
+        (_, value) => Err(ExecutionError::Uncatchable(
+            UncatchableError::CallResultNotCorrespondToInstr(value),
+        )),
+    }
 }
 
 /// Writes an executed state of a particle being sent to remote node.
-pub(crate) fn set_remote_call_result<'i>(
-    peer_pk: String,
-    exec_ctx: &mut ExecutionCtx<'i>,
-    trace_ctx: &mut TraceHandler,
-) {
+pub(crate) fn handle_remote_call<'i>(peer_pk: String, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) {
     exec_ctx.next_peer_pks.push(peer_pk);
     exec_ctx.subgraph_complete = false;
 
     let new_call_result = CallResult::sent_peer_id(exec_ctx.run_parameters.current_peer_id.clone());
     trace_ctx.meet_call_end(new_call_result);
+}
+
+fn maybe_adjust_generation(prev_stream_generation: u32, value_source: ValueSource) -> Generation {
+    match value_source {
+        ValueSource::PreviousData => Generation::Nth(prev_stream_generation),
+        ValueSource::CurrentData => Generation::Last,
+    }
 }

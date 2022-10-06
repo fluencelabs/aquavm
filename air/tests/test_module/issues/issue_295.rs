@@ -16,7 +16,7 @@
 
 use air::UncatchableError;
 use air_test_utils::prelude::*;
-use air_trace_handler::MergeError;
+use air_trace_handler::merger::MergeError;
 use air_trace_handler::TraceHandlerError;
 
 use std::rc::Rc;

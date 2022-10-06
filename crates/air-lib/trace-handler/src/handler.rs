@@ -18,7 +18,6 @@ use super::*;
 use merger::*;
 
 use air_interpreter_data::InterpreterData;
-use air_parser::ast::CallOutputValue;
 
 #[derive(Debug, Default)]
 pub struct TraceHandler {
@@ -60,8 +59,8 @@ impl TraceHandler {
 
 impl TraceHandler {
     /// Should be called at the beginning of a call execution.
-    pub fn meet_call_start(&mut self, output_value: &CallOutputValue<'_>) -> TraceHandlerResult<MergerCallResult> {
-        try_merge_next_state_as_call(&mut self.data_keeper, output_value).map_err(Into::into)
+    pub fn meet_call_start(&mut self) -> TraceHandlerResult<MergerCallResult> {
+        try_merge_next_state_as_call(&mut self.data_keeper).map_err(Into::into)
     }
 
     /// Should be called when a call instruction was executed successfully. It adds the supplied
