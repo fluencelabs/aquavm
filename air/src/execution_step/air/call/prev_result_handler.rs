@@ -46,21 +46,20 @@ pub(super) fn handle_prev_state<'i>(
 ) -> ExecutionResult<StateDescriptor> {
     use CallResult::*;
 
-    match &met_result.result {
+    match met_result.result {
         // this call was failed on one of the previous executions,
         // here it's needed to bubble this special error up
-        CallServiceFailed(ret_code, err_msg) => {
+        CallServiceFailed(ret_code, ref err_msg) => {
             exec_ctx.subgraph_complete = false;
-            let ret_code = *ret_code;
             let err_msg = err_msg.clone();
             trace_ctx.meet_call_end(met_result.result);
             Err(CatchableError::LocalServiceError(ret_code, err_msg).into())
         }
-        RequestSentBy(Sender::PeerIdWithCallId { peer_id, call_id })
+        RequestSentBy(Sender::PeerIdWithCallId { ref peer_id, call_id })
             if peer_id.as_str() == exec_ctx.run_parameters.current_peer_id.as_str() =>
         {
             // call results are identified by call_id that is saved in data
-            match exec_ctx.call_results.remove(call_id) {
+            match exec_ctx.call_results.remove(&call_id) {
                 Some(call_result) => {
                     update_state_with_service_result(tetraplet.clone(), output, call_result, exec_ctx, trace_ctx)?;
                     Ok(StateDescriptor::executed())
@@ -85,7 +84,7 @@ pub(super) fn handle_prev_state<'i>(
         // this instruction's been already executed
         Executed(value) => {
             let resulted_value = populate_context_from_data(
-                value.clone(),
+                value,
                 tetraplet.clone(),
                 met_result.trace_pos,
                 met_result.source,

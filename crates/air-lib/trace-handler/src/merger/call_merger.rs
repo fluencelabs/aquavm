@@ -39,7 +39,7 @@ pub struct MetResult {
     pub source: ValueSource,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub enum ValueSource {
     PreviousData,
     CurrentData,
