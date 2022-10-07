@@ -190,15 +190,6 @@ pub(crate) enum Generation {
     Nth(u32),
 }
 
-impl Generation {
-    pub(crate) fn from_option(raw_generation: Option<u32>) -> Self {
-        match raw_generation {
-            Some(generation) => Generation::Nth(generation),
-            None => Generation::Last,
-        }
-    }
-}
-
 pub(crate) struct StreamIter<'result> {
     iter: Box<dyn Iterator<Item = &'result ValueAggregate> + 'result>,
     len: usize,

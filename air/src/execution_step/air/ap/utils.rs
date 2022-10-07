@@ -17,56 +17,31 @@
 use super::ExecutionResult;
 use crate::execution_step::Generation;
 
-use air_interpreter_data::ApResult;
 use air_parser::ast;
 use air_parser::ast::Ap;
 use air_trace_handler::merger::MergerApResult;
 
 pub(super) fn ap_result_to_generation(ap_result: &MergerApResult) -> Generation {
-    match ap_result {
-        MergerApResult::NotMet => Generation::Last,
-        MergerApResult::Met { res_generation, .. } => Generation::from_option(*res_generation),
+    use air_trace_handler::merger::ValueSource;
+
+    let met_result = match ap_result {
+        MergerApResult::NotMet => return Generation::Last,
+        MergerApResult::Met(met_result) => met_result,
+    };
+
+    match met_result.value_source {
+        ValueSource::PreviousData => Generation::Nth(met_result.generation),
+        ValueSource::CurrentData => Generation::Last,
     }
 }
 
 pub(super) fn try_match_trace_to_instr(merger_ap_result: &MergerApResult, instr: &Ap<'_>) -> ExecutionResult<()> {
-    let res_generation = match merger_ap_result {
-        MergerApResult::Met { res_generation } => *res_generation,
-        MergerApResult::NotMet => return Ok(()),
-    };
-
-    match_position_variable(&instr.result, res_generation, merger_ap_result)
-}
-
-fn match_position_variable(
-    variable: &ast::ApResult<'_>,
-    generation: Option<u32>,
-    ap_result: &MergerApResult,
-) -> ExecutionResult<()> {
     use crate::execution_step::UncatchableError::ApResultNotCorrespondToInstr;
-    use ast::ApResult::*;
+    use ast::ApResult;
 
-    match (variable, generation) {
-        (Stream(_), Some(_)) => Ok(()),
-        (Scalar(_), None) => Ok(()),
-        _ => Err(ApResultNotCorrespondToInstr(ap_result.clone()).into()),
-    }
-}
-
-pub(super) fn to_ap_result(merger_ap_result: &MergerApResult, maybe_generation: Option<u32>) -> ApResult {
-    if let MergerApResult::Met { res_generation } = merger_ap_result {
-        let res_generation = option_to_vec(*res_generation);
-
-        return ApResult::new(res_generation);
-    }
-
-    let res_generation = option_to_vec(maybe_generation);
-    ApResult::new(res_generation)
-}
-
-fn option_to_vec(value: Option<u32>) -> Vec<u32> {
-    match value {
-        Some(value) => vec![value],
-        None => vec![],
+    match (&instr.result, merger_ap_result) {
+        (ApResult::Stream(_), MergerApResult::Met(_)) => Ok(()),
+        (_, MergerApResult::NotMet) => Ok(()),
+        _ => Err(ApResultNotCorrespondToInstr(merger_ap_result.clone()).into()),
     }
 }

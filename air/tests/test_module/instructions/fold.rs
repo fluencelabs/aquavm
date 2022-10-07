@@ -654,8 +654,8 @@ fn fold_stream_seq_next_saves_call_result() {
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
-        executed_state::ap(Some(0)),
-        executed_state::ap(Some(0)),
+        executed_state::ap(0),
+        executed_state::ap(0),
         executed_state::fold(vec![
             subtrace_lore(0, SubTraceDesc::new(3.into(), 1), SubTraceDesc::new(6.into(), 0)),
             subtrace_lore(1, SubTraceDesc::new(4.into(), 1), SubTraceDesc::new(5.into(), 1)),
@@ -704,9 +704,9 @@ fn fold_par_next_completes() {
     let result_2 = checked_call_vm!(vm_2, <_>::default(), &script, "", result_1.data.clone());
     let actual_trace = trace_from_result(&result_2);
     let expected_trace = vec![
-        executed_state::ap(Some(0)),
-        executed_state::ap(Some(0)),
-        executed_state::ap(Some(0)),
+        executed_state::ap(0),
+        executed_state::ap(0),
+        executed_state::ap(0),
         executed_state::fold(vec![
             subtrace_lore(0, SubTraceDesc::new(4.into(), 2), SubTraceDesc::new(10.into(), 0)),
             subtrace_lore(1, SubTraceDesc::new(6.into(), 2), SubTraceDesc::new(10.into(), 0)),
@@ -725,9 +725,9 @@ fn fold_par_next_completes() {
     let result_3 = checked_call_vm!(vm_3, <_>::default(), &script, "", result_1.data.clone());
     let actual_trace = trace_from_result(&result_3);
     let expected_trace = vec![
-        executed_state::ap(Some(0)),
-        executed_state::ap(Some(0)),
-        executed_state::ap(Some(0)),
+        executed_state::ap(0),
+        executed_state::ap(0),
+        executed_state::ap(0),
         executed_state::fold(vec![
             subtrace_lore(0, SubTraceDesc::new(4.into(), 2), SubTraceDesc::new(10.into(), 0)),
             subtrace_lore(1, SubTraceDesc::new(6.into(), 2), SubTraceDesc::new(10.into(), 0)),
@@ -746,9 +746,9 @@ fn fold_par_next_completes() {
     let result_4 = checked_call_vm!(vm_4, <_>::default(), &script, "", result_1.data);
     let actual_trace = trace_from_result(&result_4);
     let expected_trace = vec![
-        executed_state::ap(Some(0)),
-        executed_state::ap(Some(0)),
-        executed_state::ap(Some(0)),
+        executed_state::ap(0),
+        executed_state::ap(0),
+        executed_state::ap(0),
         executed_state::fold(vec![
             subtrace_lore(0, SubTraceDesc::new(4.into(), 2), SubTraceDesc::new(10.into(), 0)),
             subtrace_lore(1, SubTraceDesc::new(6.into(), 2), SubTraceDesc::new(10.into(), 0)),

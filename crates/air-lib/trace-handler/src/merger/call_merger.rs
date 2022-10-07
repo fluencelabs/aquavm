@@ -29,11 +29,11 @@ pub enum MergerCallResult {
 
     /// There was a state in at least one of the contexts. If there were two states in
     /// both contexts, they were successfully merged.
-    Met(MetResult),
+    Met(MetCallResult),
 }
 
 #[derive(Debug, Clone)]
-pub struct MetResult {
+pub struct MetCallResult {
     pub result: CallResult,
     pub trace_pos: TracePos,
     pub source: ValueSource,
@@ -93,7 +93,7 @@ pub(super) fn prepare_call_result(
     let trace_pos = data_keeper.result_trace_next_pos();
     prepare_positions_mapping(scheme, data_keeper);
 
-    let met_result = MetResult::new(call_result, trace_pos, scheme.into());
+    let met_result = MetCallResult::new(call_result, trace_pos, scheme.into());
     MergerCallResult::Met(met_result)
 }
 
@@ -106,7 +106,7 @@ impl From<PreparationScheme> for ValueSource {
     }
 }
 
-impl MetResult {
+impl MetCallResult {
     pub fn new(result: CallResult, trace_pos: TracePos, source: ValueSource) -> Self {
         Self {
             result,

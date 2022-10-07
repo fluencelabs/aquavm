@@ -55,9 +55,9 @@ pub enum MergeError {
 
 #[derive(ThisError, Debug)]
 pub enum ApResultError {
-    /// Error occurred when Ap results contains more then 1 generation in destination.
-    #[error("{0:?} ap result contains too many generations in destination")]
-    TooManyDstGenerations(ApResult),
+    /// Error occurred when Ap results contains not 1 generation in destination.
+    #[error("{0:?} ap result contains inappropriate generation count in destination")]
+    InvalidDstGenerations(ApResult),
 }
 
 #[derive(ThisError, Debug)]
