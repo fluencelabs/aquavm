@@ -42,7 +42,7 @@ fn issue_295() {
 
     let expected_error = UncatchableError::TraceError {
         trace_error: TraceHandlerError::MergeError(MergeError::IncompatibleExecutedStates(
-            ExecutedState::Ap(ApResult::new(vec![1])),
+            ExecutedState::Ap(ApResult::new(1)),
             ExecutedState::Call(CallResult::Executed(Value::Scalar(Rc::new(json!(""))))),
         )),
         instruction: "ap scalar $stream".to_string(),
