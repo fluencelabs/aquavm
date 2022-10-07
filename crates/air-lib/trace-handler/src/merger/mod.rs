@@ -23,9 +23,9 @@ mod par_merger;
 mod position_mapping;
 
 pub use ap_merger::MergerApResult;
+pub use ap_merger::MetApResult;
 pub use call_merger::MergerCallResult;
-pub use call_merger::MetResult;
-pub use call_merger::ValueSource;
+pub use call_merger::MetCallResult;
 pub use canon_merger::MergerCanonResult;
 pub use fold_merger::MergerFoldResult;
 pub use par_merger::MergerParResult;
@@ -58,6 +58,12 @@ use air_interpreter_data::*;
 pub enum MergeCtxType {
     Current,
     Previous,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum ValueSource {
+    PreviousData,
+    CurrentData,
 }
 
 use std::fmt;

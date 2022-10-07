@@ -23,7 +23,7 @@ use air_interpreter_data::CallResult;
 use air_interpreter_data::Sender;
 use air_interpreter_interface::CallServiceResult;
 use air_parser::ast::CallOutputValue;
-use air_trace_handler::merger::MetResult;
+use air_trace_handler::merger::MetCallResult;
 use air_trace_handler::TraceHandler;
 
 use fstrings::f;
@@ -38,7 +38,7 @@ pub(crate) struct StateDescriptor {
 /// This function looks at the existing call state, validates it,
 /// and returns Ok(true) if the call should be executed further.
 pub(super) fn handle_prev_state<'i>(
-    met_result: MetResult,
+    met_result: MetCallResult,
     tetraplet: &RcSecurityTetraplet,
     output: &CallOutputValue<'i>,
     exec_ctx: &mut ExecutionCtx<'i>,
