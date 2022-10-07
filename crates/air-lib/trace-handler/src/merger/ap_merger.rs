@@ -86,7 +86,7 @@ impl MetApResult {
     pub(crate) fn new(generation: u32, value_source: ValueSource) -> Self {
         Self {
             generation,
-            value_source
+            value_source,
         }
     }
 }

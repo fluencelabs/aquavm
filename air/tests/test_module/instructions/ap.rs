@@ -66,10 +66,7 @@ fn ap_with_string_literal() {
     let result = checked_call_vm!(vm_1, <_>::default(), script, "", "");
 
     let actual_trace = trace_from_result(&result);
-    let expected_state = vec![
-        executed_state::ap(0),
-        executed_state::scalar(json!([some_string])),
-    ];
+    let expected_state = vec![executed_state::ap(0), executed_state::scalar(json!([some_string]))];
 
     assert_eq!(actual_trace, expected_state);
     assert!(result.next_peer_pks.is_empty());
