@@ -16,7 +16,7 @@
 
 mod stream_value_descriptor;
 
-use stream_value_descriptor::StreamValueDescriptor;
+pub(crate) use stream_value_descriptor::StreamValueDescriptor;
 use crate::execution_step::ExecutionResult;
 use crate::execution_step::Generation;
 use crate::execution_step::Stream;

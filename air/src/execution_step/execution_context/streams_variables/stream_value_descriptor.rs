@@ -19,6 +19,8 @@ use crate::execution_step::ValueAggregate;
 
 use air_parser::AirPos;
 use air_trace_handler::merger::ValueSource;
+use air_trace_handler::merger::MergerCallResult;
+use air_trace_handler::merger::MergerApResult;
 
 pub(crate) struct StreamValueDescriptor<'stream_name> {
     pub value: ValueAggregate,
@@ -45,5 +47,7 @@ impl<'stream_name> StreamValueDescriptor<'stream_name> {
         }
     }
 
-    pub fn from_current_peer()
+    pub fn from_call_result(call_result: MergerCallResult) -> Self {
+
+    }
 }
