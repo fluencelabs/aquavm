@@ -89,7 +89,7 @@ fn maybe_update_trace(maybe_generation: Option<u32>, trace_ctx: &mut TraceHandle
     use air_interpreter_data::ApResult;
 
     if let Some(generation) = maybe_generation {
-        let final_ap_result = ApResult::new(vec![generation]);
+        let final_ap_result = ApResult::new(generation);
         trace_ctx.meet_ap_end(final_ap_result);
     }
 }

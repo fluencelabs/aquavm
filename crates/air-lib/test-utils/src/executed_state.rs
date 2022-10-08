@@ -133,7 +133,7 @@ pub fn subtrace_desc(begin_pos: impl Into<TracePos>, subtrace_len: u32) -> SubTr
 }
 
 pub fn ap(generation: u32) -> ExecutedState {
-    let ap_result = ApResult::new(vec![generation]);
+    let ap_result = ApResult::new(generation);
     ExecutedState::Ap(ap_result)
 }
 
