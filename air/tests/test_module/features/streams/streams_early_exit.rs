@@ -115,9 +115,9 @@ fn par_early_exit() {
         executed_state::par(5, 1),
         executed_state::par(3, 1),
         executed_state::par(1, 1),
-        executed_state::stream_string("1", 0),
-        executed_state::stream_string("2", 0),
-        executed_state::stream_string("1", 0),
+        executed_state::stream_string("1", 1),
+        executed_state::stream_string("2", 2),
+        executed_state::stream_string("1", 1),
         executed_state::stream_string("success result from fallible_call_service", 0),
         executed_state::service_failed(1, "failed result from fallible_call_service"),
         executed_state::stream_string("success result from fallible_call_service", 0),
@@ -155,7 +155,7 @@ fn par_early_exit() {
         trace_error: TraceHandlerError::MergeError(MergeError::IncorrectCallResult(CallResultError::ValuesNotEqual {
             prev_value: Value::Stream {
                 value: rc!(json!("1")),
-                generation: 0,
+                generation: 1,
             },
             current_value: Value::Stream {
                 value: rc!(json!("non_exist_value")),
@@ -226,6 +226,7 @@ fn fold_early_exit() {
         "",
         last_error_receiver_result.data
     );
+    print_trace(&last_peer_checker_result, "");
     let actual_trace = trace_from_result(&last_peer_checker_result);
 
     let unit_call_service_result = "result from unit_call_service";
@@ -235,13 +236,13 @@ fn fold_early_exit() {
         executed_state::scalar_string_array(vec!["c1", "c2"]),
         executed_state::scalar_string_array(vec!["d1", "d2"]),
         executed_state::stream_string("a1", 0),
-        executed_state::stream_string("a2", 0),
+        executed_state::stream_string("a2", 1),
         executed_state::stream_string("b1", 0),
-        executed_state::stream_string("b2", 0),
+        executed_state::stream_string("b2", 1),
         executed_state::stream_string("c1", 0),
-        executed_state::stream_string("c2", 0),
+        executed_state::stream_string("c2", 1),
         executed_state::stream_string("d1", 0),
-        executed_state::stream_string("d2", 0),
+        executed_state::stream_string("d2", 1),
         executed_state::par(17, 1),
         executed_state::fold(vec![executed_state::subtrace_lore(
             4,
@@ -342,6 +343,7 @@ fn fold_par_early_exit() {
         "",
         last_error_receiver_result.data
     );
+    print_trace(&last_peer_checker_result, "");
     let actual_trace = trace_from_result(&last_peer_checker_result);
 
     let unit_call_service_result = "result from unit_call_service";
@@ -351,13 +353,13 @@ fn fold_par_early_exit() {
         executed_state::scalar_string_array(vec!["c1", "c2"]),
         executed_state::scalar_string_array(vec!["d1", "d2"]),
         executed_state::stream_string("a1", 0),
-        executed_state::stream_string("a2", 0),
+        executed_state::stream_string("a2", 1),
         executed_state::stream_string("b1", 0),
-        executed_state::stream_string("b2", 0),
+        executed_state::stream_string("b2", 1),
         executed_state::stream_string("c1", 0),
-        executed_state::stream_string("c2", 0),
+        executed_state::stream_string("c2", 1),
         executed_state::stream_string("d1", 0),
-        executed_state::stream_string("d2", 0),
+        executed_state::stream_string("d2", 1),
         executed_state::par(69, 1),
         executed_state::fold(vec![
             executed_state::subtrace_lore(4, subtrace_desc(14, 34), subtrace_desc(82, 0)),

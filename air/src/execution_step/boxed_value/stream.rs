@@ -17,7 +17,9 @@
 use super::ExecutionResult;
 use super::ValueAggregate;
 use crate::execution_step::CatchableError;
-use crate::{ExecutionError, JValue, UncatchableError};
+use crate::ExecutionError;
+use crate::JValue;
+use crate::UncatchableError;
 
 use air_interpreter_data::TracePos;
 use air_trace_handler::merger::ValueSource;
