@@ -23,7 +23,6 @@ use super::TraceHandler;
 use crate::execution_step::air::ValueAggregate;
 use crate::execution_step::boxed_value::Variable;
 use crate::execution_step::resolver::apply_lambda;
-use crate::execution_step::execution_context::StreamValueDescriptor;
 use crate::log_instruction;
 use crate::trace_to_exec_err;
 use crate::JValue;
@@ -80,12 +79,8 @@ fn populate_context<'ctx>(
     match ap_result {
         ast::ApResult::Scalar(scalar) => exec_ctx.scalars.set_scalar_value(scalar.name, result).map(|_| None),
         ast::ApResult::Stream(stream) => {
-            let generation = ap_result_to_generation(merger_ap_result);
-            let value_descriptor = StreamValueDescriptor::new(result, stream.name, merger_ap_result)
-            exec_ctx
-                .streams
-                .add_stream_value(result, generation, stream.name, stream.position)
-                .map(Some)
+            let value_descriptor = generate_value_descriptor(result, stream, merger_ap_result);
+            exec_ctx.streams.add_stream_value(value_descriptor).map(Some)
         }
     }
 }

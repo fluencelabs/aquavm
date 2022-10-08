@@ -20,6 +20,7 @@ use crate::execution_step::CatchableError;
 use crate::JValue;
 
 use air_interpreter_data::TracePos;
+use air_trace_handler::merger::ValueSource;
 
 use std::collections::HashMap;
 use std::fmt::Formatter;
@@ -34,35 +35,51 @@ pub struct Stream {
     /// obtained values from a current_data that were not present in prev_data becomes a new generation.
     values: Vec<Vec<ValueAggregate>>,
 
+    /// Count of values from previous data.
+    previous_values_count: usize,
+
     /// This map is intended to support canonicalized stream creation, such streams has
     /// corresponding value positions in a data and this field are used to create such streams.
     values_by_pos: HashMap<TracePos, StreamValueLocation>,
 }
 
 impl Stream {
-    pub(crate) fn from_generations_count(count: usize) -> Self {
+    pub(crate) fn from_generations_count(previous_count: usize, current_count: usize) -> Self {
+        let last_generation_count = 1;
+        // TODO: check for overflow
+        let overall_count = previous_count + current_count + last_generation_count;
         Self {
-            values: vec![vec![]; count + 1],
+            values: vec![vec![]; overall_count],
+            previous_values_count: previous_count,
             values_by_pos: HashMap::new(),
         }
     }
 
+    // streams created with this ctor assumed to have only one generation,
+    // for streams that have values in
     pub(crate) fn from_value(value: ValueAggregate) -> Self {
         let values_by_pos = maplit::hashmap! {
             value.trace_pos => StreamValueLocation::new(0, 0),
         };
         Self {
             values: vec![vec![value]],
+            previous_values_count: 0,
             values_by_pos,
         }
     }
 
     // if generation is None, value would be added to the last generation, otherwise it would
     // be added to given generation
-    pub(crate) fn add_value(&mut self, value: ValueAggregate, generation: Generation) -> ExecutionResult<u32> {
-        let generation = match generation {
-            Generation::Last => self.values.len() - 1,
-            Generation::Nth(id) => id as usize,
+    pub(crate) fn add_value(
+        &mut self,
+        value: ValueAggregate,
+        generation: Generation,
+        source: ValueSource,
+    ) -> ExecutionResult<u32> {
+        let generation = match (generation, source) {
+            (Generation::Last, _) => self.values.len() - 1,
+            (Generation::Nth(id), ValueSource::PreviousData) => id as usize,
+            (Generation::Nth(id), ValueSource::CurrentData) => self.previous_values_count + id as usize,
         };
 
         if generation >= self.values.len() {
@@ -276,16 +293,21 @@ mod test {
 
     use serde_json::json;
 
+    use air_trace_handler::merger::ValueSource;
     use std::rc::Rc;
 
     #[test]
     fn test_slice_iter() {
         let value_1 = ValueAggregate::new(Rc::new(json!("value")), <_>::default(), 1.into());
         let value_2 = ValueAggregate::new(Rc::new(json!("value")), <_>::default(), 1.into());
-        let mut stream = Stream::from_generations_count(2);
+        let mut stream = Stream::from_generations_count(2, 0);
 
-        stream.add_value(value_1, Generation::Nth(0)).unwrap();
-        stream.add_value(value_2, Generation::Nth(1)).unwrap();
+        stream
+            .add_value(value_1, Generation::Nth(0), ValueSource::PreviousData)
+            .unwrap();
+        stream
+            .add_value(value_2, Generation::Nth(1), ValueSource::PreviousData)
+            .unwrap();
 
         let slice = stream.slice_iter(Generation::Nth(0), Generation::Nth(1)).unwrap();
         assert_eq!(slice.len, 2);
@@ -302,7 +324,7 @@ mod test {
 
     #[test]
     fn test_slice_on_empty_stream() {
-        let stream = Stream::from_generations_count(2);
+        let stream = Stream::from_generations_count(2, 0);
 
         let slice = stream.slice_iter(Generation::Nth(0), Generation::Nth(1));
         assert!(slice.is_none());

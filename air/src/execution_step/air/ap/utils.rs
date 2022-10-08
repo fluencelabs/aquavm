@@ -15,27 +15,39 @@
  */
 
 use super::ExecutionResult;
+use crate::execution_step::execution_context::StreamValueDescriptor;
 use crate::execution_step::Generation;
+use crate::execution_step::ValueAggregate;
 
 use air_parser::ast;
-use air_parser::ast::Ap;
 use air_trace_handler::merger::MergerApResult;
 
-pub(super) fn ap_result_to_generation(ap_result: &MergerApResult) -> Generation {
+pub(super) fn generate_value_descriptor<'stream>(
+    value: ValueAggregate,
+    stream: &'stream ast::Stream<'_>,
+    ap_result: &MergerApResult,
+) -> StreamValueDescriptor<'stream> {
     use air_trace_handler::merger::ValueSource;
 
-    let met_result = match ap_result {
-        MergerApResult::NotMet => return Generation::Last,
-        MergerApResult::Met(met_result) => met_result,
-    };
-
-    match met_result.value_source {
-        ValueSource::PreviousData => Generation::Nth(met_result.generation),
-        ValueSource::CurrentData => Generation::Last,
+    match ap_result {
+        MergerApResult::NotMet => StreamValueDescriptor::new(
+            value,
+            stream.name,
+            ValueSource::PreviousData,
+            Generation::Last,
+            stream.position,
+        ),
+        MergerApResult::Met(met_result) => StreamValueDescriptor::new(
+            value,
+            stream.name,
+            met_result.value_source,
+            Generation::Nth(met_result.generation),
+            stream.position,
+        ),
     }
 }
 
-pub(super) fn try_match_trace_to_instr(merger_ap_result: &MergerApResult, instr: &Ap<'_>) -> ExecutionResult<()> {
+pub(super) fn try_match_trace_to_instr(merger_ap_result: &MergerApResult, instr: &ast::Ap<'_>) -> ExecutionResult<()> {
     use crate::execution_step::UncatchableError::ApResultNotCorrespondToInstr;
     use ast::ApResult;
 
