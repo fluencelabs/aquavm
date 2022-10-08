@@ -17,10 +17,11 @@
 use super::ExecutionResult;
 use super::ValueAggregate;
 use crate::execution_step::CatchableError;
-use crate::JValue;
+use crate::{ExecutionError, JValue, UncatchableError};
 
 use air_interpreter_data::TracePos;
 use air_trace_handler::merger::ValueSource;
+use air_trace_handler::TraceHandler;
 
 use std::collections::HashMap;
 use std::fmt::Formatter;
@@ -198,6 +199,26 @@ impl Stream {
         let iter = StreamSliceIter { iter, len };
 
         Some(iter)
+    }
+
+    /// Removes empty generations updating data and returns final generation count.
+    pub(crate) fn compactify(mut self, trace_ctx: &mut TraceHandler) -> ExecutionResult<usize> {
+        self.remove_empty_generations();
+
+        for (generation, values) in self.values.iter().enumerate() {
+            for value in values.iter() {
+                trace_ctx
+                    .update_generation(value.trace_pos, generation as u32)
+                    .map_err(|e| ExecutionError::Uncatchable(UncatchableError::GenerationCompatificationError(e)))?;
+            }
+        }
+
+        Ok(self.values.len())
+    }
+
+    /// Removes empty generations from current values.
+    fn remove_empty_generations(&mut self) {
+        self.values.retain(|values| !values.is_empty());
     }
 }
 

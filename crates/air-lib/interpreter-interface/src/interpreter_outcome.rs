@@ -74,6 +74,22 @@ impl InterpreterOutcome {
 
         Ok(outcome)
     }
+
+    pub fn new(
+        ret_code: i64,
+        error_message: String,
+        data: Vec<u8>,
+        next_peer_pks: Vec<String>,
+        call_requests: Vec<u8>,
+    ) -> Self {
+        Self {
+            ret_code,
+            error_message,
+            data,
+            next_peer_pks,
+            call_requests,
+        }
+    }
 }
 
 #[cfg(feature = "marine")]
