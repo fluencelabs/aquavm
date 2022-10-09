@@ -22,9 +22,7 @@ use crate::InterpreterOutcome;
 use crate::ToErrorCode;
 use crate::INTERPRETER_SUCCESS;
 
-use air_interpreter_data::GlobalStreamGens;
 use air_interpreter_data::InterpreterData;
-use air_interpreter_data::RestrictedStreamGens;
 use air_interpreter_interface::CallRequests;
 use air_utils::measure;
 
@@ -88,8 +86,11 @@ fn populate_outcome_from_contexts(
     ret_code: i64,
     error_message: String,
 ) -> InterpreterOutcome {
-    let maybe_gens = exec_ctx.streams.into_streams_data(&mut trace_handler);
-    let (global_streams, restricted_streams) = match execution_error_into_outcome(maybe_gens) {
+    let maybe_gens = exec_ctx
+        .streams
+        .into_streams_data(&mut trace_handler)
+        .map_err(execution_error_into_outcome);
+    let (global_streams, restricted_streams) = match maybe_gens {
         Ok(gens) => gens,
         Err(outcome) => return outcome,
     };
@@ -117,19 +118,8 @@ fn populate_outcome_from_contexts(
 
 // this method is called only if there is an internal error in the interpreter and
 // new execution trace was corrupted
-fn execution_error_into_outcome(
-    result: Result<(GlobalStreamGens, RestrictedStreamGens), ExecutionError>,
-) -> Result<(GlobalStreamGens, RestrictedStreamGens), InterpreterOutcome> {
-    match result {
-        Ok(gens) => Ok(gens),
-        Err(execution_error) => Err(InterpreterOutcome::new(
-            execution_error.to_error_code(),
-            execution_error.to_string(),
-            vec![],
-            vec![],
-            vec![],
-        )),
-    }
+fn execution_error_into_outcome(error: ExecutionError) -> InterpreterOutcome {
+    InterpreterOutcome::new(error.to_error_code(), error.to_string(), vec![], vec![], vec![])
 }
 
 /// Deduplicate values in a supplied vector.

@@ -39,7 +39,7 @@ pub struct Stream {
     values: Vec<Vec<ValueAggregate>>,
 
     /// Count of values from previous data.
-    previous_values_count: usize,
+    previous_gens_count: usize,
 
     /// This map is intended to support canonicalized stream creation, such streams has
     /// corresponding value positions in a data and this field are used to create such streams.
@@ -53,7 +53,7 @@ impl Stream {
         let overall_count = previous_count + current_count + last_generation_count;
         Self {
             values: vec![vec![]; overall_count],
-            previous_values_count: previous_count,
+            previous_gens_count: previous_count,
             values_by_pos: HashMap::new(),
         }
     }
@@ -66,7 +66,7 @@ impl Stream {
         };
         Self {
             values: vec![vec![value]],
-            previous_values_count: 0,
+            previous_gens_count: 0,
             values_by_pos,
         }
     }
@@ -81,8 +81,8 @@ impl Stream {
     ) -> ExecutionResult<u32> {
         let generation = match (generation, source) {
             (Generation::Last, _) => self.values.len() - 1,
-            (Generation::Nth(id), ValueSource::PreviousData) => id as usize,
-            (Generation::Nth(id), ValueSource::CurrentData) => self.previous_values_count + id as usize,
+            (Generation::Nth(previous_gen), ValueSource::PreviousData) => previous_gen as usize,
+            (Generation::Nth(current_gen), ValueSource::CurrentData) => self.previous_gens_count + current_gen as usize,
         };
 
         if generation >= self.values.len() {
