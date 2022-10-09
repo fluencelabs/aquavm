@@ -361,4 +361,24 @@ mod test {
         let slice = stream.slice_iter(Generation::Last, Generation::Last);
         assert!(slice.is_none());
     }
+
+    #[test]
+    fn generation_from_current_data() {
+        let value_1 = ValueAggregate::new(Rc::new(json!("value_1")), <_>::default(), 1.into());
+        let value_2 = ValueAggregate::new(Rc::new(json!("value_2")), <_>::default(), 2.into());
+        let mut stream = Stream::from_generations_count(5, 5);
+
+        stream.add_value(value_1.clone(), Generation::Nth(2), ValueSource::CurrentData).unwrap();
+        stream.add_value(value_2.clone(), Generation::Nth(4), ValueSource::PreviousData).unwrap();
+
+        let generations_count = stream.generations_count();
+        assert_eq!(generations_count, 2);
+
+        let mut iter = stream.iter(Generation::Last).unwrap();
+        let stream_value_1 = iter.next().unwrap();
+        let stream_value_2 = iter.next().unwrap();
+
+        assert_eq!(stream_value_1, &value_2);
+        assert_eq!(stream_value_2, &value_1);
+    }
 }
