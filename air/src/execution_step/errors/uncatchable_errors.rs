@@ -41,6 +41,7 @@ pub enum UncatchableError {
         instruction: String,
     },
 
+    /// These errors are related to internal bug in the interpreter when result trace is corrupted.
     #[error(transparent)]
     GenerationCompatificationError(#[from] GenerationCompatificationError),
 
