@@ -29,6 +29,7 @@ impl<'i> super::ExecutableInstruction<'i> for Xor<'i> {
         exec_ctx.subgraph_complete = true;
         match self.0.execute(exec_ctx, trace_ctx) {
             Err(e) if e.is_catchable() => {
+                println!("xor caught a error {}", e);
                 exec_ctx.subgraph_complete = true;
                 exec_ctx.last_error_descriptor.meet_xor_right_branch();
                 print_xor_log(&e);

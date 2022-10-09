@@ -20,6 +20,7 @@ use crate::execution_step::ValueAggregate;
 use air_parser::AirPos;
 use air_trace_handler::merger::ValueSource;
 
+#[derive(Debug)]
 pub(crate) struct StreamValueDescriptor<'stream_name> {
     pub value: ValueAggregate,
     pub name: &'stream_name str,

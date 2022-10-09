@@ -83,6 +83,8 @@ impl Streams {
     }
 
     pub(crate) fn add_stream_value(&mut self, value_descriptor: StreamValueDescriptor<'_>) -> ExecutionResult<u32> {
+        //println!("add_stream_value: {:?} ", value_descriptor);
+
         let StreamValueDescriptor {
             value,
             name,
@@ -115,6 +117,7 @@ impl Streams {
         let (prev_gens_count, current_gens_count) =
             self.stream_generation_from_data(&name, span.left, iteration as usize);
 
+        //println!("r stream {} {} {}", name, prev_gens_count, current_gens_count);
         let new_stream = Stream::from_generations_count(prev_gens_count as usize, current_gens_count as usize);
         let new_descriptor = StreamDescriptor::restricted(new_stream, span);
         match self.streams.entry(name) {
@@ -188,6 +191,7 @@ impl Streams {
         position: AirPos,
         iteration: usize,
     ) -> Option<u32> {
+        // println!("r stream generations: {} {} {}", name, position, iteration);
         restricted_stream_gens
             .get(name)
             .and_then(|scopes| scopes.get(&position).and_then(|iterations| iterations.get(iteration)))
