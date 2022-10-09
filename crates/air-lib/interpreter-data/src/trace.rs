@@ -31,6 +31,10 @@ impl ExecutionTrace {
         self.0.get(usize::from(index))
     }
 
+    pub fn get_mut(&mut self, index: TracePos) -> Option<&mut ExecutedState> {
+        self.0.get_mut(usize::from(index))
+    }
+
     pub fn pop(&mut self) -> Option<ExecutedState> {
         self.0.pop()
     }

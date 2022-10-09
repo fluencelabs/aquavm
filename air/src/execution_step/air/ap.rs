@@ -79,11 +79,8 @@ fn populate_context<'ctx>(
     match ap_result {
         ast::ApResult::Scalar(scalar) => exec_ctx.scalars.set_scalar_value(scalar.name, result).map(|_| None),
         ast::ApResult::Stream(stream) => {
-            let generation = ap_result_to_generation(merger_ap_result);
-            exec_ctx
-                .streams
-                .add_stream_value(result, generation, stream.name, stream.position)
-                .map(Some)
+            let value_descriptor = generate_value_descriptor(result, stream, merger_ap_result);
+            exec_ctx.streams.add_stream_value(value_descriptor).map(Some)
         }
     }
 }

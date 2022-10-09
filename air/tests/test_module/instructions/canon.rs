@@ -120,7 +120,7 @@ fn canon_fixes_stream_correct() {
         executed_state::stream_number(1, 0),
         executed_state::par(1, 1),
         executed_state::stream_number(2, 1),
-        executed_state::stream_number(3, 1),
+        executed_state::stream_number(3, 2),
         executed_state::scalar_number(4),
         executed_state::canon(vec![3.into(), 4.into()]),
         executed_state::par(1, 1),

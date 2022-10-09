@@ -32,7 +32,7 @@ impl<'i> super::ExecutableInstruction<'i> for New<'i> {
         // any error. It's highly important to distinguish between global and restricted streams
         // at the end of execution to make a correct data.
         let instruction_result = self.instruction.execute(exec_ctx, trace_ctx);
-        let epilog_result = epilog(self, exec_ctx);
+        let epilog_result = epilog(self, exec_ctx, trace_ctx);
 
         match (instruction_result, epilog_result) {
             (Ok(()), Ok(())) => Ok(()),
@@ -62,11 +62,13 @@ fn prolog<'i>(new: &New<'i>, exec_ctx: &mut ExecutionCtx<'i>) {
     exec_ctx.tracker.meet_new(position);
 }
 
-fn epilog<'i>(new: &New<'i>, exec_ctx: &mut ExecutionCtx<'i>) -> ExecutionResult<()> {
+fn epilog<'i>(new: &New<'i>, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
     let position = new.span.left;
     match &new.argument {
         NewArgument::Stream(stream) => {
-            exec_ctx.streams.meet_scope_end(stream.name.to_string(), position);
+            exec_ctx
+                .streams
+                .meet_scope_end(stream.name.to_string(), position, trace_ctx)?;
             Ok(())
         }
         NewArgument::Scalar(scalar) => exec_ctx.scalars.meet_new_end_scalar(scalar.name),

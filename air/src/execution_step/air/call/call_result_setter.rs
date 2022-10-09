@@ -39,10 +39,14 @@ pub(crate) fn populate_context_from_peer_service_result<'i>(
             Ok(CallResult::executed_scalar(result_value))
         }
         CallOutputValue::Stream(stream) => {
-            let generation =
-                exec_ctx
-                    .streams
-                    .add_stream_value(executed_result, Generation::Last, stream.name, stream.position)?;
+            let value_descriptor = StreamValueDescriptor::new(
+                executed_result,
+                stream.name,
+                ValueSource::PreviousData,
+                Generation::Last,
+                stream.position,
+            );
+            let generation = exec_ctx.streams.add_stream_value(value_descriptor)?;
             Ok(CallResult::executed_stream(result_value, generation))
         }
         // by the internal conventions if call has no output value,
@@ -67,11 +71,14 @@ pub(crate) fn populate_context_from_data<'i>(
         }
         (CallOutputValue::Stream(stream), Value::Stream { value, generation }) => {
             let result = ValueAggregate::new(value.clone(), tetraplet, trace_pos);
-            let adjusted_generation = maybe_adjust_generation(generation, value_source);
-            let resulted_generation =
-                exec_ctx
-                    .streams
-                    .add_stream_value(result, adjusted_generation, stream.name, stream.position)?;
+            let value_descriptor = StreamValueDescriptor::new(
+                result,
+                stream.name,
+                value_source,
+                Generation::Nth(generation),
+                stream.position,
+            );
+            let resulted_generation = exec_ctx.streams.add_stream_value(value_descriptor)?;
 
             let result = Value::Stream {
                 value,
@@ -95,11 +102,4 @@ pub(crate) fn handle_remote_call<'i>(peer_pk: String, exec_ctx: &mut ExecutionCt
 
     let new_call_result = CallResult::sent_peer_id(exec_ctx.run_parameters.current_peer_id.clone());
     trace_ctx.meet_call_end(new_call_result);
-}
-
-fn maybe_adjust_generation(prev_stream_generation: u32, value_source: ValueSource) -> Generation {
-    match value_source {
-        ValueSource::PreviousData => Generation::Nth(prev_stream_generation),
-        ValueSource::CurrentData => Generation::Last,
-    }
 }

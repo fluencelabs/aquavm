@@ -55,6 +55,34 @@ impl TraceHandler {
 
         (prev_len, current_len)
     }
+
+    pub fn update_generation(
+        &mut self,
+        trace_pos: TracePos,
+        generation: u32,
+    ) -> Result<(), GenerationCompatificationError> {
+        let state = self
+            .data_keeper
+            .result_trace
+            .get_mut(trace_pos)
+            .ok_or_else(|| GenerationCompatificationError::points_to_nowhere(trace_pos))?;
+
+        match state {
+            ExecutedState::Ap(ap_result) => ap_result.res_generations = vec![generation],
+            ExecutedState::Call(CallResult::Executed(Value::Stream {
+                generation: call_generation,
+                ..
+            })) => *call_generation = generation,
+            state => {
+                return Err(GenerationCompatificationError::points_to_invalid_state(
+                    trace_pos,
+                    state.clone(),
+                ))
+            }
+        }
+
+        Ok(())
+    }
 }
 
 impl TraceHandler {
