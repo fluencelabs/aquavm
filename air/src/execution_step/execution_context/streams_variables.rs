@@ -50,7 +50,7 @@ pub(crate) struct Streams {
 
     /// Contains stream generations that each private stream had at the scope end.
     /// Then it's placed into data
-    collected_restricted_stream_gens: RestrictedStreamGens,
+    new_restricted_stream_gens: RestrictedStreamGens,
 }
 
 impl Streams {
@@ -66,7 +66,7 @@ impl Streams {
             streams,
             previous_restricted_stream_gens,
             current_restricted_stream_gens,
-            collected_restricted_stream_gens: <_>::default(),
+            new_restricted_stream_gens: <_>::default(),
         }
     }
 
@@ -168,7 +168,7 @@ impl Streams {
             })
             .collect::<Result<GlobalStreamGens, _>>()?;
 
-        Ok((global_streams, self.collected_restricted_stream_gens))
+        Ok((global_streams, self.new_restricted_stream_gens))
     }
 
     fn stream_generation_from_data(&self, name: &str, position: AirPos, iteration: usize) -> (u32, u32) {
@@ -195,7 +195,7 @@ impl Streams {
     }
 
     fn collect_stream_generation(&mut self, name: String, position: AirPos, generation: u32) {
-        match self.collected_restricted_stream_gens.entry(name) {
+        match self.new_restricted_stream_gens.entry(name) {
             Occupied(mut streams) => match streams.get_mut().entry(position) {
                 Occupied(mut iterations) => iterations.get_mut().push(generation),
                 Vacant(entry) => {

@@ -49,8 +49,11 @@ pub struct Stream {
 impl Stream {
     pub(crate) fn from_generations_count(previous_count: usize, current_count: usize) -> Self {
         let last_generation_count = 1;
-        // TODO: check for overflow
-        let overall_count = previous_count + current_count + last_generation_count;
+        // TODO: bubble up an overflow error instead of expect
+        let overall_count = previous_count
+            .checked_add(current_count)
+            .and_then(|value| value.checked_add(last_generation_count))
+            .expect("it shouldn't overflow");
         Self {
             values: vec![vec![]; overall_count],
             previous_gens_count: previous_count,
