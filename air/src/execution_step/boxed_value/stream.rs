@@ -368,8 +368,12 @@ mod test {
         let value_2 = ValueAggregate::new(Rc::new(json!("value_2")), <_>::default(), 2.into());
         let mut stream = Stream::from_generations_count(5, 5);
 
-        stream.add_value(value_1.clone(), Generation::Nth(2), ValueSource::CurrentData).unwrap();
-        stream.add_value(value_2.clone(), Generation::Nth(4), ValueSource::PreviousData).unwrap();
+        stream
+            .add_value(value_1.clone(), Generation::Nth(2), ValueSource::CurrentData)
+            .unwrap();
+        stream
+            .add_value(value_2.clone(), Generation::Nth(4), ValueSource::PreviousData)
+            .unwrap();
 
         let generations_count = stream.generations_count();
         assert_eq!(generations_count, 2);
