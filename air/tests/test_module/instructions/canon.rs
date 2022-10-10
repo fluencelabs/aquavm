@@ -239,14 +239,14 @@ fn canon_empty_stream() {
 
 #[test]
 fn canon_empty_not_writable_stream() {
-    let peer_id_1 = "peer_id_1";
-    let mut vm_1 = create_avm(echo_call_service(), peer_id_1);
+    let peer_id = "peer_id";
+    let mut vm = create_avm(echo_call_service(), peer_id);
 
     let script = f!(r#"
-        (canon "{peer_id_1}" $stream #canon_stream)
+        (canon "{peer_id}" $stream #canon_stream)
     "#);
 
-    let result = checked_call_vm!(vm_1, <_>::default(), &script, "", "");
+    let result = checked_call_vm!(vm, <_>::default(), &script, "", "");
     let actual_trace = trace_from_result(&result);
     let expected_trace = vec![executed_state::canon(vec![])];
     assert_eq!(actual_trace, expected_trace);
