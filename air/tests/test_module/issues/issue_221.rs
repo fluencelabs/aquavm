@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-use air_test_utils::prelude::*;
 use air_test_framework::TestExecutor;
+use air_test_utils::prelude::*;
 
 #[test]
 // test for github.com/fluencelabs/aquavm/issues/221
@@ -71,7 +71,8 @@ fn issue_221() {
         vec![],
         vec![peer_1_id, peer_2_id].into_iter().map(Into::into),
         &script,
-    ).expect("Invalid annotated AIR script");
+    )
+    .expect("Invalid annotated AIR script");
 
     let _result = executor.execute_one(set_variable_id).unwrap();
     let _peer_1_result = executor.execute_one(peer_1_id).unwrap();
