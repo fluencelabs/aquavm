@@ -16,8 +16,9 @@
 
 use air_test_utils::prelude::*;
 
+//https://github.com/fluencelabs/aquavm/issues/363
 #[test]
-fn issue_999() {
+fn issue_363() {
     let client_peer_id = "client";
     let mut client_vm = create_avm(
         set_variable_call_service(json!([
