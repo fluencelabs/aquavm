@@ -156,6 +156,7 @@ impl Stream {
         Some(JValue::Array(jvalue_array))
     }
 
+    #[allow(dead_code)]
     pub(crate) fn get_value_by_pos(&self, position: TracePos) -> Option<&ValueAggregate> {
         let StreamValueLocation {
             generation,

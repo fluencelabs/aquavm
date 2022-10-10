@@ -265,7 +265,9 @@ fn canon_with_empty_behaviour() {
     let expected_trace = vec![
         executed_state::par(1, 1),
         executed_state::request_sent_by(peer_2_id),
-        executed_state::canon(vec![]),
+        executed_state::canon(
+            json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_2_id", "service_id": ""}, "values": []}),
+        ),
     ];
 
     assert_eq!(actual_trace, expected_trace);

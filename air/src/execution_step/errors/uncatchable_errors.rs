@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use crate::JValue;
 use crate::ToErrorCode;
 
 use air_interpreter_data::TracePos;
@@ -83,6 +84,12 @@ pub enum UncatchableError {
     /// as a hard error.
     #[error("variable with position '{0}' wasn't defined during script execution")]
     VariableNotFoundByPos(TracePos),
+
+    #[error("can't deserialize stream {canonicalized_stream:?} with error: {de_error}")]
+    InvalidCanonStreamInData {
+        canonicalized_stream: JValue,
+        de_error: serde_json::Error,
+    },
 }
 
 impl ToErrorCode for UncatchableError {

@@ -133,7 +133,12 @@ fn length_functor_for_canon_stream() {
     let expected_trace = vec![
         executed_state::ap(0),
         executed_state::ap(0),
-        executed_state::canon(vec![0.into(), 1.into()]),
+        executed_state::canon(
+            json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": "init_peer_id", "service_id": ""},
+                "values": [{"result": 1, "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "init_peer_id", "service_id": ""}, "trace_pos": 0},
+                           {"result": 1, "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "init_peer_id", "service_id": ""}, "trace_pos": 1}
+                ]} ),
+        ),
         executed_state::scalar_number(2),
     ];
     assert_eq!(actual_trace, expected_trace);
@@ -157,7 +162,12 @@ fn length_functor_for_empty_canon_stream() {
     let result = executor.execute_one(init_peer_id).unwrap();
     let actual_trace = trace_from_result(&result);
 
-    let expected_trace = vec![executed_state::canon(vec![]), executed_state::scalar_number(0)];
+    let expected_trace = vec![
+        executed_state::canon(
+            json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": "init_peer_id", "service_id": ""}, "values": []} ),
+        ),
+        executed_state::scalar_number(0),
+    ];
     assert_eq!(actual_trace, expected_trace);
 }
 
