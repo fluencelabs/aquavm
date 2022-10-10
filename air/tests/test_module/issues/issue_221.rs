@@ -28,13 +28,6 @@ fn issue_221() {
 
     let peer_1_value = "peer_1_value";
     let peer_2_value = "peer_2_value";
-    let mut peer_1 = create_avm(set_variable_call_service(json!(peer_1_value)), peer_1_id);
-    let mut peer_2 = create_avm(set_variable_call_service(json!(peer_2_value)), peer_2_id);
-    let mut join_1 = create_avm(echo_call_service(), join_1_id);
-    let mut set_variable = create_avm(
-        set_variable_call_service(json!([peer_1_id, peer_2_id])),
-        set_variable_id,
-    );
 
     let script = f!(r#"
         (seq
@@ -78,20 +71,14 @@ fn issue_221() {
         vec![],
         vec![peer_1_id, peer_2_id].into_iter().map(Into::into),
         &script,
-    );
+    ).expect("Invalid annotated AIR script");
 
-    let result = checked_call_vm!(set_variable, <_>::default(), &script, "", "");
-    let peer_1_result = checked_call_vm!(peer_1, <_>::default(), &script, "", result.data.clone());
-    let peer_2_result = checked_call_vm!(peer_2, <_>::default(), &script, "", result.data.clone());
+    let _result = executor.execute_one(set_variable_id).unwrap();
+    let _peer_1_result = executor.execute_one(peer_1_id).unwrap();
+    let _peer_2_result = executor.execute_one(peer_2_id).unwrap();
 
-    let join_1_result = checked_call_vm!(join_1, <_>::default(), &script, "", peer_1_result.data.clone());
-    let join_1_result = checked_call_vm!(
-        join_1,
-        <_>::default(),
-        &script,
-        join_1_result.data,
-        peer_2_result.data.clone()
-    ); // before 0.20.9 it fails here
+    let _join_1_result = executor.execute_one(join_1_id).unwrap();
+    let join_1_result = executor.execute_one(join_1_id).unwrap(); // before 0.20.9 it fails here
     let actual_trace = trace_from_result(&join_1_result);
     let expected_trace = vec![
         executed_state::scalar(json!([peer_1_id, peer_2_id])),
