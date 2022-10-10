@@ -16,8 +16,9 @@
 
 use air::UncatchableError;
 use air_test_utils::prelude::*;
+use air_trace_handler::merger::CallResultError;
+use air_trace_handler::merger::MergeError;
 use air_trace_handler::TraceHandlerError;
-use air_trace_handler::{CallResultError, MergeError};
 
 #[test]
 fn par_early_exit() {
@@ -32,7 +33,7 @@ fn par_early_exit() {
     let mut setter_3 = create_avm(fallible_call_service("error"), setter_3_id);
 
     let script = format!(
-        include_str!("scripts/par_early_exit.clj"),
+        include_str!("scripts/par_early_exit.air"),
         init_peer_id, setter_1_id, setter_2_id, setter_3_id
     );
 
@@ -114,9 +115,9 @@ fn par_early_exit() {
         executed_state::par(5, 1),
         executed_state::par(3, 1),
         executed_state::par(1, 1),
-        executed_state::stream_string("1", 0),
-        executed_state::stream_string("2", 0),
-        executed_state::stream_string("1", 0),
+        executed_state::stream_string("1", 1),
+        executed_state::stream_string("2", 2),
+        executed_state::stream_string("1", 1),
         executed_state::stream_string("success result from fallible_call_service", 0),
         executed_state::service_failed(1, "failed result from fallible_call_service"),
         executed_state::stream_string("success result from fallible_call_service", 0),
@@ -154,7 +155,7 @@ fn par_early_exit() {
         trace_error: TraceHandlerError::MergeError(MergeError::IncorrectCallResult(CallResultError::ValuesNotEqual {
             prev_value: Value::Stream {
                 value: rc!(json!("1")),
-                generation: 0,
+                generation: 1,
             },
             current_value: Value::Stream {
                 value: rc!(json!("non_exist_value")),
@@ -197,7 +198,7 @@ fn fold_early_exit() {
     let mut last_peer_checker = create_avm(echo_call_service(), last_peer_checker_id);
 
     let script = format!(
-        include_str!("scripts/fold_early_exit.clj"),
+        include_str!("scripts/fold_early_exit.air"),
         variables_setter_id,
         stream_setter_id,
         fold_executor_id,
@@ -227,57 +228,14 @@ fn fold_early_exit() {
     );
     let actual_trace = trace_from_result(&last_peer_checker_result);
 
-    let unit_call_service_result = "result from unit_call_service";
-    let expected_trace = vec![
-        executed_state::scalar_string_array(vec!["a1", "a2"]),
-        executed_state::scalar_string_array(vec!["b1", "b2"]),
-        executed_state::scalar_string_array(vec!["c1", "c2"]),
-        executed_state::scalar_string_array(vec!["d1", "d2"]),
-        executed_state::stream_string("a1", 0),
-        executed_state::stream_string("a2", 0),
-        executed_state::stream_string("b1", 0),
-        executed_state::stream_string("b2", 0),
-        executed_state::stream_string("c1", 0),
-        executed_state::stream_string("c2", 0),
-        executed_state::stream_string("d1", 0),
-        executed_state::stream_string("d2", 0),
-        executed_state::par(11, 1),
-        executed_state::fold(vec![executed_state::subtrace_lore(
-            4,
-            subtrace_desc(14, 9),
-            subtrace_desc(23, 0),
-        )]),
-        executed_state::fold(vec![executed_state::subtrace_lore(
-            6,
-            subtrace_desc(15, 8),
-            subtrace_desc(23, 0),
-        )]),
-        executed_state::fold(vec![
-            executed_state::subtrace_lore(8, subtrace_desc(16, 3), subtrace_desc(22, 0)),
-            executed_state::subtrace_lore(9, subtrace_desc(19, 3), subtrace_desc(22, 0)),
-        ]),
-        executed_state::fold(vec![
-            executed_state::subtrace_lore(10, subtrace_desc(17, 1), subtrace_desc(19, 0)),
-            executed_state::subtrace_lore(11, subtrace_desc(18, 1), subtrace_desc(19, 0)),
-        ]),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::fold(vec![
-            executed_state::subtrace_lore(10, subtrace_desc(20, 1), subtrace_desc(22, 0)),
-            executed_state::subtrace_lore(11, subtrace_desc(21, 1), subtrace_desc(22, 0)),
-        ]),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::service_failed(1, "failed result from fallible_call_service"),
-        executed_state::scalar(json!({
+    let expected_state = executed_state::scalar(json!({
                 "error_code": 10000i64,
                 "instruction" : r#"call "error_trigger_id" ("error" "") [] "#,
                 "message": r#"Local service error, ret_code is 1, error message is '"failed result from fallible_call_service"'"#,
-                "peer_id": "error_trigger_id"})),
-        executed_state::scalar_string("last_peer"),
-    ];
+                "peer_id": "error_trigger_id"}));
 
-    assert_eq!(actual_trace, expected_trace);
+    let xor_right_subgraph_state_id = actual_trace.len() - 2;
+    assert_eq!(&actual_trace[xor_right_subgraph_state_id.into()], &expected_state);
 }
 
 #[test]
@@ -307,7 +265,7 @@ fn fold_par_early_exit() {
     let mut last_peer_checker = create_avm(unit_call_service(), last_peer_checker_id);
 
     let script = format!(
-        include_str!("scripts/fold_par_early_exit.clj"),
+        include_str!("scripts/fold_par_early_exit.air"),
         variables_setter_id,
         stream_setter_id,
         fold_executor_id,
@@ -344,44 +302,44 @@ fn fold_par_early_exit() {
         executed_state::scalar_string_array(vec!["c1", "c2"]),
         executed_state::scalar_string_array(vec!["d1", "d2"]),
         executed_state::stream_string("a1", 0),
-        executed_state::stream_string("a2", 0),
+        executed_state::stream_string("a2", 1),
         executed_state::stream_string("b1", 0),
-        executed_state::stream_string("b2", 0),
+        executed_state::stream_string("b2", 1),
         executed_state::stream_string("c1", 0),
-        executed_state::stream_string("c2", 0),
+        executed_state::stream_string("c2", 1),
         executed_state::stream_string("d1", 0),
-        executed_state::stream_string("d2", 0),
+        executed_state::stream_string("d2", 1),
         executed_state::par(69, 1),
         executed_state::fold(vec![
-            executed_state::subtrace_lore(4, subtrace_desc(14, 34), subtrace_desc(82, 0)),
+            executed_state::subtrace_lore(4, subtrace_desc(14, 34), subtrace_desc(48, 0)),
             executed_state::subtrace_lore(5, subtrace_desc(48, 34), subtrace_desc(82, 0)),
         ]),
-        executed_state::par(33, 34),
+        executed_state::par(33, 0),
         executed_state::fold(vec![
-            executed_state::subtrace_lore(6, subtrace_desc(16, 16), subtrace_desc(48, 0)),
+            executed_state::subtrace_lore(6, subtrace_desc(16, 16), subtrace_desc(32, 0)),
             executed_state::subtrace_lore(7, subtrace_desc(32, 16), subtrace_desc(48, 0)),
         ]),
-        executed_state::par(15, 16),
+        executed_state::par(15, 0),
         executed_state::par(13, 1),
         executed_state::fold(vec![
-            executed_state::subtrace_lore(8, subtrace_desc(19, 6), subtrace_desc(31, 0)),
+            executed_state::subtrace_lore(8, subtrace_desc(19, 6), subtrace_desc(25, 0)),
             executed_state::subtrace_lore(9, subtrace_desc(25, 6), subtrace_desc(31, 0)),
         ]),
-        executed_state::par(5, 6),
+        executed_state::par(5, 0),
         executed_state::fold(vec![
-            executed_state::subtrace_lore(10, subtrace_desc(21, 2), subtrace_desc(25, 0)),
+            executed_state::subtrace_lore(10, subtrace_desc(21, 2), subtrace_desc(23, 0)),
             executed_state::subtrace_lore(11, subtrace_desc(23, 2), subtrace_desc(25, 0)),
         ]),
-        executed_state::par(1, 2),
+        executed_state::par(1, 0),
         executed_state::scalar_string(unit_call_service_result),
         executed_state::par(1, 0),
         executed_state::scalar_string(unit_call_service_result),
         executed_state::par(5, 0),
         executed_state::fold(vec![
-            executed_state::subtrace_lore(10, subtrace_desc(27, 2), subtrace_desc(31, 0)),
+            executed_state::subtrace_lore(10, subtrace_desc(27, 2), subtrace_desc(29, 0)),
             executed_state::subtrace_lore(11, subtrace_desc(29, 2), subtrace_desc(31, 0)),
         ]),
-        executed_state::par(1, 2),
+        executed_state::par(1, 0),
         executed_state::scalar_string(unit_call_service_result),
         executed_state::par(1, 0),
         executed_state::scalar_string(unit_call_service_result),
@@ -389,7 +347,7 @@ fn fold_par_early_exit() {
         executed_state::par(15, 0),
         executed_state::par(13, 1),
         executed_state::fold(vec![
-            executed_state::subtrace_lore(8, subtrace_desc(35, 6), subtrace_desc(47, 0)),
+            executed_state::subtrace_lore(8, subtrace_desc(35, 6), subtrace_desc(41, 0)),
             executed_state::subtrace_lore(9, subtrace_desc(41, 6), subtrace_desc(47, 0)),
         ]),
     ];

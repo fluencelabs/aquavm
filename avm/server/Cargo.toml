@@ -16,7 +16,7 @@ name = "avm_server"
 path = "src/lib.rs"
 
 [dependencies]
-air-interpreter-interface = { version = "0.11.1", path = "../../crates/air-lib/interpreter-interface" }
+air-interpreter-interface = { version = "0.11.2", path = "../../crates/air-lib/interpreter-interface" }
 air-utils = { version = "0.1.0", path = "../../crates/air-lib/utils" }
 avm-data-store = { version = "0.4.1", path = "../../crates/data-store" }
 marine-runtime = "0.23.0"

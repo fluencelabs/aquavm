@@ -30,7 +30,7 @@ use crate::SecurityTetraplet;
 use air_interpreter_data::CallResult;
 use air_interpreter_interface::CallRequestParams;
 use air_parser::ast;
-use air_trace_handler::MergerCallResult;
+use air_trace_handler::merger::MergerCallResult;
 use air_trace_handler::TraceHandler;
 use air_utils::measure;
 
@@ -91,7 +91,7 @@ impl<'i> ResolvedCall<'i> {
         // call can be executed only on peers with such peer_id
         let tetraplet = &self.tetraplet;
         if tetraplet.peer_pk.as_str() != exec_ctx.run_parameters.current_peer_id.as_str() {
-            set_remote_call_result(tetraplet.peer_pk.clone(), exec_ctx, trace_ctx);
+            handle_remote_call(tetraplet.peer_pk.clone(), exec_ctx, trace_ctx);
             return Ok(());
         }
 
@@ -156,19 +156,13 @@ impl<'i> ResolvedCall<'i> {
         exec_ctx: &mut ExecutionCtx<'i>,
         trace_ctx: &mut TraceHandler,
     ) -> ExecutionResult<StateDescriptor> {
-        let (call_result, trace_pos) = match trace_to_exec_err!(trace_ctx.meet_call_start(&self.output), raw_call)? {
-            MergerCallResult::CallResult { value, trace_pos } => (value, trace_pos),
-            MergerCallResult::Empty => return Ok(StateDescriptor::no_previous_state()),
-        };
-
-        handle_prev_state(
-            &self.tetraplet,
-            &self.output,
-            call_result,
-            trace_pos,
-            exec_ctx,
-            trace_ctx,
-        )
+        let prev_result = trace_ctx.meet_call_start();
+        match trace_to_exec_err!(prev_result, raw_call)? {
+            MergerCallResult::Met(call_result) => {
+                handle_prev_state(call_result, &self.tetraplet, &self.output, exec_ctx, trace_ctx)
+            }
+            MergerCallResult::NotMet => Ok(StateDescriptor::no_previous_state()),
+        }
     }
 
     /// Prepare arguments of this call instruction by resolving and preparing their security tetraplets.

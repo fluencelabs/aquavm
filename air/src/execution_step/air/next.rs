@@ -33,8 +33,26 @@ impl<'i> super::ExecutableInstruction<'i> for Next<'i> {
         let fold_state = exec_ctx.scalars.get_iterable_mut(iterator_name)?;
         maybe_meet_iteration_end(self, fold_state, trace_ctx)?;
 
+        // TODO: refactor a body of this if to reduce LOCs count and improve readability
         if !fold_state.iterable.next() {
             maybe_meet_back_iterator(self, fold_state, trace_ctx)?;
+
+            let fold_state = exec_ctx.scalars.get_iterable(iterator_name)?;
+            // execute last instruction if any
+            if let Some(last_instr) = &fold_state.last_instr_head {
+                let last_instr = last_instr.clone();
+                exec_ctx.subgraph_complete = true; // it's needed because of determine_subgraph_complete in par
+                last_instr.execute(exec_ctx, trace_ctx)?;
+            } else {
+                // if no last instruction, execute never as a fallback for fold over stream (it'll be removed in future)
+                let fold_state = exec_ctx.scalars.get_iterable_mut(iterator_name)?;
+                if !fold_state.back_iteration_started && matches!(fold_state.iterable_type, IterableType::Stream(_)) {
+                    // this set the last iteration of a next to not executed for fold over streams
+                    // for more info see https://github.com/fluencelabs/aquavm/issues/333
+                    exec_ctx.subgraph_complete = false;
+                    fold_state.back_iteration_started = true;
+                }
+            }
 
             // just do nothing to exit
             return Ok(());

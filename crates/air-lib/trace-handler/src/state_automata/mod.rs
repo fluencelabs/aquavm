@@ -31,13 +31,13 @@ pub(super) use fsm_queue::FSMKeeper;
 pub(super) use par_fsm::ParFSM;
 
 use super::data_keeper::KeeperError;
+use super::merger::MergeCtxType;
 use super::merger::MergerParResult;
 use super::DataKeeper;
 use super::ExecutedState;
 use super::FoldResult;
 use super::FoldSubTraceLore;
 use super::MergeCtx;
-use super::MergeCtxType;
 use super::MergerFoldResult;
 use super::ParResult;
 use super::ResolvedFold;

@@ -18,7 +18,6 @@ use super::*;
 use merger::*;
 
 use air_interpreter_data::InterpreterData;
-use air_parser::ast::CallOutputValue;
 
 #[derive(Debug, Default)]
 pub struct TraceHandler {
@@ -56,12 +55,40 @@ impl TraceHandler {
 
         (prev_len, current_len)
     }
+
+    pub fn update_generation(
+        &mut self,
+        trace_pos: TracePos,
+        generation: u32,
+    ) -> Result<(), GenerationCompatificationError> {
+        let state = self
+            .data_keeper
+            .result_trace
+            .get_mut(trace_pos)
+            .ok_or_else(|| GenerationCompatificationError::points_to_nowhere(trace_pos))?;
+
+        match state {
+            ExecutedState::Ap(ap_result) => ap_result.res_generations = vec![generation],
+            ExecutedState::Call(CallResult::Executed(Value::Stream {
+                generation: call_generation,
+                ..
+            })) => *call_generation = generation,
+            state => {
+                return Err(GenerationCompatificationError::points_to_invalid_state(
+                    trace_pos,
+                    state.clone(),
+                ))
+            }
+        }
+
+        Ok(())
+    }
 }
 
 impl TraceHandler {
     /// Should be called at the beginning of a call execution.
-    pub fn meet_call_start(&mut self, output_value: &CallOutputValue<'_>) -> TraceHandlerResult<MergerCallResult> {
-        try_merge_next_state_as_call(&mut self.data_keeper, output_value).map_err(Into::into)
+    pub fn meet_call_start(&mut self) -> TraceHandlerResult<MergerCallResult> {
+        try_merge_next_state_as_call(&mut self.data_keeper).map_err(Into::into)
     }
 
     /// Should be called when a call instruction was executed successfully. It adds the supplied

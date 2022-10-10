@@ -79,9 +79,9 @@ impl ExecutedState {
 }
 
 impl ApResult {
-    pub fn new(res_gens: Vec<u32>) -> Self {
+    pub fn new(res_generation: u32) -> Self {
         Self {
-            res_generations: res_gens,
+            res_generations: vec![res_generation],
         }
     }
 }

@@ -16,7 +16,8 @@
 
 use super::DataKeeper;
 
-pub(super) enum PreparationScheme {
+#[derive(Debug, Copy, Clone)]
+pub enum PreparationScheme {
     Previous,
     Current,
     Both,

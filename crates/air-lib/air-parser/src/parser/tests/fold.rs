@@ -272,10 +272,30 @@ fn parse_fold() {
         "#;
     let instruction = parse(&source_code);
     let expected = fold_scalar_variable(
-        ScalarWithLambda::new("iterable", None, 15),
-        Scalar::new("i", 24),
+        ScalarWithLambda::new("iterable", None, 15.into()),
+        Scalar::new("i", 24.into()),
         null(),
-        Span::new(9, 54),
+        None,
+        Span::new(9.into(), 54.into()),
+    );
+    assert_eq!(instruction, expected);
+}
+
+#[test]
+fn fold_with_scalar_and_last_instruction() {
+    let source_code = r#"
+        (fold iterable i
+            (null)
+            (null)
+        )
+        "#;
+    let instruction = parse(&source_code);
+    let expected = fold_scalar_variable(
+        ScalarWithLambda::new("iterable", None, 15.into()),
+        Scalar::new("i", 24.into()),
+        null(),
+        Some(null()),
+        Span::new(9.into(), 73.into()),
     );
     assert_eq!(instruction, expected);
 }
@@ -293,11 +313,12 @@ fn fold_json_path() {
         ScalarWithLambda::from_value_path(
             "members",
             vec![ValueAccessor::ArrayAccess { idx: 123321 }],
-            33,
+            33.into(),
         ),
-        Scalar::new("m", 52),
+        Scalar::new("m", 52.into()),
         null(),
-        Span::new(27, 61),
+        None,
+        Span::new(27.into(), 61.into()),
     );
     assert_eq!(instruction, expected);
 }
@@ -311,7 +332,12 @@ fn fold_empty_array_iterable() {
     "#;
 
     let instruction = parse(source_code);
-    let expected = fold_scalar_empty_array(Scalar::new("m", 18), null(), Span::new(9, 48));
+    let expected = fold_scalar_empty_array(
+        Scalar::new("m", 18.into()),
+        null(),
+        None,
+        Span::new(9.into(), 48.into()),
+    );
     assert_eq!(instruction, expected);
 }
 
@@ -323,10 +349,31 @@ fn fold_on_stream() {
 
     let instruction = parse(source_code);
     let expected = fold_stream(
-        Stream::new("$stream", 15),
-        Scalar::new("iterator", 23),
+        Stream::new("$stream", 15.into()),
+        Scalar::new("iterator", 23.into()),
         null(),
-        Span::new(9, 39),
+        None,
+        Span::new(9.into(), 39.into()),
+    );
+    assert_eq!(instruction, expected);
+}
+
+#[test]
+fn fold_on_stream_with_last_null() {
+    let source_code = r#"
+        (fold $stream iterator
+            (null)
+            (null)
+        )
+    "#;
+
+    let instruction = parse(source_code);
+    let expected = fold_stream(
+        Stream::new("$stream", 15.into()),
+        Scalar::new("iterator", 23.into()),
+        null(),
+        Some(null()),
+        Span::new(9.into(), 79.into()),
     );
     assert_eq!(instruction, expected);
 }
@@ -341,10 +388,11 @@ fn fold_on_canon_stream() {
 
     let instruction = parse(&source_code);
     let expected = fold_scalar_canon_stream(
-        CanonStream::new(canon_stream, 15),
-        Scalar::new(iterator, 29),
+        CanonStream::new(canon_stream, 15.into()),
+        Scalar::new(iterator, 29.into()),
         null(),
-        Span::new(9, 45),
+        None,
+        Span::new(9.into(), 45.into()),
     );
     assert_eq!(instruction, expected);
 }
@@ -366,11 +414,12 @@ fn comments() {
                 },
                 ValueAccessor::ArrayAccess { idx: 1 },
             ],
-            33,
+            33.into(),
         ),
-        Scalar::new("m", 52),
+        Scalar::new("m", 52.into()),
         null(),
-        Span::new(27, 61),
+        None,
+        Span::new(27.into(), 61.into()),
     );
     assert_eq!(instruction, expected);
 }
@@ -387,10 +436,11 @@ fn parse_fold_with_xor_par_seq() {
         let instruction = parse(&source_code);
         let instr = binary_instruction(*name);
         let expected = fold_scalar_variable(
-            ScalarWithLambda::new("iterable", None, 6),
-            Scalar::new("i", 15),
+            ScalarWithLambda::new("iterable", None, 6.into()),
+            Scalar::new("i", 15.into()),
             instr(null(), null()),
-            Span::new(0, 58),
+            None,
+            Span::new(0.into(), 58.into()),
         );
         assert_eq!(instruction, expected);
     }

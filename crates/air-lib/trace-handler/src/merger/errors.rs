@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-use super::call_merger::ValueType;
 use super::ApResult;
 use super::CallResult;
 use super::ExecutedState;
@@ -56,9 +55,9 @@ pub enum MergeError {
 
 #[derive(ThisError, Debug)]
 pub enum ApResultError {
-    /// Error occurred when Ap results contains more then 1 generation in destination.
-    #[error("{0:?} ap result contains too many generations in destination")]
-    TooManyDstGenerations(ApResult),
+    /// Error occurred when Ap results contains not 1 generation in destination.
+    #[error("{0:?} ap result contains inappropriate generation count in destination")]
+    InvalidDstGenerations(ApResult),
 }
 
 #[derive(ThisError, Debug)]
@@ -72,9 +71,6 @@ pub enum CallResultError {
         prev_call: CallResult,
         current_call: CallResult,
     },
-
-    #[error("air scripts has the following value type '{air_type}' while data other '{data_value:?}'")]
-    DataNotMatchAIR { air_type: String, data_value: Value },
 }
 
 #[derive(ThisError, Debug)]
@@ -153,14 +149,6 @@ impl CallResultError {
             prev_call,
             current_call,
         };
-
-        MergeError::IncorrectCallResult(call_result_error)
-    }
-
-    pub(crate) fn data_not_match(data_value: Value, air_type: ValueType<'_>) -> MergeError {
-        let air_type = air_type.to_string();
-
-        let call_result_error = CallResultError::DataNotMatchAIR { air_type, data_value };
 
         MergeError::IncorrectCallResult(call_result_error)
     }

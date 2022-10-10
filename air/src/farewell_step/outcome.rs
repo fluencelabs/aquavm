@@ -17,6 +17,7 @@
 use super::FarewellError;
 use crate::execution_step::ExecutionCtx;
 use crate::execution_step::TraceHandler;
+use crate::ExecutionError;
 use crate::InterpreterOutcome;
 use crate::ToErrorCode;
 use crate::INTERPRETER_SUCCESS;
@@ -81,11 +82,19 @@ pub(crate) fn from_execution_error(
 #[tracing::instrument(skip(exec_ctx, trace_handler), level = "info")]
 fn populate_outcome_from_contexts(
     exec_ctx: ExecutionCtx<'_>,
-    trace_handler: TraceHandler,
+    mut trace_handler: TraceHandler,
     ret_code: i64,
     error_message: String,
 ) -> InterpreterOutcome {
-    let (global_streams, restricted_streams) = exec_ctx.streams.into_streams_data();
+    let maybe_gens = exec_ctx
+        .streams
+        .into_streams_data(&mut trace_handler)
+        .map_err(execution_error_into_outcome);
+    let (global_streams, restricted_streams) = match maybe_gens {
+        Ok(gens) => gens,
+        Err(outcome) => return outcome,
+    };
+
     let data = InterpreterData::from_execution_result(
         trace_handler.into_result_trace(),
         global_streams,
@@ -104,13 +113,13 @@ fn populate_outcome_from_contexts(
         "serde_json::to_vec(call_results)",
     );
 
-    InterpreterOutcome {
-        ret_code,
-        error_message,
-        data,
-        next_peer_pks,
-        call_requests,
-    }
+    InterpreterOutcome::new(ret_code, error_message, data, next_peer_pks, call_requests)
+}
+
+// this method is called only if there is an internal error in the interpreter and
+// new execution trace was corrupted
+fn execution_error_into_outcome(error: ExecutionError) -> InterpreterOutcome {
+    InterpreterOutcome::new(error.to_error_code(), error.to_string(), vec![], vec![], vec![])
 }
 
 /// Deduplicate values in a supplied vector.

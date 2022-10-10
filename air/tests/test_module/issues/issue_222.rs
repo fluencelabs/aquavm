@@ -15,8 +15,9 @@
  */
 
 use air_test_utils::prelude::*;
-
 use pretty_assertions::assert_eq;
+
+use std::ops::Deref;
 
 #[test]
 // test for github.com/fluencelabs/aquavm/issues/222
@@ -67,15 +68,15 @@ fn issue_222() {
     let expected_trace = vec![
         executed_state::par(3, 3),
         executed_state::par(1, 1),
-        executed_state::stream(json!([1]), 0),
+        executed_state::stream(json!([1]), 1),
         executed_state::stream(json!([2]), 0),
         executed_state::fold(vec![
-            executed_state::subtrace_lore(2, SubTraceDesc::new(5.into(), 1), SubTraceDesc::new(7.into(), 0)),
-            executed_state::subtrace_lore(3, SubTraceDesc::new(6.into(), 1), SubTraceDesc::new(7.into(), 0)),
+            executed_state::subtrace_lore(3, SubTraceDesc::new(5.into(), 1), SubTraceDesc::new(6.into(), 0)),
+            executed_state::subtrace_lore(2, SubTraceDesc::new(6.into(), 1), SubTraceDesc::new(7.into(), 0)),
         ]),
-        executed_state::scalar(json!([1])),
         executed_state::scalar(json!([2])),
+        executed_state::scalar(json!([1])),
     ];
 
-    assert_eq!(actual_trace, expected_trace);
+    assert_eq!(actual_trace.deref(), expected_trace);
 }

@@ -16,7 +16,10 @@
 
 use air_test_utils::prelude::*;
 
+use pretty_assertions::assert_eq;
+
 use std::collections::HashMap;
+use std::ops::Deref;
 
 #[test]
 fn merge_streams_in_two_fold() {
@@ -130,7 +133,7 @@ fn merge_streams_in_two_fold() {
         request_sent_by(vm_1_peer_id),
     ];
 
-    assert_eq!(actual_trace_3, expected_trace_3);
+    assert_eq!(actual_trace_3.deref(), expected_trace_3);
     assert!(result_3.next_peer_pks.is_empty());
 
     let actual_trace_4 = trace_from_result(&result_4);
@@ -206,7 +209,7 @@ fn fold_merge() {
     );
 
     let script = format!(
-        include_str!("./scripts/inner_folds_v1.clj"),
+        include_str!("./scripts/inner_folds_v1.air"),
         set_variable_vm_id, local_vm_id
     );
 
@@ -287,8 +290,8 @@ fn fold_merge() {
         .get("$stream_2")
         .expect("$stream_2 should be present in data");
 
-    assert_eq!(*stream_1_generations, 4);
-    assert_eq!(*stream_2_generations, 3);
+    assert_eq!(*stream_1_generations, 8);
+    assert_eq!(*stream_2_generations, 6);
 
     let mut fold_states_count = 0;
     let mut calls_count = HashMap::new();

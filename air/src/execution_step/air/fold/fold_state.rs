@@ -22,7 +22,10 @@ use std::rc::Rc;
 pub(crate) struct FoldState<'i> {
     pub(crate) iterable: IterableValue,
     pub(crate) iterable_type: IterableType,
+    // true of iterator exhausted and reverse execution started
+    pub(crate) back_iteration_started: bool,
     pub(crate) instr_head: Rc<Instruction<'i>>,
+    pub(crate) last_instr_head: Option<Rc<Instruction<'i>>>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -36,11 +39,14 @@ impl<'i> FoldState<'i> {
         iterable: IterableValue,
         iterable_type: IterableType,
         instr_head: Rc<Instruction<'i>>,
+        last_instr_head: Option<Rc<Instruction<'i>>>,
     ) -> Self {
         Self {
             iterable,
             iterable_type,
+            back_iteration_started: false,
             instr_head,
+            last_instr_head,
         }
     }
 }

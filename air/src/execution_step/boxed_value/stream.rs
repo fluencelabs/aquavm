@@ -17,9 +17,13 @@
 use super::ExecutionResult;
 use super::ValueAggregate;
 use crate::execution_step::CatchableError;
+use crate::ExecutionError;
 use crate::JValue;
+use crate::UncatchableError;
 
 use air_interpreter_data::TracePos;
+use air_trace_handler::merger::ValueSource;
+use air_trace_handler::TraceHandler;
 
 use std::collections::HashMap;
 use std::fmt::Formatter;
@@ -34,35 +38,54 @@ pub struct Stream {
     /// obtained values from a current_data that were not present in prev_data becomes a new generation.
     values: Vec<Vec<ValueAggregate>>,
 
+    /// Count of values from previous data.
+    previous_gens_count: usize,
+
     /// This map is intended to support canonicalized stream creation, such streams has
     /// corresponding value positions in a data and this field are used to create such streams.
     values_by_pos: HashMap<TracePos, StreamValueLocation>,
 }
 
 impl Stream {
-    pub(crate) fn from_generations_count(count: usize) -> Self {
+    pub(crate) fn from_generations_count(previous_count: usize, current_count: usize) -> Self {
+        let last_generation_count = 1;
+        // TODO: bubble up an overflow error instead of expect
+        let overall_count = previous_count
+            .checked_add(current_count)
+            .and_then(|value| value.checked_add(last_generation_count))
+            .expect("it shouldn't overflow");
         Self {
-            values: vec![vec![]; count + 1],
+            values: vec![vec![]; overall_count],
+            previous_gens_count: previous_count,
             values_by_pos: HashMap::new(),
         }
     }
 
+    // streams created with this ctor assumed to have only one generation,
+    // for streams that have values in
     pub(crate) fn from_value(value: ValueAggregate) -> Self {
         let values_by_pos = maplit::hashmap! {
             value.trace_pos => StreamValueLocation::new(0, 0),
         };
         Self {
             values: vec![vec![value]],
+            previous_gens_count: 0,
             values_by_pos,
         }
     }
 
     // if generation is None, value would be added to the last generation, otherwise it would
     // be added to given generation
-    pub(crate) fn add_value(&mut self, value: ValueAggregate, generation: Generation) -> ExecutionResult<u32> {
-        let generation = match generation {
-            Generation::Last => self.values.len() - 1,
-            Generation::Nth(id) => id as usize,
+    pub(crate) fn add_value(
+        &mut self,
+        value: ValueAggregate,
+        generation: Generation,
+        source: ValueSource,
+    ) -> ExecutionResult<u32> {
+        let generation = match (generation, source) {
+            (Generation::Last, _) => self.values.len() - 1,
+            (Generation::Nth(previous_gen), ValueSource::PreviousData) => previous_gen as usize,
+            (Generation::Nth(current_gen), ValueSource::CurrentData) => self.previous_gens_count + current_gen as usize,
         };
 
         if generation >= self.values.len() {
@@ -182,21 +205,32 @@ impl Stream {
 
         Some(iter)
     }
+
+    /// Removes empty generations updating data and returns final generation count.
+    pub(crate) fn compactify(mut self, trace_ctx: &mut TraceHandler) -> ExecutionResult<usize> {
+        self.remove_empty_generations();
+
+        for (generation, values) in self.values.iter().enumerate() {
+            for value in values.iter() {
+                trace_ctx
+                    .update_generation(value.trace_pos, generation as u32)
+                    .map_err(|e| ExecutionError::Uncatchable(UncatchableError::GenerationCompatificationError(e)))?;
+            }
+        }
+
+        Ok(self.values.len())
+    }
+
+    /// Removes empty generations from current values.
+    fn remove_empty_generations(&mut self) {
+        self.values.retain(|values| !values.is_empty());
+    }
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum Generation {
     Last,
     Nth(u32),
-}
-
-impl Generation {
-    pub(crate) fn from_option(raw_generation: Option<u32>) -> Self {
-        match raw_generation {
-            Some(generation) => Generation::Nth(generation),
-            None => Generation::Last,
-        }
-    }
 }
 
 pub(crate) struct StreamIter<'result> {
@@ -285,16 +319,21 @@ mod test {
 
     use serde_json::json;
 
+    use air_trace_handler::merger::ValueSource;
     use std::rc::Rc;
 
     #[test]
     fn test_slice_iter() {
         let value_1 = ValueAggregate::new(Rc::new(json!("value")), <_>::default(), 1.into());
         let value_2 = ValueAggregate::new(Rc::new(json!("value")), <_>::default(), 1.into());
-        let mut stream = Stream::from_generations_count(2);
+        let mut stream = Stream::from_generations_count(2, 0);
 
-        stream.add_value(value_1, Generation::Nth(0)).unwrap();
-        stream.add_value(value_2, Generation::Nth(1)).unwrap();
+        stream
+            .add_value(value_1, Generation::Nth(0), ValueSource::PreviousData)
+            .unwrap();
+        stream
+            .add_value(value_2, Generation::Nth(1), ValueSource::PreviousData)
+            .unwrap();
 
         let slice = stream.slice_iter(Generation::Nth(0), Generation::Nth(1)).unwrap();
         assert_eq!(slice.len, 2);
@@ -311,7 +350,7 @@ mod test {
 
     #[test]
     fn test_slice_on_empty_stream() {
-        let stream = Stream::from_generations_count(2);
+        let stream = Stream::from_generations_count(2, 0);
 
         let slice = stream.slice_iter(Generation::Nth(0), Generation::Nth(1));
         assert!(slice.is_none());
@@ -324,5 +363,29 @@ mod test {
 
         let slice = stream.slice_iter(Generation::Last, Generation::Last);
         assert!(slice.is_none());
+    }
+
+    #[test]
+    fn generation_from_current_data() {
+        let value_1 = ValueAggregate::new(Rc::new(json!("value_1")), <_>::default(), 1.into());
+        let value_2 = ValueAggregate::new(Rc::new(json!("value_2")), <_>::default(), 2.into());
+        let mut stream = Stream::from_generations_count(5, 5);
+
+        stream
+            .add_value(value_1.clone(), Generation::Nth(2), ValueSource::CurrentData)
+            .unwrap();
+        stream
+            .add_value(value_2.clone(), Generation::Nth(4), ValueSource::PreviousData)
+            .unwrap();
+
+        let generations_count = stream.generations_count();
+        assert_eq!(generations_count, 2);
+
+        let mut iter = stream.iter(Generation::Last).unwrap();
+        let stream_value_1 = iter.next().unwrap();
+        let stream_value_2 = iter.next().unwrap();
+
+        assert_eq!(stream_value_1, &value_2);
+        assert_eq!(stream_value_2, &value_1);
     }
 }

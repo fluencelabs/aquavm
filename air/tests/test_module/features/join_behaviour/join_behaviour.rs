@@ -248,7 +248,7 @@ fn fold_with_join_behaviour() {
 }
 
 #[test]
-fn canon_with_join_behaviour() {
+fn canon_with_empty_behaviour() {
     let peer_1_id = "peer_1_id";
     let peer_2_id = "peer_2_id";
 
@@ -262,7 +262,11 @@ fn canon_with_join_behaviour() {
 
     let result = checked_call_vm!(peer_2, <_>::default(), script, "", "");
     let actual_trace = trace_from_result(&result);
-    let expected_trace = vec![executed_state::par(1, 0), executed_state::request_sent_by(peer_2_id)];
+    let expected_trace = vec![
+        executed_state::par(1, 1),
+        executed_state::request_sent_by(peer_2_id),
+        executed_state::canon(vec![]),
+    ];
 
     assert_eq!(actual_trace, expected_trace);
 }
