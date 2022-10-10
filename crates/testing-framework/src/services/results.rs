@@ -100,11 +100,19 @@ fn seq_error_closure(call_map: HashMap<String, CallServiceResult>) -> CallServic
 
 fn map_service_closure(map: HashMap<String, serde_json::Value>) -> CallServiceClosure {
     Box::new(move |args| {
-        let repr = match &args.arguments[0] {
+        let key = args
+            .arguments
+            .get(0)
+            .expect("At least one arugment expected");
+        // Strings are looked up by value, other objects -- by string representation.
+        //
+        // For example, `"key"` is looked up as `"key"`, `5` is looked up as `"5"`, `["test"]` is looked up
+        // as `"[\"test\"]"`.
+        let key_repr = match key {
             serde_json::Value::String(s) => Cow::Borrowed(s.as_str()),
             val => Cow::Owned(val.to_string()),
         };
-        CallServiceResult::ok(json!(map.get(repr.as_ref()).cloned()))
+        CallServiceResult::ok(json!(map.get(key_repr.as_ref()).cloned()))
     })
 }
 

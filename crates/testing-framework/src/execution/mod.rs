@@ -381,6 +381,21 @@ mod tests {
     }
 
     #[test]
+    #[should_panic]
+    fn test_map_no_arg() {
+        let exec = TestExecutor::new(
+            TestRunParameters::from_init_peer_id("peer1"),
+            vec![],
+            IntoIterator::into_iter(["peer2", "peer3"]).map(Into::into),
+            r#"
+(call "peer1" ("" "") [] p) ; map = {"any": "key"}
+"#,
+        )
+        .unwrap();
+        let _result_init: Vec<_> = exec.execution_iter("peer1").unwrap().collect();
+    }
+
+    #[test]
     fn test_seq_error() {
         let exec = TestExecutor::new(
             TestRunParameters::from_init_peer_id("init_peer_id"),
