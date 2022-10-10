@@ -14,33 +14,35 @@
  * limitations under the License.
  */
 
-use air_test_framework::TestExecutor;
 use air_test_utils::prelude::*;
 
 #[test]
 fn issue_999() {
     let client_peer_id = "client";
-    let mut client_vm = create_avm(set_variable_call_service(json!([["p1",[[["p1",1],["p3",3]],[["p1",4],["p3",5]]]],["p3",[[["p3",13],["p1",14]],[["p3",16],["p1",18]]]]])), client_peer_id);
+    let mut client_vm = create_avm(
+        set_variable_call_service(json!([
+            ["p1", [[["p1", 1], ["p2", 3]], [["p1", 4], ["p2", 5]]]],
+            ["p2", [[["p2", 13], ["p1", 14]], [["p2", 16], ["p1", 18]]]]
+        ])),
+        client_peer_id,
+    );
 
-    let relay_peer_id = "relay";
-    let mut relay_vm = create_avm(echo_call_service(), relay_peer_id);
-
-    let p1 = "p1";
-    let mut p1_vm = create_avm(set_variable_call_service(json!("p1")), p1);
-    let p3 = "p3";
-    let mut p3_vm = create_avm(set_variable_call_service(json!("p3")), p3);
+    let p1_peer_id = "p1";
+    let mut p1_vm = create_avm(set_variable_call_service(json!("p1")), p1_peer_id);
+    let p2_peer_id = "p2";
+    let mut p2_vm = create_avm(set_variable_call_service(json!("p2")), p2_peer_id);
 
     let script = r#"
         (seq
             (seq
-                (call "client" ("get" "data") [] permutations) ; ok = [["p1",[[["p1",1],["p2",2],["p3",3]],[["p1",4],["p3",5],["p2",6]]]],["p2",[[["p2",7],["p1",8],["p3",9]],[["p2",10],["p3",11],["p1",12]]]],["p3",[[["p3",13],["p1",14],["p2",15]],[["p3",16],["p2",17],["p1",18]]]]]
+                (call "client" ("get" "data") [] permutations)
                 (seq
                     (fold permutations pair
                         (seq
                             (fold pair.$.[1] peer_ids
                                 (seq
                                     (seq
-                                        (call pair.$.[0] ("op" "noop") []) ; ok = null
+                                        (call pair.$.[0] ("op" "noop") [])
                                         (ap peer_ids $inner)
                                     )
                                     (next peer_ids)
@@ -56,7 +58,7 @@ fn issue_999() {
                                 (fold ns pair
                                     (seq
                                         (seq
-                                            (call pair.$.[0] ("op" "noop") []) ; ok = null
+                                            (call pair.$.[0] ("op" "noop") [])
                                             (ap pair.$.[1] $result)
                                         )
                                         (next pair)
@@ -72,15 +74,13 @@ fn issue_999() {
         "#;
 
     let client_result = checked_call_vm!(client_vm, <_>::default(), script, "", "");
-
     let p1_result_1 = checked_call_vm!(p1_vm, <_>::default(), script, "", client_result.data.clone());
+    let p2_result_1 = checked_call_vm!(p2_vm, <_>::default(), script, "", p1_result_1.data.clone());
 
-    let p3_result_1 = checked_call_vm!(p3_vm, <_>::default(), script, "", p1_result_1.data.clone());
-    let p3_trace_1 = trace_from_result(&p3_result_1);
-
-
-    let fold_p3 = p3_trace_1.get(TracePos::from(9)).unwrap();
-    if let ExecutedState::Fold(fold) = fold_p3 {
+    let p2_trace_1 = trace_from_result(&p2_result_1);
+    let fold_position = TracePos::from(9);
+    let fold_p2 = p2_trace_1.get(fold_position).unwrap();
+    if let ExecutedState::Fold(fold) = fold_p2 {
         assert_eq!(fold.lore.len(), 4);
         assert_eq!(fold.lore[0].subtraces_desc[0].subtrace_len, 2);
         assert_eq!(fold.lore[1].subtraces_desc[0].subtrace_len, 2);
@@ -90,9 +90,15 @@ fn issue_999() {
         panic!("expected fold at pos 9")
     }
 
-    let p1_result_2 = checked_call_vm!(p1_vm, <_>::default(), script, p1_result_1.data.clone(), p3_result_1.data.clone());
+    let p1_result_2 = checked_call_vm!(
+        p1_vm,
+        <_>::default(),
+        script,
+        p1_result_1.data.clone(),
+        p2_result_1.data.clone()
+    );
     let p1_trace_2 = trace_from_result(&p1_result_2);
-    let fold_p1 = p1_trace_2.get(TracePos::from(9)).unwrap();
+    let fold_p1 = p1_trace_2.get(fold_position).unwrap();
     if let ExecutedState::Fold(fold) = fold_p1 {
         assert_eq!(fold.lore.len(), 4);
         assert_eq!(fold.lore[0].subtraces_desc[0].subtrace_len, 4);
