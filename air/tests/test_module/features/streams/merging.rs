@@ -87,8 +87,8 @@ fn merging_fold_iterations_extensively() {
         vec![],
         vec!["relay", "p1", "p2", "p3"].into_iter().map(Into::into),
         &script,
-    ).unwrap();
-
+    )
+    .unwrap();
 
     let mut queue = std::collections::vec_deque::VecDeque::new();
     let mut relay_outcomes = Vec::<RawAVMOutcome>::new();
@@ -116,11 +116,9 @@ fn merging_fold_iterations_extensively() {
     let last_relay_trace = trace_from_result(last_relay_data);
     let last_fold = last_relay_trace
         .iter()
-        .filter_map(|state| {
-            match state {
-                ExecutedState::Fold(fold_result) => Some(fold_result),
-                _ => None
-            }
+        .filter_map(|state| match state {
+            ExecutedState::Fold(fold_result) => Some(fold_result),
+            _ => None,
         })
         .last()
         .unwrap();
