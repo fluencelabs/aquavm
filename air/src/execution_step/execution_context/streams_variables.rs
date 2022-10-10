@@ -83,7 +83,7 @@ impl Streams {
     }
 
     pub(crate) fn add_stream_value(&mut self, value_descriptor: StreamValueDescriptor<'_>) -> ExecutionResult<u32> {
-        //println!("add_stream_value: {:?} ", value_descriptor);
+        println!("  add_stream_value: {:?} ", value_descriptor);
 
         let StreamValueDescriptor {
             value,

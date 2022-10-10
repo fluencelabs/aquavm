@@ -82,7 +82,6 @@ impl Stream {
         generation: Generation,
         source: ValueSource,
     ) -> ExecutionResult<u32> {
-        //println!("add value {:?} {:?} {}", generation, source, self.previous_gens_count);
         let generation = match (generation, source) {
             (Generation::Last, _) => self.values.len() - 1,
             (Generation::Nth(previous_gen), ValueSource::PreviousData) => previous_gen as usize,
@@ -97,6 +96,7 @@ impl Stream {
         self.values_by_pos
             .insert(value.trace_pos, StreamValueLocation::new(generation, values.len()));
         values.push(value);
+        println!("  value added: {:?}", self.values);
         Ok(generation as u32)
     }
 

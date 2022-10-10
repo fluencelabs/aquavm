@@ -94,6 +94,7 @@ fn execute_iterations<'i>(
             // flow could contain zero values
             None => continue,
         };
+        println!("> fold stream: {:?}", value);
 
         let value_pos = value.pos();
         trace_to_exec_err!(trace_ctx.meet_iteration_start(fold_id, value_pos), fold_stream)?;
