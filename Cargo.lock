@@ -13,7 +13,7 @@ dependencies = [
 
 [[package]]
 name = "air"
-version = "0.30.0"
+version = "0.31.0"
 dependencies = [
  "air-execution-info-collector",
  "air-interpreter-data",
@@ -75,7 +75,7 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter"
-version = "0.30.0"
+version = "0.31.0"
 dependencies = [
  "air",
  "air-interpreter-interface",
@@ -91,7 +91,7 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter-data"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "air-parser",
  "air-utils",
