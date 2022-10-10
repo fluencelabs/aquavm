@@ -128,7 +128,7 @@ pub struct ApResult {
 #[derive(Debug, Default, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct CanonResult {
-    pub canonicalized_element: Vec<u8>,
+    pub canonicalized_element: JValue,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

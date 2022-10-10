@@ -87,7 +87,7 @@ impl ApResult {
 }
 
 impl CanonResult {
-    pub fn new(canonicalized_element: Vec<u8>) -> Self {
+    pub fn new(canonicalized_element: JValue) -> Self {
         Self {
             canonicalized_element,
         }

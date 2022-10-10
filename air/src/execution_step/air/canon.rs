@@ -22,6 +22,7 @@ use crate::execution_step::Stream;
 use crate::log_instruction;
 use crate::trace_to_exec_err;
 use crate::ExecutionError;
+use crate::JValue;
 use crate::UncatchableError;
 
 use air_interpreter_data::CanonResult;
@@ -47,11 +48,11 @@ impl<'i> super::ExecutableInstruction<'i> for ast::Canon<'i> {
 
 fn handle_seen_canon(
     ast_canon: &ast::Canon<'_>,
-    se_canon_stream: Vec<u8>,
+    se_canon_stream: JValue,
     exec_ctx: &mut ExecutionCtx<'_>,
     trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<()> {
-    let canon_stream = serde_json::from_slice(&se_canon_stream).map_err(|de_error| {
+    let canon_stream = serde_json::from_value(se_canon_stream.clone()).map_err(|de_error| {
         ExecutionError::Uncatchable(UncatchableError::InvalidCanonStreamInData {
             canonicalized_stream: se_canon_stream.clone(),
             de_error,
@@ -109,7 +110,7 @@ fn epilog(
 
 struct StreamWithSerializedView {
     canon_stream: CanonStream,
-    se_canon_stream: Vec<u8>,
+    se_canon_stream: JValue,
 }
 
 fn create_canon_stream_from_name(
@@ -120,7 +121,7 @@ fn create_canon_stream_from_name(
     let stream = get_stream_or_default(ast_canon, exec_ctx);
 
     let canon_stream = CanonStream::from_stream(stream.as_ref(), peer_id);
-    let se_canon_stream = serde_json::to_vec(&canon_stream).expect("default serialized shouldn't fail");
+    let se_canon_stream = serde_json::to_value(&canon_stream).expect("default serialized shouldn't fail");
 
     let result = StreamWithSerializedView {
         canon_stream,

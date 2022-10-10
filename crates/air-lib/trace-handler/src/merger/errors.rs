@@ -75,12 +75,6 @@ pub enum CallResultError {
 
 #[derive(ThisError, Debug)]
 pub enum CanonResultError {
-    #[error("canon results have different length: {prev_canon_result:?} != {current_canon_result:?}")]
-    LensNotEqual {
-        prev_canon_result: CanonResult,
-        current_canon_result: CanonResult,
-    },
-
     #[error("canon results {prev_canon_result:?} {current_canon_result:?} points to incompatible execution states")]
     IncompatibleState {
         prev_canon_result: CanonResult,
@@ -146,13 +140,6 @@ impl CallResultError {
 }
 
 impl CanonResultError {
-    pub(crate) fn different_lens(prev_canon_result: CanonResult, current_canon_result: CanonResult) -> Self {
-        Self::LensNotEqual {
-            prev_canon_result,
-            current_canon_result,
-        }
-    }
-
     pub(crate) fn incompatible_state(prev_canon_result: CanonResult, current_canon_result: CanonResult) -> Self {
         Self::IncompatibleState {
             prev_canon_result,

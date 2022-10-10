@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use crate::JValue;
 use crate::ToErrorCode;
 
 use air_interpreter_data::TracePos;
@@ -86,7 +87,7 @@ pub enum UncatchableError {
 
     #[error("can't deserialize stream {canonicalized_stream:?} with error: {de_error}")]
     InvalidCanonStreamInData {
-        canonicalized_stream: Vec<u8>,
+        canonicalized_stream: JValue,
         de_error: serde_json::Error,
     },
 }
