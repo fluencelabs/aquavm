@@ -81,19 +81,10 @@ pub enum CanonResultError {
         current_canon_result: CanonResult,
     },
 
-    #[error("canon results {prev_canon_result:?} {current_canon_result:?} at position {position} points to incompatible execution states: {prev_state:?} {current_state:?}")]
+    #[error("canon results {prev_canon_result:?} {current_canon_result:?} points to incompatible execution states")]
     IncompatibleState {
         prev_canon_result: CanonResult,
         current_canon_result: CanonResult,
-        prev_state: Option<ExecutedState>,
-        current_state: Option<ExecutedState>,
-        position: usize,
-    },
-
-    #[error("position {position} from canon result {canon_result:?} hasn't been met yet")]
-    NotMetPosition {
-        canon_result: CanonResult,
-        position: TracePos,
     },
 }
 
@@ -162,24 +153,11 @@ impl CanonResultError {
         }
     }
 
-    pub(crate) fn incompatible_state(
-        prev_canon_result: CanonResult,
-        current_canon_result: CanonResult,
-        prev_state: Option<ExecutedState>,
-        current_state: Option<ExecutedState>,
-        position: usize,
-    ) -> Self {
+    pub(crate) fn incompatible_state(prev_canon_result: CanonResult, current_canon_result: CanonResult) -> Self {
         Self::IncompatibleState {
             prev_canon_result,
             current_canon_result,
-            prev_state,
-            current_state,
-            position,
         }
-    }
-
-    pub(crate) fn not_met_position(canon_result: CanonResult, position: TracePos) -> Self {
-        Self::NotMetPosition { canon_result, position }
     }
 }
 

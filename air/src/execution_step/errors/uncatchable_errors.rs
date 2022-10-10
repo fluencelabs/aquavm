@@ -83,6 +83,12 @@ pub enum UncatchableError {
     /// as a hard error.
     #[error("variable with position '{0}' wasn't defined during script execution")]
     VariableNotFoundByPos(TracePos),
+
+    #[error("can't deserialize stream {canonicalized_stream:?} with error: {de_error}")]
+    InvalidCanonStreamInData {
+        canonicalized_stream: Vec<u8>,
+        de_error: serde_json::Error,
+    },
 }
 
 impl ToErrorCode for UncatchableError {

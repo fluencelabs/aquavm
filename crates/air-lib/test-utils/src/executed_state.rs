@@ -137,7 +137,7 @@ pub fn ap(generation: u32) -> ExecutedState {
     ExecutedState::Ap(ap_result)
 }
 
-pub fn canon(stream_elements_pos: Vec<TracePos>) -> ExecutedState {
-    let canon_result = CanonResult::new(stream_elements_pos);
+pub fn canon(canonicalized_element: Vec<u8>) -> ExecutedState {
+    let canon_result = CanonResult::new(canonicalized_element);
     ExecutedState::Canon(canon_result)
 }

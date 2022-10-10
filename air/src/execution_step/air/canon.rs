@@ -18,7 +18,6 @@ use super::ExecutionCtx;
 use super::ExecutionResult;
 use super::TraceHandler;
 use crate::execution_step::boxed_value::CanonStream;
-use crate::execution_step::Generation;
 use crate::execution_step::Stream;
 use crate::log_instruction;
 use crate::trace_to_exec_err;
@@ -26,7 +25,6 @@ use crate::ExecutionError;
 use crate::UncatchableError;
 
 use air_interpreter_data::CanonResult;
-use air_interpreter_data::TracePos;
 use air_parser::ast;
 use air_trace_handler::merger::MergerCanonResult;
 
@@ -39,8 +37,8 @@ impl<'i> super::ExecutableInstruction<'i> for ast::Canon<'i> {
         let canon_result = trace_to_exec_err!(trace_ctx.meet_canon_start(), self)?;
 
         match canon_result {
-            MergerCanonResult::CanonResult { stream_elements_pos } => {
-                handle_seen_canon(self, stream_elements_pos, exec_ctx, trace_ctx)
+            MergerCanonResult::CanonResult { canonicalized_element } => {
+                handle_seen_canon(self, canonicalized_element, exec_ctx, trace_ctx)
             }
             MergerCanonResult::Empty => handle_unseen_canon(self, exec_ctx, trace_ctx),
         }
@@ -49,17 +47,22 @@ impl<'i> super::ExecutableInstruction<'i> for ast::Canon<'i> {
 
 fn handle_seen_canon(
     ast_canon: &ast::Canon<'_>,
-    stream_elements_pos: Vec<TracePos>,
+    se_canon_stream: Vec<u8>,
     exec_ctx: &mut ExecutionCtx<'_>,
     trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<()> {
-    let canon_stream = create_canon_stream_from_pos(&stream_elements_pos, ast_canon, exec_ctx)?;
-    let stream_with_positions = StreamWithPositions {
+    let canon_stream = serde_json::from_slice(&se_canon_stream).map_err(|de_error| {
+        ExecutionError::Uncatchable(UncatchableError::InvalidCanonStreamInData {
+            canonicalized_stream: se_canon_stream.clone(),
+            de_error,
+        })
+    })?;
+    let canon_stream_with_se = StreamWithSerializedView {
         canon_stream,
-        stream_elements_pos,
+        se_canon_stream,
     };
 
-    epilog(ast_canon.canon_stream.name, stream_with_positions, exec_ctx, trace_ctx)
+    epilog(ast_canon.canon_stream.name, canon_stream_with_se, exec_ctx, trace_ctx)
 }
 
 fn handle_unseen_canon(
@@ -85,72 +88,43 @@ fn handle_unseen_canon(
     epilog(ast_canon.canon_stream.name, stream_with_positions, exec_ctx, trace_ctx)
 }
 
-fn create_canon_stream_from_pos(
-    stream_elements_pos: &[TracePos],
-    ast_canon: &ast::Canon<'_>,
-    exec_ctx: &ExecutionCtx<'_>,
-) -> ExecutionResult<CanonStream> {
-    let stream = get_stream_or_default(ast_canon, exec_ctx);
-
-    let values = stream_elements_pos
-        .iter()
-        .map(|&position| {
-            stream
-                .get_value_by_pos(position)
-                .ok_or(ExecutionError::Uncatchable(UncatchableError::VariableNotFoundByPos(
-                    position,
-                )))
-                .cloned()
-        })
-        .collect::<Result<Vec<_>, _>>()?;
-
-    let peer_id = crate::execution_step::air::resolve_to_string(&ast_canon.peer_pk, exec_ctx)?;
-    let canon_stream = CanonStream::new(values, peer_id);
-    Ok(canon_stream)
-}
-
 fn epilog(
     canon_stream_name: &str,
-    stream_with_positions: StreamWithPositions,
+    stream_with_positions: StreamWithSerializedView,
     exec_ctx: &mut ExecutionCtx<'_>,
     trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<()> {
-    let StreamWithPositions {
+    let StreamWithSerializedView {
         canon_stream,
-        stream_elements_pos,
+        se_canon_stream,
     } = stream_with_positions;
 
     exec_ctx
         .scalars
         .set_canon_value(canon_stream_name, canon_stream)
         .map(|_| ())?;
-    trace_ctx.meet_canon_end(CanonResult::new(stream_elements_pos));
+    trace_ctx.meet_canon_end(CanonResult::new(se_canon_stream));
     Ok(())
 }
 
-struct StreamWithPositions {
+struct StreamWithSerializedView {
     canon_stream: CanonStream,
-    stream_elements_pos: Vec<TracePos>,
+    se_canon_stream: Vec<u8>,
 }
 
 fn create_canon_stream_from_name(
     ast_canon: &ast::Canon<'_>,
     peer_id: String,
     exec_ctx: &ExecutionCtx<'_>,
-) -> ExecutionResult<StreamWithPositions> {
+) -> ExecutionResult<StreamWithSerializedView> {
     let stream = get_stream_or_default(ast_canon, exec_ctx);
 
     let canon_stream = CanonStream::from_stream(stream.as_ref(), peer_id);
-    let stream_elements_pos = stream
-        .iter(Generation::Last)
-        // it's always safe to iter over all generations
-        .unwrap()
-        .map(|value| value.trace_pos)
-        .collect::<Vec<_>>();
+    let se_canon_stream = serde_json::to_vec(&canon_stream).expect("default serialized shouldn't fail");
 
-    let result = StreamWithPositions {
+    let result = StreamWithSerializedView {
         canon_stream,
-        stream_elements_pos,
+        se_canon_stream,
     };
 
     Ok(result)
