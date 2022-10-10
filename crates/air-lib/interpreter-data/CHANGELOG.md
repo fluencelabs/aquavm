@@ -1,3 +1,8 @@
+## Version 0.4.0
+
+[PR 356](https://github.com/fluencelabs/aquavm/pull/358):  
+- temporary fix of a bug with fold and canon compatibility
+
 ## Version 0.3.0
 
 [PR 292](https://github.com/fluencelabs/aquavm/pull/292):  

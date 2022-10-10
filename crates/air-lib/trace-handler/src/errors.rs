@@ -18,8 +18,6 @@ use super::data_keeper::KeeperError;
 use super::merger::MergeError;
 use super::state_automata::StateFSMError;
 
-use air_interpreter_data::ExecutedState;
-use air_interpreter_data::TracePos;
 use thiserror::Error as ThisError;
 
 /// Errors arose out of merging previous data with a new.
@@ -34,26 +32,4 @@ pub enum TraceHandlerError {
 
     #[error(transparent)]
     StateFSMError(#[from] StateFSMError),
-}
-
-#[derive(ThisError, Debug)]
-#[allow(clippy::enum_variant_names)]
-pub enum GenerationCompatificationError {
-    #[error("trying to change generation of an invalid trace position {0}")]
-    TracePosPointsToNowhere(TracePos),
-
-    #[error(
-        "trying to change generation of a state {state} on {position} position, the state doesn't contain generation"
-    )]
-    TracePosPointsToInvalidState { position: TracePos, state: ExecutedState },
-}
-
-impl GenerationCompatificationError {
-    pub fn points_to_nowhere(position: TracePos) -> Self {
-        GenerationCompatificationError::TracePosPointsToNowhere(position)
-    }
-
-    pub fn points_to_invalid_state(position: TracePos, state: ExecutedState) -> Self {
-        GenerationCompatificationError::TracePosPointsToInvalidState { position, state }
-    }
 }

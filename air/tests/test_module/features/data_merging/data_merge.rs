@@ -290,8 +290,8 @@ fn fold_merge() {
         .get("$stream_2")
         .expect("$stream_2 should be present in data");
 
-    assert_eq!(*stream_1_generations, 8);
-    assert_eq!(*stream_2_generations, 6);
+    assert_eq!(*stream_1_generations, 4);
+    assert_eq!(*stream_2_generations, 3);
 
     let mut fold_states_count = 0;
     let mut calls_count = HashMap::new();

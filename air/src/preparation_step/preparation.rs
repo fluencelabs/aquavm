@@ -45,7 +45,7 @@ pub(crate) fn prepare<'i>(
 
     let air: Instruction<'i> = *air_parser::parse(raw_air).map_err(PreparationError::AIRParseError)?;
 
-    let exec_ctx = make_exec_ctx(&prev_data, &current_data, call_results, run_parameters)?;
+    let exec_ctx = make_exec_ctx(&prev_data, call_results, run_parameters)?;
     let trace_handler = TraceHandler::from_data(prev_data, current_data);
 
     let result = PreparationDescriptor {
@@ -66,13 +66,12 @@ fn try_to_data(raw_data: &[u8]) -> PreparationResult<InterpreterData> {
 #[tracing::instrument(skip_all)]
 fn make_exec_ctx(
     prev_data: &InterpreterData,
-    current_data: &InterpreterData,
     call_results: &[u8],
     run_parameters: RunParameters,
 ) -> PreparationResult<ExecutionCtx<'static>> {
     let call_results = serde_json::from_slice(call_results)
         .map_err(|e| PreparationError::CallResultsDeFailed(e, call_results.to_vec()))?;
 
-    let ctx = ExecutionCtx::new(prev_data, current_data, call_results, run_parameters);
+    let ctx = ExecutionCtx::new(prev_data, call_results, run_parameters);
     Ok(ctx)
 }
