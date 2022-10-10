@@ -77,8 +77,8 @@ jobs:
       - aqua-snapshot
       - rust-peer
 
-    uses: fluencelabs/registry/.github/workflows/tests.yml@aqua-tests
+    uses: fluencelabs/registry/.github/workflows/tests.yml@main
     with:
       aqua-version: ${{ needs.aqua-snapshot.outputs.aqua-version }}
       rust-peer-image: ${{ needs.rust-peer.outputs.rust-peer-image }}
-      ref: aqua-tests
+      ref: fix-e2e-registry-path
