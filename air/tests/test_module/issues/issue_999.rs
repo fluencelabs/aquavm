@@ -79,8 +79,8 @@ fn issue_999() {
     let p3_trace_1 = trace_from_result(&p3_result_1);
 
 
-    let fold = p3_trace_1.get(TracePos::from(9)).unwrap();
-    if let ExecutedState::Fold(fold) = fold {
+    let fold_p3 = p3_trace_1.get(TracePos::from(9)).unwrap();
+    if let ExecutedState::Fold(fold) = fold_p3 {
         assert_eq!(fold.lore.len(), 4);
         assert_eq!(fold.lore[0].subtraces_desc[0].subtrace_len, 2);
         assert_eq!(fold.lore[1].subtraces_desc[0].subtrace_len, 2);
@@ -91,12 +91,14 @@ fn issue_999() {
     }
 
     let p1_result_2 = checked_call_vm!(p1_vm, <_>::default(), script, p1_result_1.data.clone(), p3_result_1.data.clone());
-    if let ExecutedState::Fold(fold) = fold {
+    let p1_trace_2 = trace_from_result(&p1_result_2);
+    let fold_p1 = p1_trace_2.get(TracePos::from(9)).unwrap();
+    if let ExecutedState::Fold(fold) = fold_p1 {
         assert_eq!(fold.lore.len(), 4);
         assert_eq!(fold.lore[0].subtraces_desc[0].subtrace_len, 4);
         assert_eq!(fold.lore[1].subtraces_desc[0].subtrace_len, 4);
-        assert_eq!(fold.lore[2].subtraces_desc[0].subtrace_len, 4);
-        assert_eq!(fold.lore[3].subtraces_desc[0].subtrace_len, 4);
+        assert_eq!(fold.lore[2].subtraces_desc[0].subtrace_len, 5);
+        assert_eq!(fold.lore[3].subtraces_desc[0].subtrace_len, 5);
     } else {
         panic!("expected fold at pos 9")
     }
