@@ -56,7 +56,7 @@ jobs:
     needs:
       - fluence-js-snapshot
 
-    uses: fluencelabs/aqua/.github/workflows/snapshot.yml@upload-package-lock
+    uses: fluencelabs/aqua/.github/workflows/snapshot.yml@main
     with:
       fluence-js-version: "=${{ needs.fluence-js-snapshot.outputs.fluence-js-version }}"
 
