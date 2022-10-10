@@ -90,6 +90,7 @@ impl<R: AirRunner> TestRunner<R> {
 
             next_peer_pks.extend(outcome.next_peer_pks);
 
+            println!("  call_requests: {:?}", outcome.call_requests);
             if outcome.call_requests.is_empty() {
                 outcome.next_peer_pks = next_peer_pks.into_iter().collect::<Vec<_>>();
                 return Ok(outcome);
