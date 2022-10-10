@@ -236,7 +236,7 @@ fn ap_canon_stream_with_lambda() {
     let expected_state = vec![
         executed_state::stream_number(0, 0),
         executed_state::stream_number(1, 1),
-        executed_state::canon_new(
+        executed_state::canon(
             json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_1_peer_id", "service_id": ""},
             "values": [{"result": 0, "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_1_peer_id", "service_id": ""}, "trace_pos": 0},
                 {"result": 1, "tetraplet": {"function_name": "some_function_name", "json_path": "", "peer_pk": "vm_1_peer_id", "service_id": "some_service_name"}, "trace_pos": 1}]}),
@@ -281,7 +281,7 @@ fn ap_canon_stream() {
     let expected_state = vec![
         executed_state::stream_number(0, 0),
         executed_state::stream_number(1, 1),
-        executed_state::canon_new(
+        executed_state::canon(
             json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_1_peer_id", "service_id": ""},
             "values": [{"result": 0, "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_1_peer_id", "service_id": ""}, "trace_pos": 0},
                 {"result": 1, "tetraplet": {"function_name": "some_function_name", "json_path": "", "peer_pk": "vm_1_peer_id", "service_id": "some_service_name"}, "trace_pos": 1}]}),

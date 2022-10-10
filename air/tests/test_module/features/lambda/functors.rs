@@ -133,7 +133,7 @@ fn length_functor_for_canon_stream() {
     let expected_trace = vec![
         executed_state::ap(0),
         executed_state::ap(0),
-        executed_state::canon_new(
+        executed_state::canon(
             json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": "init_peer_id", "service_id": ""},
                 "values": [{"result": 1, "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "init_peer_id", "service_id": ""}, "trace_pos": 0},
                            {"result": 1, "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "init_peer_id", "service_id": ""}, "trace_pos": 1}
@@ -163,7 +163,7 @@ fn length_functor_for_empty_canon_stream() {
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
-        executed_state::canon_new(
+        executed_state::canon(
             json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": "init_peer_id", "service_id": ""}, "values": []} ),
         ),
         executed_state::scalar_number(0),

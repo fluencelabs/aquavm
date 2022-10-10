@@ -137,12 +137,7 @@ pub fn ap(generation: u32) -> ExecutedState {
     ExecutedState::Ap(ap_result)
 }
 
-pub fn canon(_canonicalized_element: Vec<u8>) -> ExecutedState {
-    let canon_result = CanonResult::new(serde_json::json!([]));
-    ExecutedState::Canon(canon_result)
-}
-
-pub fn canon_new(canonicalized_element: JValue) -> ExecutedState {
+pub fn canon(canonicalized_element: JValue) -> ExecutedState {
     let canon_result = CanonResult::new(canonicalized_element);
     ExecutedState::Canon(canon_result)
 }
