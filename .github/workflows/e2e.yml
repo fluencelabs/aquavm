@@ -81,4 +81,5 @@ jobs:
     with:
       aqua-version: ${{ needs.aqua-snapshot.outputs.aqua-version }}
       rust-peer-image: ${{ needs.rust-peer.outputs.rust-peer-image }}
-      ref: fix-e2e-registry-path
+      # uncomment and change to branch name to run against
+      # ref: some-branch
