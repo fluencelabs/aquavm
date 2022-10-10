@@ -40,14 +40,17 @@ fn issue_999() {
                         )
                     )
                     (seq
-                        (canon "relay" $inner #inner)
+                        (null)
                         (fold $inner ns
                             (par
                                 (fold ns pair
                                     (seq
                                         (seq
                                             (call pair.$.[0] ("op" "noop") []) ; ok = null
-                                            (ap pair.$.[1] $result)
+                                            (seq
+                                                (ap pair.$.[1] $result)
+                                                (call pair.$.[0] ("" "") [$result]) ; behaviour = echo
+                                            )
                                         )
                                         (next pair)
                                     )
@@ -61,16 +64,22 @@ fn issue_999() {
             (seq
                 (new $monotonic_stream
                     (seq
-                        (fold $result elem
-                            (seq
-                                (ap elem $monotonic_stream)
+                        (seq
+                            (call "relay" ("" "") [$result]) ; behaviour = echo
+                            (fold $result elem
                                 (seq
-                                    (canon "relay" $monotonic_stream #canon_stream)
-                                    (xor
-                                        (match #canon_stream.length 18
-                                            (null)
+                                    (seq
+                                        (call "relay" ("" "") [$result]) ; behaviour = echo
+                                        (ap elem $monotonic_stream)
+                                    )
+                                    (seq
+                                        (canon "relay" $monotonic_stream #canon_stream)
+                                        (xor
+                                            (match #canon_stream.length 18
+                                                (null)
+                                            )
+                                            (next elem)
                                         )
-                                        (next elem)
                                     )
                                 )
                             )
@@ -78,11 +87,26 @@ fn issue_999() {
                         (canon "relay" $result #joined_result)
                     )
                 )
-                (call "client" ("return" "") [#inner #joined_result])  ; ok = null
+                (call "client" ("return" "") [$inner #joined_result])  ; ok = null
             )
         )
         "#;
 
+    /*
+    17 - [71, 2], [75, 0]
+    20 - [91, 2], [93, 0]
+    25 - [73, 2], [75, 0]
+    33 - [81, 2], [85, 0]
+    36 - [85, 2], [87, 0]
+    43 - [83, 2], [85, 0]
+    46 - [95, 2], [97, 0]
+    51 - [75, 2], [79, 0]
+    54 - [79, 2], [81, 0]
+    57 - [93, 2], [95, 0]
+    61 - [77, 2], [79, 0]
+    64 - [87, 2], [89, 0]
+    67 - [89, 2], [91, 0]
+     */
     let engine = TestExecutor::new(
         TestRunParameters::from_init_peer_id("client"),
         vec![],
@@ -97,25 +121,21 @@ fn issue_999() {
     while !queue.is_empty() {
         let peer = queue.pop_front().unwrap();
         if let Some(outcomes) = engine.execution_iter(peer.as_str()) {
-            let mut next_peers = std::collections::HashSet::<String>::new();
+            //let mut next_peers = std::collections::HashSet::<String>::new();
             for outcome in outcomes {
                 print_trace(&outcome, &format!("peer: {}",peer));
                 assert_eq!(outcome.ret_code, 0, "{:?}", outcome);
                 println!("next_peer_pks: {:?}", &outcome.next_peer_pks);
                 for peer in outcome.next_peer_pks {
-                    next_peers.insert(peer);
+                    queue.push_back(peer);
                 }
-            }
-
-            for peer in next_peers {
-                queue.push_back(peer);
             }
         } else {
             println!("peer: {}, no executions", peer);
         }
     }
 
-    /*
+/*
     for cycle in 0..8 {
         for peer in ["client", "relay", "p1", "p2", "p3"] {
             if let Some(outcomes) = engine.execution_iter(peer) {
