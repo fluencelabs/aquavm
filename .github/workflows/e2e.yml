@@ -19,7 +19,7 @@ jobs:
     needs:
       - snapshot
 
-    uses: fluencelabs/rust-peer/.github/workflows/snapshot.yml@upload-cargo-lock
+    uses: fluencelabs/rust-peer/.github/workflows/snapshot.yml@master
     with:
       image-name: "docker.fluence.dev/aquavm"
       avm-server-version: |
@@ -38,7 +38,7 @@ jobs:
     needs:
       - snapshot
 
-    uses: fluencelabs/fluence-js/.github/workflows/tests.yml@master
+    uses: fluencelabs/fluence-js/.github/workflows/tests.yml@fix-setting-version
     with:
       avm-version: "=${{ needs.snapshot.outputs.avm-version }}"
 
@@ -47,7 +47,7 @@ jobs:
     needs:
       - snapshot
 
-    uses: fluencelabs/fluence-js/.github/workflows/snapshot.yml@master
+    uses: fluencelabs/fluence-js/.github/workflows/snapshot.yml@fix-setting-version
     with:
       avm-version: "=${{ needs.snapshot.outputs.avm-version }}"
 
@@ -66,7 +66,7 @@ jobs:
       - aqua-snapshot
       - rust-peer
 
-    uses: fluencelabs/aqua-playground/.github/workflows/tests.yml@master
+    uses: fluencelabs/aqua-playground/.github/workflows/tests.yml@fix-setting-version
     with:
       fluence-js-version: "=${{ needs.fluence-js-snapshot.outputs.fluence-js-version }}"
       aqua-version: "=${{ needs.aqua-snapshot.outputs.aqua-version }}"
@@ -77,7 +77,7 @@ jobs:
       - aqua-snapshot
       - rust-peer
 
-    uses: fluencelabs/registry/.github/workflows/tests.yml@main
+    uses: fluencelabs/registry/.github/workflows/tests.yml@fix-setting-version
     with:
       aqua-version: "=${{ needs.aqua-snapshot.outputs.aqua-version }}"
       rust-peer-image: "${{ needs.rust-peer.outputs.rust-peer-image }}"
