@@ -21,8 +21,9 @@ use air_test_utils::{
     prelude::{echo_call_service, unit_call_service},
     CallRequestParams, CallServiceClosure, CallServiceResult,
 };
+use serde_json::json;
 
-use std::{cell::Cell, collections::HashMap, convert::TryInto, time::Duration};
+use std::{borrow::Cow, cell::Cell, collections::HashMap, convert::TryInto, time::Duration};
 
 pub struct ResultService {
     results: HashMap<u32, CallServiceClosure>,
@@ -37,8 +38,10 @@ impl TryInto<CallServiceClosure> for ServiceDefinition {
                 Ok(Box::new(move |_| CallServiceResult::ok(jvalue.clone())))
             }
             ServiceDefinition::Error(call_result) => Ok(Box::new(move |_| call_result.clone())),
-            ServiceDefinition::SeqResult(call_map) => Ok(seq_result_closure(call_map)),
+            ServiceDefinition::SeqOk(call_map) => Ok(seq_ok_closure(call_map)),
+            ServiceDefinition::SeqError(call_map) => Ok(seq_error_closure(call_map)),
             ServiceDefinition::Behaviour(name) => named_service_closure(name),
+            ServiceDefinition::Map(map) => Ok(map_service_closure(map)),
         }
     }
 }
@@ -51,7 +54,7 @@ fn named_service_closure(name: String) -> Result<CallServiceClosure, String> {
     }
 }
 
-fn seq_result_closure(call_map: HashMap<String, serde_json::Value>) -> CallServiceClosure {
+fn seq_ok_closure(call_map: HashMap<String, serde_json::Value>) -> CallServiceClosure {
     let call_number_seq = Cell::new(0);
 
     Box::new(move |_| {
@@ -71,6 +74,45 @@ fn seq_result_closure(call_map: HashMap<String, serde_json::Value>) -> CallServi
                 })
                 .clone(),
         )
+    })
+}
+
+fn seq_error_closure(call_map: HashMap<String, CallServiceResult>) -> CallServiceClosure {
+    let call_number_seq = Cell::new(0);
+
+    Box::new(move |_| {
+        let call_number = call_number_seq.get();
+        let call_num_str = call_number.to_string();
+        call_number_seq.set(call_number + 1);
+
+        call_map
+            .get(&call_num_str)
+            .or_else(|| call_map.get("default"))
+            .unwrap_or_else(|| {
+                panic!(
+                    "neither value {} nor default value not found in the {:?}",
+                    call_num_str, call_map
+                )
+            })
+            .clone()
+    })
+}
+
+fn map_service_closure(map: HashMap<String, serde_json::Value>) -> CallServiceClosure {
+    Box::new(move |args| {
+        let key = args
+            .arguments
+            .get(0)
+            .expect("At least one arugment expected");
+        // Strings are looked up by value, other objects -- by string representation.
+        //
+        // For example, `"key"` is looked up as `"key"`, `5` is looked up as `"5"`, `["test"]` is looked up
+        // as `"[\"test\"]"`.
+        let key_repr = match key {
+            serde_json::Value::String(s) => Cow::Borrowed(s.as_str()),
+            val => Cow::Owned(val.to_string()),
+        };
+        CallServiceResult::ok(json!(map.get(key_repr.as_ref()).cloned()))
     })
 }
 
