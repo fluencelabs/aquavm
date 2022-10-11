@@ -20,6 +20,7 @@ use crate::ToErrorCode;
 use air_interpreter_data::TracePos;
 use air_interpreter_data::Value;
 use air_trace_handler::merger::MergerApResult;
+use air_trace_handler::GenerationCompatificationError;
 use air_trace_handler::TraceHandlerError;
 use strum::IntoEnumIterator;
 use strum_macros::EnumDiscriminants;
@@ -40,6 +41,10 @@ pub enum UncatchableError {
         trace_error: TraceHandlerError,
         instruction: String,
     },
+
+    /// These errors are related to internal bug in the interpreter when result trace is corrupted.
+    #[error(transparent)]
+    GenerationCompatificationError(#[from] GenerationCompatificationError),
 
     /// Fold state wasn't found for such iterator name.
     #[error("fold state not found for this iterable '{0}'")]

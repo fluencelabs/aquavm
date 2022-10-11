@@ -32,6 +32,7 @@ mod handler;
 pub mod merger;
 mod state_automata;
 
+pub use errors::GenerationCompatificationError;
 pub use errors::TraceHandlerError;
 pub use handler::TraceHandler;
 pub use state_automata::SubgraphType;
