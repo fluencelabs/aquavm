@@ -124,11 +124,11 @@ fn parse_sexp_string(inp: Input<'_>) -> IResult<Input<'_>, Sexp, ParseError<'_>>
 fn parse_sexp_symbol(inp: Input<'_>) -> IResult<Input<'_>, Sexp, ParseError<'_>> {
     map(
         recognize(pair(
-            many1_count(alt((
-                value((), alphanumeric1),
-                value((), one_of("_-.$#%!")),
-            ))),
-            opt(delimited(tag("["), parse_sexp_symbol, tag("]"))),
+            many1_count(alt((value((), alphanumeric1), value((), one_of("_-.$#%"))))),
+            opt(terminated(
+                delimited(tag("["), parse_sexp_symbol, tag("]")),
+                opt(tag("!")),
+            )),
         )),
         Sexp::symbol,
     )(inp)
@@ -338,8 +338,8 @@ mod tests {
 
     #[test]
     fn test_symbol_lambda_exclamation() {
-        let res = Sexp::from_str("sym_bol.$.blabla!");
-        assert_eq!(res, Ok(Sexp::symbol("sym_bol.$.blabla!")));
+        let res = Sexp::from_str("pid-num.$.[0]!");
+        assert_eq!(res, Ok(Sexp::symbol("pid-num.$.[0]!")));
     }
 
     #[test]
