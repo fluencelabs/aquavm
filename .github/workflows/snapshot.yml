@@ -3,8 +3,15 @@ name: Publish snapshots
 on:
   workflow_call:
     inputs:
+      ref:
+        description: "GitHub ref to checkout to"
+        type: string
+        default: "master"
       marine-runtime-version:
         description: "marine-runtime version"
+        type: string
+      fluence-app-service:
+        description: "fluence-app-service version"
         type: string
     outputs:
       avm-version:
@@ -28,9 +35,26 @@ jobs:
     steps:
       - name: Checkout AquaVM
         uses: actions/checkout@v3
+        with:
+          repository: fluencelabs/aquavm
+          ref: ${{ inputs.ref }}
 
       - name: Setup Rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Set marine-runtime version from branch
+        if: inputs.marine-runtime-version != ''
+        uses: fluencelabs/github-actions/cargo-set-dependency@override-dependency-with-path
+        with:
+          package: marine-runtime
+          version: ${{ inputs.marine-runtime-version }}
+
+      - name: Set fluence-app-service version from branch
+        if: inputs.fluence-app-service-version != ''
+        uses: fluencelabs/github-actions/cargo-set-dependency@override-dependency-with-path
+        with:
+          package: fluence-app-service
+          version: ${{ inputs.fluence-app-service-version }}
 
       - name: Install marine
         uses: baptiste0928/cargo-install@v1
@@ -64,6 +88,9 @@ jobs:
     steps:
       - name: Checkout AquaVM
         uses: actions/checkout@v3
+        with:
+          repository: fluencelabs/aquavm
+          ref: ${{ inputs.ref }}
 
       - name: Download air-interpreter-wasm binary
         uses: actions/download-artifact@v3
@@ -126,30 +153,6 @@ jobs:
         working-directory: avm/client
         run: npm publish --tag snapshot --registry https://npm.fluence.dev
 
-      - name: Find comment in PR
-        uses: peter-evans/find-comment@v1
-        id: comment
-        with:
-          issue-number: "${{ github.event.pull_request.number }}"
-          comment-author: github-actions[bot]
-          body-includes: "## AVM version is"
-
-      - name: Update comment in PR
-        uses: peter-evans/create-or-update-comment@v1
-        env:
-          AVM_VERSION: ${{ steps.build.outputs.version }}
-        with:
-          comment-id: "${{ steps.comment.outputs.comment-id }}"
-          issue-number: "${{ github.event.pull_request.number }}"
-          edit-mode: replace
-          body: |
-            ## AVM version is [${{ env.AVM_VERSION }}](https://npm.fluence.dev/-/web/detail/@fluencelabs/avm/v/${{ env.AVM_VERSION }})
-            To install it run:
-            ```shell
-            npm login --registry https://npm.fluence.dev
-            npm i @fluencelabs/avm@${{ env.AVM_VERSION }} --registry=https://npm.fluence.dev
-            ```
-
   publish-interpreter:
     name: "Publish air-interpreter-wasm snapshot"
     runs-on: ubuntu-latest
@@ -167,6 +170,9 @@ jobs:
     steps:
       - name: Checkout AquaVM
         uses: actions/checkout@v3
+        with:
+          repository: fluencelabs/aquavm
+          ref: ${{ inputs.ref }}
 
       - name: Download air-interpreter-wasm binary
         uses: actions/download-artifact@v3
@@ -220,29 +226,6 @@ jobs:
       - name: Publish to self-hosted cargo registry
         working-directory: crates/interpreter-wasm
         run: cargo publish --registry fluence --allow-dirty
-
-      - name: Find comment in PR
-        uses: peter-evans/find-comment@v1
-        id: comment
-        with:
-          issue-number: "${{ github.event.pull_request.number }}"
-          comment-author: github-actions[bot]
-          body-includes: "## air-interpreter-wasm version is"
-
-      - name: Update comment in PR
-        uses: peter-evans/create-or-update-comment@v1
-        env:
-          VERSION: ${{ steps.build.outputs.version }}
-        with:
-          comment-id: "${{ steps.comment.outputs.comment-id }}"
-          issue-number: "${{ github.event.pull_request.number }}"
-          edit-mode: replace
-          body: |
-            ## air-interpreter-wasm version is [${{ env.VERSION }}](https://crates.fluence.dev/#/crate?name=air-interpreter-wasm&version=${{ env.VERSION }})
-            To install it run:
-            ```shell
-            cargo add air-interpreter-wasm@${{ env.VERSION }} --registry fluence
-            ```
 
   publish-avm-server:
     name: "Publish avm-server snapshot"
@@ -287,10 +270,17 @@ jobs:
 
       - name: Set marine-runtime version from branch
         if: inputs.marine-runtime-version != ''
-        uses: fluencelabs/github-actions/cargo-set-dependency@main
+        uses: fluencelabs/github-actions/cargo-set-dependency@override-dependency-with-path
         with:
           package: marine-runtime
           version: ${{ inputs.marine-runtime-version }}
+
+      - name: Set fluence-app-service version from branch
+        if: inputs.fluence-app-service-version != ''
+        uses: fluencelabs/github-actions/cargo-set-dependency@override-dependency-with-path
+        with:
+          package: fluence-app-service
+          version: ${{ inputs.fluence-app-service-version }}
 
       - name: Install cargo-edit
         uses: baptiste0928/cargo-install@v1
@@ -321,26 +311,3 @@ jobs:
       - name: Publish to self-hosted cargo registry
         working-directory: avm/server
         run: cargo publish --registry fluence --allow-dirty
-
-      - name: Find comment in PR
-        uses: peter-evans/find-comment@v1
-        id: comment
-        with:
-          issue-number: "${{ github.event.pull_request.number }}"
-          comment-author: github-actions[bot]
-          body-includes: "## avm-server version is"
-
-      - name: Update comment in PR
-        uses: peter-evans/create-or-update-comment@v1
-        env:
-          VERSION: ${{ steps.build.outputs.version }}
-        with:
-          comment-id: "${{ steps.comment.outputs.comment-id }}"
-          issue-number: "${{ github.event.pull_request.number }}"
-          edit-mode: replace
-          body: |
-            ## avm-server version is [${{ env.VERSION }}](https://crates.fluence.dev/#/crate?name=avm-server&version=${{ env.VERSION }})
-            To install it run:
-            ```shell
-            cargo add avm-server@${{ env.VERSION }} --registry fluence
-            ```
