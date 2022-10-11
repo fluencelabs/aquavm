@@ -510,7 +510,7 @@ mod tests {
 
     #[test]
     fn test_invalid_air() {
-        let err = TestExecutor::new(
+        let res = TestExecutor::new(
             TestRunParameters::from_init_peer_id("init_peer_id"),
             vec![],
             std::iter::empty(),
@@ -520,10 +520,13 @@ mod tests {
 "#,
         );
 
-        assert!(err.is_err());
+        assert!(res.is_err());
         // TestExecutor doesn't implement Debug, so we have to unpack the error this way:
-        if let Err(e) = err {
-            assert_eq!(e, "error: \n  ┌─ script.air:3:1\n  │\n3 │ )\n  │ ^ expected \"(\"\n\n");
+        if let Err(err) = res {
+            assert_eq!(
+                err,
+                "error: \n  ┌─ script.air:3:1\n  │\n3 │ )\n  │ ^ expected \"(\"\n\n"
+            );
         }
     }
 }
