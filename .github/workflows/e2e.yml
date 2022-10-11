@@ -13,6 +13,8 @@ jobs:
   snapshot:
     name: "aquavm"
     uses: ./.github/workflows/snapshot.yml
+    with:
+      ref: ${{ github.ref }}
 
   rust-peer:
     name: "rust-peer"
