@@ -125,3 +125,138 @@ fn merging_fold_iterations_extensively() {
 
     assert_eq!(last_fold.lore.len(), 18);
 }
+
+#[test]
+fn merging_fold_iterations_extensively_2() {
+    let script = r#"
+        (seq
+            (seq
+                (call "client" ("get" "data") [] permutations) ; ok = [["p1",[[["p1",1],["p2",2],["p3",3]],[["p1",4],["p3",5],["p2",6]]]],["p2",[[["p2",7],["p1",8],["p3",9]],[["p2",10],["p3",11],["p1",12]]]],["p3",[[["p3",13],["p1",14],["p2",15]],[["p3",16],["p2",17],["p1",18]]]]]
+                (seq
+                    (seq
+                        (fold permutations pair
+                            (seq
+                                (null)
+                                (seq
+                                    (fold pair.$.[1] pid-num-arr
+                                        (seq
+                                            (seq
+                                                (call pair.$.[0] ("op" "noop") []) ; ok = null
+                                                (ap pid-num-arr $pid-num-arrs)
+                                            )
+                                            (seq
+                                                (null)
+                                                (next pid-num-arr)
+                                            )
+                                        )
+                                    )
+                                    (next pair)
+                                )
+                            )
+                        )
+                        (call "relay" ("test" "print") [$pid-num-arrs]) ; behaviour = echo
+                    )
+                    (seq
+                        (seq
+                            (canon "relay" $pid-num-arrs #pid-num-arrs)
+                            (call "relay" ("test" "print") [$pid-num-arrs]) ; behaviour = echo
+                        )
+                        (new $result
+                            (fold $pid-num-arrs pid-num-arr
+                                (seq
+                                    (seq
+                                        (call "relay" ("test" "print") [pid-num-arr]) ; behaviour = echo
+                                        (fold pid-num-arr pid-num
+                                            (seq
+                                                (seq
+                                                    (null)
+                                                    (seq
+                                                        (call pid-num.$.[0] ("op" "noop") []) ; ok = null
+                                                        (ap pid-num.$.[1] $result)
+                                                    )
+                                                )
+                                                (seq
+                                                    (seq
+                                                        (canon pid-num.$.[0] $result #mon_res)
+                                                        (call pid-num.$.[0] ("test" "print") [#mon_res]) ; behaviour = echo
+                                                    )
+                                                    (next pid-num)
+                                                )
+                                            )
+                                        )
+                                    )
+                                    (seq
+                                        (seq
+                                            (canon "relay" $result #mon_res)
+                                            (call "relay" ("test" "print") [#mon_res]) ; behaviour = echo
+                                        )
+                                        (xor
+                                            (match #mon_res.length 18
+                                                (call "relay" ("test" "print") [#mon_res.length]) ; behaviour = echo
+                                            )
+                                            (seq
+                                                (call "relay" ("test" "print") ["not enought length"]) ; behaviour = echo
+                                                (next pid-num-arr)
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+            (seq
+                (call "relay" ("op" "noop") ["final relay"]) ; behaviour = echo
+                (seq
+                    (canon "client" $result #end_result)
+                    (call "relay" ("return" "") [#end_result]) ; behaviour = echo
+                )
+            )
+        )
+                "#;
+
+    let engine = TestExecutor::new(
+        TestRunParameters::from_init_peer_id("client"),
+        vec![],
+        vec!["relay", "p1", "p2", "p3"].into_iter().map(Into::into),
+        &script,
+    )
+    .unwrap();
+
+    let mut queue = std::collections::vec_deque::VecDeque::new();
+    let mut relay_outcomes = Vec::<RawAVMOutcome>::new();
+    queue.push_back("client".to_string());
+    while !queue.is_empty() {
+        let peer = queue.pop_front().unwrap();
+        if let Some(outcomes) = engine.execution_iter(peer.as_str()) {
+            for outcome in outcomes {
+                assert_eq!(outcome.ret_code, 0, "{:?}", outcome);
+
+                for peer in &outcome.next_peer_pks {
+                    queue.push_back(peer.clone());
+                }
+
+                if peer == "relay" {
+                    relay_outcomes.push(outcome);
+                }
+            }
+        } else {
+            println!("peer: {}, no executions", peer);
+        }
+    }
+
+    let last_relay_data = relay_outcomes.last().unwrap();
+    let last_relay_trace = trace_from_result(last_relay_data);
+    assert_eq!(last_relay_trace.len(), 116);
+    let last_fold = last_relay_trace
+        .iter()
+        .filter_map(|state| match state {
+            ExecutedState::Fold(fold_result) => Some(fold_result),
+            _ => None,
+        })
+        .last()
+        .unwrap();
+
+    assert_eq!(last_fold.lore.len(), 6);
+}
