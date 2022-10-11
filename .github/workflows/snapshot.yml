@@ -10,7 +10,7 @@ on:
       marine-runtime-version:
         description: "marine-runtime version"
         type: string
-      fluence-app-service:
+      fluence-app-service-version:
         description: "fluence-app-service version"
         type: string
     outputs:
