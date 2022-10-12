@@ -37,6 +37,8 @@ impl<'i> ExecutableInstruction<'i> for FoldStream<'i> {
         log_instruction!(fold, exec_ctx, trace_ctx);
         exec_ctx.tracker.meet_fold_stream();
 
+        println!("> {}", self);
+
         let iterable = &self.iterable;
         let stream = match exec_ctx.streams.get(iterable.name, iterable.position) {
             Some(stream) => stream,
@@ -46,6 +48,8 @@ impl<'i> ExecutableInstruction<'i> for FoldStream<'i> {
                 return Ok(());
             }
         };
+
+        println!("  stream: {:?}", stream);
 
         let fold_id = exec_ctx.tracker.fold.seen_stream_count;
         trace_to_exec_err!(trace_ctx.meet_fold_start(fold_id), self)?;
