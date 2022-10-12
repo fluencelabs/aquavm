@@ -184,6 +184,7 @@ dependencies = [
 name = "air-testing-framework"
 version = "0.1.0"
 dependencies = [
+ "air-parser",
  "air-test-utils",
  "itertools",
  "maplit",

@@ -42,6 +42,9 @@ impl TestExecutor {
         extra_peers: impl IntoIterator<Item = PeerId>,
         annotated_air_script: &str,
     ) -> Result<Self, String> {
+        // validate the AIR script with the standard parser first
+        air_parser::parse(annotated_air_script)?;
+
         let mut sexp = Sexp::from_str(annotated_air_script)?;
         let mut walker = Transformer::new();
         walker.transform(&mut sexp);
@@ -503,5 +506,27 @@ mod tests {
             trace_from_result(outcome1),
             ExecutionTrace::from(vec![scalar_number(1), request_sent_by("peer1"),]),
         )
+    }
+
+    #[test]
+    fn test_invalid_air() {
+        let res = TestExecutor::new(
+            TestRunParameters::from_init_peer_id("init_peer_id"),
+            vec![],
+            std::iter::empty(),
+            r#"(seq
+(call "peer1" ("service" "func") [1 22] arg) ; behaviour=echo
+)
+"#,
+        );
+
+        assert!(res.is_err());
+        // TestExecutor doesn't implement Debug, so we have to unpack the error this way:
+        if let Err(err) = res {
+            assert_eq!(
+                err,
+                "error: \n  ┌─ script.air:3:1\n  │\n3 │ )\n  │ ^ expected \"(\"\n\n"
+            );
+        }
     }
 }
