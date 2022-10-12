@@ -222,7 +222,7 @@ fn merging_fold_iterations_extensively_2() {
         vec!["relay", "p1", "p2", "p3"].into_iter().map(Into::into),
         &script,
     )
-        .unwrap();
+    .unwrap();
 
     let mut queue = std::collections::vec_deque::VecDeque::new();
     let mut p1_outcomes = Vec::<RawAVMOutcome>::new();
@@ -266,4 +266,3 @@ fn merging_fold_iterations_extensively_2() {
 
     assert_eq!(last_fold.lore.len(), 6);
 }
-

@@ -24,8 +24,8 @@ use crate::ExecutionError;
 use stream_descriptor::*;
 pub(crate) use stream_value_descriptor::StreamValueDescriptor;
 
-use air_interpreter_data::RestrictedStreamGens;
 use air_interpreter_data::GlobalStreamGens;
+use air_interpreter_data::RestrictedStreamGens;
 use air_parser::ast::Span;
 use air_parser::AirPos;
 use air_trace_handler::TraceHandler;
@@ -149,7 +149,10 @@ impl Streams {
 
     /// This method must be called at the end of execution, because it contains logic to collect
     /// all global streams depending on their presence in a streams field.
-    pub(crate) fn into_streams_data(self, trace_ctx: &mut TraceHandler) -> ExecutionResult<(GlobalStreamGens, RestrictedStreamGens)> {
+    pub(crate) fn into_streams_data(
+        self,
+        trace_ctx: &mut TraceHandler,
+    ) -> ExecutionResult<(GlobalStreamGens, RestrictedStreamGens)> {
         // since it's called at the end of execution, streams contains only global ones,
         // because all private's been deleted after exiting a scope
         let global_streams = self

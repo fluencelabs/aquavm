@@ -109,6 +109,16 @@ impl Stream {
         }
     }
 
+    pub(crate) fn last_non_empty_generation(&self) -> usize {
+        self.values
+            .iter()
+            .rposition(|generation| !generation.is_empty())
+            // it's safe to add + 1 here, because this function is called when
+            // there is a new state was added with add_new_generation_if_non_empty
+            .map(|non_empty_gens| non_empty_gens + 1)
+            .unwrap_or_else(|| self.generations_count())
+    }
+
     /// Add a new empty generation if the latest isn't empty.
     pub(crate) fn add_new_generation_if_non_empty(&mut self) -> bool {
         let should_add_generation = match self.values.last() {
