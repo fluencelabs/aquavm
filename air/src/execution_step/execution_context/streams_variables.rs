@@ -20,6 +20,7 @@ mod utils;
 
 use crate::execution_step::ExecutionResult;
 use crate::execution_step::Stream;
+use crate::ExecutionError;
 use stream_descriptor::*;
 pub(crate) use stream_value_descriptor::StreamValueDescriptor;
 
@@ -27,6 +28,7 @@ use air_interpreter_data::GlobalStreamGens;
 use air_interpreter_data::RestrictedStreamGens;
 use air_parser::ast::Span;
 use air_parser::AirPos;
+use air_trace_handler::TraceHandler;
 
 use std::collections::hash_map::Entry::{Occupied, Vacant};
 use std::collections::HashMap;
@@ -42,6 +44,10 @@ pub(crate) struct Streams {
     /// should have at the scope start.
     previous_restricted_stream_gens: RestrictedStreamGens,
 
+    /// Contains stream generations from current data that a restricted stream
+    /// should have at the scope start.
+    current_restricted_stream_gens: RestrictedStreamGens,
+
     /// Contains stream generations that each private stream had at the scope end.
     /// Then it's placed into data
     new_restricted_stream_gens: RestrictedStreamGens,
@@ -50,13 +56,16 @@ pub(crate) struct Streams {
 impl Streams {
     pub(crate) fn from_data(
         previous_global_streams: &GlobalStreamGens,
+        current_global_streams: &GlobalStreamGens,
         previous_restricted_stream_gens: RestrictedStreamGens,
+        current_restricted_stream_gens: RestrictedStreamGens,
     ) -> Self {
-        let streams = utils::prepare_global_streams(previous_global_streams);
+        let streams = utils::merge_global_streams(previous_global_streams, current_global_streams);
 
         Self {
             streams,
             previous_restricted_stream_gens,
+            current_restricted_stream_gens,
             new_restricted_stream_gens: <_>::default(),
         }
     }
@@ -103,9 +112,10 @@ impl Streams {
 
     pub(crate) fn meet_scope_start(&mut self, name: impl Into<String>, span: Span, iteration: u32) {
         let name = name.into();
-        let prev_gens_count = self.stream_generation_from_data(&name, span.left, iteration as usize);
+        let (prev_gens_count, current_gens_count) =
+            self.stream_generation_from_data(&name, span.left, iteration as usize);
 
-        let new_stream = Stream::from_generations_count(prev_gens_count as usize);
+        let new_stream = Stream::from_generations_count(prev_gens_count as usize, current_gens_count as usize);
         let new_descriptor = StreamDescriptor::restricted(new_stream, span);
         match self.streams.entry(name) {
             Occupied(mut entry) => {
@@ -117,7 +127,12 @@ impl Streams {
         }
     }
 
-    pub(crate) fn meet_scope_end(&mut self, name: String, position: AirPos) -> ExecutionResult<()> {
+    pub(crate) fn meet_scope_end(
+        &mut self,
+        name: String,
+        position: AirPos,
+        trace_ctx: &mut TraceHandler,
+    ) -> ExecutionResult<()> {
         // unwraps are safe here because met_scope_end must be called after met_scope_start
         let stream_descriptors = self.streams.get_mut(&name).unwrap();
         // delete a stream after exit from a scope
@@ -126,37 +141,57 @@ impl Streams {
             // streams should contain only non-empty stream embodiments
             self.streams.remove(&name);
         }
+        let gens_count = last_descriptor.stream.compactify(trace_ctx)?;
 
-        self.collect_stream_generation(name, position, last_descriptor.stream.generations_count() as u32);
+        self.collect_stream_generation(name, position, gens_count as u32);
         Ok(())
     }
 
     /// This method must be called at the end of execution, because it contains logic to collect
     /// all global streams depending on their presence in a streams field.
-    pub(crate) fn into_streams_data(self) -> (GlobalStreamGens, RestrictedStreamGens) {
+    pub(crate) fn into_streams_data(
+        self,
+        trace_ctx: &mut TraceHandler,
+    ) -> ExecutionResult<(GlobalStreamGens, RestrictedStreamGens)> {
         // since it's called at the end of execution, streams contains only global ones,
         // because all private's been deleted after exiting a scope
         let global_streams = self
             .streams
             .into_iter()
-            .map(|(name, mut descriptors)| {
+            .map(|(name, mut descriptors)| -> Result<_, ExecutionError> {
                 // unwrap is safe here because of invariant that streams contains non-empty vectors,
                 // moreover it must contain only one value, because this method is called at the end
                 // of the execution
                 let stream = descriptors.pop().unwrap().stream;
-                (name, stream.generations_count() as u32)
+                let gens_count = stream.compactify(trace_ctx)?;
+                Ok((name, gens_count as u32))
             })
-            .collect::<GlobalStreamGens>();
+            .collect::<Result<GlobalStreamGens, _>>()?;
 
-        (global_streams, self.new_restricted_stream_gens)
+        Ok((global_streams, self.new_restricted_stream_gens))
     }
 
-    fn stream_generation_from_data(&self, name: &str, position: AirPos, iteration: usize) -> u32 {
-        self.previous_restricted_stream_gens
+    fn stream_generation_from_data(&self, name: &str, position: AirPos, iteration: usize) -> (u32, u32) {
+        let previous_generation =
+            Self::restricted_stream_generation(&self.previous_restricted_stream_gens, name, position, iteration)
+                .unwrap_or_default();
+        let current_generation =
+            Self::restricted_stream_generation(&self.current_restricted_stream_gens, name, position, iteration)
+                .unwrap_or_default();
+
+        (previous_generation, current_generation)
+    }
+
+    fn restricted_stream_generation(
+        restricted_stream_gens: &RestrictedStreamGens,
+        name: &str,
+        position: AirPos,
+        iteration: usize,
+    ) -> Option<u32> {
+        restricted_stream_gens
             .get(name)
             .and_then(|scopes| scopes.get(&position).and_then(|iterations| iterations.get(iteration)))
             .copied()
-            .unwrap_or_default()
     }
 
     fn collect_stream_generation(&mut self, name: String, position: AirPos, generation: u32) {
