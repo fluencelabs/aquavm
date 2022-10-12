@@ -15,6 +15,7 @@ path = "src/lib.rs"
 
 [dependencies]
 air-test-utils = { path = "../air-lib/test-utils" }
+air-parser = { path = "../air-lib/air-parser" }
 
 itertools = "0.10.4"
 strum = { version="0.24.1", features=["derive"] }
