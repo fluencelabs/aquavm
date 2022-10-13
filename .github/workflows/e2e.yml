@@ -37,10 +37,12 @@ jobs:
     name: "fluence-js"
     needs:
       - snapshot
+      - rust-peer
 
     uses: fluencelabs/fluence-js/.github/workflows/tests.yml@master
     with:
       avm-version: "${{ needs.snapshot.outputs.avm-version }}"
+      rust-peer-image: "${{ needs.rust-peer.outputs.rust-peer-image }}"
 
   fluence-js-snapshot:
     name: "fluence-js"
