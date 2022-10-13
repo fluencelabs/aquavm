@@ -39,7 +39,7 @@ dependencies = [
  "non-empty-vec",
  "once_cell",
  "polyplets",
- "pretty_assertions",
+ "pretty_assertions 0.6.1",
  "semver 1.0.14",
  "serde",
  "serde_json",
@@ -192,7 +192,7 @@ dependencies = [
  "maplit",
  "nom 7.1.1",
  "nom_locate",
- "pretty_assertions",
+ "pretty_assertions 1.3.0",
  "serde_json",
  "strum",
 ]
@@ -2072,6 +2072,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "pretty_assertions"
+version = "1.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a25e9bcb20aa780fd0bb16b72403a9064d6b3f22f026946029acb941a50af755"
+dependencies = [
+ "ctor",
+ "diff",
+ "output_vt100",
+ "yansi",
+]
+
+[[package]]
 name = "proc-macro-error"
 version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3124,3 +3136,9 @@ name = "windows_x86_64_msvc"
 version = "0.36.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c811ca4a8c853ef420abd8592ba53ddbbac90410fab6903b3e79972a631f7680"
+
+[[package]]
+name = "yansi"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "09041cd90cf85f7f8b2df60c646f853b7f535ce68f85244eb6731cf89fa498ec"
