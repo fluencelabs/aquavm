@@ -15,9 +15,12 @@
  */
 
 mod errors;
+mod minimal_supported_version;
 mod preparation;
 
 pub use errors::PreparationError;
 
 pub(crate) use preparation::prepare;
 pub(crate) use preparation::PreparationDescriptor;
+
+use minimal_supported_version::min_supported_version;

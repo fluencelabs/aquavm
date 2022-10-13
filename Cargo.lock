@@ -13,7 +13,7 @@ dependencies = [
 
 [[package]]
 name = "air"
-version = "0.31.0"
+version = "0.31.2"
 dependencies = [
  "air-execution-info-collector",
  "air-interpreter-data",
@@ -40,6 +40,7 @@ dependencies = [
  "once_cell",
  "polyplets",
  "pretty_assertions",
+ "semver 1.0.14",
  "serde",
  "serde_json",
  "strum",
@@ -91,7 +92,7 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter-data"
-version = "0.4.0"
+version = "0.4.1"
 dependencies = [
  "air-parser",
  "air-utils",
@@ -177,6 +178,7 @@ dependencies = [
  "marine-rs-sdk",
  "object-pool",
  "once_cell",
+ "semver 1.0.14",
  "serde_json",
 ]
 

@@ -43,6 +43,8 @@ pub(crate) fn prepare<'i>(
     let prev_data = try_to_data(prev_data)?;
     let current_data = try_to_data(current_data)?;
 
+    check_version_compatibility(&current_data)?;
+
     let air: Instruction<'i> = *air_parser::parse(raw_air).map_err(PreparationError::AIRParseError)?;
 
     let exec_ctx = make_exec_ctx(&prev_data, &current_data, call_results, run_parameters)?;
@@ -60,7 +62,8 @@ pub(crate) fn prepare<'i>(
 fn try_to_data(raw_data: &[u8]) -> PreparationResult<InterpreterData> {
     use PreparationError::DataDeFailed;
 
-    InterpreterData::try_from_slice(raw_data).map_err(|err| DataDeFailed(err, raw_data.to_vec()))
+    InterpreterData::try_from_slice(raw_data, super::min_supported_version())
+        .map_err(|err| DataDeFailed(err, raw_data.to_vec()))
 }
 
 #[tracing::instrument(skip_all)]
@@ -75,4 +78,15 @@ fn make_exec_ctx(
 
     let ctx = ExecutionCtx::new(prev_data, current_data, call_results, run_parameters);
     Ok(ctx)
+}
+
+fn check_version_compatibility(data: &InterpreterData) -> PreparationResult<()> {
+    if &data.interpreter_version < super::min_supported_version() {
+        return Err(PreparationError::UnsupportedInterpreterVersion {
+            actual_version: data.interpreter_version.clone(),
+            required_version: super::min_supported_version().clone(),
+        });
+    }
+
+    Ok(())
 }

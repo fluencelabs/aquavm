@@ -91,8 +91,13 @@ pub fn data_from_result(result: &RawAVMOutcome) -> InterpreterData {
 }
 
 pub fn raw_data_from_trace(trace: impl Into<ExecutionTrace>) -> Vec<u8> {
-    let data =
-        InterpreterData::from_execution_result(trace.into(), <_>::default(), <_>::default(), 0);
+    let data = InterpreterData::from_execution_result(
+        trace.into(),
+        <_>::default(),
+        <_>::default(),
+        0,
+        semver::Version::new(1, 1, 1),
+    );
     serde_json::to_vec(&data).expect("default serializer shouldn't fail")
 }
 

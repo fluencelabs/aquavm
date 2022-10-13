@@ -39,6 +39,13 @@ pub enum PreparationError {
     /// Error occurred on call results deserialization.
     #[error("error occurred while deserialize call results: {1:?}:\n{0:?}")]
     CallResultsDeFailed(SerdeJsonError, Vec<u8>),
+
+    /// Error occurred when a version of interpreter produced supplied data is less then minimal.
+    #[error("supplied data was produced by `{actual_version}` version of interpreter, but minimum `{required_version}` version is required")]
+    UnsupportedInterpreterVersion {
+        actual_version: semver::Version,
+        required_version: semver::Version,
+    },
 }
 
 impl ToErrorCode for PreparationError {
