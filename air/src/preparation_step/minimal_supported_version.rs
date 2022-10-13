@@ -21,7 +21,7 @@ use std::str::FromStr;
 static MINIMAL_SUPPORTED_VERSION: Lazy<semver::Version> =
     Lazy::new(|| semver::Version::from_str("0.31.2").expect("valid minimal supported version specified"));
 
-// This local is intended to check that set version is correct at the AquaVM start.
+// This local is intended to check that set version is correct at the AquaVM start for graceful error message.
 thread_local!(static MINIMAL_SUPPORTED_VERSION_CHECK: &'static semver::Version = Lazy::force(&MINIMAL_SUPPORTED_VERSION));
 
 /// Return minimal support version interpreter.

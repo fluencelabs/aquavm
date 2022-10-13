@@ -1,6 +1,6 @@
-## Version 0.4.0
+## Version 0.4.1
 
-[PR 368](https://github.com/fluencelabs/aquavm/pull/368):  
+[PR 367](https://github.com/fluencelabs/aquavm/pull/367):  
 - add interpreter version in data
 
 ## Version 0.4.0
