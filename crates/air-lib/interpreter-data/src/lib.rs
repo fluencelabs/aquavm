@@ -41,6 +41,11 @@ pub use trace_pos::*;
 use once_cell::sync::Lazy;
 use std::str::FromStr;
 
-pub static DATA_FORMAT_VERSION: Lazy<semver::Version> = Lazy::new(|| {
-    semver::Version::from_str("0.2.2").expect("invalid data format version specified")
+static DATA_FORMAT_VERSION: Lazy<semver::Version> = Lazy::new(|| {
+    semver::Version::from_str(env!("CARGO_PKG_VERSION"))
+        .expect("invalid data format version specified")
 });
+
+pub fn data_version() -> &'static semver::Version {
+    Lazy::force(&DATA_FORMAT_VERSION)
+}

@@ -15,7 +15,7 @@
  */
 
 use crate::ToErrorCode;
-use air_interpreter_data::DATA_FORMAT_VERSION;
+use air_interpreter_data::data_version;
 
 use serde_json::Error as SerdeJsonError;
 use strum::IntoEnumIterator;
@@ -32,13 +32,23 @@ pub enum PreparationError {
     AIRParseError(String),
 
     /// Errors occurred on executed trace deserialization.
-    #[error("an error occurred while executed trace deserialization on {1:?}:\n{0:?}.\
-    Probably it's a data of an old version that couldn't be converted to '{}'", *DATA_FORMAT_VERSION)]
+    #[error(
+        "an error occurred while executed trace deserialization on {1:?}:\n{0:?}.\
+    Probably it's a data of an old version that can't be converted to '{}'",
+        data_version()
+    )]
     DataDeFailed(SerdeJsonError, Vec<u8>),
 
     /// Error occurred on call results deserialization.
     #[error("error occurred while deserialize call results: {1:?}:\n{0:?}")]
     CallResultsDeFailed(SerdeJsonError, Vec<u8>),
+
+    /// Error occurred when a version of interpreter produced supplied data is less then minimal.
+    #[error("supplied data was produced by `{actual_version}` version of interpreter, but minimum `{required_version}` version is required")]
+    UnsupportedInterpreterVersion {
+        actual_version: semver::Version,
+        required_version: semver::Version,
+    },
 }
 
 impl ToErrorCode for PreparationError {

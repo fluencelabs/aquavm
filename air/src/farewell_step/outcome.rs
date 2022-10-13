@@ -100,6 +100,7 @@ fn populate_outcome_from_contexts(
         global_streams,
         restricted_streams,
         exec_ctx.last_call_request_id,
+        semver::Version::parse(env!("CARGO_PKG_VERSION")).expect("cargo version is valid"),
     );
     let data = measure!(
         serde_json::to_vec(&data).expect("default serializer shouldn't fail"),
