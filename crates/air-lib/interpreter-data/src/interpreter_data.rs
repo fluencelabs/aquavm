@@ -16,13 +16,11 @@
 
 use super::GlobalStreamGens;
 use super::RestrictedStreamGens;
-use super::DATA_FORMAT_VERSION;
 use crate::ExecutionTrace;
 use air_utils::measure;
 
 use serde::Deserialize;
 use serde::Serialize;
-use std::ops::Deref;
 
 /// The AIR interpreter could be considered as a function
 /// f(prev_data: InterpreterData, current_data: InterpreterData, ... ) -> (result_data: InterpreterData, ...).
@@ -62,7 +60,7 @@ impl InterpreterData {
         Self {
             trace: ExecutionTrace::default(),
             global_streams: GlobalStreamGens::new(),
-            version: DATA_FORMAT_VERSION.deref().clone(),
+            version: crate::data_version().clone(),
             last_call_request_id: 0,
             restricted_streams: RestrictedStreamGens::new(),
             interpreter_version,
@@ -79,7 +77,7 @@ impl InterpreterData {
         Self {
             trace,
             global_streams: streams,
-            version: DATA_FORMAT_VERSION.deref().clone(),
+            version: crate::data_version().clone(),
             last_call_request_id,
             restricted_streams,
             interpreter_version,
