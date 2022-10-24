@@ -27,7 +27,7 @@ use std::{borrow::Borrow, collections::HashMap, hash::Hash, rc::Rc, str::FromStr
 
 pub struct TestExecutor {
     pub air_script: String,
-    pub network: Network,
+    pub network: Rc<Network>,
     pub test_parameters: TestRunParameters,
 }
 
@@ -66,7 +66,7 @@ impl TestExecutor {
 
         Ok(TestExecutor {
             air_script: transformed_air_script,
-            network,
+            network: Rc::new(network),
             test_parameters,
         })
     }
