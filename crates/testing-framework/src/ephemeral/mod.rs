@@ -106,7 +106,7 @@ impl std::fmt::Debug for Peer {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Network {
     peers: HashMap<PeerId, Rc<RefCell<PeerEnv>>>,
     default_neighborhood: HashSet<PeerId>,
@@ -114,7 +114,7 @@ pub struct Network {
 
 impl Network {
     pub fn empty() -> Self {
-        Self::new(std::iter::empty::<&str>())
+        Default::default()
     }
 
     pub fn new(default_neiborhoud: impl Iterator<Item = impl Into<PeerId>>) -> Self {
