@@ -100,10 +100,12 @@ jobs:
           SHA=${{ github.event.pull_request.head.sha }}
           echo "::set-output name=sha::${SHA::7}"
           echo "::set-output name=branch::${GITHUB_HEAD_REF//[^a-zA-Z0-9-]/-}"
+          echo "::set-output name=avm::$(cargo read-manifest --manifest-path air-interpreter/Cargo.toml | jq -r .version)"
 
       - name: Set package version
         id: build
         env:
+          VERSION: ${{ steps.version.outputs.avm }}
           BRANCH: ${{ steps.version.outputs.branch }}
           SHA: ${{ steps.version.outputs.sha }}
           RUN: ${{ github.run_number }}
@@ -111,9 +113,8 @@ jobs:
         working-directory: avm/client
         run: |
           echo "::set-output name=version::$(\
-                npm version prerelease \
-                --no-git-tag-version \
-                --preid ${{ env.BRANCH }}-${{ env.SHA }}-${{ env.RUN }}-${{ env.ATTEMPT }})"
+                npm version --no-git-tag-version \
+                ${{ env.VERSION }}-${{ env.BRANCH }}-${{ env.SHA }}-${{ env.RUN }}-${{ env.ATTEMPT }})"
 
       - name: Publish to self-hosted npm repo
         working-directory: avm/client
