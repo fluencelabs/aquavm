@@ -49,20 +49,21 @@ impl TestExecutor {
         let mut walker = Transformer::new();
         walker.transform(&mut sexp);
 
-        let init_peer_id = test_parameters.init_peer_id.clone();
+        let init_peer_id = test_parameters.init_peer_id.as_str();
         let transformed_air_script = sexp.to_string();
 
         let peers = build_peers(
             common_services,
             walker.results,
             walker.peers,
-            PeerId::new(init_peer_id.clone()),
+            PeerId::new(init_peer_id),
             extra_peers,
         )?;
 
         let network = Network::from_peers(peers);
+
         // Seed execution
-        network.distribute_to_peers(&[init_peer_id], &vec![]);
+        network.distribute_to_peers(&[init_peer_id], &<_>::default());
 
         Ok(TestExecutor {
             air_script: transformed_air_script,

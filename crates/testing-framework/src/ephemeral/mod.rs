@@ -29,26 +29,27 @@ use std::{
     cell::RefCell,
     collections::{HashMap, HashSet},
     hash::Hash,
+    ops::Deref,
     rc::Rc,
 };
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-pub struct PeerId(String);
+pub struct PeerId(Rc<str>);
 
 impl PeerId {
-    pub fn new(peer_id: impl Into<String>) -> Self {
-        Self(peer_id.into())
+    pub fn new<'a>(peer_id: impl Into<&'a str>) -> Self {
+        Self(peer_id.into().into())
     }
 }
 impl From<String> for PeerId {
     fn from(source: String) -> Self {
-        Self(source)
+        Self(source.as_str().into())
     }
 }
 
 impl From<&str> for PeerId {
     fn from(source: &str) -> Self {
-        Self(source.to_owned())
+        Self(source.into())
     }
 }
 
@@ -71,7 +72,7 @@ impl Peer {
     pub fn new(peer_id: impl Into<PeerId>, services: Rc<[MarineServiceHandle]>) -> Self {
         let peer_id = Into::into(peer_id);
         let call_service = services_to_call_service_closure(services);
-        let runner = create_avm(call_service, &peer_id.0);
+        let runner = create_avm(call_service, &*peer_id.0);
 
         Self {
             peer_id,
@@ -245,9 +246,12 @@ impl Network {
         })
     }
 
-    pub fn distribute_to_peers(&self, peers: &[String], data: &Data) {
+    pub fn distribute_to_peers<Id>(&self, peers: &[Id], data: &Data)
+    where
+        Id: Deref<Target = str>,
+    {
         for peer_id in peers {
-            if let Some(peer_env_cell) = self.get_peer_env(peer_id.as_str()) {
+            if let Some(peer_env_cell) = self.get_peer_env::<str>(peer_id) {
                 peer_env_cell
                     .borrow_mut()
                     .data_queue
