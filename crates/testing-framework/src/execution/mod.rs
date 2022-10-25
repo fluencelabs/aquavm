@@ -17,6 +17,7 @@
 use crate::{
     asserts::ServiceDefinition,
     ephemeral::{Network, Peer, PeerId},
+    queue::ExecutionQueue,
     services::{results::ResultService, MarineService, MarineServiceHandle},
     transform::{walker::Transformer, Sexp},
 };
@@ -29,6 +30,7 @@ pub struct TestExecutor {
     pub air_script: String,
     pub network: Rc<Network>,
     pub test_parameters: TestRunParameters,
+    queue: ExecutionQueue,
 }
 
 impl TestExecutor {
@@ -62,13 +64,15 @@ impl TestExecutor {
 
         let network = Network::from_peers(peers);
 
+        let queue = ExecutionQueue::new();
         // Seed execution
-        network.distribute_to_peers(&[init_peer_id], &<_>::default());
+        queue.distribute_to_peers(&network, &[init_peer_id], &<_>::default());
 
         Ok(TestExecutor {
             air_script: transformed_air_script,
             network: Rc::new(network),
             test_parameters,
+            queue,
         })
     }
 
@@ -85,6 +89,33 @@ impl TestExecutor {
         )
     }
 
+    pub fn from_network(
+        test_parameters: TestRunParameters,
+        network: Rc<Network>,
+        annotated_air_script: &str,
+    ) -> Result<Self, String> {
+        // validate the AIR script with the standard parser first
+        air_parser::parse(annotated_air_script)?;
+
+        let mut sexp = Sexp::from_str(annotated_air_script)?;
+        let mut walker = Transformer::new();
+        walker.transform(&mut sexp);
+
+        let init_peer_id = test_parameters.init_peer_id.as_str();
+        let transformed_air_script = sexp.to_string();
+
+        let queue = ExecutionQueue::new();
+        // Seed execution
+        queue.distribute_to_peers(&network, &[init_peer_id], &<_>::default());
+
+        Ok(TestExecutor {
+            air_script: transformed_air_script,
+            network,
+            test_parameters,
+            queue,
+        })
+    }
+
     /// Return Iterator for handling all the queued datas
     /// for particular peer_id.
     pub fn execution_iter<'s, Id>(
@@ -93,11 +124,14 @@ impl TestExecutor {
     ) -> Option<impl Iterator<Item = RawAVMOutcome> + 's>
     where
         PeerId: Borrow<Id>,
-        // TODO it's not clear why compiler requies + 's here, but not at Network::iter_execution
-        Id: Eq + Hash + ?Sized + 's,
+        Id: Eq + Hash + ?Sized,
     {
-        self.network
-            .execution_iter(&self.air_script, &self.test_parameters, peer_id)
+        self.queue.execution_iter(
+            &self.air_script,
+            self.network.clone(),
+            &self.test_parameters,
+            peer_id,
+        )
     }
 
     /// Process all queued datas, panicing on error.

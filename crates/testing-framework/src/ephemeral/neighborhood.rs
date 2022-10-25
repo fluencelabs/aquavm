@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-use super::{Data, Network, Peer, PeerId};
+use super::{Network, Peer, PeerId};
+use crate::queue::ExecutionQueue;
 
 use air_test_utils::test_runner::TestRunParameters;
 
 use std::{
     borrow::Borrow,
-    collections::{HashMap, HashSet, VecDeque},
+    collections::{HashMap, HashSet},
     hash::Hash,
     ops::Deref,
 };
@@ -105,7 +106,6 @@ pub struct PeerEnv {
     // failed for everyone
     failed: bool,
     neighborhood: Neighborhood,
-    pub(crate) data_queue: VecDeque<Data>,
 }
 
 impl PeerEnv {
@@ -114,7 +114,6 @@ impl PeerEnv {
             peer,
             failed: false,
             neighborhood: Default::default(),
-            data_queue: Default::default(),
         }
     }
 
@@ -171,23 +170,23 @@ impl PeerEnv {
         self.neighborhood.iter()
     }
 
-    pub fn send_data(&mut self, data: Data) {
-        self.data_queue.push_back(data);
-    }
-
-    pub fn execute_once(
+    pub(crate) fn execute_once(
         &mut self,
         air: impl Into<String>,
         network: &Network,
+        queue: &ExecutionQueue,
         test_parameters: &TestRunParameters,
     ) -> Option<Result<air_test_utils::RawAVMOutcome, String>> {
-        let maybe_data = self.data_queue.pop_front();
+        let queue = queue.clone();
+        let maybe_data = queue
+            .get_peer_queue_cell(self.peer.peer_id.clone())
+            .pop_data();
 
         maybe_data.map(|data| {
             let res = self.peer.invoke(air, data, test_parameters.clone());
 
             if let Ok(outcome) = &res {
-                network.distribute_to_peers(&outcome.next_peer_pks, &outcome.data)
+                queue.distribute_to_peers(network, &outcome.next_peer_pks, &outcome.data)
             }
 
             res

@@ -29,7 +29,6 @@ use std::{
     cell::RefCell,
     collections::{HashMap, HashSet},
     hash::Hash,
-    ops::Deref,
     rc::Rc,
 };
 
@@ -62,7 +61,7 @@ impl Borrow<str> for PeerId {
 pub type Data = Vec<u8>;
 
 pub struct Peer {
-    peer_id: PeerId,
+    pub(crate) peer_id: PeerId,
     // We presume that only one particle is run over the network.
     prev_data: Data,
     runner: TestRunner,
@@ -220,43 +219,5 @@ impl Network {
         Id: Hash + Eq + ?Sized,
     {
         self.peers.get(peer_id).cloned()
-    }
-
-    /// Iterator for handling al the queued data.  It borrows peer env's `RefCell` only temporarily.
-    /// Following test-utils' call_vm macro, it panics on failed VM.
-    pub fn execution_iter<'s, Id>(
-        &'s self,
-        air: &'s str,
-        test_parameters: &'s TestRunParameters,
-        peer_id: &Id,
-    ) -> Option<impl Iterator<Item = RawAVMOutcome> + 's>
-    where
-        PeerId: Borrow<Id>,
-        Id: Eq + Hash + ?Sized,
-    {
-        let peer_env = self.get_peer_env(peer_id);
-
-        peer_env.map(|peer_env_cell| {
-            std::iter::from_fn(move || {
-                let mut peer_env = peer_env_cell.borrow_mut();
-                peer_env
-                    .execute_once(air, self, test_parameters)
-                    .map(|r| r.unwrap_or_else(|err| panic!("VM call failed: {}", err)))
-            })
-        })
-    }
-
-    pub fn distribute_to_peers<Id>(&self, peers: &[Id], data: &Data)
-    where
-        Id: Deref<Target = str>,
-    {
-        for peer_id in peers {
-            if let Some(peer_env_cell) = self.get_peer_env::<str>(peer_id) {
-                peer_env_cell
-                    .borrow_mut()
-                    .data_queue
-                    .push_back(data.clone());
-            }
-        }
     }
 }
