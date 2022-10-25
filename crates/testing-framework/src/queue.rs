@@ -14,11 +14,23 @@
  * limitations under the License.
  */
 
-pub mod asserts;
-pub mod ephemeral;
-pub mod execution;
-pub mod services;
-pub mod transform;
-mod queue;
+use crate::ephemeral::{Data, PeerId};
 
-pub use execution::TestExecutor;
+use std::collections::{VecDeque, HashMap};
+
+/// Per-particle message queue.
+#[derive(Debug, Default)]
+pub(crate) struct Queue {
+    queues: HashMap<PeerId, VecDeque<Data>>,
+}
+
+impl Queue {
+    pub(crate) fn new() -> Self {
+        Default::default()
+    }
+
+    pub(crate) fn get_queue_cell(&mut self, peer_id: PeerId) -> &mut VecDeque<Data>
+    {
+        self.queues.entry(peer_id).or_default()
+    }
+}
