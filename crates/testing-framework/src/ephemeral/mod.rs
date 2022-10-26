@@ -17,7 +17,10 @@
 pub mod neighborhood;
 
 use self::neighborhood::{PeerEnv, PeerSet};
-use crate::services::{services_to_call_service_closure, MarineServiceHandle};
+use crate::{
+    queue::PeerQueueCell,
+    services::{services_to_call_service_closure, MarineServiceHandle},
+};
 
 use air_test_utils::{
     test_runner::{create_avm, TestRunParameters, TestRunner},
@@ -62,8 +65,6 @@ pub type Data = Vec<u8>;
 
 pub struct Peer {
     pub(crate) peer_id: PeerId,
-    // We presume that only one particle is run over the network.
-    prev_data: Data,
     runner: TestRunner,
 }
 
@@ -73,24 +74,20 @@ impl Peer {
         let call_service = services_to_call_service_closure(services);
         let runner = create_avm(call_service, &*peer_id.0);
 
-        Self {
-            peer_id,
-            prev_data: vec![],
-            runner,
-        }
+        Self { peer_id, runner }
     }
 
-    pub fn invoke(
+    pub(crate) fn invoke(
         &mut self,
         air: impl Into<String>,
         data: Data,
         test_run_params: TestRunParameters,
+        queue_cell: &PeerQueueCell,
     ) -> Result<RawAVMOutcome, String> {
-        let mut prev_data = vec![];
-        std::mem::swap(&mut prev_data, &mut self.prev_data);
+        let prev_data = queue_cell.take_prev_data();
         let res = self.runner.call(air, prev_data, data, test_run_params);
         if let Ok(outcome) = &res {
-            self.prev_data = outcome.data.clone();
+            queue_cell.set_prev_data(outcome.data.clone());
         }
         res
     }
@@ -100,7 +97,6 @@ impl std::fmt::Debug for Peer {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Peer")
             .field("peer_id", &self.peer_id)
-            .field("prev_data", &self.prev_data)
             .field("services", &"...")
             .finish()
     }

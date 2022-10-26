@@ -27,9 +27,10 @@ use std::{
     rc::Rc,
 };
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default)]
 pub(crate) struct PeerQueueCell {
-    queue: Rc<RefCell<VecDeque<Data>>>,
+    queue: RefCell<VecDeque<Data>>,
+    data: RefCell<Data>,
 }
 
 impl PeerQueueCell {
@@ -42,13 +43,23 @@ impl PeerQueueCell {
         let mut cell_ref = RefCell::borrow_mut(&self.queue);
         cell_ref.push_back(data);
     }
+
+    pub(crate) fn take_prev_data(&self) -> Data {
+        let cell_ref = RefCell::borrow_mut(&self.data);
+        (*cell_ref).clone()
+    }
+
+    pub(crate) fn set_prev_data(&self, data: Data) {
+        let mut cell_ref = RefCell::borrow_mut(&self.data);
+        *cell_ref = data;
+    }
 }
 
 /// Per-particle message queue.
 #[derive(Debug, Clone, Default)]
 // TODO make it pub(crate) and see what is broken
 pub(crate) struct ExecutionQueue {
-    queues: Rc<RefCell<HashMap<PeerId, PeerQueueCell>>>,
+    queues: Rc<RefCell<HashMap<PeerId, Rc<PeerQueueCell>>>>,
 }
 
 impl ExecutionQueue {
@@ -56,7 +67,7 @@ impl ExecutionQueue {
         Default::default()
     }
 
-    pub(crate) fn get_peer_queue_cell(&self, peer_id: PeerId) -> PeerQueueCell {
+    pub(crate) fn get_peer_queue_cell(&self, peer_id: PeerId) -> Rc<PeerQueueCell> {
         let mut queues_ref = RefCell::borrow_mut(&self.queues);
         queues_ref.entry(peer_id).or_default().clone()
     }
@@ -96,6 +107,8 @@ impl ExecutionQueue {
                 let peer_env_ref = RefCell::borrow(&peer_env_cell);
                 self.get_peer_queue_cell(peer_env_ref.peer.peer_id.clone())
                     .push_data(data.clone());
+            } else {
+                panic!("Unknown peer")
             }
         }
     }

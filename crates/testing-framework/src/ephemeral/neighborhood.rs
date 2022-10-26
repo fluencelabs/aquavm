@@ -178,12 +178,13 @@ impl PeerEnv {
         test_parameters: &TestRunParameters,
     ) -> Option<Result<air_test_utils::RawAVMOutcome, String>> {
         let queue = queue.clone();
-        let maybe_data = queue
-            .get_peer_queue_cell(self.peer.peer_id.clone())
-            .pop_data();
+        let queue_cell = queue.get_peer_queue_cell(self.peer.peer_id.clone());
+        let maybe_data = queue_cell.pop_data();
 
         maybe_data.map(|data| {
-            let res = self.peer.invoke(air, data, test_parameters.clone());
+            let res = self
+                .peer
+                .invoke(air, data, test_parameters.clone(), &queue_cell);
 
             if let Ok(outcome) = &res {
                 queue.distribute_to_peers(network, &outcome.next_peer_pks, &outcome.data)
