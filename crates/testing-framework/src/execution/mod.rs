@@ -15,16 +15,15 @@
  */
 
 use crate::{
-    asserts::ServiceDefinition,
-    ephemeral::{Network, Peer, PeerId},
+    ephemeral::{Network, PeerId},
     queue::ExecutionQueue,
-    services::{results::ResultService, MarineService, MarineServiceHandle},
+    services::MarineServiceHandle,
     transform::{walker::Transformer, Sexp},
 };
 
 use air_test_utils::{test_runner::TestRunParameters, RawAVMOutcome};
 
-use std::{borrow::Borrow, collections::HashMap, hash::Hash, rc::Rc, str::FromStr};
+use std::{borrow::Borrow, hash::Hash, rc::Rc, str::FromStr};
 
 pub struct TestExecutor {
     pub air_script: String,
@@ -47,22 +46,16 @@ impl TestExecutor {
         // validate the AIR script with the standard parser first
         air_parser::parse(annotated_air_script)?;
 
+        let network = Rc::new(Network::new(extra_peers.into_iter(), common_services));
+
         let mut sexp = Sexp::from_str(annotated_air_script)?;
-        let mut walker = Transformer::new();
+        let mut walker = Transformer::new(network.clone());
         walker.transform(&mut sexp);
 
         let init_peer_id = test_parameters.init_peer_id.as_str();
         let transformed_air_script = sexp.to_string();
 
-        let peers = build_peers(
-            common_services,
-            walker.results,
-            walker.peers,
-            PeerId::new(init_peer_id),
-            extra_peers,
-        )?;
-
-        let network = Network::from_peers(peers);
+        network.ensure_peer(init_peer_id);
 
         let queue = ExecutionQueue::new();
         // Seed execution
@@ -70,7 +63,7 @@ impl TestExecutor {
 
         Ok(TestExecutor {
             air_script: transformed_air_script,
-            network: Rc::new(network),
+            network,
             test_parameters,
             queue,
         })
@@ -83,7 +76,7 @@ impl TestExecutor {
     ) -> Result<Self, String> {
         Self::new(
             test_parameters,
-            <_>::default(),
+            vec![],
             std::iter::empty(),
             annotated_air_script,
         )
@@ -98,7 +91,7 @@ impl TestExecutor {
         air_parser::parse(annotated_air_script)?;
 
         let mut sexp = Sexp::from_str(annotated_air_script)?;
-        let mut walker = Transformer::new();
+        let mut walker = Transformer::new(network.clone());
         walker.transform(&mut sexp);
 
         let init_peer_id = test_parameters.init_peer_id.as_str();
@@ -152,33 +145,6 @@ impl TestExecutor {
         self.execution_iter(peer_id)
             .map(|mut it| it.next().unwrap())
     }
-}
-
-fn build_peers(
-    common_services: Vec<MarineServiceHandle>,
-    results: HashMap<u32, ServiceDefinition>,
-    known_peers: std::collections::HashSet<PeerId>,
-    init_peer_id: PeerId,
-    extra_peers: impl IntoIterator<Item = PeerId>,
-) -> Result<Vec<Peer>, String> {
-    let mut result_services: Vec<MarineServiceHandle> =
-        Vec::with_capacity(1 + common_services.len());
-    result_services.push(ResultService::new(results)?.to_handle());
-    result_services.extend(common_services);
-    let result_services = Rc::<[_]>::from(result_services);
-
-    let extra_peers_pairs = extra_peers
-        .into_iter()
-        .chain(std::iter::once(init_peer_id))
-        .map(|peer_id| (peer_id.clone(), Peer::new(peer_id, result_services.clone())));
-    let mut peers = extra_peers_pairs.collect::<HashMap<_, _>>();
-
-    let known_peers_pairs = known_peers
-        .into_iter()
-        .map(|peer_id| (peer_id.clone(), Peer::new(peer_id, result_services.clone())));
-    peers.extend(known_peers_pairs);
-
-    Ok(peers.into_values().collect())
 }
 
 #[cfg(test)]

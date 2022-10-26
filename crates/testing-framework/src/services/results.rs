@@ -17,126 +17,32 @@
 use super::{FunctionOutcome, MarineService};
 use crate::asserts::ServiceDefinition;
 
-use air_test_utils::{
-    prelude::{echo_call_service, unit_call_service},
-    CallRequestParams, CallServiceClosure, CallServiceResult,
-};
-use serde_json::json;
+use air_test_utils::CallRequestParams;
 
-use std::{borrow::Cow, cell::Cell, collections::HashMap, convert::TryInto, time::Duration};
+use std::{cell::RefCell, collections::HashMap, rc::Rc, time::Duration};
 
-pub struct ResultService {
-    results: HashMap<u32, CallServiceClosure>,
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub(crate) struct ResultStore {
+    pub(crate) results: RefCell<HashMap<usize, ServiceDefinition>>,
 }
 
-impl TryInto<CallServiceClosure> for ServiceDefinition {
-    type Error = String;
-
-    fn try_into(self) -> Result<CallServiceClosure, String> {
-        match self {
-            ServiceDefinition::Ok(jvalue) => {
-                Ok(Box::new(move |_| CallServiceResult::ok(jvalue.clone())))
-            }
-            ServiceDefinition::Error(call_result) => Ok(Box::new(move |_| call_result.clone())),
-            ServiceDefinition::SeqOk(call_map) => Ok(seq_ok_closure(call_map)),
-            ServiceDefinition::SeqError(call_map) => Ok(seq_error_closure(call_map)),
-            ServiceDefinition::Behaviour(name) => named_service_closure(name),
-            ServiceDefinition::Map(map) => Ok(map_service_closure(map)),
-        }
+impl ResultStore {
+    pub(crate) fn insert(&self, service_definition: ServiceDefinition) -> Result<usize, String> {
+        let mut results = self.results.borrow_mut();
+        let id = results.len();
+        results.insert(id, service_definition);
+        Ok(id)
     }
 }
 
-fn named_service_closure(name: String) -> Result<CallServiceClosure, String> {
-    match name.as_str() {
-        "echo" => Ok(echo_call_service()),
-        "unit" => Ok(unit_call_service()),
-        _ => Err(format!("unknown service name: {:?}", name)),
-    }
-}
-
-fn seq_ok_closure(call_map: HashMap<String, serde_json::Value>) -> CallServiceClosure {
-    let call_number_seq = Cell::new(0);
-
-    Box::new(move |_| {
-        let call_number = call_number_seq.get();
-        let call_num_str = call_number.to_string();
-        call_number_seq.set(call_number + 1);
-
-        CallServiceResult::ok(
-            call_map
-                .get(&call_num_str)
-                .or_else(|| call_map.get("default"))
-                .unwrap_or_else(|| {
-                    panic!(
-                        "neither value {} nor default value not found in the {:?}",
-                        call_num_str, call_map
-                    )
-                })
-                .clone(),
-        )
-    })
-}
-
-fn seq_error_closure(call_map: HashMap<String, CallServiceResult>) -> CallServiceClosure {
-    let call_number_seq = Cell::new(0);
-
-    Box::new(move |_| {
-        let call_number = call_number_seq.get();
-        let call_num_str = call_number.to_string();
-        call_number_seq.set(call_number + 1);
-
-        call_map
-            .get(&call_num_str)
-            .or_else(|| call_map.get("default"))
-            .unwrap_or_else(|| {
-                panic!(
-                    "neither value {} nor default value not found in the {:?}",
-                    call_num_str, call_map
-                )
-            })
-            .clone()
-    })
-}
-
-fn map_service_closure(map: HashMap<String, serde_json::Value>) -> CallServiceClosure {
-    Box::new(move |args| {
-        let key = args
-            .arguments
-            .get(0)
-            .expect("At least one arugment expected");
-        // Strings are looked up by value, other objects -- by string representation.
-        //
-        // For example, `"key"` is looked up as `"key"`, `5` is looked up as `"5"`, `["test"]` is looked up
-        // as `"[\"test\"]"`.
-        let key_repr = match key {
-            serde_json::Value::String(s) => Cow::Borrowed(s.as_str()),
-            val => Cow::Owned(val.to_string()),
-        };
-        CallServiceResult::ok(json!(map.get(key_repr.as_ref()).cloned()))
-    })
-}
-
-impl ResultService {
-    pub(crate) fn new(results: HashMap<u32, ServiceDefinition>) -> Result<Self, String> {
-        Ok(Self {
-            results: results
-                .into_iter()
-                .map(|(id, service_def)| {
-                    service_def
-                        .try_into()
-                        .map(move |s: CallServiceClosure| (id, s))
-                })
-                .collect::<Result<_, String>>()?,
-        })
-    }
-}
-
-impl MarineService for ResultService {
+impl MarineService for ResultStore {
     fn call(&self, params: CallRequestParams) -> FunctionOutcome {
+        let results = self.results.borrow();
         if let Some((_, suffix)) = params.service_id.split_once("..") {
             if let Ok(key) = suffix.parse() {
-                let service_desc = self.results.get(&key).expect("Unknown result id");
-                FunctionOutcome::ServiceResult(service_desc(params), Duration::ZERO)
+                let service_desc = results.get(&key).expect("Unknown result id");
+                let service_result = service_desc.call(params);
+                FunctionOutcome::ServiceResult(service_result, Duration::ZERO)
             } else {
                 // Pass malformed service names further in a chain
                 FunctionOutcome::NotDefined
@@ -144,5 +50,21 @@ impl MarineService for ResultService {
         } else {
             FunctionOutcome::NotDefined
         }
+    }
+}
+
+pub(crate) struct MarineServiceWrapper<T> {
+    wrapped: Rc<T>,
+}
+
+impl<T> MarineServiceWrapper<T> {
+    pub(crate) fn new(wrapped: Rc<T>) -> Self {
+        Self { wrapped }
+    }
+}
+
+impl<T: MarineService> MarineService for MarineServiceWrapper<T> {
+    fn call(&self, params: CallRequestParams) -> FunctionOutcome {
+        self.wrapped.call(params)
     }
 }

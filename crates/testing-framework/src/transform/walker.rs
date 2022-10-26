@@ -15,21 +15,17 @@
  */
 
 use super::{Call, Sexp};
-use crate::{asserts::ServiceDefinition, ephemeral::PeerId};
+use crate::ephemeral::Network;
 
-use std::collections::{HashMap, HashSet};
-use std::fmt::Write;
+use std::{fmt::Write, rc::Rc};
 
-#[derive(Debug, Default)]
 pub(crate) struct Transformer {
-    cnt: u32,
-    pub(crate) results: HashMap<u32, ServiceDefinition>,
-    pub(crate) peers: HashSet<PeerId>,
+    pub(crate) network: Rc<Network>,
 }
 
 impl Transformer {
-    pub(crate) fn new() -> Self {
-        Default::default()
+    pub(crate) fn new(network: Rc<Network>) -> Self {
+        Self { network }
     }
 
     pub(crate) fn transform(&mut self, sexp: &mut Sexp) {
@@ -47,15 +43,14 @@ impl Transformer {
     fn handle_call(&mut self, call: &mut Call) {
         // collect peers...
         if let Sexp::String(peer_id) = &call.triplet.0 {
-            self.peers.insert(peer_id.clone().into());
+            self.network.ensure_peer(peer_id.clone());
         }
+
+        let result_store = self.network.get_services().get_result_store();
 
         if let Some(service) = &call.service_desc {
             // install a value
-            let call_id = self.cnt;
-            self.cnt += 1;
-
-            self.results.insert(call_id, service.clone());
+            let call_id = result_store.insert(service.clone()).unwrap();
 
             match &mut call.triplet.1 {
                 Sexp::String(ref mut value) => {
@@ -70,21 +65,35 @@ impl Transformer {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::{iter::FromIterator, str::FromStr};
+    use crate::{asserts::ServiceDefinition, ephemeral::PeerId, services::results::ResultStore};
+
+    use std::{
+        collections::{HashMap, HashSet},
+        iter::FromIterator,
+        str::FromStr,
+    };
+
+    impl ResultStore {
+        pub fn into_inner(self) -> HashMap<usize, ServiceDefinition> {
+            self.results.into_inner()
+        }
+    }
 
     #[test]
     fn test_translate_null() {
+        let network = Rc::new(Network::empty());
         let mut tree = Sexp::from_str("(null)").unwrap();
-        let mut transformer = Transformer::new();
+        let mut transformer = Transformer::new(network);
         transformer.transform(&mut tree);
         assert_eq!(tree.to_string(), "(null)");
     }
 
     #[test]
     fn test_translate_call_no_result() {
+        let network = Rc::new(Network::empty());
         let script = r#"(call peer_id ("service_id" func) [])"#;
         let mut tree = Sexp::from_str(script).unwrap();
-        let mut transformer = Transformer::new();
+        let mut transformer = Transformer::new(network);
         transformer.transform(&mut tree);
         assert_eq!(tree.to_string(), script);
     }
@@ -92,19 +101,21 @@ mod tests {
     #[test]
     #[should_panic]
     fn test_translate_call_no_string() {
+        let network = Rc::new(Network::empty());
         // TODO rewrite to Result instead of panic?
         let script = r#"(call "peer_id" (service_id func) [])"#;
         let mut tree = Sexp::from_str(script).unwrap();
-        let mut transformer = Transformer::new();
+        let mut transformer = Transformer::new(network);
         transformer.transform(&mut tree);
         assert_eq!(tree.to_string(), script);
     }
 
     #[test]
     fn test_translate_call_result() {
+        let network = Rc::new(Network::empty());
         let script = r#"(call "peer_id" ("service_id" func) []) ; ok = 42"#;
         let mut tree = Sexp::from_str(script).unwrap();
-        let mut transformer = Transformer::new();
+        let mut transformer = Transformer::new(network.clone());
         transformer.transform(&mut tree);
         assert_eq!(
             tree.to_string(),
@@ -112,14 +123,16 @@ mod tests {
         );
 
         assert_eq!(
-            transformer.results,
+            (*network.get_services().get_result_store())
+                .clone()
+                .into_inner(),
             maplit::hashmap! {
-                0u32 => ServiceDefinition::Ok(serde_json::json!(42)),
+                0usize => ServiceDefinition::Ok(serde_json::json!(42)),
             }
         );
 
         assert_eq!(
-            transformer.peers.into_iter().collect::<Vec<_>>(),
+            network.get_peers().collect::<Vec<_>>(),
             vec![PeerId::new("peer_id")],
         );
     }
@@ -133,8 +146,9 @@ mod tests {
       (call peer_id ("service_id" func) [1]) ; ok=true
 ))"#;
 
+        let network = Rc::new(Network::empty());
         let mut tree = Sexp::from_str(script).unwrap();
-        let mut transformer = Transformer::new();
+        let mut transformer = Transformer::new(network.clone());
         transformer.transform(&mut tree);
         assert_eq!(
             tree.to_string(),
@@ -150,14 +164,16 @@ mod tests {
         );
 
         assert_eq!(
-            transformer.results,
+            (*network.get_services().get_result_store())
+                .clone()
+                .into_inner(),
             maplit::hashmap! {
-                0u32 => ServiceDefinition::Ok(serde_json::json!({"test":"me"})),
+                0usize => ServiceDefinition::Ok(serde_json::json!({"test":"me"})),
                 1 => ServiceDefinition::Ok(serde_json::json!(true)),
             }
         );
 
-        assert!(transformer.peers.is_empty());
+        assert!(network.get_peers().collect::<Vec<_>>().is_empty());
     }
 
     #[test]
@@ -171,12 +187,13 @@ mod tests {
       (call peer_id3 ("service_id" func) [b])
 ))"#;
 
+        let network = Rc::new(Network::empty());
         let mut tree = Sexp::from_str(script).unwrap();
-        let mut transformer = Transformer::new();
+        let mut transformer = Transformer::new(network.clone());
         transformer.transform(&mut tree);
 
         assert_eq!(
-            transformer.peers,
+            network.get_peers().collect::<HashSet<_>>(),
             HashSet::from_iter(vec![PeerId::new("peer_id1"), PeerId::new("peer_id2")]),
         )
     }

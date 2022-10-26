@@ -19,7 +19,7 @@ pub mod neighborhood;
 use self::neighborhood::{PeerEnv, PeerSet};
 use crate::{
     queue::PeerQueueCell,
-    services::{services_to_call_service_closure, MarineServiceHandle},
+    services::{services_to_call_service_closure, MarineServiceHandle, NetworkServices},
 };
 
 use air_test_utils::{
@@ -27,13 +27,7 @@ use air_test_utils::{
     RawAVMOutcome,
 };
 
-use std::{
-    borrow::Borrow,
-    cell::RefCell,
-    collections::{HashMap, HashSet},
-    hash::Hash,
-    rc::Rc,
-};
+use std::{borrow::Borrow, cell::RefCell, collections::HashMap, hash::Hash, rc::Rc};
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct PeerId(Rc<str>);
@@ -102,22 +96,28 @@ impl std::fmt::Debug for Peer {
     }
 }
 
-#[derive(Debug, Default)]
 pub struct Network {
-    peers: HashMap<PeerId, Rc<RefCell<PeerEnv>>>,
-    default_neighborhood: HashSet<PeerId>,
+    peers: RefCell<HashMap<PeerId, Rc<RefCell<PeerEnv>>>>,
+    services: Rc<NetworkServices>,
 }
 
 impl Network {
     pub fn empty() -> Self {
-        Default::default()
+        Self::new(std::iter::empty::<PeerId>(), vec![])
     }
 
-    pub fn new(default_neiborhoud: impl Iterator<Item = impl Into<PeerId>>) -> Self {
-        Self {
+    pub fn new(
+        peers: impl Iterator<Item = impl Into<PeerId>>,
+        common_services: Vec<MarineServiceHandle>,
+    ) -> Self {
+        let network = Self {
             peers: Default::default(),
-            default_neighborhood: default_neiborhoud.map(Into::into).collect(),
+            services: NetworkServices::new(common_services).into(),
+        };
+        for peer_id in peers {
+            network.ensure_peer(peer_id);
         }
+        network
     }
 
     pub fn from_peers(nodes: Vec<Peer>) -> Self {
@@ -133,26 +133,38 @@ impl Network {
         &mut self,
         peer: Peer,
         neighborhood: impl IntoIterator<Item = impl Into<PeerId>>,
-    ) -> &mut PeerEnv {
+    ) {
         let peer_id = peer.peer_id.clone();
         let mut peer_env = PeerEnv::new(peer);
         peer_env.extend_neighborhood(neighborhood.into_iter());
-        self.insert_peer_env_entry(peer_id, peer_env)
+        self.insert_peer_env_entry(peer_id, peer_env);
+    }
+
+    pub fn ensure_peer(&self, peer_id: impl Into<PeerId>) {
+        let peer_id = peer_id.into();
+        let exists = {
+            let peers_ref = self.peers.borrow();
+            peers_ref.contains_key(&peer_id)
+        };
+        if !exists {
+            let peer = Peer::new(peer_id, self.services.get_services());
+            self.add_peer(peer);
+        }
     }
 
     /// Add a peer with default neighborhood.
-    pub fn add_peer(&mut self, peer: Peer) -> &mut PeerEnv {
+    pub fn add_peer(&self, peer: Peer) {
         let peer_id = peer.peer_id.clone();
-        let mut peer_env = PeerEnv::new(peer);
-        peer_env.extend_neighborhood(self.default_neighborhood.iter().cloned());
-        self.insert_peer_env_entry(peer_id, peer_env)
+        let peer_env = PeerEnv::new(peer);
+        self.insert_peer_env_entry(peer_id, peer_env);
     }
 
-    fn insert_peer_env_entry(&mut self, peer_id: PeerId, peer_env: PeerEnv) -> &mut PeerEnv {
+    fn insert_peer_env_entry(&self, peer_id: PeerId, peer_env: PeerEnv) {
+        let mut peers_ref = self.peers.borrow_mut();
         let peer_env = Rc::new(peer_env.into());
         // It will be simplified with entry_insert stabilization
         // https://github.com/rust-lang/rust/issues/65225
-        let cell = match self.peers.entry(peer_id) {
+        match peers_ref.entry(peer_id) {
             std::collections::hash_map::Entry::Occupied(ent) => {
                 let cell = ent.into_mut();
                 *cell = peer_env;
@@ -160,8 +172,6 @@ impl Network {
             }
             std::collections::hash_map::Entry::Vacant(ent) => ent.insert(peer_env),
         };
-        // never panics because Rc have been just created and there's just single reference
-        Rc::get_mut(cell).unwrap().get_mut()
     }
 
     pub fn set_peer_failed<Id>(&mut self, peer_id: &Id, failed: bool)
@@ -169,7 +179,8 @@ impl Network {
         PeerId: Borrow<Id>,
         Id: Hash + Eq + ?Sized,
     {
-        self.peers
+        let mut peers_ref = self.peers.borrow_mut();
+        peers_ref
             .get_mut(peer_id)
             .expect("unknown peer")
             .as_ref()
@@ -182,7 +193,8 @@ impl Network {
         PeerId: Borrow<Id>,
         Id: Hash + Eq + ?Sized,
     {
-        self.peers
+        let mut peers_ref = self.peers.borrow_mut();
+        peers_ref
             .get_mut(source_peer_id)
             .expect("unknown peer")
             .as_ref()
@@ -198,7 +210,8 @@ impl Network {
         PeerId: Borrow<Id2>,
         Id2: Hash + Eq + ?Sized,
     {
-        self.peers
+        let mut peers_ref = self.peers.borrow_mut();
+        peers_ref
             .get_mut(source_peer_id)
             .expect("unknown peer")
             .as_ref()
@@ -214,6 +227,16 @@ impl Network {
         PeerId: Borrow<Id>,
         Id: Hash + Eq + ?Sized,
     {
-        self.peers.get(peer_id).cloned()
+        let peers_ref = self.peers.borrow();
+        peers_ref.get(peer_id).cloned()
+    }
+
+    pub(crate) fn get_services(&self) -> Rc<NetworkServices> {
+        self.services.clone()
+    }
+
+    pub fn get_peers(&self) -> impl Iterator<Item = PeerId> {
+        let peers_ref = self.peers.borrow();
+        peers_ref.keys().cloned().collect::<Vec<_>>().into_iter()
     }
 }
