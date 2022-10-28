@@ -81,7 +81,7 @@ mod tests {
 
     #[test]
     fn test_translate_null() {
-        let network = Rc::new(Network::empty());
+        let network = Network::empty();
         let mut tree = Sexp::from_str("(null)").unwrap();
         let mut transformer = Transformer::new(network);
         transformer.transform(&mut tree);
@@ -90,7 +90,7 @@ mod tests {
 
     #[test]
     fn test_translate_call_no_result() {
-        let network = Rc::new(Network::empty());
+        let network = Network::empty();
         let script = r#"(call peer_id ("service_id" func) [])"#;
         let mut tree = Sexp::from_str(script).unwrap();
         let mut transformer = Transformer::new(network);
@@ -101,7 +101,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn test_translate_call_no_string() {
-        let network = Rc::new(Network::empty());
+        let network = Network::empty();
         // TODO rewrite to Result instead of panic?
         let script = r#"(call "peer_id" (service_id func) [])"#;
         let mut tree = Sexp::from_str(script).unwrap();
@@ -112,7 +112,7 @@ mod tests {
 
     #[test]
     fn test_translate_call_result() {
-        let network = Rc::new(Network::empty());
+        let network = Network::empty();
         let script = r#"(call "peer_id" ("service_id" func) []) ; ok = 42"#;
         let mut tree = Sexp::from_str(script).unwrap();
         let mut transformer = Transformer::new(network.clone());
@@ -146,7 +146,7 @@ mod tests {
       (call peer_id ("service_id" func) [1]) ; ok=true
 ))"#;
 
-        let network = Rc::new(Network::empty());
+        let network = Network::empty();
         let mut tree = Sexp::from_str(script).unwrap();
         let mut transformer = Transformer::new(network.clone());
         transformer.transform(&mut tree);
@@ -187,7 +187,7 @@ mod tests {
       (call peer_id3 ("service_id" func) [b])
 ))"#;
 
-        let network = Rc::new(Network::empty());
+        let network = Network::empty();
         let mut tree = Sexp::from_str(script).unwrap();
         let mut transformer = Transformer::new(network.clone());
         transformer.transform(&mut tree);

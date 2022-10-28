@@ -46,7 +46,7 @@ impl TestExecutor {
         // validate the AIR script with the standard parser first
         air_parser::parse(annotated_air_script)?;
 
-        let network = Rc::new(Network::new(extra_peers.into_iter(), common_services));
+        let network = Network::new(extra_peers.into_iter(), common_services);
 
         let mut sexp = Sexp::from_str(annotated_air_script)?;
         let mut walker = Transformer::new(network.clone());

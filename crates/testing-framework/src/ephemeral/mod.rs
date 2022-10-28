@@ -102,26 +102,26 @@ pub struct Network {
 }
 
 impl Network {
-    pub fn empty() -> Self {
+    pub fn empty() -> Rc<Self> {
         Self::new(std::iter::empty::<PeerId>(), vec![])
     }
 
     pub fn new(
         peers: impl Iterator<Item = impl Into<PeerId>>,
         common_services: Vec<MarineServiceHandle>,
-    ) -> Self {
-        let network = Self {
+    ) -> Rc<Self> {
+        let network = Rc::new(Self {
             peers: Default::default(),
             services: NetworkServices::new(common_services).into(),
-        };
+        });
         for peer_id in peers {
             network.ensure_peer(peer_id);
         }
         network
     }
 
-    pub fn from_peers(nodes: Vec<Peer>) -> Self {
-        let mut network = Self::empty();
+    pub fn from_peers(nodes: Vec<Peer>) -> Rc<Self> {
+        let network = Self::empty();
         let neighborhood: PeerSet = nodes.iter().map(|peer| peer.peer_id.clone()).collect();
         for peer in nodes {
             network.add_peer_env(peer, neighborhood.iter().cloned());
@@ -130,17 +130,17 @@ impl Network {
     }
 
     pub fn add_peer_env(
-        &mut self,
+        self: &Rc<Self>,
         peer: Peer,
         neighborhood: impl IntoIterator<Item = impl Into<PeerId>>,
     ) {
         let peer_id = peer.peer_id.clone();
-        let mut peer_env = PeerEnv::new(peer);
+        let mut peer_env = PeerEnv::new(peer, self);
         peer_env.extend_neighborhood(neighborhood.into_iter());
         self.insert_peer_env_entry(peer_id, peer_env);
     }
 
-    pub fn ensure_peer(&self, peer_id: impl Into<PeerId>) {
+    pub fn ensure_peer(self: &Rc<Self>, peer_id: impl Into<PeerId>) {
         let peer_id = peer_id.into();
         let exists = {
             let peers_ref = self.peers.borrow();
@@ -153,9 +153,9 @@ impl Network {
     }
 
     /// Add a peer with default neighborhood.
-    pub fn add_peer(&self, peer: Peer) {
+    pub fn add_peer(self: &Rc<Self>, peer: Peer) {
         let peer_id = peer.peer_id.clone();
-        let peer_env = PeerEnv::new(peer);
+        let peer_env = PeerEnv::new(peer, self);
         self.insert_peer_env_entry(peer_id, peer_env);
     }
 
