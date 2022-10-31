@@ -297,7 +297,6 @@ jobs:
         if: always()
         run: |
           cat <<'SNAPSHOT' >> $GITHUB_STEP_SUMMARY
-          ## air-interpreter-wasm version is [${{ env.VERSION }}](https://crates.fluence.dev/#/crate?name=air-interpreter-wasm&version=${{ env.VERSION }})
           ## air-beautify-wasm version is [${{ env.VERSION }}](https://npm.fluence.dev/-/web/detail/@fluencelabs/air_beautify/v/${{ env.VERSION }})
           To use it run:
           ```shell
