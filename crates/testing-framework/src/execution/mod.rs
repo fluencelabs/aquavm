@@ -18,21 +18,38 @@ use crate::{
     ephemeral::{Network, PeerId},
     queue::ExecutionQueue,
     services::MarineServiceHandle,
-    transform::{walker::Transformer, Sexp},
+    transform::walker::Transformee,
 };
 
 use air_test_utils::{test_runner::TestRunParameters, RawAVMOutcome};
 
-use std::{borrow::Borrow, hash::Hash, rc::Rc, str::FromStr};
+use std::{borrow::Borrow, hash::Hash, rc::Rc};
 
 pub struct TestExecutor {
-    pub air_script: String,
-    pub network: Rc<Network>,
-    pub test_parameters: TestRunParameters,
+    transformee: Transformee,
+    test_parameters: TestRunParameters,
     queue: ExecutionQueue,
 }
 
 impl TestExecutor {
+    pub fn from_transformee(
+        test_parameters: TestRunParameters,
+        transformee: Transformee,
+    ) -> Result<Self, String> {
+        let network = transformee.get_network();
+        let init_peer_id = test_parameters.init_peer_id.as_str();
+        network.ensure_peer(init_peer_id);
+
+        let queue = ExecutionQueue::new();
+        // Seed execution
+        queue.distribute_to_peers(&network, &[init_peer_id], &<_>::default());
+
+        Ok(Self {
+            transformee,
+            test_parameters,
+            queue,
+        })
+    }
     /// Create execution from the annotated air script.
     ///
     /// `extra_peers` allows you to define peers that are not mentioned in the annotated script
@@ -43,30 +60,10 @@ impl TestExecutor {
         extra_peers: impl IntoIterator<Item = PeerId>,
         annotated_air_script: &str,
     ) -> Result<Self, String> {
-        // validate the AIR script with the standard parser first
-        air_parser::parse(annotated_air_script)?;
-
         let network = Network::new(extra_peers.into_iter(), common_services);
+        let transformee = Transformee::new(annotated_air_script, network)?;
 
-        let mut sexp = Sexp::from_str(annotated_air_script)?;
-        let mut walker = Transformer::new(network.clone());
-        walker.transform(&mut sexp);
-
-        let init_peer_id = test_parameters.init_peer_id.as_str();
-        let transformed_air_script = sexp.to_string();
-
-        network.ensure_peer(init_peer_id);
-
-        let queue = ExecutionQueue::new();
-        // Seed execution
-        queue.distribute_to_peers(&network, &[init_peer_id], &<_>::default());
-
-        Ok(TestExecutor {
-            air_script: transformed_air_script,
-            network,
-            test_parameters,
-            queue,
-        })
+        Self::from_transformee(test_parameters, transformee)
     }
 
     /// Simple constructor where everything is generated from the annotated_air_script.
@@ -87,26 +84,9 @@ impl TestExecutor {
         network: Rc<Network>,
         annotated_air_script: &str,
     ) -> Result<Self, String> {
-        // validate the AIR script with the standard parser first
-        air_parser::parse(annotated_air_script)?;
+        let transformee = Transformee::new(annotated_air_script, network)?;
 
-        let mut sexp = Sexp::from_str(annotated_air_script)?;
-        let mut walker = Transformer::new(network.clone());
-        walker.transform(&mut sexp);
-
-        let init_peer_id = test_parameters.init_peer_id.as_str();
-        let transformed_air_script = sexp.to_string();
-
-        let queue = ExecutionQueue::new();
-        // Seed execution
-        queue.distribute_to_peers(&network, &[init_peer_id], &<_>::default());
-
-        Ok(TestExecutor {
-            air_script: transformed_air_script,
-            network,
-            test_parameters,
-            queue,
-        })
+        Self::from_transformee(test_parameters, transformee)
     }
 
     /// Return Iterator for handling all the queued datas
@@ -120,8 +100,8 @@ impl TestExecutor {
         Id: Eq + Hash + ?Sized,
     {
         self.queue.execution_iter(
-            &self.air_script,
-            self.network.clone(),
+            &self.transformee,
+            self.transformee.get_network(),
             &self.test_parameters,
             peer_id,
         )

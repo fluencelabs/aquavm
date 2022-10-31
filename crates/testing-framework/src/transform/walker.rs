@@ -17,18 +17,52 @@
 use super::{Call, Sexp};
 use crate::ephemeral::Network;
 
-use std::{fmt::Write, rc::Rc};
+use std::{fmt::Write, ops::Deref, rc::Rc, str::FromStr};
 
-pub(crate) struct Transformer {
-    pub(crate) network: Rc<Network>,
+#[derive(Clone)]
+pub struct Transformee {
+    network: Rc<Network>,
+    tranformed: Rc<str>,
 }
 
-impl Transformer {
-    pub(crate) fn new(network: Rc<Network>) -> Self {
-        Self { network }
+impl Transformee {
+    pub fn new(annotated_air_script: &str, network: Rc<Network>) -> Result<Self, String> {
+        // validate the AIR script with the standard parser first
+        air_parser::parse(annotated_air_script)?;
+
+        Self::new_unchecked(annotated_air_script, network)
     }
 
-    pub(crate) fn transform(&mut self, sexp: &mut Sexp) {
+    pub fn new_unchecked(annotated_air_script: &str, network: Rc<Network>) -> Result<Self, String> {
+        let transformer = Transformer { network: &network };
+        let mut sexp = Sexp::from_str(annotated_air_script)?;
+        transformer.transform(&mut sexp);
+
+        Ok(Self {
+            network,
+            tranformed: Rc::from(sexp.to_string().as_str()),
+        })
+    }
+
+    pub(crate) fn get_network(&self) -> Rc<Network> {
+        self.network.clone()
+    }
+}
+
+impl Deref for Transformee {
+    type Target = str;
+
+    fn deref(&self) -> &Self::Target {
+        &self.tranformed
+    }
+}
+
+struct Transformer<'net> {
+    network: &'net Rc<Network>,
+}
+
+impl Transformer<'_> {
+    pub(crate) fn transform(&self, sexp: &mut Sexp) {
         match sexp {
             Sexp::Call(call) => self.handle_call(call),
             Sexp::List(children) => {
@@ -40,7 +74,7 @@ impl Transformer {
         }
     }
 
-    fn handle_call(&mut self, call: &mut Call) {
+    fn handle_call(&self, call: &mut Call) {
         // collect peers...
         if let Sexp::String(peer_id) = &call.triplet.0 {
             self.network.ensure_peer(peer_id.clone());
@@ -70,7 +104,6 @@ mod tests {
     use std::{
         collections::{HashMap, HashSet},
         iter::FromIterator,
-        str::FromStr,
     };
 
     impl ResultStore {
@@ -82,20 +115,16 @@ mod tests {
     #[test]
     fn test_translate_null() {
         let network = Network::empty();
-        let mut tree = Sexp::from_str("(null)").unwrap();
-        let mut transformer = Transformer::new(network);
-        transformer.transform(&mut tree);
-        assert_eq!(tree.to_string(), "(null)");
+        let transformee = Transformee::new("(null)", network).unwrap();
+        assert_eq!(&*transformee, "(null)");
     }
 
     #[test]
     fn test_translate_call_no_result() {
         let network = Network::empty();
         let script = r#"(call peer_id ("service_id" func) [])"#;
-        let mut tree = Sexp::from_str(script).unwrap();
-        let mut transformer = Transformer::new(network);
-        transformer.transform(&mut tree);
-        assert_eq!(tree.to_string(), script);
+        let transformee = Transformee::new_unchecked(script, network).unwrap();
+        assert_eq!(&*transformee, script);
     }
 
     #[test]
@@ -104,21 +133,17 @@ mod tests {
         let network = Network::empty();
         // TODO rewrite to Result instead of panic?
         let script = r#"(call "peer_id" (service_id func) [])"#;
-        let mut tree = Sexp::from_str(script).unwrap();
-        let mut transformer = Transformer::new(network);
-        transformer.transform(&mut tree);
-        assert_eq!(tree.to_string(), script);
+        let transformee = Transformee::new(script, network).unwrap();
+        assert_eq!(&*transformee, script);
     }
 
     #[test]
     fn test_translate_call_result() {
         let network = Network::empty();
         let script = r#"(call "peer_id" ("service_id" func) []) ; ok = 42"#;
-        let mut tree = Sexp::from_str(script).unwrap();
-        let mut transformer = Transformer::new(network.clone());
-        transformer.transform(&mut tree);
+        let transformer = Transformee::new_unchecked(script, network.clone()).unwrap();
         assert_eq!(
-            tree.to_string(),
+            &*transformer,
             r#"(call "peer_id" ("service_id..0" func) [])"#
         );
 
@@ -147,11 +172,9 @@ mod tests {
 ))"#;
 
         let network = Network::empty();
-        let mut tree = Sexp::from_str(script).unwrap();
-        let mut transformer = Transformer::new(network.clone());
-        transformer.transform(&mut tree);
+        let transformee = Transformee::new_unchecked(script, network.clone()).unwrap();
         assert_eq!(
-            tree.to_string(),
+            &*transformee,
             concat!(
                 "(seq ",
                 r#"(call peer_id ("service_id..0" func) [a 11])"#,
@@ -188,9 +211,7 @@ mod tests {
 ))"#;
 
         let network = Network::empty();
-        let mut tree = Sexp::from_str(script).unwrap();
-        let mut transformer = Transformer::new(network.clone());
-        transformer.transform(&mut tree);
+        let _ = Transformee::new_unchecked(script, network.clone());
 
         assert_eq!(
             network.get_peers().collect::<HashSet<_>>(),
