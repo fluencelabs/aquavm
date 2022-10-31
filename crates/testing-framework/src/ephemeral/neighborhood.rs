@@ -99,7 +99,9 @@ impl Neighborhood {
         Id: Eq + Hash + ?Sized,
     {
         let network = self.network.upgrade().expect(EXPECT_VALID_NETWORK);
-        if network.get_peer_env(target).is_some() || self.altered.get(target) == Some(&AlterState::Added) {
+        if network.get_peer_env(target).is_some()
+            || self.altered.get(target) == Some(&AlterState::Added)
+        {
             !self.unreachable.contains(target)
         } else {
             false
@@ -113,10 +115,7 @@ impl std::iter::IntoIterator for &Neighborhood {
     type IntoIter = std::collections::hash_set::IntoIter<PeerId>;
 
     fn into_iter(self) -> Self::IntoIter {
-        let network = self
-            .network
-            .upgrade()
-            .expect(EXPECT_VALID_NETWORK);
+        let network = self.network.upgrade().expect(EXPECT_VALID_NETWORK);
         let mut peers: HashSet<_> = network
             .get_peers()
             .filter(|peer| self.altered.get(peer) != Some(&AlterState::Removed))
