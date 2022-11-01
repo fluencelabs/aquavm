@@ -33,14 +33,18 @@ pub enum PreparationError {
 
     /// Errors occurred on executed trace deserialization.
     #[error(
-        "an error occurred while executed trace deserialization on {1:?}:\n{0:?}.\
-    Probably it's a data of an old version that can't be converted to '{}'",
+        "an error occurred while executed trace deserialization: {0:?}.\
+    Probably it's a data of an old version that can't be converted to '{}'.\n\
+    Data: {1:?}",
         data_version()
     )]
     DataDeFailed(SerdeJsonError, Vec<u8>),
 
     /// Error occurred on call results deserialization.
-    #[error("error occurred while deserialize call results: {1:?}:\n{0:?}")]
+    #[error(
+        "error occurred while deserialize call results: {0:?}.\n\
+    Call results: {1:?}"
+    )]
     CallResultsDeFailed(SerdeJsonError, Vec<u8>),
 
     /// Error occurred when a version of interpreter produced supplied data is less then minimal.
