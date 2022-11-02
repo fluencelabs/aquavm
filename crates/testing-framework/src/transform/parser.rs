@@ -88,13 +88,24 @@ fn parse_sexp_list(inp: Input<'_>) -> IResult<Input<'_>, Sexp, ParseError<'_>> {
         "within generic list",
         preceded(
             terminated(tag("("), sexp_multispace0),
-            cut(terminated(
-                map(separated_list0(sexp_multispace1, parse_sexp), Sexp::list),
-                preceded(
-                    sexp_multispace0,
-                    context("closing parentheses not found", tag(")")),
-                ),
-            )),
+            map_res(
+                cut(pair(
+                    map(separated_list0(sexp_multispace1, parse_sexp), Sexp::list),
+                    preceded(
+                        preceded(
+                            sexp_multispace0,
+                            context("closing parentheses not found", tag(")")),
+                        ),
+                        parse_annotation_comment,
+                    ),
+                )),
+                |(mut sexp, annotation)| {
+                    if let Some(service_definition) = annotation {
+                        sexp.inject(service_definition)?;
+                    }
+                    Ok::<_, String>(sexp)
+                },
+            ),
         ),
     )(inp)
 }
@@ -785,6 +796,79 @@ mod tests {
                     service_desc: None,
                 }),
             ])),
+        );
+    }
+
+    #[test]
+    fn test_call_with_annotation_last_form() {
+        let res = Sexp::from_str(
+            r#"(par
+  (call peerid ("serv" "func") [a b] var)
+  (call peerid2 ("serv" "func") [])) ; ok=42
+"#,
+        );
+        assert_eq!(
+            res,
+            Ok(Sexp::List(vec![
+                Sexp::symbol("par"),
+                Sexp::Call(Call {
+                    triplet: Box::new((
+                        Sexp::symbol("peerid"),
+                        Sexp::string("serv"),
+                        Sexp::string("func"),
+                    )),
+                    args: vec![Sexp::symbol("a"), Sexp::symbol("b")],
+                    var: Some(Box::new(Sexp::symbol("var"))),
+                    service_desc: None,
+                }),
+                Sexp::Call(Call {
+                    triplet: Box::new((
+                        Sexp::symbol("peerid2"),
+                        Sexp::string("serv"),
+                        Sexp::string("func"),
+                    )),
+                    args: vec![],
+                    var: None,
+                    service_desc: Some(ServiceDefinition::Ok(json!(42))),
+                }),
+            ]))
+        );
+    }
+    #[test]
+    fn test_call_with_annotation_last_form_multiline() {
+        let res = Sexp::from_str(
+            r#"(par
+  (call peerid ("serv" "func") [a b] var)
+  (call peerid2 ("serv" "func") [])) (#
+    ok=42
+  #)
+"#,
+        );
+        assert_eq!(
+            res,
+            Ok(Sexp::List(vec![
+                Sexp::symbol("par"),
+                Sexp::Call(Call {
+                    triplet: Box::new((
+                        Sexp::symbol("peerid"),
+                        Sexp::string("serv"),
+                        Sexp::string("func"),
+                    )),
+                    args: vec![Sexp::symbol("a"), Sexp::symbol("b")],
+                    var: Some(Box::new(Sexp::symbol("var"))),
+                    service_desc: None,
+                }),
+                Sexp::Call(Call {
+                    triplet: Box::new((
+                        Sexp::symbol("peerid2"),
+                        Sexp::string("serv"),
+                        Sexp::string("func"),
+                    )),
+                    args: vec![],
+                    var: None,
+                    service_desc: Some(ServiceDefinition::Ok(json!(42))),
+                }),
+            ]))
         );
     }
 }
