@@ -40,28 +40,38 @@ impl FromStr for ServiceDefinition {
 pub fn parse_kw(inp: &str) -> IResult<&str, ServiceDefinition, ParseError> {
     use nom::branch::alt;
     use nom::bytes::complete::tag;
-    use nom::combinator::{cut, map_res, rest};
+    use nom::character::complete::alphanumeric1;
+    use nom::combinator::{cut, map_res, recognize};
     use nom::error::context;
     use nom::sequence::separated_pair;
 
     let equal = || delim_ws(tag("="));
+    let json_value = || {
+        cut(context(
+            "result value has to be a valid JSON",
+            recognize(super::json::json_value),
+        ))
+    };
+    let json_map = || {
+        cut(context(
+            "result value has to be a valid JSON hash",
+            recognize(super::json::hash),
+        ))
+    };
 
     delim_ws(map_res(
-        separated_pair(
-            alt((
-                tag(ServiceTagName::Ok.as_ref()),
-                tag(ServiceTagName::Error.as_ref()),
-                tag(ServiceTagName::SeqOk.as_ref()),
-                tag(ServiceTagName::SeqError.as_ref()),
+        alt((
+            separated_pair(tag(ServiceTagName::Ok.as_ref()), equal(), json_value()),
+            separated_pair(tag(ServiceTagName::Error.as_ref()), equal(), json_map()),
+            separated_pair(tag(ServiceTagName::SeqOk.as_ref()), equal(), json_map()),
+            separated_pair(tag(ServiceTagName::SeqError.as_ref()), equal(), json_map()),
+            separated_pair(
                 tag(ServiceTagName::Behaviour.as_ref()),
-                tag(ServiceTagName::Map.as_ref()),
-            )),
-            equal(),
-            cut(context(
-                "result value is consumed to end and has to be a valid JSON",
-                rest,
-            )),
-        ),
+                equal(),
+                cut(alphanumeric1),
+            ),
+            separated_pair(tag(ServiceTagName::Map.as_ref()), equal(), json_map()),
+        )),
         |(tag, value): (&str, &str)| {
             let value = value.trim();
             match ServiceTagName::from_str(tag) {
@@ -220,5 +230,23 @@ mod tests {
                 "a".to_owned() => json!(2)
             }))
         );
+    }
+
+    #[test]
+    fn test_composable() {
+        use nom::bytes::complete::tag;
+        use nom::multi::separated_list1;
+
+        let res = separated_list1(tag(";"), parse_kw)(r#"ok={"ret_code": 0};map={"default": 42}"#);
+        assert_eq!(
+            res,
+            Ok((
+                "",
+                vec![
+                    ServiceDefinition::Ok(json!({"ret_code":0,})),
+                    ServiceDefinition::Map(maplit::hashmap! {"default".to_owned()=>json!(42),})
+                ]
+            ))
+        )
     }
 }
