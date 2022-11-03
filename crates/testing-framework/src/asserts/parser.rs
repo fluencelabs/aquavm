@@ -23,7 +23,7 @@ use nom::{error::VerboseError, IResult};
 
 use std::{collections::HashMap, str::FromStr};
 
-type ParseError<'inp> = VerboseError<&'inp str>;
+pub(crate) type ParseError<'inp> = VerboseError<&'inp str>;
 
 impl FromStr for ServiceDefinition {
     type Err = String;

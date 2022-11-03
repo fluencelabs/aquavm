@@ -1,0 +1,211 @@
+/*
+ * Copyright 2022 Fluence Labs Limited
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+use crate::services::{FunctionOutcome, JValue, MarineService};
+
+use air_test_utils::{
+    prelude::{echo_call_service, unit_call_service},
+    CallServiceResult, SecurityTetraplet,
+};
+use nom::IResult;
+use serde_json::json;
+use strum::{AsRefStr, EnumDiscriminants, EnumString};
+
+#[derive(Debug, Clone, PartialEq, Eq, EnumDiscriminants)]
+#[strum_discriminants(strum(serialize_all = "snake_case"))]
+#[strum_discriminants(derive(AsRefStr, EnumString))]
+#[strum_discriminants(name(BehaviorTagName))]
+pub(crate) enum Behavior {
+    Echo,
+    Unit,
+    Service,
+    Function,
+    Arg(usize),
+    Tetraplet(SecurityTetrapletField),
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq, AsRefStr, EnumString)]
+#[strum(serialize_all = "snake_case")]
+pub(crate) enum SecurityTetrapletField {
+    PeerPk,
+    ServiceId,
+    FunctionName,
+    JsonPath,
+}
+
+fn parse_behaviour(inp: &str) -> IResult<&str, Behavior, super::parser::ParseError> {
+    use nom::branch::alt;
+    use nom::bytes::complete::tag;
+    use nom::character::complete::u32 as u32_parse;
+    use nom::combinator::{map, value};
+    use nom::sequence::{pair, preceded};
+
+    alt((
+        value(Behavior::Echo, tag(BehaviorTagName::Echo.as_ref())),
+        value(Behavior::Unit, tag(BehaviorTagName::Unit.as_ref())),
+        value(Behavior::Function, tag(BehaviorTagName::Function.as_ref())),
+        value(Behavior::Service, tag(BehaviorTagName::Service.as_ref())),
+        map(
+            preceded(
+                pair(tag(BehaviorTagName::Arg.as_ref()), tag(".")),
+                u32_parse,
+            ),
+            |n| Behavior::Arg(n as _),
+        ),
+        map(
+            preceded(
+                pair(tag(BehaviorTagName::Tetraplet.as_ref()), tag(".")),
+                parse_tetraplet_field,
+            ),
+            Behavior::Tetraplet,
+        ),
+    ))(inp)
+}
+
+fn parse_tetraplet_field(
+    inp: &str,
+) -> IResult<&str, SecurityTetrapletField, super::parser::ParseError> {
+    use nom::branch::alt;
+    use nom::bytes::complete::tag;
+    use nom::combinator::value;
+
+    use SecurityTetrapletField::*;
+
+    alt((
+        value(PeerPk, tag(PeerPk.as_ref())),
+        value(ServiceId, tag(ServiceId.as_ref())),
+        value(FunctionName, tag(FunctionName.as_ref())),
+        value(JsonPath, tag(JsonPath.as_ref())),
+    ))(inp)
+}
+
+impl MarineService for Behavior {
+    fn call(&self, params: air_test_utils::CallRequestParams) -> FunctionOutcome {
+        use Behavior::*;
+
+        match self {
+            Echo => FunctionOutcome::from_service_result(echo_call_service()(params)),
+            Unit => FunctionOutcome::from_service_result(unit_call_service()(params)),
+            Function => FunctionOutcome::from_value(params.function_name.into()),
+            Service => FunctionOutcome::from_value(params.service_id.into()),
+            Arg(n) => match params.arguments.get(*n) {
+                Some(val) => FunctionOutcome::from_value(val.clone()),
+                None => FunctionOutcome::from_service_result(CallServiceResult::err(
+                    // TODO test-utils uses just json!{ "default" } value.
+                    42,
+                    json!("not enough arguments"),
+                )),
+            },
+            Tetraplet(field) => FunctionOutcome::from_value(extract_from_tetraplet(
+                &params.tetraplets[0][0],
+                *field,
+            )),
+        }
+    }
+}
+
+pub(crate) fn extract_from_tetraplet(
+    tetraplet: &SecurityTetraplet,
+    field: SecurityTetrapletField,
+) -> JValue {
+    use SecurityTetrapletField::*;
+
+    let value = match field {
+        PeerPk => tetraplet.peer_pk.clone(),
+        ServiceId => tetraplet.service_id.clone(),
+        FunctionName => tetraplet.function_name.clone(),
+        JsonPath => tetraplet.json_path.clone(),
+    };
+    JValue::String(value)
+}
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_behavior_echo() {
+        let res = parse_behaviour("echo");
+        assert_eq!(
+            res,
+            Ok(("", Behavior::Echo)),
+            "{:?}",
+            BehaviorTagName::Echo.as_ref()
+        );
+    }
+
+    #[test]
+    fn test_parse_behavior_unit() {
+        let res = parse_behaviour("unit");
+        assert_eq!(res, Ok(("", Behavior::Unit)));
+    }
+
+    #[test]
+    fn test_parse_behavior_service() {
+        let res = parse_behaviour("service");
+        assert_eq!(res, Ok(("", Behavior::Service)));
+    }
+
+    #[test]
+    fn test_parse_behavior_function() {
+        let res = parse_behaviour("function");
+        assert_eq!(res, Ok(("", Behavior::Function)));
+    }
+
+    #[test]
+    fn test_parse_behavior_arg() {
+        let res = parse_behaviour("arg.42");
+        assert_eq!(res, Ok(("", Behavior::Arg(42))));
+    }
+
+    #[test]
+    fn test_parse_behavior_tetraplet_peer_pk() {
+        let res = parse_behaviour("tetraplet.peer_pk");
+        assert_eq!(
+            res,
+            Ok(("", Behavior::Tetraplet(SecurityTetrapletField::PeerPk)))
+        );
+    }
+
+    #[test]
+    fn test_parse_behavior_tetraplet_service_id() {
+        let res = parse_behaviour("tetraplet.service_id");
+        assert_eq!(
+            res,
+            Ok(("", Behavior::Tetraplet(SecurityTetrapletField::ServiceId)))
+        );
+    }
+
+    #[test]
+    fn test_parse_behavior_tetraplet_function_name() {
+        let res = parse_behaviour("tetraplet.function_name");
+        assert_eq!(
+            res,
+            Ok((
+                "",
+                Behavior::Tetraplet(SecurityTetrapletField::FunctionName)
+            ))
+        );
+    }
+
+    #[test]
+    fn test_parse_behavior_tetraplet_json_path() {
+        let res = parse_behaviour("tetraplet.json_path");
+        assert_eq!(
+            res,
+            Ok(("", Behavior::Tetraplet(SecurityTetrapletField::JsonPath)))
+        );
+    }
+}

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+mod behavior;
 mod json;
 pub(crate) mod parser;
 
