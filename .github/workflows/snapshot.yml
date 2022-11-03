@@ -88,10 +88,10 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
 
       - name: Set dependencies
-        if: inputs.dependencies != ''
+        if: inputs.cargo-dependencies != ''
         uses: fluencelabs/github-actions/cargo-set-dependency@update-cargo-set-dependency
         with:
-          dependencies: ${{ inputs.dependencies }}
+          dependencies: ${{ inputs.cargo-dependencies }}
 
       - name: Download air-interpreter-wasm binary
         uses: actions/download-artifact@v3
