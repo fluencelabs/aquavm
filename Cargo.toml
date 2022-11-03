@@ -29,9 +29,6 @@ exclude = [
     "tools/wasm/wasm-air-beautify",
 ]
 
-[workspace.dependencies]
-marine-runtime = "0.23.0"
-
 [profile.release]
 opt-level = 3
 # since the interpreter in actively development stage, these settings are true at least for a while
