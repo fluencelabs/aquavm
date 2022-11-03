@@ -11,12 +11,12 @@ on:
         description: "Cargo dependencies map"
         type: string
     outputs:
-      avm-version:
-        description: "@fluencelabs/avm version"
-        value: ${{ jobs.publish-avm.outputs.version }}
       cargo-version:
         description: "cargo snapshot version"
         value: ${{ jobs.cargo-snapshot.outputs.version }}
+      avm-version:
+        description: "@fluencelabs/avm version"
+        value: ${{ jobs.publish-avm.outputs.version }}
 
 env:
   FORCE_COLOR: true
