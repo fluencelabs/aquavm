@@ -7,7 +7,6 @@ edition = "2018"
 license = "Apache-2.0"
 documentation = "https://docs.rs/avm-interface"
 repository = "https://github.com/fluencelabs/aquavm/tree/master/avm/interface"
-publish = true # this crate is used by the node
 keywords = ["fluence", "air", "webassembly", "programming-language"]
 categories = ["wasm"]
 

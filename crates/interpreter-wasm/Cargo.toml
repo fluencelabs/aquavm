@@ -12,7 +12,6 @@ include = [
 ]
 documentation = "https://docs.rs/air-interpreter-wasm"
 repository = "https://github.com/fluencelabs/aquavm/tree/master/crates/interpreter-wasm"
-publish = true # this crate is used by the node
 keywords = ["fluence", "air", "webassembly", "programming-language"]
 categories = ["wasm"]
 
