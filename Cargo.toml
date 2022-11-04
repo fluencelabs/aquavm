@@ -15,7 +15,7 @@ members = [
     "crates/air-lib/test-utils",
     "crates/air-lib/trace-handler",
     "crates/air-lib/utils",
-    "crates/intepreter-wasm",
+    "crates/interpreter-wasm",
     "crates/beautifier",
     "crates/data-store",
     "crates/testing-framework",
