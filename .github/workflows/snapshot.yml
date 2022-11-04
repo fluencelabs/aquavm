@@ -206,6 +206,9 @@ jobs:
     steps:
       - name: Checkout aquavm
         uses: actions/checkout@v3
+        with:
+          repository: fluencelabs/aquavm
+          ref: ${{ inputs.ref }}
 
       - name: Import secrets
         uses: hashicorp/vault-action@v2.4.2
