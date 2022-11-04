@@ -111,6 +111,11 @@ jobs:
         id: snapshot
         uses: fluencelabs/github-actions/cargo-publish-snapshot@FLU-119-cargo-publish-snapshot
 
+      - name: debug
+        run: |
+          cat avm/server/Cargo.toml
+          cat Cargo.lock
+
   publish-avm:
     name: "Publish @fluencelabs/avm snapshot"
     runs-on: ubuntu-latest
