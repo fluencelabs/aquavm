@@ -16,9 +16,10 @@
 
 use super::{ServiceDefinition, ServiceTagName};
 use crate::services::JValue;
+use crate::transform::parser::delim_ws;
 
 use air_test_utils::CallServiceResult;
-use nom::{error::VerboseError, IResult, InputTakeAtPosition, Parser};
+use nom::{error::VerboseError, IResult};
 
 use std::{collections::HashMap, str::FromStr};
 
@@ -50,8 +51,10 @@ pub fn parse_kw(inp: &str) -> IResult<&str, ServiceDefinition, ParseError> {
             alt((
                 tag(ServiceTagName::Ok.as_ref()),
                 tag(ServiceTagName::Error.as_ref()),
-                tag(ServiceTagName::SeqResult.as_ref()),
+                tag(ServiceTagName::SeqOk.as_ref()),
+                tag(ServiceTagName::SeqError.as_ref()),
                 tag(ServiceTagName::Behaviour.as_ref()),
+                tag(ServiceTagName::Map.as_ref()),
             )),
             equal(),
             cut(context(
@@ -68,33 +71,26 @@ pub fn parse_kw(inp: &str) -> IResult<&str, ServiceDefinition, ParseError> {
                 Ok(ServiceTagName::Error) => {
                     serde_json::from_str::<CallServiceResult>(value).map(ServiceDefinition::Error)
                 }
-                Ok(ServiceTagName::SeqResult) => {
-                    serde_json::from_str::<HashMap<String, JValue>>(value)
-                        .map(ServiceDefinition::SeqResult)
+                Ok(ServiceTagName::SeqOk) => {
+                    serde_json::from_str(value).map(ServiceDefinition::SeqOk)
+                }
+                Ok(ServiceTagName::SeqError) => {
+                    serde_json::from_str::<HashMap<String, CallServiceResult>>(value)
+                        .map(ServiceDefinition::SeqError)
                 }
                 Ok(ServiceTagName::Behaviour) => Ok(ServiceDefinition::Behaviour(value.to_owned())),
+                Ok(ServiceTagName::Map) => serde_json::from_str(value).map(ServiceDefinition::Map),
                 Err(_) => unreachable!("unknown tag {:?}", tag),
             }
         },
     ))(inp)
 }
 
-pub(crate) fn delim_ws<I, O, E, F>(f: F) -> impl FnMut(I) -> IResult<I, O, E>
-where
-    F: Parser<I, O, E>,
-    E: nom::error::ParseError<I>,
-    I: InputTakeAtPosition,
-    <I as InputTakeAtPosition>::Item: nom::AsChar + Clone,
-{
-    use nom::character::complete::multispace0;
-    use nom::sequence::delimited;
-
-    delimited(multispace0, f, multispace0)
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
+    use pretty_assertions::assert_eq;
+    use serde_json::json;
 
     #[test]
     fn test_parse_empty() {
@@ -151,13 +147,13 @@ mod tests {
     }
 
     #[test]
-    fn test_seq_result() {
+    fn test_seq_ok() {
         use serde_json::json;
 
-        let res = ServiceDefinition::from_str(r#"seq_result={"default": 42, "1": true, "3": []}"#);
+        let res = ServiceDefinition::from_str(r#"seq_ok={"default": 42, "1": true, "3": []}"#);
         assert_eq!(
             res,
-            Ok(ServiceDefinition::SeqResult(maplit::hashmap! {
+            Ok(ServiceDefinition::SeqOk(maplit::hashmap! {
                 "default".to_owned() => json!(42),
                 "1".to_owned() => json!(true),
                 "3".to_owned() => json!([]),
@@ -166,15 +162,45 @@ mod tests {
     }
 
     #[test]
-    fn test_seq_result_malformed() {
-        let res = ServiceDefinition::from_str(r#"seq_result={"default": 42, "1": true, "3": ]}"#);
+    fn test_seq_ok_malformed() {
+        let res = ServiceDefinition::from_str(r#"seq_ok={"default": 42, "1": true, "3": ]}"#);
         assert!(res.is_err());
     }
 
     #[test]
-    fn test_seq_result_invalid() {
+    fn test_seq_ok_invalid() {
         // TODO perhaps, we should support both arrays and maps
-        let res = ServiceDefinition::from_str(r#"seq_result=[42, 43]"#);
+        let res = ServiceDefinition::from_str(r#"seq_ok=[42, 43]"#);
+        assert!(res.is_err());
+    }
+
+    #[test]
+    fn test_seq_error() {
+        use serde_json::json;
+
+        let res = ServiceDefinition::from_str(
+            r#"seq_error={"default": {"ret_code": 0, "result": 42}, "1": {"ret_code": 0, "result": true}, "3": {"ret_code": 1, "result": "error"}}"#,
+        );
+        assert_eq!(
+            res,
+            Ok(ServiceDefinition::SeqError(maplit::hashmap! {
+                "default".to_owned() => CallServiceResult::ok(json!(42)),
+                "1".to_owned() => CallServiceResult::ok(json!(true)),
+                "3".to_owned() => CallServiceResult::err(1, json!("error")),
+            })),
+        );
+    }
+
+    #[test]
+    fn test_seq_error_malformed() {
+        let res = ServiceDefinition::from_str(r#"seq_error={"default": 42, "1": true]}"#);
+        assert!(res.is_err());
+    }
+
+    #[test]
+    fn test_seq_error_invalid() {
+        // TODO perhaps, we should support both arrays and maps
+        let res = ServiceDefinition::from_str(r#"seq_error=[42, 43]"#);
         assert!(res.is_err());
     }
 
@@ -182,5 +208,17 @@ mod tests {
     fn test_behaviour() {
         let res = ServiceDefinition::from_str(r#"behaviour=echo"#);
         assert_eq!(res, Ok(ServiceDefinition::Behaviour("echo".to_owned())),);
+    }
+
+    #[test]
+    fn test_map() {
+        let res = ServiceDefinition::from_str(r#"map = {"42": [], "a": 2}"#);
+        assert_eq!(
+            res,
+            Ok(ServiceDefinition::Map(maplit::hashmap! {
+                "42".to_owned() => json!([]),
+                "a".to_owned() => json!(2)
+            }))
+        );
     }
 }

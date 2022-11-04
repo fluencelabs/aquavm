@@ -1,5 +1,5 @@
 [package]
-name = "wasm-air-beautify"
+name = "air-beautify-wasm"
 version = "0.1.0"
 authors = ["Fluence Labs"]
 edition = "2021"
@@ -13,9 +13,5 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 # 0.2.79: a function can return Result<..., JsError>.
-wasm-bindgen = { version = "=0.2.80", features = ["serde-serialize"] }
+wasm-bindgen = { version = "=0.2.82", features = ["serde-serialize"] }
 air-beautifier = { version = "0.1.0", path = "../../../crates/beautifier" }
-
-[profile.release]
-# Tell `rustc` to optimize for small code size.
-opt-level = "s"

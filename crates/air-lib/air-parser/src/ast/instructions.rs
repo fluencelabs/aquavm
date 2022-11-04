@@ -119,6 +119,8 @@ pub struct FoldScalar<'i> {
     #[serde(borrow)]
     pub iterator: Scalar<'i>,
     pub instruction: Rc<Instruction<'i>>,
+    // option is needed to provide a graceful period of adoption
+    pub last_instruction: Option<Rc<Instruction<'i>>>,
     pub span: Span,
 }
 
@@ -129,6 +131,8 @@ pub struct FoldStream<'i> {
     #[serde(borrow)]
     pub iterator: Scalar<'i>,
     pub instruction: Rc<Instruction<'i>>,
+    // option is needed to provide a graceful period of adoption
+    pub last_instruction: Option<Rc<Instruction<'i>>>,
     pub span: Span,
 }
 

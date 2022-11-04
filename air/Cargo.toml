@@ -1,6 +1,6 @@
 [package]
 name = "air"
-version = "0.30.0"
+version = "0.31.2"
 description = "Interpreter of AIR scripts intended to coordinate request flow in the Fluence network"
 authors = ["Fluence Labs"]
 edition = "2018"
@@ -26,19 +26,21 @@ air-trace-handler = { path = "../crates/air-lib/trace-handler" }
 air-utils = { version = "0.1.0", path = "../crates/air-lib/utils" }
 polyplets = { path = "../crates/air-lib/polyplets" }
 
-serde = { version = "1.0.144", features = [ "derive", "rc" ] }
-serde_json = "1.0.85"
+serde = { version = "1.0.145", features = [ "derive", "rc" ] }
+serde_json = "1.0.86"
 
 boolinator = "2.4.0"
 concat-idents = "1.1.3"
 maplit = "1.0.2"
 non-empty-vec = "0.2.3"
 log = "0.4.17"
+once_cell = "1.15.0"
 fstrings = "0.2.3"
-thiserror = "1.0.35"
+thiserror = "1.0.37"
+semver = "1.0.14"
 strum = "0.24"
 strum_macros = "0.24"
-tracing = "0.1.36"
+tracing = "0.1.37"
 
 [dev_dependencies]
 air-test-utils = { path = "../crates/air-lib/test-utils" }

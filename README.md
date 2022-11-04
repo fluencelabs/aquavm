@@ -23,7 +23,7 @@ In summary, the AquaVM execution model handles the topological hops for simple a
 
 ## Aquamarine Intermediate Representation (AIR): IR For P2P Systems
 
-AIR scripts control the Fluence peer-to-peer network, its peers and, through Marine adapter services, even resources on other (p2p) networks, such as IPFS and Filecoin, e.g., [Fluence IPFS library](https://doc.fluence.dev/aqua-book/libraries/aqua-ipfs).
+AIR scripts control the Fluence peer-to-peer network, its peers and, through Marine adapter services, even resources on other (p2p) networks, such as IPFS and Filecoin, e.g., [Fluence IPFS library](https://fluence.dev/docs/aqua-book/libraries/aqua-ipfs).
 
 ### What is AIR?
 

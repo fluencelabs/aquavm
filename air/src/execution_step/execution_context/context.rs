@@ -66,9 +66,19 @@ pub(crate) struct ExecutionCtx<'i> {
 }
 
 impl<'i> ExecutionCtx<'i> {
-    pub(crate) fn new(prev_data: &InterpreterData, call_results: CallResults, run_parameters: RunParameters) -> Self {
+    pub(crate) fn new(
+        prev_data: &InterpreterData,
+        current_data: &InterpreterData,
+        call_results: CallResults,
+        run_parameters: RunParameters,
+    ) -> Self {
         let run_parameters = RcRunParameters::from_run_parameters(run_parameters);
-        let streams = Streams::from_data(&prev_data.global_streams, prev_data.restricted_streams.clone());
+        let streams = Streams::from_data(
+            &prev_data.global_streams,
+            &current_data.global_streams,
+            prev_data.restricted_streams.clone(),
+            current_data.restricted_streams.clone(),
+        );
 
         Self {
             run_parameters,

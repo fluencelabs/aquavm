@@ -240,7 +240,7 @@ mod tests {
 
         let fold_result = FoldResult { lore };
 
-        let slider = TraceSlider::new(vec![ExecutedState::Ap(ApResult::new(vec![0]))]);
+        let slider = TraceSlider::new(vec![ExecutedState::Ap(ApResult::new(0))]);
         let ctx = MergeCtx { slider };
 
         let (all_states, convoluted_lens) =
@@ -285,9 +285,9 @@ mod tests {
         let fold_result = FoldResult { lore };
 
         let slider = TraceSlider::new(vec![
-            ExecutedState::Ap(ApResult::new(vec![0])),
-            ExecutedState::Ap(ApResult::new(vec![1])),
-            ExecutedState::Ap(ApResult::new(vec![2])),
+            ExecutedState::Ap(ApResult::new(0)),
+            ExecutedState::Ap(ApResult::new(1)),
+            ExecutedState::Ap(ApResult::new(2)),
         ]);
         let ctx = MergeCtx { slider };
 

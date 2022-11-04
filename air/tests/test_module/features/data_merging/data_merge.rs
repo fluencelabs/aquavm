@@ -209,7 +209,7 @@ fn fold_merge() {
     );
 
     let script = format!(
-        include_str!("./scripts/inner_folds_v1.clj"),
+        include_str!("./scripts/inner_folds_v1.air"),
         set_variable_vm_id, local_vm_id
     );
 
@@ -280,7 +280,8 @@ fn fold_merge() {
         local_vms_results[6].data.clone()
     );
 
-    let data = InterpreterData::try_from_slice(&result_7.data).expect("data should be well-formed");
+    let data = InterpreterData::try_from_slice(&result_7.data, &semver::Version::new(1, 1, 1))
+        .expect("data should be well-formed");
     let stream_1_generations = data
         .global_streams
         .get("$stream_1")
@@ -290,8 +291,8 @@ fn fold_merge() {
         .get("$stream_2")
         .expect("$stream_2 should be present in data");
 
-    assert_eq!(*stream_1_generations, 4);
-    assert_eq!(*stream_2_generations, 3);
+    assert_eq!(*stream_1_generations, 8);
+    assert_eq!(*stream_2_generations, 6);
 
     let mut fold_states_count = 0;
     let mut calls_count = HashMap::new();

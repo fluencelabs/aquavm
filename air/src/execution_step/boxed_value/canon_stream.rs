@@ -20,12 +20,14 @@ use crate::execution_step::Generation;
 use crate::JValue;
 
 use polyplets::SecurityTetraplet;
+use serde::Deserialize;
+use serde::Serialize;
 
 use std::rc::Rc;
 
 /// Canon stream is a value type lies between a scalar and a stream, it has the same algebra as
 /// scalars, and represent a stream fixed at some execution point.
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, Deserialize, Serialize)]
 pub struct CanonStream {
     values: Vec<ValueAggregate>,
     // tetraplet is needed to handle adding canon streams as a whole to a stream
@@ -33,15 +35,6 @@ pub struct CanonStream {
 }
 
 impl CanonStream {
-    pub(crate) fn new(values: Vec<ValueAggregate>, peer_pk: String) -> Self {
-        // tetraplet is comprised only from peer_pk here
-        let tetraplet = SecurityTetraplet::new(peer_pk, "", "", "");
-        Self {
-            values,
-            tetraplet: Rc::new(tetraplet),
-        }
-    }
-
     pub(crate) fn from_stream(stream: &Stream, peer_pk: String) -> Self {
         // it's always possible to iter over all generations of a stream
         let values = stream.iter(Generation::Last).unwrap().cloned().collect::<Vec<_>>();

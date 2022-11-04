@@ -136,6 +136,12 @@ impl<'i> Scalars<'i> {
         self.non_iterable_variables.get_value(name)
     }
 
+    pub(crate) fn get_iterable(&mut self, name: &str) -> ExecutionResult<&FoldState<'i>> {
+        self.iterable_variables
+            .get(name)
+            .ok_or_else(|| UncatchableError::FoldStateNotFound(name.to_string()).into())
+    }
+
     pub(crate) fn get_iterable_mut(&mut self, name: &str) -> ExecutionResult<&mut FoldState<'i>> {
         self.iterable_variables
             .get_mut(name)

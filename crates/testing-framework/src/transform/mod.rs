@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-mod parser;
+pub(crate) mod parser;
 pub(crate) mod walker;
 
 use crate::asserts::ServiceDefinition;

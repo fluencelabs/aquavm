@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-use super::call_merger::ValueType;
 use super::ApResult;
 use super::CallResult;
 use super::ExecutedState;
@@ -56,9 +55,9 @@ pub enum MergeError {
 
 #[derive(ThisError, Debug)]
 pub enum ApResultError {
-    /// Error occurred when Ap results contains more then 1 generation in destination.
-    #[error("{0:?} ap result contains too many generations in destination")]
-    TooManyDstGenerations(ApResult),
+    /// Error occurred when Ap results contains not 1 generation in destination.
+    #[error("{0:?} ap result contains inappropriate generation count in destination")]
+    InvalidDstGenerations(ApResult),
 }
 
 #[derive(ThisError, Debug)]
@@ -72,32 +71,14 @@ pub enum CallResultError {
         prev_call: CallResult,
         current_call: CallResult,
     },
-
-    #[error("air scripts has the following value type '{air_type}' while data other '{data_value:?}'")]
-    DataNotMatchAIR { air_type: String, data_value: Value },
 }
 
 #[derive(ThisError, Debug)]
 pub enum CanonResultError {
-    #[error("canon results have different length: {prev_canon_result:?} != {current_canon_result:?}")]
-    LensNotEqual {
-        prev_canon_result: CanonResult,
-        current_canon_result: CanonResult,
-    },
-
-    #[error("canon results {prev_canon_result:?} {current_canon_result:?} at position {position} points to incompatible execution states: {prev_state:?} {current_state:?}")]
+    #[error("canon results {prev_canon_result:?} {current_canon_result:?} points to incompatible execution states")]
     IncompatibleState {
         prev_canon_result: CanonResult,
         current_canon_result: CanonResult,
-        prev_state: Option<ExecutedState>,
-        current_state: Option<ExecutedState>,
-        position: usize,
-    },
-
-    #[error("position {position} from canon result {canon_result:?} hasn't been met yet")]
-    NotMetPosition {
-        canon_result: CanonResult,
-        position: TracePos,
     },
 }
 
@@ -156,42 +137,14 @@ impl CallResultError {
 
         MergeError::IncorrectCallResult(call_result_error)
     }
-
-    pub(crate) fn data_not_match(data_value: Value, air_type: ValueType<'_>) -> MergeError {
-        let air_type = air_type.to_string();
-
-        let call_result_error = CallResultError::DataNotMatchAIR { air_type, data_value };
-
-        MergeError::IncorrectCallResult(call_result_error)
-    }
 }
 
 impl CanonResultError {
-    pub(crate) fn different_lens(prev_canon_result: CanonResult, current_canon_result: CanonResult) -> Self {
-        Self::LensNotEqual {
-            prev_canon_result,
-            current_canon_result,
-        }
-    }
-
-    pub(crate) fn incompatible_state(
-        prev_canon_result: CanonResult,
-        current_canon_result: CanonResult,
-        prev_state: Option<ExecutedState>,
-        current_state: Option<ExecutedState>,
-        position: usize,
-    ) -> Self {
+    pub(crate) fn incompatible_state(prev_canon_result: CanonResult, current_canon_result: CanonResult) -> Self {
         Self::IncompatibleState {
             prev_canon_result,
             current_canon_result,
-            prev_state,
-            current_state,
-            position,
         }
-    }
-
-    pub(crate) fn not_met_position(canon_result: CanonResult, position: TracePos) -> Self {
-        Self::NotMetPosition { canon_result, position }
     }
 }
 
