@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use crate::services::{FunctionOutcome, JValue, MarineService};
+use crate::services::JValue;
 
 use air_test_utils::{
     prelude::{echo_call_service, unit_call_service},
@@ -28,7 +28,7 @@ use strum::{AsRefStr, EnumDiscriminants, EnumString};
 #[strum_discriminants(strum(serialize_all = "snake_case"))]
 #[strum_discriminants(derive(AsRefStr, EnumString))]
 #[strum_discriminants(name(BehaviorTagName))]
-pub(crate) enum Behavior {
+pub enum Behavior {
     Echo,
     Unit,
     Service,
@@ -39,14 +39,14 @@ pub(crate) enum Behavior {
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, AsRefStr, EnumString)]
 #[strum(serialize_all = "snake_case")]
-pub(crate) enum SecurityTetrapletField {
+pub enum SecurityTetrapletField {
     PeerPk,
     ServiceId,
     FunctionName,
     JsonPath,
 }
 
-fn parse_behaviour(inp: &str) -> IResult<&str, Behavior, super::parser::ParseError> {
+pub(crate) fn parse_behaviour(inp: &str) -> IResult<&str, Behavior, super::parser::ParseError> {
     use nom::branch::alt;
     use nom::bytes::complete::tag;
     use nom::character::complete::u32 as u32_parse;
@@ -92,27 +92,26 @@ fn parse_tetraplet_field(
     ))(inp)
 }
 
-impl MarineService for Behavior {
-    fn call(&self, params: air_test_utils::CallRequestParams) -> FunctionOutcome {
+impl Behavior {
+    pub(crate) fn call(&self, params: air_test_utils::CallRequestParams) -> CallServiceResult {
         use Behavior::*;
 
         match self {
-            Echo => FunctionOutcome::from_service_result(echo_call_service()(params)),
-            Unit => FunctionOutcome::from_service_result(unit_call_service()(params)),
-            Function => FunctionOutcome::from_value(params.function_name.into()),
-            Service => FunctionOutcome::from_value(params.service_id.into()),
+            Echo => echo_call_service()(params),
+            Unit => unit_call_service()(params),
+            Function => CallServiceResult::ok(params.function_name.into()),
+            Service => CallServiceResult::ok(params.service_id.into()),
             Arg(n) => match params.arguments.get(*n) {
-                Some(val) => FunctionOutcome::from_value(val.clone()),
-                None => FunctionOutcome::from_service_result(CallServiceResult::err(
+                Some(val) => CallServiceResult::ok(val.clone()),
+                None => CallServiceResult::err(
                     // TODO test-utils uses just json!{ "default" } value.
                     42,
                     json!("not enough arguments"),
-                )),
+                ),
             },
-            Tetraplet(field) => FunctionOutcome::from_value(extract_from_tetraplet(
-                &params.tetraplets[0][0],
-                *field,
-            )),
+            Tetraplet(field) => {
+                CallServiceResult::ok(extract_from_tetraplet(&params.tetraplets[0][0], *field))
+            }
         }
     }
 }
