@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-use crate::services::JValue;
-
 use air_test_utils::{
     prelude::{echo_call_service, unit_call_service},
-    CallServiceResult, SecurityTetraplet,
+    CallServiceResult,
 };
 use nom::IResult;
 use serde_json::json;
@@ -34,16 +32,7 @@ pub enum Behavior {
     Service,
     Function,
     Arg(usize),
-    Tetraplet(SecurityTetrapletField),
-}
-
-#[derive(Debug, Copy, Clone, PartialEq, Eq, AsRefStr, EnumString)]
-#[strum(serialize_all = "snake_case")]
-pub enum SecurityTetrapletField {
-    PeerPk,
-    ServiceId,
-    FunctionName,
-    JsonPath,
+    Tetraplet,
 }
 
 pub(crate) fn parse_behaviour(inp: &str) -> IResult<&str, Behavior, super::parser::ParseError> {
@@ -65,30 +54,10 @@ pub(crate) fn parse_behaviour(inp: &str) -> IResult<&str, Behavior, super::parse
             ),
             |n| Behavior::Arg(n as _),
         ),
-        map(
-            preceded(
-                pair(tag(BehaviorTagName::Tetraplet.as_ref()), tag(".")),
-                parse_tetraplet_field,
-            ),
+        value(
             Behavior::Tetraplet,
+            tag(BehaviorTagName::Tetraplet.as_ref()),
         ),
-    ))(inp)
-}
-
-fn parse_tetraplet_field(
-    inp: &str,
-) -> IResult<&str, SecurityTetrapletField, super::parser::ParseError> {
-    use nom::branch::alt;
-    use nom::bytes::complete::tag;
-    use nom::combinator::value;
-
-    use SecurityTetrapletField::*;
-
-    alt((
-        value(PeerPk, tag(PeerPk.as_ref())),
-        value(ServiceId, tag(ServiceId.as_ref())),
-        value(FunctionName, tag(FunctionName.as_ref())),
-        value(JsonPath, tag(JsonPath.as_ref())),
     ))(inp)
 }
 
@@ -109,26 +78,9 @@ impl Behavior {
                     json!("not enough arguments"),
                 ),
             },
-            Tetraplet(field) => {
-                CallServiceResult::ok(extract_from_tetraplet(&params.tetraplets[0][0], *field))
-            }
+            Tetraplet => CallServiceResult::ok(serde_json::to_value(&params.tetraplets).unwrap()),
         }
     }
-}
-
-pub(crate) fn extract_from_tetraplet(
-    tetraplet: &SecurityTetraplet,
-    field: SecurityTetrapletField,
-) -> JValue {
-    use SecurityTetrapletField::*;
-
-    let value = match field {
-        PeerPk => tetraplet.peer_pk.clone(),
-        ServiceId => tetraplet.service_id.clone(),
-        FunctionName => tetraplet.function_name.clone(),
-        JsonPath => tetraplet.json_path.clone(),
-    };
-    JValue::String(value)
 }
 #[cfg(test)]
 mod tests {
@@ -170,41 +122,8 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_behavior_tetraplet_peer_pk() {
-        let res = parse_behaviour("tetraplet.peer_pk");
-        assert_eq!(
-            res,
-            Ok(("", Behavior::Tetraplet(SecurityTetrapletField::PeerPk)))
-        );
-    }
-
-    #[test]
-    fn test_parse_behavior_tetraplet_service_id() {
-        let res = parse_behaviour("tetraplet.service_id");
-        assert_eq!(
-            res,
-            Ok(("", Behavior::Tetraplet(SecurityTetrapletField::ServiceId)))
-        );
-    }
-
-    #[test]
-    fn test_parse_behavior_tetraplet_function_name() {
-        let res = parse_behaviour("tetraplet.function_name");
-        assert_eq!(
-            res,
-            Ok((
-                "",
-                Behavior::Tetraplet(SecurityTetrapletField::FunctionName)
-            ))
-        );
-    }
-
-    #[test]
-    fn test_parse_behavior_tetraplet_json_path() {
-        let res = parse_behaviour("tetraplet.json_path");
-        assert_eq!(
-            res,
-            Ok(("", Behavior::Tetraplet(SecurityTetrapletField::JsonPath)))
-        );
+    fn test_parse_behavior_tetraplet() {
+        let res = parse_behaviour("tetraplet");
+        assert_eq!(res, Ok(("", Behavior::Tetraplet)));
     }
 }
