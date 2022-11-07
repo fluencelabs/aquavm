@@ -606,4 +606,28 @@ mod tests {
             }
         }
     }
+
+    #[test]
+    fn test_behaviour_service() {
+        let peer = "peer1";
+        let exec = AirScriptExecutor::new(
+            TestRunParameters::from_init_peer_id(peer),
+            vec![],
+            std::iter::empty(),
+            r#"(call "peer1" ("service" "func") [1 22] arg) ; behaviour=service"#,
+        )
+        .unwrap();
+
+        let result_init: Vec<_> = exec.execution_iter(peer).unwrap().collect();
+
+        assert_eq!(result_init.len(), 1);
+        let outcome = &result_init[0];
+        assert_eq!(outcome.ret_code, 0);
+        assert_eq!(outcome.error_message, "");
+
+        assert_eq!(
+            trace_from_result(outcome),
+            ExecutionTrace::from(vec![scalar_string("service"),]),
+        )
+    }
 }
