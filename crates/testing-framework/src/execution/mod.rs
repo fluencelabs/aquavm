@@ -129,8 +129,8 @@ impl TestExecutor {
 
 #[cfg(test)]
 mod tests {
-    use crate::services::MarineService;
     use super::*;
+    use crate::services::MarineService;
 
     use air_test_utils::prelude::*;
     use pretty_assertions::assert_eq;
