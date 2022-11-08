@@ -123,18 +123,19 @@ impl TestExecutor {
         Id: Eq + Hash + ?Sized,
     {
         self.execution_iter(peer_id)
-            .map(|mut it| it.next().unwrap())
+            .map(|mut it| it.next().expect("Nothing to execute"))
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use crate::services::MarineService;
     use super::*;
 
     use air_test_utils::prelude::*;
     use pretty_assertions::assert_eq;
 
-    use std::ops::Deref;
+    use std::cell::RefCell;
 
     #[test]
     fn test_execution() {
@@ -354,7 +355,7 @@ mod tests {
             let trace = trace_from_result(outcome3);
 
             assert_eq!(
-                trace.deref(),
+                &*trace,
                 vec![
                     executed_state::scalar(json!(["peer2", "peer3"])),
                     executed_state::scalar(json!(42)),
@@ -487,6 +488,95 @@ mod tests {
             trace_from_result(outcome1),
             ExecutionTrace::from(vec![scalar_number(1), request_sent_by("peer1"),]),
         )
+    }
+
+    #[test]
+    fn test_transformee_distinct() {
+        let peer = "peer1";
+        let network = Network::empty();
+
+        let transformee1 = Transformee::new(
+            &f!(r#"(call "{}" ("service" "function") []) ; ok = 42"#, peer),
+            network.clone(),
+        )
+        .unwrap();
+        let exectution1 = TestExecutor::from_transformee(
+            TestRunParameters::from_init_peer_id(peer),
+            transformee1,
+        )
+        .unwrap();
+
+        let transformee2 = Transformee::new(
+            &f!(r#"(call "{}" ("service" "function") []) ; ok = 24"#, peer),
+            network.clone(),
+        )
+        .unwrap();
+        let exectution2 = TestExecutor::from_transformee(
+            TestRunParameters::from_init_peer_id(peer),
+            transformee2,
+        )
+        .unwrap();
+
+        let trace1 = exectution1.execute_one(peer).unwrap();
+        let trace2 = exectution2.execute_one(peer).unwrap();
+
+        assert_eq!(
+            trace_from_result(&trace1),
+            ExecutionTrace::from(vec![scalar_number(42)]),
+        );
+        assert_eq!(
+            trace_from_result(&trace2),
+            ExecutionTrace::from(vec![scalar_number(24)]),
+        );
+    }
+
+    #[test]
+    fn test_transformee_shared() {
+        struct Service {
+            state: RefCell<std::vec::IntoIter<JValue>>,
+        }
+
+        impl MarineService for Service {
+            fn call(&self, _params: CallRequestParams) -> crate::services::FunctionOutcome {
+                let mut cell = self.state.borrow_mut();
+                crate::services::FunctionOutcome::ServiceResult(
+                    CallServiceResult::ok(cell.next().unwrap()),
+                    <_>::default(),
+                )
+            }
+        }
+        let service = Service {
+            state: vec![json!(42), json!(24)].into_iter().into(),
+        };
+        let network = Network::new(std::iter::empty::<PeerId>(), vec![service.to_handle()]);
+
+        let peer = "peer1";
+        let air_script = f!(r#"(call "{}" ("service" "function") [])"#, peer);
+        let transformee1 = Transformee::new(&air_script, network.clone()).unwrap();
+        let exectution1 = TestExecutor::from_transformee(
+            TestRunParameters::from_init_peer_id(peer),
+            transformee1,
+        )
+        .unwrap();
+
+        let transformee2 = Transformee::new(&air_script, network.clone()).unwrap();
+        let exectution2 = TestExecutor::from_transformee(
+            TestRunParameters::from_init_peer_id(peer),
+            transformee2,
+        )
+        .unwrap();
+
+        let trace1 = exectution1.execute_one(peer).unwrap();
+        let trace2 = exectution2.execute_one(peer).unwrap();
+
+        assert_eq!(
+            trace_from_result(&trace1),
+            ExecutionTrace::from(vec![scalar_number(42)]),
+        );
+        assert_eq!(
+            trace_from_result(&trace2),
+            ExecutionTrace::from(vec![scalar_number(24)]),
+        );
     }
 
     #[test]
