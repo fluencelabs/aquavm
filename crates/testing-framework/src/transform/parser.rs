@@ -192,12 +192,12 @@ fn parse_annotation_comment(
             map(cut(parse_singleline_annotation), Some),
         ),
         delimited(
-            pair(space1, tag("(#")),
+            pair(space1, tag("#|")),
             map(
-                cut(map_parser(take_until("#)"), parse_multiline_annotation)),
+                cut(map_parser(take_until("|#"), parse_multiline_annotation)),
                 Some,
             ),
-            tag("#)"),
+            tag("|#"),
         ),
         success(None),
     ))(inp)
@@ -721,21 +721,21 @@ mod tests {
 
     #[test]
     fn test_annotation_multiline() {
-        let multiline_annotation = r#" (#
+        let multiline_annotation = r#" #|
         map = {
           "0": null
-        } #)"#;
+        } |#"#;
         let res = parse_annotation_comment(multiline_annotation.into());
         assert!(res.is_ok(), "{:?}", res);
     }
 
     #[test]
     fn test_annotation_multiline_with_call() {
-        let sexp_str = r#"(call "peer_id" ("serv" "func") [a b] var) (#
+        let sexp_str = r#"(call "peer_id" ("serv" "func") [a b] var) #|
         map = {
            "0": null
         }
-        #)"#;
+        |#"#;
         let expected_annotation = ServiceDefinition::Map(maplit::hashmap! {
             "0".to_owned() => json!(None::<()>),
         });
@@ -759,11 +759,11 @@ mod tests {
     #[test]
     fn test_annotation_multiline_with_many_calls() {
         let sexp_str = r#"(seq
-            (call "peer_id" ("serv" "func") [a b] var) (#
+            (call "peer_id" ("serv" "func") [a b] var) #|
                    map = {
                      "0": null
                    }
-                #)
+                |#
             (call "peer_id" ("serv" "func") [a b] var)
         )"#;
         let expected_annotation = ServiceDefinition::Map(maplit::hashmap! {
@@ -839,9 +839,9 @@ mod tests {
         let res = Sexp::from_str(
             r#"(par
   (call peerid ("serv" "func") [a b] var)
-  (call peerid2 ("serv" "func") [])) (#
+  (call peerid2 ("serv" "func") [])) #|
     ok=42
-  #)
+  |#
 "#,
         );
         assert_eq!(
