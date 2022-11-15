@@ -113,7 +113,14 @@ jobs:
 
       - name: debug
         run: |
+          echo avm-server
           cat avm/server/Cargo.toml
+          echo air-interpreter
+          cat air-interpreter/Cargo.toml
+          echo air-interpreter
+          cat crates/air-lib/interpreter-interface/Cargo.toml
+
+          echo
           cat Cargo.lock
 
   publish-avm:
