@@ -30,10 +30,13 @@ impl Transformee {
         // validate the AIR script with the standard parser first
         air_parser::parse(annotated_air_script)?;
 
-        Self::new_unchecked(annotated_air_script, network)
+        Self::new_unvalidated(annotated_air_script, network)
     }
 
-    pub fn new_unchecked(annotated_air_script: &str, network: Rc<Network>) -> Result<Self, String> {
+    pub(crate) fn new_unvalidated(
+        annotated_air_script: &str,
+        network: Rc<Network>,
+    ) -> Result<Self, String> {
         let transformer = Transformer { network: &network };
         let mut sexp = Sexp::from_str(annotated_air_script)?;
         transformer.transform(&mut sexp);
@@ -123,7 +126,7 @@ mod tests {
     fn test_translate_call_no_result() {
         let network = Network::empty();
         let script = r#"(call peer_id ("service_id" func) [])"#;
-        let transformee = Transformee::new_unchecked(script, network).unwrap();
+        let transformee = Transformee::new_unvalidated(script, network).unwrap();
         assert_eq!(&*transformee, script);
     }
 
@@ -131,24 +134,23 @@ mod tests {
     #[should_panic]
     fn test_translate_call_no_string() {
         let network = Network::empty();
-        // TODO rewrite to Result instead of panic?
         let script = r#"(call "peer_id" (service_id func) [])"#;
-        let transformee = Transformee::new(script, network).unwrap();
-        assert_eq!(&*transformee, script);
+        let transformee = Transformee::new(script, network);
+        assert_eq!(transformee.as_deref(), Ok(script));
     }
 
     #[test]
     fn test_translate_call_result() {
         let network = Network::empty();
         let script = r#"(call "peer_id" ("service_id" func) []) ; ok = 42"#;
-        let transformer = Transformee::new_unchecked(script, network.clone()).unwrap();
+        let transformer = Transformee::new_unvalidated(script, network.clone()).unwrap();
         assert_eq!(
             &*transformer,
             r#"(call "peer_id" ("service_id..0" func) [])"#
         );
 
         assert_eq!(
-            (*network.get_services().get_result_store())
+            Rc::deref(&network.get_services().get_result_store())
                 .clone()
                 .into_inner(),
             maplit::hashmap! {
@@ -172,7 +174,7 @@ mod tests {
 ))"#;
 
         let network = Network::empty();
-        let transformee = Transformee::new_unchecked(script, network.clone()).unwrap();
+        let transformee = Transformee::new_unvalidated(script, network.clone()).unwrap();
         assert_eq!(
             &*transformee,
             concat!(
@@ -211,7 +213,7 @@ mod tests {
 ))"#;
 
         let network = Network::empty();
-        let _ = Transformee::new_unchecked(script, network.clone());
+        let _ = Transformee::new_unvalidated(script, network.clone());
 
         assert_eq!(
             network.get_peers().collect::<HashSet<_>>(),

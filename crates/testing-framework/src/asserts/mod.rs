@@ -81,10 +81,10 @@ impl ServiceDefinition {
         match self {
             ServiceDefinition::Ok(ok) => CallServiceResult::ok(ok.clone()),
             ServiceDefinition::Error(call_result) => call_result.clone(),
-            ServiceDefinition::SeqOk(call_number_seq, call_map) => {
+            ServiceDefinition::SeqOk(ref call_number_seq, call_map) => {
                 call_seq_ok(call_number_seq, call_map)
             }
-            ServiceDefinition::SeqError(call_number_seq, call_map) => {
+            ServiceDefinition::SeqError(ref call_number_seq, call_map) => {
                 call_seq_error(call_number_seq, call_map)
             }
             ServiceDefinition::Behaviour(name) => call_named_service(name, params),
@@ -100,18 +100,18 @@ fn call_seq_ok(
     let call_number = call_number_seq.get();
     let call_num_str = call_number.to_string();
     call_number_seq.set(call_number + 1);
-    CallServiceResult::ok(
-        call_map
-            .get(&call_num_str)
-            .or_else(|| call_map.get("default"))
-            .unwrap_or_else(|| {
-                panic!(
-                    "neither value {} nor default value not found in the {:?}",
-                    call_num_str, call_map
-                )
-            })
-            .clone(),
-    )
+
+    let value = call_map
+        .get(&call_num_str)
+        .or_else(|| call_map.get("default"))
+        .unwrap_or_else(|| {
+            panic!(
+                r#"neither key {:?} nor "default" key not found in the {:?}"#,
+                call_num_str, call_map
+            )
+        })
+        .clone();
+    CallServiceResult::ok(value)
 }
 
 fn call_seq_error(
@@ -121,12 +121,13 @@ fn call_seq_error(
     let call_number = call_number_seq.get();
     let call_num_str = call_number.to_string();
     call_number_seq.set(call_number + 1);
+
     call_map
         .get(&call_num_str)
         .or_else(|| call_map.get("default"))
         .unwrap_or_else(|| {
             panic!(
-                "neither value {} nor default value not found in the {:?}",
+                r#"neither key {:?} nor "default" key not found in the {:?}"#,
                 call_num_str, call_map
             )
         })
@@ -149,7 +150,7 @@ fn call_map_service(
         .arguments
         .get(0)
         .expect("At least one arugment expected");
-    // Strings are looked up by value, other objects -- by string representation.
+    // Strings are looked up by value, other objects -- by their string representation.
     //
     // For example, `"key"` is looked up as `"key"`, `5` is looked up as `"5"`, `["test"]` is looked up
     // as `"[\"test\"]"`.
