@@ -12,7 +12,7 @@ on:
         type: string
     outputs:
       cargo-version:
-        description: "cargo snapshot version"
+        description: "Cargo snapshot version"
         value: ${{ jobs.cargo-snapshot.outputs.version }}
       avm-version:
         description: "@fluencelabs/avm version"
@@ -75,7 +75,7 @@ jobs:
           ref: ${{ inputs.ref }}
 
       - name: Import secrets
-        uses: hashicorp/vault-action@v2.4.2
+        uses: hashicorp/vault-action@v2.4.3
         with:
           url: https://vault.fluence.dev
           path: jwt/github
@@ -92,7 +92,7 @@ jobs:
 
       - name: Set dependencies
         if: inputs.cargo-dependencies != ''
-        uses: fluencelabs/github-actions/cargo-set-dependency@update-cargo-set-dependency
+        uses: fluencelabs/github-actions/cargo-set-dependency@main
         with:
           dependencies: ${{ inputs.cargo-dependencies }}
 
@@ -107,22 +107,9 @@ jobs:
       - name: Setup Rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
 
-      - name: Publish cargo snapshots
+      - name: Publish crate snapshots
         id: snapshot
-        uses: fluencelabs/github-actions/cargo-publish-snapshot@FLU-119-cargo-publish-snapshot
-
-      - name: debug
-        if: always()
-        run: |
-          echo avm-server
-          cat avm/server/Cargo.toml
-          echo air-interpreter
-          cat air-interpreter/Cargo.toml
-          echo air-interpreter
-          cat crates/air-lib/interpreter-interface/Cargo.toml
-
-          echo
-          cat Cargo.lock
+        uses: fluencelabs/github-actions/cargo-publish-snapshot@main
 
   publish-avm:
     name: "Publish @fluencelabs/avm snapshot"
@@ -154,7 +141,7 @@ jobs:
         working-directory: avm/client/dist
 
       - name: Import secrets
-        uses: hashicorp/vault-action@v2.4.2
+        uses: hashicorp/vault-action@v2.4.3
         with:
           url: https://vault.fluence.dev
           path: jwt/github
@@ -224,7 +211,7 @@ jobs:
           ref: ${{ inputs.ref }}
 
       - name: Import secrets
-        uses: hashicorp/vault-action@v2.4.2
+        uses: hashicorp/vault-action@v2.4.3
         with:
           url: https://vault.fluence.dev
           path: jwt/github
