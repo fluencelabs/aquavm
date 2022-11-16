@@ -194,7 +194,7 @@ jobs:
 
   publish-air-beautify:
     name: "Publish air-beautify-wasm snapshot"
-    runs-on: ubuntu-latest
+    runs-on: builder
 
     outputs:
       version: "${{ steps.build.outputs.version }}"
