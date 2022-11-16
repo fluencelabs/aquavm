@@ -227,10 +227,10 @@ jobs:
           secrets: |
             kv/npm-registry/basicauth/ci token | NODE_AUTH_TOKEN
 
-      - name: Setup wasm-pack
-        uses: jetli/wasm-pack-action@v0.3.0
+      - name: Install wasm-pack
+        uses: baptiste0928/cargo-install@v1.3.0
         with:
-          version: 'latest'
+          crate: wasm-pack
 
       - name: Setup node with self-hosted npm registry
         uses: actions/setup-node@v3
