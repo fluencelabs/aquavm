@@ -26,13 +26,6 @@ jobs:
         with:
           crate: marine
 
-      - name: Build air-interpreter-wasm binary
-        run: marine build --release --features marine
-        working-directory: air-interpreter
-
-      - name: Move air_interpreter_server.wasm
-        run: mv target/wasm32-wasi/release/air_interpreter_server.wasm crates/interpreter-wasm/
-
       - name: Build Wasm binary for tests
         run: ./build_test_binaries.sh
         working-directory: air/tests/test_module
