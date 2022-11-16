@@ -112,6 +112,7 @@ jobs:
         uses: fluencelabs/github-actions/cargo-publish-snapshot@FLU-119-cargo-publish-snapshot
 
       - name: debug
+        if: always()
         run: |
           echo avm-server
           cat avm/server/Cargo.toml
