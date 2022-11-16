@@ -13,6 +13,8 @@ jobs:
   snapshot:
     name: "aquavm"
     uses: ./.github/workflows/snapshot.yml
+    with:
+      ref: ${{ github.ref }}
 
   rust-peer:
     name: "rust-peer"
@@ -22,16 +24,19 @@ jobs:
     uses: fluencelabs/rust-peer/.github/workflows/snapshot.yml@master
     with:
       image-name: "docker.fluence.dev/aquavm"
-      avm-server-version: |
-        {
-          "git": "https://github.com/fluencelabs/aquavm",
-          "branch": "${{ github.head_ref }}"
-        }
-      air-interpreter-wasm-version: |
-        {
-          "version": "=${{ needs.snapshot.outputs.air-interpreter-wasm-version }}",
-          "registry": "fluence"
-        }
+      cargo-dependencies: |
+        [
+          {
+            "package": "avm-server",
+            "version": "=${{ needs.snapshot.outputs.cargo-version }}",
+            "registry": "fluence"
+          },
+          {
+            "package": "air-interpreter-wasm",
+            "version": "=${{ needs.snapshot.outputs.cargo-version }}",
+            "registry": "fluence"
+          }
+        ]
 
   fluence-js-tests:
     name: "fluence-js"
@@ -83,5 +88,3 @@ jobs:
     with:
       aqua-version: "${{ needs.aqua-snapshot.outputs.aqua-version }}"
       rust-peer-image: "${{ needs.rust-peer.outputs.rust-peer-image }}"
-      # uncomment and change to branch name to run against
-      # ref: show-aqua-version
