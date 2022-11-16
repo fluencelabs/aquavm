@@ -109,7 +109,7 @@ jobs:
 
       - name: Add air-interpreter-wasm to workspace
         run: |
-          sed -i '/members =/a "crates/interpreter-wasm"' Cargo.toml
+          sed -i '/members/a "crates/interpreter-wasm",' Cargo.toml
 
       - name: Publish crate snapshots
         id: snapshot
