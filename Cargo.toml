@@ -1,6 +1,5 @@
 [workspace]
 members = [
-"crates/interpreter-wasm"
     "air",
     "air-interpreter",
     "avm/interface",
