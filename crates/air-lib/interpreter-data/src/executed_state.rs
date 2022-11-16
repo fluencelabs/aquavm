@@ -55,11 +55,23 @@ pub enum CallResult {
     CallServiceFailed(i32, Rc<String>),
 }
 
+pub type CID = Rc<str>;
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Value {
-    Scalar(Rc<JValue>),
-    Stream { value: Rc<JValue>, generation: u32 },
+    // Why CID is not part of the JValue or like this?  We may need to abstract
+    // over values, and value should know its orignal CID (and values should
+    // maintain its original binary data).
+    Scalar {
+        cid: CID,
+        value: Rc<JValue>,
+    },
+    Stream {
+        cid: CID,
+        value: Rc<JValue>,
+        generation: u32,
+    },
 }
 
 /// Let's consider an example of trace that could be produces by the following fold:

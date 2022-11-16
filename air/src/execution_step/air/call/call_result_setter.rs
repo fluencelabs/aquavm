@@ -33,10 +33,11 @@ pub(crate) fn populate_context_from_peer_service_result<'i>(
     exec_ctx: &mut ExecutionCtx<'i>,
 ) -> ExecutionResult<CallResult> {
     let result_value = executed_result.result.clone();
+    let cid = executed_result.cid.clone();
     match output {
         CallOutputValue::Scalar(scalar) => {
             exec_ctx.scalars.set_scalar_value(scalar.name, executed_result)?;
-            Ok(CallResult::executed_scalar(result_value))
+            Ok(CallResult::executed_scalar(cid, result_value))
         }
         CallOutputValue::Stream(stream) => {
             let value_descriptor = StreamValueDescriptor::new(

@@ -43,6 +43,9 @@ pub struct InterpreterOutcome {
 
     /// Collected parameters of all met call instructions that could be executed on a current peer.
     pub call_requests: Vec<u8>,
+
+    /// IPLD CID of the data field.
+    pub cid: String,
 }
 
 impl InterpreterOutcome {
@@ -53,14 +56,33 @@ impl InterpreterOutcome {
         next_peer_pks: Vec<String>,
         call_requests: Vec<u8>,
     ) -> Self {
+        let cid = json_data_cid(&data);
+
         Self {
             ret_code,
             error_message,
             data,
             next_peer_pks,
             call_requests,
+            cid,
         }
     }
+}
+
+// TODO we might refactor this to `SerializationFormat` trait
+// that both transform data to binary/text form (be it JSON, CBOR or something else)
+// and produces CID too
+fn json_data_cid(data: &[u8]) -> String {
+    use cid::Cid;
+    use multihash::{Code, MultihashDigest};
+
+    // the Sha2_256 is current IPFS default hash
+    let digest = Code::Sha2_256.digest(data);
+    // seems to be better than RAW_CODEC = 0x55
+    const JSON_CODEC: u64 = 0x0200;
+
+    let cid = Cid::new_v1(JSON_CODEC, digest);
+    cid.to_string()
 }
 
 #[cfg(feature = "marine")]
@@ -82,13 +104,7 @@ impl InterpreterOutcome {
         let error_message = try_as_string(record_values.pop().unwrap(), "error_message")?;
         let ret_code = try_as_i64(record_values.pop().unwrap(), "ret_code")?;
 
-        let outcome = Self {
-            ret_code,
-            error_message,
-            data,
-            next_peer_pks,
-            call_requests,
-        };
+        let outcome = Self::new(ret_code, error_message, data, next_peer_pks, call_requests);
 
         Ok(outcome)
     }

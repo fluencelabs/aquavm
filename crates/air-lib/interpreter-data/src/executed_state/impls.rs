@@ -41,14 +41,14 @@ impl CallResult {
         CallResult::RequestSentBy(Sender::PeerIdWithCallId { peer_id, call_id })
     }
 
-    pub fn executed_scalar(value: Rc<JValue>) -> CallResult {
-        let value = Value::Scalar(value);
+    pub fn executed_scalar(cid: Rc<str>, value: Rc<JValue>) -> CallResult {
+        let value = Value::Scalar{ cid, value, };
 
         CallResult::Executed(value)
     }
 
-    pub fn executed_stream(value: Rc<JValue>, generation: u32) -> CallResult {
-        let value = Value::Stream { value, generation };
+    pub fn executed_stream(cid: Rc<str>, value: Rc<JValue>, generation: u32) -> CallResult {
+        let value = Value::Stream { cid, value, generation };
 
         CallResult::Executed(value)
     }

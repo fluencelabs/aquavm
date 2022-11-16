@@ -29,6 +29,7 @@ use std::rc::Rc;
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct ValueAggregate {
     pub result: Rc<JValue>,
+    pub cid: Rc<str>,
     pub tetraplet: RcSecurityTetraplet,
     pub trace_pos: TracePos,
 }
