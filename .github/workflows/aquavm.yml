@@ -26,8 +26,8 @@ jobs:
         with:
           crate: marine
 
-      - name: Build Wasm binary for interpreter
-        run: marine build --features marine
+      - name: Build air-interpreter-wasm binary
+        run: marine build --release --features marine
         working-directory: air-interpreter
 
       - name: Move air_interpreter_server.wasm
