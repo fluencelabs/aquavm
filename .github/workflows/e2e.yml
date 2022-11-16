@@ -32,7 +32,7 @@ jobs:
             "registry": "fluence"
           },
           {
-            "package": "air-interpreter-wasm"
+            "package": "air-interpreter-wasm",
             "version": "=${{ needs.snapshot.outputs.cargo-version }}",
             "registry": "fluence"
           }
