@@ -104,9 +104,6 @@ jobs:
       - name: Move air_interpreter_server.wasm
         run: mv air_interpreter_server.wasm crates/interpreter-wasm/
 
-      - name: Setup Rust toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-
       - name: Add air-interpreter-wasm to workspace
         run: |
           sed -i '/members/a "crates/interpreter-wasm",' Cargo.toml
