@@ -37,6 +37,7 @@ pub trait AirRunner {
         init_peer_id: impl Into<String>,
         timestamp: u64,
         ttl: u32,
+        override_current_peer_id: Option<String>,
         call_results: avm_server::CallResults,
     ) -> Result<RawAVMOutcome, Box<dyn std::error::Error>>;
 }
@@ -51,6 +52,7 @@ pub struct TestRunParameters {
     pub init_peer_id: String,
     pub timestamp: u64,
     pub ttl: u32,
+    pub override_current_peer_id: Option<String>,
 }
 
 impl<R: AirRunner> TestRunner<R> {
@@ -69,6 +71,7 @@ impl<R: AirRunner> TestRunner<R> {
             init_peer_id,
             timestamp,
             ttl,
+            override_current_peer_id,
         } = test_run_params;
 
         let mut call_results = HashMap::new();
@@ -84,6 +87,7 @@ impl<R: AirRunner> TestRunner<R> {
                     init_peer_id.clone(),
                     timestamp,
                     ttl,
+                    override_current_peer_id.clone(),
                     call_results,
                 )
                 .map_err(|e| e.to_string())?;
@@ -128,6 +132,7 @@ impl TestRunParameters {
             init_peer_id: init_peer_id.into(),
             timestamp,
             ttl,
+            override_current_peer_id: None,
         }
     }
 
@@ -136,6 +141,7 @@ impl TestRunParameters {
             init_peer_id: init_peer_id.into(),
             timestamp: 0,
             ttl: 0,
+            override_current_peer_id: None,
         }
     }
 
@@ -144,6 +150,7 @@ impl TestRunParameters {
             init_peer_id: String::new(),
             timestamp,
             ttl: 0,
+            override_current_peer_id: None,
         }
     }
 
@@ -152,6 +159,7 @@ impl TestRunParameters {
             init_peer_id: String::new(),
             timestamp: 0,
             ttl,
+            override_current_peer_id: None,
         }
     }
 }

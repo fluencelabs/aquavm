@@ -25,6 +25,7 @@ pub struct ParticleParameters<'init_peer_id, 'particle_id> {
     pub particle_id: Cow<'particle_id, str>,
     pub timestamp: u64,
     pub ttl: u32,
+    pub override_current_peer_id: Option<String>,
 }
 
 impl<'init_peer_id, 'particle_id> ParticleParameters<'init_peer_id, 'particle_id> {
@@ -39,6 +40,7 @@ impl<'init_peer_id, 'particle_id> ParticleParameters<'init_peer_id, 'particle_id
             particle_id,
             timestamp,
             ttl,
+            override_current_peer_id: None,
         }
     }
 }

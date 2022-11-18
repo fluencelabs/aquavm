@@ -100,6 +100,7 @@ impl<E> AVM<E> {
                 particle_parameters.init_peer_id.clone().into_owned(),
                 particle_parameters.timestamp,
                 particle_parameters.ttl,
+                particle_parameters.override_current_peer_id.clone(),
                 call_results,
             )
             .map_err(AVMError::RunnerError)?;

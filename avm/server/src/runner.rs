@@ -78,13 +78,16 @@ impl AVMRunner {
         init_peer_id: impl Into<String>,
         timestamp: u64,
         ttl: u32,
+        override_current_peer_id: Option<String>,
         call_results: CallResults,
     ) -> RunnerResult<RawAVMOutcome> {
+        let current_peer_id =
+            override_current_peer_id.unwrap_or_else(|| self.current_peer_id.clone());
         let args = prepare_args(
             air,
             prev_data,
             data,
-            self.current_peer_id.clone(),
+            current_peer_id,
             init_peer_id.into(),
             timestamp,
             ttl,

@@ -65,6 +65,7 @@ impl AirRunner for WasmAirRunner {
         init_peer_id: impl Into<String>,
         timestamp: u64,
         ttl: u32,
+        override_current_peer_id: Option<String>,
         call_results: avm_server::CallResults,
     ) -> Result<RawAVMOutcome, Box<dyn std::error::Error>> {
         Ok(self.0.call(
@@ -74,6 +75,7 @@ impl AirRunner for WasmAirRunner {
             init_peer_id,
             timestamp,
             ttl,
+            override_current_peer_id,
             call_results,
         )?)
     }
