@@ -16,6 +16,6 @@
 
 mod chat_join;
 mod create_service;
-mod current_override;
 mod dashboard;
 mod network_explore;
+mod override_current;
