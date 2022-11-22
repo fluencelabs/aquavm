@@ -180,7 +180,7 @@ jobs:
 
       - name: Publish snapshot
         id: snapshot
-        uses: fluencelabs/github-actions/npm-publish-snapshot@main
+        uses: fluencelabs/github-actions/npm-publish-snapshot@small-fixes
         with:
           working-directory: avm/client
           id: ${{ steps.version.outputs.id }}
