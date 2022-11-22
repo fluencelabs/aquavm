@@ -114,7 +114,7 @@ jobs:
 
       - name: Publish crate snapshots
         id: snapshot
-        uses: fluencelabs/github-actions/cargo-publish-snapshot@small-fixes
+        uses: fluencelabs/github-actions/cargo-publish-snapshot@main
         with:
           id: ${{ steps.version.outputs.id }}
 
@@ -180,7 +180,7 @@ jobs:
 
       - name: Publish snapshot
         id: snapshot
-        uses: fluencelabs/github-actions/npm-publish-snapshot@small-fixes
+        uses: fluencelabs/github-actions/npm-publish-snapshot@main
         with:
           working-directory: avm/client
           id: ${{ steps.version.outputs.id }}
