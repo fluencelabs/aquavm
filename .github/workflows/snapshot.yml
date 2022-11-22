@@ -116,7 +116,7 @@ jobs:
         id: snapshot
         uses: fluencelabs/github-actions/cargo-publish-snapshot@small-fixes
         with:
-          id: ${{ steps.version.output.id }}
+          id: ${{ steps.version.outputs.id }}
 
   publish-avm:
     name: "Publish @fluencelabs/avm snapshot"
