@@ -49,13 +49,13 @@ pub fn parse_kw(inp: &str) -> IResult<&str, ServiceDefinition, ParseError> {
     let json_value = || {
         cut(context(
             "result value has to be a valid JSON",
-            recognize(super::json::json_value),
+            recognize(wson::value_parser),
         ))
     };
     let json_map = || {
         cut(context(
             "result value has to be a valid JSON hash",
-            recognize(super::json::hash),
+            recognize(wson::object),
         ))
     };
 

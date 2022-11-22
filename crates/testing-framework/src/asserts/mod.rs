@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-mod json;
 pub(crate) mod parser;
 
 use crate::services::JValue;
