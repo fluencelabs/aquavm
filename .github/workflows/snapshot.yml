@@ -108,9 +108,15 @@ jobs:
         run: |
           sed -i '/members/a "crates/interpreter-wasm",' Cargo.toml
 
+      - name: Generate snapshot version
+        id: version
+        uses: fluencelabs/github-actions/generate-snapshot-id@main
+
       - name: Publish crate snapshots
         id: snapshot
-        uses: fluencelabs/github-actions/cargo-publish-snapshot@main
+        uses: fluencelabs/github-actions/cargo-publish-snapshot@small-fixes
+        with:
+          id: ${{ steps.version.output.id }}
 
   publish-avm:
     name: "Publish @fluencelabs/avm snapshot"
@@ -119,7 +125,7 @@ jobs:
     needs: wasm
 
     outputs:
-      version: "${{ steps.build.outputs.version }}"
+      version: "${{ steps.snaphot.outputs.version }}"
 
     permissions:
       contents: read
@@ -168,37 +174,23 @@ jobs:
       - run: npm run build
         working-directory: avm/client
 
-      - name: Generate package version
+      - name: Generate snapshot version
         id: version
-        run: |
-          SHA=${{ github.event.pull_request.head.sha }}
-          echo "::set-output name=sha::${SHA::7}"
-          echo "::set-output name=branch::${GITHUB_HEAD_REF//[^a-zA-Z0-9-]/-}"
+        uses: fluencelabs/github-actions/generate-snapshot-id@main
 
-      - name: Set package version
-        id: build
-        env:
-          BRANCH: ${{ steps.version.outputs.branch }}
-          SHA: ${{ steps.version.outputs.sha }}
-          RUN: ${{ github.run_number }}
-          ATTEMPT: ${{ github.run_attempt }}
-        working-directory: avm/client
-        run: |
-          echo "::set-output name=version::$(\
-                npm version prerelease \
-                --no-git-tag-version \
-                --preid ${{ env.BRANCH }}-${{ env.SHA }}-${{ env.RUN }}-${{ env.ATTEMPT }})"
-
-      - name: Publish to self-hosted npm repo
-        working-directory: avm/client
-        run: npm publish --tag snapshot --registry https://npm.fluence.dev
+      - name: Publish snapshot
+        id: snapshot
+        uses: fluencelabs/github-actions/npm-publish-snapshot@main
+        with:
+          working-directory: avm/client
+          id: ${{ steps.version.outputs.id }}
 
   publish-air-beautify:
     name: "Publish air-beautify-wasm snapshot"
     runs-on: builder
 
     outputs:
-      version: "${{ steps.build.outputs.version }}"
+      version: "${{ steps.snapshot.outputs.version }}"
 
     permissions:
       contents: read
@@ -242,27 +234,13 @@ jobs:
           wasm-pack build --release
         working-directory: tools/wasm/air-beautify-wasm
 
-      - name: Generate package version
+      - name: Generate snapshot version
         id: version
-        run: |
-          SHA=${{ github.event.pull_request.head.sha }}
-          echo "::set-output name=sha::${SHA::7}"
-          echo "::set-output name=branch::${GITHUB_HEAD_REF//[^a-zA-Z0-9-]/-}"
+        uses: fluencelabs/github-actions/generate-snapshot-id@main
 
-      - name: Set package version
-        id: build
-        env:
-          BRANCH: ${{ steps.version.outputs.branch }}
-          SHA: ${{ steps.version.outputs.sha }}
-          RUN: ${{ github.run_number }}
-          ATTEMPT: ${{ github.run_attempt }}
-        working-directory: tools/wasm/air-beautify-wasm/pkg
-        run: |
-          echo "::set-output name=version::$(\
-                npm version prerelease \
-                --no-git-tag-version \
-                --preid ${{ env.BRANCH }}-${{ env.SHA }}-${{ env.RUN }}-${{ env.ATTEMPT }})"
-
-      - name: Publish to self-hosted npm repo
-        working-directory: tools/wasm/air-beautify-wasm/pkg
-        run: npm publish --tag snapshot --registry https://npm.fluence.dev
+      - name: Publish snapshot
+        id: snapshot
+        uses: fluencelabs/github-actions/npm-publish-snapshot@main
+        with:
+          working-directory: tools/wasm/air-beautify-wasm/pkg
+          id: ${{ steps.version.outputs.id }}
