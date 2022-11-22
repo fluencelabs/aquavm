@@ -23,5 +23,5 @@ pub(crate) struct ExecutionData<'ctx> {
     pub(crate) air_script: String,
     pub(crate) current_data: String,
     pub(crate) prev_data: String,
-    pub(crate) particle: ParticleParameters<'ctx, 'ctx>,
+    pub(crate) particle: ParticleParameters<'ctx, 'ctx, 'ctx>,
 }

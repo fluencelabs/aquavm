@@ -39,7 +39,7 @@ pub(crate) fn load(args: &AnomalyDataArgs) -> anyhow::Result<super::ExecutionDat
         .context("Anomaly current_data is not a valid string")?;
     let current_data = String::from_utf8(anomaly_data.current_data.to_vec())
         .context("Anomaly current_data is not a valid string")?;
-    let particle: ParticleParameters<'static, 'static> =
+    let particle: ParticleParameters<'static, 'static, 'static> =
         serde_json::from_reader(&*anomaly_data.particle.to_vec())
             .context("Anomaly particle is not a valid JSON")?;
 
