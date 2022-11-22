@@ -22,7 +22,7 @@ jobs:
     needs:
       - aquavm
 
-    uses: fluencelabs/rust-peer/.github/workflows/snapshot.yml@main
+    uses: fluencelabs/rust-peer/.github/workflows/snapshot.yml@master
     with:
       image-name: "docker.fluence.dev/aquavm"
       cargo-dependencies: |
