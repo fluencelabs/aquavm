@@ -80,7 +80,7 @@ impl<E> AVM<E> {
         &mut self,
         air: impl Into<String>,
         data: impl Into<Vec<u8>>,
-        particle_parameters: ParticleParameters<'_, '_, '_>,
+        particle_parameters: ParticleParameters<'_>,
         call_results: CallResults,
     ) -> AVMResult<AVMOutcome, E> {
         let air = air.into();
@@ -140,7 +140,7 @@ impl<E> AVM<E> {
         &mut self,
         air_script: &str,
         current_data: &[u8],
-        particle_parameters: &ParticleParameters<'_, '_, '_>,
+        particle_parameters: &ParticleParameters<'_>,
         avm_outcome: &RawAVMOutcome,
         execution_time: Duration,
         memory_delta: usize,

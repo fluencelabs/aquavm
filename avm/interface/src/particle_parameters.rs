@@ -20,23 +20,21 @@ use std::borrow::Cow;
 
 /// Represents parameters obtained from a particle.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ParticleParameters<'init_peer_id, 'particle_id, 'current_peer_id> {
-    pub init_peer_id: Cow<'init_peer_id, str>,
-    pub particle_id: Cow<'particle_id, str>,
+pub struct ParticleParameters<'ctx> {
+    pub init_peer_id: Cow<'ctx, str>,
+    pub particle_id: Cow<'ctx, str>,
     pub timestamp: u64,
     pub ttl: u32,
-    pub current_peer_id: Cow<'current_peer_id, str>,
+    pub current_peer_id: Cow<'ctx, str>,
 }
 
-impl<'init_peer_id, 'particle_id, 'current_peer_id>
-    ParticleParameters<'init_peer_id, 'particle_id, 'current_peer_id>
-{
+impl<'ctx> ParticleParameters<'ctx> {
     pub fn new(
-        init_peer_id: Cow<'init_peer_id, str>,
-        particle_id: Cow<'particle_id, str>,
+        init_peer_id: Cow<'ctx, str>,
+        particle_id: Cow<'ctx, str>,
         timestamp: u64,
         ttl: u32,
-        current_peer_id: Cow<'current_peer_id, str>,
+        current_peer_id: Cow<'ctx, str>,
     ) -> Self {
         Self {
             init_peer_id,
