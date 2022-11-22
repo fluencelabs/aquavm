@@ -176,7 +176,7 @@ dependencies = [
 
 [[package]]
 name = "air-test-utils"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "air",
  "air-interpreter-interface",
@@ -319,7 +319,7 @@ dependencies = [
 
 [[package]]
 name = "avm-interface"
-version = "0.26.1"
+version = "0.27.0"
 dependencies = [
  "air-interpreter-interface",
  "air-utils",
@@ -335,7 +335,7 @@ dependencies = [
 
 [[package]]
 name = "avm-server"
-version = "0.26.1"
+version = "0.27.0"
 dependencies = [
  "air-interpreter-interface",
  "air-utils",
