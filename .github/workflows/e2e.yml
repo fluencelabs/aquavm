@@ -77,7 +77,7 @@ jobs:
 
   registry:
     needs:
-      - aqua-snapshot
+      - aqua
       - rust-peer
 
     uses: fluencelabs/registry/.github/workflows/tests.yml@main
