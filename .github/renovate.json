@@ -20,6 +20,10 @@
       ],
       "automerge": true,
       "automergeType": "branch"
+    },
+    {
+      "matchPackagePatterns": ["^@wasmer", "^wasmer", "^wasm-bindgen"],
+      "enabled": false
     }
   ]
 }
