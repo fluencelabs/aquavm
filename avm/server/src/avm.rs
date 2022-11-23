@@ -58,6 +58,7 @@ pub struct AVM<E> {
 
 impl<E> AVM<E> {
     /// Create AVM with provided config.
+    #[allow(clippy::result_large_err)]
     pub fn new(config: AVMConfig<E>) -> AVMResult<Self, E> {
         let AVMConfig {
             air_wasm_path,
@@ -76,6 +77,7 @@ impl<E> AVM<E> {
         Ok(avm)
     }
 
+    #[allow(clippy::result_large_err)]
     pub fn call(
         &mut self,
         air: impl Into<String>,
@@ -126,6 +128,7 @@ impl<E> AVM<E> {
     }
 
     /// Cleanup data that become obsolete.
+    #[allow(clippy::result_large_err)]
     pub fn cleanup_data(&mut self, particle_id: &str) -> AVMResult<(), E> {
         self.data_store.cleanup_data(particle_id)?;
         Ok(())
@@ -136,6 +139,7 @@ impl<E> AVM<E> {
         self.runner.memory_stats()
     }
 
+    #[allow(clippy::result_large_err)]
     fn save_anomaly_data(
         &mut self,
         air_script: &str,
