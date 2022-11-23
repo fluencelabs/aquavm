@@ -32,10 +32,10 @@ impl JValuable for () {
         Err(LambdaApplierError(EmptyStream).into())
     }
 
-    fn apply_lambda_with_tetraplets<'i>(
+    fn apply_lambda_with_tetraplets(
         &self,
         _lambda: &LambdaAST<'_>,
-        _exec_ctx: &ExecutionCtx<'i>,
+        _exec_ctx: &ExecutionCtx<'_>,
     ) -> ExecutionResult<(Cow<'_, JValue>, SecurityTetraplet)> {
         // applying lambda to an empty stream will produce a join behaviour
         Err(LambdaApplierError(EmptyStream).into())
