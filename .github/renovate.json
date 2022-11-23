@@ -18,7 +18,8 @@
       "matchManagers": [
         "github-actions"
       ],
-      "automerge": true
+      "automerge": true,
+      "automergeType": "branch"
     }
   ]
 }
