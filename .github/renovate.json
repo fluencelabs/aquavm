@@ -3,5 +3,22 @@
   "extends": [
     "config:base"
   ],
-  "enabledManagers": ["cargo", "npm", "github-actions"]
+  "enabledManagers": ["cargo", "npm", "github-actions"],
+  "prConcurrentLimit": 5,
+  "packageRules": [
+    {
+      "matchDepTypes": ["devDependencies"],
+      "prPriority": -1
+    },
+    {
+      "matchUpdateTypes": ["major"],
+      "prConcurrentLimit": 1
+    },
+    {
+      "matchManagers": [
+        "github-actions"
+      ],
+      "automerge": true
+    }
+  ]
 }
