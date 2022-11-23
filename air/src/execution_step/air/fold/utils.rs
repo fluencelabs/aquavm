@@ -86,10 +86,7 @@ pub(crate) fn construct_stream_iterable_values(
         .collect::<Vec<_>>()
 }
 
-fn create_scalar_iterable<'ctx>(
-    exec_ctx: &ExecutionCtx<'ctx>,
-    variable_name: &str,
-) -> ExecutionResult<FoldIterableScalar> {
+fn create_scalar_iterable(exec_ctx: &ExecutionCtx<'_>, variable_name: &str) -> ExecutionResult<FoldIterableScalar> {
     match exec_ctx.scalars.get_value(variable_name)? {
         ScalarRef::Value(call_result) => from_value(call_result.clone(), variable_name),
         ScalarRef::IterableValue(fold_state) => {
@@ -127,8 +124,8 @@ fn from_value(call_result: ValueAggregate, variable_name: &str) -> ExecutionResu
     Ok(iterable)
 }
 
-fn create_scalar_lambda_iterable<'ctx>(
-    exec_ctx: &ExecutionCtx<'ctx>,
+fn create_scalar_lambda_iterable(
+    exec_ctx: &ExecutionCtx<'_>,
     scalar_name: &str,
     lambda: &LambdaAST<'_>,
 ) -> ExecutionResult<FoldIterableScalar> {
