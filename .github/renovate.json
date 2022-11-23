@@ -3,27 +3,5 @@
   "extends": [
     "config:base"
   ],
-  "enabledManagers": ["cargo", "npm"],
-  "packageRules": [
-    {
-      "matchLanguages": ["rust"],
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
-      ],
-      "groupName": "all non-major Rust dependencies"
-    },
-    {
-      "matchLanguages": ["js"],
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
-      ],
-      "groupName": "all non-major JS dependencies"
-    },
-    {
-      "matchPackagePatterns": ["^@wasmer", "^wasmer", "^wasm-bindgen"],
-      "enabled": false
-    }
-  ]
+  "enabledManagers": ["cargo", "npm", "github-actions"]
 }
