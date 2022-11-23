@@ -183,6 +183,7 @@ dependencies = [
  "avm-interface",
  "avm-server",
  "fstrings",
+ "maplit",
  "marine-rs-sdk",
  "object-pool",
  "once_cell",

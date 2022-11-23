@@ -18,4 +18,3 @@ mod chat_join;
 mod create_service;
 mod dashboard;
 mod network_explore;
-mod override_current;
