@@ -125,7 +125,7 @@ jobs:
     needs: wasm
 
     outputs:
-      version: "${{ steps.snaphot.outputs.version }}"
+      version: "${{ steps.snapshot.outputs.version }}"
 
     permissions:
       contents: read
