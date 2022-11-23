@@ -26,7 +26,7 @@ const AIR_WASM_PATH: &str = "../target/wasm32-wasi/debug/air_interpreter_server.
 
 pub struct WasmAirRunner {
     current_peer_id: String,
-    runner: object_pool::Reusable<'static, AVMRunner>
+    runner: object_pool::Reusable<'static, AVMRunner>,
 }
 
 fn make_pooled_avm_runner() -> AVMRunner {
