@@ -29,11 +29,7 @@ use std::borrow::Cow;
 use std::ops::Deref;
 
 impl<'ctx> JValuable for IterableItem<'ctx> {
-    fn apply_lambda<'i>(
-        &self,
-        lambda: &LambdaAST<'_>,
-        exec_ctx: &ExecutionCtx<'i>,
-    ) -> ExecutionResult<Cow<'_, JValue>> {
+    fn apply_lambda(&self, lambda: &LambdaAST<'_>, exec_ctx: &ExecutionCtx<'_>) -> ExecutionResult<Cow<'_, JValue>> {
         use super::IterableItem::*;
 
         let jvalue = match self {
@@ -46,10 +42,10 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
         Ok(selected_value)
     }
 
-    fn apply_lambda_with_tetraplets<'i>(
+    fn apply_lambda_with_tetraplets(
         &self,
         lambda: &LambdaAST<'_>,
-        exec_ctx: &ExecutionCtx<'i>,
+        exec_ctx: &ExecutionCtx<'_>,
     ) -> ExecutionResult<(Cow<'_, JValue>, SecurityTetraplet)> {
         use super::IterableItem::*;
 
