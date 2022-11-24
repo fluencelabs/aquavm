@@ -4,7 +4,7 @@
     "config:base"
   ],
   "enabledManagers": ["cargo", "npm", "github-actions"],
-  "prConcurrentLimit": 5,
+  "schedule": "every weekend",
   "packageRules": [
     {
       "matchDepTypes": ["devDependencies"],
@@ -15,11 +15,10 @@
       "prConcurrentLimit": 1
     },
     {
-      "matchManagers": [
-        "github-actions"
-      ],
+      "matchManagers": [ "github-actions" ],
       "automerge": true,
-      "automergeType": "branch"
+      "automergeType": "branch",
+      "prPriority": 1
     },
     {
       "matchPackagePatterns": ["^@wasmer", "^wasmer", "^wasm-bindgen"],
