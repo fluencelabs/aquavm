@@ -3,23 +3,22 @@
   "extends": [
     "config:base"
   ],
-  "enabledManagers": ["cargo", "npm"],
+  "enabledManagers": ["cargo", "npm", "github-actions"],
+  "schedule": "every weekend",
   "packageRules": [
     {
-      "matchLanguages": ["rust"],
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
-      ],
-      "groupName": "all non-major Rust dependencies"
+      "matchDepTypes": ["devDependencies"],
+      "prPriority": -1
     },
     {
-      "matchLanguages": ["js"],
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
-      ],
-      "groupName": "all non-major JS dependencies"
+      "matchUpdateTypes": ["major"],
+      "prConcurrentLimit": 1
+    },
+    {
+      "matchManagers": [ "github-actions" ],
+      "automerge": true,
+      "automergeType": "branch",
+      "prPriority": 1
     },
     {
       "matchPackagePatterns": ["^@wasmer", "^wasmer", "^wasm-bindgen"],
