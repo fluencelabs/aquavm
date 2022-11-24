@@ -25,15 +25,15 @@ use air_test_utils::{test_runner::TestRunParameters, RawAVMOutcome};
 
 use std::{borrow::Borrow, hash::Hash, rc::Rc};
 
-/// A particle execution. Several executors (particles) may share same TransformedAirScript
+/// A executor for an AIR script. Several executors may share same TransformedAirScript
 /// and its state.
-pub struct ParticleExecutor {
+pub struct AirScriptExecutor {
     transformed_air_script: TransformedAirScript,
     test_parameters: TestRunParameters,
     queue: ExecutionQueue,
 }
 
-impl ParticleExecutor {
+impl AirScriptExecutor {
     pub fn from_transformed_air_script(
         test_parameters: TestRunParameters,
         transformed_air_script: TransformedAirScript,
@@ -142,7 +142,7 @@ mod tests {
 
     #[test]
     fn test_execution() {
-        let exec = ParticleExecutor::new(
+        let exec = AirScriptExecutor::new(
             TestRunParameters::from_init_peer_id("init_peer_id"),
             vec![],
             std::iter::empty(),
@@ -173,7 +173,7 @@ mod tests {
 
     #[test]
     fn test_call_result_success() {
-        let exec = ParticleExecutor::new(
+        let exec = AirScriptExecutor::new(
             TestRunParameters::from_init_peer_id("init_peer_id"),
             vec![],
             std::iter::empty(),
@@ -202,7 +202,7 @@ mod tests {
 
     #[test]
     fn test_call_result_error() {
-        let exec = ParticleExecutor::new(
+        let exec = AirScriptExecutor::new(
             TestRunParameters::from_init_peer_id("init_peer_id"),
             vec![],
             std::iter::empty(),
@@ -240,7 +240,7 @@ mod tests {
 
     #[test]
     fn test_seq_ok() {
-        let exec = ParticleExecutor::new(
+        let exec = AirScriptExecutor::new(
             TestRunParameters::from_init_peer_id("init_peer_id"),
             vec![],
             IntoIterator::into_iter(["peer2", "peer3"]).map(Into::into),
@@ -315,7 +315,7 @@ mod tests {
 
     #[test]
     fn test_map() {
-        let exec = ParticleExecutor::new(
+        let exec = AirScriptExecutor::new(
             TestRunParameters::from_init_peer_id("peer1"),
             vec![],
             IntoIterator::into_iter(["peer2", "peer3"]).map(Into::into),
@@ -371,7 +371,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn test_map_no_arg() {
-        let exec = ParticleExecutor::new(
+        let exec = AirScriptExecutor::new(
             TestRunParameters::from_init_peer_id("peer1"),
             vec![],
             IntoIterator::into_iter(["peer2", "peer3"]).map(Into::into),
@@ -385,7 +385,7 @@ mod tests {
 
     #[test]
     fn test_seq_error() {
-        let exec = ParticleExecutor::new(
+        let exec = AirScriptExecutor::new(
             TestRunParameters::from_init_peer_id("init_peer_id"),
             vec![],
             IntoIterator::into_iter(["peer2", "peer3"]).map(Into::into),
@@ -461,7 +461,7 @@ mod tests {
 
     #[test]
     fn test_echo() {
-        let exec = ParticleExecutor::new(
+        let exec = AirScriptExecutor::new(
             TestRunParameters::from_init_peer_id("init_peer_id"),
             vec![],
             std::iter::empty(),
@@ -503,7 +503,7 @@ mod tests {
             network.clone(),
         )
         .unwrap();
-        let exectution1 = ParticleExecutor::from_transformed_air_script(
+        let exectution1 = AirScriptExecutor::from_transformed_air_script(
             TestRunParameters::from_init_peer_id(peer),
             transformed1,
         )
@@ -514,7 +514,7 @@ mod tests {
             network.clone(),
         )
         .unwrap();
-        let exectution2 = ParticleExecutor::from_transformed_air_script(
+        let exectution2 = AirScriptExecutor::from_transformed_air_script(
             TestRunParameters::from_init_peer_id(peer),
             transformed2,
         )
@@ -556,14 +556,14 @@ mod tests {
         let peer = "peer1";
         let air_script = f!(r#"(call "{}" ("service" "function") [])"#, peer);
         let transformed1 = TransformedAirScript::new(&air_script, network.clone()).unwrap();
-        let exectution1 = ParticleExecutor::from_transformed_air_script(
+        let exectution1 = AirScriptExecutor::from_transformed_air_script(
             TestRunParameters::from_init_peer_id(peer),
             transformed1,
         )
         .unwrap();
 
         let transformed2 = TransformedAirScript::new(&air_script, network.clone()).unwrap();
-        let exectution2 = ParticleExecutor::from_transformed_air_script(
+        let exectution2 = AirScriptExecutor::from_transformed_air_script(
             TestRunParameters::from_init_peer_id(peer),
             transformed2,
         )
@@ -584,7 +584,7 @@ mod tests {
 
     #[test]
     fn test_invalid_air() {
-        let res = ParticleExecutor::new(
+        let res = AirScriptExecutor::new(
             TestRunParameters::from_init_peer_id("init_peer_id"),
             vec![],
             std::iter::empty(),

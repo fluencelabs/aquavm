@@ -21,4 +21,4 @@ mod queue;
 pub mod services;
 pub mod transform;
 
-pub use execution::ParticleExecutor;
+pub use execution::AirScriptExecutor;

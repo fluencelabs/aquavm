@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use air_test_framework::ParticleExecutor;
+use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::*;
 
 #[test]
@@ -66,7 +66,7 @@ fn issue_221() {
         )
     "#);
 
-    let executor = ParticleExecutor::new(
+    let executor = AirScriptExecutor::new(
         TestRunParameters::from_init_peer_id("set_variable_id"),
         vec![],
         vec![peer_1_id, peer_2_id].into_iter().map(Into::into),

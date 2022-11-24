@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use air_test_framework::ParticleExecutor;
+use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::*;
 
 #[test]
@@ -82,7 +82,7 @@ fn merging_fold_iterations_extensively() {
         )
         "#;
 
-    let engine = ParticleExecutor::new(
+    let engine = AirScriptExecutor::new(
         TestRunParameters::from_init_peer_id("client"),
         vec![],
         vec!["relay", "p1", "p2", "p3"].into_iter().map(Into::into),
@@ -216,7 +216,7 @@ fn merging_fold_iterations_extensively_2() {
         )
                 "#;
 
-    let engine = ParticleExecutor::new(
+    let engine = AirScriptExecutor::new(
         TestRunParameters::from_init_peer_id("client"),
         vec![],
         vec!["relay", "p1", "p2", "p3"].into_iter().map(Into::into),
