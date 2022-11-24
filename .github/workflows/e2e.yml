@@ -72,7 +72,7 @@ jobs:
       - aqua
       - rust-peer
 
-    uses: fluencelabs/aqua-playground/.github/workflows/tests.yml@master
+    uses: fluencelabs/aqua-playground/.github/workflows/tests.yml@FLU-121
     with:
       fluence-js-version: "${{ needs.fluence-js.outputs.fluence-js-version }}"
       aqua-version: "${{ needs.aqua.outputs.aqua-version }}"
