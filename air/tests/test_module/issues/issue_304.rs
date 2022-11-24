@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use air_test_framework::TestExecutor;
+use air_test_framework::ParticleExecutor;
 use air_test_utils::prelude::*;
 
 #[test]
@@ -33,7 +33,7 @@ fn issue_304() {
     "#;
 
     let init_peer_id = "init_peer_id";
-    let executor = TestExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), &script)
+    let executor = ParticleExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), &script)
         .expect("invalid test AIR script");
 
     let res = executor.execute_one(init_peer_id).unwrap();

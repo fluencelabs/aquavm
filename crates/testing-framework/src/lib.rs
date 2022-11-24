@@ -21,4 +21,4 @@ mod queue;
 pub mod services;
 pub mod transform;
 
-pub use execution::TestExecutor;
+pub use execution::ParticleExecutor;

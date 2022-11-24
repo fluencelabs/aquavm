@@ -15,7 +15,7 @@
  */
 
 use air::CatchableError;
-use air_test_framework::TestExecutor;
+use air_test_framework::ParticleExecutor;
 use air_test_utils::prelude::*;
 
 use std::cell::RefCell;
@@ -30,7 +30,7 @@ fn length_functor_for_array_scalar() {
         "#;
 
     let init_peer_id = "init_peer_id";
-    let executor = TestExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), &script)
+    let executor = ParticleExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), &script)
         .expect("invalid test AIR script");
 
     let result = executor.execute_one(init_peer_id).unwrap();
@@ -54,7 +54,7 @@ fn length_functor_for_non_array_scalar() {
         "#);
 
     let init_peer_id = "init_peer_id";
-    let executor = TestExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), &script)
+    let executor = ParticleExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), &script)
         .expect("invalid test AIR script");
 
     let result = executor.execute_one(init_peer_id).unwrap();
@@ -76,7 +76,7 @@ fn length_functor_for_stream() {
         "#;
 
     let init_peer_id = "init_peer_id";
-    let executor = TestExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), &script)
+    let executor = ParticleExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), &script)
         .expect("invalid test AIR script");
 
     let result = executor.execute_one(init_peer_id).unwrap();
@@ -99,7 +99,7 @@ fn length_functor_for_empty_stream() {
         "#;
 
     let init_peer_id = "init_peer_id";
-    let executor = TestExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), &script)
+    let executor = ParticleExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), &script)
         .expect("invalid test AIR script");
 
     let result = executor.execute_one(init_peer_id).unwrap();
@@ -124,7 +124,7 @@ fn length_functor_for_canon_stream() {
         "#;
 
     let init_peer_id = "init_peer_id";
-    let executor = TestExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), &script)
+    let executor = ParticleExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), &script)
         .expect("invalid test AIR script");
 
     let result = executor.execute_one(init_peer_id).unwrap();
@@ -156,7 +156,7 @@ fn length_functor_for_empty_canon_stream() {
         "#;
 
     let init_peer_id = "init_peer_id";
-    let executor = TestExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), &script)
+    let executor = ParticleExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), &script)
         .expect("invalid test AIR script");
 
     let result = executor.execute_one(init_peer_id).unwrap();

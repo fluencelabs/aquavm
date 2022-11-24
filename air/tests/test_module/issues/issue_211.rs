@@ -59,7 +59,8 @@ fn issue_211() {
 
     let run_params = TestRunParameters::from_init_peer_id(peer_1_id);
 
-    let engine = air_test_framework::TestExecutor::simple(run_params, &script).expect("invalid test executor config");
+    let engine =
+        air_test_framework::ParticleExecutor::simple(run_params, &script).expect("invalid test executor config");
 
     let result = engine.execute_one(peer_1_id).unwrap();
 

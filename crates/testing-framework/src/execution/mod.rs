@@ -18,25 +18,27 @@ use crate::{
     ephemeral::{Network, PeerId},
     queue::ExecutionQueue,
     services::MarineServiceHandle,
-    transform::walker::TransformedScript,
+    transform::walker::TransformedAirScript,
 };
 
 use air_test_utils::{test_runner::TestRunParameters, RawAVMOutcome};
 
 use std::{borrow::Borrow, hash::Hash, rc::Rc};
 
-pub struct TestExecutor {
-    transformee: TransformedScript,
+/// A particle execution. Several executors (particles) may share same TransformedAirScript
+/// and its state.
+pub struct ParticleExecutor {
+    transformed_air_script: TransformedAirScript,
     test_parameters: TestRunParameters,
     queue: ExecutionQueue,
 }
 
-impl TestExecutor {
-    pub fn from_transformee(
+impl ParticleExecutor {
+    pub fn from_transformed_air_script(
         test_parameters: TestRunParameters,
-        transformee: TransformedScript,
+        transformed_air_script: TransformedAirScript,
     ) -> Result<Self, String> {
-        let network = transformee.get_network();
+        let network = transformed_air_script.get_network();
         let init_peer_id = test_parameters.init_peer_id.as_str();
         network.ensure_peer(init_peer_id);
 
@@ -45,11 +47,12 @@ impl TestExecutor {
         queue.distribute_to_peers(&network, &[init_peer_id], &<_>::default());
 
         Ok(Self {
-            transformee,
+            transformed_air_script,
             test_parameters,
             queue,
         })
     }
+
     /// Create execution from the annotated air script.
     ///
     /// `extra_peers` allows you to define peers that are not mentioned in the annotated script
@@ -61,9 +64,9 @@ impl TestExecutor {
         annotated_air_script: &str,
     ) -> Result<Self, String> {
         let network = Network::new(extra_peers.into_iter(), common_services);
-        let transformee = TransformedScript::new(annotated_air_script, network)?;
+        let transformed = TransformedAirScript::new(annotated_air_script, network)?;
 
-        Self::from_transformee(test_parameters, transformee)
+        Self::from_transformed_air_script(test_parameters, transformed)
     }
 
     /// Simple constructor where everything is generated from the annotated_air_script.
@@ -84,9 +87,9 @@ impl TestExecutor {
         network: Rc<Network>,
         annotated_air_script: &str,
     ) -> Result<Self, String> {
-        let transformee = TransformedScript::new(annotated_air_script, network)?;
+        let transformed = TransformedAirScript::new(annotated_air_script, network)?;
 
-        Self::from_transformee(test_parameters, transformee)
+        Self::from_transformed_air_script(test_parameters, transformed)
     }
 
     /// Return Iterator for handling all the queued datas
@@ -100,8 +103,8 @@ impl TestExecutor {
         Id: Eq + Hash + ?Sized,
     {
         self.queue.execution_iter(
-            &self.transformee,
-            self.transformee.get_network(),
+            &self.transformed_air_script,
+            self.transformed_air_script.get_network(),
             &self.test_parameters,
             peer_id,
         )
@@ -139,7 +142,7 @@ mod tests {
 
     #[test]
     fn test_execution() {
-        let exec = TestExecutor::new(
+        let exec = ParticleExecutor::new(
             TestRunParameters::from_init_peer_id("init_peer_id"),
             vec![],
             std::iter::empty(),
@@ -170,7 +173,7 @@ mod tests {
 
     #[test]
     fn test_call_result_success() {
-        let exec = TestExecutor::new(
+        let exec = ParticleExecutor::new(
             TestRunParameters::from_init_peer_id("init_peer_id"),
             vec![],
             std::iter::empty(),
@@ -199,7 +202,7 @@ mod tests {
 
     #[test]
     fn test_call_result_error() {
-        let exec = TestExecutor::new(
+        let exec = ParticleExecutor::new(
             TestRunParameters::from_init_peer_id("init_peer_id"),
             vec![],
             std::iter::empty(),
@@ -237,7 +240,7 @@ mod tests {
 
     #[test]
     fn test_seq_ok() {
-        let exec = TestExecutor::new(
+        let exec = ParticleExecutor::new(
             TestRunParameters::from_init_peer_id("init_peer_id"),
             vec![],
             IntoIterator::into_iter(["peer2", "peer3"]).map(Into::into),
@@ -312,7 +315,7 @@ mod tests {
 
     #[test]
     fn test_map() {
-        let exec = TestExecutor::new(
+        let exec = ParticleExecutor::new(
             TestRunParameters::from_init_peer_id("peer1"),
             vec![],
             IntoIterator::into_iter(["peer2", "peer3"]).map(Into::into),
@@ -368,7 +371,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn test_map_no_arg() {
-        let exec = TestExecutor::new(
+        let exec = ParticleExecutor::new(
             TestRunParameters::from_init_peer_id("peer1"),
             vec![],
             IntoIterator::into_iter(["peer2", "peer3"]).map(Into::into),
@@ -382,7 +385,7 @@ mod tests {
 
     #[test]
     fn test_seq_error() {
-        let exec = TestExecutor::new(
+        let exec = ParticleExecutor::new(
             TestRunParameters::from_init_peer_id("init_peer_id"),
             vec![],
             IntoIterator::into_iter(["peer2", "peer3"]).map(Into::into),
@@ -458,7 +461,7 @@ mod tests {
 
     #[test]
     fn test_echo() {
-        let exec = TestExecutor::new(
+        let exec = ParticleExecutor::new(
             TestRunParameters::from_init_peer_id("init_peer_id"),
             vec![],
             std::iter::empty(),
@@ -491,29 +494,29 @@ mod tests {
     }
 
     #[test]
-    fn test_transformee_distinct() {
+    fn test_transformed_distinct() {
         let peer = "peer1";
         let network = Network::empty();
 
-        let transformee1 = TransformedScript::new(
+        let transformed1 = TransformedAirScript::new(
             &f!(r#"(call "{}" ("service" "function") []) ; ok = 42"#, peer),
             network.clone(),
         )
         .unwrap();
-        let exectution1 = TestExecutor::from_transformee(
+        let exectution1 = ParticleExecutor::from_transformed_air_script(
             TestRunParameters::from_init_peer_id(peer),
-            transformee1,
+            transformed1,
         )
         .unwrap();
 
-        let transformee2 = TransformedScript::new(
+        let transformed2 = TransformedAirScript::new(
             &f!(r#"(call "{}" ("service" "function") []) ; ok = 24"#, peer),
             network.clone(),
         )
         .unwrap();
-        let exectution2 = TestExecutor::from_transformee(
+        let exectution2 = ParticleExecutor::from_transformed_air_script(
             TestRunParameters::from_init_peer_id(peer),
-            transformee2,
+            transformed2,
         )
         .unwrap();
 
@@ -531,7 +534,7 @@ mod tests {
     }
 
     #[test]
-    fn test_transformee_shared() {
+    fn test_transformed_shared() {
         struct Service {
             state: RefCell<std::vec::IntoIter<JValue>>,
         }
@@ -552,17 +555,17 @@ mod tests {
 
         let peer = "peer1";
         let air_script = f!(r#"(call "{}" ("service" "function") [])"#, peer);
-        let transformee1 = TransformedScript::new(&air_script, network.clone()).unwrap();
-        let exectution1 = TestExecutor::from_transformee(
+        let transformed1 = TransformedAirScript::new(&air_script, network.clone()).unwrap();
+        let exectution1 = ParticleExecutor::from_transformed_air_script(
             TestRunParameters::from_init_peer_id(peer),
-            transformee1,
+            transformed1,
         )
         .unwrap();
 
-        let transformee2 = TransformedScript::new(&air_script, network.clone()).unwrap();
-        let exectution2 = TestExecutor::from_transformee(
+        let transformed2 = TransformedAirScript::new(&air_script, network.clone()).unwrap();
+        let exectution2 = ParticleExecutor::from_transformed_air_script(
             TestRunParameters::from_init_peer_id(peer),
-            transformee2,
+            transformed2,
         )
         .unwrap();
 
@@ -581,7 +584,7 @@ mod tests {
 
     #[test]
     fn test_invalid_air() {
-        let res = TestExecutor::new(
+        let res = ParticleExecutor::new(
             TestRunParameters::from_init_peer_id("init_peer_id"),
             vec![],
             std::iter::empty(),
@@ -591,13 +594,16 @@ mod tests {
 "#,
         );
 
-        assert!(res.is_err());
-        // TestExecutor doesn't implement Debug, so we have to unpack the error this way:
-        if let Err(err) = res {
-            assert_eq!(
-                err,
-                "error: \n  ┌─ script.air:3:1\n  │\n3 │ )\n  │ ^ expected \"(\"\n\n"
-            );
+        match &res {
+            Ok(_) => {
+                assert!(res.is_err());
+            }
+            Err(err) => {
+                assert_eq!(
+                    err,
+                    "error: \n  ┌─ script.air:3:1\n  │\n3 │ )\n  │ ^ expected \"(\"\n\n"
+                );
+            }
         }
     }
 }

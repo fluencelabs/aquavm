@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use air_test_framework::TestExecutor;
+use air_test_framework::ParticleExecutor;
 use air_test_utils::prelude::*;
 
 #[test]
@@ -48,7 +48,7 @@ fn issue_356() {
         )
         "#;
 
-    let engine = TestExecutor::new(
+    let engine = ParticleExecutor::new(
         TestRunParameters::from_init_peer_id("client"),
         vec![],
         vec!["p1", "p2", "p3"].into_iter().map(Into::into),
