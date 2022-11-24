@@ -18,7 +18,7 @@ use crate::{
     ephemeral::{Network, PeerId},
     queue::ExecutionQueue,
     services::MarineServiceHandle,
-    transform::walker::Transformee,
+    transform::walker::TransformedScript,
 };
 
 use air_test_utils::{test_runner::TestRunParameters, RawAVMOutcome};
@@ -26,7 +26,7 @@ use air_test_utils::{test_runner::TestRunParameters, RawAVMOutcome};
 use std::{borrow::Borrow, hash::Hash, rc::Rc};
 
 pub struct TestExecutor {
-    transformee: Transformee,
+    transformee: TransformedScript,
     test_parameters: TestRunParameters,
     queue: ExecutionQueue,
 }
@@ -34,7 +34,7 @@ pub struct TestExecutor {
 impl TestExecutor {
     pub fn from_transformee(
         test_parameters: TestRunParameters,
-        transformee: Transformee,
+        transformee: TransformedScript,
     ) -> Result<Self, String> {
         let network = transformee.get_network();
         let init_peer_id = test_parameters.init_peer_id.as_str();
@@ -61,7 +61,7 @@ impl TestExecutor {
         annotated_air_script: &str,
     ) -> Result<Self, String> {
         let network = Network::new(extra_peers.into_iter(), common_services);
-        let transformee = Transformee::new(annotated_air_script, network)?;
+        let transformee = TransformedScript::new(annotated_air_script, network)?;
 
         Self::from_transformee(test_parameters, transformee)
     }
@@ -84,7 +84,7 @@ impl TestExecutor {
         network: Rc<Network>,
         annotated_air_script: &str,
     ) -> Result<Self, String> {
-        let transformee = Transformee::new(annotated_air_script, network)?;
+        let transformee = TransformedScript::new(annotated_air_script, network)?;
 
         Self::from_transformee(test_parameters, transformee)
     }
@@ -495,7 +495,7 @@ mod tests {
         let peer = "peer1";
         let network = Network::empty();
 
-        let transformee1 = Transformee::new(
+        let transformee1 = TransformedScript::new(
             &f!(r#"(call "{}" ("service" "function") []) ; ok = 42"#, peer),
             network.clone(),
         )
@@ -506,7 +506,7 @@ mod tests {
         )
         .unwrap();
 
-        let transformee2 = Transformee::new(
+        let transformee2 = TransformedScript::new(
             &f!(r#"(call "{}" ("service" "function") []) ; ok = 24"#, peer),
             network.clone(),
         )
@@ -552,14 +552,14 @@ mod tests {
 
         let peer = "peer1";
         let air_script = f!(r#"(call "{}" ("service" "function") [])"#, peer);
-        let transformee1 = Transformee::new(&air_script, network.clone()).unwrap();
+        let transformee1 = TransformedScript::new(&air_script, network.clone()).unwrap();
         let exectution1 = TestExecutor::from_transformee(
             TestRunParameters::from_init_peer_id(peer),
             transformee1,
         )
         .unwrap();
 
-        let transformee2 = Transformee::new(&air_script, network.clone()).unwrap();
+        let transformee2 = TransformedScript::new(&air_script, network.clone()).unwrap();
         let exectution2 = TestExecutor::from_transformee(
             TestRunParameters::from_init_peer_id(peer),
             transformee2,

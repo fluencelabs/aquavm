@@ -20,12 +20,12 @@ use crate::ephemeral::Network;
 use std::{fmt::Write, ops::Deref, rc::Rc, str::FromStr};
 
 #[derive(Clone)]
-pub struct Transformee {
+pub struct TransformedScript {
     network: Rc<Network>,
     tranformed: Rc<str>,
 }
 
-impl Transformee {
+impl TransformedScript {
     pub fn new(annotated_air_script: &str, network: Rc<Network>) -> Result<Self, String> {
         // validate the AIR script with the standard parser first
         air_parser::parse(annotated_air_script)?;
@@ -52,7 +52,7 @@ impl Transformee {
     }
 }
 
-impl Deref for Transformee {
+impl Deref for TransformedScript {
     type Target = str;
 
     fn deref(&self) -> &Self::Target {
@@ -118,7 +118,7 @@ mod tests {
     #[test]
     fn test_translate_null() {
         let network = Network::empty();
-        let transformee = Transformee::new("(null)", network).unwrap();
+        let transformee = TransformedScript::new("(null)", network).unwrap();
         assert_eq!(&*transformee, "(null)");
     }
 
@@ -126,7 +126,7 @@ mod tests {
     fn test_translate_call_no_result() {
         let network = Network::empty();
         let script = r#"(call peer_id ("service_id" func) [])"#;
-        let transformee = Transformee::new_unvalidated(script, network).unwrap();
+        let transformee = TransformedScript::new_unvalidated(script, network).unwrap();
         assert_eq!(&*transformee, script);
     }
 
@@ -135,7 +135,7 @@ mod tests {
     fn test_translate_call_no_string() {
         let network = Network::empty();
         let script = r#"(call "peer_id" (service_id func) [])"#;
-        let transformee = Transformee::new(script, network);
+        let transformee = TransformedScript::new(script, network);
         assert_eq!(transformee.as_deref(), Ok(script));
     }
 
@@ -143,7 +143,7 @@ mod tests {
     fn test_translate_call_result() {
         let network = Network::empty();
         let script = r#"(call "peer_id" ("service_id" func) []) ; ok = 42"#;
-        let transformer = Transformee::new_unvalidated(script, network.clone()).unwrap();
+        let transformer = TransformedScript::new_unvalidated(script, network.clone()).unwrap();
         assert_eq!(
             &*transformer,
             r#"(call "peer_id" ("service_id..0" func) [])"#
@@ -174,7 +174,7 @@ mod tests {
 ))"#;
 
         let network = Network::empty();
-        let transformee = Transformee::new_unvalidated(script, network.clone()).unwrap();
+        let transformee = TransformedScript::new_unvalidated(script, network.clone()).unwrap();
         assert_eq!(
             &*transformee,
             concat!(
@@ -213,7 +213,7 @@ mod tests {
 ))"#;
 
         let network = Network::empty();
-        let _ = Transformee::new_unvalidated(script, network.clone());
+        let _ = TransformedScript::new_unvalidated(script, network.clone());
 
         assert_eq!(
             network.get_peers().collect::<HashSet<_>>(),
