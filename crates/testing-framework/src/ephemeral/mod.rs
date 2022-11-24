@@ -17,38 +17,35 @@
 pub mod neighborhood;
 
 use self::neighborhood::{PeerEnv, PeerSet};
-use crate::services::{services_to_call_service_closure, MarineServiceHandle};
+use crate::{
+    queue::PeerQueueCell,
+    services::{services_to_call_service_closure, MarineServiceHandle, NetworkServices},
+};
 
 use air_test_utils::{
     test_runner::{create_avm, TestRunParameters, TestRunner},
     RawAVMOutcome,
 };
 
-use std::{
-    borrow::Borrow,
-    cell::RefCell,
-    collections::{HashMap, HashSet},
-    hash::Hash,
-    rc::Rc,
-};
+use std::{borrow::Borrow, cell::RefCell, collections::HashMap, hash::Hash, rc::Rc};
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-pub struct PeerId(String);
+pub struct PeerId(Rc<str>);
 
 impl PeerId {
-    pub fn new(peer_id: impl Into<String>) -> Self {
-        Self(peer_id.into())
+    pub fn new<'any>(peer_id: impl Into<&'any str>) -> Self {
+        Self(peer_id.into().into())
     }
 }
 impl From<String> for PeerId {
     fn from(source: String) -> Self {
-        Self(source)
+        Self(source.as_str().into())
     }
 }
 
 impl From<&str> for PeerId {
     fn from(source: &str) -> Self {
-        Self(source.to_owned())
+        Self(source.into())
     }
 }
 
@@ -61,9 +58,7 @@ impl Borrow<str> for PeerId {
 pub type Data = Vec<u8>;
 
 pub struct Peer {
-    peer_id: PeerId,
-    // We presume that only one particle is run over the network.
-    prev_data: Data,
+    pub(crate) peer_id: PeerId,
     runner: TestRunner,
 }
 
@@ -71,26 +66,22 @@ impl Peer {
     pub fn new(peer_id: impl Into<PeerId>, services: Rc<[MarineServiceHandle]>) -> Self {
         let peer_id = Into::into(peer_id);
         let call_service = services_to_call_service_closure(services);
-        let runner = create_avm(call_service, &peer_id.0);
+        let runner = create_avm(call_service, &*peer_id.0);
 
-        Self {
-            peer_id,
-            prev_data: vec![],
-            runner,
-        }
+        Self { peer_id, runner }
     }
 
-    pub fn invoke(
+    pub(crate) fn invoke(
         &mut self,
         air: impl Into<String>,
         data: Data,
         test_run_params: TestRunParameters,
+        queue_cell: &PeerQueueCell,
     ) -> Result<RawAVMOutcome, String> {
-        let mut prev_data = vec![];
-        std::mem::swap(&mut prev_data, &mut self.prev_data);
+        let prev_data = queue_cell.take_prev_data();
         let res = self.runner.call(air, prev_data, data, test_run_params);
         if let Ok(outcome) = &res {
-            self.prev_data = outcome.data.clone();
+            queue_cell.set_prev_data(outcome.data.clone());
         }
         res
     }
@@ -100,32 +91,37 @@ impl std::fmt::Debug for Peer {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Peer")
             .field("peer_id", &self.peer_id)
-            .field("prev_data", &self.prev_data)
             .field("services", &"...")
             .finish()
     }
 }
 
-#[derive(Debug)]
 pub struct Network {
-    peers: HashMap<PeerId, Rc<RefCell<PeerEnv>>>,
-    default_neighborhood: HashSet<PeerId>,
+    peers: RefCell<HashMap<PeerId, Rc<RefCell<PeerEnv>>>>,
+    services: Rc<NetworkServices>,
 }
 
 impl Network {
-    pub fn empty() -> Self {
-        Self::new(std::iter::empty::<&str>())
+    pub fn empty() -> Rc<Self> {
+        Self::new(std::iter::empty::<PeerId>(), vec![])
     }
 
-    pub fn new(default_neiborhoud: impl Iterator<Item = impl Into<PeerId>>) -> Self {
-        Self {
+    pub fn new(
+        peers: impl Iterator<Item = impl Into<PeerId>>,
+        common_services: Vec<MarineServiceHandle>,
+    ) -> Rc<Self> {
+        let network = Rc::new(Self {
             peers: Default::default(),
-            default_neighborhood: default_neiborhoud.map(Into::into).collect(),
+            services: NetworkServices::new(common_services).into(),
+        });
+        for peer_id in peers {
+            network.ensure_peer(peer_id);
         }
+        network
     }
 
-    pub fn from_peers(nodes: Vec<Peer>) -> Self {
-        let mut network = Self::empty();
+    pub fn from_peers(nodes: Vec<Peer>) -> Rc<Self> {
+        let network = Self::empty();
         let neighborhood: PeerSet = nodes.iter().map(|peer| peer.peer_id.clone()).collect();
         for peer in nodes {
             network.add_peer_env(peer, neighborhood.iter().cloned());
@@ -134,29 +130,41 @@ impl Network {
     }
 
     pub fn add_peer_env(
-        &mut self,
+        self: &Rc<Self>,
         peer: Peer,
         neighborhood: impl IntoIterator<Item = impl Into<PeerId>>,
-    ) -> &mut PeerEnv {
+    ) {
         let peer_id = peer.peer_id.clone();
-        let mut peer_env = PeerEnv::new(peer);
+        let mut peer_env = PeerEnv::new(peer, self);
         peer_env.extend_neighborhood(neighborhood.into_iter());
-        self.insert_peer_env_entry(peer_id, peer_env)
+        self.insert_peer_env_entry(peer_id, peer_env);
+    }
+
+    pub fn ensure_peer(self: &Rc<Self>, peer_id: impl Into<PeerId>) {
+        let peer_id = peer_id.into();
+        let exists = {
+            let peers_ref = self.peers.borrow();
+            peers_ref.contains_key(&peer_id)
+        };
+        if !exists {
+            let peer = Peer::new(peer_id, self.services.get_services());
+            self.add_peer(peer);
+        }
     }
 
     /// Add a peer with default neighborhood.
-    pub fn add_peer(&mut self, peer: Peer) -> &mut PeerEnv {
+    pub fn add_peer(self: &Rc<Self>, peer: Peer) {
         let peer_id = peer.peer_id.clone();
-        let mut peer_env = PeerEnv::new(peer);
-        peer_env.extend_neighborhood(self.default_neighborhood.iter().cloned());
-        self.insert_peer_env_entry(peer_id, peer_env)
+        let peer_env = PeerEnv::new(peer, self);
+        self.insert_peer_env_entry(peer_id, peer_env);
     }
 
-    fn insert_peer_env_entry(&mut self, peer_id: PeerId, peer_env: PeerEnv) -> &mut PeerEnv {
+    fn insert_peer_env_entry(&self, peer_id: PeerId, peer_env: PeerEnv) {
+        let mut peers_ref = self.peers.borrow_mut();
         let peer_env = Rc::new(peer_env.into());
         // It will be simplified with entry_insert stabilization
         // https://github.com/rust-lang/rust/issues/65225
-        let cell = match self.peers.entry(peer_id) {
+        match peers_ref.entry(peer_id) {
             std::collections::hash_map::Entry::Occupied(ent) => {
                 let cell = ent.into_mut();
                 *cell = peer_env;
@@ -164,8 +172,6 @@ impl Network {
             }
             std::collections::hash_map::Entry::Vacant(ent) => ent.insert(peer_env),
         };
-        // never panics because Rc have been just created and there's just single reference
-        Rc::get_mut(cell).unwrap().get_mut()
     }
 
     pub fn set_peer_failed<Id>(&mut self, peer_id: &Id, failed: bool)
@@ -173,7 +179,8 @@ impl Network {
         PeerId: Borrow<Id>,
         Id: Hash + Eq + ?Sized,
     {
-        self.peers
+        let mut peers_ref = self.peers.borrow_mut();
+        peers_ref
             .get_mut(peer_id)
             .expect("unknown peer")
             .as_ref()
@@ -186,7 +193,8 @@ impl Network {
         PeerId: Borrow<Id>,
         Id: Hash + Eq + ?Sized,
     {
-        self.peers
+        let mut peers_ref = self.peers.borrow_mut();
+        peers_ref
             .get_mut(source_peer_id)
             .expect("unknown peer")
             .as_ref()
@@ -202,7 +210,8 @@ impl Network {
         PeerId: Borrow<Id2>,
         Id2: Hash + Eq + ?Sized,
     {
-        self.peers
+        let mut peers_ref = self.peers.borrow_mut();
+        peers_ref
             .get_mut(source_peer_id)
             .expect("unknown peer")
             .as_ref()
@@ -218,41 +227,16 @@ impl Network {
         PeerId: Borrow<Id>,
         Id: Hash + Eq + ?Sized,
     {
-        self.peers.get(peer_id).cloned()
+        let peers_ref = self.peers.borrow();
+        peers_ref.get(peer_id).cloned()
     }
 
-    /// Iterator for handling al the queued data.  It borrows peer env's `RefCell` only temporarily.
-    /// Following test-utils' call_vm macro, it panics on failed VM.
-    pub fn execution_iter<'s, Id>(
-        &'s self,
-        air: &'s str,
-        test_parameters: &'s TestRunParameters,
-        peer_id: &Id,
-    ) -> Option<impl Iterator<Item = RawAVMOutcome> + 's>
-    where
-        PeerId: Borrow<Id>,
-        Id: Eq + Hash + ?Sized,
-    {
-        let peer_env = self.get_peer_env(peer_id);
-
-        peer_env.map(|peer_env_cell| {
-            std::iter::from_fn(move || {
-                let mut peer_env = peer_env_cell.borrow_mut();
-                peer_env
-                    .execute_once(air, self, test_parameters)
-                    .map(|r| r.unwrap_or_else(|err| panic!("VM call failed: {}", err)))
-            })
-        })
+    pub(crate) fn get_services(&self) -> Rc<NetworkServices> {
+        self.services.clone()
     }
 
-    pub fn distribute_to_peers(&self, peers: &[String], data: &Data) {
-        for peer_id in peers {
-            if let Some(peer_env_cell) = self.get_peer_env(peer_id.as_str()) {
-                peer_env_cell
-                    .borrow_mut()
-                    .data_queue
-                    .push_back(data.clone());
-            }
-        }
+    pub fn get_peers(&self) -> impl Iterator<Item = PeerId> {
+        let peers_ref = self.peers.borrow();
+        peers_ref.keys().cloned().collect::<Vec<_>>().into_iter()
     }
 }

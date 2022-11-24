@@ -66,20 +66,20 @@ pub fn parse_kw(inp: &str) -> IResult<&str, ServiceDefinition, ParseError> {
             let value = value.trim();
             match ServiceTagName::from_str(tag) {
                 Ok(ServiceTagName::Ok) => {
-                    serde_json::from_str::<JValue>(value).map(ServiceDefinition::Ok)
+                    serde_json::from_str::<JValue>(value).map(ServiceDefinition::ok)
                 }
                 Ok(ServiceTagName::Error) => {
-                    serde_json::from_str::<CallServiceResult>(value).map(ServiceDefinition::Error)
+                    serde_json::from_str::<CallServiceResult>(value).map(ServiceDefinition::error)
                 }
                 Ok(ServiceTagName::SeqOk) => {
-                    serde_json::from_str(value).map(ServiceDefinition::SeqOk)
+                    serde_json::from_str(value).map(ServiceDefinition::seq_ok)
                 }
                 Ok(ServiceTagName::SeqError) => {
                     serde_json::from_str::<HashMap<String, CallServiceResult>>(value)
-                        .map(ServiceDefinition::SeqError)
+                        .map(ServiceDefinition::seq_error)
                 }
-                Ok(ServiceTagName::Behaviour) => Ok(ServiceDefinition::Behaviour(value.to_owned())),
-                Ok(ServiceTagName::Map) => serde_json::from_str(value).map(ServiceDefinition::Map),
+                Ok(ServiceTagName::Behaviour) => Ok(ServiceDefinition::behaviour(value)),
+                Ok(ServiceTagName::Map) => serde_json::from_str(value).map(ServiceDefinition::map),
                 Err(_) => unreachable!("unknown tag {:?}", tag),
             }
         },
@@ -153,7 +153,7 @@ mod tests {
         let res = ServiceDefinition::from_str(r#"seq_ok={"default": 42, "1": true, "3": []}"#);
         assert_eq!(
             res,
-            Ok(ServiceDefinition::SeqOk(maplit::hashmap! {
+            Ok(ServiceDefinition::seq_ok(maplit::hashmap! {
                 "default".to_owned() => json!(42),
                 "1".to_owned() => json!(true),
                 "3".to_owned() => json!([]),
@@ -183,7 +183,7 @@ mod tests {
         );
         assert_eq!(
             res,
-            Ok(ServiceDefinition::SeqError(maplit::hashmap! {
+            Ok(ServiceDefinition::seq_error(maplit::hashmap! {
                 "default".to_owned() => CallServiceResult::ok(json!(42)),
                 "1".to_owned() => CallServiceResult::ok(json!(true)),
                 "3".to_owned() => CallServiceResult::err(1, json!("error")),
