@@ -41,9 +41,15 @@ pub enum ServiceDefinition {
     /// Service that may return a new value on subsequent call.  Its keys are either
     /// call number string starting from "0", or "default".
     #[strum_discriminants(strum(serialize = "seq_ok"))]
-    SeqOk(Cell<usize>, HashMap<String, JValue>),
+    SeqOk {
+        call_number_seq: Cell<usize>,
+        call_map: HashMap<String, JValue>,
+    },
     #[strum_discriminants(strum(serialize = "seq_error"))]
-    SeqError(Cell<usize>, HashMap<String, CallServiceResult>),
+    SeqError {
+        call_number_seq: Cell<usize>,
+        call_map: HashMap<String, CallServiceResult>,
+    },
     /// Some known service by name: "echo", "unit" (more to follow).
     #[strum_discriminants(strum(serialize = "behaviour"))]
     Behaviour(String),
@@ -61,12 +67,18 @@ impl ServiceDefinition {
         Self::Error(value)
     }
 
-    pub fn seq_ok(values: HashMap<String, JValue>) -> Self {
-        Self::SeqOk(0.into(), values)
+    pub fn seq_ok(call_map: HashMap<String, JValue>) -> Self {
+        Self::SeqOk {
+            call_number_seq: 0.into(),
+            call_map,
+        }
     }
 
-    pub fn seq_error(values: HashMap<String, CallServiceResult>) -> Self {
-        Self::SeqError(0.into(), values)
+    pub fn seq_error(call_map: HashMap<String, CallServiceResult>) -> Self {
+        Self::SeqError {
+            call_number_seq: 0.into(),
+            call_map,
+        }
     }
 
     pub fn behaviour(name: impl Into<String>) -> Self {
@@ -81,12 +93,14 @@ impl ServiceDefinition {
         match self {
             ServiceDefinition::Ok(ok) => CallServiceResult::ok(ok.clone()),
             ServiceDefinition::Error(call_result) => call_result.clone(),
-            ServiceDefinition::SeqOk(ref call_number_seq, call_map) => {
-                call_seq_ok(call_number_seq, call_map)
-            }
-            ServiceDefinition::SeqError(ref call_number_seq, call_map) => {
-                call_seq_error(call_number_seq, call_map)
-            }
+            ServiceDefinition::SeqOk {
+                ref call_number_seq,
+                call_map,
+            } => call_seq_ok(call_number_seq, call_map),
+            ServiceDefinition::SeqError {
+                ref call_number_seq,
+                call_map,
+            } => call_seq_error(call_number_seq, call_map),
             ServiceDefinition::Behaviour(name) => call_named_service(name, params),
             ServiceDefinition::Map(map) => call_map_service(map, params),
         }

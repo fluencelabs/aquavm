@@ -33,7 +33,7 @@ use std::{borrow::Borrow, cell::RefCell, collections::HashMap, hash::Hash, rc::R
 pub struct PeerId(Rc<str>);
 
 impl PeerId {
-    pub fn new<'a>(peer_id: impl Into<&'a str>) -> Self {
+    pub fn new<'any>(peer_id: impl Into<&'any str>) -> Self {
         Self(peer_id.into().into())
     }
 }

@@ -16,11 +16,11 @@
 
 pub(crate) mod results;
 
+use self::results::{MarineServiceWrapper, ResultStore};
+
 use air_test_utils::{CallRequestParams, CallServiceClosure, CallServiceResult};
 
 use std::{cell::RefCell, rc::Rc, time::Duration};
-
-use self::results::{MarineServiceWrapper, ResultStore};
 
 pub type JValue = serde_json::Value;
 

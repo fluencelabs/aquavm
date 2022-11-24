@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-use air_test_utils::{test_runner::TestRunParameters, RawAVMOutcome};
-
 use crate::ephemeral::{Data, Network, PeerId};
+
+use air_test_utils::{test_runner::TestRunParameters, RawAVMOutcome};
 
 use std::{
     borrow::Borrow,
@@ -35,22 +35,22 @@ pub(crate) struct PeerQueueCell {
 
 impl PeerQueueCell {
     pub(crate) fn pop_data(&self) -> Option<Data> {
-        let mut cell_ref = RefCell::borrow_mut(&self.queue);
+        let mut cell_ref = self.queue.borrow_mut();
         cell_ref.pop_front()
     }
 
     pub(crate) fn push_data(&self, data: Data) {
-        let mut cell_ref = RefCell::borrow_mut(&self.queue);
+        let mut cell_ref = self.queue.borrow_mut();
         cell_ref.push_back(data);
     }
 
     pub(crate) fn take_prev_data(&self) -> Data {
-        let cell_ref = RefCell::borrow_mut(&self.data);
+        let cell_ref = self.data.borrow_mut();
         (*cell_ref).clone()
     }
 
     pub(crate) fn set_prev_data(&self, data: Data) {
-        let mut cell_ref = RefCell::borrow_mut(&self.data);
+        let mut cell_ref = self.data.borrow_mut();
         *cell_ref = data;
     }
 }
@@ -74,13 +74,13 @@ impl ExecutionQueue {
 
     /// Iterator for handling al the queued data.  It borrows peer env's `RefCell` only temporarily.
     /// Following test-utils' call_vm macro, it panics on failed VM.
-    pub fn execution_iter<'s, Id>(
-        &'s self,
-        air: &'s str,
+    pub fn execution_iter<'ctx, Id>(
+        &'ctx self,
+        air: &'ctx str,
         network: Rc<Network>,
-        test_parameters: &'s TestRunParameters,
+        test_parameters: &'ctx TestRunParameters,
         peer_id: &Id,
-    ) -> Option<impl Iterator<Item = RawAVMOutcome> + 's>
+    ) -> Option<impl Iterator<Item = RawAVMOutcome> + 'ctx>
     where
         PeerId: Borrow<Id>,
         Id: Eq + Hash + ?Sized,
@@ -89,7 +89,7 @@ impl ExecutionQueue {
 
         peer_env.map(|peer_env_cell| {
             std::iter::from_fn(move || {
-                let mut peer_env = RefCell::borrow_mut(&peer_env_cell);
+                let mut peer_env = peer_env_cell.borrow_mut();
                 peer_env
                     .execute_once(air, &network, self, test_parameters)
                     .map(|r| r.unwrap_or_else(|err| panic!("VM call failed: {}", err)))
@@ -103,12 +103,13 @@ impl ExecutionQueue {
     {
         for peer_id in peers {
             let peer_id: &str = peer_id;
-            if let Some(peer_env_cell) = network.get_peer_env::<str>(peer_id) {
-                let peer_env_ref = RefCell::borrow(&peer_env_cell);
-                self.get_peer_queue_cell(peer_env_ref.peer.peer_id.clone())
-                    .push_data(data.clone());
-            } else {
-                panic!("Unknown peer")
+            match network.get_peer_env::<str>(peer_id) {
+                Some(peer_env_cell) => {
+                    let peer_env_ref = RefCell::borrow(&peer_env_cell);
+                    self.get_peer_queue_cell(peer_env_ref.peer.peer_id.clone())
+                        .push_data(data.clone());
+                }
+                None => panic!("Unknown peer"),
             }
         }
     }
