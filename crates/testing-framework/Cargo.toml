@@ -22,7 +22,6 @@ strum = { version="0.24.1", features=["derive"] }
 nom = "7.1.1"
 nom_locate = "4.0.0"
 serde_json = "1.0.86"
-wson = { git = "https://github.com/monoid/wson/", branch = "fluence-edition" }
 
 [dev-dependencies]
 maplit = "1.0.2"
