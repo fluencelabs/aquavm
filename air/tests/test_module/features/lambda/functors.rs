@@ -65,7 +65,6 @@ fn length_functor_for_non_array_scalar() {
 }
 
 #[test]
-<<<<<<< HEAD
 fn length_functor_for_stream() {
     let script = r#"
         (seq
