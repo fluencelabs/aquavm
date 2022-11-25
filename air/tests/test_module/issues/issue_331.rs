@@ -30,8 +30,7 @@ fn issue_331() {
                     (seq
                         (seq
                             (seq
-                                (par
-                                    (call "unknown_peer_id" ("" "") [] $status)
+                                (new $status
                                     (canon %init_peer_id% $status #status)
                                 )
                                 (call %init_peer_id% ("op" "array_length") [#status] array_length)

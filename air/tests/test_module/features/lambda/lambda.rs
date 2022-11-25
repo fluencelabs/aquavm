@@ -233,7 +233,7 @@ fn lambda_with_scalar_join() {
 // after 0.32 version AIR is no longer supports lambdas over stream,
 // although this test could be useful in the future for functors
 #[test]
-fn lambda_with_stream_join() {
+fn lambda_with_canon_stream_join() {
     let set_variable_peer_id = "set_variable";
     let variables = maplit::hashmap! {
         "number_accessor".to_string() => json!(1),
@@ -273,7 +273,7 @@ fn lambda_with_stream_join() {
     let actual_trace = trace_from_result(&result);
 
     assert_eq!(
-        &actual_trace[6.into()],
-        &executed_state::request_sent_by("set_variable")
+        &actual_trace[7.into()],
+        &executed_state::request_sent_by("set_variable"),
     );
 }
