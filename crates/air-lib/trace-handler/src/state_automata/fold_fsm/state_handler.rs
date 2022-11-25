@@ -15,7 +15,7 @@
  */
 
 use super::*;
-use crate::MergeCtxType;
+use crate::merger::MergeCtxType;
 use crate::ResolvedFold;
 
 /// This state updater manage to do the same thing as CtxStateHandler in ParFSM,

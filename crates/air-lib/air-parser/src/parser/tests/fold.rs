@@ -275,7 +275,27 @@ fn parse_fold() {
         Scalar::new("iterable", 15.into()),
         Scalar::new("i", 24.into()),
         null(),
+        None,
         Span::new(9.into(), 54.into()),
+    );
+    assert_eq!(instruction, expected);
+}
+
+#[test]
+fn fold_with_scalar_and_last_instruction() {
+    let source_code = r#"
+        (fold iterable i
+            (null)
+            (null)
+        )
+        "#;
+    let instruction = parse(&source_code);
+    let expected = fold_scalar_variable(
+        Scalar::new("iterable", 15.into()),
+        Scalar::new("i", 24.into()),
+        null(),
+        Some(null()),
+        Span::new(9.into(), 73.into()),
     );
     assert_eq!(instruction, expected);
 }
@@ -297,6 +317,7 @@ fn fold_json_path() {
         ),
         Scalar::new("m", 52.into()),
         null(),
+        None,
         Span::new(27.into(), 61.into()),
     );
     assert_eq!(instruction, expected);
@@ -314,6 +335,7 @@ fn fold_empty_array_iterable() {
     let expected = fold_scalar_empty_array(
         Scalar::new("m", 18.into()),
         null(),
+        None,
         Span::new(9.into(), 48.into()),
     );
     assert_eq!(instruction, expected);
@@ -330,7 +352,28 @@ fn fold_on_stream() {
         Stream::new("$stream", 15.into()),
         Scalar::new("iterator", 23.into()),
         null(),
+        None,
         Span::new(9.into(), 39.into()),
+    );
+    assert_eq!(instruction, expected);
+}
+
+#[test]
+fn fold_on_stream_with_last_null() {
+    let source_code = r#"
+        (fold $stream iterator
+            (null)
+            (null)
+        )
+    "#;
+
+    let instruction = parse(source_code);
+    let expected = fold_stream(
+        Stream::new("$stream", 15.into()),
+        Scalar::new("iterator", 23.into()),
+        null(),
+        Some(null()),
+        Span::new(9.into(), 79.into()),
     );
     assert_eq!(instruction, expected);
 }
@@ -348,6 +391,7 @@ fn fold_on_canon_stream() {
         CanonStream::new(canon_stream, 15.into()),
         Scalar::new(iterator, 29.into()),
         null(),
+        None,
         Span::new(9.into(), 45.into()),
     );
     assert_eq!(instruction, expected);
@@ -374,6 +418,7 @@ fn comments() {
         ),
         Scalar::new("m", 52.into()),
         null(),
+        None,
         Span::new(27.into(), 61.into()),
     );
     assert_eq!(instruction, expected);
@@ -394,6 +439,7 @@ fn parse_fold_with_xor_par_seq() {
             Scalar::new("iterable", 6.into()),
             Scalar::new("i", 15.into()),
             instr(null(), null()),
+            None,
             Span::new(0.into(), 58.into()),
         );
         assert_eq!(instruction, expected);

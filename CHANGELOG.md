@@ -1,3 +1,14 @@
+## Version 0.31.0 (2022-10-11)
+
+[PR 362](https://github.com/fluencelabs/aquavm/pull/362):  
+Partially revert [PR 340](https://github.com/fluencelabs/aquavm/pull/340) due to fixes in [PR 358](https://github.com/fluencelabs/aquavm/pull/358)
+
+[PR 360](https://github.com/fluencelabs/aquavm/pull/360):  
+Allow using stream without insertion
+
+[PR 358](https://github.com/fluencelabs/aquavm/pull/358):  
+Implement a temporary fix for fold with canon
+
 ## Version 0.30.0 (2022-09-28)
 
 [PR 340](https://github.com/fluencelabs/aquavm/pull/340):  

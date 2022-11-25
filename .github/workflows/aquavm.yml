@@ -21,11 +21,10 @@ jobs:
       - name: Setup rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
 
-      - run: cargo install marine
-
-      - name: Build Wasm binary for interpreter
-        run: marine build --features marine
-        working-directory: air-interpreter
+      - name: Install marine
+        uses: baptiste0928/cargo-install@v1.3.0
+        with:
+          crate: marine
 
       - name: Build Wasm binary for tests
         run: ./build_test_binaries.sh

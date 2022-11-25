@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
+use crate::JValue;
 use crate::ToErrorCode;
 
 use air_interpreter_data::TracePos;
-use air_trace_handler::MergerApResult;
+use air_interpreter_data::Value;
+use air_trace_handler::merger::MergerApResult;
+use air_trace_handler::GenerationCompatificationError;
 use air_trace_handler::TraceHandlerError;
 use strum::IntoEnumIterator;
 use strum_macros::EnumDiscriminants;
@@ -39,6 +42,10 @@ pub enum UncatchableError {
         instruction: String,
     },
 
+    /// These errors are related to internal bug in the interpreter when result trace is corrupted.
+    #[error(transparent)]
+    GenerationCompatificationError(#[from] GenerationCompatificationError),
+
     /// Fold state wasn't found for such iterator name.
     #[error("fold state not found for this iterable '{0}'")]
     FoldStateNotFound(String),
@@ -51,10 +58,15 @@ pub enum UncatchableError {
     #[error("multiple iterable values found for iterable name '{0}'")]
     MultipleIterableValues(String),
 
-    /// Errors occurred when result from data doesn't match to a instruction, f.e. an instruction
+    /// Errors occurred when result from data doesn't match to an ap instruction, f.e. an ap
     /// could be applied to a stream, but result doesn't contain generation in a source position.
     #[error("ap result {0:?} doesn't match with corresponding instruction")]
     ApResultNotCorrespondToInstr(MergerApResult),
+
+    /// Errors occurred when result from data doesn't match to a call instruction, f.e. a call
+    /// could be applied to a stream, but result doesn't contain generation in a source position.
+    #[error("call result value {0:?} doesn't match with corresponding instruction")]
+    CallResultNotCorrespondToInstr(Value),
 
     /// Variable shadowing is not allowed, usually it's thrown when a AIR tries to assign value
     /// for a variable not in a fold block or in a global scope but not right after new.
@@ -72,6 +84,12 @@ pub enum UncatchableError {
     /// as a hard error.
     #[error("variable with position '{0}' wasn't defined during script execution")]
     VariableNotFoundByPos(TracePos),
+
+    #[error("can't deserialize stream {canonicalized_stream:?} with error: {de_error}")]
+    InvalidCanonStreamInData {
+        canonicalized_stream: JValue,
+        de_error: serde_json::Error,
+    },
 }
 
 impl ToErrorCode for UncatchableError {

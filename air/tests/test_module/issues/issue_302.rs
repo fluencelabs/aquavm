@@ -38,7 +38,10 @@ fn issue_302() {
                     (call "{peer_id_2}" ("" "") [1] $stream)
                     (seq
                         (call "{peer_id_3}" ("" "") [0] $stream)
-                        (call "{peer_id_2}" ("" "") [$stream])
+                        (seq
+                            (canon "{peer_id_2}" $stream #stream)
+                            (call "{peer_id_2}" ("" "") [#stream])
+                        )
                     )
                 )
             )
@@ -52,10 +55,30 @@ fn issue_302() {
     let actual_trace = trace_from_result(&result_4);
 
     let expected_trace = vec![
-        executed_state::par(1, 3),
+        executed_state::par(1, 4),
         executed_state::stream_number(2, 1),
         executed_state::stream_number(1, 0),
-        executed_state::stream_number(0, 1),
+        executed_state::stream_number(0, 2),
+        executed_state::canon(json!({
+            "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id_2", "service_id": ""},
+            "values": [
+                {
+                    "result": 1,
+                    "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id_2", "service_id": ""},
+                    "trace_pos": 2
+                },
+               {
+                    "result": 2,
+                    "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id_1", "service_id": ""},
+                    "trace_pos": 1
+                },
+            {
+                    "result": 0,
+                    "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id_3", "service_id": ""},
+                    "trace_pos": 3
+                },
+            ]
+        })),
         executed_state::scalar(json!([1, 2, 0])),
     ];
     assert_eq!(actual_trace.deref(), expected_trace);

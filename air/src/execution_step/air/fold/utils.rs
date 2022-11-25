@@ -17,6 +17,7 @@
 use super::*;
 use crate::execution_step::boxed_value::populate_tetraplet_with_lambda;
 use crate::execution_step::CatchableError;
+use crate::execution_step::PEEK_ALLOWED_ON_NON_EMPTY;
 use crate::JValue;
 use crate::LambdaAST;
 use crate::SecurityTetraplet;
@@ -37,17 +38,16 @@ pub(crate) enum FoldIterableScalar {
 }
 
 /// Creates iterable value for given scalar iterable.
-pub(crate) fn create_scalar_iterable<'ctx>(
-    scalar_iterable: &ast::Scalar<'ctx>,
-    exec_ctx: &ExecutionCtx<'ctx>,
+pub(crate) fn create_scalar_iterable(
+    exec_ctx: &ExecutionCtx<'_>,
+    variable_name: &str,
 ) -> ExecutionResult<FoldIterableScalar> {
-    let scalar_name = scalar_iterable.name;
-    match exec_ctx.scalars.get_value(scalar_name)? {
-        ScalarRef::Value(call_result) => from_value(call_result.clone(), scalar_name),
+    match exec_ctx.scalars.get_value(variable_name)? {
+        ScalarRef::Value(call_result) => from_value(call_result.clone(), variable_name),
         ScalarRef::IterableValue(fold_state) => {
-            let iterable_value = fold_state.iterable.peek().unwrap();
+            let iterable_value = fold_state.iterable.peek().expect(PEEK_ALLOWED_ON_NON_EMPTY);
             let call_result = iterable_value.into_resolved_result();
-            from_value(call_result, scalar_name)
+            from_value(call_result, variable_name)
         }
     }
 }

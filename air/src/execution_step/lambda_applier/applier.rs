@@ -36,10 +36,10 @@ pub(crate) struct StreamSelectResult<'value> {
     pub(crate) tetraplet_idx: Option<usize>,
 }
 
-pub(crate) fn select_by_lambda_from_stream<'value, 'i>(
+pub(crate) fn select_by_lambda_from_stream<'value>(
     stream: impl ExactSizeIterator<Item = &'value JValue> + 'value,
     lambda: &LambdaAST<'_>,
-    exec_ctx: &ExecutionCtx<'i>,
+    exec_ctx: &ExecutionCtx<'_>,
 ) -> ExecutionResult<StreamSelectResult<'value>> {
     match lambda {
         LambdaAST::ValuePath(value_path) => select_by_path_from_stream(stream, value_path, exec_ctx),
@@ -47,10 +47,10 @@ pub(crate) fn select_by_lambda_from_stream<'value, 'i>(
     }
 }
 
-pub(crate) fn select_by_lambda_from_scalar<'value, 'i>(
+pub(crate) fn select_by_lambda_from_scalar<'value>(
     value: &'value JValue,
     lambda: &LambdaAST<'_>,
-    exec_ctx: &ExecutionCtx<'i>,
+    exec_ctx: &ExecutionCtx<'_>,
 ) -> ExecutionResult<Cow<'value, JValue>> {
     match lambda {
         LambdaAST::ValuePath(value_path) => select_by_path_from_scalar(value, value_path.iter(), exec_ctx),
@@ -58,10 +58,10 @@ pub(crate) fn select_by_lambda_from_scalar<'value, 'i>(
     }
 }
 
-fn select_by_path_from_stream<'value, 'i>(
+fn select_by_path_from_stream<'value>(
     stream: impl ExactSizeIterator<Item = &'value JValue> + 'value,
     lambda: &NonEmpty<ValueAccessor<'_>>,
-    exec_ctx: &ExecutionCtx<'i>,
+    exec_ctx: &ExecutionCtx<'_>,
 ) -> ExecutionResult<StreamSelectResult<'value>> {
     let (prefix, body) = lambda.split_first();
     let idx = match prefix {
@@ -89,7 +89,7 @@ fn select_by_path_from_stream<'value, 'i>(
     Ok(select_result)
 }
 
-fn select_by_functor_from_stream<'value, 'i>(
+fn select_by_functor_from_stream<'value>(
     stream: impl ExactSizeIterator<Item = &'value JValue> + 'value,
     functor: &Functor,
 ) -> StreamSelectResult<'value> {
@@ -101,10 +101,10 @@ fn select_by_functor_from_stream<'value, 'i>(
     }
 }
 
-fn select_by_path_from_scalar<'value, 'accessor, 'i>(
+fn select_by_path_from_scalar<'value, 'accessor>(
     mut value: &'value JValue,
     lambda: impl Iterator<Item = &'accessor ValueAccessor<'accessor>>,
-    exec_ctx: &ExecutionCtx<'i>,
+    exec_ctx: &ExecutionCtx<'_>,
 ) -> ExecutionResult<Cow<'value, JValue>> {
     for accessor in lambda {
         match accessor {

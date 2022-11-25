@@ -132,21 +132,12 @@ pub fn subtrace_desc(begin_pos: impl Into<TracePos>, subtrace_len: u32) -> SubTr
     }
 }
 
-pub fn ap(dst: Option<u32>) -> ExecutedState {
-    let res_generations = option_to_vec(dst);
-    let ap_result = ApResult::new(res_generations);
-
+pub fn ap(generation: u32) -> ExecutedState {
+    let ap_result = ApResult::new(generation);
     ExecutedState::Ap(ap_result)
 }
 
-pub fn canon(stream_elements_pos: Vec<TracePos>) -> ExecutedState {
-    let canon_result = CanonResult::new(stream_elements_pos);
+pub fn canon(canonicalized_element: JValue) -> ExecutedState {
+    let canon_result = CanonResult::new(canonicalized_element);
     ExecutedState::Canon(canon_result)
-}
-
-fn option_to_vec(maybe_value: Option<u32>) -> Vec<u32> {
-    match maybe_value {
-        Some(value) => vec![value],
-        None => vec![],
-    }
 }

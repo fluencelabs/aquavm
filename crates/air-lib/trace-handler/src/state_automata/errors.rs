@@ -16,7 +16,7 @@
 
 use super::KeeperError;
 use super::ParResult;
-use crate::MergeCtxType;
+use crate::merger::MergeCtxType;
 use crate::ResolvedFold;
 use crate::TracePos;
 

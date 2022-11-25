@@ -69,11 +69,11 @@ fn fail_with_scalar_wl<'i>(scalar: &ast::ScalarWithLambda<'i>, exec_ctx: &mut Ex
     fail_with_error_object(exec_ctx, Rc::new(value), Some(tetraplet))
 }
 
-fn fail_with_literals<'i>(
+fn fail_with_literals(
     error_code: i64,
     error_message: &str,
     fail: &Fail<'_>,
-    exec_ctx: &mut ExecutionCtx<'i>,
+    exec_ctx: &mut ExecutionCtx<'_>,
 ) -> ExecutionResult<()> {
     let error_object = crate::execution_step::execution_context::error_from_raw_fields(
         error_code,

@@ -1,3 +1,13 @@
+## Version 0.4.1
+
+[PR 367](https://github.com/fluencelabs/aquavm/pull/367):  
+- add interpreter version in data
+
+## Version 0.4.0
+
+[PR 356](https://github.com/fluencelabs/aquavm/pull/358):  
+- temporary fix of a bug with fold and canon compatibility
+
 ## Version 0.3.0
 
 [PR 292](https://github.com/fluencelabs/aquavm/pull/292):  

@@ -67,7 +67,7 @@ fn stream_merging_v0() {
     let mut executor = create_avm(unit_call_service(), executor_id);
 
     let script = format!(
-        include_str!("scripts/stream_fold_merging_v0.clj"),
+        include_str!("scripts/stream_fold_merging_v0.air"),
         initiator_id, setter_1_id, setter_2_id, setter_3_id, executor_id
     );
 
@@ -219,7 +219,7 @@ fn stream_merging_v1() {
     let mut executor = create_avm(unit_call_service(), executor_id);
 
     let script = format!(
-        include_str!("scripts/stream_fold_merging_v1.clj"),
+        include_str!("scripts/stream_fold_merging_v1.air"),
         initiator_id, setter_1_id, setter_2_id, setter_3_id, executor_id
     );
 
@@ -387,7 +387,7 @@ fn stream_merging_v2() {
     let mut executor = create_avm(unit_call_service(), executor_id);
 
     let script = format!(
-        include_str!("scripts/stream_fold_merging_v2.clj"),
+        include_str!("scripts/stream_fold_merging_v2.air"),
         initiator_id, setter_1_id, setter_2_id, setter_3_id, executor_id
     );
 

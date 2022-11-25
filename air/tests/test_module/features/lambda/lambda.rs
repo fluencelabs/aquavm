@@ -229,6 +229,9 @@ fn lambda_with_scalar_join() {
     assert_eq!(&trace[3.into()], &executed_state::request_sent_by("set_variable"));
 }
 
+#[ignore]
+// after 0.32 version AIR is no longer supports lambdas over stream,
+// although this test could be useful in the future for functors
 #[test]
 fn lambda_with_stream_join() {
     let set_variable_peer_id = "set_variable";
@@ -258,7 +261,10 @@ fn lambda_with_stream_join() {
                     )
                 )
             )
-            (call "{local_peer_id}" ("" "") [$stream.$.[number_accessor]])
+            (seq
+                (canon "{local_peer_id}" $stream #stream)
+                (call "{local_peer_id}" ("" "") [#stream.$.[number_accessor]])
+            )
         )
         "#);
 

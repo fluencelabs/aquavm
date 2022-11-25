@@ -102,6 +102,7 @@ fn execute_iterations<'i>(
             IterableType::Stream(fold_id),
             fold_stream.iterator.name,
             fold_stream.instruction.clone(),
+            fold_stream.last_instruction.clone(),
             exec_ctx,
             trace_ctx,
         );

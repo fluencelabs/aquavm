@@ -110,12 +110,14 @@ impl<'i> FoldScalar<'i> {
         iterable: FoldScalarIterable<'i>,
         iterator: Scalar<'i>,
         instruction: Instruction<'i>,
+        last_instruction: Option<Instruction<'i>>,
         span: Span,
     ) -> Self {
         Self {
             iterable,
             iterator,
             instruction: Rc::new(instruction),
+            last_instruction: last_instruction.map(Rc::new),
             span,
         }
     }
@@ -126,12 +128,14 @@ impl<'i> FoldStream<'i> {
         iterable: Stream<'i>,
         iterator: Scalar<'i>,
         instruction: Instruction<'i>,
+        last_instruction: Option<Instruction<'i>>,
         span: Span,
     ) -> Self {
         Self {
             iterable,
             iterator,
             instruction: Rc::new(instruction),
+            last_instruction: last_instruction.map(Rc::new),
             span,
         }
     }

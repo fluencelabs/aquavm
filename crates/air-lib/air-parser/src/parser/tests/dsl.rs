@@ -96,12 +96,14 @@ pub(super) fn fold_scalar_variable<'i>(
     scalar: Scalar<'i>,
     iterator: Scalar<'i>,
     instruction: Instruction<'i>,
+    last_instruction: Option<Instruction<'i>>,
     span: Span,
 ) -> Instruction<'i> {
     Instruction::FoldScalar(FoldScalar {
         iterable: FoldScalarIterable::Scalar(scalar),
         iterator,
         instruction: Rc::new(instruction),
+        last_instruction: last_instruction.map(Rc::new),
         span,
     })
 }
@@ -110,12 +112,14 @@ pub(super) fn fold_scalar_variable_wl<'i>(
     scalar: ScalarWithLambda<'i>,
     iterator: Scalar<'i>,
     instruction: Instruction<'i>,
+    last_instruction: Option<Instruction<'i>>,
     span: Span,
 ) -> Instruction<'i> {
     Instruction::FoldScalar(FoldScalar {
         iterable: FoldScalarIterable::ScalarWithLambda(scalar),
         iterator,
         instruction: Rc::new(instruction),
+        last_instruction: last_instruction.map(Rc::new),
         span,
     })
 }
@@ -124,12 +128,14 @@ pub(super) fn fold_scalar_canon_stream<'i>(
     canon_stream: CanonStream<'i>,
     iterator: Scalar<'i>,
     instruction: Instruction<'i>,
+    last_instruction: Option<Instruction<'i>>,
     span: Span,
 ) -> Instruction<'i> {
     Instruction::FoldScalar(FoldScalar {
         iterable: FoldScalarIterable::CanonStream(canon_stream),
         iterator,
         instruction: Rc::new(instruction),
+        last_instruction: last_instruction.map(Rc::new),
         span,
     })
 }
@@ -137,12 +143,14 @@ pub(super) fn fold_scalar_canon_stream<'i>(
 pub(super) fn fold_scalar_empty_array<'i>(
     iterator: Scalar<'i>,
     instruction: Instruction<'i>,
+    last_instruction: Option<Instruction<'i>>,
     span: Span,
 ) -> Instruction<'i> {
     Instruction::FoldScalar(FoldScalar {
         iterable: FoldScalarIterable::EmptyArray,
         iterator,
         instruction: Rc::new(instruction),
+        last_instruction: last_instruction.map(Rc::new),
         span,
     })
 }
@@ -151,12 +159,14 @@ pub(super) fn fold_stream<'i>(
     iterable: Stream<'i>,
     iterator: Scalar<'i>,
     instruction: Instruction<'i>,
+    last_instruction: Option<Instruction<'i>>,
     span: Span,
 ) -> Instruction<'i> {
     Instruction::FoldStream(FoldStream {
         iterable,
         iterator,
         instruction: Rc::new(instruction),
+        last_instruction: last_instruction.map(Rc::new),
         span,
     })
 }
