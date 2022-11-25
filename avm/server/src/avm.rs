@@ -62,7 +62,6 @@ impl<E> AVM<E> {
     pub fn new(config: AVMConfig<E>) -> AVMResult<Self, E> {
         let AVMConfig {
             air_wasm_path,
-            current_peer_id,
             max_heap_size,
             logging_mask,
             mut data_store,
@@ -70,7 +69,7 @@ impl<E> AVM<E> {
 
         data_store.initialize()?;
 
-        let runner = AVMRunner::new(air_wasm_path, current_peer_id, max_heap_size, logging_mask)
+        let runner = AVMRunner::new(air_wasm_path, max_heap_size, logging_mask)
             .map_err(AVMError::RunnerError)?;
         let runner = SendSafeRunner(runner);
         let avm = Self { runner, data_store };
@@ -83,7 +82,7 @@ impl<E> AVM<E> {
         &mut self,
         air: impl Into<String>,
         data: impl Into<Vec<u8>>,
-        particle_parameters: ParticleParameters<'_, '_>,
+        particle_parameters: ParticleParameters<'_>,
         call_results: CallResults,
     ) -> AVMResult<AVMOutcome, E> {
         let air = air.into();
@@ -102,6 +101,7 @@ impl<E> AVM<E> {
                 particle_parameters.init_peer_id.clone().into_owned(),
                 particle_parameters.timestamp,
                 particle_parameters.ttl,
+                particle_parameters.current_peer_id.clone(),
                 call_results,
             )
             .map_err(AVMError::RunnerError)?;
@@ -144,7 +144,7 @@ impl<E> AVM<E> {
         &mut self,
         air_script: &str,
         current_data: &[u8],
-        particle_parameters: &ParticleParameters<'_, '_>,
+        particle_parameters: &ParticleParameters<'_>,
         avm_outcome: &RawAVMOutcome,
         execution_time: Duration,
         memory_delta: usize,

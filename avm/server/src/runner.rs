@@ -30,7 +30,6 @@ use std::path::PathBuf;
 
 pub struct AVMRunner {
     marine: Marine,
-    current_peer_id: String,
     /// file name of the AIR interpreter .wasm
     wasm_filename: String,
 }
@@ -48,7 +47,6 @@ impl AVMRunner {
     /// Create AVM with the provided config.
     pub fn new(
         air_wasm_path: PathBuf,
-        current_peer_id: impl Into<String>,
         max_heap_size: Option<u64>,
         logging_mask: i32,
     ) -> RunnerResult<Self> {
@@ -57,11 +55,9 @@ impl AVMRunner {
         let marine_config =
             make_marine_config(wasm_dir, &wasm_filename, max_heap_size, logging_mask);
         let marine = Marine::with_raw_config(marine_config)?;
-        let current_peer_id = current_peer_id.into();
 
         let avm = Self {
             marine,
-            current_peer_id,
             wasm_filename,
         };
 
@@ -78,13 +74,14 @@ impl AVMRunner {
         init_peer_id: impl Into<String>,
         timestamp: u64,
         ttl: u32,
+        current_peer_id: impl Into<String>,
         call_results: CallResults,
     ) -> RunnerResult<RawAVMOutcome> {
         let args = prepare_args(
             air,
             prev_data,
             data,
-            self.current_peer_id.clone(),
+            current_peer_id.into(),
             init_peer_id.into(),
             timestamp,
             ttl,
@@ -117,6 +114,7 @@ impl AVMRunner {
         init_peer_id: impl Into<String>,
         timestamp: u64,
         ttl: u32,
+        current_peer_id: impl Into<String>,
         call_results: CallResults,
         tracing_params: String,
         tracing_output_mode: u8,
@@ -125,7 +123,7 @@ impl AVMRunner {
             air,
             prev_data,
             data,
-            self.current_peer_id.clone(),
+            current_peer_id.into(),
             init_peer_id.into(),
             timestamp,
             ttl,
@@ -164,11 +162,6 @@ impl AVMRunner {
             memory_size: stats[0].memory_size,
             max_memory_size: stats[0].max_memory_size,
         }
-    }
-
-    #[inline]
-    pub fn set_peer_id(&mut self, current_peer_id: impl Into<String>) {
-        self.current_peer_id = current_peer_id.into();
     }
 }
 

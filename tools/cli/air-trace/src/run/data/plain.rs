@@ -26,12 +26,14 @@ const DEFAULT_DATA: &str = "";
 
 #[derive(clap::Args, Debug)]
 pub(crate) struct PlainDataArgs {
-    #[clap(long)]
-    init_peer_id: Option<String>,
+    #[clap(long, default_value = "some_id")]
+    init_peer_id: String,
     #[clap(long, help = "default: current time")]
     timestamp: Option<u64>,
     #[clap(long, help = "default: max possible ttl")]
     ttl: Option<u32>,
+    #[clap(long, default_value = "some_id")]
+    current_peer_id: String,
 
     #[clap(long = "script", help = "read from stdin by default")]
     air_script_path: Option<PathBuf>,
@@ -54,9 +56,17 @@ pub(crate) fn load(args: &PlainDataArgs) -> anyhow::Result<ExecutionData<'_>> {
 
     let timestamp = args.timestamp.unwrap_or_else(unix_timestamp_now);
     let ttl = args.ttl.unwrap_or(u32::MAX);
-    let init_peer_id = args.init_peer_id.as_deref().unwrap_or("some_id");
+    let init_peer_id = &args.init_peer_id;
+    let current_peer_id = &args.current_peer_id;
 
-    let particle = ParticleParameters::new(init_peer_id.into(), "".into(), timestamp, ttl);
+    let particle = ParticleParameters::new(
+        init_peer_id.into(),
+        "".into(),
+        timestamp,
+        ttl,
+        current_peer_id.into(),
+    );
+
     Ok(ExecutionData {
         air_script,
         prev_data,

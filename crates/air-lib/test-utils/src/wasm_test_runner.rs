@@ -24,15 +24,16 @@ use std::path::PathBuf;
 const AVM_MAX_HEAP_SIZE: u64 = 10 * 1024 * 1024;
 const AIR_WASM_PATH: &str = "../target/wasm32-wasi/debug/air_interpreter_server.wasm";
 
-pub struct WasmAirRunner(object_pool::Reusable<'static, AVMRunner>);
+pub struct WasmAirRunner {
+    current_peer_id: String,
+    runner: object_pool::Reusable<'static, AVMRunner>,
+}
 
 fn make_pooled_avm_runner() -> AVMRunner {
-    let fake_current_peer_id = "";
     let logging_mask = i32::MAX;
 
     AVMRunner::new(
         PathBuf::from(AIR_WASM_PATH),
-        fake_current_peer_id,
         Some(AVM_MAX_HEAP_SIZE),
         logging_mask,
     )
@@ -51,10 +52,12 @@ impl AirRunner for WasmAirRunner {
             )
         });
 
-        let mut runner = pool.pull(make_pooled_avm_runner);
-        runner.set_peer_id(current_peer_id);
+        let runner = pool.pull(make_pooled_avm_runner);
 
-        Self(runner)
+        Self {
+            current_peer_id: current_peer_id.into(),
+            runner,
+        }
     }
 
     fn call(
@@ -65,15 +68,20 @@ impl AirRunner for WasmAirRunner {
         init_peer_id: impl Into<String>,
         timestamp: u64,
         ttl: u32,
+        override_current_peer_id: Option<String>,
         call_results: avm_server::CallResults,
     ) -> Result<RawAVMOutcome, Box<dyn std::error::Error>> {
-        Ok(self.0.call(
+        let current_peer_id =
+            override_current_peer_id.unwrap_or_else(|| self.current_peer_id.clone());
+
+        Ok(self.runner.call(
             air,
             prev_data,
             data,
             init_peer_id,
             timestamp,
             ttl,
+            current_peer_id,
             call_results,
         )?)
     }

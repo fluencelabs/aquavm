@@ -1,6 +1,6 @@
 [package]
 name = "air-test-utils"
-version = "0.3.0"
+version = "0.4.0"
 description = "Test utils for the AIR interpreter"
 authors = ["Fluence Labs"]
 edition = "2018"
@@ -25,6 +25,9 @@ object-pool = "0.5.4"
 once_cell = "1.16.0"
 semver = "1.0.14"
 serde_json = "1.0.89"
+
+[dev-dependencies]
+maplit = "1.0.2"
 
 [features]
 test_with_native_code = []
