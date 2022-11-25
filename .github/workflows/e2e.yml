@@ -25,7 +25,6 @@ jobs:
     uses: fluencelabs/rust-peer/.github/workflows/snapshot.yml@master
     with:
       image-name: "docker.fluence.dev/aquavm"
-      ref: "aquavm_current_peer_id"
       cargo-dependencies: |
         [
           {
