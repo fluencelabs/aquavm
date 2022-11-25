@@ -28,6 +28,7 @@ impl AirRunner for WasmAvmRunner {
         init_peer_id: String,
         timestamp: u64,
         ttl: u32,
+        current_peer_id: String,
         call_results: avm_interface::CallResults,
         tracing_params: String,
         tracing_output_mode: u8,
@@ -39,6 +40,7 @@ impl AirRunner for WasmAvmRunner {
             init_peer_id,
             timestamp,
             ttl,
+            current_peer_id,
             call_results,
             tracing_params,
             tracing_output_mode,
@@ -47,15 +49,11 @@ impl AirRunner for WasmAvmRunner {
 }
 
 pub(crate) fn create_wasm_avm_runner(
-    current_peer_id: impl Into<String>,
     air_interpreter_wasm_path: &Path,
     max_heap_size: Option<u64>,
 ) -> anyhow::Result<Box<dyn AirRunner>> {
-    let current_peer_id = current_peer_id.into();
-
     Ok(Box::new(WasmAvmRunner(AVMRunner::new(
         air_interpreter_wasm_path.to_owned(),
-        current_peer_id,
         max_heap_size,
         0,
     )?)))

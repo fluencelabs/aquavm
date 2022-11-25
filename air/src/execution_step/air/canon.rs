@@ -134,10 +134,7 @@ fn create_canon_stream_from_name(
 /// This function gets a stream from context or return a default empty stream,
 /// it's crucial for deterministic behaviour, for more info see
 /// github.com/fluencelabs/aquavm/issues/346
-fn get_stream_or_default<'ctx, 'value>(
-    ast_canon: &ast::Canon<'_>,
-    exec_ctx: &'ctx ExecutionCtx<'value>,
-) -> Cow<'ctx, Stream> {
+fn get_stream_or_default<'ctx>(ast_canon: &ast::Canon<'_>, exec_ctx: &'ctx ExecutionCtx<'_>) -> Cow<'ctx, Stream> {
     let maybe_stream = exec_ctx.streams.get(ast_canon.stream.name, ast_canon.stream.position);
     maybe_stream.map(Cow::Borrowed).unwrap_or_default()
 }

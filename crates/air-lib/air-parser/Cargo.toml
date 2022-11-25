@@ -17,14 +17,14 @@ air-lambda-ast = { path = "../lambda/ast" }
 air-lambda-parser = { path = "../lambda/parser" }
 
 lalrpop-util = "0.19.8"
-regex = "1.6.0"
+regex = "1.7.0"
 codespan = "0.11.1"
 codespan-reporting = "0.11.1"
 multimap = "0.8.3"
 
 # TODO: hide serde behind a feature
-serde = { version = "1.0.145", features = ["rc", "derive"] }
-serde_json = "1.0.86"
+serde = { version = "1.0.147", features = ["rc", "derive"] }
+serde_json = "1.0.89"
 
 itertools = "0.10.5"
 thiserror = "1.0.37"

@@ -53,9 +53,9 @@ pub(super) fn try_jvalue_with_field_name<'value>(
     }
 }
 
-pub(super) fn select_by_scalar<'value, 'i>(
+pub(super) fn select_by_scalar<'value>(
     value: &'value JValue,
-    scalar_ref: ScalarRef<'i>,
+    scalar_ref: ScalarRef<'_>,
 ) -> LambdaResult<&'value JValue> {
     use ScalarRef::*;
 

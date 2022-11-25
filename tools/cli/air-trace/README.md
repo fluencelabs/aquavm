@@ -10,7 +10,6 @@ Executes an AIR script with data in WASM AquaVM.  It has two modes of parameter 
 All common parameters are optional.  Their position is before the mode selector (`--plain` or `--anomaly`).
 
 + `--call-results PATH` parameter allows you to provide call results for current execution.
-+ `--current-peer-id STR` by default is "some_id".
 + `--max-heap-size N` defines maximum heap size for WASM runtime.
 + `--interpreter PATH` option defines the AquaVM WASM binary to be executed.  By default, it is "target/wasm32-wasi/release/air_interpreter_server.wasm", but you can define a global value with the `AIR_INTERPRETER_WASM_PATH` environment variable.  The default presumes that the tool is run from the root of this repository.  Feel free to use option or environment variable to run from any location.
 + with the `--json` option, tracing info is output (to stderr) in machine-readable JSON format.  The output can be later processed with `air-trace stats` subcommand.

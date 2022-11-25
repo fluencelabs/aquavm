@@ -1,13 +1,12 @@
 [package]
 name = "avm-interface"
 description = "Fluence AIR VM interfacing"
-version = "0.26.1"
+version = "0.27.0"
 authors = ["Fluence Labs"]
 edition = "2018"
 license = "Apache-2.0"
 documentation = "https://docs.rs/avm-interface"
 repository = "https://github.com/fluencelabs/aquavm/tree/master/avm/interface"
-publish = true # this crate is used by the node
 keywords = ["fluence", "air", "webassembly", "programming-language"]
 categories = ["wasm"]
 
@@ -23,7 +22,7 @@ polyplets = { version = "0.3.2", path = "../../crates/air-lib/polyplets" }
 
 thiserror = "1.0.37"
 maplit = "1.0.2"
-serde_json = "1.0.86"
-serde = "1.0.145"
+serde_json = "1.0.89"
+serde = "1.0.147"
 log = "0.4.17"
 tracing = "0.1.37"
