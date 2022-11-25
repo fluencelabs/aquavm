@@ -49,6 +49,27 @@ impl Sexp {
     pub(crate) fn string(value: impl ToString) -> Self {
         Self::String(value.to_string())
     }
+
+    pub(crate) fn inject(&mut self, service_definition: ServiceDefinition) -> Result<(), String> {
+        match self {
+            Sexp::Call(ref mut call) => {
+                call.service_desc = Some(service_definition);
+                Ok(())
+            }
+            Sexp::List(ref mut list) => match list.last_mut() {
+                Some(last) => last.inject(service_definition),
+                None => Err("cannot attach a service definition an empty list".to_owned()),
+            },
+            Sexp::Symbol(s) => Err(format!(
+                "cannot attach a service definition to a symbol {:?}",
+                s
+            )),
+            Sexp::String(ref s) => Err(format!(
+                r#"cannot attach a service definition to a string: "{:?}""#,
+                s
+            )),
+        }
+    }
 }
 
 impl std::fmt::Display for Sexp {

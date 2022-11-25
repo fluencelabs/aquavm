@@ -18,9 +18,9 @@ use super::{Call, Sexp, Triplet};
 use crate::asserts::ServiceDefinition;
 
 use nom::branch::alt;
-use nom::bytes::complete::{is_not, tag};
+use nom::bytes::complete::{is_not, tag, take_until};
 use nom::character::complete::{alphanumeric1, multispace0, multispace1, one_of, space1};
-use nom::combinator::{cut, map, map_res, opt, recognize, value};
+use nom::combinator::{cut, map, map_parser, map_res, opt, recognize, rest, value};
 use nom::error::{context, VerboseError, VerboseErrorKind};
 use nom::multi::{many0, many1, many1_count, separated_list0};
 use nom::sequence::{delimited, pair, preceded, separated_pair, terminated};
@@ -88,13 +88,24 @@ fn parse_sexp_list(inp: Input<'_>) -> IResult<Input<'_>, Sexp, ParseError<'_>> {
         "within generic list",
         preceded(
             terminated(tag("("), sexp_multispace0),
-            cut(terminated(
-                map(separated_list0(sexp_multispace1, parse_sexp), Sexp::list),
-                preceded(
-                    sexp_multispace0,
-                    context("closing parentheses not found", tag(")")),
-                ),
-            )),
+            map_res(
+                cut(pair(
+                    map(separated_list0(sexp_multispace1, parse_sexp), Sexp::list),
+                    preceded(
+                        preceded(
+                            sexp_multispace0,
+                            context("closing parentheses not found", tag(")")),
+                        ),
+                        parse_annotation_comment,
+                    ),
+                )),
+                |(mut sexp, annotation)| {
+                    if let Some(service_definition) = annotation {
+                        sexp.inject(service_definition)?;
+                    }
+                    Ok::<_, String>(sexp)
+                },
+            ),
         ),
     )(inp)
 }
@@ -156,10 +167,7 @@ fn parse_sexp_call_content(inp: Input<'_>) -> IResult<Input<'_>, Sexp, ParseErro
                     opt(preceded(sexp_multispace1, map(parse_sexp_symbol, Box::new))),
                     preceded(sexp_multispace0, tag(")")),
                 ),
-                alt((
-                    opt(preceded(pair(space1, tag("; ")), parse_annotation)),
-                    value(None, sexp_multispace0),
-                )),
+                parse_annotation_comment,
             ),
         ),
         |((triplet, args), (var, annotation))| {
@@ -173,12 +181,53 @@ fn parse_sexp_call_content(inp: Input<'_>) -> IResult<Input<'_>, Sexp, ParseErro
     )(inp)
 }
 
-fn parse_annotation(inp: Input<'_>) -> IResult<Input<'_>, ServiceDefinition, ParseError<'_>> {
-    map_res(
-        is_not("\r\n"),
-        |span: Input<'_>| -> Result<ServiceDefinition, ParseError<'_>> {
-            Ok(ServiceDefinition::from_str(&span).unwrap())
-        },
+fn parse_annotation_comment(
+    inp: Input<'_>,
+) -> IResult<Input<'_>, Option<ServiceDefinition>, ParseError<'_>> {
+    use nom::combinator::success;
+
+    alt((
+        preceded(
+            pair(space1, tag("; ")),
+            map(cut(parse_singleline_annotation), Some),
+        ),
+        delimited(
+            pair(space1, tag("#|")),
+            map(
+                cut(map_parser(take_until("|#"), parse_multiline_annotation)),
+                Some,
+            ),
+            tag("|#"),
+        ),
+        success(None),
+    ))(inp)
+}
+
+fn parse_singleline_annotation(
+    inp: Input<'_>,
+) -> IResult<Input<'_>, ServiceDefinition, ParseError<'_>> {
+    context(
+        "single-line annotation",
+        map_res(
+            is_not("\r\n"),
+            |span: Input<'_>| -> Result<ServiceDefinition, ParseError<'_>> {
+                Ok(ServiceDefinition::from_str(&span).expect("invalid service definition"))
+            },
+        ),
+    )(inp)
+}
+
+fn parse_multiline_annotation(
+    inp: Input<'_>,
+) -> IResult<Input<'_>, ServiceDefinition, ParseError<'_>> {
+    context(
+        "multiline annotation",
+        map_res(
+            recognize(rest),
+            |span: Input<'_>| -> Result<ServiceDefinition, ParseError<'_>> {
+                Ok(ServiceDefinition::from_str(&span).expect("invalid service definition"))
+            },
+        ),
     )(inp)
 }
 
@@ -667,6 +716,159 @@ mod tests {
                     Sexp::string("test"),
                 ]),
             ])]))
+        );
+    }
+
+    #[test]
+    fn test_annotation_multiline() {
+        let multiline_annotation = r#" #|
+        map = {
+          "0": null
+        } |#"#;
+        let res = parse_annotation_comment(multiline_annotation.into());
+        assert!(res.is_ok(), "{:?}", res);
+    }
+
+    #[test]
+    fn test_annotation_multiline_with_call() {
+        let sexp_str = r#"(call "peer_id" ("serv" "func") [a b] var) #|
+        map = {
+           "0": null
+        }
+        |#"#;
+        let expected_annotation = ServiceDefinition::Map(maplit::hashmap! {
+            "0".to_owned() => json!(None::<()>),
+        });
+
+        let res = Sexp::from_str(sexp_str);
+        assert_eq!(
+            res,
+            Ok(Sexp::Call(Call {
+                triplet: Box::new((
+                    Sexp::string("peer_id"),
+                    Sexp::string("serv"),
+                    Sexp::string("func"),
+                )),
+                args: vec![Sexp::symbol("a"), Sexp::symbol("b")],
+                var: Some(Box::new(Sexp::symbol("var"))),
+                service_desc: Some(expected_annotation),
+            }))
+        );
+    }
+
+    #[test]
+    fn test_annotation_multiline_with_many_calls() {
+        let sexp_str = r#"(seq
+            (call "peer_id" ("serv" "func") [a b] var) #|
+                   map = {
+                     "0": null
+                   }
+                |#
+            (call "peer_id" ("serv" "func") [a b] var)
+        )"#;
+        let expected_annotation = ServiceDefinition::Map(maplit::hashmap! {
+            "0".to_owned() => json!(None::<()>),
+        });
+
+        let res = Sexp::from_str(sexp_str);
+        assert_eq!(
+            res,
+            Ok(Sexp::List(vec![
+                Sexp::symbol("seq"),
+                Sexp::Call(Call {
+                    triplet: Box::new((
+                        Sexp::string("peer_id"),
+                        Sexp::string("serv"),
+                        Sexp::string("func"),
+                    )),
+                    args: vec![Sexp::symbol("a"), Sexp::symbol("b")],
+                    var: Some(Box::new(Sexp::symbol("var"))),
+                    service_desc: Some(expected_annotation),
+                }),
+                Sexp::Call(Call {
+                    triplet: Box::new((
+                        Sexp::string("peer_id"),
+                        Sexp::string("serv"),
+                        Sexp::string("func"),
+                    )),
+                    args: vec![Sexp::symbol("a"), Sexp::symbol("b")],
+                    var: Some(Box::new(Sexp::symbol("var"))),
+                    service_desc: None,
+                }),
+            ])),
+        );
+    }
+
+    #[test]
+    fn test_call_with_annotation_last_form() {
+        let res = Sexp::from_str(
+            r#"(par
+  (call peerid ("serv" "func") [a b] var)
+  (call peerid2 ("serv" "func") [])) ; ok=42
+"#,
+        );
+        assert_eq!(
+            res,
+            Ok(Sexp::List(vec![
+                Sexp::symbol("par"),
+                Sexp::Call(Call {
+                    triplet: Box::new((
+                        Sexp::symbol("peerid"),
+                        Sexp::string("serv"),
+                        Sexp::string("func"),
+                    )),
+                    args: vec![Sexp::symbol("a"), Sexp::symbol("b")],
+                    var: Some(Box::new(Sexp::symbol("var"))),
+                    service_desc: None,
+                }),
+                Sexp::Call(Call {
+                    triplet: Box::new((
+                        Sexp::symbol("peerid2"),
+                        Sexp::string("serv"),
+                        Sexp::string("func"),
+                    )),
+                    args: vec![],
+                    var: None,
+                    service_desc: Some(ServiceDefinition::Ok(json!(42))),
+                }),
+            ]))
+        );
+    }
+    #[test]
+    fn test_call_with_annotation_last_form_multiline() {
+        let res = Sexp::from_str(
+            r#"(par
+  (call peerid ("serv" "func") [a b] var)
+  (call peerid2 ("serv" "func") [])) #|
+    ok=42
+  |#
+"#,
+        );
+        assert_eq!(
+            res,
+            Ok(Sexp::List(vec![
+                Sexp::symbol("par"),
+                Sexp::Call(Call {
+                    triplet: Box::new((
+                        Sexp::symbol("peerid"),
+                        Sexp::string("serv"),
+                        Sexp::string("func"),
+                    )),
+                    args: vec![Sexp::symbol("a"), Sexp::symbol("b")],
+                    var: Some(Box::new(Sexp::symbol("var"))),
+                    service_desc: None,
+                }),
+                Sexp::Call(Call {
+                    triplet: Box::new((
+                        Sexp::symbol("peerid2"),
+                        Sexp::string("serv"),
+                        Sexp::string("func"),
+                    )),
+                    args: vec![],
+                    var: None,
+                    service_desc: Some(ServiceDefinition::Ok(json!(42))),
+                }),
+            ]))
         );
     }
 }
