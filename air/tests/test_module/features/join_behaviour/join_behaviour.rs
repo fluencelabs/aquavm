@@ -225,26 +225,19 @@ fn fold_with_join_behaviour() {
 
 #[test]
 fn canon_with_empty_behaviour() {
-    let peer_1_id = "peer_1_id";
-    let peer_2_id = "peer_2_id";
+    let peer_id = "peer_id";
 
-    let mut peer_2 = create_avm(unit_call_service(), peer_2_id);
+    let mut peer_2 = create_avm(unit_call_service(), peer_id);
 
     let script = f!(r#"
-        (par
-            (call "{peer_1_id}" ("" "") [] $stream)
-            (canon "{peer_2_id}" $stream #canon_stream))
+        (canon "{peer_id}" $stream #canon_stream)
     "#);
 
     let result = checked_call_vm!(peer_2, <_>::default(), script, "", "");
     let actual_trace = trace_from_result(&result);
-    let expected_trace = vec![
-        executed_state::par(1, 1),
-        executed_state::request_sent_by(peer_2_id),
-        executed_state::canon(
-            json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_2_id", "service_id": ""}, "values": []}),
-        ),
-    ];
+    let expected_trace = vec![executed_state::canon(
+        json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id", "service_id": ""}, "values": []}),
+    )];
 
     assert_eq!(actual_trace, expected_trace);
 }
