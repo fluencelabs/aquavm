@@ -19,7 +19,7 @@ use crate::asserts::ServiceDefinition;
 
 use air_test_utils::CallRequestParams;
 
-use std::{cell::RefCell, collections::HashMap, rc::Rc, time::Duration};
+use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub(crate) struct ResultStore {
@@ -45,7 +45,7 @@ impl MarineService for ResultStore {
                 });
                 // hide the artificial service_id
                 params.service_id = real_service_id.to_owned();
-                FunctionOutcome::ServiceResult(service_desc.call(params), Duration::ZERO)
+                FunctionOutcome::from_service_result(service_desc.call(params))
             } else {
                 // Pass malformed service names further in a chain
                 FunctionOutcome::NotDefined

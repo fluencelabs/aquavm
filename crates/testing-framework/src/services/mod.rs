@@ -33,6 +33,16 @@ pub enum FunctionOutcome {
     Empty,
 }
 
+impl FunctionOutcome {
+    pub fn from_service_result(service_result: CallServiceResult) -> Self {
+        FunctionOutcome::ServiceResult(service_result, Duration::ZERO)
+    }
+
+    pub fn from_value(value: JValue) -> Self {
+        Self::from_service_result(CallServiceResult::ok(value))
+    }
+}
+
 /// A mocked Marine service.
 pub trait MarineService {
     fn call(&self, params: CallRequestParams) -> FunctionOutcome;

@@ -542,10 +542,7 @@ mod tests {
         impl MarineService for Service {
             fn call(&self, _params: CallRequestParams) -> crate::services::FunctionOutcome {
                 let mut cell = self.state.borrow_mut();
-                crate::services::FunctionOutcome::ServiceResult(
-                    CallServiceResult::ok(cell.next().unwrap()),
-                    <_>::default(),
-                )
+                crate::services::FunctionOutcome::from_value(cell.next().unwrap())
             }
         }
         let service = Service {
