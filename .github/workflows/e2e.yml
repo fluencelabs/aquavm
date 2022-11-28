@@ -45,20 +45,18 @@ jobs:
       - aquavm
       - rust-peer
 
-    uses: fluencelabs/fluence-js/.github/workflows/tests.yml@fix-avm-integration-tests
+    uses: fluencelabs/fluence-js/.github/workflows/tests.yml@master
     with:
       avm-version: "${{ needs.aquavm.outputs.avm-version }}"
       rust-peer-image: "${{ needs.rust-peer.outputs.rust-peer-image }}"
-      ref: fix-avm-integration-tests
 
   fluence-js:
     needs:
       - aquavm
 
-    uses: fluencelabs/fluence-js/.github/workflows/snapshot.yml@fix-avm-integration-tests
+    uses: fluencelabs/fluence-js/.github/workflows/snapshot.yml@master
     with:
       avm-version: "${{ needs.aquavm.outputs.avm-version }}"
-      ref: fix-avm-integration-tests
 
   aqua:
     needs:
