@@ -60,7 +60,7 @@ jobs:
           echo "JS_PKG_NAME=$JS_PKG_NAME" | tee -a $GITHUB_ENV
 
       - name: Setup wasm-pack
-        uses: jetli/wasm-pack-action@v0.3.0
+        uses: jetli/wasm-pack-action@v0.4.0
         with:
           version: 'latest'
 
