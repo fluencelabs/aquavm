@@ -41,16 +41,6 @@ impl<'i> ScalarWithLambda<'i> {
     }
 }
 
-impl<'i> StreamWithLambda<'i> {
-    pub fn new(name: &'i str, lambda: LambdaAST<'i>, position: AirPos) -> Self {
-        Self {
-            name,
-            lambda,
-            position,
-        }
-    }
-}
-
 impl<'i> CanonStream<'i> {
     pub fn new(name: &'i str, position: AirPos) -> Self {
         Self { name, position }

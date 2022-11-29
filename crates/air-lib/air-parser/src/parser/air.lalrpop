@@ -240,7 +240,6 @@ extern {
         Scalar => Token::Scalar { name:<&'input str>, position: <AirPos> },
         ScalarWithLambda => Token::ScalarWithLambda { name: <&'input str>, lambda: <LambdaAST<'input>>, position: <AirPos> },
         Stream => Token::Stream { name: <&'input str>, position: <AirPos> },
-        StreamWithLambda => Token::StreamWithLambda {name: <&'input str>, lambda:<LambdaAST<'input>>, position: <AirPos>},
         CanonStream => Token::CanonStream { name: <&'input str>, position: <AirPos> },
         CanonStreamWithLambda => Token::CanonStreamWithLambda {name: <&'input str>, lambda:<LambdaAST<'input>>, position: <AirPos>},
 

@@ -216,25 +216,6 @@ fn canon_stream() {
 }
 
 #[test]
-fn stream_with_functor() {
-    let stream_name = "$stream";
-    let stream_with_functor: String = f!("{stream_name}.length");
-
-    lexer_test(
-        &stream_with_functor,
-        Single(Ok((
-            0.into(),
-            Token::StreamWithLambda {
-                name: stream_name,
-                lambda: LambdaAST::Functor(Functor::Length),
-                position: 0.into(),
-            },
-            stream_with_functor.len().into(),
-        ))),
-    );
-}
-
-#[test]
 fn canon_stream_with_functor() {
     let canon_stream_name = "#canon_stream";
     let canon_stream_with_functor: String = f!("{canon_stream_name}.length");

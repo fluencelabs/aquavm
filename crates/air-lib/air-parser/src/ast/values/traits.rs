@@ -41,12 +41,6 @@ impl fmt::Display for CanonStream<'_> {
     }
 }
 
-impl fmt::Display for StreamWithLambda<'_> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}{}", self.name, self.lambda)
-    }
-}
-
 impl fmt::Display for CanonStreamWithLambda<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}{}", self.name, self.lambda)

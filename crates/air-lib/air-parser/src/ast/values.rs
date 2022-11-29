@@ -46,15 +46,6 @@ pub struct Stream<'i> {
     pub position: AirPos,
 }
 
-/// A stream with a lambda expression (it'll be replaced with functors eventually).
-#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
-pub struct StreamWithLambda<'i> {
-    pub name: &'i str,
-    #[serde(borrow)]
-    pub lambda: LambdaAST<'i>,
-    pub position: AirPos,
-}
-
 /// A canonicalized stream without a lambda.
 #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct CanonStream<'i> {

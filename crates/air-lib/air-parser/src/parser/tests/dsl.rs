@@ -19,8 +19,8 @@ use std::rc::Rc;
 
 pub(super) fn call<'i>(
     peer_pk: ResolvableToPeerIdVariable<'i>,
-    service_id: ResolvableToPeerIdVariable<'i>,
-    function_name: ResolvableToPeerIdVariable<'i>,
+    service_id: ResolvableToStringVariable<'i>,
+    function_name: ResolvableToStringVariable<'i>,
     args: Rc<Vec<ImmutableValue<'i>>>,
     output: CallOutputValue<'i>,
 ) -> Instruction<'i> {
