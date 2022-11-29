@@ -32,16 +32,16 @@ fn parse_seq() {
     let instruction = parse(source_code);
     let expected = par(
         call(
-            ResolvableToStringVariable::Literal(""),
-            ResolvableToStringVariable::Literal(""),
-            ResolvableToStringVariable::Literal(""),
+            ResolvableToPeerIdVariable::Literal(""),
+            ResolvableToPeerIdVariable::Literal(""),
+            ResolvableToPeerIdVariable::Literal(""),
             Rc::new(vec![]),
             CallOutputValue::None,
         ),
         call(
-            ResolvableToStringVariable::Literal(""),
-            ResolvableToStringVariable::Literal(""),
-            ResolvableToStringVariable::Literal(""),
+            ResolvableToPeerIdVariable::Literal(""),
+            ResolvableToPeerIdVariable::Literal(""),
+            ResolvableToPeerIdVariable::Literal(""),
             Rc::new(vec![]),
             CallOutputValue::None,
         ),
@@ -64,24 +64,24 @@ fn parse_par_par() {
     let expected = par(
         par(
             call(
-                ResolvableToStringVariable::Literal(""),
-                ResolvableToStringVariable::Literal(""),
-                ResolvableToStringVariable::Literal(""),
+                ResolvableToPeerIdVariable::Literal(""),
+                ResolvableToPeerIdVariable::Literal(""),
+                ResolvableToPeerIdVariable::Literal(""),
                 Rc::new(vec![]),
                 CallOutputValue::None,
             ),
             call(
-                ResolvableToStringVariable::Literal(""),
-                ResolvableToStringVariable::Literal(""),
-                ResolvableToStringVariable::Literal(""),
+                ResolvableToPeerIdVariable::Literal(""),
+                ResolvableToPeerIdVariable::Literal(""),
+                ResolvableToPeerIdVariable::Literal(""),
                 Rc::new(vec![]),
                 CallOutputValue::None,
             ),
         ),
         call(
-            ResolvableToStringVariable::Literal(""),
-            ResolvableToStringVariable::Literal(""),
-            ResolvableToStringVariable::Literal(""),
+            ResolvableToPeerIdVariable::Literal(""),
+            ResolvableToPeerIdVariable::Literal(""),
+            ResolvableToPeerIdVariable::Literal(""),
             Rc::new(vec![]),
             CallOutputValue::None,
         ),

@@ -38,12 +38,12 @@ impl<'i> Call<'i> {
 
 impl<'i> Canon<'i> {
     pub fn new(
-        peer_pk: ResolvableToStringVariable<'i>,
+        peer_id: ResolvableToPeerIdVariable<'i>,
         stream: Stream<'i>,
         canon_stream: CanonStream<'i>,
     ) -> Self {
         Self {
-            peer_pk,
+            peer_id,
             stream,
             canon_stream,
         }

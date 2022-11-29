@@ -32,16 +32,16 @@ fn parse_seq() {
     let instruction = parse(source_code);
     let expected = seq(
         call(
-            ResolvableToStringVariable::Scalar(Scalar::new("peer_id", 32.into())),
-            ResolvableToStringVariable::Scalar(Scalar::new("service_id", 41.into())),
-            ResolvableToStringVariable::Scalar(Scalar::new("function_name", 52.into())),
+            ResolvableToPeerIdVariable::Scalar(Scalar::new("peer_id", 32.into())),
+            ResolvableToPeerIdVariable::Scalar(Scalar::new("service_id", 41.into())),
+            ResolvableToPeerIdVariable::Scalar(Scalar::new("function_name", 52.into())),
             Rc::new(vec![ImmutableValue::EmptyArray, ImmutableValue::EmptyArray]),
             CallOutputValue::Scalar(Scalar::new("output", 75.into())),
         ),
         call(
-            ResolvableToStringVariable::Literal("peer_id"),
-            ResolvableToStringVariable::Literal("service_id"),
-            ResolvableToStringVariable::Literal("function_name"),
+            ResolvableToPeerIdVariable::Literal("peer_id"),
+            ResolvableToPeerIdVariable::Literal("service_id"),
+            ResolvableToPeerIdVariable::Literal("function_name"),
             Rc::new(vec![
                 ImmutableValue::Literal("hello"),
                 ImmutableValue::EmptyArray,
@@ -68,24 +68,24 @@ fn parse_seq_seq() {
     let expected = seq(
         seq(
             call(
-                ResolvableToStringVariable::Scalar(Scalar::new("peer_id", 53.into())),
-                ResolvableToStringVariable::Scalar(Scalar::new("service_id", 62.into())),
-                ResolvableToStringVariable::Scalar(Scalar::new("function_name", 73.into())),
+                ResolvableToPeerIdVariable::Scalar(Scalar::new("peer_id", 53.into())),
+                ResolvableToPeerIdVariable::Scalar(Scalar::new("service_id", 62.into())),
+                ResolvableToPeerIdVariable::Scalar(Scalar::new("function_name", 73.into())),
                 Rc::new(vec![]),
                 CallOutputValue::None,
             ),
             call(
-                ResolvableToStringVariable::Scalar(Scalar::new("peer_id", 114.into())),
-                ResolvableToStringVariable::Literal("service_B"),
-                ResolvableToStringVariable::Scalar(Scalar::new("function_name", 135.into())),
+                ResolvableToPeerIdVariable::Scalar(Scalar::new("peer_id", 114.into())),
+                ResolvableToPeerIdVariable::Literal("service_B"),
+                ResolvableToPeerIdVariable::Scalar(Scalar::new("function_name", 135.into())),
                 Rc::new(vec![]),
                 CallOutputValue::None,
             ),
         ),
         call(
-            ResolvableToStringVariable::Literal("peer_id"),
-            ResolvableToStringVariable::Literal("service_id"),
-            ResolvableToStringVariable::Literal("function_name"),
+            ResolvableToPeerIdVariable::Literal("peer_id"),
+            ResolvableToPeerIdVariable::Literal("service_id"),
+            ResolvableToPeerIdVariable::Literal("function_name"),
             Rc::new(vec![
                 ImmutableValue::Literal("hello"),
                 ImmutableValue::Variable(ImmutableVariable::scalar("name", 236.into())),

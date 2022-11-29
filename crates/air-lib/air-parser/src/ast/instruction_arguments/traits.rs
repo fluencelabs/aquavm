@@ -48,12 +48,25 @@ impl fmt::Display for ImmutableValue<'_> {
     }
 }
 
+impl fmt::Display for ResolvableToPeerIdVariable<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use ResolvableToPeerIdVariable::*;
+
+        match self {
+            InitPeerId => write!(f, "%init_peer_id%"),
+            Literal(literal) => write!(f, r#""{}""#, literal),
+            Scalar(scalar) => write!(f, "{}", scalar),
+            ScalarWithLambda(scalar) => write!(f, "{}", scalar),
+            CanonStreamWithLambda(canon_stream) => write!(f, "{}", canon_stream),
+        }
+    }
+}
+
 impl fmt::Display for ResolvableToStringVariable<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use ResolvableToStringVariable::*;
 
         match self {
-            InitPeerId => write!(f, "%init_peer_id%"),
             Literal(literal) => write!(f, r#""{}""#, literal),
             Scalar(scalar) => write!(f, "{}", scalar),
             ScalarWithLambda(scalar) => write!(f, "{}", scalar),
@@ -100,7 +113,7 @@ impl fmt::Display for Triplet<'_> {
         write!(
             f,
             "{} ({} {})",
-            self.peer_pk, self.service_id, self.function_name
+            self.peer_id, self.service_id, self.function_name
         )
     }
 }

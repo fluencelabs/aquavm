@@ -66,9 +66,9 @@ impl<'i> VariableValidator<'i> {
     }
 
     pub(super) fn met_call(&mut self, call: &Call<'i>, span: Span) {
-        self.met_call_instr_value(&call.triplet.peer_pk, span);
-        self.met_call_instr_value(&call.triplet.service_id, span);
-        self.met_call_instr_value(&call.triplet.function_name, span);
+        self.met_peer_id_resolvable_value(&call.triplet.peer_id, span);
+        self.met_string_resolvable_value(&call.triplet.service_id, span);
+        self.met_string_resolvable_value(&call.triplet.function_name, span);
 
         self.met_args(call.args.deref(), span);
 
@@ -164,11 +164,30 @@ impl<'i> VariableValidator<'i> {
         }
     }
 
-    fn met_call_instr_value(&mut self, instr_value: &ResolvableToStringVariable<'i>, span: Span) {
+    fn met_peer_id_resolvable_value(
+        &mut self,
+        variable: &ResolvableToPeerIdVariable<'i>,
+        span: Span,
+    ) {
+        use ResolvableToPeerIdVariable::*;
+
+        match variable {
+            InitPeerId | Literal(_) => {}
+            Scalar(scalar) => self.met_scalar(scalar, span),
+            ScalarWithLambda(scalar) => self.met_scalar_wl(scalar, span),
+            CanonStreamWithLambda(stream) => self.met_canon_stream_wl(stream, span),
+        }
+    }
+
+    fn met_string_resolvable_value(
+        &mut self,
+        variable: &ResolvableToStringVariable<'i>,
+        span: Span,
+    ) {
         use ResolvableToStringVariable::*;
 
-        match instr_value {
-            InitPeerId | Literal(_) => {}
+        match variable {
+            Literal(_) => {}
             Scalar(scalar) => self.met_scalar(scalar, span),
             ScalarWithLambda(scalar) => self.met_scalar_wl(scalar, span),
             CanonStreamWithLambda(stream) => self.met_canon_stream_wl(stream, span),

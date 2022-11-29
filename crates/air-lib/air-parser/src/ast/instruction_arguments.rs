@@ -30,10 +30,20 @@ use air_lambda_ast::LambdaAST;
 use serde::Deserialize;
 use serde::Serialize;
 
+/// Contains all variable variants that could be resolved to a peer id.
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
+pub enum ResolvableToPeerIdVariable<'i> {
+    InitPeerId,
+    Literal(&'i str),
+    Scalar(Scalar<'i>),
+    ScalarWithLambda(ScalarWithLambda<'i>),
+    // canon without lambda can't be resolved to a string, since it represents an array of values
+    CanonStreamWithLambda(CanonStreamWithLambda<'i>),
+}
+
 /// Contains all variable variants that could be resolved to a string type.
 #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub enum ResolvableToStringVariable<'i> {
-    InitPeerId,
     Literal(&'i str),
     Scalar(Scalar<'i>),
     ScalarWithLambda(ScalarWithLambda<'i>),
@@ -46,7 +56,7 @@ pub enum ResolvableToStringVariable<'i> {
 #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct Triplet<'i> {
     #[serde(borrow)]
-    pub peer_pk: ResolvableToStringVariable<'i>,
+    pub peer_id: ResolvableToPeerIdVariable<'i>,
     #[serde(borrow)]
     pub service_id: ResolvableToStringVariable<'i>,
     #[serde(borrow)]

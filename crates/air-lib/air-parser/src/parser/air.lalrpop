@@ -25,8 +25,8 @@ Instr: Box<Instruction<'input>> = {
         Box::new(Instruction::Call(call))
     },
 
-    <left: @L> "(" canon <peer_pk:ResolvableToStringVariable> <stream:StreamArgument> <canon_stream:CanonStreamArgument> ")" <right: @R> => {
-        let canon = Canon::new(peer_pk, stream, canon_stream);
+    <left: @L> "(" canon <peer_id:ResolvableToPeerIdVariable> <stream:StreamArgument> <canon_stream:CanonStreamArgument> ")" <right: @R> => {
+        let canon = Canon::new(peer_id, stream, canon_stream);
 
         let span = Span::new(left, right);
         validator.met_canon(&canon, span);
@@ -118,8 +118,8 @@ Args: Vec<ImmutableValue<'input>> = {
 }
 
 Triplet: Triplet<'input> = {
-    <peer_pk:PeerId> "(" <service_id:ServiceId> <function_name:Function> ")" => Triplet {
-        peer_pk,
+    <peer_id:PeerId> "(" <service_id:ServiceId> <function_name:Function> ")" => Triplet {
+        peer_id,
         service_id,
         function_name
     }
@@ -155,12 +155,19 @@ FoldScalarIterable: FoldScalarIterable<'input> = {
     "[" "]" => FoldScalarIterable::EmptyArray,
 };
 
+PeerId = ResolvableToPeerIdVariable;
 Function = ResolvableToStringVariable;
-PeerId = ResolvableToStringVariable;
 ServiceId = ResolvableToStringVariable;
 
+ResolvableToPeerIdVariable: ResolvableToPeerIdVariable<'input> = {
+    InitPeerId => ResolvableToPeerIdVariable::InitPeerId,
+    <literal:Literal> => ResolvableToPeerIdVariable::Literal(literal),
+    <scalar:Scalar> => ResolvableToPeerIdVariable::Scalar(Scalar::new(scalar.0, scalar.1)),
+    <scalar:ScalarWithLambda> => ResolvableToPeerIdVariable::ScalarWithLambda(ScalarWithLambda::new(scalar.0, scalar.1, scalar.2)),
+    <canon_stream:CanonStreamWithLambda> => ResolvableToPeerIdVariable::CanonStreamWithLambda(CanonStreamWithLambda::new(canon_stream.0, canon_stream.1, canon_stream.2)),
+}
+
 ResolvableToStringVariable: ResolvableToStringVariable<'input> = {
-    InitPeerId => ResolvableToStringVariable::InitPeerId,
     <literal:Literal> => ResolvableToStringVariable::Literal(literal),
     <scalar:Scalar> => ResolvableToStringVariable::Scalar(Scalar::new(scalar.0, scalar.1)),
     <scalar:ScalarWithLambda> => ResolvableToStringVariable::ScalarWithLambda(ScalarWithLambda::new(scalar.0, scalar.1, scalar.2)),

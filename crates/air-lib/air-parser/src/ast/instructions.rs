@@ -63,7 +63,7 @@ pub struct Ap<'i> {
 /// (canon peer_id $stream #canon_stream)
 #[derive(Serialize, Debug, PartialEq, Eq)]
 pub struct Canon<'i> {
-    pub peer_pk: ResolvableToStringVariable<'i>,
+    pub peer_id: ResolvableToPeerIdVariable<'i>,
     pub stream: Stream<'i>,
     pub canon_stream: CanonStream<'i>,
 }

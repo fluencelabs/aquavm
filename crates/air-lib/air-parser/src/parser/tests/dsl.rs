@@ -18,14 +18,14 @@ use crate::ast::*;
 use std::rc::Rc;
 
 pub(super) fn call<'i>(
-    peer_pk: ResolvableToStringVariable<'i>,
-    service_id: ResolvableToStringVariable<'i>,
-    function_name: ResolvableToStringVariable<'i>,
+    peer_pk: ResolvableToPeerIdVariable<'i>,
+    service_id: ResolvableToPeerIdVariable<'i>,
+    function_name: ResolvableToPeerIdVariable<'i>,
     args: Rc<Vec<ImmutableValue<'i>>>,
     output: CallOutputValue<'i>,
 ) -> Instruction<'i> {
     let triplet = Triplet {
-        peer_pk,
+        peer_id: peer_pk,
         service_id,
         function_name,
     };
@@ -200,12 +200,12 @@ pub(super) fn ap<'i>(argument: ApArgument<'i>, result: ApResult<'i>) -> Instruct
 }
 
 pub(super) fn canon<'i>(
-    peer_pk: ResolvableToStringVariable<'i>,
+    peer_pk: ResolvableToPeerIdVariable<'i>,
     stream: Stream<'i>,
     canon_stream: CanonStream<'i>,
 ) -> Instruction<'i> {
     Instruction::Canon(Canon {
-        peer_pk,
+        peer_id: peer_pk,
         stream,
         canon_stream,
     })

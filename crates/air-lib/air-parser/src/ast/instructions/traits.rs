@@ -57,7 +57,7 @@ impl fmt::Display for Canon<'_> {
         write!(
             f,
             "canon {} {} {}",
-            self.peer_pk, self.stream, self.canon_stream
+            self.peer_id, self.stream, self.canon_stream
         )
     }
 }

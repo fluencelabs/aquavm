@@ -32,7 +32,7 @@ mod par;
 mod seq;
 mod xor;
 
-pub(crate) use call::triplet::resolve_to_string;
+pub(crate) use call::triplet::resolve_to_string_peer_id;
 pub(crate) use fold::FoldState;
 
 use super::boxed_value::ScalarRef;
