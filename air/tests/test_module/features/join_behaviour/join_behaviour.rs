@@ -65,34 +65,6 @@ fn dont_wait_on_json_path() {
 }
 
 #[test]
-fn wait_on_stream_json_path_by_id() {
-    let local_peer_id = "local_peer_id";
-    let mut local_vm = create_avm(unit_call_service(), local_peer_id);
-
-    let non_join_stream_script = f!(r#"
-    (par
-        (call "{local_peer_id}" ("" "") [] $status)
-        (call "{local_peer_id}" ("history" "add") [$status.$[0]!])
-     )"#);
-
-    let result = checked_call_vm!(local_vm, <_>::default(), non_join_stream_script, "", "");
-    let actual_trace = trace_from_result(&result);
-
-    assert_eq!(actual_trace.len(), 3);
-
-    let join_stream_script = f!(r#"
-    (par
-        (call "{local_peer_id}" ("" "") [] $status)
-        (call "{local_peer_id}" ("history" "add") [$status.$[1]!]) ; $status stream here has only one value
-     )"#);
-
-    let result = checked_call_vm!(local_vm, <_>::default(), join_stream_script, "", "");
-    let actual_trace = trace_from_result(&result);
-
-    assert_eq!(actual_trace.len(), 2); // par and the first call emit traces, second call doesn't
-}
-
-#[test]
 fn wait_on_empty_stream_json_path() {
     let local_peer_id = "local_peer_id";
     let mut local_vm = create_avm(echo_call_service(), local_peer_id);
@@ -108,13 +80,17 @@ fn wait_on_empty_stream_json_path() {
                 )
             )
         )
-        (call "{local_peer_id}" ("" "") [$ns.$.[0] $ns.$.[1] $ns])
+        (seq
+            (canon "{local_peer_id}" $ns #ns)
+            (call "{local_peer_id}" ("" "") [#ns.$.[0] #ns.$.[1] #ns])
+        )
      )"#);
 
     let result = checked_call_vm!(local_vm, <_>::default(), join_stream_script, "", "");
+    print_trace(&result, "");
     let actual_trace = trace_from_result(&result);
 
-    assert_eq!(actual_trace.len(), 1); // only the first call should produce a trace
+    assert_eq!(actual_trace.len(), 2); // only the first call and canon should produce a trace
 }
 
 #[test]
@@ -249,24 +225,19 @@ fn fold_with_join_behaviour() {
 
 #[test]
 fn canon_with_empty_behaviour() {
-    let peer_1_id = "peer_1_id";
-    let peer_2_id = "peer_2_id";
+    let peer_id = "peer_id";
 
-    let mut peer_2 = create_avm(unit_call_service(), peer_2_id);
+    let mut peer_2 = create_avm(unit_call_service(), peer_id);
 
     let script = f!(r#"
-        (par
-            (call "{peer_1_id}" ("" "") [] $stream)
-            (canon "{peer_2_id}" $stream #canon_stream))
+        (canon "{peer_id}" $stream #canon_stream)
     "#);
 
     let result = checked_call_vm!(peer_2, <_>::default(), script, "", "");
     let actual_trace = trace_from_result(&result);
-    let expected_trace = vec![
-        executed_state::par(1, 1),
-        executed_state::request_sent_by(peer_2_id),
-        executed_state::canon(vec![]),
-    ];
+    let expected_trace = vec![executed_state::canon(
+        json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id", "service_id": ""}, "values": []}),
+    )];
 
     assert_eq!(actual_trace, expected_trace);
 }

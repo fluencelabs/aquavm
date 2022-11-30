@@ -23,43 +23,50 @@ fn issue_211() {
     let peer_1_id = "peer_1_id";
 
     let script = f!(r#"
-    (xor
-     (seq
-      (seq
-       (seq
+     (xor
         (seq
-         (null)
-         (call %init_peer_id% ("getDataSrv" "idx") [] idx) ; ok=2
-        )
-        (call %init_peer_id% ("getDataSrv" "nodes") [] nodes) ; ok = [1,2,3]
-       )
-       (new $nodes2
-        (seq
-         (seq
-          (par
-           (fold nodes node
-            (par
-             (ap node $nodes2)
-             (next node)
-            )
-           )
-           (null)
+          (seq
+             (seq
+                (seq
+                   (null)
+                   (call %init_peer_id% ("getdatasrv" "idx") [] idx) ; ok=2
+                )
+                (call %init_peer_id% ("getdatasrv" "nodes") [] nodes) ; ok = [1,2,3]
+             )
+             (new $nodes2
+                (seq
+                   (seq
+                      (par
+                         (fold nodes node
+                            (par
+                               (ap node $nodes2)
+                               (next node)
+                            )
+                         )
+                         (null)
+                      )
+                      (seq
+                         (canon %init_peer_id% $nodes2 #nodes2_0)
+                         (call %init_peer_id% ("op" "noop") [#nodes2_0.$.[idx]! nodes]) ; ok="expected result"
+                      )
+                   )
+                   (seq
+                      (canon %init_peer_id% $nodes2 #nodes2_1)
+                      (call %init_peer_id% ("op" "identity") [#nodes2_1] nodes2-fix) ; ok="expected result"
+                   )
+                )
+             )
           )
-          (call %init_peer_id% ("op" "noop") [$nodes2.$.[idx] nodes]) ; ok="expected result"
-         )
-         (call %init_peer_id% ("op" "identity") [$nodes2] nodes2-fix) ; ok="expected result"
+          (null)
         )
-       )
-      )
-      (null)
+        (call %init_peer_id% ("errorhandlingsrv" "error") [%last_error% 2]) ; ok="error"
      )
-     (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2]) ; ok="error"
-    )
     "#);
 
     let run_params = TestRunParameters::from_init_peer_id(peer_1_id);
 
-    let engine = air_test_framework::TestExecutor::simple(run_params, &script).expect("invalid test executor config");
+    let engine =
+        air_test_framework::AirScriptExecutor::simple(run_params, &script).expect("invalid test executor config");
 
     let result = engine.execute_one(peer_1_id).unwrap();
 
@@ -68,12 +75,52 @@ fn issue_211() {
         executed_state::scalar(json!([1, 2, 3])),
         executed_state::par(6, 0),
         executed_state::par(1, 4),
-        executed_state::ap(Some(0)),
+        executed_state::ap(0),
         executed_state::par(1, 2),
-        executed_state::ap(Some(0)),
+        executed_state::ap(0),
         executed_state::par(1, 0),
-        executed_state::ap(Some(0)),
+        executed_state::ap(0),
+        executed_state::canon(json!({
+            "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_1_id", "service_id": ""},
+            "values": [
+                {
+                    "result": 1,
+                    "tetraplet": {"function_name": "nodes", "json_path": "", "peer_pk": "peer_1_id", "service_id": "getdatasrv..1"},
+                    "trace_pos": 4
+                },
+               {
+                    "result": 2,
+                    "tetraplet": {"function_name": "nodes", "json_path": "", "peer_pk": "peer_1_id", "service_id": "getdatasrv..1"},
+                    "trace_pos": 6
+                },
+            {
+                    "result": 3,
+                    "tetraplet": {"function_name": "nodes", "json_path": "", "peer_pk": "peer_1_id", "service_id": "getdatasrv..1"},
+                    "trace_pos": 8
+                },
+            ]
+        })),
         executed_state::scalar_string("expected result"),
+        executed_state::canon(json!({
+            "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_1_id", "service_id": ""},
+            "values": [
+                {
+                    "result": 1,
+                    "tetraplet": {"function_name": "nodes", "json_path": "", "peer_pk": "peer_1_id", "service_id": "getdatasrv..1"},
+                    "trace_pos": 4
+                },
+               {
+                    "result": 2,
+                    "tetraplet": {"function_name": "nodes", "json_path": "", "peer_pk": "peer_1_id", "service_id": "getdatasrv..1"},
+                    "trace_pos": 6
+                },
+            {
+                    "result": 3,
+                    "tetraplet": {"function_name": "nodes", "json_path": "", "peer_pk": "peer_1_id", "service_id": "getdatasrv..1"},
+                    "trace_pos": 8
+                },
+            ]
+        })),
         executed_state::scalar_string("expected result"),
     ];
 

@@ -272,7 +272,7 @@ fn parse_fold() {
         "#;
     let instruction = parse(&source_code);
     let expected = fold_scalar_variable(
-        ScalarWithLambda::new("iterable", None, 15.into()),
+        Scalar::new("iterable", 15.into()),
         Scalar::new("i", 24.into()),
         null(),
         None,
@@ -291,7 +291,7 @@ fn fold_with_scalar_and_last_instruction() {
         "#;
     let instruction = parse(&source_code);
     let expected = fold_scalar_variable(
-        ScalarWithLambda::new("iterable", None, 15.into()),
+        Scalar::new("iterable", 15.into()),
         Scalar::new("i", 24.into()),
         null(),
         Some(null()),
@@ -309,8 +309,8 @@ fn fold_json_path() {
     "#;
 
     let instruction = parse(source_code);
-    let expected = fold_scalar_variable(
-        ScalarWithLambda::from_value_path(
+    let expected = fold_scalar_variable_wl(
+        ScalarWithLambda::from_raw_lambda(
             "members",
             vec![ValueAccessor::ArrayAccess { idx: 123321 }],
             33.into(),
@@ -405,8 +405,8 @@ fn comments() {
         ;;; comme;?!.$.  nt[][][][()()()null;$::!
     "#;
     let instruction = parse(source_code);
-    let expected = fold_scalar_variable(
-        ScalarWithLambda::from_value_path(
+    let expected = fold_scalar_variable_wl(
+        ScalarWithLambda::from_raw_lambda(
             "members",
             vec![
                 ValueAccessor::FieldAccessByName {
@@ -436,7 +436,7 @@ fn parse_fold_with_xor_par_seq() {
         let instruction = parse(&source_code);
         let instr = binary_instruction(*name);
         let expected = fold_scalar_variable(
-            ScalarWithLambda::new("iterable", None, 6.into()),
+            Scalar::new("iterable", 6.into()),
             Scalar::new("i", 15.into()),
             instr(null(), null()),
             None,

@@ -15,24 +15,60 @@
  */
 
 use super::{Call, Sexp};
-use crate::{asserts::ServiceDefinition, ephemeral::PeerId};
+use crate::ephemeral::Network;
 
-use std::collections::{HashMap, HashSet};
-use std::fmt::Write;
+use std::{fmt::Write, ops::Deref, rc::Rc, str::FromStr};
 
-#[derive(Debug, Default)]
-pub(crate) struct Transformer {
-    cnt: u32,
-    pub(crate) results: HashMap<u32, ServiceDefinition>,
-    pub(crate) peers: HashSet<PeerId>,
+/// Transformed script represents transformed script's services' state within the network.
+/// Executions that use the same transformed script share same generated services' state.
+/// This struct is cheap to clone, and cloned copies share same internal state.
+#[derive(Clone)]
+pub struct TransformedAirScript {
+    network: Rc<Network>,
+    tranformed: Rc<str>,
 }
 
-impl Transformer {
-    pub(crate) fn new() -> Self {
-        Default::default()
+impl TransformedAirScript {
+    pub fn new(annotated_air_script: &str, network: Rc<Network>) -> Result<Self, String> {
+        // validate the AIR script with the standard parser first
+        air_parser::parse(annotated_air_script)?;
+
+        Self::new_unvalidated(annotated_air_script, network)
     }
 
-    pub(crate) fn transform(&mut self, sexp: &mut Sexp) {
+    pub(crate) fn new_unvalidated(
+        annotated_air_script: &str,
+        network: Rc<Network>,
+    ) -> Result<Self, String> {
+        let transformer = Transformer { network: &network };
+        let mut sexp = Sexp::from_str(annotated_air_script)?;
+        transformer.transform(&mut sexp);
+
+        Ok(Self {
+            network,
+            tranformed: Rc::from(sexp.to_string().as_str()),
+        })
+    }
+
+    pub(crate) fn get_network(&self) -> Rc<Network> {
+        self.network.clone()
+    }
+}
+
+impl Deref for TransformedAirScript {
+    type Target = str;
+
+    fn deref(&self) -> &Self::Target {
+        &self.tranformed
+    }
+}
+
+struct Transformer<'net> {
+    network: &'net Rc<Network>,
+}
+
+impl Transformer<'_> {
+    pub(crate) fn transform(&self, sexp: &mut Sexp) {
         match sexp {
             Sexp::Call(call) => self.handle_call(call),
             Sexp::List(children) => {
@@ -44,18 +80,17 @@ impl Transformer {
         }
     }
 
-    fn handle_call(&mut self, call: &mut Call) {
+    fn handle_call(&self, call: &mut Call) {
         // collect peers...
         if let Sexp::String(peer_id) = &call.triplet.0 {
-            self.peers.insert(peer_id.clone().into());
+            self.network.ensure_peer(peer_id.clone());
         }
+
+        let result_store = self.network.get_services().get_result_store();
 
         if let Some(service) = &call.service_desc {
             // install a value
-            let call_id = self.cnt;
-            self.cnt += 1;
-
-            self.results.insert(call_id, service.clone());
+            let call_id = result_store.insert(service.clone()).unwrap();
 
             match &mut call.triplet.1 {
                 Sexp::String(ref mut value) => {
@@ -70,56 +105,64 @@ impl Transformer {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::{iter::FromIterator, str::FromStr};
+    use crate::{asserts::ServiceDefinition, ephemeral::PeerId, services::results::ResultStore};
+
+    use std::{
+        collections::{HashMap, HashSet},
+        iter::FromIterator,
+    };
+
+    impl ResultStore {
+        pub fn into_inner(self) -> HashMap<usize, ServiceDefinition> {
+            self.results.into_inner()
+        }
+    }
 
     #[test]
     fn test_translate_null() {
-        let mut tree = Sexp::from_str("(null)").unwrap();
-        let mut transformer = Transformer::new();
-        transformer.transform(&mut tree);
-        assert_eq!(tree.to_string(), "(null)");
+        let network = Network::empty();
+        let transformed = TransformedAirScript::new("(null)", network).unwrap();
+        assert_eq!(&*transformed, "(null)");
     }
 
     #[test]
     fn test_translate_call_no_result() {
+        let network = Network::empty();
         let script = r#"(call peer_id ("service_id" func) [])"#;
-        let mut tree = Sexp::from_str(script).unwrap();
-        let mut transformer = Transformer::new();
-        transformer.transform(&mut tree);
-        assert_eq!(tree.to_string(), script);
+        let transformed = TransformedAirScript::new_unvalidated(script, network).unwrap();
+        assert_eq!(&*transformed, script);
     }
 
     #[test]
     #[should_panic]
     fn test_translate_call_no_string() {
-        // TODO rewrite to Result instead of panic?
+        let network = Network::empty();
         let script = r#"(call "peer_id" (service_id func) [])"#;
-        let mut tree = Sexp::from_str(script).unwrap();
-        let mut transformer = Transformer::new();
-        transformer.transform(&mut tree);
-        assert_eq!(tree.to_string(), script);
+        let transformed = TransformedAirScript::new(script, network);
+        assert_eq!(transformed.as_deref(), Ok(script));
     }
 
     #[test]
     fn test_translate_call_result() {
+        let network = Network::empty();
         let script = r#"(call "peer_id" ("service_id" func) []) ; ok = 42"#;
-        let mut tree = Sexp::from_str(script).unwrap();
-        let mut transformer = Transformer::new();
-        transformer.transform(&mut tree);
+        let transformer = TransformedAirScript::new_unvalidated(script, network.clone()).unwrap();
         assert_eq!(
-            tree.to_string(),
+            &*transformer,
             r#"(call "peer_id" ("service_id..0" func) [])"#
         );
 
         assert_eq!(
-            transformer.results,
+            Rc::deref(&network.get_services().get_result_store())
+                .clone()
+                .into_inner(),
             maplit::hashmap! {
-                0u32 => ServiceDefinition::Ok(serde_json::json!(42)),
+                0usize => ServiceDefinition::Ok(serde_json::json!(42)),
             }
         );
 
         assert_eq!(
-            transformer.peers.into_iter().collect::<Vec<_>>(),
+            network.get_peers().collect::<Vec<_>>(),
             vec![PeerId::new("peer_id")],
         );
     }
@@ -133,11 +176,10 @@ mod tests {
       (call peer_id ("service_id" func) [1]) ; ok=true
 ))"#;
 
-        let mut tree = Sexp::from_str(script).unwrap();
-        let mut transformer = Transformer::new();
-        transformer.transform(&mut tree);
+        let network = Network::empty();
+        let transformed = TransformedAirScript::new_unvalidated(script, network.clone()).unwrap();
         assert_eq!(
-            tree.to_string(),
+            &*transformed,
             concat!(
                 "(seq ",
                 r#"(call peer_id ("service_id..0" func) [a 11])"#,
@@ -150,14 +192,16 @@ mod tests {
         );
 
         assert_eq!(
-            transformer.results,
+            (*network.get_services().get_result_store())
+                .clone()
+                .into_inner(),
             maplit::hashmap! {
-                0u32 => ServiceDefinition::Ok(serde_json::json!({"test":"me"})),
+                0usize => ServiceDefinition::Ok(serde_json::json!({"test":"me"})),
                 1 => ServiceDefinition::Ok(serde_json::json!(true)),
             }
         );
 
-        assert!(transformer.peers.is_empty());
+        assert!(network.get_peers().collect::<Vec<_>>().is_empty());
     }
 
     #[test]
@@ -171,12 +215,11 @@ mod tests {
       (call peer_id3 ("service_id" func) [b])
 ))"#;
 
-        let mut tree = Sexp::from_str(script).unwrap();
-        let mut transformer = Transformer::new();
-        transformer.transform(&mut tree);
+        let network = Network::empty();
+        let _ = TransformedAirScript::new_unvalidated(script, network.clone());
 
         assert_eq!(
-            transformer.peers,
+            network.get_peers().collect::<HashSet<_>>(),
             HashSet::from_iter(vec![PeerId::new("peer_id1"), PeerId::new("peer_id2")]),
         )
     }

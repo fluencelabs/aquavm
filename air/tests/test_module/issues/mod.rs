@@ -34,3 +34,5 @@ mod issue_306;
 mod issue_331;
 mod issue_346;
 mod issue_348;
+mod issue_356;
+mod issue_363;

@@ -18,8 +18,9 @@ mod impls;
 mod traits;
 
 use super::*;
-use air_lambda_ast::LambdaAST;
+
 use serde::Serialize;
+
 use std::rc::Rc;
 
 // TODO: sort instruction in alphanumeric order
@@ -48,7 +49,7 @@ pub enum Instruction<'i> {
 #[derive(Serialize, Debug, PartialEq)]
 pub struct Call<'i> {
     pub triplet: Triplet<'i>,
-    pub args: Rc<Vec<Value<'i>>>,
+    pub args: Rc<Vec<ImmutableValue<'i>>>,
     pub output: CallOutputValue<'i>,
 }
 
@@ -62,7 +63,7 @@ pub struct Ap<'i> {
 /// (canon peer_id $stream #canon_stream)
 #[derive(Serialize, Debug, PartialEq, Eq)]
 pub struct Canon<'i> {
-    pub peer_pk: CallInstrValue<'i>,
+    pub peer_id: ResolvableToPeerIdVariable<'i>,
     pub stream: Stream<'i>,
     pub canon_stream: CanonStream<'i>,
 }
@@ -82,32 +83,31 @@ pub struct Xor<'i>(pub Box<Instruction<'i>>, pub Box<Instruction<'i>>);
 /// (match left_value right_value instruction)
 #[derive(Serialize, Debug, PartialEq)]
 pub struct Match<'i> {
-    pub left_value: Value<'i>,
-    pub right_value: Value<'i>,
+    pub left_value: ImmutableValue<'i>,
+    pub right_value: ImmutableValue<'i>,
     pub instruction: Box<Instruction<'i>>,
 }
 
 /// (mismatch left_value right_value instruction)
 #[derive(Serialize, Debug, PartialEq)]
 pub struct MisMatch<'i> {
-    pub left_value: Value<'i>,
-    pub right_value: Value<'i>,
+    pub left_value: ImmutableValue<'i>,
+    pub right_value: ImmutableValue<'i>,
     pub instruction: Box<Instruction<'i>>,
 }
 
 /// (fail 1337 "error message")
 /// (fail %last_error%)
+/// (fail value)
 #[derive(Serialize, Debug, PartialEq, Eq)]
 pub enum Fail<'i> {
-    Scalar(ScalarWithLambda<'i>),
+    Scalar(Scalar<'i>),
+    ScalarWithLambda(ScalarWithLambda<'i>),
     Literal {
         ret_code: i64,
         error_message: &'i str,
     },
-    CanonStream {
-        name: &'i str,
-        lambda: LambdaAST<'i>,
-    },
+    CanonStreamWithLambda(CanonStreamWithLambda<'i>),
     LastError,
 }
 

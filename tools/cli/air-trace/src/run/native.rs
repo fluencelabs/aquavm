@@ -18,9 +18,7 @@ use super::runner::AirRunner;
 use air_interpreter_interface::RunParameters;
 use avm_interface::raw_outcome::RawAVMOutcome;
 
-struct NativeAvmRunner {
-    current_peer_id: String,
-}
+struct NativeAvmRunner {}
 
 impl AirRunner for NativeAvmRunner {
     fn call_tracing(
@@ -31,6 +29,7 @@ impl AirRunner for NativeAvmRunner {
         init_peer_id: String,
         timestamp: u64,
         ttl: u32,
+        current_peer_id: String,
         call_results: avm_interface::CallResults,
         // We use externally configured logger.
         _tracing_params: String,
@@ -48,7 +47,7 @@ impl AirRunner for NativeAvmRunner {
             data,
             RunParameters {
                 init_peer_id,
-                current_peer_id: self.current_peer_id.clone(),
+                current_peer_id,
                 timestamp,
                 ttl,
             },
@@ -60,10 +59,6 @@ impl AirRunner for NativeAvmRunner {
     }
 }
 
-pub(crate) fn create_native_avm_runner(
-    current_peer_id: impl Into<String>,
-) -> anyhow::Result<Box<dyn AirRunner>> {
-    Ok(Box::new(NativeAvmRunner {
-        current_peer_id: current_peer_id.into(),
-    }))
+pub(crate) fn create_native_avm_runner() -> anyhow::Result<Box<dyn AirRunner>> {
+    Ok(Box::new(NativeAvmRunner {}))
 }

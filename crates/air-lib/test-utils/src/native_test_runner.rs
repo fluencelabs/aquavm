@@ -38,11 +38,15 @@ impl AirRunner for NativeAirRunner {
         init_peer_id: impl Into<String>,
         timestamp: u64,
         ttl: u32,
+        override_current_peer_id: Option<String>,
         call_results: avm_server::CallResults,
     ) -> Result<RawAVMOutcome, Box<dyn std::error::Error>> {
         // some inner parts transformations
         let raw_call_results = into_raw_result(call_results);
         let raw_call_results = serde_json::to_vec(&raw_call_results).unwrap();
+
+        let current_peer_id =
+            override_current_peer_id.unwrap_or_else(|| self.current_peer_id.clone());
 
         let outcome = air::execute_air(
             air.into(),
@@ -50,7 +54,7 @@ impl AirRunner for NativeAirRunner {
             data.into(),
             RunParameters {
                 init_peer_id: init_peer_id.into(),
-                current_peer_id: self.current_peer_id.clone(),
+                current_peer_id,
                 timestamp,
                 ttl,
             },

@@ -1,13 +1,12 @@
 [package]
 name = "avm-server"
 description = "Fluence AIR VM"
-version = "0.26.1"
+version = "0.27.0"
 authors = ["Fluence Labs"]
 edition = "2018"
 license = "Apache-2.0"
 documentation = "https://docs.rs/avm-server"
 repository = "https://github.com/fluencelabs/aquavm/tree/master/avm/server"
-publish = true # this crate is used by the node
 keywords = ["fluence", "air", "webassembly", "programming-language"]
 categories = ["wasm"]
 
@@ -16,18 +15,18 @@ name = "avm_server"
 path = "src/lib.rs"
 
 [dependencies]
-air-interpreter-interface = { version = "0.11.1", path = "../../crates/air-lib/interpreter-interface" }
+air-interpreter-interface = { version = "0.11.2", path = "../../crates/air-lib/interpreter-interface" }
 air-utils = { version = "0.1.0", path = "../../crates/air-lib/utils" }
 avm-data-store = { version = "0.4.1", path = "../../crates/data-store" }
-marine-runtime = "0.23.0"
+marine-runtime = "0.23.1"
 polyplets = { version = "0.3.2", path = "../../crates/air-lib/polyplets" }
-avm-interface = { version = "0.26.1", path = "../../avm/interface" }
+avm-interface = { version = "0.27.0", path = "../../avm/interface" }
 
 eyre = "0.6.8"
-thiserror = "1.0.35"
+thiserror = "1.0.37"
 maplit = "1.0.2"
-serde_json = "1.0.85"
-serde = "1.0.144"
+serde_json = "1.0.89"
+serde = "1.0.147"
 log = "0.4.17"
 parking_lot = "0.12.1"
-tracing = "0.1.36"
+tracing = "0.1.37"

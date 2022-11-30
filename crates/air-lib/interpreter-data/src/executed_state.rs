@@ -128,8 +128,7 @@ pub struct ApResult {
 #[derive(Debug, Default, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct CanonResult {
-    #[serde(rename = "ids")]
-    pub stream_elements_pos: Vec<TracePos>,
+    pub canonicalized_element: JValue,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

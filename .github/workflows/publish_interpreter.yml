@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
@@ -69,6 +69,7 @@ jobs:
 
           echo "FINAL_VERSION=$MAX_VERSION" | tee -a $GITHUB_ENV
           echo "JS_PKG_NAME=$JS_PKG_NAME" | tee -a $GITHUB_ENV
+          echo "RS_PKG_NAME=$RS_PKG_NAME" | tee -a $GITHUB_ENV
 
       - name: Install marine
         run: cargo install marine
@@ -112,7 +113,7 @@ jobs:
           release_name: AIR interpreter ${{ env.FINAL_VERSION }}
           body: |
             - [${{ env.FINAL_VERSION }} @ NPM registry](https://www.npmjs.com/package/${{ env.JS_PKG_NAME }}/v/${{ env.FINAL_VERSION }})
-            - [${{ env.FINAL_VERSION }} @ crates.io](https://crates.io/crates/${{ env.PKG_NAME }}/${{ env.FINAL_VERSION }})
+            - [${{ env.FINAL_VERSION }} @ crates.io](https://crates.io/crates/${{ env.RS_PKG_NAME }}/${{ env.FINAL_VERSION }})
           draft: false
           prerelease: false
 
@@ -132,7 +133,7 @@ jobs:
         working-directory: avm/client
 
       - name: Setup node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
           node-version: "14"
           registry-url: "https://registry.npmjs.org"

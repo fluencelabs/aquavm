@@ -31,9 +31,6 @@ use std::path::{Path, PathBuf};
 #[derive(Parser, Debug)]
 #[clap(about = "Run AIR script with AquaVM")]
 pub(crate) struct Args {
-    #[clap(long)]
-    current_peer_id: Option<String>,
-
     #[clap(long = "call-results")]
     call_results_path: Option<PathBuf>,
 
@@ -82,13 +79,7 @@ pub(crate) fn run(args: Args) -> anyhow::Result<()> {
     let global_tracing_params = args.tracing_params.clone();
     init_tracing(global_tracing_params, tracing_json);
 
-    let current_peer_id = args.current_peer_id.as_deref().unwrap_or("some_id");
-    let mut runner = get_runner(
-        args.native,
-        current_peer_id,
-        &args.air_interpreter_path,
-        args.max_heap_size,
-    )?;
+    let mut runner = get_runner(args.native, &args.air_interpreter_path, args.max_heap_size)?;
 
     let execution_data = match &args.source {
         Source::Anomaly(anomaly) => data::anomaly::load(anomaly)?,
@@ -108,6 +99,7 @@ pub(crate) fn run(args: Args) -> anyhow::Result<()> {
                 particle.init_peer_id.clone().into_owned(),
                 particle.timestamp,
                 particle.ttl,
+                particle.current_peer_id.clone().into(),
                 call_results.clone(),
                 args.tracing_params.clone(),
                 tracing_json,
@@ -124,20 +116,14 @@ pub(crate) fn run(args: Args) -> anyhow::Result<()> {
 #[cfg(feature = "wasm")]
 fn get_runner(
     native: bool,
-    current_peer_id: impl Into<String>,
     air_interpreter_wasm_path: &Path,
     max_heap_size: Option<u64>,
 ) -> anyhow::Result<Box<dyn AirRunner>> {
     if native {
-        self::native::create_native_avm_runner(current_peer_id)
-            .context("Failed to instantiate a native AVM")
+        self::native::create_native_avm_runner().context("Failed to instantiate a native AVM")
     } else {
-        self::wasm::create_wasm_avm_runner(
-            current_peer_id,
-            air_interpreter_wasm_path,
-            max_heap_size,
-        )
-        .context("Failed to instantiate WASM AVM")
+        self::wasm::create_wasm_avm_runner(air_interpreter_wasm_path, max_heap_size)
+            .context("Failed to instantiate WASM AVM")
     }
 }
 

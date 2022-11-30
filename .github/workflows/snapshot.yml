@@ -2,13 +2,24 @@ name: Publish snapshots
 
 on:
   workflow_call:
+    inputs:
+      ref:
+        description: "GitHub ref to checkout to"
+        type: string
+        default: "master"
+      cargo-dependencies:
+        description: "Cargo dependencies map"
+        type: string
     outputs:
+      cargo-version:
+        description: "Cargo snapshot version"
+        value: ${{ jobs.cargo-snapshot.outputs.version }}
       avm-version:
         description: "@fluencelabs/avm version"
         value: ${{ jobs.publish-avm.outputs.version }}
-      air-interpreter-wasm-version:
-        description: "air-interpreter-wasm version"
-        value: ${{ jobs.publish-interpreter.outputs.version }}
+      air-beautify-wasm-version:
+        description: "air-beautify-wasm version"
+        value: ${{ jobs.publish-beautify.outputs.version }}
 
 env:
   FORCE_COLOR: true
@@ -21,12 +32,15 @@ jobs:
     steps:
       - name: Checkout AquaVM
         uses: actions/checkout@v3
+        with:
+          repository: fluencelabs/aquavm
+          ref: ${{ inputs.ref }}
 
       - name: Setup Rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
 
       - name: Install marine
-        uses: baptiste0928/cargo-install@v1
+        uses: baptiste0928/cargo-install@v1.3.0
         with:
           crate: marine
 
@@ -40,23 +54,89 @@ jobs:
           name: air-interpreter-wasm
           path: target/wasm32-wasi/release/air_interpreter_server.wasm
 
-  publish-avm:
-    name: "Publish avm snapshot"
+  cargo-snapshot:
+    name: "Publish cargo snapshots"
     runs-on: ubuntu-latest
 
     needs: wasm
 
     outputs:
-      version: "${{ steps.build.outputs.version }}"
+      version: "${{ steps.snapshot.outputs.version }}"
 
     permissions:
       contents: read
-      pull-requests: write
       id-token: write
 
     steps:
       - name: Checkout AquaVM
         uses: actions/checkout@v3
+        with:
+          repository: fluencelabs/aquavm
+          ref: ${{ inputs.ref }}
+
+      - name: Import secrets
+        uses: hashicorp/vault-action@v2.4.3
+        with:
+          url: https://vault.fluence.dev
+          path: jwt/github
+          role: ci
+          method: jwt
+          jwtGithubAudience: "https://github.com/fluencelabs"
+          jwtTtl: 300
+          exportToken: false
+          secrets: |
+            kv/cargo-registry/users/ci token | CARGO_REGISTRIES_FLUENCE_TOKEN
+
+      - name: Setup Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Set dependencies
+        if: inputs.cargo-dependencies != ''
+        uses: fluencelabs/github-actions/cargo-set-dependency@main
+        with:
+          dependencies: ${{ inputs.cargo-dependencies }}
+
+      - name: Download air-interpreter-wasm binary
+        uses: actions/download-artifact@v3
+        with:
+          name: air-interpreter-wasm
+
+      - name: Move air_interpreter_server.wasm
+        run: mv air_interpreter_server.wasm crates/interpreter-wasm/
+
+      - name: Add air-interpreter-wasm to workspace
+        run: |
+          sed -i '/members/a "crates/interpreter-wasm",' Cargo.toml
+
+      - name: Generate snapshot version
+        id: version
+        uses: fluencelabs/github-actions/generate-snapshot-id@main
+
+      - name: Publish crate snapshots
+        id: snapshot
+        uses: fluencelabs/github-actions/cargo-publish-snapshot@main
+        with:
+          id: ${{ steps.version.outputs.id }}
+
+  publish-avm:
+    name: "Publish @fluencelabs/avm snapshot"
+    runs-on: ubuntu-latest
+
+    needs: wasm
+
+    outputs:
+      version: "${{ steps.snapshot.outputs.version }}"
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout AquaVM
+        uses: actions/checkout@v3
+        with:
+          repository: fluencelabs/aquavm
+          ref: ${{ inputs.ref }}
 
       - name: Download air-interpreter-wasm binary
         uses: actions/download-artifact@v3
@@ -68,7 +148,7 @@ jobs:
         working-directory: avm/client/dist
 
       - name: Import secrets
-        uses: hashicorp/vault-action@v2.4.2
+        uses: hashicorp/vault-action@v2.4.3
         with:
           url: https://vault.fluence.dev
           path: jwt/github
@@ -94,82 +174,37 @@ jobs:
       - run: npm run build
         working-directory: avm/client
 
-      - name: Generate package version
+      - name: Generate snapshot version
         id: version
-        run: |
-          SHA=${{ github.event.pull_request.head.sha }}
-          echo "::set-output name=sha::${SHA::7}"
-          echo "::set-output name=branch::${GITHUB_HEAD_REF//[^a-zA-Z0-9-]/-}"
+        uses: fluencelabs/github-actions/generate-snapshot-id@main
 
-      - name: Set package version
-        id: build
-        env:
-          BRANCH: ${{ steps.version.outputs.branch }}
-          SHA: ${{ steps.version.outputs.sha }}
-          RUN: ${{ github.run_number }}
-          ATTEMPT: ${{ github.run_attempt }}
-        working-directory: avm/client
-        run: |
-          echo "::set-output name=version::$(\
-                npm version prerelease \
-                --no-git-tag-version \
-                --preid ${{ env.BRANCH }}-${{ env.SHA }}-${{ env.RUN }}-${{ env.ATTEMPT }})"
-
-      - name: Publish to self-hosted npm repo
-        working-directory: avm/client
-        run: npm publish --tag snapshot --registry https://npm.fluence.dev
-
-      - name: Find comment in PR
-        uses: peter-evans/find-comment@v1
-        id: comment
+      - name: Publish snapshot
+        id: snapshot
+        uses: fluencelabs/github-actions/npm-publish-snapshot@main
         with:
-          issue-number: "${{ github.event.pull_request.number }}"
-          comment-author: github-actions[bot]
-          body-includes: "## AVM version is"
+          working-directory: avm/client
+          id: ${{ steps.version.outputs.id }}
 
-      - name: Update comment in PR
-        uses: peter-evans/create-or-update-comment@v1
-        env:
-          AVM_VERSION: ${{ steps.build.outputs.version }}
-        with:
-          comment-id: "${{ steps.comment.outputs.comment-id }}"
-          issue-number: "${{ github.event.pull_request.number }}"
-          edit-mode: replace
-          body: |
-            ## AVM version is [${{ env.AVM_VERSION }}](https://npm.fluence.dev/-/web/detail/@fluencelabs/avm/v/${{ env.AVM_VERSION }})
-            To install it run:
-            ```shell
-            npm login --registry https://npm.fluence.dev
-            npm i @fluencelabs/avm@${{ env.AVM_VERSION }} --registry=https://npm.fluence.dev
-            ```
-
-  publish-interpreter:
-    name: "Publish air-interpreter-wasm snapshot"
-    runs-on: ubuntu-latest
-
-    needs: wasm
+  publish-air-beautify:
+    name: "Publish air-beautify-wasm snapshot"
+    runs-on: builder
 
     outputs:
-      version: "${{ steps.build.outputs.version }}"
+      version: "${{ steps.snapshot.outputs.version }}"
 
     permissions:
       contents: read
-      pull-requests: write
       id-token: write
 
     steps:
-      - name: Checkout AquaVM
+      - name: Checkout aquavm
         uses: actions/checkout@v3
-
-      - name: Download air-interpreter-wasm binary
-        uses: actions/download-artifact@v3
         with:
-          name: air-interpreter-wasm
-
-      - run: mv air_interpreter_server.wasm crates/interpreter-wasm/
+          repository: fluencelabs/aquavm
+          ref: ${{ inputs.ref }}
 
       - name: Import secrets
-        uses: hashicorp/vault-action@v2.4.2
+        uses: hashicorp/vault-action@v2.4.3
         with:
           url: https://vault.fluence.dev
           path: jwt/github
@@ -179,60 +214,33 @@ jobs:
           jwtTtl: 300
           exportToken: false
           secrets: |
-            kv/cargo-registry/users/ci token | CARGO_REGISTRIES_FLUENCE_TOKEN
+            kv/npm-registry/basicauth/ci token | NODE_AUTH_TOKEN
 
       - name: Setup Rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
 
-      - name: Install cargo-edit
-        uses: baptiste0928/cargo-install@v1
-        with:
-          crate: cargo-edit
+      - name: Setup wasm-pack
+        uses: jetli/wasm-pack-action@v0.4.0
 
-      - name: Generate package version
+      - name: Setup node with self-hosted npm registry
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16"
+          registry-url: "https://npm.fluence.dev"
+
+      - name: Build air-beautify-wasm
+        run: |
+          rm -rf pack
+          wasm-pack build --release
+        working-directory: tools/wasm/air-beautify-wasm
+
+      - name: Generate snapshot version
         id: version
-        run: |
-          SHA=${{ github.event.pull_request.head.sha }}
-          echo "::set-output name=sha::${SHA::7}"
-          echo "::set-output name=branch::${GITHUB_HEAD_REF//[^a-zA-Z0-9-]/-}"
+        uses: fluencelabs/github-actions/generate-snapshot-id@main
 
-      - name: Set package version
-        id: build
-        env:
-          BRANCH: ${{ steps.version.outputs.branch }}
-          SHA: ${{ steps.version.outputs.sha }}
-          RUN: ${{ github.run_number }}
-          ATTEMPT: ${{ github.run_attempt }}
-        working-directory: crates/interpreter-wasm
-        run: |
-          cargo set-version --bump alpha
-          cargo set-version "$(cargo read-manifest | jq -r .version)-${{ env.BRANCH }}-${{ env.SHA }}-${{ env.RUN }}-${{ env.ATTEMPT }}"
-
-          echo "::set-output name=version::$(cargo read-manifest | jq -r .version)"
-
-      - name: Publish to self-hosted cargo registry
-        working-directory: crates/interpreter-wasm
-        run: cargo publish --registry fluence --allow-dirty
-
-      - name: Find comment in PR
-        uses: peter-evans/find-comment@v1
-        id: comment
+      - name: Publish snapshot
+        id: snapshot
+        uses: fluencelabs/github-actions/npm-publish-snapshot@main
         with:
-          issue-number: "${{ github.event.pull_request.number }}"
-          comment-author: github-actions[bot]
-          body-includes: "## air-interpreter-wasm version is"
-
-      - name: Update comment in PR
-        uses: peter-evans/create-or-update-comment@v1
-        env:
-          VERSION: ${{ steps.build.outputs.version }}
-        with:
-          comment-id: "${{ steps.comment.outputs.comment-id }}"
-          issue-number: "${{ github.event.pull_request.number }}"
-          edit-mode: replace
-          body: |
-            ## air-interpreter-wasm version is [${{ env.VERSION }}](https://crates.fluence.dev/#/crate?name=air-interpreter-wasm&version=${{ env.VERSION }})
-            To install it run:
-            ```shell
-            cargo add air-interpreter-wasm@${{ env.VERSION }} --registry fluence
-            ```
+          working-directory: tools/wasm/air-beautify-wasm/pkg
+          id: ${{ steps.version.outputs.id }}

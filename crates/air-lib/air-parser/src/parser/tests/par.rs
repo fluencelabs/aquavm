@@ -32,16 +32,16 @@ fn parse_seq() {
     let instruction = parse(source_code);
     let expected = par(
         call(
-            CallInstrValue::Literal(""),
-            CallInstrValue::Literal(""),
-            CallInstrValue::Literal(""),
+            ResolvableToPeerIdVariable::Literal(""),
+            ResolvableToStringVariable::Literal(""),
+            ResolvableToStringVariable::Literal(""),
             Rc::new(vec![]),
             CallOutputValue::None,
         ),
         call(
-            CallInstrValue::Literal(""),
-            CallInstrValue::Literal(""),
-            CallInstrValue::Literal(""),
+            ResolvableToPeerIdVariable::Literal(""),
+            ResolvableToStringVariable::Literal(""),
+            ResolvableToStringVariable::Literal(""),
             Rc::new(vec![]),
             CallOutputValue::None,
         ),
@@ -64,24 +64,24 @@ fn parse_par_par() {
     let expected = par(
         par(
             call(
-                CallInstrValue::Literal(""),
-                CallInstrValue::Literal(""),
-                CallInstrValue::Literal(""),
+                ResolvableToPeerIdVariable::Literal(""),
+                ResolvableToStringVariable::Literal(""),
+                ResolvableToStringVariable::Literal(""),
                 Rc::new(vec![]),
                 CallOutputValue::None,
             ),
             call(
-                CallInstrValue::Literal(""),
-                CallInstrValue::Literal(""),
-                CallInstrValue::Literal(""),
+                ResolvableToPeerIdVariable::Literal(""),
+                ResolvableToStringVariable::Literal(""),
+                ResolvableToStringVariable::Literal(""),
                 Rc::new(vec![]),
                 CallOutputValue::None,
             ),
         ),
         call(
-            CallInstrValue::Literal(""),
-            CallInstrValue::Literal(""),
-            CallInstrValue::Literal(""),
+            ResolvableToPeerIdVariable::Literal(""),
+            ResolvableToStringVariable::Literal(""),
+            ResolvableToStringVariable::Literal(""),
             Rc::new(vec![]),
             CallOutputValue::None,
         ),

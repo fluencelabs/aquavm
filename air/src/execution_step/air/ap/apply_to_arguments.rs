@@ -38,7 +38,9 @@ pub(super) fn apply_to_arg(
         Boolean(value) => apply_const(*value, exec_ctx, trace_ctx),
         EmptyArray => apply_const(serde_json::json!([]), exec_ctx, trace_ctx),
         Scalar(scalar) => apply_scalar(scalar, exec_ctx, trace_ctx, should_touch_trace)?,
+        ScalarWithLambda(scalar) => apply_scalar_wl(scalar, exec_ctx, trace_ctx)?,
         CanonStream(canon_stream) => apply_canon_stream(canon_stream, exec_ctx, trace_ctx)?,
+        CanonStreamWithLambda(canon_stream) => apply_canon_stream_wl(canon_stream, exec_ctx, trace_ctx)?,
     };
 
     Ok(result)
@@ -67,27 +69,14 @@ fn apply_last_error<'i>(
 }
 
 fn apply_scalar(
-    scalar: &ast::ScalarWithLambda<'_>,
-    exec_ctx: &ExecutionCtx<'_>,
-    trace_ctx: &TraceHandler,
-    should_touch_trace: bool,
-) -> ExecutionResult<ValueAggregate> {
-    // TODO: refactor this code after boxed value
-    match &scalar.lambda {
-        Some(lambda) => apply_scalar_wl_impl(scalar.name, lambda, exec_ctx, trace_ctx),
-        None => apply_scalar_impl(scalar.name, exec_ctx, trace_ctx, should_touch_trace),
-    }
-}
-
-fn apply_scalar_impl(
-    scalar_name: &str,
+    ast_scalar: &ast::Scalar<'_>,
     exec_ctx: &ExecutionCtx<'_>,
     trace_ctx: &TraceHandler,
     should_touch_trace: bool,
 ) -> ExecutionResult<ValueAggregate> {
     use crate::execution_step::ScalarRef;
 
-    let scalar = exec_ctx.scalars.get_value(scalar_name)?;
+    let scalar = exec_ctx.scalars.get_value(ast_scalar.name)?;
 
     let mut result = match scalar {
         ScalarRef::Value(result) => result.clone(),
@@ -104,14 +93,13 @@ fn apply_scalar_impl(
     Ok(result)
 }
 
-fn apply_scalar_wl_impl(
-    scalar_name: &str,
-    lambda: &LambdaAST<'_>,
+fn apply_scalar_wl(
+    ast_scalar: &ast::ScalarWithLambda<'_>,
     exec_ctx: &ExecutionCtx<'_>,
     trace_ctx: &TraceHandler,
 ) -> ExecutionResult<ValueAggregate> {
-    let variable = Variable::scalar(scalar_name);
-    let (jvalue, tetraplet) = apply_lambda(variable, lambda, exec_ctx)?;
+    let variable = Variable::scalar(ast_scalar.name);
+    let (jvalue, tetraplet) = apply_lambda(variable, &ast_scalar.lambda, exec_ctx)?;
     let tetraplet = Rc::new(tetraplet);
     let result = ValueAggregate::new(Rc::new(jvalue), tetraplet, trace_ctx.trace_pos());
 
@@ -119,45 +107,32 @@ fn apply_scalar_wl_impl(
 }
 
 fn apply_canon_stream(
-    canon_stream: &ast::CanonStreamWithLambda<'_>,
-    exec_ctx: &ExecutionCtx<'_>,
-    trace_ctx: &TraceHandler,
-) -> ExecutionResult<ValueAggregate> {
-    match &canon_stream.lambda {
-        Some(lambda) => apply_canon_stream_with_lambda(canon_stream.name, lambda, exec_ctx, trace_ctx),
-        None => apply_canon_stream_without_lambda(canon_stream.name, exec_ctx, trace_ctx),
-    }
-}
-
-fn apply_canon_stream_with_lambda(
-    stream_name: &str,
-    lambda: &LambdaAST<'_>,
+    ast_stream: &ast::CanonStream<'_>,
     exec_ctx: &ExecutionCtx<'_>,
     trace_ctx: &TraceHandler,
 ) -> ExecutionResult<ValueAggregate> {
     // TODO: refactor this code after boxed value
     use crate::execution_step::boxed_value::JValuable;
 
-    let canon_stream = exec_ctx.scalars.get_canon_stream(stream_name)?;
-    let (result, tetraplet) = JValuable::apply_lambda_with_tetraplets(&canon_stream, lambda, exec_ctx)?;
-    let position = trace_ctx.trace_pos();
-
-    let value = ValueAggregate::new(Rc::new(result.into_owned()), Rc::new(tetraplet), position);
-    Ok(value)
-}
-
-fn apply_canon_stream_without_lambda(
-    stream_name: &str,
-    exec_ctx: &ExecutionCtx<'_>,
-    trace_ctx: &TraceHandler,
-) -> ExecutionResult<ValueAggregate> {
-    use crate::execution_step::boxed_value::JValuable;
-
-    let canon_stream = exec_ctx.scalars.get_canon_stream(stream_name)?;
-    // TODO: refactor this code after boxed value
+    let canon_stream = exec_ctx.scalars.get_canon_stream(ast_stream.name)?;
     let value = JValuable::as_jvalue(&canon_stream).into_owned();
     let tetraplet = canon_stream.tetraplet().clone();
     let position = trace_ctx.trace_pos();
     let value = ValueAggregate::new(Rc::new(value), tetraplet, position);
+    Ok(value)
+}
+
+fn apply_canon_stream_wl(
+    ast_stream: &ast::CanonStreamWithLambda<'_>,
+    exec_ctx: &ExecutionCtx<'_>,
+    trace_ctx: &TraceHandler,
+) -> ExecutionResult<ValueAggregate> {
+    // TODO: refactor this code after boxed value
+    use crate::execution_step::boxed_value::JValuable;
+
+    let canon_stream = exec_ctx.scalars.get_canon_stream(ast_stream.name)?;
+    let (result, tetraplet) = JValuable::apply_lambda_with_tetraplets(&canon_stream, &ast_stream.lambda, exec_ctx)?;
+    let position = trace_ctx.trace_pos();
+    let value = ValueAggregate::new(Rc::new(result.into_owned()), Rc::new(tetraplet), position);
     Ok(value)
 }

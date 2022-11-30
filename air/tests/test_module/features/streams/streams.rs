@@ -34,13 +34,20 @@ fn empty_stream() {
         })
     }
 
-    let mut vm = create_avm(arg_type_check_closure(), "A");
+    let vm_peer_id = "vm_peer_id";
+    let mut vm = create_avm(arg_type_check_closure(), vm_peer_id);
 
-    let script = r#"
+    let script = f!(r#"
         (seq
-            (call "A" ("" "") [$stream] $other_stream)
+            (par
+                (call "unknown_peer" ("" "") [] $stream) ; to make validator happy
+                (seq
+                    (canon "{vm_peer_id}" $stream #canon_stream)
+                    (call "{vm_peer_id}" ("" "") [#canon_stream] $other_stream)
+                )
+            )
             (null)
-        )"#;
+        )"#);
 
     let _ = checked_call_vm!(vm, <_>::default(), script, "", "");
 }
@@ -60,7 +67,7 @@ fn stream_merging_v0() {
     let mut executor = create_avm(unit_call_service(), executor_id);
 
     let script = format!(
-        include_str!("scripts/stream_fold_merging_v0.clj"),
+        include_str!("scripts/stream_fold_merging_v0.air"),
         initiator_id, setter_1_id, setter_2_id, setter_3_id, executor_id
     );
 
@@ -212,7 +219,7 @@ fn stream_merging_v1() {
     let mut executor = create_avm(unit_call_service(), executor_id);
 
     let script = format!(
-        include_str!("scripts/stream_fold_merging_v1.clj"),
+        include_str!("scripts/stream_fold_merging_v1.air"),
         initiator_id, setter_1_id, setter_2_id, setter_3_id, executor_id
     );
 
@@ -380,7 +387,7 @@ fn stream_merging_v2() {
     let mut executor = create_avm(unit_call_service(), executor_id);
 
     let script = format!(
-        include_str!("scripts/stream_fold_merging_v2.clj"),
+        include_str!("scripts/stream_fold_merging_v2.air"),
         initiator_id, setter_1_id, setter_2_id, setter_3_id, executor_id
     );
 

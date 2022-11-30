@@ -15,16 +15,16 @@
  */
 
 use super::{Call, Sexp, Triplet};
-use crate::asserts::{parser::delim_ws, ServiceDefinition};
+use crate::asserts::ServiceDefinition;
 
 use nom::branch::alt;
-use nom::bytes::complete::{is_not, tag};
+use nom::bytes::complete::{is_not, tag, take_until};
 use nom::character::complete::{alphanumeric1, multispace0, multispace1, one_of, space1};
-use nom::combinator::{cut, map, map_res, opt, recognize, value};
+use nom::combinator::{cut, map, map_parser, map_res, opt, recognize, rest, value};
 use nom::error::{context, VerboseError, VerboseErrorKind};
-use nom::multi::{many1_count, separated_list0};
+use nom::multi::{many0, many1, many1_count, separated_list0};
 use nom::sequence::{delimited, pair, preceded, separated_pair, terminated};
-use nom::IResult;
+use nom::{IResult, InputTakeAtPosition};
 use nom_locate::LocatedSpan;
 
 use std::str::FromStr;
@@ -87,14 +87,25 @@ fn parse_sexp_list(inp: Input<'_>) -> IResult<Input<'_>, Sexp, ParseError<'_>> {
     context(
         "within generic list",
         preceded(
-            terminated(tag("("), multispace0),
-            cut(terminated(
-                map(separated_list0(multispace1, parse_sexp), Sexp::list),
-                preceded(
-                    multispace0,
-                    context("closing parentheses not found", tag(")")),
-                ),
-            )),
+            terminated(tag("("), sexp_multispace0),
+            map_res(
+                cut(pair(
+                    map(separated_list0(sexp_multispace1, parse_sexp), Sexp::list),
+                    preceded(
+                        preceded(
+                            sexp_multispace0,
+                            context("closing parentheses not found", tag(")")),
+                        ),
+                        parse_annotation_comment,
+                    ),
+                )),
+                |(mut sexp, annotation)| {
+                    if let Some(service_definition) = annotation {
+                        sexp.inject(service_definition)?;
+                    }
+                    Ok::<_, String>(sexp)
+                },
+            ),
         ),
     )(inp)
 }
@@ -125,7 +136,10 @@ fn parse_sexp_symbol(inp: Input<'_>) -> IResult<Input<'_>, Sexp, ParseError<'_>>
     map(
         recognize(pair(
             many1_count(alt((value((), alphanumeric1), value((), one_of("_-.$#%"))))),
-            opt(delimited(tag("["), parse_sexp_symbol, tag("]"))),
+            opt(terminated(
+                delimited(tag("["), parse_sexp_symbol, tag("]")),
+                opt(tag("!")),
+            )),
         )),
         Sexp::symbol,
     )(inp)
@@ -150,13 +164,10 @@ fn parse_sexp_call_content(inp: Input<'_>) -> IResult<Input<'_>, Sexp, ParseErro
             // possible variable, closing ")", possible annotation
             pair(
                 terminated(
-                    opt(preceded(multispace1, map(parse_sexp_symbol, Box::new))),
-                    preceded(multispace0, tag(")")),
+                    opt(preceded(sexp_multispace1, map(parse_sexp_symbol, Box::new))),
+                    preceded(sexp_multispace0, tag(")")),
                 ),
-                alt((
-                    opt(preceded(pair(space1, tag("; ")), parse_annotation)),
-                    value(None, multispace0),
-                )),
+                parse_annotation_comment,
             ),
         ),
         |((triplet, args), (var, annotation))| {
@@ -170,12 +181,53 @@ fn parse_sexp_call_content(inp: Input<'_>) -> IResult<Input<'_>, Sexp, ParseErro
     )(inp)
 }
 
-fn parse_annotation(inp: Input<'_>) -> IResult<Input<'_>, ServiceDefinition, ParseError<'_>> {
-    map_res(
-        is_not("\r\n"),
-        |span: Input<'_>| -> Result<ServiceDefinition, ParseError<'_>> {
-            Ok(ServiceDefinition::from_str(&span).unwrap())
-        },
+fn parse_annotation_comment(
+    inp: Input<'_>,
+) -> IResult<Input<'_>, Option<ServiceDefinition>, ParseError<'_>> {
+    use nom::combinator::success;
+
+    alt((
+        preceded(
+            pair(space1, tag("; ")),
+            map(cut(parse_singleline_annotation), Some),
+        ),
+        delimited(
+            pair(space1, tag("#|")),
+            map(
+                cut(map_parser(take_until("|#"), parse_multiline_annotation)),
+                Some,
+            ),
+            tag("|#"),
+        ),
+        success(None),
+    ))(inp)
+}
+
+fn parse_singleline_annotation(
+    inp: Input<'_>,
+) -> IResult<Input<'_>, ServiceDefinition, ParseError<'_>> {
+    context(
+        "single-line annotation",
+        map_res(
+            is_not("\r\n"),
+            |span: Input<'_>| -> Result<ServiceDefinition, ParseError<'_>> {
+                Ok(ServiceDefinition::from_str(&span).expect("invalid service definition"))
+            },
+        ),
+    )(inp)
+}
+
+fn parse_multiline_annotation(
+    inp: Input<'_>,
+) -> IResult<Input<'_>, ServiceDefinition, ParseError<'_>> {
+    context(
+        "multiline annotation",
+        map_res(
+            recognize(rest),
+            |span: Input<'_>| -> Result<ServiceDefinition, ParseError<'_>> {
+                Ok(ServiceDefinition::from_str(&span).expect("invalid service definition"))
+            },
+        ),
     )(inp)
 }
 
@@ -183,12 +235,12 @@ fn parse_sexp_call_triplet(inp: Input<'_>) -> IResult<Input<'_>, Box<Triplet>, P
     map(
         separated_pair(
             context("triplet peer_id", parse_sexp),
-            multispace0,
+            sexp_multispace0,
             delimited(
                 delim_ws(tag("(")),
                 separated_pair(
                     context("triplet service name", parse_sexp_string),
-                    multispace0,
+                    sexp_multispace0,
                     context("triplet function name", parse_sexp),
                 ),
                 delim_ws(tag(")")),
@@ -202,13 +254,124 @@ fn parse_sexp_call_arguments(inp: Input<'_>) -> IResult<Input<'_>, Vec<Sexp>, Pa
     delimited(tag("["), separated_list0(multispace1, parse_sexp), tag("]"))(inp)
 }
 
+pub(crate) fn delim_ws<I, O, E, F>(f: F) -> impl FnMut(I) -> IResult<I, O, E>
+where
+    F: nom::Parser<I, O, E>,
+    E: nom::error::ParseError<I>,
+    I: nom::InputTakeAtPosition
+        + nom::InputLength
+        + for<'a> nom::Compare<&'a str>
+        + nom::InputTake
+        + Clone,
+    <I as InputTakeAtPosition>::Item: nom::AsChar + Clone,
+    for<'a> &'a str: nom::FindToken<<I as InputTakeAtPosition>::Item>,
+{
+    delimited(sexp_multispace0, f, sexp_multispace0)
+}
+
+pub(crate) fn sexp_multispace0<I, E>(inp: I) -> IResult<I, (), E>
+where
+    E: nom::error::ParseError<I>,
+    I: InputTakeAtPosition
+        + nom::InputLength
+        + for<'a> nom::Compare<&'a str>
+        + nom::InputTake
+        + Clone,
+    <I as InputTakeAtPosition>::Item: nom::AsChar + Clone,
+    for<'a> &'a str: nom::FindToken<<I as InputTakeAtPosition>::Item>,
+{
+    map(
+        opt(many0(pair(
+            // white space
+            multispace1,
+            // possible ;;, ;;; comment
+            opt(pair(tag(";;"), is_not("\r\n"))),
+        ))),
+        |_| (),
+    )(inp)
+}
+
+pub(crate) fn sexp_multispace1(inp: Input<'_>) -> IResult<Input<'_>, (), ParseError<'_>> {
+    map(
+        // It's not the fastest implementation, but easiest to write.
+        // It passes initial whitespace two times.
+        many1(alt((
+            map(
+                pair(
+                    // white space
+                    multispace0,
+                    // ;;, ;;;, etc comment
+                    pair(tag(";;"), is_not("\r\n")),
+                ),
+                |_| (),
+            ),
+            map(multispace1, |_| ()),
+        ))),
+        |_| (),
+    )(inp)
+}
+
 #[cfg(test)]
 mod tests {
+    use super::*;
+    use crate::asserts::ServiceDefinition;
+
+    use pretty_assertions::assert_eq;
     use serde_json::json;
 
-    use super::*;
+    #[test]
+    fn test_multispace0_empty() {
+        let res = sexp_multispace0::<_, ()>("");
+        assert!(res.is_ok(), "{}", res.unwrap_err());
+    }
 
-    use crate::asserts::ServiceDefinition;
+    #[test]
+    fn test_multispace0_spaces() {
+        let res = sexp_multispace0::<_, ()>("  ");
+        assert!(res.is_ok(), "{}", res.unwrap_err());
+    }
+
+    #[test]
+    fn test_multispace0_comment() {
+        let res = sexp_multispace0::<_, ()>(";; this is comment");
+        assert!(res.is_ok(), "{}", res.unwrap_err());
+    }
+
+    #[test]
+    fn test_multispace0_comment_with_space() {
+        let res = sexp_multispace0::<_, ()>(" ;; ");
+        assert!(res.is_ok(), "{}", res.unwrap_err());
+    }
+
+    #[test]
+    fn test_multispace0_multiline() {
+        let res = sexp_multispace0::<_, ()>(" ;; \n ;;;; \n ");
+        assert!(res.is_ok(), "{}", res.unwrap_err());
+    }
+
+    #[test]
+    fn test_multispace1_empty() {
+        let res = sexp_multispace1("".into());
+        assert!(res.is_err());
+    }
+
+    #[test]
+    fn test_multispace1_space() {
+        let res = sexp_multispace1(" ".into());
+        assert!(res.is_ok(), "{}", res.unwrap_err());
+    }
+
+    #[test]
+    fn test_multispace1_comment() {
+        let res = sexp_multispace1(" ;; ".into());
+        assert!(res.is_ok(), "{}", res.unwrap_err());
+    }
+
+    #[test]
+    fn test_multispace1_multiline() {
+        let res = sexp_multispace1(" ;; \n ;;;; \n ".into());
+        assert!(res.is_ok(), "{}", res.unwrap_err());
+    }
 
     #[test]
     fn test_symbol() {
@@ -220,6 +383,12 @@ mod tests {
     fn test_symbol_lambda() {
         let res = Sexp::from_str("sym_bol.$.blabla");
         assert_eq!(res, Ok(Sexp::symbol("sym_bol.$.blabla")));
+    }
+
+    #[test]
+    fn test_symbol_lambda_exclamation() {
+        let res = Sexp::from_str("pid-num.$.[0]!");
+        assert_eq!(res, Ok(Sexp::symbol("pid-num.$.[0]!")));
     }
 
     #[test]
@@ -515,5 +684,191 @@ mod tests {
         let sexp_str = r#"(seq (canon peer_id $stream #canon) (fold #canon i (next)))"#;
         let res = Sexp::from_str(sexp_str);
         assert!(res.is_ok(), "{:?}", res);
+    }
+
+    #[test]
+    fn test_comments() {
+        let sexp_str = r#" ;; One comment
+( ;;; Second comment
+  ;; The third one
+  (par ;;;; Comment comment comment
+    ;;;; Comment comment comment
+    (null)  ;;;;; Comment
+    (fail  ;; Fails
+        1    ;; Retcode
+        "test"  ;; Message
+        ;; Nothing more
+    )
+  )   ;;;;; Comment
+  ;;;;; Comment
+ )  ;;;;; Comment
+;;; Comment
+"#;
+        let res = Sexp::from_str(sexp_str);
+        assert_eq!(
+            res,
+            Ok(Sexp::list(vec![Sexp::list(vec![
+                Sexp::symbol("par"),
+                Sexp::list(vec![Sexp::symbol("null"),]),
+                Sexp::list(vec![
+                    Sexp::symbol("fail"),
+                    Sexp::symbol("1"),
+                    Sexp::string("test"),
+                ]),
+            ])]))
+        );
+    }
+
+    #[test]
+    fn test_annotation_multiline() {
+        let multiline_annotation = r#" #|
+        map = {
+          "0": null
+        } |#"#;
+        let res = parse_annotation_comment(multiline_annotation.into());
+        assert!(res.is_ok(), "{:?}", res);
+    }
+
+    #[test]
+    fn test_annotation_multiline_with_call() {
+        let sexp_str = r#"(call "peer_id" ("serv" "func") [a b] var) #|
+        map = {
+           "0": null
+        }
+        |#"#;
+        let expected_annotation = ServiceDefinition::Map(maplit::hashmap! {
+            "0".to_owned() => json!(None::<()>),
+        });
+
+        let res = Sexp::from_str(sexp_str);
+        assert_eq!(
+            res,
+            Ok(Sexp::Call(Call {
+                triplet: Box::new((
+                    Sexp::string("peer_id"),
+                    Sexp::string("serv"),
+                    Sexp::string("func"),
+                )),
+                args: vec![Sexp::symbol("a"), Sexp::symbol("b")],
+                var: Some(Box::new(Sexp::symbol("var"))),
+                service_desc: Some(expected_annotation),
+            }))
+        );
+    }
+
+    #[test]
+    fn test_annotation_multiline_with_many_calls() {
+        let sexp_str = r#"(seq
+            (call "peer_id" ("serv" "func") [a b] var) #|
+                   map = {
+                     "0": null
+                   }
+                |#
+            (call "peer_id" ("serv" "func") [a b] var)
+        )"#;
+        let expected_annotation = ServiceDefinition::Map(maplit::hashmap! {
+            "0".to_owned() => json!(None::<()>),
+        });
+
+        let res = Sexp::from_str(sexp_str);
+        assert_eq!(
+            res,
+            Ok(Sexp::List(vec![
+                Sexp::symbol("seq"),
+                Sexp::Call(Call {
+                    triplet: Box::new((
+                        Sexp::string("peer_id"),
+                        Sexp::string("serv"),
+                        Sexp::string("func"),
+                    )),
+                    args: vec![Sexp::symbol("a"), Sexp::symbol("b")],
+                    var: Some(Box::new(Sexp::symbol("var"))),
+                    service_desc: Some(expected_annotation),
+                }),
+                Sexp::Call(Call {
+                    triplet: Box::new((
+                        Sexp::string("peer_id"),
+                        Sexp::string("serv"),
+                        Sexp::string("func"),
+                    )),
+                    args: vec![Sexp::symbol("a"), Sexp::symbol("b")],
+                    var: Some(Box::new(Sexp::symbol("var"))),
+                    service_desc: None,
+                }),
+            ])),
+        );
+    }
+
+    #[test]
+    fn test_call_with_annotation_last_form() {
+        let res = Sexp::from_str(
+            r#"(par
+  (call peerid ("serv" "func") [a b] var)
+  (call peerid2 ("serv" "func") [])) ; ok=42
+"#,
+        );
+        assert_eq!(
+            res,
+            Ok(Sexp::List(vec![
+                Sexp::symbol("par"),
+                Sexp::Call(Call {
+                    triplet: Box::new((
+                        Sexp::symbol("peerid"),
+                        Sexp::string("serv"),
+                        Sexp::string("func"),
+                    )),
+                    args: vec![Sexp::symbol("a"), Sexp::symbol("b")],
+                    var: Some(Box::new(Sexp::symbol("var"))),
+                    service_desc: None,
+                }),
+                Sexp::Call(Call {
+                    triplet: Box::new((
+                        Sexp::symbol("peerid2"),
+                        Sexp::string("serv"),
+                        Sexp::string("func"),
+                    )),
+                    args: vec![],
+                    var: None,
+                    service_desc: Some(ServiceDefinition::Ok(json!(42))),
+                }),
+            ]))
+        );
+    }
+    #[test]
+    fn test_call_with_annotation_last_form_multiline() {
+        let res = Sexp::from_str(
+            r#"(par
+  (call peerid ("serv" "func") [a b] var)
+  (call peerid2 ("serv" "func") [])) #|
+    ok=42
+  |#
+"#,
+        );
+        assert_eq!(
+            res,
+            Ok(Sexp::List(vec![
+                Sexp::symbol("par"),
+                Sexp::Call(Call {
+                    triplet: Box::new((
+                        Sexp::symbol("peerid"),
+                        Sexp::string("serv"),
+                        Sexp::string("func"),
+                    )),
+                    args: vec![Sexp::symbol("a"), Sexp::symbol("b")],
+                    var: Some(Box::new(Sexp::symbol("var"))),
+                    service_desc: None,
+                }),
+                Sexp::Call(Call {
+                    triplet: Box::new((
+                        Sexp::symbol("peerid2"),
+                        Sexp::string("serv"),
+                        Sexp::string("func"),
+                    )),
+                    args: vec![],
+                    var: None,
+                    service_desc: Some(ServiceDefinition::Ok(json!(42))),
+                }),
+            ]))
+        );
     }
 }

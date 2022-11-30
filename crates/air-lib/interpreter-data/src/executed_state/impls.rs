@@ -79,17 +79,17 @@ impl ExecutedState {
 }
 
 impl ApResult {
-    pub fn new(res_gens: Vec<u32>) -> Self {
+    pub fn new(res_generation: u32) -> Self {
         Self {
-            res_generations: res_gens,
+            res_generations: vec![res_generation],
         }
     }
 }
 
 impl CanonResult {
-    pub fn new(stream_elements_pos: Vec<TracePos>) -> Self {
+    pub fn new(canonicalized_element: JValue) -> Self {
         Self {
-            stream_elements_pos,
+            canonicalized_element,
         }
     }
 }
@@ -129,8 +129,8 @@ impl std::fmt::Display for ExecutedState {
             Ap(ap) => {
                 write!(f, "ap: _ -> {:?}", ap.res_generations)
             }
-            Canon(canon) => {
-                write!(f, "canon {:?}", canon.stream_elements_pos)
+            Canon(_) => {
+                write!(f, "canon [<object>]")
             }
         }
     }

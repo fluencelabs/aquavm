@@ -63,7 +63,7 @@ fn create_service() {
 
     let mut vm = create_avm(call_service, "A");
 
-    let script = include_str!("./scripts/create_service.clj");
+    let script = include_str!("./scripts/create_service.air");
 
     let test_params = TestRunParameters::from_init_peer_id("init_peer_id");
     let result = checked_call_vm!(set_variables_vm, test_params.clone(), script, "", "");

@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.27.0] - 2022-11-22
+
+### Added
+
+- Add `current_peer_id` field to the `ParticleParameters`
+
+### Changed
+
+- `ParticleParameters` now has only single lifetime parameter
+
 ## [0.26.1] - 2022-09-13
 
 ### Fixed

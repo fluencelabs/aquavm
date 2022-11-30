@@ -60,7 +60,7 @@ fn last_error_tetraplets() {
     );
 
     let script = format!(
-        include_str!("scripts/create_service_with_xor.clj"),
+        include_str!("scripts/create_service_with_xor.air"),
         set_variable_peer_id, fallible_peer_id, local_peer_id
     );
 

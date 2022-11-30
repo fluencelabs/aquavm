@@ -15,3 +15,4 @@
  */
 
 mod empty_array;
+mod version_check;

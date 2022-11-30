@@ -19,7 +19,7 @@ air-log-targets = { path = "../log-targets" }
 air-parser = { path = "../air-parser" }
 
 bimap = "0.6.2"
-serde_json = "1.0.85"
+serde_json = "1.0.89"
 log = "0.4.17"
-thiserror = "1.0.35"
-tracing = "0.1.36"
+thiserror = "1.0.37"
+tracing = "0.1.37"

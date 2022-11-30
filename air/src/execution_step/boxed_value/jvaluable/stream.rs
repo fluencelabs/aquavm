@@ -38,21 +38,17 @@ pub(crate) struct StreamJvaluableIngredients<'stream> {
 // TODO: this will be deleted soon, because it would be impossible to use streams without
 // canonicalization as an arg of a call
 impl JValuable for StreamJvaluableIngredients<'_> {
-    fn apply_lambda<'i>(
-        &self,
-        lambda: &LambdaAST<'_>,
-        exec_ctx: &ExecutionCtx<'i>,
-    ) -> ExecutionResult<Cow<'_, JValue>> {
+    fn apply_lambda(&self, lambda: &LambdaAST<'_>, exec_ctx: &ExecutionCtx<'_>) -> ExecutionResult<Cow<'_, JValue>> {
         let iter = self.iter()?.map(|v| v.result.deref());
         let select_result = select_by_lambda_from_stream(iter, lambda, exec_ctx)?;
 
         Ok(select_result.result)
     }
 
-    fn apply_lambda_with_tetraplets<'i>(
+    fn apply_lambda_with_tetraplets(
         &self,
         lambda: &LambdaAST<'_>,
-        exec_ctx: &ExecutionCtx<'i>,
+        exec_ctx: &ExecutionCtx<'_>,
     ) -> ExecutionResult<(Cow<'_, JValue>, SecurityTetraplet)> {
         let iter = self.iter()?.map(|v| v.result.deref());
         let select_result = select_by_lambda_from_stream(iter, lambda, exec_ctx)?;

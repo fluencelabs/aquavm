@@ -16,10 +16,9 @@
 
 use super::*;
 use air_lambda_parser::LambdaAST;
-use air_lambda_parser::ValueAccessor;
 
 impl<'i> ScalarWithLambda<'i> {
-    pub fn new(name: &'i str, lambda: Option<LambdaAST<'i>>, position: AirPos) -> Self {
+    pub fn new(name: &'i str, lambda: LambdaAST<'i>, position: AirPos) -> Self {
         Self {
             name,
             lambda,
@@ -27,36 +26,13 @@ impl<'i> ScalarWithLambda<'i> {
         }
     }
 
-    pub(crate) fn from_value_path(
+    #[cfg(test)]
+    pub(crate) fn from_raw_lambda(
         name: &'i str,
-        accessors: Vec<ValueAccessor<'i>>,
+        lambda: Vec<air_lambda_parser::ValueAccessor<'i>>,
         position: AirPos,
     ) -> Self {
-        let lambda = LambdaAST::try_from_accessors(accessors).ok();
-        Self {
-            name,
-            lambda,
-            position,
-        }
-    }
-}
-
-impl<'i> StreamWithLambda<'i> {
-    pub fn new(name: &'i str, lambda: Option<LambdaAST<'i>>, position: AirPos) -> Self {
-        Self {
-            name,
-            lambda,
-            position,
-        }
-    }
-
-    #[allow(dead_code)]
-    pub(crate) fn from_value_path(
-        name: &'i str,
-        accessors: Vec<ValueAccessor<'i>>,
-        position: AirPos,
-    ) -> Self {
-        let lambda = LambdaAST::try_from_accessors(accessors).ok();
+        let lambda = LambdaAST::try_from_accessors(lambda).unwrap();
         Self {
             name,
             lambda,
@@ -72,7 +48,7 @@ impl<'i> CanonStream<'i> {
 }
 
 impl<'i> CanonStreamWithLambda<'i> {
-    pub fn new(name: &'i str, lambda: Option<LambdaAST<'i>>, position: AirPos) -> Self {
+    pub fn new(name: &'i str, lambda: LambdaAST<'i>, position: AirPos) -> Self {
         Self {
             name,
             lambda,
@@ -93,82 +69,53 @@ impl<'i> Stream<'i> {
     }
 }
 
-impl<'i> Variable<'i> {
+impl<'i> ImmutableVariable<'i> {
     pub fn scalar(name: &'i str, position: AirPos) -> Self {
         Self::Scalar(Scalar::new(name, position))
     }
 
-    pub fn stream(name: &'i str, position: AirPos) -> Self {
-        Self::Stream(Stream::new(name, position))
+    pub fn canon_stream(name: &'i str, position: AirPos) -> Self {
+        Self::CanonStream(CanonStream::new(name, position))
     }
 
     pub fn name(&self) -> &'i str {
         match self {
-            Variable::Scalar(scalar) => scalar.name,
-            Variable::Stream(stream) => stream.name,
-            Variable::CanonStream(stream) => stream.name,
+            ImmutableVariable::Scalar(scalar) => scalar.name,
+            ImmutableVariable::CanonStream(stream) => stream.name,
         }
     }
 }
 
-impl<'i> VariableWithLambda<'i> {
-    pub fn scalar(name: &'i str, position: AirPos) -> Self {
-        Self::Scalar(ScalarWithLambda::new(name, None, position))
+impl<'i> ImmutableVariableWithLambda<'i> {
+    pub fn scalar(name: &'i str, lambda: LambdaAST<'i>, position: AirPos) -> Self {
+        Self::Scalar(ScalarWithLambda::new(name, lambda, position))
     }
 
-    pub fn scalar_wl(name: &'i str, lambda: LambdaAST<'i>, position: AirPos) -> Self {
-        Self::Scalar(ScalarWithLambda::new(name, Some(lambda), position))
-    }
-
-    pub fn stream(name: &'i str, position: AirPos) -> Self {
-        Self::Stream(StreamWithLambda::new(name, None, position))
-    }
-
-    pub fn stream_wl(name: &'i str, lambda: LambdaAST<'i>, position: AirPos) -> Self {
-        Self::Stream(StreamWithLambda::new(name, Some(lambda), position))
-    }
-
-    pub fn canon_stream(name: &'i str, position: AirPos) -> Self {
-        Self::CanonStream(CanonStreamWithLambda::new(name, None, position))
-    }
-
-    pub fn canon_stream_wl(name: &'i str, lambda: LambdaAST<'i>, position: AirPos) -> Self {
-        Self::CanonStream(CanonStreamWithLambda::new(name, Some(lambda), position))
+    pub fn canon_stream(name: &'i str, lambda: LambdaAST<'i>, position: AirPos) -> Self {
+        Self::CanonStream(CanonStreamWithLambda::new(name, lambda, position))
     }
 
     pub fn name(&self) -> &'i str {
         match self {
-            VariableWithLambda::Scalar(scalar) => scalar.name,
-            VariableWithLambda::Stream(stream) => stream.name,
-            VariableWithLambda::CanonStream(canon_stream) => canon_stream.name,
+            ImmutableVariableWithLambda::Scalar(scalar) => scalar.name,
+            ImmutableVariableWithLambda::CanonStream(canon_stream) => canon_stream.name,
         }
     }
 
-    pub fn lambda(&self) -> &Option<LambdaAST<'i>> {
+    pub fn lambda(&self) -> &LambdaAST<'i> {
         match self {
-            VariableWithLambda::Scalar(scalar) => &scalar.lambda,
-            VariableWithLambda::Stream(stream) => &stream.lambda,
-            VariableWithLambda::CanonStream(canon_stream) => &canon_stream.lambda,
+            ImmutableVariableWithLambda::Scalar(scalar) => &scalar.lambda,
+            ImmutableVariableWithLambda::CanonStream(canon_stream) => &canon_stream.lambda,
         }
     }
 
-    #[allow(dead_code)]
+    #[cfg(test)]
     pub(crate) fn from_raw_value_path(
         name: &'i str,
-        lambda: Vec<ValueAccessor<'i>>,
+        lambda: Vec<air_lambda_parser::ValueAccessor<'i>>,
         position: AirPos,
     ) -> Self {
-        let scalar = ScalarWithLambda::from_value_path(name, lambda, position);
+        let scalar = ScalarWithLambda::from_raw_lambda(name, lambda, position);
         Self::Scalar(scalar)
-    }
-
-    #[allow(dead_code)]
-    pub(crate) fn from_raw_lambda_stream(
-        name: &'i str,
-        lambda: Vec<ValueAccessor<'i>>,
-        position: AirPos,
-    ) -> Self {
-        let stream = StreamWithLambda::from_value_path(name, lambda, position);
-        Self::Stream(stream)
     }
 }

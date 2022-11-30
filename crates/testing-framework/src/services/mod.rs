@@ -16,6 +16,8 @@
 
 pub(crate) mod results;
 
+use self::results::{MarineServiceWrapper, ResultStore};
+
 use air_test_utils::{CallRequestParams, CallServiceClosure, CallServiceResult};
 
 use std::{cell::RefCell, rc::Rc, time::Duration};
@@ -67,4 +69,32 @@ pub(crate) fn services_to_call_service_closure(
         }
         panic!("No function found for params {:?}", params)
     })
+}
+
+pub(crate) struct NetworkServices {
+    result_store: Rc<ResultStore>,
+    common_services: Rc<[MarineServiceHandle]>,
+}
+
+impl NetworkServices {
+    pub(crate) fn new(mut common_services: Vec<MarineServiceHandle>) -> Self {
+        let result_service = Rc::<ResultStore>::default();
+
+        // insert result service into all services:
+        let wrapper = MarineServiceWrapper::new(result_service.clone()).to_handle();
+        common_services.insert(0, wrapper);
+
+        Self {
+            result_store: result_service,
+            common_services: common_services.into(),
+        }
+    }
+
+    pub(crate) fn get_result_store(&self) -> Rc<ResultStore> {
+        self.result_store.clone()
+    }
+
+    pub(crate) fn get_services(&self) -> Rc<[MarineServiceHandle]> {
+        self.common_services.clone()
+    }
 }

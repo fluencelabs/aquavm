@@ -32,12 +32,15 @@ fn par_ap_behaviour() {
                     (call "{relay_id}" ("peer" "timeout") [join_it] $result) ; behaviour=unit
                     (ap "fast_result" $result)
                 )
-                (call "{client_id}" ("op" "return") [$result.$[0]]) ; behaviour=unit
+                (seq
+                    (canon "{client_id}" $result #result)
+                    (call "{client_id}" ("op" "return") [#result.$[0]]) ; behaviour=unit
+                )
             )
         )
         "#);
 
-    let engine = air_test_framework::TestExecutor::simple(TestRunParameters::new("client_id", 0, 1), &script)
+    let engine = air_test_framework::AirScriptExecutor::simple(TestRunParameters::new("client_id", 0, 1), &script)
         .expect("invalid test executor config");
 
     let client_result_1 = engine.execute_one(client_id).unwrap();

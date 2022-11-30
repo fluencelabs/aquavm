@@ -22,9 +22,6 @@ pub struct AVMConfig<E> {
     /// Path to a AIR interpreter Wasm file.
     pub air_wasm_path: PathBuf,
 
-    /// Current peer id.
-    pub current_peer_id: String,
-
     /// Maximum heap size in bytes available for the interpreter.
     pub max_heap_size: Option<u64>,
 

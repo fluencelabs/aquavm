@@ -27,6 +27,7 @@ pub(crate) trait AirRunner {
         init_peer_id: String,
         timestamp: u64,
         ttl: u32,
+        current_peer_id: String,
         call_results: CallResults,
         tracing_params: String,
         tracing_output_mode: u8,

@@ -146,7 +146,7 @@ struct AVMState {
 
 #[test]
 fn dashboard() {
-    let script = include_str!("./scripts/dashboard.clj");
+    let script = include_str!("./scripts/dashboard.air");
 
     let known_peer_ids = parse_peers();
     let client_id = "client_id".to_string();

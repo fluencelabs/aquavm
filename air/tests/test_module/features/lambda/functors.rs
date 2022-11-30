@@ -15,7 +15,7 @@
  */
 
 use air::CatchableError;
-use air_test_framework::TestExecutor;
+use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::*;
 
 use std::cell::RefCell;
@@ -30,7 +30,7 @@ fn length_functor_for_array_scalar() {
         "#;
 
     let init_peer_id = "init_peer_id";
-    let executor = TestExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), &script)
+    let executor = AirScriptExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), &script)
         .expect("invalid test AIR script");
 
     let result = executor.execute_one(init_peer_id).unwrap();
@@ -54,7 +54,7 @@ fn length_functor_for_non_array_scalar() {
         "#);
 
     let init_peer_id = "init_peer_id";
-    let executor = TestExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), &script)
+    let executor = AirScriptExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), &script)
         .expect("invalid test AIR script");
 
     let result = executor.execute_one(init_peer_id).unwrap();
@@ -71,20 +71,38 @@ fn length_functor_for_stream() {
             (seq
                 (ap 1 $stream)
                 (ap 1 $stream))
-            (call %init_peer_id% ("" "") [$stream.length]) ; behaviour = echo
+            (seq
+                (canon %init_peer_id% $stream #stream)
+                (call %init_peer_id% ("" "") [#stream.length]) ; behaviour = echo
+            )
         )
         "#;
 
     let init_peer_id = "init_peer_id";
-    let executor = TestExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), &script)
+    let executor = AirScriptExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), &script)
         .expect("invalid test AIR script");
 
     let result = executor.execute_one(init_peer_id).unwrap();
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
-        executed_state::ap(Some(0)),
-        executed_state::ap(Some(0)),
+        executed_state::ap(0),
+        executed_state::ap(0),
+        executed_state::canon(json!({
+            "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "init_peer_id", "service_id": ""},
+            "values": [
+                {
+                    "result": 1,
+                    "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "init_peer_id", "service_id": ""},
+                    "trace_pos": 0,
+                },
+                {
+                    "result": 1,
+                    "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "init_peer_id", "service_id": ""},
+                    "trace_pos": 1,
+                },
+            ]
+        })),
         executed_state::scalar_number(2),
     ];
     assert_eq!(actual_trace, expected_trace);
@@ -94,18 +112,27 @@ fn length_functor_for_stream() {
 fn length_functor_for_empty_stream() {
     let script = r#"
         (new $stream
-            (call %init_peer_id% ("" "") [$stream.length]) ; behaviour = echo
+            (seq
+                (canon %init_peer_id% $stream #canon_stream)
+                (call %init_peer_id% ("" "") [#canon_stream.length]) ; behaviour = echo
+            )
         )
         "#;
 
     let init_peer_id = "init_peer_id";
-    let executor = TestExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), &script)
+    let executor = AirScriptExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), &script)
         .expect("invalid test AIR script");
 
     let result = executor.execute_one(init_peer_id).unwrap();
     let actual_trace = trace_from_result(&result);
 
-    let expected_trace = vec![executed_state::scalar_number(0)];
+    let expected_trace = vec![
+        executed_state::canon(
+            json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": "init_peer_id", "service_id": ""},
+                "values": []} ),
+        ),
+        executed_state::scalar_number(0),
+    ];
     assert_eq!(actual_trace, expected_trace);
 }
 
@@ -124,16 +151,21 @@ fn length_functor_for_canon_stream() {
         "#;
 
     let init_peer_id = "init_peer_id";
-    let executor = TestExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), &script)
+    let executor = AirScriptExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), &script)
         .expect("invalid test AIR script");
 
     let result = executor.execute_one(init_peer_id).unwrap();
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
-        executed_state::ap(Some(0)),
-        executed_state::ap(Some(0)),
-        executed_state::canon(vec![0.into(), 1.into()]),
+        executed_state::ap(0),
+        executed_state::ap(0),
+        executed_state::canon(
+            json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": "init_peer_id", "service_id": ""},
+                "values": [{"result": 1, "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "init_peer_id", "service_id": ""}, "trace_pos": 0},
+                           {"result": 1, "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "init_peer_id", "service_id": ""}, "trace_pos": 1}
+                ]} ),
+        ),
         executed_state::scalar_number(2),
     ];
     assert_eq!(actual_trace, expected_trace);
@@ -151,13 +183,18 @@ fn length_functor_for_empty_canon_stream() {
         "#;
 
     let init_peer_id = "init_peer_id";
-    let executor = TestExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), &script)
+    let executor = AirScriptExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), &script)
         .expect("invalid test AIR script");
 
     let result = executor.execute_one(init_peer_id).unwrap();
     let actual_trace = trace_from_result(&result);
 
-    let expected_trace = vec![executed_state::canon(vec![]), executed_state::scalar_number(0)];
+    let expected_trace = vec![
+        executed_state::canon(
+            json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": "init_peer_id", "service_id": ""}, "values": []} ),
+        ),
+        executed_state::scalar_number(0),
+    ];
     assert_eq!(actual_trace, expected_trace);
 }
 

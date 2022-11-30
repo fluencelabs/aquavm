@@ -49,7 +49,7 @@ fn fmt_indent(output: &mut impl io::Write, indent: usize) -> io::Result<()> {
     write!(output, "{:indent$}", "", indent = indent)
 }
 
-struct CallArgs<'ctx, 'i>(&'ctx [ast::Value<'i>]);
+struct CallArgs<'ctx, 'i>(&'ctx [ast::ImmutableValue<'i>]);
 
 impl<'ctx, 'i> Display for CallArgs<'ctx, 'i> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -65,7 +65,7 @@ impl<'ctx, 'i> Display for CallTriplet<'ctx, 'i> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_fmt(format_args!(
             "{} ({}, {})",
-            self.0.peer_pk, self.0.service_id, self.0.function_name
+            self.0.peer_id, self.0.service_id, self.0.function_name
         ))
     }
 }
