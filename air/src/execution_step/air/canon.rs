@@ -71,7 +71,7 @@ fn handle_unseen_canon(
     exec_ctx: &mut ExecutionCtx<'_>,
     trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<()> {
-    let peer_id = crate::execution_step::air::resolve_to_string_peer_id(&ast_canon.peer_id, exec_ctx)?;
+    let peer_id = crate::execution_step::air::resolve_peer_id_to_string(&ast_canon.peer_id, exec_ctx)?;
 
     if exec_ctx.run_parameters.current_peer_id.as_str() != peer_id {
         exec_ctx.subgraph_complete = false;

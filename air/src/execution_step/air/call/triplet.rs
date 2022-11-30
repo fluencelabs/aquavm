@@ -30,7 +30,7 @@ pub(crate) fn resolve<'i>(triplet: &ast::Triplet<'i>, ctx: &ExecutionCtx<'i>) ->
         function_name,
     } = triplet;
 
-    let peer_pk = resolve_to_string_peer_id(peer_pk, ctx)?;
+    let peer_pk = resolve_peer_id_to_string(peer_pk, ctx)?;
     let service_id = resolve_to_string(service_id, ctx)?;
     let function_name = resolve_to_string(function_name, ctx)?;
 
@@ -41,10 +41,10 @@ pub(crate) fn resolve<'i>(triplet: &ast::Triplet<'i>, ctx: &ExecutionCtx<'i>) ->
     })
 }
 
-/// Resolve value to string by either resolving variable from `ExecutionCtx`, taking literal value, or etc.
+/// Resolve peer id to string by either resolving variable from `ExecutionCtx`, taking literal value, or etc.
 // TODO: return Rc<String> to avoid excess cloning
 // TODO: move this function into resolve in boxed value PR
-pub(crate) fn resolve_to_string_peer_id<'i>(
+pub(crate) fn resolve_peer_id_to_string<'i>(
     value: &ast::ResolvableToPeerIdVariable<'i>,
     exec_ctx: &ExecutionCtx<'i>,
 ) -> ExecutionResult<String> {
@@ -66,6 +66,8 @@ pub(crate) fn resolve_to_string_peer_id<'i>(
 }
 
 /// Resolve value to string by either resolving variable from `ExecutionCtx`, taking literal value, or etc.
+// TODO: return Rc<String> to avoid excess cloning
+// TODO: move this function into resolve in boxed value PR
 pub(crate) fn resolve_to_string<'i>(
     value: &ast::ResolvableToStringVariable<'i>,
     exec_ctx: &ExecutionCtx<'i>,
