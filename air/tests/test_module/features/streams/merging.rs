@@ -154,12 +154,15 @@ fn merging_fold_iterations_extensively_2() {
                                 )
                             )
                         )
-                        (call "p1" ("test" "print") [$pid-num-arrs]) ; behaviour = echo
+                        (seq
+                            (canon "p1" $pid-num-arrs #pid-num-arrs-1)
+                            (call "p1" ("test" "print") [#pid-num-arrs-1]) ; behaviour = echo
+                        )
                     )
                     (seq
                         (seq
-                            (canon "p1" $pid-num-arrs #pid-num-arrs)
-                            (call "p1" ("test" "print") [$pid-num-arrs]) ; behaviour = echo
+                            (canon "p1" $pid-num-arrs #pid-num-arrs-2)
+                            (call "p1" ("test" "print") [#pid-num-arrs-2]) ; behaviour = echo
                         )
                         (new $result
                             (fold $pid-num-arrs pid-num-arr

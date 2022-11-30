@@ -23,72 +23,59 @@ use air_lambda_parser::LambdaAST;
 use serde::Deserialize;
 use serde::Serialize;
 
-/// A scalar value without lambda.
+/// A scalar value without a lambda.
 #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct Scalar<'i> {
     pub name: &'i str,
     pub position: AirPos,
 }
 
-/// A scalar value with possible lambda expression.
+/// A scalar value with a lambda expression.
 #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct ScalarWithLambda<'i> {
     pub name: &'i str,
     #[serde(borrow)]
-    pub lambda: Option<LambdaAST<'i>>,
+    pub lambda: LambdaAST<'i>,
     pub position: AirPos,
 }
 
-/// A stream without lambda.
+/// A stream without a lambda.
 #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct Stream<'i> {
     pub name: &'i str,
     pub position: AirPos,
 }
 
-/// A stream with possible lambda expression.
-#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
-pub struct StreamWithLambda<'i> {
-    pub name: &'i str,
-    #[serde(borrow)]
-    pub lambda: Option<LambdaAST<'i>>,
-    pub position: AirPos,
-}
-
-/// A canonicalized stream without lambda.
+/// A canonicalized stream without a lambda.
 #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct CanonStream<'i> {
     pub name: &'i str,
     pub position: AirPos,
 }
 
-/// A canonicalized stream with lambda.
+/// A canonicalized stream with a lambda.
 #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct CanonStreamWithLambda<'i> {
     pub name: &'i str,
     #[serde(borrow)]
-    pub lambda: Option<LambdaAST<'i>>,
+    pub lambda: LambdaAST<'i>,
     pub position: AirPos,
 }
 
 /// A variable that could be either scalar or stream without lambda.
 #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
-pub enum Variable<'i> {
+pub enum ImmutableVariable<'i> {
     #[serde(borrow)]
     Scalar(Scalar<'i>),
-    #[serde(borrow)]
-    Stream(Stream<'i>),
     #[serde(borrow)]
     CanonStream(CanonStream<'i>),
 }
 
 /// A variable that could be either scalar or stream with possible lambda expression.
 #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
-pub enum VariableWithLambda<'i> {
+pub enum ImmutableVariableWithLambda<'i> {
     #[serde(borrow)]
     Scalar(ScalarWithLambda<'i>),
-    #[serde(borrow)]
-    Stream(StreamWithLambda<'i>),
     #[serde(borrow)]
     CanonStream(CanonStreamWithLambda<'i>),
 }

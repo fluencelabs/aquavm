@@ -157,7 +157,7 @@ fn ap_with_canon_stream() {
 
     let actual = parse(&source_code);
     let expected = ap(
-        ApArgument::CanonStream(CanonStreamWithLambda::new(canon_stream, None, 13.into())),
+        ApArgument::CanonStream(CanonStream::new(canon_stream, 13.into())),
         ApResult::Scalar(Scalar::new(scalar, 27.into())),
     );
 
@@ -174,11 +174,9 @@ fn ap_with_canon_stream_with_lambda() {
 
     let actual = parse(&source_code);
     let expected = ap(
-        ApArgument::CanonStream(CanonStreamWithLambda::new(
+        ApArgument::CanonStreamWithLambda(CanonStreamWithLambda::new(
             canon_stream,
-            Some(
-                LambdaAST::try_from_accessors(vec![ValueAccessor::ArrayAccess { idx: 0 }]).unwrap(),
-            ),
+            LambdaAST::try_from_accessors(vec![ValueAccessor::ArrayAccess { idx: 0 }]).unwrap(),
             13.into(),
         )),
         ApResult::Scalar(Scalar::new(scalar, 33.into())),

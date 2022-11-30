@@ -57,7 +57,7 @@ impl fmt::Display for Canon<'_> {
         write!(
             f,
             "canon {} {} {}",
-            self.peer_pk, self.stream, self.canon_stream
+            self.peer_id, self.stream, self.canon_stream
         )
     }
 }
@@ -72,12 +72,13 @@ impl fmt::Display for Fail<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Fail::Scalar(scalar) => write!(f, "fail {}", scalar),
+            Fail::ScalarWithLambda(scalar) => write!(f, "fail {}", scalar),
             Fail::Literal {
                 ret_code,
                 error_message,
             } => write!(f, r#"fail {} "{}""#, ret_code, error_message),
-            Fail::CanonStream { name, lambda, .. } => {
-                write!(f, "fail {}.$.{}", name, lambda)
+            Fail::CanonStreamWithLambda(stream) => {
+                write!(f, "fail {}", stream)
             }
             Fail::LastError => write!(f, "fail %last_error%"),
         }

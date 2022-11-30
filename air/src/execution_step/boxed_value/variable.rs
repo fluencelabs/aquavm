@@ -22,6 +22,7 @@ pub(crate) enum Variable<'i> {
     Scalar {
         name: &'i str,
     },
+    #[allow(dead_code)] // it will be used in BoxedValues
     Stream {
         name: &'i str,
         generation: Generation,
@@ -37,38 +38,28 @@ impl<'i> Variable<'i> {
         Self::Scalar { name }
     }
 
-    pub(crate) fn stream(name: &'i str, generation: Generation, position: AirPos) -> Self {
-        Self::Stream {
-            name,
-            generation,
-            position,
-        }
-    }
-
     pub(crate) fn canon_stream(name: &'i str) -> Self {
         Self::CanonStream { name }
     }
 }
 
-impl<'i> From<&ast::Variable<'i>> for Variable<'i> {
-    fn from(ast_variable: &ast::Variable<'i>) -> Self {
-        use ast::Variable::*;
+impl<'i> From<&ast::ImmutableVariable<'i>> for Variable<'i> {
+    fn from(ast_variable: &ast::ImmutableVariable<'i>) -> Self {
+        use ast::ImmutableVariable::*;
 
         match ast_variable {
             Scalar(scalar) => Self::scalar(scalar.name),
-            Stream(stream) => Self::stream(stream.name, Generation::Last, stream.position),
             CanonStream(canon_stream) => Self::canon_stream(canon_stream.name),
         }
     }
 }
 
-impl<'i> From<&ast::VariableWithLambda<'i>> for Variable<'i> {
-    fn from(ast_variable: &ast::VariableWithLambda<'i>) -> Self {
-        use ast::VariableWithLambda::*;
+impl<'i> From<&ast::ImmutableVariableWithLambda<'i>> for Variable<'i> {
+    fn from(ast_variable: &ast::ImmutableVariableWithLambda<'i>) -> Self {
+        use ast::ImmutableVariableWithLambda::*;
 
         match ast_variable {
             Scalar(scalar) => Self::scalar(scalar.name),
-            Stream(stream) => Self::stream(stream.name, Generation::Last, stream.position),
             CanonStream(canon_stream) => Self::canon_stream(canon_stream.name),
         }
     }

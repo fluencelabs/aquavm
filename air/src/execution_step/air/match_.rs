@@ -31,7 +31,8 @@ impl<'i> super::ExecutableInstruction<'i> for Match<'i> {
 
         let are_values_equal = joinable!(
             are_matchable_eq(&self.left_value, &self.right_value, exec_ctx),
-            exec_ctx
+            exec_ctx,
+            ()
         )?;
 
         if !are_values_equal {

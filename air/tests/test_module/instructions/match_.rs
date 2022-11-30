@@ -306,7 +306,10 @@ fn issue_165() {
                     )
                     (ap 2 $results)
                 )
-                (call "{echo_peer_id}" ("callbackSrv" "response") [$results.$.[0]!])
+                (seq
+                    (canon "{echo_peer_id}" $results #results)
+                    (call "{echo_peer_id}" ("callbackSrv" "response") [#results.$.[0]!])
+                )
             )
         )
     "#);

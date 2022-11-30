@@ -161,7 +161,9 @@ fn canon_stream_can_be_created_from_aps() {
                 (canon "{vm_1_peer_id}" $stream #canon_stream)
                 (seq
                     (ap #canon_stream $stream_2)
-                    (call "{vm_2_peer_id}" ("" "") [$stream_2]))))
+                    (seq
+                        (canon "{vm_2_peer_id}" $stream_2 #canon_stream_2)
+                        (call "{vm_2_peer_id}" ("" "") [#canon_stream_2])))))
         "#);
 
     let result_1 = checked_call_vm!(vm_1, <_>::default(), &script, "", "");
@@ -267,14 +269,21 @@ fn canon_empty_not_writable_stream() {
     let mut vm = create_avm(echo_call_service(), peer_id);
 
     let script = f!(r#"
-        (canon "{peer_id}" $stream #canon_stream)
+        (par
+            (call "unwkown_peer_id" ("" "") [] $stream)
+            (canon "{peer_id}" $stream #canon_stream)
+        )
     "#);
 
     let result = checked_call_vm!(vm, <_>::default(), &script, "", "");
     let actual_trace = trace_from_result(&result);
-    let expected_trace = vec![executed_state::canon(
-        json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id", "service_id": ""}, "values": []} ),
-    )];
+    let expected_trace = vec![
+        executed_state::par(1, 1),
+        executed_state::request_sent_by(peer_id),
+        executed_state::canon(
+            json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id", "service_id": ""}, "values": []} ),
+        ),
+    ];
     assert_eq!(actual_trace, expected_trace);
 }
 

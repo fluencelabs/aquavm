@@ -135,7 +135,10 @@ fn lambda_with_number_stream() {
                     )
                 )
             )
-            (call "{local_peer_id}" ("" "") [$stream.$.[number_accessor]])
+            (seq
+                (canon "{local_peer_id}" $stream #canon_stream)
+                (call "{local_peer_id}" ("" "") [#canon_stream.$.[number_accessor]])
+            )
         )
         "#);
 
@@ -143,7 +146,7 @@ fn lambda_with_number_stream() {
     let result = checked_call_vm!(local_vm, <_>::default(), script, "", result.data);
     let actual_trace = trace_from_result(&result);
 
-    assert_eq!(&actual_trace[5.into()], &executed_state::scalar_number(2));
+    assert_eq!(&actual_trace[6.into()], &executed_state::scalar_number(2));
 }
 
 #[test]
@@ -180,7 +183,10 @@ fn lambda_with_number_stream_and_followed_scalar() {
                     )
                 )
             )
-            (call "{local_peer_id}" ("" "") [$stream.$.[number_accessor].field_1]) ;; get the 2nd value and then access its field
+            (seq
+                (canon "{local_peer_id}" $stream #canon_stream)
+                (call "{local_peer_id}" ("" "") [#canon_stream.$.[number_accessor].field_1]) ;; get the 2nd value and then access its field
+            )
         )
         "#);
 
@@ -188,7 +194,7 @@ fn lambda_with_number_stream_and_followed_scalar() {
     let result = checked_call_vm!(local_vm, <_>::default(), script, "", result.data);
     let actual_trace = trace_from_result(&result);
 
-    assert_eq!(&actual_trace[6.into()], &executed_state::scalar_number(checkable_value));
+    assert_eq!(&actual_trace[7.into()], &executed_state::scalar_number(checkable_value));
 }
 
 #[test]
@@ -223,8 +229,11 @@ fn lambda_with_scalar_join() {
     assert_eq!(&trace[3.into()], &executed_state::request_sent_by("set_variable"));
 }
 
+#[ignore]
+// after 0.32 version AIR is no longer supports lambdas over stream,
+// although this test could be useful in the future for functors
 #[test]
-fn lambda_with_stream_join() {
+fn lambda_with_canon_stream_join() {
     let set_variable_peer_id = "set_variable";
     let variables = maplit::hashmap! {
         "number_accessor".to_string() => json!(1),
@@ -252,7 +261,10 @@ fn lambda_with_stream_join() {
                     )
                 )
             )
-            (call "{local_peer_id}" ("" "") [$stream.$.[number_accessor]])
+            (seq
+                (canon "{local_peer_id}" $stream #stream)
+                (call "{local_peer_id}" ("" "") [#stream.$.[number_accessor]])
+            )
         )
         "#);
 
@@ -261,7 +273,7 @@ fn lambda_with_stream_join() {
     let actual_trace = trace_from_result(&result);
 
     assert_eq!(
-        &actual_trace[6.into()],
-        &executed_state::request_sent_by("set_variable")
+        &actual_trace[7.into()],
+        &executed_state::request_sent_by("set_variable"),
     );
 }

@@ -1,3 +1,11 @@
+## Version 0.32.0 (2022-11-25)
+
+[PR 298](https://github.com/fluencelabs/aquavm/pull/298):
+Reduce stream scopes in order to prohibit nondeterministic behaviour
+
+[PR 366](https://github.com/fluencelabs/aquavm/pull/366):  
+Save order between current generations
+
 ## Version 0.31.0 (2022-10-11)
 
 [PR 362](https://github.com/fluencelabs/aquavm/pull/362):  

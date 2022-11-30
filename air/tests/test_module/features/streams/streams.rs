@@ -34,13 +34,20 @@ fn empty_stream() {
         })
     }
 
-    let mut vm = create_avm(arg_type_check_closure(), "A");
+    let vm_peer_id = "vm_peer_id";
+    let mut vm = create_avm(arg_type_check_closure(), vm_peer_id);
 
-    let script = r#"
+    let script = f!(r#"
         (seq
-            (call "A" ("" "") [$stream] $other_stream)
+            (par
+                (call "unknown_peer" ("" "") [] $stream) ; to make validator happy
+                (seq
+                    (canon "{vm_peer_id}" $stream #canon_stream)
+                    (call "{vm_peer_id}" ("" "") [#canon_stream] $other_stream)
+                )
+            )
             (null)
-        )"#;
+        )"#);
 
     let _ = checked_call_vm!(vm, <_>::default(), script, "", "");
 }

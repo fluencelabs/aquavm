@@ -148,7 +148,10 @@ fn flattening_empty_values() {
     let script = f!(r#"
         (seq
             (call "{set_variable_peer_id}" ("" "") [] $stream)
-            (call "{local_peer_id}" ("" "") [$stream.$.[1]!]) ; here $stream.$.[1] returns an empty array
+            (seq
+                (canon "{local_peer_id}" $stream #stream)
+                (call "{local_peer_id}" ("" "") [#stream.$.[1]!]) ; here #stream.$.[1] returns an empty array
+            )
         )
         "#);
 

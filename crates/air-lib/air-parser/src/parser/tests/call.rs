@@ -34,16 +34,16 @@ fn parse_json_path() {
 
     let instruction = parse(source_code);
     let expected = call(
-        CallInstrValue::Variable(VariableWithLambda::from_raw_value_path(
+        ResolvableToPeerIdVariable::ScalarWithLambda(ScalarWithLambda::from_raw_lambda(
             "peer_id",
             vec![ValueAccessor::FieldAccessByName { field_name: "a" }],
             15.into(),
         )),
-        CallInstrValue::Literal("service_id"),
-        CallInstrValue::Literal("function_name"),
+        ResolvableToStringVariable::Literal("service_id"),
+        ResolvableToStringVariable::Literal("function_name"),
         Rc::new(vec![
-            Value::Literal("hello"),
-            Value::Variable(VariableWithLambda::scalar("name", 68.into())),
+            ImmutableValue::Literal("hello"),
+            ImmutableValue::Variable(ImmutableVariable::scalar("name", 68.into())),
         ]),
         CallOutputValue::Stream(Stream::new("$void", 74.into())),
     );
@@ -58,13 +58,13 @@ fn parse_empty_array() {
 
     let actual = parse(source_code);
     let expected = call(
-        CallInstrValue::Variable(VariableWithLambda::scalar("peer_id", 15.into())),
-        CallInstrValue::Variable(VariableWithLambda::scalar("service_id", 24.into())),
-        CallInstrValue::Literal("function_name"),
+        ResolvableToPeerIdVariable::Scalar(Scalar::new("peer_id", 15.into())),
+        ResolvableToStringVariable::Scalar(Scalar::new("service_id", 24.into())),
+        ResolvableToStringVariable::Literal("function_name"),
         Rc::new(vec![
-            Value::Literal(""),
-            Value::EmptyArray,
-            Value::Variable(VariableWithLambda::scalar("arg", 59.into())),
+            ImmutableValue::Literal(""),
+            ImmutableValue::EmptyArray,
+            ImmutableValue::Variable(ImmutableVariable::scalar("arg", 59.into())),
         ]),
         CallOutputValue::None,
     );
@@ -80,13 +80,13 @@ fn parse_empty_array_2() {
 
     let actual = parse(source_code);
     let expected = call(
-        CallInstrValue::Variable(VariableWithLambda::scalar("peer_id", 15.into())),
-        CallInstrValue::Literal("service_id"),
-        CallInstrValue::Literal("function_name"),
+        ResolvableToPeerIdVariable::Scalar(Scalar::new("peer_id", 15.into())),
+        ResolvableToStringVariable::Literal("service_id"),
+        ResolvableToStringVariable::Literal("function_name"),
         Rc::new(vec![
-            Value::Variable(VariableWithLambda::scalar("k", 55.into())),
-            Value::EmptyArray,
-            Value::EmptyArray,
+            ImmutableValue::Variable(ImmutableVariable::scalar("k", 55.into())),
+            ImmutableValue::EmptyArray,
+            ImmutableValue::EmptyArray,
         ]),
         CallOutputValue::None,
     );
@@ -147,36 +147,6 @@ fn parse_undefined_stream_without_json_path() {
 }
 
 #[test]
-fn parse_undefined_stream_with_lambda() {
-    let source_code = r#"
-        (call "" ("" "") [$stream.$.json_path])
-        "#;
-
-    let lexer = crate::AIRLexer::new(source_code);
-
-    let parser = crate::AIRParser::new();
-    let mut errors = Vec::new();
-    let mut validator = crate::parser::VariableValidator::new();
-    parser
-        .parse(source_code, &mut errors, &mut validator, lexer)
-        .expect("parser shouldn't fail");
-
-    let errors = validator.finalize();
-
-    assert_eq!(errors.len(), 1);
-    let error = &errors[0].error;
-    let parser_error = match error {
-        ParseError::User { error } => error,
-        _ => panic!("unexpected error type"),
-    };
-
-    assert!(matches!(
-        parser_error,
-        ParserError::UndefinedVariable { .. }
-    ));
-}
-
-#[test]
 fn parse_lambda_complex() {
     let source_code = r#"
         (seq
@@ -187,18 +157,18 @@ fn parse_lambda_complex() {
     let instruction = parse(source_code);
     let expected = seq(
         call(
-            CallInstrValue::Variable(VariableWithLambda::from_raw_value_path(
+            ResolvableToPeerIdVariable::ScalarWithLambda(ScalarWithLambda::from_raw_lambda(
                 "m",
                 vec![ValueAccessor::ArrayAccess { idx: 1 }],
                 32.into(),
             )),
-            CallInstrValue::Literal("service_id"),
-            CallInstrValue::Literal("function_name"),
+            ResolvableToStringVariable::Literal("service_id"),
+            ResolvableToStringVariable::Literal("function_name"),
             Rc::new(vec![]),
             CallOutputValue::Scalar(Scalar::new("void", 75.into())),
         ),
         call(
-            CallInstrValue::Variable(VariableWithLambda::from_raw_value_path(
+            ResolvableToPeerIdVariable::ScalarWithLambda(ScalarWithLambda::from_raw_lambda(
                 "m",
                 vec![
                     ValueAccessor::FieldAccessByName { field_name: "abc" },
@@ -211,8 +181,8 @@ fn parse_lambda_complex() {
                 ],
                 99.into(),
             )),
-            CallInstrValue::Literal("service_id"),
-            CallInstrValue::Literal("function_name"),
+            ResolvableToStringVariable::Literal("service_id"),
+            ResolvableToStringVariable::Literal("function_name"),
             Rc::new(vec![]),
             CallOutputValue::Scalar(Scalar::new("void", 162.into())),
         ),
@@ -231,7 +201,7 @@ fn parse_lambda_with_scalars_complex() {
     let instruction = parse(source_code);
     let expected = seq(
         call(
-            CallInstrValue::Variable(VariableWithLambda::from_raw_value_path(
+            ResolvableToPeerIdVariable::ScalarWithLambda(ScalarWithLambda::from_raw_lambda(
                 "m",
                 vec![
                     ValueAccessor::ArrayAccess { idx: 1 },
@@ -244,13 +214,13 @@ fn parse_lambda_with_scalars_complex() {
                 ],
                 32.into(),
             )),
-            CallInstrValue::Literal("service_id"),
-            CallInstrValue::Literal("function_name"),
+            ResolvableToStringVariable::Literal("service_id"),
+            ResolvableToStringVariable::Literal("function_name"),
             Rc::new(vec![]),
             CallOutputValue::Scalar(Scalar::new("void", 97.into())),
         ),
         call(
-            CallInstrValue::Variable(VariableWithLambda::from_raw_value_path(
+            ResolvableToPeerIdVariable::ScalarWithLambda(ScalarWithLambda::from_raw_lambda(
                 "m",
                 vec![
                     ValueAccessor::FieldAccessByName { field_name: "abc" },
@@ -269,8 +239,8 @@ fn parse_lambda_with_scalars_complex() {
                 ],
                 121.into(),
             )),
-            CallInstrValue::Literal("service_id"),
-            CallInstrValue::Literal("function_name"),
+            ResolvableToStringVariable::Literal("service_id"),
+            ResolvableToStringVariable::Literal("function_name"),
             Rc::new(vec![]),
             CallOutputValue::Scalar(Scalar::new("void", 205.into())),
         ),
@@ -285,17 +255,17 @@ fn json_path_square_braces() {
         "#;
     let instruction = parse(source_code);
     let expected = call(
-        CallInstrValue::Variable(VariableWithLambda::from_raw_value_path(
+        ResolvableToPeerIdVariable::ScalarWithLambda(ScalarWithLambda::from_raw_lambda(
             "u",
             vec![ValueAccessor::FieldAccessByName {
                 field_name: "peer_id",
             }],
             15.into(),
         )),
-        CallInstrValue::Literal("return"),
-        CallInstrValue::Literal(""),
+        ResolvableToStringVariable::Literal("return"),
+        ResolvableToStringVariable::Literal(""),
         Rc::new(vec![
-            Value::Variable(VariableWithLambda::from_raw_value_path(
+            ImmutableValue::VariableWithLambda(ImmutableVariableWithLambda::from_raw_value_path(
                 "u",
                 vec![
                     ValueAccessor::ArrayAccess { idx: 1 },
@@ -306,7 +276,7 @@ fn json_path_square_braces() {
                 ],
                 43.into(),
             )),
-            Value::Variable(VariableWithLambda::from_raw_value_path(
+            ImmutableValue::VariableWithLambda(ImmutableVariableWithLambda::from_raw_value_path(
                 "u",
                 vec![ValueAccessor::FieldAccessByName { field_name: "name" }],
                 64.into(),
@@ -333,16 +303,16 @@ fn parse_init_peer_id() {
     let instruction = parse(&source_code);
     let expected = seq(
         call(
-            CallInstrValue::Literal(peer_id),
-            CallInstrValue::Literal("local_service_id"),
-            CallInstrValue::Literal("local_fn_name"),
+            ResolvableToPeerIdVariable::Literal(peer_id),
+            ResolvableToStringVariable::Literal("local_service_id"),
+            ResolvableToStringVariable::Literal("local_fn_name"),
             Rc::new(vec![]),
             CallOutputValue::None,
         ),
         call(
-            CallInstrValue::InitPeerId,
-            CallInstrValue::Literal("service_id"),
-            CallInstrValue::Literal("fn_name"),
+            ResolvableToPeerIdVariable::InitPeerId,
+            ResolvableToStringVariable::Literal("service_id"),
+            ResolvableToStringVariable::Literal("fn_name"),
             Rc::new(vec![]),
             CallOutputValue::None,
         ),
@@ -359,10 +329,10 @@ fn parse_timestamp() {
 
     let instruction = parse(source_code);
     let expected = call(
-        CallInstrValue::Literal("peer_id"),
-        CallInstrValue::Literal("service_id"),
-        CallInstrValue::Literal("fn_name"),
-        Rc::new(vec![Value::Timestamp]),
+        ResolvableToPeerIdVariable::Literal("peer_id"),
+        ResolvableToStringVariable::Literal("service_id"),
+        ResolvableToStringVariable::Literal("fn_name"),
+        Rc::new(vec![ImmutableValue::Timestamp]),
         CallOutputValue::None,
     );
 
@@ -377,10 +347,10 @@ fn parse_ttl() {
 
     let instruction = parse(source_code);
     let expected = call(
-        CallInstrValue::Literal("peer_id"),
-        CallInstrValue::Literal("service_id"),
-        CallInstrValue::Literal("fn_name"),
-        Rc::new(vec![Value::TTL]),
+        ResolvableToPeerIdVariable::Literal("peer_id"),
+        ResolvableToStringVariable::Literal("service_id"),
+        ResolvableToStringVariable::Literal("fn_name"),
+        Rc::new(vec![ImmutableValue::TTL]),
         CallOutputValue::None,
     );
 
@@ -400,10 +370,10 @@ fn parse_last_error() {
     let instruction = parse(&source_code);
     let expected = seq(
         call(
-            CallInstrValue::InitPeerId,
-            CallInstrValue::Literal("service_id"),
-            CallInstrValue::Literal("fn_name"),
-            Rc::new(vec![Value::LastError(None)]),
+            ResolvableToPeerIdVariable::InitPeerId,
+            ResolvableToStringVariable::Literal("service_id"),
+            ResolvableToStringVariable::Literal("fn_name"),
+            Rc::new(vec![ImmutableValue::LastError(None)]),
             CallOutputValue::None,
         ),
         null(),
@@ -423,13 +393,12 @@ fn canon_stream_in_args() {
 
     let instruction = parse(&source_code);
     let expected = call(
-        CallInstrValue::InitPeerId,
-        CallInstrValue::Literal(service_id),
-        CallInstrValue::Literal(function_name),
-        Rc::new(vec![Value::Variable(VariableWithLambda::canon_stream(
-            canon_stream,
-            66.into(),
-        ))]),
+        ResolvableToPeerIdVariable::InitPeerId,
+        ResolvableToStringVariable::Literal(service_id),
+        ResolvableToStringVariable::Literal(function_name),
+        Rc::new(vec![ImmutableValue::Variable(
+            ImmutableVariable::canon_stream(canon_stream, 66.into()),
+        )]),
         CallOutputValue::None,
     );
 
@@ -445,16 +414,20 @@ fn canon_stream_in_triplet() {
             (call {canon_stream} ("{service_id}" "{function_name}") [])
         "#);
 
-    let instruction = parse(&source_code);
-    let expected = call(
-        CallInstrValue::Variable(VariableWithLambda::canon_stream(canon_stream, 19.into())),
-        CallInstrValue::Literal(service_id),
-        CallInstrValue::Literal(function_name),
-        Rc::new(vec![]),
-        CallOutputValue::None,
-    );
+    let lexer = crate::AIRLexer::new(&source_code);
 
-    assert_eq!(instruction, expected);
+    let parser = crate::AIRParser::new();
+    let mut errors = Vec::new();
+    let mut validator = crate::parser::VariableValidator::new();
+    parser
+        .parse(&source_code, &mut errors, &mut validator, lexer)
+        .expect("parser shouldn't fail");
+
+    assert_eq!(errors.len(), 1);
+    assert!(matches!(
+        &errors[0].error,
+        ParseError::UnrecognizedToken { .. }
+    ));
 }
 
 #[test]
@@ -469,7 +442,7 @@ fn canon_stream_with_lambda_in_triplet() {
 
     let instruction = parse(&source_code);
     let expected = call(
-        CallInstrValue::Variable(VariableWithLambda::canon_stream_wl(
+        ResolvableToPeerIdVariable::CanonStreamWithLambda(CanonStreamWithLambda::new(
             canon_stream,
             LambdaAST::try_from_accessors(vec![
                 ValueAccessor::ArrayAccess { idx: 0 },
@@ -478,8 +451,8 @@ fn canon_stream_with_lambda_in_triplet() {
             .unwrap(),
             19.into(),
         )),
-        CallInstrValue::Literal(service_id),
-        CallInstrValue::Literal(function_name),
+        ResolvableToStringVariable::Literal(service_id),
+        ResolvableToStringVariable::Literal(function_name),
         Rc::new(vec![]),
         CallOutputValue::None,
     );
@@ -503,24 +476,24 @@ fn seq_par_call() {
     let expected = seq(
         par(
             call(
-                CallInstrValue::Literal(peer_id),
-                CallInstrValue::Literal("local_service_id"),
-                CallInstrValue::Literal("local_fn_name"),
+                ResolvableToPeerIdVariable::Literal(peer_id),
+                ResolvableToStringVariable::Literal("local_service_id"),
+                ResolvableToStringVariable::Literal("local_fn_name"),
                 Rc::new(vec![]),
                 CallOutputValue::Scalar(Scalar::new("result_1", 108.into())),
             ),
             call(
-                CallInstrValue::Literal(peer_id),
-                CallInstrValue::Literal("service_id"),
-                CallInstrValue::Literal("fn_name"),
+                ResolvableToPeerIdVariable::Literal(peer_id),
+                ResolvableToStringVariable::Literal("service_id"),
+                ResolvableToStringVariable::Literal("fn_name"),
                 Rc::new(vec![]),
                 CallOutputValue::Scalar(Scalar::new("g", 183.into())),
             ),
         ),
         call(
-            CallInstrValue::Literal(peer_id),
-            CallInstrValue::Literal("local_service_id"),
-            CallInstrValue::Literal("local_fn_name"),
+            ResolvableToPeerIdVariable::Literal(peer_id),
+            ResolvableToStringVariable::Literal("local_service_id"),
+            ResolvableToStringVariable::Literal("local_fn_name"),
             Rc::new(vec![]),
             CallOutputValue::Scalar(Scalar::new("result_2", 273.into())),
         ),
@@ -558,47 +531,50 @@ fn seq_with_empty_and_dash() {
         seq(
             seq(
                 call(
-                    CallInstrValue::Literal("set_variables"),
-                    CallInstrValue::Literal(""),
-                    CallInstrValue::Literal(""),
-                    Rc::new(vec![Value::Literal("module-bytes")]),
+                    ResolvableToPeerIdVariable::Literal("set_variables"),
+                    ResolvableToStringVariable::Literal(""),
+                    ResolvableToStringVariable::Literal(""),
+                    Rc::new(vec![ImmutableValue::Literal("module-bytes")]),
                     CallOutputValue::Scalar(Scalar::new("module-bytes", 119.into())),
                 ),
                 call(
-                    CallInstrValue::Literal("set_variables"),
-                    CallInstrValue::Literal(""),
-                    CallInstrValue::Literal(""),
-                    Rc::new(vec![Value::Literal("module_config")]),
+                    ResolvableToPeerIdVariable::Literal("set_variables"),
+                    ResolvableToStringVariable::Literal(""),
+                    ResolvableToStringVariable::Literal(""),
+                    Rc::new(vec![ImmutableValue::Literal("module_config")]),
                     CallOutputValue::Scalar(Scalar::new("module_config", 201.into())),
                 ),
             ),
             call(
-                CallInstrValue::Literal("set_variables"),
-                CallInstrValue::Literal(""),
-                CallInstrValue::Literal(""),
-                Rc::new(vec![Value::Literal("blueprint")]),
+                ResolvableToPeerIdVariable::Literal("set_variables"),
+                ResolvableToStringVariable::Literal(""),
+                ResolvableToStringVariable::Literal(""),
+                Rc::new(vec![ImmutableValue::Literal("blueprint")]),
                 CallOutputValue::Scalar(Scalar::new("blueprint", 294.into())),
             ),
         ),
         seq(
             call(
-                CallInstrValue::Literal("A"),
-                CallInstrValue::Literal("add_module"),
-                CallInstrValue::Literal(""),
+                ResolvableToPeerIdVariable::Literal("A"),
+                ResolvableToStringVariable::Literal("add_module"),
+                ResolvableToStringVariable::Literal(""),
                 Rc::new(vec![
-                    Value::Variable(VariableWithLambda::scalar("module-bytes", 381.into())),
-                    Value::Variable(VariableWithLambda::scalar("module_config", 394.into())),
+                    ImmutableValue::Variable(ImmutableVariable::scalar("module-bytes", 381.into())),
+                    ImmutableValue::Variable(ImmutableVariable::scalar(
+                        "module_config",
+                        394.into(),
+                    )),
                 ]),
                 CallOutputValue::Scalar(Scalar::new("module", 409.into())),
             ),
             seq(
                 Instruction::Call(Call {
                     triplet: Triplet {
-                        peer_pk: CallInstrValue::Literal("A"),
-                        service_id: CallInstrValue::Literal("add_blueprint"),
-                        function_name: CallInstrValue::Literal(""),
+                        peer_id: ResolvableToPeerIdVariable::Literal("A"),
+                        service_id: ResolvableToStringVariable::Literal("add_blueprint"),
+                        function_name: ResolvableToStringVariable::Literal(""),
                     },
-                    args: Rc::new(vec![Value::Variable(VariableWithLambda::scalar(
+                    args: Rc::new(vec![ImmutableValue::Variable(ImmutableVariable::scalar(
                         "blueprint",
                         490.into(),
                     ))]),
@@ -606,20 +582,20 @@ fn seq_with_empty_and_dash() {
                 }),
                 seq(
                     call(
-                        CallInstrValue::Literal("A"),
-                        CallInstrValue::Literal("create"),
-                        CallInstrValue::Literal(""),
-                        Rc::new(vec![Value::Variable(VariableWithLambda::scalar(
+                        ResolvableToPeerIdVariable::Literal("A"),
+                        ResolvableToStringVariable::Literal("create"),
+                        ResolvableToStringVariable::Literal(""),
+                        Rc::new(vec![ImmutableValue::Variable(ImmutableVariable::scalar(
                             "blueprint_id",
                             589.into(),
                         ))]),
                         CallOutputValue::Scalar(Scalar::new("service_id", 603.into())),
                     ),
                     call(
-                        CallInstrValue::Literal("remote_peer_id"),
-                        CallInstrValue::Literal(""),
-                        CallInstrValue::Literal(""),
-                        Rc::new(vec![Value::Variable(VariableWithLambda::scalar(
+                        ResolvableToPeerIdVariable::Literal("remote_peer_id"),
+                        ResolvableToStringVariable::Literal(""),
+                        ResolvableToStringVariable::Literal(""),
+                        Rc::new(vec![ImmutableValue::Variable(ImmutableVariable::scalar(
                             "service_id",
                             671.into(),
                         ))]),
@@ -642,9 +618,9 @@ fn no_output() {
     let actual = parse(source_code);
 
     let expected = call(
-        CallInstrValue::Variable(VariableWithLambda::scalar("peer", 15.into())),
-        CallInstrValue::Variable(VariableWithLambda::scalar("service", 21.into())),
-        CallInstrValue::Variable(VariableWithLambda::scalar("fname", 29.into())),
+        ResolvableToPeerIdVariable::Scalar(Scalar::new("peer", 15.into())),
+        ResolvableToStringVariable::Scalar(Scalar::new("service", 21.into())),
+        ResolvableToStringVariable::Scalar(Scalar::new("fname", 29.into())),
         Rc::new(vec![]),
         CallOutputValue::None,
     );

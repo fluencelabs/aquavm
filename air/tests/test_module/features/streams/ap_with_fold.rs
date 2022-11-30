@@ -51,7 +51,9 @@ fn ap_with_fold() {
                             (null))))
                 (seq
                     (call "{local_vm_peer_id}" ("op" "noop") [])
-                    (call "{local_vm_peer_id}" ("return" "") [$inner]))))
+                    (seq
+                        (canon "{local_vm_peer_id}" $inner #canon_stream)
+                        (call "{local_vm_peer_id}" ("return" "") [#canon_stream])))))
         "#);
 
     let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");

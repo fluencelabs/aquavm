@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-use crate::ast::Value;
+use crate::ast::ImmutableValue;
+
 use air_lambda_ast::LambdaAST;
 use air_lambda_ast::ValueAccessor;
 
 #[test]
 // https://github.com/fluencelabs/aquavm/issues/263
 fn issue_263() {
-    let val = Value::LastError(Some(
+    let val = ImmutableValue::LastError(Some(
         LambdaAST::try_from_accessors(vec![ValueAccessor::FieldAccessByName {
             field_name: "message",
         }])

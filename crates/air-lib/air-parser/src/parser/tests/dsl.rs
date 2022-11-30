@@ -18,14 +18,14 @@ use crate::ast::*;
 use std::rc::Rc;
 
 pub(super) fn call<'i>(
-    peer_pk: CallInstrValue<'i>,
-    service_id: CallInstrValue<'i>,
-    function_name: CallInstrValue<'i>,
-    args: Rc<Vec<Value<'i>>>,
+    peer_pk: ResolvableToPeerIdVariable<'i>,
+    service_id: ResolvableToStringVariable<'i>,
+    function_name: ResolvableToStringVariable<'i>,
+    args: Rc<Vec<ImmutableValue<'i>>>,
     output: CallOutputValue<'i>,
 ) -> Instruction<'i> {
     let triplet = Triplet {
-        peer_pk,
+        peer_id: peer_pk,
         service_id,
         function_name,
     };
@@ -73,8 +73,12 @@ pub(super) fn null() -> Instruction<'static> {
     Instruction::Null(Null)
 }
 
-pub(super) fn fail_scalar(scalar: ScalarWithLambda) -> Instruction<'_> {
+pub(super) fn fail_scalar(scalar: Scalar) -> Instruction<'_> {
     Instruction::Fail(Fail::Scalar(scalar))
+}
+
+pub(super) fn fail_scalar_wl(scalar: ScalarWithLambda) -> Instruction<'_> {
+    Instruction::Fail(Fail::ScalarWithLambda(scalar))
 }
 
 pub(super) fn fail_literals(ret_code: i64, error_message: &str) -> Instruction<'_> {
@@ -89,7 +93,7 @@ pub(super) fn fail_last_error() -> Instruction<'static> {
 }
 
 pub(super) fn fold_scalar_variable<'i>(
-    scalar: ScalarWithLambda<'i>,
+    scalar: Scalar<'i>,
     iterator: Scalar<'i>,
     instruction: Instruction<'i>,
     last_instruction: Option<Instruction<'i>>,
@@ -97,6 +101,22 @@ pub(super) fn fold_scalar_variable<'i>(
 ) -> Instruction<'i> {
     Instruction::FoldScalar(FoldScalar {
         iterable: FoldScalarIterable::Scalar(scalar),
+        iterator,
+        instruction: Rc::new(instruction),
+        last_instruction: last_instruction.map(Rc::new),
+        span,
+    })
+}
+
+pub(super) fn fold_scalar_variable_wl<'i>(
+    scalar: ScalarWithLambda<'i>,
+    iterator: Scalar<'i>,
+    instruction: Instruction<'i>,
+    last_instruction: Option<Instruction<'i>>,
+    span: Span,
+) -> Instruction<'i> {
+    Instruction::FoldScalar(FoldScalar {
+        iterable: FoldScalarIterable::ScalarWithLambda(scalar),
         iterator,
         instruction: Rc::new(instruction),
         last_instruction: last_instruction.map(Rc::new),
@@ -152,8 +172,8 @@ pub(super) fn fold_stream<'i>(
 }
 
 pub(super) fn match_<'i>(
-    left_value: Value<'i>,
-    right_value: Value<'i>,
+    left_value: ImmutableValue<'i>,
+    right_value: ImmutableValue<'i>,
     instruction: Instruction<'i>,
 ) -> Instruction<'i> {
     Instruction::Match(Match {
@@ -164,8 +184,8 @@ pub(super) fn match_<'i>(
 }
 
 pub(super) fn mismatch<'i>(
-    left_value: Value<'i>,
-    right_value: Value<'i>,
+    left_value: ImmutableValue<'i>,
+    right_value: ImmutableValue<'i>,
     instruction: Instruction<'i>,
 ) -> Instruction<'i> {
     Instruction::MisMatch(MisMatch {
@@ -180,12 +200,12 @@ pub(super) fn ap<'i>(argument: ApArgument<'i>, result: ApResult<'i>) -> Instruct
 }
 
 pub(super) fn canon<'i>(
-    peer_pk: CallInstrValue<'i>,
+    peer_pk: ResolvableToPeerIdVariable<'i>,
     stream: Stream<'i>,
     canon_stream: CanonStream<'i>,
 ) -> Instruction<'i> {
     Instruction::Canon(Canon {
-        peer_pk,
+        peer_id: peer_pk,
         stream,
         canon_stream,
     })

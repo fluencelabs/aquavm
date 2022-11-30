@@ -39,11 +39,17 @@
         )
        )
       (par
-       (call %init_peer_id% ("op" "identity") [$res.$.[19]!])
+       (seq
+         (canon %init_peer_id% $res #res)
+         (call %init_peer_id% ("op" "identity") [#res.$.[19]!])
+       )
        (call %init_peer_id% ("peer" "timeout") [1000 "timeout"])
        )
       )
-     (call %init_peer_id% ("op" "identity") [$res] res-fix)
+     (seq
+       (canon %init_peer_id% $res #res)
+       (call %init_peer_id% ("op" "identity") [#res] res-fix)
+     )
      )
     )
    )

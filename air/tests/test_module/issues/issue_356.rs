@@ -43,7 +43,10 @@ fn issue_356() {
                         )
                     )
                 )
-                (call "client" ("return" "") [$external_addresses neighs_inner] x) ; ok = null
+                (seq
+                    (canon "client" $external_addresses #external_addresses)
+                    (call "client" ("return" "") [#external_addresses neighs_inner] x) ; ok = null
+                )
             )
         )
         "#;
