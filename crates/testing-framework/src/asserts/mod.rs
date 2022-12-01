@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
+mod behavior;
 mod json;
 pub(crate) mod parser;
 
 use crate::services::JValue;
 
-use air_test_utils::{
-    prelude::{echo_call_service, unit_call_service},
-    CallRequestParams, CallServiceResult,
-};
+use air_test_utils::{CallRequestParams, CallServiceResult};
 use serde_json::json;
 use strum::{AsRefStr, EnumDiscriminants, EnumString};
 
 use std::{borrow::Cow, cell::Cell, collections::HashMap};
+
+use self::behavior::Behavior;
 
 /// Service definition in the testing framework comment DSL.
 #[derive(Debug, PartialEq, Eq, Clone, EnumDiscriminants)]
@@ -53,7 +53,7 @@ pub enum ServiceDefinition {
     },
     /// Some known service by name: "echo", "unit" (more to follow).
     #[strum_discriminants(strum(serialize = "behaviour"))]
-    Behaviour(String),
+    Behaviour(Behavior),
     /// Maps first argument to a value
     #[strum_discriminants(strum(serialize = "map"))]
     Map(HashMap<String, JValue>),
@@ -82,8 +82,8 @@ impl ServiceDefinition {
         }
     }
 
-    pub fn behaviour(name: impl Into<String>) -> Self {
-        Self::Behaviour(name.into())
+    pub fn behaviour(name: Behavior) -> Self {
+        Self::Behaviour(name)
     }
 
     pub fn map(map: HashMap<String, JValue>) -> Self {
@@ -102,7 +102,7 @@ impl ServiceDefinition {
                 ref call_number_seq,
                 call_map,
             } => call_seq_error(call_number_seq, call_map),
-            ServiceDefinition::Behaviour(name) => call_named_service(name, params),
+            ServiceDefinition::Behaviour(name) => name.call(params),
             ServiceDefinition::Map(map) => call_map_service(map, params),
         }
     }
@@ -147,14 +147,6 @@ fn call_seq_error(
             )
         })
         .clone()
-}
-
-fn call_named_service(name: &str, params: CallRequestParams) -> CallServiceResult {
-    match name {
-        "echo" => echo_call_service()(params),
-        "unit" => unit_call_service()(params),
-        _ => unreachable!("shoudn't be allowed by a parser"),
-    }
 }
 
 fn call_map_service(

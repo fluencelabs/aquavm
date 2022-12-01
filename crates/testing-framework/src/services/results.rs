@@ -19,7 +19,7 @@ use crate::asserts::ServiceDefinition;
 
 use air_test_utils::CallRequestParams;
 
-use std::{cell::RefCell, collections::HashMap, rc::Rc, time::Duration};
+use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub(crate) struct ResultStore {
@@ -36,18 +36,23 @@ impl ResultStore {
 }
 
 impl MarineService for ResultStore {
-    fn call(&self, params: CallRequestParams) -> FunctionOutcome {
+    fn call(&self, mut params: CallRequestParams) -> FunctionOutcome {
         let results = self.results.borrow();
-        if let Some((_, suffix)) = params.service_id.split_once("..") {
-            if let Ok(key) = suffix.parse() {
-                let service_desc = results.get(&key).expect("Unknown result id");
-                let service_result = service_desc.call(params);
-                FunctionOutcome::ServiceResult(service_result, Duration::ZERO)
-            } else {
-                // Pass malformed service names further in a chain
-                FunctionOutcome::NotDefined
-            }
+
+        let (real_service_id, suffix) = match params.service_id.rsplit_once("..") {
+            Some(split) => split,
+            None => return FunctionOutcome::NotDefined,
+        };
+
+        if let Ok(result_id) = suffix.parse::<usize>() {
+            let service_desc = results
+                .get(&result_id)
+                .unwrap_or_else(|| panic!("failed to parse service name {:?}", params.service_id));
+            // hide the artificial service_id
+            params.service_id = real_service_id.to_owned();
+            FunctionOutcome::from_service_result(service_desc.call(params))
         } else {
+            // Pass malformed service names further in a chain
             FunctionOutcome::NotDefined
         }
     }
