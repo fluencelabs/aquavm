@@ -42,6 +42,8 @@ impl<Val> Default for CidStore<Val> {
     }
 }
 
+pub type CidTrackerError = serde_json::Error;
+
 #[derive(Clone, Debug)]
 pub struct CidTracker<Val = JValue> {
     cids: HashMap<Rc<CID>, Rc<Val>>,
@@ -67,12 +69,11 @@ impl<Val> CidTracker<Val> {
 }
 
 impl<Val: Serialize> CidTracker<Val> {
-    pub fn record_value(&mut self, value: impl Into<Rc<Val>>) -> Rc<CID> {
-        // TODO do something with error: propagate, or unwrap earlier.
+    pub fn record_value(&mut self, value: impl Into<Rc<Val>>) -> Result<Rc<CID>, CidTrackerError> {
         let value = value.into();
-        let cid = Rc::new(value_to_json_cid(&value).unwrap());
+        let cid = Rc::new(value_to_json_cid(&value)?);
         self.cids.insert(cid.clone(), value);
-        cid
+        Ok(cid)
     }
 }
 
@@ -110,12 +111,14 @@ mod tests {
     #[test]
     fn test_record() {
         let mut tracker = CidTracker::new();
-        tracker.record_value(json!("test"));
-        tracker.record_value(json!(1));
-        tracker.record_value(json!([1, 2, 3]));
-        tracker.record_value(json!({
-            "key": 42,
-        }));
+        tracker.record_value(json!("test")).unwrap();
+        tracker.record_value(json!(1)).unwrap();
+        tracker.record_value(json!([1, 2, 3])).unwrap();
+        tracker
+            .record_value(json!({
+                "key": 42,
+            }))
+            .unwrap();
         let store = CidStore::from(tracker);
         assert_eq!(
             store.into_iter().collect::<HashMap<_, _>>(),

@@ -17,8 +17,10 @@
 use crate::JValue;
 use crate::ToErrorCode;
 
+use air_interpreter_data::CidTrackerError;
 use air_interpreter_data::TracePos;
 use air_interpreter_data::Value;
+use air_interpreter_interface::CID;
 use air_trace_handler::merger::MergerApResult;
 use air_trace_handler::GenerationCompatificationError;
 use air_trace_handler::TraceHandlerError;
@@ -26,6 +28,8 @@ use strum::IntoEnumIterator;
 use strum_macros::EnumDiscriminants;
 use strum_macros::EnumIter;
 use thiserror::Error as ThisError;
+
+use std::rc::Rc;
 
 /// Uncatchable errors arisen during AIR script execution. Uncatchable here means that these errors
 /// couldn't be handled by a xor instruction and their error_code couldn't be used in a match
@@ -90,6 +94,12 @@ pub enum UncatchableError {
         canonicalized_stream: JValue,
         de_error: serde_json::Error,
     },
+
+    #[error("failed to calculate value's CID")]
+    CidError(#[from] CidTrackerError),
+
+    #[error("value for CID {0:?} not found")]
+    ValueForCidNotFound(Rc<CID>),
 }
 
 impl ToErrorCode for UncatchableError {

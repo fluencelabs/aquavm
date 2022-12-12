@@ -41,7 +41,7 @@ pub fn scalar(result: JValue) -> ExecutedState {
 }
 
 pub fn scalar_tracked(result: impl Into<JValue>, tracker: &mut CidTracker) -> ExecutedState {
-    let cid = tracker.record_value(Rc::new(result.into()));
+    let cid = tracker.record_value(Rc::new(result.into())).unwrap();
     let value = Value::Scalar(cid);
     ExecutedState::Call(CallResult::Executed(value))
 }
@@ -67,7 +67,7 @@ pub fn stream_tracked(
     generation: u32,
     tracker: &mut CidTracker,
 ) -> ExecutedState {
-    let cid = tracker.record_value(Rc::new(value.into()));
+    let cid = tracker.record_value(Rc::new(value.into())).unwrap();
     ExecutedState::Call(CallResult::executed_stream(cid, generation))
 }
 

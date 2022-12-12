@@ -23,7 +23,7 @@ use std::rc::Rc;
 fn seq_remote_remote() {
     let mut vm = create_avm(unit_call_service(), "");
     let mut cid_tracker = CidTracker::new();
-    cid_tracker.record_value(Rc::new("".into()));
+    cid_tracker.record_value(Rc::new("".into())).unwrap();
 
     let script = r#"
             (seq

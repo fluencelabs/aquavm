@@ -37,7 +37,7 @@ fn issue_295() {
     "#);
 
     let mut cid_tracker = CidTracker::new();
-    cid_tracker.record_value(Rc::new("".into()));
+    cid_tracker.record_value(Rc::new("".into())).unwrap();
     let prev_trace = vec![executed_state::scalar_string(""), executed_state::ap(1)];
     let current_trace = vec![executed_state::scalar_string(""), executed_state::scalar_string("")];
     let prev_data = raw_data_from_trace(prev_trace, cid_tracker.clone().into());

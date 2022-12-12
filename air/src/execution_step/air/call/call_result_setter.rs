@@ -32,7 +32,10 @@ pub(crate) fn populate_context_from_peer_service_result<'i>(
     output: &CallOutputValue<'i>,
     exec_ctx: &mut ExecutionCtx<'i>,
 ) -> ExecutionResult<CallResult> {
-    let cid = exec_ctx.cid_tracker.record_value(executed_result.result.clone());
+    let cid = exec_ctx
+        .cid_tracker
+        .record_value(executed_result.result.clone())
+        .map_err(UncatchableError::from)?;
 
     match output {
         CallOutputValue::Scalar(scalar) => {
@@ -65,20 +68,18 @@ pub(crate) fn populate_context_from_data<'i>(
     exec_ctx: &mut ExecutionCtx<'i>,
 ) -> ExecutionResult<Value> {
     match (output, value) {
-        (CallOutputValue::Scalar(_scalar), Value::Scalar(_cid)) => {
+        (CallOutputValue::Scalar(scalar), Value::Scalar(cid)) => {
             let value = exec_ctx
-                .get_value_by_cid(&_cid)
-                // TODO error handling
-                .unwrap_or_else(|| panic!("No value for CID {:?} found", _cid));
+                .get_value_by_cid(&cid)
+                .ok_or_else(|| UncatchableError::ValueForCidNotFound(cid.clone()))?;
             let result = ValueAggregate::new(value, tetraplet, trace_pos);
-            exec_ctx.scalars.set_scalar_value(_scalar.name, result)?;
-            Ok(Value::Scalar(_cid))
+            exec_ctx.scalars.set_scalar_value(scalar.name, result)?;
+            Ok(Value::Scalar(cid))
         }
         (CallOutputValue::Stream(stream), Value::Stream { cid, generation }) => {
             let value = exec_ctx
                 .get_value_by_cid(&cid)
-                // TODO error handling
-                .unwrap_or_else(|| panic!("No value for CID {:?} found", cid));
+                .ok_or_else(|| UncatchableError::ValueForCidNotFound(cid.clone()))?;
             let result = ValueAggregate::new(value, tetraplet, trace_pos);
             let value_descriptor = StreamValueDescriptor::new(
                 result,
