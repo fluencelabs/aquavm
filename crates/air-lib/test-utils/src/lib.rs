@@ -95,7 +95,7 @@ pub fn raw_data_from_trace(trace: impl Into<ExecutionTrace>, cid_tracker: CidTra
         trace.into(),
         <_>::default(),
         <_>::default(),
-        cid_tracker.into(),
+        cid_tracker,
         0,
         semver::Version::new(1, 1, 1),
     );

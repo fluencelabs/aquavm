@@ -77,10 +77,12 @@ impl InterpreterData {
         trace: ExecutionTrace,
         streams: GlobalStreamGens,
         restricted_streams: RestrictedStreamGens,
-        cid_store: CidStore,
+        cid_store: impl Into<CidStore>,
         last_call_request_id: u32,
         interpreter_version: semver::Version,
     ) -> Self {
+        let cid_store = cid_store.into();
+
         Self {
             trace,
             global_streams: streams,

@@ -93,7 +93,7 @@ fn populate_outcome_from_contexts(
         trace_handler.into_result_trace(),
         global_streams,
         restricted_streams,
-        exec_ctx.cid_tracker.into(),
+        exec_ctx.cid_tracker,
         exec_ctx.last_call_request_id,
         semver::Version::parse(env!("CARGO_PKG_VERSION")).expect("cargo version is valid"),
     );
