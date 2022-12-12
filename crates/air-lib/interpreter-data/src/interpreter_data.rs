@@ -18,6 +18,7 @@ use super::GlobalStreamGens;
 use super::RestrictedStreamGens;
 use crate::cid_store::CidStore;
 use crate::ExecutionTrace;
+use crate::JValue;
 
 use air_utils::measure;
 
@@ -57,7 +58,7 @@ pub struct InterpreterData {
     pub interpreter_version: semver::Version,
 
     /// Map CID to values
-    pub cid_store: CidStore,
+    pub cid_store: CidStore<JValue>,
 }
 
 impl InterpreterData {
@@ -77,7 +78,7 @@ impl InterpreterData {
         trace: ExecutionTrace,
         streams: GlobalStreamGens,
         restricted_streams: RestrictedStreamGens,
-        cid_store: impl Into<CidStore>,
+        cid_store: impl Into<CidStore<JValue>>,
         last_call_request_id: u32,
         interpreter_version: semver::Version,
     ) -> Self {

@@ -22,31 +22,37 @@ use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, rc::Rc};
 
 /// Stores CID to Value corresponance.
-#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(transparent)]
-pub struct CidStore(HashMap<Rc<CID>, Rc<JValue>>);
+pub struct CidStore<Val>(HashMap<Rc<CID>, Rc<Val>>);
 
-impl CidStore {
+impl<Val> CidStore<Val> {
     pub fn new() -> Self {
         Self::default()
     }
 
-    pub fn get(&self, cid: &CID) -> Option<Rc<JValue>> {
+    pub fn get(&self, cid: &CID) -> Option<Rc<Val>> {
         self.0.get(cid).cloned()
     }
 }
 
-#[derive(Clone, Debug, Default)]
-pub struct CidTracker {
-    cids: HashMap<Rc<CID>, Rc<JValue>>,
+impl<Val> Default for CidStore<Val> {
+    fn default() -> Self {
+        Self(Default::default())
+    }
 }
 
-impl CidTracker {
+#[derive(Clone, Debug)]
+pub struct CidTracker<Val = JValue> {
+    cids: HashMap<Rc<CID>, Rc<Val>>,
+}
+
+impl<Val> CidTracker<Val> {
     pub fn new() -> Self {
         Self::default()
     }
 
-    pub fn from_cid_stores(prev_cid_map: &CidStore, current_cid_map: &CidStore) -> Self {
+    pub fn from_cid_stores(prev_cid_map: &CidStore<Val>, current_cid_map: &CidStore<Val>) -> Self {
         let mut cids = prev_cid_map.0.clone();
         for (cid, val) in &current_cid_map.0 {
             // TODO check that values matches?
@@ -55,29 +61,39 @@ impl CidTracker {
         Self { cids }
     }
 
-    pub fn record_value(&mut self, value: impl Into<Rc<JValue>>) -> Rc<CID> {
+    pub fn get(&self, cid: &CID) -> Option<Rc<Val>> {
+        self.cids.get(cid).cloned()
+    }
+}
+
+impl<Val: Serialize> CidTracker<Val> {
+    pub fn record_value(&mut self, value: impl Into<Rc<Val>>) -> Rc<CID> {
         // TODO do something with error: propagate, or unwrap earlier.
         let value = value.into();
         let cid = Rc::new(value_to_cid(&value).unwrap());
         self.cids.insert(cid.clone(), value);
         cid
     }
+}
 
-    pub fn get(&self, cid: &CID) -> Option<Rc<JValue>> {
-        self.cids.get(cid).cloned()
+impl<Val> Default for CidTracker<Val> {
+    fn default() -> Self {
+        Self {
+            cids: Default::default(),
+        }
     }
 }
 
-impl From<CidTracker> for CidStore {
-    fn from(value: CidTracker) -> Self {
+impl<Val> From<CidTracker<Val>> for CidStore<Val> {
+    fn from(value: CidTracker<Val>) -> Self {
         Self(value.cids)
     }
 }
 
-impl IntoIterator for CidStore {
-    type Item = (Rc<CID>, Rc<JValue>);
+impl<Val> IntoIterator for CidStore<Val> {
+    type Item = (Rc<CID>, Rc<Val>);
 
-    type IntoIter = std::collections::hash_map::IntoIter<Rc<CID>, Rc<JValue>>;
+    type IntoIter = std::collections::hash_map::IntoIter<Rc<CID>, Rc<Val>>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.0.into_iter()
