@@ -56,7 +56,7 @@ impl InterpreterOutcome {
         next_peer_pks: Vec<String>,
         call_requests: Vec<u8>,
     ) -> Self {
-        let cid = json_data_cid(&data);
+        let cid = crate::json_data_cid(&data).into();
 
         Self {
             ret_code,
@@ -64,7 +64,7 @@ impl InterpreterOutcome {
             data,
             next_peer_pks,
             call_requests,
-            cid: cid.into(),
+            cid,
         }
     }
 }
@@ -95,8 +95,6 @@ impl InterpreterOutcome {
 
 #[cfg(feature = "marine")]
 use fluence_it_types::ne_vec::NEVec;
-
-use crate::json_data_cid;
 
 #[cfg(feature = "marine")]
 fn try_as_record(ivalue: IValue) -> Result<NEVec<IValue>, String> {

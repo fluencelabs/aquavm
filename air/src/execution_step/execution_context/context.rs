@@ -15,7 +15,6 @@
  */
 
 use crate::JValue;
-
 use super::LastError;
 use super::LastErrorDescriptor;
 use super::Scalars;
@@ -86,7 +85,7 @@ impl<'i> ExecutionCtx<'i> {
             current_data.restricted_streams.clone(),
         );
 
-        let cid_to_value = CidTracker::from_cid_stores(&prev_data.cid_store, &current_data.cid_store);
+        let cid_tracker = CidTracker::from_cid_stores(&prev_data.cid_store, &current_data.cid_store);
 
         Self {
             run_parameters,
@@ -94,7 +93,7 @@ impl<'i> ExecutionCtx<'i> {
             last_call_request_id: prev_data.last_call_request_id,
             call_results,
             streams,
-            cid_tracker: cid_to_value,
+            cid_tracker,
             ..<_>::default()
         }
     }

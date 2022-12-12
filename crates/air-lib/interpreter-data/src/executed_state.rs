@@ -60,9 +60,6 @@ pub enum CallResult {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Value {
-    // Why CID is not part of the JValue or like this?  We may need to abstract
-    // over values, and value should know its orignal CID (and values should
-    // maintain its original binary data).
     Scalar(Rc<CID>),
     Stream { cid: Rc<CID>, generation: u32 },
 }

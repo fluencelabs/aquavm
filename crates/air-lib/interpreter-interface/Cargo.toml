@@ -23,7 +23,6 @@ multihash = { version = "0.17.0", default-features = false, features = ["multiha
 serde = "1.0.147"
 serde_json = "1.0.89"
 
-
 [features]
 default = ["marine"]
 marine = ["marine-rs-sdk", "fluence-it-types"]
