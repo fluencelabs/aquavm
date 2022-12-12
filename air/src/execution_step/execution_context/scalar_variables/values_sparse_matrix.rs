@@ -252,7 +252,7 @@ where
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match &self.value {
-            Some(value) => write!(f, "{}", value),
+            Some(value) => write!(f, "{value}"),
             None => write!(f, "none"),
         }
     }
@@ -266,10 +266,10 @@ where
         writeln!(f, "current_depth: {}", self.current_depth)?;
 
         for (name, values) in self.cells.iter() {
-            write!(f, "{}: ", name)?;
+            write!(f, "{name}: ")?;
 
             for value in values.iter() {
-                write!(f, "{} ", value)?;
+                write!(f, "{value} ")?;
             }
             writeln!(f)?;
         }
@@ -305,7 +305,7 @@ mod test {
         scalars.meet_fold_start();
         scalars.set_value(value_2_name, value_aggregate.clone()).unwrap();
         scalars.meet_fold_start();
-        scalars.set_value(value_2_name, value_aggregate.clone()).unwrap();
+        scalars.set_value(value_2_name, value_aggregate).unwrap();
 
         let expected_values_count = scalars.cells.get(value_2_name).unwrap().len();
         assert_eq!(expected_values_count, NonZeroUsize::new(2).unwrap());

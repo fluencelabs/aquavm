@@ -27,7 +27,7 @@ use air_parser::AIRLexer;
 use air_parser::AIRParser;
 use air_parser::VariableValidator;
 
-const SOURCE_CODE_BAD: &'static str = r#"(seq
+const SOURCE_CODE_BAD: &str = r#"(seq
         (seq
             (call node ("identity" "") [] $void)
             (call provider (service_id "{fname}") {arg_list} result)
@@ -38,7 +38,7 @@ const SOURCE_CODE_BAD: &'static str = r#"(seq
         )
     )"#;
 
-const SOURCE_CODE_GOOD: &'static str = r#"
+const SOURCE_CODE_GOOD: &str = r#"
     (seq
         (seq
             (call node ("identity" "") [] $void)
@@ -73,7 +73,7 @@ mod gen {
 }
 
 fn create_parser(c: &mut Criterion) {
-    c.bench_function("create_parser", move |b| b.iter(move || AIRParser::new()));
+    c.bench_function("create_parser", move |b| b.iter(AIRParser::new));
 }
 
 fn parse(c: &mut Criterion) {

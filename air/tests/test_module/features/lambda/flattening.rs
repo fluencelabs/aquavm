@@ -71,7 +71,7 @@ fn flattening_scalar_arrays() {
         "#);
 
     let result = checked_call_vm!(set_variable_vm, <_>::default(), script.clone(), "", "");
-    let result = call_vm!(local_vm, <_>::default(), script.clone(), "", result.data);
+    let result = call_vm!(local_vm, <_>::default(), script, "", result.data);
 
     assert!(is_interpreter_succeded(&result));
     assert_eq!(
@@ -118,7 +118,7 @@ fn flattening_streams() {
         "#);
 
     let result = checked_call_vm!(set_variable_vm, <_>::default(), script.clone(), "", "");
-    let result = call_vm!(local_vm, <_>::default(), script.clone(), "", result.data);
+    let result = call_vm!(local_vm, <_>::default(), script, "", result.data);
 
     assert!(is_interpreter_succeded(&result));
     assert_eq!(
@@ -156,7 +156,7 @@ fn flattening_empty_values() {
         "#);
 
     let result = checked_call_vm!(set_variable_vm, <_>::default(), script.clone(), "", "");
-    let result = checked_call_vm!(local_vm, <_>::default(), script.clone(), "", result.data);
+    let result = checked_call_vm!(local_vm, <_>::default(), script, "", result.data);
 
     assert!(is_interpreter_succeded(&result));
     assert_eq!(closure_call_args.args_var, Rc::new(RefCell::new(vec![])));
@@ -174,7 +174,7 @@ fn test_handling_non_flattening_values() {
 
     let closure_call_args = ClosureCallArgs::default();
     let local_peer_id = "local_peer_id";
-    let mut local_vm = create_avm(create_check_service_closure(closure_call_args.clone()), local_peer_id);
+    let mut local_vm = create_avm(create_check_service_closure(closure_call_args), local_peer_id);
 
     let script = f!(r#"
         (seq

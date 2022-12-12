@@ -113,7 +113,7 @@ fn stream_merging_v0() {
         executor,
         <_>::default(),
         &script,
-        executor_result_1.data.clone(),
+        executor_result_1.data,
         setter_2_res.data
     );
     let actual_trace_2 = trace_from_result(&executor_result_2);
@@ -157,7 +157,7 @@ fn stream_merging_v0() {
         executor,
         <_>::default(),
         &script,
-        executor_result_2.data.clone(),
+        executor_result_2.data,
         setter_3_res.data
     );
     let actual_trace_3 = trace_from_result(&executor_result_3);
@@ -268,7 +268,7 @@ fn stream_merging_v1() {
         executor,
         <_>::default(),
         &script,
-        executor_result_1.data.clone(),
+        executor_result_1.data,
         setter_2_res.data
     );
     let actual_trace_2 = trace_from_result(&executor_result_2);
@@ -317,7 +317,7 @@ fn stream_merging_v1() {
         executor,
         <_>::default(),
         &script,
-        executor_result_2.data.clone(),
+        executor_result_2.data,
         setter_3_res.data
     );
     let actual_trace_3 = trace_from_result(&executor_result_3);
@@ -433,7 +433,7 @@ fn stream_merging_v2() {
         executor,
         <_>::default(),
         &script,
-        executor_result_1.data.clone(),
+        executor_result_1.data,
         setter_2_res.data
     );
     let actual_trace_2 = trace_from_result(&executor_result_2);
@@ -477,7 +477,7 @@ fn stream_merging_v2() {
         executor,
         <_>::default(),
         &script,
-        executor_result_2.data.clone(),
+        executor_result_2.data,
         setter_3_res.data
     );
     let actual_trace_3 = trace_from_result(&executor_result_3);

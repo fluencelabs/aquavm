@@ -294,10 +294,9 @@ fn parse_init_peer_id() {
     let source_code = format!(
         r#"
         (seq
-            (call "{}" ("local_service_id" "local_fn_name") [])
+            (call "{peer_id}" ("local_service_id" "local_fn_name") [])
             (call %init_peer_id% ("service_id" "fn_name") [])
-        )"#,
-        peer_id
+        )"#
     );
 
     let instruction = parse(&source_code);
@@ -359,13 +358,12 @@ fn parse_ttl() {
 
 #[test]
 fn parse_last_error() {
-    let source_code = format!(
-        r#"
+    let source_code = r#"
         (seq
             (call %init_peer_id% ("service_id" "fn_name") [%last_error%])
             (null)
-        )"#,
-    );
+        )"#
+    .to_string();
 
     let instruction = parse(&source_code);
     let expected = seq(

@@ -113,7 +113,7 @@ fn parse_seq_par_xor_seq() {
     for name in &["xor", "par", "seq"] {
         let source_code = source_seq_with(name);
         let instruction = parse(&source_code);
-        let instr = binary_instruction(*name);
+        let instr = binary_instruction(name);
         let expected = seq(instr(seqnn(), null()), instr(null(), seqnn()));
         assert_eq!(instruction, expected);
     }

@@ -320,7 +320,7 @@ fn init_peer_id() {
     assert_eq!(client_1_actual_trace, client_1_expected_trace);
     assert_eq!(client_1_result.next_peer_pks, vec![initiator_peer_id.to_string()]);
 
-    let initiator_1_result = checked_call_vm!(initiator, test_params.clone(), script, client_1_result.data, "");
+    let initiator_1_result = checked_call_vm!(initiator, test_params, script, client_1_result.data, "");
 
     let initiator_1_actual_trace = trace_from_result(&initiator_1_result);
 

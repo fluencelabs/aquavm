@@ -75,7 +75,7 @@ fn issue_363() {
         "#;
 
     let client_result = checked_call_vm!(client_vm, <_>::default(), script, "", "");
-    let p1_result_1 = checked_call_vm!(p1_vm, <_>::default(), script, "", client_result.data.clone());
+    let p1_result_1 = checked_call_vm!(p1_vm, <_>::default(), script, "", client_result.data);
     let p2_result_1 = checked_call_vm!(p2_vm, <_>::default(), script, "", p1_result_1.data.clone());
 
     let p2_trace_1 = trace_from_result(&p2_result_1);
@@ -91,13 +91,7 @@ fn issue_363() {
         panic!("expected fold at pos 9")
     }
 
-    let p1_result_2 = checked_call_vm!(
-        p1_vm,
-        <_>::default(),
-        script,
-        p1_result_1.data.clone(),
-        p2_result_1.data.clone()
-    );
+    let p1_result_2 = checked_call_vm!(p1_vm, <_>::default(), script, p1_result_1.data, p2_result_1.data);
     let p1_trace_2 = trace_from_result(&p1_result_2);
     let fold_p1 = p1_trace_2.get(fold_position).unwrap();
     if let ExecutedState::Fold(fold) = fold_p1 {
