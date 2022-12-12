@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-use crate::JValue;
 use super::LastError;
 use super::LastErrorDescriptor;
 use super::Scalars;
 use super::Streams;
+use crate::JValue;
 
 use air_execution_info_collector::InstructionTracker;
 use air_interpreter_data::CidTracker;
