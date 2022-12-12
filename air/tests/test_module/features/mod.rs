@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+mod cid;
 mod data_merging;
 mod errors;
 mod join_behaviour;
