@@ -131,7 +131,7 @@ fn match_with_init_peer_id() {
 
     let test_params = TestRunParameters::from_init_peer_id(local_peer_id);
     let result = checked_call_vm!(set_variable_vm, test_params.clone(), &script, "", "");
-    let result = checked_call_vm!(vm, test_params.clone(), script, "", result.data);
+    let result = checked_call_vm!(vm, test_params, script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
     let expected_executed_call_result = executed_state::scalar_string("result_1");
@@ -162,7 +162,7 @@ fn match_with_timestamp() {
 
     let test_params = TestRunParameters::from_timestamp(timestamp);
     let result = checked_call_vm!(set_variable_vm, test_params.clone(), &script, "", "");
-    let result = checked_call_vm!(vm, test_params.clone(), script, "", result.data);
+    let result = checked_call_vm!(vm, test_params, script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
     let expected_executed_call_result = executed_state::scalar_string("result_1");
@@ -193,7 +193,7 @@ fn match_with_ttl() {
 
     let test_params = TestRunParameters::from_ttl(ttl);
     let result = checked_call_vm!(set_variable_vm, test_params.clone(), &script, "", "");
-    let result = checked_call_vm!(vm, test_params.clone(), script, "", result.data);
+    let result = checked_call_vm!(vm, test_params, script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
     let expected_executed_call_result = executed_state::scalar_string("result_1");

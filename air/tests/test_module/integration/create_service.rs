@@ -67,7 +67,7 @@ fn create_service() {
 
     let test_params = TestRunParameters::from_init_peer_id("init_peer_id");
     let result = checked_call_vm!(set_variables_vm, test_params.clone(), script, "", "");
-    let result = checked_call_vm!(vm, test_params.clone(), script, "", result.data);
+    let result = checked_call_vm!(vm, test_params, script, "", result.data);
 
     let add_module_response = "add_module response";
     let add_blueprint_response = "add_blueprint response";

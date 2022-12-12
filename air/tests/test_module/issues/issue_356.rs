@@ -55,14 +55,14 @@ fn issue_356() {
         TestRunParameters::from_init_peer_id("client"),
         vec![],
         vec!["p1", "p2", "p3"].into_iter().map(Into::into),
-        &script,
+        script,
     )
     .unwrap();
 
     for _ in 0..7 {
         for peer in ["client", "relay", "p1", "p2"] {
             for outcome in engine.execution_iter(peer).unwrap() {
-                assert_eq!(outcome.ret_code, 0, "{:?}", outcome);
+                assert_eq!(outcome.ret_code, 0, "{outcome:?}");
             }
         }
     }

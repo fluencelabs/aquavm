@@ -50,7 +50,7 @@ fn parse_to_functor(source_code: &str) -> Functor {
 #[test]
 fn field_access() {
     let field_name = "some_field_name";
-    let lambda = format!(".$.{}", field_name);
+    let lambda = format!(".$.{field_name}");
 
     let actual = parse_to_accessors(&lambda);
     let expected = vec![ValueAccessor::FieldAccessByName { field_name }];
@@ -60,7 +60,7 @@ fn field_access() {
 #[test]
 fn field_access_with_flattening() {
     let field_name = "some_field_name";
-    let lambda = format!(".$.{}!", field_name);
+    let lambda = format!(".$.{field_name}!");
 
     let actual = parse_to_accessors(&lambda);
     let expected = vec![ValueAccessor::FieldAccessByName { field_name }];
@@ -70,7 +70,7 @@ fn field_access_with_flattening() {
 #[test]
 fn array_access() {
     let idx = 0;
-    let lambda = format!(".$.[{}]", idx);
+    let lambda = format!(".$.[{idx}]");
 
     let actual = parse_to_accessors(&lambda);
     let expected = vec![ValueAccessor::ArrayAccess { idx }];
@@ -80,7 +80,7 @@ fn array_access() {
 #[test]
 fn array_access_with_flattening() {
     let idx = 0;
-    let lambda = format!(".$.[{}]!", idx);
+    let lambda = format!(".$.[{idx}]!");
 
     let actual = parse_to_accessors(&lambda);
     let expected = vec![ValueAccessor::ArrayAccess { idx }];
@@ -90,7 +90,7 @@ fn array_access_with_flattening() {
 #[test]
 fn scalar_access() {
     let scalar_name = "some_field_name";
-    let lambda = format!(".$.[{}]", scalar_name);
+    let lambda = format!(".$.[{scalar_name}]");
 
     let actual = parse_to_accessors(&lambda);
     let expected = vec![ValueAccessor::FieldAccessByScalar { scalar_name }];
@@ -100,7 +100,7 @@ fn scalar_access() {
 #[test]
 fn scalar_access_with_flattening() {
     let scalar_name = "some_scalar_name";
-    let lambda = format!(".$.[{}]!", scalar_name);
+    let lambda = format!(".$.[{scalar_name}]!");
 
     let actual = parse_to_accessors(&lambda);
     let expected = vec![ValueAccessor::FieldAccessByScalar { scalar_name }];
@@ -111,7 +111,7 @@ fn scalar_access_with_flattening() {
 fn field_array_access() {
     let field_name = "some_field_name";
     let idx = 1;
-    let lambda = format!(".$.{}.[{}]", field_name, idx);
+    let lambda = format!(".$.{field_name}.[{idx}]");
 
     let actual = parse_to_accessors(&lambda);
     let expected = vec![
@@ -125,7 +125,7 @@ fn field_array_access() {
 fn field_scalar_access() {
     let field_name = "some_field_name";
     let scalar_name = "some_scalar_name";
-    let lambda = format!(".$.{}.[{}]", field_name, scalar_name);
+    let lambda = format!(".$.{field_name}.[{scalar_name}]");
 
     let actual = parse_to_accessors(&lambda);
     let expected = vec![
@@ -139,7 +139,7 @@ fn field_scalar_access() {
 fn scalar_array_access() {
     let scalar_name = "some_scalar_name";
     let idx = 1;
-    let lambda = format!(".$.[{}].[{}]", scalar_name, idx);
+    let lambda = format!(".$.[{scalar_name}].[{idx}]");
 
     let actual = parse_to_accessors(&lambda);
     let expected = vec![
@@ -153,7 +153,7 @@ fn scalar_array_access() {
 fn field_array_access_without_dot() {
     let field_name = "some_field_name";
     let idx = 1;
-    let lambda = format!(".$.{}[{}]", field_name, idx);
+    let lambda = format!(".$.{field_name}[{idx}]");
 
     let actual = parse_to_accessors(&lambda);
     let expected = vec![
@@ -167,7 +167,7 @@ fn field_array_access_without_dot() {
 fn array_field_access() {
     let field_name = "some_field_name";
     let idx = 1;
-    let lambda = format!(".$.[{}].{}", idx, field_name);
+    let lambda = format!(".$.[{idx}].{field_name}");
 
     let actual = parse_to_accessors(&lambda);
     let expected = vec![
@@ -181,7 +181,7 @@ fn array_field_access() {
 fn array_scalar_access() {
     let scalar_name = "some_scalar_name";
     let idx = 1;
-    let lambda = format!(".$.[{}].[{}]", idx, scalar_name);
+    let lambda = format!(".$.[{idx}].[{scalar_name}]");
 
     let actual = parse_to_accessors(&lambda);
     let expected = vec![
@@ -197,10 +197,7 @@ fn many_array_field_access() {
     let field_name_2 = "some_field_name_2";
     let idx_1 = 1;
     let idx_2 = u32::MAX;
-    let lambda = format!(
-        ".$.[{}].{}.[{}].{}",
-        idx_1, field_name_1, idx_2, field_name_2
-    );
+    let lambda = format!(".$.[{idx_1}].{field_name_1}.[{idx_2}].{field_name_2}");
 
     let actual = parse_to_accessors(&lambda);
     let expected = vec![
@@ -225,8 +222,7 @@ fn many_array_field_scalar_access() {
     let scalar_name_1 = "some_scalar_name_1";
     let scalar_name_2 = "some_scalar_name_2";
     let lambda = format!(
-        ".$.[{}].[{}].{}.[{}].[{}].{}",
-        idx_1, scalar_name_1, field_name_1, idx_2, scalar_name_2, field_name_2
+        ".$.[{idx_1}].[{scalar_name_1}].{field_name_1}.[{idx_2}].[{scalar_name_2}].{field_name_2}"
     );
 
     let actual = parse_to_accessors(&lambda);
@@ -253,7 +249,7 @@ fn many_array_field_scalar_access() {
 fn parse_length_functor() {
     let lambda = ".length";
 
-    let actual = parse_to_functor(&lambda);
+    let actual = parse_to_functor(lambda);
     let expected = Functor::Length;
     assert_eq!(actual, expected);
 }

@@ -149,8 +149,8 @@ impl<W: io::Write> Beautifier<W> {
     fn beautify_call(&mut self, call: &ast::Call<'_>, indent: usize) -> io::Result<()> {
         fmt_indent(&mut self.output, indent)?;
         match &call.output {
-            ast::CallOutputValue::Scalar(v) => write!(&mut self.output, "{} <- ", v)?,
-            ast::CallOutputValue::Stream(v) => write!(&mut self.output, "{} <- ", v)?,
+            ast::CallOutputValue::Scalar(v) => write!(&mut self.output, "{v} <- ")?,
+            ast::CallOutputValue::Stream(v) => write!(&mut self.output, "{v} <- ")?,
             ast::CallOutputValue::None => {}
         }
         writeln!(
@@ -163,7 +163,7 @@ impl<W: io::Write> Beautifier<W> {
 
     fn beautify_simple(&mut self, instruction: impl Display, indent: usize) -> io::Result<()> {
         fmt_indent(&mut self.output, indent)?;
-        writeln!(&mut self.output, "{}", instruction)
+        writeln!(&mut self.output, "{instruction}")
     }
 
     fn beautify_seq(&mut self, seq: &ast::Seq<'_>, indent: usize) -> io::Result<()> {

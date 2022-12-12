@@ -46,13 +46,7 @@ fn issue_348() {
     "#);
 
     let result11 = checked_call_vm!(peer_vm_1, <_>::default(), &script, "", "");
-    let result21 = checked_call_vm!(peer_vm_2, <_>::default(), &script, "", result11.data.clone());
+    let result21 = checked_call_vm!(peer_vm_2, <_>::default(), &script, "", result11.data);
     let result31 = checked_call_vm!(peer_vm_3, <_>::default(), &script, "", result21.data.clone());
-    let _result22 = checked_call_vm!(
-        peer_vm_2,
-        <_>::default(),
-        &script,
-        result21.data.clone(),
-        result31.data.clone()
-    );
+    let _result22 = checked_call_vm!(peer_vm_2, <_>::default(), &script, result21.data, result31.data);
 }

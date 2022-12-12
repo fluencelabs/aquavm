@@ -61,12 +61,10 @@ impl Sexp {
                 None => Err("cannot attach a service definition an empty list".to_owned()),
             },
             Sexp::Symbol(s) => Err(format!(
-                "cannot attach a service definition to a symbol {:?}",
-                s
+                "cannot attach a service definition to a symbol {s:?}"
             )),
             Sexp::String(ref s) => Err(format!(
-                r#"cannot attach a service definition to a string: "{:?}""#,
-                s
+                r#"cannot attach a service definition to a string: "{s:?}""#
             )),
         }
     }
@@ -86,14 +84,14 @@ impl std::fmt::Display for Sexp {
                     func = call.triplet.2,
                     args = call.args.iter().format(" "),
                     var = match &call.var {
-                        Some(var) => format!(" {}", var),
+                        Some(var) => format!(" {var}"),
                         None => "".to_owned(),
                     }
                 )
             }
             Sexp::List(items) => write!(f, "({})", items.iter().format(" ")),
-            Sexp::Symbol(symbol) => write!(f, "{}", symbol),
-            Sexp::String(string) => write!(f, r#""{}""#, string),
+            Sexp::Symbol(symbol) => write!(f, "{symbol}"),
+            Sexp::String(string) => write!(f, r#""{string}""#),
         }
     }
 }
@@ -108,34 +106,34 @@ mod tests {
     fn test_parse_fmt_call() {
         let sexp_str = r#"(call "my_id" ("serv" "function") [other_peer_id "other_arg"])"#;
         let sexp = Sexp::from_str(sexp_str).unwrap();
-        assert_eq!(format!("{}", sexp), sexp_str);
+        assert_eq!(format!("{sexp}"), sexp_str);
     }
 
     #[test]
     fn test_parse_fmt_call_var() {
         let sexp_str = r#"(call "my_id" ("serv" "function") [other_peer_id "other_arg"] var)"#;
         let sexp = Sexp::from_str(sexp_str).unwrap();
-        assert_eq!(format!("{}", sexp), sexp_str);
+        assert_eq!(format!("{sexp}"), sexp_str);
     }
 
     #[test]
     fn test_parse_fmt_symbol() {
         let sexp_str = "symbol";
         let sexp = Sexp::from_str(sexp_str).unwrap();
-        assert_eq!(format!("{}", sexp), sexp_str);
+        assert_eq!(format!("{sexp}"), sexp_str);
     }
 
     #[test]
     fn test_parse_fmt_string() {
         let sexp_str = r#""my_id""#;
         let sexp = Sexp::from_str(sexp_str).unwrap();
-        assert_eq!(format!("{}", sexp), sexp_str);
+        assert_eq!(format!("{sexp}"), sexp_str);
     }
 
     #[test]
     fn test_parse_fmt_sexp() {
         let sexp_str = r#"(par (ap x y) (fold x y (next)))"#;
         let sexp = Sexp::from_str(sexp_str).unwrap();
-        assert_eq!(format!("{}", sexp), sexp_str);
+        assert_eq!(format!("{sexp}"), sexp_str);
     }
 }

@@ -96,10 +96,7 @@ fn not_clear_last_error_in_match() {
 
     let args = Rc::new(RefCell::new(None));
     let tetraplets = Rc::new(RefCell::new(None));
-    let mut local_vm = create_avm(
-        create_check_service_closure(args.clone(), tetraplets.clone()),
-        local_peer_id,
-    );
+    let mut local_vm = create_avm(create_check_service_closure(args.clone(), tetraplets), local_peer_id);
 
     let script = f!(r#"
         (seq
@@ -132,10 +129,7 @@ fn not_clear_last_error_in_mismatch() {
 
     let args = Rc::new(RefCell::new(None));
     let tetraplets = Rc::new(RefCell::new(None));
-    let mut local_vm = create_avm(
-        create_check_service_closure(args.clone(), tetraplets.clone()),
-        local_peer_id,
-    );
+    let mut local_vm = create_avm(create_check_service_closure(args.clone(), tetraplets), local_peer_id);
 
     let script = f!(r#"
         (seq
@@ -168,10 +162,7 @@ fn track_current_peer_id() {
 
     let args = Rc::new(RefCell::new(None));
     let tetraplets = Rc::new(RefCell::new(None));
-    let mut local_vm = create_avm(
-        create_check_service_closure(args.clone(), tetraplets.clone()),
-        local_peer_id,
-    );
+    let mut local_vm = create_avm(create_check_service_closure(args.clone(), tetraplets), local_peer_id);
 
     let script = f!(r#"
         (xor
@@ -288,10 +279,7 @@ fn last_error_with_par_one_subgraph_failed() {
     let vm_peer_id = "local_peer_id";
     let args = Rc::new(RefCell::new(None));
     let tetraplets = Rc::new(RefCell::new(None));
-    let mut vm = create_avm(
-        create_check_service_closure(args.clone(), tetraplets.clone()),
-        vm_peer_id,
-    );
+    let mut vm = create_avm(create_check_service_closure(args.clone(), tetraplets), vm_peer_id);
     let script = f!(r#"
         (seq
             (par
@@ -454,7 +442,7 @@ fn fail_with_scalar_from_call_field_not_right_type() {
     let result = call_vm!(vm, <_>::default(), &script, "", "");
 
     let expected_error = CatchableError::InvalidLastErrorObjectError(LastErrorObjectError::ScalarFieldIsWrongType {
-        scalar: service_result.clone(),
+        scalar: service_result,
         field_name: "error_code",
         expected_type: "integer",
     });

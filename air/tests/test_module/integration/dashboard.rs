@@ -37,7 +37,7 @@ fn parse_peers() -> Vec<String> {
         result.push(record.as_slice().to_string());
     }
 
-    return result;
+    result
 }
 
 fn into_hashset(peers: Vec<String>) -> HashSet<String> {
@@ -56,7 +56,7 @@ fn client_host_function(
 
     let to_ret_value = Box::new(
         move |service_name: &str, function_name: &str, arguments: Vec<String>| -> JValue {
-            if service_name != "" || function_name != "load" || arguments.len() != 1 {
+            if !service_name.is_empty() || function_name != "load" || arguments.len() != 1 {
                 return JValue::Null;
             }
 
@@ -181,7 +181,7 @@ fn dashboard() {
     // -> client 1
     let client_1_result = checked_call_vm!(client, test_params.clone(), script, "", "");
     let next_peer_pks = into_hashset(client_1_result.next_peer_pks);
-    let mut all_peer_pks = into_hashset(known_peer_ids.clone());
+    let mut all_peer_pks = into_hashset(known_peer_ids);
     all_peer_pks.insert(relay_id.clone());
     assert_eq!(next_peer_pks, all_peer_pks);
 
@@ -209,11 +209,11 @@ fn dashboard() {
     );
 
     let mut relay_2_result = relay_1_result.clone();
-    let mut client_3_result = client_2_result.clone();
+    let mut client_3_result = client_2_result;
 
     // peers 1 -> relay 2 -> client 3
     for avm in known_peers.iter_mut() {
-        let prev_result = std::mem::replace(&mut avm.prev_result, vec![]);
+        let prev_result = std::mem::take(&mut avm.prev_result);
         let known_peer_result = checked_call_vm!(
             avm.vm,
             test_params.clone(),
@@ -254,12 +254,12 @@ fn dashboard() {
     all_peer_pks.remove(&client_id);
     all_peer_pks.insert(relay_id.to_string());
 
-    let mut relay_3_result = relay_2_result.clone();
-    let mut client_4_result = client_3_result.clone();
+    let mut relay_3_result = relay_2_result;
+    let mut client_4_result = client_3_result;
 
     // peers 2 -> relay 3 -> client 4
     for avm in known_peers.iter_mut() {
-        let prev_result = std::mem::replace(&mut avm.prev_result, vec![]);
+        let prev_result = std::mem::take(&mut avm.prev_result);
         let known_peer_result = checked_call_vm!(
             avm.vm,
             test_params.clone(),
@@ -302,8 +302,8 @@ fn dashboard() {
         )
     }
 
-    let mut relay_4_result = relay_3_result.clone();
-    let mut client_5_result = client_4_result.clone();
+    let mut relay_4_result = relay_3_result;
+    let mut client_5_result = client_4_result;
 
     // peers 2 -> peers 3 -> relay 4 -> client 5
     for i in 0..known_peers.len() {

@@ -34,7 +34,7 @@ fn issue_300() {
     "#);
 
     let result_1 = checked_call_vm!(peer_vm_2, <_>::default(), &script, "", "");
-    let result_2 = checked_call_vm!(peer_vm_1, <_>::default(), &script, "", result_1.data.clone());
+    let result_2 = checked_call_vm!(peer_vm_1, <_>::default(), &script, "", result_1.data);
     let actual_trace = trace_from_result(&result_2);
 
     let expected_trace = vec![

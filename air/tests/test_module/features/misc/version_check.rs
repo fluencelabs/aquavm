@@ -42,7 +42,7 @@ fn publish_version_check() {
 
     let actual_version =
         semver::Version::parse("0.36.2-feat-VM-173-add-interpreter-version-in-data-a2d575b-205-1.0").unwrap();
-    let current_data = InterpreterData::new(actual_version.clone());
+    let current_data = InterpreterData::new(actual_version);
     let current_data = serde_json::to_vec(&current_data).expect("default serializer shouldn't fail");
     let result = call_vm!(vm, <_>::default(), script, "", current_data);
 

@@ -106,7 +106,7 @@ pub(crate) fn run(args: Args) -> anyhow::Result<()> {
             )
             .context("Failed to execute the script")?;
         if args.repeat.is_none() {
-            println!("{:?}", result);
+            println!("{result:?}");
         }
     }
 

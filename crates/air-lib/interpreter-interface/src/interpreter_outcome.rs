@@ -71,8 +71,7 @@ impl InterpreterOutcome {
         let mut record_values = try_as_record(ivalue)?.into_vec();
         if record_values.len() != OUTCOME_FIELDS_COUNT {
             return Err(format!(
-                "expected InterpreterOutcome struct with {} fields, got {:?}",
-                OUTCOME_FIELDS_COUNT, record_values
+                "expected InterpreterOutcome struct with {OUTCOME_FIELDS_COUNT} fields, got {record_values:?}"
             ));
         }
 
@@ -101,10 +100,7 @@ use fluence_it_types::ne_vec::NEVec;
 fn try_as_record(ivalue: IValue) -> Result<NEVec<IValue>, String> {
     match ivalue {
         IValue::Record(record_values) => Ok(record_values),
-        v => Err(format!(
-            "expected record for InterpreterOutcome, got {:?}",
-            v
-        )),
+        v => Err(format!("expected record for InterpreterOutcome, got {v:?}")),
     }
 }
 
@@ -112,7 +108,7 @@ fn try_as_record(ivalue: IValue) -> Result<NEVec<IValue>, String> {
 fn try_as_i64(ivalue: IValue, field_name: &str) -> Result<i64, String> {
     match ivalue {
         IValue::S64(value) => Ok(value),
-        v => Err(format!("expected an i64 for {}, got {:?}", field_name, v)),
+        v => Err(format!("expected an i64 for {field_name}, got {v:?}")),
     }
 }
 
@@ -120,7 +116,7 @@ fn try_as_i64(ivalue: IValue, field_name: &str) -> Result<i64, String> {
 fn try_as_string(ivalue: IValue, field_name: &str) -> Result<String, String> {
     match ivalue {
         IValue::String(value) => Ok(value),
-        v => Err(format!("expected a string for {}, got {:?}", field_name, v)),
+        v => Err(format!("expected a string for {field_name}, got {v:?}")),
     }
 }
 
@@ -132,18 +128,13 @@ fn try_as_byte_vec(ivalue: IValue, field_name: &str) -> Result<Vec<u8>, String> 
                 .into_iter()
                 .map(|v| match v {
                     IValue::U8(byte) => Ok(byte),
-                    v => Err(format!("expected a byte, got {:?}", v)),
+                    v => Err(format!("expected a byte, got {v:?}")),
                 })
                 .collect();
             array?
         }
         IValue::ByteArray(array) => array,
-        v => {
-            return Err(format!(
-                "expected a Vec<u8> for {}, got {:?}",
-                field_name, v
-            ))
-        }
+        v => return Err(format!("expected a Vec<u8> for {field_name}, got {v:?}")),
     };
 
     Ok(byte_vec)
@@ -157,12 +148,12 @@ fn try_as_string_vec(ivalue: IValue, field_name: &str) -> Result<Vec<String>, St
                 .into_iter()
                 .map(|v| match v {
                     IValue::String(str) => Ok(str),
-                    v => Err(format!("expected string for next_peer_pks, got {:?}", v)),
+                    v => Err(format!("expected string for next_peer_pks, got {v:?}")),
                 })
                 .collect::<Result<Vec<String>, _>>()?;
 
             Ok(array)
         }
-        v => Err(format!("expected an array for {}, got {:?}", field_name, v)),
+        v => Err(format!("expected an array for {field_name}, got {v:?}")),
     }
 }

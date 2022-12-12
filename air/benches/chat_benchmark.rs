@@ -65,9 +65,7 @@ fn chat_sent_message_benchmark() -> Result<RawAVMOutcome, String> {
 }
 
 fn criterion_benchmark(c: &mut Criterion) {
-    c.bench_function("chat_send_message", move |b| {
-        b.iter(move || chat_sent_message_benchmark())
-    });
+    c.bench_function("chat_send_message", move |b| b.iter(chat_sent_message_benchmark));
 }
 
 criterion_group!(benches, criterion_benchmark);

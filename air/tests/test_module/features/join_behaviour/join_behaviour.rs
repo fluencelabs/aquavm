@@ -61,7 +61,7 @@ fn dont_wait_on_json_path() {
     let result = checked_call_vm!(set_variable_vm, test_params.clone(), &script, "", "");
     let result = checked_call_vm!(local_vm, test_params.clone(), script, "", result.data);
 
-    assert_eq!(result.next_peer_pks, vec![test_params.init_peer_id.to_string()]);
+    assert_eq!(result.next_peer_pks, vec![test_params.init_peer_id]);
 }
 
 #[test]
@@ -127,7 +127,7 @@ fn dont_wait_on_json_path_on_scalars() {
     "#);
 
     let result = call_vm!(set_variable_vm, <_>::default(), &script, "", "");
-    let array_result = call_vm!(array_consumer, <_>::default(), &script, "", result.data.clone());
+    let array_result = call_vm!(array_consumer, <_>::default(), &script, "", result.data);
 
     let expected_error =
         CatchableError::LambdaApplierError(LambdaError::ValueNotContainSuchArrayIdx { value: array, idx: 5 });

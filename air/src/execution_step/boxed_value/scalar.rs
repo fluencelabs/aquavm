@@ -75,7 +75,7 @@ impl fmt::Display for ValueAggregate {
 impl<'i> fmt::Display for ScalarRef<'i> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ScalarRef::Value(value) => write!(f, "{:?}", value)?,
+            ScalarRef::Value(value) => write!(f, "{value:?}")?,
             ScalarRef::IterableValue(cursor) => {
                 let iterable = &cursor.iterable;
                 write!(f, "cursor, current value: {:?}", iterable.peek())?;
