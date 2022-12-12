@@ -16,7 +16,7 @@
 
 use air::UncatchableError;
 use air_interpreter_data::CidTracker;
-use air_interpreter_interface::value_to_cid;
+use air_interpreter_interface::value_to_json_cid;
 use air_test_utils::prelude::*;
 use air_trace_handler::merger::MergeError;
 use air_trace_handler::TraceHandlerError;
@@ -44,7 +44,7 @@ fn issue_295() {
     let current_data = raw_data_from_trace(current_trace, cid_tracker.into());
     let result = call_vm!(vm, <_>::default(), &script, prev_data, current_data);
 
-    let cid = value_to_cid(&json!("")).unwrap().into();
+    let cid = value_to_json_cid(&json!("")).unwrap().into();
     let expected_error = UncatchableError::TraceError {
         trace_error: TraceHandlerError::MergeError(MergeError::IncompatibleExecutedStates(
             ExecutedState::Ap(ApResult::new(1)),

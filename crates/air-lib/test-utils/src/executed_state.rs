@@ -15,7 +15,7 @@
  */
 
 use air_interpreter_data::CidTracker;
-use air_interpreter_interface::value_to_cid;
+use air_interpreter_interface::value_to_json_cid;
 
 use super::ApResult;
 use super::CallResult;
@@ -34,7 +34,7 @@ use crate::SubTraceDesc;
 use std::rc::Rc;
 
 pub fn scalar(result: JValue) -> ExecutedState {
-    let cid = value_to_cid(&result)
+    let cid = value_to_json_cid(&result)
         .unwrap_or_else(|e| panic!("{:?}: failed to compute CID of {:?}", e, result));
     let value = Value::Scalar(Rc::new(cid));
     ExecutedState::Call(CallResult::Executed(value))
@@ -53,7 +53,7 @@ pub fn scalar_number(result: impl Into<serde_json::Number>) -> ExecutedState {
 }
 
 pub fn stream_call_result(result: JValue, generation: u32) -> CallResult {
-    let cid = value_to_cid(&result)
+    let cid = value_to_json_cid(&result)
         .unwrap_or_else(|e| panic!("{:?}: failed to compute CID of {:?}", e, result));
     CallResult::executed_stream(Rc::new(cid), generation)
 }

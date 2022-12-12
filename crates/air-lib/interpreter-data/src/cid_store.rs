@@ -16,7 +16,7 @@
 
 use crate::JValue;
 
-use air_interpreter_interface::{value_to_cid, CID};
+use air_interpreter_interface::{value_to_json_cid, CID};
 use serde::{Deserialize, Serialize};
 
 use std::{collections::HashMap, rc::Rc};
@@ -70,7 +70,7 @@ impl<Val: Serialize> CidTracker<Val> {
     pub fn record_value(&mut self, value: impl Into<Rc<Val>>) -> Rc<CID> {
         // TODO do something with error: propagate, or unwrap earlier.
         let value = value.into();
-        let cid = Rc::new(value_to_cid(&value).unwrap());
+        let cid = Rc::new(value_to_json_cid(&value).unwrap());
         self.cids.insert(cid.clone(), value);
         cid
     }

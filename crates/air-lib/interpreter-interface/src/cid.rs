@@ -53,7 +53,7 @@ pub fn json_data_cid(data: &[u8]) -> CID {
 }
 
 /// Calculate a CID of JSON-serialized value.
-pub fn value_to_cid<Val: Serialize>(value: &Val) -> Result<CID, serde_json::Error> {
+pub fn value_to_json_cid<Val: Serialize>(value: &Val) -> Result<CID, serde_json::Error> {
     let data = serde_json::to_vec(value)?;
     Ok(json_data_cid(&data))
 }
