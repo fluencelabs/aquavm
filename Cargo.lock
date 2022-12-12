@@ -102,6 +102,7 @@ dependencies = [
 name = "air-interpreter-data"
 version = "0.4.1"
 dependencies = [
+ "air-interpreter-interface",
  "air-parser",
  "air-utils",
  "once_cell",
@@ -181,6 +182,7 @@ name = "air-test-utils"
 version = "0.4.0"
 dependencies = [
  "air",
+ "air-interpreter-data",
  "air-interpreter-interface",
  "avm-interface",
  "avm-server",
@@ -230,6 +232,7 @@ name = "air-trace-handler"
 version = "0.1.0"
 dependencies = [
  "air-interpreter-data",
+ "air-interpreter-interface",
  "air-log-targets",
  "air-parser",
  "bimap",

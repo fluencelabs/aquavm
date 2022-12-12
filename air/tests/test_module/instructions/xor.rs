@@ -128,6 +128,8 @@ fn xor_par() {
     let result = checked_call_vm!(vm, <_>::default(), &script, "", "");
     let actual_trace = trace_from_result(&result);
 
+    eprintln!("1: {:?}", result);
+
     let success_result = "success result from fallible_call_service";
     let failed_result = "failed result from fallible_call_service";
     let expected_trace = vec![
@@ -145,6 +147,8 @@ fn xor_par() {
     assert_eq!(actual_trace, expected_trace);
 
     let result = checked_call_vm!(vm, <_>::default(), script, "", result.data);
+
+    eprintln!("2: {:?}", result);
 
     let actual_trace = trace_from_result(&result);
     assert_eq!(actual_trace, expected_trace);

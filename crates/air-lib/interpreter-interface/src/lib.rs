@@ -28,9 +28,11 @@
 
 mod call_request_parameters;
 mod call_service_result;
+mod cid;
 mod interpreter_outcome;
 mod run_parameters;
 
+pub use crate::cid::*;
 pub use call_request_parameters::*;
 pub use call_service_result::*;
 pub use interpreter_outcome::*;

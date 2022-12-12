@@ -29,7 +29,6 @@ use std::rc::Rc;
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct ValueAggregate {
     pub result: Rc<JValue>,
-    pub cid: Rc<str>,
     pub tetraplet: RcSecurityTetraplet,
     pub trace_pos: TracePos,
 }
@@ -67,8 +66,8 @@ impl fmt::Display for ValueAggregate {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "value: {}, tetraplet: {}, position: {} ",
-            self.result, self.tetraplet, self.trace_pos
+            "value: {}, tetraplet: {}, position: {}",
+            self.result, self.tetraplet, self.trace_pos,
         )
     }
 }

@@ -32,12 +32,12 @@ pub(crate) fn populate_context_from_peer_service_result<'i>(
     output: &CallOutputValue<'i>,
     exec_ctx: &mut ExecutionCtx<'i>,
 ) -> ExecutionResult<CallResult> {
-    let result_value = executed_result.result.clone();
-    let cid = executed_result.cid.clone();
+    let cid = exec_ctx.cid_tracker.record_value(executed_result.result.clone());
+
     match output {
         CallOutputValue::Scalar(scalar) => {
             exec_ctx.scalars.set_scalar_value(scalar.name, executed_result)?;
-            Ok(CallResult::executed_scalar(cid, result_value))
+            Ok(CallResult::executed_scalar(cid))
         }
         CallOutputValue::Stream(stream) => {
             let value_descriptor = StreamValueDescriptor::new(
@@ -48,11 +48,11 @@ pub(crate) fn populate_context_from_peer_service_result<'i>(
                 stream.position,
             );
             let generation = exec_ctx.streams.add_stream_value(value_descriptor)?;
-            Ok(CallResult::executed_stream(result_value, generation))
+            Ok(CallResult::executed_stream(cid, generation))
         }
         // by the internal conventions if call has no output value,
         // corresponding data should have scalar type
-        CallOutputValue::None => Ok(CallResult::executed_scalar(result_value)),
+        CallOutputValue::None => Ok(CallResult::executed_scalar(cid)),
     }
 }
 
@@ -65,13 +65,21 @@ pub(crate) fn populate_context_from_data<'i>(
     exec_ctx: &mut ExecutionCtx<'i>,
 ) -> ExecutionResult<Value> {
     match (output, value) {
-        (CallOutputValue::Scalar(scalar), Value::Scalar(value)) => {
-            let result = ValueAggregate::new(value.clone(), tetraplet, trace_pos);
-            exec_ctx.scalars.set_scalar_value(scalar.name, result)?;
-            Ok(Value::Scalar(value))
+        (CallOutputValue::Scalar(_scalar), Value::Scalar(_cid)) => {
+            let value = exec_ctx
+                .get_value_by_cid(&_cid)
+                // TODO error handling
+                .unwrap_or_else(|| panic!("No value for CID {:?} found", _cid));
+            let result = ValueAggregate::new(value, tetraplet, trace_pos);
+            exec_ctx.scalars.set_scalar_value(_scalar.name, result)?;
+            Ok(Value::Scalar(_cid))
         }
-        (CallOutputValue::Stream(stream), Value::Stream { value, generation }) => {
-            let result = ValueAggregate::new(value.clone(), tetraplet, trace_pos);
+        (CallOutputValue::Stream(stream), Value::Stream { cid, generation }) => {
+            let value = exec_ctx
+                .get_value_by_cid(&cid)
+                // TODO error handling
+                .unwrap_or_else(|| panic!("No value for CID {:?} found", cid));
+            let result = ValueAggregate::new(value, tetraplet, trace_pos);
             let value_descriptor = StreamValueDescriptor::new(
                 result,
                 stream.name,
@@ -82,7 +90,7 @@ pub(crate) fn populate_context_from_data<'i>(
             let resulted_generation = exec_ctx.streams.add_stream_value(value_descriptor)?;
 
             let result = Value::Stream {
-                value,
+                cid,
                 generation: resulted_generation,
             };
             Ok(result)

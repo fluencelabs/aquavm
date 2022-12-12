@@ -15,6 +15,7 @@ path = "src/lib.rs"
 
 [dependencies]
 air-interpreter-data = { path = "../interpreter-data" }
+air-interpreter-interface = { path = "../interpreter-interface" }
 air-log-targets = { path = "../log-targets" }
 air-parser = { path = "../air-parser" }
 

@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
+use crate::JValue;
+
 use super::LastError;
 use super::LastErrorDescriptor;
 use super::Scalars;
 use super::Streams;
 
 use air_execution_info_collector::InstructionTracker;
+use air_interpreter_data::CidTracker;
 use air_interpreter_data::InterpreterData;
 use air_interpreter_interface::*;
 
@@ -63,6 +66,9 @@ pub(crate) struct ExecutionCtx<'i> {
 
     /// Tracks all functions that should be called from services.
     pub(crate) call_requests: CallRequests,
+
+    /// Merged CID-to-value dictionaries
+    pub(crate) cid_tracker: CidTracker,
 }
 
 impl<'i> ExecutionCtx<'i> {
@@ -80,12 +86,15 @@ impl<'i> ExecutionCtx<'i> {
             current_data.restricted_streams.clone(),
         );
 
+        let cid_to_value = CidTracker::from_cid_stores(&prev_data.cid_store, &current_data.cid_store);
+
         Self {
             run_parameters,
             subgraph_complete: true,
             last_call_request_id: prev_data.last_call_request_id,
             call_results,
             streams,
+            cid_tracker: cid_to_value,
             ..<_>::default()
         }
     }
@@ -97,6 +106,10 @@ impl<'i> ExecutionCtx<'i> {
     pub(crate) fn next_call_request_id(&mut self) -> u32 {
         self.last_call_request_id += 1;
         self.last_call_request_id
+    }
+
+    pub(crate) fn get_value_by_cid(&self, cid: &CID) -> Option<Rc<JValue>> {
+        self.cid_tracker.get(cid)
     }
 }
 

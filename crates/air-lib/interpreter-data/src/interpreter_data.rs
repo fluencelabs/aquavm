@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-use std::collections::HashMap;
-
 use super::GlobalStreamGens;
 use super::RestrictedStreamGens;
+use crate::cid_store::CidStore;
 use crate::ExecutionTrace;
-use crate::Value;
+
 use air_utils::measure;
 
 use serde::Deserialize;
 use serde::Serialize;
-
-use std::rc::Rc;
 
 /// The AIR interpreter could be considered as a function
 /// f(prev_data: InterpreterData, current_data: InterpreterData, ... ) -> (result_data: InterpreterData, ...).
@@ -59,8 +56,8 @@ pub struct InterpreterData {
     /// Version of interpreter produced this data.
     pub interpreter_version: semver::Version,
 
-    /// Map values to CID
-    pub values: HashMap<Rc<str>, Value>,
+    /// Map CID to values
+    pub cid_store: CidStore,
 }
 
 impl InterpreterData {
@@ -72,7 +69,7 @@ impl InterpreterData {
             last_call_request_id: 0,
             restricted_streams: RestrictedStreamGens::new(),
             interpreter_version,
-            values: <_>::default(),
+            cid_store: <_>::default(),
         }
     }
 
@@ -80,6 +77,7 @@ impl InterpreterData {
         trace: ExecutionTrace,
         streams: GlobalStreamGens,
         restricted_streams: RestrictedStreamGens,
+        cid_store: CidStore,
         last_call_request_id: u32,
         interpreter_version: semver::Version,
     ) -> Self {
@@ -90,7 +88,7 @@ impl InterpreterData {
             last_call_request_id,
             restricted_streams,
             interpreter_version,
-            values: <_>::default(),
+            cid_store,
         }
     }
 

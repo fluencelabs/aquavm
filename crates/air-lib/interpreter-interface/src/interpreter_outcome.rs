@@ -64,25 +64,9 @@ impl InterpreterOutcome {
             data,
             next_peer_pks,
             call_requests,
-            cid,
+            cid: cid.into(),
         }
     }
-}
-
-// TODO we might refactor this to `SerializationFormat` trait
-// that both transform data to binary/text form (be it JSON, CBOR or something else)
-// and produces CID too
-fn json_data_cid(data: &[u8]) -> String {
-    use cid::Cid;
-    use multihash::{Code, MultihashDigest};
-
-    // the Sha2_256 is current IPFS default hash
-    let digest = Code::Sha2_256.digest(data);
-    // seems to be better than RAW_CODEC = 0x55
-    const JSON_CODEC: u64 = 0x0200;
-
-    let cid = Cid::new_v1(JSON_CODEC, digest);
-    cid.to_string()
 }
 
 #[cfg(feature = "marine")]
@@ -112,6 +96,8 @@ impl InterpreterOutcome {
 
 #[cfg(feature = "marine")]
 use fluence_it_types::ne_vec::NEVec;
+
+use crate::json_data_cid;
 
 #[cfg(feature = "marine")]
 fn try_as_record(ivalue: IValue) -> Result<NEVec<IValue>, String> {

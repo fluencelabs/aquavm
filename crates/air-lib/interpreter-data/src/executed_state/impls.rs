@@ -41,14 +41,14 @@ impl CallResult {
         CallResult::RequestSentBy(Sender::PeerIdWithCallId { peer_id, call_id })
     }
 
-    pub fn executed_scalar(cid: Rc<str>, value: Rc<JValue>) -> CallResult {
-        let value = Value::Scalar{ cid, value, };
+    pub fn executed_scalar(cid: Rc<CID>) -> CallResult {
+        let value = Value::Scalar(cid);
 
         CallResult::Executed(value)
     }
 
-    pub fn executed_stream(cid: Rc<str>, value: Rc<JValue>, generation: u32) -> CallResult {
-        let value = Value::Stream { cid, value, generation };
+    pub fn executed_stream(cid: Rc<CID>, generation: u32) -> CallResult {
+        let value = Value::Stream { cid, generation };
 
         CallResult::Executed(value)
     }
@@ -139,9 +139,9 @@ impl std::fmt::Display for ExecutedState {
 impl std::fmt::Display for Value {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            Value::Scalar(value) => write!(f, "scalar: {}", value),
-            Value::Stream { value, generation } => {
-                write!(f, "stream: {} generation: {}", value, generation)
+            Value::Scalar(cid) => write!(f, "scalar: {:?}", cid),
+            Value::Stream { cid, generation } => {
+                write!(f, "stream: {:?} generation: {}", cid, generation)
             }
         }
     }

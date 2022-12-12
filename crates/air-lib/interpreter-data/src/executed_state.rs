@@ -17,13 +17,15 @@
 mod impls;
 mod se_de;
 
+use crate::JValue;
 use crate::TracePos;
 
+use air_interpreter_interface::CID;
 use se_de::par_serializer;
 use se_de::sender_serializer;
 use serde::Deserialize;
 use serde::Serialize;
-use serde_json::Value as JValue;
+
 use std::fmt::Formatter;
 use std::rc::Rc;
 
@@ -55,23 +57,14 @@ pub enum CallResult {
     CallServiceFailed(i32, Rc<String>),
 }
 
-pub type CID = Rc<str>;
-
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Value {
     // Why CID is not part of the JValue or like this?  We may need to abstract
     // over values, and value should know its orignal CID (and values should
     // maintain its original binary data).
-    Scalar {
-        cid: CID,
-        value: Rc<JValue>,
-    },
-    Stream {
-        cid: CID,
-        value: Rc<JValue>,
-        generation: u32,
-    },
+    Scalar(Rc<CID>),
+    Stream { cid: Rc<CID>, generation: u32 },
 }
 
 /// Let's consider an example of trace that could be produces by the following fold:
