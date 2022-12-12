@@ -126,10 +126,10 @@ fn executed_trace_seq_seq() {
         "#);
 
     let result = checked_call_vm!(vm2, <_>::default(), &script, "", "");
-    assert_eq!(result.next_peer_pks, vec![peer_id_1.clone()]);
+    assert_eq!(result.next_peer_pks, vec![peer_id_1]);
 
     let result = checked_call_vm!(vm1, <_>::default(), &script, "", result.data);
-    assert_eq!(result.next_peer_pks, vec![peer_id_2.clone()]);
+    assert_eq!(result.next_peer_pks, vec![peer_id_2]);
 
     let result = checked_call_vm!(vm2, <_>::default(), script, "", result.data);
 

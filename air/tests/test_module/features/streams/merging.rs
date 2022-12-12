@@ -86,7 +86,7 @@ fn merging_fold_iterations_extensively() {
         TestRunParameters::from_init_peer_id("client"),
         vec![],
         vec!["relay", "p1", "p2", "p3"].into_iter().map(Into::into),
-        &script,
+        script,
     )
     .unwrap();
 
@@ -97,7 +97,7 @@ fn merging_fold_iterations_extensively() {
         let peer = queue.pop_front().unwrap();
         if let Some(outcomes) = engine.execution_iter(peer.as_str()) {
             for outcome in outcomes {
-                assert_eq!(outcome.ret_code, 0, "{:?}", outcome);
+                assert_eq!(outcome.ret_code, 0, "{outcome:?}");
 
                 for peer in &outcome.next_peer_pks {
                     queue.push_back(peer.clone());
@@ -108,7 +108,7 @@ fn merging_fold_iterations_extensively() {
                 }
             }
         } else {
-            println!("peer: {}, no executions", peer);
+            println!("peer: {peer}, no executions");
         }
     }
 
@@ -223,7 +223,7 @@ fn merging_fold_iterations_extensively_2() {
         TestRunParameters::from_init_peer_id("client"),
         vec![],
         vec!["relay", "p1", "p2", "p3"].into_iter().map(Into::into),
-        &script,
+        script,
     )
     .unwrap();
 
@@ -235,7 +235,7 @@ fn merging_fold_iterations_extensively_2() {
         let peer = queue.pop_front().unwrap();
         if let Some(outcomes) = engine.execution_iter(peer.as_str()) {
             for outcome in outcomes {
-                assert_eq!(outcome.ret_code, 0, "{:?}", outcome);
+                assert_eq!(outcome.ret_code, 0, "{outcome:?}");
 
                 for peer in &outcome.next_peer_pks {
                     if !queue.contains(peer) {
@@ -248,7 +248,7 @@ fn merging_fold_iterations_extensively_2() {
                 }
             }
         } else {
-            println!("peer: {}, no executions", peer);
+            println!("peer: {peer}, no executions");
         }
     }
 

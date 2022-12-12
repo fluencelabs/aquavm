@@ -80,7 +80,7 @@ impl fmt::Display for CanonStream {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "[")?;
         for value in self.values.iter() {
-            write!(f, "{}, ", value)?;
+            write!(f, "{value}, ")?;
         }
         write!(f, "]")
     }

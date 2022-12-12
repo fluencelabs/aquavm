@@ -105,7 +105,7 @@ fn xor_par() {
 
     let fallible_service_id = String::from("service_id_1");
     let local_peer_id = "local_peer_id";
-    let mut vm = create_avm(fallible_call_service(fallible_service_id.clone()), local_peer_id);
+    let mut vm = create_avm(fallible_call_service(fallible_service_id), local_peer_id);
 
     let script = f!(r#"
             (xor

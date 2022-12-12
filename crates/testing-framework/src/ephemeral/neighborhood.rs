@@ -270,13 +270,13 @@ mod tests {
         let other_id2: PeerId = "other2".into();
         let network = Network::empty();
 
-        let penv = PeerEnv::new(Peer::new(peer_id.clone(), Rc::from(vec![])), &network);
+        let penv = PeerEnv::new(Peer::new(peer_id, Rc::from(vec![])), &network);
         // iter is empty
         assert!(penv.iter().next().is_none());
 
         network.ensure_peer(other_id1.clone());
         network.ensure_peer(other_id2.clone());
-        let expected_neighborhood = PeerSet::from([other_id1.clone(), other_id2.clone()]);
+        let expected_neighborhood = PeerSet::from([other_id1, other_id2]);
         assert_eq!(penv.iter().collect::<PeerSet>(), expected_neighborhood);
     }
 
@@ -286,14 +286,14 @@ mod tests {
         let peer_id: PeerId = "someone".into();
         let other_id1: PeerId = "other1".into();
         let other_id2: PeerId = "other2".into();
-        let penv = PeerEnv::new(Peer::new(peer_id.clone(), Rc::from(vec![])), &network);
+        let penv = PeerEnv::new(Peer::new(peer_id, Rc::from(vec![])), &network);
 
         // iter is empty
         assert!(penv.iter().next().is_none());
 
         network.ensure_peer(other_id1.clone());
         network.ensure_peer(other_id2.clone());
-        let expected_neighborhood = PeerSet::from([other_id1.clone(), other_id2.clone()]);
+        let expected_neighborhood = PeerSet::from([other_id1, other_id2]);
         assert_eq!(PeerSet::from_iter(penv.iter()), expected_neighborhood);
     }
 
@@ -303,7 +303,7 @@ mod tests {
         let peer_id: PeerId = "someone".into();
         let other_id1: PeerId = "other1".into();
         let other_id2: PeerId = "other2".into();
-        let mut penv = PeerEnv::new(Peer::new(peer_id.clone(), Rc::from(vec![])), &network);
+        let mut penv = PeerEnv::new(Peer::new(peer_id, Rc::from(vec![])), &network);
 
         // iter is empty
         assert!(penv.iter().next().is_none());
@@ -311,7 +311,7 @@ mod tests {
         nei.alter(other_id1.clone(), AlterState::Added);
         nei.alter(other_id2.clone(), AlterState::Added);
 
-        let expected_neighborhood = PeerSet::from([other_id1.clone(), other_id2.clone()]);
+        let expected_neighborhood = PeerSet::from([other_id1, other_id2]);
         assert_eq!(PeerSet::from_iter(penv.iter()), expected_neighborhood);
     }
 
@@ -320,7 +320,7 @@ mod tests {
         let network = Network::empty();
         let peer_id: PeerId = "someone".into();
         let other_id1: PeerId = "other1".into();
-        let mut penv = PeerEnv::new(Peer::new(peer_id.clone(), Rc::from(vec![])), &network);
+        let mut penv = PeerEnv::new(Peer::new(peer_id, Rc::from(vec![])), &network);
 
         // iter is empty
         assert!(penv.iter().next().is_none());
@@ -337,7 +337,7 @@ mod tests {
     fn test_extend_neighborhood() {
         let network = Network::empty();
         let peer_id: PeerId = "someone".into();
-        let mut penv = PeerEnv::new(Peer::new(peer_id.clone(), Rc::from(vec![])), &network);
+        let mut penv = PeerEnv::new(Peer::new(peer_id, Rc::from(vec![])), &network);
         penv.get_neighborhood_mut()
             .alter(PeerId::from("zero"), AlterState::Added);
         penv.extend_neighborhood(IntoIterator::into_iter(["one", "two"]));
@@ -352,7 +352,7 @@ mod tests {
     fn test_remove_from_neiborhood() {
         let network = Network::empty();
         let peer_id: PeerId = "someone".into();
-        let mut penv = PeerEnv::new(Peer::new(peer_id.clone(), Rc::from(vec![])), &network);
+        let mut penv = PeerEnv::new(Peer::new(peer_id, Rc::from(vec![])), &network);
         penv.get_neighborhood_mut()
             .alter(PeerId::from("zero"), AlterState::Added);
         penv.extend_neighborhood(IntoIterator::into_iter(["one", "two"]));
@@ -370,7 +370,7 @@ mod tests {
         let network = Network::empty();
         let peer_id: PeerId = "someone".into();
         let other_id: PeerId = "other".into();
-        let mut penv = PeerEnv::new(Peer::new(peer_id.clone(), Rc::from(vec![])), &network);
+        let mut penv = PeerEnv::new(Peer::new(peer_id, Rc::from(vec![])), &network);
 
         let nei = penv.get_neighborhood_mut();
         nei.alter(other_id.clone(), AlterState::Added);
@@ -386,7 +386,7 @@ mod tests {
         let network = Network::empty();
         let peer_id: PeerId = "someone".into();
         let other_id: PeerId = "other".into();
-        let mut penv = PeerEnv::new(Peer::new(peer_id.clone(), Rc::from(vec![])), &network);
+        let mut penv = PeerEnv::new(Peer::new(peer_id, Rc::from(vec![])), &network);
 
         let nei = penv.get_neighborhood_mut();
         nei.alter(other_id.clone(), AlterState::Added);
@@ -407,7 +407,7 @@ mod tests {
         let network = Network::empty();
         let peer_id: PeerId = "someone".into();
         let other_id: PeerId = "other".into();
-        let mut penv = PeerEnv::new(Peer::new(peer_id.clone(), Rc::from(vec![])), &network);
+        let mut penv = PeerEnv::new(Peer::new(peer_id, Rc::from(vec![])), &network);
 
         let nei = penv.get_neighborhood_mut();
         nei.alter(other_id.clone(), AlterState::Added);

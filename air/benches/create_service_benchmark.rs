@@ -85,7 +85,7 @@ fn create_service_benchmark() -> Result<RawAVMOutcome, String> {
 }
 
 fn criterion_benchmark(c: &mut Criterion) {
-    c.bench_function("create_service", move |b| b.iter(move || create_service_benchmark()));
+    c.bench_function("create_service", move |b| b.iter(create_service_benchmark));
 }
 
 criterion_group!(benches, criterion_benchmark);

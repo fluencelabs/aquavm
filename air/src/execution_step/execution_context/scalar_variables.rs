@@ -226,7 +226,7 @@ impl<'i> fmt::Display for Scalars<'i> {
 
         for (name, _) in self.iterable_variables.iter() {
             // it's impossible to print an iterable value for now
-            writeln!(f, "{} => iterable", name)?;
+            writeln!(f, "{name} => iterable")?;
         }
 
         Ok(())

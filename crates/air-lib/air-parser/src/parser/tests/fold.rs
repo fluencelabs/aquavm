@@ -270,7 +270,7 @@ fn parse_fold() {
             (null)
         )
         "#;
-    let instruction = parse(&source_code);
+    let instruction = parse(source_code);
     let expected = fold_scalar_variable(
         Scalar::new("iterable", 15.into()),
         Scalar::new("i", 24.into()),
@@ -289,7 +289,7 @@ fn fold_with_scalar_and_last_instruction() {
             (null)
         )
         "#;
-    let instruction = parse(&source_code);
+    let instruction = parse(source_code);
     let expected = fold_scalar_variable(
         Scalar::new("iterable", 15.into()),
         Scalar::new("i", 24.into()),
@@ -434,7 +434,7 @@ fn parse_fold_with_xor_par_seq() {
     for name in &["xor", "par", "seq"] {
         let source_code = source_fold_with(name);
         let instruction = parse(&source_code);
-        let instr = binary_instruction(*name);
+        let instr = binary_instruction(name);
         let expected = fold_scalar_variable(
             Scalar::new("iterable", 6.into()),
             Scalar::new("i", 15.into()),

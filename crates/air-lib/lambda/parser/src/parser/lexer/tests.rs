@@ -42,7 +42,7 @@ fn array_access() {
 #[test]
 fn field_access() {
     let field_name = "some_field_name";
-    let field_access = format!(".$.{}", field_name);
+    let field_access = format!(".$.{field_name}");
 
     let actual = run_lexer(&field_access);
     let expected = vec![

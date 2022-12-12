@@ -511,7 +511,7 @@ mod tests {
 
         let transformed2 = TransformedAirScript::new(
             &f!(r#"(call "{}" ("service" "function") []) ; ok = 24"#, peer),
-            network.clone(),
+            network,
         )
         .unwrap();
         let exectution2 = AirScriptExecutor::from_transformed_air_script(
@@ -559,7 +559,7 @@ mod tests {
         )
         .unwrap();
 
-        let transformed2 = TransformedAirScript::new(&air_script, network.clone()).unwrap();
+        let transformed2 = TransformedAirScript::new(&air_script, network).unwrap();
         let exectution2 = AirScriptExecutor::from_transformed_air_script(
             TestRunParameters::from_init_peer_id(peer),
             transformed2,

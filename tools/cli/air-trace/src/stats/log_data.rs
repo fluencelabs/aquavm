@@ -77,7 +77,7 @@ impl std::fmt::Display for Message {
         match self {
             Message::New => write!(f, "new"),
             Message::Enter => write!(f, "enter"),
-            Message::Close(c) => write!(f, "close {}", c),
+            Message::Close(c) => write!(f, "close {c}"),
         }
     }
 }

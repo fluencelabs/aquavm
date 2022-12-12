@@ -70,21 +70,21 @@ fn par_early_exit() {
         setter_3,
         <_>::default(),
         &script,
-        setter_3_res_1.data.clone(),
-        setter_1_res.data.clone()
+        setter_3_res_1.data,
+        setter_1_res.data
     );
     let setter_3_res_3 = checked_call_vm!(
         setter_3,
         <_>::default(),
         &script,
-        setter_3_res_2.data.clone(),
-        setter_2_res.data.clone()
+        setter_3_res_2.data,
+        setter_2_res.data
     );
     let init_result_2 = checked_call_vm!(
         init,
         <_>::default(),
         &script,
-        init_result_1.data.clone(),
+        init_result_1.data,
         setter_3_res_3.data.clone()
     );
     let actual_trace_2 = trace_from_result(&setter_3_res_3);

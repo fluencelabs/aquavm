@@ -47,7 +47,7 @@ fn lfold() {
     assert_eq!(actual_trace[0.into()], expected_state);
 
     for i in 1..=5 {
-        let expected_state = executed_state::stream_string(format!("{}", i), i as u32 - 1);
+        let expected_state = executed_state::stream_string(format!("{i}"), i as u32 - 1);
         assert_eq!(actual_trace[i.into()], expected_state);
     }
 }
@@ -289,7 +289,7 @@ fn lambda() {
     assert_eq!(actual_trace[0.into()], expected_state);
 
     for i in 1..=5 {
-        let expected_state = executed_state::stream_string(format!("{}", i), i as u32 - 1);
+        let expected_state = executed_state::stream_string(format!("{i}"), i as u32 - 1);
         assert_eq!(actual_trace[i.into()], expected_state);
     }
 }
@@ -619,7 +619,7 @@ fn fold_scalar_seq_next_not_completes_with_never() {
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
-        executed_state::scalar(service_result.clone()),
+        executed_state::scalar(service_result),
         executed_state::par(1, 2),
         executed_state::request_sent_by(vm_peer_id),
         executed_state::par(1, 0),

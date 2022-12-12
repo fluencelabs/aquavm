@@ -136,7 +136,7 @@ fn fail_with_canon_stream() {
             )"#);
 
     let test_params = TestRunParameters::from_init_peer_id("init_peer_id");
-    let result = call_vm!(vm, test_params.clone(), script, "", "");
+    let result = call_vm!(vm, test_params, script, "", "");
 
     let expected_error = CatchableError::UserError {
         error: rc!(json!( {

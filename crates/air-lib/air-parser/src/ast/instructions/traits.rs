@@ -23,21 +23,21 @@ impl fmt::Display for Instruction<'_> {
         use Instruction::*;
 
         match self {
-            Call(call) => write!(f, "{}", call),
-            Canon(canon) => write!(f, "{}", canon),
-            Ap(ap) => write!(f, "{}", ap),
-            Seq(seq) => write!(f, "{}", seq),
-            Par(par) => write!(f, "{}", par),
-            Xor(xor) => write!(f, "{}", xor),
-            Match(match_) => write!(f, "{}", match_),
-            MisMatch(mismatch) => write!(f, "{}", mismatch),
-            Fail(fail) => write!(f, "{}", fail),
-            FoldScalar(fold) => write!(f, "{}", fold),
-            FoldStream(fold) => write!(f, "{}", fold),
-            Never(never) => write!(f, "{}", never),
-            Next(next) => write!(f, "{}", next),
-            New(new) => write!(f, "{}", new),
-            Null(null) => write!(f, "{}", null),
+            Call(call) => write!(f, "{call}"),
+            Canon(canon) => write!(f, "{canon}"),
+            Ap(ap) => write!(f, "{ap}"),
+            Seq(seq) => write!(f, "{seq}"),
+            Par(par) => write!(f, "{par}"),
+            Xor(xor) => write!(f, "{xor}"),
+            Match(match_) => write!(f, "{match_}"),
+            MisMatch(mismatch) => write!(f, "{mismatch}"),
+            Fail(fail) => write!(f, "{fail}"),
+            FoldScalar(fold) => write!(f, "{fold}"),
+            FoldStream(fold) => write!(f, "{fold}"),
+            Never(never) => write!(f, "{never}"),
+            Next(next) => write!(f, "{next}"),
+            New(new) => write!(f, "{new}"),
+            Null(null) => write!(f, "{null}"),
             Error => write!(f, "error"),
         }
     }
@@ -47,7 +47,7 @@ impl fmt::Display for Call<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use itertools::Itertools;
 
-        let args = self.args.iter().map(|arg| format!("{}", arg)).join(" ");
+        let args = self.args.iter().map(|arg| format!("{arg}")).join(" ");
         write!(f, "call {} [{}] {}", self.triplet, args, self.output)
     }
 }
@@ -71,14 +71,14 @@ impl fmt::Display for Ap<'_> {
 impl fmt::Display for Fail<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Fail::Scalar(scalar) => write!(f, "fail {}", scalar),
-            Fail::ScalarWithLambda(scalar) => write!(f, "fail {}", scalar),
+            Fail::Scalar(scalar) => write!(f, "fail {scalar}"),
+            Fail::ScalarWithLambda(scalar) => write!(f, "fail {scalar}"),
             Fail::Literal {
                 ret_code,
                 error_message,
-            } => write!(f, r#"fail {} "{}""#, ret_code, error_message),
+            } => write!(f, r#"fail {ret_code} "{error_message}""#),
             Fail::CanonStreamWithLambda(stream) => {
-                write!(f, "fail {}", stream)
+                write!(f, "fail {stream}")
             }
             Fail::LastError => write!(f, "fail %last_error%"),
         }

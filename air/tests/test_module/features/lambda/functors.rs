@@ -30,7 +30,7 @@ fn length_functor_for_array_scalar() {
         "#;
 
     let init_peer_id = "init_peer_id";
-    let executor = AirScriptExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), &script)
+    let executor = AirScriptExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), script)
         .expect("invalid test AIR script");
 
     let result = executor.execute_one(init_peer_id).unwrap();
@@ -79,7 +79,7 @@ fn length_functor_for_stream() {
         "#;
 
     let init_peer_id = "init_peer_id";
-    let executor = AirScriptExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), &script)
+    let executor = AirScriptExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), script)
         .expect("invalid test AIR script");
 
     let result = executor.execute_one(init_peer_id).unwrap();
@@ -120,7 +120,7 @@ fn length_functor_for_empty_stream() {
         "#;
 
     let init_peer_id = "init_peer_id";
-    let executor = AirScriptExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), &script)
+    let executor = AirScriptExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), script)
         .expect("invalid test AIR script");
 
     let result = executor.execute_one(init_peer_id).unwrap();
@@ -151,7 +151,7 @@ fn length_functor_for_canon_stream() {
         "#;
 
     let init_peer_id = "init_peer_id";
-    let executor = AirScriptExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), &script)
+    let executor = AirScriptExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), script)
         .expect("invalid test AIR script");
 
     let result = executor.execute_one(init_peer_id).unwrap();
@@ -183,7 +183,7 @@ fn length_functor_for_empty_canon_stream() {
         "#;
 
     let init_peer_id = "init_peer_id";
-    let executor = AirScriptExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), &script)
+    let executor = AirScriptExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), script)
         .expect("invalid test AIR script");
 
     let result = executor.execute_one(init_peer_id).unwrap();

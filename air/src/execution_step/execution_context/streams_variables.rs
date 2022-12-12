@@ -218,7 +218,7 @@ impl fmt::Display for Streams {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for (name, descriptors) in self.streams.iter() {
             if let Some(last_descriptor) = descriptors.last() {
-                writeln!(f, "{} => {}", name, last_descriptor)?;
+                writeln!(f, "{name} => {last_descriptor}")?;
             }
         }
         Ok(())

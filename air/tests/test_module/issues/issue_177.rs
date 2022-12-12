@@ -124,7 +124,7 @@ fn issue_177() {
         .runner
         .call(
             script,
-            relay_result_1.data.clone(),
+            relay_result_1.data,
             "",
             client_peer_id,
             0,
@@ -143,7 +143,7 @@ fn issue_177() {
         .runner
         .call(
             script,
-            relay_result_2.data.clone(),
+            relay_result_2.data,
             "",
             client_peer_id,
             0,
@@ -162,7 +162,7 @@ fn issue_177() {
         .runner
         .call(
             script,
-            relay_result_3.data.clone(),
+            relay_result_3.data,
             "",
             client_peer_id,
             0,
@@ -179,7 +179,7 @@ fn issue_177() {
         .call(
             script,
             client_result_2.data,
-            relay_result_4.data.clone(),
+            relay_result_4.data,
             client_peer_id,
             0,
             0,

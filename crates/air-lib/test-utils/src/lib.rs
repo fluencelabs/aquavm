@@ -118,7 +118,7 @@ pub fn print_trace(result: &RawAVMOutcome, trace_name: &str) {
 
     println!("trace {} (states_count: {}): [", trace_name, trace.len());
     for (id, state) in trace.iter().enumerate() {
-        println!("  {}: {}", id, state);
+        println!("  {id}: {state}");
     }
     println!("]");
 }
