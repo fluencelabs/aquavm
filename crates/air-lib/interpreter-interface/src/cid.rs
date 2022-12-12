@@ -52,8 +52,36 @@ pub fn json_data_cid(data: &[u8]) -> CID {
     CID(cid.to_string())
 }
 
+pub struct CidCalculationError(serde_json::Error);
+
+use std::fmt;
+
+impl fmt::Debug for CidCalculationError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt::Debug::fmt(&self.0, f)
+    }
+}
+
+impl fmt::Display for CidCalculationError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt::Display::fmt(&self.0, f)
+    }
+}
+
+impl From<serde_json::Error> for CidCalculationError {
+    fn from(source: serde_json::Error) -> Self {
+        Self(source)
+    }
+}
+
+impl std::error::Error for CidCalculationError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        Some(&self.0)
+    }
+}
+
 /// Calculate a CID of JSON-serialized value.
-pub fn value_to_json_cid<Val: Serialize>(value: &Val) -> Result<CID, serde_json::Error> {
+pub fn value_to_json_cid<Val: Serialize>(value: &Val) -> Result<CID, CidCalculationError> {
     let data = serde_json::to_vec(value)?;
     Ok(json_data_cid(&data))
 }

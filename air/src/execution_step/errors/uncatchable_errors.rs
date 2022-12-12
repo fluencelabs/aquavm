@@ -17,9 +17,9 @@
 use crate::JValue;
 use crate::ToErrorCode;
 
-use air_interpreter_data::CidTrackerError;
 use air_interpreter_data::TracePos;
 use air_interpreter_data::Value;
+use air_interpreter_interface::CidCalculationError;
 use air_interpreter_interface::CID;
 use air_trace_handler::merger::MergerApResult;
 use air_trace_handler::GenerationCompatificationError;
@@ -96,7 +96,7 @@ pub enum UncatchableError {
     },
 
     #[error("failed to calculate value's CID")]
-    CidError(#[from] CidTrackerError),
+    CidError(#[from] CidCalculationError),
 
     #[error("value for CID {0:?} not found")]
     ValueForCidNotFound(Rc<CID>),

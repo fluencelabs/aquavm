@@ -16,7 +16,7 @@
 
 use crate::JValue;
 
-use air_interpreter_interface::{value_to_json_cid, CID};
+use air_interpreter_interface::{value_to_json_cid, CidCalculationError, CID};
 use serde::{Deserialize, Serialize};
 
 use std::{collections::HashMap, rc::Rc};
@@ -41,8 +41,6 @@ impl<Val> Default for CidStore<Val> {
         Self(Default::default())
     }
 }
-
-pub type CidTrackerError = serde_json::Error;
 
 #[derive(Clone, Debug)]
 pub struct CidTracker<Val = JValue> {
@@ -69,7 +67,10 @@ impl<Val> CidTracker<Val> {
 }
 
 impl<Val: Serialize> CidTracker<Val> {
-    pub fn record_value(&mut self, value: impl Into<Rc<Val>>) -> Result<Rc<CID>, CidTrackerError> {
+    pub fn record_value(
+        &mut self,
+        value: impl Into<Rc<Val>>,
+    ) -> Result<Rc<CID>, CidCalculationError> {
         let value = value.into();
         let cid = Rc::new(value_to_json_cid(&value)?);
         self.cids.insert(cid.clone(), value);
@@ -109,7 +110,7 @@ mod tests {
     use serde_json::json;
 
     #[test]
-    fn test_record() {
+    fn test_iter() {
         let mut tracker = CidTracker::new();
         tracker.record_value(json!("test")).unwrap();
         tracker.record_value(json!(1)).unwrap();
@@ -148,5 +149,54 @@ mod tests {
                 )
             ])
         );
+    }
+
+    #[test]
+    fn test_store() {
+        let mut tracker = CidTracker::new();
+        tracker.record_value(json!("test")).unwrap();
+        tracker.record_value(json!(1)).unwrap();
+        tracker.record_value(json!([1, 2, 3])).unwrap();
+        tracker
+            .record_value(json!({
+                "key": 42,
+            }))
+            .unwrap();
+        let store = CidStore::from(tracker);
+
+        assert_eq!(
+            &*store
+                .get(&CID::new(
+                    "bagaaierajwlhumardpzj6dv2ahcerm3vyfrjwl7nahg7zq5o3eprwv6v3vpa"
+                ))
+                .unwrap(),
+            &json!("test"),
+        );
+        assert_eq!(
+            &*store
+                .get(&CID::new(
+                    "bagaaierauyk65lxcdxsrphpaqdpiymcszdnjaejyibv2ohbyyaziix35kt2a"
+                ))
+                .unwrap(),
+            &json!([1, 2, 3]),
+        );
+        assert_eq!(
+            &*store
+                .get(&CID::new(
+                    "bagaaieranodle477gt6odhllqbhp6wr7k5d23jhkuixr2soadzjn3n4hlnfq"
+                ))
+                .unwrap(),
+            &json!(1),
+        );
+        assert_eq!(
+            &*store
+                .get(&CID::new(
+                    "bagaaierad7lci6475zdrps4h6fmcpmqyknz5z6bw6p6tmpjkfyueavqw4kaq"
+                ))
+                .unwrap(),
+            &json!({"key": 42}),
+        );
+
+        assert_eq!(store.get(&CID::new("loremimpsumdolorsitament")), None,);
     }
 }
