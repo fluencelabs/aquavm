@@ -580,7 +580,7 @@ mod tests {
   (call peerid ("serv" "func") [a b] var) ; ok=42
   (call peerid2 ("serv" "func") []))"#,
         );
-        assert!(res.is_ok(), "{res:?}");
+        assert!(res.is_ok(), "{}", "{res:?}");
     }
 
     #[test]
@@ -609,7 +609,7 @@ mod tests {
     #[test]
     fn test_trailing_error() {
         let res = Sexp::from_str("(null))");
-        assert!(res.is_err(), "{res:?}");
+        assert!(res.is_err(), "{}", "{res:?}");
     }
 
     #[test]
@@ -683,7 +683,7 @@ mod tests {
     fn test_canon_syntax() {
         let sexp_str = r#"(seq (canon peer_id $stream #canon) (fold #canon i (next)))"#;
         let res = Sexp::from_str(sexp_str);
-        assert!(res.is_ok(), "{res:?}");
+        assert!(res.is_ok(), "{}", "{res:?}");
     }
 
     #[test]
@@ -726,7 +726,7 @@ mod tests {
           "0": null
         } |#"#;
         let res = parse_annotation_comment(multiline_annotation.into());
-        assert!(res.is_ok(), "{res:?}");
+        assert!(res.is_ok(), "{}", "{res:?}");
     }
 
     #[test]

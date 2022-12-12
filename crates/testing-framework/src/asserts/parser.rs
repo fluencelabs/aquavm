@@ -121,7 +121,7 @@ mod tests {
     #[test]
     fn test_parse_garbage0() {
         let res = ServiceDefinition::from_str("garbage");
-        assert!(res.is_err(), "{res:?}");
+        assert!(res.is_err(), "{}", "{res:?}");
     }
 
     #[test]
