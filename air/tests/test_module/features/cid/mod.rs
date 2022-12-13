@@ -15,6 +15,7 @@
  */
 
 use air_interpreter_data::CidTracker;
+use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::*;
 
 #[test]
@@ -56,4 +57,65 @@ fn test_correct_cid() {
     let cur_data = raw_data_from_trace(trace, tracker);
     let result = call_vm!(vm, <_>::default(), air_script, vec![], cur_data);
     assert_eq!(result.ret_code, 0);
+}
+
+#[test]
+fn test_scalar_cid() {
+    let vm_peer_id = "vm_peer_id";
+
+    let annotated_air_script = format!(
+        r#"
+       (seq
+          (call "{vm_peer_id}" ("service" "call1") [] x) ; ok="hi"
+          (call "{vm_peer_id}" ("service" "call2") [] y) ; ok="ipld"
+       )"#
+    );
+    let executor = AirScriptExecutor::new(
+        TestRunParameters::from_init_peer_id(vm_peer_id),
+        vec![],
+        std::iter::empty(),
+        &annotated_air_script,
+    )
+    .unwrap();
+
+    let result = executor.execute_one(vm_peer_id).unwrap();
+    let data = data_from_result(&result);
+    let mut tracker = CidTracker::<JValue>::new();
+    let expected_trace = vec![scalar_tracked("hi", &mut tracker), scalar_tracked("ipld", &mut tracker)];
+
+    assert_eq!(result.ret_code, 0);
+    assert_eq!(data.trace, expected_trace);
+    assert_eq!(data.cid_store, tracker.into());
+}
+
+#[test]
+fn test_stream_cid() {
+    let vm_peer_id = "vm_peer_id";
+
+    let annotated_air_script = format!(
+        r#"
+       (seq
+          (call "{vm_peer_id}" ("service" "call1") [] $x) ; ok="hi"
+          (call "{vm_peer_id}" ("service" "call2") [] $x) ; ok="ipld"
+       )"#
+    );
+    let executor = AirScriptExecutor::new(
+        TestRunParameters::from_init_peer_id(vm_peer_id),
+        vec![],
+        std::iter::empty(),
+        &annotated_air_script,
+    )
+    .unwrap();
+
+    let result = executor.execute_one(vm_peer_id).unwrap();
+    let data = data_from_result(&result);
+    let mut tracker = CidTracker::<JValue>::new();
+    let expected_trace = vec![
+        stream_tracked("hi", 0, &mut tracker),
+        stream_tracked("ipld", 1, &mut tracker),
+    ];
+
+    assert_eq!(result.ret_code, 0);
+    assert_eq!(data.trace, expected_trace);
+    assert_eq!(data.cid_store, tracker.into());
 }

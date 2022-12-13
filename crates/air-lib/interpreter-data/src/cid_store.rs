@@ -22,7 +22,7 @@ use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, rc::Rc};
 
 /// Stores CID to Value corresponance.
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(transparent)]
 pub struct CidStore<Val>(HashMap<Rc<CID>, Rc<Val>>);
 
