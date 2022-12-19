@@ -133,6 +133,13 @@ pub struct CanonResult {
     pub canonicalized_element: JValue,
 }
 
+/// The type Canon trace CID refers to.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct CanonValueAggregate {
+    pub value: Rc<CID>,
+    pub tetraplet: Rc<CID>,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum ExecutedState {

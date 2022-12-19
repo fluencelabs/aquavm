@@ -18,7 +18,9 @@ use super::ExecutionCtx;
 use super::ExecutionResult;
 use super::TraceHandler;
 use crate::execution_step::boxed_value::CanonStream;
+use crate::execution_step::boxed_value::RawCanonStream;
 use crate::execution_step::Stream;
+use crate::execution_step::ValueAggregate;
 use crate::log_instruction;
 use crate::trace_to_exec_err;
 use crate::ExecutionError;
@@ -26,6 +28,7 @@ use crate::JValue;
 use crate::UncatchableError;
 
 use air_interpreter_data::CanonResult;
+use air_interpreter_data::TracePos;
 use air_parser::ast;
 use air_trace_handler::merger::MergerCanonResult;
 
@@ -52,12 +55,34 @@ fn handle_seen_canon(
     exec_ctx: &mut ExecutionCtx<'_>,
     trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<()> {
-    let canon_stream = serde_json::from_value(se_canon_stream.clone()).map_err(|de_error| {
+    let raw_canon_stream: RawCanonStream = serde_json::from_value(se_canon_stream.clone()).map_err(|de_error| {
         ExecutionError::Uncatchable(UncatchableError::InvalidCanonStreamInData {
             canonicalized_stream: se_canon_stream.clone(),
             de_error,
         })
     })?;
+    let tetraplet = exec_ctx
+        .tetraplet_tracker
+        .get(&raw_canon_stream.tetraplet)
+        .expect("TODO error");
+    let values = raw_canon_stream
+        .values
+        .iter()
+        .map(|canon_value_agg| {
+            let result = exec_ctx.get_value_by_cid(&canon_value_agg.value).expect("TODO error");
+            let tetraplet = exec_ctx
+                .tetraplet_tracker
+                .get(&canon_value_agg.tetraplet)
+                .expect("TODO error");
+            let trace_pos = TracePos::default(); // fake value
+
+            ValueAggregate::new(result, tetraplet, trace_pos)
+        })
+        .collect::<Vec<_>>();
+
+    // TODO make some method, so that fields are not pub(crate) anymore
+    let canon_stream = CanonStream { values, tetraplet };
+
     let canon_stream_with_se = StreamWithSerializedView {
         canon_stream,
         se_canon_stream,

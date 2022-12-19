@@ -17,10 +17,12 @@
 use super::GlobalStreamGens;
 use super::RestrictedStreamGens;
 use crate::cid_store::CidStore;
+use crate::CanonValueAggregate;
 use crate::ExecutionTrace;
 use crate::JValue;
 
 use air_utils::measure;
+use polyplets::SecurityTetraplet;
 
 use serde::Deserialize;
 use serde::Serialize;
@@ -57,8 +59,14 @@ pub struct InterpreterData {
     /// Version of interpreter produced this data.
     pub interpreter_version: semver::Version,
 
-    /// Map CID to values
+    /// Map CID to value
     pub cid_store: CidStore<JValue>,
+
+    /// Map CID to a tetraplet
+    pub tetraplet_store: CidStore<SecurityTetraplet>,
+
+    /// Map CID to a canon value
+    pub canon_store: CidStore<CanonValueAggregate>,
 }
 
 impl InterpreterData {
@@ -71,6 +79,8 @@ impl InterpreterData {
             restricted_streams: RestrictedStreamGens::new(),
             interpreter_version,
             cid_store: <_>::default(),
+            tetraplet_store: <_>::default(),
+            canon_store: <_>::default(),
         }
     }
 
@@ -79,10 +89,14 @@ impl InterpreterData {
         streams: GlobalStreamGens,
         restricted_streams: RestrictedStreamGens,
         cid_store: impl Into<CidStore<JValue>>,
+        tetraplet_store: impl Into<CidStore<SecurityTetraplet>>,
+        canon_store: impl Into<CidStore<CanonValueAggregate>>,
         last_call_request_id: u32,
         interpreter_version: semver::Version,
     ) -> Self {
         let cid_store = cid_store.into();
+        let tetraplet_store = tetraplet_store.into();
+        let canon_store = canon_store.into();
 
         Self {
             trace,
@@ -92,6 +106,8 @@ impl InterpreterData {
             restricted_streams,
             interpreter_version,
             cid_store,
+            tetraplet_store,
+            canon_store,
         }
     }
 

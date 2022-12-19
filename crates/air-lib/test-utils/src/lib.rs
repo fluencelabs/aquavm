@@ -36,6 +36,8 @@ mod native_test_runner;
 mod wasm_test_runner;
 
 pub use air::interpreter_data::*;
+use air_interpreter_data::CanonValueAggregate;
+use air_interpreter_data::CidTracker;
 pub use avm_interface::raw_outcome::*;
 pub use avm_server::*;
 
@@ -96,6 +98,27 @@ pub fn raw_data_from_trace(trace: impl Into<ExecutionTrace>, cid_tracker: CidTra
         <_>::default(),
         <_>::default(),
         cid_tracker,
+        CidTracker::<_>::default(),
+        CidTracker::<_>::default(),
+        0,
+        semver::Version::new(1, 1, 1),
+    );
+    serde_json::to_vec(&data).expect("default serializer shouldn't fail")
+}
+
+pub fn raw_data_from_trace_with_canon(
+    trace: impl Into<ExecutionTrace>,
+    cid_tracker: CidTracker,
+    tetraplet_tracker: CidTracker<SecurityTetraplet>,
+    canon_tracker: CidTracker<CanonValueAggregate>,
+) -> Vec<u8> {
+    let data = InterpreterData::from_execution_result(
+        trace.into(),
+        <_>::default(),
+        <_>::default(),
+        cid_tracker,
+        tetraplet_tracker,
+        canon_tracker,
         0,
         semver::Version::new(1, 1, 1),
     );

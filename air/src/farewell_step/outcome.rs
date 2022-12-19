@@ -94,6 +94,8 @@ fn populate_outcome_from_contexts(
         global_streams,
         restricted_streams,
         exec_ctx.cid_tracker,
+        exec_ctx.tetraplet_tracker,
+        exec_ctx.canon_tracker,
         exec_ctx.last_call_request_id,
         semver::Version::parse(env!("CARGO_PKG_VERSION")).expect("cargo version is valid"),
     );

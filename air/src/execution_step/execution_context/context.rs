@@ -22,11 +22,13 @@ use crate::JValue;
 
 use air_execution_info_collector::InstructionTracker;
 use air_interpreter_cid::CID;
+use air_interpreter_data::CanonValueAggregate;
 use air_interpreter_data::CidStore;
 use air_interpreter_data::CidTracker;
 use air_interpreter_data::GlobalStreamGens;
 use air_interpreter_data::RestrictedStreamGens;
 use air_interpreter_interface::*;
+use polyplets::SecurityTetraplet;
 
 use std::rc::Rc;
 
@@ -71,6 +73,11 @@ pub(crate) struct ExecutionCtx<'i> {
 
     /// Merged CID-to-value dictionaries
     pub(crate) cid_tracker: CidTracker,
+
+    /// Merged CID-to-tetraplet dictionaries
+    pub(crate) tetraplet_tracker: CidTracker<SecurityTetraplet>,
+    /// Merged CID-to-cell value dictionaries
+    pub(crate) canon_tracker: CidTracker<CanonValueAggregate>,
 }
 
 impl<'i> ExecutionCtx<'i> {
@@ -89,6 +96,9 @@ impl<'i> ExecutionCtx<'i> {
         );
 
         let cid_tracker = CidTracker::from_cid_stores(prev_ingredients.cid_store, current_ingredients.cid_store);
+        let tetraplet_tracker =
+            CidTracker::from_cid_stores(prev_ingredients.tetraplet_store, current_ingredients.tetraplet_store);
+        let canon_tracker = CidTracker::from_cid_stores(prev_ingredients.canon_store, current_ingredients.canon_store);
 
         Self {
             run_parameters,
@@ -97,6 +107,8 @@ impl<'i> ExecutionCtx<'i> {
             call_results,
             streams,
             cid_tracker,
+            tetraplet_tracker,
+            canon_tracker,
             ..<_>::default()
         }
     }
@@ -122,6 +134,8 @@ pub(crate) struct ExecCtxIngredients {
     pub(crate) last_call_request_id: u32,
     pub(crate) restricted_streams: RestrictedStreamGens,
     pub(crate) cid_store: CidStore<JValue>,
+    pub(crate) tetraplet_store: CidStore<SecurityTetraplet>,
+    pub(crate) canon_store: CidStore<CanonValueAggregate>,
 }
 
 use serde::Deserialize;

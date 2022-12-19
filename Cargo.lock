@@ -118,6 +118,7 @@ dependencies = [
  "air-parser",
  "air-utils",
  "once_cell",
+ "polyplets",
  "semver 1.0.16",
  "serde",
  "serde_json",
