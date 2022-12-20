@@ -16,9 +16,9 @@
 
 use crate::JValue;
 
-use air_interpreter_interface::value_to_json_cid;
-use air_interpreter_interface::CidCalculationError;
-use air_interpreter_interface::CID;
+use air_interpreter_cid::value_to_json_cid;
+use air_interpreter_cid::CidCalculationError;
+use air_interpreter_cid::CID;
 use serde::Deserialize;
 use serde::Serialize;
 

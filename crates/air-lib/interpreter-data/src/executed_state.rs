@@ -20,7 +20,7 @@ mod se_de;
 use crate::JValue;
 use crate::TracePos;
 
-use air_interpreter_interface::CID;
+use air_interpreter_cid::CID;
 use se_de::par_serializer;
 use se_de::sender_serializer;
 use serde::Deserialize;

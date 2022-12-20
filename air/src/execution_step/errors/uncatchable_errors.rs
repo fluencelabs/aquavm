@@ -17,10 +17,10 @@
 use crate::JValue;
 use crate::ToErrorCode;
 
+use air_interpreter_cid::CidCalculationError;
+use air_interpreter_cid::CID;
 use air_interpreter_data::TracePos;
 use air_interpreter_data::Value;
-use air_interpreter_interface::CidCalculationError;
-use air_interpreter_interface::CID;
 use air_trace_handler::merger::MergerApResult;
 use air_trace_handler::GenerationCompatificationError;
 use air_trace_handler::TraceHandlerError;

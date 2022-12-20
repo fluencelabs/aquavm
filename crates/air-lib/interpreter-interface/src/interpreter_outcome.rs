@@ -56,7 +56,7 @@ impl InterpreterOutcome {
         next_peer_pks: Vec<String>,
         call_requests: Vec<u8>,
     ) -> Self {
-        let cid = crate::json_data_cid(&data).into();
+        let cid = air_interpreter_cid::json_data_cid(&data).into();
 
         Self {
             ret_code,

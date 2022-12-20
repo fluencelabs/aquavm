@@ -16,6 +16,7 @@ name = "air"
 version = "0.32.0"
 dependencies = [
  "air-execution-info-collector",
+ "air-interpreter-cid",
  "air-interpreter-data",
  "air-interpreter-interface",
  "air-lambda-ast",
@@ -99,9 +100,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "air-interpreter-cid"
+version = "0.1.0"
+dependencies = [
+ "cid",
+ "multihash",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "air-interpreter-data"
 version = "0.4.1"
 dependencies = [
+ "air-interpreter-cid",
  "air-interpreter-interface",
  "air-parser",
  "air-utils",
@@ -116,10 +128,9 @@ dependencies = [
 name = "air-interpreter-interface"
 version = "0.11.2"
 dependencies = [
- "cid",
+ "air-interpreter-cid",
  "fluence-it-types",
  "marine-rs-sdk",
- "multihash",
  "serde",
  "serde_json",
 ]
@@ -182,6 +193,7 @@ name = "air-test-utils"
 version = "0.4.0"
 dependencies = [
  "air",
+ "air-interpreter-cid",
  "air-interpreter-data",
  "air-interpreter-interface",
  "avm-interface",
@@ -231,6 +243,7 @@ dependencies = [
 name = "air-trace-handler"
 version = "0.1.0"
 dependencies = [
+ "air-interpreter-cid",
  "air-interpreter-data",
  "air-interpreter-interface",
  "air-log-targets",

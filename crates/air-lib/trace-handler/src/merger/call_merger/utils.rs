@@ -16,7 +16,7 @@
 
 use super::*;
 
-use air_interpreter_interface::CID;
+use air_interpreter_cid::CID;
 
 pub(super) fn merge_executed(prev_value: Value, current_value: Value) -> MergeResult<CallResult> {
     match (&prev_value, &current_value) {

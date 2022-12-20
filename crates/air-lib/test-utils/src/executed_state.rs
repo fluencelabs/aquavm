@@ -28,8 +28,8 @@ use crate::FoldResult;
 use crate::FoldSubTraceLore;
 use crate::SubTraceDesc;
 
+use air_interpreter_cid::value_to_json_cid;
 use air_interpreter_data::CidTracker;
-use air_interpreter_interface::value_to_json_cid;
 
 use std::rc::Rc;
 

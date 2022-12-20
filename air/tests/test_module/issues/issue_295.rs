@@ -15,8 +15,8 @@
  */
 
 use air::UncatchableError;
+use air_interpreter_cid::value_to_json_cid;
 use air_interpreter_data::CidTracker;
-use air_interpreter_interface::value_to_json_cid;
 use air_test_utils::prelude::*;
 use air_trace_handler::merger::MergeError;
 use air_trace_handler::TraceHandlerError;
