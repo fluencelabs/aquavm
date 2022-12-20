@@ -21,8 +21,10 @@ use super::Streams;
 use crate::JValue;
 
 use air_execution_info_collector::InstructionTracker;
+use air_interpreter_data::CidStore;
 use air_interpreter_data::CidTracker;
-use air_interpreter_data::InterpreterData;
+use air_interpreter_data::GlobalStreamGens;
+use air_interpreter_data::RestrictedStreamGens;
 use air_interpreter_interface::*;
 
 use std::rc::Rc;
@@ -72,25 +74,25 @@ pub(crate) struct ExecutionCtx<'i> {
 
 impl<'i> ExecutionCtx<'i> {
     pub(crate) fn new(
-        prev_data: &InterpreterData,
-        current_data: &InterpreterData,
+        prev_ingredients: ExecCtxIngredients,
+        current_ingredients: ExecCtxIngredients,
         call_results: CallResults,
         run_parameters: RunParameters,
     ) -> Self {
         let run_parameters = RcRunParameters::from_run_parameters(run_parameters);
         let streams = Streams::from_data(
-            &prev_data.global_streams,
-            &current_data.global_streams,
-            prev_data.restricted_streams.clone(),
-            current_data.restricted_streams.clone(),
+            prev_ingredients.global_streams,
+            current_ingredients.global_streams,
+            prev_ingredients.restricted_streams,
+            current_ingredients.restricted_streams,
         );
 
-        let cid_tracker = CidTracker::from_cid_stores(&prev_data.cid_store, &current_data.cid_store);
+        let cid_tracker = CidTracker::from_cid_stores(prev_ingredients.cid_store, current_ingredients.cid_store);
 
         Self {
             run_parameters,
             subgraph_complete: true,
-            last_call_request_id: prev_data.last_call_request_id,
+            last_call_request_id: prev_ingredients.last_call_request_id,
             call_results,
             streams,
             cid_tracker,
@@ -110,6 +112,15 @@ impl<'i> ExecutionCtx<'i> {
     pub(crate) fn get_value_by_cid(&self, cid: &CID) -> Option<Rc<JValue>> {
         self.cid_tracker.get(cid)
     }
+}
+
+/// Helper struct for ExecCtx construction.
+#[derive(Debug, Clone)]
+pub(crate) struct ExecCtxIngredients {
+    pub(crate) global_streams: GlobalStreamGens,
+    pub(crate) last_call_request_id: u32,
+    pub(crate) restricted_streams: RestrictedStreamGens,
+    pub(crate) cid_store: CidStore<JValue>,
 }
 
 use serde::Deserialize;

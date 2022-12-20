@@ -17,8 +17,6 @@
 use super::*;
 use merger::*;
 
-use air_interpreter_data::InterpreterData;
-
 #[derive(Debug, Default)]
 pub struct TraceHandler {
     data_keeper: DataKeeper,
@@ -26,8 +24,8 @@ pub struct TraceHandler {
 }
 
 impl TraceHandler {
-    pub fn from_data(prev_data: InterpreterData, current_data: InterpreterData) -> Self {
-        let data_keeper = DataKeeper::from_data(prev_data, current_data);
+    pub fn from_trace(prev_trace: ExecutionTrace, current_trace: ExecutionTrace) -> Self {
+        let data_keeper = DataKeeper::from_trace(prev_trace, current_trace);
 
         Self {
             data_keeper,

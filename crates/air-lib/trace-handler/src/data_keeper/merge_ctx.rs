@@ -20,8 +20,6 @@ use super::KeeperResult;
 use super::TraceSlider;
 use crate::TracePos;
 
-use air_interpreter_data::InterpreterData;
-
 /// Contains all necessary information about data.
 #[derive(Debug, Default, PartialEq, Eq)]
 pub struct MergeCtx {
@@ -29,15 +27,8 @@ pub struct MergeCtx {
 }
 
 impl MergeCtx {
-    #[allow(dead_code)]
     pub(crate) fn from_trace(trace: ExecutionTrace) -> Self {
         let slider = TraceSlider::new(trace);
-
-        Self { slider }
-    }
-
-    pub(crate) fn from_data(data: InterpreterData) -> Self {
-        let slider = TraceSlider::new(data.trace);
 
         Self { slider }
     }

@@ -55,11 +55,11 @@ impl<Val> CidTracker<Val> {
         Self::default()
     }
 
-    pub fn from_cid_stores(prev_cid_map: &CidStore<Val>, current_cid_map: &CidStore<Val>) -> Self {
-        let mut cids = prev_cid_map.0.clone();
-        for (cid, val) in &current_cid_map.0 {
+    pub fn from_cid_stores(prev_cid_map: CidStore<Val>, current_cid_map: CidStore<Val>) -> Self {
+        let mut cids = prev_cid_map.0;
+        for (cid, val) in current_cid_map.0 {
             // TODO check that values matches?
-            cids.insert(cid.clone(), val.clone());
+            cids.insert(cid, val);
         }
         Self { cids }
     }

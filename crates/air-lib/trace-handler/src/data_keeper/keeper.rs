@@ -19,8 +19,6 @@ use super::MergeCtx;
 use super::TraceSlider;
 use crate::TracePos;
 
-use air_interpreter_data::InterpreterData;
-
 use bimap::BiHashMap;
 
 /// Keeps all necessary data for merging.
@@ -34,9 +32,9 @@ pub(crate) struct DataKeeper {
 }
 
 impl DataKeeper {
-    pub(crate) fn from_data(prev_data: InterpreterData, current_data: InterpreterData) -> Self {
-        let prev_ctx = MergeCtx::from_data(prev_data);
-        let current_ctx = MergeCtx::from_data(current_data);
+    pub(crate) fn from_trace(prev_trace: ExecutionTrace, current_trace: ExecutionTrace) -> Self {
+        let prev_ctx = MergeCtx::from_trace(prev_trace);
+        let current_ctx = MergeCtx::from_trace(current_trace);
 
         Self {
             prev_ctx,
