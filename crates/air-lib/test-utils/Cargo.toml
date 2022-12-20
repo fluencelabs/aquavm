@@ -15,7 +15,7 @@ path = "src/lib.rs"
 
 [dependencies]
 air = { path = "../../../air" }
-air-interpreter-cid = { path = "../interpreter-cid" }
+air-interpreter-cid = { version = "0.1.0", path = "../interpreter-cid" }
 air-interpreter-data = { path = "../interpreter-data" }
 air-interpreter-interface = { path = "../interpreter-interface" }
 avm-interface = { path = "../../../avm/interface" }
