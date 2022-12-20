@@ -17,7 +17,7 @@
 use air::UncatchableError;
 use air_interpreter_cid::value_to_json_cid;
 use air_interpreter_data::CidTracker;
-use air_interpreter_data::Value;
+use air_interpreter_data::ValueRef;
 use air_test_utils::prelude::*;
 use air_trace_handler::merger::CallResultError;
 use air_trace_handler::merger::MergeError;
@@ -155,11 +155,11 @@ fn par_early_exit() {
         setter_3_malicious_data
     );
 
-    let prev_value = Value::Stream {
+    let prev_value = ValueRef::Stream {
         cid: value_to_json_cid(&json!("1")).unwrap().into(),
         generation: 1,
     };
-    let current_value = Value::Stream {
+    let current_value = ValueRef::Stream {
         cid: value_to_json_cid(&json!("non_exist_value")).unwrap().into(),
         generation: 0,
     };

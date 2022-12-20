@@ -22,7 +22,7 @@ use crate::UncatchableError;
 
 use air_interpreter_data::CallResult;
 use air_interpreter_data::TracePos;
-use air_interpreter_data::Value;
+use air_interpreter_data::ValueRef;
 use air_parser::ast::CallOutputValue;
 use air_trace_handler::merger::ValueSource;
 use air_trace_handler::TraceHandler;
@@ -60,23 +60,23 @@ pub(crate) fn populate_context_from_peer_service_result<'i>(
 }
 
 pub(crate) fn populate_context_from_data<'i>(
-    value: Value,
+    value: ValueRef,
     tetraplet: RcSecurityTetraplet,
     trace_pos: TracePos,
     value_source: ValueSource,
     output: &CallOutputValue<'i>,
     exec_ctx: &mut ExecutionCtx<'i>,
-) -> ExecutionResult<Value> {
+) -> ExecutionResult<ValueRef> {
     match (output, value) {
-        (CallOutputValue::Scalar(scalar), Value::Scalar(cid)) => {
+        (CallOutputValue::Scalar(scalar), ValueRef::Scalar(cid)) => {
             let value = exec_ctx
                 .get_value_by_cid(&cid)
                 .ok_or_else(|| UncatchableError::ValueForCidNotFound(cid.clone()))?;
             let result = ValueAggregate::new(value, tetraplet, trace_pos);
             exec_ctx.scalars.set_scalar_value(scalar.name, result)?;
-            Ok(Value::Scalar(cid))
+            Ok(ValueRef::Scalar(cid))
         }
-        (CallOutputValue::Stream(stream), Value::Stream { cid, generation }) => {
+        (CallOutputValue::Stream(stream), ValueRef::Stream { cid, generation }) => {
             let value = exec_ctx
                 .get_value_by_cid(&cid)
                 .ok_or_else(|| UncatchableError::ValueForCidNotFound(cid.clone()))?;
@@ -90,7 +90,7 @@ pub(crate) fn populate_context_from_data<'i>(
             );
             let resulted_generation = exec_ctx.streams.add_stream_value(value_descriptor)?;
 
-            let result = Value::Stream {
+            let result = ValueRef::Stream {
                 cid,
                 generation: resulted_generation,
             };
@@ -98,7 +98,7 @@ pub(crate) fn populate_context_from_data<'i>(
         }
         // by the internal conventions if call has no output value,
         // corresponding data should have scalar type
-        (CallOutputValue::None, value @ Value::Scalar(_)) => Ok(value),
+        (CallOutputValue::None, value @ ValueRef::Scalar(_)) => Ok(value),
         (_, value) => Err(ExecutionError::Uncatchable(
             UncatchableError::CallResultNotCorrespondToInstr(value),
         )),

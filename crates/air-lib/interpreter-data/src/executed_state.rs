@@ -50,7 +50,7 @@ pub enum CallResult {
     RequestSentBy(Sender),
 
     /// A corresponding call's been already executed with such value as a result.
-    Executed(Value),
+    Executed(ValueRef),
 
     /// call_service ended with a service error.
     #[serde(rename = "failed")]
@@ -59,7 +59,7 @@ pub enum CallResult {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub enum Value {
+pub enum ValueRef {
     Scalar(Rc<CID>),
     Stream { cid: Rc<CID>, generation: u32 },
 }

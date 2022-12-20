@@ -67,7 +67,7 @@ impl TraceHandler {
 
         match state {
             ExecutedState::Ap(ap_result) => ap_result.res_generations = vec![generation],
-            ExecutedState::Call(CallResult::Executed(Value::Stream {
+            ExecutedState::Call(CallResult::Executed(ValueRef::Stream {
                 generation: call_generation,
                 ..
             })) => *call_generation = generation,

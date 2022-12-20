@@ -22,7 +22,7 @@ use super::JValue;
 use super::ParResult;
 use super::Sender;
 use super::TracePos;
-use super::Value;
+use super::ValueRef;
 use crate::FoldLore;
 use crate::FoldResult;
 use crate::FoldSubTraceLore;
@@ -36,13 +36,13 @@ use std::rc::Rc;
 pub fn scalar(result: JValue) -> ExecutedState {
     let cid = value_to_json_cid(&result)
         .unwrap_or_else(|e| panic!("{:?}: failed to compute CID of {:?}", e, result));
-    let value = Value::Scalar(Rc::new(cid));
+    let value = ValueRef::Scalar(Rc::new(cid));
     ExecutedState::Call(CallResult::Executed(value))
 }
 
 pub fn scalar_tracked(result: impl Into<JValue>, tracker: &mut CidTracker) -> ExecutedState {
     let cid = tracker.record_value(Rc::new(result.into())).unwrap();
-    let value = Value::Scalar(cid);
+    let value = ValueRef::Scalar(cid);
     ExecutedState::Call(CallResult::Executed(value))
 }
 

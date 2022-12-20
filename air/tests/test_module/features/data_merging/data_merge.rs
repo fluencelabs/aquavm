@@ -311,8 +311,8 @@ fn fold_merge() {
                 let value_pos = subtrace_lore.value_pos;
                 if let ExecutedState::Call(CallResult::Executed(value)) = &data.trace[value_pos] {
                     let cid = match value {
-                        Value::Scalar(cid) => cid,
-                        Value::Stream { cid, .. } => cid,
+                        ValueRef::Scalar(cid) => cid,
+                        ValueRef::Stream { cid, .. } => cid,
                     };
 
                     let value = data.cid_store.get(cid).unwrap().clone();

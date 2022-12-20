@@ -18,13 +18,13 @@ use super::*;
 
 use air_interpreter_cid::CID;
 
-pub(super) fn merge_executed(prev_value: Value, current_value: Value) -> MergeResult<CallResult> {
+pub(super) fn merge_executed(prev_value: ValueRef, current_value: ValueRef) -> MergeResult<CallResult> {
     match (&prev_value, &current_value) {
-        (Value::Scalar(_), Value::Scalar(_)) => {
+        (ValueRef::Scalar(_), ValueRef::Scalar(_)) => {
             are_scalars_equal(&prev_value, &current_value)?;
             Ok(CallResult::Executed(prev_value))
         }
-        (Value::Stream { cid: pr, .. }, Value::Stream { cid: cr, .. }) => {
+        (ValueRef::Stream { cid: pr, .. }, ValueRef::Stream { cid: cr, .. }) => {
             are_streams_equal(pr, cr, &prev_value, &current_value)?;
             Ok(CallResult::Executed(prev_value))
         }
@@ -32,7 +32,7 @@ pub(super) fn merge_executed(prev_value: Value, current_value: Value) -> MergeRe
     }
 }
 
-fn are_scalars_equal(prev_value: &Value, current_value: &Value) -> MergeResult<()> {
+fn are_scalars_equal(prev_value: &ValueRef, current_value: &ValueRef) -> MergeResult<()> {
     if prev_value == current_value {
         return Ok(());
     }
@@ -46,8 +46,8 @@ fn are_scalars_equal(prev_value: &Value, current_value: &Value) -> MergeResult<(
 fn are_streams_equal(
     prev_result_value: &CID,
     current_result_value: &CID,
-    prev_value: &Value,
-    current_value: &Value,
+    prev_value: &ValueRef,
+    current_value: &ValueRef,
 ) -> MergeResult<()> {
     // values from streams could have different generations and it's ok
     if prev_result_value == current_result_value {

@@ -20,7 +20,7 @@ use crate::ToErrorCode;
 use air_interpreter_cid::CidCalculationError;
 use air_interpreter_cid::CID;
 use air_interpreter_data::TracePos;
-use air_interpreter_data::Value;
+use air_interpreter_data::ValueRef;
 use air_trace_handler::merger::MergerApResult;
 use air_trace_handler::GenerationCompatificationError;
 use air_trace_handler::TraceHandlerError;
@@ -70,7 +70,7 @@ pub enum UncatchableError {
     /// Errors occurred when result from data doesn't match to a call instruction, f.e. a call
     /// could be applied to a stream, but result doesn't contain generation in a source position.
     #[error("call result value {0:?} doesn't match with corresponding instruction")]
-    CallResultNotCorrespondToInstr(Value),
+    CallResultNotCorrespondToInstr(ValueRef),
 
     /// Variable shadowing is not allowed, usually it's thrown when a AIR tries to assign value
     /// for a variable not in a fold block or in a global scope but not right after new.

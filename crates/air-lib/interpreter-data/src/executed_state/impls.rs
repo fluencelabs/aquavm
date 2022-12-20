@@ -42,13 +42,13 @@ impl CallResult {
     }
 
     pub fn executed_scalar(cid: Rc<CID>) -> CallResult {
-        let value = Value::Scalar(cid);
+        let value = ValueRef::Scalar(cid);
 
         CallResult::Executed(value)
     }
 
     pub fn executed_stream(cid: Rc<CID>, generation: u32) -> CallResult {
-        let value = Value::Stream { cid, generation };
+        let value = ValueRef::Stream { cid, generation };
 
         CallResult::Executed(value)
     }
@@ -136,11 +136,11 @@ impl std::fmt::Display for ExecutedState {
     }
 }
 
-impl std::fmt::Display for Value {
+impl std::fmt::Display for ValueRef {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            Value::Scalar(cid) => write!(f, "scalar: {cid:?}"),
-            Value::Stream { cid, generation } => {
+            ValueRef::Scalar(cid) => write!(f, "scalar: {cid:?}"),
+            ValueRef::Stream { cid, generation } => {
                 write!(f, "stream: {cid:?} generation: {generation}")
             }
         }
