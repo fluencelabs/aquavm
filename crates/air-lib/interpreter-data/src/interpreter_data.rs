@@ -60,7 +60,7 @@ pub struct InterpreterData {
     pub interpreter_version: semver::Version,
 
     /// Map CID to value
-    pub cid_store: CidStore<JValue>,
+    pub value_store: CidStore<JValue>,
 
     /// Map CID to a tetraplet
     pub tetraplet_store: CidStore<SecurityTetraplet>,
@@ -78,7 +78,7 @@ impl InterpreterData {
             last_call_request_id: 0,
             restricted_streams: RestrictedStreamGens::new(),
             interpreter_version,
-            cid_store: <_>::default(),
+            value_store: <_>::default(),
             tetraplet_store: <_>::default(),
             canon_store: <_>::default(),
         }
@@ -105,7 +105,7 @@ impl InterpreterData {
             last_call_request_id,
             restricted_streams,
             interpreter_version,
-            cid_store,
+            value_store: cid_store,
             tetraplet_store,
             canon_store,
         }

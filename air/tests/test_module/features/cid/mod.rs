@@ -85,7 +85,7 @@ fn test_scalar_cid() {
 
     assert_eq!(result.ret_code, 0);
     assert_eq!(data.trace, expected_trace);
-    assert_eq!(data.cid_store, tracker.into());
+    assert_eq!(data.value_store, tracker.into());
 }
 
 #[test]
@@ -117,5 +117,5 @@ fn test_stream_cid() {
 
     assert_eq!(result.ret_code, 0);
     assert_eq!(data.trace, expected_trace);
-    assert_eq!(data.cid_store, tracker.into());
+    assert_eq!(data.value_store, tracker.into());
 }

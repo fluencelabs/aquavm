@@ -52,7 +52,7 @@ pub(crate) fn prepare<'i>(
         global_streams: prev_data.global_streams,
         last_call_request_id: prev_data.last_call_request_id,
         restricted_streams: prev_data.restricted_streams,
-        cid_store: prev_data.cid_store,
+        value_store: prev_data.value_store,
         tetraplet_store: prev_data.tetraplet_store,
         canon_store: prev_data.canon_store,
     };
@@ -61,7 +61,7 @@ pub(crate) fn prepare<'i>(
         global_streams: current_data.global_streams,
         last_call_request_id: current_data.last_call_request_id,
         restricted_streams: current_data.restricted_streams,
-        cid_store: current_data.cid_store,
+        value_store: current_data.value_store,
         tetraplet_store: current_data.tetraplet_store,
         canon_store: current_data.canon_store,
     };

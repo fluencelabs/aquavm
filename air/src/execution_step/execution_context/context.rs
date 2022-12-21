@@ -72,11 +72,10 @@ pub(crate) struct ExecutionCtx<'i> {
     pub(crate) call_requests: CallRequests,
 
     /// Merged CID-to-value dictionaries
-    pub(crate) cid_tracker: CidTracker,
-
+    pub(crate) value_tracker: CidTracker,
     /// Merged CID-to-tetraplet dictionaries
     pub(crate) tetraplet_tracker: CidTracker<SecurityTetraplet>,
-    /// Merged CID-to-cell value dictionaries
+    /// Merged CID-to-canon value aggregate dictionaries
     pub(crate) canon_tracker: CidTracker<CanonValueAggregate>,
 }
 
@@ -95,7 +94,7 @@ impl<'i> ExecutionCtx<'i> {
             current_ingredients.restricted_streams,
         );
 
-        let cid_tracker = CidTracker::from_cid_stores(prev_ingredients.cid_store, current_ingredients.cid_store);
+        let value_tracker = CidTracker::from_cid_stores(prev_ingredients.value_store, current_ingredients.value_store);
         let tetraplet_tracker =
             CidTracker::from_cid_stores(prev_ingredients.tetraplet_store, current_ingredients.tetraplet_store);
         let canon_tracker = CidTracker::from_cid_stores(prev_ingredients.canon_store, current_ingredients.canon_store);
@@ -106,7 +105,7 @@ impl<'i> ExecutionCtx<'i> {
             last_call_request_id: prev_ingredients.last_call_request_id,
             call_results,
             streams,
-            cid_tracker,
+            value_tracker,
             tetraplet_tracker,
             canon_tracker,
             ..<_>::default()
@@ -123,7 +122,7 @@ impl<'i> ExecutionCtx<'i> {
     }
 
     pub(crate) fn get_value_by_cid(&self, cid: &CID) -> Option<Rc<JValue>> {
-        self.cid_tracker.get(cid)
+        self.value_tracker.get(cid)
     }
 }
 
@@ -133,7 +132,7 @@ pub(crate) struct ExecCtxIngredients {
     pub(crate) global_streams: GlobalStreamGens,
     pub(crate) last_call_request_id: u32,
     pub(crate) restricted_streams: RestrictedStreamGens,
-    pub(crate) cid_store: CidStore<JValue>,
+    pub(crate) value_store: CidStore<JValue>,
     pub(crate) tetraplet_store: CidStore<SecurityTetraplet>,
     pub(crate) canon_store: CidStore<CanonValueAggregate>,
 }

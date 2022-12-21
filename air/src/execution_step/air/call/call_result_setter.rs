@@ -33,7 +33,7 @@ pub(crate) fn populate_context_from_peer_service_result<'i>(
     exec_ctx: &mut ExecutionCtx<'i>,
 ) -> ExecutionResult<CallResult> {
     let cid = exec_ctx
-        .cid_tracker
+        .value_tracker
         .record_value(executed_result.result.clone())
         .map_err(UncatchableError::from)?;
 
