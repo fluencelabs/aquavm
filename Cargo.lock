@@ -13,7 +13,7 @@ dependencies = [
 
 [[package]]
 name = "air"
-version = "0.32.0"
+version = "0.33.0"
 dependencies = [
  "air-execution-info-collector",
  "air-interpreter-cid",
@@ -85,7 +85,7 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter"
-version = "0.32.0"
+version = "0.33.0"
 dependencies = [
  "air",
  "air-interpreter-interface",
@@ -111,7 +111,7 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter-data"
-version = "0.4.1"
+version = "0.5.0"
 dependencies = [
  "air-interpreter-cid",
  "air-interpreter-interface",
@@ -126,7 +126,7 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter-interface"
-version = "0.11.2"
+version = "0.12.0"
 dependencies = [
  "air-interpreter-cid",
  "fluence-it-types",
@@ -338,7 +338,7 @@ dependencies = [
 
 [[package]]
 name = "avm-interface"
-version = "0.27.0"
+version = "0.28.0"
 dependencies = [
  "air-interpreter-interface",
  "air-utils",
