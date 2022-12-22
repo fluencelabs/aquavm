@@ -18,6 +18,8 @@ use super::LastError;
 use super::LastErrorDescriptor;
 use super::Scalars;
 use super::Streams;
+use crate::execution_step::RcSecurityTetraplet;
+use crate::execution_step::ValueAggregate;
 use crate::JValue;
 
 use air_execution_info_collector::InstructionTracker;
@@ -27,6 +29,7 @@ use air_interpreter_data::CidStore;
 use air_interpreter_data::CidTracker;
 use air_interpreter_data::GlobalStreamGens;
 use air_interpreter_data::RestrictedStreamGens;
+use air_interpreter_data::TracePos;
 use air_interpreter_interface::*;
 use polyplets::SecurityTetraplet;
 
@@ -123,6 +126,28 @@ impl<'i> ExecutionCtx<'i> {
 
     pub(crate) fn get_value_by_cid(&self, cid: &CID) -> Option<Rc<JValue>> {
         self.value_tracker.get(cid)
+    }
+
+    pub(crate) fn get_tetraplet_by_cid(&self, cid: &CID) -> Option<RcSecurityTetraplet> {
+        self.tetraplet_tracker.get(cid)
+    }
+
+    // TODO Rc?
+    pub(crate) fn get_canon_value_by_cid(&self, cid: &CID) -> Option<ValueAggregate> {
+        let canon_aggregate = self.canon_tracker.get(cid);
+        canon_aggregate.and_then(|agg| {
+            let result = self.value_tracker.get(&agg.value);
+            let tetraplet = self.tetraplet_tracker.get(&agg.tetraplet);
+
+            result.zip(tetraplet).map(|(result, tetraplet)| {
+                let fake_trace_pos = TracePos::default();
+                ValueAggregate {
+                    result,
+                    tetraplet,
+                    trace_pos: fake_trace_pos,
+                }
+            })
+        })
     }
 }
 

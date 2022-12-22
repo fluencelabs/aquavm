@@ -20,7 +20,6 @@ use crate::execution_step::Generation;
 use crate::JValue;
 
 use air_interpreter_cid::CID;
-use air_interpreter_data::CanonValueAggregate;
 use polyplets::SecurityTetraplet;
 use serde::Deserialize;
 use serde::Serialize;
@@ -29,7 +28,7 @@ use std::rc::Rc;
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub(crate) struct RawCanonStream {
-    pub(crate) values: Vec<CanonValueAggregate>,
+    pub(crate) values: Vec<Rc<CID>>,
     // tetraplet is needed to handle adding canon streams as a whole to a stream
     pub(crate) tetraplet: Rc<CID>,
 }

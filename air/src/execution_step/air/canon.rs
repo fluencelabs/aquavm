@@ -20,7 +20,6 @@ use super::TraceHandler;
 use crate::execution_step::boxed_value::CanonStream;
 use crate::execution_step::boxed_value::RawCanonStream;
 use crate::execution_step::Stream;
-use crate::execution_step::ValueAggregate;
 use crate::log_instruction;
 use crate::trace_to_exec_err;
 use crate::ExecutionError;
@@ -28,7 +27,7 @@ use crate::JValue;
 use crate::UncatchableError;
 
 use air_interpreter_data::CanonResult;
-use air_interpreter_data::TracePos;
+use air_interpreter_data::CanonValueAggregate;
 use air_parser::ast;
 use air_trace_handler::merger::MergerCanonResult;
 
@@ -62,23 +61,15 @@ fn handle_seen_canon(
         })
     })?;
     let tetraplet = exec_ctx
-        .tetraplet_tracker
-        .get(&raw_canon_stream.tetraplet)
+        .get_tetraplet_by_cid(&raw_canon_stream.tetraplet)
         .expect("TODO error");
     let values = raw_canon_stream
         .values
         .iter()
-        .map(|canon_value_agg| {
-            let result = exec_ctx.get_value_by_cid(&canon_value_agg.value).expect("TODO error");
-            let tetraplet = exec_ctx
-                .tetraplet_tracker
-                .get(&canon_value_agg.tetraplet)
-                .expect("TODO error");
-            let trace_pos = TracePos::default(); // fake value
-
-            ValueAggregate::new(result, tetraplet, trace_pos)
-        })
-        .collect::<Vec<_>>();
+        .map(|canon_value_cid| exec_ctx.get_canon_value_by_cid(canon_value_cid))
+        // TODO result with value not found
+        .collect::<Option<Vec<_>>>()
+        .expect("TODO error");
 
     // TODO make some method, so that fields are not pub(crate) anymore
     let canon_stream = CanonStream { values, tetraplet };
@@ -141,12 +132,33 @@ struct StreamWithSerializedView {
 fn create_canon_stream_from_name(
     ast_canon: &ast::Canon<'_>,
     peer_id: String,
-    exec_ctx: &ExecutionCtx<'_>,
+    exec_ctx: &mut ExecutionCtx<'_>,
 ) -> ExecutionResult<StreamWithSerializedView> {
     let stream = get_stream_or_default(ast_canon, exec_ctx);
 
     let canon_stream = CanonStream::from_stream(stream.as_ref(), peer_id);
-    let se_canon_stream = serde_json::to_value(&canon_stream).expect("default serialized shouldn't fail");
+
+    let raw_values = canon_stream
+        .values
+        .iter()
+        .map(|val| {
+            let canon_value_aggregate = CanonValueAggregate {
+                value: exec_ctx.value_tracker.record_value(val.result.clone())?,
+                tetraplet: exec_ctx.tetraplet_tracker.record_value(val.tetraplet.clone())?,
+            };
+            exec_ctx.canon_tracker.record_value(canon_value_aggregate)
+        })
+        .collect::<Result<_, air_interpreter_cid::CidCalculationError>>()
+        .expect("TODO error");
+    let raw_tetraplet = exec_ctx
+        .tetraplet_tracker
+        .record_value(canon_stream.tetraplet.clone())
+        .expect("TODO error");
+    let raw_canon_stream = RawCanonStream {
+        values: raw_values,
+        tetraplet: raw_tetraplet,
+    };
+    let se_canon_stream = serde_json::to_value(&raw_canon_stream).expect("default serialized shouldn't fail");
 
     let result = StreamWithSerializedView {
         canon_stream,
