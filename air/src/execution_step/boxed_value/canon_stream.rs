@@ -19,20 +19,11 @@ use super::ValueAggregate;
 use crate::execution_step::Generation;
 use crate::JValue;
 
-use air_interpreter_cid::CID;
 use polyplets::SecurityTetraplet;
 use serde::Deserialize;
 use serde::Serialize;
 
 use std::rc::Rc;
-
-#[derive(Debug, Clone, Deserialize, Serialize)]
-pub(crate) struct RawCanonStream {
-    pub(crate) values: Vec<Rc<CID>>,
-    // tetraplet is needed to handle adding canon streams as a whole to a stream
-    pub(crate) tetraplet: Rc<CID>,
-}
-/// Canon stream where CIDs are used instead of values and tetraplets.
 
 /// Canon stream is a value type lies between a scalar and a stream, it has the same algebra as
 /// scalars, and represent a stream fixed at some execution point.

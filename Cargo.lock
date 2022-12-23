@@ -204,6 +204,7 @@ dependencies = [
  "object-pool",
  "once_cell",
  "semver 1.0.16",
+ "serde",
  "serde_json",
 ]
 

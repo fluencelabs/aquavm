@@ -87,10 +87,8 @@ impl ApResult {
 }
 
 impl CanonResult {
-    pub fn new(canonicalized_element: JValue) -> Self {
-        Self {
-            canonicalized_element,
-        }
+    pub fn new(tetraplet: Rc<CID>, values: Vec<Rc<CID>>) -> Self {
+        Self { tetraplet, values }
     }
 }
 

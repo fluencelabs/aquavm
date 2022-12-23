@@ -17,7 +17,6 @@
 mod impls;
 mod se_de;
 
-use crate::JValue;
 use crate::TracePos;
 
 use air_interpreter_cid::CID;
@@ -127,10 +126,11 @@ pub struct ApResult {
 }
 
 /// Contains ids of element that were on a stream at the moment of an appropriate canon call.
-#[derive(Debug, Default, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct CanonResult {
-    pub canonicalized_element: JValue,
+    pub tetraplet: Rc<CID>,
+    pub values: Vec<Rc<CID>>,
 }
 
 /// The type Canon trace CID refers to.

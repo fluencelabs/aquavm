@@ -17,7 +17,9 @@
 use super::*;
 use crate::merger::errors::CanonResultError;
 
-use serde_json::Value as JValue;
+use air_interpreter_cid::CID;
+
+use std::rc::Rc;
 
 const EXPECTED_STATE_NAME: &str = "canon";
 
@@ -28,7 +30,7 @@ pub enum MergerCanonResult {
 
     /// There was a state in at least one of the contexts. If there were two states in
     /// both contexts, they were successfully merged.
-    CanonResult { canonicalized_element: JValue },
+    CanonResult { tetraplet: Rc<CID>, values: Vec<Rc<CID>> },
 }
 
 pub(crate) fn try_merge_next_state_as_canon(data_keeper: &mut DataKeeper) -> MergeResult<MergerCanonResult> {
@@ -60,7 +62,8 @@ fn prepare_both_canon_result(
 
 fn prepare_single_canon_result(canon_result: CanonResult) -> MergeResult<MergerCanonResult> {
     Ok(MergerCanonResult::CanonResult {
-        canonicalized_element: canon_result.canonicalized_element,
+        tetraplet: canon_result.tetraplet,
+        values: canon_result.values,
     })
 }
 
@@ -68,7 +71,7 @@ fn check_canon_results(
     prev_canon_result: &CanonResult,
     current_canon_result: &CanonResult,
 ) -> Result<(), CanonResultError> {
-    if prev_canon_result.canonicalized_element != current_canon_result.canonicalized_element {
+    if prev_canon_result != current_canon_result {
         return Err(CanonResultError::incompatible_state(
             prev_canon_result.clone(),
             current_canon_result.clone(),

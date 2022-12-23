@@ -29,7 +29,11 @@ use crate::FoldSubTraceLore;
 use crate::SubTraceDesc;
 
 use air_interpreter_cid::value_to_json_cid;
+use air_interpreter_data::CanonValueAggregate;
 use air_interpreter_data::CidTracker;
+use avm_server::SecurityTetraplet;
+use serde::Deserialize;
+use serde::Serialize;
 
 use std::rc::Rc;
 
@@ -158,7 +162,41 @@ pub fn ap(generation: u32) -> ExecutedState {
     ExecutedState::Ap(ap_result)
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ValueAggregateAlike {
+    pub result: Rc<JValue>,
+    pub tetraplet: Rc<SecurityTetraplet>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct CanonResultAlike {
+    pub tetraplet: SecurityTetraplet,
+    pub values: Vec<ValueAggregateAlike>,
+}
+
+/// This function takes a JSON DSL-like struct for compatibility and test writer
+/// convenience.
 pub fn canon(canonicalized_element: JValue) -> ExecutedState {
-    let canon_result = CanonResult::new(canonicalized_element);
+    let canon_input = serde_json::from_value::<CanonResultAlike>(canonicalized_element)
+        .expect("Malformed canon input");
+    let tetraplet_cid = value_to_json_cid(&canon_input.tetraplet).unwrap_or_else(|e| {
+        panic!(
+            "{:?}: failed to compute CID of {:?}",
+            e, canon_input.tetraplet
+        )
+    });
+    let value_cids = canon_input
+        .values
+        .iter()
+        .map(|value| {
+            value_to_json_cid(&CanonValueAggregate {
+                value: value_to_json_cid(&value.result)?.into(),
+                tetraplet: value_to_json_cid(&value.tetraplet)?.into(),
+            })
+            .map(Rc::new)
+        })
+        .collect::<Result<Vec<_>, _>>()
+        .unwrap_or_else(|e| panic!("{:?}: failed to compute CID of {:?}", e, canon_input.values));
+    let canon_result = CanonResult::new(tetraplet_cid.into(), value_cids);
     ExecutedState::Canon(canon_result)
 }
