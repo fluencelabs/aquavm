@@ -21,6 +21,7 @@ use crate::execution_step::boxed_value::CanonStream;
 use crate::execution_step::Stream;
 use crate::log_instruction;
 use crate::trace_to_exec_err;
+use crate::UncatchableError;
 
 use air_interpreter_cid::CID;
 use air_interpreter_data::CanonResult;
@@ -53,15 +54,18 @@ fn handle_seen_canon(
     exec_ctx: &mut ExecutionCtx<'_>,
     trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<()> {
-    let tetraplet = exec_ctx.get_tetraplet_by_cid(&tetraplet_cid).expect("TODO error");
+    let tetraplet = exec_ctx
+        .get_tetraplet_by_cid(&tetraplet_cid)
+        .ok_or_else(|| UncatchableError::ValueForCidNotFound(tetraplet_cid.clone()))?;
     let values = value_cids
         .iter()
-        .map(|canon_value_cid| exec_ctx.get_canon_value_by_cid(canon_value_cid))
-        // TODO result with value not found
-        .collect::<Option<Vec<_>>>()
-        .expect("TODO error");
+        .map(|canon_value_cid| {
+            exec_ctx
+                .get_canon_value_by_cid(canon_value_cid)
+                .ok_or_else(|| UncatchableError::ValueForCidNotFound(canon_value_cid.clone()))
+        })
+        .collect::<Result<Vec<_>, _>>()?;
 
-    // TODO make some method, so that fields are not pub(crate) anymore
     let canon_stream = CanonStream { values, tetraplet };
 
     let canon_stream_with_se = StreamWithSerializedView {
@@ -134,19 +138,18 @@ fn create_canon_stream_from_name(
     let value_cids = canon_stream
         .values
         .iter()
-        .map(|val| {
+        .map(|val| -> Result<_, UncatchableError> {
             let canon_value_aggregate = CanonValueAggregate {
                 value: exec_ctx.value_tracker.record_value(val.result.clone())?,
                 tetraplet: exec_ctx.tetraplet_tracker.record_value(val.tetraplet.clone())?,
             };
-            exec_ctx.canon_tracker.record_value(canon_value_aggregate)
+            Ok(exec_ctx.canon_tracker.record_value(canon_value_aggregate)?)
         })
-        .collect::<Result<_, air_interpreter_cid::CidCalculationError>>()
-        .expect("TODO error");
+        .collect::<Result<_, _>>()?;
     let tetraplet_cid = exec_ctx
         .tetraplet_tracker
         .record_value(canon_stream.tetraplet.clone())
-        .expect("TODO error");
+        .map_err(UncatchableError::from)?;
 
     let result = StreamWithSerializedView {
         canon_stream,

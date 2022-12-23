@@ -132,7 +132,6 @@ impl<'i> ExecutionCtx<'i> {
         self.tetraplet_tracker.get(cid)
     }
 
-    // TODO Rc?
     pub(crate) fn get_canon_value_by_cid(&self, cid: &CID) -> Option<ValueAggregate> {
         let canon_aggregate = self.canon_tracker.get(cid);
         canon_aggregate.and_then(|agg| {
