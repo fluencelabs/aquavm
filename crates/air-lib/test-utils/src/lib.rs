@@ -36,7 +36,7 @@ mod native_test_runner;
 mod wasm_test_runner;
 
 pub use air::interpreter_data::*;
-use air_interpreter_data::CanonValueAggregate;
+use air_interpreter_data::CanonCidAggregate;
 use air_interpreter_data::CidTracker;
 pub use avm_interface::raw_outcome::*;
 pub use avm_server::*;
@@ -110,7 +110,7 @@ pub fn raw_data_from_trace_with_canon(
     trace: impl Into<ExecutionTrace>,
     cid_tracker: CidTracker,
     tetraplet_tracker: CidTracker<SecurityTetraplet>,
-    canon_tracker: CidTracker<CanonValueAggregate>,
+    canon_tracker: CidTracker<CanonCidAggregate>,
 ) -> Vec<u8> {
     let data = InterpreterData::from_execution_result(
         trace.into(),

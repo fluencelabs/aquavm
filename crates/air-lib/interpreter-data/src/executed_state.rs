@@ -135,12 +135,12 @@ pub struct ApResult {
 #[serde(rename_all = "snake_case")]
 pub struct CanonResult {
     pub tetraplet: Rc<CID<SecurityTetraplet>>,
-    pub values: Vec<Rc<CID<CanonValueAggregate>>>,
+    pub values: Vec<Rc<CID<CanonCidAggregate>>>,
 }
 
 /// The type Canon trace CID refers to.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct CanonValueAggregate {
+pub struct CanonCidAggregate {
     pub value: Rc<CID<serde_json::Value>>,
     pub tetraplet: Rc<CID<SecurityTetraplet>>,
 }

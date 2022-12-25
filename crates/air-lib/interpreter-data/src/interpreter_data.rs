@@ -17,7 +17,7 @@
 use super::GlobalStreamGens;
 use super::RestrictedStreamGens;
 use crate::cid_store::CidStore;
-use crate::CanonValueAggregate;
+use crate::CanonCidAggregate;
 use crate::ExecutionTrace;
 use crate::JValue;
 
@@ -66,7 +66,7 @@ pub struct InterpreterData {
     pub tetraplet_store: CidStore<SecurityTetraplet>,
 
     /// Map CID to a canon value
-    pub canon_store: CidStore<CanonValueAggregate>,
+    pub canon_store: CidStore<CanonCidAggregate>,
 }
 
 impl InterpreterData {
@@ -90,7 +90,7 @@ impl InterpreterData {
         restricted_streams: RestrictedStreamGens,
         cid_store: impl Into<CidStore<JValue>>,
         tetraplet_store: impl Into<CidStore<SecurityTetraplet>>,
-        canon_store: impl Into<CidStore<CanonValueAggregate>>,
+        canon_store: impl Into<CidStore<CanonCidAggregate>>,
         last_call_request_id: u32,
         interpreter_version: semver::Version,
     ) -> Self {

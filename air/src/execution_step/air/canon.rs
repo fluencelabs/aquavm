@@ -24,8 +24,8 @@ use crate::trace_to_exec_err;
 use crate::UncatchableError;
 
 use air_interpreter_cid::CID;
+use air_interpreter_data::CanonCidAggregate;
 use air_interpreter_data::CanonResult;
-use air_interpreter_data::CanonValueAggregate;
 use air_parser::ast;
 use air_trace_handler::merger::MergerCanonResult;
 use polyplets::SecurityTetraplet;
@@ -51,7 +51,7 @@ impl<'i> super::ExecutableInstruction<'i> for ast::Canon<'i> {
 fn handle_seen_canon(
     ast_canon: &ast::Canon<'_>,
     tetraplet_cid: Rc<CID<SecurityTetraplet>>,
-    value_cids: Vec<Rc<CID<CanonValueAggregate>>>,
+    value_cids: Vec<Rc<CID<CanonCidAggregate>>>,
     exec_ctx: &mut ExecutionCtx<'_>,
     trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<()> {
@@ -118,7 +118,7 @@ fn epilog(
 struct StreamWithSerializedView {
     canon_stream: CanonStream,
     tetraplet_cid: Rc<CID<SecurityTetraplet>>,
-    value_cids: Vec<Rc<CID<CanonValueAggregate>>>,
+    value_cids: Vec<Rc<CID<CanonCidAggregate>>>,
 }
 
 fn create_canon_stream_from_name(
@@ -134,7 +134,7 @@ fn create_canon_stream_from_name(
         .values
         .iter()
         .map(|val| -> Result<_, UncatchableError> {
-            let canon_value_aggregate = CanonValueAggregate {
+            let canon_value_aggregate = CanonCidAggregate {
                 value: exec_ctx.value_tracker.record_value(val.result.clone())?,
                 tetraplet: exec_ctx.tetraplet_tracker.record_value(val.tetraplet.clone())?,
             };

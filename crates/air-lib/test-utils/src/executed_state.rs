@@ -29,7 +29,7 @@ use crate::FoldSubTraceLore;
 use crate::SubTraceDesc;
 
 use air_interpreter_cid::value_to_json_cid;
-use air_interpreter_data::CanonValueAggregate;
+use air_interpreter_data::CanonCidAggregate;
 use air_interpreter_data::CidTracker;
 use avm_server::SecurityTetraplet;
 use serde::Deserialize;
@@ -179,7 +179,7 @@ pub struct CanonResultAlike {
 pub fn canon(canonicalized_element: JValue) -> ExecutedState {
     let mut value_tracker = CidTracker::<JValue>::new();
     let mut tetraplet_tracker = CidTracker::<SecurityTetraplet>::new();
-    let mut canon_tracker = CidTracker::<CanonValueAggregate>::new();
+    let mut canon_tracker = CidTracker::<CanonCidAggregate>::new();
 
     canon_tracked(
         canonicalized_element,
@@ -193,7 +193,7 @@ pub fn canon_tracked(
     canonicalized_element: JValue,
     value_tracker: &mut CidTracker<JValue>,
     tetraplet_tracker: &mut CidTracker<SecurityTetraplet>,
-    canon_tracker: &mut CidTracker<CanonValueAggregate>,
+    canon_tracker: &mut CidTracker<CanonCidAggregate>,
 ) -> ExecutedState {
     let canon_input = serde_json::from_value::<CanonResultAlike>(canonicalized_element)
         .expect("Malformed canon input");
@@ -211,7 +211,7 @@ pub fn canon_tracked(
         .map(|value| {
             let value_cid = value_tracker.record_value(value.result.clone())?;
             let tetraplet_cid = tetraplet_tracker.record_value(value.tetraplet.clone())?;
-            canon_tracker.record_value(CanonValueAggregate {
+            canon_tracker.record_value(CanonCidAggregate {
                 value: value_cid,
                 tetraplet: tetraplet_cid,
             })

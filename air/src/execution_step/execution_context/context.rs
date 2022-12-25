@@ -25,7 +25,7 @@ use crate::UncatchableError;
 
 use air_execution_info_collector::InstructionTracker;
 use air_interpreter_cid::CID;
-use air_interpreter_data::CanonValueAggregate;
+use air_interpreter_data::CanonCidAggregate;
 use air_interpreter_data::CidStore;
 use air_interpreter_data::CidTracker;
 use air_interpreter_data::GlobalStreamGens;
@@ -80,7 +80,7 @@ pub(crate) struct ExecutionCtx<'i> {
     /// Merged CID-to-tetraplet dictionaries
     pub(crate) tetraplet_tracker: CidTracker<SecurityTetraplet>,
     /// Merged CID-to-canon value aggregate dictionaries
-    pub(crate) canon_tracker: CidTracker<CanonValueAggregate>,
+    pub(crate) canon_tracker: CidTracker<CanonCidAggregate>,
 }
 
 impl<'i> ExecutionCtx<'i> {
@@ -142,7 +142,7 @@ impl<'i> ExecutionCtx<'i> {
 
     pub(crate) fn get_canon_value_by_cid(
         &self,
-        cid: &CID<CanonValueAggregate>,
+        cid: &CID<CanonCidAggregate>,
     ) -> Result<ValueAggregate, UncatchableError> {
         let canon_aggregate = self.canon_tracker.get(cid);
         canon_aggregate
@@ -169,7 +169,7 @@ pub(crate) struct ExecCtxIngredients {
     pub(crate) restricted_streams: RestrictedStreamGens,
     pub(crate) value_store: CidStore<JValue>,
     pub(crate) tetraplet_store: CidStore<SecurityTetraplet>,
-    pub(crate) canon_store: CidStore<CanonValueAggregate>,
+    pub(crate) canon_store: CidStore<CanonCidAggregate>,
 }
 
 use serde::Deserialize;

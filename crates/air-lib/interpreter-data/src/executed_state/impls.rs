@@ -90,7 +90,7 @@ impl ApResult {
 impl CanonResult {
     pub fn new(
         tetraplet: Rc<CID<SecurityTetraplet>>,
-        values: Vec<Rc<CID<CanonValueAggregate>>>,
+        values: Vec<Rc<CID<CanonCidAggregate>>>,
     ) -> Self {
         Self { tetraplet, values }
     }

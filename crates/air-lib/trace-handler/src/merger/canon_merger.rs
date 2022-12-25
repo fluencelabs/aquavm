@@ -33,7 +33,7 @@ pub enum MergerCanonResult {
     /// both contexts, they were successfully merged.
     CanonResult {
         tetraplet: Rc<CID<SecurityTetraplet>>,
-        values: Vec<Rc<CID<CanonValueAggregate>>>,
+        values: Vec<Rc<CID<CanonCidAggregate>>>,
     },
 }
 
