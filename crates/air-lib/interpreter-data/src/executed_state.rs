@@ -17,9 +17,11 @@
 mod impls;
 mod se_de;
 
+use crate::JValue;
 use crate::TracePos;
 
 use air_interpreter_cid::CID;
+use polyplets::SecurityTetraplet;
 use se_de::par_serializer;
 use se_de::sender_serializer;
 use serde::Deserialize;
@@ -59,8 +61,11 @@ pub enum CallResult {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum ValueRef {
-    Scalar(Rc<CID>),
-    Stream { cid: Rc<CID>, generation: u32 },
+    Scalar(Rc<CID<JValue>>),
+    Stream {
+        cid: Rc<CID<JValue>>,
+        generation: u32,
+    },
 }
 
 /// Let's consider an example of trace that could be produces by the following fold:
@@ -129,15 +134,15 @@ pub struct ApResult {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct CanonResult {
-    pub tetraplet: Rc<CID>,
-    pub values: Vec<Rc<CID>>,
+    pub tetraplet: Rc<CID<SecurityTetraplet>>,
+    pub values: Vec<Rc<CID<CanonValueAggregate>>>,
 }
 
 /// The type Canon trace CID refers to.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct CanonValueAggregate {
-    pub value: Rc<CID>,
-    pub tetraplet: Rc<CID>,
+    pub value: Rc<CID<serde_json::Value>>,
+    pub tetraplet: Rc<CID<SecurityTetraplet>>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

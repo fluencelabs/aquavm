@@ -19,6 +19,7 @@ air-interpreter-data = { path = "../interpreter-data" }
 air-interpreter-interface = { path = "../interpreter-interface" }
 air-log-targets = { path = "../log-targets" }
 air-parser = { path = "../air-parser" }
+polyplets = { path = "../polyplets" }
 
 bimap = "0.6.2"
 serde_json = "1.0.91"

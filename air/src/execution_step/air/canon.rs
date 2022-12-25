@@ -28,6 +28,7 @@ use air_interpreter_data::CanonResult;
 use air_interpreter_data::CanonValueAggregate;
 use air_parser::ast;
 use air_trace_handler::merger::MergerCanonResult;
+use polyplets::SecurityTetraplet;
 
 use std::borrow::Cow;
 use std::rc::Rc;
@@ -49,20 +50,20 @@ impl<'i> super::ExecutableInstruction<'i> for ast::Canon<'i> {
 
 fn handle_seen_canon(
     ast_canon: &ast::Canon<'_>,
-    tetraplet_cid: Rc<CID>,
-    value_cids: Vec<Rc<CID>>,
+    tetraplet_cid: Rc<CID<SecurityTetraplet>>,
+    value_cids: Vec<Rc<CID<CanonValueAggregate>>>,
     exec_ctx: &mut ExecutionCtx<'_>,
     trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<()> {
     let tetraplet = exec_ctx
         .get_tetraplet_by_cid(&tetraplet_cid)
-        .ok_or_else(|| UncatchableError::ValueForCidNotFound(tetraplet_cid.clone()))?;
+        .ok_or_else(|| UncatchableError::ValueForCidNotFound((*tetraplet_cid).clone().into()))?;
     let values = value_cids
         .iter()
         .map(|canon_value_cid| {
             exec_ctx
                 .get_canon_value_by_cid(canon_value_cid)
-                .ok_or_else(|| UncatchableError::ValueForCidNotFound(canon_value_cid.clone()))
+                .ok_or_else(|| UncatchableError::ValueForCidNotFound((**canon_value_cid).clone().into()))
         })
         .collect::<Result<Vec<_>, _>>()?;
 
@@ -122,8 +123,8 @@ fn epilog(
 
 struct StreamWithSerializedView {
     canon_stream: CanonStream,
-    tetraplet_cid: Rc<CID>,
-    value_cids: Vec<Rc<CID>>,
+    tetraplet_cid: Rc<CID<SecurityTetraplet>>,
+    value_cids: Vec<Rc<CID<CanonValueAggregate>>>,
 }
 
 fn create_canon_stream_from_name(

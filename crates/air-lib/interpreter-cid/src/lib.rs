@@ -29,13 +29,16 @@
 use serde::Deserialize;
 use serde::Serialize;
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Hash)]
-#[serde(transparent)]
-pub struct CID(String);
+use std::fmt;
+use std::marker::PhantomData;
 
-impl CID {
+#[derive(Clone, Serialize, Deserialize)]
+#[serde(transparent)]
+pub struct CID<T: ?Sized>(String, #[serde(skip)] PhantomData<*const T>);
+
+impl<T: ?Sized> CID<T> {
     pub fn new(cid: impl Into<String>) -> Self {
-        CID(cid.into())
+        Self(cid.into(), PhantomData)
     }
 
     pub fn into_inner(self) -> String {
@@ -43,8 +46,29 @@ impl CID {
     }
 }
 
-impl From<CID> for String {
-    fn from(value: CID) -> Self {
+impl<T: ?Sized> fmt::Debug for CID<T> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_tuple("CID").field(&self.0).finish()
+    }
+}
+
+impl<Val> PartialEq for CID<Val> {
+    fn eq(&self, other: &Self) -> bool {
+        self.0 == other.0
+    }
+}
+
+impl<Val> Eq for CID<Val> {}
+
+impl<Val> std::hash::Hash for CID<Val> {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.0.hash(state);
+        self.1.hash(state);
+    }
+}
+
+impl<T: ?Sized> From<CID<T>> for String {
+    fn from(value: CID<T>) -> Self {
         value.0
     }
 }
@@ -52,7 +76,7 @@ impl From<CID> for String {
 // TODO we might refactor this to `SerializationFormat` trait
 // that both transform data to binary/text form (be it JSON, CBOR or something else)
 // and produces CID too
-pub fn json_data_cid(data: &[u8]) -> CID {
+pub fn json_data_cid<Val: ?Sized>(data: &[u8]) -> CID<Val> {
     use cid::Cid;
     use multihash::{Code, MultihashDigest};
 
@@ -62,12 +86,10 @@ pub fn json_data_cid(data: &[u8]) -> CID {
     const JSON_CODEC: u64 = 0x0200;
 
     let cid = Cid::new_v1(JSON_CODEC, digest);
-    CID(cid.to_string())
+    CID::new(cid.to_string())
 }
 
 pub struct CidCalculationError(serde_json::Error);
-
-use std::fmt;
 
 impl fmt::Debug for CidCalculationError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -94,7 +116,7 @@ impl std::error::Error for CidCalculationError {
 }
 
 /// Calculate a CID of JSON-serialized value.
-pub fn value_to_json_cid<Val: Serialize>(value: &Val) -> Result<CID, CidCalculationError> {
+pub fn value_to_json_cid<Val: Serialize>(value: &Val) -> Result<CID<Val>, CidCalculationError> {
     let data = serde_json::to_vec(value)?;
     Ok(json_data_cid(&data))
 }

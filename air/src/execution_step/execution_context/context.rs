@@ -75,7 +75,7 @@ pub(crate) struct ExecutionCtx<'i> {
     pub(crate) call_requests: CallRequests,
 
     /// Merged CID-to-value dictionaries
-    pub(crate) value_tracker: CidTracker,
+    pub(crate) value_tracker: CidTracker<JValue>,
     /// Merged CID-to-tetraplet dictionaries
     pub(crate) tetraplet_tracker: CidTracker<SecurityTetraplet>,
     /// Merged CID-to-canon value aggregate dictionaries
@@ -124,15 +124,15 @@ impl<'i> ExecutionCtx<'i> {
         self.last_call_request_id
     }
 
-    pub(crate) fn get_value_by_cid(&self, cid: &CID) -> Option<Rc<JValue>> {
+    pub(crate) fn get_value_by_cid(&self, cid: &CID<JValue>) -> Option<Rc<JValue>> {
         self.value_tracker.get(cid)
     }
 
-    pub(crate) fn get_tetraplet_by_cid(&self, cid: &CID) -> Option<RcSecurityTetraplet> {
+    pub(crate) fn get_tetraplet_by_cid(&self, cid: &CID<SecurityTetraplet>) -> Option<RcSecurityTetraplet> {
         self.tetraplet_tracker.get(cid)
     }
 
-    pub(crate) fn get_canon_value_by_cid(&self, cid: &CID) -> Option<ValueAggregate> {
+    pub(crate) fn get_canon_value_by_cid(&self, cid: &CID<CanonValueAggregate>) -> Option<ValueAggregate> {
         let canon_aggregate = self.canon_tracker.get(cid);
         canon_aggregate.and_then(|agg| {
             let result = self.value_tracker.get(&agg.value);

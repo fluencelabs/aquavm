@@ -27,14 +27,14 @@ use std::{collections::HashMap, rc::Rc};
 /// Stores CID to Value corresponance.
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(transparent)]
-pub struct CidStore<Val>(HashMap<Rc<CID>, Rc<Val>>);
+pub struct CidStore<Val>(HashMap<Rc<CID<Val>>, Rc<Val>>);
 
 impl<Val> CidStore<Val> {
     pub fn new() -> Self {
         Self::default()
     }
 
-    pub fn get(&self, cid: &CID) -> Option<Rc<Val>> {
+    pub fn get(&self, cid: &CID<Val>) -> Option<Rc<Val>> {
         self.0.get(cid).cloned()
     }
 }
@@ -47,7 +47,7 @@ impl<Val> Default for CidStore<Val> {
 
 #[derive(Clone, Debug)]
 pub struct CidTracker<Val = JValue> {
-    cids: HashMap<Rc<CID>, Rc<Val>>,
+    cids: HashMap<Rc<CID<Val>>, Rc<Val>>,
 }
 
 impl<Val> CidTracker<Val> {
@@ -64,7 +64,7 @@ impl<Val> CidTracker<Val> {
         Self { cids }
     }
 
-    pub fn get(&self, cid: &CID) -> Option<Rc<Val>> {
+    pub fn get(&self, cid: &CID<Val>) -> Option<Rc<Val>> {
         self.cids.get(cid).cloned()
     }
 }
@@ -73,9 +73,9 @@ impl<Val: Serialize> CidTracker<Val> {
     pub fn record_value(
         &mut self,
         value: impl Into<Rc<Val>>,
-    ) -> Result<Rc<CID>, CidCalculationError> {
+    ) -> Result<Rc<CID<Val>>, CidCalculationError> {
         let value = value.into();
-        let cid = Rc::new(value_to_json_cid(&value)?);
+        let cid = Rc::new(value_to_json_cid(&*value)?);
         self.cids.insert(cid.clone(), value);
         Ok(cid)
     }
@@ -96,9 +96,9 @@ impl<Val> From<CidTracker<Val>> for CidStore<Val> {
 }
 
 impl<Val> IntoIterator for CidStore<Val> {
-    type Item = (Rc<CID>, Rc<Val>);
+    type Item = (Rc<CID<Val>>, Rc<Val>);
 
-    type IntoIter = std::collections::hash_map::IntoIter<Rc<CID>, Rc<Val>>;
+    type IntoIter = std::collections::hash_map::IntoIter<Rc<CID<Val>>, Rc<Val>>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.0.into_iter()

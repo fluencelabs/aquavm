@@ -36,7 +36,7 @@ fn test_missing_cid() {
     assert_eq!(result.ret_code, 20012);
     assert_eq!(
         result.error_message,
-        "value for CID CID(\"bagaaieraondvznakk2hi3kfaixhnceatpykz7cikytniqo3lc7ogkgz2qbeq\") not found"
+        "value for CID \"bagaaieraondvznakk2hi3kfaixhnceatpykz7cikytniqo3lc7ogkgz2qbeq\" not found"
     );
 }
 
