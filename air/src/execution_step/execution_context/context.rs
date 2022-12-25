@@ -21,6 +21,7 @@ use super::Streams;
 use crate::execution_step::RcSecurityTetraplet;
 use crate::execution_step::ValueAggregate;
 use crate::JValue;
+use crate::UncatchableError;
 
 use air_execution_info_collector::InstructionTracker;
 use air_interpreter_cid::CID;
@@ -124,29 +125,39 @@ impl<'i> ExecutionCtx<'i> {
         self.last_call_request_id
     }
 
-    pub(crate) fn get_value_by_cid(&self, cid: &CID<JValue>) -> Option<Rc<JValue>> {
-        self.value_tracker.get(cid)
+    pub(crate) fn get_value_by_cid(&self, cid: &CID<JValue>) -> Result<Rc<JValue>, UncatchableError> {
+        self.value_tracker
+            .get(cid)
+            .ok_or_else(|| UncatchableError::ValueForCidNotFound(cid.clone().into()))
     }
 
-    pub(crate) fn get_tetraplet_by_cid(&self, cid: &CID<SecurityTetraplet>) -> Option<RcSecurityTetraplet> {
-        self.tetraplet_tracker.get(cid)
+    pub(crate) fn get_tetraplet_by_cid(
+        &self,
+        cid: &CID<SecurityTetraplet>,
+    ) -> Result<RcSecurityTetraplet, UncatchableError> {
+        self.tetraplet_tracker
+            .get(cid)
+            .ok_or_else(|| UncatchableError::ValueForCidNotFound(cid.clone().into()))
     }
 
-    pub(crate) fn get_canon_value_by_cid(&self, cid: &CID<CanonValueAggregate>) -> Option<ValueAggregate> {
+    pub(crate) fn get_canon_value_by_cid(
+        &self,
+        cid: &CID<CanonValueAggregate>,
+    ) -> Result<ValueAggregate, UncatchableError> {
         let canon_aggregate = self.canon_tracker.get(cid);
-        canon_aggregate.and_then(|agg| {
-            let result = self.value_tracker.get(&agg.value);
-            let tetraplet = self.tetraplet_tracker.get(&agg.tetraplet);
+        canon_aggregate
+            .map(|agg| {
+                let result = self.get_value_by_cid(&agg.value)?;
+                let tetraplet = self.get_tetraplet_by_cid(&agg.tetraplet)?;
 
-            result.zip(tetraplet).map(|(result, tetraplet)| {
                 let fake_trace_pos = TracePos::default();
-                ValueAggregate {
+                Ok(ValueAggregate {
                     result,
                     tetraplet,
                     trace_pos: fake_trace_pos,
-                }
+                })
             })
-        })
+            .unwrap_or_else(|| Err(UncatchableError::ValueForCidNotFound(cid.clone().into())))
     }
 }
 

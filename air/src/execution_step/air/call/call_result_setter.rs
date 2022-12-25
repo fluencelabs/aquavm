@@ -69,17 +69,13 @@ pub(crate) fn populate_context_from_data<'i>(
 ) -> ExecutionResult<ValueRef> {
     match (output, value) {
         (CallOutputValue::Scalar(scalar), ValueRef::Scalar(cid)) => {
-            let value = exec_ctx
-                .get_value_by_cid(&cid)
-                .ok_or_else(|| UncatchableError::ValueForCidNotFound((*cid).clone().into()))?;
+            let value = exec_ctx.get_value_by_cid(&cid)?;
             let result = ValueAggregate::new(value, tetraplet, trace_pos);
             exec_ctx.scalars.set_scalar_value(scalar.name, result)?;
             Ok(ValueRef::Scalar(cid))
         }
         (CallOutputValue::Stream(stream), ValueRef::Stream { cid, generation }) => {
-            let value = exec_ctx
-                .get_value_by_cid(&cid)
-                .ok_or_else(|| UncatchableError::ValueForCidNotFound((*cid).clone().into()))?;
+            let value = exec_ctx.get_value_by_cid(&cid)?;
             let result = ValueAggregate::new(value, tetraplet, trace_pos);
             let value_descriptor = StreamValueDescriptor::new(
                 result,

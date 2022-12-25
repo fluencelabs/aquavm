@@ -55,16 +55,10 @@ fn handle_seen_canon(
     exec_ctx: &mut ExecutionCtx<'_>,
     trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<()> {
-    let tetraplet = exec_ctx
-        .get_tetraplet_by_cid(&tetraplet_cid)
-        .ok_or_else(|| UncatchableError::ValueForCidNotFound((*tetraplet_cid).clone().into()))?;
+    let tetraplet = exec_ctx.get_tetraplet_by_cid(&tetraplet_cid)?;
     let values = value_cids
         .iter()
-        .map(|canon_value_cid| {
-            exec_ctx
-                .get_canon_value_by_cid(canon_value_cid)
-                .ok_or_else(|| UncatchableError::ValueForCidNotFound((**canon_value_cid).clone().into()))
-        })
+        .map(|canon_value_cid| exec_ctx.get_canon_value_by_cid(canon_value_cid))
         .collect::<Result<Vec<_>, _>>()?;
 
     let canon_stream = CanonStream { values, tetraplet };
