@@ -170,33 +170,54 @@ pub struct ValueAggregateAlike {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CanonResultAlike {
-    pub tetraplet: SecurityTetraplet,
+    pub tetraplet: Rc<SecurityTetraplet>,
     pub values: Vec<ValueAggregateAlike>,
 }
 
 /// This function takes a JSON DSL-like struct for compatibility and test writer
 /// convenience.
 pub fn canon(canonicalized_element: JValue) -> ExecutedState {
+    let mut value_tracker = CidTracker::<JValue>::new();
+    let mut tetraplet_tracker = CidTracker::<SecurityTetraplet>::new();
+    let mut canon_tracker = CidTracker::<CanonValueAggregate>::new();
+
+    canon_tracked(
+        canonicalized_element,
+        &mut value_tracker,
+        &mut tetraplet_tracker,
+        &mut canon_tracker,
+    )
+}
+
+pub fn canon_tracked(
+    canonicalized_element: JValue,
+    value_tracker: &mut CidTracker<JValue>,
+    tetraplet_tracker: &mut CidTracker<SecurityTetraplet>,
+    canon_tracker: &mut CidTracker<CanonValueAggregate>,
+) -> ExecutedState {
     let canon_input = serde_json::from_value::<CanonResultAlike>(canonicalized_element)
         .expect("Malformed canon input");
-    let tetraplet_cid = value_to_json_cid(&canon_input.tetraplet).unwrap_or_else(|e| {
-        panic!(
-            "{:?}: failed to compute CID of {:?}",
-            e, canon_input.tetraplet
-        )
-    });
+    let tetraplet_cid = tetraplet_tracker
+        .record_value(canon_input.tetraplet.clone())
+        .unwrap_or_else(|e| {
+            panic!(
+                "{:?}: failed to compute CID of {:?}",
+                e, canon_input.tetraplet
+            )
+        });
     let value_cids = canon_input
         .values
         .iter()
         .map(|value| {
-            value_to_json_cid(&CanonValueAggregate {
-                value: value_to_json_cid(&value.result)?.into(),
-                tetraplet: value_to_json_cid(&value.tetraplet)?.into(),
+            let value_cid = value_tracker.record_value(value.result.clone())?;
+            let tetraplet_cid = tetraplet_tracker.record_value(value.tetraplet.clone())?;
+            canon_tracker.record_value(CanonValueAggregate {
+                value: value_cid,
+                tetraplet: tetraplet_cid,
             })
-            .map(Rc::new)
         })
         .collect::<Result<Vec<_>, _>>()
         .unwrap_or_else(|e| panic!("{:?}: failed to compute CID of {:?}", e, canon_input.values));
-    let canon_result = CanonResult::new(tetraplet_cid.into(), value_cids);
+    let canon_result = CanonResult::new(tetraplet_cid, value_cids);
     ExecutedState::Canon(canon_result)
 }
