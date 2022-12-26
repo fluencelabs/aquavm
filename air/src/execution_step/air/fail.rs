@@ -119,7 +119,7 @@ fn fail_with_error_object(
     exec_ctx
         .last_error_descriptor
         .set_from_error_object(error.clone(), tetraplet);
-    exec_ctx.subgraph_complete = false;
+    exec_ctx.make_subgraph_incomplete();
 
     Err(ExecutionError::Catchable(Rc::new(CatchableError::UserError { error })))
 }

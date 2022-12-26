@@ -109,7 +109,7 @@ impl<'i> ResolvedCall<'i> {
         let call_id = exec_ctx.next_call_request_id();
         exec_ctx.call_requests.insert(call_id, request_params);
 
-        exec_ctx.subgraph_complete = false;
+        exec_ctx.make_subgraph_incomplete();
         trace_ctx.meet_call_end(CallResult::sent_peer_id_with_call_id(
             exec_ctx.run_parameters.current_peer_id.clone(),
             call_id,

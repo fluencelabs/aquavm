@@ -39,7 +39,7 @@ impl FoldGenerationObserver {
     }
 
     pub(super) fn update_completeness(&self, exec_ctx: &mut ExecutionCtx<'_>) {
-        exec_ctx.subgraph_complete = self.subtree_complete;
+        exec_ctx.set_subgraph_completeness(self.subtree_complete);
     }
 
     pub(super) fn into_result(self) -> ExecutionResult<()> {

@@ -26,13 +26,13 @@ impl<'i> super::ExecutableInstruction<'i> for Xor<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         log_instruction!(xor, exec_ctx, trace_ctx);
 
-        exec_ctx.subgraph_complete = true;
+        exec_ctx.flush_subgraph_completeness();
         match self.0.execute(exec_ctx, trace_ctx) {
             Err(e) if e.is_catchable() => {
-                exec_ctx.subgraph_complete = true;
-                exec_ctx.last_error_descriptor.meet_xor_right_branch();
                 print_xor_log(&e);
 
+                exec_ctx.flush_subgraph_completeness();
+                exec_ctx.last_error_descriptor.meet_xor_right_branch();
                 self.1.execute(exec_ctx, trace_ctx)
             }
             res => res,

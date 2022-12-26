@@ -33,14 +33,14 @@ impl ParCompletenessUpdater {
 
     pub(super) fn observe_completeness(&mut self, exec_ctx: &ExecutionCtx<'_>, subgraph_type: SubgraphType) {
         match subgraph_type {
-            SubgraphType::Left => self.left_subgraph_complete = exec_ctx.subgraph_complete,
-            SubgraphType::Right => self.right_subgraph_complete = exec_ctx.subgraph_complete,
+            SubgraphType::Left => self.left_subgraph_complete = exec_ctx.is_subgraph_complete(),
+            SubgraphType::Right => self.right_subgraph_complete = exec_ctx.is_subgraph_complete(),
         }
     }
 
     pub(super) fn set_completeness(self, exec_ctx: &mut ExecutionCtx<'_>) {
         // par is completed if at least one of its subgraphs is completed
         let subgraph_complete = self.left_subgraph_complete || self.right_subgraph_complete;
-        exec_ctx.subgraph_complete = subgraph_complete;
+        exec_ctx.set_subgraph_completeness(subgraph_complete);
     }
 }

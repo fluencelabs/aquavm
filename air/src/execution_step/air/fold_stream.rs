@@ -42,7 +42,7 @@ impl<'i> ExecutableInstruction<'i> for FoldStream<'i> {
             Some(stream) => stream,
             None => {
                 // having empty streams means that it haven't been met yet, and it's needed to wait
-                exec_ctx.subgraph_complete = false;
+                exec_ctx.make_subgraph_incomplete();
                 return Ok(());
             }
         };
@@ -107,7 +107,7 @@ fn execute_iterations<'i>(
             trace_ctx,
         );
         trace_to_exec_err!(trace_ctx.meet_generation_end(fold_id), fold_stream)?;
-        generation_observer.observe_generation_results(exec_ctx.subgraph_complete, result);
+        generation_observer.observe_generation_results(exec_ctx.is_subgraph_complete(), result);
     }
 
     Ok(())

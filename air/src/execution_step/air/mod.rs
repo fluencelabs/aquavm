@@ -122,7 +122,7 @@ macro_rules! log_instruction {
         log::trace!(
             target: air_log_targets::SUBGRAPH_COMPLETE,
             "  subgraph complete: {}",
-            $exec_ctx.subgraph_complete
+            $exec_ctx.is_subgraph_complete()
         );
 
         log::trace!(
@@ -144,7 +144,7 @@ macro_rules! joinable {
     ($cmd:expr, $exec_ctx:expr, $ok_result:expr) => {
         match $cmd {
             Err(e) if e.is_joinable() => {
-                $exec_ctx.subgraph_complete = false;
+                $exec_ctx.make_subgraph_incomplete();
                 return Ok($ok_result);
             }
             v => v,
