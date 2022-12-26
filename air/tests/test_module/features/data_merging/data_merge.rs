@@ -200,8 +200,6 @@ fn stream_merge() {
 
 #[test]
 fn fold_merge() {
-    use std::ops::Deref;
-
     let set_variable_vm_id = "set_variable";
     let local_vm_id = "local_vm";
 
@@ -244,21 +242,21 @@ fn fold_merge() {
         local_vm,
         <_>::default(),
         &script,
-        result_1.data.clone(),
+        result_1.data,
         local_vms_results[3].data.clone()
     );
     let result_3 = checked_call_vm!(
         local_vm,
         <_>::default(),
         &script,
-        result_2.data.clone(),
+        result_2.data,
         local_vms_results[4].data.clone()
     );
     let result_4 = checked_call_vm!(
         local_vm,
         <_>::default(),
         &script,
-        result_3.data.clone(),
+        result_3.data,
         local_vms_results[5].data.clone()
     );
 
@@ -266,7 +264,7 @@ fn fold_merge() {
         local_vm,
         <_>::default(),
         &script,
-        result_4.data.clone(),
+        result_4.data,
         local_vms_results[1].data.clone()
     );
 
@@ -274,7 +272,7 @@ fn fold_merge() {
         local_vm,
         <_>::default(),
         &script,
-        result_5.data.clone(),
+        result_5.data,
         local_vms_results[2].data.clone()
     );
 
@@ -282,7 +280,7 @@ fn fold_merge() {
         local_vm,
         <_>::default(),
         &script,
-        result_6.data.clone(),
+        result_6.data,
         local_vms_results[6].data.clone()
     );
 
@@ -312,14 +310,15 @@ fn fold_merge() {
             for subtrace_lore in fold.lore.iter() {
                 let value_pos = subtrace_lore.value_pos;
                 if let ExecutedState::Call(CallResult::Executed(value)) = &data.trace[value_pos] {
-                    let value = match value {
-                        Value::Scalar(value) => value,
-                        Value::Stream { value, .. } => value,
+                    let cid = match value {
+                        ValueRef::Scalar(cid) => cid,
+                        ValueRef::Stream { cid, .. } => cid,
                     };
 
-                    if let JValue::String(var_name) = value.deref() {
-                        let current_count: usize = calls_count.get(var_name).map(|v| *v).unwrap_or_default();
-                        calls_count.insert(var_name, current_count + 1);
+                    let value = data.cid_store.get(cid).unwrap().clone();
+                    if let JValue::String(ref var_name) = &*value {
+                        let current_count: usize = calls_count.get(var_name).copied().unwrap_or_default();
+                        calls_count.insert(var_name.to_owned(), current_count + 1);
                     }
                 }
             }

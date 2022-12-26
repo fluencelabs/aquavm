@@ -15,6 +15,8 @@
  */
 
 use air::UncatchableError;
+use air_interpreter_cid::value_to_json_cid;
+use air_interpreter_data::CidTracker;
 use air_test_utils::prelude::*;
 use air_trace_handler::merger::MergeError;
 use air_trace_handler::TraceHandlerError;
@@ -34,16 +36,19 @@ fn issue_295() {
         )
     "#);
 
+    let mut cid_tracker = CidTracker::new();
+    cid_tracker.record_value(Rc::new("".into())).unwrap();
     let prev_trace = vec![executed_state::scalar_string(""), executed_state::ap(1)];
     let current_trace = vec![executed_state::scalar_string(""), executed_state::scalar_string("")];
-    let prev_data = raw_data_from_trace(prev_trace);
-    let current_data = raw_data_from_trace(current_trace);
+    let prev_data = raw_data_from_trace(prev_trace, cid_tracker.clone().into());
+    let current_data = raw_data_from_trace(current_trace, cid_tracker.into());
     let result = call_vm!(vm, <_>::default(), &script, prev_data, current_data);
 
+    let cid = value_to_json_cid(&json!("")).unwrap().into();
     let expected_error = UncatchableError::TraceError {
         trace_error: TraceHandlerError::MergeError(MergeError::IncompatibleExecutedStates(
             ExecutedState::Ap(ApResult::new(1)),
-            ExecutedState::Call(CallResult::Executed(Value::Scalar(Rc::new(json!(""))))),
+            ExecutedState::Call(CallResult::Executed(ValueRef::Scalar(cid))),
         )),
         instruction: "ap scalar $stream".to_string(),
     };

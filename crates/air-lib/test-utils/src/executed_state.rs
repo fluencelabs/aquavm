@@ -22,35 +22,58 @@ use super::JValue;
 use super::ParResult;
 use super::Sender;
 use super::TracePos;
-use super::Value;
+use super::ValueRef;
 use crate::FoldLore;
 use crate::FoldResult;
 use crate::FoldSubTraceLore;
 use crate::SubTraceDesc;
 
+use air_interpreter_cid::value_to_json_cid;
+use air_interpreter_data::CidTracker;
+
 use std::rc::Rc;
 
 pub fn scalar(result: JValue) -> ExecutedState {
-    let value = Value::Scalar(Rc::new(result));
+    let cid = value_to_json_cid(&result)
+        .unwrap_or_else(|e| panic!("{:?}: failed to compute CID of {:?}", e, result));
+    let value = ValueRef::Scalar(Rc::new(cid));
+    ExecutedState::Call(CallResult::Executed(value))
+}
+
+pub fn scalar_tracked(result: impl Into<JValue>, tracker: &mut CidTracker) -> ExecutedState {
+    let cid = tracker.record_value(Rc::new(result.into())).unwrap();
+    let value = ValueRef::Scalar(cid);
     ExecutedState::Call(CallResult::Executed(value))
 }
 
 pub fn scalar_number(result: impl Into<serde_json::Number>) -> ExecutedState {
     let result = JValue::Number(result.into());
-    let value = Rc::new(result);
 
-    ExecutedState::Call(CallResult::executed_scalar(value))
+    scalar(result)
+}
+
+pub fn stream_call_result(result: JValue, generation: u32) -> CallResult {
+    let cid = value_to_json_cid(&result)
+        .unwrap_or_else(|e| panic!("{:?}: failed to compute CID of {:?}", e, result));
+    CallResult::executed_stream(Rc::new(cid), generation)
 }
 
 pub fn stream(result: JValue, generation: u32) -> ExecutedState {
-    let call_result = CallResult::executed_stream(Rc::new(result), generation);
-    ExecutedState::Call(call_result)
+    ExecutedState::Call(stream_call_result(result, generation))
+}
+
+pub fn stream_tracked(
+    value: impl Into<JValue>,
+    generation: u32,
+    tracker: &mut CidTracker,
+) -> ExecutedState {
+    let cid = tracker.record_value(Rc::new(value.into())).unwrap();
+    ExecutedState::Call(CallResult::executed_stream(cid, generation))
 }
 
 pub fn scalar_string(result: impl Into<String>) -> ExecutedState {
     let result = JValue::String(result.into());
-    let value = Rc::new(result);
-    ExecutedState::Call(CallResult::executed_scalar(value))
+    scalar(result)
 }
 
 pub fn scalar_string_array(result: Vec<impl Into<String>>) -> ExecutedState {
@@ -58,23 +81,21 @@ pub fn scalar_string_array(result: Vec<impl Into<String>>) -> ExecutedState {
         .into_iter()
         .map(|s| JValue::String(s.into()))
         .collect::<Vec<_>>();
-    let value = Rc::new(JValue::Array(result));
+    let value = JValue::Array(result);
 
-    ExecutedState::Call(CallResult::executed_scalar(value))
+    scalar(value)
 }
 
 pub fn stream_string(result: impl Into<String>, generation: u32) -> ExecutedState {
     let result = JValue::String(result.into());
-    let value = Rc::new(result);
 
-    ExecutedState::Call(CallResult::executed_stream(value, generation))
+    stream(result, generation)
 }
 
 pub fn stream_number(result: impl Into<serde_json::Number>, generation: u32) -> ExecutedState {
     let result = JValue::Number(result.into());
-    let value = Rc::new(result);
 
-    ExecutedState::Call(CallResult::executed_stream(value, generation))
+    stream(result, generation)
 }
 
 pub fn stream_string_array(result: Vec<impl Into<String>>, generation: u32) -> ExecutedState {
@@ -82,9 +103,9 @@ pub fn stream_string_array(result: Vec<impl Into<String>>, generation: u32) -> E
         .into_iter()
         .map(|s| JValue::String(s.into()))
         .collect::<Vec<_>>();
-    let value = Rc::new(JValue::Array(result));
+    let value = JValue::Array(result);
 
-    ExecutedState::Call(CallResult::executed_stream(value, generation))
+    stream(value, generation)
 }
 
 pub fn request_sent_by(sender: impl Into<String>) -> ExecutedState {
@@ -105,7 +126,7 @@ pub fn par(left: usize, right: usize) -> ExecutedState {
 pub fn service_failed(ret_code: i32, error_message: &str) -> ExecutedState {
     ExecutedState::Call(CallResult::CallServiceFailed(
         ret_code,
-        Rc::new(format!(r#""{}""#, error_message)),
+        Rc::new(format!(r#""{error_message}""#)),
     ))
 }
 

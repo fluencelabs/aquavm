@@ -29,7 +29,7 @@ fn parse_match() {
             (null)
         )
         "#;
-    let instruction = parse(&source_code);
+    let instruction = parse(source_code);
     let expected = match_(
         ImmutableValue::Variable(ImmutableVariable::scalar("v1", 16.into())),
         ImmutableValue::Variable(ImmutableVariable::scalar("v2", 19.into())),
@@ -68,7 +68,7 @@ fn parse_match_with_init_peer_id() {
             (null)
         )
         "#;
-    let instruction = parse(&source_code);
+    let instruction = parse(source_code);
     let expected = match_(
         ImmutableValue::Variable(ImmutableVariable::scalar("v1", 16.into())),
         ImmutableValue::InitPeerId,
@@ -116,7 +116,7 @@ fn parse_mismatch() {
             (null)
         )
         "#;
-    let instruction = parse(&source_code);
+    let instruction = parse(source_code);
     let expected = mismatch(
         ImmutableValue::Variable(ImmutableVariable::scalar("v1", 19.into())),
         ImmutableValue::Variable(ImmutableVariable::scalar("v2", 22.into())),

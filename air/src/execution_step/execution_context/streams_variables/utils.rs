@@ -22,8 +22,8 @@ use air_interpreter_data::GlobalStreamGens;
 use std::collections::HashMap;
 
 pub(super) fn merge_global_streams(
-    previous_global_streams: &GlobalStreamGens,
-    current_global_streams: &GlobalStreamGens,
+    previous_global_streams: GlobalStreamGens,
+    current_global_streams: GlobalStreamGens,
 ) -> HashMap<String, Vec<StreamDescriptor>> {
     let mut global_streams = previous_global_streams
         .iter()
@@ -35,14 +35,14 @@ pub(super) fn merge_global_streams(
         })
         .collect::<HashMap<_, _>>();
 
-    for (stream_name, &current_gens_count) in current_global_streams {
-        if previous_global_streams.contains_key(stream_name) {
+    for (stream_name, current_gens_count) in current_global_streams {
+        if previous_global_streams.contains_key(&stream_name) {
             continue;
         }
 
         let global_stream = Stream::from_generations_count(0, current_gens_count as usize);
         let descriptor = StreamDescriptor::global(global_stream);
-        global_streams.insert(stream_name.clone(), vec![descriptor]);
+        global_streams.insert(stream_name, vec![descriptor]);
     }
 
     global_streams

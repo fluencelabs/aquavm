@@ -191,7 +191,7 @@ fn local_and_global_scalars() {
 
     let expected_trace = vec![
         executed_state::scalar(iterable_content.clone()),
-        executed_state::scalar(iterable_content.clone()),
+        executed_state::scalar(iterable_content),
         executed_state::scalar_number(0),
         executed_state::scalar_number(1),
         executed_state::scalar_number(2),

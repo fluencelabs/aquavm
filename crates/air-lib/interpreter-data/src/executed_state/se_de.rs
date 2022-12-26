@@ -77,7 +77,7 @@ pub mod sender_serializer {
         match value {
             Sender::PeerId(peer_id) => serializer.serialize_str(peer_id.as_str()),
             Sender::PeerIdWithCallId { peer_id, call_id } => {
-                let result = format!("{}: {}", peer_id, call_id);
+                let result = format!("{peer_id}: {call_id}");
                 serializer.serialize_str(&result)
             }
         }
@@ -103,8 +103,7 @@ pub mod sender_serializer {
                         let call_id = &raw_sender[pos + 2..];
                         let call_id = call_id.parse::<u32>().map_err(|e| {
                             serde::de::Error::custom(format!(
-                                "failed to parse call_id of a sender {}: {}",
-                                call_id, e
+                                "failed to parse call_id of a sender {call_id}: {e}"
                             ))
                         })?;
                         Sender::PeerIdWithCallId {

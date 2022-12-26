@@ -491,10 +491,10 @@ fn new_with_global_scalars() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-const GET_ITERABLE_ACTION_NAME: &'static str = "get_iterable_action_name";
-const OUTSIDE_ACTION_NAME: &'static str = "outside_new";
-const INSIDE_ACTION_NAME: &'static str = "inside_new";
-const OUTPUT_ACTION_NAME: &'static str = "output";
+const GET_ITERABLE_ACTION_NAME: &str = "get_iterable_action_name";
+const OUTSIDE_ACTION_NAME: &str = "outside_new";
+const INSIDE_ACTION_NAME: &str = "inside_new";
+const OUTPUT_ACTION_NAME: &str = "output";
 
 fn prepare_new_test_call_service() -> CallServiceClosure {
     let outside_new_id = std::cell::Cell::new(0u32);
@@ -520,7 +520,7 @@ fn prepare_new_test_call_service() -> CallServiceClosure {
                 CallServiceResult::ok(second_argument)
             }
             action_name => {
-                println!("unknown action: {:?}", action_name);
+                println!("unknown action: {action_name:?}");
                 CallServiceResult::err(1, json!("no such action"))
             }
         }

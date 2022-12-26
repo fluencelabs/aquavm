@@ -90,11 +90,12 @@ pub fn data_from_result(result: &RawAVMOutcome) -> InterpreterData {
     serde_json::from_slice(&result.data).expect("default serializer shouldn't fail")
 }
 
-pub fn raw_data_from_trace(trace: impl Into<ExecutionTrace>) -> Vec<u8> {
+pub fn raw_data_from_trace(trace: impl Into<ExecutionTrace>, cid_tracker: CidTracker) -> Vec<u8> {
     let data = InterpreterData::from_execution_result(
         trace.into(),
         <_>::default(),
         <_>::default(),
+        cid_tracker,
         0,
         semver::Version::new(1, 1, 1),
     );
@@ -117,7 +118,7 @@ pub fn print_trace(result: &RawAVMOutcome, trace_name: &str) {
 
     println!("trace {} (states_count: {}): [", trace_name, trace.len());
     for (id, state) in trace.iter().enumerate() {
-        println!("  {}: {}", id, state);
+        println!("  {id}: {state}");
     }
     println!("]");
 }

@@ -55,8 +55,8 @@ pub(crate) struct Streams {
 
 impl Streams {
     pub(crate) fn from_data(
-        previous_global_streams: &GlobalStreamGens,
-        current_global_streams: &GlobalStreamGens,
+        previous_global_streams: GlobalStreamGens,
+        current_global_streams: GlobalStreamGens,
         previous_restricted_stream_gens: RestrictedStreamGens,
         current_restricted_stream_gens: RestrictedStreamGens,
     ) -> Self {
@@ -218,7 +218,7 @@ impl fmt::Display for Streams {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for (name, descriptors) in self.streams.iter() {
             if let Some(last_descriptor) = descriptors.last() {
-                writeln!(f, "{} => {}", name, last_descriptor)?;
+                writeln!(f, "{name} => {last_descriptor}")?;
             }
         }
         Ok(())

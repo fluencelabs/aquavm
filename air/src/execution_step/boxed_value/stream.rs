@@ -316,9 +316,9 @@ impl fmt::Display for Stream {
 
         writeln!(f, "[")?;
         for (id, generation) in self.values.iter().enumerate() {
-            write!(f, " -- {}: ", id)?;
+            write!(f, " -- {id}: ")?;
             for value in generation.iter() {
-                write!(f, "{:?}, ", value)?;
+                write!(f, "{value:?}, ")?;
             }
             writeln!(f)?;
         }

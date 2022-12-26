@@ -15,7 +15,6 @@
  */
 
 use super::{ServiceDefinition, ServiceTagName};
-use crate::services::JValue;
 use crate::transform::parser::delim_ws;
 
 use air_test_utils::CallServiceResult;
@@ -23,7 +22,7 @@ use nom::{error::VerboseError, IResult};
 
 use std::{collections::HashMap, str::FromStr};
 
-type ParseError<'inp> = VerboseError<&'inp str>;
+pub(crate) type ParseError<'inp> = VerboseError<&'inp str>;
 
 impl FromStr for ServiceDefinition {
     type Err = String;
@@ -38,12 +37,12 @@ impl FromStr for ServiceDefinition {
 // kw "=" val
 // example: "id=firstcall"
 pub fn parse_kw(inp: &str) -> IResult<&str, ServiceDefinition, ParseError> {
+    use super::behavior::parse_behaviour;
     use nom::branch::alt;
     use nom::bytes::complete::tag;
-    use nom::character::complete::alphanumeric1;
-    use nom::combinator::{cut, map_res, recognize};
+    use nom::combinator::{cut, map, map_res, recognize};
     use nom::error::context;
-    use nom::sequence::separated_pair;
+    use nom::sequence::{pair, preceded};
 
     let equal = || delim_ws(tag("="));
     let json_value = || {
@@ -59,45 +58,56 @@ pub fn parse_kw(inp: &str) -> IResult<&str, ServiceDefinition, ParseError> {
         ))
     };
 
-    delim_ws(map_res(
-        alt((
-            separated_pair(tag(ServiceTagName::Ok.as_ref()), equal(), json_value()),
-            separated_pair(tag(ServiceTagName::Error.as_ref()), equal(), json_map()),
-            separated_pair(tag(ServiceTagName::SeqOk.as_ref()), equal(), json_map()),
-            separated_pair(tag(ServiceTagName::SeqError.as_ref()), equal(), json_map()),
-            separated_pair(
-                tag(ServiceTagName::Behaviour.as_ref()),
-                equal(),
-                cut(alphanumeric1),
+    delim_ws(alt((
+        map_res(
+            preceded(
+                pair(tag(ServiceTagName::Ok.as_ref()), equal()),
+                json_value(),
             ),
-            separated_pair(tag(ServiceTagName::Map.as_ref()), equal(), json_map()),
-        )),
-        |(tag, value): (&str, &str)| {
-            let value = value.trim();
-            match ServiceTagName::from_str(tag) {
-                Ok(ServiceTagName::Ok) => {
-                    serde_json::from_str::<JValue>(value).map(ServiceDefinition::ok)
-                }
-                Ok(ServiceTagName::Error) => {
-                    serde_json::from_str::<CallServiceResult>(value).map(ServiceDefinition::error)
-                }
-                Ok(ServiceTagName::SeqOk) => {
-                    serde_json::from_str(value).map(ServiceDefinition::seq_ok)
-                }
-                Ok(ServiceTagName::SeqError) => {
-                    serde_json::from_str::<HashMap<String, CallServiceResult>>(value)
-                        .map(ServiceDefinition::seq_error)
-                }
-                Ok(ServiceTagName::Behaviour) => Ok(ServiceDefinition::behaviour(value)),
-                Ok(ServiceTagName::Map) => serde_json::from_str(value).map(ServiceDefinition::map),
-                Err(_) => unreachable!("unknown tag {:?}", tag),
-            }
-        },
-    ))(inp)
+            |value| serde_json::from_str(value).map(ServiceDefinition::Ok),
+        ),
+        map_res(
+            preceded(
+                pair(tag(ServiceTagName::Error.as_ref()), equal()),
+                json_map(),
+            ),
+            |value| serde_json::from_str::<CallServiceResult>(value).map(ServiceDefinition::Error),
+        ),
+        map_res(
+            preceded(
+                pair(tag(ServiceTagName::SeqOk.as_ref()), equal()),
+                json_map(),
+            ),
+            |value| serde_json::from_str(value).map(ServiceDefinition::seq_ok),
+        ),
+        map_res(
+            preceded(
+                pair(tag(ServiceTagName::SeqError.as_ref()), equal()),
+                json_map(),
+            ),
+            |value| {
+                serde_json::from_str::<HashMap<String, CallServiceResult>>(value)
+                    .map(ServiceDefinition::seq_error)
+            },
+        ),
+        map(
+            preceded(
+                pair(tag(ServiceTagName::Behaviour.as_ref()), equal()),
+                cut(parse_behaviour),
+            ),
+            ServiceDefinition::Behaviour,
+        ),
+        map_res(
+            preceded(pair(tag(ServiceTagName::Map.as_ref()), equal()), json_map()),
+            |value| serde_json::from_str(value).map(ServiceDefinition::Map),
+        ),
+    )))(inp)
 }
 
 #[cfg(test)]
 mod tests {
+    use crate::asserts::behavior::Behavior;
+
     use super::*;
     use pretty_assertions::assert_eq;
     use serde_json::json;
@@ -111,7 +121,7 @@ mod tests {
     #[test]
     fn test_parse_garbage0() {
         let res = ServiceDefinition::from_str("garbage");
-        assert!(res.is_err(), "{:?}", res);
+        assert!(res.is_err(), "{}", "{res:?}");
     }
 
     #[test]
@@ -217,7 +227,7 @@ mod tests {
     #[test]
     fn test_behaviour() {
         let res = ServiceDefinition::from_str(r#"behaviour=echo"#);
-        assert_eq!(res, Ok(ServiceDefinition::Behaviour("echo".to_owned())),);
+        assert_eq!(res, Ok(ServiceDefinition::Behaviour(Behavior::Echo)),);
     }
 
     #[test]

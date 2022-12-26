@@ -59,13 +59,7 @@ pub(crate) fn from_uncatchable_error(
     let data = data.into();
     let call_requests = serde_json::to_vec(&CallRequests::new()).expect("default serializer shouldn't fail");
 
-    InterpreterOutcome {
-        ret_code,
-        error_message: error.to_string(),
-        data,
-        next_peer_pks: vec![],
-        call_requests,
-    }
+    InterpreterOutcome::new(ret_code, error.to_string(), data, vec![], call_requests)
 }
 
 /// Create InterpreterOutcome from supplied execution context, trace handler, and error,
@@ -99,6 +93,7 @@ fn populate_outcome_from_contexts(
         trace_handler.into_result_trace(),
         global_streams,
         restricted_streams,
+        exec_ctx.cid_tracker,
         exec_ctx.last_call_request_id,
         semver::Version::parse(env!("CARGO_PKG_VERSION")).expect("cargo version is valid"),
     );

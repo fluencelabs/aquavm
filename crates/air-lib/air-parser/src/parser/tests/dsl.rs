@@ -215,9 +215,9 @@ pub(super) fn binary_instruction<'i, 'b>(
     name: &'i str,
 ) -> impl Fn(Instruction<'b>, Instruction<'b>) -> Instruction<'b> {
     match name {
-        "xor" => |l, r| xor(l, r),
-        "par" => |l, r| par(l, r),
-        "seq" => |l, r| seq(l, r),
+        "xor" => xor,
+        "par" => par,
+        "seq" => seq,
         _ => unreachable!(),
     }
 }

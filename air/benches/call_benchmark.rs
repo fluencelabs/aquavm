@@ -20,7 +20,7 @@ fn current_peer_id_call() -> Result<RawAVMOutcome, String> {
 }
 
 fn criterion_benchmark(c: &mut Criterion) {
-    c.bench_function("current_peer_id_call", move |b| b.iter(move || current_peer_id_call()));
+    c.bench_function("current_peer_id_call", move |b| b.iter(current_peer_id_call));
 }
 
 criterion_group!(benches, criterion_benchmark);

@@ -184,7 +184,7 @@ fn check_tetraplet_works_correctly() {
     };
 
     let second_arg_tetraplet = SecurityTetraplet {
-        peer_pk: set_variable_vm_peer_id.clone(),
+        peer_pk: set_variable_vm_peer_id,
         service_id,
         function_name,
         json_path: String::from(".$.args.[0]"),
@@ -206,7 +206,7 @@ use std::path::PathBuf;
 
 fn construct_service_config(module_name: impl Into<String>) -> AppServiceConfig {
     let module_name = module_name.into();
-    let module_path = format!("./tests/security_tetraplets/{}/target/wasm32-wasi/debug/", module_name);
+    let module_path = format!("./tests/security_tetraplets/{module_name}/target/wasm32-wasi/debug/");
 
     let module_descriptor = ModuleDescriptor {
         file_name: module_name.clone() + ".wasm",
@@ -222,12 +222,10 @@ fn construct_service_config(module_name: impl Into<String>) -> AppServiceConfig 
 
     let service_base_dir = std::env::temp_dir();
 
-    let config = AppServiceConfig {
+    AppServiceConfig {
         service_base_dir,
         marine_config,
-    };
-
-    config
+    }
 }
 
 #[test]
@@ -238,11 +236,11 @@ fn tetraplet_with_wasm_modules() {
 
     let auth_module_name = String::from("auth_module");
     let auth_service_config = construct_service_config(auth_module_name.clone());
-    let auth_service = AppService::new(auth_service_config, auth_module_name.clone(), <_>::default()).unwrap();
+    let auth_service = AppService::new(auth_service_config, auth_module_name, <_>::default()).unwrap();
 
     let log_module_name = String::from("log_storage");
     let log_service_config = construct_service_config(log_module_name.clone());
-    let log_service = AppService::new(log_service_config, log_module_name.clone(), <_>::default()).unwrap();
+    let log_service = AppService::new(log_service_config, log_module_name, <_>::default()).unwrap();
 
     let services = maplit::hashmap!(
       "auth" => auth_service,

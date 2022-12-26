@@ -23,8 +23,8 @@ impl fmt::Display for ApResult<'_> {
         use ApResult::*;
 
         match self {
-            Scalar(scalar) => write!(f, "{}", scalar),
-            Stream(stream) => write!(f, "{}", stream),
+            Scalar(scalar) => write!(f, "{scalar}"),
+            Stream(stream) => write!(f, "{stream}"),
         }
     }
 }
@@ -36,14 +36,14 @@ impl fmt::Display for ImmutableValue<'_> {
         match self {
             InitPeerId => write!(f, "%init_peer_id%"),
             LastError(error_accessor) => display_last_error(f, error_accessor),
-            Literal(literal) => write!(f, r#""{}""#, literal),
+            Literal(literal) => write!(f, r#""{literal}""#),
             Timestamp => write!(f, "%timestamp%"),
             TTL => write!(f, "%ttl%"),
-            Number(number) => write!(f, "{}", number),
-            Boolean(bool) => write!(f, "{}", bool),
+            Number(number) => write!(f, "{number}"),
+            Boolean(bool) => write!(f, "{bool}"),
             EmptyArray => write!(f, "[]"),
-            Variable(variable) => write!(f, "{}", variable),
-            VariableWithLambda(variable) => write!(f, "{}", variable),
+            Variable(variable) => write!(f, "{variable}"),
+            VariableWithLambda(variable) => write!(f, "{variable}"),
         }
     }
 }
@@ -54,10 +54,10 @@ impl fmt::Display for ResolvableToPeerIdVariable<'_> {
 
         match self {
             InitPeerId => write!(f, "%init_peer_id%"),
-            Literal(literal) => write!(f, r#""{}""#, literal),
-            Scalar(scalar) => write!(f, "{}", scalar),
-            ScalarWithLambda(scalar) => write!(f, "{}", scalar),
-            CanonStreamWithLambda(canon_stream) => write!(f, "{}", canon_stream),
+            Literal(literal) => write!(f, r#""{literal}""#),
+            Scalar(scalar) => write!(f, "{scalar}"),
+            ScalarWithLambda(scalar) => write!(f, "{scalar}"),
+            CanonStreamWithLambda(canon_stream) => write!(f, "{canon_stream}"),
         }
     }
 }
@@ -67,10 +67,10 @@ impl fmt::Display for ResolvableToStringVariable<'_> {
         use ResolvableToStringVariable::*;
 
         match self {
-            Literal(literal) => write!(f, r#""{}""#, literal),
-            Scalar(scalar) => write!(f, "{}", scalar),
-            ScalarWithLambda(scalar) => write!(f, "{}", scalar),
-            CanonStreamWithLambda(canon_stream) => write!(f, "{}", canon_stream),
+            Literal(literal) => write!(f, r#""{literal}""#),
+            Scalar(scalar) => write!(f, "{scalar}"),
+            ScalarWithLambda(scalar) => write!(f, "{scalar}"),
+            CanonStreamWithLambda(canon_stream) => write!(f, "{canon_stream}"),
         }
     }
 }
@@ -80,8 +80,8 @@ impl fmt::Display for CallOutputValue<'_> {
         use CallOutputValue::*;
 
         match self {
-            Scalar(scalar) => write!(f, "{}", scalar),
-            Stream(stream) => write!(f, "{}", stream),
+            Scalar(scalar) => write!(f, "{scalar}"),
+            Stream(stream) => write!(f, "{stream}"),
             None => Ok(()),
         }
     }
@@ -94,16 +94,16 @@ impl fmt::Display for ApArgument<'_> {
         match self {
             InitPeerId => write!(f, "%init_peer_id%"),
             LastError(error_accessor) => display_last_error(f, error_accessor),
-            Literal(str) => write!(f, r#""{}""#, str),
+            Literal(str) => write!(f, r#""{str}""#),
             Timestamp => write!(f, "%timestamp%"),
             TTL => write!(f, "%ttl%"),
-            Number(number) => write!(f, "{}", number),
-            Boolean(bool) => write!(f, "{}", bool),
+            Number(number) => write!(f, "{number}"),
+            Boolean(bool) => write!(f, "{bool}"),
             EmptyArray => write!(f, "[]"),
-            Scalar(scalar) => write!(f, "{}", scalar),
-            ScalarWithLambda(scalar) => write!(f, "{}", scalar),
-            CanonStream(canon_stream) => write!(f, "{}", canon_stream),
-            CanonStreamWithLambda(canon_stream) => write!(f, "{}", canon_stream),
+            Scalar(scalar) => write!(f, "{scalar}"),
+            ScalarWithLambda(scalar) => write!(f, "{scalar}"),
+            CanonStream(canon_stream) => write!(f, "{canon_stream}"),
+            CanonStreamWithLambda(canon_stream) => write!(f, "{canon_stream}"),
         }
     }
 }
@@ -121,9 +121,9 @@ impl fmt::Display for Triplet<'_> {
 impl fmt::Display for NewArgument<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::Scalar(scalar) => write!(f, "{}", scalar),
-            Self::Stream(stream) => write!(f, "{}", stream),
-            Self::CanonStream(canon_stream) => write!(f, "{}", canon_stream),
+            Self::Scalar(scalar) => write!(f, "{scalar}"),
+            Self::Stream(stream) => write!(f, "{stream}"),
+            Self::CanonStream(canon_stream) => write!(f, "{canon_stream}"),
         }
     }
 }
@@ -133,8 +133,8 @@ impl fmt::Display for Number {
         use Number::*;
 
         match self {
-            Int(number) => write!(f, "{}", number),
-            Float(number) => write!(f, "{}", number),
+            Int(number) => write!(f, "{number}"),
+            Float(number) => write!(f, "{number}"),
         }
     }
 }
@@ -144,9 +144,9 @@ impl fmt::Display for FoldScalarIterable<'_> {
         use FoldScalarIterable::*;
 
         match self {
-            Scalar(scalar) => write!(f, "{}", scalar),
-            ScalarWithLambda(scalar) => write!(f, "{}", scalar),
-            CanonStream(canon_stream) => write!(f, "{}", canon_stream),
+            Scalar(scalar) => write!(f, "{scalar}"),
+            ScalarWithLambda(scalar) => write!(f, "{scalar}"),
+            CanonStream(canon_stream) => write!(f, "{canon_stream}"),
             EmptyArray => write!(f, "[]"),
         }
     }
@@ -169,7 +169,7 @@ impl From<&Number> for serde_json::Value {
 
 fn display_last_error(f: &mut fmt::Formatter, lambda_ast: &Option<LambdaAST>) -> fmt::Result {
     match lambda_ast {
-        Some(lambda_ast) => write!(f, "%last_error%{}", lambda_ast),
+        Some(lambda_ast) => write!(f, "%last_error%{lambda_ast}"),
         None => write!(f, "%last_error%"),
     }
 }

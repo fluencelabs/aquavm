@@ -52,8 +52,8 @@ impl fmt::Display for ImmutableVariable<'_> {
         use ImmutableVariable::*;
 
         match self {
-            Scalar(scalar) => write!(f, "{}", scalar),
-            CanonStream(canon_stream) => write!(f, "{}", canon_stream),
+            Scalar(scalar) => write!(f, "{scalar}"),
+            CanonStream(canon_stream) => write!(f, "{canon_stream}"),
         }
     }
 }
@@ -63,8 +63,8 @@ impl fmt::Display for ImmutableVariableWithLambda<'_> {
         use ImmutableVariableWithLambda::*;
 
         match self {
-            Scalar(scalar) => write!(f, "{}", scalar),
-            CanonStream(canon_stream) => write!(f, "{}", canon_stream),
+            Scalar(scalar) => write!(f, "{scalar}"),
+            CanonStream(canon_stream) => write!(f, "{canon_stream}"),
         }
     }
 }

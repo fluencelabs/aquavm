@@ -511,7 +511,7 @@ mod tests {
 
         let transformed2 = TransformedAirScript::new(
             &f!(r#"(call "{}" ("service" "function") []) ; ok = 24"#, peer),
-            network.clone(),
+            network,
         )
         .unwrap();
         let exectution2 = AirScriptExecutor::from_transformed_air_script(
@@ -542,10 +542,7 @@ mod tests {
         impl MarineService for Service {
             fn call(&self, _params: CallRequestParams) -> crate::services::FunctionOutcome {
                 let mut cell = self.state.borrow_mut();
-                crate::services::FunctionOutcome::ServiceResult(
-                    CallServiceResult::ok(cell.next().unwrap()),
-                    <_>::default(),
-                )
+                crate::services::FunctionOutcome::from_value(cell.next().unwrap())
             }
         }
         let service = Service {
@@ -562,7 +559,7 @@ mod tests {
         )
         .unwrap();
 
-        let transformed2 = TransformedAirScript::new(&air_script, network.clone()).unwrap();
+        let transformed2 = TransformedAirScript::new(&air_script, network).unwrap();
         let exectution2 = AirScriptExecutor::from_transformed_air_script(
             TestRunParameters::from_init_peer_id(peer),
             transformed2,
@@ -605,5 +602,111 @@ mod tests {
                 );
             }
         }
+    }
+
+    #[test]
+    fn test_behaviour_service() {
+        let peer = "peer1";
+        let exec = AirScriptExecutor::new(
+            TestRunParameters::from_init_peer_id(peer),
+            vec![],
+            std::iter::empty(),
+            r#"(call "peer1" ("service" "func") [1 22] arg) ; behaviour=service"#,
+        )
+        .unwrap();
+
+        let result_init: Vec<_> = exec.execution_iter(peer).unwrap().collect();
+
+        assert_eq!(result_init.len(), 1);
+        let outcome = &result_init[0];
+        assert_eq!(outcome.ret_code, 0);
+        assert_eq!(outcome.error_message, "");
+
+        assert_eq!(
+            trace_from_result(outcome),
+            ExecutionTrace::from(vec![scalar_string("service"),]),
+        )
+    }
+
+    #[test]
+    fn test_behaviour_function() {
+        let peer = "peer1";
+        let exec = AirScriptExecutor::new(
+            TestRunParameters::from_init_peer_id(peer),
+            vec![],
+            std::iter::empty(),
+            r#"(call "peer1" ("service" "func") [1 22] arg) ; behaviour=function"#,
+        )
+        .unwrap();
+
+        let result_init: Vec<_> = exec.execution_iter(peer).unwrap().collect();
+
+        assert_eq!(result_init.len(), 1);
+        let outcome = &result_init[0];
+        assert_eq!(outcome.ret_code, 0);
+        assert_eq!(outcome.error_message, "");
+
+        assert_eq!(
+            trace_from_result(outcome),
+            ExecutionTrace::from(vec![scalar_string("func"),]),
+        )
+    }
+
+    #[test]
+    fn test_behaviour_arg() {
+        let peer = "peer1";
+        let exec = AirScriptExecutor::new(
+            TestRunParameters::from_init_peer_id(peer),
+            vec![],
+            std::iter::empty(),
+            r#"(call "peer1" ("service" "func") [1 22] arg) ; behaviour=arg.1"#,
+        )
+        .unwrap();
+
+        let result_init: Vec<_> = exec.execution_iter(peer).unwrap().collect();
+
+        assert_eq!(result_init.len(), 1);
+        let outcome = &result_init[0];
+        assert_eq!(outcome.ret_code, 0);
+        assert_eq!(outcome.error_message, "");
+
+        assert_eq!(
+            trace_from_result(outcome),
+            ExecutionTrace::from(vec![scalar_number(22),]),
+        )
+    }
+
+    #[test]
+    fn test_behaviour_tetraplet() {
+        let peer = "peer1";
+        let exec = AirScriptExecutor::new(
+            TestRunParameters::from_init_peer_id(peer),
+            vec![],
+            std::iter::empty(),
+            r#"(call "peer1" ("service" "func") [1 22] arg) ; behaviour=tetraplet"#,
+        )
+        .unwrap();
+
+        let result_init: Vec<_> = exec.execution_iter(peer).unwrap().collect();
+
+        assert_eq!(result_init.len(), 1);
+        let outcome = &result_init[0];
+        assert_eq!(outcome.ret_code, 0);
+        assert_eq!(outcome.error_message, "");
+
+        assert_eq!(
+            trace_from_result(outcome),
+            ExecutionTrace::from(vec![scalar(json!([[{
+                "function_name": "",
+                "json_path": "",
+                "peer_pk": "peer1",
+                "service_id": "",
+            }], [{
+                "function_name": "",
+                "json_path": "",
+                "peer_pk": "peer1",
+                "service_id": "",
+            }]]))]),
+        )
     }
 }

@@ -19,7 +19,7 @@ use super::CallResult;
 use super::ExecutedState;
 use super::FoldResult;
 use super::KeeperError;
-use super::Value;
+use super::ValueRef;
 
 use air_interpreter_data::CanonResult;
 use air_interpreter_data::TracePos;
@@ -63,7 +63,10 @@ pub enum ApResultError {
 #[derive(ThisError, Debug)]
 pub enum CallResultError {
     #[error("values in call results are not equal: {prev_value:?} != {current_value:?}")]
-    ValuesNotEqual { prev_value: Value, current_value: Value },
+    ValuesNotEqual {
+        prev_value: ValueRef,
+        current_value: ValueRef,
+    },
 
     /// Errors occurred when previous and current call results are incompatible.
     #[error("previous and current call results are incompatible: '{prev_call:?}' '{current_call:?}'")]
@@ -120,7 +123,7 @@ impl MergeError {
 
 // these impl methods allow construction of MergeError and are used to make code more clean
 impl CallResultError {
-    pub(crate) fn not_equal_values(prev_value: Value, current_value: Value) -> MergeError {
+    pub(crate) fn not_equal_values(prev_value: ValueRef, current_value: ValueRef) -> MergeError {
         let call_result_error = CallResultError::ValuesNotEqual {
             prev_value,
             current_value,

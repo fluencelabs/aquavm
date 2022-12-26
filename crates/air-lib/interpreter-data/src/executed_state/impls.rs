@@ -41,14 +41,14 @@ impl CallResult {
         CallResult::RequestSentBy(Sender::PeerIdWithCallId { peer_id, call_id })
     }
 
-    pub fn executed_scalar(value: Rc<JValue>) -> CallResult {
-        let value = Value::Scalar(value);
+    pub fn executed_scalar(cid: Rc<CID>) -> CallResult {
+        let value = ValueRef::Scalar(cid);
 
         CallResult::Executed(value)
     }
 
-    pub fn executed_stream(value: Rc<JValue>, generation: u32) -> CallResult {
-        let value = Value::Stream { value, generation };
+    pub fn executed_stream(cid: Rc<CID>, generation: u32) -> CallResult {
+        let value = ValueRef::Stream { cid, generation };
 
         CallResult::Executed(value)
     }
@@ -103,13 +103,13 @@ impl std::fmt::Display for ExecutedState {
             Par(ParResult {
                 left_size: left_subgraph_size,
                 right_size: right_subgraph_size,
-            }) => write!(f, "par({}, {})", left_subgraph_size, right_subgraph_size),
-            Call(RequestSentBy(sender)) => write!(f, r"{}", sender),
+            }) => write!(f, "par({left_subgraph_size}, {right_subgraph_size})"),
+            Call(RequestSentBy(sender)) => write!(f, r"{sender}"),
             Call(Executed(value)) => {
-                write!(f, "executed({})", value)
+                write!(f, "executed({value})")
             }
             Call(CallServiceFailed(ret_code, err_msg)) => {
-                write!(f, r#"call_service_failed({}, "{}")"#, ret_code, err_msg)
+                write!(f, r#"call_service_failed({ret_code}, "{err_msg}")"#)
             }
             Fold(FoldResult { lore }) => {
                 writeln!(f, "fold(",)?;
@@ -136,12 +136,12 @@ impl std::fmt::Display for ExecutedState {
     }
 }
 
-impl std::fmt::Display for Value {
+impl std::fmt::Display for ValueRef {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            Value::Scalar(value) => write!(f, "scalar: {}", value),
-            Value::Stream { value, generation } => {
-                write!(f, "stream: {} generation: {}", value, generation)
+            ValueRef::Scalar(cid) => write!(f, "scalar: {cid:?}"),
+            ValueRef::Stream { cid, generation } => {
+                write!(f, "stream: {cid:?} generation: {generation}")
             }
         }
     }
@@ -150,9 +150,9 @@ impl std::fmt::Display for Value {
 impl std::fmt::Display for Sender {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Sender::PeerId(peer_id) => write!(f, "request_sent_by({})", peer_id),
+            Sender::PeerId(peer_id) => write!(f, "request_sent_by({peer_id})"),
             Sender::PeerIdWithCallId { peer_id, call_id } => {
-                write!(f, "request_sent_by({}: {})", peer_id, call_id)
+                write!(f, "request_sent_by({peer_id}: {call_id})")
             }
         }
     }
