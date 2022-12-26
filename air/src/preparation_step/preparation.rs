@@ -15,6 +15,7 @@
  */
 
 use super::PreparationError;
+use crate::execution_step::execution_context::ExecCtxIngredients;
 use crate::execution_step::ExecutionCtx;
 use crate::execution_step::TraceHandler;
 
@@ -47,8 +48,22 @@ pub(crate) fn prepare<'i>(
 
     let air: Instruction<'i> = *air_parser::parse(raw_air).map_err(PreparationError::AIRParseError)?;
 
-    let exec_ctx = make_exec_ctx(&prev_data, &current_data, call_results, run_parameters)?;
-    let trace_handler = TraceHandler::from_data(prev_data, current_data);
+    let prev_ingredients = ExecCtxIngredients {
+        global_streams: prev_data.global_streams,
+        last_call_request_id: prev_data.last_call_request_id,
+        restricted_streams: prev_data.restricted_streams,
+        cid_store: prev_data.cid_store,
+    };
+
+    let current_ingredients = ExecCtxIngredients {
+        global_streams: current_data.global_streams,
+        last_call_request_id: current_data.last_call_request_id,
+        restricted_streams: current_data.restricted_streams,
+        cid_store: current_data.cid_store,
+    };
+
+    let exec_ctx = make_exec_ctx(prev_ingredients, current_ingredients, call_results, run_parameters)?;
+    let trace_handler = TraceHandler::from_trace(prev_data.trace, current_data.trace);
 
     let result = PreparationDescriptor {
         exec_ctx,
@@ -68,15 +83,15 @@ fn try_to_data(raw_data: &[u8]) -> PreparationResult<InterpreterData> {
 
 #[tracing::instrument(skip_all)]
 fn make_exec_ctx(
-    prev_data: &InterpreterData,
-    current_data: &InterpreterData,
+    prev_ingredients: ExecCtxIngredients,
+    current_ingredients: ExecCtxIngredients,
     call_results: &[u8],
     run_parameters: RunParameters,
 ) -> PreparationResult<ExecutionCtx<'static>> {
     let call_results = serde_json::from_slice(call_results)
         .map_err(|e| PreparationError::CallResultsDeFailed(e, call_results.to_vec()))?;
 
-    let ctx = ExecutionCtx::new(prev_data, current_data, call_results, run_parameters);
+    let ctx = ExecutionCtx::new(prev_ingredients, current_ingredients, call_results, run_parameters);
     Ok(ctx)
 }
 

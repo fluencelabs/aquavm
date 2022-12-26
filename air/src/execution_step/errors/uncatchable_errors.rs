@@ -17,8 +17,10 @@
 use crate::JValue;
 use crate::ToErrorCode;
 
+use air_interpreter_cid::CidCalculationError;
+use air_interpreter_cid::CID;
 use air_interpreter_data::TracePos;
-use air_interpreter_data::Value;
+use air_interpreter_data::ValueRef;
 use air_trace_handler::merger::MergerApResult;
 use air_trace_handler::GenerationCompatificationError;
 use air_trace_handler::TraceHandlerError;
@@ -26,6 +28,8 @@ use strum::IntoEnumIterator;
 use strum_macros::EnumDiscriminants;
 use strum_macros::EnumIter;
 use thiserror::Error as ThisError;
+
+use std::rc::Rc;
 
 /// Uncatchable errors arisen during AIR script execution. Uncatchable here means that these errors
 /// couldn't be handled by a xor instruction and their error_code couldn't be used in a match
@@ -66,7 +70,7 @@ pub enum UncatchableError {
     /// Errors occurred when result from data doesn't match to a call instruction, f.e. a call
     /// could be applied to a stream, but result doesn't contain generation in a source position.
     #[error("call result value {0:?} doesn't match with corresponding instruction")]
-    CallResultNotCorrespondToInstr(Value),
+    CallResultNotCorrespondToInstr(ValueRef),
 
     /// Variable shadowing is not allowed, usually it's thrown when a AIR tries to assign value
     /// for a variable not in a fold block or in a global scope but not right after new.
@@ -90,6 +94,12 @@ pub enum UncatchableError {
         canonicalized_stream: JValue,
         de_error: serde_json::Error,
     },
+
+    #[error("failed to calculate value's CID")]
+    CidError(#[from] CidCalculationError),
+
+    #[error("value for CID {0:?} not found")]
+    ValueForCidNotFound(Rc<CID>),
 }
 
 impl ToErrorCode for UncatchableError {

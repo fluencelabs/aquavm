@@ -200,8 +200,6 @@ fn stream_merge() {
 
 #[test]
 fn fold_merge() {
-    use std::ops::Deref;
-
     let set_variable_vm_id = "set_variable";
     let local_vm_id = "local_vm";
 
@@ -312,14 +310,15 @@ fn fold_merge() {
             for subtrace_lore in fold.lore.iter() {
                 let value_pos = subtrace_lore.value_pos;
                 if let ExecutedState::Call(CallResult::Executed(value)) = &data.trace[value_pos] {
-                    let value = match value {
-                        Value::Scalar(value) => value,
-                        Value::Stream { value, .. } => value,
+                    let cid = match value {
+                        ValueRef::Scalar(cid) => cid,
+                        ValueRef::Stream { cid, .. } => cid,
                     };
 
-                    if let JValue::String(var_name) = value.deref() {
+                    let value = data.cid_store.get(cid).unwrap().clone();
+                    if let JValue::String(ref var_name) = &*value {
                         let current_count: usize = calls_count.get(var_name).copied().unwrap_or_default();
-                        calls_count.insert(var_name, current_count + 1);
+                        calls_count.insert(var_name.to_owned(), current_count + 1);
                     }
                 }
             }

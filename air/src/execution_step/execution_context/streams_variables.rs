@@ -55,8 +55,8 @@ pub(crate) struct Streams {
 
 impl Streams {
     pub(crate) fn from_data(
-        previous_global_streams: &GlobalStreamGens,
-        current_global_streams: &GlobalStreamGens,
+        previous_global_streams: GlobalStreamGens,
+        current_global_streams: GlobalStreamGens,
         previous_restricted_stream_gens: RestrictedStreamGens,
         current_restricted_stream_gens: RestrictedStreamGens,
     ) -> Self {

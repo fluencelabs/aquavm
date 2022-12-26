@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.12.0] - 2022-12-21
+
++ New `cid` field of the `InterpreterOutcome` contains CID of the data.
+
 ## [0.11.1] - 2022-09-13
 
 ### Other

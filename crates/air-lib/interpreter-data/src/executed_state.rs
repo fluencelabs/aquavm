@@ -17,13 +17,15 @@
 mod impls;
 mod se_de;
 
+use crate::JValue;
 use crate::TracePos;
 
+use air_interpreter_cid::CID;
 use se_de::par_serializer;
 use se_de::sender_serializer;
 use serde::Deserialize;
 use serde::Serialize;
-use serde_json::Value as JValue;
+
 use std::fmt::Formatter;
 use std::rc::Rc;
 
@@ -48,7 +50,7 @@ pub enum CallResult {
     RequestSentBy(Sender),
 
     /// A corresponding call's been already executed with such value as a result.
-    Executed(Value),
+    Executed(ValueRef),
 
     /// call_service ended with a service error.
     #[serde(rename = "failed")]
@@ -57,9 +59,9 @@ pub enum CallResult {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub enum Value {
-    Scalar(Rc<JValue>),
-    Stream { value: Rc<JValue>, generation: u32 },
+pub enum ValueRef {
+    Scalar(Rc<CID>),
+    Stream { cid: Rc<CID>, generation: u32 },
 }
 
 /// Let's consider an example of trace that could be produces by the following fold:

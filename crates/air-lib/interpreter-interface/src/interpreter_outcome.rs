@@ -43,6 +43,9 @@ pub struct InterpreterOutcome {
 
     /// Collected parameters of all met call instructions that could be executed on a current peer.
     pub call_requests: Vec<u8>,
+
+    /// IPLD CID of the data field.
+    pub cid: String,
 }
 
 impl InterpreterOutcome {
@@ -53,12 +56,15 @@ impl InterpreterOutcome {
         next_peer_pks: Vec<String>,
         call_requests: Vec<u8>,
     ) -> Self {
+        let cid = air_interpreter_cid::json_data_cid(&data).into();
+
         Self {
             ret_code,
             error_message,
             data,
             next_peer_pks,
             call_requests,
+            cid,
         }
     }
 }
@@ -81,13 +87,7 @@ impl InterpreterOutcome {
         let error_message = try_as_string(record_values.pop().unwrap(), "error_message")?;
         let ret_code = try_as_i64(record_values.pop().unwrap(), "ret_code")?;
 
-        let outcome = Self {
-            ret_code,
-            error_message,
-            data,
-            next_peer_pks,
-            call_requests,
-        };
+        let outcome = Self::new(ret_code, error_message, data, next_peer_pks, call_requests);
 
         Ok(outcome)
     }

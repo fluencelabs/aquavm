@@ -1,3 +1,8 @@
+## Version 0.5.0
+
+- Call result values are stored as CIDs in the data trace.  These CIDs refer
+  to a new `cid_store` data's field that maps a CID string to a value.
+
 ## Version 0.4.1
 
 [PR 367](https://github.com/fluencelabs/aquavm/pull/367):  
