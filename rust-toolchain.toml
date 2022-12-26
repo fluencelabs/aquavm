@@ -1,6 +1,6 @@
 [toolchain]
 # AquaVM can be built with "stable", "nightly" required only to build Marine tests
-channel = "nightly-2022-12-01"
-components = [ "rustfmt", "clippy", "rust-src" ]
+channel = "nightly-2022-11-30"
+components = [ "rustfmt", "clippy", "rust-src"]
 targets = [ "x86_64-unknown-linux-gnu", "x86_64-apple-darwin", "wasm32-wasi" ]
 profile = "minimal"
