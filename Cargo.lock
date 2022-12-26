@@ -41,7 +41,7 @@ dependencies = [
  "once_cell",
  "polyplets",
  "pretty_assertions 0.6.1",
- "semver 1.0.14",
+ "semver 1.0.16",
  "serde",
  "serde_json",
  "strum",
@@ -118,7 +118,7 @@ dependencies = [
  "air-parser",
  "air-utils",
  "once_cell",
- "semver 1.0.14",
+ "semver 1.0.16",
  "serde",
  "serde_json",
  "tracing",
@@ -202,7 +202,7 @@ dependencies = [
  "marine-rs-sdk",
  "object-pool",
  "once_cell",
- "semver 1.0.14",
+ "semver 1.0.16",
  "serde_json",
 ]
 
@@ -1669,7 +1669,7 @@ dependencies = [
  "parity-wasm 0.45.0",
  "paste",
  "pwasm-utils",
- "semver 1.0.14",
+ "semver 1.0.16",
  "serde",
  "thiserror",
  "wasmer-interface-types-fl",
@@ -1702,7 +1702,7 @@ dependencies = [
  "parity-wasm 0.45.0",
  "paste",
  "pwasm-utils",
- "semver 1.0.14",
+ "semver 1.0.16",
  "serde",
  "thiserror",
  "wasmer-interface-types-fl",
@@ -1749,7 +1749,7 @@ dependencies = [
  "marine-it-interfaces",
  "marine-module-interface",
  "nom 5.1.2",
- "semver 1.0.14",
+ "semver 1.0.16",
  "serde",
  "thiserror",
  "walrus",
@@ -1787,7 +1787,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d23211d31dc45b0941666e867e717c951d3f446c27ddbf148b4fa62c4de1f159"
 dependencies = [
  "once_cell",
- "semver 1.0.14",
+ "semver 1.0.16",
 ]
 
 [[package]]
@@ -1799,7 +1799,7 @@ dependencies = [
  "anyhow",
  "chrono",
  "marine-rs-sdk-main",
- "semver 1.0.14",
+ "semver 1.0.16",
  "serde",
  "thiserror",
  "walrus",
@@ -1816,7 +1816,7 @@ dependencies = [
  "itertools",
  "marine-it-interfaces",
  "nom 5.1.2",
- "semver 1.0.14",
+ "semver 1.0.16",
  "serde",
  "thiserror",
  "walrus",
@@ -2572,9 +2572,9 @@ dependencies = [
 
 [[package]]
 name = "semver"
-version = "1.0.14"
+version = "1.0.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e25dfac463d778e353db5be2449d1cce89bd6fd23c9f1ea21310ce6e5a1b29c4"
+checksum = "58bc9567378fc7690d6b2addae4e60ac2eeea07becb2c64b9f218b53865cba2a"
 dependencies = [
  "serde",
 ]
@@ -3230,7 +3230,7 @@ dependencies = [
  "log",
  "nom 5.1.2",
  "safe-transmute",
- "semver 1.0.14",
+ "semver 1.0.16",
  "serde",
  "serde_json",
  "thiserror",
