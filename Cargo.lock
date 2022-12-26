@@ -13,7 +13,7 @@ dependencies = [
 
 [[package]]
 name = "air"
-version = "0.33.0"
+version = "0.34.0"
 dependencies = [
  "air-execution-info-collector",
  "air-interpreter-cid",
@@ -85,7 +85,7 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter"
-version = "0.33.0"
+version = "0.34.0"
 dependencies = [
  "air",
  "air-interpreter-interface",
@@ -126,9 +126,8 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter-interface"
-version = "0.12.0"
+version = "0.12.1"
 dependencies = [
- "air-interpreter-cid",
  "fluence-it-types",
  "marine-rs-sdk",
  "serde",
@@ -338,7 +337,7 @@ dependencies = [
 
 [[package]]
 name = "avm-interface"
-version = "0.28.0"
+version = "0.28.1"
 dependencies = [
  "air-interpreter-interface",
  "air-utils",
@@ -354,7 +353,7 @@ dependencies = [
 
 [[package]]
 name = "avm-server"
-version = "0.28.0"
+version = "0.28.1"
 dependencies = [
  "air-interpreter-interface",
  "air-utils",
