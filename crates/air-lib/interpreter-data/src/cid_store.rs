@@ -37,6 +37,10 @@ impl<Val> CidStore<Val> {
     pub fn get(&self, cid: &CID<Val>) -> Option<Rc<Val>> {
         self.0.get(cid).cloned()
     }
+
+    pub fn len(&self) -> usize {
+        self.0.len()
+    }
 }
 
 impl<Val> Default for CidStore<Val> {

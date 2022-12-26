@@ -128,7 +128,7 @@ impl<'i> ExecutionCtx<'i> {
     pub(crate) fn get_value_by_cid(&self, cid: &CID<JValue>) -> Result<Rc<JValue>, UncatchableError> {
         self.value_tracker
             .get(cid)
-            .ok_or_else(|| UncatchableError::ValueForCidNotFound(cid.clone().into()))
+            .ok_or_else(|| UncatchableError::ValueForCidNotFound("value", cid.clone().into()))
     }
 
     pub(crate) fn get_tetraplet_by_cid(
@@ -137,7 +137,7 @@ impl<'i> ExecutionCtx<'i> {
     ) -> Result<RcSecurityTetraplet, UncatchableError> {
         self.tetraplet_tracker
             .get(cid)
-            .ok_or_else(|| UncatchableError::ValueForCidNotFound(cid.clone().into()))
+            .ok_or_else(|| UncatchableError::ValueForCidNotFound("tetraplet", cid.clone().into()))
     }
 
     pub(crate) fn get_canon_value_by_cid(
@@ -157,7 +157,12 @@ impl<'i> ExecutionCtx<'i> {
                     trace_pos: fake_trace_pos,
                 })
             })
-            .unwrap_or_else(|| Err(UncatchableError::ValueForCidNotFound(cid.clone().into())))
+            .unwrap_or_else(|| {
+                Err(UncatchableError::ValueForCidNotFound(
+                    "canon aggregate",
+                    cid.clone().into(),
+                ))
+            })
     }
 }
 

@@ -95,8 +95,8 @@ pub enum UncatchableError {
     #[error("failed to calculate value's CID")]
     CidError(#[from] CidCalculationError),
 
-    #[error("value for CID {0:?} not found")]
-    ValueForCidNotFound(String),
+    #[error("{0} for CID {1:?} not found")]
+    ValueForCidNotFound(&'static str, String),
 }
 
 impl ToErrorCode for UncatchableError {

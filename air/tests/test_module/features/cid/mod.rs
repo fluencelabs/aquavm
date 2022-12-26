@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+mod canon;
+
 use air_interpreter_data::CidTracker;
 use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::*;
