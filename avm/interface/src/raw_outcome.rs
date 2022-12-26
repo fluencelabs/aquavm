@@ -41,7 +41,6 @@ impl RawAVMOutcome {
             data,
             call_requests,
             next_peer_pks,
-            cid: _,
         } = outcome;
 
         let call_requests = crate::from_raw_call_requests(call_requests)?;
