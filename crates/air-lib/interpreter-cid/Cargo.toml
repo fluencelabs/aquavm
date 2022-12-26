@@ -7,7 +7,7 @@ edition = "2018"
 license = "Apache-2.0"
 documentation = "https://docs.rs/air-interpreter-cid"
 repository = "https://github.com/fluencelabs/aquavm/tree/master/crates/air-lib/interpreter-cid"
-keywords = ["fluence", "air", "webassembly", "programming-language", "cid", "ipld"]
+keywords = ["fluence", "air", "programming-language", "cid", "ipld"]
 categories = ["wasm"]
 
 [dependencies]
