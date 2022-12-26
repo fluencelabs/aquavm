@@ -15,7 +15,7 @@
  */
 
 use super::*;
-use crate::execution_step::air::call::call_result_setter::populate_context_from_data;
+use crate::execution_step::instructions::call::call_result_setter::populate_context_from_data;
 use crate::execution_step::CatchableError;
 use crate::execution_step::RcSecurityTetraplet;
 
