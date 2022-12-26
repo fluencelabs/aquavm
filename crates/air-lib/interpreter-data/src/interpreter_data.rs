@@ -16,7 +16,10 @@
 
 use super::GlobalStreamGens;
 use super::RestrictedStreamGens;
+use crate::cid_store::CidStore;
 use crate::ExecutionTrace;
+use crate::JValue;
+
 use air_utils::measure;
 
 use serde::Deserialize;
@@ -53,6 +56,9 @@ pub struct InterpreterData {
 
     /// Version of interpreter produced this data.
     pub interpreter_version: semver::Version,
+
+    /// Map CID to values
+    pub cid_store: CidStore<JValue>,
 }
 
 impl InterpreterData {
@@ -64,6 +70,7 @@ impl InterpreterData {
             last_call_request_id: 0,
             restricted_streams: RestrictedStreamGens::new(),
             interpreter_version,
+            cid_store: <_>::default(),
         }
     }
 
@@ -71,9 +78,12 @@ impl InterpreterData {
         trace: ExecutionTrace,
         streams: GlobalStreamGens,
         restricted_streams: RestrictedStreamGens,
+        cid_store: impl Into<CidStore<JValue>>,
         last_call_request_id: u32,
         interpreter_version: semver::Version,
     ) -> Self {
+        let cid_store = cid_store.into();
+
         Self {
             trace,
             global_streams: streams,
@@ -81,6 +91,7 @@ impl InterpreterData {
             last_call_request_id,
             restricted_streams,
             interpreter_version,
+            cid_store,
         }
     }
 

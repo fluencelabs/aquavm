@@ -46,6 +46,7 @@ pub fn execute_air(
     execute_air_impl(air, prev_data, data, params, call_results).unwrap_or_else(identity)
 }
 
+#[allow(clippy::result_large_err)]
 fn execute_air_impl(
     air: String,
     prev_data: Vec<u8>,

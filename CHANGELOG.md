@@ -1,3 +1,15 @@
+## Version 0.34.0 (2022-12-26)
+
+[PR 414](https://github.com/fluencelabs/aquavm/pull/414):  
+Remove the `InterpreterOutcome::cid` as it is not really neaded,
+but makes integration more difficult.
+
+## Version 0.33.0 (2022-12-21)
+
+[PR 401](https://github.com/fluencelabs/aquavm/pull/401):  
+Call result values are stored as CIDs in the data trace.  These CIDs refer
+to a new `cid_store` data's field that maps a CID string to a value.
+
 ## Version 0.32.0 (2022-11-25)
 
 [PR 298](https://github.com/fluencelabs/aquavm/pull/298):
