@@ -1,3 +1,9 @@
+## Version 0.34.0 (2022-12-26)
+
+[PR 414](https://github.com/fluencelabs/aquavm/pull/414):  
+Remove the `InterpreterOutcome::cid` as it is not really neaded,
+but makes integration more difficult.
+
 ## Version 0.33.0 (2022-12-21)
 
 [PR 401](https://github.com/fluencelabs/aquavm/pull/401):  
