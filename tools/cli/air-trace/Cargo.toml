@@ -15,7 +15,7 @@ air-interpreter-interface = { path = "../../../crates/air-lib/interpreter-interf
 avm-data-store = { path = "../../../crates/data-store" }
 avm-interface = { path = "../../../avm/interface" }
 
-anyhow = "1.0.66"
+anyhow = "1.0.68"
 clap = { version = "4.0.32", features = ["derive", "env"] }
 itertools = "0.10.5"
 serde = { version = "1.0.151", features = ["derive"] }
