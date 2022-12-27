@@ -14,7 +14,7 @@ name = "air_trace_handler"
 path = "src/lib.rs"
 
 [dependencies]
-air-interpreter-cid = { version = "0.1.0", path = "../interpreter-cid" }
+air-interpreter-cid = { version = "0.2.0", path = "../interpreter-cid" }
 air-interpreter-data = { path = "../interpreter-data" }
 air-interpreter-interface = { path = "../interpreter-interface" }
 air-log-targets = { path = "../log-targets" }
