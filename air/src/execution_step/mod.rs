@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-mod air;
 mod boxed_value;
 mod errors;
 pub(crate) mod execution_context;
+mod instructions;
 mod lambda_applier;
 mod resolver;
 
@@ -38,8 +38,8 @@ pub mod errors_prelude {
     pub use super::UncatchableError;
 }
 
-pub(super) use self::air::ExecutableInstruction;
-pub(super) use self::air::FoldState;
+pub(super) use self::instructions::ExecutableInstruction;
+pub(super) use self::instructions::FoldState;
 pub(super) use boxed_value::Generation;
 pub(super) use boxed_value::ScalarRef;
 pub(super) use boxed_value::Stream;
