@@ -23,9 +23,9 @@ polyplets = { version = "0.3.2", path = "../../crates/air-lib/polyplets" }
 avm-interface = { version = "0.28.0", path = "../../avm/interface" }
 
 eyre = "0.6.8"
-thiserror = "1.0.37"
+thiserror = "1.0.38"
 maplit = "1.0.2"
-serde_json = "1.0.89"
+serde_json = "1.0.91"
 serde = "1.0.151"
 log = "0.4.17"
 parking_lot = "0.12.1"
