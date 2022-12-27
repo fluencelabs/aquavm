@@ -178,7 +178,6 @@ fn par_early_exit() {
 }
 
 #[test]
-// TODO: rewrite this test
 fn fold_early_exit() {
     let fold_executor_id = "fold_executor_id";
     let error_trigger_id = "error_trigger_id";
