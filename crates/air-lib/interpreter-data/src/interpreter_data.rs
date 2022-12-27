@@ -84,6 +84,7 @@ impl InterpreterData {
         }
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub fn from_execution_result(
         trace: ExecutionTrace,
         streams: GlobalStreamGens,
