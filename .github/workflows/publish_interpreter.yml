@@ -64,7 +64,7 @@ jobs:
           cargo show --json "$RS_PKG_NAME" > "$CRATE_VERSIONS"
 
           CRATE_VERSIONS_FILTERED=$(mktemp)
-          jq -r ".versions[] | .num | select(test(\"$PAT\"))") "$CRATE_VERSIONS" > "$CRATE_VERSIONS_FILTERED"
+          jq -r ".versions[] | .num | select(test(\"$PAT\"))" "$CRATE_VERSIONS" > "$CRATE_VERSIONS_FILTERED"
           
           MAX_RS_VERSION="$(semver -p $(cat $CRATE_VERSIONS_FILTERED) | tail -n1 || true)"
           NEXT_RS_VERSION="$(semver --increment patch "$MAX_RS_VERSION" || true)"
