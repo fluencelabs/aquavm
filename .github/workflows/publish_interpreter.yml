@@ -59,9 +59,13 @@ jobs:
           NEXT_JS_VERSION="$(semver --increment patch "$JS_VERSION" || true)"
 
           # get & increment version from crates.io
-          CRATE_VERSIONS=$(cargo show --json "$RS_PKG_NAME")
-          CRATE_VERSIONS_FILTERED=$(echo $CRATE_VERSIONS | jq -r ".versions[] | .num | select(test(\"$PAT\"))")
-          MAX_RS_VERSION="$(semver -p $CRATE_VERSIONS_FILTERED | tail -n1 || true)"
+          CRATE_VERSIONS=$(mktemp)
+          cargo show --json "$RS_PKG_NAME" > "$CRATE_VERSIONS"
+
+          CRATE_VERSIONS_FILTERED=$(mktemp)
+          jq -r ".versions[] | .num | select(test(\"$PAT\"))") "$CRATE_VERSIONS" > "$CRATE_VERSIONS_FILTERED"
+          
+          MAX_RS_VERSION="$(semver -p $(cat $CRATE_VERSIONS_FILTERED) | tail -n1 || true)"
           NEXT_RS_VERSION="$(semver --increment patch "$MAX_RS_VERSION" || true)"
 
           # take the highest version
