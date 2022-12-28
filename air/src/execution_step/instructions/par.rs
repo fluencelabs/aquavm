@@ -60,7 +60,7 @@ fn execute_subgraph<'i>(
         SubgraphType::Left => &par.0,
         SubgraphType::Right => &par.1,
     };
-    exec_ctx.subgraph_complete = determine_subgraph_complete(subgraph);
+    exec_ctx.set_subgraph_completeness(determine_subgraph_complete(subgraph));
 
     // execute a subgraph
     let result = match subgraph.execute(exec_ctx, trace_ctx) {
@@ -69,12 +69,12 @@ fn execute_subgraph<'i>(
             SubgraphResult::Succeeded
         }
         Err(e) if e.is_catchable() => {
-            exec_ctx.subgraph_complete = false;
+            exec_ctx.make_subgraph_incomplete();
             trace_to_exec_err!(trace_ctx.meet_par_subgraph_end(subgraph_type), par)?;
             SubgraphResult::Failed(e)
         }
         Err(e) => {
-            exec_ctx.subgraph_complete = false;
+            exec_ctx.make_subgraph_incomplete();
             return Err(e);
         }
     };

@@ -55,7 +55,7 @@ pub(crate) struct ExecutionCtx<'i> {
     ///   - at least one of xor subgraphs is completed without an error
     ///   - all of seq subgraphs are completed
     ///   - call executed successfully (executed state is Executed)
-    pub(crate) subgraph_complete: bool,
+    subgraph_completeness: bool,
 
     /// Tracker of all met instructions.
     pub(crate) tracker: InstructionTracker,
@@ -92,7 +92,7 @@ impl<'i> ExecutionCtx<'i> {
 
         Self {
             run_parameters,
-            subgraph_complete: true,
+            subgraph_completeness: true,
             last_call_request_id: prev_ingredients.last_call_request_id,
             call_results,
             streams,
@@ -112,6 +112,24 @@ impl<'i> ExecutionCtx<'i> {
 
     pub(crate) fn get_value_by_cid(&self, cid: &CID) -> Option<Rc<JValue>> {
         self.cid_tracker.get(cid)
+    }
+}
+
+impl ExecutionCtx<'_> {
+    pub(crate) fn make_subgraph_incomplete(&mut self) {
+        self.subgraph_completeness = false;
+    }
+
+    pub(crate) fn is_subgraph_complete(&self) -> bool {
+        self.subgraph_completeness
+    }
+
+    pub(crate) fn set_subgraph_completeness(&mut self, subgraph_complete: bool) {
+        self.subgraph_completeness = subgraph_complete;
+    }
+
+    pub(crate) fn flush_subgraph_completeness(&mut self) {
+        self.subgraph_completeness = true;
     }
 }
 
@@ -160,7 +178,7 @@ impl<'i> Display for ExecutionCtx<'i> {
         writeln!(f, "current peer id: {}", self.run_parameters.current_peer_id)?;
         writeln!(f, "init peer id: {}", self.run_parameters.init_peer_id)?;
         writeln!(f, "timestamp: {}", self.run_parameters.timestamp)?;
-        writeln!(f, "subgraph complete: {}", self.subgraph_complete)?;
+        writeln!(f, "subgraph complete: {}", self.subgraph_completeness)?;
         writeln!(f, "next peer public keys: {:?}", self.next_peer_pks)?;
 
         Ok(())

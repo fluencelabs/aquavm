@@ -74,7 +74,7 @@ fn handle_unseen_canon(
     let peer_id = crate::execution_step::instructions::resolve_peer_id_to_string(&ast_canon.peer_id, exec_ctx)?;
 
     if exec_ctx.run_parameters.current_peer_id.as_str() != peer_id {
-        exec_ctx.subgraph_complete = false;
+        exec_ctx.make_subgraph_incomplete();
         exec_ctx.next_peer_pks.push(peer_id);
         //this branch is executed only when
         //  this canon instruction executes for the first time

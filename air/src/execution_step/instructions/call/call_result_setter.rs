@@ -108,7 +108,7 @@ pub(crate) fn populate_context_from_data<'i>(
 /// Writes an executed state of a particle being sent to remote node.
 pub(crate) fn handle_remote_call(peer_pk: String, exec_ctx: &mut ExecutionCtx<'_>, trace_ctx: &mut TraceHandler) {
     exec_ctx.next_peer_pks.push(peer_pk);
-    exec_ctx.subgraph_complete = false;
+    exec_ctx.make_subgraph_incomplete();
 
     let new_call_result = CallResult::sent_peer_id(exec_ctx.run_parameters.current_peer_id.clone());
     trace_ctx.meet_call_end(new_call_result);

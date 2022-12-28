@@ -50,7 +50,7 @@ pub(super) fn handle_prev_state<'i>(
         // this call was failed on one of the previous executions,
         // here it's needed to bubble this special error up
         CallServiceFailed(ret_code, ref err_msg) => {
-            exec_ctx.subgraph_complete = false;
+            exec_ctx.make_subgraph_incomplete();
             let err_msg = err_msg.clone();
             trace_ctx.meet_call_end(met_result.result);
             Err(CatchableError::LocalServiceError(ret_code, err_msg).into())
@@ -66,7 +66,7 @@ pub(super) fn handle_prev_state<'i>(
                 }
                 // result hasn't been prepared yet
                 None => {
-                    exec_ctx.subgraph_complete = false;
+                    exec_ctx.make_subgraph_incomplete();
                     Ok(StateDescriptor::not_ready(met_result.result))
                 }
             }
@@ -78,7 +78,7 @@ pub(super) fn handle_prev_state<'i>(
                 return Ok(StateDescriptor::can_execute_now(met_result.result));
             }
 
-            exec_ctx.subgraph_complete = false;
+            exec_ctx.make_subgraph_incomplete();
             Ok(StateDescriptor::cant_execute_now(met_result.result))
         }
         // this instruction's been already executed
