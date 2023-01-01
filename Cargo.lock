@@ -104,7 +104,7 @@ name = "air-interpreter-cid"
 version = "0.1.0"
 dependencies = [
  "cid",
- "multihash 0.17.0",
+ "multihash",
  "serde",
  "serde_json",
 ]
@@ -563,7 +563,7 @@ checksum = "751fbf5712cada59d2be51b7df333c7b57fabcaca0f3b7cc5d7e1e57e44dcc44"
 dependencies = [
  "core2",
  "multibase",
- "multihash 0.18.0",
+ "multihash",
  "serde",
  "unsigned-varint",
 ]
@@ -1971,25 +1971,14 @@ dependencies = [
 
 [[package]]
 name = "multihash"
-version = "0.17.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "835d6ff01d610179fbce3de1694d007e500bf33a7f29689838941d6bf783ae40"
-dependencies = [
- "core2",
- "digest 0.10.6",
- "multihash-derive",
- "sha2",
- "unsigned-varint",
-]
-
-[[package]]
-name = "multihash"
 version = "0.18.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "15e5d911412e631e1de11eb313e4dd71f73fd964401102aab23d6c8327c431ba"
 dependencies = [
  "core2",
+ "digest 0.10.6",
  "multihash-derive",
+ "sha2",
  "unsigned-varint",
 ]
 
