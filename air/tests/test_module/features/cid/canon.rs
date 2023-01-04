@@ -72,9 +72,9 @@ fn test_canon_ok() {
     ];
 
     assert_eq!(&*data.trace, expected_trace);
-    assert_eq!(data.value_store, value_tracker.into());
-    assert_eq!(data.tetraplet_store, tetraplet_tracker.into());
-    assert_eq!(data.canon_store, canon_tracker.into());
+    assert_eq!(data.cid_info.value_store, value_tracker.into());
+    assert_eq!(data.cid_info.tetraplet_store, tetraplet_tracker.into());
+    assert_eq!(data.cid_info.canon_store, canon_tracker.into());
 }
 
 #[test]
@@ -133,10 +133,10 @@ fn test_canon_ok_multi() {
     ];
 
     assert_eq!(&*data.trace, expected_trace);
-    assert_eq!(data.value_store.len(), 2);
-    assert_eq!(data.value_store, value_tracker.into());
-    assert_eq!(data.tetraplet_store, tetraplet_tracker.into());
-    assert_eq!(data.canon_store, canon_tracker.into());
+    assert_eq!(data.cid_info.value_store.len(), 2);
+    assert_eq!(data.cid_info.value_store, value_tracker.into());
+    assert_eq!(data.cid_info.tetraplet_store, tetraplet_tracker.into());
+    assert_eq!(data.cid_info.canon_store, canon_tracker.into());
 }
 
 #[test]

@@ -26,7 +26,7 @@ use crate::UncatchableError;
 use air_execution_info_collector::InstructionTracker;
 use air_interpreter_cid::CID;
 use air_interpreter_data::CanonCidAggregate;
-use air_interpreter_data::CidStore;
+use air_interpreter_data::CidInfo;
 use air_interpreter_data::CidTracker;
 use air_interpreter_data::GlobalStreamGens;
 use air_interpreter_data::RestrictedStreamGens;
@@ -75,12 +75,8 @@ pub(crate) struct ExecutionCtx<'i> {
     /// Tracks all functions that should be called from services.
     pub(crate) call_requests: CallRequests,
 
-    /// Merged CID-to-value dictionaries
-    pub(crate) value_tracker: CidTracker<JValue>,
-    /// Merged CID-to-tetraplet dictionaries
-    pub(crate) tetraplet_tracker: CidTracker<SecurityTetraplet>,
-    /// Merged CID-to-canon value aggregate dictionaries
-    pub(crate) canon_tracker: CidTracker<CanonCidAggregate>,
+    /// CID-to-something trackers.
+    pub(crate) cid_state: ExecutionCidState,
 }
 
 impl<'i> ExecutionCtx<'i> {
@@ -98,10 +94,7 @@ impl<'i> ExecutionCtx<'i> {
             current_ingredients.restricted_streams,
         );
 
-        let value_tracker = CidTracker::from_cid_stores(prev_ingredients.value_store, current_ingredients.value_store);
-        let tetraplet_tracker =
-            CidTracker::from_cid_stores(prev_ingredients.tetraplet_store, current_ingredients.tetraplet_store);
-        let canon_tracker = CidTracker::from_cid_stores(prev_ingredients.canon_store, current_ingredients.canon_store);
+        let cid_state = ExecutionCidState::from_cid_info(prev_ingredients.cid_info, current_ingredients.cid_info);
 
         Self {
             run_parameters,
@@ -109,9 +102,7 @@ impl<'i> ExecutionCtx<'i> {
             last_call_request_id: prev_ingredients.last_call_request_id,
             call_results,
             streams,
-            value_tracker,
-            tetraplet_tracker,
-            canon_tracker,
+            cid_state,
             ..<_>::default()
         }
     }
@@ -123,6 +114,35 @@ impl<'i> ExecutionCtx<'i> {
     pub(crate) fn next_call_request_id(&mut self) -> u32 {
         self.last_call_request_id += 1;
         self.last_call_request_id
+    }
+}
+
+/// Helper struct for ExecCtx construction.
+#[derive(Debug, Clone)]
+pub(crate) struct ExecCtxIngredients {
+    pub(crate) global_streams: GlobalStreamGens,
+    pub(crate) last_call_request_id: u32,
+    pub(crate) restricted_streams: RestrictedStreamGens,
+    pub(crate) cid_info: CidInfo,
+}
+
+#[derive(Debug, Default, Clone)]
+pub struct ExecutionCidState {
+    pub(crate) value_tracker: CidTracker<JValue>,
+    pub(crate) tetraplet_tracker: CidTracker<SecurityTetraplet>,
+    pub(crate) canon_tracker: CidTracker<CanonCidAggregate>,
+}
+
+impl ExecutionCidState {
+    fn from_cid_info(prev_cid_info: CidInfo, current_cid_info: CidInfo) -> Self {
+        Self {
+            value_tracker: CidTracker::from_cid_stores(prev_cid_info.value_store, current_cid_info.value_store),
+            tetraplet_tracker: CidTracker::from_cid_stores(
+                prev_cid_info.tetraplet_store,
+                current_cid_info.tetraplet_store,
+            ),
+            canon_tracker: CidTracker::from_cid_stores(prev_cid_info.canon_store, current_cid_info.canon_store),
+        }
     }
 
     pub(crate) fn get_value_by_cid(&self, cid: &CID<JValue>) -> Result<Rc<JValue>, UncatchableError> {
@@ -160,15 +180,14 @@ impl<'i> ExecutionCtx<'i> {
     }
 }
 
-/// Helper struct for ExecCtx construction.
-#[derive(Debug, Clone)]
-pub(crate) struct ExecCtxIngredients {
-    pub(crate) global_streams: GlobalStreamGens,
-    pub(crate) last_call_request_id: u32,
-    pub(crate) restricted_streams: RestrictedStreamGens,
-    pub(crate) value_store: CidStore<JValue>,
-    pub(crate) tetraplet_store: CidStore<SecurityTetraplet>,
-    pub(crate) canon_store: CidStore<CanonCidAggregate>,
+impl From<ExecutionCidState> for CidInfo {
+    fn from(value: ExecutionCidState) -> Self {
+        Self {
+            value_store: value.value_tracker.into(),
+            tetraplet_store: value.tetraplet_tracker.into(),
+            canon_store: value.canon_tracker.into(),
+        }
+    }
 }
 
 use serde::Deserialize;

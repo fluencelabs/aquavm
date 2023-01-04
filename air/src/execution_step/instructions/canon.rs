@@ -55,10 +55,10 @@ fn handle_seen_canon(
     exec_ctx: &mut ExecutionCtx<'_>,
     trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<()> {
-    let tetraplet = exec_ctx.get_tetraplet_by_cid(&tetraplet_cid)?;
+    let tetraplet = exec_ctx.cid_state.get_tetraplet_by_cid(&tetraplet_cid)?;
     let values = value_cids
         .iter()
-        .map(|canon_value_cid| exec_ctx.get_canon_value_by_cid(canon_value_cid))
+        .map(|canon_value_cid| exec_ctx.cid_state.get_canon_value_by_cid(canon_value_cid))
         .collect::<Result<Vec<_>, _>>()?;
 
     let canon_stream = CanonStream::new(values, tetraplet);
@@ -134,13 +134,17 @@ fn create_canon_stream_from_name(
         .iter()
         .map(|val| -> Result<_, UncatchableError> {
             let canon_value_aggregate = CanonCidAggregate {
-                value: exec_ctx.value_tracker.record_value(val.result.clone())?,
-                tetraplet: exec_ctx.tetraplet_tracker.record_value(val.tetraplet.clone())?,
+                value: exec_ctx.cid_state.value_tracker.record_value(val.result.clone())?,
+                tetraplet: exec_ctx
+                    .cid_state
+                    .tetraplet_tracker
+                    .record_value(val.tetraplet.clone())?,
             };
-            Ok(exec_ctx.canon_tracker.record_value(canon_value_aggregate)?)
+            Ok(exec_ctx.cid_state.canon_tracker.record_value(canon_value_aggregate)?)
         })
         .collect::<Result<_, _>>()?;
     let tetraplet_cid = exec_ctx
+        .cid_state
         .tetraplet_tracker
         .record_value(canon_stream.tetraplet().clone())
         .map_err(UncatchableError::from)?;
