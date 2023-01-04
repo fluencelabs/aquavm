@@ -4,6 +4,7 @@
 - Canon data is stored with CIDs.  Values, tetraplets and canon elements
   are stored as CIDs resolved with data's `value_store`, `tetraplet_store`
   and `canon_store` fields respectively.
+- Group stores in the data into `cid_info: CidInfo` field.
 
 ## Version 0.5.0
 
