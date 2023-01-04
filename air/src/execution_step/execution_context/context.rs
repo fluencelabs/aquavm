@@ -144,25 +144,19 @@ impl<'i> ExecutionCtx<'i> {
         &self,
         cid: &CID<CanonCidAggregate>,
     ) -> Result<ValueAggregate, UncatchableError> {
-        let canon_aggregate = self.canon_tracker.get(cid);
-        canon_aggregate
-            .map(|agg| {
-                let result = self.get_value_by_cid(&agg.value)?;
-                let tetraplet = self.get_tetraplet_by_cid(&agg.tetraplet)?;
+        let canon_aggregate = self
+            .canon_tracker
+            .get(cid)
+            .ok_or_else(|| UncatchableError::ValueForCidNotFound("canon aggregate", cid.clone().into()))?;
+        let result = self.get_value_by_cid(&canon_aggregate.value)?;
+        let tetraplet = self.get_tetraplet_by_cid(&canon_aggregate.tetraplet)?;
 
-                let fake_trace_pos = TracePos::default();
-                Ok(ValueAggregate {
-                    result,
-                    tetraplet,
-                    trace_pos: fake_trace_pos,
-                })
-            })
-            .unwrap_or_else(|| {
-                Err(UncatchableError::ValueForCidNotFound(
-                    "canon aggregate",
-                    cid.clone().into(),
-                ))
-            })
+        let fake_trace_pos = TracePos::default();
+        Ok(ValueAggregate {
+            result,
+            tetraplet,
+            trace_pos: fake_trace_pos,
+        })
     }
 }
 

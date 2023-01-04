@@ -95,6 +95,8 @@ pub enum UncatchableError {
     #[error("failed to calculate value's CID")]
     CidError(#[from] CidCalculationError),
 
+    /// We consider now that every CID should present in the data;
+    /// and not having any CID is considered a non-catching error.
     #[error("{0} for CID {1:?} not found")]
     ValueForCidNotFound(&'static str, String),
 }

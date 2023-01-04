@@ -61,7 +61,7 @@ fn handle_seen_canon(
         .map(|canon_value_cid| exec_ctx.get_canon_value_by_cid(canon_value_cid))
         .collect::<Result<Vec<_>, _>>()?;
 
-    let canon_stream = CanonStream { values, tetraplet };
+    let canon_stream = CanonStream::new(values, tetraplet);
 
     let canon_stream_with_se = StreamWithSerializedView {
         canon_stream,
@@ -131,7 +131,6 @@ fn create_canon_stream_from_name(
     let canon_stream = CanonStream::from_stream(stream.as_ref(), peer_id);
 
     let value_cids = canon_stream
-        .values
         .iter()
         .map(|val| -> Result<_, UncatchableError> {
             let canon_value_aggregate = CanonCidAggregate {
@@ -143,7 +142,7 @@ fn create_canon_stream_from_name(
         .collect::<Result<_, _>>()?;
     let tetraplet_cid = exec_ctx
         .tetraplet_tracker
-        .record_value(canon_stream.tetraplet.clone())
+        .record_value(canon_stream.tetraplet().clone())
         .map_err(UncatchableError::from)?;
 
     let result = StreamWithSerializedView {
