@@ -35,6 +35,10 @@ pub struct CanonStream {
 }
 
 impl CanonStream {
+    pub(crate) fn new(values: Vec<ValueAggregate>, tetraplet: Rc<SecurityTetraplet>) -> Self {
+        Self { values, tetraplet }
+    }
+
     pub(crate) fn from_stream(stream: &Stream, peer_pk: String) -> Self {
         // it's always possible to iter over all generations of a stream
         let values = stream.iter(Generation::Last).unwrap().cloned().collect::<Vec<_>>();

@@ -15,6 +15,7 @@
  */
 
 use super::*;
+use crate::JValue;
 
 impl ParResult {
     pub fn new(left_size: u32, right_size: u32) -> Self {
@@ -41,13 +42,13 @@ impl CallResult {
         CallResult::RequestSentBy(Sender::PeerIdWithCallId { peer_id, call_id })
     }
 
-    pub fn executed_scalar(cid: Rc<CID>) -> CallResult {
+    pub fn executed_scalar(cid: Rc<CID<JValue>>) -> CallResult {
         let value = ValueRef::Scalar(cid);
 
         CallResult::Executed(value)
     }
 
-    pub fn executed_stream(cid: Rc<CID>, generation: u32) -> CallResult {
+    pub fn executed_stream(cid: Rc<CID<JValue>>, generation: u32) -> CallResult {
         let value = ValueRef::Stream { cid, generation };
 
         CallResult::Executed(value)
@@ -87,10 +88,11 @@ impl ApResult {
 }
 
 impl CanonResult {
-    pub fn new(canonicalized_element: JValue) -> Self {
-        Self {
-            canonicalized_element,
-        }
+    pub fn new(
+        tetraplet: Rc<CID<SecurityTetraplet>>,
+        values: Vec<Rc<CID<CanonCidAggregate>>>,
+    ) -> Self {
+        Self { tetraplet, values }
     }
 }
 

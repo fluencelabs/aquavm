@@ -17,10 +17,12 @@
 use super::GlobalStreamGens;
 use super::RestrictedStreamGens;
 use crate::cid_store::CidStore;
+use crate::CanonCidAggregate;
 use crate::ExecutionTrace;
 use crate::JValue;
 
 use air_utils::measure;
+use polyplets::SecurityTetraplet;
 
 use serde::Deserialize;
 use serde::Serialize;
@@ -57,8 +59,8 @@ pub struct InterpreterData {
     /// Version of interpreter produced this data.
     pub interpreter_version: semver::Version,
 
-    /// Map CID to values
-    pub cid_store: CidStore<JValue>,
+    /// CID-to-somethings mappings.
+    pub cid_info: CidInfo,
 }
 
 impl InterpreterData {
@@ -70,20 +72,19 @@ impl InterpreterData {
             last_call_request_id: 0,
             restricted_streams: RestrictedStreamGens::new(),
             interpreter_version,
-            cid_store: <_>::default(),
+            cid_info: <_>::default(),
         }
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub fn from_execution_result(
         trace: ExecutionTrace,
         streams: GlobalStreamGens,
         restricted_streams: RestrictedStreamGens,
-        cid_store: impl Into<CidStore<JValue>>,
+        cid_info: CidInfo,
         last_call_request_id: u32,
         interpreter_version: semver::Version,
     ) -> Self {
-        let cid_store = cid_store.into();
-
         Self {
             trace,
             global_streams: streams,
@@ -91,7 +92,7 @@ impl InterpreterData {
             last_call_request_id,
             restricted_streams,
             interpreter_version,
-            cid_store,
+            cid_info,
         }
     }
 
@@ -112,6 +113,18 @@ impl InterpreterData {
             "serde_json::from_slice"
         )
     }
+}
+
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
+pub struct CidInfo {
+    /// Map CID to value
+    pub value_store: CidStore<JValue>,
+
+    /// Map CID to a tetraplet
+    pub tetraplet_store: CidStore<SecurityTetraplet>,
+
+    /// Map CID to a canon value
+    pub canon_store: CidStore<CanonCidAggregate>,
 }
 
 #[cfg(test)]

@@ -1,7 +1,7 @@
 [package]
 name = "air-interpreter-data"
 description = "Data format of the AIR interpreter"
-version = "0.5.0"
+version = "0.6.0"
 authors = ["Fluence Labs"]
 edition = "2018"
 license = "Apache-2.0"
@@ -18,7 +18,8 @@ air-utils = { path = "../utils" }
 air-parser = { path = "../air-parser" }
 # TODO version?
 air-interpreter-interface = { path = "../interpreter-interface" }
-air-interpreter-cid = { version = "0.1.0", path = "../interpreter-cid" }
+air-interpreter-cid = { version = "0.2.0", path = "../interpreter-cid" }
+polyplets = { path = "../polyplets" }
 
 serde = {version = "1.0.152", features = ["derive", "rc"]}
 serde_json = "1.0.91"

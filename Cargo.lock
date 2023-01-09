@@ -13,7 +13,7 @@ dependencies = [
 
 [[package]]
 name = "air"
-version = "0.34.0"
+version = "0.35.0"
 dependencies = [
  "air-execution-info-collector",
  "air-interpreter-cid",
@@ -85,7 +85,7 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter"
-version = "0.34.0"
+version = "0.35.0"
 dependencies = [
  "air",
  "air-interpreter-interface",
@@ -101,7 +101,7 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter-cid"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "cid",
  "multihash",
@@ -111,13 +111,14 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter-data"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "air-interpreter-cid",
  "air-interpreter-interface",
  "air-parser",
  "air-utils",
  "once_cell",
+ "polyplets",
  "semver 1.0.16",
  "serde",
  "serde_json",
@@ -203,6 +204,7 @@ dependencies = [
  "object-pool",
  "once_cell",
  "semver 1.0.16",
+ "serde",
  "serde_json",
 ]
 
@@ -249,6 +251,7 @@ dependencies = [
  "air-parser",
  "bimap",
  "log",
+ "polyplets",
  "serde_json",
  "thiserror",
  "tracing",

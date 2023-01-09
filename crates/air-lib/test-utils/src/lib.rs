@@ -36,6 +36,9 @@ mod native_test_runner;
 mod wasm_test_runner;
 
 pub use air::interpreter_data::*;
+use air_interpreter_data::CanonCidAggregate;
+use air_interpreter_data::CidStore;
+use air_interpreter_data::CidTracker;
 pub use avm_interface::raw_outcome::*;
 pub use avm_server::*;
 
@@ -90,12 +93,37 @@ pub fn data_from_result(result: &RawAVMOutcome) -> InterpreterData {
     serde_json::from_slice(&result.data).expect("default serializer shouldn't fail")
 }
 
-pub fn raw_data_from_trace(trace: impl Into<ExecutionTrace>, cid_tracker: CidTracker) -> Vec<u8> {
+pub fn raw_data_from_trace(trace: impl Into<ExecutionTrace>, value_tracker: CidTracker) -> Vec<u8> {
     let data = InterpreterData::from_execution_result(
         trace.into(),
         <_>::default(),
         <_>::default(),
-        cid_tracker,
+        CidInfo {
+            value_store: value_tracker.into(),
+            tetraplet_store: CidStore::<_>::default(),
+            canon_store: CidStore::<_>::default(),
+        },
+        0,
+        semver::Version::new(1, 1, 1),
+    );
+    serde_json::to_vec(&data).expect("default serializer shouldn't fail")
+}
+
+pub fn raw_data_from_trace_with_canon(
+    trace: impl Into<ExecutionTrace>,
+    value_tracker: CidTracker,
+    tetraplet_tracker: CidTracker<SecurityTetraplet>,
+    canon_tracker: CidTracker<CanonCidAggregate>,
+) -> Vec<u8> {
+    let data = InterpreterData::from_execution_result(
+        trace.into(),
+        <_>::default(),
+        <_>::default(),
+        CidInfo {
+            value_store: value_tracker.into(),
+            tetraplet_store: tetraplet_tracker.into(),
+            canon_store: canon_tracker.into(),
+        },
         0,
         semver::Version::new(1, 1, 1),
     );
