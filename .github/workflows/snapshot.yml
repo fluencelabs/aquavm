@@ -96,6 +96,12 @@ jobs:
         with:
           dependencies: ${{ inputs.cargo-dependencies }}
 
+      - name: Debug
+        if: always()
+        run: |
+          cat avm/server/Cargo.toml
+          cat air/Cargo.toml
+
       - name: Download air-interpreter-wasm binary
         uses: actions/download-artifact@v3
         with:
