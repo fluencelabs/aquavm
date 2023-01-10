@@ -130,12 +130,10 @@ fn get_runner(
 #[cfg(not(feature = "wasm"))]
 fn get_runner(
     _native: bool,
-    current_peer_id: impl Into<String>,
     _air_interpreter_wasm_path: &Path,
     _max_heap_size: Option<u64>,
 ) -> anyhow::Result<Box<dyn AirRunner>> {
-    self::native::create_native_avm_runner(current_peer_id)
-        .context("Failed to instantiate a native AVM")
+    self::native::create_native_avm_runner().context("Failed to instantiate a native AVM")
 }
 
 // TODO This is a copy of function from air_interpreter/marine.rs.  It should be moved to the marine_rs_sdk.

@@ -1,6 +1,6 @@
 [package]
 name = "air-trace"
-version = "0.2.1"
+version = "0.2.2"
 edition = "2021"
 description = "AIR performance tracing tool"
 authors = ["Fluence Labs"]
