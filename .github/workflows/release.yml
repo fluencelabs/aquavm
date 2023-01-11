@@ -1,0 +1,277 @@
+name: "release-please"
+
+on:
+  push:
+    branches:
+      - "master"
+
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+
+    outputs:
+      releases-created: ${{ steps.release.outputs.releases_created }}
+
+      air-release-created: ${{ steps.release.outputs['air--release_created'] }}
+      air-version: ${{ steps.release.outputs['air--version'] }}
+      air-tag-name: ${{ steps.release.outputs['air--tag_name'] }}
+
+      air-interpreter-release-created: ${{ steps.release.outputs['air-interpreter--release_created'] }}
+      air-interpreter-tag-name: ${{ steps.release.outputs['air-interpreter--tag_name'] }}
+
+      air-beautify-wasm-release-created: ${{ steps.release.outputs['tools/wasm/air-beautify-wasm--release_created'] }}
+      air-beautify-wasm-tag-name: ${{ steps.release.outputs['tools/wasm/air-beautify-wasm--tag_name'] }}
+
+    steps:
+      - name: Run release-please
+        id: release
+        uses: google-github-actions/release-please-action@v3
+        with:
+          token: ${{ secrets.FLUENCEBOT_RELEASE_PLEASE_PAT }}
+          command: manifest
+          config-file: .github/release-please/config.json
+          manifest-file: .github/release-please/manifest.json
+
+      - name: Show output from release-please
+        if: steps.release.outputs.releases_created
+        env:
+          RELEASE_PLEASE_OUTPUT: ${{ toJSON(steps.release.outputs) }}
+        run: echo "${RELEASE_PLEASE_OUTPUT}" | jq
+
+
+  crates:
+    if: needs.release-please.outputs.releases-created
+    runs-on: builder
+    needs:
+      - release-please
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Import secrets
+        uses: hashicorp/vault-action@v2.4.3
+        with:
+          url: https://vault.fluence.dev
+          path: jwt/github
+          role: ci
+          method: jwt
+          jwtGithubAudience: "https://github.com/fluencelabs"
+          jwtTtl: 300
+          exportToken: false
+          secrets: |
+            kv/crates.io/fluencebot token | CARGO_REGISTRY_TOKEN
+
+      - name: Setup Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Install cargo-workspaces
+        uses: baptiste0928/cargo-install@v1.3.0
+        with:
+          crate: cargo-workspaces
+
+      - name: Publish to crates.io
+        run: |
+          cargo ws publish \
+            --no-git-commit \
+            --allow-dirty \
+            --from-git \
+            --skip-published \
+            --yes
+
+  air-interpreter:
+    runs-on: builder
+    needs:
+      - release-please
+
+    permissions:
+      contents: write
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Install marine
+        uses: baptiste0928/cargo-install@v1.3.0
+        with:
+          crate: marine
+
+      - name: Build air_interpreter_server.wasm
+        run: marine build --release -p air-interpreter --features marine
+        working-directory: air-interpreter
+
+      - name: Upload air-interpreter-wasm artifact to GitHub checks
+        uses: actions/upload-artifact@v3
+        with:
+          name: air-interpreter-wasm
+          path: target/wasm32-wasi/release/air_interpreter_server.wasm
+
+      - name: Add air-interpreter-wasm artifact to GitHub release
+        if: needs.release-please.outputs.air-interpreter-release-created
+        uses: softprops/action-gh-release@v1
+        with:
+          files: target/wasm32-wasi/release/air_interpreter_server.wasm
+          tag_name: ${{ needs.release-please.outputs.air-interpreter-tag-name }}
+
+  air:
+    if: needs.release-please.outputs.air-release-created
+    runs-on: builder
+    needs:
+      - release-please
+      - air-interpreter
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Install wasm-pack
+        uses: jetli/wasm-pack-action@v0.4.0
+
+      - name: Download air-interpreter-wasm artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: air-interpreter-wasm
+          path: avm/client/dist/
+
+      - run: mv air_interpreter_server.wasm avm.wasm
+        working-directory: avm/client/dist
+
+      - name: Import secrets
+        uses: hashicorp/vault-action@v2.4.3
+        with:
+          url: https://vault.fluence.dev
+          path: jwt/github
+          role: ci
+          method: jwt
+          jwtGithubAudience: "https://github.com/fluencelabs"
+          jwtTtl: 300
+          exportToken: false
+          secrets: |
+            kv/npmjs/fluencebot token | NODE_AUTH_TOKEN
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16"
+          cache-dependency-path: avm/client/package-lock.json
+          cache: "npm"
+
+      - run: npm i
+        working-directory: avm/client
+
+      - run: npm run build
+        working-directory: avm/client
+
+      - name: Publish to npm registry
+        run: npm publish --access public
+        working-directory: avm/client
+
+  air-interpreter-wasm:
+    if: needs.release-please.outputs.air-release-created
+    runs-on: builder
+    needs:
+      - release-please
+      - air-interpreter
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Download air-interpreter-wasm artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: air-interpreter-wasm
+          path: crates/interpreter-wasm/
+
+      - name: Import secrets
+        uses: hashicorp/vault-action@v2.4.3
+        with:
+          url: https://vault.fluence.dev
+          path: jwt/github
+          role: ci
+          method: jwt
+          jwtGithubAudience: "https://github.com/fluencelabs"
+          jwtTtl: 300
+          exportToken: false
+          secrets: |
+            kv/crates.io/fluencebot token | CARGO_REGISTRY_TOKEN
+
+      - name: Set air-interpreter-wasm version
+        working-directory: crates/interpreter-wasm
+        run: |
+          sed -i 's/version = ".*"/version = "${{ needs.release-please.outputs.air-version }}"/g' Cargo.toml
+
+      - name: Publish to crates.io
+        run: cargo publish --allow-dirty
+        working-directory: crates/interpreter-wasm
+
+  air-beautify-wasm:
+    if: needs.release-please.outputs.air-beautify-wasm-release-created
+    runs-on: builder
+    needs:
+      - release-please
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Install wasm-pack
+        uses: jetli/wasm-pack-action@v0.4.0
+
+      - name: Build air_interpreter_server.wasm for node
+        working-directory: tools/wasm/air-beautify-wasm
+        run: wasm-pack build --release -m force
+
+      - name: Import secrets
+        uses: hashicorp/vault-action@v2.4.3
+        with:
+          url: https://vault.fluence.dev
+          path: jwt/github
+          role: ci
+          method: jwt
+          jwtGithubAudience: "https://github.com/fluencelabs"
+          jwtTtl: 300
+          exportToken: false
+          secrets: |
+            kv/npmjs/fluencebot token | NODE_AUTH_TOKEN
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16"
+
+      - name: Publish to npm registry
+        run: npm publish --access public
+        working-directory: tools/wasm/air-beautify-wasm/pkg
