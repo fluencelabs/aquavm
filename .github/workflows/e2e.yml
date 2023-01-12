@@ -40,6 +40,7 @@ jobs:
         ]
 
   rust-peer-tests:
+    name: "rust-peer"
     needs:
       - aquavm
 
