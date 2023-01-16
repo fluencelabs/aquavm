@@ -39,6 +39,27 @@ jobs:
           }
         ]
 
+  rust-peer-tests:
+    name: "rust-peer"
+    needs:
+      - aquavm
+
+    uses: fluencelabs/rust-peer/.github/workflows/tests.yml@master
+    with:
+      cargo-dependencies: |
+        [
+          {
+            "package": "avm-server",
+            "version": "=${{ needs.aquavm.outputs.cargo-version }}",
+            "registry": "fluence"
+          },
+          {
+            "package": "air-interpreter-wasm",
+            "version": "=${{ needs.aquavm.outputs.cargo-version }}",
+            "registry": "fluence"
+          }
+        ]
+
   fluence-js-tests:
     name: "fluence-js"
     needs:
