@@ -1,0 +1,23 @@
+{
+  "d77ebe8481884bc3b2778c8083f1bf459e548e929edd87041beb14f6b868d35f": {
+    "platform": "macOS-13.1-arm64-arm-64bit",
+    "stats": {
+      "big_values_data": {
+        "execute": "0:00:00.000247",
+        "from_success_result": "0:00:00.008870",
+        "make_exec_ctx": "0:00:00.002730",
+        "parse": "0:00:00.004460",
+        "populate_outcome_from_contexts": "0:00:00.006520",
+        "prepare": "0:00:00.017600"
+      },
+      "long_data": {
+        "execute": "0:00:00.000254",
+        "from_success_result": "0:00:00.008870",
+        "make_exec_ctx": "0:00:00.002710",
+        "parse": "0:00:00.004450",
+        "populate_outcome_from_contexts": "0:00:00.006520",
+        "prepare": "0:00:00.018600"
+      }
+    }
+  }
+}
