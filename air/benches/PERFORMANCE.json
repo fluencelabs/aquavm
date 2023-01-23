@@ -1,25 +1,33 @@
 {
   "d77ebe8481884bc3b2778c8083f1bf459e548e929edd87041beb14f6b868d35f": {
-    "datetime": "2023-01-20 16:03:38.477764+00:00",
+    "datetime": "2023-01-23 16:58:50.186929+00:00",
     "platform": "macOS-13.1-arm64-arm-64bit",
     "stats": {
       "big_values_data": {
-        "execute": "0:00:00.000253",
-        "from_success_result": "0:00:00.104000",
-        "make_exec_ctx": "0:00:00.002860",
-        "parse": "0:00:00.003900",
-        "populate_outcome_from_contexts": "0:00:00.102000",
+        "execute": "0:00:00.000247",
+        "from_success_result": "0:00:00.109000",
+        "make_exec_ctx": "0:00:00.002690",
+        "parse": "0:00:00.003650",
+        "populate_outcome_from_contexts": "0:00:00.106000",
         "prepare": "0:00:01.110000",
-        "serde_json::from_slice": "0:00:01.100000"
+        "serde_json::from_slice": "0:00:01.090000"
       },
       "long_data": {
-        "execute": "0:00:00.000247",
-        "from_success_result": "0:00:00.029500",
-        "make_exec_ctx": "0:00:00.003330",
-        "parse": "0:00:00.003670",
-        "populate_outcome_from_contexts": "0:00:00.027100",
-        "prepare": "0:00:00.322000",
-        "serde_json::from_slice": "0:00:00.305000"
+        "execute": "0:00:00.000249",
+        "from_success_result": "0:00:00.027700",
+        "make_exec_ctx": "0:00:00.003310",
+        "parse": "0:00:00.003640",
+        "populate_outcome_from_contexts": "0:00:00.025200",
+        "prepare": "0:00:00.291000",
+        "serde_json::from_slice": "0:00:00.274000"
+      },
+      "parser_10000_100": {
+        "execute": "0:00:00.003190",
+        "from_success_result": "0:00:00.009650",
+        "make_exec_ctx": "0:00:00.002690",
+        "parse": "0:00:01.280000",
+        "populate_outcome_from_contexts": "0:00:00.007300",
+        "prepare": "0:00:01.290000"
       }
     }
   }
