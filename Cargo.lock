@@ -560,9 +560,9 @@ dependencies = [
 
 [[package]]
 name = "cid"
-version = "0.10.0"
+version = "0.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "751fbf5712cada59d2be51b7df333c7b57fabcaca0f3b7cc5d7e1e57e44dcc44"
+checksum = "fd94671561e36e4e7de75f753f577edafb0e7c05d6e4547229fdf7938fbcd2c3"
 dependencies = [
  "core2",
  "multibase",
