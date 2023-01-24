@@ -8,6 +8,22 @@
   "schedule": "every weekend",
   "packageRules": [
     {
+      "matchPackagePatterns": ["^@wasmer", "^wasmer", "^wasm-bindgen"],
+      "enabled": false
+    },
+    {
+      "matchManagers": ["cargo", "npm"],
+      "matchPackagePatterns": [
+        "@fluencelabs/.*",
+        "fluence-.*",
+        "marine-.*",
+        "marine"
+      ],
+      "semanticCommitType": "fix",
+      "semanticCommitScope": "deps",
+      "schedule": "at any time"
+    },
+    {
       "matchDepTypes": ["devDependencies"],
       "prPriority": -1
     },
@@ -16,14 +32,8 @@
       "prConcurrentLimit": 1
     },
     {
-      "matchManagers": [ "github-actions" ],
-      "automerge": true,
-      "automergeType": "branch",
+      "matchManagers": ["github-actions"],
       "prPriority": 1
-    },
-    {
-      "matchPackagePatterns": ["^@wasmer", "^wasmer", "^wasm-bindgen"],
-      "enabled": false
     }
   ]
 }

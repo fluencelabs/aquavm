@@ -1,4 +1,4 @@
-name: "aquavm"
+name: "Run tests"
 
 on:
   pull_request:
@@ -11,8 +11,9 @@ env:
   RUST_TEST_THREADS: 1
 
 jobs:
-  aquavm:
-    name: "Run tests"
+  tests:
+    name: "aquavm / cargo test"
+    timeout-minutes: 60
     runs-on: builder
 
     steps:
