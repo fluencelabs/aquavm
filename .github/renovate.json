@@ -12,8 +12,9 @@
       "enabled": false
     },
     {
-      "matchManagers": ["cargo"],
+      "matchManagers": ["cargo", "npm"],
       "matchPackagePatterns": [
+        "@fluencelabs/.*",
         "fluence-.*",
         "marine-.*",
         "marine"
