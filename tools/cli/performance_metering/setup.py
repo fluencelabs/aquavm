@@ -19,9 +19,8 @@ from setuptools import setup
 setup(name='aquavm_performance_metering',
       version='0.1',
       description='An AquaVM Performance metering tool',
-      author='Fluence Labs',
-      author_email='devs@fluencelabs.one',
-      license='Apache',
+      author='Fluence Labs Limited',
+      license='Apache-2.0',
       packages=['performance_metering'],
       zip_safe=True,
       entry_points={
