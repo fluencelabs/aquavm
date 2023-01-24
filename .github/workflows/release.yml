@@ -288,7 +288,7 @@ jobs:
       - crates
       - air
       - air-interpreter-wasm
-      - air-intepreter
+      - air-interpreter
       - air-beautify-wasm
 
     permissions:
