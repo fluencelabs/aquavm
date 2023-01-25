@@ -42,39 +42,42 @@ class Bench:
         self.air_script_path = discover_file(bench_path, "script.air")
         self.native = native
 
-    def run(self):
+    def run(self, repeat):
         """Run the bench, storing and parsing its output."""
         logger.info("%s", self.get_name())
-        return self._execute()
+        return self._execute(repeat)
 
-    def _execute(self) -> str:
-        proc = subprocess.run(
-            [
-                "cargo", "run",
-                "--quiet",
-                "--release",
-                "--package", "air-trace",
-                "--",
-                "run",
-                "--json",
-                "--repeat", "1",
-            ] + (
-                ["--native"] if self.native else []
-            ) + [
-                "--plain",
-                "--data", self.cur_data_path,
-                "--prev-data", self.prev_data_path,
-                "--script", self.air_script_path,
-            ] + [
-                arg
-                for (param, val) in self.params.items()
-                for arg in ('--' + param, val)
-            ],
-            check=True,
-            stderr=subprocess.PIPE,
-        )
-        lines = proc.stderr.decode("utf-8").split('\n')
-        return list(map(json.loads, filter(lambda x: x, lines)))
+    def _execute(self, repeat) -> str:
+        all_output = []
+        for _ in range(repeat):
+            proc = subprocess.run(
+                [
+                    "cargo", "run",
+                    "--quiet",
+                    "--release",
+                    "--package", "air-trace",
+                    "--",
+                    "run",
+                    "--json",
+                    "--repeat", "1",
+                ] + (
+                    ["--native"] if self.native else []
+                ) + [
+                    "--plain",
+                    "--data", self.cur_data_path,
+                    "--prev-data", self.prev_data_path,
+                    "--script", self.air_script_path,
+                ] + [
+                    arg
+                    for (param, val) in self.params.items()
+                    for arg in ('--' + param, val)
+                ],
+                check=True,
+                stderr=subprocess.PIPE,
+            )
+            lines = proc.stderr.decode("utf-8").split('\n')
+            all_output.extend(lines)
+        return list(map(json.loads, filter(lambda x: x, all_output)))
 
     def get_name(self):
         """Return the bench name."""

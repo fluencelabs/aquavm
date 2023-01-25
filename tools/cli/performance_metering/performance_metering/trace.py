@@ -45,7 +45,7 @@ def parse_if_interesting(raw_rec: dict) -> Optional[TraceRecord]:
     return None
 
 
-def combine_traces(traces: list[TraceRecord]):
+def combine_traces(traces: list[TraceRecord], repeat: int):
     """Calculate cumulutive time for each span."""
     from collections import defaultdict
     combined = defaultdict(datetime.timedelta)
@@ -54,7 +54,7 @@ def combine_traces(traces: list[TraceRecord]):
         combined[trace.span] += trace.execution_time
 
     return {
-        span: str(time) for (span, time) in combined.items()
+        span: str(time / repeat) for (span, time) in combined.items()
     }
 
 

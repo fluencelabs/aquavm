@@ -1,33 +1,33 @@
 {
   "d77ebe8481884bc3b2778c8083f1bf459e548e929edd87041beb14f6b868d35f": {
-    "datetime": "2023-01-23 16:58:50.186929+00:00",
+    "datetime": "2023-01-25 09:15:29.373827+00:00",
     "platform": "macOS-13.1-arm64-arm-64bit",
     "stats": {
       "big_values_data": {
-        "execute": "0:00:00.000247",
-        "from_success_result": "0:00:00.109000",
-        "make_exec_ctx": "0:00:00.002690",
-        "parse": "0:00:00.003650",
-        "populate_outcome_from_contexts": "0:00:00.106000",
-        "prepare": "0:00:01.110000",
-        "serde_json::from_slice": "0:00:01.090000"
+        "execute": "0:00:00.000248",
+        "from_success_result": "0:00:00.111600",
+        "make_exec_ctx": "0:00:00.002698",
+        "parse": "0:00:00.003686",
+        "populate_outcome_from_contexts": "0:00:00.109100",
+        "prepare": "0:00:01.132000",
+        "serde_json::from_slice": "0:00:01.114000"
       },
       "long_data": {
         "execute": "0:00:00.000249",
-        "from_success_result": "0:00:00.027700",
-        "make_exec_ctx": "0:00:00.003310",
-        "parse": "0:00:00.003640",
-        "populate_outcome_from_contexts": "0:00:00.025200",
-        "prepare": "0:00:00.291000",
-        "serde_json::from_slice": "0:00:00.274000"
+        "from_success_result": "0:00:00.029770",
+        "make_exec_ctx": "0:00:00.003353",
+        "parse": "0:00:00.003703",
+        "populate_outcome_from_contexts": "0:00:00.027320",
+        "prepare": "0:00:00.321200",
+        "serde_json::from_slice": "0:00:00.303800"
       },
       "parser_10000_100": {
-        "execute": "0:00:00.003190",
-        "from_success_result": "0:00:00.009650",
-        "make_exec_ctx": "0:00:00.002690",
-        "parse": "0:00:01.280000",
-        "populate_outcome_from_contexts": "0:00:00.007300",
-        "prepare": "0:00:01.290000"
+        "execute": "0:00:00.003269",
+        "from_success_result": "0:00:00.009863",
+        "make_exec_ctx": "0:00:00.002779",
+        "parse": "0:00:01.199000",
+        "populate_outcome_from_contexts": "0:00:00.007458",
+        "prepare": "0:00:01.214000"
       }
     }
   }
