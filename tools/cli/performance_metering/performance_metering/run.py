@@ -13,7 +13,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
-"""Running benches module."""
+"""Running benches."""
+
+import logging
 import os
 import subprocess
 import typing
@@ -24,16 +26,21 @@ from .trace import combine_traces, parse_if_interesting
 
 DEFAULT_TEST_DIR = "benches/performance_metering"
 
+logger = logging.getLogger(__name__)
 
-def prepare():
-    """Prepare the environment: build the tools required."""
-    subprocess.check_call([
-        "marine", "build", "--release", "--features", "marine",
-        "--package", "air-interpreter",
-    ])
-    subprocess.check_call([
-        "cargo", "build", "--release", "--package", "air-trace",
-    ])
+
+def _prepare(args):
+    if args.prepare_binaries:
+        logger.info("Build air-interpreter...")
+        """Prepare the environment: build the tools required."""
+        subprocess.check_call([
+            "marine", "build", "--release", "--features", "marine",
+            "--package", "air-interpreter",
+        ])
+        logger.info("Build air-trace...")
+        subprocess.check_call([
+            "cargo", "build", "--release", "--package", "air-trace",
+        ])
 
 
 def discover_tests(bench_dir: typing.Optional[str]) -> list[Bench]:
@@ -48,7 +55,7 @@ def discover_tests(bench_dir: typing.Optional[str]) -> list[Bench]:
 
 def run(args):
     """Run test suite, saving results to database."""
-    prepare()
+    _prepare(args)
 
     suite = discover_tests(args.bench_dir)
     with Db(args.path, args.host_id) as db:

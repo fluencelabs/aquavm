@@ -24,6 +24,8 @@ from . import run
 
 def main():
     """Run main function."""
+    logging.basicConfig(level=logging.INFO)
+
     parser = argparse.ArgumentParser()
     subp = parser.add_subparsers(dest='command')
 
@@ -32,6 +34,11 @@ def main():
     run_subparser.add_argument("--host-id", required=False, type=str)
     run_subparser.add_argument("--bench-dir", required=False, type=str)
     run_subparser.add_argument("--repeat", required=False, type=int, default=1)
+    run_subparser.add_argument(
+        "--no-prepare-binaries",
+        action='store_false',
+        dest='prepare_binaries',
+    )
 
     args = parser.parse_args()
 
@@ -42,5 +49,4 @@ def main():
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
     main()
