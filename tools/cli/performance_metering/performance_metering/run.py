@@ -22,7 +22,7 @@ from .bench import Bench
 from .db import Db
 from .trace import combine_traces, parse_if_interesting
 
-DEFAULT_TEST_DIR = "tools/cli/performance_metering/benches"
+DEFAULT_TEST_DIR = "benches/performance_metering"
 
 
 def prepare():

@@ -24,7 +24,7 @@ from typing import Optional
 
 from performance_metering.helpers import get_host_id
 
-DEFAULT_PATH = "air/benches/PERFORMANCE.json"
+DEFAULT_PATH = "benches/PERFORMANCE.json"
 
 
 class Db:

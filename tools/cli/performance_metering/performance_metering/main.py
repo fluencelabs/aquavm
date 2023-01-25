@@ -19,7 +19,6 @@
 import argparse
 import logging
 
-from . import db
 from . import run
 
 
