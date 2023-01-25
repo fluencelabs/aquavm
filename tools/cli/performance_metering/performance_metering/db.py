@@ -22,9 +22,10 @@ import os.path
 import platform
 from typing import Optional
 
-from performance_metering.helpers import get_host_id
+from performance_metering.helpers import get_host_id, get_aquavm_version
 
 DEFAULT_PATH = "benches/PERFORMANCE.json"
+AQUAVM_TOML_PATH = "air/Cargo.toml"
 
 
 class Db:
@@ -59,6 +60,9 @@ class Db:
         self.data[self.host_id]["platform"] = platform.platform()
         self.data[self.host_id]["datetime"] = str(
             datetime.datetime.now(datetime.timezone.utc)
+        )
+        self.data[self.host_id]["version"] = get_aquavm_version(
+            AQUAVM_TOML_PATH
         )
 
     def save(self):

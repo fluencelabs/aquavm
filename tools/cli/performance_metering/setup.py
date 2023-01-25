@@ -23,6 +23,10 @@ setup(name='aquavm_performance_metering',
       license='Apache-2.0',
       packages=['performance_metering'],
       zip_safe=True,
+      install_requires=[
+          # python 3.11 use standard tomllib, but it is not yet available everywhere.
+          'toml',
+      ],
       entry_points={
           'console_scripts': [
               'aquavm_performance_metering=performance_metering.main:main',

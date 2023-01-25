@@ -23,3 +23,11 @@ def get_host_id() -> str:
 
     hostname = socket.gethostname().encode('utf-8')
     return hashlib.sha256(hostname).hexdigest()
+
+
+def get_aquavm_version(path: str) -> str:
+    """Get `version` field from a TOML file."""
+    import toml
+    with open(path, 'r') as inp:
+        data = toml.load(inp)
+    return data['package']['version']
