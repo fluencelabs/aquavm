@@ -40,7 +40,7 @@ class _Params:
                 comment = data.pop('comment')
                 return _Params(comment, data)
         except IOError:
-            return {}
+            return _Params(None, {})
 
 
 class Bench:
