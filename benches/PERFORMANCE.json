@@ -4,66 +4,86 @@
       "big_values_data": {
         "comment": "Loading a trace with huge values",
         "stats": {
-          "execute": "255.00µs",
-          "from_success_result": "107.98ms",
-          "make_exec_ctx": "2.78ms",
-          "parse": "3.79ms",
-          "populate_outcome_from_contexts": "105.46ms",
-          "prepare": "1.07s",
-          "serde_json::from_slice": "1.05s"
+          "execute": "251.00µs",
+          "from_success_result": "112.00ms",
+          "make_exec_ctx": "2.71ms",
+          "parse": "3.71ms",
+          "populate_outcome_from_contexts": "109.40ms",
+          "prepare": "1.12s",
+          "serde_json::from_slice": "1.10s",
+          "serde_json::to_vec(call_results)": "183.00µs",
+          "serde_json::to_vec(data)": "103.81ms"
         }
       },
       "dashboard": {
         "comment": "big dashboard test",
         "stats": {
-          "execute": "17.51ms",
-          "from_success_result": "28.29ms",
-          "make_exec_ctx": "3.15ms",
-          "parse": "12.50ms",
-          "populate_outcome_from_contexts": "25.70ms",
-          "prepare": "53.03ms",
-          "serde_json::from_slice": "27.16ms",
-          "serde_json::to_string(tetraplets)": "797.00µs"
+          "execute": "209.85ms",
+          "from_success_result": "27.05ms",
+          "make_exec_ctx": "3.19ms",
+          "new": "53.62ms",
+          "parse": "12.36ms",
+          "populate_outcome_from_contexts": "25.60ms",
+          "prepare": "53.34ms",
+          "prepare_request_params": "2.75ms",
+          "resolve_ast_scalar": "39.14ms",
+          "resolve_ast_variable": "26.20ms",
+          "resolve_variable": "8.28ms",
+          "serde_json::from_slice": "27.79ms",
+          "serde_json::to_string(tetraplets)": "804.00µs",
+          "serde_json::to_vec(call_results)": "362.00µs",
+          "serde_json::to_vec(data)": "21.96ms"
         }
       },
       "long_data": {
         "comment": "Long data trace",
         "stats": {
-          "execute": "252.00µs",
-          "from_success_result": "28.44ms",
-          "make_exec_ctx": "3.40ms",
-          "parse": "3.75ms",
-          "populate_outcome_from_contexts": "26.01ms",
-          "prepare": "302.70ms",
-          "serde_json::from_slice": "284.80ms"
+          "execute": "254.00µs",
+          "from_success_result": "29.62ms",
+          "make_exec_ctx": "3.44ms",
+          "parse": "3.78ms",
+          "populate_outcome_from_contexts": "27.17ms",
+          "prepare": "310.60ms",
+          "serde_json::from_slice": "292.80ms",
+          "serde_json::to_vec(call_results)": "188.00µs",
+          "serde_json::to_vec(data)": "21.86ms"
         }
       },
       "network_explore": {
         "comment": "network_explore-inspired script",
         "stats": {
-          "execute": "17.27ms",
-          "from_success_result": "12.86ms",
-          "make_exec_ctx": "4.12ms",
-          "parse": "13.28ms",
-          "populate_outcome_from_contexts": "10.34ms",
-          "prepare": "39.19ms",
-          "serde_json::from_slice": "11.83ms"
+          "execute": "48.87ms",
+          "from_success_result": "10.68ms",
+          "make_exec_ctx": "4.13ms",
+          "new": "6.20ms",
+          "parse": "13.30ms",
+          "populate_outcome_from_contexts": "9.16ms",
+          "prepare": "39.22ms",
+          "resolve_ast_scalar": "3.59ms",
+          "resolve_ast_variable": "2.79ms",
+          "resolve_variable": "737.00µs",
+          "serde_json::from_slice": "11.92ms",
+          "serde_json::to_vec(call_results)": "181.00µs",
+          "serde_json::to_vec(data)": "4.76ms"
         }
       },
       "parser_10000_100": {
         "comment": "Running very long AIR script with lot of variables and assignments",
         "stats": {
-          "execute": "3.29ms",
-          "from_success_result": "10.01ms",
-          "make_exec_ctx": "2.76ms",
-          "parse": "1.33s",
-          "populate_outcome_from_contexts": "7.48ms",
-          "prepare": "1.35s"
+          "execute": "13.02ms",
+          "from_success_result": "7.47ms",
+          "make_exec_ctx": "2.80ms",
+          "new": "1.30ms",
+          "parse": "1.31s",
+          "populate_outcome_from_contexts": "6.16ms",
+          "prepare": "1.32s",
+          "serde_json::to_vec(call_results)": "178.00µs",
+          "serde_json::to_vec(data)": "2.84ms"
         }
       }
     },
     "comment": "Running very long AIR script with lot of variables and assignments",
-    "datetime": "2023-01-26 18:46:49.177537+00:00",
+    "datetime": "2023-01-26 19:39:45.883975+00:00",
     "platform": "macOS-13.1-arm64-arm-64bit",
     "version": "0.35.0"
   }

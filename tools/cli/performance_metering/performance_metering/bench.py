@@ -63,12 +63,12 @@ class Bench:
         self.air_script_path = discover_file(bench_path, "script.air")
         self.native = native
 
-    def run(self, repeat):
+    def run(self, repeat, tracing_params):
         """Run the bench, storing and parsing its output."""
         logger.info("Executing %s...", self.get_name())
-        return self._execute(repeat)
+        return self._execute(repeat, tracing_params)
 
-    def _execute(self, repeat) -> str:
+    def _execute(self, repeat, tracing_params) -> str:
         all_output = []
         for _ in range(repeat):
             proc = subprocess.run(
@@ -84,6 +84,7 @@ class Bench:
                 ] + (
                     ["--native"] if self.native else []
                 ) + [
+                    "--tracing-params", tracing_params,
                     "--plain",
                     "--data", self.cur_data_path,
                     "--prev-data", self.prev_data_path,

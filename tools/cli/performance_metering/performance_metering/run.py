@@ -60,7 +60,7 @@ def run(args):
     suite = discover_tests(args.bench_dir)
     with Db(args.path, args.host_id) as db:
         for bench in suite:
-            raw_stats = bench.run(args.repeat)
+            raw_stats = bench.run(args.repeat, args.tracing_params)
             interesting_traces = [
                 trace
                 for trace in map(parse_if_interesting, raw_stats)
