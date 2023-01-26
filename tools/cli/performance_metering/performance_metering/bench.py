@@ -65,7 +65,7 @@ class Bench:
 
     def run(self, repeat):
         """Run the bench, storing and parsing its output."""
-        logger.info("%s", self.get_name())
+        logger.info("Executing %s...", self.get_name())
         return self._execute(repeat)
 
     def _execute(self, repeat) -> str:

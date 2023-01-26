@@ -55,8 +55,12 @@ class Db:
     def record(self, bench, stats):
         """Record the bench stats."""
         if self.host_id not in self.data:
-            self.data[self.host_id] = {"stats": {}}
-        self.data[self.host_id]["stats"][bench.get_name()] = stats
+            self.data[self.host_id] = {"benches": {}}
+        bench_name = bench.get_name()
+
+        self.data[self.host_id]["benches"][bench_name] = {
+            "stats": stats,
+        }
         self.data[self.host_id]["platform"] = platform.platform()
         self.data[self.host_id]["datetime"] = str(
             datetime.datetime.now(datetime.timezone.utc)
@@ -64,9 +68,10 @@ class Db:
         self.data[self.host_id]["version"] = get_aquavm_version(
             AQUAVM_TOML_PATH
         )
+
         comment = bench.get_comment()
         if comment is not None:
-            self.data[self.host_id]["comment"] = comment
+            self.data[self.host_id]["benches"][bench_name]["comment"] = comment
 
     def save(self):
         """Save the database."""
