@@ -1,34 +1,34 @@
 {
   "d77ebe8481884bc3b2778c8083f1bf459e548e929edd87041beb14f6b868d35f": {
     "comment": "Running very long AIR script with lot of variables and assignments",
-    "datetime": "2023-01-26 10:11:43.681744+00:00",
+    "datetime": "2023-01-26 10:16:03.837344+00:00",
     "platform": "macOS-13.1-arm64-arm-64bit",
     "stats": {
       "big_values_data": {
-        "execute": "0:00:00.000250",
-        "from_success_result": "0:00:00.107000",
-        "make_exec_ctx": "0:00:00.002720",
-        "parse": "0:00:00.003650",
-        "populate_outcome_from_contexts": "0:00:00.105000",
-        "prepare": "0:00:01.070000",
-        "serde_json::from_slice": "0:00:01.060000"
+        "execute": "241.00µs",
+        "from_success_result": "91.90ms",
+        "make_exec_ctx": "2.68ms",
+        "parse": "3.65ms",
+        "populate_outcome_from_contexts": "89.50ms",
+        "prepare": "911.00ms",
+        "serde_json::from_slice": "893.00ms"
       },
       "long_data": {
-        "execute": "0:00:00.000250",
-        "from_success_result": "0:00:00.026900",
-        "make_exec_ctx": "0:00:00.003360",
-        "parse": "0:00:00.003670",
-        "populate_outcome_from_contexts": "0:00:00.024500",
-        "prepare": "0:00:00.285000",
-        "serde_json::from_slice": "0:00:00.268000"
+        "execute": "246.00µs",
+        "from_success_result": "25.50ms",
+        "make_exec_ctx": "3.29ms",
+        "parse": "3.67ms",
+        "populate_outcome_from_contexts": "23.10ms",
+        "prepare": "266.00ms",
+        "serde_json::from_slice": "249.00ms"
       },
       "parser_10000_100": {
-        "execute": "0:00:00.003260",
-        "from_success_result": "0:00:00.009730",
-        "make_exec_ctx": "0:00:00.002700",
-        "parse": "0:00:01.220000",
-        "populate_outcome_from_contexts": "0:00:00.007370",
-        "prepare": "0:00:01.230000"
+        "execute": "3.21ms",
+        "from_success_result": "10.90ms",
+        "make_exec_ctx": "2.70ms",
+        "parse": "1.12s",
+        "populate_outcome_from_contexts": "7.36ms",
+        "prepare": "1.13s"
       }
     },
     "version": "0.35.0"

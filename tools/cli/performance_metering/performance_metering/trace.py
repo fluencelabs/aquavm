@@ -17,6 +17,7 @@
 
 import datetime
 from typing import Optional
+from .helpers import format_timedelta, parse_trace_timedelta
 
 
 class TraceRecord:
@@ -29,7 +30,7 @@ class TraceRecord:
     def __init__(self, span, raw_time):
         """Create a TraceRecord instance."""
         self.span = span
-        self.execution_time = _parse_trace_timedelta(raw_time)
+        self.execution_time = parse_trace_timedelta(raw_time)
         self.raw_time = raw_time
 
 
@@ -54,17 +55,6 @@ def combine_traces(traces: list[TraceRecord], repeat: int):
         combined[trace.span] += trace.execution_time
 
     return {
-        span: str(time / repeat) for (span, time) in combined.items()
+        span: format_timedelta(time / repeat)
+        for (span, time) in combined.items()
     }
-
-
-def _parse_trace_timedelta(inp: str) -> datetime.timedelta:
-    for (suffix, scale) in [
-            ("ns", 1e-9), ("µs", 1e-6), ("ms", 1e-3), ("s", 1e0)
-    ]:
-        if inp.endswith(suffix):
-            val = float(inp[:-len(suffix)])
-            seconds = val * scale
-            return datetime.timedelta(seconds=seconds)
-    else:
-        raise ValueError("Unknown time suffix")

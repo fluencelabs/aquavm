@@ -14,6 +14,32 @@
 #  limitations under the License.
 #
 """Helper functions for performance_metering."""
+import datetime
+
+# The ordering of elements is important.
+TIME_SUFFIXES = [("ns", 1e-9), ("µs", 1e-6), ("ms", 1e-3), ("s", 1e0)]
+
+
+def parse_trace_timedelta(inp: str) -> datetime.timedelta:
+    """Parse `tracing`-formatted execution times."""
+    for (suffix, scale) in TIME_SUFFIXES:
+        if inp.endswith(suffix):
+            val = float(inp[:-len(suffix)])
+            seconds = val * scale
+            return datetime.timedelta(seconds=seconds)
+    else:
+        raise ValueError("Unknown time suffix")
+
+
+def format_timedelta(td: datetime.timedelta) -> str:
+    """Print execution times to `tracing` format."""
+    seconds = td.total_seconds()
+    for (suffix, scale) in reversed(TIME_SUFFIXES):
+        if seconds >= scale:
+            return "{:0.2f}{}".format(seconds / scale, suffix)
+    else:
+        (suffix, scale) = TIME_SUFFIXES[-1]
+        return "{:0.2f}{}".format(seconds / scale, suffix)
 
 
 def get_host_id() -> str:
