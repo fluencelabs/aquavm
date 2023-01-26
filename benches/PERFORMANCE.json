@@ -1,44 +1,53 @@
 {
   "d77ebe8481884bc3b2778c8083f1bf459e548e929edd87041beb14f6b868d35f": {
     "comment": "Running very long AIR script with lot of variables and assignments",
-    "datetime": "2023-01-26 15:54:47.524027+00:00",
+    "datetime": "2023-01-26 18:34:47.494687+00:00",
     "platform": "macOS-13.1-arm64-arm-64bit",
     "stats": {
       "big_values_data": {
-        "execute": "241.00µs",
-        "from_success_result": "111.00ms",
+        "execute": "246.00µs",
+        "from_success_result": "109.60ms",
         "make_exec_ctx": "2.69ms",
-        "parse": "3.64ms",
-        "populate_outcome_from_contexts": "109.00ms",
-        "prepare": "1.14s",
-        "serde_json::from_slice": "1.12s"
+        "parse": "3.67ms",
+        "populate_outcome_from_contexts": "107.50ms",
+        "prepare": "1.11s",
+        "serde_json::from_slice": "1.09s"
       },
       "dashboard": {
-        "execute": "17.00ms",
-        "from_success_result": "28.90ms",
+        "execute": "17.08ms",
+        "from_success_result": "28.35ms",
         "make_exec_ctx": "3.07ms",
-        "parse": "12.10ms",
-        "populate_outcome_from_contexts": "26.30ms",
-        "prepare": "52.30ms",
-        "serde_json::from_slice": "26.35ms",
-        "serde_json::to_string(tetraplets)": "766.00µs"
+        "parse": "12.13ms",
+        "populate_outcome_from_contexts": "25.69ms",
+        "prepare": "51.80ms",
+        "serde_json::from_slice": "26.96ms",
+        "serde_json::to_string(tetraplets)": "774.00µs"
       },
       "long_data": {
-        "execute": "245.00µs",
-        "from_success_result": "28.50ms",
+        "execute": "248.00µs",
+        "from_success_result": "29.15ms",
         "make_exec_ctx": "3.32ms",
-        "parse": "3.64ms",
-        "populate_outcome_from_contexts": "26.10ms",
-        "prepare": "307.00ms",
-        "serde_json::from_slice": "290.00ms"
+        "parse": "3.67ms",
+        "populate_outcome_from_contexts": "26.75ms",
+        "prepare": "312.30ms",
+        "serde_json::from_slice": "295.20ms"
+      },
+      "network_explore": {
+        "execute": "17.16ms",
+        "from_success_result": "12.80ms",
+        "make_exec_ctx": "4.13ms",
+        "parse": "13.12ms",
+        "populate_outcome_from_contexts": "10.30ms",
+        "prepare": "38.75ms",
+        "serde_json::from_slice": "11.73ms"
       },
       "parser_10000_100": {
-        "execute": "3.21ms",
-        "from_success_result": "9.66ms",
-        "make_exec_ctx": "2.71ms",
-        "parse": "1.35s",
-        "populate_outcome_from_contexts": "7.31ms",
-        "prepare": "1.36s"
+        "execute": "3.25ms",
+        "from_success_result": "10.01ms",
+        "make_exec_ctx": "2.72ms",
+        "parse": "1.36s",
+        "populate_outcome_from_contexts": "7.48ms",
+        "prepare": "1.37s"
       }
     },
     "version": "0.35.0"
