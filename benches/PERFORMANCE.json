@@ -1,33 +1,34 @@
 {
   "d77ebe8481884bc3b2778c8083f1bf459e548e929edd87041beb14f6b868d35f": {
-    "datetime": "2023-01-25 09:35:46.252873+00:00",
+    "comment": "Running very long AIR script with lot of variables and assignments",
+    "datetime": "2023-01-26 10:11:43.681744+00:00",
     "platform": "macOS-13.1-arm64-arm-64bit",
     "stats": {
       "big_values_data": {
-        "execute": "0:00:00.000246",
-        "from_success_result": "0:00:00.111500",
-        "make_exec_ctx": "0:00:00.002694",
-        "parse": "0:00:00.003681",
-        "populate_outcome_from_contexts": "0:00:00.109000",
-        "prepare": "0:00:01.139000",
-        "serde_json::from_slice": "0:00:01.121000"
+        "execute": "0:00:00.000250",
+        "from_success_result": "0:00:00.107000",
+        "make_exec_ctx": "0:00:00.002720",
+        "parse": "0:00:00.003650",
+        "populate_outcome_from_contexts": "0:00:00.105000",
+        "prepare": "0:00:01.070000",
+        "serde_json::from_slice": "0:00:01.060000"
       },
       "long_data": {
-        "execute": "0:00:00.000253",
-        "from_success_result": "0:00:00.029190",
-        "make_exec_ctx": "0:00:00.003342",
-        "parse": "0:00:00.003719",
-        "populate_outcome_from_contexts": "0:00:00.026660",
-        "prepare": "0:00:00.318200",
-        "serde_json::from_slice": "0:00:00.300500"
+        "execute": "0:00:00.000250",
+        "from_success_result": "0:00:00.026900",
+        "make_exec_ctx": "0:00:00.003360",
+        "parse": "0:00:00.003670",
+        "populate_outcome_from_contexts": "0:00:00.024500",
+        "prepare": "0:00:00.285000",
+        "serde_json::from_slice": "0:00:00.268000"
       },
       "parser_10000_100": {
-        "execute": "0:00:00.003268",
-        "from_success_result": "0:00:00.009959",
-        "make_exec_ctx": "0:00:00.002729",
-        "parse": "0:00:01.358000",
-        "populate_outcome_from_contexts": "0:00:00.007437",
-        "prepare": "0:00:01.372000"
+        "execute": "0:00:00.003260",
+        "from_success_result": "0:00:00.009730",
+        "make_exec_ctx": "0:00:00.002700",
+        "parse": "0:00:01.220000",
+        "populate_outcome_from_contexts": "0:00:00.007370",
+        "prepare": "0:00:01.230000"
       }
     },
     "version": "0.35.0"

@@ -18,15 +18,36 @@ import json
 import logging
 import os.path
 import subprocess
+from typing import Optional
 
 logger = logging.getLogger(__name__)
+
+
+class _Params:
+    comment: Optional[str]
+    args: dict
+
+    def __init__(self, comment, args):
+        self.comment = comment
+        self.args = args
+
+    @staticmethod
+    def _load_params(bench_path):
+        try:
+            params_path = os.path.join(bench_path, "params.json")
+            with open(params_path, 'r') as inp:
+                data = json.load(inp)
+                comment = data.pop('comment')
+                return _Params(comment, data)
+        except IOError:
+            return {}
 
 
 class Bench:
     """Single bench consists of `air-trace run` parameters."""
 
     path: str
-    params: dict
+    params: _Params
     prev_data_path: str
     cur_data_path: str
     air_script_path: str
@@ -36,7 +57,7 @@ class Bench:
         """Load data."""
         self.path = bench_path
 
-        self.params = _load_params(bench_path)
+        self.params = _Params._load_params(bench_path)
         self.prev_data_path = discover_file(bench_path, "prev_data.json")
         self.cur_data_path = discover_file(bench_path, "cur_data.json")
         self.air_script_path = discover_file(bench_path, "script.air")
@@ -69,7 +90,7 @@ class Bench:
                     "--script", self.air_script_path,
                 ] + [
                     arg
-                    for (param, val) in self.params.items()
+                    for (param, val) in self.params.args.items()
                     for arg in ('--' + param, val)
                 ],
                 check=True,
@@ -83,21 +104,16 @@ class Bench:
         """Return the bench name."""
         return os.path.basename(self.path)
 
+    def get_comment(self):
+        """Return the bench comment."""
+        return self.params.comment
+
     def __repr__(self):
         """`repr` implementation."""
         return "Bench({!r}, {!r})".format(
             os.path.basename(self.path),
             self.params
         )
-
-
-def _load_params(bench_path) -> dict:
-    try:
-        params_path = os.path.join(bench_path, "params.json")
-        with open(params_path, 'r') as inp:
-            return json.load(inp)
-    except IOError:
-        return {}
 
 
 def discover_file(base_dir: str, filename: str) -> str:

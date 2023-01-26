@@ -64,6 +64,9 @@ class Db:
         self.data[self.host_id]["version"] = get_aquavm_version(
             AQUAVM_TOML_PATH
         )
+        comment = bench.get_comment()
+        if comment is not None:
+            self.data[self.host_id]["comment"] = comment
 
     def save(self):
         """Save the database."""
