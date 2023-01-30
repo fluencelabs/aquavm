@@ -15,7 +15,7 @@
 #
 """Trace record handling."""
 
-from .trace_combiner import TraceWalker
+from .trace_walker import TraceWalker
 
 
 def combine_traces(raw_traces: list, repeat: int):
