@@ -22,7 +22,7 @@ import typing
 
 from .bench import Bench
 from .db import Db
-from .trace import combine_traces, parse_if_interesting
+from .trace import combine_traces
 
 DEFAULT_TEST_DIR = "benches/performance_metering"
 
@@ -61,10 +61,5 @@ def run(args):
     with Db(args.path, args.host_id) as db:
         for bench in suite:
             raw_stats = bench.run(args.repeat, args.tracing_params)
-            interesting_traces = [
-                trace
-                for trace in map(parse_if_interesting, raw_stats)
-                if trace
-            ]
-            combined_stats = combine_traces(interesting_traces, args.repeat)
+            combined_stats = combine_traces(raw_stats, args.repeat)
             db.record(bench, combined_stats)

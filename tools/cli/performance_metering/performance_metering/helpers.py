@@ -15,13 +15,16 @@
 #
 """Helper functions for performance_metering."""
 import datetime
+from typing import Optional
 
 # The ordering of elements is important.
 TIME_SUFFIXES = [("ns", 1e-9), ("µs", 1e-6), ("ms", 1e-3), ("s", 1e0)]
 
 
-def parse_trace_timedelta(inp: str) -> datetime.timedelta:
+def parse_trace_timedelta(inp: Optional[str]) -> datetime.timedelta:
     """Parse `tracing`-formatted execution times."""
+    if inp is None:
+        return datetime.timedelta()
     for (suffix, scale) in TIME_SUFFIXES:
         if inp.endswith(suffix):
             val = float(inp[:-len(suffix)])
