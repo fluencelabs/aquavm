@@ -46,7 +46,7 @@ def main():
     if args.command == 'run':
         run.run(args)
     else:
-        parser.error("Unknown command {!r}".format(args.command))
+        parser.error(f"Unknown command {args.command!r}")
 
 
 if __name__ == '__main__':

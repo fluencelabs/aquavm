@@ -15,7 +15,11 @@
 #
 """Helper functions for performance_metering."""
 import datetime
+import hashlib
+import socket
 from typing import Optional
+
+import toml
 
 # The ordering of elements is important.
 TIME_SUFFIXES = [("ns", 1e-9), ("µs", 1e-6), ("ms", 1e-3), ("s", 1e0)]
@@ -30,8 +34,7 @@ def parse_trace_timedelta(inp: Optional[str]) -> datetime.timedelta:
             val = float(inp[:-len(suffix)])
             seconds = val * scale
             return datetime.timedelta(seconds=seconds)
-    else:
-        raise ValueError("Unknown time suffix")
+    raise ValueError("Unknown time suffix")
 
 
 def format_timedelta(td: datetime.timedelta) -> str:
@@ -39,16 +42,14 @@ def format_timedelta(td: datetime.timedelta) -> str:
     seconds = td.total_seconds()
     for (suffix, scale) in reversed(TIME_SUFFIXES):
         if seconds >= scale:
-            return "{:0.2f}{}".format(seconds / scale, suffix)
-    else:
-        (suffix, scale) = TIME_SUFFIXES[-1]
-        return "{:0.2f}{}".format(seconds / scale, suffix)
+            return f"{seconds / scale:0.2f}{suffix}"
+    # else
+    (suffix, scale) = TIME_SUFFIXES[-1]
+    return f"{seconds / scale:0.2f}{suffix}"
 
 
 def get_host_id() -> str:
     """Return a hash of host id."""
-    import socket
-    import hashlib
 
     hostname = socket.gethostname().encode('utf-8')
     return hashlib.sha256(hostname).hexdigest()
@@ -56,7 +57,6 @@ def get_host_id() -> str:
 
 def get_aquavm_version(path: str) -> str:
     """Get `version` field from a TOML file."""
-    import toml
-    with open(path, 'r') as inp:
+    with open(path, 'r', encoding="utf8") as inp:
         data = toml.load(inp)
     return data['package']['version']

@@ -20,6 +20,7 @@ import json
 import logging
 import os.path
 import platform
+import tempfile
 from typing import Optional
 
 from performance_metering.helpers import get_host_id, get_aquavm_version
@@ -46,10 +47,10 @@ class Db:
         self.host_id = host_id
 
         try:
-            with open(path, 'r') as inp:
+            with open(path, 'r', encoding="utf-8") as inp:
                 self.data = json.load(inp)
         except IOError as ex:
-            logging.warn("cannot open data at %r: %s", path, ex)
+            logging.warning("cannot open data at %r: %s", path, ex)
             self.data = {}
 
     def record(self, bench, stats):
@@ -75,13 +76,12 @@ class Db:
 
     def save(self):
         """Save the database."""
-        import tempfile
-
         with tempfile.NamedTemporaryFile(
                 mode="w+",
                 dir=os.path.dirname(self.path),
                 prefix=os.path.basename(self.path),
                 suffix='.tmpXXXXXX',
+                encoding="utf-8",
                 delete=False,
         ) as out:
             try:
@@ -94,7 +94,7 @@ class Db:
                 )
                 out.flush()
                 os.rename(out.name, self.path)
-            except Exception:
+            except IOError:
                 os.remove(out.name)
 
     def __enter__(self):

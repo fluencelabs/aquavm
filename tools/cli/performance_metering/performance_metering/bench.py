@@ -35,7 +35,7 @@ class _Params:
     def _load_params(bench_path):
         try:
             params_path = os.path.join(bench_path, "params.json")
-            with open(params_path, 'r') as inp:
+            with open(params_path, 'r', encoding="utf8") as inp:
                 data = json.load(inp)
                 comment = data.pop('comment')
                 return _Params(comment, data)
@@ -120,6 +120,6 @@ class Bench:
 def discover_file(base_dir: str, filename: str) -> str:
     """Return the file in the base_dir, checking it can be read."""
     path = os.path.join(base_dir, filename)
-    with open(path, 'r'):
+    with open(path, 'r', encoding="utf8"):
         pass
     return path

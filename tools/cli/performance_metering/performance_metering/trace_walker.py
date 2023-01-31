@@ -17,11 +17,10 @@
 
 import datetime
 import logging
+from itertools import zip_longest
+from typing import Optional
 
 from .helpers import format_timedelta, parse_trace_timedelta
-from typing import Optional
-from itertools import zip_longest
-
 
 logger = logging.getLogger(__name__)
 
@@ -64,8 +63,7 @@ class TraceRecord:
         """Return qualified function name."""
         if self.target is None:
             return self.span
-        else:
-            return "{}::{}".format(self.target, self.span)
+        return f"{self.target}::{self.span}"
 
     def to_json(self, repeat: int) -> dict:
         """Convert trace to JSON report."""
@@ -112,7 +110,7 @@ class TraceWalker:
         self.root = {}
 
     def process(self, records):
-        """Handle all input records, building a call tree in the `root` field."""
+        """With all input records, building a call tree in the `root` field."""
         for raw_rec in records:
             logger.debug("raw_rec %r", raw_rec)
             message = raw_rec["fields"]["message"]
@@ -126,8 +124,7 @@ class TraceWalker:
                     rec = self.stack.pop()
                     logger.debug("Poped %r from %r", rec, self.stack)
                     real_rec = self._get_closing_rec(rec)
-                    assert rec == real_rec, "{!r} vs {!r}".format(
-                        rec, real_rec)
+                    assert rec == real_rec, f"{rec!r} vs {real_rec!r}"
                     rec.execution_time += parse_trace_timedelta(time_busy)
                 elif message == "enter":
                     assert span == spans[-1]
@@ -147,10 +144,8 @@ class TraceWalker:
 
         for (sp1, tr2) in zip_longest(rec.spans, self.stack):
             # Validity check.  Should hold for single-threaded app.
-            assert tr2 is not None, "{!r} vs {!r}".format(
-                rec.spans, self.stack)
-            assert sp1 == tr2.get_span(), "{!r} vs {!r}".format(
-                rec.spans, self.stack)
+            assert tr2 is not None, f"{rec.spans!r} vs {self.stack!r}"
+            assert sp1 == tr2.get_span(), f"{rec.spans!r} vs {self.stack!r}"
             parent = parent.nested[tr2.get_func_name()]
         return parent
 

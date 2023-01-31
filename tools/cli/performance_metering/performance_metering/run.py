@@ -30,9 +30,9 @@ logger = logging.getLogger(__name__)
 
 
 def _prepare(args):
+    """Prepare the environment: build the tools required."""
     if args.prepare_binaries:
         logger.info("Build air-interpreter...")
-        """Prepare the environment: build the tools required."""
         subprocess.check_call([
             "marine", "build", "--release", "--features", "marine",
             "--package", "air-interpreter",
