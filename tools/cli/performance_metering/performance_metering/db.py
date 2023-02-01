@@ -92,6 +92,8 @@ class Db:
                     indent=2,
                     ensure_ascii=False,
                 )
+                # Add a new line for data readability
+                print("", file=out)
                 out.flush()
                 os.rename(out.name, self.path)
             except IOError:
