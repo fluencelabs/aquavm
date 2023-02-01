@@ -67,14 +67,21 @@ class TraceRecord:
 
     def to_json(self, repeat: int) -> dict:
         """Convert trace to JSON report."""
-        result = {
-            'duration': format_timedelta(self.execution_time / repeat)
-        }
+        duration = format_timedelta(self.execution_time / repeat)
         if self.nested:
-            result['nested'] = {
-                fname: trace_record.to_json(repeat)
+            prefix = _common_prefix(self.nested)
+            nested = {
+                _split_prefix(fname, prefix): trace_record.to_json(repeat)
                 for (fname, trace_record) in self.nested.items()
             }
+
+            result = {
+                "common_prefix": "::".join(prefix),
+                "duration": duration,
+                "nested": nested,
+            }
+        else:
+            result = duration
         return result
 
     def __repr__(self):
@@ -87,6 +94,27 @@ class TraceRecord:
             self.execution_time,
             self.nested,
         )
+
+
+def _common_prefix(nested: dict) -> list[str]:
+    items = iter(nested.keys())
+    prefix = next(items).split("::")[:-1]
+    for fname in items:
+        fname_split = fname.split("::")[:-1]
+        new_prefix = []
+        for (old, new) in zip(prefix, fname_split):
+            if old == new:
+                new_prefix.append(old)
+            else:
+                break
+        prefix = new_prefix
+    return prefix
+
+
+def _split_prefix(fname, prefix):
+    fname_prefix = fname.split("::")[len(prefix):]
+    logger.debug("split_prefix %r -> %r", fname, fname_prefix)
+    return "::".join(fname_prefix)
 
 
 class _RootStub:
