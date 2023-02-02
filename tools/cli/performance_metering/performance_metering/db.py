@@ -18,14 +18,13 @@
 import datetime
 import json
 import logging
-import os.path
 import platform
-import tempfile
 from typing import Optional
 
-from performance_metering.helpers import get_host_id, get_aquavm_version
+from .helpers import get_host_id, get_aquavm_version, intermediate_temp_file
 
-DEFAULT_PATH = "benches/PERFORMANCE.json"
+DEFAULT_JSON_PATH = "benches/PERFORMANCE.json"
+DEFAULT_TEXT_PATH = "benches/PERFORMANCE.yaml"
 AQUAVM_TOML_PATH = "air/Cargo.toml"
 
 
@@ -36,21 +35,30 @@ class Db:
     host_id: str
     data: hash
 
-    def __init__(self, path: Optional[str], host_id=None):
+    def __init__(
+            self,
+            json_path: Optional[str],
+            text_path: Optional[str],
+            host_id=None
+    ):
         """Load data from file, if it exits."""
-        if path is None:
-            path = DEFAULT_PATH
-        self.path = path
+        if json_path is None:
+            json_path = DEFAULT_JSON_PATH
+        self.json_path = json_path
+
+        if text_path is None:
+            text_path = DEFAULT_TEXT_PATH
+        self.text_path = text_path
 
         if host_id is None:
             host_id = get_host_id()
         self.host_id = host_id
 
         try:
-            with open(path, 'r', encoding="utf-8") as inp:
+            with open(json_path, 'r', encoding="utf-8") as inp:
                 self.data = json.load(inp)
         except IOError as ex:
-            logging.warning("cannot open data at %r: %s", path, ex)
+            logging.warning("cannot open data at %r: %s", json_path, ex)
             self.data = {}
 
     def record(self, bench, stats):
@@ -75,29 +83,17 @@ class Db:
             self.data[self.host_id]["benches"][bench_name]["comment"] = comment
 
     def save(self):
-        """Save the database."""
-        with tempfile.NamedTemporaryFile(
-                mode="w+",
-                dir=os.path.dirname(self.path),
-                prefix=os.path.basename(self.path),
-                suffix='.tmpXXXXXX',
-                encoding="utf-8",
-                delete=False,
-        ) as out:
-            try:
-                json.dump(
-                    self.data, out,
-                    # for better diffs and readable files:
-                    sort_keys=True,
-                    indent=2,
-                    ensure_ascii=False,
-                )
-                # Add a new line for data readability
-                print("", file=out)
-                out.flush()
-                os.rename(out.name, self.path)
-            except IOError:
-                os.remove(out.name)
+        """Save the database to JSON."""
+        with intermediate_temp_file(self.json_path) as out:
+            json.dump(
+                self.data, out,
+                # for better diffs and readable files:
+                sort_keys=True,
+                indent=2,
+                ensure_ascii=False,
+            )
+            # Add a new line for data readability
+            print("", file=out)
 
     def __enter__(self):
         """Enter context manager."""

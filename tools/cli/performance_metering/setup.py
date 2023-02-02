@@ -24,7 +24,8 @@ setup(name='aquavm_performance_metering',
       packages=['performance_metering'],
       zip_safe=True,
       install_requires=[
-          # python 3.11 use standard tomllib, but it is not yet available everywhere.
+          # python 3.11 use standard tomllib, but it is not yet available
+          # everywhere.
           'toml',
       ],
       entry_points={

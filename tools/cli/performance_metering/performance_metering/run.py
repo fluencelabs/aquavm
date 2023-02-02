@@ -22,9 +22,12 @@ import typing
 
 from .bench import Bench
 from .db import Db
-from .trace import combine_traces
+from .helpers import intermediate_temp_file
+from .text_report import TextReporter
+from .trace_walker import TraceWalker
 
 DEFAULT_TEST_DIR = "benches/performance_metering"
+DEFAULT_REPORT_PATH = "benches/PERFORMANCE.txt"
 
 logger = logging.getLogger(__name__)
 
@@ -61,5 +64,15 @@ def run(args):
     with Db(args.path, args.host_id) as db:
         for bench in suite:
             raw_stats = bench.run(args.repeat, args.tracing_params)
-            combined_stats = combine_traces(raw_stats, args.repeat)
+            walker = TraceWalker()
+            walker.process(raw_stats)
+
+            combined_stats = walker.to_json(args.repeat)
             db.record(bench, combined_stats)
+
+            with (
+                    intermediate_temp_file(
+                        args.report_path or DEFAULT_REPORT_PATH) as out
+            ):
+                report = TextReporter(db.data)
+                report.save_text_report(out)

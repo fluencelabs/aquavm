@@ -31,6 +31,7 @@ def main():
 
     run_subparser = subp.add_parser("run")
     run_subparser.add_argument("--path", required=False, type=str)
+    run_subparser.add_argument("--report-path", required=False, type=str)
     run_subparser.add_argument("--host-id", required=False, type=str)
     run_subparser.add_argument("--bench-dir", required=False, type=str)
     run_subparser.add_argument("--repeat", required=False, type=int, default=1)

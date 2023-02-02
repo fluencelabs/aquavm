@@ -1,0 +1,74 @@
+#
+#  Copyright 2023 Fluence Labs Limited
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+#
+"""Human readable text report generation."""
+
+
+class TextReporter:
+    """A generator for human readable text report."""
+    data: dict
+    indent_step = 2
+
+    def __init__(self, data):
+        """Construct a reporter for db data."""
+        self.data = data
+
+    def save_text_report(self, file):
+        """Save report to the file."""
+        for machine_id, machine in self.data.items():
+            _print_indent("Machine {}:".format(machine_id),
+                          indent=0, file=file)
+            self._save_machine(machine,  file=file)
+
+    def _save_machine(self, machine, file):
+        indent = self.indent_step
+        _print_indent("Platform: {}".format(machine["platform"]),
+                      indent=indent, file=file)
+        _print_indent("Timestamp: {}".format(machine["datetime"]),
+                      indent=indent, file=file)
+        _print_indent("AquaVM version: {}".format(machine["version"]),
+                      indent=indent, file=file)
+        _print_indent("Benches:", indent=indent, file=file)
+
+        nested_indent = indent + self.indent_step
+        for bench_name, bench in machine["benches"].items():
+            self._save_bench(
+                bench_name, bench, indent=nested_indent, file=file)
+
+    def _save_bench(self, bench_name, bench, indent, file):
+        _print_indent("{}: {}".format(bench_name, bench["comment"]),
+                      indent=indent, file=file)
+        for fname, stats in bench["stats"].items():
+            self._save_stats(fname, stats, indent + self.indent_step, file)
+
+    def _save_stats(self, fname, stats, indent, file):
+        if isinstance(stats, dict):
+            duration = stats["duration"]
+
+            _print_indent(
+                "{}: {}".format(fname, duration),
+                indent=indent,
+                file=file)
+            for nested_fname, nested_stats in stats["nested"].items():
+                self._save_stats(nested_fname, nested_stats,
+                                 indent=(indent + self.indent_step), file=file)
+        else:
+            assert isinstance(stats, str)
+            _print_indent("{}: {}".format(fname, stats),
+                          indent=indent, file=file)
+
+
+def _print_indent(line, indent, file):
+    print("{:<{indent}}{}".format("", line, indent=indent), file=file)

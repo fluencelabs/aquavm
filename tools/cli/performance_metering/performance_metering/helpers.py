@@ -16,7 +16,10 @@
 """Helper functions for performance_metering."""
 import datetime
 import hashlib
+import os.path
 import socket
+import tempfile
+from contextlib import contextmanager
 from typing import Optional
 
 import toml
@@ -60,3 +63,30 @@ def get_aquavm_version(path: str) -> str:
     with open(path, 'r', encoding="utf8") as inp:
         data = toml.load(inp)
     return data['package']['version']
+
+
+@contextmanager
+def intermediate_temp_file(target_file: str):
+    """
+    Context manager that create an intermediate temp file.
+
+    It to be used as an itermediate for owerwriting the target file on
+    success.
+    """
+    out = tempfile.NamedTemporaryFile(
+        mode="w+",
+        dir=os.path.dirname(target_file),
+        prefix=os.path.basename(target_file) + ".",
+        encoding="utf-8",
+        delete=False,
+    )
+    try:
+        yield out
+        out.flush()
+        os.rename(out.name, target_file)
+    except:
+        out.close()
+        try:
+            os.remove(out.name)
+        except OSError:
+            pass
