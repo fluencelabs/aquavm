@@ -167,6 +167,15 @@ class TraceWalker:
             for (fname, trace_record) in self.root.items()
         }
 
+    def get_total_time(self, repeat: int):
+        """Get total execution time."""
+        assert not self.stack
+        root_time = sum(
+            (node.execution_time for node in self.root.values()),
+            start=datetime.timedelta()
+        ) / repeat
+        return format_timedelta(root_time)
+
     def _find_parent(self, rec: TraceRecord) -> TraceRecord:
         parent = _RootStub(self.root)
 

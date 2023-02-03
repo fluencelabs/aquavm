@@ -48,8 +48,10 @@ class TextReporter:
                 bench_name, bench, indent=nested_indent, file=file)
 
     def _save_bench(self, bench_name, bench, indent, file):
-        _print_indent("{}: {}".format(bench_name, bench["comment"]),
-                      indent=indent, file=file)
+        _print_indent(
+            "{} ({}): {}".format(
+                bench_name, bench["total_time"], bench["comment"]),
+            indent=indent, file=file)
         for fname, stats in bench["stats"].items():
             self._save_stats(fname, stats, indent + self.indent_step, file)
 

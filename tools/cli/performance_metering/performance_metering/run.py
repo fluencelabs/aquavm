@@ -68,7 +68,8 @@ def run(args):
             walker.process(raw_stats)
 
             combined_stats = walker.to_json(args.repeat)
-            db.record(bench, combined_stats)
+            total_time = walker.get_total_time(args.repeat)
+            db.record(bench, combined_stats, total_time)
 
             with (
                     intermediate_temp_file(

@@ -61,7 +61,7 @@ class Db:
             logging.warning("cannot open data at %r: %s", json_path, ex)
             self.data = {}
 
-    def record(self, bench, stats):
+    def record(self, bench, stats, total_time):
         """Record the bench stats."""
         if self.host_id not in self.data:
             self.data[self.host_id] = {"benches": {}}
@@ -69,6 +69,7 @@ class Db:
 
         self.data[self.host_id]["benches"][bench_name] = {
             "stats": stats,
+            "total_time": total_time,
         }
         self.data[self.host_id]["platform"] = platform.platform()
         self.data[self.host_id]["datetime"] = str(
