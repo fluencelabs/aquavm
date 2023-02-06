@@ -22,7 +22,7 @@ polyplets = { version = "0.3.2", path = "../../crates/air-lib/polyplets" }
 
 thiserror = "1.0.38"
 maplit = "1.0.2"
-serde_json = "1.0.91"
+serde_json = "1.0.92"
 serde = "1.0.152"
 log = "0.4.17"
 tracing = "0.1.37"
