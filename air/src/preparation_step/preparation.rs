@@ -77,8 +77,13 @@ pub(crate) fn prepare<'i>(
 fn try_to_data(raw_data: &[u8]) -> PreparationResult<InterpreterData> {
     use PreparationError::DataDeFailed;
 
-    InterpreterData::try_from_slice(raw_data, super::min_supported_version())
-        .map_err(|err| DataDeFailed(err, raw_data.to_vec()))
+    // treat empty slice as an empty data,
+    // it allows abstracting from an internal format for an empty data
+    if raw_data.is_empty() {
+        return Ok(InterpreterData::new(super::min_supported_version().clone()));
+    }
+
+    InterpreterData::try_from_slice(raw_data).map_err(|err| DataDeFailed(err, raw_data.to_vec()))
 }
 
 #[tracing::instrument(skip_all)]

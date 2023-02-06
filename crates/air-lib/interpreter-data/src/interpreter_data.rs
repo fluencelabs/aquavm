@@ -97,16 +97,7 @@ impl InterpreterData {
     }
 
     /// Tries to de InterpreterData from slice according to the data version.
-    pub fn try_from_slice(
-        slice: &[u8],
-        min_support_version: &semver::Version,
-    ) -> Result<Self, serde_json::Error> {
-        // treat empty slice as an empty interpreter data allows abstracting from
-        // the internal format for empty data.
-        if slice.is_empty() {
-            return Ok(Self::new(min_support_version.clone()));
-        }
-
+    pub fn try_from_slice(slice: &[u8]) -> Result<Self, serde_json::Error> {
         measure!(
             serde_json::from_slice(slice),
             tracing::Level::INFO,
