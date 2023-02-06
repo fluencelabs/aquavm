@@ -1,0 +1,10 @@
+[package]
+name = "cidify"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+air-interpreter-cid = { version = "0.2.0", path = "../../crates/air-lib/interpreter-cid" }
+air-interpreter-data = { version = "0.6.0", path = "../../crates/air-lib/interpreter-data" }
+serde = { version = "1.0.152", features = ["derive"]}
+serde_json = "1.0.91"
