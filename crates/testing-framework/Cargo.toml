@@ -1,6 +1,6 @@
 [package]
 name = "air-testing-framework"
-version = "0.1.1"
+version = "0.1.2"
 description = "AquaVM testing framework"
 authors = ["Fluence Labs"]
 edition = "2018"
