@@ -1,5 +1,19 @@
+## Version 0.6.1
+[PR](https://github.com/fluencelabs/aquavm/pull/451):  
+- move data and interpreter versions into a new structure
+- add new API to get versions from data
+
+## Version 0.6.0
+[PR 419](https://github.com/fluencelabs/aquavm/pull/419):  
+- Rename data's `cid_store` field to `value_store`.
+- Canon data is stored with CIDs.  Values, tetraplets and canon elements
+  are stored as CIDs resolved with data's `value_store`, `tetraplet_store`
+  and `canon_store` fields respectively.
+- Group stores in the data into `cid_info: CidInfo` field.
+
 ## Version 0.5.0
 
+[PR 401](https://github.com/fluencelabs/aquavm/pull/401):  
 - Call result values are stored as CIDs in the data trace.  These CIDs refer
   to a new `cid_store` data's field that maps a CID string to a value.
 

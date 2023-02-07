@@ -24,6 +24,7 @@ use air_interpreter_interface::RunParameters;
 use air_log_targets::RUN_PARAMS;
 use air_utils::measure;
 
+#[tracing::instrument(skip_all)]
 pub fn execute_air(
     air: String,
     prev_data: Vec<u8>,

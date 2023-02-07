@@ -1,6 +1,6 @@
 [package]
 name = "air-trace"
-version = "0.2.1"
+version = "0.2.3"
 edition = "2021"
 description = "AIR performance tracing tool"
 authors = ["Fluence Labs"]
@@ -15,11 +15,11 @@ air-interpreter-interface = { path = "../../../crates/air-lib/interpreter-interf
 avm-data-store = { path = "../../../crates/data-store" }
 avm-interface = { path = "../../../avm/interface" }
 
-anyhow = "1.0.66"
-clap = { version = "4.0.29", features = ["derive", "env"] }
+anyhow = "1.0.69"
+clap = { version = "4.1.4", features = ["derive", "env"] }
 itertools = "0.10.5"
-serde = { version = "1.0.151", features = ["derive"] }
-serde_json = "1.0.89"
+serde = { version = "1.0.152", features = ["derive"] }
+serde_json = "1.0.92"
 tracing-subscriber = { version = "0.3.16", default-features = false, features = [ "env-filter", "json", "smallvec", "time", "fmt" ] }
 
 [features]

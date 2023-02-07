@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+mod canon;
+
 use air_interpreter_data::CidTracker;
 use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::*;
@@ -36,7 +38,7 @@ fn test_missing_cid() {
     assert_eq!(result.ret_code, 20012);
     assert_eq!(
         result.error_message,
-        "value for CID CID(\"bagaaieraondvznakk2hi3kfaixhnceatpykz7cikytniqo3lc7ogkgz2qbeq\") not found"
+        "value for CID \"bagaaieraondvznakk2hi3kfaixhnceatpykz7cikytniqo3lc7ogkgz2qbeq\" not found"
     );
 }
 
@@ -85,7 +87,7 @@ fn test_scalar_cid() {
 
     assert_eq!(result.ret_code, 0);
     assert_eq!(data.trace, expected_trace);
-    assert_eq!(data.cid_store, tracker.into());
+    assert_eq!(data.cid_info.value_store, tracker.into());
 }
 
 #[test]
@@ -117,5 +119,5 @@ fn test_stream_cid() {
 
     assert_eq!(result.ret_code, 0);
     assert_eq!(data.trace, expected_trace);
-    assert_eq!(data.cid_store, tracker.into());
+    assert_eq!(data.cid_info.value_store, tracker.into());
 }

@@ -14,14 +14,15 @@ name = "air_trace_handler"
 path = "src/lib.rs"
 
 [dependencies]
-air-interpreter-cid = { version = "0.1.0", path = "../interpreter-cid" }
+air-interpreter-cid = { version = "0.2.0", path = "../interpreter-cid" }
 air-interpreter-data = { path = "../interpreter-data" }
 air-interpreter-interface = { path = "../interpreter-interface" }
 air-log-targets = { path = "../log-targets" }
 air-parser = { path = "../air-parser" }
+polyplets = { path = "../polyplets" }
 
 bimap = "0.6.2"
-serde_json = "1.0.89"
+serde_json = "1.0.92"
 log = "0.4.17"
-thiserror = "1.0.37"
+thiserror = "1.0.38"
 tracing = "0.1.37"

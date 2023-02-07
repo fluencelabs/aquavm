@@ -1,0 +1,63 @@
+{
+  "bootstrap-sha": "80e71783c8f7af03b009f67d6a9a9382756819f2",
+  "release-type": "rust",
+  "bump-minor-pre-major": true,
+  "bump-patch-for-minor-pre-major": true,
+  "plugins": [
+    {
+      "type": "cargo-workspace",
+      "merge": false
+    },
+    {
+      "type": "linked-versions",
+      "groupName": "air and air-interpreter",
+      "components": [
+        "air",
+        "air-interpreter"
+      ]
+    },
+    {
+      "type": "linked-versions",
+      "groupName": "air-beautifier and air-beautify",
+      "components": [
+        "air-beautifier",
+        "air-beautify",
+        "air-beautify-wasm"
+      ]
+    }
+  ],
+  "packages": {
+    "air": {
+      "component": "air"
+    },
+    "air-interpreter": {
+      "component": "air-interpreter"
+    },
+    "avm/interface": {},
+    "avm/server": {},
+    "crates/air-lib/air-parser": {},
+    "crates/air-lib/execution-info-collector": {},
+    "crates/air-lib/interpreter-cid": {},
+    "crates/air-lib/interpreter-data": {},
+    "crates/air-lib/interpreter-interface": {},
+    "crates/air-lib/lambda/ast": {},
+    "crates/air-lib/lambda/parser": {},
+    "crates/air-lib/log-targets": {},
+    "crates/air-lib/polyplets": {},
+    "crates/air-lib/test-utils": {},
+    "crates/air-lib/trace-handler": {},
+    "crates/air-lib/utils": {},
+    "crates/beautifier": {
+      "component": "air-beautifier"
+    },
+    "crates/data-store": {},
+    "crates/testing-framework": {},
+    "tools/cli/air-beautify": {
+      "component": "air-beautify"
+    },
+    "tools/cli/air-trace": {},
+    "tools/wasm/air-beautify-wasm": {
+      "component": "air-beautify-wasm"
+    }
+  }
+}

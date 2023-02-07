@@ -21,3 +21,4 @@ mod features;
 mod instructions;
 mod integration;
 mod issues;
+mod negative_tests;

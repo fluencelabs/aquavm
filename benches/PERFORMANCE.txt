@@ -1,0 +1,82 @@
+Machine d77ebe8481884bc3b2778c8083f1bf459e548e929edd87041beb14f6b868d35f:
+  Platform: macOS-13.1-arm64-arm-64bit
+  Timestamp: 2023-02-03 12:08:43.454860+00:00
+  AquaVM version: 0.35.0
+  Benches:
+    big_values_data (1.20s): Loading a trace with huge values
+      air::runner::execute_air: 1.20s
+        preparation_step::preparation::prepare: 1.09s
+          air_interpreter_data::interpreter_data::serde_json::from_slice: 1.07s
+          air_parser::parser::air_parser::parse: 3.66ms
+          air::preparation_step::preparation::make_exec_ctx: 2.79ms
+        runner::execute: 262.00µs
+        farewell_step::outcome::from_success_result: 104.61ms
+          populate_outcome_from_contexts: 102.47ms
+            to_vec(data): 96.71ms
+            to_vec(call_results): 142.00µs
+    dashboard (187.90ms): big dashboard test
+      air::runner::execute_air: 187.90ms
+        preparation_step::preparation::prepare: 46.88ms
+          air_interpreter_data::interpreter_data::serde_json::from_slice: 26.69ms
+          air_parser::parser::air_parser::parse: 12.49ms
+          air::preparation_step::preparation::make_exec_ctx: 3.15ms
+        runner::execute: 109.00ms
+          execute: 90.78ms
+            new: 54.94ms
+              resolve_ast_scalar: 40.19ms
+                resolve_ast_variable: 25.15ms
+                  resolve_variable: 8.23ms
+            execute: 14.54ms
+              resolver::resolve::resolve_ast_variable: 1.31ms
+                resolve_variable: 355.00µs
+              instructions::call::resolved_call::prepare_request_params: 2.61ms
+                resolver::resolve::resolve_ast_variable: 430.00µs
+                  resolve_variable: 140.00µs
+                instructions::call::resolved_call::serde_json::to_string(tetraplets): 621.00µs
+        farewell_step::outcome::from_success_result: 25.78ms
+          populate_outcome_from_contexts: 24.63ms
+            to_vec(data): 20.87ms
+            to_vec(call_results): 453.00µs
+    long_data (344.40ms): Long data trace
+      air::runner::execute_air: 344.40ms
+        preparation_step::preparation::prepare: 308.90ms
+          air_interpreter_data::interpreter_data::serde_json::from_slice: 297.10ms
+          air_parser::parser::air_parser::parse: 3.65ms
+          air::preparation_step::preparation::make_exec_ctx: 3.27ms
+        runner::execute: 261.00µs
+        farewell_step::outcome::from_success_result: 29.24ms
+          populate_outcome_from_contexts: 27.04ms
+            to_vec(data): 22.00ms
+            to_vec(call_results): 142.00µs
+    network_explore (80.18ms): N peers of network are discovered
+      air::runner::execute_air: 80.18ms
+        preparation_step::preparation::prepare: 34.07ms
+          air_interpreter_data::interpreter_data::serde_json::from_slice: 11.86ms
+          air_parser::parser::air_parser::parse: 13.67ms
+          air::preparation_step::preparation::make_exec_ctx: 4.15ms
+        runner::execute: 29.04ms
+          execute: 15.34ms
+            new: 6.34ms
+              resolve_ast_scalar: 3.88ms
+                resolve_ast_variable: 2.67ms
+                  resolve_variable: 907.00µs
+            execute: 5.12ms
+              resolve_ast_variable: 392.00µs
+                resolve_variable: 126.00µs
+        farewell_step::outcome::from_success_result: 10.68ms
+          populate_outcome_from_contexts: 9.30ms
+            to_vec(data): 4.76ms
+            to_vec(call_results): 138.00µs
+    parser_10000_100 (1.34s): Running very long AIR script with lot of variables and assignments
+      air::runner::execute_air: 1.34s
+        preparation_step::preparation::prepare: 1.31s
+          air_parser::parser::air_parser::parse: 1.31s
+          air::preparation_step::preparation::make_exec_ctx: 2.82ms
+        runner::execute: 7.53ms
+          execute: 4.54ms
+            new: 1.27ms
+            execute: 619.00µs
+        farewell_step::outcome::from_success_result: 7.32ms
+          populate_outcome_from_contexts: 6.24ms
+            to_vec(data): 2.89ms
+            to_vec(call_results): 139.00µs

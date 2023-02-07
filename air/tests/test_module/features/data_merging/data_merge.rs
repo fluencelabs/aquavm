@@ -284,8 +284,7 @@ fn fold_merge() {
         local_vms_results[6].data.clone()
     );
 
-    let data = InterpreterData::try_from_slice(&result_7.data, &semver::Version::new(1, 1, 1))
-        .expect("data should be well-formed");
+    let data = InterpreterData::try_from_slice(&result_7.data).expect("data should be well-formed");
     let stream_1_generations = data
         .global_streams
         .get("$stream_1")
@@ -315,7 +314,7 @@ fn fold_merge() {
                         ValueRef::Stream { cid, .. } => cid,
                     };
 
-                    let value = data.cid_store.get(cid).unwrap().clone();
+                    let value = data.cid_info.value_store.get(cid).unwrap().clone();
                     if let JValue::String(ref var_name) = &*value {
                         let current_count: usize = calls_count.get(var_name).copied().unwrap_or_default();
                         calls_count.insert(var_name.to_owned(), current_count + 1);
