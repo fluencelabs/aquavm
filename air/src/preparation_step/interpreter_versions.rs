@@ -18,13 +18,22 @@ use once_cell::sync::Lazy;
 
 use std::str::FromStr;
 
+// TODO: change to 0.35.0 in the next PR
 static MINIMAL_SUPPORTED_VERSION: Lazy<semver::Version> =
     Lazy::new(|| semver::Version::from_str("0.31.2").expect("valid minimal supported version specified"));
+
+static INTERPRETER_VERSION: Lazy<semver::Version> =
+    Lazy::new(|| semver::Version::from_str(env!("CARGO_PKG_VERSION")).expect("invalid data format version specified"));
 
 // This local is intended to check that set version is correct at the AquaVM start for graceful error message.
 thread_local!(static _MINIMAL_SUPPORTED_VERSION_CHECK: &'static semver::Version = Lazy::force(&MINIMAL_SUPPORTED_VERSION));
 
-/// Return minimal support version interpreter.
+/// Returns a minimal support version by this interpreter.
 pub fn min_supported_version() -> &'static semver::Version {
     Lazy::force(&MINIMAL_SUPPORTED_VERSION)
+}
+
+/// Returns a current interpreter version.
+pub fn interpreter_version() -> &'static semver::Version {
+    Lazy::force(&INTERPRETER_VERSION)
 }

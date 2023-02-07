@@ -33,6 +33,10 @@ use serde::Serialize;
 /// have the following format.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct InterpreterData {
+    /// Versions of data and an interpreter produced this data.
+    #[serde(flatten)]
+    pub versions: Versions,
+
     /// Trace of AIR execution, which contains executed call, par, fold, and ap states.
     pub trace: ExecutionTrace,
 
@@ -42,36 +46,41 @@ pub struct InterpreterData {
     #[serde(rename = "streams")] // for compatibility with versions <= 0.2.1
     pub global_streams: GlobalStreamGens,
 
-    /// Version of this data format.
-    pub version: semver::Version,
-
-    /// Last exposed to a peer call request id. All next call request ids will be bigger than this.
-    #[serde(default)]
-    #[serde(rename = "lcid")]
-    pub last_call_request_id: u32,
-
     /// Contains maximum generation for each private stream. This info will be used while merging
     /// values in streams.
     #[serde(default)]
     #[serde(rename = "r_streams")]
     pub restricted_streams: RestrictedStreamGens,
 
-    /// Version of interpreter produced this data.
-    pub interpreter_version: semver::Version,
+    /// Last exposed to a peer call request id. All next call request ids will be bigger than this.
+    #[serde(default)]
+    #[serde(rename = "lcid")]
+    pub last_call_request_id: u32,
 
     /// CID-to-somethings mappings.
     pub cid_info: CidInfo,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Versions {
+    /// Version of this data format.
+    #[serde(rename = "version")] // for compatibility with versions <= 0.6.0
+    pub data_version: semver::Version,
+
+    /// Version of an interpreter produced this data.
+    pub interpreter_version: semver::Version,
+}
+
 impl InterpreterData {
     pub fn new(interpreter_version: semver::Version) -> Self {
+        let versions = Versions::new(interpreter_version);
+
         Self {
+            versions,
             trace: ExecutionTrace::default(),
             global_streams: GlobalStreamGens::new(),
-            version: crate::data_version().clone(),
             last_call_request_id: 0,
             restricted_streams: RestrictedStreamGens::new(),
-            interpreter_version,
             cid_info: <_>::default(),
         }
     }
@@ -85,33 +94,39 @@ impl InterpreterData {
         last_call_request_id: u32,
         interpreter_version: semver::Version,
     ) -> Self {
+        let versions = Versions::new(interpreter_version);
+
         Self {
+            versions,
             trace,
             global_streams: streams,
-            version: crate::data_version().clone(),
             last_call_request_id,
             restricted_streams,
-            interpreter_version,
             cid_info,
         }
     }
 
     /// Tries to de InterpreterData from slice according to the data version.
-    pub fn try_from_slice(
-        slice: &[u8],
-        min_support_version: &semver::Version,
-    ) -> Result<Self, serde_json::Error> {
-        // treat empty slice as an empty interpreter data allows abstracting from
-        // the internal format for empty data.
-        if slice.is_empty() {
-            return Ok(Self::new(min_support_version.clone()));
-        }
-
+    pub fn try_from_slice(slice: &[u8]) -> Result<Self, serde_json::Error> {
         measure!(
             serde_json::from_slice(slice),
             tracing::Level::INFO,
             "serde_json::from_slice"
         )
+    }
+
+    /// Tries to de only versions part of interpreter data.
+    pub fn try_get_versions(slice: &[u8]) -> Result<Versions, serde_json::Error> {
+        serde_json::from_slice(slice)
+    }
+}
+
+impl Versions {
+    pub fn new(interpreter_version: semver::Version) -> Self {
+        Self {
+            data_version: crate::data_version().clone(),
+            interpreter_version,
+        }
     }
 }
 
@@ -134,62 +149,42 @@ mod tests {
     use serde::Serialize;
 
     #[test]
-    #[ignore] // TODO: fix tests
-    fn compatible_with_0_2_0_version() {
-        #[derive(Serialize, Deserialize)]
-        struct InterpreterData0_2_0 {
+    fn compatible_with_0_6_0_version() {
+        #[derive(Debug, Clone, Serialize, Deserialize)]
+        pub struct InterpreterData0_6_0 {
             pub trace: ExecutionTrace,
-            pub streams: GlobalStreamGens,
-            pub version: semver::Version,
-        }
-
-        // test 0.2.0 to 0.2.2 conversion
-        let data_0_2_0 = InterpreterData0_2_0 {
-            trace: ExecutionTrace::default(),
-            streams: GlobalStreamGens::default(),
-            version: semver::Version::new(0, 2, 0),
-        };
-
-        let data_0_2_0_se = serde_json::to_vec(&data_0_2_0).unwrap();
-        let data_0_2_1 = serde_json::from_slice::<InterpreterData>(&data_0_2_0_se);
-        assert!(data_0_2_1.is_ok());
-
-        // test 0.2.2 to 0.2.0 conversion
-        let data_0_2_2 = InterpreterData::new(semver::Version::new(1, 1, 1));
-        let data_0_2_2_se = serde_json::to_vec(&data_0_2_2).unwrap();
-        let data_0_2_0 = serde_json::from_slice::<InterpreterData0_2_0>(&data_0_2_2_se);
-        assert!(data_0_2_0.is_ok());
-    }
-
-    #[test]
-    #[ignore] // TODO: fix tests
-    fn compatible_with_0_2_1_version() {
-        #[derive(Serialize, Deserialize)]
-        struct InterpreterData0_2_1 {
-            pub trace: ExecutionTrace,
-            pub streams: GlobalStreamGens,
+            #[serde(rename = "streams")] // for compatibility with versions <= 0.2.1
+            pub global_streams: GlobalStreamGens,
             pub version: semver::Version,
             #[serde(default)]
             #[serde(rename = "lcid")]
             pub last_call_request_id: u32,
+            #[serde(default)]
+            #[serde(rename = "r_streams")]
+            pub restricted_streams: RestrictedStreamGens,
+            pub interpreter_version: semver::Version,
+            pub cid_info: CidInfo,
         }
 
-        // test 0.2.1 to 0.2.2 conversion
-        let data_0_2_1 = InterpreterData0_2_1 {
+        // test 0.6.0 to 0.6.1 conversion
+        let data_0_6_0 = InterpreterData0_6_0 {
             trace: ExecutionTrace::default(),
-            streams: GlobalStreamGens::default(),
-            version: semver::Version::new(0, 2, 1),
-            last_call_request_id: 1,
+            global_streams: GlobalStreamGens::default(),
+            version: semver::Version::new(0, 2, 0),
+            last_call_request_id: 0,
+            restricted_streams: RestrictedStreamGens::default(),
+            interpreter_version: semver::Version::new(0, 1, 1),
+            cid_info: CidInfo::default(),
         };
 
-        let data_0_2_1_se = serde_json::to_vec(&data_0_2_1).unwrap();
-        let data_0_2_2 = serde_json::from_slice::<InterpreterData>(&data_0_2_1_se);
-        assert!(data_0_2_2.is_ok());
+        let data_0_6_0_se = serde_json::to_vec(&data_0_6_0).unwrap();
+        let data_0_6_1 = serde_json::from_slice::<InterpreterData>(&data_0_6_0_se);
+        assert!(data_0_6_1.is_ok());
 
-        // test 0.2.2 to 0.2.1 conversion
-        let data_0_2_2 = InterpreterData::new(semver::Version::new(1, 1, 1));
-        let data_0_2_2_se = serde_json::to_vec(&data_0_2_2).unwrap();
-        let data_0_2_0 = serde_json::from_slice::<InterpreterData0_2_1>(&data_0_2_2_se);
-        assert!(data_0_2_0.is_ok());
+        // test 0.6.1 to 0.6.0 conversion
+        let data_0_6_1 = InterpreterData::new(semver::Version::new(1, 1, 1));
+        let data_0_6_1_se = serde_json::to_vec(&data_0_6_1).unwrap();
+        let data_0_6_0 = serde_json::from_slice::<InterpreterData0_6_0>(&data_0_6_1_se);
+        assert!(data_0_6_0.is_ok());
     }
 }

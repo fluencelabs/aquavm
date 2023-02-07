@@ -75,10 +75,20 @@ pub(crate) fn prepare<'i>(
 }
 
 fn try_to_data(raw_data: &[u8]) -> PreparationResult<InterpreterData> {
-    use PreparationError::DataDeFailed;
+    // treat empty slice as an empty data,
+    // it allows abstracting from an internal format for an empty data
+    if raw_data.is_empty() {
+        return Ok(InterpreterData::new(super::min_supported_version().clone()));
+    }
 
-    InterpreterData::try_from_slice(raw_data, super::min_supported_version())
-        .map_err(|err| DataDeFailed(err, raw_data.to_vec()))
+    InterpreterData::try_from_slice(raw_data).map_err(|de_error| to_date_de_error(raw_data.to_vec(), de_error))
+}
+
+fn to_date_de_error(raw_data: Vec<u8>, de_error: serde_json::Error) -> PreparationError {
+    match InterpreterData::try_get_versions(&raw_data) {
+        Ok(versions) => PreparationError::data_de_failed_with_versions(raw_data, de_error, versions),
+        Err(_) => PreparationError::data_de_failed(raw_data, de_error),
+    }
 }
 
 #[tracing::instrument(skip_all)]
@@ -89,16 +99,16 @@ fn make_exec_ctx(
     run_parameters: RunParameters,
 ) -> PreparationResult<ExecutionCtx<'static>> {
     let call_results = serde_json::from_slice(call_results)
-        .map_err(|e| PreparationError::CallResultsDeFailed(e, call_results.to_vec()))?;
+        .map_err(|e| PreparationError::call_results_de_failed(call_results.to_vec(), e))?;
 
     let ctx = ExecutionCtx::new(prev_ingredients, current_ingredients, call_results, run_parameters);
     Ok(ctx)
 }
 
 fn check_version_compatibility(data: &InterpreterData) -> PreparationResult<()> {
-    if &data.interpreter_version < super::min_supported_version() {
+    if &data.versions.interpreter_version < super::min_supported_version() {
         return Err(PreparationError::UnsupportedInterpreterVersion {
-            actual_version: data.interpreter_version.clone(),
+            actual_version: data.versions.interpreter_version.clone(),
             required_version: super::min_supported_version().clone(),
         });
     }

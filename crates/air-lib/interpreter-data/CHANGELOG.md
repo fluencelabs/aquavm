@@ -1,3 +1,8 @@
+## Version 0.6.1
+[PR](https://github.com/fluencelabs/aquavm/pull/451):  
+- move data and interpreter versions into a new structure
+- add new API to get versions from data
+
 ## Version 0.6.0
 [PR 419](https://github.com/fluencelabs/aquavm/pull/419):  
 - Rename data's `cid_store` field to `value_store`.
