@@ -111,7 +111,7 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter-data"
-version = "0.6.0"
+version = "0.6.1"
 dependencies = [
  "air-interpreter-cid",
  "air-interpreter-interface",
