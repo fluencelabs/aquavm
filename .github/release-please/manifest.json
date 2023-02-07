@@ -1,3 +1,5 @@
 {
-  "tools/cli/air-trace": "0.2.3"
+  "tools/cli/air-trace": "0.2.3",
+  "crates/air-lib/interpreter-data": "0.1.0",
+  "crates/air-lib/test-utils": "0.1.0"
 }

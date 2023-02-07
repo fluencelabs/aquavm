@@ -1,6 +1,6 @@
 [package]
 name = "air-test-utils"
-version = "0.4.1"
+version = "0.1.0"
 description = "Test utils for the AIR interpreter"
 authors = ["Fluence Labs"]
 edition = "2018"
