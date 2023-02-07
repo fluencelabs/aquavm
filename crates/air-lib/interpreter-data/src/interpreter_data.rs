@@ -33,7 +33,7 @@ use serde::Serialize;
 /// have the following format.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct InterpreterData {
-    /// Versions of data and interpreter produced this data.
+    /// Versions of data and an interpreter produced this data.
     #[serde(flatten)]
     pub versions: Versions,
 
@@ -67,7 +67,7 @@ pub struct Versions {
     #[serde(rename = "version")] // for compatibility with versions <= 0.6.0
     pub data_version: semver::Version,
 
-    /// Version of interpreter produced this data.
+    /// Version of an interpreter produced this data.
     pub interpreter_version: semver::Version,
 }
 
@@ -178,8 +178,8 @@ mod tests {
         };
 
         let data_0_6_0_se = serde_json::to_vec(&data_0_6_0).unwrap();
-        let data_0_7_1 = serde_json::from_slice::<InterpreterData>(&data_0_6_0_se);
-        assert!(data_0_7_1.is_ok());
+        let data_0_6_1 = serde_json::from_slice::<InterpreterData>(&data_0_6_0_se);
+        assert!(data_0_6_1.is_ok());
 
         // test 0.6.1 to 0.6.0 conversion
         let data_0_6_1 = InterpreterData::new(semver::Version::new(1, 1, 1));

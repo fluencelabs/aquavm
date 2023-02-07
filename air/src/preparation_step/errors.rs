@@ -35,7 +35,7 @@ pub enum PreparationError {
     /// Errors occurred on executed trace deserialization.
     #[error(
         "an error occurred while data deserialization: {error:?}.\n\
-        Your AquaVM's version is {} and it's expecting data of {} version,\
+        AquaVM version is {} and it expect data of {} version,\
         it's failed to get version of AquaVM produced this data.\n\
         data: {data:?}",
         super::interpreter_version(),
@@ -47,7 +47,7 @@ pub enum PreparationError {
     /// when it was possible to recover versions.
     #[error(
         "an error occurred while data deserialization: {error:?}.\n\
-        Your AquaVM's version is {} and it's expecting data of {} version.\n\
+        AquaVM's version is {} and it expects data of {} version.\n\
         Supplied data version is {}, it's produced by AquaVM of {} version.\n\
         Data: {data:?}",
         super::interpreter_version(),
