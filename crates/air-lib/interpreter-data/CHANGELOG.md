@@ -1,4 +1,4 @@
-## Version 0.7.0
+## Version 0.6.1
 [PR](https://github.com/fluencelabs/aquavm/pull/451):  
 - move data and interpreter versions into a new structure
 - add new API to get versions from data
