@@ -43,7 +43,8 @@ pub enum PreparationError {
     )]
     DataDeFailed { data: Vec<u8>, error: SerdeJsonError },
 
-    /// Errors occurred on executed trace deserialization.
+    /// Errors occurred on executed trace deserialization
+    /// when it was possible to recover versions.
     #[error(
         "an error occurred while data deserialization: {error:?}.\n\
         Your AquaVM's version is {} and it's expecting data of {} version.\n\
