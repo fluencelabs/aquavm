@@ -10,7 +10,7 @@ keywords = ["fluence", "air", "tracing"]
 
 [dependencies]
 air = { version = "0.35.0", path = "../../../air" }
-air-test-utils = { version = "0.1.0",path = "../../../crates/air-lib/test-utils", optional = true }
+air-test-utils = { version = "0.4.1",path = "../../../crates/air-lib/test-utils", optional = true }
 air-interpreter-interface = { version = "0.12.1", path = "../../../crates/air-lib/interpreter-interface", default-features = false }
 avm-data-store = { version = "0.4.1", path = "../../../crates/data-store" }
 avm-interface = { version = "0.28.1", path = "../../../avm/interface" }
