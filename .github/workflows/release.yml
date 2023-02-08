@@ -76,7 +76,7 @@ jobs:
       - name: Commit version bump
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: "chore: Bump air-interpreter-wasm version to ${{ steps.version.outputs.version }}"
+          commit_message: "chore: Bump air-interpreter version to ${{ steps.version.outputs.version }}"
           branch: ${{ fromJson(needs.release-please.outputs.pr).headBranchName }}
           commit_user_name: fluencebot
           commit_user_email: devops@fluence.one
@@ -89,7 +89,7 @@ jobs:
       - release-please
 
     permissions:
-      contents: read
+      contents: write
       id-token: write
 
     steps:
