@@ -151,7 +151,9 @@ jobs:
   avm-client:
     if: needs.release-please.outputs.air-interpreter-release-created
     runs-on: builder
-    needs: release-please
+    needs:
+      - release-please
+      - crates
 
     permissions:
       contents: read
@@ -210,7 +212,9 @@ jobs:
   air-interpreter-wasm:
     if: needs.release-please.outputs.air-interpreter-release-created
     runs-on: builder
-    needs: release-please
+    needs:
+      - release-please
+      - crates
 
     permissions:
       contents: read
@@ -266,7 +270,7 @@ jobs:
       - name: Install wasm-pack
         uses: jetli/wasm-pack-action@v0.4.0
 
-      - name: Build air_interpreter_server.wasm for node
+      - name: Build wasm
         working-directory: tools/wasm/air-beautify-wasm
         run: wasm-pack build --release -m force
 
