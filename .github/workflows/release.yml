@@ -305,9 +305,8 @@ jobs:
     needs:
       - release-please
       - crates
-      - air
+      - avm-client
       - air-interpreter-wasm
-      - air-interpreter
       - air-beautify-wasm
 
     permissions:
