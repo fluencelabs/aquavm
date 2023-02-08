@@ -16,7 +16,7 @@ doctest = false
 
 [dependencies]
 air-parser = { version = "0.7.2", path = "../crates/air-lib/air-parser" }
-air-execution-info-collector = { version = "0.1.0", path = "../crates/air-lib/execution-info-collector" }
+air-execution-info-collector = { version = "0.7.2", path = "../crates/air-lib/execution-info-collector" }
 air-interpreter-cid = { version = "0.2.0", path = "../crates/air-lib/interpreter-cid" }
 air-interpreter-data = { version = "0.1.0", path = "../crates/air-lib/interpreter-data" }
 air-interpreter-interface = { version = "0.12.1", path = "../crates/air-lib/interpreter-interface", default-features = false }
