@@ -85,7 +85,7 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter"
-version = "0.35.0"
+version = "0.35.3"
 dependencies = [
  "air",
  "air-interpreter-interface",
