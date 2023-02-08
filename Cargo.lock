@@ -78,7 +78,7 @@ dependencies = [
 
 [[package]]
 name = "air-execution-info-collector"
-version = "0.1.0"
+version = "0.7.2"
 dependencies = [
  "air-parser",
 ]
@@ -190,7 +190,7 @@ dependencies = [
 
 [[package]]
 name = "air-test-utils"
-version = "0.4.0"
+version = "0.4.1"
 dependencies = [
  "air",
  "air-interpreter-cid",
@@ -210,7 +210,7 @@ dependencies = [
 
 [[package]]
 name = "air-testing-framework"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "air-parser",
  "air-test-utils",
@@ -225,7 +225,7 @@ dependencies = [
 
 [[package]]
 name = "air-trace"
-version = "0.2.2"
+version = "0.2.3"
 dependencies = [
  "air",
  "air-interpreter-interface",
