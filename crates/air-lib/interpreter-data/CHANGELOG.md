@@ -1,13 +1,3 @@
-# Changelog
-
-## 0.6.2 (2023-02-07)
-
-### Features
-
-- **trace-handler:** improve data deserialization version check
-  ([#451](https://github.com/fluencelabs/aquavm/issues/451))
-  ([367546b](https://github.com/fluencelabs/aquavm/commit/367546b82cd5f133b956857bf48d279512b157b2))
-
 ## Version 0.6.1
 
 [PR](https://github.com/fluencelabs/aquavm/pull/451):

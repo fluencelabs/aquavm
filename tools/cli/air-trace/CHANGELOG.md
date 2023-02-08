@@ -1,7 +1,5 @@
 # Changelog
 
-
-
 ## [0.2.3](https://github.com/fluencelabs/aquavm/compare/air-trace-v0.2.2...air-trace-v0.2.3) (2023-02-06)
 
 
