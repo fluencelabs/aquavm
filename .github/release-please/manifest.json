@@ -1,6 +1,6 @@
 {
   "air": "0.35.0",
-  "air-interpreter": "0.35.0",
+  "air-interpreter": "0.35.3",
   "avm/interface": "0.28.1",
   "avm/server": "0.28.1",
   "crates/air-lib/air-parser": "0.7.2",
