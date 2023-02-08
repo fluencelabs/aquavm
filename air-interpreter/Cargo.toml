@@ -18,9 +18,9 @@ name = "air_interpreter_server"
 path = "src/marine.rs"
 
 [dependencies]
-air = { path = "../air" }
-air-interpreter-interface = { path = "../crates/air-lib/interpreter-interface" }
-air-log-targets = { path = "../crates/air-lib/log-targets" }
+air = { version = "0.35.0", path = "../air" }
+air-interpreter-interface = { version = "0.12.1", path = "../crates/air-lib/interpreter-interface" }
+air-log-targets = { version = "0.1.0", path = "../crates/air-lib/log-targets" }
 
 marine-rs-sdk = { version = "0.7.1", features = ["logger"] }
 

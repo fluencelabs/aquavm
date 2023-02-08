@@ -17,7 +17,7 @@ path = "src/lib.rs"
 lalrpop = "0.19.8"
 
 [dependencies]
-air-lambda-ast = { path = "../ast" }
+air-lambda-ast = { version = "0.1.0", path = "../ast" }
 
 lalrpop-util = "0.19.8"
 regex = "1.7.1"

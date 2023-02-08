@@ -9,6 +9,6 @@ publish = false
 keywords = ["fluence", "air", "beautifier"]
 
 [dependencies]
-air-beautifier = { path = "../../../crates/beautifier" }
+air-beautifier = { version = "0.1.1", path = "../../../crates/beautifier" }
 clap = { version = "4.1.4", features = ["derive"] }
 anyhow = "1.0.69"
