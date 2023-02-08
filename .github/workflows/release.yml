@@ -73,10 +73,20 @@ jobs:
         run: cargo set-version ${{ steps.version.outputs.version }}
         working-directory: crates/interpreter-wasm
 
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Set avm-client version
+        run: npm version ${{ steps.version.outputs.version }}
+        working-directory: avm/client
+
       - name: Commit version bump
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: "chore: Bump air-interpreter-wasm version to ${{ steps.version.outputs.version }}"
+          commit_message: "chore: Bump air-interpreter version to ${{ steps.version.outputs.version }}"
           branch: ${{ fromJson(needs.release-please.outputs.pr).headBranchName }}
           commit_user_name: fluencebot
           commit_user_email: devops@fluence.one
