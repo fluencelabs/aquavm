@@ -14,6 +14,7 @@ jobs:
 
     outputs:
       releases-created: ${{ steps.release.outputs.releases_created }}
+      pr: ${{ steps.release.outputs['pr'] }}
 
       air-interpreter-release-created: ${{ steps.release.outputs['air-interpreter--release_created'] }}
       air-interpreter-version: ${{ steps.release.outputs['air-interpreter--version'] }}
@@ -52,6 +53,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: ${{ fromJson(needs.release-please.outputs.pr).headBranchName }}
+          token: ${{ secrets.FLUENCEBOT_RELEASE_PLEASE_PAT }}
 
       - name: Setup Rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
@@ -64,7 +66,7 @@ jobs:
       - name: Get air-interpreter version
         id: version
         run: |
-          version="$(jq -r '.["air-nterpreter"]' .github/release-please/manifest.json)"
+          version="$(jq -r '.["air-interpreter"]' .github/release-please/manifest.json)"
           echo "version=${version}" >> $GITHUB_OUTPUT
 
       - name: Set air-interpreter-wasm version
