@@ -15,11 +15,8 @@ jobs:
     outputs:
       releases-created: ${{ steps.release.outputs.releases_created }}
 
-      air-release-created: ${{ steps.release.outputs['air--release_created'] }}
-      air-version: ${{ steps.release.outputs['air--version'] }}
-      air-tag-name: ${{ steps.release.outputs['air--tag_name'] }}
-
       air-interpreter-release-created: ${{ steps.release.outputs['air-interpreter--release_created'] }}
+      air-interpreter-version: ${{ steps.release.outputs['air-interpreter--version'] }}
       air-interpreter-tag-name: ${{ steps.release.outputs['air-interpreter--tag_name'] }}
 
       air-beautify-wasm-release-created: ${{ steps.release.outputs['tools/wasm/air-beautify-wasm--release_created'] }}
@@ -41,6 +38,47 @@ jobs:
           RELEASE_PLEASE_OUTPUT: ${{ toJSON(steps.release.outputs) }}
         run: echo "${RELEASE_PLEASE_OUTPUT}" | jq
 
+  bump-version:
+    if: needs.release-please.outputs.pr != null
+    runs-on: builder
+    needs:
+      - release-please
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ fromJson(needs.release-please.outputs.pr).headBranchName }}
+
+      - name: Setup Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Install cargo-edit
+        uses: baptiste0928/cargo-install@v1.3.0
+        with:
+          crate: cargo-edit
+
+      - name: Get air-interpreter version
+        id: version
+        run: |
+          version="$(jq -r '.["air-nterpreter"]' .github/release-please/manifest.json)"
+          echo "version=${version}" >> $GITHUB_OUTPUT
+
+      - name: Set air-interpreter-wasm version
+        run: cargo set-version ${{ steps.version.outputs.version }}
+        working-directory: crates/interpreter-wasm
+
+      - name: Commit version bump
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "chore: Bump air-interpreter-wasm version to ${{ steps.version.outputs.version }}"
+          branch: ${{ fromJson(needs.release-please.outputs.pr).headBranchName }}
+          commit_user_name: fluencebot
+          commit_user_email: devops@fluence.one
+          commit_author: fluencebot <devops@fluence.one>
 
   crates:
     if: needs.release-please.outputs.releases-created
@@ -72,36 +110,6 @@ jobs:
       - name: Setup Rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
 
-      - name: Install cargo-workspaces
-        uses: baptiste0928/cargo-install@v1.3.0
-        with:
-          crate: cargo-workspaces
-
-      - name: Publish to crates.io
-        run: |
-          cargo ws publish \
-            --no-git-commit \
-            --allow-dirty \
-            --from-git \
-            --skip-published \
-            --yes
-
-  air-interpreter:
-    runs-on: builder
-    needs:
-      - release-please
-
-    permissions:
-      contents: write
-      id-token: write
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Setup Rust toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-
       - name: Install marine
         uses: baptiste0928/cargo-install@v1.3.0
         with:
@@ -124,12 +132,24 @@ jobs:
           files: target/wasm32-wasi/release/air_interpreter_server.wasm
           tag_name: ${{ needs.release-please.outputs.air-interpreter-tag-name }}
 
-  air:
-    if: needs.release-please.outputs.air-release-created
+      - name: Install cargo-workspaces
+        uses: baptiste0928/cargo-install@v1.3.0
+        with:
+          crate: cargo-workspaces
+
+      - name: Publish to crates.io
+        run: |
+          cargo ws publish \
+            --no-git-commit \
+            --allow-dirty \
+            --from-git \
+            --skip-published \
+            --yes
+
+  avm-client:
+    if: needs.release-please.outputs.air-interpreter-release-created
     runs-on: builder
-    needs:
-      - release-please
-      - air-interpreter
+    needs: release-please
 
     permissions:
       contents: read
@@ -186,11 +206,9 @@ jobs:
         working-directory: avm/client
 
   air-interpreter-wasm:
-    if: needs.release-please.outputs.air-release-created
+    if: needs.release-please.outputs.air-interpreter-release-created
     runs-on: builder
-    needs:
-      - release-please
-      - air-interpreter
+    needs: release-please
 
     permissions:
       contents: read
@@ -221,11 +239,6 @@ jobs:
           exportToken: false
           secrets: |
             kv/crates.io/fluencebot token | CARGO_REGISTRY_TOKEN
-
-      - name: Set air-interpreter-wasm version
-        working-directory: crates/interpreter-wasm
-        run: |
-          sed -i 's/version = ".*"/version = "${{ needs.release-please.outputs.air-version }}"/g' Cargo.toml
 
       - name: Publish to crates.io
         run: cargo publish --allow-dirty
