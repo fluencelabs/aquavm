@@ -3,45 +3,64 @@
         (seq
             (seq
                 (seq
-                    (call "{0}" ("" "") ["stream_1"] stream_1_ingredients)
-                    (call "{0}" ("" "") ["stream_2"] stream_2_ingredients))
-                (call "{0}" ("" "") ["stream_3"] stream_3_ingredients))
-            (call "{0}" ("" "") ["stream_4"] stream_4_ingredients))
-        (seq
+                    (ap "a1" $stream_1)
+                    (ap "a2" $stream_1)
+                )
+                (seq
+                    (ap "b1" $stream_2)
+                    (ap "b2" $stream_2)
+                )
+            )
             (seq
-                (seq
-                    (fold stream_1_ingredients v1
-                        (seq
-                            (call "{1}" ("" "") [v1] $stream_1)
-                            (next v1)))
-                    (fold stream_2_ingredients v2
-                        (seq
-                            (call "{1}" ("" "") [v2] $stream_2)
-                            (next v2))))
-                (fold stream_3_ingredients v3
-                    (seq
-                        (call "{1}" ("" "") [v3] $stream_3)
-                        (next v3))))
-            (fold stream_4_ingredients v4
-                (seq
-                    (call "{1}" ("" "") [v4] $stream_4)
-                    (next v4)))))
+                (ap "c1" $stream_3)
+                (ap "c2" $stream_3)
+            )
+        )
+        (seq
+            (ap "d1" $stream_4)
+            (ap "d2" $stream_4)
+        )
+    )
     (par
-        (xor
-            (fold $stream_1 v1
-                (seq
-                    (fold $stream_2 v2
-                        (seq
-                            (seq
-                                (fold $stream_3 v3
-                                    (par
-                                        (fold $stream_4 v4
+        (par
+            (xor
+                (fold $stream_1 v1
+                    (seq
+                        (fold $stream_2 v2
+                            (xor
+                                (seq
+                                    (seq
+                                        (fold $stream_3 v3
                                             (par
-                                                (call "{2}" ("" "") [])
-                                                (next v4)))
-                                        (next v3)))
-                                (call "{3}" ("error" "") [])) ; will trigger an error
-                            (next v2)))
-                    (next v1)))
-            (call "{4}" ("" "") [%last_error%]))
-        (call "{5}" ("" "") ["last_peer"])))
+                                                (fold $stream_4 v4
+                                                    (par
+                                                        (call "{fold_executor_id}" ("" "") [])
+                                                        (next v4)
+                                                    )
+                                                )
+                                                (next v3)))
+                                        (call "{error_trigger_id}" ("error" "") []) ; will trigger an error
+                                    )
+                                    (next v2)
+                                )
+                                (ap %last_error% $error_stream)
+                            )
+                        )
+                        (next v1)
+                    )
+                )
+                (call "{last_error_receiver_id}" ("" "") [%last_error%]) ; shouldn't be called
+            )
+            (seq
+                (call "{last_peer_checker_id}" ("" "") ["last_peer 2"])
+                (fold $error_stream error
+                    (seq
+                        (call "{last_peer_checker_id}" ("" "") [error])
+                        (next error)
+                    )
+                )
+            )
+        )
+        (call "{last_peer_checker_id}" ("" "") ["last_peer"])
+    )
+)

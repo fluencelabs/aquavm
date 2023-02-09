@@ -15,34 +15,23 @@
  */
 
 use super::ExecutionCtx;
-use super::ExecutionResult;
 
 pub(super) struct FoldGenerationObserver {
-    subtree_complete: bool,
-    // keeps either Ok or the last met error
-    result: ExecutionResult<()>,
+    subgraph_complete: bool,
 }
 
 impl FoldGenerationObserver {
     pub(super) fn new() -> Self {
         Self {
-            subtree_complete: false,
-            result: Ok(()),
+            subgraph_complete: false,
         }
     }
 
-    pub(super) fn observe_generation_results(&mut self, completeness: bool, result: ExecutionResult<()>) {
-        self.subtree_complete |= completeness;
-        if result.is_err() {
-            self.result = result;
-        }
+    pub(super) fn observe_completeness(&mut self, completeness: bool) {
+        self.subgraph_complete |= completeness;
     }
 
-    pub(super) fn update_completeness(&self, exec_ctx: &mut ExecutionCtx<'_>) {
-        exec_ctx.set_subgraph_completeness(self.subtree_complete);
-    }
-
-    pub(super) fn into_result(self) -> ExecutionResult<()> {
-        self.result
+    pub(super) fn update_completeness(self, exec_ctx: &mut ExecutionCtx<'_>) {
+        exec_ctx.set_subgraph_completeness(self.subgraph_complete);
     }
 }

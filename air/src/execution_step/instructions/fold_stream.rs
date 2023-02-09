@@ -70,7 +70,7 @@ impl<'i> ExecutableInstruction<'i> for FoldStream<'i> {
 
         observer.update_completeness(exec_ctx);
         trace_to_exec_err!(trace_ctx.meet_fold_end(fold_id), self)?;
-        observer.into_result()
+        Ok(())
     }
 }
 
@@ -106,8 +106,10 @@ fn execute_iterations<'i>(
             exec_ctx,
             trace_ctx,
         );
+        throw_error_if_not_catchable(result)?;
         trace_to_exec_err!(trace_ctx.meet_generation_end(fold_id), fold_stream)?;
-        generation_observer.observe_generation_results(exec_ctx.is_subgraph_complete(), result);
+
+        generation_observer.observe_completeness(exec_ctx.is_subgraph_complete());
     }
 
     Ok(())
@@ -127,4 +129,14 @@ fn remove_new_generation_if_non_empty<'ctx>(
     let stream = exec_ctx.streams.get_mut(stream.name, stream.position).unwrap();
     stream.remove_last_generation_if_empty();
     stream
+}
+
+/// Fold over streams doesn't throw an error if it's a catchable one, because otherwise it would be
+/// not deterministic.
+fn throw_error_if_not_catchable(result: ExecutionResult<()>) -> ExecutionResult<()> {
+    match result {
+        Ok(_) => Ok(()),
+        Err(error) if error.is_catchable() => Ok(()),
+        error @ Err(_) => error,
+    }
 }

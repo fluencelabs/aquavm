@@ -179,58 +179,33 @@ fn par_early_exit() {
 
 #[test]
 fn fold_early_exit() {
-    let variables_setter_id = "set_variable_id";
-    let stream_setter_id = "stream_setter_id";
     let fold_executor_id = "fold_executor_id";
     let error_trigger_id = "error_trigger_id";
     let last_error_receiver_id = "last_error_receiver_id";
     let last_peer_checker_id = "last_peer_checker_id";
 
-    let variables = maplit::hashmap!(
-        "stream_1".to_string() => json!(["a1", "a2"]),
-        "stream_2".to_string() => json!(["b1", "b2"]),
-        "stream_3".to_string() => json!(["c1", "c2"]),
-        "stream_4".to_string() => json!(["d1", "d2"]),
-    );
-
-    let mut variables_setter = create_avm(
-        set_variables_call_service(variables, VariableOptionSource::Argument(0)),
-        variables_setter_id,
-    );
-    let mut stream_setter = create_avm(echo_call_service(), stream_setter_id);
     let mut fold_executor = create_avm(unit_call_service(), fold_executor_id);
     let mut error_trigger = create_avm(fallible_call_service("error"), error_trigger_id);
-    let mut last_error_receiver = create_avm(echo_call_service(), last_error_receiver_id);
     let mut last_peer_checker = create_avm(echo_call_service(), last_peer_checker_id);
 
     let script = format!(
         include_str!("scripts/fold_early_exit.air"),
-        variables_setter_id,
-        stream_setter_id,
-        fold_executor_id,
-        error_trigger_id,
-        last_error_receiver_id,
-        last_peer_checker_id
+        fold_executor_id = fold_executor_id,
+        error_trigger_id = error_trigger_id,
+        last_error_receiver_id = last_error_receiver_id,
+        last_peer_checker_id = last_peer_checker_id
     );
 
-    let variables_setter_result = checked_call_vm!(variables_setter, <_>::default(), &script, "", "");
-    let stream_setter_result =
-        checked_call_vm!(stream_setter, <_>::default(), &script, "", variables_setter_result.data);
-    let fold_executor_result = checked_call_vm!(fold_executor, <_>::default(), &script, "", stream_setter_result.data);
+    let fold_executor_result = checked_call_vm!(fold_executor, <_>::default(), &script, "", "");
     let error_trigger_result = checked_call_vm!(error_trigger, <_>::default(), &script, "", fold_executor_result.data);
-    let last_error_receiver_result = checked_call_vm!(
-        last_error_receiver,
-        <_>::default(),
-        &script,
-        "",
-        error_trigger_result.data
-    );
+    let fold_executor_result = checked_call_vm!(fold_executor, <_>::default(), &script, "", error_trigger_result.data);
+    let error_trigger_result = checked_call_vm!(error_trigger, <_>::default(), &script, "", fold_executor_result.data);
     let last_peer_checker_result = checked_call_vm!(
         last_peer_checker,
         <_>::default(),
         &script,
         "",
-        last_error_receiver_result.data
+        error_trigger_result.data
     );
     let actual_trace = trace_from_result(&last_peer_checker_result);
 
@@ -240,8 +215,11 @@ fn fold_early_exit() {
                 "message": r#"Local service error, ret_code is 1, error message is '"failed result from fallible_call_service"'"#,
                 "peer_id": "error_trigger_id"}));
 
-    let xor_right_subgraph_state_id = actual_trace.len() - 2;
-    assert_eq!(&actual_trace[xor_right_subgraph_state_id.into()], &expected_state);
+    let bubbled_error_from_stream_1 = actual_trace.len() - 3;
+    assert_eq!(&actual_trace[bubbled_error_from_stream_1.into()], &expected_state);
+
+    let bubbled_error_from_stream_2 = actual_trace.len() - 2;
+    assert_eq!(&actual_trace[bubbled_error_from_stream_2.into()], &expected_state);
 }
 
 #[test]
