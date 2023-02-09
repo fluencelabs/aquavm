@@ -11,5 +11,3 @@ categories = ["wasm"]
 [lib]
 name = "air_utils"
 path = "src/lib.rs"
-
-[dependencies]

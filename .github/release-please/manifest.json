@@ -1,3 +1,20 @@
 {
-  "tools/cli/air-trace": "0.2.3"
+  "air": "0.35.4",
+  "air-interpreter": "0.35.4",
+  "avm/interface": "0.28.1",
+  "avm/server": "0.28.1",
+  "avm/client": "0.35.4",
+  "crates/air-lib/air-parser": "0.7.2",
+  "crates/air-lib/execution-info-collector": "0.7.2",
+  "crates/air-lib/interpreter-cid": "0.2.0",
+  "crates/air-lib/interpreter-data": "0.6.2",
+  "crates/air-lib/test-utils": "0.4.2",
+  "crates/air-lib/trace-handler": "0.1.1",
+  "crates/air-lib/utils": "0.1.0",
+  "crates/beautifier": "0.1.1",
+  "crates/data-store": "0.4.1",
+  "crates/testing-framework": "0.1.2",
+  "tools/cli/air-beautify": "0.1.1",
+  "tools/cli/air-trace": "0.2.4",
+  "tools/wasm/air-beautify-wasm": "0.1.0"
 }

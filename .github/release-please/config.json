@@ -5,15 +5,15 @@
   "bump-patch-for-minor-pre-major": true,
   "plugins": [
     {
-      "type": "cargo-workspace",
-      "merge": false
+      "type": "cargo-workspace"
     },
     {
       "type": "linked-versions",
-      "groupName": "air and air-interpreter",
+      "groupName": "air-interpreter",
       "components": [
         "air",
-        "air-interpreter"
+        "air-interpreter",
+        "avm-client"
       ]
     },
     {
@@ -32,6 +32,10 @@
     },
     "air-interpreter": {
       "component": "air-interpreter"
+    },
+    "avm/client": {
+      "release-type": "node",
+      "component": "avm-client"
     },
     "avm/interface": {},
     "avm/server": {},

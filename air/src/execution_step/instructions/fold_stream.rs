@@ -131,7 +131,7 @@ fn remove_new_generation_if_non_empty<'ctx>(
     stream
 }
 
-/// Fold over streams doesn't throw an error if it not catchable, because otherwise it would be
+/// Fold over streams doesn't throw an error if it's a catchable one, because otherwise it would be
 /// not deterministic.
 fn throw_error_if_not_catchable(result: ExecutionResult<()>) -> ExecutionResult<()> {
     match result {
