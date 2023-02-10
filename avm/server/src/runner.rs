@@ -21,10 +21,10 @@ use air_interpreter_interface::InterpreterOutcome;
 use air_utils::measure;
 use avm_interface::raw_outcome::RawAVMOutcome;
 use avm_interface::CallResults;
-use marine::{DefaultMarine, DefaultWasmBackend, IValue};
 use marine::Marine;
 use marine::MarineConfig;
 use marine::ModuleDescriptor;
+use marine::{DefaultMarine, DefaultWasmBackend, IValue};
 
 use std::path::PathBuf;
 
