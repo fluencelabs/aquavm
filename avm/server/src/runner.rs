@@ -21,7 +21,7 @@ use air_interpreter_interface::InterpreterOutcome;
 use air_utils::measure;
 use avm_interface::raw_outcome::RawAVMOutcome;
 use avm_interface::CallResults;
-use marine::IValue;
+use marine::{DefaultMarine, DefaultWasmBackend, IValue};
 use marine::Marine;
 use marine::MarineConfig;
 use marine::ModuleDescriptor;
@@ -29,7 +29,7 @@ use marine::ModuleDescriptor;
 use std::path::PathBuf;
 
 pub struct AVMRunner {
-    marine: Marine,
+    marine: DefaultMarine,
     /// file name of the AIR interpreter .wasm
     wasm_filename: String,
 }
@@ -152,7 +152,7 @@ impl AVMRunner {
         Ok(outcome)
     }
 
-    pub fn memory_stats(&self) -> AVMMemoryStats {
+    pub fn memory_stats(&mut self) -> AVMMemoryStats {
         let stats = self.marine.module_memory_stats();
 
         // only the interpreters must be loaded in Marine
@@ -239,7 +239,7 @@ fn make_marine_config(
     air_wasm_file: &str,
     max_heap_size: Option<u64>,
     logging_mask: i32,
-) -> MarineConfig {
+) -> MarineConfig<DefaultWasmBackend> {
     let air_module_config = marine::MarineModuleConfig {
         mem_pages_count: None,
         max_heap_size,
