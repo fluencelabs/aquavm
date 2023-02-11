@@ -18,4 +18,4 @@ non-empty-vec = { version = "0.2.3", features = ["serde"] }
 itertools = "0.10.5"
 
 serde = { version = "1.0.152", features = ["rc", "derive"] }
-serde_json = "1.0.92"
+serde_json = "1.0.93"
