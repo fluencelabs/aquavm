@@ -27,7 +27,7 @@ class TextReporter:
 
     def save_text_report(self, file):
         """Save report to the file."""
-        for machine_id, machine in sorted_items(self.data):
+        for machine_id, machine in _sorted_items(self.data):
             _print_indent("Machine {}:".format(machine_id),
                           indent=0, file=file)
             self._save_machine(machine,  file=file)
@@ -43,7 +43,7 @@ class TextReporter:
         _print_indent("Benches:", indent=indent, file=file)
 
         nested_indent = indent + self.indent_step
-        for bench_name, bench in sorted_items(machine["benches"]):
+        for bench_name, bench in _sorted_items(machine["benches"]):
             self._save_bench(
                 bench_name, bench, indent=nested_indent, file=file)
 
@@ -52,7 +52,7 @@ class TextReporter:
             "{} ({}): {}".format(
                 bench_name, bench["total_time"], bench["comment"]),
             indent=indent, file=file)
-        for fname, stats in sorted_items(bench["stats"]):
+        for fname, stats in _sorted_items(bench["stats"]):
             self._save_stats(fname, stats, indent + self.indent_step, file)
 
     def _save_stats(self, fname, stats, indent, file):
@@ -63,7 +63,7 @@ class TextReporter:
                 "{}: {}".format(fname, duration),
                 indent=indent,
                 file=file)
-            for nested_fname, nested_stats in sorted_items(stats["nested"]):
+            for nested_fname, nested_stats in _sorted_items(stats["nested"]):
                 self._save_stats(nested_fname, nested_stats,
                                  indent=(indent + self.indent_step), file=file)
         else:
@@ -75,5 +75,5 @@ class TextReporter:
 def _print_indent(line, indent, file):
     print("{:<{indent}}{}".format("", line, indent=indent), file=file)
 
-def sorted_items(d):
+def _sorted_items(d):
     return sorted(d.items(), key=lambda pair: pair[0])
