@@ -129,7 +129,7 @@ dependencies = [
 name = "air-interpreter-interface"
 version = "0.12.1"
 dependencies = [
- "fluence-it-types",
+ "fluence-it-types 0.4.0",
  "marine-rs-sdk",
  "serde",
  "serde_json",
@@ -1212,6 +1212,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "fluence-it-types"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d57951373d9ece94e8494a7b2f8a3772c56e290a7b7972a24eaecd7292b11083"
+dependencies = [
+ "it-to-bytes",
+ "serde",
+ "variant_count",
+]
+
+[[package]]
 name = "fnv"
 version = "1.0.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1490,7 +1501,7 @@ version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "59726dde6ea2df9ad15bb67341103879cb94f26642ee0e40bf9a426f8e69bec8"
 dependencies = [
- "fluence-it-types",
+ "fluence-it-types 0.3.2",
  "it-memory-traits",
  "log",
  "paste",
@@ -3174,7 +3185,7 @@ version = "0.24.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ba2a3bf176a65a5a1a136be5b9440395c2ba4493a3a07ea70cac553fe924185d"
 dependencies = [
- "fluence-it-types",
+ "fluence-it-types 0.3.2",
  "it-lilo",
  "it-memory-traits",
  "it-to-bytes",
