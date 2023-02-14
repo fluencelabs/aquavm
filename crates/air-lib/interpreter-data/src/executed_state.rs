@@ -51,10 +51,12 @@ pub enum CallResult {
     RequestSentBy(Sender),
 
     /// A corresponding call's been already executed with such value as a result.
-    Executed(ValueRef),
+    Executed(Rc<CID<ServiceResultAggregate>>),
 
     /// call_service ended with a service error.
     #[serde(rename = "failed")]
+    // TODO: Rc<CID<ServiceResultAggregate>> that has two fields.
+    // TODO: separate store for them?
     CallServiceFailed(i32, Rc<String>),
 }
 
@@ -66,6 +68,18 @@ pub enum ValueRef {
         cid: Rc<CID<JValue>>,
         generation: u32,
     },
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+/// A proof of service result execution result.
+pub struct ServiceResultAggregate {
+    /// CID reference to value store.
+    value: ValueRef,
+    /// Hash of the call arguments.
+    argument_hash: String,
+    /// The tetraplet of the call result.
+    tetraplet: Rc<CID<SecurityTetraplet>>,
 }
 
 /// Let's consider an example of trace that could be produces by the following fold:

@@ -16,6 +16,7 @@
 
 use super::GlobalStreamGens;
 use super::RestrictedStreamGens;
+use crate::ServiceResultAggregate;
 use crate::cid_store::CidStore;
 use crate::CanonCidAggregate;
 use crate::ExecutionTrace;
@@ -132,13 +133,16 @@ impl Versions {
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct CidInfo {
-    /// Map CID to value
+    /// Map CID to value.
     pub value_store: CidStore<JValue>,
 
-    /// Map CID to a tetraplet
+    /// Map CID to a tetraplet.
     pub tetraplet_store: CidStore<SecurityTetraplet>,
 
-    /// Map CID to a canon value
+    /// Map CID to a service result aggregate.
+    pub service_result_store: CidStore<ServiceResultAggregate>,
+
+    /// Map CID to a canon value.
     pub canon_store: CidStore<CanonCidAggregate>,
 }
 

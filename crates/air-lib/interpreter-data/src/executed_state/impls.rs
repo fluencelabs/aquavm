@@ -15,7 +15,7 @@
  */
 
 use super::*;
-use crate::JValue;
+use crate::{JValue, CidTracker};
 
 impl ParResult {
     pub fn new(left_size: u32, right_size: u32) -> Self {
@@ -42,16 +42,47 @@ impl CallResult {
         CallResult::RequestSentBy(Sender::PeerIdWithCallId { peer_id, call_id })
     }
 
-    pub fn executed_scalar(cid: Rc<CID<JValue>>) -> CallResult {
-        let value = ValueRef::Scalar(cid);
-
-        CallResult::Executed(value)
+    pub fn executed_service_result(
+        service_result_id: Rc<CID<ServiceResultAggregate>>,
+    ) -> Self {
+        Self::Executed(service_result_id)
     }
 
-    pub fn executed_stream(cid: Rc<CID<JValue>>, generation: u32) -> CallResult {
-        let value = ValueRef::Stream { cid, generation };
+    pub fn executed_scalar(
+        cid: Rc<CID<JValue>>,
+        argument_hash: String,
+        tetraplet_cid: Rc<CID<SecurityTetraplet>>,
+        service_result_tracker: &mut CidTracker<ServiceResultAggregate>,
+    ) -> Self {
+        let value = ValueRef::Scalar(cid);
+        let service_result = ServiceResultAggregate {
+            value,
+            argument_hash,
+            tetraplet: tetraplet_cid,
+        };
+        let service_result_cid = service_result_tracker.record_value(service_result)
+            .expect("Failed to calculate a CID of service result.");
 
-        CallResult::Executed(value)
+        Self::executed_service_result(service_result_cid)
+    }
+
+    pub fn executed_stream(
+        cid: Rc<CID<JValue>>,
+        argument_hash: String,
+        tetraplet_cid: Rc<CID<SecurityTetraplet>>,
+        service_result_tracker: &mut CidTracker<ServiceResultAggregate>,
+        generation: u32
+    ) -> CallResult {
+        let value = ValueRef::Stream { cid, generation };
+        let service_result = ServiceResultAggregate {
+            value,
+            argument_hash,
+            tetraplet: tetraplet_cid,
+        };
+        let service_result_cid = service_result_tracker.record_value(service_result)
+            .expect("Failed to calculate a CID of service result.");
+
+        Self::executed_service_result(service_result_cid)
     }
 
     pub fn failed(ret_code: i32, error_msg: impl Into<String>) -> CallResult {
@@ -108,7 +139,7 @@ impl std::fmt::Display for ExecutedState {
             }) => write!(f, "par({left_subgraph_size}, {right_subgraph_size})"),
             Call(RequestSentBy(sender)) => write!(f, r"{sender}"),
             Call(Executed(value)) => {
-                write!(f, "executed({value})")
+                write!(f, "executed({value:?})")
             }
             Call(CallServiceFailed(ret_code, err_msg)) => {
                 write!(f, r#"call_service_failed({ret_code}, "{err_msg}")"#)
