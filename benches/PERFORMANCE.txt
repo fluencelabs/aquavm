@@ -1,3 +1,85 @@
+Machine 0dfa4f098d7a6ef0d77a7bbc028ccf65fd6dc8d37be8a466ab3933a1a4a8e113:
+  Platform: macOS-11.7.3-x86_64-i386-64bit
+  Timestamp: 2023-02-14 04:31:01.303450+00:00
+  AquaVM version: 0.35.1
+  Benches:
+    big_values_data (14.17ms): Loading a trace with huge values
+      air::runner::execute_air: 14.17ms
+        farewell_step::outcome::from_success_result: 6.08ms
+          populate_outcome_from_contexts: 6.00ms
+            to_vec(call_results): 17.00µs
+            to_vec(data): 4.95ms
+        preparation_step::preparation::prepare: 7.87ms
+          air::preparation_step::preparation::make_exec_ctx: 40.00µs
+          air_interpreter_data::interpreter_data::serde_json::from_slice: 7.61ms
+          air_parser::parser::air_parser::parse: 66.00µs
+        runner::execute: 18.00µs
+    dashboard (89.32ms): big dashboard test
+      air::runner::execute_air: 89.32ms
+        farewell_step::outcome::from_success_result: 469.00µs
+          populate_outcome_from_contexts: 415.00µs
+            to_vec(call_results): 33.00µs
+            to_vec(data): 215.00µs
+        preparation_step::preparation::prepare: 1.06ms
+          air::preparation_step::preparation::make_exec_ctx: 56.00µs
+          air_interpreter_data::interpreter_data::serde_json::from_slice: 589.00µs
+          air_parser::parser::air_parser::parse: 233.00µs
+        runner::execute: 87.58ms
+          execute: 78.38ms
+            execute: 7.91ms
+              instructions::call::resolved_call::prepare_request_params: 678.00µs
+                instructions::call::resolved_call::serde_json::to_string(tetraplets): 36.00µs
+                resolver::resolve::resolve_ast_variable: 416.00µs
+                  resolve_variable: 131.00µs
+              resolver::resolve::resolve_ast_variable: 1.09ms
+                resolve_variable: 362.00µs
+            new: 50.99ms
+              resolve_ast_scalar: 37.72ms
+                resolve_ast_variable: 23.15ms
+                  resolve_variable: 7.40ms
+    long_data (4.44ms): Long data trace
+      air::runner::execute_air: 4.44ms
+        farewell_step::outcome::from_success_result: 1.32ms
+          populate_outcome_from_contexts: 1.24ms
+            to_vec(call_results): 23.00µs
+            to_vec(data): 672.00µs
+        preparation_step::preparation::prepare: 2.88ms
+          air::preparation_step::preparation::make_exec_ctx: 64.00µs
+          air_interpreter_data::interpreter_data::serde_json::from_slice: 2.59ms
+          air_parser::parser::air_parser::parse: 63.00µs
+        runner::execute: 22.00µs
+    network_explore (8.09ms): 5 peers of network are discovered
+      air::runner::execute_air: 8.09ms
+        farewell_step::outcome::from_success_result: 256.00µs
+          populate_outcome_from_contexts: 198.00µs
+            to_vec(call_results): 21.00µs
+            to_vec(data): 62.00µs
+        preparation_step::preparation::prepare: 661.00µs
+          air::preparation_step::preparation::make_exec_ctx: 60.00µs
+          air_interpreter_data::interpreter_data::serde_json::from_slice: 244.00µs
+          air_parser::parser::air_parser::parse: 174.00µs
+        runner::execute: 6.94ms
+          execute: 6.12ms
+            execute: 1.02ms
+              resolve_ast_variable: 393.00µs
+                resolve_variable: 124.00µs
+            new: 3.57ms
+              resolve_ast_scalar: 2.61ms
+                resolve_ast_variable: 1.60ms
+                  resolve_variable: 517.00µs
+    parser_10000_100 (32.25ms): Running very long AIR script with lot of variables and assignments
+      air::runner::execute_air: 32.25ms
+        farewell_step::outcome::from_success_result: 202.00µs
+          populate_outcome_from_contexts: 152.00µs
+            to_vec(call_results): 17.00µs
+            to_vec(data): 45.00µs
+        preparation_step::preparation::prepare: 29.95ms
+          air::preparation_step::preparation::make_exec_ctx: 49.00µs
+          air_parser::parser::air_parser::parse: 29.74ms
+        runner::execute: 264.00µs
+          execute: 169.00µs
+            execute: 29.00µs
+            new: 40.00µs
 Machine 5fce753d17dde8b439ef04cdbce135789eb44646c753548ad79a37b88cf17f0a:
   Platform: macOS-12.3.1-arm64-arm-64bit
   Timestamp: 2023-02-13 16:59:20.507375+00:00
