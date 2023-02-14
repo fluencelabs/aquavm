@@ -18,7 +18,7 @@ path = "src/lib.rs"
 air-interpreter-interface = { version = "0.12.1", path = "../../crates/air-lib/interpreter-interface" }
 air-utils = { version = "0.1.0", path = "../../crates/air-lib/utils" }
 avm-data-store = { version = "0.4.1", path = "../../crates/data-store" }
-marine-runtime = "0.24.0"
+marine-runtime = {version = "0.24.0", branch = "marine-web-milestone2", git = "https://github.com/fluencelabs/marine"}
 polyplets = { version = "0.3.2", path = "../../crates/air-lib/polyplets" }
 avm-interface = { version = "0.28.0", path = "../../avm/interface" }
 

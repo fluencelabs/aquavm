@@ -164,7 +164,7 @@ dependencies = [
 name = "air-interpreter-interface"
 version = "0.12.1"
 dependencies = [
- "fluence-it-types",
+ "fluence-it-types 0.4.0",
  "marine-rs-sdk",
  "serde",
  "serde_json",
@@ -1545,11 +1545,22 @@ name = "fluence-it-types"
 version = "0.3.2"
 source = "git+https://github.com/fluencelabs/interface-types?branch=feat/add-store#4f73d5e069f823c6d0272fa63bfc7001c966915d"
 dependencies = [
- "it-to-bytes",
+ "it-to-bytes 0.1.0 (git+https://github.com/fluencelabs/interface-types?branch=feat/add-store)",
  "nom",
  "serde",
  "variant_count",
  "wast 8.0.0",
+]
+
+[[package]]
+name = "fluence-it-types"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d57951373d9ece94e8494a7b2f8a3772c56e290a7b7972a24eaecd7292b11083"
+dependencies = [
+ "it-to-bytes 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde",
+ "variant_count",
 ]
 
 [[package]]
@@ -1849,7 +1860,7 @@ name = "it-lilo"
 version = "0.4.1"
 source = "git+https://github.com/fluencelabs/interface-types?branch=feat/add-store#4f73d5e069f823c6d0272fa63bfc7001c966915d"
 dependencies = [
- "fluence-it-types",
+ "fluence-it-types 0.3.2",
  "it-memory-traits",
  "log",
  "paste",
@@ -1863,6 +1874,12 @@ source = "git+https://github.com/fluencelabs/interface-types?branch=feat/add-sto
 dependencies = [
  "thiserror",
 ]
+
+[[package]]
+name = "it-to-bytes"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "729c74bb4236418898a219c6d96f14cba77456dd7c04a2e99e65e9c643709b56"
 
 [[package]]
 name = "it-to-bytes"
@@ -3832,10 +3849,10 @@ name = "wasmer-interface-types-fl"
 version = "0.25.0"
 source = "git+https://github.com/fluencelabs/interface-types?branch=feat/add-store#4f73d5e069f823c6d0272fa63bfc7001c966915d"
 dependencies = [
- "fluence-it-types",
+ "fluence-it-types 0.3.2",
  "it-lilo",
  "it-memory-traits",
- "it-to-bytes",
+ "it-to-bytes 0.1.0 (git+https://github.com/fluencelabs/interface-types?branch=feat/add-store)",
  "itertools",
  "log",
  "nom",
