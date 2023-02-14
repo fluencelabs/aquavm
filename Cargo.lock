@@ -164,7 +164,7 @@ dependencies = [
 name = "air-interpreter-interface"
 version = "0.12.1"
 dependencies = [
- "fluence-it-types 0.4.0",
+ "fluence-it-types",
  "marine-rs-sdk",
  "serde",
  "serde_json",
@@ -1527,7 +1527,7 @@ checksum = "0ce7134b9999ecaf8bcd65542e436736ef32ddca1b3e06094cb6ec5755203b80"
 [[package]]
 name = "fluence-app-service"
 version = "0.23.0"
-source = "git+https://github.com/fluencelabs/marine?branch=marine-web-milestone2#332b1558b7b748cd06170c4828a3c31b860aec4f"
+source = "git+https://github.com/fluencelabs/marine?branch=marine-web-milestone2#0fbeada02d42224d0c6bd604bcf518e848104a0e"
 dependencies = [
  "log",
  "maplit",
@@ -1542,25 +1542,15 @@ dependencies = [
 
 [[package]]
 name = "fluence-it-types"
-version = "0.3.2"
-source = "git+https://github.com/fluencelabs/interface-types?branch=feat/add-store#4f73d5e069f823c6d0272fa63bfc7001c966915d"
-dependencies = [
- "it-to-bytes 0.1.0 (git+https://github.com/fluencelabs/interface-types?branch=feat/add-store)",
- "nom",
- "serde",
- "variant_count",
- "wast 8.0.0",
-]
-
-[[package]]
-name = "fluence-it-types"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d57951373d9ece94e8494a7b2f8a3772c56e290a7b7972a24eaecd7292b11083"
 dependencies = [
- "it-to-bytes 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "it-to-bytes",
+ "nom",
  "serde",
  "variant_count",
+ "wast 53.0.0",
 ]
 
 [[package]]
@@ -1846,7 +1836,7 @@ dependencies = [
 [[package]]
 name = "it-json-serde"
 version = "0.3.5"
-source = "git+https://github.com/fluencelabs/marine?branch=marine-web-milestone2#332b1558b7b748cd06170c4828a3c31b860aec4f"
+source = "git+https://github.com/fluencelabs/marine?branch=marine-web-milestone2#0fbeada02d42224d0c6bd604bcf518e848104a0e"
 dependencies = [
  "serde",
  "serde_derive",
@@ -1857,10 +1847,11 @@ dependencies = [
 
 [[package]]
 name = "it-lilo"
-version = "0.4.1"
-source = "git+https://github.com/fluencelabs/interface-types?branch=feat/add-store#4f73d5e069f823c6d0272fa63bfc7001c966915d"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "89811f46f772c0a839ba49cef3e976ff7cc57d899328c739bf25e8d0d9491ac1"
 dependencies = [
- "fluence-it-types 0.3.2",
+ "fluence-it-types",
  "it-memory-traits",
  "log",
  "paste",
@@ -1869,8 +1860,9 @@ dependencies = [
 
 [[package]]
 name = "it-memory-traits"
-version = "0.3.1"
-source = "git+https://github.com/fluencelabs/interface-types?branch=feat/add-store#4f73d5e069f823c6d0272fa63bfc7001c966915d"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d563f2a6baee17cf471b7951dfb96ab17fecc5e8947de39f1057cf3fb4cc906d"
 dependencies = [
  "thiserror",
 ]
@@ -1880,11 +1872,6 @@ name = "it-to-bytes"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "729c74bb4236418898a219c6d96f14cba77456dd7c04a2e99e65e9c643709b56"
-
-[[package]]
-name = "it-to-bytes"
-version = "0.1.0"
-source = "git+https://github.com/fluencelabs/interface-types?branch=feat/add-store#4f73d5e069f823c6d0272fa63bfc7001c966915d"
 
 [[package]]
 name = "itertools"
@@ -2047,7 +2034,7 @@ checksum = "3e2e65a1a2e43cfcb47a895c4c8b10d1f4a61097f9f254f183aee60cad9c651d"
 [[package]]
 name = "marine-core"
 version = "0.19.0"
-source = "git+https://github.com/fluencelabs/marine?branch=marine-web-milestone2#332b1558b7b748cd06170c4828a3c31b860aec4f"
+source = "git+https://github.com/fluencelabs/marine?branch=marine-web-milestone2#0fbeada02d42224d0c6bd604bcf518e848104a0e"
 dependencies = [
  "anyhow",
  "boolinator",
@@ -2078,7 +2065,7 @@ dependencies = [
 [[package]]
 name = "marine-it-generator"
 version = "0.9.5"
-source = "git+https://github.com/fluencelabs/marine?branch=marine-web-milestone2#332b1558b7b748cd06170c4828a3c31b860aec4f"
+source = "git+https://github.com/fluencelabs/marine?branch=marine-web-milestone2#0fbeada02d42224d0c6bd604bcf518e848104a0e"
 dependencies = [
  "it-lilo",
  "marine-it-parser",
@@ -2094,7 +2081,7 @@ dependencies = [
 [[package]]
 name = "marine-it-interfaces"
 version = "0.7.3"
-source = "git+https://github.com/fluencelabs/marine?branch=marine-web-milestone2#332b1558b7b748cd06170c4828a3c31b860aec4f"
+source = "git+https://github.com/fluencelabs/marine?branch=marine-web-milestone2#0fbeada02d42224d0c6bd604bcf518e848104a0e"
 dependencies = [
  "multimap",
  "wasmer-interface-types-fl",
@@ -2103,7 +2090,7 @@ dependencies = [
 [[package]]
 name = "marine-it-parser"
 version = "0.11.1"
-source = "git+https://github.com/fluencelabs/marine?branch=marine-web-milestone2#332b1558b7b748cd06170c4828a3c31b860aec4f"
+source = "git+https://github.com/fluencelabs/marine?branch=marine-web-milestone2#0fbeada02d42224d0c6bd604bcf518e848104a0e"
 dependencies = [
  "anyhow",
  "itertools",
@@ -2145,7 +2132,7 @@ dependencies = [
 [[package]]
 name = "marine-min-it-version"
 version = "0.2.1"
-source = "git+https://github.com/fluencelabs/marine?branch=marine-web-milestone2#332b1558b7b748cd06170c4828a3c31b860aec4f"
+source = "git+https://github.com/fluencelabs/marine?branch=marine-web-milestone2#0fbeada02d42224d0c6bd604bcf518e848104a0e"
 dependencies = [
  "once_cell",
  "semver",
@@ -2154,7 +2141,7 @@ dependencies = [
 [[package]]
 name = "marine-module-info-parser"
 version = "0.5.1"
-source = "git+https://github.com/fluencelabs/marine?branch=marine-web-milestone2#332b1558b7b748cd06170c4828a3c31b860aec4f"
+source = "git+https://github.com/fluencelabs/marine?branch=marine-web-milestone2#0fbeada02d42224d0c6bd604bcf518e848104a0e"
 dependencies = [
  "anyhow",
  "chrono",
@@ -2170,7 +2157,7 @@ dependencies = [
 [[package]]
 name = "marine-module-interface"
 version = "0.6.1"
-source = "git+https://github.com/fluencelabs/marine?branch=marine-web-milestone2#332b1558b7b748cd06170c4828a3c31b860aec4f"
+source = "git+https://github.com/fluencelabs/marine?branch=marine-web-milestone2#0fbeada02d42224d0c6bd604bcf518e848104a0e"
 dependencies = [
  "anyhow",
  "itertools",
@@ -2209,7 +2196,7 @@ dependencies = [
 [[package]]
 name = "marine-runtime"
 version = "0.24.0"
-source = "git+https://github.com/fluencelabs/marine?branch=marine-web-milestone2#332b1558b7b748cd06170c4828a3c31b860aec4f"
+source = "git+https://github.com/fluencelabs/marine?branch=marine-web-milestone2#0fbeada02d42224d0c6bd604bcf518e848104a0e"
 dependencies = [
  "bytesize",
  "it-json-serde",
@@ -2246,12 +2233,12 @@ dependencies = [
 [[package]]
 name = "marine-utils"
 version = "0.4.0"
-source = "git+https://github.com/fluencelabs/marine?branch=marine-web-milestone2#332b1558b7b748cd06170c4828a3c31b860aec4f"
+source = "git+https://github.com/fluencelabs/marine?branch=marine-web-milestone2#0fbeada02d42224d0c6bd604bcf518e848104a0e"
 
 [[package]]
 name = "marine-wasm-backend-traits"
 version = "0.1.0"
-source = "git+https://github.com/fluencelabs/marine?branch=marine-web-milestone2#332b1558b7b748cd06170c4828a3c31b860aec4f"
+source = "git+https://github.com/fluencelabs/marine?branch=marine-web-milestone2#0fbeada02d42224d0c6bd604bcf518e848104a0e"
 dependencies = [
  "anyhow",
  "it-memory-traits",
@@ -2264,7 +2251,7 @@ dependencies = [
 [[package]]
 name = "marine-wasmtime-backend"
 version = "0.1.0"
-source = "git+https://github.com/fluencelabs/marine?branch=marine-web-milestone2#332b1558b7b748cd06170c4828a3c31b860aec4f"
+source = "git+https://github.com/fluencelabs/marine?branch=marine-web-milestone2#0fbeada02d42224d0c6bd604bcf518e848104a0e"
 dependencies = [
  "anyhow",
  "it-memory-traits",
@@ -3846,13 +3833,14 @@ dependencies = [
 
 [[package]]
 name = "wasmer-interface-types-fl"
-version = "0.25.0"
-source = "git+https://github.com/fluencelabs/interface-types?branch=feat/add-store#4f73d5e069f823c6d0272fa63bfc7001c966915d"
+version = "0.26.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9b3d15a6608fcdd309d6b4439616629ad84dbf28a21dba5bce447254a040b8a8"
 dependencies = [
- "fluence-it-types 0.3.2",
+ "fluence-it-types",
  "it-lilo",
  "it-memory-traits",
- "it-to-bytes 0.1.0 (git+https://github.com/fluencelabs/interface-types?branch=feat/add-store)",
+ "it-to-bytes",
  "itertools",
  "log",
  "nom",
@@ -3861,7 +3849,7 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror",
- "wast 8.0.0",
+ "wast 53.0.0",
 ]
 
 [[package]]
@@ -4127,15 +4115,6 @@ dependencies = [
  "wasi-common",
  "wasmtime",
  "wiggle",
-]
-
-[[package]]
-name = "wast"
-version = "8.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3f9df3d716118a503b2f6bbb6ff46b21997ab0cc167b01de7a188e45e4b01e8d"
-dependencies = [
- "leb128",
 ]
 
 [[package]]
