@@ -328,83 +328,83 @@ Machine c1f3ea5950db0a10b44da931c25774d64ab25084f47d504f72f311e694550ff1:
             new: 38.00µs
 Machine d77ebe8481884bc3b2778c8083f1bf459e548e929edd87041beb14f6b868d35f:
   Platform: macOS-13.1-arm64-arm-64bit
-  Timestamp: 2023-02-03 12:08:43.454860+00:00
-  AquaVM version: 0.35.0
+  Timestamp: 2023-02-14 11:51:40.780024+00:00
+  AquaVM version: 0.35.1
   Benches:
-    big_values_data (1.20s): Loading a trace with huge values
-      air::runner::execute_air: 1.20s
-        farewell_step::outcome::from_success_result: 104.61ms
-          populate_outcome_from_contexts: 102.47ms
-            to_vec(call_results): 142.00µs
-            to_vec(data): 96.71ms
-        preparation_step::preparation::prepare: 1.09s
-          air::preparation_step::preparation::make_exec_ctx: 2.79ms
-          air_interpreter_data::interpreter_data::serde_json::from_slice: 1.07s
-          air_parser::parser::air_parser::parse: 3.66ms
-        runner::execute: 262.00µs
-    dashboard (187.90ms): big dashboard test
-      air::runner::execute_air: 187.90ms
-        farewell_step::outcome::from_success_result: 25.78ms
-          populate_outcome_from_contexts: 24.63ms
-            to_vec(call_results): 453.00µs
-            to_vec(data): 20.87ms
-        preparation_step::preparation::prepare: 46.88ms
-          air::preparation_step::preparation::make_exec_ctx: 3.15ms
-          air_interpreter_data::interpreter_data::serde_json::from_slice: 26.69ms
-          air_parser::parser::air_parser::parse: 12.49ms
-        runner::execute: 109.00ms
-          execute: 90.78ms
-            execute: 14.54ms
-              instructions::call::resolved_call::prepare_request_params: 2.61ms
-                instructions::call::resolved_call::serde_json::to_string(tetraplets): 621.00µs
-                resolver::resolve::resolve_ast_variable: 430.00µs
-                  resolve_variable: 140.00µs
-              resolver::resolve::resolve_ast_variable: 1.31ms
-                resolve_variable: 355.00µs
-            new: 54.94ms
-              resolve_ast_scalar: 40.19ms
-                resolve_ast_variable: 25.15ms
-                  resolve_variable: 8.23ms
-    long_data (344.40ms): Long data trace
-      air::runner::execute_air: 344.40ms
-        farewell_step::outcome::from_success_result: 29.24ms
-          populate_outcome_from_contexts: 27.04ms
-            to_vec(call_results): 142.00µs
-            to_vec(data): 22.00ms
-        preparation_step::preparation::prepare: 308.90ms
-          air::preparation_step::preparation::make_exec_ctx: 3.27ms
-          air_interpreter_data::interpreter_data::serde_json::from_slice: 297.10ms
-          air_parser::parser::air_parser::parse: 3.65ms
-        runner::execute: 261.00µs
-    network_explore (80.18ms): N peers of network are discovered
-      air::runner::execute_air: 80.18ms
-        farewell_step::outcome::from_success_result: 10.68ms
-          populate_outcome_from_contexts: 9.30ms
-            to_vec(call_results): 138.00µs
-            to_vec(data): 4.76ms
-        preparation_step::preparation::prepare: 34.07ms
-          air::preparation_step::preparation::make_exec_ctx: 4.15ms
-          air_interpreter_data::interpreter_data::serde_json::from_slice: 11.86ms
-          air_parser::parser::air_parser::parse: 13.67ms
-        runner::execute: 29.04ms
-          execute: 15.34ms
-            execute: 5.12ms
-              resolve_ast_variable: 392.00µs
-                resolve_variable: 126.00µs
-            new: 6.34ms
-              resolve_ast_scalar: 3.88ms
-                resolve_ast_variable: 2.67ms
-                  resolve_variable: 907.00µs
-    parser_10000_100 (1.34s): Running very long AIR script with lot of variables and assignments
-      air::runner::execute_air: 1.34s
-        farewell_step::outcome::from_success_result: 7.32ms
-          populate_outcome_from_contexts: 6.24ms
-            to_vec(call_results): 139.00µs
-            to_vec(data): 2.89ms
-        preparation_step::preparation::prepare: 1.31s
-          air::preparation_step::preparation::make_exec_ctx: 2.82ms
-          air_parser::parser::air_parser::parse: 1.31s
-        runner::execute: 7.53ms
-          execute: 4.54ms
-            execute: 619.00µs
-            new: 1.27ms
+    big_values_data (31.11ms): Loading a trace with huge values
+      air::runner::execute_air: 31.11ms
+        farewell_step::outcome::from_success_result: 9.24ms
+          populate_outcome_from_contexts: 7.66ms
+            to_vec(call_results): 95.00µs
+            to_vec(data): 4.74ms
+        preparation_step::preparation::prepare: 17.66ms
+          air::preparation_step::preparation::make_exec_ctx: 1.42ms
+          air_interpreter_data::interpreter_data::serde_json::from_slice: 11.20ms
+          air_parser::parser::air_parser::parse: 1.73ms
+        runner::execute: 126.00µs
+    dashboard (103.30ms): big dashboard test
+      air::runner::execute_air: 103.30ms
+        farewell_step::outcome::from_success_result: 4.26ms
+          populate_outcome_from_contexts: 3.49ms
+            to_vec(call_results): 127.00µs
+            to_vec(data): 1.73ms
+        preparation_step::preparation::prepare: 16.36ms
+          air::preparation_step::preparation::make_exec_ctx: 1.63ms
+          air_interpreter_data::interpreter_data::serde_json::from_slice: 5.79ms
+          air_parser::parser::air_parser::parse: 5.98ms
+        runner::execute: 78.79ms
+          execute: 66.87ms
+            execute: 9.53ms
+              instructions::call::resolved_call::prepare_request_params: 1.49ms
+                instructions::call::resolved_call::serde_json::to_string(tetraplets): 326.00µs
+                resolver::resolve::resolve_ast_variable: 316.00µs
+                  resolve_variable: 100.00µs
+              resolver::resolve::resolve_ast_variable: 922.00µs
+                resolve_variable: 264.00µs
+            new: 41.00ms
+              resolve_ast_scalar: 29.92ms
+                resolve_ast_variable: 18.44ms
+                  resolve_variable: 5.83ms
+    long_data (24.19ms): Long data trace
+      air::runner::execute_air: 24.19ms
+        farewell_step::outcome::from_success_result: 6.36ms
+          populate_outcome_from_contexts: 4.77ms
+            to_vec(call_results): 98.00µs
+            to_vec(data): 2.14ms
+        preparation_step::preparation::prepare: 13.75ms
+          air::preparation_step::preparation::make_exec_ctx: 1.73ms
+          air_interpreter_data::interpreter_data::serde_json::from_slice: 7.07ms
+          air_parser::parser::air_parser::parse: 1.73ms
+        runner::execute: 127.00µs
+    network_explore (45.66ms): 5 peers of network are discovered
+      air::runner::execute_air: 45.66ms
+        farewell_step::outcome::from_success_result: 4.96ms
+          populate_outcome_from_contexts: 4.20ms
+            to_vec(call_results): 94.00µs
+            to_vec(data): 2.09ms
+        preparation_step::preparation::prepare: 19.04ms
+          air::preparation_step::preparation::make_exec_ctx: 2.10ms
+          air_interpreter_data::interpreter_data::serde_json::from_slice: 7.41ms
+          air_parser::parser::air_parser::parse: 6.61ms
+        runner::execute: 17.54ms
+          execute: 10.17ms
+            execute: 3.47ms
+              resolve_ast_variable: 544.00µs
+                resolve_variable: 96.00µs
+            new: 4.49ms
+              resolve_ast_scalar: 2.94ms
+                resolve_ast_variable: 1.76ms
+                  resolve_variable: 537.00µs
+    parser_10000_100 (46.91ms): Running very long AIR script with lot of variables and assignments
+      air::runner::execute_air: 46.91ms
+        farewell_step::outcome::from_success_result: 4.02ms
+          populate_outcome_from_contexts: 3.32ms
+            to_vec(call_results): 97.00µs
+            to_vec(data): 1.50ms
+        preparation_step::preparation::prepare: 33.50ms
+          air::preparation_step::preparation::make_exec_ctx: 1.45ms
+          air_parser::parser::air_parser::parse: 28.97ms
+        runner::execute: 4.27ms
+          execute: 2.07ms
+            execute: 431.00µs
+            new: 475.00µs
