@@ -1,3 +1,85 @@
+Machine 0dfa4f098d7a6ef0d77a7bbc028ccf65fd6dc8d37be8a466ab3933a1a4a8e113:
+  Platform: macOS-11.7.3-x86_64-i386-64bit
+  Timestamp: 2023-02-14 04:14:24.203403+00:00
+  AquaVM version: 0.35.1
+  Benches:
+    big_values_data (2.05s): Loading a trace with huge values
+      air::runner::execute_air: 2.05s
+        farewell_step::outcome::from_success_result: 172.60ms
+          populate_outcome_from_contexts: 172.50ms
+            to_vec(call_results): 34.00µs
+            to_vec(data): 170.60ms
+        preparation_step::preparation::prepare: 1.88s
+          air::preparation_step::preparation::make_exec_ctx: 79.00µs
+          air_interpreter_data::interpreter_data::serde_json::from_slice: 1.88s
+          air_parser::parser::air_parser::parse: 103.00µs
+        runner::execute: 28.00µs
+    dashboard (180.10ms): big dashboard test
+      air::runner::execute_air: 180.10ms
+        farewell_step::outcome::from_success_result: 28.69ms
+          populate_outcome_from_contexts: 28.61ms
+            to_vec(call_results): 45.00µs
+            to_vec(data): 28.26ms
+        preparation_step::preparation::prepare: 33.35ms
+          air::preparation_step::preparation::make_exec_ctx: 111.00µs
+          air_interpreter_data::interpreter_data::serde_json::from_slice: 32.33ms
+          air_parser::parser::air_parser::parse: 587.00µs
+        runner::execute: 117.90ms
+          execute: 105.62ms
+            execute: 11.06ms
+              instructions::call::resolved_call::prepare_request_params: 1.07ms
+                instructions::call::resolved_call::serde_json::to_string(tetraplets): 54.00µs
+                resolver::resolve::resolve_ast_variable: 657.00µs
+                  resolve_variable: 210.00µs
+              resolver::resolve::resolve_ast_variable: 1.53ms
+                resolve_variable: 482.00µs
+            new: 68.98ms
+              resolve_ast_scalar: 51.42ms
+                resolve_ast_variable: 31.75ms
+                  resolve_variable: 10.31ms
+    long_data (547.50ms): Long data trace
+      air::runner::execute_air: 547.50ms
+        farewell_step::outcome::from_success_result: 33.98ms
+          populate_outcome_from_contexts: 33.84ms
+            to_vec(call_results): 37.00µs
+            to_vec(data): 32.87ms
+        preparation_step::preparation::prepare: 513.30ms
+          air::preparation_step::preparation::make_exec_ctx: 128.00µs
+          air_interpreter_data::interpreter_data::serde_json::from_slice: 512.80ms
+          air_parser::parser::air_parser::parse: 112.00µs
+        runner::execute: 27.00µs
+    network_explore (11.61ms): 5 peers of network are discovered
+      air::runner::execute_air: 11.61ms
+        farewell_step::outcome::from_success_result: 409.00µs
+          populate_outcome_from_contexts: 332.00µs
+            to_vec(call_results): 30.00µs
+            to_vec(data): 124.00µs
+        preparation_step::preparation::prepare: 1.15ms
+          air::preparation_step::preparation::make_exec_ctx: 109.00µs
+          air_interpreter_data::interpreter_data::serde_json::from_slice: 408.00µs
+          air_parser::parser::air_parser::parse: 382.00µs
+        runner::execute: 9.75ms
+          execute: 8.51ms
+            execute: 1.50ms
+              resolve_ast_variable: 563.00µs
+                resolve_variable: 185.00µs
+            new: 4.95ms
+              resolve_ast_scalar: 3.64ms
+                resolve_ast_variable: 2.27ms
+                  resolve_variable: 739.00µs
+    parser_10000_100 (2.26s): Running very long AIR script with lot of variables and assignments
+      air::runner::execute_air: 2.26s
+        farewell_step::outcome::from_success_result: 358.00µs
+          populate_outcome_from_contexts: 278.00µs
+            to_vec(call_results): 30.00µs
+            to_vec(data): 88.00µs
+        preparation_step::preparation::prepare: 2.25s
+          air::preparation_step::preparation::make_exec_ctx: 81.00µs
+          air_parser::parser::air_parser::parse: 2.25s
+        runner::execute: 394.00µs
+          execute: 260.00µs
+            execute: 50.00µs
+            new: 64.00µs
 Machine 05b76e53f793eceba4cb1e947eecaedf581b236317d6c24d5fba40ce9350735f:
   Platform: Linux-5.10.136-x86_64-AMD_Ryzen_9_5950X_16-Core_Processor-with-glibc2.36
   Timestamp: 2023-02-14 07:40:29.560900+00:00
