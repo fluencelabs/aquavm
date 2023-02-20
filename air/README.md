@@ -1,12 +1,13 @@
 # AIR
 
-### Overview
+## Overview
 
-This crates defines the core of the AIR interpreter intended to execute scripts to control execution flow in the Fluence network. From the high level point of view the interpreter could be considered as a state transition function that takes two states, merge them and then produce a new state.
+This crates defines the core of the AIR interpreter intended to execute scripts to control execution flow in the [Fluence](https://fluence.network) network. From a high level point of view, the interpreter could be considered as a state transition function that takes two states, merges them, and then produces a new state.
 
-### Interpreter interface
+## Interpreter interface
 
- This interpreter has only one export function called `invoke` and no import functions. The export function has the following signature: 
+This interpreter has only one export function called `invoke` and no import functions. The export function has the following signature:
+
 ```rust
 pub fn executed_air(
     /// AIR script to execute.
@@ -44,9 +45,9 @@ pub struct InterpreterOutcome {
 }
 ```
 
-As it was already mentioned in the previous section, `invoke` takes two states (`prev_data` and `current_data`) and returns a new state (`new_data`). Additionally, it takes AIR script that should be executed, some run parameters (such as `init_peer_id` and `current_peer_id`), and `call_results`, results of services calling. As a result it provides the `IntepreterOutcome` structure described in the upper code snippet.
+As it was already mentioned in the previous section, `invoke` takes two states (`prev_data` and `current_data`) and returns a new state (`new_data`). Additionally, it takes AIR script that should be executed, some run parameters (such as `init_peer_id` and `current_peer_id`), and `call_results`, results of services calling. As a result it provides the `IntepreterOutcome` structure described in the code snippet above.
 
-### Main properties
+## Main properties
 
 Let's consider the interpreter with respect to data first, because previous, current and resulted data are the most interesting parts of arguments and the outcome. Assuming `X` is a set of all possible values that data could have, we'll denote `executed_air` export function as `f: X * X -> X`. It could be seen that with respect to data `f` forms a magma. 
 
@@ -59,7 +60,7 @@ Even more, `f` is an idempotent non-commutative monoid, because:
    1. `forall x from X: f(x, x) = x`
    2. `forall a, b from X: f(a, b) = c, f(c, b) = c, f(c, a) = c`
 
-### Interaction with the interpreter
+## Interaction with the interpreter
 
 The interpreter allows a peer (either a node or a browser) to call service asynchronously by collecting all arguments and other necessary stuff from each `call` instruction that could be called during the execution and return them in `InterpreterOutcome`. A host should then execute them at any time and call back the interpreter providing executed service results as the `call_results` argument.
 
@@ -78,4 +79,4 @@ Then this flow should be repeated starting from point 2.
 
 4. If `call_requests` was empty, the whole execution is completed, `new_data` must be preserved and particle send for all `new_peer_pks` as usual.
 
-An example of interaction could be found in [tests](https://github.com/fluencelabs/aquavm/blob/async/crates/test-utils/src/test_runner.rs).
+An example of interaction can be found in [tests](https://github.com/fluencelabs/aquavm/blob/async/crates/test-utils/src/test_runner.rs).
