@@ -39,8 +39,8 @@ A description of AIR values and a list of AIR instructions together with example
     - [client](./avm/client) - AquaVM launcher for browser and Node.js targets
     - [server](./avm/server) - AquaVM launcher for server-side targets
 - **[crates](./crates)**
-    - [air-lib](./crates/air-lib) - contains all main libraries for the core
-    - [beautifier](./crates/beautifier) - core library for air-beautifier
+    - [air-lib](./crates/air-lib) - contains all main crate for the core of AquaVM
+    - [beautifier](./crates/beautifier) - air-beautifier realization
     - [data-store](./crates/data-store) - defines `DataStore` trait used by the Fluence node
     - [interpreter-wasm](./crates/interpreter-wasm) - crate for better integration compiled Wasm code into the Fluence node
     - [testing-framework](./crates/testing-framework) - realization of the framework improves test writing experience
