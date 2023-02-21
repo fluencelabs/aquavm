@@ -108,7 +108,10 @@ impl<E> AVM<E> {
 
         let execution_time = execution_start_time.elapsed();
         let memory_delta = self.memory_stats().memory_size - memory_size_before;
-        if self.data_store.detect_anomaly(execution_time, memory_delta) {
+        if self
+            .data_store
+            .detect_anomaly(execution_time, memory_delta, &outcome)
+        {
             self.save_anomaly_data(
                 &air,
                 &current_data,

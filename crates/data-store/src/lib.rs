@@ -26,6 +26,8 @@
     unreachable_patterns
 )]
 
+use avm_interface::raw_outcome::RawAVMOutcome;
+
 use serde::Deserialize;
 use serde::Serialize;
 use std::borrow::Cow;
@@ -48,10 +50,16 @@ pub trait DataStore {
 
     /// Returns true if an anomaly happened and it's necessary to save execution data
     /// for debugging purposes.
-    ///  execution_time - is time taken by the interpreter to execute provided script
-    ///  memory_delta - is a count of bytes on which an interpreter heap has been extended
+    ///  execution_time - time taken by the interpreter to execute provided script
+    ///  memory_delta - a count of bytes on which an interpreter heap has been extended
     ///                 during execution of a particle
-    fn detect_anomaly(&self, execution_time: Duration, memory_delta: usize) -> bool;
+    ///  outcome - a result of AquaVM invocation
+    fn detect_anomaly(
+        &self,
+        execution_time: Duration,
+        memory_delta: usize,
+        outcome: &RawAVMOutcome,
+    ) -> bool;
 
     fn collect_anomaly_data(
         &mut self,
