@@ -17,7 +17,6 @@ path = "src/lib.rs"
 [dependencies]
 air-interpreter-interface = { version = "0.12.1", path = "../../crates/air-lib/interpreter-interface", default-features = false }
 air-utils = { version = "0.1.0", path = "../../crates/air-lib/utils" }
-avm-data-store = { version = "0.4.1", path = "../../crates/data-store" }
 polyplets = { version = "0.3.2", path = "../../crates/air-lib/polyplets" }
 
 thiserror = "1.0.38"

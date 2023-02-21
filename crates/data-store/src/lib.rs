@@ -26,6 +26,8 @@
     unreachable_patterns
 )]
 
+use avm_interface::raw_outcome::RawAVMOutcome;
+
 use serde::Deserialize;
 use serde::Serialize;
 use std::borrow::Cow;
@@ -48,10 +50,16 @@ pub trait DataStore {
 
     /// Returns true if an anomaly happened and it's necessary to save execution data
     /// for debugging purposes.
-    ///  execution_time - is time taken by the interpreter to execute provided script
-    ///  memory_delta - is a count of bytes on which an interpreter heap has been extended
+    ///  execution_time - time taken by the interpreter to execute provided script
+    ///  memory_delta - count of bytes on which an interpreter heap has been extended
     ///                 during execution of a particle
-    fn detect_anomaly(&self, execution_time: Duration, memory_delta: usize) -> bool;
+    ///  outcome - a result of AquaVM invocation
+    fn detect_anomaly(
+        &self,
+        execution_time: Duration,
+        memory_delta: usize,
+        outcome: &RawAVMOutcome,
+    ) -> bool;
 
     fn collect_anomaly_data(
         &mut self,
@@ -71,17 +79,21 @@ pub struct AnomalyData<'data> {
     #[serde(borrow, with = "serde_bytes")]
     pub current_data: Cow<'data, [u8]>,
     #[serde(borrow, with = "serde_bytes")]
-    pub avm_outcome: Cow<'data, [u8]>, // it's byte because of the restriction on trait objects methods
+    pub call_results: Cow<'data, [u8]>,
+    #[serde(borrow, with = "serde_bytes")]
+    pub avm_outcome: Cow<'data, [u8]>,
     pub execution_time: Duration,
     pub memory_delta: usize,
 }
 
 impl<'data> AnomalyData<'data> {
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         air_script: &'data str,
         particle: &'data [u8],
         prev_data: &'data [u8],
         current_data: &'data [u8],
+        call_results: &'data [u8],
         avm_outcome: &'data [u8],
         execution_time: Duration,
         memory_delta: usize,
@@ -91,6 +103,7 @@ impl<'data> AnomalyData<'data> {
             particle: particle.into(),
             prev_data: prev_data.into(),
             current_data: current_data.into(),
+            call_results: call_results.into(),
             avm_outcome: avm_outcome.into(),
             execution_time,
             memory_delta,
@@ -107,6 +120,7 @@ mod tests {
         particle: &[u8],
         prev_data: &[u8],
         current_data: &[u8],
+        call_results: &[u8],
         avm_outcome: &[u8],
     ) -> String {
         format!(
@@ -115,6 +129,7 @@ mod tests {
                 r#""particle":{particle},"#,
                 r#""prev_data":{prev_data},"#,
                 r#""current_data":{current_data},"#,
+                r#""call_results":{call_results},"#,
                 r#""avm_outcome":{avm_outcome},"#,
                 r#""execution_time":{{"secs":42,"nanos":0}},"#,
                 r#""memory_delta":123"#,
@@ -124,6 +139,7 @@ mod tests {
             particle = serde_json::to_string(particle).unwrap(),
             prev_data = serde_json::to_string(prev_data).unwrap(),
             current_data = serde_json::to_string(current_data).unwrap(),
+            call_results = serde_json::to_string(call_results).unwrap(),
             avm_outcome = serde_json::to_string(avm_outcome).unwrap(),
         )
     }
@@ -135,6 +151,7 @@ mod tests {
             br#"{"trace":[]}"#,      // not real data
             br#"{"trace":[1,2,3]}"#, // not real data
             b"{}",                   // not real data
+            b"{}",
             Duration::from_secs(42),
             123,
         );
@@ -145,6 +162,7 @@ mod tests {
             &anomaly.particle,
             &anomaly.prev_data,
             &anomaly.current_data,
+            &anomaly.call_results,
             &anomaly.avm_outcome,
         );
         assert_eq!(json_data, expected);
@@ -156,11 +174,13 @@ mod tests {
         let current_data = br#"{"data":"current"}"#;
         let prev_data = br#"{"data":"prev"}"#;
         let avm_outcome = br#"{"avm":[1,2,3]}"#;
+        let call_results = br#"{"call_results": "excellent result"}"#;
         let json_data = anomaly_json(
             "(null)",
             &particle[..],
             &prev_data[..],
             &current_data[..],
+            &call_results[..],
             &avm_outcome[..],
         );
 
@@ -174,6 +194,7 @@ mod tests {
                 &particle[..],
                 &prev_data[..],
                 &current_data[..],
+                &call_results[..],
                 &avm_outcome[..],
                 Duration::from_secs(42),
                 123,

@@ -14,7 +14,7 @@ lalrpop = "0.19.8"
 
 [dependencies]
 air-lambda-ast = { version = "0.1.0", path = "../lambda/ast" }
-air-lambda-parser = { vesrion = "0.1.0", path = "../lambda/parser" }
+air-lambda-parser = { version = "0.1.0", path = "../lambda/parser" }
 
 lalrpop-util = "0.19.8"
 regex = "1.7.1"
