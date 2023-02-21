@@ -1,5 +1,12 @@
 # Changelog
 
+* The following workspace dependencies were updated
+  * dependencies
+    * air bumped from 0.35.1 to 0.36.0
+    * air-test-utils bumped from 0.4.2 to 0.4.3
+    * avm-data-store bumped from 0.4.1 to 0.5.0
+    * avm-interface bumped from 0.28.1 to 0.28.2
+
 ## [0.2.4](https://github.com/fluencelabs/aquavm/compare/air-trace-v0.2.3...air-trace-v0.2.4) (2023-02-08)
 
 
