@@ -102,7 +102,7 @@ impl<E> AVM<E> {
                 particle_parameters.timestamp,
                 particle_parameters.ttl,
                 particle_parameters.current_peer_id.clone(),
-                call_results,
+                call_results.clone(),
             )
             .map_err(AVMError::RunnerError)?;
 
@@ -112,6 +112,7 @@ impl<E> AVM<E> {
             self.save_anomaly_data(
                 &air,
                 &current_data,
+                &call_results,
                 &particle_parameters,
                 &outcome,
                 execution_time,
@@ -144,6 +145,7 @@ impl<E> AVM<E> {
         &mut self,
         air_script: &str,
         current_data: &[u8],
+        call_result: &CallResults,
         particle_parameters: &ParticleParameters<'_>,
         avm_outcome: &RawAVMOutcome,
         execution_time: Duration,
@@ -152,6 +154,7 @@ impl<E> AVM<E> {
         let prev_data = self
             .data_store
             .read_data(&particle_parameters.particle_id)?;
+        let call_results = serde_json::to_vec(call_result).map_err(AVMError::AnomalyDataSeError)?;
         let ser_particle =
             serde_json::to_vec(particle_parameters).map_err(AVMError::AnomalyDataSeError)?;
         let ser_avm_outcome =
@@ -162,6 +165,7 @@ impl<E> AVM<E> {
             &ser_particle,
             &prev_data,
             current_data,
+            &call_results,
             &ser_avm_outcome,
             execution_time,
             memory_delta,
