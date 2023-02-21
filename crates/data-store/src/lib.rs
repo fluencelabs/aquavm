@@ -51,7 +51,7 @@ pub trait DataStore {
     /// Returns true if an anomaly happened and it's necessary to save execution data
     /// for debugging purposes.
     ///  execution_time - time taken by the interpreter to execute provided script
-    ///  memory_delta - a count of bytes on which an interpreter heap has been extended
+    ///  memory_delta - count of bytes on which an interpreter heap has been extended
     ///                 during execution of a particle
     ///  outcome - a result of AquaVM invocation
     fn detect_anomaly(
