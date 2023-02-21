@@ -143,7 +143,7 @@ impl<E> AVM<E> {
         self.runner.memory_stats()
     }
 
-    #[allow(clippy::result_large_err)]
+    #[allow(clippy::result_large_err, clippy::too_many_arguments)]
     fn save_anomaly_data(
         &mut self,
         air_script: &str,

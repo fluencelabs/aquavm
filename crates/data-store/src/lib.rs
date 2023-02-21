@@ -87,6 +87,7 @@ pub struct AnomalyData<'data> {
 }
 
 impl<'data> AnomalyData<'data> {
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         air_script: &'data str,
         particle: &'data [u8],
