@@ -21,6 +21,7 @@ use crate::execution_step::RcSecurityTetraplet;
 
 use air_interpreter_data::CallResult;
 use air_interpreter_data::Sender;
+use air_interpreter_data::ServiceResultAggregate;
 use air_interpreter_interface::CallServiceResult;
 use air_parser::ast::CallOutputValue;
 use air_trace_handler::merger::MetCallResult;
@@ -49,11 +50,13 @@ pub(super) fn handle_prev_state<'i>(
     match met_result.result {
         // this call was failed on one of the previous executions,
         // here it's needed to bubble this special error up
-        CallServiceFailed(ret_code, ref err_msg) => {
+        Failed(ref failed_cid) => {
+            let err_value = exec_ctx.cid_state.resolve_service_value(failed_cid).expect("TODO");
+            let call_service_result: CallServiceResult = serde_json::from_value((&*err_value).clone()).expect("TODO");
             exec_ctx.make_subgraph_incomplete();
-            let err_msg = err_msg.clone();
+            let err_msg = call_service_result.result.clone();
             trace_ctx.meet_call_end(met_result.result);
-            Err(CatchableError::LocalServiceError(ret_code, err_msg).into())
+            Err(CatchableError::LocalServiceError(call_service_result.ret_code, err_msg.into()).into())
         }
         RequestSentBy(Sender::PeerIdWithCallId { ref peer_id, call_id })
             if peer_id.as_str() == exec_ctx.run_parameters.current_peer_id.as_str() =>
@@ -111,7 +114,7 @@ fn update_state_with_service_result<'i>(
     trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<()> {
     // check that service call succeeded
-    let service_result = handle_service_error(service_result, trace_ctx)?;
+    let service_result = handle_service_error(service_result, exec_ctx, trace_ctx)?;
     // try to get service result from call service result
     let result = try_to_service_result(service_result, trace_ctx)?;
 
@@ -124,42 +127,63 @@ fn update_state_with_service_result<'i>(
     Ok(())
 }
 
-fn handle_service_error(
+fn handle_service_error<'i>(
     service_result: CallServiceResult,
-    trace_ctx: &mut TraceHandler,
+    exec_ctx: &mut ExecutionCtx<'i>,
+    _trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<CallServiceResult> {
     use air_interpreter_interface::CALL_SERVICE_SUCCESS;
-    use CallResult::CallServiceFailed;
+    use CallResult::Failed;
 
     if service_result.ret_code == CALL_SERVICE_SUCCESS {
         return Ok(service_result);
     }
 
-    let error_message = Rc::new(service_result.result);
-    let error = CatchableError::LocalServiceError(service_result.ret_code, error_message.clone());
+    let error_message = Rc::new(service_result.result.clone());
+    let _error = CatchableError::LocalServiceError(service_result.ret_code, error_message.clone());
 
-    trace_ctx.meet_call_end(CallServiceFailed(service_result.ret_code, error_message));
+    let error_value = serde_json::to_value(&service_result).expect("TODO");
+    let value_cid = exec_ctx
+        .cid_state
+        .value_tracker
+        .record_value(error_value)
+        .expect("TODO");
 
-    Err(error.into())
+    let _service_result_agg = ServiceResultAggregate {
+        value: value_cid,
+        argument_hash: todo!(),
+        tetraplet: todo!(),
+    };
+
+    let service_result_agg_cid = exec_ctx
+        .cid_state
+        .service_result_agg_tracker
+        .record_value(_service_result_agg)
+        .expect("TODO");
+
+    _trace_ctx.meet_call_end(Failed(service_result_agg_cid));
+
+    Err(_error.into())
 }
 
 fn try_to_service_result(
     service_result: CallServiceResult,
-    trace_ctx: &mut TraceHandler,
+    _trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<Rc<JValue>> {
-    use CallResult::CallServiceFailed;
+    // use CallResult::Failed;
 
     match serde_json::from_str(&service_result.result) {
         Ok(result) => Ok(Rc::new(result)),
         Err(e) => {
             let error_msg =
                 f!("call_service result '{service_result}' can't be serialized or deserialized with an error: {e}");
-            let error_msg = Rc::new(error_msg);
+            let _error_msg = Rc::new(error_msg);
 
-            let error = CallServiceFailed(i32::MAX, error_msg.clone());
-            trace_ctx.meet_call_end(error);
+            // let error = Failed(i32::MAX, error_msg.clone());
+            let _error = todo!();
+            _trace_ctx.meet_call_end(_error);
 
-            Err(CatchableError::LocalServiceError(i32::MAX, error_msg).into())
+            Err(CatchableError::LocalServiceError(i32::MAX, _error_msg).into())
         }
     }
 }

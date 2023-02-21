@@ -30,6 +30,7 @@ use air_interpreter_data::CidInfo;
 use air_interpreter_data::CidTracker;
 use air_interpreter_data::GlobalStreamGens;
 use air_interpreter_data::RestrictedStreamGens;
+use air_interpreter_data::ServiceResultAggregate;
 use air_interpreter_data::TracePos;
 use air_interpreter_interface::*;
 use polyplets::SecurityTetraplet;
@@ -149,6 +150,7 @@ pub struct ExecutionCidState {
     pub(crate) value_tracker: CidTracker<JValue>,
     pub(crate) tetraplet_tracker: CidTracker<SecurityTetraplet>,
     pub(crate) canon_tracker: CidTracker<CanonCidAggregate>,
+    pub(crate) service_result_agg_tracker: CidTracker<ServiceResultAggregate>,
 }
 
 impl ExecutionCidState {
@@ -160,6 +162,10 @@ impl ExecutionCidState {
                 current_cid_info.tetraplet_store,
             ),
             canon_tracker: CidTracker::from_cid_stores(prev_cid_info.canon_store, current_cid_info.canon_store),
+            service_result_agg_tracker: CidTracker::from_cid_stores(
+                prev_cid_info.service_result_store,
+                current_cid_info.service_result_store,
+            ),
         }
     }
 
@@ -196,6 +202,23 @@ impl ExecutionCidState {
             trace_pos: fake_trace_pos,
         })
     }
+
+    pub(crate) fn get_service_result_agg_by_cid(
+        &self,
+        cid: &CID<ServiceResultAggregate>,
+    ) -> Result<Rc<ServiceResultAggregate>, UncatchableError> {
+        self.service_result_agg_tracker
+            .get(cid)
+            .ok_or_else(|| UncatchableError::ValueForCidNotFound("canon aggregate", cid.clone().into()))
+    }
+
+    pub(crate) fn resolve_service_value(
+        &self,
+        service_result_agg_cid: &CID<ServiceResultAggregate>,
+    ) -> Result<Rc<JValue>, UncatchableError> {
+        let service_result_aggregate = self.get_service_result_agg_by_cid(service_result_agg_cid)?;
+        self.get_value_by_cid(&service_result_aggregate.value)
+    }
 }
 
 impl From<ExecutionCidState> for CidInfo {
@@ -204,6 +227,7 @@ impl From<ExecutionCidState> for CidInfo {
             value_store: value.value_tracker.into(),
             tetraplet_store: value.tetraplet_tracker.into(),
             canon_store: value.canon_tracker.into(),
+            service_result_store: value.service_result_agg_tracker.into(),
         }
     }
 }

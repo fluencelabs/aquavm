@@ -29,19 +29,27 @@ use air_trace_handler::TraceHandler;
 
 pub(crate) fn populate_context_from_peer_service_result<'i>(
     executed_result: ValueAggregate,
-    output: &CallOutputValue<'i>,
+    _output: &CallOutputValue<'i>,
     exec_ctx: &mut ExecutionCtx<'i>,
 ) -> ExecutionResult<CallResult> {
-    let cid = exec_ctx
+    let _cid = exec_ctx
         .cid_state
         .value_tracker
         .record_value(executed_result.result.clone())
         .map_err(UncatchableError::from)?;
 
-    match output {
+    let _argument_hash = todo!();
+    let _tetraplet_cid = todo!();
+
+    match _output {
         CallOutputValue::Scalar(scalar) => {
             exec_ctx.scalars.set_scalar_value(scalar.name, executed_result)?;
-            Ok(CallResult::executed_scalar(cid))
+            Ok(CallResult::executed_scalar(
+                _cid,
+                _argument_hash,
+                _tetraplet_cid,
+                &mut exec_ctx.cid_state.service_result_agg_tracker,
+            ))
         }
         CallOutputValue::Stream(stream) => {
             let value_descriptor = StreamValueDescriptor::new(
@@ -52,11 +60,20 @@ pub(crate) fn populate_context_from_peer_service_result<'i>(
                 stream.position,
             );
             let generation = exec_ctx.streams.add_stream_value(value_descriptor)?;
-            Ok(CallResult::executed_stream(cid, generation))
+            Ok(CallResult::executed_stream(
+                _cid,
+                _argument_hash,
+                _tetraplet_cid,
+                &mut exec_ctx.cid_state.service_result_agg_tracker,
+                generation,
+            ))
         }
-        // by the internal conventions if call has no output value,
-        // corresponding data should have scalar type
-        CallOutputValue::None => Ok(CallResult::executed_scalar(cid)),
+        CallOutputValue::None => Ok(CallResult::executed_unused(
+            _cid,
+            _argument_hash,
+            _tetraplet_cid,
+            &mut exec_ctx.cid_state.service_result_agg_tracker,
+        )),
     }
 }
 
@@ -70,13 +87,13 @@ pub(crate) fn populate_context_from_data<'i>(
 ) -> ExecutionResult<ValueRef> {
     match (output, value) {
         (CallOutputValue::Scalar(scalar), ValueRef::Scalar(cid)) => {
-            let value = exec_ctx.cid_state.get_value_by_cid(&cid)?;
+            let value = exec_ctx.cid_state.resolve_service_value(&cid)?;
             let result = ValueAggregate::new(value, tetraplet, trace_pos);
             exec_ctx.scalars.set_scalar_value(scalar.name, result)?;
             Ok(ValueRef::Scalar(cid))
         }
         (CallOutputValue::Stream(stream), ValueRef::Stream { cid, generation }) => {
-            let value = exec_ctx.cid_state.get_value_by_cid(&cid)?;
+            let value = exec_ctx.cid_state.resolve_service_value(&cid)?;
             let result = ValueAggregate::new(value, tetraplet, trace_pos);
             let value_descriptor = StreamValueDescriptor::new(
                 result,
@@ -93,9 +110,7 @@ pub(crate) fn populate_context_from_data<'i>(
             };
             Ok(result)
         }
-        // by the internal conventions if call has no output value,
-        // corresponding data should have scalar type
-        (CallOutputValue::None, value @ ValueRef::Scalar(_)) => Ok(value),
+        (CallOutputValue::None, value @ ValueRef::Unused(_)) => Ok(value),
         (_, value) => Err(ExecutionError::Uncatchable(
             UncatchableError::CallResultNotCorrespondToInstr(value),
         )),

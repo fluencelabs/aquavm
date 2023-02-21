@@ -51,35 +51,40 @@ pub enum CallResult {
     RequestSentBy(Sender),
 
     /// A corresponding call's been already executed with such value as a result.
-    Executed(Rc<CID<ServiceResultAggregate>>),
+    Executed(ValueRef),
 
-    /// call_service ended with a service error.
-    #[serde(rename = "failed")]
-    // TODO: Rc<CID<ServiceResultAggregate>> that has two fields.
-    // TODO: separate store for them?
-    CallServiceFailed(i32, Rc<String>),
+    /// The call returned a service error.
+    ///
+    /// The `JValue` has to be a two element array `[i32, String]`.
+    Failed(Rc<CID<ServiceResultAggregate>>),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum ValueRef {
-    Scalar(Rc<CID<JValue>>),
+    /// The call value is stored to a scalar variable.
+    Scalar(Rc<CID<ServiceResultAggregate>>),
+    /// The call value is stored to a stream variable.
     Stream {
-        cid: Rc<CID<JValue>>,
+        cid: Rc<CID<ServiceResultAggregate>>,
         generation: u32,
     },
+    /// The call value is not stored.
+    Unused(Rc<CID<ServiceResultAggregate>>),
 }
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct CallServiceFailed(pub i32, pub Rc<String>);
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 /// A proof of service result execution result.
 pub struct ServiceResultAggregate {
-    /// CID reference to value store.
-    value: ValueRef,
+    pub value: Rc<CID<JValue>>,
     /// Hash of the call arguments.
-    argument_hash: String,
+    pub argument_hash: String,
     /// The tetraplet of the call result.
-    tetraplet: Rc<CID<SecurityTetraplet>>,
+    pub tetraplet: Rc<CID<SecurityTetraplet>>,
 }
 
 /// Let's consider an example of trace that could be produces by the following fold:

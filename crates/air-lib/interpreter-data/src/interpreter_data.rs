@@ -16,11 +16,11 @@
 
 use super::GlobalStreamGens;
 use super::RestrictedStreamGens;
-use crate::ServiceResultAggregate;
 use crate::cid_store::CidStore;
 use crate::CanonCidAggregate;
 use crate::ExecutionTrace;
 use crate::JValue;
+use crate::ServiceResultAggregate;
 
 use air_utils::measure;
 use polyplets::SecurityTetraplet;
@@ -131,7 +131,7 @@ impl Versions {
     }
 }
 
-#[derive(Debug, Default, Clone, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct CidInfo {
     /// Map CID to value.
     pub value_store: CidStore<JValue>,

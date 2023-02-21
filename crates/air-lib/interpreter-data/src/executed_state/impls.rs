@@ -15,7 +15,7 @@
  */
 
 use super::*;
-use crate::{JValue, CidTracker};
+use crate::{CidTracker, JValue};
 
 impl ParResult {
     pub fn new(left_size: u32, right_size: u32) -> Self {
@@ -42,51 +42,91 @@ impl CallResult {
         CallResult::RequestSentBy(Sender::PeerIdWithCallId { peer_id, call_id })
     }
 
-    pub fn executed_service_result(
-        service_result_id: Rc<CID<ServiceResultAggregate>>,
-    ) -> Self {
-        Self::Executed(service_result_id)
+    pub fn executed_service_result(value_ref: ValueRef) -> Self {
+        Self::Executed(value_ref)
     }
 
     pub fn executed_scalar(
-        cid: Rc<CID<JValue>>,
+        value_cid: Rc<CID<JValue>>,
         argument_hash: String,
         tetraplet_cid: Rc<CID<SecurityTetraplet>>,
-        service_result_tracker: &mut CidTracker<ServiceResultAggregate>,
+        service_result_agg_tracker: &mut CidTracker<ServiceResultAggregate>,
     ) -> Self {
-        let value = ValueRef::Scalar(cid);
-        let service_result = ServiceResultAggregate {
-            value,
+        let service_result_agg = ServiceResultAggregate {
+            value: value_cid,
             argument_hash,
             tetraplet: tetraplet_cid,
         };
-        let service_result_cid = service_result_tracker.record_value(service_result)
+        let service_result_agg_cid = service_result_agg_tracker
+            .record_value(service_result_agg)
             .expect("Failed to calculate a CID of service result.");
 
-        Self::executed_service_result(service_result_cid)
+        Self::executed_service_result(ValueRef::Scalar(service_result_agg_cid))
     }
 
     pub fn executed_stream(
-        cid: Rc<CID<JValue>>,
+        value_cid: Rc<CID<JValue>>,
         argument_hash: String,
         tetraplet_cid: Rc<CID<SecurityTetraplet>>,
-        service_result_tracker: &mut CidTracker<ServiceResultAggregate>,
-        generation: u32
+        service_result_agg_tracker: &mut CidTracker<ServiceResultAggregate>,
+        generation: u32,
     ) -> CallResult {
-        let value = ValueRef::Stream { cid, generation };
-        let service_result = ServiceResultAggregate {
-            value,
+        let service_result_agg = ServiceResultAggregate {
+            value: value_cid,
             argument_hash,
             tetraplet: tetraplet_cid,
         };
-        let service_result_cid = service_result_tracker.record_value(service_result)
+        let service_result_agg_cid = service_result_agg_tracker
+            .record_value(service_result_agg)
             .expect("Failed to calculate a CID of service result.");
 
-        Self::executed_service_result(service_result_cid)
+        Self::executed_service_result(ValueRef::Stream {
+            cid: service_result_agg_cid,
+            generation,
+        })
     }
 
-    pub fn failed(ret_code: i32, error_msg: impl Into<String>) -> CallResult {
-        CallResult::CallServiceFailed(ret_code, Rc::new(error_msg.into()))
+    pub fn executed_unused(
+        value_cid: Rc<CID<JValue>>,
+        argument_hash: String,
+        tetraplet_cid: Rc<CID<SecurityTetraplet>>,
+        service_result_agg_tracker: &mut CidTracker<ServiceResultAggregate>,
+    ) -> CallResult {
+        let service_result_agg = ServiceResultAggregate {
+            value: value_cid,
+            argument_hash,
+            tetraplet: tetraplet_cid,
+        };
+        let service_result_agg_cid = service_result_agg_tracker
+            .record_value(service_result_agg)
+            .expect("Failed to calculate a CID of service result.");
+
+        Self::executed_service_result(ValueRef::Unused(service_result_agg_cid))
+    }
+
+    pub fn failed(
+        ret_code: i32,
+        error_msg: impl Into<String>,
+        argument_hash: String,
+        tetraplet_cid: Rc<CID<SecurityTetraplet>>,
+        value_tracker: &mut CidTracker<JValue>,
+        service_result_agg_tracker: &mut CidTracker<ServiceResultAggregate>,
+    ) -> CallResult {
+        let call_service_failed = CallServiceFailed(ret_code, error_msg.into().into());
+        let failed_value = serde_json::to_value(&call_service_failed).expect("TODO can't fail");
+
+        let failed_value_cid = value_tracker.record_value(failed_value).unwrap();
+
+        let service_result_agg = ServiceResultAggregate {
+            value: failed_value_cid,
+            argument_hash,
+            tetraplet: tetraplet_cid,
+        };
+        let service_result_agg_cid = service_result_agg_tracker
+            .record_value(service_result_agg)
+            .expect("Failed to calculate a CID of service result.");
+
+        CallResult::Failed(service_result_agg_cid)
     }
 }
 
@@ -138,11 +178,11 @@ impl std::fmt::Display for ExecutedState {
                 right_size: right_subgraph_size,
             }) => write!(f, "par({left_subgraph_size}, {right_subgraph_size})"),
             Call(RequestSentBy(sender)) => write!(f, r"{sender}"),
-            Call(Executed(value)) => {
-                write!(f, "executed({value:?})")
+            Call(Executed(value_ref)) => {
+                write!(f, "executed({value_ref:?})")
             }
-            Call(CallServiceFailed(ret_code, err_msg)) => {
-                write!(f, r#"call_service_failed({ret_code}, "{err_msg}")"#)
+            Call(Failed(failed_cid)) => {
+                write!(f, "failed({failed_cid:?})")
             }
             Fold(FoldResult { lore }) => {
                 writeln!(f, "fold(",)?;
@@ -176,6 +216,7 @@ impl std::fmt::Display for ValueRef {
             ValueRef::Stream { cid, generation } => {
                 write!(f, "stream: {cid:?} generation: {generation}")
             }
+            ValueRef::Unused(cid) => write!(f, "unused: {cid:?}"),
         }
     }
 }
