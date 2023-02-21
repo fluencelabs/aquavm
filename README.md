@@ -33,11 +33,18 @@ A description of AIR values and a list of AIR instructions together with example
 ## Repository Structure
 
 
-- [air](./air) _TO BE FILLED_
-- [air-interpreter](./air-interpreter)
-- [avm](./avm)
-- [crates](./crates)
-- [tools](./tools)
+- **[air](./air)** - core of AquaVM
+- **[air-interpreter](./air-interpreter)** - crate to support different compilation targets (Marine and wasm-bindgen)
+- **[avm](./avm)**
+    - [client](./avm/client) - AquaVM launcher for browser and Node.js targets
+    - [server](./avm/server) - AquaVM launcher for server-side targets
+- **[crates](./crates)**
+    - [air-lib](./crates/air-lib) - contains all main libraries for the core
+    - [beautifier](./crates/beautifier) - core library for air-beautifier
+    - [data-store](./crates/data-store) - defines `DataStore` trait used by the Fluence node
+    - [interpreter-wasm](./crates/interpreter-wasm) - crate for better integration compiled Wasm code into the Fluence node
+    - [testing-framework](./crates/testing-framework) - realization of the framework improves test writing experience
+- **[tools](./tools)** - AquaVM-related tools
 
 
 ## Support
