@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.28.2](https://github.com/fluencelabs/aquavm/compare/avm-interface-v0.28.1...avm-interface-v0.28.2) (2023-02-21)
+
+
+### ⚠ BREAKING CHANGES
+
+* **avm:** improve anomaly detection
+
+### Features
+
+* **avm:** improve anomaly detection ([5e6863d](https://github.com/fluencelabs/aquavm/commit/5e6863d4d59684d4f2b509ece6e597831e648f05))
+
+
+### Bug Fixes
+
+* **avm-interface:** minor code fix ([#482](https://github.com/fluencelabs/aquavm/issues/482)) ([a1f7a5c](https://github.com/fluencelabs/aquavm/commit/a1f7a5ce74b5002f3283494164a3d57fdd1cbd80))
+
 ## [Unreleased]
 
 ## [0.28.1] - 2022-12-26

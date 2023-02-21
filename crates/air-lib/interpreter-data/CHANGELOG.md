@@ -1,5 +1,9 @@
 # Changelog
 
+* The following workspace dependencies were updated
+  * dependencies
+    * air-parser bumped from 0.7.2 to 0.7.3
+
 ## [0.6.2](https://github.com/fluencelabs/aquavm/compare/air-interpreter-data-v0.6.1...air-interpreter-data-v0.6.2) (2023-02-08)
 
 
