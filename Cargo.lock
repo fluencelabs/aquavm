@@ -1824,9 +1824,9 @@ dependencies = [
 
 [[package]]
 name = "marine-runtime"
-version = "0.24.0"
+version = "0.24.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ba3726e9dccce778d0b848ebc9adb312f33f338128bb182aa5ed8429f3f7aac1"
+checksum = "545262bf5b68d2b4f4b9eed2557f09421cc4bb62a10e71c307140f27b6411b9c"
 dependencies = [
  "bytesize",
  "it-json-serde",
