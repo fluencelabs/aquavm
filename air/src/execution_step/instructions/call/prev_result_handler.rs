@@ -18,7 +18,9 @@ use super::*;
 use crate::execution_step::instructions::call::call_result_setter::populate_context_from_data;
 use crate::execution_step::CatchableError;
 use crate::execution_step::RcSecurityTetraplet;
+use crate::UncatchableError;
 
+use air_interpreter_cid::CID;
 use air_interpreter_data::CallResult;
 use air_interpreter_data::Sender;
 use air_interpreter_data::ServiceResultAggregate;
@@ -26,6 +28,7 @@ use air_interpreter_interface::CallServiceResult;
 use air_parser::ast::CallOutputValue;
 use air_trace_handler::merger::MetCallResult;
 use air_trace_handler::TraceHandler;
+use polyplets::SecurityTetraplet;
 
 use fstrings::f;
 use fstrings::format_args_f;
@@ -51,20 +54,32 @@ pub(super) fn handle_prev_state<'i>(
         // this call was failed on one of the previous executions,
         // here it's needed to bubble this special error up
         Failed(ref failed_cid) => {
-            let err_value = exec_ctx.cid_state.resolve_service_value(failed_cid).expect("TODO");
-            let call_service_result: CallServiceResult = serde_json::from_value((&*err_value).clone()).expect("TODO");
+            let err_value = exec_ctx
+                .cid_state
+                .resolve_service_value(failed_cid)
+                .map_err(UncatchableError::from)?;
+            let call_service_result: CallServiceResult = serde_json::from_value((*err_value).clone()).expect("TODO");
             exec_ctx.make_subgraph_incomplete();
             let err_msg = call_service_result.result.clone();
             trace_ctx.meet_call_end(met_result.result);
             Err(CatchableError::LocalServiceError(call_service_result.ret_code, err_msg.into()).into())
         }
-        RequestSentBy(Sender::PeerIdWithCallId { ref peer_id, call_id })
-            if peer_id.as_str() == exec_ctx.run_parameters.current_peer_id.as_str() =>
-        {
+        RequestSentBy(Sender::PeerIdWithCallId {
+            ref peer_id,
+            call_id,
+            ref argument_hash,
+        }) if peer_id.as_str() == exec_ctx.run_parameters.current_peer_id.as_str() => {
             // call results are identified by call_id that is saved in data
             match exec_ctx.call_results.remove(&call_id) {
                 Some(call_result) => {
-                    update_state_with_service_result(tetraplet.clone(), output, call_result, exec_ctx, trace_ctx)?;
+                    update_state_with_service_result(
+                        tetraplet.clone(),
+                        argument_hash.clone(),
+                        output,
+                        call_result,
+                        exec_ctx,
+                        trace_ctx,
+                    )?;
                     Ok(StateDescriptor::executed())
                 }
                 // result hasn't been prepared yet
@@ -108,20 +123,41 @@ use crate::JValue;
 
 fn update_state_with_service_result<'i>(
     tetraplet: RcSecurityTetraplet,
+    argument_hash: Rc<str>,
     output: &CallOutputValue<'i>,
     service_result: CallServiceResult,
     exec_ctx: &mut ExecutionCtx<'i>,
     trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<()> {
     // check that service call succeeded
-    let service_result = handle_service_error(service_result, exec_ctx, trace_ctx)?;
+    let service_result = handle_service_error(
+        service_result,
+        argument_hash.clone(),
+        tetraplet.clone(),
+        exec_ctx,
+        trace_ctx,
+    )?;
+
+    let tetraplet_cid = exec_ctx
+        .cid_state
+        .tetraplet_tracker
+        .record_value(tetraplet.clone())
+        .map_err(UncatchableError::from)?;
+
     // try to get service result from call service result
-    let result = try_to_service_result(service_result, trace_ctx)?;
+    let result = try_to_service_result(
+        service_result,
+        argument_hash.clone(),
+        tetraplet_cid.clone(),
+        exec_ctx,
+        trace_ctx,
+    )?;
 
     let trace_pos = trace_ctx.trace_pos();
 
     let executed_result = ValueAggregate::new(result, tetraplet, trace_pos);
-    let new_call_result = populate_context_from_peer_service_result(executed_result, output, exec_ctx)?;
+    let new_call_result =
+        populate_context_from_peer_service_result(executed_result, output, tetraplet_cid, argument_hash, exec_ctx)?;
     trace_ctx.meet_call_end(new_call_result);
 
     Ok(())
@@ -129,8 +165,10 @@ fn update_state_with_service_result<'i>(
 
 fn handle_service_error<'i>(
     service_result: CallServiceResult,
+    argument_hash: Rc<str>,
+    tetraplet: RcSecurityTetraplet,
     exec_ctx: &mut ExecutionCtx<'i>,
-    _trace_ctx: &mut TraceHandler,
+    trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<CallServiceResult> {
     use air_interpreter_interface::CALL_SERVICE_SUCCESS;
     use CallResult::Failed;
@@ -140,35 +178,44 @@ fn handle_service_error<'i>(
     }
 
     let error_message = Rc::new(service_result.result.clone());
-    let _error = CatchableError::LocalServiceError(service_result.ret_code, error_message.clone());
+    let error = CatchableError::LocalServiceError(service_result.ret_code, error_message);
 
     let error_value = serde_json::to_value(&service_result).expect("TODO");
     let value_cid = exec_ctx
         .cid_state
         .value_tracker
         .record_value(error_value)
-        .expect("TODO");
+        .map_err(UncatchableError::from)?;
 
-    let _service_result_agg = ServiceResultAggregate {
-        value: value_cid,
-        argument_hash: todo!(),
-        tetraplet: todo!(),
+    let tetraplet_cid = exec_ctx
+        .cid_state
+        .tetraplet_tracker
+        .record_value(tetraplet)
+        .map_err(UncatchableError::from)?;
+
+    let service_result_agg = ServiceResultAggregate {
+        value_cid,
+        argument_hash,
+        tetraplet_cid,
     };
 
     let service_result_agg_cid = exec_ctx
         .cid_state
         .service_result_agg_tracker
-        .record_value(_service_result_agg)
-        .expect("TODO");
+        .record_value(service_result_agg)
+        .map_err(UncatchableError::from)?;
 
-    _trace_ctx.meet_call_end(Failed(service_result_agg_cid));
+    trace_ctx.meet_call_end(Failed(service_result_agg_cid));
 
-    Err(_error.into())
+    Err(error.into())
 }
 
 fn try_to_service_result(
     service_result: CallServiceResult,
-    _trace_ctx: &mut TraceHandler,
+    argument_hash: Rc<str>,
+    tetraplet_cid: Rc<CID<SecurityTetraplet>>,
+    exec_ctx: &mut ExecutionCtx<'_>,
+    trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<Rc<JValue>> {
     // use CallResult::Failed;
 
@@ -177,13 +224,20 @@ fn try_to_service_result(
         Err(e) => {
             let error_msg =
                 f!("call_service result '{service_result}' can't be serialized or deserialized with an error: {e}");
-            let _error_msg = Rc::new(error_msg);
+            let error_msg = Rc::new(error_msg);
 
             // let error = Failed(i32::MAX, error_msg.clone());
-            let _error = todo!();
-            _trace_ctx.meet_call_end(_error);
+            let error = CallResult::failed(
+                i32::MAX,
+                error_msg.clone(),
+                argument_hash,
+                tetraplet_cid,
+                &mut exec_ctx.cid_state.value_tracker,
+                &mut exec_ctx.cid_state.service_result_agg_tracker,
+            );
+            trace_ctx.meet_call_end(error);
 
-            Err(CatchableError::LocalServiceError(i32::MAX, _error_msg).into())
+            Err(CatchableError::LocalServiceError(i32::MAX, error_msg).into())
         }
     }
 }

@@ -39,7 +39,11 @@ pub struct ParResult {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Sender {
     PeerId(Rc<String>),
-    PeerIdWithCallId { peer_id: Rc<String>, call_id: u32 },
+    PeerIdWithCallId {
+        peer_id: Rc<String>,
+        call_id: u32,
+        argument_hash: Rc<str>,
+    },
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -80,11 +84,11 @@ pub struct CallServiceFailed(pub i32, pub Rc<String>);
 #[serde(rename_all = "snake_case")]
 /// A proof of service result execution result.
 pub struct ServiceResultAggregate {
-    pub value: Rc<CID<JValue>>,
+    pub value_cid: Rc<CID<JValue>>,
     /// Hash of the call arguments.
-    pub argument_hash: String,
+    pub argument_hash: Rc<str>,
     /// The tetraplet of the call result.
-    pub tetraplet: Rc<CID<SecurityTetraplet>>,
+    pub tetraplet_cid: Rc<CID<SecurityTetraplet>>,
 }
 
 /// Let's consider an example of trace that could be produces by the following fold:

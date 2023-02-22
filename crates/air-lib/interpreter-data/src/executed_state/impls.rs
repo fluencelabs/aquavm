@@ -38,8 +38,16 @@ impl CallResult {
         CallResult::RequestSentBy(Sender::PeerId(peer_id))
     }
 
-    pub fn sent_peer_id_with_call_id(peer_id: Rc<String>, call_id: u32) -> CallResult {
-        CallResult::RequestSentBy(Sender::PeerIdWithCallId { peer_id, call_id })
+    pub fn sent_peer_id_with_call_id(
+        peer_id: Rc<String>,
+        call_id: u32,
+        argument_hash: Rc<str>,
+    ) -> CallResult {
+        CallResult::RequestSentBy(Sender::PeerIdWithCallId {
+            peer_id,
+            call_id,
+            argument_hash,
+        })
     }
 
     pub fn executed_service_result(value_ref: ValueRef) -> Self {
@@ -48,14 +56,14 @@ impl CallResult {
 
     pub fn executed_scalar(
         value_cid: Rc<CID<JValue>>,
-        argument_hash: String,
+        argument_hash: Rc<str>,
         tetraplet_cid: Rc<CID<SecurityTetraplet>>,
         service_result_agg_tracker: &mut CidTracker<ServiceResultAggregate>,
     ) -> Self {
         let service_result_agg = ServiceResultAggregate {
-            value: value_cid,
+            value_cid,
             argument_hash,
-            tetraplet: tetraplet_cid,
+            tetraplet_cid,
         };
         let service_result_agg_cid = service_result_agg_tracker
             .record_value(service_result_agg)
@@ -66,15 +74,15 @@ impl CallResult {
 
     pub fn executed_stream(
         value_cid: Rc<CID<JValue>>,
-        argument_hash: String,
+        argument_hash: Rc<str>,
         tetraplet_cid: Rc<CID<SecurityTetraplet>>,
         service_result_agg_tracker: &mut CidTracker<ServiceResultAggregate>,
         generation: u32,
     ) -> CallResult {
         let service_result_agg = ServiceResultAggregate {
-            value: value_cid,
+            value_cid,
             argument_hash,
-            tetraplet: tetraplet_cid,
+            tetraplet_cid,
         };
         let service_result_agg_cid = service_result_agg_tracker
             .record_value(service_result_agg)
@@ -88,14 +96,14 @@ impl CallResult {
 
     pub fn executed_unused(
         value_cid: Rc<CID<JValue>>,
-        argument_hash: String,
+        argument_hash: Rc<str>,
         tetraplet_cid: Rc<CID<SecurityTetraplet>>,
         service_result_agg_tracker: &mut CidTracker<ServiceResultAggregate>,
     ) -> CallResult {
         let service_result_agg = ServiceResultAggregate {
-            value: value_cid,
+            value_cid,
             argument_hash,
-            tetraplet: tetraplet_cid,
+            tetraplet_cid,
         };
         let service_result_agg_cid = service_result_agg_tracker
             .record_value(service_result_agg)
@@ -106,21 +114,21 @@ impl CallResult {
 
     pub fn failed(
         ret_code: i32,
-        error_msg: impl Into<String>,
-        argument_hash: String,
+        error_msg: impl Into<Rc<String>>,
+        argument_hash: Rc<str>,
         tetraplet_cid: Rc<CID<SecurityTetraplet>>,
         value_tracker: &mut CidTracker<JValue>,
         service_result_agg_tracker: &mut CidTracker<ServiceResultAggregate>,
     ) -> CallResult {
-        let call_service_failed = CallServiceFailed(ret_code, error_msg.into().into());
+        let call_service_failed = CallServiceFailed(ret_code, error_msg.into());
         let failed_value = serde_json::to_value(&call_service_failed).expect("TODO can't fail");
 
         let failed_value_cid = value_tracker.record_value(failed_value).unwrap();
 
         let service_result_agg = ServiceResultAggregate {
-            value: failed_value_cid,
+            value_cid: failed_value_cid,
             argument_hash,
-            tetraplet: tetraplet_cid,
+            tetraplet_cid,
         };
         let service_result_agg_cid = service_result_agg_tracker
             .record_value(service_result_agg)
@@ -225,8 +233,12 @@ impl std::fmt::Display for Sender {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Sender::PeerId(peer_id) => write!(f, "request_sent_by({peer_id})"),
-            Sender::PeerIdWithCallId { peer_id, call_id } => {
-                write!(f, "request_sent_by({peer_id}: {call_id})")
+            Sender::PeerIdWithCallId {
+                peer_id,
+                call_id,
+                argument_hash,
+            } => {
+                write!(f, "request_sent_by({peer_id}: {call_id}; {argument_hash})")
             }
         }
     }

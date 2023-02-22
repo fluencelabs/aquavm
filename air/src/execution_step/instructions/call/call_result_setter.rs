@@ -20,34 +20,35 @@ use crate::execution_step::Generation;
 use crate::execution_step::ValueAggregate;
 use crate::UncatchableError;
 
+use air_interpreter_cid::CID;
 use air_interpreter_data::CallResult;
 use air_interpreter_data::TracePos;
 use air_interpreter_data::ValueRef;
 use air_parser::ast::CallOutputValue;
 use air_trace_handler::merger::ValueSource;
 use air_trace_handler::TraceHandler;
+use polyplets::SecurityTetraplet;
 
 pub(crate) fn populate_context_from_peer_service_result<'i>(
     executed_result: ValueAggregate,
-    _output: &CallOutputValue<'i>,
+    output: &CallOutputValue<'i>,
+    tetraplet_cid: Rc<CID<SecurityTetraplet>>,
+    argument_hash: Rc<str>,
     exec_ctx: &mut ExecutionCtx<'i>,
 ) -> ExecutionResult<CallResult> {
-    let _cid = exec_ctx
+    let cid = exec_ctx
         .cid_state
         .value_tracker
         .record_value(executed_result.result.clone())
         .map_err(UncatchableError::from)?;
 
-    let _argument_hash = todo!();
-    let _tetraplet_cid = todo!();
-
-    match _output {
+    match output {
         CallOutputValue::Scalar(scalar) => {
             exec_ctx.scalars.set_scalar_value(scalar.name, executed_result)?;
             Ok(CallResult::executed_scalar(
-                _cid,
-                _argument_hash,
-                _tetraplet_cid,
+                cid,
+                argument_hash,
+                tetraplet_cid,
                 &mut exec_ctx.cid_state.service_result_agg_tracker,
             ))
         }
@@ -61,17 +62,17 @@ pub(crate) fn populate_context_from_peer_service_result<'i>(
             );
             let generation = exec_ctx.streams.add_stream_value(value_descriptor)?;
             Ok(CallResult::executed_stream(
-                _cid,
-                _argument_hash,
-                _tetraplet_cid,
+                cid,
+                argument_hash,
+                tetraplet_cid,
                 &mut exec_ctx.cid_state.service_result_agg_tracker,
                 generation,
             ))
         }
         CallOutputValue::None => Ok(CallResult::executed_unused(
-            _cid,
-            _argument_hash,
-            _tetraplet_cid,
+            cid,
+            argument_hash,
+            tetraplet_cid,
             &mut exec_ctx.cid_state.service_result_agg_tracker,
         )),
     }

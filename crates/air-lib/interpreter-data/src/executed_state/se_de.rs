@@ -76,8 +76,12 @@ pub mod sender_serializer {
     {
         match value {
             Sender::PeerId(peer_id) => serializer.serialize_str(peer_id.as_str()),
-            Sender::PeerIdWithCallId { peer_id, call_id } => {
-                let result = format!("{peer_id}: {call_id}");
+            Sender::PeerIdWithCallId {
+                peer_id,
+                call_id,
+                argument_hash,
+            } => {
+                let result = format!("{peer_id}: {call_id}; {argument_hash}");
                 serializer.serialize_str(&result)
             }
         }
@@ -96,19 +100,23 @@ pub mod sender_serializer {
             }
 
             fn visit_str<E: serde::de::Error>(self, raw_sender: &str) -> Result<Self::Value, E> {
-                let sender = match raw_sender.find(": ") {
+                let sender = match raw_sender.split_once(": ") {
                     None => Sender::PeerId(Rc::new(raw_sender.to_string())),
-                    Some(pos) => {
-                        let peer_id = raw_sender[..pos].to_string();
-                        let call_id = &raw_sender[pos + 2..];
-                        let call_id = call_id.parse::<u32>().map_err(|e| {
-                            serde::de::Error::custom(format!(
-                                "failed to parse call_id of a sender {call_id}: {e}"
-                            ))
-                        })?;
-                        Sender::PeerIdWithCallId {
-                            peer_id: Rc::new(peer_id),
-                            call_id,
+                    Some((peer_id, call_id_with_args)) => {
+                        match call_id_with_args.split_once("; ") {
+                            None => todo!("TODO not supported yet"),
+                            Some((call_id, argument_hash)) => {
+                                let call_id = call_id.parse::<u32>().map_err(|e| {
+                                    serde::de::Error::custom(format!(
+                                        "failed to parse call_id of a sender {call_id}: {e}"
+                                    ))
+                                })?;
+                                Sender::PeerIdWithCallId {
+                                    peer_id: Rc::new(peer_id.to_owned()),
+                                    call_id,
+                                    argument_hash: argument_hash.into(),
+                                }
+                            }
                         }
                     }
                 };

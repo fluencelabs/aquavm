@@ -217,7 +217,7 @@ impl ExecutionCidState {
         service_result_agg_cid: &CID<ServiceResultAggregate>,
     ) -> Result<Rc<JValue>, UncatchableError> {
         let service_result_aggregate = self.get_service_result_agg_by_cid(service_result_agg_cid)?;
-        self.get_value_by_cid(&service_result_aggregate.value)
+        self.get_value_by_cid(&service_result_aggregate.value_cid)
     }
 }
 

@@ -27,6 +27,7 @@ use crate::trace_to_exec_err;
 use crate::JValue;
 use crate::SecurityTetraplet;
 
+use air_interpreter_cid::json_data_cid;
 use air_interpreter_data::CallResult;
 use air_interpreter_interface::CallRequestParams;
 use air_parser::ast;
@@ -106,13 +107,17 @@ impl<'i> ResolvedCall<'i> {
                 return Err(e);
             }
         };
+
         let call_id = exec_ctx.next_call_request_id();
+        let arugment_hash = json_data_cid::<JValue>(request_params.arguments.as_bytes()).into_inner();
+
         exec_ctx.call_requests.insert(call_id, request_params);
 
         exec_ctx.make_subgraph_incomplete();
         trace_ctx.meet_call_end(CallResult::sent_peer_id_with_call_id(
             exec_ctx.run_parameters.current_peer_id.clone(),
             call_id,
+            arugment_hash.into(),
         ));
 
         Ok(())
