@@ -2,7 +2,7 @@
 
 ## Overview
 
-This crates defines the core of the AIR interpreter intended to execute scripts to control execution flow in the [Fluence](https://fluence.network) network. From a high level point of view, the interpreter could be considered as a state transition function that takes two states, merges them, and then produces a new state.
+This crate defines the core of the AIR interpreter intended to execute scripts to control execution flow in the [Fluence](https://fluence.network) network. From a high level point of view, the interpreter can be considered as a state transition function that takes two states, merges them, and then produces a new state.
 
 ## Interpreter interface
 

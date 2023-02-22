@@ -1,25 +1,3 @@
-## AIR: values
-### Scalars
-
-- scalars are fully consistent - have the same value on each peer during a script execution
-- could be an argument of any instruction
-- JSON-based (fold could iterate only over array-based value)
-
-### Streams
-
-- streams are CRDT-like (locally-consistent) - have deterministic execution wrt one peer
-- versioned
-- could be used only by call and fold instructions (more instructions for streams to come)
-- could be turned to scalar (canonicalized)
-
-### Canonicalized streams
-
-- contains an array of elements that was in a stream at the moment of canonicalization
-- canonicalized streams are imutable and fully consistent as scalars
-- has the same algebra as a stream for `match`/`mismatch` and `call` argument
-- has the same algebra as a scalar for `new`
-- has mixed behaviour for with other instructions
-
 ## AIR: Instructions
 
 ### call
@@ -178,4 +156,28 @@ Example
 ```
 
 - does nothing, useful for code generation
+
+
+## AIR: values
+
+### Scalars
+
+- scalars are fully consistent - have the same value on each peer during a script execution
+- could be an argument of any instruction
+- JSON-based (fold could iterate only over array-based value)
+
+### Streams
+
+- streams are CRDT-like (locally-consistent) - have deterministic execution wrt one peer
+- versioned
+- can be used only by call and fold instructions (more instructions for streams to come)
+- can be turned to scalar (canonicalized)
+
+### Canonicalized streams
+
+- contains an array of elements that was in a stream at the moment of canonicalization
+- canonicalized streams are imutable and fully consistent as scalars
+- has the same algebra as a stream for `match`/`mismatch` and `call` argument
+- has the same algebra as a scalar for `new`
+- has mixed behaviour for with other instructions
 
