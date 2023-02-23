@@ -147,10 +147,10 @@ pub(crate) struct ExecCtxIngredients {
 
 #[derive(Debug, Default, Clone)]
 pub struct ExecutionCidState {
-    pub(crate) value_tracker: CidTracker<JValue>,
-    pub(crate) tetraplet_tracker: CidTracker<SecurityTetraplet>,
-    pub(crate) canon_tracker: CidTracker<CanonCidAggregate>,
-    pub(crate) service_result_agg_tracker: CidTracker<ServiceResultAggregate>,
+    pub value_tracker: CidTracker<JValue>,
+    pub tetraplet_tracker: CidTracker<SecurityTetraplet>,
+    pub canon_tracker: CidTracker<CanonCidAggregate>,
+    pub service_result_agg_tracker: CidTracker<ServiceResultAggregate>,
 }
 
 impl ExecutionCidState {

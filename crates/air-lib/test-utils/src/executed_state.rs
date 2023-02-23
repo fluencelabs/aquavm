@@ -28,26 +28,55 @@ use crate::FoldResult;
 use crate::FoldSubTraceLore;
 use crate::SubTraceDesc;
 
-use air_interpreter_cid::value_to_json_cid;
+use air::ExecutionCidState;
+use air_interpreter_cid::CID;
 use air_interpreter_data::CanonCidAggregate;
 use air_interpreter_data::CidTracker;
+use air_interpreter_data::ServiceResultAggregate;
+use air_interpreter_interface::CallServiceResult;
 use avm_server::SecurityTetraplet;
 use serde::Deserialize;
 use serde::Serialize;
 
 use std::rc::Rc;
 
-pub fn scalar(result: JValue) -> ExecutedState {
-    let cid = value_to_json_cid(&result)
-        .unwrap_or_else(|e| panic!("{:?}: failed to compute CID of {:?}", e, result));
-    let value = ValueRef::Scalar(Rc::new(cid));
+fn simple_value_aggregate_cid(
+    result: impl Into<serde_json::Value>,
+    cid_state: &mut ExecutionCidState,
+) -> Rc<CID<ServiceResultAggregate>> {
+    let value_cid = cid_state
+        .value_tracker
+        .record_value(Rc::new(result.into()))
+        .unwrap();
+    let tetraplet = SecurityTetraplet::default();
+    let tetraplet_cid = cid_state
+        .tetraplet_tracker
+        .record_value(Rc::new(tetraplet))
+        .unwrap();
+    let service_result_agg = ServiceResultAggregate {
+        value_cid,
+        argument_hash: "".into(),
+        tetraplet_cid,
+    };
+    let service_result_agg_cid = cid_state
+        .service_result_agg_tracker
+        .record_value(Rc::new(service_result_agg))
+        .unwrap();
+    service_result_agg_cid
+}
+
+pub fn scalar_tracked(
+    result: impl Into<JValue>,
+    cid_state: &mut ExecutionCidState,
+) -> ExecutedState {
+    let service_result_agg_cid = simple_value_aggregate_cid(result, cid_state);
+    let value = ValueRef::Scalar(service_result_agg_cid);
     ExecutedState::Call(CallResult::Executed(value))
 }
 
-pub fn scalar_tracked(result: impl Into<JValue>, tracker: &mut CidTracker) -> ExecutedState {
-    let cid = tracker.record_value(Rc::new(result.into())).unwrap();
-    let value = ValueRef::Scalar(cid);
-    ExecutedState::Call(CallResult::Executed(value))
+pub fn scalar(result: JValue) -> ExecutedState {
+    let mut cid_state = ExecutionCidState::default();
+    scalar_tracked(result, &mut cid_state)
 }
 
 pub fn scalar_number(result: impl Into<serde_json::Number>) -> ExecutedState {
@@ -57,9 +86,9 @@ pub fn scalar_number(result: impl Into<serde_json::Number>) -> ExecutedState {
 }
 
 pub fn stream_call_result(result: JValue, generation: u32) -> CallResult {
-    let cid = value_to_json_cid(&result)
-        .unwrap_or_else(|e| panic!("{:?}: failed to compute CID of {:?}", e, result));
-    CallResult::executed_stream(Rc::new(cid), generation)
+    let mut cid_state = ExecutionCidState::default();
+    let service_result_agg_cid = simple_value_aggregate_cid(result, &mut cid_state);
+    CallResult::Executed(ValueRef::Stream { cid: service_result_agg_cid, generation  })
 }
 
 pub fn stream(result: JValue, generation: u32) -> ExecutedState {
@@ -69,10 +98,10 @@ pub fn stream(result: JValue, generation: u32) -> ExecutedState {
 pub fn stream_tracked(
     value: impl Into<JValue>,
     generation: u32,
-    tracker: &mut CidTracker,
+    cid_state: &mut ExecutionCidState,
 ) -> ExecutedState {
-    let cid = tracker.record_value(Rc::new(value.into())).unwrap();
-    ExecutedState::Call(CallResult::executed_stream(cid, generation))
+    let service_result_agg_cid = simple_value_aggregate_cid(value, cid_state);
+    ExecutedState::Call(CallResult::Executed(ValueRef::Stream { cid: service_result_agg_cid, generation  }))
 }
 
 pub fn scalar_string(result: impl Into<String>) -> ExecutedState {
@@ -128,10 +157,14 @@ pub fn par(left: usize, right: usize) -> ExecutedState {
 }
 
 pub fn service_failed(ret_code: i32, error_message: &str) -> ExecutedState {
-    ExecutedState::Call(CallResult::CallServiceFailed(
+    let mut cid_state = ExecutionCidState::default();
+    let result = CallServiceResult {
         ret_code,
-        Rc::new(format!(r#""{error_message}""#)),
-    ))
+        result: error_message.to_owned(),
+    };
+    let result_value = serde_json::to_value(result).unwrap();
+    let service_result_agg_cid = simple_value_aggregate_cid(result_value, &mut cid_state);
+    ExecutedState::Call(CallResult::Failed(service_result_agg_cid))
 }
 
 pub fn fold(lore: FoldLore) -> ExecutedState {
