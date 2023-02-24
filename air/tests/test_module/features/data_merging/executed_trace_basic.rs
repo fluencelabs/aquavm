@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use air_interpreter_data::CidTracker;
+use air::ExecutionCidState;
 use air_test_utils::prelude::*;
 
 #[test]
@@ -31,14 +31,14 @@ fn executed_trace_seq_par_call() {
             (call "{local_peer_id}" ("local_service_id" "local_fn_name") [] result_2)
         )"#);
 
-    let mut tracker = CidTracker::new();
+    let mut cid_state = ExecutionCidState::new();
     let unit_call_service_result = "result from unit_call_service";
     let initial_trace = vec![
         par(1, 1),
-        scalar_tracked(unit_call_service_result, &mut tracker),
-        scalar_tracked(unit_call_service_result, &mut tracker),
+        scalar_tracked(unit_call_service_result, &mut cid_state),
+        scalar_tracked(unit_call_service_result, &mut cid_state),
     ];
-    let initial_data = raw_data_from_trace(initial_trace, tracker);
+    let initial_data = raw_data_from_trace(initial_trace, cid_state);
 
     let result = checked_call_vm!(vm, <_>::default(), script, "", initial_data);
     let actual_trace = trace_from_result(&result);
@@ -69,15 +69,15 @@ fn executed_trace_par_par_call() {
         )"#);
 
     let unit_call_service_result = "result from unit_call_service";
-    let mut tracker = CidTracker::new();
+    let mut cid_state = ExecutionCidState::new();
     let initial_state = vec![
         par(2, 1),
         par(1, 0),
         request_sent_by("peer_id_1"),
-        scalar_tracked(unit_call_service_result, &mut tracker),
+        scalar_tracked(unit_call_service_result, &mut cid_state),
     ];
 
-    let initial_data = raw_data_from_trace(initial_state, tracker);
+    let initial_data = raw_data_from_trace(initial_state, cid_state);
 
     let result = checked_call_vm!(vm, <_>::default(), &script, "", initial_data);
     let actual_trace = trace_from_result(&result);
@@ -182,21 +182,21 @@ fn executed_trace_create_service() {
 
     let script = include_str!("./scripts/create_service.air");
 
-    let mut cid_tracker = CidTracker::new();
+    let mut cid_state = ExecutionCidState::new();
 
     let add_module_response = "add_module response";
     let add_blueprint_response = "add_blueprint response";
     let create_response = "create response";
     let expected_trace = vec![
-        scalar_tracked(module_bytes.clone(), &mut cid_tracker),
-        scalar_tracked(module_config.clone(), &mut cid_tracker),
-        scalar_tracked(blueprint.clone(), &mut cid_tracker),
-        scalar_tracked(add_module_response, &mut cid_tracker),
-        scalar_tracked(add_blueprint_response, &mut cid_tracker),
-        scalar_tracked(create_response, &mut cid_tracker),
-        scalar_tracked("test", &mut cid_tracker),
+        scalar_tracked(module_bytes.clone(), &mut cid_state),
+        scalar_tracked(module_config.clone(), &mut cid_state),
+        scalar_tracked(blueprint.clone(), &mut cid_state),
+        scalar_tracked(add_module_response, &mut cid_state),
+        scalar_tracked(add_blueprint_response, &mut cid_state),
+        scalar_tracked(create_response, &mut cid_state),
+        scalar_tracked("test", &mut cid_state),
     ];
-    let initial_data = raw_data_from_trace(expected_trace.clone(), cid_tracker);
+    let initial_data = raw_data_from_trace(expected_trace.clone(), cid_state);
 
     let result = checked_call_vm!(vm, <_>::default(), script, "", initial_data);
 

@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
+use air::ExecutionCidState;
 use air::UncatchableError;
-use air_interpreter_cid::value_to_json_cid;
-use air_interpreter_data::CidTracker;
 use air_interpreter_data::ValueRef;
 use air_test_utils::prelude::*;
 use air_trace_handler::merger::CallResultError;
@@ -130,9 +129,9 @@ fn par_early_exit() {
     ];
     assert_eq!(actual_trace_3, expected_trace);
 
-    let mut setter_3_tracker = CidTracker::new();
+    let mut setter_3_cid_state = ExecutionCidState::new();
     let setter_3_malicious_trace = vec![
-        executed_state::scalar_tracked("result from unit_call_service", &mut setter_3_tracker),
+        executed_state::scalar_tracked("result from unit_call_service", &mut setter_3_cid_state),
         executed_state::par(10, 0),
         executed_state::par(9, 0),
         executed_state::par(7, 1),
@@ -141,12 +140,12 @@ fn par_early_exit() {
         executed_state::par(1, 1),
         executed_state::request_sent_by(init_peer_id),
         executed_state::request_sent_by(init_peer_id),
-        executed_state::stream_tracked("non_exist_value", 0, &mut setter_3_tracker),
-        executed_state::stream_tracked("success result from fallible_call_service", 0, &mut setter_3_tracker),
+        executed_state::stream_tracked("non_exist_value", 0, &mut setter_3_cid_state),
+        executed_state::stream_tracked("success result from fallible_call_service", 0, &mut setter_3_cid_state),
         executed_state::service_failed(1, "failed result from fallible_call_service"),
         executed_state::request_sent_by(setter_3_id),
     ];
-    let setter_3_malicious_data = raw_data_from_trace(setter_3_malicious_trace, setter_3_tracker);
+    let setter_3_malicious_data = raw_data_from_trace(setter_3_malicious_trace, setter_3_cid_state);
     let init_result_3 = call_vm!(
         init,
         <_>::default(),
@@ -155,12 +154,14 @@ fn par_early_exit() {
         setter_3_malicious_data
     );
 
+    let mut cid_state = ExecutionCidState::new();
+
     let prev_value = ValueRef::Stream {
-        cid: value_to_json_cid(&json!("1")).unwrap().into(),
+        cid: simple_value_aggregate_cid(json!("1"), &mut cid_state),
         generation: 1,
     };
     let current_value = ValueRef::Stream {
-        cid: value_to_json_cid(&json!("non_exist_value")).unwrap().into(),
+        cid: simple_value_aggregate_cid(json!("non_exist_value"), &mut cid_state),
         generation: 0,
     };
     let expected_error = UncatchableError::TraceError {

@@ -31,7 +31,6 @@ use crate::SubTraceDesc;
 use air::ExecutionCidState;
 use air_interpreter_cid::CID;
 use air_interpreter_data::CanonCidAggregate;
-use air_interpreter_data::CidTracker;
 use air_interpreter_data::ServiceResultAggregate;
 use air_interpreter_interface::CallServiceResult;
 use avm_server::SecurityTetraplet;
@@ -40,7 +39,7 @@ use serde::Serialize;
 
 use std::rc::Rc;
 
-fn simple_value_aggregate_cid(
+pub fn simple_value_aggregate_cid(
     result: impl Into<serde_json::Value>,
     cid_state: &mut ExecutionCidState,
 ) -> Rc<CID<ServiceResultAggregate>> {
@@ -58,11 +57,10 @@ fn simple_value_aggregate_cid(
         argument_hash: "".into(),
         tetraplet_cid,
     };
-    let service_result_agg_cid = cid_state
+    cid_state
         .service_result_agg_tracker
         .record_value(Rc::new(service_result_agg))
-        .unwrap();
-    service_result_agg_cid
+        .unwrap()
 }
 
 pub fn scalar_tracked(
@@ -75,7 +73,7 @@ pub fn scalar_tracked(
 }
 
 pub fn scalar(result: JValue) -> ExecutedState {
-    let mut cid_state = ExecutionCidState::default();
+    let mut cid_state = ExecutionCidState::new();
     scalar_tracked(result, &mut cid_state)
 }
 
@@ -86,9 +84,12 @@ pub fn scalar_number(result: impl Into<serde_json::Number>) -> ExecutedState {
 }
 
 pub fn stream_call_result(result: JValue, generation: u32) -> CallResult {
-    let mut cid_state = ExecutionCidState::default();
+    let mut cid_state = ExecutionCidState::new();
     let service_result_agg_cid = simple_value_aggregate_cid(result, &mut cid_state);
-    CallResult::Executed(ValueRef::Stream { cid: service_result_agg_cid, generation  })
+    CallResult::Executed(ValueRef::Stream {
+        cid: service_result_agg_cid,
+        generation,
+    })
 }
 
 pub fn stream(result: JValue, generation: u32) -> ExecutedState {
@@ -101,7 +102,10 @@ pub fn stream_tracked(
     cid_state: &mut ExecutionCidState,
 ) -> ExecutedState {
     let service_result_agg_cid = simple_value_aggregate_cid(value, cid_state);
-    ExecutedState::Call(CallResult::Executed(ValueRef::Stream { cid: service_result_agg_cid, generation  }))
+    ExecutedState::Call(CallResult::Executed(ValueRef::Stream {
+        cid: service_result_agg_cid,
+        generation,
+    }))
 }
 
 pub fn scalar_string(result: impl Into<String>) -> ExecutedState {
@@ -157,7 +161,7 @@ pub fn par(left: usize, right: usize) -> ExecutedState {
 }
 
 pub fn service_failed(ret_code: i32, error_message: &str) -> ExecutedState {
-    let mut cid_state = ExecutionCidState::default();
+    let mut cid_state = ExecutionCidState::new();
     let result = CallServiceResult {
         ret_code,
         result: error_message.to_owned(),
@@ -210,27 +214,19 @@ pub struct CanonResultAlike {
 /// This function takes a JSON DSL-like struct for compatibility and test writer
 /// convenience.
 pub fn canon(canonicalized_element: JValue) -> ExecutedState {
-    let mut value_tracker = CidTracker::<JValue>::new();
-    let mut tetraplet_tracker = CidTracker::<SecurityTetraplet>::new();
-    let mut canon_tracker = CidTracker::<CanonCidAggregate>::new();
+    let mut cid_state = ExecutionCidState::new();
 
-    canon_tracked(
-        canonicalized_element,
-        &mut value_tracker,
-        &mut tetraplet_tracker,
-        &mut canon_tracker,
-    )
+    canon_tracked(canonicalized_element, &mut cid_state)
 }
 
 pub fn canon_tracked(
     canonicalized_element: JValue,
-    value_tracker: &mut CidTracker<JValue>,
-    tetraplet_tracker: &mut CidTracker<SecurityTetraplet>,
-    canon_tracker: &mut CidTracker<CanonCidAggregate>,
+    cid_state: &mut ExecutionCidState,
 ) -> ExecutedState {
     let canon_input = serde_json::from_value::<CanonResultAlike>(canonicalized_element)
         .expect("Malformed canon input");
-    let tetraplet_cid = tetraplet_tracker
+    let tetraplet_cid = cid_state
+        .tetraplet_tracker
         .record_value(canon_input.tetraplet.clone())
         .unwrap_or_else(|e| {
             panic!(
@@ -242,9 +238,11 @@ pub fn canon_tracked(
         .values
         .iter()
         .map(|value| {
-            let value_cid = value_tracker.record_value(value.result.clone())?;
-            let tetraplet_cid = tetraplet_tracker.record_value(value.tetraplet.clone())?;
-            canon_tracker.record_value(CanonCidAggregate {
+            let value_cid = cid_state.value_tracker.record_value(value.result.clone())?;
+            let tetraplet_cid = cid_state
+                .tetraplet_tracker
+                .record_value(value.tetraplet.clone())?;
+            cid_state.canon_tracker.record_value(CanonCidAggregate {
                 value: value_cid,
                 tetraplet: tetraplet_cid,
             })

@@ -312,9 +312,18 @@ fn fold_merge() {
                     let cid = match value {
                         ValueRef::Scalar(cid) => cid,
                         ValueRef::Stream { cid, .. } => cid,
+                        ValueRef::Unused(cid) => cid,
                     };
 
-                    let value = data.cid_info.value_store.get(cid).unwrap().clone();
+                    // TODO convert to a function
+                    let service_result_agg = data.cid_info.service_result_store.get(cid).unwrap().clone();
+                    let value = data
+                        .cid_info
+                        .value_store
+                        .get(&service_result_agg.value_cid)
+                        .unwrap()
+                        .clone();
+
                     if let JValue::String(ref var_name) = &*value {
                         let current_count: usize = calls_count.get(var_name).copied().unwrap_or_default();
                         calls_count.insert(var_name.to_owned(), current_count + 1);

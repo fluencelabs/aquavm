@@ -36,9 +36,7 @@ mod native_test_runner;
 mod wasm_test_runner;
 
 pub use air::interpreter_data::*;
-use air_interpreter_data::CanonCidAggregate;
-use air_interpreter_data::CidStore;
-use air_interpreter_data::CidTracker;
+use air::ExecutionCidState;
 pub use avm_interface::raw_outcome::*;
 pub use avm_server::*;
 
@@ -93,17 +91,15 @@ pub fn data_from_result(result: &RawAVMOutcome) -> InterpreterData {
     serde_json::from_slice(&result.data).expect("default serializer shouldn't fail")
 }
 
-pub fn raw_data_from_trace(trace: impl Into<ExecutionTrace>, value_tracker: CidTracker) -> Vec<u8> {
+pub fn raw_data_from_trace(
+    trace: impl Into<ExecutionTrace>,
+    cid_state: ExecutionCidState,
+) -> Vec<u8> {
     let data = InterpreterData::from_execution_result(
         trace.into(),
         <_>::default(),
         <_>::default(),
-        CidInfo {
-            value_store: value_tracker.into(),
-            tetraplet_store: CidStore::<_>::default(),
-            canon_store: CidStore::<_>::default(),
-            service_result_store: CidStore::<_>::default(),
-        },
+        cid_state.into(),
         0,
         semver::Version::new(1, 1, 1),
     );
@@ -112,19 +108,17 @@ pub fn raw_data_from_trace(trace: impl Into<ExecutionTrace>, value_tracker: CidT
 
 pub fn raw_data_from_trace_with_canon(
     trace: impl Into<ExecutionTrace>,
-    value_tracker: CidTracker,
-    tetraplet_tracker: CidTracker<SecurityTetraplet>,
-    canon_tracker: CidTracker<CanonCidAggregate>,
+    cid_state: ExecutionCidState,
 ) -> Vec<u8> {
     let data = InterpreterData::from_execution_result(
         trace.into(),
         <_>::default(),
         <_>::default(),
         CidInfo {
-            value_store: value_tracker.into(),
-            tetraplet_store: tetraplet_tracker.into(),
-            canon_store: canon_tracker.into(),
-            service_result_store: CidStore::<_>::default(),
+            value_store: cid_state.value_tracker.into(),
+            tetraplet_store: cid_state.tetraplet_tracker.into(),
+            canon_store: cid_state.canon_tracker.into(),
+            service_result_store: cid_state.service_result_agg_tracker.into(),
         },
         0,
         semver::Version::new(1, 1, 1),

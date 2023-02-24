@@ -154,6 +154,10 @@ pub struct ExecutionCidState {
 }
 
 impl ExecutionCidState {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
     fn from_cid_info(prev_cid_info: CidInfo, current_cid_info: CidInfo) -> Self {
         Self {
             value_tracker: CidTracker::from_cid_stores(prev_cid_info.value_store, current_cid_info.value_store),
@@ -209,7 +213,7 @@ impl ExecutionCidState {
     ) -> Result<Rc<ServiceResultAggregate>, UncatchableError> {
         self.service_result_agg_tracker
             .get(cid)
-            .ok_or_else(|| UncatchableError::ValueForCidNotFound("canon aggregate", cid.clone().into()))
+            .ok_or_else(|| UncatchableError::ValueForCidNotFound("service result aggregate", cid.clone().into()))
     }
 
     pub(crate) fn resolve_service_value(

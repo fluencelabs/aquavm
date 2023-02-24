@@ -16,7 +16,7 @@
 
 mod canon;
 
-use air_interpreter_data::CidTracker;
+use air::ExecutionCidState;
 use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::*;
 
@@ -30,10 +30,10 @@ fn test_missing_cid() {
           (call "peer_id" ("service" "call1") [] x)
           (call "peer_id" ("service" "call2") []))"#;
     let trace = vec![scalar_number(42), scalar_number(43)];
-    let mut tracker = CidTracker::<JValue>::new();
-    tracker.record_value(json!(43)).unwrap();
+    let mut cid_state = ExecutionCidState::new();
+    cid_state.value_tracker.record_value(json!(43)).unwrap();
 
-    let cur_data = raw_data_from_trace(trace, tracker);
+    let cur_data = raw_data_from_trace(trace, cid_state);
     let result = call_vm!(vm, <_>::default(), air_script, vec![], cur_data);
     assert_eq!(result.ret_code, 20012);
     assert_eq!(
@@ -52,9 +52,9 @@ fn test_correct_cid() {
           (call "peer_id" ("service" "call1") [] x)
           (call "peer_id" ("service" "call2") [] y))"#;
     let trace = vec![scalar_number(42), scalar_number(43)];
-    let mut tracker = CidTracker::<JValue>::new();
-    tracker.record_value(json!(43)).unwrap();
-    tracker.record_value(json!(42)).unwrap();
+    let mut tracker = ExecutionCidState::new();
+    tracker.value_tracker.record_value(json!(43)).unwrap();
+    tracker.value_tracker.record_value(json!(42)).unwrap();
 
     let cur_data = raw_data_from_trace(trace, tracker);
     let result = call_vm!(vm, <_>::default(), air_script, vec![], cur_data);
@@ -82,12 +82,20 @@ fn test_scalar_cid() {
 
     let result = executor.execute_one(vm_peer_id).unwrap();
     let data = data_from_result(&result);
-    let mut tracker = CidTracker::<JValue>::new();
-    let expected_trace = vec![scalar_tracked("hi", &mut tracker), scalar_tracked("ipld", &mut tracker)];
+    let mut cid_state = ExecutionCidState::new();
+    let expected_trace = vec![
+        scalar_tracked("hi", &mut cid_state),
+        scalar_tracked("ipld", &mut cid_state),
+    ];
 
     assert_eq!(result.ret_code, 0);
     assert_eq!(data.trace, expected_trace);
-    assert_eq!(data.cid_info.value_store, tracker.into());
+    assert_eq!(data.cid_info.value_store, cid_state.value_tracker.into());
+    assert_eq!(data.cid_info.tetraplet_store, cid_state.tetraplet_tracker.into());
+    assert_eq!(
+        data.cid_info.service_result_store,
+        cid_state.service_result_agg_tracker.into()
+    );
 }
 
 #[test]
@@ -111,13 +119,18 @@ fn test_stream_cid() {
 
     let result = executor.execute_one(vm_peer_id).unwrap();
     let data = data_from_result(&result);
-    let mut tracker = CidTracker::<JValue>::new();
+    let mut cid_state = ExecutionCidState::new();
     let expected_trace = vec![
-        stream_tracked("hi", 0, &mut tracker),
-        stream_tracked("ipld", 1, &mut tracker),
+        stream_tracked("hi", 0, &mut cid_state),
+        stream_tracked("ipld", 1, &mut cid_state),
     ];
 
     assert_eq!(result.ret_code, 0);
     assert_eq!(data.trace, expected_trace);
-    assert_eq!(data.cid_info.value_store, tracker.into());
+    assert_eq!(data.cid_info.value_store, cid_state.value_tracker.into());
+    assert_eq!(data.cid_info.tetraplet_store, cid_state.tetraplet_tracker.into());
+    assert_eq!(
+        data.cid_info.service_result_store,
+        cid_state.service_result_agg_tracker.into()
+    );
 }
