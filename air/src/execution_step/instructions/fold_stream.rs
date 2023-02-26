@@ -35,6 +35,7 @@ use air_parser::ast::FoldStream;
 impl<'i> ExecutableInstruction<'i> for FoldStream<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         log_instruction!(fold, exec_ctx, trace_ctx);
+        println!("> {}", self);
         exec_ctx.tracker.meet_fold_stream();
 
         let iterable = &self.iterable;

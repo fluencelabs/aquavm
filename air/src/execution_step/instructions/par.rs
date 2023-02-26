@@ -33,6 +33,7 @@ use air_trace_handler::SubgraphType;
 impl<'i> ExecutableInstruction<'i> for Par<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         log_instruction!(par, exec_ctx, trace_ctx);
+        println!("> {}", self);
 
         let mut completeness_updater = ParCompletenessUpdater::new();
         trace_to_exec_err!(trace_ctx.meet_par_start(), self)?;

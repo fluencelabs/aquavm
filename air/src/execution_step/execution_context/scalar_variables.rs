@@ -163,7 +163,10 @@ impl<'i> Scalars<'i> {
             (Ok(None), _) => Err(CatchableError::VariableWasNotInitializedAfterNew(name.to_string()).into()),
             (Ok(Some(value)), None) => Ok(ScalarRef::Value(value)),
             (Err(_), Some(iterable_value)) => Ok(ScalarRef::IterableValue(iterable_value)),
-            (Ok(_), Some(_)) => unreachable!("this is checked on the parsing stage"),
+            (Ok(_), Some(_)) => {
+                println!("variable name is {}", name);
+                unreachable!("this is checked on the parsing stage");
+            }
         }
     }
 

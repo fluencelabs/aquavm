@@ -97,6 +97,7 @@ impl TraceHandler {
             "  adding new call executed state {:?}",
             call_result
         );
+        println!("  {:?}", call_result);
         self.data_keeper.result_trace.push(ExecutedState::Call(call_result));
     }
 }

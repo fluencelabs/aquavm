@@ -24,6 +24,7 @@ use air_parser::ast::Seq;
 impl<'i> super::ExecutableInstruction<'i> for Seq<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         log_instruction!(seq, exec_ctx, trace_ctx);
+        println!("> {}", self);
 
         exec_ctx.flush_subgraph_completeness();
         self.0.execute(exec_ctx, trace_ctx)?;

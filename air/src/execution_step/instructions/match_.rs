@@ -28,6 +28,7 @@ use air_parser::ast::Match;
 impl<'i> super::ExecutableInstruction<'i> for Match<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         log_instruction!(match_, exec_ctx, trace_ctx);
+        println!("> {}", self);
 
         let are_values_equal = joinable!(
             are_matchable_eq(&self.left_value, &self.right_value, exec_ctx),

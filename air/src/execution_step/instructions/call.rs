@@ -38,6 +38,7 @@ impl<'i> super::ExecutableInstruction<'i> for Call<'i> {
     #[tracing::instrument(level = "debug", skip(exec_ctx, trace_ctx))]
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         log_instruction!(call, exec_ctx, trace_ctx);
+        println!("> {}", self);
         exec_ctx.tracker.meet_call();
 
         let resolved_call = joinable!(ResolvedCall::new(self, exec_ctx), exec_ctx, ())

@@ -25,10 +25,12 @@ use air_parser::ast::Xor;
 impl<'i> super::ExecutableInstruction<'i> for Xor<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         log_instruction!(xor, exec_ctx, trace_ctx);
+        println!("> {}", self);
 
         exec_ctx.flush_subgraph_completeness();
         match self.0.execute(exec_ctx, trace_ctx) {
             Err(e) if e.is_catchable() => {
+                println!("  xor: {:?}", e);
                 print_xor_log(&e);
 
                 exec_ctx.flush_subgraph_completeness();

@@ -36,6 +36,7 @@ use std::rc::Rc;
 impl<'i> super::ExecutableInstruction<'i> for Fail<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         log_instruction!(fail, exec_ctx, trace_ctx);
+        println!("> {}", self);
 
         match self {
             Fail::Scalar(scalar) => fail_with_scalar(scalar, exec_ctx),

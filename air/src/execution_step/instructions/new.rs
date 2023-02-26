@@ -25,6 +25,7 @@ use air_parser::ast::NewArgument;
 impl<'i> super::ExecutableInstruction<'i> for New<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         log_instruction!(new, exec_ctx, trace_ctx);
+        println!("> {}", self);
 
         prolog(self, exec_ctx);
         // it should be a lazy error evaluating after execution of epilog block, since it's
