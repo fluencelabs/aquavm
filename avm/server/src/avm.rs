@@ -155,9 +155,7 @@ impl<E> AVM<E> {
         memory_delta: usize,
     ) -> AVMResult<(), E> {
         let store_key = store_key_from_particle(&particle_parameters);
-        let prev_data = self
-            .data_store
-            .read_data(&store_key)?;
+        let prev_data = self.data_store.read_data(&store_key)?;
         let call_results = serde_json::to_vec(call_result).map_err(AVMError::AnomalyDataSeError)?;
         let ser_particle =
             serde_json::to_vec(particle_parameters).map_err(AVMError::AnomalyDataSeError)?;
@@ -182,5 +180,8 @@ impl<E> AVM<E> {
 }
 
 fn store_key_from_particle(params: &ParticleParameters<'_>) -> String {
-    format!("particle_{}-peer_{}", params.particle_id, params.current_peer_id)
+    format!(
+        "particle_{}-peer_{}",
+        params.particle_id, params.current_peer_id
+    )
 }
