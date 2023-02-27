@@ -133,8 +133,9 @@ impl<E> AVM<E> {
 
     /// Cleanup data that become obsolete.
     #[allow(clippy::result_large_err)]
-    pub fn cleanup_data(&mut self, particle_id: &str) -> AVMResult<(), E> {
-        self.data_store.cleanup_data(particle_id)?;
+    pub fn cleanup_data(&mut self, particle_id: &str, current_peer_id: &str) -> AVMResult<(), E> {
+        let store_key = store_key_from_components(particle_id, current_peer_id);
+        self.data_store.cleanup_data(&store_key)?;
         Ok(())
     }
 
@@ -180,8 +181,9 @@ impl<E> AVM<E> {
 }
 
 fn store_key_from_particle(params: &ParticleParameters<'_>) -> String {
-    format!(
-        "particle_{}-peer_{}",
-        params.particle_id, params.current_peer_id
-    )
+    store_key_from_components(&params.particle_id, &params.current_peer_id)
+}
+
+fn store_key_from_components(particle_id: &str, current_peer_id: &str) -> String {
+    format!("particle_{}-peer_{}", particle_id, current_peer_id)
 }
