@@ -86,8 +86,10 @@ impl<E> AVM<E> {
         call_results: CallResults,
     ) -> AVMResult<AVMOutcome, E> {
         let air = air.into();
-        let store_key = store_key_from_particle(&particle_parameters);
-        let prev_data = self.data_store.read_data(&store_key)?;
+        let prev_data = self.data_store.read_data(
+            &particle_parameters.particle_id,
+            &particle_parameters.current_peer_id,
+        )?;
         let current_data = data.into();
 
         let execution_start_time = Instant::now();
@@ -124,7 +126,11 @@ impl<E> AVM<E> {
         }
 
         // persist resulted data
-        self.data_store.store_data(&outcome.data, &store_key)?;
+        self.data_store.store_data(
+            &outcome.data,
+            &particle_parameters.particle_id,
+            &particle_parameters.current_peer_id,
+        )?;
         let outcome = AVMOutcome::from_raw_outcome(outcome, memory_delta, execution_time)
             .map_err(AVMError::InterpreterFailed)?;
 
@@ -134,8 +140,7 @@ impl<E> AVM<E> {
     /// Cleanup data that become obsolete.
     #[allow(clippy::result_large_err)]
     pub fn cleanup_data(&mut self, particle_id: &str, current_peer_id: &str) -> AVMResult<(), E> {
-        let store_key = store_key_from_components(particle_id, current_peer_id);
-        self.data_store.cleanup_data(&store_key)?;
+        self.data_store.cleanup_data(particle_id, current_peer_id)?;
         Ok(())
     }
 
@@ -155,8 +160,10 @@ impl<E> AVM<E> {
         execution_time: Duration,
         memory_delta: usize,
     ) -> AVMResult<(), E> {
-        let store_key = store_key_from_particle(particle_parameters);
-        let prev_data = self.data_store.read_data(&store_key)?;
+        let prev_data = self.data_store.read_data(
+            &particle_parameters.particle_id,
+            &particle_parameters.current_peer_id,
+        )?;
         let call_results = serde_json::to_vec(call_result).map_err(AVMError::AnomalyDataSeError)?;
         let ser_particle =
             serde_json::to_vec(particle_parameters).map_err(AVMError::AnomalyDataSeError)?;
@@ -175,15 +182,11 @@ impl<E> AVM<E> {
         );
 
         self.data_store
-            .collect_anomaly_data(&store_key, anomaly_data)
+            .collect_anomaly_data(
+                &particle_parameters.particle_id,
+                &particle_parameters.current_peer_id,
+                anomaly_data,
+            )
             .map_err(Into::into)
     }
-}
-
-fn store_key_from_particle(params: &ParticleParameters<'_>) -> String {
-    store_key_from_components(&params.particle_id, &params.current_peer_id)
-}
-
-fn store_key_from_components(particle_id: &str, current_peer_id: &str) -> String {
-    format!("particle_{}-peer_{}", particle_id, current_peer_id)
 }

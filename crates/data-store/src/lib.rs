@@ -41,12 +41,22 @@ pub trait DataStore {
 
     fn initialize(&mut self) -> Result<(), Self::Error>;
 
-    fn store_data(&mut self, data: &[u8], key: &str) -> Result<(), Self::Error>;
+    fn store_data(
+        &mut self,
+        data: &[u8],
+        particle_id: &str,
+        current_peer_id: &str,
+    ) -> Result<(), Self::Error>;
 
-    fn read_data(&mut self, key: &str) -> Result<Vec<u8>, Self::Error>;
+    fn read_data(
+        &mut self,
+        particle_id: &str,
+        current_peer_id: &str,
+    ) -> Result<Vec<u8>, Self::Error>;
 
     /// Cleanup data that become obsolete.
-    fn cleanup_data(&mut self, key: &str) -> Result<(), Self::Error>;
+    fn cleanup_data(&mut self, particle_id: &str, current_peer_id: &str)
+        -> Result<(), Self::Error>;
 
     /// Returns true if an anomaly happened and it's necessary to save execution data
     /// for debugging purposes.
@@ -63,7 +73,8 @@ pub trait DataStore {
 
     fn collect_anomaly_data(
         &mut self,
-        key: &str,
+        particle_id: &str,
+        current_peer_id: &str,
         anomaly_data: AnomalyData<'_>,
     ) -> Result<(), Self::Error>;
 }
