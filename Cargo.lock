@@ -52,7 +52,7 @@ dependencies = [
 
 [[package]]
 name = "air-beautifier"
-version = "0.1.2"
+version = "0.1.1"
 dependencies = [
  "air-parser",
  "itertools",
@@ -61,7 +61,7 @@ dependencies = [
 
 [[package]]
 name = "air-beautify"
-version = "0.1.2"
+version = "0.1.1"
 dependencies = [
  "air-beautifier",
  "anyhow",
@@ -70,7 +70,7 @@ dependencies = [
 
 [[package]]
 name = "air-beautify-wasm"
-version = "0.1.1"
+version = "0.1.0"
 dependencies = [
  "air-beautifier",
  "wasm-bindgen",
@@ -78,7 +78,7 @@ dependencies = [
 
 [[package]]
 name = "air-execution-info-collector"
-version = "0.7.3"
+version = "0.7.2"
 dependencies = [
  "air-parser",
 ]
@@ -111,7 +111,7 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter-data"
-version = "0.6.3"
+version = "0.6.2"
 dependencies = [
  "air-interpreter-cid",
  "air-interpreter-interface",
@@ -168,7 +168,7 @@ version = "0.1.0"
 
 [[package]]
 name = "air-parser"
-version = "0.7.3"
+version = "0.7.2"
 dependencies = [
  "air-lambda-ast",
  "air-lambda-parser",
@@ -190,7 +190,7 @@ dependencies = [
 
 [[package]]
 name = "air-test-utils"
-version = "0.4.3"
+version = "0.4.2"
 dependencies = [
  "air",
  "air-interpreter-cid",
@@ -210,7 +210,7 @@ dependencies = [
 
 [[package]]
 name = "air-testing-framework"
-version = "0.1.3"
+version = "0.1.2"
 dependencies = [
  "air-parser",
  "air-test-utils",
@@ -225,7 +225,7 @@ dependencies = [
 
 [[package]]
 name = "air-trace"
-version = "0.2.5"
+version = "0.2.4"
 dependencies = [
  "air",
  "air-interpreter-interface",
@@ -242,7 +242,7 @@ dependencies = [
 
 [[package]]
 name = "air-trace-handler"
-version = "0.1.2"
+version = "0.1.1"
 dependencies = [
  "air-interpreter-cid",
  "air-interpreter-data",
@@ -331,7 +331,7 @@ checksum = "d468802bab17cbc0cc575e9b053f41e72aa36bfa6b7f55e3529ffa43161b97fa"
 
 [[package]]
 name = "avm-data-store"
-version = "0.5.0"
+version = "0.4.1"
 dependencies = [
  "avm-interface",
  "serde",
@@ -341,7 +341,7 @@ dependencies = [
 
 [[package]]
 name = "avm-interface"
-version = "0.28.2"
+version = "0.28.1"
 dependencies = [
  "air-interpreter-interface",
  "air-utils",
@@ -356,7 +356,7 @@ dependencies = [
 
 [[package]]
 name = "avm-server"
-version = "0.29.0"
+version = "0.28.1"
 dependencies = [
  "air-interpreter-interface",
  "air-utils",
