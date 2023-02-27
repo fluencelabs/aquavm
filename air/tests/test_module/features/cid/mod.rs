@@ -17,8 +17,11 @@
 mod canon;
 
 use air::ExecutionCidState;
+use air_interpreter_data::ExecutionTrace;
 use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::*;
+
+use pretty_assertions::assert_eq;
 
 #[test]
 fn test_missing_cid() {
@@ -38,7 +41,7 @@ fn test_missing_cid() {
     assert_eq!(result.ret_code, 20012);
     assert_eq!(
         result.error_message,
-        "value for CID \"bagaaieraondvznakk2hi3kfaixhnceatpykz7cikytniqo3lc7ogkgz2qbeq\" not found"
+        "service result aggregate for CID \"bagaaieradi5vlnnji5z6g6wlcgu67cq4jwbz2tt2vitvra6lnugnyro44saa\" not found",
     );
 }
 
@@ -89,12 +92,12 @@ fn test_scalar_cid() {
     ];
 
     assert_eq!(result.ret_code, 0);
-    assert_eq!(data.trace, expected_trace);
+    assert_eq!(data.trace, ExecutionTrace::from(expected_trace));
     assert_eq!(data.cid_info.value_store, cid_state.value_tracker.into());
     assert_eq!(data.cid_info.tetraplet_store, cid_state.tetraplet_tracker.into());
     assert_eq!(
         data.cid_info.service_result_store,
-        cid_state.service_result_agg_tracker.into()
+        cid_state.service_result_agg_tracker.into(),
     );
 }
 
@@ -121,8 +124,20 @@ fn test_stream_cid() {
     let data = data_from_result(&result);
     let mut cid_state = ExecutionCidState::new();
     let expected_trace = vec![
-        stream_tracked("hi", 0, &mut cid_state),
-        stream_tracked("ipld", 1, &mut cid_state),
+        stream_tracked(
+            "hi",
+            0,
+            SecurityTetraplet::new(vm_peer_id, "service..0", "call1", ""),
+            vec![],
+            &mut cid_state,
+        ),
+        stream_tracked(
+            "ipld",
+            1,
+            SecurityTetraplet::new(vm_peer_id, "service..1", "call2", ""),
+            vec![],
+            &mut cid_state,
+        ),
     ];
 
     assert_eq!(result.ret_code, 0);

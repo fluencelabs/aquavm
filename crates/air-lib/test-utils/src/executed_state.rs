@@ -30,6 +30,7 @@ use crate::SubTraceDesc;
 
 use air::ExecutionCidState;
 use air_interpreter_cid::CID;
+use air_interpreter_cid::value_to_json_cid;
 use air_interpreter_data::CanonCidAggregate;
 use air_interpreter_data::ServiceResultAggregate;
 use air_interpreter_interface::CallServiceResult;
@@ -57,6 +58,36 @@ pub fn simple_value_aggregate_cid(
         argument_hash: "".into(),
         tetraplet_cid,
     };
+    cid_state
+        .service_result_agg_tracker
+        .record_value(Rc::new(service_result_agg))
+        .unwrap()
+}
+
+pub fn value_aggregate_cid(
+    result: impl Into<serde_json::Value>,
+    tetraplet: SecurityTetraplet,
+    args: Vec<serde_json::Value>,
+    cid_state: &mut ExecutionCidState,
+) -> Rc<CID<ServiceResultAggregate>> {
+    let value_cid = cid_state
+        .value_tracker
+        .record_value(Rc::new(result.into()))
+        .unwrap();
+    let tetraplet_cid = cid_state
+        .tetraplet_tracker
+        .record_value(Rc::new(tetraplet))
+        .unwrap();
+
+    let arguments = serde_json::Value::Array(args);
+    let argument_hash = value_to_json_cid(&arguments).unwrap().into_inner().into();
+
+    let service_result_agg = ServiceResultAggregate {
+        value_cid,
+        argument_hash,
+        tetraplet_cid,
+    };
+
     cid_state
         .service_result_agg_tracker
         .record_value(Rc::new(service_result_agg))
@@ -99,9 +130,11 @@ pub fn stream(result: JValue, generation: u32) -> ExecutedState {
 pub fn stream_tracked(
     value: impl Into<JValue>,
     generation: u32,
+    tetraplet: SecurityTetraplet,
+    args: Vec<serde_json::Value>,
     cid_state: &mut ExecutionCidState,
 ) -> ExecutedState {
-    let service_result_agg_cid = simple_value_aggregate_cid(value, cid_state);
+    let service_result_agg_cid = value_aggregate_cid(value, tetraplet, args, cid_state);
     ExecutedState::Call(CallResult::Executed(ValueRef::Stream {
         cid: service_result_agg_cid,
         generation,

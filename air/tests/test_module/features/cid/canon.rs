@@ -42,7 +42,13 @@ fn test_canon_ok() {
 
     let expected_trace = vec![
         ap(0),
-        stream_tracked("to canon", 1, &mut cid_state),
+        stream_tracked(
+            "to canon",
+            1,
+            SecurityTetraplet::new(init_peer_id, "serv..0", "func", ""),
+            vec![],
+            &mut cid_state,
+        ),
         canon_tracked(
             json!({
                 "tetraplet": {"function_name": "", "json_path": "", "peer_pk": init_peer_id, "service_id": ""},
@@ -102,8 +108,20 @@ fn test_canon_ok_multi() {
     let mut cid_state = ExecutionCidState::new();
 
     let expected_trace = vec![
-        stream_tracked("to canon", 0, &mut cid_state),
-        stream_tracked("other", 1, &mut cid_state),
+        stream_tracked(
+            "to canon",
+            0,
+            SecurityTetraplet::new(init_peer_id, "serv..0", "func", ""),
+            vec![],
+            &mut cid_state,
+        ),
+        stream_tracked(
+            "other",
+            1,
+            SecurityTetraplet::new(other_peer_id, "other_serv..1", "other_func", ""),
+            vec![],
+            &mut cid_state,
+        ),
         canon_tracked(
             json!({
                 "tetraplet": {"function_name": "", "json_path": "", "peer_pk": init_peer_id, "service_id": ""},
@@ -256,7 +274,13 @@ fn test_canon_tetraplet_not_found() {
           (canon "{init_peer_id}" $stream #canon))"#
     );
     let trace = vec![
-        stream_tracked(42, 0, &mut cid_state),
+        stream_tracked(
+            42,
+            0,
+            SecurityTetraplet::new("peer_1", "serv..0", "func", ""),
+            vec![],
+            &mut cid_state,
+        ),
         canon_tracked(
             json!({
                 "tetraplet": {"function_name": "", "json_path": "", "peer_pk": init_peer_id, "service_id": ""},
@@ -291,54 +315,6 @@ fn test_canon_tetraplet_not_found() {
     assert_eq!(
         result.error_message,
         format!("tetraplet for CID \"{missing_cid}\" not found"),
-    );
-}
-
-#[test]
-fn test_canon_service_result_agg_not_found() {
-    let init_peer_id = "vm_peer_id";
-    let mut vm = create_avm(echo_call_service(), init_peer_id);
-
-    let mut cid_state = ExecutionCidState::new();
-
-    let air_script = format!(
-        r#"
-       (seq
-          (ap 42 $stream)
-          (canon "other_peer_id" $stream #canon))"#
-    );
-    let trace = vec![
-        ap(0),
-        canon_tracked(
-            json!({
-                "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "other_peer_id", "service_id": ""},
-                "values": [{
-                    "result": 42,
-                    "tetraplet": {
-                        "function_name": "",
-                        "json_path": "",
-                        "peer_pk": init_peer_id,
-                        "service_id": "",
-                    },
-                }]
-            }),
-            &mut cid_state,
-        ),
-    ];
-
-    let missing_cid = "bagaaierapp2oi35ib4iveexfswax6jcf2zhj3e2ergzjyavm6m7stlzh23ta";
-    let service_result_agg_store: CidStore<_> = cid_state.service_result_agg_tracker.clone().into();
-    assert!(service_result_agg_store.get(&CID::<_>::new(missing_cid)).is_some());
-
-    // Fake data
-    cid_state.service_result_agg_tracker = <_>::default();
-    let cur_data = raw_data_from_trace_with_canon(trace, cid_state);
-    let result = call_vm!(vm, <_>::default(), air_script, vec![], cur_data);
-
-    assert_eq!(result.ret_code, 20012);
-    assert_eq!(
-        result.error_message,
-        format!("service result aggregate for CID \"{missing_cid}\" not found")
     );
 }
 

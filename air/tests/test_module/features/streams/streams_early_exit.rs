@@ -22,6 +22,8 @@ use air_trace_handler::merger::CallResultError;
 use air_trace_handler::merger::MergeError;
 use air_trace_handler::TraceHandlerError;
 
+use pretty_assertions::assert_eq;
+
 #[test]
 fn par_early_exit() {
     let init_peer_id = "init_peer_id";
@@ -140,8 +142,22 @@ fn par_early_exit() {
         executed_state::par(1, 1),
         executed_state::request_sent_by(init_peer_id),
         executed_state::request_sent_by(init_peer_id),
-        executed_state::stream_tracked("non_exist_value", 0, &mut setter_3_cid_state),
-        executed_state::stream_tracked("success result from fallible_call_service", 0, &mut setter_3_cid_state),
+        executed_state::stream_tracked(
+            "non_exist_value",
+            0,
+            // TODO
+            SecurityTetraplet::new(setter_1_id, "", "", ""),
+            vec![],
+            &mut setter_3_cid_state,
+        ),
+        executed_state::stream_tracked(
+            "success result from fallible_call_service",
+            0,
+            // TODO
+            SecurityTetraplet::new(setter_1_id, "", "", ""),
+            vec![],
+            &mut setter_3_cid_state,
+        ),
         executed_state::service_failed(1, "failed result from fallible_call_service"),
         executed_state::request_sent_by(setter_3_id),
     ];
@@ -157,11 +173,21 @@ fn par_early_exit() {
     let mut cid_state = ExecutionCidState::new();
 
     let prev_value = ValueRef::Stream {
-        cid: simple_value_aggregate_cid(json!("1"), &mut cid_state),
+        cid: value_aggregate_cid(
+            json!("1"),
+            SecurityTetraplet::new(setter_1_id, "", "", ""),
+            vec![],
+            &mut cid_state,
+        ),
         generation: 1,
     };
     let current_value = ValueRef::Stream {
-        cid: simple_value_aggregate_cid(json!("non_exist_value"), &mut cid_state),
+        cid: value_aggregate_cid(
+            json!("non_exist_value"),
+            SecurityTetraplet::new(setter_1_id, "", "", ""),
+            vec![],
+            &mut cid_state,
+        ),
         generation: 0,
     };
     let expected_error = UncatchableError::TraceError {
@@ -338,5 +364,5 @@ fn fold_par_early_exit() {
     ];
     let trace_len = expected_trace.len();
 
-    assert_eq!((*actual_trace)[0..trace_len], expected_trace);
+    assert_eq!(&(*actual_trace)[0..trace_len], expected_trace);
 }
