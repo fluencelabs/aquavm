@@ -29,8 +29,8 @@ use crate::FoldSubTraceLore;
 use crate::SubTraceDesc;
 
 use air::ExecutionCidState;
-use air_interpreter_cid::CID;
 use air_interpreter_cid::value_to_json_cid;
+use air_interpreter_cid::CID;
 use air_interpreter_data::CanonCidAggregate;
 use air_interpreter_data::ServiceResultAggregate;
 use air_interpreter_interface::CallServiceResult;
@@ -96,16 +96,29 @@ pub fn value_aggregate_cid(
 
 pub fn scalar_tracked(
     result: impl Into<JValue>,
+    tetraplet: SecurityTetraplet,
+    args: Vec<serde_json::Value>,
     cid_state: &mut ExecutionCidState,
 ) -> ExecutedState {
-    let service_result_agg_cid = simple_value_aggregate_cid(result, cid_state);
+    let service_result_agg_cid = value_aggregate_cid(result, tetraplet, args, cid_state);
     let value = ValueRef::Scalar(service_result_agg_cid);
+    ExecutedState::Call(CallResult::Executed(value))
+}
+
+pub fn scalar_unused_tracked(
+    result: impl Into<JValue>,
+    tetraplet: SecurityTetraplet,
+    args: Vec<serde_json::Value>,
+    cid_state: &mut ExecutionCidState,
+) -> ExecutedState {
+    let service_result_agg_cid = value_aggregate_cid(result, tetraplet, args, cid_state);
+    let value = ValueRef::Unused(service_result_agg_cid);
     ExecutedState::Call(CallResult::Executed(value))
 }
 
 pub fn scalar(result: JValue) -> ExecutedState {
     let mut cid_state = ExecutionCidState::new();
-    scalar_tracked(result, &mut cid_state)
+    scalar_tracked(result, SecurityTetraplet::default(), vec![], &mut cid_state)
 }
 
 pub fn scalar_number(result: impl Into<serde_json::Number>) -> ExecutedState {

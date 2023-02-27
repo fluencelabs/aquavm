@@ -133,7 +133,12 @@ fn par_early_exit() {
 
     let mut setter_3_cid_state = ExecutionCidState::new();
     let setter_3_malicious_trace = vec![
-        executed_state::scalar_tracked("result from unit_call_service", &mut setter_3_cid_state),
+        executed_state::scalar_tracked(
+            "result from unit_call_service",
+            SecurityTetraplet::new(init_peer_id, "", "", ""),
+            vec![],
+            &mut setter_3_cid_state,
+        ),
         executed_state::par(10, 0),
         executed_state::par(9, 0),
         executed_state::par(7, 1),

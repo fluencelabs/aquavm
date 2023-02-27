@@ -20,13 +20,14 @@ use air_test_utils::prelude::*;
 #[test]
 fn executed_trace_seq_par_call() {
     let local_peer_id = "local_peer_id";
+    let remote_peer_id = "remote_peer_id";
     let mut vm = create_avm(unit_call_service(), local_peer_id);
 
     let script = f!(r#"
         (seq
             (par
                 (call "{local_peer_id}" ("local_service_id" "local_fn_name") [] result_1)
-                (call "remote_peer_id" ("service_id" "fn_name") [] g)
+                (call "{remote_peer_id}" ("service_id" "fn_name") [] g)
             )
             (call "{local_peer_id}" ("local_service_id" "local_fn_name") [] result_2)
         )"#);
@@ -35,8 +36,18 @@ fn executed_trace_seq_par_call() {
     let unit_call_service_result = "result from unit_call_service";
     let initial_trace = vec![
         par(1, 1),
-        scalar_tracked(unit_call_service_result, &mut cid_state),
-        scalar_tracked(unit_call_service_result, &mut cid_state),
+        scalar_tracked(
+            unit_call_service_result,
+            SecurityTetraplet::new(local_peer_id, "local_service_id", "local_fn_name", ""),
+            vec![],
+            &mut cid_state,
+        ),
+        scalar_tracked(
+            unit_call_service_result,
+            SecurityTetraplet::new(remote_peer_id, "service_id", "fn_name", ""),
+            vec![],
+            &mut cid_state,
+        ),
     ];
     let initial_data = raw_data_from_trace(initial_trace, cid_state);
 
@@ -57,13 +68,14 @@ fn executed_trace_seq_par_call() {
 #[test]
 fn executed_trace_par_par_call() {
     let local_peer_id = "local_peer_id";
+    let remote_peer_id = "remote_peer_id";
     let mut vm = create_avm(unit_call_service(), local_peer_id);
 
     let script = f!(r#"
         (par
             (par
                 (call "{local_peer_id}" ("local_service_id" "local_fn_name") [] result_1)
-                (call "remote_peer_id" ("service_id" "fn_name") [] g)
+                (call "{remote_peer_id}" ("service_id" "fn_name") [] g)
             )
             (call "{local_peer_id}" ("local_service_id" "local_fn_name") [] result_2)
         )"#);
@@ -74,7 +86,12 @@ fn executed_trace_par_par_call() {
         par(2, 1),
         par(1, 0),
         request_sent_by("peer_id_1"),
-        scalar_tracked(unit_call_service_result, &mut cid_state),
+        scalar_tracked(
+            unit_call_service_result,
+            SecurityTetraplet::new(local_peer_id, "local_service_id", "local_fn_name", ""),
+            vec![],
+            &mut cid_state,
+        ),
     ];
 
     let initial_data = raw_data_from_trace(initial_state, cid_state);
@@ -162,7 +179,7 @@ fn executed_trace_create_service() {
     );
 
     let module_bytes = json!([1, 2]);
-    let blueprint = json!({ "name": "blueprint", "dependencies": [module]});
+    let blueprint = json!({"name": "blueprint", "dependencies": [module]});
 
     let add_module_response = "add_module response";
     let add_blueprint_response = "add_blueprint response";
@@ -178,7 +195,9 @@ fn executed_trace_create_service() {
         CallServiceResult::ok(json!(response))
     });
 
-    let mut vm = create_avm(call_service, "A");
+    let init_peer_id = "A";
+    let set_variables_id = "set_variables";
+    let mut vm = create_avm(call_service, init_peer_id);
 
     let script = include_str!("./scripts/create_service.air");
 
@@ -188,13 +207,48 @@ fn executed_trace_create_service() {
     let add_blueprint_response = "add_blueprint response";
     let create_response = "create response";
     let expected_trace = vec![
-        scalar_tracked(module_bytes.clone(), &mut cid_state),
-        scalar_tracked(module_config.clone(), &mut cid_state),
-        scalar_tracked(blueprint.clone(), &mut cid_state),
-        scalar_tracked(add_module_response, &mut cid_state),
-        scalar_tracked(add_blueprint_response, &mut cid_state),
-        scalar_tracked(create_response, &mut cid_state),
-        scalar_tracked("test", &mut cid_state),
+        scalar_tracked(
+            module_bytes.clone(),
+            SecurityTetraplet::new(set_variables_id, "add_module", "", ""),
+            vec!["module_bytes".into()],
+            &mut cid_state,
+        ),
+        scalar_tracked(
+            module_config.clone(),
+            SecurityTetraplet::new(set_variables_id, "add_module", "", ""),
+            vec!["module_config".into()],
+            &mut cid_state,
+        ),
+        scalar_tracked(
+            blueprint.clone(),
+            SecurityTetraplet::new(set_variables_id, "add_module", "", ""),
+            vec!["blueprint".into()],
+            &mut cid_state,
+        ),
+        scalar_tracked(
+            add_module_response,
+            SecurityTetraplet::new(init_peer_id, "add_module", "", ""),
+            vec![module_bytes, module_config],
+            &mut cid_state,
+        ),
+        scalar_tracked(
+            add_blueprint_response,
+            SecurityTetraplet::new(init_peer_id, "add_blueprint", "", ""),
+            vec![blueprint],
+            &mut cid_state,
+        ),
+        scalar_tracked(
+            create_response,
+            SecurityTetraplet::new(init_peer_id, "create", "", ""),
+            vec![add_blueprint_response.into()],
+            &mut cid_state,
+        ),
+        scalar_tracked(
+            "test",
+            SecurityTetraplet::new("remote_peer_id", "", "", ""),
+            vec![create_response.into()],
+            &mut cid_state,
+        ),
     ];
     let initial_data = raw_data_from_trace(expected_trace.clone(), cid_state);
 

@@ -25,43 +25,67 @@ use pretty_assertions::assert_eq;
 
 #[test]
 fn test_missing_cid() {
-    let vm_peer_id = "vm_peer_id";
-    let mut vm = create_avm(echo_call_service(), vm_peer_id);
+    let peer_id = "peer_id";
+    let mut vm = create_avm(echo_call_service(), peer_id);
 
     let air_script = r#"
        (seq
           (call "peer_id" ("service" "call1") [] x)
           (call "peer_id" ("service" "call2") []))"#;
-    let trace = vec![scalar_number(42), scalar_number(43)];
     let mut cid_state = ExecutionCidState::new();
-    cid_state.value_tracker.record_value(json!(43)).unwrap();
+    let trace = vec![
+        scalar_tracked(
+            42,
+            SecurityTetraplet::new(peer_id, "service", "call1", ""),
+            vec![],
+            &mut cid_state,
+        ),
+        scalar_unused_tracked(
+            43,
+            SecurityTetraplet::new(peer_id, "service", "call2", ""),
+            vec![],
+            &mut cid_state,
+        ),
+    ];
+    cid_state.service_result_agg_tracker = <_>::default();
 
     let cur_data = raw_data_from_trace(trace, cid_state);
     let result = call_vm!(vm, <_>::default(), air_script, vec![], cur_data);
-    assert_eq!(result.ret_code, 20012);
+    assert_eq!(result.ret_code, 20012, "{:?}", result);
     assert_eq!(
         result.error_message,
-        "service result aggregate for CID \"bagaaieradi5vlnnji5z6g6wlcgu67cq4jwbz2tt2vitvra6lnugnyro44saa\" not found",
+        "service result aggregate for CID \"bagaaierajmqwu6mhm7iw5mxxy647ri6yznuwjxfm72u4u5a5zdasfid4xwiq\" not found",
     );
 }
 
 #[test]
 fn test_correct_cid() {
-    let vm_peer_id = "vm_peer_id";
-    let mut vm = create_avm(echo_call_service(), vm_peer_id);
+    let peer_id = "peer_id";
+    let mut vm = create_avm(echo_call_service(), peer_id);
 
     let air_script = r#"
        (seq
           (call "peer_id" ("service" "call1") [] x)
           (call "peer_id" ("service" "call2") [] y))"#;
-    let trace = vec![scalar_number(42), scalar_number(43)];
     let mut tracker = ExecutionCidState::new();
-    tracker.value_tracker.record_value(json!(43)).unwrap();
-    tracker.value_tracker.record_value(json!(42)).unwrap();
+    let trace = vec![
+        scalar_tracked(
+            42,
+            SecurityTetraplet::new(peer_id, "service", "call1", ""),
+            vec![],
+            &mut tracker,
+        ),
+        scalar_tracked(
+            43,
+            SecurityTetraplet::new(peer_id, "service", "call2", ""),
+            vec![],
+            &mut tracker,
+        ),
+    ];
 
     let cur_data = raw_data_from_trace(trace, tracker);
     let result = call_vm!(vm, <_>::default(), air_script, vec![], cur_data);
-    assert_eq!(result.ret_code, 0);
+    assert_eq!(result.ret_code, 0, "{:?}", result);
 }
 
 #[test]
@@ -87,8 +111,18 @@ fn test_scalar_cid() {
     let data = data_from_result(&result);
     let mut cid_state = ExecutionCidState::new();
     let expected_trace = vec![
-        scalar_tracked("hi", &mut cid_state),
-        scalar_tracked("ipld", &mut cid_state),
+        scalar_tracked(
+            "hi",
+            SecurityTetraplet::new(vm_peer_id, "service..0", "call1", ""),
+            vec![],
+            &mut cid_state,
+        ),
+        scalar_tracked(
+            "ipld",
+            SecurityTetraplet::new(vm_peer_id, "service..1", "call2", ""),
+            vec![],
+            &mut cid_state,
+        ),
     ];
 
     assert_eq!(result.ret_code, 0);
