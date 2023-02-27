@@ -1,6 +1,6 @@
 [package]
 name = "air"
-version = "0.35.1"
+version = "0.36.0"
 description = "Interpreter of AIR scripts intended to coordinate request flow in the Fluence network"
 authors = ["Fluence Labs"]
 edition = "2018"
