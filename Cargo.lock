@@ -13,7 +13,7 @@ dependencies = [
 
 [[package]]
 name = "air"
-version = "0.35.1"
+version = "0.36.0"
 dependencies = [
  "air-execution-info-collector",
  "air-interpreter-cid",
@@ -85,7 +85,7 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter"
-version = "0.35.4"
+version = "0.35.5"
 dependencies = [
  "air",
  "air-interpreter-interface",
@@ -190,7 +190,7 @@ dependencies = [
 
 [[package]]
 name = "air-test-utils"
-version = "0.4.2"
+version = "0.4.4"
 dependencies = [
  "air",
  "air-interpreter-cid",
@@ -210,7 +210,7 @@ dependencies = [
 
 [[package]]
 name = "air-testing-framework"
-version = "0.1.2"
+version = "0.1.4"
 dependencies = [
  "air-parser",
  "air-test-utils",
@@ -225,7 +225,7 @@ dependencies = [
 
 [[package]]
 name = "air-trace"
-version = "0.2.4"
+version = "0.2.5"
 dependencies = [
  "air",
  "air-interpreter-interface",
@@ -331,7 +331,7 @@ checksum = "d468802bab17cbc0cc575e9b053f41e72aa36bfa6b7f55e3529ffa43161b97fa"
 
 [[package]]
 name = "avm-data-store"
-version = "0.4.1"
+version = "0.6.0"
 dependencies = [
  "avm-interface",
  "serde",
@@ -356,7 +356,7 @@ dependencies = [
 
 [[package]]
 name = "avm-server"
-version = "0.28.1"
+version = "0.30.0"
 dependencies = [
  "air-interpreter-interface",
  "air-utils",
