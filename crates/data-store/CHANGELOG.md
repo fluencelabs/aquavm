@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0](https://github.com/fluencelabs/aquavm/compare/avm-data-store-v0.5.0...avm-data-store-v0.6.0) (2023-02-27)
+
+
+### ⚠ BREAKING CHANGES
+
+* **data_store:** use particle_id + current_peer_id as prev_data key in DataStore ([#485](https://github.com/fluencelabs/aquavm/issues/485))
+
+### Bug Fixes
+
+* **data_store:** use particle_id + current_peer_id as prev_data key in DataStore ([#485](https://github.com/fluencelabs/aquavm/issues/485)) ([36e1c87](https://github.com/fluencelabs/aquavm/commit/36e1c8762c1888f375adacc21907d98a811d28d9))
+
 ## [0.5.0](https://github.com/fluencelabs/aquavm/compare/avm-data-store-v0.4.1...avm-data-store-v0.5.0) (2023-02-21)
 
 
