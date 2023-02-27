@@ -155,7 +155,7 @@ impl<E> AVM<E> {
         execution_time: Duration,
         memory_delta: usize,
     ) -> AVMResult<(), E> {
-        let store_key = store_key_from_particle(&particle_parameters);
+        let store_key = store_key_from_particle(particle_parameters);
         let prev_data = self.data_store.read_data(&store_key)?;
         let call_results = serde_json::to_vec(call_result).map_err(AVMError::AnomalyDataSeError)?;
         let ser_particle =
