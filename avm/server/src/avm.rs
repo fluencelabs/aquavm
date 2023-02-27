@@ -86,8 +86,8 @@ impl<E> AVM<E> {
         call_results: CallResults,
     ) -> AVMResult<AVMOutcome, E> {
         let air = air.into();
-        let storage_key = store_key_from_particle(&particle_parameters);
-        let prev_data = self.data_store.read_data(&storage_key)?;
+        let store_key = store_key_from_particle(&particle_parameters);
+        let prev_data = self.data_store.read_data(&store_key)?;
         let current_data = data.into();
 
         let execution_start_time = Instant::now();
@@ -124,7 +124,7 @@ impl<E> AVM<E> {
         }
 
         // persist resulted data
-        self.data_store.store_data(&outcome.data, &storage_key)?;
+        self.data_store.store_data(&outcome.data, &store_key)?;
         let outcome = AVMOutcome::from_raw_outcome(outcome, memory_delta, execution_time)
             .map_err(AVMError::InterpreterFailed)?;
 
