@@ -94,103 +94,6 @@ pub fn value_aggregate_cid(
         .unwrap()
 }
 
-pub fn scalar_tracked(
-    result: impl Into<JValue>,
-    tetraplet: SecurityTetraplet,
-    args: Vec<serde_json::Value>,
-    cid_state: &mut ExecutionCidState,
-) -> ExecutedState {
-    let service_result_agg_cid = value_aggregate_cid(result, tetraplet, args, cid_state);
-    let value = ValueRef::Scalar(service_result_agg_cid);
-    ExecutedState::Call(CallResult::Executed(value))
-}
-
-pub fn scalar_unused_tracked(
-    result: impl Into<JValue>,
-    tetraplet: SecurityTetraplet,
-    args: Vec<serde_json::Value>,
-    cid_state: &mut ExecutionCidState,
-) -> ExecutedState {
-    let service_result_agg_cid = value_aggregate_cid(result, tetraplet, args, cid_state);
-    let value = ValueRef::Unused(service_result_agg_cid);
-    ExecutedState::Call(CallResult::Executed(value))
-}
-
-pub fn scalar(result: JValue) -> ExecutedState {
-    let mut cid_state = ExecutionCidState::new();
-    scalar_tracked(result, SecurityTetraplet::default(), vec![], &mut cid_state)
-}
-
-pub fn scalar_number(result: impl Into<serde_json::Number>) -> ExecutedState {
-    let result = JValue::Number(result.into());
-
-    scalar(result)
-}
-
-pub fn stream_call_result(result: JValue, generation: u32) -> CallResult {
-    let mut cid_state = ExecutionCidState::new();
-    let service_result_agg_cid = simple_value_aggregate_cid(result, &mut cid_state);
-    CallResult::Executed(ValueRef::Stream {
-        cid: service_result_agg_cid,
-        generation,
-    })
-}
-
-pub fn stream(result: JValue, generation: u32) -> ExecutedState {
-    ExecutedState::Call(stream_call_result(result, generation))
-}
-
-pub fn stream_tracked(
-    value: impl Into<JValue>,
-    generation: u32,
-    tetraplet: SecurityTetraplet,
-    args: Vec<serde_json::Value>,
-    cid_state: &mut ExecutionCidState,
-) -> ExecutedState {
-    let service_result_agg_cid = value_aggregate_cid(value, tetraplet, args, cid_state);
-    ExecutedState::Call(CallResult::Executed(ValueRef::Stream {
-        cid: service_result_agg_cid,
-        generation,
-    }))
-}
-
-pub fn scalar_string(result: impl Into<String>) -> ExecutedState {
-    let result = JValue::String(result.into());
-    scalar(result)
-}
-
-pub fn scalar_string_array(result: Vec<impl Into<String>>) -> ExecutedState {
-    let result = result
-        .into_iter()
-        .map(|s| JValue::String(s.into()))
-        .collect::<Vec<_>>();
-    let value = JValue::Array(result);
-
-    scalar(value)
-}
-
-pub fn stream_string(result: impl Into<String>, generation: u32) -> ExecutedState {
-    let result = JValue::String(result.into());
-
-    stream(result, generation)
-}
-
-pub fn stream_number(result: impl Into<serde_json::Number>, generation: u32) -> ExecutedState {
-    let result = JValue::Number(result.into());
-
-    stream(result, generation)
-}
-
-pub fn stream_string_array(result: Vec<impl Into<String>>, generation: u32) -> ExecutedState {
-    let result = result
-        .into_iter()
-        .map(|s| JValue::String(s.into()))
-        .collect::<Vec<_>>();
-    let value = JValue::Array(result);
-
-    stream(value, generation)
-}
-
 pub fn request_sent_by(sender: impl Into<String>) -> ExecutedState {
     ExecutedState::Call(CallResult::RequestSentBy(Sender::PeerId(Rc::new(
         sender.into(),
@@ -297,4 +200,223 @@ pub fn canon_tracked(
         .unwrap_or_else(|e| panic!("{:?}: failed to compute CID of {:?}", e, canon_input.values));
     let canon_result = CanonResult::new(tetraplet_cid, value_cids);
     ExecutedState::Canon(canon_result)
+}
+
+#[macro_export]
+macro_rules! _trace_value_body {
+    ($value:tt) => {
+        $crate::executed_state::ExecutedCallBuilder::new($value)
+    };
+
+    ($value:tt, $func1:ident = $v1:expr $(, $func:ident = $v:expr)*) => {
+        $crate::executed_state::ExecutedCallBuilder::new($value) .$func1($v1) $(. $func($v))*
+    };
+}
+
+#[macro_export]
+macro_rules! scalar {
+    ($value:tt) => {
+        _trace_value_body!($value).scalar()
+    };
+
+    ($value:tt, $func1:ident = $v1:expr $(, $func:ident = $v:expr)*) => {
+        _trace_value_body!($value, $func1 = $v1 $(, $func = $v)*).scalar()
+    };
+}
+
+#[macro_export]
+macro_rules! scalar_unused {
+    ($value:tt) => {
+        _trace_value_body!($value).scalar_unused()
+    };
+
+    ($value:tt, $func1:ident = $v1:expr $(, $func:ident = $v:expr)*) => {
+        _trace_value_body!($value, $func1 = $v1 $(, $func = $v)*).scalar_unused()
+    };
+}
+
+#[macro_export]
+macro_rules! scalar_tracked {
+    ($value:tt, $state:tt) => {
+        _trace_value_body!($value).scalar_tracked(&mut $state)
+    };
+
+    ($value:tt, $state:tt, $func1:ident = $v1:expr $(, $func:ident = $v:expr)*) => {
+        _trace_value_body!($value, $func1 = $v1 $(, $func = $v)*).scalar_tracked(&mut $state)
+    };
+}
+
+#[macro_export]
+macro_rules! scalar_unused_tracked {
+    ($value:tt, $state:tt) => {
+        _trace_value_body!($value).scalar_unused_tracked(&mut $state)
+    };
+
+    ($value:tt, $state:tt, $func1:ident = $v1:expr $(, $func:ident = $v:expr)*) => {
+        _trace_value_body!($value, $func1 = $v1 $(, $func = $v)*).scalar_unused_tracked(&mut $state)
+    };
+}
+
+#[macro_export]
+macro_rules! stream {
+    ($value:expr, $generation:expr) => {
+        _trace_value_body!($value).stream($generation)
+    };
+
+    ($value:expr, $generation:expr, $func1:ident = $v1:expr $(, $func:ident = $v:expr)*) => {
+        _trace_value_body!($value, $func1 = $v1 $(, $func = $v)*).stream($generation)
+    };
+}
+
+#[macro_export]
+macro_rules! stream_unused {
+    ($value:expr, $generation:expr) => {
+        _trace_value_body!($value).stream_unused($generation)
+    };
+
+    ($value:expr, $generation:expr, $func1:ident = $v1:expr $(, $func:ident = $v:expr)*) => {
+        _trace_value_body!($value, $func1 = $v1 $(, $func = $v)*).stream_unused($generation)
+    };
+}
+
+#[macro_export]
+macro_rules! stream_tracked {
+    ($value:expr, $generation:expr, $state:tt) => {
+        _trace_value_body!($value).stream_tracked(&mut $state)
+    };
+
+    ($value:expr, $generation:expr, $state:tt, $func1:ident = $v1:expr $(, $func:ident = $v:expr)*) => {
+        _trace_value_body!($value, $func1 = $v1 $(, $func = $v)*).stream_tracked($generation, &mut $state)
+    };
+}
+
+#[macro_export]
+macro_rules! stream_unused_tracked {
+    ($value:expr, $generation:expr, $state:tt) => {
+        _trace_value_body!($value).stream_unused_tracked(&mut $state)
+    };
+
+    ($value:expr, $generation:expr, $state:tt, $func1:ident = $v1:expr $(, $func:ident = $v:expr)*) => {
+        _trace_value_body!($value, $func1 = $v1 $(, $func = $v)*).stream_unused_tracked($generation, &mut $state)
+    };
+}
+
+pub struct ExecutedCallBuilder {
+    result: JValue,
+    tetraplet: SecurityTetraplet,
+    args: Vec<JValue>,
+}
+
+impl ExecutedCallBuilder {
+    pub fn new(result: impl Into<JValue>) -> Self {
+        Self {
+            result: result.into(),
+            tetraplet: Default::default(),
+            args: Default::default(),
+        }
+    }
+
+    pub fn peer(mut self, peer_pk: impl Into<String>) -> Self {
+        self.tetraplet.peer_pk = peer_pk.into();
+        self
+    }
+
+    pub fn service(mut self, service_id: impl Into<String>) -> Self {
+        self.tetraplet.service_id = service_id.into();
+        self
+    }
+
+    pub fn function(mut self, function_name: impl Into<String>) -> Self {
+        self.tetraplet.function_name = function_name.into();
+        self
+    }
+
+    pub fn args(mut self, args: Vec<impl Into<JValue>>) -> Self {
+        self.args = args.into_iter().map(Into::into).collect();
+        self
+    }
+
+    pub fn scalar(self) -> ExecutedState {
+        let mut cid_state = ExecutionCidState::new();
+        self.scalar_tracked(&mut cid_state)
+    }
+
+    pub fn scalar_unused(self) -> ExecutedState {
+        let mut cid_state = ExecutionCidState::new();
+        self.scalar_unused_tracked(&mut cid_state)
+    }
+
+    pub fn scalar_tracked(self, cid_state: &mut ExecutionCidState) -> ExecutedState {
+        let service_result_agg_cid = value_aggregate_cid(self.result, self.tetraplet, self.args, cid_state);
+        let value = ValueRef::Scalar(service_result_agg_cid);
+        ExecutedState::Call(CallResult::Executed(value))
+    }
+
+    pub fn scalar_unused_tracked(self, cid_state: &mut ExecutionCidState) -> ExecutedState {
+        let service_result_agg_cid = value_aggregate_cid(self.result, self.tetraplet, self.args, cid_state);
+        let value = ValueRef::Unused(service_result_agg_cid);
+        ExecutedState::Call(CallResult::Executed(value))
+    }
+
+    pub fn stream(self, generation: u32) -> ExecutedState {
+        let mut cid_state = ExecutionCidState::new();
+        self.stream_tracked(generation, &mut cid_state)
+    }
+
+    pub fn stream_tracked(self, generation: u32, cid_state: &mut ExecutionCidState) -> ExecutedState {
+        let service_result_agg_cid = value_aggregate_cid(self.result, self.tetraplet, self.args, cid_state);
+        let value = ValueRef::Stream { cid: service_result_agg_cid, generation };
+        ExecutedState::Call(CallResult::Executed(value))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use air::ExecutionCidState;
+    use serde_json::json;
+
+    #[test]
+    fn test_scalar() {
+        assert_eq!(scalar!(42), scalar!(42));
+        assert_eq!(scalar!("test"), scalar!("test"));
+        assert_ne!(scalar!(42), scalar!(42, peer="test"));
+        assert_ne!(
+            scalar!(42, peer="test"),
+            scalar!(42, peer="test", args=vec![json!(1)]),
+        );
+    }
+
+    #[test]
+    fn test_scalar_tracked() {
+        let mut store = ExecutionCidState::new();
+        assert_eq!(scalar_tracked!(42, store), scalar_tracked!(42, store));
+        assert_eq!(scalar!(42), scalar_tracked!(42, store));
+        assert_eq!(scalar_tracked!("test", store), scalar_tracked!("test", store));
+        assert_ne!(scalar_tracked!(42, store), scalar_tracked!(42, store, peer="test"));
+        assert_ne!(
+            scalar_tracked!(42, store, peer="test"),
+            scalar_tracked!(42, store, peer="test", args=vec![json!(1)]),
+        );
+        assert_eq!(
+            scalar!(42, peer="test", args=vec![json!(1)]),
+            scalar_tracked!(42, store, peer="test", args=vec![json!(1)]),
+        );
+    }
+
+    #[test]
+    fn test_scalar_unused_tracked() {
+        let mut store = ExecutionCidState::new();
+        assert_eq!(scalar_unused_tracked!(42, store), scalar_unused_tracked!(42, store));
+        assert_eq!(scalar_unused!(42), scalar_unused_tracked!(42, store));
+        assert_eq!(scalar_unused_tracked!("test", store), scalar_unused_tracked!("test", store));
+        assert_ne!(scalar_unused_tracked!(42, store), scalar_unused_tracked!(42, store, peer="test"));
+        assert_ne!(
+            scalar_unused_tracked!(42, store, peer="test"),
+            scalar_unused_tracked!(42, store, peer="test", args=vec![json!(1)]),
+        );
+        assert_eq!(
+            scalar_unused!(42, peer="test", args=vec![json!(1)]),
+            scalar_unused_tracked!(42, store, peer="test", args=vec![json!(1)]),
+        );
+    }
 }

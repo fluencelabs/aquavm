@@ -287,8 +287,18 @@ mod tests {
             assert_eq!(
                 trace,
                 ExecutionTrace::from(vec![
-                    scalar(json!([{"p":"peer2","v":2},{"p":"peer3","v":3},])),
-                    scalar_number(12),
+                    scalar!(
+                        (json!([{"p":"peer2","v":2},{"p":"peer3","v":3}])),
+                        peer="peer1",
+                        service="service..0",
+                        function="func"),
+                    scalar!(
+                        12,
+                        peer="peer2",
+                        service="service..1",
+                        function="func",
+                        args=vec![json!({"p":"peer2","v":2}), json!(1)]
+                    ),
                     request_sent_by("peer2"),
                 ])
             );
@@ -305,8 +315,18 @@ mod tests {
             assert_eq!(
                 trace,
                 ExecutionTrace::from(vec![
-                    scalar(json!([{"p":"peer2","v":2},{"p":"peer3","v":3},])),
-                    scalar_number(12),
+                    scalar!(
+                        (json!([{"p":"peer2","v":2},{"p":"peer3","v":3}])),
+                        peer="peer1",
+                        service="service..0",
+                        function="func"),
+                    scalar!(
+                        12,
+                        peer="peer2",
+                        service="service..1",
+                        function="func",
+                        args=vec![json!({"p":"peer2","v":2}), json!(1)]
+                    ),
                     request_sent_by("peer2"),
                 ])
             );
@@ -360,9 +380,13 @@ mod tests {
             assert_eq!(
                 &*trace,
                 vec![
-                    executed_state::scalar(json!(["peer2", "peer3"])),
-                    executed_state::scalar(json!(42)),
-                    executed_state::scalar(json!(43)),
+                    scalar!(
+                        (json!(["peer2", "peer3"])),
+                        peer="peer1",
+                        service="..0"
+                    ),
+                    scalar_unused!((json!(42)), peer="peer2", service="..1", args=vec!["peer2"]),
+                    scalar_unused!((json!(43)), peer="peer3", service="..1", args=vec!["peer3"]),
                 ]
             );
         }
@@ -432,8 +456,19 @@ mod tests {
             assert_eq!(
                 trace,
                 ExecutionTrace::from(vec![
-                    scalar(json!([{"p":"peer2","v":2},{"p":"peer3","v":3},{"p":"peer4"}])),
-                    scalar_number(12),
+                    scalar!(
+                        (json!([{"p":"peer2","v":2},{"p":"peer3","v":3},{"p":"peer4"}])),
+                        peer="peer1",
+                        service="service..0",
+                        function="func"
+                    ),
+                    scalar!(
+                        12,
+                        peer="peer2",
+                        service="service..1",
+                        function="func",
+                        args=vec![2, 1]
+                    ),
                     request_sent_by("peer2"),
                 ])
             );
@@ -451,8 +486,19 @@ mod tests {
             assert_eq!(
                 trace,
                 ExecutionTrace::from(vec![
-                    scalar(json!([{"p":"peer2","v":2},{"p":"peer3","v":3},{"p":"peer4"}])),
-                    scalar_number(12),
+                    scalar!(
+                        (json!([{"p":"peer2","v":2},{"p":"peer3","v":3},{"p":"peer4"}])),
+                        peer="peer1",
+                        service="service..0",
+                        function="func"
+                    ),
+                    scalar!(
+                        12,
+                        peer="peer2",
+                        service="service..1",
+                        function="func",
+                        args=vec![2, 1]
+                    ),
                     request_sent_by("peer2"),
                 ])
             );
@@ -489,7 +535,16 @@ mod tests {
 
         assert_eq!(
             trace_from_result(outcome1),
-            ExecutionTrace::from(vec![scalar_number(1), request_sent_by("peer1"),]),
+            ExecutionTrace::from(vec![
+                scalar!(
+                    1,
+                    peer="peer1",
+                    service="service..0",
+                    function="func",
+                    args=vec![1, 22]
+                ),
+                request_sent_by("peer1"),
+            ]),
         )
     }
 
@@ -525,11 +580,15 @@ mod tests {
 
         assert_eq!(
             trace_from_result(&trace1),
-            ExecutionTrace::from(vec![scalar_number(42)]),
+            ExecutionTrace::from(
+                vec![scalar_unused!(42, peer=peer, service="service..0", function="function")]
+            ),
         );
         assert_eq!(
             trace_from_result(&trace2),
-            ExecutionTrace::from(vec![scalar_number(24)]),
+            ExecutionTrace::from(
+                vec![scalar_unused!(24, peer=peer, service="service..1", function="function")]
+            ),
         );
     }
 
@@ -571,11 +630,15 @@ mod tests {
 
         assert_eq!(
             trace_from_result(&trace1),
-            ExecutionTrace::from(vec![scalar_number(42)]),
+            ExecutionTrace::from(vec![
+                scalar_unused!(42, peer=peer, service="service", function="function"),
+            ]),
         );
         assert_eq!(
             trace_from_result(&trace2),
-            ExecutionTrace::from(vec![scalar_number(24)]),
+            ExecutionTrace::from(vec![
+                scalar_unused!(24, peer=peer, service="service", function="function"),
+            ]),
         );
     }
 
@@ -624,7 +687,13 @@ mod tests {
 
         assert_eq!(
             trace_from_result(outcome),
-            ExecutionTrace::from(vec![scalar_string("service"),]),
+            ExecutionTrace::from(vec![scalar!(
+                "service",
+                peer="peer1",
+                service="service..0",
+                function="func",
+                args=vec![1, 22]
+            ),]),
         )
     }
 
@@ -648,7 +717,13 @@ mod tests {
 
         assert_eq!(
             trace_from_result(outcome),
-            ExecutionTrace::from(vec![scalar_string("func"),]),
+            ExecutionTrace::from(vec![scalar!(
+                "func",
+                peer="peer1",
+                service="service..0",
+                function="func",
+                args=vec![1, 22]
+            ),]),
         )
     }
 
@@ -672,7 +747,13 @@ mod tests {
 
         assert_eq!(
             trace_from_result(outcome),
-            ExecutionTrace::from(vec![scalar_number(22),]),
+            ExecutionTrace::from(vec![scalar!(
+                22,
+                peer="peer1",
+                service="service..0",
+                function="func",
+                args=vec![1, 22]
+            ),]),
         )
     }
 
@@ -696,17 +777,23 @@ mod tests {
 
         assert_eq!(
             trace_from_result(outcome),
-            ExecutionTrace::from(vec![scalar(json!([[{
-                "function_name": "",
-                "json_path": "",
-                "peer_pk": "peer1",
-                "service_id": "",
-            }], [{
-                "function_name": "",
-                "json_path": "",
-                "peer_pk": "peer1",
-                "service_id": "",
-            }]]))]),
+            ExecutionTrace::from(vec![scalar!(
+                (json!([[{
+                    "function_name": "",
+                    "json_path": "",
+                    "peer_pk": "peer1",
+                    "service_id": "",
+                }], [{
+                    "function_name": "",
+                    "json_path": "",
+                    "peer_pk": "peer1",
+                    "service_id": "",
+                }]])),
+                peer=peer,
+                service="service..0",
+                function="func",
+                args=vec![1, 22]
+            )]),
         )
     }
 }
