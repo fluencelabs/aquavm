@@ -203,9 +203,7 @@ fn variable_names_shown_in_error() {
 
     assert_eq!(
         trace[1.into()],
-        executed_state::scalar(json!(
-            "call cannot resolve non-String triplet variable part `-relay-` with value '1'"
-        ))
+        scalar!("call cannot resolve non-String triplet variable part `-relay-` with value '1'"),
     );
 }
 

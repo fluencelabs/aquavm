@@ -34,7 +34,7 @@ fn seq_remote_remote() {
     let result = checked_call_vm!(vm, <_>::default(), script, "", "");
     assert_eq!(result.next_peer_pks, vec![String::from("remote_peer_id_1")]);
 
-    let initial_trace = vec![executed_state::scalar_string("")];
+    let initial_trace = vec![scalar!("")];
     let initial_data = raw_data_from_trace(initial_trace, cid_state.into());
 
     let result = checked_call_vm!(vm, <_>::default(), script, "", initial_data);

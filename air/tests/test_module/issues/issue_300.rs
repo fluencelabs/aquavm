@@ -37,10 +37,6 @@ fn issue_300() {
     let result_2 = checked_call_vm!(peer_vm_1, <_>::default(), &script, "", result_1.data);
     let actual_trace = trace_from_result(&result_2);
 
-    let expected_trace = vec![
-        executed_state::par(1, 1),
-        executed_state::stream_number(2, 1),
-        executed_state::stream_number(1, 0),
-    ];
+    let expected_trace = vec![executed_state::par(1, 1), stream!(2, 1), stream!(1, 0)];
     assert_eq!(actual_trace, expected_trace);
 }

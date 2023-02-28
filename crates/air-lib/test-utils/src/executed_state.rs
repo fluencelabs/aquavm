@@ -331,6 +331,11 @@ impl ExecutedCallBuilder {
         self
     }
 
+    pub fn json_path(mut self, json_path: impl Into<String>) -> Self {
+        self.tetraplet.json_path = json_path.into();
+        self
+    }
+
     pub fn args(mut self, args: Vec<impl Into<JValue>>) -> Self {
         self.args = args.into_iter().map(Into::into).collect();
         self
@@ -347,13 +352,15 @@ impl ExecutedCallBuilder {
     }
 
     pub fn scalar_tracked(self, cid_state: &mut ExecutionCidState) -> ExecutedState {
-        let service_result_agg_cid = value_aggregate_cid(self.result, self.tetraplet, self.args, cid_state);
+        let service_result_agg_cid =
+            value_aggregate_cid(self.result, self.tetraplet, self.args, cid_state);
         let value = ValueRef::Scalar(service_result_agg_cid);
         ExecutedState::Call(CallResult::Executed(value))
     }
 
     pub fn scalar_unused_tracked(self, cid_state: &mut ExecutionCidState) -> ExecutedState {
-        let service_result_agg_cid = value_aggregate_cid(self.result, self.tetraplet, self.args, cid_state);
+        let service_result_agg_cid =
+            value_aggregate_cid(self.result, self.tetraplet, self.args, cid_state);
         let value = ValueRef::Unused(service_result_agg_cid);
         ExecutedState::Call(CallResult::Executed(value))
     }
@@ -363,9 +370,17 @@ impl ExecutedCallBuilder {
         self.stream_tracked(generation, &mut cid_state)
     }
 
-    pub fn stream_tracked(self, generation: u32, cid_state: &mut ExecutionCidState) -> ExecutedState {
-        let service_result_agg_cid = value_aggregate_cid(self.result, self.tetraplet, self.args, cid_state);
-        let value = ValueRef::Stream { cid: service_result_agg_cid, generation };
+    pub fn stream_tracked(
+        self,
+        generation: u32,
+        cid_state: &mut ExecutionCidState,
+    ) -> ExecutedState {
+        let service_result_agg_cid =
+            value_aggregate_cid(self.result, self.tetraplet, self.args, cid_state);
+        let value = ValueRef::Stream {
+            cid: service_result_agg_cid,
+            generation,
+        };
         ExecutedState::Call(CallResult::Executed(value))
     }
 }
@@ -379,10 +394,10 @@ mod tests {
     fn test_scalar() {
         assert_eq!(scalar!(42), scalar!(42));
         assert_eq!(scalar!("test"), scalar!("test"));
-        assert_ne!(scalar!(42), scalar!(42, peer="test"));
+        assert_ne!(scalar!(42), scalar!(42, peer = "test"));
         assert_ne!(
-            scalar!(42, peer="test"),
-            scalar!(42, peer="test", args=vec![json!(1)]),
+            scalar!(42, peer = "test"),
+            scalar!(42, peer = "test", args = vec![json!(1)]),
         );
     }
 
@@ -391,32 +406,47 @@ mod tests {
         let mut store = ExecutionCidState::new();
         assert_eq!(scalar_tracked!(42, store), scalar_tracked!(42, store));
         assert_eq!(scalar!(42), scalar_tracked!(42, store));
-        assert_eq!(scalar_tracked!("test", store), scalar_tracked!("test", store));
-        assert_ne!(scalar_tracked!(42, store), scalar_tracked!(42, store, peer="test"));
+        assert_eq!(
+            scalar_tracked!("test", store),
+            scalar_tracked!("test", store)
+        );
         assert_ne!(
-            scalar_tracked!(42, store, peer="test"),
-            scalar_tracked!(42, store, peer="test", args=vec![json!(1)]),
+            scalar_tracked!(42, store),
+            scalar_tracked!(42, store, peer = "test")
+        );
+        assert_ne!(
+            scalar_tracked!(42, store, peer = "test"),
+            scalar_tracked!(42, store, peer = "test", args = vec![json!(1)]),
         );
         assert_eq!(
-            scalar!(42, peer="test", args=vec![json!(1)]),
-            scalar_tracked!(42, store, peer="test", args=vec![json!(1)]),
+            scalar!(42, peer = "test", args = vec![json!(1)]),
+            scalar_tracked!(42, store, peer = "test", args = vec![json!(1)]),
         );
     }
 
     #[test]
     fn test_scalar_unused_tracked() {
         let mut store = ExecutionCidState::new();
-        assert_eq!(scalar_unused_tracked!(42, store), scalar_unused_tracked!(42, store));
+        assert_eq!(
+            scalar_unused_tracked!(42, store),
+            scalar_unused_tracked!(42, store)
+        );
         assert_eq!(scalar_unused!(42), scalar_unused_tracked!(42, store));
-        assert_eq!(scalar_unused_tracked!("test", store), scalar_unused_tracked!("test", store));
-        assert_ne!(scalar_unused_tracked!(42, store), scalar_unused_tracked!(42, store, peer="test"));
+        assert_eq!(
+            scalar_unused_tracked!("test", store),
+            scalar_unused_tracked!("test", store)
+        );
         assert_ne!(
-            scalar_unused_tracked!(42, store, peer="test"),
-            scalar_unused_tracked!(42, store, peer="test", args=vec![json!(1)]),
+            scalar_unused_tracked!(42, store),
+            scalar_unused_tracked!(42, store, peer = "test")
+        );
+        assert_ne!(
+            scalar_unused_tracked!(42, store, peer = "test"),
+            scalar_unused_tracked!(42, store, peer = "test", args = vec![json!(1)]),
         );
         assert_eq!(
-            scalar_unused!(42, peer="test", args=vec![json!(1)]),
-            scalar_unused_tracked!(42, store, peer="test", args=vec![json!(1)]),
+            scalar_unused!(42, peer = "test", args = vec![json!(1)]),
+            scalar_unused_tracked!(42, store, peer = "test", args = vec![json!(1)]),
         );
     }
 }

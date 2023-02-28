@@ -34,18 +34,8 @@ fn test_missing_cid() {
           (call "peer_id" ("service" "call2") []))"#;
     let mut cid_state = ExecutionCidState::new();
     let trace = vec![
-        scalar_tracked(
-            42,
-            SecurityTetraplet::new(peer_id, "service", "call1", ""),
-            vec![],
-            &mut cid_state,
-        ),
-        scalar_unused_tracked(
-            43,
-            SecurityTetraplet::new(peer_id, "service", "call2", ""),
-            vec![],
-            &mut cid_state,
-        ),
+        scalar_tracked!(42, cid_state, peer = peer_id, service = "service", function = "call1"),
+        scalar_unused_tracked!(43, cid_state, peer = peer_id, service = "service", function = "call2"),
     ];
     cid_state.service_result_agg_tracker = <_>::default();
 
@@ -69,18 +59,8 @@ fn test_correct_cid() {
           (call "peer_id" ("service" "call2") [] y))"#;
     let mut tracker = ExecutionCidState::new();
     let trace = vec![
-        scalar_tracked(
-            42,
-            SecurityTetraplet::new(peer_id, "service", "call1", ""),
-            vec![],
-            &mut tracker,
-        ),
-        scalar_tracked(
-            43,
-            SecurityTetraplet::new(peer_id, "service", "call2", ""),
-            vec![],
-            &mut tracker,
-        ),
+        scalar_tracked!(42, tracker, peer = peer_id, service = "service", function = "call1"),
+        scalar_tracked!(43, tracker, peer = peer_id, service = "service", function = "call2"),
     ];
 
     let cur_data = raw_data_from_trace(trace, tracker);
@@ -111,17 +91,19 @@ fn test_scalar_cid() {
     let data = data_from_result(&result);
     let mut cid_state = ExecutionCidState::new();
     let expected_trace = vec![
-        scalar_tracked(
+        scalar_tracked!(
             "hi",
-            SecurityTetraplet::new(vm_peer_id, "service..0", "call1", ""),
-            vec![],
-            &mut cid_state,
+            cid_state,
+            peer = vm_peer_id,
+            service = "service..0",
+            function = "call1"
         ),
-        scalar_tracked(
+        scalar_tracked!(
             "ipld",
-            SecurityTetraplet::new(vm_peer_id, "service..1", "call2", ""),
-            vec![],
-            &mut cid_state,
+            cid_state,
+            peer = vm_peer_id,
+            service = "service..1",
+            function = "call2"
         ),
     ];
 
@@ -158,19 +140,21 @@ fn test_stream_cid() {
     let data = data_from_result(&result);
     let mut cid_state = ExecutionCidState::new();
     let expected_trace = vec![
-        stream_tracked(
+        stream_tracked!(
             "hi",
             0,
-            SecurityTetraplet::new(vm_peer_id, "service..0", "call1", ""),
-            vec![],
-            &mut cid_state,
+            cid_state,
+            peer = vm_peer_id,
+            service = "service..0",
+            function = "call1"
         ),
-        stream_tracked(
+        stream_tracked!(
             "ipld",
             1,
-            SecurityTetraplet::new(vm_peer_id, "service..1", "call2", ""),
-            vec![],
-            &mut cid_state,
+            cid_state,
+            peer = vm_peer_id,
+            service = "service..1",
+            function = "call2"
         ),
     ];
 

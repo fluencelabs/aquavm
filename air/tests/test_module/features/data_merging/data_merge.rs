@@ -83,16 +83,16 @@ fn merge_streams_in_two_fold() {
     let actual_trace_1 = trace_from_result(&result_1);
 
     let expected_trace_1 = vec![
-        scalar_string_array(vec![vm_1_peer_id, vm_2_peer_id]),
+        scalar!((json!([vm_1_peer_id, vm_2_peer_id]))),
         par(1, 2),
-        stream_string(vm_1_peer_id, 0),
+        stream!(vm_1_peer_id, 0),
         par(1, 0),
         request_sent_by(set_variable_peer_id),
         par(1, 2),
-        stream_string(vm_1_peer_id, 0),
+        stream!(vm_1_peer_id, 0),
         par(1, 0),
         request_sent_by(vm_1_peer_id),
-        stream_string(vm_1_peer_id, 1),
+        stream!(vm_1_peer_id, 1),
         request_sent_by(vm_1_peer_id),
     ];
 
@@ -102,15 +102,15 @@ fn merge_streams_in_two_fold() {
     let actual_trace_2 = trace_from_result(&result_2);
 
     let expected_trace_2 = vec![
-        scalar_string_array(vec![vm_1_peer_id, vm_2_peer_id]),
+        scalar!((json!([vm_1_peer_id, vm_2_peer_id]))),
         par(1, 2),
         request_sent_by(set_variable_peer_id),
         par(1, 0),
-        stream_string(vm_2_peer_id, 0),
+        stream!(vm_2_peer_id, 0),
         par(1, 2),
         request_sent_by(vm_2_peer_id),
         par(1, 0),
-        stream_string(vm_2_peer_id, 0),
+        stream!(vm_2_peer_id, 0),
         request_sent_by(vm_2_peer_id),
     ];
 
@@ -120,16 +120,16 @@ fn merge_streams_in_two_fold() {
     let actual_trace_3 = trace_from_result(&result_3);
 
     let expected_trace_3 = vec![
-        scalar_string_array(vec![vm_1_peer_id, vm_2_peer_id]),
+        scalar!((json!([vm_1_peer_id, vm_2_peer_id]))),
         par(1, 2),
-        stream_string(vm_1_peer_id, 0),
+        stream!(vm_1_peer_id, 0),
         par(1, 0),
-        stream_string(vm_2_peer_id, 2),
+        stream!(vm_2_peer_id, 2),
         par(1, 2),
-        stream_string(vm_1_peer_id, 0),
+        stream!(vm_1_peer_id, 0),
         par(1, 0),
-        stream_string(vm_2_peer_id, 1),
-        stream_string(vm_1_peer_id, 1),
+        stream!(vm_2_peer_id, 1),
+        stream!(vm_1_peer_id, 1),
         request_sent_by(vm_1_peer_id),
     ];
 
@@ -139,17 +139,17 @@ fn merge_streams_in_two_fold() {
     let actual_trace_4 = trace_from_result(&result_4);
 
     let expected_trace_4 = vec![
-        scalar_string_array(vec![vm_1_peer_id, vm_2_peer_id]),
+        scalar!((json!([vm_1_peer_id, vm_2_peer_id]))),
         par(1, 2),
-        stream_string(vm_1_peer_id, 0),
+        stream!(vm_1_peer_id, 0),
         par(1, 0),
-        stream_string(vm_2_peer_id, 2),
+        stream!(vm_2_peer_id, 2),
         par(1, 2),
-        stream_string(vm_1_peer_id, 0),
+        stream!(vm_1_peer_id, 0),
         par(1, 0),
-        stream_string(vm_2_peer_id, 1),
-        stream_string(vm_1_peer_id, 1),
-        scalar_string(vm_2_peer_id),
+        stream!(vm_2_peer_id, 1),
+        stream!(vm_1_peer_id, 1),
+        scalar!(vm_2_peer_id),
     ];
 
     assert_eq!(actual_trace_4, expected_trace_4);

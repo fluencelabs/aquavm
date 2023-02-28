@@ -74,20 +74,20 @@ fn issue_173() {
 
     let actual_trace = trace_from_result(&vm_2_result);
     let expected_trace = vec![
-        executed_state::stream_number(1, 0),
-        executed_state::stream_number(2, 0),
+        stream!(1, 0),
+        stream!(2, 0),
         executed_state::fold(vec![
             executed_state::subtrace_lore(0, SubTraceDesc::new(3.into(), 2), SubTraceDesc::new(9.into(), 2)),
             executed_state::subtrace_lore(1, SubTraceDesc::new(5.into(), 2), SubTraceDesc::new(7.into(), 2)),
         ]),
         executed_state::par(6, 1),
-        executed_state::stream_number(1, 0),
+        stream!(1, 0),
         executed_state::par(2, 1),
-        executed_state::stream_number(2, 0),
-        executed_state::scalar(json!([2])),
-        executed_state::scalar(json!([1, 2])),
-        executed_state::scalar(json!([1])),
-        executed_state::scalar(json!([1, 2])),
+        stream!(2, 0),
+        scalar!((json!([2]))),
+        scalar!((json!([1, 2]))),
+        scalar!((json!([1]))),
+        scalar!((json!([1, 2]))),
     ];
     assert_eq!(actual_trace, expected_trace);
 

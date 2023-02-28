@@ -36,13 +36,19 @@ fn issue_295() {
 
     let mut cid_state = ExecutionCidState::new();
     cid_state.value_tracker.record_value(Rc::new("".into())).unwrap();
-    let prev_trace = vec![executed_state::scalar_string(""), executed_state::ap(1)];
-    let current_trace = vec![executed_state::scalar_string(""), executed_state::scalar_string("")];
+    let scalar = scalar!("", peer = vm_peer_id);
+    let prev_trace = vec![scalar.clone(), executed_state::ap(1)];
+    let current_trace = vec![scalar.clone(), scalar];
     let prev_data = raw_data_from_trace(prev_trace, cid_state.clone().into());
     let current_data = raw_data_from_trace(current_trace, cid_state.clone().into());
     let result = call_vm!(vm, <_>::default(), &script, prev_data, current_data);
 
-    let cid = simple_value_aggregate_cid(json!(""), &mut cid_state);
+    let cid = value_aggregate_cid(
+        json!(""),
+        SecurityTetraplet::new(vm_peer_id, "", "", ""),
+        vec![],
+        &mut cid_state,
+    );
     let expected_error = UncatchableError::TraceError {
         trace_error: TraceHandlerError::MergeError(MergeError::IncompatibleExecutedStates(
             ExecutedState::Ap(ApResult::new(1)),

@@ -63,11 +63,11 @@ fn scalars_scope() {
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
-        executed_state::scalar(peers),
+        scalar!(peers),
         executed_state::par(1, 0),
-        executed_state::scalar(array_1_content),
-        executed_state::scalar_string("result from unit_call_service"),
-        executed_state::scalar_string("result from unit_call_service"),
+        scalar!(array_1_content),
+        scalar!("result from unit_call_service"),
+        scalar!("result from unit_call_service"),
         executed_state::par(1, 0),
         executed_state::request_sent_by(some_peer_id),
     ];
@@ -112,13 +112,13 @@ fn before_after_of_next() {
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
-        executed_state::scalar(array_0_content),
-        executed_state::scalar_number(0),
-        executed_state::scalar_number(1),
-        executed_state::scalar_number(2),
-        executed_state::scalar_number(2),
-        executed_state::scalar_number(1),
-        executed_state::scalar_number(0),
+        scalar!(array_0_content),
+        scalar!(0),
+        scalar!(1),
+        scalar!(2),
+        scalar!(2),
+        scalar!(1),
+        scalar!(0),
     ];
     assert_eq!(actual_trace, expected_trace);
 }
@@ -190,22 +190,22 @@ fn local_and_global_scalars() {
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
-        executed_state::scalar(iterable_content.clone()),
-        executed_state::scalar(iterable_content),
-        executed_state::scalar_number(0),
-        executed_state::scalar_number(1),
-        executed_state::scalar_number(2),
-        executed_state::scalar_number(2),
-        executed_state::scalar_number(3),
-        executed_state::scalar_number(3),
-        executed_state::scalar_number(1),
-        executed_state::scalar_number(4),
-        executed_state::scalar_number(5),
-        executed_state::scalar_number(5),
-        executed_state::scalar_number(6),
-        executed_state::scalar_number(6),
-        executed_state::scalar_number(4),
-        executed_state::scalar_number(0),
+        scalar!((iterable_content.clone())),
+        scalar!(iterable_content),
+        scalar!(0),
+        scalar!(1),
+        scalar!(2),
+        scalar!(2),
+        scalar!(3),
+        scalar!(3),
+        scalar!(1),
+        scalar!(4),
+        scalar!(5),
+        scalar!(5),
+        scalar!(6),
+        scalar!(6),
+        scalar!(4),
+        scalar!(0),
     ];
     assert_eq!(actual_trace, expected_trace);
 }

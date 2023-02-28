@@ -36,17 +36,19 @@ fn executed_trace_seq_par_call() {
     let unit_call_service_result = "result from unit_call_service";
     let initial_trace = vec![
         par(1, 1),
-        scalar_tracked(
+        scalar_tracked!(
             unit_call_service_result,
-            SecurityTetraplet::new(local_peer_id, "local_service_id", "local_fn_name", ""),
-            vec![],
-            &mut cid_state,
+            cid_state,
+            peer = local_peer_id,
+            service = "local_service_id",
+            function = "local_fn_name"
         ),
-        scalar_tracked(
+        scalar_tracked!(
             unit_call_service_result,
-            SecurityTetraplet::new(remote_peer_id, "service_id", "fn_name", ""),
-            vec![],
-            &mut cid_state,
+            cid_state,
+            peer = remote_peer_id,
+            service = "service_id",
+            function = "fn_name"
         ),
     ];
     let initial_data = raw_data_from_trace(initial_trace, cid_state);
@@ -56,9 +58,9 @@ fn executed_trace_seq_par_call() {
 
     let expected_trace = vec![
         par(1, 1),
-        scalar_string(unit_call_service_result),
-        scalar_string(unit_call_service_result),
-        scalar_string(unit_call_service_result),
+        scalar!(unit_call_service_result),
+        scalar!(unit_call_service_result),
+        scalar!(unit_call_service_result),
     ];
 
     assert_eq!(actual_trace, expected_trace);
@@ -86,11 +88,12 @@ fn executed_trace_par_par_call() {
         par(2, 1),
         par(1, 0),
         request_sent_by("peer_id_1"),
-        scalar_tracked(
+        scalar_tracked!(
             unit_call_service_result,
-            SecurityTetraplet::new(local_peer_id, "local_service_id", "local_fn_name", ""),
-            vec![],
-            &mut cid_state,
+            cid_state,
+            peer = local_peer_id,
+            service = "local_service_id",
+            function = "local_fn_name"
         ),
     ];
 
@@ -102,9 +105,9 @@ fn executed_trace_par_par_call() {
     let expected_trace = vec![
         par(3, 1),
         par(1, 1),
-        scalar_string(unit_call_service_result),
+        scalar!(unit_call_service_result),
         request_sent_by(local_peer_id),
-        scalar_string(unit_call_service_result),
+        scalar!(unit_call_service_result),
     ];
 
     assert_eq!(actual_trace, expected_trace);
@@ -154,9 +157,9 @@ fn executed_trace_seq_seq() {
 
     let call_service_result = "result from unit_call_service";
     let expected_trace = vec![
-        scalar_string(call_service_result),
-        scalar_string(call_service_result),
-        scalar_string(call_service_result),
+        scalar!(call_service_result),
+        scalar!(call_service_result),
+        scalar!(call_service_result),
     ];
 
     assert_eq!(actual_trace, expected_trace);
@@ -207,48 +210,49 @@ fn executed_trace_create_service() {
     let add_blueprint_response = "add_blueprint response";
     let create_response = "create response";
     let expected_trace = vec![
-        scalar_tracked(
-            module_bytes.clone(),
-            SecurityTetraplet::new(set_variables_id, "add_module", "", ""),
-            vec!["module_bytes".into()],
-            &mut cid_state,
+        scalar_tracked!(
+            (module_bytes.clone()),
+            cid_state,
+            peer = set_variables_id,
+            service = "add_module",
+            args = vec!["module_bytes"]
         ),
-        scalar_tracked(
-            module_config.clone(),
-            SecurityTetraplet::new(set_variables_id, "add_module", "", ""),
-            vec!["module_config".into()],
-            &mut cid_state,
+        scalar_tracked!(
+            (module_config.clone()),
+            cid_state,
+            peer = set_variables_id,
+            service = "add_module",
+            args = vec!["module_config"]
         ),
-        scalar_tracked(
-            blueprint.clone(),
-            SecurityTetraplet::new(set_variables_id, "add_module", "", ""),
-            vec!["blueprint".into()],
-            &mut cid_state,
+        scalar_tracked!(
+            (blueprint.clone()),
+            cid_state,
+            peer = set_variables_id,
+            service = "add_module",
+            args = vec!["blueprint"]
         ),
-        scalar_tracked(
+        scalar_tracked!(
             add_module_response,
-            SecurityTetraplet::new(init_peer_id, "add_module", "", ""),
-            vec![module_bytes, module_config],
-            &mut cid_state,
+            cid_state,
+            peer = init_peer_id,
+            service = "add_module",
+            args = vec![module_bytes, module_config]
         ),
-        scalar_tracked(
+        scalar_tracked!(
             add_blueprint_response,
-            SecurityTetraplet::new(init_peer_id, "add_blueprint", "", ""),
-            vec![blueprint],
-            &mut cid_state,
+            cid_state,
+            peer = init_peer_id,
+            service = "add_blueprint",
+            args = vec![blueprint]
         ),
-        scalar_tracked(
+        scalar_tracked!(
             create_response,
-            SecurityTetraplet::new(init_peer_id, "create", "", ""),
-            vec![add_blueprint_response.into()],
-            &mut cid_state,
+            cid_state,
+            peer = init_peer_id,
+            service = "create",
+            args = vec![add_blueprint_response]
         ),
-        scalar_tracked(
-            "test",
-            SecurityTetraplet::new("remote_peer_id", "", "", ""),
-            vec![create_response.into()],
-            &mut cid_state,
-        ),
+        scalar_tracked!("test", cid_state, peer = "remote_peer_id", args = vec![create_response]),
     ];
     let initial_data = raw_data_from_trace(expected_trace.clone(), cid_state);
 
@@ -299,28 +303,28 @@ fn executed_trace_par_seq_fold_call() {
     let generation = 0;
     let expected_trace = vec![
         par(21, 1),
-        scalar_string_array(vec!["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]),
+        scalar!((json!(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]))),
         par(1, 18),
-        stream_string(1.to_string(), generation),
+        stream!(1.to_string(), generation),
         par(1, 16),
-        stream_string(2.to_string(), generation),
+        stream!(2.to_string(), generation),
         par(1, 14),
-        stream_string(3.to_string(), generation),
+        stream!(3.to_string(), generation),
         par(1, 12),
-        stream_string(4.to_string(), generation),
+        stream!(4.to_string(), generation),
         par(1, 10),
-        stream_string(5.to_string(), generation),
+        stream!(5.to_string(), generation),
         par(1, 8),
-        stream_string(6.to_string(), generation),
+        stream!(6.to_string(), generation),
         par(1, 6),
-        stream_string(7.to_string(), generation),
+        stream!(7.to_string(), generation),
         par(1, 4),
-        stream_string(8.to_string(), generation),
+        stream!(8.to_string(), generation),
         par(1, 2),
-        stream_string(9.to_string(), generation),
+        stream!(9.to_string(), generation),
         par(1, 0),
-        stream_string(10.to_string(), generation),
-        scalar_string("result from unit_call_service"),
+        stream!(10.to_string(), generation),
+        scalar!("result from unit_call_service"),
     ];
 
     assert_eq!(actual_trace, expected_trace);
@@ -363,28 +367,28 @@ fn executed_trace_par_seq_fold_in_cycle_call() {
         let generation = 0;
         let expected_trace = vec![
             par(21, 1),
-            scalar_string_array(vec!["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]),
+            scalar!((json!(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]))),
             par(1, 18),
-            stream_string(1.to_string(), generation),
+            stream!(1.to_string(), generation),
             par(1, 16),
-            stream_string(2.to_string(), generation),
+            stream!(2.to_string(), generation),
             par(1, 14),
-            stream_string(3.to_string(), generation),
+            stream!(3.to_string(), generation),
             par(1, 12),
-            stream_string(4.to_string(), generation),
+            stream!(4.to_string(), generation),
             par(1, 10),
-            stream_string(5.to_string(), generation),
+            stream!(5.to_string(), generation),
             par(1, 8),
-            stream_string(6.to_string(), generation),
+            stream!(6.to_string(), generation),
             par(1, 6),
-            stream_string(7.to_string(), generation),
+            stream!(7.to_string(), generation),
             par(1, 4),
-            stream_string(8.to_string(), generation),
+            stream!(8.to_string(), generation),
             par(1, 2),
-            stream_string(9.to_string(), generation),
+            stream!(9.to_string(), generation),
             par(1, 0),
-            stream_string(10.to_string(), generation),
-            scalar_string("result from unit_call_service"),
+            stream!(10.to_string(), generation),
+            scalar!("result from unit_call_service"),
         ];
 
         assert_eq!(actual_trace, expected_trace);
@@ -428,11 +432,11 @@ fn executed_trace_seq_par_seq_seq() {
     let unit_call_service_result = "result from unit_call_service";
     let executed_trace = vec![
         par(2, 2),
-        scalar_string(unit_call_service_result),
-        scalar_string(unit_call_service_result),
-        scalar_string(unit_call_service_result),
-        scalar_string(unit_call_service_result),
-        scalar_string(unit_call_service_result),
+        scalar!(unit_call_service_result),
+        scalar!(unit_call_service_result),
+        scalar!(unit_call_service_result),
+        scalar!(unit_call_service_result),
+        scalar!(unit_call_service_result),
     ];
 
     assert_eq!(actual_trace, executed_trace);

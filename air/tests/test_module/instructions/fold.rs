@@ -41,13 +41,13 @@ fn lfold() {
     let result = checked_call_vm!(vm, <_>::default(), lfold, "", result.data);
 
     let actual_trace = trace_from_result(&result);
-    let expected_state = executed_state::scalar_string_array(vec!["1", "2", "3", "4", "5"]);
+    let expected_state = scalar!((json!(["1", "2", "3", "4", "5"])));
 
     assert_eq!(actual_trace.len(), 6);
     assert_eq!(actual_trace[0.into()], expected_state);
 
     for i in 1..=5 {
-        let expected_state = executed_state::stream_string(format!("{i}"), i as u32 - 1);
+        let expected_state = stream!(format!("{i}"), i as u32 - 1);
         assert_eq!(actual_trace[i.into()], expected_state);
     }
 }
@@ -77,11 +77,11 @@ fn rfold() {
     let actual_trace = trace_from_result(&result);
     assert_eq!(actual_trace.len(), 6);
 
-    let expected_state = executed_state::scalar_string_array(vec!["1", "2", "3", "4", "5"]);
+    let expected_state = scalar!((json!(["1", "2", "3", "4", "5"])));
     assert_eq!(actual_trace[0.into()], expected_state);
 
     for i in 1..=5 {
-        let expected_state = executed_state::stream_string(format!("{}", 6 - i), i as u32 - 1);
+        let expected_state = stream!(format!("{}", 6 - i), i as u32 - 1);
         assert_eq!(actual_trace[i.into()], expected_state);
     }
 }
@@ -119,14 +119,14 @@ fn inner_fold() {
     let actual_trace = trace_from_result(&result);
     assert_eq!(actual_trace.len(), 27);
 
-    let expected_state = executed_state::scalar_string_array(vec!["1", "2", "3", "4", "5"]);
+    let expected_state = scalar!((json!(["1", "2", "3", "4", "5"])));
     assert_eq!(actual_trace[0.into()], expected_state);
     assert_eq!(actual_trace[1.into()], expected_state);
 
     for i in 1..=5 {
         for j in 1..=5 {
             let state_id = 1 + 5 * (i - 1) + j;
-            let expected_state = executed_state::stream_string(i.to_string(), state_id as u32 - 2);
+            let expected_state = stream!(i.to_string(), state_id as u32 - 2);
             assert_eq!(actual_trace[state_id.into()], expected_state);
         }
     }
@@ -184,7 +184,7 @@ fn empty_iterable_fold() {
     let result = checked_call_vm!(vm, <_>::default(), empty_fold, "", result.data);
 
     let actual_trace = trace_from_result(&result);
-    let expected_state = executed_state::scalar(json!([]));
+    let expected_state = scalar!((json!([])));
 
     assert_eq!(actual_trace.len(), 1);
     assert_eq!(actual_trace[0.into()], expected_state);
@@ -228,7 +228,7 @@ fn empty_fold_json_path() {
     let result = checked_call_vm!(vm, <_>::default(), empty_fold, "", result.data);
 
     let actual_trace = trace_from_result(&result);
-    let expected_trace = vec![executed_state::scalar(json!({ "messages": [] }))];
+    let expected_trace = vec![scalar!((json!({ "messages": [] })))];
 
     assert_eq!(actual_trace, expected_trace);
 }
@@ -283,13 +283,13 @@ fn lambda() {
     let result = checked_call_vm!(vm, <_>::default(), script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
-    let expected_state = executed_state::scalar(json!({ "array": ["1", "2", "3", "4", "5"] }));
+    let expected_state = scalar!((json!({ "array": ["1", "2", "3", "4", "5"] })));
 
     assert_eq!(actual_trace.len(), 6);
     assert_eq!(actual_trace[0.into()], expected_state);
 
     for i in 1..=5 {
-        let expected_state = executed_state::stream_string(format!("{i}"), i as u32 - 1);
+        let expected_state = stream!(format!("{i}"), i as u32 - 1);
         assert_eq!(actual_trace[i.into()], expected_state);
     }
 }
@@ -340,17 +340,17 @@ fn shadowing() {
 
     let actual_trace = trace_from_result(&result);
     let expected_trace = vec![
-        scalar_string_array(vec!["1", "2"]),
-        scalar_string_array(vec!["1", "2"]),
-        scalar_string("1"),
-        scalar_string("1"),
-        scalar_string("1"),
-        scalar_string("1"),
+        scalar!((json!(["1", "2"]))),
+        scalar!((json!(["1", "2"]))),
+        scalar!("1"),
+        scalar!("1"),
+        scalar!("1"),
+        scalar!("1"),
         par(1, 1),
-        scalar_string("1"),
-        scalar_string("1"),
-        scalar_string("2"),
-        scalar_string("2"),
+        scalar!("1"),
+        scalar!("1"),
+        scalar!("2"),
+        scalar!("2"),
         request_sent_by("B"),
     ];
 
@@ -407,16 +407,16 @@ fn shadowing_scope() {
 
     let actual_trace = trace_from_result(&result);
     let expected_trace = vec![
-        scalar_string_array(vec!["1", "2"]),
-        scalar_string_array(vec!["1", "2"]),
-        scalar_string("value"),
-        scalar_string("1"),
-        scalar_string("1"),
-        scalar_string("1"),
-        scalar_string("1"),
-        scalar_string("value"),
-        scalar_string("value"),
-        scalar_string("2"),
+        scalar!((vec!["1", "2"])),
+        scalar!((vec!["1", "2"])),
+        scalar!("value"),
+        scalar!("1"),
+        scalar!("1"),
+        scalar!("1"),
+        scalar!("1"),
+        scalar!("value"),
+        scalar!("value"),
+        scalar!("2"),
         request_sent_by("A"),
     ];
 
@@ -464,13 +464,13 @@ fn fold_stream_seq_next_never_completes() {
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
-        executed_state::stream_number(1, 0),
+        stream!(1, 0),
         executed_state::fold(vec![subtrace_lore(
             0,
             SubTraceDesc::new(2.into(), 1),
             SubTraceDesc::new(3.into(), 0),
         )]),
-        executed_state::stream_number(1, 0),
+        stream!(1, 0),
     ];
     assert_eq!(actual_trace, expected_trace);
 }
@@ -500,13 +500,13 @@ fn fold_stream_seq_next_never_completes_with_never() {
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
-        executed_state::stream_number(1, 0),
+        stream!(1, 0),
         executed_state::fold(vec![subtrace_lore(
             0,
             SubTraceDesc::new(2.into(), 1),
             SubTraceDesc::new(3.into(), 0),
         )]),
-        executed_state::stream_number(1, 0),
+        stream!(1, 0),
     ];
     assert_eq!(actual_trace, expected_trace);
 }
@@ -536,14 +536,14 @@ fn fold_stream_seq_next_completes_with_null() {
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
-        executed_state::stream_number(1, 0),
+        stream!(1, 0),
         executed_state::fold(vec![subtrace_lore(
             0,
             SubTraceDesc::new(2.into(), 1),
             SubTraceDesc::new(3.into(), 0),
         )]),
-        executed_state::stream_number(1, 0),
-        executed_state::scalar_number(1),
+        stream!(1, 0),
+        scalar!(1),
     ];
     assert_eq!(actual_trace, expected_trace);
 }
@@ -577,15 +577,15 @@ fn fold_scalar_seq_next_completes_with_null() {
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
-        executed_state::scalar(service_result.clone()),
+        scalar!((service_result.clone())),
         executed_state::par(1, 2),
-        executed_state::stream(service_result.clone(), 0),
+        stream!(service_result.clone(), 0),
         executed_state::par(1, 0),
-        executed_state::stream(service_result.clone(), 0),
+        stream!(service_result.clone(), 0),
         executed_state::canon(
             json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_peer_id", "service_id": ""}, "values": []}),
         ),
-        executed_state::scalar(service_result),
+        scalar!(service_result),
     ];
     assert_eq!(actual_trace, expected_trace);
 }
@@ -619,7 +619,7 @@ fn fold_scalar_seq_next_not_completes_with_never() {
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
-        executed_state::scalar(service_result),
+        scalar!(service_result),
         executed_state::par(1, 2),
         executed_state::request_sent_by(vm_peer_id),
         executed_state::par(1, 0),
@@ -662,10 +662,10 @@ fn fold_stream_seq_next_saves_call_result() {
             subtrace_lore(0, SubTraceDesc::new(3.into(), 1), SubTraceDesc::new(6.into(), 0)),
             subtrace_lore(1, SubTraceDesc::new(4.into(), 1), SubTraceDesc::new(5.into(), 1)),
         ]),
-        executed_state::stream_number(1, 0),
-        executed_state::stream_number(2, 1),
-        executed_state::stream_number(2, 2),
-        executed_state::scalar_number(0),
+        stream!(1, 0),
+        stream!(2, 1),
+        stream!(2, 2),
+        scalar!(0),
     ];
     assert_eq!(actual_trace, expected_trace);
 }
@@ -715,7 +715,7 @@ fn fold_par_next_completes() {
             subtrace_lore(2, SubTraceDesc::new(8.into(), 2), SubTraceDesc::new(10.into(), 0)),
         ]),
         executed_state::par(1, 4),
-        executed_state::stream_number(1, 0),
+        stream!(1, 0),
         executed_state::par(1, 2),
         executed_state::request_sent_by(vm_1_peer_id),
         executed_state::par(1, 0),
@@ -738,7 +738,7 @@ fn fold_par_next_completes() {
         executed_state::par(1, 4),
         executed_state::request_sent_by(vm_1_peer_id),
         executed_state::par(1, 2),
-        executed_state::stream_number(1, 0),
+        stream!(1, 0),
         executed_state::par(1, 0),
         executed_state::request_sent_by(vm_1_peer_id),
         executed_state::request_sent_by(vm_3_peer_id),
@@ -761,7 +761,7 @@ fn fold_par_next_completes() {
         executed_state::par(1, 2),
         executed_state::request_sent_by(vm_1_peer_id),
         executed_state::par(1, 0),
-        executed_state::stream_number(1, 0),
+        stream!(1, 0),
         executed_state::request_sent_by(vm_4_peer_id),
     ];
     assert_eq!(actual_trace, expected_trace);

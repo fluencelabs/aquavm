@@ -58,11 +58,7 @@ fn issue_214() {
 
     let test_params = TestRunParameters::from_init_peer_id(client_id);
     let result = checked_call_vm!(client, test_params, &script, "", "");
-    let expected_trace = vec![
-        executed_state::scalar_string(relay_id),
-        executed_state::scalar(scalar),
-        executed_state::scalar_string(error_handler),
-    ];
+    let expected_trace = vec![scalar!(relay_id), scalar!(scalar), scalar!(error_handler)];
     let actual_trace = trace_from_result(&result);
 
     assert_eq!(actual_trace, expected_trace);

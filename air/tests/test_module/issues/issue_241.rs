@@ -57,13 +57,13 @@ fn issue_241() {
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
-        executed_state::scalar(peers),
+        scalar!(peers, peer = set_array_0_peer_id),
         executed_state::par(1, 4),
-        executed_state::scalar(array_1_content),
-        executed_state::scalar_string("result from unit_call_service"),
-        executed_state::scalar_string("result from unit_call_service"),
+        scalar!(array_1_content, peer = peer_1_id),
+        scalar!("result from unit_call_service", peer = some_peer_id),
+        scalar!("result from unit_call_service", peer = some_peer_id),
         executed_state::par(1, 0),
-        // before 0.22.0 scalars wasn't clear after end of a fold block and here was more states
+        // before 0.22.0 scalar!s wasn't clear after end of a fold block and here was more states
         // from the second iteration of fold over array-1
         executed_state::request_sent_by(some_peer_id),
     ];

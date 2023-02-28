@@ -282,7 +282,7 @@ fn tetraplet_with_wasm_modules() {
     let test_params = TestRunParameters::from_init_peer_id(ADMIN_PEER_PK);
     let result = checked_call_vm!(vm, test_params, script, "", "");
     let actual_trace = trace_from_result(&result);
-    let expected_state = executed_state::scalar_string("Ok");
+    let expected_state = scalar!("Ok");
 
     assert_eq!(actual_trace[1.into()], expected_state)
 }

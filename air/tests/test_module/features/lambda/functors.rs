@@ -36,10 +36,7 @@ fn length_functor_for_array_scalar() {
     let result = executor.execute_one(init_peer_id).unwrap();
     let actual_trace = trace_from_result(&result);
 
-    let expected_trace = vec![
-        executed_state::scalar(json!([1, 1, 1])),
-        executed_state::scalar_number(3),
-    ];
+    let expected_trace = vec![scalar!((json!([1, 1, 1]))), scalar!(3)];
     assert_eq!(actual_trace, expected_trace);
 }
 
@@ -103,7 +100,7 @@ fn length_functor_for_stream() {
                 },
             ]
         })),
-        executed_state::scalar_number(2),
+        scalar!(2),
     ];
     assert_eq!(actual_trace, expected_trace);
 }
@@ -131,7 +128,7 @@ fn length_functor_for_empty_stream() {
             json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": "init_peer_id", "service_id": ""},
                 "values": []} ),
         ),
-        executed_state::scalar_number(0),
+        scalar!(0),
     ];
     assert_eq!(actual_trace, expected_trace);
 }
@@ -166,7 +163,7 @@ fn length_functor_for_canon_stream() {
                            {"result": 1, "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "init_peer_id", "service_id": ""}, "trace_pos": 1}
                 ]} ),
         ),
-        executed_state::scalar_number(2),
+        scalar!(2),
     ];
     assert_eq!(actual_trace, expected_trace);
 }
@@ -193,7 +190,7 @@ fn length_functor_for_empty_canon_stream() {
         executed_state::canon(
             json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": "init_peer_id", "service_id": ""}, "values": []} ),
         ),
-        executed_state::scalar_number(0),
+        scalar!(0),
     ];
     assert_eq!(actual_trace, expected_trace);
 }
@@ -231,9 +228,6 @@ fn functor_dont_influence_tetraplet() {
     let expected_tetraplet = RefCell::new(vec![vec![SecurityTetraplet::new("", "", "", ".length")]]);
     assert_eq!(actual_tetraplet.as_ref(), &expected_tetraplet);
 
-    let expected_trace = vec![
-        executed_state::scalar(set_variable_peer_result),
-        executed_state::scalar_number(3),
-    ];
+    let expected_trace = vec![scalar!(set_variable_peer_result), scalar!(3)];
     assert_eq!(actual_trace, expected_trace);
 }

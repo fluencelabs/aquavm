@@ -30,7 +30,7 @@ fn empty_array() {
     let result = checked_call_vm!(vm, <_>::default(), script, "", "");
     let actual_trace = trace_from_result(&result);
 
-    let expected_trace = vec![executed_state::scalar(json!([])), executed_state::scalar(json!([]))];
+    let expected_trace = vec![scalar!((json!([]))), scalar!((json!([])))];
 
     assert_eq!(actual_trace, expected_trace);
     assert!(result.next_peer_pks.is_empty());

@@ -73,18 +73,18 @@ fn new_with_global_streams_seq() {
 
     let actual_trace = trace_from_result(&vm_2_result);
     let expected_trace = vec![
-        executed_state::stream_number(1, 0),
-        executed_state::stream_number(2, 0),
+        stream!(1, 0),
+        stream!(2, 0),
         executed_state::fold(vec![
             executed_state::subtrace_lore(0, SubTraceDesc::new(3.into(), 1), SubTraceDesc::new(7.into(), 2)),
             executed_state::subtrace_lore(1, SubTraceDesc::new(4.into(), 1), SubTraceDesc::new(5.into(), 2)),
         ]),
-        executed_state::stream_number(1, 0),
-        executed_state::stream_number(2, 0),
-        executed_state::scalar(json!([2])),
-        executed_state::scalar(json!([1, 2])),
-        executed_state::scalar(json!([1])),
-        executed_state::scalar(json!([1, 2])),
+        stream!(1, 0),
+        stream!(2, 0),
+        scalar!((json!([2]))),
+        scalar!((json!([1, 2]))),
+        scalar!((json!([1]))),
+        scalar!((json!([1, 2]))),
     ];
     assert_eq!(actual_trace, expected_trace);
 
@@ -120,14 +120,14 @@ fn several_restrictions() {
 
     let actual_trace = trace_from_result(&result);
     let expected_trace = vec![
-        executed_state::stream_string("test", 0),
+        stream!("test", 0),
         executed_state::canon(json!({
             "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_peer_id", "service_id": ""},
             "values": [
 
             ]
         })),
-        executed_state::scalar(json!([])),
+        scalar!((json!([]))),
     ];
     assert_eq!(actual_trace, expected_trace);
 }
@@ -195,7 +195,7 @@ fn check_influence_to_not_restricted() {
             ]
         }
         )),
-        executed_state::scalar(json!(["more"])),
+        scalar!((json!(["more"]))),
         executed_state::canon(json!(
             {
             "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_peer_id", "service_id": ""},
@@ -208,7 +208,7 @@ fn check_influence_to_not_restricted() {
             ]
         }
         )),
-        executed_state::scalar(json!(["push more"])),
+        scalar!((json!(["push more"]))),
         executed_state::canon(json!({
             "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_peer_id", "service_id": ""},
             "values": [
@@ -219,14 +219,14 @@ fn check_influence_to_not_restricted() {
                 }
             ]
         })),
-        executed_state::scalar(json!(["push more"])),
+        scalar!((json!(["push more"]))),
         executed_state::canon(json!({
             "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_peer_id", "service_id": ""},
             "values": [
             ]
         })),
-        executed_state::scalar(json!([])),
-        executed_state::scalar(json!(["more"])),
+        scalar!((json!([]))),
+        scalar!((json!(["more"]))),
     ];
     assert_eq!(actual_trace, expected_trace);
 }
@@ -264,7 +264,7 @@ fn new_in_fold_with_ap() {
 
     let actual_trace = trace_from_result(&result);
     let expected_trace = vec![
-        executed_state::scalar(json!([1, 2, 3, 4, 5])),
+        scalar!((json!([1, 2, 3, 4, 5]))),
         executed_state::ap(0),
         executed_state::canon(json!({
             "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_peer_id", "service_id": ""},
@@ -276,7 +276,7 @@ fn new_in_fold_with_ap() {
                 }
             ]
         })),
-        executed_state::scalar_string_array(vec!["none"]),
+        scalar!((json!(["none"]))),
         executed_state::ap(0),
         executed_state::canon(json!({
             "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_peer_id", "service_id": ""},
@@ -288,7 +288,7 @@ fn new_in_fold_with_ap() {
                 }
             ]
         })),
-        executed_state::scalar_string_array(vec!["none"]),
+        scalar!((json!(["none"]))),
         executed_state::ap(0),
         executed_state::canon(json!({
             "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_peer_id", "service_id": ""},
@@ -300,7 +300,7 @@ fn new_in_fold_with_ap() {
                 }
             ]
         })),
-        executed_state::scalar_string_array(vec!["none"]),
+        scalar!((json!(["none"]))),
         executed_state::ap(0),
         executed_state::canon(json!({
             "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_peer_id", "service_id": ""},
@@ -312,7 +312,7 @@ fn new_in_fold_with_ap() {
                 }
             ]
         })),
-        executed_state::scalar_string_array(vec!["none"]),
+        scalar!((json!(["none"]))),
         executed_state::ap(0),
         executed_state::canon(json!({
             "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_peer_id", "service_id": ""},
@@ -324,7 +324,7 @@ fn new_in_fold_with_ap() {
                 }
             ]
         })),
-        executed_state::scalar_string_array(vec!["none"]),
+        scalar!((json!(["none"]))),
     ];
     assert_eq!(actual_trace, expected_trace);
 
@@ -367,8 +367,8 @@ fn new_with_streams_with_errors() {
 
     let actual_trace = trace_from_result(&result);
     let expected_trace = vec![
-        executed_state::stream_number(1, 0),
-        executed_state::stream_number(2, 0),
+        stream!(1, 0),
+        stream!(2, 0),
         executed_state::service_failed(1, "failed result from fallible_call_service"),
     ];
     assert_eq!(actual_trace, expected_trace);
@@ -439,12 +439,12 @@ fn new_with_scalars_with_errors() {
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
-        executed_state::scalar_number(1),
-        executed_state::scalar_number(2),
-        executed_state::scalar_number(2),
+        scalar!(1),
+        scalar!(2),
+        scalar!(2),
         executed_state::service_failed(1, r#"failed result from fallible_call_service"#),
-        executed_state::scalar_number(1),
-        executed_state::scalar_number(1),
+        scalar!(1),
+        scalar!(1),
     ];
     assert_eq!(actual_trace, expected_trace);
 }
@@ -482,12 +482,7 @@ fn new_with_global_scalars() {
     let result = checked_call_vm!(variable_receiver, <_>::default(), &script, "", result.data);
     let actual_trace = trace_from_result(&result);
 
-    let expected_trace = vec![
-        executed_state::scalar_number(1),
-        executed_state::scalar_number(2),
-        executed_state::scalar_number(2),
-        executed_state::scalar_number(1),
-    ];
+    let expected_trace = vec![scalar!(1), scalar!(2), scalar!(2), scalar!(1)];
     assert_eq!(actual_trace, expected_trace);
 }
 
@@ -564,22 +559,22 @@ fn new_with_scalars_in_lfold_with_outside_next() {
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
-        executed_state::scalar(json!([1, 2, 3])),
-        executed_state::scalar_number(0),
-        executed_state::scalar_number(0),
-        executed_state::scalar_number(10),
-        executed_state::scalar_number(10),
-        executed_state::scalar_number(1),
-        executed_state::scalar_number(1),
-        executed_state::scalar_number(11),
-        executed_state::scalar_number(11),
-        executed_state::scalar_number(2),
-        executed_state::scalar_number(2),
-        executed_state::scalar_number(12),
-        executed_state::scalar_number(12),
-        executed_state::scalar_number(2),
-        executed_state::scalar_number(1),
-        executed_state::scalar_number(0),
+        scalar!((json!([1, 2, 3]))),
+        scalar!(0),
+        scalar!(0),
+        scalar!(10),
+        scalar!(10),
+        scalar!(1),
+        scalar!(1),
+        scalar!(11),
+        scalar!(11),
+        scalar!(2),
+        scalar!(2),
+        scalar!(12),
+        scalar!(12),
+        scalar!(2),
+        scalar!(1),
+        scalar!(0),
     ];
     assert_eq!(actual_trace, expected_trace);
 }
@@ -621,22 +616,22 @@ fn new_with_scalars_in_rfold_with_outside_next() {
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
-        executed_state::scalar(json!([1, 2, 3])),
-        executed_state::scalar_number(0),
-        executed_state::scalar_number(0),
-        executed_state::scalar_number(10),
-        executed_state::scalar_number(10),
-        executed_state::scalar_number(0),
-        executed_state::scalar_number(1),
-        executed_state::scalar_number(1),
-        executed_state::scalar_number(11),
-        executed_state::scalar_number(11),
-        executed_state::scalar_number(1),
-        executed_state::scalar_number(2),
-        executed_state::scalar_number(2),
-        executed_state::scalar_number(12),
-        executed_state::scalar_number(12),
-        executed_state::scalar_number(2),
+        scalar!((json!([1, 2, 3]))),
+        scalar!(0),
+        scalar!(0),
+        scalar!(10),
+        scalar!(10),
+        scalar!(0),
+        scalar!(1),
+        scalar!(1),
+        scalar!(11),
+        scalar!(11),
+        scalar!(1),
+        scalar!(2),
+        scalar!(2),
+        scalar!(12),
+        scalar!(12),
+        scalar!(2),
     ];
     assert_eq!(actual_trace, expected_trace);
 }
@@ -681,25 +676,25 @@ fn new_with_scalars_in_fold_with_inside_next() {
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
-        executed_state::scalar(json!([1, 2, 3])),
-        executed_state::scalar_number(0),
-        executed_state::scalar_number(0),
-        executed_state::scalar_number(10),
-        executed_state::scalar_number(10),
-        executed_state::scalar_number(1),
-        executed_state::scalar_number(1),
-        executed_state::scalar_number(11),
-        executed_state::scalar_number(11),
-        executed_state::scalar_number(2),
-        executed_state::scalar_number(2),
-        executed_state::scalar_number(12),
-        executed_state::scalar_number(12),
-        executed_state::scalar_number(12),
-        executed_state::scalar_number(2),
-        executed_state::scalar_number(11),
-        executed_state::scalar_number(1),
-        executed_state::scalar_number(10),
-        executed_state::scalar_number(0),
+        scalar!((json!([1, 2, 3]))),
+        scalar!(0),
+        scalar!(0),
+        scalar!(10),
+        scalar!(10),
+        scalar!(1),
+        scalar!(1),
+        scalar!(11),
+        scalar!(11),
+        scalar!(2),
+        scalar!(2),
+        scalar!(12),
+        scalar!(12),
+        scalar!(12),
+        scalar!(2),
+        scalar!(11),
+        scalar!(1),
+        scalar!(10),
+        scalar!(0),
     ];
     assert_eq!(actual_trace, expected_trace);
 }

@@ -75,12 +75,12 @@ fn create_service() {
 
     let actual_trace = trace_from_result(&result);
     let expected_trace = vec![
-        executed_state::scalar(module_bytes),
-        executed_state::scalar(module_config),
-        executed_state::scalar(blueprint),
-        executed_state::scalar_string(add_module_response),
-        executed_state::scalar_string(add_blueprint_response),
-        executed_state::scalar_string(create_response),
+        scalar!(module_bytes),
+        scalar!(module_config),
+        scalar!(blueprint),
+        scalar!(add_module_response),
+        scalar!(add_blueprint_response),
+        scalar!(create_response),
         executed_state::request_sent_by("A"),
     ];
 

@@ -42,12 +42,13 @@ fn test_canon_ok() {
 
     let expected_trace = vec![
         ap(0),
-        stream_tracked(
+        stream_tracked!(
             "to canon",
             1,
-            SecurityTetraplet::new(init_peer_id, "serv..0", "func", ""),
-            vec![],
-            &mut cid_state,
+            cid_state,
+            peer = init_peer_id,
+            service = "serv..0",
+            function = "func"
         ),
         canon_tracked(
             json!({
@@ -108,19 +109,21 @@ fn test_canon_ok_multi() {
     let mut cid_state = ExecutionCidState::new();
 
     let expected_trace = vec![
-        stream_tracked(
+        stream_tracked!(
             "to canon",
             0,
-            SecurityTetraplet::new(init_peer_id, "serv..0", "func", ""),
-            vec![],
-            &mut cid_state,
+            cid_state,
+            peer = init_peer_id,
+            service = "serv..0",
+            function = "func"
         ),
-        stream_tracked(
+        stream_tracked!(
             "other",
             1,
-            SecurityTetraplet::new(other_peer_id, "other_serv..1", "other_func", ""),
-            vec![],
-            &mut cid_state,
+            cid_state,
+            peer = other_peer_id,
+            service = "other_serv..1",
+            function = "other_func"
         ),
         canon_tracked(
             json!({
@@ -274,12 +277,13 @@ fn test_canon_tetraplet_not_found() {
           (canon "{init_peer_id}" $stream #canon))"#
     );
     let trace = vec![
-        stream_tracked(
+        stream_tracked!(
             42,
             0,
-            SecurityTetraplet::new("peer_1", "serv..0", "func", ""),
-            vec![],
-            &mut cid_state,
+            cid_state,
+            peer = "peer_1",
+            service = "serv..0",
+            function = "func"
         ),
         canon_tracked(
             json!({

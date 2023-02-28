@@ -32,7 +32,7 @@ fn xor() {
     let result = checked_call_vm!(vm, <_>::default(), script, "", "");
 
     let actual_trace = trace_from_result(&result);
-    let expected_call_result = executed_state::scalar_string("success result from fallible_call_service");
+    let expected_call_result = scalar!("success result from fallible_call_service");
 
     assert_eq!(actual_trace.len(), 2);
     assert_eq!(
@@ -138,8 +138,8 @@ fn xor_par() {
         par(1, 1),
         service_failed(1, failed_result),
         service_failed(1, failed_result),
-        scalar_string(success_result),
-        scalar_string(success_result),
+        scalar!(success_result),
+        scalar!(success_result),
     ];
 
     assert_eq!(actual_trace, expected_trace);
@@ -167,9 +167,8 @@ fn last_error_with_xor() {
     let result = checked_call_vm!(vm, <_>::default(), script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
-    let expected_state = executed_state::scalar_string(
-        r#"Local service error, ret_code is 1, error message is '"failed result from fallible_call_service"'"#,
-    );
+    let expected_state =
+        scalar!(r#"Local service error, ret_code is 1, error message is '"failed result from fallible_call_service"'"#);
 
     assert_eq!(actual_trace[1.into()], expected_state);
 }

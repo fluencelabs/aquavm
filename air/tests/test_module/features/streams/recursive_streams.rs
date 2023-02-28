@@ -55,14 +55,14 @@ fn recursive_stream_with_early_exit() {
     let result = checked_call_vm!(vm, <_>::default(), script, "", "");
     let actual_trace = trace_from_result(&result);
     let expected_state = vec![
-        executed_state::stream_number(1, 0),
-        executed_state::stream_number(1, 1),
+        stream!(1, 0),
+        stream!(1, 1),
         executed_state::fold(vec![
             executed_state::subtrace_lore(0, subtrace_desc(3, 1), subtrace_desc(4, 0)),
             executed_state::subtrace_lore(1, subtrace_desc(4, 1), subtrace_desc(5, 0)),
         ]),
-        executed_state::scalar_string("stop"),
-        executed_state::scalar_string("stop"),
+        scalar!("stop"),
+        scalar!("stop"),
     ];
 
     assert_eq!(actual_trace, expected_state);
@@ -156,7 +156,7 @@ fn recursive_stream_many_iterations() {
     let result = checked_call_vm!(vm_2, <_>::default(), script, "", result.data);
     let actual_trace = trace_from_result(&result);
     let actual_last_state = actual_trace.last().unwrap();
-    let expected_last_state = executed_state::scalar_string(result_value);
+    let expected_last_state = scalar!(result_value);
     assert_eq!(actual_last_state, &expected_last_state);
 }
 
@@ -218,8 +218,8 @@ fn recursive_stream_join() {
     let actual_trace = trace_from_result(&result);
     let expected_trace = vec![
         executed_state::par(1, 1),
-        executed_state::stream_string("non_join", 0),
-        executed_state::scalar_string(""),
+        stream!("non_join", 0),
+        scalar!(""),
         executed_state::fold(vec![
             executed_state::subtrace_lore(1, subtrace_desc(4, 2), subtrace_desc(6, 0)),
             executed_state::subtrace_lore(5, subtrace_desc(6, 2), subtrace_desc(8, 0)),
@@ -227,17 +227,17 @@ fn recursive_stream_join() {
             executed_state::subtrace_lore(9, subtrace_desc(10, 2), subtrace_desc(12, 0)),
             executed_state::subtrace_lore(11, subtrace_desc(12, 2), subtrace_desc(14, 0)),
         ]),
-        executed_state::scalar_string("non_join"),
+        scalar!("non_join"),
         executed_state::ap(1),
-        executed_state::scalar_string("non_join"),
+        scalar!("non_join"),
         executed_state::ap(2),
-        executed_state::scalar_string("non_join"),
+        scalar!("non_join"),
         executed_state::ap(3),
-        executed_state::scalar_string("non_join"),
+        scalar!("non_join"),
         executed_state::ap(4),
-        executed_state::scalar_string("join"),
-        executed_state::scalar_string(""),
-        executed_state::scalar_string(result_value),
+        scalar!("join"),
+        scalar!(""),
+        scalar!(result_value),
     ];
     assert_eq!(actual_trace, expected_trace);
 }
@@ -290,9 +290,10 @@ fn recursive_stream_error_handling() {
 
     let result = checked_call_vm!(vm_1, <_>::default(), &script, "", "");
     let actual_trace = trace_from_result(&result);
+
     let expected_trace = vec![
-        executed_state::stream_string("non_stop", 0),
-        executed_state::stream_string("non_stop", 1),
+        stream!("non_stop", 0),
+        stream!("non_stop", 1),
         executed_state::fold(vec![
             subtrace_lore(0, SubTraceDesc::new(3.into(), 2), SubTraceDesc::new(5.into(), 0)),
             subtrace_lore(1, SubTraceDesc::new(5.into(), 2), SubTraceDesc::new(7.into(), 0)),
@@ -300,11 +301,11 @@ fn recursive_stream_error_handling() {
             subtrace_lore(6, SubTraceDesc::new(9.into(), 1), SubTraceDesc::new(10.into(), 0)),
             subtrace_lore(8, SubTraceDesc::new(10.into(), 1), SubTraceDesc::new(11.into(), 0)),
         ]),
-        executed_state::scalar_string("non_stop"),
+        scalar!("non_stop"),
         executed_state::ap(2),
-        executed_state::scalar_string("non_stop"),
+        scalar!("non_stop"),
         executed_state::ap(2),
-        executed_state::scalar_string("non_stop"),
+        scalar!("non_stop"),
         executed_state::ap(3),
         executed_state::service_failed(1, "error"),
         executed_state::service_failed(1, "error"),
@@ -371,7 +372,7 @@ fn recursive_stream_inner_fold() {
     let actual_trace = trace_from_result(&result);
 
     let actual_last_state = actual_trace.last().unwrap();
-    let expected_last_state = executed_state::scalar_string(result_value);
+    let expected_last_state = scalar!(result_value);
     assert_eq!(actual_last_state, &expected_last_state);
 }
 

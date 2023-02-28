@@ -71,8 +71,8 @@ fn issue_211() {
     let result = engine.execute_one(peer_1_id).unwrap();
 
     let expected_trace = vec![
-        executed_state::scalar_number(2),
-        executed_state::scalar(json!([1, 2, 3])),
+        scalar!(2),
+        scalar!((json!([1, 2, 3]))),
         executed_state::par(6, 0),
         executed_state::par(1, 4),
         executed_state::ap(0),
@@ -100,7 +100,7 @@ fn issue_211() {
                 },
             ]
         })),
-        executed_state::scalar_string("expected result"),
+        scalar!("expected result"),
         executed_state::canon(json!({
             "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_1_id", "service_id": ""},
             "values": [
@@ -121,7 +121,7 @@ fn issue_211() {
                 },
             ]
         })),
-        executed_state::scalar_string("expected result"),
+        scalar!("expected result"),
     ];
 
     let actual_trace = trace_from_result(&result);
