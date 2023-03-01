@@ -1681,6 +1681,7 @@ static AIR: &'static str = r#"(xor
 
 #[test]
 fn issue__() {
+    // 12D3KooWHCJbJKGDfCgHSoCuK9q4STyRnVveqLoXAPBbXHTZx9Cv
     let client_peer_id = "12D3KooW9xAAjbEWMq7VLV3ihLa1dmZBxYS9R4MWNuEzCCZypsw1";
     let mut client_vm = create_avm(unit_call_service(), client_peer_id);
 
