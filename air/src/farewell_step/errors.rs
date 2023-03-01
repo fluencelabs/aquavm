@@ -28,9 +28,9 @@ use thiserror::Error as ThisError;
 pub enum FarewellError {
     /// Call results should be empty at the end of execution thanks to a execution invariant.
     #[error(
-        "after finishing execution of supplied AIR, call results aren't empty: `{0:?}`, probably wrong call_id used"
+        "after finishing execution of supplied AIR, there are some unprocessed call results: `{0:?}`, probably a wrong call_id used"
     )]
-    CallResultsNotEmpty(CallResults),
+    UnprocessedCallResult(CallResults),
 }
 
 impl ToErrorCode for FarewellError {
