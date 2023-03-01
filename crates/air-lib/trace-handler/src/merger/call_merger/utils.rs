@@ -28,6 +28,10 @@ pub(super) fn merge_executed(prev_value: ValueRef, current_value: ValueRef) -> M
             are_streams_equal(pr, cr, &prev_value, &current_value)?;
             Ok(CallResult::Executed(prev_value))
         }
+        (ValueRef::Unused(_), ValueRef::Unused(_)) => {
+            are_scalars_equal(&prev_value, &current_value)?;
+            Ok(CallResult::Executed(prev_value))
+        }
         _ => Err(CallResultError::not_equal_values(prev_value, current_value)),
     }
 }
