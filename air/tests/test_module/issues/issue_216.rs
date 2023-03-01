@@ -48,6 +48,9 @@ fn issue_216() {
     let result = checked_call_vm!(client, test_params, &script, "", result.data); // before 0.20.4 it's just failed
     let actual_trace = trace_from_result(&result);
 
-    let expected_trace = vec![scalar!((json!([]))), scalar!(error_message)];
+    let expected_trace = vec![
+        scalar!((json!([])), peer = some_peer_id, function = "value"),
+        scalar_unused!(error_message, peer = client_id, args = vec![error_message]),
+    ];
     assert_eq!(actual_trace, expected_trace);
 }

@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
+use air_interpreter_data::ExecutionTrace;
 use air_test_utils::prelude::*;
+
+use pretty_assertions::assert_eq;
 
 #[test]
 // test for github.com/fluencelabs/aquavm/issues/241
@@ -56,16 +59,16 @@ fn issue_241() {
     let result = checked_call_vm!(some_peer_vm, <_>::default(), &script, "", result.data);
     let actual_trace = trace_from_result(&result);
 
-    let expected_trace = vec![
+    let expected_trace = ExecutionTrace::from(vec![
         scalar!(peers, peer = set_array_0_peer_id),
         executed_state::par(1, 4),
         scalar!(array_1_content, peer = peer_1_id),
-        scalar!("result from unit_call_service", peer = some_peer_id),
-        scalar!("result from unit_call_service", peer = some_peer_id),
+        scalar_unused!("result from unit_call_service", peer = some_peer_id),
+        scalar_unused!("result from unit_call_service", peer = some_peer_id),
         executed_state::par(1, 0),
         // before 0.22.0 scalar!s wasn't clear after end of a fold block and here was more states
         // from the second iteration of fold over array-1
         executed_state::request_sent_by(some_peer_id),
-    ];
+    ]);
     assert_eq!(actual_trace, expected_trace);
 }

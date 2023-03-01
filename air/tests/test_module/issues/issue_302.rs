@@ -56,9 +56,9 @@ fn issue_302() {
 
     let expected_trace = vec![
         executed_state::par(1, 4),
-        stream!(2, 1),
-        stream!(1, 0),
-        stream!(0, 2),
+        stream!(2, 1, peer = peer_id_1, args = vec![2]),
+        stream!(1, 0, peer = peer_id_2, args = vec![1]),
+        stream!(0, 2, peer = peer_id_3, args = vec![0]),
         executed_state::canon(json!({
             "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id_2", "service_id": ""},
             "values": [
@@ -79,7 +79,7 @@ fn issue_302() {
                 },
             ]
         })),
-        scalar!((json!([1, 2, 0])), peer = peer_id_2),
+        scalar_unused!((json!([1, 2, 0])), peer = peer_id_2, args = vec![vec![1, 2, 0]]),
     ];
     assert_eq!(actual_trace.deref(), expected_trace);
 }
