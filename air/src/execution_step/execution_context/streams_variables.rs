@@ -112,20 +112,9 @@ impl Streams {
 
     pub(crate) fn meet_scope_start(&mut self, name: impl Into<String>, span: Span, iteration: u32) {
         let name = name.into();
-        let (mut prev_gens_count, current_gens_count) =
+        let (prev_gens_count, current_gens_count) =
             self.stream_generation_from_data(&name, span.left, iteration as usize);
-
-        if name == "$hashes"  {
-            prev_gens_count = 2;
-        }
-
-        if name == "$successful" {
-            prev_gens_count= 5;
-        }
-
-        if name == "$successful_test" {
-            prev_gens_count= 5;
-        }
+        println!("  meet_scope_start: {} {} {}", name, prev_gens_count, current_gens_count);
 
         let new_stream = Stream::from_generations_count(prev_gens_count as usize, current_gens_count as usize);
         let new_descriptor = StreamDescriptor::restricted(new_stream, span);

@@ -104,7 +104,9 @@ impl TraceHandler {
 
 impl TraceHandler {
     pub fn meet_ap_start(&mut self) -> TraceHandlerResult<MergerApResult> {
-        try_merge_next_state_as_ap(&mut self.data_keeper).map_err(Into::into)
+        let result = try_merge_next_state_as_ap(&mut self.data_keeper).map_err(Into::into);
+        println!("   {:?}", result);
+        result
     }
 
     pub fn meet_ap_end(&mut self, ap_result: ApResult) {
