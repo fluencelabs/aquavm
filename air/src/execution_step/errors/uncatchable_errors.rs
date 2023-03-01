@@ -83,13 +83,6 @@ pub enum UncatchableError {
     #[error("new end block tries to pop up a variable '{scalar_name}' that wasn't defined at depth {depth}")]
     ScalarsStateCorrupted { scalar_name: String, depth: usize },
 
-    /// Errors occurred while insertion of a value inside stream that doesn't have corresponding generation.
-    #[error(
-        "stream doesn't have generation with number {generation}, supplied to the interpreter data is corrupted,\n\
-             stream is {stream}"
-    )]
-    StreamNotContainNeededGeneration { stream: Stream, generation: Generation },
-
     /// Variable with such a position wasn't defined during AIR script execution.
     /// Canon instruction requires this value to be present in data, otherwise it's considered
     /// as a hard error.
@@ -109,6 +102,13 @@ pub enum UncatchableError {
     /// and not having any CID is considered a non-catching error.
     #[error("{0} for CID {1:?} not found")]
     ValueForCidNotFound(&'static str, String),
+
+    /// Errors occurred while insertion of a value inside stream that doesn't have corresponding generation.
+    #[error(
+    "stream doesn't have generation with number {generation}, supplied to the interpreter data is corrupted,\n\
+             stream is {stream}"
+    )]
+    StreamNotContainNeededGeneration { stream: Stream, generation: Generation },
 }
 
 impl ToErrorCode for UncatchableError {
