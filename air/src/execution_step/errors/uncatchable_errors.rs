@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+use super::Stream;
+use crate::execution_step::Generation;
 use crate::JValue;
 use crate::ToErrorCode;
 
@@ -23,6 +25,7 @@ use air_interpreter_data::ValueRef;
 use air_trace_handler::merger::MergerApResult;
 use air_trace_handler::GenerationCompatificationError;
 use air_trace_handler::TraceHandlerError;
+
 use strum::IntoEnumIterator;
 use strum_macros::EnumDiscriminants;
 use strum_macros::EnumIter;
@@ -79,6 +82,13 @@ pub enum UncatchableError {
     /// be caught by a xor instruction.
     #[error("new end block tries to pop up a variable '{scalar_name}' that wasn't defined at depth {depth}")]
     ScalarsStateCorrupted { scalar_name: String, depth: usize },
+
+    /// Errors occurred while insertion of a value inside stream that doesn't have corresponding generation.
+    #[error(
+        "stream doesn't have generation with number {generation}, supplied to the interpreter data is corrupted,\n\
+             stream is {stream}"
+    )]
+    StreamNotContainNeededGeneration { stream: Stream, generation: Generation },
 
     /// Variable with such a position wasn't defined during AIR script execution.
     /// Canon instruction requires this value to be present in data, otherwise it's considered

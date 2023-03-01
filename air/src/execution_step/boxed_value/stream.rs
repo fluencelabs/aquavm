@@ -16,7 +16,6 @@
 
 use super::ExecutionResult;
 use super::ValueAggregate;
-use crate::execution_step::CatchableError;
 use crate::ExecutionError;
 use crate::JValue;
 use crate::UncatchableError;
@@ -26,7 +25,6 @@ use air_trace_handler::merger::ValueSource;
 use air_trace_handler::TraceHandler;
 
 use std::collections::HashMap;
-use std::fmt::Formatter;
 
 /// Streams are CRDT-like append only data structures. They are guaranteed to have the same order
 /// of values on each peer.
@@ -83,21 +81,27 @@ impl Stream {
         generation: Generation,
         source: ValueSource,
     ) -> ExecutionResult<u32> {
-        let generation = match (generation, source) {
+        let generation_number = match (generation, source) {
             (Generation::Last, _) => self.values.len() - 1,
             (Generation::Nth(previous_gen), ValueSource::PreviousData) => previous_gen as usize,
             (Generation::Nth(current_gen), ValueSource::CurrentData) => self.previous_gens_count + current_gen as usize,
         };
 
-        if generation >= self.values.len() {
-            return Err(CatchableError::StreamDontHaveSuchGeneration(self.clone(), generation).into());
+        if generation_number >= self.values.len() {
+            return Err(UncatchableError::StreamNotContainNeededGeneration {
+                stream: self.clone(),
+                generation,
+            }
+            .into());
         }
 
-        let values = &mut self.values[generation];
-        self.values_by_pos
-            .insert(value.trace_pos, StreamValueLocation::new(generation, values.len()));
+        let values = &mut self.values[generation_number];
+        self.values_by_pos.insert(
+            value.trace_pos,
+            StreamValueLocation::new(generation_number, values.len()),
+        );
         values.push(value);
-        Ok(generation as u32)
+        Ok(generation_number as u32)
     }
 
     pub(crate) fn generations_count(&self) -> usize {
@@ -244,7 +248,7 @@ impl Stream {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(crate) enum Generation {
+pub enum Generation {
     Last,
     Nth(u32),
 }
@@ -309,7 +313,7 @@ impl StreamValueLocation {
 use std::fmt;
 
 impl fmt::Display for Stream {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if self.values.is_empty() {
             return write!(f, "[]");
         }
@@ -324,6 +328,15 @@ impl fmt::Display for Stream {
         }
 
         write!(f, "]")
+    }
+}
+
+impl fmt::Display for Generation {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Generation::Nth(generation) => write!(f, "{}", generation),
+            Generation::Last => write!(f, "last"),
+        }
     }
 }
 
