@@ -49,14 +49,27 @@ jobs:
             RUSTFLAGS="$RUSTFLAGS -Z sanitizer=$san" cargo test --features test_with_native_code --target x86_64-unknown-linux-gnu
           done
 
-      - name: Run codecov
+      - name: Setup grcov
+        uses: SierraSoftworks/setup-grcov@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          version: latest
+
+      - name: Run grcov
         id: coverage
         uses: actions-rs/grcov@v0.1
 
-      - name: Coveralls upload
-        uses: coverallsapp/github-action@v1
+      - name: Upload to codecov.io
+        uses: codecov/codecov-action@v2
         with:
-          path-to-lcov: ${{ steps.coverage.outputs.report }}
+          files: ${{ steps.coverage.outputs.report }}
+
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v1
+        with:
+          name: code-coverage-report.zip
+          path: ${{ steps.coverage.outputs.report }}
+
 
   lint:
     name: "aquavm / lints"
