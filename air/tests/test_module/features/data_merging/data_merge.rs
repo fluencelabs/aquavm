@@ -84,7 +84,11 @@ fn merge_streams_in_two_fold() {
     let actual_trace_1 = trace_from_result(&result_1);
 
     let expected_trace_1 = ExecutionTrace::from(vec![
-        scalar!(json!([vm_1_peer_id, vm_2_peer_id]), peer = set_variable_peer_id, service = "neighborhood"),
+        scalar!(
+            json!([vm_1_peer_id, vm_2_peer_id]),
+            peer = set_variable_peer_id,
+            service = "neighborhood"
+        ),
         par(1, 2),
         stream!(vm_1_peer_id, 0, peer = vm_1_peer_id, service = "add_provider"),
         par(1, 0),
@@ -103,7 +107,11 @@ fn merge_streams_in_two_fold() {
     let actual_trace_2 = trace_from_result(&result_2);
 
     let expected_trace_2 = ExecutionTrace::from(vec![
-        scalar!(json!([vm_1_peer_id, vm_2_peer_id]), peer = set_variable_peer_id, service = "neighborhood"),
+        scalar!(
+            json!([vm_1_peer_id, vm_2_peer_id]),
+            peer = set_variable_peer_id,
+            service = "neighborhood"
+        ),
         par(1, 2),
         request_sent_by(set_variable_peer_id),
         par(1, 0),
@@ -121,7 +129,11 @@ fn merge_streams_in_two_fold() {
     let actual_trace_3 = trace_from_result(&result_3);
 
     let expected_trace_3 = vec![
-        scalar!(json!([vm_1_peer_id, vm_2_peer_id]), peer = set_variable_peer_id, service = "neighborhood"),
+        scalar!(
+            json!([vm_1_peer_id, vm_2_peer_id]),
+            peer = set_variable_peer_id,
+            service = "neighborhood"
+        ),
         par(1, 2),
         stream!(vm_1_peer_id, 0, peer = vm_1_peer_id, service = "add_provider"),
         par(1, 0),
@@ -140,7 +152,11 @@ fn merge_streams_in_two_fold() {
     let actual_trace_4 = trace_from_result(&result_4);
 
     let expected_trace_4 = ExecutionTrace::from(vec![
-        scalar!(json!([vm_1_peer_id, vm_2_peer_id]), peer = set_variable_peer_id, service = "neighborhood"),
+        scalar!(
+            json!([vm_1_peer_id, vm_2_peer_id]),
+            peer = set_variable_peer_id,
+            service = "neighborhood"
+        ),
         par(1, 2),
         stream!(vm_1_peer_id, 0, peer = vm_1_peer_id, service = "add_provider"),
         par(1, 0),

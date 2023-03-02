@@ -15,7 +15,10 @@
  */
 
 use air::ExecutionCidState;
+use air_interpreter_data::ExecutionTrace;
 use air_test_utils::prelude::*;
+
+use pretty_assertions::assert_eq;
 
 #[test]
 fn executed_trace_seq_par_call() {
@@ -58,9 +61,24 @@ fn executed_trace_seq_par_call() {
 
     let expected_trace = vec![
         par(1, 1),
-        scalar!(unit_call_service_result),
-        scalar!(unit_call_service_result),
-        scalar!(unit_call_service_result),
+        scalar!(
+            unit_call_service_result,
+            peer = local_peer_id,
+            service = "local_service_id",
+            function = "local_fn_name"
+        ),
+        scalar!(
+            unit_call_service_result,
+            peer = remote_peer_id,
+            service = "service_id",
+            function = "fn_name"
+        ),
+        scalar!(
+            unit_call_service_result,
+            peer = local_peer_id,
+            service = "local_service_id",
+            function = "local_fn_name"
+        ),
     ];
 
     assert_eq!(actual_trace, expected_trace);
@@ -102,13 +120,23 @@ fn executed_trace_par_par_call() {
     let result = checked_call_vm!(vm, <_>::default(), &script, "", initial_data);
     let actual_trace = trace_from_result(&result);
 
-    let expected_trace = vec![
+    let expected_trace = ExecutionTrace::from(vec![
         par(3, 1),
         par(1, 1),
-        scalar!(unit_call_service_result),
+        scalar!(
+            unit_call_service_result,
+            peer = local_peer_id,
+            service = "local_service_id",
+            function = "local_fn_name"
+        ),
         request_sent_by(local_peer_id),
-        scalar!(unit_call_service_result),
-    ];
+        scalar!(
+            unit_call_service_result,
+            peer = local_peer_id,
+            service = "local_service_id",
+            function = "local_fn_name"
+        ),
+    ]);
 
     assert_eq!(actual_trace, expected_trace);
     assert_eq!(result.next_peer_pks, vec![String::from("remote_peer_id")]);
@@ -130,8 +158,8 @@ fn executed_trace_par_par_call() {
 
 #[test]
 fn executed_trace_seq_seq() {
-    let peer_id_1 = String::from("12D3KooWHk9BjDQBUqnavciRPhAYFvqKBe4ZiPPvde7vDaqgn5er");
-    let peer_id_2 = String::from("12D3KooWAzJcYitiZrerycVB4Wryrx22CFKdDGx7c4u31PFdfTbR");
+    let peer_id_1 = "12D3KooWHk9BjDQBUqnavciRPhAYFvqKBe4ZiPPvde7vDaqgn5er";
+    let peer_id_2 = "12D3KooWAzJcYitiZrerycVB4Wryrx22CFKdDGx7c4u31PFdfTbR";
     let mut vm1 = create_avm(unit_call_service(), peer_id_1.clone());
     let mut vm2 = create_avm(unit_call_service(), peer_id_2.clone());
 
@@ -157,9 +185,13 @@ fn executed_trace_seq_seq() {
 
     let call_service_result = "result from unit_call_service";
     let expected_trace = vec![
-        scalar!(call_service_result),
-        scalar!(call_service_result),
-        scalar!(call_service_result),
+        scalar!(call_service_result, peer = peer_id_1, service = "identity"),
+        scalar!(call_service_result, peer = peer_id_1, service = "add_blueprint"),
+        scalar!(
+            call_service_result,
+            peer = peer_id_2,
+            service = "addBlueprint-14d8488e-d10d-474d-96b2-878f6a7d74c8"
+        ),
     ];
 
     assert_eq!(actual_trace, expected_trace);
@@ -301,31 +333,111 @@ fn executed_trace_par_seq_fold_call() {
     let actual_trace = trace_from_result(&result);
 
     let generation = 0;
-    let expected_trace = vec![
+    let expected_trace = ExecutionTrace::from(vec![
         par(21, 1),
-        scalar!((json!(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]))),
+        scalar!(
+            json!(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]),
+            peer = "some_peer_id_1",
+            service = "local_service_id",
+            function = "local_fn_name"
+        ),
         par(1, 18),
-        stream!(1.to_string(), generation),
+        stream!(
+            1.to_string(),
+            generation,
+            peer = "some_peer_id_2",
+            service = "local_service_id",
+            function = "local_fn_name",
+            args = vec!["1"]
+        ),
         par(1, 16),
-        stream!(2.to_string(), generation),
+        stream!(
+            2.to_string(),
+            generation,
+            peer = "some_peer_id_2",
+            service = "local_service_id",
+            function = "local_fn_name",
+            args = vec!["2"]
+        ),
         par(1, 14),
-        stream!(3.to_string(), generation),
+        stream!(
+            3.to_string(),
+            generation,
+            peer = "some_peer_id_2",
+            service = "local_service_id",
+            function = "local_fn_name",
+            args = vec!["3"]
+        ),
         par(1, 12),
-        stream!(4.to_string(), generation),
+        stream!(
+            4.to_string(),
+            generation,
+            peer = "some_peer_id_2",
+            service = "local_service_id",
+            function = "local_fn_name",
+            args = vec!["4"]
+        ),
         par(1, 10),
-        stream!(5.to_string(), generation),
+        stream!(
+            5.to_string(),
+            generation,
+            peer = "some_peer_id_2",
+            service = "local_service_id",
+            function = "local_fn_name",
+            args = vec!["5"]
+        ),
         par(1, 8),
-        stream!(6.to_string(), generation),
+        stream!(
+            6.to_string(),
+            generation,
+            peer = "some_peer_id_2",
+            service = "local_service_id",
+            function = "local_fn_name",
+            args = vec!["6"]
+        ),
         par(1, 6),
-        stream!(7.to_string(), generation),
+        stream!(
+            7.to_string(),
+            generation,
+            peer = "some_peer_id_2",
+            service = "local_service_id",
+            function = "local_fn_name",
+            args = vec!["7"]
+        ),
         par(1, 4),
-        stream!(8.to_string(), generation),
+        stream!(
+            8.to_string(),
+            generation,
+            peer = "some_peer_id_2",
+            service = "local_service_id",
+            function = "local_fn_name",
+            args = vec!["8"]
+        ),
         par(1, 2),
-        stream!(9.to_string(), generation),
+        stream!(
+            9.to_string(),
+            generation,
+            peer = "some_peer_id_2",
+            service = "local_service_id",
+            function = "local_fn_name",
+            args = vec!["9"]
+        ),
         par(1, 0),
-        stream!(10.to_string(), generation),
-        scalar!("result from unit_call_service"),
-    ];
+        stream!(
+            10.to_string(),
+            generation,
+            peer = "some_peer_id_2",
+            service = "local_service_id",
+            function = "local_fn_name",
+            args = vec!["10"]
+        ),
+        scalar!(
+            "result from unit_call_service",
+            peer = "some_peer_id_3",
+            service = "local_service_id",
+            function = "local_fn_name"
+        ),
+    ]);
 
     assert_eq!(actual_trace, expected_trace);
     assert!(result.next_peer_pks.is_empty());
@@ -367,28 +479,108 @@ fn executed_trace_par_seq_fold_in_cycle_call() {
         let generation = 0;
         let expected_trace = vec![
             par(21, 1),
-            scalar!((json!(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]))),
+            scalar!(
+                json!(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]),
+                peer = "some_peer_id_1",
+                service = "local_service_id",
+                function = "local_fn_name"
+            ),
             par(1, 18),
-            stream!(1.to_string(), generation),
+            stream!(
+                1.to_string(),
+                generation,
+                peer = "some_peer_id_2",
+                service = "local_service_id",
+                function = "local_fn_name",
+                args = vec!["1"]
+            ),
             par(1, 16),
-            stream!(2.to_string(), generation),
+            stream!(
+                2.to_string(),
+                generation,
+                peer = "some_peer_id_2",
+                service = "local_service_id",
+                function = "local_fn_name",
+                args = vec!["2"]
+            ),
             par(1, 14),
-            stream!(3.to_string(), generation),
+            stream!(
+                3.to_string(),
+                generation,
+                peer = "some_peer_id_2",
+                service = "local_service_id",
+                function = "local_fn_name",
+                args = vec!["3"]
+            ),
             par(1, 12),
-            stream!(4.to_string(), generation),
+            stream!(
+                4.to_string(),
+                generation,
+                peer = "some_peer_id_2",
+                service = "local_service_id",
+                function = "local_fn_name",
+                args = vec!["4"]
+            ),
             par(1, 10),
-            stream!(5.to_string(), generation),
+            stream!(
+                5.to_string(),
+                generation,
+                peer = "some_peer_id_2",
+                service = "local_service_id",
+                function = "local_fn_name",
+                args = vec!["5"]
+            ),
             par(1, 8),
-            stream!(6.to_string(), generation),
+            stream!(
+                6.to_string(),
+                generation,
+                peer = "some_peer_id_2",
+                service = "local_service_id",
+                function = "local_fn_name",
+                args = vec!["6"]
+            ),
             par(1, 6),
-            stream!(7.to_string(), generation),
+            stream!(
+                7.to_string(),
+                generation,
+                peer = "some_peer_id_2",
+                service = "local_service_id",
+                function = "local_fn_name",
+                args = vec!["7"]
+            ),
             par(1, 4),
-            stream!(8.to_string(), generation),
+            stream!(
+                8.to_string(),
+                generation,
+                peer = "some_peer_id_2",
+                service = "local_service_id",
+                function = "local_fn_name",
+                args = vec!["8"]
+            ),
             par(1, 2),
-            stream!(9.to_string(), generation),
+            stream!(
+                9.to_string(),
+                generation,
+                peer = "some_peer_id_2",
+                service = "local_service_id",
+                function = "local_fn_name",
+                args = vec!["9"]
+            ),
             par(1, 0),
-            stream!(10.to_string(), generation),
-            scalar!("result from unit_call_service"),
+            stream!(
+                10.to_string(),
+                generation,
+                peer = "some_peer_id_2",
+                service = "local_service_id",
+                function = "local_fn_name",
+                args = vec!["10"]
+            ),
+            scalar!(
+                "result from unit_call_service",
+                peer = "some_peer_id_3",
+                service = "local_service_id",
+                function = "local_fn_name"
+            ),
         ];
 
         assert_eq!(actual_trace, expected_trace);
@@ -432,11 +624,11 @@ fn executed_trace_seq_par_seq_seq() {
     let unit_call_service_result = "result from unit_call_service";
     let executed_trace = vec![
         par(2, 2),
-        scalar!(unit_call_service_result),
-        scalar!(unit_call_service_result),
-        scalar!(unit_call_service_result),
-        scalar!(unit_call_service_result),
-        scalar!(unit_call_service_result),
+        scalar!(unit_call_service_result, peer = peer_id_1),
+        scalar!(unit_call_service_result, peer = peer_id_2),
+        scalar!(unit_call_service_result, peer = peer_id_2),
+        scalar!(unit_call_service_result, peer = peer_id_1),
+        scalar!(unit_call_service_result, peer = peer_id_2),
     ];
 
     assert_eq!(actual_trace, executed_trace);

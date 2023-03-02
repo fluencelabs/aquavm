@@ -18,9 +18,6 @@ use air::CatchableError;
 use air::ExecutionError;
 use air_test_utils::prelude::*;
 
-use fstrings::f;
-use fstrings::format_args_f;
-
 #[test]
 fn scalars_scope() {
     let peer_1_id = "peer_1_id";
@@ -35,7 +32,8 @@ fn scalars_scope() {
     let peers = json!([peer_1_id, peer_2_id]);
     let mut set_array_0_vm = create_avm(set_variable_call_service(peers.clone()), set_array_0_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (call "{set_array_0_peer_id}" ("" "") [] array-0)
             (fold array-0 array-0-iterator
@@ -55,7 +53,8 @@ fn scalars_scope() {
                     )
                 )
             )
-        )"#);
+        )"#
+    );
 
     let result = checked_call_vm!(set_array_0_vm, <_>::default(), &script, "", "");
     let result = checked_call_vm!(peer_1_vm, <_>::default(), &script, "", result.data);
@@ -63,11 +62,11 @@ fn scalars_scope() {
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
-        scalar!(peers),
+        scalar!(peers, peer = set_array_0_peer_id),
         executed_state::par(1, 0),
-        scalar!(array_1_content),
-        scalar!("result from unit_call_service"),
-        scalar!("result from unit_call_service"),
+        scalar!(array_1_content, peer = peer_1_id),
+        scalar_unused!("result from unit_call_service", peer = some_peer_id),
+        scalar_unused!("result from unit_call_service", peer = some_peer_id),
         executed_state::par(1, 0),
         executed_state::request_sent_by(some_peer_id),
     ];
@@ -92,7 +91,8 @@ fn before_after_of_next() {
     let vm_peer_1_id = "vm_peer_1_id";
     let mut peer_1_vm = create_avm(echo_call_service(), vm_peer_1_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (call "{set_array_0_peer_id}" ("" "") [] array-0)
             (fold array-0 array-0-iterator
@@ -104,7 +104,8 @@ fn before_after_of_next() {
                     )
                 )
             )
-        )"#);
+        )"#
+    );
 
     let result = checked_call_vm!(set_array_0_vm, <_>::default(), &script, "", "");
     let result = checked_call_vm!(peer_0_vm, <_>::default(), &script, "", result.data);
@@ -112,13 +113,13 @@ fn before_after_of_next() {
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
-        scalar!(array_0_content),
-        scalar!(0),
-        scalar!(1),
-        scalar!(2),
-        scalar!(2),
-        scalar!(1),
-        scalar!(0),
+        scalar!(array_0_content, peer = set_array_0_peer_id),
+        scalar!(0, peer = vm_peer_0_id),
+        scalar!(1, peer = vm_peer_0_id),
+        scalar!(2, peer = vm_peer_0_id),
+        scalar_unused!(2, peer = vm_peer_1_id, args = vec![2]),
+        scalar_unused!(1, peer = vm_peer_1_id, args = vec![1]),
+        scalar_unused!(0, peer = vm_peer_1_id, args = vec![0]),
     ];
     assert_eq!(actual_trace, expected_trace);
 }
@@ -144,7 +145,8 @@ fn local_and_global_scalars() {
     let local_consumer_peer_id = "local_consumer_peer_id";
     let mut local_consumer_vm = create_avm(echo_call_service(), local_consumer_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
            (seq
                (seq
@@ -176,7 +178,8 @@ fn local_and_global_scalars() {
                 )
             )
             (call "{local_consumer_peer_id}" ("" "") [local]) ;; local set by (1) will be used
-        )"#);
+        )"#
+    );
 
     let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
     let result = checked_call_vm!(local_setter_vm, <_>::default(), &script, "", result.data);
@@ -190,22 +193,22 @@ fn local_and_global_scalars() {
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
-        scalar!(iterable_content.clone()),
-        scalar!(iterable_content),
-        scalar!(0),
-        scalar!(1),
-        scalar!(2),
-        scalar!(2),
-        scalar!(3),
-        scalar!(3),
-        scalar!(1),
-        scalar!(4),
-        scalar!(5),
-        scalar!(5),
-        scalar!(6),
-        scalar!(6),
-        scalar!(4),
-        scalar!(0),
+        scalar!(iterable_content.clone(), peer = set_variable_peer_id),
+        scalar!(iterable_content, peer = set_variable_peer_id),
+        scalar!(0, peer = local_setter_peer_id),
+        scalar!(1, peer = local_setter_peer_id),
+        scalar!(2, peer = local_setter_peer_id),
+        scalar_unused!(2, peer = local_consumer_peer_id, args = vec![2]),
+        scalar!(3, peer = local_setter_peer_id),
+        scalar_unused!(3, peer = local_consumer_peer_id, args = vec![3]),
+        scalar_unused!(1, peer = local_consumer_peer_id, args = vec![1]),
+        scalar!(4, peer = local_setter_peer_id),
+        scalar!(5, peer = local_setter_peer_id),
+        scalar_unused!(5, peer = local_consumer_peer_id, args = vec![5]),
+        scalar!(6, peer = local_setter_peer_id),
+        scalar_unused!(6, peer = local_consumer_peer_id, args = vec![6]),
+        scalar_unused!(4, peer = local_consumer_peer_id, args = vec![4]),
+        scalar_unused!(0, peer = local_consumer_peer_id, args = vec![0]),
     ];
     assert_eq!(actual_trace, expected_trace);
 }
@@ -216,7 +219,8 @@ fn new_with_randomly_set_scalars_in_fold_1() {
     let mut test_vm_1 = create_avm(set_variable_call_service(json!([1, 2, 3])), test_peer_id_1);
 
     let test_peer_id_2 = "test_peer_id_2";
-    let script = f!(r#"
+    let script = format!(
+        r#"
     (seq
         (call "{test_peer_id_1}" ("" "") [] iterable)
         (fold iterable iterator
@@ -242,7 +246,8 @@ fn new_with_randomly_set_scalars_in_fold_1() {
                 (call "{test_peer_id_1}" ("" "") [scalar])
             )
         )
-    )"#);
+    )"#
+    );
 
     let result = call_vm!(test_vm_1, <_>::default(), &script, "", "");
     assert_eq!(result.ret_code, 0)
@@ -255,7 +260,8 @@ fn new_with_randomly_set_scalars_in_fold_2() {
 
     let test_peer_id_2 = "test_peer_id_2";
     let variable_name = "scalar";
-    let script = f!(r#"
+    let script = format!(
+        r#"
     (seq
         (call "{test_peer_id_1}" ("" "") [] iterable)
         (fold iterable iterator
@@ -278,7 +284,8 @@ fn new_with_randomly_set_scalars_in_fold_2() {
                 (call "{test_peer_id_1}" ("" "") [{variable_name}])
             )
         )
-    )"#);
+    )"#
+    );
 
     let result = call_vm!(test_vm_1, <_>::default(), &script, "", "");
     let expected_error = ExecutionError::Catchable(rc!(CatchableError::VariableWasNotInitializedAfterNew(
