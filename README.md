@@ -1,9 +1,8 @@
-[![Coverage Status](https://coveralls.io/repos/github/fluencelabs/aquavm/badge.svg?branch=master)](https://coveralls.io/github/fluencelabs/aquavm?branch=master)
-
 # AquaVM
 
 [![crates.io version](https://img.shields.io/crates/v/air-interpreter-wasm?style=flat-square)](https://crates.io/crates/air-interpreter-wasm)
 [![npm version](https://img.shields.io/npm/v/@fluencelabs/avm)](https://www.npmjs.com/package/@fluencelabs/avm)
+[![Coverage Status](https://coveralls.io/repos/github/fluencelabs/aquavm/badge.svg?branch=master)](https://coveralls.io/github/fluencelabs/aquavm?branch=master)
 
 AquaVM executes compiled [Aqua](https://github.com/fluencelabs/aqua), i.e., Aqua
 Intermediate Representation (AIR) scripts, and plays an integral role in the
