@@ -94,11 +94,11 @@ impl<'stream> StreamJvaluableIngredients<'stream> {
     }
 
     pub(self) fn iter(&self) -> ExecutionResult<StreamIter<'_>> {
-        use crate::execution_step::UncatchableError::StreamNotContainNeededGeneration;
+        use crate::execution_step::UncatchableError::StreamDontHaveSuchGeneration;
 
         match self.stream.iter(self.generation) {
             Some(iter) => Ok(iter),
-            None => Err(StreamNotContainNeededGeneration {
+            None => Err(StreamDontHaveSuchGeneration {
                 stream: self.stream.clone(),
                 generation: self.generation,
             }

@@ -88,7 +88,7 @@ impl Stream {
         };
 
         if generation_number >= self.values.len() {
-            return Err(UncatchableError::StreamNotContainNeededGeneration {
+            return Err(UncatchableError::StreamDontHaveSuchGeneration {
                 stream: self.clone(),
                 generation,
             }
@@ -335,7 +335,7 @@ impl fmt::Display for Generation {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Generation::Nth(generation) => write!(f, "{}", generation),
-            Generation::Last => write!(f, "last"),
+            Generation::Last => write!(f, "Last"),
         }
     }
 }
