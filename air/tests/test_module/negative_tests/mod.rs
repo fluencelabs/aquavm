@@ -14,4 +14,5 @@
  * limitations under the License.
  */
 
+mod farewell_step;
 mod preparation_step;
