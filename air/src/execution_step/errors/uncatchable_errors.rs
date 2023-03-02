@@ -105,7 +105,7 @@ pub enum UncatchableError {
 
     /// Errors occurred while insertion of a value inside stream that doesn't have corresponding generation.
     #[error(
-    "stream doesn't have generation with number {generation}, supplied to the interpreter data is corrupted,\n\
+        "stream doesn't have generation with number {generation}, supplied to the interpreter data is corrupted,\n\
              stream is {stream}"
     )]
     StreamNotContainNeededGeneration { stream: Stream, generation: Generation },
