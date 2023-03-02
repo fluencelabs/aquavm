@@ -307,8 +307,8 @@ fn recursive_stream_error_handling() {
         executed_state::ap(2),
         scalar!("non_stop"),
         executed_state::ap(3),
-        executed_state::service_failed(1, "error"),
-        executed_state::service_failed(1, "error"),
+        failed!(1, "error", peer = vm_peer_id_1, function = "stop"),
+        failed!(1, "error", peer = vm_peer_id_1, function = "stop"),
     ];
 
     assert_eq!(actual_trace, expected_trace);

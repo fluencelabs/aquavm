@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+use air_interpreter_data::ExecutionTrace;
 use air_test_utils::prelude::*;
 
-use fstrings::f;
-use fstrings::format_args_f;
+use pretty_assertions::assert_eq;
 
 #[test]
 fn check_that_scalar_is_visible_only_inside_fold_block() {
@@ -30,7 +30,8 @@ fn check_that_scalar_is_visible_only_inside_fold_block() {
     let variable_receiver_peer_id = "variable_receiver_peer_id";
     let mut variable_receiver_peer_vm = create_avm(echo_call_service(), variable_receiver_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (call "{variable_setter_peer_id}" ("" "") ["iterable_1"] iterable_1)
             (xor
@@ -46,21 +47,31 @@ fn check_that_scalar_is_visible_only_inside_fold_block() {
                 (call "{variable_receiver_peer_id}" ("" "") [scalar])
             )
         )
-    "#);
+    "#
+    );
 
     let result = checked_call_vm!(variable_setter_vm, <_>::default(), &script, "", "");
     let result = checked_call_vm!(fallible_peer_vm, <_>::default(), &script, "", result.data);
     let result = checked_call_vm!(variable_receiver_peer_vm, <_>::default(), &script, "", result.data);
     let actual_trace = trace_from_result(&result);
 
-    let expected_trace = vec![
-        scalar!(json!([1, 2, 3])),
-        scalar!(json!([1, 2, 3])),
-        scalar!(json!([1, 2, 3])),
-        scalar!(json!([1, 2, 3])),
-        executed_state::service_failed(1, "failed result from fallible_call_service"),
+    let expected_trace = ExecutionTrace::from(vec![
+        scalar!(
+            json!([1, 2, 3]),
+            peer = variable_setter_peer_id,
+            args = vec!["iterable_1"]
+        ),
+        scalar!(json!([1, 2, 3]), peer = variable_setter_peer_id),
+        scalar!(json!([1, 2, 3]), peer = variable_setter_peer_id),
+        scalar!(json!([1, 2, 3]), peer = variable_setter_peer_id),
+        failed!(
+            1,
+            "failed result from fallible_call_service",
+            peer = fallible_peer_id,
+            service = "fail"
+        ),
         executed_state::request_sent_by(fallible_peer_id),
-    ];
+    ]);
 
     assert_eq!(actual_trace, expected_trace);
 }
@@ -76,7 +87,8 @@ fn scopes_check_that_scalar_not_overwritten_by_fold_end() {
     let variable_receiver_peer_id = "variable_receiver_peer_id";
     let mut variable_receiver_peer_vm = create_avm(echo_call_service(), variable_receiver_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (seq
                 (call "{variable_setter_peer_id}" ("" "") ["iterable_1"] iterable_1)
@@ -95,22 +107,36 @@ fn scopes_check_that_scalar_not_overwritten_by_fold_end() {
                 (call "{variable_receiver_peer_id}" ("" "") [scalar])
             )
         )
-    "#);
+    "#
+    );
 
     let result = checked_call_vm!(variable_setter_vm, <_>::default(), &script, "", "");
     let result = checked_call_vm!(fallible_peer_vm, <_>::default(), &script, "", result.data);
     let result = checked_call_vm!(variable_receiver_peer_vm, <_>::default(), &script, "", result.data);
     let actual_trace = trace_from_result(&result);
 
-    let expected_trace = vec![
-        scalar!(json!([1, 2, 3])),
-        scalar!(json!([1, 2, 3])),
-        scalar!(json!([1, 2, 3])),
-        scalar!(json!([1, 2, 3])),
-        scalar!(json!([1, 2, 3])),
-        executed_state::service_failed(1, "failed result from fallible_call_service"),
-        scalar!(json!([1, 2, 3])),
-    ];
+    let expected_trace = ExecutionTrace::from(vec![
+        scalar!(
+            json!([1, 2, 3]),
+            peer = variable_setter_peer_id,
+            args = vec!["iterable_1"]
+        ),
+        scalar!(json!([1, 2, 3]), peer = variable_setter_peer_id, args = vec!["scalar"]),
+        scalar!(json!([1, 2, 3]), peer = variable_setter_peer_id),
+        scalar!(json!([1, 2, 3]), peer = variable_setter_peer_id),
+        scalar!(json!([1, 2, 3]), peer = variable_setter_peer_id),
+        failed!(
+            1,
+            "failed result from fallible_call_service",
+            peer = fallible_peer_id,
+            service = "fail"
+        ),
+        scalar_unused!(
+            json!([1, 2, 3]),
+            peer = variable_receiver_peer_id,
+            args = vec![json!([1, 2, 3])]
+        ),
+    ]);
 
     assert_eq!(actual_trace, expected_trace);
 }
