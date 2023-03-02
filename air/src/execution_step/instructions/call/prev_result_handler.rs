@@ -22,6 +22,7 @@ use crate::UncatchableError;
 
 use air_interpreter_cid::CID;
 use air_interpreter_data::CallResult;
+use air_interpreter_data::CallServiceFailed;
 use air_interpreter_data::Sender;
 use air_interpreter_data::ServiceResultAggregate;
 use air_interpreter_interface::CallServiceResult;
@@ -58,11 +59,11 @@ pub(super) fn handle_prev_state<'i>(
                 .cid_state
                 .resolve_service_value(failed_cid)
                 .map_err(UncatchableError::from)?;
-            let call_service_result: CallServiceResult = serde_json::from_value((*err_value).clone()).expect("TODO");
+            let call_service_failed: CallServiceFailed = serde_json::from_value((*err_value).clone()).expect("TODO");
             exec_ctx.make_subgraph_incomplete();
-            let err_msg = call_service_result.result.clone();
+            let err_msg = call_service_failed.1.clone();
             trace_ctx.meet_call_end(met_result.result);
-            Err(CatchableError::LocalServiceError(call_service_result.ret_code, err_msg.into()).into())
+            Err(CatchableError::LocalServiceError(call_service_failed.0, err_msg).into())
         }
         RequestSentBy(Sender::PeerIdWithCallId {
             ref peer_id,
@@ -178,9 +179,10 @@ fn handle_service_error<'i>(
     }
 
     let error_message = Rc::new(service_result.result.clone());
-    let error = CatchableError::LocalServiceError(service_result.ret_code, error_message);
+    let error = CatchableError::LocalServiceError(service_result.ret_code, error_message.clone());
+    let failed = CallServiceFailed(service_result.ret_code, error_message);
 
-    let error_value = serde_json::to_value(&service_result).expect("TODO");
+    let error_value = serde_json::to_value(&failed).expect("TODO");
     let value_cid = exec_ctx
         .cid_state
         .value_tracker

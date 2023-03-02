@@ -258,6 +258,18 @@ macro_rules! scalar_unused_tracked {
 }
 
 #[macro_export]
+macro_rules! failed {
+    ($ret_code:expr, $error_message:expr) => {{
+        let failed_value = $crate::executed_state::_failure_to_value($ret_code, $error_message);
+        _trace_value_body!(failed_value).failed()
+    }};
+    ($ret_code:expr, $error_message:expr, $func1:ident = $v1:expr $(, $func:ident = $v:expr)*) => {{
+        let failed_value = $crate::executed_state::_failure_to_value($ret_code, $error_message);
+        _trace_value_body!(failed_value, $func1 = $v1 $(, $func = $v)*).failed()
+    }}
+}
+
+#[macro_export]
 macro_rules! stream {
     ($value:expr, $generation:expr) => {
         _trace_value_body!($value).stream($generation)
@@ -299,6 +311,12 @@ macro_rules! stream_unused_tracked {
     ($value:expr, $generation:expr, $state:expr, $func1:ident = $v1:expr $(, $func:ident = $v:expr)*) => {
         _trace_value_body!($value, $func1 = $v1 $(, $func = $v)*).stream_unused_tracked($generation, &mut $state)
     };
+}
+
+pub fn _failure_to_value(ret_code: i32, error_message: &str) -> JValue {
+    let message_serialized = serde_json::to_string(error_message).unwrap();
+    let failed = crate::CallServiceFailed(ret_code, message_serialized.into());
+    serde_json::to_value(failed).unwrap()
 }
 
 pub struct ExecutedCallBuilder {
@@ -363,6 +381,17 @@ impl ExecutedCallBuilder {
             value_aggregate_cid(self.result, self.tetraplet, self.args, cid_state);
         let value = ValueRef::Unused(service_result_agg_cid);
         ExecutedState::Call(CallResult::Executed(value))
+    }
+
+    pub fn failed(self) -> ExecutedState {
+        let mut cid_state = ExecutionCidState::new();
+        self.failed_tracked(&mut cid_state)
+    }
+
+    pub fn failed_tracked(self, cid_state: &mut ExecutionCidState) -> ExecutedState {
+        let service_result_agg_cid =
+            value_aggregate_cid(self.result, self.tetraplet, self.args, cid_state);
+        ExecutedState::Call(CallResult::Failed(service_result_agg_cid))
     }
 
     pub fn stream(self, generation: u32) -> ExecutedState {
