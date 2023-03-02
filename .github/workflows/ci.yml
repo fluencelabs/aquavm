@@ -16,6 +16,9 @@ jobs:
     timeout-minutes: 60
     runs-on: builder
 
+    permissions:
+      checks: write # for coverall to create checks
+
     steps:
       - uses: actions/checkout@v3
 
@@ -59,17 +62,16 @@ jobs:
         id: coverage
         uses: actions-rs/grcov@v0.1
 
-      - name: Upload to codecov.io
-        uses: codecov/codecov-action@v2
+      - name: Coveralls upload
+        uses: coverallsapp/github-action@v1
         with:
-          files: ${{ steps.coverage.outputs.report }}
+          path-to-lcov: ${{ steps.coverage.outputs.report }}
 
       - name: Archive code coverage results
         uses: actions/upload-artifact@v1
         with:
           name: code-coverage-report.zip
           path: ${{ steps.coverage.outputs.report }}
-
 
   lint:
     name: "aquavm / lints"
