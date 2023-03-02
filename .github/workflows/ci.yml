@@ -70,7 +70,7 @@ jobs:
       - name: Coveralls upload
         uses: coverallsapp/github-action@v1
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           path-to-lcov: ${{ steps.coverage.outputs.report }}
 
       - name: Archive code coverage results
