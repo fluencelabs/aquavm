@@ -288,7 +288,7 @@ mod tests {
                 trace,
                 ExecutionTrace::from(vec![
                     scalar!(
-                        (json!([{"p":"peer2","v":2},{"p":"peer3","v":3}])),
+                        json!([{"p":"peer2","v":2},{"p":"peer3","v":3}]),
                         peer = "peer1",
                         service = "service..0",
                         function = "func"
@@ -317,7 +317,7 @@ mod tests {
                 trace,
                 ExecutionTrace::from(vec![
                     scalar!(
-                        (json!([{"p":"peer2","v":2},{"p":"peer3","v":3}])),
+                        json!([{"p":"peer2","v":2},{"p":"peer3","v":3}]),
                         peer = "peer1",
                         service = "service..0",
                         function = "func"
@@ -382,15 +382,15 @@ mod tests {
             assert_eq!(
                 &*trace,
                 vec![
-                    scalar!((json!(["peer2", "peer3"])), peer = "peer1", service = "..0"),
+                    scalar!(json!(["peer2", "peer3"]), peer = "peer1", service = "..0"),
                     scalar_unused!(
-                        (json!(42)),
+                        json!(42),
                         peer = "peer2",
                         service = "..1",
                         args = vec!["peer2"]
                     ),
                     scalar_unused!(
-                        (json!(43)),
+                        json!(43),
                         peer = "peer3",
                         service = "..1",
                         args = vec!["peer3"]
@@ -465,7 +465,7 @@ mod tests {
                 trace,
                 ExecutionTrace::from(vec![
                     scalar!(
-                        (json!([{"p":"peer2","v":2},{"p":"peer3","v":3},{"p":"peer4"}])),
+                        json!([{"p":"peer2","v":2},{"p":"peer3","v":3},{"p":"peer4"}]),
                         peer = "peer1",
                         service = "service..0",
                         function = "func"
@@ -495,7 +495,7 @@ mod tests {
                 trace,
                 ExecutionTrace::from(vec![
                     scalar!(
-                        (json!([{"p":"peer2","v":2},{"p":"peer3","v":3},{"p":"peer4"}])),
+                        json!([{"p":"peer2","v":2},{"p":"peer3","v":3},{"p":"peer4"}]),
                         peer = "peer1",
                         service = "service..0",
                         function = "func"
@@ -798,7 +798,7 @@ mod tests {
         assert_eq!(
             trace_from_result(outcome),
             ExecutionTrace::from(vec![scalar!(
-                (json!([[{
+                json!([[{
                     "function_name": "",
                     "json_path": "",
                     "peer_pk": "peer1",
@@ -808,7 +808,7 @@ mod tests {
                     "json_path": "",
                     "peer_pk": "peer1",
                     "service_id": "",
-                }]])),
+                }]]),
                 peer = peer,
                 service = "service..0",
                 function = "func",

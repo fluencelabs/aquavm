@@ -204,55 +204,55 @@ pub fn canon_tracked(
 
 #[macro_export]
 macro_rules! _trace_value_body {
-    ($value:tt) => {
+    ($value:expr) => {
         $crate::executed_state::ExecutedCallBuilder::new($value)
     };
 
-    ($value:tt, $func1:ident = $v1:expr $(, $func:ident = $v:expr)*) => {
+    ($value:expr, $func1:ident = $v1:expr $(, $func:ident = $v:expr)*) => {
         $crate::executed_state::ExecutedCallBuilder::new($value) .$func1($v1) $(. $func($v))*
     };
 }
 
 #[macro_export]
 macro_rules! scalar {
-    ($value:tt) => {
+    ($value:expr) => {
         _trace_value_body!($value).scalar()
     };
 
-    ($value:tt, $func1:ident = $v1:expr $(, $func:ident = $v:expr)*) => {
+    ($value:expr, $func1:ident = $v1:expr $(, $func:ident = $v:expr)*) => {
         _trace_value_body!($value, $func1 = $v1 $(, $func = $v)*).scalar()
     };
 }
 
 #[macro_export]
 macro_rules! scalar_unused {
-    ($value:tt) => {
+    ($value:expr) => {
         _trace_value_body!($value).scalar_unused()
     };
 
-    ($value:tt, $func1:ident = $v1:expr $(, $func:ident = $v:expr)*) => {
+    ($value:expr, $func1:ident = $v1:expr $(, $func:ident = $v:expr)*) => {
         _trace_value_body!($value, $func1 = $v1 $(, $func = $v)*).scalar_unused()
     };
 }
 
 #[macro_export]
 macro_rules! scalar_tracked {
-    ($value:tt, $state:tt) => {
+    ($value:expr, $state:expr) => {
         _trace_value_body!($value).scalar_tracked(&mut $state)
     };
 
-    ($value:tt, $state:tt, $func1:ident = $v1:expr $(, $func:ident = $v:expr)*) => {
+    ($value:expr, $state:expr, $func1:ident = $v1:expr $(, $func:ident = $v:expr)*) => {
         _trace_value_body!($value, $func1 = $v1 $(, $func = $v)*).scalar_tracked(&mut $state)
     };
 }
 
 #[macro_export]
 macro_rules! scalar_unused_tracked {
-    ($value:tt, $state:tt) => {
+    ($value:expr, $state:expr) => {
         _trace_value_body!($value).scalar_unused_tracked(&mut $state)
     };
 
-    ($value:tt, $state:tt, $func1:ident = $v1:expr $(, $func:ident = $v:expr)*) => {
+    ($value:expr, $state:expr, $func1:ident = $v1:expr $(, $func:ident = $v:expr)*) => {
         _trace_value_body!($value, $func1 = $v1 $(, $func = $v)*).scalar_unused_tracked(&mut $state)
     };
 }
@@ -281,22 +281,22 @@ macro_rules! stream_unused {
 
 #[macro_export]
 macro_rules! stream_tracked {
-    ($value:expr, $generation:expr, $state:tt) => {
+    ($value:expr, $generation:expr, $state:expr) => {
         _trace_value_body!($value).stream_tracked(&mut $state)
     };
 
-    ($value:expr, $generation:expr, $state:tt, $func1:ident = $v1:expr $(, $func:ident = $v:expr)*) => {
+    ($value:expr, $generation:expr, $state:expr, $func1:ident = $v1:expr $(, $func:ident = $v:expr)*) => {
         _trace_value_body!($value, $func1 = $v1 $(, $func = $v)*).stream_tracked($generation, &mut $state)
     };
 }
 
 #[macro_export]
 macro_rules! stream_unused_tracked {
-    ($value:expr, $generation:expr, $state:tt) => {
+    ($value:expr, $generation:expr, $state:expr) => {
         _trace_value_body!($value).stream_unused_tracked(&mut $state)
     };
 
-    ($value:expr, $generation:expr, $state:tt, $func1:ident = $v1:expr $(, $func:ident = $v:expr)*) => {
+    ($value:expr, $generation:expr, $state:expr, $func1:ident = $v1:expr $(, $func:ident = $v:expr)*) => {
         _trace_value_body!($value, $func1 = $v1 $(, $func = $v)*).stream_unused_tracked($generation, &mut $state)
     };
 }

@@ -76,7 +76,7 @@ fn issue_211() {
     let expected_trace = ExecutionTrace::from(vec![
         scalar!(2, peer = peer_1_id, service = "getdatasrv..0", function = "idx"),
         scalar!(
-            (json!([1, 2, 3])),
+            json!([1, 2, 3]),
             peer = peer_1_id,
             service = "getdatasrv..1",
             function = "nodes"

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use air_interpreter_data::ExecutionTrace;
 use air_test_utils::prelude::*;
 
 use pretty_assertions::assert_eq;
@@ -82,37 +83,37 @@ fn merge_streams_in_two_fold() {
 
     let actual_trace_1 = trace_from_result(&result_1);
 
-    let expected_trace_1 = vec![
-        scalar!((json!([vm_1_peer_id, vm_2_peer_id]))),
+    let expected_trace_1 = ExecutionTrace::from(vec![
+        scalar!(json!([vm_1_peer_id, vm_2_peer_id]), peer = set_variable_peer_id, service = "neighborhood"),
         par(1, 2),
-        stream!(vm_1_peer_id, 0),
+        stream!(vm_1_peer_id, 0, peer = vm_1_peer_id, service = "add_provider"),
         par(1, 0),
         request_sent_by(set_variable_peer_id),
         par(1, 2),
-        stream!(vm_1_peer_id, 0),
+        stream!(vm_1_peer_id, 0, peer = vm_1_peer_id, service = "get_providers"),
         par(1, 0),
         request_sent_by(vm_1_peer_id),
-        stream!(vm_1_peer_id, 1),
+        stream!(vm_1_peer_id, 1, peer = vm_1_peer_id, service = "identity"),
         request_sent_by(vm_1_peer_id),
-    ];
+    ]);
 
     assert_eq!(actual_trace_1, expected_trace_1);
     assert_eq!(result_1.next_peer_pks, vec![vm_2_peer_id.to_string()]);
 
     let actual_trace_2 = trace_from_result(&result_2);
 
-    let expected_trace_2 = vec![
-        scalar!((json!([vm_1_peer_id, vm_2_peer_id]))),
+    let expected_trace_2 = ExecutionTrace::from(vec![
+        scalar!(json!([vm_1_peer_id, vm_2_peer_id]), peer = set_variable_peer_id, service = "neighborhood"),
         par(1, 2),
         request_sent_by(set_variable_peer_id),
         par(1, 0),
-        stream!(vm_2_peer_id, 0),
+        stream!(vm_2_peer_id, 0, peer = vm_2_peer_id, service = "add_provider"),
         par(1, 2),
         request_sent_by(vm_2_peer_id),
         par(1, 0),
-        stream!(vm_2_peer_id, 0),
+        stream!(vm_2_peer_id, 0, peer = vm_2_peer_id, service = "get_providers"),
         request_sent_by(vm_2_peer_id),
-    ];
+    ]);
 
     assert_eq!(actual_trace_2, expected_trace_2);
     assert_eq!(result_2.next_peer_pks, vec![vm_1_peer_id.to_string()]);
@@ -120,16 +121,16 @@ fn merge_streams_in_two_fold() {
     let actual_trace_3 = trace_from_result(&result_3);
 
     let expected_trace_3 = vec![
-        scalar!((json!([vm_1_peer_id, vm_2_peer_id]))),
+        scalar!(json!([vm_1_peer_id, vm_2_peer_id]), peer = set_variable_peer_id, service = "neighborhood"),
         par(1, 2),
-        stream!(vm_1_peer_id, 0),
+        stream!(vm_1_peer_id, 0, peer = vm_1_peer_id, service = "add_provider"),
         par(1, 0),
-        stream!(vm_2_peer_id, 2),
+        stream!(vm_2_peer_id, 2, peer = vm_2_peer_id, service = "add_provider"),
         par(1, 2),
-        stream!(vm_1_peer_id, 0),
+        stream!(vm_1_peer_id, 0, peer = vm_1_peer_id, service = "get_providers"),
         par(1, 0),
-        stream!(vm_2_peer_id, 1),
-        stream!(vm_1_peer_id, 1),
+        stream!(vm_2_peer_id, 1, peer = vm_2_peer_id, service = "get_providers"),
+        stream!(vm_1_peer_id, 1, peer = vm_1_peer_id, service = "identity"),
         request_sent_by(vm_1_peer_id),
     ];
 
@@ -138,19 +139,19 @@ fn merge_streams_in_two_fold() {
 
     let actual_trace_4 = trace_from_result(&result_4);
 
-    let expected_trace_4 = vec![
-        scalar!((json!([vm_1_peer_id, vm_2_peer_id]))),
+    let expected_trace_4 = ExecutionTrace::from(vec![
+        scalar!(json!([vm_1_peer_id, vm_2_peer_id]), peer = set_variable_peer_id, service = "neighborhood"),
         par(1, 2),
-        stream!(vm_1_peer_id, 0),
+        stream!(vm_1_peer_id, 0, peer = vm_1_peer_id, service = "add_provider"),
         par(1, 0),
-        stream!(vm_2_peer_id, 2),
+        stream!(vm_2_peer_id, 2, peer = vm_2_peer_id, service = "add_provider"),
         par(1, 2),
-        stream!(vm_1_peer_id, 0),
+        stream!(vm_1_peer_id, 0, peer = vm_1_peer_id, service = "get_providers"),
         par(1, 0),
-        stream!(vm_2_peer_id, 1),
-        stream!(vm_1_peer_id, 1),
-        scalar!(vm_2_peer_id),
-    ];
+        stream!(vm_2_peer_id, 1, peer = vm_2_peer_id, service = "get_providers"),
+        stream!(vm_1_peer_id, 1, peer = vm_1_peer_id, service = "identity"),
+        scalar!(vm_2_peer_id, peer = vm_2_peer_id),
+    ]);
 
     assert_eq!(actual_trace_4, expected_trace_4);
     assert!(result_4.next_peer_pks.is_empty());

@@ -190,7 +190,7 @@ fn local_and_global_scalars() {
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
-        scalar!((iterable_content.clone())),
+        scalar!(iterable_content.clone()),
         scalar!(iterable_content),
         scalar!(0),
         scalar!(1),

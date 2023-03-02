@@ -41,7 +41,7 @@ fn ap_with_scalars() {
     let result = checked_call_vm!(vm_2, <_>::default(), script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
-    let expected_state = vec![scalar!((json!({ "field": test_value }))), scalar!(test_value)];
+    let expected_state = vec![scalar!(json!({ "field": test_value })), scalar!(test_value)];
 
     assert_eq!(actual_trace, expected_state);
     assert!(result.next_peer_pks.is_empty());
@@ -78,7 +78,7 @@ fn ap_with_string_literal() {
             ]
         }
         )),
-        scalar!((json!([some_string]))),
+        scalar!(json!([some_string])),
     ];
 
     assert_eq!(actual_trace, expected_state);
@@ -113,7 +113,7 @@ fn ap_with_bool_literal() {
                 }
             ]
         })),
-        scalar!((json!([true]))),
+        scalar!(json!([true])),
     ];
 
     assert_eq!(actual_trace, expected_state);
@@ -148,7 +148,7 @@ fn ap_with_number_literal() {
                 }
             ]
         })),
-        scalar!((json!([100]))),
+        scalar!(json!([100])),
     ];
 
     assert_eq!(actual_trace, expected_state);
@@ -183,7 +183,7 @@ fn ap_with_last_error() {
                 }
             ]
         })),
-        scalar!((json!([null]))),
+        scalar!(json!([null])),
     ];
 
     assert_eq!(actual_trace, expected_state);
@@ -206,7 +206,7 @@ fn ap_with_timestamp() {
     let result = checked_call_vm!(vm_1, test_params.clone(), script, "", "");
 
     let actual_trace = trace_from_result(&result);
-    let expected_state = vec![scalar!((test_params.timestamp))];
+    let expected_state = vec![scalar!(test_params.timestamp)];
 
     assert_eq!(actual_trace, expected_state);
 }
@@ -227,7 +227,7 @@ fn ap_with_ttl() {
     let result = checked_call_vm!(vm_1, test_params.clone(), script, "", "");
 
     let actual_trace = trace_from_result(&result);
-    let expected_state = vec![scalar!((test_params.ttl))];
+    let expected_state = vec![scalar!(test_params.ttl)];
 
     assert_eq!(actual_trace, expected_state);
 }
@@ -256,7 +256,7 @@ fn ap_with_dst_stream() {
 
     let actual_trace = trace_from_result(&result);
     let expected_state = vec![
-        scalar!((json!({ "field": test_value }))),
+        scalar!(json!({ "field": test_value })),
         executed_state::ap(0),
         executed_state::canon(json!({
             "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_2_peer_id", "service_id": ""},
@@ -268,7 +268,7 @@ fn ap_with_dst_stream() {
                 }
             ]
         })),
-        scalar!((json!([{ "field": test_value }]))),
+        scalar!(json!([{ "field": test_value }])),
     ];
 
     assert_eq!(actual_trace, expected_state);
@@ -321,7 +321,7 @@ fn ap_canon_stream_with_lambda() {
             ]
             }
         )),
-        scalar!((json!([1]))),
+        scalar!(json!([1])),
     ];
     assert_eq!(actual_trace, expected_state);
 
@@ -381,7 +381,7 @@ fn ap_canon_stream() {
             ]
             }
         )),
-        scalar!((json!([[0, 1]]))),
+        scalar!(json!([[0, 1]])),
     ];
     assert_eq!(actual_trace, expected_state);
 

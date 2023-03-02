@@ -81,10 +81,10 @@ fn new_with_global_streams_seq() {
         ]),
         stream!(1, 0),
         stream!(2, 0),
-        scalar!((json!([2]))),
-        scalar!((json!([1, 2]))),
-        scalar!((json!([1]))),
-        scalar!((json!([1, 2]))),
+        scalar!(json!([2])),
+        scalar!(json!([1, 2])),
+        scalar!(json!([1])),
+        scalar!(json!([1, 2])),
     ];
     assert_eq!(actual_trace, expected_trace);
 
@@ -127,7 +127,7 @@ fn several_restrictions() {
 
             ]
         })),
-        scalar!((json!([]))),
+        scalar!(json!([])),
     ];
     assert_eq!(actual_trace, expected_trace);
 }
@@ -195,7 +195,7 @@ fn check_influence_to_not_restricted() {
             ]
         }
         )),
-        scalar!((json!(["more"]))),
+        scalar!(json!(["more"])),
         executed_state::canon(json!(
             {
             "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_peer_id", "service_id": ""},
@@ -208,7 +208,7 @@ fn check_influence_to_not_restricted() {
             ]
         }
         )),
-        scalar!((json!(["push more"]))),
+        scalar!(json!(["push more"])),
         executed_state::canon(json!({
             "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_peer_id", "service_id": ""},
             "values": [
@@ -219,14 +219,14 @@ fn check_influence_to_not_restricted() {
                 }
             ]
         })),
-        scalar!((json!(["push more"]))),
+        scalar!(json!(["push more"])),
         executed_state::canon(json!({
             "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_peer_id", "service_id": ""},
             "values": [
             ]
         })),
-        scalar!((json!([]))),
-        scalar!((json!(["more"]))),
+        scalar!(json!([])),
+        scalar!(json!(["more"])),
     ];
     assert_eq!(actual_trace, expected_trace);
 }
@@ -264,7 +264,7 @@ fn new_in_fold_with_ap() {
 
     let actual_trace = trace_from_result(&result);
     let expected_trace = vec![
-        scalar!((json!([1, 2, 3, 4, 5]))),
+        scalar!(json!([1, 2, 3, 4, 5])),
         executed_state::ap(0),
         executed_state::canon(json!({
             "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_peer_id", "service_id": ""},
@@ -276,7 +276,7 @@ fn new_in_fold_with_ap() {
                 }
             ]
         })),
-        scalar!((json!(["none"]))),
+        scalar!(json!(["none"])),
         executed_state::ap(0),
         executed_state::canon(json!({
             "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_peer_id", "service_id": ""},
@@ -288,7 +288,7 @@ fn new_in_fold_with_ap() {
                 }
             ]
         })),
-        scalar!((json!(["none"]))),
+        scalar!(json!(["none"])),
         executed_state::ap(0),
         executed_state::canon(json!({
             "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_peer_id", "service_id": ""},
@@ -300,7 +300,7 @@ fn new_in_fold_with_ap() {
                 }
             ]
         })),
-        scalar!((json!(["none"]))),
+        scalar!(json!(["none"])),
         executed_state::ap(0),
         executed_state::canon(json!({
             "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_peer_id", "service_id": ""},
@@ -312,7 +312,7 @@ fn new_in_fold_with_ap() {
                 }
             ]
         })),
-        scalar!((json!(["none"]))),
+        scalar!(json!(["none"])),
         executed_state::ap(0),
         executed_state::canon(json!({
             "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_peer_id", "service_id": ""},
@@ -324,7 +324,7 @@ fn new_in_fold_with_ap() {
                 }
             ]
         })),
-        scalar!((json!(["none"]))),
+        scalar!(json!(["none"])),
     ];
     assert_eq!(actual_trace, expected_trace);
 
@@ -559,7 +559,7 @@ fn new_with_scalars_in_lfold_with_outside_next() {
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
-        scalar!((json!([1, 2, 3]))),
+        scalar!(json!([1, 2, 3])),
         scalar!(0),
         scalar!(0),
         scalar!(10),
@@ -616,7 +616,7 @@ fn new_with_scalars_in_rfold_with_outside_next() {
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
-        scalar!((json!([1, 2, 3]))),
+        scalar!(json!([1, 2, 3])),
         scalar!(0),
         scalar!(0),
         scalar!(10),
@@ -676,7 +676,7 @@ fn new_with_scalars_in_fold_with_inside_next() {
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
-        scalar!((json!([1, 2, 3]))),
+        scalar!(json!([1, 2, 3])),
         scalar!(0),
         scalar!(0),
         scalar!(10),

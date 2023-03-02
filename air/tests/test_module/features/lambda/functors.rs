@@ -36,7 +36,7 @@ fn length_functor_for_array_scalar() {
     let result = executor.execute_one(init_peer_id).unwrap();
     let actual_trace = trace_from_result(&result);
 
-    let expected_trace = vec![scalar!((json!([1, 1, 1]))), scalar!(3)];
+    let expected_trace = vec![scalar!(json!([1, 1, 1])), scalar!(3)];
     assert_eq!(actual_trace, expected_trace);
 }
 

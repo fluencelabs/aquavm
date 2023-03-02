@@ -66,14 +66,14 @@ fn issue_222() {
     let expected_trace = vec![
         executed_state::par(3, 3),
         executed_state::par(1, 1),
-        stream!((json!([1])), 1, peer = other_1_id),
-        stream!((json!([2])), 0, peer = other_2_id),
+        stream!(json!([1]), 1, peer = other_1_id),
+        stream!(json!([2]), 0, peer = other_2_id),
         executed_state::fold(vec![
             executed_state::subtrace_lore(3, SubTraceDesc::new(5.into(), 1), SubTraceDesc::new(6.into(), 0)),
             executed_state::subtrace_lore(2, SubTraceDesc::new(6.into(), 1), SubTraceDesc::new(7.into(), 0)),
         ]),
-        scalar_unused!((json!([2])), peer = other_id, args = vec![vec![2]]),
-        scalar_unused!((json!([1])), peer = other_id, args = vec![vec![1]]),
+        scalar_unused!(json!([2]), peer = other_id, args = vec![vec![2]]),
+        scalar_unused!(json!([1]), peer = other_id, args = vec![vec![1]]),
     ];
 
     assert_eq!(&*actual_trace, expected_trace);

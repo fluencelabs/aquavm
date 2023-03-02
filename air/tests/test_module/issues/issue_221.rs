@@ -84,12 +84,12 @@ fn issue_221() {
     let join_1_result = executor.execute_one(join_1_id).unwrap(); // before 0.20.9 it fails here
     let actual_trace = trace_from_result(&join_1_result);
     let expected_trace = ExecutionTrace::from(vec![
-        scalar!((json!([peer_1_id, peer_2_id])), peer = set_variable_id, service = "..0"),
+        scalar!(json!([peer_1_id, peer_2_id]), peer = set_variable_id, service = "..0"),
         executed_state::par(2, 3),
-        scalar!(peer_1_value, peer = peer_1_id, service = "..1", args=vec![peer_1_id]),
+        scalar!(peer_1_value, peer = peer_1_id, service = "..1", args = vec![peer_1_id]),
         executed_state::ap(0),
         executed_state::par(2, 0),
-        scalar!(peer_2_value, peer = peer_2_id, service = "..1", args=vec![peer_2_id]),
+        scalar!(peer_2_value, peer = peer_2_id, service = "..1", args = vec![peer_2_id]),
         executed_state::ap(1),
         executed_state::fold(vec![
             executed_state::subtrace_lore(3, SubTraceDesc::new(8.into(), 4), SubTraceDesc::new(12.into(), 0)),
@@ -97,11 +97,21 @@ fn issue_221() {
         ]),
         executed_state::par(3, 0),
         executed_state::par(1, 1),
-        scalar_unused!(peer_1_value, peer = join_1_id, service = "..2", args = vec![peer_1_value]),
+        scalar_unused!(
+            peer_1_value,
+            peer = join_1_id,
+            service = "..2",
+            args = vec![peer_1_value]
+        ),
         executed_state::request_sent_by(peer_1_id),
         executed_state::par(3, 0),
         executed_state::par(1, 1),
-        scalar_unused!(peer_2_value, peer = join_1_id, service = "..2", args = vec![peer_2_value]),
+        scalar_unused!(
+            peer_2_value,
+            peer = join_1_id,
+            service = "..2",
+            args = vec![peer_2_value]
+        ),
         executed_state::request_sent_by(peer_2_id),
         executed_state::request_sent_by(join_1_id),
     ]);

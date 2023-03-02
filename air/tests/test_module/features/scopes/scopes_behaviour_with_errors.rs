@@ -54,10 +54,10 @@ fn check_that_scalar_is_visible_only_inside_fold_block() {
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
-        scalar!((json!([1, 2, 3]))),
-        scalar!((json!([1, 2, 3]))),
-        scalar!((json!([1, 2, 3]))),
-        scalar!((json!([1, 2, 3]))),
+        scalar!(json!([1, 2, 3])),
+        scalar!(json!([1, 2, 3])),
+        scalar!(json!([1, 2, 3])),
+        scalar!(json!([1, 2, 3])),
         executed_state::service_failed(1, "failed result from fallible_call_service"),
         executed_state::request_sent_by(fallible_peer_id),
     ];
@@ -103,13 +103,13 @@ fn scopes_check_that_scalar_not_overwritten_by_fold_end() {
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
-        scalar!((json!([1, 2, 3]))),
-        scalar!((json!([1, 2, 3]))),
-        scalar!((json!([1, 2, 3]))),
-        scalar!((json!([1, 2, 3]))),
-        scalar!((json!([1, 2, 3]))),
+        scalar!(json!([1, 2, 3])),
+        scalar!(json!([1, 2, 3])),
+        scalar!(json!([1, 2, 3])),
+        scalar!(json!([1, 2, 3])),
+        scalar!(json!([1, 2, 3])),
         executed_state::service_failed(1, "failed result from fallible_call_service"),
-        scalar!((json!([1, 2, 3]))),
+        scalar!(json!([1, 2, 3])),
     ];
 
     assert_eq!(actual_trace, expected_trace);

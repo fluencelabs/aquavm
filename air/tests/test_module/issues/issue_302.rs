@@ -79,7 +79,7 @@ fn issue_302() {
                 },
             ]
         })),
-        scalar_unused!((json!([1, 2, 0])), peer = peer_id_2, args = vec![vec![1, 2, 0]]),
+        scalar_unused!(json!([1, 2, 0]), peer = peer_id_2, args = vec![vec![1, 2, 0]]),
     ];
     assert_eq!(actual_trace.deref(), expected_trace);
 }

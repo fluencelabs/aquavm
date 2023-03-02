@@ -84,10 +84,10 @@ fn issue_173() {
         stream!(1, 0),
         executed_state::par(2, 1),
         stream!(2, 0),
-        scalar!((json!([2]))),
-        scalar!((json!([1, 2]))),
-        scalar!((json!([1]))),
-        scalar!((json!([1, 2]))),
+        scalar!(json!([2])),
+        scalar!(json!([1, 2])),
+        scalar!(json!([1])),
+        scalar!(json!([1, 2])),
     ];
     assert_eq!(actual_trace, expected_trace);
 

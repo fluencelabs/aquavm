@@ -41,7 +41,7 @@ fn lfold() {
     let result = checked_call_vm!(vm, <_>::default(), lfold, "", result.data);
 
     let actual_trace = trace_from_result(&result);
-    let expected_state = scalar!((json!(["1", "2", "3", "4", "5"])));
+    let expected_state = scalar!(json!(["1", "2", "3", "4", "5"]));
 
     assert_eq!(actual_trace.len(), 6);
     assert_eq!(actual_trace[0.into()], expected_state);
@@ -77,7 +77,7 @@ fn rfold() {
     let actual_trace = trace_from_result(&result);
     assert_eq!(actual_trace.len(), 6);
 
-    let expected_state = scalar!((json!(["1", "2", "3", "4", "5"])));
+    let expected_state = scalar!(json!(["1", "2", "3", "4", "5"]));
     assert_eq!(actual_trace[0.into()], expected_state);
 
     for i in 1..=5 {
@@ -119,7 +119,7 @@ fn inner_fold() {
     let actual_trace = trace_from_result(&result);
     assert_eq!(actual_trace.len(), 27);
 
-    let expected_state = scalar!((json!(["1", "2", "3", "4", "5"])));
+    let expected_state = scalar!(json!(["1", "2", "3", "4", "5"]));
     assert_eq!(actual_trace[0.into()], expected_state);
     assert_eq!(actual_trace[1.into()], expected_state);
 
@@ -184,7 +184,7 @@ fn empty_iterable_fold() {
     let result = checked_call_vm!(vm, <_>::default(), empty_fold, "", result.data);
 
     let actual_trace = trace_from_result(&result);
-    let expected_state = scalar!((json!([])));
+    let expected_state = scalar!(json!([]));
 
     assert_eq!(actual_trace.len(), 1);
     assert_eq!(actual_trace[0.into()], expected_state);
@@ -228,7 +228,7 @@ fn empty_fold_json_path() {
     let result = checked_call_vm!(vm, <_>::default(), empty_fold, "", result.data);
 
     let actual_trace = trace_from_result(&result);
-    let expected_trace = vec![scalar!((json!({ "messages": [] })))];
+    let expected_trace = vec![scalar!(json!({ "messages": [] }))];
 
     assert_eq!(actual_trace, expected_trace);
 }
@@ -283,7 +283,7 @@ fn lambda() {
     let result = checked_call_vm!(vm, <_>::default(), script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
-    let expected_state = scalar!((json!({ "array": ["1", "2", "3", "4", "5"] })));
+    let expected_state = scalar!(json!({ "array": ["1", "2", "3", "4", "5"] }));
 
     assert_eq!(actual_trace.len(), 6);
     assert_eq!(actual_trace[0.into()], expected_state);
@@ -340,8 +340,8 @@ fn shadowing() {
 
     let actual_trace = trace_from_result(&result);
     let expected_trace = vec![
-        scalar!((json!(["1", "2"]))),
-        scalar!((json!(["1", "2"]))),
+        scalar!(json!(["1", "2"])),
+        scalar!(json!(["1", "2"])),
         scalar!("1"),
         scalar!("1"),
         scalar!("1"),
@@ -407,8 +407,8 @@ fn shadowing_scope() {
 
     let actual_trace = trace_from_result(&result);
     let expected_trace = vec![
-        scalar!((vec!["1", "2"])),
-        scalar!((vec!["1", "2"])),
+        scalar!(vec!["1", "2"]),
+        scalar!(vec!["1", "2"]),
         scalar!("value"),
         scalar!("1"),
         scalar!("1"),
@@ -577,7 +577,7 @@ fn fold_scalar_seq_next_completes_with_null() {
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
-        scalar!((service_result.clone())),
+        scalar!(service_result.clone()),
         executed_state::par(1, 2),
         stream!(service_result.clone(), 0),
         executed_state::par(1, 0),

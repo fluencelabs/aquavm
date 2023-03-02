@@ -61,7 +61,7 @@ fn call_with_timestamp() {
     let result = checked_call_vm!(vm, test_params.clone(), script, "", "");
 
     let actual_trace = trace_from_result(&result);
-    let expected_trace = vec![scalar!((test_params.timestamp))];
+    let expected_trace = vec![scalar!(test_params.timestamp)];
 
     assert_eq!(actual_trace, expected_trace);
 }
@@ -77,7 +77,7 @@ fn call_with_ttl() {
     let result = checked_call_vm!(vm, test_params.clone(), script, "", "");
 
     let actual_trace = trace_from_result(&result);
-    let expected_trace = vec![scalar!((test_params.ttl))];
+    let expected_trace = vec![scalar!(test_params.ttl)];
 
     assert_eq!(actual_trace, expected_trace);
 }

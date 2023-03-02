@@ -234,13 +234,12 @@ fn fold_early_exit() {
     );
     let actual_trace = trace_from_result(&last_peer_checker_result);
 
-    let expected_state = scalar!(
-        (json!({
-                "error_code": 10000i64,
-                "instruction" : r#"call "error_trigger_id" ("error" "") [] "#,
-                "message": r#"Local service error, ret_code is 1, error message is '"failed result from fallible_call_service"'"#,
-                "peer_id": "error_trigger_id"}))
-    );
+    let expected_state = scalar!(json!({
+            "error_code": 10000i64,
+            "instruction" : r#"call "error_trigger_id" ("error" "") [] "#,
+            "message": r#"Local service error, ret_code is 1, error message is '"failed result from fallible_call_service"'"#,
+            "peer_id": "error_trigger_id"
+    }));
 
     let bubbled_error_from_stream_1 = actual_trace.len() - 3;
     assert_eq!(&actual_trace[bubbled_error_from_stream_1.into()], &expected_state);
@@ -308,10 +307,10 @@ fn fold_par_early_exit() {
 
     let unit_call_service_result = "result from unit_call_service";
     let expected_trace = vec![
-        scalar!((json!(["a1", "a2"]))),
-        scalar!((json!(["b1", "b2"]))),
-        scalar!((json!(["c1", "c2"]))),
-        scalar!((json!(["d1", "d2"]))),
+        scalar!(json!(["a1", "a2"])),
+        scalar!(json!(["b1", "b2"])),
+        scalar!(json!(["c1", "c2"])),
+        scalar!(json!(["d1", "d2"])),
         stream!("a1", 0),
         stream!("a2", 1),
         stream!("b1", 0),
