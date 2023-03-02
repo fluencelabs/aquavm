@@ -49,7 +49,7 @@ jobs:
             RUSTFLAGS="$RUSTFLAGS -Z sanitizer=$san" cargo test --features test_with_native_code --target x86_64-unknown-linux-gnu
           done
 
-      - name: Run codecod
+      - name: Run codecov
         id: coverage
         uses: actions-rs/grcov@v0.1
 
@@ -59,7 +59,7 @@ jobs:
           path-to-lcov: ${{ steps.coverage.outputs.report }}
 
   lint:
-    name: "aquavm / rust lints"
+    name: "aquavm / lints"
     timeout-minutes: 60
     runs-on: builder
 
