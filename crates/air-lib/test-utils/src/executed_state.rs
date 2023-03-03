@@ -354,7 +354,7 @@ impl ExecutedCallBuilder {
         self
     }
 
-    pub fn args(mut self, args: Vec<impl Into<JValue>>) -> Self {
+    pub fn args(mut self, args: impl IntoIterator<Item = impl Into<JValue>>) -> Self {
         self.args = args.into_iter().map(Into::into).collect();
         self
     }
