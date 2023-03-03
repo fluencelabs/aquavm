@@ -33,7 +33,6 @@ use air_interpreter_cid::value_to_json_cid;
 use air_interpreter_cid::CID;
 use air_interpreter_data::CanonCidAggregate;
 use air_interpreter_data::ServiceResultAggregate;
-use air_interpreter_interface::CallServiceResult;
 use avm_server::SecurityTetraplet;
 use serde::Deserialize;
 use serde::Serialize;
@@ -107,17 +106,6 @@ pub fn par(left: usize, right: usize) -> ExecutedState {
     };
 
     ExecutedState::Par(par_result)
-}
-
-pub fn service_failed(ret_code: i32, error_message: &str) -> ExecutedState {
-    let mut cid_state = ExecutionCidState::new();
-    let result = CallServiceResult {
-        ret_code,
-        result: error_message.to_owned(),
-    };
-    let result_value = serde_json::to_value(result).unwrap();
-    let service_result_agg_cid = simple_value_aggregate_cid(result_value, &mut cid_state);
-    ExecutedState::Call(CallResult::Failed(service_result_agg_cid))
 }
 
 pub fn fold(lore: FoldLore) -> ExecutedState {
