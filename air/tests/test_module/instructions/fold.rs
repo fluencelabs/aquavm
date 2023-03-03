@@ -16,7 +16,10 @@
 
 use air::PreparationError;
 use air::ToErrorCode;
+use air_interpreter_data::ExecutionTrace;
 use air_test_utils::prelude::*;
+
+use pretty_assertions::assert_eq;
 
 #[test]
 fn lfold() {
@@ -41,13 +44,14 @@ fn lfold() {
     let result = checked_call_vm!(vm, <_>::default(), lfold, "", result.data);
 
     let actual_trace = trace_from_result(&result);
-    let expected_state = scalar!(json!(["1", "2", "3", "4", "5"]));
+    let expected_state = scalar!(json!(["1", "2", "3", "4", "5"]), peer = "set_variable");
 
     assert_eq!(actual_trace.len(), 6);
     assert_eq!(actual_trace[0.into()], expected_state);
 
     for i in 1..=5 {
-        let expected_state = stream!(format!("{i}"), i as u32 - 1);
+        let val = format!("{i}");
+        let expected_state = stream!(val.as_str(), i as u32 - 1, peer = "A", args = [val.as_str()]);
         assert_eq!(actual_trace[i.into()], expected_state);
     }
 }
@@ -77,11 +81,12 @@ fn rfold() {
     let actual_trace = trace_from_result(&result);
     assert_eq!(actual_trace.len(), 6);
 
-    let expected_state = scalar!(json!(["1", "2", "3", "4", "5"]));
+    let expected_state = scalar!(json!(["1", "2", "3", "4", "5"]), peer = "set_variable");
     assert_eq!(actual_trace[0.into()], expected_state);
 
     for i in 1..=5 {
-        let expected_state = stream!(format!("{}", 6 - i), i as u32 - 1);
+        let val = format!("{}", 6 - i);
+        let expected_state = stream!(val.as_str(), i as u32 - 1, peer = "A", args = [val.as_str()]);
         assert_eq!(actual_trace[i.into()], expected_state);
     }
 }
@@ -119,14 +124,15 @@ fn inner_fold() {
     let actual_trace = trace_from_result(&result);
     assert_eq!(actual_trace.len(), 27);
 
-    let expected_state = scalar!(json!(["1", "2", "3", "4", "5"]));
+    let expected_state = scalar!(json!(["1", "2", "3", "4", "5"]), peer = "set_variable");
     assert_eq!(actual_trace[0.into()], expected_state);
     assert_eq!(actual_trace[1.into()], expected_state);
 
     for i in 1..=5 {
         for j in 1..=5 {
             let state_id = 1 + 5 * (i - 1) + j;
-            let expected_state = stream!(i.to_string(), state_id as u32 - 2);
+            let val = i.to_string();
+            let expected_state = stream!(val.as_str(), state_id as u32 - 2, peer = "A", args = [val]);
             assert_eq!(actual_trace[state_id.into()], expected_state);
         }
     }
@@ -184,7 +190,7 @@ fn empty_iterable_fold() {
     let result = checked_call_vm!(vm, <_>::default(), empty_fold, "", result.data);
 
     let actual_trace = trace_from_result(&result);
-    let expected_state = scalar!(json!([]));
+    let expected_state = scalar!(json!([]), peer = "set_variable");
 
     assert_eq!(actual_trace.len(), 1);
     assert_eq!(actual_trace[0.into()], expected_state);
@@ -228,7 +234,7 @@ fn empty_fold_json_path() {
     let result = checked_call_vm!(vm, <_>::default(), empty_fold, "", result.data);
 
     let actual_trace = trace_from_result(&result);
-    let expected_trace = vec![scalar!(json!({ "messages": [] }))];
+    let expected_trace = vec![scalar!(json!({ "messages": [] }), peer = "set_variable")];
 
     assert_eq!(actual_trace, expected_trace);
 }
@@ -283,13 +289,14 @@ fn lambda() {
     let result = checked_call_vm!(vm, <_>::default(), script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
-    let expected_state = scalar!(json!({ "array": ["1", "2", "3", "4", "5"] }));
+    let expected_state = scalar!(json!({ "array": ["1", "2", "3", "4", "5"] }), peer = "set_variable");
 
     assert_eq!(actual_trace.len(), 6);
     assert_eq!(actual_trace[0.into()], expected_state);
 
     for i in 1..=5 {
-        let expected_state = stream!(format!("{i}"), i as u32 - 1);
+        let val = format!("{i}");
+        let expected_state = stream!(val.as_str(), i as u32 - 1, peer = "A", args = [val]);
         assert_eq!(actual_trace[i.into()], expected_state);
     }
 }
@@ -339,20 +346,20 @@ fn shadowing() {
     let result = checked_call_vm!(vm_b, <_>::default(), script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
-    let expected_trace = vec![
-        scalar!(json!(["1", "2"])),
-        scalar!(json!(["1", "2"])),
-        scalar!("1"),
-        scalar!("1"),
-        scalar!("1"),
-        scalar!("1"),
+    let expected_trace = ExecutionTrace::from(vec![
+        scalar!(json!(["1", "2"]), peer = "set_variable"),
+        scalar!(json!(["1", "2"]), peer = "set_variable"),
+        scalar!("1", peer = "A", args = ["1"]),
+        scalar_unused!("1", peer = "B", args = ["1"]),
+        scalar!("1", peer = "A", args = ["1"]),
+        scalar_unused!("1", peer = "B", args = ["1"]),
         par(1, 1),
-        scalar!("1"),
-        scalar!("1"),
-        scalar!("2"),
-        scalar!("2"),
+        scalar!("1", peer = "A", args = ["1"]),
+        scalar_unused!("1", peer = "B", args = ["1"]),
+        scalar!("2", peer = "A", args = ["2"]),
+        scalar_unused!("2", peer = "B", args = ["2"]),
         request_sent_by("B"),
-    ];
+    ]);
 
     assert_eq!(actual_trace, expected_trace);
 }
@@ -406,19 +413,19 @@ fn shadowing_scope() {
     let result = execute_script(String::from(variable_shadowing_script)).unwrap();
 
     let actual_trace = trace_from_result(&result);
-    let expected_trace = vec![
-        scalar!(vec!["1", "2"]),
-        scalar!(vec!["1", "2"]),
-        scalar!("value"),
-        scalar!("1"),
-        scalar!("1"),
-        scalar!("1"),
-        scalar!("1"),
-        scalar!("value"),
-        scalar!("value"),
-        scalar!("2"),
+    let expected_trace = ExecutionTrace::from(vec![
+        scalar!(vec!["1", "2"], peer = "set_variable"),
+        scalar!(vec!["1", "2"], peer = "set_variable"),
+        scalar!("value", peer = "A", args = ["value"]),
+        scalar!("1", peer = "A", args = ["1"]),
+        scalar_unused!("1", peer = "B", args = ["1"]),
+        scalar!("1", peer = "A", args = ["1"]),
+        scalar_unused!("1", peer = "B", args = ["1"]),
+        scalar_unused!("value", peer = "A", args = ["value"]),
+        scalar!("value", peer = "A", args = ["value"]),
+        scalar!("2", peer = "A", args = ["2"]),
         request_sent_by("A"),
-    ];
+    ]);
 
     assert_eq!(actual_trace, expected_trace);
 }
@@ -464,13 +471,13 @@ fn fold_stream_seq_next_never_completes() {
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
-        stream!(1, 0),
+        stream!(1, 0, peer = vm_peer_id),
         executed_state::fold(vec![subtrace_lore(
             0,
             SubTraceDesc::new(2.into(), 1),
             SubTraceDesc::new(3.into(), 0),
         )]),
-        stream!(1, 0),
+        stream!(1, 0, peer = vm_peer_id, args = [1]),
     ];
     assert_eq!(actual_trace, expected_trace);
 }
@@ -500,13 +507,13 @@ fn fold_stream_seq_next_never_completes_with_never() {
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
-        stream!(1, 0),
+        stream!(1, 0, peer = vm_peer_id),
         executed_state::fold(vec![subtrace_lore(
             0,
             SubTraceDesc::new(2.into(), 1),
             SubTraceDesc::new(3.into(), 0),
         )]),
-        stream!(1, 0),
+        stream!(1, 0, peer = vm_peer_id, args = [1]),
     ];
     assert_eq!(actual_trace, expected_trace);
 }
@@ -536,14 +543,14 @@ fn fold_stream_seq_next_completes_with_null() {
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
-        stream!(1, 0),
+        stream!(1, 0, peer = vm_peer_id),
         executed_state::fold(vec![subtrace_lore(
             0,
             SubTraceDesc::new(2.into(), 1),
             SubTraceDesc::new(3.into(), 0),
         )]),
-        stream!(1, 0),
-        scalar!(1),
+        stream!(1, 0, peer = vm_peer_id, args = [1]),
+        scalar_unused!(1, peer = vm_peer_id),
     ];
     assert_eq!(actual_trace, expected_trace);
 }
@@ -576,17 +583,17 @@ fn fold_scalar_seq_next_completes_with_null() {
     let result = checked_call_vm!(vm, <_>::default(), &script, "", "");
     let actual_trace = trace_from_result(&result);
 
-    let expected_trace = vec![
-        scalar!(service_result.clone()),
+    let expected_trace = ExecutionTrace::from(vec![
+        scalar!(service_result.clone(), peer = vm_peer_id),
         executed_state::par(1, 2),
-        stream!(service_result.clone(), 0),
+        stream!(service_result.clone(), 0, peer = vm_peer_id, args = [1]),
         executed_state::par(1, 0),
-        stream!(service_result.clone(), 0),
+        stream!(service_result.clone(), 0, peer = vm_peer_id, args = [2]),
         executed_state::canon(
             json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_peer_id", "service_id": ""}, "values": []}),
         ),
-        scalar!(service_result),
-    ];
+        scalar_unused!(service_result, peer = vm_peer_id, args = [json!([])]),
+    ]);
     assert_eq!(actual_trace, expected_trace);
 }
 
@@ -619,7 +626,7 @@ fn fold_scalar_seq_next_not_completes_with_never() {
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
-        scalar!(service_result),
+        scalar!(service_result, peer = vm_peer_id),
         executed_state::par(1, 2),
         executed_state::request_sent_by(vm_peer_id),
         executed_state::par(1, 0),
@@ -662,10 +669,10 @@ fn fold_stream_seq_next_saves_call_result() {
             subtrace_lore(0, SubTraceDesc::new(3.into(), 1), SubTraceDesc::new(6.into(), 0)),
             subtrace_lore(1, SubTraceDesc::new(4.into(), 1), SubTraceDesc::new(5.into(), 1)),
         ]),
-        stream!(1, 0),
-        stream!(2, 1),
-        stream!(2, 2),
-        scalar!(0),
+        stream!(1, 0, peer = vm_peer_id, args = [1]),
+        stream!(2, 1, peer = vm_peer_id, args = [2]),
+        stream!(2, 2, peer = vm_peer_id, args = [2]),
+        scalar_unused!(0, peer = vm_peer_id, args = [0]),
     ];
     assert_eq!(actual_trace, expected_trace);
 }
@@ -715,7 +722,7 @@ fn fold_par_next_completes() {
             subtrace_lore(2, SubTraceDesc::new(8.into(), 2), SubTraceDesc::new(10.into(), 0)),
         ]),
         executed_state::par(1, 4),
-        stream!(1, 0),
+        stream!(1, 0, peer = vm_2_peer_id),
         executed_state::par(1, 2),
         executed_state::request_sent_by(vm_1_peer_id),
         executed_state::par(1, 0),
@@ -738,7 +745,7 @@ fn fold_par_next_completes() {
         executed_state::par(1, 4),
         executed_state::request_sent_by(vm_1_peer_id),
         executed_state::par(1, 2),
-        stream!(1, 0),
+        stream!(1, 0, peer = vm_3_peer_id),
         executed_state::par(1, 0),
         executed_state::request_sent_by(vm_1_peer_id),
         executed_state::request_sent_by(vm_3_peer_id),
@@ -761,7 +768,7 @@ fn fold_par_next_completes() {
         executed_state::par(1, 2),
         executed_state::request_sent_by(vm_1_peer_id),
         executed_state::par(1, 0),
-        stream!(1, 0),
+        stream!(1, 0, peer = vm_4_peer_id),
         executed_state::request_sent_by(vm_4_peer_id),
     ];
     assert_eq!(actual_trace, expected_trace);

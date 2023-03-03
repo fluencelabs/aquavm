@@ -34,7 +34,12 @@ fn current_peer_id_call() {
     let result = checked_call_vm!(vm, test_params, script, "", "");
 
     let actual_trace = trace_from_result(&result);
-    let expected_trace = vec![scalar!("result from unit_call_service")];
+    let expected_trace = vec![scalar!(
+        "result from unit_call_service",
+        peer = vm_peer_id,
+        service = service_id,
+        function = function_name
+    )];
 
     assert_eq!(actual_trace, expected_trace);
     assert!(result.next_peer_pks.is_empty());
@@ -61,7 +66,11 @@ fn call_with_timestamp() {
     let result = checked_call_vm!(vm, test_params.clone(), script, "", "");
 
     let actual_trace = trace_from_result(&result);
-    let expected_trace = vec![scalar!(test_params.timestamp)];
+    let expected_trace = vec![scalar!(
+        test_params.timestamp,
+        peer = vm_peer_id,
+        args = [test_params.timestamp]
+    )];
 
     assert_eq!(actual_trace, expected_trace);
 }
@@ -77,7 +86,7 @@ fn call_with_ttl() {
     let result = checked_call_vm!(vm, test_params.clone(), script, "", "");
 
     let actual_trace = trace_from_result(&result);
-    let expected_trace = vec![scalar!(test_params.ttl)];
+    let expected_trace = vec![scalar!(test_params.ttl, peer = vm_peer_id, args = [test_params.ttl])];
 
     assert_eq!(actual_trace, expected_trace);
 }
@@ -166,7 +175,13 @@ fn string_parameters() {
     let result = checked_call_vm!(vm, <_>::default(), script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
-    let expected_state = scalar!("arg1");
+    let expected_state = scalar!(
+        "arg1",
+        peer = vm_peer_id,
+        service = service_id,
+        function = function_name,
+        args = ["arg1", "arg2", "arg3_value"]
+    );
 
     assert_eq!(actual_trace.len(), 2);
     assert_eq!(actual_trace[1.into()], expected_state);

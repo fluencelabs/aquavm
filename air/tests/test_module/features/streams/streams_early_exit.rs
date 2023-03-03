@@ -16,6 +16,7 @@
 
 use air::ExecutionCidState;
 use air::UncatchableError;
+use air_interpreter_data::ExecutionTrace;
 use air_interpreter_data::ValueRef;
 use air_test_utils::prelude::*;
 use air_trace_handler::merger::CallResultError;
@@ -47,8 +48,8 @@ fn par_early_exit() {
     let setter_3_res_1 = checked_call_vm!(setter_3, <_>::default(), &script, "", init_result_1.data.clone());
     let actual_trace_1 = trace_from_result(&setter_3_res_1);
 
-    let expected_trace = vec![
-        scalar!("result from unit_call_service"),
+    let expected_trace = ExecutionTrace::from(vec![
+        scalar_unused!("result from unit_call_service", peer = init_peer_id),
         executed_state::par(12, 1),
         executed_state::par(9, 1),
         executed_state::par(7, 1),
@@ -58,13 +59,28 @@ fn par_early_exit() {
         executed_state::request_sent_by(init_peer_id),
         executed_state::request_sent_by(init_peer_id),
         executed_state::request_sent_by(init_peer_id),
-        stream!("success result from fallible_call_service", 0),
-        executed_state::service_failed(1, "failed result from fallible_call_service"),
-        stream!("success result from fallible_call_service", 0),
-        executed_state::service_failed(1, "failed result from fallible_call_service"),
-        executed_state::service_failed(1, "failed result from fallible_call_service"),
+        stream!("success result from fallible_call_service", 0, peer = setter_3_id),
+        failed!(
+            1,
+            "failed result from fallible_call_service",
+            peer = setter_3_id,
+            service = "error"
+        ),
+        stream!("success result from fallible_call_service", 0, peer = setter_3_id),
+        failed!(
+            1,
+            "failed result from fallible_call_service",
+            peer = setter_3_id,
+            service = "error"
+        ),
+        failed!(
+            1,
+            "failed result from fallible_call_service",
+            peer = setter_3_id,
+            service = "error"
+        ),
         executed_state::request_sent_by(setter_3_id),
-    ];
+    ]);
     assert_eq!(actual_trace_1, expected_trace);
 
     let setter_3_res_2 = checked_call_vm!(
@@ -91,48 +107,78 @@ fn par_early_exit() {
     let actual_trace_2 = trace_from_result(&setter_3_res_3);
     let actual_trace_3 = trace_from_result(&init_result_2);
 
-    let expected_trace = vec![
-        scalar!("result from unit_call_service"),
+    let expected_trace = ExecutionTrace::from(vec![
+        scalar_unused!("result from unit_call_service", peer = init_peer_id),
         executed_state::par(12, 1),
         executed_state::par(9, 1),
         executed_state::par(7, 1),
         executed_state::par(5, 1),
         executed_state::par(3, 1),
         executed_state::par(1, 1),
-        stream!("1", 1),
-        stream!("2", 2),
-        stream!("1", 1),
-        stream!("success result from fallible_call_service", 0),
-        executed_state::service_failed(1, "failed result from fallible_call_service"),
-        stream!("success result from fallible_call_service", 0),
-        executed_state::service_failed(1, "failed result from fallible_call_service"),
-        executed_state::service_failed(1, "failed result from fallible_call_service"),
+        stream!("1", 1, peer = setter_1_id),
+        stream!("2", 2, peer = setter_2_id),
+        stream!("1", 1, peer = setter_1_id),
+        stream!("success result from fallible_call_service", 0, peer = setter_3_id),
+        failed!(
+            1,
+            "failed result from fallible_call_service",
+            peer = setter_3_id,
+            service = "error"
+        ),
+        stream!("success result from fallible_call_service", 0, peer = setter_3_id),
+        failed!(
+            1,
+            "failed result from fallible_call_service",
+            peer = setter_3_id,
+            service = "error"
+        ),
+        failed!(
+            1,
+            "failed result from fallible_call_service",
+            peer = setter_3_id,
+            service = "error"
+        ),
         executed_state::request_sent_by("setter_3"),
-    ];
+    ]);
     assert_eq!(actual_trace_2, expected_trace);
 
-    let expected_trace = vec![
-        scalar!("result from unit_call_service"),
+    let expected_trace = ExecutionTrace::from(vec![
+        scalar_unused!("result from unit_call_service", peer = init_peer_id),
         executed_state::par(12, 1),
         executed_state::par(9, 1),
         executed_state::par(7, 1),
         executed_state::par(5, 1),
         executed_state::par(3, 1),
         executed_state::par(1, 1),
-        stream!("1", 1),
-        stream!("2", 2),
-        stream!("1", 1),
-        stream!("success result from fallible_call_service", 0),
-        executed_state::service_failed(1, "failed result from fallible_call_service"),
-        stream!("success result from fallible_call_service", 0),
-        executed_state::service_failed(1, "failed result from fallible_call_service"),
-        executed_state::service_failed(1, "failed result from fallible_call_service"),
-        scalar!("result from unit_call_service"),
-    ];
+        stream!("1", 1, peer = setter_1_id),
+        stream!("2", 2, peer = setter_2_id),
+        stream!("1", 1, peer = setter_1_id),
+        stream!("success result from fallible_call_service", 0, peer = setter_3_id),
+        failed!(
+            1,
+            "failed result from fallible_call_service",
+            peer = setter_3_id,
+            service = "error"
+        ),
+        stream!("success result from fallible_call_service", 0, peer = setter_3_id),
+        failed!(
+            1,
+            "failed result from fallible_call_service",
+            peer = setter_3_id,
+            service = "error"
+        ),
+        failed!(
+            1,
+            "failed result from fallible_call_service",
+            peer = setter_3_id,
+            service = "error"
+        ),
+        scalar_unused!("result from unit_call_service", peer = init_peer_id),
+    ]);
     assert_eq!(actual_trace_3, expected_trace);
 
     let mut setter_3_cid_state = ExecutionCidState::new();
-    let setter_3_malicious_trace = vec![
+    let setter_3_malicious_trace = ExecutionTrace::from(vec![
         scalar_tracked!("result from unit_call_service", setter_3_cid_state, peer = init_peer_id),
         executed_state::par(10, 0),
         executed_state::par(9, 0),
@@ -156,9 +202,14 @@ fn par_early_exit() {
             // TODO
             peer = setter_1_id
         ),
-        executed_state::service_failed(1, "failed result from fallible_call_service"),
+        failed!(
+            1,
+            "failed result from fallible_call_service",
+            peer = setter_3_id,
+            service = "error"
+        ),
         executed_state::request_sent_by(setter_3_id),
-    ];
+    ]);
     let setter_3_malicious_data = raw_data_from_trace(setter_3_malicious_trace, setter_3_cid_state);
     let init_result_3 = call_vm!(
         init,
@@ -234,12 +285,13 @@ fn fold_early_exit() {
     );
     let actual_trace = trace_from_result(&last_peer_checker_result);
 
-    let expected_state = scalar!(json!({
+    let error_value = json!({
             "error_code": 10000i64,
             "instruction" : r#"call "error_trigger_id" ("error" "") [] "#,
             "message": r#"Local service error, ret_code is 1, error message is '"failed result from fallible_call_service"'"#,
             "peer_id": "error_trigger_id"
-    }));
+    });
+    let expected_state = scalar_unused!(error_value.clone(), peer = last_peer_checker_id, args = [error_value]);
 
     let bubbled_error_from_stream_1 = actual_trace.len() - 3;
     assert_eq!(&actual_trace[bubbled_error_from_stream_1.into()], &expected_state);
@@ -307,18 +359,18 @@ fn fold_par_early_exit() {
 
     let unit_call_service_result = "result from unit_call_service";
     let expected_trace = vec![
-        scalar!(json!(["a1", "a2"])),
-        scalar!(json!(["b1", "b2"])),
-        scalar!(json!(["c1", "c2"])),
-        scalar!(json!(["d1", "d2"])),
-        stream!("a1", 0),
-        stream!("a2", 1),
-        stream!("b1", 0),
-        stream!("b2", 1),
-        stream!("c1", 0),
-        stream!("c2", 1),
-        stream!("d1", 0),
-        stream!("d2", 1),
+        scalar!(json!(["a1", "a2"]), peer = variables_setter_id, args = ["stream_1"]),
+        scalar!(json!(["b1", "b2"]), peer = variables_setter_id, args = ["stream_2"]),
+        scalar!(json!(["c1", "c2"]), peer = variables_setter_id, args = ["stream_3"]),
+        scalar!(json!(["d1", "d2"]), peer = variables_setter_id, args = ["stream_4"]),
+        stream!("a1", 0, peer = stream_setter_id, args = ["a1"]),
+        stream!("a2", 1, peer = stream_setter_id, args = ["a2"]),
+        stream!("b1", 0, peer = stream_setter_id, args = ["b1"]),
+        stream!("b2", 1, peer = stream_setter_id, args = ["b2"]),
+        stream!("c1", 0, peer = stream_setter_id, args = ["c1"]),
+        stream!("c2", 1, peer = stream_setter_id, args = ["c2"]),
+        stream!("d1", 0, peer = stream_setter_id, args = ["d1"]),
+        stream!("d2", 1, peer = stream_setter_id, args = ["d2"]),
         executed_state::par(69, 1),
         executed_state::fold(vec![
             executed_state::subtrace_lore(4, subtrace_desc(14, 34), subtrace_desc(48, 0)),
@@ -341,19 +393,24 @@ fn fold_par_early_exit() {
             executed_state::subtrace_lore(11, subtrace_desc(23, 2), subtrace_desc(25, 0)),
         ]),
         executed_state::par(1, 0),
-        scalar!(unit_call_service_result),
+        scalar_unused!(unit_call_service_result, peer = fold_executor_id),
         par(1, 0),
-        scalar!(unit_call_service_result),
+        scalar_unused!(unit_call_service_result, peer = fold_executor_id),
         executed_state::par(5, 0),
         executed_state::fold(vec![
             executed_state::subtrace_lore(10, subtrace_desc(27, 2), subtrace_desc(29, 0)),
             executed_state::subtrace_lore(11, subtrace_desc(29, 2), subtrace_desc(31, 0)),
         ]),
         executed_state::par(1, 0),
-        scalar!(unit_call_service_result),
+        scalar_unused!(unit_call_service_result, peer = fold_executor_id),
         par(1, 0),
-        scalar!(unit_call_service_result),
-        executed_state::service_failed(1, "failed result from fallible_call_service"),
+        scalar_unused!(unit_call_service_result, peer = fold_executor_id),
+        failed!(
+            1,
+            "failed result from fallible_call_service",
+            peer = error_trigger_id,
+            service = "error"
+        ),
         executed_state::par(15, 0),
         executed_state::par(13, 1),
         executed_state::fold(vec![

@@ -32,12 +32,23 @@ fn xor() {
     let result = checked_call_vm!(vm, <_>::default(), script, "", "");
 
     let actual_trace = trace_from_result(&result);
-    let expected_call_result = scalar!("success result from fallible_call_service");
+    let expected_call_result = scalar!(
+        "success result from fallible_call_service",
+        peer = local_peer_id,
+        service = "service_id_2",
+        function = "local_fn_name"
+    );
 
     assert_eq!(actual_trace.len(), 2);
     assert_eq!(
         actual_trace[0.into()],
-        executed_state::service_failed(1, "failed result from fallible_call_service")
+        failed!(
+            1,
+            "failed result from fallible_call_service",
+            peer = local_peer_id,
+            service = "service_id_1",
+            function = "local_fn_name"
+        )
     );
     assert_eq!(actual_trace[1.into()], expected_call_result);
 
@@ -133,13 +144,47 @@ fn xor_par() {
     let expected_trace = vec![
         par(3, 3),
         par(1, 1),
-        service_failed(1, failed_result),
-        service_failed(1, failed_result),
+        failed!(
+            1,
+            failed_result,
+            peer = local_peer_id,
+            service = "service_id_1",
+            function = "local_fn_name"
+        ),
+        failed!(
+            1,
+            failed_result,
+            peer = local_peer_id,
+            service = "service_id_1",
+            function = "local_fn_name"
+        ),
         par(1, 1),
-        service_failed(1, failed_result),
-        service_failed(1, failed_result),
-        scalar!(success_result),
-        scalar!(success_result),
+        failed!(
+            1,
+            failed_result,
+            peer = local_peer_id,
+            service = "service_id_1",
+            function = "local_fn_name"
+        ),
+        failed!(
+            1,
+            failed_result,
+            peer = local_peer_id,
+            service = "service_id_1",
+            function = "local_fn_name"
+        ),
+        scalar!(
+            success_result,
+            peer = local_peer_id,
+            service = "service_id_2",
+            function = "local_fn_name"
+        ),
+        scalar!(
+            success_result,
+            peer = local_peer_id,
+            service = "service_id_2",
+            function = "local_fn_name"
+        ),
     ];
 
     assert_eq!(actual_trace, expected_trace);
@@ -167,8 +212,14 @@ fn last_error_with_xor() {
     let result = checked_call_vm!(vm, <_>::default(), script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
-    let expected_state =
-        scalar!(r#"Local service error, ret_code is 1, error message is '"failed result from fallible_call_service"'"#);
+    let msg = r#"Local service error, ret_code is 1, error message is '"failed result from fallible_call_service"'"#;
+    let expected_state = scalar!(
+        msg,
+        peer = local_peer_id,
+        service = "service_id_2",
+        function = "local_fn_name",
+        args = [msg]
+    );
 
     assert_eq!(actual_trace[1.into()], expected_state);
 }

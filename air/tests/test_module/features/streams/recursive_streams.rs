@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use air_interpreter_data::ExecutionTrace;
 use air_test_utils::prelude::*;
 
 use pretty_assertions::assert_eq;
@@ -55,14 +56,14 @@ fn recursive_stream_with_early_exit() {
     let result = checked_call_vm!(vm, <_>::default(), script, "", "");
     let actual_trace = trace_from_result(&result);
     let expected_state = vec![
-        stream!(1, 0),
-        stream!(1, 1),
+        stream!(1, 0, peer = vm_peer_id, function = "stream_value"),
+        stream!(1, 1, peer = vm_peer_id, function = "stream_value"),
         executed_state::fold(vec![
             executed_state::subtrace_lore(0, subtrace_desc(3, 1), subtrace_desc(4, 0)),
             executed_state::subtrace_lore(1, subtrace_desc(4, 1), subtrace_desc(5, 0)),
         ]),
-        scalar!("stop"),
-        scalar!("stop"),
+        scalar!("stop", peer = vm_peer_id, function = "stop"),
+        scalar!("stop", peer = vm_peer_id, function = "stop"),
     ];
 
     assert_eq!(actual_trace, expected_state);
@@ -156,7 +157,7 @@ fn recursive_stream_many_iterations() {
     let result = checked_call_vm!(vm_2, <_>::default(), script, "", result.data);
     let actual_trace = trace_from_result(&result);
     let actual_last_state = actual_trace.last().unwrap();
-    let expected_last_state = scalar!(result_value);
+    let expected_last_state = scalar_unused!(result_value, peer = vm_peer_id_2, args = [result_value]);
     assert_eq!(actual_last_state, &expected_last_state);
 }
 
@@ -216,10 +217,10 @@ fn recursive_stream_join() {
     let result = checked_call_vm!(vm_3, <_>::default(), &script, "", result.data);
     let result = checked_call_vm!(vm_2, <_>::default(), &script, "", result.data);
     let actual_trace = trace_from_result(&result);
-    let expected_trace = vec![
+    let expected_trace = ExecutionTrace::from(vec![
         executed_state::par(1, 1),
-        stream!("non_join", 0),
-        scalar!(""),
+        stream!("non_join", 0, peer = vm_peer_id_1, function = "stream_value"),
+        scalar!("", peer = vm_peer_id_3, function = "stream_value", args = [""]),
         executed_state::fold(vec![
             executed_state::subtrace_lore(1, subtrace_desc(4, 2), subtrace_desc(6, 0)),
             executed_state::subtrace_lore(5, subtrace_desc(6, 2), subtrace_desc(8, 0)),
@@ -227,18 +228,18 @@ fn recursive_stream_join() {
             executed_state::subtrace_lore(9, subtrace_desc(10, 2), subtrace_desc(12, 0)),
             executed_state::subtrace_lore(11, subtrace_desc(12, 2), subtrace_desc(14, 0)),
         ]),
-        scalar!("non_join"),
+        scalar!("non_join", peer = vm_peer_id_1, args = [""]),
         executed_state::ap(1),
-        scalar!("non_join"),
+        scalar!("non_join", peer = vm_peer_id_1, args = [""]),
         executed_state::ap(2),
-        scalar!("non_join"),
+        scalar!("non_join", peer = vm_peer_id_1, args = [""]),
         executed_state::ap(3),
-        scalar!("non_join"),
+        scalar!("non_join", peer = vm_peer_id_1, args = [""]),
         executed_state::ap(4),
-        scalar!("join"),
-        scalar!(""),
-        scalar!(result_value),
-    ];
+        scalar!("join", peer = vm_peer_id_1, args = [""]),
+        scalar_unused!("", peer = vm_peer_id_2, args = [""]),
+        scalar_unused!(result_value, peer = vm_peer_id_2, args = [result_value]),
+    ]);
     assert_eq!(actual_trace, expected_trace);
 }
 
@@ -292,8 +293,8 @@ fn recursive_stream_error_handling() {
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
-        stream!("non_stop", 0),
-        stream!("non_stop", 1),
+        stream!("non_stop", 0, peer = vm_peer_id_1, function = "stream_value"),
+        stream!("non_stop", 1, peer = vm_peer_id_1, function = "stream_value"),
         executed_state::fold(vec![
             subtrace_lore(0, SubTraceDesc::new(3.into(), 2), SubTraceDesc::new(5.into(), 0)),
             subtrace_lore(1, SubTraceDesc::new(5.into(), 2), SubTraceDesc::new(7.into(), 0)),
@@ -301,11 +302,11 @@ fn recursive_stream_error_handling() {
             subtrace_lore(6, SubTraceDesc::new(9.into(), 1), SubTraceDesc::new(10.into(), 0)),
             subtrace_lore(8, SubTraceDesc::new(10.into(), 1), SubTraceDesc::new(11.into(), 0)),
         ]),
-        scalar!("non_stop"),
+        scalar!("non_stop", peer = vm_peer_id_1, function = "stop"),
         executed_state::ap(2),
-        scalar!("non_stop"),
+        scalar!("non_stop", peer = vm_peer_id_1, function = "stop"),
         executed_state::ap(2),
-        scalar!("non_stop"),
+        scalar!("non_stop", peer = vm_peer_id_1, function = "stop"),
         executed_state::ap(3),
         failed!(1, "error", peer = vm_peer_id_1, function = "stop"),
         failed!(1, "error", peer = vm_peer_id_1, function = "stop"),
@@ -372,7 +373,7 @@ fn recursive_stream_inner_fold() {
     let actual_trace = trace_from_result(&result);
 
     let actual_last_state = actual_trace.last().unwrap();
-    let expected_last_state = scalar!(result_value);
+    let expected_last_state = scalar_unused!(result_value, peer = vm_peer_id_2, args = [result_value]);
     assert_eq!(actual_last_state, &expected_last_state);
 }
 
