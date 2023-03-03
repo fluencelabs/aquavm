@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
+use air_interpreter_data::ExecutionTrace;
 use air_test_utils::prelude::*;
+
+use pretty_assertions::assert_eq;
 
 #[test]
 fn join_chat_1() {
@@ -71,7 +74,12 @@ fn join_chat_1() {
 
     let relay_1_actual_trace = trace_from_result(&relay_1_result);
     let relay_1_expected_trace = vec![
-        stream!("result from unit_call_service", 0),
+        stream!(
+            "result from unit_call_service",
+            0,
+            peer = relay_1_peer_id,
+            service = "identity"
+        ),
         executed_state::request_sent_by(relay_1_peer_id),
     ];
 
@@ -82,15 +90,25 @@ fn join_chat_1() {
 
     let remote_actual_trace = trace_from_result(&remote_result);
     let remote_expected_trace = vec![
-        stream!("result from unit_call_service", 0),
+        stream!(
+            "result from unit_call_service",
+            0,
+            peer = relay_1_peer_id,
+            service = "identity"
+        ),
         stream!(
             json!([[client_1_peer_id, relay_1_peer_id], [client_2_peer_id, relay_2_peer_id]]),
-            0
+            0,
+            peer = remote_peer_id,
+            service = "552196ea-b9b2-4761-98d4-8e7dba77fac4",
+            function = "add"
         ),
-        scalar!(json!([
-            [client_1_peer_id, relay_1_peer_id],
-            [client_2_peer_id, relay_2_peer_id]
-        ])),
+        scalar!(
+            json!([[client_1_peer_id, relay_1_peer_id], [client_2_peer_id, relay_2_peer_id]]),
+            peer = remote_peer_id,
+            service = "920e3ba3-cbdf-4ae3-8972-0fa2f31fffd9",
+            function = "get_users"
+        ),
         executed_state::par(1, 2),
         executed_state::request_sent_by(remote_peer_id),
         executed_state::par(1, 0),
@@ -110,22 +128,37 @@ fn join_chat_1() {
 
     let relay_1_actual_trace = trace_from_result(&relay_1_result);
 
-    let relay_1_expected_trace = vec![
-        stream!("result from unit_call_service", 0),
+    let relay_1_expected_trace = ExecutionTrace::from(vec![
+        stream!(
+            "result from unit_call_service",
+            0,
+            peer = relay_1_peer_id,
+            service = "identity"
+        ),
         stream!(
             json!([[client_1_peer_id, relay_1_peer_id], [client_2_peer_id, relay_2_peer_id]]),
-            0
+            0,
+            peer = remote_peer_id,
+            service = "552196ea-b9b2-4761-98d4-8e7dba77fac4",
+            function = "add"
         ),
-        scalar!(json!([
-            [client_1_peer_id, relay_1_peer_id],
-            [client_2_peer_id, relay_2_peer_id]
-        ])),
+        scalar!(
+            json!([[client_1_peer_id, relay_1_peer_id], [client_2_peer_id, relay_2_peer_id]]),
+            peer = remote_peer_id,
+            service = "920e3ba3-cbdf-4ae3-8972-0fa2f31fffd9",
+            function = "get_users"
+        ),
         executed_state::par(2, 2),
-        stream!("result from unit_call_service", 0),
+        stream!(
+            "result from unit_call_service",
+            0,
+            peer = relay_1_peer_id,
+            service = "identity"
+        ),
         executed_state::request_sent_by(relay_1_peer_id),
         executed_state::par(1, 0),
         executed_state::request_sent_by(remote_peer_id),
-    ];
+    ]);
 
     assert_eq!(relay_1_actual_trace, relay_1_expected_trace);
     assert_eq!(relay_1_result.next_peer_pks, vec![String::from(client_1_peer_id)]);
@@ -134,22 +167,43 @@ fn join_chat_1() {
 
     let client_1_actual_trace = trace_from_result(&client_1_result);
 
-    let client_1_expected_trace = vec![
-        stream!("result from unit_call_service", 0),
+    let client_1_expected_trace = ExecutionTrace::from(vec![
+        stream!(
+            "result from unit_call_service",
+            0,
+            peer = relay_1_peer_id,
+            service = "identity"
+        ),
         stream!(
             json!([[client_1_peer_id, relay_1_peer_id], [client_2_peer_id, relay_2_peer_id]]),
-            0
+            0,
+            peer = remote_peer_id,
+            service = "552196ea-b9b2-4761-98d4-8e7dba77fac4",
+            function = "add"
         ),
-        scalar!(json!([
-            [client_1_peer_id, relay_1_peer_id],
-            [client_2_peer_id, relay_2_peer_id]
-        ])),
+        scalar!(
+            json!([[client_1_peer_id, relay_1_peer_id], [client_2_peer_id, relay_2_peer_id]]),
+            peer = remote_peer_id,
+            service = "920e3ba3-cbdf-4ae3-8972-0fa2f31fffd9",
+            function = "get_users"
+        ),
         executed_state::par(2, 2),
-        stream!("result from unit_call_service", 0),
-        stream!("result from unit_call_service", 0),
+        stream!(
+            "result from unit_call_service",
+            0,
+            peer = relay_1_peer_id,
+            service = "identity"
+        ),
+        stream!(
+            "result from unit_call_service",
+            0,
+            peer = client_1_peer_id,
+            service = "fgemb3",
+            function = "add"
+        ),
         executed_state::par(1, 0),
         executed_state::request_sent_by(remote_peer_id),
-    ];
+    ]);
 
     assert_eq!(client_1_actual_trace, client_1_expected_trace);
     assert!(client_1_result.next_peer_pks.is_empty());
@@ -158,22 +212,37 @@ fn join_chat_1() {
 
     let relay_2_actual_trace = trace_from_result(&relay_2_result);
 
-    let relay_2_expected_trace = vec![
-        stream!("result from unit_call_service", 0),
+    let relay_2_expected_trace = ExecutionTrace::from(vec![
+        stream!(
+            "result from unit_call_service",
+            0,
+            peer = relay_1_peer_id,
+            service = "identity"
+        ),
         stream!(
             json!([[client_1_peer_id, relay_1_peer_id], [client_2_peer_id, relay_2_peer_id]]),
-            0
+            0,
+            peer = remote_peer_id,
+            service = "552196ea-b9b2-4761-98d4-8e7dba77fac4",
+            function = "add"
         ),
-        scalar!(json!([
-            [client_1_peer_id, relay_1_peer_id],
-            [client_2_peer_id, relay_2_peer_id]
-        ])),
+        scalar!(
+            json!([[client_1_peer_id, relay_1_peer_id], [client_2_peer_id, relay_2_peer_id]]),
+            peer = remote_peer_id,
+            service = "920e3ba3-cbdf-4ae3-8972-0fa2f31fffd9",
+            function = "get_users"
+        ),
         executed_state::par(1, 3),
         executed_state::request_sent_by(remote_peer_id),
         executed_state::par(2, 0),
-        stream!("result from unit_call_service", 0),
+        stream!(
+            "result from unit_call_service",
+            0,
+            peer = relay_2_peer_id,
+            service = "identity"
+        ),
         executed_state::request_sent_by(relay_2_peer_id),
-    ];
+    ]);
 
     assert_eq!(relay_2_actual_trace, relay_2_expected_trace);
     assert_eq!(relay_2_result.next_peer_pks, vec![String::from(client_2_peer_id)]);
@@ -182,22 +251,43 @@ fn join_chat_1() {
 
     let client_2_actual_trace = trace_from_result(&client_2_result);
 
-    let client_2_expected_trace = vec![
-        stream!("result from unit_call_service", 0),
+    let client_2_expected_trace = ExecutionTrace::from(vec![
+        stream!(
+            "result from unit_call_service",
+            0,
+            peer = relay_1_peer_id,
+            service = "identity"
+        ),
         stream!(
             json!([[client_1_peer_id, relay_1_peer_id], [client_2_peer_id, relay_2_peer_id]]),
-            0
+            0,
+            peer = remote_peer_id,
+            service = "552196ea-b9b2-4761-98d4-8e7dba77fac4",
+            function = "add"
         ),
-        scalar!(json!([
-            [client_1_peer_id, relay_1_peer_id],
-            [client_2_peer_id, relay_2_peer_id]
-        ])),
+        scalar!(
+            json!([[client_1_peer_id, relay_1_peer_id], [client_2_peer_id, relay_2_peer_id]]),
+            peer = remote_peer_id,
+            service = "920e3ba3-cbdf-4ae3-8972-0fa2f31fffd9",
+            function = "get_users"
+        ),
         executed_state::par(1, 3),
         executed_state::request_sent_by(remote_peer_id),
         executed_state::par(2, 0),
-        stream!("result from unit_call_service", 0),
-        stream!("result from unit_call_service", 0),
-    ];
+        stream!(
+            "result from unit_call_service",
+            0,
+            peer = relay_2_peer_id,
+            service = "identity"
+        ),
+        stream!(
+            "result from unit_call_service",
+            0,
+            peer = client_2_peer_id,
+            service = "fgemb3",
+            function = "add"
+        ),
+    ]);
 
     assert_eq!(client_2_actual_trace, client_2_expected_trace);
     assert!(client_2_result.next_peer_pks.is_empty());
@@ -243,16 +333,50 @@ fn join_chat_2() {
 
     let client_1_actual_trace = trace_from_result(&client_1_result);
 
-    let client_1_expected_trace = vec![
-        stream!("result from unit_call_service", 0),
-        scalar!(json!([["A"], ["B"]])),
+    let client_1_expected_trace = ExecutionTrace::from(vec![
+        stream!(
+            "result from unit_call_service",
+            0,
+            peer = relay_1_peer_id,
+            service = "identity"
+        ),
+        scalar!(
+            json!([["A"], ["B"]]),
+            peer = remote_peer_id,
+            service = "920e3ba3-cbdf-4ae3-8972-0fa2f31fffd9",
+            function = "get_users"
+        ),
         executed_state::par(2, 3),
-        stream!("result from unit_call_service", 0),
-        stream!("result from unit_call_service", 0),
+        stream!(
+            "result from unit_call_service",
+            0,
+            peer = relay_1_peer_id,
+            service = "identity"
+        ),
+        stream!(
+            "result from unit_call_service",
+            0,
+            peer = client_peer_id,
+            service = "fgemb3",
+            function = "add",
+            args = [json!(["A"])]
+        ),
         executed_state::par(2, 0),
-        stream!("result from unit_call_service", 0),
-        stream!("result from unit_call_service", 0),
-    ];
+        stream!(
+            "result from unit_call_service",
+            0,
+            peer = relay_1_peer_id,
+            service = "identity"
+        ),
+        stream!(
+            "result from unit_call_service",
+            0,
+            peer = client_peer_id,
+            service = "fgemb3",
+            function = "add",
+            args = [json!(["B"])]
+        ),
+    ]);
 
     assert_eq!(client_1_actual_trace, client_1_expected_trace);
     assert!(client_1_result.next_peer_pks.is_empty());
@@ -305,17 +429,46 @@ fn init_peer_id() {
 
     let client_1_actual_trace = trace_from_result(&client_1_result);
 
-    let client_1_expected_trace = vec![
-        scalar!("result from unit_call_service"),
-        scalar!(json!([[client_1_peer_id], ["B"]])),
+    let client_1_expected_trace = ExecutionTrace::from(vec![
+        scalar_unused!(
+            "result from unit_call_service",
+            peer = relay_1_peer_id,
+            service = "identity"
+        ),
+        scalar!(
+            json!([[client_1_peer_id], ["B"]]),
+            peer = remote_peer_id,
+            service = "920e3ba3-cbdf-4ae3-8972-0fa2f31fffd9",
+            function = "get_users"
+        ),
         executed_state::par(2, 3),
-        scalar!("result from unit_call_service"),
-        scalar!("result from unit_call_service"),
+        scalar_unused!(
+            "result from unit_call_service",
+            peer = relay_1_peer_id,
+            service = "identity"
+        ),
+        scalar_unused!(
+            "result from unit_call_service",
+            peer = client_1_peer_id,
+            service = "fgemb3",
+            function = "add",
+            args = [json!([client_1_peer_id])]
+        ),
         executed_state::par(2, 0),
-        scalar!("result from unit_call_service"),
-        scalar!("result from unit_call_service"),
+        scalar_unused!(
+            "result from unit_call_service",
+            peer = relay_1_peer_id,
+            service = "identity"
+        ),
+        scalar_unused!(
+            "result from unit_call_service",
+            peer = client_1_peer_id,
+            service = "fgemb3",
+            function = "add",
+            args = [json!(["B"])]
+        ),
         executed_state::request_sent_by(client_1_peer_id),
-    ];
+    ]);
 
     assert_eq!(client_1_actual_trace, client_1_expected_trace);
     assert_eq!(client_1_result.next_peer_pks, vec![initiator_peer_id.to_string()]);
@@ -324,17 +477,50 @@ fn init_peer_id() {
 
     let initiator_1_actual_trace = trace_from_result(&initiator_1_result);
 
-    let initiator_1_expected_trace = vec![
-        scalar!("result from unit_call_service"),
-        scalar!(json!([[client_1_peer_id], ["B"]])),
+    let initiator_1_expected_trace = ExecutionTrace::from(vec![
+        scalar_unused!(
+            "result from unit_call_service",
+            peer = relay_1_peer_id,
+            service = "identity"
+        ),
+        scalar!(
+            json!([[client_1_peer_id], ["B"]]),
+            peer = remote_peer_id,
+            service = "920e3ba3-cbdf-4ae3-8972-0fa2f31fffd9",
+            function = "get_users"
+        ),
         executed_state::par(2, 3),
-        scalar!("result from unit_call_service"),
-        scalar!("result from unit_call_service"),
+        scalar_unused!(
+            "result from unit_call_service",
+            peer = relay_1_peer_id,
+            service = "identity"
+        ),
+        scalar_unused!(
+            "result from unit_call_service",
+            peer = client_1_peer_id,
+            service = "fgemb3",
+            function = "add",
+            args = [json!([client_1_peer_id])]
+        ),
         executed_state::par(2, 0),
-        scalar!("result from unit_call_service"),
-        scalar!("result from unit_call_service"),
-        scalar!("result from unit_call_service"),
-    ];
+        scalar_unused!(
+            "result from unit_call_service",
+            peer = relay_1_peer_id,
+            service = "identity"
+        ),
+        scalar_unused!(
+            "result from unit_call_service",
+            peer = client_1_peer_id,
+            service = "fgemb3",
+            function = "add",
+            args = [json!(["B"])]
+        ),
+        scalar_unused!(
+            "result from unit_call_service",
+            peer = initiator_peer_id,
+            service = "identity"
+        ),
+    ]);
 
     assert_eq!(initiator_1_actual_trace, initiator_1_expected_trace);
     assert!(initiator_1_result.next_peer_pks.is_empty());

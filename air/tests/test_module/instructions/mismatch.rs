@@ -43,7 +43,13 @@ fn mismatch_equal() {
     let result = checked_call_vm!(vm, <_>::default(), script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
-    let expected_state = scalar!("result_2");
+    let expected_state = scalar!(
+        "result_2",
+        peer = local_peer_id,
+        service = "service_id_2",
+        function = "local_fn_name",
+        args = ["result_2"]
+    );
 
     assert_eq!(actual_trace.len(), 3);
     assert_eq!(actual_trace[2.into()], expected_state);
@@ -75,7 +81,13 @@ fn mismatch_not_equal() {
     let result = checked_call_vm!(vm, <_>::default(), script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
-    let expected_state = scalar!("result_1");
+    let expected_state = scalar!(
+        "result_1",
+        peer = local_peer_id,
+        service = "service_id_2",
+        function = "local_fn_name",
+        args = ["result_1"]
+    );
 
     assert_eq!(actual_trace.len(), 3);
     assert_eq!(actual_trace[2.into()], expected_state);
@@ -104,7 +116,13 @@ fn mismatch_with_string() {
     let result = checked_call_vm!(vm, <_>::default(), script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
-    let expected_state = scalar!("result_2");
+    let expected_state = scalar!(
+        "result_2",
+        peer = local_peer_id,
+        service = "service_id_2",
+        function = "local_fn_name",
+        args = ["result_2"]
+    );
 
     assert_eq!(actual_trace.len(), 2);
     assert_eq!(actual_trace[1.into()], expected_state);
