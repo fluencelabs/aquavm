@@ -66,7 +66,7 @@ jobs:
       - aquavm
       - rust-peer
 
-    uses: fluencelabs/js-client/.github/workflows/tests.yml@FLU-274-hotfix
+    uses: fluencelabs/js-client/.github/workflows/tests.yml@FLU-274-hotix
     with:
       avm-version: "${{ needs.aquavm.outputs.avm-version }}"
       rust-peer-image: "${{ needs.rust-peer.outputs.rust-peer-image }}"
@@ -75,7 +75,7 @@ jobs:
     needs:
       - aquavm
 
-    uses: fluencelabs/js-client/.github/workflows/snapshot.yml@FLU-274-hotfix
+    uses: fluencelabs/js-client/.github/workflows/snapshot.yml@FLU-274-hofix
     with:
       avm-version: "${{ needs.aquavm.outputs.avm-version }}"
 
