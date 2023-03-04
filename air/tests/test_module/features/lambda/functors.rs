@@ -40,7 +40,7 @@ fn length_functor_for_array_scalar() {
 
     let expected_trace = vec![
         scalar!(json!([1, 1, 1]), peer = init_peer_id, service = "..0"),
-        scalar_unused!(3, peer = init_peer_id, args = vec![3], service = "..1"),
+        unused!(3, peer = init_peer_id, args = vec![3], service = "..1"),
     ];
     assert_eq!(actual_trace, expected_trace);
 }
@@ -105,7 +105,7 @@ fn length_functor_for_stream() {
                 },
             ]
         })),
-        scalar_unused!(2, peer = init_peer_id, service = "..0", args = vec![2]),
+        unused!(2, peer = init_peer_id, service = "..0", args = vec![2]),
     ];
     assert_eq!(actual_trace, expected_trace);
 }
@@ -133,7 +133,7 @@ fn length_functor_for_empty_stream() {
             json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": "init_peer_id", "service_id": ""},
                 "values": []} ),
         ),
-        scalar_unused!(0, peer = init_peer_id, service = "..0", args = vec![0]),
+        unused!(0, peer = init_peer_id, service = "..0", args = vec![0]),
     ];
     assert_eq!(actual_trace, expected_trace);
 }
@@ -168,7 +168,7 @@ fn length_functor_for_canon_stream() {
                            {"result": 1, "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "init_peer_id", "service_id": ""}, "trace_pos": 1}
                 ]} ),
         ),
-        scalar_unused!(2, peer = init_peer_id, service = "..0", args = vec![2]),
+        unused!(2, peer = init_peer_id, service = "..0", args = vec![2]),
     ];
     assert_eq!(actual_trace, expected_trace);
 }
@@ -195,7 +195,7 @@ fn length_functor_for_empty_canon_stream() {
         executed_state::canon(
             json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": "init_peer_id", "service_id": ""}, "values": []} ),
         ),
-        scalar_unused!(0, peer = init_peer_id, service = "..0", args = vec![0]),
+        unused!(0, peer = init_peer_id, service = "..0", args = vec![0]),
     ];
     assert_eq!(actual_trace, expected_trace);
 }
@@ -235,7 +235,7 @@ fn functor_dont_influence_tetraplet() {
 
     let expected_trace = vec![
         scalar!(set_variable_peer_result, peer = set_variable_peer_id),
-        scalar_unused!(3, peer = tetraplet_catcher_peer_id, args = vec![3]),
+        unused!(3, peer = tetraplet_catcher_peer_id, args = vec![3]),
     ];
     assert_eq!(actual_trace, expected_trace);
 }

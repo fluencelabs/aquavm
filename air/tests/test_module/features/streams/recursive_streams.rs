@@ -157,7 +157,7 @@ fn recursive_stream_many_iterations() {
     let result = checked_call_vm!(vm_2, <_>::default(), script, "", result.data);
     let actual_trace = trace_from_result(&result);
     let actual_last_state = actual_trace.last().unwrap();
-    let expected_last_state = scalar_unused!(result_value, peer = vm_peer_id_2, args = [result_value]);
+    let expected_last_state = unused!(result_value, peer = vm_peer_id_2, args = [result_value]);
     assert_eq!(actual_last_state, &expected_last_state);
 }
 
@@ -237,8 +237,8 @@ fn recursive_stream_join() {
         scalar!("non_join", peer = vm_peer_id_1, args = [""]),
         executed_state::ap(4),
         scalar!("join", peer = vm_peer_id_1, args = [""]),
-        scalar_unused!("", peer = vm_peer_id_2, args = [""]),
-        scalar_unused!(result_value, peer = vm_peer_id_2, args = [result_value]),
+        unused!("", peer = vm_peer_id_2, args = [""]),
+        unused!(result_value, peer = vm_peer_id_2, args = [result_value]),
     ]);
     assert_eq!(actual_trace, expected_trace);
 }
@@ -373,7 +373,7 @@ fn recursive_stream_inner_fold() {
     let actual_trace = trace_from_result(&result);
 
     let actual_last_state = actual_trace.last().unwrap();
-    let expected_last_state = scalar_unused!(result_value, peer = vm_peer_id_2, args = [result_value]);
+    let expected_last_state = unused!(result_value, peer = vm_peer_id_2, args = [result_value]);
     assert_eq!(actual_last_state, &expected_last_state);
 }
 

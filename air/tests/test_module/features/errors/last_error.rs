@@ -202,10 +202,7 @@ fn variable_names_shown_in_error() {
     let trace = trace_from_result(&result);
 
     let msg = "call cannot resolve non-String triplet variable part `-relay-` with value '1'";
-    assert_eq!(
-        trace[1.into()],
-        scalar_unused!(msg, peer = echo_vm_peer_id, args = vec![msg])
-    );
+    assert_eq!(trace[1.into()], unused!(msg, peer = echo_vm_peer_id, args = vec![msg]));
 }
 
 #[test]

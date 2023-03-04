@@ -97,7 +97,7 @@ fn issue_221() {
         ]),
         executed_state::par(3, 0),
         executed_state::par(1, 1),
-        scalar_unused!(
+        unused!(
             peer_1_value,
             peer = join_1_id,
             service = "..2",
@@ -106,7 +106,7 @@ fn issue_221() {
         executed_state::request_sent_by(peer_1_id),
         executed_state::par(3, 0),
         executed_state::par(1, 1),
-        scalar_unused!(
+        unused!(
             peer_2_value,
             peer = join_1_id,
             service = "..2",

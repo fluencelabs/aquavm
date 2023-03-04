@@ -430,7 +430,7 @@ fn init_peer_id() {
     let client_1_actual_trace = trace_from_result(&client_1_result);
 
     let client_1_expected_trace = ExecutionTrace::from(vec![
-        scalar_unused!(
+        unused!(
             "result from unit_call_service",
             peer = relay_1_peer_id,
             service = "identity"
@@ -442,12 +442,12 @@ fn init_peer_id() {
             function = "get_users"
         ),
         executed_state::par(2, 3),
-        scalar_unused!(
+        unused!(
             "result from unit_call_service",
             peer = relay_1_peer_id,
             service = "identity"
         ),
-        scalar_unused!(
+        unused!(
             "result from unit_call_service",
             peer = client_1_peer_id,
             service = "fgemb3",
@@ -455,12 +455,12 @@ fn init_peer_id() {
             args = [json!([client_1_peer_id])]
         ),
         executed_state::par(2, 0),
-        scalar_unused!(
+        unused!(
             "result from unit_call_service",
             peer = relay_1_peer_id,
             service = "identity"
         ),
-        scalar_unused!(
+        unused!(
             "result from unit_call_service",
             peer = client_1_peer_id,
             service = "fgemb3",
@@ -478,7 +478,7 @@ fn init_peer_id() {
     let initiator_1_actual_trace = trace_from_result(&initiator_1_result);
 
     let initiator_1_expected_trace = ExecutionTrace::from(vec![
-        scalar_unused!(
+        unused!(
             "result from unit_call_service",
             peer = relay_1_peer_id,
             service = "identity"
@@ -490,12 +490,12 @@ fn init_peer_id() {
             function = "get_users"
         ),
         executed_state::par(2, 3),
-        scalar_unused!(
+        unused!(
             "result from unit_call_service",
             peer = relay_1_peer_id,
             service = "identity"
         ),
-        scalar_unused!(
+        unused!(
             "result from unit_call_service",
             peer = client_1_peer_id,
             service = "fgemb3",
@@ -503,19 +503,19 @@ fn init_peer_id() {
             args = [json!([client_1_peer_id])]
         ),
         executed_state::par(2, 0),
-        scalar_unused!(
+        unused!(
             "result from unit_call_service",
             peer = relay_1_peer_id,
             service = "identity"
         ),
-        scalar_unused!(
+        unused!(
             "result from unit_call_service",
             peer = client_1_peer_id,
             service = "fgemb3",
             function = "add",
             args = [json!(["B"])]
         ),
-        scalar_unused!(
+        unused!(
             "result from unit_call_service",
             peer = initiator_peer_id,
             service = "identity"

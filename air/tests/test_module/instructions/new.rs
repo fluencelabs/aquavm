@@ -130,7 +130,7 @@ fn several_restrictions() {
 
             ]
         })),
-        scalar_unused!(json!([]), peer = vm_peer_id, args = [json!([])]),
+        unused!(json!([]), peer = vm_peer_id, args = [json!([])]),
     ]);
     assert_eq!(actual_trace, expected_trace);
 }
@@ -217,7 +217,7 @@ fn check_influence_to_not_restricted() {
                 ]
             }
         )),
-        scalar_unused!(
+        unused!(
             json!(["push more"]),
             peer = vm_peer_id,
             service = "callbackSrv",
@@ -234,7 +234,7 @@ fn check_influence_to_not_restricted() {
                 }
             ]
         })),
-        scalar_unused!(
+        unused!(
             json!(["push more"]),
             peer = vm_peer_id,
             service = "callbackSrv",
@@ -246,14 +246,14 @@ fn check_influence_to_not_restricted() {
             "values": [
             ]
         })),
-        scalar_unused!(
+        unused!(
             json!([]),
             peer = vm_peer_id,
             service = "callbackSrv",
             function = "response",
             args = [json!([])]
         ),
-        scalar_unused!(
+        unused!(
             json!(["more"]),
             peer = vm_peer_id,
             service = "callbackSrv",
@@ -481,10 +481,10 @@ fn new_with_scalars_with_errors() {
     let expected_trace = ExecutionTrace::from(vec![
         scalar!(1, peer = set_variable_peer_id, args = ["global"]),
         scalar!(2, peer = set_variable_peer_id, args = ["scoped"]),
-        scalar_unused!(2, peer = variable_receiver_peer_id, args = [2]),
+        unused!(2, peer = variable_receiver_peer_id, args = [2]),
         failed!(1, msg, peer = fallible_peer_id, service = fallible_service_id),
-        scalar_unused!(1, peer = variable_receiver_peer_id, args = [1]),
-        scalar_unused!(1, peer = variable_receiver_peer_id, args = [1]),
+        unused!(1, peer = variable_receiver_peer_id, args = [1]),
+        unused!(1, peer = variable_receiver_peer_id, args = [1]),
     ]);
     assert_eq!(actual_trace, expected_trace);
 }
@@ -525,8 +525,8 @@ fn new_with_global_scalars() {
     let expected_trace = vec![
         scalar!(1, peer = set_variable_peer_id, args = ["global"]),
         scalar!(2, peer = set_variable_peer_id, args = ["scoped"]),
-        scalar_unused!(2, peer = variable_receiver_peer_id, args = [2]),
-        scalar_unused!(1, peer = variable_receiver_peer_id, args = [1]),
+        unused!(2, peer = variable_receiver_peer_id, args = [2]),
+        unused!(1, peer = variable_receiver_peer_id, args = [1]),
     ];
     assert_eq!(actual_trace, expected_trace);
 }
@@ -606,20 +606,20 @@ fn new_with_scalars_in_lfold_with_outside_next() {
     let expected_trace = ExecutionTrace::from(vec![
         scalar!(json!([1, 2, 3]), peer = test_peer_id, args = [GET_ITERABLE_ACTION_NAME]),
         scalar!(0, peer = test_peer_id, args = [json!(OUTSIDE_ACTION_NAME)]),
-        scalar_unused!(0, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(0)]),
+        unused!(0, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(0)]),
         scalar!(10, peer = test_peer_id, args = [INSIDE_ACTION_NAME]),
-        scalar_unused!(10, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(10)]),
+        unused!(10, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(10)]),
         scalar!(1, peer = test_peer_id, args = [json!(OUTSIDE_ACTION_NAME)]),
-        scalar_unused!(1, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(1)]),
+        unused!(1, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(1)]),
         scalar!(11, peer = test_peer_id, args = [INSIDE_ACTION_NAME]),
-        scalar_unused!(11, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(11)]),
+        unused!(11, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(11)]),
         scalar!(2, peer = test_peer_id, args = [json!(OUTSIDE_ACTION_NAME)]),
-        scalar_unused!(2, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(2)]),
+        unused!(2, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(2)]),
         scalar!(12, peer = test_peer_id, args = [INSIDE_ACTION_NAME]),
-        scalar_unused!(12, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(12)]),
-        scalar_unused!(2, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(2)]),
-        scalar_unused!(1, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(1)]),
-        scalar_unused!(0, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(0)]),
+        unused!(12, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(12)]),
+        unused!(2, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(2)]),
+        unused!(1, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(1)]),
+        unused!(0, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(0)]),
     ]);
     assert_eq!(actual_trace, expected_trace);
 }
@@ -663,20 +663,20 @@ fn new_with_scalars_in_rfold_with_outside_next() {
     let expected_trace = ExecutionTrace::from(vec![
         scalar!(json!([1, 2, 3]), peer = test_peer_id, args = [GET_ITERABLE_ACTION_NAME]),
         scalar!(0, peer = test_peer_id, args = [OUTSIDE_ACTION_NAME]),
-        scalar_unused!(0, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(0)]),
+        unused!(0, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(0)]),
         scalar!(10, peer = test_peer_id, args = [json!(INSIDE_ACTION_NAME)]),
-        scalar_unused!(10, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(10)]),
-        scalar_unused!(0, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(0)]),
+        unused!(10, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(10)]),
+        unused!(0, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(0)]),
         scalar!(1, peer = test_peer_id, args = [OUTSIDE_ACTION_NAME]),
-        scalar_unused!(1, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(1)]),
+        unused!(1, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(1)]),
         scalar!(11, peer = test_peer_id, args = [json!(INSIDE_ACTION_NAME)]),
-        scalar_unused!(11, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(11)]),
-        scalar_unused!(1, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(1)]),
+        unused!(11, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(11)]),
+        unused!(1, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(1)]),
         scalar!(2, peer = test_peer_id, args = [OUTSIDE_ACTION_NAME]),
-        scalar_unused!(2, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(2)]),
+        unused!(2, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(2)]),
         scalar!(12, peer = test_peer_id, args = [json!(INSIDE_ACTION_NAME)]),
-        scalar_unused!(12, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(12)]),
-        scalar_unused!(2, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(2)]),
+        unused!(12, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(12)]),
+        unused!(2, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(2)]),
     ]);
     assert_eq!(actual_trace, expected_trace);
 }
@@ -723,23 +723,23 @@ fn new_with_scalars_in_fold_with_inside_next() {
     let expected_trace = ExecutionTrace::from(vec![
         scalar!(json!([1, 2, 3]), peer = test_peer_id, args = [GET_ITERABLE_ACTION_NAME]),
         scalar!(0, peer = test_peer_id, args = [OUTSIDE_ACTION_NAME]),
-        scalar_unused!(0, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(0)]),
+        unused!(0, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(0)]),
         scalar!(10, peer = test_peer_id, args = [json!(INSIDE_ACTION_NAME)]),
-        scalar_unused!(10, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(10)]),
+        unused!(10, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(10)]),
         scalar!(1, peer = test_peer_id, args = [OUTSIDE_ACTION_NAME]),
-        scalar_unused!(1, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(1)]),
+        unused!(1, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(1)]),
         scalar!(11, peer = test_peer_id, args = [json!(INSIDE_ACTION_NAME)]),
-        scalar_unused!(11, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(11)]),
+        unused!(11, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(11)]),
         scalar!(2, peer = test_peer_id, args = [OUTSIDE_ACTION_NAME]),
-        scalar_unused!(2, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(2)]),
+        unused!(2, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(2)]),
         scalar!(12, peer = test_peer_id, args = [json!(INSIDE_ACTION_NAME)]),
-        scalar_unused!(12, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(12)]),
-        scalar_unused!(12, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(12)]),
-        scalar_unused!(2, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(2)]),
-        scalar_unused!(11, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(11)]),
-        scalar_unused!(1, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(1)]),
-        scalar_unused!(10, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(10)]),
-        scalar_unused!(0, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(0)]),
+        unused!(12, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(12)]),
+        unused!(12, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(12)]),
+        unused!(2, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(2)]),
+        unused!(11, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(11)]),
+        unused!(1, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(1)]),
+        unused!(10, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(10)]),
+        unused!(0, peer = test_peer_id, args = [json!(OUTPUT_ACTION_NAME), json!(0)]),
     ]);
     assert_eq!(actual_trace, expected_trace);
 }

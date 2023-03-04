@@ -65,8 +65,8 @@ fn scalars_scope() {
         scalar!(peers, peer = set_array_0_peer_id),
         executed_state::par(1, 0),
         scalar!(array_1_content, peer = peer_1_id),
-        scalar_unused!("result from unit_call_service", peer = some_peer_id),
-        scalar_unused!("result from unit_call_service", peer = some_peer_id),
+        unused!("result from unit_call_service", peer = some_peer_id),
+        unused!("result from unit_call_service", peer = some_peer_id),
         executed_state::par(1, 0),
         executed_state::request_sent_by(some_peer_id),
     ];
@@ -117,9 +117,9 @@ fn before_after_of_next() {
         scalar!(0, peer = vm_peer_0_id),
         scalar!(1, peer = vm_peer_0_id),
         scalar!(2, peer = vm_peer_0_id),
-        scalar_unused!(2, peer = vm_peer_1_id, args = vec![2]),
-        scalar_unused!(1, peer = vm_peer_1_id, args = vec![1]),
-        scalar_unused!(0, peer = vm_peer_1_id, args = vec![0]),
+        unused!(2, peer = vm_peer_1_id, args = vec![2]),
+        unused!(1, peer = vm_peer_1_id, args = vec![1]),
+        unused!(0, peer = vm_peer_1_id, args = vec![0]),
     ];
     assert_eq!(actual_trace, expected_trace);
 }
@@ -198,17 +198,17 @@ fn local_and_global_scalars() {
         scalar!(0, peer = local_setter_peer_id),
         scalar!(1, peer = local_setter_peer_id),
         scalar!(2, peer = local_setter_peer_id),
-        scalar_unused!(2, peer = local_consumer_peer_id, args = vec![2]),
+        unused!(2, peer = local_consumer_peer_id, args = vec![2]),
         scalar!(3, peer = local_setter_peer_id),
-        scalar_unused!(3, peer = local_consumer_peer_id, args = vec![3]),
-        scalar_unused!(1, peer = local_consumer_peer_id, args = vec![1]),
+        unused!(3, peer = local_consumer_peer_id, args = vec![3]),
+        unused!(1, peer = local_consumer_peer_id, args = vec![1]),
         scalar!(4, peer = local_setter_peer_id),
         scalar!(5, peer = local_setter_peer_id),
-        scalar_unused!(5, peer = local_consumer_peer_id, args = vec![5]),
+        unused!(5, peer = local_consumer_peer_id, args = vec![5]),
         scalar!(6, peer = local_setter_peer_id),
-        scalar_unused!(6, peer = local_consumer_peer_id, args = vec![6]),
-        scalar_unused!(4, peer = local_consumer_peer_id, args = vec![4]),
-        scalar_unused!(0, peer = local_consumer_peer_id, args = vec![0]),
+        unused!(6, peer = local_consumer_peer_id, args = vec![6]),
+        unused!(4, peer = local_consumer_peer_id, args = vec![4]),
+        unused!(0, peer = local_consumer_peer_id, args = vec![0]),
     ];
     assert_eq!(actual_trace, expected_trace);
 }

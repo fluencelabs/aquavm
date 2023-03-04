@@ -49,7 +49,7 @@ fn par_early_exit() {
     let actual_trace_1 = trace_from_result(&setter_3_res_1);
 
     let expected_trace = ExecutionTrace::from(vec![
-        scalar_unused!("result from unit_call_service", peer = init_peer_id),
+        unused!("result from unit_call_service", peer = init_peer_id),
         executed_state::par(12, 1),
         executed_state::par(9, 1),
         executed_state::par(7, 1),
@@ -108,7 +108,7 @@ fn par_early_exit() {
     let actual_trace_3 = trace_from_result(&init_result_2);
 
     let expected_trace = ExecutionTrace::from(vec![
-        scalar_unused!("result from unit_call_service", peer = init_peer_id),
+        unused!("result from unit_call_service", peer = init_peer_id),
         executed_state::par(12, 1),
         executed_state::par(9, 1),
         executed_state::par(7, 1),
@@ -143,7 +143,7 @@ fn par_early_exit() {
     assert_eq!(actual_trace_2, expected_trace);
 
     let expected_trace = ExecutionTrace::from(vec![
-        scalar_unused!("result from unit_call_service", peer = init_peer_id),
+        unused!("result from unit_call_service", peer = init_peer_id),
         executed_state::par(12, 1),
         executed_state::par(9, 1),
         executed_state::par(7, 1),
@@ -173,7 +173,7 @@ fn par_early_exit() {
             peer = setter_3_id,
             service = "error"
         ),
-        scalar_unused!("result from unit_call_service", peer = init_peer_id),
+        unused!("result from unit_call_service", peer = init_peer_id),
     ]);
     assert_eq!(actual_trace_3, expected_trace);
 
@@ -291,7 +291,7 @@ fn fold_early_exit() {
             "message": r#"Local service error, ret_code is 1, error message is '"failed result from fallible_call_service"'"#,
             "peer_id": "error_trigger_id"
     });
-    let expected_state = scalar_unused!(error_value.clone(), peer = last_peer_checker_id, args = [error_value]);
+    let expected_state = unused!(error_value.clone(), peer = last_peer_checker_id, args = [error_value]);
 
     let bubbled_error_from_stream_1 = actual_trace.len() - 3;
     assert_eq!(&actual_trace[bubbled_error_from_stream_1.into()], &expected_state);
@@ -393,18 +393,18 @@ fn fold_par_early_exit() {
             executed_state::subtrace_lore(11, subtrace_desc(23, 2), subtrace_desc(25, 0)),
         ]),
         executed_state::par(1, 0),
-        scalar_unused!(unit_call_service_result, peer = fold_executor_id),
+        unused!(unit_call_service_result, peer = fold_executor_id),
         par(1, 0),
-        scalar_unused!(unit_call_service_result, peer = fold_executor_id),
+        unused!(unit_call_service_result, peer = fold_executor_id),
         executed_state::par(5, 0),
         executed_state::fold(vec![
             executed_state::subtrace_lore(10, subtrace_desc(27, 2), subtrace_desc(29, 0)),
             executed_state::subtrace_lore(11, subtrace_desc(29, 2), subtrace_desc(31, 0)),
         ]),
         executed_state::par(1, 0),
-        scalar_unused!(unit_call_service_result, peer = fold_executor_id),
+        unused!(unit_call_service_result, peer = fold_executor_id),
         par(1, 0),
-        scalar_unused!(unit_call_service_result, peer = fold_executor_id),
+        unused!(unit_call_service_result, peer = fold_executor_id),
         failed!(
             1,
             "failed result from fallible_call_service",

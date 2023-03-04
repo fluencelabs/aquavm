@@ -213,7 +213,7 @@ macro_rules! scalar {
 }
 
 #[macro_export]
-macro_rules! scalar_unused {
+macro_rules! unused {
     ($value:expr) => {
         _trace_value_body!($value).scalar_unused()
     };
@@ -448,7 +448,7 @@ mod tests {
             scalar_unused_tracked!(42, store),
             scalar_unused_tracked!(42, store)
         );
-        assert_eq!(scalar_unused!(42), scalar_unused_tracked!(42, store));
+        assert_eq!(unused!(42), scalar_unused_tracked!(42, store));
         assert_eq!(
             scalar_unused_tracked!("test", store),
             scalar_unused_tracked!("test", store)
@@ -462,7 +462,7 @@ mod tests {
             scalar_unused_tracked!(42, store, peer = "test", args = vec![json!(1)]),
         );
         assert_eq!(
-            scalar_unused!(42, peer = "test", args = vec![json!(1)]),
+            unused!(42, peer = "test", args = vec![json!(1)]),
             scalar_unused_tracked!(42, store, peer = "test", args = vec![json!(1)]),
         );
     }

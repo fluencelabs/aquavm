@@ -32,7 +32,7 @@ fn empty_array() {
 
     let expected_trace = vec![
         scalar!(json!([]), peer = vm_peer_id, args = vec![json!([])]),
-        scalar_unused!(json!([]), peer = vm_peer_id, args = vec![json!([])]),
+        unused!(json!([]), peer = vm_peer_id, args = vec![json!([])]),
     ];
 
     assert_eq!(actual_trace, expected_trace);

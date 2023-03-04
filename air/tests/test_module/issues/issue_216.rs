@@ -50,7 +50,7 @@ fn issue_216() {
 
     let expected_trace = vec![
         scalar!(json!([]), peer = some_peer_id, function = "value"),
-        scalar_unused!(error_message, peer = client_id, args = vec![error_message]),
+        unused!(error_message, peer = client_id, args = vec![error_message]),
     ];
     assert_eq!(actual_trace, expected_trace);
 }

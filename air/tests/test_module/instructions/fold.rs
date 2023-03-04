@@ -350,14 +350,14 @@ fn shadowing() {
         scalar!(json!(["1", "2"]), peer = "set_variable"),
         scalar!(json!(["1", "2"]), peer = "set_variable"),
         scalar!("1", peer = "A", args = ["1"]),
-        scalar_unused!("1", peer = "B", args = ["1"]),
+        unused!("1", peer = "B", args = ["1"]),
         scalar!("1", peer = "A", args = ["1"]),
-        scalar_unused!("1", peer = "B", args = ["1"]),
+        unused!("1", peer = "B", args = ["1"]),
         par(1, 1),
         scalar!("1", peer = "A", args = ["1"]),
-        scalar_unused!("1", peer = "B", args = ["1"]),
+        unused!("1", peer = "B", args = ["1"]),
         scalar!("2", peer = "A", args = ["2"]),
-        scalar_unused!("2", peer = "B", args = ["2"]),
+        unused!("2", peer = "B", args = ["2"]),
         request_sent_by("B"),
     ]);
 
@@ -418,10 +418,10 @@ fn shadowing_scope() {
         scalar!(vec!["1", "2"], peer = "set_variable"),
         scalar!("value", peer = "A", args = ["value"]),
         scalar!("1", peer = "A", args = ["1"]),
-        scalar_unused!("1", peer = "B", args = ["1"]),
+        unused!("1", peer = "B", args = ["1"]),
         scalar!("1", peer = "A", args = ["1"]),
-        scalar_unused!("1", peer = "B", args = ["1"]),
-        scalar_unused!("value", peer = "A", args = ["value"]),
+        unused!("1", peer = "B", args = ["1"]),
+        unused!("value", peer = "A", args = ["value"]),
         scalar!("value", peer = "A", args = ["value"]),
         scalar!("2", peer = "A", args = ["2"]),
         request_sent_by("A"),
@@ -550,7 +550,7 @@ fn fold_stream_seq_next_completes_with_null() {
             SubTraceDesc::new(3.into(), 0),
         )]),
         stream!(1, 0, peer = vm_peer_id, args = [1]),
-        scalar_unused!(1, peer = vm_peer_id),
+        unused!(1, peer = vm_peer_id),
     ];
     assert_eq!(actual_trace, expected_trace);
 }
@@ -592,7 +592,7 @@ fn fold_scalar_seq_next_completes_with_null() {
         executed_state::canon(
             json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_peer_id", "service_id": ""}, "values": []}),
         ),
-        scalar_unused!(service_result, peer = vm_peer_id, args = [json!([])]),
+        unused!(service_result, peer = vm_peer_id, args = [json!([])]),
     ]);
     assert_eq!(actual_trace, expected_trace);
 }
@@ -672,7 +672,7 @@ fn fold_stream_seq_next_saves_call_result() {
         stream!(1, 0, peer = vm_peer_id, args = [1]),
         stream!(2, 1, peer = vm_peer_id, args = [2]),
         stream!(2, 2, peer = vm_peer_id, args = [2]),
-        scalar_unused!(0, peer = vm_peer_id, args = [0]),
+        unused!(0, peer = vm_peer_id, args = [0]),
     ];
     assert_eq!(actual_trace, expected_trace);
 }

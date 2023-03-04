@@ -383,13 +383,13 @@ mod tests {
                 &*trace,
                 vec![
                     scalar!(json!(["peer2", "peer3"]), peer = "peer1", service = "..0"),
-                    scalar_unused!(
+                    unused!(
                         json!(42),
                         peer = "peer2",
                         service = "..1",
                         args = vec!["peer2"]
                     ),
-                    scalar_unused!(
+                    unused!(
                         json!(43),
                         peer = "peer3",
                         service = "..1",
@@ -588,7 +588,7 @@ mod tests {
 
         assert_eq!(
             trace_from_result(&trace1),
-            ExecutionTrace::from(vec![scalar_unused!(
+            ExecutionTrace::from(vec![unused!(
                 42,
                 peer = peer,
                 service = "service..0",
@@ -597,7 +597,7 @@ mod tests {
         );
         assert_eq!(
             trace_from_result(&trace2),
-            ExecutionTrace::from(vec![scalar_unused!(
+            ExecutionTrace::from(vec![unused!(
                 24,
                 peer = peer,
                 service = "service..1",
@@ -644,7 +644,7 @@ mod tests {
 
         assert_eq!(
             trace_from_result(&trace1),
-            ExecutionTrace::from(vec![scalar_unused!(
+            ExecutionTrace::from(vec![unused!(
                 42,
                 peer = peer,
                 service = "service",
@@ -653,7 +653,7 @@ mod tests {
         );
         assert_eq!(
             trace_from_result(&trace2),
-            ExecutionTrace::from(vec![scalar_unused!(
+            ExecutionTrace::from(vec![unused!(
                 24,
                 peer = peer,
                 service = "service",

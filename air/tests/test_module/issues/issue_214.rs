@@ -64,7 +64,7 @@ fn issue_214() {
     let expected_trace = ExecutionTrace::from(vec![
         scalar!(relay_id, peer = client_id, service = "getDataSrv", function = "-relay-"),
         scalar!(scalar, peer = client_id, service = "getDataSrv", function = "s"),
-        scalar_unused!(
+        unused!(
             error_handler,
             peer = client_id,
             service = "errorHandlingSrv",

@@ -131,7 +131,7 @@ fn scopes_check_that_scalar_not_overwritten_by_fold_end() {
             peer = fallible_peer_id,
             service = "fail"
         ),
-        scalar_unused!(
+        unused!(
             json!([1, 2, 3]),
             peer = variable_receiver_peer_id,
             args = vec![json!([1, 2, 3])]

@@ -108,7 +108,7 @@ fn issue_211() {
                 },
             ]
         })),
-        scalar_unused!(
+        unused!(
             "expected result",
             peer = peer_1_id,
             service = "op..2",

@@ -63,8 +63,8 @@ fn issue_241() {
         scalar!(peers, peer = set_array_0_peer_id),
         executed_state::par(1, 4),
         scalar!(array_1_content, peer = peer_1_id),
-        scalar_unused!("result from unit_call_service", peer = some_peer_id),
-        scalar_unused!("result from unit_call_service", peer = some_peer_id),
+        unused!("result from unit_call_service", peer = some_peer_id),
+        unused!("result from unit_call_service", peer = some_peer_id),
         executed_state::par(1, 0),
         // before 0.22.0 scalar!s wasn't clear after end of a fold block and here was more states
         // from the second iteration of fold over array-1

@@ -82,7 +82,7 @@ fn stream_merging_v0() {
 
     let unit_call_service_result = "result from unit_call_service";
     let expected_trace_1 = ExecutionTrace::from(vec![
-        scalar_unused!(unit_call_service_result, peer = initiator_id),
+        unused!(unit_call_service_result, peer = initiator_id),
         executed_state::par(11, 1),
         executed_state::par(9, 1),
         executed_state::par(7, 1),
@@ -101,12 +101,12 @@ fn stream_merging_v0() {
             executed_state::subtrace_lore(9, subtrace_desc(17, 2), subtrace_desc(21, 0)),
             executed_state::subtrace_lore(12, subtrace_desc(19, 2), subtrace_desc(21, 0)),
         ]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
     ]);
     assert_eq!(actual_trace_1, expected_trace_1);
 
@@ -120,7 +120,7 @@ fn stream_merging_v0() {
     let actual_trace_2 = trace_from_result(&executor_result_2);
 
     let expected_trace_2 = vec![
-        scalar_unused!(unit_call_service_result, peer = initiator_id),
+        unused!(unit_call_service_result, peer = initiator_id),
         executed_state::par(11, 1),
         executed_state::par(9, 1),
         executed_state::par(7, 1),
@@ -141,16 +141,16 @@ fn stream_merging_v0() {
             executed_state::subtrace_lore(8, subtrace_desc(21, 2), subtrace_desc(25, 0)),
             executed_state::subtrace_lore(13, subtrace_desc(23, 2), subtrace_desc(25, 0)),
         ]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
     ];
     assert_eq!(actual_trace_2.deref(), expected_trace_2);
 
@@ -164,7 +164,7 @@ fn stream_merging_v0() {
     let actual_trace_3 = trace_from_result(&executor_result_3);
 
     let expected_trace_3 = ExecutionTrace::from(vec![
-        scalar_unused!(unit_call_service_result, peer = initiator_id),
+        unused!(unit_call_service_result, peer = initiator_id),
         executed_state::par(11, 1),
         executed_state::par(9, 1),
         executed_state::par(7, 1),
@@ -187,20 +187,20 @@ fn stream_merging_v0() {
             executed_state::subtrace_lore(10, subtrace_desc(25, 2), subtrace_desc(29, 0)),
             executed_state::subtrace_lore(11, subtrace_desc(27, 2), subtrace_desc(29, 0)),
         ]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["3"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["3"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["3"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["3"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["3"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["3"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["3"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["3"]),
     ]);
     assert_eq!(actual_trace_3, expected_trace_3);
 }
@@ -234,7 +234,7 @@ fn stream_merging_v1() {
 
     let unit_call_service_result = "result from unit_call_service";
     let expected_trace_1 = ExecutionTrace::from(vec![
-        scalar_unused!(unit_call_service_result, peer = initiator_id),
+        unused!(unit_call_service_result, peer = initiator_id),
         executed_state::par(11, 1),
         executed_state::par(9, 1),
         executed_state::par(7, 1),
@@ -254,14 +254,14 @@ fn stream_merging_v1() {
             executed_state::subtrace_lore(12, subtrace_desc(19, 2), subtrace_desc(21, 1)),
         ]),
         executed_state::par(7, 1),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
         executed_state::par(4, 1),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
         executed_state::par(1, 1),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
     ]);
     assert_eq!(actual_trace_1, expected_trace_1);
 
@@ -275,7 +275,7 @@ fn stream_merging_v1() {
     let actual_trace_2 = trace_from_result(&executor_result_2);
 
     let expected_trace_2 = ExecutionTrace::from(vec![
-        scalar_unused!(unit_call_service_result, peer = initiator_id),
+        unused!(unit_call_service_result, peer = initiator_id),
         executed_state::par(11, 1),
         executed_state::par(9, 1),
         executed_state::par(7, 1),
@@ -297,20 +297,20 @@ fn stream_merging_v1() {
             executed_state::subtrace_lore(13, subtrace_desc(26, 2), subtrace_desc(28, 1)),
         ]),
         executed_state::par(7, 1),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
         executed_state::par(4, 1),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
         executed_state::par(1, 1),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
         executed_state::par(4, 1),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
         executed_state::par(1, 1),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
     ]);
     assert_eq!(actual_trace_2, expected_trace_2);
 
@@ -324,7 +324,7 @@ fn stream_merging_v1() {
     let actual_trace_3 = trace_from_result(&executor_result_3);
 
     let expected_trace_3 = ExecutionTrace::from(vec![
-        scalar_unused!(unit_call_service_result, peer = initiator_id),
+        unused!(unit_call_service_result, peer = initiator_id),
         executed_state::par(11, 1),
         executed_state::par(9, 1),
         executed_state::par(7, 1),
@@ -348,26 +348,26 @@ fn stream_merging_v1() {
             executed_state::subtrace_lore(11, subtrace_desc(32, 2), subtrace_desc(34, 1)),
         ]),
         executed_state::par(7, 1),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
         executed_state::par(4, 1),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
         executed_state::par(1, 1),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
         executed_state::par(4, 1),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
         executed_state::par(1, 1),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
         executed_state::par(4, 1),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["3"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["3"]),
         executed_state::par(1, 1),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["3"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["3"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["3"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["3"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["3"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["3"]),
     ]);
     assert_eq!(actual_trace_3, expected_trace_3);
 }
@@ -402,7 +402,7 @@ fn stream_merging_v2() {
 
     let unit_call_service_result = "result from unit_call_service";
     let expected_trace_1 = ExecutionTrace::from(vec![
-        scalar_unused!(unit_call_service_result, peer = initiator_id),
+        unused!(unit_call_service_result, peer = initiator_id),
         executed_state::par(11, 1),
         executed_state::par(9, 1),
         executed_state::par(7, 1),
@@ -421,12 +421,12 @@ fn stream_merging_v2() {
             executed_state::subtrace_lore(9, subtrace_desc(16, 1), subtrace_desc(19, 2)),
             executed_state::subtrace_lore(12, subtrace_desc(17, 1), subtrace_desc(18, 2)),
         ]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
     ]);
     assert_eq!(actual_trace_1, expected_trace_1);
 
@@ -440,7 +440,7 @@ fn stream_merging_v2() {
     let actual_trace_2 = trace_from_result(&executor_result_2);
 
     let expected_trace_2 = ExecutionTrace::from(vec![
-        scalar_unused!(unit_call_service_result, peer = initiator_id),
+        unused!(unit_call_service_result, peer = initiator_id),
         executed_state::par(11, 1),
         executed_state::par(9, 1),
         executed_state::par(7, 1),
@@ -461,16 +461,16 @@ fn stream_merging_v2() {
             executed_state::subtrace_lore(8, subtrace_desc(21, 0), subtrace_desc(23, 2)),
             executed_state::subtrace_lore(13, subtrace_desc(21, 0), subtrace_desc(21, 2)),
         ]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
     ]);
     assert_eq!(actual_trace_2, expected_trace_2);
 
@@ -484,7 +484,7 @@ fn stream_merging_v2() {
     let actual_trace_3 = trace_from_result(&executor_result_3);
 
     let expected_trace_3 = ExecutionTrace::from(vec![
-        scalar_unused!(unit_call_service_result, peer = initiator_id),
+        unused!(unit_call_service_result, peer = initiator_id),
         executed_state::par(11, 1),
         executed_state::par(9, 1),
         executed_state::par(7, 1),
@@ -507,20 +507,20 @@ fn stream_merging_v2() {
             executed_state::subtrace_lore(10, subtrace_desc(25, 0), subtrace_desc(27, 2)),
             executed_state::subtrace_lore(11, subtrace_desc(25, 0), subtrace_desc(25, 2)),
         ]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["3"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["3"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["3"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["3"]),
-        scalar_unused!(unit_call_service_result, peer = executor_id, args = ["3"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["3"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["3"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["3"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["3"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["3"]),
     ]);
     assert_eq!(actual_trace_3, expected_trace_3);
 }

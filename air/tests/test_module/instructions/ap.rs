@@ -47,7 +47,7 @@ fn ap_with_scalars() {
             peer = vm_1_peer_id,
             args = ["scalar_1_result"]
         ),
-        scalar_unused!(test_value, peer = vm_2_peer_id, args = [test_value]),
+        unused!(test_value, peer = vm_2_peer_id, args = [test_value]),
     ];
 
     assert_eq!(actual_trace, expected_state);
@@ -85,7 +85,7 @@ fn ap_with_string_literal() {
             ]
         }
         )),
-        scalar_unused!(json!([some_string]), peer = vm_1_peer_id, args = [json!([some_string])]),
+        unused!(json!([some_string]), peer = vm_1_peer_id, args = [json!([some_string])]),
     ];
 
     assert_eq!(actual_trace, expected_state);
@@ -120,7 +120,7 @@ fn ap_with_bool_literal() {
                 }
             ]
         })),
-        scalar_unused!(json!([true]), peer = vm_1_peer_id, args = [json!([true])]),
+        unused!(json!([true]), peer = vm_1_peer_id, args = [json!([true])]),
     ];
 
     assert_eq!(actual_trace, expected_state);
@@ -155,7 +155,7 @@ fn ap_with_number_literal() {
                 }
             ]
         })),
-        scalar_unused!(json!([100]), peer = vm_1_peer_id, args = [json!([100])]),
+        unused!(json!([100]), peer = vm_1_peer_id, args = [json!([100])]),
     ];
 
     assert_eq!(actual_trace, expected_state);
@@ -190,7 +190,7 @@ fn ap_with_last_error() {
                 }
             ]
         })),
-        scalar_unused!(json!([null]), peer = vm_1_peer_id, args = [json!([null])]),
+        unused!(json!([null]), peer = vm_1_peer_id, args = [json!([null])]),
     ];
 
     assert_eq!(actual_trace, expected_state);
@@ -213,7 +213,7 @@ fn ap_with_timestamp() {
     let result = checked_call_vm!(vm_1, test_params.clone(), script, "", "");
 
     let actual_trace = trace_from_result(&result);
-    let expected_state = vec![scalar_unused!(
+    let expected_state = vec![unused!(
         test_params.timestamp,
         peer = vm_1_peer_id,
         args = [test_params.timestamp]
@@ -238,11 +238,7 @@ fn ap_with_ttl() {
     let result = checked_call_vm!(vm_1, test_params.clone(), script, "", "");
 
     let actual_trace = trace_from_result(&result);
-    let expected_state = vec![scalar_unused!(
-        test_params.ttl,
-        peer = vm_1_peer_id,
-        args = [test_params.ttl]
-    )];
+    let expected_state = vec![unused!(test_params.ttl, peer = vm_1_peer_id, args = [test_params.ttl])];
 
     assert_eq!(actual_trace, expected_state);
 }
@@ -287,7 +283,7 @@ fn ap_with_dst_stream() {
                 }
             ]
         })),
-        scalar_unused!(
+        unused!(
             json!([{ "field": test_value }]),
             peer = vm_2_peer_id,
             args = [json!([{ "field": test_value }])]
@@ -351,7 +347,7 @@ fn ap_canon_stream_with_lambda() {
             ]
             }
         )),
-        scalar_unused!(json!([1]), peer = vm_1_peer_id, args = [json!([1])]),
+        unused!(json!([1]), peer = vm_1_peer_id, args = [json!([1])]),
     ];
     assert_eq!(actual_trace, expected_state);
 
@@ -418,7 +414,7 @@ fn ap_canon_stream() {
             ]
             }
         )),
-        scalar_unused!(json!([[0, 1]]), peer = vm_1_peer_id, args = [json!([[0, 1]])]),
+        unused!(json!([[0, 1]]), peer = vm_1_peer_id, args = [json!([[0, 1]])]),
     ];
     assert_eq!(actual_trace, expected_state);
 

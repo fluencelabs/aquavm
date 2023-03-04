@@ -356,7 +356,7 @@ fn issue_165() {
     let trace = trace_from_result(&echo_result);
     assert_eq!(
         trace.last().unwrap(),
-        &scalar_unused!(
+        &unused!(
             1,
             peer = echo_peer_id,
             service = "callbackSrv",
