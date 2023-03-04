@@ -19,8 +19,6 @@ use air_test_utils::prelude::*;
 use air_trace_handler::merger::MergeError;
 use air_trace_handler::TraceHandlerError;
 
-use std::rc::Rc;
-
 #[test]
 // test for github.com/fluencelabs/aquavm/issues/295
 fn issue_295() {
@@ -35,8 +33,8 @@ fn issue_295() {
     "#);
 
     let mut cid_state = ExecutionCidState::new();
-    cid_state.value_tracker.record_value(Rc::new("".into())).unwrap();
-    let scalar = scalar!("", peer = vm_peer_id);
+
+    let scalar = scalar_tracked!("", cid_state, peer = vm_peer_id);
     let prev_trace = vec![scalar.clone(), executed_state::ap(1)];
     let current_trace = vec![scalar.clone(), scalar];
     let prev_data = raw_data_from_trace(prev_trace, cid_state.clone().into());
