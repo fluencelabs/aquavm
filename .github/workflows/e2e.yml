@@ -75,7 +75,7 @@ jobs:
     needs:
       - aquavm
 
-    uses: fluencelabs/js-client/.github/workflows/snapshot.yml@FLU-274-hofix
+    uses: fluencelabs/js-client/.github/workflows/snapshot.yml@FLU-274-hotix
     with:
       avm-version: "${{ needs.aquavm.outputs.avm-version }}"
 
