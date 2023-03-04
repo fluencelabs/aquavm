@@ -212,14 +212,15 @@ macro_rules! scalar {
     };
 }
 
+/// Please note that `unused_tracked` does not exist as unused is never tracked.
 #[macro_export]
 macro_rules! unused {
     ($value:expr) => {
-        _trace_value_body!($value).scalar_unused()
+        _trace_value_body!($value).unused()
     };
 
     ($value:expr, $func1:ident = $v1:expr $(, $func:ident = $v:expr)*) => {
-        _trace_value_body!($value, $func1 = $v1 $(, $func = $v)*).scalar_unused()
+        _trace_value_body!($value, $func1 = $v1 $(, $func = $v)*).unused()
     };
 }
 
@@ -231,17 +232,6 @@ macro_rules! scalar_tracked {
 
     ($value:expr, $state:expr, $func1:ident = $v1:expr $(, $func:ident = $v:expr)*) => {
         _trace_value_body!($value, $func1 = $v1 $(, $func = $v)*).scalar_tracked(&mut $state)
-    };
-}
-
-#[macro_export]
-macro_rules! scalar_unused_tracked {
-    ($value:expr, $state:expr) => {
-        _trace_value_body!($value).scalar_unused_tracked(&mut $state)
-    };
-
-    ($value:expr, $state:expr, $func1:ident = $v1:expr $(, $func:ident = $v:expr)*) => {
-        _trace_value_body!($value, $func1 = $v1 $(, $func = $v)*).scalar_unused_tracked(&mut $state)
     };
 }
 
@@ -352,22 +342,18 @@ impl ExecutedCallBuilder {
         self.scalar_tracked(&mut cid_state)
     }
 
-    pub fn scalar_unused(self) -> ExecutedState {
+    pub fn unused(self) -> ExecutedState {
         let mut cid_state = ExecutionCidState::new();
-        self.scalar_unused_tracked(&mut cid_state)
+        let service_result_agg_cid =
+            value_aggregate_cid(self.result, self.tetraplet, self.args, &mut cid_state);
+        let value = ValueRef::Unused(service_result_agg_cid);
+        ExecutedState::Call(CallResult::Executed(value))
     }
 
     pub fn scalar_tracked(self, cid_state: &mut ExecutionCidState) -> ExecutedState {
         let service_result_agg_cid =
             value_aggregate_cid(self.result, self.tetraplet, self.args, cid_state);
         let value = ValueRef::Scalar(service_result_agg_cid);
-        ExecutedState::Call(CallResult::Executed(value))
-    }
-
-    pub fn scalar_unused_tracked(self, cid_state: &mut ExecutionCidState) -> ExecutedState {
-        let service_result_agg_cid =
-            value_aggregate_cid(self.result, self.tetraplet, self.args, cid_state);
-        let value = ValueRef::Unused(service_result_agg_cid);
         ExecutedState::Call(CallResult::Executed(value))
     }
 
@@ -438,32 +424,6 @@ mod tests {
         assert_eq!(
             scalar!(42, peer = "test", args = vec![json!(1)]),
             scalar_tracked!(42, store, peer = "test", args = vec![json!(1)]),
-        );
-    }
-
-    #[test]
-    fn test_scalar_unused_tracked() {
-        let mut store = ExecutionCidState::new();
-        assert_eq!(
-            scalar_unused_tracked!(42, store),
-            scalar_unused_tracked!(42, store)
-        );
-        assert_eq!(unused!(42), scalar_unused_tracked!(42, store));
-        assert_eq!(
-            scalar_unused_tracked!("test", store),
-            scalar_unused_tracked!("test", store)
-        );
-        assert_ne!(
-            scalar_unused_tracked!(42, store),
-            scalar_unused_tracked!(42, store, peer = "test")
-        );
-        assert_ne!(
-            scalar_unused_tracked!(42, store, peer = "test"),
-            scalar_unused_tracked!(42, store, peer = "test", args = vec![json!(1)]),
-        );
-        assert_eq!(
-            unused!(42, peer = "test", args = vec![json!(1)]),
-            scalar_unused_tracked!(42, store, peer = "test", args = vec![json!(1)]),
         );
     }
 }

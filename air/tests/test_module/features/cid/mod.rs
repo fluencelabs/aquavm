@@ -35,7 +35,7 @@ fn test_missing_cid() {
     let mut cid_state = ExecutionCidState::new();
     let trace = vec![
         scalar_tracked!(42, cid_state, peer = peer_id, service = "service", function = "call1"),
-        scalar_unused_tracked!(43, cid_state, peer = peer_id, service = "service", function = "call2"),
+        unused!(43, peer = peer_id, service = "service", function = "call2"),
     ];
     cid_state.service_result_agg_tracker = <_>::default();
 
