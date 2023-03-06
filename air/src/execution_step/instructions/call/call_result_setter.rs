@@ -20,39 +20,36 @@ use crate::execution_step::Generation;
 use crate::execution_step::ValueAggregate;
 use crate::UncatchableError;
 
-use air_interpreter_cid::CID;
 use air_interpreter_data::CallResult;
 use air_interpreter_data::TracePos;
 use air_interpreter_data::ValueRef;
 use air_parser::ast::CallOutputValue;
 use air_trace_handler::merger::ValueSource;
 use air_trace_handler::TraceHandler;
-use polyplets::SecurityTetraplet;
 
 pub(crate) fn populate_context_from_peer_service_result<'i>(
     executed_result: ValueAggregate,
     output: &CallOutputValue<'i>,
-    tetraplet_cid: Rc<CID<SecurityTetraplet>>,
+    tetraplet: RcSecurityTetraplet,
     argument_hash: Rc<str>,
     exec_ctx: &mut ExecutionCtx<'i>,
 ) -> ExecutionResult<CallResult> {
-    let cid = exec_ctx
-        .cid_state
-        .value_tracker
-        .record_value(executed_result.result.clone())
-        .map_err(UncatchableError::from)?;
-
     match output {
         CallOutputValue::Scalar(scalar) => {
+            let service_result_agg_cid = exec_ctx
+                .cid_state
+                .insert_value(executed_result.result.clone(), tetraplet, argument_hash)
+                .map_err(UncatchableError::from)?;
+
             exec_ctx.scalars.set_scalar_value(scalar.name, executed_result)?;
-            Ok(CallResult::executed_scalar(
-                cid,
-                argument_hash,
-                tetraplet_cid,
-                &mut exec_ctx.cid_state.service_result_agg_tracker,
-            ))
+            Ok(CallResult::executed_scalar(service_result_agg_cid))
         }
         CallOutputValue::Stream(stream) => {
+            let service_result_agg_cid = exec_ctx
+                .cid_state
+                .insert_value(executed_result.result.clone(), tetraplet, argument_hash)
+                .map_err(UncatchableError::from)?;
+
             let value_descriptor = StreamValueDescriptor::new(
                 executed_result,
                 stream.name,
@@ -61,20 +58,17 @@ pub(crate) fn populate_context_from_peer_service_result<'i>(
                 stream.position,
             );
             let generation = exec_ctx.streams.add_stream_value(value_descriptor)?;
-            Ok(CallResult::executed_stream(
-                cid,
-                argument_hash,
-                tetraplet_cid,
-                &mut exec_ctx.cid_state.service_result_agg_tracker,
-                generation,
-            ))
+            Ok(CallResult::executed_stream(service_result_agg_cid, generation))
         }
-        CallOutputValue::None => Ok(CallResult::executed_unused(
-            cid,
-            argument_hash,
-            tetraplet_cid,
-            &mut exec_ctx.cid_state.service_result_agg_tracker,
-        )),
+        CallOutputValue::None => {
+            let mut dummy_cid_state = ExecutionCidState::new();
+            let service_result_agg_cid = dummy_cid_state
+                .insert_value(executed_result.result, tetraplet, argument_hash)
+                .map_err(UncatchableError::from)?;
+
+            // TODO: Might we add only value's CID for the `Unused`?
+            Ok(CallResult::executed_unused(service_result_agg_cid))
+        }
     }
 }
 

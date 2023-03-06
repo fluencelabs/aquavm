@@ -54,61 +54,21 @@ impl CallResult {
         Self::Executed(value_ref)
     }
 
-    pub fn executed_scalar(
-        value_cid: Rc<CID<JValue>>,
-        argument_hash: Rc<str>,
-        tetraplet_cid: Rc<CID<SecurityTetraplet>>,
-        service_result_agg_tracker: &mut CidTracker<ServiceResultAggregate>,
-    ) -> Self {
-        let service_result_agg = ServiceResultAggregate {
-            value_cid,
-            argument_hash,
-            tetraplet_cid,
-        };
-        let service_result_agg_cid = service_result_agg_tracker
-            .record_value(service_result_agg)
-            .expect("Failed to calculate a CID of service result.");
-
+    pub fn executed_scalar(service_result_agg_cid: Rc<CID<ServiceResultAggregate>>) -> Self {
         Self::executed_service_result(ValueRef::Scalar(service_result_agg_cid))
     }
 
     pub fn executed_stream(
-        value_cid: Rc<CID<JValue>>,
-        argument_hash: Rc<str>,
-        tetraplet_cid: Rc<CID<SecurityTetraplet>>,
-        service_result_agg_tracker: &mut CidTracker<ServiceResultAggregate>,
+        service_result_agg_cid: Rc<CID<ServiceResultAggregate>>,
         generation: u32,
     ) -> CallResult {
-        let service_result_agg = ServiceResultAggregate {
-            value_cid,
-            argument_hash,
-            tetraplet_cid,
-        };
-        let service_result_agg_cid = service_result_agg_tracker
-            .record_value(service_result_agg)
-            .expect("Failed to calculate a CID of service result.");
-
         Self::executed_service_result(ValueRef::Stream {
             cid: service_result_agg_cid,
             generation,
         })
     }
 
-    pub fn executed_unused(
-        value_cid: Rc<CID<JValue>>,
-        argument_hash: Rc<str>,
-        tetraplet_cid: Rc<CID<SecurityTetraplet>>,
-        service_result_agg_tracker: &mut CidTracker<ServiceResultAggregate>,
-    ) -> CallResult {
-        let service_result_agg = ServiceResultAggregate {
-            value_cid,
-            argument_hash,
-            tetraplet_cid,
-        };
-        let service_result_agg_cid = service_result_agg_tracker
-            .record_value(service_result_agg)
-            .expect("Failed to calculate a CID of service result.");
-
+    pub fn executed_unused(service_result_agg_cid: Rc<CID<ServiceResultAggregate>>) -> CallResult {
         Self::executed_service_result(ValueRef::Unused(service_result_agg_cid))
     }
 

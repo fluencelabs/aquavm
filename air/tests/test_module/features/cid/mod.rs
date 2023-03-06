@@ -167,3 +167,37 @@ fn test_stream_cid() {
         cid_state.service_result_agg_tracker.into()
     );
 }
+
+#[test]
+fn test_unused_cid() {
+    let vm_peer_id = "vm_peer_id";
+
+    let annotated_air_script = format!(
+        r#"
+       (seq
+          (call "{vm_peer_id}" ("service" "call1") []) ; ok="hi"
+          (call "{vm_peer_id}" ("service" "call2") []) ; ok="ipld"
+       )"#
+    );
+    let executor = AirScriptExecutor::new(
+        TestRunParameters::from_init_peer_id(vm_peer_id),
+        vec![],
+        std::iter::empty(),
+        &annotated_air_script,
+    )
+    .unwrap();
+
+    let result = executor.execute_one(vm_peer_id).unwrap();
+    let data = data_from_result(&result);
+
+    let expected_trace = vec![
+        unused!("hi", peer = vm_peer_id, service = "service..0", function = "call1"),
+        unused!("ipld", peer = vm_peer_id, service = "service..1", function = "call2"),
+    ];
+
+    assert_eq!(result.ret_code, 0);
+    assert_eq!(data.trace, expected_trace);
+    assert!(data.cid_info.value_store.is_empty());
+    assert!(data.cid_info.tetraplet_store.is_empty());
+    assert!(data.cid_info.service_result_store.is_empty());
+}

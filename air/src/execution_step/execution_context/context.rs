@@ -24,6 +24,7 @@ use crate::JValue;
 use crate::UncatchableError;
 
 use air_execution_info_collector::InstructionTracker;
+use air_interpreter_cid::CidCalculationError;
 use air_interpreter_cid::CID;
 use air_interpreter_data::CanonCidAggregate;
 use air_interpreter_data::CidInfo;
@@ -156,6 +157,25 @@ pub struct ExecutionCidState {
 impl ExecutionCidState {
     pub fn new() -> Self {
         Self::default()
+    }
+
+    pub fn insert_value(
+        &mut self,
+        value: Rc<JValue>,
+        tetraplet: RcSecurityTetraplet,
+        argument_hash: Rc<str>,
+    ) -> Result<Rc<CID<ServiceResultAggregate>>, CidCalculationError> {
+        let value_cid = self.value_tracker.record_value(value)?;
+
+        let tetraplet_cid = self.tetraplet_tracker.record_value(tetraplet)?;
+
+        let service_result_agg = ServiceResultAggregate {
+            value_cid,
+            argument_hash,
+            tetraplet_cid,
+        };
+
+        self.service_result_agg_tracker.record_value(service_result_agg)
     }
 
     fn from_cid_info(prev_cid_info: CidInfo, current_cid_info: CidInfo) -> Self {
