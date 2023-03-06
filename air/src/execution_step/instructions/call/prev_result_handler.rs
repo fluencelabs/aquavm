@@ -23,7 +23,6 @@ use crate::UncatchableError;
 use air_interpreter_data::CallResult;
 use air_interpreter_data::CallServiceFailed;
 use air_interpreter_data::Sender;
-use air_interpreter_data::ServiceResultAggregate;
 use air_interpreter_interface::CallServiceResult;
 use air_parser::ast::CallOutputValue;
 use air_trace_handler::merger::MetCallResult;
@@ -166,31 +165,13 @@ fn handle_service_error<'i>(
 
     let error_message = Rc::new(service_result.result.clone());
     let error = CatchableError::LocalServiceError(service_result.ret_code, error_message.clone());
+
     let failed = CallServiceFailed(service_result.ret_code, error_message);
-
-    let error_value = serde_json::to_value(&failed).expect("TODO");
-    let value_cid = exec_ctx
-        .cid_state
-        .value_tracker
-        .record_value(error_value)
-        .map_err(UncatchableError::from)?;
-
-    let tetraplet_cid = exec_ctx
-        .cid_state
-        .tetraplet_tracker
-        .record_value(tetraplet)
-        .map_err(UncatchableError::from)?;
-
-    let service_result_agg = ServiceResultAggregate {
-        value_cid,
-        argument_hash,
-        tetraplet_cid,
-    };
+    let failed_value = serde_json::to_value(&failed).expect("TODO");
 
     let service_result_agg_cid = exec_ctx
         .cid_state
-        .service_result_agg_tracker
-        .record_value(service_result_agg)
+        .insert_value(failed_value.into(), tetraplet, argument_hash)
         .map_err(UncatchableError::from)?;
 
     trace_ctx.meet_call_end(Failed(service_result_agg_cid));
@@ -214,21 +195,16 @@ fn try_to_service_result(
                 f!("call_service result '{service_result}' can't be serialized or deserialized with an error: {e}");
             let error_msg = Rc::new(error_msg);
 
-            let tetraplet_cid = exec_ctx
-                .cid_state
-                .tetraplet_tracker
-                .record_value(tetraplet.clone())
-                .map_err(UncatchableError::from)?;
-
             // let error = Failed(i32::MAX, error_msg.clone());
-            let error = CallResult::failed(
-                i32::MAX,
-                error_msg.clone(),
-                argument_hash.clone(),
-                tetraplet_cid,
-                &mut exec_ctx.cid_state.value_tracker,
-                &mut exec_ctx.cid_state.service_result_agg_tracker,
-            );
+            let call_service_failed = CallServiceFailed(i32::MAX, error_msg.clone());
+            let failed_value = serde_json::to_value(&call_service_failed).expect("TODO can't fail");
+
+            let service_result_agg_cid = exec_ctx
+                .cid_state
+                .insert_value(failed_value.into(), tetraplet.clone(), argument_hash.clone())
+                .map_err(UncatchableError::from)?;
+            let error = CallResult::failed(service_result_agg_cid);
+
             trace_ctx.meet_call_end(error);
 
             Err(CatchableError::LocalServiceError(i32::MAX, error_msg).into())

@@ -15,7 +15,6 @@
  */
 
 use super::*;
-use crate::{CidTracker, JValue};
 
 impl ParResult {
     pub fn new(left_size: u32, right_size: u32) -> Self {
@@ -72,28 +71,7 @@ impl CallResult {
         Self::executed_service_result(ValueRef::Unused(service_result_agg_cid))
     }
 
-    pub fn failed(
-        ret_code: i32,
-        error_msg: impl Into<Rc<String>>,
-        argument_hash: Rc<str>,
-        tetraplet_cid: Rc<CID<SecurityTetraplet>>,
-        value_tracker: &mut CidTracker<JValue>,
-        service_result_agg_tracker: &mut CidTracker<ServiceResultAggregate>,
-    ) -> CallResult {
-        let call_service_failed = CallServiceFailed(ret_code, error_msg.into());
-        let failed_value = serde_json::to_value(&call_service_failed).expect("TODO can't fail");
-
-        let failed_value_cid = value_tracker.record_value(failed_value).unwrap();
-
-        let service_result_agg = ServiceResultAggregate {
-            value_cid: failed_value_cid,
-            argument_hash,
-            tetraplet_cid,
-        };
-        let service_result_agg_cid = service_result_agg_tracker
-            .record_value(service_result_agg)
-            .expect("Failed to calculate a CID of service result.");
-
+    pub fn failed(service_result_agg_cid: Rc<CID<ServiceResultAggregate>>) -> CallResult {
         CallResult::Failed(service_result_agg_cid)
     }
 }
