@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-use air_interpreter_data::ExecutionTrace;
+use air::ExecutionCidState;
+use air_interpreter_data::{ExecutionTrace, InterpreterData};
 use air_test_utils::prelude::*;
 
 use pretty_assertions::assert_eq;
+use semver::Version;
 
 use std::collections::HashMap;
 use std::ops::Deref;
@@ -361,4 +363,211 @@ fn fold_merge() {
             assert_eq!(call_count, 16);
         }
     }
+}
+
+#[test]
+fn test_merge_scalar_match() {
+    let air = r#"(call "peer" ("" "") [] var)"#;
+
+    let mut avm = create_avm(echo_call_service(), "peer");
+    let mut cid_store = ExecutionCidState::new();
+
+    let trace = ExecutionTrace::from(vec![scalar_tracked!(42, cid_store, peer = "peer")]);
+    let data = InterpreterData::from_execution_result(
+        trace,
+        <_>::default(),
+        <_>::default(),
+        cid_store.into(),
+        0,
+        Version::new(1, 1, 1),
+    );
+    let data = serde_json::to_vec(&data).unwrap();
+    checked_call_vm!(avm, <_>::default(), air, data.clone(), data);
+}
+
+#[test]
+fn test_merge_scalar_mismatch() {
+    let air = r#"(call "peer" ("" "") [] var)"#;
+    let mut avm = create_avm(echo_call_service(), "peer");
+
+    let mut cid_state1 = ExecutionCidState::default();
+    let mut cid_state2 = ExecutionCidState::default();
+    let trace1 = ExecutionTrace::from(vec![scalar_tracked!(42, cid_state1, peer = "peer")]);
+    let trace2 = ExecutionTrace::from(vec![scalar_tracked!(43, cid_state2, peer = "peer")]);
+    let data1 = InterpreterData::from_execution_result(
+        trace1,
+        <_>::default(),
+        <_>::default(),
+        cid_state1.into(),
+        0,
+        Version::new(1, 1, 1),
+    );
+    let data2 = InterpreterData::from_execution_result(
+        trace2,
+        <_>::default(),
+        <_>::default(),
+        cid_state2.into(),
+        0,
+        Version::new(1, 1, 1),
+    );
+    let data1 = serde_json::to_vec(&data1).unwrap();
+    let data2 = serde_json::to_vec(&data2).unwrap();
+    let result = avm.call(air, data1, data2, <_>::default()).unwrap();
+    assert_eq!(result.ret_code, 20000);
+    assert_eq!(
+        result.error_message,
+        concat!(
+            r#"on instruction 'call "peer" ("" "") [] var' trace handler encountered an error:"#,
+            r#" values in call results are not equal:"#,
+            r#" Scalar(CID("bagaaierautomsqybwfcilogqikd6sxzhaqkrout64cosdlpo7p6wvod4miza"))"#,
+            r#" != Scalar(CID("bagaaieraywolxobx5koykfm7lnjtpci6wt4ccqqehbbhpebomznlzaszhgya"))"#
+        )
+    );
+}
+
+#[test]
+fn test_merge_stream_match() {
+    let air = r#"(call "peer" ("" "") [] $var)"#;
+
+    let mut avm = create_avm(echo_call_service(), "peer");
+    let mut cid_store = ExecutionCidState::new();
+
+    let trace = ExecutionTrace::from(vec![stream_tracked!(42, 0, cid_store, peer = "peer")]);
+    let data = InterpreterData::from_execution_result(
+        trace,
+        <_>::default(),
+        <_>::default(),
+        cid_store.into(),
+        0,
+        Version::new(1, 1, 1),
+    );
+    let data = serde_json::to_vec(&data).unwrap();
+    checked_call_vm!(avm, <_>::default(), air, data.clone(), data);
+}
+
+#[test]
+fn test_merge_stream_match_gen() {
+    let air = r#"(call "peer" ("" "") [] $var)"#;
+    let mut avm = create_avm(echo_call_service(), "peer");
+
+    let mut cid_state1 = ExecutionCidState::default();
+    let mut cid_state2 = ExecutionCidState::default();
+    let trace1 = ExecutionTrace::from(vec![stream_tracked!(42, 0, cid_state1, peer = "peer")]);
+    let trace2 = ExecutionTrace::from(vec![stream_tracked!(42, 1, cid_state2, peer = "peer")]);
+    let data1 = InterpreterData::from_execution_result(
+        trace1,
+        <_>::default(),
+        <_>::default(),
+        cid_state1.into(),
+        0,
+        Version::new(1, 1, 1),
+    );
+    let data2 = InterpreterData::from_execution_result(
+        trace2,
+        <_>::default(),
+        <_>::default(),
+        cid_state2.into(),
+        0,
+        Version::new(1, 1, 1),
+    );
+    let data1 = serde_json::to_vec(&data1).unwrap();
+    let data2 = serde_json::to_vec(&data2).unwrap();
+    checked_call_vm!(avm, <_>::default(), air, data1, data2);
+}
+
+#[test]
+fn test_merge_stream_mismatch() {
+    let air = r#"(call "peer" ("" "") [] $var)"#;
+    let mut avm = create_avm(echo_call_service(), "peer");
+
+    let mut cid_state1 = ExecutionCidState::default();
+    let mut cid_state2 = ExecutionCidState::default();
+    let trace1 = ExecutionTrace::from(vec![stream_tracked!(42, 0, cid_state1, peer = "peer")]);
+    let trace2 = ExecutionTrace::from(vec![stream_tracked!(43, 0, cid_state2, peer = "peer")]);
+    let data1 = InterpreterData::from_execution_result(
+        trace1,
+        <_>::default(),
+        <_>::default(),
+        cid_state1.into(),
+        0,
+        Version::new(1, 1, 1),
+    );
+    let data2 = InterpreterData::from_execution_result(
+        trace2,
+        <_>::default(),
+        <_>::default(),
+        cid_state2.into(),
+        0,
+        Version::new(1, 1, 1),
+    );
+    let data1 = serde_json::to_vec(&data1).unwrap();
+    let data2 = serde_json::to_vec(&data2).unwrap();
+    let result = avm.call(air, data1, data2, <_>::default()).unwrap();
+    assert_eq!(result.ret_code, 20000);
+    assert_eq!(
+        result.error_message,
+        concat!(
+            r#"on instruction 'call "peer" ("" "") [] $var' trace handler encountered an error:"#,
+            r#" values in call results are not equal:"#,
+            r#" Stream { cid: CID("bagaaierautomsqybwfcilogqikd6sxzhaqkrout64cosdlpo7p6wvod4miza"), generation: 0 }"#,
+            r#" != Stream { cid: CID("bagaaieraywolxobx5koykfm7lnjtpci6wt4ccqqehbbhpebomznlzaszhgya"), generation: 0 }"#
+        )
+    );
+}
+
+#[test]
+fn test_merge_unused_match() {
+    let air = r#"(call "peer" ("" "") [])"#;
+
+    let mut avm = create_avm(echo_call_service(), "peer");
+
+    let trace = ExecutionTrace::from(vec![unused!(42, peer = "peer")]);
+    let data = InterpreterData::from_execution_result(
+        trace,
+        <_>::default(),
+        <_>::default(),
+        <_>::default(),
+        0,
+        Version::new(1, 1, 1),
+    );
+    let data = serde_json::to_vec(&data).unwrap();
+    checked_call_vm!(avm, <_>::default(), air, data.clone(), data);
+}
+
+#[test]
+fn test_merge_unused_mismatch() {
+    let air = r#"(call "peer" ("" "") [])"#;
+    let mut avm = create_avm(echo_call_service(), "peer");
+
+    let trace1 = ExecutionTrace::from(vec![unused!(42, peer = "peer")]);
+    let trace2 = ExecutionTrace::from(vec![unused!(43, peer = "peer")]);
+    let data1 = InterpreterData::from_execution_result(
+        trace1,
+        <_>::default(),
+        <_>::default(),
+        <_>::default(),
+        0,
+        Version::new(1, 1, 1),
+    );
+    let data2 = InterpreterData::from_execution_result(
+        trace2,
+        <_>::default(),
+        <_>::default(),
+        <_>::default(),
+        0,
+        Version::new(1, 1, 1),
+    );
+    let data1 = serde_json::to_vec(&data1).unwrap();
+    let data2 = serde_json::to_vec(&data2).unwrap();
+    let result = avm.call(air, data1, data2, <_>::default()).unwrap();
+    assert_eq!(result.ret_code, 20000);
+    assert_eq!(
+        result.error_message,
+        concat!(
+            r#"on instruction 'call "peer" ("" "") [] ' trace handler encountered an error:"#,
+            r#" values in call results are not equal:"#,
+            r#" Unused(CID("bagaaierautomsqybwfcilogqikd6sxzhaqkrout64cosdlpo7p6wvod4miza"))"#,
+            r#" != Unused(CID("bagaaieraywolxobx5koykfm7lnjtpci6wt4ccqqehbbhpebomznlzaszhgya"))"#
+        )
+    );
 }
