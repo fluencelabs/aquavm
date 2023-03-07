@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-use air::UncatchableError;
+use air::{ExecutionCidState, UncatchableError};
+use air_interpreter_data::{ExecutionTrace, InterpreterData, ServiceResultAggregate};
 use air_test_utils::prelude::*;
+use semver::Version;
 
 // Check that %init_peer_id% alias works correctly (by comparing result with it and explicit peer id).
 // Additionally, check that empty string for data does the same as empty call path.
@@ -185,4 +187,46 @@ fn string_parameters() {
 
     assert_eq!(actual_trace.len(), 2);
     assert_eq!(actual_trace[1.into()], expected_state);
+}
+
+#[test]
+fn test_invalid_call_service_failed() {
+    let peer_id = "init_peer_id";
+    let mut cid_state = ExecutionCidState::new();
+
+    // Craft an artificial incorrect error result
+    let value = json!("error");
+    let value_cid = cid_state.value_tracker.record_value(value).unwrap();
+    let tetraplet = SecurityTetraplet::literal_tetraplet(peer_id);
+    let tetraplet_cid = cid_state.tetraplet_tracker.record_value(tetraplet).unwrap();
+    let service_result_agg = ServiceResultAggregate {
+        value_cid,
+        argument_hash: "0000000000000".into(),
+        tetraplet_cid,
+    };
+    let service_result_agg_cid = cid_state
+        .service_result_agg_tracker
+        .record_value(service_result_agg)
+        .unwrap();
+
+    let trace = ExecutionTrace::from(vec![ExecutedState::Call(CallResult::Failed(service_result_agg_cid))]);
+    let data = InterpreterData::from_execution_result(
+        trace,
+        <_>::default(),
+        <_>::default(),
+        cid_state.into(),
+        0,
+        Version::new(1, 1, 1),
+    );
+    let data = serde_json::to_vec(&data).unwrap();
+
+    let mut vm = create_avm(unit_call_service(), peer_id);
+    let air = format!(r#"(call "{peer_id}" ("" "") [] var)"#);
+    let res = vm.call(&air, vec![], data, TestRunParameters::default()).unwrap();
+
+    assert_eq!(res.ret_code, 20014);
+    assert_eq!(
+        res.error_message,
+        "failed to deserialize invalid type: string \"error\", expected tuple struct CallServiceFailed",
+    );
 }
