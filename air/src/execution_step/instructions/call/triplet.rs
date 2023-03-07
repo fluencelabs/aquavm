@@ -91,10 +91,9 @@ pub(crate) fn resolve_to_string<'i>(
 fn try_jvalue_to_string(jvalue: JValue, variable_name: impl Into<String>) -> ExecutionResult<String> {
     match jvalue {
         JValue::String(s) => Ok(s),
-        _ => Err(CatchableError::IncompatibleJValueType {
+        _ => Err(CatchableError::NonStringValueInTripletResolution {
             variable_name: variable_name.into(),
             actual_value: jvalue,
-            expected_value_type: "string",
         }
         .into()),
     }
