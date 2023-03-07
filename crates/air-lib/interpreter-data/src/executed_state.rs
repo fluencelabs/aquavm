@@ -80,6 +80,16 @@ pub enum ValueRef {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct CallServiceFailed(pub i32, pub Rc<String>);
 
+impl CallServiceFailed {
+    pub fn new(ret_code: i32, message: Rc<String>) -> Self {
+        Self(ret_code, message)
+    }
+
+    pub fn to_value(&self) -> JValue {
+        serde_json::to_value(self).expect("default serializer shouldn't fail")
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 /// A proof of service result execution result.

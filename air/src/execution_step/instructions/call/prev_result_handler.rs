@@ -166,8 +166,7 @@ fn handle_service_error<'i>(
     let error_message = Rc::new(service_result.result.clone());
     let error = CatchableError::LocalServiceError(service_result.ret_code, error_message.clone());
 
-    let failed = CallServiceFailed(service_result.ret_code, error_message);
-    let failed_value = serde_json::to_value(&failed).expect("TODO");
+    let failed_value = CallServiceFailed::new(service_result.ret_code, error_message).to_value();
 
     let service_result_agg_cid = exec_ctx
         .cid_state
@@ -195,9 +194,7 @@ fn try_to_service_result(
                 f!("call_service result '{service_result}' can't be serialized or deserialized with an error: {e}");
             let error_msg = Rc::new(error_msg);
 
-            // let error = Failed(i32::MAX, error_msg.clone());
-            let call_service_failed = CallServiceFailed(i32::MAX, error_msg.clone());
-            let failed_value = serde_json::to_value(&call_service_failed).expect("TODO can't fail");
+            let failed_value = CallServiceFailed::new(i32::MAX, error_msg.clone()).to_value();
 
             let service_result_agg_cid = exec_ctx
                 .cid_state
