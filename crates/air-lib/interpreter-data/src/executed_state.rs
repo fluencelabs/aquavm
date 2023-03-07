@@ -77,6 +77,7 @@ pub enum ValueRef {
     Unused(Rc<CID<ServiceResultAggregate>>),
 }
 
+/// Please note that second argument is a JSON-serialized value, not a plain error message.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct CallServiceFailed(pub i32, pub Rc<String>);
 

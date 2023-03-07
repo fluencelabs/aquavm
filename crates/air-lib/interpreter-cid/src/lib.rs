@@ -44,12 +44,6 @@ impl<T: ?Sized> CID<T> {
     pub fn into_inner(self) -> String {
         self.0
     }
-
-    /// Occationaly we generate CID of one type, but we have to
-    /// store it as another data type.
-    pub fn transmute<S: ?Sized>(self) -> CID<S> {
-        CID(self.0, PhantomData)
-    }
 }
 
 impl<T: ?Sized> fmt::Debug for CID<T> {

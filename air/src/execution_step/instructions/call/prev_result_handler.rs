@@ -189,8 +189,6 @@ fn try_to_service_result(
     exec_ctx: &mut ExecutionCtx<'_>,
     trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<Rc<JValue>> {
-    // use CallResult::Failed;
-
     match serde_json::from_str(&service_result.result) {
         Ok(result) => Ok(Rc::new(result)),
         Err(e) => {
