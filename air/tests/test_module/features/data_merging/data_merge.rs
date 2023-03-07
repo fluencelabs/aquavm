@@ -334,14 +334,8 @@ fn fold_merge() {
                         ValueRef::Unused(cid) => cid,
                     };
 
-                    // TODO convert to a function
-                    let service_result_agg = data.cid_info.service_result_store.get(cid).unwrap().clone();
-                    let value = data
-                        .cid_info
-                        .value_store
-                        .get(&service_result_agg.value_cid)
-                        .unwrap()
-                        .clone();
+                    let service_result_agg = data.cid_info.service_result_store.get(cid).unwrap();
+                    let value = data.cid_info.value_store.get(&service_result_agg.value_cid).unwrap();
 
                     if let JValue::String(ref var_name) = &*value {
                         let current_count: usize = calls_count.get(var_name).copied().unwrap_or_default();

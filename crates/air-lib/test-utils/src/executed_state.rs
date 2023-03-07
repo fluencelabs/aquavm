@@ -212,18 +212,6 @@ macro_rules! scalar {
     };
 }
 
-/// Please note that `unused_tracked` does not exist as unused is never tracked.
-#[macro_export]
-macro_rules! unused {
-    ($value:expr) => {
-        _trace_value_body!($value).unused()
-    };
-
-    ($value:expr, $func1:ident = $v1:expr $(, $func:ident = $v:expr)*) => {
-        _trace_value_body!($value, $func1 = $v1 $(, $func = $v)*).unused()
-    };
-}
-
 #[macro_export]
 macro_rules! scalar_tracked {
     ($value:expr, $state:expr) => {
@@ -259,17 +247,6 @@ macro_rules! stream {
 }
 
 #[macro_export]
-macro_rules! stream_unused {
-    ($value:expr, $generation:expr) => {
-        _trace_value_body!($value).stream_unused($generation)
-    };
-
-    ($value:expr, $generation:expr, $func1:ident = $v1:expr $(, $func:ident = $v:expr)*) => {
-        _trace_value_body!($value, $func1 = $v1 $(, $func = $v)*).stream_unused($generation)
-    };
-}
-
-#[macro_export]
 macro_rules! stream_tracked {
     ($value:expr, $generation:expr, $state:expr) => {
         _trace_value_body!($value).stream_tracked(&mut $state)
@@ -280,21 +257,21 @@ macro_rules! stream_tracked {
     };
 }
 
+/// Please note that `unused_tracked` does not exist as unused is never tracked.
 #[macro_export]
-macro_rules! stream_unused_tracked {
-    ($value:expr, $generation:expr, $state:expr) => {
-        _trace_value_body!($value).stream_unused_tracked(&mut $state)
+macro_rules! unused {
+    ($value:expr) => {
+        _trace_value_body!($value).unused()
     };
 
-    ($value:expr, $generation:expr, $state:expr, $func1:ident = $v1:expr $(, $func:ident = $v:expr)*) => {
-        _trace_value_body!($value, $func1 = $v1 $(, $func = $v)*).stream_unused_tracked($generation, &mut $state)
+    ($value:expr, $func1:ident = $v1:expr $(, $func:ident = $v:expr)*) => {
+        _trace_value_body!($value, $func1 = $v1 $(, $func = $v)*).unused()
     };
 }
 
 pub fn _failure_to_value(ret_code: i32, error_message: &str) -> JValue {
     let message_serialized = serde_json::to_string(error_message).unwrap();
-    let failed = crate::CallServiceFailed(ret_code, message_serialized.into());
-    serde_json::to_value(failed).unwrap()
+    crate::CallServiceFailed::new(ret_code, message_serialized.into()).to_value()
 }
 
 pub struct ExecutedCallBuilder {

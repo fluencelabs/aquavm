@@ -188,18 +188,11 @@ fn par_early_exit() {
         executed_state::par(1, 1),
         executed_state::request_sent_by(init_peer_id),
         executed_state::request_sent_by(init_peer_id),
-        stream_tracked!(
-            "non_exist_value",
-            0,
-            setter_3_cid_state,
-            // TODO
-            peer = setter_1_id
-        ),
+        stream_tracked!("non_exist_value", 0, setter_3_cid_state, peer = setter_1_id),
         stream_tracked!(
             "success result from fallible_call_service",
             0,
             setter_3_cid_state,
-            // TODO
             peer = setter_1_id
         ),
         failed!(
