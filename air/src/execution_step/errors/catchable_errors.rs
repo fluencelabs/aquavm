@@ -86,6 +86,13 @@ pub enum CatchableError {
     /// This error type is occurred when the length functor applied to a value of non-array type.
     #[error("the length functor could applied only to an array-like value, but it's applied to '{0}'")]
     LengthFunctorAppliedToNotArray(JValue),
+
+    /// Call gets non-string JValue resolving triplet parts.
+    #[error("call cannot resolve non-String triplet variable part `{variable_name}` with value '{actual_value}'")]
+    NonStringValueInTripletResolution {
+        variable_name: String,
+        actual_value: JValue,
+    },
 }
 
 impl From<LambdaError> for Rc<CatchableError> {

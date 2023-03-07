@@ -204,7 +204,7 @@ fn variable_names_shown_in_error() {
     assert_eq!(
         trace[1.into()],
         executed_state::scalar(json!(
-            "expected JValue type 'string' for the variable `-relay-`, but got '1'"
+            "call cannot resolve non-String triplet variable part `-relay-` with value '1'"
         ))
     );
 }
