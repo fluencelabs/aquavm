@@ -210,15 +210,7 @@ fn test_invalid_call_service_failed() {
         .unwrap();
 
     let trace = ExecutionTrace::from(vec![ExecutedState::Call(CallResult::Failed(service_result_agg_cid))]);
-    let data = InterpreterData::from_execution_result(
-        trace,
-        <_>::default(),
-        <_>::default(),
-        cid_state.into(),
-        0,
-        Version::new(1, 1, 1),
-    );
-    let data = serde_json::to_vec(&data).unwrap();
+    let data = raw_data_from_trace(trace, cid_state);
 
     let mut vm = create_avm(unit_call_service(), peer_id);
     let air = format!(r#"(call "{peer_id}" ("" "") [] var)"#);
