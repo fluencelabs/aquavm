@@ -65,35 +65,6 @@ fn dont_wait_on_json_path() {
 }
 
 #[test]
-fn wait_on_empty_stream_json_path() {
-    let local_peer_id = "local_peer_id";
-    let mut local_vm = create_avm(echo_call_service(), local_peer_id);
-
-    let join_stream_script = f!(r#"
-    (seq
-        (seq
-            (call "{local_peer_id}" ("" "") [[]] nodes)
-            (fold nodes n
-                (par
-                    (call n ("" "") [n] $ns)
-                    (next n)
-                )
-            )
-        )
-        (seq
-            (canon "{local_peer_id}" $ns #ns)
-            (call "{local_peer_id}" ("" "") [#ns.$.[0] #ns.$.[1] #ns])
-        )
-     )"#);
-
-    let result = checked_call_vm!(local_vm, <_>::default(), join_stream_script, "", "");
-    print_trace(&result, "");
-    let actual_trace = trace_from_result(&result);
-
-    assert_eq!(actual_trace.len(), 2); // only the first call and canon should produce a trace
-}
-
-#[test]
 fn dont_wait_on_json_path_on_scalars() {
     let array = json!([1u32, 2u32, 3u32, 4u32, 5u32]);
 

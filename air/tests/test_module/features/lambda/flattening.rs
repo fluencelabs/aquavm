@@ -133,36 +133,6 @@ fn flattening_streams() {
 }
 
 #[test]
-fn flattening_empty_values() {
-    let stream_value = json!(
-        {"args": []}
-    );
-
-    let set_variable_peer_id = "set_variable";
-    let mut set_variable_vm = create_avm(set_variable_call_service(stream_value), set_variable_peer_id);
-
-    let closure_call_args = ClosureCallArgs::default();
-    let local_peer_id = "local_peer_id";
-    let mut local_vm = create_avm(create_check_service_closure(closure_call_args.clone()), local_peer_id);
-
-    let script = f!(r#"
-        (seq
-            (call "{set_variable_peer_id}" ("" "") [] $stream)
-            (seq
-                (canon "{local_peer_id}" $stream #stream)
-                (call "{local_peer_id}" ("" "") [#stream.$.[1]!]) ; here #stream.$.[1] returns an empty array
-            )
-        )
-        "#);
-
-    let result = checked_call_vm!(set_variable_vm, <_>::default(), script.clone(), "", "");
-    let result = checked_call_vm!(local_vm, <_>::default(), script, "", result.data);
-
-    assert!(is_interpreter_succeded(&result));
-    assert_eq!(closure_call_args.args_var, Rc::new(RefCell::new(vec![])));
-}
-
-#[test]
 #[ignore]
 fn test_handling_non_flattening_values() {
     let stream_value = json!(

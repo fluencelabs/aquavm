@@ -82,7 +82,7 @@ fn select_by_path_from_stream<'value>(
     let value = lambda_to_execution_error!(stream
         .peekable()
         .nth(idx as usize)
-        .ok_or(LambdaError::StreamNotHaveEnoughValues { stream_size, idx }))?;
+        .ok_or(LambdaError::CanonStreamNotHaveEnoughValues { stream_size, idx }))?;
 
     let result = select_by_path_from_scalar(value, body.iter(), exec_ctx)?;
     let select_result = StreamSelectResult::from_cow(result, idx);
