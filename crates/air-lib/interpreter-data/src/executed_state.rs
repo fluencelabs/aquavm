@@ -63,6 +63,24 @@ pub enum CallResult {
     Failed(Rc<CID<ServiceResultAggregate>>),
 }
 
+/*
+ * Previous data scheme was (Scalar as an example, other cases are similar):
+ *
+ * Scalar(CID<JValue>) ---<CID>----> JValue
+ *
+ * New data scheme is much more sofisticated:
+ *
+ * ```
+ * Scalar(CID<ServiceResultAggregate>) ---+
+ *                                        |
+ *             +--------------------------+
+ *             |
+ *             +---<CID>----> ServiceResultAggregate:
+ *                                value_cid -------------<CID>----> JValue
+ *                                tetraplet_cid ---------<CID>----> SecurityTetraplet
+ *                                argument_hash
+ * ```
+ */
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum ValueRef {
