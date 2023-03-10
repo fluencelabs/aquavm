@@ -49,5 +49,5 @@ fn print_xor_log(e: &ExecutionError) {
         return;
     }
 
-    log::debug!("xor caught an error: {}", e);
+    log::trace!("xor caught an error: {}", e);
 }
