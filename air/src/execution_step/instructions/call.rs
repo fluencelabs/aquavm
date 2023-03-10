@@ -68,7 +68,7 @@ fn set_last_error<'i>(
         None => exec_ctx.run_parameters.current_peer_id.to_string(),
     };
 
-    log::warn!(
+    log::debug!(
         "call failed with an error `{}`, peerId `{}`",
         catchable_error,
         current_peer_id
