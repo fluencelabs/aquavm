@@ -60,15 +60,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "air-beautify"
-version = "0.1.2"
-dependencies = [
- "air-beautifier",
- "anyhow",
- "clap 4.1.8",
-]
-
-[[package]]
 name = "air-beautify-wasm"
 version = "0.1.1"
 dependencies = [
@@ -224,10 +215,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "air-trace"
+name = "air-tool"
 version = "0.2.5"
 dependencies = [
  "air",
+ "air-beautifier",
  "air-interpreter-interface",
  "air-test-utils",
  "anyhow",

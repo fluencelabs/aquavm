@@ -15,7 +15,7 @@
  */
 
 use super::ExecutionData;
-use crate::utils::unix_timestamp_now;
+use super::super::super::utils::unix_timestamp_now;
 use avm_interface::ParticleParameters;
 
 use anyhow::Context;
@@ -44,7 +44,7 @@ pub(crate) struct PlainDataArgs {
 }
 
 pub(crate) fn load(args: &PlainDataArgs) -> anyhow::Result<ExecutionData<'_>> {
-    use crate::run::load_data;
+    use super::super::load_data;
 
     let air_script =
         read_air_script(args.air_script_path.as_deref()).context("failed to read AIR script")?;

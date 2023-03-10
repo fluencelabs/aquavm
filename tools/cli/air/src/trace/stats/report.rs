@@ -15,7 +15,7 @@
  */
 
 use super::log_data::{LogKey, LogRecord, Message};
-use crate::utils::parse_tracing_duration;
+use super::super::utils::parse_tracing_duration;
 
 use std::{collections::HashMap, time::Duration};
 
