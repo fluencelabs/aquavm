@@ -22,7 +22,7 @@ use thiserror::Error as ThisError;
 #[derive(Debug, Clone, ThisError)]
 pub enum LambdaError {
     #[error("lambda is applied to a stream that have only '{stream_size}' elements, but '{idx}' requested")]
-    StreamNotHaveEnoughValues { stream_size: usize, idx: u32 },
+    CanonStreamNotHaveEnoughValues { stream_size: usize, idx: u32 },
 
     /// An error occurred while trying to apply lambda to an empty stream.
     #[error("lambda is applied to an empty stream")]

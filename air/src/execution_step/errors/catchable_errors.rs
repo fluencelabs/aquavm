@@ -141,15 +141,6 @@ impl Joinable for CatchableError {
                 log_join!("  waiting for an argument with name '{}'", var_name);
                 true
             }
-            LambdaApplierError(LambdaError::StreamNotHaveEnoughValues { stream_size, idx }) => {
-                log_join!("  waiting for an argument with idx '{}' on stream with size '{}'", idx, stream_size);
-                true
-            }
-            LambdaApplierError(LambdaError::EmptyStream) => {
-                log_join!("  waiting on empty stream for path ");
-                true
-            }
-
             _ => false,
         }
     }
