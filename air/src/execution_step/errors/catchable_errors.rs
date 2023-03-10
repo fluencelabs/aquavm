@@ -125,7 +125,7 @@ impl LastErrorAffectable for CatchableError {
 
 macro_rules! log_join {
     ($($args:tt)*) => {
-        log::info!(target: air_log_targets::JOIN_BEHAVIOUR, $($args)*)
+        log::trace!(target: air_log_targets::JOIN_BEHAVIOUR, $($args)*)
     }
 }
 
