@@ -215,24 +215,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "air-tool"
-version = "0.2.5"
-dependencies = [
- "air",
- "air-beautifier",
- "air-interpreter-interface",
- "air-test-utils",
- "anyhow",
- "avm-data-store",
- "avm-interface",
- "clap 4.1.8",
- "itertools",
- "serde",
- "serde_json",
- "tracing-subscriber",
-]
-
-[[package]]
 name = "air-trace-handler"
 version = "0.1.2"
 dependencies = [
@@ -1159,6 +1141,24 @@ name = "fixedbitset"
 version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0ce7134b9999ecaf8bcd65542e436736ef32ddca1b3e06094cb6ec5755203b80"
+
+[[package]]
+name = "fluence-air-cli"
+version = "0.2.5"
+dependencies = [
+ "air",
+ "air-beautifier",
+ "air-interpreter-interface",
+ "air-test-utils",
+ "anyhow",
+ "avm-data-store",
+ "avm-interface",
+ "clap 4.1.8",
+ "itertools",
+ "serde",
+ "serde_json",
+ "tracing-subscriber",
+]
 
 [[package]]
 name = "fluence-app-service"
