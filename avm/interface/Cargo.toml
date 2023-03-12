@@ -19,9 +19,9 @@ air-interpreter-interface = { version = "0.12.1", path = "../../crates/air-lib/i
 air-utils = { version = "0.1.0", path = "../../crates/air-lib/utils" }
 polyplets = { version = "0.3.2", path = "../../crates/air-lib/polyplets" }
 
-thiserror = "1.0.38"
+thiserror = "1.0.39"
 maplit = "1.0.2"
 serde_json = "1.0.94"
-serde = "1.0.152"
+serde = "1.0.155"
 log = "0.4.17"
 tracing = "0.1.37"
