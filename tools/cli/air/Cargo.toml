@@ -1,5 +1,5 @@
 [package]
-name = "fluence-air-cli"
+name = "aquavm-air-cli"
 version = "0.2.5"
 edition = "2021"
 description = "AIR execution and printing tool"

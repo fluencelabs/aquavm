@@ -38,7 +38,7 @@
     },
     "crates/data-store": {},
     "crates/testing-framework": {},
-    "tools/cli/fluence-air-cli": {},
+    "tools/cli/aquavm-air-cli": {},
     "tools/wasm/air-beautify-wasm": {
       "component": "air-beautify-wasm"
     }

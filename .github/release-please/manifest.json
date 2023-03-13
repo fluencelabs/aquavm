@@ -14,6 +14,6 @@
   "crates/beautifier": "0.1.1",
   "crates/data-store": "0.6.0",
   "crates/testing-framework": "0.1.4",
-  "tools/cli/fluence-air-cli": "0.2.5",
+  "tools/cli/aquavm-air-cli": "0.2.5",
   "tools/wasm/air-beautify-wasm": "0.1.0"
 }

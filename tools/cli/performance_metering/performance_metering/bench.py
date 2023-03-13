@@ -76,7 +76,7 @@ class Bench:
                     "cargo", "run",
                     "--quiet",
                     "--release",
-                    "--package", "fluence-air-cli",
+                    "--package", "aquavm-air-cli",
                     "--",
                     "run",
                     "--json",
