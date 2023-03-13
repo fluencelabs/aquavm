@@ -4,7 +4,7 @@ version = 3
 
 [[package]]
 name = "air-interpreter-wasm"
-version = "0.35.5"
+version = "0.37.0"
 dependencies = [
  "built",
 ]
