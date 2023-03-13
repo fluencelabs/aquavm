@@ -15,9 +15,8 @@
  */
 
 use air::{ExecutionCidState, UncatchableError};
-use air_interpreter_data::{ExecutionTrace, InterpreterData, ServiceResultAggregate};
+use air_interpreter_data::{ExecutionTrace, ServiceResultAggregate};
 use air_test_utils::prelude::*;
-use semver::Version;
 
 // Check that %init_peer_id% alias works correctly (by comparing result with it and explicit peer id).
 // Additionally, check that empty string for data does the same as empty call path.
