@@ -40,8 +40,11 @@ struct Cli {
 #[derive(clap::Subcommand)]
 #[allow(clippy::large_enum_variant)]
 enum Subcommand {
+    #[clap(alias = "b")]
     Beautify(self::beautify::Args),
+    #[clap(alias = "r")]
     Run(self::trace::run::Args),
+    #[clap(alias = "s")]
     Stats(self::trace::stats::Args),
 }
 

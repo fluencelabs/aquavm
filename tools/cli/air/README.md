@@ -4,11 +4,15 @@ The `air` CLI utility is a helper tool for Aqua and AIR developers.  It has thre
 
 ## `air beautify`
 
+Alias: `air b`.
+
 This subcommand reads an AIR script from standard input and prints it in human-readable Python-like representation.  This representation cannot be executed and is intended to be read by mere mortals.
 
 It outputs to standard output or a file.
 
 ## `air run`
+
+Alias: `air r`.
 
 Executes an AIR script with data in WASM AquaVM.  It has two modes of parameter input: plain and anomaly.
 
@@ -37,6 +41,8 @@ In the anomaly mode, the only argument is a path to self-contained anomaly data 
 Run `air run --anomaly --help` to see all anomaly mode options.
 
 ## `air stats`
+
+Alias: `air s`.
 
 This subcommand allows to process JSON trace collected with `air run --json`.  It has two primary options:
 
