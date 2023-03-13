@@ -64,11 +64,7 @@ pub enum CallResult {
 }
 
 /*
- * Previous data scheme was (Scalar as an example, other cases are similar):
- *
- * Scalar(CID<JValue>) ---<CID>----> JValue
- *
- * New data scheme is much more sofisticated:
+ * The current value structure is:
  *
  * ```
  * Scalar(CID<ServiceResultAggregate>) ---+
