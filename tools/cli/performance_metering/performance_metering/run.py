@@ -42,7 +42,7 @@ def _prepare(args):
         ])
         logger.info("Build air-trace...")
         subprocess.check_call([
-            "cargo", "build", "--release", "--package", "air-trace",
+            "cargo", "build", "--release", "--package", "fluence-air-cli",
         ])
 
 

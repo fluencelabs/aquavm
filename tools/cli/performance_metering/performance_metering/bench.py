@@ -76,7 +76,7 @@ class Bench:
                     "cargo", "run",
                     "--quiet",
                     "--release",
-                    "--package", "air-trace",
+                    "--package", "fluence-air-cli",
                     "--",
                     "run",
                     "--json",
