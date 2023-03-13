@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-use super::log_data::{LogKey, LogRecord, Message};
 use super::super::utils::parse_tracing_duration;
+use super::log_data::{LogKey, LogRecord, Message};
 
 use std::{collections::HashMap, time::Duration};
 

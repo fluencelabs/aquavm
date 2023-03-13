@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-use super::ExecutionData;
 use super::super::super::utils::unix_timestamp_now;
+use super::ExecutionData;
 use avm_interface::ParticleParameters;
 
 use anyhow::Context;
