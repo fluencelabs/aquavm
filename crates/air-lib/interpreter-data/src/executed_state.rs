@@ -23,7 +23,6 @@ use crate::TracePos;
 use air_interpreter_cid::CID;
 use polyplets::SecurityTetraplet;
 use se_de::par_serializer;
-use se_de::sender_serializer;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -36,7 +35,7 @@ pub struct ParResult {
     pub right_size: u32,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Sender {
     PeerId(Rc<String>),
     PeerIdWithCallId {
@@ -50,7 +49,6 @@ pub enum Sender {
 #[serde(rename_all = "snake_case")]
 pub enum CallResult {
     /// Request was sent to a target node by node with such public key and it shouldn't be called again.
-    #[serde(with = "sender_serializer")]
     #[serde(rename = "sent_by")]
     RequestSentBy(Sender),
 
