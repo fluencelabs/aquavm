@@ -61,10 +61,12 @@ pub(super) fn handle_prev_state<'i>(
                 .resolve_service_value(failed_cid)
                 .map_err(UncatchableError::from)?;
             let call_service_failed: CallServiceFailed = deserialize_from_value((*err_value).clone())?;
+
             exec_ctx.make_subgraph_incomplete();
-            let err_msg = call_service_failed.1.clone();
             trace_ctx.meet_call_end(met_result.result);
-            Err(CatchableError::LocalServiceError(call_service_failed.0, err_msg).into())
+
+            let err_msg = call_service_failed.message;
+            Err(CatchableError::LocalServiceError(call_service_failed.ret_code, err_msg).into())
         }
         RequestSentBy(Sender::PeerIdWithCallId {
             ref peer_id,

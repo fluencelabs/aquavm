@@ -91,13 +91,16 @@ pub enum ValueRef {
     Unused(Rc<CID<ServiceResultAggregate>>),
 }
 
-/// Please note that second argument is a JSON-serialized value, not a plain error message.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct CallServiceFailed(pub i32, pub Rc<String>);
+pub struct CallServiceFailed {
+    pub ret_code: i32,
+    /// This field contains a JSON-serialized value, not a plain error message.
+    pub message: Rc<String>,
+}
 
 impl CallServiceFailed {
     pub fn new(ret_code: i32, message: Rc<String>) -> Self {
-        Self(ret_code, message)
+        Self { ret_code, message }
     }
 
     pub fn to_value(&self) -> JValue {
