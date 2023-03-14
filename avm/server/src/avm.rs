@@ -145,7 +145,7 @@ impl<E> AVM<E> {
     }
 
     /// Return memory stat of an interpreter heap.
-    pub fn memory_stats(&mut self) -> AVMMemoryStats {
+    pub fn memory_stats(&self) -> AVMMemoryStats {
         self.runner.memory_stats()
     }
 

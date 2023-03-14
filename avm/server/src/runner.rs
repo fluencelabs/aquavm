@@ -152,7 +152,7 @@ impl AVMRunner {
         Ok(outcome)
     }
 
-    pub fn memory_stats(&mut self) -> AVMMemoryStats {
+    pub fn memory_stats(&self) -> AVMMemoryStats {
         let stats = self.marine.module_memory_stats();
 
         // only the interpreters must be loaded in Marine
