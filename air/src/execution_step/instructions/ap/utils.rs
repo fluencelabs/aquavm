@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-use super::ExecutionResult;
 use crate::execution_step::execution_context::StreamValueDescriptor;
 use crate::execution_step::Generation;
 use crate::execution_step::ValueAggregate;
@@ -44,16 +43,5 @@ pub(super) fn generate_value_descriptor<'stream>(
             Generation::Nth(met_result.generation),
             stream.position,
         ),
-    }
-}
-
-pub(super) fn try_match_trace_to_instr(merger_ap_result: &MergerApResult, instr: &ast::Ap<'_>) -> ExecutionResult<()> {
-    use crate::execution_step::UncatchableError::ApResultNotCorrespondToInstr;
-    use ast::ApResult;
-
-    match (&instr.result, merger_ap_result) {
-        (ApResult::Stream(_), MergerApResult::Met(_)) => Ok(()),
-        (_, MergerApResult::NotMet) => Ok(()),
-        _ => Err(ApResultNotCorrespondToInstr(merger_ap_result.clone()).into()),
     }
 }
