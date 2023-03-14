@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+use super::Stream;
+use crate::execution_step::Generation;
 use crate::JValue;
 use crate::ToErrorCode;
 
@@ -23,6 +25,7 @@ use air_interpreter_data::ValueRef;
 use air_trace_handler::merger::MergerApResult;
 use air_trace_handler::GenerationCompatificationError;
 use air_trace_handler::TraceHandlerError;
+
 use strum::IntoEnumIterator;
 use strum_macros::EnumDiscriminants;
 use strum_macros::EnumIter;
@@ -99,6 +102,13 @@ pub enum UncatchableError {
     /// and not having any CID is considered a non-catching error.
     #[error("{0} for CID {1:?} not found")]
     ValueForCidNotFound(&'static str, String),
+
+    /// Errors occurred while insertion of a value inside stream that doesn't have corresponding generation.
+    #[error(
+        "stream doesn't have generation with number {generation}, supplied to the interpreter data is corrupted,\n\
+             stream is {stream:?}"
+    )]
+    StreamDontHaveSuchGeneration { stream: Stream, generation: Generation },
 }
 
 impl ToErrorCode for UncatchableError {

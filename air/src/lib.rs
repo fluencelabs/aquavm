@@ -41,6 +41,7 @@ pub use execution_step::ExecutionError;
 pub use execution_step::LambdaError;
 pub use execution_step::LastErrorObjectError;
 pub use execution_step::UncatchableError;
+pub use farewell_step::FarewellError;
 pub use polyplets::ResolvedTriplet;
 pub use polyplets::SecurityTetraplet;
 pub use preparation_step::PreparationError;

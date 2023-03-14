@@ -40,7 +40,7 @@ pub(crate) fn from_success_result(
     let (ret_code, error_message) = if exec_ctx.call_results.is_empty() {
         (INTERPRETER_SUCCESS, String::new())
     } else {
-        let farewell_error = Rc::new(FarewellError::CallResultsNotEmpty(exec_ctx.call_results.clone()));
+        let farewell_error = Rc::new(FarewellError::UnprocessedCallResult(exec_ctx.call_results.clone()));
         (farewell_error.to_error_code(), farewell_error.to_string())
     };
 

@@ -5,7 +5,8 @@
   "bump-patch-for-minor-pre-major": true,
   "plugins": [
     {
-      "type": "cargo-workspace"
+      "type": "cargo-workspace",
+      "merge": false
     },
     {
       "type": "linked-versions",
@@ -14,15 +15,6 @@
         "air",
         "air-interpreter",
         "avm-client"
-      ]
-    },
-    {
-      "type": "linked-versions",
-      "groupName": "air-beautifier and air-beautify",
-      "components": [
-        "air-beautifier",
-        "air-beautify",
-        "air-beautify-wasm"
       ]
     }
   ],

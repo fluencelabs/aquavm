@@ -15,6 +15,7 @@
  */
 
 use air::PreparationError;
+use air_interpreter_interface::{CallResults, RunParameters};
 use air_test_utils::prelude::*;
 
 use serde::Deserialize;
@@ -72,5 +73,29 @@ fn invalid_data_with_versions() {
         error: expected_serde_error,
         versions,
     };
+    assert!(check_error(&result, expected_error));
+}
+
+#[test]
+fn invalid_callresults() {
+    let air = r#"(null)"#.to_string();
+    let client_peer_id = "some_peer_id".to_string();
+    let prev_data = InterpreterData::new(semver::Version::new(1, 1, 1));
+    let prev_data: Vec<u8> = serde_json::to_vec(&prev_data).unwrap();
+    let data = Vec::<u8>::new();
+    let wrong_call_results = Vec::<u32>::new();
+    let wrong_call_results = serde_json::to_vec(&wrong_call_results).unwrap();
+    let run_parameters = RunParameters::new(client_peer_id.clone(), client_peer_id.clone(), 0, 0);
+    let result = air::execute_air(air, prev_data, data, run_parameters, wrong_call_results.clone());
+    let result = RawAVMOutcome::from_interpreter_outcome(result).unwrap();
+
+    let expected_serde_error = serde_json::from_slice::<CallResults>(&wrong_call_results)
+        .err()
+        .unwrap();
+    let expected_error = PreparationError::CallResultsDeFailed {
+        error: expected_serde_error,
+        call_results: wrong_call_results,
+    };
+
     assert!(check_error(&result, expected_error));
 }

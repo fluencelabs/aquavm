@@ -29,8 +29,7 @@ use codespan_reporting::term;
 use codespan_reporting::term::termcolor::{Buffer, ColorChoice, StandardStream};
 use lalrpop_util::{ErrorRecovery, ParseError};
 
-// Caching parser to cache internal regexes, which are expensive to instantiate
-// See also https://github.com/lalrpop/lalrpop/issues/269
+// caching parser to improve instantiation time
 thread_local!(static PARSER: AIRParser = AIRParser::new());
 
 /// Parse AIR `source_code` to `Box<Instruction>`

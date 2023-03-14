@@ -99,10 +99,10 @@ impl AVMOutcome {
 }
 
 impl ErrorAVMOutcome {
-    pub(self) fn new(error_code: i64, error_msg: String, outcome: AVMOutcome) -> Self {
+    pub(self) fn new(error_code: i64, error_message: String, outcome: AVMOutcome) -> Self {
         Self {
             error_code,
-            error_message: error_msg,
+            error_message,
             outcome,
         }
     }
