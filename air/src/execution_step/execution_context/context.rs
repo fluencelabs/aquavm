@@ -166,7 +166,6 @@ impl ExecutionCidState {
         argument_hash: Rc<str>,
     ) -> Result<Rc<CID<ServiceResultAggregate>>, CidCalculationError> {
         let value_cid = self.value_tracker.record_value(value)?;
-
         let tetraplet_cid = self.tetraplet_tracker.record_value(tetraplet)?;
 
         let service_result_agg = ServiceResultAggregate {
