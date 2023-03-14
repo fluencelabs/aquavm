@@ -196,15 +196,15 @@ fn check_tetraplet_works_correctly() {
     assert_eq!(arg_tetraplets, expected_tetraplets);
 }
 
+use fluence_app_service::AppService;
 use fluence_app_service::AppServiceConfig;
 use fluence_app_service::MarineConfig;
 use fluence_app_service::ModuleDescriptor;
-use fluence_app_service::{AppService, DefaultWasmBackend};
 
 use air_test_utils::trace_from_result;
 use std::path::PathBuf;
 
-fn construct_service_config(module_name: impl Into<String>) -> AppServiceConfig<DefaultWasmBackend> {
+fn construct_service_config(module_name: impl Into<String>) -> AppServiceConfig {
     let module_name = module_name.into();
     let module_path = format!("./tests/security_tetraplets/{module_name}/target/wasm32-wasi/debug/");
 
@@ -223,6 +223,7 @@ fn construct_service_config(module_name: impl Into<String>) -> AppServiceConfig<
     let service_base_dir = std::env::temp_dir();
 
     AppServiceConfig {
+        service_working_dir: service_base_dir.clone(),
         service_base_dir,
         marine_config,
     }
@@ -260,7 +261,7 @@ fn tetraplet_with_wasm_modules() {
         call_parameters.tetraplets = tetraplets;
 
         let mut service = services_inner.borrow_mut();
-        let service: &mut AppService<_> = service.get_mut(params.service_id.as_str()).unwrap();
+        let service = service.get_mut(params.service_id.as_str()).unwrap();
 
         let result = service
             .call(params.function_name, JValue::Array(params.arguments), call_parameters)

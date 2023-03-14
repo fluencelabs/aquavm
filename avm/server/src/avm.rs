@@ -86,8 +86,10 @@ impl<E> AVM<E> {
         call_results: CallResults,
     ) -> AVMResult<AVMOutcome, E> {
         let air = air.into();
-        let particle_id = particle_parameters.particle_id.as_ref();
-        let prev_data = self.data_store.read_data(particle_id)?;
+        let prev_data = self.data_store.read_data(
+            &particle_parameters.particle_id,
+            &particle_parameters.current_peer_id,
+        )?;
         let current_data = data.into();
 
         let execution_start_time = Instant::now();
@@ -102,16 +104,20 @@ impl<E> AVM<E> {
                 particle_parameters.timestamp,
                 particle_parameters.ttl,
                 particle_parameters.current_peer_id.clone(),
-                call_results,
+                call_results.clone(),
             )
             .map_err(AVMError::RunnerError)?;
 
         let execution_time = execution_start_time.elapsed();
         let memory_delta = self.memory_stats().memory_size - memory_size_before;
-        if self.data_store.detect_anomaly(execution_time, memory_delta) {
+        if self
+            .data_store
+            .detect_anomaly(execution_time, memory_delta, &outcome)
+        {
             self.save_anomaly_data(
                 &air,
                 &current_data,
+                &call_results,
                 &particle_parameters,
                 &outcome,
                 execution_time,
@@ -120,7 +126,11 @@ impl<E> AVM<E> {
         }
 
         // persist resulted data
-        self.data_store.store_data(&outcome.data, particle_id)?;
+        self.data_store.store_data(
+            &outcome.data,
+            &particle_parameters.particle_id,
+            &particle_parameters.current_peer_id,
+        )?;
         let outcome = AVMOutcome::from_raw_outcome(outcome, memory_delta, execution_time)
             .map_err(AVMError::InterpreterFailed)?;
 
@@ -129,29 +139,32 @@ impl<E> AVM<E> {
 
     /// Cleanup data that become obsolete.
     #[allow(clippy::result_large_err)]
-    pub fn cleanup_data(&mut self, particle_id: &str) -> AVMResult<(), E> {
-        self.data_store.cleanup_data(particle_id)?;
+    pub fn cleanup_data(&mut self, particle_id: &str, current_peer_id: &str) -> AVMResult<(), E> {
+        self.data_store.cleanup_data(particle_id, current_peer_id)?;
         Ok(())
     }
 
     /// Return memory stat of an interpreter heap.
-    pub fn memory_stats(&mut self) -> AVMMemoryStats {
+    pub fn memory_stats(&self) -> AVMMemoryStats {
         self.runner.memory_stats()
     }
 
-    #[allow(clippy::result_large_err)]
+    #[allow(clippy::result_large_err, clippy::too_many_arguments)]
     fn save_anomaly_data(
         &mut self,
         air_script: &str,
         current_data: &[u8],
+        call_result: &CallResults,
         particle_parameters: &ParticleParameters<'_>,
         avm_outcome: &RawAVMOutcome,
         execution_time: Duration,
         memory_delta: usize,
     ) -> AVMResult<(), E> {
-        let prev_data = self
-            .data_store
-            .read_data(&particle_parameters.particle_id)?;
+        let prev_data = self.data_store.read_data(
+            &particle_parameters.particle_id,
+            &particle_parameters.current_peer_id,
+        )?;
+        let call_results = serde_json::to_vec(call_result).map_err(AVMError::AnomalyDataSeError)?;
         let ser_particle =
             serde_json::to_vec(particle_parameters).map_err(AVMError::AnomalyDataSeError)?;
         let ser_avm_outcome =
@@ -162,13 +175,18 @@ impl<E> AVM<E> {
             &ser_particle,
             &prev_data,
             current_data,
+            &call_results,
             &ser_avm_outcome,
             execution_time,
             memory_delta,
         );
 
         self.data_store
-            .collect_anomaly_data(&particle_parameters.particle_id, anomaly_data)
+            .collect_anomaly_data(
+                &particle_parameters.particle_id,
+                &particle_parameters.current_peer_id,
+                anomaly_data,
+            )
             .map_err(Into::into)
     }
 }

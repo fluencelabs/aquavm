@@ -2,6 +2,11 @@ name: "Run tests"
 
 on:
   pull_request:
+    paths-ignore:
+      - "!**.md"
+  push:
+    branches:
+      - "master"
 
 concurrency:
   group: "${{ github.workflow }}-${{ github.ref }}"
@@ -16,6 +21,9 @@ jobs:
     timeout-minutes: 60
     runs-on: builder
 
+    permissions:
+      checks: write # for coverall to create checks
+
     steps:
       - uses: actions/checkout@v3
 
@@ -23,7 +31,67 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
 
       - name: Install marine
-        uses: baptiste0928/cargo-install@v1.3.0
+        uses: baptiste0928/cargo-install@v1.3.1
+        with:
+          crate: marine
+
+      - name: Build Wasm binary for tests
+        run: ./build_test_binaries.sh
+        working-directory: air/tests/test_module
+
+      - name: Run cargo build
+        run: cargo build
+
+      - name: Run cargo test
+        env:
+          # required by grcov
+          CARGO_INCREMENTAL: 0
+          RUSTFLAGS: "-Zprofile -Ccodegen-units=1 -Copt-level=0 -Clink-dead-code -Coverflow-checks=off -Zpanic_abort_tests -Cpanic=abort"
+          RUSTDOCFLAGS: "-Cpanic=abort"
+        run: |
+          cargo test --release
+          # Check that it does compile
+          cargo bench --no-run
+          # The `memory` sanitizer on cargo test has false positive even on empty project.
+          for san in address leak; do
+            RUSTFLAGS="$RUSTFLAGS -Z sanitizer=$san" cargo test --features test_with_native_code --target x86_64-unknown-linux-gnu
+          done
+
+      - name: Setup grcov
+        uses: SierraSoftworks/setup-grcov@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          version: latest
+
+      - name: Run grcov
+        id: coverage
+        uses: actions-rs/grcov@v0.1
+
+      - name: Coveralls upload
+        uses: coverallsapp/github-action@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: ${{ steps.coverage.outputs.report }}
+
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v3
+        with:
+          name: code-coverage-report.zip
+          path: ${{ steps.coverage.outputs.report }}
+
+  lint:
+    name: "aquavm / lints"
+    timeout-minutes: 60
+    runs-on: builder
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Install marine
+        uses: baptiste0928/cargo-install@v1.3.1
         with:
           crate: marine
 
@@ -39,16 +107,6 @@ jobs:
 
       - name: Check native air-trace
         run: cargo check --package air-trace --no-default-features
-
-      - name: Run cargo test
-        run: |
-          cargo test --release
-          # Check that it does compile
-          cargo bench --no-run
-          # The `memory` sanitizer on cargo test has false positive even on empty project.
-          for san in address leak; do
-              RUSTFLAGS="-Z sanitizer=$san" cargo test --features test_with_native_code --target x86_64-unknown-linux-gnu
-          done
 
       - name: Run cargo clippy
         run: cargo clippy -v

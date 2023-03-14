@@ -16,7 +16,6 @@
 
 use super::Joinable;
 use super::LastErrorAffectable;
-use super::Stream;
 use crate::execution_step::execution_context::LastErrorObjectError;
 use crate::execution_step::lambda_applier::LambdaError;
 use crate::JValue;
@@ -56,7 +55,7 @@ pub enum CatchableError {
     },
 
     /// A fold instruction must iterate over array value.
-    #[error("lambda '{1}' returned non-array value '{0}' for fold instruction")]
+    #[error("expression '{1}' returned non-array value '{0}' for fold iterable")]
     FoldIteratesOverNonArray(JValue, String),
 
     /// This error type is produced by a match to notify xor that compared values aren't equal.
@@ -75,10 +74,6 @@ pub enum CatchableError {
     #[error(transparent)]
     LambdaApplierError(#[from] LambdaError),
 
-    /// Errors occurred while insertion of a value inside stream that doesn't have corresponding generation.
-    #[error("stream {0:?} doesn't have generation with number {1}, probably a supplied to the interpreter data is corrupted")]
-    StreamDontHaveSuchGeneration(Stream, usize),
-
     /// This error type is produced by a fail instruction that tries to throw a scalar that have inappropriate type.
     #[error(transparent)]
     InvalidLastErrorObjectError(#[from] LastErrorObjectError),
@@ -91,6 +86,13 @@ pub enum CatchableError {
     /// This error type is occurred when the length functor applied to a value of non-array type.
     #[error("the length functor could applied only to an array-like value, but it's applied to '{0}'")]
     LengthFunctorAppliedToNotArray(JValue),
+
+    /// Call gets non-string JValue resolving triplet parts.
+    #[error("call cannot resolve non-String triplet variable part `{variable_name}` with value '{actual_value}'")]
+    NonStringValueInTripletResolution {
+        variable_name: String,
+        actual_value: JValue,
+    },
 }
 
 impl From<LambdaError> for Rc<CatchableError> {
@@ -123,7 +125,7 @@ impl LastErrorAffectable for CatchableError {
 
 macro_rules! log_join {
     ($($args:tt)*) => {
-        log::info!(target: air_log_targets::JOIN_BEHAVIOUR, $($args)*)
+        log::trace!(target: air_log_targets::JOIN_BEHAVIOUR, $($args)*)
     }
 }
 
@@ -139,15 +141,6 @@ impl Joinable for CatchableError {
                 log_join!("  waiting for an argument with name '{}'", var_name);
                 true
             }
-            LambdaApplierError(LambdaError::StreamNotHaveEnoughValues { stream_size, idx }) => {
-                log_join!("  waiting for an argument with idx '{}' on stream with size '{}'", idx, stream_size);
-                true
-            }
-            LambdaApplierError(LambdaError::EmptyStream) => {
-                log_join!("  waiting on empty stream for path ");
-                true
-            }
-
             _ => false,
         }
     }

@@ -1,6 +1,6 @@
 [package]
 name = "air-beautify"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 description = "AIR human-readable format transformer binary"
 authors = ["Fluence Labs"]
@@ -9,6 +9,6 @@ publish = false
 keywords = ["fluence", "air", "beautifier"]
 
 [dependencies]
-air-beautifier = { version = "0.1.1", path = "../../../crates/beautifier" }
-clap = { version = "4.1.4", features = ["derive"] }
+air-beautifier = { version = "0.1.2", path = "../../../crates/beautifier" }
+clap = { version = "4.1.8", features = ["derive"] }
 anyhow = "1.0.69"
