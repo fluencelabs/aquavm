@@ -5,7 +5,17 @@
   "bump-patch-for-minor-pre-major": true,
   "plugins": [
     {
-      "type": "cargo-workspace"
+      "type": "cargo-workspace",
+      "merge": false
+    },
+    {
+      "type": "linked-versions",
+      "groupName": "air-interpreter",
+      "components": [
+        "air",
+        "air-interpreter",
+        "avm-client"
+      ]
     }
   ],
   "packages": {

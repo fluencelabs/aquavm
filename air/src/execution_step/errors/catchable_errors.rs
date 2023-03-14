@@ -55,7 +55,7 @@ pub enum CatchableError {
     },
 
     /// A fold instruction must iterate over array value.
-    #[error("expression '{1}' returned non-array value '{0}' for a fold iterable")]
+    #[error("expression '{1}' returned non-array value '{0}' for fold iterable")]
     FoldIteratesOverNonArray(JValue, String),
 
     /// This error type is produced by a match to notify xor that compared values aren't equal.
