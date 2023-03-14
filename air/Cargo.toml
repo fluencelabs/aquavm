@@ -46,7 +46,7 @@ tracing = "0.1.37"
 [dev_dependencies]
 air-test-utils = { version = "0.4.1", path = "../crates/air-lib/test-utils" }
 air-testing-framework = { version = "0.1.1", path = "../crates/testing-framework" }
-fluence-app-service = {version = "0.23.0", branch = "marine-web-milestone2", git = "https://github.com/fluencelabs/marine"}
+fluence-app-service = {version = "0.24.0", branch = "marine-web-milestone2", git = "https://github.com/fluencelabs/marine"}
 marine-rs-sdk = { version = "0.7.0", features = ["logger"] }
 
 # the feature just silence a warning in the criterion 0.3.x.

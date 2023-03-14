@@ -13,5 +13,5 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 # 0.2.79: a function can return Result<..., JsError>.
-wasm-bindgen = { version = "=0.2.82", features = ["serde-serialize"] }
+wasm-bindgen = { version = "=0.2.83", features = ["serde-serialize"] }
 air-beautifier = { version = "0.1.2", path = "../../../crates/beautifier" }
