@@ -35,7 +35,7 @@ fn test_missing_cid() {
 
     let cur_data = raw_data_from_trace(trace, tracker);
     let result = call_vm!(vm, <_>::default(), air_script, vec![], cur_data);
-    assert_eq!(result.ret_code, 20012);
+    assert_eq!(result.ret_code, 20011);
     assert_eq!(
         result.error_message,
         "value for CID \"bagaaieraondvznakk2hi3kfaixhnceatpykz7cikytniqo3lc7ogkgz2qbeq\" not found"

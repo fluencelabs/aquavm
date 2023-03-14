@@ -182,7 +182,7 @@ fn test_canon_value_not_found() {
     let cur_data = raw_data_from_trace_with_canon(trace, CidTracker::<_>::new(), tetraplet_tracker, canon_tracker);
     let result = call_vm!(vm, <_>::default(), air_script, vec![], cur_data);
 
-    assert_eq!(result.ret_code, 20012);
+    assert_eq!(result.ret_code, 20011);
     assert_eq!(
         result.error_message,
         format!("value for CID \"{missing_cid}\" not found")
@@ -238,7 +238,7 @@ fn test_canon_root_tetraplet_not_found() {
     let cur_data = raw_data_from_trace_with_canon(trace, value_tracker, fake_tetraplet_tracker, canon_tracker);
     let result = call_vm!(vm, <_>::default(), air_script, vec![], cur_data);
 
-    assert_eq!(result.ret_code, 20012);
+    assert_eq!(result.ret_code, 20011);
     assert_eq!(
         result.error_message,
         format!("tetraplet for CID \"{missing_cid}\" not found")
@@ -293,7 +293,7 @@ fn test_canon_tetraplet_not_found() {
     let cur_data = raw_data_from_trace_with_canon(trace, value_tracker, fake_tetraplet_tracker, canon_tracker);
     let result = call_vm!(vm, <_>::default(), air_script, vec![], cur_data);
 
-    assert_eq!(result.ret_code, 20012);
+    assert_eq!(result.ret_code, 20011);
     assert_eq!(
         result.error_message,
         format!("tetraplet for CID \"{missing_cid}\" not found"),
@@ -343,7 +343,7 @@ fn test_canon_agg_not_found() {
     let cur_data = raw_data_from_trace_with_canon(trace, value_tracker, tetraplet_tracker, <_>::default());
     let result = call_vm!(vm, <_>::default(), air_script, vec![], cur_data);
 
-    assert_eq!(result.ret_code, 20012);
+    assert_eq!(result.ret_code, 20011);
     assert_eq!(
         result.error_message,
         format!("canon aggregate for CID \"{missing_cid}\" not found")
