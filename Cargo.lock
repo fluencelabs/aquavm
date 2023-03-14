@@ -48,7 +48,7 @@ dependencies = [
 
 [[package]]
 name = "air"
-version = "0.36.0"
+version = "0.37.0"
 dependencies = [
  "air-execution-info-collector",
  "air-interpreter-cid",
@@ -120,7 +120,7 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter"
-version = "0.35.5"
+version = "0.37.0"
 dependencies = [
  "air",
  "air-interpreter-interface",
@@ -225,7 +225,7 @@ dependencies = [
 
 [[package]]
 name = "air-test-utils"
-version = "0.4.4"
+version = "0.4.5"
 dependencies = [
  "air",
  "air-interpreter-cid",
@@ -245,7 +245,7 @@ dependencies = [
 
 [[package]]
 name = "air-testing-framework"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "air-parser",
  "air-test-utils",
@@ -260,7 +260,7 @@ dependencies = [
 
 [[package]]
 name = "air-trace"
-version = "0.2.5"
+version = "0.2.6"
 dependencies = [
  "air",
  "air-interpreter-interface",
@@ -402,7 +402,7 @@ dependencies = [
 
 [[package]]
 name = "avm-server"
-version = "0.30.0"
+version = "0.30.1"
 dependencies = [
  "air-interpreter-interface",
  "air-utils",
