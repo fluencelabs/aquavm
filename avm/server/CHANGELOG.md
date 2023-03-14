@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.30.1](https://github.com/fluencelabs/aquavm/compare/avm-server-v0.30.0...avm-server-v0.30.1) (2023-03-13)
+
+
+### Bug Fixes
+
+* **deps:** update rust crate marine-runtime to 0.25.0 ([#498](https://github.com/fluencelabs/aquavm/issues/498)) ([8c25dbe](https://github.com/fluencelabs/aquavm/commit/8c25dbe8f681f46cbfc5e914614b4f103f0f556a))
+
 ## [0.30.0](https://github.com/fluencelabs/aquavm/compare/avm-server-v0.29.0...avm-server-v0.30.0) (2023-02-27)
 
 
