@@ -5,7 +5,8 @@ description = "Implementation of AIR execution info collector"
 authors = ["Fluence Labs"]
 edition = "2018"
 license = "Apache-2.0"
-publish = false
+repository = "https://github.com/fluencelabs/aquavm"
+documentation = "https://docs.rs/air-execution-info-collector"
 keywords = ["fluence", "air", "webassembly", "programming-language"]
 categories = ["wasm"]
 
@@ -14,4 +15,4 @@ name = "air_execution_info_collector"
 path = "src/lib.rs"
 
 [dependencies]
-air-parser = { path = "../air-parser" }
+aquavm-air-parser = { path = "../air-parser" }

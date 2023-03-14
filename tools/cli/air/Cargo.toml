@@ -5,11 +5,12 @@ edition = "2021"
 description = "AIR execution and printing tool"
 authors = ["Fluence Labs"]
 license = "Apache-2.0"
-publish = false
+repository = "https://github.com/fluencelabs/aquavm"
+documentation = "https://docs.rs/aquavm-air-cli"
 keywords = ["fluence", "air", "tracing"]
 
 [dependencies]
-air = { version = "0.36.0", path = "../../../air" }
+aquavm-air = { version = "0.36.0", path = "../../../air" }
 air-beautifier = { version = "0.1.2", path = "../../../crates/beautifier" }
 avm-data-store = { version = "0.6.0", path = "../../../crates/data-store" }
 avm-interface = { version = "0.28.2", path = "../../../avm/interface" }
