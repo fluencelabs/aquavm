@@ -22,7 +22,6 @@ use crate::ToErrorCode;
 use air_interpreter_cid::CidCalculationError;
 use air_interpreter_data::TracePos;
 use air_interpreter_data::ValueRef;
-use air_trace_handler::merger::MergerApResult;
 use air_trace_handler::GenerationCompatificationError;
 use air_trace_handler::TraceHandlerError;
 
@@ -61,11 +60,6 @@ pub enum UncatchableError {
     /// Multiple fold states found for such iterator name.
     #[error("multiple iterable values found for iterable name '{0}'")]
     MultipleIterableValues(String),
-
-    /// Errors occurred when result from data doesn't match to an ap instruction, f.e. an ap
-    /// could be applied to a stream, but result doesn't contain generation in a source position.
-    #[error("ap result {0:?} doesn't match with corresponding instruction")]
-    ApResultNotCorrespondToInstr(MergerApResult),
 
     /// Errors occurred when result from data doesn't match to a call instruction, f.e. a call
     /// could be applied to a stream, but result doesn't contain generation in a source position.
