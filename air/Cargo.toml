@@ -4,6 +4,7 @@ version = "0.37.1"
 description = "Interpreter of AIR scripts intended to coordinate request flow in the Fluence network"
 authors = ["Fluence Labs"]
 edition = "2018"
+license = "Apache-2.0"
 repository = "https://github.com/fluencelabs/aquavm"
 documentation = "https://docs.rs/aquavm-air"
 keywords = ["fluence", "air", "webassembly", "programming-language"]

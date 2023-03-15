@@ -6,7 +6,7 @@ authors = ["Fluence Labs"]
 edition = "2018"
 license = "Apache-2.0"
 repository = "https://github.com/fluencelabs/aquavm/tree/master/crates/test-framework"
-publish = false
+documentation = "https://docs.rs/air-testing-framework"
 keywords = ["fluence", "air", "test"]
 
 [lib]
