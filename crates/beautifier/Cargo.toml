@@ -1,6 +1,6 @@
 [package]
 name = "air-beautifier"
-version = "0.1.2"
+version = "0.1.3"
 description = "AIR human-readable format transformer library"
 authors = ["Fluence Labs"]
 edition = "2018"

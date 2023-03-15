@@ -1,7 +1,7 @@
 {
     "name": "@fluencelabs/avm",
     "description": "Aquamarine VM",
-    "version": "0.37.1",
+    "version": "0.38.0",
     "main": "./dist/index.js",
     "repository": "https://github.com/fluencelabs/air",
     "author": "Fluence Labs",
