@@ -5,7 +5,6 @@ description = "Implementation of AIR trace handler"
 authors = ["Fluence Labs"]
 edition = "2018"
 license = "Apache-2.0"
-publish = false
 keywords = ["fluence", "air", "webassembly", "programming-language"]
 categories = ["wasm"]
 
