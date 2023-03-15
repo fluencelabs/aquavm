@@ -287,6 +287,10 @@ jobs:
           node-version: "16"
           registry-url: "https://registry.npmjs.org"
 
+      - name: Rename package
+        run: sed -i -e "s/air-beautify-wasm/@fluencelabs\/air-beautify-wasm/" package.json
+        working-directory: tools/wasm/air-beautify-wasm/pkg
+
       - name: Publish to npm registry
         run: npm publish --access public
         working-directory: tools/wasm/air-beautify-wasm/pkg
