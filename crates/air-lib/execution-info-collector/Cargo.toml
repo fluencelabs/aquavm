@@ -15,4 +15,4 @@ name = "air_execution_info_collector"
 path = "src/lib.rs"
 
 [dependencies]
-aquavm-air-parser = { path = "../air-parser" }
+aquavm-air-parser = { version = "0.7.3", path = "../air-parser" }
