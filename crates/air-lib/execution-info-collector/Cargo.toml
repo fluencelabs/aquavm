@@ -1,6 +1,6 @@
 [package]
 name = "air-execution-info-collector"
-version = "0.7.4"
+version = "0.7.3"
 description = "Implementation of AIR execution info collector"
 authors = ["Fluence Labs"]
 edition = "2018"
