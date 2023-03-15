@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.13.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-interface-v0.12.1...air-interpreter-interface-v0.13.0) (2023-03-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* **avm:** integrate Marine 0.26.0 ([#461](https://github.com/fluencelabs/aquavm/issues/461))
+
+### Features
+
+* **avm:** integrate Marine 0.26.0 ([#461](https://github.com/fluencelabs/aquavm/issues/461)) ([126d550](https://github.com/fluencelabs/aquavm/commit/126d5507c81a7f978ab9cf06c492b1092a336cf6))
+
 ## [Unreleased]
 
 ## [0.12.1] - 2022-12-26

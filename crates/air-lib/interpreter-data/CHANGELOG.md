@@ -4,6 +4,20 @@
   * dependencies
     * air-parser bumped from 0.7.2 to 0.7.3
 
+## [0.6.4](https://github.com/fluencelabs/aquavm/compare/air-interpreter-data-v0.6.3...air-interpreter-data-v0.6.4) (2023-03-15)
+
+
+### Features
+
+* **tools:** merge some tools into the `air` CLI tool ([#509](https://github.com/fluencelabs/aquavm/issues/509)) ([79ac153](https://github.com/fluencelabs/aquavm/commit/79ac153f1dcfc0a77ec511c6e25285728312ad4c))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-interpreter-interface bumped from 0.12.1 to 0.13.0
+
 ## [0.6.3](https://github.com/fluencelabs/aquavm/compare/air-interpreter-data-v0.6.2...air-interpreter-data-v0.6.3) (2023-03-15)
 
 

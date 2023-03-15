@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+* The following workspace dependencies were updated
+  * dependencies
+    * avm-interface bumped from 0.28.2 to 0.28.3
+
 ## [0.6.0](https://github.com/fluencelabs/aquavm/compare/avm-data-store-v0.5.0...avm-data-store-v0.6.0) (2023-02-27)
 
 
