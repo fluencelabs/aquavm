@@ -18,7 +18,7 @@ name = "air_interpreter_server"
 path = "src/marine.rs"
 
 [dependencies]
-air = { version = "0.37.0", path = "../air" }
+aquavm-air = { version = "0.37.0", path = "../air" }
 air-interpreter-interface = { version = "0.12.1", path = "../crates/air-lib/interpreter-interface" }
 air-log-targets = { version = "0.1.0", path = "../crates/air-lib/log-targets" }
 

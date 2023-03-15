@@ -5,7 +5,8 @@ description = "Test utils for the AIR interpreter"
 authors = ["Fluence Labs"]
 edition = "2018"
 license = "Apache-2.0"
-publish = false
+repository = "https://github.com/fluencelabs/aquavm"
+documentation = "https://docs.rs/air-test-utils"
 keywords = ["fluence", "air", "webassembly", "security", "authorization"]
 categories = ["wasm"]
 
@@ -14,7 +15,7 @@ name = "air_test_utils"
 path = "src/lib.rs"
 
 [dependencies]
-air = { path = "../../../air" }
+aquavm-air = { path = "../../../air" }
 air-interpreter-cid = { version = "0.2.0", path = "../interpreter-cid" }
 air-interpreter-data = { version = "0.6.3", path = "../interpreter-data" }
 air-interpreter-interface = { version = "0.12.1", path = "../interpreter-interface" }

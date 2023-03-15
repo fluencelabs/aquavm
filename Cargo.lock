@@ -12,60 +12,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "air"
-version = "0.37.0"
-dependencies = [
- "air-execution-info-collector",
- "air-interpreter-cid",
- "air-interpreter-data",
- "air-interpreter-interface",
- "air-lambda-ast",
- "air-lambda-parser",
- "air-log-targets",
- "air-parser",
- "air-test-utils",
- "air-testing-framework",
- "air-trace-handler",
- "air-utils",
- "boolinator",
- "concat-idents",
- "criterion 0.3.6",
- "csv",
- "env_logger",
- "fluence-app-service",
- "fstrings",
- "log",
- "maplit",
- "marine-rs-sdk",
- "non-empty-vec",
- "once_cell",
- "polyplets",
- "pretty_assertions 0.6.1",
- "semver 1.0.17",
- "serde",
- "serde_json",
- "strum",
- "strum_macros",
- "thiserror",
- "tracing",
-]
-
-[[package]]
 name = "air-beautifier"
 version = "0.1.2"
 dependencies = [
- "air-parser",
+ "aquavm-air-parser",
  "itertools",
  "thiserror",
-]
-
-[[package]]
-name = "air-beautify"
-version = "0.1.2"
-dependencies = [
- "air-beautifier",
- "anyhow",
- "clap 4.1.8",
 ]
 
 [[package]]
@@ -80,16 +32,16 @@ dependencies = [
 name = "air-execution-info-collector"
 version = "0.7.3"
 dependencies = [
- "air-parser",
+ "aquavm-air-parser",
 ]
 
 [[package]]
 name = "air-interpreter"
 version = "0.37.0"
 dependencies = [
- "air",
  "air-interpreter-interface",
  "air-log-targets",
+ "aquavm-air",
  "log",
  "marine-rs-sdk",
  "serde",
@@ -115,8 +67,8 @@ version = "0.6.3"
 dependencies = [
  "air-interpreter-cid",
  "air-interpreter-interface",
- "air-parser",
  "air-utils",
+ "aquavm-air-parser",
  "once_cell",
  "polyplets",
  "semver 1.0.17",
@@ -167,35 +119,13 @@ name = "air-log-targets"
 version = "0.1.0"
 
 [[package]]
-name = "air-parser"
-version = "0.7.3"
-dependencies = [
- "air-lambda-ast",
- "air-lambda-parser",
- "codespan",
- "codespan-reporting",
- "criterion 0.4.0",
- "fstrings",
- "itertools",
- "lalrpop",
- "lalrpop-util",
- "multimap",
- "non-empty-vec",
- "regex",
- "serde",
- "serde_json",
- "thiserror",
- "tracing",
-]
-
-[[package]]
 name = "air-test-utils"
 version = "0.4.5"
 dependencies = [
- "air",
  "air-interpreter-cid",
  "air-interpreter-data",
  "air-interpreter-interface",
+ "aquavm-air",
  "avm-interface",
  "avm-server",
  "fstrings",
@@ -212,8 +142,8 @@ dependencies = [
 name = "air-testing-framework"
 version = "0.1.5"
 dependencies = [
- "air-parser",
  "air-test-utils",
+ "aquavm-air-parser",
  "itertools",
  "maplit",
  "nom 7.1.3",
@@ -224,23 +154,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "air-trace"
-version = "0.2.6"
-dependencies = [
- "air",
- "air-interpreter-interface",
- "air-test-utils",
- "anyhow",
- "avm-data-store",
- "avm-interface",
- "clap 4.1.8",
- "itertools",
- "serde",
- "serde_json",
- "tracing-subscriber",
-]
-
-[[package]]
 name = "air-trace-handler"
 version = "0.1.2"
 dependencies = [
@@ -248,7 +161,7 @@ dependencies = [
  "air-interpreter-data",
  "air-interpreter-interface",
  "air-log-targets",
- "air-parser",
+ "aquavm-air-parser",
  "bimap",
  "log",
  "polyplets",
@@ -290,6 +203,85 @@ name = "anyhow"
 version = "1.0.69"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "224afbd727c3d6e4b90103ece64b8d1b67fbb1973b1046c2281eed3f3803f800"
+
+[[package]]
+name = "aquavm-air"
+version = "0.37.0"
+dependencies = [
+ "air-execution-info-collector",
+ "air-interpreter-cid",
+ "air-interpreter-data",
+ "air-interpreter-interface",
+ "air-lambda-ast",
+ "air-lambda-parser",
+ "air-log-targets",
+ "air-test-utils",
+ "air-testing-framework",
+ "air-trace-handler",
+ "air-utils",
+ "aquavm-air-parser",
+ "boolinator",
+ "concat-idents",
+ "criterion 0.3.6",
+ "csv",
+ "env_logger",
+ "fluence-app-service",
+ "fstrings",
+ "log",
+ "maplit",
+ "marine-rs-sdk",
+ "non-empty-vec",
+ "once_cell",
+ "polyplets",
+ "pretty_assertions 0.6.1",
+ "semver 1.0.17",
+ "serde",
+ "serde_json",
+ "strum",
+ "strum_macros",
+ "thiserror",
+ "tracing",
+]
+
+[[package]]
+name = "aquavm-air-cli"
+version = "0.2.6"
+dependencies = [
+ "air-beautifier",
+ "air-interpreter-interface",
+ "air-test-utils",
+ "anyhow",
+ "aquavm-air",
+ "avm-data-store",
+ "avm-interface",
+ "clap 4.1.8",
+ "itertools",
+ "serde",
+ "serde_json",
+ "tracing-subscriber",
+]
+
+[[package]]
+name = "aquavm-air-parser"
+version = "0.7.3"
+dependencies = [
+ "air-lambda-ast",
+ "air-lambda-parser",
+ "codespan",
+ "codespan-reporting",
+ "criterion 0.4.0",
+ "fstrings",
+ "itertools",
+ "lalrpop",
+ "lalrpop-util",
+ "multimap",
+ "non-empty-vec",
+ "regex",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "tracing",
+]
 
 [[package]]
 name = "arrayref"

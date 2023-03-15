@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+use super::super::load_data;
 use super::ExecutionData;
-use crate::run::load_data;
 use avm_data_store::AnomalyData;
 use avm_interface::ParticleParameters;
 

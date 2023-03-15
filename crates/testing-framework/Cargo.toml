@@ -15,7 +15,7 @@ path = "src/lib.rs"
 
 [dependencies]
 air-test-utils = { version = "0.4.5", path = "../air-lib/test-utils" }
-air-parser = { version = "0.7.3", path = "../air-lib/air-parser" }
+aquavm-air-parser = { version = "0.7.3", path = "../air-lib/air-parser" }
 
 itertools = "0.10.5"
 strum = { version="0.24.1", features=["derive"] }

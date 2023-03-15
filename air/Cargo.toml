@@ -1,11 +1,11 @@
 [package]
-name = "air"
+name = "aquavm-air"
 version = "0.37.0"
 description = "Interpreter of AIR scripts intended to coordinate request flow in the Fluence network"
 authors = ["Fluence Labs"]
 edition = "2018"
 repository = "https://github.com/fluencelabs/aquavm"
-publish = false
+documentation = "https://docs.rs/aquavm-air"
 keywords = ["fluence", "air", "webassembly", "programming-language"]
 categories = ["wasm"]
 
@@ -15,7 +15,7 @@ path = "src/lib.rs"
 doctest = false
 
 [dependencies]
-air-parser = { version = "0.7.2", path = "../crates/air-lib/air-parser" }
+aquavm-air-parser = { version = "0.7.2", path = "../crates/air-lib/air-parser" }
 air-execution-info-collector = { version = "0.7.2", path = "../crates/air-lib/execution-info-collector" }
 air-interpreter-cid = { version = "0.2.0", path = "../crates/air-lib/interpreter-cid" }
 air-interpreter-data = { version = "0.6.2", path = "../crates/air-lib/interpreter-data" }

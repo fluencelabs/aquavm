@@ -2,7 +2,7 @@
 
 Execute an AquaVM special benchmarking suite and recort results with some meta information to `benches/PERFORMANCE.json` database.
 
-This script is intended to be run from the project root.  It uses the `air-trace` through `cargo`, without installation.
+This script is intended to be run from the project root.  It uses the `air` through `cargo`, without installation.
 
 # Installation
 

@@ -1,13 +1,18 @@
 [package]
-name = "air-parser"
+name = "aquavm-air-parser"
 description = "Parser of the AIR scripts in a form of string to AST"
 version = "0.7.3"
 authors = ["Fluence Labs"]
 edition = "2018"
 license = "Apache-2.0"
-publish = false
+documentation = "https://docs.rs/air-parser"
+repository = "https://github.com/fluencelabs/aquavm"
 keywords = ["fluence", "air", "parser", "lalrpop"]
 categories = ["wasm"]
+
+[lib]
+name = "air_parser"
+path = "src/lib.rs"
 
 [build-dependencies]
 lalrpop = "0.19.8"
