@@ -12,7 +12,7 @@
       "type": "linked-versions",
       "groupName": "air-interpreter",
       "components": [
-        "aquavm-air",
+        "air",
         "air-interpreter",
         "avm-client"
       ]
@@ -20,7 +20,7 @@
   ],
   "packages": {
     "air": {
-      "component": "aquavm-air"
+      "component": "air"
     },
     "air-interpreter": {
       "component": "air-interpreter"
