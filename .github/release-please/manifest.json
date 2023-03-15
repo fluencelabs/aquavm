@@ -19,5 +19,6 @@
   "tools/cli/air": "0.2.7",
   "crates/air-lib/lambda/ast": "0.1.0",
   "crates/air-lib/lambda/parser": "0.1.0",
-  "crates/air-lib/log-targets": "0.1.0"
+  "crates/air-lib/log-targets": "0.1.0",
+  "crates/air-lib/interpreter-interface": "0.12.1"
 }
