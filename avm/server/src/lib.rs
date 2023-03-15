@@ -43,7 +43,6 @@ pub mod avm_runner {
 
 // Re-exports
 pub use marine::ne_vec;
-pub use marine::Ctx;
 pub use marine::HostExportedFunc;
 pub use marine::HostImportDescriptor;
 pub use marine::HostImportError;

@@ -24,7 +24,7 @@ air-log-targets = { version = "0.1.0", path = "../crates/air-lib/log-targets" }
 
 marine-rs-sdk = { version = "0.7.1", features = ["logger"] }
 
-wasm-bindgen = "=0.2.82"
+wasm-bindgen = "=0.2.83"
 
 log = "0.4.17"
 serde = { version = "1.0.155", features = [ "derive", "rc" ] }
