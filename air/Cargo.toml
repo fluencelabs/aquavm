@@ -23,7 +23,7 @@ air-interpreter-interface = { version = "0.12.1", path = "../crates/air-lib/inte
 air-log-targets = { version = "0.1.0", path = "../crates/air-lib/log-targets" }
 air-lambda-ast = { version = "0.1.0", path = "../crates/air-lib/lambda/ast" }
 air-lambda-parser = { version = "0.1.0", path = "../crates/air-lib/lambda/parser" }
-air-trace-handler = { version = "0.1.1", path = "../crates/air-lib/trace-handler" }
+air-trace-handler = { version = "0.1.2", path = "../crates/air-lib/trace-handler" }
 air-utils = { version = "0.1.0", path = "../crates/air-lib/utils" }
 polyplets = { version = "0.3.2", path = "../crates/air-lib/polyplets" }
 
