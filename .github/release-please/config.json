@@ -31,7 +31,9 @@
     },
     "avm/interface": {},
     "avm/server": {},
-    "crates/air-lib/air-parser": {},
+    "crates/air-lib/air-parser": {
+      "component": "air-parser"
+    },
     "crates/air-lib/execution-info-collector": {},
     "crates/air-lib/interpreter-cid": {},
     "crates/air-lib/interpreter-data": {},
