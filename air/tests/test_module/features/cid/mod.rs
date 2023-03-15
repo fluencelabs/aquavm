@@ -16,6 +16,7 @@
 
 mod canon;
 
+use air::UncatchableError::ValueForCidNotFound;
 use air_interpreter_data::CidTracker;
 use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::*;
@@ -35,11 +36,9 @@ fn test_missing_cid() {
 
     let cur_data = raw_data_from_trace(trace, tracker);
     let result = call_vm!(vm, <_>::default(), air_script, vec![], cur_data);
-    assert_eq!(result.ret_code, 20012);
-    assert_eq!(
-        result.error_message,
-        "value for CID \"bagaaieraondvznakk2hi3kfaixhnceatpykz7cikytniqo3lc7ogkgz2qbeq\" not found"
-    );
+    let missing_cid = String::from("bagaaieraondvznakk2hi3kfaixhnceatpykz7cikytniqo3lc7ogkgz2qbeq");
+    let expected_error = ValueForCidNotFound("value", missing_cid);
+    assert!(check_error(&result, expected_error));
 }
 
 #[test]

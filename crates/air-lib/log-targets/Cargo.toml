@@ -5,7 +5,8 @@ description = "Definition of global consts used for logging"
 authors = ["Fluence Labs"]
 edition = "2018"
 license = "Apache-2.0"
-publish = false
+repository = "https://github.com/fluencelabs/aquavm"
+documentation = "https://docs.rs/air-log-targets"
 keywords = ["fluence", "air", "webassembly", "programming-language"]
 categories = ["wasm"]
 

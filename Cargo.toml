@@ -19,8 +19,7 @@ members = [
     "crates/beautifier",
     "crates/data-store",
     "crates/testing-framework",
-    "tools/cli/air-beautify",
-    "tools/cli/air-trace",
+    "tools/cli/air",
     "tools/wasm/air-beautify-wasm",
 ]
 

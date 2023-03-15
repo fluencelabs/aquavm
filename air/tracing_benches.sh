@@ -5,7 +5,7 @@ set -o pipefail -e
 # Its dependencies:
 #   + jq utility
 #   + compiled AquaVM WASM binary
-#   + installed air-trace
+#   + installed air
 
 function trace_len {
     jq '.trace | length'
@@ -37,7 +37,7 @@ function error {
 function main {
     if [ "$#" \< 2 ]; then
         if [ x"$1" == x"--help" ]; then
-            error "usage: $0 (--all|big|long) (--all|merge|nomerge) [ air-trace run args ... ]"
+            error "usage: $0 (--all|big|long) (--all|merge|nomerge) [ air run args ... ]"
         else
             error "Provide at least two arguments: (--all|big|long) and (--all|merge|nomerge)"
         fi
@@ -113,7 +113,7 @@ function main {
             echo >&1
             echo "*** Running test ${tst}-${subt}..." >&1
             eval "${script_cmd}" | \
-                air-trace run "$@" --repeat 1 --plain \
+                air run "$@" --repeat 1 --plain \
                     --prev-data "$prev_data_path" \
                     --data "$current_data_path"
         done

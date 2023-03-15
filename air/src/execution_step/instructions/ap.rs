@@ -61,13 +61,13 @@ fn should_touch_trace(ap: &Ap<'_>) -> bool {
 }
 
 fn to_merger_ap_result(instr: &Ap<'_>, trace_ctx: &mut TraceHandler) -> ExecutionResult<MergerApResult> {
-    if !should_touch_trace(instr) {
-        return Ok(MergerApResult::NotMet);
+    match instr.result {
+        ast::ApResult::Scalar(_) => Ok(MergerApResult::NotMet),
+        ast::ApResult::Stream(_) => {
+            let merger_ap_result = trace_to_exec_err!(trace_ctx.meet_ap_start(), instr)?;
+            Ok(merger_ap_result)
+        }
     }
-
-    let merger_ap_result = trace_to_exec_err!(trace_ctx.meet_ap_start(), instr)?;
-    try_match_trace_to_instr(&merger_ap_result, instr)?;
-    Ok(merger_ap_result)
 }
 
 fn populate_context<'ctx>(

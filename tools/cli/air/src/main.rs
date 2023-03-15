@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Fluence Labs Limited
+ * Copyright 2023 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,8 @@
     unreachable_patterns
 )]
 
-mod run;
-mod stats;
-mod utils;
+mod beautify;
+mod trace;
 
 use clap::Parser;
 
@@ -41,14 +40,19 @@ struct Cli {
 #[derive(clap::Subcommand)]
 #[allow(clippy::large_enum_variant)]
 enum Subcommand {
-    Run(crate::run::Args),
-    Stats(crate::stats::Args),
+    #[clap(alias = "b")]
+    Beautify(self::beautify::Args),
+    #[clap(alias = "r")]
+    Run(self::trace::run::Args),
+    #[clap(alias = "s")]
+    Stats(self::trace::stats::Args),
 }
 
 fn main() -> anyhow::Result<()> {
     let args = Cli::parse();
     match args.subcommand {
-        Subcommand::Run(args) => crate::run::run(args),
-        Subcommand::Stats(args) => crate::stats::stats(args),
+        Subcommand::Run(args) => self::trace::run::run(args),
+        Subcommand::Stats(args) => self::trace::stats::stats(args),
+        Subcommand::Beautify(args) => self::beautify::beautify(args),
     }
 }

@@ -1,19 +1,21 @@
 [package]
-name = "air-trace"
-version = "0.2.6"
+name = "aquavm-air-cli"
+version = "0.2.7"
 edition = "2021"
-description = "AIR performance tracing tool"
+description = "AIR execution and printing tool"
 authors = ["Fluence Labs"]
 license = "Apache-2.0"
-publish = false
+repository = "https://github.com/fluencelabs/aquavm"
+documentation = "https://docs.rs/aquavm-air-cli"
 keywords = ["fluence", "air", "tracing"]
 
 [dependencies]
-air = { version = "0.37.0", path = "../../../air" }
-air-test-utils = { version = "0.4.5",path = "../../../crates/air-lib/test-utils", optional = true }
-air-interpreter-interface = { version = "0.12.1", path = "../../../crates/air-lib/interpreter-interface", default-features = false }
+aquavm-air = { version = "0.37.1", path = "../../../air" }
+air-beautifier = { version = "0.1.2", path = "../../../crates/beautifier" }
 avm-data-store = { version = "0.6.0", path = "../../../crates/data-store" }
 avm-interface = { version = "0.28.2", path = "../../../avm/interface" }
+air-interpreter-interface = { version = "0.12.1", path = "../../../crates/air-lib/interpreter-interface", default-features = false }
+air-test-utils = { version = "0.4.6",path = "../../../crates/air-lib/test-utils", optional = true }
 
 anyhow = "1.0.69"
 clap = { version = "4.1.8", features = ["derive", "env"] }
@@ -25,3 +27,7 @@ tracing-subscriber = { version = "0.3.16", default-features = false, features = 
 [features]
 default = ["wasm"]
 wasm = ["air-test-utils"]
+
+[[bin]]
+name = "air"
+path = "src/main.rs"

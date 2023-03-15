@@ -5,7 +5,6 @@ description = "Implementation of AIR trace handler"
 authors = ["Fluence Labs"]
 edition = "2018"
 license = "Apache-2.0"
-publish = false
 keywords = ["fluence", "air", "webassembly", "programming-language"]
 categories = ["wasm"]
 
@@ -18,7 +17,7 @@ air-interpreter-cid = { version = "0.2.0", path = "../interpreter-cid" }
 air-interpreter-data = { version = "0.6.3", path = "../interpreter-data" }
 air-interpreter-interface = { version = "0.12.1", path = "../interpreter-interface" }
 air-log-targets = { version = "0.1.0", path = "../log-targets" }
-air-parser = { version = "0.7.3", path = "../air-parser" }
+aquavm-air-parser = { version = "0.7.4", path = "../air-parser" }
 polyplets = { version = "0.3.2", path = "../polyplets" }
 
 bimap = "0.6.2"
