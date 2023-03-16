@@ -20,7 +20,6 @@ use crate::JValue;
 use crate::ToErrorCode;
 
 use air_interpreter_cid::CidCalculationError;
-use air_interpreter_data::TracePos;
 use air_interpreter_data::ValueRef;
 use air_trace_handler::GenerationCompatificationError;
 use air_trace_handler::TraceHandlerError;
@@ -76,12 +75,6 @@ pub enum UncatchableError {
     /// be caught by a xor instruction.
     #[error("new end block tries to pop up a variable '{scalar_name}' that wasn't defined at depth {depth}")]
     ScalarsStateCorrupted { scalar_name: String, depth: usize },
-
-    /// Variable with such a position wasn't defined during AIR script execution.
-    /// Canon instruction requires this value to be present in data, otherwise it's considered
-    /// as a hard error.
-    #[error("variable with position '{0}' wasn't defined during script execution")]
-    VariableNotFoundByPos(TracePos),
 
     #[error("can't deserialize stream {canonicalized_stream:?} with error: {de_error}")]
     InvalidCanonStreamInData {

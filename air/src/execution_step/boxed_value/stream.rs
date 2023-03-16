@@ -20,11 +20,8 @@ use crate::ExecutionError;
 use crate::JValue;
 use crate::UncatchableError;
 
-use air_interpreter_data::TracePos;
 use air_trace_handler::merger::ValueSource;
 use air_trace_handler::TraceHandler;
-
-use std::collections::HashMap;
 
 /// Streams are CRDT-like append only data structures. They are guaranteed to have the same order
 /// of values on each peer.
@@ -38,10 +35,6 @@ pub struct Stream {
 
     /// Count of values from previous data.
     previous_gens_count: usize,
-
-    /// This map is intended to support canonicalized stream creation, such streams has
-    /// corresponding value positions in a data and this field are used to create such streams.
-    values_by_pos: HashMap<TracePos, StreamValueLocation>,
 }
 
 impl Stream {
@@ -56,20 +49,15 @@ impl Stream {
         Self {
             values: vec![vec![]; overall_count],
             previous_gens_count: previous_count,
-            values_by_pos: HashMap::new(),
         }
     }
 
     // streams created with this ctor assumed to have only one generation,
     // for streams that have values in
     pub(crate) fn from_value(value: ValueAggregate) -> Self {
-        let values_by_pos = maplit::hashmap! {
-            value.trace_pos => StreamValueLocation::new(0, 0),
-        };
         Self {
             values: vec![vec![value]],
             previous_gens_count: 0,
-            values_by_pos,
         }
     }
 
@@ -95,12 +83,7 @@ impl Stream {
             .into());
         }
 
-        let values = &mut self.values[generation_number];
-        self.values_by_pos.insert(
-            value.trace_pos,
-            StreamValueLocation::new(generation_number, values.len()),
-        );
-        values.push(value);
+        self.values[generation_number].push(value);
         Ok(generation_number as u32)
     }
 
@@ -173,16 +156,6 @@ impl Stream {
         let jvalue_array = iter.map(|r| r.result.deref().clone()).collect::<Vec<_>>();
 
         Some(JValue::Array(jvalue_array))
-    }
-
-    #[allow(dead_code)]
-    pub(crate) fn get_value_by_pos(&self, position: TracePos) -> Option<&ValueAggregate> {
-        let StreamValueLocation {
-            generation,
-            position_in_generation,
-        } = self.values_by_pos.get(&position)?;
-        let value = &self.values[*generation][*position_in_generation];
-        Some(value)
     }
 
     pub(crate) fn iter(&self, generation: Generation) -> Option<StreamIter<'_>> {
@@ -292,21 +265,6 @@ impl<'slice> Iterator for StreamSliceIter<'slice> {
 
     fn size_hint(&self) -> (usize, Option<usize>) {
         (self.len, Some(self.len))
-    }
-}
-
-#[derive(Clone, Copy, Debug, Default)]
-struct StreamValueLocation {
-    pub generation: usize,
-    pub position_in_generation: usize,
-}
-
-impl StreamValueLocation {
-    pub(super) fn new(generation: usize, position_in_generation: usize) -> Self {
-        Self {
-            generation,
-            position_in_generation,
-        }
     }
 }
 
