@@ -16,7 +16,6 @@
 
 use super::Stream;
 use crate::execution_step::Generation;
-use crate::JValue;
 use crate::ToErrorCode;
 
 use air_interpreter_cid::CidCalculationError;
@@ -75,12 +74,6 @@ pub enum UncatchableError {
     /// be caught by a xor instruction.
     #[error("new end block tries to pop up a variable '{scalar_name}' that wasn't defined at depth {depth}")]
     ScalarsStateCorrupted { scalar_name: String, depth: usize },
-
-    #[error("can't deserialize stream {canonicalized_stream:?} with error: {de_error}")]
-    InvalidCanonStreamInData {
-        canonicalized_stream: JValue,
-        de_error: serde_json::Error,
-    },
 
     #[error("failed to calculate value's CID")]
     CidError(#[from] CidCalculationError),
