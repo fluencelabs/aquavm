@@ -31,6 +31,7 @@ use crate::SubTraceDesc;
 use air_interpreter_cid::value_to_json_cid;
 use air_interpreter_data::CanonCidAggregate;
 use air_interpreter_data::CidTracker;
+use air_interpreter_data::GenerationIdx;
 use avm_server::SecurityTetraplet;
 use serde::Deserialize;
 use serde::Serialize;
@@ -56,19 +57,19 @@ pub fn scalar_number(result: impl Into<serde_json::Number>) -> ExecutedState {
     scalar(result)
 }
 
-pub fn stream_call_result(result: JValue, generation: u32) -> CallResult {
+pub fn stream_call_result(result: JValue, generation: GenerationIdx) -> CallResult {
     let cid = value_to_json_cid(&result)
         .unwrap_or_else(|e| panic!("{:?}: failed to compute CID of {:?}", e, result));
     CallResult::executed_stream(Rc::new(cid), generation)
 }
 
-pub fn stream(result: JValue, generation: u32) -> ExecutedState {
+pub fn stream(result: JValue, generation: GenerationIdx) -> ExecutedState {
     ExecutedState::Call(stream_call_result(result, generation))
 }
 
 pub fn stream_tracked(
     value: impl Into<JValue>,
-    generation: u32,
+    generation: GenerationIdx,
     tracker: &mut CidTracker,
 ) -> ExecutedState {
     let cid = tracker.record_value(Rc::new(value.into())).unwrap();
@@ -90,19 +91,19 @@ pub fn scalar_string_array(result: Vec<impl Into<String>>) -> ExecutedState {
     scalar(value)
 }
 
-pub fn stream_string(result: impl Into<String>, generation: u32) -> ExecutedState {
+pub fn stream_string(result: impl Into<String>, generation: GenerationIdx) -> ExecutedState {
     let result = JValue::String(result.into());
 
     stream(result, generation)
 }
 
-pub fn stream_number(result: impl Into<serde_json::Number>, generation: u32) -> ExecutedState {
+pub fn stream_number(result: impl Into<serde_json::Number>, generation: GenerationIdx) -> ExecutedState {
     let result = JValue::Number(result.into());
 
     stream(result, generation)
 }
 
-pub fn stream_string_array(result: Vec<impl Into<String>>, generation: u32) -> ExecutedState {
+pub fn stream_string_array(result: Vec<impl Into<String>>, generation: GenerationIdx) -> ExecutedState {
     let result = result
         .into_iter()
         .map(|s| JValue::String(s.into()))
@@ -157,7 +158,7 @@ pub fn subtrace_desc(begin_pos: impl Into<TracePos>, subtrace_len: u32) -> SubTr
     }
 }
 
-pub fn ap(generation: u32) -> ExecutedState {
+pub fn ap(generation: GenerationIdx) -> ExecutedState {
     let ap_result = ApResult::new(generation);
     ExecutedState::Ap(ap_result)
 }

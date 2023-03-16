@@ -60,11 +60,13 @@ pub enum CallResult {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
+
+pub type GenerationIdx = u32;
 pub enum ValueRef {
     Scalar(Rc<CID<JValue>>),
     Stream {
         cid: Rc<CID<JValue>>,
-        generation: u32,
+        generation: GenerationIdx,
     },
 }
 

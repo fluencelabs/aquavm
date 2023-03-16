@@ -20,6 +20,7 @@ use crate::ExecutionError;
 use crate::JValue;
 use crate::UncatchableError;
 
+use air_interpreter_data::GenerationIdx;
 use air_interpreter_data::TracePos;
 use air_trace_handler::merger::ValueSource;
 use air_trace_handler::TraceHandler;
@@ -250,7 +251,7 @@ impl Stream {
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Generation {
     Last,
-    Nth(u32),
+    Nth(GenerationIdx),
 }
 
 pub(crate) struct StreamIter<'result> {

@@ -21,6 +21,7 @@ mod utils;
 use crate::execution_step::ExecutionResult;
 use crate::execution_step::Stream;
 use crate::ExecutionError;
+use air_interpreter_data::GenerationIdx;
 use stream_descriptor::*;
 pub(crate) use stream_value_descriptor::StreamValueDescriptor;
 
@@ -194,7 +195,7 @@ impl Streams {
             .copied()
     }
 
-    fn collect_stream_generation(&mut self, name: String, position: AirPos, generation: u32) {
+    fn collect_stream_generation(&mut self, name: String, position: AirPos, generation: GenerationIdx) {
         match self.new_restricted_stream_gens.entry(name) {
             Occupied(mut streams) => match streams.get_mut().entry(position) {
                 Occupied(mut iterations) => iterations.get_mut().push(generation),

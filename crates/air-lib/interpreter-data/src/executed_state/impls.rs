@@ -48,7 +48,7 @@ impl CallResult {
         CallResult::Executed(value)
     }
 
-    pub fn executed_stream(cid: Rc<CID<JValue>>, generation: u32) -> CallResult {
+    pub fn executed_stream(cid: Rc<CID<JValue>>, generation: GenerationIdx) -> CallResult {
         let value = ValueRef::Stream { cid, generation };
 
         CallResult::Executed(value)
@@ -80,7 +80,7 @@ impl ExecutedState {
 }
 
 impl ApResult {
-    pub fn new(res_generation: u32) -> Self {
+    pub fn new(res_generation: GenerationIdx) -> Self {
         Self {
             res_generations: vec![res_generation],
         }
