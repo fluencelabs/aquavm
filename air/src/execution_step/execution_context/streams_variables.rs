@@ -21,12 +21,13 @@ mod utils;
 use crate::execution_step::ExecutionResult;
 use crate::execution_step::Stream;
 use crate::ExecutionError;
-use air_interpreter_data::GenerationIdx;
+
 use stream_descriptor::*;
 pub(crate) use stream_value_descriptor::StreamValueDescriptor;
 
 use air_interpreter_data::GlobalStreamGens;
 use air_interpreter_data::RestrictedStreamGens;
+use air_interpreter_data::GenerationIdx;
 use air_parser::ast::Span;
 use air_parser::AirPos;
 use air_trace_handler::TraceHandler;

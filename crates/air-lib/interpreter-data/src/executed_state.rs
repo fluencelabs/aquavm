@@ -62,6 +62,7 @@ pub enum CallResult {
 #[serde(rename_all = "snake_case")]
 
 pub type GenerationIdx = u32;
+
 pub enum ValueRef {
     Scalar(Rc<CID<JValue>>),
     Stream {
