@@ -46,7 +46,7 @@ jobs:
       - run: cargo build
 
       - name: Run cargo test
-        run: cargo llvm-cov nextest --release --all-features --profile ci --lcov --output-path lcov.info
+        run: cargo llvm-cov nextest --release --all-features --lcov --output-path lcov.info
 
       - name: Coveralls upload
         uses: coverallsapp/github-action@v1
